@@ -17,25 +17,12 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import process from 'process';
+import { resolve, dirname } from 'path';
+import { PackageInfo, EnvironmentMode } from './types';
 
 // `require` is necessary for this to work inside x-pack code as well
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pkg = require('../../../../package.json');
-
-export interface PackageInfo {
-  version: string;
-  branch: string;
-  buildNum: number;
-  buildSha: string;
-}
-
-export interface EnvironmentMode {
-  name: 'development' | 'production';
-  dev: boolean;
-  prod: boolean;
-}
 
 /** @internal */
 export interface EnvOptions {
@@ -55,6 +42,7 @@ export interface CliArgs {
   basePath: boolean;
   optimize: boolean;
   open: boolean;
+  oss: boolean;
 }
 
 export class Env {
@@ -62,7 +50,8 @@ export class Env {
    * @internal
    */
   public static createDefault(options: EnvOptions): Env {
-    return new Env(process.cwd(), options);
+    const repoRoot = dirname(require.resolve('../../../../package.json'));
+    return new Env(repoRoot, options);
   }
 
   /** @internal */
@@ -74,7 +63,7 @@ export class Env {
   /** @internal */
   public readonly staticFilesDir: string;
   /** @internal */
-  public readonly pluginSearchPaths: ReadonlyArray<string>;
+  public readonly pluginSearchPaths: readonly string[];
 
   /**
    * Information about Kibana package (version, build number etc.).
@@ -96,7 +85,7 @@ export class Env {
    * Paths to the configuration files.
    * @internal
    */
-  public readonly configs: ReadonlyArray<string>;
+  public readonly configs: readonly string[];
 
   /**
    * Indicates that this Kibana instance is run as development Node Cluster master.
@@ -107,7 +96,7 @@ export class Env {
   /**
    * @internal
    */
-  constructor(readonly homeDir: string, options: EnvOptions) {
+  constructor(public readonly homeDir: string, options: EnvOptions) {
     this.configDir = resolve(this.homeDir, 'config');
     this.binDir = resolve(this.homeDir, 'bin');
     this.logDir = resolve(this.homeDir, 'log');
@@ -115,9 +104,10 @@ export class Env {
 
     this.pluginSearchPaths = [
       resolve(this.homeDir, 'src', 'plugins'),
+      options.cliArgs.oss ? '' : resolve(this.homeDir, 'x-pack', 'plugins'),
       resolve(this.homeDir, 'plugins'),
       resolve(this.homeDir, '..', 'kibana-extra'),
-    ];
+    ].filter(Boolean);
 
     this.cliArgs = Object.freeze(options.cliArgs);
     this.configs = Object.freeze(options.configs);
@@ -130,12 +120,13 @@ export class Env {
       prod: !isDevMode,
     });
 
-    const isKibanaDistributable = pkg.build && pkg.build.distributable === true;
+    const isKibanaDistributable = Boolean(pkg.build && pkg.build.distributable === true);
     this.packageInfo = Object.freeze({
       branch: pkg.branch,
       buildNum: isKibanaDistributable ? pkg.build.number : Number.MAX_SAFE_INTEGER,
       buildSha: isKibanaDistributable ? pkg.build.sha : 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
       version: pkg.version,
+      dist: isKibanaDistributable,
     });
   }
 }

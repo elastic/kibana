@@ -6,7 +6,8 @@
 
 import _ from 'lodash';
 import chrome from 'ui/chrome';
-import 'ui/listen';
+import 'ui/directives/listen';
+import 'ui/directives/storage';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -15,8 +16,8 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 import { Provider } from 'react-redux';
-import { createMapStore } from '../store/store';
-import { GisMap } from '../components/gis_map';
+import { createMapStore } from '../reducers/store';
+import { GisMap } from '../connected_components/gis_map';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import {
   setSelectedLayer,
@@ -25,19 +26,19 @@ import {
   replaceLayerList,
   setQuery,
   clearTransientLayerStateAndCloseFlyout,
-} from '../actions/store_actions';
+} from '../actions/map_actions';
+import { DEFAULT_IS_LAYER_TOC_OPEN, FLYOUT_STATE } from '../reducers/ui';
 import {
-  DEFAULT_IS_LAYER_TOC_OPEN,
   enableFullScreen,
-  getIsFullScreen,
   updateFlyout,
-  FLYOUT_STATE,
   setReadOnly,
   setIsLayerTOCOpen,
   setOpenTOCDetails,
-} from '../store/ui';
-import { getQueryableUniqueIndexPatternIds } from '../selectors/map_selectors';
-import { getInspectorAdapters } from '../store/non_serializable_instances';
+} from '../actions/ui_actions';
+import { getIsFullScreen } from '../selectors/ui_selectors';
+import { copyPersistentState } from '../reducers/util';
+import { getQueryableUniqueIndexPatternIds, hasDirtyState, getLayerListRaw } from '../selectors/map_selectors';
+import { getInspectorAdapters } from '../reducers/non_serializable_instances';
 import { Inspector } from 'ui/inspector';
 import { docTitle } from 'ui/doc_title';
 import { indexPatternService } from '../kibana_services';
@@ -48,45 +49,67 @@ import { getInitialLayers } from './get_initial_layers';
 import { getInitialQuery } from './get_initial_query';
 import { getInitialTimeFilters } from './get_initial_time_filters';
 import { getInitialRefreshConfig } from './get_initial_refresh_config';
-import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
+import {
+  MAP_SAVED_OBJECT_TYPE,
+  MAP_APP_PATH
+} from '../../common/constants';
+import { start as data } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
+import { npStart } from 'ui/new_platform';
+import { esFilters } from '../../../../../../src/plugins/data/public';
+
+const { savedQueryService } = data.search.services;
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
+const app = uiModules.get(MAP_APP_PATH, []);
 
-const app = uiModules.get('app/maps', []);
-
-app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage, AppState, globalState) => {
-
+app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppState, globalState) => {
+  const { filterManager } = npStart.plugins.data.query;
   const savedMap = $route.current.locals.map;
   let unsubscribe;
-
+  let initialLayerListConfig;
+  const $state = new AppState();
   const store = createMapStore();
 
+  function getAppStateFilters() {
+    return _.get($state, 'filters', []);
+  }
+
   $scope.$listen(globalState, 'fetch_with_changes', (diff) => {
-    if (diff.includes('time')) {
-      $scope.updateQueryAndDispatch({ query: $scope.query, dateRange: globalState.time });
+    if (diff.includes('time') || diff.includes('filters')) {
+      onQueryChange({
+        filters: [...globalState.filters, ...getAppStateFilters()],
+        time: globalState.time,
+      });
     }
     if (diff.includes('refreshInterval')) {
       $scope.onRefreshChange({ isPaused: globalState.pause, refreshInterval: globalState.value });
     }
   });
 
-  const $state = new AppState();
   $scope.$listen($state, 'fetch_with_changes', function (diff) {
-    if (diff.includes('query') && $state.query) {
-      $scope.updateQueryAndDispatch({ query: $state.query, dateRange: $scope.time });
+    if ((diff.includes('query') || diff.includes('filters')) && $state.query) {
+      onQueryChange({
+        filters: [...globalState.filters, ...getAppStateFilters()],
+        query: $state.query,
+      });
     }
   });
 
   function syncAppAndGlobalState() {
     $scope.$evalAsync(() => {
+      // appState
       $state.query = $scope.query;
+      $state.filters = filterManager.getAppFilters();
       $state.save();
+
+      // globalState
       globalState.time = $scope.time;
       globalState.refreshInterval = {
         pause: $scope.refreshConfig.isPaused,
         value: $scope.refreshConfig.interval,
       };
+      globalState.filters = filterManager.getGlobalFilters();
       globalState.save();
     });
   }
@@ -104,15 +127,113 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     mapStateJSON: savedMap.mapStateJSON,
     globalState: globalState,
   });
-  syncAppAndGlobalState();
+
+  /* Saved Queries */
+  $scope.showSaveQuery = capabilities.get().maps.saveQuery;
+
+  $scope.$watch(() => capabilities.get().maps.saveQuery, (newCapability) => {
+    $scope.showSaveQuery = newCapability;
+  });
+
+  $scope.onQuerySaved = savedQuery => {
+    $scope.savedQuery = savedQuery;
+  };
+
+  $scope.onSavedQueryUpdated = savedQuery => {
+    $scope.savedQuery = { ...savedQuery };
+  };
+
+  $scope.onClearSavedQuery = () => {
+    delete $scope.savedQuery;
+    delete $state.savedQuery;
+    onQueryChange({
+      filters: [],
+      query: {
+        query: '',
+        language: localStorage.get('kibana.userQueryLanguage')
+      },
+    });
+  };
+
+  function updateStateFromSavedQuery(savedQuery) {
+    if (savedQuery.attributes.timefilter) {
+      if (savedQuery.attributes.timefilter.refreshInterval) {
+        $scope.onRefreshChange({
+          isPaused: savedQuery.attributes.timefilter.refreshInterval.pause,
+          refreshInterval: savedQuery.attributes.timefilter.refreshInterval.value
+        });
+      }
+      onQueryChange({
+        filters: savedQuery.attributes.filters || [],
+        query: savedQuery.attributes.query,
+        time: savedQuery.attributes.timefilter
+      });
+    } else {
+      onQueryChange({
+        filters: savedQuery.attributes.filters || [],
+        query: savedQuery.attributes.query,
+      });
+    }
+  }
+
+  $scope.$watch('savedQuery', (newSavedQuery) => {
+    if (!newSavedQuery) return;
+
+    $state.savedQuery = newSavedQuery.id;
+    updateStateFromSavedQuery(newSavedQuery);
+  });
+
+  $scope.$watch(() => $state.savedQuery, newSavedQueryId => {
+    if (!newSavedQueryId) {
+      $scope.savedQuery = undefined;
+      return;
+    }
+    if ($scope.savedQuery && newSavedQueryId !== $scope.savedQuery.id) {
+      savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
+        $scope.$evalAsync(() => {
+          $scope.savedQuery = savedQuery;
+          updateStateFromSavedQuery(savedQuery);
+        });
+      });
+    }
+  });
+  /* End of Saved Queries */
+  async function onQueryChange({ filters, query, time, refresh }) {
+    if (filters) {
+      filterManager.setFilters(filters); // Maps and merges filters
+      $scope.filters = filterManager.getFilters();
+    }
+    if (query) {
+      $scope.query = query;
+    }
+    if (time) {
+      $scope.time = time;
+    }
+    syncAppAndGlobalState();
+    dispatchSetQuery(refresh);
+  }
+
+  function dispatchSetQuery(refresh) {
+    store.dispatch(setQuery({
+      filters: $scope.filters,
+      query: $scope.query,
+      timeFilters: $scope.time,
+      refresh,
+    }));
+  }
 
   $scope.indexPatterns = [];
-  $scope.updateQueryAndDispatch = function ({ dateRange, query }) {
-    $scope.query = query;
-    $scope.time = dateRange;
-    syncAppAndGlobalState();
-
-    store.dispatch(setQuery({ query: $scope.query, timeFilters: $scope.time }));
+  $scope.onQuerySubmit = function ({ dateRange, query }) {
+    onQueryChange({
+      query,
+      time: dateRange,
+      refresh: true,
+    });
+  };
+  $scope.updateFiltersAndDispatch = function (filters) {
+    onQueryChange({
+      filters,
+    });
   };
   $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
     $scope.refreshConfig = {
@@ -124,7 +245,43 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     store.dispatch(setRefreshConfig($scope.refreshConfig));
   };
 
-  function renderMap() {
+  function addFilters(newFilters) {
+    newFilters.forEach(filter => {
+      filter.$state = esFilters.FilterStateStore.APP_STATE;
+    });
+    $scope.updateFiltersAndDispatch([...$scope.filters, ...newFilters]);
+  }
+
+  function hasUnsavedChanges() {
+
+    const state = store.getState();
+    const layerList = getLayerListRaw(state);
+    const layerListConfigOnly = copyPersistentState(layerList);
+
+    const savedLayerList  = savedMap.getLayerList();
+    const oldConfig = savedLayerList ? savedLayerList : initialLayerListConfig;
+
+    return !_.isEqual(layerListConfigOnly, oldConfig);
+  }
+
+  function isOnMapNow() {
+    return window.location.hash.startsWith(`#/${MAP_SAVED_OBJECT_TYPE}`);
+  }
+
+  function beforeUnload(event) {
+    if (!isOnMapNow()) {
+      return;
+    }
+
+    const hasChanged = hasUnsavedChanges();
+    if (hasChanged) {
+      event.preventDefault();
+      event.returnValue = 'foobar';//this is required for Chrome
+    }
+  }
+  window.addEventListener('beforeunload', beforeUnload);
+
+  async function renderMap() {
     // clear old UI state
     store.dispatch(setSelectedLayer(null));
     store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
@@ -136,6 +293,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     });
 
     // sync store with savedMap mapState
+    let savedObjectFilters = [];
     if (savedMap.mapStateJSON) {
       const mapState = JSON.parse(savedMap.mapStateJSON);
       store.dispatch(setGotoWithCenter({
@@ -143,6 +301,9 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
         lon: mapState.center.lon,
         zoom: mapState.zoom,
       }));
+      if (mapState.filters) {
+        savedObjectFilters = mapState.filters;
+      }
     }
 
     if (savedMap.uiStateJSON) {
@@ -151,18 +312,23 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       store.dispatch(setOpenTOCDetails(_.get(uiState, 'openTOCDetails', [])));
     }
 
-    const isDarkMode = config.get('theme:darkMode', false);
-    const layerList = getInitialLayers(savedMap.layerListJSON, isDarkMode);
+    const layerList = getInitialLayers(savedMap.layerListJSON);
+    initialLayerListConfig = copyPersistentState(layerList);
     store.dispatch(replaceLayerList(layerList));
-
     store.dispatch(setRefreshConfig($scope.refreshConfig));
-    store.dispatch(setQuery({ query: $scope.query, timeFilters: $scope.time }));
+
+    const initialFilters = [
+      ..._.get(globalState, 'filters', []),
+      ...getAppStateFilters(),
+      ...savedObjectFilters
+    ];
+    await onQueryChange({ filters: initialFilters });
 
     const root = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
     render(
       <Provider store={store}>
         <I18nProvider>
-          <GisMap/>
+          <GisMap addFilters={addFilters}/>
         </I18nProvider>
       </Provider>,
       root
@@ -191,6 +357,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   }
 
   $scope.isFullScreen = false;
+  $scope.isSaveDisabled = false;
   function handleStoreChanges(store) {
     const nextIsFullScreen = getIsFullScreen(store.getState());
     if (nextIsFullScreen !== $scope.isFullScreen) {
@@ -205,9 +372,19 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       prevIndexPatternIds = nextIndexPatternIds;
       updateIndexPatterns(nextIndexPatternIds);
     }
+
+    const nextIsSaveDisabled = hasDirtyState(store.getState());
+    if (nextIsSaveDisabled !== $scope.isSaveDisabled) {
+      $scope.$evalAsync(() => {
+        $scope.isSaveDisabled = nextIsSaveDisabled;
+      });
+    }
   }
 
   $scope.$on('$destroy', () => {
+
+    window.removeEventListener('beforeunload', beforeUnload);
+
     if (unsubscribe) {
       unsubscribe();
     }
@@ -223,7 +400,18 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
         text: i18n.translate('xpack.maps.mapController.mapsBreadcrumbLabel', {
           defaultMessage: 'Maps'
         }),
-        href: '#'
+        onClick: () => {
+          if (isOnMapNow() && hasUnsavedChanges()) {
+            const navigateAway = window.confirm(i18n.translate('xpack.maps.mapController.unsavedChangesWarning', {
+              defaultMessage: `Your unsaved changes might not be saved`,
+            }));
+            if (navigateAway) {
+              window.location.hash = '#';
+            }
+          } else {
+            window.location.hash = '#';
+          }
+        }
       },
       { text: savedMap.title }
     ]);
@@ -277,7 +465,8 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   timefilter.disableAutoRefreshSelector();
   $scope.showDatePicker = true; // used by query-bar directive to enable timepikcer in query bar
   $scope.topNavMenu = [{
-    key: i18n.translate('xpack.maps.mapController.fullScreenButtonLabel', {
+    id: 'full-screen',
+    label: i18n.translate('xpack.maps.mapController.fullScreenButtonLabel', {
       defaultMessage: `full screen`
     }),
     description: i18n.translate('xpack.maps.mapController.fullScreenDescription', {
@@ -288,7 +477,8 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       store.dispatch(enableFullScreen());
     }
   }, {
-    key: i18n.translate('xpack.maps.mapController.openInspectorButtonLabel', {
+    id: 'inspect',
+    label: i18n.translate('xpack.maps.mapController.openInspectorButtonLabel', {
       defaultMessage: `inspect`
     }),
     description: i18n.translate('xpack.maps.mapController.openInspectorDescription', {
@@ -300,13 +490,24 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       Inspector.open(inspectorAdapters, {});
     }
   }, ...(capabilities.get().maps.save ? [{
-    key: i18n.translate('xpack.maps.mapController.saveMapButtonLabel', {
+    id: 'save',
+    label: i18n.translate('xpack.maps.mapController.saveMapButtonLabel', {
       defaultMessage: `save`
     }),
     description: i18n.translate('xpack.maps.mapController.saveMapDescription', {
       defaultMessage: `Save map`
     }),
     testId: 'mapSaveButton',
+    disableButton() {
+      return $scope.isSaveDisabled;
+    },
+    tooltip() {
+      if ($scope.isSaveDisabled) {
+        return i18n.translate('xpack.maps.mapController.saveMapDisabledButtonTooltip', {
+          defaultMessage: 'Save or Cancel your layer changes before saving'
+        });
+      }
+    },
     run: async () => {
       const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
         const currentTitle = savedMap.title;
@@ -317,12 +518,12 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
           isTitleDuplicateConfirmed,
           onTitleDuplicate,
         };
-        return doSave(saveOptions).then(({ id, error }) => {
+        return doSave(saveOptions).then((response) => {
           // If the save wasn't successful, put the original values back.
-          if (!id || error) {
+          if (!response.id || response.error) {
             savedMap.title = currentTitle;
           }
-          return { id, error };
+          return response;
         });
       };
 

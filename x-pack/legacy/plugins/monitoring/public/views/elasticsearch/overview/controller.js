@@ -82,6 +82,7 @@ export class ElasticsearchOverviewController extends MonitoringViewBaseControlle
           onBrush={this.onBrush}
           showShardActivityHistory={this.showShardActivityHistory}
           toggleShardActivityHistory={this.toggleShardActivityHistory}
+          zoomInfo={this.zoomInfo}
         />
       </I18nContext>
     );

@@ -5,15 +5,14 @@
  */
 
 import { EuiIcon, EuiLoadingSpinner, EuiText, EuiToolTip } from '@elastic/eui';
-import moment from 'moment';
+
 import React from 'react';
 import { ApolloConsumer } from 'react-apollo';
 import { pure } from 'recompose';
 
 import { useFirstLastSeenHostQuery } from '../../../../containers/hosts/first_last_seen';
 import { getEmptyTagValue } from '../../../empty_value';
-import { PreferenceFormattedDate } from '../../../formatted_date';
-import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
+import { FormattedRelativePreferenceDate } from '../../../formatted_date';
 
 export enum FirstLastSeenHostType {
   FIRST_SEEN = 'first-seen',
@@ -52,9 +51,7 @@ export const FirstLastSeenHost = pure<{ hostname: string; type: FirstLastSeenHos
                 : !loading &&
                   valueSeen != null && (
                     <EuiText size="s">
-                      <LocalizedDateTooltip date={moment(new Date(valueSeen)).toDate()}>
-                        <PreferenceFormattedDate value={new Date(valueSeen)} />
-                      </LocalizedDateTooltip>
+                      <FormattedRelativePreferenceDate value={`${valueSeen}`} />
                     </EuiText>
                   )}
               {!loading && valueSeen == null && getEmptyTagValue()}
@@ -65,3 +62,5 @@ export const FirstLastSeenHost = pure<{ hostname: string; type: FirstLastSeenHos
     );
   }
 );
+
+FirstLastSeenHost.displayName = 'FirstLastSeenHost';

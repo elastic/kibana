@@ -9,23 +9,37 @@ import toJson from 'enzyme-to-json';
 import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
-import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import {
   apolloClientObservable,
-  mockFrameworks,
   mockIndexPattern,
   mockGlobalState,
   TestProviders,
 } from '../../../../mock';
+import { mockUiSettings } from '../../../../mock/ui_settings';
+import { useKibanaCore } from '../../../../lib/compose/kibana_core';
 import { createStore, hostsModel, State } from '../../../../store';
-
+import { HostsTableType } from '../../../../store/hosts/model';
 import { HostsTable } from './index';
 import { mockData } from './mock';
-import { KibanaConfigContext } from '../../../../lib/adapters/framework/kibana_framework_adapter';
 
-describe('Load More Table Component', () => {
-  const loadMore = jest.fn();
+const mockUseKibanaCore = useKibanaCore as jest.Mock;
+jest.mock('../../../../lib/compose/kibana_core');
+mockUseKibanaCore.mockImplementation(() => ({
+  uiSettings: mockUiSettings,
+}));
+
+// Test will fail because we will to need to mock some core services to make the test work
+// For now let's forget about SiemSearchBar and QueryBar
+jest.mock('../../../search_bar', () => ({
+  SiemSearchBar: () => null,
+}));
+jest.mock('../../../query_bar', () => ({
+  QueryBar: () => null,
+}));
+
+describe('Hosts Table', () => {
+  const loadPage = jest.fn();
   const state: State = mockGlobalState;
 
   let store = createStore(state, apolloClientObservable);
@@ -37,20 +51,20 @@ describe('Load More Table Component', () => {
   describe('rendering', () => {
     test('it renders the default Hosts table', () => {
       const wrapper = shallow(
-        <ReduxStoreProvider store={store}>
-          <KibanaConfigContext.Provider value={mockFrameworks.default_UTC}>
-            <HostsTable
-              indexPattern={mockIndexPattern}
-              loading={false}
-              data={mockData.Hosts.edges}
-              totalCount={mockData.Hosts.totalCount}
-              hasNextPage={getOr(false, 'hasNextPage', mockData.Hosts.pageInfo)!}
-              nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)}
-              loadMore={loadMore}
-              type={hostsModel.HostsType.page}
-            />
-          </KibanaConfigContext.Provider>
-        </ReduxStoreProvider>
+        <TestProviders store={store}>
+          <HostsTable
+            data={mockData.Hosts.edges}
+            id="hostsQuery"
+            isInspect={false}
+            indexPattern={mockIndexPattern}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Hosts.pageInfo)}
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.Hosts.pageInfo)}
+            totalCount={mockData.Hosts.totalCount}
+            type={hostsModel.HostsType.page}
+          />
+        </TestProviders>
       );
 
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -61,13 +75,19 @@ describe('Load More Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <HostsTable
+              id="hostsQuery"
+              isInspect={false}
               indexPattern={mockIndexPattern}
               loading={false}
               data={mockData.Hosts.edges}
               totalCount={mockData.Hosts.totalCount}
-              hasNextPage={getOr(false, 'hasNextPage', mockData.Hosts.pageInfo)!}
-              nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)}
-              loadMore={loadMore}
+              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Hosts.pageInfo)}
+              showMorePagesIndicator={getOr(
+                false,
+                'showMorePagesIndicator',
+                mockData.Hosts.pageInfo
+              )}
+              loadPage={loadPage}
               type={hostsModel.HostsType.page}
             />
           </TestProviders>
@@ -79,13 +99,19 @@ describe('Load More Table Component', () => {
           <MockedProvider>
             <TestProviders store={store}>
               <HostsTable
+                id="hostsQuery"
                 indexPattern={mockIndexPattern}
+                isInspect={false}
                 loading={false}
                 data={mockData.Hosts.edges}
                 totalCount={mockData.Hosts.totalCount}
-                hasNextPage={getOr(false, 'hasNextPage', mockData.Hosts.pageInfo)!}
-                nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)}
-                loadMore={loadMore}
+                fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Hosts.pageInfo)}
+                showMorePagesIndicator={getOr(
+                  false,
+                  'showMorePagesIndicator',
+                  mockData.Hosts.pageInfo
+                )}
+                loadPage={loadPage}
                 type={hostsModel.HostsType.page}
               />
             </TestProviders>
@@ -93,7 +119,8 @@ describe('Load More Table Component', () => {
         );
       });
       test('Initial value of the store', () => {
-        expect(store.getState().hosts.page.queries.hosts).toEqual({
+        expect(store.getState().hosts.page.queries[HostsTableType.hosts]).toEqual({
+          activePage: 0,
           direction: 'desc',
           sortField: 'lastSeen',
           limit: 10,
@@ -103,7 +130,7 @@ describe('Load More Table Component', () => {
             .find('.euiTable thead tr th button')
             .at(1)
             .text()
-        ).toEqual('Last SeenClick to sort in ascending order');
+        ).toEqual('Last seen Click to sort in ascending order');
         expect(
           wrapper
             .find('.euiTable thead tr th button')
@@ -120,7 +147,8 @@ describe('Load More Table Component', () => {
 
         wrapper.update();
 
-        expect(store.getState().hosts.page.queries.hosts).toEqual({
+        expect(store.getState().hosts.page.queries[HostsTableType.hosts]).toEqual({
+          activePage: 0,
           direction: 'asc',
           sortField: 'hostName',
           limit: 10,
@@ -130,7 +158,7 @@ describe('Load More Table Component', () => {
             .find('.euiTable thead tr th button')
             .first()
             .text()
-        ).toEqual('NameClick to sort in descending order');
+        ).toEqual('Host nameClick to sort in descending order');
       });
     });
   });

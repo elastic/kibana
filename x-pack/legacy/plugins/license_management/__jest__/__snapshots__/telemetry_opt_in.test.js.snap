@@ -150,20 +150,19 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
               "popover": <EuiPopover
                 anchorPosition="downCenter"
                 button={
-                  <EuiLink
-                    color="primary"
+                  <ForwardRef
                     onClick={[Function]}
-                    type="button"
                   >
                     <FormattedMessage
                       defaultMessage="Read more"
                       id="xpack.licenseMgmt.telemetryOptIn.readMoreLinkText"
                       values={Object {}}
                     />
-                  </EuiLink>
+                  </ForwardRef>
                 }
                 className="eui-AlignBaseline"
                 closePopover={[Function]}
+                display="inlineBlock"
                 hasArrow={true}
                 id="readMorePopover"
                 isOpen={false}
@@ -179,29 +178,25 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
                       id="xpack.licenseMgmt.telemetryOptIn.featureUsageWarningMessage"
                       values={
                         Object {
-                          "exampleLink": <EuiLink
-                            color="primary"
+                          "exampleLink": <ForwardRef
                             onClick={[Function]}
-                            type="button"
                           >
                             <FormattedMessage
                               defaultMessage="example"
                               id="xpack.licenseMgmt.telemetryOptIn.exampleLinkText"
                               values={Object {}}
                             />
-                          </EuiLink>,
-                          "telemetryPrivacyStatementLink": <EuiLink
-                            color="primary"
-                            href="https://www.elastic.co/legal/telemetry-privacy-statement"
+                          </ForwardRef>,
+                          "telemetryPrivacyStatementLink": <ForwardRef
+                            href="https://www.elastic.co/legal/privacy-statement"
                             target="_blank"
-                            type="button"
                           >
                             <FormattedMessage
                               defaultMessage="telemetry privacy statement"
                               id="xpack.licenseMgmt.telemetryOptIn.telemetryPrivacyStatementLinkText"
                               values={Object {}}
                             />
-                          </EuiLink>,
+                          </ForwardRef>,
                         }
                       }
                     />
@@ -242,20 +237,19 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
                 "popover": <EuiPopover
                   anchorPosition="downCenter"
                   button={
-                    <EuiLink
-                      color="primary"
+                    <ForwardRef
                       onClick={[Function]}
-                      type="button"
                     >
                       <FormattedMessage
                         defaultMessage="Read more"
                         id="xpack.licenseMgmt.telemetryOptIn.readMoreLinkText"
                         values={Object {}}
                       />
-                    </EuiLink>
+                    </ForwardRef>
                   }
                   className="eui-AlignBaseline"
                   closePopover={[Function]}
+                  display="inlineBlock"
                   hasArrow={true}
                   id="readMorePopover"
                   isOpen={false}
@@ -271,29 +265,25 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
                         id="xpack.licenseMgmt.telemetryOptIn.featureUsageWarningMessage"
                         values={
                           Object {
-                            "exampleLink": <EuiLink
-                              color="primary"
+                            "exampleLink": <ForwardRef
                               onClick={[Function]}
-                              type="button"
                             >
                               <FormattedMessage
                                 defaultMessage="example"
                                 id="xpack.licenseMgmt.telemetryOptIn.exampleLinkText"
                                 values={Object {}}
                               />
-                            </EuiLink>,
-                            "telemetryPrivacyStatementLink": <EuiLink
-                              color="primary"
-                              href="https://www.elastic.co/legal/telemetry-privacy-statement"
+                            </ForwardRef>,
+                            "telemetryPrivacyStatementLink": <ForwardRef
+                              href="https://www.elastic.co/legal/privacy-statement"
                               target="_blank"
-                              type="button"
                             >
                               <FormattedMessage
                                 defaultMessage="telemetry privacy statement"
                                 id="xpack.licenseMgmt.telemetryOptIn.telemetryPrivacyStatementLinkText"
                                 values={Object {}}
                               />
-                            </EuiLink>,
+                            </ForwardRef>,
                           }
                         }
                       />
@@ -307,20 +297,19 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
             <EuiPopover
               anchorPosition="downCenter"
               button={
-                <EuiLink
-                  color="primary"
+                <ForwardRef
                   onClick={[Function]}
-                  type="button"
                 >
                   <FormattedMessage
                     defaultMessage="Read more"
                     id="xpack.licenseMgmt.telemetryOptIn.readMoreLinkText"
                     values={Object {}}
                   />
-                </EuiLink>
+                </ForwardRef>
               }
               className="eui-AlignBaseline"
               closePopover={[Function]}
+              display="inlineBlock"
               hasArrow={true}
               id="readMorePopover"
               isOpen={false}
@@ -344,9 +333,7 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
                     className="euiPopover__anchor"
                   >
                     <EuiLink
-                      color="primary"
                       onClick={[Function]}
-                      type="button"
                     >
                       <button
                         className="euiLink euiLink--primary"
@@ -375,6 +362,113 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
 `;
 
 exports[`TelemetryOptIn should not display when telemetry is opted in 1`] = `
+<TelemetryOptIn
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+/>
+`;
+
+exports[`TelemetryOptIn shouldn't display when telemetry optIn status can't change 1`] = `
 <TelemetryOptIn
   intl={
     Object {

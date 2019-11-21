@@ -18,6 +18,8 @@ const AndOrContainer = styled.div`
   top: -1px;
 `;
 
+AndOrContainer.displayName = 'AndOrContainer';
+
 interface ModeProperties {
   mode: KqlMode;
   description: string;

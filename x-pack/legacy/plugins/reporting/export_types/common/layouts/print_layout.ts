@@ -4,30 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import path from 'path';
-import { EvaluateOptions, KbnServer, Size } from '../../../types';
+import { EvaluateFn, SerializableOrJSHandle } from 'puppeteer';
+import { LevelLogger } from '../../../server/lib';
+import { HeadlessChromiumDriver } from '../../../server/browsers/chromium/driver';
+import { ServerFacade } from '../../../types';
 import { LayoutTypes } from '../constants';
-import { Layout } from './layout';
+import { getDefaultLayoutSelectors, Layout, LayoutSelectorDictionary, Size } from './layout';
 import { CaptureConfig } from './types';
 
-interface BrowserClient {
-  evaluate: (evaluateOptions: EvaluateOptions) => void;
-}
-
 export class PrintLayout extends Layout {
-  public readonly selectors = {
+  public readonly selectors: LayoutSelectorDictionary = {
+    ...getDefaultLayoutSelectors(),
     screenshot: '[data-shared-item]',
-    renderComplete: '[data-shared-item]',
-    itemsCountAttribute: 'data-shared-items-count',
-    timefilterFromAttribute: 'data-shared-timefilter-from',
-    timefilterToAttribute: 'data-shared-timefilter-to',
-    toastHeader: '[data-test-subj="euiToastHeader"]',
   };
-
   public readonly groupCount = 2;
-
   private captureConfig: CaptureConfig;
 
-  constructor(server: KbnServer) {
+  constructor(server: ServerFacade) {
     super(LayoutTypes.PRINT);
     this.captureConfig = server.config().get('xpack.reporting.capture');
   }
@@ -52,12 +45,17 @@ export class PrintLayout extends Layout {
     };
   }
 
-  public async positionElements(browser: BrowserClient): Promise<void> {
+  public async positionElements(
+    browser: HeadlessChromiumDriver,
+    logger: LevelLogger
+  ): Promise<void> {
+    logger.debug('positioning elements');
+
     const elementSize: Size = {
       width: this.captureConfig.viewport.width / this.captureConfig.zoom,
       height: this.captureConfig.viewport.height / this.captureConfig.zoom,
     };
-    const evalOptions: EvaluateOptions = {
+    const evalOptions: { fn: EvaluateFn; args: SerializableOrJSHandle[] } = {
       fn: (selector: string, height: number, width: number) => {
         const visualizations = document.querySelectorAll(selector) as NodeListOf<HTMLElement>;
         const visualizationsLength = visualizations.length;

@@ -5,69 +5,114 @@
  */
 import {
   EuiBadge,
-  EuiComboBox,
-  EuiComboBoxOptionProps,
+  EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
-  // @ts-ignore
-  EuiInMemoryTable,
   EuiPanel,
+  EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
+  EuiFormRow,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import moment from 'moment';
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
+// @ts-ignore formatNumber
+import { formatNumber } from '@elastic/eui/lib/services/format';
 import { Ping, PingResults } from '../../../common/graphql/types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../lib/helper';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { pingsQuery } from '../../queries';
+import { LocationName } from './location_name';
+import { Criteria, Pagination } from './monitor_list';
+import { PingListExpandedRowComponent } from './ping_list/expanded_row';
 
 interface PingListQueryResult {
   allPings?: PingResults;
 }
 
 interface PingListProps {
+  onSelectedStatusChange: (status: string | undefined) => void;
+  onSelectedLocationChange: (location: any) => void;
+  onPageCountChange: (itemCount: number) => void;
   onUpdateApp: () => void;
-  onSelectedStatusUpdate: (status: string | null) => void;
+  pageSize: number;
   selectedOption: string;
+  selectedLocation: string | undefined;
 }
 
 type Props = UptimeGraphQLQueryProps<PingListQueryResult> & PingListProps;
+interface ExpandedRowMap {
+  [key: string]: JSX.Element;
+}
+
+export const AllLocationOption = { text: 'All', value: '' };
+
+export const toggleDetails = (
+  ping: Ping,
+  itemIdToExpandedRowMap: ExpandedRowMap,
+  setItemIdToExpandedRowMap: (update: ExpandedRowMap) => any
+) => {
+  // If the user has clicked on the expanded map, close all expanded rows.
+  if (itemIdToExpandedRowMap[ping.id]) {
+    setItemIdToExpandedRowMap({});
+    return;
+  }
+
+  // Otherwise expand this row
+  const newItemIdToExpandedRowMap: ExpandedRowMap = {};
+  newItemIdToExpandedRowMap[ping.id] = <PingListExpandedRowComponent ping={ping} />;
+  setItemIdToExpandedRowMap(newItemIdToExpandedRowMap);
+};
 
 export const PingListComponent = ({
   data,
   loading,
-  onSelectedStatusUpdate,
+  onPageCountChange,
+  onSelectedLocationChange,
+  onSelectedStatusChange,
   onUpdateApp,
+  pageSize,
   selectedOption,
+  selectedLocation,
 }: Props) => {
-  const statusOptions: EuiComboBoxOptionProps[] = [
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<ExpandedRowMap>({});
+
+  const statusOptions = [
     {
-      label: i18n.translate('xpack.uptime.pingList.statusOptions.allStatusOptionLabel', {
+      text: i18n.translate('xpack.uptime.pingList.statusOptions.allStatusOptionLabel', {
         defaultMessage: 'All',
       }),
       value: '',
     },
     {
-      label: i18n.translate('xpack.uptime.pingList.statusOptions.upStatusOptionLabel', {
+      text: i18n.translate('xpack.uptime.pingList.statusOptions.upStatusOptionLabel', {
         defaultMessage: 'Up',
       }),
       value: 'up',
     },
     {
-      label: i18n.translate('xpack.uptime.pingList.statusOptions.downStatusOptionLabel', {
+      text: i18n.translate('xpack.uptime.pingList.statusOptions.downStatusOptionLabel', {
         defaultMessage: 'Down',
       }),
       value: 'down',
     },
   ];
-  const columns = [
+  const locations = get<string[]>(data, 'allPings.locations');
+  const locationOptions = !locations
+    ? [AllLocationOption]
+    : [AllLocationOption].concat(
+        locations.map(name => {
+          return { text: name, value: name };
+        })
+      );
+
+  const columns: any[] = [
     {
       field: 'monitor.status',
       name: i18n.translate('xpack.uptime.pingList.statusColumnLabel', {
@@ -96,59 +141,48 @@ export const PingListComponent = ({
       ),
     },
     {
-      field: 'monitor.ip',
+      align: 'left',
       dataType: 'number',
+      field: 'observer.geo.name',
+      name: i18n.translate('xpack.uptime.pingList.locationNameColumnLabel', {
+        defaultMessage: 'Location',
+      }),
+      render: (location: string) => <LocationName location={location} />,
+    },
+    {
+      align: 'right',
+      dataType: 'number',
+      field: 'monitor.ip',
       name: i18n.translate('xpack.uptime.pingList.ipAddressColumnLabel', {
         defaultMessage: 'IP',
       }),
     },
     {
+      align: 'right',
       field: 'monitor.duration.us',
       name: i18n.translate('xpack.uptime.pingList.durationMsColumnLabel', {
         defaultMessage: 'Duration',
       }),
-      render: (duration: number) => microsToMillis(duration),
+      render: (duration: number) =>
+        i18n.translate('xpack.uptime.pingList.durationMsColumnFormatting', {
+          values: { millis: microsToMillis(duration) },
+          defaultMessage: '{millis} ms',
+        }),
     },
     {
+      align: 'left',
       field: 'error.type',
       name: i18n.translate('xpack.uptime.pingList.errorTypeColumnLabel', {
         defaultMessage: 'Error type',
       }),
     },
-    {
-      field: 'error.message',
-      name: i18n.translate('xpack.uptime.pingList.errorMessageColumnLabel', {
-        defaultMessage: 'Error message',
-      }),
-      render: (message: string) =>
-        message && message.length > 25 ? (
-          <EuiToolTip
-            position="top"
-            title={i18n.translate('xpack.uptime.pingList.columns.errorMessageTooltipTitle', {
-              defaultMessage: 'Error message',
-            })}
-            content={<p>{message}</p>}
-          >
-            <code>{message.slice(0, 24)}…</code>
-          </EuiToolTip>
-        ) : (
-          <EuiText size="s">
-            <code>{message}</code>
-          </EuiText>
-        ),
-    },
   ];
-  useEffect(
-    () => {
-      onUpdateApp();
-    },
-    [selectedOption]
-  );
+  useEffect(() => {
+    onUpdateApp();
+  }, [selectedOption]);
   let pings: Ping[] = [];
-  let total: number = 0;
   if (data && data.allPings && data.allPings.pings) {
     pings = data.allPings.pings;
-    total = data.allPings.total;
     const hasStatus: boolean = pings.reduce(
       (hasHttpStatus: boolean, currentPing: Ping) =>
         hasHttpStatus || !!get(currentPing, 'http.response.status_code'),
@@ -166,62 +200,113 @@ export const PingListComponent = ({
       });
     }
   }
+  columns.push({
+    align: 'right',
+    width: '40px',
+    isExpander: true,
+    render: (item: Ping) => (
+      <EuiButtonIcon
+        onClick={() => toggleDetails(item, itemIdToExpandedRowMap, setItemIdToExpandedRowMap)}
+        aria-label={
+          itemIdToExpandedRowMap[item.id]
+            ? i18n.translate('xpack.uptime.pingList.collapseRow', { defaultMessage: 'Collapse' })
+            : i18n.translate('xpack.uptime.pingList.expandRow', { defaultMessage: 'Expand' })
+        }
+        iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+      />
+    ),
+  });
+  const pagination: Pagination = {
+    initialPageSize: 20,
+    pageIndex: 0,
+    pageSize,
+    pageSizeOptions: [5, 10, 20, 50, 100],
+    /**
+     * we're not currently supporting pagination in this component
+     * so the first page is the only page
+     */
+    totalItemCount: pageSize,
+  };
 
   return (
     <Fragment>
-      <EuiPanel paddingSize="s">
+      <EuiPanel>
+        <EuiTitle size="xs">
+          <h4>
+            <FormattedMessage
+              id="xpack.uptime.pingList.checkHistoryTitle"
+              defaultMessage="History"
+            />
+          </h4>
+        </EuiTitle>
+        <EuiSpacer size="s" />
         <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xs">
-                  <h4>
-                    <FormattedMessage
-                      id="xpack.uptime.pingList.checkHistoryTitle"
-                      defaultMessage="History"
-                    />
-                  </h4>
-                </EuiTitle>
-              </EuiFlexItem>
-              {!!total && (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow">{total}</EuiBadge>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup>
               <EuiFlexItem style={{ minWidth: 200 }}>
-                <EuiComboBox
-                  isClearable={false}
-                  singleSelection={{ asPlainText: true }}
-                  selectedOptions={[
-                    statusOptions.find(({ value }) => value === selectedOption) || statusOptions[2],
-                  ]}
-                  options={statusOptions}
-                  aria-label={i18n.translate('xpack.uptime.pingList.statusLabel', {
-                    defaultMessage: 'Status',
-                  })}
-                  onChange={(selectedOptions: EuiComboBoxOptionProps[]) => {
-                    if (typeof selectedOptions[0].value === 'string') {
-                      onSelectedStatusUpdate(
-                        // @ts-ignore it's definitely a string
-                        selectedOptions[0].value !== '' ? selectedOptions[0].value : null
-                      );
-                    }
-                  }}
-                />
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <EuiFormRow
+                      label="Status"
+                      aria-label={i18n.translate('xpack.uptime.pingList.statusLabel', {
+                        defaultMessage: 'Status',
+                      })}
+                    >
+                      <EuiSelect
+                        options={statusOptions}
+                        aria-label={i18n.translate('xpack.uptime.pingList.statusLabel', {
+                          defaultMessage: 'Status',
+                        })}
+                        value={selectedOption}
+                        onChange={selected => {
+                          if (typeof selected.target.value === 'string') {
+                            onSelectedStatusChange(
+                              selected.target && selected.target.value !== ''
+                                ? selected.target.value
+                                : undefined
+                            );
+                          }
+                        }}
+                      />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFormRow
+                      label="Location"
+                      aria-label={i18n.translate('xpack.uptime.pingList.locationLabel', {
+                        defaultMessage: 'Location',
+                      })}
+                    >
+                      <EuiSelect
+                        options={locationOptions}
+                        value={selectedLocation}
+                        aria-label={i18n.translate('xpack.uptime.pingList.locationLabel', {
+                          defaultMessage: 'Location',
+                        })}
+                        onChange={selected => {
+                          onSelectedLocationChange(
+                            selected.target && selected.target.value !== ''
+                              ? selected.target.value
+                              : null
+                          );
+                        }}
+                      />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
-        <EuiInMemoryTable
+        <EuiBasicTable
           loading={loading}
           columns={columns}
           items={pings}
-          pagination={{ initialPageSize: 20, pageSizeOptions: [5, 10, 20, 100] }}
+          itemId="id"
+          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+          pagination={pagination}
+          onChange={({ page: { size } }: Criteria) => onPageCountChange(size)}
         />
       </EuiPanel>
     </Fragment>

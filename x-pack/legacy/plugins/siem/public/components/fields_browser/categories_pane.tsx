@@ -6,7 +6,6 @@
 
 import { EuiInMemoryTable, EuiTitle } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
@@ -27,14 +26,15 @@ const CategoryNames = styled.div<{ height: number; width: number }>`
   }
 `;
 
+CategoryNames.displayName = 'CategoryNames';
+
 const Title = styled(EuiTitle)`
   padding-left: 5px;
 `;
 
-type Props = Pick<
-  FieldBrowserProps,
-  'browserFields' | 'isLoading' | 'timelineId' | 'onUpdateColumns'
-> & {
+Title.displayName = 'Title';
+
+type Props = Pick<FieldBrowserProps, 'browserFields' | 'timelineId' | 'onUpdateColumns'> & {
   /**
    * A map of categoryId -> metadata about the fields in that category,
    * filtered such that the name of every field in the category includes
@@ -51,11 +51,11 @@ type Props = Pick<
   /** The width of the categories pane */
   width: number;
 };
-export const CategoriesPane = pure<Props>(
+
+export const CategoriesPane = React.memo<Props>(
   ({
     browserFields,
     filteredBrowserFields,
-    isLoading,
     onCategorySelected,
     onUpdateColumns,
     selectedCategoryId,
@@ -64,15 +64,19 @@ export const CategoriesPane = pure<Props>(
   }) => (
     <>
       <Title size="xxs">
-        <h5>{i18n.CATEGORIES}</h5>
+        <h5 data-test-subj="categories-pane-title">{i18n.CATEGORIES}</h5>
       </Title>
 
-      <CategoryNames data-test-subj="categories-container" height={TABLE_HEIGHT} width={width}>
+      <CategoryNames
+        className="euiTable--compressed"
+        data-test-subj="categories-container"
+        height={TABLE_HEIGHT}
+        width={width}
+      >
         <EuiInMemoryTable
           columns={getCategoryColumns({
             browserFields,
             filteredBrowserFields,
-            isLoading,
             onCategorySelected,
             onUpdateColumns,
             selectedCategoryId,
@@ -89,3 +93,5 @@ export const CategoriesPane = pure<Props>(
     </>
   )
 );
+
+CategoriesPane.displayName = 'CategoriesPane';

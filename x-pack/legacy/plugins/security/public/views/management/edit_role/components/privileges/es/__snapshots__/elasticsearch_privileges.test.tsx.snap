@@ -13,19 +13,17 @@ exports[`it renders without crashing 1`] = `
           id="xpack.security.management.editRole.elasticSearchPrivileges.manageRoleActionsDescription"
           values={Object {}}
         />
-        <EuiLink
+        <ForwardRef
           className="editRole__learnMore"
-          color="primary"
           href="undefinedguide/en/elastic-stack-overview/undefined/security-privileges.html#privileges-list-cluster"
           target="_blank"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Learn more"
             id="xpack.security.management.editRole.elasticSearchPrivileges.learnMoreLinkText"
             values={Object {}}
           />
-        </EuiLink>
+        </ForwardRef>
       </p>
     }
     fullWidth={false}
@@ -43,11 +41,20 @@ exports[`it renders without crashing 1`] = `
   >
     <EuiFormRow
       describedByIds={Array []}
+      display="row"
       fullWidth={true}
+      hasChildLabel={true}
       hasEmptyLabelSpace={true}
       labelType="label"
     >
       <ClusterPrivileges
+        builtinClusterPrivileges={
+          Array [
+            "all",
+            "manage",
+            "monitor",
+          ]
+        }
         onChange={[Function]}
         role={
           Object {
@@ -72,19 +79,17 @@ exports[`it renders without crashing 1`] = `
           id="xpack.security.management.editRole.elasticSearchPrivileges.howToBeSubmittedOnBehalfOfOtherUsersDescription"
           values={Object {}}
         />
-        <EuiLink
+        <ForwardRef
           className="editRole__learnMore"
-          color="primary"
           href="undefinedguide/en/elastic-stack-overview/undefined/security-privileges.html#_run_as_privilege"
           target="_blank"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Learn more"
             id="xpack.security.management.editRole.elasticSearchPrivileges.learnMoreLinkText"
             values={Object {}}
           />
-        </EuiLink>
+        </ForwardRef>
       </p>
     }
     fullWidth={false}
@@ -102,7 +107,9 @@ exports[`it renders without crashing 1`] = `
   >
     <EuiFormRow
       describedByIds={Array []}
+      display="row"
       fullWidth={false}
+      hasChildLabel={true}
       hasEmptyLabelSpace={true}
       labelType="label"
     >
@@ -147,10 +154,8 @@ exports[`it renders without crashing 1`] = `
       />
       <EuiLink
         className="editRole__learnMore"
-        color="primary"
         href="undefinedguide/en/elastic-stack-overview/undefined/security-privileges.html#privileges-list-indices"
         target="_blank"
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Learn more"
@@ -163,6 +168,14 @@ exports[`it renders without crashing 1`] = `
   <IndexPrivileges
     allowDocumentLevelSecurity={true}
     allowFieldLevelSecurity={true}
+    availableIndexPrivileges={
+      Array [
+        "all",
+        "read",
+        "write",
+        "index",
+      ]
+    }
     httpClient={[MockFunction]}
     indexPatterns={Array []}
     onChange={[MockFunction]}
@@ -185,13 +198,8 @@ exports[`it renders without crashing 1`] = `
   />
   <EuiHorizontalRule />
   <EuiButton
-    color="primary"
-    fill={false}
-    iconSide="left"
     iconType="plusInCircleFilled"
     onClick={[Function]}
-    size="m"
-    type="button"
   >
     <FormattedMessage
       defaultMessage="Add index privilege"

@@ -29,5 +29,6 @@ export const ExplorerNoJobsFound = () => (
         />
       </EuiButton>
     }
+    data-test-subj="mlNoJobsFound"
   />
 );

@@ -2,7 +2,7 @@
 
 exports[`StepIndexPattern renders errors when input is invalid 1`] = `
 Object {
-  "component": <InjectIntl(HeaderComponent)
+  "component": <Header
     characterList="\\\\, /, ?, \\", <, >, |"
     data-test-subj="createIndexPatternStep1Header"
     errors={

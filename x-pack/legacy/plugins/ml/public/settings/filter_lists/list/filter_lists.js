@@ -9,9 +9,7 @@
  * React table for displaying a table of filter lists.
  */
 
-import React, {
-  Component
-} from 'react';
+import React, { Component, Fragment } from 'react';
 import { PropTypes } from 'prop-types';
 
 import {
@@ -22,6 +20,8 @@ import {
 import { injectI18n } from '@kbn/i18n/react';
 
 import { toastNotifications } from 'ui/notify';
+
+import { NavigationMenu } from '../../../components/navigation_menu';
 
 import { FilterListsHeader } from './header';
 import { FilterListsTable } from './table';
@@ -88,26 +88,29 @@ export const FilterLists = injectI18n(class extends Component {
     const { canCreateFilter, canDeleteFilter } = this.props;
 
     return (
-      <EuiPage className="ml-list-filter-lists">
-        <EuiPageContent
-          className="ml-list-filter-lists-content"
-          verticalPosition="center"
-          horizontalPosition="center"
-        >
-          <FilterListsHeader
-            totalCount={filterLists.length}
-            refreshFilterLists={this.refreshFilterLists}
-          />
-          <FilterListsTable
-            canCreateFilter={canCreateFilter}
-            canDeleteFilter={canDeleteFilter}
-            filterLists={filterLists}
-            selectedFilterLists={selectedFilterLists}
-            setSelectedFilterLists={this.setSelectedFilterLists}
-            refreshFilterLists={this.refreshFilterLists}
-          />
-        </EuiPageContent>
-      </EuiPage>
+      <Fragment>
+        <NavigationMenu tabId="settings" />
+        <EuiPage className="ml-list-filter-lists">
+          <EuiPageContent
+            className="ml-list-filter-lists-content"
+            verticalPosition="center"
+            horizontalPosition="center"
+          >
+            <FilterListsHeader
+              totalCount={filterLists.length}
+              refreshFilterLists={this.refreshFilterLists}
+            />
+            <FilterListsTable
+              canCreateFilter={canCreateFilter}
+              canDeleteFilter={canDeleteFilter}
+              filterLists={filterLists}
+              selectedFilterLists={selectedFilterLists}
+              setSelectedFilterLists={this.setSelectedFilterLists}
+              refreshFilterLists={this.refreshFilterLists}
+            />
+          </EuiPageContent>
+        </EuiPage>
+      </Fragment>
     );
   }
 });

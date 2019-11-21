@@ -24,7 +24,8 @@ export default function ({ getService }) {
           expect(body.usage).to.be(undefined);
         });
 
-        it('should return 401 for extended', async () => {
+        // FLAKY: https://github.com/elastic/kibana/issues/29254
+        it.skip('should return 401 for extended', async () => {
           await supertestNoAuth
             .get('/api/stats?extended')
             .expect(401); // unauthorized

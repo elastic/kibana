@@ -19,9 +19,11 @@
  * under the License.
  */
 
-const { createServer } = require('http');
+const fs = require('fs');
 const { format: formatUrl } = require('url');
-const { exitCode, start } = JSON.parse(process.argv[2]);
+const { exitCode, start, ssl } = JSON.parse(process.argv[2]);
+const { createServer } = ssl ? require('https') : require('http');
+const { ES_KEY_PATH, ES_CERT_PATH } = require('@kbn/dev-utils');
 
 process.exitCode = exitCode;
 
@@ -30,27 +32,33 @@ if (!start) {
 }
 
 let serverUrl;
-const server = createServer((req, res) => {
-  const url = new URL(req.url, serverUrl);
-  const send = (code, body) => {
-    res.writeHead(code, { 'content-type': 'application/json' });
-    res.end(JSON.stringify(body));
-  };
+const server = createServer(
+  {
+    key: ssl ? fs.readFileSync(ES_KEY_PATH) : undefined,
+    cert: ssl ? fs.readFileSync(ES_CERT_PATH) : undefined,
+  },
+  (req, res) => {
+    const url = new URL(req.url, serverUrl);
+    const send = (code, body) => {
+      res.writeHead(code, { 'content-type': 'application/json' });
+      res.end(JSON.stringify(body));
+    };
 
-  if (url.pathname === '/_xpack') {
-    return send(400, {
+    if (url.pathname === '/_xpack') {
+      return send(400, {
+        error: {
+          reason: 'foo bar',
+        },
+      });
+    }
+
+    return send(404, {
       error: {
-        reason: 'foo bar',
+        reason: 'not found',
       },
     });
   }
-
-  return send(404, {
-    error: {
-      reason: 'not found',
-    },
-  });
-});
+);
 
 // setup server auto close after 1 second of silence
 let serverCloseTimer;

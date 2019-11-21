@@ -14,7 +14,7 @@ const initTestBed = registerTestBed(JobCreate, { store: rollupJobsStore });
 
 export const setup = (props) => {
   const testBed = initTestBed(props);
-  const { component, form } = testBed;
+  const { component, form, table } = testBed;
 
   // User actions
   const clickNextStep = () => {
@@ -68,6 +68,30 @@ export const setup = (props) => {
     }
   };
 
+  // Helpers for the metrics step in job creation.
+  // Mostly placed here for now to make test file a bit smaller and specific
+  // to tests.
+  const getFieldListTableRows = () => {
+    const { rows } = table.getMetaData('rollupJobMetricsFieldList');
+    return rows;
+  };
+
+  const getFieldListTableRow = (row) => {
+    const rows = getFieldListTableRows();
+    return rows[row];
+  };
+
+  const getFieldChooserColumnForRow = (row) => {
+    const selectedRow = getFieldListTableRow(row);
+    const [,, fieldChooserColumn] = selectedRow.columns;
+    return fieldChooserColumn;
+  };
+
+  const getSelectAllInputForRow = (row) => {
+    const fieldChooser = getFieldChooserColumnForRow(row);
+    return fieldChooser.reactWrapper.find('input').first();
+  };
+
   // Misc
   const getEuiStepsHorizontalActive = () => component.find('.euiStepHorizontal-isSelected').text();
 
@@ -84,5 +108,11 @@ export const setup = (props) => {
       ...testBed.form,
       fillFormFields,
     },
+    metrics: {
+      getFieldListTableRows,
+      getFieldListTableRow,
+      getFieldChooserColumnForRow,
+      getSelectAllInputForRow,
+    }
   };
 };

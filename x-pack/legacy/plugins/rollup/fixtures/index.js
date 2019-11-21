@@ -7,4 +7,5 @@
 export {
   getJob,
   getJobs,
+  jobCount
 } from './job';

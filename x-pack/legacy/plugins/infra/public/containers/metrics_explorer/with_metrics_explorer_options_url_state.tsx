@@ -14,17 +14,26 @@ import {
   MetricsExplorerOptions,
   MetricsExplorerOptionsContainer,
   MetricsExplorerTimeOptions,
+  MetricsExplorerYAxisMode,
+  MetricsExplorerChartType,
+  MetricsExplorerChartOptions,
 } from './use_metrics_explorer_options';
 
 interface MetricsExplorerUrlState {
   timerange?: MetricsExplorerTimeOptions;
   options?: MetricsExplorerOptions;
+  chartOptions?: MetricsExplorerChartOptions;
 }
 
 export const WithMetricsExplorerOptionsUrlState = () => {
-  const { options, currentTimerange, setOptions: setRawOptions, setTimeRange } = useContext(
-    MetricsExplorerOptionsContainer.Context
-  );
+  const {
+    options,
+    chartOptions,
+    setChartOptions,
+    currentTimerange,
+    setOptions: setRawOptions,
+    setTimeRange,
+  } = useContext(MetricsExplorerOptionsContainer.Context);
 
   const setOptions = (value: MetricsExplorerOptions) => {
     setRawOptions(value);
@@ -33,32 +42,32 @@ export const WithMetricsExplorerOptionsUrlState = () => {
   const urlState = useMemo(
     () => ({
       options,
+      chartOptions,
       timerange: currentTimerange,
     }),
-    [options, currentTimerange]
+    [options, chartOptions, currentTimerange]
   );
+
+  const handleChange = (newUrlState: MetricsExplorerUrlState | undefined) => {
+    if (newUrlState && newUrlState.options) {
+      setOptions(newUrlState.options);
+    }
+    if (newUrlState && newUrlState.timerange) {
+      setTimeRange(newUrlState.timerange);
+    }
+    if (newUrlState && newUrlState.chartOptions) {
+      setChartOptions(newUrlState.chartOptions);
+    }
+  };
 
   return (
     <UrlStateContainer
       urlState={urlState}
       urlStateKey="metricsExplorer"
       mapToUrlState={mapToUrlState}
-      onChange={newUrlState => {
-        if (newUrlState && newUrlState.options) {
-          setOptions(newUrlState.options);
-        }
-        if (newUrlState && newUrlState.timerange) {
-          setTimeRange(newUrlState.timerange);
-        }
-      }}
-      onInitialize={newUrlState => {
-        if (newUrlState && newUrlState.options) {
-          setOptions(newUrlState.options);
-        }
-        if (newUrlState && newUrlState.timerange) {
-          setTimeRange(newUrlState.timerange);
-        }
-      }}
+      onChange={handleChange}
+      onInitialize={handleChange}
+      populateWithInitialState={true}
     />
   );
 };
@@ -71,7 +80,9 @@ function isMetricExplorerOptions(subject: any): subject is MetricsExplorerOption
   const MetricOptional = t.partial({
     field: t.string,
     rate: t.boolean,
-    color: t.union(values(MetricsExplorerColor).map(c => t.literal(c as string))),
+    color: t.keyof(
+      Object.fromEntries(values(MetricsExplorerColor).map(c => [c, null])) as Record<string, null>
+    ),
     label: t.string,
   });
 
@@ -91,6 +102,32 @@ function isMetricExplorerOptions(subject: any): subject is MetricsExplorerOption
   const Options = t.intersection([OptionsRequired, OptionsOptional]);
 
   const result = Options.decode(subject);
+
+  try {
+    ThrowReporter.report(result);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function isMetricExplorerChartOptions(subject: any): subject is MetricsExplorerChartOptions {
+  const ChartOptions = t.type({
+    yAxisMode: t.keyof(
+      Object.fromEntries(values(MetricsExplorerYAxisMode).map(v => [v, null])) as Record<
+        string,
+        null
+      >
+    ),
+    type: t.keyof(
+      Object.fromEntries(values(MetricsExplorerChartType).map(v => [v, null])) as Record<
+        string,
+        null
+      >
+    ),
+    stack: t.boolean,
+  });
+  const result = ChartOptions.decode(subject);
 
   try {
     ThrowReporter.report(result);
@@ -123,6 +160,9 @@ const mapToUrlState = (value: any): MetricsExplorerUrlState | undefined => {
     }
     if (value.timerange && isMetricExplorerTimeOption(value.timerange)) {
       set(finalState, 'timerange', value.timerange);
+    }
+    if (value.chartOptions && isMetricExplorerChartOptions(value.chartOptions)) {
+      set(finalState, 'chartOptions', value.chartOptions);
     }
     return finalState;
   }

@@ -42,9 +42,7 @@ describe('Markdown', () => {
 
   describe('markdown tables', () => {
     const headerColumns = ['we', 'support', 'markdown', 'tables'];
-    const header = `| ${headerColumns[0]} | ${headerColumns[1]} | ${headerColumns[2]} | ${
-      headerColumns[3]
-    } |`;
+    const header = `| ${headerColumns[0]} | ${headerColumns[1]} | ${headerColumns[2]} | ${headerColumns[3]} |`;
 
     const rawTable = `${header}\n|---------|---------|------------|--------|\n| because | tables  | are        | pretty |\n| useful  | for     | formatting | data   |`;
 

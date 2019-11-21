@@ -4,24 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// TODO: Remove once typescript definitions are in EUI
-declare module '@elastic/eui' {
-  export const EuiCopy: React.SFC<any>;
-}
-
-import {
-  EuiButton,
-  EuiCopy as EuiCopyTyped,
-  EuiForm,
-  EuiFormRow,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButton, EuiCopy, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, ReactElement } from 'react';
 import { KFetchError } from 'ui/kfetch/kfetch_error';
 import { toastNotifications } from 'ui/notify';
 import url from 'url';
+import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { reportingClient } from '../lib/reporting_client';
 
 interface Props {
@@ -138,19 +127,16 @@ class ReportingPanelContentUi extends Component<Props, State> {
         </EuiText>
         <EuiSpacer size="s" />
 
-        <EuiCopyTyped
-          textToCopy={this.state.absoluteUrl}
-          anchorClassName="kbnShareContextMenu__copyAnchor"
-        >
-          {(copy: () => void) => (
-            <EuiButton className="kbnShareContextMenu__copyButton" onClick={copy} size="s">
+        <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="eui-displayBlock">
+          {copy => (
+            <EuiButton fullWidth onClick={copy} size="s">
               <FormattedMessage
                 id="xpack.reporting.panelContent.copyUrlButtonLabel"
                 defaultMessage="Copy POST URL"
               />
             </EuiButton>
           )}
-        </EuiCopyTyped>
+        </EuiCopy>
       </EuiForm>
     );
   }
@@ -158,8 +144,8 @@ class ReportingPanelContentUi extends Component<Props, State> {
   private renderGenerateReportButton = (isDisabled: boolean) => {
     return (
       <EuiButton
-        className="kbnShareContextMenu__copyButton"
         disabled={isDisabled}
+        fullWidth
         fill
         onClick={this.createReportingJob}
         data-test-subj="generateReportButton"
@@ -221,7 +207,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
             },
             { objectType: this.props.objectType }
           ),
-          text: (
+          text: toMountPoint(
             <FormattedMessage
               id="xpack.reporting.panelContent.successfullyQueuedReportNotificationDescription"
               defaultMessage="Track its progress in Management"
@@ -241,7 +227,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
               },
               { objectType: this.props.objectType }
             ),
-            text: (
+            text: toMountPoint(
               <FormattedMessage
                 id="xpack.reporting.panelContent.whatCanBeExportedWarningDescription"
                 defaultMessage="Please save your work first"
@@ -268,7 +254,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
             id: 'xpack.reporting.panelContent.notification.reportingErrorTitle',
             defaultMessage: 'Reporting error',
           }),
-          text: kfetchError.message || defaultMessage,
+          text: toMountPoint(kfetchError.message || defaultMessage),
           'data-test-subj': 'queueReportError',
         });
       });

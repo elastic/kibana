@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { ExpressionFunction } from 'src/plugins/expressions/common/types';
 // @ts-ignore untyped local
 import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
 // @ts-ignore .png file
 import { elasticOutline } from '../../lib/elastic_outline';
-import { Render } from '../types';
-import { getFunctionHelp, getFunctionErrors } from '../../strings';
+import { Render } from '../../../types';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 export enum Origin {
   TOP = 'top',

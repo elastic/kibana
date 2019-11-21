@@ -1,0 +1,43 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": "timestamp-millis",
+    "mappings": {
+      "properties": {
+        "timestamp": {
+          "type": "date"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": "timestamp-nanos",
+    "mappings": {
+      "properties": {
+        "timestamp": {
+          "type": "date_nanos"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

@@ -8,9 +8,16 @@
 import uniqBy from 'lodash.uniqby';
 // @ts-ignore Untyped Elastic library
 import { evaluate } from 'tinymath';
-import { groupBy, zipObject, omit, values } from 'lodash';
+import { groupBy, zipObject, omit } from 'lodash';
 import moment from 'moment';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { ExpressionFunction } from 'src/plugins/expressions/common';
+import {
+  Datatable,
+  DatatableRow,
+  PointSeries,
+  PointSeriesColumnName,
+  PointSeriesColumns,
+} from 'src/plugins/expressions/common';
 // @ts-ignore Untyped local
 import { pivotObjectArray } from '../../../../common/lib/pivot_object_array';
 // @ts-ignore Untyped local
@@ -19,14 +26,7 @@ import { unquoteString } from '../../../../common/lib/unquote_string';
 import { isColumnReference } from './lib/is_column_reference';
 // @ts-ignore Untyped local
 import { getExpressionType } from './lib/get_expression_type';
-import { getFunctionHelp, getFunctionErrors } from '../../../strings';
-import {
-  Datatable,
-  DatatableRow,
-  PointSeries,
-  PointSeriesColumnName,
-  PointSeriesColumns,
-} from '../../types';
+import { getFunctionHelp, getFunctionErrors } from '../../../../i18n';
 
 // TODO: pointseries performs poorly, that's why we run it on the server.
 
@@ -55,14 +55,6 @@ export function pointseries(): ExpressionFunction<
       types: ['datatable'],
     },
     args: {
-      x: {
-        types: ['string'],
-        help: argHelp.x,
-      },
-      y: {
-        types: ['string'],
-        help: argHelp.y,
-      },
       color: {
         types: ['string'],
         help: argHelp.color, // If you need categorization, transform the field.
@@ -74,6 +66,14 @@ export function pointseries(): ExpressionFunction<
       text: {
         types: ['string'],
         help: argHelp.text,
+      },
+      x: {
+        types: ['string'],
+        help: argHelp.x,
+      },
+      y: {
+        types: ['string'],
+        help: argHelp.y,
       },
       // In the future it may make sense to add things like shape, or tooltip values, but I think what we have is good for now
       // The way the function below is written you can add as many arbitrary named args as you want.
@@ -185,9 +185,12 @@ export function pointseries(): ExpressionFunction<
       );
 
       // Then compute that 1 value for each measure
-      values<DatatableRow[]>(measureKeys).forEach(valueRows => {
+      Object.values<DatatableRow[]>(measureKeys).forEach(valueRows => {
         const subtable = { type: 'datatable', columns: context.columns, rows: valueRows };
-        const subScope = pivotObjectArray(subtable.rows, subtable.columns.map(col => col.name));
+        const subScope = pivotObjectArray(
+          subtable.rows,
+          subtable.columns.map(col => col.name)
+        );
         const measureValues = measureNames.map(measure => {
           try {
             const ev = evaluate(args[measure], subScope);
@@ -209,7 +212,7 @@ export function pointseries(): ExpressionFunction<
 
       // It only makes sense to uniq the rows in a point series as 2 values can not exist in the exact same place at the same time.
       const resultingRows = uniqBy(
-        values(results).map(row => omit(row, PRIMARY_KEY)),
+        Object.values(results).map(row => omit(row, PRIMARY_KEY)),
         JSON.stringify
       );
 

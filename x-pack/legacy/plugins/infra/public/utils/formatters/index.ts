@@ -5,22 +5,25 @@
  */
 
 import Mustache from 'mustache';
-import { InfraFormatterType, InfraWaffleMapDataFormat } from '../../lib/lib';
-import { createDataFormatter } from './data';
+import { InfraWaffleMapDataFormat } from '../../lib/lib';
+import { createBytesFormatter } from './bytes';
 import { formatNumber } from './number';
 import { formatPercent } from './percent';
+import { InventoryFormatterType } from '../../../common/inventory_models/types';
 
 export const FORMATTERS = {
-  [InfraFormatterType.number]: formatNumber,
-  [InfraFormatterType.abbreviatedNumber]: createDataFormatter(
-    InfraWaffleMapDataFormat.abbreviatedNumber
-  ),
-  [InfraFormatterType.bytes]: createDataFormatter(InfraWaffleMapDataFormat.bytesDecimal),
-  [InfraFormatterType.bits]: createDataFormatter(InfraWaffleMapDataFormat.bitsDecimal),
-  [InfraFormatterType.percent]: formatPercent,
+  number: formatNumber,
+  // Because the implimentation for formatting large numbers is the same as formatting
+  // bytes we are re-using the same code, we just format the number using the abbreviated number format.
+  abbreviatedNumber: createBytesFormatter(InfraWaffleMapDataFormat.abbreviatedNumber),
+  // bytes in bytes formatted string out
+  bytes: createBytesFormatter(InfraWaffleMapDataFormat.bytesDecimal),
+  // bytes in bits formatted string out
+  bits: createBytesFormatter(InfraWaffleMapDataFormat.bitsDecimal),
+  percent: formatPercent,
 };
 
-export const createFormatter = (format: InfraFormatterType, template: string = '{{value}}') => (
+export const createFormatter = (format: InventoryFormatterType, template: string = '{{value}}') => (
   val: string | number
 ) => {
   if (val == null) {

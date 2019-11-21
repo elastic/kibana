@@ -4,20 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
-import styled from 'styled-components';
 
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 import { OpenTimelineProps } from './types';
 import { SearchRow } from './search_row';
 import { TimelinesTable } from './timelines_table';
 import { TitleRow } from './title_row';
-
-export const OpenTimelinePanel = styled(EuiPanel)`
-  width: 100%;
-`;
 
 export const OpenTimeline = pure<OpenTimelineProps>(
   ({
@@ -44,7 +39,7 @@ export const OpenTimeline = pure<OpenTimelineProps>(
     title,
     totalSearchResultsCount,
   }) => (
-    <OpenTimelinePanel className={OPEN_TIMELINE_CLASS_NAME} paddingSize="l">
+    <EuiPanel className={OPEN_TIMELINE_CLASS_NAME}>
       <TitleRow
         data-test-subj="title-row"
         onDeleteSelected={onDeleteSelected}
@@ -52,8 +47,6 @@ export const OpenTimeline = pure<OpenTimelineProps>(
         selectedTimelinesCount={selectedItems.length}
         title={title}
       />
-
-      <EuiSpacer data-test-subj="title-row-spacer" size="l" />
 
       <SearchRow
         data-test-subj="search-row"
@@ -63,8 +56,6 @@ export const OpenTimeline = pure<OpenTimelineProps>(
         query={query}
         totalSearchResultsCount={totalSearchResultsCount}
       />
-
-      <EuiSpacer data-test-subj="search-row-spacer" size="l" />
 
       <TimelinesTable
         data-test-subj="timelines-table"
@@ -84,6 +75,8 @@ export const OpenTimeline = pure<OpenTimelineProps>(
         sortField={sortField}
         totalSearchResultsCount={totalSearchResultsCount}
       />
-    </OpenTimelinePanel>
+    </EuiPanel>
   )
 );
+
+OpenTimeline.displayName = 'OpenTimeline';

@@ -231,6 +231,10 @@ describe('ElasticIndex', () => {
               body: {
                 dest: { index: '.ze-index' },
                 source: { index: '.muchacha' },
+                script: {
+                  source: `ctx._id = ctx._source.type + ':' + ctx._id`,
+                  lang: 'painless',
+                },
               },
               refresh: true,
               waitForCompletion: false,
@@ -267,7 +271,13 @@ describe('ElasticIndex', () => {
           properties: { foo: { type: 'keyword' } },
         },
       };
-      await Index.convertToAlias(callCluster as any, info, '.muchacha', 10);
+      await Index.convertToAlias(
+        callCluster as any,
+        info,
+        '.muchacha',
+        10,
+        `ctx._id = ctx._source.type + ':' + ctx._id`
+      );
 
       expect(callCluster.mock.calls.map(([path]) => path)).toEqual([
         'indices.create',

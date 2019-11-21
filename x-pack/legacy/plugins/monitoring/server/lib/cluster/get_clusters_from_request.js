@@ -17,17 +17,28 @@ import { alertsClustersAggregation } from '../../cluster_alerts/alerts_clusters_
 import { alertsClusterSearch } from '../../cluster_alerts/alerts_cluster_search';
 import { checkLicense as checkLicenseForAlerts } from '../../cluster_alerts/check_license';
 import { getClustersSummary } from './get_clusters_summary';
-import { CLUSTER_ALERTS_SEARCH_SIZE, STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
+import {
+  CLUSTER_ALERTS_SEARCH_SIZE,
+  STANDALONE_CLUSTER_CLUSTER_UUID,
+  CODE_PATH_ML,
+  CODE_PATH_ALERTS,
+  CODE_PATH_LOGS,
+  CODE_PATH_KIBANA,
+  CODE_PATH_LOGSTASH,
+  CODE_PATH_BEATS,
+  CODE_PATH_APM
+} from '../../../common/constants';
 import { getApmsForClusters } from '../apm/get_apms_for_clusters';
 import { i18n } from '@kbn/i18n';
 import { checkCcrEnabled } from '../elasticsearch/ccr';
 import { getStandaloneClusterDefinition, hasStandaloneClusters } from '../standalone_clusters';
 import { getLogTypes } from '../logs';
+import { isInCodePath } from './is_in_code_path';
 
 /**
  * Get all clusters or the cluster associated with {@code clusterUuid} when it is defined.
  */
-export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, start, end } = {}) {
+export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, start, end, codePaths } = {}) {
   const {
     esIndexPattern,
     kbnIndexPattern,
@@ -76,20 +87,26 @@ export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, 
     const cluster = clusters[0];
 
     // add ml jobs and alerts data
-    const mlJobs = await getMlJobsForCluster(req, esIndexPattern, cluster);
+    const mlJobs = isInCodePath(codePaths, [CODE_PATH_ML])
+      ? await getMlJobsForCluster(req, esIndexPattern, cluster)
+      : null;
     if (mlJobs !== null) {
       cluster.ml = { jobs: mlJobs };
     }
-    const alerts = await alertsClusterSearch(req, alertsIndex, cluster, checkLicenseForAlerts, {
-      start,
-      end,
-      size: CLUSTER_ALERTS_SEARCH_SIZE
-    });
+    const alerts = isInCodePath(codePaths, [CODE_PATH_ALERTS])
+      ? await alertsClusterSearch(req, alertsIndex, cluster, checkLicenseForAlerts, {
+        start,
+        end,
+        size: CLUSTER_ALERTS_SEARCH_SIZE
+      })
+      : null;
     if (alerts) {
       cluster.alerts = alerts;
     }
 
-    cluster.logs = await getLogTypes(req, filebeatIndexPattern, { clusterUuid: cluster.cluster_uuid, start, end });
+    cluster.logs = isInCodePath(codePaths, [CODE_PATH_LOGS])
+      ? await getLogTypes(req, filebeatIndexPattern, { clusterUuid: cluster.cluster_uuid, start, end })
+      : [];
   } else if (!isStandaloneCluster) {
     // get all clusters
     if (!clusters || clusters.length === 0) {
@@ -103,21 +120,24 @@ export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, 
     clusters = await getSupportedClusters(clusters);
 
     // add alerts data
-    const clustersAlerts = await alertsClustersAggregation(req, alertsIndex, clusters, checkLicenseForAlerts);
-    clusters.forEach((cluster) => {
-      cluster.alerts = {
-        alertsMeta: {
-          enabled: clustersAlerts.alertsMeta.enabled,
-          message: clustersAlerts.alertsMeta.message // NOTE: this is only defined when the alert feature is disabled
-        },
-        ...clustersAlerts[cluster.cluster_uuid]
-      };
-    });
+    if (isInCodePath(codePaths, [CODE_PATH_ALERTS])) {
+      const clustersAlerts = await alertsClustersAggregation(req, alertsIndex, clusters, checkLicenseForAlerts);
+      clusters.forEach((cluster) => {
+        cluster.alerts = {
+          alertsMeta: {
+            enabled: clustersAlerts.alertsMeta.enabled,
+            message: clustersAlerts.alertsMeta.message // NOTE: this is only defined when the alert feature is disabled
+          },
+          ...clustersAlerts[cluster.cluster_uuid]
+        };
+      });
+    }
   }
 
   // add kibana data
-
-  const kibanas = isStandaloneCluster ? [] : await getKibanasForClusters(req, kbnIndexPattern, clusters);
+  const kibanas = isInCodePath(codePaths, [CODE_PATH_KIBANA]) && !isStandaloneCluster
+    ? await getKibanasForClusters(req, kbnIndexPattern, clusters)
+    : [];
   // add the kibana data to each cluster
   kibanas.forEach(kibana => {
     const clusterIndex = findIndex(clusters, { cluster_uuid: kibana.clusterUuid });
@@ -125,9 +145,13 @@ export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, 
   });
 
   // add logstash data
-  const logstashes = await getLogstashForClusters(req, lsIndexPattern, clusters);
+  const logstashes = isInCodePath(codePaths, [CODE_PATH_LOGSTASH])
+    ? await getLogstashForClusters(req, lsIndexPattern, clusters)
+    : [];
 
-  const clusterPipelineNodesCount = await getPipelines(req, lsIndexPattern, ['logstash_cluster_pipeline_nodes_count']);
+  const clusterPipelineNodesCount = isInCodePath(codePaths, [CODE_PATH_LOGSTASH])
+    ? await getPipelines(req, lsIndexPattern, null, ['logstash_cluster_pipeline_nodes_count'])
+    : [];
 
   // add the logstash data to each cluster
   logstashes.forEach(logstash => {
@@ -142,14 +166,18 @@ export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, 
   });
 
   // add beats data
-  const beatsByCluster = await getBeatsForClusters(req, beatsIndexPattern, clusters);
+  const beatsByCluster = isInCodePath(codePaths, [CODE_PATH_BEATS])
+    ? await getBeatsForClusters(req, beatsIndexPattern, clusters)
+    : [];
   beatsByCluster.forEach(beats => {
     const clusterIndex = findIndex(clusters, { cluster_uuid: beats.clusterUuid });
     set(clusters[clusterIndex], 'beats', beats.stats);
   });
 
   // add apm data
-  const apmsByCluster = await getApmsForClusters(req, apmIndexPattern, clusters);
+  const apmsByCluster = isInCodePath(codePaths, [CODE_PATH_APM])
+    ? await getApmsForClusters(req, apmIndexPattern, clusters)
+    : [];
   apmsByCluster.forEach(apm => {
     const clusterIndex = findIndex(clusters, { cluster_uuid: apm.clusterUuid });
     set(clusters[clusterIndex], 'apm', apm.stats);
@@ -160,5 +188,6 @@ export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, 
 
   const config = req.server.config();
   const kibanaUuid = config.get('server.uuid');
-  return getClustersSummary(clusters, kibanaUuid, isCcrEnabled);
+
+  return getClustersSummary(req.server, clusters, kibanaUuid, isCcrEnabled);
 }

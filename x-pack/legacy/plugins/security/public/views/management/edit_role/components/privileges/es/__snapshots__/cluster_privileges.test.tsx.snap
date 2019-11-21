@@ -7,83 +7,22 @@ exports[`it renders without crashing 1`] = `
   >
     <EuiComboBox
       compressed={false}
+      data-test-subj="cluster-privileges-combobox"
       fullWidth={false}
       isClearable={true}
       isDisabled={false}
       onChange={[Function]}
+      onCreateOption={[Function]}
       options={
         Array [
           Object {
             "label": "all",
           },
           Object {
-            "label": "monitor",
-          },
-          Object {
             "label": "manage",
           },
           Object {
-            "label": "manage_security",
-          },
-          Object {
-            "label": "manage_index_templates",
-          },
-          Object {
-            "label": "manage_pipeline",
-          },
-          Object {
-            "label": "manage_ingest_pipelines",
-          },
-          Object {
-            "label": "transport_client",
-          },
-          Object {
-            "label": "manage_ml",
-          },
-          Object {
-            "label": "monitor_ml",
-          },
-          Object {
-            "label": "manage_data_frame_transforms",
-          },
-          Object {
-            "label": "monitor_data_frame_transforms",
-          },
-          Object {
-            "label": "manage_watcher",
-          },
-          Object {
-            "label": "monitor_watcher",
-          },
-          Object {
-            "label": "read_ccr",
-          },
-          Object {
-            "label": "manage_ccr",
-          },
-          Object {
-            "label": "manage_ilm",
-          },
-          Object {
-            "label": "read_ilm",
-          },
-          Object {
-            "label": "monitor_rollup",
-          },
-          Object {
-            "label": "manage_rollup",
-          },
-          Object {
-            "label": "manage_token",
-          },
-          Object {
-            "label": "manage_saml",
-          },
-          Object {
-            "label": "create_snapshot",
-          },
-          Object {
-            "label": "manage_oidc",
+            "label": "monitor",
           },
         ]
       }

@@ -23,6 +23,7 @@ interface CreateCustomTest extends CreateTest {
 interface CreateTests {
   spaceAware: CreateTest;
   notSpaceAware: CreateTest;
+  hiddenType: CreateTest;
   custom?: CreateCustomTest;
 }
 
@@ -41,6 +42,14 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
       statusCode: 403,
       error: 'Forbidden',
       message: `Unable to create ${type}`,
+    });
+  };
+
+  const expectBadRequestForHiddenType = (resp: { [key: string]: any }) => {
+    expect(resp.body).to.eql({
+      message: "Unsupported saved object type: 'hiddentype': Bad Request",
+      statusCode: 400,
+      error: 'Bad Request',
     });
   };
 
@@ -73,7 +82,6 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     // query ES directory to ensure namespace was or wasn't specified
     const { _source } = await es.get({
       id: `${expectedSpacePrefix}${spaceAwareType}:${resp.body.id}`,
-      type: '_doc',
       index: '.kibana',
     });
 
@@ -112,7 +120,6 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     // query ES directory to ensure namespace wasn't specified
     const { _source } = await es.get({
       id: `${notSpaceAwareType}:${resp.body.id}`,
-      type: '_doc',
       index: '.kibana',
     });
 
@@ -122,6 +129,8 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
   };
 
   const expectSpaceAwareRbacForbidden = createExpectRbacForbidden(spaceAwareType);
+
+  const expectHiddenTypeRbacForbidden = createExpectRbacForbidden('hiddentype');
 
   const makeCreateTest = (describeFn: DescribeFn) => (
     description: string,
@@ -157,6 +166,19 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
           .then(tests.notSpaceAware.response);
       });
 
+      it(`should return ${tests.hiddenType.statusCode} for the hiddentype`, async () => {
+        await supertest
+          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/hiddentype`)
+          .auth(user.username, user.password)
+          .send({
+            attributes: {
+              name: `Can't be created via the Saved Objects API`,
+            },
+          })
+          .expect(tests.hiddenType.statusCode)
+          .then(tests.hiddenType.response);
+      });
+
       if (tests.custom) {
         it(tests.custom.description, async () => {
           await supertest
@@ -180,5 +202,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     expectNotSpaceAwareRbacForbidden,
     expectNotSpaceAwareResults,
     expectSpaceAwareRbacForbidden,
+    expectBadRequestForHiddenType,
+    expectHiddenTypeRbacForbidden,
   };
 }

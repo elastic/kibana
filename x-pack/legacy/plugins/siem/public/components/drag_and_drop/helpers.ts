@@ -52,10 +52,10 @@ export const getDroppableId = (visualizationPlaceholderId: string): string =>
 export const sourceIsContent = (result: DropResult): boolean =>
   result.source.droppableId.startsWith(droppableContentPrefix);
 
-export const draggableIsContent = (result: DropResult): boolean =>
+export const draggableIsContent = (result: DropResult | { draggableId: string }): boolean =>
   result.draggableId.startsWith(draggableContentPrefix);
 
-export const draggableIsField = (result: DropResult): boolean =>
+export const draggableIsField = (result: DropResult | { draggableId: string }): boolean =>
   result.draggableId.startsWith(draggableFieldPrefix);
 
 export const reasonIsDrop = (result: DropResult): boolean => result.reason === 'DROP';
@@ -221,3 +221,6 @@ export const updateShowTimeline = ({
  * header drop zone in the timeline
  */
 export const DRAG_TYPE_FIELD = 'drag-type-field';
+
+/** This class is added to the document body while dragging */
+export const IS_DRAGGING_CLASS_NAME = 'is-dragging';

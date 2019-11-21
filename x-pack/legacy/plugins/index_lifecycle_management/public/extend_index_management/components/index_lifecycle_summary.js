@@ -9,6 +9,7 @@ import moment from 'moment-timezone';
 import {
   EuiButtonEmpty,
   EuiCallOut,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiDescriptionList,
@@ -94,30 +95,40 @@ export class IndexLifecycleSummary extends Component {
     const button = (
       <EuiLink onClick={this.togglePhaseExecutionPopover}>
         <FormattedMessage
-          defaultMessage="Show phase definition"
+          defaultMessage="Show definition"
           id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
         />
       </EuiLink>
     );
     return (
-      <EuiPopover
-        key="phaseExecutionPopover"
-        id="phaseExecutionPopover"
-        button={button}
-        isOpen={this.state.showPhaseExecutionPopover}
-        closePopover={this.closePhaseExecutionPopover}
-        withTitle
-      >
-        <EuiPopoverTitle>
-          <FormattedMessage
-            defaultMessage="Phase definition"
-            id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.phaseDefinitionTitle"
-          />
-        </EuiPopoverTitle>
-        <div style={{ maxHeight: '400px', width: '400px', overflowY: 'scroll' }}>
-          <pre>{JSON.stringify(ilm.phase_execution, null, 2)}</pre>
-        </div>
-      </EuiPopover>
+      <Fragment key="phaseDefinition">
+        <EuiDescriptionListTitle>
+          <strong>
+            <FormattedMessage
+              defaultMessage="Phase definition"
+              id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionDescriptionTitle"
+            />
+          </strong>
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription key="phaseDefinition_desc">
+          <EuiPopover
+            key="phaseExecutionPopover"
+            id="phaseExecutionPopover"
+            button={button}
+            isOpen={this.state.showPhaseExecutionPopover}
+            closePopover={this.closePhaseExecutionPopover}
+            withTitle
+          >
+            <EuiPopoverTitle>
+              <FormattedMessage
+                defaultMessage="Phase definition"
+                id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.phaseDefinitionTitle"
+              />
+            </EuiPopoverTitle>
+            <EuiCodeBlock lang="json">{JSON.stringify(ilm.phase_execution, null, 2)}</EuiCodeBlock>
+          </EuiPopover>
+        </EuiDescriptionListDescription>
+      </Fragment>
     );
   }
   buildRows() {

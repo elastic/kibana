@@ -1,13 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Load More Table Component rendering it renders the default Hosts table 1`] = `
-<ContextProvider
-  value={
+exports[`Hosts Table rendering it renders the default Hosts table 1`] = `
+<Component
+  store={
     Object {
-      "bytesFormat": "0,0.[000]b",
-      "dateFormat": "MMM D, YYYY @ HH:mm:ss.SSS",
-      "dateFormatTz": "UTC",
-      "timezone": "UTC",
+      "dispatch": [Function],
+      "getState": [Function],
+      "replaceReducer": [Function],
+      "subscribe": [Function],
+      Symbol(observable): [Function],
     }
   }
 >
@@ -76,7 +77,8 @@ exports[`Load More Table Component rendering it renders the default Hosts table 
         },
       ]
     }
-    hasNextPage={true}
+    fakeTotalCount={50}
+    id="hostsQuery"
     indexPattern={
       Object {
         "fields": Array [
@@ -158,15 +160,22 @@ exports[`Load More Table Component rendering it renders the default Hosts table 
             "searchable": true,
             "type": "string",
           },
+          Object {
+            "aggregatable": true,
+            "name": "host.name",
+            "searchable": true,
+            "type": "string",
+          },
         ],
         "title": "filebeat-*,auditbeat-*,packetbeat-*",
       }
     }
-    loadMore={[MockFunction]}
+    isInspect={false}
+    loadPage={[MockFunction]}
     loading={false}
-    nextCursor="aa7ca589f1b8220002f2fc61c64cfbf1"
+    showMorePagesIndicator={true}
     totalCount={4}
     type="page"
   />
-</ContextProvider>
+</Component>
 `;

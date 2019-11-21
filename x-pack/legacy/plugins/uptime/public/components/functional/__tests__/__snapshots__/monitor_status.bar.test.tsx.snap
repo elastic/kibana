@@ -5,7 +5,7 @@ exports[`MonitorStatusBar component renders duration in ms, not us 1`] = `
   class="euiPanel euiPanel--paddingMedium"
 >
   <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
   >
     <div
       class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -59,11 +59,11 @@ exports[`MonitorStatusBar component renders duration in ms, not us 1`] = `
       aria-label="Monitor duration in milliseconds"
       class="euiFlexItem euiFlexItem--flexGrowZero"
     >
-      1235ms
+      1234ms
     </div>
     <div
       aria-label="Time since last check"
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem"
     >
       15 minutes ago
     </div>

@@ -8,16 +8,16 @@ import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { ServiceListAPIResponse } from '../../../../../server/lib/services/get_services';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { fontSizes, truncate } from '../../../../style/variables';
-import { asDecimal, asMillis } from '../../../../utils/formatters';
-import { APMLink } from '../../../shared/Links/APMLink';
-import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
+import { asDecimal, convertTo } from '../../../../utils/formatters';
+import { ManagedTable } from '../../../shared/ManagedTable';
 import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
+import { TransactionOverviewLink } from '../../../shared/Links/apm/TransactionOverviewLink';
 
 interface Props {
-  items?: ServiceListAPIResponse['items'];
+  items: ServiceListAPIResponse['items'];
   noItemsMessage?: React.ReactNode;
 }
 
@@ -35,14 +35,12 @@ function formatString(value?: string | null) {
   return value || NOT_AVAILABLE_LABEL;
 }
 
-const AppLink = styled(APMLink)`
+const AppLink = styled(TransactionOverviewLink)`
   font-size: ${fontSizes.large};
   ${truncate('100%')};
 `;
 
-export const SERVICE_COLUMNS: Array<
-  ITableColumn<ServiceListAPIResponse['items'][0]>
-> = [
+export const SERVICE_COLUMNS = [
   {
     field: 'serviceName',
     name: i18n.translate('xpack.apm.servicesTable.nameColumnLabel', {
@@ -52,9 +50,7 @@ export const SERVICE_COLUMNS: Array<
     sortable: true,
     render: (serviceName: string) => (
       <EuiToolTip content={formatString(serviceName)} id="service-name-tooltip">
-        <AppLink path={`/${serviceName}/transactions`}>
-          {formatString(serviceName)}
-        </AppLink>
+        <AppLink serviceName={serviceName}>{formatString(serviceName)}</AppLink>
       </EuiToolTip>
     )
   },
@@ -84,7 +80,11 @@ export const SERVICE_COLUMNS: Array<
     }),
     sortable: true,
     dataType: 'number',
-    render: (value: number) => asMillis(value)
+    render: (time: number) =>
+      convertTo({
+        unit: 'milliseconds',
+        microseconds: time
+      }).formatted
   },
   {
     field: 'transactionsPerMinute',
@@ -121,13 +121,13 @@ export const SERVICE_COLUMNS: Array<
   }
 ];
 
-export function ServiceList({ items = [], noItemsMessage }: Props) {
+export function ServiceList({ items, noItemsMessage }: Props) {
   return (
     <ManagedTable
       columns={SERVICE_COLUMNS}
       items={items}
       noItemsMessage={noItemsMessage}
-      initialSort={{ field: 'serviceName', direction: 'asc' }}
+      initialSortField="serviceName"
       initialPageSize={50}
     />
   );

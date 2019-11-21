@@ -43,13 +43,13 @@ describe('action_status', () => {
       it(`throws an error if no 'id' property in json`, () => {
         delete upstreamJson.id;
         expect(ActionStatus.fromUpstreamJson).withArgs(upstreamJson)
-          .to.throwError(/must contain an id property/i);
+          .to.throwError('JSON argument must contain an "id" property');
       });
 
       it(`throws an error if no 'actionStatusJson' property in json`, () => {
         delete upstreamJson.actionStatusJson;
         expect(ActionStatus.fromUpstreamJson).withArgs(upstreamJson)
-          .to.throwError(/must contain an actionStatusJson property/i);
+          .to.throwError('JSON argument must contain an "actionStatusJson" property');
       });
 
       it('returns correct ActionStatus instance', () => {

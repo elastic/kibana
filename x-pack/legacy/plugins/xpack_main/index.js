@@ -7,32 +7,18 @@
 import { resolve } from 'path';
 import dedent from 'dedent';
 import {
-  XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING,
   XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS
 } from '../../server/lib/constants';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { replaceInjectedVars } from './server/lib/replace_injected_vars';
 import { setupXPackMain } from './server/lib/setup_xpack_main';
-import {
-  xpackInfoRoute,
-  featuresRoute,
-  settingsRoute,
-} from './server/routes/api/v1';
-import { i18n } from '@kbn/i18n';
+import { xpackInfoRoute, settingsRoute } from './server/routes/api/v1';
 
-import { registerOssFeatures } from './server/lib/register_oss_features';
-import { uiCapabilitiesForFeatures } from './server/lib/ui_capabilities_for_features';
 import { has } from 'lodash';
 
-function movedToTelemetry(configPath) {
-  return (settings, log) => {
-    if (has(settings, configPath)) {
-      log(`Config key ${configPath} is deprecated. Use "xpack.telemetry.${configPath}" instead.`);
-    }
-  };
-}
-
 export { callClusterFactory } from './server/lib/call_cluster_factory';
+import { registerMonitoringCollection } from './server/telemetry_collection';
+
 export const xpackMain = (kibana) => {
   return new kibana.Plugin({
     id: 'xpack_main',
@@ -53,28 +39,26 @@ export const xpackMain = (kibana) => {
     },
 
     uiCapabilities(server) {
-      return uiCapabilitiesForFeatures(server.plugins.xpack_main);
+      const featuresPlugin = server.newPlatform.setup.plugins.features;
+      if (!featuresPlugin) {
+        throw new Error('New Platform XPack Features plugin is not available.');
+      }
+      return featuresPlugin.getFeaturesUICapabilities();
     },
 
     uiExports: {
-      uiSettingDefaults: {
-        [XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING]: {
-          name: i18n.translate('xpack.main.uiSettings.adminEmailTitle', {
-            defaultMessage: 'Admin email'
-          }),
-          // TODO: change the description when email address is used for more things?
-          description: i18n.translate('xpack.main.uiSettings.adminEmailDescription', {
-            defaultMessage:
-              'Recipient email address for X-Pack admin operations, such as Cluster Alert email notifications from Monitoring.'
-          }),
-          type: 'string', // TODO: Any way of ensuring this is a valid email address?
-          value: null
-        }
-      },
       hacks: [
         'plugins/xpack_main/hacks/check_xpack_info_change',
       ],
       replaceInjectedVars,
+      injectDefaultVars(server) {
+        const config = server.config();
+
+        return {
+          activeSpace: null,
+          spacesEnabled: config.get('xpack.spaces.enabled'),
+        };
+      },
       __webpackPluginProvider__(webpack) {
         return new webpack.BannerPlugin({
           banner: dedent`
@@ -87,21 +71,36 @@ export const xpackMain = (kibana) => {
     },
 
     init(server) {
-      mirrorPluginStatus(server.plugins.elasticsearch, this, 'yellow', 'red');
+      const featuresPlugin = server.newPlatform.setup.plugins.features;
+      if (!featuresPlugin) {
+        throw new Error('New Platform XPack Features plugin is not available.');
+      }
 
-      setupXPackMain(server);
-      const { types: savedObjectTypes } = server.savedObjects;
-      registerOssFeatures(server.plugins.xpack_main.registerFeature, savedObjectTypes);
+      mirrorPluginStatus(server.plugins.elasticsearch, this, 'yellow', 'red');
+      registerMonitoringCollection();
+
+      featuresPlugin.registerLegacyAPI({
+        xpackInfo: setupXPackMain(server),
+        savedObjectTypes: server.savedObjects.types
+      });
 
       // register routes
       xpackInfoRoute(server);
       settingsRoute(server, this.kbnServer);
-      featuresRoute(server);
     },
-    deprecations: () => [
-      movedToTelemetry('telemetry.config'),
-      movedToTelemetry('telemetry.url'),
-      movedToTelemetry('telemetry.enabled'),
-    ],
+    deprecations: () => {
+      function movedToTelemetry(configPath) {
+        return (settings, log) => {
+          if (has(settings, configPath)) {
+            log(`Config key "xpack.xpack_main.${configPath}" is deprecated. Use "telemetry.${configPath}" instead.`);
+          }
+        };
+      }
+      return [
+        movedToTelemetry('telemetry.config'),
+        movedToTelemetry('telemetry.url'),
+        movedToTelemetry('telemetry.enabled'),
+      ];
+    },
   });
 };

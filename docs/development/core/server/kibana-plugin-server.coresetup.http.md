@@ -4,14 +4,10 @@
 
 ## CoreSetup.http property
 
+[HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md)
+
 <b>Signature:</b>
 
 ```typescript
-http: {
-        registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
-        registerAuth: HttpServiceSetup['registerAuth'];
-        registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
-        basePath: HttpServiceSetup['basePath'];
-        createNewServer: HttpServiceSetup['createNewServer'];
-    };
+http: HttpServiceSetup;
 ```

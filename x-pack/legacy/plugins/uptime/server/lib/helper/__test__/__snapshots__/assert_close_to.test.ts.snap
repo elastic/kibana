@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`assertCloseTo throws an error when expected value is outside of precision range 1`] = `"expected [12500] to be within 100 of 10000"`;

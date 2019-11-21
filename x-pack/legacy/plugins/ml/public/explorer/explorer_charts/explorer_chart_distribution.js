@@ -21,16 +21,15 @@ import moment from 'moment';
 // because it won't work with the jest tests
 import { formatHumanReadableDateTime } from '../../util/date_utils';
 import { formatValue } from '../../formatters/format_value';
-import { getSeverityWithLow } from '../../../common/util/anomaly_utils';
+import { getSeverityColor, getSeverityWithLow } from '../../../common/util/anomaly_utils';
 import {
   getChartType,
   getTickValues,
   numTicksForDateFormat,
   removeLabelOverlap
 } from '../../util/chart_utils';
-import { TimeBuckets } from 'ui/time_buckets';
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
-import { mlEscape } from '../../util/string_utils';
+import { TimeBuckets } from '../../util/time_buckets';
 import { mlFieldFormatService } from '../../services/field_format_service';
 import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
 import { severity$ } from '../../components/controls/select_severity/select_severity';
@@ -255,7 +254,7 @@ export const ExplorerChartDistribution = injectI18n(class ExplorerChartDistribut
       const xAxisTickFormat = timeBuckets.getScaledDateFormat();
 
       const tickValuesStart = Math.max(config.selectedEarliest, config.plotEarliest);
-      // +1 ms to account for the ms that was substracted for query aggregations.
+      // +1 ms to account for the ms that was subtracted for query aggregations.
       const interval = config.selectedLatest - config.selectedEarliest + 1;
       const tickValues = getTickValues(tickValuesStart, interval, config.plotEarliest, config.plotLatest);
 
@@ -407,74 +406,100 @@ export const ExplorerChartDistribution = injectI18n(class ExplorerChartDistribut
       // Show the time and metric values in the tooltip.
       // Uses date, value, upper, lower and anomalyScore (optional) marker properties.
       const formattedDate = formatHumanReadableDateTime(marker.date);
-      let contents = `${formattedDate}<br/><hr/>`;
+      const tooltipData = [{ name: formattedDate }];
+      const seriesKey = config.detectorLabel;
 
       if (_.has(marker, 'entity')) {
-        contents += `<div>${marker.entity}</div>`;
+        tooltipData.push({
+          name: intl.formatMessage({
+            id: 'xpack.ml.explorer.distributionChart.entityLabel',
+            defaultMessage: 'entity'
+          }),
+          value: marker.entity,
+          seriesKey
+        });
       }
 
       if (_.has(marker, 'anomalyScore')) {
         const score = parseInt(marker.anomalyScore);
         const displayScore = (score > 0 ? score : '< 1');
-        contents += intl.formatMessage({
-          id: 'xpack.ml.explorer.distributionChart.anomalyScoreLabel',
-          defaultMessage: 'anomaly score: {displayScore}'
-        }, { displayScore });
+        tooltipData.push({
+          name: intl.formatMessage({
+            id: 'xpack.ml.explorer.distributionChart.anomalyScoreLabel',
+            defaultMessage: 'anomaly score'
+          }),
+          value: displayScore,
+          color: getSeverityColor(score),
+          seriesKey,
+          yAccessor: 'anomaly_score'
+        });
         if (chartType !== CHART_TYPE.EVENT_DISTRIBUTION) {
-          contents += intl.formatMessage({
-            id: 'xpack.ml.explorer.distributionChart.valueLabel',
-            defaultMessage: '{br}value: {value}'
-          }, {
-            br: '<br />',
-            value: formatValue(marker.value, config.functionDescription, fieldFormat)
+          tooltipData.push({
+            name: intl.formatMessage({
+              id: 'xpack.ml.explorer.distributionChart.valueLabel',
+              defaultMessage: 'value'
+            }),
+            value: formatValue(marker.value, config.functionDescription, fieldFormat),
+            seriesKey,
+            yAccessor: 'value'
           });
           if (typeof marker.numberOfCauses === 'undefined' || marker.numberOfCauses === 1) {
-            contents += intl.formatMessage({
-              id: 'xpack.ml.explorer.distributionChart.typicalLabel',
-              defaultMessage: '{br}typical: {typicalValue}'
-            }, {
-              br: '<br />',
-              typicalValue: formatValue(marker.typical, config.functionDescription, fieldFormat)
+            tooltipData.push({
+              name: intl.formatMessage({
+                id: 'xpack.ml.explorer.distributionChart.typicalLabel',
+                defaultMessage: 'typical'
+              }),
+              value: formatValue(marker.typical, config.functionDescription, fieldFormat),
+              seriesKey,
+              yAccessor: 'typical'
             });
           }
           if (typeof marker.byFieldName !== 'undefined' && _.has(marker, 'numberOfCauses')) {
-            const numberOfCauses = marker.numberOfCauses;
-            const byFieldName = mlEscape(marker.byFieldName);
-            contents += intl.formatMessage({
-              id: 'xpack.ml.explorer.distributionChart.unusualByFieldValuesLabel',
-              defaultMessage:
-                '{br} { numberOfCauses, plural, one {# unusual {byFieldName} value} other {#{plusSign} unusual {byFieldName} values}}'
-            }, {
-              br: '<br />',
-              numberOfCauses,
-              byFieldName,
-              // Maximum of 10 causes are stored in the record, so '10' may mean more than 10.
-              plusSign: numberOfCauses < 10 ? '' : '+',
+            tooltipData.push({
+              name: intl.formatMessage({
+                id: 'xpack.ml.explorer.distributionChart.unusualByFieldValuesLabel',
+                defaultMessage:
+                  '{ numberOfCauses, plural, one {# unusual {byFieldName} value} other {#{plusSign} unusual {byFieldName} values}}'
+              }, {
+                numberOfCauses: marker.numberOfCauses,
+                byFieldName: marker.byFieldName,
+                // Maximum of 10 causes are stored in the record, so '10' may mean more than 10.
+                plusSign: marker.numberOfCauses < 10 ? '' : '+',
+              }),
+              seriesKey,
+              yAccessor: 'numberOfCauses'
             });
           }
         }
       } else if (chartType !== CHART_TYPE.EVENT_DISTRIBUTION) {
-        contents += intl.formatMessage({
-          id: 'xpack.ml.explorer.distributionChart.valueWithoutAnomalyScoreLabel',
-          defaultMessage: 'value: {value}'
-        }, {
-          value: formatValue(marker.value, config.functionDescription, fieldFormat)
+        tooltipData.push({
+          name: intl.formatMessage({
+            id: 'xpack.ml.explorer.distributionChart.valueWithoutAnomalyScoreLabel',
+            defaultMessage: 'value'
+          }),
+          value: formatValue(marker.value, config.functionDescription, fieldFormat),
+          seriesKey,
+          yAccessor: 'value'
         });
       }
 
       if (_.has(marker, 'scheduledEvents')) {
-        contents += '<div><hr/>' + intl.formatMessage({
-          id: 'xpack.ml.explorer.distributionChart.scheduledEventsLabel',
-          defaultMessage: 'Scheduled events:{br}{scheduledEventsValue}'
-        }, {
-          br: '<br />',
-          scheduledEventsValue: marker.scheduledEvents.map(mlEscape).join('<br/>')
-        }) + '</div>';
+        marker.scheduledEvents.forEach((scheduledEvent, i) => {
+          tooltipData.push({
+            name: intl.formatMessage({
+              id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.scheduledEventsLabel',
+              defaultMessage: 'scheduled event{counter}'
+            }, { counter: marker.scheduledEvents.length > 1 ? ` #${i + 1}` : '' }),
+            value: scheduledEvent,
+            seriesKey,
+            yAccessor: `scheduled_events_${i + 1}`
+          });
+        });
       }
 
-      mlChartTooltipService.show(contents, circle, {
-        x: LINE_CHART_ANOMALY_RADIUS * 2,
-        y: 0
+      mlChartTooltipService.show(tooltipData, circle, {
+        x: LINE_CHART_ANOMALY_RADIUS * 3,
+        y: LINE_CHART_ANOMALY_RADIUS * 2,
       });
     }
   }

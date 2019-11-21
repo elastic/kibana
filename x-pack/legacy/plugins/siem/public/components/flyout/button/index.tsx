@@ -4,66 +4,85 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiNotificationBadge, EuiIcon, EuiButton } from '@elastic/eui';
+import { rgba } from 'polished';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
-import { droppableTimelineFlyoutButtonPrefix } from '../../drag_and_drop/helpers';
+import {
+  droppableTimelineFlyoutButtonPrefix,
+  IS_DRAGGING_CLASS_NAME,
+} from '../../drag_and_drop/helpers';
 import { DataProvider } from '../../timeline/data_providers/data_provider';
 
 import * as i18n from './translations';
 
+export const NOT_READY_TO_DROP_CLASS_NAME = 'not-ready-to-drop';
+export const READY_TO_DROP_CLASS_NAME = 'ready-to-drop';
+
 const Container = styled.div`
   overflow-x: auto;
   overflow-y: hidden;
+  padding-top: 8px;
   position: fixed;
   top: 40%;
-  right: -3px;
-  min-width: 50px;
-  max-width: 80px;
-  z-index: 9;
-  height: 240px;
-  max-height: 240px;
+  right: -51px;
+  z-index: ${({ theme }) => theme.eui.euiZLevel9};
+  transform: rotate(-90deg);
+  user-select: none;
+
+  button {
+    border-radius: 4px 4px 0 0;
+    box-shadow: none;
+    height: 46px;
+    margin: 1px 0 1px 1px;
+    width: 136px;
+  }
+
+  .euiButton:hover:not(:disabled) {
+    transform: none;
+  }
+
+  .euiButton--primary:enabled {
+    background: ${({ theme }) => theme.eui.euiColorEmptyShade};
+    box-shadow: none;
+  }
+
+  .euiButton--primary:enabled:hover,
+  .euiButton--primary:enabled:focus {
+    animation: none;
+    background: ${({ theme }) => theme.eui.euiColorEmptyShade};
+    box-shadow: none;
+  }
+
+  .${IS_DRAGGING_CLASS_NAME} & .${NOT_READY_TO_DROP_CLASS_NAME} {
+    color: ${({ theme }) => theme.eui.euiColorSuccess};
+    background: ${({ theme }) => rgba(theme.eui.euiColorSuccess, 0.1)} !important;
+    border: 1px solid ${({ theme }) => theme.eui.euiColorSuccess};
+    border-bottom: none;
+    text-decoration: none;
+  }
+
+  .${READY_TO_DROP_CLASS_NAME} {
+    color: ${({ theme }) => theme.eui.euiColorSuccess};
+    background: ${({ theme }) => rgba(theme.eui.euiColorSuccess, 0.2)} !important;
+    border: 1px solid ${({ theme }) => theme.eui.euiColorSuccess};
+    border-bottom: none;
+    text-decoration: none;
+  }
 `;
+
+Container.displayName = 'Container';
 
 const BadgeButtonContainer = styled.div`
-  align-items: center;
+  align-items: flex-start;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
 `;
 
-export const Button = styled(EuiPanel)`
-  display: flex;
-  z-index: 9;
-  justify-content: center;
-  text-align: center;
-  border-top: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-  border-bottom: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-  border-left: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-  border-radius: 6px 0 0 6px;
-  box-shadow: ${({ theme }) =>
-    `0 3px 3px -1px ${theme.eui.euiColorLightestShade}, 0 5px 7px -2px ${
-      theme.eui.euiColorLightestShade
-    }`};
-  background-color: inherit;
-  cursor: pointer;
-`;
+BadgeButtonContainer.displayName = 'BadgeButtonContainer';
 
-export const Text = styled(EuiText)`
-  width: 12px;
-  z-index: 10;
-  user-select: none;
-`;
-
-export const Badge = styled(EuiBadge)`
-  border-radius: 5px;
-  min-width: 25px;
-  padding: 0px;
-  transform: translateY(10px);
-  z-index: 10;
-`;
 interface FlyoutButtonProps {
   dataProviders: DataProvider[];
   onOpen: () => void;
@@ -71,29 +90,62 @@ interface FlyoutButtonProps {
   timelineId: string;
 }
 
-export const FlyoutButton = pure<FlyoutButtonProps>(({ onOpen, show, dataProviders, timelineId }) =>
-  show ? (
-    <Container>
-      <DroppableWrapper droppableId={`${droppableTimelineFlyoutButtonPrefix}${timelineId}`}>
-        <BadgeButtonContainer
-          className="flyout-overlay"
-          data-test-subj="flyoutOverlay"
-          onClick={onOpen}
-        >
-          {dataProviders.length !== 0 && (
-            <Badge data-test-subj="badge" color="primary">
-              {dataProviders.length}
-            </Badge>
+export const FlyoutButton = React.memo<FlyoutButtonProps>(
+  ({ onOpen, show, dataProviders, timelineId }) =>
+    show ? (
+      <Container onClick={onOpen}>
+        <DroppableWrapper
+          data-test-subj="flyout-droppable-wrapper"
+          droppableId={`${droppableTimelineFlyoutButtonPrefix}${timelineId}`}
+          render={({ isDraggingOver }) => (
+            <BadgeButtonContainer
+              className="flyout-overlay"
+              data-test-subj="flyoutOverlay"
+              onClick={onOpen}
+            >
+              {!isDraggingOver ? (
+                <EuiButton
+                  className={NOT_READY_TO_DROP_CLASS_NAME}
+                  data-test-subj="flyout-button-not-ready-to-drop"
+                  fill={false}
+                  iconSide="right"
+                  iconType="arrowUp"
+                >
+                  {i18n.FLYOUT_BUTTON}
+                </EuiButton>
+              ) : (
+                <EuiButton
+                  className={READY_TO_DROP_CLASS_NAME}
+                  data-test-subj="flyout-button-ready-to-drop"
+                  fill={false}
+                >
+                  <EuiIcon data-test-subj="flyout-button-plus-icon" type="plusInCircleFilled" />
+                </EuiButton>
+              )}
+
+              <EuiNotificationBadge
+                color="accent"
+                data-test-subj="badge"
+                style={{
+                  left: '-9px',
+                  position: 'relative',
+                  top: '-6px',
+                  transform: 'rotate(90deg)',
+                  visibility: dataProviders.length !== 0 ? 'inherit' : 'hidden',
+                  zIndex: 10,
+                }}
+              >
+                {dataProviders.length}
+              </EuiNotificationBadge>
+            </BadgeButtonContainer>
           )}
-          <Button>
-            <Text data-test-subj="flyoutButton" size="s">
-              {i18n.TIMELINE.toLocaleUpperCase()
-                .split('')
-                .join(' ')}
-            </Text>
-          </Button>
-        </BadgeButtonContainer>
-      </DroppableWrapper>
-    </Container>
-  ) : null
+        />
+      </Container>
+    ) : null,
+  (prevProps, nextProps) =>
+    prevProps.show === nextProps.show &&
+    prevProps.dataProviders === nextProps.dataProviders &&
+    prevProps.timelineId === nextProps.timelineId
 );
+
+FlyoutButton.displayName = 'FlyoutButton';

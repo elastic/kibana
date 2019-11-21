@@ -49,10 +49,6 @@ uiRoutes
     redirectTo: '/management'
   });
 
-require('./route_setup/load_default')({
-  whenMissingRedirectTo: '/management/kibana/index_pattern'
-});
-
 export function updateLandingPage(version) {
   const node = document.getElementById(LANDING_ID);
   if (!node) {

@@ -55,6 +55,24 @@ export function getUiSettingDefaults() {
     'buildNum': {
       readonly: true
     },
+    'defaultRoute': {
+      name: i18n.translate('kbn.advancedSettings.defaultRoute.defaultRouteTitle', {
+        defaultMessage: 'Default route',
+      }),
+      value: '/app/kibana',
+      validation: {
+        regexString: '^\/',
+        message: i18n.translate('kbn.advancedSettings.defaultRoute.defaultRouteValidationMessage', {
+          defaultMessage: 'The route must start with a slash ("/")',
+        }),
+      },
+      description:
+        i18n.translate('kbn.advancedSettings.defaultRoute.defaultRouteText', {
+          defaultMessage: 'This setting specifies the default route when opening Kibana. ' +
+          'You can use this setting to modify the landing page when opening Kibana. ' +
+          'The route must start with a slash ("/").',
+        }),
+    },
     'query:queryString:options': {
       name: i18n.translate('kbn.advancedSettings.query.queryStringOptionsTitle', {
         defaultMessage: 'Query string options',
@@ -298,6 +316,19 @@ export function getUiSettingDefaults() {
       }),
       category: ['discover'],
     },
+    'discover:searchOnPageLoad': {
+      name: i18n.translate('kbn.advancedSettings.discover.searchOnPageLoadTitle', {
+        defaultMessage: 'Search on page load',
+      }),
+      value: true,
+      type: 'boolean',
+      description: i18n.translate('kbn.advancedSettings.discover.searchOnPageLoadText', {
+        defaultMessage:
+          'Controls whether a search is executed when Discover first loads. This setting does not ' +
+          'have an effect when loading a saved search.',
+      }),
+      category: ['discover'],
+    },
     'doc_table:highlight': {
       name: i18n.translate('kbn.advancedSettings.docTableHighlightTitle', {
         defaultMessage: 'Highlight results',
@@ -402,6 +433,20 @@ export function getUiSettingDefaults() {
             `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-multi-search.html"
             target="_blank" rel="noopener" >max_concurrent_shard_requests</a>`
         },
+      }),
+      category: ['search'],
+    },
+    'courier:batchSearches': {
+      name: i18n.translate('kbn.advancedSettings.courier.batchSearchesTitle', {
+        defaultMessage: 'Batch concurrent searches',
+      }),
+      value: false,
+      type: 'boolean',
+      description: i18n.translate('kbn.advancedSettings.courier.batchSearchesText', {
+        defaultMessage:
+          `When disabled, dashboard panels will load individually, and search requests will terminate when users navigate
+           away or update the query. When enabled, dashboard panels will load together when all of the data is loaded, and
+           searches will not terminate.`,
       }),
       category: ['search'],
     },
@@ -559,6 +604,19 @@ export function getUiSettingDefaults() {
       }),
       category: ['visualization'],
     },
+    'visualization:heatmap:maxBuckets': {
+      name: i18n.translate('kbn.advancedSettings.visualization.heatmap.maxBucketsTitle', {
+        defaultMessage: 'Heatmap maximum buckets',
+      }),
+      value: 50,
+      type: 'number',
+      description: i18n.translate('kbn.advancedSettings.visualization.heatmap.maxBucketsText', {
+        defaultMessage:
+          'The maximum number of buckets a single datasource can return. ' +
+          'A higher number might have negative impact on browser rendering performance'
+      }),
+      category: ['visualization'],
+    },
     'csv:separator': {
       name: i18n.translate('kbn.advancedSettings.csv.separatorTitle', {
         defaultMessage: 'CSV separator',
@@ -667,7 +725,7 @@ export function getUiSettingDefaults() {
       name: i18n.translate('kbn.advancedSettings.format.bytesFormatTitle', {
         defaultMessage: 'Bytes format',
       }),
-      value: '0,0.[000]b',
+      value: '0,0.[0]b',
       type: 'string',
       description: i18n.translate('kbn.advancedSettings.format.bytesFormatText', {
         defaultMessage: 'Default {numeralFormatLink} for the "bytes" format',
@@ -771,7 +829,7 @@ export function getUiSettingDefaults() {
     },
     'timepicker:timeDefaults': {
       name: i18n.translate('kbn.advancedSettings.timepicker.timeDefaultsTitle', {
-        defaultMessage: 'Time picker defaults',
+        defaultMessage: 'Time filter defaults',
       }),
       value:
 `{
@@ -786,7 +844,7 @@ export function getUiSettingDefaults() {
     },
     'timepicker:refreshIntervalDefaults': {
       name: i18n.translate('kbn.advancedSettings.timepicker.refreshIntervalDefaultsTitle', {
-        defaultMessage: 'Time picker refresh interval',
+        defaultMessage: 'Time filter refresh interval',
       }),
       value:
 `{
@@ -801,7 +859,7 @@ export function getUiSettingDefaults() {
     },
     'timepicker:quickRanges': {
       name: i18n.translate('kbn.advancedSettings.timepicker.quickRangesTitle', {
-        defaultMessage: 'Time picker quick ranges',
+        defaultMessage: 'Time filter quick ranges',
       }),
       value: JSON.stringify([
         {
@@ -857,7 +915,7 @@ export function getUiSettingDefaults() {
       type: 'json',
       description: i18n.translate('kbn.advancedSettings.timepicker.quickRangesText', {
         defaultMessage:
-          'The list of ranges to show in the Quick section of the time picker. This should be an array of objects, ' +
+          'The list of ranges to show in the Quick section of the time filter. This should be an array of objects, ' +
           'with each object containing "from", "to" (see {acceptedFormatsLink}), and ' +
           '"display" (the title to be displayed).',
         description:

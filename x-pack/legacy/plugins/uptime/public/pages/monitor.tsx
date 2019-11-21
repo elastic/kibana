@@ -22,11 +22,12 @@ import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
+import { useTrackPageview } from '../../../infra/public';
+import { getTitle } from '../lib/helper/get_title';
 
 interface MonitorPageProps {
-  history: { push: any };
-  location: { pathname: string; search: string };
-  match: { params: { id: string } };
+  logMonitorPageLoad: () => void;
+  match: { params: { monitorId: string } };
   // this is the query function provided by Apollo's Client API
   query: <T, TVariables = OperationVariables>(
     options: QueryOptions<TVariables>
@@ -34,57 +35,86 @@ interface MonitorPageProps {
   setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 
-export const MonitorPage = ({ history, location, query, setBreadcrumbs }: MonitorPageProps) => {
-  const parsedPath = location.pathname.replace(/^(\/monitor\/)/, '').split('/');
-  const [monitorId] = useState<string>(decodeURI(parsedPath[0]));
-  const [geoLocation] = useState<string | undefined>(
-    parsedPath[1] ? decodeURI(parsedPath[1]) : undefined
-  );
+export const MonitorPage = ({
+  logMonitorPageLoad,
+  query,
+  setBreadcrumbs,
+  match,
+}: MonitorPageProps) => {
+  // decode 64 base string, it was decoded to make it a valid url, since monitor id can be a url
+  const monitorId = atob(match.params.monitorId);
+  const [pingListPageCount, setPingListPageCount] = useState<number>(10);
   const { colors, refreshApp, setHeadingText } = useContext(UptimeSettingsContext);
-  const [params, updateUrlParams] = useUrlParams(history, location);
+  const [getUrlParams, updateUrlParams] = useUrlParams();
+  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
   const { dateRangeStart, dateRangeEnd, selectedPingStatus } = params;
 
-  useEffect(
-    () => {
-      query({
-        query: gql`
-          query MonitorPageTitle($monitorId: String!) {
-            monitorPageTitle: getMonitorPageTitle(monitorId: $monitorId) {
-              id
-              url
-              name
-            }
+  useEffect(() => {
+    query({
+      query: gql`
+        query MonitorPageTitle($monitorId: String!) {
+          monitorPageTitle: getMonitorPageTitle(monitorId: $monitorId) {
+            id
+            url
+            name
           }
-        `,
-        variables: { monitorId },
-      }).then((result: any) => {
-        const { name, url, id } = result.data.monitorPageTitle;
-        const heading: string = name || url || id;
-        setBreadcrumbs(getMonitorPageBreadcrumb(heading, stringifyUrlParams(params)));
-        if (setHeadingText) {
-          setHeadingText(heading);
         }
-      });
-    },
-    [params]
-  );
-  const sharedVariables = { dateRangeStart, dateRangeEnd, location: geoLocation, monitorId };
+      `,
+      variables: { monitorId },
+    }).then((result: any) => {
+      const { name, url, id } = result.data.monitorPageTitle;
+      const heading: string = name || url || id;
+      document.title = getTitle(name);
+      setBreadcrumbs(getMonitorPageBreadcrumb(heading, stringifyUrlParams(params)));
+      if (setHeadingText) {
+        setHeadingText(heading);
+      }
+    });
+  }, [params]);
+
+  const [selectedLocation, setSelectedLocation] = useState(undefined);
+
+  const sharedVariables = {
+    dateRangeStart,
+    dateRangeEnd,
+    location: selectedLocation,
+    monitorId,
+  };
+
+  useEffect(() => {
+    logMonitorPageLoad();
+  }, []);
+
+  useTrackPageview({ app: 'uptime', path: 'monitor' });
+  useTrackPageview({ app: 'uptime', path: 'monitor', delay: 15000 });
+
   return (
     <Fragment>
       <MonitorPageTitle monitorId={monitorId} variables={{ monitorId }} />
       <EuiSpacer size="s" />
       <MonitorStatusBar monitorId={monitorId} variables={sharedVariables} />
       <EuiSpacer size="s" />
-      <MonitorCharts {...colors} variables={sharedVariables} />
+      <MonitorCharts
+        {...colors}
+        monitorId={monitorId}
+        variables={sharedVariables}
+        dateRangeStart={dateRangeStart}
+        dateRangeEnd={dateRangeEnd}
+      />
       <EuiSpacer size="s" />
       <PingList
-        onSelectedStatusUpdate={(selectedStatus: string | null) =>
+        onPageCountChange={setPingListPageCount}
+        onSelectedLocationChange={setSelectedLocation}
+        onSelectedStatusChange={(selectedStatus: string | undefined) =>
           updateUrlParams({ selectedPingStatus: selectedStatus || '' })
         }
         onUpdateApp={refreshApp}
+        pageSize={pingListPageCount}
         selectedOption={selectedPingStatus}
+        selectedLocation={selectedLocation}
         variables={{
           ...sharedVariables,
+          size: pingListPageCount,
           status: selectedPingStatus,
         }}
       />

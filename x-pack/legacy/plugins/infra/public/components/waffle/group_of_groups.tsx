@@ -51,6 +51,7 @@ export const GroupOfGroups: React.SFC<Props> = props => {
 
 const GroupOfGroupsContainer = euiStyled.div`
   margin: 0 10px;
+  width: 100%;
 `;
 
 const Groups = euiStyled.div`

@@ -4,34 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request, ResponseToolkit } from 'hapi';
 import querystring from 'querystring';
 import { API_BASE_URL } from '../../common/constants';
-import { KbnServer } from '../../types';
-import { getRouteConfigFactoryReportingPre } from './lib/route_config_factories';
+import { ServerFacade, RequestFacade, ReportingResponseToolkit } from '../../types';
+import {
+  getRouteConfigFactoryReportingPre,
+  GetRouteConfigFactoryFn,
+} from './lib/route_config_factories';
 import { HandlerErrorFunction, HandlerFunction } from './types';
 
-const getStaticFeatureConfig = (getRouteConfig: any, featureId: any) =>
+const getStaticFeatureConfig = (getRouteConfig: GetRouteConfigFactoryFn, featureId: string) =>
   getRouteConfig(() => featureId);
+
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
 export function registerLegacy(
-  server: KbnServer,
+  server: ServerFacade,
   handler: HandlerFunction,
   handleError: HandlerErrorFunction
 ) {
   const getRouteConfig = getRouteConfigFactoryReportingPre(server);
 
-  function createLegacyPdfRoute({ path, objectType }: { path: string; objectType: any }) {
+  function createLegacyPdfRoute({ path, objectType }: { path: string; objectType: string }) {
     const exportTypeId = 'printablePdf';
     server.route({
       path,
       method: 'POST',
-      config: getStaticFeatureConfig(getRouteConfig, exportTypeId),
-      handler: async (request: Request, h: ResponseToolkit) => {
-        const message = `The following URL is deprecated and will stop working in the next major version: ${
-          request.url.path
-        }`;
+      options: getStaticFeatureConfig(getRouteConfig, exportTypeId),
+      handler: async (request: RequestFacade, h: ReportingResponseToolkit) => {
+        const message = `The following URL is deprecated and will stop working in the next major version: ${request.url.path}`;
         server.log(['warning', 'reporting', 'deprecation'], message);
 
         try {

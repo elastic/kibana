@@ -2,7 +2,6 @@
   @include euiScrollBar;
 
   width: 100%;
-  padding: $euiSizeM;
   max-height: 100vh;
   overflow-y: auto;
   overflow-x: hidden;
@@ -25,6 +24,15 @@
   margin-bottom: $euiSizeS;
 }
 
+.canvasSidebar__panel {
+  border-bottom: $euiBorderThin;
+  padding: $euiSizeS $euiSizeM;
+
+  &--isEmpty {
+    border-bottom: none;
+  }
+}
+
 .canvasSidebar__panel-noMinWidth .euiButton {
   min-width: 0;
 }
@@ -33,9 +41,11 @@
   0% {
     opacity: 0;
   }
+
   1% {
     opacity: 0;
   }
+
   100% {
     opacity: 1;
   }

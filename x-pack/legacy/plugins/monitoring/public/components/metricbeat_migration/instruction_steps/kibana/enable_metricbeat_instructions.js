@@ -9,57 +9,20 @@ import {
   EuiSpacer,
   EuiCodeBlock,
   EuiLink,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-  EuiCallOut,
   EuiText
 } from '@elastic/eui';
 import { Monospace } from '../components/monospace';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { statusTitle } from './common_kibana_instructions';
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
+import { getMigrationStatusStep, getSecurityStep } from '../common_instructions';
 
 export function getKibanaInstructionsForEnablingMetricbeat(product, _meta, {
   esMonitoringUrl,
-  hasCheckedStatus,
-  checkingMigrationStatus,
-  checkForMigrationStatus,
-  autoCheckIntervalInMs
 }) {
-  const securitySetup = (
-    <Fragment>
-      <EuiSpacer size="m"/>
-      <EuiCallOut
-        color="warning"
-        iconType="help"
-        title={(
-          <EuiText>
-            <FormattedMessage
-              id="xpack.monitoring.metricbeatMigration.kibanaInstructions.metricbeatSecuritySetup"
-              defaultMessage="If security features are enabled, there may be more setup required.{link}"
-              values={{
-                link: (
-                  <Fragment>
-                    {` `}
-                    <EuiLink
-                      href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/reference/${DOC_LINK_VERSION}/configuring-metricbeat.html`}
-                      target="_blank"
-                    >
-                      <FormattedMessage
-                        id="xpack.monitoring.metricbeatMigration.kibanaInstructions.metricbeatSecuritySetupLinkText"
-                        defaultMessage="View more information."
-                      />
-                    </EuiLink>
-                  </Fragment>
-                )
-              }}
-            />
-          </EuiText>
-        )}
-      />
-    </Fragment>
+  const securitySetup = getSecurityStep(
+    `${ELASTIC_WEBSITE_URL}guide/en/kibana/reference/${DOC_LINK_VERSION}/monitoring-metricbeat.html`
   );
+
   const installMetricbeatStep = {
     title: i18n.translate('xpack.monitoring.metricbeatMigration.kibanaInstructions.installMetricbeatTitle', {
       defaultMessage: 'Install Metricbeat on the same server as Kibana'
@@ -73,7 +36,7 @@ export function getKibanaInstructionsForEnablingMetricbeat(product, _meta, {
           >
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.kibanaInstructions.installMetricbeatLinkText"
-              defaultMessage="Follow the instructions here"
+              defaultMessage="Follow the instructions here."
             />
           </EuiLink>
         </p>
@@ -137,7 +100,7 @@ export function getKibanaInstructionsForEnablingMetricbeat(product, _meta, {
           isCopyable
         >
           {`output.elasticsearch:
-  hosts: ["${esMonitoringUrl}"] ## Monitoring cluster
+  hosts: [${esMonitoringUrl}] ## Monitoring cluster
 
   # Optional protocol and basic auth credentials.
   #protocol: "https"
@@ -164,7 +127,7 @@ export function getKibanaInstructionsForEnablingMetricbeat(product, _meta, {
           >
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.kibanaInstructions.startMetricbeatLinkText"
-              defaultMessage="Follow the instructions here"
+              defaultMessage="Follow the instructions here."
             />
           </EuiLink>
         </p>
@@ -172,90 +135,7 @@ export function getKibanaInstructionsForEnablingMetricbeat(product, _meta, {
     )
   };
 
-  let migrationStatusStep = null;
-  if (product.isInternalCollector) {
-    let status = null;
-    if (hasCheckedStatus) {
-      status = (
-        <Fragment>
-          <EuiSpacer size="m"/>
-          <EuiCallOut
-            size="s"
-            color="warning"
-            title={i18n.translate('xpack.monitoring.metricbeatMigration.kibanaInstructions.isInternalCollectorStatusTitle', {
-              defaultMessage: `We have not detected any monitoring data coming from Metricbeat for this Kibana.
-              We will continuously check every {timePeriod} seconds in the background.`,
-              values: {
-                timePeriod: autoCheckIntervalInMs / 1000,
-              }
-            })}
-          />
-        </Fragment>
-      );
-    }
-
-    let buttonLabel;
-    if (checkingMigrationStatus) {
-      buttonLabel = i18n.translate('xpack.monitoring.metricbeatMigration.kibanaInstructions.checkingStatusButtonLabel', {
-        defaultMessage: 'Checking for data...'
-      });
-    } else {
-      buttonLabel = i18n.translate('xpack.monitoring.metricbeatMigration.kibanaInstructions.checkStatusButtonLabel', {
-        defaultMessage: 'Check for data'
-      });
-    }
-
-    migrationStatusStep = {
-      title: statusTitle,
-      status: 'incomplete',
-      children: (
-        <Fragment>
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem>
-              <EuiText>
-                <p>
-                  {i18n.translate('xpack.monitoring.metricbeatMigration.kibanaInstructions.statusDescription', {
-                    defaultMessage: 'Check that data is received from the Metricbeat'
-                  })}
-                </p>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton onClick={checkForMigrationStatus} isDisabled={checkingMigrationStatus}>
-                {buttonLabel}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          {status}
-        </Fragment>
-      )
-    };
-  }
-  else if (product.isPartiallyMigrated || product.isFullyMigrated) {
-    migrationStatusStep = {
-      title: statusTitle,
-      status: 'complete',
-      children: (
-        <EuiCallOut
-          size="s"
-          color="success"
-          title={i18n.translate(
-            'xpack.monitoring.metricbeatMigration.kibanaInstructions.fullyMigratedStatusTitle',
-            {
-              defaultMessage: 'Congratulations!'
-            }
-          )}
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.monitoring.metricbeatMigration.kibanaInstructions.fullyMigratedStatusDescription"
-              defaultMessage="We are now seeing monitoring data shipping from Metricbeat!"
-            />
-          </p>
-        </EuiCallOut>
-      )
-    };
-  }
+  const migrationStatusStep = getMigrationStatusStep(product);
 
   return [
     installMetricbeatStep,

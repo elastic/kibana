@@ -6,15 +6,11 @@
 
 import { isArray, isObject, isString } from 'lodash';
 import mustache from 'mustache';
-import chrome from 'ui/chrome';
 import uuid from 'uuid';
-import { StringMap } from '../../../../../../typings/common';
 // @ts-ignore
 import * as rest from '../../../../../services/rest/watcher';
 import { createErrorGroupWatch } from '../createErrorGroupWatch';
 import { esResponse } from './esResponse';
-
-jest.mock('ui/kfetch');
 
 // disable html escaping since this is also disabled in watcher\s mustache implementation
 mustache.escape = value => value;
@@ -23,7 +19,6 @@ describe('createErrorGroupWatch', () => {
   let createWatchResponse: string;
   let tmpl: any;
   beforeEach(async () => {
-    chrome.getInjected = jest.fn().mockReturnValue('myIndexPattern');
     jest.spyOn(uuid, 'v4').mockReturnValue(new Buffer('mocked-uuid'));
     jest.spyOn(rest, 'createWatch').mockReturnValue(undefined);
 
@@ -37,7 +32,8 @@ describe('createErrorGroupWatch', () => {
       serviceName: 'opbeans-node',
       slackUrl: 'https://hooks.slack.com/services/slackid1/slackid2/slackid3',
       threshold: 10,
-      timeRange: { value: 24, unit: 'h' }
+      timeRange: { value: 24, unit: 'h' },
+      apmIndexPatternTitle: 'myIndexPattern'
     });
 
     const watchBody = rest.createWatch.mock.calls[0][1];
@@ -88,8 +84,11 @@ describe('createErrorGroupWatch', () => {
 });
 
 // Recursively iterate a nested structure and render strings as mustache templates
-type InputOutput = string | string[] | StringMap<any>;
-function renderMustache(input: InputOutput, ctx: StringMap): InputOutput {
+type InputOutput = string | string[] | Record<string, any>;
+function renderMustache(
+  input: InputOutput,
+  ctx: Record<string, unknown>
+): InputOutput {
   if (isString(input)) {
     return mustache.render(input, {
       ctx,

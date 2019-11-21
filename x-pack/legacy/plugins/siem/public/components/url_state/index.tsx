@@ -4,92 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEqual } from 'lodash/fp';
 import React from 'react';
-import { compose } from 'redux';
+import { compose, Dispatch } from 'redux';
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
 
-import {
-  hostsModel,
-  hostsSelectors,
-  inputsSelectors,
-  networkModel,
-  networkSelectors,
-  State,
-} from '../../store';
-import { hostsActions, inputsActions, networkActions } from '../../store/actions';
+import { timelineActions } from '../../store/actions';
+import { RouteSpyState } from '../../utils/route/types';
+import { useRouteSpy } from '../../utils/route/use_route_spy';
 
-import { CONSTANTS } from './constants';
-import { UrlStateContainerPropTypes, UrlStateProps, KqlQueryObject } from './types';
+import { UrlStateContainerPropTypes, UrlStateProps } from './types';
 import { useUrlStateHooks } from './use_url_state';
+import { dispatchUpdateTimeline } from '../open_timeline/helpers';
+import { dispatchSetInitialStateFromUrl } from './initialize_redux_by_url';
+import { makeMapStateToProps } from './helpers';
 
-export const UrlStateContainer = (props: UrlStateContainerPropTypes) => {
-  const { isInitializing } = useUrlStateHooks(props);
-  return props.children({ isInitializing });
-};
+export const UrlStateContainer = React.memo<UrlStateContainerPropTypes>(
+  (props: UrlStateContainerPropTypes) => {
+    useUrlStateHooks(props);
+    return null;
+  },
+  (prevProps, nextProps) =>
+    prevProps.pathName === nextProps.pathName && isEqual(prevProps.urlState, nextProps.urlState)
+);
 
-const makeMapStateToProps = () => {
-  const getInputsSelector = inputsSelectors.inputsSelector();
-  const getHostsFilterQueryAsKuery = hostsSelectors.hostsFilterQueryAsKuery();
-  const getNetworkFilterQueryAsKuery = networkSelectors.networkFilterQueryAsKuery();
-  const mapStateToProps = (state: State) => {
-    const inputState = getInputsSelector(state);
-    const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
-    const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
+UrlStateContainer.displayName = 'UrlStateContainer';
 
-    const kqlQueryInitialState: KqlQueryObject = {
-      [CONSTANTS.hostsDetails]: {
-        filterQuery: getHostsFilterQueryAsKuery(state, hostsModel.HostsType.details),
-        queryLocation: CONSTANTS.hostsDetails,
-        type: hostsModel.HostsType.details,
-      },
-      [CONSTANTS.hostsPage]: {
-        filterQuery: getHostsFilterQueryAsKuery(state, hostsModel.HostsType.page),
-        queryLocation: CONSTANTS.hostsPage,
-        type: hostsModel.HostsType.page,
-      },
-      [CONSTANTS.networkDetails]: {
-        filterQuery: getNetworkFilterQueryAsKuery(state, networkModel.NetworkType.details),
-        queryLocation: CONSTANTS.networkDetails,
-        type: networkModel.NetworkType.details,
-      },
-      [CONSTANTS.networkPage]: {
-        filterQuery: getNetworkFilterQueryAsKuery(state, networkModel.NetworkType.page),
-        queryLocation: CONSTANTS.networkPage,
-        type: networkModel.NetworkType.page,
-      },
-    };
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  setInitialStateFromUrl: dispatchSetInitialStateFromUrl(dispatch),
+  updateTimeline: dispatchUpdateTimeline(dispatch),
+  updateTimelineIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) =>
+    dispatch(timelineActions.updateIsLoading({ id, isLoading })),
+});
 
-    return {
-      urlState: {
-        [CONSTANTS.timerange]: {
-          global: {
-            [CONSTANTS.timerange]: globalTimerange,
-            linkTo: globalLinkTo,
-          },
-          timeline: {
-            [CONSTANTS.timerange]: timelineTimerange,
-            linkTo: timelineLinkTo,
-          },
-        },
-        [CONSTANTS.kqlQuery]: kqlQueryInitialState,
-      },
-    };
-  };
-
-  return mapStateToProps;
-};
-
-export const UseUrlState = compose<React.ComponentClass<UrlStateProps>>(
-  withRouter,
-  connect(
-    makeMapStateToProps,
-    {
-      setAbsoluteTimerange: inputsActions.setAbsoluteRangeDatePicker,
-      setHostsKql: hostsActions.applyHostsFilterQuery,
-      setNetworkKql: networkActions.applyNetworkFilterQuery,
-      setRelativeTimerange: inputsActions.setRelativeRangeDatePicker,
-      toggleTimelineLinkTo: inputsActions.toggleTimelineLinkTo,
-    }
-  )
+export const UrlStateRedux = compose<React.ComponentClass<UrlStateProps & RouteSpyState>>(
+  connect(makeMapStateToProps, mapDispatchToProps)
 )(UrlStateContainer);
+
+export const UseUrlState = React.memo<UrlStateProps>(props => {
+  const [routeProps] = useRouteSpy();
+  const urlStateReduxProps: RouteSpyState & UrlStateProps = { ...routeProps, ...props };
+  return <UrlStateRedux {...urlStateReduxProps} />;
+});

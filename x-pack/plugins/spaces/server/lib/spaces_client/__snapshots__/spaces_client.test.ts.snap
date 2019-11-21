@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#create authorization is null throws bad request when we are at the maximum number of spaces 1`] = `"Unable to create Space, this exceeds the maximum number of spaces set by the xpack.spaces.maxSpaces setting"`;
+
+exports[`#create authorization.mode.useRbacForRequest returns false throws bad request when we're at the maximum number of spaces 1`] = `"Unable to create Space, this exceeds the maximum number of spaces set by the xpack.spaces.maxSpaces setting"`;
+
+exports[`#create useRbacForRequest is true throws Boom.forbidden if the user isn't authorized at space 1`] = `"Unauthorized to create spaces"`;
+
+exports[`#create useRbacForRequest is true throws bad request when we are at the maximum number of spaces 1`] = `"Unable to create Space, this exceeds the maximum number of spaces set by the xpack.spaces.maxSpaces setting"`;
+
+exports[`#delete authorization is null throws bad request when the space is reserved 1`] = `"This Space cannot be deleted because it is reserved."`;
+
+exports[`#delete authorization.mode.useRbacForRequest returns false throws bad request when the space is reserved 1`] = `"This Space cannot be deleted because it is reserved."`;
+
+exports[`#delete authorization.mode.useRbacForRequest returns true throws Boom.forbidden if the user isn't authorized 1`] = `"Unauthorized to delete spaces"`;
+
+exports[`#delete authorization.mode.useRbacForRequest returns true throws bad request if the user is authorized but the space is reserved 1`] = `"This Space cannot be deleted because it is reserved."`;
+
+exports[`#get useRbacForRequest is true throws Boom.forbidden if the user isn't authorized at space 1`] = `"Unauthorized to get foo-space space"`;
+
+exports[`#getAll authorization.mode.useRbacForRequest returns false throws Boom.badRequest when an invalid purpose is provided' 1`] = `"unsupported space purpose: invalid_purpose"`;
+
+exports[`#getAll useRbacForRequest is true throws Boom.badRequest when an invalid purpose is provided 1`] = `"unsupported space purpose: invalid_purpose"`;
+
+exports[`#getAll useRbacForRequest is true with purpose='any' throws Boom.forbidden when user isn't authorized for any spaces 1`] = `"Forbidden"`;
+
+exports[`#getAll useRbacForRequest is true with purpose='copySavedObjectsIntoSpace' throws Boom.forbidden when user isn't authorized for any spaces 1`] = `"Forbidden"`;
+
+exports[`#getAll useRbacForRequest is true with purpose='undefined' throws Boom.forbidden when user isn't authorized for any spaces 1`] = `"Forbidden"`;
+
+exports[`#update useRbacForRequest is true throws Boom.forbidden when user isn't authorized at space 1`] = `"Unauthorized to update spaces"`;

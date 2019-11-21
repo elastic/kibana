@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { difference } from 'lodash';
+import { difference, isEqual } from 'lodash';
+import { BehaviorSubject } from 'rxjs';
 import { toastNotifications } from 'ui/notify';
-import { mlJobService } from '../../services/job_service';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import d3 from 'd3';
 
+import { mlJobService } from '../../services/job_service';
 
 function warnAboutInvalidJobIds(invalidIds) {
   if (invalidIds.length > 0) {
@@ -34,7 +35,34 @@ function getInvalidJobIds(ids) {
   });
 }
 
+export const jobSelectServiceFactory = (globalState) => {
+  const { jobIds, selectedGroups } = getSelectedJobIds(globalState);
+  const jobSelectService = new BehaviorSubject({ selection: jobIds, groups: selectedGroups, resetSelection: false });
+
+  // Subscribe to changes to globalState and trigger
+  // a jobSelectService update if the job selection changed.
+  const listener = () => {
+    const { jobIds: newJobIds, selectedGroups: newSelectedGroups } = getSelectedJobIds(globalState);
+    const oldSelectedJobIds = jobSelectService.getValue().selection;
+
+    if (newJobIds && !(isEqual(oldSelectedJobIds, newJobIds))) {
+      jobSelectService.next({ selection: newJobIds, groups: newSelectedGroups });
+    }
+  };
+
+  globalState.on('save_with_changes', listener);
+
+  const unsubscribeFromGlobalState = () => {
+    globalState.off('save_with_changes', listener);
+  };
+
+  return { jobSelectService, unsubscribeFromGlobalState };
+};
+
 function loadJobIdsFromGlobalState(globalState) { // jobIds, groups
+  // fetch to get the latest state
+  globalState.fetch();
+
   const jobIds = [];
   let groups = [];
 
@@ -73,12 +101,32 @@ function loadJobIdsFromGlobalState(globalState) { // jobIds, groups
   return { jobIds, selectedGroups: groups };
 }
 
-export function setGlobalState(globalState, { selectedIds, selectedGroups }) {
+// TODO:
+// Merge `setGlobalStateSkipRefresh()` and `setGlobalState()` into
+// a single function similar to how we do `appStateHandler()`.
+// When changing jobs in job selector it would trigger multiple events
+// which in return would be consumed by Single Metric Viewer and could cause
+// race conditions when updating the whole page. Because we don't control
+// the internals of the involved timefilter event triggering, we use
+// a global `skipRefresh` to control when Single Metric Viewer should
+// skip updates triggered by timefilter.
+export function setGlobalStateSkipRefresh(globalState, skipRefresh) {
+  globalState.fetch();
+  if (globalState.ml === undefined) {
+    globalState.ml = {};
+  }
+  globalState.ml.skipRefresh = skipRefresh;
+  globalState.save();
+}
+
+export function setGlobalState(globalState, { selectedIds, selectedGroups, skipRefresh }) {
+  globalState.fetch();
   if (globalState.ml === undefined) {
     globalState.ml = {};
   }
   globalState.ml.jobIds = selectedIds;
   globalState.ml.groups = selectedGroups || [];
+  globalState.ml.skipRefresh = !!skipRefresh;
   globalState.save();
 }
 
@@ -155,8 +203,12 @@ export function getGroupsFromJobs(jobs) {
 }
 
 export function normalizeTimes(jobs, dateFormatTz, ganttBarWidth) {
-  const min = Math.min(...jobs.map(job => +job.timeRange.from));
-  const max = Math.max(...jobs.map(job => +job.timeRange.to));
+  const jobsWithTimeRange = jobs.filter((job) => {
+    return (job.timeRange.to !== undefined) && (job.timeRange.from !== undefined);
+  });
+
+  const min = Math.min(...jobsWithTimeRange.map(job => +job.timeRange.from));
+  const max = Math.max(...jobsWithTimeRange.map(job => +job.timeRange.to));
   const ganttScale = d3.scale.linear().domain([min, max]).range([1, ganttBarWidth]);
 
   jobs.forEach(job => {
@@ -180,6 +232,13 @@ export function normalizeTimes(jobs, dateFormatTz, ganttBarWidth) {
           fromString,
           toString,
         }
+      });
+    } else {
+      job.timeRange.widthPx = 0;
+      job.timeRange.fromPx = 0;
+      job.timeRange.toPx = 0;
+      job.timeRange.label = i18n.translate('xpack.ml.jobSelector.noResultsForJobLabel', {
+        defaultMessage: 'No results'
       });
     }
   });

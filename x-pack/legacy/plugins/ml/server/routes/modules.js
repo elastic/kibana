@@ -36,6 +36,8 @@ function saveModuleItems(
   startDatafeed,
   start,
   end,
+  jobOverrides,
+  datafeedOverrides,
   request
 ) {
   const dr = new DataRecognizer(callWithRequest);
@@ -49,6 +51,8 @@ function saveModuleItems(
     startDatafeed,
     start,
     end,
+    jobOverrides,
+    datafeedOverrides,
     request);
 }
 
@@ -107,7 +111,9 @@ export function dataRecognizer({ commonRouteConfig, elasticsearchPlugin, route }
         useDedicatedIndex,
         startDatafeed,
         start,
-        end
+        end,
+        jobOverrides,
+        datafeedOverrides,
       } = request.payload;
 
       return saveModuleItems(
@@ -121,6 +127,8 @@ export function dataRecognizer({ commonRouteConfig, elasticsearchPlugin, route }
         startDatafeed,
         start,
         end,
+        jobOverrides,
+        datafeedOverrides,
         request
       )
         .catch(resp => wrapError(resp));

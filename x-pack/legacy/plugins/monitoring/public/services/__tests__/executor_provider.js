@@ -8,7 +8,7 @@ import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { executorProvider } from '../executor_provider';
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 import { timefilter } from 'ui/timefilter';
 
 describe('$executor service', () => {
@@ -32,28 +32,10 @@ describe('$executor service', () => {
       value: 0
     });
 
-    executor = executorProvider(Promise, $timeout);
+    executor = executorProvider(Bluebird, $timeout);
   });
 
   afterEach(() => executor.destroy());
-
-  it('should register listener for fetch upon start', () => {
-    executor.start(scope);
-    const listeners = timefilter.listeners('fetch');
-    const handlerFunc = listeners.find(listener => {
-      return listener.name === 'reFetch';
-    });
-    expect(handlerFunc).to.not.be.null;
-  });
-
-  it('should register listener for refreshIntervalUpdate upon start', () => {
-    executor.start(scope);
-    const listeners = timefilter.listeners('refreshIntervalUpdate');
-    const handlerFunc = listeners.find(listener => {
-      return listener.name === 'killIfPaused';
-    });
-    expect(handlerFunc).to.not.be.null;
-  });
 
   it('should not call $timeout if the timefilter is not paused and set to zero', () => {
     executor.start(scope);
@@ -74,7 +56,7 @@ describe('$executor service', () => {
       pause: false,
       value: 1000
     });
-    executor.register({ execute: () => Promise.resolve().then(() => done(), done) });
+    executor.register({ execute: () => Bluebird.resolve().then(() => done(), done) });
     executor.start(scope);
   });
 
@@ -86,7 +68,7 @@ describe('$executor service', () => {
     });
     executor.register({ execute: () => {
       if (calls++ > 1) { done(); }
-      return Promise.resolve();
+      return Bluebird.resolve();
     } });
     executor.start(scope);
   });
@@ -97,7 +79,7 @@ describe('$executor service', () => {
       value: 10
     });
     executor.register({
-      execute: () => Promise.resolve(),
+      execute: () => Bluebird.resolve(),
       handleResponse: () => done()
     });
     executor.start(scope);
@@ -109,7 +91,7 @@ describe('$executor service', () => {
       value: 10
     });
     executor.register({
-      execute: () => Promise.reject(new Error('reject test')),
+      execute: () => Bluebird.reject(new Error('reject test')),
       handleError: () => done()
     });
     executor.start(scope);

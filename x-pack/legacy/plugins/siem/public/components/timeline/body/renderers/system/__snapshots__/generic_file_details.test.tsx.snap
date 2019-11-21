@@ -2,7 +2,7 @@
 
 exports[`SystemGenericFileDetails rendering it renders the default SystemGenericDetails 1`] = `
 <Component>
-  <pure(Component)
+  <SystemGenericFileDetails
     browserFields={Object {}}
     contextId="[contextid-123]"
     data={
@@ -90,6 +90,7 @@ exports[`SystemGenericFileDetails rendering it renders the default SystemGeneric
       }
     }
     text="[generic-text-123]"
+    timelineId="test"
   />
 </Component>
 `;

@@ -40,10 +40,6 @@ export class QueryTemplate<
     tiebreaker?: string
   ) => FetchMoreOptionsArgs<TData, TVariables>;
 
-  public constructor(props: T) {
-    super(props);
-  }
-
   public setFetchMore = (
     val: (fetchMoreOptions: FetchMoreOptionsArgs<TData, TVariables>) => PromiseApolloQueryResult
   ) => {

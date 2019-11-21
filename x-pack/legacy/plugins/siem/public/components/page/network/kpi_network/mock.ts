@@ -7,6 +7,8 @@
 import { KpiNetworkData } from '../../../../graphql/types';
 import { StatItems } from '../../../stat_items';
 
+export const mockNarrowDateRange = jest.fn();
+
 export const mockData: { KpiNetwork: KpiNetworkData } = {
   KpiNetwork: {
     networkEvents: 16,
@@ -40,25 +42,26 @@ export const mockData: { KpiNetwork: KpiNetworkData } = {
 
 const mockMappingItems: StatItems = {
   key: 'UniqueIps',
+  index: 0,
   fields: [
     {
       key: 'uniqueSourcePrivateIps',
       value: null,
       name: 'Src.',
-      description: 'Source',
+      description: 'source',
       color: '#DB1374',
       icon: 'visMapCoordinate',
     },
     {
       key: 'uniqueDestinationPrivateIps',
       value: null,
-      name: 'Dist.',
-      description: 'Destination',
+      name: 'Dest.',
+      description: 'destination',
       color: '#490092',
       icon: 'visMapCoordinate',
     },
   ],
-  description: 'Unique Private IPs',
+  description: 'Unique private IPs',
   enableAreaChart: true,
   enableBarChart: true,
   grow: 2,
@@ -78,20 +81,20 @@ export const mockDisableChartsInitialData = {
       key: 'uniqueSourcePrivateIps',
       value: undefined,
       name: 'Src.',
-      description: 'Source',
+      description: 'source',
       color: '#DB1374',
       icon: 'visMapCoordinate',
     },
     {
       key: 'uniqueDestinationPrivateIps',
       value: undefined,
-      name: 'Dist.',
-      description: 'Destination',
+      name: 'Dest.',
+      description: 'destination',
       color: '#490092',
       icon: 'visMapCoordinate',
     },
   ],
-  description: 'Unique Private IPs',
+  description: 'Unique private IPs',
   enableAreaChart: false,
   enableBarChart: false,
   grow: 2,
@@ -105,20 +108,20 @@ export const mockEnableChartsInitialData = {
       key: 'uniqueSourcePrivateIps',
       value: undefined,
       name: 'Src.',
-      description: 'Source',
+      description: 'source',
       color: '#DB1374',
       icon: 'visMapCoordinate',
     },
     {
       key: 'uniqueDestinationPrivateIps',
       value: undefined,
-      name: 'Dist.',
-      description: 'Destination',
+      name: 'Dest.',
+      description: 'destination',
       color: '#490092',
       icon: 'visMapCoordinate',
     },
   ],
-  description: 'Unique Private IPs',
+  description: 'Unique private IPs',
   enableAreaChart: true,
   enableBarChart: true,
   grow: 2,
@@ -141,7 +144,7 @@ export const mockEnableChartsInitialData = {
       value: [
         {
           g: 'uniqueDestinationPrivateIps',
-          x: 'Dist.',
+          x: 'Dest.',
           y: null,
         },
       ],
@@ -150,28 +153,6 @@ export const mockEnableChartsInitialData = {
 };
 
 export const mockEnableChartsData = {
-  fields: [
-    {
-      key: 'uniqueSourcePrivateIps',
-      value: 383,
-      name: 'Src.',
-      description: 'Source',
-      color: '#DB1374',
-      icon: 'visMapCoordinate',
-    },
-    {
-      key: 'uniqueDestinationPrivateIps',
-      value: 18,
-      name: 'Dist.',
-      description: 'Destination',
-      color: '#490092',
-      icon: 'visMapCoordinate',
-    },
-  ],
-  description: 'Unique Private IPs',
-  enableAreaChart: true,
-  enableBarChart: true,
-  grow: 2,
   areaChart: [
     {
       key: 'uniqueSourcePrivateIpsHistogram',
@@ -183,7 +164,7 @@ export const mockEnableChartsData = {
         },
       ],
       name: 'Src.',
-      description: 'Source',
+      description: 'source',
       color: '#DB1374',
       icon: 'visMapCoordinate',
     },
@@ -193,8 +174,8 @@ export const mockEnableChartsData = {
         { x: new Date('2019-02-09T16:00:00.000Z').valueOf(), y: 8 },
         { x: new Date('2019-02-09T19:00:00.000Z').valueOf(), y: 0 },
       ],
-      name: 'Dist.',
-      description: 'Destination',
+      name: 'Dest.',
+      description: 'destination',
       color: '#490092',
       icon: 'visMapCoordinate',
     },
@@ -203,12 +184,47 @@ export const mockEnableChartsData = {
     {
       key: 'uniqueSourcePrivateIps',
       color: '#DB1374',
-      value: [{ x: 'Src.', y: 383, g: 'uniqueSourcePrivateIps' }],
+      value: [
+        {
+          x: 'Src.',
+          y: 383,
+          g: 'uniqueSourcePrivateIps',
+          y0: 0,
+        },
+      ],
     },
     {
       key: 'uniqueDestinationPrivateIps',
       color: '#490092',
-      value: [{ x: 'Dist.', y: 18, g: 'uniqueDestinationPrivateIps' }],
+      value: [{ x: 'Dest.', y: 18, g: 'uniqueDestinationPrivateIps', y0: 0 }],
     },
   ],
+  description: 'Unique private IPs',
+  enableAreaChart: true,
+  enableBarChart: true,
+  fields: [
+    {
+      key: 'uniqueSourcePrivateIps',
+      value: 383,
+      name: 'Src.',
+      description: 'source',
+      color: '#DB1374',
+      icon: 'visMapCoordinate',
+    },
+    {
+      key: 'uniqueDestinationPrivateIps',
+      value: 18,
+      name: 'Dest.',
+      description: 'destination',
+      color: '#490092',
+      icon: 'visMapCoordinate',
+    },
+  ],
+  from: 1560578400000,
+  grow: 2,
+  id: 'statItem',
+  index: 2,
+  statKey: 'UniqueIps',
+  to: 1560837600000,
+  narrowDateRange: mockNarrowDateRange,
 };

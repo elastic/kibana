@@ -7,7 +7,6 @@
 import { cloneDeep, set } from 'lodash/fp';
 import { mount } from 'enzyme';
 import React, { useEffect } from 'react';
-import { wait } from 'react-testing-library';
 
 import { AppToast, useStateToaster, ManageGlobalToaster, GlobalToaster } from '.';
 
@@ -34,9 +33,10 @@ describe('Toaster', () => {
               onClick={() => dispatch({ type: 'addToaster', toast: mockToast })}
             />
             {toasts.map(toast => (
-              <span data-test-subj={`add-toaster-${toast.id}`} key={`add-toaster-${toast.id}`}>{`${
-                toast.title
-              } ${toast.text}`}</span>
+              <span
+                data-test-subj={`add-toaster-${toast.id}`}
+                key={`add-toaster-${toast.id}`}
+              >{`${toast.title} ${toast.text}`}</span>
             ))}
           </>
         );
@@ -47,11 +47,8 @@ describe('Toaster', () => {
         </ManageGlobalToaster>
       );
       wrapper.find('[data-test-subj="add-toast"]').simulate('click');
-      wrapper.update();
-
       expect(wrapper.find('[data-test-subj="add-toaster-id-super-id"]').exists()).toBe(true);
     });
-
     test('we can delete a toast in the reducer', () => {
       const DeleteToaster = () => {
         const [{ toasts }, dispatch] = useStateToaster();
@@ -63,7 +60,7 @@ describe('Toaster', () => {
         return (
           <>
             <button
-              data-test-subj="add-toast"
+              data-test-subj="delete-toast"
               type="button"
               onClick={() => dispatch({ type: 'deleteToaster', id: mockToast.id })}
             />
@@ -76,19 +73,14 @@ describe('Toaster', () => {
           </>
         );
       };
-
       const wrapper = mount(
         <ManageGlobalToaster>
           <DeleteToaster />
         </ManageGlobalToaster>
       );
-      wrapper.update();
 
       expect(wrapper.find('[data-test-subj="delete-toaster-id-super-id"]').exists()).toBe(true);
-
-      wrapper.find('[data-test-subj="add-toast"]').simulate('click');
-      wrapper.update();
-
+      wrapper.find('[data-test-subj="delete-toast"]').simulate('click');
       expect(wrapper.find('[data-test-subj="delete-toaster-id-super-id"]').exists()).toBe(false);
     });
   });
@@ -117,7 +109,6 @@ describe('Toaster', () => {
         </ManageGlobalToaster>
       );
       wrapper.find('[data-test-subj="add-toast"]').simulate('click');
-      wrapper.update();
 
       expect(wrapper.find('.euiGlobalToastList').exists()).toBe(true);
       expect(wrapper.find('.euiToastHeader__title').text()).toBe('Test & Test');
@@ -150,7 +141,6 @@ describe('Toaster', () => {
         </ManageGlobalToaster>
       );
       wrapper.find('[data-test-subj="add-toast"]').simulate('click');
-      wrapper.update();
 
       expect(wrapper.find('.euiGlobalToastList').exists()).toBe(true);
       expect(wrapper.find('.euiToastHeader__title').text()).toBe('Test & Test ERROR');
@@ -176,6 +166,13 @@ describe('Toaster', () => {
                 dispatch({ type: 'addToaster', toast: mockOneMoreToast });
               }}
             />
+            <button
+              data-test-subj="delete-toast"
+              type="button"
+              onClick={() => {
+                dispatch({ type: 'deleteToaster', id: mockToast.id });
+              }}
+            />
             {toasts.map(toast => (
               <span key={`add-toaster-${toast.id}`}>{`${toast.title} ${toast.text}`}</span>
             ))}
@@ -189,17 +186,12 @@ describe('Toaster', () => {
         </ManageGlobalToaster>
       );
       wrapper.find('[data-test-subj="add-toast"]').simulate('click');
-      wrapper.update();
 
-      expect(wrapper.find('.euiToast').length).toBe(1);
+      expect(wrapper.find('button[data-test-subj="toastCloseButton"]').length).toBe(1);
       expect(wrapper.find('.euiToastHeader__title').text()).toBe('Test & Test');
-      wait(
-        () => {
-          expect(wrapper.find('.euiToast').length).toBe(1);
-          expect(wrapper.find('.euiToastHeader__title').text()).toBe('Test & Test II');
-        },
-        { timeout: 110 }
-      );
+      wrapper.find('button[data-test-subj="delete-toast"]').simulate('click');
+      expect(wrapper.find('.euiToast').length).toBe(1);
+      expect(wrapper.find('.euiToastHeader__title').text()).toBe('Test & Test II');
     });
 
     test('Do not show anymore toaster when modal error is open', () => {
@@ -232,22 +224,14 @@ describe('Toaster', () => {
         </ManageGlobalToaster>
       );
       wrapper.find('[data-test-subj="add-toast"]').simulate('click');
-      wrapper.update();
-
       wrapper.find('button[data-test-subj="toaster-show-all-error-modal"]').simulate('click');
 
-      wrapper.update();
-
-      wait(
-        () => {
-          expect(wrapper.find('.euiToast').length).toBe(0);
-        },
-        { timeout: 110 }
-      );
+      expect(wrapper.find('.euiToast').length).toBe(0);
     });
 
     test('Show new toaster when modal error is closing', () => {
       let mockErrorToast: AppToast = cloneDeep(mockToast);
+      mockErrorToast.title = 'Test & Test II';
       mockErrorToast.id = 'id-super-id-error';
       mockErrorToast = set('errors', [mockErrorToast.text], mockErrorToast);
 
@@ -276,24 +260,14 @@ describe('Toaster', () => {
         </ManageGlobalToaster>
       );
       wrapper.find('[data-test-subj="add-toast"]').simulate('click');
-      wrapper.update();
+      expect(wrapper.find('.euiToastHeader__title').text()).toBe('Test & Test II');
 
       wrapper.find('button[data-test-subj="toaster-show-all-error-modal"]').simulate('click');
+      expect(wrapper.find('.euiToast').length).toBe(0);
 
-      wrapper.update();
-
-      wait(
-        () => {
-          expect(wrapper.find('.euiToast').length).toBe(0);
-
-          wrapper.find('[data-test-subj="modal-all-errors-close"]').simulate('click');
-          wrapper.update();
-
-          expect(wrapper.find('.euiToast').length).toBe(1);
-          expect(wrapper.find('.euiToastHeader__title').text()).toBe('Test & Test II');
-        },
-        { timeout: 110 }
-      );
+      wrapper.find('button[data-test-subj="modal-all-errors-close"]').simulate('click');
+      expect(wrapper.find('.euiToast').length).toBe(1);
+      expect(wrapper.find('.euiToastHeader__title').text()).toBe('Test & Test');
     });
   });
 });

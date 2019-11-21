@@ -8,16 +8,20 @@ import { get, isEmpty, noop } from 'lodash/fp';
 import { BrowserFields } from '../../../containers/source';
 import { Ecs } from '../../../graphql/types';
 import { OnPinEvent, OnUnPinEvent } from '../events';
-
 import { ColumnHeader } from './column_headers/column_header';
 import * as i18n from './translations';
 
 /** The (fixed) width of the Actions column */
-export const ACTIONS_COLUMN_WIDTH = 115; // px;
+export const DEFAULT_ACTIONS_COLUMN_WIDTH = 115; // px;
+/**
+ * The (fixed) width of the Actions column when the timeline body is used as
+ * an events viewer, which has fewer actions than a regular events viewer
+ */
+export const EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH = 32; // px;
 /** The default minimum width of a column (when a width for the column type is not specified) */
 export const DEFAULT_COLUMN_MIN_WIDTH = 180; // px
 /** The default minimum width of a column of type `date` */
-export const DEFAULT_DATE_COLUMN_MIN_WIDTH = 240; // px
+export const DEFAULT_DATE_COLUMN_MIN_WIDTH = 190; // px
 
 export const DEFAULT_TIMELINE_WIDTH = 1100; // px
 
@@ -51,7 +55,7 @@ export interface GetPinOnClickParams {
   eventId: string;
   onPinEvent: OnPinEvent;
   onUnPinEvent: OnUnPinEvent;
-  pinnedEventIds: Readonly<Record<string, boolean>>;
+  isEventPinned: boolean;
 }
 
 export const getPinOnClick = ({
@@ -59,15 +63,12 @@ export const getPinOnClick = ({
   eventId,
   onPinEvent,
   onUnPinEvent,
-  pinnedEventIds,
+  isEventPinned,
 }: GetPinOnClickParams): (() => void) => {
   if (!allowUnpinning) {
     return noop;
   }
-
-  return eventIsPinned({ eventId, pinnedEventIds })
-    ? () => onUnPinEvent(eventId)
-    : () => onPinEvent(eventId);
+  return isEventPinned ? () => onUnPinEvent(eventId) : () => onPinEvent(eventId);
 };
 
 export const getColumnWidthFromType = (type: string): number =>
@@ -90,3 +91,7 @@ export const getColumnHeaders = (
     };
   });
 };
+
+/** Returns the (fixed) width of the Actions column */
+export const getActionsColumnWidth = (isEventViewer: boolean): number =>
+  isEventViewer ? EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH : DEFAULT_ACTIONS_COLUMN_WIDTH;

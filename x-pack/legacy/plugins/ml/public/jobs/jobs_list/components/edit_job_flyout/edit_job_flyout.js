@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import PropTypes from 'prop-types';
-import React, {
-  Component,
-} from 'react';
-
+import React, { Component } from 'react';
+import { cloneDeep, isEqual, pick } from 'lodash';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -21,20 +18,22 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTabbedContent,
+  EuiOverlayMask,
+  EuiConfirmModal,
 } from '@elastic/eui';
 
 import { JobDetails, Detectors, Datafeed, CustomUrls } from './tabs';
 import { saveJob } from './edit_utils';
 import { loadFullJob } from '../utils';
-import {
-  validateModelMemoryLimit,
-  validateGroupNames,
-  isValidCustomUrls } from '../validate_job';
-import { mlMessageBarService } from '../../../../components/messagebar/messagebar_service';
+import { validateModelMemoryLimit, validateGroupNames, isValidCustomUrls } from '../validate_job';
+import { mlMessageBarService } from '../../../../components/messagebar';
 import { toastNotifications } from 'ui/notify';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 class EditJobFlyoutUI extends Component {
+
+  _initialJobFormState = null;
+
   constructor(props) {
     super(props);
 
@@ -42,6 +41,7 @@ class EditJobFlyoutUI extends Component {
       job: {},
       hasDatafeed: false,
       isFlyoutVisible: false,
+      isConfirmationModalVisible: false,
       jobDescription: '',
       jobGroups: [],
       jobModelMemoryLimit: '',
@@ -73,78 +73,121 @@ class EditJobFlyoutUI extends Component {
     }
   }
 
-  closeFlyout = () => {
+  closeFlyout = (isConfirmed = false) => {
+    if (this.containsUnsavedChanges() && !isConfirmed) {
+      this.setState({ isConfirmationModalVisible: true });
+      return;
+    }
+    this.setState({ isConfirmationModalVisible: false });
     this.setState({ isFlyoutVisible: false });
+  };
+
+  /**
+   * Checks if there are any unsaved changes.
+   * @returns {boolean}
+   */
+  containsUnsavedChanges() {
+    return !isEqual(
+      this._initialJobFormState,
+      pick(this.state, [
+        'jobDescription',
+        'jobGroups',
+        'jobModelMemoryLimit',
+        'jobCustomUrls',
+        'jobDetectors',
+        'jobDetectorDescriptions',
+        'jobBucketSpan',
+        'datafeedQuery',
+        'datafeedQueryDelay',
+        'datafeedFrequency',
+        'datafeedScrollSize',
+      ]),
+    );
   }
 
-  showFlyout = (jobLite) => {
+  showFlyout = jobLite => {
     const hasDatafeed = jobLite.hasDatafeed;
     loadFullJob(jobLite.id)
-    	.then((job) => {
+      .then(job => {
         this.extractJob(job, hasDatafeed);
         this.setState({
           job,
           isFlyoutVisible: true,
         });
       })
-      .catch((error) => {
+      .catch(error => {
         console.error(error);
       });
-  }
+  };
 
-  extractJob(job, hasDatafeed) {
-    const mml = (job.analysis_limits && job.analysis_limits.model_memory_limit) ?
-      job.analysis_limits.model_memory_limit :
-      '';
-    const detectors = (job.analysis_config && job.analysis_config.detectors) ?
-      job.analysis_config.detectors :
-      '';
+  extractInitialJobFormState(job, hasDatafeed) {
+    const mml =
+      job.analysis_limits && job.analysis_limits.model_memory_limit
+        ? job.analysis_limits.model_memory_limit
+        : '';
+    const detectors =
+      job.analysis_config && job.analysis_config.detectors
+        ? [...job.analysis_config.detectors]
+        : [];
 
-    const bucketSpan = (job.analysis_config) ? job.analysis_config.bucket_span : '';
+    const bucketSpan = job.analysis_config ? job.analysis_config.bucket_span : '';
 
-    const datafeedConfig = job.datafeed_config;
-    const frequency = (datafeedConfig.frequency !== undefined) ? datafeedConfig.frequency : '';
-    const customUrls = (job.custom_settings && job.custom_settings.custom_urls) ?
-      job.custom_settings.custom_urls : [];
+    const datafeedConfig = { ...job.datafeed_config };
+    const frequency = datafeedConfig.frequency !== undefined ? datafeedConfig.frequency : '';
+    const customUrls =
+      job.custom_settings && job.custom_settings.custom_urls
+        ? [...job.custom_settings.custom_urls]
+        : [];
 
-    this.setState({
-      job,
-      hasDatafeed,
+    this._initialJobFormState = Object.freeze({
       jobDescription: job.description,
-      jobGroups: (job.groups !== undefined) ?  job.groups : [],
+      jobGroups: job.groups !== undefined ? job.groups : [],
       jobModelMemoryLimit: mml,
       jobDetectors: detectors,
       jobDetectorDescriptions: detectors.map(d => d.detector_description),
       jobBucketSpan: bucketSpan,
       jobCustomUrls: customUrls,
-      datafeedQuery: (hasDatafeed) ? JSON.stringify(datafeedConfig.query, null, 2) : '',
-      datafeedQueryDelay: (hasDatafeed) ? datafeedConfig.query_delay : '',
-      datafeedFrequency: (hasDatafeed) ? frequency : '',
-      datafeedScrollSize: (hasDatafeed) ? +datafeedConfig.scroll_size : '',
-      jobModelMemoryLimitValidationError: '',
-      jobGroupsValidationError: '',
+      datafeedQuery: hasDatafeed ? JSON.stringify(datafeedConfig.query, null, 2) : '',
+      datafeedQueryDelay: hasDatafeed ? datafeedConfig.query_delay : '',
+      datafeedFrequency: hasDatafeed ? frequency : '',
+      datafeedScrollSize: hasDatafeed ? +datafeedConfig.scroll_size : null,
     });
   }
 
-  setJobDetails = (jobDetails) => {
+  extractJob(job, hasDatafeed) {
+    this.extractInitialJobFormState(job, hasDatafeed);
+
+    this.setState({
+      job,
+      hasDatafeed,
+      jobModelMemoryLimitValidationError: '',
+      jobGroupsValidationError: '',
+      ...cloneDeep(this._initialJobFormState),
+    });
+  }
+
+  setJobDetails = jobDetails => {
     let { jobModelMemoryLimitValidationError, jobGroupsValidationError } = this.state;
 
     if (jobDetails.jobModelMemoryLimit !== undefined) {
-      jobModelMemoryLimitValidationError = validateModelMemoryLimit(jobDetails.jobModelMemoryLimit).message;
+      jobModelMemoryLimitValidationError = validateModelMemoryLimit(jobDetails.jobModelMemoryLimit)
+        .message;
     }
 
     if (jobDetails.jobGroups !== undefined) {
       if (jobDetails.jobGroups.some(j => this.props.allJobIds.includes(j))) {
         jobGroupsValidationError = this.props.intl.formatMessage({
           id: 'xpack.ml.jobsList.editJobFlyout.groupsAndJobsHasSameIdErrorMessage',
-          defaultMessage: 'A job with this ID already exists. Groups and jobs cannot use the same ID.'
+          defaultMessage:
+            'A job with this ID already exists. Groups and jobs cannot use the same ID.',
         });
       } else {
         jobGroupsValidationError = validateGroupNames(jobDetails.jobGroups).message;
       }
     }
 
-    const isValidJobDetails = (jobModelMemoryLimitValidationError === '' && jobGroupsValidationError === '');
+    const isValidJobDetails =
+      jobModelMemoryLimitValidationError === '' && jobGroupsValidationError === '';
 
     this.setState({
       ...jobDetails,
@@ -152,27 +195,27 @@ class EditJobFlyoutUI extends Component {
       jobGroupsValidationError,
       isValidJobDetails,
     });
-  }
+  };
 
-  setDetectorDescriptions = (jobDetectorDescriptions) => {
+  setDetectorDescriptions = jobDetectorDescriptions => {
     this.setState({
-      ...jobDetectorDescriptions
+      ...jobDetectorDescriptions,
     });
-  }
+  };
 
-  setDatafeed = (datafeed) => {
+  setDatafeed = datafeed => {
     this.setState({
-      ...datafeed
+      ...datafeed,
     });
-  }
+  };
 
-  setCustomUrls = (jobCustomUrls) => {
+  setCustomUrls = jobCustomUrls => {
     const isValidJobCustomUrls = isValidCustomUrls(jobCustomUrls);
     this.setState({
       jobCustomUrls,
       isValidJobCustomUrls,
     });
-  }
+  };
 
   save = () => {
     const newJobData = {
@@ -189,27 +232,40 @@ class EditJobFlyoutUI extends Component {
 
     saveJob(this.state.job, newJobData)
       .then(() => {
-        toastNotifications.addSuccess(this.props.intl.formatMessage({
-          id: 'xpack.ml.jobsList.editJobFlyout.changesSavedNotificationMessage',
-          defaultMessage: 'Changes to {jobId} saved' }, {
-          jobId: this.state.job.job_id }
-        ));
+        toastNotifications.addSuccess(
+          this.props.intl.formatMessage(
+            {
+              id: 'xpack.ml.jobsList.editJobFlyout.changesSavedNotificationMessage',
+              defaultMessage: 'Changes to {jobId} saved',
+            },
+            {
+              jobId: this.state.job.job_id,
+            }
+          )
+        );
         this.refreshJobs();
-        this.closeFlyout();
+        this.closeFlyout(true);
       })
-      .catch((error) => {
+      .catch(error => {
         console.error(error);
-        toastNotifications.addDanger(this.props.intl.formatMessage({
-          id: 'xpack.ml.jobsList.editJobFlyout.changesNotSavedNotificationMessage',
-          defaultMessage: 'Could not save changes to {jobId}' }, {
-          jobId: this.state.job.job_id }
-        ));
+        toastNotifications.addDanger(
+          this.props.intl.formatMessage(
+            {
+              id: 'xpack.ml.jobsList.editJobFlyout.changesNotSavedNotificationMessage',
+              defaultMessage: 'Could not save changes to {jobId}',
+            },
+            {
+              jobId: this.state.job.job_id,
+            }
+          )
+        );
         mlMessageBarService.notify.error(error);
       });
-  }
+  };
 
   render() {
     let flyout;
+    let confirmationModal;
 
     if (this.state.isFlyoutVisible) {
       const {
@@ -233,63 +289,76 @@ class EditJobFlyoutUI extends Component {
 
       const { intl } = this.props;
 
-      const tabs = [{
-        id: 'job-details',
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.editJobFlyout.jobDetailsTitle',
-          defaultMessage: 'Job details'
-        }),
-        content: <JobDetails
-          jobDescription={jobDescription}
-          jobGroups={jobGroups}
-          jobModelMemoryLimit={jobModelMemoryLimit}
-          setJobDetails={this.setJobDetails}
-          jobGroupsValidationError={jobGroupsValidationError}
-          jobModelMemoryLimitValidationError={jobModelMemoryLimitValidationError}
-        />,
-      }, {
-        id: 'detectors',
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.editJobFlyout.detectorsTitle',
-          defaultMessage: 'Detectors'
-        }),
-        content: <Detectors
-          jobDetectors={jobDetectors}
-          jobDetectorDescriptions={jobDetectorDescriptions}
-          setDetectorDescriptions={this.setDetectorDescriptions}
-        />,
-      }, {
-        id: 'datafeed',
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.editJobFlyout.datafeedTitle',
-          defaultMessage: 'Datafeed'
-        }),
-        content: <Datafeed
-          datafeedQuery={datafeedQuery}
-          datafeedQueryDelay={datafeedQueryDelay}
-          datafeedFrequency={datafeedFrequency}
-          datafeedScrollSize={datafeedScrollSize}
-          jobBucketSpan={jobBucketSpan}
-          setDatafeed={this.setDatafeed}
-        />,
-      }, {
-        id: 'custom-urls',
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.editJobFlyout.customUrlsTitle',
-          defaultMessage: 'Custom URLs'
-        }),
-        content: <CustomUrls
-          job={job}
-          jobCustomUrls={jobCustomUrls}
-          setCustomUrls={this.setCustomUrls}
-        />,
-      }
+      const tabs = [
+        {
+          id: 'job-details',
+          name: intl.formatMessage({
+            id: 'xpack.ml.jobsList.editJobFlyout.jobDetailsTitle',
+            defaultMessage: 'Job details',
+          }),
+          content: (
+            <JobDetails
+              jobDescription={jobDescription}
+              jobGroups={jobGroups}
+              jobModelMemoryLimit={jobModelMemoryLimit}
+              setJobDetails={this.setJobDetails}
+              jobGroupsValidationError={jobGroupsValidationError}
+              jobModelMemoryLimitValidationError={jobModelMemoryLimitValidationError}
+            />
+          ),
+        },
+        {
+          id: 'detectors',
+          name: intl.formatMessage({
+            id: 'xpack.ml.jobsList.editJobFlyout.detectorsTitle',
+            defaultMessage: 'Detectors',
+          }),
+          content: (
+            <Detectors
+              jobDetectors={jobDetectors}
+              jobDetectorDescriptions={jobDetectorDescriptions}
+              setDetectorDescriptions={this.setDetectorDescriptions}
+            />
+          ),
+        },
+        {
+          id: 'datafeed',
+          name: intl.formatMessage({
+            id: 'xpack.ml.jobsList.editJobFlyout.datafeedTitle',
+            defaultMessage: 'Datafeed',
+          }),
+          content: (
+            <Datafeed
+              datafeedQuery={datafeedQuery}
+              datafeedQueryDelay={datafeedQueryDelay}
+              datafeedFrequency={datafeedFrequency}
+              datafeedScrollSize={datafeedScrollSize}
+              jobBucketSpan={jobBucketSpan}
+              setDatafeed={this.setDatafeed}
+            />
+          ),
+        },
+        {
+          id: 'custom-urls',
+          name: intl.formatMessage({
+            id: 'xpack.ml.jobsList.editJobFlyout.customUrlsTitle',
+            defaultMessage: 'Custom URLs',
+          }),
+          content: (
+            <CustomUrls
+              job={job}
+              jobCustomUrls={jobCustomUrls}
+              setCustomUrls={this.setCustomUrls}
+            />
+          ),
+        },
       ];
 
       flyout = (
         <EuiFlyout
-          // ownFocus
-          onClose={this.closeFlyout}
+          onClose={() => {
+            this.closeFlyout();
+          }}
           size="m"
         >
           <EuiFlyoutHeader>
@@ -304,20 +373,16 @@ class EditJobFlyoutUI extends Component {
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-
-            <EuiTabbedContent
-              tabs={tabs}
-              initialSelectedTab={tabs[0]}
-              onTabClick={() => { }}
-            />
-
+            <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} onTabClick={() => {}} />
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   iconType="cross"
-                  onClick={this.closeFlyout}
+                  onClick={() => {
+                    this.closeFlyout();
+                  }}
                   flush="left"
                 >
                   <FormattedMessage
@@ -330,7 +395,7 @@ class EditJobFlyoutUI extends Component {
                 <EuiButton
                   onClick={this.save}
                   fill
-                  isDisabled={(isValidJobDetails === false) || (isValidJobCustomUrls === false)}
+                  isDisabled={isValidJobDetails === false || isValidJobCustomUrls === false}
                 >
                   <FormattedMessage
                     id="xpack.ml.jobsList.editJobFlyout.saveButtonLabel"
@@ -344,12 +409,51 @@ class EditJobFlyoutUI extends Component {
       );
     }
 
-    return (
-      <div>
-        {flyout}
-      </div>
-    );
+    if (this.state.isConfirmationModalVisible) {
+      confirmationModal = (
+        <EuiOverlayMask>
+          <EuiConfirmModal
+            title={
+              <FormattedMessage
+                id="xpack.ml.jobsList.editJobFlyout.unsavedChangesDialogTitle"
+                defaultMessage="Save changes before leaving?"
+              />
+            }
+            onCancel={() => this.closeFlyout(true)}
+            onConfirm={() => this.save()}
+            cancelButtonText={
+              <FormattedMessage
+                id="xpack.ml.jobsList.editJobFlyout.leaveAnywayButtonLabel"
+                defaultMessage="Leave anyway"
+              />
+            }
+            confirmButtonText={
+              <FormattedMessage
+                id="xpack.ml.jobsList.editJobFlyout.saveChangesButtonLabel"
+                defaultMessage="Save changes"
+              />
+            }
+            defaultFocusedButton="confirm"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.ml.jobsList.editJobFlyout.unsavedChangesDialogMessage"
+                defaultMessage="If you don't save, your changes will be lost."
+              />
+            </p>
+          </EuiConfirmModal>
+        </EuiOverlayMask>
+      );
+    }
 
+    {
+      return (
+        <div>
+          {flyout}
+          {confirmationModal}
+        </div>
+      );
+    }
   }
 }
 

@@ -7,22 +7,25 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiSelect } from '@elastic/eui';
+import { ArgumentStrings } from '../../../../i18n';
+
+const { DataColumn: strings } = ArgumentStrings;
 
 export const SimpleMathFunction = ({ onChange, value, inputRef, onlymath }) => {
   const options = [
-    { text: 'Average', value: 'mean' },
-    { text: 'Count', value: 'size' },
-    { text: 'First', value: 'first' },
-    { text: 'Last', value: 'last' },
-    { text: 'Max', value: 'max' },
-    { text: 'Median', value: 'median' },
-    { text: 'Min', value: 'min' },
-    { text: 'Sum', value: 'sum' },
-    { text: 'Unique', value: 'unique' },
+    { text: strings.getOptionAverage(), value: 'mean' },
+    { text: strings.getOptionCount(), value: 'size' },
+    { text: strings.getOptionFirst(), value: 'first' },
+    { text: strings.getOptionLast(), value: 'last' },
+    { text: strings.getOptionMax(), value: 'max' },
+    { text: strings.getOptionMedian(), value: 'median' },
+    { text: strings.getOptionMin(), value: 'min' },
+    { text: strings.getOptionSum(), value: 'sum' },
+    { text: strings.getOptionUnique(), value: 'unique' },
   ];
 
   if (!onlymath) {
-    options.unshift({ text: 'Value', value: '' });
+    options.unshift({ text: strings.getOptionValue(), value: '' });
   }
 
   return (

@@ -6,28 +6,28 @@ Array [
     "color": "#3185fc",
     "disabled": undefined,
     "onClick": [Function],
-    "text": <styled.span>
+    "text": <ForwardRef(styled.span)>
       Avg.
-      <styled.span>
+      <ForwardRef(styled.span)>
         468 ms
-      </styled.span>
-    </styled.span>,
+      </ForwardRef(styled.span)>
+    </ForwardRef(styled.span)>,
   },
   Object {
     "color": "#e6c220",
     "disabled": undefined,
     "onClick": [Function],
-    "text": <styled.span>
+    "text": <ForwardRef(styled.span)>
       95th percentile
-    </styled.span>,
+    </ForwardRef(styled.span)>,
   },
   Object {
     "color": "#f98510",
     "disabled": undefined,
     "onClick": [Function],
-    "text": <styled.span>
+    "text": <ForwardRef(styled.span)>
       99th percentile
-    </styled.span>,
+    </ForwardRef(styled.span)>,
   },
 ]
 `;
@@ -72,32 +72,6 @@ Array [
           onWheel={[Function]}
           width={800}
         >
-          <g
-            className="rv-xy-plot__grid-lines"
-            transform="translate(80,16)"
-          >
-            <line
-              className="rv-xy-plot__grid-lines__line"
-              x1={0}
-              x2={720}
-              y1={208}
-              y2={208}
-            />
-            <line
-              className="rv-xy-plot__grid-lines__line"
-              x1={0}
-              x2={720}
-              y1={104}
-              y2={104}
-            />
-            <line
-              className="rv-xy-plot__grid-lines__line"
-              x1={0}
-              x2={720}
-              y1={0}
-              y2={0}
-            />
-          </g>
           <g
             className="rv-xy-plot__axis rv-xy-plot__axis--horizontal "
             style={Object {}}
@@ -254,6 +228,32 @@ Array [
                 </text>
               </g>
             </g>
+          </g>
+          <g
+            className="rv-xy-plot__grid-lines"
+            transform="translate(80,16)"
+          >
+            <line
+              className="rv-xy-plot__grid-lines__line"
+              x1={0}
+              x2={720}
+              y1={208}
+              y2={208}
+            />
+            <line
+              className="rv-xy-plot__grid-lines__line"
+              x1={0}
+              x2={720}
+              y1={104}
+              y2={104}
+            />
+            <line
+              className="rv-xy-plot__grid-lines__line"
+              x1={0}
+              x2={720}
+              y1={0}
+              y2={0}
+            />
           </g>
           <g
             className="rv-xy-plot__axis rv-xy-plot__axis--vertical "
@@ -2703,66 +2703,112 @@ Array [
   display: inline-block;
 }
 
-<div
-    className="c0"
-  >
+<styled.div>
     <div
-      className="c1"
-      disabled={false}
-      fontSize="12px"
-      onClick={[Function]}
+      className="c0"
     >
-      <span
-        className="c2"
-        color="#3185fc"
-        radius={11}
-      />
-      <span
-        className="c3"
+      <styled.div
+        clickable={true}
+        disabled={false}
+        fontSize="12px"
+        onClick={[Function]}
       >
-        Avg.
-        <span
-          className="c4"
+        <div
+          className="c1"
+          disabled={false}
+          fontSize="12px"
+          onClick={[Function]}
         >
-          468 ms
-        </span>
-      </span>
-    </div>
-    <div
-      className="c1"
-      disabled={false}
-      fontSize="12px"
-      onClick={[Function]}
-    >
-      <span
-        className="c5"
-        color="#e6c220"
-        radius={11}
-      />
-      <span
-        className="c3"
+          <styled.span
+            color="#3185fc"
+            radius={11}
+          >
+            <span
+              className="c2"
+              color="#3185fc"
+              radius={11}
+            />
+          </styled.span>
+          <styled.span>
+            <span
+              className="c3"
+            >
+              Avg.
+              <styled.span>
+                <span
+                  className="c4"
+                >
+                  468 ms
+                </span>
+              </styled.span>
+            </span>
+          </styled.span>
+        </div>
+      </styled.div>
+      <styled.div
+        clickable={true}
+        disabled={false}
+        fontSize="12px"
+        onClick={[Function]}
       >
-        95th percentile
-      </span>
-    </div>
-    <div
-      className="c1"
-      disabled={false}
-      fontSize="12px"
-      onClick={[Function]}
-    >
-      <span
-        className="c6"
-        color="#f98510"
-        radius={11}
-      />
-      <span
-        className="c3"
+        <div
+          className="c1"
+          disabled={false}
+          fontSize="12px"
+          onClick={[Function]}
+        >
+          <styled.span
+            color="#e6c220"
+            radius={11}
+          >
+            <span
+              className="c5"
+              color="#e6c220"
+              radius={11}
+            />
+          </styled.span>
+          <styled.span>
+            <span
+              className="c3"
+            >
+              95th percentile
+            </span>
+          </styled.span>
+        </div>
+      </styled.div>
+      <styled.div
+        clickable={true}
+        disabled={false}
+        fontSize="12px"
+        onClick={[Function]}
       >
-        99th percentile
-      </span>
+        <div
+          className="c1"
+          disabled={false}
+          fontSize="12px"
+          onClick={[Function]}
+        >
+          <styled.span
+            color="#f98510"
+            radius={11}
+          >
+            <span
+              className="c6"
+              color="#f98510"
+              radius={11}
+            />
+          </styled.span>
+          <styled.span>
+            <span
+              className="c3"
+            >
+              99th percentile
+            </span>
+          </styled.span>
+        </div>
+      </styled.div>
     </div>
-  </div>,
+  </styled.div>,
 ]
 `;
 
@@ -2903,6 +2949,7 @@ Array [
 .c4 {
   color: #98a2b3;
   padding-bottom: 0;
+  padding-right: 8px;
 }
 
 .c7 {
@@ -2948,32 +2995,6 @@ Array [
           onWheel={[Function]}
           width={800}
         >
-          <g
-            className="rv-xy-plot__grid-lines"
-            transform="translate(80,16)"
-          >
-            <line
-              className="rv-xy-plot__grid-lines__line"
-              x1={0}
-              x2={720}
-              y1={208}
-              y2={208}
-            />
-            <line
-              className="rv-xy-plot__grid-lines__line"
-              x1={0}
-              x2={720}
-              y1={104}
-              y2={104}
-            />
-            <line
-              className="rv-xy-plot__grid-lines__line"
-              x1={0}
-              x2={720}
-              y1={0}
-              y2={0}
-            />
-          </g>
           <g
             className="rv-xy-plot__axis rv-xy-plot__axis--horizontal "
             style={Object {}}
@@ -3130,6 +3151,32 @@ Array [
                 </text>
               </g>
             </g>
+          </g>
+          <g
+            className="rv-xy-plot__grid-lines"
+            transform="translate(80,16)"
+          >
+            <line
+              className="rv-xy-plot__grid-lines__line"
+              x1={0}
+              x2={720}
+              y1={208}
+              y2={208}
+            />
+            <line
+              className="rv-xy-plot__grid-lines__line"
+              x1={0}
+              x2={720}
+              y1={104}
+              y2={104}
+            />
+            <line
+              className="rv-xy-plot__grid-lines__line"
+              x1={0}
+              x2={720}
+              y1={0}
+              y2={0}
+            />
           </g>
           <g
             className="rv-xy-plot__axis rv-xy-plot__axis--vertical "
@@ -5002,7 +5049,7 @@ Array [
           >
             <circle
               cx={360}
-              cy={189.74989696}
+              cy={132.27231180799998}
               onClick={[Function]}
               onContextMenu={[Function]}
               onMouseOut={[Function]}
@@ -5010,9 +5057,9 @@ Array [
               r={5}
               style={
                 Object {
-                  "fill": "#3185fc",
+                  "fill": "#f98510",
                   "opacity": 1,
-                  "stroke": "#3185fc",
+                  "stroke": "#f98510",
                   "strokeWidth": 1,
                 }
               }
@@ -5036,7 +5083,7 @@ Array [
             />
             <circle
               cx={360}
-              cy={132.27231180799998}
+              cy={189.74989696}
               onClick={[Function]}
               onContextMenu={[Function]}
               onMouseOut={[Function]}
@@ -5044,9 +5091,9 @@ Array [
               r={5}
               style={
                 Object {
-                  "fill": "#f98510",
+                  "fill": "#3185fc",
                   "opacity": 1,
-                  "stroke": "#f98510",
+                  "stroke": "#3185fc",
                   "strokeWidth": 1,
                 }
               }
@@ -5076,85 +5123,159 @@ Array [
             }
           }
         >
-          <div
-            className="c0"
-          >
+          <styled.div>
             <div
-              className="c1"
+              className="c0"
             >
-              1502283720
+              <styled.div>
+                <div
+                  className="c1"
+                >
+                  1502283720
+                </div>
+              </styled.div>
+              <styled.div>
+                <div
+                  className="c2"
+                >
+                  <styled.div>
+                    <div
+                      className="c3"
+                    >
+                      <Styled(Legend)
+                        color="#3185fc"
+                        radius={8}
+                        text="Avg."
+                      >
+                        <styled.div
+                          className="c4"
+                          clickable={false}
+                          disabled={false}
+                          fontSize="12px"
+                        >
+                          <div
+                            className="c5 c4"
+                            disabled={false}
+                            fontSize="12px"
+                          >
+                            <styled.span
+                              color="#3185fc"
+                              radius={8}
+                            >
+                              <span
+                                className="c6"
+                                color="#3185fc"
+                                radius={8}
+                              />
+                            </styled.span>
+                            Avg.
+                          </div>
+                        </styled.div>
+                      </Styled(Legend)>
+                      <styled.div>
+                        <div
+                          className="c7"
+                        >
+                          438704.4
+                        </div>
+                      </styled.div>
+                    </div>
+                  </styled.div>
+                  <styled.div>
+                    <div
+                      className="c3"
+                    >
+                      <Styled(Legend)
+                        color="#e6c220"
+                        radius={8}
+                        text="95th"
+                      >
+                        <styled.div
+                          className="c4"
+                          clickable={false}
+                          disabled={false}
+                          fontSize="12px"
+                        >
+                          <div
+                            className="c5 c4"
+                            disabled={false}
+                            fontSize="12px"
+                          >
+                            <styled.span
+                              color="#e6c220"
+                              radius={8}
+                            >
+                              <span
+                                className="c8"
+                                color="#e6c220"
+                                radius={8}
+                              />
+                            </styled.span>
+                            95th
+                          </div>
+                        </styled.div>
+                      </Styled(Legend)>
+                      <styled.div>
+                        <div
+                          className="c7"
+                        >
+                          1557383.999999999
+                        </div>
+                      </styled.div>
+                    </div>
+                  </styled.div>
+                  <styled.div>
+                    <div
+                      className="c3"
+                    >
+                      <Styled(Legend)
+                        color="#f98510"
+                        radius={8}
+                        text="99th"
+                      >
+                        <styled.div
+                          className="c4"
+                          clickable={false}
+                          disabled={false}
+                          fontSize="12px"
+                        >
+                          <div
+                            className="c5 c4"
+                            disabled={false}
+                            fontSize="12px"
+                          >
+                            <styled.span
+                              color="#f98510"
+                              radius={8}
+                            >
+                              <span
+                                className="c9"
+                                color="#f98510"
+                                radius={8}
+                              />
+                            </styled.span>
+                            99th
+                          </div>
+                        </styled.div>
+                      </Styled(Legend)>
+                      <styled.div>
+                        <div
+                          className="c7"
+                        >
+                          1820377.1200000006
+                        </div>
+                      </styled.div>
+                    </div>
+                  </styled.div>
+                </div>
+              </styled.div>
+              <styled.div>
+                <div
+                  className="c10"
+                />
+              </styled.div>
             </div>
-            <div
-              className="c2"
-            >
-              <div
-                className="c3"
-              >
-                <div
-                  className="c4 c5"
-                  disabled={false}
-                  fontSize="12px"
-                >
-                  <span
-                    className="c6"
-                    color="#3185fc"
-                    radius={8}
-                  />
-                  Avg.
-                </div>
-                <div
-                  className="c7"
-                >
-                  438704.4
-                </div>
-              </div>
-              <div
-                className="c3"
-              >
-                <div
-                  className="c4 c5"
-                  disabled={false}
-                  fontSize="12px"
-                >
-                  <span
-                    className="c8"
-                    color="#e6c220"
-                    radius={8}
-                  />
-                  95th
-                </div>
-                <div
-                  className="c7"
-                >
-                  1557383.999999999
-                </div>
-              </div>
-              <div
-                className="c3"
-              >
-                <div
-                  className="c4 c5"
-                  disabled={false}
-                  fontSize="12px"
-                >
-                  <span
-                    className="c9"
-                    color="#f98510"
-                    radius={8}
-                  />
-                  99th
-                </div>
-                <div
-                  className="c7"
-                >
-                  1820377.1200000006
-                </div>
-              </div>
-            </div>
-            <div
-              className="c10"
-            />
-          </div>
+          </styled.div>
         </div>
       </div>
     </div>
@@ -5739,66 +5860,112 @@ Array [
   display: inline-block;
 }
 
-<div
-    className="c0"
-  >
+<styled.div>
     <div
-      className="c1"
-      disabled={false}
-      fontSize="12px"
-      onClick={[Function]}
+      className="c0"
     >
-      <span
-        className="c2"
-        color="#3185fc"
-        radius={11}
-      />
-      <span
-        className="c3"
+      <styled.div
+        clickable={true}
+        disabled={false}
+        fontSize="12px"
+        onClick={[Function]}
       >
-        Avg.
-        <span
-          className="c4"
+        <div
+          className="c1"
+          disabled={false}
+          fontSize="12px"
+          onClick={[Function]}
         >
-          468 ms
-        </span>
-      </span>
-    </div>
-    <div
-      className="c1"
-      disabled={false}
-      fontSize="12px"
-      onClick={[Function]}
-    >
-      <span
-        className="c5"
-        color="#e6c220"
-        radius={11}
-      />
-      <span
-        className="c3"
+          <styled.span
+            color="#3185fc"
+            radius={11}
+          >
+            <span
+              className="c2"
+              color="#3185fc"
+              radius={11}
+            />
+          </styled.span>
+          <styled.span>
+            <span
+              className="c3"
+            >
+              Avg.
+              <styled.span>
+                <span
+                  className="c4"
+                >
+                  468 ms
+                </span>
+              </styled.span>
+            </span>
+          </styled.span>
+        </div>
+      </styled.div>
+      <styled.div
+        clickable={true}
+        disabled={false}
+        fontSize="12px"
+        onClick={[Function]}
       >
-        95th percentile
-      </span>
-    </div>
-    <div
-      className="c1"
-      disabled={false}
-      fontSize="12px"
-      onClick={[Function]}
-    >
-      <span
-        className="c6"
-        color="#f98510"
-        radius={11}
-      />
-      <span
-        className="c3"
+        <div
+          className="c1"
+          disabled={false}
+          fontSize="12px"
+          onClick={[Function]}
+        >
+          <styled.span
+            color="#e6c220"
+            radius={11}
+          >
+            <span
+              className="c5"
+              color="#e6c220"
+              radius={11}
+            />
+          </styled.span>
+          <styled.span>
+            <span
+              className="c3"
+            >
+              95th percentile
+            </span>
+          </styled.span>
+        </div>
+      </styled.div>
+      <styled.div
+        clickable={true}
+        disabled={false}
+        fontSize="12px"
+        onClick={[Function]}
       >
-        99th percentile
-      </span>
+        <div
+          className="c1"
+          disabled={false}
+          fontSize="12px"
+          onClick={[Function]}
+        >
+          <styled.span
+            color="#f98510"
+            radius={11}
+          >
+            <span
+              className="c6"
+              color="#f98510"
+              radius={11}
+            />
+          </styled.span>
+          <styled.span>
+            <span
+              className="c3"
+            >
+              99th percentile
+            </span>
+          </styled.span>
+        </div>
+      </styled.div>
     </div>
-  </div>,
+  </styled.div>,
 ]
 `;
 
@@ -5835,7 +6002,7 @@ Array [
         style={
           Object {
             "height": "256px",
-            "width": "100px",
+            "width": "800px",
           }
         }
       >
@@ -5849,34 +6016,8 @@ Array [
           onMouseLeave={[Function]}
           onMouseMove={[Function]}
           onWheel={[Function]}
-          width={100}
+          width={800}
         >
-          <g
-            className="rv-xy-plot__grid-lines"
-            transform="translate(80,16)"
-          >
-            <line
-              className="rv-xy-plot__grid-lines__line"
-              x1={0}
-              x2={20}
-              y1={208}
-              y2={208}
-            />
-            <line
-              className="rv-xy-plot__grid-lines__line"
-              x1={0}
-              x2={20}
-              y1={104}
-              y2={104}
-            />
-            <line
-              className="rv-xy-plot__grid-lines__line"
-              x1={0}
-              x2={20}
-              y1={0}
-              y2={0}
-            />
-          </g>
           <g
             className="rv-xy-plot__axis rv-xy-plot__axis--horizontal "
             style={Object {}}
@@ -5886,7 +6027,7 @@ Array [
               className="rv-xy-plot__axis__line"
               style={Object {}}
               x1={0}
-              x2={20}
+              x2={720}
               y1={0}
               y2={0}
             />
@@ -5920,7 +6061,7 @@ Array [
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(1.6666666666666665, 0)"
+                transform="translate(60, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -5943,7 +6084,7 @@ Array [
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(3.333333333333333, 0)"
+                transform="translate(120, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -5966,7 +6107,7 @@ Array [
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(5, 0)"
+                transform="translate(180, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -5989,7 +6130,7 @@ Array [
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(6.666666666666666, 0)"
+                transform="translate(240, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -6012,7 +6153,7 @@ Array [
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(8.333333333333334, 0)"
+                transform="translate(300, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -6035,7 +6176,7 @@ Array [
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(10, 0)"
+                transform="translate(360, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -6058,7 +6199,7 @@ Array [
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(11.666666666666668, 0)"
+                transform="translate(420, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -6081,7 +6222,7 @@ Array [
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(13.333333333333332, 0)"
+                transform="translate(480, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -6104,7 +6245,7 @@ Array [
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(15, 0)"
+                transform="translate(540, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -6127,7 +6268,7 @@ Array [
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(16.666666666666668, 0)"
+                transform="translate(600, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -6150,7 +6291,7 @@ Array [
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(18.333333333333332, 0)"
+                transform="translate(660, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -6173,7 +6314,7 @@ Array [
               <g
                 className="rv-xy-plot__axis__tick"
                 style={Object {}}
-                transform="translate(20, 0)"
+                transform="translate(720, 0)"
               >
                 <line
                   className="rv-xy-plot__axis__tick__line"
@@ -6191,179 +6332,6 @@ Array [
                   transform="translate(0, 8)"
                 >
                   1451610000000
-                </text>
-              </g>
-            </g>
-          </g>
-          <g
-            className="rv-xy-plot__axis rv-xy-plot__axis--vertical "
-            style={
-              Object {
-                "line": Object {
-                  "fill": "none",
-                  "stroke": "none",
-                },
-              }
-            }
-            transform="translate(0,16)"
-          >
-            <line
-              className="rv-xy-plot__axis__line"
-              style={
-                Object {
-                  "fill": "none",
-                  "line": Object {
-                    "fill": "none",
-                    "stroke": "none",
-                  },
-                  "stroke": "none",
-                }
-              }
-              x1={80}
-              x2={80}
-              y1={0}
-              y2={208}
-            />
-            <g
-              className="rv-xy-plot__axis__ticks"
-              transform="translate(80, 0)"
-            >
-              <g
-                className="rv-xy-plot__axis__tick"
-                style={
-                  Object {
-                    "line": Object {
-                      "fill": "none",
-                      "stroke": "none",
-                    },
-                  }
-                }
-                transform="translate(0, 208)"
-              >
-                <line
-                  className="rv-xy-plot__axis__tick__line"
-                  style={
-                    Object {
-                      "fill": "none",
-                      "line": Object {
-                        "fill": "none",
-                        "stroke": "none",
-                      },
-                      "stroke": "none",
-                    }
-                  }
-                  x1={0}
-                  x2={-0}
-                  y1={0}
-                  y2={0}
-                />
-                <text
-                  className="rv-xy-plot__axis__tick__text"
-                  dy="0.32em"
-                  style={
-                    Object {
-                      "line": Object {
-                        "fill": "none",
-                        "stroke": "none",
-                      },
-                    }
-                  }
-                  textAnchor="end"
-                  transform="translate(-8, 0)"
-                >
-                  0
-                </text>
-              </g>
-              <g
-                className="rv-xy-plot__axis__tick"
-                style={
-                  Object {
-                    "line": Object {
-                      "fill": "none",
-                      "stroke": "none",
-                    },
-                  }
-                }
-                transform="translate(0, 104)"
-              >
-                <line
-                  className="rv-xy-plot__axis__tick__line"
-                  style={
-                    Object {
-                      "fill": "none",
-                      "line": Object {
-                        "fill": "none",
-                        "stroke": "none",
-                      },
-                      "stroke": "none",
-                    }
-                  }
-                  x1={0}
-                  x2={-0}
-                  y1={0}
-                  y2={0}
-                />
-                <text
-                  className="rv-xy-plot__axis__tick__text"
-                  dy="0.32em"
-                  style={
-                    Object {
-                      "line": Object {
-                        "fill": "none",
-                        "stroke": "none",
-                      },
-                    }
-                  }
-                  textAnchor="end"
-                  transform="translate(-8, 0)"
-                >
-                  0.5
-                </text>
-              </g>
-              <g
-                className="rv-xy-plot__axis__tick"
-                style={
-                  Object {
-                    "line": Object {
-                      "fill": "none",
-                      "stroke": "none",
-                    },
-                  }
-                }
-                transform="translate(0, 0)"
-              >
-                <line
-                  className="rv-xy-plot__axis__tick__line"
-                  style={
-                    Object {
-                      "fill": "none",
-                      "line": Object {
-                        "fill": "none",
-                        "stroke": "none",
-                      },
-                      "stroke": "none",
-                    }
-                  }
-                  x1={0}
-                  x2={-0}
-                  y1={0}
-                  y2={0}
-                />
-                <text
-                  className="rv-xy-plot__axis__tick__text"
-                  dy="0.32em"
-                  style={
-                    Object {
-                      "line": Object {
-                        "fill": "none",
-                        "stroke": "none",
-                      },
-                    }
-                  }
-                  textAnchor="end"
-                  transform="translate(-8, 0)"
-                >
-                  1
                 </text>
               </g>
             </g>
@@ -6397,7 +6365,7 @@ Array [
         style={
           Object {
             "height": "256px",
-            "width": "100px",
+            "width": "800px",
           }
         }
       >
@@ -6411,7 +6379,7 @@ Array [
           onMouseLeave={[Function]}
           onMouseMove={[Function]}
           onWheel={[Function]}
-          width={100}
+          width={800}
         />
       </div>
     </div>

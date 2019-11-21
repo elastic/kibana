@@ -152,8 +152,7 @@ class FilterOptionsUI extends Component<Props, State> {
         button={
           <EuiButtonIcon
             onClick={this.togglePopover}
-            color="text"
-            iconType="gear"
+            iconType="filter"
             aria-label={this.props.intl.formatMessage({
               id: 'data.filter.options.changeAllFiltersButtonLabel',
               defaultMessage: 'Change all filters',

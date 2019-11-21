@@ -17,40 +17,69 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-// @ts-ignore
-import { mockFields, mockIndexPattern } from 'ui/index_patterns/fixtures';
-// @ts-ignore
-import { INDEX_PATTERN_ILLEGAL_CHARACTERS } from 'ui/index_patterns/index';
-// @ts-ignore
-import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns/index';
-// @ts-ignore
-import { IndexPatternSelect } from 'ui/index_patterns/index';
-// @ts-ignore
-import { IndexPatterns } from 'ui/index_patterns/index';
-// @ts-ignore
-import { validateIndexPattern } from 'ui/index_patterns/index';
+import {
+  UiSettingsClientContract,
+  SavedObjectsClientContract,
+  HttpServiceBase,
+  NotificationsStart,
+} from 'src/core/public';
+import { FieldFormatsStart } from '../../../../../plugins/data/public';
+import { Field, FieldList, FieldListInterface, FieldType } from './fields';
+import { createIndexPatternSelect } from './components';
+import { setNotifications, setFieldFormats } from './services';
 
-// IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field
-import * as types from 'ui/index_patterns';
+import {
+  createFlattenHitWrapper,
+  formatHitProvider,
+  IndexPattern,
+  IndexPatterns,
+  StaticIndexPattern,
+} from './index_patterns';
 
-const config = chrome.getUiSettingsClient();
-const savedObjectsClient = chrome.getSavedObjectsClient();
+export interface IndexPatternDependencies {
+  uiSettings: UiSettingsClientContract;
+  savedObjectsClient: SavedObjectsClientContract;
+  http: HttpServiceBase;
+  notifications: NotificationsStart;
+  fieldFormats: FieldFormatsStart;
+}
+
 /**
  * Index Patterns Service
- *
- * The `setup` method of this service returns the public contract for
- * index patterns. Right now these APIs are simply imported from `ui/public`
- * and re-exported here. Once the index patterns code actually moves to
- * this plugin, the imports above can simply be updated to point to their
- * corresponding local directory.
  *
  * @internal
  */
 export class IndexPatternsService {
+  private setupApi: any;
+
   public setup() {
+    this.setupApi = {
+      FieldList,
+      flattenHitWrapper: createFlattenHitWrapper(),
+      formatHitProvider,
+      __LEGACY: {
+        // For BWC we must temporarily export the class implementation of Field,
+        // which is only used externally by the Index Pattern UI.
+        FieldImpl: Field,
+      },
+    };
+    return this.setupApi;
+  }
+
+  public start({
+    uiSettings,
+    savedObjectsClient,
+    http,
+    notifications,
+    fieldFormats,
+  }: IndexPatternDependencies) {
+    setNotifications(notifications);
+    setFieldFormats(fieldFormats);
+
     return {
-      indexPatterns: new IndexPatterns(config, savedObjectsClient),
+      ...this.setupApi,
+      indexPatterns: new IndexPatterns(uiSettings, savedObjectsClient, http),
+      IndexPatternSelect: createIndexPatternSelect(savedObjectsClient),
     };
   }
 
@@ -59,35 +88,36 @@ export class IndexPatternsService {
   }
 }
 
-// static exports
+// static code
 
-const constants = {
+/** @public */
+export { IndexPatternSelect } from './components';
+export {
+  CONTAINS_SPACES,
+  getFromSavedObject,
+  getRoutes,
+  ILLEGAL_CHARACTERS,
   INDEX_PATTERN_ILLEGAL_CHARACTERS,
   INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-};
-
-const fixtures = {
-  mockFields,
-  mockIndexPattern,
-};
-
-const ui = {
-  IndexPatternSelect,
-};
-
-export { validateIndexPattern, constants, fixtures, ui };
+  validateIndexPattern,
+} from './utils';
 
 /** @public */
+export {
+  IndexPatternAlreadyExists,
+  IndexPatternMissingIndices,
+  NoDefaultIndexPattern,
+  NoDefinedIndexPatterns,
+} from './errors';
+
+// types
+
+/** @internal */
 export type IndexPatternsSetup = ReturnType<IndexPatternsService['setup']>;
+export type IndexPatternsStart = ReturnType<IndexPatternsService['start']>;
 
 /** @public */
-export type IndexPattern = types.IndexPattern;
+export { IndexPattern, IndexPatterns, StaticIndexPattern, Field, FieldType, FieldListInterface };
 
 /** @public */
-export type StaticIndexPattern = types.StaticIndexPattern;
-
-/** @public */
-export type StaticIndexPatternField = types.StaticIndexPatternField;
-
-/** @public */
-export type Field = types.Field;
+export { getIndexPatternTitle, findIndexPatternByTitle } from './utils';

@@ -27,7 +27,7 @@ import { fatalError, toastNotifications } from 'ui/notify';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './edit_index_pattern.html';
-import { FieldWildcardProvider } from 'ui/field_wildcard';
+import { fieldWildcardMatcher } from 'ui/field_wildcard';
 import { IndexPatternListFactory } from 'ui/management/index_pattern_list';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -100,8 +100,9 @@ function updateScriptedFieldsTable($scope, $state) {
               getRouteHref: (obj, route) => $scope.kbnUrl.getRouteHref(obj, route),
             }}
             onRemoveField={() => {
-              $scope.editSections = $scope.editSectionsProvider($scope.indexPattern, $scope.indexPatternListProvider);
+              $scope.editSections = $scope.editSectionsProvider($scope.indexPattern, $scope.fieldFilter, $scope.indexPatternListProvider);
               $scope.refreshFilters();
+              $scope.$apply();
             }}
           />
         </I18nContext>,
@@ -172,15 +173,17 @@ uiModules.get('apps/management')
   .controller('managementIndexPatternsEdit', function (
     $scope, $location, $route, Promise, config, indexPatterns, Private, AppState, confirmModal) {
     const $state = $scope.state = new AppState();
-    const { fieldWildcardMatcher } = Private(FieldWildcardProvider);
     const indexPatternListProvider = Private(IndexPatternListFactory)();
 
-    $scope.fieldWildcardMatcher = fieldWildcardMatcher;
+    $scope.fieldWildcardMatcher = (...args) => fieldWildcardMatcher(...args, config.get('metaFields'));
     $scope.editSectionsProvider = Private(IndicesEditSectionsProvider);
     $scope.kbnUrl = Private(KbnUrlProvider);
     $scope.indexPattern = $route.current.locals.indexPattern;
     $scope.indexPatternListProvider = indexPatternListProvider;
-    $scope.indexPattern.tags = indexPatternListProvider.getIndexPatternTags($scope.indexPattern);
+    $scope.indexPattern.tags = indexPatternListProvider.getIndexPatternTags(
+      $scope.indexPattern,
+      $scope.indexPattern.id === config.get('defaultIndex')
+    );
     $scope.getFieldInfo = indexPatternListProvider.getFieldInfo;
     docTitle.change($scope.indexPattern.title);
 
@@ -260,7 +263,7 @@ uiModules.get('apps/management')
           }
         }
 
-        Promise.resolve(indexPatterns.delete($scope.indexPattern))
+        Promise.resolve($scope.indexPattern.destroy())
           .then(function () {
             $location.url('/management/kibana/index_patterns');
           })

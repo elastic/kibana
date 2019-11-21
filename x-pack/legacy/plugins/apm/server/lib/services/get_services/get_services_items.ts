@@ -4,45 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx';
+import { mergeProjection } from '../../../../common/projections/util/merge_projection';
 import {
   PROCESSOR_EVENT,
   SERVICE_AGENT_NAME,
   SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
   TRANSACTION_DURATION
 } from '../../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../../typings/common';
-import { rangeFilter } from '../../helpers/range_filter';
-import { Setup } from '../../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../helpers/setup_request';
+import { getServicesProjection } from '../../../../common/projections/services';
 
 export type ServiceListAPIResponse = PromiseReturnType<typeof getServicesItems>;
-export async function getServicesItems(setup: Setup) {
-  const { start, end, uiFiltersES, client, config } = setup;
+export async function getServicesItems(
+  setup: Setup & SetupTimeRange & SetupUIFilters
+) {
+  const { start, end, client } = setup;
 
-  const params = {
-    index: [
-      config.get<string>('apm_oss.metricsIndices'),
-      config.get<string>('apm_oss.errorIndices'),
-      config.get<string>('apm_oss.transactionIndices')
-    ],
+  const projection = getServicesProjection({ setup });
+
+  const params = mergeProjection(projection, {
     body: {
       size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] }
-            },
-            { range: rangeFilter(start, end) },
-            ...uiFiltersES
-          ]
-        }
-      },
       aggs: {
         services: {
           terms: {
-            field: SERVICE_NAME,
+            ...projection.body.aggs.services.terms,
             size: 500
           },
           aggs: {
@@ -62,21 +53,21 @@ export async function getServicesItems(setup: Setup) {
         }
       }
     }
-  };
+  });
 
   const resp = await client.search(params);
   const aggs = resp.aggregations;
 
-  const serviceBuckets = idx(aggs, _ => _.services.buckets) || [];
+  const serviceBuckets = aggs?.services.buckets || [];
 
   const items = serviceBuckets.map(bucket => {
     const eventTypes = bucket.events.buckets;
 
     const transactions = eventTypes.find(e => e.key === 'transaction');
-    const totalTransactions = idx(transactions, _ => _.doc_count) || 0;
+    const totalTransactions = transactions?.doc_count || 0;
 
     const errors = eventTypes.find(e => e.key === 'error');
-    const totalErrors = idx(errors, _ => _.doc_count) || 0;
+    const totalErrors = errors?.doc_count || 0;
 
     const deltaAsMinutes = (end - start) / 1000 / 60;
     const transactionsPerMinute = totalTransactions / deltaAsMinutes;
@@ -84,12 +75,12 @@ export async function getServicesItems(setup: Setup) {
 
     const environmentsBuckets = bucket.environments.buckets;
     const environments = environmentsBuckets.map(
-      environmentBucket => environmentBucket.key
+      environmentBucket => environmentBucket.key as string
     );
 
     return {
-      serviceName: bucket.key,
-      agentName: idx(bucket, _ => _.agents.buckets[0].key),
+      serviceName: bucket.key as string,
+      agentName: bucket.agents.buckets[0]?.key as string | undefined,
       transactionsPerMinute,
       errorsPerMinute,
       avgResponseTime: bucket.avg.value,

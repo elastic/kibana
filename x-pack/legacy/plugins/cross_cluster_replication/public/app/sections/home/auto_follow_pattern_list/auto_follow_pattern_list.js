@@ -19,7 +19,7 @@ import {
 
 import routing from '../../../services/routing';
 import { extractQueryParams } from '../../../services/query_params';
-import { trackUiMetric } from '../../../services/track_ui_metric';
+import { trackUiMetric, METRIC_TYPE } from '../../../services/track_ui_metric';
 import { API_STATUS, UIM_AUTO_FOLLOW_PATTERN_LIST_LOAD } from '../../../constants';
 import { SectionLoading, SectionError, SectionUnauthorized } from '../../../components';
 import { AutoFollowPatternTable, DetailPanel } from './components';
@@ -60,7 +60,7 @@ export class AutoFollowPatternList extends PureComponent {
   componentDidMount() {
     const { loadAutoFollowPatterns, loadAutoFollowStats, selectAutoFollowPattern, history } = this.props;
 
-    trackUiMetric(UIM_AUTO_FOLLOW_PATTERN_LIST_LOAD);
+    trackUiMetric(METRIC_TYPE.LOADED, UIM_AUTO_FOLLOW_PATTERN_LIST_LOAD);
     loadAutoFollowPatterns();
     loadAutoFollowStats();
 

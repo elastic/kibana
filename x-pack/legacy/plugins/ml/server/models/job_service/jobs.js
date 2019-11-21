@@ -9,16 +9,18 @@ import { i18n } from '@kbn/i18n';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import { datafeedsProvider } from './datafeeds';
 import { jobAuditMessagesProvider } from '../job_audit_messages';
+import { resultsServiceProvider } from '../results_service';
 import { CalendarManager } from '../calendar';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
-import { isTimeSeriesViewJob } from '../../../common/util/job_utils';
-import moment from 'moment';
+import { getLatestDataOrBucketTimestamp, isTimeSeriesViewJob } from '../../../common/util/job_utils';
+import { groupsProvider } from './groups';
 import { uniq } from 'lodash';
 
 export function jobsProvider(callWithRequest) {
 
   const { forceDeleteDatafeed, getDatafeedIdsByJobId } = datafeedsProvider(callWithRequest);
   const { getAuditMessagesSummary } = jobAuditMessagesProvider(callWithRequest);
+  const { getLatestBucketTimestampByJob } = resultsServiceProvider(callWithRequest);
   const calMngr = new CalendarManager(callWithRequest);
 
   async function forceDeleteJob(jobId) {
@@ -103,9 +105,7 @@ export function jobsProvider(callWithRequest) {
 
     const jobs = fullJobsList.map((job) => {
       const hasDatafeed = (typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0);
-      const {
-        earliest: earliestTimestampMs,
-        latest: latestTimestampMs } = earliestAndLatestTimestamps(job.data_counts);
+      const dataCounts = job.data_counts;
 
       const tempJob = {
         id: job.job_id,
@@ -118,8 +118,9 @@ export function jobsProvider(callWithRequest) {
         datafeedId: (hasDatafeed && job.datafeed_config.datafeed_id) ? job.datafeed_config.datafeed_id : '',
         datafeedIndices: (hasDatafeed && job.datafeed_config.indices) ? job.datafeed_config.indices : [],
         datafeedState: (hasDatafeed && job.datafeed_config.state) ? job.datafeed_config.state : '',
-        latestTimestampMs,
-        earliestTimestampMs,
+        latestTimestampMs: dataCounts.latest_record_timestamp,
+        earliestTimestampMs: dataCounts.earliest_record_timestamp,
+        latestResultsTimestampMs: getLatestDataOrBucketTimestamp(dataCounts.latest_record_timestamp, dataCounts.latest_bucket_timestamp),
         isSingleMetricViewerJob: isTimeSeriesViewJob(job),
         nodeName: (job.node) ? job.node.name : undefined,
         deleting: (job.deleting || undefined),
@@ -149,9 +150,12 @@ export function jobsProvider(callWithRequest) {
       const hasDatafeed = (typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0);
       const timeRange = {};
 
-      if (job.data_counts !== undefined) {
-        timeRange.to = job.data_counts.latest_record_timestamp;
-        timeRange.from = job.data_counts.earliest_record_timestamp;
+      const dataCounts = job.data_counts;
+      if (dataCounts !== undefined) {
+        timeRange.to = getLatestDataOrBucketTimestamp(
+          dataCounts.latest_record_timestamp,
+          dataCounts.latest_bucket_timestamp);
+        timeRange.from = dataCounts.earliest_record_timestamp;
       }
 
       const tempJob = {
@@ -170,7 +174,7 @@ export function jobsProvider(callWithRequest) {
   }
 
   async function createFullJobsList(jobIds = []) {
-    const [ JOBS, JOB_STATS, DATAFEEDS, DATAFEED_STATS, CALENDARS ] = [0, 1, 2, 3, 4];
+    const [ JOBS, JOB_STATS, DATAFEEDS, DATAFEED_STATS, CALENDARS, BUCKET_TIMESTAMPS ] = [0, 1, 2, 3, 4, 5];
 
     const jobs = [];
     const groups = {};
@@ -186,7 +190,8 @@ export function jobsProvider(callWithRequest) {
     requests.push(
       callWithRequest('ml.datafeeds'),
       callWithRequest('ml.datafeedStats'),
-      calMngr.getAllCalendars());
+      calMngr.getAllCalendars(),
+      getLatestBucketTimestampByJob());
 
     const results = await Promise.all(requests);
 
@@ -196,6 +201,7 @@ export function jobsProvider(callWithRequest) {
           const datafeedStats = results[DATAFEED_STATS].datafeeds.find(ds => (ds.datafeed_id === datafeed.datafeed_id));
           if (datafeedStats) {
             datafeed.state = datafeedStats.state;
+            datafeed.timing_stats = datafeedStats.timing_stats;
           }
         }
         datafeeds[datafeed.job_id] = datafeed;
@@ -270,6 +276,11 @@ export function jobsProvider(callWithRequest) {
             if (jobStats.open_time) {
               job.open_time = jobStats.open_time;
             }
+
+            // Add in the timestamp of the last bucket processed for each job if available.
+            if (results[BUCKET_TIMESTAMPS] && results[BUCKET_TIMESTAMPS][job.job_id]) {
+              job.data_counts.latest_bucket_timestamp = results[BUCKET_TIMESTAMPS][job.job_id];
+            }
           }
         }
 
@@ -282,23 +293,6 @@ export function jobsProvider(callWithRequest) {
       });
     }
     return jobs;
-  }
-
-  function earliestAndLatestTimestamps(dataCounts) {
-    const obj = {
-      earliest: undefined,
-      latest: undefined,
-    };
-
-    if (dataCounts.earliest_record_timestamp) {
-      obj.earliest = moment(dataCounts.earliest_record_timestamp).valueOf();
-    }
-
-    if (dataCounts.latest_record_timestamp) {
-      obj.latest = moment(dataCounts.latest_record_timestamp).valueOf();
-    }
-
-    return obj;
   }
 
   async function deletingJobTasks() {
@@ -349,6 +343,53 @@ export function jobsProvider(callWithRequest) {
     return results;
   }
 
+  async function getAllJobAndGroupIds() {
+    const { getAllGroups } = groupsProvider(callWithRequest);
+    const jobs = await callWithRequest('ml.jobs');
+    const jobIds = jobs.jobs.map(job => job.job_id);
+    const groups = await getAllGroups();
+    const groupIds = groups.map(group => group.id);
+
+    return {
+      jobIds,
+      groupIds,
+    };
+  }
+
+  async function getLookBackProgress(jobId, start, end) {
+    const datafeedId = `datafeed-${jobId}`;
+    const [jobStats, isRunning] = await Promise.all([
+      callWithRequest('ml.jobStats', { jobId: [jobId] }),
+      isDatafeedRunning(datafeedId)
+    ]);
+
+    if (jobStats.jobs.length) {
+      const statsForJob = jobStats.jobs[0];
+      const time = statsForJob.data_counts.latest_record_timestamp;
+      const progress = (time - start) / (end - start);
+      const isJobClosed = statsForJob.state === JOB_STATE.CLOSED;
+      return {
+        progress: (progress > 0 ? Math.round(progress * 100) : 0),
+        isRunning,
+        isJobClosed,
+      };
+    }
+    return { progress: 0, isRunning: false, isJobClosed: true, };
+  }
+
+  async function isDatafeedRunning(datafeedId) {
+    const stats = await callWithRequest('ml.datafeedStats', { datafeedId: [datafeedId] });
+    if (stats.datafeeds.length) {
+      const state = stats.datafeeds[0].state;
+      return (
+        state === DATAFEED_STATE.STARTED ||
+        state === DATAFEED_STATE.STARTING ||
+        state === DATAFEED_STATE.STOPPING
+      );
+    }
+    return false;
+  }
+
   return {
     forceDeleteJob,
     deleteJobs,
@@ -358,5 +399,7 @@ export function jobsProvider(callWithRequest) {
     createFullJobsList,
     deletingJobTasks,
     jobsExist,
+    getAllJobAndGroupIds,
+    getLookBackProgress,
   };
 }

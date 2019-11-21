@@ -17,22 +17,11 @@
  * under the License.
  */
 
-export {
-  KuiBar,
-  KuiBarSection,
-} from './bar';
+export { KuiBar, KuiBarSection } from './bar';
 
-export {
-  KuiButton,
-  KuiButtonGroup,
-  KuiButtonIcon,
-  KuiLinkButton,
-  KuiSubmitButton,
-} from './button';
+export { KuiButton, KuiButtonGroup, KuiButtonIcon, KuiLinkButton, KuiSubmitButton } from './button';
 
-export {
-  KuiCollapseButton,
-} from './collapse_button';
+export { KuiCollapseButton } from './collapse_button';
 
 export {
   KuiEmptyTablePrompt,
@@ -40,15 +29,7 @@ export {
   KuiEmptyTablePromptPanel,
 } from './empty_table_prompt';
 
-export {
-  KuiExpression,
-  KuiExpressionButton,
-} from './expression';
-
-export {
-  KuiFieldGroup,
-  KuiFieldGroupSection,
-} from './form_layout';
+export { KuiFieldGroup, KuiFieldGroupSection } from './form_layout';
 
 export {
   KuiLabel,
@@ -68,45 +49,9 @@ export {
   KuiLocalTitle,
 } from './local_nav';
 
-export {
-  KuiMenu,
-  KuiMenuItem,
-} from './menu';
+export { KuiPager, KuiPagerButtonGroup } from './pager';
 
-export {
-  KUI_MODAL_CANCEL_BUTTON,
-  KUI_MODAL_CONFIRM_BUTTON,
-  KuiConfirmModal,
-  KuiModal,
-  KuiModalBody,
-  KuiModalFooter,
-  KuiModalHeader,
-  KuiModalHeaderTitle,
-  KuiModalOverlay,
-} from './modal';
-
-export {
-  KuiOutsideClickDetector,
-} from './outside_click_detector';
-
-export {
-  KuiPager,
-  KuiPagerButtonGroup,
-} from './pager';
-
-export {
-  KuiPanelSimple,
-} from './panel_simple';
-
-export {
-  KuiPopover,
-  KuiPopoverTitle,
-} from './popover';
-
-export {
-  KuiTabs,
-  KuiTab
-} from './tabs';
+export { KuiTabs, KuiTab } from './tabs';
 
 export {
   KuiTable,
@@ -123,7 +68,7 @@ export {
   KuiListingTableCreateButton,
   KuiListingTableDeleteButton,
   KuiListingTableNoMatchesPrompt,
-  KuiListingTableLoadingPrompt
+  KuiListingTableLoadingPrompt,
 } from './table';
 
 export {
@@ -132,5 +77,5 @@ export {
   KuiToolBarFooter,
   KuiToolBarSection,
   KuiToolBarFooterSection,
-  KuiToolBarText
+  KuiToolBarText,
 } from './tool_bar';

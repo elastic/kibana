@@ -8,17 +8,17 @@ import { EuiCheckbox, EuiSuperSelect } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
-import styled, { injectGlobal } from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 
 import { getEventsSelectOptions } from './helpers';
 
 export type CheckState = 'checked' | 'indeterminate' | 'unchecked';
 export const EVENTS_SELECT_WIDTH = 60; // px
 
-// SIDE EFFECT: the following `injectGlobal` overrides
+// SIDE EFFECT: the following `createGlobalStyle` overrides
 // the style of the select items
 // eslint-disable-next-line
-injectGlobal`
+createGlobalStyle`
   .eventsSelectItem {
     width: 100% !important;
 
@@ -36,11 +36,15 @@ const CheckboxContainer = styled.div`
   position: relative;
 `;
 
+CheckboxContainer.displayName = 'CheckboxContainer';
+
 const PositionedCheckbox = styled.div`
   left: 7px;
   position: absolute;
   top: -28px;
 `;
+
+PositionedCheckbox.displayName = 'PositionedCheckbox';
 
 interface Props {
   checkState: CheckState;
@@ -72,3 +76,5 @@ export const EventsSelect = pure<Props>(({ checkState, timelineId }) => {
     </div>
   );
 });
+
+EventsSelect.displayName = 'EventsSelect';

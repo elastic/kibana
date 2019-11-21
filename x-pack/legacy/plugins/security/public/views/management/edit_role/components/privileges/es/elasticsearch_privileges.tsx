@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
-import { Role } from '../../../../../../../common/model';
+import { Role, BuiltinESPrivileges } from '../../../../../../../common/model';
 // @ts-ignore
 import { documentationLinks } from '../../../../../../documentation_links';
 import { RoleValidator } from '../../../lib/validate_role';
@@ -35,6 +35,7 @@ interface Props {
   onChange: (role: Role) => void;
   runAsUsers: string[];
   validator: RoleValidator;
+  builtinESPrivileges: BuiltinESPrivileges;
   indexPatterns: string[];
   allowDocumentLevelSecurity: boolean;
   allowFieldLevelSecurity: boolean;
@@ -59,6 +60,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
       indexPatterns,
       allowDocumentLevelSecurity,
       allowFieldLevelSecurity,
+      builtinESPrivileges,
     } = this.props;
 
     const indexProps = {
@@ -69,6 +71,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
       allowDocumentLevelSecurity,
       allowFieldLevelSecurity,
       onChange,
+      availableIndexPrivileges: builtinESPrivileges.index,
     };
 
     return (
@@ -93,7 +96,11 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
           }
         >
           <EuiFormRow fullWidth={true} hasEmptyLabelSpace>
-            <ClusterPrivileges role={this.props.role} onChange={this.onClusterPrivilegesChange} />
+            <ClusterPrivileges
+              role={this.props.role}
+              onChange={this.onClusterPrivilegesChange}
+              builtinClusterPrivileges={builtinESPrivileges.cluster}
+            />
           </EuiFormRow>
         </EuiDescribedFormGroup>
 

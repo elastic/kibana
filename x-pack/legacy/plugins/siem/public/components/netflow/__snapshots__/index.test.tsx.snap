@@ -105,7 +105,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
     }
   }
 >
-  <pure(Component)
+  <Netflow
     contextId="test"
     destinationBytes={
       Array [

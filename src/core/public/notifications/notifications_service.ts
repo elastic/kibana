@@ -22,11 +22,11 @@ import { i18n } from '@kbn/i18n';
 import { Subscription } from 'rxjs';
 import { I18nStart } from '../i18n';
 import { ToastsService, ToastsSetup, ToastsStart } from './toasts';
-import { UiSettingsSetup } from '../ui_settings';
+import { UiSettingsClientContract } from '../ui_settings';
 import { OverlayStart } from '../overlays';
 
 interface SetupDeps {
-  uiSettings: UiSettingsSetup;
+  uiSettings: UiSettingsClientContract;
 }
 
 interface StartDeps {
@@ -48,7 +48,7 @@ export class NotificationsService {
   public setup({ uiSettings }: SetupDeps): NotificationsSetup {
     const notificationSetup = { toasts: this.toasts.setup({ uiSettings }) };
 
-    this.uiSettingsErrorSubscription = uiSettings.getUpdateErrors$().subscribe(error => {
+    this.uiSettingsErrorSubscription = uiSettings.getUpdateErrors$().subscribe((error: Error) => {
       notificationSetup.toasts.addDanger({
         title: i18n.translate('core.notifications.unableUpdateUISettingNotificationMessageTitle', {
           defaultMessage: 'Unable to update UI setting',
@@ -85,10 +85,12 @@ export class NotificationsService {
 
 /** @public */
 export interface NotificationsSetup {
+  /** {@link ToastsSetup} */
   toasts: ToastsSetup;
 }
 
 /** @public */
 export interface NotificationsStart {
+  /** {@link ToastsStart} */
   toasts: ToastsStart;
 }

@@ -12,7 +12,7 @@ import { toastNotifications } from 'ui/notify';
 import { I18nContext } from 'ui/i18n';
 import { PipelineEditor } from '../../../../components/pipeline_editor';
 import 'plugins/logstash/services/license';
-import 'plugins/logstash/services/security';
+import { logstashSecurity } from 'plugins/logstash/services/security';
 import 'ace';
 
 const app = uiModules.get('xpack/logstash');
@@ -20,7 +20,6 @@ const app = uiModules.get('xpack/logstash');
 app.directive('pipelineEdit', function ($injector) {
   const pipelineService = $injector.get('pipelineService');
   const licenseService = $injector.get('logstashLicenseService');
-  const securityService = $injector.get('logstashSecurityService');
   const kbnUrl = $injector.get('kbnUrl');
   const shieldUser = $injector.get('ShieldUser');
   const $route = $injector.get('$route');
@@ -32,7 +31,7 @@ app.directive('pipelineEdit', function ($injector) {
       const open = id =>
         scope.$evalAsync(kbnUrl.change(`/management/logstash/pipelines/${id}/edit`));
 
-      const userResource = securityService.isSecurityEnabled
+      const userResource = logstashSecurity.isSecurityEnabled()
         ? await shieldUser.getCurrent().$promise
         : null;
 

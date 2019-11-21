@@ -12,7 +12,7 @@ import chrome from 'ui/chrome';
 import { http } from '../../services/http_service';
 
 import { annotations } from './annotations';
-import { dataFrame } from './data_frame';
+import { dataFrameAnalytics } from './data_frame_analytics';
 import { filters } from './filters';
 import { results } from './results';
 import { jobs } from './jobs';
@@ -211,11 +211,25 @@ export const ml = {
     });
   },
 
-  checkPrivilege(obj) {
+  hasPrivileges(obj) {
     return http({
       url: `${basePath}/_has_privileges`,
       method: 'POST',
       data: obj
+    });
+  },
+
+  checkMlPrivileges() {
+    return http({
+      url: `${basePath}/ml_capabilities`,
+      method: 'GET',
+    });
+  },
+
+  checkManageMLPrivileges() {
+    return http({
+      url: `${basePath}/ml_capabilities?ignoreSpaces=true`,
+      method: 'GET'
     });
   },
 
@@ -275,7 +289,11 @@ export const ml = {
       'groups',
       'indexPatternName',
       'query',
-      'useDedicatedIndex'
+      'useDedicatedIndex',
+      'startDatafeed',
+      'start',
+      'end',
+      'jobOverrides',
     ]);
 
     return http({
@@ -435,7 +453,7 @@ export const ml = {
   },
 
   annotations,
-  dataFrame,
+  dataFrameAnalytics,
   filters,
   results,
   jobs,

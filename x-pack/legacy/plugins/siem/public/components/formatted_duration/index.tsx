@@ -23,3 +23,5 @@ export const FormattedDuration = pure<{
     </div>
   </FormattedDurationTooltip>
 ));
+
+FormattedDuration.displayName = 'FormattedDuration';

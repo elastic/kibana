@@ -11,8 +11,8 @@ import euiStyled from '../../../../common/eui_styled_components';
 export const ColumnarPage = euiStyled.div`
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  flex: 1 0 0%;
+  flex: 1 0 auto;
+  width: 100%
 `;
 
 export const PageContent = euiStyled.div`

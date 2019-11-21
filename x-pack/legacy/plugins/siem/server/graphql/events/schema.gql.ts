@@ -9,16 +9,11 @@ import gql from 'graphql-tag';
 export const eventsSchema = gql`
   scalar EsValue
 
-  type KpiItem {
-    value: String
-    count: Float!
-  }
-
-  type EventsData {
-    kpiEventType: [KpiItem!]
+  type EventsTimelineData {
     edges: [EcsEdges!]!
     totalCount: Float!
     pageInfo: PageInfo!
+    inspect: Inspect
   }
 
   type TimelineNonEcsData {
@@ -42,14 +37,11 @@ export const eventsSchema = gql`
     edges: [TimelineEdges!]!
     totalCount: Float!
     pageInfo: PageInfo!
+    inspect: Inspect
   }
 
   type DetailItem {
-    category: String!
-    description: String
-    example: String
     field: String!
-    type: String!
     values: ToStringArray
     originalValue: EsValue
   }
@@ -61,10 +53,12 @@ export const eventsSchema = gql`
 
   type TimelineDetailsData {
     data: [DetailItem!]
+    inspect: Inspect
   }
 
   type LastEventTimeData {
     lastSeen: Date
+    inspect: Inspect
   }
 
   enum LastEventIndexKey {
@@ -74,15 +68,19 @@ export const eventsSchema = gql`
     network
   }
 
+  type MatrixOverTimeHistogramData {
+    x: Float!
+    y: Float!
+    g: String!
+  }
+
+  type EventsOverTimeData {
+    inspect: Inspect
+    eventsOverTime: [MatrixOverTimeHistogramData!]!
+    totalCount: Float!
+  }
+
   extend type Source {
-    "Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified"
-    Events(
-      pagination: PaginationInput!
-      sortField: SortField!
-      timerange: TimerangeInput
-      filterQuery: String
-      defaultIndex: [String!]!
-    ): EventsData!
     Timeline(
       pagination: PaginationInput!
       sortField: SortField!
@@ -102,5 +100,10 @@ export const eventsSchema = gql`
       details: LastTimeDetails!
       defaultIndex: [String!]!
     ): LastEventTimeData!
+    EventsOverTime(
+      timerange: TimerangeInput!
+      filterQuery: String
+      defaultIndex: [String!]!
+    ): EventsOverTimeData!
   }
 `;

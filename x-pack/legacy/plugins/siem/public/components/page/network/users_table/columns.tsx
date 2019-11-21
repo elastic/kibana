@@ -6,21 +6,20 @@
 
 import { FlowTarget, UsersItem } from '../../../../graphql/types';
 import { defaultToEmptyTag } from '../../../empty_value';
-import { Columns } from '../../../load_more_table';
+import { Columns } from '../../../paginated_table';
 
 import * as i18n from './translations';
 import { getRowItemDraggables, getRowItemDraggable } from '../../../tables/helpers';
 
-export const getUsersColumns = (
-  flowTarget: FlowTarget,
-  tableId: string
-): [
+export type UsersColumns = [
   Columns<UsersItem['name']>,
   Columns<UsersItem['id']>,
   Columns<UsersItem['groupName']>,
   Columns<UsersItem['groupId']>,
   Columns<UsersItem['count']>
-] => [
+];
+
+export const getUsersColumns = (flowTarget: FlowTarget, tableId: string): UsersColumns => [
   {
     field: 'node.user.name',
     name: i18n.USER_NAME,
@@ -74,6 +73,7 @@ export const getUsersColumns = (
       }),
   },
   {
+    align: 'right',
     field: 'node.user.count',
     name: i18n.DOCUMENT_COUNT,
     truncateText: false,

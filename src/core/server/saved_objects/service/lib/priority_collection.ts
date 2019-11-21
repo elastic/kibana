@@ -38,6 +38,10 @@ export class PriorityCollection<T> {
     this.array.splice(spliceIndex, 0, { priority, value });
   }
 
+  public has(predicate: (value: T) => boolean): boolean {
+    return this.array.some(entry => predicate(entry.value));
+  }
+
   public toPrioritizedArray(): T[] {
     return this.array.map(entry => entry.value);
   }

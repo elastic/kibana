@@ -6,6 +6,8 @@
 
 export const PLUGIN_ID = 'reporting';
 
+export const BROWSER_TYPE = 'chromium';
+
 export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
   'xpack.reporting.jobCompletionNotifications';
 
@@ -24,6 +26,7 @@ export const WHITELISTED_JOB_CONTENT_TYPES = [
 
 export const KBN_SCREENSHOT_HEADER_BLACKLIST = [
   'accept-encoding',
+  'connection',
   'content-length',
   'content-type',
   'host',

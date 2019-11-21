@@ -17,9 +17,6 @@
  * under the License.
  */
 
-import { createKfetch } from 'ui/kfetch/kfetch';
-import { setup } from 'test_utils/http_test_setup';
-
 const mockIndexPattern = {
   id: '1234',
   title: 'logstash-*',
@@ -35,24 +32,6 @@ const mockIndexPattern = {
   ],
 };
 
-const mockChromeFactory = jest.fn(() => {
-  return {
-    getBasePath: () => `foo`,
-    getUiSettingsClient: () => {
-      return {
-        get: (key: string) => {
-          switch (key) {
-            case 'history:limit':
-              return 10;
-            default:
-              throw new Error(`Unexpected config key: ${key}`);
-          }
-        },
-      };
-    },
-  };
-});
-
 export const mockPersistedLog = {
   add: jest.fn(),
   get: jest.fn(() => ['response:200']),
@@ -62,30 +41,15 @@ export const mockPersistedLogFactory = jest.fn<jest.Mocked<typeof mockPersistedL
   return mockPersistedLog;
 });
 
-export const mockGetAutocompleteSuggestions = jest.fn(() => Promise.resolve([]));
-const mockAutocompleteProvider = jest.fn(() => mockGetAutocompleteSuggestions);
-export const mockGetAutocompleteProvider = jest.fn(() => mockAutocompleteProvider);
-const mockKfetch = jest.fn(() => createKfetch(setup().http));
-
 export const mockFetchIndexPatterns = jest
   .fn()
   .mockReturnValue(Promise.resolve([mockIndexPattern]));
 
-jest.mock('ui/chrome', () => mockChromeFactory());
-jest.mock('ui/kfetch', () => ({
-  kfetch: () => {},
-}));
-jest.mock('ui/persisted_log', () => ({
+jest.mock('../../../../../../../plugins/data/public/query/persisted_log', () => ({
   PersistedLog: mockPersistedLogFactory,
 }));
-jest.mock('ui/autocomplete_providers', () => ({
-  getAutocompleteProvider: mockGetAutocompleteProvider,
-}));
-jest.mock('ui/kfetch', () => ({
-  kfetch: mockKfetch,
-}));
 
-jest.mock('../lib/fetch_index_patterns', () => ({
+jest.mock('./fetch_index_patterns', () => ({
   fetchIndexPatterns: mockFetchIndexPatterns,
 }));
 

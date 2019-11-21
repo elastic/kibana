@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import os from 'os';
+
 import { ToolingLog } from '@kbn/dev-utils';
 import chalk from 'chalk';
 import execa from 'execa';
@@ -38,16 +40,19 @@ export function execInProjects(
     projects.map(project => ({
       task: () =>
         execa(cmd, getArgs(project), {
-          cwd: project.directory,
+          // execute in the current working directory so that relative paths in errors
+          // are relative from the right location
+          cwd: process.cwd(),
           env: chalk.enabled ? { FORCE_COLOR: 'true' } : {},
           stdio: ['ignore', 'pipe', 'pipe'],
+          preferLocal: true,
         }).catch(error => {
           throw new ProjectFailure(project, error);
         }),
       title: project.name,
     })),
     {
-      concurrent: true,
+      concurrent: Math.min(4, Math.round((os.cpus() || []).length / 2) || 1) || false,
       exitOnError: false,
     }
   );

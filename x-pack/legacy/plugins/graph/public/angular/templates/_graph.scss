@@ -1,0 +1,43 @@
+@import 'src/legacy/ui/public/chrome/variables';
+
+@mixin gphSvgText() {
+  font-family: $euiFontFamily;
+  font-size: $euiSizeS;
+  line-height: $euiSizeM;
+  fill: $euiColorDarkShade;
+  color: $euiColorDarkShade;
+}
+
+/**
+ * THE SVG Graph
+ * 1. Calculated px values come from the open/closed state of the global nav sidebar
+ */
+
+
+ #graphBasic {
+   display: flex;
+   flex-direction: column;
+   flex: 1;
+   overflow: hidden;
+ }
+
+.gphGraph__container {
+  display: flex;
+  flex-direction: column;
+  background: $euiColorEmptyShade;
+  position: relative;
+  flex: 1;
+}
+
+.gphGraph__menus {
+  margin: $euiSizeS;
+}
+
+.gphGraph__flexGroup {
+  display: flex;
+  width: 100%;
+}
+
+.gphGraph__flexGroupFiller {
+  flex: 1 1 auto;
+}

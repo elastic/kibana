@@ -14,12 +14,16 @@ async function isTaskManagerReady(server: HapiServer) {
 }
 
 async function fetch(server: HapiServer) {
-  const { taskManager } = server;
+  const taskManager = server.plugins.task_manager;
+
+  if (!taskManager) {
+    return null;
+  }
 
   let docs;
   try {
     ({ docs } = await taskManager.fetch({
-      query: { bool: { filter: { term: { _id: `${PLUGIN_ID}-${VIS_TELEMETRY_TASK}` } } } },
+      query: { bool: { filter: { term: { _id: `task:${PLUGIN_ID}-${VIS_TELEMETRY_TASK}` } } } },
     }));
   } catch (err) {
     const errMessage = err && err.message ? err.message : err.toString();

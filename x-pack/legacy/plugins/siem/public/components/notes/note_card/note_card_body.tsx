@@ -18,6 +18,8 @@ const BodyContainer = styled(EuiPanel)`
   border: none;
 `;
 
+BodyContainer.displayName = 'BodyContainer';
+
 const HoverActionsContainer = styled(EuiPanel)`
   align-items: center;
   display: flex;
@@ -29,6 +31,8 @@ const HoverActionsContainer = styled(EuiPanel)`
   top: -5px;
   width: 30px;
 `;
+
+HoverActionsContainer.displayName = 'HoverActionsContainer';
 
 export const NoteCardBody = pure<{ rawNote: string }>(({ rawNote }) => (
   <BodyContainer data-test-subj="note-card-body" hasShadow={false} paddingSize="s">
@@ -44,3 +48,5 @@ export const NoteCardBody = pure<{ rawNote: string }>(({ rawNote }) => (
     />
   </BodyContainer>
 ));
+
+NoteCardBody.displayName = 'NoteCardBody';

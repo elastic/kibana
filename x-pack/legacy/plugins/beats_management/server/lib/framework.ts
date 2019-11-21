@@ -53,14 +53,14 @@ export class BackendFrameworkLib {
   /**
    * Expired `null` happens when we have no xpack info
    */
-  get license() {
+  public get license() {
     return {
       type: this.adapter.info ? this.adapter.info.license.type : 'unknown',
       expired: this.adapter.info ? this.adapter.info.license.expired : null,
     };
   }
 
-  get securityIsEnabled() {
+  public get securityIsEnabled() {
     return this.adapter.info ? this.adapter.info.security.enabled : false;
   }
 
@@ -86,9 +86,7 @@ export class BackendFrameworkLib {
       ) {
         return {
           error: {
-            message: `Your ${
-              this.license.type
-            } license does not support this API or is expired. Please upgrade your license.`,
+            message: `Your ${this.license.type} license does not support this API or is expired. Please upgrade your license.`,
             code: 403,
           },
           success: false,

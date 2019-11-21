@@ -24,6 +24,21 @@ import {
   Tutorial,
 } from './tutorial';
 
+
+jest.mock('../../kibana_services', () =>({
+  getServices: () =>({
+    getBasePath: jest.fn(() => 'path'),
+    chrome: {
+      setBreadcrumbs: () => {}
+    }
+  })
+}));
+jest.mock('../../../../../kibana_react/public', () => {
+  return {
+    Markdown: () => <div className="markdown"/>,
+  };
+});
+
 function buildInstructionSet(type) {
   return {
     instructionSets: [

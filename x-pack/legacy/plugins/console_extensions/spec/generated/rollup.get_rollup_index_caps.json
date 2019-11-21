@@ -1,0 +1,10 @@
+{
+  "rollup.get_rollup_index_caps": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "{indices}/_rollup/data"
+    ]
+  }
+}

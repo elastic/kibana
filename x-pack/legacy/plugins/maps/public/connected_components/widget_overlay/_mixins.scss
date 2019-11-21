@@ -1,0 +1,12 @@
+@mixin mapOverlayIsTextOnly {
+  text-shadow:
+  0 0 2px $euiColorEmptyShade,
+  // Multiple shadows helps turn it into an outline since
+  // text shadows have no spread value
+  0 0 1px $euiColorEmptyShade,
+  0 0 1px $euiColorEmptyShade,
+  0 0 1px $euiColorEmptyShade,
+  0 0 1px $euiColorEmptyShade,
+  0 0 1px $euiColorEmptyShade,
+  0 0 1px $euiColorEmptyShade;
+}

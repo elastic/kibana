@@ -18,16 +18,21 @@
  */
 
 import { ResponseObject, Server } from 'hapi';
+import { UnwrapPromise } from '@kbn/utility-types';
 
+import { SavedObjectsClientProviderOptions, CoreSetup } from 'src/core/server';
 import {
   ConfigService,
   ElasticsearchServiceSetup,
-  InternalCoreSetup,
-  InternalCoreStart,
+  EnvironmentMode,
   LoggerFactory,
   SavedObjectsClientContract,
-  SavedObjectsService,
+  SavedObjectsLegacyService,
+  IUiSettingsClient,
+  PackageInfo,
 } from '../../core/server';
+
+import { LegacyServiceSetupDeps, LegacyServiceStartDeps } from '../../core/server/';
 // Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsManagement } from '../../core/server/saved_objects/management';
@@ -37,6 +42,7 @@ import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/ela
 import { CapabilitiesModifier } from './capabilities';
 import { IndexPatternsServiceFactory } from './index_patterns';
 import { Capabilities } from '../../core/public';
+import { UiSettingsServiceFactoryOptions } from '../../legacy/ui/ui_settings/ui_settings_service_factory';
 
 export interface KibanaConfig {
   get<T>(key: string): T;
@@ -60,7 +66,7 @@ declare module 'hapi' {
   interface Server {
     config: () => KibanaConfig;
     indexPatternsServiceFactory: IndexPatternsServiceFactory;
-    savedObjects: SavedObjectsService;
+    savedObjects: SavedObjectsLegacyService;
     usage: { collectorSet: any };
     injectUiAppVars: (pluginName: string, getAppVars: () => { [key: string]: any }) => void;
     getHiddenUiAppById(appId: string): UiApp;
@@ -71,12 +77,20 @@ declare module 'hapi' {
     savedObjectsManagement(): SavedObjectsManagement;
     getInjectedUiAppVars: (pluginName: string) => { [key: string]: any };
     getUiNavLinks(): Array<{ _id: string }>;
+    addMemoizedFactoryToRequest: (
+      name: string,
+      factoryFn: (request: Request) => Record<string, any>
+    ) => void;
+    uiSettingsServiceFactory: (options?: UiSettingsServiceFactoryOptions) => IUiSettingsClient;
+    logWithMetadata: (tags: string[], message: string, meta: Record<string, any>) => void;
+    newPlatform: KbnServer['newPlatform'];
   }
 
   interface Request {
-    getSavedObjectsClient(): SavedObjectsClientContract;
+    getSavedObjectsClient(options?: SavedObjectsClientProviderOptions): SavedObjectsClientContract;
     getBasePath(): string;
-    getUiSettingsService(): any;
+    getDefaultRoute(): Promise<string>;
+    getUiSettingsService(): IUiSettingsClient;
     getCapabilities(): Promise<Capabilities>;
   }
 
@@ -86,24 +100,36 @@ declare module 'hapi' {
 }
 
 type KbnMixinFunc = (kbnServer: KbnServer, server: Server, config: any) => Promise<any> | void;
-type Unpromise<T> = T extends Promise<infer U> ? U : T;
+
 // eslint-disable-next-line import/no-default-export
 export default class KbnServer {
   public readonly newPlatform: {
+    __internals: {
+      hapiServer: LegacyServiceSetupDeps['core']['http']['server'];
+      uiPlugins: LegacyServiceSetupDeps['core']['plugins']['uiPlugins'];
+      uiPluginConfigs: LegacyServiceSetupDeps['core']['plugins']['uiPluginConfigs'];
+      elasticsearch: LegacyServiceSetupDeps['core']['elasticsearch'];
+      uiSettings: LegacyServiceSetupDeps['core']['uiSettings'];
+      kibanaMigrator: LegacyServiceStartDeps['core']['savedObjects']['migrator'];
+    };
+    env: {
+      mode: Readonly<EnvironmentMode>;
+      packageInfo: Readonly<PackageInfo>;
+    };
     coreContext: {
       logger: LoggerFactory;
     };
     setup: {
-      core: InternalCoreSetup;
-      plugins: Record<string, unknown>;
+      core: CoreSetup;
+      plugins: Record<string, object>;
     };
     start: {
-      core: InternalCoreStart;
-      plugins: Record<string, unknown>;
+      core: CoreSetup;
+      plugins: Record<string, object>;
     };
     stop: null;
     params: {
-      handledConfigPaths: Unpromise<ReturnType<ConfigService['getUsedPaths']>>;
+      handledConfigPaths: UnwrapPromise<ReturnType<ConfigService['getUsedPaths']>>;
     };
   };
   public server: Server;
@@ -118,11 +144,12 @@ export default class KbnServer {
   public close(): Promise<void>;
   public afterPluginsInit(callback: () => void): void;
   public applyLoggingConfiguration(settings: any): void;
+  public config: KibanaConfig;
 }
 
 // Re-export commonly used hapi types.
 export { Server, Request, ResponseToolkit } from 'hapi';
 
 // Re-export commonly accessed api types.
-export { IndexPatternsService } from './index_patterns';
-export { SavedObjectsService, SavedObjectsClient } from 'src/core/server';
+export { IndexPatternsFetcher as IndexPatternsService } from './index_patterns';
+export { SavedObjectsLegacyService, SavedObjectsClient } from 'src/core/server';

@@ -22,7 +22,7 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { WorkQueue } from '../work_queue';
 import sinon from 'sinon';
-import '../../promises';
+import { createDefer } from 'ui/promises';
 
 describe('work queue', function () {
   let queue;
@@ -37,7 +37,7 @@ describe('work queue', function () {
 
   describe('#push', function () {
     it('adds to the interval queue', function () {
-      queue.push(Promise.defer());
+      queue.push(createDefer(Promise));
       expect(queue).to.have.length(1);
     });
   });
@@ -47,17 +47,17 @@ describe('work queue', function () {
       const size = _.random(5, 50);
       queue.limit = size;
 
-      const whenFull = Promise.defer();
+      const whenFull = createDefer(Promise);
       sinon.stub(whenFull, 'resolve');
       queue.resolveWhenFull(whenFull);
 
       // push all but one into the queue
       _.times(size - 1, function () {
-        queue.push(Promise.defer());
+        queue.push(createDefer(Promise));
       });
 
       expect(whenFull.resolve.callCount).to.be(0);
-      queue.push(Promise.defer());
+      queue.push(createDefer(Promise));
       expect(whenFull.resolve.callCount).to.be(1);
 
       queue.empty();
@@ -76,7 +76,7 @@ describe('work queue', function () {
     const stub = sinon.stub();
 
     _.times(size, function () {
-      const d = Promise.defer();
+      const d = createDefer(Promise);
       // overwrite the defer methods with the stub
       d.resolve = stub;
       d.reject = stub;

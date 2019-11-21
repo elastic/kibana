@@ -18,10 +18,9 @@
  */
 
 import _ from 'lodash';
-import { pushFilterBarFilters } from '../../filter_manager/push_filters';
+import { pushFilterBarFilters } from '../push_filters';
 import { onBrushEvent } from './brush_event';
-import { uniqFilters } from '../../filter_manager/lib/uniq_filters';
-import { toggleFilterNegated } from '@kbn/es-query';
+import { uniqFilters, esFilters } from '../../../../../plugins/data/public';
 
 /**
  * For terms aggregations on `__other__` buckets, this assembles a list of applicable filter
@@ -95,7 +94,7 @@ const createFiltersFromEvent = (event) => {
     if (filter) {
       filter.forEach(f => {
         if (event.negate) {
-          f = toggleFilterNegated(f);
+          f = esFilters.toggleFilterNegated(f);
         }
         filters.push(f);
       });
@@ -116,13 +115,9 @@ const VisFiltersProvider = (getAppState, $timeout) => {
     }
   };
 
-
   return {
     pushFilters,
-    brush: (event) => {
-      onBrushEvent(event, getAppState());
-    },
   };
 };
 
-export { VisFiltersProvider, createFilter, createFiltersFromEvent };
+export { VisFiltersProvider, createFilter, createFiltersFromEvent, onBrushEvent };

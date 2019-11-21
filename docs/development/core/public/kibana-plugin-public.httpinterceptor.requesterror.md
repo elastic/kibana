@@ -4,10 +4,12 @@
 
 ## HttpInterceptor.requestError() method
 
+Define an interceptor to be executed if a request interceptor throws an error or returns a rejected Promise.
+
 <b>Signature:</b>
 
 ```typescript
-requestError?(httpErrorRequest: HttpErrorRequest, controller: HttpInterceptController): Promise<Request> | Request | void;
+requestError?(httpErrorRequest: HttpErrorRequest, controller: IHttpInterceptController): Promise<Request> | Request | void;
 ```
 
 ## Parameters
@@ -15,7 +17,7 @@ requestError?(httpErrorRequest: HttpErrorRequest, controller: HttpInterceptContr
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  httpErrorRequest | <code>HttpErrorRequest</code> |  |
-|  controller | <code>HttpInterceptController</code> |  |
+|  controller | <code>IHttpInterceptController</code> |  |
 
 <b>Returns:</b>
 

@@ -13,6 +13,7 @@ import React, {
 
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { JobGroup } from '../job_group';
+import { getSelectedJobIdFromUrl, clearSelectedJobIdFromUrl } from '../utils';
 
 import {
   EuiSearchBar,
@@ -56,10 +57,30 @@ class JobFilterBarUI extends Component {
     this.setFilters = props.setFilters;
   }
 
+  urlFilterIdCleared = false;
+
+  componentDidMount() {
+    // If job id is selected in url, filter table to that id
+    const selectedId = getSelectedJobIdFromUrl(window.location.href);
+    if (selectedId !== undefined) {
+      this.setState({
+        selectedId
+      }, () => {
+        // trigger onChange with query for job id to trigger table filter
+        const query = EuiSearchBar.Query.parse(selectedId);
+        this.onChange({ query });
+      });
+    }
+  }
+
   onChange = ({ query, error }) => {
     if (error) {
       this.setState({ error });
     } else {
+      if (query.text === '' && this.urlFilterIdCleared === false) {
+        this.urlFilterIdCleared = true;
+        clearSelectedJobIdFromUrl(window.location.href);
+      }
       let clauses = [];
       if (query && query.ast !== undefined && query.ast.clauses !== undefined) {
         clauses = query.ast.clauses;
@@ -71,7 +92,7 @@ class JobFilterBarUI extends Component {
 
   render() {
     const { intl } = this.props;
-    const { error } = this.state;
+    const { error,  selectedId } = this.state;
     const filters = [
       {
         type: 'field_value_toggle_group',
@@ -133,10 +154,12 @@ class JobFilterBarUI extends Component {
       }
 
     ];
-
+    // if prop flag for default filter set to true
+    // set defaultQuery to job id and force trigger filter with onChange - pass it the query object for the job id
     return (
       <EuiFlexGroup direction="column">
         <EuiFlexItem data-test-subj="mlJobListSearchBar" grow={false}>
+          {selectedId === undefined &&
           <EuiSearchBar
             box={{
               incremental: true,
@@ -145,6 +168,17 @@ class JobFilterBarUI extends Component {
             onChange={this.onChange}
             className="mlJobFilterBar"
           />
+          }
+          {selectedId !== undefined &&
+          <EuiSearchBar
+            box={{
+              incremental: true,
+            }}
+            defaultQuery={selectedId}
+            filters={filters}
+            onChange={this.onChange}
+            className="mlJobFilterBar"
+          />}
           <EuiFormRow
             fullWidth
             isInvalid={(error !== null)}

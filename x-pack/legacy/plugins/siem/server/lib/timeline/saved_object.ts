@@ -15,6 +15,7 @@ import {
   PageInfoTimeline,
   SortTimeline,
   ResponseFavoriteTimeline,
+  TimelineResult,
 } from '../../graphql/types';
 import { FrameworkRequest, internalFrameworkRequest } from '../framework';
 import { NoteSavedObject } from '../note/types';
@@ -49,7 +50,7 @@ export class Timeline {
     request: FrameworkRequest,
     timelineId: string
   ): Promise<TimelineSavedObject> {
-    return await this.getSavedTimeline(request, timelineId);
+    return this.getSavedTimeline(request, timelineId);
   }
 
   public async getAllTimeline(
@@ -60,6 +61,7 @@ export class Timeline {
     sort: SortTimeline | null
   ): Promise<ResponseTimelines> {
     const options: SavedObjectsFindOptions = {
+      type: timelineSavedObjectType,
       perPage: pageInfo != null ? pageInfo.pageSize : undefined,
       page: pageInfo != null ? pageInfo.pageIndex : undefined,
       search: search != null ? search : undefined,
@@ -70,61 +72,75 @@ export class Timeline {
       sortOrder: sort != null ? sort.sortOrder : undefined,
     };
 
-    return await this.getAllSavedTimeline(request, options);
+    return this.getAllSavedTimeline(request, options);
   }
 
   public async persistFavorite(
     request: FrameworkRequest,
     timelineId: string | null
   ): Promise<ResponseFavoriteTimeline> {
-    let timeline: SavedTimeline = {};
-    if (timelineId != null) {
-      const {
-        eventIdToNoteIds,
-        notes,
-        noteIds,
-        pinnedEventIds,
-        pinnedEventsSaveObject,
-        savedObjectId,
-        version,
-        ...savedTimeline
-      } = await this.getBasicSavedTimeline(request, timelineId);
-      timelineId = savedObjectId;
-      timeline = savedTimeline;
-    }
     const userName = getOr(null, 'credentials.username', request[internalFrameworkRequest].auth);
     const fullName = getOr(null, 'credentials.fullname', request[internalFrameworkRequest].auth);
-    const userFavoriteTimeline = {
-      keySearch: userName != null ? convertStringToBase64(userName) : null,
-      favoriteDate: new Date().valueOf(),
-      fullName,
-      userName,
-    };
-    if (timeline.favorite != null) {
-      const alreadyExistsTimelineFavoriteByUser = timeline.favorite.findIndex(
-        user => user.userName === userName
-      );
+    try {
+      let timeline: SavedTimeline = {};
+      if (timelineId != null) {
+        const {
+          eventIdToNoteIds,
+          notes,
+          noteIds,
+          pinnedEventIds,
+          pinnedEventsSaveObject,
+          savedObjectId,
+          version,
+          ...savedTimeline
+        } = await this.getBasicSavedTimeline(request, timelineId);
+        timelineId = savedObjectId; // eslint-disable-line no-param-reassign
+        timeline = savedTimeline;
+      }
 
-      timeline.favorite =
-        alreadyExistsTimelineFavoriteByUser > -1
-          ? [
-              ...timeline.favorite.slice(0, alreadyExistsTimelineFavoriteByUser),
-              ...timeline.favorite.slice(alreadyExistsTimelineFavoriteByUser + 1),
-            ]
-          : [...timeline.favorite, userFavoriteTimeline];
-    } else if (timeline.favorite == null) {
-      timeline.favorite = [userFavoriteTimeline];
+      const userFavoriteTimeline = {
+        keySearch: userName != null ? convertStringToBase64(userName) : null,
+        favoriteDate: new Date().valueOf(),
+        fullName,
+        userName,
+      };
+      if (timeline.favorite != null) {
+        const alreadyExistsTimelineFavoriteByUser = timeline.favorite.findIndex(
+          user => user.userName === userName
+        );
+
+        timeline.favorite =
+          alreadyExistsTimelineFavoriteByUser > -1
+            ? [
+                ...timeline.favorite.slice(0, alreadyExistsTimelineFavoriteByUser),
+                ...timeline.favorite.slice(alreadyExistsTimelineFavoriteByUser + 1),
+              ]
+            : [...timeline.favorite, userFavoriteTimeline];
+      } else if (timeline.favorite == null) {
+        timeline.favorite = [userFavoriteTimeline];
+      }
+
+      const persistResponse = await this.persistTimeline(request, timelineId, null, timeline);
+      return {
+        savedObjectId: persistResponse.timeline.savedObjectId,
+        version: persistResponse.timeline.version,
+        favorite:
+          persistResponse.timeline.favorite != null
+            ? persistResponse.timeline.favorite.filter(fav => fav.userName === userName)
+            : [],
+      };
+    } catch (err) {
+      if (getOr(null, 'output.statusCode', err) === 403) {
+        return {
+          savedObjectId: '',
+          version: '',
+          favorite: [],
+          code: 403,
+          message: err.message,
+        };
+      }
+      throw err;
     }
-
-    const persistResponse = await this.persistTimeline(request, timelineId, null, timeline);
-    return {
-      savedObjectId: persistResponse.timeline.savedObjectId,
-      version: persistResponse.timeline.version,
-      favorite:
-        persistResponse.timeline.favorite != null
-          ? persistResponse.timeline.favorite.filter(fav => fav.userName === userName)
-          : [],
-    };
   }
 
   public async persistTimeline(
@@ -133,27 +149,26 @@ export class Timeline {
     version: string | null,
     timeline: SavedTimeline
   ): Promise<ResponseTimeline> {
-    if (timelineId == null) {
-      // Create new timeline
-      return {
-        code: 200,
-        message: 'success',
-        timeline: convertSavedObjectToSavedTimeline(
-          await this.libs.savedObjects
-            .getScopedSavedObjectsClient(request[internalFrameworkRequest])
-            .create(
-              timelineSavedObjectType,
-              pickSavedTimeline(
-                timelineId,
-                timeline,
-                request[internalFrameworkRequest].auth || null
-              )
-            )
-        ),
-      };
-    }
-
     try {
+      if (timelineId == null) {
+        // Create new timeline
+        return {
+          code: 200,
+          message: 'success',
+          timeline: convertSavedObjectToSavedTimeline(
+            await this.libs.savedObjects
+              .getScopedSavedObjectsClient(request[internalFrameworkRequest])
+              .create(
+                timelineSavedObjectType,
+                pickSavedTimeline(
+                  timelineId,
+                  timeline,
+                  request[internalFrameworkRequest].auth || null
+                )
+              )
+          ),
+        };
+      }
       // Update Timeline
       await this.libs.savedObjects
         .getScopedSavedObjectsClient(request[internalFrameworkRequest])
@@ -171,11 +186,25 @@ export class Timeline {
         timeline: await this.getSavedTimeline(request, timelineId),
       };
     } catch (err) {
-      if (this.libs.savedObjects.SavedObjectsClient.errors.isConflictError(err)) {
+      if (
+        timelineId != null &&
+        this.libs.savedObjects.SavedObjectsClient.errors.isConflictError(err)
+      ) {
         return {
           code: 409,
           message: err.message,
           timeline: await this.getSavedTimeline(request, timelineId),
+        };
+      } else if (getOr(null, 'output.statusCode', err) === 403) {
+        const timelineToReturn: TimelineResult = {
+          ...timeline,
+          savedObjectId: '',
+          version: '',
+        };
+        return {
+          code: 403,
+          message: err.message,
+          timeline: timelineToReturn,
         };
       }
       throw err;
@@ -238,10 +267,7 @@ export class Timeline {
       }`;
     }
 
-    const savedObjects = await savedObjectsClient.find({
-      type: timelineSavedObjectType,
-      ...options,
-    });
+    const savedObjects = await savedObjectsClient.find(options);
 
     const timelinesWithNotesAndPinnedEvents = await Promise.all(
       savedObjects.saved_objects.map(async savedObject => {

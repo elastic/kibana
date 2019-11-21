@@ -18,8 +18,9 @@
  */
 
 import { Readable } from 'stream';
-import { SavedObject } from '../service';
+import { SavedObject } from '../types';
 import { resolveImportErrors } from './resolve_import_errors';
+import { savedObjectsClientMock } from '../../mocks';
 
 describe('resolveImportErrors()', () => {
   const savedObjects: SavedObject[] = [
@@ -62,16 +63,7 @@ describe('resolveImportErrors()', () => {
       ],
     },
   ];
-  const savedObjectsClient = {
-    errors: {} as any,
-    bulkCreate: jest.fn(),
-    bulkGet: jest.fn(),
-    create: jest.fn(),
-    delete: jest.fn(),
-    find: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-  };
+  const savedObjectsClient = savedObjectsClientMock.create();
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -79,8 +71,9 @@ describe('resolveImportErrors()', () => {
 
   test('works with empty parameters', async () => {
     const readStream = new Readable({
+      objectMode: true,
       read() {
-        savedObjects.forEach(obj => this.push(JSON.stringify(obj) + '\n'));
+        savedObjects.forEach(obj => this.push(obj));
         this.push(null);
       },
     });
@@ -95,18 +88,19 @@ describe('resolveImportErrors()', () => {
       supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
     });
     expect(result).toMatchInlineSnapshot(`
-Object {
-  "success": true,
-  "successCount": 0,
-}
-`);
+      Object {
+        "success": true,
+        "successCount": 0,
+      }
+    `);
     expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`[MockFunction]`);
   });
 
   test('works with retries', async () => {
     const readStream = new Readable({
+      objectMode: true,
       read() {
-        savedObjects.forEach(obj => this.push(JSON.stringify(obj) + '\n'));
+        savedObjects.forEach(obj => this.push(obj));
         this.push(null);
       },
     });
@@ -128,42 +122,46 @@ Object {
       supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
     });
     expect(result).toMatchInlineSnapshot(`
-Object {
-  "success": true,
-  "successCount": 1,
-}
-`);
+      Object {
+        "success": true,
+        "successCount": 1,
+      }
+    `);
     expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        Object {
-          "attributes": Object {
-            "title": "My Visualization",
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Array [
+              Object {
+                "attributes": Object {
+                  "title": "My Visualization",
+                },
+                "id": "3",
+                "migrationVersion": Object {},
+                "references": Array [],
+                "type": "visualization",
+              },
+            ],
+            Object {
+              "namespace": undefined,
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
           },
-          "id": "3",
-          "migrationVersion": Object {},
-          "references": Array [],
-          "type": "visualization",
-        },
-      ],
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`);
+        ],
+      }
+    `);
   });
 
   test('works with overwrites', async () => {
     const readStream = new Readable({
+      objectMode: true,
       read() {
-        savedObjects.forEach(obj => this.push(JSON.stringify(obj) + '\n'));
+        savedObjects.forEach(obj => this.push(obj));
         this.push(null);
       },
     });
@@ -185,45 +183,47 @@ Object {
       supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
     });
     expect(result).toMatchInlineSnapshot(`
-Object {
-  "success": true,
-  "successCount": 1,
-}
-`);
-    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        Object {
-          "attributes": Object {
-            "title": "My Index Pattern",
-          },
-          "id": "1",
-          "migrationVersion": Object {},
-          "references": Array [],
-          "type": "index-pattern",
-        },
-      ],
       Object {
-        "overwrite": true,
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`);
+        "success": true,
+        "successCount": 1,
+      }
+    `);
+    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Array [
+              Object {
+                "attributes": Object {
+                  "title": "My Index Pattern",
+                },
+                "id": "1",
+                "migrationVersion": Object {},
+                "references": Array [],
+                "type": "index-pattern",
+              },
+            ],
+            Object {
+              "namespace": undefined,
+              "overwrite": true,
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      }
+    `);
   });
 
   test('works wtih replaceReferences', async () => {
     const readStream = new Readable({
+      objectMode: true,
       read() {
-        savedObjects.forEach(obj => this.push(JSON.stringify(obj) + '\n'));
+        savedObjects.forEach(obj => this.push(obj));
         this.push(null);
       },
     });
@@ -251,48 +251,52 @@ Object {
       supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
     });
     expect(result).toMatchInlineSnapshot(`
-Object {
-  "success": true,
-  "successCount": 1,
-}
-`);
+      Object {
+        "success": true,
+        "successCount": 1,
+      }
+    `);
     expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        Object {
-          "attributes": Object {
-            "title": "My Dashboard",
-          },
-          "id": "4",
-          "migrationVersion": Object {},
-          "references": Array [
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Array [
+              Object {
+                "attributes": Object {
+                  "title": "My Dashboard",
+                },
+                "id": "4",
+                "migrationVersion": Object {},
+                "references": Array [
+                  Object {
+                    "id": "13",
+                    "name": "panel_0",
+                    "type": "visualization",
+                  },
+                ],
+                "type": "dashboard",
+              },
+            ],
             Object {
-              "id": "13",
-              "name": "panel_0",
-              "type": "visualization",
+              "namespace": undefined,
             },
           ],
-          "type": "dashboard",
-        },
-      ],
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`);
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      }
+    `);
   });
 
   test('extracts errors for conflicts', async () => {
     const readStream = new Readable({
+      objectMode: true,
       read() {
-        savedObjects.forEach(obj => this.push(JSON.stringify(obj) + '\n'));
+        savedObjects.forEach(obj => this.push(obj));
         this.push(null);
       },
     });
@@ -304,6 +308,8 @@ Object {
           statusCode: 409,
           message: 'conflict',
         },
+        attributes: {},
+        references: [],
       })),
     });
     const result = await resolveImportErrors({
@@ -319,82 +325,79 @@ Object {
       supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
     });
     expect(result).toMatchInlineSnapshot(`
-Object {
-  "errors": Array [
-    Object {
-      "error": Object {
-        "type": "conflict",
-      },
-      "id": "1",
-      "title": "My Index Pattern",
-      "type": "index-pattern",
-    },
-    Object {
-      "error": Object {
-        "type": "conflict",
-      },
-      "id": "2",
-      "title": "My Search",
-      "type": "search",
-    },
-    Object {
-      "error": Object {
-        "type": "conflict",
-      },
-      "id": "3",
-      "title": "My Visualization",
-      "type": "visualization",
-    },
-    Object {
-      "error": Object {
-        "type": "conflict",
-      },
-      "id": "4",
-      "title": "My Dashboard",
-      "type": "dashboard",
-    },
-  ],
-  "success": false,
-  "successCount": 0,
-}
-`);
+      Object {
+        "errors": Array [
+          Object {
+            "error": Object {
+              "type": "conflict",
+            },
+            "id": "1",
+            "title": "My Index Pattern",
+            "type": "index-pattern",
+          },
+          Object {
+            "error": Object {
+              "type": "conflict",
+            },
+            "id": "2",
+            "title": "My Search",
+            "type": "search",
+          },
+          Object {
+            "error": Object {
+              "type": "conflict",
+            },
+            "id": "3",
+            "title": "My Visualization",
+            "type": "visualization",
+          },
+          Object {
+            "error": Object {
+              "type": "conflict",
+            },
+            "id": "4",
+            "title": "My Dashboard",
+            "type": "dashboard",
+          },
+        ],
+        "success": false,
+        "successCount": 0,
+      }
+    `);
   });
 
   test('validates references', async () => {
     const readStream = new Readable({
+      objectMode: true,
       read() {
-        this.push(
-          JSON.stringify({
-            id: '1',
-            type: 'search',
-            attributes: {
-              title: 'My Search',
+        this.push({
+          id: '1',
+          type: 'search',
+          attributes: {
+            title: 'My Search',
+          },
+          references: [
+            {
+              name: 'ref_0',
+              type: 'index-pattern',
+              id: '2',
             },
-            references: [
-              {
-                name: 'ref_0',
-                type: 'index-pattern',
-                id: '2',
-              },
-            ],
-          }) + '\n'
-        );
-        this.push(
-          JSON.stringify({
-            id: '3',
-            type: 'visualization',
-            attributes: {
-              title: 'My Visualization',
+          ],
+        });
+        this.push({
+          id: '3',
+          type: 'visualization',
+          attributes: {
+            title: 'My Visualization',
+          },
+          references: [
+            {
+              name: 'ref_0',
+              type: 'search',
+              id: '1',
             },
-            references: [
-              {
-                name: 'ref_0',
-                type: 'search',
-                id: '1',
-              },
-            ],
-          }) + '\n'
-        );
+          ],
+        });
         this.push(null);
       },
     });
@@ -407,6 +410,8 @@ Object {
             statusCode: 404,
             message: 'Not found',
           },
+          attributes: {},
+          references: [],
         },
       ],
     });
@@ -431,63 +436,67 @@ Object {
       supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
     });
     expect(result).toMatchInlineSnapshot(`
-Object {
-  "errors": Array [
-    Object {
-      "error": Object {
-        "blocking": Array [
+      Object {
+        "errors": Array [
           Object {
-            "id": "3",
-            "type": "visualization",
+            "error": Object {
+              "blocking": Array [
+                Object {
+                  "id": "3",
+                  "type": "visualization",
+                },
+              ],
+              "references": Array [
+                Object {
+                  "id": "2",
+                  "type": "index-pattern",
+                },
+              ],
+              "type": "missing_references",
+            },
+            "id": "1",
+            "title": "My Search",
+            "type": "search",
           },
         ],
-        "references": Array [
-          Object {
-            "id": "2",
-            "type": "index-pattern",
-          },
-        ],
-        "type": "missing_references",
-      },
-      "id": "1",
-      "title": "My Search",
-      "type": "search",
-    },
-  ],
-  "success": false,
-  "successCount": 0,
-}
-`);
+        "success": false,
+        "successCount": 0,
+      }
+    `);
     expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        Object {
-          "fields": Array [
-            "id",
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Array [
+              Object {
+                "fields": Array [
+                  "id",
+                ],
+                "id": "2",
+                "type": "index-pattern",
+              },
+            ],
+            Object {
+              "namespace": undefined,
+            },
           ],
-          "id": "2",
-          "type": "index-pattern",
-        },
-      ],
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`);
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      }
+    `);
   });
 
   test('validates object types', async () => {
     const readStream = new Readable({
+      objectMode: true,
       read() {
-        savedObjects.forEach(obj => this.push(JSON.stringify(obj) + '\n'));
-        this.push('{"id":"1","type":"wigwags","attributes":{"title":"my title"},"references":[]}');
+        savedObjects.forEach(obj => this.push(obj));
+        this.push({ id: '1', type: 'wigwags', attributes: { title: 'my title' }, references: [] });
         this.push(null);
       },
     });
@@ -509,21 +518,67 @@ Object {
       supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
     });
     expect(result).toMatchInlineSnapshot(`
-Object {
-  "errors": Array [
-    Object {
-      "error": Object {
-        "type": "unsupported_type",
-      },
-      "id": "1",
-      "title": "my title",
-      "type": "wigwags",
-    },
-  ],
-  "success": false,
-  "successCount": 0,
-}
-`);
+      Object {
+        "errors": Array [
+          Object {
+            "error": Object {
+              "type": "unsupported_type",
+            },
+            "id": "1",
+            "title": "my title",
+            "type": "wigwags",
+          },
+        ],
+        "success": false,
+        "successCount": 0,
+      }
+    `);
     expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`[MockFunction]`);
+  });
+
+  test('uses namespace when provided', async () => {
+    const readStream = new Readable({
+      objectMode: true,
+      read() {
+        savedObjects.forEach(obj => this.push(obj));
+        this.push(null);
+      },
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: savedObjects.filter(obj => obj.type === 'index-pattern' && obj.id === '1'),
+    });
+    const result = await resolveImportErrors({
+      readStream,
+      objectLimit: 4,
+      retries: [
+        {
+          type: 'index-pattern',
+          id: '1',
+          overwrite: true,
+          replaceReferences: [],
+        },
+      ],
+      savedObjectsClient,
+      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
+      namespace: 'foo',
+    });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "success": true,
+        "successCount": 1,
+      }
+    `);
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [
+        {
+          attributes: { title: 'My Index Pattern' },
+          id: '1',
+          migrationVersion: {},
+          references: [],
+          type: 'index-pattern',
+        },
+      ],
+      { namespace: 'foo', overwrite: true }
+    );
   });
 });

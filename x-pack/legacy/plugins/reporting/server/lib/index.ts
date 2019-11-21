@@ -5,10 +5,12 @@
  */
 
 // @ts-ignore untyped module
-export { createTaggedLogger } from './create_tagged_logger';
+export { exportTypesRegistryFactory } from './export_types_registry';
 // @ts-ignore untyped module
-export { cryptoFactory } from './crypto';
-// @ts-ignore untyped module
-export { oncePerServer } from './once_per_server';
+export { checkLicenseFactory } from './check_license';
 
 export { LevelLogger } from './level_logger';
+export { createQueueFactory } from './create_queue';
+export { cryptoFactory } from './crypto';
+export { oncePerServer } from './once_per_server';
+export { runValidations } from './validate';

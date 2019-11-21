@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './influencers_list';
+export { InfluencersList } from './influencers_list';

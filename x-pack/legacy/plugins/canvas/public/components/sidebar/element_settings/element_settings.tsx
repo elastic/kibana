@@ -6,12 +6,13 @@
 
 import React, { FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
-import { EuiSpacer, EuiTabbedContent } from '@elastic/eui';
+import { EuiTabbedContent } from '@elastic/eui';
 // @ts-ignore unconverted component
 import { Datasource } from '../../datasource';
 // @ts-ignore unconverted component
 import { FunctionFormList } from '../../function_form_list';
-import { PositionedElement } from '../../../lib/positioned_element';
+import { PositionedElement } from '../../../../types';
+import { ComponentStrings } from '../../../../i18n';
 
 interface Props {
   /**
@@ -20,14 +21,15 @@ interface Props {
   element: PositionedElement;
 }
 
+const { ElementSettings: strings } = ComponentStrings;
+
 export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
   const tabs = [
     {
       id: 'edit',
-      name: 'Display',
+      name: strings.getDisplayTabLabel(),
       content: (
         <div className="canvasSidebar__pop">
-          <EuiSpacer size="s" />
           <div className="canvasSidebar--args">
             <FunctionFormList element={element} />
           </div>
@@ -36,10 +38,9 @@ export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
     },
     {
       id: 'data',
-      name: 'Data',
+      name: strings.getDataTabLabel(),
       content: (
         <div className="canvasSidebar__pop">
-          <EuiSpacer size="s" />
           <Datasource />
         </div>
       ),

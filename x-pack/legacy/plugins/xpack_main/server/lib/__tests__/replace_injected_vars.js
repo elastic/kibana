@@ -8,17 +8,19 @@ import sinon from 'sinon';
 import expect from '@kbn/expect';
 
 import { replaceInjectedVars } from '../replace_injected_vars';
+import { KibanaRequest } from '../../../../../../../src/core/server';
 
-const buildRequest = (telemetryOptedIn = null, path = '/app/kibana') => {
+const buildRequest = (path = '/app/kibana') => {
   const get = sinon.stub();
-  if (telemetryOptedIn === null) {
-    get.withArgs('telemetry', 'telemetry').returns(Promise.reject(new Error('not found exception')));
-  } else {
-    get.withArgs('telemetry', 'telemetry').returns(Promise.resolve({ attributes: { enabled: telemetryOptedIn } }));
-  }
 
   return {
     path,
+    route: { settings: {} },
+    raw: {
+      req: {
+        socket: {}
+      }
+    },
     getSavedObjectsClient: () => {
       return {
         get,
@@ -43,14 +45,16 @@ describe('replaceInjectedVars uiExport', () => {
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
     expect(newVars).to.eql({
       a: 1,
-      telemetryOptedIn: null,
       xpackInitialInfo: {
         b: 1
       },
     });
 
-    sinon.assert.calledOnce(server.plugins.security.isAuthenticated);
-    expect(server.plugins.security.isAuthenticated.firstCall.args[0]).to.be(request);
+    sinon.assert.calledOnce(server.newPlatform.setup.plugins.security.authc.isAuthenticated);
+    sinon.assert.calledWithExactly(
+      server.newPlatform.setup.plugins.security.authc.isAuthenticated,
+      sinon.match.instanceOf(KibanaRequest)
+    );
   });
 
   it('sends the xpack info if security plugin is disabled', async () => {
@@ -58,11 +62,11 @@ describe('replaceInjectedVars uiExport', () => {
     const request = buildRequest();
     const server = mockServer();
     delete server.plugins.security;
+    delete server.newPlatform.setup.plugins.security;
 
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
     expect(newVars).to.eql({
       a: 1,
-      telemetryOptedIn: null,
       xpackInitialInfo: {
         b: 1
       },
@@ -78,7 +82,6 @@ describe('replaceInjectedVars uiExport', () => {
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
     expect(newVars).to.eql({
       a: 1,
-      telemetryOptedIn: null,
       xpackInitialInfo: {
         b: 1
       },
@@ -87,14 +90,13 @@ describe('replaceInjectedVars uiExport', () => {
 
   it('respects the telemetry opt-in document when opted-out', async () => {
     const originalInjectedVars = { a: 1 };
-    const request = buildRequest(false);
+    const request = buildRequest();
     const server = mockServer();
     server.plugins.xpack_main.info.license.isOneOf.returns(true);
 
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
     expect(newVars).to.eql({
       a: 1,
-      telemetryOptedIn: false,
       xpackInitialInfo: {
         b: 1
       },
@@ -103,14 +105,13 @@ describe('replaceInjectedVars uiExport', () => {
 
   it('respects the telemetry opt-in document when opted-in', async () => {
     const originalInjectedVars = { a: 1 };
-    const request = buildRequest(true);
+    const request = buildRequest();
     const server = mockServer();
     server.plugins.xpack_main.info.license.isOneOf.returns(true);
 
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
     expect(newVars).to.eql({
       a: 1,
-      telemetryOptedIn: true,
       xpackInitialInfo: {
         b: 1
       },
@@ -126,7 +127,6 @@ describe('replaceInjectedVars uiExport', () => {
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
     expect(newVars).to.eql({
       a: 1,
-      telemetryOptedIn: false,
       xpackInitialInfo: {
         b: 1
       },
@@ -137,7 +137,7 @@ describe('replaceInjectedVars uiExport', () => {
     const originalInjectedVars = { a: 1 };
     const request = buildRequest();
     const server = mockServer();
-    server.plugins.security.isAuthenticated.returns(false);
+    server.newPlatform.setup.plugins.security.authc.isAuthenticated.returns(false);
 
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
     expect(newVars).to.eql(originalInjectedVars);
@@ -163,7 +163,6 @@ describe('replaceInjectedVars uiExport', () => {
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
     expect(newVars).to.eql({
       a: 1,
-      telemetryOptedIn: null,
       xpackInitialInfo: undefined,
       uiCapabilities: {
         navLinks: { foo: true },
@@ -191,10 +190,13 @@ describe('replaceInjectedVars uiExport', () => {
 function mockServer() {
   const getLicenseCheckResults = sinon.stub().returns({});
   return {
+    newPlatform: {
+      setup: {
+        plugins: { security: { authc: { isAuthenticated: sinon.stub().returns(true) } } }
+      }
+    },
     plugins: {
-      security: {
-        isAuthenticated: sinon.stub().returns(true)
-      },
+      security: {},
       xpack_main: {
         getFeatures: () => [{
           id: 'mockFeature',

@@ -39,9 +39,7 @@ export const queryEsSQL = (elasticsearchClient, { count, query, filter, timezone
     .catch(e => {
       if (e.message.indexOf('parsing_exception') > -1) {
         throw new Error(
-          `Couldn't parse Elasticsearch SQL query. You may need to add double quotes to names containing special characters. Check your query and try again. Error: ${
-            e.message
-          }`
+          `Couldn't parse Elasticsearch SQL query. You may need to add double quotes to names containing special characters. Check your query and try again. Error: ${e.message}`
         );
       }
       throw new Error(`Unexpected error from Elasticsearch: ${e.message}`);

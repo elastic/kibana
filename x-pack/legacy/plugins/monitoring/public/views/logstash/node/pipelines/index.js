@@ -22,8 +22,9 @@ import { MonitoringViewBaseEuiTableController } from '../../../';
 import { I18nContext } from 'ui/i18n';
 import { PipelineListing } from '../../../../components/logstash/pipeline_listing/pipeline_listing';
 import { DetailStatus } from '../../../../components/logstash/detail_status';
+import { CODE_PATH_LOGSTASH } from '../../../../../common/constants';
 
-const getPageData = ($injector) => {
+const getPageData = ($injector, _api = undefined, routeOptions = {}) => {
   const $route = $injector.get('$route');
   const $http = $injector.get('$http');
   const globalState = $injector.get('globalState');
@@ -38,7 +39,8 @@ const getPageData = ($injector) => {
     timeRange: {
       min: timeBounds.min.toISOString(),
       max: timeBounds.max.toISOString()
-    }
+    },
+    ...routeOptions
   })
     .then(response => response.data)
     .catch((err) => {
@@ -67,9 +69,8 @@ uiRoutes
     resolve: {
       clusters(Private) {
         const routeInit = Private(routeInitProvider);
-        return routeInit();
+        return routeInit({ codePaths: [CODE_PATH_LOGSTASH] });
       },
-      pageData: getPageData
     },
     controller: class extends MonitoringViewBaseEuiTableController {
       constructor($injector, $scope) {
@@ -81,8 +82,10 @@ uiRoutes
           getPageData,
           reactNodeId: 'monitoringLogstashNodePipelinesApp',
           $scope,
-          $injector
+          $injector,
+          fetchDataImmediately: false // We want to apply pagination before sending the first request
         });
+
 
         $scope.$watch(() => this.data, data => {
           if (!data || !data.nodeSummary) {
@@ -96,17 +99,21 @@ uiRoutes
             }
           }));
 
+          const pagination = {
+            ...this.pagination,
+            totalItemCount: data.totalPipelineCount
+          };
+
           this.renderReact(
             <I18nContext>
               <PipelineListing
                 className="monitoringLogstashPipelinesTable"
                 onBrush={this.onBrush}
+                zoomInfo={this.zoomInfo}
                 stats={data.nodeSummary}
                 statusComponent={DetailStatus}
                 data={data.pipelines}
-                sorting={this.sorting}
-                pagination={this.pagination}
-                onTableChange={this.onTableChange}
+                {...this.getPaginationTableProps(pagination)}
                 dateFormat={config.get('dateFormat')}
                 upgradeMessage={makeUpgradeMessage(data.nodeSummary.version, i18n)}
                 angular={{

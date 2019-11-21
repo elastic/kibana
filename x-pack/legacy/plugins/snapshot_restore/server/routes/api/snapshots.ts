@@ -4,13 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Router, RouterRouteHandler } from '../../../../../server/lib/create_router';
-import { SnapshotDetails } from '../../../common/types';
-import { deserializeSnapshotDetails } from '../../lib';
-import { SnapshotDetailsEs } from '../../types';
+import {
+  wrapEsError,
+  wrapCustomError,
+} from '../../../../../server/lib/create_router/error_wrappers';
+import { SnapshotDetails, SnapshotDetailsEs } from '../../../common/types';
+import { deserializeSnapshotDetails } from '../../../common/lib';
+import { Plugins } from '../../../shim';
+import { getManagedRepositoryName } from '../../lib';
 
-export function registerSnapshotsRoutes(router: Router) {
+let callWithInternalUser: any;
+
+export function registerSnapshotsRoutes(router: Router, plugins: Plugins) {
+  callWithInternalUser = plugins.elasticsearch.getCluster('data').callWithInternalUser;
   router.get('snapshots', getAllHandler);
   router.get('snapshots/{repository}/{snapshot}', getOneHandler);
+  router.delete('snapshots/{ids}', deleteHandler);
 }
 
 export const getAllHandler: RouterRouteHandler = async (
@@ -19,8 +28,27 @@ export const getAllHandler: RouterRouteHandler = async (
 ): Promise<{
   snapshots: SnapshotDetails[];
   errors: any[];
+  policies: string[];
   repositories: string[];
+  managedRepository?: string;
 }> => {
+  const managedRepository = await getManagedRepositoryName(callWithInternalUser);
+  let policies: string[] = [];
+
+  // Attempt to retrieve policies
+  // This could fail if user doesn't have access to read SLM policies
+  try {
+    const policiesByName = await callWithRequest('slm.policies');
+    policies = Object.keys(policiesByName);
+  } catch (e) {
+    // Silently swallow error as policy names aren't required in UI
+  }
+
+  /*
+   * TODO: For 8.0, replace the logic in this handler with one call to `GET /_snapshot/_all/_all`
+   * when no repositories bug is fixed: https://github.com/elastic/elasticsearch/issues/43547
+   */
+
   const repositoriesByName = await callWithRequest('snapshot.getRepository', {
     repository: '_all',
   });
@@ -28,7 +56,7 @@ export const getAllHandler: RouterRouteHandler = async (
   const repositoryNames = Object.keys(repositoriesByName);
 
   if (repositoryNames.length === 0) {
-    return { snapshots: [], errors: [], repositories: [] };
+    return { snapshots: [], errors: [], repositories: [], policies };
   }
 
   const snapshots: SnapshotDetails[] = [];
@@ -39,16 +67,23 @@ export const getAllHandler: RouterRouteHandler = async (
     try {
       // If any of these repositories 504 they will cost the request significant time.
       const {
-        snapshots: fetchedSnapshots,
-      }: { snapshots: SnapshotDetailsEs[] } = await callWithRequest('snapshot.get', {
+        responses: fetchedResponses,
+      }: {
+        responses: Array<{
+          repository: 'string';
+          snapshots: SnapshotDetailsEs[];
+        }>;
+      } = await callWithRequest('snapshot.get', {
         repository,
         snapshot: '_all',
         ignore_unavailable: true, // Allow request to succeed even if some snapshots are unavailable.
       });
 
       // Decorate each snapshot with the repository with which it's associated.
-      fetchedSnapshots.forEach((snapshot: SnapshotDetailsEs) => {
-        snapshots.push(deserializeSnapshotDetails(repository, snapshot));
+      fetchedResponses.forEach(({ snapshots: fetchedSnapshots }) => {
+        fetchedSnapshots.forEach(snapshot => {
+          snapshots.push(deserializeSnapshotDetails(repository, snapshot, managedRepository));
+        });
       });
 
       repositories.push(repository);
@@ -63,6 +98,7 @@ export const getAllHandler: RouterRouteHandler = async (
 
   return {
     snapshots,
+    policies,
     repositories,
     errors,
   };
@@ -73,11 +109,62 @@ export const getOneHandler: RouterRouteHandler = async (
   callWithRequest
 ): Promise<SnapshotDetails> => {
   const { repository, snapshot } = req.params;
-  const { snapshots }: { snapshots: SnapshotDetailsEs[] } = await callWithRequest('snapshot.get', {
+  const managedRepository = await getManagedRepositoryName(callWithInternalUser);
+  const {
+    responses: snapshotResponses,
+  }: {
+    responses: Array<{
+      repository: string;
+      snapshots: SnapshotDetailsEs[];
+      error?: any;
+    }>;
+  } = await callWithRequest('snapshot.get', {
     repository,
     snapshot,
   });
 
-  // If the snapshot is missing the endpoint will return a 404, so we'll never get to this point.
-  return deserializeSnapshotDetails(repository, snapshots[0]);
+  if (snapshotResponses && snapshotResponses[0] && snapshotResponses[0].snapshots) {
+    return deserializeSnapshotDetails(
+      repository,
+      snapshotResponses[0].snapshots[0],
+      managedRepository
+    );
+  }
+
+  // If snapshot doesn't exist, ES will return 200 with an error object, so manually throw 404 here
+  throw wrapCustomError(new Error('Snapshot not found'), 404);
+};
+
+export const deleteHandler: RouterRouteHandler = async (req, callWithRequest) => {
+  const { ids } = req.params;
+  const snapshotIds = ids.split(',');
+  const response: {
+    itemsDeleted: Array<{ snapshot: string; repository: string }>;
+    errors: any[];
+  } = {
+    itemsDeleted: [],
+    errors: [],
+  };
+
+  // We intentially perform deletion requests sequentially (blocking) instead of in parallel (non-blocking)
+  // because there can only be one snapshot deletion task performed at a time (ES restriction).
+  for (let i = 0; i < snapshotIds.length; i++) {
+    // IDs come in the format of `repository-name/snapshot-name`
+    // Extract the two parts by splitting at last occurrence of `/` in case
+    // repository name contains '/` (from older versions)
+    const id = snapshotIds[i];
+    const indexOfDivider = id.lastIndexOf('/');
+    const snapshot = id.substring(indexOfDivider + 1);
+    const repository = id.substring(0, indexOfDivider);
+    await callWithRequest('snapshot.delete', { snapshot, repository })
+      .then(() => response.itemsDeleted.push({ snapshot, repository }))
+      .catch(e =>
+        response.errors.push({
+          id: { snapshot, repository },
+          error: wrapEsError(e),
+        })
+      );
+  }
+
+  return response;
 };

@@ -4,37 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIcon } from '@elastic/eui';
+import { EuiButtonIcon, IconSize } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
-import styled from 'styled-components';
 
-export type PinRotation = 'rotate(0)' | 'rotate(45)';
+import * as i18n from '../../components/timeline/body/translations';
 
-export const getPinRotation = (pinned: boolean): PinRotation =>
-  pinned ? 'rotate(0)' : 'rotate(45)';
+export type PinIcon = 'pin' | 'pinFilled';
 
-const PinIcon = styled(EuiIcon)<{ transform: string }>`
-  overflow: hidden;
-  transform: ${({ transform }) => transform};
-`;
+export const getPinIcon = (pinned: boolean): PinIcon => (pinned ? 'pinFilled' : 'pin');
 
 interface Props {
   allowUnpinning: boolean;
-  pinned: boolean;
+  iconSize?: IconSize;
   onClick?: () => void;
+  pinned: boolean;
 }
 
-export const Pin = pure<Props>(({ allowUnpinning, pinned, onClick = noop }) => (
-  <PinIcon
-    cursor={allowUnpinning ? 'pointer' : 'not-allowed'}
-    color={pinned ? 'primary' : 'subdued'}
+export const Pin = pure<Props>(({ allowUnpinning, iconSize = 'm', onClick = noop, pinned }) => (
+  <EuiButtonIcon
+    aria-label={pinned ? i18n.PINNED : i18n.UNPINNED}
     data-test-subj="pin"
+    iconSize={iconSize}
+    iconType={getPinIcon(pinned)}
+    isDisabled={allowUnpinning ? false : true}
     onClick={onClick}
-    role="button"
-    size="l"
-    transform={getPinRotation(pinned)}
-    type="pin"
   />
 ));
+
+Pin.displayName = 'Pin';

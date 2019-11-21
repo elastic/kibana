@@ -52,7 +52,7 @@ export function createElasticCloudInstructions(config) {
 }
 
 function getApmServerInstructionSet(config) {
-  const apmUiUrl = getIfExists(config, 'xpack.cloud.apm.ui.url');
+  const cloudId = getIfExists(config, 'xpack.cloud.id');
   return {
     title: i18n.translate('kbn.server.tutorials.apm.apmServer.title', {
       defaultMessage: 'APM Server',
@@ -65,10 +65,8 @@ function getApmServerInstructionSet(config) {
             title: 'Enable the APM Server in the ESS console',
             textPre: i18n.translate('kbn.server.tutorials.apm.elasticCloud.textPre', {
               defaultMessage:
-                'To enable the APM Server go to [the ESS console]({essConsoleLink}). Once enabled, refresh this page.',
-              values: {
-                essConsoleLink: apmUiUrl,
-              },
+                'To enable the APM Server go to [the Elastic Cloud console](https://cloud.elastic.co/deployments?q={cloudId}) and enable APM in the deployment settings. Once enabled, refresh this page.',
+              values: { cloudId },
             }),
           },
         ],

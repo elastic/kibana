@@ -12,9 +12,30 @@
 
 .infReactRoot {
   background-color: $euiColorEmptyShade;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  // display: flex;
+  // flex-direction: column;
+  align-items: flex-start;
+  flex: 1 0 auto;
+  overflow-x: hidden;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  flex: 1 0 0%;
-  overflow: hidden;
+}
+
+// This is a temporary workaround for https://github.com/elastic/kibana/issues/39808
+// A real fix will most likely depend on changes in elastic-charts.
+
+.infrastructureChart .echTooltip {
+  max-width: 90vw;
+}
+
+.infrastructureChart .echTooltip__label {
+  overflow-x: hidden;
+  white-space: no-wrap;
+  text-overflow: ellipsis;
 }

@@ -15,8 +15,10 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { uiModules } from 'ui/modules';
 import template from './index.html';
+import { timefilter } from 'ui/timefilter';
 import { shortenPipelineHash } from '../../../common/formatting';
 import 'ui/directives/kbn_href';
+import { getSetupModeState, initSetupModeState } from '../../lib/setup_mode';
 
 const setOptions = (controller) => {
   if (!controller.pipelineVersions || !controller.pipelineVersions.length || !controller.pipelineDropdownElement) {
@@ -54,6 +56,7 @@ const setOptions = (controller) => {
     , controller.pipelineDropdownElement);
 };
 
+
 /*
  * Manage data and provide helper methods for the "main" directive's template
  */
@@ -80,8 +83,11 @@ export class MonitoringMainController {
     this._licenseService = options.licenseService;
     this._breadcrumbsService = options.breadcrumbsService;
     this._kbnUrlService = options.kbnUrlService;
+    this._executorService = options.executorService;
 
     Object.assign(this, options.attributes);
+
+    this.navName = `${this.name}-nav`;
 
     // set the section we're navigated in
     if (this.product) {
@@ -93,7 +99,7 @@ export class MonitoringMainController {
     } else {
       this.inOverview = this.name === 'overview';
       this.inAlerts = this.name === 'alerts';
-      this.inListing = this.name === 'listing' || this.name === 'no-data';
+      this.inListing = this.name === 'listing';// || this.name === 'no-data';
     }
 
     if (!this.inListing) {
@@ -107,6 +113,30 @@ export class MonitoringMainController {
         return this._kbnUrlService.changePath(`/logstash/pipelines/${this.pipelineId}/${this.pipelineHash}`);
       };
     }
+
+    this.datePicker = {
+      timeRange: timefilter.getTime(),
+      refreshInterval: timefilter.getRefreshInterval(),
+      onRefreshChange: ({ isPaused, refreshInterval }) => {
+        this.datePicker.refreshInterval = {
+          pause: isPaused,
+          value: refreshInterval,
+        };
+
+        timefilter.setRefreshInterval({
+          pause: isPaused,
+          value: refreshInterval ? refreshInterval : this.datePicker.refreshInterval.value
+        });
+      },
+      onTimeUpdate: ({ dateRange }) => {
+        this.datePicker.timeRange = {
+          ...dateRange
+        };
+        timefilter.setTime(dateRange);
+        this._executorService.cancel();
+        this._executorService.run();
+      }
+    };
   }
 
   // check whether to "highlight" a tab
@@ -118,10 +148,29 @@ export class MonitoringMainController {
   isMlSupported()  {
     return this._licenseService.mlIsSupported();
   }
+
+  isDisabledTab(product) {
+    const setupMode = getSetupModeState();
+    if (!setupMode.enabled || !setupMode.data) {
+      return false;
+    }
+
+    const data = setupMode.data[product] || {};
+    if (data.totalUniqueInstanceCount === 0) {
+      return true;
+    }
+    if (data.totalUniqueInternallyCollectedCount === 0
+      && data.totalUniqueFullyMigratedCount === 0 && data.totalUniquePartiallyMigratedCount === 0) {
+      return true;
+    }
+    return false;
+  }
 }
 
 const uiModule = uiModules.get('plugins/monitoring/directives', []);
 uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, $injector) => {
+  const $executor = $injector.get('$executor');
+
   return {
     restrict: 'E',
     transclude: true,
@@ -130,6 +179,9 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, $injector) =
     controllerAs: 'monitoringMain',
     bindToController: true,
     link(scope, _element, attributes, controller) {
+      initSetupModeState(scope, $injector, () => {
+        controller.setup(getSetupObj());
+      });
       if (!scope.cluster) {
         const $route = $injector.get('$route');
         const globalState = $injector.get('globalState');
@@ -140,6 +192,7 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, $injector) =
         return {
           licenseService: license,
           breadcrumbsService: breadcrumbs,
+          executorService: $executor,
           kbnUrlService: kbnUrl,
           attributes: {
             name: attributes.name,

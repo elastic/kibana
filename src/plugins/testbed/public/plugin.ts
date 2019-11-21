@@ -17,12 +17,20 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup } from 'kibana/public';
+import { Plugin, CoreSetup, PluginInitializerContext } from 'kibana/public';
+
+interface ConfigType {
+  uiProp: string;
+}
 
 export class TestbedPlugin implements Plugin<TestbedPluginSetup, TestbedPluginStart> {
-  public setup(core: CoreSetup, deps: {}) {
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
+
+  public async setup(core: CoreSetup, deps: {}) {
+    const config = this.initializerContext.config.get<ConfigType>();
+
     // eslint-disable-next-line no-console
-    console.log(`Testbed plugin set up`);
+    console.log(`Testbed plugin set up. uiProp: '${config.uiProp}'`);
     return {
       foo: 'bar',
     };
@@ -32,6 +40,8 @@ export class TestbedPlugin implements Plugin<TestbedPluginSetup, TestbedPluginSt
     // eslint-disable-next-line no-console
     console.log(`Testbed plugin started`);
   }
+
+  public stop() {}
 }
 
 export type TestbedPluginSetup = ReturnType<TestbedPlugin['setup']>;

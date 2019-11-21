@@ -41,11 +41,8 @@ exports[`renders DashboardCloneModal 1`] = `
     </EuiModalBody>
     <EuiModalFooter>
       <EuiButtonEmpty
-        color="primary"
         data-test-subj="cloneCancelButton"
-        iconSide="left"
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Cancel"
@@ -54,14 +51,10 @@ exports[`renders DashboardCloneModal 1`] = `
         />
       </EuiButtonEmpty>
       <EuiButton
-        color="primary"
         data-test-subj="cloneConfirmButton"
         fill={true}
-        iconSide="left"
         isLoading={false}
         onClick={[Function]}
-        size="m"
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Confirm Clone"

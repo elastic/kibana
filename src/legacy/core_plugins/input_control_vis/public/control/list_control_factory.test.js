@@ -17,22 +17,56 @@
  * under the License.
  */
 
+import chrome from 'ui/chrome';
 import { listControlFactory } from './list_control_factory';
 
-const mockField = {
-  name: 'myField',
-  format: {
-    convert: (val) => { return val; }
-  }
-};
+jest.mock('ui/timefilter', () => ({
+  createFilter: jest.fn(),
+}));
 
-const mockIndexPattern = {
-  fields: {
-    byName: {
-      myField: mockField,
-    }
+jest.mock('ui/new_platform', () => ({
+  npStart: {
+    plugins: {
+      data: {
+        query: {
+          filterManager: {
+            fieldName: 'myNumberField',
+            getIndexPattern: () => ({
+              fields: { getByName: name => {
+                const fields = { myField: { name: 'myField' } };
+                return fields[name];
+              } }
+            }),
+            getAppFilters: jest.fn().mockImplementation(() => ([])),
+            getGlobalFilters: jest.fn().mockImplementation(() => ([])),
+          }
+        }
+      }
+    },
+  },
+}));
+
+jest.mock('../../../../core_plugins/data/public/legacy', () => ({
+  start: {
+    indexPatterns: {
+      indexPatterns: {
+        get: () => ({
+          fields: { getByName: name => {
+            const fields = { myField: { name: 'myField' } };
+            return fields[name];
+          } }
+        }),
+      }
+    },
   }
-};
+}));
+
+chrome.getInjected.mockImplementation((key) => {
+  switch(key) {
+    case 'autocompleteTimeout': return 1000;
+    case 'autocompleteTerminateAfter': return 100000;
+  }
+});
 
 function MockSearchSource() {
   return {
@@ -59,23 +93,6 @@ function MockSearchSource() {
   };
 }
 
-const mockKbnApi = {
-  indexPatterns: {
-    get: async () => {
-      return mockIndexPattern;
-    }
-  },
-  queryFilter: {
-    getAppFilters: () => {
-      return [];
-    },
-    getGlobalFilters: () => {
-      return [];
-    }
-  },
-  SearchSource: MockSearchSource,
-};
-
 describe('hasValue', () => {
   const controlParams = {
     id: '1',
@@ -86,7 +103,7 @@ describe('hasValue', () => {
 
   let listControl;
   beforeEach(async () => {
-    listControl = await listControlFactory(controlParams, mockKbnApi, useTimeFilter);
+    listControl = await listControlFactory(controlParams, useTimeFilter, MockSearchSource);
   });
 
   test('should be false when control has no value', () => {
@@ -111,10 +128,19 @@ describe('fetch', () => {
     options: {}
   };
   const useTimeFilter = false;
+  const SearchSource = jest.fn(MockSearchSource);
 
   let listControl;
   beforeEach(async () => {
-    listControl = await listControlFactory(controlParams, mockKbnApi, useTimeFilter);
+    listControl = await listControlFactory(controlParams, useTimeFilter, SearchSource);
+  });
+
+  test('should pass in timeout parameters from injected vars', async () => {
+    await listControl.fetch();
+    expect(SearchSource).toHaveBeenCalledWith({
+      timeout: `1000ms`,
+      terminate_after: 100000
+    });
   });
 
   test('should set selectOptions to results of terms aggregation', async () => {
@@ -135,14 +161,14 @@ describe('fetch with ancestors', () => {
   let listControl;
   let parentControl;
   beforeEach(async () => {
-    listControl = await listControlFactory(controlParams, mockKbnApi, useTimeFilter);
+    listControl = await listControlFactory(controlParams, useTimeFilter, MockSearchSource);
 
     const parentControlParams = {
       id: 'parent',
       fieldName: 'myField',
       options: {},
     };
-    parentControl = await listControlFactory(parentControlParams, mockKbnApi, useTimeFilter);
+    parentControl = await listControlFactory(parentControlParams, useTimeFilter, MockSearchSource);
     parentControl.clear();
     listControl.setAncestors([parentControl]);
   });

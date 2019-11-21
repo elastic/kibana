@@ -13,6 +13,7 @@ import {
   EuiText,
   EuiTitle,
   EuiSpacer,
+  EuiTextAlign,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -48,7 +49,7 @@ export class LicenseStatus extends React.PureComponent {
         />
       );
     } else {
-      icon = <EuiIcon color="success" type="checkInCircleFilled" />;
+      icon = <EuiIcon color="success" type="checkInCircleFilled" size="l" />;
       message = expiryDate ? (
         <Fragment>
           <FormattedMessage
@@ -81,28 +82,20 @@ export class LicenseStatus extends React.PureComponent {
       );
     }
     return (
-      <div>
-        <EuiFlexGroup justifyContent="spaceAround">
+      <EuiTextAlign textAlign="center">
+        <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="m">
-                  <h2 data-test-subj="licenseText">{title}</h2>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiTitle size="m">
+              <h1 data-test-subj="licenseText">{title}</h1>
+            </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiFlexGroup justifyContent="spaceAround">
-          <EuiFlexItem grow={false}>
-            <span data-test-subj="licenseSubText">
-              <EuiText color="subdued">{message}</EuiText>
-            </span>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+
         <EuiSpacer />
-      </div>
+
+        <EuiText data-test-subj="licenseSubText">{message}</EuiText>
+      </EuiTextAlign>
     );
   }
 }

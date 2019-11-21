@@ -4,15 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery, JsonObject } from '@kbn/es-query';
 import { isEmpty, isString, flow } from 'lodash/fp';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import {
+  Query,
+  esFilters,
+  esQuery,
+  IIndexPattern,
+} from '../../../../../../../src/plugins/data/public';
 
 import { KueryFilterQuery } from '../../store';
 
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,
-  indexPattern: StaticIndexPattern
+  indexPattern: IIndexPattern
 ) => {
   try {
     return kueryExpression
@@ -23,12 +28,25 @@ export const convertKueryToElasticSearchQuery = (
   }
 };
 
+export const convertKueryToDslFilter = (
+  kueryExpression: string,
+  indexPattern: IIndexPattern
+): JsonObject => {
+  try {
+    return kueryExpression
+      ? toElasticsearchQuery(fromKueryExpression(kueryExpression), indexPattern)
+      : {};
+  } catch (err) {
+    return {};
+  }
+};
+
 export const escapeQueryValue = (val: number | string = ''): string | number => {
   if (isString(val)) {
     if (isEmpty(val)) {
       return '""';
     }
-    return escapeKuery(val);
+    return `"${escapeKuery(val)}"`;
   }
 
   return val;
@@ -52,16 +70,39 @@ const escapeWhitespace = (val: string) =>
     .replace(/\n/g, '\\n');
 
 // See the SpecialCharacter rule in kuery.peg
-const escapeSpecialCharacters = (val: string) => val.replace(/[\\():<>"*]/g, '\\$&'); // $& means the whole matched string
+const escapeSpecialCharacters = (val: string) => val.replace(/["]/g, '\\$&'); // $& means the whole matched string
 
 // See the Keyword rule in kuery.peg
 const escapeAndOr = (val: string) => val.replace(/(\s+)(and|or)(\s+)/gi, '$1\\$2$3');
 
 const escapeNot = (val: string) => val.replace(/not(\s+)/gi, '\\$&');
 
-export const escapeKuery = flow(
-  escapeSpecialCharacters,
-  escapeAndOr,
-  escapeNot,
-  escapeWhitespace
-);
+export const escapeKuery = flow(escapeSpecialCharacters, escapeAndOr, escapeNot, escapeWhitespace);
+
+export const convertToBuildEsQuery = ({
+  config,
+  indexPattern,
+  queries,
+  filters,
+}: {
+  config: esQuery.EsQueryConfig;
+  indexPattern: IIndexPattern;
+  queries: Query[];
+  filters: esFilters.Filter[];
+}) => {
+  try {
+    return JSON.stringify(
+      esQuery.buildEsQuery(
+        indexPattern,
+        queries,
+        filters.filter(f => f.meta.disabled === false),
+        {
+          ...config,
+          dateFormatTZ: undefined,
+        }
+      )
+    );
+  } catch (exp) {
+    return '';
+  }
+};

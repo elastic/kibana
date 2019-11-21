@@ -9,14 +9,15 @@ Context that's available to plugins during initialization stage.
 <b>Signature:</b>
 
 ```typescript
-export interface PluginInitializerContext 
+export interface PluginInitializerContext<ConfigSchema = unknown> 
 ```
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [config](./kibana-plugin-server.plugininitializercontext.config.md) | <code>{</code><br/><code>        create: &lt;Schema&gt;() =&gt; Observable&lt;Schema&gt;;</code><br/><code>        createIfExists: &lt;Schema&gt;() =&gt; Observable&lt;Schema &#124; undefined&gt;;</code><br/><code>    }</code> |  |
-|  [env](./kibana-plugin-server.plugininitializercontext.env.md) | <code>{</code><br/><code>        mode: EnvironmentMode;</code><br/><code>    }</code> |  |
+|  [config](./kibana-plugin-server.plugininitializercontext.config.md) | <code>{</code><br/><code>        create: &lt;T = ConfigSchema&gt;() =&gt; Observable&lt;T&gt;;</code><br/><code>        createIfExists: &lt;T = ConfigSchema&gt;() =&gt; Observable&lt;T &#124; undefined&gt;;</code><br/><code>    }</code> |  |
+|  [env](./kibana-plugin-server.plugininitializercontext.env.md) | <code>{</code><br/><code>        mode: EnvironmentMode;</code><br/><code>        packageInfo: Readonly&lt;PackageInfo&gt;;</code><br/><code>    }</code> |  |
 |  [logger](./kibana-plugin-server.plugininitializercontext.logger.md) | <code>LoggerFactory</code> |  |
+|  [opaqueId](./kibana-plugin-server.plugininitializercontext.opaqueid.md) | <code>PluginOpaqueId</code> |  |
 

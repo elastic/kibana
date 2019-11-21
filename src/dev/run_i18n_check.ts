@@ -20,9 +20,17 @@
 import chalk from 'chalk';
 import Listr from 'listr';
 
-import { ErrorReporter, mergeConfigs } from './i18n';
-import { extractDefaultMessages, extractUntrackedMessages, checkCompatibility } from './i18n/tasks';
-import { createFailError, run } from './run';
+import { createFailError, run } from '@kbn/dev-utils';
+import { ErrorReporter, I18nConfig } from './i18n';
+import {
+  extractDefaultMessages,
+  extractUntrackedMessages,
+  checkCompatibility,
+  checkConfigs,
+  mergeConfigs,
+} from './i18n/tasks';
+
+const skipNoTranslations = ({ config }: { config: I18nConfig }) => !config.translations.length;
 
 run(
   async ({
@@ -59,27 +67,34 @@ run(
       throw createFailError(`${chalk.white.bgRed(' I18N ERROR ')} --fix can't have a value`);
     }
 
-    const config = await mergeConfigs(includeConfig);
     const srcPaths = Array().concat(path || ['./src', './packages', './x-pack']);
-
-    if (config.translations.length === 0) {
-      return;
-    }
 
     const list = new Listr(
       [
         {
-          title: 'Checking For Untracked Messages',
-          task: () => new Listr(extractUntrackedMessages(srcPaths, config), { exitOnError: true }),
+          title: 'Checking .i18nrc.json files',
+          task: () => new Listr(checkConfigs(includeConfig), { exitOnError: true }),
+        },
+        {
+          title: 'Merging .i18nrc.json files',
+          task: () => new Listr(mergeConfigs(includeConfig), { exitOnError: true }),
+        },
+        {
+          title: 'Checking For Untracked Messages based on .i18nrc.json',
+          skip: skipNoTranslations,
+          task: ({ config }) =>
+            new Listr(extractUntrackedMessages(srcPaths), { exitOnError: true }),
         },
         {
           title: 'Validating Default Messages',
-          task: () =>
-            new Listr(extractDefaultMessages({ path: srcPaths, config }), { exitOnError: true }),
+          skip: skipNoTranslations,
+          task: ({ config }) =>
+            new Listr(extractDefaultMessages(config, srcPaths), { exitOnError: true }),
         },
         {
           title: 'Compatibility Checks',
-          task: () =>
+          skip: skipNoTranslations,
+          task: ({ config }) =>
             new Listr(
               checkCompatibility(
                 config,

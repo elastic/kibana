@@ -20,4 +20,4 @@
 import { get } from 'lodash';
 import { documentationLinks } from './documentation_links';
 
-export const getDocLink = (id: string) => get(documentationLinks, id);
+export const getDocLink = (id: string): string | undefined => get(documentationLinks, id);

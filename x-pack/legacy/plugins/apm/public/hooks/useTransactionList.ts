@@ -5,11 +5,10 @@
  */
 
 import { useMemo } from 'react';
-import { TransactionListAPIResponse } from '../../server/lib/transactions/get_top_transactions';
-import { loadTransactionList } from '../services/rest/apm/transaction_groups';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useUiFilters } from '../context/UrlParamsContext';
 import { useFetcher } from './useFetcher';
+import { TransactionGroupListAPIResponse } from '../../server/lib/transaction_groups';
 
 const getRelativeImpact = (
   impact: number,
@@ -21,7 +20,7 @@ const getRelativeImpact = (
     1
   );
 
-function getWithRelativeImpact(items: TransactionListAPIResponse) {
+function getWithRelativeImpact(items: TransactionGroupListAPIResponse) {
   const impacts = items
     .map(({ impact }) => impact)
     .filter(impact => impact !== null) as number[];
@@ -44,14 +43,19 @@ export function useTransactionList(urlParams: IUrlParams) {
   const { serviceName, transactionType, start, end } = urlParams;
   const uiFilters = useUiFilters(urlParams);
   const { data = [], error, status } = useFetcher(
-    () => {
+    callApmApi => {
       if (serviceName && start && end && transactionType) {
-        return loadTransactionList({
-          serviceName,
-          start,
-          end,
-          transactionType,
-          uiFilters
+        return callApmApi({
+          pathname: '/api/apm/services/{serviceName}/transaction_groups',
+          params: {
+            path: { serviceName },
+            query: {
+              start,
+              end,
+              transactionType,
+              uiFilters: JSON.stringify(uiFilters)
+            }
+          }
         });
       }
     },

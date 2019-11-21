@@ -8,10 +8,9 @@ import React from 'react';
 import moment from 'moment';
 import { get } from 'lodash';
 import { formatMetric } from 'plugins/monitoring/lib/format_number';
-import { ClusterItemContainer, BytesPercentageUsage } from './helpers';
+import { ClusterItemContainer, BytesPercentageUsage, DisabledIfNoDataAndInSetupModeLink } from './helpers';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-
 import {
   EuiFlexGrid,
   EuiFlexItem,
@@ -22,17 +21,33 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiHorizontalRule,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { formatTimestampToDuration } from '../../../../common';
-import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
+import { CALCULATE_DURATION_SINCE, APM_SYSTEM_ID } from '../../../../common/constants';
+import { SetupModeTooltip } from '../../setup_mode/tooltip';
 
 export function ApmPanel(props) {
-  if (!get(props, 'apms.total', 0) > 0) {
+  const { setupMode } = props;
+  const apmsTotal = get(props, 'apms.total') || 0;
+  // Do not show if we are not in setup mode
+  if (apmsTotal === 0 && !setupMode.enabled) {
     return null;
   }
 
   const goToApm = () => props.changeUrl('apm');
   const goToInstances = () => props.changeUrl('apm/instances');
+
+  const setupModeData = get(setupMode.data, 'apm');
+  const setupModeTooltip = setupMode && setupMode.enabled
+    ? (
+      <SetupModeTooltip
+        setupModeData={setupModeData}
+        badgeClickAction={goToInstances}
+        productName={APM_SYSTEM_ID}
+      />
+    )
+    : null;
 
   return (
     <ClusterItemContainer
@@ -47,7 +62,9 @@ export function ApmPanel(props) {
           <EuiPanel paddingSize="m">
             <EuiTitle size="s">
               <h3>
-                <EuiLink
+                <DisabledIfNoDataAndInSetupModeLink
+                  setupModeEnabled={setupMode.enabled}
+                  setupModeData={setupModeData}
                   onClick={goToApm}
                   aria-label={i18n.translate('xpack.monitoring.cluster.overview.apmPanel.overviewLinkAriaLabel', {
                     defaultMessage: 'APM Overview'
@@ -58,7 +75,7 @@ export function ApmPanel(props) {
                     id="xpack.monitoring.cluster.overview.apmPanel.overviewLinkLabel"
                     defaultMessage="Overview"
                   />
-                </EuiLink>
+                </DisabledIfNoDataAndInSetupModeLink>
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
@@ -90,27 +107,32 @@ export function ApmPanel(props) {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
-            <EuiTitle size="s">
-              <h3>
-                <EuiLink
-                  onClick={goToInstances}
-                  aria-label={i18n.translate(
-                    'xpack.monitoring.cluster.overview.apmPanel.instancesTotalLinkAriaLabel',
-                    {
-                      defaultMessage: 'Apm Instances: {apmsTotal}',
-                      values: { apmsTotal: props.apms.total }
-                    }
-                  )}
-                  data-test-subj="apmListing"
-                >
-                  <FormattedMessage
-                    id="xpack.monitoring.cluster.overview.apmPanel.serversTotalLinkLabel"
-                    defaultMessage="APM Servers: {apmsTotal}"
-                    values={{ apmsTotal: (<span data-test-subj="apmsTotal">{props.apms.total}</span>) }}
-                  />
-                </EuiLink>
-              </h3>
-            </EuiTitle>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="s">
+                  <h3>
+                    <EuiLink
+                      onClick={goToInstances}
+                      aria-label={i18n.translate(
+                        'xpack.monitoring.cluster.overview.apmPanel.instancesTotalLinkAriaLabel',
+                        {
+                          defaultMessage: 'APM Instances: {apmsTotal}',
+                          values: { apmsTotal }
+                        }
+                      )}
+                      data-test-subj="apmListing"
+                    >
+                      <FormattedMessage
+                        id="xpack.monitoring.cluster.overview.apmPanel.serversTotalLinkLabel"
+                        defaultMessage="APM Servers: {apmsTotal}"
+                        values={{ apmsTotal: (<span data-test-subj="apmsTotal">{apmsTotal}</span>) }}
+                      />
+                    </EuiLink>
+                  </h3>
+                </EuiTitle>
+              </EuiFlexItem>
+              {setupModeTooltip}
+            </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
               <EuiDescriptionListTitle>

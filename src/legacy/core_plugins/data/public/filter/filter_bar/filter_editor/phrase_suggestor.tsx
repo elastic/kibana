@@ -18,14 +18,22 @@
  */
 
 import { Component } from 'react';
-import chrome from 'ui/chrome';
-import { Field, IndexPattern } from 'ui/index_patterns';
-import { getSuggestions } from 'ui/value_suggestions';
-const config = chrome.getUiSettingsClient();
+import { debounce } from 'lodash';
+import {
+  withKibana,
+  KibanaReactContextValue,
+} from '../../../../../../../plugins/kibana_react/public';
+
+import {
+  IDataPluginServices,
+  IIndexPattern,
+  IFieldType,
+} from '../../../../../../../plugins/data/public';
 
 export interface PhraseSuggestorProps {
-  indexPattern: IndexPattern;
-  field?: Field;
+  kibana: KibanaReactContextValue<IDataPluginServices>;
+  indexPattern: IIndexPattern;
+  field?: IFieldType;
 }
 
 export interface PhraseSuggestorState {
@@ -38,10 +46,11 @@ export interface PhraseSuggestorState {
  * aggregatable), we pull out the common logic for requesting suggestions into this component
  * which both of them extend.
  */
-export class PhraseSuggestor<T extends PhraseSuggestorProps> extends Component<
+export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends Component<
   T,
   PhraseSuggestorState
 > {
+  private services = this.props.kibana.services;
   public state: PhraseSuggestorState = {
     suggestions: [],
     isLoading: false,
@@ -52,7 +61,7 @@ export class PhraseSuggestor<T extends PhraseSuggestorProps> extends Component<
   }
 
   protected isSuggestingValues() {
-    const shouldSuggestValues = config.get('filterEditor:suggestValues');
+    const shouldSuggestValues = this.services.uiSettings.get('filterEditor:suggestValues');
     const { field } = this.props;
     return shouldSuggestValues && field && field.aggregatable && field.type === 'string';
   }
@@ -61,13 +70,15 @@ export class PhraseSuggestor<T extends PhraseSuggestorProps> extends Component<
     this.updateSuggestions(`${value}`);
   };
 
-  protected async updateSuggestions(value: string = '') {
+  protected updateSuggestions = debounce(async (value: string = '') => {
     const { indexPattern, field } = this.props as PhraseSuggestorProps;
     if (!field || !this.isSuggestingValues()) {
       return;
     }
     this.setState({ isLoading: true });
-    const suggestions = await getSuggestions(indexPattern.title, field, value);
+    const suggestions = await this.services.data.getSuggestions(indexPattern.title, field, value);
     this.setState({ suggestions, isLoading: false });
-  }
+  }, 500);
 }
+
+export const PhraseSuggestor = withKibana(PhraseSuggestorUI);

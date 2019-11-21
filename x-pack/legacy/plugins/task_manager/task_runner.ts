@@ -10,43 +10,45 @@
  * rescheduling, middleware application, etc.
  */
 
+import { performance } from 'perf_hooks';
 import Joi from 'joi';
-import { intervalFromNow, minutesFromNow } from './lib/intervals';
-import { Logger } from './lib/logger';
-import { BeforeRunFunction } from './lib/middleware';
+import { intervalFromDate, intervalFromNow } from './lib/intervals';
+import { Logger } from './types';
+import { BeforeRunFunction, BeforeMarkRunningFunction } from './lib/middleware';
 import {
   CancelFunction,
   CancellableTask,
   ConcreteTaskInstance,
   RunResult,
-  SanitizedTaskDefinition,
+  TaskDefinition,
   TaskDictionary,
   validateRunResult,
+  TaskStatus,
 } from './task';
-import { RemoveResult } from './task_store';
+
+const defaultBackoffPerFailure = 5 * 60 * 1000;
 
 export interface TaskRunner {
-  numWorkers: number;
   isExpired: boolean;
   cancel: CancelFunction;
-  claimOwnership: () => Promise<boolean>;
+  markTaskAsRunning: () => Promise<boolean>;
   run: () => Promise<RunResult>;
-  toString?: () => string;
+  toString: () => string;
 }
 
 interface Updatable {
   readonly maxAttempts: number;
   update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance>;
-  remove(id: string): Promise<RemoveResult>;
+  remove(id: string): Promise<void>;
 }
 
 interface Opts {
   logger: Logger;
-  definitions: TaskDictionary<SanitizedTaskDefinition>;
+  definitions: TaskDictionary<TaskDefinition>;
   instance: ConcreteTaskInstance;
   store: Updatable;
-  kbnServer: any;
   beforeRun: BeforeRunFunction;
+  beforeMarkRunning: BeforeMarkRunningFunction;
 }
 
 /**
@@ -60,11 +62,11 @@ interface Opts {
 export class TaskManagerRunner implements TaskRunner {
   private task?: CancellableTask;
   private instance: ConcreteTaskInstance;
-  private definitions: TaskDictionary<SanitizedTaskDefinition>;
+  private definitions: TaskDictionary<TaskDefinition>;
   private logger: Logger;
-  private store: Updatable;
-  private kbnServer: any;
+  private bufferedTaskStore: Updatable;
   private beforeRun: BeforeRunFunction;
+  private beforeMarkRunning: BeforeMarkRunningFunction;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -73,7 +75,6 @@ export class TaskManagerRunner implements TaskRunner {
    * @prop {TaskDefinition} definition - The definition of the task being run
    * @prop {ConcreteTaskInstance} instance - The record describing this particular task instance
    * @prop {Updatable} store - The store used to read / write tasks instance info
-   * @prop {kbnServer} kbnServer - An async function that provides the task's run context
    * @prop {BeforeRunFunction} beforeRun - A function that adjusts the run context prior to running the task
    * @memberof TaskManagerRunner
    */
@@ -81,17 +82,9 @@ export class TaskManagerRunner implements TaskRunner {
     this.instance = sanitizeInstance(opts.instance);
     this.definitions = opts.definitions;
     this.logger = opts.logger;
-    this.store = opts.store;
-    this.kbnServer = opts.kbnServer;
+    this.bufferedTaskStore = opts.store;
     this.beforeRun = opts.beforeRun;
-  }
-
-  /**
-   * Gets how many workers are occupied by this task instance.
-   * Per Joi validation logic, this will return a number >= 1
-   */
-  public get numWorkers() {
-    return this.definition.numWorkers;
+    this.beforeMarkRunning = opts.beforeMarkRunning;
   }
 
   /**
@@ -119,7 +112,7 @@ export class TaskManagerRunner implements TaskRunner {
    * Gets whether or not this task has run longer than its expiration setting allows.
    */
   public get isExpired() {
-    return this.instance.runAt < new Date();
+    return intervalFromDate(this.instance.startedAt!, this.definition.timeout)! < new Date();
   }
 
   /**
@@ -140,7 +133,6 @@ export class TaskManagerRunner implements TaskRunner {
   public async run(): Promise<RunResult> {
     this.logger.debug(`Running task ${this}`);
     const modifiedContext = await this.beforeRun({
-      kbnServer: this.kbnServer,
       taskInstance: this.instance,
     });
 
@@ -164,23 +156,66 @@ export class TaskManagerRunner implements TaskRunner {
    *
    * @returns {Promise<boolean>}
    */
-  public async claimOwnership(): Promise<boolean> {
+  public async markTaskAsRunning(): Promise<boolean> {
+    performance.mark('markTaskAsRunning_start');
+
     const VERSION_CONFLICT_STATUS = 409;
+    const now = new Date();
+
+    const { taskInstance } = await this.beforeMarkRunning({
+      taskInstance: this.instance,
+    });
+
+    const attempts = taskInstance.attempts + 1;
+    const ownershipClaimedUntil = taskInstance.retryAt;
 
     try {
-      this.instance = await this.store.update({
-        ...this.instance,
+      const { id } = taskInstance;
+
+      const timeUntilClaimExpires = howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil);
+      if (timeUntilClaimExpires < 0) {
+        this.logger.debug(
+          `[Task Runner] Task ${id} started after ownership expired (${Math.abs(
+            timeUntilClaimExpires
+          )}ms after expiry)`
+        );
+      }
+
+      this.instance = await this.bufferedTaskStore.update({
+        ...taskInstance,
         status: 'running',
-        runAt: intervalFromNow(this.definition.timeout)!,
+        startedAt: now,
+        attempts,
+        retryAt: this.instance.interval
+          ? intervalFromNow(this.definition.timeout)!
+          : this.getRetryDelay({
+              attempts,
+              // Fake an error. This allows retry logic when tasks keep timing out
+              // and lets us set a proper "retryAt" value each time.
+              error: new Error('Task timeout'),
+              addDuration: this.definition.timeout,
+            }),
       });
 
+      const timeUntilClaimExpiresAfterUpdate = howManyMsUntilOwnershipClaimExpires(
+        ownershipClaimedUntil
+      );
+      if (timeUntilClaimExpiresAfterUpdate < 0) {
+        this.logger.debug(
+          `[Task Runner] Task ${id} ran after ownership expired (${Math.abs(
+            timeUntilClaimExpiresAfterUpdate
+          )}ms after expiry)`
+        );
+      }
+
+      performanceStopMarkingTaskAsRunning();
       return true;
     } catch (error) {
+      performanceStopMarkingTaskAsRunning();
       if (error.statusCode !== VERSION_CONFLICT_STATUS) {
         throw error;
       }
     }
-
     return false;
   }
 
@@ -196,14 +231,14 @@ export class TaskManagerRunner implements TaskRunner {
       return task.cancel();
     }
 
-    this.logger.warning(`The task ${this} is not cancellable.`);
+    this.logger.warn(`The task ${this} is not cancellable.`);
   }
 
   private validateResult(result?: RunResult | void): RunResult {
     const { error } = Joi.validate(result, validateRunResult);
 
     if (error) {
-      this.logger.warning(`Invalid task result for ${this}: ${error.message}`);
+      this.logger.warn(`Invalid task result for ${this}: ${error.message}`);
     }
 
     return result || { state: {} };
@@ -211,27 +246,43 @@ export class TaskManagerRunner implements TaskRunner {
 
   private async processResultForRecurringTask(result: RunResult): Promise<RunResult> {
     // recurring task: update the task instance
+    const startedAt = this.instance.startedAt!;
     const state = result.state || this.instance.state || {};
-    const status = this.instance.attempts < this.store.maxAttempts ? 'idle' : 'failed';
+    let status: TaskStatus = this.getInstanceStatus();
 
     let runAt;
     if (status === 'failed') {
       // task run errored, keep the same runAt
       runAt = this.instance.runAt;
+    } else if (result.runAt) {
+      runAt = result.runAt;
+    } else if (result.error) {
+      // when result.error is truthy, then we're retrying because it failed
+      const newRunAt = this.instance.interval
+        ? intervalFromDate(startedAt, this.instance.interval)!
+        : this.getRetryDelay({
+            attempts: this.instance.attempts,
+            error: result.error,
+          });
+      if (!newRunAt) {
+        status = 'failed';
+        runAt = this.instance.runAt;
+      } else {
+        runAt = newRunAt;
+      }
     } else {
-      runAt =
-        result.runAt ||
-        intervalFromNow(this.instance.interval) ||
-        // when result.error is truthy, then we're retrying because it failed
-        minutesFromNow((this.instance.attempts + 1) * 5); // incrementally backs off an extra 5m per failure
+      runAt = intervalFromDate(startedAt, this.instance.interval)!;
     }
 
-    await this.store.update({
+    await this.bufferedTaskStore.update({
       ...this.instance,
       runAt,
       state,
       status,
-      attempts: result.error ? this.instance.attempts + 1 : 0,
+      startedAt: null,
+      retryAt: null,
+      ownerId: null,
+      attempts: result.error ? this.instance.attempts : 0,
     });
 
     return result;
@@ -240,12 +291,10 @@ export class TaskManagerRunner implements TaskRunner {
   private async processResultWhenDone(result: RunResult): Promise<RunResult> {
     // not a recurring task: clean up by removing the task instance from store
     try {
-      await this.store.remove(this.instance.id);
+      await this.bufferedTaskStore.remove(this.instance.id);
     } catch (err) {
       if (err.statusCode === 404) {
-        this.logger.warning(
-          `Task cleanup of ${this} failed in processing. Was remove called twice?`
-        );
+        this.logger.warn(`Task cleanup of ${this} failed in processing. Was remove called twice?`);
       } else {
         throw err;
       }
@@ -262,6 +311,45 @@ export class TaskManagerRunner implements TaskRunner {
     }
     return result;
   }
+
+  private getInstanceStatus() {
+    if (this.instance.interval) {
+      return 'idle';
+    }
+
+    const maxAttempts = this.definition.maxAttempts || this.bufferedTaskStore.maxAttempts;
+    return this.instance.attempts < maxAttempts ? 'idle' : 'failed';
+  }
+
+  private getRetryDelay({
+    error,
+    attempts,
+    addDuration,
+  }: {
+    error: any;
+    attempts: number;
+    addDuration?: string;
+  }): Date | null {
+    let result = null;
+
+    // Use custom retry logic, if any, otherwise we'll use the default logic
+    const retry: boolean | Date = this.definition.getRetry
+      ? this.definition.getRetry(attempts, error)
+      : true;
+
+    if (retry instanceof Date) {
+      result = retry;
+    } else if (retry === true) {
+      result = new Date(Date.now() + attempts * defaultBackoffPerFailure);
+    }
+
+    // Add a duration to the result
+    if (addDuration && result) {
+      result = intervalFromDate(result, addDuration)!;
+    }
+
+    return result;
+  }
 }
 
 function sanitizeInstance(instance: ConcreteTaskInstance): ConcreteTaskInstance {
@@ -270,4 +358,17 @@ function sanitizeInstance(instance: ConcreteTaskInstance): ConcreteTaskInstance 
     params: instance.params || {},
     state: instance.state || {},
   };
+}
+
+function howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil: Date | null): number {
+  return ownershipClaimedUntil ? ownershipClaimedUntil.getTime() - Date.now() : 0;
+}
+
+function performanceStopMarkingTaskAsRunning() {
+  performance.mark('markTaskAsRunning_stop');
+  performance.measure(
+    'taskRunner.markTaskAsRunning',
+    'markTaskAsRunning_start',
+    'markTaskAsRunning_stop'
+  );
 }

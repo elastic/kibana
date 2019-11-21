@@ -136,10 +136,12 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
       },
     ]
   }
-  hasNextPage={true}
-  loadMore={[MockFunction]}
+  fakeTotalCount={50}
+  id="dns"
+  isInspect={false}
+  loadPage={[MockFunction]}
   loading={false}
-  nextCursor="10"
+  showMorePagesIndicator={true}
   totalCount={80}
   type="page"
 />

@@ -29,6 +29,7 @@ export function formatValues([key, value]) {
     case 'last_data_time':
     case 'latest_empty_bucket_timestamp':
     case 'latest_sparse_bucket_timestamp':
+    case 'latest_bucket_timestamp':
       value = formatDate(value, TIME_FORMAT);
       break;
 

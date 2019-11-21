@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore - Interpreter not typed yet
-import { fromExpression, toExpression } from '@kbn/interpreter/common';
+import { fromExpression, toExpression, Ast } from '@kbn/interpreter/common';
 import { get } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { syncFilterExpression } from '../../../public/lib/sync_filter_expression';
-import { RendererFactory } from '../types';
+import { RendererFactory } from '../../../types';
 import { DropdownFilter } from './component';
+import { RendererStrings } from '../../../i18n';
+
+const { dropdownFilter: strings } = RendererStrings;
 
 interface Config {
   /** The column to use within the exactly function */
@@ -37,8 +39,8 @@ const getFilterValue = (filterExpression: string) => {
 
 export const dropdownFilter: RendererFactory<Config> = () => ({
   name: 'dropdown_filter',
-  displayName: 'Dropdown filter',
-  help: 'A dropdown from which you can select values for an "exactly" filter',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelpDescription(),
   reuseDomNode: true,
   height: 50,
   render(domNode, config, handlers) {
@@ -58,7 +60,7 @@ export const dropdownFilter: RendererFactory<Config> = () => ({
       if (commitValue === '%%CANVAS_MATCH_ALL%%') {
         handlers.setFilter('');
       } else {
-        const newFilterAST = {
+        const newFilterAST: Ast = {
           type: 'expression',
           chain: [
             {

@@ -35,15 +35,6 @@ export interface TaskInstance {
 }
 
 export interface HapiServer {
-  taskManager: {
-    registerTaskDefinitions: (opts: any) => void;
-    schedule: (opts: any) => Promise<void>;
-    fetch: (
-      opts: any
-    ) => Promise<{
-      docs: TaskInstance[];
-    }>;
-  };
   plugins: {
     xpack_main: any;
     elasticsearch: {
@@ -52,6 +43,15 @@ export interface HapiServer {
       ) => {
         callWithInternalUser: () => Promise<ESQueryResponse>;
       };
+    };
+    task_manager: {
+      registerTaskDefinitions: (opts: any) => void;
+      ensureScheduled: (opts: any) => Promise<void>;
+      fetch: (
+        opts: any
+      ) => Promise<{
+        docs: TaskInstance[];
+      }>;
     };
   };
   usage: {

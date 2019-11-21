@@ -17,46 +17,30 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import globby from 'globby';
 import { i18n, i18nLoader } from '@kbn/i18n';
-
+import { basename } from 'path';
 import { fromRoot } from '../../utils';
+import { getTranslationPaths } from './get_translations_path';
+import { I18N_RC } from './constants';
 
 export async function i18nMixin(kbnServer, server, config) {
   const locale = config.get('i18n.locale');
 
-  // eslint-disable-next-line max-len
-  const translationsDirs = [fromRoot('src/legacy/ui/translations'), fromRoot('src/legacy/server/translations'), fromRoot('src/core/translations')];
-
-  const groupedEntries = await Promise.all([
-    ...config.get('plugins.scanDirs').map(async path => {
-      const entries = await globby(`*/translations/${locale}.json`, {
-        cwd: path,
-      });
-      return entries.map(entry => resolve(path, entry));
+  const translationPaths = await Promise.all([
+    getTranslationPaths({
+      cwd: fromRoot('.'),
+      glob: I18N_RC,
     }),
-
-    ...config.get('plugins.paths').map(async path => {
-      const entries = await globby(
-        [`translations/${locale}.json`, `plugins/*/translations/${locale}.json`],
-        {
-          cwd: path,
-        }
-      );
-      return entries.map(entry => resolve(path, entry));
-    }),
-
-    ...translationsDirs.map(async path => {
-      const entries = await globby(`${locale}.json`, {
-        cwd: path,
-      });
-      return entries.map(entry => resolve(path, entry));
+    ...config.get('plugins.paths').map(cwd => getTranslationPaths({ cwd, glob: I18N_RC })),
+    ...config.get('plugins.scanDirs').map(cwd => getTranslationPaths({ cwd, glob: `*/${I18N_RC}` })),
+    getTranslationPaths({
+      cwd: fromRoot('../kibana-extra'),
+      glob: `*/${I18N_RC}`,
     }),
   ]);
 
-  const translationPaths = [].concat(...groupedEntries);
-  i18nLoader.registerTranslationFiles(translationPaths);
+  const currentTranslationPaths = [].concat(...translationPaths).filter(translationPath => basename(translationPath, '.json') === locale);
+  i18nLoader.registerTranslationFiles(currentTranslationPaths);
 
   const translations = await i18nLoader.getTranslationsByLocale(locale);
   i18n.init(Object.freeze({
@@ -64,5 +48,5 @@ export async function i18nMixin(kbnServer, server, config) {
     ...translations,
   }));
 
-  server.decorate('server', 'getTranslationsFilePaths', () => translationPaths);
+  server.decorate('server', 'getTranslationsFilePaths', () => currentTranslationPaths);
 }

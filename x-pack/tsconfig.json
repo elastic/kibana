@@ -5,15 +5,21 @@
     "legacy/common/**/*",
     "legacy/server/**/*",
     "legacy/plugins/**/*",
-    "test_utils/**/*"
+    "plugins/**/*",
+    "test_utils/**/*",
+    "tasks/**/*"
   ],
   "exclude": [
     "test/**/*",
+    "legacy/plugins/siem/cypress/**/*",
+    "legacy/plugins/apm/cypress/**/*",
     "**/typespec_tests.ts"
   ],
   "compilerOptions": {
     "outDir": ".",
     "paths": {
+      "kibana/public": ["src/core/public"],
+      "kibana/server": ["src/core/server"],
       "ui/*": [
         "src/legacy/ui/public/*"
       ],
@@ -31,7 +37,8 @@
       ],
       "monitoring/common/*": [
         "x-pack/monitoring/common/*"
-      ]
+      ],
+      "plugins/*": ["src/legacy/core_plugins/*/public/"]
     },
     "types": [
       "node",

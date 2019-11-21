@@ -8,7 +8,6 @@ import { act } from 'react-dom/test-utils';
 import * as fixtures from '../../test/fixtures';
 import { SNAPSHOT_STATE } from '../../public/app/constants';
 import { API_BASE_PATH } from '../../common/constants';
-import { formatDate } from '../../public/app/services/text';
 import {
   setupEnvironment,
   pageHelpers,
@@ -18,6 +17,7 @@ import {
 } from './helpers';
 import { HomeTestBed } from './helpers/home.helpers';
 import { REPOSITORY_NAME } from './helpers/constant';
+import moment from 'moment-timezone';
 
 const { setup } = pageHelpers.home;
 
@@ -52,7 +52,7 @@ describe.skip('<SnapshotRestoreHome />', () => {
     test('should set the correct app title', () => {
       const { exists, find } = testBed;
       expect(exists('appTitle')).toBe(true);
-      expect(find('appTitle').text()).toEqual('Snapshot Repositories');
+      expect(find('appTitle').text()).toEqual('Snapshot and Restore');
     });
 
     test('should display a loading while fetching the repositories', () => {
@@ -64,7 +64,7 @@ describe.skip('<SnapshotRestoreHome />', () => {
     test('should have a link to the documentation', () => {
       const { exists, find } = testBed;
       expect(exists('documentationLink')).toBe(true);
-      expect(find('documentationLink').text()).toBe('Snapshot docs');
+      expect(find('documentationLink').text()).toBe('Snapshot and Restore docs');
     });
 
     describe('tabs', () => {
@@ -78,20 +78,31 @@ describe.skip('<SnapshotRestoreHome />', () => {
         });
       });
 
-      test('should have 2 tabs', () => {
+      test('should have 4 tabs', () => {
         const { find } = testBed;
 
-        expect(find('tab').length).toBe(2);
-        expect(find('tab').map(t => t.text())).toEqual(['Snapshots', 'Repositories']);
+        expect(find('tab').length).toBe(4);
+        expect(find('tab').map(t => t.text())).toEqual([
+          'Snapshots',
+          'Repositories',
+          'Policies',
+          'Restore Status',
+        ]);
       });
 
-      test('should navigate to snapshot list tab', () => {
+      test('should navigate to snapshot list tab', async () => {
         const { exists, actions } = testBed;
 
         expect(exists('repositoryList')).toBe(true);
         expect(exists('snapshotList')).toBe(false);
 
         actions.selectTab('snapshots');
+
+        // @ts-ignore (remove when react 16.9.0 is released)
+        await act(async () => {
+          await nextTick();
+          testBed.component.update();
+        });
 
         expect(exists('repositoryList')).toBe(false);
         expect(exists('snapshotList')).toBe(true);
@@ -265,6 +276,11 @@ describe.skip('<SnapshotRestoreHome />', () => {
           expect(exists('repositoryDetail')).toBe(false);
 
           await actions.clickRepositoryAt(0);
+          // @ts-ignore (remove when react 16.9.0 is released)
+          await act(async () => {
+            await nextTick();
+            testBed.component.update();
+          });
 
           expect(exists('repositoryDetail')).toBe(true);
         });
@@ -384,9 +400,7 @@ describe.skip('<SnapshotRestoreHome />', () => {
 
       test('should invite the user to first register a repository', () => {
         const { find, exists } = testBed;
-        expect(find('emptyPrompt.title').text()).toBe(
-          `You don't have any snapshots or repositories yet`
-        );
+        expect(find('emptyPrompt.title').text()).toBe('Start by registering a repository');
         expect(exists('emptyPrompt.registerRepositoryButton')).toBe(true);
       });
     });
@@ -455,14 +469,19 @@ describe.skip('<SnapshotRestoreHome />', () => {
         const { tableCellsValues } = table.getMetaData('snapshotTable');
         tableCellsValues.forEach((row, i) => {
           const snapshot = snapshots[i];
+          const startTime = moment(new Date(snapshot.startTimeInMillis));
+          const timezone = moment.tz.guess();
+
           expect(row).toEqual([
+            '', // Checkbox
             snapshot.snapshot, // Snapshot
             REPOSITORY_NAME, // Repository
-            formatDate(snapshot.startTimeInMillis), // Date created
-            `${Math.ceil(snapshot.durationInMillis / 1000).toString()}s`, // Duration
             snapshot.indices.length.toString(), // Indices
             snapshot.shards.total.toString(), // Shards
             snapshot.shards.failed.toString(), // Failed shards
+            startTime.tz(timezone).format('MMMM D, YYYY h:mm A z'), // Start time
+            `${Math.ceil(snapshot.durationInMillis / 1000).toString()}s`, // Duration
+            '',
           ]);
         });
       });
@@ -591,25 +610,37 @@ describe.skip('<SnapshotRestoreHome />', () => {
 
             describe('summary tab', () => {
               test('should set the correct summary values', () => {
+                const {
+                  version,
+                  versionId,
+                  uuid,
+                  indices,
+                  endTimeInMillis,
+                  startTimeInMillis,
+                } = snapshot1;
+
                 const { find } = testBed;
+                const startTime = moment(new Date(startTimeInMillis));
+                const endTime = moment(new Date(endTimeInMillis));
+                const timezone = moment.tz.guess();
 
                 expect(find('snapshotDetail.version.value').text()).toBe(
-                  `${snapshot1.version} / ${snapshot1.versionId}`
+                  `${version} / ${versionId}`
                 );
-                expect(find('snapshotDetail.uuid.value').text()).toBe(snapshot1.uuid);
+                expect(find('snapshotDetail.uuid.value').text()).toBe(uuid);
                 expect(find('snapshotDetail.state.value').text()).toBe('Snapshot complete');
                 expect(find('snapshotDetail.includeGlobalState.value').text()).toBe('Yes');
                 expect(find('snapshotDetail.indices.title').text()).toBe(
-                  `Indices (${snapshot1.indices.length})`
+                  `Indices (${indices.length})`
                 );
-                expect(find('snapshotDetail.indices.value').text()).toBe(
-                  snapshot1.indices.join('')
+                expect(find('snapshotDetail.indices.value').text()).toContain(
+                  indices.splice(0, 10).join('')
                 );
                 expect(find('snapshotDetail.startTime.value').text()).toBe(
-                  formatDate(snapshot1.startTimeInMillis)
+                  startTime.tz(timezone).format('MMMM D, YYYY h:mm A z')
                 );
                 expect(find('snapshotDetail.endTime.value').text()).toBe(
-                  formatDate(snapshot1.endTimeInMillis)
+                  endTime.tz(timezone).format('MMMM D, YYYY h:mm A z')
                 );
               });
 
@@ -652,7 +683,7 @@ describe.skip('<SnapshotRestoreHome />', () => {
                   [SNAPSHOT_STATE.INCOMPATIBLE]: 'Incompatible version ',
                 };
 
-                // Call sequencially each state and verify that the message is ok
+                // Call sequentially each state and verify that the message is ok
                 return Object.entries(mapStateToMessage).reduce((promise, [state, message]) => {
                   return promise.then(async () => expectMessageForSnapshotState(state, message));
                 }, Promise.resolve());

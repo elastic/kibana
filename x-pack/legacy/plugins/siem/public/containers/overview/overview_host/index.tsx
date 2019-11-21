@@ -7,22 +7,31 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
+import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { GetOverviewHostQuery, OverviewHostData } from '../../../graphql/types';
-import { inputsModel } from '../../../store/inputs';
-import { createFilter } from '../../helpers';
+import { inputsModel, inputsSelectors } from '../../../store/inputs';
+import { State } from '../../../store';
+import { createFilter, getDefaultFetchPolicy } from '../../helpers';
 import { QueryTemplateProps } from '../../query_template';
 
 import { overviewHostQuery } from './index.gql_query';
 
+export const ID = 'overviewHostQuery';
+
 export interface OverviewHostArgs {
   id: string;
-  overviewHost: OverviewHostData;
+  inspect: inputsModel.InspectQuery;
   loading: boolean;
+  overviewHost: OverviewHostData;
   refetch: inputsModel.Refetch;
+}
+
+export interface OverviewHostReducer {
+  isInspected: boolean;
 }
 
 export interface OverviewHostProps extends QueryTemplateProps {
@@ -32,11 +41,11 @@ export interface OverviewHostProps extends QueryTemplateProps {
   startDate: number;
 }
 
-export const OverviewHostQuery = pure<OverviewHostProps>(
-  ({ id = 'overviewHostQuery', children, filterQuery, sourceId, startDate, endDate }) => (
+const OverviewHostComponentQuery = pure<OverviewHostProps & OverviewHostReducer>(
+  ({ id = ID, children, filterQuery, isInspected, sourceId, startDate, endDate }) => (
     <Query<GetOverviewHostQuery.Query, GetOverviewHostQuery.Variables>
       query={overviewHostQuery}
-      fetchPolicy="cache-and-network"
+      fetchPolicy={getDefaultFetchPolicy()}
       variables={{
         sourceId,
         timerange: {
@@ -46,12 +55,14 @@ export const OverviewHostQuery = pure<OverviewHostProps>(
         },
         filterQuery: createFilter(filterQuery),
         defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+        inspect: isInspected,
       }}
     >
       {({ data, loading, refetch }) => {
         const overviewHost = getOr({}, `source.OverviewHost`, data);
         return children({
           id,
+          inspect: getOr(null, 'source.OverviewHost.inspect', data),
           overviewHost,
           loading,
           refetch,
@@ -60,3 +71,18 @@ export const OverviewHostQuery = pure<OverviewHostProps>(
     </Query>
   )
 );
+
+OverviewHostComponentQuery.displayName = 'OverviewHostComponentQuery';
+
+const makeMapStateToProps = () => {
+  const getQuery = inputsSelectors.globalQueryByIdSelector();
+  const mapStateToProps = (state: State, { id = ID }: OverviewHostProps) => {
+    const { isInspected } = getQuery(state, id);
+    return {
+      isInspected,
+    };
+  };
+  return mapStateToProps;
+};
+
+export const OverviewHostQuery = connect(makeMapStateToProps)(OverviewHostComponentQuery);

@@ -9,8 +9,9 @@ import { GraphQLSchema } from 'graphql';
 import { Lifecycle, ResponseToolkit, RouteOptions } from 'hapi';
 import { Legacy } from 'kibana';
 
+import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { JsonObject } from '../../../../common/typed_json';
-import { InfraMetricModel } from '../metrics/adapter_types';
+import { TSVBMetricModel } from '../../../../common/inventory_models/types';
 
 export const internalInfraFrameworkRequest = Symbol('internalInfraFrameworkRequest');
 
@@ -49,17 +50,24 @@ export interface InfraBackendFrameworkAdapter {
   ): Promise<InfraDatabaseGetIndicesResponse>;
   callWithRequest(
     req: InfraFrameworkRequest,
+    method: 'ml.getBuckets',
+    options?: object
+  ): Promise<InfraDatabaseGetIndicesResponse>;
+  callWithRequest(
+    req: InfraFrameworkRequest,
     method: string,
     options?: object
   ): Promise<InfraDatabaseSearchResponse>;
   getIndexPatternsService(req: InfraFrameworkRequest<any>): Legacy.IndexPatternsService;
   getSavedObjectsService(): Legacy.SavedObjectsService;
+  getSpaceId(request: InfraFrameworkRequest<any>): string;
   makeTSVBRequest(
     req: InfraFrameworkRequest,
-    model: InfraMetricModel,
+    model: TSVBMetricModel,
     timerange: { min: number; max: number },
     filters: JsonObject[]
   ): Promise<InfraTSVBResponse>;
+  config(req: InfraFrameworkRequest): KibanaConfig;
 }
 /* eslint-enable  @typescript-eslint/unified-signatures */
 
@@ -149,15 +157,21 @@ export interface SortedSearchHit extends SearchHit {
   };
 }
 
-export interface InfraDateRangeAggregationBucket {
+export type InfraDateRangeAggregationBucket<NestedAggregation extends object = {}> = {
   from?: number;
   to?: number;
   doc_count: number;
   key: string;
+} & NestedAggregation;
+
+export interface InfraDateRangeAggregationResponse<NestedAggregation extends object = {}> {
+  buckets: Array<InfraDateRangeAggregationBucket<NestedAggregation>>;
 }
 
-export interface InfraDateRangeAggregationResponse {
-  buckets: InfraDateRangeAggregationBucket[];
+export interface InfraTopHitsAggregationResponse {
+  hits: {
+    hits: [];
+  };
 }
 
 export interface InfraMetadataAggregationBucket {
@@ -193,6 +207,7 @@ export interface InfraTSVBPanel {
 
 export interface InfraTSVBSeries {
   id: string;
+  label: string;
   data: InfraTSVBDataPoint[];
 }
 

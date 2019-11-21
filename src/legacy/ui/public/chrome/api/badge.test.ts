@@ -19,6 +19,7 @@
 
 import * as Rx from 'rxjs';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ChromeBadge } from 'src/core/public/chrome';
 import { newPlatformChrome } from './badge.test.mocks';
 import { initChromeBadgeApi } from './badge';

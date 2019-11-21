@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import gql from 'graphql-tag';
 import { SecurityService, SpacesService } from '../../../common/services';
-import { KbnTestProvider } from './types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const introspectionQuery = gql`
   query Schema {
@@ -19,7 +19,8 @@ const introspectionQuery = gql`
   }
 `;
 
-const featureControlsTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
+  const config = getService('config');
   const supertest = getService('supertestWithoutAuth');
   const security: SecurityService = getService('security');
   const spaces: SpacesService = getService('spaces');
@@ -82,6 +83,11 @@ const featureControlsTests: KbnTestProvider = ({ getService }) => {
   };
 
   describe('feature controls', () => {
+    let isProd = false;
+    before(() => {
+      const kbnConfig = config.get('servers.kibana');
+      isProd = kbnConfig.hostname === 'localhost' && kbnConfig.port === 5620 ? false : true;
+    });
     it(`APIs can't be accessed by user with no privileges`, async () => {
       const username = 'logstash_read';
       const roleName = 'logstash_read';
@@ -130,7 +136,11 @@ const featureControlsTests: KbnTestProvider = ({ getService }) => {
         expectGraphQLResponse(graphQLResult);
 
         const graphQLIResult = await executeGraphIQLRequest(username, password);
-        expectGraphIQLResponse(graphQLIResult);
+        if (!isProd) {
+          expectGraphIQLResponse(graphQLIResult);
+        } else {
+          expectGraphIQL404(graphQLIResult);
+        }
       } finally {
         await security.role.delete(roleName);
         await security.user.delete(username);
@@ -225,7 +235,11 @@ const featureControlsTests: KbnTestProvider = ({ getService }) => {
         expectGraphQLResponse(graphQLResult);
 
         const graphQLIResult = await executeGraphIQLRequest(username, password, space1Id);
-        expectGraphIQLResponse(graphQLIResult);
+        if (!isProd) {
+          expectGraphIQLResponse(graphQLIResult);
+        } else {
+          expectGraphIQL404(graphQLIResult);
+        }
       });
 
       it(`user_1 can't access APIs in space_2`, async () => {
@@ -237,7 +251,4 @@ const featureControlsTests: KbnTestProvider = ({ getService }) => {
       });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default featureControlsTests;
+}

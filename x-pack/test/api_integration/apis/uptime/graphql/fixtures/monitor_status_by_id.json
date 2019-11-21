@@ -1,10 +1,20 @@
-{
-  "monitorStatus": [
-    {
-      "timestamp": "2019-01-28T18:43:16.078Z",
-      "monitor": { "status": "up", "duration": { "us": 3328 } },
-      "observer": null,
-      "url": { "full": "tcp://localhost:9200" }
+[
+  {
+    "timestamp": "2019-09-11T03:40:34.371Z",
+    "monitor": {
+      "status": "up",
+      "duration": {
+        "us": 24627
+      }
+    },
+    "observer": {
+      "geo": {
+        "name": "mpls"
+      }
+    },
+    "tls": null,
+    "url": {
+      "full": "http://localhost:5678/pattern?r=200x1"
     }
-  ]
-}
+  }
+]

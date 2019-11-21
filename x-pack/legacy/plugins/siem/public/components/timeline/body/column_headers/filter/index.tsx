@@ -34,3 +34,5 @@ export const Filter = pure<Props>(({ header, onFilterChange = noop }) => {
       return null;
   }
 });
+
+Filter.displayName = 'Filter';

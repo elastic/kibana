@@ -78,7 +78,7 @@ export function initChromeNavApi(chrome: any, internals: NavInternals) {
     coreNavLinks
       .getAll()
       // Filter only legacy links
-      .filter(link => link.subUrlBase)
+      .filter(link => link.legacy)
       .forEach(link => {
         const active = url.startsWith(link.subUrlBase!);
         link = coreNavLinks.update(link.id, { active })!;

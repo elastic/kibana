@@ -7,7 +7,7 @@
 import React from 'react';
 import moment from 'moment';
 import { TlsNode } from '../../../../graphql/types';
-import { Columns } from '../../../load_more_table';
+import { Columns } from '../../../paginated_table';
 
 import { getRowItemDraggables, getRowItemDraggable } from '../../../tables/helpers';
 import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
@@ -15,15 +15,15 @@ import { PreferenceFormattedDate } from '../../../formatted_date';
 
 import * as i18n from './translations';
 
-export const getTlsColumns = (
-  tableId: string
-): [
+export type TlsColumns = [
   Columns<TlsNode>,
   Columns<TlsNode>,
   Columns<TlsNode['_id']>,
   Columns<TlsNode>,
   Columns<TlsNode>
-] => [
+];
+
+export const getTlsColumns = (tableId: string): TlsColumns => [
   {
     field: 'node',
     name: i18n.ISSUER,

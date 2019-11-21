@@ -4,19 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getTelemetryOptIn } from '../../../telemetry/server';
+import { KibanaRequest } from '../../../../../../src/core/server';
 
 export async function replaceInjectedVars(originalInjectedVars, request, server) {
   const xpackInfo = server.plugins.xpack_main.info;
 
   const withXpackInfo = async () => ({
     ...originalInjectedVars,
-    telemetryOptedIn: await getTelemetryOptIn(request),
     xpackInitialInfo: xpackInfo.isAvailable() ? xpackInfo.toJSON() : undefined,
   });
 
   // security feature is disabled
-  if (!server.plugins.security) {
+  if (!server.plugins.security || !server.newPlatform.setup.plugins.security) {
     return await withXpackInfo();
   }
 
@@ -26,7 +25,7 @@ export async function replaceInjectedVars(originalInjectedVars, request, server)
   }
 
   // request is not authenticated
-  if (!await server.plugins.security.isAuthenticated(request)) {
+  if (!await server.newPlatform.setup.plugins.security.authc.isAuthenticated(KibanaRequest.from(request))) {
     return originalInjectedVars;
   }
 

@@ -5,76 +5,129 @@
  */
 
 import {
-  DomainsSortField,
-  FlowDirection,
   FlowTarget,
   NetworkDnsSortField,
-  NetworkTopNFlowSortField,
+  NetworkHttpSortField,
+  NetworkTopTablesSortField,
   TlsSortField,
   UsersSortField,
 } from '../../graphql/types';
-import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 export enum NetworkType {
   page = 'page',
   details = 'details',
 }
 
-export interface BasicQuery {
+export enum NetworkTableType {
+  dns = 'dns',
+  http = 'http',
+  topCountriesDestination = 'topCountriesDestination',
+  topCountriesSource = 'topCountriesSource',
+  topNFlowDestination = 'topNFlowDestination',
+  topNFlowSource = 'topNFlowSource',
+  tls = 'tls',
+}
+
+export type TopNTableType =
+  | IpDetailsTableType.topNFlowDestination
+  | IpDetailsTableType.topNFlowSource
+  | NetworkTableType.topNFlowDestination
+  | NetworkTableType.topNFlowSource;
+
+export type TopCountriesTableType =
+  | IpDetailsTableType.topCountriesDestination
+  | IpDetailsTableType.topCountriesSource
+  | NetworkTableType.topCountriesDestination
+  | NetworkTableType.topCountriesSource;
+
+export type TopTlsTableType = IpDetailsTableType.tls | NetworkTableType.tls;
+
+export type HttpTableType = IpDetailsTableType.http | NetworkTableType.http;
+
+export enum IpDetailsTableType {
+  http = 'http',
+  tls = 'tls',
+  topCountriesDestination = 'topCountriesDestination',
+  topCountriesSource = 'topCountriesSource',
+  topNFlowDestination = 'topNFlowDestination',
+  topNFlowSource = 'topNFlowSource',
+  users = 'users',
+}
+
+export type AllNetworkTables = NetworkTableType | IpDetailsTableType;
+
+export interface BasicQueryPaginated {
+  activePage: number;
   limit: number;
 }
 
 // Network Page Models
-export interface TopNFlowQuery extends BasicQuery {
-  flowTarget: FlowTarget;
-  topNFlowSort: NetworkTopNFlowSortField;
-  flowDirection: FlowDirection;
+export interface TopNFlowQuery extends BasicQueryPaginated {
+  sort: NetworkTopTablesSortField;
 }
 
-export interface DnsQuery extends BasicQuery {
-  dnsSortField: NetworkDnsSortField;
+export interface TopCountriesQuery extends BasicQueryPaginated {
+  sort: NetworkTopTablesSortField;
+}
+
+export interface DnsQuery extends BasicQueryPaginated {
+  sort: NetworkDnsSortField;
   isPtrIncluded: boolean;
 }
 
-interface NetworkQueries {
-  topNFlow: TopNFlowQuery;
-  dns: DnsQuery;
+export interface TlsQuery extends BasicQueryPaginated {
+  sort: TlsSortField;
+}
+
+export interface HttpQuery extends BasicQueryPaginated {
+  sort: NetworkHttpSortField;
+}
+
+export interface TableUpdates {
+  activePage?: number;
+  limit?: number;
+  isPtrIncluded?: boolean;
+  sort?:
+    | NetworkDnsSortField
+    | NetworkHttpSortField
+    | NetworkTopTablesSortField
+    | TlsSortField
+    | UsersSortField;
+}
+
+export interface NetworkQueries {
+  [NetworkTableType.dns]: DnsQuery;
+  [NetworkTableType.http]: HttpQuery;
+  [NetworkTableType.topCountriesDestination]: TopCountriesQuery;
+  [NetworkTableType.topCountriesSource]: TopCountriesQuery;
+  [NetworkTableType.topNFlowDestination]: TopNFlowQuery;
+  [NetworkTableType.topNFlowSource]: TopNFlowQuery;
+  [NetworkTableType.tls]: TlsQuery;
 }
 
 export interface NetworkPageModel {
-  filterQuery: SerializedFilterQuery | null;
-  filterQueryDraft: KueryFilterQuery | null;
   queries: NetworkQueries;
 }
 
-// IP Details Models
-export interface DomainsQuery extends BasicQuery {
-  flowDirection: FlowDirection;
-  domainsSortField: DomainsSortField;
+export interface UsersQuery extends BasicQueryPaginated {
+  sort: UsersSortField;
 }
 
-export interface TlsQuery extends BasicQuery {
-  tlsSortField: TlsSortField;
-}
-
-export interface UsersQuery extends BasicQuery {
-  usersSortField: UsersSortField;
-}
-
-interface IpOverviewQueries {
-  domains: DomainsQuery;
-  tls: TlsQuery;
-  users: UsersQuery;
+export interface IpOverviewQueries {
+  [IpDetailsTableType.http]: HttpQuery;
+  [IpDetailsTableType.tls]: TlsQuery;
+  [IpDetailsTableType.topCountriesDestination]: TopCountriesQuery;
+  [IpDetailsTableType.topCountriesSource]: TopCountriesQuery;
+  [IpDetailsTableType.topNFlowDestination]: TopNFlowQuery;
+  [IpDetailsTableType.topNFlowSource]: TopNFlowQuery;
+  [IpDetailsTableType.users]: UsersQuery;
 }
 
 export interface NetworkDetailsModel {
-  filterQuery: SerializedFilterQuery | null;
-  filterQueryDraft: KueryFilterQuery | null;
   flowTarget: FlowTarget;
   queries: IpOverviewQueries;
 }
 
-// Network Model
 export interface NetworkModel {
   [NetworkType.page]: NetworkPageModel;
   [NetworkType.details]: NetworkDetailsModel;

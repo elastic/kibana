@@ -9,20 +9,21 @@ import gql from 'graphql-tag';
 export const networkTopNFlowQuery = gql`
   query GetNetworkTopNFlowQuery(
     $sourceId: ID!
-    $flowDirection: FlowDirection!
+    $ip: String
     $filterQuery: String
-    $pagination: PaginationInput!
-    $sort: NetworkTopNFlowSortField!
-    $flowTarget: FlowTarget!
+    $pagination: PaginationInputPaginated!
+    $sort: NetworkTopTablesSortField!
+    $flowTarget: FlowTargetSourceDest!
     $timerange: TimerangeInput!
     $defaultIndex: [String!]!
+    $inspect: Boolean!
   ) {
     source(id: $sourceId) {
       id
       NetworkTopNFlow(
         filterQuery: $filterQuery
-        flowDirection: $flowDirection
         flowTarget: $flowTarget
+        ip: $ip
         pagination: $pagination
         sort: $sort
         timerange: $timerange
@@ -32,29 +33,50 @@ export const networkTopNFlowQuery = gql`
         edges {
           node {
             source {
-              count
-              ip
+              autonomous_system {
+                name
+                number
+              }
               domain
+              ip
+              location {
+                geo {
+                  continent_name
+                  country_name
+                  country_iso_code
+                  city_name
+                  region_iso_code
+                  region_name
+                }
+                flowTarget
+              }
+              flows
+              destination_ips
             }
             destination {
-              count
-              ip
+              autonomous_system {
+                name
+                number
+              }
               domain
-            }
-            client {
-              count
               ip
-              domain
-            }
-            server {
-              count
-              ip
-              domain
+              location {
+                geo {
+                  continent_name
+                  country_name
+                  country_iso_code
+                  city_name
+                  region_iso_code
+                  region_name
+                }
+                flowTarget
+              }
+              flows
+              source_ips
             }
             network {
-              bytes
-              direction
-              packets
+              bytes_in
+              bytes_out
             }
           }
           cursor {
@@ -62,10 +84,13 @@ export const networkTopNFlowQuery = gql`
           }
         }
         pageInfo {
-          endCursor {
-            value
-          }
-          hasNextPage
+          activePage
+          fakeTotalCount
+          showMorePagesIndicator
+        }
+        inspect @include(if: $inspect) {
+          dsl
+          response
         }
       }
     }

@@ -8,8 +8,8 @@ import cheerio from 'cheerio';
 import { UICapabilities } from 'ui/capabilities';
 import { format as formatUrl } from 'url';
 import util from 'util';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
-import { LogService } from '../../../types/services';
+import { ToolingLog } from '@kbn/dev-utils';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 export interface BasicCredentials {
   username: string;
@@ -17,7 +17,7 @@ export interface BasicCredentials {
 }
 
 export enum GetUICapabilitiesFailureReason {
-  RedirectedToRoot = 'Redirected to Root',
+  RedirectedToSpaceSelector = 'Redirected to Space Selector',
   NotFound = 'Not Found',
 }
 
@@ -28,10 +28,10 @@ interface GetUICapabilitiesResult {
 }
 
 export class UICapabilitiesService {
-  private readonly log: LogService;
+  private readonly log: ToolingLog;
   private readonly axios: AxiosInstance;
 
-  constructor(url: string, log: LogService) {
+  constructor(url: string, log: ToolingLog) {
     this.log = log;
     this.axios = axios.create({
       headers: { 'kbn-xsrf': 'x-pack/ftr/services/ui_capabilities' },
@@ -61,10 +61,10 @@ export class UICapabilitiesService {
       headers: requestHeaders,
     });
 
-    if (response.status === 302 && response.headers.location === '/') {
+    if (response.status === 302 && response.headers.location === '/spaces/space_selector') {
       return {
         success: false,
-        failureReason: GetUICapabilitiesFailureReason.RedirectedToRoot,
+        failureReason: GetUICapabilitiesFailureReason.RedirectedToSpaceSelector,
       };
     }
 
@@ -105,7 +105,7 @@ export class UICapabilitiesService {
   }
 }
 
-export function UICapabilitiesProvider({ getService }: KibanaFunctionalTestDefaultProviders) {
+export function UICapabilitiesProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
   const noAuthUrl = formatUrl({

@@ -114,7 +114,7 @@ block content
       }
     }
 
-  .kibanaWelcomeView(id="kbn_loading_message", style="display: none;")
+  .kibanaWelcomeView(id="kbn_loading_message", style="display: none;", data-test-subj="kbnLoadingMessage")
     .kibanaLoaderWrap
       .kibanaLoader
       .kibanaWelcomeLogoCircle
@@ -132,9 +132,9 @@ block content
       | #{i18n('common.ui.legacyBrowserMessage', { defaultMessage: 'This Kibana installation has strict security requirements enabled that your current browser does not meet.' })}
 
   script.
-    // Since this script tag does not contain a nonce, this code will not run
+    // Since this is an unsafe inline script, this code will not run
     // in browsers that support content security policy(CSP). This is
     // intentional as we check for the existence of __kbnCspNotEnforced__ in
     // bootstrap.
     window.__kbnCspNotEnforced__ = true;
-  script(src=bootstrapScriptUrl, nonce=nonce)
+  script(src=bootstrapScriptUrl)

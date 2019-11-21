@@ -29,7 +29,7 @@ export default function ({ getPageObjects, getService }) {
 <h3>Inline HTML that should not be rendered as html</h3>
   `;
 
-  describe('visualize app', async () => {
+  describe('visualize app', () => {
     before(async function () {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickMarkdownWidget();
@@ -37,7 +37,7 @@ export default function ({ getPageObjects, getService }) {
       await PageObjects.visualize.clickGo();
     });
 
-    describe('markdown vis', async () => {
+    describe('markdown vis', () => {
 
       it('should not have inspector enabled', async function () {
         await inspector.expectIsNotEnabled();

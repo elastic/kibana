@@ -24,7 +24,7 @@ function getDiscoverQuery(error: APMError, kuery?: string) {
     _a: {
       interval: 'auto',
       query: {
-        language: 'lucene',
+        language: 'kuery',
         query
       },
       sort: { '@timestamp': 'desc' }

@@ -28,6 +28,7 @@ export {
   createGenerateIndexRecordsStream,
   deleteKibanaIndices,
   migrateKibanaIndex,
+  createDefaultSpace,
 } from './indices';
 
 export {

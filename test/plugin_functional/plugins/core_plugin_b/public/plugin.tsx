@@ -17,12 +17,14 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup } from 'kibana/public';
+import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/public';
 import { CorePluginAPluginSetup } from '../../core_plugin_a/public/plugin';
 
 declare global {
   interface Window {
     corePluginB?: string;
+    hasAccessToInjectedMetadata?: boolean;
+    env?: PluginInitializerContext['env'];
   }
 }
 
@@ -32,11 +34,25 @@ export interface CorePluginBDeps {
 
 export class CorePluginBPlugin
   implements Plugin<CorePluginBPluginSetup, CorePluginBPluginStart, CorePluginBDeps> {
+  constructor(pluginContext: PluginInitializerContext) {
+    window.env = pluginContext.env;
+  }
   public setup(core: CoreSetup, deps: CorePluginBDeps) {
     window.corePluginB = `Plugin A said: ${deps.core_plugin_a.getGreeting()}`;
+    window.hasAccessToInjectedMetadata = 'getInjectedVar' in core.injectedMetadata;
+
+    core.application.register({
+      id: 'bar',
+      title: 'Bar',
+      async mount(context, params) {
+        const { renderApp } = await import('./application');
+        return renderApp(context, params);
+      },
+    });
   }
 
   public start() {}
+  public stop() {}
 }
 
 export type CorePluginBPluginSetup = ReturnType<CorePluginBPlugin['setup']>;

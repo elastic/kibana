@@ -98,7 +98,7 @@ export const buildOverviewNetworkQuery = ({
         },
       },
       size: 0,
-      track_total_hits: true,
+      track_total_hits: false,
     },
   };
 
@@ -135,6 +135,64 @@ export const buildOverviewHostQuery = ({
           filter: {
             term: {
               'event.module': 'auditd',
+            },
+          },
+        },
+        endgame_module: {
+          filter: {
+            term: {
+              'event.module': 'endgame',
+            },
+          },
+          aggs: {
+            dns_event_count: {
+              filter: {
+                term: {
+                  'endgame.event_type_full': 'dns_event',
+                },
+              },
+            },
+            file_event_count: {
+              filter: {
+                term: {
+                  'endgame.event_type_full': 'file_event',
+                },
+              },
+            },
+            image_load_event_count: {
+              filter: {
+                term: {
+                  'endgame.event_type_full': 'image_load_event',
+                },
+              },
+            },
+            network_event_count: {
+              filter: {
+                term: {
+                  'endgame.event_type_full': 'network_event',
+                },
+              },
+            },
+            process_event_count: {
+              filter: {
+                term: {
+                  'endgame.event_type_full': 'process_event',
+                },
+              },
+            },
+            registry_event: {
+              filter: {
+                term: {
+                  'endgame.event_type_full': 'registry_event',
+                },
+              },
+            },
+            security_event_count: {
+              filter: {
+                term: {
+                  'endgame.event_type_full': 'security_event',
+                },
+              },
             },
           },
         },
@@ -203,7 +261,7 @@ export const buildOverviewHostQuery = ({
         },
       },
       size: 0,
-      track_total_hits: true,
+      track_total_hits: false,
     },
   };
 

@@ -1,0 +1,19 @@
+.mlDataFrameAnalyticsExploration {
+  /* Overwrite to give table cells a more grid-like appearance */
+  .euiTableHeaderCell {
+    padding: 0 4px;
+  }
+  .euiTableCellContent {
+    padding: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    line-height: 2;
+  }
+}
+
+.mlColoredTableCell {
+  width: 100%;
+  height: 100%;
+  padding: 0 4px;
+}

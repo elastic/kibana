@@ -7,18 +7,15 @@
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
 import { ServerRoute } from 'hapi';
-import { KibanaConfig, SavedObjectsService } from 'src/legacy/server/kbn_server';
-import { HttpServiceSetup, Logger, PluginInitializerContext } from 'src/core/server';
+import { KibanaConfig, SavedObjectsLegacyService } from 'src/legacy/server/kbn_server';
+import { Logger, PluginInitializerContext, CoreSetup } from 'src/core/server';
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
 import { addLinksToSampleDatasets } from '../lib/sample_data_sets';
-// @ts-ignore: could not find declaration file for module
 import { checkLicense } from '../lib/check_license';
 // @ts-ignore: could not find declaration file for module
 import { mirrorPluginStatus } from '../../../../server/lib/mirror_plugin_status';
-// @ts-ignore: could not find declaration file for module
 import { FEATURE_ANNOTATIONS_ENABLED } from '../../common/constants/feature_flags';
-// @ts-ignore: could not find declaration file for module
 import { LICENSE_TYPE } from '../../common/constants/license';
 // @ts-ignore: could not find declaration file for module
 import { annotationRoutes } from '../routes/annotations';
@@ -30,14 +27,13 @@ import { dataFeedRoutes } from '../routes/datafeeds';
 import { indicesRoutes } from '../routes/indices';
 // @ts-ignore: could not find declaration file for module
 import { jobValidationRoutes } from '../routes/job_validation';
-// @ts-ignore: could not find declaration file for module
 import { makeMlUsageCollector } from '../lib/ml_telemetry';
 // @ts-ignore: could not find declaration file for module
 import { notificationRoutes } from '../routes/notification_settings';
 // @ts-ignore: could not find declaration file for module
 import { systemRoutes } from '../routes/system';
 // @ts-ignore: could not find declaration file for module
-import { dataFrameRoutes } from '../routes/data_frame';
+import { dataFrameAnalyticsRoutes } from '../routes/data_frame_analytics';
 // @ts-ignore: could not find declaration file for module
 import { dataRecognizer } from '../routes/modules';
 // @ts-ignore: could not find declaration file for module
@@ -56,10 +52,10 @@ import { jobServiceRoutes } from '../routes/job_service';
 import { jobAuditMessagesRoutes } from '../routes/job_audit_messages';
 // @ts-ignore: could not find declaration file for module
 import { fileDataVisualizerRoutes } from '../routes/file_data_visualizer';
-// @ts-ignore: could not find declaration file for module
 import { initMlServerLog, LogInitialization } from '../client/log';
 
-export interface MlHttpServiceSetup extends HttpServiceSetup {
+type CoreHttpSetup = CoreSetup['http'];
+export interface MlHttpServiceSetup extends CoreHttpSetup {
   route(route: ServerRoute | ServerRoute[]): void;
 }
 
@@ -71,7 +67,7 @@ export interface MlCoreSetup {
   addAppLinksToSampleDataset: () => any;
   injectUiAppVars: (id: string, callback: () => {}) => any;
   http: MlHttpServiceSetup;
-  savedObjects: SavedObjectsService;
+  savedObjects: SavedObjectsLegacyService;
   usage: {
     collectorSet: {
       makeUsageCollector: any;
@@ -87,6 +83,7 @@ export interface PluginsSetup {
   elasticsearch: ElasticsearchPlugin;
   xpackMain: MlXpackMainPlugin;
   security: any;
+  spaces: any;
   // TODO: this is temporary for `mirrorPluginStatus`
   ml: any;
 }
@@ -96,7 +93,8 @@ export interface RouteInitialization {
   elasticsearchPlugin: ElasticsearchPlugin;
   route(route: ServerRoute | ServerRoute[]): void;
   xpackMainPlugin?: MlXpackMainPlugin;
-  savedObjects?: SavedObjectsService;
+  savedObjects?: SavedObjectsLegacyService;
+  spacesPlugin: any;
 }
 export interface UsageInitialization {
   elasticsearchPlugin: ElasticsearchPlugin;
@@ -106,7 +104,7 @@ export interface UsageInitialization {
       register: (collector: any) => void;
     };
   };
-  savedObjects: SavedObjectsService;
+  savedObjects: SavedObjectsLegacyService;
 }
 
 export class Plugin {
@@ -193,6 +191,7 @@ export class Plugin {
       commonRouteConfig,
       route: http.route,
       elasticsearchPlugin: plugins.elasticsearch,
+      spacesPlugin: plugins.spaces,
     };
 
     const extendedRouteInitializationDeps: RouteInitialization = {
@@ -200,6 +199,7 @@ export class Plugin {
       config: this.config,
       xpackMainPlugin: plugins.xpackMain,
       savedObjects: core.savedObjects,
+      spacesPlugin: plugins.spaces,
     };
 
     const usageInitializationDeps: UsageInitialization = {
@@ -215,7 +215,7 @@ export class Plugin {
     annotationRoutes(routeInitializationDeps);
     jobRoutes(routeInitializationDeps);
     dataFeedRoutes(routeInitializationDeps);
-    dataFrameRoutes(routeInitializationDeps);
+    dataFrameAnalyticsRoutes(routeInitializationDeps);
     indicesRoutes(routeInitializationDeps);
     jobValidationRoutes(extendedRouteInitializationDeps);
     notificationRoutes(routeInitializationDeps);

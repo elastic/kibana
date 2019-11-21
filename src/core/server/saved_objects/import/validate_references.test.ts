@@ -18,18 +18,10 @@
  */
 
 import { getNonExistingReferenceAsKeys, validateReferences } from './validate_references';
+import { savedObjectsClientMock } from '../../mocks';
 
 describe('getNonExistingReferenceAsKeys()', () => {
-  const savedObjectsClient = {
-    errors: {} as any,
-    bulkCreate: jest.fn(),
-    bulkGet: jest.fn(),
-    create: jest.fn(),
-    delete: jest.fn(),
-    find: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-  };
+  const savedObjectsClient = savedObjectsClientMock.create();
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -107,6 +99,9 @@ describe('getNonExistingReferenceAsKeys()', () => {
           "type": "index-pattern",
         },
       ],
+      Object {
+        "namespace": undefined,
+      },
     ],
   ],
   "results": Array [
@@ -173,6 +168,8 @@ describe('getNonExistingReferenceAsKeys()', () => {
             statusCode: 404,
             message: 'Not found',
           },
+          attributes: {},
+          references: [],
         },
         {
           id: '3',
@@ -181,6 +178,8 @@ describe('getNonExistingReferenceAsKeys()', () => {
             statusCode: 404,
             message: 'Not found',
           },
+          attributes: {},
+          references: [],
         },
       ],
     });
@@ -206,6 +205,9 @@ describe('getNonExistingReferenceAsKeys()', () => {
           "type": "search",
         },
       ],
+      Object {
+        "namespace": undefined,
+      },
     ],
   ],
   "results": Array [
@@ -220,16 +222,7 @@ describe('getNonExistingReferenceAsKeys()', () => {
 });
 
 describe('validateReferences()', () => {
-  const savedObjectsClient = {
-    errors: {} as any,
-    bulkCreate: jest.fn(),
-    bulkGet: jest.fn(),
-    create: jest.fn(),
-    delete: jest.fn(),
-    find: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-  };
+  const savedObjectsClient = savedObjectsClientMock.create();
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -256,6 +249,8 @@ Object {
             statusCode: 404,
             message: 'Not found',
           },
+          attributes: {},
+          references: [],
         },
         {
           type: 'index-pattern',
@@ -264,6 +259,8 @@ Object {
             statusCode: 404,
             message: 'Not found',
           },
+          attributes: {},
+          references: [],
         },
         {
           type: 'index-pattern',
@@ -272,6 +269,8 @@ Object {
             statusCode: 404,
             message: 'Not found',
           },
+          attributes: {},
+          references: [],
         },
         {
           type: 'search',
@@ -280,6 +279,8 @@ Object {
             statusCode: 404,
             message: 'Not found',
           },
+          attributes: {},
+          references: [],
         },
         {
           id: '8',
@@ -434,6 +435,9 @@ Object {
           "type": "search",
         },
       ],
+      Object {
+        "namespace": undefined,
+      },
     ],
   ],
   "results": Array [
@@ -602,6 +606,8 @@ Object {
             statusCode: 400,
             message: 'Error',
           },
+          attributes: {},
+          references: [],
         },
       ],
     });

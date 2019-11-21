@@ -20,13 +20,13 @@ import 'uiExports/visResponseHandlers';
 import 'uiExports/visRequestHandlers';
 import 'uiExports/visEditorTypes';
 import 'uiExports/inspectorViews';
+import 'uiExports/interpreter';
 import 'uiExports/savedObjectTypes';
+import 'uiExports/embeddableActions';
 import 'uiExports/embeddableFactories';
 import 'uiExports/navbarExtensions';
 import 'uiExports/docViews';
-import 'uiExports/fieldFormats';
 import 'uiExports/search';
-import 'uiExports/autocompleteProviders';
 import 'uiExports/shareContextMenuExtensions';
 import _ from 'lodash';
 import 'ui/autoload/all';
@@ -35,15 +35,18 @@ import 'plugins/kibana/dashboard';
 import 'ui/vislib';
 import 'ui/agg_response';
 import 'ui/agg_types';
-import 'ui/timepicker';
 import 'leaflet';
 import { npStart } from 'ui/new_platform';
+import { localApplicationService } from 'plugins/kibana/local_application_service';
+
 
 import { showAppRedirectNotification } from 'ui/notify';
 import { DashboardConstants, createDashboardEditUrl } from 'plugins/kibana/dashboard/dashboard_constants';
 
 uiModules.get('kibana')
   .config(dashboardConfigProvider => dashboardConfigProvider.turnHideWriteControlsOn());
+
+localApplicationService.attachToAngular(routes);
 
 routes.enable();
 routes.otherwise({ redirectTo: defaultUrl() });

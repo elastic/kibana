@@ -17,11 +17,15 @@
  * under the License.
  */
 import { OverlayService, OverlayStart } from './overlay_service';
+import { overlayBannersServiceMock } from './banners/banners_service.mock';
+import { overlayFlyoutServiceMock } from './flyout/flyout_service.mock';
+import { overlayModalServiceMock } from './modal/modal_service.mock';
 
 const createStartContractMock = () => {
-  const startContract: jest.Mocked<PublicMethodsOf<OverlayStart>> = {
-    openFlyout: jest.fn(),
-    openModal: jest.fn(),
+  const startContract: DeeplyMockedKeys<OverlayStart> = {
+    openFlyout: overlayFlyoutServiceMock.createStartContract().open,
+    openModal: overlayModalServiceMock.createStartContract().open,
+    banners: overlayBannersServiceMock.createStartContract(),
   };
   return startContract;
 };

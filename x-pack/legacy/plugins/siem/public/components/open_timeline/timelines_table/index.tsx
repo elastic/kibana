@@ -9,6 +9,7 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import * as i18n from '../translations';
 import {
   DeleteTimelines,
   OnOpenTimeline,
@@ -22,25 +23,16 @@ import { getCommonColumns } from './common_columns';
 import { getExtendedColumns } from './extended_columns';
 import { getIconHeaderColumns } from './icon_header_columns';
 
-import * as i18n from '../translations';
-
-const TimelinesTableContainer = styled.div`
+const BasicTable = styled(EuiBasicTable)`
   .euiTableCellContent {
-    animation: none;
-    text-align: left;
+    animation: none; //Prevents applying max-height from animation
   }
 
-  .euiTableCellContent__text {
-    width: 100%;
-  }
-
-  tbody {
-    th,
-    td {
-      vertical-align: top;
-    }
+  .euiTableRow-isExpandedRow .euiTableCellContent__text {
+    width: 100%; //Fixes collapsing nested flex content in IE11
   }
 `;
+BasicTable.displayName = 'BasicTable';
 
 const getExtendedColumnsIfEnabled = (showExtendedColumnsAndActions: boolean) =>
   showExtendedColumnsAndActions ? [...getExtendedColumns()] : [];
@@ -146,30 +138,29 @@ export const TimelinesTable = pure<TimelinesTableProps>(
     };
 
     return (
-      <TimelinesTableContainer data-test-subj="timelines-table-container">
-        <EuiBasicTable
-          compressed={true}
-          columns={getTimelinesTableColumns({
-            deleteTimelines,
-            itemIdToExpandedNotesRowMap,
-            onOpenTimeline,
-            onToggleShowNotes,
-            showExtendedColumnsAndActions,
-          })}
-          data-test-subj="timelines-table"
-          isExpandable={true}
-          isSelectable={showExtendedColumnsAndActions}
-          itemId="savedObjectId"
-          itemIdToExpandedRowMap={itemIdToExpandedNotesRowMap}
-          items={searchResults}
-          loading={isLoading}
-          noItemsMessage={i18n.ZERO_TIMELINES_MATCH}
-          onChange={onTableChange}
-          pagination={pagination}
-          selection={showExtendedColumnsAndActions ? selection : undefined}
-          sorting={sorting}
-        />
-      </TimelinesTableContainer>
+      <BasicTable
+        columns={getTimelinesTableColumns({
+          deleteTimelines,
+          itemIdToExpandedNotesRowMap,
+          onOpenTimeline,
+          onToggleShowNotes,
+          showExtendedColumnsAndActions,
+        })}
+        compressed
+        data-test-subj="timelines-table"
+        isExpandable={true}
+        isSelectable={showExtendedColumnsAndActions}
+        itemId="savedObjectId"
+        itemIdToExpandedRowMap={itemIdToExpandedNotesRowMap}
+        items={searchResults}
+        loading={isLoading}
+        noItemsMessage={i18n.ZERO_TIMELINES_MATCH}
+        onChange={onTableChange}
+        pagination={pagination}
+        selection={showExtendedColumnsAndActions ? selection : undefined}
+        sorting={sorting}
+      />
     );
   }
 );
+TimelinesTable.displayName = 'TimelinesTable';

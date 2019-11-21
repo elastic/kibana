@@ -108,21 +108,29 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   // Currently the endpoint uses a default size of 100 unless a size is supplied.
   // So until paging is supported in the UI, explicitly supply a size of 1000
   // to match the max number of docs that the endpoint can return.
-  ml.getDataFrameTransforms = ca({
+  ml.getDataFrameAnalytics = ca({
     urls: [
       {
-        fmt: '/_data_frame/transforms/_all?size=1000',
+        fmt: '/_ml/data_frame/analytics/<%=analyticsId%>',
+        req: {
+          analyticsId: {
+            type: 'string'
+          }
+        }
+      },
+      {
+        fmt: '/_ml/data_frame/analytics/_all?size=1000',
       }
     ],
     method: 'GET'
   });
 
-  ml.getDataFrameTransformsStats = ca({
+  ml.getDataFrameAnalyticsStats = ca({
     urls: [
       {
-        fmt: '/_data_frame/transforms/<%=jobId%>/_stats',
+        fmt: '/_ml/data_frame/analytics/<%=analyticsId%>/_stats',
         req: {
-          jobId: {
+          analyticsId: {
             type: 'string'
           }
         }
@@ -131,18 +139,18 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         // Currently the endpoint uses a default size of 100 unless a size is supplied.
         // So until paging is supported in the UI, explicitly supply a size of 1000
         // to match the max number of docs that the endpoint can return.
-        fmt: '/_data_frame/transforms/_all/_stats?size=1000',
+        fmt: '/_ml/data_frame/analytics/_all/_stats?size=1000',
       }
     ],
     method: 'GET'
   });
 
-  ml.createDataFrameTransformsJob = ca({
+  ml.createDataFrameAnalytics = ca({
     urls: [
       {
-        fmt: '/_data_frame/transforms/<%=jobId%>',
+        fmt: '/_ml/data_frame/analytics/<%=analyticsId%>',
         req: {
-          jobId: {
+          analyticsId: {
             type: 'string'
           }
         }
@@ -152,12 +160,32 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'PUT'
   });
 
-  ml.deleteDataFrameTransformsJob = ca({
+  ml.evaluateDataFrameAnalytics = ca({
     urls: [
       {
-        fmt: '/_data_frame/transforms/<%=jobId%>',
+        fmt: '/_ml/data_frame/_evaluate',
+      }
+    ],
+    needBody: true,
+    method: 'POST'
+  });
+
+  ml.estimateDataFrameAnalyticsMemoryUsage = ca({
+    urls: [
+      {
+        fmt: '/_ml/data_frame/analytics/_estimate_memory_usage',
+      }
+    ],
+    needBody: true,
+    method: 'POST'
+  });
+
+  ml.deleteDataFrameAnalytics = ca({
+    urls: [
+      {
+        fmt: '/_ml/data_frame/analytics/<%=analyticsId%>',
         req: {
-          jobId: {
+          analyticsId: {
             type: 'string'
           }
         }
@@ -166,22 +194,12 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'DELETE'
   });
 
-  ml.getDataFrameTransformsPreview = ca({
+  ml.startDataFrameAnalytics = ca({
     urls: [
       {
-        fmt: '/_data_frame/transforms/_preview'
-      }
-    ],
-    needBody: true,
-    method: 'POST'
-  });
-
-  ml.startDataFrameTransformsJob = ca({
-    urls: [
-      {
-        fmt: '/_data_frame/transforms/<%=jobId%>/_start',
+        fmt: '/_ml/data_frame/analytics/<%=analyticsId%>/_start',
         req: {
-          jobId: {
+          analyticsId: {
             type: 'string'
           }
         }
@@ -190,17 +208,17 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'POST'
   });
 
-  ml.stopDataFrameTransformsJob = ca({
+  ml.stopDataFrameAnalytics = ca({
     urls: [
       {
-        fmt: '/_data_frame/transforms/<%=jobId%>/_stop?&force=<%=force%>',
+        fmt: '/_ml/data_frame/analytics/<%=analyticsId%>/_stop?&force=<%=force%>',
         req: {
-          jobId: {
+          analyticsId: {
             type: 'string'
           },
           force: {
             type: 'boolean'
-          }
+          },
         }
       }
     ],
@@ -721,6 +739,20 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     ],
     needBody: true,
     method: 'POST'
+  });
+
+  ml.rollupIndexCapabilities = ca({
+    urls: [
+      {
+        fmt: '/<%=indexPattern%>/_rollup/data',
+        req: {
+          indexPattern: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    method: 'GET'
   });
 
 };

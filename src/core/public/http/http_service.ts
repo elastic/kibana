@@ -17,8 +17,15 @@
  * under the License.
  */
 
-import { HttpDeps, HttpSetup, HttpStart, HttpServiceBase } from './types';
+import { HttpSetup, HttpStart, HttpServiceBase } from './types';
 import { setup } from './http_setup';
+import { InjectedMetadataSetup } from '../injected_metadata';
+import { FatalErrorsSetup } from '../fatal_errors';
+
+interface HttpDeps {
+  injectedMetadata: InjectedMetadataSetup;
+  fatalErrors: FatalErrorsSetup | null;
+}
 
 /** @internal */
 export class HttpService {

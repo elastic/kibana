@@ -16,22 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Request } from 'hapi';
-import { KibanaRequest, getIncomingMessage } from './router';
+import { KibanaRequest, ensureRawRequest, LegacyRequest } from './router';
 import { AuthHeaders } from './lifecycle/auth';
 
 /**
  * Get headers to authenticate a user against Elasticsearch.
+ * @param request {@link KibanaRequest} - an incoming request.
+ * @return authentication headers {@link AuthHeaders} for - an incoming request.
  * @public
  * */
-export type GetAuthHeaders = (request: KibanaRequest | Request) => AuthHeaders | undefined;
+export type GetAuthHeaders = (request: KibanaRequest | LegacyRequest) => AuthHeaders | undefined;
 
+/** @internal */
 export class AuthHeadersStorage {
-  private authHeadersCache = new WeakMap<ReturnType<typeof getIncomingMessage>, AuthHeaders>();
-  public set = (request: KibanaRequest | Request, headers: AuthHeaders) => {
-    this.authHeadersCache.set(getIncomingMessage(request), headers);
+  private authHeadersCache = new WeakMap<LegacyRequest, AuthHeaders>();
+  public set = (request: KibanaRequest | LegacyRequest, headers: AuthHeaders) => {
+    this.authHeadersCache.set(ensureRawRequest(request), headers);
   };
   public get: GetAuthHeaders = request => {
-    return this.authHeadersCache.get(getIncomingMessage(request));
+    return this.authHeadersCache.get(ensureRawRequest(request));
   };
 }

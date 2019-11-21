@@ -20,6 +20,7 @@ import {
   EuiModalHeaderTitle,
   EuiModalProps,
   EuiOverlayMask,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
@@ -61,15 +62,18 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
         </span>
       );
       warning = (
-        <EuiCallOut color="warning">
-          <EuiText>
-            <FormattedMessage
-              id="xpack.spaces.management.confirmDeleteModal.redirectAfterDeletingCurrentSpaceWarningMessage"
-              defaultMessage="You are about to delete your current space {name}. You will be redirected to choose a different space if you continue."
-              values={{ name }}
-            />
-          </EuiText>
-        </EuiCallOut>
+        <>
+          <EuiSpacer />
+          <EuiCallOut color="warning">
+            <EuiText>
+              <FormattedMessage
+                id="xpack.spaces.management.confirmDeleteModal.redirectAfterDeletingCurrentSpaceWarningMessage"
+                defaultMessage="You are about to delete your current space {name}. You will be redirected to choose a different space if you continue."
+                values={{ name }}
+              />
+            </EuiText>
+          </EuiCallOut>
+        </>
       );
     }
 

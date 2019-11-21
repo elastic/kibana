@@ -11,6 +11,8 @@
     "yarn.lock",
     "tsconfig.json",
     "index.js",
+    ".i18nrc.json",
+    "plugins/**/*",
     "legacy/plugins/reporting/.phantom/*",
     "legacy/plugins/reporting/.chromium/*",
     "legacy/common/**/*",
@@ -26,7 +28,9 @@
     "!legacy/plugins/**/*.test.{js,ts}",
     "!legacy/plugins/**/__snapshots__",
     "!legacy/plugins/**/__snapshots__/*",
-    "!legacy/plugins/**/__mocks__/*"
+    "!legacy/plugins/**/__mocks__/*",
+    "!legacy/plugins/canvas/shareable_runtime/test",
+    "!legacy/plugins/canvas/shareable_runtime/test/**/*"
   ],
   "skipInstallDependencies": true
 }

@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const mockJobQueueClient = { getInfo: jest.fn() };
+export const mockJobQueueClient = { list: jest.fn(), total: jest.fn(), getInfo: jest.fn() };
 jest.mock('../lib/job_queue_client', () => ({ jobQueueClient: mockJobQueueClient }));

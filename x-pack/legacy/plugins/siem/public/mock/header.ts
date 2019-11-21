@@ -88,6 +88,17 @@ export const defaultHeaders: ColumnHeader[] = [
     width: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
+    aggregatable: true,
+    category: 'destination',
+    columnHeaderType: defaultColumnHeaderType,
+    description: 'Bytes sent from the source to the destination',
+    example: '123',
+    format: 'bytes',
+    id: 'destination.bytes',
+    type: 'number',
+    width: DEFAULT_COLUMN_MIN_WIDTH,
+  },
+  {
     category: 'user',
     columnHeaderType: defaultColumnHeaderType,
     description: 'Short name or login of the user.',

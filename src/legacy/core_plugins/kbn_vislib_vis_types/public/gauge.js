@@ -17,16 +17,17 @@
  * under the License.
  */
 
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
+import { visFactory } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import gaugeTemplate from './editors/gauge.html';
-import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
+import { AggGroupNames } from 'ui/vis/editors/default';
+import { ColorSchemas } from 'ui/vislib/components/color/colormaps';
+import { GaugeOptions } from './components/options';
+import { getGaugeCollections, Alignments, ColorModes, GaugeTypes } from './utils/collections';
+import { vislibVisController } from './controller';
 
-export default function GaugeVisType(Private) {
-  const VisFactory = Private(VisFactoryProvider);
-
-  return VisFactory.createVislibVisualization({
+export default function GaugeVisType() {
+  return visFactory.createBaseVisualization({
     name: 'gauge',
     title: i18n.translate('kbnVislibVisTypes.gauge.gaugeTitle', { defaultMessage: 'Gauge' }),
     icon: 'visGauge',
@@ -40,15 +41,15 @@ export default function GaugeVisType(Private) {
         addLegend: true,
         isDisplayWarning: false,
         gauge: {
-          alignment: 'automatic',
+          alignment: Alignments.AUTOMATIC,
           extendRange: true,
           percentageMode: false,
-          gaugeType: 'Arc',
+          gaugeType: GaugeTypes.ARC,
           gaugeStyle: 'Full',
           backStyle: 'Full',
           orientation: 'vertical',
-          colorSchema: 'Green to Red',
-          gaugeColorMode: 'Labels',
+          colorSchema: ColorSchemas.GreenToRed,
+          gaugeColorMode: ColorModes.LABELS,
           colorsRange: [
             { from: 0, to: 50 },
             { from: 50, to: 75 },
@@ -79,33 +80,13 @@ export default function GaugeVisType(Private) {
         }
       },
     },
-    events: {
-      brush: { disabled: true },
-    },
+    visualization: vislibVisController,
     editorConfig: {
-      collections: {
-        gaugeTypes: ['Arc', 'Circle'],
-        gaugeColorMode: ['None', 'Labels', 'Background'],
-        alignments: [
-          {
-            id: 'automatic',
-            label: i18n.translate('kbnVislibVisTypes.gauge.alignmentAutomaticTitle', { defaultMessage: 'Automatic' })
-          },
-          {
-            id: 'horizontal',
-            label: i18n.translate('kbnVislibVisTypes.gauge.alignmentHorizontalTitle', { defaultMessage: 'Horizontal' })
-          },
-          {
-            id: 'vertical',
-            label: i18n.translate('kbnVislibVisTypes.gauge.alignmentVerticalTitle', { defaultMessage: 'Vertical' }) },
-        ],
-        scales: ['linear', 'log', 'square root'],
-        colorSchemas: Object.values(vislibColorMaps).map(value => ({ id: value.id, label: value.label })),
-      },
-      optionsTemplate: gaugeTemplate,
+      collections: getGaugeCollections(),
+      optionsTemplate: GaugeOptions,
       schemas: new Schemas([
         {
-          group: 'metrics',
+          group: AggGroupNames.Metrics,
           name: 'metric',
           title: i18n.translate('kbnVislibVisTypes.gauge.metricTitle', { defaultMessage: 'Metric' }),
           min: 1,
@@ -117,9 +98,9 @@ export default function GaugeVisType(Private) {
           ]
         },
         {
-          group: 'buckets',
+          group: AggGroupNames.Buckets,
           name: 'group',
-          title: i18n.translate('kbnVislibVisTypes.gauge.groupTitle', { defaultMessage: 'Split Group' }),
+          title: i18n.translate('kbnVislibVisTypes.gauge.groupTitle', { defaultMessage: 'Split group' }),
           min: 0,
           max: 1,
           aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']

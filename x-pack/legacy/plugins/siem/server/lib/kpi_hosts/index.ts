@@ -6,7 +6,8 @@
 
 import { FrameworkRequest, RequestBasicOptions } from '../framework';
 
-import { KpiHostsAdapter, KpiHostsMappedData } from './types';
+import { KpiHostsAdapter } from './types';
+import { KpiHostsData, KpiHostDetailsData } from '../../graphql/types';
 
 export class KpiHosts {
   constructor(private readonly adapter: KpiHostsAdapter) {}
@@ -14,7 +15,14 @@ export class KpiHosts {
   public async getKpiHosts(
     req: FrameworkRequest,
     options: RequestBasicOptions
-  ): Promise<KpiHostsMappedData> {
-    return await this.adapter.getKpiHosts(req, options);
+  ): Promise<KpiHostsData> {
+    return this.adapter.getKpiHosts(req, options);
+  }
+
+  public async getKpiHostDetails(
+    req: FrameworkRequest,
+    options: RequestBasicOptions
+  ): Promise<KpiHostDetailsData> {
+    return this.adapter.getKpiHostDetails(req, options);
   }
 }

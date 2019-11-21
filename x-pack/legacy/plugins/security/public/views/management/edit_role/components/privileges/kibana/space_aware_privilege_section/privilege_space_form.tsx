@@ -25,7 +25,7 @@ import {
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
-import { Feature } from '../../../../../../../../../xpack_main/types';
+import { Feature } from '../../../../../../../../../../../plugins/features/server';
 import { KibanaPrivileges, Role } from '../../../../../../../../common/model';
 import {
   AllowedPrivilege,
@@ -34,7 +34,7 @@ import {
 } from '../../../../../../../lib/kibana_privilege_calculator';
 import { hasAssignedFeaturePrivileges } from '../../../../../../../lib/privilege_utils';
 import { copyRole } from '../../../../../../../lib/role_utils';
-import { CUSTOM_PRIVILEGE_VALUE, NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
+import { CUSTOM_PRIVILEGE_VALUE } from '../../../../lib/constants';
 import { FeatureTable } from '../feature_table';
 import { SpaceSelector } from './space_selector';
 
@@ -489,7 +489,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
       if (
         hasAssignedFeaturePrivileges(form) ||
-        explanation.actualPrivilege === NO_PRIVILEGE_VALUE ||
+        form.base.length === 0 ||
         this.state.isCustomizingFeaturePrivileges
       ) {
         displayedBasePrivilege = CUSTOM_PRIVILEGE_VALUE;

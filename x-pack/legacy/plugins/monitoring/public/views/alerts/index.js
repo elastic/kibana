@@ -18,6 +18,7 @@ import { Alerts } from '../../components/alerts';
 import { MonitoringViewBaseEuiTableController } from '../base_eui_table_controller';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer, EuiLink } from '@elastic/eui';
+import { CODE_PATH_ALERTS } from '../../../common/constants';
 
 function getPageData($injector) {
   const globalState = $injector.get('globalState');
@@ -46,7 +47,7 @@ uiRoutes.when('/alerts', {
   resolve: {
     clusters(Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_ALERTS] });
     },
     alerts: getPageData
   },
@@ -65,6 +66,7 @@ uiRoutes.when('/alerts', {
         getPageData,
         $scope,
         $injector,
+        storageKey: 'alertsTable',
         reactNodeId: 'monitoringAlertsApp'
       });
 

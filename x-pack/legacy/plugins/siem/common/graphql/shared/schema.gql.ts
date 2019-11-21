@@ -30,6 +30,17 @@ export const sharedSchema = gql`
     tiebreaker: String
   }
 
+  input PaginationInputPaginated {
+    "The activePage parameter defines the page of results you want to fetch"
+    activePage: Float!
+    "The cursorStart parameter defines the start of the results to be displayed"
+    cursorStart: Float!
+    "The fakePossibleCount parameter determines the total count in order to show 5 additional pages"
+    fakePossibleCount: Float!
+    "The querySize parameter is the number of items to be returned"
+    querySize: Float!
+  }
+
   enum Direction {
     asc
     desc
@@ -39,6 +50,11 @@ export const sharedSchema = gql`
     client
     destination
     server
+    source
+  }
+
+  enum FlowTargetSourceDest {
+    destination
     source
   }
 
@@ -55,5 +71,16 @@ export const sharedSchema = gql`
   type PageInfo {
     endCursor: CursorType
     hasNextPage: Boolean
+  }
+
+  type Inspect {
+    dsl: [String!]!
+    response: [String!]!
+  }
+
+  type PageInfoPaginated {
+    activePage: Float!
+    fakeTotalCount: Float!
+    showMorePagesIndicator: Boolean!
   }
 `;

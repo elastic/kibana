@@ -4,18 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiModules } from 'ui/modules';
-import { SearchSourceProvider } from 'ui/courier';
-import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
-import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
+export { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
+import { start as data } from '../../../../../src/legacy/core_plugins/data/public/legacy';
 
-export let indexPatternService;
-export let SearchSource;
-export let filterBarQueryFilter;
-export let xpackInfo;
+export { SearchSource } from 'ui/courier';
+export const indexPatternService = data.indexPatterns.indexPatterns;
 
-export async function fetchSearchSourceAndRecordWithInspector({ searchSource, requestId, requestName, requestDesc, inspectorAdapters }) {
+export async function fetchSearchSourceAndRecordWithInspector({
+  searchSource,
+  requestId,
+  requestName,
+  requestDesc,
+  inspectorAdapters,
+  abortSignal,
+}) {
   const inspectorRequest = inspectorAdapters.requests.start(
     requestName,
     { id: requestId, description: requestDesc });
@@ -25,7 +28,7 @@ export async function fetchSearchSourceAndRecordWithInspector({ searchSource, re
     searchSource.getSearchRequestBody().then(body => {
       inspectorRequest.json(body);
     });
-    resp = await searchSource.fetch();
+    resp = await searchSource.fetch({ abortSignal });
     inspectorRequest
       .stats(getResponseInspectorStats(searchSource, resp))
       .ok({ json: resp });
@@ -36,11 +39,3 @@ export async function fetchSearchSourceAndRecordWithInspector({ searchSource, re
 
   return resp;
 }
-
-uiModules.get('app/maps').run(($injector) => {
-  indexPatternService = $injector.get('indexPatterns');
-  const Private = $injector.get('Private');
-  SearchSource = Private(SearchSourceProvider);
-  filterBarQueryFilter = Private(FilterBarQueryFilterProvider);
-  xpackInfo = Private(XPackInfoProvider);
-});

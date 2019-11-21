@@ -10,11 +10,14 @@ import { ExplainPluginEnabled } from '../plugin_enabled';
 
 describe('ExplainPluginEnabled', () => {
   test('should explain about xpack.monitoring.enabled setting', () => {
+    const reason = {
+      property: 'xpack.monitoring.enabled',
+      data: 'false',
+      context: 'cluster'
+    };
     const component = renderWithIntl(
       <ExplainPluginEnabled
-        property="xpack.monitoring.enabled"
-        data="false"
-        context="cluster"
+        {...{ reason }}
       />
     );
     expect(component).toMatchSnapshot();

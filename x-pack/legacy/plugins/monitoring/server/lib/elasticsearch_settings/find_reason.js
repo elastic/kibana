@@ -14,7 +14,7 @@ const isEnabledOrDefault = property => {
   return property === undefined || (Boolean(property) && property !== 'false');
 };
 
-export function findReason(settingsSource, context) {
+export function findReason(settingsSource, context, isCloud) {
   const iterateReasons = () => {
     // PluginEnabled: check for `monitoring.enabled: false`
     const monitoringEnabled = get(settingsSource, 'enabled');
@@ -89,15 +89,26 @@ export function findReason(settingsSource, context) {
           const exporter = exportersFromPacked[key];
           return exporter.type !== 'local' && isEnabledOrDefault(exporter.enabled);
         });
-
         if (allEnabledRemote.length > 0 && allEnabledLocal.length === 0) {
-          return {
-            found: true,
-            reason: {
-              property: 'xpack.monitoring.exporters',
-              data: 'Remote exporters indicate a possible misconfiguration: ' + allEnabledRemote.join(', ')
-            }
-          };
+          let ret = {};
+          if (isCloud) {
+            ret = {
+              found: true,
+              reason: {
+                property: 'xpack.monitoring.exporters.cloud_enabled',
+                data: 'Cloud detected'
+              }
+            };
+          } else {
+            ret =  {
+              found: true,
+              reason: {
+                property: 'xpack.monitoring.exporters',
+                data: 'Remote exporters indicate a possible misconfiguration: ' + allEnabledRemote.join(', ')
+              }
+            };
+          }
+          return ret;
         }
       }
     }

@@ -1,0 +1,12 @@
+.mapLayerAddpanel__card {
+  // EUITODO: Fix horizontal layout so it works with any size icon
+  .euiCard__content {
+    // sass-lint:disable-block no-important
+    padding-top: 0 !important;
+  }
+
+  .euiCard__top + .euiCard__content {
+    // sass-lint:disable-block no-important
+    padding-top: 2px !important;
+  }
+}

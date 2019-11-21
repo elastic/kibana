@@ -8,12 +8,13 @@ import 'plugins/security/views/management/change_password_form/change_password_f
 import 'plugins/security/views/management/password_form/password_form';
 import 'plugins/security/views/management/users_grid/users';
 import 'plugins/security/views/management/roles_grid/roles';
+import 'plugins/security/views/management/api_keys_grid/api_keys';
 import 'plugins/security/views/management/edit_user/edit_user';
 import 'plugins/security/views/management/edit_role/index';
 import routes from 'ui/routes';
-import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import '../../services/shield_user';
-import { ROLES_PATH, USERS_PATH } from './management_urls';
+import { ROLES_PATH, USERS_PATH, API_KEYS_PATH } from './management_urls';
 
 import { management } from 'ui/management';
 import { i18n } from '@kbn/i18n';
@@ -21,8 +22,7 @@ import { toastNotifications } from 'ui/notify';
 
 routes.defaults(/^\/management\/security(\/|$)/, {
   resolve: {
-    showLinks(kbnUrl, Promise, Private) {
-      const xpackInfo = Private(XPackInfoProvider);
+    showLinks(kbnUrl, Promise) {
       if (!xpackInfo.get('features.security.showLinks')) {
         toastNotifications.addDanger({
           title: xpackInfo.get('features.security.linksMessage')
@@ -34,8 +34,7 @@ routes.defaults(/^\/management\/security(\/|$)/, {
   }
 }).defaults(/\/management/, {
   resolve: {
-    securityManagementSection: function (ShieldUser, Private) {
-      const xpackInfo = Private(XPackInfoProvider);
+    securityManagementSection: function (ShieldUser) {
       const showSecurityLinks = xpackInfo.get('features.security.showLinks');
 
       function deregisterSecurity() {
@@ -76,6 +75,18 @@ routes.defaults(/^\/management\/security(\/|$)/, {
                 defaultMessage: 'Roles',
               }),
             url: `#${ROLES_PATH}`,
+          });
+        }
+
+        if (!security.hasItem('apiKeys')) {
+          security.register('apiKeys', {
+            name: 'securityApiKeysLink',
+            order: 30,
+            display: i18n.translate(
+              'xpack.security.management.apiKeysTitle', {
+                defaultMessage: 'API Keys',
+              }),
+            url: `#${API_KEYS_PATH}`,
           });
         }
       }

@@ -10,26 +10,28 @@ import sinon from 'sinon';
 
 import { serverFixture } from '../../../../lib/__tests__/__fixtures__/server';
 import { requestFixture } from '../../../../lib/__tests__/__fixtures__/request';
-import { AuthenticationResult } from '../../../../../server/lib/authentication/authentication_result';
-import { BasicCredentials } from '../../../../../server/lib/authentication/providers/basic';
+import { AuthenticationResult } from '../../../../../../../../plugins/security/server';
 import { initUsersApi } from '../users';
 import * as ClientShield from '../../../../../../../server/lib/get_client_shield';
+import { KibanaRequest } from '../../../../../../../../../src/core/server';
 
 describe('User routes', () => {
   const sandbox = sinon.createSandbox();
 
   let clusterStub;
   let serverStub;
+  let loginStub;
 
   beforeEach(() => {
     serverStub = serverFixture();
+    loginStub = sinon.stub();
 
     // Cluster is returned by `getClient` function that is wrapped into `once` making cluster
     // a static singleton, so we should use sandbox to set/reset its behavior between tests.
     clusterStub = sinon.stub({ callWithRequest() {} });
     sandbox.stub(ClientShield, 'getClient').returns(clusterStub);
 
-    initUsersApi(serverStub);
+    initUsersApi({ authc: { login: loginStub }, __legacyCompat: { config: { authc: { providers: ['basic'] } } } }, serverStub);
   });
 
   afterEach(() => sandbox.restore());
@@ -69,61 +71,54 @@ describe('User routes', () => {
     });
 
     describe('own password', () => {
-      let getUserStub;
       beforeEach(() => {
         request.params.username = request.auth.credentials.username;
-
-        getUserStub = serverStub.plugins.security.getUser
+        loginStub = loginStub
           .withArgs(
-            sinon.match(BasicCredentials.decorateRequest(request, 'user', 'old-password'))
-          );
-      });
-
-      it('returns 401 if old password is wrong.', async () => {
-        getUserStub.returns(Promise.reject(new Error('Something went wrong.')));
-
-        return changePasswordRoute
-          .handler(request)
-          .catch((response) => {
-            sinon.assert.notCalled(clusterStub.callWithRequest);
-            expect(response.isBoom).to.be(true);
-            expect(response.output.payload).to.eql({
-              statusCode: 401,
-              error: 'Unauthorized',
-              message: 'Something went wrong.'
-            });
-          });
-      });
-
-      it('returns 401 if user can authenticate with new password.', async () => {
-        getUserStub.returns(Promise.resolve({}));
-
-        serverStub.plugins.security.authenticate
-          .withArgs(
-            sinon.match(BasicCredentials.decorateRequest(request, 'user', 'new-password'))
+            sinon.match.instanceOf(KibanaRequest),
+            { provider: 'basic', value: { username: 'user', password: 'old-password' }, stateless: true }
           )
-          .returns(
-            Promise.resolve(AuthenticationResult.failed(new Error('Something went wrong.')))
-          );
+          .resolves(AuthenticationResult.succeeded({}));
+      });
 
-        return changePasswordRoute
-          .handler(request)
-          .catch((response) => {
-            sinon.assert.calledOnce(clusterStub.callWithRequest);
-            sinon.assert.calledWithExactly(
-              clusterStub.callWithRequest,
-              sinon.match.same(request),
-              'shield.changePassword',
-              { username: 'user', body: { password: 'new-password' } }
-            );
+      it('returns 403 if old password is wrong.', async () => {
+        loginStub.resolves(AuthenticationResult.failed(new Error('Something went wrong.')));
 
-            expect(response.isBoom).to.be(true);
-            expect(response.output.payload).to.eql({
-              statusCode: 401,
-              error: 'Unauthorized',
-              message: 'Something went wrong.'
-            });
-          });
+        const response = await changePasswordRoute.handler(request);
+
+        sinon.assert.notCalled(clusterStub.callWithRequest);
+        expect(response.isBoom).to.be(true);
+        expect(response.output.payload).to.eql({
+          statusCode: 403,
+          error: 'Forbidden',
+          message: 'Something went wrong.'
+        });
+      });
+
+      it(`returns 401 if user can't authenticate with new password.`, async () => {
+        loginStub
+          .withArgs(
+            sinon.match.instanceOf(KibanaRequest),
+            { provider: 'basic', value: { username: 'user', password: 'new-password' } }
+          )
+          .resolves(AuthenticationResult.failed(new Error('Something went wrong.')));
+
+        const response = await changePasswordRoute.handler(request);
+
+        sinon.assert.calledOnce(clusterStub.callWithRequest);
+        sinon.assert.calledWithExactly(
+          clusterStub.callWithRequest,
+          sinon.match.same(request),
+          'shield.changePassword',
+          { username: 'user', body: { password: 'new-password' } }
+        );
+
+        expect(response.isBoom).to.be(true);
+        expect(response.output.payload).to.eql({
+          statusCode: 401,
+          error: 'Unauthorized',
+          message: 'Something went wrong.'
+        });
       });
 
       it('returns 500 if password update request fails.', async () => {
@@ -133,30 +128,25 @@ describe('User routes', () => {
             'shield.changePassword',
             { username: 'user', body: { password: 'new-password' } }
           )
-          .returns(Promise.reject(new Error('Request failed.')));
+          .rejects(new Error('Request failed.'));
 
-        return changePasswordRoute
-          .handler(request)
-          .catch((response) => {
-            expect(response.isBoom).to.be(true);
-            expect(response.output.payload).to.eql({
-              statusCode: 500,
-              error: 'Internal Server Error',
-              message: 'An internal server error occurred'
-            });
-          });
+        const response = await changePasswordRoute.handler(request);
+
+        expect(response.isBoom).to.be(true);
+        expect(response.output.payload).to.eql({
+          statusCode: 500,
+          error: 'Internal Server Error',
+          message: 'An internal server error occurred'
+        });
       });
 
       it('successfully changes own password if provided old password is correct.', async () => {
-        getUserStub.returns(Promise.resolve({}));
-
-        serverStub.plugins.security.authenticate
+        loginStub
           .withArgs(
-            sinon.match(BasicCredentials.decorateRequest(request, 'user', 'new-password'))
+            sinon.match.instanceOf(KibanaRequest),
+            { provider: 'basic', value: { username: 'user', password: 'new-password' } }
           )
-          .returns(
-            Promise.resolve(AuthenticationResult.succeeded({}))
-          );
+          .resolves(AuthenticationResult.succeeded({}));
 
         const hResponseStub = { code: sinon.stub() };
         const hStub = { response: sinon.stub().returns(hResponseStub) };
@@ -186,19 +176,17 @@ describe('User routes', () => {
           )
           .returns(Promise.reject(new Error('Request failed.')));
 
-        return changePasswordRoute
-          .handler(request)
-          .catch((response) => {
-            sinon.assert.notCalled(serverStub.plugins.security.getUser);
-            sinon.assert.notCalled(serverStub.plugins.security.authenticate);
+        const response = await changePasswordRoute.handler(request);
 
-            expect(response.isBoom).to.be(true);
-            expect(response.output.payload).to.eql({
-              statusCode: 500,
-              error: 'Internal Server Error',
-              message: 'An internal server error occurred'
-            });
-          });
+        sinon.assert.notCalled(serverStub.plugins.security.getUser);
+        sinon.assert.notCalled(loginStub);
+
+        expect(response.isBoom).to.be(true);
+        expect(response.output.payload).to.eql({
+          statusCode: 500,
+          error: 'Internal Server Error',
+          message: 'An internal server error occurred'
+        });
       });
 
       it('successfully changes user password.', async () => {
@@ -208,7 +196,7 @@ describe('User routes', () => {
         await changePasswordRoute.handler(request, hStub);
 
         sinon.assert.notCalled(serverStub.plugins.security.getUser);
-        sinon.assert.notCalled(serverStub.plugins.security.authenticate);
+        sinon.assert.notCalled(loginStub);
 
         sinon.assert.calledOnce(clusterStub.callWithRequest);
         sinon.assert.calledWithExactly(

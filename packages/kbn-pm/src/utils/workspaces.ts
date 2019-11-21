@@ -29,7 +29,7 @@ import { getProjects } from './projects';
 const glob = promisify(globSync);
 
 export async function workspacePackagePaths(rootPath: string): Promise<string[]> {
-  const rootPkgJson = await readPackageJson(path.join(rootPath, 'package.json'));
+  const rootPkgJson = await readPackageJson(rootPath);
 
   if (!rootPkgJson.workspaces) {
     return [];

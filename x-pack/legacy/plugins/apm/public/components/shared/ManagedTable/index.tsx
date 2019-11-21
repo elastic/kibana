@@ -6,13 +6,16 @@
 
 import { EuiBasicTable } from '@elastic/eui';
 import { sortByOrder } from 'lodash';
-import React, { Component } from 'react';
-import { idx } from '@kbn/elastic-idx';
+import React, { useMemo, useCallback, ReactNode } from 'react';
+import { useUrlParams } from '../../../hooks/useUrlParams';
+import { history } from '../../../utils/history';
+import { fromQuery, toQuery } from '../Links/url_helpers';
 
 // TODO: this should really be imported from EUI
 export interface ITableColumn<T> {
-  field: string;
-  name: string;
+  name: ReactNode;
+  actions?: Array<Record<string, unknown>>;
+  field?: string;
   dataType?: string;
   align?: string;
   width?: string;
@@ -20,83 +23,100 @@ export interface ITableColumn<T> {
   render?: (value: any, item: T) => unknown;
 }
 
-interface IState {
-  page: { index: number; size: number };
-  sort: {
-    field: string;
-    direction: string;
-  };
-}
-
 interface Props<T> {
   items: T[];
   columns: Array<ITableColumn<T>>;
   initialPageIndex?: number;
   initialPageSize?: number;
+  initialSortField?: ITableColumn<T>['field'];
+  initialSortDirection?: 'asc' | 'desc';
   hidePerPageOptions?: boolean;
-  initialSort?: {
-    field: Extract<keyof T, string>;
-    direction: string;
-  };
   noItemsMessage?: React.ReactNode;
+  sortItems?: boolean;
 }
 
-export class ManagedTable<T> extends Component<Props<T>, IState> {
-  constructor(props: Props<T>) {
-    super(props);
+function UnoptimizedManagedTable<T>(props: Props<T>) {
+  const {
+    items,
+    columns,
+    initialPageIndex = 0,
+    initialPageSize = 10,
+    initialSortField = props.columns[0]?.field || '',
+    initialSortDirection = 'asc',
+    hidePerPageOptions = true,
+    noItemsMessage,
+    sortItems = true
+  } = props;
 
-    const defaultSort = {
-      field: idx(props, _ => _.columns[0].field) || '',
-      direction: 'asc'
-    };
+  const {
+    urlParams: {
+      page = initialPageIndex,
+      pageSize = initialPageSize,
+      sortField = initialSortField,
+      sortDirection = initialSortDirection
+    }
+  } = useUrlParams();
 
-    const {
-      initialPageIndex = 0,
-      initialPageSize = 10,
-      initialSort = defaultSort
-    } = props;
-
-    this.state = {
-      page: { index: initialPageIndex, size: initialPageSize },
-      sort: initialSort
-    };
-  }
-
-  public onTableChange = ({ page, sort }: IState) => {
-    this.setState({ page, sort });
-  };
-
-  public getCurrentItems() {
-    const { items } = this.props;
-    const { sort, page } = this.state;
+  const renderedItems = useMemo(() => {
     // TODO: Use _.orderBy once we upgrade to lodash 4+
-    const sorted = sortByOrder(items, sort.field, sort.direction);
-    return sorted.slice(page.index * page.size, (page.index + 1) * page.size);
-  }
+    const sortedItems = sortItems
+      ? sortByOrder(items, sortField, sortDirection)
+      : items;
 
-  public render() {
-    const {
-      columns,
-      noItemsMessage,
-      items,
-      hidePerPageOptions = true
-    } = this.props;
-    const { page, sort } = this.state;
+    return sortedItems.slice(page * pageSize, (page + 1) * pageSize);
+  }, [page, pageSize, sortField, sortDirection, items, sortItems]);
 
-    return (
-      <EuiBasicTable
-        noItemsMessage={noItemsMessage}
-        items={this.getCurrentItems()}
-        columns={columns}
-        pagination={{
-          hidePerPageOptions,
-          totalItemCount: items.length,
-          pageIndex: page.index,
-          pageSize: page.size
-        }}
-        sorting={{ sort }}
-        onChange={this.onTableChange}
-      />
-    );
-  }
+  const sort = useMemo(() => {
+    return {
+      sort: {
+        field: sortField,
+        direction: sortDirection
+      }
+    };
+  }, [sortField, sortDirection]);
+
+  const onTableChange = useCallback(
+    (options: {
+      page: { index: number; size: number };
+      sort: { field: string; direction: 'asc' | 'desc' };
+    }) => {
+      history.push({
+        ...history.location,
+        search: fromQuery({
+          ...toQuery(history.location.search),
+          page: options.page.index,
+          pageSize: options.page.size,
+          sortField: options.sort.field,
+          sortDirection: options.sort.direction
+        })
+      });
+    },
+    []
+  );
+
+  const pagination = useMemo(() => {
+    return {
+      hidePerPageOptions,
+      totalItemCount: items.length,
+      pageIndex: page,
+      pageSize
+    };
+  }, [hidePerPageOptions, items, page, pageSize]);
+
+  return (
+    <EuiBasicTable
+      noItemsMessage={noItemsMessage}
+      items={renderedItems}
+      columns={columns}
+      pagination={pagination}
+      sorting={sort}
+      onChange={onTableChange}
+    />
+  );
 }
+
+const ManagedTable = React.memo(
+  UnoptimizedManagedTable
+) as typeof UnoptimizedManagedTable;
+
+export { ManagedTable };

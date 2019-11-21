@@ -18,13 +18,13 @@
  */
 
 import expect from '@kbn/expect';
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 import { get } from 'lodash';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   describe('telemetry API', () => {
     before(() => esArchiver.load('saved_objects/basic'));
@@ -89,7 +89,7 @@ export default function ({ getService }) {
     });
 
     it('should only accept literal boolean values for the opt_in POST body param', function () {
-      return Promise.all([
+      return Bluebird.all([
         supertest
           .post('/api/kibana/kql_opt_in_telemetry')
           .set('content-type', 'application/json')

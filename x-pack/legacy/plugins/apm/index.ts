@@ -7,13 +7,10 @@
 import { i18n } from '@kbn/i18n';
 import { Server } from 'hapi';
 import { resolve } from 'path';
-import {
-  InternalCoreSetup,
-  PluginInitializerContext
-} from '../../../../src/core/server';
+import { APMPluginContract } from '../../../plugins/apm/server/plugin';
 import { LegacyPluginInitializer } from '../../../../src/legacy/types';
 import mappings from './mappings.json';
-import { plugin } from './server/new-platform/index';
+import { makeApmUsageCollector } from './server/lib/apm_telemetry';
 
 export const apm: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
@@ -41,12 +38,17 @@ export const apm: LegacyPluginInitializer = kibana => {
         const config = server.config();
         return {
           apmUiEnabled: config.get('xpack.apm.ui.enabled'),
-          apmIndexPatternTitle: config.get('apm_oss.indexPattern') // TODO: rename to apm_oss.indexPatternTitle in 7.0 (breaking change)
+          // TODO: rename to apm_oss.indexPatternTitle in 7.0 (breaking change)
+          apmIndexPatternTitle: config.get('apm_oss.indexPattern'),
+          apmServiceMapEnabled: config.get('xpack.apm.serviceMapEnabled')
         };
       },
       hacks: ['plugins/apm/hacks/toggle_app_link_in_nav'],
       savedObjectSchemas: {
-        'apm-telemetry': {
+        'apm-services-telemetry': {
+          isNamespaceAgnostic: true
+        },
+        'apm-indices': {
           isNamespaceAgnostic: true
         }
       },
@@ -59,15 +61,18 @@ export const apm: LegacyPluginInitializer = kibana => {
         // display menu item
         ui: Joi.object({
           enabled: Joi.boolean().default(true),
-          transactionGroupBucketSize: Joi.number().default(100)
+          transactionGroupBucketSize: Joi.number().default(100),
+          maxTraceItems: Joi.number().default(1000)
         }).default(),
 
         // enable plugin
         enabled: Joi.boolean().default(true),
 
-        // buckets
-        minimumBucketSize: Joi.number().default(15),
-        bucketTargetCount: Joi.number().default(27)
+        // index patterns
+        autocreateApmIndexPattern: Joi.boolean().default(true),
+
+        // service map
+        serviceMapEnabled: Joi.boolean().default(false)
       }).default();
     },
 
@@ -84,7 +89,7 @@ export const apm: LegacyPluginInitializer = kibana => {
         catalogue: ['apm'],
         privileges: {
           all: {
-            api: ['apm'],
+            api: ['apm', 'apm_write'],
             catalogue: ['apm'],
             savedObject: {
               all: [],
@@ -103,14 +108,11 @@ export const apm: LegacyPluginInitializer = kibana => {
           }
         }
       });
+      makeApmUsageCollector(server);
+      const apmPlugin = server.newPlatform.setup.plugins
+        .apm as APMPluginContract;
 
-      const initializerContext = {} as PluginInitializerContext;
-      const core = {
-        http: {
-          server
-        }
-      } as InternalCoreSetup;
-      plugin(initializerContext).setup(core);
+      apmPlugin.registerLegacyAPI({ server });
     }
   });
 };

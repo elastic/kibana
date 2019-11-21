@@ -83,6 +83,16 @@ export const createBeatUpdateRoute = (libs: CMServerLibs) => ({
 
     const beat = await libs.beats.getById(internalUser, beatId);
 
+    if (!beat) {
+      return {
+        error: {
+          message: 'Beat not found',
+          code: 404,
+        },
+        success: false,
+      };
+    }
+
     return {
       item: beat,
       action: 'updated',

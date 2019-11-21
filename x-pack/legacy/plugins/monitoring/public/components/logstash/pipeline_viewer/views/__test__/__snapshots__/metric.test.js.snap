@@ -25,7 +25,6 @@ exports[`Metric component renders warning badge 1`] = `
   <EuiBadge
     className="metricClass"
     color="warning"
-    iconSide="left"
   >
     220
   </EuiBadge>

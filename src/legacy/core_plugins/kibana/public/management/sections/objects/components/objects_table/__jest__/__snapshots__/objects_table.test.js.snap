@@ -97,7 +97,9 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
   <EuiModalBody>
     <EuiFormRow
       describedByIds={Array []}
+      display="row"
       fullWidth={false}
+      hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
         <FormattedMessage
@@ -140,6 +142,9 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
         }
       />
     </EuiFormRow>
+    <EuiSpacer
+      size="m"
+    />
     <EuiSwitch
       checked={true}
       label={
@@ -165,10 +170,7 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
             grow={false}
           >
             <EuiButtonEmpty
-              color="primary"
-              iconSide="left"
               onClick={[Function]}
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="Cancel"
@@ -181,12 +183,8 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
             grow={false}
           >
             <EuiButton
-              color="primary"
               fill={true}
-              iconSide="left"
               onClick={[Function]}
-              size="m"
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="Export all"
@@ -203,15 +201,13 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
 `;
 
 exports[`ObjectsTable import should show the flyout 1`] = `
-<InjectIntl(FlyoutUI)
+<Flyout
   close={[Function]}
   confirmModalPromise={[MockFunction]}
   done={[Function]}
   indexPatterns={
     Object {
-      "cache": Object {
-        "clearAll": [MockFunction],
-      },
+      "clearCache": [MockFunction],
     }
   }
   newIndexPatternUrl=""
@@ -220,7 +216,7 @@ exports[`ObjectsTable import should show the flyout 1`] = `
 `;
 
 exports[`ObjectsTable relationships should show the flyout 1`] = `
-<InjectIntl(RelationshipsUI)
+<Relationships
   close={[Function]}
   getRelationships={[Function]}
   goInspectObject={[Function]}
@@ -256,7 +252,7 @@ exports[`ObjectsTable should render normally 1`] = `
   <EuiSpacer
     size="xs"
   />
-  <InjectIntl(TableUI)
+  <Table
     canDelete={false}
     filterOptions={
       Array [

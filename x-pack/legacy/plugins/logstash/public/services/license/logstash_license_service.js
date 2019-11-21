@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { toastNotifications } from 'ui/notify';
-import { MarkdownSimple } from 'ui/markdown';
+import { MarkdownSimple } from '../../../../../../../src/legacy/core_plugins/kibana_react/public';
 import { PLUGIN } from '../../../common/constants';
 
 export class LogstashLicenseService {

@@ -11,7 +11,7 @@ export function MonitoringKibanaInstancesProvider({ getService }) {
   const SUBJ_INSTANCES_PAGE = 'kibanaInstancesPage';
 
   const SUBJ_TABLE_BODY        = 'kibanaInstancesTableContainer';
-  const SUBJ_INDEX_LINK_PREFIX = `${SUBJ_TABLE_BODY} kibanaLink-`;
+  const SUBJ_INDEX_LINK_PREFIX = `${SUBJ_TABLE_BODY} > kibanaLink-`;
 
   return new class KibanaInstances {
 

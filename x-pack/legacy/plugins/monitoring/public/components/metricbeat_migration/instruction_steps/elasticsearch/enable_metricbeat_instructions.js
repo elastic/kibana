@@ -9,56 +9,18 @@ import {
   EuiSpacer,
   EuiCodeBlock,
   EuiLink,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-  EuiCallOut,
   EuiText
 } from '@elastic/eui';
 import { Monospace } from '../components/monospace';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { statusTitle } from './common_elasticsearch_instructions';
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
+import { getSecurityStep, getMigrationStatusStep } from '../common_instructions';
 
 export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta, {
   esMonitoringUrl,
-  hasCheckedStatus,
-  checkingMigrationStatus,
-  checkForMigrationStatus,
-  autoCheckIntervalInMs
 }) {
-  const securitySetup = (
-    <Fragment>
-      <EuiSpacer size="m"/>
-      <EuiCallOut
-        color="warning"
-        iconType="help"
-        title={(
-          <EuiText>
-            <FormattedMessage
-              id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.metricbeatSecuritySetup"
-              defaultMessage="If security features are enabled, there may be more setup required.{link}"
-              values={{
-                link: (
-                  <Fragment>
-                    {` `}
-                    <EuiLink
-                      href={`${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/configuring-metricbeat.html`}
-                      target="_blank"
-                    >
-                      <FormattedMessage
-                        id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.metricbeatSecuritySetupLinkText"
-                        defaultMessage="View more information."
-                      />
-                    </EuiLink>
-                  </Fragment>
-                )
-              }}
-            />
-          </EuiText>
-        )}
-      />
-    </Fragment>
+  const securitySetup = getSecurityStep(
+    `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/configuring-metricbeat.html`
   );
 
   const installMetricbeatStep = {
@@ -74,7 +36,7 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta
           >
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.installMetricbeatLinkText"
-              defaultMessage="Follow the instructions here"
+              defaultMessage="Follow these instructions."
             />
           </EuiLink>
         </p>
@@ -89,6 +51,14 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta
     }),
     children: (
       <Fragment>
+        <EuiText>
+          <p>
+            {i18n.translate('xpack.monitoring.metricbeatMigration.elasticsearchInstructions.enableMetricbeatModuleInstallDirectory', {
+              defaultMessage: 'From the installation directory, run:'
+            })}
+          </p>
+        </EuiText>
+        <EuiSpacer size="s"/>
         <EuiCodeBlock
           isCopyable
           language="bash"
@@ -100,9 +70,8 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta
           <p>
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.enableMetricbeatModuleDescription"
-              defaultMessage="By default the module will collect Elasticsearch monitoring metrics from {url}.
-              If the local Elasticsearch server has a different address,
-              you must specify it via the hosts setting in the {module} file."
+              defaultMessage="By default the module collects Elasticsearch metrics from {url}.
+              If the local server has a different address, add it to the hosts setting in {module}."
               values={{
                 module: (
                   <Monospace>modules.d/elasticsearch-xpack.yml</Monospace>
@@ -121,14 +90,14 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta
 
   const configureMetricbeatStep = {
     title: i18n.translate('xpack.monitoring.metricbeatMigration.elasticsearchInstructions.configureMetricbeatTitle', {
-      defaultMessage: 'Configure Metricbeat to send to the monitoring cluster'
+      defaultMessage: 'Configure Metricbeat to send data to the monitoring cluster'
     }),
     children: (
       <Fragment>
         <EuiText>
           <FormattedMessage
             id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.configureMetricbeatDescription"
-            defaultMessage="Make these changes in your {file}."
+            defaultMessage="Modify {file} to set the connection information."
             values={{
               file: (
                 <Monospace>metricbeat.yml</Monospace>
@@ -141,7 +110,7 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta
           isCopyable
         >
           {`output.elasticsearch:
-  hosts: ["${esMonitoringUrl}"] ## Monitoring cluster
+  hosts: [${esMonitoringUrl}] ## Monitoring cluster
 
   # Optional protocol and basic auth credentials.
   #protocol: "https"
@@ -168,7 +137,7 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta
           >
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.startMetricbeatLinkText"
-              defaultMessage="Follow the instructions here"
+              defaultMessage="Follow these instructions."
             />
           </EuiLink>
         </p>
@@ -176,90 +145,7 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta
     )
   };
 
-  let migrationStatusStep = null;
-  if (product.isInternalCollector) {
-    let status = null;
-    if (hasCheckedStatus) {
-      status = (
-        <Fragment>
-          <EuiSpacer size="m"/>
-          <EuiCallOut
-            size="s"
-            color="warning"
-            title={i18n.translate('xpack.monitoring.metricbeatMigration.elasticsearchInstructions.isInternalCollectorStatusTitle', {
-              defaultMessage: `We have not detected any monitoring data coming from Metricbeat for this Elasticsearch.
-              We will continuously check every {timePeriod} seconds in the background.`,
-              values: {
-                timePeriod: autoCheckIntervalInMs / 1000,
-              }
-            })}
-          />
-        </Fragment>
-      );
-    }
-
-    let buttonLabel;
-    if (checkingMigrationStatus) {
-      buttonLabel = i18n.translate('xpack.monitoring.metricbeatMigration.elasticsearchInstructions.checkingStatusButtonLabel', {
-        defaultMessage: 'Checking for data...'
-      });
-    } else {
-      buttonLabel = i18n.translate('xpack.monitoring.metricbeatMigration.elasticsearchInstructions.checkStatusButtonLabel', {
-        defaultMessage: 'Check for data'
-      });
-    }
-
-    migrationStatusStep = {
-      title: statusTitle,
-      status: 'incomplete',
-      children: (
-        <Fragment>
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem>
-              <EuiText>
-                <p>
-                  {i18n.translate('xpack.monitoring.metricbeatMigration.elasticsearchInstructions.statusDescription', {
-                    defaultMessage: 'Check that data is received from the Metricbeat'
-                  })}
-                </p>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton onClick={checkForMigrationStatus} isDisabled={checkingMigrationStatus}>
-                {buttonLabel}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          {status}
-        </Fragment>
-      )
-    };
-  }
-  else if (product.isPartiallyMigrated || product.isFullyMigrated) {
-    migrationStatusStep = {
-      title: statusTitle,
-      status: 'complete',
-      children: (
-        <EuiCallOut
-          size="s"
-          color="success"
-          title={i18n.translate(
-            'xpack.monitoring.metricbeatMigration.elasticsearchInstructions.fullyMigratedStatusTitle',
-            {
-              defaultMessage: 'Congratulations!'
-            }
-          )}
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.fullyMigratedStatusDescription"
-              defaultMessage="We are now seeing monitoring data shipping from Metricbeat!"
-            />
-          </p>
-        </EuiCallOut>
-      )
-    };
-  }
+  const migrationStatusStep = getMigrationStatusStep(product);
 
   return [
     installMetricbeatStep,

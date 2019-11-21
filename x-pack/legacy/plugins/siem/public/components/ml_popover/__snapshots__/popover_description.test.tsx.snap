@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`JobsTableFilters renders correctly against snapshot 1`] = `
+<EuiText
+  size="s"
+>
+  <FormattedMessage
+    defaultMessage="Run any of the Machine Learning jobs below to view anomalous events throughout the SIEM application. We’ve provided a few common detection jobs to get you started. If you wish to add your own custom jobs, simply create and tag them with “SIEM” from the {machineLearning} application for inclusion here."
+    id="xpack.siem.components.mlPopup.anomalyDetectionDescription"
+    values={
+      Object {
+        "machineLearning": <ForwardRef
+          href="/test/base/path/app/ml"
+          target="_blank"
+        >
+          <FormattedMessage
+            defaultMessage="Machine Learning"
+            id="xpack.siem.components.mlPopup.machineLearningLink"
+            values={Object {}}
+          />
+        </ForwardRef>,
+      }
+    }
+  />
+</EuiText>
+`;

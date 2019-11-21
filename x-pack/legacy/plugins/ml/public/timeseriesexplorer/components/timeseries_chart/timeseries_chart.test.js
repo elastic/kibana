@@ -6,6 +6,7 @@
 
 //import mockOverallSwimlaneData from './__mocks__/mock_overall_swimlane.json';
 
+import './timeseries_chart.test.mocks';
 import moment from 'moment-timezone';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
@@ -15,6 +16,7 @@ import { TimeseriesChart } from './timeseries_chart';
 // mocking the following files because they import some core kibana
 // code which the jest setup isn't happy with.
 jest.mock('ui/chrome', () => ({
+  addBasePath: path => path,
   getBasePath: path => path,
   // returns false for mlAnnotationsEnabled
   getInjected: () => false,
@@ -23,7 +25,7 @@ jest.mock('ui/chrome', () => ({
   }),
 }));
 
-jest.mock('ui/time_buckets', () => ({
+jest.mock('../../../util/time_buckets', () => ({
   TimeBuckets: function () {
     this.setBounds = jest.fn();
     this.setInterval = jest.fn();
@@ -43,7 +45,8 @@ function getTimeseriesChartPropsMock() {
     showForecast: true,
     showModelBounds: true,
     svgWidth: 1600,
-    timefilter: {}
+    timefilter: {},
+    skipRefresh: false
   };
 }
 

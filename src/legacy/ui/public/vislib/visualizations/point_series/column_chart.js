@@ -18,14 +18,16 @@
  */
 
 import _ from 'lodash';
+import d3 from 'd3';
+import { isColorDark } from '@elastic/eui/lib/services';
 import { PointSeries } from './_point_series';
-
 
 const defaults = {
   mode: 'normal',
   showTooltip: true,
   color: undefined,
   fillColor: undefined,
+  showLabel: true,
 };
 
 /**
@@ -58,6 +60,7 @@ export class ColumnChart extends PointSeries {
   constructor(handler, chartEl, chartData, seriesConfigArgs) {
     super(handler, chartEl, chartData, seriesConfigArgs);
     this.seriesConfig = _.defaults(seriesConfigArgs || {}, defaults);
+    this.labelOptions = _.defaults(handler.visConfig.get('labels', {}), defaults.showLabel);
   }
 
   addBars(svg, data) {
@@ -124,8 +127,10 @@ export class ColumnChart extends PointSeries {
     const yScale = this.getValueAxis().getScale();
     const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
     const isTimeScale = this.getCategoryAxis().axisConfig.isTimeDomain();
+    const isLabels = this.labelOptions.show;
     const yMin = yScale.domain()[0];
     const gutterSpacingPercentage = 0.15;
+    const chartData = this.chartData;
     const groupCount = this.getGroupedCount();
     const groupNum = this.getGroupedNum(this.chartData);
     let barWidth;
@@ -154,6 +159,22 @@ export class ColumnChart extends PointSeries {
       return yScale(d.y0 + d.y);
     }
 
+    function labelX(d, i) {
+      return x(d, i) + widthFunc(d, i) / 2;
+    }
+
+    function labelY(d) {
+      return y(d) + heightFunc(d) / 2;
+    }
+
+    function labelDisplay(d, i) {
+      if (isHorizontal && this.getBBox().width > widthFunc(d, i)) return 'none';
+      if (!isHorizontal && this.getBBox().width > heightFunc(d)) return 'none';
+      if (isHorizontal && this.getBBox().height > heightFunc(d)) return 'none';
+      if (!isHorizontal && this.getBBox().height > widthFunc(d, i)) return 'none';
+      return 'block';
+    }
+
     function widthFunc(d, i) {
       if (isTimeScale) {
         return datumWidth(barWidth, d, bars.data()[i + 1], xScale, gutterWidth, groupCount);
@@ -167,8 +188,11 @@ export class ColumnChart extends PointSeries {
       if (d.y0 === 0 && yMin > 0) {
         return yScale(yMin) - yScale(d.y);
       }
-
       return Math.abs(yScale(d.y0) - yScale(d.y0 + d.y));
+    }
+
+    function formatValue(d) {
+      return chartData.yAxisFormatter(d.y);
     }
 
     // update
@@ -177,6 +201,34 @@ export class ColumnChart extends PointSeries {
       .attr('width', isHorizontal ? widthFunc : heightFunc)
       .attr('y', isHorizontal ? y : x)
       .attr('height', isHorizontal ? heightFunc : widthFunc);
+
+    const layer = d3.select(bars[0].parentNode);
+    const barLabels = layer.selectAll('text').data(chartData.values.filter(function (d) {
+      return !_.isNull(d.y);
+    }));
+
+    if (isLabels) {
+      const colorFunc = this.handler.data.getColorFunc();
+      const d3Color = d3.rgb(colorFunc(chartData.label));
+      let labelClass;
+      if (isColorDark(d3Color.r, d3Color.g, d3Color.b)) {
+        labelClass = 'visColumnChart__bar-label--light';
+      } else {
+        labelClass = 'visColumnChart__bar-label--dark';
+      }
+
+      barLabels
+        .enter()
+        .append('text')
+        .text(formatValue)
+        .attr('class', `visColumnChart__barLabel visColumnChart__barLabel--stack ${labelClass}`)
+        .attr('x', isHorizontal ? labelX : labelY)
+        .attr('y', isHorizontal ? labelY : labelX)
+
+        // display must apply last, because labelDisplay decision it based
+        // on text bounding box which depends on actual applied style.
+        .attr('display', labelDisplay);
+    }
 
     return bars;
   }
@@ -191,12 +243,14 @@ export class ColumnChart extends PointSeries {
   addGroupedBars(bars) {
     const xScale = this.getCategoryAxis().getScale();
     const yScale = this.getValueAxis().getScale();
+    const chartData = this.chartData;
     const groupCount = this.getGroupedCount();
     const groupNum = this.getGroupedNum(this.chartData);
     const gutterSpacingPercentage = 0.15;
     const isTimeScale = this.getCategoryAxis().axisConfig.isTimeDomain();
     const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
     const isLogScale = this.getValueAxis().axisConfig.isLogScale();
+    const isLabels = this.labelOptions.show;
     let barWidth;
     let gutterWidth;
 
@@ -220,10 +274,29 @@ export class ColumnChart extends PointSeries {
       if ((isHorizontal && d.y < 0) || (!isHorizontal && d.y > 0)) {
         return yScale(0);
       }
-
       return yScale(d.y);
     }
 
+    function labelX(d, i) {
+      return x(d, i) + widthFunc(d, i) / 2;
+    }
+
+    function labelY(d) {
+      if (isHorizontal) {
+        return d.y >= 0 ? y(d) - 4 : y(d) + heightFunc(d) + this.getBBox().height;
+      }
+      return d.y >= 0 ? y(d) + heightFunc(d) + 4 : y(d) - this.getBBox().width - 4;
+    }
+
+    function labelDisplay(d, i) {
+      if (isHorizontal && this.getBBox().width > widthFunc(d, i)) {
+        return 'none';
+      }
+      if (!isHorizontal && this.getBBox().height > widthFunc(d)) {
+        return 'none';
+      }
+      return 'block';
+    }
     function widthFunc(d, i) {
       if (isTimeScale) {
         return datumWidth(barWidth, d, bars.data()[i + 1], xScale, gutterWidth, groupCount);
@@ -236,6 +309,10 @@ export class ColumnChart extends PointSeries {
       return Math.abs(yScale(baseValue) - yScale(d.y));
     }
 
+    function formatValue(d) {
+      return chartData.yAxisFormatter(d.y);
+    }
+
     // update
     bars
       .attr('x', isHorizontal ? x : y)
@@ -243,6 +320,33 @@ export class ColumnChart extends PointSeries {
       .attr('y', isHorizontal ? y : x)
       .attr('height', isHorizontal ? heightFunc : widthFunc);
 
+    const layer = d3.select(bars[0].parentNode);
+    const barLabels = layer.selectAll('text').data(chartData.values.filter(function (d) {
+      return !_.isNull(d.y);
+    }));
+
+    barLabels
+      .exit()
+      .remove();
+
+    if (isLabels) {
+      const labelColor = this.handler.data.getColorFunc()(chartData.label);
+
+      barLabels
+        .enter()
+        .append('text')
+        .text(formatValue)
+        .attr('class', 'visColumnChart__barLabel')
+        .attr('x', isHorizontal ? labelX : labelY)
+        .attr('y', isHorizontal ? labelY : labelX)
+        .attr('dominant-baseline', isHorizontal ? 'auto' : 'central')
+        .attr('text-anchor', isHorizontal ? 'middle' : 'start')
+        .attr('fill', labelColor)
+
+        // display must apply last, because labelDisplay decision it based
+        // on text bounding box which depends on actual applied style.
+        .attr('display', labelDisplay);
+    }
     return bars;
   }
 
@@ -262,6 +366,10 @@ export class ColumnChart extends PointSeries {
 
         const bars = self.addBars(svg, self.chartData);
         self.addCircleEvents(bars);
+
+        if (self.thresholdLineOptions.show) {
+          self.addThresholdLine(self.chartEl);
+        }
 
         self.events.emit('rendered', {
           chart: self.chartData

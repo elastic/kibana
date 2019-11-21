@@ -1,0 +1,11 @@
+/**
+   * 1. We want the kbnDocTable__container to scroll only when embedded in an embeddable panel
+   * 2. Force a better looking scrollbar
+   */
+.embPanel {
+  .kbnDocTable__container {
+    @include euiScrollBar; /* 2 */
+    flex: 1 1 0; /* 1 */
+    overflow: auto; /* 1 */
+  }
+}

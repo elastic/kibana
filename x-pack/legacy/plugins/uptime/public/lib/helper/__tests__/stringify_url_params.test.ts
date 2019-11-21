@@ -13,11 +13,11 @@ describe('stringifyUrlParams', () => {
       autorefreshIsPaused: false,
       dateRangeStart: 'now-15m',
       dateRangeEnd: 'now',
+      filters: 'monitor.id: bar',
       search: 'monitor.id: foo',
       selectedPingStatus: 'down',
+      statusFilter: 'up',
     });
-    expect(result).toEqual(
-      '?autorefreshInterval=50000&autorefreshIsPaused=false&dateRangeStart=now-15m&dateRangeEnd=now&search=monitor.id%3A%20foo&selectedPingStatus=down'
-    );
+    expect(result).toMatchSnapshot();
   });
 });

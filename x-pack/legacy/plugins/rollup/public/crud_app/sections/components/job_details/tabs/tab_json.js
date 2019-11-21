@@ -20,7 +20,7 @@ export const TabJson = ({
       mode="json"
       theme="textmate"
       isReadOnly
-      setOptions={{ maxLines: Infinity }}
+      setOptions={{ maxLines: Infinity, useWorker: false }}
       value={jsonString}
       editorProps={{
         $blockScrolling: Infinity

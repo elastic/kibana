@@ -13,82 +13,53 @@ import { QueryOperator } from './data_providers/data_provider';
 export type OnDataProviderRemoved = (providerId: string, andProviderId?: string) => void;
 
 /** Invoked when a user temporarily disables or re-enables a data provider */
-export type OnToggleDataProviderEnabled = (
-  toggled: {
-    providerId: string;
-    enabled: boolean;
-    andProviderId?: string;
-  }
-) => void;
+export type OnToggleDataProviderEnabled = (toggled: {
+  providerId: string;
+  enabled: boolean;
+  andProviderId?: string;
+}) => void;
 
 /** Invoked when a user toggles negation ("boolean NOT") of a data provider */
-export type OnToggleDataProviderExcluded = (
-  excluded: {
-    providerId: string;
-    excluded: boolean;
-    andProviderId?: string;
-  }
-) => void;
+export type OnToggleDataProviderExcluded = (excluded: {
+  providerId: string;
+  excluded: boolean;
+  andProviderId?: string;
+}) => void;
 
 /** Invoked when a user edits the properties of a data provider */
-export type OnDataProviderEdited = (
-  {
-    andProviderId,
-    excluded,
-    field,
-    id,
-    operator,
-    providerId,
-    value,
-  }: {
-    andProviderId?: string;
-    excluded: boolean;
-    field: string;
-    id: string;
-    operator: QueryOperator;
-    providerId: string;
-    value: string | number;
-  }
-) => void;
+export type OnDataProviderEdited = ({
+  andProviderId,
+  excluded,
+  field,
+  id,
+  operator,
+  providerId,
+  value,
+}: {
+  andProviderId?: string;
+  excluded: boolean;
+  field: string;
+  id: string;
+  operator: QueryOperator;
+  providerId: string;
+  value: string | number;
+}) => void;
 
 /** Invoked when a user change the kql query of our data provider */
-export type OnChangeDataProviderKqlQuery = (
-  edit: {
-    providerId: string;
-    kqlQuery: string;
-  }
-) => void;
+export type OnChangeDataProviderKqlQuery = (edit: { providerId: string; kqlQuery: string }) => void;
 
 /** Invoked when a user selects a new minimap time range */
 export type OnRangeSelected = (range: string) => void;
 
 /** Invoked when a user updates a column's filter */
-export type OnFilterChange = (
-  filter: {
-    columnId: ColumnId;
-    filter: string;
-  }
-) => void;
+export type OnFilterChange = (filter: { columnId: ColumnId; filter: string }) => void;
 
 /** Invoked when a column is sorted */
-export type OnColumnSorted = (
-  sorted: {
-    columnId: ColumnId;
-    sortDirection: SortDirection;
-  }
-) => void;
+export type OnColumnSorted = (sorted: { columnId: ColumnId; sortDirection: SortDirection }) => void;
 
 export type OnColumnRemoved = (columnId: ColumnId) => void;
 
-export type OnColumnResized = (
-  {
-    columnId,
-    delta,
-  }: {
-    columnId: ColumnId;
-    delta: number;
-  }
-) => void;
+export type OnColumnResized = ({ columnId, delta }: { columnId: ColumnId; delta: number }) => void;
 
 /** Invoked when a user clicks to change the number items to show per page */
 export type OnChangeItemsPerPage = (itemsPerPage: number) => void;

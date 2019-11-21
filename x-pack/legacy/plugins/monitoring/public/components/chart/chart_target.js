@@ -35,12 +35,13 @@ export class ChartTarget extends React.Component {
   componentWillUnmount() {
     this.shutdownChart();
     window.removeEventListener('resize', this._handleResize);
+    this.componentUnmounted = true;
   }
 
   filterByShow(seriesToShow) {
     if (seriesToShow) {
       return (metric) => {
-        return seriesToShow.some(id => _.startsWith(id, metric.id));
+        return seriesToShow.some(id => id.toLowerCase() === metric.id.toLowerCase());
       };
     }
     return (_metric) => true;
@@ -62,7 +63,6 @@ export class ChartTarget extends React.Component {
 
   componentDidMount() {
     this.renderChart();
-    window.addEventListener('resize', this._handleResize, false);
   }
 
   componentDidUpdate() {
@@ -76,8 +76,8 @@ export class ChartTarget extends React.Component {
       .value();
   }
 
-  getOptions() {
-    const opts = getChartOptions({
+  async getOptions() {
+    const opts = await getChartOptions({
       yaxis: { tickFormatter: this.props.tickFormatter },
       xaxis: this.props.timeRange
     });
@@ -88,12 +88,15 @@ export class ChartTarget extends React.Component {
     };
   }
 
-  renderChart() {
+  async renderChart() {
     const { target } = this.refs;
     const { series } = this.props;
     const data = this.filterData(series, this.props.seriesToShow);
 
-    this.plot = $.plot(target, data, this.getOptions());
+    this.plot = $.plot(target, data, await this.getOptions());
+    if (this.componentUnmounted || !this.plot) {
+      return;
+    }
 
     this._handleResize = () => {
       if (!this.plot) { return; }
@@ -109,6 +112,8 @@ export class ChartTarget extends React.Component {
          * the event */
       }
     };
+
+    window.addEventListener('resize', this._handleResize, false);
 
     this.handleMouseLeave = () => {
       eventBus.trigger('thorPlotLeave', []);

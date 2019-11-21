@@ -11,21 +11,19 @@ query Snapshot(
   $dateRangeStart: String!
   $dateRangeEnd: String!
   $filters: String
+  $statusFilter: String
 ) {
-snapshot: getSnapshot(
-  dateRangeStart: $dateRangeStart
-  dateRangeEnd: $dateRangeEnd
-  filters: $filters
-) {
-  up
-  down
-  total
-  histogram {
-      upCount
-      downCount
-      x
-      x0
-      y
+  snapshot: getSnapshot(
+    dateRangeStart: $dateRangeStart
+    dateRangeEnd: $dateRangeEnd
+    filters: $filters
+    statusFilter: $statusFilter
+  ) {
+    counts {
+      down
+      mixed
+      up
+      total
     }
   }
 }

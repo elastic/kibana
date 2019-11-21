@@ -17,36 +17,86 @@
  * under the License.
  */
 
-import Boom from 'boom';
+import Joi from 'joi';
+import { Report } from '@kbn/analytics';
 import { Server } from 'hapi';
-import { API_BASE_PATH } from '../../../common';
 
-export const registerUserActionRoute = (server: Server) => {
-  /*
-   * Increment a count on an object representing a specific interaction with the UI.
-   */
+export async function storeReport(server: any, report: Report) {
+  const { getSavedObjectsRepository } = server.savedObjects;
+  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
+  const internalRepository = getSavedObjectsRepository(callWithInternalUser);
+
+  const uiStatsMetrics = report.uiStatsMetrics ? Object.entries(report.uiStatsMetrics) : [];
+  const userAgents = report.userAgent ? Object.entries(report.userAgent) : [];
+  return Promise.all([
+    ...userAgents.map(async ([key, metric]) => {
+      const { userAgent } = metric;
+      const savedObjectId = `${key}:${userAgent}`;
+      return await internalRepository.create(
+        'ui-metric',
+        { count: 1 },
+        {
+          id: savedObjectId,
+          overwrite: true,
+        }
+      );
+    }),
+    ...uiStatsMetrics.map(async ([key, metric]) => {
+      const { appName, eventName } = metric;
+      const savedObjectId = `${appName}:${eventName}`;
+      return await internalRepository.incrementCounter('ui-metric', savedObjectId, 'count');
+    }),
+  ]);
+}
+
+export function registerUiMetricRoute(server: Server) {
   server.route({
-    path: `${API_BASE_PATH}/{appName}/{metricTypes}`,
     method: 'POST',
-    handler: async (request: any) => {
-      const { appName, metricTypes } = request.params;
-
+    path: '/api/telemetry/report',
+    options: {
+      validate: {
+        payload: Joi.object({
+          reportVersion: Joi.number().optional(),
+          userAgent: Joi.object()
+            .pattern(
+              /.*/,
+              Joi.object({
+                key: Joi.string().required(),
+                type: Joi.string().required(),
+                appName: Joi.string().required(),
+                userAgent: Joi.string().required(),
+              })
+            )
+            .allow(null)
+            .optional(),
+          uiStatsMetrics: Joi.object()
+            .pattern(
+              /.*/,
+              Joi.object({
+                key: Joi.string().required(),
+                type: Joi.string().required(),
+                appName: Joi.string().required(),
+                eventName: Joi.string().required(),
+                stats: Joi.object({
+                  min: Joi.number(),
+                  sum: Joi.number(),
+                  max: Joi.number(),
+                  avg: Joi.number(),
+                }).allow(null),
+              })
+            )
+            .allow(null),
+        }),
+      },
+    },
+    handler: async (req: any, h: any) => {
       try {
-        const { getSavedObjectsRepository } = server.savedObjects;
-        const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-        const internalRepository = getSavedObjectsRepository(callWithInternalUser);
-
-        const incrementRequests = metricTypes.split(',').map((metricType: string) => {
-          const savedObjectId = `${appName}:${metricType}`;
-          // This object is created if it doesn't already exist.
-          return internalRepository.incrementCounter('ui-metric', savedObjectId, 'count');
-        });
-
-        await Promise.all(incrementRequests);
-        return {};
+        const report = req.payload;
+        await storeReport(server, report);
+        return { status: 'ok' };
       } catch (error) {
-        return new Boom('Something went wrong', { statusCode: error.status });
+        return { status: 'fail' };
       }
     },
   });
-};
+}

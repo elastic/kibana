@@ -1,8 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
 /* tslint:disable */
 
 // ====================================================
@@ -29,28 +24,35 @@ export interface Query {
 
   getSnapshot?: Snapshot | null;
 
+  getSnapshotHistogram: HistogramDataPoint[];
+
   getMonitorChartsData?: MonitorChart | null;
   /** Fetch the most recent event data for a monitor ID, date range, location. */
   getLatestMonitors: Ping[];
 
   getFilterBar?: FilterBar | null;
 
-  getErrorsList?: ErrorListItem[] | null;
-
   getMonitorPageTitle?: MonitorPageTitle | null;
+  /** Fetches the current state of Uptime monitors for the given parameters. */
+  getMonitorStates?: MonitorSummaryResult | null;
+  /** Fetches details about the uptime index. */
+  getStatesIndexStatus: StatesIndexStatus;
 }
 
 export interface PingResults {
+  /** Total number of matching pings */
   total: UnsignedInteger;
-
+  /** Unique list of all locations the query matched */
+  locations: string[];
+  /** List of pings */
   pings: Ping[];
 }
 /** A request sent from a monitor to a host */
 export interface Ping {
+  /** unique ID for this ping */
+  id: string;
   /** The timestamp of the ping's creation */
   timestamp: string;
-  /** Milliseconds from the timestamp to the current time */
-  millisFromNow?: string | null;
   /** The agent that recorded the ping */
   beat?: Beat | null;
 
@@ -86,7 +88,7 @@ export interface Ping {
 
   tcp?: Tcp | null;
 
-  tls?: Tls | null;
+  tls?: PingTls | null;
 
   url?: Url | null;
 }
@@ -168,15 +170,28 @@ export interface Os {
 }
 
 export interface Http {
-  response?: StatusCode | null;
+  response?: HttpResponse | null;
 
   rtt?: HttpRtt | null;
 
   url?: string | null;
 }
 
-export interface StatusCode {
-  status_code?: number | null;
+export interface HttpResponse {
+  status_code?: UnsignedInteger | null;
+
+  body?: HttpBody | null;
+}
+
+export interface HttpBody {
+  /** Size of HTTP response body in bytes */
+  bytes?: UnsignedInteger | null;
+  /** Hash of the HTTP response body */
+  hash?: string | null;
+  /** Response body of the HTTP Response. May be truncated based on client settings. */
+  content?: string | null;
+  /** Byte length of the content string, taking into account multibyte chars. */
+  content_bytes?: UnsignedInteger | null;
 }
 
 export interface HttpRtt {
@@ -317,6 +332,20 @@ export interface Summary {
   up?: number | null;
 
   down?: number | null;
+
+  geo?: CheckGeo | null;
+}
+
+export interface CheckGeo {
+  name?: string | null;
+
+  location?: Location | null;
+}
+
+export interface Location {
+  lat?: number | null;
+
+  lon?: number | null;
 }
 
 export interface Tcp {
@@ -324,8 +353,9 @@ export interface Tcp {
 
   rtt?: Rtt | null;
 }
-
-export interface Tls {
+/** Contains monitor transmission encryption information. */
+export interface PingTls {
+  /** The date and time after which the certificate is invalid. */
   certificate_not_valid_after?: string | null;
 
   certificate_not_valid_before?: string | null;
@@ -381,13 +411,17 @@ export interface MonitorSeriesPoint {
 }
 
 export interface Snapshot {
-  up?: number | null;
+  counts: SnapshotCount;
+}
 
-  down?: number | null;
+export interface SnapshotCount {
+  up: number;
 
-  total?: number | null;
+  down: number;
 
-  histogram: HistogramDataPoint[];
+  mixed: number;
+
+  total: number;
 }
 
 export interface HistogramDataPoint {
@@ -403,10 +437,8 @@ export interface HistogramDataPoint {
 }
 /** The data used to populate the monitor charts. */
 export interface MonitorChart {
-  /** The max and min values for the monitor duration. */
-  durationArea: MonitorDurationAreaPoint[];
   /** The average values for the monitor duration. */
-  durationLine: MonitorDurationAveragePoint[];
+  locationDurationLines: LocationDurationLine[];
   /** The counts of up/down checks for the monitor. */
   status: StatusData[];
   /** The maximum status doc count in this chart. */
@@ -414,14 +446,11 @@ export interface MonitorChart {
   /** The maximum duration value in this chart. */
   durationMaxValue: number;
 }
-/** Represents a monitor's duration performance in microseconds at a point in time. */
-export interface MonitorDurationAreaPoint {
-  /** The timeseries value for this point in time. */
-  x: UnsignedInteger;
-  /** The min duration value in microseconds at this time. */
-  yMin?: number | null;
-  /** The max duration value in microseconds at this point. */
-  yMax?: number | null;
+
+export interface LocationDurationLine {
+  name: string;
+
+  line: MonitorDurationAveragePoint[];
 }
 /** Represents the average monitor duration ms at a point in time. */
 export interface MonitorDurationAveragePoint {
@@ -444,36 +473,17 @@ export interface StatusData {
 /** The data used to enrich the filter bar. */
 export interface FilterBar {
   /** A series of monitor IDs in the heartbeat indices. */
-  ids?: MonitorKey[] | null;
+  ids?: string[] | null;
   /** The location values users have configured for the agents. */
   locations?: string[] | null;
-  /** The names users have configured for the monitors. */
-  names?: string[] | null;
   /** The ports of the monitored endpoints. */
   ports?: number[] | null;
   /** The schemes used by the monitors. */
   schemes?: string[] | null;
   /** The possible status values contained in the indices. */
   statuses?: string[] | null;
-}
-/** A representation of an error state for a monitor. */
-export interface ErrorListItem {
-  /** The number of times this error has occurred. */
-  count: number;
-  /** The most recent message associated with this error type. */
-  latestMessage?: string | null;
-  /** The location assigned to the agent reporting this error. */
-  location?: string | null;
-  /** The ID of the monitor reporting the error. */
-  monitorId?: string | null;
-  /** The name configured for the monitor by the user. */
-  name?: string | null;
-  /** The status code, if available, of the error request. */
-  statusCode?: string | null;
-  /** When the most recent error state occurred. */
-  timestamp?: string | null;
-  /** What kind of error the monitor reported. */
-  type: string;
+  /** The list of URLs */
+  urls?: string[] | null;
 }
 
 export interface MonitorPageTitle {
@@ -483,11 +493,191 @@ export interface MonitorPageTitle {
 
   name?: string | null;
 }
+/** The primary object returned for monitor states. */
+export interface MonitorSummaryResult {
+  /** Used to go to the next page of results */
+  prevPagePagination?: string | null;
+  /** Used to go to the previous page of results */
+  nextPagePagination?: string | null;
+  /** The objects representing the state of a series of heartbeat monitors. */
+  summaries?: MonitorSummary[] | null;
+  /** The number of summaries. */
+  totalSummaryCount: DocCount;
+}
+/** Represents the current state and associated data for an Uptime monitor. */
+export interface MonitorSummary {
+  /** The ID assigned by the config or generated by the user. */
+  monitor_id: string;
+  /** The state of the monitor and its associated details. */
+  state: State;
+
+  histogram?: SummaryHistogram | null;
+}
+/** Unifies the subsequent data for an uptime monitor. */
+export interface State {
+  /** The agent processing the monitor. */
+  agent?: Agent | null;
+  /** There is a check object for each instance of the monitoring agent. */
+  checks?: Check[] | null;
+
+  geo?: StateGeo | null;
+
+  observer?: StateObserver | null;
+
+  monitor?: MonitorState | null;
+
+  summary: Summary;
+
+  timestamp: UnsignedInteger;
+  /** Transport encryption information. */
+  tls?: (StateTls | null)[] | null;
+
+  url?: StateUrl | null;
+}
+
+export interface Agent {
+  id: string;
+}
+
+export interface Check {
+  agent?: Agent | null;
+
+  container?: StateContainer | null;
+
+  kubernetes?: StateKubernetes | null;
+
+  monitor: CheckMonitor;
+
+  observer?: CheckObserver | null;
+
+  timestamp: string;
+}
+
+export interface StateContainer {
+  id?: string | null;
+}
+
+export interface StateKubernetes {
+  pod?: StatePod | null;
+}
+
+export interface StatePod {
+  uid?: string | null;
+}
+
+export interface CheckMonitor {
+  ip?: string | null;
+
+  name?: string | null;
+
+  status: string;
+}
+
+export interface CheckObserver {
+  geo?: CheckGeo | null;
+}
+
+export interface StateGeo {
+  name?: (string | null)[] | null;
+
+  location?: Location | null;
+}
+
+export interface StateObserver {
+  geo?: StateGeo | null;
+}
+
+export interface MonitorState {
+  status?: string | null;
+
+  name?: string | null;
+
+  id?: string | null;
+
+  type?: string | null;
+}
+/** Contains monitor transmission encryption information. */
+export interface StateTls {
+  /** The date and time after which the certificate is invalid. */
+  certificate_not_valid_after?: string | null;
+
+  certificate_not_valid_before?: string | null;
+
+  certificates?: string | null;
+
+  rtt?: Rtt | null;
+}
+
+export interface StateUrl {
+  domain?: string | null;
+
+  full?: string | null;
+
+  path?: string | null;
+
+  port?: number | null;
+
+  scheme?: string | null;
+}
+/** Monitor status data over time. */
+export interface SummaryHistogram {
+  /** The number of documents used to assemble the histogram. */
+  count: number;
+  /** The individual histogram data points. */
+  points: SummaryHistogramPoint[];
+}
+/** Represents a monitor's statuses for a period of time. */
+export interface SummaryHistogramPoint {
+  /** The time at which these data were collected. */
+  timestamp: UnsignedInteger;
+  /** The number of _up_ documents. */
+  up: number;
+  /** The number of _down_ documents. */
+  down: number;
+}
+/** Represents the current status of the uptime index. */
+export interface StatesIndexStatus {
+  /** Flag denoting whether the index exists. */
+  indexExists: boolean;
+  /** The number of documents in the index. */
+  docCount?: DocCount | null;
+}
 
 export interface DataPoint {
   x?: UnsignedInteger | null;
 
   y?: number | null;
+}
+/** Represents a monitor's duration performance in microseconds at a point in time. */
+export interface MonitorDurationAreaPoint {
+  /** The timeseries value for this point in time. */
+  x: UnsignedInteger;
+  /** The min duration value in microseconds at this time. */
+  yMin?: number | null;
+  /** The max duration value in microseconds at this point. */
+  yMax?: number | null;
+}
+
+export interface MonitorSummaryUrl {
+  domain?: string | null;
+
+  fragment?: string | null;
+
+  full?: string | null;
+
+  original?: string | null;
+
+  password?: string | null;
+
+  path?: string | null;
+
+  port?: number | null;
+
+  query?: string | null;
+
+  scheme?: string | null;
+
+  username?: string | null;
 }
 
 // ====================================================
@@ -516,6 +706,8 @@ export interface GetMonitorsQueryArgs {
   dateRangeEnd: string;
 
   filters?: string | null;
+
+  statusFilter?: string | null;
 }
 export interface GetSnapshotQueryArgs {
   dateRangeStart: string;
@@ -523,6 +715,19 @@ export interface GetSnapshotQueryArgs {
   dateRangeEnd: string;
 
   filters?: string | null;
+
+  statusFilter?: string | null;
+}
+export interface GetSnapshotHistogramQueryArgs {
+  dateRangeStart: string;
+
+  dateRangeEnd: string;
+
+  filters?: string | null;
+
+  statusFilter?: string | null;
+
+  monitorId?: string | null;
 }
 export interface GetMonitorChartsDataQueryArgs {
   monitorId: string;
@@ -548,15 +753,33 @@ export interface GetFilterBarQueryArgs {
 
   dateRangeEnd: string;
 }
-export interface GetErrorsListQueryArgs {
+export interface GetMonitorPageTitleQueryArgs {
+  monitorId: string;
+}
+export interface GetMonitorStatesQueryArgs {
   dateRangeStart: string;
 
   dateRangeEnd: string;
 
+  pagination?: string | null;
+
   filters?: string | null;
+
+  statusFilter?: string | null;
 }
-export interface GetMonitorPageTitleQueryArgs {
-  monitorId: string;
+
+// ====================================================
+// Enums
+// ====================================================
+
+export enum CursorDirection {
+  AFTER = 'AFTER',
+  BEFORE = 'BEFORE',
+}
+
+export enum SortOrder {
+  ASC = 'ASC',
+  DESC = 'DESC',
 }
 
 // ====================================================

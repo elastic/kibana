@@ -7,21 +7,21 @@
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { idx } from '@kbn/elastic-idx';
 import { IStackframe } from '../../../../typings/es_schemas/raw/fields/Stackframe';
 import { fontFamilyCode, fontSize, px, units } from '../../../style/variables';
 
 const FileDetails = styled.div`
-  color: ${theme.euiColorMediumShade};
-  padding: ${px(units.half)};
+  color: ${theme.euiColorDarkShade};
+  padding: ${px(units.half)} 0;
   font-family: ${fontFamilyCode};
   font-size: ${fontSize};
 `;
+
 const LibraryFrameFileDetail = styled.span`
   color: ${theme.euiColorDarkShade};
 `;
+
 const AppFrameFileDetail = styled.span`
-  font-weight: bold;
   color: ${theme.euiColorFullShade};
 `;
 
@@ -34,7 +34,7 @@ const FrameHeading: React.SFC<Props> = ({ stackframe, isLibraryFrame }) => {
   const FileDetail = isLibraryFrame
     ? LibraryFrameFileDetail
     : AppFrameFileDetail;
-  const lineNumber = idx(stackframe, _ => _.line.number) || 0;
+  const lineNumber = stackframe.line.number;
   return (
     <FileDetails>
       <FileDetail>{stackframe.filename}</FileDetail> in{' '}

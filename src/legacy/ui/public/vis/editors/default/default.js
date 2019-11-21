@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import 'ui/angular-bootstrap';
+import './fancy_forms';
 import './sidebar';
 import { i18n } from '@kbn/i18n';
 import './vis_options';
@@ -28,13 +30,15 @@ import _ from 'lodash';
 import angular from 'angular';
 import defaultEditorTemplate from './default.html';
 import { keyCodes } from '@elastic/eui';
+import { parentPipelineAggHelper } from 'ui/agg_types/metrics/lib/parent_pipeline_agg_helper';
 import { DefaultEditorSize } from '../../editor_size';
 
 import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_types';
-import { getVisualizeLoader } from '../../../visualize/loader/visualize_loader';
+import { AggGroupNames } from './agg_groups';
 
+import { start as embeddables } from '../../../../../core_plugins/embeddable_api/public/np_ready/public/legacy';
 
-const defaultEditor = function ($rootScope, $compile) {
+const defaultEditor = function ($rootScope, $compile, getAppState) {
   return class DefaultEditor {
     static key = 'default';
 
@@ -54,7 +58,7 @@ const defaultEditor = function ($rootScope, $compile) {
       }
     }
 
-    render({ uiState, timeRange, filters, appState }) {
+    render({ uiState, timeRange, filters, query }) {
       let $scope;
 
       const updateScope = () => {
@@ -63,7 +67,7 @@ const defaultEditor = function ($rootScope, $compile) {
         //$scope.$apply();
       };
 
-      return new Promise(resolve => {
+      return new Promise(async (resolve) => {
         if (!this.$scope) {
           this.$scope = $scope = $rootScope.$new();
 
@@ -123,16 +127,12 @@ const defaultEditor = function ($rootScope, $compile) {
             return $scope.vis.getSerializableState($scope.state);
           }, function (newState) {
             $scope.vis.dirty = !angular.equals(newState, $scope.oldState);
-            $scope.responseValueAggs = null;
-            try {
-              $scope.responseValueAggs = $scope.state.aggs.getResponseAggs().filter(function (agg) {
-                return _.get(agg, 'schema.group') === 'metrics';
-              });
-            }
-            // this can fail when the agg.type is changed but the
-            // params have not been set yet. watcher will trigger again
-            // when the params update
-            catch (e) {} // eslint-disable-line no-empty
+            const responseAggs = $scope.state.aggs.getResponseAggs();
+            $scope.hasHistogramAgg = responseAggs.some(agg => agg.type.name === 'histogram');
+            $scope.metricAggs = responseAggs.filter(agg =>
+              _.get(agg, 'schema.group') === AggGroupNames.Metrics);
+            const lastParentPipelineAgg = _.findLast($scope.metricAggs, ({ type }) => type.subtype === parentPipelineAggHelper.subtype);
+            $scope.lastParentPipelineAggTitle = lastParentPipelineAgg && lastParentPipelineAgg.type.title;
           }, true);
 
           // fires when visualization state changes, and we need to copy changes to editorState
@@ -158,23 +158,21 @@ const defaultEditor = function ($rootScope, $compile) {
 
         if (!this._handler) {
           const visualizationEl = this.el.find('.visEditor__canvas')[0];
-          getVisualizeLoader().then(loader => {
-            if (!visualizationEl) {
-              return;
-            }
-            this._loader = loader;
-            this._handler = this._loader.embedVisualizationWithSavedObject(visualizationEl, this.savedObj, {
-              uiState: uiState,
-              listenOnChange: false,
-              timeRange: timeRange,
-              filters: filters,
-              appState: appState,
-            });
-          });
-        } else {
-          this._handler.update({
+
+          this._handler = await embeddables.getEmbeddableFactory('visualization').createFromObject(this.savedObj, {
+            uiState: uiState,
+            appState: getAppState(),
             timeRange: timeRange,
-            filters: filters,
+            filters: filters || [],
+            query: query,
+          });
+          this._handler.render(visualizationEl);
+
+        } else {
+          this._handler.updateInput({
+            timeRange: timeRange,
+            filters: filters || [],
+            query: query,
           });
         }
 

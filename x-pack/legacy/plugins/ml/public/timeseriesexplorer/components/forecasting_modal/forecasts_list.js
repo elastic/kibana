@@ -109,6 +109,7 @@ export function ForecastsList({ forecasts, viewForecast }) {
         items={forecasts}
         columns={getColumns(viewForecast)}
         pagination={false}
+        data-test-subj="mlModalForecastTable"
       />
     </EuiText>
   );

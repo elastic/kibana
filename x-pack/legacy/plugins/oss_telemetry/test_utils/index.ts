@@ -30,15 +30,17 @@ export const getMockTaskFetch = (docs: TaskInstance[] = defaultMockTaskDocs) => 
   return () => Promise.resolve({ docs });
 };
 
+export const getMockConfig = () => {
+  return {
+    get: () => '',
+  };
+};
+
 export const getMockKbnServer = (
   mockCallWithInternal = getMockCallWithInternal(),
-  mockTaskFetch = getMockTaskFetch()
+  mockTaskFetch = getMockTaskFetch(),
+  mockConfig = getMockConfig()
 ): HapiServer => ({
-  taskManager: {
-    registerTaskDefinitions: (opts: any) => undefined,
-    schedule: (opts: any) => Promise.resolve(),
-    fetch: mockTaskFetch,
-  },
   plugins: {
     elasticsearch: {
       getCluster: (cluster: string) => ({
@@ -46,6 +48,11 @@ export const getMockKbnServer = (
       }),
     },
     xpack_main: {},
+    task_manager: {
+      registerTaskDefinitions: (opts: any) => undefined,
+      ensureScheduled: (opts: any) => Promise.resolve(),
+      fetch: mockTaskFetch,
+    },
   },
   usage: {
     collectorSet: {
@@ -53,6 +60,6 @@ export const getMockKbnServer = (
       register: () => undefined,
     },
   },
-  config: () => ({ get: () => '' }),
+  config: () => mockConfig,
   log: () => undefined,
 });

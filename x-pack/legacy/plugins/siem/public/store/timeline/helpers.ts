@@ -3,8 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { getOr, omit, uniq, isEmpty, isEqualWith } from 'lodash/fp';
 
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { getColumnWidthFromType } from '../../components/timeline/body/helpers';
 import { Sort } from '../../components/timeline/body/sort';
@@ -28,6 +30,7 @@ export const initialTimelineState: TimelineState = {
     timelineId: null,
     newTimelineModel: null,
   },
+  showCallOutUnauthorizedMsg: false,
 };
 
 interface AddTimelineHistoryParams {
@@ -102,16 +105,43 @@ export const addTimelineNoteToEvent = ({
   };
 };
 
+interface AddTimelineParams {
+  id: string;
+  timeline: TimelineModel;
+  timelineById: TimelineById;
+}
+
+/**
+ * Add a saved object timeline to the store
+ * and default the value to what need to be if values are null
+ */
+export const addTimelineToStore = ({
+  id,
+  timeline,
+  timelineById,
+}: AddTimelineParams): TimelineById => ({
+  ...timelineById,
+  [id]: {
+    ...timeline,
+    isLoading: timelineById[id].isLoading,
+  },
+});
+
 interface AddNewTimelineParams {
   columns: ColumnHeader[];
   id: string;
+  itemsPerPage?: number;
   show?: boolean;
+  sort?: Sort;
   timelineById: TimelineById;
 }
+
 /** Adds a new `Timeline` to the provided collection of `TimelineById` */
 export const addNewTimeline = ({
   columns,
   id,
+  itemsPerPage = timelineDefaults.itemsPerPage,
+  sort = timelineDefaults.sort,
   show = false,
   timelineById,
 }: AddNewTimelineParams): TimelineById => ({
@@ -120,6 +150,8 @@ export const addNewTimeline = ({
     id,
     ...timelineDefaults,
     columns,
+    itemsPerPage,
+    sort,
     show,
     savedObjectId: null,
     version: null,
@@ -1102,6 +1134,46 @@ export const updateHighlightedDropAndProvider = ({
     [id]: {
       ...timeline,
       highlightedDropAndProviderId: providerId,
+    },
+  };
+};
+
+interface UpdateSavedQueryParams {
+  id: string;
+  savedQueryId: string | null;
+  timelineById: TimelineById;
+}
+
+export const updateSavedQuery = ({
+  id,
+  savedQueryId,
+  timelineById,
+}: UpdateSavedQueryParams): TimelineById => {
+  const timeline = timelineById[id];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      savedQueryId,
+    },
+  };
+};
+
+interface UpdateFiltersParams {
+  id: string;
+  filters: esFilters.Filter[];
+  timelineById: TimelineById;
+}
+
+export const updateFilters = ({ id, filters, timelineById }: UpdateFiltersParams): TimelineById => {
+  const timeline = timelineById[id];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      filters,
     },
   };
 };

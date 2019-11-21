@@ -8,10 +8,13 @@ import { EuiHorizontalRule, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
-import { capabilities } from 'ui/capabilities';
+// @ts-ignore
+import { xpackInfo } from '../../../../../../xpack_main/public/services/xpack_info';
 
 export const SecureSpaceMessage = ({}) => {
-  if (capabilities.get().spaces.manage) {
+  const showSecurityLinks = xpackInfo.get('features.security.showLinks');
+
+  if (showSecurityLinks) {
     const rolesLinkTextAriaLabel = i18n.translate(
       'xpack.spaces.management.secureSpaceMessage.rolesLinkTextAriaLabel',
       { defaultMessage: 'Roles management page' }

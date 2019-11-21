@@ -4,34 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
-
-// @ts-ignore no module definition
-import { buildEsQuery } from '@kbn/es-query';
 // @ts-ignore no module definition
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
-
 import { CancellationToken } from '../../../../common/cancellation_token';
-
-import { KbnServer, Logger, JobParams } from '../../../../types';
-import {
-  IndexPatternSavedObject,
-  SavedSearchObjectAttributes,
-  SearchPanel,
-  SearchRequest,
-  SearchSource,
-  SearchSourceQuery,
-} from '../../';
+import { ServerFacade, RequestFacade, Logger } from '../../../../types';
+import { SavedSearchObjectAttributes, SearchPanel, SearchRequest, SearchSource } from '../../types';
 import {
   CsvResultFromSearch,
-  ESQueryConfig,
   GenerateCsvParams,
-  Filter,
   IndexPatternField,
   QueryFilter,
-} from './';
+} from '../../types';
 import { getDataSource } from './get_data_source';
 import { getFilters } from './get_filters';
+import { JobParamsDiscoverCsv } from '../../../csv/types';
+import {
+  esQuery,
+  esFilters,
+  IIndexPattern,
+  Query,
+} from '../../../../../../../../src/plugins/data/server';
 
 const getEsQueryConfig = async (config: any) => {
   const configs = await Promise.all([
@@ -40,7 +32,11 @@ const getEsQueryConfig = async (config: any) => {
     config.get('courier:ignoreFilterIfFieldNotInIndex'),
   ]);
   const [allowLeadingWildcards, queryStringOptions, ignoreFilterIfFieldNotInIndex] = configs;
-  return { allowLeadingWildcards, queryStringOptions, ignoreFilterIfFieldNotInIndex };
+  return {
+    allowLeadingWildcards,
+    queryStringOptions,
+    ignoreFilterIfFieldNotInIndex,
+  } as esQuery.EsQueryConfig;
 };
 
 const getUiSettings = async (config: any) => {
@@ -50,11 +46,11 @@ const getUiSettings = async (config: any) => {
 };
 
 export async function generateCsvSearch(
-  req: Request,
-  server: KbnServer,
+  req: RequestFacade,
+  server: ServerFacade,
   logger: Logger,
   searchPanel: SearchPanel,
-  jobParams: JobParams
+  jobParams: JobParamsDiscoverCsv
 ): Promise<CsvResultFromSearch> {
   const { savedObjects, uiSettingsServiceFactory } = server;
   const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(req);
@@ -86,7 +82,9 @@ export async function generateCsvSearch(
   let payloadSort: any[] = [];
   if (jobParams.post && jobParams.post.state) {
     ({
-      post: { state: { query: payloadQuery, sort: payloadSort = [] } },
+      post: {
+        state: { query: payloadQuery, sort: payloadSort = [] },
+      },
     } = jobParams);
   }
 
@@ -99,9 +97,11 @@ export async function generateCsvSearch(
     payloadQuery
   );
 
-  const [savedSortField, savedSortOrder] = savedSearchObjectAttr.sort;
-  const sortConfig = [...payloadSort, { [savedSortField]: { order: savedSortOrder } }];
-
+  const savedSortConfigs = savedSearchObjectAttr.sort;
+  const sortConfig = [...payloadSort];
+  savedSortConfigs.forEach(([savedSortField, savedSortOrder]) => {
+    sortConfig.push({ [savedSortField]: { order: savedSortOrder } });
+  });
   const scriptFieldsConfig = indexPatternFields
     .filter((f: IndexPatternField) => f.scripted)
     .reduce((accum: any, curr: IndexPatternField) => {
@@ -116,28 +116,23 @@ export async function generateCsvSearch(
       };
     }, {});
   const docValueFields = indexPatternTimeField ? [indexPatternTimeField] : undefined;
-
-  // this array helps ensure the params are passed to buildEsQuery (non-Typescript) in the right order
-  const buildCsvParams: [IndexPatternSavedObject, SearchSourceQuery, Filter[], ESQueryConfig] = [
-    indexPatternSavedObject,
-    searchSourceQuery,
-    combinedFilter,
-    esQueryConfig,
-  ];
-
   const searchRequest: SearchRequest = {
     index: esIndex,
     body: {
       _source: { includes },
       docvalue_fields: docValueFields,
-      query: buildEsQuery(...buildCsvParams),
+      query: esQuery.buildEsQuery(
+        indexPatternSavedObject as IIndexPattern,
+        (searchSourceQuery as unknown) as Query,
+        (combinedFilter as unknown) as esFilters.Filter,
+        esQueryConfig
+      ),
       script_fields: scriptFieldsConfig,
       sort: sortConfig,
     },
   };
-
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-  const callCluster = (...params: any[]) => callWithRequest(req, ...params);
+  const callCluster = (...params: [string, object]) => callWithRequest(req, ...params);
   const config = server.config();
   const uiSettings = await getUiSettings(uiConfig);
 

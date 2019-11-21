@@ -8,17 +8,13 @@ import { get } from 'lodash';
 
 import { parseNext } from '../../lib/parse_next';
 
-export function initLoginView(server, xpackMainPlugin) {
+export function initLoginView({ __legacyCompat: { config: { cookieName }, license } }, server) {
   const config = server.config();
-  const cookieName = config.get('xpack.security.cookieName');
   const login = server.getHiddenUiAppById('login');
 
   function shouldShowLogin() {
-    if (xpackMainPlugin && xpackMainPlugin.info) {
-      const licenseCheckResults = xpackMainPlugin.info.feature('security').getLicenseCheckResults();
-      if (licenseCheckResults) {
-        return Boolean(licenseCheckResults.showLogin);
-      }
+    if (license.isEnabled()) {
+      return Boolean(license.getFeatures().showLogin);
     }
 
     // default to true if xpack info isn't available or

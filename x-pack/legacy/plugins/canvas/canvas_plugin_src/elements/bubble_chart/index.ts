@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElementFactory } from '../types';
+import { ElementFactory } from '../../../types';
 import header from './header.png';
 
 export const bubbleChart: ElementFactory = () => ({

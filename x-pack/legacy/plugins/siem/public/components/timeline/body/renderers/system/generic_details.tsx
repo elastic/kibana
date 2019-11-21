@@ -38,6 +38,7 @@ interface Props {
   sshMethod: string | null | undefined;
   sshSignature: string | null | undefined;
   text: string | null | undefined;
+  userDomain: string | null | undefined;
   userName: string | null | undefined;
   workingDirectory: string | null | undefined;
 }
@@ -58,14 +59,16 @@ export const SystemGenericLine = pure<Props>(
     sshSignature,
     sshMethod,
     text,
+    userDomain,
     userName,
     workingDirectory,
   }) => (
     <>
-      <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
+      <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none" wrap={true}>
         <UserHostWorkingDir
           contextId={contextId}
           eventId={id}
+          userDomain={userDomain}
           userName={userName}
           hostName={hostName}
           workingDirectory={workingDirectory}
@@ -76,6 +79,8 @@ export const SystemGenericLine = pure<Props>(
         <TokensFlexItem grow={false} component="span">
           <ProcessDraggable
             contextId={contextId}
+            endgamePid={undefined}
+            endgameProcessName={undefined}
             eventId={id}
             processPid={processPid}
             processName={processName}
@@ -126,51 +131,60 @@ export const SystemGenericLine = pure<Props>(
   )
 );
 
+SystemGenericLine.displayName = 'SystemGenericLine';
+
 interface GenericDetailsProps {
   browserFields: BrowserFields;
   data: Ecs;
   contextId: string;
   text: string;
+  timelineId: string;
 }
 
-export const SystemGenericDetails = pure<GenericDetailsProps>(({ data, contextId, text }) => {
-  const id = data._id;
-  const message: string | null = data.message != null ? data.message[0] : null;
-  const hostName: string | null | undefined = get('host.name[0]', data);
-  const userName: string | null | undefined = get('user.name[0]', data);
-  const outcome: string | null | undefined = get('event.outcome[0]', data);
-  const packageName: string | null | undefined = get('system.audit.package.name[0]', data);
-  const packageSummary: string | null | undefined = get('system.audit.package.summary[0]', data);
-  const packageVersion: string | null | undefined = get('system.audit.package.version[0]', data);
-  const processPid: number | null | undefined = get('process.pid[0]', data);
-  const processName: string | null | undefined = get('process.name[0]', data);
-  const processExecutable: string | null | undefined = get('process.executable[0]', data);
-  const sshSignature: string | null | undefined = get('system.auth.ssh.signature[0]', data);
-  const sshMethod: string | null | undefined = get('system.auth.ssh.method[0]', data);
-  const workingDirectory: string | null | undefined = get('process.working_directory[0]', data);
+export const SystemGenericDetails = pure<GenericDetailsProps>(
+  ({ data, contextId, text, timelineId }) => {
+    const id = data._id;
+    const message: string | null = data.message != null ? data.message[0] : null;
+    const hostName: string | null | undefined = get('host.name[0]', data);
+    const userDomain: string | null | undefined = get('user.domain[0]', data);
+    const userName: string | null | undefined = get('user.name[0]', data);
+    const outcome: string | null | undefined = get('event.outcome[0]', data);
+    const packageName: string | null | undefined = get('system.audit.package.name[0]', data);
+    const packageSummary: string | null | undefined = get('system.audit.package.summary[0]', data);
+    const packageVersion: string | null | undefined = get('system.audit.package.version[0]', data);
+    const processPid: number | null | undefined = get('process.pid[0]', data);
+    const processName: string | null | undefined = get('process.name[0]', data);
+    const processExecutable: string | null | undefined = get('process.executable[0]', data);
+    const sshSignature: string | null | undefined = get('system.auth.ssh.signature[0]', data);
+    const sshMethod: string | null | undefined = get('system.auth.ssh.method[0]', data);
+    const workingDirectory: string | null | undefined = get('process.working_directory[0]', data);
 
-  return (
-    <Details>
-      <SystemGenericLine
-        contextId={contextId}
-        hostName={hostName}
-        id={id}
-        message={message}
-        outcome={outcome}
-        packageName={packageName}
-        packageSummary={packageSummary}
-        packageVersion={packageVersion}
-        processExecutable={processExecutable}
-        processPid={processPid}
-        processName={processName}
-        sshMethod={sshMethod}
-        sshSignature={sshSignature}
-        text={text}
-        userName={userName}
-        workingDirectory={workingDirectory}
-      />
-      <EuiSpacer size="s" />
-      <NetflowRenderer data={data} />
-    </Details>
-  );
-});
+    return (
+      <Details>
+        <SystemGenericLine
+          contextId={contextId}
+          hostName={hostName}
+          id={id}
+          message={message}
+          outcome={outcome}
+          packageName={packageName}
+          packageSummary={packageSummary}
+          packageVersion={packageVersion}
+          processExecutable={processExecutable}
+          processPid={processPid}
+          processName={processName}
+          sshMethod={sshMethod}
+          sshSignature={sshSignature}
+          text={text}
+          userDomain={userDomain}
+          userName={userName}
+          workingDirectory={workingDirectory}
+        />
+        <EuiSpacer size="s" />
+        <NetflowRenderer data={data} timelineId={timelineId} />
+      </Details>
+    );
+  }
+);
+
+SystemGenericDetails.displayName = 'SystemGenericDetails';

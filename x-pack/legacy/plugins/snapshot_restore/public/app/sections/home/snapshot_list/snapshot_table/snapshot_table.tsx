@@ -4,23 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { EuiButton, EuiInMemoryTable, EuiLink, Query, EuiLoadingSpinner } from '@elastic/eui';
+import React, { useState } from 'react';
+import {
+  EuiButton,
+  EuiInMemoryTable,
+  EuiLink,
+  Query,
+  EuiLoadingSpinner,
+  EuiToolTip,
+  EuiButtonIcon,
+} from '@elastic/eui';
 
 import { SnapshotDetails } from '../../../../../../common/types';
 import { SNAPSHOT_STATE, UIM_SNAPSHOT_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
-import { formatDate } from '../../../../services/text';
-import { linkToRepository } from '../../../../services/navigation';
+import { linkToRepository, linkToRestoreSnapshot } from '../../../../services/navigation';
 import { uiMetricService } from '../../../../services/ui_metric';
-import { DataPlaceholder } from '../../../../components';
+import { DataPlaceholder, FormattedDateTime, SnapshotDeleteProvider } from '../../../../components';
+import { SendRequestResponse } from '../../../../../shared_imports';
 
 interface Props {
   snapshots: SnapshotDetails[];
   repositories: string[];
-  reload: () => Promise<void>;
+  reload: () => Promise<SendRequestResponse>;
   openSnapshotDetailsUrl: (repositoryName: string, snapshotId: string) => string;
   repositoryFilter?: string;
+  policyFilter?: string;
+  onSnapshotDeleted: (snapshotsDeleted: Array<{ snapshot: string; repository: string }>) => void;
 }
 
 export const SnapshotTable: React.FunctionComponent<Props> = ({
@@ -28,13 +38,16 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
   repositories,
   reload,
   openSnapshotDetailsUrl,
+  onSnapshotDeleted,
   repositoryFilter,
+  policyFilter,
 }) => {
   const {
     core: { i18n },
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
   const { trackUiMetric } = uiMetricService;
+  const [selectedItems, setSelectedItems] = useState<SnapshotDetails[]>([]);
 
   const columns = [
     {
@@ -45,6 +58,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       truncateText: true,
       sortable: true,
       render: (snapshotId: string, snapshot: SnapshotDetails) => (
+        /* eslint-disable-next-line @elastic/eui/href-or-on-click */
         <EuiLink
           onClick={() => trackUiMetric(UIM_SNAPSHOT_SHOW_DETAILS_CLICK)}
           href={openSnapshotDetailsUrl(snapshot.repository, snapshotId)}
@@ -66,40 +80,6 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
           {repositoryName}
         </EuiLink>
       ),
-    },
-    {
-      field: 'startTimeInMillis',
-      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.startTimeColumnTitle', {
-        defaultMessage: 'Date created',
-      }),
-      truncateText: true,
-      sortable: true,
-      render: (startTimeInMillis: number) => (
-        <DataPlaceholder data={startTimeInMillis}>{formatDate(startTimeInMillis)}</DataPlaceholder>
-      ),
-    },
-    {
-      field: 'durationInMillis',
-      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.durationColumnTitle', {
-        defaultMessage: 'Duration',
-      }),
-      truncateText: true,
-      sortable: true,
-      width: '100px',
-      render: (durationInMillis: number, { state }: SnapshotDetails) => {
-        if (state === SNAPSHOT_STATE.IN_PROGRESS) {
-          return <EuiLoadingSpinner size="m" />;
-        }
-        return (
-          <DataPlaceholder data={durationInMillis}>
-            <FormattedMessage
-              id="xpack.snapshotRestore.snapshotList.table.durationColumnValueLabel"
-              defaultMessage="{seconds}s"
-              values={{ seconds: Math.ceil(durationInMillis / 1000) }}
-            />
-          </DataPlaceholder>
-        );
-      },
     },
     {
       field: 'indices',
@@ -131,6 +111,132 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       width: '100px',
       render: (failedShards: number) => failedShards,
     },
+    {
+      field: 'startTimeInMillis',
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.startTimeColumnTitle', {
+        defaultMessage: 'Date created',
+      }),
+      truncateText: true,
+      sortable: true,
+      render: (startTimeInMillis: number) => (
+        <DataPlaceholder data={startTimeInMillis}>
+          <FormattedDateTime epochMs={startTimeInMillis} />
+        </DataPlaceholder>
+      ),
+    },
+    {
+      field: 'durationInMillis',
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.durationColumnTitle', {
+        defaultMessage: 'Duration',
+      }),
+      truncateText: true,
+      sortable: true,
+      width: '100px',
+      render: (durationInMillis: number, { state }: SnapshotDetails) => {
+        if (state === SNAPSHOT_STATE.IN_PROGRESS) {
+          return <EuiLoadingSpinner size="m" />;
+        }
+        return (
+          <DataPlaceholder data={durationInMillis}>
+            <FormattedMessage
+              id="xpack.snapshotRestore.snapshotList.table.durationColumnValueLabel"
+              defaultMessage="{seconds}s"
+              values={{ seconds: Math.ceil(durationInMillis / 1000) }}
+            />
+          </DataPlaceholder>
+        );
+      },
+    },
+    {
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.actionsColumnTitle', {
+        defaultMessage: 'Actions',
+      }),
+      actions: [
+        {
+          render: ({ snapshot, repository, state }: SnapshotDetails) => {
+            const canRestore = state === SNAPSHOT_STATE.SUCCESS || state === SNAPSHOT_STATE.PARTIAL;
+            const label = canRestore
+              ? i18n.translate('xpack.snapshotRestore.snapshotList.table.actionRestoreTooltip', {
+                  defaultMessage: 'Restore',
+                })
+              : state === SNAPSHOT_STATE.IN_PROGRESS
+              ? i18n.translate(
+                  'xpack.snapshotRestore.snapshotList.table.actionRestoreDisabledInProgressTooltip',
+                  {
+                    defaultMessage: `Can't restore in-progress snapshot`,
+                  }
+                )
+              : i18n.translate(
+                  'xpack.snapshotRestore.snapshotList.table.actionRestoreDisabledInvalidTooltip',
+                  {
+                    defaultMessage: `Can't restore invalid snapshot`,
+                  }
+                );
+            return (
+              <EuiToolTip content={label}>
+                <EuiButtonIcon
+                  aria-label={i18n.translate(
+                    'xpack.snapshotRestore.snapshotList.table.actionRestoreAriaLabel',
+                    {
+                      defaultMessage: 'Store snapshot `{name}`',
+                      values: { name: snapshot },
+                    }
+                  )}
+                  iconType="importAction"
+                  color="primary"
+                  data-test-subj="srsnapshotListRestoreActionButton"
+                  href={linkToRestoreSnapshot(repository, snapshot)}
+                  isDisabled={!canRestore}
+                />
+              </EuiToolTip>
+            );
+          },
+        },
+        {
+          render: ({ snapshot, repository, isManagedRepository }: SnapshotDetails) => {
+            return (
+              <SnapshotDeleteProvider>
+                {deleteSnapshotPrompt => {
+                  const label = !isManagedRepository
+                    ? i18n.translate(
+                        'xpack.snapshotRestore.snapshotList.table.actionDeleteTooltip',
+                        { defaultMessage: 'Delete' }
+                      )
+                    : i18n.translate(
+                        'xpack.snapshotRestore.snapshotList.table.deleteManagedRepositorySnapshotTooltip',
+                        {
+                          defaultMessage:
+                            'You cannot delete a snapshot stored in a managed repository.',
+                        }
+                      );
+                  return (
+                    <EuiToolTip content={label}>
+                      <EuiButtonIcon
+                        aria-label={i18n.translate(
+                          'xpack.snapshotRestore.snapshotList.table.actionDeleteAriaLabel',
+                          {
+                            defaultMessage: 'Delete snapshot `{name}`',
+                            values: { name: snapshot },
+                          }
+                        )}
+                        iconType="trash"
+                        color="danger"
+                        data-test-subj="srsnapshotListDeleteActionButton"
+                        onClick={() =>
+                          deleteSnapshotPrompt([{ snapshot, repository }], onSnapshotDeleted)
+                        }
+                        isDisabled={isManagedRepository}
+                      />
+                    </EuiToolTip>
+                  );
+                }}
+              </SnapshotDeleteProvider>
+            );
+          },
+        },
+      ],
+      width: '100px',
+    },
   ];
 
   // By default, we'll display the most recent snapshots at the top of the table.
@@ -151,10 +257,61 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       repository: {
         type: 'string',
       },
+      policyName: {
+        type: 'string',
+      },
+    },
+  };
+
+  const selection = {
+    onSelectionChange: (newSelectedItems: SnapshotDetails[]) => setSelectedItems(newSelectedItems),
+    selectable: ({ isManagedRepository }: SnapshotDetails) => !isManagedRepository,
+    selectableMessage: (selectable: boolean) => {
+      if (!selectable) {
+        return i18n.translate(
+          'xpack.snapshotRestore.snapshotList.table.deleteManagedRepositorySnapshotTooltip',
+          {
+            defaultMessage: 'You cannot delete a snapshot stored in a managed repository.',
+          }
+        );
+      }
     },
   };
 
   const search = {
+    toolsLeft: selectedItems.length ? (
+      <SnapshotDeleteProvider>
+        {(
+          deleteSnapshotPrompt: (
+            ids: Array<{ snapshot: string; repository: string }>,
+            onSuccess?: (snapshotsDeleted: Array<{ snapshot: string; repository: string }>) => void
+          ) => void
+        ) => {
+          return (
+            <EuiButton
+              onClick={() =>
+                deleteSnapshotPrompt(
+                  selectedItems.map(({ snapshot, repository }) => ({ snapshot, repository })),
+                  onSnapshotDeleted
+                )
+              }
+              color="danger"
+              data-test-subj="srSnapshotListBulkDeleteActionButton"
+            >
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotList.table.deleteSnapshotButton"
+                defaultMessage="Delete {count, plural, one {snapshot} other {snapshots}}"
+                values={{
+                  count: selectedItems.length,
+                }}
+              />
+            </EuiButton>
+          );
+        }}
+      </SnapshotDeleteProvider>
+    ) : (
+      undefined
+    ),
     toolsRight: (
       <EuiButton
         color="secondary"
@@ -176,7 +333,9 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       {
         type: 'field_value_selection',
         field: 'repository',
-        name: 'Repository',
+        name: i18n.translate('xpack.snapshotRestore.snapshotList.table.repositoryFilterLabel', {
+          defaultMessage: 'Repository',
+        }),
         multiSelect: false,
         options: repositories.map(repository => ({
           value: repository,
@@ -184,8 +343,15 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
         })),
       },
     ],
-    defaultQuery: repositoryFilter
-      ? Query.parse(`repository:'${repositoryFilter}'`, {
+    defaultQuery: policyFilter
+      ? Query.parse(`policyName="${policyFilter}"`, {
+          schema: {
+            ...searchSchema,
+            strict: true,
+          },
+        })
+      : repositoryFilter
+      ? Query.parse(`repository="${repositoryFilter}"`, {
           schema: {
             ...searchSchema,
             strict: true,
@@ -197,15 +363,17 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
   return (
     <EuiInMemoryTable
       items={snapshots}
-      itemId="name"
+      itemId="uuid"
       columns={columns}
       search={search}
       sorting={sorting}
+      isSelectable={true}
+      selection={selection}
       pagination={pagination}
       rowProps={() => ({
         'data-test-subj': 'row',
       })}
-      cellProps={(item: any, column: any) => ({
+      cellProps={() => ({
         'data-test-subj': 'cell',
       })}
       data-test-subj="snapshotTable"

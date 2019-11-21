@@ -17,7 +17,7 @@ import {
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { Feature } from '../../../../../../../../../xpack_main/types';
+import { Feature } from '../../../../../../../../../../../plugins/features/server';
 import { FeaturesPrivileges, KibanaPrivileges, Role } from '../../../../../../../../common/model';
 import {
   AllowedPrivilege,
@@ -63,11 +63,17 @@ export class FeatureTable extends Component<Props, {}> {
 
     const items: TableRow[] = features
       .sort((feature1, feature2) => {
-        if (feature1.reserved && !feature2.reserved) {
+        if (
+          Object.keys(feature1.privileges).length === 0 &&
+          Object.keys(feature2.privileges).length > 0
+        ) {
           return 1;
         }
 
-        if (feature2.reserved && !feature1.reserved) {
+        if (
+          Object.keys(feature2.privileges).length === 0 &&
+          Object.keys(feature1.privileges).length > 0
+        ) {
           return -1;
         }
 
@@ -165,9 +171,9 @@ export class FeatureTable extends Component<Props, {}> {
         </span>
       ),
       render: (roleEntry: Role, record: TableRow) => {
-        const { id: featureId, reserved } = record.feature;
+        const { id: featureId, name: featureName, reserved, privileges } = record.feature;
 
-        if (reserved) {
+        if (reserved && Object.keys(privileges).length === 0) {
           return <EuiText size={'s'}>{reserved.description}</EuiText>;
         }
 
@@ -194,8 +200,27 @@ export class FeatureTable extends Component<Props, {}> {
           !this.props.disabled && (allowsNone || enabledFeaturePrivileges.length > 1);
 
         if (!canChangePrivilege) {
+          const assignedBasePrivilege =
+            this.props.role.kibana[this.props.spacesIndex].base.length > 0;
+
+          const excludedFromBasePrivilegsTooltip = (
+            <FormattedMessage
+              id="xpack.security.management.editRole.featureTable.excludedFromBasePrivilegsTooltip"
+              defaultMessage='Use "Custom" privileges to grant access. {featureName} isn&apos;t part of the base privileges.'
+              values={{ featureName }}
+            />
+          );
+
           return (
-            <PrivilegeDisplay privilege={actualPrivilegeValue} explanation={privilegeExplanation} />
+            <PrivilegeDisplay
+              privilege={actualPrivilegeValue}
+              explanation={privilegeExplanation}
+              tooltipContent={
+                assignedBasePrivilege && actualPrivilegeValue === NO_PRIVILEGE_VALUE
+                  ? excludedFromBasePrivilegsTooltip
+                  : undefined
+              }
+            />
           );
         }
 

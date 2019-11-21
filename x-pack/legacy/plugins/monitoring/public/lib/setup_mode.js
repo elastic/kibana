@@ -5,20 +5,24 @@
  */
 
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
+import { get, contains } from 'lodash';
+import chrome from 'ui/chrome';
+import { toastNotifications } from 'ui/notify';
+import { i18n } from '@kbn/i18n';
+
+function isOnPage(hash) {
+  return contains(window.location.hash, hash);
+}
 
 const angularState = {
   injector: null,
   scope: null,
 };
 
-export const setAngularState = ($scope, $injector) => {
-  angularState.scope = $scope;
-  angularState.injector = $injector;
-};
 const checkAngularState = () => {
   if (!angularState.injector || !angularState.scope) {
     throw 'Unable to interact with setup mode because the angular injector was not previously set.'
-      + ' This needs to be set by calling `setAngularState`.';
+      + ' This needs to be set by calling `initSetupModeState`.';
   }
 };
 
@@ -30,7 +34,17 @@ const setupModeState = {
 
 export const getSetupModeState = () => setupModeState;
 
-export const fetchCollectionData = async () => {
+export const setNewlyDiscoveredClusterUuid = clusterUuid => {
+  const globalState = angularState.injector.get('globalState');
+  const executor = angularState.injector.get('$executor');
+  angularState.scope.$apply(() => {
+    globalState.cluster_uuid = clusterUuid;
+    globalState.save();
+  });
+  executor.run();
+};
+
+export const fetchCollectionData = async (uuid, fetchWithoutClusterUuid = false) => {
   checkAngularState();
 
   const http = angularState.injector.get('$http');
@@ -39,8 +53,14 @@ export const fetchCollectionData = async () => {
   const ccs = globalState.ccs;
 
   let url = '../api/monitoring/v1/setup/collection';
-  if (clusterUuid) {
-    url += `/${clusterUuid}`;
+  if (uuid) {
+    url += `/node/${uuid}`;
+  }
+  else if (!fetchWithoutClusterUuid && clusterUuid) {
+    url += `/cluster/${clusterUuid}`;
+  }
+  else {
+    url += '/cluster';
   }
 
   try {
@@ -54,73 +74,128 @@ export const fetchCollectionData = async () => {
   }
 };
 
-const notifySetupModeDataChange = () => {
-  setupModeState.callbacks.forEach(cb => cb());
+const notifySetupModeDataChange = (oldData) => {
+  setupModeState.callbacks.forEach(cb => cb(oldData));
 };
 
-export const updateSetupModeData = async () => {
-  setupModeState.data = await fetchCollectionData();
-  notifySetupModeDataChange();
+export const updateSetupModeData = async (uuid, fetchWithoutClusterUuid = false) => {
+  const oldData = setupModeState.data;
+  const data = await fetchCollectionData(uuid, fetchWithoutClusterUuid);
+  setupModeState.data = data;
+
+  const isCloud = chrome.getInjected('isOnCloud');
+  const hasPermissions = get(data, '_meta.hasPermissions', false);
+  if (isCloud || !hasPermissions) {
+    const text = !hasPermissions
+      ? i18n.translate('xpack.monitoring.setupMode.notAvailablePermissions', {
+        defaultMessage: 'You do not have the necessary permissions to do this.'
+      })
+      : i18n.translate('xpack.monitoring.setupMode.notAvailableCloud', {
+        defaultMessage: 'This feature is not available on cloud.'
+      });
+
+    angularState.scope.$evalAsync(() => {
+      toastNotifications.addDanger({
+        title: i18n.translate('xpack.monitoring.setupMode.notAvailableTitle', {
+          defaultMessage: 'Setup mode is not available'
+        }),
+        text,
+      });
+    });
+    return toggleSetupMode(false); // eslint-disable-line no-use-before-define
+  }
+  notifySetupModeDataChange(oldData);
+
+  const globalState = angularState.injector.get('globalState');
+  const clusterUuid = globalState.cluster_uuid;
+  if (!clusterUuid) {
+    const liveClusterUuid = get(data, '_meta.liveClusterUuid');
+    const migratedEsNodes = Object.values(get(data, 'elasticsearch.byUuid', {}))
+      .filter(node => node.isPartiallyMigrated || node.isFullyMigrated);
+    if (liveClusterUuid && migratedEsNodes.length > 0) {
+      setNewlyDiscoveredClusterUuid(liveClusterUuid);
+    }
+  }
+};
+
+export const disableElasticsearchInternalCollection = async () => {
+  checkAngularState();
+
+  const http = angularState.injector.get('$http');
+  const globalState = angularState.injector.get('globalState');
+  const clusterUuid = globalState.cluster_uuid;
+  const url = `../api/monitoring/v1/setup/collection/${clusterUuid}/disable_internal_collection`;
+  try {
+    const response = await http.post(url);
+    return response.data;
+  }
+  catch (err) {
+    const Private = angularState.injector.get('Private');
+    const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
+    return ajaxErrorHandlers(err);
+  }
 };
 
 export const toggleSetupMode = inSetupMode => {
   checkAngularState();
 
   const globalState = angularState.injector.get('globalState');
-  angularState.scope.$evalAsync(async () => {
-    setupModeState.enabled = inSetupMode;
-    globalState.inSetupMode = inSetupMode;
-    globalState.save();
-    setSetupModeMenuItem(); // eslint-disable-line  no-use-before-define
-    notifySetupModeDataChange();
+  setupModeState.enabled = inSetupMode;
+  globalState.inSetupMode = inSetupMode;
+  globalState.save();
+  setSetupModeMenuItem(); // eslint-disable-line  no-use-before-define
+  notifySetupModeDataChange();
 
-    if (inSetupMode) {
-      await updateSetupModeData();
-    }
-  });
+  if (inSetupMode) {
+    // Intentionally do not await this so we don't block UI operations
+    updateSetupModeData();
+  }
 };
 
-const setSetupModeMenuItem = () => {
-  // Disabling this for this initial release. This will be added back in
-  // in a subsequent PR
-  // checkAngularState();
-
-  // const globalState = angularState.injector.get('globalState');
-  // const navItems = globalState.inSetupMode
-  //   ? [
-  //     {
-  //       key: 'exit',
-  //       label: 'Exit Setup Mode',
-  //       description: 'Exit setup mode',
-  //       run: () => toggleSetupMode(false),
-  //       testId: 'exitSetupMode'
-  //     },
-  //     {
-  //       key: 'refresh',
-  //       label: 'Refresh Setup Data',
-  //       description: 'Refresh data used for setup mode',
-  //       run: () => updateSetupModeData(),
-  //       testId: 'refreshSetupModeData'
-  //     }
-  //   ]
-  //   : [{
-  //     key: 'enter',
-  //     label: 'Enter Setup Mode',
-  //     description: 'Enter setup mode',
-  //     run: () => toggleSetupMode(true),
-  //     testId: 'enterSetupMode'
-  //   }];
-
-  // angularState.scope.topNavMenu = [...navItems];
-};
-
-export const initSetupModeState = (callback) => {
+export const setSetupModeMenuItem = () => {
   checkAngularState();
-  setSetupModeMenuItem();
-  callback && setupModeState.callbacks.push(callback);
+
+  if (isOnPage('no-data')) {
+    return;
+  }
 
   const globalState = angularState.injector.get('globalState');
-  if (globalState.inSetupMode) {
-    toggleSetupMode(true);
+  const navItems = [];
+  if (!globalState.inSetupMode && !chrome.getInjected('isOnCloud')) {
+    navItems.push({
+      id: 'enter',
+      label: i18n.translate('xpack.monitoring.setupMode.enter', {
+        defaultMessage: 'Enter Setup Mode'
+      }),
+      run: () => toggleSetupMode(true),
+      testId: 'enterSetupMode'
+    });
   }
+
+  angularState.scope.topNavMenu = [...navItems];
+  // LOL angular
+  if (!angularState.scope.$$phase) {
+    angularState.scope.$apply();
+  }
+};
+
+export const initSetupModeState = async ($scope, $injector, callback) => {
+  angularState.scope = $scope;
+  angularState.injector = $injector;
+  callback && setupModeState.callbacks.push(callback);
+
+  const globalState = $injector.get('globalState');
+  if (globalState.inSetupMode) {
+    await toggleSetupMode(true);
+  }
+};
+
+export const isInSetupMode = async () => {
+  if (setupModeState.enabled) {
+    return true;
+  }
+
+  const $injector = angularState.injector || await chrome.dangerouslyGetActiveInjector();
+  const globalState = $injector.get('globalState');
+  return globalState.inSetupMode;
 };

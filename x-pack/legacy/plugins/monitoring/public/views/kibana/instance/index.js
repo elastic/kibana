@@ -19,6 +19,7 @@ import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { DetailStatus } from 'plugins/monitoring/components/kibana/detail_status';
 import { I18nContext } from 'ui/i18n';
 import { MonitoringViewBaseController } from '../../base_controller';
+import { CODE_PATH_KIBANA } from '../../../../common/constants';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
@@ -47,7 +48,7 @@ uiRoutes.when('/kibana/instances/:uuid', {
   resolve: {
     clusters(Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_KIBANA] });
     },
     pageData: getPageData
   },
@@ -84,6 +85,7 @@ uiRoutes.when('/kibana/instances/:uuid', {
                       <MonitoringTimeseriesContainer
                         series={data.metrics.kibana_requests}
                         onBrush={this.onBrush}
+                        zoomInfo={this.zoomInfo}
                       />
                       <EuiSpacer />
                     </EuiFlexItem>
@@ -91,6 +93,7 @@ uiRoutes.when('/kibana/instances/:uuid', {
                       <MonitoringTimeseriesContainer
                         series={data.metrics.kibana_response_times}
                         onBrush={this.onBrush}
+                        zoomInfo={this.zoomInfo}
                       />
                       <EuiSpacer />
                     </EuiFlexItem>
@@ -98,6 +101,7 @@ uiRoutes.when('/kibana/instances/:uuid', {
                       <MonitoringTimeseriesContainer
                         series={data.metrics.kibana_memory}
                         onBrush={this.onBrush}
+                        zoomInfo={this.zoomInfo}
                       />
                       <EuiSpacer />
                     </EuiFlexItem>
@@ -105,6 +109,7 @@ uiRoutes.when('/kibana/instances/:uuid', {
                       <MonitoringTimeseriesContainer
                         series={data.metrics.kibana_average_concurrent_connections}
                         onBrush={this.onBrush}
+                        zoomInfo={this.zoomInfo}
                       />
                       <EuiSpacer />
                     </EuiFlexItem>
@@ -112,6 +117,7 @@ uiRoutes.when('/kibana/instances/:uuid', {
                       <MonitoringTimeseriesContainer
                         series={data.metrics.kibana_os_load}
                         onBrush={this.onBrush}
+                        zoomInfo={this.zoomInfo}
                       />
                       <EuiSpacer />
                     </EuiFlexItem>
@@ -119,6 +125,7 @@ uiRoutes.when('/kibana/instances/:uuid', {
                       <MonitoringTimeseriesContainer
                         series={data.metrics.kibana_process_delay}
                         onBrush={this.onBrush}
+                        zoomInfo={this.zoomInfo}
                       />
                       <EuiSpacer />
                     </EuiFlexItem>

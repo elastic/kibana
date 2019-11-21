@@ -58,6 +58,19 @@ function getCategoryExamples(callWithRequest, payload) {
     maxExamples);
 }
 
+
+function getMaxAnomalyScore(callWithRequest, payload) {
+  const rs = resultsServiceProvider(callWithRequest);
+  const {
+    jobIds,
+    earliestMs,
+    latestMs } = payload;
+  return rs.getMaxAnomalyScore(
+    jobIds,
+    earliestMs,
+    latestMs);
+}
+
 export function resultsServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route }) {
 
   route({
@@ -79,6 +92,19 @@ export function resultsServiceRoutes({ commonRouteConfig, elasticsearchPlugin, r
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       return getCategoryDefinition(callWithRequest, request.payload)
+        .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  route({
+    method: 'POST',
+    path: '/api/ml/results/max_anomaly_score',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
+      return getMaxAnomalyScore(callWithRequest, request.payload)
         .catch(resp => wrapError(resp));
     },
     config: {

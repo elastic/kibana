@@ -7,34 +7,55 @@ import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 
-import { ContextMenuAction, ContextMenuActionsRegistryProvider } from 'ui/embeddable';
-import { PanelActionAPI } from 'ui/embeddable/context_menu_actions/types';
 import { kfetch } from 'ui/kfetch';
 import { toastNotifications } from 'ui/notify';
 import chrome from 'ui/chrome';
+
+import { npSetup } from 'ui/new_platform';
+import { IAction, IncompatibleActionError } from '../../../../../../src/plugins/ui_actions/public';
+
+import {
+  ViewMode,
+  IEmbeddable,
+  CONTEXT_MENU_TRIGGER,
+} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import {
+  ISearchEmbeddable,
+  SEARCH_EMBEDDABLE_TYPE,
+} from '../../../../../../src/legacy/core_plugins/kibana/public/discover/embeddable';
 import { API_BASE_URL_V1 } from '../../common/constants';
 
 const API_BASE_URL = `${API_BASE_URL_V1}/generate/immediate/csv/saved-object`;
 
-class GetCsvReportPanelAction extends ContextMenuAction {
+const CSV_REPORTING_ACTION = 'downloadCsvReport';
+
+function isSavedSearchEmbeddable(
+  embeddable: IEmbeddable | ISearchEmbeddable
+): embeddable is ISearchEmbeddable {
+  return embeddable.type === SEARCH_EMBEDDABLE_TYPE;
+}
+
+interface ActionContext {
+  embeddable: ISearchEmbeddable;
+}
+
+class GetCsvReportPanelAction implements IAction<ActionContext> {
   private isDownloading: boolean;
+  public readonly type = CSV_REPORTING_ACTION;
+  public readonly id = CSV_REPORTING_ACTION;
 
   constructor() {
-    super(
-      {
-        id: 'downloadCsvReport',
-        parentPanelId: 'mainMenu',
-      },
-      {
-        icon: 'document',
-        getDisplayName: () =>
-          i18n.translate('xpack.reporting.dashboard.downloadCsvPanelTitle', {
-            defaultMessage: 'Download CSV',
-          }),
-      }
-    );
-
     this.isDownloading = false;
+  }
+
+  public getIconType() {
+    return 'document';
+  }
+
+  public getDisplayName() {
+    return i18n.translate('xpack.reporting.dashboard.downloadCsvPanelTitle', {
+      defaultMessage: 'Download CSV',
+    });
   }
 
   public async getSearchRequestBody({ searchEmbeddable }: { searchEmbeddable: any }) {
@@ -47,40 +68,43 @@ class GetCsvReportPanelAction extends ContextMenuAction {
       return {};
     }
 
-    return searchEmbeddable.searchScope.searchSource.getSearchRequestBody();
+    return searchEmbeddable.getSavedSearch().searchSource.getSearchRequestBody();
   }
 
-  public isVisible = (panelActionAPI: PanelActionAPI): boolean => {
+  public isCompatible = async (context: ActionContext) => {
     const enablePanelActionDownload = chrome.getInjected('enablePanelActionDownload');
 
     if (!enablePanelActionDownload) {
       return false;
     }
 
-    const { embeddable, containerState } = panelActionAPI;
+    const { embeddable } = context;
 
-    return (
-      containerState.viewMode !== 'edit' && !!embeddable && embeddable.hasOwnProperty('savedSearch')
-    );
+    return embeddable.getInput().viewMode !== ViewMode.EDIT && embeddable.type === 'search';
   };
 
-  public onClick = async (panelActionAPI: PanelActionAPI) => {
-    const { embeddable } = panelActionAPI as any;
-    const {
-      timeRange: { from, to },
-    } = embeddable;
+  public execute = async (context: ActionContext) => {
+    const { embeddable } = context;
 
-    if (!embeddable || this.isDownloading) {
+    if (!isSavedSearchEmbeddable(embeddable)) {
+      throw new IncompatibleActionError();
+    }
+
+    if (this.isDownloading) {
       return;
     }
+
+    const {
+      timeRange: { to, from },
+    } = embeddable.getInput();
 
     const searchEmbeddable = embeddable;
     const searchRequestBody = await this.getSearchRequestBody({ searchEmbeddable });
     const state = _.pick(searchRequestBody, ['sort', 'docvalue_fields', 'query']);
     const kibanaTimezone = chrome.getUiSettingsClient().get('dateFormat:tz');
 
-    const id = `search:${embeddable.savedSearch.id}`;
-    const filename = embeddable.getPanelTitle();
+    const id = `search:${embeddable.getSavedSearch().id}`;
+    const filename = embeddable.getTitle();
     const timezone = kibanaTimezone === 'Browser' ? moment.tz.guess() : kibanaTimezone;
     const fromTime = dateMath.parse(from);
     const toTime = dateMath.parse(to);
@@ -151,4 +175,6 @@ class GetCsvReportPanelAction extends ContextMenuAction {
   }
 }
 
-ContextMenuActionsRegistryProvider.register(() => new GetCsvReportPanelAction());
+const action = new GetCsvReportPanelAction();
+npSetup.plugins.uiActions.registerAction(action);
+npSetup.plugins.uiActions.attachAction(CONTEXT_MENU_TRIGGER, action.id);

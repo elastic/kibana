@@ -57,13 +57,15 @@ export const cursorPosition = select(({ cursor }, position) => position || curso
 
 export const mouseButton = select(next => {
   if (!next) {
-    return { down: false, uid: null };
+    return { down: false, up: false, uid: null };
   }
   const { event, uid } = next;
   if (event === 'mouseDown') {
-    return { down: true, uid };
+    return { down: true, up: false, uid };
   } else {
-    return event === 'mouseUp' ? { down: false, uid } : { down: false, uid: null };
+    return event === 'mouseUp'
+      ? { down: false, up: true, uid }
+      : { down: false, up: false, uid: null };
   }
 })(mouseButtonEvent);
 

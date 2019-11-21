@@ -18,12 +18,11 @@
  */
 
 import { resolve, dirname, relative } from 'path';
-import { writeFileSync } from 'fs';
+import { writeFileSync, mkdirSync } from 'fs';
 
-import mkdirp from 'mkdirp';
 import xmlBuilder from 'xmlbuilder';
 
-import { escapeCdata } from '../xml';
+import { escapeCdata } from '@kbn/test';
 
 const ROOT_DIR = dirname(require.resolve('../../../package.json'));
 
@@ -33,10 +32,7 @@ const ROOT_DIR = dirname(require.resolve('../../../package.json'));
  */
 export default class JestJUnitReporter {
   constructor(globalConfig, options = {}) {
-    const {
-      reportName = 'Jest Tests',
-      rootDirectory = ROOT_DIR
-    } = options;
+    const { reportName = 'Jest Tests', rootDirectory = ROOT_DIR } = options;
 
     this._reportName = reportName;
     this._rootDirectory = resolve(rootDirectory);
@@ -62,8 +58,8 @@ export default class JestJUnitReporter {
       { skipNullAttributes: true }
     );
 
-    const msToIso = ms => ms ? new Date(ms).toISOString().slice(0, -5) : undefined;
-    const msToSec = ms => ms ? (ms / 1000).toFixed(3) : undefined;
+    const msToIso = ms => (ms ? new Date(ms).toISOString().slice(0, -5) : undefined);
+    const msToSec = ms => (ms ? (ms / 1000).toFixed(3) : undefined);
 
     root.att({
       name: 'jest',
@@ -83,7 +79,7 @@ export default class JestJUnitReporter {
         tests: suite.testResults.length,
         failures: suite.numFailingTests,
         skipped: suite.numPendingTests,
-        file: suite.testFilePath
+        file: suite.testFilePath,
       });
 
       // nested in there are the tests in that file
@@ -93,10 +89,10 @@ export default class JestJUnitReporter {
         const testEl = suiteEl.ele('testcase', {
           classname,
           name: [...test.ancestorTitles, test.title].join(' '),
-          time: msToSec(test.duration)
+          time: msToSec(test.duration),
         });
 
-        test.failureMessages.forEach((message) => {
+        test.failureMessages.forEach(message => {
           testEl.ele('failure').dat(escapeCdata(message));
         });
 
@@ -106,15 +102,15 @@ export default class JestJUnitReporter {
       });
     });
 
-    const reportPath = resolve(rootDirectory, `target/junit/TEST-${reportName}.xml`);
-    const reportXML = root.end({
-      pretty: true,
-      indent: '  ',
-      newline: '\n',
-      spacebeforeslash: ''
-    });
+    const reportPath = resolve(
+      rootDirectory,
+      'target/junit',
+      process.env.JOB || '.',
+      `TEST-${process.env.JOB ? process.env.JOB + '-' : ''}${reportName}.xml`
+    );
 
-    mkdirp.sync(dirname(reportPath));
+    const reportXML = root.end();
+    mkdirSync(dirname(reportPath), { recursive: true });
     writeFileSync(reportPath, reportXML, 'utf8');
   }
 }

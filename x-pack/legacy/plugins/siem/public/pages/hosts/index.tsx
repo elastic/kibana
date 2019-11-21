@@ -5,20 +5,85 @@
  */
 
 import React from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
-import { pure } from 'recompose';
+import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 
-import { HostComponentProps } from '../../components/link_to/redirect_to_hosts';
+import { HostDetails } from './details';
+import { HostsTableType } from '../../store/hosts/model';
 
-import { HostDetails } from './host_details';
+import { GlobalTime } from '../../containers/global_time';
+import { SiemPageName } from '../home/types';
 import { Hosts } from './hosts';
+import { hostsPagePath, hostDetailsPagePath } from './types';
 
-export const HostsContainer = pure<HostComponentProps>(({ match }) => (
-  <>
-    <Switch>
-      <Route strict exact path={match.url} component={Hosts} />
-      <Route path={`${match.url}/:hostName`} component={HostDetails} />
-      <Redirect from="/hosts/" to="/hosts" />
-    </Switch>
-  </>
+const getHostsTabPath = (pagePath: string) =>
+  `${pagePath}/:tabName(` +
+  `${HostsTableType.hosts}|` +
+  `${HostsTableType.authentications}|` +
+  `${HostsTableType.uncommonProcesses}|` +
+  `${HostsTableType.anomalies}|` +
+  `${HostsTableType.events})`;
+
+const getHostDetailsTabPath = (pagePath: string) =>
+  `${hostDetailsPagePath}/:tabName(` +
+  `${HostsTableType.authentications}|` +
+  `${HostsTableType.uncommonProcesses}|` +
+  `${HostsTableType.anomalies}|` +
+  `${HostsTableType.events})`;
+
+type Props = Partial<RouteComponentProps<{}>> & { url: string };
+
+export const HostsContainer = React.memo<Props>(({ url }) => (
+  <GlobalTime>
+    {({ to, from, setQuery, deleteQuery, isInitializing }) => (
+      <Switch>
+        <Route
+          strict
+          exact
+          path={getHostsTabPath(hostsPagePath)}
+          render={() => (
+            <Hosts
+              hostsPagePath={hostsPagePath}
+              from={from}
+              to={to}
+              setQuery={setQuery}
+              isInitializing={isInitializing}
+              deleteQuery={deleteQuery}
+            />
+          )}
+        />
+        <Route
+          strict
+          path={getHostDetailsTabPath(hostsPagePath)}
+          render={props => (
+            <HostDetails
+              hostDetailsPagePath={hostDetailsPagePath}
+              detailName={props.match.params.detailName}
+              from={from}
+              to={to}
+              setQuery={setQuery}
+              isInitializing={isInitializing}
+              deleteQuery={deleteQuery}
+            />
+          )}
+        />
+        <Route
+          path={hostDetailsPagePath}
+          render={({
+            match: {
+              params: { detailName },
+            },
+            location: { search = '' },
+          }) => <Redirect to={`${url}/${detailName}/${HostsTableType.authentications}${search}`} />}
+        />
+        <Route
+          path={`${hostsPagePath}/`}
+          render={({ location: { search = '' } }) => (
+            <Redirect to={`/${SiemPageName.hosts}/${HostsTableType.hosts}${search}`} />
+          )}
+        />
+      </Switch>
+    )}
+  </GlobalTime>
 ));
+
+HostsContainer.displayName = 'HostsContainer';

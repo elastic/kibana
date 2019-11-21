@@ -49,14 +49,9 @@ describe('BulkUploader', () => {
 
       server = {
         log: sinon.spy(),
-        plugins: {
-          xpack_main: {
-            telemetryCollectionInterval: 3000,
-          },
-          elasticsearch: {
-            createCluster: () => cluster,
-            getCluster: () => cluster,
-          },
+        elasticsearchPlugin: {
+          createCluster: () => cluster,
+          getCluster: () => cluster,
         },
         usage: {},
       };
@@ -72,7 +67,8 @@ describe('BulkUploader', () => {
         }
       ]);
 
-      const uploader = new BulkUploader(server, {
+      const uploader = new BulkUploader({
+        ...server,
         interval: FETCH_INTERVAL
       });
 
@@ -117,9 +113,7 @@ describe('BulkUploader', () => {
         }
       ]);
 
-      const uploader = new BulkUploader(server, {
-        interval: FETCH_INTERVAL
-      });
+      const uploader = new BulkUploader({ ...server, interval: FETCH_INTERVAL });
 
       uploader.start(collectors);
 
@@ -154,9 +148,7 @@ describe('BulkUploader', () => {
           formatForBulkUpload: result => result
         }
       ]);
-      const uploader = new BulkUploader(server, {
-        interval: FETCH_INTERVAL
-      });
+      const uploader = new BulkUploader({ ...server, interval: FETCH_INTERVAL });
 
       uploader.start(collectors);
 
@@ -200,9 +192,7 @@ describe('BulkUploader', () => {
         }
       ]);
 
-      const uploader = new BulkUploader(server, {
-        interval: FETCH_INTERVAL
-      });
+      const uploader = new BulkUploader({ ...server, interval: FETCH_INTERVAL });
       uploader._lastFetchUsageTime = Date.now();
 
       uploader.start(collectors);
@@ -210,6 +200,31 @@ describe('BulkUploader', () => {
         uploader.stop();
         expect(collectorFetch.callCount).to.be.greaterThan(0);
         expect(usageCollectorFetch.callCount).to.eql(0);
+        done();
+      }, CHECK_DELAY);
+    });
+
+
+    it('refetches UsageCollectors if uploading to local cluster was not successful', done => {
+      const usageCollectorFetch = sinon.stub().returns({ type: 'type_usage_collector_test', result: { testData: 12345 } });
+
+      const collectors = new MockCollectorSet(server, [
+        {
+          fetch: usageCollectorFetch,
+          isReady: () => true,
+          formatForBulkUpload: result => result,
+          isUsageCollector: true,
+        }
+      ]);
+
+      const uploader = new BulkUploader({ ...server, interval: FETCH_INTERVAL });
+
+      uploader._onPayload = async () => ({ took: 0, ignored: true, errors: false });
+
+      uploader.start(collectors);
+      setTimeout(() => {
+        uploader.stop();
+        expect(usageCollectorFetch.callCount).to.be.greaterThan(1);
         done();
       }, CHECK_DELAY);
     });
@@ -233,9 +248,7 @@ describe('BulkUploader', () => {
         }
       ]);
 
-      const uploader = new BulkUploader(server, {
-        interval: FETCH_INTERVAL
-      });
+      const uploader = new BulkUploader({ ...server, interval: FETCH_INTERVAL });
       uploader._lastFetchUsageTime = Date.now() - uploader._usageInterval;
 
       uploader.start(collectors);

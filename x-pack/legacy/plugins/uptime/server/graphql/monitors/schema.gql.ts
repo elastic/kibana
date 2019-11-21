@@ -10,17 +10,17 @@ export const monitorsSchema = gql`
   "The data used to enrich the filter bar."
   type FilterBar {
     "A series of monitor IDs in the heartbeat indices."
-    ids: [MonitorKey!]
+    ids: [String!]
     "The location values users have configured for the agents."
     locations: [String!]
-    "The names users have configured for the monitors."
-    names: [String!]
     "The ports of the monitored endpoints."
     ports: [Int!]
     "The schemes used by the monitors."
     schemes: [String!]
     "The possible status values contained in the indices."
     statuses: [String!]
+    "The list of URLs"
+    urls: [String!]
   }
 
   type HistogramDataPoint {
@@ -31,11 +31,15 @@ export const monitorsSchema = gql`
     y: UnsignedInteger
   }
 
+  type SnapshotCount {
+    up: Int!
+    down: Int!
+    mixed: Int!
+    total: Int!
+  }
+
   type Snapshot {
-    up: Int
-    down: Int
-    total: Int
-    histogram: [HistogramDataPoint!]!
+    counts: SnapshotCount!
   }
 
   type DataPoint {
@@ -57,16 +61,19 @@ export const monitorsSchema = gql`
 
   "The data used to populate the monitor charts."
   type MonitorChart {
-    "The max and min values for the monitor duration."
-    durationArea: [MonitorDurationAreaPoint!]!
     "The average values for the monitor duration."
-    durationLine: [MonitorDurationAveragePoint!]!
+    locationDurationLines: [LocationDurationLine!]!
     "The counts of up/down checks for the monitor."
     status: [StatusData!]!
     "The maximum status doc count in this chart."
     statusMaxCount: Int!
     "The maximum duration value in this chart."
     durationMaxValue: Int!
+  }
+
+  type LocationDurationLine {
+    name: String!
+    line: [MonitorDurationAveragePoint!]!
   }
 
   type MonitorKey {
@@ -113,24 +120,9 @@ export const monitorsSchema = gql`
     monitors: [LatestMonitor!]
   }
 
-  "A representation of an error state for a monitor."
-  type ErrorListItem {
-    "The number of times this error has occurred."
-    count: Int!
-    "The most recent message associated with this error type."
-    latestMessage: String
-    "The location assigned to the agent reporting this error."
-    location: String
-    "The ID of the monitor reporting the error."
-    monitorId: String
-    "The name configured for the monitor by the user."
-    name: String
-    "The status code, if available, of the error request."
-    statusCode: String
-    "When the most recent error state occurred."
-    timestamp: String
-    "What kind of error the monitor reported."
-    type: String!
+  type HistogramResult {
+    histogram: [HistogramDataPoint]!
+    interval: UnsignedInteger!
   }
 
   type MonitorPageTitle {
@@ -144,9 +136,23 @@ export const monitorsSchema = gql`
       dateRangeStart: String!
       dateRangeEnd: String!
       filters: String
+      statusFilter: String
     ): LatestMonitorsResult
 
-    getSnapshot(dateRangeStart: String!, dateRangeEnd: String!, filters: String): Snapshot
+    getSnapshot(
+      dateRangeStart: String!
+      dateRangeEnd: String!
+      filters: String
+      statusFilter: String
+    ): Snapshot
+
+    getSnapshotHistogram(
+      dateRangeStart: String!
+      dateRangeEnd: String!
+      filters: String
+      statusFilter: String
+      monitorId: String
+    ): HistogramResult
 
     getMonitorChartsData(
       monitorId: String!
@@ -168,8 +174,6 @@ export const monitorsSchema = gql`
     ): [Ping!]!
 
     getFilterBar(dateRangeStart: String!, dateRangeEnd: String!): FilterBar
-
-    getErrorsList(dateRangeStart: String!, dateRangeEnd: String!, filters: String): [ErrorListItem!]
 
     getMonitorPageTitle(monitorId: String!): MonitorPageTitle
   }

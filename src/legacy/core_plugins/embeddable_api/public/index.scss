@@ -1,13 +1,3 @@
 @import 'src/legacy/ui/public/styles/styling_constants';
 
-// Prefix all styles with "emb" to avoid conflicts.
-// Examples
-//   embChart
-//   embChart__legend
-//   embChart__legend--small
-//   embChart__legend-isLoading
-
-@import './variables';
-
-@import './panel/index';
-
+@import '../../../../plugins/embeddable/public/index';

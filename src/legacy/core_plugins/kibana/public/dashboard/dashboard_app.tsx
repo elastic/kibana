@@ -17,58 +17,32 @@
  * under the License.
  */
 
-import _ from 'lodash';
-
-// @ts-ignore
-import { uiModules } from 'ui/modules';
-import { IInjector } from 'ui/chrome';
-import { wrapInI18nContext } from 'ui/i18n';
-
-// @ts-ignore
-import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
-
-// @ts-ignore
-import { docTitle } from 'ui/doc_title';
-
-// @ts-ignore
-import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-
-// @ts-ignore
-import * as filterActions from 'plugins/kibana/discover/doc_table/actions/filter';
-
-// @ts-ignore
-import { FilterManagerProvider } from 'ui/filter_manager';
-import { EmbeddableFactory } from 'ui/embeddable';
+import { StaticIndexPattern, SavedQuery } from 'plugins/data';
+import moment from 'moment';
+import { Subscription } from 'rxjs';
 
 import {
   AppStateClass as TAppStateClass,
   AppState as TAppState,
-} from 'ui/state_management/app_state';
+  IInjector,
+  KbnUrl,
+} from './legacy_imports';
 
-import { KbnUrl } from 'ui/url/kbn_url';
-import { Filter } from '@kbn/es-query';
-import { TimeRange } from 'ui/timefilter/time_history';
-import { IndexPattern } from 'ui/index_patterns';
-import { IPrivate } from 'ui/private';
-import { StaticIndexPattern, Query } from 'src/legacy/core_plugins/data/public';
-import moment from 'moment';
+import { ViewMode } from '../../../embeddable_api/public/np_ready/public';
 import { SavedObjectDashboard } from './saved_dashboard/saved_dashboard';
-import { DashboardAppState, SavedDashboardPanel, ConfirmModalFn, AddFilterFn } from './types';
+import { DashboardAppState, SavedDashboardPanel, ConfirmModalFn } from './types';
+import { TimeRange, Query, esFilters } from '../../../../../../src/plugins/data/public';
 
-// @ts-ignore -- going away soon
-import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
-
-import { DashboardStateManager } from './dashboard_state_manager';
-import { DashboardViewMode } from './dashboard_view_mode';
 import { DashboardAppController } from './dashboard_app_controller';
+import { RenderDeps } from './application';
 
 export interface DashboardAppScope extends ng.IScope {
   dash: SavedObjectDashboard;
   appState: TAppState;
   screenTitle: string;
   model: {
-    query: Query | string;
-    filters: Filter[];
+    query: Query;
+    filters: esFilters.Filter[];
     timeRestore: boolean;
     title: string;
     description: string;
@@ -77,97 +51,70 @@ export interface DashboardAppScope extends ng.IScope {
       | { to: string | moment.Moment | undefined; from: string | moment.Moment | undefined };
     refreshInterval: any;
   };
+  savedQuery?: SavedQuery;
   refreshInterval: any;
   panels: SavedDashboardPanel[];
   indexPatterns: StaticIndexPattern[];
   $evalAsync: any;
-  dashboardViewMode: DashboardViewMode;
+  dashboardViewMode: ViewMode;
   expandedPanel?: string;
   getShouldShowEditHelp: () => boolean;
   getShouldShowViewHelp: () => boolean;
   updateQueryAndFetch: ({ query, dateRange }: { query: Query; dateRange?: TimeRange }) => void;
-  onRefreshChange: (
-    { isPaused, refreshInterval }: { isPaused: boolean; refreshInterval: any }
-  ) => void;
-  onFiltersUpdated: (filters: Filter[]) => void;
-  $listenAndDigestAsync: any;
+  onRefreshChange: ({
+    isPaused,
+    refreshInterval,
+  }: {
+    isPaused: boolean;
+    refreshInterval: any;
+  }) => void;
+  onFiltersUpdated: (filters: esFilters.Filter[]) => void;
   onCancelApplyFilters: () => void;
-  onApplyFilters: (filters: Filter[]) => void;
+  onApplyFilters: (filters: esFilters.Filter[]) => void;
+  onQuerySaved: (savedQuery: SavedQuery) => void;
+  onSavedQueryUpdated: (savedQuery: SavedQuery) => void;
+  onClearSavedQuery: () => void;
   topNavMenu: any;
   showFilterBar: () => boolean;
   showAddPanel: any;
+  showSaveQuery: boolean;
   kbnTopNav: any;
   enterEditMode: () => void;
-  $listen: any;
-  getEmbeddableFactory: (type: string) => EmbeddableFactory;
-  getDashboardState: () => DashboardStateManager;
-  refresh: () => void;
+  timefilterSubscriptions$: Subscription;
+  isVisible: boolean;
 }
 
-const app = uiModules.get('app/dashboard', [
-  'elasticsearch',
-  'ngRoute',
-  'react',
-  'kibana/courier',
-  'kibana/config',
-]);
+export function initDashboardAppDirective(app: any, deps: RenderDeps) {
+  app.directive('dashboardApp', function($injector: IInjector) {
+    const AppState = $injector.get<TAppStateClass<DashboardAppState>>('AppState');
+    const kbnUrl = $injector.get<KbnUrl>('kbnUrl');
+    const confirmModal = $injector.get<ConfirmModalFn>('confirmModal');
+    const config = deps.uiSettings;
 
-app.directive('dashboardViewportProvider', function(reactDirective: any) {
-  return reactDirective(wrapInI18nContext(DashboardViewportProvider));
-});
-
-app.directive('dashboardApp', function($injector: IInjector) {
-  const AppState = $injector.get<TAppStateClass<DashboardAppState>>('AppState');
-  const kbnUrl = $injector.get<KbnUrl>('kbnUrl');
-  const confirmModal = $injector.get<ConfirmModalFn>('confirmModal');
-  const config = $injector.get('config');
-  const courier = $injector.get<{ fetch: () => void }>('courier');
-
-  const Private = $injector.get<IPrivate>('Private');
-
-  const filterManager = Private(FilterManagerProvider);
-  const addFilter: AddFilterFn = ({ field, value, operator, index }, appState: TAppState) => {
-    filterActions.addFilter(field, value, operator, index, appState, filterManager);
-  };
-
-  const indexPatterns = $injector.get<{
-    getDefault: () => Promise<IndexPattern>;
-  }>('indexPatterns');
-
-  return {
-    restrict: 'E',
-    controllerAs: 'dashboardApp',
-    controller: (
-      $scope: DashboardAppScope,
-      $rootScope: ng.IRootScopeService,
-      $route: any,
-      $routeParams: {
-        id?: string;
-      },
-      getAppState: {
-        previouslyStored: () => TAppState | undefined;
-      },
-      dashboardConfig: {
-        getHideWriteControls: () => boolean;
-      },
-      localStorage: WindowLocalStorage
-    ) =>
-      new DashboardAppController({
-        $route,
-        $rootScope,
-        $scope,
-        $routeParams,
-        getAppState,
-        dashboardConfig,
-        localStorage,
-        Private,
-        kbnUrl,
-        AppStateClass: AppState,
-        indexPatterns,
-        config,
-        confirmModal,
-        addFilter,
-        courier,
-      }),
-  };
-});
+    return {
+      restrict: 'E',
+      controllerAs: 'dashboardApp',
+      controller: (
+        $scope: DashboardAppScope,
+        $route: any,
+        $routeParams: {
+          id?: string;
+        },
+        getAppState: any,
+        globalState: any
+      ) =>
+        new DashboardAppController({
+          $route,
+          $scope,
+          $routeParams,
+          getAppState,
+          globalState,
+          kbnUrl,
+          AppStateClass: AppState,
+          config,
+          confirmModal,
+          ...deps,
+        }),
+    };
+  });
+}

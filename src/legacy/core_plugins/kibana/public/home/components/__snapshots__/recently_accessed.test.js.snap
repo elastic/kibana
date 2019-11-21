@@ -2,14 +2,12 @@
 
 exports[`render 1`] = `
 <EuiPanel
-  grow={true}
-  hasShadow={false}
   paddingSize="l"
 >
   <EuiTitle
     size="xs"
   >
-    <h3>
+    <h2>
       <EuiTextColor
         color="subdued"
       >
@@ -19,7 +17,7 @@ exports[`render 1`] = `
           values={Object {}}
         />
       </EuiTextColor>
-    </h3>
+    </h2>
   </EuiTitle>
   <EuiSpacer
     size="s"
@@ -51,9 +49,7 @@ exports[`render 1`] = `
           >
             <EuiLink
               className="homRecentlyAccessed__longLink"
-              color="primary"
               href="link0"
-              type="button"
             >
               label0
             </EuiLink>
@@ -87,9 +83,7 @@ exports[`render 1`] = `
           >
             <EuiLink
               className="homRecentlyAccessed__longLink"
-              color="primary"
               href="link1"
-              type="button"
             >
               label1
             </EuiLink>

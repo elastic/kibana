@@ -5,21 +5,12 @@
  */
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-import { Legacy } from 'kibana';
+import { CoreSetup, PluginsSetup } from '../shim';
 // @ts-ignore missing local declaration
 import { CANVAS_USAGE_TYPE } from '../../common/lib/constants';
 import { workpadCollector } from './workpad_collector';
 import { customElementCollector } from './custom_element_collector';
-
-/**
-  Function for collecting information about canvas usage
- */
-export type TelemetryCollector = (
-  /** The server instance */
-  server: Legacy.Server,
-  /** Function for calling elasticsearch */
-  callCluster: CallCluster
-) => Record<string, any>;
+import { TelemetryCollector } from '../../types';
 
 const collectors: TelemetryCollector[] = [workpadCollector, customElementCollector];
 
@@ -31,13 +22,14 @@ const collectors: TelemetryCollector[] = [workpadCollector, customElementCollect
 
   A usage collector function returns an object derived from current data in the ES Cluster.
 */
-export function registerCanvasUsageCollector(server: Legacy.Server) {
-  const canvasCollector = server.usage.collectorSet.makeUsageCollector({
+export function registerCanvasUsageCollector(setup: CoreSetup, plugins: PluginsSetup) {
+  const kibanaIndex = setup.getServerConfig().get<string>('kibana.index');
+  const canvasCollector = plugins.usage.collectorSet.makeUsageCollector({
     type: CANVAS_USAGE_TYPE,
     isReady: () => true,
     fetch: async (callCluster: CallCluster) => {
       const collectorResults = await Promise.all(
-        collectors.map(collector => collector(server, callCluster))
+        collectors.map(collector => collector(kibanaIndex, callCluster))
       );
 
       return collectorResults.reduce(
@@ -50,5 +42,5 @@ export function registerCanvasUsageCollector(server: Legacy.Server) {
     },
   });
 
-  server.usage.collectorSet.register(canvasCollector);
+  plugins.usage.collectorSet.register(canvasCollector);
 }

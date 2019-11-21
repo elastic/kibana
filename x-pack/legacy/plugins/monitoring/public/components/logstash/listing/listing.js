@@ -12,10 +12,14 @@ import { ClusterStatus } from '..//cluster_status';
 import { EuiMonitoringTable } from '../../table';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { LOGSTASH_SYSTEM_ID } from '../../../../common/constants';
+import { SetupModeBadge } from '../../setup_mode/badge';
+import { ListingCallOut } from '../../setup_mode/listing_callout';
 
 export class Listing extends PureComponent {
   getColumns() {
     const { kbnUrl, scope } = this.props.angular;
+    const setupMode = this.props.setupMode;
 
     return [
       {
@@ -24,24 +28,49 @@ export class Listing extends PureComponent {
         }),
         field: 'name',
         sortable: true,
-        render: (name, node) => (
-          <div>
+        render: (name, node) => {
+          let setupModeStatus = null;
+          if (setupMode && setupMode.enabled) {
+            const list = get(setupMode, 'data.byUuid', {});
+            const uuid = get(node, 'logstash.uuid');
+            const status = list[uuid] || {};
+            const instance = {
+              uuid,
+              name: node.name
+            };
+
+            setupModeStatus = (
+              <div className="monTableCell__setupModeStatus">
+                <SetupModeBadge
+                  setupMode={setupMode}
+                  status={status}
+                  instance={instance}
+                  productName={LOGSTASH_SYSTEM_ID}
+                />
+              </div>
+            );
+          }
+
+          return (
             <div>
-              <EuiLink
-                onClick={() => {
-                  scope.$evalAsync(() => {
-                    kbnUrl.changePath(`/logstash/node/${node.logstash.uuid}`);
-                  });
-                }}
-              >
-                {name}
-              </EuiLink>
+              <div>
+                <EuiLink
+                  onClick={() => {
+                    scope.$evalAsync(() => {
+                      kbnUrl.changePath(`/logstash/node/${node.logstash.uuid}`);
+                    });
+                  }}
+                >
+                  {name}
+                </EuiLink>
+              </div>
+              <div>
+                {node.logstash.http_address}
+              </div>
+              {setupModeStatus}
             </div>
-            <div>
-              {node.logstash.http_address}
-            </div>
-          </div>
-        )
+          );
+        }
       },
       {
         name: i18n.translate('xpack.monitoring.logstash.nodes.cpuUsageTitle', {
@@ -110,8 +139,9 @@ export class Listing extends PureComponent {
       }
     ];
   }
+
   render() {
-    const { data, stats, sorting, pagination, onTableChange } = this.props;
+    const { stats, sorting, pagination, onTableChange, data, setupMode } = this.props;
     const columns = this.getColumns();
     const flattenedData = data.map(item => ({
       ...item,
@@ -123,6 +153,17 @@ export class Listing extends PureComponent {
       version: get(item, 'logstash.version', 'N/A'),
     }));
 
+    let setupModeCallOut = null;
+    if (setupMode.enabled && setupMode.data) {
+      setupModeCallOut = (
+        <ListingCallOut
+          setupModeData={setupMode.data}
+          useNodeIdentifier
+          productName={LOGSTASH_SYSTEM_ID}
+        />
+      );
+    }
+
     return (
       <EuiPage>
         <EuiPageBody>
@@ -130,10 +171,13 @@ export class Listing extends PureComponent {
             <ClusterStatus stats={stats} />
           </EuiPanel>
           <EuiSpacer size="m" />
+          {setupModeCallOut}
           <EuiPageContent>
             <EuiMonitoringTable
               className="logstashNodesTable"
               rows={flattenedData}
+              setupMode={setupMode}
+              productName={LOGSTASH_SYSTEM_ID}
               columns={columns}
               sorting={{
                 ...sorting,

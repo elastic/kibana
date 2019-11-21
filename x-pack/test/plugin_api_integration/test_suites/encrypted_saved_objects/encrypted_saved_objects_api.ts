@@ -6,12 +6,11 @@
 
 import expect from '@kbn/expect';
 import { SavedObject } from 'src/core/server';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
-  const es = getService('es');
-  const chance = getService('chance');
+export default function({ getService }: FtrProviderContext) {
+  const es = getService('legacyEs');
+  const randomness = getService('randomness');
   const supertest = getService('supertest');
 
   const SAVED_OBJECT_WITH_SECRET_TYPE = 'saved-object-with-secret';
@@ -22,7 +21,6 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         _source: { [SAVED_OBJECT_WITH_SECRET_TYPE]: savedObject },
       } = await es.get({
         id: generateRawID(id),
-        type: '_doc',
         index: '.kibana',
       });
 
@@ -38,15 +36,15 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
     let savedObject: SavedObject;
     beforeEach(async () => {
       savedObjectOriginalAttributes = {
-        publicProperty: chance.string(),
-        publicPropertyExcludedFromAAD: chance.string(),
-        privateProperty: chance.string(),
+        publicProperty: randomness.string(),
+        publicPropertyExcludedFromAAD: randomness.string(),
+        privateProperty: randomness.string(),
       };
 
       const { body } = await supertest
         .post(`${getURLAPIBaseURL()}${SAVED_OBJECT_WITH_SECRET_TYPE}`)
         .set('kbn-xsrf', 'xxx')
-        .send({ attributes: savedObjectOriginalAttributes }, {})
+        .send({ attributes: savedObjectOriginalAttributes })
         .expect(200);
 
       savedObject = body;
@@ -75,17 +73,17 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         {
           type: SAVED_OBJECT_WITH_SECRET_TYPE,
           attributes: {
-            publicProperty: chance.string(),
-            publicPropertyExcludedFromAAD: chance.string(),
-            privateProperty: chance.string(),
+            publicProperty: randomness.string(),
+            publicPropertyExcludedFromAAD: randomness.string(),
+            privateProperty: randomness.string(),
           },
         },
         {
           type: SAVED_OBJECT_WITH_SECRET_TYPE,
           attributes: {
-            publicProperty: chance.string(),
-            publicPropertyExcludedFromAAD: chance.string(),
-            privateProperty: chance.string(),
+            publicProperty: randomness.string(),
+            publicPropertyExcludedFromAAD: randomness.string(),
+            privateProperty: randomness.string(),
           },
         },
       ];
@@ -163,15 +161,15 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
 
     it('#update encrypts attributes and strips them from response', async () => {
       const updatedAttributes = {
-        publicProperty: chance.string(),
-        publicPropertyExcludedFromAAD: chance.string(),
-        privateProperty: chance.string(),
+        publicProperty: randomness.string(),
+        publicPropertyExcludedFromAAD: randomness.string(),
+        privateProperty: randomness.string(),
       };
 
       const { body: response } = await supertest
         .put(`${getURLAPIBaseURL()}${SAVED_OBJECT_WITH_SECRET_TYPE}/${savedObject.id}`)
         .set('kbn-xsrf', 'xxx')
-        .send({ attributes: updatedAttributes }, {})
+        .send({ attributes: updatedAttributes })
         .expect(200);
 
       expect(response.attributes).to.eql({
@@ -198,12 +196,12 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
     });
 
     it('#getDecryptedAsInternalUser is able to decrypt if non-AAD attribute has changed', async () => {
-      const updatedAttributes = { publicPropertyExcludedFromAAD: chance.string() };
+      const updatedAttributes = { publicPropertyExcludedFromAAD: randomness.string() };
 
       const { body: response } = await supertest
         .put(`${getURLAPIBaseURL()}${SAVED_OBJECT_WITH_SECRET_TYPE}/${savedObject.id}`)
         .set('kbn-xsrf', 'xxx')
-        .send({ attributes: updatedAttributes }, {})
+        .send({ attributes: updatedAttributes })
         .expect(200);
 
       expect(response.attributes).to.eql({
@@ -221,12 +219,12 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
     });
 
     it('#getDecryptedAsInternalUser fails to decrypt if AAD attribute has changed', async () => {
-      const updatedAttributes = { publicProperty: chance.string() };
+      const updatedAttributes = { publicProperty: randomness.string() };
 
       const { body: response } = await supertest
         .put(`${getURLAPIBaseURL()}${SAVED_OBJECT_WITH_SECRET_TYPE}/${savedObject.id}`)
         .set('kbn-xsrf', 'xxx')
-        .send({ attributes: updatedAttributes }, {})
+        .send({ attributes: updatedAttributes })
         .expect(200);
 
       expect(response.attributes).to.eql({
@@ -254,7 +252,10 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
     });
 
     describe('within a default space', () => {
-      runTests(() => '/api/saved_objects/', id => `${SAVED_OBJECT_WITH_SECRET_TYPE}:${id}`);
+      runTests(
+        () => '/api/saved_objects/',
+        id => `${SAVED_OBJECT_WITH_SECRET_TYPE}:${id}`
+      );
     });
 
     describe('within a custom space', () => {

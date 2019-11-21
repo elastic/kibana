@@ -49,6 +49,7 @@ describe('Elasticsearch Cluster Settings', () => {
       reason: {
         context: `cluster ${source}`,
         data: '-1',
+        isCloud: false,
         property: 'xpack.monitoring.collection.interval'
       }
     });
@@ -78,6 +79,7 @@ describe('Elasticsearch Cluster Settings', () => {
       reason: {
         context: `cluster ${source}`,
         data: 'Remote exporters indicate a possible misconfiguration: myCoolExporter',
+        isCloud: false,
         property: 'xpack.monitoring.exporters'
       }
     });
@@ -107,6 +109,7 @@ describe('Elasticsearch Cluster Settings', () => {
       reason: {
         context: `cluster ${source}`,
         data: 'false',
+        isCloud: false,
         property: 'xpack.monitoring.enabled'
       }
     });

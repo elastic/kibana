@@ -6,22 +6,16 @@
 
 import { mapValues } from 'lodash';
 
-export interface ShortcutMap {
-  osx: string[];
-  windows: string[];
-  linux: string[];
-  other: string[];
-  help: string;
-}
+import { ShortcutMap, ShortcutNameSpace } from '../../types';
+import { ShortcutStrings as strings } from '../../i18n/';
 
-export interface ShortcutNameSpace {
-  displayName: string;
-  [shortcut: string]: string | ShortcutMap;
-}
+const shortcutHelp = strings.getShortcutHelp();
+const namespaceDisplayNames = strings.getNamespaceDisplayNames();
 
 interface KeyMap {
   [category: string]: ShortcutNameSpace;
 }
+
 type Modifier = 'ctrl' | 'command' | 'shift' | 'alt' | 'option';
 
 // maps key for all OS's with optional modifiers
@@ -39,23 +33,23 @@ const getShortcuts = (
     modifiers = [modifiers];
   }
 
-  let macShortcuts = shortcuts;
+  let macShortcuts = [...shortcuts];
 
   // handle shift modifier
   if (modifiers.includes('shift')) {
-    macShortcuts = shortcuts.map(shortcut => `shift+${shortcut}`);
+    macShortcuts = macShortcuts.map(shortcut => `shift+${shortcut}`);
     shortcuts = shortcuts.map(shortcut => `shift+${shortcut}`);
   }
 
   // handle alt modifier
   if (modifiers.includes('alt') || modifiers.includes('option')) {
-    macShortcuts = shortcuts.map(shortcut => `option+${shortcut}`);
+    macShortcuts = macShortcuts.map(shortcut => `option+${shortcut}`);
     shortcuts = shortcuts.map(shortcut => `alt+${shortcut}`);
   }
 
   // handle ctrl modifier
   if (modifiers.includes('ctrl') || modifiers.includes('command')) {
-    macShortcuts = shortcuts.map(shortcut => `command+${shortcut}`);
+    macShortcuts = macShortcuts.map(shortcut => `command+${shortcut}`);
     shortcuts = shortcuts.map(shortcut => `ctrl+${shortcut}`);
   }
 
@@ -68,60 +62,97 @@ const getShortcuts = (
   };
 };
 
-const refreshShortcut = getShortcuts('r', { modifiers: 'alt', help: 'Refresh workpad' });
-const previousPageShortcut = getShortcuts('[', { modifiers: 'alt', help: 'Go to previous page' });
-const nextPageShortcut = getShortcuts(']', { modifiers: 'alt', help: 'Go to next page' });
+const refreshShortcut = getShortcuts('r', {
+  modifiers: 'alt',
+  help: shortcutHelp.REFRESH,
+});
+const previousPageShortcut = getShortcuts('[', { modifiers: 'alt', help: shortcutHelp.PREV });
+const nextPageShortcut = getShortcuts(']', { modifiers: 'alt', help: shortcutHelp.NEXT });
+const fullscreenShortcut = getShortcuts(['f', 'p'], {
+  modifiers: 'alt',
+  help: shortcutHelp.FULLSCREEN,
+});
 
 export const keymap: KeyMap = {
   ELEMENT: {
-    displayName: 'Element controls',
-    CUT: getShortcuts('x', { modifiers: 'ctrl', help: 'Cut' }),
-    COPY: getShortcuts('c', { modifiers: 'ctrl', help: 'Copy' }),
-    PASTE: getShortcuts('v', { modifiers: 'ctrl', help: 'Paste' }),
-    CLONE: getShortcuts('d', { modifiers: 'ctrl', help: 'Clone' }),
-    DELETE: getShortcuts(['del', 'backspace'], { help: 'Delete' }),
-    BRING_FORWARD: getShortcuts('up', { modifiers: 'ctrl', help: 'Bring to front' }),
-    BRING_TO_FRONT: getShortcuts('up', { modifiers: ['ctrl', 'shift'], help: 'Bring forward' }),
-    SEND_BACKWARD: getShortcuts('down', { modifiers: 'ctrl', help: 'Send backward' }),
-    SEND_TO_BACK: getShortcuts('down', { modifiers: ['ctrl', 'shift'], help: 'Send to back' }),
-    GROUP: getShortcuts('g', { help: 'Group' }),
-    UNGROUP: getShortcuts('u', { help: 'Ungroup' }),
+    displayName: namespaceDisplayNames.ELEMENT,
+    CUT: getShortcuts('x', { modifiers: 'ctrl', help: shortcutHelp.CUT }),
+    COPY: getShortcuts('c', { modifiers: 'ctrl', help: shortcutHelp.COPY }),
+    PASTE: getShortcuts('v', { modifiers: 'ctrl', help: shortcutHelp.PASTE }),
+    CLONE: getShortcuts('d', { modifiers: 'ctrl', help: shortcutHelp.CLONE }),
+    DELETE: getShortcuts(['del', 'backspace'], { help: shortcutHelp.DELETE }),
+    BRING_FORWARD: getShortcuts('up', { modifiers: 'ctrl', help: shortcutHelp.BRING_TO_FRONT }),
+    BRING_TO_FRONT: getShortcuts('up', {
+      modifiers: ['ctrl', 'shift'],
+      help: shortcutHelp.BRING_FORWARD,
+    }),
+    SEND_BACKWARD: getShortcuts('down', { modifiers: 'ctrl', help: shortcutHelp.SEND_BACKWARD }),
+    SEND_TO_BACK: getShortcuts('down', {
+      modifiers: ['ctrl', 'shift'],
+      help: shortcutHelp.SEND_TO_BACK,
+    }),
+    GROUP: getShortcuts('g', { help: shortcutHelp.GROUP }),
+    UNGROUP: getShortcuts('u', { help: shortcutHelp.UNGROUP }),
+    SHIFT_UP: getShortcuts('up', { help: shortcutHelp.SHIFT_UP }),
+    SHIFT_DOWN: getShortcuts('down', { help: shortcutHelp.SHIFT_DOWN }),
+    SHIFT_LEFT: getShortcuts('left', { help: shortcutHelp.SHIFT_LEFT }),
+    SHIFT_RIGHT: getShortcuts('right', { help: shortcutHelp.SHIFT_RIGHT }),
+    NUDGE_UP: getShortcuts('up', {
+      modifiers: ['shift'],
+      help: shortcutHelp.NUDGE_UP,
+    }),
+    NUDGE_DOWN: getShortcuts('down', {
+      modifiers: ['shift'],
+      help: shortcutHelp.NUDGE_DOWN,
+    }),
+    NUDGE_LEFT: getShortcuts('left', {
+      modifiers: ['shift'],
+      help: shortcutHelp.NUDGE_LEFT,
+    }),
+    NUDGE_RIGHT: getShortcuts('right', {
+      modifiers: ['shift'],
+      help: shortcutHelp.NUDGE_RIGHT,
+    }),
   },
   EXPRESSION: {
-    displayName: 'Expression controls',
-    RUN: getShortcuts('enter', { modifiers: 'ctrl', help: 'Run whole expression' }),
+    displayName: namespaceDisplayNames.EXPRESSION,
+    RUN: getShortcuts('enter', { modifiers: 'ctrl', help: shortcutHelp.RUN }),
   },
   EDITOR: {
-    displayName: 'Editor controls',
+    displayName: namespaceDisplayNames.EDITOR,
     // added for documentation purposes, not handled by `react-shortcuts`
-    MULTISELECT: getShortcuts('click', { modifiers: 'shift', help: 'Select multiple elements' }),
+    MULTISELECT: getShortcuts('click', { modifiers: 'shift', help: shortcutHelp.MULTISELECT }),
     // added for documentation purposes, not handled by `react-shortcuts`
     RESIZE_FROM_CENTER: getShortcuts('drag', {
       modifiers: 'alt',
-      help: 'Resize from center',
+      help: shortcutHelp.RESIZE_FROM_CENTER,
     }),
     // added for documentation purposes, not handled by `react-shortcuts`
     IGNORE_SNAP: getShortcuts('drag', {
       modifiers: 'ctrl',
-      help: 'Move, resize, and rotate without snapping',
+      help: shortcutHelp.IGNORE_SNAP,
     }),
     // added for documentation purposes, not handled by `react-shortcuts`
     SELECT_BEHIND: getShortcuts('click', {
       modifiers: 'ctrl',
-      help: 'Select element below',
+      help: shortcutHelp.SELECT_BEHIND,
     }),
-    UNDO: getShortcuts('z', { modifiers: 'ctrl', help: 'Undo last action' }),
-    REDO: getShortcuts('z', { modifiers: ['ctrl', 'shift'], help: 'Redo last action' }),
+    UNDO: getShortcuts('z', { modifiers: 'ctrl', help: shortcutHelp.UNDO }),
+    REDO: getShortcuts('z', { modifiers: ['ctrl', 'shift'], help: shortcutHelp.REDO }),
     PREV: previousPageShortcut,
     NEXT: nextPageShortcut,
-    EDITING: getShortcuts('e', { modifiers: 'alt', help: 'Toggle edit mode' }),
-    GRID: getShortcuts('g', { modifiers: 'alt', help: 'Show grid' }),
+    EDITING: getShortcuts('e', { modifiers: 'alt', help: shortcutHelp.EDITING }),
+    GRID: getShortcuts('g', { modifiers: 'alt', help: shortcutHelp.GRID }),
     REFRESH: refreshShortcut,
+    ZOOM_IN: getShortcuts('plus', { modifiers: ['ctrl', 'alt'], help: shortcutHelp.ZOOM_IN }),
+    ZOOM_OUT: getShortcuts('minus', { modifiers: ['ctrl', 'alt'], help: shortcutHelp.ZOOM_OUT }),
+    ZOOM_RESET: getShortcuts('[', { modifiers: ['ctrl', 'alt'], help: shortcutHelp.ZOOM_RESET }),
+    FULLSCREEN: fullscreenShortcut,
   },
   PRESENTATION: {
-    displayName: 'Presentation controls',
-    FULLSCREEN: getShortcuts(['f', 'p'], { modifiers: 'alt', help: 'Enter presentation mode' }),
-    FULLSCREEN_EXIT: getShortcuts('esc', { help: 'Exit presentation mode' }),
+    displayName: namespaceDisplayNames.PRESENTATION,
+    FULLSCREEN: fullscreenShortcut,
+    FULLSCREEN_EXIT: getShortcuts('esc', { help: shortcutHelp.FULLSCREEN_EXIT }),
     PREV: mapValues(previousPageShortcut, (osShortcuts: string[], key?: string) =>
       // adds 'backspace' and 'left' to list of shortcuts per OS
       key === 'help' ? osShortcuts : osShortcuts.concat(['backspace', 'left'])
@@ -131,6 +162,6 @@ export const keymap: KeyMap = {
       key === 'help' ? osShortcuts : osShortcuts.concat(['space', 'right'])
     ),
     REFRESH: refreshShortcut,
-    PAGE_CYCLE_TOGGLE: getShortcuts('p', { help: 'Toggle page cycling' }),
+    PAGE_CYCLE_TOGGLE: getShortcuts('p', { help: shortcutHelp.PAGE_CYCLE_TOGGLE }),
   },
 };

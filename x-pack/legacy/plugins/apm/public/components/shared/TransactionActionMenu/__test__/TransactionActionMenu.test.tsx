@@ -10,10 +10,8 @@ import 'react-testing-library/cleanup-after-each';
 import { TransactionActionMenu } from '../TransactionActionMenu';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import * as Transactions from './mockData';
-import * as hooks from '../../../../hooks/useAPMIndexPattern';
-import { ISavedObject } from '../../../../services/rest/savedObjects';
-
-jest.mock('ui/kfetch');
+import * as kibanaCore from '../../../../../../observability/public/context/kibana_core';
+import { LegacyCoreStart } from 'src/core/public';
 
 const renderTransaction = async (transaction: Record<string, any>) => {
   const rendered = render(
@@ -27,9 +25,15 @@ const renderTransaction = async (transaction: Record<string, any>) => {
 
 describe('TransactionActionMenu component', () => {
   beforeEach(() => {
-    jest
-      .spyOn(hooks, 'useAPMIndexPattern')
-      .mockReturnValue({ id: 'foo' } as ISavedObject);
+    const coreMock = ({
+      http: {
+        basePath: {
+          prepend: (path: string) => `/basepath${path}`
+        }
+      }
+    } as unknown) as LegacyCoreStart;
+
+    jest.spyOn(kibanaCore, 'useKibanaCore').mockReturnValue(coreMock);
   });
 
   afterEach(() => {

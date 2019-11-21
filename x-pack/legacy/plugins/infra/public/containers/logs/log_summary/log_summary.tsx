@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 import { LogSummary as LogSummaryQuery } from '../../../graphql/types';
 import { useApolloClient } from '../../../utils/apollo_context';
 import { useCancellableEffect } from '../../../utils/cancellable_effect';
 import { logSummaryQuery } from './log_summary.gql_query';
+import { useLogSummaryBufferInterval } from './use_log_summary_buffer_interval';
 
-const LOAD_BUCKETS_PER_PAGE = 100;
 export type LogSummaryBetween = LogSummaryQuery.Query['source']['logSummaryBetween'];
 export type LogSummaryBuckets = LogSummaryBetween['buckets'];
 
@@ -24,19 +24,9 @@ export const useLogSummary = (
   const [logSummaryBetween, setLogSummaryBetween] = useState<LogSummaryBetween>({ buckets: [] });
   const apolloClient = useApolloClient();
 
-  const [bufferStart, bufferEnd] = useMemo(
-    () => {
-      if (midpointTime === null || intervalSize <= 0) {
-        return [null, null];
-      }
-
-      const halfIntervalSize = intervalSize / 2;
-      return [
-        (Math.floor((midpointTime - halfIntervalSize) / intervalSize) - 0.5) * intervalSize,
-        (Math.ceil((midpointTime + halfIntervalSize) / intervalSize) + 0.5) * intervalSize,
-      ];
-    },
-    [midpointTime, intervalSize]
+  const { start: bufferStart, end: bufferEnd, bucketSize } = useLogSummaryBufferInterval(
+    midpointTime,
+    intervalSize
   );
 
   useCancellableEffect(
@@ -54,7 +44,7 @@ export const useLogSummary = (
             sourceId,
             start: bufferStart,
             end: bufferEnd,
-            bucketSize: intervalSize / LOAD_BUCKETS_PER_PAGE,
+            bucketSize,
           },
         })
         .then(response => {
@@ -63,10 +53,12 @@ export const useLogSummary = (
           }
         });
     },
-    [apolloClient, sourceId, filterQuery, bufferStart, bufferEnd, intervalSize]
+    [apolloClient, sourceId, filterQuery, bufferStart, bufferEnd, bucketSize]
   );
 
   return {
     buckets: logSummaryBetween.buckets,
+    start: bufferStart,
+    end: bufferEnd,
   };
 };

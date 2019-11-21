@@ -28,25 +28,31 @@ export type TypeOf<RT extends Type<any>> = RT['type'];
 
 // Because of https://github.com/Microsoft/TypeScript/issues/14041
 // this might not have perfect _rendering_ output, but it will be typed.
-
 export type ObjectResultType<P extends Props> = Readonly<{ [K in keyof P]: TypeOf<P[K]> }>;
+
+export type ObjectTypeOptions<P extends Props = any> = TypeOptions<
+  { [K in keyof P]: TypeOf<P[K]> }
+> & {
+  allowUnknowns?: boolean;
+};
 
 export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>> {
   private props: Record<string, AnySchema>;
 
-  constructor(props: P, options: TypeOptions<{ [K in keyof P]: TypeOf<P[K]> }> = {}) {
+  constructor(props: P, options: ObjectTypeOptions<P> = {}) {
     const schemaKeys = {} as Record<string, AnySchema>;
     for (const [key, value] of Object.entries(props)) {
       schemaKeys[key] = value.getSchema();
     }
-
+    const { allowUnknowns, ...typeOptions } = options;
     const schema = internals
       .object()
       .keys(schemaKeys)
       .optional()
-      .default();
+      .default()
+      .unknown(Boolean(allowUnknowns));
 
-    super(schema, options);
+    super(schema, typeOptions);
     this.props = schemaKeys;
   }
 

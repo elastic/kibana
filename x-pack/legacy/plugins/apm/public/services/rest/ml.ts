@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from 'elasticsearch';
-import chrome from 'ui/chrome';
+import { HttpServiceBase } from 'kibana/public';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
@@ -13,6 +12,8 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { getMlJobId, getMlPrefix } from '../../../common/ml_job_constants';
 import { callApi } from './callApi';
+import { ESFilter } from '../../../typings/elasticsearch';
+import { createCallApmApi, APMClient } from './createCallApmApi';
 
 interface MlResponseItem {
   id: string;
@@ -31,14 +32,25 @@ interface StartedMLJobApiResponse {
   jobs: MlResponseItem[];
 }
 
+async function getTransactionIndices(http: HttpServiceBase) {
+  const callApmApi: APMClient = createCallApmApi(http);
+  const indices = await callApmApi({
+    method: 'GET',
+    pathname: `/api/apm/settings/apm-indices`
+  });
+  return indices['apm_oss.transactionIndices'];
+}
+
 export async function startMLJob({
   serviceName,
-  transactionType
+  transactionType,
+  http
 }: {
   serviceName: string;
   transactionType: string;
+  http: HttpServiceBase;
 }) {
-  const indexPatternName = chrome.getInjected('apmIndexPatternTitle');
+  const transactionIndices = await getTransactionIndices(http);
   const groups = ['apm', serviceName.toLowerCase()];
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
@@ -46,13 +58,13 @@ export async function startMLJob({
     { term: { [TRANSACTION_TYPE]: transactionType } }
   ];
   groups.push(transactionType.toLowerCase());
-  return callApi<StartedMLJobApiResponse>({
+  return callApi<StartedMLJobApiResponse>(http, {
     method: 'POST',
     pathname: `/api/ml/modules/setup/apm_transaction`,
     body: JSON.stringify({
       prefix: getMlPrefix(serviceName, transactionType),
       groups,
-      indexPatternName,
+      indexPatternName: transactionIndices,
       startDatafeed: true,
       query: {
         bool: {
@@ -73,13 +85,15 @@ export interface MLJobApiResponse {
 
 export async function getHasMLJob({
   serviceName,
-  transactionType
+  transactionType,
+  http
 }: {
   serviceName: string;
   transactionType: string;
+  http: HttpServiceBase;
 }) {
   try {
-    await callApi<MLJobApiResponse>({
+    await callApi<MLJobApiResponse>(http, {
       method: 'GET',
       pathname: `/api/ml/anomaly_detectors/${getMlJobId(
         serviceName,

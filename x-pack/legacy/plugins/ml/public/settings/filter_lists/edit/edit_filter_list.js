@@ -11,9 +11,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, {
-  Component
-} from 'react';
+import React, { Component, Fragment } from 'react';
 
 import {
   EuiButton,
@@ -33,6 +31,7 @@ import { toastNotifications } from 'ui/notify';
 import { EditFilterListHeader } from './header';
 import { EditFilterListToolbar } from './toolbar';
 import { ItemsGrid } from '../../../components/items_grid';
+import { NavigationMenu } from '../../../components/navigation_menu';
 import {
   isValidFilterListId,
   saveFilterList
@@ -309,71 +308,74 @@ export const EditFilterList = injectI18n(class extends Component {
     const totalItemCount = (items !== undefined) ? items.length : 0;
 
     return (
-      <EuiPage className="ml-edit-filter-lists">
-        <EuiPageContent
-          className="ml-edit-filter-lists-content"
-          verticalPosition="center"
-          horizontalPosition="center"
-        >
-          <EditFilterListHeader
-            canCreateFilter={canCreateFilter}
-            filterId={this.props.filterId}
-            newFilterId={newFilterId}
-            isNewFilterIdInvalid={isNewFilterIdInvalid}
-            updateNewFilterId={this.updateNewFilterId}
-            description={description}
-            updateDescription={this.updateDescription}
-            totalItemCount={totalItemCount}
-            usedBy={loadedFilter.used_by}
-          />
-          <EditFilterListToolbar
-            canCreateFilter={canCreateFilter}
-            canDeleteFilter={canDeleteFilter}
-            onSearchChange={this.onSearchChange}
-            addItems={this.addItems}
-            deleteSelectedItems={this.deleteSelectedItems}
-            selectedItemCount={selectedItems.length}
-          />
-          <EuiSpacer size="xl" />
-          <ItemsGrid
-            totalItemCount={totalItemCount}
-            items={matchingItems}
-            selectedItems={selectedItems}
-            itemsPerPage={itemsPerPage}
-            setItemsPerPage={this.setItemsPerPage}
-            setItemSelected={this.setItemSelected}
-            activePage={activePage}
-            setActivePage={this.setActivePage}
-          />
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                onClick={returnToFiltersList}
-              >
-                <FormattedMessage
-                  id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
-                  defaultMessage="Cancel"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                onClick={this.save}
-                disabled={(saveInProgress === true) ||
+      <Fragment>
+        <NavigationMenu tabId="settings" />
+        <EuiPage className="ml-edit-filter-lists">
+          <EuiPageContent
+            className="ml-edit-filter-lists-content"
+            verticalPosition="center"
+            horizontalPosition="center"
+          >
+            <EditFilterListHeader
+              canCreateFilter={canCreateFilter}
+              filterId={this.props.filterId}
+              newFilterId={newFilterId}
+              isNewFilterIdInvalid={isNewFilterIdInvalid}
+              updateNewFilterId={this.updateNewFilterId}
+              description={description}
+              updateDescription={this.updateDescription}
+              totalItemCount={totalItemCount}
+              usedBy={loadedFilter.used_by}
+            />
+            <EditFilterListToolbar
+              canCreateFilter={canCreateFilter}
+              canDeleteFilter={canDeleteFilter}
+              onSearchChange={this.onSearchChange}
+              addItems={this.addItems}
+              deleteSelectedItems={this.deleteSelectedItems}
+              selectedItemCount={selectedItems.length}
+            />
+            <EuiSpacer size="xl" />
+            <ItemsGrid
+              totalItemCount={totalItemCount}
+              items={matchingItems}
+              selectedItems={selectedItems}
+              itemsPerPage={itemsPerPage}
+              setItemsPerPage={this.setItemsPerPage}
+              setItemSelected={this.setItemSelected}
+              activePage={activePage}
+              setActivePage={this.setActivePage}
+            />
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  onClick={returnToFiltersList}
+                >
+                  <FormattedMessage
+                    id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
+                    defaultMessage="Cancel"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  onClick={this.save}
+                  disabled={(saveInProgress === true) ||
                   (isNewFilterIdInvalid === true) ||
                   (canCreateFilter === false)
-                }
-                fill
-              >
-                <FormattedMessage
-                  id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
-                  defaultMessage="Save"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPageContent>
-      </EuiPage>
+                  }
+                  fill
+                >
+                  <FormattedMessage
+                    id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
+                    defaultMessage="Save"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPageContent>
+        </EuiPage>
+      </Fragment>
     );
   }
 });

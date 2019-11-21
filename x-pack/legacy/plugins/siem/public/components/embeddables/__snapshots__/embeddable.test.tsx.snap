@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Embeddable it renders 1`] = `
+<Component>
+  <Embeddable>
+    <p>
+      Test content
+    </p>
+  </Embeddable>
+</Component>
+`;

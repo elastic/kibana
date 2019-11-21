@@ -27,6 +27,7 @@ import _ from 'lodash';
 import { fatalError } from './notify';
 import { SimpleEmitter } from './utils/simple_emitter';
 import { createLegacyClass } from './utils/legacy_class';
+import { createDefer } from 'ui/promises';
 
 const location = 'EventEmitter';
 
@@ -55,12 +56,15 @@ export function EventsProvider(Promise) {
     this._listeners[name].push(listener);
 
     (function rebuildDefer() {
-      listener.defer = Promise.defer();
+      listener.defer = createDefer(Promise);
       listener.resolved = listener.defer.promise.then(function (args) {
         rebuildDefer();
 
         // we ignore the completion of handlers, just watch for unhandled errors
         Promise.resolve(handler.apply(handler, args)).catch(error => fatalError(error, location));
+
+        // indicate to bluebird not to worry about this promise being a "runaway"
+        return null;
       });
     }());
 

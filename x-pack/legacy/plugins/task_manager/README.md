@@ -19,7 +19,8 @@ At a high-level, the task manager works like this:
   - `attempts` is less than the configured threshold
 - Attempt to claim the task by using optimistic concurrency to set:
   - status to `running`
-  - `runAt` to now + the timeout specified by the task
+  - `startedAt` to now
+  - `retryAt` to next time task should retry if it times out and is still in `running` status
 - Execute the task, if the previous claim succeeded
 - If the task fails, increment the `attempts` count and reschedule it
 - If the task succeeds:
@@ -38,7 +39,7 @@ If a task specifies a higher `numWorkers` than the system supports, the system's
 
 The task_manager can be configured via `taskManager` config options (e.g. `taskManager.maxAttempts`):
 
-- `max_attempts` - How many times a failing task instance will be retried before it is never run again
+- `max_attempts` - The maximum number of times a task will be attempted before being abandoned as failed
 - `poll_interval` - How often the background worker should check the task_manager index for more work
 - `index` - The name of the index that the task_manager
 - `max_workers` - The maximum number of tasks a Kibana will run concurrently (defaults to 10)
@@ -49,12 +50,12 @@ The task_manager can be configured via `taskManager` config options (e.g. `taskM
 
 ## Task definitions
 
-Plugins define tasks by calling the `registerTaskDefinitions` method on the `server.taskManager` object.
+Plugins define tasks by calling the `registerTaskDefinitions` method on the `server.plugins.task_manager` object.
 
 A sample task can be found in the [x-pack/test/plugin_api_integration/plugins/task_manager](../../test/plugin_api_integration/plugins/task_manager/index.js) folder.
 
 ```js
-const { taskManager } = server;
+const taskManager = server.plugins.task_manager;
 taskManager.registerTaskDefinitions({
   // clusterMonitoring is the task type, and must be unique across the entire system
   clusterMonitoring: {
@@ -64,10 +65,14 @@ taskManager.registerTaskDefinitions({
     // Optional, human-friendly, more detailed description
     description: 'Amazing!!',
 
-    // Optional, how long, in minutes, the system should wait before
+    // Optional, how long, in minutes or seconds, the system should wait before
     // a running instance of this task is considered to be timed out.
     // This defaults to 5 minutes.
     timeout: '5m',
+
+    // Optional, how many attempts before marking task as failed.
+    // This defaults to what is configured at the task manager level.
+    maxAttempts: 5,
 
     // The clusterMonitoring task occupies 2 workers, so if the system has 10 worker slots,
     // 5 clusterMonitoring tasks could run concurrently per Kibana instance. This value is
@@ -75,7 +80,7 @@ taskManager.registerTaskDefinitions({
     numWorkers: 2,
 
     // The createTaskRunner function / method returns an object that is responsible for
-    // performing the work of the task. context: { taskInstance, kbnServer }, is documented below.
+    // performing the work of the task. context: { taskInstance }, is documented below.
     createTaskRunner(context) {
       return {
         // Perform the work of the task. The return value should fit the TaskResult interface, documented
@@ -101,9 +106,6 @@ When Kibana attempts to claim and run a task instance, it looks its definition u
 
 ```js
 {
-  // An instance of the Kibana server object.
-  kbnServer,
-
   // The data associated with this instance of the task, with two properties being most notable:
   //
   // params:
@@ -161,7 +163,7 @@ The data stored for a task instance looks something like this:
   runAt: "2020-07-24T17:34:35.272Z",
 
   // Indicates that this is a recurring task. We currently only support
-  // 1 minute granularity.
+  // minute syntax `5m` or second syntax `10s`.
   interval: '5m',
 
   // How many times this task has been unsuccesfully attempted,
@@ -169,9 +171,14 @@ The data stored for a task instance looks something like this:
   // This is incremented if a task fails or times out.
   attempts: 0,
 
-  // Currently, this is either idle | running. It is used to
+  // Currently, this is either idle | claiming | running | failed. It is used to
   // coordinate which Kibana instance owns / is running a specific
   // task instance.
+  // idle: Task Instance isn't being worked on
+  // claiming: A Kibana instance has claimed ownership but hasn't started running
+  //           the Task Instance yet
+  // running: A Kibana instance has began working on the Task Instance
+  // failed: The last run of the Task Instance failed, waiting to retry
   status: 'idle',
 
   // The params specific to this task instance, which will be
@@ -205,6 +212,9 @@ The data stored for a task instance looks something like this:
   // An application-specific designation, allowing different Kibana
   // plugins / apps to query for only those tasks they care about.
   scope: ['alerting'],
+
+  // The Kibana UUID of the Kibana instance who last claimed ownership for running this task.
+  ownerId: '123e4567-e89b-12d3-a456-426655440000'
 }
 ```
 
@@ -212,8 +222,11 @@ The data stored for a task instance looks something like this:
 
 The task manager mixin exposes a taskManager object on the Kibana server which plugins can use to manage scheduled tasks. Each method takes an optional `scope` argument and ensures that only tasks with the specified scope(s) will be affected.
 
+### schedule
+Using `schedule` you can instruct TaskManger to schedule an instance of a TaskType at some point in the future.
+
 ```js
-const { taskManager } = server;
+const taskManager = server.plugins.task_manager;
 // Schedules a task. All properties are as documented in the previous
 // storage section, except that here, params is an object, not a JSON
 // string.
@@ -246,6 +259,14 @@ const results = await manager.find({ scope: 'my-fanci-app', searchAfter: ['ids']
 }
 ```
 
+### ensureScheduling
+When using the `schedule` api to schedule a Task you can provide a hard coded `id` on the Task. This tells TaskManager to use this `id` to identify the Task Instance rather than generate an `id` on its own.
+The danger is that in such a situation, a Task with that same `id` might already have been scheduled at some earlier point, and this would result in an error. In some cases, this is the expected behavior, but often you only care about ensuring the task has been _scheduled_ and don't need it to be scheduled a fresh.
+
+To achieve this you should use the `ensureScheduling` api which has the exact same behavior as `schedule`, except it allows the scheduling of a Task with an `id` that's already in assigned to another Task and it will assume that the existing Task is the one you wished to `schedule`, treating this as a successful operation.
+
+### more options
+
 More custom access to the tasks can be done directly via Elasticsearch, though that won't be officially supported, as we can change the document structure at any time.
 
 ## Middleware
@@ -256,7 +277,7 @@ For example:
 
 ```js
 // In your plugin's init
-server.taskManager.addMiddleware({
+server.plugins.task_manager.addMiddleware({
   async beforeSave({ taskInstance, ...opts }) {
     console.log(`About to save a task of type ${taskInstance.taskType}`);
 

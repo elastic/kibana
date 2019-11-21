@@ -7,7 +7,7 @@ import { EuiFieldText } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { User } from '../../../../common/model/user';
+import { User } from '../../../../common/model';
 import { UserAPIClient } from '../../../lib/api';
 import { ChangePasswordForm } from './change_password_form';
 

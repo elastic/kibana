@@ -27,10 +27,10 @@ import { REPOSITORY_TYPES } from '../../../../common/constants';
 
 import { useAppDependencies } from '../../index';
 import { documentationLinksService } from '../../services/documentation';
-import { loadRepositoryTypes } from '../../services/http';
+import { useLoadRepositoryTypes } from '../../services/http';
 import { textService } from '../../services/text';
 import { RepositoryValidation } from '../../services/validation';
-import { SectionError, SectionLoading, RepositoryTypeLogo } from '../';
+import { SectionError, SectionLoading, RepositoryTypeLogo, Error } from '../';
 
 interface Props {
   repository: Repository | EmptyRepository;
@@ -54,9 +54,9 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
   // Load repository types
   const {
     error: repositoryTypesError,
-    loading: repositoryTypesLoading,
+    isLoading: repositoryTypesLoading,
     data: repositoryTypes = [],
-  } = loadRepositoryTypes();
+  } = useLoadRepositoryTypes();
 
   const hasValidationErrors: boolean = !validation.isValid;
 
@@ -88,12 +88,12 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
     <EuiDescribedFormGroup
       title={
         <EuiTitle size="s">
-          <h3>
+          <h2>
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryForm.fields.nameDescriptionTitle"
               defaultMessage="Repository name"
             />
-          </h3>
+          </h2>
         </EuiTitle>
       }
       description={
@@ -143,6 +143,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
         <EuiCard
           title={displayName}
           icon={<RepositoryTypeLogo type={type} size="l" />}
+          description={<Fragment />} /* EuiCard requires `description` */
           footer={
             <EuiButtonEmpty
               href={documentationLinksService.getRepositoryTypeDocUrl(type)}
@@ -176,7 +177,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
               defaultMessage="Error loading repository types"
             />
           }
-          error={repositoryTypesError}
+          error={repositoryTypesError as Error}
         />
       );
     }
@@ -226,12 +227,12 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
     return (
       <Fragment>
         <EuiTitle size="s">
-          <h3>
+          <h2>
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryForm.fields.typeDescriptionTitle"
               defaultMessage="Repository type"
             />
-          </h3>
+          </h2>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText id="repositoryTypeDescription" size="s" color="subdued">
@@ -273,12 +274,12 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
     <EuiDescribedFormGroup
       title={
         <EuiTitle size="s">
-          <h3>
+          <h2>
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryForm.fields.sourceOnlyDescriptionTitle"
               defaultMessage="Source-only snapshots"
             />
-          </h3>
+          </h2>
         </EuiTitle>
       }
       description={

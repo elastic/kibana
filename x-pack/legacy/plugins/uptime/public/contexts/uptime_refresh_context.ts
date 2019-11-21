@@ -5,13 +5,23 @@
  */
 
 import { createContext } from 'react';
+import { History } from 'history';
+
+interface Location {
+  pathname: string;
+  search: string;
+}
 
 interface UMRefreshContext {
   lastRefresh: number;
+  history: History | undefined;
+  location: Location | undefined;
 }
 
 const defaultContext: UMRefreshContext = {
   lastRefresh: 0,
+  history: undefined,
+  location: undefined,
 };
 
 export const UptimeRefreshContext = createContext(defaultContext);

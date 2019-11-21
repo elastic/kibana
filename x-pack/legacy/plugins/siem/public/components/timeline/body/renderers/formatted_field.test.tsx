@@ -4,16 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { get } from 'lodash/fp';
 import * as React from 'react';
+import { ThemeProvider } from 'styled-components';
 
 import { mockTimelineData, TestProviders } from '../../../../mock';
 import { getEmptyValue } from '../../../empty_value';
+
 import { FormattedFieldValue } from './formatted_field';
+import { HOST_NAME_FIELD_NAME } from './constants';
+
+jest.mock('../../../../lib/settings/use_kibana_ui_setting');
 
 describe('Events', () => {
+  const theme = () => ({ eui: euiDarkVars, darkMode: true });
+
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
       <FormattedFieldValue
@@ -90,39 +98,44 @@ describe('Events', () => {
 
   test('it renders placeholder text for a non-date field when the field is NOT populated', () => {
     const wrapper = mount(
-      <FormattedFieldValue
-        eventId={mockTimelineData[0].ecs._id}
-        contextId="test"
-        fieldName="fake.field"
-        fieldType="text"
-        value={get('fake.field', mockTimelineData[0].ecs)}
-      />
+      <ThemeProvider theme={theme}>
+        <FormattedFieldValue
+          eventId={mockTimelineData[0].ecs._id}
+          contextId="test"
+          fieldName="fake.field"
+          fieldType="text"
+          value={get('fake.field', mockTimelineData[0].ecs)}
+        />
+      </ThemeProvider>
     );
 
     expect(wrapper.text()).toEqual(getEmptyValue());
   });
 
-  test('it renders tooltip for message when it exists', () => {
+  test('it renders tooltip for truncatable message when it exists', () => {
     const wrapper = mount(
       <FormattedFieldValue
-        eventId={mockTimelineData[0].ecs._id}
         contextId="test"
+        eventId={mockTimelineData[0].ecs._id}
         fieldName="message"
         fieldType="text"
+        truncate
         value={'some message'}
       />
     );
+
     expect(wrapper.find('[data-test-subj="message-tool-tip"]').exists()).toEqual(true);
   });
 
-  test('it does NOT render a tooltip for message when it is null', () => {
+  test('it does NOT render a tooltip for truncatable message when it is null', () => {
     const wrapper = mount(
       <TestProviders>
         <FormattedFieldValue
-          eventId={mockTimelineData[0].ecs._id}
           contextId="test"
+          eventId={mockTimelineData[0].ecs._id}
           fieldName="message"
           fieldType="text"
+          truncate
           value={null}
         />
       </TestProviders>
@@ -130,14 +143,15 @@ describe('Events', () => {
     expect(wrapper.find('[data-test-subj="message-tool-tip"]').exists()).toEqual(false);
   });
 
-  test('it does NOT render a tooltip for message when it is undefined', () => {
+  test('it does NOT render a tooltip for truncatable message when it is undefined', () => {
     const wrapper = mount(
       <TestProviders>
         <FormattedFieldValue
-          eventId={mockTimelineData[0].ecs._id}
           contextId="test"
+          eventId={mockTimelineData[0].ecs._id}
           fieldName="message"
           fieldType="text"
+          truncate
           value={undefined}
         />
       </TestProviders>
@@ -145,14 +159,15 @@ describe('Events', () => {
     expect(wrapper.find('[data-test-subj="message-tool-tip"]').exists()).toEqual(false);
   });
 
-  test('it does NOT render a tooltip for message when it is an empty string', () => {
+  test('it does NOT render a tooltip for truncatable message when it is an empty string', () => {
     const wrapper = mount(
       <TestProviders>
         <FormattedFieldValue
-          eventId={mockTimelineData[0].ecs._id}
           contextId="test"
+          eventId={mockTimelineData[0].ecs._id}
           fieldName="message"
           fieldType="text"
+          truncate
           value={''}
         />
       </TestProviders>
@@ -171,5 +186,75 @@ describe('Events', () => {
       />
     );
     expect(wrapper.text()).toEqual('some message');
+  });
+
+  test('it renders truncatable message text when fieldName is message with truncate prop', () => {
+    const wrapper = mount(
+      <FormattedFieldValue
+        contextId="test"
+        eventId={mockTimelineData[0].ecs._id}
+        fieldName="message"
+        fieldType="text"
+        truncate
+        value={'some message'}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="truncatable-message"]').exists()).toEqual(true);
+  });
+
+  test('it does NOT render the truncatable message style when fieldName is NOT message', () => {
+    const wrapper = mount(
+      <FormattedFieldValue
+        eventId={mockTimelineData[0].ecs._id}
+        contextId="test"
+        fieldName="NOT-message"
+        fieldType="text"
+        value={'a NON-message value'}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="truncatable-message"]').exists()).toEqual(false);
+  });
+
+  test('it renders a hyperlink to the hosts details page when fieldName is host.name, and a hostname is provided', () => {
+    const wrapper = mount(
+      <FormattedFieldValue
+        eventId={mockTimelineData[0].ecs._id}
+        contextId="test"
+        fieldName={HOST_NAME_FIELD_NAME}
+        fieldType="text"
+        value={'some-hostname'}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="host-details-link"]').exists()).toEqual(true);
+  });
+
+  test('it does NOT render a hyperlink to the hosts details page when fieldName is host.name, but a hostname is NOT provided', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <FormattedFieldValue
+          eventId={mockTimelineData[0].ecs._id}
+          contextId="test"
+          fieldName={HOST_NAME_FIELD_NAME}
+          fieldType="text"
+          value={undefined}
+        />
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj="host-details-link"]').exists()).toEqual(false);
+  });
+
+  test('it renders placeholder text when fieldName is host.name, but a hostname is NOT provided', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <FormattedFieldValue
+          eventId={mockTimelineData[0].ecs._id}
+          contextId="test"
+          fieldName={HOST_NAME_FIELD_NAME}
+          fieldType="text"
+          value={undefined}
+        />
+      </TestProviders>
+    );
+    expect(wrapper.text()).toEqual(getEmptyValue());
   });
 });

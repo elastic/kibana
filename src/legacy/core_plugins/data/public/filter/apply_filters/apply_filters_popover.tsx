@@ -17,28 +17,17 @@
  * under the License.
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiForm,
-  EuiFormRow,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiOverlayMask,
-  EuiSwitch,
-} from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiModal, EuiOverlayMask } from '@elastic/eui';
 import React, { Component } from 'react';
-import { getFilterDisplayText } from '../filter_bar/filter_view';
+import { ApplyFiltersPopoverContent } from './apply_filter_popover_content';
+import { IndexPattern } from '../../index_patterns/index_patterns';
+import { esFilters } from '../../../../../../plugins/data/public';
 
 interface Props {
-  filters: Filter[];
+  filters: esFilters.Filter[];
   onCancel: () => void;
-  onSubmit: (filters: Filter[]) => void;
+  onSubmit: (filters: esFilters.Filter[]) => void;
+  indexPatterns: IndexPattern[];
 }
 
 interface State {
@@ -46,83 +35,40 @@ interface State {
 }
 
 export class ApplyFiltersPopover extends Component<Props, State> {
-  public static defaultProps = {
-    filters: [],
-  };
-
-  public constructor(props: Props) {
-    super(props);
-    this.state = {
-      isFilterSelected: props.filters.map(() => true),
-    };
-  }
-
   public render() {
-    if (this.props.filters.length === 0) {
+    if (!this.props.filters || this.props.filters.length === 0) {
       return '';
     }
-
-    const form = (
-      <EuiForm>
-        {this.props.filters.map((filter, i) => (
-          <EuiFormRow key={i}>
-            <EuiSwitch
-              label={getFilterDisplayText(filter)}
-              checked={this.isFilterSelected(i)}
-              onChange={() => this.toggleFilterSelected(i)}
-            />
-          </EuiFormRow>
-        ))}
-      </EuiForm>
-    );
 
     return (
       <EuiOverlayMask>
         <EuiModal onClose={this.props.onCancel}>
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>
-              <FormattedMessage
-                id="data.filter.applyFilters.popupHeader"
-                defaultMessage="Select filters to apply"
-              />
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-
-          <EuiModalBody>{form}</EuiModalBody>
-
-          <EuiModalFooter>
-            <EuiButtonEmpty onClick={this.props.onCancel}>
-              <FormattedMessage
-                id="data.filter.applyFiltersPopup.cancelButtonLabel"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
-            <EuiButton onClick={this.onSubmit} fill>
-              <FormattedMessage
-                id="data.filter.applyFiltersPopup.saveButtonLabel"
-                defaultMessage="Apply"
-              />
-            </EuiButton>
-          </EuiModalFooter>
+          <ApplyFiltersPopoverContent
+            filters={this.props.filters}
+            onCancel={this.props.onCancel}
+            onSubmit={this.props.onSubmit}
+            indexPatterns={this.props.indexPatterns}
+          />
         </EuiModal>
       </EuiOverlayMask>
     );
   }
-
-  private isFilterSelected = (i: number) => {
-    return this.state.isFilterSelected[i];
-  };
-
-  private toggleFilterSelected = (i: number) => {
-    const isFilterSelected = [...this.state.isFilterSelected];
-    isFilterSelected[i] = !isFilterSelected[i];
-    this.setState({ isFilterSelected });
-  };
-
-  private onSubmit = () => {
-    const selectedFilters = this.props.filters.filter(
-      (filter, i) => this.state.isFilterSelected[i]
-    );
-    this.props.onSubmit(selectedFilters);
-  };
 }
+
+type cancelFunction = () => void;
+type submitFunction = (filters: esFilters.Filter[]) => void;
+export const applyFiltersPopover = (
+  filters: esFilters.Filter[],
+  indexPatterns: IndexPattern[],
+  onCancel: cancelFunction,
+  onSubmit: submitFunction
+) => {
+  return (
+    <ApplyFiltersPopoverContent
+      indexPatterns={indexPatterns}
+      filters={filters}
+      onCancel={onCancel}
+      onSubmit={onSubmit}
+    />
+  );
+};

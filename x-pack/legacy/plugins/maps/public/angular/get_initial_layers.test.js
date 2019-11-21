@@ -45,17 +45,13 @@ describe('kibana.yml configured with map.tilemap.url', () => {
       alpha: 1,
       __dataRequests: [],
       id: layers[0].id,
-      applyGlobalQuery: true,
       label: null,
       maxZoom: 24,
       minZoom: 0,
       sourceDescriptor: {
         type: 'KIBANA_TILEMAP'
       },
-      style: {
-        properties: {},
-        type: 'TILE',
-      },
+      style: {},
       type: 'TILE',
       visible: true,
     }]);
@@ -84,49 +80,22 @@ describe('EMS is enabled', () => {
     };
   });
 
-  it('Should get initial layer from EMS data source', () => {
-    const layers = getInitialLayers(layerListNotProvided, false);
+  it('Should get initial layer with EMS tile source', () => {
+    const layers = getInitialLayers(layerListNotProvided);
     expect(layers).toEqual([{
       alpha: 1,
       __dataRequests: [],
       id: layers[0].id,
-      applyGlobalQuery: true,
       label: null,
       maxZoom: 24,
       minZoom: 0,
       source: undefined,
       sourceDescriptor: {
-        id: 'road_map',
+        isAutoSelect: true,
         type: 'EMS_TMS'
       },
-      style: {
-        properties: {},
-        type: 'TILE',
-      },
-      type: 'TILE',
-      visible: true,
-    }]);
-  });
-
-  it('Should use the default dark EMS layer when Kibana dark theme is set', () => {
-    const layers = getInitialLayers(layerListNotProvided, true);
-    expect(layers).toEqual([{
-      alpha: 1,
-      __dataRequests: [],
-      id: layers[0].id,
-      applyGlobalQuery: true,
-      label: null,
-      maxZoom: 24,
-      minZoom: 0,
-      sourceDescriptor: {
-        type: 'EMS_TMS',
-        id: 'dark_map',
-      },
-      style: {
-        properties: {},
-        type: 'TILE',
-      },
-      type: 'TILE',
+      style: {},
+      type: 'VECTOR_TILE',
       visible: true,
     }]);
   });

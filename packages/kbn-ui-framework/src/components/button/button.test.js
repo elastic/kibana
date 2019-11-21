@@ -56,7 +56,7 @@ describe('KuiButton', () => {
   describe('Props', () => {
     describe('buttonType', () => {
       BUTTON_TYPES.forEach(buttonType => {
-        describe(buttonType, () => {
+        describe(`${buttonType}`, () => {
           test(`renders the ${buttonType} class`, () => {
             const $button = render(
               <KuiButton

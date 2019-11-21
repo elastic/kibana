@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
@@ -15,22 +16,26 @@ import {
   TRANSACTION_TYPE
 } from '../../../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../../helpers/range_filter';
-import { Setup } from '../../../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../../helpers/setup_request';
 
-export function bucketFetcher(
+export async function bucketFetcher(
   serviceName: string,
   transactionName: string,
   transactionType: string,
   transactionId: string,
   traceId: string,
+  distributionMax: number,
   bucketSize: number,
-  setup: Setup
+  setup: Setup & SetupTimeRange & SetupUIFilters
 ) {
-  const { start, end, uiFiltersES, client, config } = setup;
-  const bucketTargetCount = config.get<number>('xpack.apm.bucketTargetCount');
+  const { start, end, uiFiltersES, client, indices } = setup;
 
   const params = {
-    index: config.get<string>('apm_oss.transactionIndices'),
+    index: indices['apm_oss.transactionIndices'],
     body: {
       size: 0,
       query: {
@@ -58,7 +63,7 @@ export function bucketFetcher(
             min_doc_count: 0,
             extended_bounds: {
               min: 0,
-              max: bucketSize * bucketTargetCount
+              max: distributionMax
             }
           },
           aggs: {
@@ -74,5 +79,7 @@ export function bucketFetcher(
     }
   };
 
-  return client.search(params);
+  const response = await client.search<Transaction, typeof params>(params);
+
+  return response;
 }

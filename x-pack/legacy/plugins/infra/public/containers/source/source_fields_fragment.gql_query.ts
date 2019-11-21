@@ -48,6 +48,7 @@ export const sourceStatusFieldsFragment = gql`
       type
       searchable
       aggregatable
+      displayable
     }
     logIndicesExist
     metricIndicesExist

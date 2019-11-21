@@ -7,6 +7,14 @@
 import { compact, pick } from 'lodash';
 import datemath from '@elastic/datemath';
 import { IUrlParams } from './types';
+import { ProcessorEvent } from '../../../common/processor_event';
+
+interface PathParams {
+  processorEvent?: ProcessorEvent;
+  serviceName?: string;
+  errorGroupId?: string;
+  serviceNodeName?: string;
+}
 
 export function getParsedDate(rawDate?: string, opts = {}) {
   if (rawDate) {
@@ -56,40 +64,58 @@ export function removeUndefinedProps<T>(obj: T): Partial<T> {
   return pick(obj, value => value !== undefined);
 }
 
-export function getPathParams(pathname: string = '') {
+export function getPathParams(pathname: string = ''): PathParams {
   const paths = getPathAsArray(pathname);
-  const pageName = paths.length > 1 ? paths[1] : paths[0];
+  const pageName = paths[0];
 
   // TODO: use react router's real match params instead of guessing the path order
+
   switch (pageName) {
-    case 'transactions':
-      return {
-        processorEvent: 'transaction',
-        serviceName: paths[0],
-        transactionType: paths[2],
-        transactionName: paths[3]
-      };
-    case 'errors':
-      return {
-        processorEvent: 'error',
-        serviceName: paths[0],
-        errorGroupId: paths[2]
-      };
-    case 'metrics':
-      return {
-        processorEvent: 'metric',
-        serviceName: paths[0]
-      };
-    case 'services': // fall thru since services and traces share path params
+    case 'services':
+      let servicePageName = paths[2];
+      const serviceName = paths[1];
+      const serviceNodeName = paths[3];
+
+      if (servicePageName === 'nodes' && paths.length > 3) {
+        servicePageName = 'metrics';
+      }
+
+      switch (servicePageName) {
+        case 'transactions':
+          return {
+            processorEvent: ProcessorEvent.transaction,
+            serviceName
+          };
+        case 'errors':
+          return {
+            processorEvent: ProcessorEvent.error,
+            serviceName,
+            errorGroupId: paths[3]
+          };
+        case 'metrics':
+          return {
+            processorEvent: ProcessorEvent.metric,
+            serviceName,
+            serviceNodeName
+          };
+        case 'nodes':
+          return {
+            processorEvent: ProcessorEvent.metric,
+            serviceName
+          };
+        case 'service-map':
+          return {
+            serviceName
+          };
+        default:
+          return {};
+      }
+
     case 'traces':
       return {
-        processorEvent: 'transaction',
-        serviceName: undefined
+        processorEvent: ProcessorEvent.transaction
       };
     default:
-      return {
-        processorEvent: 'transaction',
-        serviceName: paths[0]
-      };
+      return {};
   }
 }

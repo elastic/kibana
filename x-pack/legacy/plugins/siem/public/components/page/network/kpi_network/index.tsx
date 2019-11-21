@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
 
-import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexItem, EuiLoadingSpinner, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
-import { EuiSpacer } from '@elastic/eui';
 import { chunk as _chunk } from 'lodash/fp';
 import {
   StatItemsComponent,
@@ -20,6 +18,7 @@ import {
 import { KpiNetworkData } from '../../../../graphql/types';
 
 import * as i18n from './translations';
+import { UpdateDateRange } from '../../../charts/common';
 
 const kipsPerRow = 2;
 const kpiWidgetHeight = 228;
@@ -30,26 +29,31 @@ const euiColorVis3 = '#490092';
 
 interface KpiNetworkProps {
   data: KpiNetworkData;
+  from: number;
+  id: string;
   loading: boolean;
+  to: number;
+  narrowDateRange: UpdateDateRange;
 }
 
 export const fieldTitleChartMapping: Readonly<StatItems[]> = [
   {
     key: 'UniqueIps',
+    index: 2,
     fields: [
       {
         key: 'uniqueSourcePrivateIps',
         value: null,
-        name: i18n.SRC,
-        description: i18n.SOURCE,
+        name: i18n.SOURCE_CHART_LABEL,
+        description: i18n.SOURCE_UNIT_LABEL,
         color: euiColorVis2,
         icon: 'visMapCoordinate',
       },
       {
         key: 'uniqueDestinationPrivateIps',
         value: null,
-        name: i18n.DIST,
-        description: i18n.DESTINATION,
+        name: i18n.DESTINATION_CHART_LABEL,
+        description: i18n.DESTINATION_UNIT_LABEL,
         color: euiColorVis3,
         icon: 'visMapCoordinate',
       },
@@ -64,6 +68,7 @@ export const fieldTitleChartMapping: Readonly<StatItems[]> = [
 const fieldTitleMatrixMapping: Readonly<StatItems[]> = [
   {
     key: 'networkEvents',
+    index: 0,
     fields: [
       {
         key: 'networkEvents',
@@ -76,6 +81,7 @@ const fieldTitleMatrixMapping: Readonly<StatItems[]> = [
   },
   {
     key: 'dnsQueries',
+    index: 1,
     fields: [
       {
         key: 'dnsQueries',
@@ -86,6 +92,7 @@ const fieldTitleMatrixMapping: Readonly<StatItems[]> = [
   },
   {
     key: 'uniqueFlowId',
+    index: 3,
     fields: [
       {
         key: 'uniqueFlowId',
@@ -96,6 +103,7 @@ const fieldTitleMatrixMapping: Readonly<StatItems[]> = [
   },
   {
     key: 'tlsHandshakes',
+    index: 4,
     fields: [
       {
         key: 'tlsHandshakes',
@@ -110,44 +118,72 @@ const FlexGroup = styled(EuiFlexGroup)`
   min-height: ${kpiWidgetHeight}px;
 `;
 
-export const KpiNetworkBaseComponent = ({
-  fieldsMapping,
-  data,
-}: {
+FlexGroup.displayName = 'FlexGroup';
+
+export const KpiNetworkBaseComponent = React.memo<{
   fieldsMapping: Readonly<StatItems[]>;
   data: KpiNetworkData;
-}) => {
-  const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(fieldsMapping, data);
+  id: string;
+  from: number;
+  to: number;
+  narrowDateRange: UpdateDateRange;
+}>(({ fieldsMapping, data, id, from, to, narrowDateRange }) => {
+  const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(
+    fieldsMapping,
+    data,
+    id,
+    from,
+    to,
+    narrowDateRange
+  );
 
   return (
     <EuiFlexGroup wrap>
-      {statItemsProps.map(mappedStatItemProps => {
+      {statItemsProps.map((mappedStatItemProps, idx) => {
         return <StatItemsComponent {...mappedStatItemProps} />;
       })}
     </EuiFlexGroup>
   );
-};
-
-export const KpiNetworkComponent = React.memo<KpiNetworkProps>(({ data, loading }) => {
-  return loading ? (
-    <FlexGroup justifyContent="center" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <EuiLoadingSpinner size="xl" />
-      </EuiFlexItem>
-    </FlexGroup>
-  ) : (
-    <EuiFlexGroup wrap>
-      <EuiFlexItem grow={1}>
-        {_chunk(kipsPerRow, fieldTitleMatrixMapping).map((mappingsPerLine, idx) => (
-          <React.Fragment key={`kpi-network-row-${idx}`}>
-            {idx % kipsPerRow === 1 && <EuiSpacer size="l" />}
-            <KpiNetworkBaseComponent data={data} fieldsMapping={mappingsPerLine} />
-          </React.Fragment>
-        ))}
-      </EuiFlexItem>
-      <EuiFlexItem grow={1}>
-        <KpiNetworkBaseComponent data={data} fieldsMapping={fieldTitleChartMapping} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
 });
+
+export const KpiNetworkComponent = React.memo<KpiNetworkProps>(
+  ({ data, from, id, loading, to, narrowDateRange }) => {
+    return loading ? (
+      <FlexGroup justifyContent="center" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="xl" />
+        </EuiFlexItem>
+      </FlexGroup>
+    ) : (
+      <EuiFlexGroup wrap>
+        <EuiFlexItem grow={1}>
+          {_chunk(kipsPerRow, fieldTitleMatrixMapping).map((mappingsPerLine, idx) => (
+            <React.Fragment key={`kpi-network-row-${idx}`}>
+              {idx % kipsPerRow === 1 && <EuiSpacer size="l" />}
+              <KpiNetworkBaseComponent
+                data={data}
+                id={id}
+                fieldsMapping={mappingsPerLine}
+                from={from}
+                to={to}
+                narrowDateRange={narrowDateRange}
+              />
+            </React.Fragment>
+          ))}
+        </EuiFlexItem>
+        <EuiFlexItem grow={1}>
+          <KpiNetworkBaseComponent
+            data={data}
+            id={id}
+            fieldsMapping={fieldTitleChartMapping}
+            from={from}
+            to={to}
+            narrowDateRange={narrowDateRange}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
+
+KpiNetworkComponent.displayName = 'KpiNetworkComponent';

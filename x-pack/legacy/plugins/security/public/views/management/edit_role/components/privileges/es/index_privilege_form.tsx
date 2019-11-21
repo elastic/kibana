@@ -20,8 +20,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { ChangeEvent, Component, Fragment } from 'react';
 import { RoleIndexPrivilege } from '../../../../../../../common/model';
-// @ts-ignore
-import { getIndexPrivileges } from '../../../../../../services/role_privileges';
 import { RoleValidator } from '../../../lib/validate_role';
 
 const fromOption = (option: any) => option.label;
@@ -31,6 +29,7 @@ interface Props {
   formIndex: number;
   indexPrivilege: RoleIndexPrivilege;
   indexPatterns: string[];
+  availableIndexPrivileges: string[];
   availableFields: string[];
   onChange: (indexPrivilege: RoleIndexPrivilege) => void;
   onDelete: () => void;
@@ -126,7 +125,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
             >
               <EuiComboBox
                 data-test-subj={`privilegesInput${this.props.formIndex}`}
-                options={getIndexPrivileges().map(toOption)}
+                options={this.props.availableIndexPrivileges.map(toOption)}
                 selectedOptions={this.props.indexPrivilege.privileges.map(toOption)}
                 onChange={this.onPrivilegeChange}
                 isDisabled={this.props.isReadOnlyRole}

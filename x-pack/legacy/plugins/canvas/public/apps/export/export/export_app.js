@@ -6,6 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import Style from 'style-it';
 import { WorkpadPage } from '../../../components/workpad_page';
 import { Link } from '../../../components/link';
 
@@ -36,9 +37,20 @@ export class ExportApp extends React.PureComponent {
               Edit Workpad
             </Link>
           </div>
-          <div className="canvasExport__stageContent">
-            <WorkpadPage isSelected page={activePage} height={height} width={width} />
-          </div>
+          {Style.it(
+            workpad.css,
+            <div className="canvasExport__stageContent">
+              <WorkpadPage
+                isSelected
+                key={activePage.id}
+                pageId={activePage.id}
+                height={height}
+                width={width}
+                registerLayout={() => {}}
+                unregisterLayout={() => {}}
+              />
+            </div>
+          )}
         </div>
       </div>
     );

@@ -5,20 +5,24 @@
  */
 import React from 'react';
 import { FETCH_STATUS, useFetcher } from '../../hooks/useFetcher';
-import { loadLicense } from '../../services/rest/xpack';
+import { loadLicense, LicenseApiResponse } from '../../services/rest/xpack';
 import { InvalidLicenseNotification } from './InvalidLicenseNotification';
+import { useKibanaCore } from '../../../../observability/public';
 
-const initialLicense = {
-  features: {
-    watcher: { is_available: false },
-    ml: { is_available: false }
-  },
-  license: { is_active: false }
+const initialLicense: LicenseApiResponse = {
+  features: {},
+  license: {
+    is_active: false
+  }
 };
 export const LicenseContext = React.createContext(initialLicense);
 
 export const LicenseProvider: React.FC = ({ children }) => {
-  const { data = initialLicense, status } = useFetcher(() => loadLicense(), []);
+  const { http } = useKibanaCore();
+  const { data = initialLicense, status } = useFetcher(
+    () => loadLicense(http),
+    [http]
+  );
   const hasValidLicense = data.license.is_active;
 
   // if license is invalid show an error message

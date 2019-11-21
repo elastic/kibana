@@ -9,7 +9,9 @@ exports[`renders DashboardSaveModal 1`] = `
     <React.Fragment>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -30,7 +32,9 @@ exports[`renders DashboardSaveModal 1`] = `
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={
           <FormattedMessage

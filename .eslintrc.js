@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 const { readdirSync } = require('fs');
 const { resolve } = require('path');
 
@@ -31,15 +50,192 @@ const ELASTIC_LICENSE_HEADER = `
 `;
 
 module.exports = {
-  extends: ['@elastic/eslint-config-kibana'],
+  root: true,
+
+  extends: ['@elastic/eslint-config-kibana', 'plugin:@elastic/eui/recommended'],
 
   overrides: [
+    /**
+     * Temporarily disable some react rules for specific plugins, remove in separate PRs
+     */
+    {
+      files: ['packages/kbn-ui-framework/**/*.{js,ts,tsx}'],
+      rules: {
+        'jsx-a11y/no-onchange': 'off',
+      },
+    },
+    {
+      files: ['src/legacy/core_plugins/console/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['src/legacy/core_plugins/data/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['src/legacy/core_plugins/expressions/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['src/legacy/core_plugins/kbn_vislib_vis_types/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['src/legacy/core_plugins/kibana/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/rules-of-hooks': 'off',
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['src/legacy/core_plugins/tile_map/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['src/legacy/core_plugins/vis_type_markdown/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['src/legacy/core_plugins/vis_type_metric/**/*.{js,ts,tsx}'],
+      rules: {
+        'jsx-a11y/click-events-have-key-events': 'off',
+      },
+    },
+    {
+      files: ['src/legacy/core_plugins/vis_type_table/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['src/legacy/core_plugins/vis_type_vega/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['src/legacy/ui/public/vis/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['src/plugins/es_ui_shared/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['src/plugins/eui_utils/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['src/plugins/kibana_react/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/rules-of-hooks': 'off',
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['src/plugins/kibana_utils/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['x-pack/legacy/plugins/canvas/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+        'jsx-a11y/click-events-have-key-events': 'off',
+      },
+    },
+    {
+      files: ['x-pack/legacy/plugins/cross_cluster_replication/**/*.{js,ts,tsx}'],
+      rules: {
+        'jsx-a11y/click-events-have-key-events': 'off',
+      },
+    },
+    {
+      files: ['x-pack/legacy/plugins/graph/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['x-pack/legacy/plugins/index_management/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+        'react-hooks/rules-of-hooks': 'off',
+      },
+    },
+    {
+      files: ['x-pack/legacy/plugins/infra/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+        'react-hooks/rules-of-hooks': 'off',
+      },
+    },
+    {
+      files: ['x-pack/legacy/plugins/lens/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+        'react-hooks/rules-of-hooks': 'off',
+      },
+    },
+    {
+      files: ['x-pack/legacy/plugins/ml/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['x-pack/legacy/plugins/monitoring/**/*.{js,ts,tsx}'],
+      rules: {
+        'jsx-a11y/click-events-have-key-events': 'off',
+      },
+    },
+    {
+      files: ['x-pack/legacy/plugins/snapshot_restore/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['x-pack/legacy/plugins/uptime/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+        'react-hooks/rules-of-hooks': 'off',
+      },
+    },
+    {
+      files: ['x-pack/legacy/plugins/watcher/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/rules-of-hooks': 'off',
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+
     /**
      * Prettier
      */
     {
       files: [
         '.eslintrc.js',
+        'packages/kbn-utility-types/**/*',
         'packages/kbn-eslint-plugin-eslint/**/*',
         'packages/kbn-config-schema/**/*',
         'packages/kbn-pm/**/*',
@@ -140,19 +336,42 @@ module.exports = {
                   'src/core/public/**/*',
                   '!src/core/public/index.ts',
                   '!src/core/public/mocks.ts',
+                  '!src/core/public/*.test.mocks.ts',
                   '!src/core/public/utils/**/*',
 
                   'src/core/server/**/*',
                   '!src/core/server/index.ts',
                   '!src/core/server/mocks.ts',
+                  '!src/core/server/types.ts',
+                  // for absolute imports until fixed in
+                  // https://github.com/elastic/kibana/issues/36096
+                  '!src/core/server/types',
+                  '!src/core/server/*.test.mocks.ts',
 
                   'src/plugins/**/public/**/*',
-                  '!src/plugins/**/public/index*',
+                  '!src/plugins/**/public/index.{js,ts,tsx}',
 
                   'src/plugins/**/server/**/*',
-                  '!src/plugins/**/server/index*',
+                  '!src/plugins/**/server/index.{js,ts,tsx}',
                 ],
                 allowSameFolder: true,
+              },
+              {
+                from: ['src/legacy/ui/**/*', 'ui/**/*'],
+                target: [
+                  'test/plugin_functional/plugins/**/public/np_ready/**/*',
+                  'test/plugin_functional/plugins/**/server/np_ready/**/*',
+                  'src/legacy/core_plugins/**/public/np_ready/**/*',
+                  'src/legacy/core_plugins/**/server/np_ready/**/*',
+                  'x-pack/legacy/plugins/**/public/np_ready/**/*',
+                  'x-pack/legacy/plugins/**/server/np_ready/**/*',
+                ],
+                allowSameFolder: true,
+                errorMessage:
+                  'NP-ready code should not import from /src/legacy/ui/** folder. ' +
+                  'Instead of importing from /src/legacy/ui/** deeply within a np_ready folder, ' +
+                  'import those things once at the top level of your plugin and pass those down, just ' +
+                  'like you pass down `core` and `plugins` objects.',
               },
             ],
           },
@@ -168,9 +387,12 @@ module.exports = {
         'x-pack/test/functional/apps/**/*.js',
         'x-pack/legacy/plugins/apm/**/*.js',
         'test/*/config.ts',
+        'test/*/{tests,test_suites,apis,apps}/**/*',
         'test/visual_regression/tests/**/*',
-        'x-pack/test/visual_regression/tests/**/*',
-        'x-pack/test/*/config.ts',
+        'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
+        'x-pack/test/*/*config.*ts',
+        'x-pack/test/saved_object_api_integration/*/apis/**/*',
+        'x-pack/test/ui_capabilities/*/tests/**/*',
       ],
       rules: {
         'import/no-default-export': 'off',
@@ -306,7 +528,6 @@ module.exports = {
     {
       files: [
         'test/functional/services/lib/web_element_wrapper/scroll_into_view_if_necessary.js',
-        'test/visual_regression/services/visual_testing/take_percy_snapshot.js',
         '**/browser_exec_scripts/**/*.js',
       ],
       rules: {
@@ -361,6 +582,16 @@ module.exports = {
     },
 
     /**
+     * Jest specific rules
+     */
+    {
+      files: ['**/*.test.{js,ts,tsx}'],
+      rules: {
+        'jest/valid-describe': 'error',
+      },
+    },
+
+    /**
      * APM overrides
      */
     {
@@ -368,6 +599,14 @@ module.exports = {
       rules: {
         'no-unused-vars': ['error', { ignoreRestSiblings: true }],
         'no-console': ['warn', { allow: ['error'] }],
+      },
+    },
+    {
+      plugins: ['react-hooks'],
+      files: ['x-pack/legacy/plugins/apm/**/*.{ts,tsx}'],
+      rules: {
+        'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
+        'react-hooks/exhaustive-deps': ['error', { additionalHooks: '^useFetcher$' }],
       },
     },
 
@@ -469,6 +708,10 @@ module.exports = {
       // typescript and javascript for front and back end
       files: ['x-pack/legacy/plugins/siem/**/*.{js,ts,tsx}'],
       plugins: ['eslint-plugin-node', 'react'],
+      env: {
+        mocha: true,
+        jest: true,
+      },
       rules: {
         'accessor-pairs': 'error',
         'array-callback-return': 'error',
@@ -496,8 +739,7 @@ module.exports = {
         'no-continue': 'error',
         'no-dupe-keys': 'error',
         'no-duplicate-case': 'error',
-        // This will be turned on after bug fixes are mostly completed
-        // 'no-duplicate-imports': 'warn',
+        'no-duplicate-imports': 'error',
         'no-empty-character-class': 'error',
         'no-empty-pattern': 'error',
         'no-ex-assign': 'error',
@@ -516,18 +758,15 @@ module.exports = {
         'no-misleading-character-class': 'error',
         'no-new-symbol': 'error',
         'no-obj-calls': 'error',
-        // This will be turned on after bug fixes are mostly complete
-        // 'no-param-reassign': 'warn',
+        'no-param-reassign': 'error',
         'no-process-exit': 'error',
         'no-prototype-builtins': 'error',
-        // This will be turned on after bug fixes are mostly complete
-        // 'no-return-await': 'warn',
+        'no-return-await': 'error',
         'no-self-compare': 'error',
         'no-shadow-restricted-names': 'error',
         'no-sparse-arrays': 'error',
         'no-this-before-super': 'error',
-        // This will be turned on after bug fixes are mostly complete
-        // 'no-undef': 'warn',
+        'no-undef': 'error',
         'no-unreachable': 'error',
         'no-unsafe-finally': 'error',
         'no-useless-call': 'error',
@@ -577,7 +816,6 @@ module.exports = {
         // will introduced after the other warns are fixed
         // 'react/sort-comp': 'error',
         'react/void-dom-elements-no-children': 'error',
-        'react/jsx-boolean-value': ['error', 'warn'],
         // will introduced after the other warns are fixed
         // 'react/jsx-no-bind': 'error',
         'react/jsx-no-comment-textnodes': 'error',
@@ -588,11 +826,23 @@ module.exports = {
         // might be introduced after the other warns are fixed
         // 'react/jsx-sort-props': 'error',
         'react/jsx-tag-spacing': 'error',
+        // might be introduced after the other warns are fixed
+        'react-hooks/exhaustive-deps': 'off',
         'require-atomic-updates': 'error',
         'rest-spread-spacing': ['error', 'never'],
         'symbol-description': 'error',
         'template-curly-spacing': 'error',
         'vars-on-top': 'error',
+      },
+    },
+
+    /**
+     * Lens overrides
+     */
+    {
+      files: ['x-pack/legacy/plugins/lens/**/*.ts', 'x-pack/legacy/plugins/lens/**/*.tsx'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
       },
     },
 

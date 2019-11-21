@@ -12,7 +12,6 @@ function isEnabledByDefault(actionType) {
     case ACTION_TYPES.WEBHOOK:
     case ACTION_TYPES.INDEX:
     case ACTION_TYPES.LOGGING:
-    case ACTION_TYPES.SLACK: // https://github.com/elastic/x-pack-elasticsearch/issues/1573
       return true;
     default:
       return false;
@@ -22,8 +21,7 @@ function isEnabledByDefault(actionType) {
 function requiresAccountInfo(actionType) {
   switch (actionType) {
     case ACTION_TYPES.EMAIL:
-    case ACTION_TYPES.HIPCHAT:
-    // case ACTION_TYPES.SLACK: // https://github.com/elastic/x-pack-elasticsearch/issues/1573
+    case ACTION_TYPES.SLACK:
     case ACTION_TYPES.JIRA:
     case ACTION_TYPES.PAGERDUTY:
       return true;

@@ -57,6 +57,56 @@ module.exports = async ({ config }) => {
     ],
   });
 
+  // Enable SASS, but exclude CSS Modules in Storybook
+  config.module.rules.push({
+    test: /\.scss$/,
+    exclude: /\.module.(s(a|c)ss)$/,
+    use: [
+      { loader: 'style-loader' },
+      { loader: 'css-loader', options: { importLoaders: 2 } },
+      {
+        loader: 'postcss-loader',
+        options: {
+          path: path.resolve(KIBANA_ROOT, 'src/optimize/postcss.config.js'),
+        },
+      },
+      { loader: 'sass-loader' },
+    ],
+  });
+
+  // Enable CSS Modules in Storybook
+  config.module.rules.push({
+    test: /\.module\.s(a|c)ss$/,
+    loader: [
+      'style-loader',
+      {
+        loader: 'css-loader',
+        options: {
+          importLoaders: 2,
+          modules: true,
+          localIdentName: '[name]__[local]___[hash:base64:5]',
+        },
+      },
+      {
+        loader: 'postcss-loader',
+        options: {
+          path: path.resolve(KIBANA_ROOT, 'src/optimize/postcss.config.js'),
+        },
+      },
+      {
+        loader: 'sass-loader',
+      },
+    ],
+  });
+
+  // Ensure jQuery is global for Storybook, specifically for the runtime.
+  config.plugins.push(
+    new webpack.ProvidePlugin({
+      $: 'jquery',
+      jQuery: 'jquery',
+    })
+  );
+
   // Reference the built DLL file of static(ish) dependencies, which are removed
   // during kbn:bootstrap and rebuilt if missing.
   config.plugins.push(
@@ -109,8 +159,8 @@ module.exports = async ({ config }) => {
     })
   );
 
-  // Tell Webpack about the ts/x extensions
-  config.resolve.extensions.push('.ts', '.tsx');
+  // Tell Webpack about relevant extensions
+  config.resolve.extensions.push('.ts', '.tsx', '.scss');
 
   // Alias imports to either a mock or the proper module or directory.
   // NOTE: order is important here - `ui/notify` will override `ui/notify/foo` if it
@@ -126,6 +176,10 @@ module.exports = async ({ config }) => {
   config.resolve.alias['plugins/interpreter/interpreter'] = path.resolve(
     KIBANA_ROOT,
     'packages/kbn-interpreter/target/common'
+  );
+  config.resolve.alias['plugins/interpreter/registries'] = path.resolve(
+    KIBANA_ROOT,
+    'packages/kbn-interpreter/target/common/registries'
   );
 
   return config;

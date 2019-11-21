@@ -12,37 +12,35 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Location } from 'history';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useFetcher } from '../../../hooks/useFetcher';
-import {
-  loadErrorDistribution,
-  loadErrorGroupList
-} from '../../../services/rest/apm/error_groups';
-import { IUrlParams } from '../../../context/UrlParamsContext/types';
-import { useUiFilters } from '../../../context/UrlParamsContext';
 import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
 import { ErrorGroupList } from './List';
+import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useTrackPageview } from '../../../../../infra/public';
+import { PROJECTION } from '../../../../common/projections/typings';
+import { LocalUIFilters } from '../../shared/LocalUIFilters';
 
-interface ErrorGroupOverviewProps {
-  urlParams: IUrlParams;
-  location: Location;
-}
+const ErrorGroupOverview: React.SFC = () => {
+  const { urlParams, uiFilters } = useUrlParams();
 
-const ErrorGroupOverview: React.SFC<ErrorGroupOverviewProps> = ({
-  urlParams,
-  location
-}) => {
   const { serviceName, start, end, sortField, sortDirection } = urlParams;
-  const uiFilters = useUiFilters(urlParams);
+
   const { data: errorDistributionData } = useFetcher(
-    () => {
+    callApmApi => {
       if (serviceName && start && end) {
-        return loadErrorDistribution({
-          serviceName,
-          start,
-          end,
-          uiFilters
+        return callApmApi({
+          pathname: '/api/apm/services/{serviceName}/errors/distribution',
+          params: {
+            path: {
+              serviceName
+            },
+            query: {
+              start,
+              end,
+              uiFilters: JSON.stringify(uiFilters)
+            }
+          }
         });
       }
     },
@@ -50,58 +48,86 @@ const ErrorGroupOverview: React.SFC<ErrorGroupOverviewProps> = ({
   );
 
   const { data: errorGroupListData } = useFetcher(
-    () => {
+    callApmApi => {
+      const normalizedSortDirection = sortDirection === 'asc' ? 'asc' : 'desc';
+
       if (serviceName && start && end) {
-        return loadErrorGroupList({
-          serviceName,
-          start,
-          end,
-          sortField,
-          sortDirection,
-          uiFilters
+        return callApmApi({
+          pathname: '/api/apm/services/{serviceName}/errors',
+          params: {
+            path: {
+              serviceName
+            },
+            query: {
+              start,
+              end,
+              sortField,
+              sortDirection: normalizedSortDirection,
+              uiFilters: JSON.stringify(uiFilters)
+            }
+          }
         });
       }
     },
     [serviceName, start, end, sortField, sortDirection, uiFilters]
   );
 
+  useTrackPageview({
+    app: 'apm',
+    path: 'error_group_overview'
+  });
+  useTrackPageview({ app: 'apm', path: 'error_group_overview', delay: 15000 });
+
+  const localUIFiltersConfig = useMemo(() => {
+    const config: React.ComponentProps<typeof LocalUIFilters> = {
+      filterNames: ['host', 'containerId', 'podName'],
+      params: {
+        serviceName
+      },
+      projection: PROJECTION.ERROR_GROUPS
+    };
+
+    return config;
+  }, [serviceName]);
+
   if (!errorDistributionData || !errorGroupListData) {
     return null;
   }
 
   return (
-    <React.Fragment>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiPanel>
-            <ErrorDistribution
-              distribution={errorDistributionData}
-              title={i18n.translate(
-                'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
-                {
-                  defaultMessage: 'Error occurrences'
-                }
-              )}
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <EuiFlexGroup>
+      <EuiFlexItem grow={1}>
+        <LocalUIFilters {...localUIFiltersConfig} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={7}>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiPanel>
+              <ErrorDistribution
+                distribution={errorDistributionData}
+                title={i18n.translate(
+                  'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
+                  {
+                    defaultMessage: 'Error occurrences'
+                  }
+                )}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-      <EuiSpacer size="s" />
-
-      <EuiPanel>
-        <EuiTitle size="xs">
-          <h3>Errors</h3>
-        </EuiTitle>
         <EuiSpacer size="s" />
 
-        <ErrorGroupList
-          urlParams={urlParams}
-          items={errorGroupListData}
-          location={location}
-        />
-      </EuiPanel>
-    </React.Fragment>
+        <EuiPanel>
+          <EuiTitle size="xs">
+            <h3>Errors</h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+
+          <ErrorGroupList items={errorGroupListData} />
+        </EuiPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

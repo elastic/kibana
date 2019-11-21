@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Authentication Table Component rendering it renders the authentication table 1`] = `
-<Connect(pure(Component))
+<Connect(AuthenticationTableComponent)
   data={
     Array [
       Object {
@@ -100,11 +100,13 @@ exports[`Authentication Table Component rendering it renders the authentication 
       },
     ]
   }
-  hasNextPage={true}
-  loadMore={[MockFunction]}
+  fakeTotalCount={50}
+  id="authentication"
+  isInspect={false}
+  loadPage={[MockFunction]}
   loading={false}
-  nextCursor="aa7ca589f1b8220002f2fc61c64cfbf1"
-  totalCount={4}
+  showMorePagesIndicator={true}
+  totalCount={54}
   type="page"
 />
 `;

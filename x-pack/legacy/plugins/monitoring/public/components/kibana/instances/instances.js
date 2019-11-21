@@ -4,35 +4,82 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { PureComponent } from 'react';
-import { EuiPage, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, EuiLink } from '@elastic/eui';
-import { capitalize } from 'lodash';
+import React, { PureComponent, Fragment } from 'react';
+import {
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+  EuiPanel,
+  EuiSpacer,
+  EuiLink,
+  EuiCallOut
+} from '@elastic/eui';
+import { capitalize, get } from 'lodash';
 import { ClusterStatus } from '../cluster_status';
 import { EuiMonitoringTable } from '../../table';
 import { KibanaStatusIcon } from '../status_icon';
+import { StatusIcon } from 'plugins/monitoring/components/status_icon';
 import { formatMetric, formatNumber } from '../../../lib/format_number';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { SetupModeBadge } from '../../setup_mode/badge';
+import { KIBANA_SYSTEM_ID } from '../../../../common/constants';
+import { ListingCallOut } from '../../setup_mode/listing_callout';
 
-const getColumns = (kbnUrl, scope) => {
+const getColumns = (kbnUrl, scope, setupMode) => {
   const columns = [
     {
       name: i18n.translate('xpack.monitoring.kibana.listing.nameColumnTitle', {
         defaultMessage: 'Name'
       }),
       field: 'name',
-      render: (name, kibana) => (
-        <EuiLink
-          onClick={() => {
-            scope.$evalAsync(() => {
-              kbnUrl.changePath(`/kibana/instances/${kibana.kibana.uuid}`);
-            });
-          }}
-          data-test-subj={`kibanaLink-${name}`}
-        >
-          { name }
-        </EuiLink>
-      )
+      render: (name, kibana) => {
+        let setupModeStatus = null;
+        if (setupMode && setupMode.enabled) {
+          const list = get(setupMode, 'data.byUuid', {});
+          const uuid = get(kibana, 'kibana.uuid');
+          const status = list[uuid] || {};
+          const instance = {
+            uuid,
+            name: kibana.name
+          };
+
+          setupModeStatus = (
+            <div className="monTableCell__setupModeStatus">
+              <SetupModeBadge
+                setupMode={setupMode}
+                status={status}
+                instance={instance}
+                productName={KIBANA_SYSTEM_ID}
+              />
+            </div>
+          );
+          if (status.isNetNewUser) {
+            return (
+              <div>
+                {name}
+                {setupModeStatus}
+              </div>
+            );
+          }
+        }
+
+        return (
+          <div>
+            <EuiLink
+              onClick={() => {
+                scope.$evalAsync(() => {
+                  kbnUrl.changePath(`/kibana/instances/${kibana.kibana.uuid}`);
+                });
+              }}
+              data-test-subj={`kibanaLink-${name}`}
+            >
+              { name }
+            </EuiLink>
+            {setupModeStatus}
+          </div>
+        );
+      }
     },
     {
       name: i18n.translate('xpack.monitoring.kibana.listing.statusColumnTitle', {
@@ -41,7 +88,14 @@ const getColumns = (kbnUrl, scope) => {
       field: 'status',
       render: (status, kibana) => (
         <div
-          title={`Instance status: ${status}`}
+          title={
+            i18n.translate('xpack.monitoring.kibana.listing.instanceStatusTitle', {
+              defaultMessage: 'Instance status: {kibanaStatus}',
+              values: {
+                kibanaStatus: status
+              }
+            })
+          }
           className="monTableCell__status"
         >
           <KibanaStatusIcon status={status} availability={kibana.availability} />&nbsp;
@@ -118,7 +172,6 @@ const getColumns = (kbnUrl, scope) => {
 export class KibanaInstances extends PureComponent {
   render() {
     const {
-      instances,
       clusterStatus,
       angular,
       setupMode,
@@ -127,11 +180,78 @@ export class KibanaInstances extends PureComponent {
       onTableChange
     } = this.props;
 
+    let setupModeCallOut = null;
+    // Merge the instances data with the setup data if enabled
+    const instances = this.props.instances || [];
+    if (setupMode.enabled && setupMode.data) {
+      // We want to create a seamless experience for the user by merging in the setup data
+      // and the node data from monitoring indices in the likely scenario where some instances
+      // are using MB collection and some are using no collection
+      const instancesByUuid = instances.reduce((byUuid, instance) => ({
+        ...byUuid,
+        [get(instance, 'kibana.uuid')]: instance
+      }), {});
+
+      instances.push(...Object.entries(setupMode.data.byUuid)
+        .reduce((instances, [nodeUuid, instance]) => {
+          if (!instancesByUuid[nodeUuid]) {
+            instances.push({
+              kibana: {
+                ...instance.instance.kibana,
+                status: StatusIcon.TYPES.GRAY
+              }
+            });
+          }
+          return instances;
+        }, []));
+
+      setupModeCallOut = (
+        <ListingCallOut
+          setupModeData={setupMode.data}
+          useNodeIdentifier={false}
+          productName={KIBANA_SYSTEM_ID}
+          customRenderer={() => {
+            const customRenderResponse = {
+              shouldRender: false,
+              componentToRender: null
+            };
+
+            const hasInstances = setupMode.data.totalUniqueInstanceCount > 0;
+            if (!hasInstances) {
+              customRenderResponse.shouldRender = true;
+              customRenderResponse.componentToRender = (
+                <Fragment>
+                  <EuiCallOut
+                    title={i18n.translate('xpack.monitoring.kibana.instances.metricbeatMigration.detectedNodeTitle', {
+                      defaultMessage: 'Kibana instance detected',
+                    })}
+                    color="warning"
+                    iconType="flag"
+                  >
+                    <p>
+                      {i18n.translate('xpack.monitoring.kibana.instances.metricbeatMigration.detectedNodeDescription', {
+                        defaultMessage: `The following instances are not monitored.
+                        Click 'Monitor with Metricbeat' below to start monitoring.`,
+                      })}
+                    </p>
+                  </EuiCallOut>
+                  <EuiSpacer size="m"/>
+                </Fragment>
+              );
+            }
+
+            return customRenderResponse;
+          }}
+        />
+      );
+    }
+
     const dataFlattened = instances.map(item => ({
       ...item,
       name: item.kibana.name,
       status: item.kibana.status,
     }));
+
 
     return (
       <EuiPage>
@@ -140,16 +260,16 @@ export class KibanaInstances extends PureComponent {
             <ClusterStatus stats={clusterStatus} />
           </EuiPanel>
           <EuiSpacer size="m" />
+          {setupModeCallOut}
           <EuiPageContent>
             <EuiMonitoringTable
               className="kibanaInstancesTable"
               rows={dataFlattened}
-              columns={getColumns(angular.kbnUrl, angular.$scope)}
+              columns={getColumns(angular.kbnUrl, angular.$scope, setupMode)}
               sorting={sorting}
               pagination={pagination}
               setupMode={setupMode}
-              uuidField="kibana.uuid"
-              nameField="name"
+              productName={KIBANA_SYSTEM_ID}
               search={{
                 box: {
                   incremental: true,

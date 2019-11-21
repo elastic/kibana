@@ -9,7 +9,6 @@ import PropTypes from 'prop-types';
 import { Suggestions } from '../suggestions';
 import { ClickOutside } from '../click_outside';
 import { EuiFieldSearch, EuiProgress, keyCodes } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 export class FilterBar extends Component {
   state = {
@@ -165,17 +164,7 @@ export class FilterBar extends Component {
             style={{
               backgroundImage: 'none'
             }}
-            placeholder={i18n.translate(
-              'xpack.ml.explorer.kueryBar.filterPlaceholder',
-              {
-                defaultMessage:
-                  'Filter by influencer fields… (E.g. {queryExample})',
-                values: {
-                  queryExample:
-                    `${this.props.placeholder}`
-                }
-              }
-            )}
+            placeholder={this.props.placeholder}
             inputRef={node => {
               if (node) {
                 this.inputRef = node;
@@ -189,6 +178,7 @@ export class FilterBar extends Component {
             onClick={this.onClickInput}
             autoComplete="off"
             spellCheck={false}
+            data-test-subj={this.props.testSubj}
           />
 
           {this.props.isLoading && (
@@ -224,12 +214,14 @@ FilterBar.propTypes = {
   placeholder: PropTypes.string,
   onSubmit: PropTypes.func.isRequired,
   valueExternal: PropTypes.string,
-  suggestions: PropTypes.array.isRequired
+  suggestions: PropTypes.array.isRequired,
+  testSubj: PropTypes.string,
 };
 
 FilterBar.defaultProps = {
   isLoading: false,
   disabled: false,
   placeholder: 'tag : engineering OR tag : marketing',
-  suggestions: []
+  suggestions: [],
+  testSubj: undefined,
 };

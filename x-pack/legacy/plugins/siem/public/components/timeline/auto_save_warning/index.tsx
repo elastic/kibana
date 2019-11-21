@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, Toast } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiGlobalToastListToast as Toast,
+} from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import { pure } from 'recompose';
 import * as React from 'react';
@@ -91,6 +96,8 @@ const AutoSaveWarningMsgComponent = pure<OwnProps>(
   }
 );
 
+AutoSaveWarningMsgComponent.displayName = 'AutoSaveWarningMsgComponent';
+
 const mapStateToProps = (state: State) => {
   const autoSaveMessage: AutoSavedWarningMsg = timelineSelectors.autoSaveMsgSelector(state);
 
@@ -100,11 +107,8 @@ const mapStateToProps = (state: State) => {
   };
 };
 
-export const AutoSaveWarningMsg = connect(
-  mapStateToProps,
-  {
-    setTimelineRangeDatePicker: dispatchSetTimelineRangeDatePicker,
-    updateAutoSaveMsg: timelineActions.updateAutoSaveMsg,
-    updateTimeline: timelineActions.updateTimeline,
-  }
-)(AutoSaveWarningMsgComponent);
+export const AutoSaveWarningMsg = connect(mapStateToProps, {
+  setTimelineRangeDatePicker: dispatchSetTimelineRangeDatePicker,
+  updateAutoSaveMsg: timelineActions.updateAutoSaveMsg,
+  updateTimeline: timelineActions.updateTimeline,
+})(AutoSaveWarningMsgComponent);

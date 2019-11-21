@@ -30,7 +30,8 @@ export const createTestEntryTemplate = (defaultUiSettings) => (bundle) => `
  */
 
 // import global polyfills before everything else
-import '@babel/polyfill';
+import 'core-js/stable';
+import 'regenerator-runtime/runtime';
 import 'custom-event-polyfill';
 import 'whatwg-fetch';
 import 'abortcontroller-polyfill';
@@ -58,6 +59,13 @@ const uiCapabilities = {
   timelion: {
     save: true
   },
+  management: {
+    kibana: {
+      settings: true,
+      index_patterns: true,
+      objects: true
+    }
+  }
 };
 
 // Mock fetch for CoreSystem calls.
@@ -68,15 +76,16 @@ fetchMock.post(/\\/api\\/capabilities/, {
   headers: { 'Content-Type': 'application/json' },
 });
 
-// render the core system in a child of the body as the default children of the body
-// in the browser tests are needed for mocha and other test components to work
+// render the core system in a element not attached to the document as the
+// default children of the body in the browser tests are needed for mocha and
+// other test components to work
 const rootDomElement = document.createElement('div');
-document.body.appendChild(rootDomElement)
 
 const coreSystem = new CoreSystem({
   injectedMetadata: {
     version: '1.2.3',
     buildNumber: 1234,
+    legacyMode: true,
     legacyMetadata: {
       nav: [],
       version: '1.2.3',
@@ -118,9 +127,6 @@ const coreSystem = new CoreSystem({
         enabled: true,
         enableExternalUrls: true
       },
-      interpreterConfig: {
-        enableInVisualize: true
-      }
     },
   },
   rootDomElement,

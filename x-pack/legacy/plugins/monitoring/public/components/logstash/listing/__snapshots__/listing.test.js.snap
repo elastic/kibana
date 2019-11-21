@@ -55,6 +55,7 @@ exports[`Listing should render with certain data pieces missing 1`] = `
       ],
     }
   }
+  productName="logstash"
   rows={
     Array [
       Object {
@@ -80,6 +81,7 @@ exports[`Listing should render with certain data pieces missing 1`] = `
       },
     }
   }
+  setupMode={Object {}}
   sorting={
     Object {
       "sort": Object {
@@ -148,6 +150,7 @@ exports[`Listing should render with expected props 1`] = `
       ],
     }
   }
+  productName="logstash"
   rows={
     Array [
       Object {
@@ -205,6 +208,7 @@ exports[`Listing should render with expected props 1`] = `
       },
     }
   }
+  setupMode={Object {}}
   sorting={
     Object {
       "sort": Object {

@@ -27,11 +27,6 @@ export const getMockTaskFetch = (docs = defaultMockTaskDocs) => {
 export const getMockKbnServer = (
   mockCallWithInternal = getMockCallWithInternal(),
   mockTaskFetch = getMockTaskFetch()) => ({
-  taskManager: {
-    registerTaskDefinitions: () => undefined,
-    schedule: () => Promise.resolve(),
-    fetch: mockTaskFetch,
-  },
   plugins: {
     elasticsearch: {
       getCluster: () => ({
@@ -39,6 +34,11 @@ export const getMockKbnServer = (
       }),
     },
     xpack_main: {},
+    task_manager: {
+      registerTaskDefinitions: () => undefined,
+      schedule: () => Promise.resolve(),
+      fetch: mockTaskFetch,
+    },
   },
   usage: {
     collectorSet: {

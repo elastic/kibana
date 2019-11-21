@@ -5,9 +5,11 @@
  */
 
 import { handleActions } from 'redux-actions';
-import { assign, push, del, set } from 'object-path-immutable';
+import immutable from 'object-path-immutable';
 import { get } from 'lodash';
 import * as actions from '../actions/elements';
+
+const { assign, push, del, set } = immutable;
 
 const getLocation = type => (type === 'group' ? 'groups' : 'elements');
 const firstOccurrence = (element, index, array) => array.indexOf(element) === index;
@@ -29,14 +31,14 @@ function getNodeIndexById(page, nodeId, location) {
 function assignNodeProperties(workpadState, pageId, nodeId, props) {
   const pageIndex = getPageIndexById(workpadState, pageId);
   const location = getLocationFromIds(workpadState, pageId, nodeId);
-  const nodesPath = ['pages', pageIndex, location];
+  const nodesPath = `pages.${pageIndex}.${location}`;
   const nodeIndex = get(workpadState, nodesPath, []).findIndex(node => node.id === nodeId);
 
   if (pageIndex === -1 || nodeIndex === -1) {
     return workpadState;
   }
 
-  return assign(workpadState, nodesPath.concat(nodeIndex), props);
+  return assign(workpadState, `${nodesPath}.${nodeIndex}`, props);
 }
 
 function moveNodeLayer(workpadState, pageId, nodeId, movement, location) {
@@ -66,7 +68,7 @@ function moveNodeLayer(workpadState, pageId, nodeId, movement, location) {
   const newNodes = nodes.slice(0);
   newNodes.splice(to, 0, newNodes.splice(from, 1)[0]);
 
-  return set(workpadState, ['pages', pageIndex, location], newNodes);
+  return set(workpadState, `pages.${pageIndex}.${location}`, newNodes);
 }
 
 const trimPosition = ({ left, top, width, height, angle, parent }) => ({
@@ -123,7 +125,7 @@ export const elementsReducer = handleActions(
       }
       return push(
         workpadState,
-        ['pages', pageIndex, getLocation(element.position.type)],
+        `pages.${pageIndex}.${getLocation(element.position.type)}`,
         trimElement(element)
       );
     },
@@ -136,7 +138,7 @@ export const elementsReducer = handleActions(
         (state, element) =>
           push(
             state,
-            ['pages', pageIndex, getLocation(element.position.type)],
+            `pages.${pageIndex}.${getLocation(element.position.type)}`,
             trimElement(element)
           ),
         workpadState
@@ -160,7 +162,7 @@ export const elementsReducer = handleActions(
         .sort((a, b) => b.index - a.index); // deleting from end toward beginning, otherwise indices will become off - todo fuse loops!
 
       return nodeIndices.reduce((state, { location, index }) => {
-        return del(state, ['pages', pageIndex, location, index]);
+        return del(state, `pages.${pageIndex}.${location}.${index}`);
       }, workpadState);
     },
   },

@@ -11,7 +11,7 @@ export const PLUGIN = {
   MINIMUM_LICENSE_REQUIRED: LICENSE_TYPE_BASIC as LicenseType,
   getI18nName: (i18n: any): string => {
     return i18n.translate('xpack.snapshotRestore.appName', {
-      defaultMessage: 'Snapshot Repositories',
+      defaultMessage: 'Snapshot and Restore',
     });
   },
 };
@@ -48,4 +48,16 @@ export const REPOSITORY_PLUGINS_MAP: { [key: string]: RepositoryType } = {
   'repository-gcs': REPOSITORY_TYPES.gcs,
 };
 
-export const APP_PERMISSIONS = ['create_snapshot', 'cluster:admin/repository'];
+export const APP_REQUIRED_CLUSTER_PRIVILEGES = [
+  'cluster:admin/snapshot',
+  'cluster:admin/repository',
+];
+export const APP_RESTORE_INDEX_PRIVILEGES = ['monitor'];
+export const APP_SLM_CLUSTER_PRIVILEGES = ['manage_slm'];
+
+export const TIME_UNITS: { [key: string]: 'd' | 'h' | 'm' | 's' } = {
+  DAY: 'd',
+  HOUR: 'h',
+  MINUTE: 'm',
+  SECOND: 's',
+};

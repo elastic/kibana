@@ -16,16 +16,20 @@ export const isEsErrorFactory = server => {
   return createIsEsError(server);
 };
 
-export const createRouter = (server, pluginId, apiBasePath = '') => {
+export const createRouter = (server, pluginId, apiBasePath = '', config) => {
   const isEsError = isEsErrorFactory(server);
 
   // NOTE: The license-checking logic depends on the xpack_main plugin, so if your plugin
   // consumes this helper, make sure it declares 'xpack_main' as a dependency.
   const licensePreRouting = licensePreRoutingFactory(server, pluginId);
 
+  const callWithRequestInstance = callWithRequestFactory(server, pluginId, config);
+
   const requestHandler = (handler) => async (request, h) => {
-    const callWithRequest = callWithRequestFactory(server, request);
     try {
+      const callWithRequest = (...args) => {
+        return callWithRequestInstance(request, ...args);
+      };
       return await handler(request, callWithRequest, h);
     } catch (err) {
       if (err instanceof Boom) {
@@ -44,7 +48,7 @@ export const createRouter = (server, pluginId, apiBasePath = '') => {
   return (['get', 'post', 'put', 'delete', 'patch'].reduce((router, methodName) => {
     router[methodName] = (subPath, handler) => {
       const method = methodName.toUpperCase();
-      const path = `${apiBasePath}${subPath}`;
+      const path = apiBasePath + subPath;
       server.route({
         path,
         method,

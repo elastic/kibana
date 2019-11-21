@@ -18,6 +18,7 @@ export const setRefreshInterval = createAction('setRefreshInterval');
 export const setWorkpadCSS = createAction('setWorkpadCSS');
 export const enableAutoplay = createAction('enableAutoplay');
 export const setAutoplayInterval = createAction('setAutoplayInterval');
+export const resetWorkpad = createAction('resetWorkpad');
 
 export const initializeWorkpad = createThunk('initializeWorkpad', ({ dispatch }) => {
   dispatch(fetchAllRenderables());
@@ -38,7 +39,6 @@ export const removeColor = createThunk('removeColor', ({ dispatch, getState }, c
 export const setWorkpad = createThunk(
   'setWorkpad',
   ({ dispatch, type }, workpad, { loadPages = true } = {}) => {
-    dispatch(setRefreshInterval(0)); // disable refresh interval
     dispatch(createAction(type)(workpad)); // set the workpad object in state
     if (loadPages) {
       dispatch(initializeWorkpad());

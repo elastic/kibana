@@ -7,9 +7,10 @@
 import expect from '@kbn/expect';
 import { overviewHostQuery } from '../../../../legacy/plugins/siem/public/containers/overview/overview_host/index.gql_query';
 import { GetOverviewHostQuery } from '../../../../legacy/plugins/siem/public/graphql/types';
-import { KbnTestProvider } from './types';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { defaultIndexPattern } from '../../../../legacy/plugins/siem/default_index_pattern';
 
-const overviewHostTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
   describe('Overview Host', () => {
@@ -26,8 +27,15 @@ const overviewHostTests: KbnTestProvider = ({ getService }) => {
         auditbeatPackage: 3,
         auditbeatProcess: 7,
         auditbeatUser: 6,
+        endgameDns: 1,
+        endgameFile: 2,
+        endgameImageLoad: 1,
+        endgameNetwork: 4,
+        endgameProcess: 2,
+        endgameRegistry: 1,
+        endgameSecurity: 4,
         filebeatSystemModule: 0,
-        winlogbeat: 0,
+        winlogbeat: 1,
         __typename: 'OverviewHostData',
       };
 
@@ -42,7 +50,8 @@ const overviewHostTests: KbnTestProvider = ({ getService }) => {
                 to: TO,
                 from: FROM,
               },
-              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              defaultIndex: defaultIndexPattern,
+              inspect: false,
             },
           })
           .then(resp => {
@@ -52,7 +61,4 @@ const overviewHostTests: KbnTestProvider = ({ getService }) => {
       });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default overviewHostTests;
+}

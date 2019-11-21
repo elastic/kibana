@@ -8,7 +8,7 @@ import { KibanaPrivileges } from '../../../../common/model';
 export const defaultPrivilegeDefinition = new KibanaPrivileges({
   global: {
     all: ['api:/*', 'ui:/*'],
-    read: ['ui:/feature1/foo', 'ui:/feature2/foo', 'ui:/feature3/foo/*'],
+    read: ['ui:/feature1/foo', 'ui:/feature2/foo', 'ui:/feature3/foo/*', 'ui:/feature4/foo'],
   },
   space: {
     all: [
@@ -18,8 +18,9 @@ export const defaultPrivilegeDefinition = new KibanaPrivileges({
       'ui:/feature2/*',
       'ui:/feature3/foo',
       'ui:/feature3/foo/*',
+      'ui:/feature4/foo',
     ],
-    read: ['ui:/feature1/foo', 'ui:/feature2/foo', 'ui:/feature3/foo/bar'],
+    read: ['ui:/feature1/foo', 'ui:/feature2/foo', 'ui:/feature3/foo/bar', 'ui:/feature4/foo'],
   },
   features: {
     feature1: {
@@ -32,6 +33,10 @@ export const defaultPrivilegeDefinition = new KibanaPrivileges({
     },
     feature3: {
       all: ['ui:/feature3/foo', 'ui:/feature3/foo/*'],
+    },
+    feature4: {
+      all: ['somethingObscure:/feature4/foo', 'ui:/feature4/foo'],
+      read: ['ui:/feature4/foo'],
     },
   },
   reserved: {},

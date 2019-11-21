@@ -17,8 +17,10 @@ import { createStore, networkModel, State } from '../../../../store';
 import { TlsTable } from '.';
 import { mockTlsData } from './mock';
 
+jest.mock('../../../../lib/settings/use_kibana_ui_setting');
+
 describe('Tls Table Component', () => {
-  const loadMore = jest.fn();
+  const loadPage = jest.fn();
   const state: State = mockGlobalState;
 
   let store = createStore(state, apolloClientObservable);
@@ -32,12 +34,14 @@ describe('Tls Table Component', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <TlsTable
-            totalCount={1}
-            loading={false}
-            loadMore={loadMore}
             data={mockTlsData.edges}
-            hasNextPage={getOr(false, 'hasNextPage', mockTlsData.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockTlsData.pageInfo)}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockTlsData.pageInfo)}
+            id="tls"
+            isInspect={false}
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockTlsData.pageInfo)}
+            totalCount={1}
             type={networkModel.NetworkType.details}
           />
         </ReduxStoreProvider>
@@ -53,18 +57,20 @@ describe('Tls Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <TlsTable
-              totalCount={1}
-              loading={false}
-              loadMore={loadMore}
               data={mockTlsData.edges}
-              hasNextPage={getOr(false, 'hasNextPage', mockTlsData.pageInfo)!}
-              nextCursor={getOr(null, 'endCursor.value', mockTlsData.pageInfo)}
+              fakeTotalCount={getOr(50, 'fakeTotalCount', mockTlsData.pageInfo)}
+              id="tls"
+              isInspect={false}
+              loading={false}
+              loadPage={loadPage}
+              showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockTlsData.pageInfo)}
+              totalCount={1}
               type={networkModel.NetworkType.details}
             />
           </TestProviders>
         </MockedProvider>
       );
-      expect(store.getState().network.details.queries!.tls.tlsSortField).toEqual({
+      expect(store.getState().network.details.queries!.tls.sort).toEqual({
         direction: 'desc',
         field: '_id',
       });
@@ -76,7 +82,7 @@ describe('Tls Table Component', () => {
 
       wrapper.update();
 
-      expect(store.getState().network.details.queries!.tls.tlsSortField).toEqual({
+      expect(store.getState().network.details.queries!.tls.sort).toEqual({
         direction: 'asc',
         field: '_id',
       });
@@ -86,7 +92,7 @@ describe('Tls Table Component', () => {
           .find('.euiTable thead tr th button')
           .first()
           .text()
-      ).toEqual('SHA1 FingerprintClick to sort in descending order');
+      ).toEqual('SHA1 fingerprintClick to sort in descending order');
     });
   });
 });

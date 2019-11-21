@@ -6,13 +6,17 @@
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
-import { AutocompleteSuggestion, getAutocompleteProvider } from 'ui/autocomplete_providers';
-import { RestAPIAdapter } from '../rest_api/adapter_types';
+import { npStart } from 'ui/new_platform';
 import { ElasticsearchAdapter } from './adapter_types';
+import { AutocompleteSuggestion } from '../../../../../../../../src/plugins/data/public';
+import { setup as data } from '../../../../../../../../src/legacy/core_plugins/data/public/legacy';
+
+const getAutocompleteProvider = (language: string) =>
+  npStart.plugins.data.autocomplete.getProvider(language);
 
 export class RestElasticsearchAdapter implements ElasticsearchAdapter {
   private cachedIndexPattern: any = null;
-  constructor(private readonly api: RestAPIAdapter, private readonly indexPatternName: string) {}
+  constructor(private readonly indexPatternName: string) {}
 
   public isKueryValid(kuery: string): boolean {
     try {
@@ -61,9 +65,9 @@ export class RestElasticsearchAdapter implements ElasticsearchAdapter {
     if (this.cachedIndexPattern) {
       return this.cachedIndexPattern;
     }
-    const res = await this.api.get<any>(
-      `/api/index_patterns/_fields_for_wildcard?pattern=${this.indexPatternName}`
-    );
+    const res = await data.indexPatterns.indexPatterns.getFieldsForWildcard({
+      pattern: this.indexPatternName,
+    });
     if (isEmpty(res.fields)) {
       return;
     }

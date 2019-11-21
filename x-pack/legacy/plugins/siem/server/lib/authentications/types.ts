@@ -4,12 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AuthenticationsData, LastSourceHost } from '../../graphql/types';
-import { FrameworkRequest, RequestOptions } from '../framework';
+import {
+  AuthenticationsData,
+  AuthenticationsOverTimeData,
+  LastSourceHost,
+} from '../../graphql/types';
+import { FrameworkRequest, RequestOptionsPaginated, RequestBasicOptions } from '../framework';
 import { Hit, SearchHit, TotalHit } from '../types';
 
 export interface AuthenticationsAdapter {
-  getAuthentications(req: FrameworkRequest, options: RequestOptions): Promise<AuthenticationsData>;
+  getAuthentications(
+    req: FrameworkRequest,
+    options: RequestOptionsPaginated
+  ): Promise<AuthenticationsData>;
+  getAuthenticationsOverTime(
+    req: FrameworkRequest,
+    options: RequestBasicOptions
+  ): Promise<AuthenticationsOverTimeData>;
 }
 
 type StringOrNumber = string | number;
@@ -56,4 +67,18 @@ export interface AuthenticationData extends SearchHit {
       buckets: AuthenticationBucket[];
     };
   };
+}
+
+interface AuthenticationsOverTimeHistogramData {
+  key_as_string: string;
+  key: number;
+  doc_count: number;
+}
+
+export interface AuthenticationsActionGroupData {
+  key: number;
+  events: {
+    bucket: AuthenticationsOverTimeHistogramData[];
+  };
+  doc_count: number;
 }

@@ -7,12 +7,9 @@
 // import testSubjSelector from '@kbn/test-subj-selector';
 // import moment from 'moment';
 
-import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export function InfraLogsPageProvider({
-  getPageObjects,
-  getService,
-}: KibanaFunctionalTestDefaultProviders) {
+export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common']);
 
@@ -27,11 +24,6 @@ export function InfraLogsPageProvider({
 
     async getNoLogsIndicesPrompt() {
       return await testSubjects.find('noLogsIndicesPrompt');
-    },
-
-    async openSourceConfigurationFlyout() {
-      await testSubjects.click('configureSourceButton');
-      await testSubjects.exists('sourceConfigurationFlyout');
     },
   };
 }

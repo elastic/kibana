@@ -32,12 +32,14 @@ export class UiBundle {
       modules,
       template,
       controller,
+      extendConfig,
     } = options;
 
     this._id = id;
     this._modules = modules;
     this._template = template;
     this._controller = controller;
+    this._extendConfig = extendConfig;
   }
 
   getId() {
@@ -125,5 +127,13 @@ export class UiBundle {
       entryPath: this.getEntryPath(),
       outputPath: this.getOutputPath()
     };
+  }
+
+  getExtendedConfig(webpackConfig) {
+    if (!this._extendConfig) {
+      return webpackConfig;
+    }
+
+    return this._extendConfig(webpackConfig);
   }
 }

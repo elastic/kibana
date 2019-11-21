@@ -8,16 +8,20 @@ import { unmountComponentAtNode } from 'react-dom';
 import chrome from 'ui/chrome';
 import { management } from 'ui/management';
 import routes from 'ui/routes';
-import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { i18n } from '@kbn/i18n';
 
 import template from './main.html';
 import { BASE_PATH } from '../common/constants';
 import { renderReact } from './app';
 import { setHttpClient } from './app/services/api';
-import { setLicense } from './app/services/license';
 
-if (chrome.getInjected('ccrUiEnabled')) {
+const isAvailable = xpackInfo.get('features.crossClusterReplication.isAvailable');
+const isActive = xpackInfo.get('features.crossClusterReplication.isActive');
+const isLicenseOK = isAvailable && isActive;
+const isCcrUiEnabled = chrome.getInjected('ccrUiEnabled');
+
+if (isLicenseOK && isCcrUiEnabled) {
   const esSection = management.getSection('elasticsearch');
 
   esSection.register('ccr', {
@@ -35,22 +39,9 @@ if (chrome.getInjected('ccrUiEnabled')) {
 
   routes.when(`${BASE_PATH}/:section?/:subsection?/:view?/:id?`, {
     template,
-    resolve: {
-      license(Private) {
-        const xpackInfo = Private(XPackInfoProvider);
-        return {
-          isAvailable: () => xpackInfo.get('features.crossClusterReplication.isAvailable'),
-          isActive: () => xpackInfo.get('features.crossClusterReplication.isActive'),
-          getReason: () => xpackInfo.get('features.crossClusterReplication.message'),
-        };
-      }
-    },
     controllerAs: 'ccr',
     controller: class CrossClusterReplicationController {
       constructor($scope, $route, $http, $q) {
-        const { license: { isAvailable, isActive, getReason } } = $route.current.locals;
-        setLicense(isAvailable, isActive, getReason);
-
         // React-router's <Redirect> does not play well with the angular router. It will cause this controller
         // to re-execute without the $destroy handler being called. This means that the app will be mounted twice
         // creating a memory leak when leaving (only 1 app will be unmounted).

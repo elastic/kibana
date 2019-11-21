@@ -17,8 +17,11 @@
  * under the License.
  */
 
-import { ConfigService, Env } from './config';
+import { IConfigService, Env } from './config';
 import { LoggerFactory } from './logging';
+
+/** @internal */
+export type CoreId = symbol;
 
 /**
  * Groups all main Kibana's core modules/systems/services that are consumed in a
@@ -26,7 +29,8 @@ import { LoggerFactory } from './logging';
  * @internal
  */
 export interface CoreContext {
+  coreId: CoreId;
   env: Env;
-  configService: ConfigService;
+  configService: IConfigService;
   logger: LoggerFactory;
 }

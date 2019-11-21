@@ -5,7 +5,7 @@
  */
 
 import { resolve } from 'path';
-import init from './init';
+import { init } from './init';
 import { mappings } from './server/mappings';
 import { CANVAS_APP, CANVAS_TYPE, CUSTOM_ELEMENT_TYPE } from './common/lib';
 import { migrations } from './migrations';
@@ -24,7 +24,11 @@ export function canvas(kibana) {
         euiIconType: 'canvasApp',
         main: 'plugins/canvas/app',
       },
-      interpreter: ['plugins/canvas/browser_functions', 'plugins/canvas/renderers'],
+      interpreter: [
+        'plugins/canvas/browser_functions',
+        'plugins/canvas/renderers',
+        'plugins/canvas/interpreter_expression_types',
+      ],
       styleSheetPaths: resolve(__dirname, 'public/style/index.scss'),
       hacks: [
         // window.onerror override

@@ -21,6 +21,7 @@ import { createReadStream } from 'fs';
 
 import globby from 'globby';
 import MultiStream from 'multistream';
+import webpackMerge from 'webpack-merge';
 
 import { fromRoot } from '../../../legacy/utils';
 import { replacePlaceholder } from '../../../optimize/public_path_placeholder';
@@ -51,17 +52,13 @@ export default (kibana) => {
           }
         } = kbnServer;
 
-        const testGlobs = [
-          'src/legacy/ui/public/**/*.js',
-          '!src/legacy/ui/public/flot-charts/**/*',
-        ];
+        const testGlobs = [];
+
         const testingPluginIds = config.get('tests_bundle.pluginId');
 
         if (testingPluginIds) {
-          testGlobs.push('!src/legacy/ui/public/**/__tests__/**/*');
           testingPluginIds.split(',').forEach((pluginId) => {
-            const plugin = plugins
-              .find(plugin => plugin.id === pluginId);
+            const plugin = plugins.find(plugin => plugin.id === pluginId);
 
             if (!plugin) {
               throw new Error('Invalid testingPluginId :: unknown plugin ' + pluginId);
@@ -77,6 +74,8 @@ export default (kibana) => {
             testGlobs.push(`${plugin.publicDir}/**/__tests__/**/*.js`);
           });
         } else {
+          // add all since we are not just focused on specific plugins
+          testGlobs.push('src/legacy/ui/public/**/*.js', '!src/legacy/ui/public/flot-charts/**/*');
           // add the modules from all of the apps
           for (const app of uiApps) {
             modules.add(app.getMainModuleId());
@@ -94,7 +93,7 @@ export default (kibana) => {
           uiBundles.addPostLoader({
             test: /\.js$/,
             exclude: /[\/\\](__tests__|node_modules|bower_components|webpackShims)[\/\\]/,
-            loader: 'istanbul-instrumenter-loader'
+            loader: 'istanbul-instrumenter-loader',
           });
         }
 
@@ -102,6 +101,27 @@ export default (kibana) => {
           id: 'tests',
           modules: [...modules],
           template: createTestEntryTemplate(uiSettingDefaults),
+          extendConfig(webpackConfig) {
+            const mergedConfig = webpackMerge({
+              resolve: {
+                extensions: ['.karma_mock.js', '.karma_mock.tsx', '.karma_mock.ts']
+              }
+            }, webpackConfig);
+
+            /**
+             * [..] it removes the commons bundle creation from the webpack
+             * config when we're building the bundle for the browser tests. It
+             * shouldn't be created, and by default isn't, but something is
+             * triggering it in webpack which breaks the tests so if we just
+             * remove the optimization config it will never happen and the tests
+             * will keep working [..]
+             *
+             * TLDR: If you have any questions about this line, ask Spencer.
+             */
+            delete mergedConfig.optimization.splitChunks.cacheGroups.commons;
+
+            return mergedConfig;
+          }
         });
 
         kbnServer.server.route({

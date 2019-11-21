@@ -11,10 +11,15 @@ import mean from 'lodash.mean';
 import { rgba } from 'polished';
 import { TimeSeriesAPIResponse } from '../../server/lib/transactions/charts';
 import { ApmTimeSeriesResponse } from '../../server/lib/transactions/charts/get_timeseries_data/transform';
-import { StringMap } from '../../typings/common';
-import { Coordinate, RectCoordinate } from '../../typings/timeseries';
-import { asDecimal, asMillis, tpmUnit } from '../utils/formatters';
+import {
+  Coordinate,
+  RectCoordinate,
+  TimeSeries
+} from '../../typings/timeseries';
+import { asDecimal, tpmUnit, convertTo } from '../utils/formatters';
 import { IUrlParams } from '../context/UrlParamsContext/types';
+import { getEmptySeries } from '../components/shared/charts/CustomPlot/getEmptySeries';
+import { httpStatusCodeToColor } from '../utils/httpStatusCodeToColor';
 
 export interface ITpmBucket {
   title: string;
@@ -25,21 +30,19 @@ export interface ITpmBucket {
 }
 
 export interface ITransactionChartData {
-  noHits: boolean;
   tpmSeries: ITpmBucket[];
-  responseTimeSeries: TimeSerie[];
+  responseTimeSeries: TimeSeries[];
 }
 
 const INITIAL_DATA = {
   apmTimeseries: {
-    totalHits: 0,
     responseTimes: {
       avg: [],
       p95: [],
       p99: []
     },
     tpmBuckets: [],
-    overallAvgDuration: undefined
+    overallAvgDuration: null
   },
   anomalyTimeseries: undefined
 };
@@ -48,7 +51,6 @@ export function getTransactionCharts(
   { transactionType }: IUrlParams,
   { apmTimeseries, anomalyTimeseries }: TimeSeriesAPIResponse = INITIAL_DATA
 ): ITransactionChartData {
-  const noHits = apmTimeseries.totalHits === 0;
   const tpmSeries = getTpmSeries(apmTimeseries, transactionType);
 
   const responseTimeSeries = getResponseTimeSeries({
@@ -57,22 +59,9 @@ export function getTransactionCharts(
   });
 
   return {
-    noHits,
     tpmSeries,
     responseTimeSeries
   };
-}
-
-interface TimeSerie {
-  title: string;
-  titleShort?: string;
-  hideLegend?: boolean;
-  hideTooltipValue?: boolean;
-  data: Array<Coordinate | RectCoordinate>;
-  legendValue?: string;
-  type: string;
-  color: string;
-  areaColor?: string;
 }
 
 export function getResponseTimeSeries({
@@ -81,14 +70,18 @@ export function getResponseTimeSeries({
 }: TimeSeriesAPIResponse) {
   const { overallAvgDuration } = apmTimeseries;
   const { avg, p95, p99 } = apmTimeseries.responseTimes;
+  const formattedDuration = convertTo({
+    unit: 'milliseconds',
+    microseconds: overallAvgDuration
+  }).formatted;
 
-  const series: TimeSerie[] = [
+  const series: TimeSeries[] = [
     {
       title: i18n.translate('xpack.apm.transactions.chart.averageLabel', {
         defaultMessage: 'Avg.'
       }),
       data: avg,
-      legendValue: asMillis(overallAvgDuration),
+      legendValue: formattedDuration,
       type: 'linemark',
       color: theme.euiColorVis1
     },
@@ -170,28 +163,39 @@ export function getTpmSeries(
   const bucketKeys = tpmBuckets.map(({ key }) => key);
   const getColor = getColorByKey(bucketKeys);
 
+  const { avg } = apmTimeseries.responseTimes;
+
+  if (!tpmBuckets.length && avg.length) {
+    const start = avg[0].x;
+    const end = avg[avg.length - 1].x;
+    return getEmptySeries(start, end);
+  }
+
   return tpmBuckets.map(bucket => {
-    const avg = mean(bucket.dataPoints.map(p => p.y));
+    const average = mean(bucket.dataPoints.map(p => p.y));
     return {
       title: bucket.key,
       data: bucket.dataPoints,
-      legendValue: `${asDecimal(avg)} ${tpmUnit(transactionType || '')}`,
+      legendValue: `${asDecimal(average)} ${tpmUnit(transactionType || '')}`,
       type: 'linemark',
       color: getColor(bucket.key)
     };
   });
 }
 
-function getColorByKey(keys: string[]) {
-  const assignedColors: StringMap<string> = {
-    'HTTP 2xx': theme.euiColorVis0,
-    'HTTP 3xx': theme.euiColorVis5,
-    'HTTP 4xx': theme.euiColorVis7,
-    'HTTP 5xx': theme.euiColorVis2
-  };
+function colorMatch(key: string) {
+  if (/ok|success/i.test(key)) {
+    return theme.euiColorSecondary;
+  } else if (/error|fail/i.test(key)) {
+    return theme.euiColorDanger;
+  }
+}
 
-  const unknownKeys = difference(keys, Object.keys(assignedColors));
-  const unassignedColors: StringMap<string> = zipObject(unknownKeys, [
+function getColorByKey(keys: string[]) {
+  const assignedColors = ['HTTP 2xx', 'HTTP 3xx', 'HTTP 4xx', 'HTTP 5xx'];
+
+  const unknownKeys = difference(keys, assignedColors);
+  const unassignedColors: Record<string, string> = zipObject(unknownKeys, [
     theme.euiColorVis1,
     theme.euiColorVis3,
     theme.euiColorVis4,
@@ -200,5 +204,6 @@ function getColorByKey(keys: string[]) {
     theme.euiColorVis8
   ]);
 
-  return (key: string) => assignedColors[key] || unassignedColors[key];
+  return (key: string) =>
+    colorMatch(key) || httpStatusCodeToColor(key) || unassignedColors[key];
 }

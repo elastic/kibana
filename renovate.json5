@@ -23,20 +23,21 @@
     'release_note:skip',
     'renovate',
     'v8.0.0',
-    'v7.3.0',
+    'v7.6.0',
   ],
   major: {
     labels: [
       'release_note:skip',
       'renovate',
       'v8.0.0',
-      'v7.3.0',
+      'v7.6.0',
       'renovate:major',
     ],
   },
+  separateMajorMinor: false,
   masterIssue: true,
   masterIssueApproval: true,
-  rangeStrategy: 'replace',
+  rangeStrategy: 'bump',
   npm: {
     lockFileMaintenance: {
       enabled: false,
@@ -66,6 +67,18 @@
         packagePatterns: [
           '(\\b|_)jest(\\b|_)',
         ],
+      },
+      {
+        groupSlug: '@elastic/charts',
+        groupName: '@elastic/charts related packages',
+        packageNames: [
+          '@elastic/charts',
+          '@types/elastic__charts',
+        ],
+        reviewers: [
+          'markov00',
+        ],
+        masterIssueApproval: false,
       },
       {
         groupSlug: 'mocha',
@@ -131,10 +144,18 @@
         ],
       },
       {
+        groupSlug: 'moment',
+        groupName: 'moment related packages',
+        packagePatterns: [
+          '(\\b|_)moment(\\b|_)',
+        ],
+      },
+      {
         groupSlug: 'graphql',
         groupName: 'graphql related packages',
         packagePatterns: [
           '(\\b|_)graphql(\\b|_)',
+          '(\\b|_)apollo(\\b|_)',
         ],
       },
       {
@@ -159,6 +180,7 @@
         packagePatterns: [
           '(\\b|_)vega(\\b|_)',
         ],
+        enabled: false,
       },
       {
         groupSlug: 'language server',
@@ -208,7 +230,7 @@
           'release_note:skip',
           'renovate',
           'v8.0.0',
-          'v7.3.0',
+          'v7.6.0',
           ':ml',
         ],
       },
@@ -222,6 +244,34 @@
           '@types/microsoft__api-extractor',
         ],
         enabled: false,
+      },
+      {
+        groupSlug: 'jsts',
+        groupName: 'jsts related packages',
+        packageNames: [
+          'jsts',
+          '@types/jsts',
+        ],
+        allowedVersions: '^1.6.2',
+      },
+      {
+        groupSlug: 'storybook',
+        groupName: 'storybook related packages',
+        packagePatterns: [
+          '(\\b|_)storybook(\\b|_)',
+        ],
+      },
+      {
+        groupSlug: 'typescript',
+        groupName: 'typescript related packages',
+        packagePatterns: [
+          '(\\b|_)ts(\\b|_)',
+          '(\\b|_)typescript(\\b|_)',
+        ],
+        packageNames: [
+          'tslib',
+          '@types/tslib',
+        ],
       },
       {
         groupSlug: 'json-stable-stringify',
@@ -304,14 +354,6 @@
         ],
       },
       {
-        groupSlug: 'execa',
-        groupName: 'execa related packages',
-        packageNames: [
-          'execa',
-          '@types/execa',
-        ],
-      },
-      {
         groupSlug: 'fetch-mock',
         groupName: 'fetch-mock related packages',
         packageNames: [
@@ -352,11 +394,11 @@
         ],
       },
       {
-        groupSlug: 'humps',
-        groupName: 'humps related packages',
+        groupSlug: 'history',
+        groupName: 'history related packages',
         packageNames: [
-          'humps',
-          '@types/humps',
+          'history',
+          '@types/history',
         ],
       },
       {
@@ -432,14 +474,6 @@
         ],
       },
       {
-        groupSlug: 'moment-timezone',
-        groupName: 'moment-timezone related packages',
-        packageNames: [
-          'moment-timezone',
-          '@types/moment-timezone',
-        ],
-      },
-      {
         groupSlug: 'mustache',
         groupName: 'mustache related packages',
         packageNames: [
@@ -464,6 +498,14 @@
         ],
       },
       {
+        groupSlug: 'pngjs',
+        groupName: 'pngjs related packages',
+        packageNames: [
+          'pngjs',
+          '@types/pngjs',
+        ],
+      },
+      {
         groupSlug: 'podium',
         groupName: 'podium related packages',
         packageNames: [
@@ -472,11 +514,11 @@
         ],
       },
       {
-        groupSlug: 'puppeteer-core',
-        groupName: 'puppeteer-core related packages',
+        groupSlug: '@reach/router',
+        groupName: '@reach/router related packages',
         packageNames: [
-          'puppeteer-core',
-          '@types/puppeteer-core',
+          '@reach/router',
+          '@types/reach__router',
         ],
       },
       {
@@ -485,14 +527,6 @@
         packageNames: [
           'request',
           '@types/request',
-        ],
-      },
-      {
-        groupSlug: 'rimraf',
-        groupName: 'rimraf related packages',
-        packageNames: [
-          'rimraf',
-          '@types/rimraf',
         ],
       },
       {
@@ -544,6 +578,14 @@
         ],
       },
       {
+        groupSlug: 'supertest-as-promised',
+        groupName: 'supertest-as-promised related packages',
+        packageNames: [
+          'supertest-as-promised',
+          '@types/supertest-as-promised',
+        ],
+      },
+      {
         groupSlug: 'type-detect',
         groupName: 'type-detect related packages',
         packageNames: [
@@ -560,11 +602,27 @@
         ],
       },
       {
+        groupSlug: 'vinyl-fs',
+        groupName: 'vinyl-fs related packages',
+        packageNames: [
+          'vinyl-fs',
+          '@types/vinyl-fs',
+        ],
+      },
+      {
         groupSlug: 'zen-observable',
         groupName: 'zen-observable related packages',
         packageNames: [
           'zen-observable',
           '@types/zen-observable',
+        ],
+      },
+      {
+        groupSlug: 'archiver',
+        groupName: 'archiver related packages',
+        packageNames: [
+          'archiver',
+          '@types/archiver',
         ],
       },
       {
@@ -592,11 +650,35 @@
         ],
       },
       {
+        groupSlug: 'cytoscape',
+        groupName: 'cytoscape related packages',
+        packageNames: [
+          'cytoscape',
+          '@types/cytoscape',
+        ],
+      },
+      {
+        groupSlug: 'fancy-log',
+        groupName: 'fancy-log related packages',
+        packageNames: [
+          'fancy-log',
+          '@types/fancy-log',
+        ],
+      },
+      {
         groupSlug: 'file-saver',
         groupName: 'file-saver related packages',
         packageNames: [
           'file-saver',
           '@types/file-saver',
+        ],
+      },
+      {
+        groupSlug: 'getos',
+        groupName: 'getos related packages',
+        packageNames: [
+          'getos',
+          '@types/getos',
         ],
       },
       {
@@ -608,11 +690,11 @@
         ],
       },
       {
-        groupSlug: 'history',
-        groupName: 'history related packages',
+        groupSlug: 'jsdom',
+        groupName: 'jsdom related packages',
         packageNames: [
-          'history',
-          '@types/history',
+          'jsdom',
+          '@types/jsdom',
         ],
       },
       {
@@ -621,6 +703,14 @@
         packageNames: [
           'jsonwebtoken',
           '@types/jsonwebtoken',
+        ],
+      },
+      {
+        groupSlug: 'mapbox-gl',
+        groupName: 'mapbox-gl related packages',
+        packageNames: [
+          'mapbox-gl',
+          '@types/mapbox-gl',
         ],
       },
       {
@@ -640,14 +730,6 @@
         ],
       },
       {
-        groupSlug: 'mkdirp',
-        groupName: 'mkdirp related packages',
-        packageNames: [
-          'mkdirp',
-          '@types/mkdirp',
-        ],
-      },
-      {
         groupSlug: 'nock',
         groupName: 'nock related packages',
         packageNames: [
@@ -661,6 +743,14 @@
         packageNames: [
           'node-fetch',
           '@types/node-fetch',
+        ],
+      },
+      {
+        groupSlug: 'nodemailer',
+        groupName: 'nodemailer related packages',
+        packageNames: [
+          'nodemailer',
+          '@types/nodemailer',
         ],
       },
       {
@@ -680,14 +770,6 @@
         ],
       },
       {
-        groupSlug: 'pngjs',
-        groupName: 'pngjs related packages',
-        packageNames: [
-          'pngjs',
-          '@types/pngjs',
-        ],
-      },
-      {
         groupSlug: 'proper-lockfile',
         groupName: 'proper-lockfile related packages',
         packageNames: [
@@ -696,35 +778,19 @@
         ],
       },
       {
+        groupSlug: 'puppeteer',
+        groupName: 'puppeteer related packages',
+        packageNames: [
+          'puppeteer',
+          '@types/puppeteer',
+        ],
+      },
+      {
         groupSlug: 'reduce-reducers',
         groupName: 'reduce-reducers related packages',
         packageNames: [
           'reduce-reducers',
           '@types/reduce-reducers',
-        ],
-      },
-      {
-        groupSlug: '@storybook/addon-actions',
-        groupName: '@storybook/addon-actions related packages',
-        packageNames: [
-          '@storybook/addon-actions',
-          '@types/storybook__addon-actions',
-        ],
-      },
-      {
-        groupSlug: '@storybook/addon-info',
-        groupName: '@storybook/addon-info related packages',
-        packageNames: [
-          '@storybook/addon-info',
-          '@types/storybook__addon-info',
-        ],
-      },
-      {
-        groupSlug: '@storybook/addon-knobs',
-        groupName: '@storybook/addon-knobs related packages',
-        packageNames: [
-          '@storybook/addon-knobs',
-          '@types/storybook__addon-knobs',
         ],
       },
       {
@@ -741,6 +807,22 @@
         packageNames: [
           'tinycolor2',
           '@types/tinycolor2',
+        ],
+      },
+      {
+        groupSlug: 'xml-crypto',
+        groupName: 'xml-crypto related packages',
+        packageNames: [
+          'xml-crypto',
+          '@types/xml-crypto',
+        ],
+      },
+      {
+        groupSlug: 'xml2js',
+        groupName: 'xml2js related packages',
+        packageNames: [
+          'xml2js',
+          '@types/xml2js',
         ],
       },
       {
@@ -848,6 +930,14 @@
         ],
       },
       {
+        groupSlug: 'parse-link-header',
+        groupName: 'parse-link-header related packages',
+        packageNames: [
+          'parse-link-header',
+          '@types/parse-link-header',
+        ],
+      },
+      {
         packagePatterns: [
           '^@kbn/.*',
         ],
@@ -855,7 +945,7 @@
       },
     ],
   },
-  prConcurrentLimit: 6,
+  prConcurrentLimit: 0,
   vulnerabilityAlerts: {
     enabled: false,
   },

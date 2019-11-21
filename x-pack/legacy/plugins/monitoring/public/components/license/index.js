@@ -12,7 +12,9 @@ import {
   EuiCodeBlock,
   EuiPanel,
   EuiText,
-  EuiLink
+  EuiLink,
+  EuiFlexGroup,
+  EuiFlexItem
 } from '@elastic/eui';
 import { LicenseStatus, AddLicense } from 'plugins/xpack_main/components';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -68,15 +70,20 @@ export function License(props) {
         />
         <EuiSpacer />
 
-        <LicenseUpdateInfoForPrimary {...props} />
-        <LicenseUpdateInfoForRemote {...props} />
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <LicenseUpdateInfoForPrimary {...props} />
+            <LicenseUpdateInfoForRemote {...props} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
         <EuiSpacer />
-        <EuiText size="m" textAlign="center">
+        <EuiText size="s" textAlign="center">
           <p>
             For more license options please visit&nbsp;
             <EuiLink href={licenseManagement}>
               License Management
-            </EuiLink>
+            </EuiLink>.
           </p>
         </EuiText>
       </EuiPageBody>

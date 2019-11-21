@@ -1,0 +1,14 @@
+{
+  "indices.clone": {
+    "data_autocomplete_rules": {
+      "settings": {
+        "__scope_link": "put_settings"
+      },
+      "aliases": {
+        "__template": {
+          "NAME": {}
+        }
+      }
+    }
+  }
+}

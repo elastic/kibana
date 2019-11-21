@@ -197,14 +197,14 @@ export class RecentlyAccessed extends Component {
     return (
       <EuiPanel paddingSize="l">
         <EuiTitle size="xs">
-          <h3>
+          <h2>
             <EuiTextColor color="subdued">
               <FormattedMessage
                 id="kbn.home.recentlyAccessed.recentlyViewedTitle"
                 defaultMessage="Recently viewed"
               />
             </EuiTextColor>
-          </h3>
+          </h2>
         </EuiTitle>
 
         <EuiSpacer size="s"/>

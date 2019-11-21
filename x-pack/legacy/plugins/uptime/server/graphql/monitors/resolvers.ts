@@ -8,20 +8,20 @@ import { UMGqlRange } from '../../../common/domain_types';
 import { UMResolver } from '../../../common/graphql/resolver_types';
 import {
   FilterBar,
-  GetErrorsListQueryArgs,
   GetFilterBarQueryArgs,
   GetLatestMonitorsQueryArgs,
   GetMonitorChartsDataQueryArgs,
   GetMonitorPageTitleQueryArgs,
-  GetMonitorsQueryArgs,
   GetSnapshotQueryArgs,
   MonitorChart,
   MonitorPageTitle,
   Ping,
   Snapshot,
+  GetSnapshotHistogramQueryArgs,
 } from '../../../common/graphql/types';
 import { UMServerLibs } from '../../lib/lib';
 import { CreateUMGraphQLResolvers, UMContext } from '../types';
+import { HistogramResult } from '../../../common/domain_types';
 
 export type UMSnapshotResolver = UMResolver<
   Snapshot | Promise<Snapshot>,
@@ -31,13 +31,6 @@ export type UMSnapshotResolver = UMResolver<
 >;
 
 export type UMMonitorsResolver = UMResolver<any | Promise<any>, any, UMGqlRange, UMContext>;
-
-export type UMGetMonitorsResolver = UMResolver<
-  any | Promise<any>,
-  any,
-  GetMonitorsQueryArgs,
-  UMContext
->;
 
 export type UMLatestMonitorsResolver = UMResolver<
   Ping[] | Promise<Ping[]>,
@@ -60,13 +53,6 @@ export type UMGetFilterBarResolver = UMResolver<
   UMContext
 >;
 
-export type UMGetErrorsListResolver = UMResolver<
-  any | Promise<any>,
-  any,
-  GetErrorsListQueryArgs,
-  UMContext
->;
-
 export type UMGetMontiorPageTitleResolver = UMResolver<
   MonitorPageTitle | Promise<MonitorPageTitle | null> | null,
   any,
@@ -74,41 +60,56 @@ export type UMGetMontiorPageTitleResolver = UMResolver<
   UMContext
 >;
 
+export type UMGetSnapshotHistogram = UMResolver<
+  HistogramResult | Promise<HistogramResult>,
+  any,
+  GetSnapshotHistogramQueryArgs,
+  UMContext
+>;
+
 export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
   libs: UMServerLibs
 ): {
   Query: {
-    getMonitors: UMGetMonitorsResolver;
     getSnapshot: UMSnapshotResolver;
+    getSnapshotHistogram: UMGetSnapshotHistogram;
     getMonitorChartsData: UMGetMonitorChartsResolver;
     getLatestMonitors: UMLatestMonitorsResolver;
     getFilterBar: UMGetFilterBarResolver;
-    getErrorsList: UMGetErrorsListResolver;
     getMonitorPageTitle: UMGetMontiorPageTitleResolver;
   };
 } => ({
   Query: {
-    // @ts-ignore TODO update typings and remove this comment
-    async getMonitors(resolver, { dateRangeStart, dateRangeEnd, filters }, { req }): Promise<any> {
-      const result = await libs.monitors.getMonitors(req, dateRangeStart, dateRangeEnd, filters);
-      return {
-        monitors: result,
-      };
-    },
-    async getSnapshot(resolver, { dateRangeStart, dateRangeEnd, filters }, { req }): Promise<any> {
-      const { up, down, total } = await libs.monitors.getSnapshotCount(
+    async getSnapshot(
+      resolver,
+      { dateRangeStart, dateRangeEnd, filters, statusFilter },
+      { req }
+    ): Promise<Snapshot> {
+      const counts = await libs.monitors.getSnapshotCount(
         req,
         dateRangeStart,
         dateRangeEnd,
-        filters
+        filters,
+        statusFilter
       );
 
       return {
-        up,
-        down,
-        total,
-        histogram: await libs.pings.getPingHistogram(req, dateRangeStart, dateRangeEnd, filters),
+        counts,
       };
+    },
+    async getSnapshotHistogram(
+      resolver,
+      { dateRangeStart, dateRangeEnd, filters, monitorId, statusFilter },
+      { req }
+    ): Promise<HistogramResult> {
+      return await libs.pings.getPingHistogram(
+        req,
+        dateRangeStart,
+        dateRangeEnd,
+        filters,
+        monitorId,
+        statusFilter
+      );
     },
     async getMonitorChartsData(
       resolver,
@@ -138,13 +139,6 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
     },
     async getFilterBar(resolver, { dateRangeStart, dateRangeEnd }, { req }): Promise<FilterBar> {
       return await libs.monitors.getFilterBar(req, dateRangeStart, dateRangeEnd);
-    },
-    async getErrorsList(
-      resolver,
-      { dateRangeStart, dateRangeEnd, filters },
-      { req }
-    ): Promise<any> {
-      return await libs.monitors.getErrorsList(req, dateRangeStart, dateRangeEnd, filters);
     },
     async getMonitorPageTitle(
       resolver: any,

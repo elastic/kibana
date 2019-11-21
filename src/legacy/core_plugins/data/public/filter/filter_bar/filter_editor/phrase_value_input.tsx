@@ -22,8 +22,9 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { uniq } from 'lodash';
 import React from 'react';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
-import { PhraseSuggestor, PhraseSuggestorProps } from './phrase_suggestor';
+import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
 import { ValueInputType } from './value_input_type';
+import { withKibana } from '../../../../../../../plugins/kibana_react/public';
 
 interface Props extends PhraseSuggestorProps {
   value?: string;
@@ -31,7 +32,7 @@ interface Props extends PhraseSuggestorProps {
   intl: InjectedIntl;
 }
 
-class PhraseValueInputUI extends PhraseSuggestor<Props> {
+class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
   public render() {
     return (
       <EuiFormRow
@@ -60,7 +61,9 @@ class PhraseValueInputUI extends PhraseSuggestor<Props> {
   private renderWithSuggestions() {
     const { suggestions } = this.state;
     const { value, intl, onChange } = this.props;
-    const options = value ? uniq([value, ...suggestions]) : suggestions;
+    // there are cases when the value is a number, this would cause an exception
+    const valueAsStr = String(value);
+    const options = value ? uniq([valueAsStr, ...suggestions]) : suggestions;
     return (
       <StringComboBox
         placeholder={intl.formatMessage({
@@ -69,7 +72,7 @@ class PhraseValueInputUI extends PhraseSuggestor<Props> {
         })}
         options={options}
         getLabel={option => option}
-        selectedOptions={value ? [value] : []}
+        selectedOptions={value ? [valueAsStr] : []}
         onChange={([newValue = '']) => onChange(newValue)}
         onSearchChange={this.onSearchChange}
         singleSelection={{ asPlainText: true }}
@@ -85,4 +88,4 @@ function StringComboBox(props: GenericComboBoxProps<string>) {
   return GenericComboBox(props);
 }
 
-export const PhraseValueInput = injectI18n(PhraseValueInputUI);
+export const PhraseValueInput = injectI18n(withKibana(PhraseValueInputUI));

@@ -39,7 +39,7 @@ export interface FrameworkAdapter {
 export const RuntimeFrameworkInfo = t.type({
   basePath: t.string,
   license: t.type({
-    type: t.union(LICENSES.map(s => t.literal(s))),
+    type: t.keyof(Object.fromEntries(LICENSES.map(s => [s, null])) as Record<string, null>),
     expired: t.boolean,
     expiry_date_in_millis: t.number,
   }),

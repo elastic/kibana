@@ -5,32 +5,36 @@
  */
 
 import {
-  EuiFormRow,
   EuiPanel,
-  EuiSelect,
   EuiSpacer,
-  EuiTitle
+  EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import { first } from 'lodash';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useKibanaCore } from '../../../../../observability/public';
 import { useTransactionList } from '../../../hooks/useTransactionList';
-import { useTransactionOverviewCharts } from '../../../hooks/useTransactionOverviewCharts';
+import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
-import { legacyEncodeURIComponent } from '../../shared/Links/url_helpers';
+import { TransactionBreakdown } from '../../shared/TransactionBreakdown';
 import { TransactionList } from './List';
 import { useRedirect } from './useRedirect';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { getHasMLJob } from '../../../services/rest/ml';
 import { history } from '../../../utils/history';
 import { useLocation } from '../../../hooks/useLocation';
-
-interface Props {
-  urlParams: IUrlParams;
-  serviceTransactionTypes: string[];
-}
+import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
+import { useTrackPageview } from '../../../../../infra/public';
+import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
+import { LocalUIFilters } from '../../shared/LocalUIFilters';
+import { PROJECTION } from '../../../../common/projections/typings';
+import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
+import { TransactionTypeFilter } from '../../shared/LocalUIFilters/TransactionTypeFilter';
 
 function getRedirectLocation({
   urlParams,
@@ -40,23 +44,28 @@ function getRedirectLocation({
   location: Location;
   urlParams: IUrlParams;
   serviceTransactionTypes: string[];
-}) {
-  const { serviceName, transactionType } = urlParams;
+}): Location | undefined {
+  const { transactionType } = urlParams;
   const firstTransactionType = first(serviceTransactionTypes);
+
   if (!transactionType && firstTransactionType) {
     return {
       ...location,
-      pathname: `/${serviceName}/transactions/${firstTransactionType}`
+      search: fromQuery({
+        ...toQuery(location.search),
+        transactionType: firstTransactionType
+      })
     };
   }
 }
 
-export function TransactionOverview({
-  urlParams,
-  serviceTransactionTypes
-}: Props) {
+export function TransactionOverview() {
   const location = useLocation();
+  const { urlParams } = useUrlParams();
   const { serviceName, transactionType } = urlParams;
+
+  // TODO: fetching of transaction types should perhaps be lifted since it is needed in several places. Context?
+  const serviceTransactionTypes = useServiceTransactionTypes(urlParams);
 
   // redirect to first transaction type
   useRedirect(
@@ -68,8 +77,33 @@ export function TransactionOverview({
     })
   );
 
-  const { data: transactionOverviewCharts } = useTransactionOverviewCharts(
-    urlParams
+  const { data: transactionCharts } = useTransactionCharts();
+
+  useTrackPageview({ app: 'apm', path: 'transaction_overview' });
+  useTrackPageview({ app: 'apm', path: 'transaction_overview', delay: 15000 });
+  const {
+    data: transactionListData,
+    status: transactionListStatus
+  } = useTransactionList(urlParams);
+
+  const { http } = useKibanaCore();
+
+  const { data: hasMLJob = false } = useFetcher(() => {
+    if (serviceName && transactionType) {
+      return getHasMLJob({ serviceName, transactionType, http });
+    }
+  }, [http, serviceName, transactionType]);
+
+  const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(
+    () => ({
+      filterNames: ['transactionResult', 'host', 'containerId', 'podName'],
+      params: {
+        serviceName,
+        transactionType
+      },
+      projection: PROJECTION.TRANSACTION_GROUPS
+    }),
+    [serviceName, transactionType]
   );
 
   // TODO: improve urlParams typings.
@@ -78,60 +112,42 @@ export function TransactionOverview({
     return null;
   }
 
-  const { data: transactionListData } = useTransactionList(urlParams);
-  const { data: hasMLJob = false } = useFetcher(
-    () => getHasMLJob({ serviceName, transactionType }),
-    [serviceName, transactionType]
-  );
-
   return (
-    <React.Fragment>
-      {serviceTransactionTypes.length > 1 ? (
-        <EuiFormRow
-          id="transaction-type-select-row"
-          label={i18n.translate(
-            'xpack.apm.transactionsTable.filterByTypeLabel',
-            {
-              defaultMessage: 'Filter by type'
-            }
-          )}
-        >
-          <EuiSelect
-            options={serviceTransactionTypes.map(type => ({
-              text: `${type}`,
-              value: type
-            }))}
-            value={transactionType}
-            onChange={event => {
-              const type = legacyEncodeURIComponent(event.target.value);
-              history.push({
-                ...location,
-                pathname: `/${urlParams.serviceName}/transactions/${type}`
-              });
-            }}
+    <EuiFlexGroup>
+      <EuiFlexItem grow={1}>
+        <LocalUIFilters {...localFiltersConfig}>
+          <TransactionTypeFilter transactionTypes={serviceTransactionTypes} />
+          <EuiSpacer size="xl" />
+          <EuiHorizontalRule margin="none" />
+        </LocalUIFilters>
+      </EuiFlexItem>
+      <EuiFlexItem grow={7}>
+        <ChartsSyncContextProvider>
+          <TransactionBreakdown initialIsOpen={true} />
+
+          <EuiSpacer size="s" />
+
+          <TransactionCharts
+            hasMLJob={hasMLJob}
+            charts={transactionCharts}
+            location={location}
+            urlParams={urlParams}
           />
-        </EuiFormRow>
-      ) : null}
+        </ChartsSyncContextProvider>
 
-      <TransactionCharts
-        hasMLJob={hasMLJob}
-        charts={transactionOverviewCharts}
-        location={location}
-        urlParams={urlParams}
-      />
-
-      <EuiSpacer size="s" />
-
-      <EuiPanel>
-        <EuiTitle size="xs">
-          <h3>Transactions</h3>
-        </EuiTitle>
         <EuiSpacer size="s" />
-        <TransactionList
-          items={transactionListData}
-          serviceName={serviceName}
-        />
-      </EuiPanel>
-    </React.Fragment>
+
+        <EuiPanel>
+          <EuiTitle size="xs">
+            <h3>Transactions</h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <TransactionList
+            isLoading={transactionListStatus === 'loading'}
+            items={transactionListData}
+          />
+        </EuiPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

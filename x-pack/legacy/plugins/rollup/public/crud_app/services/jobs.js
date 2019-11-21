@@ -155,6 +155,6 @@ export function deserializeJob(job) {
   return deserializedJob;
 }
 
-export function deserializeJobs(jobs) {
+export function deserializeJobs(jobs = []) {
   return jobs.map(deserializeJob);
 }

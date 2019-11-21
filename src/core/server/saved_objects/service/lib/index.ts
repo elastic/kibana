@@ -21,7 +21,9 @@ export { SavedObjectsRepository, SavedObjectsRepositoryOptions } from './reposit
 export {
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
-  ScopedSavedObjectsClientProvider,
+  ISavedObjectsClientProvider,
+  SavedObjectsClientProvider,
+  SavedObjectsClientProviderOptions,
 } from './scoped_client_provider';
 
 export { SavedObjectsErrorHelpers } from './errors';

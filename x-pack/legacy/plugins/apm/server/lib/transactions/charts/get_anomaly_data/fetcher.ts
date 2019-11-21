@@ -6,7 +6,7 @@
 
 import { getMlIndex } from '../../../../../common/ml_job_constants';
 import { PromiseReturnType } from '../../../../../typings/common';
-import { Setup } from '../../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
 
 export type ESResponse = Exclude<
   PromiseReturnType<typeof anomalySeriesFetcher>,
@@ -24,7 +24,7 @@ export async function anomalySeriesFetcher({
   transactionType: string;
   intervalString: string;
   mlBucketSize: number;
-  setup: Setup;
+  setup: Setup & SetupTimeRange;
 }) {
   const { client, start, end } = setup;
 
@@ -56,7 +56,7 @@ export async function anomalySeriesFetcher({
         ml_avg_response_times: {
           date_histogram: {
             field: 'timestamp',
-            interval: intervalString,
+            fixed_interval: intervalString,
             min_doc_count: 0,
             extended_bounds: {
               min: newStart,

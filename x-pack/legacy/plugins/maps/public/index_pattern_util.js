@@ -7,7 +7,6 @@
 import { indexPatternService } from './kibana_services';
 
 export async function getIndexPatternsFromIds(indexPatternIds = []) {
-
   const promises = [];
   indexPatternIds.forEach((id) => {
     const indexPatternPromise = indexPatternService.get(id);
@@ -17,5 +16,19 @@ export async function getIndexPatternsFromIds(indexPatternIds = []) {
   });
 
   return await Promise.all(promises);
+}
 
+export function getTermsFields(fields) {
+  return fields.filter(field => {
+    return field.aggregatable && ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type);
+  });
+}
+
+// Returns filtered fields list containing only fields that exist in _source.
+export function getSourceFields(fields) {
+  return fields.filter(field => {
+    // Multi fields are not stored in _source and only exist in index.
+    const isMultiField = field.subType && field.subType.multi;
+    return !isMultiField;
+  });
 }

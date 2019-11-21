@@ -24,8 +24,8 @@ import {
 
 import { toastNotifications } from 'ui/notify';
 import { loadFullJob } from '../utils';
-import { mlCreateWatchService } from '../../../../jobs/new_job/simple/components/watcher/create_watch_service';
-import { CreateWatch } from '../../../../jobs/new_job/simple/components/watcher/create_watch_view';
+import { mlCreateWatchService } from './create_watch_service';
+import { CreateWatch } from './create_watch_view';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 
@@ -80,8 +80,12 @@ class CreateWatchFlyoutUI extends Component {
     }
   }
 
-  closeFlyout = () => {
-    this.setState({ isFlyoutVisible: false });
+  closeFlyout = (watchCreated = false) => {
+    this.setState({ isFlyoutVisible: false }, ()=>{
+      if (typeof this.props.flyoutHidden === 'function') {
+        this.props.flyoutHidden(watchCreated);
+      }
+    });
   }
 
   showFlyout = (jobId) => {
@@ -107,7 +111,7 @@ class CreateWatchFlyoutUI extends Component {
     mlCreateWatchService.createNewWatch(this.state.jobId)
     	.then((resp) => {
         toastNotifications.addSuccess(getSuccessToast(resp.id, resp.url, intl));
-        this.closeFlyout();
+        this.closeFlyout(true);
       })
       .catch((error) => {
         toastNotifications.addDanger(intl.formatMessage({
@@ -194,6 +198,7 @@ class CreateWatchFlyoutUI extends Component {
 CreateWatchFlyoutUI.propTypes = {
   setShowFunction: PropTypes.func.isRequired,
   unsetShowFunction: PropTypes.func.isRequired,
+  flyoutHidden: PropTypes.func,
 };
 
 export const CreateWatchFlyout = injectI18n(CreateWatchFlyoutUI);

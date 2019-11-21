@@ -6,10 +6,11 @@
 
 
 
-import React, {
-  Component
-} from 'react';
+import React, { Component, Fragment } from 'react';
 import { PropTypes } from 'prop-types';
+import { timefilter } from 'ui/timefilter';
+
+import { injectI18n } from '@kbn/i18n/react';
 
 import {
   EuiPage,
@@ -18,14 +19,16 @@ import {
 } from '@elastic/eui';
 
 import chrome from 'ui/chrome';
+import { toastNotifications } from 'ui/notify';
+
+import { NavigationMenu } from '../../../components/navigation_menu';
+
 import { getCalendarSettingsData, validateCalendarId } from './utils';
 import { CalendarForm } from './calendar_form/';
 import { NewEventModal } from './new_event_modal/';
 import { ImportModal } from './import_modal';
 import { ml } from '../../../services/ml_api_service';
-import { toastNotifications } from 'ui/notify';
 
-import { injectI18n } from '@kbn/i18n/react';
 
 export const NewCalendar = injectI18n(class NewCalendar extends Component {
   static propTypes = {
@@ -57,6 +60,8 @@ export const NewCalendar = injectI18n(class NewCalendar extends Component {
   }
 
   componentDidMount() {
+    timefilter.disableTimeRangeSelector();
+    timefilter.disableAutoRefreshSelector();
     this.formSetup();
   }
 
@@ -333,39 +338,42 @@ export const NewCalendar = injectI18n(class NewCalendar extends Component {
     }
 
     return (
-      <EuiPage className="mlCalendarEditForm">
-        <EuiPageContent
-          className="mlCalendarEditForm__content"
-          verticalPosition="center"
-          horizontalPosition="center"
-        >
-          <CalendarForm
-            calendarId={selectedCalendar ? selectedCalendar.calendar_id : formCalendarId}
-            canCreateCalendar={this.props.canCreateCalendar}
-            canDeleteCalendar={this.props.canDeleteCalendar}
-            description={selectedCalendar ? selectedCalendar.description : description}
-            eventsList={events}
-            groupIds={groupIdOptions}
-            isEdit={selectedCalendar !== undefined}
-            isNewCalendarIdValid={(selectedCalendar || isNewCalendarIdValid === null) ? true : isNewCalendarIdValid}
-            jobIds={jobIdOptions}
-            onCalendarIdChange={this.onCalendarIdChange}
-            onCreate={this.onCreate}
-            onDescriptionChange={this.onDescriptionChange}
-            onEdit={this.onEdit}
-            onEventDelete={this.onEventDelete}
-            onGroupSelection={this.onGroupSelection}
-            showImportModal={this.showImportModal}
-            onJobSelection={this.onJobSelection}
-            saving={saving}
-            selectedGroupOptions={selectedGroupOptions}
-            selectedJobOptions={selectedJobOptions}
-            onCreateGroupOption={this.onCreateGroupOption}
-            showNewEventModal={this.showNewEventModal}
-          />
-        </EuiPageContent>
-        {modal}
-      </EuiPage>
+      <Fragment>
+        <NavigationMenu tabId="settings" />
+        <EuiPage className="mlCalendarEditForm">
+          <EuiPageContent
+            className="mlCalendarEditForm__content"
+            verticalPosition="center"
+            horizontalPosition="center"
+          >
+            <CalendarForm
+              calendarId={selectedCalendar ? selectedCalendar.calendar_id : formCalendarId}
+              canCreateCalendar={this.props.canCreateCalendar}
+              canDeleteCalendar={this.props.canDeleteCalendar}
+              description={selectedCalendar ? selectedCalendar.description : description}
+              eventsList={events}
+              groupIds={groupIdOptions}
+              isEdit={selectedCalendar !== undefined}
+              isNewCalendarIdValid={(selectedCalendar || isNewCalendarIdValid === null) ? true : isNewCalendarIdValid}
+              jobIds={jobIdOptions}
+              onCalendarIdChange={this.onCalendarIdChange}
+              onCreate={this.onCreate}
+              onDescriptionChange={this.onDescriptionChange}
+              onEdit={this.onEdit}
+              onEventDelete={this.onEventDelete}
+              onGroupSelection={this.onGroupSelection}
+              showImportModal={this.showImportModal}
+              onJobSelection={this.onJobSelection}
+              saving={saving}
+              selectedGroupOptions={selectedGroupOptions}
+              selectedJobOptions={selectedJobOptions}
+              onCreateGroupOption={this.onCreateGroupOption}
+              showNewEventModal={this.showNewEventModal}
+            />
+          </EuiPageContent>
+          {modal}
+        </EuiPage>
+      </Fragment>
     );
   }
 });

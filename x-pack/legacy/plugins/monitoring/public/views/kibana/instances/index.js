@@ -13,13 +13,14 @@ import template from './index.html';
 import { KibanaInstances } from 'plugins/monitoring/components/kibana/instances';
 import { SetupModeRenderer } from '../../../components/renderers';
 import { I18nContext } from 'ui/i18n';
+import { KIBANA_SYSTEM_ID, CODE_PATH_KIBANA } from '../../../../common/constants';
 
 uiRoutes.when('/kibana/instances', {
   template,
   resolve: {
     clusters(Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_KIBANA] });
     },
     pageData: getPageData,
   },
@@ -44,8 +45,8 @@ uiRoutes.when('/kibana/instances', {
             <SetupModeRenderer
               scope={$scope}
               injector={$injector}
-              productName="kibana"
-              render={({ setupMode, flyoutComponent }) => (
+              productName={KIBANA_SYSTEM_ID}
+              render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
                 <Fragment>
                   {flyoutComponent}
                   <KibanaInstances
@@ -60,6 +61,7 @@ uiRoutes.when('/kibana/instances', {
                       kbnUrl,
                     }}
                   />
+                  {bottomBarComponent}
                 </Fragment>
               )}
             />

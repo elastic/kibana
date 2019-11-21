@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DocCount, HistogramDataPoint, Ping, PingResults } from '../../../../common/graphql/types';
+import { DocCount, Ping, PingResults } from '../../../../common/graphql/types';
+import { HistogramResult } from '../../../../common/domain_types';
 
 export interface UMPingsAdapter {
   getAll(
@@ -30,8 +31,10 @@ export interface UMPingsAdapter {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    filters?: string | null
-  ): Promise<HistogramDataPoint[]>;
+    filters?: string | null,
+    monitorId?: string | null,
+    statusFilter?: string | null
+  ): Promise<HistogramResult>;
 
   getDocCount(request: any): Promise<DocCount>;
 }

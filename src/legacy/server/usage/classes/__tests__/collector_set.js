@@ -71,6 +71,24 @@ describe('CollectorSet', () => {
         result: { passTest: 1000 }
       }]);
     });
+
+    it('should gracefully handle a collector fetch method throwing an error', async () => {
+      const mockCallCluster = () => Promise.resolve({ passTest: 1000 });
+      const collectors = new CollectorSet(server);
+      collectors.register(new Collector(server, {
+        type: 'MY_TEST_COLLECTOR',
+        fetch: () => new Promise((_resolve, reject) => reject())
+      }));
+
+      let result;
+      try {
+        result = await collectors.bulkFetch(mockCallCluster);
+      } catch (err) {
+        // Do nothing
+      }
+      // This must return an empty object instead of null/undefined
+      expect(result).to.eql([]);
+    });
   });
 
   describe('toApiFieldNames', () => {

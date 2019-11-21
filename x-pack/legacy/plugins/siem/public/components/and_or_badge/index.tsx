@@ -16,12 +16,12 @@ const RoundedBadge = styled(EuiBadge)`
   border-radius: 100%;
   display: inline-flex;
   font-size: 9px;
-  height: 19px;
+  height: 34px;
   justify-content: center;
   margin: 0 5px 0 5px;
   padding: 7px 6px 4px 6px;
   user-select: none;
-  width: 19px;
+  width: 34px;
 
   .euiBadge__content {
     position: relative;
@@ -33,11 +33,18 @@ const RoundedBadge = styled(EuiBadge)`
   }
 `;
 
+RoundedBadge.displayName = 'RoundedBadge';
+
 export type AndOr = 'and' | 'or';
 
 /** Displays AND / OR in a round badge */
-export const AndOrBadge = pure<{ type: AndOr }>(({ type }) => (
-  <RoundedBadge data-test-subj="and-or-badge" color="hollow">
-    {type === 'and' ? i18n.AND : i18n.OR}
-  </RoundedBadge>
-));
+// Ref: https://github.com/elastic/eui/issues/1655
+export const AndOrBadge = pure<{ type: AndOr }>(({ type }) => {
+  return (
+    <RoundedBadge data-test-subj="and-or-badge" color="hollow">
+      {type === 'and' ? i18n.AND : i18n.OR}
+    </RoundedBadge>
+  );
+});
+
+AndOrBadge.displayName = 'AndOrBadge';

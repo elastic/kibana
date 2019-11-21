@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`UncommonProcess Table Component rendering it renders the default Uncommon process table 1`] = `
+exports[`Uncommon Process Table Component rendering it renders the default Uncommon process table 1`] = `
 <Component>
-  <Connect(pure(Component))
+  <Connect(UncommonProcessTableComponent)
     data={
       Array [
         Object {
@@ -201,10 +201,12 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
         },
       ]
     }
-    hasNextPage={true}
-    loadMore={[MockFunction]}
+    fakeTotalCount={50}
+    id="uncommonProcess"
+    isInspect={false}
+    loadPage={[MockFunction]}
     loading={false}
-    nextCursor="aa7ca589f1b8220002f2fc61c64cfbf1"
+    showMorePagesIndicator={true}
     totalCount={5}
     type="page"
   />

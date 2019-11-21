@@ -7,18 +7,26 @@
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { Fragment } from 'react';
 
-interface Props {
-  title: React.ReactNode;
-  error: {
-    data: {
-      error: string;
-      cause?: string[];
-      message?: string;
-    };
+export interface Error {
+  data: {
+    error: string;
+    cause?: string[];
+    message?: string;
   };
 }
 
-export const SectionError: React.FunctionComponent<Props> = ({ title, error, ...rest }) => {
+interface Props {
+  title: React.ReactNode;
+  error: Error;
+  actions?: JSX.Element;
+}
+
+export const SectionError: React.FunctionComponent<Props> = ({
+  title,
+  error,
+  actions,
+  ...rest
+}) => {
   const {
     error: errorString,
     cause, // wrapEsError() on the server adds a "cause" array
@@ -27,10 +35,10 @@ export const SectionError: React.FunctionComponent<Props> = ({ title, error, ...
 
   return (
     <EuiCallOut title={title} color="danger" iconType="alert" {...rest}>
-      <div>{message || errorString}</div>
+      {cause ? message || errorString : <p>{message || errorString}</p>}
       {cause && (
         <Fragment>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
           <ul>
             {cause.map((causeMsg, i) => (
               <li key={i}>{causeMsg}</li>
@@ -38,6 +46,7 @@ export const SectionError: React.FunctionComponent<Props> = ({ title, error, ...
           </ul>
         </Fragment>
       )}
+      {actions ? actions : null}
     </EuiCallOut>
   );
 };

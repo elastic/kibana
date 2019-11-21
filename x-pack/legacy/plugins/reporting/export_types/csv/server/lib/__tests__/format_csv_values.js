@@ -11,7 +11,16 @@ describe('formatCsvValues', function () {
   const separator = ',';
   const fields = ['foo', 'bar'];
   const mockEscapeValue = val => val;
-
+  describe('with _source as one of the fields', function () {
+    const formatsMap = new Map();
+    const formatCsvValues = createFormatCsvValues(mockEscapeValue, separator, ['foo', '_source'], formatsMap);
+    it('should return full _source for _source field', function () {
+      const values = {
+        foo: 'baz',
+      };
+      expect(formatCsvValues(values)).to.be('baz,{"foo":"baz"}');
+    });
+  });
   describe('without field formats', function () {
     const formatsMap = new Map();
     const formatCsvValues = createFormatCsvValues(mockEscapeValue, separator, fields, formatsMap);

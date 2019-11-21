@@ -4,23 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { trunc } from 'lodash';
 import open from 'opn';
-import * as Chrome from 'puppeteer-core';
 import { parse as parseUrl } from 'url';
+import { Page, SerializableOrJSHandle, EvaluateFn } from 'puppeteer';
+import { ViewZoomWidthHeight } from '../../../../export_types/common/layouts/layout';
+import { LevelLogger } from '../../../../server/lib';
+import { allowRequest } from '../../network_policy';
 import {
   ConditionalHeaders,
   ConditionalHeadersConditions,
   ElementPosition,
-  EvalArgs,
-  EvalFn,
-  EvaluateOptions,
-  Logger,
-  ViewZoomWidthHeight,
+  NetworkPolicy,
 } from '../../../../types';
 
 export interface ChromiumDriverOptions {
-  logger: Logger;
   inspect: boolean;
+  networkPolicy: NetworkPolicy;
 }
 
 interface WaitForSelectorOpts {
@@ -30,15 +30,25 @@ interface WaitForSelectorOpts {
 const WAIT_FOR_DELAY_MS: number = 100;
 
 export class HeadlessChromiumDriver {
-  private readonly page: Chrome.Page;
-  private readonly logger: Logger;
+  private readonly page: Page;
   private readonly inspect: boolean;
+  private readonly networkPolicy: NetworkPolicy;
 
-  constructor(page: Chrome.Page, { logger, inspect }: ChromiumDriverOptions) {
+  constructor(page: Page, { inspect, networkPolicy }: ChromiumDriverOptions) {
     this.page = page;
-    // @ts-ignore https://github.com/elastic/kibana/issues/32140
-    this.logger = logger.clone(['headless-chromium-driver']);
     this.inspect = inspect;
+    this.networkPolicy = networkPolicy;
+  }
+
+  private allowRequest(url: string) {
+    return !this.networkPolicy.enabled || allowRequest(url, this.networkPolicy.rules);
+  }
+
+  private truncateUrl(url: string) {
+    return trunc(url, {
+      length: 100,
+      omission: '[truncated]',
+    });
   }
 
   public async open(
@@ -46,13 +56,28 @@ export class HeadlessChromiumDriver {
     {
       conditionalHeaders,
       waitForSelector,
-    }: { conditionalHeaders: ConditionalHeaders; waitForSelector: string }
+    }: { conditionalHeaders: ConditionalHeaders; waitForSelector: string },
+    logger: LevelLogger
   ) {
-    this.logger.debug(`opening url ${url}`);
     await this.page.setRequestInterception(true);
-    this.page.on('request', (interceptedRequest: any) => {
-      if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedRequest.url())) {
-        this.logger.debug(`Using custom headers for ${interceptedRequest.url()}`);
+    logger.info(`opening url ${url}`);
+    let interceptedCount = 0;
+
+    this.page.on('request', interceptedRequest => {
+      const interceptedUrl = interceptedRequest.url();
+      const allowed = !interceptedUrl.startsWith('file://');
+      const isData = interceptedUrl.startsWith('data:');
+
+      // We should never ever let file protocol requests go through
+      if (!allowed || !this.allowRequest(interceptedUrl)) {
+        logger.error(`Got bad URL: "${interceptedUrl}", closing browser.`);
+        interceptedRequest.abort('blockedbyclient');
+        this.page.browser().close();
+        throw new Error(`Received disallowed outgoing URL: "${interceptedUrl}", exiting`);
+      }
+
+      if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedUrl)) {
+        logger.debug(`Using custom headers for ${interceptedUrl}`);
         interceptedRequest.continue({
           headers: {
             ...interceptedRequest.headers(),
@@ -60,8 +85,24 @@ export class HeadlessChromiumDriver {
           },
         });
       } else {
-        this.logger.debug(`No custom headers for ${interceptedRequest.url()}`);
+        const loggedUrl = isData ? this.truncateUrl(interceptedUrl) : interceptedUrl;
+        logger.debug(`No custom headers for ${loggedUrl}`);
         interceptedRequest.continue();
+      }
+      interceptedCount = interceptedCount + (isData ? 0 : 1);
+    });
+
+    // Even though 3xx redirects go through our request
+    // handler, we should probably inspect responses just to
+    // avoid being bamboozled by some malicious request
+    this.page.on('response', interceptedResponse => {
+      const interceptedUrl = interceptedResponse.url();
+      const allowed = !interceptedUrl.startsWith('file://');
+
+      if (!allowed || !this.allowRequest(interceptedUrl)) {
+        logger.error(`Got disallowed URL "${interceptedUrl}", closing browser.`);
+        this.page.browser().close();
+        throw new Error(`Received disallowed URL in response: ${interceptedUrl}`);
       }
     });
 
@@ -71,7 +112,8 @@ export class HeadlessChromiumDriver {
       await this.launchDebugger();
     }
 
-    await this.waitForSelector(waitForSelector);
+    await this.waitForSelector(waitForSelector, {}, logger);
+    logger.info(`handled ${interceptedCount} page requests`);
   }
 
   public async screenshot(elementPosition: ElementPosition) {
@@ -93,14 +135,18 @@ export class HeadlessChromiumDriver {
     return screenshot.toString('base64');
   }
 
-  public async evaluate({ fn, args = [] }: EvaluateOptions) {
+  public async evaluate({ fn, args = [] }: { fn: EvaluateFn; args: SerializableOrJSHandle[] }) {
     const result = await this.page.evaluate(fn, ...args);
     return result;
   }
 
-  public async waitForSelector(selector: string, opts: WaitForSelectorOpts = {}) {
+  public async waitForSelector(
+    selector: string,
+    opts: WaitForSelectorOpts = {},
+    logger: LevelLogger
+  ) {
     const { silent = false } = opts;
-    this.logger.debug(`waitForSelector ${selector}`);
+    logger.debug(`waitForSelector ${selector}`);
 
     let resp;
     try {
@@ -109,21 +155,29 @@ export class HeadlessChromiumDriver {
       if (!silent) {
         // Provide some troubleshooting info to see if we're on the login page,
         // "Kibana could not load correctly", etc
-        this.logger.error(`waitForSelector ${selector} failed on ${this.page.url()}`);
+        logger.error(`waitForSelector ${selector} failed on ${this.page.url()}`);
         const pageText = await this.evaluate({
           fn: () => document.querySelector('body')!.innerText,
           args: [],
         });
-        this.logger.debug(`Page plain text: ${pageText.replace(/\n/g, '\\n')}`); // replace newline with escaped for single log line
+        logger.debug(`Page plain text: ${pageText.replace(/\n/g, '\\n')}`); // replace newline with escaped for single log line
       }
       throw err;
     }
 
-    this.logger.debug(`waitForSelector ${selector} resolved`);
+    logger.debug(`waitForSelector ${selector} resolved`);
     return resp;
   }
 
-  public async waitFor<T>({ fn, args, toEqual }: { fn: EvalFn<T>; args: EvalArgs; toEqual: T }) {
+  public async waitFor<T>({
+    fn,
+    args,
+    toEqual,
+  }: {
+    fn: EvaluateFn;
+    args: SerializableOrJSHandle[];
+    toEqual: T;
+  }) {
     while (true) {
       const result = await this.evaluate({ fn, args });
       if (result === toEqual) {
@@ -134,8 +188,8 @@ export class HeadlessChromiumDriver {
     }
   }
 
-  public async setViewport({ width, height, zoom }: ViewZoomWidthHeight) {
-    this.logger.debug(`Setting viewport to width: ${width}, height: ${height}, zoom: ${zoom}`);
+  public async setViewport({ width, height, zoom }: ViewZoomWidthHeight, logger: LevelLogger) {
+    logger.debug(`Setting viewport to width: ${width}, height: ${height}, zoom: ${zoom}`);
 
     await this.page.setViewport({
       width: Math.floor(width / zoom),

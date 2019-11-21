@@ -140,7 +140,7 @@ uiModules.get('apps/management')
                   url: kbnUrl.eval('#/management/kibana/index_patterns/{{id}}', { id: id }),
                   active: $scope.editingId === id,
                   default: isDefault,
-                  tag: tags && tags.length ? tags[0] : null,
+                  tags,
                   //the prepending of 0 at the default pattern takes care of prioritization
                   //so the sorting will but the default index on top
                   //or on bottom of a the table

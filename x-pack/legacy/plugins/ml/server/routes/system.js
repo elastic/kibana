@@ -8,6 +8,9 @@
 
 import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { callWithInternalUserFactory } from '../client/call_with_internal_user_factory';
+import { privilegesProvider } from '../lib/check_privileges';
+import { spacesUtilsProvider } from '../lib/spaces_utils';
+
 import { mlLog } from '../client/log';
 
 import { wrapError } from '../client/errors';
@@ -15,7 +18,14 @@ import Boom from 'boom';
 
 import { isSecurityDisabled } from '../lib/security_utils';
 
-export function systemRoutes({ commonRouteConfig, elasticsearchPlugin, route, xpackMainPlugin }) {
+export function systemRoutes({
+  commonRouteConfig,
+  elasticsearchPlugin,
+  config,
+  route,
+  xpackMainPlugin,
+  spacesPlugin
+}) {
   const callWithInternalUser = callWithInternalUserFactory(elasticsearchPlugin);
 
   function getNodeCount() {
@@ -84,6 +94,29 @@ export function systemRoutes({ commonRouteConfig, elasticsearchPlugin, route, xp
 
   route({
     method: 'GET',
+    path: '/api/ml/ml_capabilities',
+    async handler(request) {
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
+      try {
+        const ignoreSpaces = request.query && request.query.ignoreSpaces === 'true';
+        // if spaces is disabled force isMlEnabledInSpace to be true
+        const { isMlEnabledInSpace } = spacesPlugin !== undefined ?
+          spacesUtilsProvider(spacesPlugin, request) :
+          { isMlEnabledInSpace: async () => true };
+
+        const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPlugin, isMlEnabledInSpace, ignoreSpaces);
+        return await getPrivileges();
+      } catch (error) {
+        return wrapError(error);
+      }
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  route({
+    method: 'GET',
     path: '/api/ml/ml_node_count',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
@@ -136,10 +169,17 @@ export function systemRoutes({ commonRouteConfig, elasticsearchPlugin, route, xp
   route({
     method: 'GET',
     path: '/api/ml/info',
-    handler(request) {
+    async handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      return callWithRequest('ml.info')
-        .catch(resp => wrapError(resp));
+
+      try {
+        const info = await callWithRequest('ml.info');
+        const cloudIdKey = 'xpack.cloud.id';
+        const cloudId = config.has(cloudIdKey) && config.get(cloudIdKey);
+        return { ...info, cloudId };
+      } catch (error) {
+        return wrapError(error);
+      }
     },
     config: {
       ...commonRouteConfig

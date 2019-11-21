@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
-import { IconType } from '@elastic/eui';
+import { EuiFlexGroup, EuiSpacer, IconType } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
@@ -38,7 +36,7 @@ interface Props {
   processExecutable: string | null | undefined;
   processTitle: string | null | undefined;
   workingDirectory: string | null | undefined;
-  args: string | null | undefined;
+  args: string[] | null | undefined;
   session: string | null | undefined;
 }
 
@@ -62,7 +60,7 @@ export const AuditdGenericFileLine = pure<Props>(
     text,
     fileIcon,
   }) => (
-    <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
+    <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none" wrap={true}>
       <SessionUserHostWorkingDir
         eventId={id}
         contextId={contextId}
@@ -95,6 +93,8 @@ export const AuditdGenericFileLine = pure<Props>(
       <TokensFlexItem grow={false} component="span">
         <ProcessDraggable
           contextId={contextId}
+          endgamePid={undefined}
+          endgameProcessName={undefined}
           eventId={id}
           processPid={processPid}
           processName={processName}
@@ -120,16 +120,19 @@ export const AuditdGenericFileLine = pure<Props>(
   )
 );
 
+AuditdGenericFileLine.displayName = 'AuditdGenericFileLine';
+
 interface GenericDetailsProps {
   browserFields: BrowserFields;
   data: Ecs;
   contextId: string;
   text: string;
   fileIcon: IconType;
+  timelineId: string;
 }
 
 export const AuditdGenericFileDetails = pure<GenericDetailsProps>(
-  ({ data, contextId, text, fileIcon = 'document' }) => {
+  ({ data, contextId, text, fileIcon = 'document', timelineId }) => {
     const id = data._id;
     const session: string | null | undefined = get('auditd.session[0]', data);
     const hostName: string | null | undefined = get('host.name[0]', data);
@@ -143,8 +146,7 @@ export const AuditdGenericFileDetails = pure<GenericDetailsProps>(
     const filePath: string | null | undefined = get('file.path[0]', data);
     const primary: string | null | undefined = get('auditd.summary.actor.primary[0]', data);
     const secondary: string | null | undefined = get('auditd.summary.actor.secondary[0]', data);
-    const rawArgs: string[] | null | undefined = get('process.args', data);
-    const args: string | null = rawArgs != null ? rawArgs.slice(1).join(' ') : null;
+    const args: string[] | null | undefined = get('process.args', data);
 
     if (data.process != null) {
       return (
@@ -169,7 +171,7 @@ export const AuditdGenericFileDetails = pure<GenericDetailsProps>(
             result={result}
           />
           <EuiSpacer size="s" />
-          <NetflowRenderer data={data} />
+          <NetflowRenderer data={data} timelineId={timelineId} />
         </Details>
       );
     } else {
@@ -177,3 +179,5 @@ export const AuditdGenericFileDetails = pure<GenericDetailsProps>(
     }
   }
 );
+
+AuditdGenericFileDetails.displayName = 'AuditdGenericFileDetails';

@@ -26,15 +26,10 @@ export const appEntryTemplate = (bundle) => `
  * context: ${bundle.getContext()}
  */
 
-// ensure the csp nonce is set in the dll
-import 'dll/set_csp_nonce';
-
-// set the csp nonce in the primary webpack bundle too
-__webpack_nonce__ = window.__kbnNonce__;
-
 // import global polyfills
 import Symbol_observable from 'symbol-observable';
-import '@babel/polyfill';
+import 'core-js/stable';
+import 'regenerator-runtime/runtime';
 import 'custom-event-polyfill';
 import 'whatwg-fetch';
 import 'abortcontroller-polyfill';

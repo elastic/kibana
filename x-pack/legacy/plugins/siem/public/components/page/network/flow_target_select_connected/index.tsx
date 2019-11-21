@@ -23,6 +23,8 @@ const SelectTypeItem = styled(EuiFlexItem)`
   min-width: 180px;
 `;
 
+SelectTypeItem.displayName = 'SelectTypeItem';
+
 interface FlowTargetSelectReduxProps {
   flowTarget: FlowTarget;
 }
@@ -50,6 +52,8 @@ const FlowTargetSelectComponent = pure<FlowTargetSelectProps>(
   )
 );
 
+FlowTargetSelectComponent.displayName = 'FlowTargetSelectComponent';
+
 const makeMapStateToProps = () => {
   const getIpDetailsFlowTargetSelector = networkSelectors.ipDetailsFlowTargetSelector();
   return (state: State) => {
@@ -59,9 +63,6 @@ const makeMapStateToProps = () => {
   };
 };
 
-export const FlowTargetSelectConnected = connect(
-  makeMapStateToProps,
-  {
-    updateIpDetailsFlowTarget: networkActions.updateIpDetailsFlowTarget,
-  }
-)(FlowTargetSelectComponent);
+export const FlowTargetSelectConnected = connect(makeMapStateToProps, {
+  updateIpDetailsFlowTarget: networkActions.updateIpDetailsFlowTarget,
+})(FlowTargetSelectComponent);

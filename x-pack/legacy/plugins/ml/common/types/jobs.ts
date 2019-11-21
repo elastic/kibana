@@ -39,6 +39,30 @@ export interface MlJob {
   state: string;
 }
 
+export interface MlSummaryJob {
+  id: string;
+  description: string;
+  groups: string[];
+  processed_record_count: number;
+  memory_status?: string;
+  jobState: string;
+  hasDatafeed: boolean;
+  datafeedId?: string;
+  datafeedIndices: any[];
+  datafeedState?: string;
+  latestTimestampMs: number;
+  earliestTimestampMs?: number;
+  latestResultsTimestampMs: number;
+  isSingleMetricViewerJob: boolean;
+  nodeName?: string;
+  deleting?: boolean;
+  fullJob?: any;
+  auditMessage?: any;
+  latestTimestampSortValue?: number;
+}
+
+export type MlSummaryJobs = MlSummaryJob[];
+
 export function isMlJob(arg: any): arg is MlJob {
   return typeof arg.job_id === 'string';
 }

@@ -8,100 +8,104 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
-
+import { compose } from 'redux';
 import chrome from 'ui/chrome';
+
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
-  FlowDirection,
-  FlowTarget,
+  FlowTargetSourceDest,
   GetNetworkTopNFlowQuery,
   NetworkTopNFlowEdges,
-  NetworkTopNFlowSortField,
-  PageInfo,
+  NetworkTopTablesSortField,
+  PageInfoPaginated,
 } from '../../graphql/types';
-import { inputsModel, networkModel, networkSelectors, State } from '../../store';
-import { createFilter } from '../helpers';
-import { QueryTemplate, QueryTemplateProps } from '../query_template';
-
+import { inputsModel, inputsSelectors, networkModel, networkSelectors, State } from '../../store';
+import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
+import { createFilter, getDefaultFetchPolicy } from '../helpers';
+import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
 import { networkTopNFlowQuery } from './index.gql_query';
+
+const ID = 'networkTopNFlowQuery';
 
 export interface NetworkTopNFlowArgs {
   id: string;
-  networkTopNFlow: NetworkTopNFlowEdges[];
-  totalCount: number;
-  pageInfo: PageInfo;
+  ip?: string;
+  inspect: inputsModel.InspectQuery;
+  isInspected: boolean;
   loading: boolean;
-  loadMore: (cursor: string) => void;
+  loadPage: (newActivePage: number) => void;
+  networkTopNFlow: NetworkTopNFlowEdges[];
+  pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
+  totalCount: number;
 }
 
-export interface OwnProps extends QueryTemplateProps {
+export interface OwnProps extends QueryTemplatePaginatedProps {
   children: (args: NetworkTopNFlowArgs) => React.ReactNode;
+  flowTarget: FlowTargetSourceDest;
+  ip?: string;
   type: networkModel.NetworkType;
 }
 
 export interface NetworkTopNFlowComponentReduxProps {
+  activePage: number;
+  isInspected: boolean;
   limit: number;
-  flowDirection: FlowDirection;
-  topNFlowSort: NetworkTopNFlowSortField;
-  flowTarget: FlowTarget;
+  sort: NetworkTopTablesSortField;
 }
 
 type NetworkTopNFlowProps = OwnProps & NetworkTopNFlowComponentReduxProps;
 
-class NetworkTopNFlowComponentQuery extends QueryTemplate<
+class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
   NetworkTopNFlowProps,
   GetNetworkTopNFlowQuery.Query,
   GetNetworkTopNFlowQuery.Variables
 > {
   public render() {
     const {
-      id = 'networkTopNFlowQuery',
+      activePage,
       children,
+      endDate,
+      flowTarget,
       filterQuery,
+      id = `${ID}-${flowTarget}`,
+      ip,
+      isInspected,
+      limit,
       skip,
       sourceId,
       startDate,
-      endDate,
-      limit,
-      flowDirection,
-      topNFlowSort,
-      flowTarget,
+      sort,
     } = this.props;
+    const variables: GetNetworkTopNFlowQuery.Variables = {
+      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      filterQuery: createFilter(filterQuery),
+      flowTarget,
+      inspect: isInspected,
+      ip,
+      pagination: generateTablePaginationOptions(activePage, limit),
+      sort,
+      sourceId,
+      timerange: {
+        interval: '12h',
+        from: startDate!,
+        to: endDate!,
+      },
+    };
     return (
       <Query<GetNetworkTopNFlowQuery.Query, GetNetworkTopNFlowQuery.Variables>
-        query={networkTopNFlowQuery}
-        fetchPolicy="cache-and-network"
+        fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
+        query={networkTopNFlowQuery}
         skip={skip}
-        variables={{
-          sourceId,
-          timerange: {
-            interval: '12h',
-            from: startDate!,
-            to: endDate!,
-          },
-          sort: topNFlowSort,
-          flowDirection,
-          flowTarget,
-          pagination: {
-            limit,
-            cursor: null,
-            tiebreaker: null,
-          },
-          filterQuery: createFilter(filterQuery),
-          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
-        }}
+        variables={variables}
       >
-        {({ data, loading, fetchMore, refetch }) => {
+        {({ data, loading, fetchMore, networkStatus, refetch }) => {
           const networkTopNFlow = getOr([], `source.NetworkTopNFlow.edges`, data);
           this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newCursor: string) => ({
+          this.setFetchMoreOptions((newActivePage: number) => ({
             variables: {
-              pagination: {
-                cursor: newCursor,
-                limit: limit + parseInt(newCursor, 10),
-              },
+              pagination: generateTablePaginationOptions(newActivePage, limit),
             },
             updateQuery: (prev, { fetchMoreResult }) => {
               if (!fetchMoreResult) {
@@ -113,23 +117,23 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
                   ...fetchMoreResult.source,
                   NetworkTopNFlow: {
                     ...fetchMoreResult.source.NetworkTopNFlow,
-                    edges: [
-                      ...prev.source.NetworkTopNFlow.edges,
-                      ...fetchMoreResult.source.NetworkTopNFlow.edges,
-                    ],
+                    edges: [...fetchMoreResult.source.NetworkTopNFlow.edges],
                   },
                 },
               };
             },
           }));
+          const isLoading = this.isItAValidLoading(loading, variables, networkStatus);
           return children({
             id,
-            refetch,
-            loading,
-            totalCount: getOr(0, 'source.NetworkTopNFlow.totalCount', data),
+            inspect: getOr(null, 'source.NetworkTopNFlow.inspect', data),
+            isInspected,
+            loading: isLoading,
+            loadPage: this.wrappedLoadMore,
             networkTopNFlow,
             pageInfo: getOr({}, 'source.NetworkTopNFlow.pageInfo', data),
-            loadMore: this.wrappedLoadMore,
+            refetch: this.memoizedRefetchQuery(variables, limit, refetch),
+            totalCount: getOr(-1, 'source.NetworkTopNFlow.totalCount', data),
           });
         }}
       </Query>
@@ -138,10 +142,17 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
 }
 
 const makeMapStateToProps = () => {
-  const getNetworkTopNFlowSelector = networkSelectors.topNFlowSelector();
-  const mapStateToProps = (state: State) => getNetworkTopNFlowSelector(state);
-
-  return mapStateToProps;
+  const getTopNFlowSelector = networkSelectors.topNFlowSelector();
+  const getQuery = inputsSelectors.globalQueryByIdSelector();
+  return (state: State, { flowTarget, id = `${ID}-${flowTarget}`, type }: OwnProps) => {
+    const { isInspected } = getQuery(state, id);
+    return {
+      ...getTopNFlowSelector(state, type, flowTarget),
+      isInspected,
+    };
+  };
 };
 
-export const NetworkTopNFlowQuery = connect(makeMapStateToProps)(NetworkTopNFlowComponentQuery);
+export const NetworkTopNFlowQuery = compose<React.ComponentClass<OwnProps>>(
+  connect(makeMapStateToProps)
+)(NetworkTopNFlowComponentQuery);

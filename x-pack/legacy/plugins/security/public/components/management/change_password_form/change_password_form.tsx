@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component } from 'react';
 import { toastNotifications } from 'ui/notify';
-import { User } from '../../../../common/model/user';
+import { User } from '../../../../common/model';
 import { UserAPIClient } from '../../../lib/api';
 
 interface Props {
@@ -314,7 +314,7 @@ export class ChangePasswordForm extends Component<Props, State> {
   };
 
   private handleChangePasswordFailure = (error: Record<string, any>) => {
-    if (error.body && error.body.statusCode === 401) {
+    if (error.body && error.body.statusCode === 403) {
       this.setState({ currentPasswordError: true });
     } else {
       toastNotifications.addDanger(

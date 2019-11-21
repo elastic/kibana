@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
+import { isEqual } from 'lodash';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { PropTypes } from 'prop-types';
 import moment from 'moment';
@@ -15,7 +14,7 @@ import { JobSelectorTable } from './job_selector_table/';
 import { IdBadges } from './id_badges';
 import { NewSelectionIdBadges } from './new_selection_id_badges';
 import { timefilter } from 'ui/timefilter';
-import { getGroupsFromJobs, normalizeTimes, setGlobalState } from './job_select_service_utils';
+import { getGroupsFromJobs, normalizeTimes, setGlobalState, setGlobalStateSkipRefresh } from './job_select_service_utils';
 import { toastNotifications } from 'ui/notify';
 import {
   EuiButton,
@@ -72,13 +71,13 @@ const BADGE_LIMIT = 10;
 const DEFAULT_GANTT_BAR_WIDTH = 299; // pixels
 
 export function JobSelector({
-  config,
+  dateFormatTz,
   globalState,
   jobSelectService,
   selectedJobIds,
   selectedGroups,
   singleSelection,
-  timeseriesOnly
+  timeseriesOnly,
 }) {
   const [jobs, setJobs] = useState([]);
   const [groups, setGroups] = useState([]);
@@ -114,8 +113,6 @@ export function JobSelector({
   // Not wrapping it would cause this dependency to change on every render
   const handleResize = useCallback(() => {
     if (jobs.length > 0 && flyoutEl && flyoutEl.current && flyoutEl.current.flyout) {
-      const tzConfig = config.get('dateFormat:tz');
-      const dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
       // get all cols in flyout table
       const tableHeaderCols = flyoutEl.current.flyout.querySelectorAll('table thead th');
       // get the width of the last col
@@ -126,7 +123,7 @@ export function JobSelector({
       setGroups(updatedGroups);
       setGanttBarWidth(derivedWidth);
     }
-  }, [config, jobs]);
+  }, [dateFormatTz, jobs]);
 
   useEffect(() => {
     // Ensure ganttBar width gets calculated on resize
@@ -141,18 +138,25 @@ export function JobSelector({
     handleResize();
   }, [handleResize, jobs]);
 
-  function closeFlyout() {
+  // On opening and closing the flyout, optionally update a global `skipRefresh` flag.
+  // This allows us to circumvent race conditions which could happen by triggering both
+  // timefilter and job selector related events in Single Metric Viewer.
+  function closeFlyout(setSkipRefresh = true) {
     setIsFlyoutVisible(false);
+    if (setSkipRefresh) {
+      setGlobalStateSkipRefresh(globalState, false);
+    }
   }
 
-  function showFlyout() {
+  function showFlyout(setSkipRefresh = true) {
     setIsFlyoutVisible(true);
+    if (setSkipRefresh) {
+      setGlobalStateSkipRefresh(globalState, true);
+    }
   }
 
   function handleJobSelectionClick() {
     showFlyout();
-    const tzConfig = config.get('dateFormat:tz');
-    const dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
 
     ml.jobs.jobsWithTimerange(dateFormatTz)
       .then((resp) => {
@@ -177,7 +181,6 @@ export function JobSelector({
   }
 
   function applySelection() {
-    closeFlyout();
     // allNewSelection will be a list of all job ids (including those from groups) selected from the table
     const allNewSelection = [];
     const groupSelection = [];
@@ -195,12 +198,33 @@ export function JobSelector({
     // create a Set to remove duplicate values
     const allNewSelectionUnique = Array.from(new Set(allNewSelection));
 
+    const isPrevousSelection = isEqual(
+      { selectedJobIds, selectedGroups },
+      { selectedJobIds: allNewSelectionUnique, selectedGroups: groupSelection }
+    );
+
     setSelectedIds(newSelection);
     setNewSelection([]);
-    applyTimeRangeFromSelection(allNewSelectionUnique);
-    jobSelectService.next({ selection: allNewSelectionUnique });
 
-    setGlobalState(globalState, { selectedIds: allNewSelectionUnique, selectedGroups: groupSelection });
+    // If the job selection is unchanged, then we close the modal and
+    // disable skipping the timefilter listener flag in globalState.
+    // If the job selection changed, this will not
+    // update skipRefresh yet to avoid firing multiple events via
+    // applyTimeRangeFromSelection() and setGlobalState().
+    closeFlyout(isPrevousSelection);
+
+    // If the job selection changed, then when
+    // calling `applyTimeRangeFromSelection()` here
+    // Single Metric Viewer will skip an update
+    // triggered by timefilter to avoid a race
+    // condition caused by the job update listener
+    // that's also going to be triggered.
+    applyTimeRangeFromSelection(allNewSelectionUnique);
+
+    // Set `skipRefresh` again to `false` here so after
+    // both the time range and jobs have been updated
+    // Single Metric Viewer should again update itself.
+    setGlobalState(globalState, { selectedIds: allNewSelectionUnique, selectedGroups: groupSelection, skipRefresh: false });
   }
 
   function applyTimeRangeFromSelection(selection) {
@@ -243,7 +267,7 @@ export function JobSelector({
     return (
       <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup wrap responsive={false} gutterSize="xs" alignItems="center">
+          <EuiFlexGroup wrap responsive={false} gutterSize="xs" alignItems="center" data-test-subj="mlJobSelectionBadges">
             <IdBadges
               limit={BADGE_LIMIT}
               maps={maps}
@@ -258,6 +282,7 @@ export function JobSelector({
             size="xs"
             iconType="pencil"
             onClick={handleJobSelectionClick}
+            data-test-subj="mlButtonEditJobSelection"
           >
             {i18n.translate('xpack.ml.jobSelector.jobSelectionButton', {
               defaultMessage: 'Edit job selection'
@@ -276,6 +301,7 @@ export function JobSelector({
           onClose={closeFlyout}
           aria-labelledby="jobSelectorFlyout"
           size="l"
+          data-test-subj="mlFlyoutJobSelector"
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
@@ -307,6 +333,7 @@ export function JobSelector({
                     <EuiButtonEmpty
                       onClick={clearSelection}
                       size="xs"
+                      data-test-subj="mlFlyoutJobSelectorButtonClearSelection"
                     >
                       {i18n.translate('xpack.ml.jobSelector.clearAllFlyoutButton', {
                         defaultMessage: 'Clear all'
@@ -320,6 +347,7 @@ export function JobSelector({
                       })}
                       checked={applyTimeRange}
                       onChange={toggleTimerangeSwitch}
+                      data-test-subj="mlFlyoutJobSelectorSwitchApplyTimeRange"
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -342,6 +370,7 @@ export function JobSelector({
                   onClick={applySelection}
                   fill
                   isDisabled={newSelection.length === 0}
+                  data-test-subj="mlFlyoutJobSelectorButtonApply"
                 >
                   {i18n.translate('xpack.ml.jobSelector.applyFlyoutButton', {
                     defaultMessage: 'Apply'
@@ -352,6 +381,7 @@ export function JobSelector({
                 <EuiButtonEmpty
                   iconType="cross"
                   onClick={closeFlyout}
+                  data-test-subj="mlFlyoutJobSelectorButtonClose"
                 >
                   {i18n.translate('xpack.ml.jobSelector.closeFlyoutButton', {
                     defaultMessage: 'Close'
@@ -377,6 +407,6 @@ JobSelector.propTypes = {
   globalState: PropTypes.object,
   jobSelectService: PropTypes.object,
   selectedJobIds: PropTypes.array,
-  singleSelection: PropTypes.string,
-  timeseriesOnly: PropTypes.string
+  singleSelection: PropTypes.bool,
+  timeseriesOnly: PropTypes.bool
 };

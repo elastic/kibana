@@ -49,9 +49,18 @@ export const CleanClientModulesOnDLLTask = {
       `${baseDir}/src/plugins/*/server/index.js`,
       `!${baseDir}/src/plugins/**/public`
     ]);
+    const discoveredNewPlatformXpackPlugins = await globby([
+      `${baseDir}/x-pack/plugins/*/server/index.js`,
+      `!${baseDir}/x-pack/plugins/**/public`
+    ]);
 
     // Compose all the needed entries
-    const serverEntries = [ ...mainCodeEntries, ...discoveredLegacyCorePluginEntries, ...discoveredPluginEntries];
+    const serverEntries = [
+      ...mainCodeEntries,
+      ...discoveredLegacyCorePluginEntries,
+      ...discoveredPluginEntries,
+      ...discoveredNewPlatformXpackPlugins
+    ];
 
     // Get the dependencies found searching through the server
     // side code entries that were provided
@@ -68,14 +77,14 @@ export const CleanClientModulesOnDLLTask = {
 
     // Get dll entries filtering out the ones
     // from any whitelisted module
-    const dllEntries = await getDllEntries(dllManifestPath, whiteListedModules);
+    const dllEntries = await getDllEntries(dllManifestPath, whiteListedModules, baseDir);
 
     for (const relativeEntryPath of dllEntries) {
-      if (relativeEntryPath.includes('@elastic/eui')) {
+      const entryPath = `${baseDir}/${relativeEntryPath}`;
+
+      if (entryPath.endsWith('package.json')) {
         continue;
       }
-
-      const entryPath = `${baseDir}/${relativeEntryPath}`;
 
       // Clean a module included into the dll
       // and then write a blank file for each

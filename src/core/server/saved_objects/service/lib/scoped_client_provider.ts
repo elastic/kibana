@@ -17,28 +17,66 @@
  * under the License.
  */
 import { PriorityCollection } from './priority_collection';
-import { SavedObjectsClientContract } from '..';
+import { SavedObjectsClientContract } from '../../types';
 
+/**
+ * Options passed to each SavedObjectsClientWrapperFactory to aid in creating the wrapper instance.
+ * @public
+ */
 export interface SavedObjectsClientWrapperOptions<Request = unknown> {
   client: SavedObjectsClientContract;
   request: Request;
 }
 
+/**
+ * Describes the factory used to create instances of Saved Objects Client Wrappers.
+ * @public
+ */
 export type SavedObjectsClientWrapperFactory<Request = unknown> = (
   options: SavedObjectsClientWrapperOptions<Request>
 ) => SavedObjectsClientContract;
 
-export type SavedObjectsClientFactory<Request = unknown> = (
-  { request }: { request: Request }
-) => SavedObjectsClientContract;
+/**
+ * Describes the factory used to create instances of the Saved Objects Client.
+ * @public
+ */
+export type SavedObjectsClientFactory<Request = unknown> = ({
+  request,
+}: {
+  request: Request;
+}) => SavedObjectsClientContract;
 
 /**
- * Provider for the Scoped Saved Object Client.
+ * Options to control the creation of the Saved Objects Client.
+ * @public
  */
-export class ScopedSavedObjectsClientProvider<Request = unknown> {
-  private readonly _wrapperFactories = new PriorityCollection<
-    SavedObjectsClientWrapperFactory<Request>
-  >();
+export interface SavedObjectsClientProviderOptions {
+  excludedWrappers?: string[];
+}
+
+/**
+ * @public
+ * See {@link SavedObjectsClientProvider}
+ */
+export type ISavedObjectsClientProvider<T = unknown> = Pick<
+  SavedObjectsClientProvider<T>,
+  keyof SavedObjectsClientProvider
+>;
+
+/**
+ * Provider for the Scoped Saved Objects Client.
+ *
+ * @internalRemarks Because `getClient` is synchronous the Client Provider does
+ * not support creating factories that react to new ES clients emitted from
+ * elasticsearch.adminClient$. The Client Provider therefore doesn't support
+ * configuration changes to the Elasticsearch client. TODO: revisit once we've
+ * closed https://github.com/elastic/kibana/pull/45796
+ */
+export class SavedObjectsClientProvider<Request = unknown> {
+  private readonly _wrapperFactories = new PriorityCollection<{
+    id: string;
+    factory: SavedObjectsClientWrapperFactory<Request>;
+  }>();
   private _clientFactory: SavedObjectsClientFactory<Request>;
   private readonly _originalClientFactory: SavedObjectsClientFactory<Request>;
 
@@ -52,12 +90,17 @@ export class ScopedSavedObjectsClientProvider<Request = unknown> {
 
   addClientWrapperFactory(
     priority: number,
-    wrapperFactory: SavedObjectsClientWrapperFactory<Request>
+    id: string,
+    factory: SavedObjectsClientWrapperFactory<Request>
   ): void {
-    this._wrapperFactories.add(priority, wrapperFactory);
+    if (this._wrapperFactories.has(entry => entry.id === id)) {
+      throw new Error(`wrapper factory with id ${id} is already defined`);
+    }
+
+    this._wrapperFactories.add(priority, { id, factory });
   }
 
-  setClientFactory(customClientFactory: SavedObjectsClientFactory) {
+  setClientFactory(customClientFactory: SavedObjectsClientFactory<Request>) {
     if (this._clientFactory !== this._originalClientFactory) {
       throw new Error(`custom client factory is already set, unable to replace the current one`);
     }
@@ -65,15 +108,24 @@ export class ScopedSavedObjectsClientProvider<Request = unknown> {
     this._clientFactory = customClientFactory;
   }
 
-  getClient(request: Request): SavedObjectsClientContract {
+  getClient(
+    request: Request,
+    options: SavedObjectsClientProviderOptions = {}
+  ): SavedObjectsClientContract {
     const client = this._clientFactory({
       request,
     });
 
+    const excludedWrappers = options.excludedWrappers || [];
+
     return this._wrapperFactories
       .toPrioritizedArray()
-      .reduceRight((clientToWrap, wrapperFactory) => {
-        return wrapperFactory({
+      .reduceRight((clientToWrap, { id, factory }) => {
+        if (excludedWrappers.includes(id)) {
+          return clientToWrap;
+        }
+
+        return factory({
           request,
           client: clientToWrap,
         });

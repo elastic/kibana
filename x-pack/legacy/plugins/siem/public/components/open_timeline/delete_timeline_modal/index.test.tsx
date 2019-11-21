@@ -5,7 +5,6 @@
  */
 
 import { EuiButtonIconProps } from '@elastic/eui';
-import { get } from 'lodash/fp';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import * as React from 'react';
 
@@ -77,35 +76,6 @@ describe('DeleteTimelineModal', () => {
         .props() as EuiButtonIconProps;
 
       expect(props.isDisabled).toBe(false);
-    });
-
-    test('it defaults showModal to false until the trash button is clicked', () => {
-      const wrapper = mountWithIntl(
-        <DeleteTimelineModalButton
-          deleteTimelines={jest.fn()}
-          savedObjectId={savedObjectId}
-          title="Privilege Escalation"
-        />
-      );
-
-      expect(get('showModal', wrapper.state())).toBe(false);
-    });
-
-    test('it sets showModal to true when the trash button is clicked', () => {
-      const wrapper = mountWithIntl(
-        <DeleteTimelineModalButton
-          deleteTimelines={jest.fn()}
-          savedObjectId={savedObjectId}
-          title="Privilege Escalation"
-        />
-      );
-
-      wrapper
-        .find('[data-test-subj="delete-timeline"]')
-        .first()
-        .simulate('click');
-
-      expect(get('showModal', wrapper.state())).toBe(true);
     });
 
     test('it does NOT render the modal when showModal is false', () => {

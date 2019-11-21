@@ -23,26 +23,33 @@ import { Server } from 'hapi';
 
 import { LoggerFactory } from '../logging';
 import { CoreService } from '../../types';
+
 import { Logger } from '../logging';
+import { ContextSetup } from '../context';
 import { CoreContext } from '../core_context';
-import { HttpConfig, HttpConfigType, config as httpConfig } from './http_config';
-import { HttpServer, HttpServerSetup } from './http_server';
+import { PluginOpaqueId } from '../plugins';
+
+import { Router } from './router';
+import { HttpConfig, HttpConfigType } from './http_config';
+import { HttpServer } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
 
-/** @public */
-export interface HttpServiceSetup extends HttpServerSetup {
-  createNewServer: (cfg: Partial<HttpConfig>) => Promise<HttpServerSetup>;
-}
-/** @public */
-export interface HttpServiceStart {
-  /** Indicates if http server is listening on a given port */
-  isListening: (port: number) => boolean;
+import {
+  RequestHandlerContextContainer,
+  RequestHandlerContextProvider,
+  InternalHttpServiceSetup,
+  HttpServiceStart,
+} from './types';
+
+import { RequestHandlerContext } from '../../server';
+
+interface SetupDeps {
+  context: ContextSetup;
 }
 
 /** @internal */
-export class HttpService implements CoreService<HttpServiceSetup, HttpServiceStart> {
+export class HttpService implements CoreService<InternalHttpServiceSetup, HttpServiceStart> {
   private readonly httpServer: HttpServer;
-  private readonly secondaryServers: Map<number, HttpServer> = new Map();
   private readonly httpsRedirectServer: HttpsRedirectServer;
   private readonly config$: Observable<HttpConfig>;
   private configSubscription?: Subscription;
@@ -50,6 +57,7 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
   private readonly logger: LoggerFactory;
   private readonly log: Logger;
   private notReadyServer?: Server;
+  private requestHandlerContext?: RequestHandlerContextContainer;
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger;
@@ -58,13 +66,14 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
       .atPath<HttpConfigType>('server')
       .pipe(map(rawConfig => new HttpConfig(rawConfig, coreContext.env)));
 
-    this.httpServer = new HttpServer(coreContext.logger.get('http', 'server'));
+    this.httpServer = new HttpServer(coreContext.logger, 'Kibana');
     this.httpsRedirectServer = new HttpsRedirectServer(
       coreContext.logger.get('http', 'redirect', 'server')
     );
   }
 
-  public async setup() {
+  public async setup(deps: SetupDeps) {
+    this.requestHandlerContext = deps.context.createContextContainer();
     this.configSubscription = this.config$.subscribe(() => {
       if (this.httpServer.isListening()) {
         // If the server is already running we can't make any config changes
@@ -77,17 +86,33 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
 
     const config = await this.config$.pipe(first()).toPromise();
 
-    const httpSetup = (this.httpServer.setup(config) || {}) as HttpServiceSetup;
-    const setup = {
-      ...httpSetup,
-      createNewServer: this.createServer.bind(this),
-    };
-
     if (this.shouldListen(config)) {
       await this.runNotReadyServer(config);
     }
 
-    return setup;
+    const { registerRouter, ...serverContract } = await this.httpServer.setup(config);
+    const contract: InternalHttpServiceSetup = {
+      ...serverContract,
+
+      createRouter: (path: string, pluginId: PluginOpaqueId = this.coreContext.coreId) => {
+        const enhanceHandler = this.requestHandlerContext!.createHandler.bind(null, pluginId);
+        const router = new Router(path, this.log, enhanceHandler);
+        registerRouter(router);
+        return router;
+      },
+
+      registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
+        pluginOpaqueId: PluginOpaqueId,
+        contextName: T,
+        provider: RequestHandlerContextProvider<T>
+      ) => this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName, provider),
+
+      config: {
+        defaultRoute: config.defaultRoute,
+      },
+    };
+
+    return contract;
   }
 
   public async start() {
@@ -105,15 +130,10 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
       }
 
       await this.httpServer.start();
-      await Promise.all([...this.secondaryServers.values()].map(server => server.start()));
     }
 
     return {
-      isListening: (port: number = 0) => {
-        const server = this.secondaryServers.get(port);
-        if (server) return server.isListening();
-        return this.httpServer.isListening();
-      },
+      isListening: () => this.httpServer.isListening(),
     };
   }
 
@@ -129,33 +149,6 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
     return !this.coreContext.env.isDevClusterMaster && config.autoListen;
   }
 
-  private async createServer(cfg: Partial<HttpConfig>) {
-    const { port } = cfg;
-    const config = await this.config$.pipe(first()).toPromise();
-
-    if (!port) {
-      throw new Error('port must be defined');
-    }
-
-    // verify that main server and none of the secondary servers are already using this port
-    if (this.secondaryServers.has(port) || config.port === port) {
-      throw new Error(`port ${port} is already in use`);
-    }
-
-    for (const [key, val] of Object.entries(cfg)) {
-      httpConfig.schema.validateKey(key, val);
-    }
-
-    const baseConfig = await this.config$.pipe(first()).toPromise();
-    const finalConfig = { ...baseConfig, ...cfg };
-    const log = this.logger.get('http', `server:${port}`);
-
-    const httpServer = new HttpServer(log);
-    const httpSetup = await httpServer.setup(finalConfig);
-    this.secondaryServers.set(port, httpServer);
-    return httpSetup;
-  }
-
   public async stop() {
     if (this.configSubscription === undefined) {
       return;
@@ -169,22 +162,20 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
     }
     await this.httpServer.stop();
     await this.httpsRedirectServer.stop();
-    await Promise.all([...this.secondaryServers.values()].map(s => s.stop()));
-    this.secondaryServers.clear();
   }
 
   private async runNotReadyServer(config: HttpConfig) {
     this.log.debug('starting NotReady server');
-    const httpServer = new HttpServer(this.log);
+    const httpServer = new HttpServer(this.logger, 'NotReady');
     const { server } = await httpServer.setup(config);
     this.notReadyServer = server;
-    // use hapi server while Kibana ResponseFactory doesn't allow specifying custom headers
+    // use hapi server while KibanaResponseFactory doesn't allow specifying custom headers
     // https://github.com/elastic/kibana/issues/33779
     this.notReadyServer.route({
       path: '/{p*}',
       method: '*',
       handler: (req, responseToolkit) => {
-        this.log.debug(`Kibana server is not ready yet ${req.method}:${req.url}.`);
+        this.log.debug(`Kibana server is not ready yet ${req.method}:${req.url.href}.`);
 
         // If server is not ready yet, because plugins or core can perform
         // long running tasks (build assets, saved objects migrations etc.)

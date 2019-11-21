@@ -6,15 +6,16 @@
 
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
+import { PluginInitializerContext } from 'src/core/server';
 import { PLUGIN } from './common/constants';
-import { initServerWithKibana, KibanaServer } from './server';
+import { KibanaServer, plugin } from './server';
 
 export const uptime = (kibana: any) =>
   new kibana.Plugin({
     configPrefix: 'xpack.uptime',
     id: PLUGIN.ID,
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
     publicDir: resolve(__dirname, 'public'),
+    require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
       app: {
         description: i18n.translate('xpack.uptime.pluginDescription', {
@@ -28,11 +29,24 @@ export const uptime = (kibana: any) =>
         }),
         main: 'plugins/uptime/app',
         order: 8900,
-        url: '/app/uptime#/',
+        url: '/app/uptime/',
       },
       home: ['plugins/uptime/register_feature'],
     },
     init(server: KibanaServer) {
-      initServerWithKibana(server);
+      const initializerContext = {} as PluginInitializerContext;
+      const { savedObjects } = server;
+      const { elasticsearch, xpack_main } = server.plugins;
+      plugin(initializerContext).setup(
+        {
+          route: (arg: any) => server.route(arg),
+        },
+        {
+          elasticsearch,
+          savedObjects,
+          usageCollector: server.usage,
+          xpack: xpack_main,
+        }
+      );
     },
   });

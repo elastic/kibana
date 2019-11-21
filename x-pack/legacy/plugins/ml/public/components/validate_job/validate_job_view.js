@@ -8,9 +8,11 @@
 
 
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
 
 import React, {
-  Component
+  Component,
+  Fragment
 } from 'react';
 
 import {
@@ -110,6 +112,35 @@ Message.propTypes = {
   })
 };
 
+const MessageList = ({ messages, idFilterList }) => {
+  const callouts = messages
+    .filter(m => idFilterList.includes(m.id) === false)
+    .map((m, i) => (
+      <Callout key={`${m.id}_${i}`} message={m} />
+    ));
+
+  // there could be no error or success messages due to the
+  // idFilterList being applied. so rather than showing nothing,
+  // show a message saying all passed
+  const allPassedCallout = (<Callout message={{
+    text: i18n.translate('xpack.ml.validateJob.allPassed', {
+      defaultMessage: 'All validation checks passed successfully',
+    }),
+    status: VALIDATION_STATUS.SUCCESS
+  }}
+  />);
+
+  return (
+    <React.Fragment>
+      {callouts.length ? callouts : allPassedCallout}
+    </React.Fragment>
+  );
+};
+MessageList.propTypes = {
+  messages: PropTypes.array,
+  idFilterList: PropTypes.array,
+};
+
 
 const Callout = ({ message }) => (
   <React.Fragment>
@@ -166,10 +197,16 @@ Modal.propType = {
   title: PropTypes.string
 };
 
-class ValidateJob extends Component {
+export class ValidateJob extends Component {
   constructor(props) {
     super(props);
     this.state = getDefaultState();
+  }
+
+  componentDidMount() {
+    if(this.props.embedded === true) {
+      this.validate();
+    }
   }
 
   closeModal = () => {
@@ -178,7 +215,7 @@ class ValidateJob extends Component {
     this.setState(newState);
   };
 
-  openModal = () => {
+  validate = () => {
     const job = this.props.getJobConfig();
     const getDuration = this.props.getDuration;
     const duration = (typeof getDuration === 'function') ? getDuration() : undefined;
@@ -204,6 +241,9 @@ class ValidateJob extends Component {
             data,
             title: job.job_id
           });
+          if (typeof this.props.setIsValid === 'function') {
+            this.props.setIsValid(data.messages.some(m => m.status === VALIDATION_STATUS.ERROR) === false);
+          }
         });
 
       // wait for 250ms before triggering the loading indicator
@@ -231,62 +271,70 @@ class ValidateJob extends Component {
     // default to false if not explicitly set to true
     const isCurrentJobConfig = (this.props.isCurrentJobConfig !== true) ? false : true;
     const isDisabled = (this.props.isDisabled !== true) ? false : true;
+    const embedded = (this.props.embedded === true);
+    const idFilterList = this.props.idFilterList || [];
 
     return (
-      <div>
-        <EuiButton
-          onClick={this.openModal}
-          size="s"
-          fill={fill}
-          iconType={isCurrentJobConfig ? this.state.ui.iconType : defaultIconType}
-          iconSide="right"
-          isDisabled={isDisabled}
-          isLoading={this.state.ui.isLoading}
-        >
-          <FormattedMessage
-            id="xpack.ml.validateJob.validateJobButtonLabel"
-            defaultMessage="Validate Job"
-          />
-        </EuiButton>
+      <Fragment>
+        {embedded === false &&
+          <div>
+            <EuiButton
+              onClick={this.validate}
+              size="s"
+              fill={fill}
+              iconType={isCurrentJobConfig ? this.state.ui.iconType : defaultIconType}
+              iconSide="right"
+              isDisabled={isDisabled}
+              isLoading={this.state.ui.isLoading}
+            >
+              <FormattedMessage
+                id="xpack.ml.validateJob.validateJobButtonLabel"
+                defaultMessage="Validate Job"
+              />
+            </EuiButton>
 
-        {!isDisabled && this.state.ui.isModalVisible &&
-          <Modal
-            close={this.closeModal}
-            title={<FormattedMessage
-              id="xpack.ml.validateJob.modal.validateJobTitle"
-              defaultMessage="Validate job {title}"
-              values={{ title: this.state.title }}
-            />}
-          >
-            {this.state.data.messages.map(
-              (m, i) => <Callout key={`${m.id}_${i}`} message={m} />
-            )}
-            <EuiText>
-              <FormattedMessage
-                id="xpack.ml.validateJob.modal.jobValidationDescriptionText"
-                defaultMessage="Job validation performs certain checks against job configurations and underlying source data
-                  and provides specific advice on how to adjust settings that are more likely to produce insightful results."
-              />
-            </EuiText>
-            <EuiText>
-              <FormattedMessage
-                id="xpack.ml.validateJob.modal.linkToJobTipsText"
-                defaultMessage="For more information, see {mlJobTipsLink}."
-                values={{
-                  mlJobTipsLink: (
-                    <EuiLink href={jobTipsUrl} target="_blank">
-                      <FormattedMessage
-                        id="xpack.ml.validateJob.modal.linkToJobTipsText.mlJobTipsLinkText"
-                        defaultMessage="Machine Learning Job Tips"
-                      />
-                    </EuiLink>
-                  )
-                }}
-              />
-            </EuiText>
-          </Modal>
+            {!isDisabled && this.state.ui.isModalVisible &&
+            <Modal
+              close={this.closeModal}
+              title={<FormattedMessage
+                id="xpack.ml.validateJob.modal.validateJobTitle"
+                defaultMessage="Validate job {title}"
+                values={{ title: this.state.title }}
+              />}
+            >
+              <MessageList messages={this.state.data.messages} idFilterList={idFilterList} />
+
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.ml.validateJob.modal.jobValidationDescriptionText"
+                  defaultMessage="Job validation performs certain checks against job configurations and underlying source data
+                    and provides specific advice on how to adjust settings that are more likely to produce insightful results."
+                />
+              </EuiText>
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.ml.validateJob.modal.linkToJobTipsText"
+                  defaultMessage="For more information, see {mlJobTipsLink}."
+                  values={{
+                    mlJobTipsLink: (
+                      <EuiLink href={jobTipsUrl} target="_blank">
+                        <FormattedMessage
+                          id="xpack.ml.validateJob.modal.linkToJobTipsText.mlJobTipsLinkText"
+                          defaultMessage="Machine Learning Job Tips"
+                        />
+                      </EuiLink>
+                    )
+                  }}
+                />
+              </EuiText>
+            </Modal>
+            }
+          </div>
         }
-      </div>
+        {embedded === true &&
+          <MessageList messages={this.state.data.messages} idFilterList={idFilterList} />
+        }
+      </Fragment>
     );
   }
 }
@@ -297,7 +345,8 @@ ValidateJob.propTypes = {
   getJobConfig: PropTypes.func.isRequired,
   isCurrentJobConfig: PropTypes.bool,
   isDisabled: PropTypes.bool,
-  mlJobService: PropTypes.object.isRequired
+  mlJobService: PropTypes.object.isRequired,
+  embedded: PropTypes.bool,
+  setIsValid: PropTypes.func,
+  idFilterList: PropTypes.array,
 };
-
-export { ValidateJob };

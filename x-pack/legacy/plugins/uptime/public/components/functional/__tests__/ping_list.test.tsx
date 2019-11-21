@@ -6,8 +6,10 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { PingResults } from '../../../../common/graphql/types';
-import { PingListComponent } from '../ping_list';
+import { PingResults, Ping } from '../../../../common/graphql/types';
+import { PingListComponent, AllLocationOption, toggleDetails } from '../ping_list';
+import { EuiComboBoxOptionProps } from '@elastic/eui';
+import { ExpandedRowMap } from '../monitor_list/types';
 
 describe('PingList component', () => {
   let pingList: { allPings: PingResults };
@@ -18,6 +20,7 @@ describe('PingList component', () => {
         total: 9231,
         pings: [
           {
+            id: 'id1',
             timestamp: '2019-01-28T17:47:08.078Z',
             http: null,
             error: {
@@ -35,6 +38,7 @@ describe('PingList component', () => {
             },
           },
           {
+            id: 'id2',
             timestamp: '2019-01-28T17:47:09.075Z',
             http: null,
             error: {
@@ -52,6 +56,7 @@ describe('PingList component', () => {
             },
           },
           {
+            id: 'id3',
             timestamp: '2019-01-28T17:47:06.077Z',
             http: null,
             error: null,
@@ -66,6 +71,7 @@ describe('PingList component', () => {
             },
           },
           {
+            id: 'id4',
             timestamp: '2019-01-28T17:47:07.075Z',
             http: null,
             error: {
@@ -83,6 +89,7 @@ describe('PingList component', () => {
             },
           },
           {
+            id: 'id5',
             timestamp: '2019-01-28T17:47:07.074Z',
             http: null,
             error: {
@@ -101,6 +108,7 @@ describe('PingList component', () => {
             },
           },
           {
+            id: 'id6',
             timestamp: '2019-01-28T17:47:18.080Z',
             http: null,
             error: {
@@ -118,6 +126,7 @@ describe('PingList component', () => {
             },
           },
           {
+            id: 'id7',
             timestamp: '2019-01-28T17:47:19.076Z',
             http: null,
             error: {
@@ -135,6 +144,7 @@ describe('PingList component', () => {
             },
           },
           {
+            id: 'id8',
             timestamp: '2019-01-28T17:47:19.076Z',
             http: null,
             error: {
@@ -153,6 +163,7 @@ describe('PingList component', () => {
             },
           },
           {
+            id: 'id9',
             timestamp: '2019-01-28T17:47:19.077Z',
             http: { response: { status_code: 200 } },
             error: null,
@@ -167,6 +178,7 @@ describe('PingList component', () => {
             },
           },
           {
+            id: 'id10',
             timestamp: '2019-01-28T17:47:19.077Z',
             http: { response: { status_code: 200 } },
             error: null,
@@ -181,6 +193,7 @@ describe('PingList component', () => {
             },
           },
         ],
+        locations: ['nyc'],
       },
     };
   });
@@ -191,11 +204,48 @@ describe('PingList component', () => {
       <PingListComponent
         loading={false}
         data={{ allPings }}
+        onPageCountChange={jest.fn()}
+        onSelectedLocationChange={(loc: EuiComboBoxOptionProps[]) => {}}
+        onSelectedStatusChange={jest.fn()}
         onUpdateApp={jest.fn()}
-        onSelectedStatusUpdate={jest.fn()}
+        pageSize={30}
         selectedOption="down"
+        selectedLocation={AllLocationOption.value}
       />
     );
     expect(component).toMatchSnapshot();
+  });
+
+  describe('toggleDetails', () => {
+    let itemIdToExpandedRowMap: ExpandedRowMap;
+    let pings: Ping[];
+
+    const setItemIdToExpandedRowMap = (update: ExpandedRowMap) => (itemIdToExpandedRowMap = update);
+
+    beforeEach(() => {
+      itemIdToExpandedRowMap = {};
+      pings = pingList.allPings.pings;
+    });
+
+    it('should expand an item if empty', () => {
+      const ping = pings[0];
+      toggleDetails(ping, itemIdToExpandedRowMap, setItemIdToExpandedRowMap);
+      expect(itemIdToExpandedRowMap).toHaveProperty(ping.id);
+    });
+
+    it('should un-expand an item if clicked again', () => {
+      const ping = pings[0];
+      toggleDetails(ping, itemIdToExpandedRowMap, setItemIdToExpandedRowMap);
+      toggleDetails(ping, itemIdToExpandedRowMap, setItemIdToExpandedRowMap);
+      expect(itemIdToExpandedRowMap).toEqual({});
+    });
+
+    it('should expand the new row and close the old when when a new row is clicked', () => {
+      const pingA = pings[0];
+      const pingB = pings[1];
+      toggleDetails(pingA, itemIdToExpandedRowMap, setItemIdToExpandedRowMap);
+      toggleDetails(pingB, itemIdToExpandedRowMap, setItemIdToExpandedRowMap);
+      expect(itemIdToExpandedRowMap).toHaveProperty(pingB.id);
+    });
   });
 });

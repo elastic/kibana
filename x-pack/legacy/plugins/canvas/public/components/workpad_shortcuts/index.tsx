@@ -13,13 +13,15 @@ import {
   basicHandlerCreators,
   clipboardHandlerCreators,
   Props as HandlerCreatorProps,
+  positionHandlerCreators,
 } from '../../lib/element_handler_creators';
 
 export const WorkpadShortcuts = compose<WorkpadShortcutsProps, HandlerCreatorProps>(
   withHandlers(groupHandlerCreators),
   withHandlers(layerHandlerCreators),
   withHandlers(basicHandlerCreators),
-  withHandlers(clipboardHandlerCreators)
+  withHandlers(clipboardHandlerCreators),
+  withHandlers(positionHandlerCreators)
 )(Component);
 
 WorkpadShortcuts.propTypes = {

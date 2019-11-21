@@ -11,13 +11,14 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import React from 'react';
-import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
+import { AutocompleteSuggestion } from '../../../../../../../src/plugins/data/public';
 
 import euiStyled from '../../../../../common/eui_styled_components';
 
 import { SuggestionItem } from './suggestion_item';
 
 interface AutocompleteFieldProps {
+  'data-test-subj'?: string;
   isLoadingSuggestions: boolean;
   isValid: boolean;
   loadSuggestions: (value: string, cursorPosition: number, maxCount?: number) => void;
@@ -47,12 +48,20 @@ export class AutocompleteField extends React.PureComponent<
   private inputElement: HTMLInputElement | null = null;
 
   public render() {
-    const { suggestions, isLoadingSuggestions, isValid, placeholder, value } = this.props;
+    const {
+      'data-test-subj': dataTestSubj,
+      suggestions,
+      isLoadingSuggestions,
+      isValid,
+      placeholder,
+      value,
+    } = this.props;
     const { areSuggestionsVisible, selectedIndex } = this.state;
     return (
       <EuiOutsideClickDetector onOutsideClick={this.handleBlur}>
         <AutocompleteContainer>
           <FixedEuiFieldSearch
+            data-test-subj={dataTestSubj}
             fullWidth
             inputRef={this.handleChangeInputRef}
             isLoading={isLoadingSuggestions}
@@ -298,26 +307,27 @@ const withUnfocused = (state: AutocompleteFieldState) => ({
   isFocused: false,
 });
 
-export const FixedEuiFieldSearch: React.SFC<
-  React.InputHTMLAttributes<HTMLInputElement> &
-    EuiFieldSearchProps & {
-      inputRef?: (element: HTMLInputElement | null) => void;
-      onSearch: (value: string) => void;
-    }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-> = EuiFieldSearch as any;
+export const FixedEuiFieldSearch: React.FC<React.InputHTMLAttributes<HTMLInputElement> &
+  EuiFieldSearchProps & {
+    inputRef?: (element: HTMLInputElement | null) => void;
+    onSearch: (value: string) => void;
+  }> = EuiFieldSearch as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 const AutocompleteContainer = euiStyled.div`
   position: relative;
 `;
 
-const SuggestionsPanel = euiStyled(EuiPanel).attrs({
+AutocompleteContainer.displayName = 'AutocompleteContainer';
+
+const SuggestionsPanel = euiStyled(EuiPanel).attrs(() => ({
   paddingSize: 'none',
   hasShadow: true,
-})`
+}))`
   position: absolute;
   width: 100%;
   margin-top: 2px;
   overflow: hidden;
-  z-index: ${props => props.theme.eui.euiZLevel1};;
+  z-index: ${props => props.theme.eui.euiZLevel1};
 `;
+
+SuggestionsPanel.displayName = 'SuggestionsPanel';

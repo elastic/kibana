@@ -9,12 +9,13 @@ import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 
-import { eventsQuery } from '../../containers/events/index.gql_query';
+import { timelineQuery } from '../../containers/timeline/index.gql_query';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { Direction } from '../../graphql/types';
-import { defaultHeaders, mockTimelineData } from '../../mock';
-import { mockIndexPattern } from '../../mock';
+import { useKibanaCore } from '../../lib/compose/kibana_core';
+import { defaultHeaders, mockTimelineData, mockIndexPattern } from '../../mock';
 import { TestProviders } from '../../mock/test_providers';
+import { mockUiSettings } from '../../mock/ui_settings';
 import { flyoutHeaderHeight } from '../flyout';
 
 import {
@@ -28,6 +29,13 @@ import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 
 const testFlyoutHeight = 980;
 
+const mockUseKibanaCore = useKibanaCore as jest.Mock;
+jest.mock('../../lib/compose/kibana_core');
+mockUseKibanaCore.mockImplementation(() => ({
+  uiSettings: mockUiSettings,
+  savedObjects: {},
+}));
+
 describe('Timeline', () => {
   const sort: Sort = {
     columnId: '@timestamp',
@@ -39,7 +47,7 @@ describe('Timeline', () => {
   const indexPattern = mockIndexPattern;
 
   const mocks = [
-    { request: { query: eventsQuery }, result: { data: { events: mockTimelineData } } },
+    { request: { query: timelineQuery }, result: { data: { events: mockTimelineData } } },
   ];
 
   describe('rendering', () => {
@@ -51,6 +59,7 @@ describe('Timeline', () => {
           id="foo"
           dataProviders={mockDataProviders}
           end={endDate}
+          filters={[]}
           flyoutHeight={testFlyoutHeight}
           flyoutHeaderHeight={flyoutHeaderHeight}
           indexPattern={indexPattern}
@@ -67,8 +76,10 @@ describe('Timeline', () => {
           onToggleDataProviderEnabled={jest.fn()}
           onToggleDataProviderExcluded={jest.fn()}
           show={true}
+          showCallOutUnauthorizedMsg={false}
           start={startDate}
           sort={sort}
+          toggleColumn={jest.fn()}
         />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -84,6 +95,7 @@ describe('Timeline', () => {
               id="foo"
               dataProviders={mockDataProviders}
               end={endDate}
+              filters={[]}
               flyoutHeight={testFlyoutHeight}
               flyoutHeaderHeight={flyoutHeaderHeight}
               indexPattern={indexPattern}
@@ -100,8 +112,10 @@ describe('Timeline', () => {
               onToggleDataProviderEnabled={jest.fn()}
               onToggleDataProviderExcluded={jest.fn()}
               show={true}
+              showCallOutUnauthorizedMsg={false}
               start={startDate}
               sort={sort}
+              toggleColumn={jest.fn()}
             />
           </MockedProvider>
         </TestProviders>
@@ -110,7 +124,7 @@ describe('Timeline', () => {
       expect(wrapper.find('[data-test-subj="timelineHeader"]').exists()).toEqual(true);
     });
 
-    test('it renders the timeline body', () => {
+    test('it renders the timeline table', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mocks}>
@@ -120,6 +134,7 @@ describe('Timeline', () => {
               id="foo"
               dataProviders={mockDataProviders}
               end={endDate}
+              filters={[]}
               flyoutHeight={testFlyoutHeight}
               flyoutHeaderHeight={flyoutHeaderHeight}
               indexPattern={indexPattern}
@@ -136,14 +151,16 @@ describe('Timeline', () => {
               onToggleDataProviderEnabled={jest.fn()}
               onToggleDataProviderExcluded={jest.fn()}
               show={true}
+              showCallOutUnauthorizedMsg={false}
               start={startDate}
               sort={sort}
+              toggleColumn={jest.fn()}
             />
           </MockedProvider>
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="horizontal-scroll"]').exists()).toEqual(true);
+      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(true);
     });
 
     test('it does NOT render the paging footer when you do NOT have any data providers', () => {
@@ -156,6 +173,7 @@ describe('Timeline', () => {
               id="foo"
               dataProviders={mockDataProviders}
               end={endDate}
+              filters={[]}
               flyoutHeight={testFlyoutHeight}
               flyoutHeaderHeight={flyoutHeaderHeight}
               indexPattern={indexPattern}
@@ -172,8 +190,10 @@ describe('Timeline', () => {
               onToggleDataProviderEnabled={jest.fn()}
               onToggleDataProviderExcluded={jest.fn()}
               show={true}
+              showCallOutUnauthorizedMsg={false}
               start={startDate}
               sort={sort}
+              toggleColumn={jest.fn()}
             />
           </MockedProvider>
         </TestProviders>
@@ -197,6 +217,7 @@ describe('Timeline', () => {
                 id="foo"
                 dataProviders={mockDataProviders}
                 end={endDate}
+                filters={[]}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
@@ -213,8 +234,10 @@ describe('Timeline', () => {
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={jest.fn()}
                 show={true}
+                showCallOutUnauthorizedMsg={false}
                 start={startDate}
                 sort={sort}
+                toggleColumn={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>
@@ -240,6 +263,7 @@ describe('Timeline', () => {
                 id="foo"
                 dataProviders={mockDataProviders}
                 end={endDate}
+                filters={[]}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
@@ -256,8 +280,10 @@ describe('Timeline', () => {
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={jest.fn()}
                 show={true}
+                showCallOutUnauthorizedMsg={false}
                 start={startDate}
                 sort={sort}
+                toggleColumn={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>
@@ -291,6 +317,7 @@ describe('Timeline', () => {
                 id="foo"
                 dataProviders={mockDataProviders}
                 end={endDate}
+                filters={[]}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
@@ -307,8 +334,10 @@ describe('Timeline', () => {
                 onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
                 onToggleDataProviderExcluded={jest.fn()}
                 show={true}
+                showCallOutUnauthorizedMsg={false}
                 start={startDate}
                 sort={sort}
+                toggleColumn={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>
@@ -346,6 +375,7 @@ describe('Timeline', () => {
                 id="foo"
                 dataProviders={mockDataProviders}
                 end={endDate}
+                filters={[]}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
@@ -362,8 +392,10 @@ describe('Timeline', () => {
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
                 show={true}
+                showCallOutUnauthorizedMsg={false}
                 start={startDate}
                 sort={sort}
+                toggleColumn={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>
@@ -404,6 +436,7 @@ describe('Timeline', () => {
                 id="foo"
                 dataProviders={dataProviders}
                 end={endDate}
+                filters={[]}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
@@ -420,8 +453,10 @@ describe('Timeline', () => {
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={jest.fn()}
                 show={true}
+                showCallOutUnauthorizedMsg={false}
                 start={startDate}
                 sort={sort}
+                toggleColumn={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>
@@ -452,6 +487,7 @@ describe('Timeline', () => {
                 id="foo"
                 dataProviders={dataProviders}
                 end={endDate}
+                filters={[]}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
@@ -468,8 +504,10 @@ describe('Timeline', () => {
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={jest.fn()}
                 show={true}
+                showCallOutUnauthorizedMsg={false}
                 start={startDate}
                 sort={sort}
+                toggleColumn={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>
@@ -506,6 +544,7 @@ describe('Timeline', () => {
                 id="foo"
                 dataProviders={dataProviders}
                 end={endDate}
+                filters={[]}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
@@ -522,8 +561,10 @@ describe('Timeline', () => {
                 onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
                 onToggleDataProviderExcluded={jest.fn()}
                 show={true}
+                showCallOutUnauthorizedMsg={false}
                 start={startDate}
                 sort={sort}
+                toggleColumn={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>
@@ -564,6 +605,7 @@ describe('Timeline', () => {
                 id="foo"
                 dataProviders={dataProviders}
                 end={endDate}
+                filters={[]}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
@@ -580,8 +622,10 @@ describe('Timeline', () => {
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
                 show={true}
+                showCallOutUnauthorizedMsg={false}
                 start={startDate}
                 sort={sort}
+                toggleColumn={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>

@@ -6,7 +6,7 @@
 
 import 'moment-duration-format';
 import { get } from 'lodash';
-import { getMoment } from 'plugins/watcher/../common/lib/get_moment';
+import { getMoment } from '../../../common/lib/get_moment';
 import { WatchStatus } from '../watch_status';
 
 export class WatchHistoryItem {

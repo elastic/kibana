@@ -4,7 +4,6 @@ exports[`AlertCallOut component renders expected component 1`] = `
 <EuiCallOut
   color="warning"
   iconType="help"
-  size="m"
   title="Only pipelines created in Kibana Management appear here"
 >
   <p>

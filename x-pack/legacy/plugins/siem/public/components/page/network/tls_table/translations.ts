@@ -16,7 +16,7 @@ export const TRANSPORT_LAYER_SECURITY = i18n.translate(
 export const UNIT = (totalCount: number) =>
   i18n.translate('xpack.siem.network.ipDetails.tlsTable.unit', {
     values: { totalCount },
-    defaultMessage: `{totalCount, plural, =1 {Issuer} other {Issuers}}`,
+    defaultMessage: `{totalCount, plural, =1 {issuer} other {issuers}}`,
   });
 
 // Columns
@@ -34,21 +34,21 @@ export const SUBJECT = i18n.translate(
 export const SHA1_FINGERPRINT = i18n.translate(
   'xpack.siem.network.ipDetails.tlsTable.columns.sha1FingerPrintTitle',
   {
-    defaultMessage: 'SHA1 Fingerprint',
+    defaultMessage: 'SHA1 fingerprint',
   }
 );
 
 export const JA3_FINGERPRINT = i18n.translate(
   'xpack.siem.network.ipDetails.tlsTable.columns.ja3FingerPrintTitle',
   {
-    defaultMessage: 'JA3 Fingerprint',
+    defaultMessage: 'JA3 fingerprint',
   }
 );
 
 export const VALID_UNTIL = i18n.translate(
   'xpack.siem.network.ipDetails.tlsTable.columns.validUntilTitle',
   {
-    defaultMessage: 'Valid Until',
+    defaultMessage: 'Valid until',
   }
 );
 
@@ -61,18 +61,4 @@ export const ROWS_5 = i18n.translate('xpack.siem.network.ipDetails.tlsTable.rows
 export const ROWS_10 = i18n.translate('xpack.siem.network.ipDetails.tlsTable.rows', {
   values: { numRows: 10 },
   defaultMessage: '{numRows} {numRows, plural, =0 {rows} =1 {row} other {rows}}',
-});
-
-export const ROWS_20 = i18n.translate('xpack.siem.network.ipDetails.tlsTable.rows', {
-  values: { numRows: 20 },
-  defaultMessage: '{numRows} {numRows, plural, =0 {rows} =1 {row} other {rows}}',
-});
-
-export const ROWS_50 = i18n.translate('xpack.siem.network.ipDetails.tlsTable.rows', {
-  values: { numRows: 50 },
-  defaultMessage: '{numRows} {numRows, plural, =0 {rows} =1 {row} other {rows}}',
-});
-
-export const MORE = i18n.translate('xpack.siem.network.ipDetails.tlsTable.moreDescription', {
-  defaultMessage: 'More ...',
 });

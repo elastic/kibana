@@ -1,0 +1,25 @@
+.mlNavigationMenu__tab {
+  padding-bottom: 0;
+  padding-left: 0px;
+  padding-right: 0px;
+  margin-left: $euiSizeM;
+}
+
+.mlNavigationMenu__mainTab {
+  margin-left: $euiSizeM;
+  padding-bottom: 0;
+  font-weight: normal;
+}
+
+.mlNavigationMenu__topNav {
+  padding-top: $euiSizeS;
+  margin-right: $euiSizeS;
+}
+
+.mlNavHorizontalRule {
+  margin: $euiSizeM 0 0 0;
+}
+
+.mlSubTabs {
+  margin-top: $euiSizeS;
+}

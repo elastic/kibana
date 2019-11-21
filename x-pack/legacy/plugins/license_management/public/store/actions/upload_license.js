@@ -17,7 +17,7 @@ const genericUploadError = i18n.translate('xpack.licenseMgmt.uploadLicense.gener
   defaultMessage: 'Error encountered uploading license:'
 });
 
-const dispatchFromResponse = async (response, dispatch, currentLicenseType, newLicenseType, { xPackInfo, kbnUrl }) => {
+const dispatchFromResponse = async (response, dispatch, currentLicenseType, newLicenseType, { xPackInfo, kbnUrl, $injector }) => {
   const { error, acknowledged, license_status: licenseStatus, acknowledge } = response;
   if (error) {
     dispatch(uploadLicenseStatus({}));
@@ -34,7 +34,7 @@ const dispatchFromResponse = async (response, dispatch, currentLicenseType, newL
         defaultMessage: 'The supplied license has expired.'
       })));
     } else {
-      await xPackInfo.refresh();
+      await xPackInfo.refresh($injector);
       dispatch(addLicense(xPackInfo.get('license')));
       dispatch(uploadLicenseStatus({}));
       kbnUrl.change(BASE_PATH);

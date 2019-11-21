@@ -7,16 +7,15 @@
 import { EuiFlexGroup } from '@elastic/eui';
 import { getOr, isEmpty } from 'lodash/fp';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { BrowserFields } from '../../containers/source';
 import { TimelineQuery } from '../../containers/timeline';
 import { Direction } from '../../graphql/types';
+import { useKibanaCore } from '../../lib/compose/kibana_core';
 import { KqlMode } from '../../store/timeline/model';
 import { AutoSizer } from '../auto_sizer';
-
 import { ColumnHeader } from './body/column_headers/column_header';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import { Sort } from './body/sort';
@@ -31,15 +30,19 @@ import {
   OnToggleDataProviderEnabled,
   OnToggleDataProviderExcluded,
 } from './events';
+import { TimelineKqlFetch } from './fetch_kql_timeline';
 import { Footer, footerHeight } from './footer';
 import { TimelineHeader } from './header';
 import { calculateBodyHeight, combineQueries } from './helpers';
 import { TimelineRefetch } from './refetch_timeline';
-import { TimelineContext } from './timeline_context';
+import { ManageTimelineContext } from './timeline_context';
+import { esQuery, esFilters } from '../../../../../../../src/plugins/data/public';
 
 const WrappedByAutoSizer = styled.div`
   width: 100%;
 `; // required by AutoSizer
+
+WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
 
 const TimelineContainer = styled(EuiFlexGroup)`
   min-height: 500px;
@@ -49,11 +52,16 @@ const TimelineContainer = styled(EuiFlexGroup)`
   width: 100%;
 `;
 
+TimelineContainer.displayName = 'TimelineContainer';
+
+export const isCompactFooter = (width: number): boolean => width < 600;
+
 interface Props {
   browserFields: BrowserFields;
   columns: ColumnHeader[];
   dataProviders: DataProvider[];
   end: number;
+  filters: esFilters.Filter[];
   flyoutHeaderHeight: number;
   flyoutHeight: number;
   id: string;
@@ -71,17 +79,20 @@ interface Props {
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
   onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
   show: boolean;
+  showCallOutUnauthorizedMsg: boolean;
   start: number;
   sort: Sort;
+  toggleColumn: (column: ColumnHeader) => void;
 }
 
 /** The parent Timeline component */
-export const Timeline = pure<Props>(
+export const Timeline = React.memo<Props>(
   ({
     browserFields,
     columns,
     dataProviders,
     end,
+    filters,
     flyoutHeaderHeight,
     flyoutHeight,
     id,
@@ -99,18 +110,23 @@ export const Timeline = pure<Props>(
     onToggleDataProviderEnabled,
     onToggleDataProviderExcluded,
     show,
+    showCallOutUnauthorizedMsg,
     start,
     sort,
+    toggleColumn,
   }) => {
-    const combinedQueries = combineQueries(
+    const core = useKibanaCore();
+    const combinedQueries = combineQueries({
+      config: esQuery.getEsQueryConfig(core.uiSettings),
       dataProviders,
       indexPattern,
       browserFields,
-      kqlQueryExpression,
+      filters,
+      kqlQuery: { query: kqlQueryExpression, language: 'kuery' },
       kqlMode,
       start,
-      end
-    );
+      end,
+    });
     const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
     return (
       <AutoSizer detectAnyWindowResize={true} content>
@@ -121,7 +137,7 @@ export const Timeline = pure<Props>(
             gutterSize="none"
             justifyContent="flexStart"
           >
-            <WrappedByAutoSizer innerRef={measureRef}>
+            <WrappedByAutoSizer ref={measureRef}>
               <TimelineHeader
                 browserFields={browserFields}
                 id={id}
@@ -134,12 +150,14 @@ export const Timeline = pure<Props>(
                 onToggleDataProviderEnabled={onToggleDataProviderEnabled}
                 onToggleDataProviderExcluded={onToggleDataProviderExcluded}
                 show={show}
+                showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
                 sort={sort}
               />
             </WrappedByAutoSizer>
-
+            <TimelineKqlFetch id={id} indexPattern={indexPattern} inputId="timeline" />
             {combinedQueries != null ? (
               <TimelineQuery
+                id={id}
                 fields={columnsHeader.map(c => c.id)}
                 sourceId="default"
                 limit={itemsPerPage}
@@ -149,14 +167,28 @@ export const Timeline = pure<Props>(
                   direction: sort.sortDirection as Direction,
                 }}
               >
-                {({ events, loading, totalCount, pageInfo, loadMore, getUpdatedAt, refetch }) => (
-                  <TimelineRefetch loading={loading} id={id} refetch={refetch}>
-                    <TimelineContext.Provider value={{ isLoading: loading }} />
+                {({
+                  events,
+                  inspect,
+                  loading,
+                  totalCount,
+                  pageInfo,
+                  loadMore,
+                  getUpdatedAt,
+                  refetch,
+                }) => (
+                  <ManageTimelineContext loading={loading} width={width}>
+                    <TimelineRefetch
+                      id={id}
+                      inputId="timeline"
+                      inspect={inspect}
+                      loading={loading}
+                      refetch={refetch}
+                    />
                     <StatefulBody
                       browserFields={browserFields}
                       data={events}
                       id={id}
-                      isLoading={loading}
                       height={calculateBodyHeight({
                         flyoutHeight,
                         flyoutHeaderHeight,
@@ -164,7 +196,7 @@ export const Timeline = pure<Props>(
                         timelineFooterHeight: footerHeight,
                       })}
                       sort={sort}
-                      width={width}
+                      toggleColumn={toggleColumn}
                     />
                     <Footer
                       serverSideEventCount={totalCount}
@@ -180,9 +212,9 @@ export const Timeline = pure<Props>(
                       nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                       tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
                       getUpdatedAt={getUpdatedAt}
-                      width={width}
+                      compact={isCompactFooter(width)}
                     />
-                  </TimelineRefetch>
+                  </ManageTimelineContext>
                 )}
               </TimelineQuery>
             ) : null}
@@ -192,3 +224,5 @@ export const Timeline = pure<Props>(
     );
   }
 );
+
+Timeline.displayName = 'Timeline';

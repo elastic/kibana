@@ -7,6 +7,7 @@
 import Joi from 'joi';
 import { getClustersFromRequest } from '../../../../lib/cluster/get_clusters_from_request';
 import { verifyMonitoringAuth } from '../../../../lib/elasticsearch/verify_monitoring_auth';
+import { verifyCcsAvailability } from '../../../../lib/elasticsearch/verify_ccs_availability';
 import { handleError } from '../../../../lib/errors';
 import {
   INDEX_PATTERN_FILEBEAT
@@ -27,7 +28,8 @@ export function clustersRoute(server) {
           timeRange: Joi.object({
             min: Joi.date().required(),
             max: Joi.date().required()
-          }).required()
+          }).required(),
+          codePaths: Joi.array().items(Joi.string().required()).required()
         })
       }
     },
@@ -39,8 +41,11 @@ export function clustersRoute(server) {
       // the monitoring data. `try/catch` makes it a little more explicit.
       try {
         await verifyMonitoringAuth(req);
+        await verifyCcsAvailability(req);
         const indexPatterns = getIndexPatterns(server, { filebeatIndexPattern: INDEX_PATTERN_FILEBEAT });
-        clusters = await getClustersFromRequest(req, indexPatterns);
+        clusters = await getClustersFromRequest(req, indexPatterns, {
+          codePaths: req.payload.codePaths
+        });
       } catch (err) {
         throw handleError(err, req);
       }

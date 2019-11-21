@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, ReactWrapper } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
+import { ThemeProvider } from 'styled-components';
 
 import {
   StatItemsComponent,
@@ -25,42 +27,66 @@ import {
   mockData,
   mockEnableChartsData,
   mockNoChartMappings,
+  mockNarrowDateRange,
 } from '../page/network/kpi_network/mock';
 import { mockGlobalState, apolloClientObservable } from '../../mock';
 import { State, createStore } from '../../store';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { KpiNetworkData, KpiHostsData } from '../../graphql/types';
-jest.mock('../charts/barchart');
-jest.mock('../charts/areachart');
+
+const from = new Date('2019-06-15T06:00:00.000Z').valueOf();
+const to = new Date('2019-06-18T06:00:00.000Z').valueOf();
+
+jest.mock('../charts/areachart', () => {
+  return { AreaChart: () => <div className="areachart" /> };
+});
+
+jest.mock('../charts/barchart', () => {
+  return { BarChart: () => <div className="barchart" /> };
+});
 
 describe('Stat Items Component', () => {
+  const theme = () => ({ eui: euiDarkVars, darkMode: true });
   const state: State = mockGlobalState;
-
   const store = createStore(state, apolloClientObservable);
 
   describe.each([
     [
       mount(
-        <ReduxStoreProvider store={store}>
-          <StatItemsComponent
-            fields={[{ key: 'hosts', value: null, color: '#3185FC', icon: 'cross' }]}
-            description="HOSTS"
-            key="mock-keys"
-          />
-        </ReduxStoreProvider>
+        <ThemeProvider theme={theme}>
+          <ReduxStoreProvider store={store}>
+            <StatItemsComponent
+              description="HOSTS"
+              fields={[{ key: 'hosts', value: null, color: '#3185FC', icon: 'cross' }]}
+              from={from}
+              id="statItems"
+              index={0}
+              key="mock-keys"
+              to={to}
+              narrowDateRange={mockNarrowDateRange}
+            />
+          </ReduxStoreProvider>
+        </ThemeProvider>
       ),
     ],
     [
       mount(
-        <ReduxStoreProvider store={store}>
-          <StatItemsComponent
-            fields={[{ key: 'hosts', value: null, color: '#3185FC', icon: 'cross' }]}
-            description="HOSTS"
-            areaChart={[]}
-            barChart={[]}
-            key="mock-keys"
-          />
-        </ReduxStoreProvider>
+        <ThemeProvider theme={theme}>
+          <ReduxStoreProvider store={store}>
+            <StatItemsComponent
+              areaChart={[]}
+              barChart={[]}
+              description="HOSTS"
+              fields={[{ key: 'hosts', value: null, color: '#3185FC', icon: 'cross' }]}
+              from={from}
+              id="statItems"
+              index={0}
+              key="mock-keys"
+              to={to}
+              narrowDateRange={mockNarrowDateRange}
+            />
+          </ReduxStoreProvider>
+        </ThemeProvider>
       ),
     ],
   ])('disable charts', wrapper => {
@@ -91,24 +117,6 @@ describe('Stat Items Component', () => {
 
   describe('rendering kpis with charts', () => {
     const mockStatItemsData: StatItemsProps = {
-      fields: [
-        {
-          key: 'uniqueSourceIps',
-          description: 'Source',
-          value: 1714,
-          color: '#DB1374',
-          icon: 'cross',
-        },
-        {
-          key: 'uniqueDestinationIps',
-          description: 'Dest.',
-          value: 2359,
-          color: '#490092',
-          icon: 'cross',
-        },
-      ],
-      enableAreaChart: true,
-      enableBarChart: true,
       areaChart: [
         {
           key: 'uniqueSourceIpsHistogram',
@@ -138,7 +146,30 @@ describe('Stat Items Component', () => {
         },
       ],
       description: 'UNIQUE_PRIVATE_IPS',
+      enableAreaChart: true,
+      enableBarChart: true,
+      fields: [
+        {
+          key: 'uniqueSourceIps',
+          description: 'Source',
+          value: 1714,
+          color: '#DB1374',
+          icon: 'cross',
+        },
+        {
+          key: 'uniqueDestinationIps',
+          description: 'Dest.',
+          value: 2359,
+          color: '#490092',
+          icon: 'cross',
+        },
+      ],
+      from,
+      id: 'statItems',
+      index: 0,
       key: 'mock-keys',
+      to,
+      narrowDateRange: mockNarrowDateRange,
     };
     let wrapper: ReactWrapper;
     beforeAll(() => {
@@ -212,7 +243,14 @@ describe('useKpiMatrixStatus', () => {
     fieldsMapping: Readonly<StatItems[]>;
     data: KpiNetworkData | KpiHostsData;
   }) => {
-    const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(fieldsMapping, data);
+    const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(
+      fieldsMapping,
+      data,
+      'statItem',
+      from,
+      to,
+      mockNarrowDateRange
+    );
 
     return (
       <div>

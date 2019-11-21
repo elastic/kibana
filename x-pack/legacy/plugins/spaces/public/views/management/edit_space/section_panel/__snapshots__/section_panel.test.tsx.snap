@@ -1,11 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`it renders without blowing up 1`] = `
-<EuiPanel
-  grow={true}
-  hasShadow={false}
-  paddingSize="m"
->
+<EuiPanel>
   <EuiFlexGroup
     alignItems="baseline"
     gutterSize="s"
@@ -17,7 +13,7 @@ exports[`it renders without blowing up 1`] = `
       <EuiTitle
         size="m"
       >
-        <h3>
+        <h2>
           <EuiIcon
             className="collapsiblePanel__logo"
             size="xl"
@@ -25,7 +21,7 @@ exports[`it renders without blowing up 1`] = `
           />
            
           Elasticsearch
-        </h3>
+        </h2>
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem
@@ -33,10 +29,8 @@ exports[`it renders without blowing up 1`] = `
     >
       <EuiLink
         aria-label="hide desc"
-        color="primary"
         data-test-subj="show-hide-section-link"
         onClick={[Function]}
-        type="button"
       >
         hide
       </EuiLink>

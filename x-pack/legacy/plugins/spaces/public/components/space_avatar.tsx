@@ -6,8 +6,9 @@
 
 import { EuiAvatar, isValidHex } from '@elastic/eui';
 import React, { SFC } from 'react';
-import { getSpaceColor, getSpaceInitials, MAX_SPACE_INITIALS } from '../../common';
+import { MAX_SPACE_INITIALS } from '../../common';
 import { Space } from '../../common/model/space';
+import { getSpaceColor, getSpaceInitials, getSpaceImageUrl } from '../lib/space_attributes';
 
 interface Props {
   space: Partial<Space>;
@@ -28,15 +29,16 @@ export const SpaceAvatar: SFC<Props> = (props: Props) => {
       type="space"
       data-test-subj={`space-avatar-${space.id}`}
       name={spaceName}
-      {...!announceSpaceName && {
+      {...(!announceSpaceName && {
         // provide empty aria-label so EUI doesn't try to provide its own
         'aria-label': '',
         'aria-hidden': true,
-      }}
+      })}
       size={size || 'm'}
       initialsLength={MAX_SPACE_INITIALS}
       initials={getSpaceInitials(space)}
       color={isValidHex(spaceColor) ? spaceColor : ''}
+      imageUrl={getSpaceImageUrl(space)}
       {...rest}
     />
   );

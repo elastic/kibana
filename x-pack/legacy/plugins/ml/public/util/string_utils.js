@@ -12,8 +12,6 @@
 import _ from 'lodash';
 import d3 from 'd3';
 
-import { relativeToAbsolute } from 'ui/url/relative_to_absolute';
-
 // Replaces all instances of dollar delimited tokens in the specified String
 // with corresponding values from the supplied object, optionally
 // encoding the replacement for a URI component.
@@ -22,7 +20,7 @@ import { relativeToAbsolute } from 'ui/url/relative_to_absolute';
 // 'http://www.google.co.uk/#q=airline+code+AAL'.
 // If a corresponding key is not found in valuesByTokenName, then the String is not replaced.
 export function replaceStringTokens(str, valuesByTokenName, encodeForURI) {
-  return String(str).replace((/\$([^?&$\'"]{1,40})\$/g), (match, name) => {
+  return String(str).replace((/\$([^?&$\'"]+)\$/g), (match, name) => {
     // Use lodash get to allow nested JSON fields to be retrieved.
     let tokenValue = _.get(valuesByTokenName, name, null);
     if (encodeForURI === true && tokenValue !== null) {
@@ -336,13 +334,6 @@ export function escapeForElasticsearchQuery(str) {
   // + - = && || > < ! ( ) { } [ ] ^ " ~ * ? : \ /
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#_reserved_characters
   return String(str).replace(/[-[\]{}()+!<>=?:\/\\^"~*&|\s]/g, '\\$&');
-}
-
-// returns whether the supplied String represents a web URL
-// i.e. whether it starts with http:// or https://
-export function isWebUrl(str) {
-  const absoluteUrl = relativeToAbsolute(str);
-  return absoluteUrl.startsWith('http://') || absoluteUrl.startsWith('https://');
 }
 
 export function calculateTextWidth(txt, isNumber, elementSelection) {

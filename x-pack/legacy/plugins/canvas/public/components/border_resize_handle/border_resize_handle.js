@@ -8,10 +8,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { matrixToCSS } from '../../lib/dom';
 
-export const BorderResizeHandle = ({ transformMatrix }) => (
+export const BorderResizeHandle = ({ transformMatrix, zoomScale }) => (
   <div
     className="canvasBorderResizeHandle canvasLayoutAnnotation"
-    style={{ transform: matrixToCSS(transformMatrix) }}
+    style={{
+      transform: `${matrixToCSS(transformMatrix)} scale3d(${1 / zoomScale},${1 / zoomScale}, 1)`,
+    }}
   />
 );
 

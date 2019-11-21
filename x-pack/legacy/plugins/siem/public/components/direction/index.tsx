@@ -70,3 +70,5 @@ export const DirectionBadge = pure<{
     value={direction}
   />
 ));
+
+DirectionBadge.displayName = 'DirectionBadge';

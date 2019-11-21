@@ -22,3 +22,19 @@ export * from './service';
 export { SavedObjectsSchema } from './schema';
 
 export { SavedObjectsManagement } from './management';
+
+export * from './import';
+
+export {
+  getSortedObjectsForExport,
+  SavedObjectsExportOptions,
+  SavedObjectsExportResultDetails,
+} from './export';
+
+export { SavedObjectsSerializer, RawDoc as SavedObjectsRawDoc } from './serialization';
+
+export { SavedObjectsMigrationLogger } from './migrations/core/migration_logger';
+
+export { SavedObjectsService, SavedObjectsServiceStart } from './saved_objects_service';
+
+export { config } from './saved_objects_config';

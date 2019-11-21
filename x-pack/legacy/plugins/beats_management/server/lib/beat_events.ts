@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { PathReporter } from 'io-ts/lib/PathReporter';
+import { isLeft } from 'fp-ts/lib/Either';
 import { BeatEvent, RuntimeBeatEvent } from '../../common/domain_types';
 import { BeatEventsAdapter } from './adapters/events/adapter_types';
 import { FrameworkUser } from './adapters/framework/adapter_types';
@@ -20,7 +21,7 @@ export class BeatEventsLib {
   ): Promise<Array<{ success: boolean; reason?: string }>> => {
     return events.map((event, i) => {
       const assertData = RuntimeBeatEvent.decode(event);
-      if (assertData.isLeft()) {
+      if (isLeft(assertData)) {
         if (events.length - 1 === i) {
           this.beats
             .update(user, beatId, {

@@ -9,16 +9,24 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
     <EuiFlexItem
       grow={false}
     >
-      <pure(Component)
-        field="source.autonomous_system.as_org"
-        id="ip-overview-source.autonomous_system.as_org"
+      <DefaultDraggable
+        field="source.as.organization.name"
+        id="autonomous-system-renderer-default-draggable-ip-overview-source.as.organization.name"
         value="Test Org"
       />
-       /
-      <pure(Component)
-        field="source.autonomous_system.asn"
-        id="ip-overview-source.autonomous_system.asn"
-        value="Test ASN"
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      /
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <DefaultDraggable
+        field="source.as.number"
+        id="autonomous-system-renderer-default-draggable-ip-overview-source.as.number"
+        value="12345"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -27,8 +35,7 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
 
 exports[`Field Renderers #dateRenderer it renders correctly against snapshot 1`] = `
 <Component>
-  <pure(Component)
-    fieldName="firstSeen"
+  <FormattedRelativePreferenceDate
     value="2019-02-07T17:19:41.636Z"
   />
 </Component>
@@ -36,33 +43,33 @@ exports[`Field Renderers #dateRenderer it renders correctly against snapshot 1`]
 
 exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1`] = `
 <Component>
-  <pure(Component)
+  <DefaultDraggable
     field="host.name"
-    id="ip-overview-host-name"
+    id="host-name-renderer-default-draggable-ip-overview-host-name"
     value="raspberrypi"
   >
-    <pure(Component)
+    <HostDetailsLink
       hostName="raspberrypi"
     >
       raspberrypi
-    </pure(Component)>
-  </pure(Component)>
+    </HostDetailsLink>
+  </DefaultDraggable>
 </Component>
 `;
 
 exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot 1`] = `
 <Component>
-  <pure(Component)
+  <DefaultDraggable
     field="host.name"
-    id="ip-overview-host-name"
+    id="host-name-renderer-default-draggable-ip-overview-host-name"
     value="raspberrypi"
   >
-    <pure(Component)
+    <HostDetailsLink
       hostName="raspberrypi"
     >
       raspberrypi
-    </pure(Component)>
-  </pure(Component)>
+    </HostDetailsLink>
+  </DefaultDraggable>
 </Component>
 `;
 
@@ -76,9 +83,9 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
     <EuiFlexItem
       grow={false}
     >
-      <pure(Component)
+      <DefaultDraggable
         field="source.geo.city_name"
-        id="ip-overview-source.geo.city_name"
+        id="location-renderer-default-draggable-ip-overview-source.geo.city_name"
         value={
           Array [
             "New York",
@@ -90,9 +97,9 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
     <EuiFlexItem
       grow={false}
     >
-      <pure(Component)
+      <DefaultDraggable
         field="source.geo.region_name"
-        id="ip-overview-source.geo.region_name"
+        id="location-renderer-default-draggable-ip-overview-source.geo.region_name"
         value={
           Array [
             "New York",
@@ -209,17 +216,17 @@ exports[`Field Renderers #reputationRenderer it renders correctly against snapsh
     }
   }
 >
-  <pure(Component)
+  <VirusTotalLink
     link="10.10.10.10"
   >
     virustotal.com
-  </pure(Component)>
+  </VirusTotalLink>
   , 
-  <pure(Component)
+  <ReputationLink
     domain="10.10.10.10"
   >
     talosIntelligence.com
-  </pure(Component)>
+  </ReputationLink>
 </Component>
 `;
 
@@ -328,10 +335,10 @@ exports[`Field Renderers #whoisRenderer it renders correctly against snapshot 1`
     }
   }
 >
-  <pure(Component)
+  <WhoIsLink
     domain="10.10.10.10"
   >
     iana.org
-  </pure(Component)>
+  </WhoIsLink>
 </Component>
 `;

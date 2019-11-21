@@ -16,35 +16,29 @@ export function useDelayedVisibility(
   const [isVisible, setIsVisible] = useState(false);
   const delayedRef = useRef<Delayed | null>(null);
 
-  useEffect(
-    () => {
-      const delayed = new Delayed({
-        hideDelayMs,
-        showDelayMs,
-        minimumVisibleDuration
-      });
-      delayed.onChange(visibility => {
-        setIsVisible(visibility);
-      });
-      delayedRef.current = delayed;
-    },
-    [hideDelayMs, showDelayMs, minimumVisibleDuration]
-  );
+  useEffect(() => {
+    const delayed = new Delayed({
+      hideDelayMs,
+      showDelayMs,
+      minimumVisibleDuration
+    });
+    delayed.onChange(visibility => {
+      setIsVisible(visibility);
+    });
+    delayedRef.current = delayed;
+  }, [hideDelayMs, showDelayMs, minimumVisibleDuration]);
 
-  useEffect(
-    () => {
-      if (!delayedRef.current) {
-        return;
-      }
+  useEffect(() => {
+    if (!delayedRef.current) {
+      return;
+    }
 
-      if (visible) {
-        delayedRef.current.show();
-      } else {
-        delayedRef.current.hide();
-      }
-    },
-    [visible]
-  );
+    if (visible) {
+      delayedRef.current.show();
+    } else {
+      delayedRef.current.hide();
+    }
+  }, [visible]);
 
   return isVisible;
 }

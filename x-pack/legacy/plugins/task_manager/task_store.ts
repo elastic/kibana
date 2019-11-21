@@ -8,26 +8,56 @@
  * This module contains helpers for managing the task manager storage layer.
  */
 
+import { omit } from 'lodash';
 import {
-  TASK_MANAGER_API_VERSION as API_VERSION,
-  TASK_MANAGER_TEMPLATE_VERSION as TEMPLATE_VERSION,
-} from './constants';
-import { Logger } from './lib/logger';
-import { ConcreteTaskInstance, ElasticJs, TaskInstance, TaskStatus } from './task';
+  SavedObjectsClientContract,
+  SavedObject,
+  SavedObjectAttributes,
+  SavedObjectsSerializer,
+  SavedObjectsRawDoc,
+} from 'src/core/server';
+import {
+  ConcreteTaskInstance,
+  ElasticJs,
+  TaskDefinition,
+  TaskDictionary,
+  TaskInstance,
+} from './task';
 
 export interface StoreOpts {
   callCluster: ElasticJs;
-  getKibanaUuid: () => string;
   index: string;
+  taskManagerId: string;
   maxAttempts: number;
-  supportedTypes: string[];
-  logger: Logger;
+  definitions: TaskDictionary<TaskDefinition>;
+  savedObjectsRepository: SavedObjectsClientContract;
+  serializer: SavedObjectsSerializer;
 }
 
-export interface FetchOpts {
+export interface SearchOpts {
   searchAfter?: any[];
-  sort?: object[];
+  sort?: object | object[];
   query?: object;
+  size?: number;
+  seq_no_primary_term?: boolean;
+  search_after?: any[];
+}
+
+export interface FetchOpts extends SearchOpts {
+  sort?: object[];
+}
+
+export interface UpdateByQuerySearchOpts extends SearchOpts {
+  script?: object;
+}
+
+export interface UpdateByQueryOpts extends SearchOpts {
+  max_docs?: number;
+}
+
+export interface OwnershipClaimingOpts {
+  claimOwnershipUntil: Date;
+  size: number;
 }
 
 export interface FetchResult {
@@ -35,40 +65,20 @@ export interface FetchResult {
   docs: ConcreteTaskInstance[];
 }
 
-export interface RemoveResult {
-  index: string;
-  id: string;
-  sequenceNumber: number;
-  primaryTerm: number;
-  result: string;
+export interface ClaimOwnershipResult {
+  claimedTasks: number;
+  docs: ConcreteTaskInstance[];
 }
 
-// Internal, the raw document, as stored in the Kibana index.
-export interface RawTaskDoc {
-  _id: string;
-  _index: string;
-  _seq_no: number;
-  _primary_term: number;
-  _source: {
-    type: string;
-    kibana: {
-      uuid: string;
-      version: number;
-      apiVersion: number;
-    };
-    task: {
-      taskType: string;
-      scheduledAt: Date;
-      runAt: Date;
-      interval?: string;
-      attempts: number;
-      status: TaskStatus;
-      params: string;
-      state: string;
-      user?: string;
-      scope?: string[];
-    };
-  };
+export interface BulkUpdateTaskFailureResult {
+  error: NonNullable<SavedObject['error']>;
+  task: ConcreteTaskInstance;
+}
+
+export interface UpdateByQueryResult {
+  updated: number;
+  version_conflicts: number;
+  total: number;
 }
 
 /**
@@ -77,12 +87,12 @@ export interface RawTaskDoc {
  */
 export class TaskStore {
   public readonly maxAttempts: number;
-  public getKibanaUuid: () => string;
   public readonly index: string;
+  public readonly taskManagerId: string;
   private callCluster: ElasticJs;
-  private supportedTypes: string[];
-  private _isInitialized = false; // eslint-disable-line @typescript-eslint/camelcase
-  private logger: Logger;
+  private definitions: TaskDictionary<TaskDefinition>;
+  private savedObjectsRepository: SavedObjectsClientContract;
+  private serializer: SavedObjectsSerializer;
 
   /**
    * Constructs a new TaskStore.
@@ -90,133 +100,18 @@ export class TaskStore {
    * @prop {CallCluster} callCluster - The elastic search connection
    * @prop {string} index - The name of the task manager index
    * @prop {number} maxAttempts - The maximum number of attempts before a task will be abandoned
-   * @prop {string[]} supportedTypes - The task types supported by this store
-   * @prop {Logger} logger - The task manager logger.
+   * @prop {TaskDefinition} definition - The definition of the task being run
+   * @prop {serializer} - The saved object serializer
+   * @prop {savedObjectsRepository} - An instance to the saved objects repository
    */
   constructor(opts: StoreOpts) {
     this.callCluster = opts.callCluster;
     this.index = opts.index;
+    this.taskManagerId = opts.taskManagerId;
     this.maxAttempts = opts.maxAttempts;
-    this.supportedTypes = opts.supportedTypes;
-    this.logger = opts.logger;
-    this.getKibanaUuid = opts.getKibanaUuid;
-
-    this.fetchAvailableTasks = this.fetchAvailableTasks.bind(this);
-  }
-
-  public addSupportedTypes(types: string[]) {
-    if (!this._isInitialized) {
-      this.supportedTypes = this.supportedTypes.concat(types);
-    } else {
-      throw new Error('Cannot add task types after initialization');
-    }
-  }
-
-  /**
-   * Initializes the store, ensuring the task manager index template is created
-   * and the version is up to date.
-   */
-  public async init() {
-    if (this._isInitialized) {
-      throw new Error('TaskStore has already been initialized!');
-    }
-
-    let existingVersion = -Infinity;
-    const templateName = this.index;
-
-    try {
-      // check if template exists
-      const templateCheck = await this.callCluster('indices.getTemplate', {
-        name: templateName,
-        filter_path: '*.version',
-      });
-      // extract the existing version
-      const template = templateCheck[templateName] || {};
-      existingVersion = template.version || 0;
-    } catch (err) {
-      if (err.statusCode !== 404) {
-        throw err; // ignore not found
-      }
-    }
-
-    if (existingVersion > TEMPLATE_VERSION) {
-      // Do not trample a newer version template
-      this.logger.warning(
-        `This Kibana instance defines an older template version (${TEMPLATE_VERSION}) than is currently in Elasticsearch (${existingVersion}). ` +
-          `Because of the potential for non-backwards compatible changes, this Kibana instance will only be able to claim scheduled tasks with ` +
-          `"kibana.apiVersion" <= ${API_VERSION} in the task metadata.`
-      );
-      return;
-    } else if (existingVersion === TEMPLATE_VERSION) {
-      // The latest template is already saved, so just log a debug line.
-      this.logger.debug(
-        `Not installing ${this.index} index template: version ${TEMPLATE_VERSION} already exists.`
-      );
-      return;
-    }
-
-    // Activate template creation / update
-    if (existingVersion > 0) {
-      this.logger.info(
-        `Upgrading ${
-          this.index
-        } index template. Old version: ${existingVersion}, New version: ${TEMPLATE_VERSION}.`
-      );
-    } else {
-      this.logger.info(`Installing ${this.index} index template version: ${TEMPLATE_VERSION}.`);
-    }
-
-    const templateResult = await this.callCluster('indices.putTemplate', {
-      name: templateName,
-      body: {
-        index_patterns: [this.index],
-        mappings: {
-          dynamic: false,
-          properties: {
-            type: { type: 'keyword' },
-            task: {
-              properties: {
-                taskType: { type: 'keyword' },
-                scheduledAt: { type: 'date' },
-                runAt: { type: 'date' },
-                interval: { type: 'text' },
-                attempts: { type: 'integer' },
-                status: { type: 'keyword' },
-                params: { type: 'text' },
-                state: { type: 'text' },
-                user: { type: 'keyword' },
-                scope: { type: 'keyword' },
-              },
-            },
-            kibana: {
-              properties: {
-                apiVersion: { type: 'integer' }, // 1, 2, 3, etc
-                uuid: { type: 'keyword' }, //
-                version: { type: 'integer' }, // 7000099, etc
-              },
-            },
-          },
-        },
-        settings: {
-          number_of_shards: 1,
-          auto_expand_replicas: '0-1',
-        },
-        version: TEMPLATE_VERSION,
-      },
-    });
-
-    this._isInitialized = true;
-    this.logger.info(
-      `Installed ${
-        this.index
-      } index template: version ${TEMPLATE_VERSION} (API version ${API_VERSION})`
-    );
-
-    return templateResult;
-  }
-
-  get isInitialized() {
-    return this._isInitialized;
+    this.definitions = opts.definitions;
+    this.serializer = opts.serializer;
+    this.savedObjectsRepository = opts.savedObjectsRepository;
   }
 
   /**
@@ -225,38 +120,21 @@ export class TaskStore {
    * @param task - The task being scheduled.
    */
   public async schedule(taskInstance: TaskInstance): Promise<ConcreteTaskInstance> {
-    if (!this._isInitialized) {
-      await this.init();
-    }
-
-    if (!this.supportedTypes.includes(taskInstance.taskType)) {
+    if (!this.definitions[taskInstance.taskType]) {
       throw new Error(
-        `Unsupported task type "${
-          taskInstance.taskType
-        }". Supported types are ${this.supportedTypes.join(', ')}`
+        `Unsupported task type "${taskInstance.taskType}". Supported types are ${Object.keys(
+          this.definitions
+        ).join(', ')}`
       );
     }
 
-    const { id, ...body } = rawSource(taskInstance, this);
-    const result = await this.callCluster('index', {
-      id,
-      body,
-      index: this.index,
-      refresh: true,
-    });
+    const savedObject = await this.savedObjectsRepository.create(
+      'task',
+      taskInstanceToAttributes(taskInstance),
+      { id: taskInstance.id, refresh: false }
+    );
 
-    const { task } = body;
-    return {
-      ...taskInstance,
-      id: result._id,
-      sequenceNumber: result._seq_no,
-      primaryTerm: result._primary_term,
-      attempts: 0,
-      status: task.status,
-      scheduledAt: task.scheduledAt,
-      runAt: task.runAt,
-      state: taskInstance.state || {},
-    };
+    return savedObjectToConcreteTaskInstance(savedObject);
   }
 
   /**
@@ -274,30 +152,146 @@ export class TaskStore {
   }
 
   /**
-   * Fetches tasks from the index, which are ready to be run.
+   * Claims available tasks from the index, which are ready to be run.
    * - runAt is now or past
-   * - id is not currently running in this instance of Kibana
+   * - is not currently claimed by any instance of Kibana
    * - has a type that is in our task definitions
    *
-   * @param {TaskQuery} query
-   * @prop {string[]} types - Task types to be queried
-   * @prop {number} size - The number of task instances to retrieve
-   * @returns {Promise<ConcreteTaskInstance[]>}
+   * @param {OwnershipClaimingOpts} options
+   * @returns {Promise<ClaimOwnershipResult>}
    */
-  public async fetchAvailableTasks(): Promise<ConcreteTaskInstance[]> {
+  public async claimAvailableTasks(opts: OwnershipClaimingOpts): Promise<ClaimOwnershipResult> {
+    const claimedTasks = await this.markAvailableTasksAsClaimed(opts);
+    const docs = claimedTasks > 0 ? await this.sweepForClaimedTasks(opts) : [];
+    return {
+      claimedTasks,
+      docs,
+    };
+  }
+
+  private async markAvailableTasksAsClaimed({
+    size,
+    claimOwnershipUntil,
+  }: OwnershipClaimingOpts): Promise<number> {
+    const { updated } = await this.updateByQuery(
+      {
+        query: {
+          bool: {
+            must: [
+              // Either a task with idle status and runAt <= now or
+              // status running or claiming with a retryAt <= now.
+              {
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        must: [
+                          { term: { 'task.status': 'idle' } },
+                          { range: { 'task.runAt': { lte: 'now' } } },
+                        ],
+                      },
+                    },
+                    {
+                      bool: {
+                        must: [
+                          {
+                            bool: {
+                              should: [
+                                { term: { 'task.status': 'running' } },
+                                { term: { 'task.status': 'claiming' } },
+                              ],
+                            },
+                          },
+                          { range: { 'task.retryAt': { lte: 'now' } } },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+              // Either task has an interval or the attempts < the maximum configured
+              {
+                bool: {
+                  should: [
+                    { exists: { field: 'task.interval' } },
+                    ...Object.entries(this.definitions).map(([type, definition]) => ({
+                      bool: {
+                        must: [
+                          { term: { 'task.taskType': type } },
+                          {
+                            range: {
+                              'task.attempts': {
+                                lt: definition.maxAttempts || this.maxAttempts,
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    })),
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        sort: {
+          _script: {
+            type: 'number',
+            order: 'asc',
+            script: {
+              lang: 'expression',
+              source: `doc['task.retryAt'].value || doc['task.runAt'].value`,
+            },
+          },
+        },
+        seq_no_primary_term: true,
+        script: {
+          source: `ctx._source.task.ownerId=params.ownerId; ctx._source.task.status=params.status; ctx._source.task.retryAt=params.retryAt;`,
+          lang: 'painless',
+          params: {
+            ownerId: this.taskManagerId,
+            retryAt: claimOwnershipUntil,
+            status: 'claiming',
+          },
+        },
+      },
+      {
+        max_docs: size,
+      }
+    );
+    return updated;
+  }
+
+  /**
+   * Fetches tasks from the index, which are owned by the current Kibana instance
+   */
+  private async sweepForClaimedTasks({
+    size,
+  }: OwnershipClaimingOpts): Promise<ConcreteTaskInstance[]> {
     const { docs } = await this.search({
       query: {
         bool: {
           must: [
-            { terms: { 'task.taskType': this.supportedTypes } },
-            { range: { 'task.attempts': { lte: this.maxAttempts } } },
-            { range: { 'task.runAt': { lte: 'now' } } },
-            { range: { 'kibana.apiVersion': { lte: API_VERSION } } },
+            {
+              term: {
+                'task.ownerId': this.taskManagerId,
+              },
+            },
+            { term: { 'task.status': 'claiming' } },
           ],
         },
       },
-      size: 10,
-      sort: { 'task.runAt': { order: 'asc' } },
+      size,
+      sort: {
+        _script: {
+          type: 'number',
+          order: 'asc',
+          script: {
+            lang: 'expression',
+            source: `doc['task.retryAt'].value || doc['task.runAt'].value`,
+          },
+        },
+      },
       seq_no_primary_term: true,
     });
 
@@ -312,26 +306,17 @@ export class TaskStore {
    * @returns {Promise<TaskDoc>}
    */
   public async update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance> {
-    const rawDoc = taskDocToRaw(doc, this);
+    const updatedSavedObject = await this.savedObjectsRepository.update(
+      'task',
+      doc.id,
+      taskInstanceToAttributes(doc),
+      {
+        refresh: false,
+        version: doc.version,
+      }
+    );
 
-    const result = await this.callCluster('update', {
-      body: {
-        doc: rawDoc._source,
-      },
-      id: doc.id,
-      index: this.index,
-      if_seq_no: doc.sequenceNumber,
-      if_primary_term: doc.primaryTerm,
-      // The refresh is important so that if we immediately look for work,
-      // we don't pick up this task.
-      refresh: true,
-    });
-
-    return {
-      ...doc,
-      sequenceNumber: result._seq_no,
-      primaryTerm: result._primary_term,
-    };
+    return savedObjectToConcreteTaskInstance(updatedSavedObject);
   }
 
   /**
@@ -340,30 +325,12 @@ export class TaskStore {
    * @param {string} id
    * @returns {Promise<void>}
    */
-  public async remove(id: string): Promise<RemoveResult> {
-    const result = await this.callCluster('delete', {
-      id,
-      index: this.index,
-      // The refresh is important so that if we immediately look for work,
-      // we don't pick up this task.
-      refresh: true,
-    });
-
-    return {
-      index: result._index,
-      id: result._id,
-      sequenceNumber: result._seq_no,
-      primaryTerm: result._primary_term,
-      result: result.result,
-    };
+  public async remove(id: string): Promise<void> {
+    await this.savedObjectsRepository.delete('task', id);
   }
 
-  private async search(opts: any = {}): Promise<FetchResult> {
-    const originalQuery = opts.query;
-    const queryOnlyTasks = { term: { type: 'task' } };
-    const query = originalQuery
-      ? { bool: { must: [queryOnlyTasks, originalQuery] } }
-      : queryOnlyTasks;
+  private async search(opts: SearchOpts = {}): Promise<FetchResult> {
+    const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
 
     const result = await this.callCluster('search', {
       index: this.index,
@@ -377,8 +344,36 @@ export class TaskStore {
     const rawDocs = result.hits.hits;
 
     return {
-      docs: (rawDocs as RawTaskDoc[]).map(rawToTaskDoc),
+      docs: (rawDocs as SavedObjectsRawDoc[])
+        .map(doc => this.serializer.rawToSavedObject(doc))
+        .map(doc => omit(doc, 'namespace') as SavedObject)
+        .map(savedObjectToConcreteTaskInstance),
       searchAfter: (rawDocs.length && rawDocs[rawDocs.length - 1].sort) || [],
+    };
+  }
+
+  private async updateByQuery(
+    opts: UpdateByQuerySearchOpts = {},
+    { max_docs }: UpdateByQueryOpts = {}
+  ): Promise<UpdateByQueryResult> {
+    const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
+    const result = await this.callCluster('updateByQuery', {
+      index: this.index,
+      ignoreUnavailable: true,
+      refresh: true,
+      max_docs,
+      conflicts: 'proceed',
+      body: {
+        ...opts,
+        query,
+      },
+    });
+
+    const { total, updated, version_conflicts } = result;
+    return {
+      total,
+      updated,
+      version_conflicts,
     };
   }
 }
@@ -397,62 +392,53 @@ function paginatableSort(sort: any[] = []) {
   return [...sort, sortById];
 }
 
-function rawSource(doc: TaskInstance, store: TaskStore) {
-  const { id, ...taskFields } = doc;
-  const source = {
-    ...taskFields,
+function taskInstanceToAttributes(doc: TaskInstance): SavedObjectAttributes {
+  return {
+    ...omit(doc, 'id', 'version'),
     params: JSON.stringify(doc.params || {}),
     state: JSON.stringify(doc.state || {}),
     attempts: (doc as ConcreteTaskInstance).attempts || 0,
-    scheduledAt: doc.scheduledAt || new Date(),
-    runAt: doc.runAt || new Date(),
+    scheduledAt: (doc.scheduledAt || new Date()).toISOString(),
+    startedAt: (doc.startedAt && doc.startedAt.toISOString()) || null,
+    retryAt: (doc.retryAt && doc.retryAt.toISOString()) || null,
+    runAt: (doc.runAt || new Date()).toISOString(),
     status: (doc as ConcreteTaskInstance).status || 'idle',
   };
+}
 
-  delete (source as any).id;
-  delete (source as any).sequenceNumber;
-  delete (source as any).primaryTerm;
-  delete (source as any).type;
-
+function savedObjectToConcreteTaskInstance(
+  savedObject: Omit<SavedObject, 'references'>
+): ConcreteTaskInstance {
   return {
-    id,
-    type: 'task',
-    task: source,
-    kibana: {
-      uuid: store.getKibanaUuid(), // needs to be pulled live
-      version: TEMPLATE_VERSION,
-      apiVersion: API_VERSION,
-    },
+    ...savedObject.attributes,
+    id: savedObject.id,
+    version: savedObject.version,
+    scheduledAt: new Date(savedObject.attributes.scheduledAt),
+    runAt: new Date(savedObject.attributes.runAt),
+    startedAt: savedObject.attributes.startedAt && new Date(savedObject.attributes.startedAt),
+    retryAt: savedObject.attributes.retryAt && new Date(savedObject.attributes.retryAt),
+    state: parseJSONField(savedObject.attributes.state, 'state', savedObject.id),
+    params: parseJSONField(savedObject.attributes.params, 'params', savedObject.id),
   };
 }
 
-function taskDocToRaw(doc: ConcreteTaskInstance, store: TaskStore): RawTaskDoc {
-  const { type, task, kibana } = rawSource(doc, store);
-
-  return {
-    _id: doc.id,
-    _index: store.index,
-    _source: { type, task, kibana },
-    _seq_no: doc.sequenceNumber,
-    _primary_term: doc.primaryTerm,
-  };
-}
-
-function rawToTaskDoc(doc: RawTaskDoc): ConcreteTaskInstance {
-  return {
-    ...doc._source.task,
-    id: doc._id,
-    sequenceNumber: doc._seq_no,
-    primaryTerm: doc._primary_term,
-    params: parseJSONField(doc._source.task.params, 'params', doc),
-    state: parseJSONField(doc._source.task.state, 'state', doc),
-  };
-}
-
-function parseJSONField(json: string, fieldName: string, doc: RawTaskDoc) {
+function parseJSONField(json: string, fieldName: string, id: string) {
   try {
     return json ? JSON.parse(json) : {};
   } catch (error) {
-    throw new Error(`Task "${doc._id}"'s ${fieldName} field has invalid JSON: ${json}`);
+    throw new Error(`Task "${id}"'s ${fieldName} field has invalid JSON: ${json}`);
   }
+}
+
+function ensureQueryOnlyReturnsTaskObjects(opts: SearchOpts): SearchOpts {
+  const originalQuery = opts.query;
+  const queryOnlyTasks = { term: { type: 'task' } };
+  const query = originalQuery
+    ? { bool: { must: [queryOnlyTasks, originalQuery] } }
+    : queryOnlyTasks;
+
+  return {
+    ...opts,
+    query,
+  };
 }

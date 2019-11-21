@@ -11,16 +11,18 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
 import { getPageData } from './get_page_data';
 import template from './index.html';
-import React from 'react';
+import React, { Fragment } from 'react';
 import { I18nContext } from 'ui/i18n';
 import { Listing } from '../../../components/beats/listing/listing';
+import { SetupModeRenderer } from '../../../components/renderers';
+import { CODE_PATH_BEATS, BEATS_SYSTEM_ID } from '../../../../common/constants';
 
 uiRoutes.when('/beats/beats', {
   template,
   resolve: {
     clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_BEATS] });
     },
     pageData: getPageData,
   },
@@ -43,6 +45,7 @@ uiRoutes.when('/beats/beats', {
 
       this.data = $route.current.locals.pageData;
       this.scope = $scope;
+      this.injector = $injector;
       this.kbnUrl = $injector.get('kbnUrl');
 
       //Bypassing super.updateData, since this controller loads its own data
@@ -55,16 +58,28 @@ uiRoutes.when('/beats/beats', {
       const { sorting, pagination, onTableChange } = this.scope.beats;
       this.renderReact(
         <I18nContext>
-          <Listing
-            stats={this.data.stats}
-            data={this.data.listing}
-            sorting={this.sorting || sorting}
-            pagination={this.pagination || pagination}
-            onTableChange={this.onTableChange || onTableChange}
-            angular={{
-              kbnUrl: this.kbnUrl,
-              scope: this.scope,
-            }}
+          <SetupModeRenderer
+            scope={this.scope}
+            injector={this.injector}
+            productName={BEATS_SYSTEM_ID}
+            render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
+              <Fragment>
+                {flyoutComponent}
+                <Listing
+                  stats={this.data.stats}
+                  data={this.data.listing}
+                  setupMode={setupMode}
+                  sorting={this.sorting || sorting}
+                  pagination={this.pagination || pagination}
+                  onTableChange={this.onTableChange || onTableChange}
+                  angular={{
+                    kbnUrl: this.kbnUrl,
+                    scope: this.scope,
+                  }}
+                />
+                {bottomBarComponent}
+              </Fragment>
+            )}
           />
         </I18nContext>
       );

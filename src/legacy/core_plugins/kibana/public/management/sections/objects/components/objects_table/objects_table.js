@@ -50,22 +50,25 @@ import {
   EuiModalHeaderTitle,
   EuiFormRow,
   EuiFlexGroup,
-  EuiFlexItem
+  EuiFlexItem,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import {
   parseQuery,
   getSavedObjectCounts,
   getRelationships,
   getSavedObjectLabel,
   fetchExportObjects,
-  fetchExportByType,
+  fetchExportByTypeAndSearch,
   findObjects,
 } from '../../lib';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { extractExportDetails } from '../../lib/extract_export_details';
 
 export const POSSIBLE_TYPES = chrome.getInjected('importAndExportableTypes');
 
-class ObjectsTableUI extends Component {
+export class ObjectsTable extends Component {
   static propTypes = {
     savedObjectsClient: PropTypes.object.isRequired,
     indexPatterns: PropTypes.object.isRequired,
@@ -165,13 +168,15 @@ class ObjectsTableUI extends Component {
   };
 
   fetchSavedObjects = () => {
-    this.setState({
-      isSearching: true,
-    }, this.debouncedFetch);
-  }
+    this.setState(
+      {
+        isSearching: true,
+      },
+      this.debouncedFetch
+    );
+  };
 
   debouncedFetch = debounce(async () => {
-    const { intl } = this.props;
     const { activeQuery: query, page, perPage } = this.state;
     const { queryText, visibleTypes } = parseQuery(query);
     // "searchFields" is missing from the "findOptions" but gets injected via the API.
@@ -181,9 +186,7 @@ class ObjectsTableUI extends Component {
       perPage,
       page: page + 1,
       fields: ['id'],
-      type: this.savedObjectTypes.filter(
-        type => !visibleTypes || visibleTypes.includes(type)
-      ),
+      type: this.savedObjectTypes.filter(type => !visibleTypes || visibleTypes.includes(type)),
     };
     if (findOptions.type.length > 1) {
       findOptions.sortField = 'type';
@@ -199,10 +202,10 @@ class ObjectsTableUI extends Component {
         });
       }
       toastNotifications.addDanger({
-        title: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.unableFindSavedObjectsNotificationMessage',
-          defaultMessage: 'Unable find saved objects'
-        }),
+        title: i18n.translate(
+          'kbn.management.objects.objectsTable.unableFindSavedObjectsNotificationMessage',
+          { defaultMessage: 'Unable find saved objects' }
+        ),
         text: `${error}`,
       });
       return;
@@ -253,14 +256,17 @@ class ObjectsTableUI extends Component {
   onTableChange = async table => {
     const { index: page, size: perPage } = table.page || {};
 
-    this.setState({
-      page,
-      perPage,
-      selectedSavedObjects: [],
-    }, this.fetchSavedObjects);
+    this.setState(
+      {
+        page,
+        perPage,
+        selectedSavedObjects: [],
+      },
+      this.fetchSavedObjects
+    );
   };
 
-  onShowRelationships = (object) => {
+  onShowRelationships = object => {
     this.setState({
       isShowingRelationships: true,
       relationshipObject: object,
@@ -274,8 +280,7 @@ class ObjectsTableUI extends Component {
     });
   };
 
-  onExport = async (includeReferencesDeep) => {
-    const { intl } = this.props;
+  onExport = async includeReferencesDeep => {
     const { selectedSavedObjects } = this.state;
     const objectsToExport = selectedSavedObjects.map(obj => ({ id: obj.id, type: obj.type }));
 
@@ -284,8 +289,7 @@ class ObjectsTableUI extends Component {
       blob = await fetchExportObjects(objectsToExport, includeReferencesDeep);
     } catch (e) {
       toastNotifications.addDanger({
-        title: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.export.dangerNotification',
+        title: i18n.translate('kbn.management.objects.objectsTable.export.dangerNotification', {
           defaultMessage: 'Unable to generate export',
         }),
       });
@@ -293,34 +297,31 @@ class ObjectsTableUI extends Component {
     }
 
     saveAs(blob, 'export.ndjson');
-    toastNotifications.addSuccess({
-      title: intl.formatMessage({
-        id: 'kbn.management.objects.objectsTable.export.successNotification',
-        defaultMessage: 'Your file is downloading in the background',
-      }),
-    });
+
+    const exportDetails = await extractExportDetails(blob);
+    this.showExportSuccessMessage(exportDetails);
   };
 
   onExportAll = async () => {
-    const { intl } = this.props;
-    const { exportAllSelectedOptions, isIncludeReferencesDeepChecked } = this.state;
-    const exportTypes = Object.entries(exportAllSelectedOptions).reduce(
-      (accum, [id, selected]) => {
-        if (selected) {
-          accum.push(id);
-        }
-        return accum;
-      },
-      []
-    );
+    const { exportAllSelectedOptions, isIncludeReferencesDeepChecked, activeQuery } = this.state;
+    const { queryText } = parseQuery(activeQuery);
+    const exportTypes = Object.entries(exportAllSelectedOptions).reduce((accum, [id, selected]) => {
+      if (selected) {
+        accum.push(id);
+      }
+      return accum;
+    }, []);
 
     let blob;
     try {
-      blob = await fetchExportByType(exportTypes, isIncludeReferencesDeepChecked);
+      blob = await fetchExportByTypeAndSearch(
+        exportTypes,
+        queryText ? `${queryText}*` : undefined,
+        isIncludeReferencesDeepChecked
+      );
     } catch (e) {
       toastNotifications.addDanger({
-        title: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.exportAll.dangerNotification',
+        title: i18n.translate('kbn.management.objects.objectsTable.export.dangerNotification', {
           defaultMessage: 'Unable to generate export',
         }),
       });
@@ -328,13 +329,32 @@ class ObjectsTableUI extends Component {
     }
 
     saveAs(blob, 'export.ndjson');
-    toastNotifications.addSuccess({
-      title: intl.formatMessage({
-        id: 'kbn.management.objects.objectsTable.exportAll.successNotification',
-        defaultMessage: 'Your file is downloading in the background',
-      }),
-    });
+
+    const exportDetails = await extractExportDetails(blob);
+    this.showExportSuccessMessage(exportDetails);
     this.setState({ isShowingExportAllOptionsModal: false });
+  };
+
+  showExportSuccessMessage = exportDetails => {
+    if (exportDetails && exportDetails.missingReferences.length > 0) {
+      toastNotifications.addWarning({
+        title: i18n.translate(
+          'kbn.management.objects.objectsTable.export.successWithMissingRefsNotification',
+          {
+            defaultMessage:
+              'Your file is downloading in the background. ' +
+              'Some related objects could not be found. ' +
+              'Please see the last line in the exported file for a list of missing objects.',
+          }
+        ),
+      });
+    } else {
+      toastNotifications.addSuccess({
+        title: i18n.translate('kbn.management.objects.objectsTable.export.successNotification', {
+          defaultMessage: 'Your file is downloading in the background',
+        }),
+      });
+    }
   };
 
   finishImport = () => {
@@ -365,11 +385,9 @@ class ObjectsTableUI extends Component {
 
     this.setState({ isDeleting: true });
 
-    const indexPatterns = selectedSavedObjects.filter(
-      object => object.type === 'index-pattern'
-    );
+    const indexPatterns = selectedSavedObjects.filter(object => object.type === 'index-pattern');
     if (indexPatterns.length) {
-      await this.props.indexPatterns.cache.clearAll();
+      await this.props.indexPatterns.clearCache();
     }
 
     const objects = await savedObjectsClient.bulkGet(selectedSavedObjects);
@@ -440,12 +458,7 @@ class ObjectsTableUI extends Component {
   }
 
   renderDeleteConfirmModal() {
-    const {
-      isShowingDeleteConfirmModal,
-      isDeleting,
-      selectedSavedObjects,
-    } = this.state;
-    const { intl } = this.props;
+    const { isShowingDeleteConfirmModal, isDeleting, selectedSavedObjects } = this.state;
 
     if (!isShowingDeleteConfirmModal) {
       return null;
@@ -455,9 +468,7 @@ class ObjectsTableUI extends Component {
 
     if (isDeleting) {
       // Block the user from interacting with the table while its contents are being deleted.
-      modal = (
-        <EuiLoadingKibana size="xl"/>
-      );
+      modal = <EuiLoadingKibana size="xl" />;
     } else {
       const onCancel = () => {
         this.setState({ isShowingDeleteConfirmModal: false });
@@ -478,22 +489,24 @@ class ObjectsTableUI extends Component {
           onCancel={onCancel}
           onConfirm={onConfirm}
           buttonColor="danger"
-          cancelButtonText={(
+          cancelButtonText={
             <FormattedMessage
               id="kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
               defaultMessage="Cancel"
             />
-          )}
+          }
           confirmButtonText={
-            isDeleting
-              ? (<FormattedMessage
+            isDeleting ? (
+              <FormattedMessage
                 id="kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.deleteProcessButtonLabel"
                 defaultMessage="Deleting…"
-              />)
-              :  (<FormattedMessage
+              />
+            ) : (
+              <FormattedMessage
                 id="kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
                 defaultMessage="Delete"
-              />)
+              />
+            )
           }
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         >
@@ -508,31 +521,30 @@ class ObjectsTableUI extends Component {
             columns={[
               {
                 field: 'type',
-                name: intl.formatMessage({
-                  id: 'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.typeColumnName', defaultMessage: 'Type'
-                }),
+                name: i18n.translate(
+                  'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.typeColumnName',
+                  { defaultMessage: 'Type' }
+                ),
                 width: '50px',
                 render: (type, object) => (
-                  <EuiToolTip
-                    position="top"
-                    content={getSavedObjectLabel(type)}
-                  >
+                  <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
                     <EuiIcon type={object.meta.icon || 'apps'} />
                   </EuiToolTip>
                 ),
               },
               {
                 field: 'id',
-                name: intl.formatMessage({
-                  id: 'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.idColumnName', defaultMessage: 'Id'
-                }),
+                name: i18n.translate(
+                  'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.idColumnName',
+                  { defaultMessage: 'Id' }
+                ),
               },
               {
                 field: 'meta.title',
-                name: intl.formatMessage({
-                  id: 'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.titleColumnName',
-                  defaultMessage: 'Title',
-                }),
+                name: i18n.translate(
+                  'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.titleColumnName',
+                  { defaultMessage: 'Title' }
+                ),
               },
             ]}
             pagination={true}
@@ -542,22 +554,18 @@ class ObjectsTableUI extends Component {
       );
     }
 
-    return (
-      <EuiOverlayMask>
-        {modal}
-      </EuiOverlayMask>
-    );
+    return <EuiOverlayMask>{modal}</EuiOverlayMask>;
   }
 
   changeIncludeReferencesDeep = () => {
     this.setState(state => ({
       isIncludeReferencesDeepChecked: !state.isIncludeReferencesDeepChecked,
     }));
-  }
+  };
 
   closeExportAllModal = () => {
     this.setState({ isShowingExportAllOptionsModal: false });
-  }
+  };
 
   renderExportAllOptionsModal() {
     const {
@@ -574,26 +582,26 @@ class ObjectsTableUI extends Component {
 
     return (
       <EuiOverlayMask>
-        <EuiModal
-          onClose={this.closeExportAllModal}
-        >
+        <EuiModal onClose={this.closeExportAllModal}>
           <EuiModalHeader>
             <EuiModalHeaderTitle>
               <FormattedMessage
                 id="kbn.management.objects.objectsTable.exportObjectsConfirmModalTitle"
                 defaultMessage="Export {filteredItemCount, plural, one{# object} other {# objects}}"
                 values={{
-                  filteredItemCount
+                  filteredItemCount,
                 }}
               />
             </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
             <EuiFormRow
-              label={<FormattedMessage
-                id="kbn.management.objects.objectsTable.exportObjectsConfirmModalDescription"
-                defaultMessage="Select which types to export"
-              />}
+              label={
+                <FormattedMessage
+                  id="kbn.management.objects.objectsTable.exportObjectsConfirmModalDescription"
+                  defaultMessage="Select which types to export"
+                />
+              }
               labelType="legend"
             >
               <EuiCheckboxGroup
@@ -613,14 +621,15 @@ class ObjectsTableUI extends Component {
                 }}
               />
             </EuiFormRow>
+            <EuiSpacer size="m" />
             <EuiSwitch
               name="includeReferencesDeep"
-              label={(
+              label={
                 <FormattedMessage
                   id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
                   defaultMessage="Include related objects"
                 />
-              )}
+              }
               checked={isIncludeReferencesDeepChecked}
               onChange={this.changeIncludeReferencesDeep}
             />
@@ -676,17 +685,13 @@ class ObjectsTableUI extends Component {
     }));
 
     return (
-      <EuiPageContent
-        horizontalPosition="center"
-      >
+      <EuiPageContent horizontalPosition="center">
         {this.renderFlyout()}
         {this.renderRelationships()}
         {this.renderDeleteConfirmModal()}
         {this.renderExportAllOptionsModal()}
         <Header
-          onExportAll={() =>
-            this.setState({ isShowingExportAllOptionsModal: true })
-          }
+          onExportAll={() => this.setState({ isShowingExportAllOptionsModal: true })}
           onImport={this.showImportFlyout}
           onRefresh={this.refreshData}
           filteredCount={filteredItemCount}
@@ -715,5 +720,3 @@ class ObjectsTableUI extends Component {
     );
   }
 }
-
-export const ObjectsTable = injectI18n(ObjectsTableUI);

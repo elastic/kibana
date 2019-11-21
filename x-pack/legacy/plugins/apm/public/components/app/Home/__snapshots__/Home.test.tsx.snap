@@ -1,0 +1,129 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Home component should render services 1`] = `
+<div>
+  <ApmHeader>
+    <EuiFlexGroup
+      alignItems="center"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiTitle
+          size="l"
+        >
+          <h1>
+            APM
+          </h1>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <SettingsLink>
+          <EuiButtonEmpty
+            color="primary"
+            iconType="gear"
+            size="s"
+          >
+            Settings
+          </EuiButtonEmpty>
+        </SettingsLink>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <SetupInstructionsLink />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </ApmHeader>
+  <EuiTabs
+    display="default"
+    expand={false}
+    size="m"
+  >
+    <EuiTabLink
+      isSelected={true}
+      key="services"
+    >
+      <ServiceOverviewLink>
+        Services
+      </ServiceOverviewLink>
+    </EuiTabLink>
+    <EuiTabLink
+      isSelected={false}
+      key="traces"
+    >
+      <TraceOverviewLink>
+        Traces
+      </TraceOverviewLink>
+    </EuiTabLink>
+  </EuiTabs>
+  <EuiSpacer />
+  <ServiceOverview />
+</div>
+`;
+
+exports[`Home component should render traces 1`] = `
+<div>
+  <ApmHeader>
+    <EuiFlexGroup
+      alignItems="center"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiTitle
+          size="l"
+        >
+          <h1>
+            APM
+          </h1>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <SettingsLink>
+          <EuiButtonEmpty
+            color="primary"
+            iconType="gear"
+            size="s"
+          >
+            Settings
+          </EuiButtonEmpty>
+        </SettingsLink>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <SetupInstructionsLink />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </ApmHeader>
+  <EuiTabs
+    display="default"
+    expand={false}
+    size="m"
+  >
+    <EuiTabLink
+      isSelected={false}
+      key="services"
+    >
+      <ServiceOverviewLink>
+        Services
+      </ServiceOverviewLink>
+    </EuiTabLink>
+    <EuiTabLink
+      isSelected={true}
+      key="traces"
+    >
+      <TraceOverviewLink>
+        Traces
+      </TraceOverviewLink>
+    </EuiTabLink>
+  </EuiTabs>
+  <EuiSpacer />
+  <TraceOverview />
+</div>
+`;

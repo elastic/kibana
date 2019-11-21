@@ -50,6 +50,23 @@ interface PackageGroup {
    * should be ignored.
    */
   readonly enabled?: false;
+
+  /**
+   * A semver range defining allowed versions for a package group
+   * https://renovatebot.com/docs/configuration-options/#allowedversions
+   */
+  readonly allowedVersions?: string;
+
+  /**
+   * An array of users to request reviews from
+   */
+  readonly reviewers?: string[];
+
+  /**
+   * Unless this is set to true, then PRs will only be opened when
+   * the corresponding checkbox is ticked in the master issue.
+   */
+  readonly autoOpenPr?: boolean;
 }
 
 export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
@@ -67,6 +84,13 @@ export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
   {
     name: 'jest',
     packageWords: ['jest'],
+  },
+
+  {
+    name: '@elastic/charts',
+    packageNames: ['@elastic/charts'],
+    reviewers: ['markov00'],
+    autoOpenPr: true,
   },
 
   {
@@ -106,8 +130,13 @@ export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
   },
 
   {
+    name: 'moment',
+    packageWords: ['moment'],
+  },
+
+  {
     name: 'graphql',
-    packageWords: ['graphql'],
+    packageWords: ['graphql', 'apollo'],
   },
 
   {
@@ -119,6 +148,7 @@ export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
   {
     name: 'vega',
     packageWords: ['vega'],
+    enabled: false,
   },
 
   {
@@ -142,6 +172,23 @@ export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
     name: 'api-documenter',
     packageNames: ['@microsoft/api-documenter', '@microsoft/api-extractor'],
     enabled: false,
+  },
+
+  {
+    name: 'jsts',
+    packageNames: ['jsts'],
+    allowedVersions: '^1.6.2',
+  },
+
+  {
+    name: 'storybook',
+    packageWords: ['storybook'],
+  },
+
+  {
+    name: 'typescript',
+    packageWords: ['ts', 'typescript'],
+    packageNames: ['tslib'],
   },
 ];
 

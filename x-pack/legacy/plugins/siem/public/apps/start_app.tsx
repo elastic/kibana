@@ -5,10 +5,12 @@
  */
 
 import { createHashHistory } from 'history';
-import React from 'react';
+import React, { memo, FC } from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
+import { LegacyCoreStart } from 'kibana/public';
+import { PluginsStart } from 'ui/new_platform/new_platform';
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
@@ -17,42 +19,79 @@ import { BehaviorSubject } from 'rxjs';
 import { pluck } from 'rxjs/operators';
 import { I18nContext } from 'ui/i18n';
 
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
+
+import { DEFAULT_DARK_MODE } from '../../common/constants';
 import { ErrorToastDispatcher } from '../components/error_toast_dispatcher';
-import { KibanaConfigContext } from '../lib/adapters/framework/kibana_framework_adapter';
+import { compose } from '../lib/compose/kibana_compose';
 import { AppFrontendLibs } from '../lib/lib';
+import { KibanaCoreContextProvider } from '../lib/compose/kibana_core';
+import { KibanaPluginsContextProvider } from '../lib/compose/kibana_plugins';
+import { useKibanaUiSetting } from '../lib/settings/use_kibana_ui_setting';
 import { PageRouter } from '../routes';
 import { createStore } from '../store';
 import { GlobalToaster, ManageGlobalToaster } from '../components/toasters';
+import { MlCapabilitiesProvider } from '../components/ml/permissions/ml_capabilities_provider';
 
-export const startApp = async (libs: AppFrontendLibs) => {
+import { ApolloClientContext } from '../utils/apollo_context';
+
+const StartApp: FC<AppFrontendLibs> = memo(libs => {
   const history = createHashHistory();
 
   const libs$ = new BehaviorSubject(libs);
 
   const store = createStore(undefined, libs$.pipe(pluck('apolloClient')));
 
-  libs.framework.render(
-    <EuiErrorBoundary>
-      <I18nContext>
-        <ManageGlobalToaster>
-          <ReduxStoreProvider store={store}>
-            <ApolloProvider client={libs.apolloClient}>
-              <ThemeProvider
-                theme={() => ({
-                  eui: libs.framework.darkMode ? euiDarkVars : euiLightVars,
-                  darkMode: libs.framework.darkMode,
-                })}
-              >
-                <KibanaConfigContext.Provider value={libs.framework}>
-                  <PageRouter history={history} />
-                </KibanaConfigContext.Provider>
-              </ThemeProvider>
-              <ErrorToastDispatcher />
-              <GlobalToaster />
-            </ApolloProvider>
-          </ReduxStoreProvider>
-        </ManageGlobalToaster>
-      </I18nContext>
-    </EuiErrorBoundary>
-  );
-};
+  const AppPluginRoot = memo(() => {
+    const [darkMode] = useKibanaUiSetting(DEFAULT_DARK_MODE);
+    return (
+      <EuiErrorBoundary>
+        <I18nContext>
+          <ManageGlobalToaster>
+            <ReduxStoreProvider store={store}>
+              <ApolloProvider client={libs.apolloClient}>
+                <ApolloClientContext.Provider value={libs.apolloClient}>
+                  <ThemeProvider
+                    theme={() => ({
+                      eui: darkMode ? euiDarkVars : euiLightVars,
+                      darkMode,
+                    })}
+                  >
+                    <MlCapabilitiesProvider>
+                      <PageRouter history={history} />
+                    </MlCapabilitiesProvider>
+                  </ThemeProvider>
+                  <ErrorToastDispatcher />
+                  <GlobalToaster />
+                </ApolloClientContext.Provider>
+              </ApolloProvider>
+            </ReduxStoreProvider>
+          </ManageGlobalToaster>
+        </I18nContext>
+      </EuiErrorBoundary>
+    );
+  });
+  return <AppPluginRoot />;
+});
+
+export const ROOT_ELEMENT_ID = 'react-siem-root';
+
+export const SiemApp = memo<{ core: LegacyCoreStart; plugins: PluginsStart }>(
+  ({ core, plugins }) => (
+    <KibanaContextProvider
+      services={{
+        appName: 'siem',
+        data: plugins.data,
+        storage: new Storage(localStorage),
+        ...core,
+      }}
+    >
+      <KibanaCoreContextProvider core={core}>
+        <KibanaPluginsContextProvider plugins={plugins}>
+          <StartApp {...compose()} />
+        </KibanaPluginsContextProvider>
+      </KibanaCoreContextProvider>
+    </KibanaContextProvider>
+  )
+);

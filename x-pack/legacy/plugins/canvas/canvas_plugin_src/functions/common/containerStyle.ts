@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { ContainerStyle, Overflow, BackgroundRepeat, BackgroundSize } from '../types';
-import { getFunctionHelp, getFunctionErrors } from '../../strings';
+import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ContainerStyle, Overflow, BackgroundRepeat, BackgroundSize } from '../../../types';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 // @ts-ignore untyped local
 import { isValidUrl } from '../../../common/lib/url';
 
@@ -25,24 +25,12 @@ export function containerStyle(): ExpressionFunction<
   return {
     name: 'containerStyle',
     aliases: [],
+    type: 'containerStyle',
+    help,
     context: {
       types: ['null'],
     },
-    type: 'containerStyle',
-    help,
     args: {
-      border: {
-        types: ['string'],
-        help: argHelp.border,
-      },
-      borderRadius: {
-        types: ['string'],
-        help: argHelp.borderRadius,
-      },
-      padding: {
-        types: ['string'],
-        help: argHelp.padding,
-      },
       backgroundColor: {
         types: ['string'],
         help: argHelp.backgroundColor,
@@ -51,17 +39,25 @@ export function containerStyle(): ExpressionFunction<
         types: ['string'],
         help: argHelp.backgroundImage,
       },
+      backgroundRepeat: {
+        types: ['string'],
+        help: argHelp.backgroundRepeat,
+        default: 'no-repeat',
+        options: Object.values(BackgroundRepeat),
+      },
       backgroundSize: {
         types: ['string'],
         help: argHelp.backgroundSize,
         default: 'contain',
         options: Object.values(BackgroundSize),
       },
-      backgroundRepeat: {
+      border: {
         types: ['string'],
-        help: argHelp.backgroundRepeat,
-        default: 'no-repeat',
-        options: Object.values(BackgroundRepeat),
+        help: argHelp.border,
+      },
+      borderRadius: {
+        types: ['string'],
+        help: argHelp.borderRadius,
       },
       opacity: {
         types: ['number'],
@@ -72,6 +68,10 @@ export function containerStyle(): ExpressionFunction<
         help: argHelp.overflow,
         options: Object.values(Overflow),
         default: 'hidden',
+      },
+      padding: {
+        types: ['string'],
+        help: argHelp.padding,
       },
     },
     fn: (_context, args) => {

@@ -6,7 +6,7 @@
 
 export function normalizeType(type) {
   const normalTypes = {
-    string: ['string', 'text', 'keyword', '_type', '_id', '_index'],
+    string: ['string', 'text', 'keyword', '_type', '_id', '_index', 'geo_point'],
     number: [
       'float',
       'half_float',

@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface IUrlParams {
+import { LocalUIFilterName } from '../../../server/lib/ui_filters/local_ui_filters/config';
+import { ProcessorEvent } from '../../../common/processor_event';
+
+export type IUrlParams = {
   detailTab?: string;
   end?: string;
   errorGroupId?: string;
@@ -24,4 +27,9 @@ export interface IUrlParams {
   transactionName?: string;
   transactionType?: string;
   waterfallItemId?: string;
-}
+  page?: number;
+  pageSize?: number;
+  serviceNodeName?: string;
+  searchTerm?: string;
+  processorEvent?: ProcessorEvent;
+} & Partial<Record<LocalUIFilterName, string>>;

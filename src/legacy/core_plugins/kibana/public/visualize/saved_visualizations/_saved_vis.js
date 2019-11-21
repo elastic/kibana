@@ -25,8 +25,7 @@
  * NOTE: It's a type of SavedObject, but specific to visualizations.
  */
 
-import { VisProvider } from 'ui/vis';
-import { i18n } from '@kbn/i18n';
+import { Vis } from 'ui/vis';
 import { uiModules } from 'ui/modules';
 import { updateOldState } from 'ui/vis/vis_update_state';
 import { VisualizeConstants } from '../visualize_constants';
@@ -40,7 +39,6 @@ import {
 uiModules
   .get('app/visualize')
   .factory('SavedVis', function (Promise, savedSearches, Private) {
-    const Vis = Private(VisProvider);
     const SavedObject = Private(SavedObjectProvider);
     createLegacyClass(SavedVis).inherits(SavedObject);
     function SavedVis(opts) {
@@ -58,9 +56,7 @@ uiModules
         id: opts.id,
         indexPattern: opts.indexPattern,
         defaults: {
-          title: i18n.translate('kbn.visualize.defaultVisualizationTitle', {
-            defaultMessage: 'New Visualization',
-          }),
+          title: '',
           visState: (function () {
             if (!opts.type) return null;
             const def = {};

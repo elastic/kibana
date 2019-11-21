@@ -5,45 +5,37 @@
  */
 
 import sinon from 'sinon';
-import { TaskPool } from './task_pool';
+import { TaskPool, TaskPoolRunResult } from './task_pool';
 import { mockLogger, resolvable, sleep } from './test_utils';
 
 describe('TaskPool', () => {
-  test('occupiedWorkers are a sum of worker costs', async () => {
+  test('occupiedWorkers are a sum of running tasks', async () => {
     const pool = new TaskPool({
       maxWorkers: 200,
       logger: mockLogger(),
     });
 
-    const result = await pool.run([
-      { ...mockTask(), numWorkers: 10 },
-      { ...mockTask(), numWorkers: 20 },
-      { ...mockTask(), numWorkers: 30 },
-    ]);
+    const result = await pool.run([{ ...mockTask() }, { ...mockTask() }, { ...mockTask() }]);
 
-    expect(result).toBeTruthy();
-    expect(pool.occupiedWorkers).toEqual(60);
+    expect(result).toEqual(TaskPoolRunResult.RunningAllClaimedTasks);
+    expect(pool.occupiedWorkers).toEqual(3);
   });
 
   test('availableWorkers are a function of total_capacity - occupiedWorkers', async () => {
     const pool = new TaskPool({
-      maxWorkers: 100,
+      maxWorkers: 10,
       logger: mockLogger(),
     });
 
-    const result = await pool.run([
-      { ...mockTask(), numWorkers: 20 },
-      { ...mockTask(), numWorkers: 30 },
-      { ...mockTask(), numWorkers: 40 },
-    ]);
+    const result = await pool.run([{ ...mockTask() }, { ...mockTask() }, { ...mockTask() }]);
 
-    expect(result).toBeTruthy();
-    expect(pool.availableWorkers).toEqual(10);
+    expect(result).toEqual(TaskPoolRunResult.RunningAllClaimedTasks);
+    expect(pool.availableWorkers).toEqual(7);
   });
 
   test('does not run tasks that are beyond its available capacity', async () => {
     const pool = new TaskPool({
-      maxWorkers: 10,
+      maxWorkers: 2,
       logger: mockLogger(),
     });
 
@@ -51,19 +43,84 @@ describe('TaskPool', () => {
     const shouldNotRun = mockRun();
 
     const result = await pool.run([
-      { ...mockTask(), numWorkers: 9, run: shouldRun },
-      { ...mockTask(), numWorkers: 9, run: shouldNotRun },
+      { ...mockTask(), run: shouldRun },
+      { ...mockTask(), run: shouldRun },
+      { ...mockTask(), run: shouldNotRun },
     ]);
 
-    expect(result).toBeFalsy();
-    expect(pool.availableWorkers).toEqual(1);
-    sinon.assert.calledOnce(shouldRun);
-    sinon.assert.notCalled(shouldNotRun);
+    expect(result).toEqual(TaskPoolRunResult.RanOutOfCapacity);
+    expect(pool.availableWorkers).toEqual(0);
+    expect(shouldRun).toHaveBeenCalledTimes(2);
+    expect(shouldNotRun).not.toHaveBeenCalled();
+  });
+
+  test('should log when marking a Task as running fails', async () => {
+    const logger = mockLogger();
+    const pool = new TaskPool({
+      maxWorkers: 2,
+      logger,
+    });
+
+    const taskFailedToMarkAsRunning = mockTask();
+    taskFailedToMarkAsRunning.markTaskAsRunning.mockImplementation(async () => {
+      throw new Error(`Mark Task as running has failed miserably`);
+    });
+
+    const result = await pool.run([mockTask(), taskFailedToMarkAsRunning, mockTask()]);
+
+    expect(logger.error.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "Failed to mark Task TaskType \\"shooooo\\" as running: Mark Task as running has failed miserably",
+      ]
+    `);
+
+    expect(result).toEqual(TaskPoolRunResult.RunningAllClaimedTasks);
+  });
+
+  test('should log when running a Task fails', async () => {
+    const logger = mockLogger();
+    const pool = new TaskPool({
+      maxWorkers: 3,
+      logger,
+    });
+
+    const taskFailedToRun = mockTask();
+    taskFailedToRun.run.mockImplementation(async () => {
+      throw new Error(`Run Task has failed miserably`);
+    });
+
+    const result = await pool.run([mockTask(), taskFailedToRun, mockTask()]);
+
+    expect(logger.warn.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "Task TaskType \\"shooooo\\" failed in attempt to run: Run Task has failed miserably",
+      ]
+    `);
+
+    expect(result).toEqual(TaskPoolRunResult.RunningAllClaimedTasks);
+  });
+
+  test('Running a task which fails still takes up capacity', async () => {
+    const logger = mockLogger();
+    const pool = new TaskPool({
+      maxWorkers: 1,
+      logger,
+    });
+
+    const taskFailedToRun = mockTask();
+    taskFailedToRun.run.mockImplementation(async () => {
+      await sleep(0);
+      throw new Error(`Run Task has failed miserably`);
+    });
+
+    const result = await pool.run([taskFailedToRun, mockTask()]);
+
+    expect(result).toEqual(TaskPoolRunResult.RanOutOfCapacity);
   });
 
   test('clears up capacity when a task completes', async () => {
     const pool = new TaskPool({
-      maxWorkers: 10,
+      maxWorkers: 1,
       logger: mockLogger(),
     });
 
@@ -71,41 +128,44 @@ describe('TaskPool', () => {
     const firstRun = sinon.spy(async () => {
       await sleep(0);
       firstWork.resolve();
+      return { state: {} };
     });
     const secondWork = resolvable();
     const secondRun = sinon.spy(async () => {
       await sleep(0);
       secondWork.resolve();
+      return { state: {} };
     });
 
     const result = await pool.run([
-      { ...mockTask(), numWorkers: 9, run: firstRun },
-      { ...mockTask(), numWorkers: 2, run: secondRun },
+      { ...mockTask(), run: firstRun },
+      { ...mockTask(), run: secondRun },
     ]);
 
-    expect(result).toBeFalsy();
-    expect(pool.occupiedWorkers).toEqual(9);
-    expect(pool.availableWorkers).toEqual(1);
+    expect(result).toEqual(TaskPoolRunResult.RanOutOfCapacity);
+    expect(pool.occupiedWorkers).toEqual(1);
+    expect(pool.availableWorkers).toEqual(0);
 
     await firstWork;
     sinon.assert.calledOnce(firstRun);
     sinon.assert.notCalled(secondRun);
 
-    await pool.run([{ ...mockTask(), numWorkers: 2, run: secondRun }]);
+    expect(pool.occupiedWorkers).toEqual(0);
+    await pool.run([{ ...mockTask(), run: secondRun }]);
+    expect(pool.occupiedWorkers).toEqual(1);
 
-    expect(pool.occupiedWorkers).toEqual(2);
-    expect(pool.availableWorkers).toEqual(8);
+    expect(pool.availableWorkers).toEqual(0);
 
     await secondWork;
 
     expect(pool.occupiedWorkers).toEqual(0);
-    expect(pool.availableWorkers).toEqual(10);
+    expect(pool.availableWorkers).toEqual(1);
     sinon.assert.calledOnce(secondRun);
   });
 
   test('run cancels expired tasks prior to running new tasks', async () => {
     const pool = new TaskPool({
-      maxWorkers: 10,
+      maxWorkers: 2,
       logger: mockLogger(),
     });
 
@@ -115,7 +175,6 @@ describe('TaskPool', () => {
     const result = await pool.run([
       {
         ...mockTask(),
-        numWorkers: 9,
         async run() {
           this.isExpired = true;
           expired.resolve();
@@ -128,7 +187,6 @@ describe('TaskPool', () => {
       },
       {
         ...mockTask(),
-        numWorkers: 1,
         async run() {
           await sleep(10);
           return {
@@ -139,18 +197,18 @@ describe('TaskPool', () => {
       },
     ]);
 
-    expect(result).toBeTruthy();
-    expect(pool.occupiedWorkers).toEqual(10);
+    expect(result).toEqual(TaskPoolRunResult.RunningAllClaimedTasks);
+    expect(pool.occupiedWorkers).toEqual(2);
     expect(pool.availableWorkers).toEqual(0);
 
     await expired;
 
-    expect(await pool.run([{ ...mockTask(), numWorkers: 7 }])).toBeTruthy();
+    expect(await pool.run([{ ...mockTask() }])).toBeTruthy();
     sinon.assert.calledOnce(shouldRun);
     sinon.assert.notCalled(shouldNotRun);
 
-    expect(pool.occupiedWorkers).toEqual(8);
-    expect(pool.availableWorkers).toEqual(2);
+    expect(pool.occupiedWorkers).toEqual(2);
+    expect(pool.availableWorkers).toEqual(0);
   });
 
   test('logs if cancellation errors', async () => {
@@ -164,7 +222,6 @@ describe('TaskPool', () => {
     const result = await pool.run([
       {
         ...mockTask(),
-        numWorkers: 7,
         async run() {
           this.isExpired = true;
           await sleep(10);
@@ -180,7 +237,7 @@ describe('TaskPool', () => {
       },
     ]);
 
-    expect(result).toBeTruthy();
+    expect(result).toEqual(TaskPoolRunResult.RunningAllClaimedTasks);
     await pool.run([]);
 
     expect(pool.occupiedWorkers).toEqual(0);
@@ -188,20 +245,25 @@ describe('TaskPool', () => {
     // Allow the task to cancel...
     await cancelled;
 
-    sinon.assert.calledWithMatch(logger.error, /Failed to cancel task "shooooo!"/);
+    expect(logger.error.mock.calls[0][0]).toMatchInlineSnapshot(
+      `"Failed to cancel task \\"shooooo!\\": Error: Dern!"`
+    );
   });
 
   function mockRun() {
-    return sinon.spy(async () => sleep(0));
+    return jest.fn(async () => {
+      await sleep(0);
+      return { state: {} };
+    });
   }
 
   function mockTask() {
     return {
-      numWorkers: 1,
       isExpired: false,
       cancel: async () => undefined,
-      claimOwnership: async () => true,
+      markTaskAsRunning: jest.fn(async () => true),
       run: mockRun(),
+      toString: () => `TaskType "shooooo"`,
     };
   }
 });

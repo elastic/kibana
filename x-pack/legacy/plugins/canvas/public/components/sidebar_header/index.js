@@ -14,6 +14,7 @@ import {
   clipboardHandlerCreators,
   basicHandlerCreators,
   groupHandlerCreators,
+  alignmentDistributionHandlerCreators,
 } from '../../lib/element_handler_creators';
 import { crawlTree } from '../workpad_page/integration_utils';
 import { selectToplevelNodes } from './../../state/actions/transient';
@@ -55,12 +56,10 @@ const mapDispatchToProps = dispatch => ({
 });
 
 export const SidebarHeader = compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  ),
+  connect(mapStateToProps, mapDispatchToProps),
   withHandlers(basicHandlerCreators),
   withHandlers(clipboardHandlerCreators),
   withHandlers(layerHandlerCreators),
-  withHandlers(groupHandlerCreators)
+  withHandlers(groupHandlerCreators),
+  withHandlers(alignmentDistributionHandlerCreators)
 )(Component);

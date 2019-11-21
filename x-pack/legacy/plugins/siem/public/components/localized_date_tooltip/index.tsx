@@ -45,3 +45,5 @@ export const LocalizedDateTooltip = pure<{
     <>{children}</>
   </EuiToolTip>
 ));
+
+LocalizedDateTooltip.displayName = 'LocalizedDateTooltip';

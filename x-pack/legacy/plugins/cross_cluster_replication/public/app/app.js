@@ -7,7 +7,6 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Route, Switch, Redirect } from 'react-router-dom';
-import chrome from 'ui/chrome';
 import { fatalError } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -23,9 +22,8 @@ import {
 } from '@elastic/eui';
 
 import { BASE_PATH } from '../../common/constants';
-import { SectionUnauthorized, SectionError } from './components';
+import { SectionError } from './components';
 import routing from './services/routing';
-import { isAvailable, isActive, getReason } from './services/license';
 import { loadPermissions } from './services/api';
 
 import {
@@ -112,31 +110,6 @@ export class App extends Component {
       hasPermission,
       missingClusterPrivileges,
     } = this.state;
-
-    if (!isAvailable() || !isActive()) {
-      return (
-        <SectionUnauthorized
-          title={(
-            <FormattedMessage
-              id="xpack.crossClusterReplication.app.licenseErrorTitle"
-              defaultMessage="License error"
-            />
-          )}
-        >
-          {getReason()}
-          {' '}
-          <a
-            data-test-subj="manageLicenseLink"
-            href={chrome.addBasePath('/app/kibana#/management/elasticsearch/license_management/home')}
-          >
-            <FormattedMessage
-              id="xpack.crossClusterReplication.app.licenseErrorLinkText"
-              defaultMessage="Manage your license."
-            />
-          </a>
-        </SectionUnauthorized>
-      );
-    }
 
     if (isFetchingPermissions) {
       return (

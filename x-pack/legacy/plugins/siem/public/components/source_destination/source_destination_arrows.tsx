@@ -32,13 +32,19 @@ const Percent = styled.span`
   margin-right: 5px;
 `;
 
+Percent.displayName = 'Percent';
+
 const SourceDestinationArrowsContainer = styled(EuiFlexGroup)`
   margin: 0 2px;
 `;
 
+SourceDestinationArrowsContainer.displayName = 'SourceDestinationArrowsContainer';
+
 const Data = styled(EuiText)`
   margin: 0 5px;
 `;
+
+Data.displayName = 'Data';
 
 /**
  * Visualizes the communication from a source as an arrow with draggable badges
@@ -65,7 +71,7 @@ const SourceArrow = pure<{
         <EuiFlexItem grow={false}>
           <DefaultDraggable
             field={SOURCE_BYTES_FIELD_NAME}
-            id={`${contextId}-${eventId}-${SOURCE_BYTES_FIELD_NAME}-${sourceBytes}`}
+            id={`source-arrow-default-draggable-${contextId}-${eventId}-${SOURCE_BYTES_FIELD_NAME}-${sourceBytes}`}
             value={sourceBytes}
           >
             <Data size="xs">
@@ -90,7 +96,7 @@ const SourceArrow = pure<{
         <EuiFlexItem grow={false}>
           <DefaultDraggable
             field={SOURCE_PACKETS_FIELD_NAME}
-            id={`${contextId}-${eventId}-${SOURCE_PACKETS_FIELD_NAME}-${sourcePackets}`}
+            id={`source-arrow-default-draggable-${contextId}-${eventId}-${SOURCE_PACKETS_FIELD_NAME}-${sourcePackets}`}
             value={sourcePackets}
           >
             <Data size="xs">
@@ -110,6 +116,8 @@ const SourceArrow = pure<{
     </EuiFlexGroup>
   );
 });
+
+SourceArrow.displayName = 'SourceArrow';
 
 /**
  * Visualizes the communication from a destination as an arrow with draggable
@@ -141,7 +149,7 @@ const DestinationArrow = pure<{
         <EuiFlexItem grow={false}>
           <DefaultDraggable
             field={DESTINATION_BYTES_FIELD_NAME}
-            id={`${contextId}-${eventId}-${DESTINATION_BYTES_FIELD_NAME}-${destinationBytes}`}
+            id={`destination-arrow-default-draggable-${contextId}-${eventId}-${DESTINATION_BYTES_FIELD_NAME}-${destinationBytes}`}
             value={destinationBytes}
           >
             <Data size="xs">
@@ -166,7 +174,7 @@ const DestinationArrow = pure<{
         <EuiFlexItem grow={false}>
           <DefaultDraggable
             field={DESTINATION_PACKETS_FIELD_NAME}
-            id={`${contextId}-${eventId}-${DESTINATION_PACKETS_FIELD_NAME}-${destinationPackets}`}
+            id={`destination-arrow-default-draggable-${contextId}-${eventId}-${DESTINATION_PACKETS_FIELD_NAME}-${destinationPackets}`}
             value={destinationPackets}
           >
             <Data size="xs">
@@ -184,6 +192,8 @@ const DestinationArrow = pure<{
     </EuiFlexGroup>
   );
 });
+
+DestinationArrow.displayName = 'DestinationArrow';
 
 /**
  * Visualizes the communication between a source and a destination using arrows
@@ -256,3 +266,5 @@ export const SourceDestinationArrows = pure<{
     </SourceDestinationArrowsContainer>
   );
 });
+
+SourceDestinationArrows.displayName = 'SourceDestinationArrows';

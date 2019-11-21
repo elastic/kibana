@@ -8,6 +8,12 @@ import expect from '@kbn/expect';
 import { escapeKuery } from '.';
 
 describe('Kuery escape', () => {
+  it('should not remove white spaces quotes', () => {
+    const value = ' netcat';
+    const expected = ' netcat';
+    expect(escapeKuery(value)).to.be(expected);
+  });
+
   it('should escape quotes', () => {
     const value = 'I said, "Hello."';
     const expected = 'I said, \\"Hello.\\"';
@@ -16,7 +22,7 @@ describe('Kuery escape', () => {
 
   it('should escape special characters', () => {
     const value = `This \\ has (a lot of) <special> characters, don't you *think*? "Yes."`;
-    const expected = `This \\\\ has \\(a lot of\\) \\<special\\> characters, don't you \\*think\\*? \\"Yes.\\"`;
+    const expected = `This \\ has (a lot of) <special> characters, don't you *think*? \\"Yes.\\"`;
     expect(escapeKuery(value)).to.be(expected);
   });
 
@@ -45,8 +51,8 @@ describe('Kuery escape', () => {
   });
 
   it('should escape both keywords and special characters', () => {
-    const value = 'Hello, world, and <nice> to meet you!';
-    const expected = 'Hello, world, \\and \\<nice\\> to meet you!';
+    const value = 'Hello, "world", and <nice> to meet you!';
+    const expected = 'Hello, \\"world\\", \\and <nice> to meet you!';
     expect(escapeKuery(value)).to.be(expected);
   });
 

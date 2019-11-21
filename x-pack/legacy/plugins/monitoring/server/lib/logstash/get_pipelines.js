@@ -3,12 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { cloneDeep, last, omit } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { getMetrics } from '../details/get_metrics';
 
-export function _handleResponse(response) {
+export function handleGetPipelinesResponse(response, exclusivePipelineIds) {
   const pipelinesById = {};
 
   const metrics = Object.keys(response);
@@ -16,6 +15,9 @@ export function _handleResponse(response) {
     response[metric][0].data.forEach(([x, y]) => {
       const pipelineIds = Object.keys(y);
       pipelineIds.forEach(pipelineId => {
+        if (exclusivePipelineIds && !exclusivePipelineIds.includes(pipelineId)) {
+          return;
+        }
         // Create new pipeline object if necessary
         if (!pipelinesById.hasOwnProperty(pipelineId)) {
           pipelinesById[pipelineId] = {
@@ -40,14 +42,24 @@ export function _handleResponse(response) {
     });
   });
 
-  // Convert pipelinesById map to array
+  // Convert pipelinesById map to array and preserve sorting
   const pipelines = [];
-  Object.keys(pipelinesById).forEach(pipelineId => {
-    pipelines.push({
-      id: pipelineId,
-      ...pipelinesById[pipelineId]
+  if (exclusivePipelineIds) {
+    for (const exclusivePipelineId of exclusivePipelineIds) {
+      pipelines.push({
+        id: exclusivePipelineId,
+        ...pipelinesById[exclusivePipelineId]
+      });
+    }
+  }
+  else {
+    Object.keys(pipelinesById).forEach(pipelineId => {
+      pipelines.push({
+        id: pipelineId,
+        ...pipelinesById[pipelineId]
+      });
     });
-  });
+  }
 
   return pipelines;
 }
@@ -71,10 +83,13 @@ export async function processPipelinesAPIResponse(response, throughputMetricKey,
   return processedResponse;
 }
 
-export async function getPipelines(req, logstashIndexPattern, metricSet) {
+
+export async function getPipelines(req, logstashIndexPattern, pipelineIds, metricSet, metricOptions = {}) {
   checkParam(logstashIndexPattern, 'logstashIndexPattern in logstash/getPipelines');
   checkParam(metricSet, 'metricSet in logstash/getPipelines');
 
-  const metricsResponse = await getMetrics(req, logstashIndexPattern, metricSet);
-  return _handleResponse(metricsResponse);
+  const filters = [];
+
+  const metricsResponse = await getMetrics(req, logstashIndexPattern, metricSet, filters, metricOptions);
+  return handleGetPipelinesResponse(metricsResponse, pipelineIds);
 }

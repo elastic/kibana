@@ -4,48 +4,61 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import { PLUGIN_ID } from '../../common/constants';
+import { CancellationToken } from '../../common/cancellation_token';
 import {
   ESQueueInstance,
+  QueueConfig,
+  ExportTypeDefinition,
   ESQueueWorkerExecuteFn,
-  ExportType,
+  ImmediateExecuteFn,
   JobDoc,
+  JobDocPayload,
   JobSource,
-  KbnServer,
+  RequestFacade,
+  ServerFacade,
 } from '../../types';
 // @ts-ignore untyped dependency
 import { events as esqueueEvents } from './esqueue';
-// @ts-ignore untyped dependency
 import { LevelLogger } from './level_logger';
-// @ts-ignore untyped dependency
 import { oncePerServer } from './once_per_server';
 
-function createWorkerFn(server: KbnServer) {
+function createWorkerFn(server: ServerFacade) {
   const config = server.config();
-  const queueConfig = config.get('xpack.reporting.queue');
-  const kibanaName = config.get('server.name');
-  const kibanaId = config.get('server.uuid');
-  const exportTypesRegistry = server.plugins.reporting.exportTypesRegistry;
-  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'queue', 'worker']);
+  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'queue-worker']);
+  const queueConfig: QueueConfig = config.get('xpack.reporting.queue');
+  const kibanaName: string = config.get('server.name');
+  const kibanaId: string = config.get('server.uuid');
+  const { exportTypesRegistry } = server.plugins.reporting!;
 
   // Once more document types are added, this will need to be passed in
   return function createWorker(queue: ESQueueInstance) {
     // export type / execute job map
-    const jobExectors: Map<string, ESQueueWorkerExecuteFn> = new Map();
+    const jobExecutors: Map<string, ESQueueWorkerExecuteFn | ImmediateExecuteFn> = new Map();
 
-    for (const exportType of exportTypesRegistry.getAll() as ExportType[]) {
-      const executeJob = exportType.executeJobFactory(server);
-      jobExectors.set(exportType.jobType, executeJob);
+    for (const exportType of exportTypesRegistry.getAll() as ExportTypeDefinition[]) {
+      const executeJobFactory = exportType.executeJobFactory(server);
+      jobExecutors.set(exportType.jobType, executeJobFactory);
     }
 
-    const workerFn = (job: JobSource, jobdoc: JobDoc, cancellationToken: any) => {
+    const workerFn = (
+      job: JobSource,
+      arg1: JobDocPayload | JobDoc,
+      arg2: CancellationToken | RequestFacade | undefined
+    ) => {
       // pass the work to the jobExecutor
-      const jobExecutor = jobExectors.get(job._source.jobtype);
-      if (!jobExecutor) {
+      if (!jobExecutors.get(job._source.jobtype)) {
         throw new Error(`Unable to find a job executor for the claimed job: [${job._id}]`);
       }
-      return jobExecutor(jobdoc, cancellationToken);
+      // job executor function signature is different depending on whether it
+      // is ESQueueWorkerExecuteFn or ImmediateExecuteFn
+      if (job._id) {
+        const jobExecutor = jobExecutors.get(job._source.jobtype) as ESQueueWorkerExecuteFn;
+        return jobExecutor(job._id, arg1 as JobDoc, arg2 as CancellationToken);
+      } else {
+        const jobExecutor = jobExecutors.get(job._source.jobtype) as ImmediateExecuteFn;
+        return jobExecutor(null, arg1 as JobDocPayload, arg2 as RequestFacade);
+      }
     };
     const workerOptions = {
       kibanaName,

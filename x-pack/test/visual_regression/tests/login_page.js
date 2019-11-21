@@ -11,7 +11,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'security']);
 
-  describe('Security', () => {
+  describe.skip('Security', () => {
     describe('Login Page', () => {
       before(async () => {
         await esArchiver.load('empty_kibana');
@@ -28,6 +28,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('renders login page', async () => {
         await PageObjects.common.navigateToApp('login');
+
         await retry.waitFor('login page visible', async () => (
           await testSubjects.exists('loginSubmit')
         ));

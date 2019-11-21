@@ -29,7 +29,9 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
       <EuiForm>
         <EuiFormRow
           describedByIds={Array []}
+          display="row"
           fullWidth={true}
+          hasChildLabel={true}
           hasEmptyLabelSpace={false}
           label="Spaces"
           labelType="label"
@@ -160,7 +162,9 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
         </EuiFormRow>
         <EuiFormRow
           describedByIds={Array []}
+          display="row"
           fullWidth={true}
+          hasChildLabel={true}
           hasEmptyLabelSpace={false}
           label="Privilege"
           labelType="label"
@@ -203,7 +207,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                   "value": "basePrivilege_custom",
                 },
                 Object {
-                  "disabled": true,
+                  "disabled": false,
                   "dropdownDisplay": <EuiText>
                     <strong>
                       <FormattedMessage
@@ -288,9 +292,34 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
             Object {
               "base": Object {
                 "canUnassign": true,
-                "privileges": Array [],
+                "privileges": Array [
+                  "all",
+                  "read",
+                ],
               },
-              "feature": Object {},
+              "feature": Object {
+                "allPrivilegeExcludedFromBase": Object {
+                  "canUnassign": true,
+                  "privileges": Array [
+                    "all",
+                    "read",
+                  ],
+                },
+                "bothPrivilegesExcludedFromBase": Object {
+                  "canUnassign": true,
+                  "privileges": Array [
+                    "all",
+                    "read",
+                  ],
+                },
+                "normal": Object {
+                  "canUnassign": true,
+                  "privileges": Array [
+                    "all",
+                    "read",
+                  ],
+                },
+              },
             }
           }
           calculatedPrivileges={
@@ -300,7 +329,23 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                 "actualPrivilegeSource": 40,
                 "isDirectlyAssigned": true,
               },
-              "feature": Object {},
+              "feature": Object {
+                "allPrivilegeExcludedFromBase": Object {
+                  "actualPrivilege": "none",
+                  "actualPrivilegeSource": 30,
+                  "isDirectlyAssigned": true,
+                },
+                "bothPrivilegesExcludedFromBase": Object {
+                  "actualPrivilege": "none",
+                  "actualPrivilegeSource": 30,
+                  "isDirectlyAssigned": true,
+                },
+                "normal": Object {
+                  "actualPrivilege": "none",
+                  "actualPrivilegeSource": 30,
+                  "isDirectlyAssigned": true,
+                },
+              },
               "reserved": undefined,
             }
           }
@@ -411,16 +456,80 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
           kibanaPrivileges={
             KibanaPrivileges {
               "rawKibanaPrivileges": Object {
-                "features": Object {},
-                "global": Object {},
+                "features": Object {
+                  "allPrivilegeExcludedFromBase": Object {
+                    "all": Array [
+                      "all-privilege-excluded-from-base-all",
+                      "all-privilege-excluded-from-base-read",
+                    ],
+                    "read": Array [
+                      "all-privilege-excluded-from-base-read",
+                    ],
+                  },
+                  "bothPrivilegesExcludedFromBase": Object {
+                    "all": Array [
+                      "both-privileges-excluded-from-base-all",
+                      "both-privileges-excluded-from-base-read",
+                    ],
+                    "read": Array [
+                      "both-privileges-excluded-from-base-read",
+                    ],
+                  },
+                  "normal": Object {
+                    "all": Array [
+                      "normal-feature-all",
+                      "normal-feature-read",
+                    ],
+                    "read": Array [
+                      "normal-feature-read",
+                    ],
+                  },
+                },
+                "global": Object {
+                  "all": Array [
+                    "normal-feature-all",
+                    "normal-feature-read",
+                    "just-global-all",
+                    "all-privilege-excluded-from-base-read",
+                  ],
+                  "read": Array [
+                    "normal-feature-read",
+                    "all-privilege-excluded-from-base-read",
+                  ],
+                },
                 "reserved": Object {},
-                "space": Object {},
+                "space": Object {
+                  "all": Array [
+                    "normal-feature-all",
+                    "normal-feature-read",
+                    "all-privilege-excluded-from-base-read",
+                  ],
+                  "read": Array [
+                    "normal-feature-read",
+                    "all-privilege-excluded-from-base-read",
+                  ],
+                },
               },
             }
           }
           onChange={[Function]}
           onChangeAll={[Function]}
-          rankedFeaturePrivileges={Object {}}
+          rankedFeaturePrivileges={
+            Object {
+              "allPrivilegeExcludedFromBase": Array [
+                "all",
+                "read",
+              ],
+              "bothPrivilegesExcludedFromBase": Array [
+                "all",
+                "read",
+              ],
+              "normal": Array [
+                "all",
+                "read",
+              ],
+            }
+          }
           role={
             Object {
               "elasticsearch": Object {
@@ -453,13 +562,10 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
           grow={false}
         >
           <EuiButtonEmpty
-            color="primary"
             data-test-subj="cancelSpacePrivilegeButton"
             flush="left"
-            iconSide="left"
             iconType="cross"
             onClick={[Function]}
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Cancel"
@@ -476,10 +582,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
             data-test-subj="createSpacePrivilegeButton"
             disabled={true}
             fill={true}
-            iconSide="left"
             onClick={[Function]}
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Update space privilege"

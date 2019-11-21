@@ -4,9 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import React from 'react';
 
+import { FilterLists } from './filter_lists';
+
+jest.mock('../../../components/navigation_menu', () => ({
+  NavigationMenu: () => <div id="mockNavigationMenu" />
+}));
 jest.mock('../../../privilege/check_privilege', () => ({
-  checkPermission: () => true
+  checkPermission: () => true,
 }));
 
 // Mock the call for loading the list of filters.
@@ -23,28 +30,19 @@ jest.mock('../../../services/ml_api_service', () => ({
     filters: {
       filtersStats: () => {
         return Promise.resolve([mockTestFilter]);
-      }
-    }
-  }
+      },
+    },
+  },
 }));
-
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import React from 'react';
-
-import { FilterLists } from './filter_lists';
 
 const props = {
   canCreateFilter: true,
-  canDeleteFilter: true
+  canDeleteFilter: true,
 };
 
 describe('Filter Lists', () => {
-
   test('renders a list of filters', () => {
-
-    const wrapper = shallowWithIntl(
-      <FilterLists.WrappedComponent {...props}/>
-    );
+    const wrapper = shallowWithIntl(<FilterLists.WrappedComponent {...props} />);
 
     // Cannot find a way to generate the snapshot after the Promise in the mock ml.filters
     // has resolved.
@@ -54,5 +52,4 @@ describe('Filter Lists', () => {
     wrapper.update();
     expect(wrapper).toMatchSnapshot();
   });
-
 });

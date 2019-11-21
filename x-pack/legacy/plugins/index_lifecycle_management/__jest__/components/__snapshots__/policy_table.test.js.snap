@@ -46,7 +46,7 @@ Array [
 `;
 
 exports[`policy table should show empty state when there are not any policies 1`] = `
-<div
+<main
   class="euiPageBody"
 >
   <div
@@ -99,6 +99,7 @@ exports[`policy table should show empty state when there are not any policies 1`
           class="euiButton euiButton--primary euiButton--fill"
           data-test-subj="createPolicyButton"
           href="#/management/elasticsearch/index_lifecycle_management/policies/edit"
+          rel="noreferrer"
         >
           <span
             class="euiButton__content"
@@ -125,7 +126,7 @@ exports[`policy table should show empty state when there are not any policies 1`
       />
     </div>
   </div>
-</div>
+</main>
 `;
 
 exports[`policy table should sort when linked indices header is clicked 1`] = `

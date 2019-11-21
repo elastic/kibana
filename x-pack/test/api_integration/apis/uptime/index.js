@@ -5,7 +5,7 @@
  */
 
 export default function ({ getService, loadTestFile }) {
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   describe('uptime', () => {
     before(() =>
@@ -17,6 +17,5 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./get_all_pings'));
     loadTestFile(require.resolve('./graphql'));
-    loadTestFile(require.resolve('./location'));
   });
 }

@@ -19,6 +19,7 @@ function wrapHistoryInstance(history) {
   const locationFormat = (location, action, parser) => ({
     pathname: location.pathname,
     hash: location.hash,
+    search: location.search,
     state: parser(location.state),
     action: action.toLowerCase(),
   });

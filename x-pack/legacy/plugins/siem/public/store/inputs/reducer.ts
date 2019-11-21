@@ -4,56 +4,92 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import dateMath from '@elastic/datemath';
-import { get, unionBy } from 'lodash/fp';
+import { get } from 'lodash/fp';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
   deleteAllQuery,
   setAbsoluteRangeDatePicker,
   setDuration,
+  setInspectionParameter,
   setQuery,
   setRelativeRangeDatePicker,
+  setTimelineRangeDatePicker,
   startAutoReload,
   stopAutoReload,
   toggleTimelineLinkTo,
-  setTimelineRangeDatePicker,
+  removeTimelineLinkTo,
+  removeGlobalLinkTo,
+  addGlobalLinkTo,
+  addTimelineLinkTo,
+  deleteOneQuery,
+  setFilterQuery,
+  setSavedQuery,
+  setSearchBarFilter,
 } from './actions';
-import { toggleLockTimeline, updateInputTimerange } from './helpers';
+import {
+  setIsInspected,
+  toggleLockTimeline,
+  updateInputTimerange,
+  upsertQuery,
+  removeGlobalLink,
+  addGlobalLink,
+  removeTimelineLink,
+  addTimelineLink,
+  deleteOneQuery as helperDeleteOneQuery,
+} from './helpers';
 import { InputsModel, TimeRange } from './model';
+import {
+  getDefaultFromValue,
+  getDefaultToValue,
+  getDefaultFromString,
+  getDefaultToString,
+  getDefaultIntervalKind,
+  getDefaultIntervalDuration,
+} from '../../utils/default_date_settings';
 
 export type InputsState = InputsModel;
-const momentDate = dateMath.parse('now-24h');
+
 export const initialInputsState: InputsState = {
   global: {
     timerange: {
       kind: 'relative',
-      fromStr: 'now-24h',
-      toStr: 'now',
-      from: momentDate ? momentDate.valueOf() : 0,
-      to: Date.now(),
+      fromStr: getDefaultFromString(),
+      toStr: getDefaultToString(),
+      from: getDefaultFromValue(),
+      to: getDefaultToValue(),
     },
-    query: [],
+    queries: [],
     policy: {
-      kind: 'manual',
-      duration: 300000,
+      kind: getDefaultIntervalKind(),
+      duration: getDefaultIntervalDuration(),
     },
     linkTo: ['timeline'],
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filters: [],
   },
   timeline: {
     timerange: {
       kind: 'relative',
-      fromStr: 'now-24h',
-      toStr: 'now',
-      from: momentDate ? momentDate.valueOf() : 0,
-      to: Date.now(),
+      fromStr: getDefaultFromString(),
+      toStr: getDefaultToString(),
+      from: getDefaultFromValue(),
+      to: getDefaultToValue(),
     },
-    query: [],
+    queries: [],
     policy: {
-      kind: 'manual',
-      duration: 300000,
+      kind: getDefaultIntervalKind(),
+      duration: getDefaultIntervalDuration(),
     },
     linkTo: ['global'],
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filters: [],
   },
 };
 
@@ -102,16 +138,13 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
     ...state,
     [id]: {
       ...get(id, state),
-      query: state.global.query.slice(state.global.query.length),
+      queries: state.global.queries.slice(state.global.queries.length),
     },
   }))
-  .case(setQuery, (state, { inputId, id, loading, refetch }) => ({
-    ...state,
-    [inputId]: {
-      ...get(inputId, state),
-      query: unionBy('id', [{ id, loading, refetch }], state[inputId].query),
-    },
-  }))
+  .case(setQuery, (state, { inputId, id, inspect, loading, refetch }) =>
+    upsertQuery({ inputId, id, inspect, loading, refetch, state })
+  )
+  .case(deleteOneQuery, (state, { inputId, id }) => helperDeleteOneQuery({ inputId, id, state }))
   .case(setDuration, (state, { id, duration }) => ({
     ...state,
     [id]: {
@@ -143,4 +176,35 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
     },
   }))
   .case(toggleTimelineLinkTo, (state, { linkToId }) => toggleLockTimeline(linkToId, state))
+  .case(setInspectionParameter, (state, { id, inputId, isInspected, selectedInspectIndex }) =>
+    setIsInspected({ id, inputId, isInspected, selectedInspectIndex, state })
+  )
+  .case(removeGlobalLinkTo, state => removeGlobalLink(state))
+  .case(addGlobalLinkTo, (state, { linkToId }) => addGlobalLink(linkToId, state))
+  .case(removeTimelineLinkTo, state => removeTimelineLink(state))
+  .case(addTimelineLinkTo, (state, { linkToId }) => addTimelineLink(linkToId, state))
+  .case(setFilterQuery, (state, { id, query, language }) => ({
+    ...state,
+    [id]: {
+      ...get(id, state),
+      query: {
+        query,
+        language,
+      },
+    },
+  }))
+  .case(setSavedQuery, (state, { id, savedQuery }) => ({
+    ...state,
+    [id]: {
+      ...get(id, state),
+      savedQuery,
+    },
+  }))
+  .case(setSearchBarFilter, (state, { id, filters }) => ({
+    ...state,
+    [id]: {
+      ...get(id, state),
+      filters,
+    },
+  }))
   .build();

@@ -6,92 +6,81 @@
 
 import { i18n } from '@kbn/i18n';
 
-// @ts-ignore
 import { hasLicenseExpired } from '../license/check_license';
 
-import { Privileges } from './common';
-import { getPrivileges } from './get_privileges';
+import { Privileges, getDefaultPrivileges } from '../../common/types/privileges';
+import { getPrivileges, getManageMlPrivileges } from './get_privileges';
+import { ACCESS_DENIED_PATH } from '../management/management_urls';
 
-let privileges: Privileges = {};
-
-export function checkGetJobsPrivilege(kbnUrl: any): Promise<Privileges> {
+let privileges: Privileges = getDefaultPrivileges();
+// manage_ml requires all monitor and admin cluster privileges: https://github.com/elastic/elasticsearch/blob/664a29c8905d8ce9ba8c18aa1ed5c5de93a0eabc/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/security/authz/privilege/ClusterPrivilege.java#L53
+export function canGetManagementMlJobs() {
   return new Promise((resolve, reject) => {
-    getPrivileges().then(priv => {
-      privileges = priv;
-      // the minimum privilege for using ML with a platinum license is being able to get the jobs list.
-      // all other functionality is controlled by the return privileges object
-      if (privileges.canGetJobs) {
+    getManageMlPrivileges().then(
+      ({ capabilities, isPlatinumOrTrialLicense, mlFeatureEnabledInSpace }) => {
+        privileges = capabilities;
+        // Loop through all privileges to ensure they are all set to true.
+        const isManageML = Object.values(privileges).every(p => p === true);
+
+        if (isManageML === true && isPlatinumOrTrialLicense === true) {
+          return resolve({ mlFeatureEnabledInSpace });
+        } else {
+          window.location.href = ACCESS_DENIED_PATH;
+          return reject();
+        }
+      }
+    );
+  });
+}
+
+export function checkGetJobsPrivilege(): Promise<Privileges> {
+  return new Promise((resolve, reject) => {
+    getPrivileges().then(({ capabilities, isPlatinumOrTrialLicense }) => {
+      privileges = capabilities;
+      // the minimum privilege for using ML with a platinum or trial license is being able to get the transforms list.
+      // all other functionality is controlled by the return privileges object.
+      // if the license is basic (isPlatinumOrTrialLicense === false) then do not redirect,
+      // allow the promise to resolve as the separate license check will redirect then user to
+      // a basic feature
+      if (privileges.canGetJobs || isPlatinumOrTrialLicense === false) {
         return resolve(privileges);
       } else {
-        kbnUrl.redirect('/access-denied');
+        window.location.href = '#/access-denied';
         return reject();
       }
     });
   });
 }
 
-export function checkCreateJobsPrivilege(kbnUrl: any): Promise<Privileges> {
+export function checkCreateJobsPrivilege(): Promise<Privileges> {
   return new Promise((resolve, reject) => {
-    getPrivileges().then(priv => {
-      privileges = priv;
-      if (privileges.canCreateJob) {
+    getPrivileges().then(({ capabilities, isPlatinumOrTrialLicense }) => {
+      privileges = capabilities;
+      // if the license is basic (isPlatinumOrTrialLicense === false) then do not redirect,
+      // allow the promise to resolve as the separate license check will redirect then user to
+      // a basic feature
+      if (privileges.canCreateJob || isPlatinumOrTrialLicense === false) {
         return resolve(privileges);
       } else {
         // if the user has no permission to create a job,
-        // redirect them back to the Jobs Management page
-        kbnUrl.redirect('/jobs');
+        // redirect them back to the Transforms Management page
+        window.location.href = '#/jobs';
         return reject();
       }
     });
   });
 }
 
-export function checkFindFileStructurePrivilege(kbnUrl: any): Promise<Privileges> {
+export function checkFindFileStructurePrivilege(): Promise<Privileges> {
   return new Promise((resolve, reject) => {
-    getPrivileges().then(priv => {
-      privileges = priv;
+    getPrivileges().then(({ capabilities }) => {
+      privileges = capabilities;
       // the minimum privilege for using ML with a basic license is being able to use the datavisualizer.
       // all other functionality is controlled by the return privileges object
       if (privileges.canFindFileStructure) {
         return resolve(privileges);
       } else {
-        kbnUrl.redirect('/access-denied');
-        return reject();
-      }
-    });
-  });
-}
-
-export function checkGetDataFrameJobsPrivilege(kbnUrl: any): Promise<Privileges> {
-  return new Promise((resolve, reject) => {
-    getPrivileges().then(priv => {
-      privileges = priv;
-      // the minimum privilege for using ML with a basic license is being able to use the data frames.
-      // all other functionality is controlled by the return privileges object
-      if (privileges.canGetDataFrameJobs) {
-        return resolve(privileges);
-      } else {
-        kbnUrl.redirect('/data_frames/access-denied');
-        return reject();
-      }
-    });
-  });
-}
-
-export function checkCreateDataFrameJobsPrivilege(kbnUrl: any): Promise<Privileges> {
-  return new Promise((resolve, reject) => {
-    getPrivileges().then(priv => {
-      privileges = priv;
-      if (
-        privileges.canCreateDataFrameJob &&
-        privileges.canPreviewDataFrameJob &&
-        privileges.canStartStopDataFrameJob
-      ) {
-        return resolve(privileges);
-      } else {
-        // if the user has no permission to create a data frame job,
-        // redirect them back to the Data Frame Jobs Management page
-        kbnUrl.redirect('/data_frames');
+        window.location.href = '#/access-denied';
         return reject();
       }
     });
@@ -100,14 +89,14 @@ export function checkCreateDataFrameJobsPrivilege(kbnUrl: any): Promise<Privileg
 
 // check the privilege type and the license to see whether a user has permission to access a feature.
 // takes the name of the privilege variable as specified in get_privileges.js
-export function checkPermission(privilegeType: string) {
+export function checkPermission(privilegeType: keyof Privileges) {
   const licenseHasExpired = hasLicenseExpired();
   return privileges[privilegeType] === true && licenseHasExpired !== true;
 }
 
 // create the text for the button's tooltips if the user's license has
 // expired or if they don't have the privilege to press that button
-export function createPermissionFailureMessage(privilegeType: string) {
+export function createPermissionFailureMessage(privilegeType: keyof Privileges) {
   let message = '';
   const licenseHasExpired = hasLicenseExpired();
   if (licenseHasExpired) {
@@ -141,18 +130,6 @@ export function createPermissionFailureMessage(privilegeType: string) {
   } else if (privilegeType === 'canForecastJob') {
     message = i18n.translate('xpack.ml.privilege.noPermission.runForecastsTooltip', {
       defaultMessage: 'You do not have permission to run forecasts.',
-    });
-  } else if (privilegeType === 'canCreateDataFrameJob') {
-    message = i18n.translate('xpack.ml.privilege.noPermission.createDataFrameJobsTooltip', {
-      defaultMessage: 'You do not have permission to create data frame jobs.',
-    });
-  } else if (privilegeType === 'canStartStopDataFrameJob') {
-    message = i18n.translate('xpack.ml.privilege.noPermission.startOrStopDataFrameJobTooltip', {
-      defaultMessage: 'You do not have permission to start or stop data frame jobs.',
-    });
-  } else if (privilegeType === 'canDeleteDataFrameJob') {
-    message = i18n.translate('xpack.ml.privilege.noPermission.deleteFrameJobTooltip', {
-      defaultMessage: 'You do not have permission to delete data frame jobs.',
     });
   }
   return i18n.translate('xpack.ml.privilege.pleaseContactAdministratorTooltip', {

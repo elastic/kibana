@@ -9,6 +9,8 @@ import { getFullscreen } from '../selectors/app';
 import { getInFlight } from '../selectors/resolved_args';
 import { getWorkpad, getPages, getSelectedPageIndex, getAutoplay } from '../selectors/workpad';
 import { routerProvider } from '../../lib/router_provider';
+import { setAutoplayInterval } from '../../lib/app_state';
+import { createTimeInterval } from '../../lib/time_interval';
 
 export const workpadAutoplay = ({ getState }) => next => {
   let playTimeout;
@@ -61,6 +63,13 @@ export const workpadAutoplay = ({ getState }) => next => {
     const autoplay = getAutoplay(getState());
     const shouldPlay = isFullscreen && autoplay.enabled && autoplay.interval > 0;
     displayInterval = autoplay.interval;
+
+    // update appState
+    if (autoplay.enabled) {
+      setAutoplayInterval(createTimeInterval(autoplay.interval));
+    } else {
+      setAutoplayInterval(0);
+    }
 
     // when in-flight requests are finished, update the workpad after a given delay
     if (action.type === inFlightComplete.toString() && shouldPlay) {

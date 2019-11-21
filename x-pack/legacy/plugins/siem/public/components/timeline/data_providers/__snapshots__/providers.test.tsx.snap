@@ -4,7 +4,7 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
 <Component
   droppableId="unitTest"
 >
-  <pure(Component)
+  <Providers
     browserFields={Object {}}
     dataProviders={
       Array [

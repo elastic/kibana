@@ -8,11 +8,21 @@ import { failure } from 'io-ts/lib/PathReporter';
 import { RequestAuth } from 'hapi';
 import { Legacy } from 'kibana';
 import { getOr } from 'lodash/fp';
+import uuid from 'uuid';
 
 import { SavedObjectsFindOptions } from 'src/core/server';
 
+import { pipe } from 'fp-ts/lib/pipeable';
+import { map, fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
 import { Pick3 } from '../../../common/utility_types';
-import { PageInfoNote, ResponseNote, ResponseNotes, SortNote } from '../../graphql/types';
+import {
+  PageInfoNote,
+  ResponseNote,
+  ResponseNotes,
+  SortNote,
+  NoteResult,
+} from '../../graphql/types';
 import { FrameworkRequest, internalFrameworkRequest } from '../framework';
 import { SavedNote, NoteSavedObjectRuntimeType, NoteSavedObject } from './types';
 import { noteSavedObjectType } from './saved_object_mappings';
@@ -40,6 +50,7 @@ export class Note {
 
   public async deleteNoteByTimelineId(request: FrameworkRequest, timelineId: string) {
     const options: SavedObjectsFindOptions = {
+      type: noteSavedObjectType,
       search: timelineId,
       searchFields: ['timelineId'],
     };
@@ -54,7 +65,7 @@ export class Note {
   }
 
   public async getNote(request: FrameworkRequest, noteId: string): Promise<NoteSavedObject> {
-    return await this.getSavedNote(request, noteId);
+    return this.getSavedNote(request, noteId);
   }
 
   public async getNotesByEventId(
@@ -62,6 +73,7 @@ export class Note {
     eventId: string
   ): Promise<NoteSavedObject[]> {
     const options: SavedObjectsFindOptions = {
+      type: noteSavedObjectType,
       search: eventId,
       searchFields: ['eventId'],
     };
@@ -74,6 +86,7 @@ export class Note {
     timelineId: string
   ): Promise<NoteSavedObject[]> {
     const options: SavedObjectsFindOptions = {
+      type: noteSavedObjectType,
       search: timelineId,
       searchFields: ['timelineId'],
     };
@@ -88,6 +101,7 @@ export class Note {
     sort: SortNote | null
   ): Promise<ResponseNotes> {
     const options: SavedObjectsFindOptions = {
+      type: noteSavedObjectType,
       perPage: pageInfo != null ? pageInfo.pageSize : undefined,
       page: pageInfo != null ? pageInfo.pageIndex : undefined,
       search: search != null ? search : undefined,
@@ -95,7 +109,7 @@ export class Note {
       sortField: sort != null ? sort.sortField : undefined,
       sortOrder: sort != null ? sort.sortOrder : undefined,
     };
-    return await this.getAllSavedNote(request, options);
+    return this.getAllSavedNote(request, options);
   }
 
   public async persistNote(
@@ -104,21 +118,24 @@ export class Note {
     version: string | null,
     note: SavedNote
   ): Promise<ResponseNote> {
-    let timelineVersionSavedObject = null;
     try {
-      if (note.timelineId == null) {
-        const timelineResult = convertSavedObjectToSavedTimeline(
-          await this.libs.savedObjects
-            .getScopedSavedObjectsClient(request[internalFrameworkRequest])
-            .create(
-              timelineSavedObjectType,
-              pickSavedTimeline(null, {}, request[internalFrameworkRequest].auth || null)
-            )
-        );
-        note.timelineId = timelineResult.savedObjectId;
-        timelineVersionSavedObject = timelineResult.version;
-      }
       if (noteId == null) {
+        const timelineVersionSavedObject =
+          note.timelineId == null
+            ? await (async () => {
+                const timelineResult = convertSavedObjectToSavedTimeline(
+                  await this.libs.savedObjects
+                    .getScopedSavedObjectsClient(request[internalFrameworkRequest])
+                    .create(
+                      timelineSavedObjectType,
+                      pickSavedTimeline(null, {}, request[internalFrameworkRequest].auth || null)
+                    )
+                );
+                note.timelineId = timelineResult.savedObjectId;
+                return timelineResult.version;
+              })()
+            : null;
+
         // Create new note
         return {
           code: 200,
@@ -134,6 +151,7 @@ export class Note {
           ),
         };
       }
+
       // Update new note
       return {
         code: 200,
@@ -152,6 +170,20 @@ export class Note {
         ),
       };
     } catch (err) {
+      if (getOr(null, 'output.statusCode', err) === 403) {
+        const noteToReturn: NoteResult = {
+          ...note,
+          noteId: uuid.v1(),
+          version: '',
+          timelineId: '',
+          timelineVersion: '',
+        };
+        return {
+          code: 403,
+          message: err.message,
+          note: noteToReturn,
+        };
+      }
       throw err;
     }
   }
@@ -171,10 +203,7 @@ export class Note {
       request[internalFrameworkRequest]
     );
 
-    const savedObjects = await savedObjectsClient.find({
-      type: noteSavedObjectType,
-      ...options,
-    });
+    const savedObjects = await savedObjectsClient.find(options);
 
     return {
       totalCount: savedObjects.total,
@@ -189,16 +218,18 @@ const convertSavedObjectToSavedNote = (
   savedObject: unknown,
   timelineVersion?: string | undefined | null
 ): NoteSavedObject =>
-  NoteSavedObjectRuntimeType.decode(savedObject)
-    .map(savedNote => ({
+  pipe(
+    NoteSavedObjectRuntimeType.decode(savedObject),
+    map(savedNote => ({
       noteId: savedNote.id,
       version: savedNote.version,
       timelineVersion,
       ...savedNote.attributes,
-    }))
-    .getOrElseL(errors => {
+    })),
+    fold(errors => {
       throw new Error(failure(errors).join('\n'));
-    });
+    }, identity)
+  );
 
 // we have to use any here because the SavedObjectAttributes interface is like below
 // export interface SavedObjectAttributes {

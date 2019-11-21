@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ErrorStrings } from '../../../i18n';
 import * as workpadService from '../../lib/workpad_service';
 import { notify } from '../../lib/notify';
 import { getBaseBreadcrumb, getWorkpadBreadcrumb, setBreadcrumb } from '../../lib/breadcrumbs';
@@ -12,7 +13,10 @@ import { setWorkpad } from '../../state/actions/workpad';
 import { setAssets, resetAssets } from '../../state/actions/assets';
 import { setPage } from '../../state/actions/pages';
 import { getWorkpad } from '../../state/selectors/workpad';
+import { setZoomScale } from '../../state/actions/transient';
 import { WorkpadApp } from './workpad_app';
+
+const { workpadRoutes: strings } = ErrorStrings;
 
 export const routes = [
   {
@@ -29,7 +33,7 @@ export const routes = [
             dispatch(resetAssets());
             router.redirectTo('loadWorkpad', { id: newWorkpad.id, page: 1 });
           } catch (err) {
-            notify.error(err, { title: `Couldn't create workpad` });
+            notify.error(err, { title: strings.getCreateFailureErrorMessage() });
             router.redirectTo('home');
           }
         },
@@ -51,8 +55,11 @@ export const routes = [
               const { assets, ...workpad } = fetchedWorkpad;
               dispatch(setWorkpad(workpad));
               dispatch(setAssets(assets));
+
+              // reset transient properties when changing workpads
+              dispatch(setZoomScale(1));
             } catch (err) {
-              notify.error(err, { title: `Couldn't load workpad with ID` });
+              notify.error(err, { title: strings.getLoadFailureErrorMessage() });
               return router.redirectTo('home');
             }
           }

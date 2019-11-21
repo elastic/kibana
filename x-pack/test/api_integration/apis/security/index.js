@@ -9,6 +9,8 @@ export default function ({ loadTestFile }) {
     this.tags('ciGroup6');
 
     loadTestFile(require.resolve('./basic_login'));
+    loadTestFile(require.resolve('./builtin_es_privileges'));
+    loadTestFile(require.resolve('./change_password'));
     loadTestFile(require.resolve('./index_fields'));
     loadTestFile(require.resolve('./roles'));
     loadTestFile(require.resolve('./privileges'));

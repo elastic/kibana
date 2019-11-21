@@ -1,0 +1,146 @@
+{
+  "took": 40,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "aggregations": {
+    "timeseries": {
+      "buckets": [
+        {
+          "key": 1568411568000,
+          "doc_count": 4,
+          "location": {
+            "buckets": [
+              { "key": "us-east-2", "duration": { "avg": 4658759 } },
+              { "key": "us-west-4", "duration": { "avg": 8678399.5 } }
+            ]
+          }
+        },
+        { "key": 1568411604000, "doc_count": 0, "location": { "buckets": [] } },
+        {
+          "key": 1568411640000,
+          "doc_count": 8,
+          "location": {
+            "buckets": [
+              { "key": "us-east-2", "duration": { "avg": 481780 } },
+              { "key": "us-west-4", "duration": { "avg": 685056.5 } }
+            ]
+          }
+        },
+        {
+          "key": 1568411784000,
+          "doc_count": 8,
+          "location": {
+            "buckets": [
+              { "key": "us-east-2", "duration": { "avg": 469206.5 } },
+              { "key": "us-west-4", "duration": { "avg": 261406.5 } }
+            ]
+          }
+        },
+        { "key": 1568411820000, "doc_count": 0, "location": { "buckets": [] } },
+        { "key": 1568411856000, "doc_count": 0, "location": { "buckets": [] } },
+        { "key": 1568411892000, "doc_count": 0, "location": { "buckets": [] } },
+        {
+          "key": 1568411928000,
+          "doc_count": 4,
+          "location": {
+            "buckets": [
+              { "key": "us-west-4", "duration": { "avg": 1999309.6666667 } },
+              { "key": "us-east-2", "duration": { "avg": 645563 } }
+            ]
+          }
+        },
+        {
+          "key": 1568411964000,
+          "doc_count": 7,
+          "location": {
+            "buckets": [
+              { "key": "us-west-4", "duration": { "avg": 2499799.25 } },
+              { "key": "us-east-2", "duration": { "avg": 1513896.6666667 } }
+            ]
+          }
+        },
+        {
+          "key": 1568412036000,
+          "doc_count": 5,
+          "location": {
+            "buckets": [
+              { "key": "us-west-4", "duration": { "avg": 1876155.3333333 } },
+              { "key": "us-east-2", "duration": { "avg": 1511409 } }
+            ]
+          }
+        },
+        {
+          "key": 1568412072000,
+          "doc_count": 4,
+          "location": { "buckets": [{ "key": "us-west-4", "duration": { "avg": 1490845.75 } }] }
+        },
+        {
+          "key": 1568412108000,
+          "doc_count": 3,
+          "location": {
+            "buckets": [{ "key": "us-west-4", "duration": { "avg": 2365962.6666667 } }]
+          }
+        },
+        {
+          "key": 1568412144000,
+          "doc_count": 4,
+          "location": { "buckets": [{ "key": "us-west-4", "duration": { "avg": 1788901.25 } }] }
+        },
+        {
+          "key": 1568412180000,
+          "doc_count": 4,
+          "location": { "buckets": [{ "key": "us-west-4", "duration": { "avg": 1773177.5 } }] }
+        },
+        {
+          "key": 1568412216000,
+          "doc_count": 3,
+          "location": {
+            "buckets": [{ "key": "us-west-4", "duration": { "avg": 3086220.3333333 } }]
+          }
+        },
+        {
+          "key": 1568412252000,
+          "doc_count": 1,
+          "location": { "buckets": [{ "key": "us-west-4", "duration": { "avg": 1020528 } }] }
+        },
+        {
+          "key": 1568412288000,
+          "doc_count": 3,
+          "location": {
+            "buckets": [{ "key": "us-west-4", "duration": { "avg": 1643963.3333333 } }]
+          }
+        },
+        {
+          "key": 1568412324000,
+          "doc_count": 8,
+          "location": {
+            "buckets": [
+              { "key": "us-east-2", "duration": { "avg": 1804116 } },
+              { "key": "us-west-4", "duration": { "avg": 1799630 } }
+            ]
+          }
+        },
+        {
+          "key": 1568412432000,
+          "doc_count": 8,
+          "location": {
+            "buckets": [
+              { "key": "us-east-2", "duration": { "avg": 1972483.25 } },
+              { "key": "us-west-4", "duration": { "avg": 1543307.5 } }
+            ]
+          }
+        },
+        {
+          "key": 1568412468000,
+          "doc_count": 1,
+          "location": { "buckets": [{ "key": "us-east-2", "duration": { "avg": 1020490 } }] }
+        }
+      ]
+    }
+  }
+}

@@ -4,21 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
-import { XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING } from '../../../../../server/lib/constants';
 import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY, KIBANA_SETTINGS_TYPE } from '../../../common/constants';
-
-let loggedDeprecationWarning = false;
-
-export function resetDeprecationWarning() {
-  loggedDeprecationWarning = false;
-}
 
 /*
  * Check if Cluster Alert email notifications is enabled in config
- * If so, use uiSettings API to fetch the X-Pack default admin email
+ * If so, get email from kibana.yml
  */
-export async function getDefaultAdminEmail(config, callCluster, log) {
+export async function getDefaultAdminEmail(config) {
   if (!config.get('xpack.monitoring.cluster_alerts.email_notifications.enabled')) {
     return null;
   }
@@ -26,33 +18,7 @@ export async function getDefaultAdminEmail(config, callCluster, log) {
   const emailAddressConfigKey = `xpack.monitoring.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}`;
   const configuredEmailAddress = config.get(emailAddressConfigKey);
 
-  if (configuredEmailAddress) {
-    return configuredEmailAddress;
-  }
-
-  // DEPRECATED (Remove below in 7.0): If an email address is not configured in kibana.yml, then fallback to xpack:defaultAdminEmail
-
-  const index = config.get('kibana.index');
-  const version = config.get('pkg.version');
-  const uiSettingsDoc = await callCluster('get', {
-    index,
-    id: `config:${version}`,
-    ignore: [400, 404] // 400 if the index is closed, 404 if it does not exist
-  });
-
-  const emailAddress = get(uiSettingsDoc, ['_source', 'config', XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING], null);
-
-  if (emailAddress && !loggedDeprecationWarning) {
-    const message = (
-      `Monitoring is using ${XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING} for cluster alert notifications, ` +
-      `which will not be supported in Kibana 7.0. Please configure ${emailAddressConfigKey} in your kibana.yml settings`
-    );
-
-    log.warn(message);
-    loggedDeprecationWarning = true;
-  }
-
-  return emailAddress;
+  return configuredEmailAddress || null;
 }
 
 // we use shouldUseNull to determine if we need to send nulls; we only send nulls if the last email wasn't null
@@ -80,10 +46,7 @@ export async function checkForEmailValue(
   }
 }
 
-export function getSettingsCollector(server) {
-  const config = server.config();
-  const { collectorSet } = server.usage;
-
+export function getSettingsCollector({ config, collectorSet }) {
   return collectorSet.makeStatsCollector({
     type: KIBANA_SETTINGS_TYPE,
     isReady: () => true,

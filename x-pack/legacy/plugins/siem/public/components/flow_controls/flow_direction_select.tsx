@@ -37,3 +37,5 @@ export const FlowDirectionSelect = pure<Props>(({ onChangeDirection, selectedDir
     </EuiFilterButton>
   </EuiFilterGroup>
 ));
+
+FlowDirectionSelect.displayName = 'FlowDirectionSelect';

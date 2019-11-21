@@ -19,15 +19,15 @@
 
 // Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
 /* eslint-disable @kbn/eslint/no-restricted-paths */
-
-import { KibanaMigrator } from '../../../core/server/saved_objects/migrations';
 import { SavedObjectsSchema } from '../../../core/server/saved_objects/schema';
 import { SavedObjectsSerializer } from '../../../core/server/saved_objects/serialization';
 import {
   SavedObjectsClient,
   SavedObjectsRepository,
-  ScopedSavedObjectsClientProvider,
-} from '../../../core/server/saved_objects/service';
+  getSortedObjectsForExport,
+  importSavedObjects,
+  resolveImportErrors,
+} from '../../../core/server/saved_objects';
 import { getRootPropertiesObjects } from '../../../core/server/saved_objects/mappings';
 import { SavedObjectsManagement } from '../../../core/server/saved_objects/management';
 
@@ -39,6 +39,7 @@ import {
   createFindRoute,
   createGetRoute,
   createUpdateRoute,
+  createBulkUpdateRoute,
   createExportRoute,
   createImportRoute,
   createResolveImportErrorsRoute,
@@ -54,8 +55,8 @@ function getImportableAndExportableTypes({ kbnServer, visibleTypes }) {
   );
 }
 
-export function savedObjectsMixin(kbnServer, server) {
-  const migrator = new KibanaMigrator({ kbnServer });
+export async function savedObjectsMixin(kbnServer, server) {
+  const migrator = kbnServer.newPlatform.__internals.kibanaMigrator;
   const mappings = migrator.getActiveMappings();
   const allTypes = Object.keys(getRootPropertiesObjects(mappings));
   const schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);
@@ -87,6 +88,7 @@ export function savedObjectsMixin(kbnServer, server) {
   };
   server.route(createBulkCreateRoute(prereqs));
   server.route(createBulkGetRoute(prereqs));
+  server.route(createBulkUpdateRoute(prereqs));
   server.route(createCreateRoute(prereqs));
   server.route(createDeleteRoute(prereqs));
   server.route(createFindRoute(prereqs));
@@ -112,8 +114,11 @@ export function savedObjectsMixin(kbnServer, server) {
     const combinedTypes = visibleTypes.concat(extraTypes);
     const allowedTypes = [...new Set(combinedTypes)];
 
+    const config = server.config();
+
     return new SavedObjectsRepository({
-      index: server.config().get('kibana.index'),
+      index: config.get('kibana.index'),
+      config,
       migrator,
       mappings,
       schema,
@@ -123,17 +128,7 @@ export function savedObjectsMixin(kbnServer, server) {
     });
   };
 
-  const provider = new ScopedSavedObjectsClientProvider({
-    index: server.config().get('kibana.index'),
-    mappings,
-    defaultClientFactory({ request }) {
-      const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
-      const callCluster = (...args) => callWithRequest(request, ...args);
-      const repository = createRepository(callCluster);
-
-      return new SavedObjectsClient(repository);
-    },
-  });
+  const provider = kbnServer.newPlatform.__internals.savedObjectsClientProvider;
 
   const service = {
     types: visibleTypes,
@@ -144,18 +139,25 @@ export function savedObjectsMixin(kbnServer, server) {
     setScopedSavedObjectsClientFactory: (...args) => provider.setClientFactory(...args),
     addScopedSavedObjectsClientWrapperFactory: (...args) =>
       provider.addClientWrapperFactory(...args),
+    importExport: {
+      objectLimit: server.config().get('savedObjects.maxImportExportSize'),
+      importSavedObjects,
+      resolveImportErrors,
+      getSortedObjectsForExport,
+    },
+    schema,
   };
   server.decorate('server', 'savedObjects', service);
 
   const savedObjectsClientCache = new WeakMap();
-  server.decorate('request', 'getSavedObjectsClient', function() {
+  server.decorate('request', 'getSavedObjectsClient', function(options) {
     const request = this;
 
     if (savedObjectsClientCache.has(request)) {
       return savedObjectsClientCache.get(request);
     }
 
-    const savedObjectsClient = server.savedObjects.getScopedSavedObjectsClient(request);
+    const savedObjectsClient = server.savedObjects.getScopedSavedObjectsClient(request, options);
 
     savedObjectsClientCache.set(request, savedObjectsClient);
     return savedObjectsClient;

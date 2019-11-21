@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature } from '../../../../../xpack_main/types';
+import { Feature } from '../../../../../../../plugins/features/server';
 import { getEnabledFeatures } from './feature_utils';
 
 const buildFeatures = () =>

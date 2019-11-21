@@ -5,37 +5,57 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Server } from 'hapi';
 
+import { Logger, EnvironmentMode } from 'src/core/server';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
-import { createLogger } from './utils/logger';
 import {
   noteSavedObjectType,
   pinnedEventSavedObjectType,
   timelineSavedObjectType,
 } from './saved_objects';
 
+import { signalsAlertType } from './lib/detection_engine/alerts/signals_alert_type';
+import { isAlertExecutor } from './lib/detection_engine/alerts/types';
+import { createSignalsRoute } from './lib/detection_engine/routes/create_signals_route';
+import { readSignalsRoute } from './lib/detection_engine/routes/read_signals_route';
+import { findSignalsRoute } from './lib/detection_engine/routes/find_signals_route';
+import { deleteSignalsRoute } from './lib/detection_engine/routes/delete_signals_route';
+import { updateSignalsRoute } from './lib/detection_engine/routes/update_signals_route';
+import { ServerFacade } from './types';
+
 const APP_ID = 'siem';
 
-export const amMocking = (): boolean => process.env.INGEST_MOCKS === 'true';
-
-export const initServerWithKibana = (kbnServer: Server) => {
-  // bind is so "this" binds correctly to the logger since hapi server does not auto-bind its methods
-  const logger = createLogger(kbnServer.log.bind(kbnServer));
-  logger.info('Plugin initializing');
-
-  const mocking = amMocking();
-  if (mocking) {
-    logger.info(
-      `Mocks for ${APP_ID} is activated. No real ${APP_ID} data will be used, only mocks will be used.`
-    );
+export const initServerWithKibana = (
+  kbnServer: ServerFacade,
+  logger: Logger,
+  mode: EnvironmentMode
+) => {
+  if (kbnServer.plugins.alerting != null) {
+    const type = signalsAlertType({ logger });
+    if (isAlertExecutor(type)) {
+      kbnServer.plugins.alerting.setup.registerType(type);
+    }
   }
+  kbnServer.injectUiAppVars('siem', async () => kbnServer.getInjectedUiAppVars('kibana'));
 
-  const libs = compose(kbnServer);
-  initServer(libs, { mocking, logger });
-
-  logger.info('Plugin done initializing');
+  const libs = compose(kbnServer, mode);
+  initServer(libs);
+  if (
+    kbnServer.config().has('xpack.actions.enabled') &&
+    kbnServer.config().get('xpack.actions.enabled') === true &&
+    kbnServer.config().has('xpack.alerting.enabled') &&
+    kbnServer.config().has('xpack.alerting.enabled') === true
+  ) {
+    logger.info(
+      'Detected feature flags for actions and alerting and enabling signals API endpoints'
+    );
+    createSignalsRoute(kbnServer);
+    readSignalsRoute(kbnServer);
+    updateSignalsRoute(kbnServer);
+    deleteSignalsRoute(kbnServer);
+    findSignalsRoute(kbnServer);
+  }
 
   const xpackMainPlugin = kbnServer.plugins.xpack_main;
   xpackMainPlugin.registerFeature({

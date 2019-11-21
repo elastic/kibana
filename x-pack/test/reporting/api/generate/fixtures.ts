@@ -82,32 +82,12 @@ export const CSV_RESULT_TIMELESS = `name,power
 `;
 
 export const CSV_RESULT_SCRIPTED = `date,year,name,value,"years_ago"
-"1981-01-01T00:00:00.000Z",1981,Fetty,1763,38
-"1981-01-01T00:00:00.000Z",1981,Fonnie,2330,38
-"1981-01-01T00:00:00.000Z",1981,Farbara,6456,38
 "1981-01-01T00:00:00.000Z",1981,Felinda,1886,38
-"1981-01-01T00:00:00.000Z",1981,Frenda,7162,38
-"1981-01-01T00:00:00.000Z",1981,Feth,3685,38
-"1981-01-01T00:00:00.000Z",1981,Feverly,1987,38
-"1981-01-01T00:00:00.000Z",1981,Fecky,1930,38
-"1980-01-01T00:00:00.000Z",1980,Fonnie,2748,39
-"1980-01-01T00:00:00.000Z",1980,Frenda,8335,39
-"1980-01-01T00:00:00.000Z",1980,Fetty,1967,39
-"1980-01-01T00:00:00.000Z",1980,Farbara,8026,39
-"1980-01-01T00:00:00.000Z",1980,Feth,4246,39
-"1980-01-01T00:00:00.000Z",1980,Feverly,2249,39
 "1980-01-01T00:00:00.000Z",1980,Fecky,2071,39
 `;
 
 export const CSV_RESULT_SCRIPTED_REQUERY = `date,year,name,value,"years_ago"
-"1981-01-01T00:00:00.000Z",1981,Fetty,1763,38
 "1981-01-01T00:00:00.000Z",1981,Felinda,1886,38
-"1981-01-01T00:00:00.000Z",1981,Feth,3685,38
-"1981-01-01T00:00:00.000Z",1981,Feverly,1987,38
-"1981-01-01T00:00:00.000Z",1981,Fecky,1930,38
-"1980-01-01T00:00:00.000Z",1980,Fetty,1967,39
-"1980-01-01T00:00:00.000Z",1980,Feth,4246,39
-"1980-01-01T00:00:00.000Z",1980,Feverly,2249,39
 "1980-01-01T00:00:00.000Z",1980,Fecky,2071,39
 `;
 
@@ -173,3 +153,24 @@ export const CSV_RESULT_HUGE = `date,year,name,value,"years_ago"
 "1980-01-01T00:00:00.000Z",1980,Feverly,2249,39
 "1980-01-01T00:00:00.000Z",1980,Fecky,2071,39
 `;
+
+export const CSV_RESULT_NANOS = `date,message,"_id"
+"2015-01-01T12:10:30.123456789Z","Hello 2",
+"2015-01-01T12:10:30","Hello 1",
+`;
+
+// This concatenates lines of multi-line string into a single line.
+// It is so long strings can be entered at short widths, making syntax highlighting easier on editors
+function singleLine(literals: TemplateStringsArray): string {
+  return literals[0].split('\n').join('');
+}
+
+export const JOB_PARAMS_RISON = singleLine`(conflictedTypesFields:!(),fields:!('@ti
+mestamp',clientip,extension),indexPatternId:'logstash-*',metaFields:!(_source,_id,_type,_
+index,_score),searchRequest:(body:(_source:(excludes:!(),includes:!('@timestamp',clientip
+,extension)),docvalue_fields:!(),query:(bool:(filter:!((match_all:()),(range:('@timestamp
+':(gte:'2015-09-20T10:19:40.307Z',lt:'2015-09-20T10:26:56.221Z'))),(range:('@timestamp':(
+format:strict_date_optional_time,gte:'2004-09-17T21:19:34.213Z',lte:'2019-09-17T21:19:34.
+213Z')))),must:!(),must_not:!(),should:!())),script_fields:(),sort:!(('@timestamp':(order
+:desc,unmapped_type:boolean))),stored_fields:!('@timestamp',clientip,extension),version:!
+t),index:'logstash-*'),title:'A Saved Search With a DATE FILTER',type:search)`;

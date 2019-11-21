@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
+import React, { useState, useCallback } from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
@@ -28,14 +28,13 @@ interface Props {
   render: (showHoverContent: boolean) => JSX.Element;
 }
 
-interface State {
-  showHoverContent: boolean;
-}
-
 const HoverActionsPanelContainer = styled.div`
+  color: ${({ theme }) => theme.eui.textColors.default};
   height: 100%;
   position: relative;
 `;
+
+HoverActionsPanelContainer.displayName = 'HoverActionsPanelContainer';
 
 const HoverActionsPanel = pure<{ children: JSX.Element; show: boolean }>(({ children, show }) => (
   <HoverActionsPanelContainer data-test-subj="hover-actions-panel-container">
@@ -43,12 +42,16 @@ const HoverActionsPanel = pure<{ children: JSX.Element; show: boolean }>(({ chil
   </HoverActionsPanelContainer>
 ));
 
+HoverActionsPanel.displayName = 'HoverActionsPanel';
+
 const WithHoverActionsContainer = styled.div`
   display: flex;
   flex-direction: row;
   height: 100%;
   padding-right: 5px;
 `;
+
+WithHoverActionsContainer.displayName = 'WithHoverActionsContainer';
 
 /**
  * Decorates it's children with actions that are visible on hover.
@@ -60,31 +63,26 @@ const WithHoverActionsContainer = styled.div`
  * component also passes `showHoverContent` as a render prop, which
  * provides a signal to the content that the user is in a hover state.
  */
-export class WithHoverActions extends React.PureComponent<Props, State> {
-  constructor(props: Props) {
-    super(props);
+export const WithHoverActions = React.memo<Props>(
+  ({ alwaysShow = false, hoverContent, render }) => {
+    const [showHoverContent, setShowHoverContent] = useState(false);
+    const onMouseEnter = useCallback(() => {
+      setShowHoverContent(true);
+    }, []);
 
-    this.state = { showHoverContent: false };
-  }
-
-  public render() {
-    const { alwaysShow = false, hoverContent, render } = this.props;
+    const onMouseLeave = useCallback(() => {
+      setShowHoverContent(false);
+    }, []);
 
     return (
-      <WithHoverActionsContainer onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave}>
-        <>{render(this.state.showHoverContent)}</>
-        <HoverActionsPanel show={this.state.showHoverContent || alwaysShow}>
+      <WithHoverActionsContainer onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+        <>{render(showHoverContent)}</>
+        <HoverActionsPanel show={showHoverContent || alwaysShow}>
           {hoverContent != null ? hoverContent : <></>}
         </HoverActionsPanel>
       </WithHoverActionsContainer>
     );
   }
+);
 
-  private onMouseEnter = () => {
-    this.setState({ showHoverContent: true });
-  };
-
-  private onMouseLeave = () => {
-    this.setState({ showHoverContent: false });
-  };
-}
+WithHoverActions.displayName = 'WithHoverActions';

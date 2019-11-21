@@ -12,6 +12,7 @@ export const overviewHostQuery = gql`
     $timerange: TimerangeInput!
     $filterQuery: String
     $defaultIndex: [String!]!
+    $inspect: Boolean!
   ) {
     source(id: $sourceId) {
       id
@@ -22,8 +23,19 @@ export const overviewHostQuery = gql`
         auditbeatPackage
         auditbeatProcess
         auditbeatUser
+        endgameDns
+        endgameFile
+        endgameImageLoad
+        endgameNetwork
+        endgameProcess
+        endgameRegistry
+        endgameSecurity
         filebeatSystemModule
         winlogbeat
+        inspect @include(if: $inspect) {
+          dsl
+          response
+        }
       }
     }
   }

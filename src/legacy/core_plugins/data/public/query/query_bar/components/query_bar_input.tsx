@@ -19,43 +19,57 @@
 
 import { Component } from 'react';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
-import { EuiFieldText, EuiOutsideClickDetector, PopoverAnchorPosition } from '@elastic/eui';
+import {
+  EuiFieldText,
+  EuiOutsideClickDetector,
+  PopoverAnchorPosition,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiLink,
+} from '@elastic/eui';
 
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { InjectedIntl, injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { debounce, compact, isEqual } from 'lodash';
+import { Toast } from 'src/core/public';
 import {
   AutocompleteSuggestion,
   AutocompleteSuggestionType,
-  getAutocompleteProvider,
-} from 'ui/autocomplete_providers';
-import { debounce, compact, isEqual, omit } from 'lodash';
-import { IndexPattern, StaticIndexPattern } from 'ui/index_patterns';
-import { PersistedLog } from 'ui/persisted_log';
-import chrome from 'ui/chrome';
-import { kfetch } from 'ui/kfetch';
-import { Storage } from 'ui/storage';
-import { localStorage } from 'ui/storage/storage_service';
-import { Query } from '../index';
-import { fromUser, matchPairs, toUser } from '../lib';
+  IDataPluginServices,
+  PersistedLog,
+  toUser,
+  fromUser,
+  matchPairs,
+  getQueryLog,
+  Query,
+} from '../../../../../../../plugins/data/public';
+import {
+  withKibana,
+  KibanaReactContextValue,
+  toMountPoint,
+} from '../../../../../../../plugins/kibana_react/public';
+import { IndexPattern, StaticIndexPattern } from '../../../index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
-import { getQueryLog } from '../lib/get_query_log';
-import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
+import { fetchIndexPatterns } from './fetch_index_patterns';
 
 interface Props {
-  indexPatterns: Array<IndexPattern | string>;
+  kibana: KibanaReactContextValue<IDataPluginServices>;
   intl: InjectedIntl;
+  indexPatterns: Array<IndexPattern | string>;
   query: Query;
-  appName: string;
   disableAutoFocus?: boolean;
   screenTitle?: string;
-  prepend?: any;
-  store?: Storage;
+  prepend?: React.ReactNode;
   persistedLog?: PersistedLog;
   bubbleSubmitEvent?: boolean;
+  placeholder?: string;
   languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
   onChange?: (query: Query) => void;
   onSubmit?: (query: Query) => void;
+  dataTestSubj?: string;
 }
 
 interface State {
@@ -80,11 +94,10 @@ const KEY_CODES = {
   END: 35,
 };
 
-const config = chrome.getUiSettingsClient();
 const recentSearchType: AutocompleteSuggestionType = 'recentSearch';
 
 export class QueryBarInputUI extends Component<Props, State> {
-  public state = {
+  public state: State = {
     isSuggestionsVisible: false,
     index: null,
     suggestions: [],
@@ -97,6 +110,7 @@ export class QueryBarInputUI extends Component<Props, State> {
   public inputRef: HTMLInputElement | null = null;
 
   private persistedLog: PersistedLog | undefined;
+  private services = this.props.kibana.services;
   private componentIsUnmounting = false;
 
   private getQueryString = () => {
@@ -111,7 +125,11 @@ export class QueryBarInputUI extends Component<Props, State> {
       indexPattern => typeof indexPattern !== 'string'
     ) as IndexPattern[];
 
-    const objectPatternsFromStrings = await fetchIndexPatterns(stringPatterns);
+    const objectPatternsFromStrings = (await fetchIndexPatterns(
+      this.services.savedObjects!.client,
+      stringPatterns,
+      this.services.uiSettings!
+    )) as IndexPattern[];
 
     this.setState({
       indexPatterns: [...objectPatterns, ...objectPatternsFromStrings],
@@ -123,12 +141,13 @@ export class QueryBarInputUI extends Component<Props, State> {
       return;
     }
 
+    const uiSettings = this.services.uiSettings;
     const language = this.props.query.language;
     const queryString = this.getQueryString();
 
     const recentSearchSuggestions = this.getRecentSearchSuggestions(queryString);
+    const autocompleteProvider = this.services.data.autocomplete.getProvider(language);
 
-    const autocompleteProvider = getAutocompleteProvider(language);
     if (
       !autocompleteProvider ||
       !Array.isArray(this.state.indexPatterns) ||
@@ -138,7 +157,10 @@ export class QueryBarInputUI extends Component<Props, State> {
     }
 
     const indexPatterns = this.state.indexPatterns;
-    const getAutocompleteSuggestions = autocompleteProvider({ config, indexPatterns });
+    const getAutocompleteSuggestions = autocompleteProvider({
+      config: uiSettings,
+      indexPatterns,
+    });
 
     const { selectionStart, selectionEnd } = this.inputRef;
     if (selectionStart === null || selectionEnd === null) {
@@ -196,10 +218,8 @@ export class QueryBarInputUI extends Component<Props, State> {
   };
 
   private onQueryStringChange = (value: string) => {
-    const hasValue = Boolean(value.trim());
-
     this.setState({
-      isSuggestionsVisible: hasValue,
+      isSuggestionsVisible: true,
       index: null,
       suggestionLimit: 50,
     });
@@ -294,20 +314,13 @@ export class QueryBarInputUI extends Component<Props, State> {
     }
   };
 
-  private selectSuggestion = ({
-    type,
-    text,
-    start,
-    end,
-  }: {
-    type: AutocompleteSuggestionType;
-    text: string;
-    start: number;
-    end: number;
-  }) => {
+  private selectSuggestion = (suggestion: AutocompleteSuggestion) => {
     if (!this.inputRef) {
       return;
     }
+    const { type, text, start, end, cursorIndex } = suggestion;
+
+    this.handleNestedFieldSyntaxNotification(suggestion);
 
     const query = this.getQueryString();
     const { selectionStart, selectionEnd } = this.inputRef;
@@ -320,9 +333,72 @@ export class QueryBarInputUI extends Component<Props, State> {
 
     this.onQueryStringChange(newQueryString);
 
+    this.setState({
+      selectionStart: start + (cursorIndex ? cursorIndex : text.length),
+      selectionEnd: start + (cursorIndex ? cursorIndex : text.length),
+    });
+
     if (type === recentSearchType) {
       this.setState({ isSuggestionsVisible: false, index: null });
       this.onSubmit({ query: newQueryString, language: this.props.query.language });
+    }
+  };
+
+  private handleNestedFieldSyntaxNotification = (suggestion: AutocompleteSuggestion) => {
+    if (
+      'field' in suggestion &&
+      suggestion.field.subType &&
+      suggestion.field.subType.nested &&
+      !this.services.storage.get('kibana.KQLNestedQuerySyntaxInfoOptOut')
+    ) {
+      const { notifications, docLinks } = this.services;
+
+      const onKQLNestedQuerySyntaxInfoOptOut = (toast: Toast) => {
+        if (!this.services.storage) return;
+        this.services.storage.set('kibana.KQLNestedQuerySyntaxInfoOptOut', true);
+        notifications!.toasts.remove(toast);
+      };
+
+      if (notifications && docLinks) {
+        const toast = notifications.toasts.add({
+          title: this.props.intl.formatMessage({
+            id: 'data.query.queryBar.KQLNestedQuerySyntaxInfoTitle',
+            defaultMessage: 'KQL nested query syntax',
+          }),
+          text: toMountPoint(
+            <div>
+              <p>
+                <FormattedMessage
+                  id="data.query.queryBar.KQLNestedQuerySyntaxInfoText"
+                  defaultMessage="It looks like you're querying on a nested field.
+                  You can construct KQL syntax for nested queries in different ways, depending on the results you want.
+                  Learn more in our {link}."
+                  values={{
+                    link: (
+                      <EuiLink href={docLinks.links.query.kueryQuerySyntax} target="_blank">
+                        <FormattedMessage
+                          id="data.query.queryBar.KQLNestedQuerySyntaxInfoDocLinkText"
+                          defaultMessage="docs"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButton size="s" onClick={() => onKQLNestedQuerySyntaxInfoOptOut(toast)}>
+                    <FormattedMessage
+                      id="data.query.queryBar.KQLNestedQuerySyntaxInfoOptOutText"
+                      defaultMessage="Don't show again"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </div>
+          ),
+        });
+      }
     }
   };
 
@@ -353,17 +429,11 @@ export class QueryBarInputUI extends Component<Props, State> {
     // Send telemetry info every time the user opts in or out of kuery
     // As a result it is important this function only ever gets called in the
     // UI component's change handler.
-    kfetch({
-      pathname: '/api/kibana/kql_opt_in_telemetry',
-      method: 'POST',
+    this.services.http.post('/api/kibana/kql_opt_in_telemetry', {
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 
-    if (this.props.store) {
-      this.props.store.set('kibana.userQueryLanguage', language);
-    } else {
-      localStorage.set('kibana.userQueryLanguage', language);
-    }
+    this.services.storage.set('kibana.userQueryLanguage', language);
 
     const newQuery = { query: '', language };
     this.onChange(newQuery);
@@ -384,22 +454,34 @@ export class QueryBarInputUI extends Component<Props, State> {
     this.inputRef.focus();
   };
 
+  private initPersistedLog = () => {
+    const { uiSettings, storage, appName } = this.services;
+    this.persistedLog = this.props.persistedLog
+      ? this.props.persistedLog
+      : getQueryLog(uiSettings, storage, appName, this.props.query.language);
+  };
+
   public onMouseEnterSuggestion = (index: number) => {
     this.setState({ index });
   };
 
   public componentDidMount() {
-    this.persistedLog = this.props.persistedLog
-      ? this.props.persistedLog
-      : getQueryLog(this.props.appName, this.props.query.language);
+    const parsedQuery = fromUser(toUser(this.props.query.query));
+    if (!isEqual(this.props.query.query, parsedQuery)) {
+      this.onChange({ ...this.props.query, query: parsedQuery });
+    }
 
+    this.initPersistedLog();
     this.fetchIndexPatterns().then(this.updateSuggestions);
   }
 
   public componentDidUpdate(prevProps: Props) {
-    this.persistedLog = this.props.persistedLog
-      ? this.props.persistedLog
-      : getQueryLog(this.props.appName, this.props.query.language);
+    const parsedQuery = fromUser(toUser(this.props.query.query));
+    if (!isEqual(this.props.query.query, parsedQuery)) {
+      this.onChange({ ...this.props.query, query: parsedQuery });
+    }
+
+    this.initPersistedLog();
 
     if (!isEqual(prevProps.indexPatterns, this.props.indexPatterns)) {
       this.fetchIndexPatterns().then(this.updateSuggestions);
@@ -426,39 +508,33 @@ export class QueryBarInputUI extends Component<Props, State> {
   }
 
   public render() {
-    const rest = omit(this.props, [
-      'indexPatterns',
-      'intl',
-      'query',
-      'appName',
-      'disableAutoFocus',
-      'screenTitle',
-      'prepend',
-      'store',
-      'persistedLog',
-      'bubbleSubmitEvent',
-      'languageSwitcherPopoverAnchorPosition',
-      'onChange',
-      'onSubmit',
-    ]);
+    const isSuggestionsVisible = this.state.isSuggestionsVisible && {
+      'aria-controls': 'kbnTypeahead__items',
+      'aria-owns': 'kbnTypeahead__items',
+    };
+    const ariaCombobox = { ...isSuggestionsVisible, role: 'combobox' };
 
     return (
       <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
         <div
+          {...ariaCombobox}
           style={{ position: 'relative' }}
-          role="combobox"
+          aria-label={i18n.translate('data.query.queryBar.comboboxAriaLabel', {
+            defaultMessage: 'Search and filter the {pageType} page',
+            values: { pageType: this.services.appName },
+          })}
           aria-haspopup="true"
           aria-expanded={this.state.isSuggestionsVisible}
-          aria-owns="kbnTypeahead__items"
-          aria-controls="kbnTypeahead__items"
         >
           <div role="search">
             <div className="kuiLocalSearchAssistedInput">
               <EuiFieldText
-                placeholder={this.props.intl.formatMessage({
-                  id: 'data.query.queryBar.searchInputPlaceholder',
-                  defaultMessage: 'Search',
-                })}
+                placeholder={
+                  this.props.placeholder ||
+                  i18n.translate('data.query.queryBar.searchInputPlaceholder', {
+                    defaultMessage: 'Search',
+                  })
+                }
                 value={this.getQueryString()}
                 onKeyDown={this.onKeyDown}
                 onKeyUp={this.onKeyUp}
@@ -473,27 +549,17 @@ export class QueryBarInputUI extends Component<Props, State> {
                 }}
                 autoComplete="off"
                 spellCheck={false}
-                aria-label={
-                  this.props.screenTitle
-                    ? this.props.intl.formatMessage(
-                        {
-                          id: 'data.query.queryBar.searchInputAriaLabel',
-                          defaultMessage:
-                            'You are on search box of {previouslyTranslatedPageTitle} page. Start typing to search and filter the {pageType}',
-                        },
-                        {
-                          previouslyTranslatedPageTitle: this.props.screenTitle,
-                          pageType: this.props.appName,
-                        }
-                      )
-                    : undefined
-                }
+                aria-label={i18n.translate('data.query.queryBar.searchInputAriaLabel', {
+                  defaultMessage: 'Start typing to search and filter the {pageType} page',
+                  values: { pageType: this.services.appName },
+                })}
                 type="text"
-                data-test-subj="queryInput"
                 aria-autocomplete="list"
-                aria-controls="kbnTypeahead__items"
+                aria-controls={this.state.isSuggestionsVisible ? 'kbnTypeahead__items' : undefined}
                 aria-activedescendant={
-                  this.state.isSuggestionsVisible ? 'suggestion-' + this.state.index : ''
+                  this.state.isSuggestionsVisible && typeof this.state.index === 'number'
+                    ? `suggestion-${this.state.index}`
+                    : undefined
                 }
                 role="textbox"
                 prepend={this.props.prepend}
@@ -504,7 +570,7 @@ export class QueryBarInputUI extends Component<Props, State> {
                     onSelectLanguage={this.onSelectLanguage}
                   />
                 }
-                {...rest}
+                data-test-subj={this.props.dataTestSubj || 'queryInput'}
               />
             </div>
           </div>
@@ -523,4 +589,4 @@ export class QueryBarInputUI extends Component<Props, State> {
   }
 }
 
-export const QueryBarInput = injectI18n(QueryBarInputUI);
+export const QueryBarInput = injectI18n(withKibana(QueryBarInputUI));

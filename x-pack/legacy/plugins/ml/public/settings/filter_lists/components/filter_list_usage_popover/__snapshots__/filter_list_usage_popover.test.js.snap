@@ -7,15 +7,14 @@ exports[`FilterListUsagePopover opens the popover onButtonClick 1`] = `
     button={
       <EuiButtonEmpty
         color="primary"
-        iconSide="left"
         onClick={[Function]}
         size="s"
-        type="button"
       >
         3 detectors
       </EuiButtonEmpty>
     }
     closePopover={[Function]}
+    display="inlineBlock"
     hasArrow={true}
     id="detector_filter_list_usage"
     isOpen={true}
@@ -51,15 +50,14 @@ exports[`FilterListUsagePopover renders the popover for 1 job 1`] = `
     button={
       <EuiButtonEmpty
         color="primary"
-        iconSide="left"
         onClick={[Function]}
         size="s"
-        type="button"
       >
         1 job
       </EuiButtonEmpty>
     }
     closePopover={[Function]}
+    display="inlineBlock"
     hasArrow={true}
     id="job_filter_list_usage"
     isOpen={false}
@@ -85,15 +83,14 @@ exports[`FilterListUsagePopover renders the popover for 2 detectors 1`] = `
     button={
       <EuiButtonEmpty
         color="primary"
-        iconSide="left"
         onClick={[Function]}
         size="s"
-        type="button"
       >
         3 detectors
       </EuiButtonEmpty>
     }
     closePopover={[Function]}
+    display="inlineBlock"
     hasArrow={true}
     id="detector_filter_list_usage"
     isOpen={false}

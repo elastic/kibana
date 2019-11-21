@@ -21,15 +21,9 @@ import chalk from 'chalk';
 import Listr from 'listr';
 import { resolve } from 'path';
 
-import {
-  ErrorReporter,
-  mergeConfigs,
-  serializeToJson,
-  serializeToJson5,
-  writeFileAsync,
-} from './i18n';
-import { extractDefaultMessages } from './i18n/tasks';
-import { createFailError, run } from './run';
+import { createFailError, run } from '@kbn/dev-utils';
+import { ErrorReporter, serializeToJson, serializeToJson5, writeFileAsync } from './i18n';
+import { extractDefaultMessages, mergeConfigs } from './i18n/tasks';
 
 run(
   async ({
@@ -52,13 +46,17 @@ run(
         `${chalk.white.bgRed(' I18N ERROR ')} --path and --include-config require a value`
       );
     }
-
-    const config = await mergeConfigs(includeConfig);
+    const srcPaths = Array().concat(path || ['./src', './packages', './x-pack']);
 
     const list = new Listr([
       {
+        title: 'Merging .i18nrc.json files',
+        task: () => new Listr(mergeConfigs(includeConfig), { exitOnError: true }),
+      },
+      {
         title: 'Extracting Default Messages',
-        task: () => new Listr(extractDefaultMessages({ path, config }), { exitOnError: true }),
+        task: ({ config }) =>
+          new Listr(extractDefaultMessages(config, srcPaths), { exitOnError: true }),
       },
       {
         title: 'Writing to file',
@@ -90,6 +88,7 @@ run(
         log.error(error);
       }
     }
+    process.exit();
   },
   {
     flags: {

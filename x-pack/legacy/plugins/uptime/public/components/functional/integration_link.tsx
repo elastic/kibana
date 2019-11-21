@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 interface IntegrationLinkProps {
   ariaLabel: string;
   href: string | undefined;
-  iconType: 'apmApp' | 'infraApp' | 'loggingApp';
+  iconType: 'apmApp' | 'metricsApp' | 'logsApp';
   message: string;
   tooltipContent: string;
 }
@@ -24,7 +24,7 @@ export const IntegrationLink = ({
   tooltipContent,
 }: IntegrationLinkProps) =>
   typeof href === 'undefined' ? (
-    <EuiFlexGroup>
+    <EuiFlexGroup responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiToolTip
           content={i18n.translate('xpack.uptime.integrationLink.missingDataMessage', {
@@ -40,7 +40,7 @@ export const IntegrationLink = ({
     </EuiFlexGroup>
   ) : (
     <EuiLink aria-label={ariaLabel} href={href}>
-      <EuiFlexGroup>
+      <EuiFlexGroup responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiToolTip content={tooltipContent} position="top">
             <EuiIcon type={iconType} />

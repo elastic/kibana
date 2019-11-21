@@ -13,23 +13,31 @@ import { TestProviders } from '../../../../mock';
 import { hostsModel } from '../../../../store';
 import { getEmptyValue } from '../../../empty_value';
 
-import { getArgs, UncommonProcessTable } from '.';
+import { getArgs, UncommonProcessTable, getUncommonColumnsCurated } from '.';
 import { mockData } from './mock';
+import { HostsType } from '../../../../store/hosts/model';
+import * as i18n from './translations';
 
-describe('UncommonProcess Table Component', () => {
-  const loadMore = jest.fn();
+describe('Uncommon Process Table Component', () => {
+  const loadPage = jest.fn();
 
   describe('rendering', () => {
     test('it renders the default Uncommon process table', () => {
       const wrapper = shallow(
         <TestProviders>
           <UncommonProcessTable
-            loading={false}
             data={mockData.UncommonProcess.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
+            id="uncommonProcess"
+            isInspect={false}
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockData.UncommonProcess.pageInfo
+            )}
             totalCount={mockData.UncommonProcess.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
-            loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -42,12 +50,18 @@ describe('UncommonProcess Table Component', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            loading={false}
             data={mockData.UncommonProcess.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
+            id="uncommonProcess"
+            isInspect={false}
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockData.UncommonProcess.pageInfo
+            )}
             totalCount={mockData.UncommonProcess.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
-            loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -59,19 +73,25 @@ describe('UncommonProcess Table Component', () => {
           .find('.euiTableRowCell')
           .at(3)
           .text()
-      ).toBe(`Hosts${getEmptyValue()}`);
+      ).toBe(`Host names${getEmptyValue()}`);
     });
 
     test('it has a single host without any extra comma when the number of hosts is exactly 1', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            loading={false}
             data={mockData.UncommonProcess.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
+            id="uncommonProcess"
+            isInspect={false}
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockData.UncommonProcess.pageInfo
+            )}
             totalCount={mockData.UncommonProcess.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
-            loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -84,19 +104,25 @@ describe('UncommonProcess Table Component', () => {
           .find('.euiTableRowCell')
           .at(3)
           .text()
-      ).toBe('Hostshello-world ');
+      ).toBe('Host nameshello-world ');
     });
 
     test('it has a single link when the number of hosts is exactly 1', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            loading={false}
             data={mockData.UncommonProcess.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
+            id="uncommonProcess"
+            isInspect={false}
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockData.UncommonProcess.pageInfo
+            )}
             totalCount={mockData.UncommonProcess.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
-            loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -116,12 +142,18 @@ describe('UncommonProcess Table Component', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            loading={false}
             data={mockData.UncommonProcess.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
+            id="uncommonProcess"
+            isInspect={false}
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockData.UncommonProcess.pageInfo
+            )}
             totalCount={mockData.UncommonProcess.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
-            loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -134,19 +166,25 @@ describe('UncommonProcess Table Component', () => {
           .find('.euiTableRowCell')
           .at(3)
           .text()
-      ).toBe('Hostshello-world,hello-world-2 ');
+      ).toBe('Host nameshello-world,hello-world-2 ');
     });
 
     test('it has 2 links when the number of hosts is equal to 2', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            loading={false}
             data={mockData.UncommonProcess.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
+            id="uncommonProcess"
+            isInspect={false}
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockData.UncommonProcess.pageInfo
+            )}
             totalCount={mockData.UncommonProcess.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
-            loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -166,12 +204,18 @@ describe('UncommonProcess Table Component', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            loading={false}
             data={mockData.UncommonProcess.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
+            id="uncommonProcess"
+            isInspect={false}
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockData.UncommonProcess.pageInfo
+            )}
             totalCount={mockData.UncommonProcess.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
-            loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -183,19 +227,25 @@ describe('UncommonProcess Table Component', () => {
           .find('.euiTableRowCell')
           .at(3)
           .text()
-      ).toBe(`Hosts${getEmptyValue()}`);
+      ).toBe(`Host names${getEmptyValue()}`);
     });
 
     test('it has no link when all hosts are invalid because they do not contain an id and a name', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            loading={false}
             data={mockData.UncommonProcess.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
+            id="uncommonProcess"
+            isInspect={false}
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockData.UncommonProcess.pageInfo
+            )}
             totalCount={mockData.UncommonProcess.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
-            loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -214,12 +264,18 @@ describe('UncommonProcess Table Component', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            loading={false}
             data={mockData.UncommonProcess.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
+            id="uncommonProcess"
+            isInspect={false}
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockData.UncommonProcess.pageInfo
+            )}
             totalCount={mockData.UncommonProcess.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
-            loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -231,7 +287,7 @@ describe('UncommonProcess Table Component', () => {
           .find('.euiTableRowCell')
           .at(3)
           .text()
-      ).toBe('Hostshello-world,hello-world-2 ');
+      ).toBe('Host nameshello-world,hello-world-2 ');
     });
   });
 
@@ -252,6 +308,37 @@ describe('UncommonProcess Table Component', () => {
 
     test('it returns null if given undefined', () => {
       expect(getArgs(undefined)).toEqual(null);
+    });
+  });
+
+  describe('#getUncommonColumnsCurated', () => {
+    test('on hosts page, we expect to get all columns', () => {
+      expect(getUncommonColumnsCurated(HostsType.page).length).toEqual(6);
+    });
+
+    test('on host details page, we expect to remove two columns', () => {
+      const columns = getUncommonColumnsCurated(HostsType.details);
+      expect(columns.length).toEqual(4);
+    });
+
+    test('on host page, we should have hosts', () => {
+      const columns = getUncommonColumnsCurated(HostsType.page);
+      expect(columns.some(col => col.name === i18n.HOSTS)).toEqual(true);
+    });
+
+    test('on host page, we should have number of hosts', () => {
+      const columns = getUncommonColumnsCurated(HostsType.page);
+      expect(columns.some(col => col.name === i18n.NUMBER_OF_HOSTS)).toEqual(true);
+    });
+
+    test('on host details page, we should not have hosts', () => {
+      const columns = getUncommonColumnsCurated(HostsType.details);
+      expect(columns.some(col => col.name === i18n.HOSTS)).toEqual(false);
+    });
+
+    test('on host details page, we should not have number of hosts', () => {
+      const columns = getUncommonColumnsCurated(HostsType.details);
+      expect(columns.some(col => col.name === i18n.NUMBER_OF_HOSTS)).toEqual(false);
     });
   });
 });

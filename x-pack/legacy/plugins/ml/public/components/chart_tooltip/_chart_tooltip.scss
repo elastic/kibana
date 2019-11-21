@@ -1,27 +1,54 @@
-.ml-chart-tooltip {
-  position: absolute;
-  border: 2px solid $euiColorDarkestShade;
-  border-radius: 5px;
-  padding: 7px 5px;
-  color: $euiColorEmptyShade;
-  background-color: $euiColorDarkestShade;
-  font-family: $euiFontFamily;
-  font-size: $euiFontSizeXS;
-  opacity: 0;
-  display: none;
-  white-space: nowrap;
-  z-index: 1;
-  transition: opacity 0.2s ;
-  z-index: 20;
-  max-width: 500px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+@import '@elastic/eui/src/components/tool_tip/variables';
+@import '@elastic/eui/src/components/tool_tip/mixins';
 
-  hr {
-    margin-top: $euiSizeXS;
-    margin-bottom: $euiSizeXS;
-    border: none;
-    height: 1px;
-    background-color: $euiColorMediumShade;
+.mlChartTooltip {
+  @include euiToolTipStyle('s');
+  @include euiFontSizeXS;
+  position: absolute;
+  padding: 0;
+  transition: opacity $euiAnimSpeedNormal;
+  pointer-events: none;
+  user-select: none;
+  max-width: 512px;
+
+  &__list {
+    margin: $euiSizeXS;
   }
+
+  &__header {
+    @include euiToolTipTitle;
+    padding: $euiSizeXS ($euiSizeXS * 2);
+  }
+
+  &__item {
+    display: flex;
+    padding: 3px;
+    box-sizing: border-box;
+    border-left: $euiSizeXS solid transparent;
+  }
+
+  &__label {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    min-width: 1px;
+    flex: 1 1 auto;
+  }
+
+  &__value {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    font-weight: $euiFontWeightBold;
+    text-align: right;
+    font-feature-settings: 'tnum';
+    margin-left: 8px;
+  }
+
+  &__rowHighlighted {
+    background-color: transparentize($euiColorGhost, 0.9);
+  }
+
+  &--hidden {
+    opacity: 0;
+  }
+
 }

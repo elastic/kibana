@@ -8,20 +8,34 @@ Point, polygon, and line features support different styling properties.
 [[point-style-properties]]
 ==== Point style properties
 
+You can symbolize Point features as *Circle markers* or *Icons*.
+
+Use *Circle marker* to symbolize Points as circles.
+
 *Fill color*:: The fill color of the point features.
 
 *Border color*:: The border color of the point features.
-Only applies when the point feature is symbolized as a circle.
 
 *Border width*:: The border width of the point features.
-Only applies when the point feature is symbolized as a circle.
-
-*Symbol*:: Specify whether to symbolize the point as a circle or icon.
-
-*Symbol orientation*:: The symbol orientation rotating the icon clockwise.
-Only applies when the point feature is symbolized as an icon.
 
 *Symbol size*:: The radius of the symbol size, in pixels.
+
+Use *Icon* to symbolize Points as icons.
+
+*Fill color*:: The fill color of the point features.
+
+*Border color*:: The border color of the point features.
+
+*Border width*:: The border width of the point features.
+
+*Symbol orientation*:: The symbol orientation rotating the icon clockwise.
+
+*Symbol size*:: The radius of the symbol size, in pixels.
++
+Available icons
++
+[role="screenshot"]
+image::maps/images/maki-icons.png[]
 
 
 [float]

@@ -1,0 +1,91 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DefaultEditorAggParams component should init with the default set of params 1`] = `
+<EuiForm
+  data-test-subj="visAggEditorParams"
+  error={Array []}
+  isInvalid={false}
+>
+  <DefaultEditorAggSelect
+    aggTypeOptions={Array []}
+    indexPattern={Object {}}
+    isSubAggregation={false}
+    setTouched={[Function]}
+    setValidity={[Function]}
+    setValue={[Function]}
+    showValidation={false}
+    value={
+      Object {
+        "params": Array [
+          Object {
+            "deserialize": [MockFunction],
+            "name": "interval",
+          },
+        ],
+      }
+    }
+  />
+  <DefaultEditorAggParam
+    aggParam={
+      Object {
+        "displayName": "Custom label",
+        "name": "customLabel",
+        "type": "string",
+      }
+    }
+    key="customLabelundefined"
+    onChange={[MockFunction]}
+    setTouched={[Function]}
+    setValidity={[Function]}
+    showValidation={false}
+    subAggParams={
+      Object {
+        "formIsTouched": false,
+        "onAggParamsChange": [MockFunction],
+        "onAggTypeChange": [MockFunction],
+      }
+    }
+  />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    labelType="label"
+  >
+    <EuiAccordion
+      buttonContent="Advanced"
+      data-test-subj="advancedParams-undefined"
+      id="advancedAccordion"
+      initialIsOpen={false}
+      paddingSize="none"
+    >
+      <EuiSpacer
+        size="s"
+      />
+      <DefaultEditorAggParam
+        aggParam={
+          Object {
+            "advanced": true,
+            "name": "json",
+            "type": "json",
+          }
+        }
+        key="jsonundefined"
+        onChange={[MockFunction]}
+        setTouched={[Function]}
+        setValidity={[Function]}
+        showValidation={false}
+        subAggParams={
+          Object {
+            "formIsTouched": false,
+            "onAggParamsChange": [MockFunction],
+            "onAggTypeChange": [MockFunction],
+          }
+        }
+      />
+    </EuiAccordion>
+  </EuiFormRow>
+</EuiForm>
+`;

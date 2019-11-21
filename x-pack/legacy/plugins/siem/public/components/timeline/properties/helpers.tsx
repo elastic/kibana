@@ -6,8 +6,10 @@
 
 import {
   EuiBadge,
+  EuiBadgeProps,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,30 +21,26 @@ import {
 import * as React from 'react';
 import { pure } from 'recompose';
 import uuid from 'uuid';
-import styled from 'styled-components';
 
 import { Note } from '../../../lib/note';
 import { Notes } from '../../notes';
 import { AssociateNote, UpdateNote } from '../../notes/helpers';
-
-import {
-  ButtonContainer,
-  DescriptionContainer,
-  LabelText,
-  NameField,
-  SmallNotesButtonContainer,
-  StyledStar,
-} from './styles';
-import * as i18n from './translations';
 import { NOTES_PANEL_WIDTH } from './notes_size';
+import { ButtonContainer, DescriptionContainer, LabelText, NameField, StyledStar } from './styles';
+import * as i18n from './translations';
 
 export const historyToolTip = 'The chronological history of actions related to this timeline';
 export const streamLiveToolTip = 'Update the Timeline as new data arrives';
 export const newTimelineToolTip = 'Create a new timeline';
 
-const NotesCountBadge = styled(EuiBadge)`
-  margin-left: 5px;
-`;
+// Ref: https://github.com/elastic/eui/issues/1655
+// const NotesCountBadge = styled(EuiBadge)`
+//   margin-left: 5px;
+// `;
+const NotesCountBadge = (props: EuiBadgeProps) => (
+  <EuiBadge {...props} style={{ marginLeft: '5px' }} />
+);
+NotesCountBadge.displayName = 'NotesCountBadge';
 
 type CreateTimeline = ({ id, show }: { id: string; show?: boolean }) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
@@ -70,6 +68,7 @@ export const StarIcon = pure<{
     )}
   </div>
 ));
+StarIcon.displayName = 'StarIcon';
 
 export const Description = pure<{
   description: string;
@@ -90,6 +89,7 @@ export const Description = pure<{
     </DescriptionContainer>
   </EuiToolTip>
 ));
+Description.displayName = 'Description';
 
 export const Name = pure<{ timelineId: string; title: string; updateTitle: UpdateTitle }>(
   ({ timelineId, title, updateTitle }) => (
@@ -105,6 +105,7 @@ export const Name = pure<{ timelineId: string; title: string; updateTitle: Updat
     </EuiToolTip>
   )
 );
+Name.displayName = 'Name';
 
 export const NewTimeline = pure<{
   createTimeline: CreateTimeline;
@@ -124,6 +125,7 @@ export const NewTimeline = pure<{
     {i18n.NEW_TIMELINE}
   </EuiButtonEmpty>
 ));
+NewTimeline.displayName = 'NewTimeline';
 
 interface NotesButtonProps {
   animate?: boolean;
@@ -139,15 +141,6 @@ interface NotesButtonProps {
 }
 
 const getNewNoteId = (): string => uuid.v4();
-
-const NotesIcon = pure<{ count: number }>(({ count }) => (
-  <EuiIcon
-    color={count > 0 ? 'primary' : 'subdued'}
-    data-test-subj="timeline-notes-icon"
-    size="l"
-    type="editorComment"
-  />
-));
 
 const LargeNotesButton = pure<{ noteIds: string[]; text?: string; toggleShowNotes: () => void }>(
   ({ noteIds, text, toggleShowNotes }) => (
@@ -172,18 +165,19 @@ const LargeNotesButton = pure<{ noteIds: string[]; text?: string; toggleShowNote
     </EuiButton>
   )
 );
+LargeNotesButton.displayName = 'LargeNotesButton';
 
 const SmallNotesButton = pure<{ noteIds: string[]; toggleShowNotes: () => void }>(
   ({ noteIds, toggleShowNotes }) => (
-    <SmallNotesButtonContainer
+    <EuiButtonIcon
+      aria-label={i18n.NOTES}
       data-test-subj="timeline-notes-button-small"
+      iconType="editorComment"
       onClick={() => toggleShowNotes()}
-      role="button"
-    >
-      <NotesIcon count={noteIds.length} />
-    </SmallNotesButtonContainer>
+    />
   )
 );
+SmallNotesButton.displayName = 'SmallNotesButton';
 
 /**
  * The internal implementation of the `NotesButton`
@@ -224,6 +218,7 @@ const NotesButtonComponent = pure<NotesButtonProps>(
     </ButtonContainer>
   )
 );
+NotesButtonComponent.displayName = 'NotesButtonComponent';
 
 export const NotesButton = pure<NotesButtonProps>(
   ({
@@ -266,3 +261,4 @@ export const NotesButton = pure<NotesButtonProps>(
       </EuiToolTip>
     )
 );
+NotesButton.displayName = 'NotesButton';

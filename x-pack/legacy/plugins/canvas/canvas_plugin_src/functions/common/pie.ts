@@ -7,13 +7,20 @@
 import { get, map, groupBy } from 'lodash';
 // @ts-ignore lodash.keyby imports invalid member from @types/lodash
 import keyBy from 'lodash.keyby';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 // @ts-ignore untyped local
 import { getColorsFromPalette } from '../../../common/lib/get_colors_from_palette';
 // @ts-ignore untyped local
 import { getLegendConfig } from '../../../common/lib/get_legend_config';
-import { getFunctionHelp } from '../../strings';
-import { Legend, Palette, PointSeries, Render, SeriesStyle, Style } from '../types';
+import { getFunctionHelp } from '../../../i18n';
+import {
+  Legend,
+  Palette,
+  PointSeries,
+  Render,
+  SeriesStyle,
+  Style,
+  ExpressionFunction,
+} from '../../../types';
 
 interface PieSeriesOptions {
   show: boolean;
@@ -82,47 +89,46 @@ export function pie(): ExpressionFunction<'pie', PointSeries, Arguments, Render<
       types: ['pointseries'],
     },
     args: {
-      palette: {
-        types: ['palette'],
-        help: argHelp.palette,
-        default: '{palette}',
-      },
-      seriesStyle: {
-        multi: true,
-        types: ['seriesStyle'],
-        help: argHelp.seriesStyle,
-      },
-      radius: {
-        types: ['string', 'number'],
-        help: argHelp.radius,
-        default: 'auto',
+      font: {
+        types: ['style'],
+        help: argHelp.font,
+        default: '{font}',
       },
       hole: {
         types: ['number'],
         default: 0,
         help: argHelp.hole,
       },
-      labels: {
-        types: ['boolean'],
-        default: true,
-        help: argHelp.labels,
-        options: [true, false],
-      },
       labelRadius: {
         types: ['number'],
         default: 100,
         help: argHelp.labelRadius,
       },
-      font: {
-        types: ['style'],
-        help: argHelp.font,
-        default: '{font}',
+      labels: {
+        types: ['boolean'],
+        default: true,
+        help: argHelp.labels,
       },
       legend: {
         types: ['string', 'boolean'],
         help: argHelp.legend,
         default: false,
-        options: Object.values(Legend).concat(false),
+        options: [...Object.values(Legend), false],
+      },
+      palette: {
+        types: ['palette'],
+        help: argHelp.palette,
+        default: '{palette}',
+      },
+      radius: {
+        types: ['string', 'number'],
+        help: argHelp.radius,
+        default: 'auto',
+      },
+      seriesStyle: {
+        multi: true,
+        types: ['seriesStyle'],
+        help: argHelp.seriesStyle,
       },
       tilt: {
         types: ['number'],

@@ -129,7 +129,7 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
     expect(result).to.eql({ found: false });
   });
 
-  describe('exporters', async () => {
+  describe('exporters', () => {
     it('should warn if all exporters are disabled', async () => {
       const input = {
         exporters: {
@@ -158,6 +158,31 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
           context: 'unit_test',
           data: 'Exporters are disabled: my_local, my_local_2, my_http, my_http_2',
           property: 'xpack.monitoring.exporters'
+        }
+      });
+    });
+
+    it('should detect if we are on cloud and remote exporters are enabled but local exporters are not enabled', async () => {
+      const input = {
+        exporters: {
+          my_http: {
+            type: 'http',
+            enabled: true,
+          },
+          my_local: {
+            type: 'local',
+            enabled: false
+          }
+        }
+      };
+
+      const result = await findReason(input, context, true); // last element is to enable cloud
+      expect(result).to.eql({
+        found: true,
+        reason: {
+          context: 'unit_test',
+          data: 'Cloud detected',
+          property: 'xpack.monitoring.exporters.cloud_enabled'
         }
       });
     });

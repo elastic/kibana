@@ -13,7 +13,11 @@ import {
   reportVisiblePositions,
   startAutoReload,
   stopAutoReload,
+  lockAutoReloadScroll,
+  unlockAutoReloadScroll,
 } from './actions';
+
+import { loadEntriesActionCreators } from '../../remote/log_entries/operations/load';
 
 interface ManualTargetPositionUpdatePolicy {
   policy: 'manual';
@@ -21,7 +25,6 @@ interface ManualTargetPositionUpdatePolicy {
 
 interface IntervalTargetPositionUpdatePolicy {
   policy: 'interval';
-  interval: number;
 }
 
 type TargetPositionUpdatePolicy =
@@ -36,6 +39,9 @@ export interface LogPositionState {
     middleKey: TimeKey | null;
     endKey: TimeKey | null;
   };
+  controlsShouldDisplayTargetPosition: boolean;
+  autoReloadJustAborted: boolean;
+  autoReloadScrollLock: boolean;
 }
 
 export const initialLogPositionState: LogPositionState = {
@@ -48,6 +54,9 @@ export const initialLogPositionState: LogPositionState = {
     middleKey: null,
     startKey: null,
   },
+  controlsShouldDisplayTargetPosition: false,
+  autoReloadJustAborted: false,
+  autoReloadScrollLock: false,
 };
 
 const targetPositionReducer = reducerWithInitialState(initialLogPositionState.targetPosition).case(
@@ -58,9 +67,8 @@ const targetPositionReducer = reducerWithInitialState(initialLogPositionState.ta
 const targetPositionUpdatePolicyReducer = reducerWithInitialState(
   initialLogPositionState.updatePolicy
 )
-  .case(startAutoReload, (state, interval) => ({
+  .case(startAutoReload, () => ({
     policy: 'interval',
-    interval,
   }))
   .case(stopAutoReload, () => ({
     policy: 'manual',
@@ -74,8 +82,46 @@ const visiblePositionReducer = reducerWithInitialState(
   startKey,
 }));
 
+// Determines whether to use the target position or the visible midpoint when
+// displaying a timestamp or time range in the toolbar and log minimap. When the
+// user jumps to a new target, the final visible midpoint is indeterminate until
+// all the new data has finished loading, so using this flag reduces the perception
+// that the UI is jumping around inaccurately
+const controlsShouldDisplayTargetPositionReducer = reducerWithInitialState(
+  initialLogPositionState.controlsShouldDisplayTargetPosition
+)
+  .case(jumpToTargetPosition, () => true)
+  .case(stopAutoReload, () => false)
+  .case(startAutoReload, () => true)
+  .case(reportVisiblePositions, (state, { fromScroll }) => {
+    if (fromScroll) return false;
+    return state;
+  });
+
+// If auto reload is aborted before a pending request finishes, this flag will
+// prevent the UI from displaying the Loading Entries screen
+const autoReloadJustAbortedReducer = reducerWithInitialState(
+  initialLogPositionState.autoReloadJustAborted
+)
+  .case(stopAutoReload, () => true)
+  .case(startAutoReload, () => false)
+  .case(loadEntriesActionCreators.resolveDone, () => false)
+  .case(loadEntriesActionCreators.resolveFailed, () => false)
+  .case(loadEntriesActionCreators.resolve, () => false);
+
+const autoReloadScrollLockReducer = reducerWithInitialState(
+  initialLogPositionState.autoReloadScrollLock
+)
+  .case(startAutoReload, () => false)
+  .case(stopAutoReload, () => false)
+  .case(lockAutoReloadScroll, () => true)
+  .case(unlockAutoReloadScroll, () => false);
+
 export const logPositionReducer = combineReducers<LogPositionState>({
   targetPosition: targetPositionReducer,
   updatePolicy: targetPositionUpdatePolicyReducer,
   visiblePositions: visiblePositionReducer,
+  controlsShouldDisplayTargetPosition: controlsShouldDisplayTargetPositionReducer,
+  autoReloadJustAborted: autoReloadJustAbortedReducer,
+  autoReloadScrollLock: autoReloadScrollLockReducer,
 });

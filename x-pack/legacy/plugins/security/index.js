@@ -5,34 +5,18 @@
  */
 
 import { resolve } from 'path';
-import { getUserProvider } from './server/lib/get_user';
 import { initAuthenticateApi } from './server/routes/api/v1/authenticate';
 import { initUsersApi } from './server/routes/api/v1/users';
-import { initExternalRolesApi } from './server/routes/api/external/roles';
-import { initPrivilegesApi } from './server/routes/api/external/privileges';
+import { initApiKeysApi } from './server/routes/api/v1/api_keys';
 import { initIndicesApi } from './server/routes/api/v1/indices';
 import { initOverwrittenSessionView } from './server/routes/views/overwritten_session';
 import { initLoginView } from './server/routes/views/login';
 import { initLogoutView } from './server/routes/views/logout';
 import { initLoggedOutView } from './server/routes/views/logged_out';
-import { validateConfig } from './server/lib/validate_config';
-import { authenticateFactory } from './server/lib/auth_redirect';
-import { checkLicense } from './server/lib/check_license';
-import { initAuthenticator } from './server/lib/authentication/authenticator';
-import { SecurityAuditLogger } from './server/lib/audit_logger';
 import { AuditLogger } from '../../server/lib/audit_logger';
-import {
-  createAuthorizationService,
-  disableUICapabilitesFactory,
-  initAPIAuthorization,
-  initAppAuthorization,
-  registerPrivilegesWithCluster,
-  validateFeaturePrivileges
-} from './server/lib/authorization';
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
-import { SecureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/secure_saved_objects_client_wrapper';
-import { deepFreeze } from './server/lib/deep_freeze';
-import { createOptionalPlugin } from '../../server/lib/optional_plugin';
+import { KibanaRequest } from '../../../../src/core/server';
+import { createCSPRuleString } from '../../../../src/legacy/server/csp';
 
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',
@@ -41,23 +25,12 @@ export const security = (kibana) => new kibana.Plugin({
   require: ['kibana', 'elasticsearch', 'xpack_main'],
 
   config(Joi) {
-    const providerOptionsSchema = (providerName, schema) => Joi.any()
-      .when('providers', {
-        is: Joi.array().items(Joi.string().valid(providerName).required(), Joi.string()),
-        then: schema,
-        otherwise: Joi.any().forbidden(),
-      });
-
     return Joi.object({
       enabled: Joi.boolean().default(true),
-      cookieName: Joi.string().default('sid'),
-      encryptionKey: Joi.when(Joi.ref('$dist'), {
-        is: true,
-        then: Joi.string(),
-        otherwise: Joi.string().default('a'.repeat(32)),
-      }),
-      sessionTimeout: Joi.number().allow(null).default(null),
-      secureCookies: Joi.boolean().default(false),
+      cookieName: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
+      encryptionKey: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
+      sessionTimeout: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
+      secureCookies: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
       authorization: Joi.object({
         legacyFallback: Joi.object({
           enabled: Joi.boolean().default(true) // deprecated
@@ -66,11 +39,7 @@ export const security = (kibana) => new kibana.Plugin({
       audit: Joi.object({
         enabled: Joi.boolean().default(false)
       }).default(),
-      authc: Joi.object({
-        providers: Joi.array().items(Joi.string()).default(['basic']),
-        oidc: providerOptionsSchema('oidc', Joi.object({ realm: Joi.string().required() }).required()),
-        saml: providerOptionsSchema('saml', Joi.object({ realm: Joi.string().required() }).required()),
-      }).default()
+      authc: Joi.any().description('This key is handled in the new platform security plugin ONLY')
     }).default();
   },
 
@@ -111,141 +80,80 @@ export const security = (kibana) => new kibana.Plugin({
       'plugins/security/hacks/on_unauthorized_response'
     ],
     home: ['plugins/security/register_feature'],
-    injectDefaultVars: function (server) {
-      const config = server.config();
+    injectDefaultVars: (server) => {
+      const securityPlugin = server.newPlatform.setup.plugins.security;
+      if (!securityPlugin) {
+        throw new Error('New Platform XPack Security plugin is not available.');
+      }
 
       return {
-        secureCookies: config.get('xpack.security.secureCookies'),
-        sessionTimeout: config.get('xpack.security.sessionTimeout'),
-        enableSpaceAwarePrivileges: config.get('xpack.spaces.enabled'),
+        secureCookies: securityPlugin.__legacyCompat.config.secureCookies,
+        sessionTimeout: securityPlugin.__legacyCompat.config.sessionTimeout,
+        enableSpaceAwarePrivileges: server.config().get('xpack.spaces.enabled'),
       };
-    }
+    },
   },
 
   async postInit(server) {
-    const plugin = this;
+    const securityPlugin = server.newPlatform.setup.plugins.security;
+    if (!securityPlugin) {
+      throw new Error('New Platform XPack Security plugin is not available.');
+    }
 
-    const xpackMainPlugin = server.plugins.xpack_main;
-
-    watchStatusAndLicenseToInitialize(xpackMainPlugin, plugin, async (license) => {
-      if (license.allowRbac) {
-        const { security } = server.plugins;
-        await validateFeaturePrivileges(security.authorization.actions, xpackMainPlugin.getFeatures());
-        await registerPrivilegesWithCluster(server);
+    watchStatusAndLicenseToInitialize(server.plugins.xpack_main, this, async () => {
+      if (securityPlugin.__legacyCompat.license.getFeatures().allowRbac) {
+        await securityPlugin.__legacyCompat.registerPrivilegesWithCluster();
       }
     });
   },
 
   async init(server) {
-    const plugin = this;
+    const securityPlugin = server.newPlatform.setup.plugins.security;
+    if (!securityPlugin) {
+      throw new Error('New Platform XPack Security plugin is not available.');
+    }
 
     const config = server.config();
-    const xpackMainPlugin = server.plugins.xpack_main;
-    const xpackInfo = xpackMainPlugin.info;
-
-    const xpackInfoFeature = xpackInfo.feature(plugin.id);
-
-    // Register a function that is called whenever the xpack info changes,
-    // to re-compute the license check results for this plugin
-    xpackInfoFeature.registerLicenseCheckResultsGenerator(checkLicense);
-
-    validateConfig(config, message => server.log(['security', 'warning'], message));
-
-    // Create a Hapi auth scheme that should be applied to each request.
-    server.auth.scheme('login', () => ({ authenticate: authenticateFactory(server) }));
-
-    server.auth.strategy('session', 'login');
-
-    // The default means that the `session` strategy that is based on `login` schema defined above will be
-    // automatically assigned to all routes that don't contain an auth config.
-    server.auth.default('session');
-
-    const { savedObjects } = server;
-
-    const spaces = createOptionalPlugin(config, 'xpack.spaces', server.plugins, 'spaces');
-
-    // exposes server.plugins.security.authorization
-    const authorization = createAuthorizationService(server, xpackInfoFeature, xpackMainPlugin, spaces);
-    server.expose('authorization', deepFreeze(authorization));
-
-    const auditLogger = new SecurityAuditLogger(new AuditLogger(server, 'security', server.config(), xpackInfo));
-
-    savedObjects.setScopedSavedObjectsClientFactory(({
-      request,
-    }) => {
-      const adminCluster = server.plugins.elasticsearch.getCluster('admin');
-      const { callWithRequest, callWithInternalUser } = adminCluster;
-      const callCluster = (...args) => callWithRequest(request, ...args);
-
-      if (authorization.mode.useRbacForRequest(request)) {
-        const internalRepository = savedObjects.getSavedObjectsRepository(callWithInternalUser);
-        return new savedObjects.SavedObjectsClient(internalRepository);
-      }
-
-      const callWithRequestRepository = savedObjects.getSavedObjectsRepository(callCluster);
-      return new savedObjects.SavedObjectsClient(callWithRequestRepository);
+    const xpackInfo = server.plugins.xpack_main.info;
+    securityPlugin.__legacyCompat.registerLegacyAPI({
+      savedObjects: server.savedObjects,
+      auditLogger: new AuditLogger(server, 'security', config, xpackInfo),
+      isSystemAPIRequest: server.plugins.kibana.systemApi.isSystemApiRequest.bind(
+        server.plugins.kibana.systemApi
+      ),
+      capabilities: { registerCapabilitiesModifier: server.registerCapabilitiesModifier },
+      cspRules: createCSPRuleString(config.get('csp.rules')),
+      kibanaIndexName: config.get('kibana.index'),
     });
 
-    savedObjects.addScopedSavedObjectsClientWrapperFactory(Number.MIN_SAFE_INTEGER, ({ client, request }) => {
-      if (authorization.mode.useRbacForRequest(request)) {
-        return new SecureSavedObjectsClientWrapper({
-          actions: authorization.actions,
-          auditLogger,
-          baseClient: client,
-          checkPrivilegesDynamicallyWithRequest: authorization.checkPrivilegesDynamicallyWithRequest,
-          errors: savedObjects.SavedObjectsClient.errors,
-          request,
-          savedObjectTypes: savedObjects.types,
-        });
-      }
+    // Legacy xPack Info endpoint returns whatever we return in a callback for `registerLicenseCheckResultsGenerator`
+    // and the result is consumed by the legacy plugins all over the place, so we should keep it here for now. We assume
+    // that when legacy callback is called license has been already propagated to the new platform security plugin and
+    // features are up to date.
+    xpackInfo.feature(this.id).registerLicenseCheckResultsGenerator(
+      () => securityPlugin.__legacyCompat.license.getFeatures()
+    );
 
-      return client;
-    });
+    server.expose({ getUser: request => securityPlugin.authc.getCurrentUser(KibanaRequest.from(request)) });
 
-    getUserProvider(server);
-
-    await initAuthenticator(server);
-    initAuthenticateApi(server);
-    initAPIAuthorization(server, authorization);
-    initAppAuthorization(server, xpackMainPlugin, authorization);
-    initUsersApi(server);
-    initExternalRolesApi(server);
+    initAuthenticateApi(securityPlugin, server);
+    initUsersApi(securityPlugin, server);
+    initApiKeysApi(server);
     initIndicesApi(server);
-    initPrivilegesApi(server);
-    initLoginView(server, xpackMainPlugin);
+    initLoginView(securityPlugin, server);
     initLogoutView(server);
-    initLoggedOutView(server);
+    initLoggedOutView(securityPlugin, server);
     initOverwrittenSessionView(server);
 
     server.injectUiAppVars('login', () => {
-
-      const { showLogin, loginMessage, allowLogin, layout = 'form' } = xpackInfo.feature(plugin.id).getLicenseCheckResults() || {};
-
+      const { showLogin, allowLogin, layout = 'form' } = securityPlugin.__legacyCompat.license.getFeatures();
       return {
         loginState: {
           showLogin,
           allowLogin,
-          loginMessage,
           layout,
         }
       };
-    });
-
-    server.registerCapabilitiesModifier((request, uiCapabilities) => {
-      // if we have a license which doesn't enable security, or we're a legacy user
-      // we shouldn't disable any ui capabilities
-      const { authorization } = server.plugins.security;
-      if (!authorization.mode.useRbacForRequest(request)) {
-        return uiCapabilities;
-      }
-
-      const disableUICapabilites = disableUICapabilitesFactory(server, request);
-      // if we're an anonymous route, we disable all ui capabilities
-      if (request.route.settings.auth === false) {
-        return disableUICapabilites.all(uiCapabilities);
-      }
-
-      return disableUICapabilites.usingPrivileges(uiCapabilities);
     });
   }
 });

@@ -1,0 +1,56 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Render <DocViewer/> with 3 different tabs 1`] = `
+<div
+  className="kbnDocViewer"
+>
+  <EuiTabbedContent
+    autoFocus="initial"
+    tabs={
+      Array [
+        Object {
+          "content": <DocViewerTab
+            id={0}
+            render={[MockFunction]}
+            renderProps={
+              Object {
+                "hit": Object {},
+              }
+            }
+            title="Render function"
+          />,
+          "id": "Render function",
+          "name": "Render function",
+        },
+        Object {
+          "content": <DocViewerTab
+            component={[Function]}
+            id={1}
+            renderProps={
+              Object {
+                "hit": Object {},
+              }
+            }
+            title="React component"
+          />,
+          "id": "React component",
+          "name": "React component",
+        },
+        Object {
+          "content": <DocViewerTab
+            id={2}
+            renderProps={
+              Object {
+                "hit": Object {},
+              }
+            }
+            title="Invalid doc view"
+          />,
+          "id": "Invalid doc view",
+          "name": "Invalid doc view",
+        },
+      ]
+    }
+  />
+</div>
+`;

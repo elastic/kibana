@@ -6,8 +6,6 @@
 
 Hides a link from the navigation.
 
-NOTE: remove this when ApplicationService is implemented. Instead, plugins should only register an Application if needed.
-
 <b>Signature:</b>
 
 ```typescript

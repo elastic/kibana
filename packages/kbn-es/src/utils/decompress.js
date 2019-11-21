@@ -21,7 +21,6 @@ const fs = require('fs');
 const path = require('path');
 
 const yauzl = require('yauzl');
-const mkdirp = require('mkdirp');
 const zlib = require('zlib');
 const tarFs = require('tar-fs');
 
@@ -38,7 +37,7 @@ function decompressTarball(archive, dirPath) {
 }
 
 function decompressZip(input, output) {
-  mkdirp.sync(output);
+  fs.mkdirSync(output, { recursive: true });
   return new Promise((resolve, reject) => {
     yauzl.open(input, { lazyEntries: true }, (err, zipfile) => {
       if (err) {
@@ -63,7 +62,7 @@ function decompressZip(input, output) {
         const fileName = path.resolve(output, zipPath);
 
         if (/\/$/.test(entry.fileName)) {
-          mkdirp.sync(fileName);
+          fs.mkdirSync(fileName, { recursive: true });
           zipfile.readEntry();
         } else {
           // file entry

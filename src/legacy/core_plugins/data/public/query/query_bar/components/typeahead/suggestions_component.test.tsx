@@ -19,7 +19,7 @@
 
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
+import { AutocompleteSuggestion } from '../../../../../../../../plugins/data/public';
 import { SuggestionComponent } from './suggestion_component';
 import { SuggestionsComponent } from './suggestions_component';
 

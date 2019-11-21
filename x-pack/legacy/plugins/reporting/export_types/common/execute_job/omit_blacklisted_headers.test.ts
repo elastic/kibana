@@ -20,6 +20,7 @@ test(`omits blacklisted headers`, async () => {
 
   const blacklistedHeaders = {
     'accept-encoding': '',
+    connection: 'upgrade',
     'content-length': '',
     'content-type': '',
     host: '',

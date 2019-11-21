@@ -8,6 +8,8 @@
 
 import _ from 'lodash';
 
+import { mlLog } from '../../client/log';
+
 import { INTERVALS } from './intervals';
 import { singleSeriesCheckerFactory } from './single_series_checker';
 import { polledDataCheckerFactory } from './polled_data_checker';
@@ -115,7 +117,7 @@ export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, 
     run() {
       return new Promise((resolve, reject) => {
         if (this.checkers.length === 0) {
-          console.log('BucketSpanEstimator: run has stopped because no checks were created');
+          mlLog.warn('BucketSpanEstimator: run has stopped because no checks were created');
           reject('BucketSpanEstimator: run has stopped because no checks were created');
         }
 
@@ -136,7 +138,7 @@ export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, 
                   resolve(median);
                 } else {
                 // no results found
-                  console.log('BucketSpanEstimator: run has stopped because no checks returned a valid interval');
+                  mlLog.warn('BucketSpanEstimator: run has stopped because no checks returned a valid interval');
                   reject('BucketSpanEstimator: run has stopped because no checks returned a valid interval');
                 }
               }

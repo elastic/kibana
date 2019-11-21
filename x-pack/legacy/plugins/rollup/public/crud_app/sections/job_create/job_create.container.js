@@ -10,17 +10,20 @@ import { JobCreate as JobCreateView } from './job_create';
 import {
   isSaving,
   getCreateJobError,
+  getCloneJobConfig,
 } from '../../store/selectors';
 
 import {
   createJob,
   clearCreateJobErrors,
+  clearCloneJob,
 } from '../../store/actions';
 
 const mapStateToProps = (state) => {
   return {
     isSaving: isSaving(state),
     saveError: getCreateJobError(state),
+    jobToClone: getCloneJobConfig(state),
   };
 };
 
@@ -31,6 +34,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     clearCreateJobErrors: () => {
       dispatch(clearCreateJobErrors());
+    },
+    clearCloneJob: () => {
+      dispatch(clearCloneJob());
     },
   };
 };

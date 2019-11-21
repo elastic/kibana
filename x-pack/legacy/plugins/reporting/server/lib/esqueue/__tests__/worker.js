@@ -8,15 +8,15 @@ import expect from '@kbn/expect';
 import sinon from 'sinon';
 import moment from 'moment';
 import { noop, random, get, find, identity } from 'lodash';
-import { ClientMock } from './fixtures/elasticsearch';
+import { ClientMock } from './fixtures/legacy_elasticsearch';
 import { QueueMock } from './fixtures/queue';
-import { Worker } from '../worker';
+import { formatJobObject, getUpdatedDocPath, Worker } from '../worker';
 import { constants } from '../constants';
 
 const anchor = '2016-04-02T01:02:03.456'; // saturday
 const defaults = {
   timeout: 10000,
-  size: 10,
+  size: 1,
   unknownMime: false,
   contentBody: null,
 };
@@ -107,7 +107,6 @@ describe('Worker class', function () {
       expect(worker).to.have.property('queue', mockQueue);
       expect(worker).to.have.property('jobtype', jobtype);
       expect(worker).to.have.property('workerFn', workerFn);
-      expect(worker).to.have.property('checkSize');
     });
 
     it('should have a unique ID', function () {
@@ -379,12 +378,6 @@ describe('Worker class', function () {
       it('should use default size', function () {
         const { body } = getSearchParams(jobtype);
         expect(body).to.have.property('size', defaults.size);
-      });
-
-      it('should observe the size option', function () {
-        const size = 25;
-        const { body } = getSearchParams(jobtype, { size });
-        expect(body).to.have.property('size', size);
       });
     });
   });
@@ -1059,5 +1052,35 @@ describe('Worker class', function () {
         });
       });
     });
+  });
+});
+
+describe('Format Job Object', () => {
+  it('pulls index and ID', function () {
+    const jobMock = {
+      _index: 'foo',
+      _id: 'booId',
+    };
+    expect(formatJobObject(jobMock)).eql({
+      index: 'foo',
+      id: 'booId',
+    });
+  });
+});
+
+describe('Get Doc Path from ES Response', () => {
+  it('returns a formatted string after response of an update', function () {
+    const responseMock = {
+      _index: 'foo',
+      _id: 'booId',
+    };
+    expect(getUpdatedDocPath(responseMock)).equal('/foo/_doc/booId');
+  });
+  it('returns the same formatted string even if there is no _doc provided', function () {
+    const responseMock = {
+      _index: 'foo',
+      _id: 'booId',
+    };
+    expect(getUpdatedDocPath(responseMock)).equal('/foo/_doc/booId');
   });
 });

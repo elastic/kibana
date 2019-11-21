@@ -28,7 +28,7 @@ export {
   esOverviewRoute,
   mlJobRoute,
   ccrRoute,
-  ccrShardRoute
+  ccrShardRoute,
 } from './elasticsearch';
 export {
   clusterSettingsCheckRoute,
@@ -52,6 +52,7 @@ export {
   logstashNodeRoute,
   logstashNodesRoute,
   logstashOverviewRoute,
-  logstashPipelineRoute
+  logstashPipelineRoute,
+  logstashClusterPipelineIdsRoute
 } from './logstash';
 export * from './setup';

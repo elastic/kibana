@@ -8,24 +8,11 @@ import { SearchParams } from 'elasticsearch';
 import { sum as arraySum, min as arrayMin, max as arrayMax, get } from 'lodash';
 import { fromExpression } from '@kbn/interpreter/common';
 import { CANVAS_TYPE } from '../../common/lib/constants';
-import { AST, collectFns } from './collector_helpers';
-import { TelemetryCollector } from './collector';
-
-interface Element {
-  expression: string;
-}
-
-interface Page {
-  elements: Element[];
-}
-
-interface Workpad {
-  pages: Page[];
-  [s: string]: any; // Only concerned with the pages here, but allow workpads to have any values
-}
+import { collectFns } from './collector_helpers';
+import { ExpressionAST, TelemetryCollector, CanvasWorkpad } from '../../types';
 
 interface WorkpadSearch {
-  [CANVAS_TYPE]: Workpad;
+  [CANVAS_TYPE]: CanvasWorkpad;
 }
 
 interface WorkpadTelemetry {
@@ -61,12 +48,11 @@ interface WorkpadTelemetry {
 
 /**
   Gather statistic about the given workpads
-
   @param workpadDocs a collection of workpad documents
   @returns Workpad Telemetry Data
 */
-export function summarizeWorkpads(workpadDocs: Workpad[]): WorkpadTelemetry {
-  const functionSet = new Set();
+export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetry {
+  const functionSet = new Set<string>();
 
   if (workpadDocs.length === 0) {
     return {};
@@ -87,7 +73,7 @@ export function summarizeWorkpads(workpadDocs: Workpad[]): WorkpadTelemetry {
     );
     const functionCounts = workpad.pages.reduce<number[]>((accum, page) => {
       return page.elements.map(element => {
-        const ast: AST = fromExpression(element.expression) as AST; // TODO: Remove once fromExpression is properly typed
+        const ast: ExpressionAST = fromExpression(element.expression) as ExpressionAST; // TODO: Remove once fromExpression is properly typed
         collectFns(ast, cFunction => {
           functionSet.add(cFunction);
         });
@@ -173,11 +159,10 @@ export function summarizeWorkpads(workpadDocs: Workpad[]): WorkpadTelemetry {
   };
 }
 
-const workpadCollector: TelemetryCollector = async function(server, callCluster) {
-  const index = server.config().get<string>('kibana.index');
+const workpadCollector: TelemetryCollector = async function(kibanaIndex, callCluster) {
   const searchParams: SearchParams = {
     size: 10000, // elasticsearch index.max_result_window default value
-    index,
+    index: kibanaIndex,
     ignoreUnavailable: true,
     filterPath: ['hits.hits._source.canvas-workpad', '-hits.hits._source.canvas-workpad.assets'],
     body: { query: { bool: { filter: { term: { type: CANVAS_TYPE } } } } },
@@ -185,7 +170,7 @@ const workpadCollector: TelemetryCollector = async function(server, callCluster)
 
   const esResponse = await callCluster<WorkpadSearch>('search', searchParams);
 
-  if (get(esResponse, 'hits.hits.length') > 0) {
+  if (get<number>(esResponse, 'hits.hits.length') > 0) {
     const workpads = esResponse.hits.hits.map(hit => hit._source[CANVAS_TYPE]);
     return summarizeWorkpads(workpads);
   }

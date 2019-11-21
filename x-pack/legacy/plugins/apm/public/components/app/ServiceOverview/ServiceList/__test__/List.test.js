@@ -10,7 +10,7 @@ import { ServiceList, SERVICE_COLUMNS } from '../index';
 import props from './props.json';
 import { mockMoment } from '../../../../../utils/testHelpers';
 
-describe('ErrorGroupOverview -> List', () => {
+describe('ServiceOverview -> List', () => {
   beforeAll(() => {
     mockMoment();
   });

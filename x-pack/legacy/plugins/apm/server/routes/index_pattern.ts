@@ -3,28 +3,36 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import * as t from 'io-ts';
+import { createStaticIndexPattern } from '../lib/index_pattern/create_static_index_pattern';
+import { createRoute } from './create_route';
+import { setupRequest } from '../lib/helpers/setup_request';
 
-import Boom from 'boom';
-import { InternalCoreSetup } from 'src/core/server';
-import { getIndexPattern } from '../lib/index_pattern';
+export const staticIndexPatternRoute = createRoute(() => ({
+  method: 'POST',
+  path: '/api/apm/index_pattern/static',
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    await createStaticIndexPattern(setup, context);
 
-const ROOT = '/api/apm/index_pattern';
-const defaultErrorHandler = (err: Error & { status?: number }) => {
-  // eslint-disable-next-line
-  console.error(err.stack);
-  throw Boom.boomify(err, { statusCode: err.status || 500 });
-};
+    // send empty response regardless of outcome
+    return undefined;
+  }
+}));
 
-export function initIndexPatternApi(core: InternalCoreSetup) {
-  const { server } = core.http;
-  server.route({
-    method: 'GET',
-    path: ROOT,
-    options: {
-      tags: ['access:apm']
-    },
-    handler: async req => {
-      return await getIndexPattern(core).catch(defaultErrorHandler);
-    }
-  });
-}
+export const dynamicIndexPatternRoute = createRoute(() => ({
+  path: '/api/apm/index_pattern/dynamic',
+  params: {
+    query: t.partial({
+      processorEvent: t.union([
+        t.literal('transaction'),
+        t.literal('metric'),
+        t.literal('error')
+      ])
+    })
+  },
+  handler: async ({ context, request }) => {
+    const { dynamicIndexPattern } = await setupRequest(context, request);
+    return { dynamicIndexPattern };
+  }
+}));

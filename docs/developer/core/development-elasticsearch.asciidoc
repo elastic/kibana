@@ -1,0 +1,40 @@
+[[development-elasticsearch]]
+=== Communicating with Elasticsearch
+
+Kibana exposes two clients on the server and browser for communicating with elasticsearch.
+There is an 'admin' client which is used for managing Kibana's state, and a 'data' client for all
+other requests.  The clients use the {jsclient-current}/index.html[elasticsearch.js library].
+
+[float]
+[[client-server]]
+=== Server clients
+
+Server clients are exposed through the elasticsearch plugin.
+[source,javascript]
+----
+  const adminCluster = server.plugins.elasticsearch.getCluster('admin');
+  const dataCluster = server.plugins.elasticsearch.getCluster('data');
+
+  //ping as the configured elasticsearch.user in kibana.yml
+  adminCluster.callWithInternalUser('ping');
+
+  //ping as the user specified in the current requests header
+  adminCluster.callWithRequest(req, 'ping');
+----
+
+[float]
+[[client-browser]]
+=== Browser clients
+
+Browser clients are exposed through AngularJS services.
+
+[source,javascript]
+----
+uiModules.get('kibana')
+.run(function (es) {
+  es.ping()
+  .catch(err => {
+    console.log('error pinging servers');
+  });
+});
+----

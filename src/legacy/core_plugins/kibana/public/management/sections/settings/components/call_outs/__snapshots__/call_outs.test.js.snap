@@ -5,7 +5,6 @@ exports[`CallOuts should render normally 1`] = `
   <EuiCallOut
     color="warning"
     iconType="bolt"
-    size="m"
     title={
       <FormattedMessage
         defaultMessage="Caution: You can break stuff here"

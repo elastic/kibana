@@ -12,10 +12,12 @@ import { Legacy } from 'kibana';
 import { ESQuery } from '../../../common/typed_json';
 import {
   PaginationInput,
+  PaginationInputPaginated,
   SortField,
   SourceConfiguration,
   TimerangeInput,
 } from '../../graphql/types';
+import { RequestFacade } from '../../types';
 
 export * from '../../utils/typed_resolvers';
 
@@ -50,12 +52,11 @@ export interface FrameworkAdapter {
     method: 'indices.getAlias' | 'indices.get', // eslint-disable-line
     options?: object
   ): Promise<DatabaseGetIndicesResponse>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getIndexPatternsService(req: FrameworkRequest<any>): FrameworkIndexPatternsService;
+  getIndexPatternsService(req: FrameworkRequest): FrameworkIndexPatternsService;
   getSavedObjectsService(): Legacy.SavedObjectsService;
 }
 
-export interface FrameworkRequest<InternalRequest extends WrappableRequest = WrappableRequest> {
+export interface FrameworkRequest<InternalRequest extends WrappableRequest = RequestFacade> {
   [internalFrameworkRequest]: InternalRequest;
   payload: InternalRequest['payload'];
   params: InternalRequest['params'];
@@ -117,12 +118,12 @@ export interface MappingResponse {
 }
 
 interface FrameworkIndexFieldDescriptor {
-  name: string;
-  type: string;
-  searchable: boolean;
   aggregatable: boolean;
-  readFromDocValues: boolean;
   esTypes: string[];
+  name: string;
+  readFromDocValues: boolean;
+  searchable: boolean;
+  type: string;
 }
 
 export interface FrameworkIndexPatternsService {
@@ -156,6 +157,12 @@ export interface RequestBasicOptions {
 
 export interface RequestOptions extends RequestBasicOptions {
   pagination: PaginationInput;
-  fields: ReadonlyArray<string>;
+  fields: readonly string[];
+  sortField?: SortField;
+}
+
+export interface RequestOptionsPaginated extends RequestBasicOptions {
+  pagination: PaginationInputPaginated;
+  fields: readonly string[];
   sortField?: SortField;
 }

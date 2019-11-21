@@ -4,4 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { Router } from './router';
+import { connect } from 'react-redux';
+import { setFullscreen } from '../../state/actions/transient';
+import {
+  enableAutoplay,
+  setRefreshInterval,
+  setAutoplayInterval,
+} from '../../state/actions/workpad';
+import { Router as Component } from './router';
+
+const mapDispatchToState = {
+  enableAutoplay,
+  setAutoplayInterval,
+  setFullscreen,
+  setRefreshInterval,
+};
+
+export const Router = connect(null, mapDispatchToState)(Component);

@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`includes namespace in failure 1`] = `
+"[foo-namespace]: types that failed validation:
+- [foo-namespace.0]: value is [foo] but it must have a maximum length of [1].
+- [foo-namespace.1]: expected value to equal [null] but got [foo]"
+`;
+
+exports[`validates basic type 1`] = `
+"types that failed validation:
+- [0]: expected value of type [string] but got [number]
+- [1]: expected value to equal [null] but got [666]"
+`;
+
+exports[`validates contained type 1`] = `
+"types that failed validation:
+- [0]: value is [foo] but it must have a maximum length of [1].
+- [1]: expected value to equal [null] but got [foo]"
+`;
+
+exports[`validates type errors in object 1`] = `
+"[foo]: types that failed validation:
+- [foo.0]: value is [ab] but it must have a maximum length of [1].
+- [foo.1]: expected value to equal [null] but got [ab]"
+`;

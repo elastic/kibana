@@ -16,6 +16,8 @@ const IpPortSeparator = styled.span`
   margin: 0 3px;
 `;
 
+IpPortSeparator.displayName = 'IpPortSeparator';
+
 /**
  * Renders a separator (i.e. `:`) and a draggable, hyperlinked port when
  * a port is specified
@@ -43,6 +45,8 @@ const PortWithSeparator = pure<{
     </EuiFlexGroup>
   ) : null;
 });
+
+PortWithSeparator.displayName = 'PortWithSeparator';
 
 /**
  * Renders a draggable, hyperlinked IP address, and if provided, an associated
@@ -78,3 +82,5 @@ export const IpWithPort = pure<{
     </EuiFlexGroup>
   );
 });
+
+IpWithPort.displayName = 'IpWithPort';

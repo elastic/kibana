@@ -8,12 +8,12 @@ export function MonitoringKibanaSummaryStatusProvider({ getService }) {
   const testSubjects = getService('testSubjects');
 
   const SUBJ_SUMMARY = 'kibanaClusterStatus';
-  const SUBJ_SUMMARY_INSTANCES = `${SUBJ_SUMMARY} instances`;
-  const SUBJ_SUMMARY_MEMORY = `${SUBJ_SUMMARY} memory`;
-  const SUBJ_SUMMARY_REQUESTS = `${SUBJ_SUMMARY} requests`;
-  const SUBJ_SUMMARY_CONNECTIONS = `${SUBJ_SUMMARY} connections`;
-  const SUBJ_SUMMARY_MAX_RESPONSE_TIME = `${SUBJ_SUMMARY} maxResponseTime`;
-  const SUBJ_SUMMARY_HEALTH = `${SUBJ_SUMMARY} statusIcon`;
+  const SUBJ_SUMMARY_INSTANCES = `${SUBJ_SUMMARY} > instances`;
+  const SUBJ_SUMMARY_MEMORY = `${SUBJ_SUMMARY} > memory`;
+  const SUBJ_SUMMARY_REQUESTS = `${SUBJ_SUMMARY} > requests`;
+  const SUBJ_SUMMARY_CONNECTIONS = `${SUBJ_SUMMARY} > connections`;
+  const SUBJ_SUMMARY_MAX_RESPONSE_TIME = `${SUBJ_SUMMARY} > maxResponseTime`;
+  const SUBJ_SUMMARY_HEALTH = `${SUBJ_SUMMARY} > statusIcon`;
 
   return new class KibanaSummaryStatus {
 
@@ -24,7 +24,7 @@ export function MonitoringKibanaSummaryStatusProvider({ getService }) {
         requests: await testSubjects.getVisibleText(SUBJ_SUMMARY_REQUESTS),
         connections: await testSubjects.getVisibleText(SUBJ_SUMMARY_CONNECTIONS),
         maxResponseTime: await testSubjects.getVisibleText(SUBJ_SUMMARY_MAX_RESPONSE_TIME),
-        health: await testSubjects.getProperty(SUBJ_SUMMARY_HEALTH, 'alt'),
+        health: await testSubjects.getAttribute(SUBJ_SUMMARY_HEALTH, 'alt'),
       };
     }
 

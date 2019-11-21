@@ -2,7 +2,7 @@
 
 exports[`Storyshots components/FileUpload default 1`] = `
 <div
-  className="euiFilePicker euiFilePicker--compressed canvasFileUpload"
+  className="euiFilePicker euiFilePicker--large euiFilePicker--compressed canvasFileUpload"
 >
   <div
     className="euiFilePicker__wrap"
@@ -21,7 +21,7 @@ exports[`Storyshots components/FileUpload default 1`] = `
     >
       <svg
         aria-hidden="true"
-        className="euiIcon euiIcon--medium euiIcon-isLoading euiFilePicker__icon"
+        className="euiIcon euiIcon--large euiIcon-isLoading euiFilePicker__icon"
         focusable="false"
         height={16}
         style={null}

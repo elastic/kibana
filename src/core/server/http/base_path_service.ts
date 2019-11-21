@@ -16,38 +16,59 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Request } from 'hapi';
-import { KibanaRequest, getIncomingMessage } from './router';
+import { ensureRawRequest, KibanaRequest, LegacyRequest } from './router';
 
 import { modifyUrl } from '../../utils';
 
+/**
+ * Access or manipulate the Kibana base path
+ *
+ * @public
+ */
 export class BasePath {
-  private readonly basePathCache = new WeakMap<ReturnType<typeof getIncomingMessage>, string>();
+  private readonly basePathCache = new WeakMap<LegacyRequest, string>();
 
-  constructor(private readonly serverBasePath?: string) {}
+  /**
+   * returns the server's basePath
+   *
+   * See {@link BasePath.get} for getting the basePath value for a specific request
+   */
+  public readonly serverBasePath: string;
 
-  public get = (request: KibanaRequest | Request) => {
-    const incomingMessage = getIncomingMessage(request);
+  /** @internal */
+  constructor(serverBasePath: string = '') {
+    this.serverBasePath = serverBasePath;
+  }
 
-    const requestScopePath = this.basePathCache.get(incomingMessage) || '';
-    const serverBasePath = this.serverBasePath || '';
-    return `${serverBasePath}${requestScopePath}`;
+  /**
+   * returns `basePath` value, specific for an incoming request.
+   */
+  public get = (request: KibanaRequest | LegacyRequest) => {
+    const requestScopePath = this.basePathCache.get(ensureRawRequest(request)) || '';
+    return `${this.serverBasePath}${requestScopePath}`;
   };
 
-  // should work only for KibanaRequest as soon as spaces migrate to NP
-  public set = (request: KibanaRequest | Request, requestSpecificBasePath: string) => {
-    const incomingMessage = getIncomingMessage(request);
+  /**
+   * sets `basePath` value, specific for an incoming request.
+   *
+   * @privateRemarks should work only for KibanaRequest as soon as spaces migrate to NP
+   */
+  public set = (request: KibanaRequest | LegacyRequest, requestSpecificBasePath: string) => {
+    const rawRequest = ensureRawRequest(request);
 
-    if (this.basePathCache.has(incomingMessage)) {
+    if (this.basePathCache.has(rawRequest)) {
       throw new Error(
         'Request basePath was previously set. Setting multiple times is not supported.'
       );
     }
-    this.basePathCache.set(incomingMessage, requestSpecificBasePath);
+    this.basePathCache.set(rawRequest, requestSpecificBasePath);
   };
 
+  /**
+   * Prepends `path` with the basePath.
+   */
   public prepend = (path: string): string => {
-    if (!this.serverBasePath) return path;
+    if (this.serverBasePath === '') return path;
     return modifyUrl(path, parts => {
       if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
         parts.pathname = `${this.serverBasePath}${parts.pathname}`;
@@ -55,8 +76,11 @@ export class BasePath {
     });
   };
 
+  /**
+   * Removes the prepended basePath from the `path`.
+   */
   public remove = (path: string): string => {
-    if (!this.serverBasePath) {
+    if (this.serverBasePath === '') {
       return path;
     }
 
@@ -71,3 +95,11 @@ export class BasePath {
     return path;
   };
 }
+
+/**
+ * Access or manipulate the Kibana base path
+ *
+ * {@link BasePath}
+ * @public
+ */
+export type IBasePath = Pick<BasePath, keyof BasePath>;

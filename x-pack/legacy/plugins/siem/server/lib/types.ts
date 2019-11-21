@@ -21,6 +21,7 @@ import { UncommonProcesses } from './uncommon_processes';
 import { Note } from './note/saved_object';
 import { PinnedEvent } from './pinned_event/saved_object';
 import { Timeline } from './timeline/saved_object';
+import { TLS } from './tls';
 
 export * from './hosts';
 
@@ -35,6 +36,7 @@ export interface AppDomainLibs {
   overview: Overview;
   uncommonProcesses: UncommonProcesses;
   kpiHosts: KpiHosts;
+  tls: TLS;
 }
 
 export interface AppBackendLibs extends AppDomainLibs {
@@ -58,6 +60,28 @@ export interface Configuration {
 
 export interface SiemContext {
   req: FrameworkRequest;
+}
+
+export interface SignalHit {
+  signal: {
+    '@timestamp': string;
+    id: string;
+    rule_revision: number;
+    rule_id: string | undefined | null;
+    rule_type: string;
+    parent: {
+      id: string;
+      type: string;
+      index: string;
+      depth: number;
+    };
+    name: string;
+    severity: string;
+    description: string;
+    original_time: string;
+    index_patterns: string[];
+    references: string[];
+  };
 }
 
 export interface TotalValue {
@@ -168,6 +192,17 @@ export interface AggregationRequest {
         [aggType: string]: {
           field: string;
         };
+      };
+    };
+    top_hits?: {
+      size?: number;
+      sort?: Array<{
+        [aggSortField: string]: {
+          order: SortRequestDirection;
+        };
+      }>;
+      _source: {
+        includes: string[];
       };
     };
   };

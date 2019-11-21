@@ -22,6 +22,8 @@ const TableContainer = styled.div<{ height: number; width: number }>`
   ${({ width }) => `width: ${width}px`};
 `;
 
+TableContainer.displayName = 'TableContainer';
+
 interface Props {
   categoryId: string;
   fieldItems: FieldItem[];
@@ -40,7 +42,12 @@ export const Category = pure<Props>(
         timelineId={timelineId}
       />
 
-      <TableContainer data-test-subj="category-table-container" height={TABLE_HEIGHT} width={width}>
+      <TableContainer
+        className="euiTable--compressed"
+        data-test-subj="category-table-container"
+        height={TABLE_HEIGHT}
+        width={width}
+      >
         <EuiInMemoryTable
           items={fieldItems}
           columns={getFieldColumns()}
@@ -51,3 +58,5 @@ export const Category = pure<Props>(
     </>
   )
 );
+
+Category.displayName = 'Category';

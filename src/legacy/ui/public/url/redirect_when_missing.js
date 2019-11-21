@@ -20,9 +20,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { MarkdownSimple } from 'ui/markdown';
+import { MarkdownSimple } from '../../../core_plugins/kibana_react/public/markdown';
 import { toastNotifications } from 'ui/notify';
-import { SavedObjectNotFound } from '../errors';
+import { SavedObjectNotFound } from '../../../../plugins/kibana_utils/public';
 import { uiModules } from '../modules';
 
 uiModules.get('kibana/url')

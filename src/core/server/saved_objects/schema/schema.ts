@@ -16,16 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import { Config } from '../../config';
+
 interface SavedObjectsSchemaTypeDefinition {
   isNamespaceAgnostic: boolean;
   hidden?: boolean;
-  indexPattern?: string;
+  indexPattern?: ((config: Config) => string) | string;
+  convertToAliasScript?: string;
 }
 
+/** @internal */
 export interface SavedObjectsSchemaDefinition {
   [key: string]: SavedObjectsSchemaTypeDefinition;
 }
 
+/** @internal */
 export class SavedObjectsSchema {
   private readonly definition?: SavedObjectsSchemaDefinition;
   constructor(schemaDefinition?: SavedObjectsSchemaDefinition) {
@@ -40,11 +46,18 @@ export class SavedObjectsSchema {
     return false;
   }
 
-  public getIndexForType(type: string): string | undefined {
+  public getIndexForType(config: Config, type: string): string | undefined {
     if (this.definition != null && this.definition.hasOwnProperty(type)) {
-      return this.definition[type].indexPattern;
+      const { indexPattern } = this.definition[type];
+      return typeof indexPattern === 'function' ? indexPattern(config) : indexPattern;
     } else {
       return undefined;
+    }
+  }
+
+  public getConvertToAliasScript(type: string): string | undefined {
+    if (this.definition != null && this.definition.hasOwnProperty(type)) {
+      return this.definition[type].convertToAliasScript;
     }
   }
 

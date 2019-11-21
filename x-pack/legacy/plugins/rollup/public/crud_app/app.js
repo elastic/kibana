@@ -10,7 +10,7 @@ import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
 
 import { UIM_APP_LOAD } from '../../common';
 import { CRUD_APP_BASE_PATH } from './constants';
-import { registerRouter, setUserHasLeftApp, trackUiMetric } from './services';
+import { registerRouter, setUserHasLeftApp, trackUiMetric, METRIC_TYPE } from './services';
 import { JobList, JobCreate } from './sections';
 
 class ShareRouter extends Component {
@@ -41,7 +41,7 @@ class ShareRouter extends Component {
 
 export class App extends Component { // eslint-disable-line react/no-multi-comp
   componentDidMount() {
-    trackUiMetric(UIM_APP_LOAD);
+    trackUiMetric(METRIC_TYPE.LOADED, UIM_APP_LOAD);
   }
 
   componentWillUnmount() {

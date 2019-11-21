@@ -4,22 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ConfigObject, KbnServer, Logger } from '../../../types';
+import { ServerFacade, Logger } from '../../../types';
+import { HeadlessChromiumDriverFactory } from '../../browsers/chromium/driver_factory';
 import { validateBrowser } from './validate_browser';
-// @ts-ignore
 import { validateConfig } from './validate_config';
 import { validateMaxContentLength } from './validate_max_content_length';
 
 export async function runValidations(
-  server: KbnServer,
-  config: ConfigObject,
+  server: ServerFacade,
   logger: Logger,
-  browserFactory: any
+  browserFactory: HeadlessChromiumDriverFactory
 ) {
   try {
     await Promise.all([
       validateBrowser(server, browserFactory, logger),
-      validateConfig(config, logger),
+      validateConfig(server, logger),
       validateMaxContentLength(server, logger),
     ]);
     logger.debug(`Reporting plugin self-check ok!`);

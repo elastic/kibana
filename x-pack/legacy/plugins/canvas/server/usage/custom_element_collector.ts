@@ -7,16 +7,13 @@
 import { SearchParams } from 'elasticsearch';
 import { get } from 'lodash';
 import { fromExpression } from '@kbn/interpreter/common';
-import { AST, collectFns } from './collector_helpers';
-import { TelemetryCollector } from './collector';
+import { collectFns } from './collector_helpers';
+import { TelemetryCollector } from '../../types';
+import { ExpressionAST, TelemetryCustomElement, TelemetryCustomElementDocument } from '../../types';
 
 const CUSTOM_ELEMENT_TYPE = 'canvas-element';
 interface CustomElementSearch {
-  [CUSTOM_ELEMENT_TYPE]: CustomElementDocument;
-}
-
-export interface CustomElementDocument {
-  content: string;
+  [CUSTOM_ELEMENT_TYPE]: TelemetryCustomElementDocument;
 }
 
 interface CustomElementTelemetry {
@@ -31,13 +28,7 @@ interface CustomElementTelemetry {
   };
 }
 
-export interface CustomElement {
-  selectedNodes: Array<{
-    expression: string;
-  }>;
-}
-
-function isCustomElement(maybeCustomElement: any): maybeCustomElement is CustomElement {
+function isCustomElement(maybeCustomElement: any): maybeCustomElement is TelemetryCustomElement {
   return (
     maybeCustomElement !== null &&
     Array.isArray(maybeCustomElement.selectedNodes) &&
@@ -57,16 +48,15 @@ function parseJsonOrNull(maybeJson: string) {
 
 /**
   Calculate statistics about a collection of CustomElement Documents
-
   @param customElements - Array of CustomElement documents
   @returns Statistics about how Custom Elements are being used
 */
 export function summarizeCustomElements(
-  customElements: CustomElementDocument[]
+  customElements: TelemetryCustomElementDocument[]
 ): CustomElementTelemetry {
   const functionSet = new Set<string>();
 
-  const parsedContents: CustomElement[] = customElements
+  const parsedContents: TelemetryCustomElement[] = customElements
     .map(element => element.content)
     .map(parseJsonOrNull)
     .filter(isCustomElement);
@@ -85,7 +75,7 @@ export function summarizeCustomElements(
 
   parsedContents.map(contents => {
     contents.selectedNodes.map(node => {
-      const ast: AST = fromExpression(node.expression) as AST; // TODO: Remove once fromExpression is properly typed
+      const ast: ExpressionAST = fromExpression(node.expression) as ExpressionAST; // TODO: Remove once fromExpression is properly typed
       collectFns(ast, (cFunction: string) => {
         functionSet.add(cFunction);
       });
@@ -107,14 +97,12 @@ export function summarizeCustomElements(
 }
 
 const customElementCollector: TelemetryCollector = async function customElementCollector(
-  server,
+  kibanaIndex,
   callCluster
 ) {
-  const index = server.config().get<string>('kibana.index');
-
   const customElementParams: SearchParams = {
     size: 10000,
-    index,
+    index: kibanaIndex,
     ignoreUnavailable: true,
     filterPath: [`hits.hits._source.${CUSTOM_ELEMENT_TYPE}.content`],
     body: { query: { bool: { filter: { term: { type: CUSTOM_ELEMENT_TYPE } } } } },
@@ -122,7 +110,7 @@ const customElementCollector: TelemetryCollector = async function customElementC
 
   const esResponse = await callCluster<CustomElementSearch>('search', customElementParams);
 
-  if (get(esResponse, 'hits.hits.length') > 0) {
+  if (get<number>(esResponse, 'hits.hits.length') > 0) {
     const customElements = esResponse.hits.hits.map(hit => hit._source[CUSTOM_ELEMENT_TYPE]);
     return summarizeCustomElements(customElements);
   }

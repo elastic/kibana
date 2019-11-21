@@ -9,23 +9,28 @@ import * as React from 'react';
 import { pure } from 'recompose';
 
 import { encodeIpv6 } from '../../lib/helpers';
+import { getHostDetailsUrl, getIPDetailsUrl } from '../link_to';
 
 // Internal Links
 export const HostDetailsLink = pure<{ children?: React.ReactNode; hostName: string }>(
   ({ children, hostName }) => (
-    <EuiLink href={`#/link-to/hosts/${encodeURIComponent(hostName)}`}>
+    <EuiLink href={getHostDetailsUrl(encodeURIComponent(hostName))}>
       {children ? children : hostName}
     </EuiLink>
   )
 );
 
+HostDetailsLink.displayName = 'HostDetailsLink';
+
 export const IPDetailsLink = pure<{ children?: React.ReactNode; ip: string }>(
   ({ children, ip }) => (
-    <EuiLink href={`#/link-to/network/ip/${encodeURIComponent(encodeIpv6(ip))}`}>
+    <EuiLink href={`${getIPDetailsUrl(encodeURIComponent(encodeIpv6(ip)))}`}>
       {children ? children : ip}
     </EuiLink>
   )
 );
+
+IPDetailsLink.displayName = 'IPDetailsLink';
 
 // External Links
 export const GoogleLink = pure<{ children?: React.ReactNode; link: string }>(
@@ -35,6 +40,8 @@ export const GoogleLink = pure<{ children?: React.ReactNode; link: string }>(
     </EuiLink>
   )
 );
+
+GoogleLink.displayName = 'GoogleLink';
 
 export const PortOrServiceNameLink = pure<{
   children?: React.ReactNode;
@@ -51,6 +58,8 @@ export const PortOrServiceNameLink = pure<{
   </EuiLink>
 ));
 
+PortOrServiceNameLink.displayName = 'PortOrServiceNameLink';
+
 export const Ja3FingerprintLink = pure<{ children?: React.ReactNode; ja3Fingerprint: string }>(
   ({ children, ja3Fingerprint }) => (
     <EuiLink
@@ -62,6 +71,8 @@ export const Ja3FingerprintLink = pure<{ children?: React.ReactNode; ja3Fingerpr
     </EuiLink>
   )
 );
+
+Ja3FingerprintLink.displayName = 'Ja3FingerprintLink';
 
 export const CertificateFingerprintLink = pure<{
   children?: React.ReactNode;
@@ -78,6 +89,8 @@ export const CertificateFingerprintLink = pure<{
   </EuiLink>
 ));
 
+CertificateFingerprintLink.displayName = 'CertificateFingerprintLink';
+
 export const ReputationLink = pure<{ children?: React.ReactNode; domain: string }>(
   ({ children, domain }) => (
     <EuiLink
@@ -91,6 +104,8 @@ export const ReputationLink = pure<{ children?: React.ReactNode; domain: string 
   )
 );
 
+ReputationLink.displayName = 'ReputationLink';
+
 export const VirusTotalLink = pure<{ children?: React.ReactNode; link: string }>(
   ({ children, link }) => (
     <EuiLink
@@ -102,6 +117,8 @@ export const VirusTotalLink = pure<{ children?: React.ReactNode; link: string }>
   )
 );
 
+VirusTotalLink.displayName = 'VirusTotalLink';
+
 export const WhoIsLink = pure<{ children?: React.ReactNode; domain: string }>(
   ({ children, domain }) => (
     <EuiLink href={`https://www.iana.org/whois?q=${encodeURIComponent(domain)}`} target="_blank">
@@ -109,3 +126,5 @@ export const WhoIsLink = pure<{ children?: React.ReactNode; domain: string }>(
     </EuiLink>
   )
 );
+
+WhoIsLink.displayName = 'WhoIsLink';

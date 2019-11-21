@@ -6,6 +6,9 @@
 
 import { failure } from 'io-ts/lib/PathReporter';
 
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
 import {
   InfraLogEntryColumn,
   InfraLogEntryFieldColumn,
@@ -33,8 +36,18 @@ export type InfraSourceLogEntriesBetweenResolver = ChildResolverOf<
   QuerySourceResolver
 >;
 
+export type InfraSourceLogEntryHighlightsResolver = ChildResolverOf<
+  InfraResolverOf<InfraSourceResolvers.LogEntryHighlightsResolver>,
+  QuerySourceResolver
+>;
+
 export type InfraSourceLogSummaryBetweenResolver = ChildResolverOf<
   InfraResolverOf<InfraSourceResolvers.LogSummaryBetweenResolver>,
+  QuerySourceResolver
+>;
+
+export type InfraSourceLogSummaryHighlightsBetweenResolver = ChildResolverOf<
+  InfraResolverOf<InfraSourceResolvers.LogSummaryHighlightsBetweenResolver>,
   QuerySourceResolver
 >;
 
@@ -49,7 +62,9 @@ export const createLogEntriesResolvers = (libs: {
   InfraSource: {
     logEntriesAround: InfraSourceLogEntriesAroundResolver;
     logEntriesBetween: InfraSourceLogEntriesBetweenResolver;
+    logEntryHighlights: InfraSourceLogEntryHighlightsResolver;
     logSummaryBetween: InfraSourceLogSummaryBetweenResolver;
+    logSummaryHighlightsBetween: InfraSourceLogSummaryHighlightsBetweenResolver;
     logItem: InfraSourceLogItem;
   };
   InfraLogEntryColumn: {
@@ -78,8 +93,7 @@ export const createLogEntriesResolvers = (libs: {
         args.key,
         countBefore + 1,
         countAfter + 1,
-        parseFilterQuery(args.filterQuery),
-        args.highlightQuery || undefined
+        parseFilterQuery(args.filterQuery)
       );
 
       const hasMoreBefore = entriesBefore.length > countBefore;
@@ -96,7 +110,6 @@ export const createLogEntriesResolvers = (libs: {
         hasMoreBefore,
         hasMoreAfter,
         filterQuery: args.filterQuery,
-        highlightQuery: args.highlightQuery,
         entries,
       };
     },
@@ -106,8 +119,7 @@ export const createLogEntriesResolvers = (libs: {
         source.id,
         args.startKey,
         args.endKey,
-        parseFilterQuery(args.filterQuery),
-        args.highlightQuery || undefined
+        parseFilterQuery(args.filterQuery)
       );
 
       return {
@@ -116,9 +128,27 @@ export const createLogEntriesResolvers = (libs: {
         hasMoreBefore: true,
         hasMoreAfter: true,
         filterQuery: args.filterQuery,
-        highlightQuery: args.highlightQuery,
         entries,
       };
+    },
+    async logEntryHighlights(source, args, { req }) {
+      const highlightedLogEntrySets = await libs.logEntries.getLogEntryHighlights(
+        req,
+        source.id,
+        args.startKey,
+        args.endKey,
+        args.highlights.filter(highlightInput => !!highlightInput.query),
+        parseFilterQuery(args.filterQuery)
+      );
+
+      return highlightedLogEntrySets.map(entries => ({
+        start: entries.length > 0 ? entries[0].key : null,
+        end: entries.length > 0 ? entries[entries.length - 1].key : null,
+        hasMoreBefore: true,
+        hasMoreAfter: true,
+        filterQuery: args.filterQuery,
+        entries,
+      }));
     },
     async logSummaryBetween(source, args, { req }) {
       UsageCollector.countLogs();
@@ -137,12 +167,30 @@ export const createLogEntriesResolvers = (libs: {
         buckets,
       };
     },
+    async logSummaryHighlightsBetween(source, args, { req }) {
+      const summaryHighlightSets = await libs.logEntries.getLogSummaryHighlightBucketsBetween(
+        req,
+        source.id,
+        args.start,
+        args.end,
+        args.bucketSize,
+        args.highlightQueries.filter(highlightQuery => !!highlightQuery),
+        parseFilterQuery(args.filterQuery)
+      );
+
+      return summaryHighlightSets.map(buckets => ({
+        start: buckets.length > 0 ? buckets[0].start : null,
+        end: buckets.length > 0 ? buckets[buckets.length - 1].end : null,
+        buckets,
+      }));
+    },
     async logItem(source, args, { req }) {
-      const sourceConfiguration = SourceConfigurationRuntimeType.decode(
-        source.configuration
-      ).getOrElseL(errors => {
-        throw new Error(failure(errors).join('\n'));
-      });
+      const sourceConfiguration = pipe(
+        SourceConfigurationRuntimeType.decode(source.configuration),
+        fold(errors => {
+          throw new Error(failure(errors).join('\n'));
+        }, identity)
+      );
 
       return await libs.logEntries.getLogItem(req, args.id, sourceConfiguration);
     },

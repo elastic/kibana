@@ -17,13 +17,12 @@
  * under the License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiIcon, EuiLink, EuiFormHelpText, EuiFormControlLayoutDelimited } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
-import { Component } from 'react';
 import React from 'react';
-import { getDocLink } from 'ui/documentation_links';
-import { Field } from 'ui/index_patterns';
+import { useKibana } from '../../../../../../../plugins/kibana_react/public';
+import { IFieldType } from '../../../../../../../plugins/data/public';
 import { ValueInputType } from './value_input_type';
 
 interface RangeParams {
@@ -34,88 +33,78 @@ interface RangeParams {
 type RangeParamsPartial = Partial<RangeParams>;
 
 interface Props {
-  field?: Field;
+  field?: IFieldType;
   value?: RangeParams;
   onChange: (params: RangeParamsPartial) => void;
   intl: InjectedIntl;
 }
 
-class RangeValueInputUI extends Component<Props> {
-  public constructor(props: Props) {
-    super(props);
-  }
+function RangeValueInputUI(props: Props) {
+  const kibana = useKibana();
+  const dataMathDocLink = kibana.services.docLinks!.links.date.dateMath;
+  const type = props.field ? props.field.type : 'string';
 
-  public render() {
-    const type = this.props.field ? this.props.field.type : 'string';
+  const onFromChange = (value: string | number | boolean) => {
+    if (typeof value !== 'string' && typeof value !== 'number') {
+      throw new Error('Range params must be a string or number');
+    }
+    props.onChange({ from: value, to: get(props, 'value.to') });
+  };
 
-    return (
-      <div>
-        <EuiFlexGroup style={{ maxWidth: 600 }}>
-          <EuiFlexItem>
-            <EuiFormRow
-              label={this.props.intl.formatMessage({
-                id: 'data.filter.filterEditor.rangeStartInputLabel',
-                defaultMessage: 'From',
-              })}
-            >
-              <ValueInputType
-                type={type}
-                value={this.props.value ? this.props.value.from : undefined}
-                onChange={this.onFromChange}
-                placeholder={this.props.intl.formatMessage({
-                  id: 'data.filter.filterEditor.rangeStartInputPlaceholder',
-                  defaultMessage: 'Start of the range',
-                })}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormRow
-              label={this.props.intl.formatMessage({
-                id: 'data.filter.filterEditor.rangeEndInputLabel',
-                defaultMessage: 'To',
-              })}
-            >
-              <ValueInputType
-                type={type}
-                value={this.props.value ? this.props.value.to : undefined}
-                onChange={this.onToChange}
-                placeholder={this.props.intl.formatMessage({
-                  id: 'data.filter.filterEditor.rangeEndInputPlaceholder',
-                  defaultMessage: 'End of the range',
-                })}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        {type === 'date' ? (
-          <EuiLink target="_blank" href={getDocLink('date.dateMath')}>
+  const onToChange = (value: string | number | boolean) => {
+    if (typeof value !== 'string' && typeof value !== 'number') {
+      throw new Error('Range params must be a string or number');
+    }
+    props.onChange({ from: get(props, 'value.from'), to: value });
+  };
+
+  return (
+    <div>
+      <EuiFormControlLayoutDelimited
+        aria-label={props.intl.formatMessage({
+          id: 'data.filter.filterEditor.rangeInputLabel',
+          defaultMessage: 'Range',
+        })}
+        startControl={
+          <ValueInputType
+            controlOnly
+            type={type}
+            value={props.value ? props.value.from : undefined}
+            onChange={onFromChange}
+            placeholder={props.intl.formatMessage({
+              id: 'data.filter.filterEditor.rangeStartInputPlaceholder',
+              defaultMessage: 'Start of the range',
+            })}
+          />
+        }
+        endControl={
+          <ValueInputType
+            controlOnly
+            type={type}
+            value={props.value ? props.value.to : undefined}
+            onChange={onToChange}
+            placeholder={props.intl.formatMessage({
+              id: 'data.filter.filterEditor.rangeEndInputPlaceholder',
+              defaultMessage: 'End of the range',
+            })}
+          />
+        }
+      />
+      {type === 'date' ? (
+        <EuiFormHelpText>
+          <EuiLink target="_blank" href={dataMathDocLink}>
             <FormattedMessage
               id="data.filter.filterEditor.dateFormatHelpLinkLabel"
               defaultMessage="Accepted date formats"
             />{' '}
-            <EuiIcon type="link" />
+            <EuiIcon type="popout" size="s" />
           </EuiLink>
-        ) : (
-          ''
-        )}
-      </div>
-    );
-  }
-
-  private onFromChange = (value: string | number | boolean) => {
-    if (typeof value !== 'string' && typeof value !== 'number') {
-      throw new Error('Range params must be a string or number');
-    }
-    this.props.onChange({ from: value, to: get(this, 'props.value.to') });
-  };
-
-  private onToChange = (value: string | number | boolean) => {
-    if (typeof value !== 'string' && typeof value !== 'number') {
-      throw new Error('Range params must be a string or number');
-    }
-    this.props.onChange({ from: get(this, 'props.value.from'), to: value });
-  };
+        </EuiFormHelpText>
+      ) : (
+        ''
+      )}
+    </div>
+  );
 }
 
 export const RangeValueInput = injectI18n(RangeValueInputUI);

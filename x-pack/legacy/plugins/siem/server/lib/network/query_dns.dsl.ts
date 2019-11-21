@@ -35,7 +35,7 @@ const getQueryOrder = (networkDnsSortField: NetworkDnsSortField): QueryOrder => 
 const getCountAgg = () => ({
   dns_count: {
     cardinality: {
-      field: 'dns.question.etld_plus_one',
+      field: 'dns.question.registered_domain',
     },
   },
 });
@@ -46,38 +46,25 @@ const createIncludePTRFilter = (isPtrIncluded: boolean) =>
     : {
         must_not: [
           {
-            match_phrase: {
+            term: {
               'dns.question.type': {
-                query: 'PTR',
+                value: 'PTR',
               },
             },
           },
         ],
       };
 
-const getDnsFilter = () => ({
-  must: [
-    {
-      match_phrase: {
-        'network.protocol': {
-          query: 'dns',
-        },
-      },
-    },
-  ],
-});
-
 export const buildDnsQuery = ({
-  fields,
+  defaultIndex,
   filterQuery,
   isPtrIncluded,
   networkDnsSortField,
-  timerange: { from, to },
-  pagination: { limit },
-  defaultIndex,
+  pagination: { querySize },
   sourceConfiguration: {
     fields: { timestamp },
   },
+  timerange: { from, to },
 }: NetworkDnsRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
@@ -100,8 +87,8 @@ export const buildDnsQuery = ({
         ...getCountAgg(),
         dns_name_query_count: {
           terms: {
-            field: 'dns.question.etld_plus_one',
-            size: limit + 1,
+            field: 'dns.question.registered_domain',
+            size: querySize,
             order: {
               ...getQueryOrder(networkDnsSortField),
             },
@@ -122,18 +109,12 @@ export const buildDnsQuery = ({
                 field: 'destination.bytes',
               },
             },
-            timestamp: {
-              max: {
-                field: '@timestamp',
-              },
-            },
           },
         },
       },
       query: {
         bool: {
           filter,
-          ...getDnsFilter(),
           ...createIncludePTRFilter(isPtrIncluded),
         },
       },
@@ -141,5 +122,6 @@ export const buildDnsQuery = ({
     size: 0,
     track_total_hits: false,
   };
+
   return dslQuery;
 };

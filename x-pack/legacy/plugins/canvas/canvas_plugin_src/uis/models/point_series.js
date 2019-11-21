@@ -6,39 +6,42 @@
 
 import { get } from 'lodash';
 import { getState, getValue } from '../../../public/lib/resolved_arg';
+import { ModelStrings } from '../../../i18n';
+
+const { PointSeries: strings } = ModelStrings;
 
 export const pointseries = () => ({
   name: 'pointseries',
-  displayName: 'Dimensions & measures',
+  displayName: strings.getDisplayName(),
   args: [
     {
       name: 'x',
-      displayName: 'X-axis',
-      help: 'Data along the horizontal axis. Usually a number, string or date',
+      displayName: strings.getXAxisDisplayName(),
+      help: strings.getXAxisHelp(),
       argType: 'datacolumn',
     },
     {
       name: 'y',
-      displayName: 'Y-axis',
-      help: 'Data along the vertical axis. Usually a number',
+      displayName: strings.getYaxisDisplayName(),
+      help: strings.getYaxisHelp(),
       argType: 'datacolumn',
     },
     {
       name: 'color',
-      displayName: 'Color',
-      help: 'Determines the color of a mark or series',
+      displayName: strings.getColorDisplayName(),
+      help: strings.getColorHelp(),
       argType: 'datacolumn',
     },
     {
       name: 'size',
-      displayName: 'Size',
-      help: 'Determine the size of a mark',
+      displayName: strings.getSizeDisplayName(),
+      help: strings.getSizeHelp(),
       argType: 'datacolumn',
     },
     {
       name: 'text',
-      displayName: 'Text',
-      help: 'Set the text to use as, or around, the mark',
+      displayName: strings.getTextDisplayName(),
+      help: strings.getTextHelp(),
       argType: 'datacolumn',
     },
   ],

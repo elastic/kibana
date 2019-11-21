@@ -11,19 +11,26 @@ export const HOST_ID = i18n.translate('xpack.siem.host.details.overview.hostIdTi
 });
 
 export const FIRST_SEEN = i18n.translate('xpack.siem.host.details.firstSeenTitle', {
-  defaultMessage: 'First Seen',
+  defaultMessage: 'First seen',
 });
 
 export const LAST_SEEN = i18n.translate('xpack.siem.host.details.lastSeenTitle', {
-  defaultMessage: 'Last Seen',
+  defaultMessage: 'Last seen',
 });
 
+export const MAX_ANOMALY_SCORE_BY_JOB = i18n.translate(
+  'xpack.siem.host.details.overview.maxAnomalyScoreByJobTitle',
+  {
+    defaultMessage: 'Max anomaly score by job',
+  }
+);
+
 export const IP_ADDRESSES = i18n.translate('xpack.siem.host.details.overview.ipAddressesTitle', {
-  defaultMessage: 'IP Addresses',
+  defaultMessage: 'IP addresses',
 });
 
 export const MAC_ADDRESSES = i18n.translate('xpack.siem.host.details.overview.macAddressesTitle', {
-  defaultMessage: 'MAC Addresses',
+  defaultMessage: 'MAC addresses',
 });
 
 export const PLATFORM = i18n.translate('xpack.siem.host.details.overview.platformTitle', {
@@ -31,7 +38,7 @@ export const PLATFORM = i18n.translate('xpack.siem.host.details.overview.platfor
 });
 
 export const OS = i18n.translate('xpack.siem.host.details.overview.osTitle', {
-  defaultMessage: 'Operating System',
+  defaultMessage: 'Operating system',
 });
 
 export const FAMILY = i18n.translate('xpack.siem.host.details.overview.familyTitle', {
@@ -49,7 +56,7 @@ export const ARCHITECTURE = i18n.translate('xpack.siem.host.details.architecture
 export const CLOUD_PROVIDER = i18n.translate(
   'xpack.siem.host.details.overview.cloudProviderTitle',
   {
-    defaultMessage: 'Cloud Provider',
+    defaultMessage: 'Cloud provider',
   }
 );
 
@@ -58,9 +65,13 @@ export const REGION = i18n.translate('xpack.siem.host.details.overview.regionTit
 });
 
 export const INSTANCE_ID = i18n.translate('xpack.siem.host.details.overview.instanceIdTitle', {
-  defaultMessage: 'Instance Id',
+  defaultMessage: 'Instance ID',
 });
 
 export const MACHINE_TYPE = i18n.translate('xpack.siem.host.details.overview.machineTypeTitle', {
-  defaultMessage: 'Machine Type',
+  defaultMessage: 'Machine type',
+});
+
+export const INSPECT_TITLE = i18n.translate('xpack.siem.host.details.overview.inspectTitle', {
+  defaultMessage: 'Host overview',
 });

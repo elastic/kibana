@@ -8,10 +8,13 @@ import { i18n } from '@kbn/i18n';
 import JoiNamespace from 'joi';
 import { resolve } from 'path';
 
-import { getConfigSchema, initServerWithKibana, KbnServer } from './server/kibana.index';
+import { getConfigSchema, initServerWithKibana } from './server/kibana.index';
 import { savedObjectMappings } from './server/saved_objects';
 
 const APP_ID = 'infra';
+const logsSampleDataLinkLabel = i18n.translate('xpack.infra.sampleDataLinkLabel', {
+  defaultMessage: 'Logs',
+});
 
 export function infra(kibana: any) {
   return new kibana.Plugin({
@@ -22,12 +25,12 @@ export function infra(kibana: any) {
     uiExports: {
       app: {
         description: i18n.translate('xpack.infra.infrastructureDescription', {
-          defaultMessage: 'Explore your infrastructure',
+          defaultMessage: 'Explore your metrics',
         }),
         icon: 'plugins/infra/images/infra_mono_white.svg',
         main: 'plugins/infra/app',
         title: i18n.translate('xpack.infra.infrastructureTitle', {
-          defaultMessage: 'Infrastructure',
+          defaultMessage: 'Metrics',
         }),
         listed: false,
         url: `/app/${APP_ID}#/infrastructure`,
@@ -37,14 +40,14 @@ export function infra(kibana: any) {
       links: [
         {
           description: i18n.translate('xpack.infra.linkInfrastructureDescription', {
-            defaultMessage: 'Explore your infrastructure',
+            defaultMessage: 'Explore your metrics',
           }),
           icon: 'plugins/infra/images/infra_mono_white.svg',
-          euiIconType: 'infraApp',
+          euiIconType: 'metricsApp',
           id: 'infra:home',
           order: 8000,
           title: i18n.translate('xpack.infra.linkInfrastructureTitle', {
-            defaultMessage: 'Infrastructure',
+            defaultMessage: 'Metrics',
           }),
           url: `/app/${APP_ID}#/infrastructure`,
         },
@@ -53,7 +56,7 @@ export function infra(kibana: any) {
             defaultMessage: 'Explore your logs',
           }),
           icon: 'plugins/infra/images/logging_mono_white.svg',
-          euiIconType: 'loggingApp',
+          euiIconType: 'logsApp',
           id: 'infra:logs',
           order: 8001,
           title: i18n.translate('xpack.infra.linkLogsTitle', {
@@ -67,8 +70,15 @@ export function infra(kibana: any) {
     config(Joi: typeof JoiNamespace) {
       return getConfigSchema(Joi);
     },
-    init(server: KbnServer) {
+    init(server: any) {
       initServerWithKibana(server);
+      server.addAppLinksToSampleDataset('logs', [
+        {
+          path: `/app/${APP_ID}#/logs`,
+          label: logsSampleDataLinkLabel,
+          icon: 'logsApp',
+        },
+      ]);
     },
   });
 }

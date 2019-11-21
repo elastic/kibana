@@ -29,23 +29,24 @@ const buildEffectivePrivileges = (
   return factory.getInstance(role);
 };
 
-const buildExpectedFeaturePrivileges = (
-  expectedFeaturePrivileges: PrivilegeExplanation | { [featureId: string]: PrivilegeExplanation }
-) => {
-  if (expectedFeaturePrivileges.hasOwnProperty('actualPrivilege')) {
-    return {
-      feature: {
-        feature1: expectedFeaturePrivileges,
-        feature2: expectedFeaturePrivileges,
-        feature3: expectedFeaturePrivileges,
-      },
-    };
-  }
+interface BuildExpectedFeaturePrivilegesOption {
+  features: string[];
+  privilegeExplanation: PrivilegeExplanation;
+}
 
+const buildExpectedFeaturePrivileges = (options: BuildExpectedFeaturePrivilegesOption[]) => {
   return {
-    feature: {
-      ...expectedFeaturePrivileges,
-    },
+    feature: options.reduce((acc1, option) => {
+      return {
+        ...acc1,
+        ...option.features.reduce((acc2, featureId) => {
+          return {
+            ...acc2,
+            [featureId]: option.privilegeExplanation,
+          };
+        }, {}),
+      };
+    }, {}),
   };
 };
 
@@ -78,17 +79,22 @@ describe('calculateEffectivePrivileges', () => {
           actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_BASE,
           isDirectlyAssigned: true,
         },
-        ...buildExpectedFeaturePrivileges({
-          actualPrivilege: NO_PRIVILEGE_VALUE,
-          actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_FEATURE,
-          isDirectlyAssigned: true,
-        }),
+        ...buildExpectedFeaturePrivileges([
+          {
+            features: ['feature1', 'feature2', 'feature3', 'feature4'],
+            privilegeExplanation: {
+              actualPrivilege: NO_PRIVILEGE_VALUE,
+              actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_FEATURE,
+              isDirectlyAssigned: true,
+            },
+          },
+        ]),
       },
     ]);
   });
 
   describe(`with global base privilege of "all"`, () => {
-    it(`calculates global feature privileges === all`, () => {
+    it(`calculates global feature privilege of all for features 1-3 and read for feature 4`, () => {
       const role = buildRole({
         spacesPrivileges: [
           {
@@ -108,16 +114,29 @@ describe('calculateEffectivePrivileges', () => {
             actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
             isDirectlyAssigned: true,
           },
-          ...buildExpectedFeaturePrivileges({
-            actualPrivilege: 'all',
-            actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
-            isDirectlyAssigned: false,
-          }),
+          ...buildExpectedFeaturePrivileges([
+            {
+              features: ['feature1', 'feature2', 'feature3'],
+              privilegeExplanation: {
+                actualPrivilege: 'all',
+                actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
+                isDirectlyAssigned: false,
+              },
+            },
+            {
+              features: ['feature4'],
+              privilegeExplanation: {
+                actualPrivilege: 'read',
+                actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
+                isDirectlyAssigned: false,
+              },
+            },
+          ]),
         },
       ]);
     });
 
-    it(`calculates space base and feature privileges === all`, () => {
+    it(`calculates space base and feature privilege of all for features 1-3 and read for feature 4`, () => {
       const role = buildRole({
         spacesPrivileges: [
           {
@@ -143,11 +162,24 @@ describe('calculateEffectivePrivileges', () => {
           actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
           isDirectlyAssigned: false,
         },
-        ...buildExpectedFeaturePrivileges({
-          actualPrivilege: 'all',
-          actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
-          isDirectlyAssigned: false,
-        }),
+        ...buildExpectedFeaturePrivileges([
+          {
+            features: ['feature1', 'feature2', 'feature3'],
+            privilegeExplanation: {
+              actualPrivilege: 'all',
+              actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
+              isDirectlyAssigned: false,
+            },
+          },
+          {
+            features: ['feature4'],
+            privilegeExplanation: {
+              actualPrivilege: 'read',
+              actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
+              isDirectlyAssigned: false,
+            },
+          },
+        ]),
       });
     });
 
@@ -162,6 +194,7 @@ describe('calculateEffectivePrivileges', () => {
                 feature1: ['read'],
                 feature2: ['read'],
                 feature3: ['read'],
+                feature4: ['read'],
               },
             },
             {
@@ -171,6 +204,7 @@ describe('calculateEffectivePrivileges', () => {
                 feature1: ['read'],
                 feature2: ['read'],
                 feature3: ['read'],
+                feature4: ['read'],
               },
             },
           ],
@@ -185,13 +219,26 @@ describe('calculateEffectivePrivileges', () => {
               actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
               isDirectlyAssigned: true,
             },
-            ...buildExpectedFeaturePrivileges({
-              actualPrivilege: 'all',
-              actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
-              isDirectlyAssigned: false,
-              supersededPrivilege: 'read',
-              supersededPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_FEATURE,
-            }),
+            ...buildExpectedFeaturePrivileges([
+              {
+                features: ['feature1', 'feature2', 'feature3'],
+                privilegeExplanation: {
+                  actualPrivilege: 'all',
+                  actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
+                  isDirectlyAssigned: false,
+                  supersededPrivilege: 'read',
+                  supersededPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_FEATURE,
+                },
+              },
+              {
+                features: ['feature4'],
+                privilegeExplanation: {
+                  actualPrivilege: 'read',
+                  actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_FEATURE,
+                  isDirectlyAssigned: true,
+                },
+              },
+            ]),
           },
           {
             base: {
@@ -199,13 +246,27 @@ describe('calculateEffectivePrivileges', () => {
               actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
               isDirectlyAssigned: false,
             },
-            ...buildExpectedFeaturePrivileges({
-              actualPrivilege: 'all',
-              actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
-              isDirectlyAssigned: false,
-              supersededPrivilege: 'read',
-              supersededPrivilegeSource: PRIVILEGE_SOURCE.SPACE_FEATURE,
-            }),
+            ...buildExpectedFeaturePrivileges([
+              {
+                features: ['feature1', 'feature2', 'feature3'],
+                privilegeExplanation: {
+                  actualPrivilege: 'all',
+                  actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
+                  isDirectlyAssigned: false,
+                  supersededPrivilege: 'read',
+                  supersededPrivilegeSource: PRIVILEGE_SOURCE.SPACE_FEATURE,
+                },
+              },
+              {
+                features: ['feature4'],
+                privilegeExplanation: {
+                  actualPrivilege: 'read',
+                  actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_FEATURE,
+                  isDirectlyAssigned: true,
+                  directlyAssignedFeaturePrivilegeMorePermissiveThanBase: false,
+                },
+              },
+            ]),
           },
         ]);
       });
@@ -238,23 +299,32 @@ describe('calculateEffectivePrivileges', () => {
             actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
             isDirectlyAssigned: true,
           },
-          ...buildExpectedFeaturePrivileges({
-            feature1: {
-              actualPrivilege: 'read',
-              actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
-              isDirectlyAssigned: false,
+          ...buildExpectedFeaturePrivileges([
+            {
+              features: ['feature1', 'feature2'],
+              privilegeExplanation: {
+                actualPrivilege: 'read',
+                actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
+                isDirectlyAssigned: false,
+              },
             },
-            feature2: {
-              actualPrivilege: 'read',
-              actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
-              isDirectlyAssigned: false,
+            {
+              features: ['feature3'],
+              privilegeExplanation: {
+                actualPrivilege: NO_PRIVILEGE_VALUE,
+                actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_FEATURE,
+                isDirectlyAssigned: true,
+              },
             },
-            feature3: {
-              actualPrivilege: NO_PRIVILEGE_VALUE,
-              actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_FEATURE,
-              isDirectlyAssigned: true,
+            {
+              features: ['feature4'],
+              privilegeExplanation: {
+                actualPrivilege: 'read',
+                actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
+                isDirectlyAssigned: false,
+              },
             },
-          }),
+          ]),
         },
         {
           base: {
@@ -262,23 +332,32 @@ describe('calculateEffectivePrivileges', () => {
             actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
             isDirectlyAssigned: false,
           },
-          ...buildExpectedFeaturePrivileges({
-            feature1: {
-              actualPrivilege: 'read',
-              actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
-              isDirectlyAssigned: false,
+          ...buildExpectedFeaturePrivileges([
+            {
+              features: ['feature1', 'feature2'],
+              privilegeExplanation: {
+                actualPrivilege: 'read',
+                actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
+                isDirectlyAssigned: false,
+              },
             },
-            feature2: {
-              actualPrivilege: 'read',
-              actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
-              isDirectlyAssigned: false,
+            {
+              features: ['feature3'],
+              privilegeExplanation: {
+                actualPrivilege: NO_PRIVILEGE_VALUE,
+                actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_FEATURE,
+                isDirectlyAssigned: true,
+              },
             },
-            feature3: {
-              actualPrivilege: NO_PRIVILEGE_VALUE,
-              actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_FEATURE,
-              isDirectlyAssigned: true,
+            {
+              features: ['feature4'],
+              privilegeExplanation: {
+                actualPrivilege: 'read',
+                actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
+                isDirectlyAssigned: false,
+              },
             },
-          }),
+          ]),
         },
       ]);
     });
@@ -294,6 +373,7 @@ describe('calculateEffectivePrivileges', () => {
                 feature1: ['all'],
                 feature2: ['all'],
                 feature3: ['all'],
+                feature4: ['all'],
               },
             },
             {
@@ -303,6 +383,7 @@ describe('calculateEffectivePrivileges', () => {
                 feature1: ['all'],
                 feature2: ['all'],
                 feature3: ['all'],
+                feature4: ['all'],
               },
             },
           ],
@@ -317,23 +398,16 @@ describe('calculateEffectivePrivileges', () => {
               actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
               isDirectlyAssigned: true,
             },
-            ...buildExpectedFeaturePrivileges({
-              feature1: {
-                actualPrivilege: 'all',
-                actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_FEATURE,
-                isDirectlyAssigned: true,
+            ...buildExpectedFeaturePrivileges([
+              {
+                features: ['feature1', 'feature2', 'feature3', 'feature4'],
+                privilegeExplanation: {
+                  actualPrivilege: 'all',
+                  actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_FEATURE,
+                  isDirectlyAssigned: true,
+                },
               },
-              feature2: {
-                actualPrivilege: 'all',
-                actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_FEATURE,
-                isDirectlyAssigned: true,
-              },
-              feature3: {
-                actualPrivilege: 'all',
-                actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_FEATURE,
-                isDirectlyAssigned: true,
-              },
-            }),
+            ]),
           },
           {
             base: {
@@ -341,11 +415,17 @@ describe('calculateEffectivePrivileges', () => {
               actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
               isDirectlyAssigned: false,
             },
-            ...buildExpectedFeaturePrivileges({
-              actualPrivilege: 'all',
-              actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_FEATURE,
-              isDirectlyAssigned: true,
-            }),
+            ...buildExpectedFeaturePrivileges([
+              {
+                features: ['feature1', 'feature2', 'feature3', 'feature4'],
+                privilegeExplanation: {
+                  actualPrivilege: 'all',
+                  actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_FEATURE,
+                  isDirectlyAssigned: true,
+                  directlyAssignedFeaturePrivilegeMorePermissiveThanBase: true,
+                },
+              },
+            ]),
           },
         ]);
       });
@@ -378,23 +458,32 @@ describe('calculateEffectivePrivileges', () => {
             actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
             isDirectlyAssigned: true,
           },
-          ...buildExpectedFeaturePrivileges({
-            feature1: {
-              actualPrivilege: 'read',
-              actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
-              isDirectlyAssigned: false,
+          ...buildExpectedFeaturePrivileges([
+            {
+              features: ['feature1', 'feature2'],
+              privilegeExplanation: {
+                actualPrivilege: 'read',
+                actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
+                isDirectlyAssigned: false,
+              },
             },
-            feature2: {
-              actualPrivilege: 'read',
-              actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
-              isDirectlyAssigned: false,
+            {
+              features: ['feature3'],
+              privilegeExplanation: {
+                actualPrivilege: NO_PRIVILEGE_VALUE,
+                actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_FEATURE,
+                isDirectlyAssigned: true,
+              },
             },
-            feature3: {
-              actualPrivilege: NO_PRIVILEGE_VALUE,
-              actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_FEATURE,
-              isDirectlyAssigned: true,
+            {
+              features: ['feature4'],
+              privilegeExplanation: {
+                actualPrivilege: 'read',
+                actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
+                isDirectlyAssigned: false,
+              },
             },
-          }),
+          ]),
         },
         {
           base: {
@@ -402,16 +491,29 @@ describe('calculateEffectivePrivileges', () => {
             actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_BASE,
             isDirectlyAssigned: true,
           },
-          ...buildExpectedFeaturePrivileges({
-            actualPrivilege: 'all',
-            actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_BASE,
-            isDirectlyAssigned: false,
-          }),
+          ...buildExpectedFeaturePrivileges([
+            {
+              features: ['feature1', 'feature2', 'feature3'],
+              privilegeExplanation: {
+                actualPrivilege: 'all',
+                actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_BASE,
+                isDirectlyAssigned: false,
+              },
+            },
+            {
+              features: ['feature4'],
+              privilegeExplanation: {
+                actualPrivilege: 'read',
+                actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_BASE,
+                isDirectlyAssigned: false,
+              },
+            },
+          ]),
         },
       ]);
     });
 
-    it(`calcualtes "all" for space base and space features when superceded by global "all"`, () => {
+    it(`calculates "all" for space base and space features when superceded by global "all"`, () => {
       const role = buildRole({
         spacesPrivileges: [
           {
@@ -436,11 +538,24 @@ describe('calculateEffectivePrivileges', () => {
             actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
             isDirectlyAssigned: true,
           },
-          ...buildExpectedFeaturePrivileges({
-            actualPrivilege: 'all',
-            actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
-            isDirectlyAssigned: false,
-          }),
+          ...buildExpectedFeaturePrivileges([
+            {
+              features: ['feature1', 'feature2', 'feature3'],
+              privilegeExplanation: {
+                actualPrivilege: 'all',
+                actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
+                isDirectlyAssigned: false,
+              },
+            },
+            {
+              features: ['feature4'],
+              privilegeExplanation: {
+                actualPrivilege: 'read',
+                actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
+                isDirectlyAssigned: false,
+              },
+            },
+          ]),
         },
         {
           base: {
@@ -450,11 +565,24 @@ describe('calculateEffectivePrivileges', () => {
             supersededPrivilege: 'read',
             supersededPrivilegeSource: PRIVILEGE_SOURCE.SPACE_BASE,
           },
-          ...buildExpectedFeaturePrivileges({
-            actualPrivilege: 'all',
-            actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
-            isDirectlyAssigned: false,
-          }),
+          ...buildExpectedFeaturePrivileges([
+            {
+              features: ['feature1', 'feature2', 'feature3'],
+              privilegeExplanation: {
+                actualPrivilege: 'all',
+                actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
+                isDirectlyAssigned: false,
+              },
+            },
+            {
+              features: ['feature4'],
+              privilegeExplanation: {
+                actualPrivilege: 'read',
+                actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_BASE,
+                isDirectlyAssigned: false,
+              },
+            },
+          ]),
         },
       ]);
     });
@@ -474,6 +602,7 @@ describe('calculateEffectivePrivileges', () => {
               feature1: ['all'],
               feature2: ['all'],
               feature3: ['all'],
+              feature4: ['all'],
             },
           },
         ],
@@ -488,23 +617,32 @@ describe('calculateEffectivePrivileges', () => {
             actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
             isDirectlyAssigned: true,
           },
-          ...buildExpectedFeaturePrivileges({
-            feature1: {
-              actualPrivilege: 'read',
-              actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
-              isDirectlyAssigned: false,
+          ...buildExpectedFeaturePrivileges([
+            {
+              features: ['feature1', 'feature2'],
+              privilegeExplanation: {
+                actualPrivilege: 'read',
+                actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
+                isDirectlyAssigned: false,
+              },
             },
-            feature2: {
-              actualPrivilege: 'read',
-              actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
-              isDirectlyAssigned: false,
+            {
+              features: ['feature3'],
+              privilegeExplanation: {
+                actualPrivilege: NO_PRIVILEGE_VALUE,
+                actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_FEATURE,
+                isDirectlyAssigned: true,
+              },
             },
-            feature3: {
-              actualPrivilege: NO_PRIVILEGE_VALUE,
-              actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_FEATURE,
-              isDirectlyAssigned: true,
+            {
+              features: ['feature4'],
+              privilegeExplanation: {
+                actualPrivilege: 'read',
+                actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
+                isDirectlyAssigned: false,
+              },
             },
-          }),
+          ]),
         },
         {
           base: {
@@ -514,23 +652,17 @@ describe('calculateEffectivePrivileges', () => {
             supersededPrivilege: 'read',
             supersededPrivilegeSource: PRIVILEGE_SOURCE.SPACE_BASE,
           },
-          ...buildExpectedFeaturePrivileges({
-            feature1: {
-              actualPrivilege: 'all',
-              actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_FEATURE,
-              isDirectlyAssigned: true,
+          ...buildExpectedFeaturePrivileges([
+            {
+              features: ['feature1', 'feature2', 'feature3', 'feature4'],
+              privilegeExplanation: {
+                actualPrivilege: 'all',
+                actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_FEATURE,
+                isDirectlyAssigned: true,
+                directlyAssignedFeaturePrivilegeMorePermissiveThanBase: true,
+              },
             },
-            feature2: {
-              actualPrivilege: 'all',
-              actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_FEATURE,
-              isDirectlyAssigned: true,
-            },
-            feature3: {
-              actualPrivilege: 'all',
-              actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_FEATURE,
-              isDirectlyAssigned: true,
-            },
-          }),
+          ]),
         },
       ]);
     });
@@ -636,6 +768,10 @@ describe('calculateAllowedPrivileges', () => {
           privileges: ['all'],
           canUnassign: true, // feature 3 has no "read" privilege governed by global "all"
         },
+        feature4: {
+          privileges: ['all', 'read'],
+          canUnassign: false,
+        },
       },
     };
 
@@ -697,6 +833,10 @@ describe('calculateAllowedPrivileges', () => {
             privileges: ['all'],
             canUnassign: true, // feature 3 has no "read" privilege governed by space "all"
           },
+          feature4: {
+            privileges: ['all', 'read'],
+            canUnassign: false,
+          },
         },
       },
     ]);
@@ -733,6 +873,10 @@ describe('calculateAllowedPrivileges', () => {
             privileges: ['all'],
             canUnassign: false,
           },
+          feature4: {
+            privileges: ['all', 'read'],
+            canUnassign: false,
+          },
         },
       },
     ]);
@@ -747,6 +891,7 @@ describe('calculateAllowedPrivileges', () => {
           feature: {
             feature1: ['all'],
             feature2: ['read'],
+            feature4: ['all'],
           },
         },
         {
@@ -783,6 +928,10 @@ describe('calculateAllowedPrivileges', () => {
           feature3: {
             privileges: ['all'],
             canUnassign: true, // feature 3 has no "read" privilege governed by space "all"
+          },
+          feature4: {
+            privileges: ['all'],
+            canUnassign: false,
           },
         },
       },

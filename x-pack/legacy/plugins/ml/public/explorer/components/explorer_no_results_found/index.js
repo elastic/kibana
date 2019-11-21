@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './explorer_no_results_found';
+export { ExplorerNoResultsFound } from './explorer_no_results_found';

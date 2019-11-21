@@ -1,0 +1,15 @@
+// Import the EUI global scope so we can use EUI constants
+@import 'src/legacy/ui/public/styles/_styling_constants';
+
+// Snapshot and Restore plugin styles
+
+// Prefix all styles with "snapshotRestore" to avoid conflicts.
+// Examples
+//   snapshotRestore
+//   snapshotRestore__legend
+//   snapshotRestore__legend--small
+//   snapshotRestore__legend-isLoading
+
+@import 'components/restore_snapshot_form/restore_snapshot_form';
+@import 'components/policy_form/policy_form';
+@import 'sections/home/home';

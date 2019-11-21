@@ -5,10 +5,12 @@
  */
 
 import { handleActions, combineActions } from 'redux-actions';
-import { set, assign, del } from 'object-path-immutable';
+import immutable from 'object-path-immutable';
 import { get } from 'lodash';
 import { createAsset, setAssetValue, removeAsset, setAssets, resetAssets } from '../actions/assets';
 import { getId } from '../../lib/get_id';
+
+const { set, assign, del } = immutable;
 
 export const assetsReducer = handleActions(
   {
@@ -34,7 +36,7 @@ export const assetsReducer = handleActions(
       return del(assetState, assetId);
     },
 
-    [combineActions(setAssets, resetAssets)]: (assetState, { payload }) => payload || {},
+    [combineActions(setAssets, resetAssets)]: (_assetState, { payload }) => payload || {},
   },
   {}
 );

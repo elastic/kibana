@@ -18,6 +18,7 @@
  */
 
 import { VisType } from './vis_types/vis_type';
+import { AggConfigs } from '../agg_types/agg_configs';
 
 export interface Vis {
   type: VisType;
@@ -29,8 +30,6 @@ export interface Vis {
   [key: string]: any;
 }
 
-export type VisProvider = (...dependencies: any[]) => Vis;
-
 export interface VisParams {
   [key: string]: any;
 }
@@ -39,5 +38,5 @@ export interface VisState {
   title: string;
   type: VisType;
   params: VisParams;
-  aggs: any[];
+  aggs: AggConfigs;
 }

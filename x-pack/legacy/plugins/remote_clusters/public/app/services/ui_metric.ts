@@ -5,13 +5,28 @@
  */
 
 import { UIM_APP_NAME } from '../constants';
+import {
+  createUiStatsReporter,
+  METRIC_TYPE,
+} from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
 
-export let track: any;
+export let trackUiMetric: ReturnType<typeof createUiStatsReporter>;
+export { METRIC_TYPE };
 
-export function init(_track: any): void {
-  track = _track;
+export function init(getReporter: typeof createUiStatsReporter): void {
+  trackUiMetric = getReporter(UIM_APP_NAME);
 }
 
-export function trackUiMetric(actionType: string): any {
-  return track(UIM_APP_NAME, actionType);
+/**
+ * Transparently return provided request Promise, while allowing us to track
+ * a successful completion of the request.
+ */
+export function trackUserRequest(request: Promise<any>, eventName: string) {
+  // Only track successful actions.
+  return request.then((response: any) => {
+    trackUiMetric(METRIC_TYPE.COUNT, eventName);
+    // We return the response immediately without waiting for the tracking request to resolve,
+    // to avoid adding additional latency.
+    return response;
+  });
 }

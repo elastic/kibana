@@ -4,35 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { StringMap } from '../../../typings/common';
+import { HttpServiceBase } from 'kibana/public';
 import { callApi } from './callApi';
 
 export interface LicenseApiResponse {
   license: {
-    expiry_date_in_millis: number;
     is_active: boolean;
-    type: string;
   };
   features: {
-    beats_management: StringMap;
-    graph: StringMap;
-    grokdebugger: StringMap;
-    index_management: StringMap;
-    logstash: StringMap;
-    ml: {
+    beats_management?: Record<string, unknown>;
+    graph?: Record<string, unknown>;
+    grokdebugger?: Record<string, unknown>;
+    index_management?: Record<string, unknown>;
+    logstash?: Record<string, unknown>;
+    ml?: {
       is_available: boolean;
       license_type: number;
       has_expired: boolean;
       enable_links: boolean;
       show_links: boolean;
     };
-    reporting: StringMap;
-    rollup: StringMap;
-    searchprofiler: StringMap;
-    security: StringMap;
-    spaces: StringMap;
-    tilemap: StringMap;
-    watcher: {
+    reporting?: Record<string, unknown>;
+    rollup?: Record<string, unknown>;
+    searchprofiler?: Record<string, unknown>;
+    security?: Record<string, unknown>;
+    spaces?: Record<string, unknown>;
+    tilemap?: Record<string, unknown>;
+    watcher?: {
       is_available: boolean;
       enable_links: boolean;
       show_links: boolean;
@@ -40,8 +38,8 @@ export interface LicenseApiResponse {
   };
 }
 
-export async function loadLicense() {
-  return callApi<LicenseApiResponse>({
+export async function loadLicense(http: HttpServiceBase) {
+  return callApi<LicenseApiResponse>(http, {
     pathname: `/api/xpack/v1/info`
   });
 }

@@ -9,10 +9,6 @@
  *       package includes them.
  */
 
-declare module '@elastic/eui' {
-  export const EuiWrappingPopover: React.SFC<any>;
-}
-
 import { IconType, ToolTipPositions } from '@elastic/eui';
 import { CommonProps } from '@elastic/eui/src/components/common';
 import moment from 'moment';
@@ -20,38 +16,6 @@ import { MouseEventHandler, ReactType, Ref } from 'react';
 import { JsonObject } from '../common/typed_json';
 
 declare module '@elastic/eui' {
-  export interface EuiBreadcrumbDefinition {
-    text: React.ReactNode;
-    href?: string;
-    onClick?: React.MouseEventHandler<any>;
-  }
-  type EuiBreadcrumbsProps = CommonProps & {
-    responsive?: boolean;
-    truncate?: boolean;
-    max?: number;
-    breadcrumbs: EuiBreadcrumbDefinition[];
-  };
-
-  type EuiHeaderProps = CommonProps;
-  export const EuiHeader: React.SFC<EuiHeaderProps>;
-
-  export type EuiHeaderSectionSide = 'left' | 'right';
-  type EuiHeaderSectionProps = CommonProps & {
-    side?: EuiHeaderSectionSide;
-    grow?: boolean;
-  };
-  export const EuiHeaderSection: React.SFC<EuiHeaderSectionProps>;
-
-  type EuiHeaderBreadcrumbsProps = EuiBreadcrumbsProps;
-  export const EuiHeaderBreadcrumbs: React.SFC<EuiHeaderBreadcrumbsProps>;
-
-  interface EuiOutsideClickDetectorProps {
-    children: React.ReactNode;
-    isDisabled?: boolean;
-    onOutsideClick: React.MouseEventHandler<Element>;
-  }
-  export const EuiOutsideClickDetector: React.SFC<EuiOutsideClickDetectorProps>;
-
   interface EuiFormControlLayoutIconProps {
     type: IconType;
     side?: 'left' | 'right';
@@ -61,17 +25,6 @@ declare module '@elastic/eui' {
   interface EuiFormControlLayoutClearIconProps {
     onClick?: React.MouseEventHandler<Element>;
   }
-
-  type EuiFormControlLayoutProps = CommonProps & {
-    icon?: string | EuiFormControlLayoutIconProps;
-    clear?: EuiFormControlLayoutClearIconProps;
-    fullWidth?: boolean;
-    isLoading?: boolean;
-    compressed?: boolean;
-    prepend?: React.ReactNode;
-    append?: React.ReactNode;
-  };
-  export const EuiFormControlLayout: React.SFC<EuiFormControlLayoutProps>;
 
   type EuiSideNavProps = CommonProps & {
     style?: any;
@@ -100,10 +53,6 @@ declare module '@elastic/eui' {
     sizes: EuiSizesResponsive[];
   };
 
-  export const EuiHideFor: React.SFC<EuiResponsiveProps>;
-
-  export const EuiShowFor: React.SFC<EuiResponsiveProps>;
-
   type EuiInMemoryTableProps = CommonProps & {
     items?: any;
     columns?: any;
@@ -118,6 +67,7 @@ declare module '@elastic/eui' {
     message?: any;
     rowProps?: any;
     cellProps?: any;
+    responsive?: boolean;
   };
   export const EuiInMemoryTable: React.SFC<EuiInMemoryTableProps>;
 }

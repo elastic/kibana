@@ -21,11 +21,11 @@ To control how data is collected from your {es} nodes, you configure
 {ref}/monitoring-settings.html[`xpack.monitoring.collection`
 settings] in `elasticsearch.yml`. To control how monitoring data is collected
 from Logstash, you configure
-{logstash-ref}/configuring-logstash.html#monitoring-settings[`xpack.monitoring` settings]
+{logstash-ref}/monitoring-internal-collection.html#monitoring-settings[`xpack.monitoring` settings]
 in `logstash.yml`.
 
 For more information, see
-{stack-ov}/xpack-monitoring.html[Monitoring the Elastic Stack].
+{ref}/monitor-elasticsearch-cluster.html[Monitor a cluster].
 
 [float]
 [[monitoring-general-settings]]
@@ -45,16 +45,28 @@ production cluster as well as monitor data sent to a dedicated monitoring
 cluster.
 
 `xpack.monitoring.elasticsearch.username`::
-Specifies the user ID that {kib} uses for authentication when it retrieves data
-from the monitoring cluster. If not set, {kib} uses the value of the
-`elasticsearch.username` setting.
+Specifies the username used by {kib} monitoring to establish a persistent connection
+in {kib}  to the {es} monitoring cluster and to verify licensing status on the {es}
+monitoring cluster.
+
+Every other request performed by the Stack Monitoring UI to the monitoring {es}
+cluster uses the authenticated user's credentials, which must be the same on
+both the {es} monitoring cluster and the {es} production cluster.
+
+If not set, {kib} uses the value of the `elasticsearch.username` setting.
 
 `xpack.monitoring.elasticsearch.password`::
-Specifies the password that {kib} uses for authentication when it retrieves data
-from the monitoring cluster. If not set, {kib} uses the value of the
-`elasticsearch.password` setting.
+Specifies the password used by {kib} monitoring to establish a persistent connection
+in {kib}  to the {es} monitoring cluster and to verify licensing status on the {es}
+monitoring cluster.
 
-`xpack.telemetry.enabled`::
+Every other request performed by the Stack Monitoring UI to the monitoring {es}
+cluster uses the authenticated user's credentials, which must be the same on
+both the {es} monitoring cluster and the {es} production cluster.
+
+If not set, {kib} uses the value of the `elasticsearch.password` setting.
+
+`telemetry.enabled`::
 Set to `true` (default) to send cluster statistics to Elastic. Reporting your
 cluster statistics helps us improve your user experience. Your data is never
 shared with anyone. Set to `false` to disable statistics reporting from any
@@ -129,6 +141,3 @@ For {es} clusters that are running in containers, this setting changes the
 statistics. It also adds the calculated Cgroup CPU utilization to the
 *Node Overview* page instead of the overall operating system's CPU
 utilization. Defaults to `false`.
-+
-[role="screenshot"]
-image::images/monitoring-containers.png[Elasticsearch Inside a Container]

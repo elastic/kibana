@@ -31,6 +31,7 @@ export default function ({ getPageObjects, getService }) {
 
     it('should create filters when create filter button is clicked', async () => {
       await testSubjects.click('mapTooltipCreateFilterButton');
+      await testSubjects.click('applyFiltersPopoverButton');
 
       const hasSourceFilter = await filterBar.hasFilter('name', 'charlie');
       expect(hasSourceFilter).to.be(true);
@@ -38,6 +39,5 @@ export default function ({ getPageObjects, getService }) {
       const hasJoinFilter = await filterBar.hasFilter('shape_name', 'charlie');
       expect(hasJoinFilter).to.be(true);
     });
-
   });
 }

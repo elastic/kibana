@@ -26,9 +26,12 @@ const getMockConcreteTaskInstance = () => {
     status: TaskStatus;
     runAt: Date;
     scheduledAt: Date;
+    startedAt: Date | null;
+    retryAt: Date | null;
     state: any;
     taskType: string;
     params: any;
+    ownerId: string | null;
   } = {
     id: 'hy8o99o83',
     sequenceNumber: 1,
@@ -37,9 +40,12 @@ const getMockConcreteTaskInstance = () => {
     status: 'idle',
     runAt: new Date(moment('2018-09-18T05:33:09.588Z').valueOf()),
     scheduledAt: new Date(moment('2018-09-18T05:33:09.588Z').valueOf()),
+    startedAt: null,
+    retryAt: null,
     state: {},
     taskType: 'nice_task',
     params: { abc: 'def' },
+    ownerId: null,
   };
   return concrete;
 };
@@ -64,6 +70,7 @@ describe('addMiddlewareToChain', () => {
         return opts;
       },
       beforeRun: defaultBeforeRun,
+      beforeMarkRunning: defaultBeforeRun,
     };
     const m2 = {
       beforeSave: async (opts: BeforeSaveOpts) => {
@@ -71,6 +78,7 @@ describe('addMiddlewareToChain', () => {
         return opts;
       },
       beforeRun: defaultBeforeRun,
+      beforeMarkRunning: defaultBeforeRun,
     };
     const m3 = {
       beforeSave: async (opts: BeforeSaveOpts) => {
@@ -78,6 +86,7 @@ describe('addMiddlewareToChain', () => {
         return opts;
       },
       beforeRun: defaultBeforeRun,
+      beforeMarkRunning: defaultBeforeRun,
     };
 
     let middlewareChain;
@@ -88,19 +97,19 @@ describe('addMiddlewareToChain', () => {
       .beforeSave({ taskInstance: getMockTaskInstance() })
       .then((saveOpts: any) => {
         expect(saveOpts).toMatchInlineSnapshot(`
-Object {
-  "taskInstance": Object {
-    "params": Object {
-      "abc": "def",
-      "m1": true,
-      "m2": true,
-      "m3": true,
-    },
-    "state": Object {},
-    "taskType": "nice_task",
-  },
-}
-`);
+          Object {
+            "taskInstance": Object {
+              "params": Object {
+                "abc": "def",
+                "m1": true,
+                "m2": true,
+                "m3": true,
+              },
+              "state": Object {},
+              "taskType": "nice_task",
+            },
+          }
+        `);
       });
   });
 
@@ -113,6 +122,7 @@ Object {
           m1: true,
         };
       },
+      beforeMarkRunning: defaultBeforeRun,
     };
     const m2 = {
       beforeSave: defaultBeforeSave,
@@ -122,6 +132,7 @@ Object {
           m2: true,
         };
       },
+      beforeMarkRunning: defaultBeforeRun,
     };
     const m3 = {
       beforeSave: defaultBeforeSave,
@@ -131,6 +142,7 @@ Object {
           m3: true,
         };
       },
+      beforeMarkRunning: defaultBeforeRun,
     };
 
     let middlewareChain;
@@ -141,27 +153,30 @@ Object {
       .beforeRun(getMockRunContext(getMockConcreteTaskInstance()))
       .then(contextOpts => {
         expect(contextOpts).toMatchInlineSnapshot(`
-Object {
-  "kbnServer": Object {},
-  "m1": true,
-  "m2": true,
-  "m3": true,
-  "taskInstance": Object {
-    "attempts": 0,
-    "id": "hy8o99o83",
-    "params": Object {
-      "abc": "def",
-    },
-    "primaryTerm": 1,
-    "runAt": 2018-09-18T05:33:09.588Z,
-    "scheduledAt": 2018-09-18T05:33:09.588Z,
-    "sequenceNumber": 1,
-    "state": Object {},
-    "status": "idle",
-    "taskType": "nice_task",
-  },
-}
-`);
+          Object {
+            "kbnServer": Object {},
+            "m1": true,
+            "m2": true,
+            "m3": true,
+            "taskInstance": Object {
+              "attempts": 0,
+              "id": "hy8o99o83",
+              "ownerId": null,
+              "params": Object {
+                "abc": "def",
+              },
+              "primaryTerm": 1,
+              "retryAt": null,
+              "runAt": 2018-09-18T05:33:09.588Z,
+              "scheduledAt": 2018-09-18T05:33:09.588Z,
+              "sequenceNumber": 1,
+              "startedAt": null,
+              "state": Object {},
+              "status": "idle",
+              "taskType": "nice_task",
+            },
+          }
+        `);
       });
   });
 });

@@ -25,9 +25,12 @@ const INVALID_CONFIG_PATH = resolve(__dirname, '__fixtures__/invalid_config.yml'
 
 describe('cli invalid config support', function () {
   it('exits with statusCode 64 and logs a single line when config is invalid', function () {
+    // Unused keys only throw once LegacyService starts, so disable migrations so that Core
+    // will finish the start lifecycle without a running Elasticsearch instance.
     const { error, status, stdout } = spawnSync(process.execPath, [
       'src/cli',
-      '--config', INVALID_CONFIG_PATH
+      '--config', INVALID_CONFIG_PATH,
+      '--migrations.skip=true'
     ], {
       cwd: ROOT_DIR
     });

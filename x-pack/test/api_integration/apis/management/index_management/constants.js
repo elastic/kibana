@@ -5,3 +5,5 @@
  */
 
 export const API_BASE_PATH = '/api/index_management';
+
+export const INDEX_PATTERNS = ['test*'];

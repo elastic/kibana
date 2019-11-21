@@ -5,9 +5,8 @@
  */
 
 import { take } from 'lodash';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Datatable } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { Datatable, ExpressionFunction } from '../../../types';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   count: number;

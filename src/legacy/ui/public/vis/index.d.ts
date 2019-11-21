@@ -17,8 +17,6 @@
  * under the License.
  */
 
-export { AggConfig } from './agg_config';
-export { Vis, VisProvider, VisParams, VisState } from './vis';
+export { AggConfig } from '../agg_types/agg_config';
+export { Vis, VisParams, VisState } from './vis';
 export { VisualizationController, VisType } from './vis_types/vis_type';
-export * from './request_handlers';
-export * from './response_handlers';

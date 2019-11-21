@@ -12,7 +12,27 @@ export class LoggingAction extends BaseAction {
   constructor(props = {}) {
     super(props);
 
-    this.text = get(props, 'text', '');
+    const defaultText = i18n.translate('xpack.watcher.models.loggingAction.defaultText', {
+      defaultMessage: 'Watch [{context}] has exceeded the threshold',
+      values: {
+        context: '{{ctx.metadata.name}}',
+      }
+    });
+    this.text = get(props, 'text', props.ignoreDefaults ? null : defaultText);
+  }
+
+  validate() {
+    const errors = {
+      text: [],
+    };
+    if (!this.text) {
+      errors.text.push(
+        i18n.translate('xpack.watcher.watchActions.logging.logTextIsRequiredValidationMessage', {
+          defaultMessage: 'Log text is required.',
+        })
+      );
+    }
+    return errors;
   }
 
   get upstreamJson() {
@@ -27,16 +47,6 @@ export class LoggingAction extends BaseAction {
     });
 
     return result;
-  }
-
-  get description() {
-    const text = this.text || '';
-    return i18n.translate('xpack.watcher.models.loggingAction.description', {
-      defaultMessage: 'Log message \'{text}\'',
-      values: {
-        text
-      }
-    });
   }
 
   get simulateMessage() {
@@ -58,12 +68,11 @@ export class LoggingAction extends BaseAction {
   static typeName = i18n.translate('xpack.watcher.models.loggingAction.typeName', {
     defaultMessage: 'Logging',
   });
-  static iconClass = 'kuiIcon fa-file-text-o';
+  static iconClass = 'logsApp';
   static selectMessage = i18n.translate('xpack.watcher.models.loggingAction.selectMessageText', {
-    defaultMessage: 'Add a new item to the logs.',
+    defaultMessage: 'Add an item to the logs.',
   });
-  static template = '<watch-logging-action></watch-logging-action>';
   static simulatePrompt = i18n.translate('xpack.watcher.models.loggingAction.simulateButtonLabel', {
-    defaultMessage: 'Log a sample message now',
+    defaultMessage: 'Log a sample message',
   });
 }

@@ -8,11 +8,14 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import { get } from 'lodash';
 import { Datatable } from '../../public/components/datatable';
+import { RendererStrings } from '../../i18n';
+
+const { dropdownFilter: strings } = RendererStrings;
 
 export const table = () => ({
   name: 'table',
-  displayName: 'Data table',
-  help: 'Render tabular data as HTML',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelpDescription(),
   reuseDomNode: true,
   render(domNode, config, handlers) {
     const { datatable, paginate, perPage, font, showHeader } = config;

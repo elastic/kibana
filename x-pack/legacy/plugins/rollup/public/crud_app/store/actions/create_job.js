@@ -15,6 +15,8 @@ import {
   getRouter,
 } from '../../services';
 
+import { startJobs } from './change_job_status';
+
 import {
   CREATE_JOB_START,
   CREATE_JOB_SUCCESS,
@@ -78,10 +80,16 @@ export const createJob = (jobConfig) => async (dispatch) => {
     }));
   }
 
+  const deserializedJob = deserializeJob(newJob.data);
+
   dispatch({
     type: CREATE_JOB_SUCCESS,
-    payload: { job: deserializeJob(newJob.data) },
+    payload: { job: deserializedJob }
   });
+
+  if (jobConfig.startJobAfterCreation) {
+    dispatch(startJobs([jobConfig.id]));
+  }
 
   // This will open the new job in the detail panel. Note that we're *not* showing a success toast
   // here, because it would partially obscure the detail panel.

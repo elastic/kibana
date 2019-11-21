@@ -9,7 +9,8 @@ import sinon from 'sinon';
 import { getCollectionStatus } from '../';
 import { getIndexPatterns } from '../../../cluster/get_index_patterns';
 
-const mockReq = (searchResult = {}, msearchResult = { responses: [] }) => {
+const liveClusterUuid = 'a12';
+const mockReq = (searchResult = {}) => {
   return {
     server: {
       config() {
@@ -18,12 +19,28 @@ const mockReq = (searchResult = {}, msearchResult = { responses: [] }) => {
             .withArgs('server.uuid').returns('kibana-1234')
         };
       },
+      usage: {
+        collectorSet: {
+          getCollectorByType: () => ({
+            isReady: () => false
+          })
+        }
+      },
       plugins: {
         elasticsearch: {
           getCluster() {
             return {
-              callWithRequest(_req, type) {
-                return Promise.resolve(type === 'search' ? searchResult : msearchResult);
+              callWithRequest(_req, type, params) {
+                if (type === 'transport.request' && (params && params.path === '/_cluster/state/cluster_uuid')) {
+                  return Promise.resolve({ cluster_uuid: liveClusterUuid });
+                }
+                if (type === 'transport.request' && (params && params.path === '/_nodes')) {
+                  return Promise.resolve({ nodes: {} });
+                }
+                if (type === 'cat.indices') {
+                  return Promise.resolve([1]);
+                }
+                return Promise.resolve(searchResult);
               }
             };
           }
@@ -192,7 +209,7 @@ describe('getCollectionStatus', () => {
       ]
     });
 
-    const result = await getCollectionStatus(req, getIndexPatterns(req.server));
+    const result = await getCollectionStatus(req, getIndexPatterns(req.server), liveClusterUuid);
 
     expect(result.kibana.detected.doesExist).to.be(true);
     expect(result.elasticsearch.detected.doesExist).to.be(true);

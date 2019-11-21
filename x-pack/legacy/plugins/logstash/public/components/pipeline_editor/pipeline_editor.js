@@ -348,6 +348,7 @@ class PipelineEditorUi extends React.Component {
                 value={this.state.pipeline.settings['pipeline.workers']}
               />
             </EuiFormRow>
+            <EuiSpacer />
             <EuiFlexGroup>
               <FlexItemSetting
                 formRowLabelText={intl.formatMessage({

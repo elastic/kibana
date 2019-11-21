@@ -8,15 +8,14 @@ exports[`FilterListUsagePopover opens the popover onButtonClick 1`] = `
       <EuiButtonIcon
         aria-label="Edit description"
         color="primary"
-        iconSize="m"
         iconType="pencil"
         isDisabled={false}
         onClick={[Function]}
         size="s"
-        type="button"
       />
     }
     closePopover={[Function]}
+    display="inlineBlock"
     hasArrow={true}
     id="filter_list_description_popover"
     isOpen={true}
@@ -33,7 +32,9 @@ exports[`FilterListUsagePopover opens the popover onButtonClick 1`] = `
       <EuiForm>
         <EuiFormRow
           describedByIds={Array []}
+          display="row"
           fullWidth={false}
+          hasChildLabel={true}
           hasEmptyLabelSpace={false}
           label={
             <FormattedMessage
@@ -67,15 +68,14 @@ exports[`FilterListUsagePopover renders the popover with a description 1`] = `
       <EuiButtonIcon
         aria-label="Edit description"
         color="primary"
-        iconSize="m"
         iconType="pencil"
         isDisabled={false}
         onClick={[Function]}
         size="s"
-        type="button"
       />
     }
     closePopover={[Function]}
+    display="inlineBlock"
     hasArrow={true}
     id="filter_list_description_popover"
     isOpen={false}
@@ -92,7 +92,9 @@ exports[`FilterListUsagePopover renders the popover with a description 1`] = `
       <EuiForm>
         <EuiFormRow
           describedByIds={Array []}
+          display="row"
           fullWidth={false}
+          hasChildLabel={true}
           hasEmptyLabelSpace={false}
           label={
             <FormattedMessage
@@ -126,15 +128,14 @@ exports[`FilterListUsagePopover renders the popover with no description 1`] = `
       <EuiButtonIcon
         aria-label="Edit description"
         color="primary"
-        iconSize="m"
         iconType="pencil"
         isDisabled={false}
         onClick={[Function]}
         size="s"
-        type="button"
       />
     }
     closePopover={[Function]}
+    display="inlineBlock"
     hasArrow={true}
     id="filter_list_description_popover"
     isOpen={false}
@@ -151,7 +152,9 @@ exports[`FilterListUsagePopover renders the popover with no description 1`] = `
       <EuiForm>
         <EuiFormRow
           describedByIds={Array []}
+          display="row"
           fullWidth={false}
+          hasChildLabel={true}
           hasEmptyLabelSpace={false}
           label={
             <FormattedMessage

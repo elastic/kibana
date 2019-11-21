@@ -17,15 +17,5 @@
  * under the License.
  */
 
-export { QueryBar, QueryBarInput } from './components';
-export { fromUser } from './lib/from_user';
-export { toUser } from './lib/to_user';
-export { getQueryLog } from './lib/get_query_log';
-
-// @ts-ignore
-export { setupDirective } from './directive';
-
-export interface Query {
-  query: string | { [key: string]: any };
-  language: string;
-}
+export { QueryBarTopRow } from './components/query_bar_top_row';
+export { QueryBarInput } from './components/query_bar_input';

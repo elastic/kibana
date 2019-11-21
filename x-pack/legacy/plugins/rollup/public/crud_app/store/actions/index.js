@@ -10,6 +10,11 @@ export {
 } from './change_job_status';
 
 export {
+  cloneJob,
+  clearCloneJob,
+} from './clone_job';
+
+export {
   createJob,
   clearCreateJobErrors,
 } from './create_job';

@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './explorer_chart_single_metric.test.mocks';
 import { chartData } from './__mocks__/mock_chart_data';
 import seriesConfig from './__mocks__/mock_series_config_filebeat.json';
 import seriesConfigRare from './__mocks__/mock_series_config_rare.json';
 
 // Mock TimeBuckets and mlFieldFormatService, they don't play well
 // with the jest based test setup yet.
-jest.mock('ui/time_buckets', () => ({
+jest.mock('../../util/time_buckets', () => ({
   TimeBuckets: function () {
     this.setBounds = jest.fn();
     this.setInterval = jest.fn();
@@ -36,31 +37,7 @@ jest.mock('ui/chrome',
     getBasePath: () => {
       return '<basepath>';
     },
-    getUiSettingsClient: () => {
-      return {
-        get: (key) => {
-          switch (key) {
-            case 'timepicker:timeDefaults':
-              return { from: 'now-15m', to: 'now', mode: 'quick' };
-            case 'timepicker:refreshIntervalDefaults':
-              return { pause: false, value: 0 };
-            default:
-              throw new Error(`Unexpected config key: ${key}`);
-          }
-        }
-      };
-    },
   }), { virtual: true });
-
-import moment from 'moment';
-import { timefilter } from 'ui/timefilter';
-
-timefilter.enableTimeRangeSelector();
-timefilter.enableAutoRefreshSelector();
-timefilter.setTime({
-  from: moment(seriesConfig.selectedEarliest).toISOString(),
-  to: moment(seriesConfig.selectedLatest).toISOString()
-});
 
 import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';

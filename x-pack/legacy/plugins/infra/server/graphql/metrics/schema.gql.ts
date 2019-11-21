@@ -19,6 +19,10 @@ export const metricsSchema: any = gql`
     hostLoad
     hostMemoryUsage
     hostNetworkTraffic
+    hostDockerOverview
+    hostDockerInfo
+    hostDockerTop5ByCpu
+    hostDockerTop5ByMemory
     podOverview
     podCpuUsage
     podMemoryUsage
@@ -35,6 +39,13 @@ export const metricsSchema: any = gql`
     nginxRequestRate
     nginxActiveConnections
     nginxRequestsPerConnection
+    awsOverview
+    awsCpuUtilization
+    awsNetworkBytes
+    awsNetworkPackets
+    awsDiskioBytes
+    awsDiskioOps
+    custom
   }
 
   type InfraMetricData {
@@ -44,6 +55,7 @@ export const metricsSchema: any = gql`
 
   type InfraDataSeries {
     id: ID!
+    label: String!
     data: [InfraDataPoint!]!
   }
 
@@ -52,9 +64,14 @@ export const metricsSchema: any = gql`
     value: Float
   }
 
+  input InfraNodeIdsInput {
+    nodeId: ID!
+    cloudId: ID
+  }
+
   extend type InfraSource {
     metrics(
-      nodeId: ID!
+      nodeIds: InfraNodeIdsInput!
       nodeType: InfraNodeType!
       timerange: InfraTimerangeInput!
       metrics: [InfraMetric!]!

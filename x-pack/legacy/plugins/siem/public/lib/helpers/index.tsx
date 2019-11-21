@@ -9,7 +9,7 @@ import { castArray, isUndefined } from 'lodash/fp';
 export const encodeIpv6 = (ip: string) => ip.replace(/:/g, '-');
 export const decodeIpv6 = (ip: string) => ip.replace(/-/g, ':');
 
-export type Many<T> = T | ReadonlyArray<T>;
+export type Many<T> = T | readonly T[];
 export type WrapArrayIfExitts = <T>(value: Many<T>) => T[] | undefined;
 
 /**
@@ -42,3 +42,9 @@ export const assertUnreachable = (
 ): never => {
   throw new Error(`${message}: ${x}`);
 };
+
+/**
+ * Global variables
+ */
+
+export const gutterTimeline = '70px'; // Michael: Temporary until timeline is moved.

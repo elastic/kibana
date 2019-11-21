@@ -5,8 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { get } from 'lodash/fp';
-import { uniq } from 'lodash/fp';
+import { get, uniq } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
@@ -68,6 +67,8 @@ const GeoFlexItem = styled(EuiFlexItem)`
   margin-right: 5px;
 `;
 
+GeoFlexItem.displayName = 'GeoFlexItem';
+
 const GeoFieldValues = pure<{
   contextId: string;
   eventId: string;
@@ -90,7 +91,7 @@ const GeoFieldValues = pure<{
               <DefaultDraggable
                 data-test-subj={fieldName}
                 field={fieldName}
-                id={`${contextId}-${eventId}-${fieldName}-${value}`}
+                id={`geo-field-values-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
                 tooltipContent={fieldName}
                 value={value}
               />
@@ -101,6 +102,8 @@ const GeoFieldValues = pure<{
     </>
   ) : null
 );
+
+GeoFieldValues.displayName = 'GeoFieldValues';
 
 /**
  * Renders a row of draggable text containing geographic fields, such as:
@@ -128,3 +131,5 @@ export const GeoFields = pure<GeoFieldsProps>(props => {
     </EuiFlexGroup>
   );
 });
+
+GeoFields.displayName = 'GeoFields';

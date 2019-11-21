@@ -1,1 +1,8 @@
-{ "getDocCount": { "count": 9231 } }
+{
+  "statesIndexStatus": {
+    "docCount": {
+      "count": 2000
+    },
+    "indexExists": true
+  }
+}

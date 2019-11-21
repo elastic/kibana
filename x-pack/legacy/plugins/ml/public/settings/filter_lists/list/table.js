@@ -70,6 +70,7 @@ function NewFilterButton({ canCreateFilter }) {
       key="new_filter_list"
       href={`${chrome.getBasePath()}/app/ml#/settings/filter_lists/new_filter_list`}
       isDisabled={(canCreateFilter === false)}
+      data-test-subj="mlFilterListsButtonCreate"
     >
       <FormattedMessage
         id="xpack.ml.settings.filterLists.table.newButtonLabel"
@@ -218,6 +219,7 @@ export function FilterListsTable({
             sorting={sorting}
             selection={tableSelection}
             isSelectable={true}
+            data-test-subj="mlFilterListsTable"
           />
         </React.Fragment>
       )}

@@ -7,17 +7,17 @@
 import { EuiIconTip, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
-import React, { FunctionComponent, useEffect, useCallback } from 'react';
-import { omit } from 'lodash';
-import { ITransactionDistributionAPIResponse } from '../../../../../server/lib/transactions/distribution';
+import React, { FunctionComponent, useCallback } from 'react';
+import { TransactionDistributionAPIResponse } from '../../../../../server/lib/transactions/distribution';
 import { IBucket } from '../../../../../server/lib/transactions/distribution/get_buckets/transform';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import { getTimeFormatter, timeUnit } from '../../../../utils/formatters';
+import { getDurationFormatter } from '../../../../utils/formatters';
 // @ts-ignore
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { history } from '../../../../utils/history';
+import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 
 interface IChartPoint {
   sample?: IBucket['sample'];
@@ -88,9 +88,9 @@ const getFormatYLong = (transactionType: string | undefined) => (t: number) => {
 };
 
 interface Props {
-  distribution?: ITransactionDistributionAPIResponse;
+  distribution?: TransactionDistributionAPIResponse;
   urlParams: IUrlParams;
-  loading: boolean;
+  isLoading: boolean;
 }
 
 export const TransactionDistribution: FunctionComponent<Props> = (
@@ -99,7 +99,7 @@ export const TransactionDistribution: FunctionComponent<Props> = (
   const {
     distribution,
     urlParams: { transactionId, traceId, transactionType },
-    loading
+    isLoading
   } = props;
 
   const formatYShort = useCallback(getFormatYShort(transactionType), [
@@ -110,50 +110,13 @@ export const TransactionDistribution: FunctionComponent<Props> = (
     transactionType
   ]);
 
-  const redirectToDefaultSample = useCallback(
-    () => {
-      const defaultSample =
-        distribution && distribution.defaultSample
-          ? distribution.defaultSample
-          : {};
+  // no data in response
+  if (!distribution || distribution.noHits) {
+    // only show loading state if there is no data - else show stale data until new data has loaded
+    if (isLoading) {
+      return <LoadingStatePrompt />;
+    }
 
-      const parsedQueryParams = toQuery(history.location.search);
-
-      history.replace({
-        ...history.location,
-        search: fromQuery({
-          ...omit(parsedQueryParams, 'transactionId', 'traceId'),
-          ...defaultSample
-        })
-      });
-    },
-    [distribution, loading]
-  );
-
-  useEffect(
-    () => {
-      if (loading) {
-        return;
-      }
-      const selectedSampleIsAvailable = distribution
-        ? !!distribution.buckets.find(
-            bucket =>
-              !!(
-                bucket.sample &&
-                bucket.sample.transactionId === transactionId &&
-                bucket.sample.traceId === traceId
-              )
-          )
-        : false;
-
-      if (!selectedSampleIsAvailable && !!distribution) {
-        redirectToDefaultSample();
-      }
-    },
-    [distribution, transactionId, traceId, redirectToDefaultSample, loading]
-  );
-
-  if (!distribution || !distribution.totalHits || !traceId || !transactionId) {
     return (
       <EmptyMessage
         heading={i18n.translate('xpack.apm.transactionDetails.notFoundLabel', {
@@ -169,8 +132,7 @@ export const TransactionDistribution: FunctionComponent<Props> = (
   );
 
   const xMax = d3.max(buckets, d => d.x) || 0;
-  const timeFormatter = getTimeFormatter(xMax);
-  const unit = timeUnit(xMax);
+  const timeFormatter = getDurationFormatter(xMax);
 
   const bucketIndex = buckets.findIndex(
     bucket =>
@@ -224,19 +186,18 @@ export const TransactionDistribution: FunctionComponent<Props> = (
             });
           }
         }}
-        formatX={timeFormatter}
+        formatX={(time: number) => timeFormatter(time).formatted}
         formatYShort={formatYShort}
         formatYLong={formatYLong}
         verticalLineHover={(bucket: IChartPoint) =>
           bucket.y > 0 && !bucket.sample
         }
         backgroundHover={(bucket: IChartPoint) => bucket.y > 0 && bucket.sample}
-        tooltipHeader={(bucket: IChartPoint) =>
-          `${timeFormatter(bucket.x0, { withUnit: false })} - ${timeFormatter(
-            bucket.x,
-            { withUnit: false }
-          )} ${unit}`
-        }
+        tooltipHeader={(bucket: IChartPoint) => {
+          const xFormatted = timeFormatter(bucket.x);
+          const x0Formatted = timeFormatter(bucket.x0);
+          return `${x0Formatted.value} - ${xFormatted.value} ${xFormatted.unit}`;
+        }}
         tooltipFooter={(bucket: IChartPoint) =>
           !bucket.sample &&
           i18n.translate(

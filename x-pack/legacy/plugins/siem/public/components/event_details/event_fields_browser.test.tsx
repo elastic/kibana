@@ -12,6 +12,9 @@ import { TestProviders } from '../../mock/test_providers';
 
 import { EventFieldsBrowser } from './event_fields_browser';
 import { mockBrowserFields } from '../../containers/source/mock';
+import { defaultHeaders } from '../../mock/header';
+
+jest.mock('../../lib/settings/use_kibana_ui_setting');
 
 describe('EventFieldsBrowser', () => {
   describe('column headers', () => {
@@ -21,11 +24,12 @@ describe('EventFieldsBrowser', () => {
           <TestProviders>
             <EventFieldsBrowser
               browserFields={mockBrowserFields}
+              columnHeaders={defaultHeaders}
               data={mockDetailItemData}
               eventId={mockDetailItemDataId}
-              isLoading={false}
               onUpdateColumns={jest.fn()}
               timelineId="test"
+              toggleColumn={jest.fn()}
             />
           </TestProviders>
         );
@@ -41,11 +45,12 @@ describe('EventFieldsBrowser', () => {
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
+            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            isLoading={false}
             onUpdateColumns={jest.fn()}
             timelineId="test"
+            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );
@@ -56,17 +61,106 @@ describe('EventFieldsBrowser', () => {
     });
   });
 
+  describe('toggle column checkbox', () => {
+    const eventId = 'pEMaMmkBUV60JmNWmWVi';
+
+    test('it renders an UNchecked checkbox for a field that is not a member of columnHeaders', () => {
+      const field = 'agent.id';
+
+      const wrapper = mountWithIntl(
+        <TestProviders>
+          <EventFieldsBrowser
+            browserFields={mockBrowserFields}
+            columnHeaders={defaultHeaders}
+            data={mockDetailItemData}
+            eventId={eventId}
+            onUpdateColumns={jest.fn()}
+            timelineId="test"
+            toggleColumn={jest.fn()}
+          />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper
+          .find(`[data-test-subj="toggle-field-${field}"]`)
+          .first()
+          .props().checked
+      ).toBe(false);
+    });
+
+    test('it renders an checked checkbox for a field that is a member of columnHeaders', () => {
+      const field = '@timestamp';
+
+      const wrapper = mountWithIntl(
+        <TestProviders>
+          <EventFieldsBrowser
+            browserFields={mockBrowserFields}
+            columnHeaders={defaultHeaders}
+            data={mockDetailItemData}
+            eventId={eventId}
+            onUpdateColumns={jest.fn()}
+            timelineId="test"
+            toggleColumn={jest.fn()}
+          />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper
+          .find(`[data-test-subj="toggle-field-${field}"]`)
+          .first()
+          .props().checked
+      ).toBe(true);
+    });
+
+    test('it invokes toggleColumn when the checkbox is clicked', () => {
+      const field = '@timestamp';
+      const toggleColumn = jest.fn();
+
+      const wrapper = mountWithIntl(
+        <TestProviders>
+          <EventFieldsBrowser
+            browserFields={mockBrowserFields}
+            columnHeaders={defaultHeaders}
+            data={mockDetailItemData}
+            eventId={eventId}
+            onUpdateColumns={jest.fn()}
+            timelineId="test"
+            toggleColumn={toggleColumn}
+          />
+        </TestProviders>
+      );
+
+      wrapper
+        .find(`[data-test-subj="toggle-field-${field}"]`)
+        .find(`input[type="checkbox"]`)
+        .first()
+        .simulate('change', {
+          target: { checked: true },
+        });
+      wrapper.update();
+
+      expect(toggleColumn).toBeCalledWith({
+        columnHeaderType: 'not-filtered',
+        id: '@timestamp',
+        width: 180,
+      });
+    });
+  });
+
   describe('field type icon', () => {
     test('it renders the expected icon type for the data provided', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
+            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            isLoading={false}
             onUpdateColumns={jest.fn()}
             timelineId="test"
+            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );
@@ -75,7 +169,7 @@ describe('EventFieldsBrowser', () => {
         wrapper
           .find('.euiTableRow')
           .find('.euiTableRowCell')
-          .at(0)
+          .at(1)
           .find('svg')
           .exists()
       ).toEqual(true);
@@ -88,11 +182,12 @@ describe('EventFieldsBrowser', () => {
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
+            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            isLoading={false}
             onUpdateColumns={jest.fn()}
             timelineId="test"
+            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );
@@ -101,7 +196,7 @@ describe('EventFieldsBrowser', () => {
           .find('[data-test-subj="field-name"]')
           .at(0)
           .text()
-      ).toEqual('_id');
+      ).toEqual('@timestamp');
     });
   });
 
@@ -111,20 +206,21 @@ describe('EventFieldsBrowser', () => {
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
+            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            isLoading={false}
             onUpdateColumns={jest.fn()}
             timelineId="test"
+            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );
       expect(
         wrapper
-          .find('[data-test-subj="draggable-content"]')
+          .find('[data-test-subj="draggable-content-@timestamp"]')
           .at(0)
           .text()
-      ).toEqual('pEMaMmkBUV60JmNWmWVi');
+      ).toEqual('Feb 28, 2019 @ 16:50:54.621');
     });
   });
 
@@ -134,11 +230,12 @@ describe('EventFieldsBrowser', () => {
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
+            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            isLoading={false}
             onUpdateColumns={jest.fn()}
             timelineId="test"
+            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );
@@ -149,7 +246,9 @@ describe('EventFieldsBrowser', () => {
           .find('.euiTableRowCell')
           .at(3)
           .text()
-      ).toContain('Each document has an _id that uniquely identifies it');
+      ).toContain(
+        'DescriptionDate/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events. Example: 2016-05-23T08:05:34.853Z'
+      );
     });
   });
 });

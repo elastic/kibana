@@ -15,6 +15,7 @@ exports[`removes aria-label when instructed not to announce the space name 1`] =
     aria-label=""
     color="#BFA180"
     data-test-subj="space-avatar-"
+    imageUrl=""
     initials=""
     initialsLength={2}
     name=""
@@ -43,6 +44,7 @@ exports[`renders with a space name entirely made of whitespace 1`] = `
 <EuiAvatar
   color="#DB1374"
   data-test-subj="space-avatar-"
+  imageUrl=""
   initials=""
   initialsLength={2}
   name=""
@@ -55,6 +57,7 @@ exports[`renders without crashing 1`] = `
 <EuiAvatar
   color="#BFA180"
   data-test-subj="space-avatar-"
+  imageUrl=""
   initials=""
   initialsLength={2}
   name=""

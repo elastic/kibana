@@ -6,6 +6,8 @@
 
 import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { ThemeProvider } from 'styled-components';
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 
 import { Note } from '../../../lib/note';
 
@@ -13,6 +15,7 @@ import { NoteCards } from '.';
 
 describe('NoteCards', () => {
   const noteIds = ['abc', 'def'];
+  const theme = () => ({ eui: euiDarkVars, darkMode: true });
 
   const getNotesByIds = (_: string[]): Note[] => [
     {
@@ -37,16 +40,17 @@ describe('NoteCards', () => {
 
   test('it renders the notes column when noteIds are specified', () => {
     const wrapper = mountWithIntl(
-      <NoteCards
-        associateNote={jest.fn()}
-        getNotesByIds={getNotesByIds}
-        getNewNoteId={jest.fn()}
-        noteIds={noteIds}
-        showAddNote={true}
-        toggleShowAddNote={jest.fn()}
-        updateNote={jest.fn()}
-        width="100%"
-      />
+      <ThemeProvider theme={theme}>
+        <NoteCards
+          associateNote={jest.fn()}
+          getNotesByIds={getNotesByIds}
+          getNewNoteId={jest.fn()}
+          noteIds={noteIds}
+          showAddNote={true}
+          toggleShowAddNote={jest.fn()}
+          updateNote={jest.fn()}
+        />
+      </ThemeProvider>
     );
 
     expect(wrapper.find('[data-test-subj="notes"]').exists()).toEqual(true);
@@ -54,16 +58,17 @@ describe('NoteCards', () => {
 
   test('it does NOT render the notes column when noteIds are NOT specified', () => {
     const wrapper = mountWithIntl(
-      <NoteCards
-        associateNote={jest.fn()}
-        getNotesByIds={getNotesByIds}
-        getNewNoteId={jest.fn()}
-        noteIds={[]}
-        showAddNote={true}
-        toggleShowAddNote={jest.fn()}
-        updateNote={jest.fn()}
-        width="100%"
-      />
+      <ThemeProvider theme={theme}>
+        <NoteCards
+          associateNote={jest.fn()}
+          getNotesByIds={getNotesByIds}
+          getNewNoteId={jest.fn()}
+          noteIds={[]}
+          showAddNote={true}
+          toggleShowAddNote={jest.fn()}
+          updateNote={jest.fn()}
+        />
+      </ThemeProvider>
     );
 
     expect(wrapper.find('[data-test-subj="notes"]').exists()).toEqual(false);
@@ -71,16 +76,17 @@ describe('NoteCards', () => {
 
   test('renders note cards', () => {
     const wrapper = mountWithIntl(
-      <NoteCards
-        associateNote={jest.fn()}
-        getNotesByIds={getNotesByIds}
-        getNewNoteId={jest.fn()}
-        noteIds={noteIds}
-        showAddNote={true}
-        toggleShowAddNote={jest.fn()}
-        updateNote={jest.fn()}
-        width="100%"
-      />
+      <ThemeProvider theme={theme}>
+        <NoteCards
+          associateNote={jest.fn()}
+          getNotesByIds={getNotesByIds}
+          getNewNoteId={jest.fn()}
+          noteIds={noteIds}
+          showAddNote={true}
+          toggleShowAddNote={jest.fn()}
+          updateNote={jest.fn()}
+        />
+      </ThemeProvider>
     );
 
     expect(
@@ -95,16 +101,17 @@ describe('NoteCards', () => {
 
   test('it shows controls for adding notes when showAddNote is true', () => {
     const wrapper = mountWithIntl(
-      <NoteCards
-        associateNote={jest.fn()}
-        getNotesByIds={getNotesByIds}
-        getNewNoteId={jest.fn()}
-        noteIds={noteIds}
-        showAddNote={true}
-        toggleShowAddNote={jest.fn()}
-        updateNote={jest.fn()}
-        width="100%"
-      />
+      <ThemeProvider theme={theme}>
+        <NoteCards
+          associateNote={jest.fn()}
+          getNotesByIds={getNotesByIds}
+          getNewNoteId={jest.fn()}
+          noteIds={noteIds}
+          showAddNote={true}
+          toggleShowAddNote={jest.fn()}
+          updateNote={jest.fn()}
+        />
+      </ThemeProvider>
     );
 
     expect(wrapper.find('[data-test-subj="add-note"]').exists()).toEqual(true);
@@ -112,16 +119,17 @@ describe('NoteCards', () => {
 
   test('it does NOT show controls for adding notes when showAddNote is false', () => {
     const wrapper = mountWithIntl(
-      <NoteCards
-        associateNote={jest.fn()}
-        getNotesByIds={getNotesByIds}
-        getNewNoteId={jest.fn()}
-        noteIds={noteIds}
-        showAddNote={false}
-        toggleShowAddNote={jest.fn()}
-        updateNote={jest.fn()}
-        width="100%"
-      />
+      <ThemeProvider theme={theme}>
+        <NoteCards
+          associateNote={jest.fn()}
+          getNotesByIds={getNotesByIds}
+          getNewNoteId={jest.fn()}
+          noteIds={noteIds}
+          showAddNote={false}
+          toggleShowAddNote={jest.fn()}
+          updateNote={jest.fn()}
+        />
+      </ThemeProvider>
     );
 
     expect(wrapper.find('[data-test-subj="add-note"]').exists()).toEqual(false);

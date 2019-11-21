@@ -15,9 +15,7 @@
 }
 
 /* hide unusable controls */
-.kbnGlobalNav,
 kbn-top-nav,
-.kbnToaster__container,
 filter-bar,
 ::-webkit-scrollbar,
 .euiNavDrawer {

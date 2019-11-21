@@ -21,19 +21,15 @@ interface SuperDateRangePickerRefreshChangedEvent {
 }
 
 interface Props {
-  history: any;
-  location: any;
   refreshApp: () => void;
 }
 
 type UptimeDatePickerProps = Props;
 
 export const UptimeDatePicker = (props: UptimeDatePickerProps) => {
-  const { history, location, refreshApp } = props;
-  const [
-    { autorefreshInterval, autorefreshIsPaused, dateRangeStart, dateRangeEnd },
-    updateUrl,
-  ] = useUrlParams(history, location);
+  const { refreshApp } = props;
+  const [getUrlParams, updateUrl] = useUrlParams();
+  const { autorefreshInterval, autorefreshIsPaused, dateRangeStart, dateRangeEnd } = getUrlParams();
   return (
     <EuiSuperDatePicker
       start={dateRangeStart}

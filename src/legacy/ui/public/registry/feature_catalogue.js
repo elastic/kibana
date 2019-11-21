@@ -19,6 +19,7 @@
 
 import { uiRegistry } from './_registry';
 import { capabilities } from '../capabilities';
+export { FeatureCatalogueCategory } from '../../../../plugins/home/public';
 
 export const FeatureCatalogueRegistryProvider = uiRegistry({
   name: 'featureCatalogue',
@@ -30,9 +31,3 @@ export const FeatureCatalogueRegistryProvider = uiRegistry({
     return !isDisabledViaCapabilities && Object.keys(featureCatalogItem).length > 0;
   }
 });
-
-export const FeatureCatalogueCategory = {
-  ADMIN: 'admin',
-  DATA: 'data',
-  OTHER: 'other'
-};

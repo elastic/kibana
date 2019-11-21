@@ -3,10 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
-import { DEFAULT_TIMELINE_WIDTH } from '../../components/timeline/body/helpers';
 import {
   addTimeline,
   addHistory,
@@ -23,6 +21,7 @@ import {
   removeColumn,
   removeProvider,
   setKqlFilterQueryDraft,
+  showCallOutUnauthorizedMsg,
   showTimeline,
   startTimelineSaving,
   unPinEvent,
@@ -46,6 +45,8 @@ import {
   updateTitle,
   upsertColumn,
   updateIsLoading,
+  setSavedQueryId,
+  setFilters,
 } from './actions';
 import {
   addNewTimeline,
@@ -53,6 +54,7 @@ import {
   addTimelineNote,
   addTimelineNoteToEvent,
   addTimelineProvider,
+  addTimelineToStore,
   applyDeltaToCurrentWidth,
   applyDeltaToTimelineColumnWidth,
   applyKqlFilterQueryDraft,
@@ -80,6 +82,8 @@ import {
   updateTimelineSort,
   updateTimelineTitle,
   upsertTimelineColumn,
+  updateSavedQuery,
+  updateFilters,
 } from './helpers';
 
 import { TimelineState, EMPTY_TIMELINE_BY_ID } from './types';
@@ -90,38 +94,25 @@ export const initialTimelineState: TimelineState = {
     timelineId: null,
     newTimelineModel: null,
   },
+  showCallOutUnauthorizedMsg: false,
 };
 
 /** The reducer for all timeline actions  */
 export const timelineReducer = reducerWithInitialState(initialTimelineState)
   .case(addTimeline, (state, { id, timeline }) => ({
     ...state,
-    timelineById: {
-      // As right now, We are not managing multiple timeline
-      // for now simplification, we do not need the line below
-      // ...state.timelineById,
-      [id]: {
-        ...timeline,
-        highlightedDropAndProviderId: '',
-        historyIds: [],
-        isLive: false,
-        isLoading: true,
-        itemsPerPage: 25,
-        itemsPerPageOptions: [10, 25, 50, 100],
-        id: timeline.savedObjectId || '',
-        dateRange: {
-          start: 0,
-          end: 0,
-        },
-        show: true,
-        width: DEFAULT_TIMELINE_WIDTH,
-        isSaving: false,
-      },
-    },
+    timelineById: addTimelineToStore({ id, timeline, timelineById: state.timelineById }),
   }))
-  .case(createTimeline, (state, { id, show, columns }) => ({
+  .case(createTimeline, (state, { id, show, columns, itemsPerPage, sort }) => ({
     ...state,
-    timelineById: addNewTimeline({ columns, id, show, timelineById: state.timelineById }),
+    timelineById: addNewTimeline({
+      columns,
+      id,
+      itemsPerPage,
+      sort,
+      show,
+      timelineById: state.timelineById,
+    }),
   }))
   .case(upsertColumn, (state, { column, id, index }) => ({
     ...state,
@@ -145,7 +136,11 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   }))
   .case(applyKqlFilterQuery, (state, { id, filterQuery }) => ({
     ...state,
-    timelineById: applyKqlFilterQueryDraft({ id, filterQuery, timelineById: state.timelineById }),
+    timelineById: applyKqlFilterQueryDraft({
+      id,
+      filterQuery,
+      timelineById: state.timelineById,
+    }),
   }))
   .case(setKqlFilterQueryDraft, (state, { id, filterQueryDraft }) => ({
     ...state,
@@ -369,5 +364,25 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       timelineId,
       newTimelineModel,
     },
+  }))
+  .case(showCallOutUnauthorizedMsg, state => ({
+    ...state,
+    showCallOutUnauthorizedMsg: true,
+  }))
+  .case(setSavedQueryId, (state, { id, savedQueryId }) => ({
+    ...state,
+    timelineById: updateSavedQuery({
+      id,
+      savedQueryId,
+      timelineById: state.timelineById,
+    }),
+  }))
+  .case(setFilters, (state, { id, filters }) => ({
+    ...state,
+    timelineById: updateFilters({
+      id,
+      filters,
+      timelineById: state.timelineById,
+    }),
   }))
   .build();

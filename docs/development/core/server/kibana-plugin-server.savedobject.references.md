@@ -4,6 +4,8 @@
 
 ## SavedObject.references property
 
+A reference to another saved object.
+
 <b>Signature:</b>
 
 ```typescript

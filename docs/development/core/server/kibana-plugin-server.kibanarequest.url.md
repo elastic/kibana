@@ -4,6 +4,8 @@
 
 ## KibanaRequest.url property
 
+a WHATWG URL standard object.
+
 <b>Signature:</b>
 
 ```typescript

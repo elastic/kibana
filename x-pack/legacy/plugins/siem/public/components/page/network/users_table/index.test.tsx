@@ -18,8 +18,16 @@ import { createStore, networkModel, State } from '../../../../store';
 import { UsersTable } from '.';
 import { mockUsersData } from './mock';
 
+jest.mock('../../../../lib/settings/use_kibana_ui_setting');
+
+jest.mock('../../../search_bar', () => ({
+  siemFilterManager: {
+    addFilters: jest.fn(),
+  },
+}));
+
 describe('Users Table Component', () => {
-  const loadMore = jest.fn();
+  const loadPage = jest.fn();
   const state: State = mockGlobalState;
 
   let store = createStore(state, apolloClientObservable);
@@ -33,13 +41,15 @@ describe('Users Table Component', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <UsersTable
-            totalCount={1}
-            loading={false}
-            loadMore={loadMore}
             data={mockUsersData.edges}
             flowTarget={FlowTarget.source}
-            hasNextPage={getOr(false, 'hasNextPage', mockUsersData.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockUsersData.pageInfo)!}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockUsersData.pageInfo)}
+            id="user"
+            isInspect={false}
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockUsersData.pageInfo)}
+            totalCount={1}
             type={networkModel.NetworkType.details}
           />
         </ReduxStoreProvider>
@@ -55,19 +65,25 @@ describe('Users Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <UsersTable
-              totalCount={1}
-              loading={false}
-              loadMore={loadMore}
               data={mockUsersData.edges}
               flowTarget={FlowTarget.source}
-              hasNextPage={getOr(false, 'hasNextPage', mockUsersData.pageInfo)!}
-              nextCursor={getOr(null, 'endCursor.value', mockUsersData.pageInfo)!}
+              fakeTotalCount={getOr(50, 'fakeTotalCount', mockUsersData.pageInfo)}
+              id="user"
+              isInspect={false}
+              loading={false}
+              loadPage={loadPage}
+              showMorePagesIndicator={getOr(
+                false,
+                'showMorePagesIndicator',
+                mockUsersData.pageInfo
+              )}
+              totalCount={1}
               type={networkModel.NetworkType.details}
             />
           </TestProviders>
         </MockedProvider>
       );
-      expect(store.getState().network.details.queries!.users.usersSortField).toEqual({
+      expect(store.getState().network.details.queries!.users.sort).toEqual({
         direction: 'asc',
         field: 'name',
       });
@@ -79,7 +95,7 @@ describe('Users Table Component', () => {
 
       wrapper.update();
 
-      expect(store.getState().network.details.queries!.users.usersSortField).toEqual({
+      expect(store.getState().network.details.queries!.users.sort).toEqual({
         direction: 'desc',
         field: 'name',
       });
@@ -88,7 +104,7 @@ describe('Users Table Component', () => {
           .find('.euiTable thead tr th button')
           .first()
           .text()
-      ).toEqual('NameClick to sort in ascending order');
+      ).toEqual('UserClick to sort in ascending order');
     });
   });
 });

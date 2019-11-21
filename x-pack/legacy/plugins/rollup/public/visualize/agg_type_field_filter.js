@@ -12,7 +12,7 @@ export function initAggTypeFieldFilter() {
    * and limit available fields for a given aggType based on that.
    */
   aggTypeFieldFilters.addFilter(
-    (field, fieldParamType, aggConfig) => {
+    (field, aggConfig) => {
       const indexPattern = aggConfig.getIndexPattern();
       if(!indexPattern || indexPattern.type !== 'rollup') {
         return true;

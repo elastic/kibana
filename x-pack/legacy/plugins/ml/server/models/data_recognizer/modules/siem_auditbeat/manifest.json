@@ -1,0 +1,82 @@
+{
+  "id": "siem_auditbeat",
+  "title": "SIEM Auditbeat",
+  "description": "Detect suspicious network activity and unusual processes in Auditbeat data (beta)",
+  "type": "Auditbeat data",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "auditbeat-*",
+  "query": {
+    "bool": {
+      "filter": [
+        {"term": {"agent.type": "auditbeat"}}
+      ]
+    }
+  },
+  "jobs": [
+    {
+      "id": "rare_process_by_host_linux_ecs",
+      "file": "rare_process_by_host_linux_ecs.json"
+    },
+    {
+      "id": "linux_anomalous_network_activity_ecs",
+      "file": "linux_anomalous_network_activity_ecs.json"
+    },
+    {
+      "id": "linux_anomalous_network_port_activity_ecs",
+      "file": "linux_anomalous_network_port_activity_ecs.json"
+    },
+    {
+      "id": "linux_anomalous_network_service",
+      "file": "linux_anomalous_network_service.json"
+    },
+    {
+      "id": "linux_anomalous_network_url_activity_ecs",
+      "file": "linux_anomalous_network_url_activity_ecs.json"
+    },
+    {
+      "id": "linux_anomalous_process_all_hosts_ecs",
+      "file": "linux_anomalous_process_all_hosts_ecs.json"
+    },
+    {
+      "id": "linux_anomalous_user_name_ecs",
+      "file": "linux_anomalous_user_name_ecs.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-rare_process_by_host_linux_ecs",
+      "file": "datafeed_rare_process_by_host_linux_ecs.json",
+      "job_id": "rare_process_by_host_linux_ecs"
+    },
+    {
+      "id": "datafeed-linux_anomalous_network_activity_ecs",
+      "file": "datafeed_linux_anomalous_network_activity_ecs.json",
+      "job_id": "linux_anomalous_network_activity_ecs"
+    },
+    {
+      "id": "datafeed-linux_anomalous_network_port_activity_ecs",
+      "file": "datafeed_linux_anomalous_network_port_activity_ecs.json",
+      "job_id": "linux_anomalous_network_port_activity_ecs"
+    },
+    {
+      "id": "datafeed-linux_anomalous_network_service",
+      "file": "datafeed_linux_anomalous_network_service.json",
+      "job_id": "linux_anomalous_network_service"
+    },
+    {
+      "id": "datafeed-linux_anomalous_network_url_activity_ecs",
+      "file": "datafeed_linux_anomalous_network_url_activity_ecs.json",
+      "job_id": "linux_anomalous_network_url_activity_ecs"
+    },
+    {
+      "id": "datafeed-linux_anomalous_process_all_hosts_ecs",
+      "file": "datafeed_linux_anomalous_process_all_hosts_ecs.json",
+      "job_id": "linux_anomalous_process_all_hosts_ecs"
+    },
+    {
+      "id": "datafeed-linux_anomalous_user_name_ecs",
+      "file": "datafeed_linux_anomalous_user_name_ecs.json",
+      "job_id": "linux_anomalous_user_name_ecs"
+    }
+  ]
+}

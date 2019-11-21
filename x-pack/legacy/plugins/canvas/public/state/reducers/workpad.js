@@ -5,7 +5,8 @@
  */
 
 import { handleActions } from 'redux-actions';
-import { recentlyAccessed } from 'ui/persisted_log';
+import { npStart } from 'ui/new_platform';
+import { getDefaultWorkpad } from '../defaults';
 import {
   setWorkpad,
   sizeWorkpad,
@@ -13,6 +14,7 @@ import {
   setName,
   setWriteable,
   setWorkpadCSS,
+  resetWorkpad,
 } from '../actions/workpad';
 
 import { APP_ROUTE_WORKPAD } from '../../../common/lib/constants';
@@ -20,7 +22,11 @@ import { APP_ROUTE_WORKPAD } from '../../../common/lib/constants';
 export const workpadReducer = handleActions(
   {
     [setWorkpad]: (workpadState, { payload }) => {
-      recentlyAccessed.add(`${APP_ROUTE_WORKPAD}/${payload.id}`, payload.name, payload.id);
+      npStart.core.chrome.recentlyAccessed.add(
+        `${APP_ROUTE_WORKPAD}/${payload.id}`,
+        payload.name,
+        payload.id
+      );
       return payload;
     },
 
@@ -33,7 +39,11 @@ export const workpadReducer = handleActions(
     },
 
     [setName]: (workpadState, { payload }) => {
-      recentlyAccessed.add(`${APP_ROUTE_WORKPAD}/${workpadState.id}`, payload, workpadState.id);
+      npStart.core.chrome.recentlyAccessed.add(
+        `${APP_ROUTE_WORKPAD}/${workpadState.id}`,
+        payload,
+        workpadState.id
+      );
       return { ...workpadState, name: payload };
     },
 
@@ -44,6 +54,8 @@ export const workpadReducer = handleActions(
     [setWorkpadCSS]: (workpadState, { payload }) => {
       return { ...workpadState, css: payload };
     },
+
+    [resetWorkpad]: () => ({ ...getDefaultWorkpad() }),
   },
   {}
 );

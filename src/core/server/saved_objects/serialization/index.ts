@@ -27,10 +27,7 @@
 import uuid from 'uuid';
 import { SavedObjectsSchema } from '../schema';
 import { decodeVersion, encodeVersion } from '../version';
-import {
-  SavedObjectsMigrationVersion,
-  SavedObjectReference,
-} from '../service/saved_objects_client';
+import { SavedObjectsMigrationVersion, SavedObjectReference } from '../types';
 
 /**
  * A raw document as represented directly in the saved object index.
@@ -80,6 +77,7 @@ function assertNonEmptyString(value: string, name: string) {
   }
 }
 
+/** @internal */
 export class SavedObjectsSerializer {
   private readonly schema: SavedObjectsSchema;
 

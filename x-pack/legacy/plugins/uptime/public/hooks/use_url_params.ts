@@ -5,29 +5,57 @@
  */
 
 import qs from 'querystring';
+import { useContext } from 'react';
+import { UptimeRefreshContext } from '../contexts';
 import { UptimeUrlParams, getSupportedUrlParams } from '../lib/helper';
 
-interface Location {
-  pathname: string;
-  search: string;
-}
+type GetUrlParams = () => UptimeUrlParams;
+type UpdateUrlParams = (updatedParams: { [key: string]: string | number | boolean }) => void;
 
-export const useUrlParams = (
-  history: any,
-  location: Location
-): [UptimeUrlParams, (updatedParams: any) => string] => {
-  const { pathname, search } = location;
-  const currentParams: any = qs.parse(search[0] === '?' ? search.slice(1) : search);
+export type UptimeUrlParamsHook = () => [GetUrlParams, UpdateUrlParams];
 
-  const updateUrl = (updatedParams: any) => {
-    const updatedSearch = qs.stringify({ ...currentParams, ...updatedParams });
-    history.push({
-      pathname,
-      search: updatedSearch,
-    });
+export const useUrlParams: UptimeUrlParamsHook = () => {
+  const refreshContext = useContext(UptimeRefreshContext);
 
-    return `${pathname}?${updatedSearch}`;
+  const getUrlParams: GetUrlParams = () => {
+    let search: string | undefined;
+    if (refreshContext.location) {
+      search = refreshContext.location.search;
+    }
+
+    const params = search ? { ...qs.parse(search[0] === '?' ? search.slice(1) : search) } : {};
+    return getSupportedUrlParams(params);
   };
 
-  return [getSupportedUrlParams(currentParams), updateUrl];
+  const updateUrlParams: UpdateUrlParams = updatedParams => {
+    if (!refreshContext.history || !refreshContext.location) return;
+    const {
+      history,
+      location: { pathname, search },
+    } = refreshContext;
+    const currentParams: any = qs.parse(search[0] === '?' ? search.slice(1) : search);
+    const mergedParams = {
+      ...currentParams,
+      ...updatedParams,
+    };
+
+    history.push({
+      pathname,
+      search: qs.stringify(
+        // drop any parameters that have no value
+        Object.keys(mergedParams).reduce((params, key) => {
+          const value = mergedParams[key];
+          if (value === undefined || value === '') {
+            return params;
+          }
+          return {
+            ...params,
+            [key]: value,
+          };
+        }, {})
+      ),
+    });
+  };
+
+  return [getUrlParams, updateUrlParams];
 };

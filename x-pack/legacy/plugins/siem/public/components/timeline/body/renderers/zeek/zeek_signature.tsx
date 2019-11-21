@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiBadgeProps, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
@@ -20,17 +20,25 @@ import { IS_OPERATOR } from '../../../data_providers/data_provider';
 
 import * as i18n from './translations';
 
-const Badge = styled(EuiBadge)`
-  vertical-align: top;
-`;
+// Ref: https://github.com/elastic/eui/issues/1655
+// const Badge = styled(EuiBadge)`
+//   vertical-align: top;
+// `;
+const Badge = (props: EuiBadgeProps) => <EuiBadge {...props} style={{ verticalAlign: 'top' }} />;
+
+Badge.displayName = 'Badge';
 
 const TokensFlexItem = styled(EuiFlexItem)`
   margin-left: 3px;
 `;
 
+TokensFlexItem.displayName = 'TokensFlexItem';
+
 const LinkFlexItem = styled(EuiFlexItem)`
   margin-left: 6px;
 `;
+
+LinkFlexItem.displayName = 'LinkFlexItem';
 
 type StringRenderer = (value: string) => string;
 
@@ -68,7 +76,9 @@ export const DraggableZeekElement = pure<{
         dataProvider={{
           and: [],
           enabled: true,
-          id: escapeDataProviderId(`zeek-${id}-${field}-${value}`),
+          id: escapeDataProviderId(
+            `draggable-zeek-element-draggable-wrapper-${id}-${field}-${value}`
+          ),
           name: value,
           excluded: false,
           kqlQuery: '',
@@ -95,6 +105,8 @@ export const DraggableZeekElement = pure<{
     </TokensFlexItem>
   ) : null
 );
+
+DraggableZeekElement.displayName = 'DraggableZeekElement';
 
 export const Link = pure<{ value: string | null | undefined; link?: string | null }>(
   ({ value, link }) => {
@@ -124,6 +136,8 @@ export const Link = pure<{ value: string | null | undefined; link?: string | nul
   }
 );
 
+Link.displayName = 'Link';
+
 export const TotalVirusLinkSha = pure<{ value: string | null | undefined }>(({ value }) =>
   value != null ? (
     <LinkFlexItem grow={false}>
@@ -134,6 +148,8 @@ export const TotalVirusLinkSha = pure<{ value: string | null | undefined }>(({ v
     </LinkFlexItem>
   ) : null
 );
+
+TotalVirusLinkSha.displayName = 'TotalVirusLinkSha';
 
 // English Text for these codes are shortened from
 // https://docs.zeek.org/en/stable/scripts/base/protocols/conn/main.bro.html
@@ -172,8 +188,8 @@ export const extractStateValue = (state: string | null | undefined): string | nu
 export const constructDroppedValue = (dropped: boolean | null | undefined): string | null =>
   dropped != null ? String(dropped) : null;
 
-export const ZeekSignature = pure<{ data: Ecs }>(({ data }) => {
-  const id = data._id;
+export const ZeekSignature = pure<{ data: Ecs; timelineId: string }>(({ data, timelineId }) => {
+  const id = `zeek-signature-draggable-zeek-element-${timelineId}-${data._id}`;
   const sessionId: string | null | undefined = get('zeek.session_id[0]', data);
   const dataSet: string | null | undefined = get('event.dataset[0]', data);
   const sslVersion: string | null | undefined = get('zeek.ssl.version[0]', data);
@@ -250,3 +266,5 @@ export const ZeekSignature = pure<{ data: Ecs }>(({ data }) => {
     </>
   );
 });
+
+ZeekSignature.displayName = 'ZeekSignature';

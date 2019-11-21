@@ -14,9 +14,9 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common']);
 
-  describe('smoke test', async function () {
+  describe('smoke test', function () {
     this.tags('smoke');
-    const workpadListSelector = 'canvasWorkpadLoaderTable canvasWorkpadLoaderWorkpad';
+    const workpadListSelector = 'canvasWorkpadLoaderTable > canvasWorkpadLoaderWorkpad';
     const testWorkpadId = 'workpad-1705f884-6224-47de-ba49-ca224fe6ec31';
 
     before(async () => {
@@ -47,7 +47,10 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
       // check that workpad loaded in url
       await retry.try(async () => {
         const url = await browser.getCurrentUrl();
-        expect(parse(url).hash).to.equal(`#/workpad/${testWorkpadId}/page/1`);
+
+        // remove all the search params, just compare the route
+        const hashRoute = parse(url).hash.split('?')[0];
+        expect(hashRoute).to.equal(`#/workpad/${testWorkpadId}/page/1`);
       });
     });
 
@@ -55,7 +58,7 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
       await retry.try(async () => {
         // check for elements on the page
         const elements = await testSubjects.findAll(
-          'canvasWorkpadPage canvasWorkpadPageElementContent'
+          'canvasWorkpadPage > canvasWorkpadPageElementContent'
         );
         expect(elements).to.have.length(4);
 

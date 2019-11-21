@@ -75,7 +75,7 @@ Generated plugins receive a handful of scripts that can be used during developme
 
     Run the browser tests in a real web browser.
 
-  - `yarn test:server`
+  - `yarn test:mocha`
 
     Run the server tests using mocha.
 

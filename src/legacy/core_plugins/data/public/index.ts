@@ -17,73 +17,44 @@
  * under the License.
  */
 
-// TODO these are imports from the old plugin world.
-// Once the new platform is ready, they can get removed
-// and handled by the platform itself in the setup method
-// of the ExpressionExectorService
-// @ts-ignore
-import { renderersRegistry } from 'plugins/interpreter/registries';
-import { ExpressionsService, ExpressionsSetup } from './expressions';
-import { SearchService, SearchSetup } from './search';
-import { QueryService, QuerySetup } from './query';
-import { FilterService, FilterSetup } from './filter';
-import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
+// /// Define plugin function
+import { DataPlugin as Plugin, DataSetup, DataStart } from './plugin';
 
-export class DataPlugin {
-  // Exposed services, sorted alphabetically
-  private readonly expressions: ExpressionsService;
-  private readonly filter: FilterService;
-  private readonly indexPatterns: IndexPatternsService;
-  private readonly search: SearchService;
-  private readonly query: QueryService;
-
-  constructor() {
-    this.indexPatterns = new IndexPatternsService();
-    this.filter = new FilterService();
-    this.query = new QueryService();
-    this.search = new SearchService();
-    this.expressions = new ExpressionsService();
-  }
-
-  public setup(): DataSetup {
-    // TODO: this is imported here to avoid circular imports.
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { getInterpreter } = require('plugins/interpreter/interpreter');
-    return {
-      expressions: this.expressions.setup({
-        interpreter: {
-          getInterpreter,
-          renderersRegistry,
-        },
-      }),
-      indexPatterns: this.indexPatterns.setup(),
-      filter: this.filter.setup(),
-      search: this.search.setup(),
-      query: this.query.setup(),
-    };
-  }
-
-  public stop() {
-    this.expressions.stop();
-    this.indexPatterns.stop();
-    this.filter.stop();
-    this.search.stop();
-    this.query.stop();
-  }
+export function plugin() {
+  return new Plugin();
 }
 
-/** @public */
-export interface DataSetup {
-  expressions: ExpressionsSetup;
-  indexPatterns: IndexPatternsSetup;
-  filter: FilterSetup;
-  search: SearchSetup;
-  query: QuerySetup;
-}
+// /// Export types & static code
 
 /** @public types */
-export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from './expressions';
+export { DataSetup, DataStart };
 
-/** @public types */
-export { IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field } from './index_patterns';
-export { Query } from './query';
+export { FilterBar, ApplyFiltersPopover } from './filter';
+export {
+  Field,
+  FieldType,
+  FieldListInterface,
+  IndexPattern,
+  IndexPatterns,
+  StaticIndexPattern,
+} from './index_patterns';
+export { QueryBarInput } from './query';
+export { SearchBar, SearchBarProps, SavedQueryAttributes, SavedQuery } from './search';
+
+/** @public static code */
+export * from '../common';
+export { FilterStateManager } from './filter/filter_manager';
+export {
+  CONTAINS_SPACES,
+  getFromSavedObject,
+  getRoutes,
+  IndexPatternSelect,
+  validateIndexPattern,
+  ILLEGAL_CHARACTERS,
+  INDEX_PATTERN_ILLEGAL_CHARACTERS,
+  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
+  IndexPatternAlreadyExists,
+  IndexPatternMissingIndices,
+  NoDefaultIndexPattern,
+  NoDefinedIndexPatterns,
+} from './index_patterns';

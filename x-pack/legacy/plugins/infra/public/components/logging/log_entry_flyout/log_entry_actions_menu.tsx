@@ -6,20 +6,23 @@
 
 import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import url from 'url';
 
 import chrome from 'ui/chrome';
 import { InfraLogItem } from '../../../graphql/types';
+import { useVisibilityState } from '../../../utils/use_visibility_state';
 
 const UPTIME_FIELDS = ['container.id', 'host.ip', 'kubernetes.pod.uid'];
 
 export const LogEntryActionsMenu: React.FunctionComponent<{
   logItem: InfraLogItem;
 }> = ({ logItem }) => {
-  const { hide, isVisible, show } = useVisibility();
+  const { hide, isVisible, show } = useVisibilityState(false);
 
   const uptimeLink = useMemo(() => getUptimeLink(logItem), [logItem]);
+
+  const apmLink = useMemo(() => getAPMLink(logItem), [logItem]);
 
   const menuItems = useMemo(
     () => [
@@ -32,7 +35,19 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
       >
         <FormattedMessage
           id="xpack.infra.logEntryActionsMenu.uptimeActionLabel"
-          defaultMessage="View monitor status"
+          defaultMessage="View status in Uptime"
+        />
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        data-test-subj="logEntryActionsMenuItem apmLogEntryActionsMenuItem"
+        disabled={!apmLink}
+        href={apmLink}
+        icon="apmApp"
+        key="apmLink"
+      >
+        <FormattedMessage
+          id="xpack.infra.logEntryActionsMenu.apmActionLabel"
+          defaultMessage="View in APM"
         />
       </EuiContextMenuItem>,
     ],
@@ -68,15 +83,6 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
   );
 };
 
-const useVisibility = (initialVisibility: boolean = false) => {
-  const [isVisible, setIsVisible] = useState(initialVisibility);
-
-  const hide = useCallback(() => setIsVisible(false), [setIsVisible]);
-  const show = useCallback(() => setIsVisible(true), [setIsVisible]);
-
-  return { hide, isVisible, show };
-};
-
 const getUptimeLink = (logItem: InfraLogItem) => {
   const searchExpressions = logItem.fields
     .filter(({ field, value }) => value != null && UPTIME_FIELDS.includes(field))
@@ -89,5 +95,36 @@ const getUptimeLink = (logItem: InfraLogItem) => {
   return url.format({
     pathname: chrome.addBasePath('/app/uptime'),
     hash: `/?search=(${searchExpressions.join(' OR ')})`,
+  });
+};
+
+const getAPMLink = (logItem: InfraLogItem) => {
+  const traceIdEntry = logItem.fields.find(
+    ({ field, value }) => value != null && field === 'trace.id'
+  );
+
+  if (!traceIdEntry) {
+    return undefined;
+  }
+
+  const timestampField = logItem.fields.find(({ field }) => field === '@timestamp');
+  const timestamp = timestampField ? timestampField.value : null;
+  const { rangeFrom, rangeTo } = timestamp
+    ? (() => {
+        const from = new Date(timestamp);
+        const to = new Date(timestamp);
+
+        from.setMinutes(from.getMinutes() - 10);
+        to.setMinutes(to.getMinutes() + 10);
+
+        return { rangeFrom: from.toISOString(), rangeTo: to.toISOString() };
+      })()
+    : { rangeFrom: 'now-1y', rangeTo: 'now' };
+
+  return url.format({
+    pathname: chrome.addBasePath('/app/apm'),
+    hash: `/traces?kuery=${encodeURIComponent(
+      `trace.id:${traceIdEntry.value}`
+    )}&rangeFrom=${rangeFrom}&rangeTo=${rangeTo}`,
   });
 };

@@ -10,6 +10,8 @@
  */
 export const QUERY = {
   DEFAULT_BUCKET_COUNT: 25,
+  // the maximum buckets allowed by most aggregations
+  DEFAULT_AGGS_CAP: 10000,
   SIMPLE_QUERY_STRING_FIELDS: [
     'monitor.id',
     'monitor.url',
@@ -22,4 +24,11 @@ export const QUERY = {
     'url.domain',
     'error.type',
   ],
+};
+
+export const STATES = {
+  // Number of results returned for a states query
+  LEGACY_STATES_QUERY_SIZE: 10,
+  // The maximum number of monitors that should be supported
+  MAX_MONITORS: 35000,
 };

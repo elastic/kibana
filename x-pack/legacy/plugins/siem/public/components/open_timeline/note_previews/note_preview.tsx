@@ -4,63 +4,68 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { FormattedDate } from '../../formatted_date';
 import { getEmptyValue, defaultToEmptyTag } from '../../empty_value';
+import { FormattedDate } from '../../formatted_date';
 import { Markdown } from '../../markdown';
-
 import * as i18n from '../translations';
 import { TimelineResultNote } from '../types';
 
-export const Avatar = styled(EuiAvatar)`
-  margin-right: 12px;
-  user-select: none;
+const NotePreviewGroup = styled.article`
+  & + & {
+    margin-top: ${props => props.theme.eui.euiSizeL};
+  }
 `;
 
-const UpdatedBy = styled.div`
-  font-weight: bold;
+NotePreviewGroup.displayName = 'NotePreviewGroup';
+
+const NotePreviewHeader = styled.header`
+  margin-bottom: ${props => props.theme.eui.euiSizeS};
 `;
 
-const NotePreviewFlexGroup = styled(EuiFlexGroup)`
-  margin: 16px 0;
-  width: 100%;
-`;
+NotePreviewHeader.displayName = 'NotePreviewHeader';
 
 /**
  * Renders a preview of a note in the All / Open Timelines table
  */
 export const NotePreview = pure<Pick<TimelineResultNote, 'note' | 'updated' | 'updatedBy'>>(
   ({ note, updated, updatedBy }) => (
-    <NotePreviewFlexGroup direction="row" gutterSize="none">
-      <EuiFlexItem grow={false}>
-        <Avatar data-test-subj="avatar" size="m" name={updatedBy != null ? updatedBy : '?'} />
-      </EuiFlexItem>
+    <NotePreviewGroup>
+      <EuiFlexGroup gutterSize="m" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiAvatar data-test-subj="avatar" name={updatedBy != null ? updatedBy : '?'} size="l" />
+        </EuiFlexItem>
 
-      <EuiFlexItem grow={true}>
-        <UpdatedBy data-test-subj="updated-by">{defaultToEmptyTag(updatedBy)}</UpdatedBy>
+        <EuiFlexItem>
+          <NotePreviewHeader>
+            <EuiTitle data-test-subj="updated-by" size="xxs">
+              <h6>{defaultToEmptyTag(updatedBy)}</h6>
+            </EuiTitle>
 
-        <div data-test-subj="posted">
-          <EuiText color="subdued" grow={true} size="xs">
-            {i18n.POSTED}{' '}
-            {updated != null ? (
-              <EuiToolTip content={<FormattedDate fieldName="" value={updated} />}>
-                <FormattedRelative data-test-subj="updated" value={new Date(updated)} />
-              </EuiToolTip>
-            ) : (
-              getEmptyValue()
-            )}
-          </EuiText>
-        </div>
+            <EuiText color="subdued" data-test-subj="posted" size="xs">
+              <p>
+                {i18n.POSTED}{' '}
+                {updated != null ? (
+                  <EuiToolTip content={<FormattedDate fieldName="" value={updated} />}>
+                    <FormattedRelative data-test-subj="updated" value={new Date(updated)} />
+                  </EuiToolTip>
+                ) : (
+                  getEmptyValue()
+                )}
+              </p>
+            </EuiText>
+          </NotePreviewHeader>
 
-        <EuiSpacer data-test-subj="posted-spacer" size="s" />
-
-        <Markdown raw={note || ''} size="xs" />
-      </EuiFlexItem>
-    </NotePreviewFlexGroup>
+          <Markdown raw={note || ''} size="s" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </NotePreviewGroup>
   )
 );
+
+NotePreview.displayName = 'NotePreview';

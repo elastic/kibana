@@ -21,6 +21,15 @@ import { Plugin, CoreSetup } from 'kibana/public';
 
 export class CorePluginAPlugin implements Plugin<CorePluginAPluginSetup, CorePluginAPluginStart> {
   public setup(core: CoreSetup, deps: {}) {
+    core.application.register({
+      id: 'foo',
+      title: 'Foo',
+      async mount(context, params) {
+        const { renderApp } = await import('./application');
+        return renderApp(context, params);
+      },
+    });
+
     return {
       getGreeting() {
         return 'Hello from Plugin A!';
@@ -29,6 +38,7 @@ export class CorePluginAPlugin implements Plugin<CorePluginAPluginSetup, CorePlu
   }
 
   public start() {}
+  public stop() {}
 }
 
 export type CorePluginAPluginSetup = ReturnType<CorePluginAPlugin['setup']>;

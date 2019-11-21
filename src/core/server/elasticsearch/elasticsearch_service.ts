@@ -18,14 +18,17 @@
  */
 
 import { ConnectableObservable, Observable, Subscription } from 'rxjs';
-import { filter, map, publishReplay, switchMap } from 'rxjs/operators';
+import { filter, first, map, publishReplay, switchMap } from 'rxjs/operators';
+
 import { CoreService } from '../../types';
+import { merge } from '../../utils';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { ClusterClient } from './cluster_client';
 import { ElasticsearchClientConfig } from './elasticsearch_client_config';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
-import { HttpServiceSetup, GetAuthHeaders } from '../http/';
+import { InternalHttpServiceSetup, GetAuthHeaders } from '../http/';
+import { InternalElasticsearchServiceSetup } from './types';
 
 /** @internal */
 interface CoreClusterClients {
@@ -35,23 +38,11 @@ interface CoreClusterClients {
 }
 
 interface SetupDeps {
-  http: HttpServiceSetup;
-}
-
-/** @public */
-export interface ElasticsearchServiceSetup {
-  // Required for the BWC with the legacy Kibana only.
-  readonly legacy: {
-    readonly config$: Observable<ElasticsearchConfig>;
-  };
-
-  readonly createClient: (type: string, config: ElasticsearchClientConfig) => ClusterClient;
-  readonly adminClient$: Observable<ClusterClient>;
-  readonly dataClient$: Observable<ClusterClient>;
+  http: InternalHttpServiceSetup;
 }
 
 /** @internal */
-export class ElasticsearchService implements CoreService<ElasticsearchServiceSetup> {
+export class ElasticsearchService implements CoreService<InternalElasticsearchServiceSetup> {
   private readonly log: Logger;
   private readonly config$: Observable<ElasticsearchConfig>;
   private subscription?: Subscription;
@@ -60,10 +51,10 @@ export class ElasticsearchService implements CoreService<ElasticsearchServiceSet
     this.log = coreContext.logger.get('elasticsearch-service');
     this.config$ = coreContext.configService
       .atPath<ElasticsearchConfigType>('elasticsearch')
-      .pipe(map(rawConfig => new ElasticsearchConfig(rawConfig)));
+      .pipe(map(rawConfig => new ElasticsearchConfig(rawConfig, coreContext.logger.get('config'))));
   }
 
-  public async setup(deps: SetupDeps): Promise<ElasticsearchServiceSetup> {
+  public async setup(deps: SetupDeps): Promise<InternalElasticsearchServiceSetup> {
     this.log.debug('Setting up elasticsearch service');
 
     const clients$ = this.config$.pipe(
@@ -101,14 +92,17 @@ export class ElasticsearchService implements CoreService<ElasticsearchServiceSet
 
     this.subscription = clients$.connect();
 
+    const config = await this.config$.pipe(first()).toPromise();
+
     return {
       legacy: { config$: clients$.pipe(map(clients => clients.config)) },
 
       adminClient$: clients$.pipe(map(clients => clients.adminClient)),
       dataClient$: clients$.pipe(map(clients => clients.dataClient)),
 
-      createClient: (type: string, clientConfig: ElasticsearchClientConfig) => {
-        return this.createClusterClient(type, clientConfig, deps.http.auth.getAuthHeaders);
+      createClient: (type: string, clientConfig: Partial<ElasticsearchClientConfig> = {}) => {
+        const finalConfig = merge({}, config, clientConfig);
+        return this.createClusterClient(type, finalConfig, deps.http.auth.getAuthHeaders);
       },
     };
   }

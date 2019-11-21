@@ -4,31 +4,100 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
 import moment from 'moment';
+import { KibanaRequest } from 'src/core/server';
+import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/common';
+import { APMConfig } from '../../../../../../plugins/apm/server';
+import {
+  getApmIndices,
+  ApmIndicesConfig
+} from '../settings/apm_indices/get_apm_indices';
+import { ESFilter } from '../../../typings/elasticsearch';
+import { ESClient } from './es_client';
+import { getUiFiltersES } from './convert_ui_filters/get_ui_filters_es';
+import { APMRequestHandlerContext } from '../../routes/typings';
 import { getESClient } from './es_client';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { getDynamicIndexPattern } from '../index_pattern/get_dynamic_index_pattern';
 
-function decodeUiFiltersES(esQuery?: string) {
-  return esQuery ? JSON.parse(decodeURIComponent(esQuery)) : null;
+function decodeUiFilters(
+  indexPattern: StaticIndexPattern | undefined,
+  uiFiltersEncoded?: string
+) {
+  if (!uiFiltersEncoded || !indexPattern) {
+    return [];
+  }
+  const uiFilters = JSON.parse(uiFiltersEncoded);
+  return getUiFiltersES(indexPattern, uiFilters);
+}
+// Explicitly type Setup to prevent TS initialization errors
+// https://github.com/microsoft/TypeScript/issues/34933
+
+export interface Setup {
+  client: ESClient;
+  internalClient: ESClient;
+  config: APMConfig;
+  indices: ApmIndicesConfig;
+  dynamicIndexPattern?: IIndexPattern;
 }
 
-export interface APMRequestQuery {
-  _debug: string;
-  start: string;
-  end: string;
-  uiFiltersES?: string;
+export interface SetupTimeRange {
+  start: number;
+  end: number;
+}
+export interface SetupUIFilters {
+  uiFiltersES: ESFilter[];
 }
 
-export type Setup = ReturnType<typeof setupRequest>;
-export function setupRequest(req: Legacy.Request) {
-  const query = (req.query as unknown) as APMRequestQuery;
-  const config = req.server.config();
+interface SetupRequestParams {
+  query?: {
+    _debug?: boolean;
+    start?: string;
+    end?: string;
+    uiFilters?: string;
+    processorEvent?: ProcessorEvent;
+  };
+}
+
+type InferSetup<TParams extends SetupRequestParams> = Setup &
+  (TParams extends { query: { start: string } } ? { start: number } : {}) &
+  (TParams extends { query: { end: string } } ? { end: number } : {}) &
+  (TParams extends { query: { uiFilters: string } }
+    ? { uiFiltersES: ESFilter[] }
+    : {});
+
+export async function setupRequest<TParams extends SetupRequestParams>(
+  context: APMRequestHandlerContext<TParams>,
+  request: KibanaRequest
+): Promise<InferSetup<TParams>> {
+  const { config } = context;
+  const { query } = context.params;
+
+  const indices = await getApmIndices(context);
+
+  const dynamicIndexPattern = await getDynamicIndexPattern({
+    context,
+    indices,
+    processorEvent: query.processorEvent
+  });
+
+  const uiFiltersES = decodeUiFilters(dynamicIndexPattern, query.uiFilters);
+
+  const coreSetupRequest = {
+    indices,
+    client: getESClient(context, request, { clientAsInternalUser: false }),
+    internalClient: getESClient(context, request, {
+      clientAsInternalUser: true
+    }),
+    config,
+    dynamicIndexPattern
+  };
 
   return {
-    start: moment.utc(query.start).valueOf(),
-    end: moment.utc(query.end).valueOf(),
-    uiFiltersES: decodeUiFiltersES(query.uiFiltersES) || [],
-    client: getESClient(req),
-    config
-  };
+    ...('start' in query ? { start: moment.utc(query.start).valueOf() } : {}),
+    ...('end' in query ? { end: moment.utc(query.end).valueOf() } : {}),
+    ...('uiFilters' in query ? { uiFiltersES } : {}),
+    ...coreSetupRequest
+  } as InferSetup<TParams>;
 }

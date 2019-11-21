@@ -16,6 +16,8 @@ const LinkEuiFlexItem = styled(EuiFlexItem)`
   display: inline;
 `;
 
+LinkEuiFlexItem.displayName = 'LinkEuiFlexItem';
+
 export const SuricataRefs = pure<{ signatureId: number }>(({ signatureId }) => {
   const links = getLinksFromSignature(signatureId);
   return (
@@ -31,3 +33,5 @@ export const SuricataRefs = pure<{ signatureId: number }>(({ signatureId }) => {
     </EuiFlexGroup>
   );
 });
+
+SuricataRefs.displayName = 'SuricataRefs';

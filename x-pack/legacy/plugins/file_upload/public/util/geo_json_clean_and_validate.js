@@ -4,47 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const jsts = require('jsts');
+import * as jsts from 'jsts';
 import rewind from 'geojson-rewind';
 
-export function geoJsonCleanAndValidate(parsedFile) {
+const geoJSONReader = new jsts.io.GeoJSONReader();
+const geoJSONWriter = new jsts.io.GeoJSONWriter();
 
-  const reader = new jsts.io.GeoJSONReader();
-  const geoJson = reader.read(parsedFile);
-  const isSingleFeature = parsedFile.type === 'Feature';
-  const features = isSingleFeature
-    ? [{ ...geoJson }]
-    : geoJson.features;
+export function geoJsonCleanAndValidate(feature) {
 
-  // Pass features for cleaning
-  const cleanedFeatures = cleanFeatures(features);
+  const geometryReadResult = geoJSONReader.read(feature);
 
-  // Put clean features back in geoJson object
-  const cleanGeoJson = {
-    ...parsedFile,
-    ...(isSingleFeature
-      ? cleanedFeatures[0]
-      : { features: cleanedFeatures }
-    ),
-  };
+  const cleanedGeometry = cleanGeometry(geometryReadResult);
 
-  // Pass entire geoJson object for winding
+  // For now, return the feature unmodified
+  // TODO: Consider more robust UI feedback and general handling
+  // for features that fail cleaning and/or validation
+  if (!cleanedGeometry) {
+    return feature;
+  }
+
   // JSTS does not enforce winding order, wind in clockwise order
-  const correctlyWindedGeoJson = rewind(cleanGeoJson, false);
-  return correctlyWindedGeoJson;
+  const correctlyWindedGeometry = rewind(cleanedGeometry, false);
+
+  return {
+    ...feature,
+    geometry: correctlyWindedGeometry
+  };
 }
 
-export function cleanFeatures(features) {
-  const writer = new jsts.io.GeoJSONWriter();
-  return features.map(({ id, geometry, properties }) => {
-    const geojsonGeometry = (geometry.isSimple() || geometry.isValid())
-      ? writer.write(geometry)
-      : writer.write(geometry.buffer(0));
-    return ({
-      type: 'Feature',
-      geometry: geojsonGeometry,
-      ...(id ? { id } : {}),
-      ...(properties ? { properties } : {}),
-    });
-  });
+export function cleanGeometry({ geometry }) {
+  if (!geometry) {
+    return null;
+  }
+  const geometryToWrite = (geometry.isSimple() || geometry.isValid()) ? geometry : geometry.buffer(0);
+  return geoJSONWriter.write(geometryToWrite);
 }

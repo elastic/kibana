@@ -5,6 +5,7 @@ set -e
 # move to Kibana root
 cd "$(dirname "$0")/.."
 
+source src/dev/ci_setup/load_env_keys.sh
 source src/dev/ci_setup/extract_bootstrap_cache.sh
 source src/dev/ci_setup/setup.sh
 source src/dev/ci_setup/checkout_sibling_es.sh
@@ -20,6 +21,9 @@ kibana-ciGroup*)
 kibana-visualRegression*)
   ./test/scripts/jenkins_visual_regression.sh
   ;;
+kibana-accessibility*)
+  ./test/scripts/jenkins_accessibility.sh
+  ;;
 kibana-firefoxSmoke*)
   ./test/scripts/jenkins_firefox_smoke.sh
   ;;
@@ -32,6 +36,9 @@ x-pack-ciGroup*)
   ;;
 x-pack-visualRegression*)
   ./test/scripts/jenkins_xpack_visual_regression.sh
+  ;;
+x-pack-accessibility*)
+  ./test/scripts/jenkins_xpack_accessibility.sh
   ;;
 x-pack-firefoxSmoke*)
   ./test/scripts/jenkins_xpack_firefox_smoke.sh

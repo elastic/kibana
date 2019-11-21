@@ -7,10 +7,13 @@
 import gql from 'graphql-tag';
 
 const ipOverviewSchema = gql`
+  type AutonomousSystemOrganization {
+    name: String
+  }
+
   type AutonomousSystem {
-    as_org: String
-    asn: String
-    ip: String
+    number: Float
+    organization: AutonomousSystemOrganization
   }
 
   type Overview {
@@ -26,6 +29,7 @@ const ipOverviewSchema = gql`
     host: HostEcsFields!
     server: Overview
     source: Overview
+    inspect: Inspect
   }
 
   extend type Source {
@@ -35,127 +39,6 @@ const ipOverviewSchema = gql`
       ip: String!
       defaultIndex: [String!]!
     ): IpOverviewData
-  }
-`;
-
-const domainsSchema = gql`
-  enum DomainsFields {
-    domainName
-    direction
-    bytes
-    packets
-    uniqueIpCount
-  }
-
-  input DomainsSortField {
-    field: DomainsFields!
-    direction: Direction!
-  }
-
-  type DomainsNetworkField {
-    bytes: Float
-    packets: Float
-    transport: String
-    direction: [NetworkDirectionEcs!]
-  }
-
-  type DomainsItem {
-    uniqueIpCount: Float
-    domainName: String
-    firstSeen: Date
-    lastSeen: Date
-  }
-
-  type DomainsNode {
-    _id: String
-    timestamp: Date
-    source: DomainsItem
-    destination: DomainsItem
-    client: DomainsItem
-    server: DomainsItem
-    network: DomainsNetworkField
-  }
-
-  type DomainsEdges {
-    node: DomainsNode!
-    cursor: CursorType!
-  }
-
-  type DomainsData {
-    edges: [DomainsEdges!]!
-    totalCount: Float!
-    pageInfo: PageInfo!
-  }
-
-  extend type Source {
-    Domains(
-      filterQuery: String
-      id: String
-      ip: String!
-      pagination: PaginationInput!
-      sort: DomainsSortField!
-      flowDirection: FlowDirection!
-      flowTarget: FlowTarget!
-      timerange: TimerangeInput!
-      defaultIndex: [String!]!
-    ): DomainsData!
-  }
-`;
-
-const firstLastSeenSchema = gql`
-  type FirstLastSeenDomain {
-    firstSeen: Date
-    lastSeen: Date
-  }
-
-  extend type Source {
-    DomainFirstLastSeen(
-      id: String
-      ip: String!
-      domainName: String!
-      flowTarget: FlowTarget!
-      defaultIndex: [String!]!
-    ): FirstLastSeenDomain!
-  }
-`;
-
-const tlsSchema = gql`
-  enum TlsFields {
-    _id
-  }
-  type TlsNode {
-    _id: String
-    timestamp: Date
-    alternativeNames: [String!]
-    notAfter: [String!]
-    commonNames: [String!]
-    ja3: [String!]
-    issuerNames: [String!]
-  }
-  input TlsSortField {
-    field: TlsFields!
-    direction: Direction!
-  }
-  type TlsEdges {
-    node: TlsNode!
-    cursor: CursorType!
-  }
-  type TlsData {
-    edges: [TlsEdges!]!
-    totalCount: Float!
-    pageInfo: PageInfo!
-  }
-  extend type Source {
-    Tls(
-      filterQuery: String
-      id: String
-      ip: String!
-      pagination: PaginationInput!
-      sort: TlsSortField!
-      flowTarget: FlowTarget!
-      timerange: TimerangeInput!
-      defaultIndex: [String!]!
-    ): TlsData!
   }
 `;
 
@@ -192,7 +75,8 @@ const usersSchema = gql`
   type UsersData {
     edges: [UsersEdges!]!
     totalCount: Float!
-    pageInfo: PageInfo!
+    pageInfo: PageInfoPaginated!
+    inspect: Inspect
   }
 
   extend type Source {
@@ -200,7 +84,7 @@ const usersSchema = gql`
       filterQuery: String
       id: String
       ip: String!
-      pagination: PaginationInput!
+      pagination: PaginationInputPaginated!
       sort: UsersSortField!
       flowTarget: FlowTarget!
       timerange: TimerangeInput!
@@ -209,10 +93,4 @@ const usersSchema = gql`
   }
 `;
 
-export const ipDetailsSchemas = [
-  ipOverviewSchema,
-  domainsSchema,
-  firstLastSeenSchema,
-  tlsSchema,
-  usersSchema,
-];
+export const ipDetailsSchemas = [ipOverviewSchema, usersSchema];

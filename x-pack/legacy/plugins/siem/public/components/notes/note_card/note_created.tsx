@@ -15,6 +15,8 @@ const NoteCreatedContainer = styled.span`
   user-select: none;
 `;
 
+NoteCreatedContainer.displayName = 'NoteCreatedContainer';
+
 export const NoteCreated = pure<{ created: Date }>(({ created }) => (
   <NoteCreatedContainer data-test-subj="note-created">
     <LocalizedDateTooltip date={created}>
@@ -22,3 +24,5 @@ export const NoteCreated = pure<{ created: Date }>(({ created }) => (
     </LocalizedDateTooltip>
   </NoteCreatedContainer>
 ));
+
+NoteCreated.displayName = 'NoteCreated';

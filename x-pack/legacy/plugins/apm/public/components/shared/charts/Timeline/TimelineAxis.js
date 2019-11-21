@@ -12,29 +12,30 @@ import { XYPlot, XAxis } from 'react-vis';
 import LastTickValue from './LastTickValue';
 import AgentMarker from './AgentMarker';
 import { px } from '../../../../style/variables';
-import { getTimeFormatter } from '../../../../utils/formatters';
+import { getDurationFormatter } from '../../../../utils/formatters';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 
-// Remove any tick that is too close to traceRootDuration
-const getXAxisTickValues = (tickValues, traceRootDuration) => {
-  if (traceRootDuration == null) {
+// Remove any tick that is too close to topTraceDuration
+const getXAxisTickValues = (tickValues, topTraceDuration) => {
+  if (topTraceDuration == null) {
     return tickValues;
   }
 
   const padding = (tickValues[1] - tickValues[0]) / 2;
-  const lowerBound = traceRootDuration - padding;
-  const upperBound = traceRootDuration + padding;
+  const lowerBound = topTraceDuration - padding;
+  const upperBound = topTraceDuration + padding;
 
   return tickValues.filter(value => {
     const isInRange = inRange(value, lowerBound, upperBound);
-    return !isInRange && value !== traceRootDuration;
+    return !isInRange && value !== topTraceDuration;
   });
 };
 
-function TimelineAxis({ plotValues, agentMarks, traceRootDuration }) {
+function TimelineAxis({ plotValues, agentMarks, topTraceDuration }) {
   const { margins, tickValues, width, xDomain, xMax, xScale } = plotValues;
-  const tickFormat = getTimeFormatter(xMax);
-  const xAxisTickValues = getXAxisTickValues(tickValues, traceRootDuration);
+  const tickFormatter = getDurationFormatter(xMax);
+  const xAxisTickValues = getXAxisTickValues(tickValues, topTraceDuration);
+  const topTraceDurationFormatted = tickFormatter(topTraceDuration).formatted;
 
   return (
     <Sticky disableCompensation>
@@ -66,17 +67,17 @@ function TimelineAxis({ plotValues, agentMarks, traceRootDuration }) {
                 orientation="top"
                 tickSize={0}
                 tickValues={xAxisTickValues}
-                tickFormat={tickFormat}
+                tickFormat={time => tickFormatter(time).formatted}
                 tickPadding={20}
                 style={{
                   text: { fill: theme.euiColorDarkShade }
                 }}
               />
 
-              {traceRootDuration > 0 && (
+              {topTraceDuration > 0 && (
                 <LastTickValue
-                  x={xScale(traceRootDuration)}
-                  value={tickFormat(traceRootDuration)}
+                  x={xScale(topTraceDuration)}
+                  value={topTraceDurationFormatted}
                   marginTop={28}
                 />
               )}

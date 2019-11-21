@@ -6,7 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import chrome from 'ui/chrome';
 import url from 'url';
 import uuid from 'uuid';
 import {
@@ -18,7 +17,6 @@ import {
   PROCESSOR_EVENT,
   SERVICE_NAME
 } from '../../../../../common/elasticsearch_fieldnames';
-import { StringMap } from '../../../../../typings/common';
 // @ts-ignore
 import { createWatch } from '../../../../services/rest/watcher';
 
@@ -46,12 +44,13 @@ interface Arguments {
     value: number;
     unit: string;
   };
+  apmIndexPatternTitle: string;
 }
 
 interface Actions {
   log_error: { logging: { text: string } };
-  slack_webhook?: StringMap;
-  email?: StringMap;
+  slack_webhook?: Record<string, unknown>;
+  email?: Record<string, unknown>;
 }
 
 export async function createErrorGroupWatch({
@@ -60,10 +59,10 @@ export async function createErrorGroupWatch({
   serviceName,
   slackUrl,
   threshold,
-  timeRange
+  timeRange,
+  apmIndexPatternTitle
 }: Arguments) {
   const id = `apm-${uuid.v4()}`;
-  const apmIndexPatternTitle = chrome.getInjected('apmIndexPatternTitle');
 
   const slackUrlPath = getSlackPathUrl(slackUrl);
   const emailTemplate = i18n.translate(

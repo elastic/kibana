@@ -4,7 +4,7 @@ exports[`Resizeable it renders 1`] = `
 <Component>
   <Resizeable
     handle={
-      <Styled(styled.div)
+      <ForwardRef(styled.div)
         data-test-subj="test-resize-handle"
       />
     }

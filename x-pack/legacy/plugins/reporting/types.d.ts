@@ -4,73 +4,150 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface UiSettings {
-  get: (value: string) => string;
-}
+import { ResponseObject } from 'hapi';
+import { EventEmitter } from 'events';
+import { Legacy } from 'kibana';
+import { XPackMainPlugin } from '../xpack_main/xpack_main';
+import {
+  ElasticsearchPlugin,
+  CallCluster,
+} from '../../../../src/legacy/core_plugins/elasticsearch';
+import { CancellationToken } from './common/cancellation_token';
+import { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
+import { BrowserType } from './server/browsers/types';
 
-type SavedObjectClient = any;
+type Job = EventEmitter & { id: string };
 
-// these types shoud be in core kibana and are only here temporarily
-export interface KbnServer {
-  info: { protocol: string };
-  config: () => ConfigObject;
-  expose: () => void;
-  plugins: Record<string, any>;
-  route: any;
-  log: any;
-  fieldFormatServiceFactory: (uiConfig: any) => any;
-  savedObjects: {
-    getScopedSavedObjectsClient: (
-      fakeRequest: { headers: object; getBasePath: () => string }
-    ) => SavedObjectClient;
+export interface ReportingPlugin {
+  queue: {
+    addJob: (type: string, payload: object, options: object) => Job;
   };
-  uiSettingsServiceFactory: (
-    { savedObjectsClient }: { savedObjectsClient: SavedObjectClient }
-  ) => UiSettings;
+  // TODO: convert exportTypesRegistry to TS
+  exportTypesRegistry: {
+    getById: (id: string) => ExportTypeDefinition;
+    getAll: () => ExportTypeDefinition[];
+    get: (callback: (item: ExportTypeDefinition) => boolean) => ExportTypeDefinition;
+  };
+  browserDriverFactory: HeadlessChromiumDriverFactory;
 }
 
-export interface ExportTypeDefinition {
-  id: string;
-  name: string;
-  jobType: string;
-  jobContentExtension: string;
-  createJobFactory: () => any;
-  executeJobFactory: () => any;
-  validLicenses: string[];
+export interface ReportingConfigOptions {
+  browser: BrowserConfig;
+  poll: {
+    jobCompletionNotifier: {
+      interval: number;
+      intervalErrorMultiplier: number;
+    };
+    jobsRefresh: {
+      interval: number;
+      intervalErrorMultiplier: number;
+    };
+  };
+  queue: QueueConfig;
+  capture: CaptureConfig;
 }
 
-export interface ExportTypesRegistry {
-  register: (exportTypeDefinition: ExportTypeDefinition) => void;
+export interface NetworkPolicyRule {
+  allow: boolean;
+  protocol: string;
+  host: string;
 }
 
-export interface ConfigObject {
-  get: (path?: string) => any;
+export interface NetworkPolicy {
+  enabled: boolean;
+  rules: NetworkPolicyRule[];
 }
 
-export interface Size {
-  width: number;
-  height: number;
+interface ListQuery {
+  page: string;
+  size: string;
+  ids?: string; // optional field forbids us from extending RequestQuery
+}
+interface GenerateQuery {
+  jobParams: string;
+}
+interface GenerateExportTypePayload {
+  jobParams: string;
+}
+interface DownloadParams {
+  docId: string;
 }
 
-export interface Logger {
-  debug: (message: string) => void;
-  error: (message: string) => void;
-  warning: (message: string) => void;
-  clone?: (tags: string[]) => Logger;
+/*
+ * Legacy System
+ */
+
+export type ReportingPluginSpecOptions = Legacy.PluginSpecOptions;
+
+export type ServerFacade = Legacy.Server & {
+  plugins: {
+    reporting?: ReportingPlugin;
+    xpack_main?: XPackMainPlugin & {
+      status?: any;
+    };
+  };
+};
+
+interface ReportingRequest {
+  query: ListQuery & GenerateQuery;
+  params: DownloadParams;
+  payload: GenerateExportTypePayload;
+  pre: {
+    management: {
+      jobTypes: any;
+    };
+    user: any;
+  };
 }
 
-export interface ViewZoomWidthHeight {
-  zoom: number;
-  width: number;
-  height: number;
+export type RequestFacade = ReportingRequest & Legacy.Request;
+
+export type ResponseFacade = ResponseObject & {
+  isBoom: boolean;
+};
+
+export type ReportingResponseToolkit = Legacy.ResponseToolkit;
+
+export type ESCallCluster = CallCluster;
+
+/*
+ * Reporting Config
+ */
+
+export interface CaptureConfig {
+  browser: {
+    type: BrowserType;
+    autoDownload: boolean;
+    chromium: BrowserConfig;
+  };
+  maxAttempts: number;
+  networkPolicy: NetworkPolicy;
+  loadDelay: number;
 }
 
-export type EvalArgs = any[];
-export type EvalFn<T> = ((...evalArgs: EvalArgs) => T);
+export interface BrowserConfig {
+  inspect: boolean;
+  userDataDir: string;
+  viewport: { width: number; height: number };
+  disableSandbox: boolean;
+  proxy: {
+    enabled: boolean;
+    server: string;
+    bypass?: string[];
+  };
+}
 
-export interface EvaluateOptions {
-  fn: EvalFn<any>;
-  args: EvalArgs; // Arguments to be passed into the function defined by fn.
+export interface QueueConfig {
+  indexInterval: string;
+  pollEnabled: boolean;
+  pollInterval: number;
+  pollIntervalErrorMultiplier: number;
+  timeout: number;
+}
+
+export interface ScrollConfig {
+  duration: string;
+  size: number;
 }
 
 export interface ElementPosition {
@@ -85,10 +162,6 @@ export interface ElementPosition {
     x: number;
     y: number;
   };
-}
-
-export interface HeadlessElementInfo {
-  position: ElementPosition;
 }
 
 export interface ConditionalHeaders {
@@ -113,40 +186,21 @@ export interface TimeRangeParams {
   max: Date | string | number;
 }
 
-type PostPayloadState = Partial<{
-  state: {
-    query: any;
-    sort: any[];
-    columns: string[]; // TODO
-  };
-}>;
-
 // retain POST payload data, needed for async
-interface JobParamPostPayload extends PostPayloadState {
+export interface JobParamPostPayload {
   timerange: TimeRangeParams;
 }
 
-// params that come into a request
-export interface JobParams {
-  savedObjectType: string;
-  savedObjectId: string;
-  isImmediate: boolean;
-  post?: JobParamPostPayload;
-  panel?: any; // has to be resolved by the request handler
-  visType?: string; // has to be resolved by the request handler
+export interface JobDocPayload {
+  headers?: Record<string, string>;
+  jobParams: object;
+  title: string;
+  type: string | null;
 }
 
-export interface JobDocPayload {
-  basePath?: string;
-  forceNow?: string;
-  headers?: Record<string, string>;
-  jobParams: JobParams;
-  relativeUrl?: string;
-  timeRange?: any;
-  title: string;
-  urls?: string[];
-  type?: string | null; // string if completed job; null if incomplete job;
-  objects?: string | null; // string if completed job; null if incomplete job;
+export interface JobSource {
+  _id: string;
+  _source: JobDoc;
 }
 
 export interface JobDocOutput {
@@ -161,9 +215,11 @@ export interface JobDoc {
   status: string; // completed, failed, etc
 }
 
-export interface JobSource {
-  _id: string;
-  _source: JobDoc;
+export interface JobDocExecuted {
+  jobtype: string;
+  output: JobDocOutputExecuted;
+  payload: JobDocPayload;
+  status: string; // completed, failed, etc
 }
 
 /*
@@ -189,13 +245,24 @@ export interface ESQueueWorker {
   on: (event: string, handler: any) => void;
 }
 
-export type ESQueueWorkerExecuteFn = (job: JobDoc, cancellationToken: any) => void;
+export type ESQueueCreateJobFn = (
+  jobParams: object,
+  headers: ConditionalHeaders,
+  request: RequestFacade
+) => Promise<object>;
 
-export interface ExportType {
-  jobType: string;
-  createJobFactory: any;
-  executeJobFactory: (server: KbnServer) => ESQueueWorkerExecuteFn;
-}
+export type ESQueueWorkerExecuteFn = (
+  jobId: string,
+  job: JobDoc,
+  cancellationToken?: CancellationToken
+) => void;
+
+export type JobIDForImmediate = null;
+export type ImmediateExecuteFn = (
+  jobId: JobIDForImmediate,
+  jobDocPayload: JobDocPayload,
+  request: RequestFacade
+) => Promise<JobDocOutputExecuted>;
 
 export interface ESQueueWorkerOptions {
   kibanaName: string;
@@ -211,3 +278,27 @@ export interface ESQueueInstance {
     workerOptions: ESQueueWorkerOptions
   ) => ESQueueWorker;
 }
+
+export type CreateJobFactory = (server: ServerFacade) => ESQueueCreateJobFn;
+export type ExecuteJobFactory = (server: ServerFacade) => ESQueueWorkerExecuteFn;
+export type ExecuteImmediateJobFactory = (server: ServerFacade) => ImmediateExecuteFn;
+
+export interface ExportTypeDefinition {
+  id: string;
+  name: string;
+  jobType: string;
+  jobContentEncoding?: string;
+  jobContentExtension: string;
+  createJobFactory: CreateJobFactory;
+  executeJobFactory: ExecuteJobFactory | ExecuteImmediateJobFactory;
+  validLicenses: string[];
+}
+
+export interface ExportTypesRegistry {
+  register: (exportTypeDefinition: ExportTypeDefinition) => void;
+}
+
+export { CancellationToken } from './common/cancellation_token';
+
+// Prefer to import this type using: `import { LevelLogger } from 'relative/path/server/lib';`
+export { LevelLogger as Logger } from './server/lib/level_logger';

@@ -5,9 +5,8 @@
  */
 
 import { EuiButtonIcon, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiToolTip } from '@elastic/eui';
-import * as React from 'react';
+import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
@@ -66,6 +65,8 @@ const EuiFlyoutContainer = styled.div<{ headerHeight: number; width: number }>`
   }
 `;
 
+EuiFlyoutContainer.displayName = 'EuiFlyoutContainer';
+
 const FlyoutHeaderContainer = styled.div`
   align-items: center;
   display: flex;
@@ -74,43 +75,69 @@ const FlyoutHeaderContainer = styled.div`
   width: 100%;
 `;
 
+FlyoutHeaderContainer.displayName = 'FlyoutHeaderContainer';
+
 // manually wrap the close button because EuiButtonIcon can't be a wrapped `styled`
 const WrappedCloseButton = styled.div`
   margin-right: 5px;
 `;
 
-const FlyoutHeaderWithCloseButton = pure<{
+WrappedCloseButton.displayName = 'WrappedCloseButton';
+
+const FlyoutHeaderWithCloseButton = React.memo<{
   onClose: () => void;
   timelineId: string;
   usersViewing: string[];
-}>(({ onClose, timelineId, usersViewing }) => (
-  <FlyoutHeaderContainer>
-    <WrappedCloseButton>
-      <EuiToolTip content={i18n.CLOSE_TIMELINE}>
-        <EuiButtonIcon
-          aria-label={i18n.CLOSE_TIMELINE}
-          data-test-subj="close-timeline"
-          iconType="cross"
-          onClick={onClose}
-        />
-      </EuiToolTip>
-    </WrappedCloseButton>
-    <FlyoutHeader timelineId={timelineId} usersViewing={usersViewing} />
-  </FlyoutHeaderContainer>
-));
+}>(
+  ({ onClose, timelineId, usersViewing }) => (
+    <FlyoutHeaderContainer>
+      <WrappedCloseButton>
+        <EuiToolTip content={i18n.CLOSE_TIMELINE}>
+          <EuiButtonIcon
+            aria-label={i18n.CLOSE_TIMELINE}
+            data-test-subj="close-timeline"
+            iconType="cross"
+            onClick={onClose}
+          />
+        </EuiToolTip>
+      </WrappedCloseButton>
+      <FlyoutHeader timelineId={timelineId} usersViewing={usersViewing} />
+    </FlyoutHeaderContainer>
+  ),
+  (prevProps, nextProps) =>
+    prevProps.timelineId === nextProps.timelineId &&
+    prevProps.usersViewing === nextProps.usersViewing
+);
 
-class FlyoutPaneComponent extends React.PureComponent<Props> {
-  public render() {
-    const {
-      children,
-      flyoutHeight,
-      headerHeight,
-      onClose,
-      timelineId,
-      usersViewing,
-      width,
-    } = this.props;
+FlyoutHeaderWithCloseButton.displayName = 'FlyoutHeaderWithCloseButton';
 
+const FlyoutPaneComponent = React.memo<Props>(
+  ({
+    applyDeltaToWidth,
+    children,
+    flyoutHeight,
+    headerHeight,
+    onClose,
+    timelineId,
+    usersViewing,
+    width,
+  }) => {
+    const renderFlyout = useCallback(() => <></>, []);
+
+    const onResize: OnResize = useCallback(
+      ({ delta, id }) => {
+        const bodyClientWidthPixels = document.body.clientWidth;
+
+        applyDeltaToWidth({
+          bodyClientWidthPixels,
+          delta,
+          id,
+          maxWidthPercent,
+          minWidthPixels,
+        });
+      },
+      [applyDeltaToWidth, maxWidthPercent, minWidthPixels]
+    );
     return (
       <EuiFlyoutContainer headerHeight={headerHeight} data-test-subj="flyout-pane" width={width}>
         <EuiFlyout
@@ -127,8 +154,8 @@ class FlyoutPaneComponent extends React.PureComponent<Props> {
               <TimelineResizeHandle data-test-subj="flyout-resize-handle" height={flyoutHeight} />
             }
             id={timelineId}
-            onResize={this.onResize}
-            render={this.renderFlyout}
+            onResize={onResize}
+            render={renderFlyout}
           />
           <EuiFlyoutHeader
             className="timeline-flyout-header"
@@ -148,27 +175,10 @@ class FlyoutPaneComponent extends React.PureComponent<Props> {
       </EuiFlyoutContainer>
     );
   }
+);
 
-  private renderFlyout = () => <></>;
+FlyoutPaneComponent.displayName = 'FlyoutPaneComponent';
 
-  private onResize: OnResize = ({ delta, id }) => {
-    const { applyDeltaToWidth } = this.props;
-
-    const bodyClientWidthPixels = document.body.clientWidth;
-
-    applyDeltaToWidth({
-      bodyClientWidthPixels,
-      delta,
-      id,
-      maxWidthPercent,
-      minWidthPixels,
-    });
-  };
-}
-
-export const Pane = connect(
-  null,
-  {
-    applyDeltaToWidth: timelineActions.applyDeltaToWidth,
-  }
-)(FlyoutPaneComponent);
+export const Pane = connect(null, {
+  applyDeltaToWidth: timelineActions.applyDeltaToWidth,
+})(FlyoutPaneComponent);

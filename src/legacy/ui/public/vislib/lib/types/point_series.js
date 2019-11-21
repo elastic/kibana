@@ -18,14 +18,18 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 
+function getSeriId(seri) {
+  return seri.id && seri.id.indexOf('.') !== -1
+    ? seri.id.split('.')[0]
+    : seri.id;
+}
 
 const createSeriesFromParams = (cfg, seri) => {
   //percentile data id format is {mainId}.{percentileValue}, this has to be cleaned
   //up to match with ids in cfg.seriesParams entry that contain only {mainId}
-  const seriId = seri.id && seri.id.indexOf('.') !== -1
-    ? seri.id.split('.')[0]
-    : seri.id;
+  const seriId = getSeriId(seri);
   const matchingSeriesParams = cfg.seriesParams ? cfg.seriesParams.find(seriConfig => {
     return seriId === seriConfig.data.id;
   }) : null;
@@ -128,6 +132,16 @@ function create(opts) {
       config.valueAxes.forEach(axis => {
         if (axis.labels) {
           axis.labels.axisFormatter = data.data.yAxisFormatter || data.get('yAxisFormatter');
+          const seriesParams = config.seriesParams && config.seriesParams.find(seriesParams => seriesParams.valueAxis === axis.id);
+          // if there are series assigned to this axis, get the format from the first one
+          if (seriesParams) {
+            const seriesDataId = seriesParams.data.id;
+            const series = (data.data.series || data.get('series'))
+              .find(series => getSeriId(series) === seriesDataId);
+            if (series) {
+              axis.labels.axisFormatter = series.yAxisFormatter;
+            }
+          }
         }
       });
     }
@@ -203,11 +217,17 @@ export const vislibPointSeriesTypes = {
 
   heatmap: (cfg, data) => {
     const defaults = create()(cfg, data);
-    const seriesLimit = 25;
     const hasCharts = defaults.charts.length;
-    const tooManySeries = defaults.charts.length && defaults.charts[0].series.length > seriesLimit;
+    const tooManySeries = defaults.charts.length && defaults.charts[0].series.length > cfg.heatmapMaxBuckets;
     if (hasCharts && tooManySeries) {
-      defaults.error = 'There are too many series defined.';
+      defaults.error = i18n.translate('common.ui.vislib.heatmap.maxBucketsText', {
+        defaultMessage: 'There are too many series defined ({nr}). The configured maximum is {max}.',
+        values: {
+          max: cfg.heatmapMaxBuckets,
+          nr: defaults.charts[0].series.length
+        },
+        description: 'This message appears at heatmap visualizations'
+      });
     }
     defaults.valueAxes[0].show = false;
     defaults.categoryAxes[0].style = {

@@ -86,3 +86,6 @@ export const subtract = (
 
 export const componentProduct = ([a, b, c]: Vector2d, [A, B, C]: Vector2d): Vector2d =>
   [a * A, b * B, c * C] as Vector2d;
+
+export const dotProduct = ([a, b, c]: Vector2d, [A, B, C]: Vector2d): number =>
+  a * A + b * B + c * C;

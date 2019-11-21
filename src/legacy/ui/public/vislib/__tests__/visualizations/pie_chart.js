@@ -24,7 +24,7 @@ import _ from 'lodash';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
-import { VisProvider } from '../../../vis';
+import { Vis } from '../../../vis';
 import '../../../persisted_state';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { vislibSlicesResponseHandlerProvider } from '../../../vis/response_handlers/vislib';
@@ -113,7 +113,6 @@ describe('No global chart settings', function () {
     addTooltip: true
   };
   let chart1;
-  let Vis;
   let persistedState;
   let indexPattern;
   let responseHandler;
@@ -123,7 +122,6 @@ describe('No global chart settings', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
     chart1 = Private(FixturesVislibVisFixtureProvider)(visLibParams1);
-    Vis = Private(VisProvider);
     persistedState = new ($injector.get('PersistedState'))();
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     responseHandler = vislibSlicesResponseHandlerProvider().handler;
@@ -137,7 +135,7 @@ describe('No global chart settings', function () {
     stubVis1.isHierarchical = () => true;
 
     // We need to set the aggs to a known value.
-    _.each(stubVis1.aggs, function (agg) {
+    _.each(stubVis1.aggs.aggs, function (agg) {
       agg.id = 'agg_' + id1++;
     });
   }));
@@ -203,7 +201,6 @@ describe('Vislib PieChart Class Test Suite', function () {
         addTooltip: true
       };
       let vis;
-      let Vis;
       let persistedState;
       let indexPattern;
       let data;
@@ -213,7 +210,6 @@ describe('Vislib PieChart Class Test Suite', function () {
       beforeEach(ngMock.module('kibana'));
       beforeEach(ngMock.inject(function (Private, $injector) {
         vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
-        Vis = Private(VisProvider);
         persistedState = new ($injector.get('PersistedState'))();
         indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
         responseHandler = vislibSlicesResponseHandlerProvider().handler;
@@ -225,7 +221,7 @@ describe('Vislib PieChart Class Test Suite', function () {
         });
 
         // We need to set the aggs to a known value.
-        _.each(stubVis.aggs, function (agg) { agg.id = 'agg_' + id++; });
+        _.each(stubVis.aggs.aggs, function (agg) { agg.id = 'agg_' + id++; });
 
       }));
 

@@ -6,13 +6,16 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { RendererFactory } from '../types';
+import { RendererFactory } from '../../../types';
 import { AdvancedFilter } from './component';
+import { RendererStrings } from '../../../i18n';
+
+const { advancedFilter: strings } = RendererStrings;
 
 export const advancedFilter: RendererFactory = () => ({
   name: 'advanced_filter',
-  displayName: 'Advanced filter',
-  help: 'Render a Canvas filter expression',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelpDescription(),
   reuseDomNode: true,
   height: 50,
   render(domNode, _, handlers) {

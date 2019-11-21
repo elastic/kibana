@@ -15,14 +15,14 @@ import {
   EuiPageContentHeaderSection,
   EuiText,
   EuiTitle,
-  EuiToolTip,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { toastNotifications } from 'ui/notify';
-import { Role } from '../../../../../common/model/role';
-import { isRoleEnabled } from '../../../../lib/role_utils';
+import { Role } from '../../../../../common/model';
+import { isRoleEnabled, isReadOnlyRole, isReservedRole } from '../../../../lib/role_utils';
 import { RolesApi } from '../../../../lib/roles_api';
 import { ConfirmDelete } from './confirm_delete';
 import { PermissionDenied } from './permission_denied';
@@ -39,8 +39,8 @@ interface State {
   permissionDenied: boolean;
 }
 
-const getRoleManagementHref = (roleName?: string) => {
-  return `#/management/security/roles/edit${roleName ? `/${roleName}` : ''}`;
+const getRoleManagementHref = (action: 'edit' | 'clone', roleName?: string) => {
+  return `#/management/security/roles/${action}${roleName ? `/${roleName}` : ''}`;
 };
 
 class RolesGridPageUI extends Component<Props, State> {
@@ -73,12 +73,12 @@ class RolesGridPageUI extends Component<Props, State> {
         <EuiPageContentHeader>
           <EuiPageContentHeaderSection>
             <EuiTitle>
-              <h2>
+              <h1>
                 <FormattedMessage
                   id="xpack.security.management.roles.roleTitle"
                   defaultMessage="Roles"
                 />
-              </h2>
+              </h1>
             </EuiTitle>
             <EuiText color="subdued" size="s">
               <p>
@@ -90,7 +90,7 @@ class RolesGridPageUI extends Component<Props, State> {
             </EuiText>
           </EuiPageContentHeaderSection>
           <EuiPageContentHeaderSection>
-            <EuiButton data-test-subj="createRoleButton" href={getRoleManagementHref()}>
+            <EuiButton data-test-subj="createRoleButton" href={getRoleManagementHref('edit')}>
               <FormattedMessage
                 id="xpack.security.management.roles.createRoleButtonLabel"
                 defaultMessage="Create role"
@@ -113,6 +113,7 @@ class RolesGridPageUI extends Component<Props, State> {
               itemId="name"
               responsive={false}
               columns={this.getColumnConfig(intl)}
+              hasActions={true}
               selection={{
                 itemId: 'name',
                 selectable: (role: Role) => !role.metadata || !role.metadata._reserved,
@@ -175,7 +176,7 @@ class RolesGridPageUI extends Component<Props, State> {
         render: (name: string, record: Role) => {
           return (
             <EuiText color="subdued" size="s">
-              <EuiLink data-test-subj="roleRowName" href={getRoleManagementHref(name)}>
+              <EuiLink data-test-subj="roleRowName" href={getRoleManagementHref('edit', name)}>
                 {name}
               </EuiLink>
               {!isRoleEnabled(record) && (
@@ -189,34 +190,86 @@ class RolesGridPageUI extends Component<Props, State> {
         },
       },
       {
-        field: 'metadata._reserved',
-        name: (
-          <EuiToolTip content={reservedRoleDesc}>
-            <span className="rolesGridPage__reservedRoleTooltip">
-              <FormattedMessage
-                id="xpack.security.management.roles.reservedColumnName"
-                defaultMessage="Reserved"
-              />
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-            </span>
-          </EuiToolTip>
-        ),
-        sortable: ({ metadata }: any) => (metadata && metadata._reserved) || false,
+        field: 'metadata',
+        name: intl.formatMessage({
+          id: 'xpack.security.management.roles.reservedColumnName',
+          defaultMessage: 'Reserved',
+        }),
+        sortable: ({ metadata }: Role) => Boolean(metadata && metadata._reserved),
         dataType: 'boolean',
         align: 'right',
         description: reservedRoleDesc,
-        render: (reserved: boolean | undefined) => {
+        render: (metadata: Role['metadata']) => {
           const label = intl.formatMessage({
             id: 'xpack.security.management.roles.reservedRoleIconLabel',
             defaultMessage: 'Reserved role',
           });
 
-          return reserved ? (
+          return metadata && metadata._reserved ? (
             <span title={label}>
               <EuiIcon aria-label={label} data-test-subj="reservedRole" type="check" />
             </span>
           ) : null;
         },
+      },
+      {
+        name: intl.formatMessage({
+          id: 'xpack.security.management.roles.actionsColumnName',
+          defaultMessage: 'Actions',
+        }),
+        width: '150px',
+        actions: [
+          {
+            available: (role: Role) => !isReadOnlyRole(role),
+            render: (role: Role) => {
+              const title = intl.formatMessage(
+                {
+                  id: 'xpack.security.management.roles.editRoleActionName',
+                  defaultMessage: `Edit {roleName}`,
+                },
+                {
+                  roleName: role.name,
+                }
+              );
+
+              return (
+                <EuiButtonIcon
+                  aria-label={title}
+                  data-test-subj={`edit-role-action-${role.name}`}
+                  title={title}
+                  color={'primary'}
+                  iconType={'pencil'}
+                  href={getRoleManagementHref('edit', role.name)}
+                />
+              );
+            },
+          },
+          {
+            available: (role: Role) => !isReservedRole(role),
+            render: (role: Role) => {
+              const title = intl.formatMessage(
+                {
+                  id: 'xpack.security.management.roles.cloneRoleActionName',
+                  defaultMessage: `Clone {roleName}`,
+                },
+                {
+                  roleName: role.name,
+                }
+              );
+
+              return (
+                <EuiButtonIcon
+                  aria-label={title}
+                  data-test-subj={`clone-role-action-${role.name}`}
+                  title={title}
+                  color={'primary'}
+                  iconType={'copy'}
+                  href={getRoleManagementHref('clone', role.name)}
+                />
+              );
+            },
+          },
+        ],
       },
     ];
   };

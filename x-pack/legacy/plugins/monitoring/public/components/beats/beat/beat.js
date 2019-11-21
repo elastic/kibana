@@ -109,14 +109,14 @@ export function Beat({ summary, metrics, ...props }) {
       label: i18n.translate('xpack.monitoring.beats.instance.handlesLimitSoftLabel', {
         defaultMessage: 'Handles limit (soft)'
       }),
-      value: formatMetric(summary.handlesSoftLimit, 'byte'),
+      value: formatMetric(summary.handlesSoftLimit, 'int_commas'),
       'data-test-subj': 'handlesLimitSoft'
     },
     {
       label: i18n.translate('xpack.monitoring.beats.instance.handlesLimitHardLabel', {
         defaultMessage: 'Handles limit (hard)'
       }),
-      value: formatMetric(summary.handlesHardLimit, 'byte'),
+      value: formatMetric(summary.handlesHardLimit, 'int_commas'),
       'data-test-subj': 'handlesLimitHard'
     },
   ];

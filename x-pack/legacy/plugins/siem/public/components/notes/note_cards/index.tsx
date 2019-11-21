@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiPanel } from '@elastic/eui';
-import * as React from 'react';
+import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
 
 import { Note } from '../../../lib/note';
@@ -14,20 +14,34 @@ import { AssociateNote, GetNewNoteId, UpdateNote } from '../helpers';
 import { NoteCard } from '../note_card';
 
 const AddNoteContainer = styled.div``;
+AddNoteContainer.displayName = 'AddNoteContainer';
 
 const NoteContainer = styled.div`
   margin-top: 5px;
 `;
+NoteContainer.displayName = 'NoteContainer';
 
-const NoteCardsContainer = styled(EuiPanel)<{ width?: string }>`
-  border: none;
-  width: ${({ width = '100%' }) => width};
-`;
+interface NoteCardsCompProps {
+  children: React.ReactNode;
+}
+
+const NoteCardsComp = React.memo<NoteCardsCompProps>(({ children }) => (
+  <EuiPanel
+    data-test-subj="note-cards"
+    hasShadow={false}
+    paddingSize="none"
+    style={{ border: 'none' }}
+  >
+    {children}
+  </EuiPanel>
+));
+NoteCardsComp.displayName = 'NoteCardsComp';
 
 const NotesContainer = styled(EuiFlexGroup)`
   padding: 0 5px;
   margin-bottom: 5px;
 `;
+NotesContainer.displayName = 'NotesContainer';
 
 interface Props {
   associateNote: AssociateNote;
@@ -37,39 +51,31 @@ interface Props {
   showAddNote: boolean;
   toggleShowAddNote: () => void;
   updateNote: UpdateNote;
-  width?: string;
-}
-
-interface State {
-  newNote: string;
 }
 
 /** A view for entering and reviewing notes */
-export class NoteCards extends React.PureComponent<Props, State> {
-  constructor(props: Props) {
-    super(props);
+export const NoteCards = React.memo<Props>(
+  ({
+    associateNote,
+    getNotesByIds,
+    getNewNoteId,
+    noteIds,
+    showAddNote,
+    toggleShowAddNote,
+    updateNote,
+  }) => {
+    const [newNote, setNewNote] = useState('');
 
-    this.state = { newNote: '' };
-  }
-
-  public render() {
-    const {
-      getNotesByIds,
-      getNewNoteId,
-      noteIds,
-      showAddNote,
-      toggleShowAddNote,
-      updateNote,
-      width,
-    } = this.props;
+    const associateNoteAndToggleShow = useCallback(
+      (noteId: string) => {
+        associateNote(noteId);
+        toggleShowAddNote();
+      },
+      [associateNote, toggleShowAddNote]
+    );
 
     return (
-      <NoteCardsContainer
-        data-test-subj="note-cards"
-        hasShadow={false}
-        paddingSize="none"
-        width={width}
-      >
+      <NoteCardsComp>
         {noteIds.length ? (
           <NotesContainer data-test-subj="notes" direction="column" gutterSize="none">
             {getNotesByIds(noteIds).map(note => (
@@ -83,25 +89,18 @@ export class NoteCards extends React.PureComponent<Props, State> {
         {showAddNote ? (
           <AddNoteContainer data-test-subj="add-note-container">
             <AddNote
-              associateNote={this.associateNoteAndToggleShow}
+              associateNote={associateNoteAndToggleShow}
               getNewNoteId={getNewNoteId}
-              newNote={this.state.newNote}
+              newNote={newNote}
               onCancelAddNote={toggleShowAddNote}
-              updateNewNote={this.updateNewNote}
+              updateNewNote={setNewNote}
               updateNote={updateNote}
             />
           </AddNoteContainer>
         ) : null}
-      </NoteCardsContainer>
+      </NoteCardsComp>
     );
   }
+);
 
-  private associateNoteAndToggleShow = (noteId: string) => {
-    this.props.associateNote(noteId);
-    this.props.toggleShowAddNote();
-  };
-
-  private updateNewNote = (newNote: string): void => {
-    this.setState({ newNote });
-  };
-}
+NoteCards.displayName = 'NoteCards';

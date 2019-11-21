@@ -20,3 +20,5 @@ export const IP_FIELDS = {
   [InfraNodeType.pod]: 'kubernetes.pod.ip',
   [InfraNodeType.container]: 'container.ip_address',
 };
+
+export const CLOUD_METRICS_MODULES = ['aws'];

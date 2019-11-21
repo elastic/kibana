@@ -5,9 +5,11 @@
  */
 
 import { isEqual } from 'lodash/fp';
-import * as React from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
+
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 import { WithSource } from '../../containers/source';
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
@@ -40,6 +42,7 @@ interface StateReduxProps {
   columns: ColumnHeader[];
   dataProviders?: DataProvider[];
   end: number;
+  filters: esFilters.Filter[];
   isLive: boolean;
   itemsPerPage?: number;
   itemsPerPageOptions?: number[];
@@ -49,6 +52,7 @@ interface StateReduxProps {
   sort?: Sort;
   start: number;
   show?: boolean;
+  showCallOutUnauthorizedMsg: boolean;
 }
 
 interface DispatchProps {
@@ -78,6 +82,10 @@ interface DispatchProps {
   updateProviders?: ActionCreator<{
     id: string;
     providers: DataProvider[];
+  }>;
+  removeColumn?: ActionCreator<{
+    id: string;
+    columnId: string;
   }>;
   removeProvider?: ActionCreator<{
     id: string;
@@ -117,71 +125,128 @@ interface DispatchProps {
     id: string;
     providerId: string;
   }>;
+  upsertColumn?: ActionCreator<{
+    column: ColumnHeader;
+    id: string;
+    index: number;
+  }>;
 }
 
 type Props = OwnProps & StateReduxProps & DispatchProps;
 
-class StatefulTimelineComponent extends React.Component<Props> {
-  public shouldComponentUpdate = ({
-    id,
-    flyoutHeaderHeight,
-    flyoutHeight,
-    activePage,
+const StatefulTimelineComponent = React.memo<Props>(
+  ({
     columns,
+    createTimeline,
     dataProviders,
     end,
+    filters,
+    flyoutHeaderHeight,
+    flyoutHeight,
+    id,
     isLive,
     itemsPerPage,
     itemsPerPageOptions,
     kqlMode,
     kqlQueryExpression,
-    pageCount,
+    onDataProviderEdited,
+    removeColumn,
+    removeProvider,
+    show,
+    showCallOutUnauthorizedMsg,
     sort,
     start,
-    show,
-  }: Props) =>
-    id !== this.props.id ||
-    flyoutHeaderHeight !== this.props.flyoutHeaderHeight ||
-    flyoutHeight !== this.props.flyoutHeight ||
-    activePage !== this.props.activePage ||
-    !isEqual(columns, this.props.columns) ||
-    !isEqual(dataProviders, this.props.dataProviders) ||
-    end !== this.props.end ||
-    isLive !== this.props.isLive ||
-    itemsPerPage !== this.props.itemsPerPage ||
-    !isEqual(itemsPerPageOptions, this.props.itemsPerPageOptions) ||
-    kqlMode !== this.props.kqlMode ||
-    kqlQueryExpression !== this.props.kqlQueryExpression ||
-    pageCount !== this.props.pageCount ||
-    !isEqual(sort, this.props.sort) ||
-    start !== this.props.start ||
-    show !== this.props.show;
+    updateDataProviderEnabled,
+    updateDataProviderExcluded,
+    updateDataProviderKqlQuery,
+    updateHighlightedDropAndProviderId,
+    updateItemsPerPage,
+    upsertColumn,
+  }) => {
+    const onDataProviderRemoved: OnDataProviderRemoved = useCallback(
+      (providerId: string, andProviderId?: string) =>
+        removeProvider!({ id, providerId, andProviderId }),
+      [id]
+    );
 
-  public componentDidMount() {
-    const { createTimeline, id } = this.props;
+    const onToggleDataProviderEnabled: OnToggleDataProviderEnabled = useCallback(
+      ({ providerId, enabled, andProviderId }) =>
+        updateDataProviderEnabled!({
+          id,
+          enabled,
+          providerId,
+          andProviderId,
+        }),
+      [id]
+    );
 
-    if (createTimeline != null) {
-      createTimeline({ id, columns: defaultHeaders, show: false });
-    }
-  }
+    const onToggleDataProviderExcluded: OnToggleDataProviderExcluded = useCallback(
+      ({ providerId, excluded, andProviderId }) =>
+        updateDataProviderExcluded!({
+          id,
+          excluded,
+          providerId,
+          andProviderId,
+        }),
+      [id]
+    );
 
-  public render() {
-    const {
-      columns,
-      dataProviders,
-      end,
-      flyoutHeight,
-      flyoutHeaderHeight,
-      id,
-      isLive,
-      itemsPerPage,
-      itemsPerPageOptions,
-      kqlMode,
-      kqlQueryExpression,
-      show,
-      start,
-      sort,
-    } = this.props;
+    const onDataProviderEditedLocal: OnDataProviderEdited = useCallback(
+      ({ andProviderId, excluded, field, operator, providerId, value }) =>
+        onDataProviderEdited!({
+          andProviderId,
+          excluded,
+          field,
+          id,
+          operator,
+          providerId,
+          value,
+        }),
+      [id]
+    );
+
+    const onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery = useCallback(
+      ({ providerId, kqlQuery }) => updateDataProviderKqlQuery!({ id, kqlQuery, providerId }),
+      [id]
+    );
+
+    const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
+      itemsChangedPerPage => updateItemsPerPage!({ id, itemsPerPage: itemsChangedPerPage }),
+      [id]
+    );
+
+    const onChangeDroppableAndProvider: OnChangeDroppableAndProvider = useCallback(
+      providerId => updateHighlightedDropAndProviderId!({ id, providerId }),
+      [id]
+    );
+
+    const toggleColumn = useCallback(
+      (column: ColumnHeader) => {
+        const exists = columns.findIndex(c => c.id === column.id) !== -1;
+
+        if (!exists && upsertColumn != null) {
+          upsertColumn({
+            column,
+            id,
+            index: 1,
+          });
+        }
+
+        if (exists && removeColumn != null) {
+          removeColumn({
+            columnId: column.id,
+            id,
+          });
+        }
+      },
+      [columns, id]
+    );
+
+    useEffect(() => {
+      if (createTimeline != null) {
+        createTimeline({ id, columns: defaultHeaders, show: false });
+      }
+    }, []);
 
     return (
       <WithSource sourceId="default">
@@ -189,91 +254,63 @@ class StatefulTimelineComponent extends React.Component<Props> {
           <Timeline
             browserFields={browserFields}
             columns={columns}
-            id={id}
             dataProviders={dataProviders!}
             end={end}
+            filters={filters}
             flyoutHeaderHeight={flyoutHeaderHeight}
             flyoutHeight={flyoutHeight}
+            id={id}
             indexPattern={indexPattern}
             isLive={isLive}
             itemsPerPage={itemsPerPage!}
             itemsPerPageOptions={itemsPerPageOptions!}
             kqlMode={kqlMode}
             kqlQueryExpression={kqlQueryExpression}
-            onChangeDataProviderKqlQuery={this.onChangeDataProviderKqlQuery}
-            onChangeDroppableAndProvider={this.onChangeDroppableAndProvider}
-            onChangeItemsPerPage={this.onChangeItemsPerPage}
-            onDataProviderEdited={this.onDataProviderEdited}
-            onDataProviderRemoved={this.onDataProviderRemoved}
-            onToggleDataProviderEnabled={this.onToggleDataProviderEnabled}
-            onToggleDataProviderExcluded={this.onToggleDataProviderExcluded}
+            onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
+            onChangeDroppableAndProvider={onChangeDroppableAndProvider}
+            onChangeItemsPerPage={onChangeItemsPerPage}
+            onDataProviderEdited={onDataProviderEditedLocal}
+            onDataProviderRemoved={onDataProviderRemoved}
+            onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+            onToggleDataProviderExcluded={onToggleDataProviderExcluded}
             show={show!}
-            start={start}
+            showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
             sort={sort!}
+            start={start}
+            toggleColumn={toggleColumn}
           />
         )}
       </WithSource>
     );
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.activePage === nextProps.activePage &&
+      prevProps.end === nextProps.end &&
+      prevProps.flyoutHeaderHeight === nextProps.flyoutHeaderHeight &&
+      prevProps.flyoutHeight === nextProps.flyoutHeight &&
+      prevProps.id === nextProps.id &&
+      prevProps.isLive === nextProps.isLive &&
+      prevProps.itemsPerPage === nextProps.itemsPerPage &&
+      prevProps.kqlMode === nextProps.kqlMode &&
+      prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
+      prevProps.pageCount === nextProps.pageCount &&
+      prevProps.show === nextProps.show &&
+      prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
+      prevProps.start === nextProps.start &&
+      isEqual(prevProps.columns, nextProps.columns) &&
+      isEqual(prevProps.dataProviders, nextProps.dataProviders) &&
+      isEqual(prevProps.filters, nextProps.filters) &&
+      isEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
+      isEqual(prevProps.sort, nextProps.sort)
+    );
   }
+);
 
-  private onDataProviderRemoved: OnDataProviderRemoved = (
-    providerId: string,
-    andProviderId?: string
-  ) => this.props.removeProvider!({ id: this.props.id, providerId, andProviderId });
-
-  private onToggleDataProviderEnabled: OnToggleDataProviderEnabled = ({
-    providerId,
-    enabled,
-    andProviderId,
-  }) =>
-    this.props.updateDataProviderEnabled!({
-      id: this.props.id,
-      enabled,
-      providerId,
-      andProviderId,
-    });
-
-  private onToggleDataProviderExcluded: OnToggleDataProviderExcluded = ({
-    providerId,
-    excluded,
-    andProviderId,
-  }) =>
-    this.props.updateDataProviderExcluded!({
-      id: this.props.id,
-      excluded,
-      providerId,
-      andProviderId,
-    });
-
-  private onDataProviderEdited: OnDataProviderEdited = ({
-    andProviderId,
-    excluded,
-    field,
-    operator,
-    providerId,
-    value,
-  }) =>
-    this.props.onDataProviderEdited!({
-      andProviderId,
-      excluded,
-      field,
-      id: this.props.id,
-      operator,
-      providerId,
-      value,
-    });
-
-  private onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery = ({ providerId, kqlQuery }) =>
-    this.props.updateDataProviderKqlQuery!({ id: this.props.id, kqlQuery, providerId });
-
-  private onChangeItemsPerPage: OnChangeItemsPerPage = itemsChangedPerPage =>
-    this.props.updateItemsPerPage!({ id: this.props.id, itemsPerPage: itemsChangedPerPage });
-
-  private onChangeDroppableAndProvider: OnChangeDroppableAndProvider = providerId =>
-    this.props.updateHighlightedDropAndProviderId!({ id: this.props.id, providerId });
-}
+StatefulTimelineComponent.displayName = 'StatefulTimelineComponent';
 
 const makeMapStateToProps = () => {
+  const getShowCallOutUnauthorizedMsg = timelineSelectors.getShowCallOutUnauthorizedMsg();
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const getKqlQueryTimeline = timelineSelectors.getKqlFilterQuerySelector();
   const getInputsTimeline = inputsSelectors.getTimelineSelector();
@@ -283,46 +320,50 @@ const makeMapStateToProps = () => {
     const {
       columns,
       dataProviders,
+      filters,
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
-      sort,
       show,
+      sort,
     } = timeline;
     const kqlQueryExpression = getKqlQueryTimeline(state, id);
+
+    const timelineFilter = kqlMode === 'filter' ? filters || [] : [];
 
     return {
       columns,
       dataProviders,
       end: input.timerange.to,
+      filters: timelineFilter,
       id,
       isLive: input.policy.kind === 'interval',
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
       kqlQueryExpression,
+      show,
+      showCallOutUnauthorizedMsg: getShowCallOutUnauthorizedMsg(state),
       sort,
       start: input.timerange.from,
-      show,
     };
   };
   return mapStateToProps;
 };
 
-export const StatefulTimeline = connect(
-  makeMapStateToProps,
-  {
-    addProvider: timelineActions.addProvider,
-    createTimeline: timelineActions.createTimeline,
-    onDataProviderEdited: timelineActions.dataProviderEdited,
-    updateColumns: timelineActions.updateColumns,
-    updateDataProviderEnabled: timelineActions.updateDataProviderEnabled,
-    updateDataProviderExcluded: timelineActions.updateDataProviderExcluded,
-    updateDataProviderKqlQuery: timelineActions.updateDataProviderKqlQuery,
-    updateHighlightedDropAndProviderId: timelineActions.updateHighlightedDropAndProviderId,
-    updateItemsPerPage: timelineActions.updateItemsPerPage,
-    updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,
-    updateSort: timelineActions.updateSort,
-    removeProvider: timelineActions.removeProvider,
-  }
-)(StatefulTimelineComponent);
+export const StatefulTimeline = connect(makeMapStateToProps, {
+  addProvider: timelineActions.addProvider,
+  createTimeline: timelineActions.createTimeline,
+  onDataProviderEdited: timelineActions.dataProviderEdited,
+  removeColumn: timelineActions.removeColumn,
+  removeProvider: timelineActions.removeProvider,
+  updateColumns: timelineActions.updateColumns,
+  updateDataProviderEnabled: timelineActions.updateDataProviderEnabled,
+  updateDataProviderExcluded: timelineActions.updateDataProviderExcluded,
+  updateDataProviderKqlQuery: timelineActions.updateDataProviderKqlQuery,
+  updateHighlightedDropAndProviderId: timelineActions.updateHighlightedDropAndProviderId,
+  updateItemsPerPage: timelineActions.updateItemsPerPage,
+  updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,
+  updateSort: timelineActions.updateSort,
+  upsertColumn: timelineActions.upsertColumn,
+})(StatefulTimelineComponent);

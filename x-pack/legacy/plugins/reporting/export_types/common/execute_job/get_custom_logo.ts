@@ -5,16 +5,17 @@
  */
 
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../common/constants';
-import { ConditionalHeaders, JobDocPayload, KbnServer } from '../../../types';
+import { ConditionalHeaders, ServerFacade } from '../../../types';
+import { JobDocPayloadPDF } from '../../printable_pdf/types'; // Logo is PDF only
 
 export const getCustomLogo = async ({
   job,
   conditionalHeaders,
   server,
 }: {
-  job: JobDocPayload;
+  job: JobDocPayloadPDF;
   conditionalHeaders: ConditionalHeaders;
-  server: KbnServer;
+  server: ServerFacade;
 }) => {
   const serverBasePath: string = server.config().get('server.basePath');
 
@@ -24,6 +25,16 @@ export const getCustomLogo = async ({
     // We use the basePath from the saved job, which we'll have post spaces being implemented;
     // or we use the server base path, which uses the default space
     getBasePath: () => job.basePath || serverBasePath,
+    path: '/',
+    route: { settings: {} },
+    url: {
+      href: '/',
+    },
+    raw: {
+      req: {
+        url: '/',
+      },
+    },
   };
 
   const savedObjects = server.savedObjects;

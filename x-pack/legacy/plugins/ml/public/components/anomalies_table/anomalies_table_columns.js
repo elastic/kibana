@@ -9,7 +9,6 @@
 
 import {
   EuiButtonIcon,
-  EuiHealth,
   EuiLink,
 } from '@elastic/eui';
 
@@ -31,12 +30,13 @@ import { InfluencersCell } from './influencers_cell';
 import { LinksMenu } from './links_menu';
 import { checkPermission } from '../../privilege/check_privilege';
 import { mlFieldFormatService } from '../../services/field_format_service';
-import { getSeverityColor, isRuleSupported } from '../../../common/util/anomaly_utils';
+import { isRuleSupported } from '../../../common/util/anomaly_utils';
 import { formatValue } from '../../formatters/format_value';
 import {
   INFLUENCERS_LIMIT,
   ANOMALIES_TABLE_TABS
 } from './anomalies_table_constants';
+import { SeverityCell } from './severity_cell';
 
 function renderTime(date, aggregationInterval) {
   if (aggregationInterval === 'hour') {
@@ -48,10 +48,10 @@ function renderTime(date, aggregationInterval) {
   }
 }
 
-function showLinksMenuForItem(item) {
-  const canConfigureRules = (isRuleSupported(item) && checkPermission('canUpdateJob'));
+function showLinksMenuForItem(item, showViewSeriesLink) {
+  const canConfigureRules = (isRuleSupported(item.source) && checkPermission('canUpdateJob'));
   return (canConfigureRules ||
-    item.isTimeSeriesViewRecord ||
+    (showViewSeriesLink && item.isTimeSeriesViewRecord) ||
     item.entityName === 'mlcategory' ||
     item.customUrls !== undefined);
 }
@@ -98,16 +98,10 @@ export function getColumns(
     },
     {
       field: 'severity',
-      name: isAggregatedData === true ? i18n.translate('xpack.ml.anomaliesTable.maxSeverityColumnName', {
-        defaultMessage: 'max severity',
-      }) : i18n.translate('xpack.ml.anomaliesTable.severityColumnName', {
+      name: i18n.translate('xpack.ml.anomaliesTable.severityColumnName', {
         defaultMessage: 'severity',
       }),
-      render: (score) => (
-        <EuiHealth color={getSeverityColor(score)} compressed="true">
-          {score >= 1 ? Math.floor(score) : '< 1'}
-        </EuiHealth>
-      ),
+      render: (score, item) => <SeverityCell score={score} multiBucketImpact={item.source.multi_bucket_impact} />,
       sortable: true
     },
     {
@@ -254,7 +248,7 @@ export function getColumns(
     });
   }
 
-  const showLinks = (showViewSeriesLink === true) || items.some(item => showLinksMenuForItem(item));
+  const showLinks = items.some(item => showLinksMenuForItem(item, showViewSeriesLink));
 
   if (showLinks === true) {
     columns.push({
@@ -276,8 +270,7 @@ export function getColumns(
         } else {
           return null;
         }
-      },
-      sortable: false
+      }
     });
   }
 

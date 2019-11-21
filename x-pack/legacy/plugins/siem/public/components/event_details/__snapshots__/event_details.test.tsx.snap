@@ -2,7 +2,7 @@
 
 exports[`EventDetails rendering should match snapshot 1`] = `
 <Component>
-  <pure(Component)
+  <EventDetails
     browserFields={
       Object {
         "agent": Object {
@@ -12,6 +12,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
               "category": "agent",
               "description": "Ephemeral identifier of this agent (if one exists). This id normally changes across restarts, but \`agent.id\` does not.",
               "example": "8a4f500f",
+              "format": "",
               "indexes": Array [
                 "auditbeat",
                 "filebeat",
@@ -26,6 +27,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
               "category": "agent",
               "description": null,
               "example": null,
+              "format": "",
               "indexes": Array [
                 "auditbeat",
                 "filebeat",
@@ -40,6 +42,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
               "category": "agent",
               "description": "Unique identifier of this agent (if one exists). Example: For Beats this would be beat.id.",
               "example": "8a4f500d",
+              "format": "",
               "indexes": Array [
                 "auditbeat",
                 "filebeat",
@@ -54,6 +57,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
               "category": "agent",
               "description": "Name of the agent. This is a name that can be given to an agent. This can be helpful if for example two Filebeat instances are running on the same host but a human readable separation is needed on which Filebeat instance data is coming from. If no name is given, the name is often left empty.",
               "example": "foo",
+              "format": "",
               "indexes": Array [
                 "auditbeat",
                 "filebeat",
@@ -72,6 +76,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
               "category": "auditd",
               "description": null,
               "example": null,
+              "format": "",
               "indexes": Array [
                 "auditbeat",
               ],
@@ -84,6 +89,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
               "category": "auditd",
               "description": null,
               "example": null,
+              "format": "",
               "indexes": Array [
                 "auditbeat",
               ],
@@ -96,6 +102,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
               "category": "auditd",
               "description": null,
               "example": null,
+              "format": "",
               "indexes": Array [
                 "auditbeat",
               ],
@@ -112,6 +119,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
               "category": "base",
               "description": "Date/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events.",
               "example": "2016-05-23T08:05:34.853Z",
+              "format": "",
               "indexes": Array [
                 "auditbeat",
                 "filebeat",
@@ -130,6 +138,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
               "category": "client",
               "description": "Some event client addresses are defined ambiguously. The event will sometimes list an IP, a domain or a unix socket.  You should always store the raw address in the \`.address\` field. Then it should be duplicated to \`.ip\` or \`.domain\`, depending on which one it is.",
               "example": null,
+              "format": "",
               "indexes": Array [
                 "auditbeat",
                 "filebeat",
@@ -144,6 +153,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
               "category": "client",
               "description": "Bytes sent from the client to the server.",
               "example": "184",
+              "format": "",
               "indexes": Array [
                 "auditbeat",
                 "filebeat",
@@ -158,6 +168,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
               "category": "client",
               "description": "Client domain.",
               "example": null,
+              "format": "",
               "indexes": Array [
                 "auditbeat",
                 "filebeat",
@@ -172,6 +183,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
               "category": "client",
               "description": "Country ISO code.",
               "example": "CA",
+              "format": "",
               "indexes": Array [
                 "auditbeat",
                 "filebeat",
@@ -190,6 +202,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
               "category": "cloud",
               "description": "The cloud account or organization id used to identify different entities in a multi-tenant environment. Examples: AWS account id, Google Cloud ORG Id, or other unique identifier.",
               "example": "666777888999",
+              "format": "",
               "indexes": Array [
                 "auditbeat",
                 "filebeat",
@@ -204,6 +217,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
               "category": "cloud",
               "description": "Availability zone in which this host is running.",
               "example": "us-east-1c",
+              "format": "",
               "indexes": Array [
                 "auditbeat",
                 "filebeat",
@@ -222,6 +236,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
               "category": "container",
               "description": "Unique container id.",
               "example": null,
+              "format": "",
               "indexes": Array [
                 "auditbeat",
                 "filebeat",
@@ -236,6 +251,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
               "category": "container",
               "description": "Name of the image the container was built on.",
               "example": null,
+              "format": "",
               "indexes": Array [
                 "auditbeat",
                 "filebeat",
@@ -250,6 +266,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
               "category": "container",
               "description": "Container image tag.",
               "example": null,
+              "format": "",
               "indexes": Array [
                 "auditbeat",
                 "filebeat",
@@ -268,6 +285,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
               "category": "destination",
               "description": "Some event destination addresses are defined ambiguously. The event will sometimes list an IP, a domain or a unix socket.  You should always store the raw address in the \`.address\` field. Then it should be duplicated to \`.ip\` or \`.domain\`, depending on which one it is.",
               "example": null,
+              "format": "",
               "indexes": Array [
                 "auditbeat",
                 "filebeat",
@@ -282,6 +300,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
               "category": "destination",
               "description": "Bytes sent from the destination to the source.",
               "example": "184",
+              "format": "",
               "indexes": Array [
                 "auditbeat",
                 "filebeat",
@@ -296,6 +315,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
               "category": "destination",
               "description": "Destination domain.",
               "example": null,
+              "format": "",
               "indexes": Array [
                 "auditbeat",
                 "filebeat",
@@ -310,6 +330,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
               "category": "destination",
               "description": "IP address of the destination. Can be one or multiple IPv4 or IPv6 addresses.",
               "example": "",
+              "format": "",
               "indexes": Array [
                 "auditbeat",
                 "filebeat",
@@ -324,6 +345,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
               "category": "destination",
               "description": "Port of the destination.",
               "example": "",
+              "format": "",
               "indexes": Array [
                 "auditbeat",
                 "filebeat",
@@ -342,8 +364,10 @@ exports[`EventDetails rendering should match snapshot 1`] = `
               "category": "event",
               "description": "event.end contains the date when the event ended or when the activity was last observed.",
               "example": null,
+              "format": "",
               "indexes": Array [
                 "auditbeat-*",
+                "endgame-*",
                 "filebeat-*",
                 "packetbeat-*",
                 "winlogbeat-*",
@@ -361,6 +385,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
               "category": "source",
               "description": "IP address of the source. Can be one or multiple IPv4 or IPv6 addresses.",
               "example": "",
+              "format": "",
               "indexes": Array [
                 "auditbeat",
                 "filebeat",
@@ -375,6 +400,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
               "category": "source",
               "description": "Port of the source.",
               "example": "",
+              "format": "",
               "indexes": Array [
                 "auditbeat",
                 "filebeat",
@@ -388,224 +414,267 @@ exports[`EventDetails rendering should match snapshot 1`] = `
         },
       }
     }
+    columnHeaders={
+      Array [
+        Object {
+          "aggregatable": true,
+          "category": "base",
+          "columnHeaderType": "not-filtered",
+          "description": "Date/time when the event originated.
+For log events this is the date/time when the event was generated, and not when it was read.
+Required field for all events.",
+          "example": "2016-05-23T08:05:34.853Z",
+          "id": "@timestamp",
+          "type": "date",
+          "width": 190,
+        },
+        Object {
+          "aggregatable": true,
+          "category": "event",
+          "columnHeaderType": "not-filtered",
+          "description": "Severity describes the severity of the event. What the different severity values mean can very different between use cases. It's up to the implementer to make sure severities are consistent across events.",
+          "example": "7",
+          "id": "event.severity",
+          "type": "long",
+          "width": 180,
+        },
+        Object {
+          "aggregatable": true,
+          "category": "event",
+          "columnHeaderType": "not-filtered",
+          "description": "Event category.
+This contains high-level information about the contents of the event. It is more generic than \`event.action\`, in the sense that typically a category contains multiple actions. Warning: In future versions of ECS, we plan to provide a list of acceptable values for this field, please use with caution.",
+          "example": "user-management",
+          "id": "event.category",
+          "type": "keyword",
+          "width": 180,
+        },
+        Object {
+          "aggregatable": true,
+          "category": "event",
+          "columnHeaderType": "not-filtered",
+          "description": "The action captured by the event.
+This describes the information in the event. It is more specific than \`event.category\`. Examples are \`group-add\`, \`process-started\`, \`file-created\`. The value is normally defined by the implementer.",
+          "example": "user-password-change",
+          "id": "event.action",
+          "type": "keyword",
+          "width": 180,
+        },
+        Object {
+          "aggregatable": true,
+          "category": "host",
+          "columnHeaderType": "not-filtered",
+          "description": "Name of the host.
+It can contain what \`hostname\` returns on Unix systems, the fully qualified domain name, or a name specified by the user. The sender decides which value to use.",
+          "example": "",
+          "id": "host.name",
+          "type": "keyword",
+          "width": 180,
+        },
+        Object {
+          "aggregatable": true,
+          "category": "source",
+          "columnHeaderType": "not-filtered",
+          "description": "IP address of the source.
+Can be one or multiple IPv4 or IPv6 addresses.",
+          "example": "",
+          "id": "source.ip",
+          "type": "ip",
+          "width": 180,
+        },
+        Object {
+          "aggregatable": true,
+          "category": "destination",
+          "columnHeaderType": "not-filtered",
+          "description": "IP address of the destination.
+Can be one or multiple IPv4 or IPv6 addresses.",
+          "example": "",
+          "id": "destination.ip",
+          "type": "ip",
+          "width": 180,
+        },
+        Object {
+          "aggregatable": true,
+          "category": "destination",
+          "columnHeaderType": "not-filtered",
+          "description": "Bytes sent from the source to the destination",
+          "example": "123",
+          "format": "bytes",
+          "id": "destination.bytes",
+          "type": "number",
+          "width": 180,
+        },
+        Object {
+          "aggregatable": true,
+          "category": "user",
+          "columnHeaderType": "not-filtered",
+          "description": "Short name or login of the user.",
+          "example": "albert",
+          "id": "user.name",
+          "type": "keyword",
+          "width": 180,
+        },
+        Object {
+          "aggregatable": true,
+          "category": "base",
+          "columnHeaderType": "not-filtered",
+          "description": "Each document has an _id that uniquely identifies it",
+          "example": "Y-6TfmcB0WOhS6qyMv3s",
+          "id": "_id",
+          "type": "keyword",
+          "width": 180,
+        },
+        Object {
+          "aggregatable": false,
+          "category": "base",
+          "columnHeaderType": "not-filtered",
+          "description": "For log events the message field contains the log message.
+In other use cases the message field can be used to concatenate different values which are then freely searchable. If multiple messages exist, they can be combined into one message.",
+          "example": "Hello World",
+          "id": "message",
+          "type": "text",
+          "width": 180,
+        },
+      ]
+    }
     data={
       Array [
         Object {
-          "category": "_id",
-          "description": "Each document has an _id that uniquely identifies it",
-          "example": "Y-6TfmcB0WOhS6qyMv3s",
           "field": "_id",
           "originalValue": "pEMaMmkBUV60JmNWmWVi",
-          "type": "keyword",
           "values": Array [
             "pEMaMmkBUV60JmNWmWVi",
           ],
         },
         Object {
-          "category": "_index",
-          "description": "An index is like a ‘database’ in a relational database. It has a mapping which defines multiple types. An index is a logical namespace which maps to one or more primary shards and can have zero or more replica shards.",
-          "example": "auditbeat-8.0.0-2019.02.19-000001",
           "field": "_index",
           "originalValue": "filebeat-8.0.0-2019.02.19-000001",
-          "type": "keyword",
           "values": Array [
             "filebeat-8.0.0-2019.02.19-000001",
           ],
         },
         Object {
-          "category": "_type",
-          "description": null,
-          "example": null,
           "field": "_type",
           "originalValue": "_doc",
-          "type": "keyword",
           "values": Array [
             "_doc",
           ],
         },
         Object {
-          "category": "_score",
-          "description": null,
-          "example": null,
           "field": "_score",
           "originalValue": 1,
-          "type": "long",
           "values": Array [
             "1",
           ],
         },
         Object {
-          "category": "@timestamp",
-          "description": "Date/time when the event originated.For log events this is the date/time when the event was generated, and not when it was read.Required field for all events.",
-          "example": "2016-05-23T08:05:34.853Z",
           "field": "@timestamp",
           "originalValue": "2019-02-28T16:50:54.621Z",
-          "type": "date",
           "values": Array [
             "2019-02-28T16:50:54.621Z",
           ],
         },
         Object {
-          "category": "agent",
-          "description": "Ephemeral identifier of this agent (if one exists).This id normally changes across restarts, but \`agent.id\` does not.",
-          "example": "8a4f500f",
           "field": "agent.ephemeral_id",
           "originalValue": "9d391ef2-a734-4787-8891-67031178c641",
-          "type": "keyword",
           "values": Array [
             "9d391ef2-a734-4787-8891-67031178c641",
           ],
         },
         Object {
-          "category": "agent",
-          "description": null,
-          "example": null,
           "field": "agent.hostname",
           "originalValue": "siem-kibana",
-          "type": "keyword",
           "values": Array [
             "siem-kibana",
           ],
         },
         Object {
-          "category": "agent",
-          "description": "Unique identifier of this agent (if one exists).Example: For Beats this would be beat.id.",
-          "example": "8a4f500d",
           "field": "agent.id",
           "originalValue": "5de03d5f-52f3-482e-91d4-853c7de073c3",
-          "type": "keyword",
           "values": Array [
             "5de03d5f-52f3-482e-91d4-853c7de073c3",
           ],
         },
         Object {
-          "category": "agent",
-          "description": "Type of the agent.The agent type stays always the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.",
-          "example": "filebeat",
           "field": "agent.type",
           "originalValue": "filebeat",
-          "type": "keyword",
           "values": Array [
             "filebeat",
           ],
         },
         Object {
-          "category": "agent",
-          "description": "Version of the agent.",
-          "example": "6.0.0-rc2",
           "field": "agent.version",
           "originalValue": "8.0.0",
-          "type": "keyword",
           "values": Array [
             "8.0.0",
           ],
         },
         Object {
-          "category": "cloud",
-          "description": "Availability zone in which this host is running.",
-          "example": "us-east-1c",
           "field": "cloud.availability_zone",
           "originalValue": "projects/189716325846/zones/us-east1-b",
-          "type": "keyword",
           "values": Array [
             "projects/189716325846/zones/us-east1-b",
           ],
         },
         Object {
-          "category": "cloud",
-          "description": "Instance ID of the host machine.",
-          "example": "i-1234567890abcdef0",
           "field": "cloud.instance.id",
           "originalValue": "5412578377715150143",
-          "type": "keyword",
           "values": Array [
             "5412578377715150143",
           ],
         },
         Object {
-          "category": "cloud",
-          "description": "Instance name of the host machine.",
-          "example": null,
           "field": "cloud.instance.name",
           "originalValue": "siem-kibana",
-          "type": "keyword",
           "values": Array [
             "siem-kibana",
           ],
         },
         Object {
-          "category": "cloud",
-          "description": "Machine type of the host machine.",
-          "example": "t2.medium",
           "field": "cloud.machine.type",
           "originalValue": "projects/189716325846/machineTypes/n1-standard-1",
-          "type": "keyword",
           "values": Array [
             "projects/189716325846/machineTypes/n1-standard-1",
           ],
         },
         Object {
-          "category": "cloud",
-          "description": null,
-          "example": null,
           "field": "cloud.project.id",
           "originalValue": "elastic-beats",
-          "type": "keyword",
           "values": Array [
             "elastic-beats",
           ],
         },
         Object {
-          "category": "cloud",
-          "description": "Name of the cloud provider. Example values are ec2, gce, or digitalocean.",
-          "example": "ec2",
           "field": "cloud.provider",
           "originalValue": "gce",
-          "type": "keyword",
           "values": Array [
             "gce",
           ],
         },
         Object {
-          "category": "destination",
-          "description": "Bytes sent from the destination to the source.",
-          "example": "184",
           "field": "destination.bytes",
           "originalValue": 584,
-          "type": "long",
           "values": Array [
             "584",
           ],
         },
         Object {
-          "category": "destination",
-          "description": "IP address of the destination.Can be one or multiple IPv4 or IPv6 addresses.",
-          "example": null,
           "field": "destination.ip",
           "originalValue": "10.47.8.200",
-          "type": "ip",
           "values": Array [
             "10.47.8.200",
           ],
         },
         Object {
-          "category": "destination",
-          "description": "Packets sent from the destination to the source.",
-          "example": "12",
           "field": "destination.packets",
           "originalValue": 4,
-          "type": "long",
           "values": Array [
             "4",
           ],
         },
         Object {
-          "category": "destination",
-          "description": "Port of the destination.",
-          "example": null,
           "field": "destination.port",
           "originalValue": 902,
-          "type": "long",
           "values": Array [
             "902",
           ],
@@ -613,10 +682,10 @@ exports[`EventDetails rendering should match snapshot 1`] = `
       ]
     }
     id="Y-6TfmcB0WOhS6qyMv3s"
-    isLoading={false}
     onUpdateColumns={[MockFunction]}
     onViewSelected={[MockFunction]}
     timelineId="test"
+    toggleColumn={[MockFunction]}
     view="table-view"
   />
 </Component>

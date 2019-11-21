@@ -24,10 +24,8 @@ import {
   isAngularHttpError,
 } from './lib/format_angular_http_error';
 
-const newPlatformFatalErrors = npSetup.core.fatalErrors;
-
 export function addFatalErrorCallback(callback: () => void) {
-  newPlatformFatalErrors.get$().subscribe(() => {
+  npSetup.core.fatalErrors.get$().subscribe(() => {
     callback();
   });
 }
@@ -38,5 +36,5 @@ export function fatalError(error: AngularHttpError | Error | string, location?: 
     error = formatAngularHttpError(error);
   }
 
-  newPlatformFatalErrors.add(error, location);
+  npSetup.core.fatalErrors.add(error, location);
 }

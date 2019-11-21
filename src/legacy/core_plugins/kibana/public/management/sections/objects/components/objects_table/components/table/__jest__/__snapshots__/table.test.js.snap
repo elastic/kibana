@@ -29,14 +29,10 @@ exports[`Table prevents saved objects from being deleted 1`] = `
         <EuiButton
           color="danger"
           data-test-subj="savedObjectsManagementDelete"
-          fill={false}
-          iconSide="left"
           iconType="trash"
           isDisabled={true}
           onClick={[Function]}
-          size="m"
           title="Unable to delete saved objects"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Delete"
@@ -48,14 +44,10 @@ exports[`Table prevents saved objects from being deleted 1`] = `
           anchorPosition="downCenter"
           button={
             <EuiButton
-              color="primary"
-              fill={false}
               iconSide="right"
               iconType="arrowDown"
               isDisabled={false}
               onClick={[Function]}
-              size="m"
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="Export"
@@ -65,6 +57,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             </EuiButton>
           }
           closePopover={[Function]}
+          display="inlineBlock"
           hasArrow={true}
           isOpen={false}
           ownFocus={false}
@@ -72,7 +65,9 @@ exports[`Table prevents saved objects from being deleted 1`] = `
         >
           <EuiFormRow
             describedByIds={Array []}
+            display="row"
             fullWidth={false}
+            hasChildLabel={true}
             hasEmptyLabelSpace={false}
             label={
               <FormattedMessage
@@ -98,18 +93,16 @@ exports[`Table prevents saved objects from being deleted 1`] = `
           </EuiFormRow>
           <EuiFormRow
             describedByIds={Array []}
+            display="row"
             fullWidth={false}
+            hasChildLabel={true}
             hasEmptyLabelSpace={false}
             labelType="label"
           >
             <EuiButton
-              color="primary"
               fill={true}
-              iconSide="left"
               iconType="exportAction"
               onClick={[Function]}
-              size="m"
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="Export"
@@ -244,13 +237,9 @@ exports[`Table should render normally 1`] = `
         <EuiButton
           color="danger"
           data-test-subj="savedObjectsManagementDelete"
-          fill={false}
-          iconSide="left"
           iconType="trash"
           isDisabled={false}
           onClick={[Function]}
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Delete"
@@ -262,14 +251,10 @@ exports[`Table should render normally 1`] = `
           anchorPosition="downCenter"
           button={
             <EuiButton
-              color="primary"
-              fill={false}
               iconSide="right"
               iconType="arrowDown"
               isDisabled={false}
               onClick={[Function]}
-              size="m"
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="Export"
@@ -279,6 +264,7 @@ exports[`Table should render normally 1`] = `
             </EuiButton>
           }
           closePopover={[Function]}
+          display="inlineBlock"
           hasArrow={true}
           isOpen={false}
           ownFocus={false}
@@ -286,7 +272,9 @@ exports[`Table should render normally 1`] = `
         >
           <EuiFormRow
             describedByIds={Array []}
+            display="row"
             fullWidth={false}
+            hasChildLabel={true}
             hasEmptyLabelSpace={false}
             label={
               <FormattedMessage
@@ -312,18 +300,16 @@ exports[`Table should render normally 1`] = `
           </EuiFormRow>
           <EuiFormRow
             describedByIds={Array []}
+            display="row"
             fullWidth={false}
+            hasChildLabel={true}
             hasEmptyLabelSpace={false}
             labelType="label"
           >
             <EuiButton
-              color="primary"
               fill={true}
-              iconSide="left"
               iconType="exportAction"
               onClick={[Function]}
-              size="m"
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="Export"

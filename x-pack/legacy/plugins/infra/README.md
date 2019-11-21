@@ -5,11 +5,11 @@ the infrastructure monitoring use-case within Kibana.
 
 ## UI Structure
 
-The plugin provides two main apps in Kibana - the *Infrastructure UI* and the
+The plugin provides two main apps in Kibana - the *Metrics UI* and the
 *Logs UI*. Both are reachable via their own main navigation items and via links
 from other parts of Kibana.
 
-The *Infrastructure UI* consists of three main screens, which are the
+The *Metrics UI* consists of three main screens, which are the
 *Inventory*, the *Node details* and the *Metrics explorer*.
 
 The *Logs UI* provides one log viewer screen.
@@ -31,7 +31,7 @@ this section details a few plugin-specific aspects.
 
 ### Ingesting metrics for development
 
-The *Infrastructure UI* displays [ECS]-compatible metric data from indices
+The *Metrics UI* displays [ECS]-compatible metric data from indices
 matching the `metricbeat-*` pattern by default. The primary way to ingest these
 is by running [Metricbeat] to deliver metrics to the development Elasticsearch
 cluster. It can be used to ingest development host metrics using the `system`
@@ -120,7 +120,7 @@ life-cycle of a PR looks like the following:
 There are always exceptions to the rule, so seeking guidance about any of the
 steps is highly recommended.
 
-[Kibana's contribution procedures]: ../../../CONTRIBUTING.md
+[Kibana's contribution procedures]: ../../../../CONTRIBUTING.md
 [Infrastructure forum]: https://discuss.elastic.co/c/infrastructure
 [Logs forum]: https://discuss.elastic.co/c/logs
 [ECS]: https://github.com/elastic/ecs/

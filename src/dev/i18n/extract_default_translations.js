@@ -26,7 +26,7 @@ import {
 } from './extractors';
 import { globAsync, readFileAsync, normalizePath } from './utils';
 
-import { createFailError, isFailError } from '../run';
+import { createFailError, isFailError } from '@kbn/dev-utils';
 
 function addMessageToMap(targetMap, key, value, reporter) {
   const existingValue = targetMap.get(key);
@@ -50,8 +50,8 @@ function filterEntries(entries, exclude) {
 export function validateMessageNamespace(id, filePath, allowedPaths, reporter) {
   const normalizedPath = normalizePath(filePath);
 
-  const [expectedNamespace] = Object.entries(allowedPaths).find(([, pluginPath]) =>
-    normalizedPath.startsWith(`${pluginPath}/`)
+  const [expectedNamespace] = Object.entries(allowedPaths).find(([, pluginPaths]) =>
+    pluginPaths.some(pluginPath => normalizedPath.startsWith(`${pluginPath}/`))
   );
 
   if (!id.startsWith(`${expectedNamespace}.`)) {

@@ -11,7 +11,6 @@ import {
   EuiFlexItem,
   // @ts-ignore
   EuiSearchBar,
-  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -19,26 +18,22 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import * as i18n from '../translations';
 import { OpenTimelineProps } from '../types';
 
-import * as i18n from '../translations';
-
-const ShowingContainer = styled.div`
-  user-select: none;
+const SearchRowContainer = styled.div`
+  &:not(:last-child) {
+    margin-bottom: ${props => props.theme.eui.euiSizeL};
+  }
 `;
+
+SearchRowContainer.displayName = 'SearchRowContainer';
 
 const SearchRowFlexGroup = styled(EuiFlexGroup)`
-  user-select: none;
+  margin-bottom: ${props => props.theme.eui.euiSizeXS};
 `;
 
-const FilterGroupFlexItem = styled(EuiFlexItem)`
-  margin-left: 24px;
-`;
-
-const SelectableQueryText = styled.span`
-  margin-left: 3px;
-  user-select: text;
-`;
+SearchRowFlexGroup.displayName = 'SearchRowFlexGroup';
 
 type Props = Pick<
   OpenTimelineProps,
@@ -50,14 +45,9 @@ type Props = Pick<
  */
 export const SearchRow = pure<Props>(
   ({ onlyFavorites, onQueryChange, onToggleOnlyFavorites, query, totalSearchResultsCount }) => (
-    <>
-      <SearchRowFlexGroup
-        alignItems="flexStart"
-        direction="row"
-        gutterSize="none"
-        justifyContent="spaceBetween"
-      >
-        <EuiFlexItem grow={true}>
+    <SearchRowContainer>
+      <SearchRowFlexGroup gutterSize="s">
+        <EuiFlexItem>
           <EuiSearchBar
             data-test-subj="search-bar"
             box={{
@@ -68,7 +58,7 @@ export const SearchRow = pure<Props>(
           />
         </EuiFlexItem>
 
-        <FilterGroupFlexItem grow={false}>
+        <EuiFlexItem grow={false}>
           <EuiFilterGroup>
             <EuiFilterButton
               data-test-subj="only-favorites-toggle"
@@ -78,27 +68,28 @@ export const SearchRow = pure<Props>(
               {i18n.ONLY_FAVORITES}
             </EuiFilterButton>
           </EuiFilterGroup>
-        </FilterGroupFlexItem>
+        </EuiFlexItem>
       </SearchRowFlexGroup>
 
-      <EuiSpacer size="s" />
-
-      <ShowingContainer data-test-subj="showing">
-        <EuiText color="subdued" size="xs">
+      <EuiText color="subdued" size="xs">
+        <p>
           <FormattedMessage
             data-test-subj="query-message"
             id="xpack.siem.open.timeline.showingNTimelinesLabel"
-            defaultMessage="Showing {totalSearchResultsCount} {totalSearchResultsCount, plural, one {Timeline} other {Timelines}} {with}"
+            defaultMessage="Showing: {totalSearchResultsCount} {totalSearchResultsCount, plural, one {timeline} other {timelines}} {with}"
             values={{
               totalSearchResultsCount,
-              with: query.trim().length ? i18n.WITH : '',
+              with: (
+                <span data-test-subj="selectable-query-text">
+                  {query.trim().length ? `${i18n.WITH} "${query.trim()}"` : ''}
+                </span>
+              ),
             }}
           />
-          <SelectableQueryText data-test-subj="selectable-query-text">
-            {query.trim()}
-          </SelectableQueryText>
-        </EuiText>
-      </ShowingContainer>
-    </>
+        </p>
+      </EuiText>
+    </SearchRowContainer>
   )
 );
+
+SearchRow.displayName = 'SearchRow';

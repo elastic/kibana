@@ -59,8 +59,7 @@ export default function ({ getService, getPageObjects }) {
     after(async function afterAll() {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.clickIndexPatternLogstash();
-      await PageObjects.settings.removeIndexPattern();
+      await PageObjects.settings.removeLogstashIndexPatternIfExist();
     });
 
     it('should not allow saving of invalid scripts', async function () {
@@ -125,17 +124,17 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should see scripted field value in Discover', async function () {
-        const fromTime = '2015-09-17 06:31:44.000';
-        const toTime = '2015-09-18 18:31:44.000';
+        const fromTime = 'Sep 17, 2015 @ 06:31:44.000';
+        const toTime = 'Sep 18, 2015 @ 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.visualize.waitForVisualization();
+
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName);
         await retry.try(async function () {
           await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName);
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visualize.waitForVisualization();
+
         await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\n18');
@@ -147,7 +146,7 @@ export default function ({ getService, getPageObjects }) {
         await log.debug('filter by the first value (14) in the expanded scripted field list');
         await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName, '14');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visualize.waitForVisualization();
+
         await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('31');
         });
@@ -161,7 +160,7 @@ export default function ({ getService, getPageObjects }) {
         await filterBar.removeAllFilters();
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visualize.waitForVisualization();
+
         await inspector.open();
         await inspector.setTablePageSize(50);
         await inspector.expectTableData(expectedChartValues);
@@ -187,17 +186,17 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should see scripted field value in Discover', async function () {
-        const fromTime = '2015-09-17 06:31:44.000';
-        const toTime = '2015-09-18 18:31:44.000';
+        const fromTime = 'Sep 17, 2015 @ 06:31:44.000';
+        const toTime = 'Sep 18, 2015 @ 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.visualize.waitForVisualization();
+
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
           await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName2);
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visualize.waitForVisualization();
+
         await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\ngood');
@@ -210,7 +209,7 @@ export default function ({ getService, getPageObjects }) {
         await log.debug('filter by "bad" in the expanded scripted field list');
         await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, 'bad');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visualize.waitForVisualization();
+
         await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('27');
         });
@@ -220,7 +219,6 @@ export default function ({ getService, getPageObjects }) {
       it('should visualize scripted field in vertical bar chart', async function () {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visualize.waitForVisualization();
         await inspector.open();
         await inspector.expectTableData([
           ['good', '359'],
@@ -248,17 +246,17 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should see scripted field value in Discover', async function () {
-        const fromTime = '2015-09-17 06:31:44.000';
-        const toTime = '2015-09-18 18:31:44.000';
+        const fromTime = 'Sep 17, 2015 @ 06:31:44.000';
+        const toTime = 'Sep 18, 2015 @ 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.visualize.waitForVisualization();
+
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
           await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName2);
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visualize.waitForVisualization();
+
         await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\ntrue');
@@ -271,7 +269,7 @@ export default function ({ getService, getPageObjects }) {
         await log.debug('filter by "true" in the expanded scripted field list');
         await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, 'true');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visualize.waitForVisualization();
+
         await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('359');
         });
@@ -281,7 +279,6 @@ export default function ({ getService, getPageObjects }) {
       it('should visualize scripted field in vertical bar chart', async function () {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visualize.waitForVisualization();
         await inspector.open();
         await inspector.expectTableData([
           ['true', '359'],
@@ -310,17 +307,17 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should see scripted field value in Discover', async function () {
-        const fromTime = '2015-09-17 19:22:00.000';
-        const toTime = '2015-09-18 07:00:00.000';
+        const fromTime = 'Sep 17, 2015 @ 19:22:00.000';
+        const toTime = 'Sep 18, 2015 @ 07:00:00.000';
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.visualize.waitForVisualization();
+
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
           await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName2);
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visualize.waitForVisualization();
+
         await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('Sep 18, 2015 @ 06:52:55.953\n2015-09-18 07:00');
@@ -329,10 +326,10 @@ export default function ({ getService, getPageObjects }) {
 
       it('should filter by scripted field value in Discover', async function () {
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
-        await log.debug('filter by "2015-09-17 23:00" in the expanded scripted field list');
+        await log.debug('filter by "Sep 17, 2015 @ 23:00" in the expanded scripted field list');
         await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, '2015-09-17 23:00');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visualize.waitForVisualization();
+
         await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('1');
         });
@@ -342,7 +339,6 @@ export default function ({ getService, getPageObjects }) {
       it('should visualize scripted field in vertical bar chart', async function () {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visualize.waitForVisualization();
         await inspector.open();
         await inspector.setTablePageSize(50);
         await inspector.expectTableData([

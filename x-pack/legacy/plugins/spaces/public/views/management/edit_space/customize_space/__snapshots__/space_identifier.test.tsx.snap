@@ -4,10 +4,14 @@ exports[`renders without crashing 1`] = `
 <Fragment>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={true}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <p>
+      <p
+        className="eui-textBreakAll"
+      >
         <FormattedMessage
           defaultMessage="Example: https://my-kibana.example{spaceIdentifier}/app/kibana."
           id="xpack.spaces.management.spaceIdentifier.kibanaURLForSpaceIdentifierDescription"
@@ -30,18 +34,16 @@ exports[`renders without crashing 1`] = `
           id="xpack.spaces.management.spaceIdentifier.urlIdentifierLabel"
           values={Object {}}
         />
-        <EuiLink
+        <ForwardRef
           aria-label="Customize the URL identifier"
-          color="primary"
           onClick={[Function]}
-          type="button"
         >
           <FormattedMessage
             defaultMessage="[customize]"
             id="xpack.spaces.management.spaceIdentifier.customizeSpaceLinkText"
             values={Object {}}
           />
-        </EuiLink>
+        </ForwardRef>
       </p>
     }
     labelType="label"

@@ -64,23 +64,26 @@ import Boom from 'boom';
 import _ from 'lodash';
 import cloneDeep from 'lodash.clonedeep';
 import Semver from 'semver';
+import { Logger } from '../../../logging';
 import { RawSavedObjectDoc } from '../../serialization';
-import { SavedObjectsMigrationVersion } from '../../';
-import { LogFn, Logger, MigrationLogger } from './migration_logger';
+import { SavedObjectsMigrationVersion } from '../../types';
+import { MigrationLogger, SavedObjectsMigrationLogger } from './migration_logger';
 
-export type TransformFn = (doc: RawSavedObjectDoc, log?: Logger) => RawSavedObjectDoc;
+export type TransformFn = (doc: RawSavedObjectDoc) => RawSavedObjectDoc;
+
+type MigrationFn = (doc: RawSavedObjectDoc, log: SavedObjectsMigrationLogger) => RawSavedObjectDoc;
 
 type ValidateDoc = (doc: RawSavedObjectDoc) => void;
 
-interface MigrationDefinition {
-  [type: string]: { [version: string]: TransformFn };
+export interface MigrationDefinition {
+  [type: string]: { [version: string]: MigrationFn };
 }
 
 interface Opts {
   kibanaVersion: string;
   migrations: MigrationDefinition;
   validateDoc: ValidateDoc;
-  log: LogFn;
+  log: Logger;
 }
 
 interface ActiveMigrations {
@@ -122,7 +125,7 @@ export class DocumentMigrator implements VersionedTransformer {
   constructor(opts: Opts) {
     validateMigrationDefinition(opts.migrations);
 
-    this.migrations = buildActiveMigrations(opts.migrations, new MigrationLogger(opts.log));
+    this.migrations = buildActiveMigrations(opts.migrations, opts.log);
     this.transformDoc = buildDocumentTransform({
       kibanaVersion: opts.kibanaVersion,
       migrations: this.migrations,
@@ -293,10 +296,10 @@ function markAsUpToDate(doc: RawSavedObjectDoc, migrations: ActiveMigrations) {
  * If a specific transform function fails, this tacks on a bit of information
  * about the document and transform that caused the failure.
  */
-function wrapWithTry(version: string, prop: string, transform: TransformFn, log: Logger) {
+function wrapWithTry(version: string, prop: string, transform: MigrationFn, log: Logger) {
   return function tryTransformDoc(doc: RawSavedObjectDoc) {
     try {
-      const result = transform(doc, log);
+      const result = transform(doc, new MigrationLogger(log));
 
       // A basic sanity check to help migration authors detect basic errors
       // (e.g. forgetting to return the transformed doc)
@@ -308,7 +311,7 @@ function wrapWithTry(version: string, prop: string, transform: TransformFn, log:
     } catch (error) {
       const failedTransform = `${prop}:${version}`;
       const failedDoc = JSON.stringify(doc);
-      log.warning(
+      log.warn(
         `Failed to transform document ${doc}. Transform: ${failedTransform}\nDoc: ${failedDoc}`
       );
       throw error;

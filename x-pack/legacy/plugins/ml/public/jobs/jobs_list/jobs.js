@@ -4,11 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-import { JobsListView } from './components/jobs_list_view';
 import React from 'react';
 
+import { NavigationMenu } from '../../components/navigation_menu';
+
+import { JobsListView } from './components/jobs_list_view';
 
 export const JobsPage = (props) => (
-  <JobsListView {...props} />
+  <>
+    <NavigationMenu tabId="jobs" />
+    <JobsListView {...props} />
+  </>
 );

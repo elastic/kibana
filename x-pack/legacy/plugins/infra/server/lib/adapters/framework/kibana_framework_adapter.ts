@@ -8,7 +8,8 @@ import { GenericParams } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
 import { Legacy } from 'kibana';
 
-import { InfraMetricModel } from '../metrics/adapter_types';
+import { KibanaConfig } from 'src/legacy/server/kbn_server';
+import { get } from 'lodash';
 import {
   InfraBackendFrameworkAdapter,
   InfraFrameworkRequest,
@@ -24,6 +25,7 @@ import {
   HapiGraphiQLPluginOptions,
   HapiGraphQLPluginOptions,
 } from './apollo_server_hapi';
+import { TSVBMetricModel } from '../../../../common/inventory_models/types';
 
 interface CallWithRequestParams extends GenericParams {
   max_concurrent_shard_requests?: number;
@@ -34,6 +36,11 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
 
   constructor(private server: Legacy.Server) {
     this.version = server.config().get('pkg.version');
+  }
+
+  public config(req: InfraFrameworkRequest<Legacy.Request>): KibanaConfig {
+    const internalRequest = req[internalInfraFrameworkRequest];
+    return internalRequest.server.config();
   }
 
   public exposeStaticDir(urlPath: string, dir: string): void {
@@ -112,10 +119,19 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
       }
     }
 
+    const frozenIndicesParams = ['search', 'msearch'].includes(endpoint)
+      ? {
+          ignore_throttled: !includeFrozen,
+        }
+      : {};
+
     const fields = await callWithRequest(
       internalRequest,
       endpoint,
-      { ...params, ignore_throttled: !includeFrozen },
+      {
+        ...params,
+        ...frozenIndicesParams,
+      },
       ...rest
     );
     return fields;
@@ -137,44 +153,55 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
     });
   }
 
+  public getSpaceId(request: InfraFrameworkRequest): string {
+    const spacesPlugin = this.server.plugins.spaces;
+
+    if (spacesPlugin && typeof spacesPlugin.getSpaceId === 'function') {
+      return spacesPlugin.getSpaceId(request[internalInfraFrameworkRequest]);
+    } else {
+      return 'default';
+    }
+  }
+
   public getSavedObjectsService() {
     return this.server.savedObjects;
   }
 
   public async makeTSVBRequest(
     req: InfraFrameworkRequest<Legacy.Request>,
-    model: InfraMetricModel,
+    model: TSVBMetricModel,
     timerange: { min: number; max: number },
     filters: any[]
   ) {
     const internalRequest = req[internalInfraFrameworkRequest];
     const server = internalRequest.server;
+    const getVisData = get(server, 'plugins.metrics.getVisData');
+    if (typeof getVisData !== 'function') {
+      throw new Error('TSVB is not available');
+    }
 
-    let url = '/api/metrics/vis/data';
-    if (server.plugins.spaces) {
-      const spaceId = server.plugins.spaces.getSpaceId(internalRequest);
-      if (spaceId !== 'default') {
-        url = `/s/${spaceId}${url}`;
+    // getBasePath returns randomized base path AND spaces path
+    const basePath = internalRequest.getBasePath();
+    const url = `${basePath}/api/metrics/vis/data`;
+
+    // For the following request we need a copy of the instnace of the internal request
+    // but modified for our TSVB request. This will ensure all the instance methods
+    // are available along with our overriden values
+    const request = Object.assign(
+      Object.create(Object.getPrototypeOf(internalRequest)),
+      internalRequest,
+      {
+        url,
+        method: 'POST',
+        payload: {
+          timerange,
+          panels: [model],
+          filters,
+        },
       }
-    }
-
-    const request = {
-      url,
-      method: 'POST',
-      headers: internalRequest.headers,
-      payload: {
-        timerange,
-        panels: [model],
-        filters,
-      },
-    };
-
-    const res = await server.inject(request);
-    if (res.statusCode !== 200) {
-      throw res;
-    }
-
-    return res.result as InfraTSVBResponse;
+    );
+    const result = await getVisData(request);
+    return result as InfraTSVBResponse;
   }
 }
 

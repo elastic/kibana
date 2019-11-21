@@ -23,7 +23,6 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
-import 'ui/private';
 import '../../components/field_chooser/discover_field';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
@@ -47,7 +46,7 @@ describe('discoverField', function () {
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
     _.assign($rootScope, {
-      field: indexPattern.fields.byName.extension,
+      field: indexPattern.fields.getByName('extension'),
       addField: sinon.spy(() => $rootScope.field.display = true),
       removeField: sinon.spy(() => $rootScope.field.display = false),
       showDetails: sinon.spy(() => $rootScope.field.details = { exists: true }),

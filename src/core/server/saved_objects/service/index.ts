@@ -17,26 +17,44 @@
  * under the License.
  */
 
-import { ScopedSavedObjectsClientProvider } from './lib';
+import { Readable } from 'stream';
+import { SavedObjectsClientProvider } from './lib';
 import { SavedObjectsClient } from './saved_objects_client';
+import { SavedObjectsExportOptions } from '../export';
+import { SavedObjectsImportOptions, SavedObjectsImportResponse } from '../import';
+import { SavedObjectsSchema } from '../schema';
+import { SavedObjectsResolveImportErrorsOptions } from '../import/types';
 
 /**
- * @public
+ * @internal
+ * @deprecated
  */
-export interface SavedObjectsService<Request = any> {
+export interface SavedObjectsLegacyService<Request = any> {
   // ATTENTION: these types are incomplete
-  addScopedSavedObjectsClientWrapperFactory: ScopedSavedObjectsClientProvider<
+  addScopedSavedObjectsClientWrapperFactory: SavedObjectsClientProvider<
     Request
   >['addClientWrapperFactory'];
-  getScopedSavedObjectsClient: ScopedSavedObjectsClientProvider<Request>['getClient'];
+  setScopedSavedObjectsClientFactory: SavedObjectsClientProvider<Request>['setClientFactory'];
+  getScopedSavedObjectsClient: SavedObjectsClientProvider<Request>['getClient'];
   SavedObjectsClient: typeof SavedObjectsClient;
   types: string[];
+  schema: SavedObjectsSchema;
   getSavedObjectsRepository(...rest: any[]): any;
+  importExport: {
+    objectLimit: number;
+    importSavedObjects(options: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+    resolveImportErrors(
+      options: SavedObjectsResolveImportErrorsOptions
+    ): Promise<SavedObjectsImportResponse>;
+    getSortedObjectsForExport(options: SavedObjectsExportOptions): Promise<Readable>;
+  };
 }
 
 export {
   SavedObjectsRepository,
-  ScopedSavedObjectsClientProvider,
+  SavedObjectsClientProvider,
+  ISavedObjectsClientProvider,
+  SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
   SavedObjectsErrorHelpers,

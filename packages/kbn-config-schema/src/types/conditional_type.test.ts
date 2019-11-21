@@ -114,6 +114,72 @@ test('properly validates types according chosen schema', () => {
   ).toEqual('a');
 });
 
+test('properly validates when compares with Schema', () => {
+  const type = schema.conditional(
+    schema.contextRef('context_value_1'),
+    schema.number(),
+    schema.string({ minLength: 2 }),
+    schema.string({ minLength: 3 })
+  );
+
+  expect(() =>
+    type.validate('a', {
+      context_value_1: 0,
+    })
+  ).toThrowErrorMatchingSnapshot();
+
+  expect(
+    type.validate('ab', {
+      context_value_1: 0,
+    })
+  ).toEqual('ab');
+
+  expect(() =>
+    type.validate('ab', {
+      context_value_1: 'b',
+    })
+  ).toThrowErrorMatchingSnapshot();
+
+  expect(
+    type.validate('abc', {
+      context_value_1: 'b',
+    })
+  ).toEqual('abc');
+});
+
+test('properly validates when compares with "null" literal Schema', () => {
+  const type = schema.conditional(
+    schema.contextRef('context_value_1'),
+    schema.literal(null),
+    schema.string({ minLength: 2 }),
+    schema.string({ minLength: 3 })
+  );
+
+  expect(() =>
+    type.validate('a', {
+      context_value_1: null,
+    })
+  ).toThrowErrorMatchingSnapshot();
+
+  expect(
+    type.validate('ab', {
+      context_value_1: null,
+    })
+  ).toEqual('ab');
+
+  expect(() =>
+    type.validate('ab', {
+      context_value_1: 'b',
+    })
+  ).toThrowErrorMatchingSnapshot();
+
+  expect(
+    type.validate('abc', {
+      context_value_1: 'b',
+    })
+  ).toEqual('abc');
+});
+
 test('properly handles schemas with incompatible types', () => {
   const type = schema.conditional(
     schema.contextRef('context_value_1'),

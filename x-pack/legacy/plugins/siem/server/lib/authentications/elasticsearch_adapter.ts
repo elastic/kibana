@@ -6,72 +6,142 @@
 
 import { getOr } from 'lodash/fp';
 
-import { AuthenticationsData, AuthenticationsEdges } from '../../graphql/types';
-import { mergeFieldsWithHit } from '../../utils/build_query';
-import { FrameworkAdapter, FrameworkRequest, RequestOptions } from '../framework';
+import {
+  AuthenticationsData,
+  AuthenticationsEdges,
+  AuthenticationsOverTimeData,
+  MatrixOverTimeHistogramData,
+} from '../../graphql/types';
+import { mergeFieldsWithHit, inspectStringifyObject } from '../../utils/build_query';
+import {
+  FrameworkAdapter,
+  FrameworkRequest,
+  RequestOptionsPaginated,
+  RequestBasicOptions,
+} from '../framework';
 import { TermAggregation } from '../types';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 
 import { auditdFieldsMap, buildQuery } from './query.dsl';
+import { buildAuthenticationsOverTimeQuery } from './query.authentications_over_time.dsl';
 import {
   AuthenticationBucket,
   AuthenticationData,
   AuthenticationHit,
   AuthenticationsAdapter,
+  AuthenticationsActionGroupData,
 } from './types';
+
+const getAuthenticationsOverTimeByAuthenticationResult = (
+  data: AuthenticationsActionGroupData[]
+): MatrixOverTimeHistogramData[] => {
+  let result: MatrixOverTimeHistogramData[] = [];
+  data.forEach(({ key: group, events }) => {
+    const eventsData = getOr([], 'buckets', events).map(
+      ({ key, doc_count }: { key: number; doc_count: number }) => ({
+        x: key,
+        y: doc_count,
+        g: group,
+      })
+    );
+    result = [...result, ...eventsData];
+  });
+
+  return result;
+};
 
 export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
 
   public async getAuthentications(
     request: FrameworkRequest,
-    options: RequestOptions
+    options: RequestOptionsPaginated
   ): Promise<AuthenticationsData> {
+    const dsl = buildQuery(options);
+    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
+    }
     const response = await this.framework.callWithRequest<AuthenticationData, TermAggregation>(
       request,
       'search',
-      buildQuery(options)
+      dsl
     );
-    const { cursor, limit } = options.pagination;
+    const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
     const totalCount = getOr(0, 'aggregations.user_count.value', response);
+    const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
     const hits: AuthenticationHit[] = getOr(
       [],
       'aggregations.group_by_users.buckets',
       response
     ).map((bucket: AuthenticationBucket) => ({
-      _id: bucket.authentication.hits.hits[0]._id,
+      _id: getOr(
+        `${bucket.key}+${bucket.doc_count}`,
+        'failures.lastFailure.hits.hits[0].id',
+        bucket
+      ),
       _source: {
         lastSuccess: getOr(null, 'successes.lastSuccess.hits.hits[0]._source', bucket),
         lastFailure: getOr(null, 'failures.lastFailure.hits.hits[0]._source', bucket),
       },
       user: bucket.key,
-      cursor: bucket.key.user_uid,
       failures: bucket.failures.doc_count,
       successes: bucket.successes.doc_count,
     }));
-
     const authenticationEdges: AuthenticationsEdges[] = hits.map(hit =>
       formatAuthenticationData(options.fields, hit, auditdFieldsMap)
     );
 
-    const hasNextPage = authenticationEdges.length === limit + 1;
-    const beginning = cursor != null ? parseInt(cursor!, 10) : 0;
-    const edges = authenticationEdges.splice(beginning, limit - beginning);
+    const edges = authenticationEdges.splice(cursorStart, querySize - cursorStart);
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
+    const showMorePagesIndicator = totalCount > fakeTotalCount;
+
     return {
+      inspect,
       edges,
       totalCount,
       pageInfo: {
-        hasNextPage,
-        endCursor: {
-          value: String(limit),
-          tiebreaker: null,
-        },
+        activePage: activePage ? activePage : 0,
+        fakeTotalCount,
+        showMorePagesIndicator,
       },
+    };
+  }
+
+  public async getAuthenticationsOverTime(
+    request: FrameworkRequest,
+    options: RequestBasicOptions
+  ): Promise<AuthenticationsOverTimeData> {
+    const dsl = buildAuthenticationsOverTimeQuery(options);
+    const response = await this.framework.callWithRequest<AuthenticationHit, TermAggregation>(
+      request,
+      'search',
+      dsl
+    );
+    const totalCount = getOr(0, 'hits.total.value', response);
+    const authenticationsOverTimeBucket = getOr(
+      [],
+      'aggregations.eventActionGroup.buckets',
+      response
+    );
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
+    return {
+      inspect,
+      authenticationsOverTime: getAuthenticationsOverTimeByAuthenticationResult(
+        authenticationsOverTimeBucket
+      ),
+      totalCount,
     };
   }
 }
 
 export const formatAuthenticationData = (
-  fields: ReadonlyArray<string>,
+  fields: readonly string[],
   hit: AuthenticationHit,
   fieldMap: Readonly<Record<string, string>>
 ): AuthenticationsEdges =>

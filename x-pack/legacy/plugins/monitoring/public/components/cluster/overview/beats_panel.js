@@ -17,18 +17,35 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiHorizontalRule,
+  EuiFlexGroup,
 } from '@elastic/eui';
-import { ClusterItemContainer } from './helpers';
+import { ClusterItemContainer, DisabledIfNoDataAndInSetupModeLink } from './helpers';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { SetupModeTooltip } from '../../setup_mode/tooltip';
+import { BEATS_SYSTEM_ID } from '../../../../common/constants';
 
 export function BeatsPanel(props) {
-  if (!get(props, 'beats.total', 0) > 0) {
+  const { setupMode } = props;
+  const beatsTotal = get(props, 'beats.total') || 0;
+  // Do not show if we are not in setup mode
+  if (beatsTotal === 0 && !setupMode.enabled) {
     return null;
   }
 
   const goToBeats = () => props.changeUrl('beats');
   const goToInstances = () => props.changeUrl('beats/beats');
+
+  const setupModeData = get(setupMode.data, 'beats');
+  const setupModeTooltip = setupMode && setupMode.enabled
+    ? (
+      <SetupModeTooltip
+        setupModeData={setupModeData}
+        productName={BEATS_SYSTEM_ID}
+        badgeClickAction={goToInstances}
+      />
+    )
+    : null;
 
   const beatTypes = props.beats.types.map((beat, index) => {
     return [
@@ -60,7 +77,9 @@ export function BeatsPanel(props) {
           <EuiPanel paddingSize="m">
             <EuiTitle size="s">
               <h3>
-                <EuiLink
+                <DisabledIfNoDataAndInSetupModeLink
+                  setupModeEnabled={setupMode.enabled}
+                  setupModeData={setupModeData}
                   onClick={goToBeats}
                   aria-label={i18n.translate('xpack.monitoring.cluster.overview.beatsPanel.overviewLinkAriaLabel', {
                     defaultMessage: 'Beats Overview'
@@ -71,7 +90,7 @@ export function BeatsPanel(props) {
                     id="xpack.monitoring.cluster.overview.beatsPanel.overviewLinkLabel"
                     defaultMessage="Overview"
                   />
-                </EuiLink>
+                </DisabledIfNoDataAndInSetupModeLink>
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
@@ -99,27 +118,32 @@ export function BeatsPanel(props) {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
-            <EuiTitle size="s">
-              <h3>
-                <EuiLink
-                  onClick={goToInstances}
-                  aria-label={i18n.translate(
-                    'xpack.monitoring.cluster.overview.beatsPanel.instancesTotalLinkAriaLabel',
-                    {
-                      defaultMessage: 'Beats Instances: {beatsTotal}',
-                      values: { beatsTotal: props.beats.total }
-                    }
-                  )}
-                  data-test-subj="beatsListing"
-                >
-                  <FormattedMessage
-                    id="xpack.monitoring.cluster.overview.beatsPanel.beatsTotalLinkLabel"
-                    defaultMessage="Beats: {beatsTotal}"
-                    values={{ beatsTotal: (<span data-test-subj="beatsTotal">{props.beats.total}</span>) }}
-                  />
-                </EuiLink>
-              </h3>
-            </EuiTitle>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="s">
+                  <h3>
+                    <EuiLink
+                      onClick={goToInstances}
+                      aria-label={i18n.translate(
+                        'xpack.monitoring.cluster.overview.beatsPanel.instancesTotalLinkAriaLabel',
+                        {
+                          defaultMessage: 'Beats Instances: {beatsTotal}',
+                          values: { beatsTotal }
+                        }
+                      )}
+                      data-test-subj="beatsListing"
+                    >
+                      <FormattedMessage
+                        id="xpack.monitoring.cluster.overview.beatsPanel.beatsTotalLinkLabel"
+                        defaultMessage="Beats: {beatsTotal}"
+                        values={{ beatsTotal: (<span data-test-subj="beatsTotal">{beatsTotal}</span>) }}
+                      />
+                    </EuiLink>
+                  </h3>
+                </EuiTitle>
+              </EuiFlexItem>
+              {setupModeTooltip}
+            </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
               {beatTypes}

@@ -16,7 +16,5 @@ export interface AuthToolkit
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [authenticated](./kibana-plugin-server.authtoolkit.authenticated.md) | <code>(data?: Partial&lt;AuthResultData&gt;) =&gt; AuthResult</code> | Authentication is successful with given credentials, allow request to pass through |
-|  [redirected](./kibana-plugin-server.authtoolkit.redirected.md) | <code>(url: string) =&gt; AuthResult</code> | Authentication requires to interrupt request handling and redirect to a configured url |
-|  [rejected](./kibana-plugin-server.authtoolkit.rejected.md) | <code>(error: Error, options?: {</code><br/><code>        statusCode?: number;</code><br/><code>    }) =&gt; AuthResult</code> | Authentication is unsuccessful, fail the request with specified error. |
+|  [authenticated](./kibana-plugin-server.authtoolkit.authenticated.md) | <code>(data?: AuthResultParams) =&gt; AuthResult</code> | Authentication is successful with given credentials, allow request to pass through |
 

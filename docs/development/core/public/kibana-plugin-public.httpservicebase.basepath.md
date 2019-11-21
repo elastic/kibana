@@ -4,12 +4,10 @@
 
 ## HttpServiceBase.basePath property
 
+APIs for manipulating the basePath on URL segments.
+
 <b>Signature:</b>
 
 ```typescript
-basePath: {
-        get: () => string;
-        prepend: (url: string) => string;
-        remove: (url: string) => string;
-    };
+basePath: IBasePath;
 ```

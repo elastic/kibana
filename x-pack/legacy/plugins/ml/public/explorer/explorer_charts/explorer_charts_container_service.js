@@ -266,46 +266,46 @@ export function explorerChartsContainerServiceFactory(callback) {
       const eventDistribution = response[3];
       const chartType = getChartType(seriesConfigs[seriesIndex]);
 
-      // Return dataset in format used by the chart.
-      // i.e. array of Objects with keys date (timestamp), value,
-      //    plus anomalyScore for points with anomaly markers.
-      if (metricData === undefined || _.keys(metricData).length === 0) {
-        return [];
-      }
-
       // Sort records in ascending time order matching up with chart data
       records.sort((recordA, recordB) => {
         return recordA[ML_TIME_FIELD_NAME] - recordB[ML_TIME_FIELD_NAME];
       });
 
-      let chartData;
-      if (eventDistribution.length > 0 && records.length > 0) {
-        const filterField = records[0].by_field_value || records[0].over_field_value;
-        chartData = eventDistribution.filter(d => (d.entity !== filterField));
-        _.map(metricData, (value, time) => {
-          // The filtering for rare/event_distribution charts needs to be handled
-          // differently because of how the source data is structured.
-          // For rare chart values we are only interested wether a value is either `0` or not,
-          // `0` acts like a flag in the chart whether to display the dot/marker.
-          // All other charts (single metric, population) are metric based and with
-          // those a value of `null` acts as the flag to hide a data point.
-          if (
-            (chartType === CHART_TYPE.EVENT_DISTRIBUTION && value > 0) ||
-            (chartType !== CHART_TYPE.EVENT_DISTRIBUTION && value !== null)
-          ) {
-            chartData.push({
-              date: +time,
-              value: value,
-              entity: filterField
-            });
-          }
-        });
-      } else {
-        chartData = _.map(metricData, (value, time) => ({
-          date: +time,
-          value: value
-        }));
+
+      // Return dataset in format used by the chart.
+      // i.e. array of Objects with keys date (timestamp), value,
+      //    plus anomalyScore for points with anomaly markers.
+      let chartData = [];
+      if (metricData !== undefined) {
+        if (eventDistribution.length > 0 && records.length > 0) {
+          const filterField = records[0].by_field_value || records[0].over_field_value;
+          chartData = eventDistribution.filter(d => (d.entity !== filterField));
+          _.map(metricData, (value, time) => {
+            // The filtering for rare/event_distribution charts needs to be handled
+            // differently because of how the source data is structured.
+            // For rare chart values we are only interested wether a value is either `0` or not,
+            // `0` acts like a flag in the chart whether to display the dot/marker.
+            // All other charts (single metric, population) are metric based and with
+            // those a value of `null` acts as the flag to hide a data point.
+            if (
+              (chartType === CHART_TYPE.EVENT_DISTRIBUTION && value > 0) ||
+              (chartType !== CHART_TYPE.EVENT_DISTRIBUTION && value !== null)
+            ) {
+              chartData.push({
+                date: +time,
+                value: value,
+                entity: filterField
+              });
+            }
+          });
+        } else {
+          chartData = _.map(metricData, (value, time) => ({
+            date: +time,
+            value: value
+          }));
+        }
       }
+
 
       // Iterate through the anomaly records, adding anomalyScore properties
       // to the chartData entries for anomalous buckets.

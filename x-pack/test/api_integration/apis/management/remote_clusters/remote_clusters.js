@@ -5,10 +5,14 @@
  */
 
 import expect from '@kbn/expect';
-import { API_BASE_PATH, NODE_SEED } from './constants';
+import { API_BASE_PATH } from './constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
+  const retry = getService('retry');
+
+  const esTransportPort = process.env.TEST_ES_TRANSPORT_PORT ? process.env.TEST_ES_TRANSPORT_PORT.split('-')[0] : '9300';
+  const NODE_SEED = `localhost:${esTransportPort}`;
 
   describe('Remote Clusters', function () {
     this.tags(['skipCloud']);
@@ -98,24 +102,25 @@ export default function ({ getService }) {
       it('should return an array of remote clusters', async () => {
         const uri = `${API_BASE_PATH}`;
 
-        const { body } = await supertest
-          .get(uri)
-          .expect(200);
+        await retry.try(async () => {
+          // The API to connect a remote clusters is not synchronous so we need to retry several times to avoid any flakiness.
+          const { body } = await supertest.get(uri);
 
-        expect(body).to.eql([
-          {
-            name: 'test_cluster',
-            seeds: [
-              NODE_SEED
-            ],
-            isConnected: true,
-            connectedNodesCount: 1,
-            maxConnectionsPerCluster: 3,
-            initialConnectTimeout: '30s',
-            skipUnavailable: false,
-            isConfiguredByNode: false,
-          }
-        ]);
+          expect(body).to.eql([
+            {
+              name: 'test_cluster',
+              seeds: [
+                NODE_SEED
+              ],
+              isConnected: true,
+              connectedNodesCount: 1,
+              maxConnectionsPerCluster: 3,
+              initialConnectTimeout: '30s',
+              skipUnavailable: false,
+              isConfiguredByNode: false,
+            }
+          ]);
+        });
       });
     });
 

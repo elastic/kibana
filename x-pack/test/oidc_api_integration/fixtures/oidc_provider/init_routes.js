@@ -5,8 +5,7 @@
  */
 
 import Joi from 'joi';
-import jwt from 'jsonwebtoken';
-import fs from 'fs';
+import { createTokens } from '../oidc_tools';
 
 export function initRoutes(server) {
   let nonce = '';
@@ -44,24 +43,16 @@ export function initRoutes(server) {
       },
     },
     async handler(request) {
+      const userId = request.payload.code.substring(4);
+      const { accessToken, idToken } = createTokens(userId, nonce);
       try {
-        const signingKey = fs.readFileSync(require.resolve('../../../oidc_api_integration/fixtures/jwks_private.pem'));
         const userId = request.payload.code.substring(4);
-        const iat = Math.floor(Date.now() / 1000);
-        const idToken = JSON.stringify({
-          iss: 'https://test-op.elastic.co',
-          sub: `user${userId}`,
-          aud: '0oa8sqpov3TxMWJOt356',
-          nonce,
-          exp: iat + 3600,
-          iat,
-        });
         return {
-          access_token: `valid-access-token${userId}`,
+          access_token: accessToken,
           token_type: 'Bearer',
           refresh_token: `valid-refresh-token${userId}`,
           expires_in: 3600,
-          id_token: jwt.sign(idToken, signingKey, { algorithm: 'RS256' }),
+          id_token: idToken,
         };
       } catch (err) {
         return err;

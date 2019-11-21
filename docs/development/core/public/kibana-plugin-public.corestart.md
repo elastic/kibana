@@ -16,11 +16,14 @@ export interface CoreStart
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [application](./kibana-plugin-public.corestart.application.md) | <code>Pick&lt;ApplicationStart, 'capabilities'&gt;</code> | [ApplicationStart](./kibana-plugin-public.applicationstart.md) |
+|  [application](./kibana-plugin-public.corestart.application.md) | <code>ApplicationStart</code> | [ApplicationStart](./kibana-plugin-public.applicationstart.md) |
 |  [chrome](./kibana-plugin-public.corestart.chrome.md) | <code>ChromeStart</code> | [ChromeStart](./kibana-plugin-public.chromestart.md) |
+|  [docLinks](./kibana-plugin-public.corestart.doclinks.md) | <code>DocLinksStart</code> | [DocLinksStart](./kibana-plugin-public.doclinksstart.md) |
 |  [http](./kibana-plugin-public.corestart.http.md) | <code>HttpStart</code> | [HttpStart](./kibana-plugin-public.httpstart.md) |
 |  [i18n](./kibana-plugin-public.corestart.i18n.md) | <code>I18nStart</code> | [I18nStart](./kibana-plugin-public.i18nstart.md) |
+|  [injectedMetadata](./kibana-plugin-public.corestart.injectedmetadata.md) | <code>{</code><br/><code>        getInjectedVar: (name: string, defaultValue?: any) =&gt; unknown;</code><br/><code>    }</code> | exposed temporarily until https://github.com/elastic/kibana/issues/41990 done use \*only\* to retrieve config values. There is no way to set injected values in the new platform. Use the legacy platform API instead. |
 |  [notifications](./kibana-plugin-public.corestart.notifications.md) | <code>NotificationsStart</code> | [NotificationsStart](./kibana-plugin-public.notificationsstart.md) |
 |  [overlays](./kibana-plugin-public.corestart.overlays.md) | <code>OverlayStart</code> | [OverlayStart](./kibana-plugin-public.overlaystart.md) |
-|  [uiSettings](./kibana-plugin-public.corestart.uisettings.md) | <code>UiSettingsStart</code> | [UiSettingsStart](./kibana-plugin-public.uisettingsstart.md) |
+|  [savedObjects](./kibana-plugin-public.corestart.savedobjects.md) | <code>SavedObjectsStart</code> | [SavedObjectsStart](./kibana-plugin-public.savedobjectsstart.md) |
+|  [uiSettings](./kibana-plugin-public.corestart.uisettings.md) | <code>UiSettingsClientContract</code> | [UiSettingsClient](./kibana-plugin-public.uisettingsclient.md) |
 

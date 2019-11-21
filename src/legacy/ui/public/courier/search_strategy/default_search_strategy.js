@@ -19,97 +19,13 @@
 
 import { addSearchStrategy } from './search_strategy_registry';
 import { isDefaultTypeIndexPattern } from './is_default_type_index_pattern';
-import { SearchError } from './search_error';
-
-function getAllFetchParams(searchRequests, Promise) {
-  return Promise.map(searchRequests, (searchRequest) => {
-    return Promise.try(searchRequest.getFetchParams, void 0, searchRequest)
-      .then((fetchParams) => {
-        return (searchRequest.fetchParams = fetchParams);
-      })
-      .then(value => ({ resolved: value }))
-      .catch(error => ({ rejected: error }));
-  });
-}
-
-async function serializeAllFetchParams(fetchParams, searchRequests, serializeFetchParams) {
-  const searchRequestsWithFetchParams = [];
-  const failedSearchRequests = [];
-
-  // Gather the fetch param responses from all the successful requests.
-  fetchParams.forEach((result, index) => {
-    if (result.resolved) {
-      searchRequestsWithFetchParams.push(result.resolved);
-    } else {
-      const searchRequest = searchRequests[index];
-
-      searchRequest.handleFailure(result.rejected);
-      failedSearchRequests.push(searchRequest);
-    }
-  });
-
-  return {
-    serializedFetchParams: await serializeFetchParams(searchRequestsWithFetchParams),
-    failedSearchRequests,
-  };
-}
+import { getSearchParams, getMSearchParams, getPreference, getTimeout } from '../fetch/get_search_params';
 
 export const defaultSearchStrategy = {
   id: 'default',
 
-  search: async ({ searchRequests, es, Promise, serializeFetchParams, includeFrozen = false, maxConcurrentShardRequests = 0 }) => {
-    // Flatten the searchSource within each searchRequest to get the fetch params,
-    // e.g. body, filters, index pattern, query.
-    const allFetchParams = await getAllFetchParams(searchRequests, Promise);
-
-    // Serialize the fetch params into a format suitable for the body of an ES query.
-    const {
-      serializedFetchParams,
-      failedSearchRequests,
-    } = await serializeAllFetchParams(allFetchParams, searchRequests, serializeFetchParams);
-
-    if (serializedFetchParams.trim() === '') {
-      return {
-        failedSearchRequests,
-      };
-    }
-
-    const msearchParams = {
-      rest_total_hits_as_int: true,
-      // If we want to include frozen indexes we need to specify ignore_throttled: false
-      ignore_throttled: !includeFrozen,
-      body: serializedFetchParams,
-    };
-
-    if (maxConcurrentShardRequests !== 0) {
-      msearchParams.max_concurrent_shard_requests = maxConcurrentShardRequests;
-    }
-
-    const searching = es.msearch(msearchParams);
-
-    return {
-      // Munge data into shape expected by consumer.
-      searching: new Promise((resolve, reject) => {
-        // Unwrap the responses object returned by the ES client.
-        searching.then(({ responses }) => {
-          resolve(responses);
-        }).catch(error => {
-          // Format ES client error as a SearchError.
-          const { statusCode, displayName, message, path } = error;
-
-          const searchError = new SearchError({
-            status: statusCode,
-            title: displayName,
-            message,
-            path,
-          });
-
-          reject(searchError);
-        });
-      }),
-      abort: searching.abort,
-      failedSearchRequests,
-    };
+  search: params => {
+    return params.config.get('courier:batchSearches') ? msearch(params) : search(params);
   },
 
   isViable: (indexPattern) => {
@@ -120,5 +36,44 @@ export const defaultSearchStrategy = {
     return isDefaultTypeIndexPattern(indexPattern);
   },
 };
+
+function msearch({ searchRequests, es, config, esShardTimeout }) {
+  const inlineRequests = searchRequests.map(({ index, body, search_type: searchType }) => {
+    const inlineHeader = {
+      index: index.title || index,
+      search_type: searchType,
+      ignore_unavailable: true,
+      preference: getPreference(config)
+    };
+    const inlineBody = {
+      ...body,
+      timeout: getTimeout(esShardTimeout)
+    };
+    return `${JSON.stringify(inlineHeader)}\n${JSON.stringify(inlineBody)}`;
+  });
+
+  const searching = es.msearch({
+    ...getMSearchParams(config),
+    body: `${inlineRequests.join('\n')}\n`,
+  });
+  return {
+    searching: searching.then(({ responses }) => responses),
+    abort: searching.abort
+  };
+}
+
+function search({ searchRequests, es, config, esShardTimeout }) {
+  const abortController = new AbortController();
+  const searchParams = getSearchParams(config, esShardTimeout);
+  const promises = searchRequests.map(({ index, body }) => {
+    const searching = es.search({ index: index.title || index, body, ...searchParams });
+    abortController.signal.addEventListener('abort', searching.abort);
+    return searching.catch(({ response }) => JSON.parse(response));
+  });
+  return {
+    searching: Promise.all(promises),
+    abort: () => abortController.abort(),
+  };
+}
 
 addSearchStrategy(defaultSearchStrategy);

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
-
 /**
  * Helper string to add as a tag in every logging call
  */
@@ -133,16 +131,6 @@ export const LOGSTASH = {
   }
 };
 
-export const DEFAULT_NO_DATA_MESSAGE = i18n.translate('xpack.monitoring.defaultNoDataMessage', {
-  defaultMessage: 'There are no records that match your query. Try changing the time range selection.' });
-export const DEFAULT_NO_DATA_MESSAGE_WITH_FILTER = i18n.translate('xpack.monitoring.defaultNoDataWithFilterMessage', {
-  defaultMessage:
-  'There are no records that match your query with the filter [{filter}]. Try changing the filter or the time range selection.',
-  values: { filter: '{{FILTER}}' } });
-
-export const TABLE_ACTION_UPDATE_FILTER = 'UPDATE_FILTER';
-export const TABLE_ACTION_RESET_PAGING = 'RESET_PAGING';
-
 export const DEBOUNCE_SLOW_MS = 17; // roughly how long it takes to render a frame at 60fps
 export const DEBOUNCE_FAST_MS = 10; // roughly how long it takes to render a frame at 100fps
 
@@ -166,8 +154,71 @@ export const INDEX_PATTERN_FILEBEAT = 'filebeat-*';
 export const METRICBEAT_INDEX_NAME_UNIQUE_TOKEN = '-mb-';
 
 // We use this for metricbeat migration to identify specific products that we do not have constants for
-export const ELASTICSEARCH_CUSTOM_ID = 'elasticsearch';
+export const ELASTICSEARCH_SYSTEM_ID = 'elasticsearch';
+
 /**
  * The id of the infra source owned by the monitoring plugin.
  */
 export const INFRA_SOURCE_ID = 'internal-stack-monitoring';
+
+/*
+* These constants represent code paths within `getClustersFromRequest`
+* that an api call wants to invoke. This is meant as an optimization to
+* avoid unnecessary ES queries (looking at you logstash) when the data
+* is not used. In the long term, it'd be nice to have separate api calls
+* instead of this path logic.
+*/
+export const CODE_PATH_ALL = 'all';
+export const CODE_PATH_ALERTS = 'alerts';
+export const CODE_PATH_KIBANA = 'kibana';
+export const CODE_PATH_ELASTICSEARCH = 'elasticsearch';
+export const CODE_PATH_ML = 'ml';
+export const CODE_PATH_BEATS = 'beats';
+export const CODE_PATH_LOGSTASH = 'logstash';
+export const CODE_PATH_APM = 'apm';
+export const CODE_PATH_LICENSE = 'license';
+export const CODE_PATH_LOGS = 'logs';
+
+/**
+ * The header sent by telemetry service when hitting Elasticsearch to identify query source
+ * @type {string}
+ */
+export const TELEMETRY_QUERY_SOURCE = 'TELEMETRY';
+
+/**
+ * The name of the Kibana System ID used to publish and look up Kibana stats through the Monitoring system.
+ * @type {string}
+ */
+export const KIBANA_SYSTEM_ID = 'kibana';
+
+/**
+ * The name of the Beats System ID used to publish and look up Beats stats through the Monitoring system.
+ * @type {string}
+ */
+export const BEATS_SYSTEM_ID = 'beats';
+
+/**
+ * The name of the Apm System ID used to publish and look up Apm stats through the Monitoring system.
+ * @type {string}
+ */
+export const APM_SYSTEM_ID = 'apm';
+
+/**
+ * The name of the Kibana System ID used to look up Logstash stats through the Monitoring system.
+ * @type {string}
+ */
+export const LOGSTASH_SYSTEM_ID = 'logstash';
+
+/**
+ * The name of the Kibana System ID used to look up Reporting stats through the Monitoring system.
+ * @type {string}
+ */
+export const REPORTING_SYSTEM_ID = 'reporting';
+
+/**
+ * The amount of time, in milliseconds, to wait between collecting kibana stats from es.
+ *
+ * Currently 24 hours kept in sync with reporting interval.
+ * @type {Number}
+ */
+export const TELEMETRY_COLLECTION_INTERVAL = 86400000;

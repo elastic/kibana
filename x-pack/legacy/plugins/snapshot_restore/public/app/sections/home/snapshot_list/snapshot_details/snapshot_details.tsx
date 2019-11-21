@@ -5,6 +5,7 @@
  */
 
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,26 +18,32 @@ import {
   EuiTab,
   EuiTabs,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import React, { Fragment, useState, useEffect } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
 
-import { SectionError, SectionLoading } from '../../../../components';
+import { SnapshotDetails as ISnapshotDetails } from '../../../../../../common/types';
+import {
+  SectionError,
+  SectionLoading,
+  SnapshotDeleteProvider,
+  Error,
+} from '../../../../components';
 import { useAppDependencies } from '../../../../index';
 import {
   UIM_SNAPSHOT_DETAIL_PANEL_SUMMARY_TAB,
   UIM_SNAPSHOT_DETAIL_PANEL_FAILED_INDICES_TAB,
+  SNAPSHOT_STATE,
 } from '../../../../constants';
-import { loadSnapshot } from '../../../../services/http';
-import { linkToRepository } from '../../../../services/navigation';
+import { useLoadSnapshot } from '../../../../services/http';
+import { linkToRepository, linkToRestoreSnapshot } from '../../../../services/navigation';
 import { uiMetricService } from '../../../../services/ui_metric';
 import { TabSummary, TabFailures } from './tabs';
 
-interface Props extends RouteComponentProps {
+interface Props {
   repositoryName: string;
   snapshotId: string;
   onClose: () => void;
+  onSnapshotDeleted: (snapshotsDeleted: Array<{ snapshot: string; repository: string }>) => void;
 }
 
 const TAB_SUMMARY = 'summary';
@@ -47,34 +54,32 @@ const panelTypeToUiMetricMap: { [key: string]: string } = {
   [TAB_FAILURES]: UIM_SNAPSHOT_DETAIL_PANEL_FAILED_INDICES_TAB,
 };
 
-const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
+export const SnapshotDetails: React.FunctionComponent<Props> = ({
   repositoryName,
   snapshotId,
   onClose,
+  onSnapshotDeleted,
 }) => {
   const {
     core: { i18n },
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
   const { trackUiMetric } = uiMetricService;
-  const { error, data: snapshotDetails } = loadSnapshot(repositoryName, snapshotId);
+  const { error, data: snapshotDetails } = useLoadSnapshot(repositoryName, snapshotId);
 
   const [activeTab, setActiveTab] = useState<string>(TAB_SUMMARY);
 
   // Reset tab when we look at a different snapshot.
-  useEffect(
-    () => {
-      setActiveTab(TAB_SUMMARY);
-    },
-    [repositoryName, snapshotId]
-  );
+  useEffect(() => {
+    setActiveTab(TAB_SUMMARY);
+  }, [repositoryName, snapshotId]);
 
   let tabs;
 
   let content;
 
   if (snapshotDetails) {
-    const { indexFailures, state: snapshotState } = snapshotDetails;
+    const { indexFailures, state: snapshotState } = snapshotDetails as ISnapshotDetails;
     const tabOptions = [
       {
         id: TAB_SUMMARY,
@@ -124,7 +129,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
       content = <TabFailures snapshotState={snapshotState} indexFailures={indexFailures} />;
     }
   } else if (error) {
-    const notFound = error.status === 404;
+    const notFound = (error as any).status === 404;
     const errorObject = notFound
       ? {
           data: {
@@ -147,7 +152,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
             defaultMessage="Error loading repository"
           />
         }
-        error={errorObject}
+        error={errorObject as Error}
       />
     );
   } else {
@@ -178,6 +183,65 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
+
+        {snapshotDetails ? (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem grow={false}>
+                <SnapshotDeleteProvider>
+                  {deleteSnapshotPrompt => {
+                    return (
+                      <EuiButtonEmpty
+                        color="danger"
+                        data-test-subj="srSnapshotDetailsDeleteActionButton"
+                        onClick={() =>
+                          deleteSnapshotPrompt(
+                            [{ repository: repositoryName, snapshot: snapshotId }],
+                            onSnapshotDeleted
+                          )
+                        }
+                        isDisabled={snapshotDetails.isManagedRepository}
+                        title={
+                          snapshotDetails.isManagedRepository
+                            ? i18n.translate(
+                                'xpack.snapshotRestore.snapshotDetails.deleteManagedRepositorySnapshotButtonTitle',
+                                {
+                                  defaultMessage:
+                                    'You cannot delete a snapshot stored in a managed repository.',
+                                }
+                              )
+                            : null
+                        }
+                      >
+                        <FormattedMessage
+                          id="xpack.snapshotRestore.snapshotDetails.deleteButtonLabel"
+                          defaultMessage="Delete"
+                        />
+                      </EuiButtonEmpty>
+                    );
+                  }}
+                </SnapshotDeleteProvider>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  href={linkToRestoreSnapshot(repositoryName, snapshotId)}
+                  fill
+                  color="primary"
+                  isDisabled={
+                    snapshotDetails.state !== SNAPSHOT_STATE.SUCCESS &&
+                    snapshotDetails.state !== SNAPSHOT_STATE.PARTIAL
+                  }
+                >
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.snapshotDetails.restoreButtonLabel"
+                    defaultMessage="Restore"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     );
   };
@@ -188,40 +252,29 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
       data-test-subj="snapshotDetail"
       aria-labelledby="srSnapshotDetailsFlyoutTitle"
       size="m"
-      maxWidth={400}
+      maxWidth={550}
     >
       <EuiFlyoutHeader>
-        <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem>
-            <EuiTitle size="m">
-              <h2 id="srSnapshotDetailsFlyoutTitle" data-test-subj="detailTitle">
-                {snapshotId}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-
-          <EuiFlexItem>
-            <EuiText size="s">
-              <p>
-                <EuiLink href={linkToRepository(repositoryName)} data-test-subj="repositoryLink">
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.snapshotDetails.repositoryTitle"
-                    defaultMessage="'{repositoryName}' repository"
-                    values={{ repositoryName }}
-                  />
-                </EuiLink>
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
+        <EuiText>
+          <h2 id="srSnapshotDetailsFlyoutTitle" data-test-subj="detailTitle">
+            {snapshotId}
+          </h2>
+          <p>
+            <small>
+              <EuiLink href={linkToRepository(repositoryName)} data-test-subj="repositoryLink">
+                <FormattedMessage
+                  id="xpack.snapshotRestore.snapshotDetails.repositoryTitle"
+                  defaultMessage="'{repositoryName}' repository"
+                  values={{ repositoryName }}
+                />
+              </EuiLink>
+            </small>
+          </p>
+        </EuiText>
         {tabs}
       </EuiFlyoutHeader>
-
       <EuiFlyoutBody data-test-subj="content">{content}</EuiFlyoutBody>
       <EuiFlyoutFooter>{renderFooter()}</EuiFlyoutFooter>
     </EuiFlyout>
   );
 };
-
-export const SnapshotDetails = withRouter(SnapshotDetailsUi);

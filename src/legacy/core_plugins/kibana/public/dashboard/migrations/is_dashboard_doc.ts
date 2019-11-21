@@ -17,17 +17,17 @@
  * under the License.
  */
 
-import { DashboardDoc } from './types';
+import { DashboardDoc730ToLatest } from './types';
 import { isDoc } from '../../../migrations/is_doc';
 
 export function isDashboardDoc(
-  doc: { [key: string]: unknown } | DashboardDoc
-): doc is DashboardDoc {
+  doc: { [key: string]: unknown } | DashboardDoc730ToLatest
+): doc is DashboardDoc730ToLatest {
   if (!isDoc(doc)) {
     return false;
   }
 
-  if (typeof (doc as DashboardDoc).attributes.panelsJSON !== 'string') {
+  if (typeof (doc as DashboardDoc730ToLatest).attributes.panelsJSON !== 'string') {
     return false;
   }
 

@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore untyped Elastic library
-import { getType } from '@kbn/interpreter/common';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Datatable } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { Datatable, ExpressionFunction, getType } from '../../../types';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   name: string;

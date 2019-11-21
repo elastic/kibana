@@ -17,7 +17,7 @@ export const CATEGORIES = i18n.translate('xpack.siem.fieldBrowser.categoriesTitl
 export const CATEGORIES_COUNT = (totalCount: number) =>
   i18n.translate('xpack.siem.fieldBrowser.categoriesCountTitle', {
     values: { totalCount },
-    defaultMessage: '{totalCount} {totalCount, plural, =1 {Category} other {Categories}}',
+    defaultMessage: '{totalCount} {totalCount, plural, =1 {category} other {categories}}',
   });
 
 export const COPY_TO_CLIPBOARD = i18n.translate('xpack.siem.fieldBrowser.copyToClipboard', {
@@ -37,13 +37,13 @@ export const FIELD = i18n.translate('xpack.siem.fieldBrowser.fieldLabel', {
 });
 
 export const FIELDS = i18n.translate('xpack.siem.fieldBrowser.fieldsTitle', {
-  defaultMessage: 'Fields',
+  defaultMessage: 'Columns',
 });
 
 export const FIELDS_COUNT = (totalCount: number) =>
   i18n.translate('xpack.siem.fieldBrowser.fieldsCountTitle', {
     values: { totalCount },
-    defaultMessage: '{totalCount} {totalCount, plural, =1 {Field} other {Fields}}',
+    defaultMessage: '{totalCount} {totalCount, plural, =1 {field} other {fields}}',
   });
 
 export const FILTER_PLACEHOLDER = i18n.translate('xpack.siem.fieldBrowser.filterPlaceholder', {
@@ -64,6 +64,10 @@ export const NO_FIELDS_MATCH_INPUT = (searchInput: string) =>
 
 export const RESET_FIELDS = i18n.translate('xpack.siem.fieldBrowser.resetFieldsLink', {
   defaultMessage: 'Reset Fields',
+});
+
+export const TOGGLE_COLUMN_TOOLTIP = i18n.translate('xpack.siem.fieldBrowser.toggleColumnTooltip', {
+  defaultMessage: 'Toggle column',
 });
 
 export const VIEW_CATEGORY = (categoryId: string) =>

@@ -52,10 +52,10 @@ export const createNoteResolvers = (
 } => ({
   Query: {
     async getNote(root, args, { req }) {
-      return await libs.note.getNote(req, args.id);
+      return libs.note.getNote(req, args.id);
     },
     async getAllNotes(root, args, { req }) {
-      return await libs.note.getAllNotes(
+      return libs.note.getAllNotes(
         req,
         args.pageInfo || null,
         args.search || null,
@@ -63,10 +63,10 @@ export const createNoteResolvers = (
       );
     },
     async getNotesByEventId(root, args, { req }) {
-      return await libs.note.getNotesByEventId(req, args.eventId);
+      return libs.note.getNotesByEventId(req, args.eventId);
     },
     async getNotesByTimelineId(root, args, { req }) {
-      return await libs.note.getNotesByTimelineId(req, args.timelineId);
+      return libs.note.getNotesByTimelineId(req, args.timelineId);
     },
   },
   Mutation: {
@@ -81,7 +81,7 @@ export const createNoteResolvers = (
       return true;
     },
     async persistNote(root, args, { req }) {
-      return await libs.note.persistNote(req, args.noteId || null, args.version || null, {
+      return libs.note.persistNote(req, args.noteId || null, args.version || null, {
         ...args.note,
         timelineId: args.note.timelineId || null,
       });

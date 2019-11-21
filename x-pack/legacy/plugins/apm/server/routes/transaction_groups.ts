@@ -4,114 +4,194 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import Joi from 'joi';
-import { InternalCoreSetup } from 'src/core/server';
-import { withDefaultValidators } from '../lib/helpers/input_validation';
+import * as t from 'io-ts';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getTransactionCharts } from '../lib/transactions/charts';
 import { getTransactionDistribution } from '../lib/transactions/distribution';
-import { getTopTransactions } from '../lib/transactions/get_top_transactions';
+import { getTransactionBreakdown } from '../lib/transactions/breakdown';
+import { getTransactionGroupList } from '../lib/transaction_groups';
+import { createRoute } from './create_route';
+import { uiFiltersRt, rangeRt } from './default_api_types';
+import { getTransactionAvgDurationByBrowser } from '../lib/transactions/avg_duration_by_browser';
+import { getTransactionAvgDurationByCountry } from '../lib/transactions/avg_duration_by_country';
 
-const defaultErrorHandler = (err: Error) => {
-  // eslint-disable-next-line
-  console.error(err.stack);
-  throw Boom.boomify(err, { statusCode: 400 });
-};
+export const transactionGroupsRoute = createRoute(() => ({
+  path: '/api/apm/services/{serviceName}/transaction_groups',
+  params: {
+    path: t.type({
+      serviceName: t.string
+    }),
+    query: t.intersection([
+      t.type({
+        transactionType: t.string
+      }),
+      uiFiltersRt,
+      rangeRt
+    ])
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
+    const { transactionType } = context.params.query;
 
-export function initTransactionGroupsApi(core: InternalCoreSetup) {
-  const { server } = core.http;
-
-  server.route({
-    method: 'GET',
-    path: '/api/apm/services/{serviceName}/transaction_groups',
-    options: {
-      validate: {
-        query: withDefaultValidators({
-          transactionType: Joi.string()
-        })
-      },
-      tags: ['access:apm']
-    },
-    handler: req => {
-      const { serviceName } = req.params;
-      const { transactionType } = req.query as { transactionType?: string };
-      const setup = setupRequest(req);
-
-      return getTopTransactions({
+    return getTransactionGroupList(
+      {
+        type: 'top_transactions',
         serviceName,
-        transactionType,
-        setup
-      }).catch(defaultErrorHandler);
-    }
-  });
-
-  server.route({
-    method: 'GET',
-    path: `/api/apm/services/{serviceName}/transaction_groups/charts`,
-    options: {
-      validate: {
-        query: withDefaultValidators({
-          transactionType: Joi.string(),
-          transactionName: Joi.string()
-        })
+        transactionType
       },
-      tags: ['access:apm']
-    },
-    handler: req => {
-      const setup = setupRequest(req);
-      const { serviceName } = req.params;
-      const { transactionType, transactionName } = req.query as {
-        transactionType?: string;
-        transactionName?: string;
-      };
+      setup
+    );
+  }
+}));
 
-      return getTransactionCharts({
-        serviceName,
-        transactionType,
-        transactionName,
-        setup
-      }).catch(defaultErrorHandler);
-    }
-  });
+export const transactionGroupsChartsRoute = createRoute(() => ({
+  path: '/api/apm/services/{serviceName}/transaction_groups/charts',
+  params: {
+    path: t.type({
+      serviceName: t.string
+    }),
+    query: t.intersection([
+      t.partial({
+        transactionType: t.string,
+        transactionName: t.string
+      }),
+      uiFiltersRt,
+      rangeRt
+    ])
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
+    const { transactionType, transactionName } = context.params.query;
 
-  server.route({
-    method: 'GET',
-    path: `/api/apm/services/{serviceName}/transaction_groups/distribution`,
-    options: {
-      validate: {
-        query: withDefaultValidators({
-          transactionType: Joi.string(),
-          transactionName: Joi.string(),
-          transactionId: Joi.string().default(''),
-          traceId: Joi.string().default('')
-        })
-      },
-      tags: ['access:apm']
-    },
-    handler: req => {
-      const setup = setupRequest(req);
-      const { serviceName } = req.params;
-      const {
-        transactionType,
-        transactionName,
-        transactionId,
-        traceId
-      } = req.query as {
-        transactionType: string;
-        transactionName: string;
-        transactionId: string;
-        traceId: string;
-      };
+    return getTransactionCharts({
+      serviceName,
+      transactionType,
+      transactionName,
+      setup
+    });
+  }
+}));
 
-      return getTransactionDistribution({
-        serviceName,
-        transactionType,
-        transactionName,
-        transactionId,
-        traceId,
-        setup
-      }).catch(defaultErrorHandler);
-    }
-  });
-}
+export const transactionGroupsDistributionRoute = createRoute(() => ({
+  path: '/api/apm/services/{serviceName}/transaction_groups/distribution',
+  params: {
+    path: t.type({
+      serviceName: t.string
+    }),
+    query: t.intersection([
+      t.type({
+        transactionType: t.string,
+        transactionName: t.string
+      }),
+      t.partial({
+        transactionId: t.string,
+        traceId: t.string
+      }),
+      uiFiltersRt,
+      rangeRt
+    ])
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
+    const {
+      transactionType,
+      transactionName,
+      transactionId = '',
+      traceId = ''
+    } = context.params.query;
+
+    return getTransactionDistribution({
+      serviceName,
+      transactionType,
+      transactionName,
+      transactionId,
+      traceId,
+      setup
+    });
+  }
+}));
+
+export const transactionGroupsBreakdownRoute = createRoute(() => ({
+  path: '/api/apm/services/{serviceName}/transaction_groups/breakdown',
+  params: {
+    path: t.type({
+      serviceName: t.string
+    }),
+    query: t.intersection([
+      t.type({
+        transactionType: t.string
+      }),
+      t.partial({
+        transactionName: t.string
+      }),
+      uiFiltersRt,
+      rangeRt
+    ])
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
+    const { transactionName, transactionType } = context.params.query;
+
+    return getTransactionBreakdown({
+      serviceName,
+      transactionName,
+      transactionType,
+      setup
+    });
+  }
+}));
+
+export const transactionGroupsAvgDurationByBrowser = createRoute(() => ({
+  path: `/api/apm/services/{serviceName}/transaction_groups/avg_duration_by_browser`,
+  params: {
+    path: t.type({
+      serviceName: t.string
+    }),
+    query: t.intersection([
+      t.partial({
+        transactionType: t.string,
+        transactionName: t.string
+      }),
+      uiFiltersRt,
+      rangeRt
+    ])
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
+
+    return getTransactionAvgDurationByBrowser({
+      serviceName,
+      setup
+    });
+  }
+}));
+
+export const transactionGroupsAvgDurationByCountry = createRoute(() => ({
+  path: `/api/apm/services/{serviceName}/transaction_groups/avg_duration_by_country`,
+  params: {
+    path: t.type({
+      serviceName: t.string
+    }),
+    query: t.intersection([
+      uiFiltersRt,
+      rangeRt,
+      t.partial({ transactionName: t.string })
+    ])
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
+    const { transactionName } = context.params.query;
+
+    return getTransactionAvgDurationByCountry({
+      serviceName,
+      transactionName,
+      setup
+    });
+  }
+}));

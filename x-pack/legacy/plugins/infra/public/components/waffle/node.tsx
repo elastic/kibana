@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiToolTip } from '@elastic/eui';
 import moment from 'moment';
 import { darken, readableColor } from 'polished';
 import React from 'react';
 
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+
+import { ConditionalToolTip } from './conditional_tooltip';
 import euiStyled from '../../../../../common/eui_styled_components';
 import { InfraTimerangeInput, InfraNodeType } from '../../graphql/types';
 import { InfraWaffleMapBounds, InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
@@ -30,92 +31,82 @@ interface Props {
   bounds: InfraWaffleMapBounds;
   nodeType: InfraNodeType;
   timeRange: InfraTimerangeInput;
-  intl: InjectedIntl;
 }
 
-export const Node = injectI18n(
-  class extends React.PureComponent<Props, State> {
-    public readonly state: State = initialState;
-    public render() {
-      const {
-        nodeType,
-        node,
-        options,
-        squareSize,
-        bounds,
-        formatter,
-        timeRange,
-        intl,
-      } = this.props;
-      const { isPopoverOpen } = this.state;
-      const { metric } = node;
-      const valueMode = squareSize > 70;
-      const ellipsisMode = squareSize > 30;
-      const rawValue = (metric && metric.value) || 0;
-      const color = colorFromValue(options.legend, rawValue, bounds);
-      const value = formatter(rawValue);
-      const newTimerange = {
-        ...timeRange,
-        from: moment(timeRange.to)
-          .subtract(1, 'hour')
-          .valueOf(),
-      };
-      const nodeAriaLabel = intl.formatMessage(
-        {
-          id: 'xpack.infra.node.ariaLabel',
-          defaultMessage: '{nodeName}, click to open menu',
-        },
-        { nodeName: node.name }
-      );
-      return (
-        <NodeContextMenu
-          node={node}
-          nodeType={nodeType}
-          isPopoverOpen={isPopoverOpen}
-          closePopover={this.closePopover}
-          options={options}
-          timeRange={newTimerange}
-          popoverPosition="upCenter"
+export const Node = class extends React.PureComponent<Props, State> {
+  public readonly state: State = initialState;
+  public render() {
+    const { nodeType, node, options, squareSize, bounds, formatter, timeRange } = this.props;
+    const { isPopoverOpen } = this.state;
+    const { metric } = node;
+    const valueMode = squareSize > 70;
+    const ellipsisMode = squareSize > 30;
+    const rawValue = (metric && metric.value) || 0;
+    const color = colorFromValue(options.legend, rawValue, bounds);
+    const value = formatter(rawValue);
+    const newTimerange = {
+      ...timeRange,
+      from: moment(timeRange.to)
+        .subtract(1, 'hour')
+        .valueOf(),
+    };
+    const nodeAriaLabel = i18n.translate('xpack.infra.node.ariaLabel', {
+      defaultMessage: '{nodeName}, click to open menu',
+      values: { nodeName: node.name },
+    });
+    return (
+      <NodeContextMenu
+        node={node}
+        nodeType={nodeType}
+        isPopoverOpen={isPopoverOpen}
+        closePopover={this.closePopover}
+        options={options}
+        timeRange={newTimerange}
+        popoverPosition="downCenter"
+      >
+        <ConditionalToolTip
+          delay="regular"
+          hidden={isPopoverOpen}
+          position="top"
+          content={`${node.name} | ${value}`}
         >
-          <EuiToolTip position="top" content={`${node.name} | ${value}`}>
-            <NodeContainer
-              data-test-subj="nodeContainer"
-              style={{ width: squareSize || 0, height: squareSize || 0 }}
-              onClick={this.togglePopover}
-            >
-              <SquareOuter color={color}>
-                <SquareInner color={color}>
-                  {valueMode ? (
+          <NodeContainer
+            data-test-subj="nodeContainer"
+            style={{ width: squareSize || 0, height: squareSize || 0 }}
+            onClick={this.togglePopover}
+          >
+            <SquareOuter color={color}>
+              <SquareInner color={color}>
+                {valueMode ? (
+                  <ValueInner aria-label={nodeAriaLabel}>
+                    <Label color={color}>{node.name}</Label>
+                    <Value color={color}>{value}</Value>
+                  </ValueInner>
+                ) : (
+                  ellipsisMode && (
                     <ValueInner aria-label={nodeAriaLabel}>
-                      <Label color={color}>{node.name}</Label>
-                      <Value color={color}>{value}</Value>
+                      <Label color={color}>...</Label>
                     </ValueInner>
-                  ) : (
-                    ellipsisMode && (
-                      <ValueInner aria-label={nodeAriaLabel}>
-                        <Label color={color}>...</Label>
-                      </ValueInner>
-                    )
-                  )}
-                </SquareInner>
-              </SquareOuter>
-            </NodeContainer>
-          </EuiToolTip>
-        </NodeContextMenu>
-      );
-    }
-
-    private togglePopover = () => {
-      this.setState(prevState => ({ isPopoverOpen: !prevState.isPopoverOpen }));
-    };
-
-    private closePopover = () => {
-      if (this.state.isPopoverOpen) {
-        this.setState({ isPopoverOpen: false });
-      }
-    };
+                  )
+                )}
+              </SquareInner>
+            </SquareOuter>
+          </NodeContainer>
+        </ConditionalToolTip>
+      </NodeContextMenu>
+    );
   }
-);
+
+  private togglePopover = () => {
+    this.setState(prevState => ({ isPopoverOpen: !prevState.isPopoverOpen }));
+  };
+
+  private closePopover = () => {
+    if (this.state.isPopoverOpen) {
+      this.setState({ isPopoverOpen: false });
+    }
+  };
+};
 
 const NodeContainer = euiStyled.div`
   position: relative;
@@ -125,7 +116,7 @@ interface ColorProps {
   color: string;
 }
 
-const SquareOuter = euiStyled<ColorProps, 'div'>('div')`
+const SquareOuter = euiStyled.div<ColorProps>`
   position: absolute;
   top: 4px;
   left: 4px;
@@ -136,7 +127,7 @@ const SquareOuter = euiStyled<ColorProps, 'div'>('div')`
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
 `;
 
-const SquareInner = euiStyled<ColorProps, 'div'>('div')`
+const SquareInner = euiStyled.div<ColorProps>`
   cursor: pointer;
   position: absolute;
   top: 0;
@@ -170,7 +161,7 @@ const ValueInner = euiStyled.button`
   }
 `;
 
-const SquareTextContent = euiStyled<ColorProps, 'div'>('div')`
+const SquareTextContent = euiStyled.div<ColorProps>`
   text-align: center;
   width: 100%;
   overflow: hidden;

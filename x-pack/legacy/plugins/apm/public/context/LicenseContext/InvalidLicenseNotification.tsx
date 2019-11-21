@@ -6,11 +6,14 @@
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import chrome from 'ui/chrome';
-
-const MANAGE_LICENSE_URL = `${chrome.getBasePath()}/app/kibana#/management/elasticsearch/license_management`;
+import { useKibanaCore } from '../../../../observability/public';
 
 export function InvalidLicenseNotification() {
+  const core = useKibanaCore();
+  const manageLicenseURL = core.http.basePath.prepend(
+    '/app/kibana#/management/elasticsearch/license_management'
+  );
+
   return (
     <EuiEmptyPrompt
       iconType="alert"
@@ -31,7 +34,7 @@ export function InvalidLicenseNotification() {
         </p>
       }
       actions={[
-        <EuiButton href={MANAGE_LICENSE_URL}>
+        <EuiButton href={manageLicenseURL}>
           {i18n.translate('xpack.apm.invalidLicense.licenseManagementLink', {
             defaultMessage: 'Manage your license'
           })}

@@ -24,13 +24,14 @@
  * serves as a central blueprint for what migrations will end up doing.
  */
 
+import { Logger } from 'src/core/server/logging';
 import { SavedObjectsSerializer } from '../../serialization';
 import { MappingProperties } from '../../mappings';
 import { buildActiveMappings } from './build_active_mappings';
 import { CallCluster } from './call_cluster';
 import { VersionedTransformer } from './document_migrator';
 import { fetchInfo, FullIndexInfo } from './elastic_index';
-import { LogFn, Logger, MigrationLogger } from './migration_logger';
+import { SavedObjectsMigrationLogger, MigrationLogger } from './migration_logger';
 
 export interface MigrationOpts {
   batchSize: number;
@@ -38,10 +39,11 @@ export interface MigrationOpts {
   scrollDuration: string;
   callCluster: CallCluster;
   index: string;
-  log: LogFn;
+  log: Logger;
   mappingProperties: MappingProperties;
   documentMigrator: VersionedTransformer;
   serializer: SavedObjectsSerializer;
+  convertToAliasScript?: string;
 
   /**
    * If specified, templates matching the specified pattern will be removed
@@ -56,12 +58,13 @@ export interface Context {
   source: FullIndexInfo;
   dest: FullIndexInfo;
   documentMigrator: VersionedTransformer;
-  log: Logger;
+  log: SavedObjectsMigrationLogger;
   batchSize: number;
   pollInterval: number;
   scrollDuration: string;
   serializer: SavedObjectsSerializer;
   obsoleteIndexTemplatePattern?: string;
+  convertToAliasScript?: string;
 }
 
 /**
@@ -69,8 +72,7 @@ export interface Context {
  * and various info needed to migrate the source index.
  */
 export async function migrationContext(opts: MigrationOpts): Promise<Context> {
-  const { callCluster } = opts;
-  const log = new MigrationLogger(opts.log);
+  const { log, callCluster } = opts;
   const alias = opts.index;
   const source = createSourceContext(await fetchInfo(callCluster, alias), alias);
   const dest = createDestContext(source, alias, opts.mappingProperties);
@@ -80,13 +82,14 @@ export async function migrationContext(opts: MigrationOpts): Promise<Context> {
     alias,
     source,
     dest,
-    log,
+    log: new MigrationLogger(log),
     batchSize: opts.batchSize,
     documentMigrator: opts.documentMigrator,
     pollInterval: opts.pollInterval,
     scrollDuration: opts.scrollDuration,
     serializer: opts.serializer,
     obsoleteIndexTemplatePattern: opts.obsoleteIndexTemplatePattern,
+    convertToAliasScript: opts.convertToAliasScript,
   };
 }
 

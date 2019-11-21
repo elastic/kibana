@@ -8,13 +8,7 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-import {
-  EuiErrorBoundary,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiErrorBoundary, EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
 
 import { serializeJob } from '../../../services';
 
@@ -24,22 +18,23 @@ import {
   JOB_DETAILS_TAB_TERMS,
   JOB_DETAILS_TAB_HISTOGRAM,
   JOB_DETAILS_TAB_METRICS,
-  JOB_DETAILS_TAB_JSON,
+  JOB_DETAILS_TAB_REQUEST,
   tabToHumanizedMap,
 } from '../../components';
+
 
 const JOB_DETAILS_TABS = [
   JOB_DETAILS_TAB_SUMMARY,
   JOB_DETAILS_TAB_TERMS,
   JOB_DETAILS_TAB_HISTOGRAM,
   JOB_DETAILS_TAB_METRICS,
-  JOB_DETAILS_TAB_JSON,
+  JOB_DETAILS_TAB_REQUEST,
 ];
 
 export class StepReviewUi extends Component {
   static propTypes = {
     job: PropTypes.object.isRequired,
-  }
+  };
 
   constructor(props) {
     super(props);
@@ -94,9 +89,7 @@ export class StepReviewUi extends Component {
 
     return (
       <Fragment>
-        <EuiTabs>
-          {renderedTabs}
-        </EuiTabs>
+        <EuiTabs>{renderedTabs}</EuiTabs>
         <EuiSpacer size="m" />
       </Fragment>
     );
@@ -106,27 +99,24 @@ export class StepReviewUi extends Component {
     const { job } = this.props;
     const { selectedTab } = this.state;
     const json = serializeJob(job);
+    const endpoint = `PUT _rollup/job/${job.id}`;
 
     return (
       <Fragment>
         <EuiTitle data-test-subj="rollupJobCreateReviewTitle">
-          <h3>
+          <h2>
             <FormattedMessage
               id="xpack.rollupJobs.create.stepReviewTitle"
               defaultMessage="Review details for '{jobId}'"
               values={{ jobId: job.id }}
             />
-          </h3>
+          </h2>
         </EuiTitle>
 
         {this.renderTabs()}
 
         <EuiErrorBoundary>
-          <JobDetails
-            job={job}
-            json={json}
-            tab={selectedTab}
-          />
+          <JobDetails job={job} json={json} endpoint={endpoint} tab={selectedTab} />
         </EuiErrorBoundary>
       </Fragment>
     );

@@ -4,23 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useContext, useMemo } from 'react';
 import { connect } from 'react-redux';
-import { createSelector } from 'reselect';
 
+import { StreamItem, LogEntryStreamItem } from '../../components/logging/log_text_stream/item';
 import { logEntriesActions, logEntriesSelectors, logPositionSelectors, State } from '../../store';
-import { LogEntry } from '../../utils/log_entry';
-import { asChildFunctionRenderer } from '../../utils/typed_react';
+import { LogEntry, LogEntryHighlight } from '../../utils/log_entry';
+import { PropsOfContainer, RendererFunction } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
+// deep inporting to avoid a circular import problem
+import { LogHighlightsState } from './log_highlights/log_highlights';
+import { UniqueTimeKey } from '../../../common/time';
 
 export const withStreamItems = connect(
   (state: State) => ({
+    isAutoReloading: logPositionSelectors.selectIsAutoReloading(state),
     isReloading: logEntriesSelectors.selectIsReloadingEntries(state),
     isLoadingMore: logEntriesSelectors.selectIsLoadingMoreEntries(state),
+    wasAutoReloadJustAborted: logPositionSelectors.selectAutoReloadJustAborted(state),
     hasMoreBeforeStart: logEntriesSelectors.selectHasMoreBeforeStart(state),
     hasMoreAfterEnd: logEntriesSelectors.selectHasMoreAfterEnd(state),
     lastLoadedTime: logEntriesSelectors.selectEntriesLastLoadedTime(state),
-    items: selectItems(state),
+    entries: logEntriesSelectors.selectEntries(state),
+    entriesStart: logEntriesSelectors.selectEntriesStart(state),
+    entriesEnd: logEntriesSelectors.selectEntriesEnd(state),
   }),
   bindPlainActionCreators({
     loadNewerEntries: logEntriesActions.loadNewerEntries,
@@ -29,30 +36,61 @@ export const withStreamItems = connect(
   })
 );
 
-export const WithStreamItems = asChildFunctionRenderer(withStreamItems, {
-  onInitialize: props => {
-    if (!props.isReloading && !props.isLoadingMore) {
-      props.reloadEntries();
-    }
-  },
-});
+type WithStreamItemsProps = PropsOfContainer<typeof withStreamItems>;
 
-const selectItems = createSelector(
-  logEntriesSelectors.selectEntries,
-  logEntriesSelectors.selectIsReloadingEntries,
-  logPositionSelectors.selectIsAutoReloading,
-  // searchResultsSelectors.selectSearchResultsById,
-  (logEntries, isReloading, isAutoReloading /* , searchResults */) =>
-    isReloading && !isAutoReloading
-      ? []
-      : logEntries.map(logEntry =>
-          createLogEntryStreamItem(logEntry /* , searchResults[logEntry.gid] || null */)
-        )
+export const WithStreamItems = withStreamItems(
+  ({
+    children,
+    initializeOnMount,
+    ...props
+  }: WithStreamItemsProps & {
+    children: RendererFunction<
+      WithStreamItemsProps & {
+        currentHighlightKey: UniqueTimeKey | null;
+        items: StreamItem[];
+      }
+    >;
+    initializeOnMount: boolean;
+  }) => {
+    const { currentHighlightKey, logEntryHighlightsById } = useContext(LogHighlightsState.Context);
+    const items = useMemo(
+      () =>
+        props.isReloading && !props.isAutoReloading && !props.wasAutoReloadJustAborted
+          ? []
+          : props.entries.map(logEntry =>
+              createLogEntryStreamItem(logEntry, logEntryHighlightsById[logEntry.gid] || [])
+            ),
+
+      [
+        props.isReloading,
+        props.isAutoReloading,
+        props.wasAutoReloadJustAborted,
+        props.entries,
+        logEntryHighlightsById,
+      ]
+    );
+
+    useEffect(() => {
+      if (initializeOnMount && !props.isReloading && !props.isLoadingMore) {
+        props.reloadEntries();
+      }
+    }, []);
+
+    return children({
+      ...props,
+      currentHighlightKey,
+      items,
+    });
+  }
 );
 
-const createLogEntryStreamItem = (logEntry: LogEntry) => ({
+const createLogEntryStreamItem = (
+  logEntry: LogEntry,
+  highlights: LogEntryHighlight[]
+): LogEntryStreamItem => ({
   kind: 'logEntry' as 'logEntry',
   logEntry,
+  highlights,
 });
 
 /**
@@ -67,12 +105,9 @@ const createLogEntryStreamItem = (logEntry: LogEntry) => ({
  */
 export const ReduxSourceIdBridge = withStreamItems(
   ({ setSourceId, sourceId }: { setSourceId: (sourceId: string) => void; sourceId: string }) => {
-    useEffect(
-      () => {
-        setSourceId(sourceId);
-      },
-      [setSourceId, sourceId]
-    );
+    useEffect(() => {
+      setSourceId(sourceId);
+    }, [setSourceId, sourceId]);
 
     return null;
   }

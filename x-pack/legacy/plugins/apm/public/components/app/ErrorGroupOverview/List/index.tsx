@@ -4,16 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiBasicTable, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { Location } from 'history';
-import moment from 'moment';
-import React, { Component } from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { ErrorGroupListAPIResponse } from '../../../../../server/lib/errors/get_error_groups';
-import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import {
   fontFamilyCode,
   fontSizes,
@@ -21,23 +18,12 @@ import {
   truncate,
   unit
 } from '../../../../style/variables';
-import { APMLink } from '../../../shared/Links/APMLink';
-import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
-import { history } from '../../../../utils/history';
+import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { ManagedTable } from '../../../shared/ManagedTable';
+import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
+import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 
-function paginateItems({
-  items,
-  pageIndex,
-  pageSize
-}: {
-  items: any[];
-  pageIndex: number;
-  pageSize: number;
-}) {
-  return items.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
-}
-
-const GroupIdLink = styled(APMLink)`
+const GroupIdLink = styled(ErrorDetailLink)`
   font-family: ${fontFamilyCode};
 `;
 
@@ -45,7 +31,7 @@ const MessageAndCulpritCell = styled.div`
   ${truncate('100%')};
 `;
 
-const MessageLink = styled(APMLink)`
+const MessageLink = styled(ErrorDetailLink)`
   font-family: ${fontFamilyCode};
   font-size: ${fontSizes.large};
   ${truncate('100%')};
@@ -56,57 +42,21 @@ const Culprit = styled.div`
 `;
 
 interface Props {
-  location: Location;
-  urlParams: IUrlParams;
   items: ErrorGroupListAPIResponse;
 }
 
-interface ITableChange {
-  page: { index?: number; size?: number };
-  sort: {
-    field?: string;
-    direction?: string;
-  };
-}
+const ErrorGroupList: React.FC<Props> = props => {
+  const { items } = props;
+  const {
+    urlParams: { serviceName }
+  } = useUrlParams();
 
-interface State {
-  page: { index?: number; size?: number };
-}
+  if (!serviceName) {
+    throw new Error('Service name is required');
+  }
 
-export class ErrorGroupList extends Component<Props, State> {
-  public state = {
-    page: {
-      index: 0,
-      size: 25
-    }
-  };
-
-  public onTableChange = ({ page = {}, sort = {} }: ITableChange) => {
-    this.setState({ page });
-
-    const { location } = this.props;
-
-    history.push({
-      ...location,
-      search: fromQuery({
-        ...toQuery(location.search),
-        sortField: sort.field,
-        sortDirection: sort.direction
-      })
-    });
-  };
-
-  public render() {
-    const { items } = this.props;
-    const { serviceName, sortDirection, sortField } = this.props.urlParams;
-
-    const paginatedItems = paginateItems({
-      items,
-      pageIndex: this.state.page.index,
-      pageSize: this.state.page.size
-    });
-
-    const columns = [
+  const columns = useMemo(
+    () => [
       {
         name: i18n.translate('xpack.apm.errorsTable.groupIdColumnLabel', {
           defaultMessage: 'Group ID'
@@ -116,7 +66,7 @@ export class ErrorGroupList extends Component<Props, State> {
         width: px(unit * 6),
         render: (groupId: string) => {
           return (
-            <GroupIdLink path={`/${serviceName}/errors/${groupId}`}>
+            <GroupIdLink serviceName={serviceName} errorGroupId={groupId}>
               {groupId.slice(0, 5) || NOT_AVAILABLE_LABEL}
             </GroupIdLink>
           );
@@ -139,7 +89,10 @@ export class ErrorGroupList extends Component<Props, State> {
                 id="error-message-tooltip"
                 content={message || NOT_AVAILABLE_LABEL}
               >
-                <MessageLink path={`/${serviceName}/errors/${item.groupId}`}>
+                <MessageLink
+                  serviceName={serviceName}
+                  errorGroupId={item.groupId}
+                >
                   {message || NOT_AVAILABLE_LABEL}
                 </MessageLink>
               </EuiToolTip>
@@ -189,30 +142,29 @@ export class ErrorGroupList extends Component<Props, State> {
         ),
         align: 'right',
         render: (value?: number) =>
-          value ? moment(value).fromNow() : NOT_AVAILABLE_LABEL
+          value ? (
+            <TimestampTooltip time={value} timeUnit="minutes" />
+          ) : (
+            NOT_AVAILABLE_LABEL
+          )
       }
-    ];
+    ],
+    [serviceName]
+  );
 
-    return (
-      <EuiBasicTable
-        noItemsMessage={i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
-          defaultMessage: 'No errors were found'
-        })}
-        items={paginatedItems}
-        columns={columns}
-        pagination={{
-          pageIndex: this.state.page.index,
-          pageSize: this.state.page.size,
-          totalItemCount: this.props.items.length
-        }}
-        sorting={{
-          sort: {
-            field: sortField || 'latestOccurrenceAt',
-            direction: sortDirection || 'desc'
-          }
-        }}
-        onChange={this.onTableChange}
-      />
-    );
-  }
-}
+  return (
+    <ManagedTable
+      noItemsMessage={i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
+        defaultMessage: 'No errors were found'
+      })}
+      items={items}
+      columns={columns}
+      initialPageSize={25}
+      initialSortField="latestOccurrenceAt"
+      initialSortDirection="desc"
+      sortItems={false}
+    />
+  );
+};
+
+export { ErrorGroupList };

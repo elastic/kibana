@@ -8,7 +8,7 @@ import { AuthenticationsData } from '../../../../graphql/types';
 
 export const mockData: { Authentications: AuthenticationsData } = {
   Authentications: {
-    totalCount: 4,
+    totalCount: 54,
     edges: [
       {
         node: {
@@ -74,10 +74,9 @@ export const mockData: { Authentications: AuthenticationsData } = {
       },
     ],
     pageInfo: {
-      endCursor: {
-        value: 'aa7ca589f1b8220002f2fc61c64cfbf1',
-      },
-      hasNextPage: true,
+      activePage: 1,
+      fakeTotalCount: 50,
+      showMorePagesIndicator: true,
     },
   },
 };

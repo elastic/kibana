@@ -7,6 +7,7 @@
 import { get, getOr, has, head, set } from 'lodash/fp';
 
 import { FirstLastSeenHost, HostItem, HostsData, HostsEdges } from '../../graphql/types';
+import { inspectStringifyObject } from '../../utils/build_query';
 import { hostFieldsMap } from '../ecs_fields';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
@@ -25,6 +26,7 @@ import {
   HostsRequestOptions,
   HostValue,
 } from './types';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 
 export class ElasticsearchHostsAdapter implements HostsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
@@ -33,62 +35,88 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
     request: FrameworkRequest,
     options: HostsRequestOptions
   ): Promise<HostsData> {
+    const dsl = buildHostsQuery(options);
+    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
+    }
     const response = await this.framework.callWithRequest<HostEsData, TermAggregation>(
       request,
       'search',
-      buildHostsQuery(options)
+      dsl
     );
-    const { cursor, limit } = options.pagination;
+    const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
     const totalCount = getOr(0, 'aggregations.host_count.value', response);
     const buckets: HostAggEsItem[] = getOr([], 'aggregations.host_data.buckets', response);
     const hostsEdges = buckets.map(bucket => formatHostEdgesData(options.fields, bucket));
-    const hasNextPage = hostsEdges.length === limit + 1;
-    const beginning = cursor != null ? parseInt(cursor, 10) : 0;
-    const edges = hostsEdges.splice(beginning, limit - beginning);
+    const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
+    const edges = hostsEdges.splice(cursorStart, querySize - cursorStart);
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
+    const showMorePagesIndicator = totalCount > fakeTotalCount;
 
-    return { edges, totalCount, pageInfo: { hasNextPage, endCursor: { value: String(limit) } } };
+    return {
+      inspect,
+      edges,
+      totalCount,
+      pageInfo: {
+        activePage: activePage ? activePage : 0,
+        fakeTotalCount,
+        showMorePagesIndicator,
+      },
+    };
   }
 
   public async getHostOverview(
     request: FrameworkRequest,
     options: HostOverviewRequestOptions
   ): Promise<HostItem> {
+    const dsl = buildHostOverviewQuery(options);
     const response = await this.framework.callWithRequest<HostAggEsData, TermAggregation>(
       request,
       'search',
-      buildHostOverviewQuery(options)
+      dsl
     );
     const aggregations: HostAggEsItem = get('aggregations', response) || {};
-    return { _id: options.hostName, ...formatHostItem(options.fields, aggregations) };
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
+
+    return { inspect, _id: options.hostName, ...formatHostItem(options.fields, aggregations) };
   }
 
   public async getHostFirstLastSeen(
     request: FrameworkRequest,
     options: HostLastFirstSeenRequestOptions
   ): Promise<FirstLastSeenHost> {
+    const dsl = buildLastFirstSeenHostQuery(options);
     const response = await this.framework.callWithRequest<HostAggEsData, TermAggregation>(
       request,
       'search',
-      buildLastFirstSeenHostQuery(options)
+      dsl
     );
     const aggregations: HostAggEsItem = get('aggregations', response) || {};
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
+
     return {
+      inspect,
       firstSeen: get('firstSeen.value_as_string', aggregations),
       lastSeen: get('lastSeen.value_as_string', aggregations),
     };
   }
 }
 
-export const formatHostEdgesData = (
-  fields: ReadonlyArray<string>,
-  bucket: HostAggEsItem
-): HostsEdges =>
+export const formatHostEdgesData = (fields: readonly string[], bucket: HostAggEsItem): HostsEdges =>
   fields.reduce<HostsEdges>(
     (flattenedFields, fieldName) => {
       const hostId = get('key', bucket);
       flattenedFields.node._id = hostId || null;
       flattenedFields.cursor.value = hostId || '';
-
       const fieldValue = getHostFieldValue(fieldName, bucket);
       if (fieldValue != null) {
         return set(`node.${fieldName}`, fieldValue, flattenedFields);
@@ -104,7 +132,7 @@ export const formatHostEdgesData = (
     }
   );
 
-const formatHostItem = (fields: ReadonlyArray<string>, bucket: HostAggEsItem): HostItem =>
+const formatHostItem = (fields: readonly string[], bucket: HostAggEsItem): HostItem =>
   fields.reduce<HostItem>((flattenedFields, fieldName) => {
     const fieldValue = getHostFieldValue(fieldName, bucket);
     if (fieldValue != null) {
@@ -135,6 +163,15 @@ const getHostFieldValue = (fieldName: string, bucket: HostAggEsItem): string | s
   } else if (has(aggField, bucket)) {
     const valueObj: HostValue = get(aggField, bucket);
     return valueObj.value_as_string;
+  } else if (['host.name', 'host.os.name', 'host.os.version'].includes(fieldName)) {
+    switch (fieldName) {
+      case 'host.name':
+        return get('key', bucket) || null;
+      case 'host.os.name':
+        return get('os.hits.hits[0]._source.host.os.name', bucket) || null;
+      case 'host.os.version':
+        return get('os.hits.hits[0]._source.host.os.version', bucket) || null;
+    }
   }
   return null;
 };

@@ -4,28 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { EuiButtonProps } from '@elastic/eui';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import * as React from 'react';
+import { ThemeProvider } from 'styled-components';
 
 import { TitleRow } from '.';
 
 describe('TitleRow', () => {
+  const theme = () => ({ eui: euiDarkVars, darkMode: true });
   const title = 'All Timelines / Open Timelines';
 
   test('it renders the title', () => {
     const wrapper = mountWithIntl(
-      <TitleRow
-        onAddTimelinesToFavorites={jest.fn()}
-        onDeleteSelected={jest.fn()}
-        selectedTimelinesCount={0}
-        title={title}
-      />
+      <ThemeProvider theme={theme}>
+        <TitleRow
+          onAddTimelinesToFavorites={jest.fn()}
+          onDeleteSelected={jest.fn()}
+          selectedTimelinesCount={0}
+          title={title}
+        />
+      </ThemeProvider>
     );
 
     expect(
       wrapper
-        .find('[data-test-subj="title"]')
+        .find('[data-test-subj="header-section-title"]')
         .first()
         .text()
     ).toEqual(title);
@@ -34,12 +39,14 @@ describe('TitleRow', () => {
   describe('Favorite Selected button', () => {
     test('it renders the Favorite Selected button when onAddTimelinesToFavorites is provided', () => {
       const wrapper = mountWithIntl(
-        <TitleRow
-          onAddTimelinesToFavorites={jest.fn()}
-          onDeleteSelected={jest.fn()}
-          selectedTimelinesCount={0}
-          title={title}
-        />
+        <ThemeProvider theme={theme}>
+          <TitleRow
+            onAddTimelinesToFavorites={jest.fn()}
+            onDeleteSelected={jest.fn()}
+            selectedTimelinesCount={0}
+            title={title}
+          />
+        </ThemeProvider>
       );
 
       expect(
@@ -52,7 +59,9 @@ describe('TitleRow', () => {
 
     test('it does NOT render the Favorite Selected button when onAddTimelinesToFavorites is NOT provided', () => {
       const wrapper = mountWithIntl(
-        <TitleRow onDeleteSelected={jest.fn()} selectedTimelinesCount={0} title={title} />
+        <ThemeProvider theme={theme}>
+          <TitleRow onDeleteSelected={jest.fn()} selectedTimelinesCount={0} title={title} />
+        </ThemeProvider>
       );
 
       expect(
@@ -65,12 +74,14 @@ describe('TitleRow', () => {
 
     test('it disables the Favorite Selected button when the selectedTimelinesCount is 0', () => {
       const wrapper = mountWithIntl(
-        <TitleRow
-          onAddTimelinesToFavorites={jest.fn()}
-          onDeleteSelected={jest.fn()}
-          selectedTimelinesCount={0}
-          title={title}
-        />
+        <ThemeProvider theme={theme}>
+          <TitleRow
+            onAddTimelinesToFavorites={jest.fn()}
+            onDeleteSelected={jest.fn()}
+            selectedTimelinesCount={0}
+            title={title}
+          />
+        </ThemeProvider>
       );
 
       const props = wrapper
@@ -83,12 +94,14 @@ describe('TitleRow', () => {
 
     test('it enables the Favorite Selected button when the selectedTimelinesCount is greater than 0', () => {
       const wrapper = mountWithIntl(
-        <TitleRow
-          onAddTimelinesToFavorites={jest.fn()}
-          onDeleteSelected={jest.fn()}
-          selectedTimelinesCount={3}
-          title={title}
-        />
+        <ThemeProvider theme={theme}>
+          <TitleRow
+            onAddTimelinesToFavorites={jest.fn()}
+            onDeleteSelected={jest.fn()}
+            selectedTimelinesCount={3}
+            title={title}
+          />
+        </ThemeProvider>
       );
 
       const props = wrapper
@@ -103,12 +116,14 @@ describe('TitleRow', () => {
       const onAddTimelinesToFavorites = jest.fn();
 
       const wrapper = mountWithIntl(
-        <TitleRow
-          onAddTimelinesToFavorites={onAddTimelinesToFavorites}
-          onDeleteSelected={jest.fn()}
-          selectedTimelinesCount={3}
-          title={title}
-        />
+        <ThemeProvider theme={theme}>
+          <TitleRow
+            onAddTimelinesToFavorites={onAddTimelinesToFavorites}
+            onDeleteSelected={jest.fn()}
+            selectedTimelinesCount={3}
+            title={title}
+          />
+        </ThemeProvider>
       );
 
       wrapper
@@ -123,12 +138,14 @@ describe('TitleRow', () => {
   describe('Delete Selected button', () => {
     test('it renders the Delete Selected button when onDeleteSelected is provided', () => {
       const wrapper = mountWithIntl(
-        <TitleRow
-          onAddTimelinesToFavorites={jest.fn()}
-          onDeleteSelected={jest.fn()}
-          selectedTimelinesCount={0}
-          title={title}
-        />
+        <ThemeProvider theme={theme}>
+          <TitleRow
+            onAddTimelinesToFavorites={jest.fn()}
+            onDeleteSelected={jest.fn()}
+            selectedTimelinesCount={0}
+            title={title}
+          />
+        </ThemeProvider>
       );
 
       expect(
@@ -141,7 +158,13 @@ describe('TitleRow', () => {
 
     test('it does NOT render the Delete Selected button when onDeleteSelected is NOT provided', () => {
       const wrapper = mountWithIntl(
-        <TitleRow onAddTimelinesToFavorites={jest.fn()} selectedTimelinesCount={0} title={title} />
+        <ThemeProvider theme={theme}>
+          <TitleRow
+            onAddTimelinesToFavorites={jest.fn()}
+            selectedTimelinesCount={0}
+            title={title}
+          />
+        </ThemeProvider>
       );
 
       expect(
@@ -154,12 +177,14 @@ describe('TitleRow', () => {
 
     test('it disables the Delete Selected button when the selectedTimelinesCount is 0', () => {
       const wrapper = mountWithIntl(
-        <TitleRow
-          onAddTimelinesToFavorites={jest.fn()}
-          onDeleteSelected={jest.fn()}
-          selectedTimelinesCount={0}
-          title={title}
-        />
+        <ThemeProvider theme={theme}>
+          <TitleRow
+            onAddTimelinesToFavorites={jest.fn()}
+            onDeleteSelected={jest.fn()}
+            selectedTimelinesCount={0}
+            title={title}
+          />
+        </ThemeProvider>
       );
 
       const props = wrapper
@@ -172,12 +197,14 @@ describe('TitleRow', () => {
 
     test('it enables the Delete Selected button when the selectedTimelinesCount is greater than 0', () => {
       const wrapper = mountWithIntl(
-        <TitleRow
-          onAddTimelinesToFavorites={jest.fn()}
-          onDeleteSelected={jest.fn()}
-          selectedTimelinesCount={1}
-          title={title}
-        />
+        <ThemeProvider theme={theme}>
+          <TitleRow
+            onAddTimelinesToFavorites={jest.fn()}
+            onDeleteSelected={jest.fn()}
+            selectedTimelinesCount={1}
+            title={title}
+          />
+        </ThemeProvider>
       );
 
       const props = wrapper
@@ -192,12 +219,14 @@ describe('TitleRow', () => {
       const onDeleteSelected = jest.fn();
 
       const wrapper = mountWithIntl(
-        <TitleRow
-          onAddTimelinesToFavorites={jest.fn()}
-          onDeleteSelected={onDeleteSelected}
-          selectedTimelinesCount={1}
-          title={title}
-        />
+        <ThemeProvider theme={theme}>
+          <TitleRow
+            onAddTimelinesToFavorites={jest.fn()}
+            onDeleteSelected={onDeleteSelected}
+            selectedTimelinesCount={1}
+            title={title}
+          />
+        </ThemeProvider>
       );
 
       wrapper

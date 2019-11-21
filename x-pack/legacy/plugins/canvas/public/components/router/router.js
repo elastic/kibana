@@ -8,13 +8,11 @@ import React from 'react';
 import { isClassComponent } from 'recompose';
 import PropTypes from 'prop-types';
 import { routerProvider } from '../../lib/router_provider';
+import { getAppState } from '../../lib/app_state';
+import { getTimeInterval } from '../../lib/time_interval';
 import { CanvasLoading } from './canvas_loading';
 
 export class Router extends React.PureComponent {
-  static childContextTypes = {
-    router: PropTypes.object.isRequired,
-  };
-
   static propTypes = {
     showLoading: PropTypes.bool.isRequired,
     onLoad: PropTypes.func.isRequired,
@@ -22,6 +20,11 @@ export class Router extends React.PureComponent {
     routes: PropTypes.array.isRequired,
     loadingMessage: PropTypes.string,
     onRouteChange: PropTypes.func,
+    setFullscreen: PropTypes.func.isRequired,
+  };
+
+  static childContextTypes = {
+    router: PropTypes.object.isRequired,
   };
 
   state = {
@@ -57,10 +60,27 @@ export class Router extends React.PureComponent {
       // if this is the first load, execute the route
       if (firstLoad) {
         firstLoad = false;
+
+        // execute the route
         router
           .execute()
           .then(() => onLoad())
           .catch(err => onError(err));
+      }
+
+      const appState = getAppState();
+
+      if (appState.__fullscreen) {
+        this.props.setFullscreen(appState.__fullscreen);
+      }
+
+      if (appState.__refreshInterval) {
+        this.props.setRefreshInterval(getTimeInterval(appState.__refreshInterval));
+      }
+
+      if (!!appState.__autoplayInterval) {
+        this.props.enableAutoplay(true);
+        this.props.setAutoplayInterval(getTimeInterval(appState.__autoplayInterval));
       }
 
       // notify upstream handler of route change

@@ -7,7 +7,11 @@
 import { InfraFrameworkRequest } from '../framework';
 
 export interface FieldsAdapter {
-  getIndexFields(req: InfraFrameworkRequest, indices: string): Promise<IndexFieldDescriptor[]>;
+  getIndexFields(
+    req: InfraFrameworkRequest,
+    indices: string,
+    timefield: string
+  ): Promise<IndexFieldDescriptor[]>;
 }
 
 export interface IndexFieldDescriptor {
@@ -15,4 +19,5 @@ export interface IndexFieldDescriptor {
   type: string;
   searchable: boolean;
   aggregatable: boolean;
+  displayable: boolean;
 }

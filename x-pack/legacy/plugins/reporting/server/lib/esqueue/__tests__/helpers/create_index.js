@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { createIndex } from '../../helpers/create_index';
-import { ClientMock } from '../fixtures/elasticsearch';
+import { ClientMock } from '../fixtures/legacy_elasticsearch';
 import { constants } from '../../constants';
 
 describe('Create Index', function () {

@@ -26,6 +26,10 @@
     }
   }
 
+  .single-metric-request-callout {
+    margin: 0 $euiSize;
+  }
+
   .results-container {
     padding: $euiSize;
 
@@ -57,22 +61,6 @@
 
     button {
       margin-left: $euiSizeXS;
-    }
-  }
-
-  .show-model-controls {
-    float: right;
-    position: relative;
-    top: 18px;
-
-    div {
-      display: inline;
-      padding-left: $euiSize;
-    }
-
-    .kuiCheckBoxLabel {
-      display: inline-block;
-      font-size: $euiFontSizeXS;
     }
   }
 
@@ -347,5 +335,14 @@
     rect.brush-handle:hover {
       opacity: 1;
     }
+  }
+}
+
+/* Hides the progress bar's background so it doesn't look like it increases the thickness
+   of the horizontal bar below the tab menu elements in its inactive state. */
+.mlTimeSeriesExplorerProgress {
+  background-color: $euiColorEmptyShade;
+  &::-moz-progress-bar, &::-webkit-progress-bar {
+    background-color: $euiColorEmptyShade;
   }
 }

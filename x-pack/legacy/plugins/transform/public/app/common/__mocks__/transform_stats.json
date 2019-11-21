@@ -1,0 +1,130 @@
+{
+  "count" : 4,
+  "transforms" : [
+    {
+      "id" : "transform-created",
+      "state" : "stopped",
+      "stats" : {
+        "pages_processed" : 0,
+        "documents_processed" : 0,
+        "documents_indexed" : 0,
+        "trigger_count" : 0,
+        "index_time_in_ms" : 0,
+        "index_total" : 0,
+        "index_failures" : 0,
+        "search_time_in_ms" : 0,
+        "search_total" : 0,
+        "search_failures" : 0,
+        "exponential_avg_checkpoint_duration_ms" : 0.0,
+        "exponential_avg_documents_indexed" : 0.0,
+        "exponential_avg_documents_processed" : 0.0
+      },
+      "checkpointing" : {
+        "last" : {
+          "checkpoint" : 0
+        },
+        "operations_behind" : 0
+      }
+    },
+    {
+      "id" : "transform-created-started-stopped",
+      "state" : "stopped",
+      "stats" : {
+        "pages_processed" : 2,
+        "documents_processed" : 2864381,
+        "documents_indexed" : 1000,
+        "trigger_count" : 1,
+        "index_time_in_ms" : 52,
+        "index_total" : 2,
+        "index_failures" : 0,
+        "search_time_in_ms" : 1859,
+        "search_total" : 3,
+        "search_failures" : 0,
+        "exponential_avg_checkpoint_duration_ms" : 0.0,
+        "exponential_avg_documents_indexed" : 0.0,
+        "exponential_avg_documents_processed" : 0.0
+      },
+      "checkpointing" : {
+        "last" : {
+          "checkpoint" : 0
+        },
+        "operations_behind" : 21139495
+      }
+    },
+    {
+      "id" : "transform-running",
+      "state" : "indexing",
+      "node" : {
+        "id" : "xxx",
+        "name" : "node",
+        "ephemeral_id" : "xxx",
+        "transport_address" : "127.0.0.1:9300",
+        "attributes" : { }
+      },
+      "stats" : {
+        "pages_processed" : 3,
+        "documents_processed" : 4457902,
+        "documents_indexed" : 1500,
+        "trigger_count" : 2,
+        "index_time_in_ms" : 101,
+        "index_total" : 3,
+        "index_failures" : 0,
+        "search_time_in_ms" : 1909,
+        "search_total" : 4,
+        "search_failures" : 0,
+        "exponential_avg_checkpoint_duration_ms" : 0.0,
+        "exponential_avg_documents_indexed" : 0.0,
+        "exponential_avg_documents_processed" : 0.0
+      },
+      "checkpointing" : {
+        "last" : {
+          "checkpoint" : 0
+        },
+        "next" : {
+          "checkpoint" : 1,
+          "position" : {
+            "indexer_position" : {
+              "@timestamp" : 1551282000000,
+              "agent.version" : "7.0.0"
+            }
+          },
+          "checkpoint_progress" : {
+            "docs_remaining" : 16681594,
+            "total_docs" : 21139496,
+            "percent_complete" : 21.08802404749858,
+            "docs_indexed" : 1500,
+            "docs_processed" : 4457902
+          },
+          "timestamp_millis" : 1568021396011
+        },
+        "operations_behind" : 21139495
+      }
+    },
+    {
+      "id" : "transform-completed",
+      "state" : "stopped",
+      "stats" : {
+        "pages_processed" : 22,
+        "documents_processed" : 21139496,
+        "documents_indexed" : 10154,
+        "trigger_count" : 2,
+        "index_time_in_ms" : 530,
+        "index_total" : 21,
+        "index_failures" : 0,
+        "search_time_in_ms" : 8566,
+        "search_total" : 23,
+        "search_failures" : 0,
+        "exponential_avg_checkpoint_duration_ms" : 0.0,
+        "exponential_avg_documents_indexed" : 0.0,
+        "exponential_avg_documents_processed" : 0.0
+      },
+      "checkpointing" : {
+        "last" : {
+          "checkpoint" : 1,
+          "timestamp_millis" : 1568021396011
+        },
+        "operations_behind" : 0
+      }
+    }
+  ]
+}

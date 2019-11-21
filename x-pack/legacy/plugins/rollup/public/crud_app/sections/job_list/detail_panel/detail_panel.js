@@ -33,7 +33,7 @@ import {
   UIM_DETAIL_PANEL_METRICS_TAB_CLICK,
   UIM_DETAIL_PANEL_JSON_TAB_CLICK,
 } from '../../../../../common';
-import { trackUiMetric } from '../../../services';
+import { trackUiMetric, METRIC_TYPE } from '../../../services';
 
 import {
   JobActionMenu,
@@ -114,7 +114,7 @@ export class DetailPanelUi extends Component {
       renderedTabs.push(
         <EuiTab
           onClick={() => {
-            trackUiMetric(tabToUiMetricMap[tab]);
+            trackUiMetric(METRIC_TYPE.CLICK, tabToUiMetricMap[tab]);
             openDetailPanel({ panelType: tab, jobId: id });
           }}
           isSelected={isSelected}

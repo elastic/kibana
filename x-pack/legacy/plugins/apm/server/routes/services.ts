@@ -4,61 +4,97 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as t from 'io-ts';
 import Boom from 'boom';
-import { InternalCoreSetup } from 'src/core/server';
 import { AgentName } from '../../typings/es_schemas/ui/fields/Agent';
-import { createApmTelementry, storeApmTelemetry } from '../lib/apm_telemetry';
-import { withDefaultValidators } from '../lib/helpers/input_validation';
+import {
+  createApmTelementry,
+  storeApmServicesTelemetry
+} from '../lib/apm_telemetry';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { getService } from '../lib/services/get_service';
+import { getServiceAgentName } from '../lib/services/get_service_agent_name';
 import { getServices } from '../lib/services/get_services';
+import { getServiceTransactionTypes } from '../lib/services/get_service_transaction_types';
+import { getServiceNodeMetadata } from '../lib/services/get_service_node_metadata';
+import { createRoute } from './create_route';
+import { uiFiltersRt, rangeRt } from './default_api_types';
+import { getServiceMap } from '../lib/services/map';
 
-const ROOT = '/api/apm/services';
-const defaultErrorHandler = (err: Error) => {
-  // eslint-disable-next-line
-  console.error(err.stack);
-  throw Boom.boomify(err, { statusCode: 400 });
-};
+export const servicesRoute = createRoute(() => ({
+  path: '/api/apm/services',
+  params: {
+    query: t.intersection([uiFiltersRt, rangeRt])
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const services = await getServices(setup);
 
-export function initServicesApi(core: InternalCoreSetup) {
-  const { server } = core.http;
-  server.route({
-    method: 'GET',
-    path: ROOT,
-    options: {
-      validate: {
-        query: withDefaultValidators()
-      },
-      tags: ['access:apm']
-    },
-    handler: async req => {
-      const setup = setupRequest(req);
-      const services = await getServices(setup).catch(defaultErrorHandler);
+    // Store telemetry data derived from services
+    const agentNames = services.items.map(
+      ({ agentName }) => agentName as AgentName
+    );
+    const apmTelemetry = createApmTelementry(agentNames);
+    storeApmServicesTelemetry(context.__LEGACY.server, apmTelemetry);
 
-      // Store telemetry data derived from services
-      const agentNames = services.items.map(
-        ({ agentName }) => agentName as AgentName
-      );
-      const apmTelemetry = createApmTelementry(agentNames);
-      storeApmTelemetry(server, apmTelemetry);
+    return services;
+  }
+}));
 
-      return services;
+export const serviceAgentNameRoute = createRoute(() => ({
+  path: '/api/apm/services/{serviceName}/agent_name',
+  params: {
+    path: t.type({
+      serviceName: t.string
+    }),
+    query: rangeRt
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
+    return getServiceAgentName(serviceName, setup);
+  }
+}));
+
+export const serviceTransactionTypesRoute = createRoute(() => ({
+  path: '/api/apm/services/{serviceName}/transaction_types',
+  params: {
+    path: t.type({
+      serviceName: t.string
+    }),
+    query: rangeRt
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
+    return getServiceTransactionTypes(serviceName, setup);
+  }
+}));
+
+export const serviceNodeMetadataRoute = createRoute(() => ({
+  path: '/api/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
+  params: {
+    path: t.type({
+      serviceName: t.string,
+      serviceNodeName: t.string
+    }),
+    query: t.intersection([uiFiltersRt, rangeRt])
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName, serviceNodeName } = context.params.path;
+    return getServiceNodeMetadata({ setup, serviceName, serviceNodeName });
+  }
+}));
+
+export const serviceMapRoute = createRoute(() => ({
+  path: '/api/apm/service-map',
+  params: {
+    query: rangeRt
+  },
+  handler: async ({ context }) => {
+    if (context.config['xpack.apm.servicemapEnabled']) {
+      return getServiceMap();
     }
-  });
-
-  server.route({
-    method: 'GET',
-    path: `${ROOT}/{serviceName}`,
-    options: {
-      validate: {
-        query: withDefaultValidators()
-      },
-      tags: ['access:apm']
-    },
-    handler: req => {
-      const setup = setupRequest(req);
-      const { serviceName } = req.params;
-      return getService(serviceName, setup).catch(defaultErrorHandler);
-    }
-  });
-}
+    return new Boom('Not found', { statusCode: 404 });
+  }
+}));

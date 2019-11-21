@@ -11,12 +11,12 @@ import angular from 'angular';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
-import { parseInterval } from 'ui/utils/parse_interval';
 import { ml } from './ml_api_service';
 
-import { mlMessageBarService } from '../components/messagebar/messagebar_service';
-import { isWebUrl } from '../util/string_utils';
+import { mlMessageBarService } from '../components/messagebar';
+import { isWebUrl } from '../util/url_utils';
 import { ML_DATA_PREVIEW_COUNT } from '../../common/util/job_utils';
+import { parseInterval } from '../../common/util/parse_interval';
 
 const msgs = mlMessageBarService;
 let jobs = [];
@@ -24,12 +24,18 @@ let datafeedIds = {};
 
 class JobService {
   constructor() {
-    // currentJob -> used to pass a job object between the job management page and
+    // tempJobCloningObjects -> used to pass a job object between the job management page and
     // and the advanced wizard.
     // if populated when loading the advanced wizard, the job is used for cloning.
     // if populated when loading the job management page, the start datafeed modal
     // is automatically opened.
-    this.currentJob = undefined;
+    this.tempJobCloningObjects = {
+      job: undefined,
+      skipTimeRangeStep: false,
+      start: undefined,
+      end: undefined,
+    };
+
     this.jobs = [];
 
     // Provide ready access to widely used basic job properties.
@@ -58,7 +64,6 @@ class JobService {
         defaultMessage: 'Active datafeeds'
       }), value: 0, show: true }
     };
-    this.jobUrls = {};
   }
 
   getBlankJob() {
@@ -132,7 +137,6 @@ class JobService {
                   processBasicJobInfo(this, jobs);
                   this.jobs = jobs;
                   createJobStats(this.jobs, this.jobStats);
-                  createJobUrls(this.jobs, this.jobUrls);
                   resolve({ jobs: this.jobs });
                 });
             })
@@ -218,7 +222,6 @@ class JobService {
                     }
                     this.jobs = jobs;
                     createJobStats(this.jobs, this.jobStats);
-                    createJobUrls(this.jobs, this.jobUrls);
                     resolve({ jobs: this.jobs });
                   });
               })
@@ -354,6 +357,7 @@ class JobService {
       delete tempJob.datafeed_config.job_id;
       delete tempJob.datafeed_config.state;
       delete tempJob.datafeed_config.node;
+      delete tempJob.datafeed_config.timing_stats;
 
       // remove query_delay if it's between 60s and 120s
       // the back-end produces a random value between 60 and 120 and so
@@ -398,7 +402,6 @@ class JobService {
     // return the promise chain
     return ml.validateJob(obj)
       .then((messages) => {
-        console.log('validate job', messages);
         return { success: true, messages };
       }).catch((err) => {
         msgs.error(i18n.translate('xpack.ml.jobService.jobValidationErrorMessage', {
@@ -742,6 +745,16 @@ class JobService {
   }
 
 
+  async getJobAndGroupIds() {
+    try {
+      return await ml.jobs.getAllJobAndGroupIds();
+    } catch (error) {
+      return {
+        jobIds: [],
+        groupIds: [],
+      };
+    }
+  }
 }
 
 // private function used to check the job saving response
@@ -868,33 +881,17 @@ function createJobStats(jobsList, jobStats) {
   jobStats.activeNodes.value = Object.keys(mlNodes).length;
 }
 
-function createJobUrls(jobsList, jobUrls) {
-  _.each(jobsList, (job) => {
-    if (job.data_counts) {
-      const from = moment(job.data_counts.earliest_record_timestamp).toISOString();
-      const to = moment(job.data_counts.latest_record_timestamp).toISOString();
-      const path = createResultsUrl([job.job_id], to, from);
-
-      if (jobUrls[job.job_id]) {
-        jobUrls[job.job_id].url = path;
-      } else {
-        jobUrls[job.job_id] = { url: path };
-      }
-    }
-  });
-}
-
 function createResultsUrlForJobs(jobsList, resultsPage) {
   let from = undefined;
   let to = undefined;
   if (jobsList.length === 1) {
     from = jobsList[0].earliestTimestampMs;
-    to = jobsList[0].latestTimestampMs;
+    to = jobsList[0].latestResultsTimestampMs; // Will be max(latest source data, latest bucket results)
   } else {
     const jobsWithData = jobsList.filter(j => (j.earliestTimestampMs !== undefined));
     if (jobsWithData.length > 0) {
       from = Math.min(...jobsWithData.map(j => j.earliestTimestampMs));
-      to = Math.max(...jobsWithData.map(j => j.latestTimestampMs));
+      to = Math.max(...jobsWithData.map(j => j.latestResultsTimestampMs));
     }
   }
 

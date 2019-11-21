@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Filter } from '../types';
-import { getFunctionHelp } from '../../strings';
+
+import { Filter, ExpressionFunction } from '../../../types';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   column: string;
@@ -20,10 +20,10 @@ export function exactly(): ExpressionFunction<'exactly', Filter, Arguments, Filt
     name: 'exactly',
     aliases: [],
     type: 'filter',
+    help,
     context: {
       types: ['filter'],
     },
-    help,
     args: {
       column: {
         types: ['string'],

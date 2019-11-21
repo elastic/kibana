@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, useState, useEffect } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
-
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -28,11 +26,11 @@ import 'brace/theme/textmate';
 import { useAppDependencies } from '../../../../index';
 import { documentationLinksService } from '../../../../services/documentation';
 import {
-  loadRepository,
+  useLoadRepository,
   verifyRepository as verifyRepositoryRequest,
 } from '../../../../services/http';
 import { textService } from '../../../../services/text';
-import { linkToSnapshots } from '../../../../services/navigation';
+import { linkToSnapshots, linkToEditRepository } from '../../../../services/navigation';
 
 import { REPOSITORY_TYPES } from '../../../../../../common/constants';
 import { Repository, RepositoryVerification } from '../../../../../../common/types';
@@ -41,28 +39,27 @@ import {
   SectionError,
   SectionLoading,
   RepositoryVerificationBadge,
+  Error,
 } from '../../../../components';
-import { BASE_PATH } from '../../../../constants';
 import { TypeDetails } from './type_details';
 
-interface Props extends RouteComponentProps {
+interface Props {
   repositoryName: Repository['name'];
   onClose: () => void;
   onRepositoryDeleted: (repositoriesDeleted: Array<Repository['name']>) => void;
 }
 
-const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
+export const RepositoryDetails: React.FunctionComponent<Props> = ({
   repositoryName,
   onClose,
   onRepositoryDeleted,
-  history,
 }) => {
   const {
     core: { i18n },
   } = useAppDependencies();
 
   const { FormattedMessage } = i18n;
-  const { error, data: repositoryDetails } = loadRepository(repositoryName);
+  const { error, data: repositoryDetails } = useLoadRepository(repositoryName);
   const [verification, setVerification] = useState<RepositoryVerification | undefined>(undefined);
   const [isLoadingVerification, setIsLoadingVerification] = useState<boolean>(false);
 
@@ -75,13 +72,10 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
 
   // Reset verification state when repository name changes, either from adjust URL or clicking
   // into a different repository in table list.
-  useEffect(
-    () => {
-      setVerification(undefined);
-      setIsLoadingVerification(false);
-    },
-    [repositoryName]
-  );
+  useEffect(() => {
+    setVerification(undefined);
+    setIsLoadingVerification(false);
+  }, [repositoryName]);
 
   const renderBody = () => {
     if (repositoryDetails) {
@@ -105,7 +99,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
   };
 
   const renderError = () => {
-    const notFound = error.status === 404;
+    const notFound = (error as any).status === 404;
     const errorObject = notFound
       ? {
           data: {
@@ -129,7 +123,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
             defaultMessage="Error loading repository"
           />
         }
-        error={errorObject}
+        error={errorObject as Error}
       />
     );
   };
@@ -300,8 +294,8 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
           <EuiSpacer size="m" />
           <EuiButton onClick={verifyRepository} color="primary" isLoading={isLoadingVerification}>
             <FormattedMessage
-              id="xpack.snapshotRestore.repositoryDetails.reverifyButtonLabel"
-              defaultMessage="Re-verify repository"
+              id="xpack.snapshotRestore.repositoryDetails.verifyButtonLabel"
+              defaultMessage="Verify repository"
             />
           </EuiButton>
         </Fragment>
@@ -377,13 +371,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  href={history.createHref({
-                    pathname: `${BASE_PATH}/edit_repository/${repositoryName}`,
-                  })}
-                  fill
-                  color="primary"
-                >
+                <EuiButton href={linkToEditRepository(repositoryName)} fill color="primary">
                   <FormattedMessage
                     id="xpack.snapshotRestore.repositoryDetails.editButtonLabel"
                     defaultMessage="Edit"
@@ -403,7 +391,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
       data-test-subj="repositoryDetail"
       aria-labelledby="srRepositoryDetailsFlyoutTitle"
       size="m"
-      maxWidth={400}
+      maxWidth={550}
     >
       <EuiFlyoutHeader>
         <EuiTitle size="m">
@@ -419,5 +407,3 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
     </EuiFlyout>
   );
 };
-
-export const RepositoryDetails = withRouter(RepositoryDetailsUi);

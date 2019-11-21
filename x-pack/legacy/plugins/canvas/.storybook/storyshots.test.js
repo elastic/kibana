@@ -5,9 +5,24 @@
  */
 
 import path from 'path';
+import moment from 'moment';
+import 'moment-timezone';
+
 import initStoryshots, { multiSnapshotWithOptions } from '@storybook/addon-storyshots';
 import styleSheetSerializer from 'jest-styled-components/src/styleSheetSerializer';
 import { addSerializer } from 'jest-specific-snapshot';
+
+// Several of the renderers, used by the runtime, use jQuery.
+import jquery from 'jquery';
+global.$ = jquery;
+global.jQuery = jquery;
+
+// Set our default timezone to UTC for tests so we can generate predictable snapshots
+moment.tz.setDefault('UTC');
+
+// Freeze time for the tests for predictable snapshots
+const testTime = new Date(Date.UTC(2019, 5, 1)); // June 1 2019
+Date.now = jest.fn(() => testTime);
 
 // Mock EUI generated ids to be consistently predictable for snapshots.
 jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
@@ -24,6 +39,37 @@ jest.mock('../canvas_plugin_src/renderers/shape/shapes', () => ({
     </svg>`,
   },
 }));
+
+// Mock react-datepicker dep used by eui to avoid rendering the entire large component
+jest.mock('@elastic/eui/packages/react-datepicker', () => {
+  return {
+    __esModule: true,
+    default: 'ReactDatePicker',
+  };
+});
+
+jest.mock('plugins/interpreter/registries', () => ({}));
+
+// Disabling this test due to https://github.com/elastic/eui/issues/2242
+jest.mock(
+  '../public/components/workpad_header/workpad_export/__examples__/disabled_panel.examples',
+  () => {
+    return 'Disabled Panel';
+  }
+);
+
+// Disabling this test due to https://github.com/elastic/eui/issues/2242
+jest.mock(
+  '../public/components/workpad_header/workpad_export/flyout/__examples__/share_website_flyout.examples',
+  () => {
+    return 'Disabled Panel';
+  }
+);
+
+// This element uses a `ref` and cannot be rendered by Jest snapshots.
+import { RenderedElement } from '../shareable_runtime/components/rendered_element';
+jest.mock('../shareable_runtime/components/rendered_element');
+RenderedElement.mockImplementation(() => 'RenderedElement');
 
 addSerializer(styleSheetSerializer);
 
