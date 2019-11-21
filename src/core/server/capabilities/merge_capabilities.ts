@@ -17,26 +17,19 @@
  * under the License.
  */
 
-import { CapabilitiesService, CapabilitiesSetup } from './capabilities_service';
+import { merge } from 'lodash';
+import { Capabilities } from './types';
 
-const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<CapabilitiesSetup> = {
-    registerCapabilitiesProvider: jest.fn(),
-    registerCapabilitiesSwitcher: jest.fn(),
-  };
-  return setupContract;
-};
+export const mergeCapabilities = (...sources: Array<Partial<Capabilities>>): Capabilities =>
+  merge({}, ...sources, (a: any, b: any) => {
+    if (
+      (typeof a === 'boolean' && typeof b === 'object') ||
+      (typeof a === 'object' && typeof b === 'boolean')
+    ) {
+      throw new Error(`conflict trying to merge boolean with object`);
+    }
 
-type CapabilitiesServiceContract = PublicMethodsOf<CapabilitiesService>;
-const createMock = () => {
-  const mocked: jest.Mocked<CapabilitiesServiceContract> = {
-    setup: jest.fn().mockReturnValue(createSetupContractMock()),
-    start: jest.fn(),
-  };
-  return mocked;
-};
-
-export const capabilitiesServiceMock = {
-  create: createMock,
-  createSetupContract: createSetupContractMock,
-};
+    if (typeof a === 'boolean' && typeof b === 'boolean' && a !== b) {
+      throw new Error(`conflict trying to merge booleans with different values`);
+    }
+  });

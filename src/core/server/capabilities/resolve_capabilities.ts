@@ -17,26 +17,14 @@
  * under the License.
  */
 
-import { CapabilitiesService, CapabilitiesSetup } from './capabilities_service';
+import { Capabilities, CapabilitiesSwitcher } from './types';
+import { KibanaRequest } from '../http';
 
-const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<CapabilitiesSetup> = {
-    registerCapabilitiesProvider: jest.fn(),
-    registerCapabilitiesSwitcher: jest.fn(),
-  };
-  return setupContract;
-};
-
-type CapabilitiesServiceContract = PublicMethodsOf<CapabilitiesService>;
-const createMock = () => {
-  const mocked: jest.Mocked<CapabilitiesServiceContract> = {
-    setup: jest.fn().mockReturnValue(createSetupContractMock()),
-    start: jest.fn(),
-  };
-  return mocked;
-};
-
-export const capabilitiesServiceMock = {
-  create: createMock,
-  createSetupContract: createSetupContractMock,
+export const capabilitiesResolver = (
+  capabilities: Capabilities,
+  switchers: CapabilitiesSwitcher[]
+) => async (request: KibanaRequest): Promise<Capabilities> => {
+  return switchers.reduce(async (caps, switcher) => {
+    return switcher(request, await caps);
+  }, Promise.resolve(capabilities));
 };

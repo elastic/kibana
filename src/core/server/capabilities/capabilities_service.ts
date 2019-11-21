@@ -17,18 +17,31 @@
  * under the License.
  */
 
-import { CapabilitiesSwitcher } from './types';
+import { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './types';
 import { CoreContext } from '../core_context';
-import { Logger } from '..';
+import { Logger } from '../logging';
+import { KibanaRequest } from '../http';
+import { mergeCapabilities } from './merge_capabilities';
+import { capabilitiesResolver } from './resolve_capabilities';
 
 export interface CapabilitiesSetup {
+  registerCapabilitiesProvider(provider: CapabilitiesProvider): void;
   registerCapabilitiesSwitcher(switcher: CapabilitiesSwitcher): void;
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CapabilitiesStart {}
+
+export interface CapabilitiesStart {
+  resolveCapabilities(request: KibanaRequest): Promise<Capabilities>;
+}
+
+const defaultCapabilities: Capabilities = {
+  navLinks: {},
+  management: {},
+  catalogue: {},
+};
 
 export class CapabilitiesService {
-  private capabilitiesSwitcher: CapabilitiesSwitcher[] = [];
+  private capabilitiesProviders: CapabilitiesProvider[] = [];
+  private capabilitiesSwitchers: CapabilitiesSwitcher[] = [];
   private logger: Logger;
 
   constructor(core: CoreContext) {
@@ -38,13 +51,24 @@ export class CapabilitiesService {
   public setup(): CapabilitiesSetup {
     this.logger.debug('Setting up capabilities service');
     return {
+      registerCapabilitiesProvider: (provider: CapabilitiesProvider) => {
+        this.capabilitiesProviders.push(provider);
+      },
       registerCapabilitiesSwitcher: (switcher: CapabilitiesSwitcher) => {
-        this.capabilitiesSwitcher.push(switcher);
+        this.capabilitiesSwitchers.push(switcher);
       },
     };
   }
 
   public start(): CapabilitiesStart {
-    return {};
+    return {
+      resolveCapabilities: (request: KibanaRequest) => {
+        const capabilities = mergeCapabilities(
+          defaultCapabilities,
+          ...this.capabilitiesProviders.map(provider => provider())
+        );
+        return capabilitiesResolver(capabilities, this.capabilitiesSwitchers)(request);
+      },
+    };
   }
 }
