@@ -71,6 +71,7 @@ interface SiemSearchBarProps {
   id: InputsModelId;
   indexPattern: StaticIndexPattern;
   timelineId?: string;
+  dataTestSubj?: string;
 }
 
 const SearchBarContainer = styled.div`
@@ -95,6 +96,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
     timelineId,
     toStr,
     updateSearch,
+    dataTestSubj,
   }) => {
     const { timefilter } = npStart.plugins.data.query.timefilter;
     if (fromStr != null && toStr != null) {
@@ -275,6 +277,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
           showQueryBar={true}
           showQueryInput={true}
           showSaveQuery={true}
+          dataTestSubj={dataTestSubj}
         />
       </SearchBarContainer>
     );
