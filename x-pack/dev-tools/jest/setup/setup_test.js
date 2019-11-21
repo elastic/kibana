@@ -5,7 +5,7 @@
  */
 
 /*
-  Global import, so we don't need to remember to import the lib in each file 
+  Global import, so we don't need to remember to import the lib in each file
   https://www.npmjs.com/package/jest-styled-components#global-installation
 */
 
