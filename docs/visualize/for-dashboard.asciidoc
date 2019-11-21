@@ -1,17 +1,36 @@
+[[for-dashboard]]
+== Markdown and controls
+
+[float]
+[[markdown-widget]]
+=== Markdown widget
+
+The Markdown widget is a text entry field that accepts GitHub-flavored Markdown text. Kibana renders the text you enter
+in this field and displays the results on the dashboard. You can click the *Help* link to go to the
+https://help.github.com/articles/github-flavored-markdown/[help page] for GitHub flavored Markdown. From the widget
+you can:
+
+* Click *Apply* to display the rendered text in the Preview panel
+* Click *Discard* to revert to a previously saved version
+
+
+[float]
 [[controls]]
-== Controls Visualization
+=== Controls widget
 experimental[]
 
+The Controls widget enables you to add interactive inputs
+to a dashboard.  You can create two types of inputs:
 
-The Controls visualization enables you to add interactive inputs
-to Kibana dashboards.  You can create two types of inputs:
-a dropdown menu and a radio slider.
+* Dropdown menu
+* Radio slider
 
 [role="screenshot"]
 image::images/controls/controls_in_dashboard.png[]
 
+[float]
 [[add-input-controls]]
-=== Adding Input Controls
+=== Add input controls
 
 To start a *Controls* visualization, open the Visualization application
 and click the *+* button. Scroll to the *Others* section and
@@ -20,6 +39,7 @@ select *Controls*.
 In the visualization builder, choose the type of control to add to
 your visualization.
 
+[float]
 ==== Dropdown menu
 
 A dropdown menu allows users to filter content by selecting
@@ -49,6 +69,7 @@ creating multiple dropdown menus.
 
 *Size*:: The number of options to include in the list.
 
+[float]
 ==== Range slider
 
 A range sliders allow users to filter content within a range of numbers.
@@ -73,8 +94,9 @@ specified index pattern.
 
 *Decimal Places*:: The number of decimal places.
 
+[float]
 [[global-options]]
-=== Global Options
+=== Global options
 
 Open the *Options* tab to configure settings that apply to all input
 controls in a Controls visualization.
