@@ -54,6 +54,18 @@ export const fieldToName = (field: string) => {
     'cloud.region': i18n.translate('xpack.infra.groupByDisplayNames.cloud.region', {
       defaultMessage: 'Region',
     }),
+    'aws.rds.db_instance.class': i18n.translate(
+      'xpack.infra.groupByDisplayNames.rds.db_instance.class',
+      {
+        defaultMessage: 'Instance Class',
+      }
+    ),
+    'aws.rds.db_instance.status': i18n.translate(
+      'xpack.infra.groupByDisplayNames.rds.db_instance.status',
+      {
+        defaultMessage: 'Status',
+      }
+    ),
   };
   return LOOKUP[field] || field;
 };

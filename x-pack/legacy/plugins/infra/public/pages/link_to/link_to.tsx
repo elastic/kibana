@@ -19,11 +19,11 @@ interface LinkToPageProps {
 export const LinkToPage: React.SFC<LinkToPageProps> = props => (
   <Switch>
     <Route
-      path={`${props.match.url}/:sourceId?/:nodeType(host|container|pod|awsEC2|awsS3)-logs/:nodeId`}
+      path={`${props.match.url}/:sourceId?/:nodeType(host|container|pod|awsEC2|awsS3|awsRDS)-logs/:nodeId`}
       component={RedirectToNodeLogs}
     />
     <Route
-      path={`${props.match.url}/:nodeType(host|container|pod|awsEC2|awsS3)-detail/:nodeId`}
+      path={`${props.match.url}/:nodeType(host|container|pod|awsEC2|awsS3|awsRDS)-detail/:nodeId`}
       component={RedirectToNodeDetail}
     />
     <Route

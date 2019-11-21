@@ -32,5 +32,6 @@ export const sharedSchema = gql`
     host
     awsEC2
     awsS3
+    awsRDS
   }
 `;

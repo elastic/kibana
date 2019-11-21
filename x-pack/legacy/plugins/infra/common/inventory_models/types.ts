@@ -80,6 +80,11 @@ export const InventoryMetricRT = rt.keyof({
   awsS3BucketSize: null,
   awsS3DownloadBytes: null,
   awsS3UploadBytes: null,
+  awsRDSCpuTotal: null,
+  awsRDSConnections: null,
+  awsRDSQueriesExecuted: null,
+  awsRDSActiveTransactions: null,
+  awsRDSLatency: null,
   custom: null,
 });
 export type InventoryMetric = rt.TypeOf<typeof InventoryMetricRT>;
@@ -282,6 +287,10 @@ export const SnapshotMetricTypeRT = rt.keyof({
   s3BucketSize: null,
   s3DownloadBytes: null,
   s3UploadBytes: null,
+  rdsConnections: null,
+  rdsQueriesExecuted: null,
+  rdsActiveTransactions: null,
+  rdsLatency: null,
 });
 
 export type SnapshotMetricType = rt.TypeOf<typeof SnapshotMetricTypeRT>;

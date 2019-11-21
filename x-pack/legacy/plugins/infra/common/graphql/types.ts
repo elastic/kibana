@@ -554,6 +554,7 @@ export enum InfraNodeType {
   host = 'host',
   awsEC2 = 'awsEC2',
   awsS3 = 'awsS3',
+  awsRDS = 'awsRDS',
 }
 
 export enum InfraSnapshotMetricType {
@@ -571,6 +572,10 @@ export enum InfraSnapshotMetricType {
   s3BucketSize = 's3BucketSize',
   s3DownloadBytes = 's3DownloadBytes',
   s3UploadBytes = 's3UploadBytes',
+  rdsConnections = 'rdsConnections',
+  rdsQueriesExecuted = 'rdsQueriesExecuted',
+  rdsActiveTransactions = 'rdsActiveTransactions',
+  rdsLatency = 'rdsLatency',
 }
 
 export enum InfraMetric {
@@ -611,7 +616,7 @@ export enum InfraMetric {
   awsNetworkPackets = 'awsNetworkPackets',
   awsDiskioBytes = 'awsDiskioBytes',
   awsDiskioOps = 'awsDiskioOps',
-  awsEC3CpuUtilization = 'awsEC2CpuUtilization',
+  awsEC2CpuUtilization = 'awsEC2CpuUtilization',
   awsEC2DiskIOBytes = 'awsEC2DiskIOBytes',
   awsEC2NetworkTraffic = 'awsEC2NetworkTraffic',
   awsS3TotalRequests = 'awsS3TotalRequests',
@@ -619,6 +624,11 @@ export enum InfraMetric {
   awsS3BucketSize = 'awsS3BucketSize',
   awsS3DownloadBytes = 'awsS3DownloadBytes',
   awsS3UploadBytes = 'awsS3UploadBytes',
+  awsRDSCpuTotal = 'awsRDSCpuTotal',
+  awsRDSConnections = 'awsRDSConnections',
+  awsRDSQueriesExecuted = 'awsRDSQueriesExecuted',
+  awsRDSActiveTransacions = 'awsRDSActiveTransactions',
+  awsRDSLatency = 'awsRDSLatency',
   custom = 'custom',
 }
 

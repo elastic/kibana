@@ -102,6 +102,18 @@ const ToolbarTranslations = {
   s3UploadBytes: i18n.translate('xpack.infra.waffle.metricOptions.s3UploadBytes', {
     defaultMessage: 'Uploads (Bytes)',
   }),
+  rdsConnections: i18n.translate('xpack.infra.waffle.metricOptions.rdsConnections', {
+    defaultMessage: 'Connections',
+  }),
+  rdsQueriesExecuted: i18n.translate('xpack.infra.waffle.metricOptions.rdsQueriesExecuted', {
+    defaultMessage: 'Queries Executed',
+  }),
+  rdsActiveTransactions: i18n.translate('xpack.infra.waffle.metricOptions.rdsActiveTransactions', {
+    defaultMessage: 'Active Transactions',
+  }),
+  rdsLatency: i18n.translate('xpack.infra.waffle.metricOptions.rdsLatency', {
+    defaultMessage: 'Latency',
+  }),
 };
 
 export const toGroupByOpt = (field: string) => ({
@@ -181,6 +193,26 @@ export const toMetricOpt = (metric: InfraSnapshotMetricType) => {
       return {
         text: ToolbarTranslations.s3UploadBytes,
         value: InfraSnapshotMetricType.s3UploadBytes,
+      };
+    case InfraSnapshotMetricType.rdsConnections:
+      return {
+        text: ToolbarTranslations.rdsConnections,
+        value: InfraSnapshotMetricType.rdsConnections,
+      };
+    case InfraSnapshotMetricType.rdsQueriesExecuted:
+      return {
+        text: ToolbarTranslations.rdsQueriesExecuted,
+        value: InfraSnapshotMetricType.rdsQueriesExecuted,
+      };
+    case InfraSnapshotMetricType.rdsActiveTransactions:
+      return {
+        text: ToolbarTranslations.rdsActiveTransactions,
+        value: InfraSnapshotMetricType.rdsActiveTransactions,
+      };
+    case InfraSnapshotMetricType.rdsLatency:
+      return {
+        text: ToolbarTranslations.rdsLatency,
+        value: InfraSnapshotMetricType.rdsLatency,
       };
   }
 };

@@ -49,6 +49,10 @@ export const snapshotSchema: any = gql`
     s3NumberOfObjects
     s3UploadBytes
     s3DownloadBytes
+    rdsConnections
+    rdsQueriesExecuted
+    rdsActiveTransactions
+    rdsLatency
   }
 
   input InfraSnapshotMetricInput {

@@ -53,6 +53,11 @@ export const metricsSchema: any = gql`
     awsS3BucketSize
     awsS3DownloadBytes
     awsS3UploadBytes
+    awsRDSCpuTotal
+    awsRDSConnections
+    awsRDSQueriesExecuted
+    awsRDSActiveTransacions
+    awsRDSLatency
     custom
   }
 
