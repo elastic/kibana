@@ -9,7 +9,11 @@ import {
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY
 } from '../../../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../../../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../../../helpers/setup_request';
 import { ChartBase } from '../../../types';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 
@@ -45,7 +49,7 @@ const percentUsedScript = {
 };
 
 export async function getMemoryChartData(
-  setup: Setup,
+  setup: Setup & SetupTimeRange & SetupUIFilters,
   serviceName: string,
   serviceNodeName?: string
 ) {
