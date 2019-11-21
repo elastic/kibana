@@ -5,7 +5,7 @@
  */
 
 import { Subject, Subscription, merge } from 'rxjs';
-import { takeUntil, tap } from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
 
 import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
 
@@ -31,8 +31,9 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
    */
   private removeInterceptor?: () => void;
   private licenseFetchSubscription?: Subscription;
+  private storageSubscription?: Subscription;
 
-  private infoEndpoint = '/api/xpack/v1/info';
+  private readonly infoEndpoint = '/api/licensing/info';
   private prevSignature?: string;
 
   constructor(
@@ -76,18 +77,16 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
     );
     this.licenseFetchSubscription = fetchSubscription;
 
-    const license$ = update$.pipe(
-      tap(license => {
-        if (license.error) {
-          this.prevSignature = undefined;
-          // Prevent reusing stale license if the fetch operation fails
-          this.removeSaved();
-        } else {
-          this.prevSignature = license.signature;
-          this.save(license);
-        }
-      })
-    );
+    this.storageSubscription = update$.subscribe(license => {
+      if (license.isAvailable) {
+        this.prevSignature = license.signature;
+        this.save(license);
+      } else {
+        this.prevSignature = undefined;
+        // Prevent reusing stale license if the fetch operation fails
+        this.removeSaved();
+      }
+    });
 
     this.removeInterceptor = core.http.intercept({
       response: async httpResponse => {
@@ -107,7 +106,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
       refresh: () => {
         manualRefresh$.next();
       },
-      license$,
+      license$: update$,
     };
   }
 
@@ -124,11 +123,20 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
       this.licenseFetchSubscription.unsubscribe();
       this.licenseFetchSubscription = undefined;
     }
+    if (this.storageSubscription !== undefined) {
+      this.storageSubscription.unsubscribe();
+      this.storageSubscription = undefined;
+    }
   }
 
   private fetchLicense = async (core: CoreSetup): Promise<ILicense> => {
     try {
-      const response = await core.http.get(this.infoEndpoint);
+      const response = await core.http.get(this.infoEndpoint, {
+        headers: {
+          'kbn-system-api': 'true',
+        },
+      });
+
       return new License({
         license: response.license,
         features: response.features,

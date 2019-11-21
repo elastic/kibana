@@ -8,6 +8,6 @@ import { services as apiIntegrationServices } from '../api_integration/services'
 
 export const services = {
   randomness: apiIntegrationServices.randomness,
-  es: apiIntegrationServices.es,
+  legacyEs: apiIntegrationServices.legacyEs,
   supertestWithoutAuth: apiIntegrationServices.supertestWithoutAuth,
 };
