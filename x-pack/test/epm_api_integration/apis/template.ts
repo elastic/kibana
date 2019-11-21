@@ -10,26 +10,21 @@ import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { getTemplate } from '../../../legacy/plugins/epm/server/lib/template/template';
 
 export default function({ getService }: FtrProviderContext) {
-  interface ClientWithInit extends Client {
-    init: () => void;
-  }
   const indexPattern = 'foo';
   const templateName = 'bar';
-  const es: ClientWithInit = getService('es') as ClientWithInit;
+  const es = getService('es');
   // This test was inspired by https://github.com/elastic/kibana/blob/master/x-pack/test/api_integration/apis/monitoring/common/mappings_exist.js
-  describe('load template', async () => {
-    before(async () => {
-      es.init();
-    });
-    const body = getTemplate(indexPattern);
+  describe('template', async () => {
+    it('can be loaded', async () => {
+      const body = getTemplate(indexPattern);
 
-    const { body: response } = await es.indices.putTemplate({
-      name: templateName,
-      body,
+      const { body: response } = await es.indices.putTemplate({
+        name: templateName,
+        body,
+      });
+      expect(response).to.eql({ acknowledged: true });
+      const { body: indexTemplate } = await es.indices.getTemplate({ name: templateName });
+      expect(indexTemplate[templateName].index_patterns).to.eql([indexPattern]);
     });
-    expect(response).to.eql({ acknowledged: true });
-
-    const { body: indexTemplate } = await es.indices.getTemplate({ name: templateName });
-    expect(indexTemplate[templateName].index_patterns).to.eql([indexPattern]);
   });
 }
