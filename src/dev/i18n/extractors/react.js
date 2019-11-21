@@ -185,7 +185,7 @@ export function extractEuiI18nMessages(node) {
     );
   } else if (tokens && defaultValues && tokens.length !== defaultValues.length) {
     throw createFailError(
-      `Number of tokens in <EuiI18n> must match number of default values ("${tokens}", "${defaultValues})`
+      `Number of tokens in <EuiI18n> must match number of default values ([${tokens}], [${defaultValues}])`
     );
   }
 

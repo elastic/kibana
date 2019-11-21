@@ -107,6 +107,22 @@ class Component extends PureComponent {
 }
 `;
 
+const euiI18nElementSourceInvalid = `
+class Component extends PureComponent {
+  render() {
+    return (
+      <EuiI18n
+        tokens={['euiI18nMulti.title', 'euiI18nMulti.description', 'euiI18nMulti.secondDescription']}
+        defaults={['Card Title', 'Card Description']}>
+        {([title, description, secondDescription]) => (
+          <EuiCard title={title} description={description} />
+        )}
+      </EuiI18n>
+    );
+  }
+}
+`;
+
 describe('dev/i18n/extractors/react', () => {
   describe('extractIntlMessages', () => {
     test('extracts messages from "intl.formatMessage" function call', () => {
@@ -180,6 +196,20 @@ describe('dev/i18n/extractors/react', () => {
       );
 
       expect(extractEuiI18nMessages(jsxOpeningElementNode)).toMatchSnapshot();
+    });
+
+    test('throws if there is more tokens than defaults within "<EuiI18n>" element', () => {
+      const ast = parse(euiI18nElementSourceInvalid, { plugins: ['jsx'] });
+      const jsxOpeningElementNode = [...traverseNodes(ast.program.body)].find(
+        node =>
+          isJSXOpeningElement(node) && isJSXIdentifier(node.name, { name: 'EuiI18n' })
+      );
+
+      expect(() => {
+        extractEuiI18nMessages(jsxOpeningElementNode);
+      }).toThrow('Number of tokens in <EuiI18n> must match number of default values ' +
+        '([euiI18nMulti.title,euiI18nMulti.description,euiI18nMulti.secondDescription], ' +
+        '[Card Title,Card Description])');
     });
   });
 });
