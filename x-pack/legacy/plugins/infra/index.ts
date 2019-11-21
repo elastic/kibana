@@ -15,6 +15,8 @@ import { plugin, InfraServerPluginDeps } from './server/new_platform_index';
 import { UsageCollector } from './server/usage/usage_collector';
 import { InfraSetup } from '../../../plugins/infra/server';
 import { getApmIndices } from '../apm/server/lib/settings/apm_indices/get_apm_indices';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../../plugins/features/server';
+import { SpacesPluginSetup } from '../../../plugins/spaces/server';
 
 const APP_ID = 'infra';
 const logsSampleDataLinkLabel = i18n.translate('xpack.infra.sampleDataLinkLabel', {
@@ -90,8 +92,8 @@ export function infra(kibana: any) {
           indexPatternsServiceFactory: legacyServer.indexPatternsServiceFactory,
         },
         metrics: legacyServer.plugins.metrics,
-        spaces: plugins.spaces,
-        features: plugins.features,
+        spaces: plugins.spaces as SpacesPluginSetup,
+        features: plugins.features as FeaturesPluginSetup,
         // NP_NOTE: [TSVB_GROUP] Huge hack to make TSVB (getVisData()) work with raw requests that
         // originate from the New Platform router (and are very different to the old request object).
         // Once TSVB has migrated over to NP, and can work with the new raw requests, or ideally just

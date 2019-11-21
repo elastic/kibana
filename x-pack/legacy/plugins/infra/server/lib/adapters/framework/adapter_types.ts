@@ -8,6 +8,8 @@ import { SearchResponse, GenericParams } from 'elasticsearch';
 import { Lifecycle } from 'hapi';
 import { ObjectType } from '@kbn/config-schema';
 import { RouteMethod, RouteConfig } from '../../../../../../../../src/core/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
+import { SpacesPluginSetup } from '../../../../../../../plugins/spaces/server';
 
 interface ApmIndices {
   'apm_oss.transactionIndices': string | undefined;
@@ -15,14 +17,14 @@ interface ApmIndices {
 
 // NP_TODO: Compose real types from plugins we depend on, no "any"
 export interface InfraServerPluginDeps {
-  spaces: any;
+  spaces: SpacesPluginSetup;
   metrics: {
     getVisData: any;
   };
   indexPatterns: {
     indexPatternsServiceFactory: any;
   };
-  features: any;
+  features: FeaturesPluginSetup;
   apm: {
     getIndices: (savedObjectsClient: any) => Promise<ApmIndices>;
   };
