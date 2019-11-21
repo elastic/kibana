@@ -4,12 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { GlobalState } from '../types';
+import reducers from './reducers';
 
-function alertDetailsState(state: GlobalState) {
-  return state.alertDetails;
-}
-
-export function alertDetailsData(state: GlobalState) {
-  return alertDetailsState(state).data;
-}
+export type GlobalState = ReturnType<typeof reducers>;
