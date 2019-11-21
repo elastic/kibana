@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as t from 'io-ts';
-import Boom from 'boom';
 import { createStaticIndexPattern } from '../lib/index_pattern/create_static_index_pattern';
 import { createRoute } from './create_route';
 import { setupRequest } from '../lib/helpers/setup_request';
@@ -17,7 +16,7 @@ export const staticIndexPatternRoute = createRoute(() => ({
     await createStaticIndexPattern(setup, context);
 
     // send empty response regardless of outcome
-    throw Boom.notFound();
+    return undefined;
   }
 }));
 

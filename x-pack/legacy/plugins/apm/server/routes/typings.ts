@@ -49,6 +49,18 @@ export interface Route<
   }) => Promise<TReturn>;
 }
 
+export type APMLegacyServer = Pick<Server, 'usage' | 'savedObjects' | 'log'> & {
+  usage: {
+    collectorSet: {
+      makeUsageCollector: (options: unknown) => unknown;
+      register: (options: unknown) => unknown;
+    };
+  };
+  plugins: {
+    elasticsearch: Server['plugins']['elasticsearch'];
+  };
+};
+
 export type APMRequestHandlerContext<
   TDecodedParams extends { [key in keyof Params]: any } = {}
 > = RequestHandlerContext & {
@@ -56,7 +68,7 @@ export type APMRequestHandlerContext<
   config: APMConfig;
   logger: Logger;
   __LEGACY: {
-    server: Server;
+    server: APMLegacyServer;
   };
 };
 

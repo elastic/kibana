@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
 import { countBy } from 'lodash';
 import { SavedObjectAttributes } from 'src/core/server';
 import { isAgentName } from '../../../common/agent_name';
@@ -13,15 +12,7 @@ import {
   APM_SERVICES_TELEMETRY_SAVED_OBJECT_TYPE,
   APM_SERVICES_TELEMETRY_SAVED_OBJECT_ID
 } from '../../../common/apm_saved_object_constants';
-
-type ServerWithUsageCollector = Server & {
-  usage: {
-    collectorSet: {
-      makeUsageCollector: (options: unknown) => unknown;
-      register: (options: unknown) => unknown;
-    };
-  };
-};
+import { APMLegacyServer } from '../../routes/typings';
 
 export function createApmTelementry(
   agentNames: string[] = []
@@ -34,7 +25,7 @@ export function createApmTelementry(
 }
 
 export async function storeApmServicesTelemetry(
-  server: ServerWithUsageCollector,
+  server: APMLegacyServer,
   apmTelemetry: SavedObjectAttributes
 ) {
   try {
@@ -52,7 +43,7 @@ export async function storeApmServicesTelemetry(
   }
 }
 
-export function makeApmUsageCollector(server: ServerWithUsageCollector) {
+export function makeApmUsageCollector(server: APMLegacyServer) {
   const apmUsageCollector = server.usage.collectorSet.makeUsageCollector({
     type: 'apm',
     fetch: async () => {
