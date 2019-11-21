@@ -17,7 +17,9 @@
  * under the License.
  */
 
-export default function ({ getService, getPageObjects, loadTestFile }) {
+import { FtrProviderContext } from '../../../functional/ftr_provider_context';
+
+export default function({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -25,13 +27,16 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header']);
 
-  describe('runPipeline', function () {
+  describe('runPipeline', function() {
     this.tags(['skipFirefox']);
 
     before(async () => {
       await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.load('../functional/fixtures/es_archiver/visualize_embedding');
-      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'Australia/North', 'defaultIndex': 'logstash-*' });
+      await kibanaServer.uiSettings.replace({
+        'dateFormat:tz': 'Australia/North',
+        defaultIndex: 'logstash-*',
+      });
       await browser.setWindowSize(1300, 900);
       await PageObjects.common.navigateToApp('settings');
       await appsMenu.clickLink('Run Pipeline');

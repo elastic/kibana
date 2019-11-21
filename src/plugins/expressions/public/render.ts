@@ -30,15 +30,17 @@ interface RenderError {
 
 export type IExpressionRendererExtraHandlers = Record<string, any>;
 
+export type RenderResult = RenderId | RenderError;
+
 export class ExpressionRenderHandler {
-  render$: Observable<RenderId | RenderError>;
+  render$: Observable<RenderResult>;
   update$: Observable<any>;
   events$: Observable<event>;
 
   private element: HTMLElement;
   private destroyFn?: any;
   private renderCount: number = 0;
-  private renderSubject: Rx.BehaviorSubject<RenderId | RenderError | null>;
+  private renderSubject: Rx.BehaviorSubject<RenderResult | null>;
   private eventsSubject: Rx.Subject<unknown>;
   private updateSubject: Rx.Subject<unknown>;
   private handlers: IInterpreterRenderHandlers;
@@ -49,11 +51,11 @@ export class ExpressionRenderHandler {
     this.eventsSubject = new Rx.Subject();
     this.events$ = this.eventsSubject.asObservable().pipe(share());
 
-    this.renderSubject = new Rx.BehaviorSubject(null as RenderId | RenderError | null);
+    this.renderSubject = new Rx.BehaviorSubject(null as RenderResult | null);
     this.render$ = this.renderSubject.asObservable().pipe(
       share(),
       filter(_ => _ !== null)
-    ) as Observable<RenderId | RenderError>;
+    ) as Observable<RenderResult>;
 
     this.updateSubject = new Rx.Subject();
     this.update$ = this.updateSubject.asObservable().pipe(share());
