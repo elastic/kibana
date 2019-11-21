@@ -2,7 +2,7 @@
   "id": "watcher",
   "version": "kibana",
   "requiredPlugins": [
-    "feature_catalogue"
+    "home"
   ],
   "server": true,
   "ui": true

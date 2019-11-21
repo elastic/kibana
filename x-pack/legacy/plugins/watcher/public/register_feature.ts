@@ -6,18 +6,16 @@
 
 import { i18n } from '@kbn/i18n';
 import { npSetup } from 'ui/new_platform';
+import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FeatureCatalogueCategory } from '../../../../../src/plugins/feature_catalogue/public/services';
-
-npSetup.plugins.feature_catalogue.register({
+npSetup.plugins.home.featureCatalogue.register({
   id: 'watcher',
   title: 'Watcher', // This is a product name so we don't translate it.
+  category: FeatureCatalogueCategory.ADMIN,
   description: i18n.translate('xpack.watcher.watcherDescription', {
     defaultMessage: 'Detect changes in your data by creating, managing, and monitoring alerts.',
   }),
   icon: 'watchesApp',
   path: '/app/kibana#/management/elasticsearch/watcher/watches',
   showOnHomePage: true,
-  category: FeatureCatalogueCategory.ADMIN,
 });
