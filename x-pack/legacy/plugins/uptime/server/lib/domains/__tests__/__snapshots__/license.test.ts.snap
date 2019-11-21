@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`license check throws for inactive license 1`] = `"License not active"`;
+
+exports[`license check throws for null license 1`] = `"Missing license information"`;
+
+exports[`license check throws for unsupported license type 1`] = `"License not supported"`;

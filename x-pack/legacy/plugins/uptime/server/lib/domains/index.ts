@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { authDomain, UMLicenseCheck } from './auth';
+export { licenseCheck, UMLicenseCheck } from './license';

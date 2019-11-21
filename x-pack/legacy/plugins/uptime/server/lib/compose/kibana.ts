@@ -8,7 +8,7 @@ import { UMKibanaDatabaseAdapter } from '../adapters/database/kibana_database_ad
 import { UMKibanaBackendFrameworkAdapter } from '../adapters/framework';
 import { ElasticsearchMonitorsAdapter } from '../adapters/monitors';
 import { ElasticsearchPingsAdapter } from '../adapters/pings';
-import { authDomain } from '../domains';
+import { licenseCheck } from '../domains';
 import { UMDomainLibs, UMServerLibs } from '../lib';
 import { ElasticsearchMonitorStatesAdapter } from '../adapters/monitor_states';
 import { UMKibanaSavedObjectsAdapter } from '../adapters/saved_objects/kibana_saved_objects_adapter';
@@ -20,7 +20,7 @@ export function compose(server: UptimeCoreSetup, plugins: UptimeCorePlugins): UM
   const database = new UMKibanaDatabaseAdapter(elasticsearch);
 
   const domainLibs: UMDomainLibs = {
-    auth: authDomain,
+    license: licenseCheck,
     monitors: new ElasticsearchMonitorsAdapter(database),
     monitorStates: new ElasticsearchMonitorStatesAdapter(database),
     pings: new ElasticsearchPingsAdapter(database),
