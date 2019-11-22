@@ -41,7 +41,7 @@ export interface SnapshotDetails {
   durationInMillis: number;
   indexFailures: any[];
   shards: SnapshotDetailsShardsStatus;
-  isManagedRepository?: boolean;
+  managedRepository?: string;
   policyName?: string;
 }
 

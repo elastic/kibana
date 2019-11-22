@@ -85,7 +85,7 @@ export function deserializeSnapshotDetails(
     durationInMillis,
     indexFailures,
     shards,
-    isManagedRepository: repository === managedRepository,
+    managedRepository,
   };
 
   if (policyName) {
