@@ -16,7 +16,7 @@ export const elasticsearchPingsAdapter: UMPingsAdapter = {
     callEs,
     { dateRangeStart, dateRangeEnd, monitorId, status, sort, size, location }
   ) => {
-    const sortParam = { sort: [{ '@timestamp': { order: sort } }] };
+    const sortParam = { sort: [{ '@timestamp': { order: sort ?? 'desc' } }] };
     const sizeParam = size ? { size } : undefined;
     const filter: any[] = [{ range: { '@timestamp': { gte: dateRangeStart, lte: dateRangeEnd } } }];
     if (monitorId) {
@@ -83,7 +83,6 @@ export const elasticsearchPingsAdapter: UMPingsAdapter = {
   },
 
   getLatestMonitorDocs: async (callEs, { dateRangeStart, dateRangeEnd, monitorId, location }) => {
-    // TODO: Write tests for this function
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
