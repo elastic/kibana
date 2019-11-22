@@ -145,7 +145,7 @@ export { MountPoint, UnmountCallback } from './types';
  * navigation in the generated docs until there's a fix for
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
-export interface CoreSetup {
+export interface CoreSetup<TPluginsStart extends object = object> {
   /** {@link ApplicationSetup} */
   application: ApplicationSetup;
   /** {@link ContextSetup} */
@@ -167,6 +167,13 @@ export interface CoreSetup {
   injectedMetadata: {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
   };
+
+  /**
+   * Allows plugins to get access to APIs available in start inside async
+   * handlers, such as {@link App.mount}. Promise will not resolve until Core
+   * and plugin dependencies have completed `start`.
+   */
+  getStartServices(): Promise<[CoreStart, TPluginsStart]>;
 }
 
 /**
@@ -218,7 +225,7 @@ export interface CoreStart {
  * @public
  * @deprecated
  */
-export interface LegacyCoreSetup extends CoreSetup {
+export interface LegacyCoreSetup extends CoreSetup<any> {
   /** @deprecated */
   injectedMetadata: InjectedMetadataSetup;
 }
