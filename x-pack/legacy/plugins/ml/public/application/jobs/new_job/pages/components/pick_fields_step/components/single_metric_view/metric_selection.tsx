@@ -10,7 +10,7 @@ import { SingleMetricJobCreator } from '../../../../../common/job_creator';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { AggSelect, DropDownLabel, DropDownProps, createLabel } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
-import { AggFieldPair } from '../../../../../../../../common/types/fields';
+import { AggFieldPair } from '../../../../../../../../../common/types/fields';
 import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart';
 import { getChartSettings } from '../../../charts/common/settings';
 import { mlMessageBarService } from '../../../../../../../components/messagebar';

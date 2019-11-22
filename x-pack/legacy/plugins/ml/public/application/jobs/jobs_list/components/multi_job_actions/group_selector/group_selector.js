@@ -5,7 +5,7 @@
  */
 
 
-import { checkPermission } from 'plugins/ml/privilege/check_privilege';
+import { checkPermission } from '../../../../../privilege/check_privilege';
 import PropTypes from 'prop-types';
 import React, {
   Component,

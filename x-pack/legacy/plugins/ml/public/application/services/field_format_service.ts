@@ -5,9 +5,9 @@
  */
 
 import { IndexPattern } from 'ui/index_patterns';
-import { mlFunctionToESAggregation } from '../../common/util/job_utils';
+import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
 import { getIndexPatternById, getIndexPatternIdFromName } from '../util/index_utils';
-import { mlJobService } from '../services/job_service';
+import { mlJobService } from './job_service';
 
 type FormatsByJobId = Record<string, any>;
 type IndexPatternIdsByJob = Record<string, any>;

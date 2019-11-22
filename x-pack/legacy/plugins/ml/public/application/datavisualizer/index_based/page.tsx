@@ -22,10 +22,10 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { KBN_FIELD_TYPES, esQuery } from '../../../../../../../src/plugins/data/public';
+import { KBN_FIELD_TYPES, esQuery } from '../../../../../../../../src/plugins/data/public';
 import { NavigationMenu } from '../../components/navigation_menu';
-import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
-import { SEARCH_QUERY_LANGUAGE } from '../../../common/constants/search';
+import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
+import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
 import { isFullLicense } from '../../license/check_license';
 import { FullTimeRangeSelector } from '../../components/full_time_range_selector';
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';

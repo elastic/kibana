@@ -9,7 +9,7 @@ import { useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
 import { idx } from '@kbn/elastic-idx';
 
-import { SimpleSavedObject } from 'src/core/public';
+import { SimpleSavedObject } from 'kibana/public';
 import { ml } from '../../../../../services/ml_api_service';
 import { useKibanaContext } from '../../../../../contexts/kibana';
 

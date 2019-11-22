@@ -5,7 +5,7 @@
  */
 
 import { createContext } from 'react';
-import { Field, Aggregation } from '../../../../../common/types/fields';
+import { Field, Aggregation } from '../../../../../../common/types/fields';
 import { TimeBuckets } from '../../../../util/time_buckets';
 import { JobCreatorType, SingleMetricJobCreator } from '../../common/job_creator';
 import { ChartLoader } from '../../common/chart_loader';

@@ -7,7 +7,7 @@
 import React, { FC } from 'react';
 import { EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
 
-import { Field, SplitField } from '../../../../../../../../common/types/fields';
+import { Field, SplitField } from '../../../../../../../../../common/types/fields';
 
 interface DropDownLabel {
   label: string;

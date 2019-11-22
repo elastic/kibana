@@ -10,7 +10,7 @@ import { PropTypes } from 'prop-types';
 import moment from 'moment';
 
 import { ml } from '../../services/ml_api_service';
-import { JobSelectorTable } from './job_selector_table/';
+import { JobSelectorTable } from './job_selector_table';
 import { IdBadges } from './id_badges';
 import { NewSelectionIdBadges } from './new_selection_id_badges';
 import { timefilter } from 'ui/timefilter';

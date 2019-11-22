@@ -24,15 +24,15 @@ import { timefilter } from 'ui/timefilter';
 
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
-import { FORECAST_REQUEST_STATE, JOB_STATE } from '../../../../common/constants/states';
-import { MESSAGE_LEVEL } from '../../../../common/constants/message_levels';
-import { isJobVersionGte } from '../../../../common/util/job_utils';
-import { parseInterval } from '../../../../common/util/parse_interval';
+import { FORECAST_REQUEST_STATE, JOB_STATE } from '../../../../../common/constants/states';
+import { MESSAGE_LEVEL } from '../../../../../common/constants/message_levels';
+import { isJobVersionGte } from '../../../../../common/util/job_utils';
+import { parseInterval } from '../../../../../common/util/parse_interval';
 import { Modal } from './modal';
 import { PROGRESS_STATES } from './progress_states';
-import { ml } from 'plugins/ml/services/ml_api_service';
-import { mlJobService } from 'plugins/ml/services/job_service';
-import { mlForecastService } from 'plugins/ml/services/forecast_service';
+import { ml } from '../../../services/ml_api_service';
+import { mlJobService } from '../../../services/job_service';
+import { mlForecastService } from '../../../services/forecast_service';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 export const FORECAST_DURATION_MAX_DAYS = 3650; // Max forecast duration allowed by analytics.

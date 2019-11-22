@@ -20,21 +20,16 @@ import {
   EsFieldName,
   INDEX_STATUS,
   SEARCH_SIZE,
-  defaultSearchQuery,
-  SearchQuery,
 } from '../../../../common';
 
 import { getOutlierScoreFieldName } from './common';
-import { SavedSearchQuery } from '../../../../../contexts/kibana';
 
 type TableItem = Record<string, any>;
 
 interface LoadExploreDataArg {
   field: string;
   direction: SortDirection;
-  searchQuery: SavedSearchQuery;
 }
-
 export interface UseExploreDataReturnType {
   errorMessage: string;
   loadExploreData: (arg: LoadExploreDataArg) => void;
@@ -55,7 +50,7 @@ export const useExploreData = (
   const [sortField, setSortField] = useState<string>('');
   const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
 
-  const loadExploreData = async ({ field, direction, searchQuery }: LoadExploreDataArg) => {
+  const loadExploreData = async ({ field, direction }: LoadExploreDataArg) => {
     if (jobConfig !== undefined) {
       setErrorMessage('');
       setStatus(INDEX_STATUS.LOADING);
@@ -63,24 +58,19 @@ export const useExploreData = (
       try {
         const resultsField = jobConfig.dest.results_field;
 
-        const body: SearchQuery = {
-          query: searchQuery,
-        };
-
-        if (field !== undefined) {
-          body.sort = [
-            {
-              [field]: {
-                order: direction,
-              },
-            },
-          ];
-        }
-
         const resp: SearchResponse<any> = await ml.esSearch({
           index: jobConfig.dest.index,
           size: SEARCH_SIZE,
-          body,
+          body: {
+            query: { match_all: {} },
+            sort: [
+              {
+                [field]: {
+                  order: direction,
+                },
+              },
+            ],
+          },
         });
 
         setSortField(field);
@@ -145,7 +135,6 @@ export const useExploreData = (
       loadExploreData({
         field: getOutlierScoreFieldName(jobConfig),
         direction: SORT_DIRECTION.DESC,
-        searchQuery: defaultSearchQuery,
       });
     }
   }, [jobConfig && jobConfig.id]);

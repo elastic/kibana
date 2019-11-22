@@ -12,7 +12,6 @@ import { DataFrameAnalyticsConfig } from '../../../../common';
 import { EvaluatePanel } from './evaluate_panel';
 import { ResultsTable } from './results_table';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
-import { RegressionResultsSearchQuery, defaultSearchQuery } from '../../../../common/analytics';
 
 interface GetDataFrameAnalyticsResponse {
   count: number;
@@ -25,7 +24,7 @@ const LoadingPanel: FC = () => (
   </EuiPanel>
 );
 
-export const ExplorationTitle: React.FC<{ jobId: string }> = ({ jobId }) => (
+export const ExplorationTitle: React.SFC<{ jobId: string }> = ({ jobId }) => (
   <EuiTitle size="xs">
     <span>
       {i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.jobIdTitle', {
@@ -45,7 +44,6 @@ export const RegressionExploration: FC<Props> = ({ jobId, jobStatus }) => {
   const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
   const [isLoadingJobConfig, setIsLoadingJobConfig] = useState<boolean>(false);
   const [jobConfigErrorMessage, setJobConfigErrorMessage] = useState<undefined | string>(undefined);
-  const [searchQuery, setSearchQuery] = useState<RegressionResultsSearchQuery>(defaultSearchQuery);
 
   const loadJobConfig = async () => {
     setIsLoadingJobConfig(true);
@@ -100,16 +98,12 @@ export const RegressionExploration: FC<Props> = ({ jobId, jobStatus }) => {
     <Fragment>
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
       {isLoadingJobConfig === false && jobConfig !== undefined && (
-        <EvaluatePanel jobConfig={jobConfig} jobStatus={jobStatus} searchQuery={searchQuery} />
+        <EvaluatePanel jobConfig={jobConfig} jobStatus={jobStatus} />
       )}
       <EuiSpacer />
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
       {isLoadingJobConfig === false && jobConfig !== undefined && (
-        <ResultsTable
-          jobConfig={jobConfig}
-          jobStatus={jobStatus}
-          setEvaluateSearchQuery={setSearchQuery}
-        />
+        <ResultsTable jobConfig={jobConfig} jobStatus={jobStatus} />
       )}
     </Fragment>
   );

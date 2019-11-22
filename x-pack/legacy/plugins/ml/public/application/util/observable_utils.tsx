@@ -7,7 +7,7 @@
 import React, { Component, ComponentType } from 'react';
 
 import { BehaviorSubject, Subscription } from 'rxjs';
-import { Dictionary } from '../../common/types/common';
+import { Dictionary } from '../../../common/types/common';
 
 // Sets up a ObservableComponent which subscribes to given observable updates and
 // and passes them on as prop values to the given WrappedComponent.

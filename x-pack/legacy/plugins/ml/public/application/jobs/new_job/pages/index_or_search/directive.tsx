@@ -13,7 +13,7 @@ const module = uiModules.get('apps/ml', ['react']);
 import { timefilter } from 'ui/timefilter';
 
 import { I18nContext } from 'ui/i18n';
-import { InjectorService } from '../../../../../common/types/angular';
+import { InjectorService } from '../../../../../../common/types/angular';
 import { Page } from './page';
 
 module.directive('mlIndexOrSearch', ($injector: InjectorService) => {

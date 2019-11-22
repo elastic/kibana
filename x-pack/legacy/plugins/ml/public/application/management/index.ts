@@ -15,8 +15,8 @@ import { management } from 'ui/management';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { i18n } from '@kbn/i18n';
 import { JOBS_LIST_PATH } from './management_urls';
-import { LICENSE_TYPE } from '../../common/constants/license';
-import 'plugins/ml/management/jobs_list';
+import { LICENSE_TYPE } from '../../../common/constants/license';
+import './jobs_list';
 
 if (
   xpackInfo.get('features.ml.showLinks', false) === true &&

@@ -8,12 +8,12 @@ import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/type
 import { IndexPattern } from 'ui/index_patterns';
 
 import { JobCreator } from './job_creator';
-import { Field, Aggregation, SplitField } from '../../../../../common/types/fields';
+import { Field, Aggregation, SplitField } from '../../../../../../common/types/fields';
 import { Job, Datafeed, Detector, CustomRule } from './configs';
 import { createBasicDetector } from './util/default_configs';
 import { JOB_TYPE } from './util/constants';
 import { getRichDetectors } from './util/general';
-import { isValidJson } from '../../../../../common/util/validation_utils';
+import { isValidJson } from '../../../../../../common/util/validation_utils';
 import { ml } from '../../../../services/ml_api_service';
 
 export interface RichDetector {

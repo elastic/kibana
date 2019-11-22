@@ -17,7 +17,7 @@ import uiRoutes from 'ui/routes';
 import { IndexPatterns } from 'ui/index_patterns';
 import { KibanaConfigTypeFix } from '../../contexts/kibana';
 import { getFileDataVisualizerBreadcrumbs } from './breadcrumbs';
-import { InjectorService } from '../../../common/types/angular';
+import { InjectorService } from '../../../../common/types/angular';
 import { checkBasicLicense } from '../../license/check_license';
 import { checkFindFileStructurePrivilege } from '../../privilege/check_privilege';
 import { getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';

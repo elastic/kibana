@@ -12,7 +12,7 @@ import {
   validateModelMemoryLimit as validateModelMemoryLimitUtils,
   validateGroupNames as validateGroupNamesUtils,
   validateModelMemoryLimitUnits as validateModelMemoryLimitUnitsUtils,
-} from '../../../../common/util/job_utils';
+} from '../../../../../common/util/job_utils';
 import { isValidLabel, isValidTimeRange } from '../../../util/custom_url_utils';
 
 export function validateModelMemoryLimit(mml) {

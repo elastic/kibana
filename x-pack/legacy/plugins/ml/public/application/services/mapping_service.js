@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 
-import { ml } from '../services/ml_api_service';
+import { ml } from './ml_api_service';
 
 // Returns the mapping type of the specified field.
 // Accepts fieldName containing dots representing a nested sub-field.

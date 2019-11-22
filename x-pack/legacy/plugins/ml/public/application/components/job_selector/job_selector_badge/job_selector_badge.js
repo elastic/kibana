@@ -9,7 +9,7 @@
 import React from 'react';
 import { PropTypes } from 'prop-types';
 import { EuiBadge } from '@elastic/eui';
-import { tabColor } from '../../../../common/util/group_color_utils';
+import { tabColor } from '../../../../../common/util/group_color_utils';
 import { i18n } from '@kbn/i18n';
 
 export function JobSelectorBadge({

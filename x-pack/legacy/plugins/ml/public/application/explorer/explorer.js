@@ -41,7 +41,7 @@ import { getBoundsRoundedToInterval } from '../util/time_buckets';
 import { getSelectedJobIds } from '../components/job_selector/job_select_service_utils';
 import { InfluencersList } from '../components/influencers_list';
 import { ALLOW_CELL_RANGE_SELECTION, dragSelect$, explorer$ } from './explorer_dashboard_service';
-import { mlResultsService } from 'plugins/ml/services/results_service';
+import { mlResultsService } from '../services/results_service';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
 import { NavigationMenu } from '../components/navigation_menu';
 import { CheckboxShowCharts, showCharts$ } from '../components/controls/checkbox_showcharts';
@@ -89,7 +89,7 @@ import {
   SWIMLANE_TYPE,
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
-import { ML_RESULTS_INDEX_PATTERN } from '../../common/constants/index_patterns';
+import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 
 // Explorer Charts
 import { ExplorerChartsContainer } from './explorer_charts/explorer_charts_container';

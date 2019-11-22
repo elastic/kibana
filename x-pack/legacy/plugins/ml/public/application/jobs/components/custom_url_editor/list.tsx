@@ -23,9 +23,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { isValidLabel, openCustomUrlWindow } from '../../../util/custom_url_utils';
 import { getTestUrl } from './utils';
 
-import { parseInterval } from '../../../../common/util/parse_interval';
+import { parseInterval } from '../../../../../common/util/parse_interval';
 import { TIME_RANGE_TYPE } from './constants';
-import { KibanaUrlConfig } from '../../../../common/types/custom_urls';
+import { KibanaUrlConfig } from '../../../../../common/types/custom_urls';
 import { Job } from '../../new_job/common/job_creator/configs';
 
 function isValidTimeRange(timeRange: KibanaUrlConfig['time_range']): boolean {

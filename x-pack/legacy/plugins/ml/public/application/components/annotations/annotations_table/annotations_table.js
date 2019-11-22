@@ -41,8 +41,8 @@ import { addItemToRecentlyAccessed } from '../../../util/recently_accessed';
 import { ml } from '../../../services/ml_api_service';
 import { mlJobService } from '../../../services/job_service';
 import { mlTableService } from '../../../services/table_service';
-import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../../common/constants/search';
-import { getLatestDataOrBucketTimestamp, isTimeSeriesViewJob } from '../../../../common/util/job_utils';
+import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../../../common/constants/search';
+import { getLatestDataOrBucketTimestamp, isTimeSeriesViewJob } from '../../../../../common/util/job_utils';
 
 import { annotation$, annotationsRefresh$ } from '../../../services/annotations_service';
 

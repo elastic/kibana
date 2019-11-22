@@ -15,8 +15,8 @@ import { ml } from './ml_api_service';
 
 import { mlMessageBarService } from '../components/messagebar';
 import { isWebUrl } from '../util/url_utils';
-import { ML_DATA_PREVIEW_COUNT } from '../../common/util/job_utils';
-import { parseInterval } from '../../common/util/parse_interval';
+import { ML_DATA_PREVIEW_COUNT } from '../../../common/util/job_utils';
+import { parseInterval } from '../../../common/util/parse_interval';
 
 const msgs = mlMessageBarService;
 let jobs = [];

@@ -11,7 +11,7 @@ import { MultiMetricJobCreator } from '../../../../../common/job_creator';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { DropDownLabel, DropDownProps } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
-import { AggFieldPair } from '../../../../../../../../common/types/fields';
+import { AggFieldPair } from '../../../../../../../../../common/types/fields';
 import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
 import { MetricSelector } from './metric_selector';
 import { ChartGrid } from './chart_grid';

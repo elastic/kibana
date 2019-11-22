@@ -14,8 +14,8 @@ import { timefilter } from 'ui/timefilter';
 import { IndexPatterns } from 'ui/index_patterns';
 
 import { I18nContext } from 'ui/i18n';
-import { InjectorService } from '../../../../../common/types/angular';
-import { createSearchItems } from '../../../new_job/utils/new_job_utils';
+import { InjectorService } from '../../../../../../common/types/angular';
+import { createSearchItems } from '../../utils/new_job_utils';
 import { Page } from './page';
 
 import { KibanaContext, KibanaConfigTypeFix } from '../../../../contexts/kibana';

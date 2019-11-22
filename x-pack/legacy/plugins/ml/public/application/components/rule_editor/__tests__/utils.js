@@ -16,7 +16,7 @@ import {
   APPLIES_TO,
   OPERATOR,
   FILTER_TYPE,
-} from '../../../../common/constants/detector_rule';
+} from '../../../../../common/constants/detector_rule';
 
 describe('ML - rule editor utils', () => {
 

@@ -17,7 +17,7 @@ import {
 import { JobOverrides, ModuleJobUI, SAVE_STATE } from '../page';
 import { JobItem } from './job_item';
 import { EditJob } from './edit_job';
-import { JobOverride } from '../../../../../common/types/modules';
+import { JobOverride } from '../../../../../../common/types/modules';
 
 interface ModuleJobsProps {
   jobs: ModuleJobUI[];

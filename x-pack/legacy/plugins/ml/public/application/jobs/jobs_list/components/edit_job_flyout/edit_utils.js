@@ -8,8 +8,8 @@
 import { difference } from 'lodash';
 import chrome from 'ui/chrome';
 import { getNewJobLimits } from '../../../../services/ml_server_info';
-import { mlJobService } from 'plugins/ml/services/job_service';
-import { processCreatedBy } from '../../../../../common/util/job_utils';
+import { mlJobService } from '../../../../services/job_service';
+import { processCreatedBy } from '../../../../../../common/util/job_utils';
 
 export function saveJob(job, newJobData, finish) {
 

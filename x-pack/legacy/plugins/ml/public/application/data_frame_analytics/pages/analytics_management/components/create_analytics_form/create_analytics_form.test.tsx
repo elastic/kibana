@@ -6,7 +6,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { mountHook } from '../../../../../../../../../test_utils/enzyme_helpers';
+import { mountHook } from 'test_utils/enzyme_helpers';
 
 import { CreateAnalyticsForm } from './create_analytics_form';
 

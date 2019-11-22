@@ -28,7 +28,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { isValidCustomUrlSettingsTimeRange } from '../../../jobs/components/custom_url_editor/utils';
+import { isValidCustomUrlSettingsTimeRange } from './utils';
 import { isValidLabel } from '../../../util/custom_url_utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';

@@ -21,7 +21,7 @@ import {
 import { metadata } from 'ui/metadata';
 
 // @ts-ignore undeclared module
-import { JobsListView } from '../../../../jobs/jobs_list/components/jobs_list_view';
+import { JobsListView } from '../../../../jobs/jobs_list/components/jobs_list_view/index';
 import { DataFrameAnalyticsList } from '../../../../data_frame_analytics/pages/analytics_management/components/analytics_list';
 
 interface Props {

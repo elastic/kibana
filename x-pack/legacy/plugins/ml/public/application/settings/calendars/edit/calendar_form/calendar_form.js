@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 
 import chrome from 'ui/chrome';
-import { EventsTable } from '../events_table/';
+import { EventsTable } from '../events_table';
 
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 

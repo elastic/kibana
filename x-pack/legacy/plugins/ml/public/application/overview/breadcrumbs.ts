@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
-import { ML_BREADCRUMB } from '../breadcrumbs';
+import { ML_BREADCRUMB } from '../../breadcrumbs';
 
 export function getOverviewBreadcrumbs() {
   // Whilst top level nav menu with tabs remains,

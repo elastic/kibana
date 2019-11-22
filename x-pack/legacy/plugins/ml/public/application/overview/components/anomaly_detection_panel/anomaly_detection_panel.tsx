@@ -20,8 +20,8 @@ import { toastNotifications } from 'ui/notify';
 import { AnomalyDetectionTable } from './table';
 import { ml } from '../../../services/ml_api_service';
 import { getGroupsFromJobs, getStatsBarData, getJobsWithTimerange } from './utils';
-import { Dictionary } from '../../../../common/types/common';
-import { MlSummaryJobs, MlSummaryJob } from '../../../../common/types/jobs';
+import { Dictionary } from '../../../../../common/types/common';
+import { MlSummaryJobs, MlSummaryJob } from '../../../../../common/types/jobs';
 
 export type GroupsDictionary = Dictionary<Group>;
 

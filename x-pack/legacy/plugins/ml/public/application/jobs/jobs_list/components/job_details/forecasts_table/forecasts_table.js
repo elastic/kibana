@@ -25,11 +25,11 @@ import {
 import { formatDate, formatNumber } from '@elastic/eui/lib/services/format';
 import chrome from 'ui/chrome';
 
-import { FORECAST_REQUEST_STATE } from 'plugins/ml/../common/constants/states';
-import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
-import { mlForecastService } from 'plugins/ml/services/forecast_service';
+import { FORECAST_REQUEST_STATE } from '../../../../../../../common/constants/states';
+import { addItemToRecentlyAccessed } from '../../../../../util/recently_accessed';
+import { mlForecastService } from '../../../../../services/forecast_service';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { getLatestDataOrBucketTimestamp, isTimeSeriesViewJob } from '../../../../../../common/util/job_utils';
+import { getLatestDataOrBucketTimestamp, isTimeSeriesViewJob } from '../../../../../../../common/util/job_utils';
 
 const MAX_FORECASTS = 500;
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';

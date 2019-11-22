@@ -9,11 +9,8 @@ import { BehaviorSubject } from 'rxjs';
 import { filter, distinctUntilChanged } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 import { idx } from '@kbn/elastic-idx';
-import { cloneDeep } from 'lodash';
 import { ml } from '../../services/ml_api_service';
-import { Dictionary } from '../../../common/types/common';
 import { getErrorMessage } from '../pages/analytics_management/hooks/use_create_analytics_form';
-import { SavedSearchQuery } from '../../contexts/kibana';
 
 export type IndexName = string;
 export type IndexPattern = string;
@@ -33,16 +30,6 @@ interface RegressionAnalysis {
 
 export const SEARCH_SIZE = 1000;
 
-export const defaultSearchQuery = {
-  match_all: {},
-};
-
-export interface SearchQuery {
-  track_total_hits?: boolean;
-  query: SavedSearchQuery;
-  sort?: any;
-}
-
 export enum INDEX_STATUS {
   UNUSED,
   LOADING,
@@ -51,8 +38,8 @@ export enum INDEX_STATUS {
 }
 
 export interface Eval {
-  meanSquaredError: number | string;
-  rSquared: number | string;
+  meanSquaredError: number | '';
+  rSquared: number | '';
   error: null | string;
 }
 
@@ -130,13 +117,6 @@ export const isOutlierAnalysis = (arg: any): arg is OutlierAnalysis => {
 export const isRegressionAnalysis = (arg: any): arg is RegressionAnalysis => {
   const keys = Object.keys(arg);
   return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.REGRESSION;
-};
-
-export const isRegressionResultsSearchBoolQuery = (
-  arg: any
-): arg is RegressionResultsSearchBoolQuery => {
-  const keys = Object.keys(arg);
-  return keys.length === 1 && keys[0] === 'bool';
 };
 
 export interface DataFrameAnalyticsConfig {
@@ -232,42 +212,6 @@ export function getValuesFromResponse(response: RegressionEvaluateResponse) {
 
   return { meanSquaredError, rSquared };
 }
-interface RegressionResultsSearchBoolQuery {
-  bool: Dictionary<any>;
-}
-interface RegressionResultsSearchTermQuery {
-  term: Dictionary<any>;
-}
-
-export type RegressionResultsSearchQuery =
-  | RegressionResultsSearchBoolQuery
-  | RegressionResultsSearchTermQuery
-  | SavedSearchQuery;
-
-export function getEvalQueryBody({
-  resultsField,
-  isTraining,
-  searchQuery,
-  ignoreDefaultQuery,
-}: {
-  resultsField: string;
-  isTraining: boolean;
-  searchQuery?: RegressionResultsSearchQuery;
-  ignoreDefaultQuery?: boolean;
-}) {
-  let query: RegressionResultsSearchQuery = {
-    term: { [`${resultsField}.is_training`]: { value: isTraining } },
-  };
-
-  if (searchQuery !== undefined && ignoreDefaultQuery === true) {
-    query = searchQuery;
-  } else if (isRegressionResultsSearchBoolQuery(searchQuery)) {
-    const searchQueryClone = cloneDeep(searchQuery);
-    searchQueryClone.bool.must.push(query);
-    query = searchQueryClone;
-  }
-  return query;
-}
 
 export const loadEvalData = async ({
   isTraining,
@@ -275,16 +219,12 @@ export const loadEvalData = async ({
   dependentVariable,
   resultsField,
   predictionFieldName,
-  searchQuery,
-  ignoreDefaultQuery,
 }: {
   isTraining: boolean;
   index: string;
   dependentVariable: string;
   resultsField: string;
   predictionFieldName?: string;
-  searchQuery?: RegressionResultsSearchQuery;
-  ignoreDefaultQuery?: boolean;
 }) => {
   const results: LoadEvaluateResult = { success: false, eval: null, error: null };
   const defaultPredictionField = `${dependentVariable}_prediction`;
@@ -292,7 +232,7 @@ export const loadEvalData = async ({
     predictionFieldName ? predictionFieldName : defaultPredictionField
   }`;
 
-  const query = getEvalQueryBody({ resultsField, isTraining, searchQuery, ignoreDefaultQuery });
+  const query = { term: { [`${resultsField}.is_training`]: { value: isTraining } } };
 
   const config = {
     index,

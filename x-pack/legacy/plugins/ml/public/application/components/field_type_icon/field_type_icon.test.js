@@ -8,7 +8,7 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 
 import { FieldTypeIcon } from './field_type_icon';
-import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
+import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
 
 describe('FieldTypeIcon', () => {
 

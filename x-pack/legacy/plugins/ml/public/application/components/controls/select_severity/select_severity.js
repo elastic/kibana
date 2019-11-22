@@ -22,7 +22,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { getSeverityColor } from '../../../../common/util/anomaly_utils';
+import { getSeverityColor } from '../../../../../common/util/anomaly_utils';
 import { injectObservablesAsProps } from '../../../util/observable_utils';
 
 const warningLabel = i18n.translate('xpack.ml.controls.selectSeverity.warningLabel', { defaultMessage: 'warning' });

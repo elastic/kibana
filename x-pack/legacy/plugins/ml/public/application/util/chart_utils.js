@@ -7,8 +7,8 @@
 
 
 import d3 from 'd3';
-import { calculateTextWidth } from '../util/string_utils';
-import { MULTI_BUCKET_IMPACT } from '../../common/constants/multi_bucket_impact';
+import { calculateTextWidth } from './string_utils';
+import { MULTI_BUCKET_IMPACT } from '../../../common/constants/multi_bucket_impact';
 import moment from 'moment';
 import rison from 'rison-node';
 

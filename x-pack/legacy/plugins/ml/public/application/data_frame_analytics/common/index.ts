@@ -24,8 +24,6 @@ export {
   getPredictedFieldName,
   INDEX_STATUS,
   SEARCH_SIZE,
-  defaultSearchQuery,
-  SearchQuery,
 } from './analytics';
 
 export {
