@@ -23,8 +23,6 @@ import { getSavedObjects } from './saved_objects';
 import { fieldMappings } from './field_mappings';
 import { SampleDatasetSchema } from '../../lib/sample_dataset_registry_types';
 
-const logsSavedObjects = getSavedObjects();
-
 export const logsSpecProvider = function(): SampleDatasetSchema {
   return {
     id: 'logs',
@@ -38,7 +36,7 @@ export const logsSpecProvider = function(): SampleDatasetSchema {
     darkPreviewImagePath: '/plugins/kibana/home/sample_data_resources/logs/dashboard_dark.png',
     overviewDashboard: 'edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b',
     defaultIndex: '90943e30-9a47-11e8-b64d-95841ca0b247',
-    savedObjects: logsSavedObjects,
+    savedObjects: getSavedObjects(),
     dataIndices: [
       {
         id: 'logs',

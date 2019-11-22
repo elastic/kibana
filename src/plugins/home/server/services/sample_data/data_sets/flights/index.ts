@@ -23,8 +23,6 @@ import { getSavedObjects } from './saved_objects';
 import { fieldMappings } from './field_mappings';
 import { SampleDatasetSchema } from '../../lib/sample_dataset_registry_types';
 
-const flightsSavedObjects = getSavedObjects();
-
 export const flightsSpecProvider = function(): SampleDatasetSchema {
   return {
     id: 'flights',
@@ -38,7 +36,7 @@ export const flightsSpecProvider = function(): SampleDatasetSchema {
     darkPreviewImagePath: '/plugins/kibana/home/sample_data_resources/flights/dashboard_dark.png',
     overviewDashboard: '7adfa750-4c81-11e8-b3d7-01146121b73d',
     defaultIndex: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-    savedObjects: flightsSavedObjects,
+    savedObjects: getSavedObjects(),
     dataIndices: [
       {
         id: 'flights',

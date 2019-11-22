@@ -29,20 +29,6 @@ import {
 } from '../lib/translate_timestamp';
 import { loadData } from '../lib/load_data';
 
-const validatePost = {
-  params: schema.object({ id: schema.string() }),
-  query: schema.object({
-    now: schema.maybe(
-      schema.string({
-        validate: value => {
-          Joi.date()
-            .iso()
-            .validate(value);
-        },
-      })
-    ),
-  }),
-};
 const querySchema = {
   query: Joi.object().keys({ now: Joi.date().iso() }),
 };
