@@ -7,23 +7,26 @@
 import { IClusterClient, KibanaRequest } from 'kibana/server';
 import { SearchParams, SearchResponse } from 'elasticsearch';
 import { EndpointData } from '../types';
-import { ResponseToEndpointMapper } from './response_to_endpoint_mapper';
 
 export interface EndpointRequestContext {
-  findEndpoint: (endpointId: string, request: KibanaRequest) => Promise<EndpointData[]>;
-  findLatestOfAllEndpoints: (request: KibanaRequest) => Promise<EndpointData[]>;
+  findEndpoint: (
+    endpointId: string,
+    request: KibanaRequest
+  ) => Promise<SearchResponse<EndpointData>>;
+  findLatestOfAllEndpoints: (request: KibanaRequest) => Promise<SearchResponse<EndpointData>>;
 }
 
 export class EndpointHandler implements EndpointRequestContext {
-  private responseToEndpointMapper: ResponseToEndpointMapper;
   private elasticSearchClient: IClusterClient;
 
   constructor(elasticSearchClient: IClusterClient) {
     this.elasticSearchClient = elasticSearchClient;
-    this.responseToEndpointMapper = new ResponseToEndpointMapper();
   }
 
-  async findEndpoint(endpointId: string, request: KibanaRequest): Promise<EndpointData[]> {
+  async findEndpoint(
+    endpointId: string,
+    request: KibanaRequest
+  ): Promise<SearchResponse<EndpointData>> {
     const searchParams: SearchParams = {
       body: {
         query: {
@@ -42,12 +45,15 @@ export class EndpointHandler implements EndpointRequestContext {
       },
       index: 'endpoint*',
     };
-    const response = await this.search(searchParams, request);
-    return this.responseToEndpointMapper.mapHits(response);
+    return await this.search(searchParams, request);
   }
 
-  async findLatestOfAllEndpoints(request: KibanaRequest): Promise<EndpointData[]> {
+  async findLatestOfAllEndpoints(request: KibanaRequest): Promise<SearchResponse<EndpointData>> {
+    const pageSize: number = request.params.pageSize || 10;
+    const pageIndex: number = request.params.pageIndex || 0;
     const searchParams: SearchParams = {
+      from: pageIndex * pageSize,
+      size: pageSize,
       body: {
         query: {
           match_all: {},
@@ -63,8 +69,7 @@ export class EndpointHandler implements EndpointRequestContext {
       },
       index: 'endpoint*',
     };
-    const response = await this.search(searchParams, request);
-    return this.responseToEndpointMapper.mapInnerHits(response);
+    return await this.search(searchParams, request);
   }
 
   private async search(
