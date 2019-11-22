@@ -1,7 +1,7 @@
 <div class="app-container">
+  <div id="setupModeNav"></div>
   <kbn-top-nav
     name="monitoringMain.navName"
-    config="topNavMenu"
     app-name="'monitoring'"
     show-search-bar="true"
     show-date-picker="true"
@@ -77,7 +77,11 @@
         class="euiTab"
         ng-class="{'euiTab-isSelected': monitoringMain.page === 'overview'}"
       >
-        <span ng-if="monitoringMain.tabIconClass" class="fa {{ monitoringMain.tabIconClass }}" title="{{ monitoringMain.tabIconLabel }}"></span>
+        <span
+          ng-if="monitoringMain.tabIconClass"
+          class="fa {{ monitoringMain.tabIconClass }}"
+          title="{{ monitoringMain.tabIconLabel }}"
+        ></span>
         <span
           i18n-id="xpack.monitoring.esNavigation.instance.overviewLinkText"
           i18n-default-message="Overview"
@@ -92,10 +96,12 @@
         i18n-default-message="Advanced"
       >
       </a>
-        <!-- ML Instance (for use later) -->
+      <!-- ML Instance (for use later) -->
       <a
         ng-if="monitoringMain.instance && monitoringMain.name !== 'nodes' && monitoringMain.name !== 'indices'"
-        class="euiTab">{{ monitoringMain.instance }}</a>
+        class="euiTab"
+        >{{ monitoringMain.instance }}</a
+      >
     </div>
 
     <div ng-if="monitoringMain.inKibana" class="euiTabs" role="navigation">
@@ -281,8 +287,8 @@
         class="euiTab"
         ng-if="monitoringMain.pipelineVersions.length"
         id="dropdown-elm"
-        ng-init="monitoringMain.dropdownLoadedHandler()">
-      </div>
+        ng-init="monitoringMain.dropdownLoadedHandler()"
+      ></div>
     </div>
 
     <div ng-if="monitoringMain.inOverview" class="euiTabs" role="navigation">
@@ -300,10 +306,10 @@
 
     <div ng-if="monitoringMain.inListing" class="euiTabs" role="navigation">
       <a
-      class="euiTab"
-      i18n-id="xpack.monitoring.clustersNavigation.clustersLinkText"
-      i18n-default-message="Clusters"
-    ></a>
+        class="euiTab"
+        i18n-id="xpack.monitoring.clustersNavigation.clustersLinkText"
+        i18n-default-message="Clusters"
+      ></a>
     </div>
   </div>
   <div ng-transclude></div>
