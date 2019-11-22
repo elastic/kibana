@@ -17,54 +17,28 @@
  * under the License.
  */
 
-import {
-  chromeServiceMock,
-  notificationServiceMock,
-  overlayServiceMock,
-  uiSettingsServiceMock,
-  i18nServiceMock,
-  httpServiceMock,
-  injectedMetadataServiceMock,
-} from '../../../../core/public/mocks';
-import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
-
-import { applicationServiceMock } from '../../../../core/public/application/application_service.mock';
 import { createUiNewPlatformMock } from 'ui/new_platform/__mocks__/helpers';
+import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
+import { injectedMetadataServiceMock } from '../../../../core/public/mocks';
 
-// jest.mock('ui/new_platform');
-// jest.doMock('ui/new_platform', () => ({
-//   ...createUiNewPlatformMock()
-// }));
-jest.doMock('ui/new_platform', () => ({
-  npSetup: {
-    core: {
-      notifications: notificationServiceMock.createSetupContract(),
-      injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
-    },
-  },
-  npStart: {
-    core: {
-      i18n: i18nServiceMock.createStartContract(),
-      chrome: chromeServiceMock.createStartContract(),
-      http: httpServiceMock.createStartContract({ basePath: 'path' }),
-      overlays: overlayServiceMock.createStartContract(),
-      notifications: notificationServiceMock.createStartContract(),
-      uiSettings: uiSettingsServiceMock.createStartContract(),
-      injectedMetadata: injectedMetadataServiceMock.createStartContract(),
-      application: applicationServiceMock.createInternalStartContract(),
-    },
-    plugins: {
-      data: {
-        query: {
-          timefilter: {
-            history: {},
-            timefilter: {},
-          },
-        },
+jest.doMock('ui/new_platform', () => {
+  const npMock = createUiNewPlatformMock();
+  return {
+    npSetup: {
+      core: {
+        ...npMock.npSetup.core,
+        injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
       },
     },
-  },
-}));
+    npStart: {
+      ...npMock.npStart,
+      core: {
+        ...npMock.npStart.core,
+        injectedMetadata: injectedMetadataServiceMock.createStartContract(),
+      },
+    },
+  };
+});
 
 Object.assign(window, {
   sessionStorage: new StubBrowserStorage(),

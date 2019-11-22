@@ -18,7 +18,7 @@
  */
 
 import { isNumber, times, identity, random } from 'lodash';
-import angular from 'angular';
+import angular, { IRootScopeService, IScope, ICompileService } from 'angular';
 import $ from 'jquery';
 import 'angular-sanitize';
 import 'angular-mocks';
@@ -34,21 +34,39 @@ interface Sort {
 }
 
 interface Row {
-  [key: string]: number;
+  [key: string]: number | string;
 }
 
 interface Column {
-  id: string;
+  id?: string;
   title: string;
-  formatter?: object;
+  formatter?: {
+    convert?: (val: string) => string;
+  };
+  sortable?: boolean;
+}
+
+interface Table {
+  columns: Column[];
+  rows: Row[];
+}
+
+interface PaginatedTableScope extends IScope {
+  table?: Table;
+  cols?: Column[];
+  rows?: Row[];
+  perPage?: number;
+  sort?: Sort;
+  linkToTop?: boolean;
 }
 
 describe('Table Vis - Paginated table', () => {
-  let $el: any;
-  let $rootScope;
-  let $compile: any;
-  let $scope: any;
+  let $el: JQuery<Element>;
+  let $rootScope: IRootScopeService;
+  let $compile: ICompileService;
+  let $scope: PaginatedTableScope;
   const defaultPerPage = 10;
+  let paginatedTable: any;
 
   const initLocalAngular = () => {
     const tableVisModule = getAngularModule('kibana/table_vis', npStart.core);
@@ -58,13 +76,19 @@ describe('Table Vis - Paginated table', () => {
   beforeEach(initLocalAngular);
   beforeEach(angular.mock.module('kibana/table_vis'));
 
-  beforeEach(inject((_$rootScope_: any, _$compile_: any) => {
-    $rootScope = _$rootScope_;
-    $compile = _$compile_;
-    $scope = $rootScope.$new();
-  }));
+  beforeEach(
+    angular.mock.inject((_$rootScope_: IRootScopeService, _$compile_: ICompileService) => {
+      $rootScope = _$rootScope_;
+      $compile = _$compile_;
+      $scope = $rootScope.$new();
+    })
+  );
 
-  const makeData = function(colCount: number | Column[], rowCount: number | string[][]) {
+  afterEach(() => {
+    $scope.$destroy();
+  });
+
+  const makeData = (colCount: number | Column[], rowCount: number | string[][]) => {
     let columns: Column[] = [];
     let rows: Row[] = [];
 
@@ -107,36 +131,38 @@ describe('Table Vis - Paginated table', () => {
     };
   };
 
-  const renderTable = function(
+  const renderTable = (
     table: { columns: Column[]; rows: Row[] } | null,
     cols: Column[],
     rows: Row[],
     perPage?: number,
     sort?: Sort,
     linkToTop?: boolean
-  ) {
+  ) => {
     $scope.table = table || { columns: [], rows: [] };
     $scope.cols = cols || [];
     $scope.rows = rows || [];
     $scope.perPage = perPage || defaultPerPage;
-    $scope.sort = sort || {};
+    $scope.sort = sort;
     $scope.linkToTop = linkToTop;
 
-    const template = angular.element(`
+    const template = `
       <paginated-table
         table="table"
         columns="cols"
         rows="rows"
         per-page="perPage"
         sort="sort"
-        link-to-top="linkToTop">`);
-    $el = $($compile(template)($scope));
+        link-to-top="linkToTop">`;
+    const element = $compile(template)($scope);
+    $el = $(element);
 
     $scope.$digest();
+    paginatedTable = element.controller('paginatedTable');
   };
 
   describe('rendering', () => {
-    it('should not display without rows', () => {
+    test('should not display without rows', () => {
       const cols: Column[] = [
         {
           id: 'col-1-1',
@@ -149,7 +175,7 @@ describe('Table Vis - Paginated table', () => {
       expect($el.children().length).toBe(0);
     });
 
-    it('should render columns and rows', function() {
+    test('should render columns and rows', () => {
       const data = makeData(2, 2);
       const cols = data.columns;
       const rows = data.rows;
@@ -189,7 +215,7 @@ describe('Table Vis - Paginated table', () => {
       ).toBe(rows[1][1]);
     });
 
-    it('should paginate rows', function() {
+    test('should paginate rows', () => {
       // note: paginate truncates pages, so don't make too many
       const rowCount = random(16, 24);
       const perPageCount = random(5, 8);
@@ -203,7 +229,7 @@ describe('Table Vis - Paginated table', () => {
       expect($el.find('paginate-controls button').length).toBe(pageCount + 2);
     });
 
-    it('should not show blank rows on last page', function() {
+    test('should not show blank rows on last page', () => {
       const rowCount = 7;
       const perPageCount = 10;
       const data = makeData(3, rowCount);
@@ -213,7 +239,7 @@ describe('Table Vis - Paginated table', () => {
       expect(tableRows.length).toBe(rowCount);
     });
 
-    it('should not show link to top when not set', function() {
+    test('should not show link to top when not set', () => {
       const data = makeData(5, 5);
       renderTable(data, data.columns, data.rows, 10);
 
@@ -221,7 +247,7 @@ describe('Table Vis - Paginated table', () => {
       expect(linkToTop.length).toBe(0);
     });
 
-    it('should show link to top when set', function() {
+    test('should show link to top when set', () => {
       const data = makeData(5, 5);
       renderTable(data, data.columns, data.rows, 10, undefined, true);
 
@@ -230,12 +256,11 @@ describe('Table Vis - Paginated table', () => {
     });
   });
 
-  describe('sorting', function() {
-    let data;
-    let lastRowIndex;
-    let paginatedTable;
+  describe('sorting', () => {
+    let data: Table;
+    let lastRowIndex: number;
 
-    beforeEach(function() {
+    beforeEach(() => {
       data = makeData(3, [
         ['bbbb', 'aaaa', 'zzzz'],
         ['cccc', 'cccc', 'aaaa'],
@@ -245,14 +270,9 @@ describe('Table Vis - Paginated table', () => {
 
       lastRowIndex = data.rows.length - 1;
       renderTable(data, data.columns, data.rows);
-      paginatedTable = $el.isolateScope().paginatedTable;
     });
 
-    // afterEach(function () {
-    //   $scope.$destroy();
-    // });
-
-    it('should not sort by default', function() {
+    test('should not sort by default', () => {
       const tableRows = $el.find('tbody tr');
       expect(
         tableRows
@@ -270,7 +290,7 @@ describe('Table Vis - Paginated table', () => {
       ).toBe(data.rows[lastRowIndex][0]);
     });
 
-    it('should do nothing when sorting by invalid column id', function() {
+    test('should do nothing when sorting by invalid column id', () => {
       // sortColumn
       paginatedTable.sortColumn(999);
       $scope.$digest();
@@ -299,7 +319,7 @@ describe('Table Vis - Paginated table', () => {
       ).toBe('zzzz');
     });
 
-    it('should do nothing when sorting by non sortable column', function() {
+    test('should do nothing when sorting by non sortable column', () => {
       data.columns[0].sortable = false;
 
       // sortColumn
@@ -330,7 +350,7 @@ describe('Table Vis - Paginated table', () => {
       ).toBe('zzzz');
     });
 
-    it("should set the sort direction to asc when it's not explicitly set", function() {
+    test("should set the sort direction to asc when it's not explicitly set", () => {
       paginatedTable.sortColumn(1);
       $scope.$digest();
 
@@ -358,7 +378,7 @@ describe('Table Vis - Paginated table', () => {
       ).toBe('aaaa');
     });
 
-    it('should allow you to explicitly set the sort direction', function() {
+    test('should allow you to explicitly set the sort direction', () => {
       paginatedTable.sortColumn(1, 'desc');
       $scope.$digest();
 
@@ -386,7 +406,7 @@ describe('Table Vis - Paginated table', () => {
       ).toBe('bbbb');
     });
 
-    it('should sort ascending on first invocation', function() {
+    test('should sort ascending on first invocation', () => {
       // sortColumn
       paginatedTable.sortColumn(0);
       $scope.$digest();
@@ -408,7 +428,7 @@ describe('Table Vis - Paginated table', () => {
       ).toBe('zzzz');
     });
 
-    it('should sort descending on second invocation', function() {
+    test('should sort descending on second invocation', () => {
       // sortColumn
       paginatedTable.sortColumn(0);
       paginatedTable.sortColumn(0);
@@ -431,7 +451,7 @@ describe('Table Vis - Paginated table', () => {
       ).toBe('aaaa');
     });
 
-    it('should clear sorting on third invocation', function() {
+    test('should clear sorting on third invocation', () => {
       // sortColumn
       paginatedTable.sortColumn(0);
       paginatedTable.sortColumn(0);
@@ -455,7 +475,7 @@ describe('Table Vis - Paginated table', () => {
       ).toBe('aaaa');
     });
 
-    it('should sort new column ascending', function() {
+    test('should sort new column ascending', () => {
       // sort by first column
       paginatedTable.sortColumn(0);
       $scope.$digest();
@@ -482,13 +502,12 @@ describe('Table Vis - Paginated table', () => {
     });
   });
 
-  describe('sorting duplicate columns', function() {
+  describe('sorting duplicate columns', () => {
     let data;
-    let paginatedTable;
     const colText = 'test row';
 
-    beforeEach(function() {
-      const cols = [{ title: colText }, { title: colText }, { title: colText }];
+    beforeEach(() => {
+      const cols: Column[] = [{ title: colText }, { title: colText }, { title: colText }];
       const rows = [
         ['bbbb', 'aaaa', 'zzzz'],
         ['cccc', 'cccc', 'aaaa'],
@@ -498,17 +517,16 @@ describe('Table Vis - Paginated table', () => {
       data = makeData(cols, rows);
 
       renderTable(data, data.columns, data.rows);
-      paginatedTable = $el.isolateScope().paginatedTable;
     });
 
-    it('should have duplicate column titles', function() {
+    test('should have duplicate column titles', () => {
       const columns = $el.find('thead th span');
-      columns.each(function() {
-        expect($(this).text()).toBe(colText);
+      columns.each((i, col) => {
+        expect($(col).text()).toBe(colText);
       });
     });
 
-    it('should handle sorting on columns with the same name', function() {
+    test('should handle sorting on columns with the same name', () => {
       // sort by the last column
       paginatedTable.sortColumn(2);
       $scope.$digest();
@@ -558,7 +576,7 @@ describe('Table Vis - Paginated table', () => {
       ).toBe('zzzz');
     });
 
-    it('should sort correctly between columns', function() {
+    test('should sort correctly between columns', () => {
       // sort by the last column
       paginatedTable.sortColumn(2);
       $scope.$digest();
@@ -636,7 +654,7 @@ describe('Table Vis - Paginated table', () => {
       ).toBe('zzzz');
     });
 
-    it('should not sort duplicate columns', function() {
+    test('should not sort duplicate columns', () => {
       paginatedTable.sortColumn(1);
       $scope.$digest();
 
@@ -647,16 +665,15 @@ describe('Table Vis - Paginated table', () => {
     });
   });
 
-  describe('object rows', function() {
-    let cols;
-    let rows;
-    let paginatedTable;
+  describe('object rows', () => {
+    let cols: Column[];
+    let rows: any;
 
-    beforeEach(function() {
+    beforeEach(() => {
       cols = [
         {
           title: 'object test',
-          id: 0,
+          id: '0',
           formatter: {
             convert: val => {
               return val === 'zzz' ? '<h1>hello</h1>' : val;
@@ -666,17 +683,16 @@ describe('Table Vis - Paginated table', () => {
       ];
       rows = [['aaaa'], ['zzz'], ['bbbb']];
       renderTable({ columns: cols, rows }, cols, rows);
-      paginatedTable = $el.isolateScope().paginatedTable;
     });
 
-    it('should append object markup', function() {
+    test('should append object markup', () => {
       const tableRows = $el.find('tbody tr');
       expect(tableRows.eq(0).find('h1').length).toBe(0);
       expect(tableRows.eq(1).find('h1').length).toBe(1);
       expect(tableRows.eq(2).find('h1').length).toBe(0);
     });
 
-    it('should sort using object value', function() {
+    test('should sort using object value', () => {
       paginatedTable.sortColumn(0);
       $scope.$digest();
       let tableRows = $el.find('tbody tr');
