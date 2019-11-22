@@ -66,3 +66,5 @@ export interface ScheduleStepRule {
   to?: string;
 }
 export type ScheduleStepRuleJson = ScheduleStepRule;
+
+export type FormatRuleType = 'query' | 'saved_query';

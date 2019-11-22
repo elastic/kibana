@@ -16,7 +16,7 @@ export const NewRuleSchema = t.intersection([
     name: t.string,
     query: t.string,
     severity: t.string,
-    type: t.string,
+    type: t.union([t.literal('query'), t.literal('saved_query')]),
   }),
   t.partial({
     created_by: t.string,

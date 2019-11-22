@@ -16,6 +16,7 @@ import {
   DefineStepRuleJson,
   ScheduleStepRuleJson,
   AboutStepRuleJson,
+  FormatRuleType,
 } from './types';
 
 const getTimeTypeValue = (time: string): { unit: string; value: number } => {
@@ -83,8 +84,9 @@ export const formatRule = (
   aboutStepData: AboutStepRule,
   scheduleData: ScheduleStepRule
 ): NewRule => {
+  const type: FormatRuleType = defineStepData.queryBar.saved_id != null ? 'saved_query' : 'query';
   const persistData = {
-    type: 'query',
+    type,
     ...formatDefineStepData(defineStepData),
     ...formatAboutStepData(aboutStepData),
     ...formatScheduleStepData(scheduleData),
