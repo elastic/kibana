@@ -32,9 +32,8 @@ The Linux archive for Kibana v{version} can be downloaded and installed as follo
 
 ["source","sh",subs="attributes"]
 --------------------------------------------
-wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-linux-x86_64.tar.gz
-wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-linux-x86_64.tar.gz.sha512
-shasum -a 512 -c kibana-{version}-linux-x86_64.tar.gz.sha512 <1>
+curl -O https://artifacts.elastic.co/downloads/kibana/kibana-{version}-linux-x86_64.tar.gz
+curl https://artifacts.elastic.co/downloads/kibana/kibana-{version}-linux-x86_64.tar.gz.sha512 | shasum -a 512 -c - <1>
 tar -xzf kibana-{version}-linux-x86_64.tar.gz
 cd kibana-{version}-linux-x86_64/ <2>
 --------------------------------------------
@@ -61,8 +60,7 @@ The Darwin archive for Kibana v{version} can be downloaded and installed as foll
 ["source","sh",subs="attributes"]
 --------------------------------------------
 curl -O https://artifacts.elastic.co/downloads/kibana/kibana-{version}-darwin-x86_64.tar.gz
-curl -O https://artifacts.elastic.co/downloads/kibana/kibana-{version}-darwin-x86_64.tar.gz.sha512
-shasum -a 512 -c kibana-{version}-darwin-x86_64.tar.gz.sha512 <1>
+curl https://artifacts.elastic.co/downloads/kibana/kibana-{version}-darwin-x86_64.tar.gz.sha512 | shasum -a 512 -c - <1>
 tar -xzf kibana-{version}-darwin-x86_64.tar.gz
 cd kibana-{version}-darwin-x86_64/ <2>
 --------------------------------------------
