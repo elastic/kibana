@@ -5,7 +5,6 @@
  */
 
 import React, { useState, useRef, useCallback } from 'react';
-
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiSwitch } from '@elastic/eui';
 
 import {
@@ -22,7 +21,7 @@ import { getFieldConfig } from '../../../../lib';
 type ChildrenFunc = (isOn: boolean) => React.ReactNode;
 
 interface Props {
-  title?: JSX.Element;
+  title: JSX.Element;
   withToggle?: boolean;
   toggleDefaultValue?: boolean;
   direction?: 'row' | 'column';
@@ -49,6 +48,7 @@ export const EditFieldFormRow = React.memo(
   }: Props) => {
     const form = useFormContext();
     const toggleField = useRef<FieldHook | undefined>(undefined);
+    const switchLabel = title.props.children;
 
     const initialVisibleState =
       toggleDefaultValue !== undefined
@@ -83,7 +83,7 @@ export const EditFieldFormRow = React.memo(
     const renderToggleInput = () =>
       formFieldPath === undefined ? (
         <EuiSwitch
-          label={title}
+          label={switchLabel}
           checked={isContentVisible}
           onChange={onToggle}
           data-test-subj="input"
@@ -96,7 +96,9 @@ export const EditFieldFormRow = React.memo(
         >
           {field => {
             toggleField.current = field;
-            return <ToggleField field={field} />;
+            return (
+              <ToggleField field={field} euiFieldProps={{ label: switchLabel, showLabel: false }} />
+            );
           }}
         </UseField>
       );
