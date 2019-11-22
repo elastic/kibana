@@ -17,14 +17,11 @@
  * under the License.
  */
 
-import { FieldHook } from '../hook_form_lib';
+import { PluginInitializerContext } from 'kibana/public';
+import { KibanaLegacyPlugin } from './plugin';
 
-export const getFieldValidityAndErrorMessage = (
-  field: FieldHook
-): { isInvalid: boolean; errorMessage: string | null } => {
-  const isInvalid = !field.isChangingValue && field.errors.length > 0;
-  const errorMessage =
-    !field.isChangingValue && field.errors.length ? field.errors[0].message : null;
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new KibanaLegacyPlugin();
+}
 
-  return { isInvalid, errorMessage };
-};
+export * from './plugin';
