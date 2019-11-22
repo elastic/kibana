@@ -7,7 +7,6 @@ import { createHash } from 'crypto';
 import { performance } from 'perf_hooks';
 import { pickBy } from 'lodash/fp';
 import { SignalHit, Signal } from '../../types';
-import { DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import { Logger } from '../../../../../../../../src/core/server';
 import { AlertServices } from '../../../../../alerting/server/types';
 import {
@@ -61,7 +60,6 @@ export const buildRule = ({
     severity: signalParams.severity,
     tags: signalParams.tags,
     type: signalParams.type,
-    size: signalParams.size,
     to: signalParams.to,
     enabled,
     filters: signalParams.filters,
@@ -123,7 +121,7 @@ export const buildBulkBody = ({
   return signalHit;
 };
 
-interface SingleBulkIndexParams {
+interface SingleBulkCreateParams {
   someResult: SignalSearchResponse;
   signalParams: AlertTypeParams;
   services: AlertServices;
@@ -137,8 +135,13 @@ interface SingleBulkIndexParams {
   enabled: boolean;
 }
 
+export const generateId = (docIndex: string, docId: string, version: string): string =>
+  createHash('sha256')
+    .update(docIndex.concat(docId, version))
+    .digest('hex');
+
 // Bulk Index documents.
-export const singleBulkIndex = async ({
+export const singleBulkCreate = async ({
   someResult,
   signalParams,
   services,
@@ -150,7 +153,7 @@ export const singleBulkIndex = async ({
   updatedBy,
   interval,
   enabled,
-}: SingleBulkIndexParams): Promise<boolean> => {
+}: SingleBulkCreateParams): Promise<boolean> => {
   if (someResult.hits.hits.length === 0) {
     return true;
   }
@@ -167,9 +170,7 @@ export const singleBulkIndex = async ({
     {
       create: {
         _index: signalsIndex,
-        _id: createHash('sha256')
-          .update(doc._index.concat(doc._id, doc?._version ?? ''))
-          .digest('hex'),
+        _id: generateId(doc._index, doc._id, doc._version ? doc._version.toString() : ''),
       },
     },
     buildBulkBody({ doc, signalParams, id, name, createdBy, updatedBy, interval, enabled }),
@@ -186,15 +187,13 @@ export const singleBulkIndex = async ({
   if (firstResult.errors) {
     // go through the response status errors and see what
     // types of errors they are, count them up, and log them.
-    const errorCountMap: { [key: string]: number } = {};
-    firstResult.items.forEach(item => {
+    const errorCountMap = firstResult.items.reduce((acc: { [key: string]: number }, item) => {
       if (item.create.error) {
         const responseStatusKey = item.create.status.toString();
-        errorCountMap[responseStatusKey] = errorCountMap[responseStatusKey]
-          ? errorCountMap[responseStatusKey] + 1
-          : 1;
+        acc[responseStatusKey] = acc[responseStatusKey] ? acc[responseStatusKey] + 1 : 1;
       }
-    });
+      return acc;
+    }, {});
     /*
      the logging output below should look like
      {'409': 55}
@@ -216,6 +215,7 @@ interface SingleSearchAfterParams {
   signalParams: AlertTypeParams;
   services: AlertServices;
   logger: Logger;
+  pageSize: number;
 }
 
 // utilize search_after for paging results into bulk.
@@ -224,6 +224,7 @@ export const singleSearchAfter = async ({
   signalParams,
   services,
   logger,
+  pageSize,
 }: SingleSearchAfterParams): Promise<SignalSearchResponse> => {
   if (searchAfterSortId == null) {
     throw Error('Attempted to search after with empty sort id');
@@ -234,7 +235,7 @@ export const singleSearchAfter = async ({
       from: signalParams.from,
       to: signalParams.to,
       filter: signalParams.filter,
-      size: signalParams.size ? signalParams.size : DEFAULT_SEARCH_AFTER_PAGE_SIZE,
+      size: pageSize,
       searchAfterSortId,
     });
     const nextSearchAfterResult: SignalSearchResponse = await services.callCluster(
@@ -248,7 +249,7 @@ export const singleSearchAfter = async ({
   }
 };
 
-interface SearchAfterAndBulkIndexParams {
+interface SearchAfterAndBulkCreateParams {
   someResult: SignalSearchResponse;
   signalParams: AlertTypeParams;
   services: AlertServices;
@@ -260,10 +261,11 @@ interface SearchAfterAndBulkIndexParams {
   updatedBy: string;
   interval: string;
   enabled: boolean;
+  pageSize: number;
 }
 
 // search_after through documents and re-index using bulk endpoint.
-export const searchAfterAndBulkIndex = async ({
+export const searchAfterAndBulkCreate = async ({
   someResult,
   signalParams,
   services,
@@ -275,13 +277,14 @@ export const searchAfterAndBulkIndex = async ({
   updatedBy,
   interval,
   enabled,
-}: SearchAfterAndBulkIndexParams): Promise<boolean> => {
+  pageSize,
+}: SearchAfterAndBulkCreateParams): Promise<boolean> => {
   if (someResult.hits.hits.length === 0) {
     return true;
   }
 
   logger.debug('[+] starting bulk insertion');
-  await singleBulkIndex({
+  await singleBulkCreate({
     someResult,
     signalParams,
     services,
@@ -297,10 +300,9 @@ export const searchAfterAndBulkIndex = async ({
   const totalHits =
     typeof someResult.hits.total === 'number' ? someResult.hits.total : someResult.hits.total.value;
   // maxTotalHitsSize represents the total number of docs to
-  // query for. If maxSignals is present we will only query
-  // up to max signals - otherwise use the value
-  // from track_total_hits.
-  const maxTotalHitsSize = signalParams.maxSignals ? signalParams.maxSignals : totalHits;
+  // query for
+  const maxTotalHitsSize =
+    totalHits >= signalParams.maxSignals ? signalParams.maxSignals : totalHits;
 
   // number of docs in the current search result
   let hitsSize = someResult.hits.hits.length;
@@ -324,6 +326,7 @@ export const searchAfterAndBulkIndex = async ({
         signalParams,
         services,
         logger,
+        pageSize,
       });
       if (searchAfterResult.hits.hits.length === 0) {
         return true;
@@ -337,7 +340,7 @@ export const searchAfterAndBulkIndex = async ({
       }
       sortId = sortIds[0];
       logger.debug('next bulk index');
-      await singleBulkIndex({
+      await singleBulkCreate({
         someResult: searchAfterResult,
         signalParams,
         services,

@@ -5,6 +5,7 @@
  */
 
 import { SignalSourceHit, SignalSearchResponse, AlertTypeParams } from '../types';
+import uuid from 'uuid';
 
 export const sampleSignalAlertParams = (
   maxSignals: number | undefined,
@@ -30,7 +31,6 @@ export const sampleSignalAlertParams = (
   filters: undefined,
   savedId: undefined,
   meta: undefined,
-  size: 1000,
 });
 
 export const sampleDocNoSortId: SignalSourceHit = {
@@ -38,7 +38,18 @@ export const sampleDocNoSortId: SignalSourceHit = {
   _type: 'doc',
   _score: 100,
   _version: 1,
-  _id: 'someFakeId',
+  _id: uuid.v4(),
+  _source: {
+    someKey: 'someValue',
+    '@timestamp': 'someTimeStamp',
+  },
+};
+
+export const sampleDocNoSortIdNoVersion: SignalSourceHit = {
+  _index: 'myFakeSignalIndex',
+  _type: 'doc',
+  _score: 100,
+  _id: uuid.v4(),
   _source: {
     someKey: 'someValue',
     '@timestamp': 'someTimeStamp',
@@ -50,7 +61,7 @@ export const sampleDocWithSortId: SignalSourceHit = {
   _type: 'doc',
   _score: 100,
   _version: 1,
-  _id: 'someFakeId',
+  _id: uuid.v4(),
   _source: {
     someKey: 'someValue',
     '@timestamp': 'someTimeStamp',
@@ -148,6 +159,26 @@ export const sampleDocSearchResultsNoSortId: SignalSearchResponse = {
   },
 };
 
+export const sampleDocSearchResultsNoSortIdNoVersion: SignalSearchResponse = {
+  took: 10,
+  timed_out: false,
+  _shards: {
+    total: 10,
+    successful: 10,
+    failed: 0,
+    skipped: 0,
+  },
+  hits: {
+    total: 100,
+    max_score: 100,
+    hits: [
+      {
+        ...sampleDocNoSortIdNoVersion,
+      },
+    ],
+  },
+};
+
 export const sampleDocSearchResultsNoSortIdNoHits: SignalSearchResponse = {
   took: 10,
   timed_out: false,
@@ -168,7 +199,7 @@ export const sampleDocSearchResultsNoSortIdNoHits: SignalSearchResponse = {
   },
 };
 
-export const repeatedSearchResultsWithSortId = (repeat: number) => ({
+export const repeatedSearchResultsWithSortId = (total: number, pageSize: number) => ({
   took: 10,
   timed_out: false,
   _shards: {
@@ -178,9 +209,9 @@ export const repeatedSearchResultsWithSortId = (repeat: number) => ({
     skipped: 0,
   },
   hits: {
-    total: repeat,
+    total,
     max_score: 100,
-    hits: Array.from({ length: repeat }).map(x => ({
+    hits: Array.from({ length: pageSize }).map(x => ({
       ...sampleDocWithSortId,
     })),
   },

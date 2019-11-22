@@ -42,7 +42,6 @@ export interface SignalAlertParams {
   savedId: string | undefined | null;
   meta: Record<string, {}> | undefined | null;
   severity: string;
-  size: number | undefined | null;
   tags: string[];
   to: string;
   type: 'filter' | 'query' | 'saved_query';

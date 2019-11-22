@@ -13,7 +13,7 @@ import {
 } from '../../../../common/constants';
 
 import { buildEventsSearchQuery } from './build_events_query';
-import { searchAfterAndBulkIndex } from './utils';
+import { searchAfterAndBulkCreate } from './utils';
 import { SignalAlertTypeDefinition } from './types';
 import { getFilter } from './get_filter';
 import { getInputOutputIndex } from './get_input_output_index';
@@ -51,7 +51,6 @@ export const signalsAlertType = ({
         to: schema.string(),
         type: schema.string(),
         references: schema.arrayOf(schema.string(), { defaultValue: [] }),
-        size: schema.maybe(schema.number()),
       }),
     },
     async executor({ alertId, services, params }) {
@@ -67,7 +66,6 @@ export const signalsAlertType = ({
         query,
         to,
         type,
-        size,
       } = params;
 
       // TODO: Remove this hard extraction of name once this is fixed: https://github.com/elastic/kibana/issues/50522
@@ -79,7 +77,11 @@ export const signalsAlertType = ({
       const interval: string = savedObject.attributes.interval;
       const enabled: boolean = savedObject.attributes.enabled;
 
-      const searchAfterSize = size ? size : DEFAULT_SEARCH_AFTER_PAGE_SIZE;
+      // set searchAfter page size to be the lesser of default page size or maxSignals.
+      const searchAfterSize =
+        DEFAULT_SEARCH_AFTER_PAGE_SIZE <= params.maxSignals
+          ? DEFAULT_SEARCH_AFTER_PAGE_SIZE
+          : params.maxSignals;
 
       const { inputIndex, outputIndex: signalsIndex } = await getInputOutputIndex(
         services,
@@ -123,7 +125,7 @@ export const signalsAlertType = ({
           );
         }
 
-        const bulkIndexResult = await searchAfterAndBulkIndex({
+        const bulkIndexResult = await searchAfterAndBulkCreate({
           someResult: noReIndexResult,
           signalParams: params,
           services,
@@ -135,6 +137,7 @@ export const signalsAlertType = ({
           updatedBy,
           interval,
           enabled,
+          pageSize: searchAfterSize,
         });
 
         if (bulkIndexResult) {
