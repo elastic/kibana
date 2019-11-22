@@ -34,6 +34,19 @@ module.exports = function (grunt) {
     return 'Chrome';
   }
 
+  function pickReporters() {
+    // available reporters: https://npmjs.org/browse/keyword/karma-reporter
+    if (process.env.CI && process.env.DISABLE_JUNIT_REPORTER) {
+      return ['dots'];
+    }
+
+    if (process.env.CI) {
+      return ['dots', 'junit'];
+    }
+
+    return ['progress'];
+  }
+
   const config = {
     options: {
       // base path that will be used to resolve all patterns (eg. files, exclude)
@@ -63,14 +76,13 @@ module.exports = function (grunt) {
         },
       },
 
-      // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-      reporters: process.env.CI ? ['dots', 'junit'] : ['progress'],
+      reporters: pickReporters(),
 
       junitReporter: {
         outputFile: resolve(ROOT, 'target/junit', process.env.JOB || '.', `TEST-${process.env.JOB ? process.env.JOB + '-' : ''}karma.xml`),
         useBrowserName: false,
-        nameFormatter: (browser, result) => [...result.suite, result.description].join(' '),
-        classNameFormatter: (browser, result) => {
+        nameFormatter: (_, result) => [...result.suite, result.description].join(' '),
+        classNameFormatter: (_, result) => {
           const rootSuite = result.suite[0] || result.description;
           return `Browser Unit Tests.${rootSuite.replace(/\./g, '·')}`;
         },
