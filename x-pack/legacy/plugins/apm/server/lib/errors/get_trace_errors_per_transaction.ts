@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx';
 import {
   ERROR_LOG_LEVEL,
   PROCESSOR_EVENT,
@@ -12,7 +11,7 @@ import {
   TRANSACTION_ID
 } from '../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../helpers/range_filter';
-import { Setup } from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export interface ErrorsPerTransaction {
   [transactionId: string]: number;
@@ -22,7 +21,7 @@ const includedLogLevels = ['critical', 'error', 'fatal'];
 
 export async function getTraceErrorsPerTransaction(
   traceId: string,
-  setup: Setup
+  setup: Setup & SetupTimeRange
 ): Promise<ErrorsPerTransaction> {
   const { start, end, client, indices } = setup;
 
@@ -55,7 +54,7 @@ export async function getTraceErrorsPerTransaction(
 
   const resp = await client.search(params);
 
-  return (idx(resp.aggregations, _ => _.transactions.buckets) || []).reduce(
+  return (resp.aggregations?.transactions.buckets || []).reduce(
     (acc, bucket) => ({
       ...acc,
       [bucket.key]: bucket.doc_count

@@ -17,7 +17,7 @@ interface Props {
   isVisible: boolean;
 }
 
-export const DeleteAnnotationModal: React.SFC<Props> = ({
+export const DeleteAnnotationModal: React.FC<Props> = ({
   cancelAction,
   deleteAction,
   isVisible,

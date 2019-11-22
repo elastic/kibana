@@ -5,11 +5,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { Logger } from 'src/core/server';
 import { SIGNALS_ID } from '../../../../common/constants';
-import { Logger } from '../../../../../../../../src/core/server';
-
-// TODO: Remove this for the build_events_query call eventually
-import { buildEventsReIndex } from './build_events_reindex';
 
 import { buildEventsSearchQuery } from './build_events_query';
 import { searchAfterAndBulkIndex } from './utils';
@@ -27,14 +24,17 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         falsePositives: schema.arrayOf(schema.string(), { defaultValue: [] }),
         from: schema.string(),
         filter: schema.nullable(schema.object({}, { allowUnknowns: true })),
-        id: schema.string(),
+        ruleId: schema.string(),
         immutable: schema.boolean({ defaultValue: false }),
         index: schema.arrayOf(schema.string()),
         language: schema.nullable(schema.string()),
+        outputIndex: schema.string(),
         savedId: schema.nullable(schema.string()),
+        meta: schema.nullable(schema.object({}, { allowUnknowns: true })),
         query: schema.nullable(schema.string()),
         filters: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
-        maxSignals: schema.number({ defaultValue: 100 }),
+        maxSignals: schema.number({ defaultValue: 10000 }),
+        riskScore: schema.number(),
         severity: schema.string(),
         tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
         to: schema.string(),
@@ -43,25 +43,30 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         size: schema.maybe(schema.number()),
       }),
     },
-    async executor({ services, params }) {
+    async executor({ alertId, services, params }) {
       const {
-        description,
         filter,
         from,
-        id,
+        ruleId,
         index,
         filters,
         language,
+        outputIndex,
         savedId,
         query,
-        maxSignals,
-        name,
-        references,
-        severity,
         to,
         type,
         size,
       } = params;
+
+      // TODO: Remove this hard extraction of name once this is fixed: https://github.com/elastic/kibana/issues/50522
+      const savedObject = await services.savedObjectsClient.get('alert', alertId);
+      const name: string = savedObject.attributes.name;
+
+      const createdBy: string = savedObject.attributes.createdBy;
+      const updatedBy: string = savedObject.attributes.updatedBy;
+      const interval: string = savedObject.attributes.interval;
+      const enabled: boolean = savedObject.attributes.enabled;
 
       const searchAfterSize = size ? size : 1000;
 
@@ -82,61 +87,46 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         to,
         filter: esFilter,
         size: searchAfterSize,
+        searchAfterSortId: undefined,
       });
 
       try {
-        logger.debug(`Starting signal rule "${id}"`);
-        if (process.env.USE_REINDEX_API === 'true') {
-          const reIndex = buildEventsReIndex({
-            index,
-            from,
-            to,
-            // TODO: Change this out once we have solved
-            // https://github.com/elastic/kibana/issues/47002
-            signalsIndex: process.env.SIGNALS_INDEX || '.siem-signals-10-01-2019',
-            severity,
-            description,
-            name,
-            timeDetected: new Date().toISOString(),
-            filter: esFilter,
-            maxDocs: maxSignals,
-            ruleRevision: 1,
-            id,
-            type,
-            references,
-          });
-          const result = await services.callCluster('reindex', reIndex);
-          if (result.total > 0) {
-            logger.info(
-              `Total signals found from signal rule "${id}" (reindex algorithm): ${result.total}`
-            );
-          }
-        } else {
-          logger.debug(`[+] Initial search call of signal rule "${id}"`);
-          const noReIndexResult = await services.callCluster('search', noReIndex);
-          if (noReIndexResult.hits.total.value !== 0) {
-            logger.info(
-              `Total signals found from signal rule "${id}": ${noReIndexResult.hits.total.value}`
-            );
-          }
-
-          const bulkIndexResult = await searchAfterAndBulkIndex(
-            noReIndexResult,
-            params,
-            services,
-            logger
+        logger.debug(`Starting signal rule "id: ${alertId}", "ruleId: ${ruleId}"`);
+        logger.debug(
+          `[+] Initial search call of signal rule "id: ${alertId}", "ruleId: ${ruleId}"`
+        );
+        const noReIndexResult = await services.callCluster('search', noReIndex);
+        if (noReIndexResult.hits.total.value !== 0) {
+          logger.info(
+            `Total signals found from signal rule "id: ${alertId}", "ruleId: ${ruleId}": ${noReIndexResult.hits.total.value}`
           );
+        }
 
-          if (bulkIndexResult) {
-            logger.debug(`Finished signal rule "${id}"`);
-          } else {
-            logger.error(`Error processing signal rule "${id}"`);
-          }
+        const bulkIndexResult = await searchAfterAndBulkIndex({
+          someResult: noReIndexResult,
+          signalParams: params,
+          services,
+          logger,
+          id: alertId,
+          signalsIndex: outputIndex,
+          name,
+          createdBy,
+          updatedBy,
+          interval,
+          enabled,
+        });
+
+        if (bulkIndexResult) {
+          logger.debug(`Finished signal rule "id: ${alertId}", "ruleId: ${ruleId}"`);
+        } else {
+          logger.error(`Error processing signal rule "id: ${alertId}", "ruleId: ${ruleId}"`);
         }
       } catch (err) {
         // TODO: Error handling and writing of errors into a signal that has error
         // handling/conditions
-        logger.error(`Error from signal rule "${id}", ${err.message}`);
+        logger.error(
+          `Error from signal rule "id: ${alertId}", "ruleId: ${ruleId}", ${err.message}`
+        );
       }
     },
   };

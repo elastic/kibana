@@ -6,7 +6,6 @@
 
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import 'jest-styled-components';
 import * as React from 'react';
 
 import { flyoutHeaderHeight } from '../';
@@ -23,6 +22,10 @@ const mockUseKibanaCore = useKibanaCore as jest.Mock;
 jest.mock('../../../lib/compose/kibana_core');
 mockUseKibanaCore.mockImplementation(() => ({
   uiSettings: mockUiSettings,
+}));
+
+jest.mock('ui/vis/lib/timezone', () => ({
+  timezoneProvider: () => () => 'America/New_York',
 }));
 
 describe('Pane', () => {

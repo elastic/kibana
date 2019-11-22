@@ -26,7 +26,7 @@
  *
  * @public
  */
-export type MountPoint = (element: HTMLElement) => UnmountCallback;
+export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => UnmountCallback;
 
 /**
  * A function that will unmount the element previously mounted by

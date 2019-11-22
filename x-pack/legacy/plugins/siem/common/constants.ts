@@ -15,6 +15,8 @@ export const DEFAULT_TIME_RANGE = 'timepicker:timeDefaults';
 export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults';
 export const DEFAULT_SIEM_TIME_RANGE = 'siem:timeDefaults';
 export const DEFAULT_SIEM_REFRESH_INTERVAL = 'siem:refreshIntervalDefaults';
+export const DEFAULT_SIGNALS_INDEX_KEY = 'siem:defaultSignalsIndex';
+export const DEFAULT_SIGNALS_INDEX = '.siem-signals';
 export const DEFAULT_ANOMALY_SCORE = 'siem:defaultAnomalyScore';
 export const DEFAULT_MAX_TABLE_QUERY_SIZE = 10000;
 export const DEFAULT_SCALE_DATE_FORMAT = 'dateFormat:scaled';
@@ -31,3 +33,9 @@ export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges';
  * Id for the SIGNALS alerting type
  */
 export const SIGNALS_ID = `${APP_ID}.signals`;
+
+/**
+ * Detection engine route
+ */
+export const DETECTION_ENGINE_URL = '/api/detection_engine';
+export const DETECTION_ENGINE_RULES_URL = `${DETECTION_ENGINE_URL}/rules`;

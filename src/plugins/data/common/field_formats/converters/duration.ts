@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import moment, { unitOfTime, Duration } from 'moment';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert } from '../types';
+import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 
 const ratioToSeconds: Record<string, number> = {
   picoseconds: 0.000000000001,
@@ -166,7 +166,7 @@ function parseInputAsDuration(val: number, inputFormat: string) {
 }
 
 export class DurationFormat extends FieldFormat {
-  static id = 'duration';
+  static id = FIELD_FORMAT_IDS.DURATION;
   static title = 'Duration';
   static fieldType = KBN_FIELD_TYPES.NUMBER;
   static inputFormats = inputFormats;

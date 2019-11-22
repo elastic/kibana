@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { i18n } from '@kbn/i18n';
 
 export const EMS_CATALOGUE_PATH = 'ems/catalogue';
 
@@ -59,6 +60,9 @@ export const SOURCE_DATA_ID_ORIGIN = 'source';
 
 export const GEOJSON_FILE = 'GEOJSON_FILE';
 
+export const MIN_ZOOM = 0;
+export const MAX_ZOOM = 24;
+
 export const DECIMAL_DEGREES_PRECISION = 5; // meters precision
 export const ZOOM_PRECISION = 2;
 export const ES_SIZE_LIMIT = 10000;
@@ -110,4 +114,16 @@ export const METRIC_TYPE = {
   MIN: 'min',
   SUM: 'sum',
   UNIQUE_COUNT: 'cardinality',
+};
+
+export const COUNT_AGG_TYPE = METRIC_TYPE.COUNT;
+export const COUNT_PROP_LABEL =  i18n.translate('xpack.maps.aggs.defaultCountLabel', {
+  defaultMessage: 'count'
+});
+
+export const COUNT_PROP_NAME = 'doc_count';
+
+export const STYLE_TYPE = {
+  'STATIC': 'STATIC',
+  'DYNAMIC': 'DYNAMIC'
 };
