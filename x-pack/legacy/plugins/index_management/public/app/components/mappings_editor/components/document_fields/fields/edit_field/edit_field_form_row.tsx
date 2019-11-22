@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useRef } from 'react';
-
+import React, { useState, useRef, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiSwitch } from '@elastic/eui';
 
 import {
@@ -22,7 +21,7 @@ import { getFieldConfig } from '../../../../lib';
 type ChildrenFunc = (isOn: boolean) => React.ReactNode;
 
 interface Props {
-  title?: JSX.Element;
+  title: JSX.Element;
   withToggle?: boolean;
   toggleDefaultValue?: boolean;
   direction?: 'row' | 'column';
@@ -41,7 +40,7 @@ export const EditFieldFormRow = React.memo(
     description,
     ariaId,
     withToggle = true,
-    toggleDefaultValue = false,
+    toggleDefaultValue,
     direction = 'row',
     sizeTitle = 'xs',
     formFieldPath,
@@ -49,11 +48,14 @@ export const EditFieldFormRow = React.memo(
   }: Props) => {
     const form = useFormContext();
     const toggleField = useRef<FieldHook | undefined>(undefined);
+    const switchLabel = title.props.children;
 
     const initialVisibleState =
-      formFieldPath === undefined
+      toggleDefaultValue !== undefined
         ? toggleDefaultValue
-        : (getFieldConfig(formFieldPath).defaultValue! as boolean);
+        : formFieldPath !== undefined
+        ? (getFieldConfig(formFieldPath).defaultValue! as boolean)
+        : false;
 
     const [isContentVisible, setIsContentVisible] = useState<boolean>(initialVisibleState);
 
@@ -80,13 +82,23 @@ export const EditFieldFormRow = React.memo(
 
     const renderToggleInput = () =>
       formFieldPath === undefined ? (
-        // TODO: Ask EUI why the "label" is a required prop since last update
-        <EuiSwitch label="" checked={isContentVisible} onChange={onToggle} data-test-subj="input" />
+        <EuiSwitch
+          label={switchLabel}
+          checked={isContentVisible}
+          onChange={onToggle}
+          data-test-subj="input"
+          showLabel={false}
+        />
       ) : (
-        <UseField path={formFieldPath} config={getFieldConfig(formFieldPath)}>
+        <UseField
+          path={formFieldPath}
+          config={{ ...getFieldConfig(formFieldPath), defaultValue: initialVisibleState }}
+        >
           {field => {
             toggleField.current = field;
-            return <ToggleField field={field} />;
+            return (
+              <ToggleField field={field} euiFieldProps={{ label: switchLabel, showLabel: false }} />
+            );
           }}
         </UseField>
       );
@@ -142,13 +154,16 @@ export const EditFieldFormRow = React.memo(
       </EuiFlexGroup>
     );
 
+    const renderChildren = useCallback(
+      formData => {
+        setIsContentVisible(formData[formFieldPath!]);
+        return renderContent();
+      },
+      [formFieldPath]
+    );
+
     return formFieldPath ? (
-      <FormDataProvider pathsToWatch={formFieldPath}>
-        {formData => {
-          setIsContentVisible(formData[formFieldPath]);
-          return renderContent();
-        }}
-      </FormDataProvider>
+      <FormDataProvider pathsToWatch={formFieldPath}>{renderChildren}</FormDataProvider>
     ) : (
       renderContent()
     );

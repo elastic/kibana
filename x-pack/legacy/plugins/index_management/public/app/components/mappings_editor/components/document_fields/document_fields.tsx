@@ -33,9 +33,9 @@ export const DocumentFields = () => {
 
   const renderCreateField = () => {
     // The "fieldToAddFieldTo" is undefined when adding to the top level "properties" object.
-    const showCreateField = status === 'creatingField' && fieldToAddFieldTo === undefined;
+    const isCreateFieldFormVisible = status === 'creatingField' && fieldToAddFieldTo === undefined;
 
-    if (!showCreateField) {
+    if (!isCreateFieldFormVisible) {
       return null;
     }
 

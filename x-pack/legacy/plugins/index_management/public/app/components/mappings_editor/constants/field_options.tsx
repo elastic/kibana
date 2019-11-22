@@ -154,4 +154,14 @@ export const PARAMETERS_OPTIONS: {
       ...getOptionTexts('termVector.withPositionsOffsetsPayloads'),
     },
   ] as SuperSelectOption[],
+  orientation: [
+    {
+      value: 'ccw',
+      ...getOptionTexts('orientation.counterclockwise'),
+    },
+    {
+      value: 'cw',
+      ...getOptionTexts('orientation.clockwise'),
+    },
+  ] as SuperSelectOption[],
 };

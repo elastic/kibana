@@ -15,8 +15,8 @@ export const TextType = () => {
           Content to be shown on the right
         </EditFieldFormRow>
 
-        <EditFieldFormRow withToggle={false}>
-          This one has no toggle, no title and not description!
+        <EditFieldFormRow title={<h3>Title is required</h3>} withToggle={false}>
+          This one has no toggle and not description!
         </EditFieldFormRow>
 
         <EditFieldFormRow

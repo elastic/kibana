@@ -33,66 +33,62 @@ export interface Props {
   children?: (field: FieldHook) => JSX.Element;
 }
 
-export const UseField = ({
-  path,
-  config,
-  defaultValue,
-  component = 'input',
-  componentProps = {},
-  onChange,
-  children,
-}: Props) => {
-  const form = useFormContext();
+export const UseField = React.memo(
+  ({ path, config, defaultValue, component, componentProps, onChange, children }: Props) => {
+    const form = useFormContext();
+    component = component === undefined ? 'input' : component;
+    componentProps = componentProps === undefined ? {} : componentProps;
 
-  if (typeof defaultValue === 'undefined') {
-    defaultValue = form.getFieldDefaultValue(path);
-  }
+    if (typeof defaultValue === 'undefined') {
+      defaultValue = form.getFieldDefaultValue(path);
+    }
 
-  if (!config) {
-    config = form.__readFieldConfigFromSchema(path);
-  }
+    if (!config) {
+      config = form.__readFieldConfigFromSchema(path);
+    }
 
-  // Don't modify the config object
-  const configCopy =
-    typeof defaultValue !== 'undefined' ? { ...config, defaultValue } : { ...config };
+    // Don't modify the config object
+    const configCopy =
+      typeof defaultValue !== 'undefined' ? { ...config, defaultValue } : { ...config };
 
-  if (!configCopy.path) {
-    configCopy.path = path;
-  } else {
-    if (configCopy.path !== path) {
-      throw new Error(
-        `Field path mismatch. Got "${path}" but field config has "${configCopy.path}".`
+    if (!configCopy.path) {
+      configCopy.path = path;
+    } else {
+      if (configCopy.path !== path) {
+        throw new Error(
+          `Field path mismatch. Got "${path}" but field config has "${configCopy.path}".`
+        );
+      }
+    }
+
+    const field = useField(form, path, configCopy, onChange);
+
+    // Remove field from form when it is unmounted or if its path changes
+    useEffect(() => {
+      return () => {
+        form.__removeField(path);
+      };
+    }, [path]);
+
+    // Children prevails over anything else provided.
+    if (children) {
+      return children!(field);
+    }
+
+    if (component === 'input') {
+      return (
+        <input
+          type={field.type}
+          onChange={field.onChange}
+          value={field.value as string}
+          {...componentProps}
+        />
       );
     }
+
+    return component({ field, ...componentProps });
   }
-
-  const field = useField(form, path, configCopy, onChange);
-
-  // Remove field from form when it is unmounted or if its path changes
-  useEffect(() => {
-    return () => {
-      form.__removeField(path);
-    };
-  }, [path]);
-
-  // Children prevails over anything else provided.
-  if (children) {
-    return children!(field);
-  }
-
-  if (component === 'input') {
-    return (
-      <input
-        type={field.type}
-        onChange={field.onChange}
-        value={field.value as string}
-        {...componentProps}
-      />
-    );
-  }
-
-  return component({ field, ...componentProps });
-};
+);
 
 /**
  * Get a <UseField /> component providing some common props for all instances.

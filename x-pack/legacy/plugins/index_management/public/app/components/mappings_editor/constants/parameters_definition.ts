@@ -145,7 +145,7 @@ export const PARAMETERS_DEFINITION = {
   },
   ignore_malformed: {
     fieldConfig: {
-      defaultValue: true,
+      defaultValue: false,
     },
   },
   null_value: {
@@ -442,6 +442,33 @@ export const PARAMETERS_DEFINITION = {
           }) as ValidationFunc,
         },
       ],
+    },
+  },
+  depth_limit: {
+    fieldConfig: {
+      defaultValue: 20,
+      type: FIELD_TYPES.NUMBER,
+      formatters: [toInt],
+      validations: [
+        {
+          validator: (({ value }: ValidationFuncArg<any, number>) => {
+            if ((value as number) < 0) {
+              return { message: commonErrorMessages.smallerThanZero };
+            }
+          }) as ValidationFunc,
+        },
+      ],
+    },
+  },
+  orientation: {
+    fieldConfig: {
+      defaultValue: 'ccw',
+      type: FIELD_TYPES.SUPER_SELECT,
+    },
+  },
+  ignore_z_value: {
+    fieldConfig: {
+      defaultValue: true,
     },
   },
 };

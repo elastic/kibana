@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import classNames from 'classnames';
 
 import { i18n } from '@kbn/i18n';
@@ -129,56 +129,61 @@ export const CreateField = React.memo(function CreateFieldComponent({
     form.setFieldValue('subType', subTypeOptions ? subTypeOptions[0].value : undefined);
   };
 
-  const renderFormFields = (type: MainType) => {
-    const { subTypeOptions, subTypeLabel } = getSubTypeMeta(type);
+  const renderFormFields = useCallback(
+    ({ type }) => {
+      const { subTypeOptions, subTypeLabel } = getSubTypeMeta(type);
 
-    return (
-      <EuiFlexGroup gutterSize="s">
-        {/* Field name */}
-        <EuiFlexItem>
-          <NameParameter />
+      return (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s">
+            {/* Field name */}
+            <EuiFlexItem>
+              <NameParameter />
+            </EuiFlexItem>
+
+            {/* Field type */}
+            <EuiFlexItem>
+              <UseField
+                path="type"
+                config={typeFieldConfig}
+                onChange={onTypeChange}
+                component={SelectField}
+                componentProps={{
+                  euiFieldProps: {
+                    options: isMultiField
+                      ? filterTypesForMultiField(FIELD_TYPES_OPTIONS)
+                      : FIELD_TYPES_OPTIONS,
+                  },
+                }}
+              />
+            </EuiFlexItem>
+
+            {/* Field sub type (if any) */}
+            {subTypeOptions && (
+              <EuiFlexItem grow={false}>
+                <UseField
+                  path="subType"
+                  defaultValue={subTypeOptions[0].value}
+                  config={{
+                    ...typeFieldConfig,
+                    label: subTypeLabel,
+                  }}
+                  component={SelectField}
+                  componentProps={{
+                    euiFieldProps: {
+                      options: subTypeOptions,
+                      hasNoInitialSelection: false,
+                    },
+                  }}
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
-
-        {/* Field type */}
-        <EuiFlexItem>
-          <UseField
-            path="type"
-            config={typeFieldConfig}
-            onChange={onTypeChange}
-            component={SelectField}
-            componentProps={{
-              euiFieldProps: {
-                options: isMultiField
-                  ? filterTypesForMultiField(FIELD_TYPES_OPTIONS)
-                  : FIELD_TYPES_OPTIONS,
-              },
-            }}
-          />
-        </EuiFlexItem>
-
-        {/* Field sub type (if any) */}
-        {subTypeOptions && (
-          <EuiFlexItem grow={false}>
-            <UseField
-              path="subType"
-              defaultValue={subTypeOptions[0].value}
-              config={{
-                ...typeFieldConfig,
-                label: subTypeLabel,
-              }}
-              component={SelectField}
-              componentProps={{
-                euiFieldProps: {
-                  options: subTypeOptions,
-                  hasNoInitialSelection: false,
-                },
-              }}
-            />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    );
-  };
+      );
+    },
+    [form, isMultiField]
+  );
 
   const renderFormActions = () => (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
@@ -199,6 +204,18 @@ export const CreateField = React.memo(function CreateFieldComponent({
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
+  );
+
+  const renderParametersForm = useCallback(
+    ({ type, subType }) => {
+      const ParametersForm = getParametersFormForType(type, subType);
+      return ParametersForm ? (
+        <div className="mappingsEditor__createFieldRequiredProps">
+          <ParametersForm allFields={allFields} />
+        </div>
+      ) : null;
+    },
+    [allFields]
   );
 
   return (
@@ -225,23 +242,12 @@ export const CreateField = React.memo(function CreateFieldComponent({
                   <EuiIcon type="link" />
                 </EuiFlexItem>
               )}
-              <FormDataProvider pathsToWatch="type">
-                {({ type }) => {
-                  return <EuiFlexItem grow={false}>{renderFormFields(type)}</EuiFlexItem>;
-                }}
-              </FormDataProvider>
+              <FormDataProvider pathsToWatch="type">{renderFormFields}</FormDataProvider>
               <EuiFlexItem>{renderFormActions()}</EuiFlexItem>
             </EuiFlexGroup>
 
             <FormDataProvider pathsToWatch={['type', 'subType']}>
-              {({ type, subType }) => {
-                const ParametersForm = getParametersFormForType(type, subType);
-                return ParametersForm ? (
-                  <div className="mappingsEditor__createFieldRequiredProps">
-                    <ParametersForm allFields={allFields} />
-                  </div>
-                ) : null;
-              }}
+              {renderParametersForm}
             </FormDataProvider>
           </div>
         </div>

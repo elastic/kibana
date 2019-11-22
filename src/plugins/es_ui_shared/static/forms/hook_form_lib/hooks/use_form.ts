@@ -159,11 +159,8 @@ export function useForm<T extends FormData = FormData>(
   const addField: FormHook<T>['__addField'] = field => {
     fieldsRefs.current[field.path] = field;
 
-    const currentValue = formData$.current.value[field.path];
-    const fieldValue = field.__serializeOutput();
-
-    if (currentValue !== fieldValue) {
-      updateFormDataAt(field.path, fieldValue);
+    if (!{}.hasOwnProperty.call(formData$.current.value, field.path)) {
+      updateFormDataAt(field.path, field.__serializeOutput());
     }
   };
 
