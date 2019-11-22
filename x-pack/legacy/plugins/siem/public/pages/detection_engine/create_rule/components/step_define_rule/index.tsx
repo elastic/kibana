@@ -21,6 +21,7 @@ import * as I18n from './translations';
 const CommonUseField = getUseField({ component: Field });
 
 export const StepDefineRule = memo<RuleStepProps>(({ isLoading, setStepData }) => {
+  const [initializeOutputIndex, setInitializeOutputIndex] = useState(true);
   const [localUseIndicesConfig, setLocalUseIndicesConfig] = useState('');
   const [
     { indexPatterns: indexPatternQueryBar, isLoading: indexPatternLoadingQueryBar },
@@ -52,11 +53,12 @@ export const StepDefineRule = memo<RuleStepProps>(({ isLoading, setStepData }) =
   }, [form]);
 
   useEffect(() => {
-    if (signalIndexConfig != null) {
+    if (signalIndexConfig != null && initializeOutputIndex) {
       const outputIndexField = form.getFields().outputIndex;
       outputIndexField.setValue(signalIndexConfig);
+      setInitializeOutputIndex(false);
     }
-  }, [signalIndexConfig, form]);
+  }, [initializeOutputIndex, signalIndexConfig, form]);
 
   return (
     <>
