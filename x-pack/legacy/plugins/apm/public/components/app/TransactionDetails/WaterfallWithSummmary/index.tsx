@@ -110,7 +110,7 @@ interface Props {
   isLoading: boolean;
 }
 
-export const WaterfallWithSummmary: React.SFC<Props> = ({
+export const WaterfallWithSummmary: React.FC<Props> = ({
   urlParams,
   location,
   waterfall,
