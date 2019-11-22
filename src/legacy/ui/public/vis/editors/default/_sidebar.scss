@@ -123,4 +123,10 @@
 
 .visEditorSidebar__controls {
   margin: $euiSizeS;
+  display: flex;
+  justify-content: flex-end;
+
+  .visEditorSidebar__autoApplyButton {
+    margin-left: $euiSizeM;
+  }
 }

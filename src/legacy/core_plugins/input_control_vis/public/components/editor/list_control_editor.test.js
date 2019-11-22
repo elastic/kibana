@@ -46,14 +46,12 @@ const controlParams = {
 };
 let handleFieldNameChange;
 let handleIndexPatternChange;
-let handleCheckboxOptionChange;
-let handleNumberOptionChange;
+let handleOptionsChange;
 
 beforeEach(() => {
   handleFieldNameChange = sinon.spy();
   handleIndexPatternChange = sinon.spy();
-  handleCheckboxOptionChange = sinon.spy();
-  handleNumberOptionChange = sinon.spy();
+  handleOptionsChange = sinon.spy();
 });
 
 describe('renders', () => {
@@ -76,8 +74,7 @@ describe('renders', () => {
       controlParams={controlParams}
       handleFieldNameChange={handleFieldNameChange}
       handleIndexPatternChange={handleIndexPatternChange}
-      handleCheckboxOptionChange={handleCheckboxOptionChange}
-      handleNumberOptionChange={handleNumberOptionChange}
+      handleOptionsChange={handleOptionsChange}
       handleParentChange={() => {}}
       parentCandidates={[]}
     />);
@@ -101,8 +98,7 @@ describe('renders', () => {
       controlParams={controlParams}
       handleFieldNameChange={handleFieldNameChange}
       handleIndexPatternChange={handleIndexPatternChange}
-      handleCheckboxOptionChange={handleCheckboxOptionChange}
-      handleNumberOptionChange={handleNumberOptionChange}
+      handleOptionsChange={handleOptionsChange}
       handleParentChange={() => {}}
       parentCandidates={parentCandidates}
     />);
@@ -135,8 +131,7 @@ describe('renders', () => {
         controlParams={controlParams}
         handleFieldNameChange={handleFieldNameChange}
         handleIndexPatternChange={handleIndexPatternChange}
-        handleCheckboxOptionChange={handleCheckboxOptionChange}
-        handleNumberOptionChange={handleNumberOptionChange}
+        handleOptionsChange={handleOptionsChange}
         handleParentChange={() => {}}
         parentCandidates={[]}
       />);
@@ -168,8 +163,7 @@ describe('renders', () => {
         controlParams={controlParams}
         handleFieldNameChange={handleFieldNameChange}
         handleIndexPatternChange={handleIndexPatternChange}
-        handleCheckboxOptionChange={handleCheckboxOptionChange}
-        handleNumberOptionChange={handleNumberOptionChange}
+        handleOptionsChange={handleOptionsChange}
         handleParentChange={() => {}}
         parentCandidates={[]}
       />);
@@ -201,8 +195,7 @@ describe('renders', () => {
         controlParams={controlParams}
         handleFieldNameChange={handleFieldNameChange}
         handleIndexPatternChange={handleIndexPatternChange}
-        handleCheckboxOptionChange={handleCheckboxOptionChange}
-        handleNumberOptionChange={handleNumberOptionChange}
+        handleOptionsChange={handleOptionsChange}
         handleParentChange={() => {}}
         parentCandidates={[]}
       />);
@@ -224,8 +217,7 @@ test('handleCheckboxOptionChange - multiselect', async () => {
     controlParams={controlParams}
     handleFieldNameChange={handleFieldNameChange}
     handleIndexPatternChange={handleIndexPatternChange}
-    handleCheckboxOptionChange={handleCheckboxOptionChange}
-    handleNumberOptionChange={handleNumberOptionChange}
+    handleOptionsChange={handleOptionsChange}
     handleParentChange={() => {}}
     parentCandidates={[]}
   />);
@@ -239,21 +231,13 @@ test('handleCheckboxOptionChange - multiselect', async () => {
   checkbox.simulate('click');
   sinon.assert.notCalled(handleFieldNameChange);
   sinon.assert.notCalled(handleIndexPatternChange);
-  sinon.assert.notCalled(handleNumberOptionChange);
   const expectedControlIndex = 0;
   const expectedOptionName = 'multiselect';
   sinon.assert.calledWith(
-    handleCheckboxOptionChange,
+    handleOptionsChange,
     expectedControlIndex,
     expectedOptionName,
-    sinon.match((evt) => {
-      // Synthetic `evt.target.checked` does not get altered by EuiSwitch,
-      // but its aria attribute is correctly updated
-      if (evt.target.getAttribute('aria-checked') === 'true') {
-        return true;
-      }
-      return false;
-    }, 'unexpected checkbox input event'));
+  );
 });
 
 test('handleNumberOptionChange - size', async () => {
@@ -263,8 +247,7 @@ test('handleNumberOptionChange - size', async () => {
     controlParams={controlParams}
     handleFieldNameChange={handleFieldNameChange}
     handleIndexPatternChange={handleIndexPatternChange}
-    handleCheckboxOptionChange={handleCheckboxOptionChange}
-    handleNumberOptionChange={handleNumberOptionChange}
+    handleOptionsChange={handleOptionsChange}
     handleParentChange={() => {}}
     parentCandidates={[]}
   />);
@@ -276,21 +259,15 @@ test('handleNumberOptionChange - size', async () => {
 
   const input = findTestSubject(component, 'listControlSizeInput');
   input.simulate('change', { target: { value: 7 } });
-  sinon.assert.notCalled(handleCheckboxOptionChange);
   sinon.assert.notCalled(handleFieldNameChange);
   sinon.assert.notCalled(handleIndexPatternChange);
   const expectedControlIndex = 0;
   const expectedOptionName = 'size';
   sinon.assert.calledWith(
-    handleNumberOptionChange,
+    handleOptionsChange,
     expectedControlIndex,
     expectedOptionName,
-    sinon.match((evt) => {
-      if (evt.target.value === 7) {
-        return true;
-      }
-      return false;
-    }, 'unexpected input event'));
+  );
 });
 
 test('field name change', async () => {
@@ -301,8 +278,7 @@ test('field name change', async () => {
       controlParams={controlParams}
       handleFieldNameChange={handleFieldNameChange}
       handleIndexPatternChange={handleIndexPatternChange}
-      handleCheckboxOptionChange={handleCheckboxOptionChange}
-      handleNumberOptionChange={handleNumberOptionChange}
+      handleOptionsChange={handleOptionsChange}
       handleParentChange={() => {}}
       parentCandidates={[]}
     />

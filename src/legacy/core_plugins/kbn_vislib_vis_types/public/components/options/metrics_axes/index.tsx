@@ -22,7 +22,7 @@ import { cloneDeep, uniq, get } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
 import { AggConfig } from 'ui/vis';
-import { useEditorContext } from 'ui/vis/editors/default/state';
+import { useEditorContext } from 'ui/vis/editors/default/state/editor_state_context';
 import { BasicVislibParams, ValueAxis, SeriesParam, Axis } from '../../../types';
 import { ValidationVisOptionsProps } from '../../common';
 import { SeriesPanel } from './series_panel';

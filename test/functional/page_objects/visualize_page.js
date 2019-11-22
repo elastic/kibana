@@ -656,7 +656,11 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async toggleAutoMode() {
-      await testSubjects.click('visualizeEditorAutoButton');
+      // await testSubjects.click('visualizeEditorAutoButton');
+
+      // this is a temporary solution, should be replaced with initial after fixing the EuiToggleButton
+      // passing the data-test-subj attribute to a checkbox
+      await find.clickByCssSelector('.visEditorSidebar__controls input[title="Auto apply"]');
     }
 
     async sizeUpEditor() {

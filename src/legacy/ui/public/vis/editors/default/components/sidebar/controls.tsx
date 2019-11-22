@@ -60,41 +60,9 @@ function DefaultEditorControls({
   }, [isDirty, autoApplyEnabled]);
 
   return (
-    <EuiFlexGroup
-      className="visEditorSidebar__controls"
-      justifyContent="spaceBetween"
-      gutterSize="none"
-      responsive={false}
-    >
-      {enableAutoApply && (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={i18n.translate('common.ui.vis.editors.sidebar.autoApplyChangesTooltip', {
-              defaultMessage: 'Auto apply editor changes.',
-            })}
-          >
-            <EuiButtonToggle
-              aria-label={i18n.translate(
-                'common.ui.vis.editors.sidebar.autoApplyChangesAriaLabel',
-                {
-                  defaultMessage: 'Auto update the visualization on every change',
-                }
-              )}
-              data-test-subj="visualizeEditorAutoButton"
-              fill={autoApplyEnabled}
-              iconType="refresh"
-              isSelected={autoApplyEnabled}
-              label={i18n.translate('common.ui.vis.editors.sidebar.autoApplyChangesLabel', {
-                defaultMessage: 'Auto apply',
-              })}
-              onChange={toggleAutoApply}
-              size="s"
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
+    <div className="visEditorSidebar__controls">
       {!autoApplyEnabled && (
-        <>
+        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               aria-label={i18n.translate('common.ui.vis.editors.sidebar.discardChangesAriaLabel', {
@@ -154,9 +122,33 @@ function DefaultEditorControls({
               </EuiButton>
             )}
           </EuiFlexItem>
-        </>
+        </EuiFlexGroup>
       )}
-    </EuiFlexGroup>
+      {enableAutoApply && (
+        <EuiToolTip
+          content={i18n.translate('common.ui.vis.editors.sidebar.autoApplyChangesTooltip', {
+            defaultMessage: 'Auto apply editor changes.',
+          })}
+        >
+          <EuiButtonToggle
+            aria-label={i18n.translate('common.ui.vis.editors.sidebar.autoApplyChangesAriaLabel', {
+              defaultMessage: 'Auto update the visualization on every change',
+            })}
+            className="visEditorSidebar__autoApplyButton"
+            data-test-subj="visualizeEditorAutoButton"
+            fill={autoApplyEnabled}
+            iconType="refresh"
+            isSelected={autoApplyEnabled}
+            label={i18n.translate('common.ui.vis.editors.sidebar.autoApplyChangesLabel', {
+              defaultMessage: 'Auto apply',
+            })}
+            onChange={toggleAutoApply}
+            size="s"
+            isIconOnly
+          />
+        </EuiToolTip>
+      )}
+    </div>
   );
 }
 

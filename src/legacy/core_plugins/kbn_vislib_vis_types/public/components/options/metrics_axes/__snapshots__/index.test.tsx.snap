@@ -17,11 +17,9 @@ exports[`MetricsAxisOptions component should init with the default set of props 
         "bySchemaName": [Function],
       }
     }
-    aggsLabels=""
     changeValueAxis={[Function]}
     setParamByIndex={[Function]}
     setValue={[MockFunction]}
-    setVisType={[MockFunction]}
     stateParams={
       Object {
         "categoryAxes": Array [
@@ -95,6 +93,7 @@ exports[`MetricsAxisOptions component should init with the default set of props 
     }
     vis={
       Object {
+        "setVisType": [MockFunction],
         "type": Object {
           "schemas": Object {
             "metrics": Array [
@@ -127,13 +126,11 @@ exports[`MetricsAxisOptions component should init with the default set of props 
         "bySchemaName": [Function],
       }
     }
-    aggsLabels=""
     isCategoryAxisHorizontal={true}
     onValueAxisPositionChanged={[Function]}
     removeValueAxis={[Function]}
     setParamByIndex={[Function]}
     setValue={[MockFunction]}
-    setVisType={[MockFunction]}
     stateParams={
       Object {
         "categoryAxes": Array [
@@ -207,6 +204,7 @@ exports[`MetricsAxisOptions component should init with the default set of props 
     }
     vis={
       Object {
+        "setVisType": [MockFunction],
         "type": Object {
           "schemas": Object {
             "metrics": Array [
@@ -238,7 +236,6 @@ exports[`MetricsAxisOptions component should init with the default set of props 
         "bySchemaName": [Function],
       }
     }
-    aggsLabels=""
     axis={
       Object {
         "id": "CategoryAxis-1",
@@ -263,7 +260,6 @@ exports[`MetricsAxisOptions component should init with the default set of props 
     onPositionChanged={[Function]}
     setCategoryAxis={[Function]}
     setValue={[MockFunction]}
-    setVisType={[MockFunction]}
     stateParams={
       Object {
         "categoryAxes": Array [
@@ -337,6 +333,7 @@ exports[`MetricsAxisOptions component should init with the default set of props 
     }
     vis={
       Object {
+        "setVisType": [MockFunction],
         "type": Object {
           "schemas": Object {
             "metrics": Array [
