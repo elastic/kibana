@@ -4,20 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as t from 'io-ts';
-import { getAPMIndexPattern } from '../lib/index_pattern';
+import { createStaticIndexPattern } from '../lib/index_pattern/create_static_index_pattern';
 import { createRoute } from './create_route';
-import { getKueryBarIndexPattern } from '../lib/index_pattern/getKueryBarIndexPattern';
 import { setupRequest } from '../lib/helpers/setup_request';
 
-export const indexPatternRoute = createRoute((core, { server }) => ({
-  path: '/api/apm/index_pattern',
-  handler: async () => {
-    return await getAPMIndexPattern(server);
+export const staticIndexPatternRoute = createRoute(() => ({
+  method: 'POST',
+  path: '/api/apm/index_pattern/static',
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    await createStaticIndexPattern(setup, context);
+
+    // send empty response regardless of outcome
+    return undefined;
   }
 }));
 
-export const kueryBarIndexPatternRoute = createRoute(() => ({
-  path: '/api/apm/kuery_bar_index_pattern',
+export const dynamicIndexPatternRoute = createRoute(() => ({
+  path: '/api/apm/index_pattern/dynamic',
   params: {
     query: t.partial({
       processorEvent: t.union([
@@ -27,9 +31,8 @@ export const kueryBarIndexPatternRoute = createRoute(() => ({
       ])
     })
   },
-  handler: async (request, { query }) => {
-    const { processorEvent } = query;
-    const setup = await setupRequest(request);
-    return getKueryBarIndexPattern({ request, processorEvent, setup });
+  handler: async ({ context, request }) => {
+    const { dynamicIndexPattern } = await setupRequest(context, request);
+    return { dynamicIndexPattern };
   }
 }));

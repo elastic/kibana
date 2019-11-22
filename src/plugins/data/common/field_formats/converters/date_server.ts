@@ -21,22 +21,20 @@ import { memoize, noop } from 'lodash';
 import moment from 'moment-timezone';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert } from '../types';
+import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 
 export class DateFormat extends FieldFormat {
-  static id = 'date';
+  static id = FIELD_FORMAT_IDS.DATE;
   static title = 'Date';
   static fieldType = KBN_FIELD_TYPES.DATE;
 
-  private getConfig: Function;
   private memoizedConverter: Function = noop;
   private memoizedPattern: string = '';
   private timeZone: string = '';
 
   constructor(params: Record<string, any>, getConfig: Function) {
-    super(params);
+    super(params, getConfig);
 
-    this.getConfig = getConfig;
     this.memoizedConverter = memoize((val: any) => {
       if (val == null) {
         return '-';
@@ -66,8 +64,8 @@ export class DateFormat extends FieldFormat {
 
   getParamDefaults() {
     return {
-      pattern: this.getConfig('dateFormat'),
-      timezone: this.getConfig('dateFormat:tz'),
+      pattern: this.getConfig!('dateFormat'),
+      timezone: this.getConfig!('dateFormat:tz'),
     };
   }
 

@@ -18,7 +18,6 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { mount, ReactWrapper } from 'enzyme';
 import { createMemoryHistory, History } from 'history';
 import { BehaviorSubject } from 'rxjs';
@@ -31,13 +30,8 @@ import { AppRouter, AppNotFound } from '../ui';
 
 const createMountHandler = (htmlString: string) =>
   jest.fn(async ({ appBasePath: basename, element: el }: AppMountParameters) => {
-    ReactDOM.render(
-      <div
-        dangerouslySetInnerHTML={{ __html: `\nbasename: ${basename}\nhtml: ${htmlString}\n` }}
-      />,
-      el
-    );
-    return jest.fn(() => ReactDOM.unmountComponentAtNode(el));
+    el.innerHTML = `<div>\nbasename: ${basename}\nhtml: ${htmlString}\n</div>`;
+    return jest.fn(() => (el.innerHTML = ''));
   });
 
 describe('AppContainer', () => {

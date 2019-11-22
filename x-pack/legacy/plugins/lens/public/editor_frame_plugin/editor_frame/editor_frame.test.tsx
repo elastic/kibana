@@ -18,7 +18,7 @@ import {
   createExpressionRendererMock,
   DatasourceMock,
 } from '../mocks';
-import { ExpressionRenderer } from 'src/legacy/core_plugins/expressions/public';
+import { ExpressionRenderer } from 'src/plugins/expressions/public';
 import { DragDrop } from '../../drag_drop';
 import { FrameLayout } from './frame_layout';
 
