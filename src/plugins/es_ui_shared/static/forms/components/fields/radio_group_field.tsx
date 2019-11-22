@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import React, { useCallback } from 'react';
-import { EuiFormRow, EuiRadioGroup, EuiRadioGroupOption } from '@elastic/eui';
+import React from 'react';
+import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
 
-import { FieldHook } from '../../hook_form_lib';
-import { getFieldValidityAndErrorMessage } from '../helpers';
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
 interface Props {
   field: FieldHook;
@@ -32,13 +31,6 @@ interface Props {
 
 export const RadioGroupField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-
-  const onChange = useCallback(
-    (id: string) => {
-      field.setValue(id);
-    },
-    [field.setValue]
-  );
 
   return (
     <EuiFormRow
@@ -52,8 +44,8 @@ export const RadioGroupField = ({ field, euiFieldProps = {}, ...rest }: Props) =
     >
       <EuiRadioGroup
         idSelected={field.value as string}
-        options={(field.options || []) as EuiRadioGroupOption[]}
-        onChange={onChange}
+        options={[]}
+        onChange={field.setValue}
         data-test-subj="input"
         {...euiFieldProps}
       />

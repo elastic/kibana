@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { FormSchema } from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 
-import * as globalI18n from '../../translations';
+import * as CreateRuleI18n from '../../translations';
 
 export const schema: FormSchema = {
   interval: {
@@ -34,7 +34,7 @@ export const schema: FormSchema = {
         defaultMessage: 'Additional look-back',
       }
     ),
-    labelAppend: <EuiText size="xs">{globalI18n.OPTIONAL_FIELD}</EuiText>,
+    labelAppend: <EuiText size="xs">{CreateRuleI18n.OPTIONAL_FIELD}</EuiText>,
     helpText: i18n.translate(
       'xpack.siem.detectionEngine.createRule.stepScheduleRule.fieldAdditionalLookBackHelpText',
       {

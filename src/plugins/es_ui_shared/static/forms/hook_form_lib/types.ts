@@ -69,13 +69,10 @@ export interface FormOptions {
 }
 
 export interface FieldHook {
-  readonly max?: number;
-  readonly min?: number;
   readonly path: string;
   readonly label?: string;
   readonly labelAppend?: string | ReactNode;
   readonly helpText?: string | ReactNode;
-  readonly options?: unknown[];
   readonly type: string;
   readonly value: unknown;
   readonly errors: ValidationError[];
@@ -100,8 +97,6 @@ export interface FieldHook {
 }
 
 export interface FieldConfig<T extends object = any> {
-  readonly max?: number;
-  readonly min?: number;
   readonly path?: string;
   readonly label?: string;
   readonly labelAppend?: string | ReactNode;
@@ -114,7 +109,6 @@ export interface FieldConfig<T extends object = any> {
   readonly serializer?: SerializerFunc;
   readonly fieldsToValidateOnChange?: string[];
   readonly errorDisplayDelay?: number;
-  readonly options?: unknown[];
 }
 
 export interface FieldsMap {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { FieldHook } from '../hook_form_lib';
+import { FieldHook } from './types';
 
 export const getFieldValidityAndErrorMessage = (
   field: FieldHook

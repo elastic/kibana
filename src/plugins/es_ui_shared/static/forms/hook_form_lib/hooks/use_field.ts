@@ -31,13 +31,10 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
     helpText = '',
     validations = [],
     formatters = [],
-    options = [],
     fieldsToValidateOnChange = [path],
     errorDisplayDelay = form.__options.errorDisplayDelay,
     serializer = (value: unknown) => value,
     deserializer = (value: unknown) => value,
-    max = 1,
-    min = 0,
   } = config;
 
   const [value, setStateValue] = useState(
@@ -394,10 +391,7 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
     isPristine,
     isValidating,
     isChangingValue,
-    max,
-    min,
     onChange,
-    options,
     getErrorsMessages,
     setValue,
     setErrors: _setErrors,

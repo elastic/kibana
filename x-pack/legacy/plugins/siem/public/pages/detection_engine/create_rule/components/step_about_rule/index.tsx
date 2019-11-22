@@ -7,17 +7,9 @@
 import { EuiButton, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { memo, useCallback } from 'react';
 
-import {
-  getUseField,
-  useForm,
-  Form,
-  UseField,
-  FormDataProvider,
-} from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
-import { Field } from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/components';
-
 import { RuleStepProps, RuleStep } from '../../types';
-import * as GlobalI18n from '../../translations';
+import * as CreateRuleI18n from '../../translations';
+import { Field, Form, FormDataProvider, getUseField, UseField, useForm } from '../shared_imports';
 import { AddItem } from '../add_item_form';
 import { defaultRiskScoreBySeverity, severityOptions, SeverityValue } from './data';
 import { defaultValue } from './default_value';
@@ -86,6 +78,8 @@ export const StepAboutRule = memo<RuleStepProps>(({ isLoading, setStepData }) =>
             idAria: 'detectionEngineStepAboutRuleRiskScore',
             'data-test-subj': 'detectionEngineStepAboutRuleRiskScore',
             euiFieldProps: {
+              max: 100,
+              min: 0,
               compressed: true,
               fullWidth: false,
               isDisabled: isLoading,
@@ -142,7 +136,7 @@ export const StepAboutRule = memo<RuleStepProps>(({ isLoading, setStepData }) =>
       <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButton fill onClick={onSubmit} isDisabled={isLoading}>
-            {GlobalI18n.CONTINUE}
+            {CreateRuleI18n.CONTINUE}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

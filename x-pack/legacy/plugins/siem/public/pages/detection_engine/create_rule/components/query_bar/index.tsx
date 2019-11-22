@@ -18,12 +18,12 @@ import {
   Query,
   FilterManager,
 } from '../../../../../../../../../../src/plugins/data/public';
-import { FieldHook } from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
-import { getFieldValidityAndErrorMessage } from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/components/helpers';
 
 import { QueryBar } from '../../../../../components/query_bar';
 import { useKibanaCore } from '../../../../../lib/compose/kibana_core';
 import { useSavedQueryServices } from '../../../../../utils/saved_query_services';
+
+import { FieldHook, getFieldValidityAndErrorMessage } from '../shared_imports';
 
 export interface FieldValueQueryBar {
   filters: esFilters.Filter[];

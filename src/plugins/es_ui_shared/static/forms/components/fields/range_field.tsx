@@ -20,8 +20,7 @@
 import React, { useCallback } from 'react';
 import { EuiFormRow, EuiRange } from '@elastic/eui';
 
-import { FieldHook } from '../../hook_form_lib';
-import { getFieldValidityAndErrorMessage } from '../helpers';
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
 interface Props {
   field: FieldHook;
@@ -56,8 +55,8 @@ export const RangeField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
       <EuiRange
         value={field.value as number}
         onChange={onChange}
-        max={field.max || 100}
-        min={field.min || 0}
+        max={10}
+        min={0}
         showRange
         showInput
         fullWidth

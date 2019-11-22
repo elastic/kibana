@@ -7,15 +7,9 @@
 import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import React, { memo, useCallback } from 'react';
 
-import {
-  useForm,
-  Form,
-  UseField,
-} from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
-
 import { RuleStep, RuleStepProps } from '../../types';
 import { ScheduleItem } from '../schedule_item_form';
-
+import { Form, UseField, useForm } from '../shared_imports';
 import { schema } from './schema';
 import * as I18n from './translations';
 

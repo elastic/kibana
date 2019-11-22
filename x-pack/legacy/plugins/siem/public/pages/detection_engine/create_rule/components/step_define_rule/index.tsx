@@ -5,27 +5,18 @@
  */
 
 import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import { isEqual } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useState } from 'react';
 
-import { isEqual } from 'lodash/fp';
-import {
-  getUseField,
-  useForm,
-  Form,
-  UseField,
-  FormDataProvider,
-} from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
-import { Field } from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/components';
-
+import { useFetchIndexPatterns } from '../../../../../containers/detection_engine/rules/fetch_index_patterns';
 import { DEFAULT_INDEX_KEY, DEFAULT_SIGNALS_INDEX_KEY } from '../../../../../../common/constants';
 import { useKibanaUiSetting } from '../../../../../lib/settings/use_kibana_ui_setting';
-
-import * as GlobalI18n from '../../translations';
+import * as CreateRuleI18n from '../../translations';
 import { RuleStep, RuleStepProps } from '../../types';
-
-import { schema } from './schema';
 import { QueryBarDefineRule } from '../query_bar';
-import { useFetchIndexPatterns } from '../../../../../containers/detection_engine/rules/fetch_index_patterns';
+import { Field, Form, FormDataProvider, getUseField, UseField, useForm } from '../shared_imports';
+import { schema } from './schema';
+import * as I18n from './translations';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -76,6 +67,16 @@ export const StepDefineRule = memo<RuleStepProps>(({ isLoading, setStepData }) =
             idAria: 'detectionEngineStepDefineRuleUseIndicesConfig',
             isDisabled: isLoading,
             'data-test-subj': 'detectionEngineStepDefineRuleUseIndicesConfig',
+            options: [
+              {
+                id: 'true',
+                label: I18n.CONFIG_INDICES,
+              },
+              {
+                id: 'false',
+                label: I18n.CUSTOM_INDICES,
+              },
+            ],
           }}
         />
         <CommonUseField
@@ -145,7 +146,7 @@ export const StepDefineRule = memo<RuleStepProps>(({ isLoading, setStepData }) =
       <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButton fill onClick={onSubmit} isDisabled={isLoading}>
-            {GlobalI18n.CONTINUE}
+            {CreateRuleI18n.CONTINUE}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

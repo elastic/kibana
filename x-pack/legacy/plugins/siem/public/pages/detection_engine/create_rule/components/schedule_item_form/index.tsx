@@ -9,11 +9,7 @@ import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import {
-  FieldHook,
-  UseField,
-} from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
-import { getFieldValidityAndErrorMessage } from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/components/helpers';
+import { FieldHook, getFieldValidityAndErrorMessage } from '../shared_imports';
 
 import * as I18n from './translations';
 
@@ -93,27 +89,23 @@ export const ScheduleItem = ({ dataTestSubj, field, idAria, isDisabled }: Schedu
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
     >
-      <UseField
-        path={field.path}
-        component={EuiFieldNumber}
-        componentProps={{
-          append: (
-            <EuiSelect
-              compressed={true}
-              fullWidth={false}
-              options={timeTypeOptions}
-              onChange={onChangeTimeType}
-              value={timeType}
-              {...rest}
-            />
-          ),
-          compressed: true,
-          fullWidth: false,
-          isDisabled,
-          min: 0,
-          onChange: onChangeTimeVal,
-          value: timeVal,
-        }}
+      <EuiFieldNumber
+        append={
+          <EuiSelect
+            compressed={true}
+            fullWidth={false}
+            options={timeTypeOptions}
+            onChange={onChangeTimeType}
+            value={timeType}
+            {...rest}
+          />
+        }
+        compressed
+        fullWidth
+        min={0}
+        onChange={onChangeTimeVal}
+        value={timeVal}
+        {...rest}
       />
     </StyledEuiFormRow>
   );

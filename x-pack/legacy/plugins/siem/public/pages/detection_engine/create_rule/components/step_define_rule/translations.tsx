@@ -19,3 +19,17 @@ export const INVALID_CUSTOM_QUERY = i18n.translate(
     defaultMessage: 'The KQL is invalid',
   }
 );
+
+export const CONFIG_INDICES = i18n.translate(
+  'xpack.siem.detectionEngine.createRule.stepDefineRule.indicesFromConfigDescription',
+  {
+    defaultMessage: 'Use Elasticsearch indices from SIEM advanced settings',
+  }
+);
+
+export const CUSTOM_INDICES = i18n.translate(
+  'xpack.siem.detectionEngine.createRule.stepDefineRule.indicesCustomDescription',
+  {
+    defaultMessage: 'Provide custom list of indices',
+  }
+);

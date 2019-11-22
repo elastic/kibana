@@ -5,12 +5,10 @@
  */
 
 import { EuiButtonEmpty, EuiButtonIcon, EuiFormRow, EuiFieldText, EuiSpacer } from '@elastic/eui';
+import { isEmpty, isEqual } from 'lodash/fp';
 import React, { ChangeEvent, useCallback, useEffect, useState, useRef } from 'react';
 
-import { isEmpty, isEqual } from 'lodash/fp';
-import { FieldHook } from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
-import { getFieldValidityAndErrorMessage } from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/components/helpers';
-
+import { FieldHook, getFieldValidityAndErrorMessage } from '../shared_imports';
 import * as I18n from './translations';
 
 interface AddItemProps {
@@ -20,6 +18,7 @@ interface AddItemProps {
   idAria: string;
   isDisabled: boolean;
 }
+
 export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: AddItemProps) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const [items, setItems] = useState(['']);

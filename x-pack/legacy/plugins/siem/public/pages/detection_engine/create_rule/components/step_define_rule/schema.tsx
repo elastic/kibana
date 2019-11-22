@@ -18,7 +18,7 @@ import {
 import { fieldValidators } from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/helpers';
 import { ERROR_CODE } from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/helpers/field_validators/types';
 
-import * as globalI18n from '../../translations';
+import * as CreateRuleI18n from '../../translations';
 
 import { FieldValueQueryBar } from '../query_bar';
 import { CUSTOM_QUERY_REQUIRED, INVALID_CUSTOM_QUERY } from './translations';
@@ -55,33 +55,13 @@ export const schema: FormSchema = {
         defaultMessage: 'Indices type',
       }
     ),
-    options: [
-      {
-        id: 'true',
-        label: i18n.translate(
-          'xpack.siem.detectionEngine.createRule.stepDefineRule.indicesFromConfigDescription',
-          {
-            defaultMessage: 'Use Elasticsearch indices from SIEM advanced settings',
-          }
-        ),
-      },
-      {
-        id: 'false',
-        label: i18n.translate(
-          'xpack.siem.detectionEngine.createRule.stepDefineRule.indicesCustomDescription',
-          {
-            defaultMessage: 'Provide custom list of indices',
-          }
-        ),
-      },
-    ],
   },
   index: {
     type: FIELD_TYPES.COMBO_BOX,
     label: i18n.translate('xpack.siem.detectionEngine.createRule.stepAboutRule.fiedIndicesLabel', {
       defaultMessage: 'Indices',
     }),
-    labelAppend: <EuiText size="xs">{globalI18n.OPTIONAL_FIELD}</EuiText>,
+    labelAppend: <EuiText size="xs">{CreateRuleI18n.OPTIONAL_FIELD}</EuiText>,
     validations: [
       {
         validator: emptyField(

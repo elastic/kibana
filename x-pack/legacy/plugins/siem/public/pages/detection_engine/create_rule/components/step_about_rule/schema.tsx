@@ -14,7 +14,7 @@ import {
 } from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 import { fieldValidators } from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/helpers';
 
-import * as globalI18n from '../../translations';
+import * as CreateRuleI18n from '../../translations';
 
 const { emptyField } = fieldValidators;
 
@@ -81,8 +81,6 @@ export const schema: FormSchema = {
   },
   riskScore: {
     type: FIELD_TYPES.RANGE,
-    min: 0,
-    max: 100,
     label: i18n.translate(
       'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldRiskScoreLabel',
       {
@@ -97,7 +95,7 @@ export const schema: FormSchema = {
         defaultMessage: 'Reference URLs',
       }
     ),
-    labelAppend: <EuiText size="xs">{globalI18n.OPTIONAL_FIELD}</EuiText>,
+    labelAppend: <EuiText size="xs">{CreateRuleI18n.OPTIONAL_FIELD}</EuiText>,
   },
   falsePositives: {
     label: i18n.translate(
@@ -106,13 +104,13 @@ export const schema: FormSchema = {
         defaultMessage: 'False positives',
       }
     ),
-    labelAppend: <EuiText size="xs">{globalI18n.OPTIONAL_FIELD}</EuiText>,
+    labelAppend: <EuiText size="xs">{CreateRuleI18n.OPTIONAL_FIELD}</EuiText>,
   },
   tags: {
     type: FIELD_TYPES.COMBO_BOX,
     label: i18n.translate('xpack.siem.detectionEngine.createRule.stepAboutRule.fieldTagsLabel', {
       defaultMessage: 'Tags',
     }),
-    labelAppend: <EuiText size="xs">{globalI18n.OPTIONAL_FIELD}</EuiText>,
+    labelAppend: <EuiText size="xs">{CreateRuleI18n.OPTIONAL_FIELD}</EuiText>,
   },
 };
