@@ -83,7 +83,7 @@ function insertDataIntoIndex(
 }
 
 export const createInstallRoute = () => ({
-  path: '/api/sample_data/{id}',
+  path: '/api/sample_data_LP/{id}',
   method: 'POST',
   config: {
     validate: {
@@ -94,7 +94,6 @@ export const createInstallRoute = () => ({
     },
     handler: async (request, h) => {
       const { server, params, query } = request;
-
       const sampleDataset = server.getSampleDatasets().find(({ id }) => id === params.id);
       if (!sampleDataset) {
         return h.response().code(404);

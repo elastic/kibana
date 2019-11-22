@@ -29,17 +29,22 @@ import {
 } from '../lib/translate_timestamp';
 import { loadData } from '../lib/load_data';
 
-const validate = {
+const validatePost = {
   params: schema.object({ id: schema.string() }),
   query: schema.object({
-    now: schema.string({
-      validate: value => {
-        Joi.date()
-          .iso()
-          .validate(value);
-      },
-    }),
+    now: schema.maybe(
+      schema.string({
+        validate: value => {
+          Joi.date()
+            .iso()
+            .validate(value);
+        },
+      })
+    ),
   }),
+};
+const querySchema = {
+  query: Joi.object().keys({ now: Joi.date().iso() }),
 };
 
 const insertDataIntoIndex = (
@@ -93,95 +98,116 @@ const insertDataIntoIndex = (
   return loadData(dataIndexConfig.dataPath, bulkInsert); // this returns a Promise
 };
 
-export const createInstallRoute = (
+export function createInstallRoute(
   router: IRouter,
   sampleDatasets: SampleDatasetSchema[],
   initContext: PluginInitializerContext
-) => {
-  router.post({ path: '/api/sample_data_NP/{id}', validate }, async (context, req, res) => {
-    const { params, query } = req;
-    const sampleDataset = sampleDatasets.find(({ id }) => id === params.id);
-    if (!sampleDataset) {
-      return res.notFound();
-    }
-    const now = query.now ? query.now : new Date();
-    const nowReference = dateToIso8601IgnoringTime(now);
-
-    const counts = {};
-    for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
-      const dataIndexConfig = sampleDataset.dataIndices[i];
-      const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
-
-      // clean up any old installation of dataset
-      try {
-        await context.core.elasticsearch.dataClient.callAsCurrentUser('indices.delete', { index });
-      } catch (err) {
-        // ignore delete errors
-      }
-
-      try {
-        const createIndexParams = {
-          index,
-          body: {
-            settings: { index: { number_of_shards: 1, auto_expand_replicas: '0-1' } },
-            mappings: { properties: dataIndexConfig.fields },
-          },
-        };
-        await context.core.elasticsearch.dataClient.callAsCurrentUser(
-          'indices.create',
-          createIndexParams
-        );
-      } catch (err) {
-        const errMsg = `Unable to create sample data index "${index}", error: ${err.message}`;
+): void {
+  router.post(
+    {
+      path: '/api/sample_data/{id}',
+      validate: {
+        params: schema.object({ id: schema.string() }),
+        query: schema.object({}, { allowUnknowns: true }),
+      },
+    },
+    async (context, req, res) => {
+      const { params, query } = req;
+      /*
+        We have to use a custom validation for optional query because @kbn/config-schema
+        doesn't have a date validation and using schema.maybe effectively returns
+        validate: false,
+        preventing us from accessing the params, query and body
+      */
+      const validDate = Joi.validate(query, querySchema);
+      if (!validDate) {
+        const errMsg = `Invalid date supplied "${query.now}", using current date`;
         initContext.logger.get().debug(errMsg, ['warning']);
-        return res.customError({ body: errMsg, statusCode: err.status });
+      }
+      const sampleDataset = sampleDatasets.find(({ id }) => id === params.id);
+      if (!sampleDataset) {
+        return res.notFound();
+      }
+      const now = query.now ? query.now : new Date();
+      const nowReference = dateToIso8601IgnoringTime(now);
+      const counts = {};
+      for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
+        const dataIndexConfig = sampleDataset.dataIndices[i];
+        const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
+
+        // clean up any old installation of dataset
+        try {
+          await context.core.elasticsearch.dataClient.callAsCurrentUser('indices.delete', {
+            index,
+          });
+        } catch (err) {
+          // ignore delete errors
+        }
+
+        try {
+          const createIndexParams = {
+            index,
+            body: {
+              settings: { index: { number_of_shards: 1, auto_expand_replicas: '0-1' } },
+              mappings: { properties: dataIndexConfig.fields },
+            },
+          };
+          await context.core.elasticsearch.dataClient.callAsCurrentUser(
+            'indices.create',
+            createIndexParams
+          );
+        } catch (err) {
+          const errMsg = `Unable to create sample data index "${index}", error: ${err.message}`;
+          initContext.logger.get().debug(errMsg, ['warning']);
+          return res.customError({ body: errMsg, statusCode: err.status });
+        }
+
+        try {
+          const count = await insertDataIntoIndex(
+            dataIndexConfig,
+            index,
+            nowReference,
+            context,
+            initContext
+          );
+          (counts as any)[index] = count;
+        } catch (err) {
+          const errMsg = `sample_data install errors while loading data. Error: ${err}`;
+          initContext.logger.get().debug(errMsg, ['warning']);
+          return res.internalError({ body: errMsg });
+        }
       }
 
+      let createResults;
       try {
-        const count = await insertDataIntoIndex(
-          dataIndexConfig,
-          index,
-          nowReference,
-          context,
-          initContext
+        createResults = await context.core.savedObjects.client.bulkCreate(
+          sampleDataset.savedObjects,
+          { overwrite: true }
         );
-        (counts as any)[index] = count;
       } catch (err) {
-        const errMsg = `sample_data install errors while loading data. Error: ${err}`;
+        const errMsg = `bulkCreate failed, error: ${err.message}`;
         initContext.logger.get().debug(errMsg, ['warning']);
         return res.internalError({ body: errMsg });
       }
-    }
+      const errors = createResults.saved_objects.filter(savedObjectCreateResult => {
+        return Boolean(savedObjectCreateResult.error);
+      });
+      if (errors.length > 0) {
+        const errMsg = `sample_data install errors while loading saved objects. Errors: ${errors.join(
+          ','
+        )}`;
+        initContext.logger.get().debug(errMsg, ['warning']);
+        return res.customError({ body: errMsg, statusCode: 403 });
+      }
+      // track the usage operation in a non-blocking way -> cannot move this to the NP yet
 
-    let createResults;
-    try {
-      createResults = await context.core.savedObjects.client.bulkCreate(
-        sampleDataset.savedObjects,
-        { overwrite: true }
-      );
-    } catch (err) {
-      const errMsg = `bulkCreate failed, error: ${err.message}`;
-      initContext.logger.get().debug(errMsg, ['warning']);
-      return res.internalError({ body: errMsg });
+      // FINALLY
+      return res.ok({
+        body: {
+          elasticsearchIndicesCreated: counts,
+          kibanaSavedObjectsLoaded: sampleDataset.savedObjects.length,
+        },
+      });
     }
-    const errors = createResults.saved_objects.filter(savedObjectCreateResult => {
-      return Boolean(savedObjectCreateResult.error);
-    });
-    if (errors.length > 0) {
-      const errMsg = `sample_data install errors while loading saved objects. Errors: ${errors.join(
-        ','
-      )}`;
-      initContext.logger.get().debug(errMsg, ['warning']);
-      return res.customError({ body: errMsg, statusCode: 403 });
-    }
-    // track the usage operation in a non-blocking way -> cannot move this to the NP yet
-
-    // FINALLY
-    return res.ok({
-      body: {
-        elasticsearchIndicesCreated: counts,
-        kibanaSavedObjectsLoaded: sampleDataset.savedObjects.length,
-      },
-    });
-  });
-};
+  );
+}

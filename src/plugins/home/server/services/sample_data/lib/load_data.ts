@@ -31,7 +31,7 @@ export function loadData(path: any, bulkInsert: (docs: any[]) => Promise<void>) 
 
     // pause does not stop lines already in buffer. Use smaller buffer size to avoid bulk inserting to many records
     const readStream = fs.createReadStream(path, { highWaterMark: 1024 * 4 });
-    // See https://nodejs.org/api/zlib.html#zlib_class_zlib_unzip
+
     const lineStream = readline.createInterface({ input: readStream.pipe(createUnzip()) });
     const onClose = async () => {
       if (docs.length > 0) {

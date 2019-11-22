@@ -30,12 +30,13 @@ function iso8601ToDateIgnoringTime(iso8601: string) {
   return new Date(year, month, date);
 }
 
-export function dateToIso8601IgnoringTime(date: any) {
+export function dateToIso8601IgnoringTime(date: Date) {
   // not using "Date.toISOString" because only using Date methods that deal with local time
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1;
+  const dateItem = new Date(date);
+  const year = dateItem.getFullYear();
+  const month = dateItem.getMonth() + 1;
   const monthString = month < 10 ? `0${month}` : `${month}`;
-  const dateString = date.getDate() < 10 ? `0${date.getDate()}` : `${date.getDate()}`;
+  const dateString = dateItem.getDate() < 10 ? `0${dateItem.getDate()}` : `${dateItem.getDate()}`;
   return `${year}-${monthString}-${dateString}`;
 }
 
