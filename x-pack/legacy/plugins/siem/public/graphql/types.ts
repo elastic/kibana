@@ -1626,6 +1626,8 @@ export interface NetworkDnsData {
   pageInfo: PageInfoPaginated;
 
   inspect?: Maybe<Inspect>;
+
+  histogram?: Maybe<MatrixOverOrdinalHistogramData[]>;
 }
 
 export interface NetworkDnsEdges {
@@ -1646,6 +1648,14 @@ export interface NetworkDnsItem {
   queryCount?: Maybe<number>;
 
   uniqueDomains?: Maybe<number>;
+}
+
+export interface MatrixOverOrdinalHistogramData {
+  x: string;
+
+  y: number;
+
+  g: string;
 }
 
 export interface NetworkHttpData {
@@ -3311,6 +3321,8 @@ export namespace GetNetworkDnsQuery {
     pageInfo: PageInfo;
 
     inspect: Maybe<Inspect>;
+
+    histogram: Maybe<Histogram[]>;
   };
 
   export type Edges = {
@@ -3359,6 +3371,16 @@ export namespace GetNetworkDnsQuery {
     dsl: string[];
 
     response: string[];
+  };
+
+  export type Histogram = {
+    __typename?: 'MatrixOverOrdinalHistogramData';
+
+    x: string;
+
+    y: number;
+
+    g: string;
   };
 }
 
