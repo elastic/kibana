@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }) {
     await PageObjects.visualize.selectField('machine.ram', 'metrics');
     // go to options page
     log.debug('Going to axis options');
-    await pointSeriesVis.clickAxisOptions();
+    await PageObjects.visualize.clickMetricsAndAxes();
     // add another value axis
     log.debug('adding axis');
     await pointSeriesVis.clickAddAxis();
@@ -116,7 +116,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('grid lines', function () {
       before(async function () {
-        await pointSeriesVis.clickOptions();
+        await PageObjects.visualize.clickOptionsTab();
       });
 
       it('should show category grid lines', async function () {

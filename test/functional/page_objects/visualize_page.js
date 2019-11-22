@@ -661,12 +661,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async sizeUpEditor() {
       await testSubjects.click('splitPanelResizer');
-      await browser.pressKeys(browser.keys.ARROW_RIGHT);
-    }
-
-    async clickOptions() {
-      await find.clickByPartialLinkText('Options');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await browser.pressKeys(browser.keys.ARROW_LEFT);
     }
 
     async changeHeatmapColorNumbers(value = 6) {
@@ -731,7 +726,6 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async clickVisEditorTab(tabName) {
       await testSubjects.click(`visEditorTab__${tabName}`);
-      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async selectWMS() {

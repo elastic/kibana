@@ -58,11 +58,12 @@ export default function ({ getService, getPageObjects }) {
         const expectedData = [['CN', '2,592'], ['IN', '2,373'], ['US', '1,194'], ['ID', '489'], ['BR', '415']];
         await inspector.open();
         await inspector.expectTableData(expectedData);
+        await inspector.close();
       });
 
       it('should change results after changing layer to world', async function () {
 
-        await PageObjects.visualize.clickOptions();
+        await PageObjects.visualize.clickOptionsTab();
         await  PageObjects.visualize.setSelectByOptionText('regionMapOptionsSelectLayer', 'World Countries');
 
         //ensure all fields are there
@@ -75,6 +76,8 @@ export default function ({ getService, getPageObjects }) {
         const actualData = await inspector.getTableData();
         const expectedData = [['CN', '2,592'], ['IN', '2,373'], ['US', '1,194'], ['ID', '489'], ['BR', '415']];
         expect(actualData).to.eql(expectedData);
+
+        await inspector.close();
       });
 
       it('should contain a dropdown with the default road_map base layer as an option',

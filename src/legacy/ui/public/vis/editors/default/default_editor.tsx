@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { getInitialWidth } from 'ui/vis/editor_size';
 
 import { start as embeddables } from '../../../../../core_plugins/embeddable_api/public/np_ready/public/legacy';
@@ -45,10 +45,15 @@ function DefaultEditor({
 }: DefaultEditorControllerState & EditorRenderProps) {
   const visRef = useRef<HTMLDivElement>(null);
   const [visHandler, setVisHandler] = useState<VisualizeEmbeddable | null>(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [factory, setFactory] = useState<VisualizeEmbeddableFactory | null>(null);
   const { vis } = savedObj;
   const [state, dispatch] = useEditorReducer(vis);
   const { formState, setTouched, setValidity } = useEditorFormState();
+
+  const onClickCollapse = useCallback(() => {
+    setIsCollapsed(value => !value);
+  }, []);
 
   useEffect(() => {
     async function visualize() {
@@ -90,15 +95,23 @@ function DefaultEditor({
   const editorInitialWidth = getInitialWidth(vis.type.editorConfig.defaultSize);
 
   return (
-    <PanelsContainer className="visEditor--default" resizerClassName="visEditor__resizer">
+    <PanelsContainer
+      className="visEditor--default"
+      resizerClassName={`visEditor__resizer ${isCollapsed ? 'hidden' : ''}`}
+    >
       <Panel className="visEditor__visualization" initialWidth={100 - editorInitialWidth}>
         <div className="visEditor__canvas" ref={visRef} />
       </Panel>
 
-      <Panel className="visEditor__collapsibleSidebar" initialWidth={editorInitialWidth}>
+      <Panel
+        className={`visEditor__collapsibleSidebar ${isCollapsed ? 'closed' : ''}`}
+        initialWidth={editorInitialWidth}
+      >
         <DefaultEditorSideBar
           dispatch={dispatch}
           formState={formState}
+          isCollapsed={isCollapsed}
+          onClickCollapse={onClickCollapse}
           optionTabs={optionTabs}
           setTouched={setTouched}
           setValidity={setValidity}

@@ -14,6 +14,7 @@
 .visEditor__collapsibleSidebar {
   min-width: $vis-editor-sidebar-min-width;
   max-width: 100%;
+  position: relative;
   flex-shrink: 0;
 
   @include euiBreakpoint('xs', 's', 'm') {
@@ -28,6 +29,11 @@
 
 .visEditor__collapsibleSidebar.closed {
   min-width: 0;
+  width: 0 !important;
+
+  @include euiBreakpoint('xs', 's', 'm') {
+    display: none !important;
+  }
 }
 
 /**
@@ -37,6 +43,10 @@
 .visEditor__resizer {
   @include kbnResizer($euiSizeM);
   @include euiBreakpoint('xs', 's', 'm') {
+    display: none;
+  }
+
+  &.hidden {
     display: none;
   }
 }

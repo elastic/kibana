@@ -41,6 +41,7 @@ export default function ({ getService, getPageObjects }) {
       it('should update table header when columns change', async function () {
         await inspector.open();
         await inspector.expectTableHeaders(['Count']);
+        await inspector.close();
 
         log.debug('Add Average Metric on machine.ram field');
         await PageObjects.visualize.clickBucket('Y-axis', 'metrics');
@@ -49,6 +50,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickGo();
         await inspector.open();
         await inspector.expectTableHeaders(['Count', 'Average machine.ram']);
+        await inspector.close();
       });
 
       describe('filtering on inspector table values', function () {

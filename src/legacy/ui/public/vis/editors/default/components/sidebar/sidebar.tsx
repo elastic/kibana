@@ -20,7 +20,7 @@
 import React, { useMemo, useState, useCallback, KeyboardEventHandler, useEffect } from 'react';
 import { get, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { keyCodes, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { keyCodes, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { Vis, VisState } from 'ui/vis';
 import { PersistedState } from 'ui/persisted_state';
@@ -38,10 +38,12 @@ import { DefaultEditorAggCommonProps } from '../agg_common_props';
 
 interface DefaultEditorSideBarProps {
   dispatch: React.Dispatch<EditorAction>;
+  isCollapsed: boolean;
   formState: {
     touched: boolean;
     invalid: boolean;
   };
+  onClickCollapse: () => void;
   optionTabs: OptionTab[];
   setTouched: SetTouched;
   setValidity: SetValidity;
@@ -52,7 +54,9 @@ interface DefaultEditorSideBarProps {
 
 function DefaultEditorSideBar({
   dispatch,
+  isCollapsed,
   formState,
+  onClickCollapse,
   optionTabs,
   setTouched,
   setValidity,
@@ -189,6 +193,17 @@ function DefaultEditorSideBar({
               <Editor {...(name === 'data' ? dataTabProps : optionTabProps)} />
             </div>
           ))}
+
+          <EuiButtonIcon
+            aria-expanded={!isCollapsed}
+            aria-label={i18n.translate('common.ui.vis.editors.sidebar.collapseButtonAriaLabel', {
+              defaultMessage: 'Toggle sidebar',
+            })}
+            className="visEditorSidebar__collapsibleButton"
+            data-test-subj="collapseSideBarButton"
+            iconType={isCollapsed ? 'arrowLeft' : 'arrowRight'}
+            onClick={onClickCollapse}
+          />
         </form>
       </EuiFlexItem>
 
