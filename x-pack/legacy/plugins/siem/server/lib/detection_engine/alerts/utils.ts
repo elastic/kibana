@@ -13,7 +13,6 @@ import { AlertServices } from '../../../../../alerting/server/types';
 import {
   SignalSourceHit,
   SignalSearchResponse,
-  MGetResponse,
   BulkResponse,
   AlertTypeParams,
   OutputSignalES,
@@ -282,7 +281,7 @@ export const searchAfterAndBulkIndex = async ({
   }
 
   logger.debug('[+] starting bulk insertion');
-  const firstBulkIndexSuccess = await singleBulkIndex({
+  await singleBulkIndex({
     someResult,
     signalParams,
     services,
