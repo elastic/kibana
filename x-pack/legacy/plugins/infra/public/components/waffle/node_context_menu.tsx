@@ -49,15 +49,9 @@ export const NodeContextMenu = injectUICapabilities(
     // We need to have some exceptions until 7.0 & ECS is finalized. Reference
     // #26620 for the details for these fields.
     // TODO: This is tech debt, remove it after 7.0 & ECS migration.
-    const APM_FIELDS = {
-      [InfraNodeType.host]: 'host.hostname',
-      [InfraNodeType.container]: 'container.id',
-      [InfraNodeType.pod]: 'kubernetes.pod.uid',
-      [InfraNodeType.awsEC2]: 'cloud.instance.id',
-      [InfraNodeType.awsS3]: 'aws.s3.bucket.name',
-    };
 
     const inventoryModel = findInventoryModel(nodeType);
+    const apmField = nodeType === InfraNodeType.host ? 'host.hostname' : inventoryModel.fields.id;
 
     const nodeLogsMenuItem = {
       name: i18n.translate('xpack.infra.nodeContextMenu.viewLogsName', {
@@ -89,7 +83,7 @@ export const NodeContextMenu = injectUICapabilities(
         defaultMessage: 'View {name} APM traces',
         values: { name: inventoryModel.displayName },
       }),
-      href: `../app/apm#/traces?_g=()&kuery=${APM_FIELDS[nodeType]}:"${node.id}"`,
+      href: `../app/apm#/traces?_g=()&kuery=${apmField}:"${node.id}"`,
       'data-test-subj': 'viewApmTracesContextMenuItem',
     };
 
