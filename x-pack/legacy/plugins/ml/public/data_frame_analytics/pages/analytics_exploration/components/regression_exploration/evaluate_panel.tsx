@@ -25,8 +25,8 @@ import {
   getEvalQueryBody,
   isRegressionResultsSearchBoolQuery,
   RegressionResultsSearchQuery,
+  SearchQuery,
 } from '../../../../common/analytics';
-import { SearchQuery } from './use_explore_data';
 
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;

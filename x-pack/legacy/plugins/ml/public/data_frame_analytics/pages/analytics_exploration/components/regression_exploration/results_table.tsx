@@ -50,11 +50,12 @@ import {
   getPredictedFieldName,
   INDEX_STATUS,
   SEARCH_SIZE,
+  defaultSearchQuery,
 } from '../../../../common';
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 
-import { useExploreData, defaultSearchQuery } from './use_explore_data';
+import { useExploreData } from './use_explore_data';
 import { ExplorationTitle } from './regression_exploration';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
