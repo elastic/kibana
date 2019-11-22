@@ -122,12 +122,12 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
               <EuiFormRow
                 label={intl.formatMessage({
                   id: 'xpack.spaces.management.confirmDeleteModal.confirmSpaceNameFormRowLabel',
-                  defaultMessage: 'Confirm space name to delete',
+                  defaultMessage: 'Please type DELETE to delete your space.',
                 })}
                 isInvalid={!!this.state.error}
                 error={intl.formatMessage({
                   id: 'xpack.spaces.management.confirmDeleteModal.spaceNamesDoNoMatchErrorMessage',
-                  defaultMessage: 'Space names do not match.',
+                  defaultMessage: 'Incorrect input entered.',
                 })}
               >
                 <EuiFieldText
@@ -185,7 +185,7 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
   };
 
   private onConfirm = async () => {
-    if (this.state.confirmSpaceName === this.props.space.name) {
+    if (this.state.confirmSpaceName === 'DELETE') {
       const needsRedirect = isDeletingCurrentSpace(this.props.space, this.props.spacesNavState);
       const spacesManager = this.props.spacesManager;
 
