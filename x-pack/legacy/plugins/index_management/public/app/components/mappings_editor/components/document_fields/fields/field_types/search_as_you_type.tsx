@@ -156,7 +156,7 @@ export const SearchAsYouType = React.memo(({ field }: Props) => {
                             'xpack.idxMgmt.mappingsEditor.termVectorFieldWarningMessage',
                             {
                               defaultMessage:
-                                'Setting "With positions offsets" will double the size of a field’s index.',
+                                'Setting "With positions & offsets" will double the size of a field’s index.',
                             }
                           )}
                         </p>
