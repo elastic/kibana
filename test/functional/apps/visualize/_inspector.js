@@ -27,14 +27,12 @@ export default function ({ getService, getPageObjects }) {
   describe('inspector', function describeIndexTests() {
     this.tags('smoke');
     before(async function () {
-      const fromTime = '2015-09-19 06:31:44.000';
-      const toTime = '2015-09-23 18:31:44.000';
 
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();
 
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     describe('inspector table', function indexPatternCreation() {
