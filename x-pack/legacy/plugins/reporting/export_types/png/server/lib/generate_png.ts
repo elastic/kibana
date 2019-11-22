@@ -5,7 +5,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { toArray, mergeMap, tap } from 'rxjs/operators';
+import { toArray, mergeMap } from 'rxjs/operators';
 import { LevelLogger } from '../../../../server/lib';
 import { ServerFacade, ConditionalHeaders } from '../../../../types';
 import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
@@ -36,18 +36,17 @@ export function generatePngObservableFactory(server: ServerFacade) {
     }
 
     const layout = new PreserveLayout(layoutParams.dimensions);
+    const screenshots$ = Rx.of(url).pipe(
+      mergeMap(
+        iUrl =>
+          screenshotsObservable({ logger, url: iUrl, conditionalHeaders, layout, browserTimezone }),
+        (jUrl: string, screenshot: UrlScreenshot) => screenshot,
+        captureConcurrency
+      )
+    );
 
-    return Rx.of(url).pipe(
-      mergeMap(iUrl => screenshotsObservable({ logger, url: iUrl, conditionalHeaders, layout, browserTimezone })), // prettier-ignore
-      tap((something) => {
-        console.log('help me');
-        console.log(JSON.stringify(something));
-      }),
+    return screenshots$.pipe(
       toArray(),
-      tap((something) => {
-        console.log('help me 2');
-        console.log(JSON.stringify(something));
-      }),
       mergeMap(urlScreenshots => {
         if (urlScreenshots.length !== 1) {
           throw new Error(
