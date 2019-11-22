@@ -49,28 +49,20 @@ const VISIBLE_POINT_MB_FILTER = [
   POINT_MB_FILTER,
 ];
 
-
-
 export function getFillFilterExpression(hasJoins) {
-  if (!hasJoins) {
-    return CLOSED_SHAPE_MB_FILTER;
-  }
-
-  return VISIBLE_CLOSED_SHAPE_MB_FILTER;
+  return hasJoins
+    ? VISIBLE_CLOSED_SHAPE_MB_FILTER
+    : CLOSED_SHAPE_MB_FILTER;
 }
 
 export function getLineFilterExpression(hasJoins) {
-  if (!hasJoins) {
-    return ALL_SHAPE_MB_FILTER;
-  }
-
-  return VISIBLE_ALL_SHAPE_MB_FILTER;
+  return hasJoins
+    ? VISIBLE_ALL_SHAPE_MB_FILTER
+    : ALL_SHAPE_MB_FILTER;
 }
 
 export function getPointFilterExpression(hasJoins) {
-  if (!hasJoins) {
-    return POINT_MB_FILTER;
-  }
-
-  return VISIBLE_POINT_MB_FILTER;
+  return hasJoins
+    ? VISIBLE_POINT_MB_FILTER
+    : POINT_MB_FILTER;
 }
