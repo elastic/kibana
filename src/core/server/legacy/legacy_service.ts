@@ -254,7 +254,9 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
         register: setupDeps.core.uiSettings.register,
       },
     };
-    const coreStart: CoreStart = {};
+    const coreStart: CoreStart = {
+      capabilities: startDeps.core.capabilities,
+    };
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const KbnServer = require('../../../legacy/server/kbn_server');

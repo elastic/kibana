@@ -23,16 +23,29 @@ import KbnServer from '../kbn_server';
 import { capabilitiesMixin } from './capabilities_mixin';
 
 describe('capabilitiesMixin', () => {
+  let registerMock: jest.Mock;
+
   const getKbnServer = (pluginSpecs: any[] = []) => {
-    return {
+    return ({
       afterPluginsInit: (callback: () => void) => callback(),
       pluginSpecs,
-    } as KbnServer;
+      newPlatform: {
+        setup: {
+          core: {
+            capabilities: {
+              registerCapabilitiesProvider: registerMock,
+            },
+          },
+        },
+      },
+    } as unknown) as KbnServer;
   };
 
   let server: Server;
   beforeEach(() => {
     server = new Server();
+    server.getUiNavLinks = () => [];
+    registerMock = jest.fn();
   });
 
   it('exposes request#getCapabilities for retrieving legacy capabilities', async () => {
@@ -44,5 +57,34 @@ describe('capabilitiesMixin', () => {
       'getCapabilities',
       expect.any(Function)
     );
+  });
+
+  it('calls capabilities#registerCapabilitiesProvider for each legacy plugin specs', async () => {
+    const getPluginSpec = (provider: () => any) => ({
+      getUiCapabilitiesProvider: () => provider,
+    });
+
+    const capaA = { catalogue: { A: true } };
+    const capaB = { catalogue: { B: true } };
+    const kbnServer = getKbnServer([getPluginSpec(() => capaA), getPluginSpec(() => capaB)]);
+    await capabilitiesMixin(kbnServer, server);
+
+    expect(registerMock).toHaveBeenCalledTimes(2);
+    expect(registerMock.mock.calls[0][0]()).toEqual(capaA);
+    expect(registerMock.mock.calls[1][0]()).toEqual(capaB);
+  });
+
+  it('calls capabilities#registerCapabilitiesProvider for navLinks', async () => {
+    const kbnServer = getKbnServer();
+    server.getUiNavLinks = () => [{ _id: 'A' }, { _id: 'B' }];
+    await capabilitiesMixin(kbnServer, server);
+
+    expect(registerMock).toHaveBeenCalledTimes(1);
+    expect(registerMock.mock.calls[0][0]()).toEqual({
+      navLinks: {
+        A: true,
+        B: true,
+      },
+    });
   });
 });

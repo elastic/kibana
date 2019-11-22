@@ -150,5 +150,9 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
   deps: PluginsServiceStartDeps,
   plugin: PluginWrapper<TPlugin, TPluginDependencies>
 ): CoreStart {
-  return {};
+  return {
+    capabilities: {
+      resolveCapabilities: deps.capabilities.resolveCapabilities,
+    },
+  };
 }

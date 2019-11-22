@@ -45,7 +45,7 @@ import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plug
 import { ContextSetup } from './context';
 import { IUiSettingsClient, UiSettingsServiceSetup } from './ui_settings';
 import { SavedObjectsClientContract } from './saved_objects/types';
-import { CapabilitiesSetup } from './capabilities';
+import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 
 export { bootstrap } from './bootstrap';
 export { ConfigPath, ConfigService, EnvironmentMode, PackageInfo } from './config';
@@ -244,10 +244,14 @@ export interface CoreSetup {
  *
  * @public
  */
-export interface CoreStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
+export interface CoreStart {
+  /** {@link CapabilitiesStart} */
+  capabilities: CapabilitiesStart;
+}
 
 export {
   CapabilitiesSetup,
+  CapabilitiesStart,
   ContextSetup,
   PluginsServiceSetup,
   PluginsServiceStart,

@@ -17,44 +17,46 @@
  * under the License.
  */
 
-import { Server, Request } from 'hapi';
-
-import { Capabilities } from '../../../core/public';
+import { Server } from 'hapi';
+import { KibanaRequest } from '../../../core/server';
 import KbnServer from '../kbn_server';
-import { mergeCapabilities } from './merge_capabilities';
-import { resolveCapabilities } from './resolve_capabilities';
-
-export type CapabilitiesModifier = (
-  request: Request,
-  uiCapabilities: Capabilities
-) => Capabilities | Promise<Capabilities>;
 
 export async function capabilitiesMixin(kbnServer: KbnServer, server: Server) {
-  const modifiers: CapabilitiesModifier[] = [];
+  const registerLegacyCapabilities = async () => {
+    const capabilitiesList = await Promise.all(
+      kbnServer.pluginSpecs
+        .map(spec => spec.getUiCapabilitiesProvider())
+        .filter(provider => !!provider)
+        .map(provider => provider(server))
+    );
+    // Get legacy nav links
+    const navLinks = server.getUiNavLinks().reduce(
+      (acc, spec) => ({
+        ...acc,
+        [spec._id]: true,
+      }),
+      {} as Record<string, boolean>
+    );
+    if (Object.keys(navLinks).length) {
+      capabilitiesList.push({ navLinks });
+    }
+
+    capabilitiesList.forEach(capabilities => {
+      kbnServer.newPlatform.setup.core.capabilities.registerCapabilitiesProvider(
+        () => capabilities
+      );
+    });
+  };
 
   // Some plugin capabilities are derived from data provided by other plugins,
   // so we need to wait until after all plugins have been init'd to fetch uiCapabilities.
   kbnServer.afterPluginsInit(async () => {
-    const defaultCapabilities = mergeCapabilities(
-      ...(await Promise.all(
-        kbnServer.pluginSpecs
-          .map(spec => spec.getUiCapabilitiesProvider())
-          .filter(provider => !!provider)
-          .map(provider => provider(server))
-      ))
+    await registerLegacyCapabilities();
+  });
+
+  server.decorate('request', 'getCapabilities', function() {
+    return kbnServer.newPlatform.start.core.capabilities.resolveCapabilities(
+      KibanaRequest.from(this)
     );
-
-    server.decorate('request', 'getCapabilities', function() {
-      // Get legacy nav links
-      const navLinks = server.getUiNavLinks().reduce(
-        (acc, spec) => ({
-          ...acc,
-          [spec._id]: true,
-        }),
-        {} as Record<string, boolean>
-      );
-
-      return resolveCapabilities(this, modifiers, defaultCapabilities, { navLinks });
-    });
   });
 }

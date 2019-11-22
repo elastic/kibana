@@ -20,7 +20,7 @@
 import { ResponseObject, Server } from 'hapi';
 import { UnwrapPromise } from '@kbn/utility-types';
 
-import { SavedObjectsClientProviderOptions, CoreSetup } from 'src/core/server';
+import { SavedObjectsClientProviderOptions, CoreSetup, CoreStart } from 'src/core/server';
 import {
   ConfigService,
   ElasticsearchServiceSetup,
@@ -39,7 +39,6 @@ import { SavedObjectsManagement } from '../../core/server/saved_objects/manageme
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 
-import { CapabilitiesModifier } from './capabilities';
 import { IndexPatternsServiceFactory } from './index_patterns';
 import { Capabilities } from '../../core/public';
 import { UiSettingsServiceFactoryOptions } from '../../legacy/ui/ui_settings/ui_settings_service_factory';
@@ -122,7 +121,7 @@ export default class KbnServer {
       plugins: Record<string, object>;
     };
     start: {
-      core: CoreSetup;
+      core: CoreStart;
       plugins: Record<string, object>;
     };
     stop: null;

@@ -22,7 +22,7 @@ import { InternalHttpServiceSetup } from './http';
 import { InternalUiSettingsServiceSetup } from './ui_settings';
 import { ContextSetup } from './context';
 import { SavedObjectsServiceStart } from './saved_objects';
-import { CapabilitiesSetup } from './capabilities';
+import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -37,5 +37,6 @@ export interface InternalCoreSetup {
  * @internal
  */
 export interface InternalCoreStart {
+  capabilities: CapabilitiesStart;
   savedObjects: SavedObjectsServiceStart;
 }

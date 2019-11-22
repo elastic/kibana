@@ -96,7 +96,9 @@ function createCoreSetupMock() {
 }
 
 function createCoreStartMock() {
-  const mock: MockedKeys<CoreStart> = {};
+  const mock: MockedKeys<CoreStart> = {
+    capabilities: capabilitiesServiceMock.createStartContract(),
+  };
 
   return mock;
 }

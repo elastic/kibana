@@ -96,6 +96,7 @@ beforeEach(() => {
 
   startDeps = {
     core: {
+      capabilities: capabilitiesServiceMock.createStartContract(),
       savedObjects: {
         migrator: {} as KibanaMigrator,
         clientProvider: {} as ISavedObjectsClientProvider,

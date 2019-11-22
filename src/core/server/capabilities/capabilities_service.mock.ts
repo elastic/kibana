@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CapabilitiesService, CapabilitiesSetup } from './capabilities_service';
+import { CapabilitiesService, CapabilitiesSetup, CapabilitiesStart } from './capabilities_service';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<CapabilitiesSetup> = {
@@ -27,11 +27,18 @@ const createSetupContractMock = () => {
   return setupContract;
 };
 
+const createStartContractMock = () => {
+  const setupContract: jest.Mocked<CapabilitiesStart> = {
+    resolveCapabilities: jest.fn().mockReturnValue(Promise.resolve({})),
+  };
+  return setupContract;
+};
+
 type CapabilitiesServiceContract = PublicMethodsOf<CapabilitiesService>;
 const createMock = () => {
   const mocked: jest.Mocked<CapabilitiesServiceContract> = {
     setup: jest.fn().mockReturnValue(createSetupContractMock()),
-    start: jest.fn(),
+    start: jest.fn().mockReturnValue(createStartContractMock()),
   };
   return mocked;
 };
@@ -39,4 +46,5 @@ const createMock = () => {
 export const capabilitiesServiceMock = {
   create: createMock,
   createSetupContract: createSetupContractMock,
+  createStartContract: createStartContractMock,
 };

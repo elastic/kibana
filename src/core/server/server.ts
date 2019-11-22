@@ -135,10 +135,14 @@ export class Server {
 
   public async start() {
     this.log.debug('starting server');
-    const pluginsStart = await this.plugins.start({});
     const savedObjectsStart = await this.savedObjects.start({});
+    const capabilitiesStart = this.capabilities.start();
+    const pluginsStart = await this.plugins.start({
+      capabilities: capabilitiesStart,
+    });
 
     const coreStart = {
+      capabilities: capabilitiesStart,
       savedObjects: savedObjectsStart,
       plugins: pluginsStart,
     };
