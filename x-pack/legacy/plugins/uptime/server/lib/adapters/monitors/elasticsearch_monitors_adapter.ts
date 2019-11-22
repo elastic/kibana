@@ -31,13 +31,6 @@ const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
 };
 
 export const elasticsearchMonitorsAdapter: UMMonitorsAdapter = {
-  /**
-   * Fetches data used to populate monitor charts
-   * @param request Kibana request
-   * @param monitorId ID value for the selected monitor
-   * @param dateRangeStart timestamp bounds
-   * @param dateRangeEnd timestamp bounds
-   */
   getMonitorChartsData: async (callEs, { dateRangeStart, dateRangeEnd, monitorId, location }) => {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
@@ -166,12 +159,6 @@ export const elasticsearchMonitorsAdapter: UMMonitorsAdapter = {
     return monitorChartsData;
   },
 
-  /**
-   * Fetch options for the filter bar.
-   * @param request Kibana request object
-   * @param dateRangeStart timestamp bounds
-   * @param dateRangeEnd timestamp bounds
-   */
   getFilterBar: async (callEs, { dateRangeStart, dateRangeEnd }) => {
     const fields: { [key: string]: string } = {
       ids: 'monitor.id',
@@ -207,11 +194,6 @@ export const elasticsearchMonitorsAdapter: UMMonitorsAdapter = {
     }, {});
   },
 
-  /**
-   * Fetch data for the monitor page title.
-   * @param request Kibana server request
-   * @param monitorId the ID to query
-   */
   getMonitorPageTitle: async (callEs, { monitorId }) => {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,

@@ -7,17 +7,13 @@
 import { GraphQLSchema } from 'graphql';
 import { schema as kbnSchema } from '@kbn/config-schema';
 import { runHttpQuery } from 'apollo-server-core';
-import { UptimeCorePlugins, UptimeCoreSetup } from './adapter_types';
+import { UptimeCoreSetup } from './adapter_types';
 import { UMBackendFrameworkAdapter } from './adapter_types';
 import { UMRouteDefinition } from '../../../rest_api';
 
 export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapter {
-  constructor(
-    private readonly server: UptimeCoreSetup,
-    private readonly plugins: UptimeCorePlugins
-  ) {
+  constructor(private readonly server: UptimeCoreSetup) {
     this.server = server;
-    this.plugins = plugins;
   }
 
   public registerRoute({ handler, method, options, path, validate }: UMRouteDefinition) {
@@ -48,16 +44,6 @@ export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapte
   }
 
   public registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void {
-    const options = {
-      graphQLOptions: (req: any) => ({
-        context: { req },
-        schema,
-      }),
-      path: routePath,
-      route: {
-        tags: ['access:uptime'],
-      },
-    };
     this.server.route.post(
       {
         path: routePath,
@@ -73,6 +59,26 @@ export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapte
         },
       },
       async (context, request, resp): Promise<any> => {
+        const {
+          core: {
+            elasticsearch: {
+              dataClient: { callAsCurrentUser },
+            },
+          },
+        } = context;
+        const options = {
+          graphQLOptions: (req: any) => {
+            const c = { ...context, callAsCurrentUser };
+            return {
+              context: c,
+              schema,
+            };
+          },
+          path: routePath,
+          route: {
+            tags: ['access:uptime'],
+          },
+        };
         try {
           const query = request.body as Record<string, any>;
 
@@ -99,13 +105,5 @@ export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapte
         }
       }
     );
-  }
-
-  public getSavedObjectsClient() {
-    const { elasticsearch, savedObjects } = this.plugins;
-    const { SavedObjectsClient, getSavedObjectsRepository } = savedObjects;
-    const { callWithInternalUser } = elasticsearch.getCluster('admin');
-    const internalRepository = getSavedObjectsRepository(callWithInternalUser);
-    return new SavedObjectsClient(internalRepository);
   }
 }

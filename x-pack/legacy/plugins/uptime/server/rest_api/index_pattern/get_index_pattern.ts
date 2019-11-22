@@ -14,7 +14,15 @@ export const createGetIndexPatternRoute: UMRestApiRouteCreator = (libs: UMServer
   options: {
     tags: ['access:uptime'],
   },
-  handler: async (_context, _request, response): Promise<any> => {
+  handler: async (
+    {
+      core: {
+        savedObjects: { client },
+      },
+    },
+    _request,
+    response
+  ): Promise<any> => {
     try {
       return response.ok({
         body: {

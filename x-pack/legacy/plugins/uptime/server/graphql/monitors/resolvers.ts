@@ -71,54 +71,55 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
 } => ({
   Query: {
     async getSnapshotHistogram(
-      resolver,
+      _resolver,
       { dateRangeStart, dateRangeEnd, filters, monitorId, statusFilter },
-      { req }
+      { callAsCurrentUser }
     ): Promise<HistogramResult> {
-      return await libs.pings.getPingHistogram(
-        req,
+      return await libs.pings.getPingHistogram(callAsCurrentUser, {
         dateRangeStart,
         dateRangeEnd,
         filters,
         monitorId,
-        statusFilter
-      );
+        statusFilter,
+      });
     },
     async getMonitorChartsData(
-      resolver,
+      _resolver,
       { monitorId, dateRangeStart, dateRangeEnd, location },
-      { req }
+      { callAsCurrentUser }
     ): Promise<MonitorChart> {
-      return await libs.monitors.getMonitorChartsData(
-        req,
+      return await libs.monitors.getMonitorChartsData(callAsCurrentUser, {
         monitorId,
         dateRangeStart,
         dateRangeEnd,
-        location
-      );
+        location,
+      });
     },
     async getLatestMonitors(
-      resolver,
+      _resolver,
       { dateRangeStart, dateRangeEnd, monitorId, location },
-      { req }
+      { callAsCurrentUser }
     ): Promise<Ping[]> {
-      return await libs.pings.getLatestMonitorDocs(
-        req,
+      return await libs.pings.getLatestMonitorDocs(callAsCurrentUser, {
         dateRangeStart,
         dateRangeEnd,
         monitorId,
-        location
-      );
+        location,
+      });
     },
-    async getFilterBar(resolver, { dateRangeStart, dateRangeEnd }, { req }): Promise<FilterBar> {
-      return await libs.monitors.getFilterBar(req, dateRangeStart, dateRangeEnd);
+    async getFilterBar(
+      _resolver,
+      { dateRangeStart, dateRangeEnd },
+      { callAsCurrentUser }
+    ): Promise<FilterBar> {
+      return await libs.monitors.getFilterBar(callAsCurrentUser, { dateRangeStart, dateRangeEnd });
     },
     async getMonitorPageTitle(
-      resolver: any,
+      _resolver: any,
       { monitorId },
-      { req }
+      { callAsCurrentUser }
     ): Promise<MonitorPageTitle | null> {
-      return await libs.monitors.getMonitorPageTitle(req, monitorId);
+      return await libs.monitors.getMonitorPageTitle(callAsCurrentUser, { monitorId });
     },
   },
 });

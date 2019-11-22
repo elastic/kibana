@@ -25,19 +25,28 @@ export const createGetAllRoute: UMRestApiRouteCreator = (libs: UMServerLibs) => 
   options: {
     tags: ['access:uptime'],
   },
-  handler: async (_context, request, response): Promise<any> => {
+  handler: async (
+    {
+      core: {
+        elasticsearch: {
+          dataClient: { callAsInternalUser },
+        },
+      },
+    },
+    request,
+    response
+  ): Promise<any> => {
     const { size, sort, dateRangeStart, dateRangeEnd, location, monitorId, status } = request.query;
 
-    const result = await libs.pings.getAll(
-      request,
+    const result = await libs.pings.getAll(callAsInternalUser, {
       dateRangeStart,
       dateRangeEnd,
       monitorId,
       status,
       sort,
       size,
-      location
-    );
+      location,
+    });
 
     return response.ok({
       body: {

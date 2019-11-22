@@ -15,7 +15,7 @@ export const createRouteWithAuth = (
 ): UMRouteDefinition => {
   const restRoute = routeCreator(libs);
   const { handler, method, path, options, ...rest } = restRoute;
-  const authHandler: RequestHandler<ObjectType, ObjectType, ObjectType> = async (
+  const licenseCheckHandler: RequestHandler<ObjectType, ObjectType, ObjectType> = async (
     context,
     request,
     response
@@ -29,7 +29,7 @@ export const createRouteWithAuth = (
     method,
     path,
     options,
-    handler: authHandler,
+    handler: licenseCheckHandler,
     ...rest,
   };
 };

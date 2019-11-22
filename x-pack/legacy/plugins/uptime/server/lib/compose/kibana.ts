@@ -5,29 +5,27 @@
  */
 
 import { UMKibanaBackendFrameworkAdapter } from '../adapters/framework';
-import { ElasticsearchMonitorsAdapter } from '../adapters/monitors';
-import { ElasticsearchPingsAdapter } from '../adapters/pings';
+import { elasticsearchMonitorsAdapter } from '../adapters/monitors';
+import { elasticsearchPingsAdapter } from '../adapters/pings';
 import { licenseCheck } from '../domains';
 import { UMDomainLibs, UMServerLibs } from '../lib';
 import { elasticsearchMonitorStatesAdapter } from '../adapters/monitor_states';
-import { UMKibanaSavedObjectsAdapter } from '../adapters/saved_objects/kibana_saved_objects_adapter';
+import { savedObjectsAdapter } from '../adapters/saved_objects';
 import { UptimeCorePlugins, UptimeCoreSetup } from '../adapters/framework';
 
 export function compose(server: UptimeCoreSetup, plugins: UptimeCorePlugins): UMServerLibs {
-  const { savedObjects } = plugins;
-  const framework = new UMKibanaBackendFrameworkAdapter(server, plugins);
+  const framework = new UMKibanaBackendFrameworkAdapter(server);
 
   const domainLibs: UMDomainLibs = {
     license: licenseCheck,
-    monitors: new ElasticsearchMonitorsAdapter(database),
+    monitors: elasticsearchMonitorsAdapter,
     monitorStates: elasticsearchMonitorStatesAdapter,
-    pings: new ElasticsearchPingsAdapter(database),
-    savedObjects: new UMKibanaSavedObjectsAdapter(savedObjects, elasticsearch),
+    pings: elasticsearchPingsAdapter,
+    savedObjects: savedObjectsAdapter,
   };
 
   return {
     framework,
-    database,
     ...domainLibs,
   };
 }

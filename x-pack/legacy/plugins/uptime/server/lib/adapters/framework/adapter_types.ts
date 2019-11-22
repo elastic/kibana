@@ -11,6 +11,7 @@ import {
   RequestHandler,
   IRouter,
   CallAPIOptions,
+  SavedObjectsClientContract,
 } from 'src/core/server';
 import { ObjectType } from '@kbn/config-schema';
 import { UMRouteDefinition } from '../../../rest_api';
@@ -36,6 +37,11 @@ export type UMElasticsearchQueryFn<T = any, P = undefined> = (
   params: P
 ) => Promise<T> | T;
 
+export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
+  client: SavedObjectsClientContract,
+  params: P
+) => Promise<T> | T;
+
 export interface UptimeCoreSetup {
   route: IRouter;
 }
@@ -49,5 +55,4 @@ export interface UptimeCorePlugins {
 export interface UMBackendFrameworkAdapter {
   registerRoute(route: UMRouteDefinition): void;
   registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
-  getSavedObjectsClient(): any;
 }
