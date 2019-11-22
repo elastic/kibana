@@ -9,6 +9,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
       ansiColor('xterm') {
         githubPr.withDefaultPrComments {
           catchError {
+            error "Test Error"
             // parallel([
             //   'kibana-intake-agent': kibanaPipeline.legacyJobRunner('kibana-intake'),
             //   'x-pack-intake-agent': kibanaPipeline.legacyJobRunner('x-pack-intake'),
