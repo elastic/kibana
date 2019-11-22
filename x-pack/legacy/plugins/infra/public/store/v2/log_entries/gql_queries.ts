@@ -13,7 +13,7 @@ import { LogEntriesState } from '.';
 const LOAD_CHUNK_SIZE = 200;
 
 type LogEntriesGetter = (
-  client: ApolloClient<{}>,
+  client: ApolloClient<{}> | undefined,
   countBefore: number,
   countAfter: number
 ) => (params: {
@@ -27,7 +27,7 @@ const getLogEntries: LogEntriesGetter = (client, countBefore, countAfter) => asy
   timeKey,
   filterQuery,
 }) => {
-  if (!timeKey) return false;
+  if (!timeKey || !client) return false;
   const result = await client.query({
     query: logEntriesQuery,
     variables: {
@@ -39,7 +39,6 @@ const getLogEntries: LogEntriesGetter = (client, countBefore, countAfter) => asy
     },
     fetchPolicy: 'no-cache',
   });
-  if (!result.data.source) throw new Error('No data source');
   const { logEntriesAround } = result.data.source;
   return {
     entries: logEntriesAround.entries,
@@ -53,6 +52,7 @@ const getLogEntries: LogEntriesGetter = (client, countBefore, countAfter) => asy
 
 export const useGraphQLQueries = () => {
   const client = useApolloClient();
+  if (!client) throw new Error('Unable to get Apollo Client from context');
   return {
     getLogEntriesAround: getLogEntries(client, LOAD_CHUNK_SIZE, LOAD_CHUNK_SIZE),
     getLogEntriesBefore: getLogEntries(client, LOAD_CHUNK_SIZE, 0),
