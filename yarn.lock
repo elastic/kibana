@@ -1264,14 +1264,6 @@
     oppsy "2.x.x"
     pumpify "1.3.x"
 
-"@elastic/lsp-extension@^0.1.2":
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/@elastic/lsp-extension/-/lsp-extension-0.1.2.tgz#7356d951d272e833d02a81e13a0ef710f9474195"
-  integrity sha512-yDj5Ht5KCHDwBlgrlusmLtV/Yxa5z2f3vMSYbNFotoRMup8345/ZwlFp/zmyl04iFOVpT8ouB34+Ttpzbpd3vA==
-  dependencies:
-    vscode-languageserver "^5.2.1"
-    vscode-languageserver-types "^3.14.0"
-
 "@elastic/makelogs@^5.0.0":
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/@elastic/makelogs/-/makelogs-5.0.0.tgz#0064e9009c4e480d17195ab70d627bc07635540f"
@@ -29196,7 +29188,7 @@ vscode-languageserver-protocol@3.14.1:
     vscode-jsonrpc "^4.0.0"
     vscode-languageserver-types "3.14.0"
 
-vscode-languageserver-types@3.14.0, vscode-languageserver-types@^3.14.0:
+vscode-languageserver-types@3.14.0:
   version "3.14.0"
   resolved "https://registry.yarnpkg.com/vscode-languageserver-types/-/vscode-languageserver-types-3.14.0.tgz#d3b5952246d30e5241592b6dde8280e03942e743"
   integrity sha512-lTmS6AlAlMHOvPQemVwo3CezxBp0sNB95KNPkqp3Nxd5VFEnuG1ByM0zlRWos0zjO3ZWtkvhal0COgiV1xIA4A==
