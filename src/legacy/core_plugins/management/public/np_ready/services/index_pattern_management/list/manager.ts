@@ -17,8 +17,8 @@
  * under the License.
  */
 
+import { IIndexPattern, IFieldType } from 'src/plugins/data/public';
 import { IndexPatternListConfig, IndexPatternTag } from './config';
-import { StaticIndexPattern, Field } from '../../../../../../data/public';
 
 export class IndexPatternListManager {
   private configs: IndexPatternListConfig[];
@@ -35,7 +35,7 @@ export class IndexPatternListManager {
     this.configs.push(config);
   }
 
-  public getIndexPatternTags(indexPattern: StaticIndexPattern, isDefault: boolean) {
+  public getIndexPatternTags(indexPattern: IIndexPattern, isDefault: boolean) {
     return this.configs.reduce((tags: IndexPatternTag[], config) => {
       return config.getIndexPatternTags
         ? tags.concat(config.getIndexPatternTags(indexPattern, isDefault))
@@ -43,13 +43,13 @@ export class IndexPatternListManager {
     }, []);
   }
 
-  public getFieldInfo(indexPattern: StaticIndexPattern, field: Field): string[] {
+  public getFieldInfo(indexPattern: IIndexPattern, field: IFieldType): string[] {
     return this.configs.reduce((info: string[], config) => {
       return config.getFieldInfo ? info.concat(config.getFieldInfo(indexPattern, field)) : info;
     }, []);
   }
 
-  public areScriptedFieldsEnabled(indexPattern: StaticIndexPattern): boolean {
+  public areScriptedFieldsEnabled(indexPattern: IIndexPattern): boolean {
     return this.configs.every(config => {
       return config.areScriptedFieldsEnabled ? config.areScriptedFieldsEnabled(indexPattern) : true;
     });
