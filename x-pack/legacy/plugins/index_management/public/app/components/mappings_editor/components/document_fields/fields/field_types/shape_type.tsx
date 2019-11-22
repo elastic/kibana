@@ -13,22 +13,24 @@ import { UseField, Field } from '../../../../shared_imports';
 import { EditFieldSection, EditFieldFormRow } from '../edit_field';
 
 const getDefaultValueToggle = (param: ParameterName, field: FieldType): boolean => {
-  const parameterDefaultValue =
-    getFieldConfig(param).defaultValue !== undefined
-      ? (getFieldConfig(param).defaultValue as boolean)
-      : undefined;
+  const { defaultValue } = getFieldConfig(param);
 
   switch (param) {
+    // Switches that don't map to a boolean in the mappings
     case 'boost':
-    case 'orientation':
-    case 'ignore_malformed': {
-      return field[param] !== undefined && field[param] !== parameterDefaultValue;
+    case 'orientation': {
+      return field[param] !== undefined && field[param] !== defaultValue;
     }
     case 'coerce': {
       return field.coerce !== undefined ? field.coerce : false;
     }
     default:
-      return parameterDefaultValue !== undefined ? parameterDefaultValue : false;
+      // All "boolean" parameters
+      return field[param] !== undefined
+        ? (field[param] as boolean) // If the field has a value set, use it
+        : defaultValue !== undefined // If the parameter definition has a "defaultValue" set, use it
+        ? (defaultValue as boolean)
+        : false; // Defaults to "false"
   }
 };
 
