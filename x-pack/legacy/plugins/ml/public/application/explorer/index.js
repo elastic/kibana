@@ -6,9 +6,9 @@
 
 
 
-import 'plugins/ml/explorer/explorer_controller';
-import 'plugins/ml/explorer/explorer_dashboard_service';
-import 'plugins/ml/explorer/explorer_react_wrapper_directive';
-import 'plugins/ml/explorer/explorer_charts';
-import 'plugins/ml/explorer/select_limit';
-import 'plugins/ml/components/job_selector';
+import '../explorer/explorer_controller';
+import '../explorer/explorer_dashboard_service';
+import '../explorer/explorer_react_wrapper_directive';
+import '../explorer/explorer_charts';
+import '../explorer/select_limit';
+import '../components/job_selector';

@@ -8,7 +8,7 @@ import React, { FC, memo, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
-import { SplitField } from '../../../../../../../../common/types/fields';
+import { SplitField } from '../../../../../../../../../common/types/fields';
 import { JOB_TYPE } from '../../../../../common/job_creator/util/constants';
 
 interface Props {

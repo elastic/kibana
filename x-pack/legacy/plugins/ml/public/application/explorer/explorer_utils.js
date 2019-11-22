@@ -10,12 +10,12 @@
 
 import { chain, each, get, union, uniq } from 'lodash';
 
-import { getEntityFieldList } from '../../common/util/anomaly_utils';
-import { isSourceDataChartableForDetector, isModelPlotEnabled } from '../../common/util/job_utils';
-import { parseInterval } from '../../common/util/parse_interval';
+import { getEntityFieldList } from '../../../common/util/anomaly_utils';
+import { isSourceDataChartableForDetector, isModelPlotEnabled } from '../../../common/util/job_utils';
+import { parseInterval } from '../../../common/util/parse_interval';
 import { ml } from '../services/ml_api_service';
 import { mlJobService } from '../services/job_service';
-import { mlResultsService } from 'plugins/ml/services/results_service';
+import { mlResultsService } from '../services/results_service';
 
 import {
   MAX_CATEGORY_EXAMPLES,
@@ -26,7 +26,7 @@ import {
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
-} from '../../common/constants/search';
+} from '../../../common/constants/search';
 
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';

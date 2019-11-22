@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
+import { ES_FIELD_TYPES } from '../../../../../../../../../../../src/plugins/data/public';
 
 import { Importer } from './importer';
 import Papa from 'papaparse';

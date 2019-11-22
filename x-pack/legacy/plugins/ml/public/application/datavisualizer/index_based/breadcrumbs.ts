@@ -9,7 +9,7 @@ import {
   ML_BREADCRUMB,
   DATA_VISUALIZER_BREADCRUMB,
   // @ts-ignore
-} from '../../breadcrumbs';
+} from '../../../breadcrumbs';
 
 export function getDataVisualizerBreadcrumbs() {
   // Whilst top level nav menu with tabs remains,

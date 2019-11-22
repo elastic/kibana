@@ -32,17 +32,17 @@ import {
 
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
-import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
+import { ResizeChecker } from '../../../../../../../src/plugins/kibana_utils/public';
 
-import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../common/constants/search';
-import { parseInterval } from '../../common/util/parse_interval';
+import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
+import { parseInterval } from '../../../common/util/parse_interval';
 import {
   isModelPlotEnabled,
   isSourceDataChartableForDetector,
   isTimeSeriesViewJob,
   isTimeSeriesViewDetector,
   mlFunctionToESAggregation,
-} from '../../common/util/job_utils';
+} from '../../../common/util/job_utils';
 
 import { ChartTooltip } from '../components/chart_tooltip';
 import { jobSelectServiceFactory, setGlobalState, getSelectedJobIds } from '../components/job_selector/job_select_service_utils';

@@ -11,7 +11,7 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { ConditionExpression } from './condition_expression';
-import { APPLIES_TO, OPERATOR } from '../../../common/constants/detector_rule';
+import { APPLIES_TO, OPERATOR } from '../../../../common/constants/detector_rule';
 
 describe('ConditionExpression', () => {
 

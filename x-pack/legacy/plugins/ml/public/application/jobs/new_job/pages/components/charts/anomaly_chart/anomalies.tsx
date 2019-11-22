@@ -13,8 +13,8 @@
 import React, { Fragment, FC } from 'react';
 import { AnnotationDomainTypes, getAnnotationId, LineAnnotation } from '@elastic/charts';
 import { Anomaly } from '../../../../common/results_loader';
-import { getSeverityColor } from '../../../../../../../common/util/anomaly_utils';
-import { ANOMALY_THRESHOLD } from '../../../../../../../common/constants/anomalies';
+import { getSeverityColor } from '../../../../../../../../common/util/anomaly_utils';
+import { ANOMALY_THRESHOLD } from '../../../../../../../../common/constants/anomalies';
 
 interface Props {
   anomalyData?: Anomaly[];

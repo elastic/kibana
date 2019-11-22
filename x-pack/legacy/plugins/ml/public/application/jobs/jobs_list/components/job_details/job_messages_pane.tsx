@@ -8,7 +8,7 @@ import React, { FC, useEffect, useState } from 'react';
 
 import { ml } from '../../../../services/ml_api_service';
 import { JobMessages } from '../../../../components/job_messages';
-import { JobMessage } from '../../../../../common/types/audit_message';
+import { JobMessage } from '../../../../../../common/types/audit_message';
 
 interface JobMessagesPaneProps {
   jobId: string;

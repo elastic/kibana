@@ -7,7 +7,7 @@
 
 import numeral from '@elastic/numeral';
 import { formatDate } from '@elastic/eui/lib/services/format';
-import { toLocaleString } from 'plugins/ml/util/string_utils';
+import { toLocaleString } from '../../../../util/string_utils';
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 const DATA_FORMAT = '0.0 b';

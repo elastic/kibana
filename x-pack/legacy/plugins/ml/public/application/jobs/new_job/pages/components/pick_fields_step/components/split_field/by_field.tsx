@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import { SplitFieldSelect } from './split_field_select';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { Field } from '../../../../../../../../common/types/fields';
+import { Field } from '../../../../../../../../../common/types/fields';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
 import { MultiMetricJobCreator, PopulationJobCreator } from '../../../../../common/job_creator';
 

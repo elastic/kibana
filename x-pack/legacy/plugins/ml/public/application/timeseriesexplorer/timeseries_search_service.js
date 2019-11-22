@@ -9,7 +9,7 @@
 import _ from 'lodash';
 
 import { ml } from '../services/ml_api_service';
-import { isModelPlotEnabled } from '../../common/util/job_utils';
+import { isModelPlotEnabled } from '../../../common/util/job_utils';
 import { buildConfigFromDetector } from '../util/chart_config_builder';
 import { mlResultsService } from '../services/results_service';
 

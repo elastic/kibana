@@ -7,7 +7,7 @@
 import React, { FC } from 'react';
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
-import { AuditMessageBase } from '../../../common/types/audit_message';
+import { AuditMessageBase } from '../../../../common/types/audit_message';
 
 interface Props {
   message: AuditMessageBase;

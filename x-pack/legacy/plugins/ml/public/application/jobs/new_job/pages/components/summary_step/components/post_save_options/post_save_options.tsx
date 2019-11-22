@@ -12,9 +12,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { JobRunner } from '../../../../../common/job_runner';
 
 // @ts-ignore
-import { CreateWatchFlyout } from '../../../../../../jobs_list/components/create_watch_flyout';
-import { JobCreatorContext } from '../../../../components/job_creator_context';
-import { DATAFEED_STATE } from '../../../../../../../../common/constants/states';
+import { CreateWatchFlyout } from '../../../../../../jobs_list/components/create_watch_flyout/index';
+import { JobCreatorContext } from '../../../job_creator_context';
+import { DATAFEED_STATE } from '../../../../../../../../../common/constants/states';
 
 interface Props {
   jobRunner: JobRunner | null;

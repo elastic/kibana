@@ -5,8 +5,8 @@
  */
 
 import { Job, Datafeed } from '../configs';
-import { IndexPatternTitle } from '../../../../../../common/types/kibana';
-import { Field, Aggregation, EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
+import { IndexPatternTitle } from '../../../../../../../common/types/kibana';
+import { Field, Aggregation, EVENT_RATE_FIELD_ID } from '../../../../../../../common/types/fields';
 import { Detector } from '../configs';
 
 export function createEmptyJob(): Job {

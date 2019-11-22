@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ACTION, APPLIES_TO, FILTER_TYPE, OPERATOR } from '../../../common/constants/detector_rule';
+import { ACTION, APPLIES_TO, FILTER_TYPE, OPERATOR } from '../../../../common/constants/detector_rule';
 
 import { cloneDeep } from 'lodash';
 import { ml } from '../../services/ml_api_service';
 import { mlJobService } from '../../services/job_service';
 import { i18n } from '@kbn/i18n';
-import { processCreatedBy } from '../../../common/util/job_utils';
+import { processCreatedBy } from '../../../../common/util/job_utils';
 
 export function getNewConditionDefaults() {
   return {

@@ -5,8 +5,8 @@
  */
 
 
-import { checkPermission } from 'plugins/ml/privilege/check_privilege';
-import { mlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
+import { checkPermission } from '../../../../privilege/check_privilege';
+import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
 import PropTypes from 'prop-types';
 import React, {
   Component,

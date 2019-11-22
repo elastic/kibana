@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import chrome from 'ui/chrome';
-import { detectorToString } from 'plugins/ml/util/string_utils';
+import { detectorToString } from '../../../../util/string_utils';
 import { formatValues, filterObjects } from './format_values';
 import { i18n } from '@kbn/i18n';
 

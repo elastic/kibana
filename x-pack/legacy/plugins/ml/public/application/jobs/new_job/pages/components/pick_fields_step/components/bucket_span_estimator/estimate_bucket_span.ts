@@ -7,7 +7,7 @@
 import { useContext, useState } from 'react';
 
 import { JobCreatorContext } from '../../../job_creator_context';
-import { EVENT_RATE_FIELD_ID } from '../../../../../../../../common/types/fields';
+import { EVENT_RATE_FIELD_ID } from '../../../../../../../../../common/types/fields';
 import {
   isMultiMetricJobCreator,
   isPopulationJobCreator,

@@ -9,9 +9,9 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { ml } from 'plugins/ml/services/ml_api_service';
-import { mlJobService } from 'plugins/ml/services/job_service';
-import { mlMessageBarService } from 'plugins/ml/components/messagebar';
+import { ml } from '../services/ml_api_service';
+import { mlJobService } from '../services/job_service';
+import { mlMessageBarService } from '../components/messagebar';
 
 
 

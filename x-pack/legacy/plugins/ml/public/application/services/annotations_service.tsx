@@ -6,7 +6,7 @@
 
 import { BehaviorSubject, Subject } from 'rxjs';
 
-import { Annotation } from '../../common/types/annotations';
+import { Annotation } from '../../../common/types/annotations';
 
 /*
   A TypeScript helper type to allow a given component state attribute to be either an annotation or null.
@@ -41,7 +41,7 @@ export type AnnotationState = Annotation | null;
 
   There are two ways to deal with updates of the observable:
 
-  1. Inline subscription in an existing component. 
+  1. Inline subscription in an existing component.
      This requires the component to be a class component and manage its own state.
 
   - To react to an update, use `annotation$.subscribe(annotation => { <callback> })`.

@@ -13,7 +13,7 @@ const module = uiModules.get('apps/ml', ['react']);
 
 import { I18nContext } from 'ui/i18n';
 import { IndexPatterns } from 'ui/index_patterns';
-import { InjectorService } from '../../../common/types/angular';
+import { InjectorService } from '../../../../common/types/angular';
 
 import { KibanaConfigTypeFix, KibanaContext } from '../../contexts/kibana/kibana_context';
 import { createSearchItems } from '../../jobs/new_job/utils/new_job_utils';

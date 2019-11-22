@@ -12,7 +12,7 @@ import { KibanaConfigTypeFix } from '../../contexts/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
 
 // @ts-ignore
-import { FileDataVisualizerView } from './components/file_datavisualizer_view';
+import { FileDataVisualizerView } from './components/file_datavisualizer_view/index';
 
 export interface FileDataVisualizerPageProps {
   indexPatterns: IndexPatterns;

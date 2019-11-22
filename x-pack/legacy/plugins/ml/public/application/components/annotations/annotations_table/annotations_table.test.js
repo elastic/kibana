@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import jobConfig from '../../../../common/types/__mocks__/job_config_farequote';
+import jobConfig from '../../../../../common/types/__mocks__/job_config_farequote';
 import mockAnnotations from './__mocks__/mock_annotations.json';
 import './annotations_table.test.mocks';
 

@@ -13,7 +13,7 @@
 
 import _ from 'lodash';
 
-import { mlFunctionToESAggregation } from '../../common/util/job_utils';
+import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
 
 // Builds the basic configuration to plot a chart of the source data
 // analyzed by the the detector at the given index from the specified ML job.

@@ -17,7 +17,7 @@ import {
   showMultiBucketAnomalyMarker,
   showMultiBucketAnomalyTooltip,
 } from '../chart_utils';
-import { MULTI_BUCKET_IMPACT } from '../../../common/constants/multi_bucket_impact';
+import { MULTI_BUCKET_IMPACT } from '../../../../common/constants/multi_bucket_impact';
 import { CHART_TYPE } from '../../explorer/explorer_constants';
 
 describe('ML - chart utils', () => {

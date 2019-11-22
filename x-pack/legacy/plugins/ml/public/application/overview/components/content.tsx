@@ -7,7 +7,7 @@
 import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AnomalyDetectionPanel } from './anomaly_detection_panel';
-import { AnalyticsPanel } from './analytics_panel/';
+import { AnalyticsPanel } from './analytics_panel';
 
 interface Props {
   createAnomalyDetectionJobDisabled: boolean;

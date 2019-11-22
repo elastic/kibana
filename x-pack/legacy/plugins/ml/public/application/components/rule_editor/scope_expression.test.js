@@ -12,7 +12,7 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { ScopeExpression } from './scope_expression';
-import { FILTER_TYPE } from '../../../common/constants/detector_rule';
+import { FILTER_TYPE } from '../../../../common/constants/detector_rule';
 
 describe('ScopeExpression', () => {
 

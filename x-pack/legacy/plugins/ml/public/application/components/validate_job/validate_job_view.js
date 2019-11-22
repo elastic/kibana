@@ -37,8 +37,8 @@ const jobTipsUrl = `https://www.elastic.co/guide/en/kibana/${metadata.branch}/jo
 
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
-import { VALIDATION_STATUS } from '../../../common/constants/validation';
-import { getMostSevereMessageStatus } from '../../../common/util/validation_utils';
+import { VALIDATION_STATUS } from '../../../../common/constants/validation';
+import { getMostSevereMessageStatus } from '../../../../common/util/validation_utils';
 
 const defaultIconType = 'questionInCircle';
 const getDefaultState = () => ({

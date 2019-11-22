@@ -24,8 +24,8 @@ import { toastNotifications } from 'ui/notify';
 import { NavigationMenu } from '../../../components/navigation_menu';
 
 import { getCalendarSettingsData, validateCalendarId } from './utils';
-import { CalendarForm } from './calendar_form/';
-import { NewEventModal } from './new_event_modal/';
+import { CalendarForm } from './calendar_form';
+import { NewEventModal } from './new_event_modal';
 import { ImportModal } from './import_modal';
 import { ml } from '../../../services/ml_api_service';
 
