@@ -85,7 +85,7 @@ export class CapabilitiesService {
     const router = http.createRouter('/core/capabilities');
     router.post(
       {
-        path: '/',
+        path: '',
         validate: false,
       },
       async (ctx, req, res) => {
