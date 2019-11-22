@@ -25,6 +25,7 @@ jest.doMock('ui/new_platform', () => {
   const npMock = createUiNewPlatformMock();
   return {
     npSetup: {
+      ...npMock.npSetup,
       core: {
         ...npMock.npSetup.core,
         injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
