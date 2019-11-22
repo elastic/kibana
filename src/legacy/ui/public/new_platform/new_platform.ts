@@ -29,6 +29,7 @@ import {
 } from '../../../../plugins/inspector/public';
 import { EuiUtilsStart } from '../../../../plugins/eui_utils/public';
 import { DevToolsSetup, DevToolsStart } from '../../../../plugins/dev_tools/public';
+import { KibanaLegacySetup, KibanaLegacyStart } from '../../../../plugins/kibana_legacy/public';
 import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../plugins/home/public';
 import { SharePluginSetup, SharePluginStart } from '../../../../plugins/share/public';
 
@@ -39,8 +40,9 @@ export interface PluginsSetup {
   home: HomePublicPluginSetup;
   inspector: InspectorSetup;
   uiActions: IUiActionsSetup;
+  dev_tools: DevToolsSetup;
+  kibana_legacy: KibanaLegacySetup;
   share: SharePluginSetup;
-  devTools: DevToolsSetup;
 }
 
 export interface PluginsStart {
@@ -51,8 +53,9 @@ export interface PluginsStart {
   home: HomePublicPluginStart;
   inspector: InspectorStart;
   uiActions: IUiActionsStart;
+  dev_tools: DevToolsStart;
+  kibana_legacy: KibanaLegacyStart;
   share: SharePluginStart;
-  devTools: DevToolsStart;
 }
 
 export const npSetup = {

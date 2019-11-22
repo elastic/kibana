@@ -17,13 +17,11 @@
  * under the License.
  */
 
-// make sure all dev tools are loaded and registered.
-import 'uiExports/devTools';
+import { PluginInitializerContext } from 'kibana/public';
+import { KibanaLegacyPlugin } from './plugin';
 
-import { npStart } from 'ui/new_platform';
-
-if (npStart.plugins.dev_tools.getSortedDevTools().length === 0) {
-  npStart.core.chrome.navLinks.update('kibana:dev_tools', {
-    hidden: true,
-  });
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new KibanaLegacyPlugin();
 }
+
+export * from './plugin';
