@@ -17,10 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import sinon from 'sinon';
-
-import { getServices, chance, assertSinonMatch } from './lib';
+import { getServices, chance } from './lib';
 
 export function docExistsSuite() {
   async function setup(options: any = {}) {
@@ -58,11 +55,11 @@ export function docExistsSuite() {
         url: '/api/kibana/settings',
       });
 
-      expect(statusCode).to.be(200);
-      assertSinonMatch(result, {
+      expect(statusCode).toBe(200);
+      expect(result).toMatchObject({
         settings: {
           buildNum: {
-            userValue: sinon.match.number,
+            userValue: expect.any(Number),
           },
           defaultIndex: {
             userValue: defaultIndex,
@@ -89,11 +86,12 @@ export function docExistsSuite() {
         },
       });
 
-      expect(statusCode).to.be(200);
-      assertSinonMatch(result, {
+      expect(statusCode).toBe(200);
+
+      expect(result).toMatchObject({
         settings: {
           buildNum: {
-            userValue: sinon.match.number,
+            userValue: expect.any(Number),
           },
           defaultIndex: {
             userValue: defaultIndex,
@@ -117,8 +115,8 @@ export function docExistsSuite() {
         },
       });
 
-      expect(statusCode).to.be(400);
-      assertSinonMatch(result, {
+      expect(statusCode).toBe(400);
+      expect(result).toEqual({
         error: 'Bad Request',
         message: 'Unable to update "foo" because it is overridden',
         statusCode: 400,
@@ -141,11 +139,12 @@ export function docExistsSuite() {
         },
       });
 
-      expect(statusCode).to.be(200);
-      assertSinonMatch(result, {
+      expect(statusCode).toBe(200);
+
+      expect(result).toMatchObject({
         settings: {
           buildNum: {
-            userValue: sinon.match.number,
+            userValue: expect.any(Number),
           },
           defaultIndex: {
             userValue: defaultIndex,
@@ -171,8 +170,8 @@ export function docExistsSuite() {
         },
       });
 
-      expect(statusCode).to.be(400);
-      assertSinonMatch(result, {
+      expect(statusCode).toBe(400);
+      expect(result).toEqual({
         error: 'Bad Request',
         message: 'Unable to update "foo" because it is overridden',
         statusCode: 400,
@@ -188,18 +187,18 @@ export function docExistsSuite() {
         initialSettings: { defaultIndex },
       });
 
-      expect(await uiSettings.get('defaultIndex')).to.be(defaultIndex);
+      expect(await uiSettings.get('defaultIndex')).toBe(defaultIndex);
 
       const { statusCode, result } = await kbnServer.inject({
         method: 'DELETE',
         url: '/api/kibana/settings/defaultIndex',
       });
 
-      expect(statusCode).to.be(200);
-      assertSinonMatch(result, {
+      expect(statusCode).toBe(200);
+      expect(result).toMatchObject({
         settings: {
           buildNum: {
-            userValue: sinon.match.number,
+            userValue: expect.any(Number),
           },
           foo: {
             userValue: 'bar',
@@ -216,8 +215,8 @@ export function docExistsSuite() {
         url: '/api/kibana/settings/foo',
       });
 
-      expect(statusCode).to.be(400);
-      assertSinonMatch(result, {
+      expect(statusCode).toBe(400);
+      expect(result).toEqual({
         error: 'Bad Request',
         message: 'Unable to update "foo" because it is overridden',
         statusCode: 400,

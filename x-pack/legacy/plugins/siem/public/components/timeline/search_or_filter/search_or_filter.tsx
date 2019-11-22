@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiToolTip } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
-import styled, { injectGlobal } from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { esFilters } from '../../../../../../../../src/plugins/data/public';
@@ -27,7 +27,7 @@ const searchOrFilterPopoverWidth = '352px';
 
 // SIDE EFFECT: the following creates a global class selector
 // eslint-disable-next-line no-unused-expressions
-injectGlobal`
+createGlobalStyle`
   .${timelineSelectModeItemsClassName} {
     width: 350px !important;
   }
