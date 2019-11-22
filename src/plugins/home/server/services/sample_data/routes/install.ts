@@ -90,7 +90,7 @@ const insertDataIntoIndex = (
       );
     }
   };
-  return loadData(dataIndexConfig.dataPath, bulkInsert);
+  return loadData(dataIndexConfig.dataPath, bulkInsert); // this returns a Promise
 };
 
 export const createInstallRoute = (
@@ -98,7 +98,7 @@ export const createInstallRoute = (
   sampleDatasets: SampleDatasetSchema[],
   initContext: PluginInitializerContext
 ) => {
-  router.post({ path: '/api/sample_data/{id}', validate }, async (context, req, res) => {
+  router.post({ path: '/api/sample_data_NP/{id}', validate }, async (context, req, res) => {
     const { params, query } = req;
     const sampleDataset = sampleDatasets.find(({ id }) => id === params.id);
     if (!sampleDataset) {
