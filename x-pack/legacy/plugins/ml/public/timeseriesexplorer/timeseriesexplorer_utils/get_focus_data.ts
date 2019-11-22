@@ -37,9 +37,9 @@ export interface FocusData {
   focusChartData: any;
   anomalyRecords: any;
   scheduledEvents: any;
-  showForecastCheckbox: any;
-  focusAnnotationData: any;
-  focusForecastData: any;
+  showForecastCheckbox?: any;
+  focusAnnotationData?: any;
+  focusForecastData?: any;
 }
 
 export function getFocusData(
@@ -119,20 +119,28 @@ export function getFocusData(
       : of(null),
   ]).pipe(
     map(([metricData, recordsForCriteria, scheduledEventsByBucket, annotations, forecastData]) => {
-      const refreshFocusData = {} as FocusData;
+      // Sort in descending time order before storing in scope.
+      const anomalyRecords = recordsForCriteria.records
+        .sort((a, b) => a[TIME_FIELD_NAME] - b[TIME_FIELD_NAME])
+        .reverse();
 
-      refreshFocusData.focusChartData = processMetricPlotResults(
-        metricData.results,
+      const scheduledEvents = scheduledEventsByBucket.events[selectedJob.job_id];
+
+      let focusChartData = processMetricPlotResults(metricData.results, modelPlotEnabled);
+      // Tell the results container directives to render the focus chart.
+      focusChartData = processDataForFocusAnomalies(
+        focusChartData,
+        anomalyRecords,
+        focusAggregationInterval,
         modelPlotEnabled
       );
+      focusChartData = processScheduledEventsForChart(focusChartData, scheduledEvents);
 
-      // Sort in descending time order before storing in scope.
-      refreshFocusData.anomalyRecords = _.chain(recordsForCriteria.records)
-        .sortBy(record => record[TIME_FIELD_NAME])
-        .reverse()
-        .value();
-
-      refreshFocusData.scheduledEvents = scheduledEventsByBucket.events[selectedJob.job_id];
+      const refreshFocusData: FocusData = {
+        scheduledEvents,
+        anomalyRecords,
+        focusChartData,
+      };
 
       if (annotations) {
         refreshFocusData.focusAnnotationData = (annotations.annotations[selectedJob.job_id] ?? [])
@@ -149,19 +157,6 @@ export function getFocusData(
         refreshFocusData.focusForecastData = processForecastResults(forecastData.results);
         refreshFocusData.showForecastCheckbox = refreshFocusData.focusForecastData.length > 0;
       }
-
-      // Tell the results container directives to render the focus chart.
-      refreshFocusData.focusChartData = processDataForFocusAnomalies(
-        refreshFocusData.focusChartData,
-        refreshFocusData.anomalyRecords,
-        focusAggregationInterval,
-        modelPlotEnabled
-      );
-
-      refreshFocusData.focusChartData = processScheduledEventsForChart(
-        refreshFocusData.focusChartData,
-        refreshFocusData.scheduledEvents
-      );
 
       return refreshFocusData;
     })
