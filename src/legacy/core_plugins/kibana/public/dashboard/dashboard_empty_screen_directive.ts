@@ -16,20 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+// @ts-ignore
+import angular from 'angular';
+import { DashboardEmptyScreen } from './dashboard_empty_screen';
 
-declare module 'ui/management' {
-  export const PAGE_TITLE_COMPONENT: string;
-  export const PAGE_SUBTITLE_COMPONENT: string;
-  export const PAGE_FOOTER_COMPONENT: string;
-  export const SidebarNav: React.FC<any>;
-  export function registerSettingsComponent(
-    id: string,
-    component: string | React.FC<any>,
-    allowOverride: boolean
-  ): void;
-  export const management: any; // TODO - properly provide types
-  export const MANAGEMENT_BREADCRUMB: {
-    text: string;
-    href: string;
-  };
-}
+angular
+  .module('app/dashboard/emptyScreen', ['react'])
+  .directive('dashboardEmptyScreen', function(reactDirective: any) {
+    return reactDirective(DashboardEmptyScreen, [
+      ['showLinkToVisualize', { watchDepth: 'value' }],
+      ['onLinkClick', { watchDepth: 'reference' }],
+    ]);
+  });
