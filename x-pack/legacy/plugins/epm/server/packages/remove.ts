@@ -7,8 +7,7 @@
 import { SavedObjectsClientContract } from 'src/core/server/';
 import { SAVED_OBJECT_TYPE } from '../../common/constants';
 import { getInstallationObject, savedObjectTypes, CallESAsCurrentUser } from './index';
-import { AssetType } from '../../common/types';
-import { AssetReference } from '../types';
+import { AssetReference, AssetType } from '../../common/types';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;

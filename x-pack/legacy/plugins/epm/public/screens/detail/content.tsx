@@ -8,7 +8,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { SideNavLinks } from './side_nav_links';
-import { PackageInfo } from '../../../server/types';
+import { PackageInfo } from '../../../common/types';
 import { AssetAccordion } from '../../components/asset_accordion';
 import { AssetsFacetGroup } from '../../components/assets_facet_group';
 import { Requirements } from '../../components/requirements';

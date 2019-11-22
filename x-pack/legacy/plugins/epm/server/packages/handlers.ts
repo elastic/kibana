@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AssetType } from '../../common/types';
-import { Request, ResponseToolkit } from '../../server/types';
 import { API_ROOT } from '../../common/routes';
-import { PluginContext } from '../plugin';
-import { getClient } from '../saved_objects';
+import { AssetType } from '../../common/types';
 import {
   SearchParams,
   getCategories,
@@ -19,6 +16,9 @@ import {
   installPackage,
   removeInstallation,
 } from './index';
+import { PluginContext } from '../plugin';
+import { getClient } from '../saved_objects';
+import { Request, ResponseToolkit } from '../types';
 
 interface Extra extends ResponseToolkit {
   context: PluginContext;

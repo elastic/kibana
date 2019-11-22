@@ -14,8 +14,12 @@ import {
   ListParams,
   getFilePath,
 } from '../common/routes';
-import { CategorySummaryList } from '../common/types';
-import { PackageInfo, PackageList, PackagesGroupedByStatus } from '../server/types';
+import {
+  CategorySummaryList,
+  PackageInfo,
+  PackageList,
+  PackagesGroupedByStatus,
+} from '../common/types';
 
 const defaultClient: HttpHandler = (path, options?) => fetch(path, options).then(res => res.json());
 

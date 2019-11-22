@@ -6,8 +6,7 @@
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server/';
 import { SAVED_OBJECT_TYPE } from '../../common/constants';
-import { KibanaAssetType } from '../../common/types';
-import { AssetReference, InstallationAttributes } from '../types';
+import { AssetReference, KibanaAssetType, InstallationAttributes } from '../../common/types';
 import * as Registry from '../registry';
 import { getInstallationObject } from './index';
 import { getObjects } from './get_objects';

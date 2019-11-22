@@ -8,10 +8,12 @@ import { IClusterClient, ScopedClusterClient } from 'src/core/server/';
 import {
   AssetType,
   ElasticsearchAssetType,
+  Installable,
+  Installation,
   InstallationStatus,
   KibanaAssetType,
 } from '../../common/types';
-import { Installable, Installation, Request } from '../types';
+import { Request } from '../types';
 
 export * from './get';
 export * from './install';

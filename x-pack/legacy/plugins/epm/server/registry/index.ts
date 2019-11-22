@@ -13,8 +13,8 @@ import {
   CategorySummaryList,
   KibanaAssetType,
   RegistryList,
+  RegistryPackage,
 } from '../../common/types';
-import { RegistryPackage } from '../types';
 import { cacheGet, cacheSet } from './cache';
 import { ArchiveEntry, untarBuffer } from './extract';
 import { fetchUrl, getResponseStream, getResponse } from './requests';

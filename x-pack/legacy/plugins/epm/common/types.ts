@@ -4,6 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {
+  SavedObject,
+  SavedObjectAttributes,
+  SavedObjectReference,
+} from '../../../../../src/core/server';
+
 export enum InstallationStatus {
   installed = 'installed',
   notInstalled = 'not_installed',
@@ -69,6 +75,12 @@ export interface AssetParts {
   type: AssetType;
   file: string;
 }
+export type AssetTypeToParts = KibanaAssetTypeToParts & ElasticsearchAssetTypeToParts;
+export type AssetsGroupedByServiceByType = Record<
+  Extract<'kibana', ServiceName>,
+  KibanaAssetTypeToParts
+>;
+// & Record<Extract<'elasticsearch', ServiceName>, ElasticsearchAssetTypeToParts>;
 
 export type KibanaAssetParts = AssetParts & {
   service: Extract<'kibana', ServiceName>;
@@ -86,10 +98,42 @@ export type ElasticsearchAssetTypeToParts = Record<
   ElasticsearchAssetParts[]
 >;
 
-export type AssetTypeToParts = KibanaAssetTypeToParts & ElasticsearchAssetTypeToParts;
+export interface RegistryPackage {
+  name: string;
+  version: string;
+  description: string;
+  readme?: string;
+  icon: string;
+  requirement: RequirementsByServiceName;
+  title?: string;
+  screenshots?: ScreenshotItem[];
+  assets: string[];
+}
 
-export type AssetsGroupedByServiceByType = Record<
-  Extract<'kibana', ServiceName>,
-  KibanaAssetTypeToParts
+// Managers public HTTP response types
+export type PackageList = PackageListItem[];
+
+export type PackageListItem = Installable<Required<RegistryListItem>>;
+export type PackagesGroupedByStatus = Record<InstallationStatus, PackageList>;
+
+export type PackageInfo = Installable<
+  Required<RegistryPackage> & { assets: AssetsGroupedByServiceByType }
 >;
-// & Record<Extract<'elasticsearch', ServiceName>, ElasticsearchAssetTypeToParts>;
+
+export type Installation = SavedObject<InstallationAttributes>;
+export interface InstallationAttributes extends SavedObjectAttributes {
+  installed: AssetReference[];
+}
+
+export type Installable<T> = Installed<T> | NotInstalled<T>;
+
+export type Installed<T = {}> = T & {
+  status: InstallationStatus.installed;
+  savedObject: Installation;
+};
+
+export type NotInstalled<T = {}> = T & {
+  status: InstallationStatus.notInstalled;
+};
+
+export type AssetReference = Pick<SavedObjectReference, 'id' | 'type'>;
