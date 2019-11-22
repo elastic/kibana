@@ -7,7 +7,7 @@
 import React, { Fragment } from 'react';
 import { EuiButtonEmpty, EuiButtonEmptyProps } from '@elastic/eui';
 import styled from 'styled-components';
-import { PackageInfo } from '../../../common/types';
+import { PackageInfo } from '../../../server/types';
 import { entries } from '../../../common/type_utils';
 import { DetailViewPanelName } from '../../';
 import { useLinks } from '../../hooks';

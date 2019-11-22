@@ -5,7 +5,7 @@
  */
 
 import { SAVED_OBJECT_TYPE } from '../common/constants';
-import { Request } from '../common/types';
+import { Request } from '../server/types';
 
 export const getClient = (req: Request) => req.getSavedObjectsClient();
 

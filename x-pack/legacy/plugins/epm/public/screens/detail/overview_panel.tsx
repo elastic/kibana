@@ -5,7 +5,7 @@
  */
 import React, { Fragment } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { PackageInfo } from '../../../common/types';
+import { PackageInfo } from '../../../server/types';
 import { Screenshots } from './screenshots';
 import { Readme } from './readme';
 

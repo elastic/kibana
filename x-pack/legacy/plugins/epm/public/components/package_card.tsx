@@ -7,7 +7,7 @@ import React from 'react';
 import { EuiCard, EuiIcon, ICON_TYPES } from '@elastic/eui';
 import styled from 'styled-components';
 import { useLinks } from '../hooks';
-import { PackageListItem, PackageInfo } from '../../common/types';
+import { PackageListItem, PackageInfo } from '../../server/types';
 
 export interface BadgeProps {
   showInstalledBadge?: boolean;

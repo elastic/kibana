@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { PLUGIN } from '../common/constants';
-import { ServerRoute } from '../common/types';
+import { ServerRoute } from '../server/types';
 import * as CommonRoutes from '../common/routes';
 import * as Packages from './packages/handlers';
 

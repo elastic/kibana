@@ -8,7 +8,8 @@ import { EuiHorizontalRule, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui
 import styled from 'styled-components';
 
 import { PLUGIN } from '../../../common/constants';
-import { CategorySummaryItem, PackageList } from '../../../common/types';
+import { CategorySummaryItem } from '../../../common/types';
+import { PackageList } from '../../../server/types';
 import { PackageListGrid } from '../../components/package_list_grid';
 import { useBreadcrumbs, useLinks } from '../../hooks';
 import { CategoryFacets } from './category_facets';

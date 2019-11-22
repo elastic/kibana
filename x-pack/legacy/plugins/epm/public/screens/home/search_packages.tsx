@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Search as LocalSearch } from 'js-search';
-import { PackageList, PackageListItem } from '../../../common/types';
+import { PackageList, PackageListItem } from '../../../server/types';
 import { SearchResults } from './search_results';
 
 export { LocalSearch };

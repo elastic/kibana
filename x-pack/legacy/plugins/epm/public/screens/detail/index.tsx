@@ -6,7 +6,7 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import { EuiPage, EuiPageBody, EuiPageWidthProps, ICON_TYPES } from '@elastic/eui';
 import styled from 'styled-components';
-import { PackageInfo } from '../../../common/types';
+import { PackageInfo } from '../../../server/types';
 import { DetailViewPanelName } from '../../';
 import { getPackageInfoByKey } from '../../data';
 import { useCore } from '../../hooks/use_core';

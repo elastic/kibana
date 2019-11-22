@@ -75,8 +75,8 @@ export function AssetsFacetGroup({ assets }: { assets: AssetsGroupedByServiceByT
 
             <FacetGroup>
               {entries(filteredTypes).map(([_type, parts]) => {
-                const type = _type as KibanaAssetType;
                 // only kibana assets have icons
+                const type = _type as KibanaAssetType;
                 const iconType = type in AssetIcons && AssetIcons[type];
                 const iconNode = iconType ? <EuiIcon type={iconType} size="s" /> : '';
                 const FacetButton = styled(EuiFacetButton)`

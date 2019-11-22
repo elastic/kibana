@@ -7,7 +7,7 @@ import React, { Fragment, useCallback, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiTitle, IconType } from '@elastic/eui';
 import { PLUGIN } from '../../../common/constants';
-import { PackageInfo } from '../../../common/types';
+import { PackageInfo } from '../../../server/types';
 import { Version } from '../../components/version';
 import { IconPanel } from '../../components/icon_panel';
 import { useBreadcrumbs, useLinks } from '../../hooks';

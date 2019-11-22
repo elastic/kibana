@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AssetType, Request, ResponseToolkit } from '../../common/types';
+import { AssetType } from '../../common/types';
+import { Request, ResponseToolkit } from '../../server/types';
 import { API_ROOT } from '../../common/routes';
 import { PluginContext } from '../plugin';
 import { getClient } from '../saved_objects';
