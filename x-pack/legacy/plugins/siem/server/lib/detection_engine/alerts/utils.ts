@@ -300,7 +300,10 @@ export const searchAfterAndBulkCreate = async ({
   const totalHits =
     typeof someResult.hits.total === 'number' ? someResult.hits.total : someResult.hits.total.value;
   // maxTotalHitsSize represents the total number of docs to
-  // query for
+  // query for, no matter the size of each individual page of search results.
+  // If the total number of hits for the overall search result is greater than
+  // maxSignals, default to requesting a total of maxSignals, otherwise use the
+  // totalHits in the response from the searchAfter query.
   const maxTotalHitsSize =
     totalHits >= signalParams.maxSignals ? signalParams.maxSignals : totalHits;
 
@@ -326,7 +329,7 @@ export const searchAfterAndBulkCreate = async ({
         signalParams,
         services,
         logger,
-        pageSize,
+        pageSize, // maximum number of docs to receive per search result.
       });
       if (searchAfterResult.hits.hits.length === 0) {
         return true;
