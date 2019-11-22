@@ -18,8 +18,6 @@ import { mount } from 'enzyme';
 import { EuiSuperDatePicker } from '@elastic/eui';
 import { MemoryRouter } from 'react-router-dom';
 
-jest.mock('ui/kfetch');
-
 const mockHistoryPush = jest.spyOn(history, 'push');
 const mockRefreshTimeRange = jest.fn();
 const MockUrlParamsProvider: React.FC<{
