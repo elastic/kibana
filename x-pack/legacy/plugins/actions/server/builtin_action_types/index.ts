@@ -26,7 +26,9 @@ export function registerBuiltInActionTypes({
 }) {
   actionTypeRegistry.register(getServerLogActionType({ logger }));
   actionTypeRegistry.register(getSlackActionType());
-  actionTypeRegistry.register(getEmailActionType({ logger }));
+  actionTypeRegistry.register(
+    getEmailActionType({ logger, configurationUtilities: actionsConfigUtils })
+  );
   actionTypeRegistry.register(getIndexActionType({ logger }));
   actionTypeRegistry.register(getPagerDutyActionType({ logger }));
   actionTypeRegistry.register(

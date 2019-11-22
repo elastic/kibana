@@ -14,24 +14,25 @@ import { nullableType } from './lib/nullable';
 import { portSchema } from './lib/schemas';
 import { Logger } from '../../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
+import { ActionsConfigurationUtilities } from '../actions_config';
 
 // config definition
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
-const ConfigSchema = schema.object(
-  {
-    service: nullableType(schema.string()),
-    host: nullableType(schema.string()),
-    port: nullableType(portSchema()),
-    secure: nullableType(schema.boolean()),
-    from: schema.string(),
-  },
-  {
-    validate: validateConfig,
-  }
-);
+const ConfigSchemaProps = {
+  service: nullableType(schema.string()),
+  host: nullableType(schema.string()),
+  port: nullableType(portSchema()),
+  secure: nullableType(schema.boolean()),
+  from: schema.string(),
+};
 
-function validateConfig(configObject: any): string | void {
+const ConfigSchema = schema.object(ConfigSchemaProps);
+
+function validateConfig(
+  configurationUtilities: ActionsConfigurationUtilities,
+  configObject: any
+): string | void {
   // avoids circular reference ...
   const config: ActionTypeConfigType = configObject;
 
@@ -40,7 +41,9 @@ function validateConfig(configObject: any): string | void {
   // Note, not currently making these message translated, as will be
   // emitted alongside messages from @kbn/config-schema, which does not
   // translate messages.
-  if (config.service == null) {
+  if (config.service === JSON_TRANSPORT_SERVICE) {
+    return;
+  } else if (config.service == null) {
     if (config.host == null && config.port == null) {
       return 'either [service] or [host]/[port] is required';
     }
@@ -52,10 +55,17 @@ function validateConfig(configObject: any): string | void {
     if (config.port == null) {
       return '[port] is required if [service] is not provided';
     }
+
+    if (!configurationUtilities.isWhitelistedHostname(config.host)) {
+      return `[host] value '${config.host}' is not in the whitelistedHosts configuration`;
+    }
   } else {
-    // service is not null
-    if (!isValidService(config.service)) {
-      return `[service] value "${config.service}" is not valid`;
+    const host = getServiceNameHost(config.service);
+    if (host == null) {
+      return `[service] value '${config.service}' is not valid`;
+    }
+    if (!configurationUtilities.isWhitelistedHostname(host)) {
+      return `[service] value '${config.service}' resolves to host '${host}' which is not in the whitelistedHosts configuration`;
     }
   }
 }
@@ -98,13 +108,21 @@ function validateParams(paramsObject: any): string | void {
   }
 }
 
+interface GetActionTypeParams {
+  logger: Logger;
+  configurationUtilities: ActionsConfigurationUtilities;
+}
+
 // action type definition
-export function getActionType({ logger }: { logger: Logger }): ActionType {
+export function getActionType(params: GetActionTypeParams): ActionType {
+  const { logger, configurationUtilities } = params;
   return {
     id: '.email',
     name: 'email',
     validate: {
-      config: ConfigSchema,
+      config: schema.object(ConfigSchemaProps, {
+        validate: curry(validateConfig)(configurationUtilities),
+      }),
       secrets: SecretsSchema,
       params: ParamsSchema,
     },
@@ -173,31 +191,24 @@ async function executor(
 
 // utilities
 
-const ValidServiceNames = getValidServiceNames();
+const ServiceNameHosts = getServiceNameHosts();
 
-function isValidService(service: string): boolean {
-  return ValidServiceNames.has(service.toLowerCase());
-}
+// returns map of nodemailer service name: resulting host name
+function getServiceNameHosts(): Map<string, string> {
+  const result = new Map<string, string>();
 
-function getValidServiceNames(): Set<string> {
-  const result = new Set<string>();
+  for (const [serviceName, serviceValue] of Object.entries<any>(nodemailerServices)) {
+    if (serviceValue == null) continue;
+    if (serviceValue.host == null) continue;
 
-  // add our special json service
-  result.add(JSON_TRANSPORT_SERVICE);
-
-  const keys = Object.keys(nodemailerServices) as string[];
-  for (const key of keys) {
-    result.add(key.toLowerCase());
-
-    const record = nodemailerServices[key];
-    if (record.aliases == null) continue;
-
-    for (const alias of record.aliases as string[]) {
-      result.add(alias.toLowerCase());
-    }
+    result.set(serviceName.toLowerCase(), serviceValue.host);
   }
 
   return result;
+}
+
+function getServiceNameHost(service: string): string | null {
+  return ServiceNameHosts.get(service.toLowerCase()) || null;
 }
 
 // Returns the secure value - whether to use TLS or not.
