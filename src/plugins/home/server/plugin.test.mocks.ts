@@ -23,5 +23,5 @@ export const registryForTutorialsMock = tutorialsRegistryMock.create();
 export const registryForSampleDataMock = sampleDataRegistryMock.create();
 jest.doMock('./services', () => ({
   TutorialsRegistry: jest.fn(() => registryForTutorialsMock),
-  SampleDataRegistry: jest.fn(() => re),
+  SampleDataRegistry: jest.fn(() => registryForSampleDataMock),
 }));

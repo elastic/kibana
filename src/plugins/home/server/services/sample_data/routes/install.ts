@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import Joi, { any } from 'joi';
+import Joi from 'joi';
 import { schema } from '@kbn/config-schema';
-import { IRouter, RequestHandlerContext, KibanaRequest } from 'src/core/server';
+import { IRouter, RequestHandlerContext } from 'src/core/server';
 import { PluginInitializerContext } from 'src/core/server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createIndexName } from '../lib/create_index_name';

@@ -71,7 +71,7 @@ export class SampleDataRegistry {
   public setup(core: CoreSetup) {
     const router = core.http.createRouter();
     createListRoute(router, this.sampleDatasets);
-    createInstallRoute(router, this.sampleDatasets, initContext);
+    createInstallRoute(router, this.sampleDatasets, this.initContext);
     return {
       registerSampleDataset: (specProvider: SampleDatasetProvider) => {
         const { error, value } = Joi.validate(specProvider(), sampleDataSchema);

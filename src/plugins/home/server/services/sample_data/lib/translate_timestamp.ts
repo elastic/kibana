@@ -19,7 +19,7 @@
 
 const MILLISECONDS_IN_DAY = 86400000;
 
-function iso8601ToDateIgnoringTime(iso8601) {
+function iso8601ToDateIgnoringTime(iso8601: string) {
   const split = iso8601.split('-');
   if (split.length < 3) {
     throw new Error('Unexpected timestamp format, expecting YYYY-MM-DDTHH:mm:ss');
@@ -30,7 +30,7 @@ function iso8601ToDateIgnoringTime(iso8601) {
   return new Date(year, month, date);
 }
 
-export function dateToIso8601IgnoringTime(date) {
+export function dateToIso8601IgnoringTime(date: any) {
   // not using "Date.toISOString" because only using Date methods that deal with local time
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
@@ -41,20 +41,28 @@ export function dateToIso8601IgnoringTime(date) {
 
 // Translate source timestamp by targetReference timestamp,
 // perserving the distance between source and sourceReference
-export function translateTimeRelativeToDifference(source, sourceReference, targetReference) {
+export function translateTimeRelativeToDifference(
+  source: string,
+  sourceReference: any,
+  targetReference: any
+) {
   const sourceDate = iso8601ToDateIgnoringTime(source);
   const sourceReferenceDate = iso8601ToDateIgnoringTime(sourceReference);
   const targetReferenceDate = iso8601ToDateIgnoringTime(targetReference);
 
-  const timeDelta = sourceDate.getTime() - sourceReferenceDate.getTime();
-  const translatedDate = new Date(targetReferenceDate.getTime() + timeDelta);
+  const timeDelta: number = sourceDate.getTime() - sourceReferenceDate.getTime();
+  const translatedDate: any = new Date(targetReferenceDate.getTime() + timeDelta);
 
   return `${dateToIso8601IgnoringTime(translatedDate)}T${source.substring(11)}`;
 }
 
 // Translate source timestamp by targetReference timestamp,
 // perserving the week distance between source and sourceReference and day of week of the source timestamp
-export function translateTimeRelativeToWeek(source, sourceReference, targetReference) {
+export function translateTimeRelativeToWeek(
+  source: string,
+  sourceReference: any,
+  targetReference: any
+) {
   const sourceReferenceDate = iso8601ToDateIgnoringTime(sourceReference);
   const targetReferenceDate = iso8601ToDateIgnoringTime(targetReference);
 

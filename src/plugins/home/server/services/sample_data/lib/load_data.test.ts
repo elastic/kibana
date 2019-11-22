@@ -21,7 +21,7 @@ import { loadData } from './load_data';
 
 test('load flight data', async () => {
   let myDocsCount = 0;
-  const bulkInsertMock = (docs: any[]) => {
+  const bulkInsertMock = docs => {
     myDocsCount += docs.length;
   };
   const count = await loadData(
@@ -34,7 +34,7 @@ test('load flight data', async () => {
 
 test('load log data', async () => {
   let myDocsCount = 0;
-  const bulkInsertMock = (docs: any[]) => {
+  const bulkInsertMock = docs => {
     myDocsCount += docs.length;
   };
   const count = await loadData(
@@ -47,7 +47,7 @@ test('load log data', async () => {
 
 test('load ecommerce data', async () => {
   let myDocsCount = 0;
-  const bulkInsertMock = (docs: any[]) => {
+  const bulkInsertMock = docs => {
     myDocsCount += docs.length;
   };
   const count = await loadData(
