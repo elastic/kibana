@@ -173,7 +173,46 @@ export interface SignalSource {
 export interface BulkResponse {
   took: number;
   errors: boolean;
-  items: unknown[];
+  items: [
+    {
+      create: {
+        _index: string;
+        _type?: string;
+        _id: string;
+        _version: number;
+        result?: string;
+        _shards?: {
+          total: number;
+          successful: number;
+          failed: number;
+        };
+        _seq_no?: number;
+        _primary_term?: number;
+        status: number;
+        error?: {
+          type: string;
+          reason: string;
+          index_uuid?: string;
+          shard: string;
+          index: string;
+        };
+      };
+    }
+  ];
+}
+
+export interface MGetResponse {
+  docs: GetResponse[];
+}
+export interface GetResponse {
+  _index: string;
+  _type: string;
+  _id: string;
+  _version: number;
+  _seq_no: number;
+  _primary_term: number;
+  found: boolean;
+  _source: SearchTypes;
 }
 
 export type SignalSearchResponse = SearchResponse<SignalSource>;

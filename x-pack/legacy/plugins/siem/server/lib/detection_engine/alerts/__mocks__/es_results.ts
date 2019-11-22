@@ -74,6 +74,60 @@ export const sampleEmptyDocSearchResults: SignalSearchResponse = {
   },
 };
 
+export const sampleBulkCreateDuplicateResult = {
+  took: 60,
+  errors: true,
+  items: [
+    {
+      create: {
+        _index: 'test',
+        _type: '_doc',
+        _id: '4',
+        _version: 1,
+        result: 'created',
+        _shards: {
+          total: 2,
+          successful: 1,
+          failed: 0,
+        },
+        _seq_no: 1,
+        _primary_term: 1,
+        status: 201,
+      },
+    },
+    {
+      create: {
+        _index: 'test',
+        _type: '_doc',
+        _id: '4',
+        status: 409,
+        error: {
+          type: 'version_conflict_engine_exception',
+          reason: '[4]: version conflict, document already exists (current version [1])',
+          index_uuid: 'cXmq4Rt3RGGswDTTwZFzvA',
+          shard: '0',
+          index: 'test',
+        },
+      },
+    },
+    {
+      create: {
+        _index: 'test',
+        _type: '_doc',
+        _id: '4',
+        status: 409,
+        error: {
+          type: 'version_conflict_engine_exception',
+          reason: '[4]: version conflict, document already exists (current version [1])',
+          index_uuid: 'cXmq4Rt3RGGswDTTwZFzvA',
+          shard: '0',
+          index: 'test',
+        },
+      },
+    },
+  ],
+};
+
 export const sampleDocSearchResultsNoSortId: SignalSearchResponse = {
   took: 10,
   timed_out: false,

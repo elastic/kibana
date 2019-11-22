@@ -20,6 +20,7 @@ import {
   sampleDocSearchResultsWithSortId,
   sampleEmptyDocSearchResults,
   repeatedSearchResultsWithSortId,
+  sampleBulkCreateDuplicateResult,
   sampleSignalId,
 } from './__mocks__/es_results';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
@@ -146,14 +147,11 @@ describe('utils', () => {
       });
       expect(successfulSingleBulkIndex).toEqual(true);
     });
-    test('create unsuccessful bulk index due to bulk index errors', async () => {
+    test('create successful bulk create when bulk create has errors', async () => {
       // need a sample search result, sample signal params, mock service, mock logger
       const sampleParams = sampleSignalAlertParams(undefined);
       const sampleSearchResult = sampleDocSearchResultsNoSortId;
-      mockService.callCluster.mockReturnValue({
-        took: 100,
-        errors: true,
-      });
+      mockService.callCluster.mockReturnValue(sampleBulkCreateDuplicateResult);
       const successfulSingleBulkIndex = await singleBulkIndex({
         someResult: sampleSearchResult,
         signalParams: sampleParams,
@@ -168,7 +166,7 @@ describe('utils', () => {
         enabled: true,
       });
       expect(mockLogger.error).toHaveBeenCalled();
-      expect(successfulSingleBulkIndex).toEqual(false);
+      expect(successfulSingleBulkIndex).toEqual(true);
     });
   });
   describe('singleSearchAfter', () => {
@@ -282,10 +280,7 @@ describe('utils', () => {
     });
     test('if unsuccessful first bulk index', async () => {
       const sampleParams = sampleSignalAlertParams(10);
-      mockService.callCluster.mockReturnValue({
-        took: 100,
-        errors: true, // will cause singleBulkIndex to return false
-      });
+      mockService.callCluster.mockReturnValue(sampleBulkCreateDuplicateResult);
       const result = await searchAfterAndBulkIndex({
         someResult: repeatedSearchResultsWithSortId(4),
         signalParams: sampleParams,
@@ -454,7 +449,9 @@ describe('utils', () => {
             },
           ],
         })
-        .mockRejectedValueOnce(Error('Fake Error'));
+        .mockImplementation(() => {
+          throw Error('Fake Error');
+        });
       const result = await searchAfterAndBulkIndex({
         someResult: repeatedSearchResultsWithSortId(4),
         signalParams: sampleParams,

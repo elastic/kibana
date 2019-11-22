@@ -3,18 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { createHash } from 'crypto';
 import { performance } from 'perf_hooks';
 import { pickBy } from 'lodash/fp';
 import { SignalHit, Signal } from '../../types';
-import { createHash } from 'crypto';
-import {
-  DEFAULT_SEARCH_AFTER_PAGE_SIZE,
-} from '../../../../common/constants';
+import { DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import { Logger } from '../../../../../../../../src/core/server';
 import { AlertServices } from '../../../../../alerting/server/types';
 import {
   SignalSourceHit,
   SignalSearchResponse,
+  MGetResponse,
   BulkResponse,
   AlertTypeParams,
   OutputSignalES,
@@ -156,12 +155,21 @@ export const singleBulkIndex = async ({
   if (someResult.hits.hits.length === 0) {
     return true;
   }
+  // index documents after creating an ID based on the
+  // source documents' originating index, and the original
+  // document _id. This will allow two documents from two
+  // different indexes with the same ID to be
+  // indexed, and prevents us from creating any updates
+  // to the documents once inserted into the signals index,
+  // while preventing duplicates from being added to the
+  // signals index if rules are re-run over the same time
+  // span
   const bulkBody = someResult.hits.hits.flatMap(doc => [
     {
-      index: {
+      create: {
         _index: signalsIndex,
         _id: createHash('sha256')
-          .update(id.concat(doc._id))
+          .update(doc._index.concat(doc._id))
           .digest('hex'),
       },
     },
@@ -177,8 +185,29 @@ export const singleBulkIndex = async ({
   logger.debug(`individual bulk process time took: ${time2 - time1} milliseconds`);
   logger.debug(`took property says bulk took: ${firstResult.took} milliseconds`);
   if (firstResult.errors) {
-    logger.error(`[-] bulkResponse had errors: ${JSON.stringify(firstResult.errors, null, 2)}`);
-    return false;
+    // go through the response status errors and see what
+    // types of errors they are, count them up, and log them.
+    const errorCountMap: { [key: string]: number } = {};
+    firstResult.items.forEach(item => {
+      if (item.create.error) {
+        const responseStatusKey = item.create.status.toString();
+        errorCountMap[responseStatusKey] = errorCountMap[responseStatusKey]
+          ? errorCountMap[responseStatusKey] + 1
+          : 1;
+      }
+    });
+    /*
+     the logging output below should look like
+     {'409': 55}
+     which is read as "there were 55 counts of 409 errors returned from bulk create"
+    */
+    logger.error(
+      `[-] bulkResponse had errors with response statuses:counts of...\n${JSON.stringify(
+        errorCountMap,
+        null,
+        2
+      )}`
+    );
   }
   return true;
 };
@@ -266,11 +295,6 @@ export const searchAfterAndBulkIndex = async ({
     interval,
     enabled,
   });
-  if (!firstBulkIndexSuccess) {
-    logger.error('First bulk index was unsuccessful');
-    return false;
-  }
-
   const totalHits =
     typeof someResult.hits.total === 'number' ? someResult.hits.total : someResult.hits.total.value;
   // maxTotalHitsSize represents the total number of docs to
@@ -314,7 +338,7 @@ export const searchAfterAndBulkIndex = async ({
       }
       sortId = sortIds[0];
       logger.debug('next bulk index');
-      const bulkSuccess = await singleBulkIndex({
+      await singleBulkIndex({
         someResult: searchAfterResult,
         signalParams,
         services,
@@ -328,9 +352,6 @@ export const searchAfterAndBulkIndex = async ({
         enabled,
       });
       logger.debug('finished next bulk index');
-      if (!bulkSuccess) {
-        logger.error('[-] bulk index failed but continuing');
-      }
     } catch (exc) {
       logger.error(`[-] search_after and bulk threw an error ${exc}`);
       return false;

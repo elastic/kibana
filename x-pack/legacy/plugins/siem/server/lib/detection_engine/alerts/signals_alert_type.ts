@@ -8,7 +8,6 @@ import { schema } from '@kbn/config-schema';
 import { Logger } from 'src/core/server';
 import {
   SIGNALS_ID,
-  DEFAULT_SIGNALS_INDEX,
   DEFAULT_MAX_SIGNALS,
   DEFAULT_SEARCH_AFTER_PAGE_SIZE,
 } from '../../../../common/constants';
