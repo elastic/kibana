@@ -17,16 +17,16 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
 import * as Rx from 'rxjs';
-import { filter, share } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import {
-  event,
-  RenderId,
   Data,
+  event,
   IInterpreterRenderHandlers,
-  RenderErrorHandlerFnType,
   RenderError,
+  RenderErrorHandlerFnType,
+  RenderId,
 } from './types';
 import { getRenderersRegistry } from './services';
 import { renderErrorHandler as defaultRenderErrorHandler } from './render_error_handler';
@@ -58,18 +58,17 @@ export class ExpressionRenderHandler {
     this.element = element;
 
     this.eventsSubject = new Rx.Subject();
-    this.events$ = this.eventsSubject.asObservable().pipe(share());
+    this.events$ = this.eventsSubject.asObservable();
 
     this.onRenderError = onRenderError || defaultRenderErrorHandler;
 
     this.renderSubject = new Rx.BehaviorSubject(null as RenderId | null);
-    this.render$ = this.renderSubject.asObservable().pipe(
-      share(),
-      filter(_ => _ !== null)
-    ) as Observable<RenderId>;
+    this.render$ = this.renderSubject.asObservable().pipe(filter(_ => _ !== null)) as Observable<
+      RenderId
+    >;
 
     this.updateSubject = new Rx.Subject();
-    this.update$ = this.updateSubject.asObservable().pipe(share());
+    this.update$ = this.updateSubject.asObservable();
 
     this.handlers = {
       onDestroy: (fn: any) => {

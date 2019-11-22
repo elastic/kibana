@@ -24,6 +24,7 @@ import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { EuiLoadingChart, EuiProgress } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { useShallowCompareEffect } from '../../kibana_react/public';
 import { IExpressionLoaderParams, IInterpreterRenderHandlers, RenderError } from './types';
 import { ExpressionAST } from '../common/types';
 import { ExpressionLoader } from './loader';
@@ -55,30 +56,15 @@ const defaultState: State = {
 export const ExpressionRendererImplementation = ({
   className,
   dataAttrs,
-  expression,
-  renderError,
   padding,
-  ...options
+  renderError,
+  expression,
+  ...expressionLoaderOptions
 }: ExpressionRendererProps) => {
   const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
-  const handlerRef: React.MutableRefObject<null | ExpressionLoader> = useRef(null);
   const [state, setState] = useState<State>({ ...defaultState });
-
-  // Re-fetch data automatically when the inputs change
-  /* eslint-disable react-hooks/exhaustive-deps */
-  useEffect(() => {
-    if (handlerRef.current) {
-      handlerRef.current.update(expression, options);
-    }
-  }, [
-    expression,
-    options.searchContext,
-    options.context,
-    options.variables,
-    options.disableCaching,
-  ]);
-  /* eslint-enable react-hooks/exhaustive-deps */
-
+  const hasCustomRenderErrorHandler = !!renderError;
+  const expressionLoaderRef: React.MutableRefObject<null | ExpressionLoader> = useRef(null);
   // flag to skip next render$ notification,
   // because of just handled error
   const hasHandledErrorRef = useRef(false);
@@ -87,54 +73,69 @@ export const ExpressionRendererImplementation = ({
   const errorRenderHandlerRef: React.MutableRefObject<null | IInterpreterRenderHandlers> = useRef(
     null
   );
-  // Initialize the loader only once
-  useEffect(() => {
-    if (handlerRef.current) return;
-    const subs: Subscription[] = [];
 
-    handlerRef.current = new ExpressionLoader(mountpoint.current!, expression, {
-      ...options,
+  /* eslint-disable react-hooks/exhaustive-deps */
+  // OK to ignore react-hooks/exhaustive-deps because options update is handled by calling .update()
+  useEffect(() => {
+    const subs: Subscription[] = [];
+    expressionLoaderRef.current = new ExpressionLoader(mountpoint.current!, expression, {
+      ...expressionLoaderOptions,
       // react component wrapper provides different
       // error handling api which is easier to work with from react
       // if custom renderError is not provided then we fallback to default error handling from ExpressionLoader
-      // TODO: track renderError prop change as dep?
-      onRenderError:
-        renderError &&
-        ((domNode, error, handlers) => {
-          errorRenderHandlerRef.current = handlers;
-          setState(() => ({
-            ...defaultState,
-            isEmpty: false,
-            error,
-          }));
-        }),
+      onRenderError: hasCustomRenderErrorHandler
+        ? (domNode, error, handlers) => {
+            errorRenderHandlerRef.current = handlers;
+            setState(() => ({
+              ...defaultState,
+              isEmpty: false,
+              error,
+            }));
+
+            if (expressionLoaderOptions.onRenderError) {
+              expressionLoaderOptions.onRenderError(domNode, error, handlers);
+            }
+          }
+        : expressionLoaderOptions.onRenderError,
     });
     subs.push(
-      handlerRef.current.loading$.subscribe(() => {
+      expressionLoaderRef.current.loading$.subscribe(() => {
         hasHandledErrorRef.current = false;
         setState(prevState => ({ ...prevState, isLoading: true }));
       }),
-      handlerRef.current.render$.pipe(filter(() => !hasHandledErrorRef.current)).subscribe(item => {
-        setState(() => ({
-          ...defaultState,
-          isEmpty: false,
-        }));
-      })
+      expressionLoaderRef.current.render$
+        .pipe(filter(() => !hasHandledErrorRef.current))
+        .subscribe(item => {
+          setState(() => ({
+            ...defaultState,
+            isEmpty: false,
+          }));
+        })
     );
 
     return () => {
       subs.forEach(s => s.unsubscribe());
-      if (handlerRef.current) {
-        handlerRef.current.destroy();
-        handlerRef.current = null;
+      if (expressionLoaderRef.current) {
+        expressionLoaderRef.current.destroy();
+        expressionLoaderRef.current = null;
       }
+
       errorRenderHandlerRef.current = null;
     };
+  }, [hasCustomRenderErrorHandler]);
 
-    /* eslint-disable react-hooks/exhaustive-deps */
-  }, []);
+  // Re-fetch data automatically when the inputs change
+  useShallowCompareEffect(
+    () => {
+      if (expressionLoaderRef.current) {
+        expressionLoaderRef.current.update(expression, expressionLoaderOptions);
+      }
+    },
+    // when expression is changed by reference and when any other loaderOption is changed by reference
+    [{ expression, ...expressionLoaderOptions }]
+  );
+
   /* eslint-enable react-hooks/exhaustive-deps */
-
   // call expression loader's done() handler when finished rendering custom error state
   useLayoutEffect(() => {
     if (state.error && errorRenderHandlerRef.current) {
@@ -158,8 +159,8 @@ export const ExpressionRendererImplementation = ({
 
   return (
     <div {...dataAttrs} className={classes}>
-      {state.isEmpty ? <EuiLoadingChart mono size="l" /> : null}
-      {state.isLoading ? <EuiProgress size="xs" color="accent" position="absolute" /> : null}
+      {state.isEmpty && <EuiLoadingChart mono size="l" />}
+      {state.isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
       {!state.isLoading && state.error && renderError && renderError(state.error.message)}
       <div
         className="expExpressionRenderer__expression"

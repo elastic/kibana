@@ -20,3 +20,4 @@
 export * from './use_observable';
 export * from './use_unmount';
 export * from './react_mount';
+export * from './use_shallow_compare_effect';
