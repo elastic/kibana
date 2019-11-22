@@ -26,7 +26,7 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 import { AppStateProvider } from 'ui/state_management/app_state';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 
-import { createTableVisTypeDefinition } from '../table_vis_type';
+import { tableVisTypeDefinition } from '../table_vis_type';
 import { setup as visualizationsSetup } from '../../../visualizations/public/np_ready/public/legacy';
 
 describe('Table Vis - Controller', async function () {
@@ -42,9 +42,7 @@ describe('Table Vis - Controller', async function () {
 
   ngMock.inject(function () {
 
-    visualizationsSetup.types.registerVisualization(() =>
-      createTableVisTypeDefinition()
-    );
+    visualizationsSetup.types.createBaseVisualization(tableVisTypeDefinition);
   });
 
   beforeEach(ngMock.module('kibana', 'kibana/table_vis'));

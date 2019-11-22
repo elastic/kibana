@@ -29,7 +29,7 @@ import { Vis } from '../../../../visualizations/public';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { round } from 'lodash';
 
-import { createTableVisTypeDefinition } from '../../table_vis_type';
+import { tableVisTypeDefinition } from '../../table_vis_type';
 import { setup as visualizationsSetup } from '../../../../visualizations/public/np_ready/public/legacy';
 
 describe('Table Vis - AggTable Directive', function () {
@@ -97,7 +97,7 @@ describe('Table Vis - AggTable Directive', function () {
   };
 
   ngMock.inject(function () {
-    visualizationsSetup.types.registerVisualization(() => createTableVisTypeDefinition());
+    visualizationsSetup.types.createBaseVisualization(tableVisTypeDefinition);
   });
 
   beforeEach(ngMock.module('kibana'));
