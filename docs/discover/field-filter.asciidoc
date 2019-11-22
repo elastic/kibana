@@ -14,7 +14,8 @@ To add a filter from the Fields list:
 . Click the name of the field you want to filter on. This displays the top
 five values for that field.
 +
-image::images/filter-field.jpg[]
+[role="screenshot"]
+image::images/filter-field.png[height=317]
 . To add a positive filter, click the *Positive Filter* button
 image:images/PositiveFilter.jpg[Positive Filter].
 This includes only those documents that contain that value in the field.
@@ -43,8 +44,7 @@ field name. This includes only those documents that contain the field.
 To manually add a filter:
 
 . Click *Add Filter*. A popup will be displayed for you to create the filter.
-+
-image::images/add_filter.png[]
+
 . Choose a field to filter by. This list of fields will include fields from the
 index pattern you are currently querying against.
 +
@@ -78,26 +78,26 @@ turn off the suggestions by setting the advanced setting, `filterEditor:suggestV
 [[filter-pinning]]
 === Managing Filters
 
-To modify a filter, hover over it and click one of the action buttons.
+To modify a filter, click on it and click one of the action buttons.
 
 image::images/filter-allbuttons.png[]
 
 &nbsp;
 
-image:images/filter-enable.png[] Enable Filter :: Disable the filter without
-removing it. Click again to reenable the filter. Diagonal stripes indicate
-that a filter is disabled.
-image:images/filter-pin.png[] Pin Filter :: Pin the filter. Pinned filters
+Pin across all apps :: Pinned filters
 persist when you switch contexts in Kibana. For example, you can pin a filter
 in Discover and it remains in place when you switch to Visualize.
 Note that a filter is based on a particular index field--if the indices being
 searched don't contain the field in a pinned filter, it has no effect.
-image:images/filter-toggle.png[] Invert Filter :: Switch from a positive
-filter to a negative filter and vice-versa.
-image:images/filter-delete.png[] Remove Filter :: Remove the filter.
-image:images/filter-custom.png[] Edit Filter :: <<filter-edit, Edit the
+Edit Filter :: <<filter-edit, Edit the
 filter>> definition.  Enables you to manually update the filter and
 specify a label for the filter.
+Exclude results :: Switch from a positive
+filter to a negative filter and vice-versa.
+Temporarily disable :: Disable the filter without
+removing it. Click again to reenable the filter. Diagonal stripes indicate
+that a filter is disabled.
+Remove Filter :: Remove the filter.
 
 To apply a filter action to all of the applied filters,
 click *Actions* and select the action.

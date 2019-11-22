@@ -63,7 +63,7 @@ type LogFilterUrlState = ReturnType<typeof logFilterSelectors.selectLogFilterQue
 
 type WithLogFilterUrlStateProps = WithLogFilterProps;
 
-export const WithLogFilterUrlState: React.SFC<WithLogFilterUrlStateProps> = ({ indexPattern }) => (
+export const WithLogFilterUrlState: React.FC<WithLogFilterUrlStateProps> = ({ indexPattern }) => (
   <WithLogFilter indexPattern={indexPattern}>
     {({ applyFilterQuery, filterQuery }) => (
       <UrlStateContainer
