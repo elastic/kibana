@@ -78,7 +78,7 @@ export function InfraHomePageProvider({ getService }: FtrProviderContext) {
     async waitForChartToLoad() {
       await retry.try(async () => {
         const renderComplete = await find.byCssSelector('[data-ech-render-complete="true"]');
-        if (! renderComplete ) {
+        if (!renderComplete) {
           throw new Error('Chart did not render');
         }
       });
