@@ -7,19 +7,28 @@
 // @ts-ignore
 import { cryptoFactory } from '../../../server/lib/crypto';
 import { createMockServer } from '../../../test_helpers/create_mock_server';
-import { decryptJobHeaders } from './index';
+import { Logger } from '../../../types';
+import { decryptJobHeaders } from './decrypt_job_headers';
 
-let mockServer: any;
-beforeEach(() => {
-  mockServer = createMockServer('');
-});
-
-const encryptHeaders = async (headers: Record<string, string>) => {
-  const crypto = cryptoFactory(mockServer);
-  return await crypto.encrypt(headers);
-};
+const createMockLogger = () =>
+  (({
+    warning: jest.fn(),
+    debug: jest.fn(),
+    info: jest.fn(),
+    error: jest.fn(),
+  } as unknown) as Logger);
 
 describe('headers', () => {
+  let mockServer: any;
+  const encryptHeaders = async (headers: Record<string, string>) => {
+    const crypto = cryptoFactory(mockServer);
+    return await crypto.encrypt(headers);
+  };
+
+  beforeEach(() => {
+    mockServer = createMockServer('');
+  });
+
   test(`fails if it can't decrypt headers`, async () => {
     await expect(
       decryptJobHeaders({
@@ -33,6 +42,7 @@ describe('headers', () => {
           },
         },
         server: mockServer,
+        logger: createMockLogger(),
       })
     ).rejects.toBeDefined();
   });
@@ -56,6 +66,7 @@ describe('headers', () => {
         headers: encryptedHeaders,
       },
       server: mockServer,
+      logger: createMockLogger(),
     });
     expect(decryptedHeaders).toEqual(headers);
   });
