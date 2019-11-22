@@ -34,7 +34,7 @@ const StyledEuiFormRow = styled(EuiFormRow)`
 
 export const ScheduleItem = ({ dataTestSubj, field, idAria, isDisabled }: ScheduleItemProps) => {
   const [timeType, setTimeType] = useState('s');
-  const [timeVal, setTimeVal] = useState<string | number>('');
+  const [timeVal, setTimeVal] = useState<number>(0);
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   const onChangeTimeType = useCallback(e => {
@@ -42,8 +42,8 @@ export const ScheduleItem = ({ dataTestSubj, field, idAria, isDisabled }: Schedu
   }, []);
 
   const onChangeTimeVal = useCallback(e => {
-    const sanitizedValue = parseInt(e.target.value, 10);
-    setTimeVal(isNaN(sanitizedValue) ? '' : sanitizedValue);
+    const sanitizedValue: number = parseInt(e.target.value, 10);
+    setTimeVal(isNaN(sanitizedValue) ? 0 : sanitizedValue);
   }, []);
 
   useEffect(() => {
@@ -62,7 +62,7 @@ export const ScheduleItem = ({ dataTestSubj, field, idAria, isDisabled }: Schedu
         !isNaN(Number(filterTimeVal[0])) &&
         Number(filterTimeVal[0]) !== Number(timeVal)
       ) {
-        setTimeVal(filterTimeVal[0]);
+        setTimeVal(Number(filterTimeVal[0]));
       }
       if (
         !isEmpty(filterTimeType) &&
@@ -76,7 +76,7 @@ export const ScheduleItem = ({ dataTestSubj, field, idAria, isDisabled }: Schedu
   }, [field.value]);
 
   // EUI missing some props
-  const rest = { isDisabled };
+  const rest = { disabled: isDisabled };
 
   return (
     <StyledEuiFormRow

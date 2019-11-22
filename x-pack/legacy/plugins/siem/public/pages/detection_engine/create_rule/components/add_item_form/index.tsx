@@ -94,7 +94,7 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
       <>
         {items.map((item, index) => {
           const euiFieldProps = {
-            isDisabled,
+            disabled: isDisabled,
             ...(index === items.length - 1 ? { inputRef: handleLastInputRef } : {}),
           };
           return (

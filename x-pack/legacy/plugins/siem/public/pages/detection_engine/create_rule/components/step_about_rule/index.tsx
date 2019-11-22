@@ -43,7 +43,7 @@ export const StepAboutRule = memo<RuleStepProps>(({ isLoading, setStepData }) =>
             euiFieldProps: {
               compressed: true,
               fullWidth: false,
-              isDisabled: isLoading,
+              disabled: isLoading,
             },
           }}
         />
@@ -55,7 +55,7 @@ export const StepAboutRule = memo<RuleStepProps>(({ isLoading, setStepData }) =>
             'data-test-subj': 'detectionEngineStepAboutRuleDescription',
             euiFieldProps: {
               compressed: true,
-              isDisabled: isLoading,
+              disabled: isLoading,
             },
           }}
         />
@@ -67,7 +67,7 @@ export const StepAboutRule = memo<RuleStepProps>(({ isLoading, setStepData }) =>
             euiFieldProps: {
               compressed: true,
               fullWidth: false,
-              isDisabled: isLoading,
+              disabled: isLoading,
               options: severityOptions,
             },
           }}
@@ -82,7 +82,7 @@ export const StepAboutRule = memo<RuleStepProps>(({ isLoading, setStepData }) =>
               min: 0,
               compressed: true,
               fullWidth: false,
-              isDisabled: isLoading,
+              disabled: isLoading,
               options: severityOptions,
             },
           }}

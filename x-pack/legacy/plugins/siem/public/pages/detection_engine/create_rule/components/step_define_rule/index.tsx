@@ -112,7 +112,7 @@ export const StepDefineRule = memo<RuleStepProps>(({ isLoading, setStepData }) =
             euiFieldProps: {
               compressed: true,
               fullWidth: false,
-              isDisabled: isLoading,
+              disabled: isLoading,
             },
           }}
         />

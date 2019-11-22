@@ -34,7 +34,6 @@ interface QueryBarDefineRuleProps {
   dataTestSubj: string;
   field: FieldHook;
   idAria: string;
-  isDisabled?: string;
   isLoading: boolean;
   indexPattern: StaticIndexPattern;
 }
