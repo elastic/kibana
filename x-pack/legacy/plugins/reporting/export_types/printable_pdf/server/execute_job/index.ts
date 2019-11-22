@@ -19,7 +19,7 @@ import {
   getCustomLogo,
 } from '../../../common/execute_job/';
 
-export function executeJobFactory(server: ServerFacade) {
+export const executeJobFactory = function executeJobFactoryFn(server: ServerFacade) {
   const generatePdfObservable = generatePdfObservableFactory(server);
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PDF_JOB_TYPE, 'execute']);
 
@@ -64,4 +64,4 @@ export function executeJobFactory(server: ServerFacade) {
 
     return process$.pipe(takeUntil(stop$)).toPromise();
   };
-}
+};

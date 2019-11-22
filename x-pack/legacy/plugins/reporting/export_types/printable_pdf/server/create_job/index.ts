@@ -20,7 +20,7 @@ interface CreateJobFnOpts {
   layout: any;
 }
 
-export function createJobFactory(server: ServerFacade) {
+export const createJobFactory = function createJobFactoryFn(server: ServerFacade) {
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PDF_JOB_TYPE, 'create']);
   const compatibilityShim = compatibilityShimFactory(server, logger);
   const crypto = cryptoFactory(server);
@@ -45,4 +45,4 @@ export function createJobFactory(server: ServerFacade) {
       forceNow: new Date().toISOString(),
     };
   });
-}
+};

@@ -27,7 +27,9 @@ interface VisData {
   panel: SearchPanel;
 }
 
-export function createJobFactory(server: ServerFacade): ImmediateCreateJobFn {
+export const createJobFactory = function createJobFactoryFn(
+  server: ServerFacade
+): ImmediateCreateJobFn {
   const crypto = cryptoFactory(server);
   const logger = LevelLogger.createForServer(server, [
     PLUGIN_ID,
@@ -93,4 +95,4 @@ export function createJobFactory(server: ServerFacade): ImmediateCreateJobFn {
       title,
     };
   };
-}
+};

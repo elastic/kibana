@@ -18,7 +18,7 @@ import {
 import { JobDocPayloadPNG } from '../../types';
 import { generatePngObservableFactory } from '../lib/generate_png';
 
-export function executeJobFactory(server: ServerFacade) {
+export const executeJobFactory = function executeJobFactoryFn(server: ServerFacade) {
   const generatePngObservable = generatePngObservableFactory(server);
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PNG_JOB_TYPE, 'execute']);
 
@@ -59,4 +59,4 @@ export function executeJobFactory(server: ServerFacade) {
     const stop$ = Rx.fromEventPattern(cancellationToken.on);
     return process$.pipe(takeUntil(stop$)).toPromise();
   };
-}
+};

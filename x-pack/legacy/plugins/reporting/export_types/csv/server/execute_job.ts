@@ -14,7 +14,7 @@ import { createGenerateCsv } from './lib/generate_csv';
 // @ts-ignore untyped module
 import { fieldFormatMapFactory } from './lib/field_format_map';
 
-export function executeJobFactory(server: ServerFacade) {
+export const executeJobFactory = function executeJobFactoryFn(server: ServerFacade) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   const crypto = cryptoFactory(server);
   const config = server.config();
@@ -134,4 +134,4 @@ export function executeJobFactory(server: ServerFacade) {
       csv_contains_formulas: csvContainsFormulas,
     };
   };
-}
+};
