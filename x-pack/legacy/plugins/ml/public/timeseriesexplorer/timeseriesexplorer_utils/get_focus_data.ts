@@ -98,7 +98,7 @@ export function getFocusData(
       : of(null),
     // Plus query for forecast data if there is a forecastId stored in the appState.
     forecastId !== undefined
-      ? (function() {
+      ? (() => {
           let aggType;
           const detector = selectedJob.analysis_config.detectors[detectorIndex];
           const esAgg = mlFunctionToESAggregation(detector.function);
