@@ -14,6 +14,9 @@ case "$JOB" in
 kibana-intake)
   ./test/scripts/jenkins_unit.sh
   ;;
+kibana-serverMocha)
+  node scripts/mocha;
+  ;;
 kibana-ciGroup*)
   export CI_GROUP="${JOB##kibana-ciGroup}"
   ./test/scripts/jenkins_ci_group.sh
