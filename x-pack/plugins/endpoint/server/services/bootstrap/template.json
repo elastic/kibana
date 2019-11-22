@@ -1,6 +1,6 @@
 {
   "version": "1",
-  "index_patterns": ["%v-*"],
+  "index_patterns": [],
   "mappings": {
     "_meta": {
       "version": "1.1.0"

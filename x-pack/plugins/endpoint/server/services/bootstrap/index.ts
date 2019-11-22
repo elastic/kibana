@@ -13,6 +13,7 @@ const templateVersion = 1;
 const appName = 'endpoint';
 const ilmName = 'endpoint_policy';
 const fanPipeline = 'route-events';
+const alertsIndex = 'alerts';
 
 // TODO need to get the version of the endpoint app
 const appVersion = '1.0.0';
@@ -56,8 +57,14 @@ function makeAliasBody(alias: string): any {
   };
 }
 
-function makeTemplateBody(version: number, lifecycleName: string, lifecycleRollOverAlias: string) {
+function makeTemplateBody(
+  names: string[],
+  version: number,
+  lifecycleName: string,
+  lifecycleRollOverAlias: string
+) {
   const body = JSON.parse(JSON.stringify(endpointTemplate));
+  body.index_patterns.push(...names.map(name => `${name}-*`));
   body.version = version;
   body.settings.index.lifecycle.name = lifecycleName;
   body.settings.index.lifecycle.rollover_alias = lifecycleRollOverAlias;
@@ -84,14 +91,14 @@ export class BootstrapService {
     }
   }
 
-  private async createIndex() {
-    const alias = appName;
+  private async createIndex(alias: string) {
     try {
+      const aliasWithVersion = makeNameVersion(alias, appVersion);
       const res = await this.client.callAsCurrentUser('indices.create', {
-        index: makeIndexName(makeNameVersion(appName, appVersion)),
-        body: makeAliasBody(alias),
+        index: makeIndexName(aliasWithVersion),
+        body: makeAliasBody(aliasWithVersion),
       });
-      this.logger.info(`success: ${res}`);
+      this.logger.info('success: ' + JSON.stringify(res));
     } catch (e) {
       if (alreadyExists(e)) {
         this.logger.debug('index already exists');
@@ -101,6 +108,11 @@ export class BootstrapService {
         throw e;
       }
     }
+  }
+
+  private async createAllIndices() {
+    await this.createIndex(appName);
+    await this.createIndex(alertsIndex);
   }
 
   private async createILMPolicy() {
@@ -132,23 +144,26 @@ export class BootstrapService {
 
   private async createTemplate(
     name: string,
+    indicesWithVersion: string[],
     tempVersion: number,
     lcName: string,
     lcRollAlias: string
   ) {
     const res = await this.client.callAsCurrentUser('indices.putTemplate', {
       name,
-      body: makeTemplateBody(tempVersion, lcName, lcRollAlias),
+      body: makeTemplateBody(indicesWithVersion, tempVersion, lcName, lcRollAlias),
     });
     if (!res?.acknowledged) {
       throw new Error('failed to create template');
     }
   }
 
-  private async ensureTemplate() {
-    const templateName = makeNameVersion(appName, appVersion);
+  private async ensureTemplate(baseName: string) {
+    const templateName = makeNameVersion(baseName, appVersion);
+    const indexPatterns = [templateName];
+
     const lifecycleName = makeNameVersion(ilmName, appVersion);
-    const lifecycleRollOverAlias = makeNameVersion(appName, appVersion);
+    const lifecycleRollOverAlias = makeNameVersion(baseName, appVersion);
 
     let getTempRes: any;
     try {
@@ -158,20 +173,22 @@ export class BootstrapService {
       });
     } catch (e) {
       if (e?.body?.status !== 200) {
+        this.logger.info('template did not exist, creating');
         return await this.createTemplate(
           templateName,
+          indexPatterns,
           templateVersion,
           lifecycleName,
           lifecycleRollOverAlias
         );
       }
     }
-
-    const version = getTempRes?.body?.version ?? -1;
+    const version = getTempRes?.[templateName]?.version ?? -1;
     if (version === -1) {
       this.logger.info('no template exists, creating a template');
       return await this.createTemplate(
         templateName,
+        indexPatterns,
         templateVersion,
         lifecycleName,
         lifecycleRollOverAlias
@@ -187,20 +204,16 @@ export class BootstrapService {
     this.logger.info('creating newer template version');
     return await this.createTemplate(
       templateName,
+      indexPatterns,
       templateVersion,
       lifecycleName,
       lifecycleRollOverAlias
     );
   }
 
-  private async createAlias() {
-    const index = makeIndexName(makeNameVersion(appName, appVersion));
-    this.logger.info(`creating alias [${appName}] for index [${index}]`);
-    const res = await this.client.callAsCurrentUser('indices.putAlias', {
-      index,
-      name: appName,
-    });
-    this.logger.info(`response: ${res}`);
+  private async createAllTemplates() {
+    await this.ensureTemplate(appName);
+    await this.ensureTemplate(alertsIndex);
   }
 
   private async createIngestPipeline() {
@@ -211,10 +224,15 @@ export class BootstrapService {
         description: 'sends events to specific indices',
         processors: [
           {
+            dot_expander: {
+              field: 'endgame.event_type_full',
+            },
+          },
+          {
             set: {
-              if: 'ctx.endgame.event_type_full == alert_event',
+              if: 'ctx.endgame?.event_type_full == "alert_event"',
               field: '_index',
-              value: 'alerts',
+              value: makeNameVersion(alertsIndex, appVersion),
             },
           },
         ],
@@ -224,7 +242,8 @@ export class BootstrapService {
 
   async doBootstrapping() {
     await this.createILMPolicy();
-    await this.ensureTemplate();
-    await this.createIndex();
+    await this.createAllTemplates();
+    await this.createAllIndices();
+    await this.createIngestPipeline();
   }
 }
