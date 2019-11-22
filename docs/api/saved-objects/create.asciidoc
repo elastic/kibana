@@ -1,7 +1,7 @@
 [[saved-objects-api-create]]
 === Create Object
 
-beta[This functionality is *beta*. It's on track to become a stable, permanent feature of {kib}. Caution should be exercised because it is possible a breaking change to these APIs will occur in a minor version, but we’ll avoid this wherever possible. ]
+beta["This functionality is *beta*. It's on track to become a stable, permanent feature of {kib}. Caution should be exercised because it is possible a breaking change to these APIs will occur in a minor version, but we’ll avoid this wherever possible."]
 
 The create saved object API enables you to persist a Kibana saved object.
 

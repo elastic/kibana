@@ -28,3 +28,5 @@ export { esTestConfig, createEsTestCluster } from './es';
 export { kbnTestConfig, kibanaServerTestUser, kibanaTestUser, adminTestUser } from './kbn';
 
 export { setupUsers, DEFAULT_SUPERUSER_PASS } from './functional_tests/lib/auth';
+
+export { runFailedTestsReporterCli } from './failed_tests_reporter';

@@ -8,7 +8,7 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 // eslint-disable-next-line import/no-default-export
 export default function({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
   describe('spaces', function() {
-    this.tags('ciGroup1');
+    this.tags('ciGroup6');
 
     loadTestFile(require.resolve('./space_attributes'));
   });

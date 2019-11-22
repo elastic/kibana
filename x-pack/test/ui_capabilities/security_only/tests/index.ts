@@ -17,7 +17,7 @@ export default function uiCapabilitesTests({
   const securityService: SecurityService = getService('security');
 
   describe('ui capabilities', function() {
-    this.tags('ciGroup4');
+    this.tags('ciGroup9');
 
     before(async () => {
       for (const user of UserScenarios) {

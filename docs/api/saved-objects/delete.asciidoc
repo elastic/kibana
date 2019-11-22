@@ -1,7 +1,7 @@
 [[saved-objects-api-delete]]
 === Delete Object
 
-beta[This functionality is *beta*. It's on track to become a stable, permanent feature of {kib}. Caution should be exercised because it is possible a breaking change to these APIs will occur in a minor version, but we’ll avoid this wherever possible. ]
+beta["This functionality is *beta*. It's on track to become a stable, permanent feature of {kib}. Caution should be exercised because it is possible a breaking change to these APIs will occur in a minor version, but we’ll avoid this wherever possible."]
 
 The delete saved object API permanently removes a Kibana saved object. Once a
 saved object has been deleted, _it cannot be recovered_.

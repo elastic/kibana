@@ -172,19 +172,22 @@ export function SettingsList() {
 
   return (
     <>
-      <AddSettingsFlyout
-        isOpen={isFlyoutOpen}
-        selectedConfig={selectedConfig}
-        onClose={() => {
-          setSelectedConfig(null);
-          setIsFlyoutOpen(false);
-        }}
-        onSubmit={() => {
-          setSelectedConfig(null);
-          setIsFlyoutOpen(false);
-          refresh();
-        }}
-      />
+      {isFlyoutOpen ? (
+        <AddSettingsFlyout
+          key={selectedConfig ? selectedConfig.id : undefined}
+          isOpen={isFlyoutOpen}
+          selectedConfig={selectedConfig}
+          onClose={() => {
+            setSelectedConfig(null);
+            setIsFlyoutOpen(false);
+          }}
+          onSubmit={() => {
+            setSelectedConfig(null);
+            setIsFlyoutOpen(false);
+            refresh();
+          }}
+        />
+      ) : null}
 
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>

@@ -2,7 +2,7 @@
 === PDF
 
 [float]
-==== Job Parameters
+==== Job parameters
 If integrating with Reporting via a custom UI, the following job parameters must be Rison encoded and posted to
 the aforementioned generate job url:
 
@@ -27,7 +27,7 @@ interface jobParameters {
 `jobParameters.layout.dimensions` is only currently used by "preserve_layout"
 
 [float]
-==== `export-config` Directive
+==== `export-config` directive
 If integrating with Reporting via the `export-config` directive, the AngularJS controller that contains
 the directive should expose the following methods and the `export-config` directive will POST them to the
 reporting API:
