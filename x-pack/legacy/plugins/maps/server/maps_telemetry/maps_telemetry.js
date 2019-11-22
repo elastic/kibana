@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { EMS_FILE, MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { EMS_FILE, ES_GEO_FIELD_TYPE, MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 function getSavedObjectsClient(server, callCluster) {
   const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
@@ -32,8 +32,16 @@ function getUniqueLayerCounts(layerCountsList, mapsCount) {
   }, {});
 }
 
-export function buildMapsTelemetry(savedObjects, settings) {
-  const layerLists = savedObjects
+function getIndexPatternsWithGeoFieldCount(indexPatterns) {
+  const fieldLists = indexPatterns.map(indexPattern => JSON.parse(indexPattern.attributes.fields));
+  const fieldListsWithGeoFields = fieldLists.filter(fields => {
+    return fields.some(field => (field.type === ES_GEO_FIELD_TYPE.GEO_POINT || field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE));
+  });
+  return fieldListsWithGeoFields.length;
+}
+
+export function buildMapsTelemetry({ mapSavedObjects, indexPatternSavedObjects, settings }) {
+  const layerLists = mapSavedObjects
     .map(savedMapObject =>
       JSON.parse(savedMapObject.attributes.layerListJSON));
   const mapsCount = layerLists.length;
@@ -57,8 +65,11 @@ export function buildMapsTelemetry(savedObjects, settings) {
 
   const dataSourcesCountSum = _.sum(dataSourcesCount);
   const layersCountSum = _.sum(layersCount);
+
+  const indexPatternsWithGeoFieldCount = getIndexPatternsWithGeoFieldCount(indexPatternSavedObjects);
   return {
     settings,
+    indexPatternsWithGeoFieldCount,
     // Total count of maps
     mapsTotalCount: mapsCount,
     // Time of capture
@@ -88,24 +99,23 @@ export function buildMapsTelemetry(savedObjects, settings) {
   };
 }
 
-async function getSavedObjects(savedObjectsClient) {
-  const gisMapsSavedObject = await savedObjectsClient.find({
-    type: MAP_SAVED_OBJECT_TYPE
-  });
-  return _.get(gisMapsSavedObject, 'saved_objects');
+async function getMapSavedObjects(savedObjectsClient) {
+  const mapsSavedObjects = await savedObjectsClient.find({ type: MAP_SAVED_OBJECT_TYPE });
+  return _.get(mapsSavedObjects, 'saved_objects', []);
+}
+
+async function getIndexPatternSavedObjects(savedObjectsClient) {
+  const indexPatternSavedObjects = await savedObjectsClient.find({ type: 'index-pattern' });
+  return _.get(indexPatternSavedObjects, 'saved_objects', []);
 }
 
 export async function getMapsTelemetry(server, callCluster) {
   const savedObjectsClient = getSavedObjectsClient(server, callCluster);
-  const savedObjects = await getSavedObjects(savedObjectsClient);
+  const mapSavedObjects = await getMapSavedObjects(savedObjectsClient);
+  const indexPatternSavedObjects = await getIndexPatternSavedObjects(savedObjectsClient);
   const settings = {
     showMapVisualizationTypes: server.config().get('xpack.maps.showMapVisualizationTypes')
   };
-  const mapsTelemetry = buildMapsTelemetry(savedObjects, settings);
-
-  return await savedObjectsClient.create('maps-telemetry',
-    mapsTelemetry, {
-      id: 'maps-telemetry',
-      overwrite: true,
-    });
+  const mapsTelemetry = buildMapsTelemetry({ mapSavedObjects, indexPatternSavedObjects, settings });
+  return await savedObjectsClient.create('maps-telemetry', mapsTelemetry, { id: 'maps-telemetry', overwrite: true });
 }

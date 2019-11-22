@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { oncePerServer } from './once_per_server';
-
-function getUserFn(server) {
+export function getUserFactory(server) {
   return async request => {
     if (!server.plugins.security) {
       return null;
@@ -20,5 +18,3 @@ function getUserFn(server) {
     }
   };
 }
-
-export const getUserFactory = oncePerServer(getUserFn);
