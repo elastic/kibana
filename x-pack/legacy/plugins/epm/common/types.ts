@@ -91,5 +91,5 @@ export type AssetTypeToParts = KibanaAssetTypeToParts & ElasticsearchAssetTypeTo
 export type AssetsGroupedByServiceByType = Record<
   Extract<'kibana', ServiceName>,
   KibanaAssetTypeToParts
-> &
-  Record<Extract<'elasticsearch', ServiceName>, ElasticsearchAssetTypeToParts>;
+>;
+// & Record<Extract<'elasticsearch', ServiceName>, ElasticsearchAssetTypeToParts>;

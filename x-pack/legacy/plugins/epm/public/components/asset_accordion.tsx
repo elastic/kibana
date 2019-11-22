@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { entries } from '../../common/type_utils';
-import { AssetsGroupedByServiceByType, KibanaAssetType } from '../../common/types';
+import { AssetsGroupedByServiceByType } from '../../common/types';
 import { AssetIcons, AssetTitleMap, ServiceIcons, ServiceTitleMap } from '../constants';
 import { useCore } from '../hooks/use_core';
 
@@ -49,9 +49,7 @@ export function AssetAccordion({ assets }: { assets: AssetsGroupedByServiceByTyp
             </FlexGroup>
             <EuiHorizontalRule margin="none" />
 
-            {entries(typeToParts).map(([_type], typeIndex, typeEntries) => {
-              // only kibana assets have icons
-              const type = _type as KibanaAssetType;
+            {entries(typeToParts).map(([type, parts], typeIndex, typeEntries) => {
               const iconType = type in AssetIcons && AssetIcons[type];
 
               // @types/styled-components@3 does yet support `defaultProps`, which EuiAccordion uses
@@ -76,7 +74,7 @@ export function AssetAccordion({ assets }: { assets: AssetsGroupedByServiceByTyp
                     paddingSize="m"
                     extraAction={
                       <EuiNotificationBadge color="subdued" size="m">
-                        {typeEntries.length}
+                        {parts.length}
                       </EuiNotificationBadge>
                     }
                   >

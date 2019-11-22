@@ -132,6 +132,6 @@ export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByTy
 
   return {
     kibana: assets.kibana,
-    elasticsearch: assets.elasticsearch,
+    // elasticsearch: assets.elasticsearch,
   };
 }
