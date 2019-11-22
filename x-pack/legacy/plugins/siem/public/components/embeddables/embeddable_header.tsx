@@ -6,15 +6,13 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
-const Header = styled.header.attrs({
-  className: 'siemEmbeddable__header',
-})`
-  ${({ theme }) => css`
-    border-bottom: ${theme.eui.euiBorderThin};
-    padding: ${theme.eui.paddingSizes.m};
-  `}
+const Header = styled.header.attrs(({ className }) => ({
+  className: `siemEmbeddable__header ${className}`,
+}))`
+  border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
+  padding: ${({ theme }) => theme.eui.paddingSizes.m};
 `;
 Header.displayName = 'Header';
 

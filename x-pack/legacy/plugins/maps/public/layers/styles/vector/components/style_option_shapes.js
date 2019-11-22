@@ -36,15 +36,6 @@ export const dynamicSizeShape = PropTypes.shape({
   field: fieldShape,
 });
 
-export const styleOptionShapes = [
-  staticColorShape,
-  dynamicColorShape,
-  staticOrientationShape,
-  dynamicOrientationShape,
-  staticSizeShape,
-  dynamicSizeShape
-];
-
 export const rangeShape = PropTypes.shape({
   min: PropTypes.number.isRequired,
   max: PropTypes.number.isRequired,
