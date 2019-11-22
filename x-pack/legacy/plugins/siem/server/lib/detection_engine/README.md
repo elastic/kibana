@@ -178,7 +178,7 @@ server    log   [09:54:59.013] [info][plugins][siem] Total signals found from si
 ```
 
 Signals are space aware and default to the "default" space for these scripts if you do not export
-the variable of SPACE_URL. For example, if you want to post signals to the space `test-space` you would
+the variable of SPACE_URL. For example, if you want to post rules to the space `test-space` you would
 set your SPACE_URL to be:
 
 ```sh
