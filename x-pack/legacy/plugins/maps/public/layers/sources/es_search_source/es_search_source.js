@@ -241,10 +241,17 @@ export class ESSearchSource extends AbstractESSource {
 
     const searchSource = await this._makeSearchSource(searchFilters, 0);
     searchSource.setField('aggs', {
+      uniqueCount: {
+        cardinality: {
+          field: topHitsSplitField,
+          precision_threshold: 10,
+        }
+      },
       entitySplit: {
         terms: {
           field: topHitsSplitField,
-          size: ES_SIZE_LIMIT
+          size: ES_SIZE_LIMIT,
+          shard_size: ES_SIZE_LIMIT,
         },
         aggs: {
           entityHits: {
@@ -256,24 +263,22 @@ export class ESSearchSource extends AbstractESSource {
 
     const resp = await this._runEsQuery(layerName, searchSource, registerCancelCallback, 'Elasticsearch document top hits request');
 
-    let hasTrimmedResults = false;
     const allHits = [];
     const entityBuckets = _.get(resp, 'aggregations.entitySplit.buckets', []);
+    const totalEnties = _.get(resp, 'aggregations.uniqueCount.value', 0);
     entityBuckets.forEach(entityBucket => {
-      const total = _.get(entityBucket, 'entityHits.hits.total', 0);
       const hits = _.get(entityBucket, 'entityHits.hits.hits', []);
       // Reverse hits list so top documents by sort are drawn on top
       allHits.push(...hits.reverse());
-      if (total > hits.length) {
-        hasTrimmedResults = true;
-      }
     });
 
     return {
       hits: allHits,
       meta: {
-        areResultsTrimmed: hasTrimmedResults,
+        // can not compare entityBuckets.length to totalEnties because totalEnties is an approximate
+        areResultsTrimmed: entityBuckets.length >= ES_SIZE_LIMIT,
         entityCount: entityBuckets.length,
+        totalEnties,
       }
     };
   }
@@ -459,24 +464,26 @@ export class ESSearchSource extends AbstractESSource {
     }
 
     if (this._isTopHits()) {
-      const entitiesFoundMsg = i18n.translate('xpack.maps.esSearch.topHitsEntitiesCountMsg', {
-        defaultMessage: `Found {entityCount} entities.`,
-        values: { entityCount: meta.entityCount }
-      });
-      if (meta.areResultsTrimmed) {
-        const trimmedMsg = i18n.translate('xpack.maps.esSearch.topHitsResultsTrimmedMsg', {
-          defaultMessage: `Results limited to most recent {topHitsSize} documents per entity.`,
-          values: { topHitsSize: this._descriptor.topHitsSize }
+      const entitiesFoundMsg = meta.areResultsTrimmed
+        ? i18n.translate('xpack.maps.esSearch.topHitsResultsTrimmedMsg', {
+          defaultMessage: `Results limited to first {entityCount} entities of ~{totalEnties}.`,
+          values: {
+            entityCount: meta.entityCount,
+            totalEnties: meta.totalEnties,
+          }
+        })
+        : i18n.translate('xpack.maps.esSearch.topHitsEntitiesCountMsg', {
+          defaultMessage: `Found {entityCount} entities.`,
+          values: { entityCount: meta.entityCount }
         });
-        return {
-          tooltipContent: `${entitiesFoundMsg} ${trimmedMsg}`,
-          areResultsTrimmed: false
-        };
-      }
+      const docsPerEntityMsg = i18n.translate('xpack.maps.esSearch.topHitsSizeMsg', {
+        defaultMessage: `Showing top {topHitsSize} documents per entity.`,
+        values: { topHitsSize: this._descriptor.topHitsSize }
+      });
 
       return {
-        tooltipContent: entitiesFoundMsg,
-        areResultsTrimmed: false
+        tooltipContent: `${entitiesFoundMsg} ${docsPerEntityMsg}`,
+        areResultsTrimmed: meta.areResultsTrimmed
       };
     }
 
