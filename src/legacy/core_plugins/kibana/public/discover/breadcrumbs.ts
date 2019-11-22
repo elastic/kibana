@@ -34,7 +34,7 @@ export function getSavedSearchBreadcrumbs($route: any) {
   return [
     ...getRootBreadcrumbs(),
     {
-      text: $route.current.locals.savedSearch.id,
+      text: $route.current.locals.savedObjects.savedSearch.id,
     },
   ];
 }

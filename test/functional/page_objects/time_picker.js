@@ -36,8 +36,8 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
     formatDateToAbsoluteTimeString(date) {
       // toISOString returns dates in format 'YYYY-MM-DDTHH:mm:ss.sssZ'
       // Need to replace T with space and remove timezone
-      const dateString = date.toISOString().replace('T', ' ');
-      return dateString.substring(0, 23);
+      const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
+      return moment(date).format(DEFAULT_DATE_FORMAT);
     }
 
     async getTimePickerPanel() {
@@ -74,8 +74,8 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
     }
 
     /**
-     * @param {String} fromTime YYYY-MM-DD HH:mm:ss.SSS
-     * @param {String} fromTime YYYY-MM-DD HH:mm:ss.SSS
+     * @param {String} fromTime MMM D, YYYY @ HH:mm:ss.SSS
+     * @param {String} toTime MMM D, YYYY @ HH:mm:ss.SSS
      */
     async setAbsoluteRange(fromTime, toTime) {
       log.debug(`Setting absolute range to ${fromTime} to ${toTime}`);
@@ -110,6 +110,13 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
 
       await this.waitPanelIsGone(panel);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+    }
+
+    get defaultStartTime() { return 'Sep 19, 2015 @ 06:31:44.000'; }
+    get defaultEndTime() { return 'Sep 23, 2015 @ 18:31:44.000'; }
+
+    async setDefaultAbsoluteRange() {
+      await this.setAbsoluteRange(this.defaultStartTime, this.defaultEndTime);
     }
 
     async isQuickSelectMenuOpen() {
@@ -214,7 +221,7 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
     }
 
     async getTimeDurationInHours() {
-      const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss.SSS';
+      const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
       const { start, end } = await this.getTimeConfigAsAbsoluteTimes();
 
       const startMoment = moment(start, DEFAULT_DATE_FORMAT);

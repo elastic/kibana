@@ -14,6 +14,9 @@ import { GeometryFilterForm } from '../../../components/geometry_filter_form';
 import { UrlOverflowService } from 'ui/error_url_overflow';
 import rison from 'rison-node';
 
+// over estimated and imprecise value to ensure filter has additional room for any meta keys added when filter is mapped.
+const META_OVERHEAD = 100;
+
 const urlOverflow = new UrlOverflowService();
 
 export class FeatureGeometryFilterForm extends Component {
@@ -70,7 +73,7 @@ export class FeatureGeometryFilterForm extends Component {
 
     // Ensure filter will not overflow URL. Filters that contain geometry can be extremely large.
     // No elasticsearch support for pre-indexed shapes and geo_point spatial queries.
-    if (window.location.href.length + rison.encode(filter).length > urlOverflow.failLength()) {
+    if (window.location.href.length + rison.encode(filter).length + META_OVERHEAD > urlOverflow.failLength()) {
       this.setState({
         errorMsg: i18n.translate('xpack.maps.tooltip.geometryFilterForm.filterTooLargeMessage', {
           defaultMessage: 'Cannot create filter. Filters are added to the URL, and this shape has too many vertices to fit in the URL.'
