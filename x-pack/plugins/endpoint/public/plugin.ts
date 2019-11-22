@@ -9,16 +9,17 @@ import { i18n } from '@kbn/i18n';
 
 export class EndpointPlugin implements Plugin<{}, {}> {
   public setup(core: CoreSetup) {
-    core.application.register({
-      id: 'endpoint',
-      title: i18n.translate('xpack.endpoint.pluginTitle', {
-        defaultMessage: 'Endpoint',
-      }),
-      async mount(context, params) {
-        const { renderApp } = await import('./applications/endpoint');
-        return renderApp(context, params);
-      },
-    });
+    // core.application.register({
+    //   id: 'endpoint',
+    //   title: i18n.translate('xpack.endpoint.pluginTitle', {
+    //     defaultMessage: 'Endpoint',
+    //   }),
+    //   async mount(context, params) {
+    //     return () => {};
+    //     // const { renderApp } = await import('./applications/endpoint');
+    //     // return renderApp(context, params);
+    //   },
+    // });
     return {};
   }
 
