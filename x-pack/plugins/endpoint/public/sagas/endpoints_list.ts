@@ -5,6 +5,7 @@
  */
 
 import { AppMountContext } from 'kibana/public';
+import { Dispatch } from 'redux';
 import { withPageNavigationStatus } from './common';
 import { hrefIsForPath } from '../concerns/routing';
 import { actions as endpointsListActions } from '../actions/endpoints_list';
@@ -17,7 +18,7 @@ export async function endpointsListSaga(...args: any[]) {
 
 // TODO type actionsAndState, dispatch
 async function resourceSaga(
-  { actionsAndState, dispatch }: { actionsAndState: any; dispatch: any },
+  { actionsAndState, dispatch }: { actionsAndState: any; dispatch: Dispatch },
   context: AppMountContext
 ) {
   function isOnPage(href: any) {
@@ -79,6 +80,4 @@ async function resourceSaga(
       // }
     }
   }
-
-  console.log("saga->endpointsListSaga()->resourceSaga(): EXITING"); //eslint-disable-line
 }

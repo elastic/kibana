@@ -6,6 +6,23 @@
 
 import { AnyAction, Dispatch, Middleware, MiddlewareAPI } from 'redux';
 
+interface StoreAction extends AnyAction {
+  payload: unknown[];
+  type: string;
+}
+
+interface QueuedAction {
+  action: StoreAction;
+  state: unknown; // TODO: set to GlobalState once Pedro's commit is merged
+}
+
+interface IteratorInstance {
+  queue: QueuedAction[];
+  nextResolve: null | ((inst: QueuedAction) => void);
+}
+
+type StoreActionsAndState = AsyncIterableIterator<QueuedAction>;
+
 /**
  * See https://docs.microsoft.com/en-us/previous-versions/msp-n-p/jj591569(v%3dpandp.10)
  */
@@ -13,24 +30,9 @@ import { AnyAction, Dispatch, Middleware, MiddlewareAPI } from 'redux';
 export function createSagaMiddleware(saga: () => Promise<void>): Middleware & { run: () => void } {
   // Q. Are we following the Flux standard? https://github.com/redux-utilities/flux-standard-action
 
-  interface StoreAction extends AnyAction {
-    payload: unknown[];
-    type: string;
-  }
-
-  interface QueuedAction {
-    action: StoreAction;
-    state: unknown;
-  }
-
-  interface IteratorInstance {
-    queue: QueuedAction[];
-    nextResolve: null | ((inst: QueuedAction) => void);
-  }
-
   const iteratorInstances = new Set<IteratorInstance>();
 
-  async function* iterator() {
+  async function* getActionsAndStateIterator(): StoreActionsAndState {
     const instance: IteratorInstance = { queue: [], nextResolve: null };
     iteratorInstances.add(instance);
     try {
@@ -47,9 +49,9 @@ export function createSagaMiddleware(saga: () => Promise<void>): Middleware & { 
 
     function nextActionAndState() {
       if (instance.queue.length) {
-        return Promise.resolve(instance.queue.shift());
+        return Promise.resolve(instance.queue.shift() as QueuedAction);
       } else {
-        return new Promise(function(resolve) {
+        return new Promise<QueuedAction>(function(resolve) {
           instance.nextResolve = resolve;
         });
       }
@@ -69,7 +71,7 @@ export function createSagaMiddleware(saga: () => Promise<void>): Middleware & { 
   let runSaga: () => void;
   function middleware({ getState, dispatch }: MiddlewareAPI) {
     runSaga = saga.bind(null, {
-      actionsAndState: iterator,
+      actionsAndState: getActionsAndStateIterator,
       dispatch,
     });
     return (next: Dispatch<StoreAction>) => (action: StoreAction) => {
