@@ -6,8 +6,11 @@
 import { IconType } from '@elastic/eui';
 import { ElasticsearchAssetType, KibanaAssetType, AssetType, ServiceName } from '../common/types';
 
-// TODO: figure out how to allow only corresponding asset types (KibanaAssetType, ElasticsearchAssetType)
-export const DisplayedAssets: Record<ServiceName, AssetType[]> = {
+// only allow Kibana assets for the kibana key, ES asssets for elasticsearch, etc
+type ServiceNameToAssetTypes = Record<Extract<'kibana', ServiceName>, KibanaAssetType[]> &
+  Record<Extract<'elasticsearch', ServiceName>, ElasticsearchAssetType[]>;
+
+export const DisplayedAssets: ServiceNameToAssetTypes = {
   kibana: Object.values(KibanaAssetType),
   elasticsearch: Object.values(ElasticsearchAssetType),
 };
