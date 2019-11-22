@@ -748,7 +748,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       }
     }
 
-    async saveVisualization(vizName, { saveAsNew = false } = {}) {
+    async saveVisualization(vizName, { saveAsNew = false, waitForSaveComplete = true } = {}) {
       await this.ensureSavePanelOpen();
       await testSubjects.setValue('savedObjectTitle', vizName);
       if (saveAsNew) {
@@ -758,13 +758,14 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       log.debug('Click Save Visualization button');
       await testSubjects.click('confirmSaveSavedObjectButton');
 
-      // if we wait for this, the success toast message could be gone :-()
-      // wait for save to complete before completion
-      // await PageObjects.header.waitUntilLoadingHasFinished();
+      if (waitForSaveComplete) {
+        // wait for save to complete before completion
+        await PageObjects.header.waitUntilLoadingHasFinished();
+      }
     }
 
     async saveVisualizationExpectSuccess(vizName, { saveAsNew = false } = {}) {
-      await this.saveVisualization(vizName, { saveAsNew });
+      await this.saveVisualization(vizName, { saveAsNew, waitForSaveComplete: false });
       const successToast = await testSubjects.exists('saveVisualizationSuccess', {
         timeout: 2 * defaultFindTimeout
       });
