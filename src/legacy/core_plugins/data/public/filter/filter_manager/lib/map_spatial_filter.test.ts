@@ -26,6 +26,8 @@ describe('mapSpatialFilter()', () => {
       meta: {
         alias: 'my spatial filter',
         type: FILTERS.SPATIAL_FILTER,
+        disabled: false,
+        negate: false,
       },
       query: {
         bool: {
@@ -51,6 +53,8 @@ describe('mapSpatialFilter()', () => {
       meta: {
         alias: 'my spatial filter',
         type: FILTERS.SPATIAL_FILTER,
+        disabled: false,
+        negate: false,
       },
       geo_polygon: {
         geoCoordinates: { points: [] },
@@ -67,6 +71,8 @@ describe('mapSpatialFilter()', () => {
     const filter = {
       meta: {
         alias: 'my spatial filter',
+        disabled: false,
+        negate: false,
       },
       geo_polygon: {
         geoCoordinates: { points: [] },
