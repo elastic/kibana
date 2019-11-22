@@ -16,13 +16,14 @@ import { getBoolFilter } from './get_bool_filter';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
-import {
-  AutocompleteSuggestion,
-  AutocompleteProvider,
-  esKuery,
-} from '../../../../../../../../src/plugins/data/public';
 import { useDynamicIndexPattern } from '../../../hooks/useDynamicIndexPattern';
 import { usePlugins } from '../../../new-platform/plugin';
+import { useDynamicIndexPattern } from '../../../hooks/useDynamicIndexPattern';
+import {
+  esKuery,
+  AutocompleteProvider,
+  AutocompleteSuggestion
+} from '../../../../../../../../src/plugins/data/public';
 
 const Container = styled.div`
   margin-bottom: 10px;

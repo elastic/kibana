@@ -39,9 +39,9 @@ import {
   Query,
   PersistedLog,
   getQueryLog,
+  esKuery,
 } from '../../../../../../../plugins/data/public';
 import { useKibana, toMountPoint } from '../../../../../../../plugins/kibana_react/public';
-import { esKuery } from '../../../../../../../plugins/data/public';
 import { IndexPattern } from '../../../index_patterns';
 import { QueryBarInput } from './query_bar_input';
 

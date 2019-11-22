@@ -37,9 +37,7 @@ export interface KueryParseOptions {
 
 export { nodeTypes } from './node_types';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface JsonArray extends Array<JsonValue> {}
-
+export type JsonArray = JsonValue[];
 export type JsonValue = null | boolean | number | string | JsonObject | JsonArray;
 
 export interface JsonObject {

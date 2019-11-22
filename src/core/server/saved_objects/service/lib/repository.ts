@@ -450,7 +450,7 @@ export class SavedObjectsRepository {
     let kueryNode;
 
     try {
-      if (filter && filter) {
+      if (filter) {
         kueryNode = validateConvertFilterToKueryNode(allowedTypes, filter, this._mappings);
       }
     } catch (e) {

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { isUndefined } from 'lodash';
 import { nodeTypes } from '../node_types/index';
 import { KQLSyntaxError } from '../kuery_syntax_error';
 import { KueryNode, JsonObject, DslQuery, KueryParseOptions } from '../types';
@@ -31,28 +30,25 @@ const fromExpression = (
   parseOptions: Partial<KueryParseOptions> = {},
   parse: Function = parseKuery
 ): KueryNode => {
-  if (isUndefined(expression)) {
+  if (!expression) {
     throw new Error('expression must be a string, got undefined instead');
   }
 
-  parseOptions = {
-    ...parseOptions,
-    helpers: { nodeTypes },
-  };
-
-  return parse(expression, parseOptions);
+  return parse(expression, { ...parseOptions, helpers: { nodeTypes } });
 };
 
 export const fromLiteralExpression = (
   expression: string | DslQuery,
   parseOptions: Partial<KueryParseOptions> = {}
 ): KueryNode => {
-  parseOptions = {
-    ...parseOptions,
-    startRule: 'Literal',
-  };
-
-  return fromExpression(expression, parseOptions, parseKuery);
+  return fromExpression(
+    expression,
+    {
+      ...parseOptions,
+      startRule: 'Literal',
+    },
+    parseKuery
+  );
 };
 
 export const fromKueryExpression = (
