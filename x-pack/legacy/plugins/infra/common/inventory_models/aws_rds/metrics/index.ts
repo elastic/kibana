@@ -33,6 +33,6 @@ export const metrics: InventoryMetrics = {
     rdsQueriesExecuted,
     rdsActiveTransactions,
   },
-  defaultSnapshot: 's3BucketSize',
+  defaultSnapshot: 'cpu',
   defaultTimeRangeInSeconds: 14400, // 4 hours
 };

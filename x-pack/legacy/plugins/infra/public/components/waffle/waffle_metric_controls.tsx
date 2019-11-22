@@ -44,7 +44,7 @@ export const WaffleMetricControls = class extends React.PureComponent<Props, Sta
     }
     const currentLabel = options.find(o => o.value === metric.type);
     if (!currentLabel) {
-      return 'null';
+      return null;
     }
     const panels: EuiContextMenuPanelDescriptor[] = [
       {

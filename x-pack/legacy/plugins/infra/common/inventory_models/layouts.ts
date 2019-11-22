@@ -21,6 +21,7 @@ import { Layout as ContainerLayout } from './container/layout';
 import { Layout as AwsEC2Layout } from './aws_ec2/layout';
 import { Layout as AwsS3Layout } from './aws_s3/layout';
 import { Layout as AwsRDSLayout } from './aws_rds/layout';
+import { Layout as AwsSQSLayout } from './aws_sqs/layout';
 import { InventoryItemType } from './types';
 import { LayoutProps } from '../../public/pages/metrics/types';
 
@@ -35,6 +36,7 @@ const layouts: Layouts = {
   awsEC2: AwsEC2Layout,
   awsS3: AwsS3Layout,
   awsRDS: AwsRDSLayout,
+  awsSQS: AwsSQSLayout,
 };
 
 export const findLayout = (type: InventoryItemType) => {

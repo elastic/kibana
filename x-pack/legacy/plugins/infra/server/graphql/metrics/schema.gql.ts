@@ -56,8 +56,13 @@ export const metricsSchema: any = gql`
     awsRDSCpuTotal
     awsRDSConnections
     awsRDSQueriesExecuted
-    awsRDSActiveTransacions
+    awsRDSActiveTransactions
     awsRDSLatency
+    awsSQSMessagesVisible
+    awsSQSMessagesDelayed
+    awsSQSMessagesSent
+    awsSQSMessagesEmpty
+    awsSQSOldestMessage
     custom
   }
 

@@ -583,6 +583,7 @@ export enum InfraNodeType {
   awsEC2 = 'awsEC2',
   awsS3 = 'awsS3',
   awsRDS = 'awsRDS',
+  awsSQS = 'awsSQS'
 }
 
 export enum InfraSnapshotMetricType {
@@ -604,6 +605,11 @@ export enum InfraSnapshotMetricType {
   rdsQueriesExecuted = 'rdsQueriesExecuted',
   rdsActiveTransactions = 'rdsActiveTransactions',
   rdsLatency = 'rdsLatency',
+  sqsMessagesVisible = 'sqsOldestMessage',
+  sqsMessagesDelayed = 'sqsMessagesDelayed',
+  sqsMessagesSent = 'sqsMessagesSent',
+  sqsMessagesEmpty = 'sqsMessagesEmpty',
+  sqsOldestMessage = 'sqsOldestMessage',
 }
 
 export enum InfraMetric {
@@ -655,8 +661,13 @@ export enum InfraMetric {
   awsRDSCpuTotal = 'awsRDSCpuTotal',
   awsRDSConnections = 'awsRDSConnections',
   awsRDSQueriesExecuted = 'awsRDSQueriesExecuted',
-  awsRDSActiveTransacions = 'awsRDSActiveTransactions',
+  awsRDSActiveTransactions = 'awsRDSActiveTransactions',
   awsRDSLatency = 'awsRDSLatency',
+  awsSQSMessagesVisible = 'awsSQSMessagesVisible',
+  awsSQSMessagesDelayed = 'awsSQSMessagesDelayed',
+  awsSQSMessagesSent = 'awsSQSMessagesSent',
+  awsSQSMessagesEmpty = 'awsSQSMessagesEmpty',
+  awsSQSOldestMessage = 'awsSQSOldestMessage',
   custom = 'custom',
 }
 

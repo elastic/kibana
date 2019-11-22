@@ -85,6 +85,11 @@ export const InventoryMetricRT = rt.keyof({
   awsRDSQueriesExecuted: null,
   awsRDSActiveTransactions: null,
   awsRDSLatency: null,
+  awsSQSMessagesVisible: null,
+  awsSQSMessagesDelayed: null,
+  awsSQSMessagesSent: null,
+  awsSQSMessagesEmpty: null,
+  awsSQSOldestMessage: null,
   custom: null,
 });
 export type InventoryMetric = rt.TypeOf<typeof InventoryMetricRT>;
@@ -291,6 +296,11 @@ export const SnapshotMetricTypeRT = rt.keyof({
   rdsQueriesExecuted: null,
   rdsActiveTransactions: null,
   rdsLatency: null,
+  sqsMessagesVisible: null,
+  sqsMessagesDelayed: null,
+  sqsMessagesSent: null,
+  sqsMessagesEmpty: null,
+  sqsOldestMessage: null,
 });
 
 export type SnapshotMetricType = rt.TypeOf<typeof SnapshotMetricTypeRT>;

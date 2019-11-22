@@ -53,6 +53,11 @@ export const snapshotSchema: any = gql`
     rdsQueriesExecuted
     rdsActiveTransactions
     rdsLatency
+    sqsMessagesVisible
+    sqsMessagesDelayed
+    sqsMessagesSent
+    sqsMessagesEmpty
+    sqsOldestMessage
   }
 
   input InfraSnapshotMetricInput {

@@ -89,6 +89,10 @@ const METRIC_FORMATTERS: MetricFormatters = {
     formatter: InfraFormatterType.bytes,
     template: '{{value}}',
   },
+  [InfraSnapshotMetricType.sqsOldestMessage]: {
+    formatter: InfraFormatterType.number,
+    template: '{{value}} seconds',
+  },
 };
 
 const calculateBoundsFromNodes = (nodes: InfraSnapshotNode[]): InfraWaffleMapBounds => {

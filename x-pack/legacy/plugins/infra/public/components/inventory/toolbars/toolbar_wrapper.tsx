@@ -114,6 +114,21 @@ const ToolbarTranslations = {
   rdsLatency: i18n.translate('xpack.infra.waffle.metricOptions.rdsLatency', {
     defaultMessage: 'Latency',
   }),
+  sqsMessagesVisible: i18n.translate('xpack.infra.waffle.metricOptions.sqsMessagesVisible', {
+    defaultMessage: 'Messages Available',
+  }),
+  sqsMessagesDelayed: i18n.translate('xpack.infra.waffle.metricOptions.sqsMessagesDelayed', {
+    defaultMessage: 'Messages Delayed',
+  }),
+  sqsMessagesSent: i18n.translate('xpack.infra.waffle.metricOptions.sqsMessagesSent', {
+    defaultMessage: 'Messages Added',
+  }),
+  sqsMessagesEmpty: i18n.translate('xpack.infra.waffle.metricOptions.sqsMessagesEmpty', {
+    defaultMessage: 'Messages Returned Empty',
+  }),
+  sqsOldestMessage: i18n.translate('xpack.infra.waffle.metricOptions.sqsOldestMessage', {
+    defaultMessage: 'Oldest Message',
+  }),
 };
 
 export const toGroupByOpt = (field: string) => ({
@@ -213,6 +228,31 @@ export const toMetricOpt = (metric: InfraSnapshotMetricType) => {
       return {
         text: ToolbarTranslations.rdsLatency,
         value: InfraSnapshotMetricType.rdsLatency,
+      };
+    case InfraSnapshotMetricType.sqsMessagesVisible:
+      return {
+        text: ToolbarTranslations.sqsMessagesVisible,
+        value: InfraSnapshotMetricType.sqsMessagesVisible,
+      };
+    case InfraSnapshotMetricType.sqsMessagesDelayed:
+      return {
+        text: ToolbarTranslations.sqsMessagesDelayed,
+        value: InfraSnapshotMetricType.sqsMessagesDelayed,
+      };
+    case InfraSnapshotMetricType.sqsMessagesSent:
+      return {
+        text: ToolbarTranslations.sqsMessagesSent,
+        value: InfraSnapshotMetricType.sqsMessagesSent,
+      };
+    case InfraSnapshotMetricType.sqsMessagesEmpty:
+      return {
+        text: ToolbarTranslations.sqsMessagesEmpty,
+        value: InfraSnapshotMetricType.sqsMessagesEmpty,
+      };
+    case InfraSnapshotMetricType.sqsOldestMessage:
+      return {
+        text: ToolbarTranslations.sqsOldestMessage,
+        value: InfraSnapshotMetricType.sqsOldestMessage,
       };
   }
 };

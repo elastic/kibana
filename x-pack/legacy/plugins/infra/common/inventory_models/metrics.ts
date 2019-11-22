@@ -11,6 +11,7 @@ import { metrics as containerMetrics } from './container/metrics';
 import { metrics as awsEC2Metrics } from './aws_ec2/metrics';
 import { metrics as awsS3Metrics } from './aws_s3/metrics';
 import { metrics as awsRDSMetrics } from './aws_rds/metrics';
+import { metrics as awsSQSMetrics } from './aws_sqs/metrics';
 
 export const metrics = {
   tsvb: {
@@ -21,5 +22,6 @@ export const metrics = {
     ...awsEC2Metrics.tsvb,
     ...awsS3Metrics.tsvb,
     ...awsRDSMetrics.tsvb,
+    ...awsSQSMetrics.tsvb,
   },
 };
