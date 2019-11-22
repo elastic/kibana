@@ -182,7 +182,7 @@ export interface ConditionalHeadersConditions {
 }
 
 export interface CryptoFactory {
-  decrypt: (headers?: Record<string, string>) => string;
+  decrypt: (headers?: Record<string, string>) => any;
 }
 
 export interface TimeRangeParams {

@@ -24,11 +24,13 @@ export async function getFullUrls({
   job,
   server,
   conditionalHeaders,
+  logo,
   ...mergeValues // pass-throughs
 }: {
   job: JobDocPayloadPNG | JobDocPayloadPDF;
-  conditionalHeaders: ConditionalHeaders;
   server: ServerFacade;
+  conditionalHeaders: ConditionalHeaders;
+  logo: string;
 }) {
   const config = server.config();
 
@@ -95,5 +97,5 @@ export async function getFullUrls({
     });
   });
 
-  return { job, urls, conditionalHeaders, server, ...mergeValues };
+  return { job, server, urls, logo, conditionalHeaders, ...mergeValues };
 }
