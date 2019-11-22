@@ -65,7 +65,7 @@ stage("Kibana Pipeline") {
 def getWorkerFromParams(isXpack, job, ciGroup) {
   if (!isXpack) {
     if (job == 'serverMocha') {
-      return kibanaPipeline.getPostBuildWorker('serverMocha', { runbld('.ci/run.sh', "Execute ${name}") })
+      return kibanaPipeline.getPostBuildWorker('serverMocha', { runbld('.ci/run.sh', "Execute serverMocha") })
     } else if (job == 'firefoxSmoke') {
       return kibanaPipeline.getPostBuildWorker('firefoxSmoke', { runbld('./test/scripts/jenkins_firefox_smoke.sh', 'Execute kibana-firefoxSmoke') })
     } else if(job == 'visualRegression') {
