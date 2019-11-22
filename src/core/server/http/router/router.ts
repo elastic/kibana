@@ -48,6 +48,20 @@ export interface RouterRoute {
 }
 
 /**
+ * Route handler common definition
+ *
+ * @public
+ */
+export type RouterHandler<Method extends RouteMethod> = <
+  P extends ObjectType,
+  Q extends ObjectType,
+  B extends ObjectType | Type<Buffer> | Type<Stream>
+>(
+  route: RouteConfig<P, Q, B, Method>,
+  handler: RequestHandler<P, Q, B, Method>
+) => void;
+
+/**
  * Registers route handlers for specified resource path and method.
  * See {@link RouteConfig} and {@link RequestHandler} for more information about arguments to route registrations.
  *
@@ -64,66 +78,35 @@ export interface IRouter {
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  get: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-    route: RouteConfig<P, Q, B, 'get'>,
-    handler: RequestHandler<P, Q, B, 'get'>
-  ) => void;
+  get: RouterHandler<'get'>;
 
   /**
    * Register a route handler for `POST` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  post: <
-    P extends ObjectType,
-    Q extends ObjectType,
-    B extends ObjectType | Type<Buffer> | Type<Stream>
-  >(
-    route: RouteConfig<P, Q, B, 'post'>,
-    handler: RequestHandler<P, Q, B, 'post'>
-  ) => void;
+  post: RouterHandler<'post'>;
 
   /**
    * Register a route handler for `PUT` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  put: <
-    P extends ObjectType,
-    Q extends ObjectType,
-    B extends ObjectType | Type<Buffer> | Type<Stream>
-  >(
-    route: RouteConfig<P, Q, B, 'put'>,
-    handler: RequestHandler<P, Q, B, 'put'>
-  ) => void;
+  put: RouterHandler<'put'>;
 
   /**
    * Register a route handler for `PATCH` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  patch: <
-    P extends ObjectType,
-    Q extends ObjectType,
-    B extends ObjectType | Type<Buffer> | Type<Stream>
-  >(
-    route: RouteConfig<P, Q, B, 'patch'>,
-    handler: RequestHandler<P, Q, B, 'patch'>
-  ) => void;
+  patch: RouterHandler<'patch'>;
 
   /**
    * Register a route handler for `DELETE` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  delete: <
-    P extends ObjectType,
-    Q extends ObjectType,
-    B extends ObjectType | Type<Buffer> | Type<Stream>
-  >(
-    route: RouteConfig<P, Q, B, 'delete'>,
-    handler: RequestHandler<P, Q, B, 'delete'>
-  ) => void;
+  delete: RouterHandler<'delete'>;
 
   /**
    * Returns all routes registered with this router.

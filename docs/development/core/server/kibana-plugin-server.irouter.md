@@ -16,10 +16,10 @@ export interface IRouter
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [delete](./kibana-plugin-server.irouter.delete.md) | <code>&lt;P extends ObjectType, Q extends ObjectType, B extends ObjectType &#124; Type&lt;Buffer&gt; &#124; Type&lt;Stream&gt;&gt;(route: RouteConfig&lt;P, Q, B, 'delete'&gt;, handler: RequestHandler&lt;P, Q, B, 'delete'&gt;) =&gt; void</code> | Register a route handler for <code>DELETE</code> request. |
-|  [get](./kibana-plugin-server.irouter.get.md) | <code>&lt;P extends ObjectType, Q extends ObjectType, B extends ObjectType&gt;(route: RouteConfig&lt;P, Q, B, 'get'&gt;, handler: RequestHandler&lt;P, Q, B, 'get'&gt;) =&gt; void</code> | Register a route handler for <code>GET</code> request. |
-|  [patch](./kibana-plugin-server.irouter.patch.md) | <code>&lt;P extends ObjectType, Q extends ObjectType, B extends ObjectType &#124; Type&lt;Buffer&gt; &#124; Type&lt;Stream&gt;&gt;(route: RouteConfig&lt;P, Q, B, 'patch'&gt;, handler: RequestHandler&lt;P, Q, B, 'patch'&gt;) =&gt; void</code> | Register a route handler for <code>PATCH</code> request. |
-|  [post](./kibana-plugin-server.irouter.post.md) | <code>&lt;P extends ObjectType, Q extends ObjectType, B extends ObjectType &#124; Type&lt;Buffer&gt; &#124; Type&lt;Stream&gt;&gt;(route: RouteConfig&lt;P, Q, B, 'post'&gt;, handler: RequestHandler&lt;P, Q, B, 'post'&gt;) =&gt; void</code> | Register a route handler for <code>POST</code> request. |
-|  [put](./kibana-plugin-server.irouter.put.md) | <code>&lt;P extends ObjectType, Q extends ObjectType, B extends ObjectType &#124; Type&lt;Buffer&gt; &#124; Type&lt;Stream&gt;&gt;(route: RouteConfig&lt;P, Q, B, 'put'&gt;, handler: RequestHandler&lt;P, Q, B, 'put'&gt;) =&gt; void</code> | Register a route handler for <code>PUT</code> request. |
+|  [delete](./kibana-plugin-server.irouter.delete.md) | <code>RouterHandler&lt;'delete'&gt;</code> | Register a route handler for <code>DELETE</code> request. |
+|  [get](./kibana-plugin-server.irouter.get.md) | <code>RouterHandler&lt;'get'&gt;</code> | Register a route handler for <code>GET</code> request. |
+|  [patch](./kibana-plugin-server.irouter.patch.md) | <code>RouterHandler&lt;'patch'&gt;</code> | Register a route handler for <code>PATCH</code> request. |
+|  [post](./kibana-plugin-server.irouter.post.md) | <code>RouterHandler&lt;'post'&gt;</code> | Register a route handler for <code>POST</code> request. |
+|  [put](./kibana-plugin-server.irouter.put.md) | <code>RouterHandler&lt;'put'&gt;</code> | Register a route handler for <code>PUT</code> request. |
 |  [routerPath](./kibana-plugin-server.irouter.routerpath.md) | <code>string</code> | Resulted path |
 

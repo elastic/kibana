@@ -113,6 +113,7 @@ export {
   RouteConfig,
   IRouter,
   RouterRoute,
+  RouterHandler,
   RouteMethod,
   RouteConfigOptions,
   RouteSchemas,

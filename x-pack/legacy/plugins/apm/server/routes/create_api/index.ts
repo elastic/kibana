@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import * as t from 'io-ts';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isLeft } from 'fp-ts/lib/Either';
-import { KibanaResponseFactory } from 'src/core/server';
+import { KibanaResponseFactory, RouterHandler } from 'src/core/server';
 import { APMConfig } from '../../../../../../plugins/apm/server';
 import {
   ServerAPI,
@@ -65,7 +65,7 @@ export function createApi() {
           body: bodyRt && 'props' in bodyRt ? t.exact(bodyRt) : fallbackBodyRt
         };
 
-        router[routerMethod](
+        (router[routerMethod] as RouterHandler<typeof routerMethod>)(
           {
             path,
             options,

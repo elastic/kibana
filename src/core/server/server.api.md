@@ -714,13 +714,13 @@ export interface IndexSettingsDeprecationInfo {
 
 // @public
 export interface IRouter {
-    delete: <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, 'delete'>, handler: RequestHandler<P, Q, B, 'delete'>) => void;
-    get: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B, 'get'>, handler: RequestHandler<P, Q, B, 'get'>) => void;
+    delete: RouterHandler<'delete'>;
+    get: RouterHandler<'get'>;
     // @internal
     getRoutes: () => RouterRoute[];
-    patch: <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, 'patch'>, handler: RequestHandler<P, Q, B, 'patch'>) => void;
-    post: <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, 'post'>, handler: RequestHandler<P, Q, B, 'post'>) => void;
-    put: <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, 'put'>, handler: RequestHandler<P, Q, B, 'put'>) => void;
+    patch: RouterHandler<'patch'>;
+    post: RouterHandler<'post'>;
+    put: RouterHandler<'put'>;
     routerPath: string;
 }
 
@@ -1110,6 +1110,9 @@ export type RouteContentType = 'application/json' | 'application/*+json' | 'appl
 
 // @public
 export type RouteMethod = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options';
+
+// @public
+export type RouterHandler<Method extends RouteMethod> = <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<P, Q, B, Method>) => void;
 
 // @public
 export interface RouterRoute {
