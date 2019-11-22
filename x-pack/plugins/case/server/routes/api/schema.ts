@@ -23,11 +23,15 @@ export const CommentSchema = schema.object({
   case_workflow_id: schema.string(),
 });
 
+export const UpdatedCommentSchema = schema.object({
+  comment: schema.string(),
+  last_edit_date: schema.number(),
+});
+
 export const NewCaseSchema = schema.object({
   assignees: schema.arrayOf(UserSchema, { defaultValue: [] }),
-  comments: schema.arrayOf(schema.string(), { defaultValue: [] }),
   description: schema.string(),
-  name: schema.string(),
+  title: schema.string(),
   state: schema.oneOf([schema.literal('open'), schema.literal('closed')], { defaultValue: 'open' }),
   tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
   case_type: schema.string(),
@@ -35,15 +39,9 @@ export const NewCaseSchema = schema.object({
 
 export const UpdatedCaseSchema = schema.object({
   assignees: schema.maybe(schema.arrayOf(UserSchema)),
-  comments: schema.maybe(schema.arrayOf(schema.string())),
   description: schema.maybe(schema.string()),
-  name: schema.maybe(schema.string()),
+  title: schema.maybe(schema.string()),
   state: schema.maybe(schema.oneOf([schema.literal('open'), schema.literal('closed')])),
   tags: schema.maybe(schema.arrayOf(schema.string())),
   case_type: schema.maybe(schema.string()),
-});
-
-export const UpdatedCommentSchema = schema.object({
-  comment: schema.string(),
-  last_edit_date: schema.number(),
 });

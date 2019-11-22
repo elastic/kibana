@@ -33,9 +33,6 @@ export const caseSavedObjectMappings: {
           },
         },
       },
-      comments: {
-        type: 'keyword',
-      },
       creation_date: {
         type: 'date',
       },
@@ -45,7 +42,7 @@ export const caseSavedObjectMappings: {
       last_edit_date: {
         type: 'date',
       },
-      name: {
+      title: {
         type: 'keyword',
       },
       reporter: {

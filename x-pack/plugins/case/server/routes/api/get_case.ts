@@ -19,12 +19,21 @@ export function initGetCaseApi({ caseService, router }: RouteDeps) {
       },
     },
     async (context, request, response) => {
+      let theCase;
       try {
-        const theCase = await caseService.getCase({
+        theCase = await caseService.getCase({
           client: context.core.savedObjects.client,
           caseId: request.params.id,
         });
-        return response.ok({ body: theCase });
+      } catch (error) {
+        return response.customError(wrapError(error));
+      }
+      try {
+        const theComments = await caseService.getAllCaseComments({
+          client: context.core.savedObjects.client,
+          caseId: request.params.id,
+        });
+        return response.ok({ body: { case: theCase, comments: theComments } });
       } catch (error) {
         return response.customError(wrapError(error));
       }

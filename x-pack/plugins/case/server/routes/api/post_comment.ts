@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { formatUpdatedCase, formatNewComment, wrapError } from './utils';
+import { formatNewComment, wrapError } from './utils';
 import { NewCommentSchema } from './schema';
 import { RouteDeps } from '.';
 
@@ -23,11 +23,10 @@ export function initPostCommentApi({ caseService, router }: RouteDeps) {
     async (context, request, response) => {
       let user;
       let newComment;
-      let theCase;
       try {
         user = await caseService.getUser({ request, response });
-      } catch (error) {
-        return response.customError(wrapError(error));
+      } catch (e) {
+        return e;
       }
       try {
         newComment = await caseService.postNewComment({
@@ -39,28 +38,8 @@ export function initPostCommentApi({ caseService, router }: RouteDeps) {
             case_workflow_id: request.params.id,
           }),
         });
-      } catch (error) {
-        return response.customError(wrapError(error));
-      }
-      try {
-        theCase = await caseService.getCase({
-          client: context.core.savedObjects.client,
-          caseId: request.params.id,
-        });
-      } catch (error) {
-        return response.customError(wrapError(error));
-      }
-      try {
-        const updatedCase = await caseService.updateCase({
-          client: context.core.savedObjects.client,
-          caseId: request.params.id,
-          updatedAttributes: formatUpdatedCase({
-            comments: theCase.attributes!.comments.length
-              ? [...theCase.attributes!.comments, newComment.id]
-              : [newComment.id],
-          }),
-        });
-        return response.ok({ body: { newComment, updatedCase } });
+
+        return response.ok({ body: { newComment } });
       } catch (error) {
         return response.customError(wrapError(error));
       }

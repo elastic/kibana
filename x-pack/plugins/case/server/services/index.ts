@@ -19,7 +19,6 @@ import {
   UpdatedCaseFormatted,
   UpdatedCommentType,
 } from '../routes/api/types';
-import { wrapError } from '../routes/api/utils';
 import { PluginSetupContract as SecurityPluginSetup } from '../../../security/server/plugin';
 
 interface ClientArgs {
@@ -137,13 +136,18 @@ export class CaseService {
         user = await authentication!.getCurrentUser(request);
       } catch (error) {
         this.log.debug(`Error on GET user: ${error}`);
-        throw response.customError(wrapError(error));
+        throw error;
       }
       if (!user) {
         this.log.debug(`Error on GET user: Bad User`);
-        throw response.customError(
-          wrapError({ name: 'Bad User', message: 'The user is not authenticated' })
-        );
+        throw response.badRequest({
+          body: {
+            message: 'Bad User - the user is not authenticated',
+            attributes: {
+              requestBody: request.body,
+            },
+          },
+        });
       }
       return user;
     },

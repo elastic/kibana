@@ -39,11 +39,11 @@ export const formatNewComment = ({
   username,
   case_workflow_id,
 }: NewCommentArgs): NewCommentFormatted => ({
+  ...newComment,
   creation_date: new Date().valueOf(),
   last_edit_date: new Date().valueOf(),
   user: { full_name, username },
   case_workflow_id,
-  ...newComment,
 });
 
 export const formatUpdatedCase = (updateCase: UpdatedCaseType): UpdatedCaseFormatted => ({

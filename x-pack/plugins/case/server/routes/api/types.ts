@@ -14,26 +14,11 @@ import {
   UserSchema,
 } from './schema';
 
-export type UpdatedCaseTyped = TypeOf<typeof UpdatedCaseSchema>;
-
-export interface UpdatedCaseType {
-  assignees?: UpdatedCaseTyped['assignees'];
-  comments?: UpdatedCaseTyped['comments'];
-  description?: UpdatedCaseTyped['description'];
-  name?: UpdatedCaseTyped['name'];
-  state?: UpdatedCaseTyped['state'];
-  tags?: UpdatedCaseTyped['tags'];
-  case_type?: UpdatedCaseTyped['case_type'];
-}
-
-export type UpdatedCommentType = TypeOf<typeof UpdatedCommentSchema>;
-
-export interface UpdatedCaseFormatted extends UpdatedCaseType {
-  last_edit_date: number;
-}
-
 export type NewCaseType = TypeOf<typeof NewCaseSchema>;
-
+export type NewCommentFormatted = TypeOf<typeof CommentSchema>;
+export type NewCommentType = TypeOf<typeof NewCommentSchema>;
+export type UpdatedCaseTyped = TypeOf<typeof UpdatedCaseSchema>;
+export type UpdatedCommentType = TypeOf<typeof UpdatedCommentSchema>;
 export type UserType = TypeOf<typeof UserSchema>;
 
 export interface NewCaseFormatted extends NewCaseType {
@@ -42,6 +27,15 @@ export interface NewCaseFormatted extends NewCaseType {
   reporter: UserType;
 }
 
-export type NewCommentType = TypeOf<typeof NewCommentSchema>;
+export interface UpdatedCaseFormatted extends UpdatedCaseType {
+  last_edit_date: number;
+}
 
-export type NewCommentFormatted = TypeOf<typeof CommentSchema>;
+export interface UpdatedCaseType {
+  assignees?: UpdatedCaseTyped['assignees'];
+  description?: UpdatedCaseTyped['description'];
+  title?: UpdatedCaseTyped['title'];
+  state?: UpdatedCaseTyped['state'];
+  tags?: UpdatedCaseTyped['tags'];
+  case_type?: UpdatedCaseTyped['case_type'];
+}

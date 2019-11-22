@@ -19,34 +19,35 @@ export function initDeleteCaseApi({ caseService, router }: RouteDeps) {
       },
     },
     async (context, request, response) => {
-      let theCase;
-      try {
-        theCase = await caseService.getCase({
-          client: context.core.savedObjects.client,
-          caseId: request.params.id,
-        });
-      } catch (error) {
-        return response.customError(wrapError(error));
-      }
-      try {
-        const comments = theCase.attributes.comments;
-        await Promise.all(
-          comments.map((commentId: string) =>
-            caseService.deleteComment({
-              client: context.core.savedObjects.client,
-              commentId,
-            })
-          )
-        );
-      } catch (error) {
-        return response.customError(wrapError(error));
-      }
+      let allCaseComments;
       try {
         await caseService.deleteCase({
           client: context.core.savedObjects.client,
           caseId: request.params.id,
         });
-        return response.ok({ body: { deletedCase: true } });
+      } catch (error) {
+        return response.customError(wrapError(error));
+      }
+      try {
+        allCaseComments = await caseService.getAllCaseComments({
+          client: context.core.savedObjects.client,
+          caseId: request.params.id,
+        });
+      } catch (error) {
+        return response.customError(wrapError(error));
+      }
+      try {
+        if (allCaseComments.saved_objects.length > 0) {
+          await Promise.all(
+            allCaseComments.saved_objects.map(({ id }) =>
+              caseService.deleteComment({
+                client: context.core.savedObjects.client,
+                commentId: id,
+              })
+            )
+          );
+        }
+        return response.noContent();
       } catch (error) {
         return response.customError(wrapError(error));
       }

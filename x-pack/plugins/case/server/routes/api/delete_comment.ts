@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { RouteDeps } from '.';
-import { formatUpdatedCase, wrapError } from './utils';
+import { wrapError } from './utils';
 
 export function initDeleteCommentApi({ caseService, router }: RouteDeps) {
   router.delete(
@@ -21,33 +21,12 @@ export function initDeleteCommentApi({ caseService, router }: RouteDeps) {
     },
     async (context, request, response) => {
       const client = context.core.savedObjects.client;
-      let theCase;
       try {
         await caseService.deleteComment({
           client,
           commentId: request.params.comment_id,
         });
-      } catch (error) {
-        return response.customError(wrapError(error));
-      }
-      try {
-        theCase = await caseService.getCase({
-          client,
-          caseId: request.params.case_id,
-        });
-      } catch (error) {
-        return response.customError(wrapError(error));
-      }
-      try {
-        const comments = theCase.attributes!.comments.filter(
-          (comment: string) => comment !== request.params.comment_id
-        );
-        const updatedCase = await caseService.updateCase({
-          client: context.core.savedObjects.client,
-          caseId: request.params.case_id,
-          updatedAttributes: formatUpdatedCase({ comments }),
-        });
-        return response.ok({ body: { deleted: true, updatedCase } });
+        return response.noContent();
       } catch (error) {
         return response.customError(wrapError(error));
       }
