@@ -254,12 +254,22 @@ function QueryBarTopRowUI(props: Props) {
     if (props.timeHistory) {
       recentlyUsedRanges = props.timeHistory
         .get()
-        .map(({ from, to }: { from: string; to: string }) => {
-          return {
-            start: from,
-            end: to,
-          };
-        });
+        .reduce(
+          (
+            accum: Array<{ start: string; end: string }>,
+            { to, from }: { to: string; from: string }
+          ) => {
+            if (!from && !to) {
+              return accum;
+            }
+            accum.push({
+              start: from,
+              end: to,
+            });
+            return accum;
+          },
+          []
+        );
     }
 
     const commonlyUsedRanges = uiSettings!
