@@ -17,10 +17,10 @@ export interface SlmPolicyPayload {
   repository: string;
   config?: SnapshotConfig;
   retention?: SnapshotRetention;
+  isManagedPolicy: boolean;
 }
 
 export interface SlmPolicy extends SlmPolicyPayload {
-  isManagedPolicy: boolean;
   version: number;
   modifiedDate: string;
   modifiedDateMillis: number;
