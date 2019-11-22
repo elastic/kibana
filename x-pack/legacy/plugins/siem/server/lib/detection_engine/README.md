@@ -177,6 +177,17 @@ Every 5 minutes if you get positive hits you will see messages on info like so:
 server    log   [09:54:59.013] [info][plugins][siem] Total signals found from signal rule "id: a556065c-0656-4ba1-ad64-a77ca9d2013b", "ruleId: rule-1": 10000
 ```
 
+Signals are space aware and default to the "default" space for these scripts if you do not export
+the variable of SPACE_URL. For example, if you want to post signals to the space `test-space` you would
+set your SPACE_URL to be:
+
+```sh
+export SPACE_URL=/s/test-space
+```
+
+So that the scripts append a `/s/test-space` in front of all the APIs to correctly create, modify, delete, and update
+them from within that space.
+
 See the scripts folder and the tools for more command line fun.
 
 Add the `.siem-signals-${your user id}` to your advanced SIEM settings to see any signals
