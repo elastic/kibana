@@ -10,7 +10,7 @@ import { HashRouter, Switch } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 import { EuiErrorBoundary } from '@elastic/eui';
 import euiLight from '@elastic/eui/dist/eui_theme_light.json';
-import { ChromeStart, CoreSetup, HttpStart, I18nStart } from 'src/core/public';
+import { ChromeStart, CoreSetup, HttpStart, I18nStart, NotificationsStart } from 'src/core/public';
 import { CoreProvider } from './contexts/core';
 import { setClient } from './data';
 
@@ -31,6 +31,7 @@ export interface PluginCore {
   routes: JSX.Element[];
   theme: PluginTheme;
   renderTo: HTMLElement;
+  notifications: NotificationsStart;
 }
 
 export class Plugin {
