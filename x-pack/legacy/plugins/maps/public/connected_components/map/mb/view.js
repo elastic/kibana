@@ -121,7 +121,6 @@ export class MBMapContainer extends React.Component {
         style: mbStyle,
         scrollZoom: this.props.scrollZoom,
         preserveDrawingBuffer: chrome.getInjected('preserveDrawingBuffer', false),
-        doubleClickZoom: !this.props.disableZoom,
         interactive: !this.props.disableInteractive,
       };
       if (initialView) {
