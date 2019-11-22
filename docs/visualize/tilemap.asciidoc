@@ -44,7 +44,7 @@ Enter a string in the *Custom Label* field to change the display label.
 Coordinate maps use the {ref}/search-aggregations-bucket-geohashgrid-aggregation.html[_geohash_] aggregation. Select a field, typically coordinates, from the
 drop-down.
 
-- The_Change precision on map zoom_ box is checked by default. Uncheck the box to disable this behavior.
+- The _Change precision on map zoom_ box is checked by default. Uncheck the box to disable this behavior.
 The _Precision_ slider determines the granularity of the results displayed on the map. See the documentation
 for the {ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[geohash grid]
 aggregation for details on the area specified by each precision level.
@@ -59,24 +59,8 @@ of the geohash grid cell. Leaving this checked generally results in a more accur
 
 Enter a string in the *Custom Label* field to change the display label.
 
-You can click the *Advanced* link to display more customization options for your metrics or bucket aggregation:
-
-*Exclude Pattern*:: Specify a pattern in this field to exclude from the results.
-*Include Pattern*:: Specify a pattern in this field to include in the results.
-*JSON Input*:: A text field where you can add specific JSON-formatted properties to merge with the aggregation
-definition, as in the following example:
-
-[source,shell]
-{ "script" : "doc['grade'].value * 1.2" }
-
-NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you to enable
-{ref}/modules-scripting.html[dynamic Groovy scripting].
-
-The availability of these options varies depending on the aggregation you choose.
-
 [float]
 ==== Options
-
 
 *Map type*:: Select one of the following options from the drop-down.
 *_Scaled Circle Markers_*:: Scale the size of the markers based on the metric aggregation's value.

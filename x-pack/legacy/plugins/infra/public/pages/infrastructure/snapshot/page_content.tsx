@@ -13,7 +13,7 @@ import { WithOptions } from '../../../containers/with_options';
 import { WithSource } from '../../../containers/with_source';
 import { Layout } from '../../../components/inventory/layout';
 
-export const SnapshotPageContent: React.SFC = () => (
+export const SnapshotPageContent: React.FC = () => (
   <WithSource>
     {({ configuration, createDerivedIndexPattern, sourceId }) => (
       <WithOptions>

@@ -5,11 +5,10 @@
  */
 
 import { get } from 'lodash';
-import { oncePerServer } from './once_per_server';
 
 const defaultSize = 10;
 
-function jobsQueryFn(server) {
+export function jobsQueryFactory(server) {
   const index = server.config().get('xpack.reporting.index');
   const { callWithInternalUser, errors: esErrors } = server.plugins.elasticsearch.getCluster('admin');
 
@@ -138,5 +137,3 @@ function jobsQueryFn(server) {
     }
   };
 }
-
-export const jobsQueryFactory = oncePerServer(jobsQueryFn);
