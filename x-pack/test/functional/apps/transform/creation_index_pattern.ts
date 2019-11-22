@@ -58,7 +58,7 @@ export default function({ getService }: FtrProviderContext) {
         expected: {
           pivotPreview: {
             column: 0,
-            values: `Men's Accessories`,
+            values: [`Men's Accessories`],
           },
           row: {
             status: 'stopped',
@@ -67,7 +67,7 @@ export default function({ getService }: FtrProviderContext) {
           },
           sourcePreview: {
             column: 3,
-            values: 'Ahmed Al,Kamal,Robert',
+            values: ['Ahmed Al', 'Kamal', 'Robert'],
           },
         },
       },

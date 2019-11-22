@@ -53,7 +53,7 @@ export default function({ getService }: FtrProviderContext) {
         expected: {
           pivotPreview: {
             column: 0,
-            values: 'ASA',
+            values: ['ASA'],
           },
           row: {
             status: 'stopped',
@@ -63,7 +63,7 @@ export default function({ getService }: FtrProviderContext) {
           sourceIndex: 'farequote',
           sourcePreview: {
             column: 3,
-            values: 'ASA',
+            values: ['ASA'],
           },
         },
       },

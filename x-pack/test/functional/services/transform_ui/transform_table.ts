@@ -87,7 +87,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
     async assertEuiInMemoryTableColumnValues(
       tableSubj: string,
       column: number,
-      expectedColumnValues: string
+      expectedColumnValues: string[]
     ) {
       await retry.tryForTime(2000, async () => {
         // get a 2D array of rows and cell values
@@ -102,7 +102,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
         uniqueColumnValues.sort();
 
         // check if the returned unique value matches the supplied filter value
-        expect(uniqueColumnValues.join()).to.equal(expectedColumnValues);
+        expect(uniqueColumnValues).to.eql(expectedColumnValues);
       });
     }
 
@@ -156,7 +156,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail('transformPreviewTabContent loaded', { timeout: 30 * 1000 });
     }
 
-    async assertTransformsExpandedRowPreviewColumnValues(column: number, values: string) {
+    async assertTransformsExpandedRowPreviewColumnValues(column: number, values: string[]) {
       await this.waitForTransformsExpandedRowPreviewTabToLoad();
       await this.assertEuiInMemoryTableColumnValues('transformPreviewTabContent', column, values);
     }

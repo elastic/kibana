@@ -101,7 +101,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
     async assertEuiInMemoryTableColumnValues(
       tableSubj: string,
       column: number,
-      expectedColumnValues: string
+      expectedColumnValues: string[]
     ) {
       await retry.tryForTime(2000, async () => {
         // get a 2D array of rows and cell values
@@ -116,15 +116,15 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
         uniqueColumnValues.sort();
 
         // check if the returned unique value matches the supplied filter value
-        expect(uniqueColumnValues.join()).to.equal(expectedColumnValues);
+        expect(uniqueColumnValues).to.eql(expectedColumnValues);
       });
     },
 
-    async assertSourceIndexPreviewColumnValues(column: number, values: string) {
+    async assertSourceIndexPreviewColumnValues(column: number, values: string[]) {
       await this.assertEuiInMemoryTableColumnValues('transformSourceIndexPreview', column, values);
     },
 
-    async assertPivotPreviewColumnValues(column: number, values: string) {
+    async assertPivotPreviewColumnValues(column: number, values: string[]) {
       await this.assertEuiInMemoryTableColumnValues('transformPivotPreview', column, values);
     },
 
