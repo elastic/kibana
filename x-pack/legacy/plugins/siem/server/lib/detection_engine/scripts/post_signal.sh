@@ -18,12 +18,13 @@ SIGNALS=(${@:-./signals/root_or_admin_1.json})
 for SIGNAL in "${SIGNALS[@]}"
 do {
   [ -e "$SIGNAL" ] || continue
+  POST=$(jq '.output_index=env.SIGNALS_INDEX' $SIGNAL)
   curl -s -k \
   -H 'Content-Type: application/json' \
   -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
   -X POST ${KIBANA_URL}/api/detection_engine/rules \
-  -d @${SIGNAL} \
+  -d "$POST" \
   | jq .;
 } &
 done
