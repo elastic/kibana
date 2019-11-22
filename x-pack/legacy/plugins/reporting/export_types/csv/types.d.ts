@@ -19,6 +19,7 @@ export interface JobParamsDiscoverCsv {
 }
 
 export interface JobDocPayloadDiscoverCsv extends JobDocPayload {
+  basePath: string;
   searchRequest: any;
   fields: any;
   indexPatternSavedObject: any;

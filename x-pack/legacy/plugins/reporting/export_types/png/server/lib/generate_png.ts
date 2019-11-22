@@ -5,7 +5,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { toArray, mergeMap } from 'rxjs/operators';
+import { toArray, mergeMap, tap } from 'rxjs/operators';
 import { LevelLogger } from '../../../../server/lib';
 import { ServerFacade, ConditionalHeaders } from '../../../../types';
 import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
@@ -24,22 +24,6 @@ export function generatePngObservableFactory(server: ServerFacade) {
   const screenshotsObservable = screenshotsObservableFactory(server);
   const captureConcurrency = 1;
 
-  // prettier-ignore
-  const createPngWithScreenshots = async ({ urlScreenshots }: { urlScreenshots: UrlScreenshot[] }): Promise<string> => {
-    if (urlScreenshots.length !== 1) {
-      throw new Error(
-        `Expected there to be 1 URL screenshot, but there are ${urlScreenshots.length}`
-      );
-    }
-    if (urlScreenshots[0].screenshots.length !== 1) {
-      throw new Error(
-        `Expected there to be 1 screenshot, but there are ${urlScreenshots[0].screenshots.length}`
-      );
-    }
-
-    return urlScreenshots[0].screenshots[0].base64EncodedData;
-  };
-
   return function generatePngObservable(
     logger: LevelLogger,
     url: string,
@@ -52,18 +36,32 @@ export function generatePngObservableFactory(server: ServerFacade) {
     }
 
     const layout = new PreserveLayout(layoutParams.dimensions);
-    const screenshots$ = Rx.of(url).pipe(
-      mergeMap(
-        iUrl =>
-          screenshotsObservable({ logger, url: iUrl, conditionalHeaders, layout, browserTimezone }),
-        (jUrl: string, screenshot: UrlScreenshot) => screenshot,
-        captureConcurrency
-      )
-    );
 
-    return screenshots$.pipe(
+    return Rx.of(url).pipe(
+      mergeMap(iUrl => screenshotsObservable({ logger, url: iUrl, conditionalHeaders, layout, browserTimezone })), // prettier-ignore
+      tap((something) => {
+        console.log('help me');
+        console.log(JSON.stringify(something));
+      }),
       toArray(),
-      mergeMap(urlScreenshots => createPngWithScreenshots({ urlScreenshots }))
+      tap((something) => {
+        console.log('help me 2');
+        console.log(JSON.stringify(something));
+      }),
+      mergeMap(urlScreenshots => {
+        if (urlScreenshots.length !== 1) {
+          throw new Error(
+            `Expected there to be 1 URL screenshot, but there are ${urlScreenshots.length}`
+          );
+        }
+        if (urlScreenshots[0].screenshots.length !== 1) {
+          throw new Error(
+            `Expected there to be 1 screenshot, but there are ${urlScreenshots[0].screenshots.length}`
+          );
+        }
+
+        return urlScreenshots[0].screenshots[0].base64EncodedData;
+      })
     );
   };
 }

@@ -12,7 +12,7 @@ import {
 } from 'url';
 import { getAbsoluteUrlFactory } from '../../../common/get_absolute_url';
 import { validateUrls } from '../../../common/validate_urls';
-import { ServerFacade } from '../../../types';
+import { ServerFacade, ConditionalHeaders } from '../../../types';
 import { JobDocPayloadPNG } from '../../png/types';
 import { JobDocPayloadPDF } from '../../printable_pdf/types';
 
@@ -23,9 +23,11 @@ interface KeyedRelativeUrl {
 export async function getFullUrls({
   job,
   server,
+  conditionalHeaders,
   ...mergeValues // pass-throughs
 }: {
   job: JobDocPayloadPNG | JobDocPayloadPDF;
+  conditionalHeaders: ConditionalHeaders;
   server: ServerFacade;
 }) {
   const config = server.config();
@@ -93,5 +95,5 @@ export async function getFullUrls({
     });
   });
 
-  return { job, urls, server, ...mergeValues };
+  return { job, urls, conditionalHeaders, server, ...mergeValues };
 }

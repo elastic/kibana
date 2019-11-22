@@ -251,19 +251,21 @@ export interface ESQueueWorker {
   on: (event: string, handler: any) => void;
 }
 
-type JobParamsUrl = object;
-
 interface JobParamsSavedObject {
   savedObjectType: string;
   savedObjectId: string;
   isImmediate: boolean;
 }
 
+type JobParamsUrl = object;
+
+export type JobParams = JobParamsSavedObject | JobParamsUrl;
+
 export type ESQueueCreateJobFn = (
-  jobParams: JobParamsSavedObject | JobParamsUrl,
+  jobParams: JobParams,
   headers: Record<string, string>,
   request: RequestFacade
-) => Promise<JobParamsSavedObject | JobParamsUrl>;
+) => Promise<JobParams>;
 
 export type ImmediateCreateJobFn = (
   jobParams: any,

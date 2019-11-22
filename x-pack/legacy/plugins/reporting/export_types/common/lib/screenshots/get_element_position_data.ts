@@ -47,5 +47,6 @@ export const getElementPositionAndAttributes = async (
     args: [layout.selectors.screenshot, { title: 'data-title', description: 'data-description' }],
   });
 
+  console.log(1, JSON.stringify(elementsPositionAndAttributes));
   return elementsPositionAndAttributes;
 };

@@ -8,20 +8,26 @@ import * as Rx from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
 import { PLUGIN_ID, PNG_JOB_TYPE } from '../../../../common/constants';
+import { ServerFacade } from '../../../../types';
 import { LevelLogger } from '../../../../server/lib';
-import { generatePngObservableFactory } from '../lib/generate_png';
 import {
   decryptJobHeaders,
   omitBlacklistedHeaders,
   getConditionalHeaders,
   getFullUrls,
 } from '../../../common/execute_job/';
+import { JobDocPayloadPNG } from '../../types';
+import { generatePngObservableFactory } from '../lib/generate_png';
 
-export function executeJobFactory(server) {
+export function executeJobFactory(server: ServerFacade) {
   const generatePngObservable = generatePngObservableFactory(server);
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PNG_JOB_TYPE, 'execute']);
 
-  return function executeJob(jobId, jobToExecute, cancellationToken) {
+  return function executeJob(
+    jobId: string,
+    jobToExecute: JobDocPayloadPNG,
+    cancellationToken: any
+  ) {
     const jobLogger = logger.clone([jobId]);
     const process$ = Rx.of({ job: jobToExecute, server }).pipe(
       mergeMap(decryptJobHeaders),
@@ -51,11 +57,14 @@ export function executeJobFactory(server) {
           job.layout
         );
       }),
-      map(buffer => ({
-        content_type: 'image/png',
-        content: buffer.toString('base64'),
-        size: buffer.byteLength,
-      })),
+      map(buffer => {
+        throw new Error(typeof buffer);
+        return {
+          content_type: 'image/png',
+          content: buffer.toString('base64'),
+          size: buffer.byteLength,
+        };
+      }),
       catchError(err => {
         jobLogger.error(err);
         return Rx.throwError(err);
@@ -63,7 +72,6 @@ export function executeJobFactory(server) {
     );
 
     const stop$ = Rx.fromEventPattern(cancellationToken.on);
-
     return process$.pipe(takeUntil(stop$)).toPromise();
   };
 }
