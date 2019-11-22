@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiSwitch } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
-import { ES_AGGREGATION } from '../../../../../../../../common/constants/aggregation_types';
+import { ES_AGGREGATION } from '../../../../../../../../../common/constants/aggregation_types';
 
 export const SparseDataSwitch: FC = () => {
   const { jobCreator, jobCreatorUpdated, jobCreatorUpdate } = useContext(JobCreatorContext);

@@ -17,8 +17,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { mlJobService } from 'plugins/ml/services/job_service';
-import { detectorToString } from 'plugins/ml/util/string_utils';
+import { mlJobService } from '../../../../../services/job_service';
+import { detectorToString } from '../../../../../util/string_utils';
 
 export class Detectors extends Component {
   constructor(props) {

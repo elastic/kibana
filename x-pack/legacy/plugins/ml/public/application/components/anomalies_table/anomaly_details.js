@@ -35,8 +35,8 @@ import {
   getSeverity,
   showActualForFunction,
   showTypicalForFunction,
-} from '../../../common/util/anomaly_utils';
-import { MULTI_BUCKET_IMPACT } from '../../../common/constants/multi_bucket_impact';
+} from '../../../../common/util/anomaly_utils';
+import { MULTI_BUCKET_IMPACT } from '../../../../common/constants/multi_bucket_impact';
 import { formatValue } from '../../formatters/format_value';
 import { MAX_CHARS } from './anomalies_table_constants';
 

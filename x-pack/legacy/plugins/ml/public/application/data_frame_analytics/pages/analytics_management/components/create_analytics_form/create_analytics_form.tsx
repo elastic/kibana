@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { metadata } from 'ui/metadata';
 import { IndexPattern, INDEX_PATTERN_ILLEGAL_CHARACTERS } from 'ui/index_patterns';
 import { ml } from '../../../../../services/ml_api_service';
-import { Field, EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
+import { Field, EVENT_RATE_FIELD_ID } from '../../../../../../../common/types/fields';
 
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import { useKibanaContext } from '../../../../../contexts/kibana';
@@ -32,7 +32,7 @@ import {
   DEFAULT_MODEL_MEMORY_LIMIT,
   getJobConfigFromFormState,
 } from '../../hooks/use_create_analytics_form/state';
-import { JOB_ID_MAX_LENGTH } from '../../../../../../common/constants/validation';
+import { JOB_ID_MAX_LENGTH } from '../../../../../../../common/constants/validation';
 import { Messages } from './messages';
 import { JobType } from './job_type';
 import { mmlUnitInvalidErrorMessage } from '../../hooks/use_create_analytics_form/reducer';

@@ -14,7 +14,7 @@ import { timefilter } from 'ui/timefilter';
 import { IndexPatterns } from 'ui/index_patterns';
 
 import { I18nContext } from 'ui/i18n';
-import { InjectorService } from '../../../../../common/types/angular';
+import { InjectorService } from '../../../../../../common/types/angular';
 import { createSearchItems } from '../../utils/new_job_utils';
 import { Page, PageProps } from './page';
 import { JOB_TYPE } from '../../common/job_creator/util/constants';

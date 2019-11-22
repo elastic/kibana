@@ -7,7 +7,7 @@
 import { IndexPattern } from 'ui/index_patterns';
 import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 import { KibanaConfigTypeFix } from '../../../contexts/kibana';
-import { esQuery, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
+import { esQuery, IIndexPattern } from '../../../../../../../../../src/plugins/data/public';
 
 export interface SearchItems {
   indexPattern: IIndexPattern;

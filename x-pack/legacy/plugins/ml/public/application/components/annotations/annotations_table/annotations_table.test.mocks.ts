@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { chromeServiceMock } from '../../../../../../../../src/core/public/mocks';
+import { chromeServiceMock } from '../../../../../../../../../src/core/public/mocks';
 
 jest.doMock('ui/new_platform', () => ({
   npStart: {

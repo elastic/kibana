@@ -22,11 +22,11 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 
-import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+import { ES_FIELD_TYPES } from '../../../../../../../../src/plugins/data/public';
 import { checkPermission } from '../../privilege/check_privilege';
-import { SEARCH_QUERY_LANGUAGE } from '../../../common/constants/search';
-import { isRuleSupported } from '../../../common/util/anomaly_utils';
-import { parseInterval } from '../../../common/util/parse_interval';
+import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
+import { isRuleSupported } from '../../../../common/util/anomaly_utils';
+import { parseInterval } from '../../../../common/util/parse_interval';
 import { escapeDoubleQuotes } from '../kql_filter_bar/utils';
 import { getFieldTypeFromMapping } from '../../services/mapping_service';
 import { ml } from '../../services/ml_api_service';

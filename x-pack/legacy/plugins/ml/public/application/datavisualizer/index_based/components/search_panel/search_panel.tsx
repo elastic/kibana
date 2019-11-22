@@ -23,11 +23,11 @@ import { i18n } from '@kbn/i18n';
 
 import { IndexPattern } from 'ui/index_patterns';
 
-import { SEARCH_QUERY_LANGUAGE } from '../../../../../common/constants/search';
+import { SEARCH_QUERY_LANGUAGE } from '../../../../../../common/constants/search';
 import { SavedSearchQuery } from '../../../../contexts/kibana';
 
 // @ts-ignore
-import { KqlFilterBar } from '../../../../components/kql_filter_bar';
+import { KqlFilterBar } from '../../../../components/kql_filter_bar/index';
 
 interface Props {
   indexPattern: IndexPattern;

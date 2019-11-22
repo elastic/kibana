@@ -25,7 +25,7 @@ import {
   getSeverityColor,
   getSeverityWithLow,
   getMultiBucketImpactLabel,
-} from '../../../common/util/anomaly_utils';
+} from '../../../../common/util/anomaly_utils';
 import {
   LINE_CHART_ANOMALY_RADIUS,
   MULTI_BUCKET_SYMBOL_SIZE,

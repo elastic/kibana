@@ -26,7 +26,7 @@ import { CommonProps } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { InjectedIntlProps } from 'react-intl';
 import { toastNotifications } from 'ui/notify';
-import { ANNOTATION_MAX_LENGTH_CHARS } from '../../../../common/constants/annotations';
+import { ANNOTATION_MAX_LENGTH_CHARS } from '../../../../../common/constants/annotations';
 import {
   annotation$,
   annotationsRefresh$,

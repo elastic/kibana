@@ -5,7 +5,7 @@
  */
 
 
-import { ML_BREADCRUMB, ANOMALY_DETECTION_BREADCRUMB } from '../breadcrumbs';
+import { ML_BREADCRUMB, ANOMALY_DETECTION_BREADCRUMB } from '../../breadcrumbs';
 import { i18n } from '@kbn/i18n';
 
 

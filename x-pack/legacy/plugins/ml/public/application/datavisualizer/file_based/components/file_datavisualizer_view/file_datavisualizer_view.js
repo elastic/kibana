@@ -23,7 +23,7 @@ import { ResultsView } from '../results_view';
 import { FileCouldNotBeRead, FileTooLarge } from './file_error_callouts';
 import { EditFlyout } from '../edit_flyout';
 import { ImportView } from '../import_view';
-import { MAX_BYTES } from '../../../../../common/constants/file_datavisualizer';
+import { MAX_BYTES } from '../../../../../../common/constants/file_datavisualizer';
 import {
   readFile,
   createUrlOverrides,

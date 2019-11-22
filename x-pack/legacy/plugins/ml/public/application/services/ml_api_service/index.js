@@ -9,7 +9,7 @@
 import { pick } from 'lodash';
 import chrome from 'ui/chrome';
 
-import { http } from '../../services/http_service';
+import { http } from '../http_service';
 
 import { annotations } from './annotations';
 import { dataFrameAnalytics } from './data_frame_analytics';

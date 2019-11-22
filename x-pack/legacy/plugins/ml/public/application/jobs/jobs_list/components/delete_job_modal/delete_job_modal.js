@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { deleteJobs } from '../utils';
-import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../common/constants/jobs_list';
+import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 export const DeleteJobModal = injectI18n(class extends Component {

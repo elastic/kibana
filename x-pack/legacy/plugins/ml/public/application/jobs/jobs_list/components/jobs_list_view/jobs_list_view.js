@@ -9,7 +9,7 @@ import { timefilter } from 'ui/timefilter';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 
-import { ml } from 'plugins/ml/services/ml_api_service';
+import { ml } from '../../../../services/ml_api_service';
 import { checkForAutoStartDatafeed, filterJobs, loadFullJob } from '../utils';
 import { JobsList } from '../jobs_list';
 import { JobDetails } from '../job_details';
@@ -30,7 +30,7 @@ import {
   DEFAULT_REFRESH_INTERVAL_MS,
   DELETING_JOBS_REFRESH_INTERVAL_MS,
   MINIMUM_REFRESH_INTERVAL_MS,
-} from '../../../../../common/constants/jobs_list';
+} from '../../../../../../common/constants/jobs_list';
 
 let jobsRefreshInterval = null;
 let deletingJobsRefreshTimeout = null;

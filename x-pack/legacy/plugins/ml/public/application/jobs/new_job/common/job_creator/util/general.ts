@@ -10,16 +10,16 @@ import { newJobCapsService } from '../../../../../services/new_job_capabilities_
 import {
   ML_JOB_AGGREGATION,
   SPARSE_DATA_AGGREGATIONS,
-} from '../../../../../../common/constants/aggregation_types';
-import { MLCATEGORY } from '../../../../../../common/constants/field_types';
+} from '../../../../../../../common/constants/aggregation_types';
+import { MLCATEGORY } from '../../../../../../../common/constants/field_types';
 import {
   EVENT_RATE_FIELD_ID,
   Field,
   AggFieldPair,
   mlCategory,
-} from '../../../../../../common/types/fields';
+} from '../../../../../../../common/types/fields';
 import { mlJobService } from '../../../../../services/job_service';
-import { JobCreatorType, isMultiMetricJobCreator, isPopulationJobCreator } from '../';
+import { JobCreatorType, isMultiMetricJobCreator, isPopulationJobCreator } from '../index';
 import { CREATED_BY_LABEL, JOB_TYPE } from './constants';
 
 const getFieldByIdFactory = (scriptFields: Field[]) => (id: string) => {

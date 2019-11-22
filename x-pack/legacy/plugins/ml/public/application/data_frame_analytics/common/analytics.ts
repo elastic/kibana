@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs';
 import { idx } from '@kbn/elastic-idx';
 import { cloneDeep } from 'lodash';
 import { ml } from '../../services/ml_api_service';
-import { Dictionary } from '../../../common/types/common';
+import { Dictionary } from '../../../../common/types/common';
 import { getErrorMessage } from '../pages/analytics_management/hooks/use_create_analytics_form';
 import { SavedSearchQuery } from '../../contexts/kibana';
 

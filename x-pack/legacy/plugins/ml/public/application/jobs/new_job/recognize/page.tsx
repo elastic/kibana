@@ -33,7 +33,7 @@ import {
   KibanaObjectResponse,
   Module,
   ModuleJob,
-} from '../../../../common/types/modules';
+} from '../../../../../common/types/modules';
 import { mlJobService } from '../../../services/job_service';
 import { CreateResultCallout } from './components/create_result_callout';
 import { KibanaObjects } from './components/kibana_objects';

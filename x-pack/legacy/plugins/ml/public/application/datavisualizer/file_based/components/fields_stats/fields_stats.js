@@ -11,7 +11,7 @@ import React, {
 
 import { FieldStatsCard } from './field_stats_card';
 import { getFieldNames } from './get_field_names';
-import { ML_JOB_FIELD_TYPES } from '../../../../../common/constants/field_types';
+import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';
 import { roundToDecimalPlace } from '../../../../formatters/round_to_decimal_place';
 
 export class FieldsStats extends Component {

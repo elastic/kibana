@@ -6,14 +6,14 @@
 
 import { each } from 'lodash';
 import { toastNotifications } from 'ui/notify';
-import { mlMessageBarService } from 'plugins/ml/components/messagebar';
+import { mlMessageBarService } from '../../../components/messagebar';
 import rison from 'rison-node';
 import chrome from 'ui/chrome';
 
-import { mlJobService } from 'plugins/ml/services/job_service';
-import { ml } from 'plugins/ml/services/ml_api_service';
-import { JOB_STATE, DATAFEED_STATE } from 'plugins/ml/../common/constants/states';
-import { parseInterval } from '../../../../common/util/parse_interval';
+import { mlJobService } from '../../../services/job_service';
+import { ml } from '../../../services/ml_api_service';
+import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
+import { parseInterval } from '../../../../../common/util/parse_interval';
 import { i18n } from '@kbn/i18n';
 
 export function loadFullJob(jobId) {

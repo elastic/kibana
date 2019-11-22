@@ -12,7 +12,7 @@ import { EuiToolTip } from '@elastic/eui';
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
 import { getMLJobTypeAriaLabel } from '../../util/field_types_utils';
-import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
+import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
 import { i18n } from '@kbn/i18n';
 
 export const FieldTypeIcon = ({ tooltipEnabled = false, type, needsAria = true }) => {

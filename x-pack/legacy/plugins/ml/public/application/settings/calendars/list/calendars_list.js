@@ -19,7 +19,7 @@ import {
 
 import { NavigationMenu } from '../../../components/navigation_menu';
 import { CalendarsListHeader } from './header';
-import { CalendarsListTable } from './table/';
+import { CalendarsListTable } from './table';
 import { ml } from '../../../services/ml_api_service';
 import { toastNotifications } from 'ui/notify';
 import { mlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';

@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ML_BREADCRUMB, ANOMALY_DETECTION_BREADCRUMB, SETTINGS } from '../breadcrumbs';
+import { ML_BREADCRUMB, ANOMALY_DETECTION_BREADCRUMB, SETTINGS } from '../../breadcrumbs';
 
 export function getSettingsBreadcrumbs() {
   // Whilst top level nav menu with tabs remains,

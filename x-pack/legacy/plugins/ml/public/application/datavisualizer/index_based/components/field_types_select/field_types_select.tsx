@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiSelect } from '@elastic/eui';
 
-import { ML_JOB_FIELD_TYPES } from '../../../../../common/constants/field_types';
+import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';
 
 interface Props {
   fieldTypes: ML_JOB_FIELD_TYPES[];

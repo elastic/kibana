@@ -24,7 +24,7 @@ import chrome from 'ui/chrome';
 import {
   getSeverityWithLow,
   getMultiBucketImpactLabel,
-} from '../../../../common/util/anomaly_utils';
+} from '../../../../../common/util/anomaly_utils';
 import { annotation$ } from '../../../services/annotations_service';
 import { injectObservablesAsProps } from '../../../util/observable_utils';
 import { formatValue } from '../../../formatters/format_value';

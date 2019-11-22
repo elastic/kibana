@@ -8,7 +8,7 @@ import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { Field, Aggregation, SplitField } from '../../../../../../../../common/types/fields';
+import { Field, Aggregation, SplitField } from '../../../../../../../../../common/types/fields';
 
 interface DetectorTitleProps {
   index: number;

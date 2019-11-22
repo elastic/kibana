@@ -10,7 +10,7 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { EditConditionLink } from './edit_condition_link';
-import { APPLIES_TO } from '../../../../common/constants/detector_rule';
+import { APPLIES_TO } from '../../../../../common/constants/detector_rule';
 
 function prepareTest(updateConditionValueFn, appliesTo) {
 

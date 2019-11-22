@@ -12,7 +12,7 @@
  */
 
 import moment from 'moment';
-import { AnomalyRecordDoc } from '../../common/types/anomalies';
+import { AnomalyRecordDoc } from '../../../common/types/anomalies';
 const SIGFIGS_IF_ROUNDING = 3; // Number of sigfigs to use for values < 10
 
 // Formats the value of an actual or typical field from a machine learning anomaly record.

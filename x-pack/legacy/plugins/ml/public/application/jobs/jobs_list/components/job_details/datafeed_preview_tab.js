@@ -17,9 +17,9 @@ import {
   EuiLoadingSpinner
 } from '@elastic/eui';
 
-import { mlJobService } from 'plugins/ml/services/job_service';
-import { checkPermission } from 'plugins/ml/privilege/check_privilege';
-import { ML_DATA_PREVIEW_COUNT } from 'plugins/ml/../common/util/job_utils';
+import { mlJobService } from '../../../../services/job_service';
+import { checkPermission } from '../../../../privilege/check_privilege';
+import { ML_DATA_PREVIEW_COUNT } from '../../../../../../common/util/job_utils';
 import { MLJobEditor } from '../ml_job_editor';
 import { FormattedMessage } from '@kbn/i18n/react';
 

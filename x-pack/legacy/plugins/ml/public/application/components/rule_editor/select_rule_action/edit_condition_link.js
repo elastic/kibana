@@ -23,7 +23,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { APPLIES_TO } from '../../../../common/constants/detector_rule';
+import { APPLIES_TO } from '../../../../../common/constants/detector_rule';
 import { formatValue } from '../../../formatters/format_value';
 import {
   getAppliesToValueFromAnomaly,
