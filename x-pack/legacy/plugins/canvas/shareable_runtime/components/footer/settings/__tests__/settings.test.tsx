@@ -67,7 +67,8 @@ describe('<Settings />', () => {
     expect(takeMountedSnapshot(portal(wrapper))).toMatchSnapshot();
   });
 
-  test('can navigate Toolbar Settings, closes when activated', async () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/48058
+  test.skip('can navigate Toolbar Settings, closes when activated', async () => {
     trigger(wrapper).simulate('click');
     expect(takeMountedSnapshot(portal(wrapper))).toMatchSnapshot();
     menuItems(wrapper)
