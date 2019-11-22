@@ -155,9 +155,15 @@ export const PARAMETERS_OPTIONS: {
     },
   ] as SuperSelectOption[],
   orientation: [
-    { value: 'ccw', text: 'counterclockwise' },
-    { value: 'cw', text: 'clockwise' },
-  ],
+    {
+      value: 'ccw',
+      ...getOptionTexts('orientation.counterclockwise'),
+    },
+    {
+      value: 'cw',
+      ...getOptionTexts('orientation.clockwise'),
+    },
+  ] as SuperSelectOption[],
 };
 
 const DATE_FORMATS = [

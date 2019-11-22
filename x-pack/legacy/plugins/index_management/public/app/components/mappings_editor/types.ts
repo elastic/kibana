@@ -106,7 +106,8 @@ export type ParameterName =
   | 'enable_position_increments'
   | 'orientation'
   | 'points_only'
-  | 'path';
+  | 'path'
+  | 'depth_limit';
 
 export interface Parameter {
   fieldConfig: FieldConfig;

@@ -159,13 +159,25 @@ export const TextType = React.memo(({ field }: Props) => {
             defaultMessage: 'Analysers',
           })}
         >
-          <AnalyzerParameter
-            path="analyzer"
-            label={i18n.translate('xpack.idxMgmt.mappingsEditor.indexSearchAnalyzerFieldLabel', {
-              defaultMessage: 'Index + search analyzer',
-            })}
-            defaultValue={field.source.analyzer}
-          />
+          <FormDataProvider pathsToWatch="useSameAnalyzerForSearch">
+            {({ useSameAnalyzerForSearch }) => {
+              const label = useSameAnalyzerForSearch
+                ? i18n.translate('xpack.idxMgmt.mappingsEditor.indexSearchAnalyzerFieldLabel', {
+                    defaultMessage: 'Index + search analyzer',
+                  })
+                : i18n.translate('xpack.idxMgmt.mappingsEditor.indexAnalyzerFieldLabel', {
+                    defaultMessage: 'Index analyzer',
+                  });
+
+              return (
+                <AnalyzerParameter
+                  path="analyzer"
+                  label={label}
+                  defaultValue={field.source.analyzer}
+                />
+              );
+            }}
+          </FormDataProvider>
 
           <EuiSpacer size="s" />
 

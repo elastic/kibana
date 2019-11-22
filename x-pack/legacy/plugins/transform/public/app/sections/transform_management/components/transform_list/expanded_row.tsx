@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC } from 'react';
+import React, { FC } from 'react';
 
 import { EuiTabbedContent } from '@elastic/eui';
 
@@ -35,7 +35,7 @@ interface Props {
   item: TransformListRow;
 }
 
-export const ExpandedRow: SFC<Props> = ({ item }) => {
+export const ExpandedRow: FC<Props> = ({ item }) => {
   const stateValues = { ...item.stats };
   delete stateValues.stats;
   delete stateValues.checkpointing;

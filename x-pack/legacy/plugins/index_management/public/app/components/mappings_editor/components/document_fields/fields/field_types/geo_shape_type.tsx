@@ -9,21 +9,28 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiSpacer, EuiLink } from '@elastic/eui';
 
 import { documentationService } from '../../../../../../services/documentation';
-import { NormalizedField, Field as FieldType } from '../../../../types';
+import { NormalizedField, Field as FieldType, ParameterName } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
-import { UseField, SelectField } from '../../../../shared_imports';
+import { UseField, Field } from '../../../../shared_imports';
 import { CoerceParameter, IgnoreMalformedParameter } from '../../field_parameters';
 import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
 import { PARAMETERS_OPTIONS } from '../../../../constants';
 
-const getDefaultValueToggle = (param: string, field: FieldType) => {
+const getDefaultValueToggle = (param: ParameterName, field: FieldType): boolean => {
+  const { defaultValue } = getFieldConfig(param);
+
   switch (param) {
-    case 'orientation':
-    case 'points_only': {
-      return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
+    // Switches that don't map to a boolean in the mappings
+    case 'orientation': {
+      return field[param] !== undefined && field[param] !== defaultValue;
     }
     default:
-      return false;
+      // All "boolean" parameters
+      return field[param] !== undefined
+        ? (field[param] as boolean) // If the field has a value set, use it
+        : defaultValue !== undefined // If the parameter definition has a "defaultValue" set, use it
+        ? (defaultValue as boolean)
+        : false; // Defaults to "false"
   }
 };
 
@@ -63,28 +70,29 @@ export const GeoShapeType = ({ field }: Props) => {
           <EditFieldFormRow
             title={
               <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.orientationFieldTitle', {
+                {i18n.translate('xpack.idxMgmt.mappingsEditor.geoShapeType.orientationFieldTitle', {
                   defaultMessage: 'Set orientation',
                 })}
               </h3>
             }
             description={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.geoShape.orientationFieldDescription',
+              'xpack.idxMgmt.mappingsEditor.geoShapeType.orientationFieldDescription',
               {
                 defaultMessage:
-                  'Define how to interpret vertex order for polygons or multipolygons',
+                  'Define how to interpret vertex order for polygons / multipolygons. This parameter defines one of two coordinate system rules (Right-hand or Left-hand).',
               }
             )}
+            direction="column"
             toggleDefaultValue={getDefaultValueToggle('orientation', field.source)}
           >
             <UseField
               path="orientation"
               config={getFieldConfig('orientation')}
-              component={SelectField}
+              component={Field}
               componentProps={{
                 euiFieldProps: {
                   options: PARAMETERS_OPTIONS.orientation,
-                  style: { maxWidth: 300 },
+                  style: { minWidth: 300 },
                 },
               }}
             />

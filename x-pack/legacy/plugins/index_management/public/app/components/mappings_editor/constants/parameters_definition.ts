@@ -147,7 +147,7 @@ export const PARAMETERS_DEFINITION = {
   },
   ignore_malformed: {
     fieldConfig: {
-      defaultValue: true,
+      defaultValue: false,
     },
   },
   null_value: {
@@ -208,19 +208,7 @@ export const PARAMETERS_DEFINITION = {
   orientation: {
     fieldConfig: {
       defaultValue: 'ccw',
-      type: FIELD_TYPES.TEXT,
-      validations: [
-        {
-          validator: emptyField(
-            i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.parameters.validations.orientationFieldRequiredErrorMessage',
-              {
-                defaultMessage: 'Specify an orientation.',
-              }
-            )
-          ),
-        },
-      ],
+      type: FIELD_TYPES.SUPER_SELECT,
     },
   },
   boost: {
@@ -517,6 +505,22 @@ export const PARAMETERS_DEFINITION = {
   enable_position_increments: {
     fieldConfig: {
       defaultValue: true,
+    },
+  },
+  depth_limit: {
+    fieldConfig: {
+      defaultValue: 20,
+      type: FIELD_TYPES.NUMBER,
+      formatters: [toInt],
+      validations: [
+        {
+          validator: (({ value }: ValidationFuncArg<any, number>) => {
+            if ((value as number) < 0) {
+              return { message: commonErrorMessages.smallerThanZero };
+            }
+          }) as ValidationFunc,
+        },
+      ],
     },
   },
 };

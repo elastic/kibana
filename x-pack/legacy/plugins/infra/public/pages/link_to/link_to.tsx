@@ -16,7 +16,7 @@ interface LinkToPageProps {
   match: RouteMatch<{}>;
 }
 
-export const LinkToPage: React.SFC<LinkToPageProps> = props => (
+export const LinkToPage: React.FC<LinkToPageProps> = props => (
   <Switch>
     <Route
       path={`${props.match.url}/:sourceId?/:nodeType(host|container|pod)-logs/:nodeId`}

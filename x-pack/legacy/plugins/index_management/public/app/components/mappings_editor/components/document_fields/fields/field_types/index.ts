@@ -20,6 +20,9 @@ import { CompletionType } from './completion_type';
 import { GeoPointType } from './geo_point_type';
 import { DateType } from './date_type';
 import { GeoShapeType } from './geo_shape_type';
+import { SearchAsYouType } from './search_as_you_type';
+import { FlattenedType } from './flattened_type';
+import { ShapeType } from './shape_type';
 
 const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
   alias: AliasType,
@@ -36,6 +39,9 @@ const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
   date: DateType,
   date_nanos: DateType,
   geo_shape: GeoShapeType,
+  search_as_you_type: SearchAsYouType,
+  flattened: FlattenedType,
+  shape: ShapeType,
 };
 
 export const getParametersFormForType = (

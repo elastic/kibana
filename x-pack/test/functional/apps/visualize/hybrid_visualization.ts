@@ -75,8 +75,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         ['2019-08-22 00:00', 'php', '11'],
         ['2019-08-22 16:00', 'jpg', '3'],
       ];
-      const fromTime = '2019-08-19 01:55:07.240';
-      const toTime = '2019-08-22 23:09:36.205';
+      const fromTime = 'Aug 19, 2019 @ 01:55:07.240';
+      const toTime = 'Aug 22, 2019 @ 23:09:36.205';
 
       await PageObjects.common.navigateToApp('visualize');
       await PageObjects.visualize.clickVisualizationByName('hybrid_histogram_line_chart');
