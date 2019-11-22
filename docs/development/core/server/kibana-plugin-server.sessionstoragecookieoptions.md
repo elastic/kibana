@@ -19,5 +19,5 @@ export interface SessionStorageCookieOptions<T>
 |  [encryptionKey](./kibana-plugin-server.sessionstoragecookieoptions.encryptionkey.md) | <code>string</code> | A key used to encrypt a cookie's value. Should be at least 32 characters long. |
 |  [isSecure](./kibana-plugin-server.sessionstoragecookieoptions.issecure.md) | <code>boolean</code> | Flag indicating whether the cookie should be sent only via a secure connection. |
 |  [name](./kibana-plugin-server.sessionstoragecookieoptions.name.md) | <code>string</code> | Name of the session cookie. |
-|  [validate](./kibana-plugin-server.sessionstoragecookieoptions.validate.md) | <code>(sessionValue: T) =&gt; SessionCookieValidationResult</code> | Function called to validate a cookie's decrypted value. |
+|  [validate](./kibana-plugin-server.sessionstoragecookieoptions.validate.md) | <code>(sessionValue: T &#124; T[]) =&gt; SessionCookieValidationResult</code> | Function called to validate a cookie's decrypted value. |
 

@@ -9,5 +9,5 @@ Function called to validate a cookie's decrypted value.
 <b>Signature:</b>
 
 ```typescript
-validate: (sessionValue: T) => SessionCookieValidationResult;
+validate: (sessionValue: T | T[]) => SessionCookieValidationResult;
 ```

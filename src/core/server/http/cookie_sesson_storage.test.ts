@@ -99,7 +99,10 @@ const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 const cookieOptions = {
   name: 'sid',
   encryptionKey: 'something_at_least_32_characters',
-  validate: (session: Storage) => {
+  validate: (session: Storage | Storage[]) => {
+    if (Array.isArray(session)) {
+      session = session[0];
+    }
     const isValid = session.path === path && session.expires > Date.now();
     return { isValid, path: session.path };
   },

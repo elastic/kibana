@@ -86,7 +86,7 @@ export async function setupAuthentication({
       encryptionKey: config.encryptionKey,
       isSecure: config.secureCookies,
       name: config.cookieName,
-      validate: (session: ProviderSession) => {
+      validate: (session: ProviderSession | ProviderSession[]) => {
         const array: ProviderSession[] = Array.isArray(session) ? session : [session];
         for (const sess of array) {
           if (!isValid(sess)) {

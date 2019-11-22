@@ -1579,7 +1579,7 @@ export interface SessionStorageCookieOptions<T> {
     encryptionKey: string;
     isSecure: boolean;
     name: string;
-    validate: (sessionValue: T) => SessionCookieValidationResult;
+    validate: (sessionValue: T | T[]) => SessionCookieValidationResult;
 }
 
 // @public

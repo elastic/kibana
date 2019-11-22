@@ -40,7 +40,7 @@ export interface SessionStorageCookieOptions<T> {
   /**
    * Function called to validate a cookie's decrypted value.
    */
-  validate: (sessionValue: T) => SessionCookieValidationResult;
+  validate: (sessionValue: T | T[]) => SessionCookieValidationResult;
   /**
    * Flag indicating whether the cookie should be sent only via a secure connection.
    */
@@ -128,7 +128,7 @@ export async function createCookieSessionStorageFactory<T>(
   server.auth.strategy('security-cookie', 'cookie', {
     cookie: cookieOptions.name,
     password: cookieOptions.encryptionKey,
-    validateFunc: async (req, session: T) => {
+    validateFunc: async (req, session: T | T[]) => {
       const result = cookieOptions.validate(session);
       if (!result.isValid) {
         clearInvalidCookie(req, result.path);
