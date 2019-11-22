@@ -20,22 +20,23 @@
 const ace = require('brace');
 import { addToRules } from './x_json_highlight_rules';
 
+export function addEOL(tokens, reg, nextIfEOL, normalNext) {
+  if (typeof reg === 'object') {
+    reg = reg.source;
+  }
+  return [
+    { token: tokens.concat(['whitespace']), regex: reg + '(\\s*)$', next: nextIfEOL },
+    { token: tokens, regex: reg, next: normalNext }
+  ];
+}
+
+export function mergeTokens(/* ... */) {
+  return [].concat.apply([], arguments);
+}
+
 const oop = ace.acequire('ace/lib/oop');
 const { TextHighlightRules } = ace.acequire('ace/mode/text_highlight_rules');
 export function InputHighlightRules() {
-  function mergeTokens(/* ... */) {
-    return [].concat.apply([], arguments);
-  }
-
-  function addEOL(tokens, reg, nextIfEOL, normalNext) {
-    if (typeof reg === 'object') {
-      reg = reg.source;
-    }
-    return [
-      { token: tokens.concat(['whitespace']), regex: reg + '(\\s*)$', next: nextIfEOL },
-      { token: tokens, regex: reg, next: normalNext }
-    ];
-  }
 
   // regexp must not have capturing parentheses. Use (?:) instead.
   // regexps are ordered -> the first match is used

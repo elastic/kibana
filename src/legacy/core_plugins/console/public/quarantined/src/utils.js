@@ -59,7 +59,7 @@ utils.reformatData = function (data, indent) {
 };
 
 utils.collapseLiteralStrings = function (data) {
-  const splitData = data.split(`"""`);
+  const splitData = data.replace(/"""sql/, `"""`).split(`"""`);
   for (let idx = 1; idx < splitData.length - 1; idx += 2) {
     splitData[idx] = JSON.stringify(splitData[idx]);
   }

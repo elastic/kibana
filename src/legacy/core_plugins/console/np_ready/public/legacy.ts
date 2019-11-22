@@ -21,6 +21,7 @@ import 'brace';
 import 'brace/ext/language_tools';
 import 'brace/ext/searchbox';
 import 'brace/mode/json';
+import 'brace/mode/sql';
 import 'brace/mode/text';
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */

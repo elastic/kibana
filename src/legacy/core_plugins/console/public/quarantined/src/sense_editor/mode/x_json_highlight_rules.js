@@ -17,6 +17,9 @@
  * under the License.
  */
 
+import ace from 'brace';
+
+const { SqlHighlightRules } = ace.acequire('ace/mode/sql_highlight_rules');
 const _ = require('lodash');
 const ScriptHighlightRules = require('./script_highlight_rules').ScriptHighlightRules;
 
@@ -28,6 +31,13 @@ const jsonRules = function (root) {
       token: ['variable', 'whitespace', 'ace.punctuation.colon', 'whitespace', 'punctuation.start_triple_quote'],
       regex: '("(?:[^"]*_)?script"|"inline"|"source")(\\s*?)(:)(\\s*?)(""")',
       next: 'script-start',
+      merge: false,
+      push: true
+    },
+    {
+      token: 'punctuation.start_triple_quote',
+      regex: '"""sql',
+      next: 'sql-start',
       merge: false,
       push: true
     },
@@ -123,6 +133,11 @@ const jsonRules = function (root) {
 export function addToRules(otherRules, embedUnder) {
   otherRules.$rules = _.defaultsDeep(otherRules.$rules, jsonRules(embedUnder));
   otherRules.embedRules(ScriptHighlightRules, 'script-', [{
+    token: 'punctuation.end_triple_quote',
+    regex: '"""',
+    next: 'pop',
+  }]);
+  otherRules.embedRules(SqlHighlightRules, 'sql-', [{
     token: 'punctuation.end_triple_quote',
     regex: '"""',
     next: 'pop',
