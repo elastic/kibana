@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FileUploadPlugin as Plugin } from './plugin';
+import { FileUploadPlugin } from './plugin';
 
 export function plugin() {
-  return new Plugin();
+  return new FileUploadPlugin();
 }

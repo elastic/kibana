@@ -46,7 +46,6 @@ export function getImportRouteHandler(elasticsearchPlugin, getSavedObjectsReposi
       data: [],
       ...requestObj.payload
     };
-    return importData(requestContentWithDefaults)
-      .catch(wrapError);
+    return importData(requestContentWithDefaults).catch(wrapError);
   };
 }

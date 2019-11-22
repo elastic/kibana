@@ -30,8 +30,7 @@ export class FileUploadPlugin {
     makeUsageCollector({
       type: TELEMETRY_TYPE,
       isReady: () => true,
-      fetch: async () =>
-        (await getTelemetry(elasticsearchPlugin, getSavedObjectsRepository)) || initTelemetry()
+      fetch: async () => (await getTelemetry(elasticsearchPlugin, getSavedObjectsRepository)) || initTelemetry()
     });
   }
 }

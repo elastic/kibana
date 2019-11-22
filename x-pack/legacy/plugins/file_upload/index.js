@@ -31,8 +31,7 @@ export const fileUpload = kibana => {
           elasticsearch: server.plugins.elasticsearch,
         },
         savedObjects: {
-          getSavedObjectsRepository:
-            server.savedObjects.getSavedObjectsRepository
+          getSavedObjectsRepository: server.savedObjects.getSavedObjectsRepository
         },
         usage: {
           collectorSet: {
