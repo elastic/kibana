@@ -16,6 +16,7 @@ exports[`Logs should render a default message 1`] = `
           "link": <EuiLink
             color="primary"
             href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html"
+            target="_blank"
             type="button"
           >
             <FormattedMessage
@@ -23,6 +24,34 @@ exports[`Logs should render a default message 1`] = `
               id="xpack.monitoring.logs.reason.defaultMessageLink"
               values={Object {}}
             />
+          </EuiLink>,
+        }
+      }
+    />
+  </p>
+</EuiCallOut>
+`;
+
+exports[`Logs should render with a bad indices reason 1`] = `
+<EuiCallOut
+  color="warning"
+  iconType="help"
+  size="m"
+  title="Corrupted filebeat index"
+>
+  <p>
+    <FormattedMessage
+      defaultMessage="There is an issue reading from your filebeat indices.  {link}."
+      id="xpack.monitoring.logs.reason.correctIndexNameMessage"
+      values={
+        Object {
+          "link": <EuiLink
+            color="primary"
+            href="https://www.elastic.co/guide/en/kibana/current/monitor-troubleshooting.html"
+            target="_blank"
+            type="button"
+          >
+            Click here for more information
           </EuiLink>,
         }
       }
@@ -47,6 +76,7 @@ exports[`Logs should render with a no cluster found reason 1`] = `
           "link": <EuiLink
             color="primary"
             href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html"
+            target="_blank"
             type="button"
           >
             setup
@@ -74,6 +104,7 @@ exports[`Logs should render with a no index found reason 1`] = `
           "link": <EuiLink
             color="primary"
             href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html"
+            target="_blank"
             type="button"
           >
             setup
@@ -101,6 +132,7 @@ exports[`Logs should render with a no index pattern found reason 1`] = `
           "link": <EuiLink
             color="primary"
             href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html"
+            target="_blank"
             type="button"
           >
             Filebeat
@@ -128,6 +160,7 @@ exports[`Logs should render with a no node found reason 1`] = `
           "link": <EuiLink
             color="primary"
             href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html"
+            target="_blank"
             type="button"
           >
             setup
@@ -155,6 +188,7 @@ exports[`Logs should render with a no type found reason 1`] = `
           "link": <EuiLink
             color="primary"
             href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-elasticsearch.html"
+            target="_blank"
             type="button"
           >
             these directions

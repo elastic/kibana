@@ -754,7 +754,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     async saveVisualizationExpectSuccess(vizName, { saveAsNew = false } = {}) {
       await this.saveVisualization(vizName, { saveAsNew });
       const successToast = await testSubjects.exists('saveVisualizationSuccess', {
-        timeout: defaultFindTimeout
+        timeout: 2 * defaultFindTimeout
       });
       expect(successToast).to.be(true);
     }

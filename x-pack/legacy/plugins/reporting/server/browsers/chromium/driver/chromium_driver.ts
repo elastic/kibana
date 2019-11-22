@@ -38,10 +38,18 @@ export class HeadlessChromiumDriver {
     logger.info(`opening url ${url}`);
     await this.page.setRequestInterception(true);
     let interceptedCount = 0;
+
     this.page.on('request', (interceptedRequest: any) => {
+      let interceptedUrl = interceptedRequest.url();
       let isData = false;
-      if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedRequest.url())) {
-        logger.debug(`Using custom headers for ${interceptedRequest.url()}`);
+      if (interceptedUrl.startsWith('file://')) {
+        logger.error(`Got bad URL: "${interceptedUrl}", closing browser.`);
+        interceptedRequest.abort('blockedbyclient');
+        this.page.browser().close();
+        throw new Error(`Received disallowed outgoing URL: "${interceptedUrl}", exiting`);
+      }
+      if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedUrl)) {
+        logger.debug(`Using custom headers for ${interceptedUrl}`);
         interceptedRequest.continue({
           headers: {
             ...interceptedRequest.headers(),
@@ -49,8 +57,6 @@ export class HeadlessChromiumDriver {
           },
         });
       } else {
-        let interceptedUrl = interceptedRequest.url();
-
         if (interceptedUrl.startsWith('data:')) {
           // `data:image/xyz;base64` can be very long URLs
           interceptedUrl = interceptedUrl.substring(0, 100) + '[truncated]';
@@ -61,6 +67,19 @@ export class HeadlessChromiumDriver {
         interceptedRequest.continue();
       }
       interceptedCount = interceptedCount + (isData ? 0 : 1);
+    });
+
+    // Even though 3xx redirects go through our request
+    // handler, we should probably inspect responses just to
+    // avoid being bamboozled by some malicious request
+    this.page.on('response', interceptedResponse => {
+      const interceptedUrl = interceptedResponse.url();
+
+      if (interceptedUrl.startsWith('file://')) {
+        logger.error(`Got disallowed URL "${interceptedUrl}", closing browser.`);
+        this.page.browser().close();
+        throw new Error(`Received disallowed URL in response: ${interceptedUrl}`);
+      }
     });
 
     await this.page.goto(url, { waitUntil: 'domcontentloaded' });

@@ -120,7 +120,7 @@ export class MonitoringViewBaseEuiTableController extends MonitoringViewBaseCont
         this.setPagination(page);
         this.setSorting(sort);
         this.setQueryText(queryText);
-        this.updateData();
+        await this.updateData();
       }
     };
   }

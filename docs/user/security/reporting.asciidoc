@@ -13,13 +13,14 @@ to trust the {kib} server's certificate. For more information, see
 <<securing-reporting>>.
 
 [[reporting-app-users]]
-To enable users to generate reports, assign them the built in `reporting_user`
-and `kibana_user` roles:
+To enable users to generate reports, assign them the built-in `reporting_user`
+role.  Users will also need the appropriate <<kibana-privileges, {kib} privileges>> to access the objects 
+to report on and the {es} indices.
 
 * If you're using the `native` realm, you can assign roles through
-**Management / Users** UI in Kibana or with the `user` API. For example,
+**Management > Users** UI in Kibana or with the `user` API. For example,
 the following request creates a `reporter` user that has the
-`reporting_user` and `kibana_user` roles:
+`reporting_user` role and the `kibana_user` role:
 +
 [source, sh]
 ---------------------------------------------------------------

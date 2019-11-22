@@ -1059,9 +1059,11 @@ export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
 // Warning: (ae-forgotten-export) The symbol "Omit" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = any> extends Omit<SavedObject<T>, 'attributes'> {
+export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = any> extends Omit<SavedObject<T>, 'attributes' | 'references'> {
     // (undocumented)
     attributes: Partial<T>;
+    // (undocumented)
+    references: SavedObjectReference[] | undefined;
 }
 
 // @public

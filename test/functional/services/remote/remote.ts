@@ -75,6 +75,8 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
       .manage()
       .window()
       .setRect({ width, height });
+    await driver.executeScript('window.sessionStorage.clear();');
+    await driver.executeScript('window.localStorage.clear();');
   });
 
   lifecycle.on('cleanup', async () => await driver.quit());

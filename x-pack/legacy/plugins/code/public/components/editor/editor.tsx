@@ -22,6 +22,8 @@ import { history } from '../../utils/url';
 import { Modifier, Shortcut } from '../shortcuts';
 import { ReferencesPanel } from './references_panel';
 import { encodeRevisionString } from '../../../common/uri_util';
+import { trackCodeUiMetric, METRIC_TYPE } from '../../services/ui_metric';
+import { CodeUIUsageMetrics } from '../../../model/usage_telemetry_metrics';
 
 export interface EditorActions {
   closePanel(changeUrl: boolean): void;
@@ -64,6 +66,8 @@ export class EditorComponent extends React.Component<IProps> {
     if (!this.gutterClickHandler) {
       this.gutterClickHandler = this.editor!.onMouseDown(
         (e: editorInterfaces.IEditorMouseEvent) => {
+          // track line number click count
+          trackCodeUiMetric(METRIC_TYPE.COUNT, CodeUIUsageMetrics.LINE_NUMBER_CLICK_COUNT);
           const { resource, org, repo, revision, path, pathType } = this.props.match.params;
           const queryString = this.props.location.search;
           const repoUri = `${resource}/${org}/${repo}`;

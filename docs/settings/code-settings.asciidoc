@@ -14,9 +14,6 @@ Repo update frequency in milliseconds. Defaults to `300000`.
 `xpack.code.indexRepoFrequencyMs`::
 Repo index frequency in milliseconds. Defaults to `86400000`.
 
-`xpack.code.lsp.verbose`::
-Whether to show more verbose log for language servers. Defaults to `false`.
-
 `xpack.code.security.enableMavenImport`::
 Whether to support maven. Defaults to `true`.
 

@@ -82,6 +82,7 @@ export class MonitoringMainController {
     this._licenseService = options.licenseService;
     this._breadcrumbsService = options.breadcrumbsService;
     this._kbnUrlService = options.kbnUrlService;
+    this._executorService = options.executorService;
 
     Object.assign(this, options.attributes);
 
@@ -131,6 +132,8 @@ export class MonitoringMainController {
           ...dateRange
         };
         timefilter.setTime(dateRange);
+        this._executorService.cancel();
+        this._executorService.run();
       }
     };
   }
@@ -161,6 +164,8 @@ export class MonitoringMainController {
 
 const uiModule = uiModules.get('plugins/monitoring/directives', []);
 uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, $injector) => {
+  const $executor = $injector.get('$executor');
+
   return {
     restrict: 'E',
     transclude: true,
@@ -179,6 +184,7 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, $injector) =
         return {
           licenseService: license,
           breadcrumbsService: breadcrumbs,
+          executorService: $executor,
           kbnUrlService: kbnUrl,
           attributes: {
             name: attributes.name,

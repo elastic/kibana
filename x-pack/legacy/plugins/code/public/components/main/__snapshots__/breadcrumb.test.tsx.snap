@@ -9,6 +9,7 @@ exports[`render correctly 1`] = `
     className="euiLink euiLink--subdued euiBreadcrumb codeNoMinWidth"
     data-test-subj="codeFileBreadcrumb-src"
     href="#github.com/elastic/TypeScript-Node-Starter/tree/master/src"
+    onClick={[Function]}
     rel="noreferrer"
     title="src"
   >
@@ -21,6 +22,7 @@ exports[`render correctly 1`] = `
     className="euiLink euiLink--subdued euiBreadcrumb codeNoMinWidth"
     data-test-subj="codeFileBreadcrumb-public"
     href="#github.com/elastic/TypeScript-Node-Starter/tree/master/src/public"
+    onClick={[Function]}
     rel="noreferrer"
     title="public"
   >
@@ -33,6 +35,7 @@ exports[`render correctly 1`] = `
     className="euiLink euiLink--subdued euiBreadcrumb codeNoMinWidth"
     data-test-subj="codeFileBreadcrumb-css"
     href="#github.com/elastic/TypeScript-Node-Starter/tree/master/src/public/css"
+    onClick={[Function]}
     rel="noreferrer"
     title="css"
   >
@@ -45,6 +48,7 @@ exports[`render correctly 1`] = `
     className="euiLink euiLink--subdued euiBreadcrumb codeNoMinWidth"
     data-test-subj="codeFileBreadcrumb-lib"
     href="#github.com/elastic/TypeScript-Node-Starter/tree/master/src/public/css/lib"
+    onClick={[Function]}
     rel="noreferrer"
     title="lib"
   >
@@ -57,6 +61,7 @@ exports[`render correctly 1`] = `
     className="euiLink euiLink--subdued euiBreadcrumb codeNoMinWidth"
     data-test-subj="codeFileBreadcrumb-bootstrap"
     href="#github.com/elastic/TypeScript-Node-Starter/tree/master/src/public/css/lib/bootstrap"
+    onClick={[Function]}
     rel="noreferrer"
     title="bootstrap"
   >
@@ -69,6 +74,7 @@ exports[`render correctly 1`] = `
     className="euiLink euiLink--subdued euiBreadcrumb codeNoMinWidth"
     data-test-subj="codeFileBreadcrumb-mixins"
     href="#github.com/elastic/TypeScript-Node-Starter/tree/master/src/public/css/lib/bootstrap/mixins"
+    onClick={[Function]}
     rel="noreferrer"
     title="mixins"
   >

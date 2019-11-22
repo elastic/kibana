@@ -6,6 +6,7 @@
 
 import { Request } from 'hapi';
 import { KbnServer, ConditionalHeaders, CreateJobFactory } from '../../../../types';
+import { validateUrls } from '../../../../common/validate_urls';
 import { cryptoFactory } from '../../../../server/lib/crypto';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { JobParamsPNG, ESQueueCreateJobFnPNG } from '../../types';
@@ -19,6 +20,8 @@ function createJobFn(server: KbnServer) {
     request: Request
   ) {
     const serializedEncryptedHeaders = await crypto.encrypt(headers);
+
+    validateUrls([relativeUrl]);
 
     return {
       objectType,

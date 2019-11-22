@@ -32,7 +32,8 @@ strongly recommend that you keep the default CSP rules that ship with Kibana.
 
 `csp.strict:`:: *Default: `false`* Blocks access to Kibana to any browser that
 does not enforce even rudimentary CSP rules. In practice, this will disable
-support for older, less safe browsers like Internet Explorer.
+support for older, less safe browsers like Internet Explorer. 
+See <<csp-strict-mode, Content Security Policy>> for more information.
 
 `csp.warnLegacyBrowsers:`:: *Default: `true`* Shows a warning message after
 loading Kibana to any browser that does not enforce even rudimentary CSP rules,
@@ -252,6 +253,10 @@ not saved in Elasticsearch.
 running behind a proxy. Use the `server.rewriteBasePath` setting to tell Kibana
 if it should remove the basePath from requests it receives, and to prevent a
 deprecation warning at startup. This setting cannot end in a slash (`/`).
+
+[[server-cors]]`server.cors:`:: *Default: `false`* Set to `true` to enable CORS support. This setting is required to configure `server.cors.origin`.
+
+`server.cors.origin:`:: *Default: none* Specifies origins. "origin" must be an array. To use this setting, you must set `server.cors` to `true`. To accept all origins, use `server.cors.origin: ["*"]`.
 
 `server.customResponseHeaders:`:: *Default: `{}`* Header names and values to
   send on all responses to the client from the Kibana server.

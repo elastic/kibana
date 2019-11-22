@@ -14,6 +14,8 @@ import { FileTree as Tree, FileTreeItemType } from '../../../model';
 import { EuiSideNavItem, MainRouteParams, PathTypes } from '../../common/types';
 import { RootState } from '../../reducers';
 import { encodeRevisionString } from '../../../common/uri_util';
+import { trackCodeUiMetric, METRIC_TYPE } from '../../services/ui_metric';
+import { CodeUIUsageMetrics } from '../../../model/usage_telemetry_metrics';
 
 interface Props extends RouteComponentProps<MainRouteParams> {
   node?: Tree;
@@ -129,6 +131,8 @@ export class CodeFileTree extends React.Component<Props, State> {
       const path = flattenFrom ? flattenFrom.path! : node.path!;
       this.toggleTree(path);
       this.onClick(node);
+      // track file tree click count
+      trackCodeUiMetric(METRIC_TYPE.COUNT, CodeUIUsageMetrics.FILE_TREE_CLICK_COUNT);
     };
     const nodeTypeMap = {
       [FileTreeItemType.Directory]: 'Directory',

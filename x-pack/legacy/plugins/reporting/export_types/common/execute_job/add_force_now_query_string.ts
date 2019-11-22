@@ -6,6 +6,7 @@
 
 import url from 'url';
 import { getAbsoluteUrlFactory } from '../../../common/get_absolute_url';
+import { validateUrls } from '../../../common/validate_urls';
 import { ConditionalHeaders, JobDocPayload, KbnServer } from '../../../types';
 
 function getSavedObjectAbsoluteUrl(job: JobDocPayload, relativeUrl: string, server: KbnServer) {
@@ -31,6 +32,9 @@ export const addForceNowQuerystring = async ({
     if (!job.relativeUrl) {
       throw new Error(`Unable to generate report. Url is not defined.`);
     }
+
+    validateUrls([job.relativeUrl]);
+
     job.urls = [getSavedObjectAbsoluteUrl(job, job.relativeUrl, server)];
   }
 

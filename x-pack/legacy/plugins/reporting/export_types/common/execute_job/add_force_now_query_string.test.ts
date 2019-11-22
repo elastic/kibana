@@ -91,3 +91,26 @@ test(`doesn't append forceNow query to url, if it doesn't exists`, async () => {
 
   expect(urls[0]).toEqual('http://localhost:5601/sbp/app/kibana#/something');
 });
+
+test(`errors when relativeUrls are not relative`, async () => {
+  const forceNow = '2000-01-01T00:00:00.000Z';
+
+  return expect(
+    addForceNowQuerystring({
+      job: {
+        title: 'cool-job-bro',
+        type: 'csv',
+        jobParams: {
+          savedObjectId: 'abc-123',
+          isImmediate: false,
+          savedObjectType: 'search',
+        },
+        relativeUrl: 'https://www.kibana.com/app/kibana#/something?_g=something',
+        forceNow,
+      },
+      server: mockServer,
+    })
+  ).rejects.toMatchInlineSnapshot(
+    `[Error: Found invalid URL(s), all URLs must be relative: https://www.kibana.com/app/kibana#/something?_g=something]`
+  );
+});

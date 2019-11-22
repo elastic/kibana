@@ -280,7 +280,9 @@ function taskInstanceToAttributes(doc: TaskInstance): SavedObjectAttributes {
   };
 }
 
-function savedObjectToConcreteTaskInstance(savedObject: SavedObject): ConcreteTaskInstance {
+function savedObjectToConcreteTaskInstance(
+  savedObject: Omit<SavedObject, 'references'>
+): ConcreteTaskInstance {
   return {
     ...savedObject.attributes,
     id: savedObject.id,

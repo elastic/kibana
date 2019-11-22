@@ -71,7 +71,7 @@ function createMetricAggs(metric) {
   return metric.aggs;
 }
 
-function fetchSeries(req, indexPattern, metric, metricOptions, min, max, bucketSize, filters) {
+function fetchSeries(req, indexPattern, metric, metricOptions, groupBy, min, max, bucketSize, filters) {
   // if we're using a derivative metric, offset the min (also @see comment on offsetMinForDerivativeMetric function)
   const adjustedMin = metric.derivative ? offsetMinForDerivativeMetric(min, bucketSize) : min;
 
@@ -93,6 +93,27 @@ function fetchSeries(req, indexPattern, metric, metricOptions, min, max, bucketS
     };
   }
 
+  let aggs = {
+    check: {
+      date_histogram: {
+        field: metric.timestampField,
+        fixed_interval: bucketSize + 's'
+      },
+      aggs: {
+        ...dateHistogramSubAggs
+      }
+    }
+  };
+
+  if (groupBy) {
+    aggs = {
+      groupBy: {
+        terms: groupBy,
+        aggs,
+      }
+    };
+  }
+
   const params = {
     index: indexPattern,
     size: 0,
@@ -107,17 +128,7 @@ function fetchSeries(req, indexPattern, metric, metricOptions, min, max, bucketS
         uuid: getUuid(req, metric),
         filters
       }),
-      aggs: {
-        check: {
-          date_histogram: {
-            field: metric.timestampField,
-            interval: bucketSize + 's'
-          },
-          aggs: {
-            ...dateHistogramSubAggs
-          }
-        }
-      }
+      aggs,
     }
   };
 
@@ -211,40 +222,53 @@ function countBuckets(data, count = 0) {
   return count;
 }
 
-function handleSeries(metric, min, max, bucketSizeInSeconds, timezone, response) {
+function handleSeries(metric, groupBy, min, max, bucketSizeInSeconds, timezone, response) {
   const { derivative, calculation: customCalculation } = metric;
-  const buckets = get(response, 'aggregations.check.buckets', []);
-  const firstUsableBucketIndex = findFirstUsableBucketIndex(buckets, min);
-  const lastUsableBucketIndex = findLastUsableBucketIndex(buckets, max, firstUsableBucketIndex, bucketSizeInSeconds * 1000);
-  let data = [];
 
-  if (metric.debug) {
-    console.log(`metric.debug field=${metric.field} bucketsCreated: ${countBuckets(get(response, 'aggregations.check'))}`);
-    console.log(`metric.debug`, { bucketsLength: buckets.length, firstUsableBucketIndex, lastUsableBucketIndex });
+  function getAggregatedData(buckets) {
+    const firstUsableBucketIndex = findFirstUsableBucketIndex(buckets, min);
+    const lastUsableBucketIndex = findLastUsableBucketIndex(buckets, max, firstUsableBucketIndex, bucketSizeInSeconds * 1000);
+    let data = [];
+
+    if (metric.debug) {
+      console.log(`metric.debug field=${metric.field} bucketsCreated: ${countBuckets(get(response, 'aggregations.check'))}`);
+      console.log(`metric.debug`, { bucketsLength: buckets.length, firstUsableBucketIndex, lastUsableBucketIndex });
+    }
+
+    if (firstUsableBucketIndex <= lastUsableBucketIndex) {
+      // map buckets to values for charts
+      const key = derivative ? 'metric_deriv.normalized_value' : 'metric.value';
+      const calculation = (customCalculation !== undefined) ? customCalculation : defaultCalculation;
+
+      data = buckets
+        .slice(firstUsableBucketIndex, lastUsableBucketIndex + 1) // take only the buckets we know are usable
+        .map(bucket => ([
+          formatUTCTimestampForTimezone(bucket.key, timezone),
+          calculation(bucket, key, metric, bucketSizeInSeconds)
+        ])); // map buckets to X/Y coords for Flot charting
+    }
+
+    return {
+      bucket_size: formatBucketSize(bucketSizeInSeconds),
+      timeRange: {
+        min: formatUTCTimestampForTimezone(min, timezone),
+        max: formatUTCTimestampForTimezone(max, timezone),
+      },
+      metric: metric.serialize(),
+      data
+    };
   }
 
-  if (firstUsableBucketIndex <= lastUsableBucketIndex) {
-    // map buckets to values for charts
-    const key = derivative ? 'metric_deriv.normalized_value' : 'metric.value';
-    const calculation = (customCalculation !== undefined) ? customCalculation : defaultCalculation;
-
-    data = buckets
-      .slice(firstUsableBucketIndex, lastUsableBucketIndex + 1) // take only the buckets we know are usable
-      .map(bucket => ([
-        formatUTCTimestampForTimezone(bucket.key, timezone),
-        calculation(bucket, key, metric, bucketSizeInSeconds)
-      ])); // map buckets to X/Y coords for Flot charting
+  if (groupBy) {
+    return get(response, 'aggregations.groupBy.buckets', []).map(bucket => {
+      return {
+        groupedBy: bucket.key,
+        ...getAggregatedData(get(bucket, 'check.buckets', []))
+      };
+    });
   }
 
-  return {
-    bucket_size: formatBucketSize(bucketSizeInSeconds),
-    timeRange: {
-      min: formatUTCTimestampForTimezone(min, timezone),
-      max: formatUTCTimestampForTimezone(max, timezone),
-    },
-    metric: metric.serialize(),
-    data
-  };
+  return getAggregatedData(get(response, 'aggregations.check.buckets', []));
 }
 
 /**
@@ -258,14 +282,14 @@ function handleSeries(metric, min, max, bucketSizeInSeconds, timezone, response)
  * @param {Array} filters Any filters that should be applied to the query.
  * @return {Promise} The object response containing the {@code timeRange}, {@code metric}, and {@code data}.
  */
-export async function getSeries(req, indexPattern, metricName, metricOptions, filters, { min, max, bucketSize, timezone }) {
+export async function getSeries(req, indexPattern, metricName, metricOptions, filters, groupBy, { min, max, bucketSize, timezone }) {
   checkParam(indexPattern, 'indexPattern in details/getSeries');
 
   const metric = metrics[metricName];
   if (!metric) {
     throw new Error(`Not a valid metric: ${metricName}`);
   }
-  const response = await fetchSeries(req, indexPattern, metric, metricOptions, min, max, bucketSize, filters);
+  const response = await fetchSeries(req, indexPattern, metric, metricOptions, groupBy, min, max, bucketSize, filters);
 
-  return handleSeries(metric, min, max, bucketSize, timezone, response);
+  return handleSeries(metric, groupBy, min, max, bucketSize, timezone, response);
 }

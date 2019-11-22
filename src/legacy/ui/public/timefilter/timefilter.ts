@@ -229,7 +229,7 @@ export const timefilter = new Timefilter(chrome.getUiSettingsClient());
 // and listener can be registered without angular.
 function convertISO8601(stringTime: string): string {
   const obj = moment(stringTime, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
-  return obj.isValid() ? obj.toString() : stringTime;
+  return obj.isValid() ? obj.toISOString() : stringTime;
 }
 
 // Currently some parts of Kibana (index patterns, timefilter) rely on addSetupWork in the uiRouter

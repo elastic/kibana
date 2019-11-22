@@ -88,10 +88,14 @@ export class FilterManager {
   private handleStateUpdate(newFilters: Filter[]) {
     // global filters should always be first
     newFilters.sort(({ $state: a }: Filter, { $state: b }: Filter): number => {
-      return a!.store === FilterStateStore.GLOBAL_STATE &&
-        b!.store !== FilterStateStore.GLOBAL_STATE
-        ? -1
-        : 1;
+      if (a!.store === b!.store) {
+        return 0;
+      } else {
+        return a!.store === FilterStateStore.GLOBAL_STATE &&
+          b!.store !== FilterStateStore.GLOBAL_STATE
+          ? -1
+          : 1;
+      }
     });
 
     const filtersUpdated = !_.isEqual(this.filters, newFilters);

@@ -10,7 +10,7 @@ Manage your {kib} spaces.
 * <<spaces-api-get-all, Get all {kib} spaces API>>
 * <<spaces-api-delete, Delete space API>>
 * <<spaces-api-copy-saved-objects, Copy saved objects to space API>>
-* <<spaces-api-resolve-copy-saved-objects-conflicts , Resolve copy saved objects to space conflicts API>>
+* <<spaces-api-resolve-copy-saved-objects-conflicts, Resolve copy saved objects to space conflicts API>>
 
 include::spaces-management/post.asciidoc[]
 include::spaces-management/put.asciidoc[]

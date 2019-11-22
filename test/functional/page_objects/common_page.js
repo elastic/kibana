@@ -19,7 +19,7 @@
 
 import { delay } from 'bluebird';
 import expect from '@kbn/expect';
-
+import fetch from 'node-fetch';
 import getUrl from '../../../src/test_utils/get_url';
 
 export function CommonPageProvider({ getService, getPageObjects }) {
@@ -393,6 +393,24 @@ export function CommonPageProvider({ getService, getPageObjects }) {
         const jsonElement = await find.byCssSelector('body div#json');
         return await jsonElement.getVisibleText();
       }
+    }
+
+    /**
+     * Helper to detect an OSS licensed Kibana
+     * Useful for functional testing in cloud environment
+     */
+    async isOss() {
+      const baseUrl = this.getEsHostPort();
+      const username = config.get('servers.elasticsearch.username');
+      const password = config.get('servers.elasticsearch.password');
+      const response = await fetch(baseUrl + '/_xpack', {
+        method: 'get',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Basic ' + Buffer.from(username + ':' + password).toString('base64')
+        },
+      });
+      return response.status !== 200;
     }
   }
 

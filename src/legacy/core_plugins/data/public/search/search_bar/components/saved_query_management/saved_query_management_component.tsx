@@ -38,8 +38,7 @@ import { SavedQuery } from '../../index';
 import { SavedQueryService } from '../../lib/saved_query_service';
 import { SavedQueryListItem } from './saved_query_list_item';
 
-const pageCount = 50;
-
+const perPage = 50;
 interface Props {
   showSaveQuery?: boolean;
   loadedSavedQuery?: SavedQuery;
@@ -61,18 +60,22 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
+  const [count, setTotalCount] = useState(0);
   const [activePage, setActivePage] = useState(0);
 
   useEffect(() => {
-    const fetchQueries = async () => {
-      const allSavedQueries = await savedQueryService.getAllSavedQueries();
-      const sortedAllSavedQueries = sortBy(allSavedQueries, 'attributes.title');
-      setSavedQueries(sortedAllSavedQueries);
+    const fetchCountAndSavedQueries = async () => {
+      const savedQueryCount = await savedQueryService.getSavedQueryCount();
+      setTotalCount(savedQueryCount);
+
+      const savedQueryItems = await savedQueryService.findSavedQueries('', perPage, activePage + 1);
+      const sortedSavedQueryItems = sortBy(savedQueryItems, 'attributes.title');
+      setSavedQueries(sortedSavedQueryItems);
     };
     if (isOpen) {
-      fetchQueries();
+      fetchCountAndSavedQueries();
     }
-  }, [isOpen]);
+  }, [isOpen, activePage]);
 
   const goToPage = (pageNumber: number) => {
     setActivePage(pageNumber);
@@ -132,7 +135,6 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
   );
 
   const savedQueryRows = () => {
-    // we should be recalculating the savedQueryRows after a delete action
     const savedQueriesWithoutCurrent = savedQueries.filter(savedQuery => {
       if (!loadedSavedQuery) return true;
       return savedQuery.id !== loadedSavedQuery.id;
@@ -141,11 +143,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
       loadedSavedQuery && savedQueriesWithoutCurrent.length !== savedQueries.length
         ? [loadedSavedQuery, ...savedQueriesWithoutCurrent]
         : [...savedQueriesWithoutCurrent];
-    const savedQueriesDisplayRows = savedQueriesReordered.slice(
-      activePage * pageCount,
-      activePage * pageCount + pageCount
-    );
-    return savedQueriesDisplayRows.map(savedQuery => (
+    return savedQueriesReordered.map(savedQuery => (
       <SavedQueryListItem
         key={savedQuery.id}
         savedQuery={savedQuery}
@@ -196,7 +194,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
               </div>
               <EuiPagination
                 className="kbnSavedQueryManagement__pagination"
-                pageCount={Math.ceil(savedQueries.length / pageCount)}
+                pageCount={Math.ceil(count / perPage)}
                 activePage={activePage}
                 onPageClick={goToPage}
               />

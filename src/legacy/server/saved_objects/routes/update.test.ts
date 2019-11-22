@@ -99,7 +99,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
       'index-pattern',
       'logstash-*',
       { title: 'Testing' },
-      { version: 'foo', references: [] }
+      { version: 'foo' }
     );
   });
 });
