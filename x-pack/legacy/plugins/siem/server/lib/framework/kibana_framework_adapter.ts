@@ -66,7 +66,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
     this.router.get(
       {
         path: routePath,
-        validate: false,
+        validate: { query: configSchema.object({}, { allowUnknowns: true }) },
         options: {
           tags: ['access:siem'],
         },
@@ -98,13 +98,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
     this.router.post(
       {
         path: routePath,
-        validate: {
-          body: configSchema.object({
-            operationName: configSchema.string(),
-            query: configSchema.string(),
-            variables: configSchema.any(),
-          }),
-        },
+        validate: { body: configSchema.object({}, { allowUnknowns: true }) },
         options: {
           tags: ['access:siem'],
         },
@@ -154,7 +148,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
           return response.ok({
             body: graphiqlString,
             headers: {
-              'content-type': 'application/json',
+              'content-type': 'text/html',
             },
           });
         }
