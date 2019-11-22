@@ -130,14 +130,14 @@ export class Server {
 
   public async start() {
     this.log.debug('starting server');
-    const pluginsStart = await this.plugins.start({});
     const savedObjectsStart = await this.savedObjects.start({});
+
+    const pluginsStart = await this.plugins.start({ savedObjects: savedObjectsStart });
 
     const coreStart = {
       savedObjects: savedObjectsStart,
       plugins: pluginsStart,
     };
-
     await this.legacy.start({
       core: coreStart,
       plugins: mapToObject(pluginsStart.contracts),

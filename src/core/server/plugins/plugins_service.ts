@@ -28,7 +28,7 @@ import { PluginWrapper } from './plugin';
 import { DiscoveredPlugin, DiscoveredPluginInternal, PluginName } from './types';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
-import { InternalCoreSetup } from '../internal_types';
+import { InternalCoreSetup, InternalCoreStart } from '../internal_types';
 
 /** @public */
 export interface PluginsServiceSetup {
@@ -48,7 +48,7 @@ export interface PluginsServiceStart {
 export type PluginsServiceSetupDeps = InternalCoreSetup;
 
 /** @internal */
-export interface PluginsServiceStartDeps {} // eslint-disable-line @typescript-eslint/no-empty-interface
+export type PluginsServiceStartDeps = InternalCoreStart;
 
 /** @internal */
 export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {

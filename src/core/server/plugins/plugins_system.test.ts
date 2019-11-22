@@ -69,6 +69,7 @@ let env: Env;
 let coreContext: CoreContext;
 
 const setupDeps = coreMock.createInternalSetup();
+const startDeps = coreMock.createInternalStart();
 
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());
@@ -249,7 +250,6 @@ test('correctly orders plugins and returns exposed values for "setup" and "start
     expect(plugin.setup).toHaveBeenCalledWith(setupContextMap.get(plugin.name), deps.setup);
   }
 
-  const startDeps = {};
   expect([...(await pluginsSystem.startPlugins(startDeps))]).toMatchInlineSnapshot(`
     Array [
       Array [
@@ -387,7 +387,7 @@ test('`uiPlugins` returns only ui plugin dependencies', async () => {
 
 test('can start without plugins', async () => {
   await pluginsSystem.setupPlugins(setupDeps);
-  const pluginsStart = await pluginsSystem.startPlugins({});
+  const pluginsStart = await pluginsSystem.startPlugins(startDeps);
 
   expect(pluginsStart).toBeInstanceOf(Map);
   expect(pluginsStart.size).toBe(0);
@@ -405,7 +405,7 @@ test('`startPlugins` only starts plugins that were setup', async () => {
     pluginsSystem.addPlugin(plugin);
   });
   await pluginsSystem.setupPlugins(setupDeps);
-  const result = await pluginsSystem.startPlugins({});
+  const result = await pluginsSystem.startPlugins(startDeps);
   expect([...result]).toMatchInlineSnapshot(`
     Array [
       Array [

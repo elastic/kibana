@@ -152,5 +152,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
   deps: PluginsServiceStartDeps,
   plugin: PluginWrapper<TPlugin, TPluginDependencies>
 ): CoreStart {
-  return {};
+  return {
+    savedObjects: { scopedClient: deps.savedObjects.scopedClient },
+  };
 }
