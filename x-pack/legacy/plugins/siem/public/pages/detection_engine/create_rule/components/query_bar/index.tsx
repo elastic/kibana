@@ -42,6 +42,14 @@ const StyledEuiFormRow = styled(EuiFormRow)`
   .kbnTypeahead__items {
     max-height: 14vh !important;
   }
+  .globalQueryBar {
+    padding: 4px 0px 0px 0px;
+    .kbnQueryBar {
+      & > div:first-child {
+        margin: 0px 0px 0px 4px;
+      }
+    }
+  }
 `;
 
 // TODO need to add disabled in the SearchBar
@@ -55,7 +63,6 @@ export const QueryBarDefineRule = ({
 }: QueryBarDefineRuleProps) => {
   const [savedQuery, setSavedQuery] = useState<SavedQuery | null>(null);
   const [queryDraft, setQueryDraft] = useState<Query>({ query: '', language: 'kuery' });
-  const [queryFilters, setQueryFilters] = useState<esFilters.Filter[]>([]);
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   const core = useKibanaCore();
@@ -66,7 +73,7 @@ export const QueryBarDefineRule = ({
   useEffect(() => {
     let isSubscribed = true;
     const subscriptions = new Subscription();
-    filterManager.setFilters(queryFilters);
+    filterManager.setFilters([]);
 
     subscriptions.add(
       filterManager.getUpdates$().subscribe({
@@ -75,7 +82,6 @@ export const QueryBarDefineRule = ({
             const newFilters = filterManager.getFilters();
             const { filters } = field.value as FieldValueQueryBar;
 
-            setQueryFilters(newFilters);
             if (!isEqual(filters, newFilters)) {
               field.setValue({ ...(field.value as FieldValueQueryBar), filters: newFilters });
             }
@@ -88,7 +94,7 @@ export const QueryBarDefineRule = ({
       isSubscribed = false;
       subscriptions.unsubscribe();
     };
-  }, []);
+  }, [field.value]);
 
   useEffect(() => {
     let isSubscribed = true;
@@ -97,8 +103,8 @@ export const QueryBarDefineRule = ({
       if (!isEqual(query, queryDraft)) {
         setQueryDraft(query);
       }
-      if (!isEqual(filters, queryFilters)) {
-        setQueryFilters(filters);
+      if (!isEqual(filters, filterManager.getFilters())) {
+        filterManager.setFilters(filters);
       }
       if (
         (savedId != null && savedQuery != null && savedId !== savedQuery.id) ||
@@ -121,12 +127,6 @@ export const QueryBarDefineRule = ({
       isSubscribed = false;
     };
   }, [field.value]);
-
-  useEffect(() => {
-    if (!isEqual(queryFilters, filterManager.getFilters())) {
-      filterManager.setFilters(queryFilters);
-    }
-  }, [queryFilters]);
 
   const onSubmitQuery = useCallback(
     (newQuery: Query, timefilter?: SavedQueryTimeFilter) => {
@@ -182,7 +182,7 @@ export const QueryBarDefineRule = ({
         isRefreshPaused={false}
         filterQuery={queryDraft}
         filterManager={filterManager}
-        filters={queryFilters}
+        filters={filterManager.getFilters() || []}
         onChangedQuery={onChangedQuery}
         onSubmitQuery={onSubmitQuery}
         savedQuery={savedQuery}

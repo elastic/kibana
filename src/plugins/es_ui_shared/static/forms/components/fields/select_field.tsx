@@ -48,10 +48,11 @@ export const SelectField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
         onChange={e => {
           field.setValue(e.target.value);
         }}
+        options={[]}
         hasNoInitialSelection={true}
         isInvalid={isInvalid}
         data-test-subj="select"
-        {...(euiFieldProps as { options: any; [key: string]: any })}
+        {...euiFieldProps}
       />
     </EuiFormRow>
   );

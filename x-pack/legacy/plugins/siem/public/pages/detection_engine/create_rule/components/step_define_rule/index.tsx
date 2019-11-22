@@ -65,18 +65,20 @@ export const StepDefineRule = memo<RuleStepProps>(({ isLoading, setStepData }) =
           path="useIndicesConfig"
           componentProps={{
             idAria: 'detectionEngineStepDefineRuleUseIndicesConfig',
-            isDisabled: isLoading,
             'data-test-subj': 'detectionEngineStepDefineRuleUseIndicesConfig',
-            options: [
-              {
-                id: 'true',
-                label: I18n.CONFIG_INDICES,
-              },
-              {
-                id: 'false',
-                label: I18n.CUSTOM_INDICES,
-              },
-            ],
+            euiFieldProps: {
+              disabled: isLoading,
+              options: [
+                {
+                  id: 'true',
+                  label: I18n.CONFIG_INDICES,
+                },
+                {
+                  id: 'false',
+                  label: I18n.CUSTOM_INDICES,
+                },
+              ],
+            },
           }}
         />
         <CommonUseField

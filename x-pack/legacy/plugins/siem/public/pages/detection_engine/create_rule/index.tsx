@@ -43,7 +43,12 @@ export const CreateRuleComponent = React.memo(() => {
       if ([0, 1].includes(stepRuleIdx)) {
         openCloseAccordion(step);
         openCloseAccordion(stepsRuleOrder[stepRuleIdx + 1]);
-      } else if (stepRuleIdx === 2) {
+        setOpenAccordionId(stepsRuleOrder[stepRuleIdx + 1]);
+      } else if (
+        stepRuleIdx === 2 &&
+        stepsData.current[RuleStep.defineRule].isValid &&
+        stepsData.current[RuleStep.aboutRule].isValid
+      ) {
         setRule(
           formatRule(
             stepsData.current[RuleStep.defineRule].data as DefineStepRule,
@@ -64,7 +69,7 @@ export const CreateRuleComponent = React.memo(() => {
       }
       return 'passive';
     },
-    [openAccordionId]
+    [openAccordionId, stepsData.current]
   );
 
   const defineRuleButton = (
@@ -100,23 +105,29 @@ export const CreateRuleComponent = React.memo(() => {
   };
 
   const manageAccordions = useCallback(
-    (isOpen: boolean, id?: RuleStep) => {
-      if (id != null) {
-        const stepRuleIdx = stepsRuleOrder.findIndex(step => step === id);
-        const isLatestStepsRuleValid =
-          stepRuleIdx === 0
-            ? true
-            : stepsRuleOrder
-                .filter((stepRule, index) => index < stepRuleIdx)
-                .every(stepRule => stepsData.current[stepRule].isValid);
-        if ((!isLatestStepsRuleValid && isOpen) || (id === openAccordionId && !isOpen)) {
-          openCloseAccordion(id);
-        } else if (openAccordionId != null && id !== openAccordionId && isOpen) {
-          openCloseAccordion(openAccordionId);
-          setOpenAccordionId(id);
-        } else if (openAccordionId == null && isOpen) {
-          setOpenAccordionId(id);
-        }
+    (id: RuleStep, isOpen: boolean) => {
+      const stepRuleIdx = stepsRuleOrder.findIndex(step => step === id);
+      const isLatestStepsRuleValid =
+        stepRuleIdx === 0
+          ? true
+          : stepsRuleOrder
+              .filter((stepRule, index) => index < stepRuleIdx)
+              .every(stepRule => stepsData.current[stepRule].isValid);
+
+      if (
+        openAccordionId != null &&
+        openAccordionId !== id &&
+        !stepsData.current[openAccordionId].isValid &&
+        isOpen
+      ) {
+        openCloseAccordion(id);
+      } else if (!isLatestStepsRuleValid && isOpen) {
+        openCloseAccordion(id);
+      } else if (openAccordionId != null && id !== openAccordionId && isOpen) {
+        openCloseAccordion(openAccordionId);
+        setOpenAccordionId(id);
+      } else if (openAccordionId == null && isOpen) {
+        setOpenAccordionId(id);
       }
     },
     [openAccordionId]
@@ -142,7 +153,7 @@ export const CreateRuleComponent = React.memo(() => {
             buttonContent={defineRuleButton}
             paddingSize="xs"
             ref={defineRuleRef}
-            onToggle={manageAccordions.bind(RuleStep.defineRule)}
+            onToggle={manageAccordions.bind(null, RuleStep.defineRule)}
           >
             <EuiHorizontalRule margin="xs" />
             <StepDefineRule isLoading={isLoading} setStepData={setStepData} />
@@ -156,7 +167,7 @@ export const CreateRuleComponent = React.memo(() => {
             buttonContent={aboutRuleButton}
             paddingSize="xs"
             ref={aboutRuleRef}
-            onToggle={manageAccordions.bind(RuleStep.defineRule)}
+            onToggle={manageAccordions.bind(null, RuleStep.aboutRule)}
           >
             <EuiHorizontalRule margin="xs" />
             <StepAboutRule isLoading={isLoading} setStepData={setStepData} />
@@ -170,7 +181,7 @@ export const CreateRuleComponent = React.memo(() => {
             buttonContent={scheduleRuleButton}
             paddingSize="xs"
             ref={scheduleRuleRef}
-            onToggle={manageAccordions.bind(RuleStep.defineRule)}
+            onToggle={manageAccordions.bind(null, RuleStep.scheduleRule)}
           >
             <EuiHorizontalRule margin="xs" />
             <StepScheduleRule isLoading={isLoading} setStepData={setStepData} />
