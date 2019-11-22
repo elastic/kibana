@@ -21,7 +21,6 @@ import { Server, Request } from 'hapi';
 
 import { Capabilities } from '../../../core/public';
 import KbnServer from '../kbn_server';
-import { registerCapabilitiesRoute } from './capabilities_route';
 import { mergeCapabilities } from './merge_capabilities';
 import { resolveCapabilities } from './resolve_capabilities';
 
@@ -57,7 +56,5 @@ export async function capabilitiesMixin(kbnServer: KbnServer, server: Server) {
 
       return resolveCapabilities(this, modifiers, defaultCapabilities, { navLinks });
     });
-
-    registerCapabilitiesRoute(server, defaultCapabilities, modifiers);
   });
 }

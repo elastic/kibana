@@ -20,9 +20,9 @@
 import { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import { KibanaRequest } from '../http';
+import { InternalHttpServiceSetup, KibanaRequest } from '../http';
 import { mergeCapabilities } from './merge_capabilities';
-import { capabilitiesResolver } from './resolve_capabilities';
+import { getCapabilitiesResolver, CapabilitiesResolver } from './resolve_capabilities';
 
 export interface CapabilitiesSetup {
   registerCapabilitiesProvider(provider: CapabilitiesProvider): void;
@@ -33,6 +33,10 @@ export interface CapabilitiesStart {
   resolveCapabilities(request: KibanaRequest): Promise<Capabilities>;
 }
 
+interface SetupDeps {
+  http: InternalHttpServiceSetup;
+}
+
 const defaultCapabilities: Capabilities = {
   navLinks: {},
   management: {},
@@ -40,16 +44,27 @@ const defaultCapabilities: Capabilities = {
 };
 
 export class CapabilitiesService {
-  private capabilitiesProviders: CapabilitiesProvider[] = [];
-  private capabilitiesSwitchers: CapabilitiesSwitcher[] = [];
-  private logger: Logger;
+  private readonly logger: Logger;
+  private readonly capabilitiesProviders: CapabilitiesProvider[] = [];
+  private readonly capabilitiesSwitchers: CapabilitiesSwitcher[] = [];
+  private readonly resolver: CapabilitiesResolver;
 
   constructor(core: CoreContext) {
     this.logger = core.logger.get('capabilities-service');
+    this.resolver = getCapabilitiesResolver(
+      () =>
+        mergeCapabilities(
+          defaultCapabilities,
+          ...this.capabilitiesProviders.map(provider => provider())
+        ),
+      () => this.capabilitiesSwitchers
+    );
   }
 
-  public setup(): CapabilitiesSetup {
+  public setup(setupDeps: SetupDeps): CapabilitiesSetup {
     this.logger.debug('Setting up capabilities service');
+    this.setupCapabilitiesRoute(setupDeps.http);
+
     return {
       registerCapabilitiesProvider: (provider: CapabilitiesProvider) => {
         this.capabilitiesProviders.push(provider);
@@ -62,13 +77,25 @@ export class CapabilitiesService {
 
   public start(): CapabilitiesStart {
     return {
-      resolveCapabilities: (request: KibanaRequest) => {
-        const capabilities = mergeCapabilities(
-          defaultCapabilities,
-          ...this.capabilitiesProviders.map(provider => provider())
-        );
-        return capabilitiesResolver(capabilities, this.capabilitiesSwitchers)(request);
-      },
+      resolveCapabilities: request => this.resolver(request),
     };
+  }
+
+  private setupCapabilitiesRoute(http: InternalHttpServiceSetup) {
+    const router = http.createRouter('/core/capabilities');
+    router.post(
+      {
+        path: '/',
+        validate: false,
+      },
+      async (ctx, req, res) => {
+        const capabilities = await this.resolver(req);
+        return res.ok({
+          body: {
+            capabilities,
+          },
+        });
+      }
+    );
   }
 }

@@ -20,10 +20,20 @@
 import { Capabilities, CapabilitiesSwitcher } from './types';
 import { KibanaRequest } from '../http';
 
-export const capabilitiesResolver = (
+export type CapabilitiesResolver = (request: KibanaRequest) => Promise<Capabilities>;
+
+export const getCapabilitiesResolver = (
+  capabilities: () => Capabilities,
+  switchers: () => CapabilitiesSwitcher[]
+): CapabilitiesResolver => async (request: KibanaRequest): Promise<Capabilities> => {
+  return resolveCapabilities(capabilities(), switchers(), request);
+};
+
+export const resolveCapabilities = async (
   capabilities: Capabilities,
-  switchers: CapabilitiesSwitcher[]
-) => async (request: KibanaRequest): Promise<Capabilities> => {
+  switchers: CapabilitiesSwitcher[],
+  request: KibanaRequest
+): Promise<Capabilities> => {
   return switchers.reduce(async (caps, switcher) => {
     return switcher(request, await caps);
   }, Promise.resolve(capabilities));

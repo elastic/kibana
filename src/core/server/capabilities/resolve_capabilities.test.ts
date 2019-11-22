@@ -18,11 +18,11 @@
  */
 
 import { Capabilities } from './types';
-import { capabilitiesResolver } from './resolve_capabilities';
+import { resolveCapabilities } from './resolve_capabilities';
 import { KibanaRequest } from '../http';
 import { httpServerMock } from '../http/http_server.mocks';
 
-describe('capabilitiesResolver', () => {
+describe('resolveCapabilities', () => {
   let defaultCaps: Capabilities;
   let request: KibanaRequest;
 
@@ -36,7 +36,7 @@ describe('capabilitiesResolver', () => {
   });
 
   it('should returns the initial capabilities if no switcher are used', async () => {
-    const result = await capabilitiesResolver(defaultCaps, [])(request);
+    const result = await resolveCapabilities(defaultCaps, [], request);
     expect(result).toEqual(defaultCaps);
   });
 
@@ -55,7 +55,7 @@ describe('capabilitiesResolver', () => {
         A: false,
       },
     });
-    const result = await capabilitiesResolver(caps, [switcher])(request);
+    const result = await resolveCapabilities(caps, [switcher], request);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "catalogue": Object {},

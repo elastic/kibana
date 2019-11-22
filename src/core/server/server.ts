@@ -98,7 +98,7 @@ export class Server {
 
     this.registerDefaultRoute(httpSetup);
 
-    const capabilitiesSetup = this.capabilities.setup();
+    const capabilitiesSetup = this.capabilities.setup({ http: httpSetup });
 
     const elasticsearchServiceSetup = await this.elasticsearch.setup({
       http: httpSetup,

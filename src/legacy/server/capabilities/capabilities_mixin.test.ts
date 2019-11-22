@@ -19,7 +19,6 @@
 
 import { Server } from 'hapi';
 import KbnServer from '../kbn_server';
-import { mockRegisterCapabilitiesRoute } from './capabilities_mixin.test.mocks';
 
 import { capabilitiesMixin } from './capabilities_mixin';
 
@@ -34,45 +33,6 @@ describe('capabilitiesMixin', () => {
   let server: Server;
   beforeEach(() => {
     server = new Server();
-  });
-
-  afterEach(() => {
-    mockRegisterCapabilitiesRoute.mockClear();
-  });
-
-  it('calls registerCapabilitiesRoute with merged uiCapabilitiesProviers', async () => {
-    const kbnServer = getKbnServer([
-      {
-        getUiCapabilitiesProvider: () => () => ({
-          app1: { read: true },
-          management: { section1: { feature1: true } },
-        }),
-      },
-      {
-        getUiCapabilitiesProvider: () => () => ({
-          app2: { write: true },
-          catalogue: { feature3: true },
-          management: { section2: { feature2: true } },
-        }),
-      },
-    ]);
-
-    await capabilitiesMixin(kbnServer, server);
-
-    expect(mockRegisterCapabilitiesRoute).toHaveBeenCalledWith(
-      server,
-      {
-        app1: { read: true },
-        app2: { write: true },
-        catalogue: { feature3: true },
-        management: {
-          section1: { feature1: true },
-          section2: { feature2: true },
-        },
-        navLinks: {},
-      },
-      []
-    );
   });
 
   it('exposes request#getCapabilities for retrieving legacy capabilities', async () => {
