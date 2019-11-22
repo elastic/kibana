@@ -6,24 +6,26 @@
 
 import React from 'react';
 
+import { ScaleType } from '@elastic/charts';
 import * as i18n from './translation';
 import { MatrixHistogram } from '../../../matrix_histogram';
+import { bytesFormatter } from '../../../matrix_histogram/utils';
+import { MatrixOverOrdinalHistogramData } from '../../../../graphql/types';
 import { MatrixHistogramBasicProps } from '../../../matrix_histogram/types';
-import { MatrixOverTimeHistogramData } from '../../../../graphql/types';
 
-export const EventsOverTimeHistogram = (
-  props: MatrixHistogramBasicProps<MatrixOverTimeHistogramData>
+export const NetworkDnsHistogram = (
+  props: MatrixHistogramBasicProps<MatrixOverOrdinalHistogramData>
 ) => {
-  const dataKey = 'eventsOverTime';
-  const { totalCount } = props;
-  const subtitle = `${i18n.SHOWING}: ${totalCount.toLocaleString()} ${i18n.UNIT(totalCount)}`;
+  const dataKey = 'histogram';
   const { ...matrixOverTimeProps } = props;
 
   return (
     <MatrixHistogram
-      title={i18n.EVENT_COUNT_FREQUENCY_BY_ACTION}
-      subtitle={subtitle}
+      title={i18n.NETWORK_DNS_HISTOGRAM}
       dataKey={dataKey}
+      scaleType={ScaleType.Ordinal}
+      yTickFormatter={bytesFormatter}
+      showLegend={false}
       {...matrixOverTimeProps}
     />
   );
