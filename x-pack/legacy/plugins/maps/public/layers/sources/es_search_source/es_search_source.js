@@ -241,7 +241,7 @@ export class ESSearchSource extends AbstractESSource {
 
     const searchSource = await this._makeSearchSource(searchFilters, 0);
     searchSource.setField('aggs', {
-      uniqueCount: {
+      totalEntities: {
         cardinality: {
           field: topHitsSplitField,
           precision_threshold: 10,
@@ -265,7 +265,7 @@ export class ESSearchSource extends AbstractESSource {
 
     const allHits = [];
     const entityBuckets = _.get(resp, 'aggregations.entitySplit.buckets', []);
-    const totalEnties = _.get(resp, 'aggregations.uniqueCount.value', 0);
+    const totalEntities = _.get(resp, 'aggregations.totalEntities.value', 0);
     entityBuckets.forEach(entityBucket => {
       const hits = _.get(entityBucket, 'entityHits.hits.hits', []);
       // Reverse hits list so top documents by sort are drawn on top
@@ -275,10 +275,10 @@ export class ESSearchSource extends AbstractESSource {
     return {
       hits: allHits,
       meta: {
-        // can not compare entityBuckets.length to totalEnties because totalEnties is an approximate
+        // can not compare entityBuckets.length to totalEntities because totalEntities is an approximate
         areResultsTrimmed: entityBuckets.length >= ES_SIZE_LIMIT,
         entityCount: entityBuckets.length,
-        totalEnties,
+        totalEntities,
       }
     };
   }
@@ -466,10 +466,10 @@ export class ESSearchSource extends AbstractESSource {
     if (this._isTopHits()) {
       const entitiesFoundMsg = meta.areResultsTrimmed
         ? i18n.translate('xpack.maps.esSearch.topHitsResultsTrimmedMsg', {
-          defaultMessage: `Results limited to first {entityCount} entities of ~{totalEnties}.`,
+          defaultMessage: `Results limited to first {entityCount} entities of ~{totalEntities}.`,
           values: {
             entityCount: meta.entityCount,
-            totalEnties: meta.totalEnties,
+            totalEntities: meta.totalEntities,
           }
         })
         : i18n.translate('xpack.maps.esSearch.topHitsEntitiesCountMsg', {
