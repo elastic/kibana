@@ -6,6 +6,7 @@
 
 import { InfraNodeType } from '../graphql/types';
 import { KbnServer } from '../kibana.index';
+import { InventoryItemType } from '../../common/inventory_models/types';
 
 const KIBANA_REPORTING_TYPE = 'infraops';
 
@@ -29,7 +30,7 @@ export class UsageCollector {
     });
   }
 
-  public static countNode(nodeType: InfraNodeType) {
+  public static countNode(nodeType: InventoryItemType) {
     const bucket = this.getBucket();
     this.maybeInitializeBucket(bucket);
 

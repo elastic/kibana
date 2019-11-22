@@ -5,13 +5,16 @@
  */
 
 import * as rt from 'io-ts';
+import { InventoryMetricRT, ItemTypeRT } from '../inventory_models/types';
+import { InfraWrappableRequest } from '../../server/lib/adapters/framework';
+import { InfraTimerangeInputRT } from './snapshot_api';
 
 const NodeDetailsDataPointRT = rt.intersection([
   rt.type({
     timestamp: rt.number,
   }),
   rt.partial({
-    value: rt.number,
+    value: rt.union([rt.number, rt.null]),
   }),
 ]);
 
@@ -21,49 +24,10 @@ const NodeDetailsDataSeries = rt.type({
   data: rt.array(NodeDetailsDataPointRT),
 });
 
-const NodeDetailsMetricsRT = rt.keyof({
-  hostSystemOverview: 'hostSystemOverview',
-  hostCpuUsage: 'hostCpuUsage',
-  hostFilesystem: 'hostFilesystem',
-  hostK8sOverview: 'hostK8sOverview',
-  hostK8sCpuCap: 'hostK8sCpuCap',
-  hostK8sDiskCap: 'hostK8sDiskCap',
-  hostK8sMemoryCap: 'hostK8sMemoryCap',
-  hostK8sPodCap: 'hostK8sPodCap',
-  hostLoad: 'hostLoad',
-  hostMemoryUsage: 'hostMemoryUsage',
-  hostNetworkTraffic: 'hostNetworkTraffic',
-  hostDockerOverview: 'hostDockerOverview',
-  hostDockerInfo: 'hostDockerInfo',
-  hostDockerTop5ByCpu: 'hostDockerTop5ByCpu',
-  hostDockerTop5ByMemory: 'hostDockerTop5ByMemory',
-  podOverview: 'podOverview',
-  podCpuUsage: 'podCpuUsage',
-  podMemoryUsage: 'podMemoryUsage',
-  podLogUsage: 'podLogUsage',
-  podNetworkTraffic: 'podNetworkTraffic',
-  containerOverview: 'containerOverview',
-  containerCpuKernel: 'containerCpuKernel',
-  containerCpuUsage: 'containerCpuUsage',
-  containerDiskIOOps: 'containerDiskIOOps',
-  containerDiskIOBytes: 'containerDiskIOBytes',
-  containerMemory: 'containerMemory',
-  containerNetworkTraffic: 'containerNetworkTraffic',
-  nginxHits: 'nginxHits',
-  nginxRequestRate: 'nginxRequestRate',
-  nginxActiveConnections: 'nginxActiveConnections',
-  nginxRequestsPerConnection: 'nginxRequestsPerConnection',
-  awsOverview: 'awsOverview',
-  awsCpuUtilization: 'awsCpuUtilization',
-  awsNetworkBytes: 'awsNetworkBytes',
-  awsNetworkPackets: 'awsNetworkPackets',
-  awsDiskioBytes: 'awsDiskioBytes',
-  awsDiskioOps: 'awsDiskioOps',
-  custom: 'custom',
-});
-
 export const NodeDetailsMetricDataRT = rt.intersection([
-  rt.partial({ id: NodeDetailsMetricsRT }),
+  rt.partial({
+    id: rt.union([InventoryMetricRT, rt.null]),
+  }),
   rt.type({
     series: rt.array(NodeDetailsDataSeries),
   }),
@@ -72,5 +36,23 @@ export const NodeDetailsMetricDataRT = rt.intersection([
 export const NodeDetailsMetricDataResponseRT = rt.type({
   metrics: rt.array(NodeDetailsMetricDataRT),
 });
+
+export const NodeDetailsRequestRT = rt.intersection([
+  rt.type({
+    nodeType: ItemTypeRT,
+    nodeId: rt.string,
+    metrics: rt.array(InventoryMetricRT),
+    timerange: InfraTimerangeInputRT,
+    sourceId: rt.string,
+  }),
+  rt.partial({
+    cloudId: rt.union([rt.string, rt.null]),
+  }),
+]);
+
+// export type NodeDetailsRequest = InfraWrappableRequest<NodesArgs & SourceArgs>;
+
+export type NodeDetailsRequest = rt.TypeOf<typeof NodeDetailsRequestRT>;
+export type NodeDetailsWrappedRequest = InfraWrappableRequest<NodeDetailsRequest>;
 
 export type NodeDetailsMetricDataResponse = rt.TypeOf<typeof NodeDetailsMetricDataResponseRT>;

@@ -17,7 +17,7 @@ interface Props {
   name: string;
   error: KFetchError;
 }
-// TODO: NEED TO FIGURE OUT HOW TO HANDLE ERROR CODES AND SUCH....
+
 export const PageError = ({ error, name }: Props) => {
   return (
     <>
