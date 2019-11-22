@@ -30,7 +30,7 @@ const fromExpression = (
   parseOptions: Partial<KueryParseOptions> = {},
   parse: Function = parseKuery
 ): KueryNode => {
-  if (!expression) {
+  if (typeof expression === 'undefined') {
     throw new Error('expression must be a string, got undefined instead');
   }
 
