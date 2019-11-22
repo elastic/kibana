@@ -20,8 +20,8 @@ export interface CustomUrlSettings {
   // Note timeRange is only editable in new URLs for Dashboard and Discover URLs,
   // as for other URLs we have no way of knowing how the field will be used in the URL.
   timeRange: TimeRange;
-  kibanaSettings: any;
-  otherUrlSettings: {
+  kibanaSettings?: any;
+  otherUrlSettings?: {
     urlValue: string;
   };
 }
