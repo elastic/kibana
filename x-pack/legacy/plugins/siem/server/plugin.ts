@@ -15,14 +15,12 @@ export class Plugin {
   constructor({ logger }: PluginInitializerContext) {
     this.logger = logger.get('plugins', this.name);
 
-    this.logger.info('NP plugin initialized');
+    this.logger.debug('Shim plugin initialized');
   }
 
   public setup(core: CoreSetup, dependencies: {}, __legacy: ServerFacade) {
-    this.logger.info('NP plugin setup');
+    this.logger.debug('Shim plugin setup');
 
     initServerWithKibana(core, __legacy, this.logger);
-
-    this.logger.info('NP plugin setup complete');
   }
 }
