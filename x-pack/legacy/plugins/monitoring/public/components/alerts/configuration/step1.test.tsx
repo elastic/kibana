@@ -258,6 +258,19 @@ describe('Step1', () => {
       await component.update();
       expect(component).toMatchSnapshot();
     });
+
+    it('should not allow testing if there is no email address', () => {
+      const customProps = {
+        emailAddress: '',
+      };
+      const component = shallow(<Step1 {...defaultProps} {...customProps} />);
+      expect(
+        component
+          .find('EuiButton')
+          .at(1)
+          .prop('isDisabled')
+      ).toBe(true);
+    });
   });
 
   describe('deleting', () => {

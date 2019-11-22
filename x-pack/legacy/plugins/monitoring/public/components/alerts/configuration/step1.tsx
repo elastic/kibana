@@ -251,7 +251,13 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton size="s" iconType="play" onClick={testEmailAction} isLoading={isTesting}>
+            <EuiButton
+              size="s"
+              iconType="play"
+              onClick={testEmailAction}
+              isLoading={isTesting}
+              isDisabled={!props.emailAddress || props.emailAddress.length === 0}
+            >
               {i18n.translate(
                 'xpack.monitoring.alerts.configuration.testConfiguration.buttonText',
                 {

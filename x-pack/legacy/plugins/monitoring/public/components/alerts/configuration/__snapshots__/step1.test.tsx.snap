@@ -107,6 +107,7 @@ exports[`Step1 should render normally 1`] = `
     >
       <EuiButton
         iconType="play"
+        isDisabled={false}
         isLoading={false}
         onClick={[Function]}
         size="s"
@@ -180,6 +181,7 @@ exports[`Step1 testing should show a failed test error 1`] = `
     >
       <EuiButton
         iconType="play"
+        isDisabled={false}
         isLoading={false}
         onClick={[Function]}
         size="s"
@@ -261,6 +263,7 @@ exports[`Step1 testing should show a successful test 1`] = `
     >
       <EuiButton
         iconType="play"
+        isDisabled={false}
         isLoading={false}
         onClick={[Function]}
         size="s"
