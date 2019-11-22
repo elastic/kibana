@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
-import { EuiSuperSelect, EuiSpacer } from '@elastic/eui';
+import { EuiSuperSelect, EuiSpacer, EuiColorStops } from '@elastic/eui';
 import { COLOR_GRADIENTS } from '../../../color_utils';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ColorStops } from './color_stops';
+import { isInvalid } from './color_stops_utils';
+import { i18n } from '@kbn/i18n';
 
 const CUSTOM_COLOR_RAMP = 'CUSTOM_COLOR_RAMP';
 
@@ -36,15 +38,14 @@ export class ColorRampSelect extends Component {
     });
   };
 
-  _onCustomColorRampChange = ({ colorStops, isInvalid }) => {
-    // Manage invalid custom color ramp in local state
-    if (isInvalid) {
+  _onCustomColorRampChange = (colorStops) => {
+    if (isInvalid(colorStops)) {
       this.setState({ customColorRamp: colorStops });
       return;
     }
 
     this.props.onChange({
-      customColorRamp: colorStops,
+      customColorRamp: _.sortBy(colorStops, 'stop')
     });
   };
 
@@ -62,9 +63,13 @@ export class ColorRampSelect extends Component {
       colorStopsInput = (
         <Fragment>
           <EuiSpacer size="s" />
-          <ColorStops
+          <EuiColorStops
+            label={i18n.translate('xpack.maps.style.colorRampStopsLabel', {
+              defaultMessage: 'Color ramp stops'
+            })}
             colorStops={this.state.customColorRamp}
             onChange={this._onCustomColorRampChange}
+            stopType="fixed"
           />
         </Fragment>
       );
