@@ -20,7 +20,7 @@ FeatureCatalogueRegistryProvider.register(() => {
       defaultMessage: 'Automatically model the normal behavior of your time series data to detect anomalies.'
     }),
     icon: 'machineLearningApp',
-    path: '/app/ml',
+    path: '/application/ml',
     showOnHomePage: true,
     category: FeatureCatalogueCategory.DATA
   };
