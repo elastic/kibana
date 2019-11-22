@@ -47,5 +47,5 @@ export const assertAtLeastOneEventMatchesSearch = () =>
 export const toggleFirstTimelineEventDetails = () => {
   cy.get(TOGGLE_TIMELINE_EXPAND_EVENT, { timeout: DEFAULT_TIMEOUT })
     .first()
-    .click();
+    .click({ force: true });
 };

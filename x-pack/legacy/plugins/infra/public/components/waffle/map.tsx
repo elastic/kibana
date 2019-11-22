@@ -30,7 +30,7 @@ interface Props {
   dataBounds: InfraWaffleMapBounds;
 }
 
-export const Map: React.SFC<Props> = ({
+export const Map: React.FC<Props> = ({
   nodes,
   options,
   timeRange,
@@ -46,10 +46,7 @@ export const Map: React.SFC<Props> = ({
       {({ measureRef, content: { width = 0, height = 0 } }) => {
         const groupsWithLayout = applyWaffleMapLayout(map, width, height);
         return (
-          <WaffleMapOuterContainer
-            innerRef={(el: any) => measureRef(el)}
-            data-test-subj="waffleMap"
-          >
+          <WaffleMapOuterContainer ref={(el: any) => measureRef(el)} data-test-subj="waffleMap">
             <WaffleMapInnerContainer>
               {groupsWithLayout.map(group => {
                 if (isWaffleMapGroupWithGroups(group)) {

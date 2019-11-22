@@ -13,7 +13,7 @@ function makeEMSFileSource(tooltipProperties) {
   const emsFileSource = new EMSFileSource({
     tooltipProperties: tooltipProperties
   });
-  emsFileSource._getEMSFileLayer = () => {
+  emsFileSource.getEMSFileLayer = () => {
     return {
       getFieldsInLanguage() {
         return [{

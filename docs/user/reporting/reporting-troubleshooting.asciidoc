@@ -8,18 +8,6 @@
 Having trouble? Here are solutions to common problems you might encounter while using Reporting.
 
 [float]
-=== Verbose logs
-{kib} server logs have a lot of useful information for troubleshooting and understanding how things work. If you're having any issues at
-all, the full logs from Reporting will be the first place to look. In `kibana.yml`:
-
-[source,yaml]
---------------------------------------------------------------------------------
-logging.verbose: true
---------------------------------------------------------------------------------
-
-For more information about logging, see <<logging-verbose,Kibana configuration settings>>.
-
-[float]
 [[reporting-troubleshooting-system-dependencies]]
 === System dependencies
 Reporting launches a "headless" web browser called Chromium on the Kibana server. It is a custom build made by Elastic of an open source
@@ -98,3 +86,28 @@ the CAP_SYS_ADMIN capability.
 
 Elastic recommends that you research the feasibility of enabling unprivileged user namespaces before disabling the sandbox. An exception
 is if you are running Kibana in Docker because the container runs in a user namespace with the built-in seccomp/bpf filters.
+
+[float]
+=== Verbose logs
+{kib} server logs have a lot of useful information for troubleshooting and understanding how things work. If you're having any issues at
+all, the full logs from Reporting will be the first place to look. In `kibana.yml`:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+logging.verbose: true
+--------------------------------------------------------------------------------
+
+For more information about logging, see <<logging-verbose,Kibana configuration settings>>.
+
+=== Puppeteer debug logs
+The Chromium browser that {kib} launches on the server is driven by a NodeJS library for Chromium called Puppeteer. The Puppeteer library
+has its own command-line method to generate its own debug logs, which can sometimes be helpful, particularly to figure out if a problem is
+caused by Kibana or Chromium. See more at https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/README.md#debugging-tips
+
+Using Puppeteer's debug method when launching Kibana would look like:
+> Enable verbose logging - internal DevTools protocol traffic will be logged via the debug module under the puppeteer namespace.
+>     ```
+>     env DEBUG="puppeteer:*" ./bin/kibana
+>     ```
+
+The Puppeteer logs are very verbose and could possibly contain sensitive information. Handle the generated output with care.

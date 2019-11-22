@@ -26,11 +26,17 @@ export default function ({ getService, getPageObjects }) {
   const dashboardVisualizations = getService('dashboardVisualizations');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'timePicker']);
   const browser = getService('browser');
+  const kibanaServer = getService('kibanaServer');
 
   describe('dashboard time picker', function describeIndexTests() {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
+    });
+
+    after(async () => {
+      await kibanaServer.uiSettings.replace({});
+      await browser.refresh();
     });
 
     it('Visualization updated when time picker changes', async () => {
@@ -49,7 +55,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardExpect.docTableFieldCount(150);
 
       // Set to time range with no data
-      await PageObjects.timePicker.setAbsoluteRange('2000-01-01 00:00:00.000', '2000-01-01 01:00:00.000');
+      await PageObjects.timePicker.setAbsoluteRange('Jan 1, 2000 @ 00:00:00.000', 'Jan 1, 2000 @ 01:00:00.000');
       await dashboardExpect.docTableFieldCount(0);
     });
 
@@ -71,6 +77,17 @@ export default function ({ getService, getPageObjects }) {
       expect(time.start).to.be('Nov 17, 2012 @ 00:00:00.000');
       expect(time.end).to.be('Nov 17, 2015 @ 18:01:36.621');
       expect(refresh.interval).to.be('2');
+    });
+
+    it('Timepicker respects dateFormat from UI settings', async () => {
+      await kibanaServer.uiSettings.replace({ 'dateFormat': 'YYYY-MM-DD HH:mm:ss.SSS', });
+      await browser.refresh();
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
+      // Same date range as `setTimepickerInHistoricalDataRange`
+      await PageObjects.timePicker.setAbsoluteRange('2015-09-19 06:31:44.000', '2015-09-23 18:31:44.000');
+      await pieChart.expectPieSliceCount(10);
     });
   });
 }
