@@ -22,7 +22,11 @@ import {
   JOB_ID_MAX_LENGTH,
   ALLOWED_DATA_UNITS,
 } from '../../../../../../../common/constants/validation';
-import { getDependentVar, isRegressionAnalysis } from '../../../../common/analytics';
+import {
+  getDependentVar,
+  isRegressionAnalysis,
+  isClassificationAnalysis,
+} from '../../../../common/analytics';
 
 const mmlAllowedUnitsStr = `${ALLOWED_DATA_UNITS.slice(0, ALLOWED_DATA_UNITS.length - 1).join(
   ', '
@@ -53,7 +57,7 @@ const getSourceIndexString = (state: State) => {
 };
 
 export const validateAdvancedEditor = (state: State): State => {
-  const { jobIdEmpty, jobIdValid, jobIdExists, jobType, createIndexPattern } = state.form;
+  const { jobIdEmpty, jobIdValid, jobIdExists, createIndexPattern } = state.form;
   const { jobConfig } = state;
 
   state.advancedEditorMessages = [];
@@ -89,9 +93,9 @@ export const validateAdvancedEditor = (state: State): State => {
   }
 
   let dependentVariableEmpty = false;
-  if (isRegressionAnalysis(jobConfig.analysis)) {
+  if (isRegressionAnalysis(jobConfig.analysis) || isClassificationAnalysis(jobConfig.analysis)) {
     const dependentVariableName = getDependentVar(jobConfig.analysis) || '';
-    dependentVariableEmpty = jobType === JOB_TYPES.REGRESSION && dependentVariableName === '';
+    dependentVariableEmpty = dependentVariableName === '';
   }
 
   if (sourceIndexNameEmpty) {
@@ -201,7 +205,10 @@ const validateForm = (state: State): State => {
     modelMemoryLimit,
   } = state.form;
 
-  const dependentVariableEmpty = jobType === JOB_TYPES.REGRESSION && dependentVariable === '';
+  const jobTypeEmpty = jobType === undefined;
+  const dependentVariableEmpty =
+    (jobType === JOB_TYPES.REGRESSION || jobType === JOB_TYPES.CLASSIFICATION) &&
+    dependentVariable === '';
   const modelMemoryLimitEmpty = modelMemoryLimit === '';
 
   if (!modelMemoryLimitEmpty && modelMemoryLimit !== undefined) {
@@ -210,6 +217,7 @@ const validateForm = (state: State): State => {
   }
 
   state.isValid =
+    !jobTypeEmpty &&
     state.form.modelMemoryLimitUnitValid &&
     !jobIdEmpty &&
     jobIdValid &&

@@ -145,6 +145,11 @@ export const isRegressionAnalysis = (arg: any): arg is RegressionAnalysis => {
   return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.REGRESSION;
 };
 
+export const isClassificationAnalysis = (arg: any): arg is RegressionAnalysis => {
+  const keys = Object.keys(arg);
+  return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
+};
+
 export const isRegressionResultsSearchBoolQuery = (
   arg: any
 ): arg is RegressionResultsSearchBoolQuery => {

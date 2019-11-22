@@ -150,13 +150,13 @@ export const getJobConfigFromFormState = (
     },
     model_memory_limit: formState.modelMemoryLimit,
   };
-  // for classification num_top_classes defaults to 2
+
   if (
     formState.jobType === JOB_TYPES.REGRESSION ||
     formState.jobType === JOB_TYPES.CLASSIFICATION
   ) {
     jobConfig.analysis = {
-      regression: {
+      [formState.jobType]: {
         dependent_variable: formState.dependentVariable,
         training_percent: formState.trainingPercent,
       },
