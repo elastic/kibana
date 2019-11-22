@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import { pick } from 'lodash';
-
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { PluginWrapper } from './plugin';
-import { DiscoveredPlugin, DiscoveredPluginInternal, PluginName, PluginOpaqueId } from './types';
+import { DiscoveredPlugin, PluginName, PluginOpaqueId } from './types';
 import { createPluginSetupContext, createPluginStartContext } from './plugin_context';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
 
@@ -158,33 +156,22 @@ export class PluginsSystem {
     const uiPluginNames = [...this.getTopologicallySortedPluginNames().keys()].filter(
       pluginName => this.plugins.get(pluginName)!.includesUiPlugin
     );
-    const internal = new Map<PluginName, DiscoveredPluginInternal>(
+    const publicPlugins = new Map<PluginName, DiscoveredPlugin>(
       uiPluginNames.map(pluginName => {
         const plugin = this.plugins.get(pluginName)!;
         return [
           pluginName,
           {
             id: pluginName,
-            path: plugin.path,
             configPath: plugin.manifest.configPath,
             requiredPlugins: plugin.manifest.requiredPlugins.filter(p => uiPluginNames.includes(p)),
             optionalPlugins: plugin.manifest.optionalPlugins.filter(p => uiPluginNames.includes(p)),
           },
-        ] as [PluginName, DiscoveredPluginInternal];
+        ];
       })
     );
 
-    const publicPlugins = new Map<PluginName, DiscoveredPlugin>(
-      [...internal.entries()].map(
-        ([pluginName, plugin]) =>
-          [
-            pluginName,
-            pick(plugin, ['id', 'configPath', 'requiredPlugins', 'optionalPlugins']),
-          ] as [PluginName, DiscoveredPlugin]
-      )
-    );
-
-    return { public: publicPlugins, internal };
+    return publicPlugins;
   }
 
   /**

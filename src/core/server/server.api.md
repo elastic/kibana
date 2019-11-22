@@ -1014,11 +1014,10 @@ export interface PluginsServiceSetup {
     // (undocumented)
     contracts: Map<PluginName, unknown>;
     // (undocumented)
-    uiPluginConfigs: Map<PluginName, Observable<unknown>>;
-    // (undocumented)
     uiPlugins: {
+        bundlePaths: Map<PluginName, string>;
         public: Map<PluginName, DiscoveredPlugin>;
-        internal: Map<PluginName, DiscoveredPluginInternal>;
+        browserConfigs: Map<PluginName, Observable<unknown>>;
     };
 }
 
@@ -1628,6 +1627,5 @@ export interface UserProvidedValues<T extends SavedObjectAttribute = any> {
 // Warnings were encountered during analysis:
 // 
 // src/core/server/http/router/response.ts:316:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/plugins_service.ts:45:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
 
 ```

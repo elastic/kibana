@@ -107,7 +107,6 @@ export default class KbnServer {
     __internals: {
       hapiServer: LegacyServiceSetupDeps['core']['http']['server'];
       uiPlugins: LegacyServiceSetupDeps['core']['plugins']['uiPlugins'];
-      uiPluginConfigs: LegacyServiceSetupDeps['core']['plugins']['uiPluginConfigs'];
       elasticsearch: LegacyServiceSetupDeps['core']['elasticsearch'];
       uiSettings: LegacyServiceSetupDeps['core']['uiSettings'];
       kibanaMigrator: LegacyServiceStartDeps['core']['savedObjects']['migrator'];

@@ -31,9 +31,9 @@ const createServiceMock = () => {
     contracts: new Map(),
     uiPlugins: {
       public: new Map(),
-      internal: new Map(),
+      entryPointPaths: new Map(),
+      browserConfigs: new Map(),
     },
-    uiPluginConfigs: new Map(),
   });
   mocked.start.mockResolvedValue({ contracts: new Map() });
   return mocked;

@@ -25,12 +25,7 @@ import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { PluginWrapper } from './plugin';
-import {
-  DiscoveredPlugin,
-  DiscoveredPluginInternal,
-  PluginConfigDescriptor,
-  PluginName,
-} from './types';
+import { DiscoveredPlugin, PluginConfigDescriptor, PluginName } from './types';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 import { InternalCoreSetup } from '../internal_types';
@@ -41,10 +36,22 @@ import { pick } from '../../utils';
 export interface PluginsServiceSetup {
   contracts: Map<PluginName, unknown>;
   uiPlugins: {
+    /**
+     * Paths to all discovered ui plugin entrypoints on the filesystem, even if
+     * disabled.
+     */
+    entryPointPaths: Map<PluginName, string>;
+
+    /**
+     * Information needed by client-side to load plugins and wire dependencies.
+     */
     public: Map<PluginName, DiscoveredPlugin>;
-    internal: Map<PluginName, DiscoveredPluginInternal>;
+
+    /**
+     * Configuration for plugins to be exposed to the client-side.
+     */
+    browserConfigs: Map<PluginName, Observable<unknown>>;
   };
-  uiPluginConfigs: Map<PluginName, Observable<unknown>>;
 }
 
 /** @public */
@@ -65,6 +72,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   private readonly configService: IConfigService;
   private readonly config$: Observable<PluginsConfig>;
   private readonly pluginConfigDescriptors = new Map<PluginName, PluginConfigDescriptor>();
+  private readonly uiPluginBundlePaths = new Map<PluginName, string>();
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('plugins-service');
@@ -103,8 +111,11 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     const uiPlugins = this.pluginsSystem.uiPlugins();
     return {
       contracts,
-      uiPlugins,
-      uiPluginConfigs: this.generateUiPluginsConfigs(uiPlugins.public),
+      uiPlugins: {
+        entryPointPaths: this.uiPluginBundlePaths,
+        public: uiPlugins,
+        browserConfigs: this.generateUiPluginsConfigs(uiPlugins),
+      },
     };
   }
 
@@ -194,6 +205,10 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
 
           if (pluginEnableStatuses.has(plugin.name)) {
             throw new Error(`Plugin with id "${plugin.name}" is already registered!`);
+          }
+
+          if (plugin.includesUiPlugin) {
+            this.uiPluginBundlePaths.set(plugin.name, `${plugin.path}/public`);
           }
 
           pluginEnableStatuses.set(plugin.name, { plugin, isEnabled });

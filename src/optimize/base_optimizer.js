@@ -61,7 +61,7 @@ export default class BaseOptimizer {
   constructor(opts) {
     this.logWithMetadata = opts.logWithMetadata || (() => null);
     this.uiBundles = opts.uiBundles;
-    this.discoveredPlugins = opts.discoveredPlugins;
+    this.newPlatformPluginEntryPointPaths = opts.newPlatformPluginEntryPointPaths;
     this.profile = opts.profile || false;
     this.workers = opts.workers;
 
@@ -551,9 +551,9 @@ export default class BaseOptimizer {
 
   _getDiscoveredPluginEntryPoints() {
     // New platform plugin entry points
-    return [...this.discoveredPlugins.entries()]
-      .reduce((entryPoints, [pluginId, plugin]) => {
-        entryPoints[`plugin/${pluginId}`] = `${plugin.path}/public`;
+    return [...this.newPlatformPluginEntryPointPaths.entries()]
+      .reduce((entryPoints, [pluginId, bundlePath]) => {
+        entryPoints[`plugin/${pluginId}`] = bundlePath;
         return entryPoints;
       }, {});
   }

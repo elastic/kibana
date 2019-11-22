@@ -169,18 +169,6 @@ export interface DiscoveredPlugin {
 }
 
 /**
- * An extended `DiscoveredPlugin` that exposes more sensitive information. Should never
- * be exposed to client-side code.
- * @internal
- */
-export interface DiscoveredPluginInternal extends DiscoveredPlugin {
-  /**
-   * Path on the filesystem where plugin was loaded from.
-   */
-  readonly path: string;
-}
-
-/**
  * The interface that should be returned by a `PluginInitializer`.
  *
  * @public

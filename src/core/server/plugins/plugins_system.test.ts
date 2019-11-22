@@ -323,13 +323,8 @@ test('`setupPlugins` only setups plugins that have server side', async () => {
   expect(thirdPluginToRun.setup).toHaveBeenCalledTimes(1);
 });
 
-test('`uiPlugins` returns empty Maps before plugins are added', async () => {
-  expect(pluginsSystem.uiPlugins()).toMatchInlineSnapshot(`
-    Object {
-      "internal": Map {},
-      "public": Map {},
-    }
-  `);
+test('`uiPlugins` returns empty Map before plugins are added', async () => {
+  expect(pluginsSystem.uiPlugins()).toMatchInlineSnapshot(`Map {}`);
 });
 
 test('`uiPlugins` returns ordered Maps of all plugin manifests', async () => {
@@ -351,7 +346,7 @@ test('`uiPlugins` returns ordered Maps of all plugin manifests', async () => {
     pluginsSystem.addPlugin(plugin);
   });
 
-  expect([...pluginsSystem.uiPlugins().internal.keys()]).toMatchInlineSnapshot(`
+  expect([...pluginsSystem.uiPlugins().keys()]).toMatchInlineSnapshot(`
     Array [
       "order-0",
       "order-1",
@@ -380,7 +375,7 @@ test('`uiPlugins` returns only ui plugin dependencies', async () => {
     pluginsSystem.addPlugin(plugin);
   });
 
-  const plugin = pluginsSystem.uiPlugins().internal.get('ui-plugin')!;
+  const plugin = pluginsSystem.uiPlugins().get('ui-plugin')!;
   expect(plugin.requiredPlugins).toEqual(['req-ui']);
   expect(plugin.optionalPlugins).toEqual(['opt-ui']);
 });

@@ -33,11 +33,12 @@ import { PluginsService } from './plugins_service';
 import { PluginsSystem } from './plugins_system';
 import { config } from './plugins_config';
 import { take } from 'rxjs/operators';
-import { DiscoveredPluginInternal } from './types';
+import { DiscoveredPlugin } from './types';
 
 const MockPluginsSystem: jest.Mock<PluginsSystem> = PluginsSystem as any;
 
 let pluginsService: PluginsService;
+let config$: BehaviorSubject<Config>;
 let configService: ConfigService;
 let coreId: symbol;
 let env: Env;
@@ -107,11 +108,10 @@ describe('PluginsService', () => {
     coreId = Symbol('core');
     env = Env.createDefault(getEnvOptions());
 
-    configService = new ConfigService(
-      new BehaviorSubject<Config>(new ObjectToConfigAdapter({ plugins: { initialize: true } })),
-      env,
-      logger
+    config$ = new BehaviorSubject<Config>(
+      new ObjectToConfigAdapter({ plugins: { initialize: true } })
     );
+    configService = new ConfigService(config$, env, logger);
     await configService.setSchema(config.path, config.schema);
     pluginsService = new PluginsService({ coreId, env, logger, configService });
 
@@ -198,7 +198,7 @@ describe('PluginsService', () => {
         .mockImplementation(path => Promise.resolve(!path.includes('disabled')));
 
       mockPluginSystem.setupPlugins.mockResolvedValue(new Map());
-      mockPluginSystem.uiPlugins.mockReturnValue({ public: new Map(), internal: new Map() });
+      mockPluginSystem.uiPlugins.mockReturnValue(new Map());
 
       mockDiscover.mockReturnValue({
         error$: from([]),
@@ -231,7 +231,7 @@ describe('PluginsService', () => {
 
       expect(setup.contracts).toBeInstanceOf(Map);
       expect(setup.uiPlugins.public).toBeInstanceOf(Map);
-      expect(setup.uiPlugins.internal).toBeInstanceOf(Map);
+      expect(setup.uiPlugins.entryPointPaths).toBeInstanceOf(Map);
       expect(mockPluginSystem.addPlugin).not.toHaveBeenCalled();
       expect(mockPluginSystem.setupPlugins).toHaveBeenCalledTimes(1);
       expect(mockPluginSystem.setupPlugins).toHaveBeenCalledWith(setupDeps);
@@ -390,11 +390,10 @@ describe('PluginsService', () => {
   });
 
   describe('#generateUiPluginsConfigs()', () => {
-    const pluginToDiscoveredEntry = (plugin: PluginWrapper): [string, DiscoveredPluginInternal] => [
+    const pluginToDiscoveredEntry = (plugin: PluginWrapper): [string, DiscoveredPlugin] => [
       plugin.name,
       {
         id: plugin.name,
-        path: plugin.path,
         configPath: plugin.manifest.configPath,
         requiredPlugins: [],
         optionalPlugins: [],
@@ -427,15 +426,14 @@ describe('PluginsService', () => {
         error$: from([]),
         plugin$: from([plugin]),
       });
-      mockPluginSystem.uiPlugins.mockReturnValue({
-        public: new Map([pluginToDiscoveredEntry(plugin)]),
-        internal: new Map([pluginToDiscoveredEntry(plugin)]),
-      });
+      mockPluginSystem.uiPlugins.mockReturnValue(new Map([pluginToDiscoveredEntry(plugin)]));
 
       await pluginsService.discover();
-      const { uiPluginConfigs } = await pluginsService.setup(setupDeps);
+      const {
+        uiPlugins: { browserConfigs },
+      } = await pluginsService.setup(setupDeps);
 
-      const uiConfig$ = uiPluginConfigs.get('plugin-with-expose');
+      const uiConfig$ = browserConfigs.get('plugin-with-expose');
       expect(uiConfig$).toBeDefined();
 
       const uiConfig = await uiConfig$!.pipe(take(1)).toPromise();
@@ -468,15 +466,51 @@ describe('PluginsService', () => {
         error$: from([]),
         plugin$: from([plugin]),
       });
-      mockPluginSystem.uiPlugins.mockReturnValue({
-        public: new Map([pluginToDiscoveredEntry(plugin)]),
-        internal: new Map([pluginToDiscoveredEntry(plugin)]),
-      });
+      mockPluginSystem.uiPlugins.mockReturnValue(new Map([pluginToDiscoveredEntry(plugin)]));
 
       await pluginsService.discover();
-      const { uiPluginConfigs } = await pluginsService.setup(setupDeps);
+      const {
+        uiPlugins: { browserConfigs },
+      } = await pluginsService.setup(setupDeps);
 
-      expect([...uiPluginConfigs.entries()]).toHaveLength(0);
+      expect([...browserConfigs.entries()]).toHaveLength(0);
+    });
+  });
+
+  describe('#setup()', () => {
+    describe('uiPlugins.entryPointPaths', () => {
+      it('includes disabled plugins', async () => {
+        mockDiscover.mockReturnValue({
+          error$: from([]),
+          plugin$: from([
+            createPlugin('plugin-1', {
+              path: 'path-1',
+              version: 'some-version',
+              configPath: 'plugin1',
+            }),
+            createPlugin('plugin-2', {
+              path: 'path-2',
+              version: 'some-version',
+              configPath: 'plugin2',
+            }),
+          ]),
+        });
+
+        mockPluginSystem.uiPlugins.mockReturnValue(new Map());
+
+        config$.next(
+          new ObjectToConfigAdapter({ plugins: { initialize: true }, plugin1: { enabled: false } })
+        );
+
+        await pluginsService.discover();
+        const { uiPlugins } = await pluginsService.setup({} as any);
+        expect(uiPlugins.entryPointPaths).toMatchInlineSnapshot(`
+          Map {
+            "plugin-1" => "path-1/public",
+            "plugin-2" => "path-2/public",
+          }
+        `);
+      });
     });
   });
 
