@@ -7,7 +7,7 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import { MatrixOverTimeHistogram } from '.';
+import { MatrixHistogram } from '.';
 
 jest.mock('@elastic/eui', () => {
   return {
@@ -53,7 +53,7 @@ describe('Load More Events Table Component', () => {
   };
   describe('rendering', () => {
     test('it renders EuiLoadingContent on initialLoad', () => {
-      const wrapper = shallow(<MatrixOverTimeHistogram {...mockMatrixOverTimeHistogramProps} />);
+      const wrapper = shallow(<MatrixHistogram {...mockMatrixOverTimeHistogramProps} />);
 
       expect(wrapper.find(`[data-test-subj="initialLoadingPanelMatrixOverTime"]`)).toBeTruthy();
     });
@@ -65,7 +65,7 @@ describe('Load More Events Table Component', () => {
         totalCount: 10,
         loading: true,
       };
-      const wrapper = shallow(<MatrixOverTimeHistogram {...mockProps} />);
+      const wrapper = shallow(<MatrixHistogram {...mockProps} />);
       expect(wrapper.find('.loader')).toBeTruthy();
     });
 
@@ -76,7 +76,7 @@ describe('Load More Events Table Component', () => {
         totalCount: 10,
         loading: false,
       };
-      const wrapper = shallow(<MatrixOverTimeHistogram {...mockProps} />);
+      const wrapper = shallow(<MatrixHistogram {...mockProps} />);
 
       expect(wrapper.find(`.barchart`)).toBeTruthy();
     });
