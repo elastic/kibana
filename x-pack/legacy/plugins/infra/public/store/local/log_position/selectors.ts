@@ -15,8 +15,6 @@ export const selectIsAutoReloading = (state: LogPositionState) =>
 
 export const selectAutoReloadScrollLock = (state: LogPositionState) => state.autoReloadScrollLock;
 
-export const selectAutoReloadJustAborted = (state: LogPositionState) => state.autoReloadJustAborted;
-
 export const selectFirstVisiblePosition = (state: LogPositionState) =>
   state.visiblePositions.startKey ? state.visiblePositions.startKey : null;
 

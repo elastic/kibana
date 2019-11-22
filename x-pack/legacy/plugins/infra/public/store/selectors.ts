@@ -16,8 +16,6 @@ import {
   waffleTimeSelectors as localWaffleTimeSelectors,
 } from './local';
 import { State } from './reducer';
-import { logEntriesSelectors as remoteLogEntriesSelectors } from './remote';
-
 /**
  * local selectors
  */
@@ -29,36 +27,3 @@ export const logPositionSelectors = globalizeSelectors(selectLocal, localLogPosi
 export const waffleFilterSelectors = globalizeSelectors(selectLocal, localWaffleFilterSelectors);
 export const waffleTimeSelectors = globalizeSelectors(selectLocal, localWaffleTimeSelectors);
 export const waffleOptionsSelectors = globalizeSelectors(selectLocal, localWaffleOptionsSelectors);
-
-/**
- * remote selectors
- */
-
-const selectRemote = (state: State) => state.remote;
-
-export const logEntriesSelectors = globalizeSelectors(selectRemote, remoteLogEntriesSelectors);
-
-/**
- * shared selectors
- */
-
-export const sharedSelectors = {
-  selectFirstVisibleLogEntry: createSelector(
-    logEntriesSelectors.selectEntries,
-    logPositionSelectors.selectFirstVisiblePosition,
-    (entries, firstVisiblePosition) =>
-      firstVisiblePosition ? getLogEntryAtTime(entries, firstVisiblePosition) : null
-  ),
-  selectMiddleVisibleLogEntry: createSelector(
-    logEntriesSelectors.selectEntries,
-    logPositionSelectors.selectMiddleVisiblePosition,
-    (entries, middleVisiblePosition) =>
-      middleVisiblePosition ? getLogEntryAtTime(entries, middleVisiblePosition) : null
-  ),
-  selectLastVisibleLogEntry: createSelector(
-    logEntriesSelectors.selectEntries,
-    logPositionSelectors.selectLastVisiblePosition,
-    (entries, lastVisiblePosition) =>
-      lastVisiblePosition ? getLogEntryAtTime(entries, lastVisiblePosition) : null
-  ),
-};

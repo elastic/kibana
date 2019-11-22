@@ -4,24 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, createContext } from 'react';
+import React, { useEffect, useContext, createContext } from 'react';
 import {
   useLogEntriesStore,
   logEntriesInitialState,
   logEntriesDependenciesSelector,
+  LogEntriesState,
 } from './log_entries';
-import { useLogFilterStore, logFilterInitialState } from './log_filter';
-import { useLogPositionStore, logPositionInitialState } from './log_position';
+import { useLogFilterStore, logFilterInitialState, LogFilterState } from './log_filter';
+import { useLogPositionStore, logPositionInitialState, LogPositionState } from './log_position';
 
-const storeInitialState = {
+export interface State {
+  logEntries: LogEntriesState;
+  logPosition: LogPositionState;
+  logFilter: LogFilterState;
+}
+export { LogEntriesState, LogFilterState, LogPositionState };
+
+const storeInitialState: State = {
   logEntries: logEntriesInitialState,
   logPosition: logPositionInitialState,
   logFilter: logFilterInitialState,
 };
 
-export const StoreContext = createContext(storeInitialState);
+const StoreContext = createContext(storeInitialState);
 
-export const StoreProvider = ({ children }) => {
+export const StoreProvider: React.FunctionComponent = ({ children }) => {
   const [logEntriesState, updateLogEntriesState] = useLogEntriesStore();
   const logPositionState = useLogPositionStore();
   const logFilterState = useLogFilterStore();
@@ -39,3 +47,5 @@ export const StoreProvider = ({ children }) => {
 
   return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>;
 };
+
+export const useStore = () => useContext(StoreContext);

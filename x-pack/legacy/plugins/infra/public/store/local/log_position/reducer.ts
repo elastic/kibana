@@ -17,8 +17,6 @@ import {
   unlockAutoReloadScroll,
 } from './actions';
 
-import { loadEntriesActionCreators } from '../../remote/log_entries/operations/load';
-
 interface ManualTargetPositionUpdatePolicy {
   policy: 'manual';
 }
@@ -42,7 +40,6 @@ export interface LogPositionState {
     pagesBeforeStart: number;
   };
   controlsShouldDisplayTargetPosition: boolean;
-  autoReloadJustAborted: boolean;
   autoReloadScrollLock: boolean;
 }
 
@@ -59,7 +56,6 @@ export const initialLogPositionState: LogPositionState = {
     pagesAfterEnd: Infinity,
   },
   controlsShouldDisplayTargetPosition: false,
-  autoReloadJustAborted: false,
   autoReloadScrollLock: false,
 };
 
@@ -107,17 +103,6 @@ const controlsShouldDisplayTargetPositionReducer = reducerWithInitialState(
     return state;
   });
 
-// If auto reload is aborted before a pending request finishes, this flag will
-// prevent the UI from displaying the Loading Entries screen
-const autoReloadJustAbortedReducer = reducerWithInitialState(
-  initialLogPositionState.autoReloadJustAborted
-)
-  .case(stopAutoReload, () => true)
-  .case(startAutoReload, () => false)
-  .case(loadEntriesActionCreators.resolveDone, () => false)
-  .case(loadEntriesActionCreators.resolveFailed, () => false)
-  .case(loadEntriesActionCreators.resolve, () => false);
-
 const autoReloadScrollLockReducer = reducerWithInitialState(
   initialLogPositionState.autoReloadScrollLock
 )
@@ -131,6 +116,5 @@ export const logPositionReducer = combineReducers<LogPositionState>({
   updatePolicy: targetPositionUpdatePolicyReducer,
   visiblePositions: visiblePositionReducer,
   controlsShouldDisplayTargetPosition: controlsShouldDisplayTargetPositionReducer,
-  autoReloadJustAborted: autoReloadJustAbortedReducer,
   autoReloadScrollLock: autoReloadScrollLockReducer,
 });

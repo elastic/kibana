@@ -6,10 +6,11 @@
 
 import { connect } from 'react-redux';
 import React, { createContext } from 'react';
+import { State, initialState } from '../store';
 
-export const ReduxStateContext = createContext({});
+export const ReduxStateContext = createContext(initialState);
 
-const withRedux = connect(state => state);
+const withRedux = connect((state: State) => state);
 export const ReduxStateContextProvider = withRedux(({ children, ...state }) => {
-  return <ReduxStateContext.Provider value={state}>{children}</ReduxStateContext.Provider>;
+  return <ReduxStateContext.Provider value={state as State}>{children}</ReduxStateContext.Provider>;
 });

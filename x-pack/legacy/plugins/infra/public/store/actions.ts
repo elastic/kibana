@@ -11,4 +11,3 @@ export {
   waffleTimeActions,
   waffleOptionsActions,
 } from './local';
-export { logEntriesActions } from './remote';

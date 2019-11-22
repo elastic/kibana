@@ -7,16 +7,26 @@
 import { useContext } from 'react';
 import { ReduxStateContext } from '../../../utils/redux_context';
 import { logPositionSelectors as logPositionReduxSelectors } from '../../../store/local/selectors';
+import { TimeKey } from '../../../../common/time';
 
 export const useLogPositionStore = () => {
-  const state = useContext(ReduxStateContext);
-  const timeKey = logPositionReduxSelectors.selectVisibleMidpointOrTarget(state.local);
-  const pages = logPositionReduxSelectors.selectPagesBeforeAndAfter(state.local);
-  return { timeKey, ...pages };
+  const { local: state } = useContext(ReduxStateContext);
+  const timeKey = logPositionReduxSelectors.selectVisibleMidpointOrTarget(state);
+  const pages = logPositionReduxSelectors.selectPagesBeforeAndAfter(state);
+  const isAutoReloading = logPositionReduxSelectors.selectIsAutoReloading(state);
+  return { timeKey, isAutoReloading, ...pages } as LogPositionState;
 };
+
+export interface LogPositionState {
+  timeKey: TimeKey | null;
+  pagesAfterEnd: number | null;
+  pagesBeforeStart: number | null;
+  isAutoReloading: boolean;
+}
 
 export const logPositionInitialState = {
   timeKey: null,
   pagesAfterEnd: null,
   pagesBeforeStart: null,
+  isAutoReloading: false,
 };

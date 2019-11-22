@@ -10,6 +10,7 @@ import { useGraphQLQueries } from './gql_queries';
 import { TimeKey, timeKeyIsBetween } from '../../../../common/time';
 import { SerializedFilterQuery } from '../../local/log_filter';
 import { InfraLogEntry } from './types';
+import { State } from '..';
 
 const DESIRED_BUFFER_PAGES = 2;
 
@@ -23,10 +24,20 @@ enum Action {
   ErrorOnMoreEntries,
 }
 
-interface ActionObj {
-  type: Action;
-  payload?: Object;
+type ReceiveActions =
+  | Action.ReceiveNewEntries
+  | Action.ReceiveEntriesBefore
+  | Action.ReceiveEntriesAfter;
+
+interface ReceiveEntriesAction {
+  type: ReceiveActions;
+  payload: LogEntriesState;
 }
+interface FetchOrErrorAction {
+  type: Exclude<Action, ReceiveActions>;
+}
+type ActionObj = ReceiveEntriesAction | FetchOrErrorAction;
+
 type Dispatch = (action: ActionObj) => void;
 
 interface LogEntriesDependencies {
@@ -47,29 +58,31 @@ type FetchEntriesParams = LogEntriesDependencies & {
   sourceId: string;
 };
 
-type FetchMoreEntriesParams = {
+interface FetchMoreEntriesParams {
   pagesBeforeStart: number | null;
   pagesAfterEnd: number | null;
-};
+}
 
-interface LogEntriesState {
+export interface LogEntriesState {
   entries: InfraLogEntry[];
   entriesStart: TimeKey | null;
   entriesEnd: TimeKey | null;
-  hasMoreAfter: boolean;
-  hasMoreBefore: boolean;
+  hasMoreAfterEnd: boolean;
+  hasMoreBeforeStart: boolean;
   isReloading: boolean;
   isLoadingMore: boolean;
+  lastLoadedTime: Date | null;
 }
 
 export const logEntriesInitialState: LogEntriesState = {
   entries: [],
   entriesStart: null,
   entriesEnd: null,
-  hasMoreAfter: false,
-  hasMoreBefore: false,
+  hasMoreAfterEnd: false,
+  hasMoreBeforeStart: false,
   isReloading: true,
   isLoadingMore: false,
+  lastLoadedTime: null,
 };
 
 const shouldFetchNewEntries = ({
@@ -162,7 +175,10 @@ const useFetchEntriesEffect = (
   ];
 };
 
-export const useLogEntriesStore = () => {
+export const useLogEntriesStore: () => [
+  LogEntriesState,
+  (deps: LogEntriesDependencies) => void
+] = () => {
   const [state, dispatch] = useReducer(logEntriesStateReducer, logEntriesInitialState);
 
   const [dependencies, subscriber] = useState(logEntriesInitialDependencies);
@@ -197,7 +213,10 @@ const logEntriesStateReducer = (prevState: LogEntriesState, action: ActionObj) =
   }
 };
 
-export const logEntriesDependenciesSelector = createStructuredSelector({
+export const logEntriesDependenciesSelector = createStructuredSelector<
+  State,
+  LogEntriesDependencies
+>({
   filterQuery: state => state.logFilter.filterQuery,
   timeKey: state => state.logPosition.timeKey,
   pagesBeforeStart: state => state.logPosition.pagesBeforeStart,
