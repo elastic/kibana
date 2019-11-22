@@ -10,7 +10,6 @@ import { EuiSteps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionResult } from '../../../../../actions/server/types';
 import { ALERT_ACTION_TYPE_EMAIL } from '../../../../common/constants';
-import { toggleSetupMode } from '../../../lib/setup_mode';
 import { getMissingFieldErrors } from '../../../lib/form_validation';
 import { Step1 } from './step1';
 import { Step2 } from './step2';
@@ -50,7 +49,6 @@ export const AlertsConfiguration: React.FC<AlertsConfigurationProps> = (
   React.useEffect(() => {
     async function fetchData() {
       await fetchEmailActions();
-      await toggleSetupMode(true);
     }
 
     fetchData();

@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Alert } from '../../../../alerting/server/types';
-import { getSetupModeState, addSetupModeCallback } from '../../lib/setup_mode';
+import { getSetupModeState, addSetupModeCallback, toggleSetupMode } from '../../lib/setup_mode';
 import {
   NUMBER_OF_MIGRATED_ALERTS,
   KIBANA_ALERTING_ENABLED,
@@ -51,7 +51,18 @@ export const AlertsStatus: React.FC<AlertsStatusProps> = (props: AlertsStatusPro
     fetchAlertsStatus();
   }, [clusterUuid, setupModeEnabled, showMigrationFlyout]);
 
+  React.useEffect(() => {
+    if (!setupModeEnabled && showMigrationFlyout) {
+      setShowMigrationFlyout(false);
+    }
+  }, [setupModeEnabled, showMigrationFlyout]);
+
   addSetupModeCallback(() => setSetupModeEnabled(getSetupModeState().enabled));
+
+  function enterSetupModeAndOpenFlyout() {
+    toggleSetupMode(true);
+    setShowMigrationFlyout(true);
+  }
 
   function renderContent() {
     let flyout = null;
@@ -98,7 +109,7 @@ export const AlertsStatus: React.FC<AlertsStatusProps> = (props: AlertsStatusPro
               iconType="flag"
             >
               <p>
-                <EuiLink onClick={() => setShowMigrationFlyout(true)}>
+                <EuiLink onClick={enterSetupModeAndOpenFlyout}>
                   {i18n.translate('xpack.monitoring.alerts.status.manage', {
                     defaultMessage: 'Want to make changes? Click here.',
                   })}
@@ -119,7 +130,7 @@ export const AlertsStatus: React.FC<AlertsStatusProps> = (props: AlertsStatusPro
             })}
           >
             <p>
-              <EuiLink onClick={() => setShowMigrationFlyout(true)}>
+              <EuiLink onClick={enterSetupModeAndOpenFlyout}>
                 {i18n.translate('xpack.monitoring.alerts.status.needToMigrate', {
                   defaultMessage: 'Migrate cluster alerts to our new alerting platform.',
                 })}

@@ -15,6 +15,7 @@ import { getSetupModeState } from '../../lib/setup_mode';
 jest.mock('../../lib/setup_mode', () => ({
   getSetupModeState: jest.fn(),
   addSetupModeCallback: jest.fn(),
+  toggleSetupMode: jest.fn(),
 }));
 
 jest.mock('ui/kfetch', () => ({
@@ -32,6 +33,10 @@ describe('Status', () => {
 
     (getSetupModeState as jest.Mock).mockReturnValue({
       enabled: false,
+    });
+
+    (kfetch as jest.Mock).mockReturnValue({
+      data: [],
     });
   });
 
@@ -66,5 +71,12 @@ describe('Status', () => {
 
     component.update();
     expect(component.find('EuiCallOut')).toMatchSnapshot();
+  });
+
+  it('should close the flyout if setup mode is disabled', async () => {
+    const component = mount(<AlertsStatus {...defaultProps} />);
+    component.find('EuiLink').simulate('click');
+    await new Promise(resolve => process.nextTick(resolve));
+    expect(component.find('EuiFlyout').isEmpty()).toBe(true);
   });
 });
