@@ -9,7 +9,7 @@ Additional route options.
 <b>Signature:</b>
 
 ```typescript
-export interface RouteConfigOptions<Method extends RouteMethod = any> 
+export interface RouteConfigOptions<Method extends RouteMethod> 
 ```
 
 ## Properties

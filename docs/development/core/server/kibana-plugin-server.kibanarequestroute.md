@@ -17,6 +17,6 @@ export interface KibanaRequestRoute<Method extends RouteMethod>
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [method](./kibana-plugin-server.kibanarequestroute.method.md) | <code>Method</code> |  |
-|  [options](./kibana-plugin-server.kibanarequestroute.options.md) | <code>Method extends 'get' ? Required&lt;Omit&lt;RouteConfigOptions&lt;Method&gt;, 'body'&gt;&gt; : Required&lt;RouteConfigOptions&gt;</code> |  |
+|  [options](./kibana-plugin-server.kibanarequestroute.options.md) | <code>KibanaRequestRouteOptions&lt;Method&gt;</code> |  |
 |  [path](./kibana-plugin-server.kibanarequestroute.path.md) | <code>string</code> |  |
 

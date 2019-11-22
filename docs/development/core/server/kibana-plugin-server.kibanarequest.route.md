@@ -9,5 +9,5 @@ matched route details
 <b>Signature:</b>
 
 ```typescript
-readonly route: RecursiveReadonly<KibanaRequestRoute<RouteMethod | 'patch' | 'options'>>;
+readonly route: RecursiveReadonly<KibanaRequestRoute<Method>>;
 ```

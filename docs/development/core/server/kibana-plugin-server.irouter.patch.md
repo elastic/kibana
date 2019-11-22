@@ -9,5 +9,5 @@ Register a route handler for `PATCH` request.
 <b>Signature:</b>
 
 ```typescript
-patch: <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, 'patch'>, handler: RequestHandler<P, Q, B>) => void;
+patch: <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, 'patch'>, handler: RequestHandler<P, Q, B, 'patch'>) => void;
 ```

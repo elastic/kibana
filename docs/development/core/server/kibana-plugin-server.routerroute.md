@@ -18,6 +18,6 @@ export interface RouterRoute
 |  --- | --- | --- |
 |  [handler](./kibana-plugin-server.routerroute.handler.md) | <code>(req: Request, responseToolkit: ResponseToolkit) =&gt; Promise&lt;ResponseObject &#124; Boom&lt;any&gt;&gt;</code> |  |
 |  [method](./kibana-plugin-server.routerroute.method.md) | <code>RouteMethod</code> |  |
-|  [options](./kibana-plugin-server.routerroute.options.md) | <code>RouteConfigOptions</code> |  |
+|  [options](./kibana-plugin-server.routerroute.options.md) | <code>RouteConfigOptions&lt;RouteMethod&gt;</code> |  |
 |  [path](./kibana-plugin-server.routerroute.path.md) | <code>string</code> |  |
 

@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-options: Method extends 'get' ? Required<Omit<RouteConfigOptions<Method>, 'body'>> : Required<RouteConfigOptions>;
+options: KibanaRequestRouteOptions<Method>;
 ```

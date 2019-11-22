@@ -449,11 +449,11 @@ export interface AuthToolkit {
 export class BasePath {
     // @internal
     constructor(serverBasePath?: string);
-    get: (request: KibanaRequest<unknown, unknown, unknown> | LegacyRequest) => string;
+    get: (request: KibanaRequest<import("hapi").Util.HTTP_METHODS_PARTIAL_LOWERCASE, unknown, unknown, unknown> | LegacyRequest) => string;
     prepend: (path: string) => string;
     remove: (path: string) => string;
     readonly serverBasePath: string;
-    set: (request: KibanaRequest<unknown, unknown, unknown> | LegacyRequest, requestSpecificBasePath: string) => void;
+    set: (request: KibanaRequest<import("hapi").Util.HTTP_METHODS_PARTIAL_LOWERCASE, unknown, unknown, unknown> | LegacyRequest, requestSpecificBasePath: string) => void;
 }
 
 // Warning: (ae-forgotten-export) The symbol "BootstrapArgs" needs to be exported by the entry point index.d.ts
@@ -714,14 +714,13 @@ export interface IndexSettingsDeprecationInfo {
 
 // @public
 export interface IRouter {
-    delete: <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, 'delete'>, handler: RequestHandler<P, Q, B>) => void;
-    get: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B, 'get'>, handler: RequestHandler<P, Q, B>) => void;
+    delete: <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, 'delete'>, handler: RequestHandler<P, Q, B, 'delete'>) => void;
+    get: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B, 'get'>, handler: RequestHandler<P, Q, B, 'get'>) => void;
     // @internal
     getRoutes: () => RouterRoute[];
-    options: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B, 'options'>, handler: RequestHandler<P, Q, B>) => void;
-    patch: <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, 'patch'>, handler: RequestHandler<P, Q, B>) => void;
-    post: <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, 'post'>, handler: RequestHandler<P, Q, B>) => void;
-    put: <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, 'put'>, handler: RequestHandler<P, Q, B>) => void;
+    patch: <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, 'patch'>, handler: RequestHandler<P, Q, B, 'patch'>) => void;
+    post: <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, 'post'>, handler: RequestHandler<P, Q, B, 'post'>) => void;
+    put: <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, 'put'>, handler: RequestHandler<P, Q, B, 'put'>) => void;
     routerPath: string;
 }
 
@@ -745,20 +744,20 @@ export interface IUiSettingsClient {
 }
 
 // @public
-export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
+export class KibanaRequest<Method extends RouteMethod = RouteMethod, Params = unknown, Query = unknown, Body = unknown> {
     // @internal (undocumented)
     protected readonly [requestSymbol]: Request;
     constructor(request: Request, params: Params, query: Query, body: Body, withoutSecretHeaders: boolean);
     // (undocumented)
     readonly body: Body;
     // @internal
-    static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<P["type"], Q["type"], B["type"]>;
+    static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<import("hapi").Util.HTTP_METHODS_PARTIAL_LOWERCASE, P["type"], Q["type"], B["type"]>;
     readonly headers: Headers;
     // (undocumented)
     readonly params: Params;
     // (undocumented)
     readonly query: Query;
-    readonly route: RecursiveReadonly<KibanaRequestRoute<RouteMethod | 'patch' | 'options'>>;
+    readonly route: RecursiveReadonly<KibanaRequestRoute<Method>>;
     // (undocumented)
     readonly socket: IKibanaSocket;
     readonly url: Url;
@@ -768,8 +767,10 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
 export interface KibanaRequestRoute<Method extends RouteMethod> {
     // (undocumented)
     method: Method;
+    // Warning: (ae-forgotten-export) The symbol "KibanaRequestRouteOptions" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
-    options: Method extends 'get' ? Required<Omit<RouteConfigOptions<Method>, 'body'>> : Required<RouteConfigOptions>;
+    options: KibanaRequestRouteOptions<Method>;
     // (undocumented)
     path: string;
 }
@@ -1041,7 +1042,7 @@ export type RedirectResponseOptions = HttpResponseOptions & {
 };
 
 // @public
-export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>> = (context: RequestHandlerContext, request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>, response: KibanaResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
+export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>, Method extends RouteMethod = RouteMethod> = (context: RequestHandlerContext, request: KibanaRequest<Method, TypeOf<P>, TypeOf<Q>, TypeOf<B>>, response: KibanaResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 
 // @public
 export interface RequestHandlerContext {
@@ -1090,7 +1091,7 @@ export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B exten
 }
 
 // @public
-export interface RouteConfigOptions<Method extends RouteMethod = any> {
+export interface RouteConfigOptions<Method extends RouteMethod> {
     authRequired?: boolean;
     body?: Method extends 'get' | 'options' ? never : RouteConfigOptionsBody;
     tags?: readonly string[];
@@ -1117,7 +1118,7 @@ export interface RouterRoute {
     // (undocumented)
     method: RouteMethod;
     // (undocumented)
-    options: RouteConfigOptions;
+    options: RouteConfigOptions<RouteMethod>;
     // (undocumented)
     path: string;
 }

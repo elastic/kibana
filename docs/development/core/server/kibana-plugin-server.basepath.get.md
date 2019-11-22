@@ -9,5 +9,5 @@ returns `basePath` value, specific for an incoming request.
 <b>Signature:</b>
 
 ```typescript
-get: (request: KibanaRequest<unknown, unknown, unknown> | LegacyRequest) => string;
+get: (request: KibanaRequest<import("hapi").Util.HTTP_METHODS_PARTIAL_LOWERCASE, unknown, unknown, unknown> | LegacyRequest) => string;
 ```
