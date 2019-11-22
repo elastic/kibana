@@ -11,7 +11,10 @@ import { PARAMETERS_DEFINITION } from './constants';
 export interface DataTypeDefinition {
   label: string;
   value: DataType;
-  docUri?: string;
+  documentation?: {
+    main: string;
+    [key: string]: string;
+  };
   subTypes?: { label: string; types: SubType[] };
 }
 

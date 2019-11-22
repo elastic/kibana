@@ -50,7 +50,7 @@ export const GeoShapeType = ({ field }: Props) => {
               values={{
                 docsLink: (
                   <EuiLink
-                    href={documentationService.getGeoShapeDocumentationLink()}
+                    href={documentationService.getTypeDocLink('geo_shape', 'learnMore')}
                     target="_blank"
                   >
                     {i18n.translate('xpack.idxMgmt.mappingsEditor.geoShape.learnMoreLink', {

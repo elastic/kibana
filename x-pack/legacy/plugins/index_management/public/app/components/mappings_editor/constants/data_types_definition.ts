@@ -10,17 +10,23 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
   text: {
     value: 'text',
     label: 'Text',
-    docUri: '/text.html',
+    documentation: {
+      main: '/text.html',
+    },
   },
   keyword: {
     value: 'keyword',
     label: 'Keyword',
-    docUri: '/keyword.html',
+    documentation: {
+      main: '/keyword.html',
+    },
   },
   numeric: {
     value: 'numeric',
     label: 'Numeric',
-    docUri: '/number.html',
+    documentation: {
+      main: '/number.html',
+    },
     subTypes: {
       label: 'Numeric type',
       types: ['long', 'integer', 'short', 'byte', 'double', 'float', 'half_float', 'scaled_float'],
@@ -69,32 +75,44 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
   date: {
     label: 'Date',
     value: 'date',
-    docUri: '/date.html',
+    documentation: {
+      main: '/date.html',
+    },
   },
   date_nanos: {
     label: 'Date nanos',
     value: 'date_nanos',
-    docUri: '/date_nanos.html',
+    documentation: {
+      main: '/date_nanos.html',
+    },
   },
   binary: {
     label: 'Binary',
     value: 'binary',
-    docUri: '/binary.html',
+    documentation: {
+      main: '/binary.html',
+    },
   },
   ip: {
     label: 'IP',
     value: 'ip',
-    docUri: '/ip.html',
+    documentation: {
+      main: '/ip.html',
+    },
   },
   boolean: {
     label: 'Boolean',
     value: 'boolean',
-    docUri: '/boolean.html',
+    documentation: {
+      main: '/boolean.html',
+    },
   },
   range: {
     label: 'Range',
     value: 'range',
-    docUri: '/range.html',
+    documentation: {
+      main: '/range.html',
+    },
     subTypes: {
       label: 'Range type',
       types: ['integer_range', 'float_range', 'long_range', 'double_range', 'date_range'],
@@ -103,32 +121,44 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
   object: {
     label: 'Object',
     value: 'object',
-    docUri: '/object.html',
+    documentation: {
+      main: '/object.html',
+    },
   },
   nested: {
     label: 'Nested',
     value: 'nested',
-    docUri: '/nested.html',
+    documentation: {
+      main: '/nested.html',
+    },
   },
   rank_feature: {
     label: 'Rank feature',
     value: 'rank_feature',
-    docUri: '/rank-feature.html',
+    documentation: {
+      main: '/rank-feature.html',
+    },
   },
   rank_features: {
     label: 'Rank features',
     value: 'date',
-    docUri: '/rank-features.html',
+    documentation: {
+      main: '/rank-features.html',
+    },
   },
   dense_vector: {
     label: 'Dense vector',
     value: 'dense_vector',
-    docUri: '/dense-vector.html',
+    documentation: {
+      main: '/dense-vector.html',
+    },
   },
   sparse_vector: {
     label: 'Sparse vector',
     value: 'sparse_vector',
-    docUri: '/sparse-vector.html',
+    documentation: {
+      main: '/sparse-vector.html',
+    },
   },
   date_range: {
     label: 'Date range',
@@ -161,12 +191,17 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
   geo_point: {
     label: 'Geo point',
     value: 'geo_point',
-    docUri: '/geo-point.html',
+    documentation: {
+      main: '/geo-point.html',
+    },
   },
   geo_shape: {
     label: 'Geo shape',
     value: 'geo_shape',
-    docUri: '/geo-shape.html',
+    documentation: {
+      main: '/geo-shape.html',
+      learnMore: '/geo-shape.html#geoshape-indexing-approach',
+    },
   },
   specialised: {
     label: 'Specialised',
@@ -193,42 +228,58 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
   completion: {
     label: 'Completion suggester',
     value: 'completion',
-    docUri: '/search-suggesters.html#completion-suggester',
+    documentation: {
+      main: '/search-suggesters.html#completion-suggester',
+    },
   },
   token_count: {
     label: 'Token count',
     value: 'token_count',
-    docUri: '/token-count.html',
+    documentation: {
+      main: '/token-count.html',
+    },
   },
   percolator: {
     label: 'Percolator',
     value: 'percolator',
-    docUri: '/percolator.html',
+    documentation: {
+      main: '/percolator.html',
+    },
   },
   join: {
     label: 'Join',
     value: 'join',
-    docUri: '/join.html',
+    documentation: {
+      main: '/join.html',
+    },
   },
   alias: {
     label: 'Alias',
     value: 'alias',
-    docUri: '/alias.html',
+    documentation: {
+      main: '/alias.html',
+    },
   },
   search_as_you_type: {
     label: 'Search as you type',
     value: 'search_as_you_type',
-    docUri: '/search-as-you-type.html',
+    documentation: {
+      main: '/search-as-you-type.html',
+    },
   },
   flattened: {
     label: 'Flattened',
     value: 'flattened',
-    docUri: '/flattened.html',
+    documentation: {
+      main: '/flattened.html',
+    },
   },
   shape: {
     label: 'Shape',
     value: 'shape',
-    docUri: '/shape.html',
+    documentation: {
+      main: '/shape.html',
+    },
   },
 };
 

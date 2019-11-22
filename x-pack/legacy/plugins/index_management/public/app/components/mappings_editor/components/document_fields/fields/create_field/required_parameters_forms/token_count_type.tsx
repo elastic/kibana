@@ -10,17 +10,26 @@ import { i18n } from '@kbn/i18n';
 
 import { AnalyzerParameter } from '../../../field_parameters';
 import { STANDARD } from '../../../../../constants';
-import { EditFieldSection } from '../../edit_field';
+import { FormRow } from '../../../../../shared_imports';
 
 export const TokenCountTypeRequiredParameters = () => {
   return (
-    <EditFieldSection
-      title={i18n.translate(
-        'xpack.idxMgmt.mappingsEditor.tokenCountRequired.analyzer.sectionTitle',
+    <FormRow
+      title={
+        <h3>
+          {i18n.translate('xpack.idxMgmt.mappingsEditor.tokenCount.analyzerFieldTitle', {
+            defaultMessage: 'Analyzer',
+          })}
+        </h3>
+      }
+      description={i18n.translate(
+        'xpack.idxMgmt.mappingsEditor.tokenCount.analyzerFieldDescription',
         {
-          defaultMessage: 'Analyzer',
+          defaultMessage:
+            'The analyzer which should be used to analyze the string value. For best performance, use an analyzer without token filters.',
         }
       )}
+      idAria="mappingsEditorAnalyzerParameter"
     >
       <AnalyzerParameter
         path="analyzer"
@@ -31,8 +40,8 @@ export const TokenCountTypeRequiredParameters = () => {
           }
         )}
         defaultValue={STANDARD}
-        useDefaultOptions={false}
+        allowsIndexDefaultOption={false}
       />
-    </EditFieldSection>
+    </FormRow>
   );
 };

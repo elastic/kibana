@@ -42,18 +42,11 @@ interface Props {
 export const TokenCountType = ({ field }: Props) => {
   return (
     <>
-      <EditFieldSection
-        title={i18n.translate('xpack.idxMgmt.mappingsEditor.tokenCount.analyzerSectionTitle', {
-          defaultMessage: 'Analyzer',
-        })}
-      >
+      <EditFieldSection>
         <AnalyzerParameter
           path="analyzer"
-          label={i18n.translate('xpack.idxMgmt.mappingsEditor.tokenCount.analyzerFieldLabel', {
-            defaultMessage: 'Index analyzer',
-          })}
           defaultValue={field.source.analyzer}
-          useDefaultOptions={false}
+          allowsIndexDefaultOption={false}
         />
       </EditFieldSection>
       <EditFieldSection>
@@ -70,6 +63,13 @@ export const TokenCountType = ({ field }: Props) => {
           {/* null_value */}
           <NullValueParameter
             defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
+            description={i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.tokenCount.nullValueFieldDescription',
+              {
+                defaultMessage:
+                  'Accepts a numeric value of the same type as the field which is substituted for any explicit null values.',
+              }
+            )}
           >
             <UseField
               path="null_value"

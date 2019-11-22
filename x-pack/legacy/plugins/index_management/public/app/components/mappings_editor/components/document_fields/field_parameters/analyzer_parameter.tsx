@@ -24,7 +24,7 @@ interface Props {
   defaultValue: string | undefined;
   label?: string;
   config?: FieldConfig;
-  useDefaultOptions?: boolean;
+  allowsIndexDefaultOption?: boolean;
 }
 
 const ANALYZER_OPTIONS = PARAMETERS_OPTIONS.analyzer!;
@@ -67,12 +67,14 @@ export const AnalyzerParameter = ({
   defaultValue,
   label,
   config,
-  useDefaultOptions = true,
+  allowsIndexDefaultOption = true,
 }: Props) => {
   const indexSettings = useIndexSettings();
   const customAnalyzers = getCustomAnalyzers(indexSettings);
 
-  const analyzerOptions = useDefaultOptions ? ANALYZER_OPTIONS : ANALYZER_OPTIONS_WITHOUT_DEFAULT;
+  const analyzerOptions = allowsIndexDefaultOption
+    ? ANALYZER_OPTIONS
+    : ANALYZER_OPTIONS_WITHOUT_DEFAULT;
 
   const fieldOptions = [...analyzerOptions] as SuperSelectOption[];
   const mapOptionsToSubOptions: MapOptionsToSubOptions = {

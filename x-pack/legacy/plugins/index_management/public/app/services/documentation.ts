@@ -36,17 +36,13 @@ class DocumentationService {
     return `${this.kibanaDocsBase}/managing-indices.html`;
   }
 
-  public getTypeDocLink = (type: DataType): string | undefined => {
+  public getTypeDocLink = (type: DataType, uri = 'main'): string | undefined => {
     const typeDefinition = TYPE_DEFINITION[type];
-    if (!typeDefinition || !typeDefinition.docUri) {
+    if (!typeDefinition || !typeDefinition.documentation || !typeDefinition.documentation[uri]) {
       return undefined;
     }
-    return `${this.esDocsBase}${typeDefinition.docUri}`;
+    return `${this.esDocsBase}${typeDefinition.documentation[uri]}`;
   };
-
-  public getGeoShapeDocumentationLink() {
-    return `${this.esDocsBase}/geo-shape.html#geoshape-indexing-approach`;
-  }
 }
 
 export const documentationService = new DocumentationService();
