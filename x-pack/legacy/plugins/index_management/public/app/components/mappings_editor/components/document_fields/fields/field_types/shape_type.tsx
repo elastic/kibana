@@ -7,24 +7,28 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { PARAMETERS_OPTIONS } from '../../../../constants';
-import { NormalizedField, Field as FieldType } from '../../../../types';
+import { NormalizedField, Field as FieldType, ParameterName } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
 import { UseField, Field } from '../../../../shared_imports';
 import { EditFieldSection, EditFieldFormRow } from '../edit_field';
 
-const getDefaultValueToggle = (param: string, field: FieldType) => {
+const getDefaultValueToggle = (param: ParameterName, field: FieldType): boolean => {
+  const parameterDefaultValue =
+    getFieldConfig(param).defaultValue !== undefined
+      ? (getFieldConfig(param).defaultValue as boolean)
+      : undefined;
+
   switch (param) {
     case 'boost':
     case 'orientation':
-    case 'ignore_malformed':
-    case 'ignore_z_value': {
-      return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
+    case 'ignore_malformed': {
+      return field[param] !== undefined && field[param] !== parameterDefaultValue;
     }
     case 'coerce': {
       return field.coerce !== undefined ? field.coerce : false;
     }
     default:
-      return false;
+      return parameterDefaultValue !== undefined ? parameterDefaultValue : false;
   }
 };
 
