@@ -19,6 +19,8 @@ import {
   EuiText,
   EuiFilterGroup,
   EuiFilterButton,
+  EuiSelect,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import {
   ShellEnrollmentInstructions,
@@ -26,6 +28,8 @@ import {
   ToolsEnrollmentInstructions,
 } from './enrollment_instructions';
 import { useLibs } from '../../../hooks/use_libs';
+import { useEnrollmentApiKeys, useEnrollmentApiKey } from './enrollment_api_keys/hooks';
+import { EnrollmentApiKeysTable } from './enrollment_api_keys';
 
 interface RouterProps {
   onClose: () => void;
@@ -36,8 +40,21 @@ export const AgentEnrollmentFlyout: React.SFC<RouterProps> = ({ onClose }) => {
   const [quickInstallType, setQuickInstallType] = useState<'shell' | 'container' | 'tools'>(
     'shell'
   );
+  // api keys
+  const enrollmentApiKeys = useEnrollmentApiKeys({
+    currentPage: 1,
+    pageSize: 1000,
+  });
+  const [selectedApiKeyId, setSelectedApiKeyId] = useState<string | null>(null);
+  React.useEffect(() => {
+    if (!selectedApiKeyId && enrollmentApiKeys.data && enrollmentApiKeys.data.list.length > 0) {
+      setSelectedApiKeyId(enrollmentApiKeys.data.list[0].id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enrollmentApiKeys.data]);
+  const apiKey = useEnrollmentApiKey(selectedApiKeyId);
 
-  const renderHeader = () => (
+  const header = (
     <EuiFlyoutHeader hasBorder aria-labelledby="FleetAgentEnrollmentFlyoutTitle">
       <EuiTitle size="m">
         <h2 id="FleetAgentEnrollmentFlyoutTitle">
@@ -59,7 +76,63 @@ export const AgentEnrollmentFlyout: React.SFC<RouterProps> = ({ onClose }) => {
     </EuiFlyoutHeader>
   );
 
-  const renderInstructions = () => (
+  const policyOptions = enrollmentApiKeys.data
+    ? enrollmentApiKeys.data.list.map(key => ({
+        value: key.id,
+        text: key.name,
+      }))
+    : [];
+
+  const [apiKeyListVisible, setApiKeyListVisble] = useState(false);
+  const renderedPolicySelect = (
+    <>
+      <EuiText>
+        <h5>
+          <FormattedMessage
+            id="xpack.fleet.agentEnrollment.selectPolicyTitle"
+            defaultMessage="Select Policy"
+          />
+        </h5>
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiSelect
+        options={policyOptions}
+        value={selectedApiKeyId || undefined}
+        onChange={e => setSelectedApiKeyId(e.target.value)}
+      />
+      <EuiSpacer size="m" />
+      <EuiButtonEmpty
+        color="text"
+        onClick={() => {
+          setApiKeyListVisble(!apiKeyListVisible);
+        }}
+        iconType={apiKeyListVisible ? 'arrowUp' : 'arrowDown'}
+        iconSide="right"
+        size="xs"
+        flush="left"
+      >
+        {apiKeyListVisible ? (
+          <FormattedMessage
+            id="xpack.fleet.agentEnrollment.hideKeysButton"
+            defaultMessage="Hide ApiKeys"
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.fleet.agentEnrollment.viewKeysButton"
+            defaultMessage="View ApiKeys"
+          />
+        )}
+      </EuiButtonEmpty>
+      {apiKeyListVisible && (
+        <>
+          <EuiSpacer size="m" />
+          <EnrollmentApiKeysTable />
+        </>
+      )}
+    </>
+  );
+
+  const renderedInstructions = apiKey.data && (
     <Fragment>
       <EuiText>
         <h5>
@@ -102,6 +175,7 @@ export const AgentEnrollmentFlyout: React.SFC<RouterProps> = ({ onClose }) => {
       <EuiSpacer size="m" />
       {quickInstallType === 'shell' ? (
         <ShellEnrollmentInstructions
+          apiKey={apiKey.data.item}
           kibanaUrl={`${window.location.origin}${libs.framework.info.basePath}`}
         />
       ) : null}
@@ -110,9 +184,16 @@ export const AgentEnrollmentFlyout: React.SFC<RouterProps> = ({ onClose }) => {
     </Fragment>
   );
 
-  const renderBody = () => <EuiFlyoutBody>{renderInstructions()}</EuiFlyoutBody>;
+  const body = (
+    <EuiFlyoutBody>
+      {renderedPolicySelect}
+      <EuiHorizontalRule />
+      <EuiSpacer size="l" />
+      {renderedInstructions}
+    </EuiFlyoutBody>
+  );
 
-  const renderFooter = () => (
+  const footer = (
     <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
@@ -130,10 +211,10 @@ export const AgentEnrollmentFlyout: React.SFC<RouterProps> = ({ onClose }) => {
   );
 
   return (
-    <EuiFlyout onClose={onClose} size="m" maxWidth={650}>
-      {renderHeader()}
-      {renderBody()}
-      {renderFooter()}
+    <EuiFlyout onClose={onClose} size="l" maxWidth={950}>
+      {header}
+      {body}
+      {footer}
     </EuiFlyout>
   );
 };

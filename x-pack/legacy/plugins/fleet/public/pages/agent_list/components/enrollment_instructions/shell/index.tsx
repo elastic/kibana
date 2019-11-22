@@ -17,6 +17,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { ManualEnrollmentInstructions, ManualEnrollmentSteps } from '../';
 import * as MAC_COMMANDS from './mac_commands';
+import { EnrollmentApiKey } from '../../../../../../common/types/domain_data';
 
 // No need for i18n as these are platform names
 const PLATFORMS = {
@@ -56,16 +57,17 @@ const PLATFORM_INSTRUCTIONS: {
 
 interface Props {
   kibanaUrl: string;
+  apiKey: EnrollmentApiKey;
 }
 
-export const ShellEnrollmentInstructions: React.SFC<Props> = ({ kibanaUrl }) => {
+export const ShellEnrollmentInstructions: React.SFC<Props> = ({ kibanaUrl, apiKey }) => {
   // Platform state
   const [currentPlatform, setCurrentPlatform] = useState<keyof typeof PLATFORMS>('macos');
   const [isPlatformOptionsOpen, setIsPlatformOptionsOpen] = useState<boolean>(false);
   const [isManualInstallationOpen, setIsManualInstallationOpen] = useState<boolean>(false);
 
   // Build quick installation command
-  const quickInstallInstructions = `curl ${kibanaUrl}/api/fleet/install/${currentPlatform} | bash`;
+  const quickInstallInstructions = `API_KEY=${apiKey.api_key} curl ${kibanaUrl}/api/fleet/install/${currentPlatform} | bash`;
 
   return (
     <Fragment>
