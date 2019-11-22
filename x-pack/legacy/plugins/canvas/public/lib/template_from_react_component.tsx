@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { ComponentType, FunctionComponent } from 'react';
+import React, { ComponentType } from 'react';
 import { unmountComponentAtNode, render } from 'react-dom';
-// import PropTypes from 'prop-types';
+import PropTypes from 'prop-types';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ErrorBoundary } from '../components/enhance/error_boundary';
 import { ArgumentHandlers } from '../../types/arguments';
@@ -16,7 +16,7 @@ interface Props {
 }
 
 export const templateFromReactComponent = (Component: ComponentType<any>) => {
-  const WrappedComponent: FunctionComponent<Props> = props => (
+  const WrappedComponent = (props: Props) => (
     <ErrorBoundary>
       {({ error }: { error: Error }) => {
         if (error) {
@@ -33,9 +33,9 @@ export const templateFromReactComponent = (Component: ComponentType<any>) => {
     </ErrorBoundary>
   );
 
-  // WrappedComponent.propTypes = {
-  //   renderError: PropTypes.func,
-  // };
+  WrappedComponent.propTypes = {
+    renderError: PropTypes.func,
+  };
 
   return (domNode: HTMLElement, config: Props, handlers: ArgumentHandlers) => {
     try {

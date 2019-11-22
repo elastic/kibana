@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-// import PropTypes from 'prop-types';
+import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import { EuiFlexGroup, EuiFlexItem, EuiI18n } from '@elastic/eui';
@@ -66,11 +66,11 @@ export const EuiHeaderAlert = ({
   );
 };
 
-// EuiHeaderAlert.propTypes = {
-//   action: PropTypes.node,
-//   className: PropTypes.string,
-//   date: PropTypes.node.isRequired,
-//   text: PropTypes.node,
-//   title: PropTypes.node.isRequired,
-//   badge: PropTypes.node,
-// };
+EuiHeaderAlert.propTypes = {
+  action: PropTypes.node,
+  className: PropTypes.string,
+  date: PropTypes.node.isRequired,
+  text: PropTypes.node,
+  title: PropTypes.node.isRequired,
+  badge: PropTypes.node,
+};

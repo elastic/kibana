@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, FunctionComponent } from 'react';
-// import PropTypes from 'prop-types';
+import React, { Fragment } from 'react';
+import PropTypes from 'prop-types';
 import { getId } from '../../lib/get_id';
 import { Tag } from '../tag';
 import { TagSpec } from '../../lib/tag';
@@ -24,7 +24,7 @@ export interface Props {
   getTag: (tagName: string) => TagSpec;
 }
 
-export const TagList: FunctionComponent<Props> = ({ tags = [], tagType = 'health', getTag }) => (
+export const TagList = ({ tags = [], tagType = 'health', getTag }: Props) => (
   <Fragment>
     {tags.length
       ? tags.map((tag: string) => {
@@ -36,8 +36,8 @@ export const TagList: FunctionComponent<Props> = ({ tags = [], tagType = 'health
   </Fragment>
 );
 
-// TagList.propTypes = {
-//   tags: PropTypes.array,
-//   tagType: PropTypes.oneOf(['health', 'badge']),
-//   getTag: PropTypes.func.isRequired,
-// };
+TagList.propTypes = {
+  tags: PropTypes.array,
+  tagType: PropTypes.oneOf(['health', 'badge']),
+  getTag: PropTypes.func.isRequired,
+};

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, MouseEvent } from 'react';
-// import PropTypes from 'prop-types';
+import React, { MouseEvent } from 'react';
+import PropTypes from 'prop-types';
 // @ts-ignore untyped local
 import { Popover } from '../../../../../public/components/popover';
 import { PrettyDuration } from '../pretty_duration';
@@ -21,7 +21,7 @@ export interface Props {
   onSelect: (from: string, to: string) => void;
 }
 
-export const TimePickerPopover: FunctionComponent<Props> = ({ from, to, onSelect }) => {
+export const TimePickerPopover = ({ from, to, onSelect }: Props) => {
   const button = (handleClick: (event: MouseEvent<HTMLButtonElement>) => void) => (
     <button
       className="canvasTimePickerPopover__button"
@@ -47,8 +47,8 @@ export const TimePickerPopover: FunctionComponent<Props> = ({ from, to, onSelect
   );
 };
 
-// TimePickerPopover.propTypes = {
-//   from: PropTypes.string.isRequired,
-//   to: PropTypes.string.isRequired,
-//   onSelect: PropTypes.func.isRequired,
-// };
+TimePickerPopover.propTypes = {
+  from: PropTypes.string.isRequired,
+  to: PropTypes.string.isRequired,
+  onSelect: PropTypes.func.isRequired,
+};

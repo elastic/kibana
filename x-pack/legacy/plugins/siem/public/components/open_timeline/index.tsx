@@ -8,7 +8,6 @@ import ApolloClient from 'apollo-client';
 import React, { useEffect, useState, useCallback } from 'react';
 import { connect } from 'react-redux';
 
-import { Dispatch } from 'redux';
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
 import { deleteTimelineMutation } from '../../containers/timeline/delete/persist.gql_query';
 import { AllTimelinesVariables, AllTimelinesQuery } from '../../containers/timeline/all';
@@ -330,12 +329,6 @@ interface StateProps {
 }
 
 interface DispatchProps {
-  createNewTimeline: typeof dispatchCreateNewTimeline;
-  updateIsLoading: typeof dispatchUpdateIsLoading;
-  updateTimeline: typeof dispatchUpdateTimeline;
-}
-
-const mapDispatchToProps = (dispatch: Dispatch) => ({
   createNewTimeline: ({
     id,
     columns,

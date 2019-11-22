@@ -48,7 +48,7 @@ interface SiemSearchBarRedux {
   end: number;
   fromStr: string;
   isLoading: boolean;
-  queries: inputsModel.GlobalGraphqlQuery[];
+  queries: inputsModel.GlobalQuery[];
   filterQuery: Query;
   savedQuery?: SavedQuery;
   start: number;
@@ -300,14 +300,14 @@ const makeMapStateToProps = () => {
     const inputsRange: InputsRange = getOr({}, `inputs.${id}`, state);
     return {
       end: getEndSelector(inputsRange),
-      fromStr: getFromStrSelector(inputsRange),
+      fromStr: getFromStrSelector(inputsRange) as string,
       filterQuery: getFilterQuerySelector(inputsRange),
       isLoading: getIsLoadingSelector(inputsRange),
       kind: getKindSelector(inputsRange),
       queries: getQueriesSelector(inputsRange),
       savedQuery: getSavedQuerySelector(inputsRange),
       start: getStartSelector(inputsRange),
-      toStr: getToStrSelector(inputsRange),
+      toStr: getToStrSelector(inputsRange) as string,
     };
   };
 };

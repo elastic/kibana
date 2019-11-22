@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, ChangeEvent } from 'react';
-// import PropTypes from 'prop-types';
+import React, { ChangeEvent } from 'react';
+import PropTypes from 'prop-types';
 import { EuiFieldText } from '@elastic/eui';
 import moment, { Moment } from 'moment';
 
@@ -22,13 +22,7 @@ export interface Props {
   setValid: (valid: boolean) => void;
 }
 
-export const DatetimeInput: FunctionComponent<Props> = ({
-  strValue,
-  setStrValue,
-  setMoment,
-  valid,
-  setValid,
-}) => {
+export const DatetimeInput = ({ strValue, setStrValue, setMoment, valid, setValid }: Props) => {
   function check(e: ChangeEvent<HTMLInputElement>) {
     const parsed = moment(e.target.value, 'YYYY-MM-DD HH:mm:ss', true);
     if (parsed.isValid()) {
@@ -51,10 +45,10 @@ export const DatetimeInput: FunctionComponent<Props> = ({
   );
 };
 
-// DatetimeInput.propTypes = {
-//   setMoment: PropTypes.func,
-//   strValue: PropTypes.string,
-//   setStrValue: PropTypes.func,
-//   valid: PropTypes.bool,
-//   setValid: PropTypes.func,
-// };
+DatetimeInput.propTypes = {
+  setMoment: PropTypes.func,
+  strValue: PropTypes.string,
+  setStrValue: PropTypes.func,
+  valid: PropTypes.bool,
+  setValid: PropTypes.func,
+};

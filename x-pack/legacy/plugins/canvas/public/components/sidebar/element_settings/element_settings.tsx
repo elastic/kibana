@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent } from 'react';
-// import PropTypes from 'prop-types';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { EuiTabbedContent } from '@elastic/eui';
 // @ts-ignore unconverted component
 import { Datasource } from '../../datasource';
@@ -23,7 +23,7 @@ interface Props {
 
 const { ElementSettings: strings } = ComponentStrings;
 
-export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
+export const ElementSettings = ({ element }: Props) => {
   const tabs = [
     {
       id: 'edit',
@@ -50,6 +50,6 @@ export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
   return <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} size="s" />;
 };
 
-// ElementSettings.propTypes = {
-//   element: PropTypes.object,
-// };
+ElementSettings.propTypes = {
+  element: PropTypes.object,
+};

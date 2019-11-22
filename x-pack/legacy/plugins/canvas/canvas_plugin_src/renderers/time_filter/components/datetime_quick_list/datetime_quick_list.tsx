@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { ReactNode, FunctionComponent } from 'react';
-// import PropTypes from 'prop-types';
+import React, { ReactNode } from 'react';
+import PropTypes from 'prop-types';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import 'react-datetime/css/react-datetime.css';
 import { UnitStrings } from '../../../../../i18n';
@@ -35,7 +35,7 @@ const quickRanges = [
   { from: 'now-1y', to: 'now', display: strings.getLast1YearLabel() },
 ];
 
-export const DatetimeQuickList: FunctionComponent<Props> = ({ from, to, onSelect, children }) => (
+export const DatetimeQuickList = ({ from, to, onSelect, children }: Props) => (
   <div style={{ display: 'grid', alignItems: 'center' }}>
     {quickRanges.map((range, i) =>
       from === range.from && to === range.to ? (
@@ -52,9 +52,9 @@ export const DatetimeQuickList: FunctionComponent<Props> = ({ from, to, onSelect
   </div>
 );
 
-// DatetimeQuickList.propTypes = {
-//   from: PropTypes.string.isRequired,
-//   to: PropTypes.string.isRequired,
-//   onSelect: PropTypes.func.isRequired,
-//   children: PropTypes.node,
-// };
+DatetimeQuickList.propTypes = {
+  from: PropTypes.string.isRequired,
+  to: PropTypes.string.isRequired,
+  onSelect: PropTypes.func.isRequired,
+  children: PropTypes.node,
+};

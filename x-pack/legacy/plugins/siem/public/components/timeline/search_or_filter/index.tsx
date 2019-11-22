@@ -201,17 +201,17 @@ const makeMapStateToProps = () => {
     const policy: inputsModel.Policy = getInputsPolicy(state);
     return {
       dataProviders: timeline.dataProviders,
-      filterQuery: getKqlFilterQuery(state, timelineId),
-      filterQueryDraft: getKqlFilterQueryDraft(state, timelineId),
-      filters: timeline.filters,
+      filterQuery: getKqlFilterQuery(state, timelineId) as KueryFilterQuery,
+      filterQueryDraft: getKqlFilterQueryDraft(state, timelineId) as KueryFilterQuery,
+      filters: timeline.filters as esFilters.Filter[],
       from: input.timerange.from,
-      fromStr: input.timerange.fromStr,
+      fromStr: input.timerange.fromStr as string,
       isRefreshPaused: policy.kind === 'manual',
       kqlMode: getOr('filter', 'kqlMode', timeline),
       refreshInterval: policy.duration,
-      savedQueryId: getOr(null, 'savedQueryId', timeline),
+      savedQueryId: getOr(null, 'savedQueryId', timeline) as string,
       to: input.timerange.to,
-      toStr: input.timerange.toStr,
+      toStr: input.timerange.toStr as string,
     };
   };
   return mapStateToProps;
@@ -247,7 +247,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   updateReduxTime: dispatchUpdateReduxTime(dispatch),
 });
 
-export const StatefulSearchOrFilter = connect(
+export const StatefulSearchOrFilter = connect<StateReduxProps, DispatchProps, OwnProps, State>(
   makeMapStateToProps,
   mapDispatchToProps
 )(StatefulSearchOrFilterComponent);

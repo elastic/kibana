@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent } from 'react';
-// import PropTypes from 'prop-types';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { Moment } from 'moment';
-// import { momentObj } from 'react-moment-proptypes';
+import { momentObj } from 'react-moment-proptypes';
 import { EuiDatePicker } from '@elastic/eui';
 import { DatetimeInput } from '../datetime_input';
 
@@ -28,7 +28,7 @@ export interface Props {
   maxDate?: Moment;
 }
 
-export const DatetimeCalendar: FunctionComponent<Props> = ({
+export const DatetimeCalendar = ({
   value,
   onValueChange,
   onSelect,
@@ -36,7 +36,7 @@ export const DatetimeCalendar: FunctionComponent<Props> = ({
   endDate,
   minDate,
   maxDate,
-}) => (
+}: Props) => (
   <div className="canvasDateTimeCal">
     <DatetimeInput moment={value} setMoment={onValueChange} />
     <EuiDatePicker
@@ -54,12 +54,12 @@ export const DatetimeCalendar: FunctionComponent<Props> = ({
   </div>
 );
 
-// DatetimeCalendar.propTypes = {
-//   value: PropTypes.oneOfType([momentObj, PropTypes.object]), // Handle both valid and invalid moment objects
-//   onSelect: PropTypes.func.isRequired,
-//   onValueChange: PropTypes.func.isRequired, // Called with a moment
-//   startDate: momentObj,
-//   endDate: momentObj,
-//   minDate: momentObj,
-//   maxDate: momentObj,
-// };
+DatetimeCalendar.propTypes = {
+  value: PropTypes.oneOfType([momentObj, PropTypes.object]), // Handle both valid and invalid moment objects
+  onSelect: PropTypes.func.isRequired,
+  onValueChange: PropTypes.func.isRequired, // Called with a moment
+  startDate: momentObj,
+  endDate: momentObj,
+  minDate: momentObj,
+  maxDate: momentObj,
+};

@@ -5,8 +5,8 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-// import PropTypes from 'prop-types';
-import React, { FunctionComponent } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import { ComponentStrings } from '../../../../i18n';
 
 const { AdvancedFilter: strings } = ComponentStrings;
@@ -20,7 +20,7 @@ export interface Props {
   commit: (value: string) => void;
 }
 
-export const AdvancedFilter: FunctionComponent<Props> = ({ value = '', onChange, commit }) => (
+export const AdvancedFilter = ({ value = '', onChange, commit }: Props) => (
   <form
     onSubmit={e => {
       e.preventDefault();
@@ -51,8 +51,8 @@ AdvancedFilter.defaultProps = {
   value: '',
 };
 
-// AdvancedFilter.propTypes = {
-//   onChange: PropTypes.func.isRequired,
-//   value: PropTypes.string,
-//   commit: PropTypes.func.isRequired,
-// };
+AdvancedFilter.propTypes = {
+  onChange: PropTypes.func.isRequired,
+  value: PropTypes.string,
+  commit: PropTypes.func.isRequired,
+};

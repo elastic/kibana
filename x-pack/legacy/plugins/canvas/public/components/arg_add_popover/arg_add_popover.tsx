@@ -5,7 +5,7 @@
  */
 
 import React, { MouseEvent } from 'react';
-// import PropTypes from 'prop-types';
+import PropTypes from 'prop-types';
 import { EuiButtonIcon } from '@elastic/eui';
 // @ts-ignore untyped local
 import { Popover, PopoverChildrenProps } from '../popover';
@@ -61,6 +61,6 @@ export const ArgAddPopover = ({ options }: Props) => {
   );
 };
 
-// ArgAddPopover.propTypes = {
-//   options: PropTypes.array.isRequired,
-// };
+ArgAddPopover.propTypes = {
+  options: PropTypes.array.isRequired,
+};

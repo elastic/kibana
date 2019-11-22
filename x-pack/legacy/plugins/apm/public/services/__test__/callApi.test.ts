@@ -48,7 +48,7 @@ describe('callApi', () => {
     it('should not add debug param for non-APM endpoints', async () => {
       await callApi(http, { pathname: `/api/kibana` });
 
-      expect(http.get).toHaveBeenCalledWith('/api/kibana', {});
+      expect(http.get).toHaveBeenCalledWith('/api/kibana', { query: {} });
     });
   });
 

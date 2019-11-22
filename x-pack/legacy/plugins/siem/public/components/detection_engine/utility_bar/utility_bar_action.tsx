@@ -5,7 +5,7 @@
  */
 
 import { EuiPopover } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { LinkIcon, LinkIconProps } from '../../link_icon';
 import { BarAction } from './styles';
@@ -13,6 +13,8 @@ import { BarAction } from './styles';
 const Popover: React.FC<UtilityBarActionProps> = React.memo(
   ({ children, color, iconSide, iconSize, iconType, popoverContent }) => {
     const [popoverState, setPopoverState] = useState(false);
+
+    const closePopover = useCallback(() => setPopoverState(false), [setPopoverState]);
 
     return (
       <EuiPopover
@@ -30,7 +32,7 @@ const Popover: React.FC<UtilityBarActionProps> = React.memo(
         closePopover={() => setPopoverState(false)}
         isOpen={popoverState}
       >
-        {popoverContent}
+        {popoverContent?.(closePopover)}
       </EuiPopover>
     );
   }
@@ -38,7 +40,7 @@ const Popover: React.FC<UtilityBarActionProps> = React.memo(
 Popover.displayName = 'Popover';
 
 export interface UtilityBarActionProps extends LinkIconProps {
-  popoverContent?: React.ReactNode;
+  popoverContent?: (closePopover: () => void) => React.ReactNode;
 }
 
 export const UtilityBarAction: React.FC<UtilityBarActionProps> = React.memo(

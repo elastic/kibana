@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC, useEffect, useRef, useState } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 import moment from 'moment-timezone';
 
 import { i18n } from '@kbn/i18n';
@@ -68,7 +68,7 @@ interface PreviewTitleProps {
   previewRequest: PreviewRequestBody;
 }
 
-const PreviewTitle: SFC<PreviewTitleProps> = ({ previewRequest }) => {
+const PreviewTitle: FC<PreviewTitleProps> = ({ previewRequest }) => {
   const euiCopyText = i18n.translate('xpack.transform.pivotPreview.copyClipboardTooltip', {
     defaultMessage: 'Copy Dev Console statement of the pivot preview to the clipboard.',
   });
@@ -102,7 +102,7 @@ interface ErrorMessageProps {
   message: string;
 }
 
-const ErrorMessage: SFC<ErrorMessageProps> = ({ message }) => (
+const ErrorMessage: FC<ErrorMessageProps> = ({ message }) => (
   <EuiCodeBlock language="json" fontSize="s" paddingSize="s" isCopyable>
     {message}
   </EuiCodeBlock>
@@ -114,7 +114,7 @@ interface PivotPreviewProps {
   query: PivotQuery;
 }
 
-export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy, query }) => {
+export const PivotPreview: FC<PivotPreviewProps> = React.memo(({ aggs, groupBy, query }) => {
   const [clearTable, setClearTable] = useState(false);
 
   const indexPattern = useCurrentIndexPattern();

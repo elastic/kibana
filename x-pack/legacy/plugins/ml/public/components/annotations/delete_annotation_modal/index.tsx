@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import PropTypes from 'prop-types';
+import PropTypes from 'prop-types';
 import React, { Fragment } from 'react';
 
 import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
@@ -17,11 +17,7 @@ interface Props {
   isVisible: boolean;
 }
 
-export const DeleteAnnotationModal: React.SFC<Props> = ({
-  cancelAction,
-  deleteAction,
-  isVisible,
-}) => {
+export const DeleteAnnotationModal = ({ cancelAction, deleteAction, isVisible }: Props) => {
   return (
     <Fragment>
       {isVisible === true && (
@@ -57,8 +53,8 @@ export const DeleteAnnotationModal: React.SFC<Props> = ({
   );
 };
 
-// DeleteAnnotationModal.propTypes = {
-//   cancelAction: PropTypes.func.isRequired,
-//   deleteAction: PropTypes.func.isRequired,
-//   isVisible: PropTypes.bool.isRequired,
-// };
+DeleteAnnotationModal.propTypes = {
+  cancelAction: PropTypes.func.isRequired,
+  deleteAction: PropTypes.func.isRequired,
+  isVisible: PropTypes.bool.isRequired,
+};

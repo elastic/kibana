@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import PropTypes from 'prop-types';
-import React, { FunctionComponent, ReactNode } from 'react';
+import PropTypes from 'prop-types';
+import React, { ReactNode } from 'react';
 import tinycolor from 'tinycolor2';
 
 export interface Props {
@@ -15,7 +15,7 @@ export interface Props {
   children?: ReactNode;
 }
 
-export const ColorDot: FunctionComponent<Props> = ({ value, children }) => {
+export const ColorDot = ({ value, children }: Props) => {
   const tc = tinycolor(value);
   let style = {};
 
@@ -33,7 +33,7 @@ export const ColorDot: FunctionComponent<Props> = ({ value, children }) => {
   );
 };
 
-// ColorDot.propTypes = {
-//   value: PropTypes.string,
-//   children: PropTypes.node,
-// };
+ColorDot.propTypes = {
+  value: PropTypes.string,
+  children: PropTypes.node,
+};

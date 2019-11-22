@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent } from 'react';
-// import PropTypes from 'prop-types';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { EuiSwitch } from '@elastic/eui';
 
 export interface Props {
@@ -13,7 +13,7 @@ export interface Props {
   argValue: boolean;
 }
 
-export const SimpleTemplate: FunctionComponent<Props> = ({ onValueChange, argValue }) => {
+export const SimpleTemplate = ({ onValueChange, argValue }: Props) => {
   return (
     <EuiSwitch
       compressed
@@ -25,9 +25,9 @@ export const SimpleTemplate: FunctionComponent<Props> = ({ onValueChange, argVal
   );
 };
 
-// SimpleTemplate.propTypes = {
-//   onValueChange: PropTypes.func.isRequired,
-//   argValue: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]).isRequired,
-// };
+SimpleTemplate.propTypes = {
+  onValueChange: PropTypes.func.isRequired,
+  argValue: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]).isRequired,
+};
 
 SimpleTemplate.displayName = 'AxisConfigSimpleInput';

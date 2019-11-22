@@ -11,16 +11,13 @@ import { ActionCreator } from 'typescript-fsa';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { InputsModelId } from '../../store/inputs/constants';
+import { Refetch, InspectQuery } from '../../store/inputs/model';
 
 interface SetQuery {
   id: string;
   inspect: inputsModel.InspectQuery | null;
   loading: boolean;
-  refetch: inputsModel.Refetch | inputsModel.RefetchKql;
-}
-
-interface GlobalQuery extends SetQuery {
-  inputId: InputsModelId;
+  refetch: inputsModel.Refetch;
 }
 
 export interface GlobalTimeArgs {
@@ -32,7 +29,13 @@ export interface GlobalTimeArgs {
 }
 
 interface GlobalTimeDispatch {
-  setGlobalQuery: ActionCreator<GlobalQuery>;
+  setGlobalQuery: ActionCreator<{
+    inputId: InputsModelId;
+    id: string;
+    loading: boolean;
+    refetch: Refetch;
+    inspect: InspectQuery | null;
+  }>;
   deleteAllQuery: ActionCreator<{ id: InputsModelId }>;
   deleteOneQuery: ActionCreator<{ inputId: InputsModelId; id: string }>;
 }
@@ -83,11 +86,8 @@ const mapStateToProps = (state: State) => {
   };
 };
 
-export const GlobalTime = connect<GlobalTimeReduxState, GlobalTimeDispatch, OwnProps, State>(
-  mapStateToProps,
-  {
-    deleteAllQuery: inputsActions.deleteAllQuery,
-    deleteOneQuery: inputsActions.deleteOneQuery,
-    setGlobalQuery: inputsActions.setQuery,
-  }
-)(GlobalTimeComponent);
+export const GlobalTime = connect(mapStateToProps, {
+  deleteAllQuery: inputsActions.deleteAllQuery,
+  deleteOneQuery: inputsActions.deleteOneQuery,
+  setGlobalQuery: inputsActions.setQuery,
+})(GlobalTimeComponent);

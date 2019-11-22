@@ -23,7 +23,7 @@ interface ChildFunctionRendererOptions<RenderArgs extends {}> {
 }
 
 export const asChildFunctionRenderer = <InjectedProps extends {}, OwnProps>(
-  hoc: InferableComponentEnhancerWithProps<>;
+  hoc: InferableComponentEnhancerWithProps<InjectedProps, OwnProps>,
   { onInitialize, onCleanup }: ChildFunctionRendererOptions<InjectedProps> = {}
 ) =>
   hoc(
