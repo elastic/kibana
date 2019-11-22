@@ -576,7 +576,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     this.logger.debug('Single logout has been initiated by the Identity Provider.');
 
     // Prefer realm name if it's specified, otherwise fallback to ACS.
-    const invalidatePayload = this.realm ? { realm: this.realm } : { acs: this.getACS(request) };
+    const invalidatePayload = this.realm ? { realm: this.realm } : { acs: this.getACS() };
 
     // This operation should be performed on behalf of the user with a privilege that normal
     // user usually doesn't have `cluster:admin/xpack/security/saml/invalidate`.
