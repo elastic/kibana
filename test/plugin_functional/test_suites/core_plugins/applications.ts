@@ -107,7 +107,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       expect(await testSubjects.exists('headerGlobalNav')).to.be(true);
     });
 
-    it('can navigate from NP apps to legacy apps', async () => {
+    it.skip('can navigate from NP apps to legacy apps', async () => {
       await appsMenu.clickLink('Management');
       await loadingScreenShown();
       await testSubjects.existOrFail('managementNav');
