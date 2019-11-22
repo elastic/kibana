@@ -18,7 +18,7 @@ export default function({ getService }: FtrProviderContext) {
   const transform = getService('transform');
 
   describe('creation_saved_search', function() {
-    this.tags(['smoke', 'walterra']);
+    this.tags(['smoke']);
     before(async () => {
       await esArchiver.load('ml/farequote');
     });

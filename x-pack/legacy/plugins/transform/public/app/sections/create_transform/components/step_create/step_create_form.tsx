@@ -147,8 +147,8 @@ export const StepCreateForm: FC<Props> = React.memo(
     }
 
     async function createAndStartTransform() {
-      const success = await createTransform();
-      if (success) {
+      const acknowledged = await createTransform();
+      if (acknowledged) {
         await startTransform();
       }
     }

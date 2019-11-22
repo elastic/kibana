@@ -66,8 +66,8 @@ export default function({ getService }: FtrProviderContext) {
             progress: '100',
           },
           sourcePreview: {
-            column: 3,
-            values: ['Ahmed Al', 'Kamal', 'Robert'],
+            columns: 6,
+            rows: 5,
           },
         },
       },
@@ -105,9 +105,9 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         it('shows the source index preview', async () => {
-          await transform.wizard.assertSourceIndexPreviewColumnValues(
-            testData.expected.sourcePreview.column,
-            testData.expected.sourcePreview.values
+          await transform.wizard.assertSourceIndexPreview(
+            testData.expected.sourcePreview.columns,
+            testData.expected.sourcePreview.rows
           );
         });
 

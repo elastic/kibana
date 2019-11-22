@@ -116,7 +116,29 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
         uniqueColumnValues.sort();
 
         // check if the returned unique value matches the supplied filter value
-        expect(uniqueColumnValues).to.eql(expectedColumnValues);
+        expect(uniqueColumnValues).to.eql(
+          expectedColumnValues,
+          `Unique EuiInMemoryTable column values should be '${expectedColumnValues.join()}' (got ${uniqueColumnValues.join()})`
+        );
+      });
+    },
+
+    async assertSourceIndexPreview(columns: number, rows: number) {
+      await retry.tryForTime(2000, async () => {
+        // get a 2D array of rows and cell values
+        const rowsData = await this.parseEuiInMemoryTable('transformSourceIndexPreview');
+
+        expect(rowsData).to.length(
+          rows,
+          `EuiInMemoryTable rows should be ${rows} (got ${rowsData.length})`
+        );
+
+        rowsData.map((r, i) =>
+          expect(r).to.length(
+            columns,
+            `EuiInMemoryTable row #${i + 1} column count should be ${columns} (got ${r.length})`
+          )
+        );
       });
     },
 
