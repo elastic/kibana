@@ -7,14 +7,13 @@
 import React from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import moment from 'moment-timezone';
-import { template, templateSettings } from 'lodash';
 import styled from 'styled-components';
 import { Redirect } from 'react-router-dom';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { convertTo, getDateDifference } from '../../../utils/formatters';
 import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
-import { routes } from '../Main/route_config';
+import { generatePath } from '../Main/route_config';
 import { RouteName } from '../Main/route_config/route_names';
 
 interface RedirectType {
@@ -27,23 +26,11 @@ const CentralizedContainer = styled.div`
   display: flex;
 `;
 
-const getPathName = (routeName: string, pathParms?: object) => {
-  const route = routes.find(({ name }) => name === routeName);
-  if (route && route.path) {
-    const { path } = route;
-    // Matches any string with ':param/'
-    templateSettings.interpolate = /:([\s\S].+?(?=\/))/;
-    return pathParms ? template(path)(pathParms) : path;
-  }
-
-  return '/';
-};
-
 const redirectToTransactionDetailPage = (
   traceId: string,
   transaction: Transaction
 ): RedirectType => {
-  const pathname = getPathName(RouteName.TRANSACTION_NAME, {
+  const pathname = generatePath(RouteName.TRANSACTION_NAME, {
     serviceName: transaction.service.name
   });
 
@@ -74,7 +61,7 @@ const getDiffDays = (microseconds: number) => {
 };
 
 const redirectToTracePage = (traceId: string): RedirectType => ({
-  pathname: getPathName(RouteName.TRACES),
+  pathname: generatePath(RouteName.TRACES),
   search: `?kuery=${encodeURIComponent(`trace.id : "${traceId}"`)}`
 });
 

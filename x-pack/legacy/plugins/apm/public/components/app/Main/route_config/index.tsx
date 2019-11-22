@@ -219,3 +219,28 @@ export function getRoutes({
 
   return routes;
 }
+
+export const getRouteByName = (routeName: string) =>
+  routes.find(({ name }) => name === routeName);
+
+/**
+ * Generates the path converting the params:
+ * ie:
+ * path: /services/:serviceName/service-map
+ * pathParams: {serviceName: 'opbeans-ruby'}
+ * Will be converted to: /services/opbeans-ruby/service-map
+ *
+ * @param routeName
+ * @param pathParams
+ */
+export const generatePath = (routeName: string, pathParams?: object) => {
+  const route = getRouteByName(routeName);
+  if (route && route.path) {
+    const { path } = route;
+    // Matches any string with ':param/'
+    templateSettings.interpolate = /:([\s\S].+?(?=\/))/;
+    return pathParams ? template(path)(pathParams) : path;
+  }
+
+  return '/';
+};
