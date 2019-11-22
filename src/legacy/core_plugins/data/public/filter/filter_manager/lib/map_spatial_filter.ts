@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { FILTERS } from '@kbn/es-query';
+import { Filter, FILTERS } from '@kbn/es-query';
 
 // Use mapSpatialFilter mapper to avoid bloated meta with value and params for spatial filters.
-export const mapSpatialFilter = (filter: esFilters.Filter) => {
+export const mapSpatialFilter = (filter: Filter) => {
   const metaProperty = /(^\$|meta)/;
   const key = Object.keys(filter).find(item => {
     return !item.match(metaProperty);
