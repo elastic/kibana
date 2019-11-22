@@ -11,7 +11,7 @@ import { APMPlugin } from './plugin';
 
 export const config = {
   schema: schema.object({
-    servicemapEnabled: schema.boolean({ defaultValue: false }),
+    serviceMapEnabled: schema.boolean({ defaultValue: false }),
     autocreateApmIndexPattern: schema.boolean({ defaultValue: true }),
     'ui.transactionGroupBucketSize': schema.number({ defaultValue: 100 }),
     'ui.maxTraceItems': schema.number({ defaultValue: 1000 }),
@@ -29,7 +29,7 @@ export function mergeConfigs(apmOssConfig: APMOSSConfig, apmConfig: APMXPackConf
     'apm_oss.sourcemapIndices': apmOssConfig.sourcemapIndices,
     'apm_oss.onboardingIndices': apmOssConfig.onboardingIndices,
     'apm_oss.indexPattern': apmOssConfig.indexPattern,
-    'xpack.apm.servicemapEnabled': apmConfig.servicemapEnabled,
+    'xpack.apm.serviceMapEnabled': apmConfig.serviceMapEnabled,
     'xpack.apm.ui.maxTraceItems': apmConfig['ui.maxTraceItems'],
     'xpack.apm.ui.transactionGroupBucketSize': apmConfig['ui.transactionGroupBucketSize'],
     'xpack.apm.autocreateApmIndexPattern': apmConfig.autocreateApmIndexPattern,
