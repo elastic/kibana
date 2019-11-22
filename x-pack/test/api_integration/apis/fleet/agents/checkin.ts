@@ -21,29 +21,27 @@ export default function(providerContext: FtrProviderContext) {
   describe('fleet_agents_checkin', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('fleet/agents');
-      const options = {
-        method: 'POST',
-        path: '/_security/api_key',
+
+      const { body: apiKeyBody } = await esClient.security.createApiKey({
         body: {
           name: `test access api key: ${uuid.v4()}`,
         },
-      };
-
-      // @ts-ignore
-      apiKey = await esClient.transport.request(options);
-      const { _source: agentDoc } = await esClient.get({
+      });
+      apiKey = apiKeyBody;
+      const {
+        body: { _source: agentDoc },
+      } = await esClient.get({
         index: '.kibana',
         id: 'agents:agent1',
       });
-      // @ts-ignore
       agentDoc.agents.access_api_key_id = apiKey.id;
       await esClient.update({
         index: '.kibana',
         id: 'agents:agent1',
+        refresh: 'true',
         body: {
           doc: agentDoc,
         },
-        refresh: true,
       });
     });
     after(async () => {

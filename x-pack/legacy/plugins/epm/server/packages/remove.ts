@@ -6,19 +6,14 @@
 
 import { SavedObjectsClientContract } from 'src/core/server/';
 import { SAVED_OBJECT_TYPE } from '../../common/constants';
-import {
-  getInstallationObject,
-  assetUsesObjects,
-  CallESAsCurrentUser,
-  getPackageInfo,
-} from './index';
-import { AssetType } from '../../common/types';
+import { getInstallationObject, savedObjectTypes, CallESAsCurrentUser } from './index';
+import { AssetReference, AssetType } from '../../common/types';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
   callCluster: CallESAsCurrentUser;
-}) {
+}): Promise<AssetReference[]> {
   const { savedObjectsClient, pkgkey, callCluster } = options;
   const installation = await getInstallationObject({ savedObjectsClient, pkgkey });
   const installedObjects = (installation && installation.attributes.installed) || [];
@@ -30,7 +25,7 @@ export async function removeInstallation(options: {
   // Delete the installed assets
   const deletePromises = installedObjects.map(async ({ id, type }) => {
     const assetType = type as AssetType;
-    if (assetUsesObjects(assetType)) {
+    if (savedObjectTypes.includes(assetType)) {
       savedObjectsClient.delete(assetType, id);
     } else if (assetType === 'ingest-pipeline') {
       deletePipeline(callCluster, id);
@@ -39,9 +34,7 @@ export async function removeInstallation(options: {
   await Promise.all(deletePromises);
 
   // successful delete's in SO client return {}. return something more useful
-  const packageInfo = await getPackageInfo({ savedObjectsClient, pkgkey });
-
-  return packageInfo;
+  return installedObjects;
 }
 
 async function deletePipeline(callCluster: CallESAsCurrentUser, id: string): Promise<void> {

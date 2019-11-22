@@ -7,7 +7,7 @@
 import { SignalSourceHit, SignalSearchResponse, SignalAlertParams } from '../types';
 
 export const sampleSignalAlertParams = (maxSignals: number | undefined): SignalAlertParams => ({
-  id: 'rule-1',
+  ruleId: 'rule-1',
   description: 'Detecting root and admin users',
   falsePositives: [],
   immutable: false,
@@ -148,3 +148,5 @@ export const sampleDocSearchResultsWithSortId: SignalSearchResponse = {
     ],
   },
 };
+
+export const sampleSignalId = '04128c15-0d1b-4716-a4c5-46997ac7f3bd';

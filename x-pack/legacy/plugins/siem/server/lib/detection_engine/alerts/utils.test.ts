@@ -20,6 +20,7 @@ import {
   sampleDocSearchResultsWithSortId,
   sampleEmptyDocSearchResults,
   repeatedSearchResultsWithSortId,
+  sampleSignalId,
 } from './__mocks__/es_results';
 
 const mockLogger: Logger = {
@@ -45,14 +46,15 @@ describe('utils', () => {
   describe('buildBulkBody', () => {
     test('if bulk body builds well-defined body', () => {
       const sampleParams = sampleSignalAlertParams(undefined);
-      const fakeSignalSourceHit = buildBulkBody(sampleDocNoSortId, sampleParams);
+      const fakeSignalSourceHit = buildBulkBody(sampleDocNoSortId, sampleParams, sampleSignalId);
       expect(fakeSignalSourceHit).toEqual({
         someKey: 'someValue',
         '@timestamp': 'someTimeStamp',
         signal: {
+          id: sampleSignalId,
           '@timestamp': fakeSignalSourceHit.signal['@timestamp'], // timestamp generated in the body
           rule_revision: 1,
-          rule_id: sampleParams.id,
+          rule_id: sampleParams.ruleId,
           rule_type: sampleParams.type,
           parent: {
             id: sampleDocNoSortId._id,
@@ -87,7 +89,8 @@ describe('utils', () => {
         sampleSearchResult,
         sampleParams,
         mockService,
-        mockLogger
+        mockLogger,
+        sampleSignalId
       );
       expect(successfulSingleBulkIndex).toEqual(true);
     });
@@ -99,7 +102,8 @@ describe('utils', () => {
         sampleSearchResult,
         sampleParams,
         mockService,
-        mockLogger
+        mockLogger,
+        sampleSignalId
       );
       expect(successfulSingleBulkIndex).toEqual(true);
     });
@@ -115,7 +119,8 @@ describe('utils', () => {
         sampleSearchResult,
         sampleParams,
         mockService,
-        mockLogger
+        mockLogger,
+        sampleSignalId
       );
       expect(mockLogger.error).toHaveBeenCalled();
       expect(successfulSingleBulkIndex).toEqual(false);
@@ -160,7 +165,8 @@ describe('utils', () => {
         sampleEmptyDocSearchResults,
         sampleParams,
         mockService,
-        mockLogger
+        mockLogger,
+        sampleSignalId
       );
       expect(mockService.callCluster).toHaveBeenCalledTimes(0);
       expect(result).toEqual(true);
@@ -201,7 +207,8 @@ describe('utils', () => {
         repeatedSearchResultsWithSortId(4),
         sampleParams,
         mockService,
-        mockLogger
+        mockLogger,
+        sampleSignalId
       );
       expect(mockService.callCluster).toHaveBeenCalledTimes(5);
       expect(result).toEqual(true);
@@ -216,7 +223,8 @@ describe('utils', () => {
         repeatedSearchResultsWithSortId(4),
         sampleParams,
         mockService,
-        mockLogger
+        mockLogger,
+        sampleSignalId
       );
       expect(mockLogger.error).toHaveBeenCalled();
       expect(result).toEqual(false);
@@ -237,7 +245,8 @@ describe('utils', () => {
         sampleDocSearchResultsNoSortId,
         sampleParams,
         mockService,
-        mockLogger
+        mockLogger,
+        sampleSignalId
       );
       expect(mockLogger.error).toHaveBeenCalled();
       expect(result).toEqual(false);
@@ -257,7 +266,8 @@ describe('utils', () => {
         sampleDocSearchResultsNoSortIdNoHits,
         sampleParams,
         mockService,
-        mockLogger
+        mockLogger,
+        sampleSignalId
       );
       expect(result).toEqual(true);
     });
@@ -278,7 +288,30 @@ describe('utils', () => {
         repeatedSearchResultsWithSortId(4),
         sampleParams,
         mockService,
-        mockLogger
+        mockLogger,
+        sampleSignalId
+      );
+      expect(result).toEqual(true);
+    });
+    test('if successful iteration of while loop with maxDocs and search after returns empty results with no sort ids', async () => {
+      const sampleParams = sampleSignalAlertParams(10);
+      mockService.callCluster
+        .mockReturnValueOnce({
+          took: 100,
+          errors: false,
+          items: [
+            {
+              fakeItemValue: 'fakeItemKey',
+            },
+          ],
+        })
+        .mockReturnValueOnce(sampleEmptyDocSearchResults);
+      const result = await searchAfterAndBulkIndex(
+        repeatedSearchResultsWithSortId(4),
+        sampleParams,
+        mockService,
+        mockLogger,
+        sampleSignalId
       );
       expect(result).toEqual(true);
     });
@@ -300,7 +333,8 @@ describe('utils', () => {
         repeatedSearchResultsWithSortId(4),
         sampleParams,
         mockService,
-        mockLogger
+        mockLogger,
+        sampleSignalId
       );
       expect(mockLogger.error).toHaveBeenCalled();
       expect(result).toEqual(true);
@@ -322,7 +356,8 @@ describe('utils', () => {
         repeatedSearchResultsWithSortId(4),
         sampleParams,
         mockService,
-        mockLogger
+        mockLogger,
+        sampleSignalId
       );
       expect(result).toEqual(false);
     });

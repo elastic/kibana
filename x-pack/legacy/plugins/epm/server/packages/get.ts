@@ -6,7 +6,7 @@
 
 import { SavedObjectsClientContract } from 'src/core/server/';
 import { SAVED_OBJECT_TYPE } from '../../common/constants';
-import { InstallationAttributes } from '../../common/types';
+import { InstallationAttributes, Installed, Installation, NotInstalled } from '../../common/types';
 import * as Registry from '../registry';
 import { createInstallableFrom } from './index';
 
@@ -51,7 +51,7 @@ export async function getPackages(
 export async function getPackageInfo(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
-}) {
+}): Promise<Installed | NotInstalled> {
   const { savedObjectsClient, pkgkey } = options;
   const [item, savedObject] = await Promise.all([
     Registry.fetchInfo(pkgkey),
@@ -74,7 +74,7 @@ export async function getPackageInfo(options: {
 export async function getInstallationObject(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
-}) {
+}): Promise<Installation | undefined> {
   const { savedObjectsClient, pkgkey } = options;
   return savedObjectsClient
     .get<InstallationAttributes>(SAVED_OBJECT_TYPE, pkgkey)

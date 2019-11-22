@@ -5,13 +5,13 @@
  */
 
 import { npSetup } from 'ui/new_platform';
-import { FeatureCatalogueCategory } from '../../../../../src/plugins/feature_catalogue/public';
+import { FeatureCatalogueCategory } from '../../../../../src/plugins/home/public';
 import { PLUGIN } from '../common/constants';
 import { patterns } from './routes';
 
 // This defines what shows up in the registry found at /app/kibana#/home and /app/kibana#/home/feature_directory
-if (npSetup.plugins.feature_catalogue) {
-  npSetup.plugins.feature_catalogue.register({
+if (npSetup.plugins.home && npSetup.plugins.home.featureCatalogue) {
+  npSetup.plugins.home.featureCatalogue.register({
     id: PLUGIN.ID,
     title: PLUGIN.TITLE,
     description: PLUGIN.DESCRIPTION,

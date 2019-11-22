@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AssetType, Request, ResponseToolkit } from '../../common/types';
 import { API_ROOT } from '../../common/routes';
-import { PluginContext } from '../plugin';
-import { getClient } from '../saved_objects';
+import { AssetType } from '../../common/types';
 import {
   SearchParams,
   getCategories,
@@ -18,6 +16,9 @@ import {
   installPackage,
   removeInstallation,
 } from './index';
+import { PluginContext } from '../plugin';
+import { getClient } from '../saved_objects';
+import { Request, ResponseToolkit } from '../types';
 
 interface Extra extends ResponseToolkit {
   context: PluginContext;
@@ -58,7 +59,7 @@ export async function handleGetInfo(req: PackageInfoRequest, extra: Extra) {
   return getPackageInfo({ savedObjectsClient, pkgkey });
 }
 
-export const handleGetFile = async (req: Request, extra: Extra) => {
+export async function handleGetFile(req: Request, extra: Extra) {
   if (!req.url.path) throw new Error('path is required');
   const filePath = req.url.path.replace(API_ROOT, '');
   const registryResponse = await getFile(filePath);
@@ -70,7 +71,7 @@ export const handleGetFile = async (req: Request, extra: Extra) => {
   });
 
   return epmResponse;
-};
+}
 
 export async function handleRequestInstall(req: InstallDeletePackageRequest, extra: Extra) {
   const { pkgkey } = req.params;

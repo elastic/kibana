@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function createAlertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   describe('create', () => {
     const objectRemover = new ObjectRemover(supertest);
@@ -37,12 +37,13 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       expect(response.body).to.eql({
         id: response.body.id,
         name: 'abc',
+        tags: ['foo'],
         actions: [],
         enabled: true,
         alertTypeId: 'test.noop',
         alertTypeParams: {},
         createdBy: null,
-        interval: '10s',
+        interval: '1m',
         scheduledTaskId: response.body.scheduledTaskId,
         updatedBy: null,
         throttle: '1m',

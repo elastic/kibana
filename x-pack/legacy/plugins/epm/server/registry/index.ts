@@ -11,6 +11,7 @@ import {
   AssetParts,
   CategoryId,
   CategorySummaryList,
+  KibanaAssetType,
   RegistryList,
   RegistryPackage,
 } from '../../common/types';
@@ -120,15 +121,17 @@ export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByTy
   // ASK: best way, if any, to avoid `any`?
   const assets = paths.reduce((map: any, path) => {
     const parts = pathParts(path.replace(/^\/package\//, ''));
-    if (!map[parts.service]) map[parts.service] = {};
-    if (!map[parts.service][parts.type]) map[parts.service][parts.type] = [];
-    map[parts.service][parts.type].push(parts);
+    if (parts.type in KibanaAssetType) {
+      if (!map[parts.service]) map[parts.service] = {};
+      if (!map[parts.service][parts.type]) map[parts.service][parts.type] = [];
+      map[parts.service][parts.type].push(parts);
+    }
 
     return map;
   }, {});
 
   return {
     kibana: assets.kibana,
-    elasticsearch: assets.elasticsearch,
+    // elasticsearch: assets.elasticsearch,
   };
 }

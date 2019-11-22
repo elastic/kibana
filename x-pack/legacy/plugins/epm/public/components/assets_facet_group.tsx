@@ -74,12 +74,10 @@ export function AssetsFacetGroup({ assets }: { assets: AssetsGroupedByServiceByT
             </Header>
 
             <FacetGroup>
-              {entries(filteredTypes).map(([type, parts]) => {
-                let iconType = null;
-                if (type in AssetIcons) {
-                  // only kibana assets have icons
-                  iconType = AssetIcons[type as KibanaAssetType];
-                }
+              {entries(filteredTypes).map(([_type, parts]) => {
+                const type = _type as KibanaAssetType;
+                // only kibana assets have icons
+                const iconType = type in AssetIcons && AssetIcons[type];
                 const iconNode = iconType ? <EuiIcon type={iconType} size="s" /> : '';
                 const FacetButton = styled(EuiFacetButton)`
                   padding: '${theme.eui.paddingSizes.xs} 0';

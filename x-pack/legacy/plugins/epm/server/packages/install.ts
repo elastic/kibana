@@ -6,15 +6,15 @@
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server/';
 import { SAVED_OBJECT_TYPE } from '../../common/constants';
-import { AssetReference, AssetType, InstallationAttributes } from '../../common/types';
+import { AssetReference, KibanaAssetType, InstallationAttributes } from '../../common/types';
 import * as Registry from '../registry';
-import { getInstallationObject, getPackageInfo } from './index';
+import { getInstallationObject } from './index';
 import { getObjects } from './get_objects';
 
 export async function installPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
-}) {
+}): Promise<AssetReference[] | []> {
   const { savedObjectsClient, pkgkey } = options;
 
   const toSave = await installAssets({
@@ -24,14 +24,14 @@ export async function installPackage(options: {
 
   if (toSave.length) {
     // Save those references in the package manager's state saved object
-    await saveInstallationReferences({
+    return saveInstallationReferences({
       savedObjectsClient,
       pkgkey,
       toSave,
     });
   }
 
-  return getPackageInfo({ savedObjectsClient, pkgkey });
+  return [];
 }
 
 // the function which how to install each of the various asset types
@@ -45,8 +45,7 @@ export async function installAssets(options: {
 
   // Only install certain Kibana assets during package installation.
   // All other asset types need special handling
-  const typesToInstall: AssetType[] = ['visualization', 'dashboard', 'search'];
-
+  const typesToInstall = Object.values(KibanaAssetType);
   const installationPromises = typesToInstall.map(async assetType =>
     installKibanaSavedObjects({ savedObjectsClient, pkgkey, assetType })
   );
@@ -72,11 +71,13 @@ export async function saveInstallationReferences(options: {
 
   const toInstall = toSave.reduce(mergeRefsReducer, savedRefs || []);
 
-  return savedObjectsClient.create<InstallationAttributes>(
+  await savedObjectsClient.create<InstallationAttributes>(
     SAVED_OBJECT_TYPE,
     { installed: toInstall },
     { id: pkgkey, overwrite: true }
   );
+
+  return toInstall;
 }
 
 async function installKibanaSavedObjects({
@@ -86,7 +87,7 @@ async function installKibanaSavedObjects({
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
-  assetType: AssetType;
+  assetType: KibanaAssetType;
 }) {
   const isSameType = ({ path }: Registry.ArchiveEntry) =>
     assetType === Registry.pathParts(path).type;
