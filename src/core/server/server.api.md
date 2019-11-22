@@ -519,6 +519,8 @@ export interface CoreSetup {
 
 // @public
 export interface CoreStart {
+    // (undocumented)
+    savedObjects: SavedObjectsServiceStart;
 }
 
 // @public
