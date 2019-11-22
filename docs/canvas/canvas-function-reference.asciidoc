@@ -2024,9 +2024,7 @@ Default: `${containerStyle}`
 |`string`
 |Any block of custom CSS to be scoped to the element.
 
-Default: `".canvasRenderEl${
-
-}"`
+Default: `".canvasRenderEl${}"`
 |===
 
 *Returns:* `render`
