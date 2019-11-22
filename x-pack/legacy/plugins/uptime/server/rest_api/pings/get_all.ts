@@ -29,7 +29,7 @@ export const createGetAllRoute: UMRestApiRouteCreator = (libs: UMServerLibs) => 
     {
       core: {
         elasticsearch: {
-          dataClient: { callAsInternalUser },
+          dataClient: { callAsCurrentUser },
         },
       },
     },
@@ -38,7 +38,7 @@ export const createGetAllRoute: UMRestApiRouteCreator = (libs: UMServerLibs) => 
   ): Promise<any> => {
     const { size, sort, dateRangeStart, dateRangeEnd, location, monitorId, status } = request.query;
 
-    const result = await libs.pings.getAll(callAsInternalUser, {
+    const result = await libs.pings.getAll(callAsCurrentUser, {
       dateRangeStart,
       dateRangeEnd,
       monitorId,
