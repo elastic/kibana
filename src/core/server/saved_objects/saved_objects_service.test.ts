@@ -54,7 +54,7 @@ describe('SavedObjectsService', () => {
         legacy: { uiExports: { savedObjectMappings: [] }, pluginExtendedConfig: {} },
       } as unknown) as SavedObjectsSetupDeps;
 
-      await soService.setup(coreSetup);
+      await soService.setup(coreSetup, 1);
 
       return expect((KibanaMigrator as jest.Mock).mock.calls[0][0].callCluster()).resolves.toMatch(
         'success'
