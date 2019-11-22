@@ -5,7 +5,7 @@
  */
 
 import { EuiButton, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback } from 'react';
 
 import {
   getUseField,
@@ -27,8 +27,6 @@ import * as I18n from './translations';
 const CommonUseField = getUseField({ component: Field });
 
 export const StepAboutRule = memo<RuleStepProps>(({ isLoading, setStepData }) => {
-  const [riskScore, setRiskScore] = useState(50);
-
   const { form } = useForm({
     schema,
     defaultValue,
@@ -88,7 +86,6 @@ export const StepAboutRule = memo<RuleStepProps>(({ isLoading, setStepData }) =>
             idAria: 'detectionEngineStepAboutRuleRiskScore',
             'data-test-subj': 'detectionEngineStepAboutRuleRiskScore',
             euiFieldProps: {
-              value: riskScore,
               compressed: true,
               fullWidth: false,
               isDisabled: isLoading,
@@ -133,8 +130,9 @@ export const StepAboutRule = memo<RuleStepProps>(({ isLoading, setStepData }) =>
         <FormDataProvider pathsToWatch="severity">
           {({ severity }) => {
             const newRiskScore = defaultRiskScoreBySeverity[severity as SeverityValue];
-            if (newRiskScore != null && riskScore !== newRiskScore) {
-              setRiskScore(newRiskScore);
+            const riskScoreField = form.getFields().riskScore;
+            if (newRiskScore != null && riskScoreField.value !== newRiskScore) {
+              riskScoreField.setValue(newRiskScore);
             }
             return null;
           }}

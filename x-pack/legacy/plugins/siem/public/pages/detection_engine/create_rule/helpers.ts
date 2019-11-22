@@ -68,10 +68,11 @@ const formatScheduleStepData = (scheduleData: ScheduleStepRule): ScheduleStepRul
 };
 
 const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRuleJson => {
-  const { falsePositives, riskScore, ...rest } = aboutStepData;
+  const { falsePositives, references, riskScore, ...rest } = aboutStepData;
 
   return {
-    false_positives: falsePositives,
+    false_positives: falsePositives.filter(item => !isEmpty(item)),
+    references: references.filter(item => !isEmpty(item)),
     risk_score: riskScore,
     ...rest,
   };

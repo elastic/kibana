@@ -5,18 +5,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { EuiText } from '@elastic/eui';
 import { fromKueryExpression } from '@kbn/es-query';
 import { isEmpty } from 'lodash/fp';
+import React from 'react';
 
 import {
   FormSchema,
   FIELD_TYPES,
   ValidationFunc,
 } from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
-import {
-  // fieldFormatters,
-  fieldValidators,
-} from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/helpers';
+import { fieldValidators } from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/helpers';
 import { ERROR_CODE } from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/helpers/field_validators/types';
 
 import * as globalI18n from '../../translations';
@@ -79,10 +78,10 @@ export const schema: FormSchema = {
   },
   index: {
     type: FIELD_TYPES.COMBO_BOX,
-    label: i18n.translate('xpack.siem.detectionEngine.createRule.stepAboutRule.fieldTagsLabel', {
+    label: i18n.translate('xpack.siem.detectionEngine.createRule.stepAboutRule.fiedIndicesLabel', {
       defaultMessage: 'Indices',
     }),
-    labelAppend: globalI18n.OPTIONAL_FIELD,
+    labelAppend: <EuiText size="xs">{globalI18n.OPTIONAL_FIELD}</EuiText>,
     validations: [
       {
         validator: emptyField(
@@ -107,8 +106,7 @@ export const schema: FormSchema = {
       {
         validator: (
           ...args: Parameters<ValidationFunc>
-        ): // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ReturnType<ValidationFunc<any, ERROR_CODE>> | undefined => {
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ value, path }] = args;
           const { query, filters } = value as FieldValueQueryBar;
           return isEmpty(query.query as string) && isEmpty(filters)
@@ -123,8 +121,7 @@ export const schema: FormSchema = {
       {
         validator: (
           ...args: Parameters<ValidationFunc>
-        ): // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ReturnType<ValidationFunc<any, ERROR_CODE>> | undefined => {
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ value, path }] = args;
           const { query } = value as FieldValueQueryBar;
           if (!isEmpty(query.query as string) && query.language === 'kuery') {

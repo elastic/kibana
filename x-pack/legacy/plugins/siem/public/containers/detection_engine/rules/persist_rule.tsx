@@ -37,7 +37,7 @@ export const usePersistRule = (): Return => {
       if (rule != null) {
         try {
           setIsLoading(true);
-          await persistRule({ rule, kbnVersion });
+          await persistRule({ rule, kbnVersion, signal: abortCtrl.signal });
 
           if (isSubscribed) {
             setIsSaved(true);

@@ -21,28 +21,28 @@ export const ADD_FALSE_POSITIVE = i18n.translate(
 );
 
 export const LOW = i18n.translate(
-  'xpack.siem.detectionEngine.createRule.stepAboutRuleForm.severityOptionLowDexcripton',
+  'xpack.siem.detectionEngine.createRule.stepAboutRuleForm.severityOptionLowDescription',
   {
     defaultMessage: 'Low',
   }
 );
 
 export const MEDIUM = i18n.translate(
-  'xpack.siem.detectionEngine.createRule.stepAboutRuleForm.severityOptionMediumDexcripton',
+  'xpack.siem.detectionEngine.createRule.stepAboutRuleForm.severityOptionMediumDescription',
   {
     defaultMessage: 'Medium',
   }
 );
 
 export const HIGH = i18n.translate(
-  'xpack.siem.detectionEngine.createRule.stepAboutRuleForm.severityOptionHighDexcripton',
+  'xpack.siem.detectionEngine.createRule.stepAboutRuleForm.severityOptionHighDescription',
   {
     defaultMessage: 'High',
   }
 );
 
 export const CRITICAL = i18n.translate(
-  'xpack.siem.detectionEngine.createRule.stepAboutRuleForm.severityOptionCriticalDexcripton',
+  'xpack.siem.detectionEngine.createRule.stepAboutRuleForm.severityOptionCriticalDescription',
   {
     defaultMessage: 'Critical',
   }

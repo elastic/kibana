@@ -4,14 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiFormRow, EuiFieldText, EuiSpacer } from '@elastic/eui';
+import React, { ChangeEvent, useCallback, useEffect, useState, useRef } from 'react';
 
-import {
-  UseArray,
-  FieldHook,
-  UseField,
-} from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+import { isEmpty, isEqual } from 'lodash/fp';
+import { FieldHook } from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/components/helpers';
 
 import * as I18n from './translations';
@@ -25,6 +22,65 @@ interface AddItemProps {
 }
 export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: AddItemProps) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+  const [items, setItems] = useState(['']);
+  const [haveBeenKeyboardDeleted, setHaveBeenKeyboardDeleted] = useState(false);
+
+  const lastInputRef = useRef<HTMLInputElement | null>(null);
+
+  const removeItem = useCallback(
+    (index: number) => {
+      const values = field.value as string[];
+      field.setValue([...values.slice(0, index), ...values.slice(index + 1)]);
+    },
+    [field]
+  );
+
+  const addItem = useCallback(() => {
+    const values = field.value as string[];
+    if (!isEmpty(values[values.length - 1])) {
+      field.setValue([...values, '']);
+    }
+  }, [field]);
+
+  const updateItem = useCallback(
+    (event: ChangeEvent<HTMLInputElement>, index: number) => {
+      const values = field.value as string[];
+      const value = event.target.value;
+      if (isEmpty(value)) {
+        setHaveBeenKeyboardDeleted(true);
+        field.setValue([...values.slice(0, index), ...values.slice(index + 1)]);
+      } else {
+        field.setValue([...values.slice(0, index), value, ...values.slice(index + 1)]);
+      }
+    },
+    [field]
+  );
+
+  const handleLastInputRef = useCallback(
+    (element: HTMLInputElement | null) => {
+      lastInputRef.current = element;
+    },
+    [lastInputRef]
+  );
+
+  useEffect(() => {
+    if (!isEqual(field.value, items)) {
+      setItems(
+        isEmpty(field.value)
+          ? ['']
+          : haveBeenKeyboardDeleted
+          ? [...(field.value as string[]), '']
+          : (field.value as string[])
+      );
+      setHaveBeenKeyboardDeleted(false);
+    }
+  }, [field.value]);
+
+  useEffect(() => {
+    if (!haveBeenKeyboardDeleted && lastInputRef != null && lastInputRef.current != null) {
+      lastInputRef.current.focus();
+    }
+  }, [haveBeenKeyboardDeleted, lastInputRef]);
 
   return (
     <EuiFormRow
@@ -36,50 +92,39 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
     >
-      <UseArray path={field.path}>
-        {({ items, addItem, removeItem }) => (
-          <>
-            <div>
-              {items.map((item, index) => (
-                <div key={item.id}>
-                  <UseField
-                    path={item.path}
-                    component={EuiFieldText}
-                    componentProps={{
-                      append: (
-                        <EuiButtonIcon
-                          color="danger"
-                          iconType="trash"
-                          isDisabled={isDisabled}
-                          onClick={() => removeItem(item.id)}
-                          aria-label={I18n.DELETE}
-                        />
-                      ),
-                      compressed: true,
-                      fullWidth: true,
-                      isDisabled,
-                    }}
-                    defaultValue=""
-                    config={{
-                      validations: [],
-                    }}
+      <>
+        {items.map((item, index) => {
+          const euiFieldProps = {
+            isDisabled,
+            ...(index === items.length - 1 ? { inputRef: handleLastInputRef } : {}),
+          };
+          return (
+            <div key={index}>
+              <EuiFieldText
+                append={
+                  <EuiButtonIcon
+                    color="danger"
+                    iconType="trash"
+                    isDisabled={isDisabled}
+                    onClick={() => removeItem(index)}
+                    aria-label={I18n.DELETE}
                   />
-                  {items.length - 1 !== index && <EuiSpacer size="s" />}
-                </div>
-              ))}
+                }
+                value={item}
+                onChange={e => updateItem(e, index)}
+                compressed
+                fullWidth
+                {...euiFieldProps}
+              />
+              {items.length - 1 !== index && <EuiSpacer size="s" />}
             </div>
-            <EuiButtonEmpty size="xs" onClick={addItem} isDisabled={isDisabled}>
-              {addText}
-            </EuiButtonEmpty>
-          </>
-        )}
-      </UseArray>
+          );
+        })}
+
+        <EuiButtonEmpty size="xs" onClick={addItem} isDisabled={isDisabled}>
+          {addText}
+        </EuiButtonEmpty>
+      </>
     </EuiFormRow>
   );
 };
-
-// TODO Only add item when the last one is fill
-
-// TODO Validate URL
-// var expression = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/gi;
-// var regex = new RegExp(expression);

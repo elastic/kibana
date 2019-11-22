@@ -23,7 +23,7 @@ import { throwIfNotOk } from '../../../hooks/api/api';
  * @param rule to add
  * @param kbnVersion current Kibana Version to use for headers
  */
-export const addRule = async ({ rule, kbnVersion }: AddRulesProps): Promise<NewRule> => {
+export const addRule = async ({ rule, kbnVersion, signal }: AddRulesProps): Promise<NewRule> => {
   const response = await fetch(`${chrome.getBasePath()}/api/detection_engine/rules`, {
     method: 'POST',
     credentials: 'same-origin',
@@ -33,6 +33,7 @@ export const addRule = async ({ rule, kbnVersion }: AddRulesProps): Promise<NewR
       'kbn-xsrf': kbnVersion,
     },
     body: JSON.stringify(rule),
+    signal,
   });
 
   await throwIfNotOk(response);

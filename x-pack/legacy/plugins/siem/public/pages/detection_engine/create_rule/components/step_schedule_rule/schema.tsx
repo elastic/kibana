@@ -36,7 +36,7 @@ export const schema: FormSchema = {
     ),
     labelAppend: <EuiText size="xs">{globalI18n.OPTIONAL_FIELD}</EuiText>,
     helpText: i18n.translate(
-      'xpack.siem.detectionEngine.createRule.stepScheduleRule.fieldIntervalHelpText',
+      'xpack.siem.detectionEngine.createRule.stepScheduleRule.fieldAdditionalLookBackHelpText',
       {
         defaultMessage:
           'Add more time to the look-back range in order to prevent potential gaps in signal reporting.',

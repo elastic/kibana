@@ -36,7 +36,6 @@ export const useFetchIndexPatterns = (): Return => {
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
-    const signal = abortCtrl.signal;
 
     async function fetchIndexPatterns() {
       if (apolloClient && !isEmpty(indices)) {
@@ -51,7 +50,7 @@ export const useFetchIndexPatterns = (): Return => {
             },
             context: {
               fetchOptions: {
-                signal,
+                signal: abortCtrl.signal,
               },
             },
           })

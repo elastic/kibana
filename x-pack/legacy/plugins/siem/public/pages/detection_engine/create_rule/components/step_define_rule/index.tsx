@@ -5,7 +5,7 @@
  */
 
 import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
-import React, { memo, useCallback, useEffect } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 
 import { isEqual } from 'lodash/fp';
 import {
@@ -30,6 +30,7 @@ import { useFetchIndexPatterns } from '../../../../../containers/detection_engin
 const CommonUseField = getUseField({ component: Field });
 
 export const StepDefineRule = memo<RuleStepProps>(({ isLoading, setStepData }) => {
+  const [localUseIndicesConfig, setLocalUseIndicesConfig] = useState('');
   const [
     { indexPatterns: indexPatternQueryBar, isLoading: indexPatternLoadingQueryBar },
     setIndices,
@@ -116,22 +117,26 @@ export const StepDefineRule = memo<RuleStepProps>(({ isLoading, setStepData }) =
         />
         <FormDataProvider pathsToWatch="useIndicesConfig">
           {({ useIndicesConfig }) => {
-            const indexField = form.getFields().index;
-            if (
-              indexField != null &&
-              useIndicesConfig === 'true' &&
-              !isEqual(indexField.value, indicesConfig)
-            ) {
-              indexField.setValue(indicesConfig);
-              setIndices(indicesConfig);
-            } else if (
-              indexField != null &&
-              useIndicesConfig === 'false' &&
-              !isEqual(indexField.value, [])
-            ) {
-              indexField.setValue([]);
-              setIndices([]);
+            if (localUseIndicesConfig !== useIndicesConfig) {
+              const indexField = form.getFields().index;
+              if (
+                indexField != null &&
+                useIndicesConfig === 'true' &&
+                !isEqual(indexField.value, indicesConfig)
+              ) {
+                indexField.setValue(indicesConfig);
+                setIndices(indicesConfig);
+              } else if (
+                indexField != null &&
+                useIndicesConfig === 'false' &&
+                !isEqual(indexField.value, [])
+              ) {
+                indexField.setValue([]);
+                setIndices([]);
+              }
+              setLocalUseIndicesConfig(useIndicesConfig);
             }
+
             return null;
           }}
         </FormDataProvider>

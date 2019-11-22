@@ -155,7 +155,11 @@ export const QueryBarDefineRule = ({
         const { saved_id: savedId } = field.value as FieldValueQueryBar;
         if (newSavedQuery.id !== savedId) {
           setSavedQuery(newSavedQuery);
-          field.setValue({ ...(field.value as FieldValueQueryBar), saved_id: newSavedQuery.id });
+          field.setValue({
+            filters: newSavedQuery.attributes.filters,
+            query: newSavedQuery.attributes.query,
+            saved_id: newSavedQuery.id,
+          });
         }
       }
     },

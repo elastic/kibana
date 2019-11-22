@@ -38,6 +38,7 @@ export type NewRule = t.TypeOf<typeof NewRuleSchema>;
 export interface AddRulesProps {
   rule: NewRule;
   kbnVersion: string;
+  signal: AbortSignal;
 }
 
 export const RuleSchema = t.intersection([
