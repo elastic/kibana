@@ -22,7 +22,7 @@ export { SchemaConfig } from 'ui/visualize/loader/pipeline_helpers/build_pipelin
 // @ts-ignore
 export { visFactory, VisFactoryProvider } from 'ui/vis/vis_factory';
 
-export { Vis } from 'ui/vis';
+export { Vis, AggConfig } from 'ui/vis';
 
 // @ts-ignore
 export { Schemas } from 'ui/vis/editors/default/schemas';
