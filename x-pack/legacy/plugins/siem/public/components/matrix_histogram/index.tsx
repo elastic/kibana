@@ -5,100 +5,50 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { ScaleType, niceTimeFormatter, Position } from '@elastic/charts';
+import { ScaleType } from '@elastic/charts';
 
-import { getOr, head, last } from 'lodash/fp';
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { EuiLoadingContent } from '@elastic/eui';
 import { BarChart } from '../charts/barchart';
 import { HeaderSection } from '../header_section';
-import { ChartSeriesData, UpdateDateRange } from '../charts/common';
-import { MatrixOverTimeHistogramData } from '../../graphql/types';
+import { ChartSeriesData } from '../charts/common';
 import { DEFAULT_DARK_MODE } from '../../../common/constants';
 import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 import { Loader } from '../loader';
 import { Panel } from '../panel';
+import { getBarchartConfigs, getCustomChartData } from './utils';
+import { MatrixHistogramProps, MatrixHistogramDataTypes } from './types';
 
-export interface MatrixOverTimeBasicProps {
-  id: string;
-  data: MatrixOverTimeHistogramData[];
-  loading: boolean;
-  startDate: number;
-  endDate: number;
-  updateDateRange: UpdateDateRange;
-  totalCount: number;
-}
-
-export interface MatrixOverTimeProps extends MatrixOverTimeBasicProps {
-  customChartData?: ChartSeriesData[];
-  title: string;
-  subtitle?: string;
-  dataKey: string;
-}
-
-const getBarchartConfigs = (from: number, to: number, onBrushEnd: UpdateDateRange) => ({
-  series: {
-    xScaleType: ScaleType.Time,
-    yScaleType: ScaleType.Linear,
-    stackAccessors: ['g'],
-  },
-  axis: {
-    xTickFormatter: niceTimeFormatter([from, to]),
-    yTickFormatter: (value: string | number): string => value.toLocaleString(),
-    tickSize: 8,
-  },
-  settings: {
-    legendPosition: Position.Bottom,
-    onBrushEnd,
-    showLegend: true,
-    theme: {
-      scales: {
-        barsPadding: 0.08,
-      },
-      chartMargins: {
-        left: 0,
-        right: 0,
-        top: 0,
-        bottom: 0,
-      },
-      chartPaddings: {
-        left: 0,
-        right: 0,
-        top: 0,
-        bottom: 0,
-      },
-    },
-  },
-  customHeight: 324,
-});
-
-export const MatrixOverTimeHistogram = ({
-  customChartData,
-  id,
-  loading,
+export const MatrixHistogram = ({
   data,
   dataKey,
   endDate,
-  updateDateRange,
+  id,
+  loading,
+  mapping,
+  scaleType = ScaleType.Time,
   startDate,
-  title,
   subtitle,
+  title,
   totalCount,
-}: MatrixOverTimeProps) => {
-  const bucketStartDate = getOr(startDate, 'x', head(data));
-  const bucketEndDate = getOr(endDate, 'x', last(data));
-  const barchartConfigs = getBarchartConfigs(bucketStartDate!, bucketEndDate!, updateDateRange);
+  updateDateRange,
+  yTickFormatter,
+  showLegend,
+}: MatrixHistogramProps<MatrixHistogramDataTypes>) => {
+  const barchartConfigs = getBarchartConfigs({
+    from: startDate,
+    to: endDate,
+    onBrushEnd: updateDateRange,
+    scaleType,
+    yTickFormatter,
+    showLegend,
+  });
   const [showInspect, setShowInspect] = useState(false);
   const [darkMode] = useKibanaUiSetting(DEFAULT_DARK_MODE);
   const [loadingInitial, setLoadingInitial] = useState(false);
 
-  const barChartData: ChartSeriesData[] = customChartData || [
-    {
-      key: dataKey,
-      value: data,
-    },
-  ];
+  const barChartData: ChartSeriesData[] = getCustomChartData(data, mapping);
 
   useEffect(() => {
     if (totalCount >= 0 && loadingInitial) {
