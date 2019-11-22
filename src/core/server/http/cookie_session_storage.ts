@@ -114,7 +114,7 @@ export async function createCookieSessionStorageFactory<T>(
   basePath?: string
 ): Promise<SessionStorageFactory<T>> {
   function clearInvalidCookie(req: Request | undefined, path: string = basePath || '/') {
-    // if the cookie did not include the 'path' or 'isSecure' attributes in the session value, it is a legacy cookie
+    // if the cookie did not include the 'path' attribute in the session value, it is a legacy cookie
     // we will assume that the cookie was created with the current configuration
     log.debug(`Clearing invalid session cookie`);
     // need to use Hapi toolkit to clear cookie with defined options

@@ -28,12 +28,7 @@ function getMockOptions(config: Partial<AuthenticatorOptions['config']> = {}) {
     basePath: httpServiceMock.createSetupContract().basePath,
     loggers: loggingServiceMock.create(),
     isSystemAPIRequest: jest.fn(),
-    config: {
-      sessionTimeout: null,
-      authc: { providers: [], oidc: {}, saml: {} },
-      secureCookies: false,
-      ...config,
-    },
+    config: { sessionTimeout: null, authc: { providers: [], oidc: {}, saml: {} }, ...config },
     sessionStorageFactory: sessionStorageMock.createFactory<ProviderSession>(),
   };
 }
