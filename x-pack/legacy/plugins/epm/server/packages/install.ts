@@ -6,7 +6,7 @@
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server/';
 import { SAVED_OBJECT_TYPE } from '../../common/constants';
-import { AssetReference, AssetType, InstallationAttributes } from '../../common/types';
+import { AssetReference, KibanaAssetType, InstallationAttributes } from '../../common/types';
 import * as Registry from '../registry';
 import { getInstallationObject } from './index';
 import { getObjects } from './get_objects';
@@ -45,8 +45,7 @@ export async function installAssets(options: {
 
   // Only install certain Kibana assets during package installation.
   // All other asset types need special handling
-  const typesToInstall: AssetType[] = ['visualization', 'dashboard', 'search'];
-
+  const typesToInstall = Object.values(KibanaAssetType);
   const installationPromises = typesToInstall.map(async assetType =>
     installKibanaSavedObjects({ savedObjectsClient, pkgkey, assetType })
   );
@@ -88,7 +87,7 @@ async function installKibanaSavedObjects({
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
-  assetType: AssetType;
+  assetType: KibanaAssetType;
 }) {
   const isSameType = ({ path }: Registry.ArchiveEntry) =>
     assetType === Registry.pathParts(path).type;

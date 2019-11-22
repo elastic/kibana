@@ -6,8 +6,8 @@
 
 import { SavedObjectsClientContract } from 'src/core/server/';
 import { SAVED_OBJECT_TYPE } from '../../common/constants';
-import { getInstallationObject, assetUsesObjects, CallESAsCurrentUser } from './index';
-import { AssetType, AssetReference } from '../../common/types';
+import { getInstallationObject, savedObjectTypes, CallESAsCurrentUser } from './index';
+import { AssetReference, AssetType } from '../../common/types';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -25,7 +25,7 @@ export async function removeInstallation(options: {
   // Delete the installed assets
   const deletePromises = installedObjects.map(async ({ id, type }) => {
     const assetType = type as AssetType;
-    if (assetUsesObjects(assetType)) {
+    if (savedObjectTypes.includes(assetType)) {
       savedObjectsClient.delete(assetType, id);
     } else if (assetType === 'ingest-pipeline') {
       deletePipeline(callCluster, id);

@@ -4,17 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/server';
+import {
+  SavedObject,
+  SavedObjectAttributes,
+  SavedObjectReference,
+} from '../../../../../src/core/server';
 
-export { Request, ResponseToolkit, Server, ServerRoute } from 'hapi';
-
-export type InstallationStatus = Installed['status'] | NotInstalled['status'];
+export enum InstallationStatus {
+  installed = 'installed',
+  notInstalled = 'not_installed',
+}
 
 export type AssetType = KibanaAssetType | ElasticsearchAssetType;
 
-export type KibanaAssetType = 'dashboard' | 'visualization' | 'search' | 'index-pattern';
+export enum KibanaAssetType {
+  dashboard = 'dashboard',
+  visualization = 'visualization',
+  search = 'search',
+  indexPattern = 'index-pattern',
+}
 
-export type ElasticsearchAssetType = 'ingest-pipeline' | 'index-template' | 'ilm-policy';
+export enum ElasticsearchAssetType {
+  ingestPipeline = 'ingest-pipeline',
+  indexTemplate = 'index-template',
+  ilmPolicy = 'ilm-policy',
+}
 
 // Registry's response types
 // from /search
@@ -61,8 +75,29 @@ export interface AssetParts {
   type: AssetType;
   file: string;
 }
-export type AssetTypeToParts = Record<AssetType, AssetParts[]>;
-export type AssetsGroupedByServiceByType = Record<ServiceName, AssetTypeToParts>;
+export type AssetTypeToParts = KibanaAssetTypeToParts & ElasticsearchAssetTypeToParts;
+export type AssetsGroupedByServiceByType = Record<
+  Extract<ServiceName, 'kibana'>,
+  KibanaAssetTypeToParts
+>;
+// & Record<Extract<ServiceName, 'elasticsearch'>, ElasticsearchAssetTypeToParts>;
+
+export type KibanaAssetParts = AssetParts & {
+  service: Extract<ServiceName, 'kibana'>;
+  type: KibanaAssetType;
+};
+
+export type ElasticsearchAssetParts = AssetParts & {
+  service: Extract<ServiceName, 'elasticsearch'>;
+  type: ElasticsearchAssetType;
+};
+
+export type KibanaAssetTypeToParts = Record<KibanaAssetType, KibanaAssetParts[]>;
+export type ElasticsearchAssetTypeToParts = Record<
+  ElasticsearchAssetType,
+  ElasticsearchAssetParts[]
+>;
+
 export interface RegistryPackage {
   name: string;
   version: string;
@@ -77,11 +112,10 @@ export interface RegistryPackage {
 
 // Managers public HTTP response types
 export type PackageList = PackageListItem[];
-// add title here until it's a part of registry response
+
 export type PackageListItem = Installable<Required<RegistryListItem>>;
 export type PackagesGroupedByStatus = Record<InstallationStatus, PackageList>;
 
-// add title here until it's a part of registry response
 export type PackageInfo = Installable<
   Required<RegistryPackage> & { assets: AssetsGroupedByServiceByType }
 >;
@@ -94,12 +128,12 @@ export interface InstallationAttributes extends SavedObjectAttributes {
 export type Installable<T> = Installed<T> | NotInstalled<T>;
 
 export type Installed<T = {}> = T & {
-  status: 'installed';
+  status: InstallationStatus.installed;
   savedObject: Installation;
 };
 
 export type NotInstalled<T = {}> = T & {
-  status: 'not_installed';
+  status: InstallationStatus.notInstalled;
 };
 
 export type AssetReference = Pick<SavedObjectReference, 'id' | 'type'>;
