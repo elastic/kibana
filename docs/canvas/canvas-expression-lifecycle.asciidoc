@@ -1,0 +1,52 @@
+[role="xpack"]
+[[canvas-expression-lifecycle]]
+== Canvas expression lifecycle
+
+[[canvas-expressions-only-fetch-and-manipulate-data]]
+=== Expressions Only Fetch and Manipulate Data
+
+
+[[canvas-handling-context-and-argument-types]]
+=== Handling context and argument types
+If you look through the function docs, you may notice that all of them define what a function accepts and what it returns. Additionally, every argument includes a type property that specifies the kind of data that can be used. These two types of values are actually the same, and can be used as a guide for how to deal with piping to other functions and using subexpressions for argument values. 
+
+To explain how this works, consider the following expression from the previous section:
+
+[source,text]
+----
+image dataurl={asset 3cb3ec3a-84d7-48fa-8709-274ad5cc9e0b}
+----
+
+If you <<image_fn,look at the docs>> for the `image` function, you’ll see that it accepts the `null` data type and returns an `image` data type. Accepting `null` effectively means that it does not use context at all, so if you pipe anything to `image`, the value that was produced previously will be ignored. When the function executes, it will produce an `image` output, which is simply an object of type `image` that contains the information required to render an image. 
+
+*NOTE: It does not render an image itself*
+
+As explained in "<<canvas-expressions-only-fetch-and-manipulate-data>>", the output of an expression is just data. So the `image` type here is just a specific shape of data, not an actual image.
+
+Next, let’s take a look at the `asset` function. Like `image`, it accepts `null`, but it returns something different, a `string` in this case. Because `asset` will produce a string, its output can be used as the input for any function or argument that accepts a string. 
+
+<<asset_fn,Looking at the docs>> for the `dataurl` argument, its type is `string`, meaning it will accept any kind of string. There are some rules about the value of the string that the function itself enforces, but as far as the interpreter is concerned, that expression is valid because the argument accepts a string and the output of `asset` is a string. 
+
+The interpreter also attempts to cast some input types into others, which allows you to, use a string input even when the function or argument calls for a number. Keep in mind that it’s not able to convert any string value, but if the string is a number, it can easily be cast into a `number` type. Take the following expression for example:
+
+[source,text]
+----
+string "0.4"
+| revealImage image={asset asset-06511b39-ec44-408a-a5f3-abe2da44a426}
+----
+
+If you <<revealImage_fn,check the docs>> for the `revealImage` function, you’ll see that it accepts a `number` but the `string` function returns a `string` type. In this case, because the string value is a number, it can be converted into a `number` type and used without you having to do anything else. 
+
+Most "primitive" types can be converted automatically, as you might expect. You just saw that a `string` can be cast into a `number`, but you can also pretty easily cast things into `boolean` too, and you can cast anything to `null`. 
+
+There are other useful type casting options available. For example, something of type `datatable` can be cast to a type `pointseries` simply by only preserving specific columns from the data (namely x, y, size, color, and text). This allows you to treat your source data, which is generally of type `datatable`, like a `pointseries` type simply by convention. 
+
+You can fetch data from Elasticsearch using `essql`, which allows you to aggregate the data, provide a custom name for the value, and pipe that data directly to another function that only accepts `pointseries` even though `essql` will output a `datatable` type. This makes the following example expression valid:
+
+[source,text]
+----
+essql "SELECT user AS x, sum(cost) AS y FROM index GROUP BY user"
+| plot
+----
+
+In the docs you can see that `essql` returns a `datatable` type, but `plot` expects a `pointseries` context. This works because the `datatable` output will have the columns `x` and `y` as a result of using `AS` in the sql statement to name them. Because the data follows the convention of the `pointseries` data type, casting it into `pointseries` is possible, and it can be passed directly to `plot` as a result. 
