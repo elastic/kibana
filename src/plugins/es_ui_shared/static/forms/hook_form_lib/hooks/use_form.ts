@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { get } from 'lodash';
 
 import { FormHook, FieldHook, FormData, FieldConfig, FieldsMap, FormConfig } from '../types';
@@ -39,14 +39,23 @@ export function useForm<T extends FormData = FormData>(
   const {
     onSubmit,
     schema,
-    defaultValue = {},
     serializer = (data: any) => data,
     deserializer = (data: any) => data,
     options = {},
   } = formConfig;
+
+  const formDefaultValue =
+    formConfig.defaultValue === undefined || Object.keys(formConfig.defaultValue).length === 0
+      ? {}
+      : Object.entries(formConfig.defaultValue as object)
+          .filter(({ 1: value }) => value !== undefined)
+          .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+
   const formOptions = { ...DEFAULT_OPTIONS, ...options };
-  const defaultValueDeserialized =
-    Object.keys(defaultValue).length === 0 ? defaultValue : deserializer(defaultValue);
+  const defaultValueDeserialized = useMemo(() => deserializer(formDefaultValue), [
+    formConfig.defaultValue,
+  ]);
+
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
   const [isValid, setIsValid] = useState<boolean | undefined>(undefined);
@@ -59,7 +68,7 @@ export function useForm<T extends FormData = FormData>(
   // render().
   // The <FormDataProvider> component is the one in charge of reading this observable
   // and updating its state to trigger the necessary view render.
-  const formData$ = useRef<Subject<T>>(new Subject<T>(flattenObject(defaultValue) as T));
+  const formData$ = useRef<Subject<T>>(new Subject<T>(flattenObject(formDefaultValue) as T));
 
   useEffect(() => {
     return () => {
@@ -160,7 +169,8 @@ export function useForm<T extends FormData = FormData>(
     fieldsRefs.current[field.path] = field;
 
     if (!{}.hasOwnProperty.call(formData$.current.value, field.path)) {
-      updateFormDataAt(field.path, field.__serializeOutput());
+      const fieldValue = field.__serializeOutput();
+      updateFormDataAt(field.path, fieldValue);
     }
   };
 
