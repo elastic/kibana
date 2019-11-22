@@ -77,7 +77,7 @@ interface GetDataFrameAnalyticsResponse {
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
 
-const ExplorationTitle: React.SFC<{ jobId: string }> = ({ jobId }) => (
+const ExplorationTitle: React.FC<{ jobId: string }> = ({ jobId }) => (
   <EuiTitle size="xs">
     <span>
       {i18n.translate('xpack.ml.dataframe.analytics.exploration.jobIdTitle', {
