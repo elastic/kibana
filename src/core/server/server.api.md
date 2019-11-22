@@ -961,6 +961,17 @@ export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends obje
 }
 
 // @public
+export interface PluginConfigDescriptor<T = any> {
+    exposeToBrowser?: {
+        [P in keyof T]?: boolean;
+    };
+    schema: PluginConfigSchema<T>;
+}
+
+// @public
+export type PluginConfigSchema<T> = Type<T>;
+
+// @public
 export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 // @public
@@ -1003,6 +1014,8 @@ export type PluginOpaqueId = symbol;
 export interface PluginsServiceSetup {
     // (undocumented)
     contracts: Map<PluginName, unknown>;
+    // (undocumented)
+    uiPluginConfigs: Map<PluginName, Observable<unknown>>;
     // (undocumented)
     uiPlugins: {
         public: Map<PluginName, DiscoveredPlugin>;
@@ -1621,6 +1634,6 @@ export interface UserProvidedValues<T extends SavedObjectAttribute = any> {
 // Warnings were encountered during analysis:
 // 
 // src/core/server/http/router/response.ts:316:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/plugins_service.ts:38:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/plugins_service.ts:45:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
 
 ```

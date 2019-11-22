@@ -9,6 +9,7 @@
       - [Challenges on the server](#challenges-on-the-server)
       - [Challenges in the browser](#challenges-in-the-browser)
     - [Plan of action](#plan-of-action)
+    - [Shared application plugins](#shared-application-plugins)
   - [Server-side plan of action](#server-side-plan-of-action)
     - [De-couple from hapi.js server and request objects](#de-couple-from-hapijs-server-and-request-objects)
     - [Introduce new plugin definition shim](#introduce-new-plugin-definition-shim)
@@ -313,6 +314,43 @@ The approach and level of effort varies significantly between server and browser
 First, decouple your plugin's business logic from the dependencies that are not exposed through the new platform, hapi.js and angular.js. Then introduce plugin definitions that more accurately reflect how plugins are defined in the new platform. Finally, replace the functionality you consume from core and other plugins with their new platform equivalents.
 
 Once those things are finished for any given plugin, it can officially be switched to the new plugin system.
+
+### Shared application plugins
+
+Some services have been already moved to the new platform.
+
+Below you can find their new locations:
+
+| Service | Old place                                    | New place in the NP                                             |
+| --------------- | ----------------------------------------- | --------------------------------------------------- |
+| *FieldFormats*         | ui/registry/field_formats      | plugins/data/public |
+
+The `FieldFormats` service has been moved to the `data` plugin in the New Platform. If your plugin has any imports from `ui/registry/field_formats`, you'll need to update your imports as follows:
+
+Use it in your New Platform plugin:
+
+```ts
+class MyPlugin {
+  setup (core, { data }) {
+    data.fieldFormats.register(myFieldFormat);
+    // ...
+  }
+  start (core, { data }) {
+    data.fieldFormats.getType(myFieldFormatId);
+    // ...
+  }
+}
+```
+
+Or, in your legacy platform plugin, consume it through the `ui/new_platform` module:
+
+```ts
+import { npSetup, npStart } from 'ui/new_platform';
+
+npSetup.plugins.data.fieldFormats.register(myFieldFormat);
+npStart.plugins.data.fieldFormats.getType(myFieldFormatId);
+// ...
+```
 
 ## Server-side plan of action
 
@@ -1112,6 +1150,7 @@ import { npStart: { core } } from 'ui/new_platform';
 | `ui/routes`                                           | --                                                                                                                                                                                         | There is no global routing mechanism. Each app [configures its own routing](/rfcs/text/0004_application_service_mounting.md#complete-example). |
 | `ui/saved_objects`                                    | [`core.savedObjects`](/docs/development/core/public/kibana-plugin-public.savedobjectsstart.md)                                                                                             | Client API is the same                                                                                                                         |
 | `ui/doc_title`                                        | [`core.chrome.docTitle`](/docs/development/core/public/kibana-plugin-public.chromedoctitle.md)                                                                                             |                                                                                                                                                |
+| `uiExports/injectedVars`                              | [Configure plugin](#configure-plugin) and [`PluginConfigDescriptor.exposeToBrowser`](/docs/development/core/server/kibana-plugin-server.pluginconfigdescriptor.exposetobrowser.md)         | Can only be used to expose configuration properties                                                                                            |
 
 _See also: [Public's CoreStart API Docs](/docs/development/core/public/kibana-plugin-public.corestart.md)_
 
@@ -1241,6 +1280,43 @@ class MyPlugin {
     this.config$ = initializerContext.config.create<MyPluginConfigType>();
     // or if config is optional:
     this.config$ = initializerContext.config.createIfExists<MyPluginConfigType>();
+  }
+```
+
+If your plugin also have a client-side part, you can also expose configuration properties to it using a whitelisting mechanism with the configuration `exposeToBrowser` property.
+```typescript
+// my_plugin/server/index.ts
+import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginConfigDescriptor } from 'kibana/server';
+
+const configSchema = schema.object({
+  secret: schema.string({ defaultValue: 'Only on server' }),
+  uiProp: schema.string({ defaultValue: 'Accessible from client' }),
+});
+
+type ConfigType = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor<ConfigType> = {
+  exposeToBrowser: {
+    uiProp: true,
+  },
+  schema: configSchema,
+};
+```
+
+Configuration containing only the exposed properties will be then available on the client-side using the plugin's `initializerContext`:
+```typescript
+// my_plugin/public/index.ts
+interface ClientConfigType {
+  uiProp: string;
+}
+
+export class Plugin implements Plugin<PluginSetup, PluginStart> {
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
+
+  public async setup(core: CoreSetup, deps: {}) {
+    const config = this.initializerContext.config.get<ClientConfigType>();
+    // ...
   }
 ```
 

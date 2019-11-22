@@ -16,6 +16,7 @@ import {
 import { getFilterClause, parseFilterQuery, getHistogramIntervalFormatted } from '../../helper';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
+import { MonitorDetails, Error } from '../../../../common/runtime_types';
 
 const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
   let up = null;
@@ -418,6 +419,49 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       id: get(pageTitle, 'monitor.id', null) || monitorId,
       url: get(pageTitle, 'url.full', null),
       name: get(pageTitle, 'monitor.name', null),
+    };
+  }
+
+  public async getMonitorDetails(request: any, monitorId: string): Promise<MonitorDetails> {
+    const params = {
+      index: INDEX_NAMES.HEARTBEAT,
+      body: {
+        size: 1,
+        query: {
+          bool: {
+            must: [
+              {
+                exists: {
+                  field: 'error',
+                },
+              },
+            ],
+            filter: [
+              {
+                term: {
+                  'monitor.id': monitorId,
+                },
+              },
+            ],
+          },
+        },
+        sort: [
+          {
+            '@timestamp': {
+              order: 'desc',
+            },
+          },
+        ],
+      },
+    };
+
+    const result = await this.database.search(request, params);
+
+    const monitorError: Error | undefined = get(result, 'hits.hits[0]._source.error', undefined);
+
+    return {
+      monitorId,
+      error: monitorError,
     };
   }
 }

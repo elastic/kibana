@@ -27,8 +27,6 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
 
   describe('metric chart', function () {
-    const fromTime = '2015-09-19 06:31:44.000';
-    const toTime = '2015-09-23 18:31:44.000';
 
     before(async function () {
       log.debug('navigateToApp visualize');
@@ -36,7 +34,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickMetric');
       await PageObjects.visualize.clickMetric();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     it('should have inspector enabled', async function () {

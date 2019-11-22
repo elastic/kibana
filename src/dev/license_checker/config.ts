@@ -105,6 +105,4 @@ export const LICENSE_OVERRIDES = {
 
   // TODO can be removed once we upgrade the use of walk dependency past or equal to v2.3.14
   'walk@2.3.9': ['MIT'],
-
-  '@elastic/node-ctags@1.0.2': ['Nuclide software'],
 };
