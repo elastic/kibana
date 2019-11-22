@@ -36,11 +36,13 @@ describe('duration formatters', () => {
       const oneHourAsMicro = toMicroseconds(1, 'hours');
       const twoHourAsMicro = toMicroseconds(2, 'hours');
       expect(convertTo({ unit, microseconds: oneHourAsMicro })).toEqual({
+        convertedValue: 1,
         unit: 'h',
         value: '1.0',
         formatted: '1.0 h'
       });
       expect(convertTo({ unit, microseconds: twoHourAsMicro })).toEqual({
+        convertedValue: 2,
         unit: 'h',
         value: '2.0',
         formatted: '2.0 h'
@@ -55,11 +57,13 @@ describe('duration formatters', () => {
       const oneHourAsMicro = toMicroseconds(1, 'hours');
       const twoHourAsMicro = toMicroseconds(2, 'hours');
       expect(convertTo({ unit, microseconds: oneHourAsMicro })).toEqual({
+        convertedValue: 60,
         unit: 'min',
         value: '60.0',
         formatted: '60.0 min'
       });
       expect(convertTo({ unit, microseconds: twoHourAsMicro })).toEqual({
+        convertedValue: 120,
         unit: 'min',
         value: '120.0',
         formatted: '120.0 min'
@@ -74,13 +78,19 @@ describe('duration formatters', () => {
       const twentySecondsAsMicro = toMicroseconds(20, 'seconds');
       const thirtyFiveSecondsAsMicro = toMicroseconds(35, 'seconds');
       expect(convertTo({ unit, microseconds: twentySecondsAsMicro })).toEqual({
+        convertedValue: 20,
         unit: 's',
         value: '20.0',
         formatted: '20.0 s'
       });
       expect(
         convertTo({ unit, microseconds: thirtyFiveSecondsAsMicro })
-      ).toEqual({ unit: 's', value: '35.0', formatted: '35.0 s' });
+      ).toEqual({
+        convertedValue: 35,
+        unit: 's',
+        value: '35.0',
+        formatted: '35.0 s'
+      });
       expect(
         convertTo({ unit, microseconds: null, defaultValue: '10' })
       ).toEqual({ value: '10', formatted: '10' });
@@ -91,13 +101,19 @@ describe('duration formatters', () => {
       const twentyMilliAsMicro = toMicroseconds(20, 'milliseconds');
       const thirtyFiveMilliAsMicro = toMicroseconds(35, 'milliseconds');
       expect(convertTo({ unit, microseconds: twentyMilliAsMicro })).toEqual({
+        convertedValue: 20,
         unit: 'ms',
         value: '20',
         formatted: '20 ms'
       });
-      expect(
-        convertTo({ unit, microseconds: thirtyFiveMilliAsMicro })
-      ).toEqual({ unit: 'ms', value: '35', formatted: '35 ms' });
+      expect(convertTo({ unit, microseconds: thirtyFiveMilliAsMicro })).toEqual(
+        {
+          convertedValue: 35,
+          unit: 'ms',
+          value: '35',
+          formatted: '35 ms'
+        }
+      );
       expect(
         convertTo({ unit, microseconds: null, defaultValue: '10' })
       ).toEqual({ value: '10', formatted: '10' });
@@ -106,11 +122,13 @@ describe('duration formatters', () => {
     it('microseconds', () => {
       const unit = 'microseconds';
       expect(convertTo({ unit, microseconds: 20 })).toEqual({
+        convertedValue: 20,
         unit: 'μs',
         value: '20',
         formatted: '20 μs'
       });
       expect(convertTo({ unit, microseconds: 35 })).toEqual({
+        convertedValue: 35,
         unit: 'μs',
         value: '35',
         formatted: '35 μs'

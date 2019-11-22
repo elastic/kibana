@@ -6,11 +6,11 @@
 
 import * as t from 'io-ts';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { getRootTransactionByTraceId } from '../lib/transactions/get_transaction';
+import { getTransactionByTraceId } from '../lib/transactions/get_transaction';
 import { createRoute } from './create_route';
 
-export const rootTransactionByTraceIdRoute = createRoute(() => ({
-  path: '/api/apm/trace/{traceId}',
+export const transactionByTraceIdRoute = createRoute(() => ({
+  path: '/api/apm/transaction/{traceId}',
   params: {
     path: t.type({
       traceId: t.string
@@ -19,6 +19,6 @@ export const rootTransactionByTraceIdRoute = createRoute(() => ({
   handler: async (req, { path }) => {
     const { traceId } = path;
     const setup = await setupRequest(req);
-    return getRootTransactionByTraceId(traceId, setup);
+    return getTransactionByTraceId(traceId, setup);
   }
 }));

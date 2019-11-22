@@ -21,7 +21,7 @@ type DurationTimeUnit = TimeUnit | 'microseconds';
 interface DurationUnit {
   [unit: string]: {
     label: string;
-    convert: (value: number) => string;
+    convert: (value: number) => { value: string; convertedValue: number };
   };
 }
 
@@ -29,6 +29,7 @@ interface ConvertedDuration {
   value: string;
   unit?: string;
   formatted: string;
+  convertedValue?: number;
 }
 
 export type TimeFormatter = (
@@ -43,35 +44,51 @@ const durationUnit: DurationUnit = {
     label: i18n.translate('xpack.apm.formatters.hoursTimeUnitLabel', {
       defaultMessage: 'h'
     }),
-    convert: (value: number) =>
-      asDecimal(moment.duration(value / 1000).asHours())
+    convert: (microseconds: number) => {
+      const hours = moment.duration(microseconds / 1000).asHours();
+      return { value: asDecimal(hours), convertedValue: Math.round(hours) };
+    }
   },
   minutes: {
     label: i18n.translate('xpack.apm.formatters.minutesTimeUnitLabel', {
       defaultMessage: 'min'
     }),
-    convert: (value: number) =>
-      asDecimal(moment.duration(value / 1000).asMinutes())
+    convert: (microseconds: number) => {
+      const minutes = moment.duration(microseconds / 1000).asMinutes();
+      return { value: asDecimal(minutes), convertedValue: Math.round(minutes) };
+    }
   },
   seconds: {
     label: i18n.translate('xpack.apm.formatters.secondsTimeUnitLabel', {
       defaultMessage: 's'
     }),
-    convert: (value: number) =>
-      asDecimal(moment.duration(value / 1000).asSeconds())
+    convert: (microseconds: number) => {
+      const seconds = moment.duration(microseconds / 1000).asSeconds();
+      return { value: asDecimal(seconds), convertedValue: Math.round(seconds) };
+    }
   },
   milliseconds: {
     label: i18n.translate('xpack.apm.formatters.millisTimeUnitLabel', {
       defaultMessage: 'ms'
     }),
-    convert: (value: number) =>
-      asInteger(moment.duration(value / 1000).asMilliseconds())
+    convert: (microseconds: number) => {
+      const milliseconds = moment
+        .duration(microseconds / 1000)
+        .asMilliseconds();
+      return {
+        value: asInteger(milliseconds),
+        convertedValue: Math.round(milliseconds)
+      };
+    }
   },
   microseconds: {
     label: i18n.translate('xpack.apm.formatters.microsTimeUnitLabel', {
       defaultMessage: 'μs'
     }),
-    convert: (value: number) => asInteger(value)
+    convert: (microseconds: number) => ({
+      value: asInteger(microseconds),
+      convertedValue: microseconds
+    })
   }
 };
 
@@ -97,11 +114,12 @@ export function convertTo({
     return { value: defaultValue, formatted: defaultValue };
   }
 
-  const convertedValue = duration.convert(microseconds);
+  const { value, convertedValue } = duration.convert(microseconds);
   return {
-    value: convertedValue,
+    value,
     unit: duration.label,
-    formatted: `${convertedValue} ${duration.label}`
+    formatted: `${value} ${duration.label}`,
+    convertedValue
   };
 }
 
