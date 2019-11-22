@@ -15,7 +15,7 @@ interface Props {
   testSubj?: string;
 }
 
-export const DropDown: React.SFC<Props> = ({
+export const DropDown: React.FC<Props> = ({
   changeHandler,
   options,
   placeholder = 'Search ...',
