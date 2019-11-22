@@ -468,6 +468,38 @@ export interface CallAPIOptions {
 }
 
 // @public
+export interface Capabilities {
+    [key: string]: Record<string, boolean | Record<string, boolean>>;
+    catalogue: Record<string, boolean>;
+    management: {
+        [sectionId: string]: Record<string, boolean>;
+    };
+    navLinks: Record<string, boolean>;
+}
+
+// Warning: (ae-missing-release-tag) "CapabilitiesSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface CapabilitiesSetup {
+    // Warning: (ae-forgotten-export) The symbol "CapabilitiesProvider" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    registerCapabilitiesProvider(provider: CapabilitiesProvider): void;
+    // Warning: (ae-forgotten-export) The symbol "CapabilitiesSwitcher" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    registerCapabilitiesSwitcher(switcher: CapabilitiesSwitcher): void;
+}
+
+// Warning: (ae-missing-release-tag) "CapabilitiesStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface CapabilitiesStart {
+    // (undocumented)
+    resolveCapabilities(request: KibanaRequest): Promise<Capabilities>;
+}
+
+// @public
 export class ClusterClient implements IClusterClient {
     constructor(config: ElasticsearchClientConfig, log: Logger, getAuthHeaders?: GetAuthHeaders);
     asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest): IScopedClusterClient;
@@ -506,6 +538,8 @@ export type CoreId = symbol;
 // @public
 export interface CoreSetup {
     // (undocumented)
+    capabilities: CapabilitiesSetup;
+    // (undocumented)
     context: ContextSetup;
     // (undocumented)
     elasticsearch: ElasticsearchServiceSetup;
@@ -517,6 +551,8 @@ export interface CoreSetup {
 
 // @public
 export interface CoreStart {
+    // (undocumented)
+    capabilities: CapabilitiesStart;
 }
 
 // @public
