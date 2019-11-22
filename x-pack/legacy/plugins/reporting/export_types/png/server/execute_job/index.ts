@@ -43,12 +43,11 @@ export function executeJobFactory(server: ServerFacade) {
           job.layout
         );
       }),
-      map(buffer => {
-        throw new Error(typeof buffer);
+      map((buffer: Buffer) => {
         return {
           content_type: 'image/png',
-          content: buffer,
-          size: buffer.length,
+          content: buffer.toString('base64'),
+          size: buffer.byteLength,
         };
       }),
       catchError(err => {
