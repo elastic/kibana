@@ -49,7 +49,7 @@ async function resourceSaga(
           const sortField = endpointsListSelectors.sortField(state);
           const sortDirection = endpointsListSelectors.sortDirection(state);
 
-          const response = await context.core.http.get('/endpoints', {
+          const response = await context.core.http.get('/api/endpoint/endpoints', {
             query: {
               pageIndex,
               pageSize,
