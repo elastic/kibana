@@ -96,7 +96,7 @@ export const internals = Joi.extend([
     base: Joi.binary(),
     coerce(value: any, state: State, options: ValidationOptions) {
       // If value isn't defined, let Joi handle default value if it's defined.
-      if (value !== undefined && !(typeof value === 'object' && value instanceof Buffer)) {
+      if (value !== undefined && !(typeof value === 'object' && Buffer.isBuffer(value))) {
         return this.createError('binary.base', { value }, state, options);
       }
 

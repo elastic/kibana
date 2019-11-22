@@ -43,7 +43,7 @@ import { RequestHandlerContext } from '../../../server';
 export interface RouterRoute {
   method: RouteMethod;
   path: string;
-  options: RouteConfigOptions;
+  options: RouteConfigOptions<RouteMethod>;
   handler: (req: Request, responseToolkit: ResponseToolkit) => Promise<ResponseObject | Boom<any>>;
 }
 
@@ -66,17 +66,7 @@ export interface IRouter {
    */
   get: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
     route: RouteConfig<P, Q, B, 'get'>,
-    handler: RequestHandler<P, Q, B>
-  ) => void;
-
-  /**
-   * Register a route handler for `OPTIONS` request.
-   * @param route {@link RouteConfig} - a route configuration.
-   * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
-   */
-  options: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-    route: RouteConfig<P, Q, B, 'options'>,
-    handler: RequestHandler<P, Q, B>
+    handler: RequestHandler<P, Q, B, 'get'>
   ) => void;
 
   /**
@@ -90,7 +80,7 @@ export interface IRouter {
     B extends ObjectType | Type<Buffer> | Type<Stream>
   >(
     route: RouteConfig<P, Q, B, 'post'>,
-    handler: RequestHandler<P, Q, B>
+    handler: RequestHandler<P, Q, B, 'post'>
   ) => void;
 
   /**
@@ -104,7 +94,7 @@ export interface IRouter {
     B extends ObjectType | Type<Buffer> | Type<Stream>
   >(
     route: RouteConfig<P, Q, B, 'put'>,
-    handler: RequestHandler<P, Q, B>
+    handler: RequestHandler<P, Q, B, 'put'>
   ) => void;
 
   /**
@@ -118,7 +108,7 @@ export interface IRouter {
     B extends ObjectType | Type<Buffer> | Type<Stream>
   >(
     route: RouteConfig<P, Q, B, 'patch'>,
-    handler: RequestHandler<P, Q, B>
+    handler: RequestHandler<P, Q, B, 'patch'>
   ) => void;
 
   /**
@@ -132,7 +122,7 @@ export interface IRouter {
     B extends ObjectType | Type<Buffer> | Type<Stream>
   >(
     route: RouteConfig<P, Q, B, 'delete'>,
-    handler: RequestHandler<P, Q, B>
+    handler: RequestHandler<P, Q, B, 'delete'>
   ) => void;
 
   /**
@@ -143,9 +133,12 @@ export interface IRouter {
   getRoutes: () => RouterRoute[];
 }
 
-export type ContextEnhancer<P extends ObjectType, Q extends ObjectType, B extends ObjectType> = (
-  handler: RequestHandler<P, Q, B>
-) => RequestHandlerEnhanced<P, Q, B>;
+export type ContextEnhancer<
+  Method extends RouteMethod,
+  P extends ObjectType,
+  Q extends ObjectType,
+  B extends ObjectType
+> = (handler: RequestHandler<P, Q, B, Method>) => RequestHandlerEnhanced<Method, P, Q, B>;
 
 function getRouteFullPath(routerPath: string, routePath: string) {
   // If router's path ends with slash and route's path starts with slash,
@@ -235,12 +228,11 @@ export class Router implements IRouter {
   public delete: IRouter['delete'];
   public put: IRouter['put'];
   public patch: IRouter['patch'];
-  public options: IRouter['options'];
 
   constructor(
     public readonly routerPath: string,
     private readonly log: Logger,
-    private readonly enhanceWithContext: ContextEnhancer<any, any, any>
+    private readonly enhanceWithContext: ContextEnhancer<any, any, any, any>
   ) {
     const buildMethod = <Method extends RouteMethod>(method: Method) => <
       P extends ObjectType,
@@ -248,7 +240,7 @@ export class Router implements IRouter {
       B extends ObjectType | Type<Buffer> | Type<Stream>
     >(
       route: RouteConfig<P, Q, B, Method>,
-      handler: RequestHandler<P, Q, B>
+      handler: RequestHandler<P, Q, B, Method>
     ) => {
       const routeSchemas = routeSchemasFromRouteConfig(route, method);
 
@@ -271,7 +263,6 @@ export class Router implements IRouter {
     this.delete = buildMethod('delete');
     this.put = buildMethod('put');
     this.patch = buildMethod('patch');
-    this.options = buildMethod('options');
   }
 
   public getRoutes() {
@@ -290,10 +281,10 @@ export class Router implements IRouter {
   }: {
     request: Request;
     responseToolkit: ResponseToolkit;
-    handler: RequestHandlerEnhanced<P, Q, B>;
+    handler: RequestHandlerEnhanced<typeof request.method, P, Q, B>;
     routeSchemas?: RouteSchemas<P, Q, B>;
   }) {
-    let kibanaRequest: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>;
+    let kibanaRequest: KibanaRequest<typeof request.method, TypeOf<P>, TypeOf<Q>, TypeOf<B>>;
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
       kibanaRequest = KibanaRequest.from(request, routeSchemas);
@@ -316,10 +307,11 @@ type WithoutHeadArgument<T> = T extends (first: any, ...rest: infer Params) => i
   : never;
 
 type RequestHandlerEnhanced<
+  Method extends RouteMethod,
   P extends ObjectType,
   Q extends ObjectType,
   B extends ObjectType | Type<Buffer> | Type<Stream>
-> = WithoutHeadArgument<RequestHandler<P, Q, B>>;
+> = WithoutHeadArgument<RequestHandler<P, Q, B, Method>>;
 
 /**
  * A function executed when route path matched requested resource path.
@@ -357,9 +349,10 @@ type RequestHandlerEnhanced<
 export type RequestHandler<
   P extends ObjectType,
   Q extends ObjectType,
-  B extends ObjectType | Type<Buffer> | Type<Stream>
+  B extends ObjectType | Type<Buffer> | Type<Stream>,
+  Method extends RouteMethod = RouteMethod
 > = (
   context: RequestHandlerContext,
-  request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>,
+  request: KibanaRequest<Method, TypeOf<P>, TypeOf<Q>, TypeOf<B>>,
   response: KibanaResponseFactory
 ) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;

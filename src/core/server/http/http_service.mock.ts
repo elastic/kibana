@@ -41,7 +41,6 @@ const createBasePathMock = (): jest.Mocked<InternalHttpServiceSetup['basePath']>
 const createRouterMock = (): jest.Mocked<IRouter> => ({
   routerPath: '/',
   get: jest.fn(),
-  options: jest.fn(),
   post: jest.fn(),
   put: jest.fn(),
   patch: jest.fn(),

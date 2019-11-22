@@ -25,10 +25,14 @@ import { ObjectType, Type, TypeOf } from '@kbn/config-schema';
 import { Stream } from 'stream';
 import { deepFreeze, RecursiveReadonly } from '../../../utils';
 import { Headers } from './headers';
-import { RouteMethod, RouteSchemas, RouteConfigOptions } from './route';
+import { RouteMethod, RouteSchemas, RouteConfigOptions, validBodyOutput } from './route';
 import { KibanaSocket, IKibanaSocket } from './socket';
 
 const requestSymbol = Symbol('request');
+
+export type KibanaRequestRouteOptions<Method extends RouteMethod> = Method extends 'get' | 'options'
+  ? Required<Omit<RouteConfigOptions<Method>, 'body'>>
+  : Required<RouteConfigOptions<Method>>;
 
 /**
  * Request specific route information exposed to a handler.
@@ -37,9 +41,7 @@ const requestSymbol = Symbol('request');
 export interface KibanaRequestRoute<Method extends RouteMethod> {
   path: string;
   method: Method;
-  options: Method extends 'get'
-    ? Required<Omit<RouteConfigOptions<Method>, 'body'>> // GET requests cannot have payload options
-    : Required<RouteConfigOptions>; // Using any because 'patch' and 'options' are not valid RouteMethods but shouldn't affect much to typings
+  options: KibanaRequestRouteOptions<Method>;
 }
 
 /**
@@ -53,7 +55,12 @@ export interface LegacyRequest extends Request {} // eslint-disable-line @typesc
  * Kibana specific abstraction for an incoming request.
  * @public
  */
-export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
+export class KibanaRequest<
+  Method extends RouteMethod = RouteMethod,
+  Params = unknown,
+  Query = unknown,
+  Body = unknown
+> {
   /**
    * Factory for creating requests. Validates the request before creating an
    * instance of a KibanaRequest.
@@ -65,7 +72,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     B extends ObjectType | Type<Buffer> | Type<Stream>
   >(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders: boolean = true) {
     const requestParts = KibanaRequest.validate(req, routeSchemas);
-    return new KibanaRequest(
+    return new KibanaRequest<typeof req.method, TypeOf<P>, TypeOf<Q>, TypeOf<B>>(
       req,
       requestParts.params,
       requestParts.query,
@@ -120,7 +127,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
   /** a WHATWG URL standard object. */
   public readonly url: Url;
   /** matched route details */
-  public readonly route: RecursiveReadonly<KibanaRequestRoute<RouteMethod | 'patch' | 'options'>>;
+  public readonly route: RecursiveReadonly<KibanaRequestRoute<Method>>;
   /**
    * Readonly copy of incoming request headers.
    * @remarks
@@ -155,19 +162,28 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     this.socket = new KibanaSocket(request.raw.req.socket);
   }
 
-  private getRouteInfo() {
+  private getRouteInfo(): KibanaRequestRoute<Method> {
     const request = this[requestSymbol];
+    const method = request.method as Method;
     const { parse, maxBytes, allow, output } = request.route.settings.payload || {};
+
+    const options = ({
+      authRequired: request.route.settings.auth !== false,
+      tags: request.route.settings.tags || [],
+      body: ['get', 'options'].includes(method)
+        ? undefined
+        : {
+            parse,
+            maxBytes,
+            accepts: allow,
+            output: output as typeof validBodyOutput[number], // We do not support all the HAPI-supported outputs and TS complains
+          },
+    } as unknown) as KibanaRequestRouteOptions<Method>; // TS does not understand this is OK so I'm enforced to do this enforced casting
+
     return {
       path: request.path,
-      method: request.method,
-      options: {
-        authRequired: request.route.settings.auth !== false,
-        tags: request.route.settings.tags || [],
-        body: [allow, maxBytes, output, parse].some(v => typeof v !== 'undefined')
-          ? { parse, maxBytes, accepts: allow, output }
-          : undefined,
-      },
+      method,
+      options,
     };
   }
 }
@@ -176,10 +192,10 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
  * Returns underlying Hapi Request
  * @internal
  */
-export const ensureRawRequest = (request: KibanaRequest | LegacyRequest) =>
+export const ensureRawRequest = (request: KibanaRequest<RouteMethod> | LegacyRequest) =>
   isKibanaRequest(request) ? request[requestSymbol] : request;
 
-function isKibanaRequest(request: unknown): request is KibanaRequest {
+function isKibanaRequest(request: unknown): request is KibanaRequest<RouteMethod> {
   return request instanceof KibanaRequest;
 }
 
@@ -195,6 +211,8 @@ function isRequest(request: any): request is LegacyRequest {
  * Checks if an incoming request either KibanaRequest or Legacy.Request
  * @internal
  */
-export function isRealRequest(request: unknown): request is KibanaRequest | LegacyRequest {
+export function isRealRequest(
+  request: unknown
+): request is KibanaRequest<RouteMethod> | LegacyRequest {
   return isKibanaRequest(request) || isRequest(request);
 }

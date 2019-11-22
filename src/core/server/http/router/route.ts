@@ -98,7 +98,7 @@ export interface RouteConfigOptionsBody {
  * Additional route options.
  * @public
  */
-export interface RouteConfigOptions<Method extends RouteMethod = any> {
+export interface RouteConfigOptions<Method extends RouteMethod> {
   /**
    * A flag shows that authentication for a route:
    * `enabled`  when true

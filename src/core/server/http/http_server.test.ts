@@ -677,7 +677,7 @@ describe('body options', () => {
         try {
           expect(req.body).toBeInstanceOf(Buffer);
           expect(req.body.toString()).toBe(JSON.stringify({ test: 1 }));
-          return res.ok({ body: req.route });
+          return res.ok({ body: req.route.options.body });
         } catch (err) {
           return res.internalError({ body: err.message });
         }
@@ -690,26 +690,18 @@ describe('body options', () => {
       .post('/')
       .send({ test: 1 })
       .expect(200, {
-        method: 'post',
-        path: '/',
-        options: {
-          authRequired: true,
-          tags: [],
-          body: {
-            parse: false,
-            maxBytes: 1024, // hapi populates the default
-            output: 'data',
-          },
-        },
+        parse: false,
+        maxBytes: 1024, // hapi populates the default
+        output: 'data',
       });
   });
 });
 
-test('should not parse the content in the request', async () => {
+test('should return a stream in the body', async () => {
   const { registerRouter, server: innerServer } = await server.setup(config);
 
   const router = new Router('', logger, enhanceWithContext);
-  router.post(
+  router.put(
     {
       path: '/',
       validate: { body: schema.stream() },
@@ -718,7 +710,7 @@ test('should not parse the content in the request', async () => {
     (context, req, res) => {
       try {
         expect(req.body).toBeInstanceOf(Readable);
-        return res.ok({ body: req.route });
+        return res.ok({ body: req.route.options.body });
       } catch (err) {
         return res.internalError({ body: err.message });
       }
@@ -728,20 +720,12 @@ test('should not parse the content in the request', async () => {
 
   await server.start();
   await supertest(innerServer.listener)
-    .post('/')
+    .put('/')
     .send({ test: 1 })
     .expect(200, {
-      method: 'post',
-      path: '/',
-      options: {
-        authRequired: true,
-        tags: [],
-        body: {
-          parse: true,
-          maxBytes: 1024, // hapi populates the default
-          output: 'stream',
-        },
-      },
+      parse: true,
+      maxBytes: 1024, // hapi populates the default
+      output: 'stream',
     });
 });
 
