@@ -142,6 +142,7 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          risk_score: 50,
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -155,7 +156,7 @@ describe('schemas', () => {
       ).toBeTruthy();
     });
 
-    test('[rule_id, description, from, to, index, name, severity, interval, type, query, language] does validate', () => {
+    test('[rule_id, description, from, to, index, name, severity, interval, type, query, language] does not validate', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
@@ -170,13 +171,72 @@ describe('schemas', () => {
           query: 'some query',
           language: 'kuery',
         }).error
-      ).toBeFalsy();
+      ).toBeTruthy();
     });
 
-    test('[rule_id, description, from, to, index, name, severity, interval, type, filter] does validate', () => {
+    test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score] does not validate', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          query: 'some query',
+          language: 'kuery',
+        }).error
+      ).toBeTruthy();
+    });
+
+    test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score, output_index] does validate', () => {
+      expect(
+        createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          query: 'some query',
+          language: 'kuery',
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score] does not validate', () => {
+      expect(
+        createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
+          rule_id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'filter',
+          filter: {},
+          risk_score: 50,
+        }).error
+      ).toBeTruthy();
+    });
+
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index] does validate', () => {
+      expect(
+        createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -194,6 +254,8 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -210,6 +272,8 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -228,6 +292,8 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -246,6 +312,8 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -264,6 +332,8 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -283,6 +353,8 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -303,6 +375,8 @@ describe('schemas', () => {
           Partial<Omit<SignalAlertParamsRest, 'references'>> & { references: number[] }
         >({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -324,6 +398,8 @@ describe('schemas', () => {
           Partial<Omit<SignalAlertParamsRest, 'index'>> & { index: number[] }
         >({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -342,6 +418,8 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -357,6 +435,8 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -373,6 +453,8 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -391,6 +473,8 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -407,6 +491,8 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          risk_score: 50,
+          output_index: '.siem-signals',
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -420,10 +506,12 @@ describe('schemas', () => {
       ).toBeFalsy();
     });
 
-    test('saved_query type cannot have filters with it', () => {
+    test('saved_query type can have filters with it', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -435,6 +523,28 @@ describe('schemas', () => {
           saved_id: 'some id',
           filters: [],
         }).error
+      ).toBeFalsy();
+    });
+
+    test('filters cannot be a string', () => {
+      expect(
+        createSignalsSchema.validate<
+          Partial<Omit<SignalAlertParamsRest, 'filters'> & { filters: string }>
+        >({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'saved_query',
+          saved_id: 'some id',
+          filters: 'some string',
+        }).error
       ).toBeTruthy();
     });
 
@@ -442,6 +552,8 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          risk_score: 50,
+          output_index: '.siem-signals',
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -460,6 +572,8 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -479,6 +593,8 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          risk_score: 50,
+          output_index: '.siem-signals',
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -498,6 +614,8 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -517,6 +635,8 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -537,6 +657,8 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -557,6 +679,8 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -577,6 +701,8 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -600,6 +726,8 @@ describe('schemas', () => {
           Partial<Omit<SignalAlertParamsRest, 'tags'>> & { tags: number[] }
         >({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -621,6 +749,8 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
           description: 'some description',
           false_positives: ['false_1', 'false_2'],
           from: 'now-5m',
@@ -644,6 +774,8 @@ describe('schemas', () => {
           Partial<Omit<SignalAlertParamsRest, 'false_positives'>> & { false_positives: number[] }
         >({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
           description: 'some description',
           false_positives: [5, 4],
           from: 'now-5m',
@@ -665,6 +797,8 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -688,6 +822,8 @@ describe('schemas', () => {
           Partial<Omit<SignalAlertParamsRest, 'immutable'>> & { immutable: number }
         >({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -703,6 +839,226 @@ describe('schemas', () => {
           max_signals: 1,
         }).error
       ).toBeTruthy();
+    });
+
+    test('You cannot set the risk_score to 101', () => {
+      expect(
+        createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 101,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          immutable: true,
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+        }).error
+      ).toBeTruthy();
+    });
+
+    test('You cannot set the risk_score to -1', () => {
+      expect(
+        createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: -1,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          immutable: true,
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+        }).error
+      ).toBeTruthy();
+    });
+
+    test('You can set the risk_score to 0', () => {
+      expect(
+        createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 0,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          immutable: true,
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('You can set the risk_score to 100', () => {
+      expect(
+        createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 100,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          immutable: true,
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('You can set meta to any object you want', () => {
+      expect(
+        createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          immutable: true,
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          meta: {
+            somethingMadeUp: { somethingElse: true },
+          },
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('You cannot create meta as a string', () => {
+      expect(
+        createSignalsSchema.validate<
+          Partial<Omit<SignalAlertParamsRest, 'meta'> & { meta: string }>
+        >({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          immutable: true,
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          meta: 'should not work',
+        }).error
+      ).toBeTruthy();
+    });
+
+    test('You can have an empty query string when filters are present', () => {
+      expect(
+        createSignalsSchema.validate<
+          Partial<Omit<SignalAlertParamsRest, 'meta'> & { meta: string }>
+        >({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          immutable: true,
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: '',
+          language: 'kuery',
+          filters: [],
+          max_signals: 1,
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('You can omit the query string when filters are present', () => {
+      expect(
+        createSignalsSchema.validate<
+          Partial<Omit<SignalAlertParamsRest, 'meta'> & { meta: string }>
+        >({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          immutable: true,
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          language: 'kuery',
+          filters: [],
+          max_signals: 1,
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('query string defaults to empty string when present with filters', () => {
+      expect(
+        createSignalsSchema.validate<
+          Partial<Omit<SignalAlertParamsRest, 'meta'> & { meta: string }>
+        >({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          immutable: true,
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          language: 'kuery',
+          filters: [],
+          max_signals: 1,
+        }).value.query
+      ).toEqual('');
     });
   });
 
@@ -760,6 +1116,15 @@ describe('schemas', () => {
         updateSignalSchema.validate<Partial<UpdateSignalAlertParamsRest>>({
           id: 'rule-1',
           description: 'some description',
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('[id, risk_score] does validate', () => {
+      expect(
+        updateSignalSchema.validate<Partial<UpdateSignalAlertParamsRest>>({
+          id: 'rule-1',
+          risk_score: 10,
         }).error
       ).toBeFalsy();
     });
@@ -1280,7 +1645,7 @@ describe('schemas', () => {
       ).toBeFalsy();
     });
 
-    test('saved_query type cannot have filters with it', () => {
+    test('saved_query type can have filters with it', () => {
       expect(
         updateSignalSchema.validate<Partial<UpdateSignalAlertParamsRest>>({
           id: 'rule-1',
@@ -1295,7 +1660,7 @@ describe('schemas', () => {
           saved_id: 'some id',
           filters: [],
         }).error
-      ).toBeTruthy();
+      ).toBeFalsy();
     });
 
     test('saved_query type cannot have filter with it', () => {
@@ -1432,6 +1797,38 @@ describe('schemas', () => {
         }).error
       ).toBeFalsy();
     });
+
+    test('meta can be updated', () => {
+      expect(
+        updateSignalSchema.validate<Partial<UpdateSignalAlertParamsRest>>({
+          id: 'rule-1',
+          meta: { whateverYouWant: 'anything_at_all' },
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('You update meta as a string', () => {
+      expect(
+        updateSignalSchema.validate<
+          Partial<Omit<UpdateSignalAlertParamsRest, 'meta'> & { meta: string }>
+        >({
+          id: 'rule-1',
+          meta: 'should not work',
+        }).error
+      ).toBeTruthy();
+    });
+
+    test('filters cannot be a string', () => {
+      expect(
+        updateSignalSchema.validate<
+          Partial<Omit<UpdateSignalAlertParamsRest, 'filters'> & { filters: string }>
+        >({
+          rule_id: 'rule-1',
+          type: 'query',
+          filters: 'some string',
+        }).error
+      ).toBeTruthy();
+    });
   });
 
   describe('find signals schema', () => {
@@ -1528,15 +1925,6 @@ describe('schemas', () => {
       expect(
         findSignalsSchema.validate<Partial<FindParamsRest>>({
           sort_order: 'asc',
-        }).error
-      ).toBeTruthy();
-    });
-
-    // TODO: Delete this if not used
-    test.skip('sort_field requires sort_order to work', () => {
-      expect(
-        findSignalsSchema.validate<Partial<FindParamsRest>>({
-          sort_field: 'some field',
         }).error
       ).toBeTruthy();
     });

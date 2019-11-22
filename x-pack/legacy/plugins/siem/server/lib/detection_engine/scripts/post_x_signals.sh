@@ -23,6 +23,8 @@ do {
  -X POST ${KIBANA_URL}/api/detection_engine/rules \
   --data "{
     \"rule_id\": \"${i}\",
+    \"risk_score\": \"50\",
+    \"output_index\": \"${SIGNALS_INDEX}"\",
     \"description\": \"Detecting root and admin users\",
     \"index\": [\"auditbeat-*\", \"filebeat-*\", \"packetbeat-*\", \"winlogbeat-*\"],
     \"interval\": \"24h\",
