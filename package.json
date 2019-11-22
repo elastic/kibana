@@ -282,7 +282,7 @@
     "@kbn/utility-types": "1.0.0",
     "@microsoft/api-documenter": "7.4.3",
     "@microsoft/api-extractor": "7.4.2",
-    "@percy/agent": "^0.11.0",
+    "@percy/agent": "^0.20.2",
     "@types/angular": "^1.6.56",
     "@types/angular-mocks": "^1.7.0",
     "@types/babel__core": "^7.1.2",
