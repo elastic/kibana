@@ -107,7 +107,12 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
     if (result.status === 'ok') {
       setTestingStatus(true);
     } else {
-      setTestingStatus(result.message);
+      setTestingStatus(
+        i18n.translate('xpack.monitoring.alerts.configuration.step1.testingError', {
+          defaultMessage:
+            'Unable to send test email. Please double check your email configuration.',
+        })
+      );
     }
     setIsTesting(false);
   }
@@ -117,7 +122,7 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
       <Fragment>
         <EuiText>
           <p>
-            {i18n.translate('xpack.monitoring.alerts.configuration.step2.noActions', {
+            {i18n.translate('xpack.monitoring.alerts.configuration.step1.editAction', {
               defaultMessage: 'Edit the action below.',
             })}
           </p>
@@ -214,14 +219,7 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
         <Fragment>
           <EuiSpacer />
           <EuiText color="danger">
-            <p>
-              {i18n.translate('xpack.monitoring.alerts.configuration.testConfiguration.error', {
-                defaultMessage: 'Uh oh, something went wrong. Error: {error}',
-                values: {
-                  error: testingStatus,
-                },
-              })}
-            </p>
+            <p>{testingStatus}</p>
           </EuiText>
         </Fragment>
       );

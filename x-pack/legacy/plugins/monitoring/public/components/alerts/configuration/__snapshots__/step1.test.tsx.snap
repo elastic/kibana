@@ -207,7 +207,7 @@ exports[`Step1 testing should show a failed test error 1`] = `
     color="danger"
   >
     <p>
-      Uh oh, something went wrong. Error: Very detailed error message
+      Unable to send test email. Please double check your email configuration.
     </p>
   </EuiText>
 </Fragment>
