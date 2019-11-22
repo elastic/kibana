@@ -6,6 +6,7 @@
 
 import React, { useState } from 'react';
 import {
+  EuiBadge,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
@@ -60,7 +61,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
       }),
       truncateText: true,
       sortable: true,
-      render: (name: SlmPolicy['name'], { inProgress }: SlmPolicy) => {
+      render: (name: SlmPolicy['name'], { inProgress, isManagedPolicy }: SlmPolicy) => {
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
@@ -71,7 +72,15 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
                 data-test-subj="policyLink"
               >
                 {name}
-              </EuiLink>
+              </EuiLink>{' '}
+              {isManagedPolicy ? (
+                <EuiBadge color="primary">
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.policyList.table.managedPolicyBadgeLabel"
+                    defaultMessage="Managed"
+                  />
+                </EuiBadge>
+              ) : null}
             </EuiFlexItem>
             {inProgress ? (
               <EuiFlexItem grow={false}>

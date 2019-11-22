@@ -73,9 +73,12 @@ export const getOneHandler: RouterRouteHandler = async (
     throw wrapCustomError(new Error('Policy not found'), 404);
   }
 
+  const managedPolicies = await getManagedPolicyNames(callWithInternalUser);
+  const isManagedPolicy = managedPolicies.includes(name);
+
   // Deserialize policy
   return {
-    policy: deserializePolicy(name, policiesByName[name]),
+    policy: deserializePolicy(name, policiesByName[name], isManagedPolicy),
   };
 };
 

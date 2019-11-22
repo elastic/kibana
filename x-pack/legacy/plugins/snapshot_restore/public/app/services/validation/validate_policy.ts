@@ -15,10 +15,14 @@ const isStringEmpty = (str: string | null): boolean => {
   return str ? !Boolean(str.trim()) : true;
 };
 
-export const validatePolicy = (policy: SlmPolicyPayload): PolicyValidation => {
+export const validatePolicy = (
+  policy: SlmPolicyPayload,
+  otherValidationData: any
+): PolicyValidation => {
   const i18n = textService.i18n;
 
   const { name, snapshotName, schedule, repository, config, retention } = policy;
+  const { managedRepository } = otherValidationData;
 
   const validation: PolicyValidation = {
     isValid: true,
@@ -92,6 +96,18 @@ export const validatePolicy = (policy: SlmPolicyPayload): PolicyValidation => {
       })
     );
   }
+
+  if (managedRepository && managedRepository.name === repository && managedRepository.policy) {
+    validation.errors.repository.push(
+      i18n.translate('xpack.snapshotRestore.policyValidation.invalidRepoErrorMessage', {
+        defaultMessage: 'Policy "{policyName}" is already associated with this repository.',
+        values: {
+          policyName: managedRepository.policy,
+        },
+      })
+    );
+  }
+
   // Remove fields with no errors
   validation.errors = Object.entries(validation.errors)
     .filter(([key, value]) => value.length > 0)

@@ -274,6 +274,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
                                       }
                                     ),
                                     icon: 'trash',
+                                    disabled: policyDetails.policy.isManagedPolicy,
                                     onClick: () =>
                                       deletePolicyPrompt([policyName], onPolicyDeleted),
                                   },
