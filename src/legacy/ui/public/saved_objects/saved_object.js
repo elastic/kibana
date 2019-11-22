@@ -30,32 +30,37 @@
 
 import angular from 'angular';
 import _ from 'lodash';
-
-
-import { InvalidJSONProperty, SavedObjectNotFound, expandShorthand } from '../../../../plugins/kibana_utils/public';
-
+import {
+  InvalidJSONProperty,
+  SavedObjectNotFound,
+  expandShorthand,
+} from '../../../../plugins/kibana_utils/public';
 import { SearchSource } from '../courier';
 import { findObjectByTitle } from './find_object_by_title';
 import { SavedObjectsClientProvider } from './saved_objects_client_provider';
 import { migrateLegacyQuery } from '../utils/migrate_legacy_query';
 import { npStart } from 'ui/new_platform';
 import { i18n } from '@kbn/i18n';
+import { createSource } from './helpers/create_source';
 
 /**
  * An error message to be used when the user rejects a confirm overwrite.
  * @type {string}
  */
 const OVERWRITE_REJECTED = i18n.translate('common.ui.savedObjects.overwriteRejectedDescription', {
-  defaultMessage: 'Overwrite confirmation was rejected'
+  defaultMessage: 'Overwrite confirmation was rejected',
 });
 
 /**
  * An error message to be used when the user rejects a confirm save with duplicate title.
  * @type {string}
  */
-const SAVE_DUPLICATE_REJECTED = i18n.translate('common.ui.savedObjects.saveDuplicateRejectedDescription', {
-  defaultMessage: 'Save with duplicate title confirmation was rejected'
-});
+const SAVE_DUPLICATE_REJECTED = i18n.translate(
+  'common.ui.savedObjects.saveDuplicateRejectedDescription',
+  {
+    defaultMessage: 'Save with duplicate title confirmation was rejected',
+  }
+);
 
 /**
  * @param error {Error} the error
@@ -148,22 +153,32 @@ export function SavedObjectProvider(Promise, Private, confirmModalPromise, index
 
       // Inject index id if a reference is saved
       if (searchSourceValues.indexRefName) {
-        const reference = references.find(reference => reference.name === searchSourceValues.indexRefName);
+        const reference = references.find(
+          reference => reference.name === searchSourceValues.indexRefName
+        );
         if (!reference) {
-          throw new Error(`Could not find reference for ${searchSourceValues.indexRefName} on ${this.getEsType()} ${this.id}`);
+          throw new Error(
+            `Could not find reference for ${
+              searchSourceValues.indexRefName
+            } on ${this.getEsType()} ${this.id}`
+          );
         }
         searchSourceValues.index = reference.id;
         delete searchSourceValues.indexRefName;
       }
 
       if (searchSourceValues.filter) {
-        searchSourceValues.filter.forEach((filterRow) => {
+        searchSourceValues.filter.forEach(filterRow => {
           if (!filterRow.meta || !filterRow.meta.indexRefName) {
             return;
           }
-          const reference = references.find(reference => reference.name === filterRow.meta.indexRefName);
+          const reference = references.find(
+            reference => reference.name === filterRow.meta.indexRefName
+          );
           if (!reference) {
-            throw new Error(`Could not find reference for ${filterRow.meta.indexRefName} on ${this.getEsType()}`);
+            throw new Error(
+              `Could not find reference for ${filterRow.meta.indexRefName} on ${this.getEsType()}`
+            );
           }
           filterRow.meta.index = reference.id;
           delete filterRow.meta.indexRefName;
@@ -171,14 +186,21 @@ export function SavedObjectProvider(Promise, Private, confirmModalPromise, index
       }
 
       const searchSourceFields = this.searchSource.getFields();
-      const fnProps = _.transform(searchSourceFields, function (dynamic, val, name) {
-        if (_.isFunction(val)) dynamic[name] = val;
-      }, {});
+      const fnProps = _.transform(
+        searchSourceFields,
+        function (dynamic, val, name) {
+          if (_.isFunction(val)) dynamic[name] = val;
+        },
+        {}
+      );
 
       this.searchSource.setFields(_.defaults(searchSourceValues, fnProps));
 
       if (!_.isUndefined(this.searchSource.getOwnField('query'))) {
-        this.searchSource.setField('query', migrateLegacyQuery(this.searchSource.getOwnField('query')));
+        this.searchSource.setField(
+          'query',
+          migrateLegacyQuery(this.searchSource.getOwnField('query'))
+        );
       }
     };
 
@@ -188,7 +210,7 @@ export function SavedObjectProvider(Promise, Private, confirmModalPromise, index
      *
      * @return {Promise<IndexPattern | null>}
      */
-    this.hydrateIndexPattern = (id) => {
+    this.hydrateIndexPattern = id => {
       if (!this.searchSource) {
         return Promise.resolve(null);
       }
@@ -239,7 +261,8 @@ export function SavedObjectProvider(Promise, Private, confirmModalPromise, index
           }
 
           // fetch the object from ES
-          return savedObjectsClient.get(esType, this.id)
+          return savedObjectsClient
+            .get(esType, this.id)
             .then(resp => {
               // temporary compatability for savedObjectsClient
               return {
@@ -247,7 +270,7 @@ export function SavedObjectProvider(Promise, Private, confirmModalPromise, index
                 _type: resp.type,
                 _source: _.cloneDeep(resp.attributes),
                 references: resp.references,
-                found: resp._version ? true : false
+                found: resp._version ? true : false,
               };
             })
             .then(this.applyESResp)
@@ -257,8 +280,7 @@ export function SavedObjectProvider(Promise, Private, confirmModalPromise, index
         .then(() => this);
     });
 
-
-    this.applyESResp = (resp) => {
+    this.applyESResp = resp => {
       this._source = _.cloneDeep(resp._source);
 
       if (resp.found != null && !resp.found) {
@@ -279,7 +301,12 @@ export function SavedObjectProvider(Promise, Private, confirmModalPromise, index
       // transform the source using _deserializers
       _.forOwn(mapping, (fieldMapping, fieldName) => {
         if (fieldMapping._deserialize) {
-          this._source[fieldName] = fieldMapping._deserialize(this._source[fieldName], resp, fieldName, fieldMapping);
+          this._source[fieldName] = fieldMapping._deserialize(
+            this._source[fieldName],
+            resp,
+            fieldName,
+            fieldMapping
+          );
         }
       });
 
@@ -290,14 +317,16 @@ export function SavedObjectProvider(Promise, Private, confirmModalPromise, index
       return Promise.try(() => {
         parseSearchSource(meta.searchSourceJSON, resp.references);
         return this.hydrateIndexPattern();
-      }).then(() => {
-        if (injectReferences && resp.references && resp.references.length > 0) {
-          injectReferences(this, resp.references);
-        }
-        return this;
-      }).then(() => {
-        return Promise.cast(afterESResp.call(this, resp));
-      });
+      })
+        .then(() => {
+          if (injectReferences && resp.references && resp.references.length > 0) {
+            injectReferences(this, resp.references);
+          }
+          return this;
+        })
+        .then(() => {
+          return Promise.cast(afterESResp.call(this, resp));
+        });
     };
 
     /**
@@ -311,7 +340,7 @@ export function SavedObjectProvider(Promise, Private, confirmModalPromise, index
 
       _.forOwn(mapping, (fieldMapping, fieldName) => {
         if (this[fieldName] != null) {
-          attributes[fieldName] = (fieldMapping._serialize)
+          attributes[fieldName] = fieldMapping._serialize
             ? fieldMapping._serialize(this[fieldName])
             : this[fieldName];
         }
@@ -323,7 +352,10 @@ export function SavedObjectProvider(Promise, Private, confirmModalPromise, index
           // searchSourceFields.index will normally be an IndexPattern, but can be a string in two scenarios:
           // (1) `init()` (and by extension `hydrateIndexPattern()`) hasn't been called on this Saved Object
           // (2) The IndexPattern doesn't exist, so we fail to resolve it in `hydrateIndexPattern()`
-          const indexId = typeof (searchSourceFields.index) === 'string' ? searchSourceFields.index : searchSourceFields.index.id;
+          const indexId =
+            typeof searchSourceFields.index === 'string'
+              ? searchSourceFields.index
+              : searchSourceFields.index.id;
           const refName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
           references.push({
             name: refName,
@@ -355,13 +387,13 @@ export function SavedObjectProvider(Promise, Private, confirmModalPromise, index
                   ...filterRow.meta,
                   indexRefName: refName,
                   index: undefined,
-                }
+                },
               };
             }),
           };
         }
         attributes.kibanaSavedObjectMeta = {
-          searchSourceJSON: angular.toJson(searchSourceFields)
+          searchSourceJSON: angular.toJson(searchSourceFields),
         };
       }
 
@@ -382,57 +414,24 @@ export function SavedObjectProvider(Promise, Private, confirmModalPromise, index
       ...opts,
     });
 
-    /**
-     * Attempts to create the current object using the serialized source. If an object already
-     * exists, a warning message requests an overwrite confirmation.
-     * @param source - serialized version of this object (return value from this._serialize())
-     * What will be indexed into elasticsearch.
-     * @param options - options to pass to the saved object create method
-     * @returns {Promise} - A promise that is resolved with the objects id if the object is
-     * successfully indexed. If the overwrite confirmation was rejected, an error is thrown with
-     * a confirmRejected = true parameter so that case can be handled differently than
-     * a create or index error.
-     * @resolved {SavedObject}
-     */
-    const createSource = (source, options = {}) => {
-      return savedObjectsClient.create(esType, source, options)
-        .catch(err => {
-          // record exists, confirm overwriting
-          if (_.get(err, 'res.status') === 409) {
-            const confirmMessage = i18n.translate('common.ui.savedObjects.confirmModal.overwriteConfirmationMessage', {
-              defaultMessage: 'Are you sure you want to overwrite {title}?',
-              values: { title: this.title }
-            });
-
-            return confirmModalPromise(confirmMessage, {
-              confirmButtonText: i18n.translate('common.ui.savedObjects.confirmModal.overwriteButtonLabel', {
-                defaultMessage: 'Overwrite',
-              }),
-              title: i18n.translate('common.ui.savedObjects.confirmModal.overwriteTitle', {
-                defaultMessage: 'Overwrite {name}?',
-                values: { name: this.getDisplayName() }
-              }),
-            })
-              .then(() => savedObjectsClient.create(esType, source, this.creationOpts({ overwrite: true, ...options })))
-              .catch(() => Promise.reject(new Error(OVERWRITE_REJECTED)));
-          }
-          return Promise.reject(err);
-        });
-    };
-
     const displayDuplicateTitleConfirmModal = () => {
-      const confirmMessage = i18n.translate('common.ui.savedObjects.confirmModal.saveDuplicateConfirmationMessage', {
-        defaultMessage: `A {name} with the title '{title}' already exists. Would you like to save anyway?`,
-        values: { title: this.title, name: this.getDisplayName() }
-      });
+      const confirmMessage = i18n.translate(
+        'common.ui.savedObjects.confirmModal.saveDuplicateConfirmationMessage',
+        {
+          defaultMessage: `A {name} with the title '{title}' already exists. Would you like to save anyway?`,
+          values: { title: this.title, name: this.getDisplayName() },
+        }
+      );
 
       return confirmModalPromise(confirmMessage, {
-        confirmButtonText: i18n.translate('common.ui.savedObjects.confirmModal.saveDuplicateButtonLabel', {
-          defaultMessage: 'Save {name}',
-          values: { name: this.getDisplayName() }
-        })
-      })
-        .catch(() => Promise.reject(new Error(SAVE_DUPLICATE_REJECTED)));
+        confirmButtonText: i18n.translate(
+          'common.ui.savedObjects.confirmModal.saveDuplicateButtonLabel',
+          {
+            defaultMessage: 'Save {name}',
+            values: { name: this.getDisplayName() },
+          }
+        ),
+      }).catch(() => Promise.reject(new Error(SAVE_DUPLICATE_REJECTED)));
     };
 
     const checkForDuplicateTitle = (isTitleDuplicateConfirmed, onTitleDuplicate) => {
@@ -447,20 +446,19 @@ export function SavedObjectProvider(Promise, Private, confirmModalPromise, index
         return Promise.resolve();
       }
 
-      return findObjectByTitle(savedObjectsClient, this.getEsType(), this.title)
-        .then(duplicate => {
-          if (!duplicate) return true;
-          if (duplicate.id === this.id) return true;
+      return findObjectByTitle(savedObjectsClient, this.getEsType(), this.title).then(duplicate => {
+        if (!duplicate) return true;
+        if (duplicate.id === this.id) return true;
 
-          if (onTitleDuplicate) {
-            onTitleDuplicate();
-            return Promise.reject(new Error(SAVE_DUPLICATE_REJECTED));
-          }
+        if (onTitleDuplicate) {
+          onTitleDuplicate();
+          return Promise.reject(new Error(SAVE_DUPLICATE_REJECTED));
+        }
 
-          // TODO: make onTitleDuplicate a required prop and remove UI components from this class
-          // Need to leave here until all users pass onTitleDuplicate.
-          return displayDuplicateTitleConfirmModal();
-        });
+        // TODO: make onTitleDuplicate a required prop and remove UI components from this class
+        // Need to leave here until all users pass onTitleDuplicate.
+        return displayDuplicateTitleConfirmModal();
+      });
     };
 
     /**
@@ -475,7 +473,11 @@ export function SavedObjectProvider(Promise, Private, confirmModalPromise, index
      * @return {Promise}
      * @resolved {String} - The id of the doc
      */
-    this.save = ({ confirmOverwrite = false, isTitleDuplicateConfirmed = false, onTitleDuplicate } = {}) => {
+    this.save = ({
+      confirmOverwrite = false,
+      isTitleDuplicateConfirmed = false,
+      onTitleDuplicate,
+    } = {}) => {
       // Save the original id in case the save fails.
       const originalId = this.id;
       // Read https://github.com/elastic/kibana/issues/9056 and
@@ -500,12 +502,23 @@ export function SavedObjectProvider(Promise, Private, confirmModalPromise, index
       return checkForDuplicateTitle(isTitleDuplicateConfirmed, onTitleDuplicate)
         .then(() => {
           if (confirmOverwrite) {
-            return createSource(attributes, this.creationOpts({ references }));
+            return createSource(
+              attributes,
+              this,
+              savedObjectsClient,
+              esType,
+              confirmModalPromise,
+              this.creationOpts({ references })
+            );
           } else {
-            return savedObjectsClient.create(esType, attributes, this.creationOpts({ references, overwrite: true }));
+            return savedObjectsClient.create(
+              esType,
+              attributes,
+              this.creationOpts({ references, overwrite: true })
+            );
           }
         })
-        .then((resp) => {
+        .then(resp => {
           this.id = resp.id;
         })
         .then(() => {
@@ -516,7 +529,7 @@ export function SavedObjectProvider(Promise, Private, confirmModalPromise, index
           this.lastSavedTitle = this.title;
           return this.id;
         })
-        .catch((err) => {
+        .catch(err => {
           this.isSaving = false;
           this.id = originalId;
           if (isErrorNonFatal(err)) {
