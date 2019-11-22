@@ -18,8 +18,7 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiCheckbox } from '@elastic/eui';
-import uuid from 'uuid';
+import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
@@ -30,11 +29,12 @@ interface Props {
   [key: string]: any;
 }
 
-export const CheckBoxField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
+export const RadioGroupField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   return (
     <EuiFormRow
+      label={field.label}
       helpText={field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
@@ -42,11 +42,10 @@ export const CheckBoxField = ({ field, euiFieldProps = {}, ...rest }: Props) => 
       data-test-subj={rest['data-test-subj']}
       describedByIds={rest.idAria ? [rest.idAria] : undefined}
     >
-      <EuiCheckbox
-        label={field.label}
-        checked={field.value as boolean}
-        onChange={field.onChange}
-        id={euiFieldProps.id || uuid()}
+      <EuiRadioGroup
+        idSelected={field.value as string}
+        options={[]}
+        onChange={field.setValue}
         data-test-subj="input"
         {...euiFieldProps}
       />

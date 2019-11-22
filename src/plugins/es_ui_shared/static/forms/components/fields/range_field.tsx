@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import React from 'react';
-import { EuiFormRow, EuiCheckbox } from '@elastic/eui';
-import uuid from 'uuid';
+import React, { useCallback } from 'react';
+import { EuiFormRow, EuiRange } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
@@ -30,11 +29,22 @@ interface Props {
   [key: string]: any;
 }
 
-export const CheckBoxField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
+export const RangeField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+
+  const onChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) => {
+      const event = ({ ...e, value: `${e.currentTarget.value}` } as unknown) as React.ChangeEvent<{
+        value: string;
+      }>;
+      field.onChange(event);
+    },
+    [field.onChange]
+  );
 
   return (
     <EuiFormRow
+      label={field.label}
       helpText={field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
@@ -42,12 +52,15 @@ export const CheckBoxField = ({ field, euiFieldProps = {}, ...rest }: Props) => 
       data-test-subj={rest['data-test-subj']}
       describedByIds={rest.idAria ? [rest.idAria] : undefined}
     >
-      <EuiCheckbox
-        label={field.label}
-        checked={field.value as boolean}
-        onChange={field.onChange}
-        id={euiFieldProps.id || uuid()}
-        data-test-subj="input"
+      <EuiRange
+        value={field.value as number}
+        onChange={onChange}
+        max={10}
+        min={0}
+        showRange
+        showInput
+        fullWidth
+        data-test-subj="range"
         {...euiFieldProps}
       />
     </EuiFormRow>
