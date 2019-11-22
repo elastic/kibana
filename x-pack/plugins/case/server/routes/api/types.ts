@@ -14,7 +14,17 @@ import {
   UserSchema,
 } from './schema';
 
-export type UpdatedCaseType = TypeOf<typeof UpdatedCaseSchema>;
+export type UpdatedCaseTyped = TypeOf<typeof UpdatedCaseSchema>;
+
+export interface UpdatedCaseType {
+  assignees?: UpdatedCaseTyped['assignees'];
+  comments?: UpdatedCaseTyped['comments'];
+  description?: UpdatedCaseTyped['description'];
+  name?: UpdatedCaseTyped['name'];
+  state?: UpdatedCaseTyped['state'];
+  tags?: UpdatedCaseTyped['tags'];
+  case_type?: UpdatedCaseTyped['case_type'];
+}
 
 export type UpdatedCommentType = TypeOf<typeof UpdatedCommentSchema>;
 

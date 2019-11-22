@@ -8,9 +8,8 @@ import { schema } from '@kbn/config-schema';
 import { formatUpdatedComment, wrapError } from './utils';
 import { NewCommentSchema } from './schema';
 import { RouteDeps } from '.';
-import { CASE_COMMENT_SAVED_OBJECT } from '../../constants';
 
-export function initUpdateCommentApi({ log, router }: RouteDeps) {
+export function initUpdateCommentApi({ caseService, router }: RouteDeps) {
   router.post(
     {
       path: '/api/cases/comment/{id}',
@@ -22,18 +21,14 @@ export function initUpdateCommentApi({ log, router }: RouteDeps) {
       },
     },
     async (context, request, response) => {
-      const client = context.core.savedObjects.client;
-      const savedObjectComment = formatUpdatedComment(request.body);
       try {
-        log.debug(`Attempting to POST a comment update on comment ${request.params.id}`);
-        const updatedComment = await client.update(
-          CASE_COMMENT_SAVED_OBJECT,
-          request.params.id,
-          savedObjectComment
-        );
+        const updatedComment = await caseService.updateComment({
+          client: context.core.savedObjects.client,
+          commentId: request.params.id,
+          updatedAttributes: formatUpdatedComment(request.body),
+        });
         return response.ok({ body: updatedComment });
       } catch (error) {
-        log.debug(`Error on POST a comment update on comment ${request.params.id}: ${error}`);
         return response.customError(wrapError(error));
       }
     }

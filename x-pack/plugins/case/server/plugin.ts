@@ -8,6 +8,7 @@ import { first, map } from 'rxjs/operators';
 import { CoreSetup, Logger, PluginInitializerContext } from 'kibana/server';
 import { ConfigType } from './config';
 import { initCaseApi } from './routes/api';
+import { CaseService } from './services';
 import { PluginSetupContract as SecurityPluginSetup } from '../../security/server';
 
 function createConfig$(context: PluginInitializerContext) {
@@ -33,6 +34,7 @@ export class CasePlugin {
     if (!config.enabled) {
       return;
     }
+    const service = new CaseService(this.log);
 
     this.log.debug(
       `Setting up Case Workflow with core contract [${Object.keys(
@@ -40,11 +42,13 @@ export class CasePlugin {
       )}] and plugins [${Object.keys(plugins)}]`
     );
 
+    const caseService = await service.setup({
+      authentication: plugins.security ? plugins.security.authc : null,
+    });
+
     const router = core.http.createRouter();
     initCaseApi({
-      authentication: plugins.security ? plugins.security.authc : null,
-      caseIndex: config.indexPattern,
-      log: this.log,
+      caseService,
       router,
     });
   }

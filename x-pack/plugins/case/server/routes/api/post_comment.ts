@@ -5,12 +5,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { formatNewComment, wrapError } from './utils';
+import { formatUpdatedCase, formatNewComment, wrapError } from './utils';
 import { NewCommentSchema } from './schema';
 import { RouteDeps } from '.';
-import { CASE_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../../constants';
 
-export function initPostCommentApi({ authentication, log, router }: RouteDeps) {
+export function initPostCommentApi({ caseService, router }: RouteDeps) {
   router.post(
     {
       path: '/api/cases/{id}/comment',
@@ -22,38 +21,47 @@ export function initPostCommentApi({ authentication, log, router }: RouteDeps) {
       },
     },
     async (context, request, response) => {
-      const user = await authentication!.getCurrentUser(request);
-      if (!user) {
-        log.debug(`Error on POST a new case: Bad User`);
-        return response.customError(
-          wrapError({ name: 'Bad User', message: 'The user is not authenticated' })
-        );
-      }
-      const { full_name, username } = user;
-      const client = context.core.savedObjects.client;
-      const formattedComment = formatNewComment({
-        newComment: request.body,
-        full_name,
-        username,
-        case_workflow_id: request.params.id,
-      });
+      let user;
+      let newComment;
+      let theCase;
       try {
-        log.debug(`Attempting to POST a new comment on case ${request.params.id}`);
-        const newComment = await client.create(CASE_COMMENT_SAVED_OBJECT, {
-          case_workflow_id: request.params.id,
-          ...formattedComment,
+        user = await caseService.getUser({ request, response });
+      } catch (error) {
+        return response.customError(wrapError(error));
+      }
+      try {
+        newComment = await caseService.postNewComment({
+          client: context.core.savedObjects.client,
+          attributes: formatNewComment({
+            newComment: request.body,
+            full_name: user.full_name,
+            username: user.username,
+            case_workflow_id: request.params.id,
+          }),
         });
-        const theCase = await client.get(CASE_SAVED_OBJECT, request.params.id);
-        const newCommentId = newComment.id;
-        const allCaseComments = theCase.attributes!.comments.length
-          ? [...theCase.attributes!.comments, newCommentId]
-          : [newCommentId];
-        const updatedCase = await client.update(CASE_SAVED_OBJECT, request.params.id, {
-          comments: allCaseComments,
+      } catch (error) {
+        return response.customError(wrapError(error));
+      }
+      try {
+        theCase = await caseService.getCase({
+          client: context.core.savedObjects.client,
+          caseId: request.params.id,
+        });
+      } catch (error) {
+        return response.customError(wrapError(error));
+      }
+      try {
+        const updatedCase = await caseService.updateCase({
+          client: context.core.savedObjects.client,
+          caseId: request.params.id,
+          updatedAttributes: formatUpdatedCase({
+            comments: theCase.attributes!.comments.length
+              ? [...theCase.attributes!.comments, newComment.id]
+              : [newComment.id],
+          }),
         });
         return response.ok({ body: { newComment, updatedCase } });
       } catch (error) {
-        log.debug(`Error on POST a new comment on case ${request.params.id}: ${error}`);
         return response.customError(wrapError(error));
       }
     }

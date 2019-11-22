@@ -7,9 +7,8 @@
 import { schema } from '@kbn/config-schema';
 import { RouteDeps } from '.';
 import { wrapError } from './utils';
-import { CASE_COMMENT_SAVED_OBJECT } from '../../constants';
 
-export function initGetAllCaseCommentsApi({ log, router }: RouteDeps) {
+export function initGetAllCaseCommentsApi({ caseService, router }: RouteDeps) {
   router.get(
     {
       path: '/api/cases/{id}/comments',
@@ -21,16 +20,12 @@ export function initGetAllCaseCommentsApi({ log, router }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
-        log.debug(`Attempting to GET all comments for case ${request.params.id}`);
-        const options = {
-          type: CASE_COMMENT_SAVED_OBJECT,
-          search: request.params.id,
-          searchFields: ['case_workflow_id'],
-        };
-        const theComments = await context.core.savedObjects.client.find(options);
+        const theComments = await caseService.getAllCaseComments({
+          client: context.core.savedObjects.client,
+          caseId: request.params.id,
+        });
         return response.ok({ body: theComments });
       } catch (error) {
-        log.debug(`Error on GET all comments for case  ${request.params.id}: ${error}`);
         return response.customError(wrapError(error));
       }
     }

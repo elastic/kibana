@@ -35,7 +35,7 @@ export const NewCaseSchema = schema.object({
 
 export const UpdatedCaseSchema = schema.object({
   assignees: schema.maybe(schema.arrayOf(UserSchema)),
-  comments: schema.maybe(schema.arrayOf(CommentSchema)),
+  comments: schema.maybe(schema.arrayOf(schema.string())),
   description: schema.maybe(schema.string()),
   name: schema.maybe(schema.string()),
   state: schema.maybe(schema.oneOf([schema.literal('open'), schema.literal('closed')])),

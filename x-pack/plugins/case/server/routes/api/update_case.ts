@@ -8,9 +8,8 @@ import { schema } from '@kbn/config-schema';
 import { formatUpdatedCase, wrapError } from './utils';
 import { RouteDeps } from '.';
 import { UpdatedCaseSchema } from './schema';
-import { CASE_SAVED_OBJECT } from '../../constants';
 
-export function initUpdateCaseApi({ log, router, caseIndex }: RouteDeps) {
+export function initUpdateCaseApi({ caseService, router }: RouteDeps) {
   router.post(
     {
       path: '/api/cases/{id}',
@@ -22,19 +21,14 @@ export function initUpdateCaseApi({ log, router, caseIndex }: RouteDeps) {
       },
     },
     async (context, request, response) => {
-      const formattedUpdatedCase = formatUpdatedCase(request.body);
       try {
-        log.debug(`Attempting to POST to update case ${request.params.id}`);
-        const updatedCase = await context.core.savedObjects.client.update(
-          CASE_SAVED_OBJECT,
-          request.params.id,
-          {
-            ...formattedUpdatedCase,
-          }
-        );
+        const updatedCase = await caseService.updateCase({
+          client: context.core.savedObjects.client,
+          caseId: request.params.id,
+          updatedAttributes: formatUpdatedCase(request.body),
+        });
         return response.ok({ body: updatedCase });
       } catch (error) {
-        log.debug(`Error on POST to update case ${request.params.id}: ${error}`);
         return response.customError(wrapError(error));
       }
     }

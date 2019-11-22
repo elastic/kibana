@@ -6,10 +6,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { RouteDeps } from '.';
-import { wrapError } from './utils';
-import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../constants';
+import { formatUpdatedCase, wrapError } from './utils';
 
-export function initDeleteCommentApi({ log, router }: RouteDeps) {
+export function initDeleteCommentApi({ caseService, router }: RouteDeps) {
   router.delete(
     {
       path: '/api/cases/{case_id}/comments/{comment_id}',
@@ -22,20 +21,34 @@ export function initDeleteCommentApi({ log, router }: RouteDeps) {
     },
     async (context, request, response) => {
       const client = context.core.savedObjects.client;
+      let theCase;
       try {
-        log.debug(`Attempting to DELETE comment ${request.params.comment_id}`);
-        const theComment = await context.core.savedObjects.client.delete(
-          CASE_COMMENT_SAVED_OBJECT,
-          request.params.comment_id
-        );
-        const theCase = await client.get(CASE_SAVED_OBJECT, request.params.comment_id);
-        const allCaseComments = theCase.attributes!.comments;
-        const newCaseComments = allCaseComments.filter(
+        await caseService.deleteComment({
+          client,
+          commentId: request.params.comment_id,
+        });
+      } catch (error) {
+        return response.customError(wrapError(error));
+      }
+      try {
+        theCase = await caseService.getCase({
+          client,
+          caseId: request.params.case_id,
+        });
+      } catch (error) {
+        return response.customError(wrapError(error));
+      }
+      try {
+        const comments = theCase.attributes!.comments.filter(
           (comment: string) => comment !== request.params.comment_id
         );
-        return response.ok({ body: theComment });
+        const updatedCase = await caseService.updateCase({
+          client: context.core.savedObjects.client,
+          caseId: request.params.case_id,
+          updatedAttributes: formatUpdatedCase({ comments }),
+        });
+        return response.ok({ body: { deleted: true, updatedCase } });
       } catch (error) {
-        log.debug(`Error on DELETE comment  ${request.params.comment_id}: ${error}`);
         return response.customError(wrapError(error));
       }
     }

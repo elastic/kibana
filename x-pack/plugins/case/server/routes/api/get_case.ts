@@ -7,9 +7,8 @@
 import { schema } from '@kbn/config-schema';
 import { RouteDeps } from '.';
 import { wrapError } from './utils';
-import { CASE_SAVED_OBJECT } from '../../constants';
 
-export function initGetCaseApi({ log, router }: RouteDeps) {
+export function initGetCaseApi({ caseService, router }: RouteDeps) {
   router.get(
     {
       path: '/api/cases/{id}',
@@ -21,14 +20,12 @@ export function initGetCaseApi({ log, router }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
-        log.debug(`Attempting to GET case ${request.params.id}`);
-        const theCase = await context.core.savedObjects.client.get(
-          CASE_SAVED_OBJECT,
-          request.params.id
-        );
+        const theCase = await caseService.getCase({
+          client: context.core.savedObjects.client,
+          caseId: request.params.id,
+        });
         return response.ok({ body: theCase });
       } catch (error) {
-        log.debug(`Error on GET case  ${request.params.id}: ${error}`);
         return response.customError(wrapError(error));
       }
     }
