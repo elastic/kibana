@@ -32,11 +32,6 @@ export default function({ getService }: FtrProviderContext) {
       {
         suiteTitle: 'batch transform with terms groups and avg agg with saved search filter',
         source: 'farequote_filter',
-        sourceIndex: 'farequote',
-        sourcePreviewColumn: 3,
-        sourcePreviewExpectedColumnValues: 'ASA',
-        pivotPreviewColumn: 0,
-        pivotPreviewExpectedColumnValues: 'ASA',
         groupByEntries: [
           {
             identifier: 'terms(airline)',
@@ -56,10 +51,19 @@ export default function({ getService }: FtrProviderContext) {
           return `dest_${this.transformId}`;
         },
         expected: {
+          pivotPreview: {
+            column: 0,
+            values: 'ASA',
+          },
           row: {
             status: 'stopped',
             mode: 'batch',
             progress: '100',
+          },
+          sourceIndex: 'farequote',
+          sourcePreview: {
+            column: 3,
+            values: 'ASA',
           },
         },
       },
@@ -97,10 +101,9 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         it('shows the filtered source index preview', async () => {
-          await transform.wizard.assertTableResults(
-            'transformSourceIndexPreview',
-            testData.sourcePreviewColumn,
-            testData.sourcePreviewExpectedColumnValues
+          await transform.wizard.assertSourceIndexPreviewColumnValues(
+            testData.expected.sourcePreview.column,
+            testData.expected.sourcePreview.values
           );
         });
 
@@ -147,10 +150,9 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         it('shows the pivot preview', async () => {
-          await transform.wizard.assertTableResults(
-            'transformPivotPreview',
-            testData.pivotPreviewColumn,
-            testData.pivotPreviewExpectedColumnValues
+          await transform.wizard.assertPivotPreviewColumnValues(
+            testData.expected.pivotPreview.column,
+            testData.expected.pivotPreview.values
           );
         });
 
@@ -230,7 +232,7 @@ export default function({ getService }: FtrProviderContext) {
           await transform.table.assertTransformRowFields(testData.transformId, {
             id: testData.transformId,
             description: testData.transformDescription,
-            sourceIndex: testData.sourceIndex,
+            sourceIndex: testData.expected.sourceIndex,
             destinationIndex: testData.destinationIndex,
             status: testData.expected.row.status,
             mode: testData.expected.row.mode,
@@ -243,11 +245,9 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         it('displays the transform preview in the expanded row', async () => {
-          await transform.table.waitForTransformsExpandedRowPreviewTabToLoad();
-          await transform.table.assertEuiInMemoryTableResults(
-            'transformPreviewTabContent',
-            testData.pivotPreviewColumn,
-            testData.pivotPreviewExpectedColumnValues
+          await transform.table.assertTransformsExpandedRowPreviewColumnValues(
+            testData.expected.pivotPreview.column,
+            testData.expected.pivotPreview.values
           );
         });
       });

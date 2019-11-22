@@ -32,10 +32,6 @@ export default function({ getService }: FtrProviderContext) {
       {
         suiteTitle: 'batch transform with terms+date_histogram groups and avg agg',
         source: 'ecommerce',
-        sourcePreviewColumn: 3,
-        sourcePreviewExpectedColumnValues: 'Ahmed Al,Kamal,Robert',
-        pivotPreviewColumn: 0,
-        pivotPreviewExpectedColumnValues: `Men's Accessories`,
         groupByEntries: [
           {
             identifier: 'terms(category.keyword)',
@@ -60,10 +56,18 @@ export default function({ getService }: FtrProviderContext) {
           return `dest_${this.transformId}`;
         },
         expected: {
+          pivotPreview: {
+            column: 0,
+            values: `Men's Accessories`,
+          },
           row: {
             status: 'stopped',
             mode: 'batch',
             progress: '100',
+          },
+          sourcePreview: {
+            column: 3,
+            values: 'Ahmed Al,Kamal,Robert',
           },
         },
       },
@@ -101,10 +105,9 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         it('shows the source index preview', async () => {
-          await transform.wizard.assertTableResults(
-            'transformSourceIndexPreview',
-            testData.sourcePreviewColumn,
-            testData.sourcePreviewExpectedColumnValues
+          await transform.wizard.assertSourceIndexPreviewColumnValues(
+            testData.expected.sourcePreview.column,
+            testData.expected.sourcePreview.values
           );
         });
 
@@ -153,10 +156,9 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         it('shows the pivot preview', async () => {
-          await transform.wizard.assertTableResults(
-            'transformPivotPreview',
-            testData.pivotPreviewColumn,
-            testData.pivotPreviewExpectedColumnValues
+          await transform.wizard.assertPivotPreviewColumnValues(
+            testData.expected.pivotPreview.column,
+            testData.expected.pivotPreview.values
           );
         });
 

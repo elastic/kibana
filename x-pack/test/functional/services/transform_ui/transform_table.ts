@@ -84,7 +84,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       return rows;
     }
 
-    async assertEuiInMemoryTableResults(
+    async assertEuiInMemoryTableColumnValues(
       tableSubj: string,
       column: number,
       expectedColumnValues: string
@@ -154,6 +154,11 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
     public async waitForTransformsExpandedRowPreviewTabToLoad() {
       await testSubjects.existOrFail('~transformPreviewTabContent', { timeout: 60 * 1000 });
       await testSubjects.existOrFail('transformPreviewTabContent loaded', { timeout: 30 * 1000 });
+    }
+
+    async assertTransformsExpandedRowPreviewColumnValues(column: number, values: string) {
+      await this.waitForTransformsExpandedRowPreviewTabToLoad();
+      await this.assertEuiInMemoryTableColumnValues('transformPreviewTabContent', column, values);
     }
   })();
 }

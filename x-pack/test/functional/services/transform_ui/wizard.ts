@@ -75,7 +75,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail(selector);
     },
 
-    async parseTable(tableSubj: string) {
+    async parseEuiInMemoryTable(tableSubj: string) {
       const table = await testSubjects.find(`~${tableSubj}`);
       const $ = await table.parseDomContent();
       const rows = [];
@@ -98,10 +98,14 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       return rows;
     },
 
-    async assertTableResults(tableSubj: string, column: number, expectedColumnValues: string) {
+    async assertEuiInMemoryTableColumnValues(
+      tableSubj: string,
+      column: number,
+      expectedColumnValues: string
+    ) {
       await retry.tryForTime(2000, async () => {
         // get a 2D array of rows and cell values
-        const rows = await this.parseTable(tableSubj);
+        const rows = await this.parseEuiInMemoryTable(tableSubj);
 
         // reduce the rows data to an array of unique values in the specified column
         const uniqueColumnValues = rows
@@ -114,6 +118,14 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
         // check if the returned unique value matches the supplied filter value
         expect(uniqueColumnValues.join()).to.equal(expectedColumnValues);
       });
+    },
+
+    async assertSourceIndexPreviewColumnValues(column: number, values: string) {
+      await this.assertEuiInMemoryTableColumnValues('transformSourceIndexPreview', column, values);
+    },
+
+    async assertPivotPreviewColumnValues(column: number, values: string) {
+      await this.assertEuiInMemoryTableColumnValues('transformPivotPreview', column, values);
     },
 
     async assertPivotPreviewLoaded() {
