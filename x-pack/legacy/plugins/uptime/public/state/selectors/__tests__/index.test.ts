@@ -9,6 +9,11 @@ import { AppState } from '../../../state';
 
 describe('state selectors', () => {
   const state: AppState = {
+    monitor: {
+      monitorDetailsList: [],
+      loading: false,
+      errors: [],
+    },
     snapshot: {
       count: {
         up: 2,

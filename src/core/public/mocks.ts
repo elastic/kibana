@@ -92,6 +92,9 @@ function pluginInitializerContextMock() {
         dist: false,
       },
     },
+    config: {
+      get: <T>() => ({} as T),
+    },
   };
 
   return mock;

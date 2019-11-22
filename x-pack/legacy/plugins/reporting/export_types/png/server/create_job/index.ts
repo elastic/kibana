@@ -4,18 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ServerFacade,
-  RequestFacade,
-  ConditionalHeaders,
-  CreateJobFactory,
-} from '../../../../types';
+import { ServerFacade, RequestFacade, ConditionalHeaders } from '../../../../types';
 import { validateUrls } from '../../../../common/validate_urls';
 import { cryptoFactory } from '../../../../server/lib/crypto';
-import { oncePerServer } from '../../../../server/lib/once_per_server';
-import { JobParamsPNG, ESQueueCreateJobFnPNG } from '../../types';
+import { JobParamsPNG } from '../../types';
 
-function createJobFn(server: ServerFacade) {
+export const createJobFactory = function createJobFn(server: ServerFacade) {
   const crypto = cryptoFactory(server);
 
   return async function createJob(
@@ -38,8 +32,4 @@ function createJobFn(server: ServerFacade) {
       forceNow: new Date().toISOString(),
     };
   };
-}
-
-export const createJobFactory: CreateJobFactory = oncePerServer(
-  createJobFn as (server: ServerFacade) => ESQueueCreateJobFnPNG
-);
+};

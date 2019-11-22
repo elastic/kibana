@@ -5,3 +5,4 @@
  */
 
 export * from './snapshot';
+export * from './monitor/monitor_details';

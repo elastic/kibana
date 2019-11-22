@@ -10,14 +10,16 @@ import { createGetIndexPatternRoute } from './index_pattern';
 import { createLogMonitorPageRoute, createLogOverviewPageRoute } from './telemetry';
 import { createGetSnapshotCount } from './snapshot';
 import { UMRestApiRouteCreator } from './types';
+import { createGetMonitorDetailsRoute } from './monitors';
 
 export * from './types';
 export { createRouteWithAuth } from './create_route_with_auth';
 export const restApiRoutes: UMRestApiRouteCreator[] = [
-  createIsValidRoute,
   createGetAllRoute,
+  createGetIndexPatternRoute,
+  createGetMonitorDetailsRoute,
+  createGetSnapshotCount,
+  createIsValidRoute,
   createLogMonitorPageRoute,
   createLogOverviewPageRoute,
-  createGetIndexPatternRoute,
-  createGetSnapshotCount,
 ];
