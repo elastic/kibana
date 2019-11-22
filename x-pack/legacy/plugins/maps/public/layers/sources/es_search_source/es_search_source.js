@@ -266,17 +266,24 @@ export class ESSearchSource extends AbstractESSource {
     const allHits = [];
     const entityBuckets = _.get(resp, 'aggregations.entitySplit.buckets', []);
     const totalEntities = _.get(resp, 'aggregations.totalEntities.value', 0);
+    // can not compare entityBuckets.length to totalEntities because totalEntities is an approximate
+    const areEntitiesTrimmed = entityBuckets.length >= ES_SIZE_LIMIT;
+    let areTopHitsTrimmed = false;
     entityBuckets.forEach(entityBucket => {
+      const total = _.get(entityBucket, 'entityHits.hits.total', 0);
       const hits = _.get(entityBucket, 'entityHits.hits.hits', []);
       // Reverse hits list so top documents by sort are drawn on top
       allHits.push(...hits.reverse());
+      if (total > hits.length) {
+        areTopHitsTrimmed = true;
+      }
     });
 
     return {
       hits: allHits,
       meta: {
-        // can not compare entityBuckets.length to totalEntities because totalEntities is an approximate
-        areResultsTrimmed: entityBuckets.length >= ES_SIZE_LIMIT,
+        areResultsTrimmed: areEntitiesTrimmed || areTopHitsTrimmed, // used to force re-fetch when zooming in
+        areEntitiesTrimmed,
         entityCount: entityBuckets.length,
         totalEntities,
       }
@@ -464,7 +471,7 @@ export class ESSearchSource extends AbstractESSource {
     }
 
     if (this._isTopHits()) {
-      const entitiesFoundMsg = meta.areResultsTrimmed
+      const entitiesFoundMsg = meta.areEntitiesTrimmed
         ? i18n.translate('xpack.maps.esSearch.topHitsResultsTrimmedMsg', {
           defaultMessage: `Results limited to first {entityCount} entities of ~{totalEntities}.`,
           values: {
@@ -483,7 +490,9 @@ export class ESSearchSource extends AbstractESSource {
 
       return {
         tooltipContent: `${entitiesFoundMsg} ${docsPerEntityMsg}`,
-        areResultsTrimmed: meta.areResultsTrimmed
+        // Used to show trimmed icon in legend
+        // user only needs to be notified of trimmed results when entities are trimmed
+        areResultsTrimmed: meta.areEntitiesTrimmed
       };
     }
 
