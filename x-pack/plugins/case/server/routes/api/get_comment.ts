@@ -7,6 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { RouteDeps } from '.';
 import { wrapError } from './utils';
+import { CASE_COMMENT_SAVED_OBJECT } from '../../constants';
 
 export function initGetCommentApi({ log, router }: RouteDeps) {
   router.get(
@@ -22,7 +23,7 @@ export function initGetCommentApi({ log, router }: RouteDeps) {
       try {
         log.debug(`Attempting to GET comment ${request.params.id}`);
         const theComment = await context.core.savedObjects.client.get(
-          'case-workflow-comment',
+          CASE_COMMENT_SAVED_OBJECT,
           request.params.id
         );
         return response.ok({ body: theComment });

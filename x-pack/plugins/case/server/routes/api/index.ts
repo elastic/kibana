@@ -5,6 +5,8 @@
  */
 
 import { Logger, IRouter } from 'src/core/server';
+import { initDeleteCommentApi } from './delete_comment';
+import { initGetAllCaseCommentsApi } from './get_all_case_comments';
 import { initGetAllCasesApi } from './get_all_cases';
 import { initGetCaseApi } from './get_case';
 import { initGetCommentApi } from './get_comment';
@@ -22,9 +24,11 @@ export interface RouteDeps {
 }
 
 export function initCaseApi(deps: RouteDeps) {
+  initGetAllCaseCommentsApi(deps);
   initGetAllCasesApi(deps);
   initGetCaseApi(deps);
   initGetCommentApi(deps);
+  initDeleteCommentApi(deps);
   initPostCaseApi(deps);
   initPostCommentApi(deps);
   initUpdateCaseApi(deps);

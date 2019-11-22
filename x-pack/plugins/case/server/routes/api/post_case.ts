@@ -7,6 +7,7 @@
 import { formatNewCase, wrapError } from './utils';
 import { NewCaseSchema } from './schema';
 import { RouteDeps } from '.';
+import { CASE_SAVED_OBJECT } from '../../constants';
 
 export function initPostCaseApi({ authentication, log, router }: RouteDeps) {
   router.post(
@@ -29,7 +30,7 @@ export function initPostCaseApi({ authentication, log, router }: RouteDeps) {
 
       try {
         log.debug(`Attempting to POST a new case`);
-        const newCase = await context.core.savedObjects.client.create('case-workflow', {
+        const newCase = await context.core.savedObjects.client.create(CASE_SAVED_OBJECT, {
           ...formattedCase,
         });
         return response.ok({ body: newCase });

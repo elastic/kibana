@@ -8,6 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { formatUpdatedComment, wrapError } from './utils';
 import { NewCommentSchema } from './schema';
 import { RouteDeps } from '.';
+import { CASE_COMMENT_SAVED_OBJECT } from '../../constants';
 
 export function initUpdateCommentApi({ log, router }: RouteDeps) {
   router.post(
@@ -26,7 +27,7 @@ export function initUpdateCommentApi({ log, router }: RouteDeps) {
       try {
         log.debug(`Attempting to POST a comment update on comment ${request.params.id}`);
         const updatedComment = await client.update(
-          'case-workflow-comment',
+          CASE_COMMENT_SAVED_OBJECT,
           request.params.id,
           savedObjectComment
         );
