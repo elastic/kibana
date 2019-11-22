@@ -6411,7 +6411,6 @@
     "xpack.maps.esSearch.featureCountMsg": "找到 {count} 个文档。",
     "xpack.maps.esSearch.resultsTrimmedMsg": "结果仅限于前 {count} 个文档。",
     "xpack.maps.esSearch.topHitsEntitiesCountMsg": "找到 {entityCount} 个实体。",
-    "xpack.maps.esSearch.topHitsResultsTrimmedMsg": "结果仅限于每个实体的最近 {topHitsSize} 个文档。",
     "xpack.maps.feature.appDescription": "从 Elasticsearch 和 Elastic 地图服务浏览地理空间数据",
     "xpack.maps.featureRegistry.mapsFeatureName": "Maps",
     "xpack.maps.geoGrid.resolutionLabel": "网格分辨率",

@@ -6409,7 +6409,6 @@
     "xpack.maps.esSearch.featureCountMsg": "{count} 件のドキュメントが見つかりました。",
     "xpack.maps.esSearch.resultsTrimmedMsg": "結果は初めの {count} 件のドキュメントに制限されています。",
     "xpack.maps.esSearch.topHitsEntitiesCountMsg": "{entityCount} 件のエントリーを発見.",
-    "xpack.maps.esSearch.topHitsResultsTrimmedMsg": "結果は各エンティティにつき最も最近の {topHitsSize} 件のドキュメントに制限されています。",
     "xpack.maps.feature.appDescription": "Elasticsearch と Elastic Maps Service の地理空間データを閲覧します",
     "xpack.maps.featureRegistry.mapsFeatureName": "Maps",
     "xpack.maps.geoGrid.resolutionLabel": "グリッド解像度",
