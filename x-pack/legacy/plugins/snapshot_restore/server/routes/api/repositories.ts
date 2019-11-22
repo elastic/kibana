@@ -69,23 +69,28 @@ export const getAllHandler: RouterRouteHandler = async (
     name: managedRepositoryName,
   } as ManagedRepository;
 
-  // If cloud-managed repository, we also need to check if a policy is associated to it
+  // If a managed repository, we also need to check if a policy is associated to it
   if (managedRepositoryName) {
-    const policiesByName: {
-      [key: string]: SlmPolicyEs;
-    } = await callWithRequest('slm.policies', {
-      human: true,
-    });
-    const managedRepositoryPolicy = Object.entries(policiesByName)
-      .filter(([, data]) => {
-        const { policy } = data;
-        return policy.repository === managedRepositoryName;
-      })
-      .flat();
+    try {
+      const policiesByName: {
+        [key: string]: SlmPolicyEs;
+      } = await callWithRequest('slm.policies', {
+        human: true,
+      });
+      const managedRepositoryPolicy = Object.entries(policiesByName)
+        .filter(([, data]) => {
+          const { policy } = data;
+          return policy.repository === managedRepositoryName;
+        })
+        .flat();
 
-    const [policyName] = managedRepositoryPolicy;
+      const [policyName] = managedRepositoryPolicy;
 
-    managedRepository.policy = policyName as ManagedRepository['name'];
+      managedRepository.policy = policyName as ManagedRepository['name'];
+    } catch (e) {
+      // swallow error for now
+      // we don't want to block repositories from loading if request fails
+    }
   }
 
   return { repositories, managedRepository };

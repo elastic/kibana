@@ -14,7 +14,7 @@ import {
 export const deserializePolicy = (
   name: string,
   esPolicy: SlmPolicyEs,
-  isManagedPolicy: boolean
+  managedPolicies: string[]
 ): SlmPolicy => {
   const {
     version,
@@ -39,7 +39,7 @@ export const deserializePolicy = (
     repository,
     nextExecution,
     nextExecutionMillis,
-    isManagedPolicy,
+    isManagedPolicy: managedPolicies.includes(name),
   };
 
   if (config) {

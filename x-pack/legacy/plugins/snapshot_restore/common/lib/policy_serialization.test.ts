@@ -36,7 +36,7 @@ describe('repository_serialization', () => {
             next_execution: '2019-07-11T01:30:00.000Z',
             next_execution_millis: 1562722200000,
           },
-          true
+          ['my-backups-snapshots']
         )
       ).toEqual({
         name: 'my-backups-snapshots',
@@ -100,7 +100,7 @@ describe('repository_serialization', () => {
             "stack_trace":"Some stack trace"}`,
             },
           },
-          true
+          ['my-backups-snapshots']
         )
       ).toEqual({
         name: 'my-backups-snapshots',

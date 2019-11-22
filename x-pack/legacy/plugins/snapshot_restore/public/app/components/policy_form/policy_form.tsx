@@ -85,10 +85,10 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
 
   const updatePolicy = (
     updatedFields: Partial<SlmPolicyPayload>,
-    otherValidationData = {}
+    validationHelperData = {}
   ): void => {
     const newPolicy = { ...policy, ...updatedFields };
-    const newValidation = validatePolicy(newPolicy, otherValidationData);
+    const newValidation = validatePolicy(newPolicy, validationHelperData);
     setPolicy(newPolicy);
     setValidation(newValidation);
   };

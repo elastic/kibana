@@ -48,6 +48,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
       maxCount: 10,
     },
     nextExecutionMillis: 1562722200000,
+    isManagedPolicy: false,
   };
 
   describe('getAllHandler()', () => {

@@ -73,15 +73,17 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
               >
                 {name}
               </EuiLink>{' '}
-              {isManagedPolicy ? (
+            </EuiFlexItem>
+            {isManagedPolicy ? (
+              <EuiFlexItem grow={false}>
                 <EuiBadge color="primary">
                   <FormattedMessage
                     id="xpack.snapshotRestore.policyList.table.managedPolicyBadgeLabel"
                     defaultMessage="Managed"
                   />
                 </EuiBadge>
-              ) : null}
-            </EuiFlexItem>
+              </EuiFlexItem>
+            ) : null}
             {inProgress ? (
               <EuiFlexItem grow={false}>
                 <EuiToolTip
@@ -263,7 +265,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
                         : i18n.translate(
                             'xpack.snapshotRestore.policyList.table.deleteManagedPolicyTableActionTooltip',
                             {
-                              defaultMessage: 'You cannot delete a cloud-managed policy.',
+                              defaultMessage: 'You cannot delete a managed policy.',
                             }
                           );
                       return (
@@ -316,7 +318,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
         return i18n.translate(
           'xpack.snapshotRestore.policyList.table.deleteManagedPolicySelectTooltip',
           {
-            defaultMessage: 'You cannot delete a cloud-managed policy.',
+            defaultMessage: 'You cannot delete a managed policy.',
           }
         );
       }

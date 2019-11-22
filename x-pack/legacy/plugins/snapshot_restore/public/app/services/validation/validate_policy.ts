@@ -17,12 +17,12 @@ const isStringEmpty = (str: string | null): boolean => {
 
 export const validatePolicy = (
   policy: SlmPolicyPayload,
-  otherValidationData: any
+  validationHelperData: any
 ): PolicyValidation => {
   const i18n = textService.i18n;
 
   const { name, snapshotName, schedule, repository, config, retention } = policy;
-  const { managedRepository } = otherValidationData;
+  const { managedRepository } = validationHelperData;
 
   const validation: PolicyValidation = {
     isValid: true,

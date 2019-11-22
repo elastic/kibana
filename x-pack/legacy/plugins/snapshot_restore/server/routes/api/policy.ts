@@ -47,8 +47,7 @@ export const getAllHandler: RouterRouteHandler = async (
   // Deserialize policies
   return {
     policies: Object.entries(policiesByName).map(([name, policy]) => {
-      const isManagedPolicy = managedPolicies.includes(name);
-      return deserializePolicy(name, policy, isManagedPolicy);
+      return deserializePolicy(name, policy, managedPolicies);
     }),
   };
 };
@@ -74,11 +73,10 @@ export const getOneHandler: RouterRouteHandler = async (
   }
 
   const managedPolicies = await getManagedPolicyNames(callWithInternalUser);
-  const isManagedPolicy = managedPolicies.includes(name);
 
   // Deserialize policy
   return {
-    policy: deserializePolicy(name, policiesByName[name], isManagedPolicy),
+    policy: deserializePolicy(name, policiesByName[name], managedPolicies),
   };
 };
 

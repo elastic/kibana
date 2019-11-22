@@ -33,7 +33,7 @@ interface Props {
   onSnapshotDeleted: (snapshotsDeleted: Array<{ snapshot: string; repository: string }>) => void;
 }
 
-const getLastSuccesfulManagedSnapshot = (snapshots: SnapshotDetails[]) => {
+const getLastSuccessfulManagedSnapshot = (snapshots: SnapshotDetails[]) => {
   const successfulSnapshots = snapshots
     .filter(
       ({ state, repository, managedRepository }) =>
@@ -62,7 +62,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
   const { trackUiMetric } = uiMetricService;
   const [selectedItems, setSelectedItems] = useState<SnapshotDetails[]>([]);
 
-  const lastSuccessfulManagedSnapshot = getLastSuccesfulManagedSnapshot(snapshots);
+  const lastSuccessfulManagedSnapshot = getLastSuccessfulManagedSnapshot(snapshots);
 
   const columns = [
     {
@@ -220,7 +220,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
                         'xpack.snapshotRestore.snapshotList.table.deleteManagedRepositorySnapshotTooltip',
                         {
                           defaultMessage:
-                            'You must store at least the last successful snapshot in a cloud-managed repository.',
+                            'You must store at least the last successful snapshot in a managed repository.',
                         }
                       )
                     : i18n.translate(
@@ -290,10 +290,9 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
     selectableMessage: (selectable: boolean) => {
       if (!selectable) {
         return i18n.translate(
-          'xpack.snapshotRestore.snapshotList.table.deleteManagedRepositorySnapshotTooltip',
+          'xpack.snapshotRestore.snapshotList.table.deleteManagedRepositorySnapshotDescription',
           {
-            defaultMessage:
-              'You must retain the last successful snapshot in a cloud-managed repository.',
+            defaultMessage: 'You must retain the last successful snapshot in a managed repository.',
           }
         );
       }
