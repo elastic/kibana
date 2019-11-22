@@ -12,7 +12,7 @@ import React from 'react';
 
 import { ConditionsSection } from './conditions_section';
 import { getNewConditionDefaults } from './utils';
-import { APPLIES_TO, OPERATOR } from '../../../common/constants/detector_rule';
+import { APPLIES_TO, OPERATOR } from '../../../../common/constants/detector_rule';
 
 describe('ConditionsSectionExpression', () => {
 

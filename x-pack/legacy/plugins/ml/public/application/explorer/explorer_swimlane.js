@@ -21,7 +21,7 @@ import moment from 'moment';
 // because it won't work with the jest tests
 import { formatHumanReadableDateTime } from '../util/date_utils';
 import { numTicksForDateFormat } from '../util/chart_utils';
-import { getSeverityColor } from '../../common/util/anomaly_utils';
+import { getSeverityColor } from '../../../common/util/anomaly_utils';
 import { mlEscape } from '../util/string_utils';
 import { mlChartTooltipService } from '../components/chart_tooltip/chart_tooltip_service';
 import { ALLOW_CELL_RANGE_SELECTION, dragSelect$ } from './explorer_dashboard_service';

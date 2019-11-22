@@ -19,8 +19,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ModuleJobUI } from '../page';
 import { SETUP_RESULTS_WIDTH } from './module_jobs';
-import { tabColor } from '../../../../../common/util/group_color_utils';
-import { JobOverride } from '../../../../../common/types/modules';
+import { tabColor } from '../../../../../../common/util/group_color_utils';
+import { JobOverride } from '../../../../../../common/types/modules';
 
 interface JobItemProps {
   job: ModuleJobUI;

@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Annotation } from '../../../common/types/annotations';
-import { AggFieldNamePair } from '../../../common/types/fields';
+import { Annotation } from '../../../../common/types/annotations';
+import { AggFieldNamePair } from '../../../../common/types/fields';
 import { ExistingJobsAndGroups } from '../job_service';
-import { PrivilegesResponse } from '../../../common/types/privileges';
-import { MlSummaryJobs } from '../../../common/types/jobs';
-import { MlServerDefaults, MlServerLimits } from '../../services/ml_server_info';
-import { ES_AGGREGATION } from '../../../common/constants/aggregation_types';
+import { PrivilegesResponse } from '../../../../common/types/privileges';
+import { MlSummaryJobs } from '../../../../common/types/jobs';
+import { MlServerDefaults, MlServerLimits } from '../ml_server_info';
+import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { DataFrameAnalyticsStats } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
-import { JobMessage } from '../../../common/types/audit_message';
+import { JobMessage } from '../../../../common/types/audit_message';
 import { DataFrameAnalyticsConfig } from '../../data_frame_analytics/common/analytics';
-import { DeepPartial } from '../../../common/types/common';
+import { DeepPartial } from '../../../../common/types/common';
 
 // TODO This is not a complete representation of all methods of `ml.*`.
 // It just satisfies needs for other parts of the code area which use

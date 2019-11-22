@@ -7,9 +7,9 @@
 import d3 from 'd3';
 import moment from 'moment';
 
-import { ANNOTATION_TYPE } from '../../../../common/constants/annotations';
-import { Annotation, Annotations } from '../../../../common/types/annotations';
-import { Dictionary } from '../../../../common/types/common';
+import { ANNOTATION_TYPE } from '../../../../../common/constants/annotations';
+import { Annotation, Annotations } from '../../../../../common/types/annotations';
+import { Dictionary } from '../../../../../common/types/common';
 
 // @ts-ignore
 import { mlChartTooltipService } from '../../../components/chart_tooltip/chart_tooltip_service';

@@ -5,7 +5,7 @@
  */
 
 
-import { JOB_STATE, DATAFEED_STATE } from 'plugins/ml/../common/constants/states';
+import { JOB_STATE, DATAFEED_STATE } from '../../../../../../common/constants/states';
 import { StatsBar } from '../../../../components/stats_bar';
 
 import PropTypes from 'prop-types';

@@ -18,7 +18,7 @@ import {
   EuiComboBox,
 } from '@elastic/eui';
 
-import { ml } from 'plugins/ml/services/ml_api_service';
+import { ml } from '../../../../../services/ml_api_service';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 class JobDetailsUI extends Component {

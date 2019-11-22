@@ -8,7 +8,7 @@ import React, { FC, useContext } from 'react';
 import { EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
-import { Field } from '../../../../../../../../common/types/fields';
+import { Field } from '../../../../../../../../../common/types/fields';
 import {
   createFieldOptions,
   createScriptFieldOptions,

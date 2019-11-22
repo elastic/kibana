@@ -12,17 +12,17 @@ import 'ui/autoload/all';
 // needed to make syntax highlighting work in ace editors
 import 'ace';
 
-import 'plugins/ml/access_denied';
-import 'plugins/ml/jobs';
-import 'plugins/ml/overview';
-import 'plugins/ml/services/calendar_service';
-import 'plugins/ml/data_frame_analytics';
-import 'plugins/ml/datavisualizer';
-import 'plugins/ml/explorer';
-import 'plugins/ml/timeseriesexplorer';
-import 'plugins/ml/components/navigation_menu';
-import 'plugins/ml/components/loading_indicator';
-import 'plugins/ml/settings';
+import './access_denied';
+import './jobs';
+import './overview';
+import './services/calendar_service';
+import './data_frame_analytics';
+import './datavisualizer';
+import './explorer';
+import './timeseriesexplorer';
+import './components/navigation_menu';
+import './components/loading_indicator';
+import './settings';
 
 import uiRoutes from 'ui/routes';
 

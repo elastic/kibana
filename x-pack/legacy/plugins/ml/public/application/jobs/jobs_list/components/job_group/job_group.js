@@ -5,7 +5,7 @@
  */
 
 
-import { tabColor } from '../../../../../common/util/group_color_utils';
+import { tabColor } from '../../../../../../common/util/group_color_utils';
 
 import PropTypes from 'prop-types';
 import React from 'react';

@@ -8,7 +8,7 @@ import React, { FC, useContext, useState, useEffect } from 'react';
 import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
-import { Field, Aggregation, AggFieldPair } from '../../../../../../../../common/types/fields';
+import { Field, Aggregation, AggFieldPair } from '../../../../../../../../../common/types/fields';
 
 // The display label used for an aggregation e.g. sum(bytes).
 export type Label = string;

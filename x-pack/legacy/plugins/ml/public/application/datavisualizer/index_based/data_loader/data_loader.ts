@@ -10,7 +10,7 @@ import { toastNotifications } from 'ui/notify';
 import { IndexPattern } from 'ui/index_patterns';
 
 import { SavedSearchQuery } from '../../../contexts/kibana';
-import { IndexPatternTitle } from '../../../../common/types/kibana';
+import { IndexPatternTitle } from '../../../../../common/types/kibana';
 
 import { ml } from '../../../services/ml_api_service';
 import { FieldRequestConfig } from '../common';

@@ -6,8 +6,8 @@
 
 import d3 from 'd3';
 
-import { Annotation } from '../../../../common/types/annotations';
-import { MlJob } from '../../../../common/types/jobs';
+import { Annotation } from '../../../../../common/types/annotations';
+import { MlJob } from '../../../../../common/types/jobs';
 
 interface Props {
   selectedJob: MlJob;

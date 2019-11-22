@@ -21,7 +21,7 @@ import moment from 'moment';
 // because it won't work with the jest tests
 import { formatHumanReadableDateTime } from '../../util/date_utils';
 import { formatValue } from '../../formatters/format_value';
-import { getSeverityColor, getSeverityWithLow } from '../../../common/util/anomaly_utils';
+import { getSeverityColor, getSeverityWithLow } from '../../../../common/util/anomaly_utils';
 import {
   getChartType,
   getTickValues,

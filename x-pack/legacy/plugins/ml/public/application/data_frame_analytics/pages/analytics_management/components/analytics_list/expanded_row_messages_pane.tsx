@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { ml } from '../../../../../services/ml_api_service';
 import { useRefreshAnalyticsList } from '../../../../common';
 import { JobMessages } from '../../../../../components/job_messages';
-import { JobMessage } from '../../../../../../common/types/audit_message';
+import { JobMessage } from '../../../../../../../common/types/audit_message';
 
 interface Props {
   analyticsId: string;

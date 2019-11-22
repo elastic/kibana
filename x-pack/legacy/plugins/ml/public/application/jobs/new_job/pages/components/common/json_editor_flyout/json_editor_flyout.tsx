@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { Datafeed } from '../../../../common/job_creator/configs';
 import { MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
-import { isValidJson } from '../../../../../../../common/util/validation_utils';
+import { isValidJson } from '../../../../../../../../common/util/validation_utils';
 import { JobCreatorContext } from '../../job_creator_context';
 
 const EDITOR_HEIGHT = '800px';

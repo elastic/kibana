@@ -26,7 +26,7 @@ import {
   Aggregation,
   EVENT_RATE_FIELD_ID,
   mlCategory,
-} from '../../../../../../../../common/types/fields';
+} from '../../../../../../../../../common/types/fields';
 import { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
 import { ModalWrapper } from './modal_wrapper';
 import { detectorToString } from '../../../../../../../util/string_utils';

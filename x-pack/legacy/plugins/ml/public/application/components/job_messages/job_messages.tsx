@@ -12,7 +12,7 @@ import { formatDate } from '@elastic/eui/lib/services/format';
 import { i18n } from '@kbn/i18n';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 
-import { JobMessage } from '../../../common/types/audit_message';
+import { JobMessage } from '../../../../common/types/audit_message';
 import { JobIcon } from '../job_message_icon';
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';

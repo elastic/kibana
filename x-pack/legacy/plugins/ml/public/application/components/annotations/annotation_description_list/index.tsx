@@ -14,7 +14,7 @@ import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { Annotation } from '../../../../common/types/annotations';
+import { Annotation } from '../../../../../common/types/annotations';
 import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
 
 interface Props {

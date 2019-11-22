@@ -8,7 +8,7 @@ import React, { FC, useState, useContext, useEffect } from 'react';
 import { EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { tabColor } from '../../../../../../../../common/util/group_color_utils';
+import { tabColor } from '../../../../../../../../../common/util/group_color_utils';
 import { Description } from './description';
 
 export const GroupsInput: FC = () => {

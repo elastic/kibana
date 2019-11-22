@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPatternTitle } from '../../../../../../common/types/kibana';
+import { IndexPatternTitle } from '../../../../../../../common/types/kibana';
 import { JobId } from './job';
 export type DatafeedId = string;
 

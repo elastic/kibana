@@ -7,7 +7,12 @@
 import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 import { IndexPattern } from 'ui/index_patterns';
 import { JobCreator } from './job_creator';
-import { Field, Aggregation, SplitField, AggFieldPair } from '../../../../../common/types/fields';
+import {
+  Field,
+  Aggregation,
+  SplitField,
+  AggFieldPair,
+} from '../../../../../../common/types/fields';
 import { Job, Datafeed, Detector } from './configs';
 import { createBasicDetector } from './util/default_configs';
 import { JOB_TYPE, CREATED_BY_LABEL, DEFAULT_MODEL_MEMORY_LIMIT } from './util/constants';

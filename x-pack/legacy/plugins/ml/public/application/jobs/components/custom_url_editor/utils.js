@@ -12,9 +12,9 @@ import {
 import chrome from 'ui/chrome';
 import rison from 'rison-node';
 
-import { ML_RESULTS_INDEX_PATTERN } from '../../../../common/constants/index_patterns';
-import { getPartitioningFieldNames } from '../../../../common/util/job_utils';
-import { parseInterval } from '../../../../common/util/parse_interval';
+import { ML_RESULTS_INDEX_PATTERN } from '../../../../../common/constants/index_patterns';
+import { getPartitioningFieldNames } from '../../../../../common/util/job_utils';
+import { parseInterval } from '../../../../../common/util/parse_interval';
 import { replaceTokensInUrlValue, isValidLabel } from '../../../util/custom_url_utils';
 import { ml } from '../../../services/ml_api_service';
 import { mlJobService } from '../../../services/job_service';

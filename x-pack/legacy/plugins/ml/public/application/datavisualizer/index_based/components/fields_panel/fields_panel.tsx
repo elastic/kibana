@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 
 import { toastNotifications } from 'ui/notify';
 
-import { ML_JOB_FIELD_TYPES } from '../../../../../common/constants/field_types';
+import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';
 import { FieldDataCard } from '../field_data_card';
 import { FieldTypesSelect } from '../field_types_select';
 import { FieldVisConfig } from '../../common';

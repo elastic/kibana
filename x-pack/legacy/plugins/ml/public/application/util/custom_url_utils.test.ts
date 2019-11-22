@@ -10,12 +10,12 @@ import {
   isValidLabel,
   isValidTimeRange,
 } from './custom_url_utils';
-import { AnomalyRecordDoc } from '../../common/types/anomalies';
+import { AnomalyRecordDoc } from '../../../common/types/anomalies';
 import {
   CustomUrlAnomalyRecordDoc,
   KibanaUrlConfig,
   UrlConfig,
-} from '../../common/types/custom_urls';
+} from '../../../common/types/custom_urls';
 
 describe('ML - custom URL utils', () => {
   const TEST_DOC: AnomalyRecordDoc = {

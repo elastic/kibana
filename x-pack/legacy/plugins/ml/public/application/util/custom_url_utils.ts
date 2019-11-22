@@ -9,14 +9,14 @@
 import { get, flow } from 'lodash';
 import moment from 'moment';
 
-import { parseInterval } from '../../common/util/parse_interval';
+import { parseInterval } from '../../../common/util/parse_interval';
 import { escapeForElasticsearchQuery, replaceStringTokens } from './string_utils';
 import {
   UrlConfig,
   KibanaUrlConfig,
   CustomUrlAnomalyRecordDoc,
-} from '../../common/types/custom_urls';
-import { AnomalyRecordDoc } from '../../common/types/anomalies';
+} from '../../../common/types/custom_urls';
+import { AnomalyRecordDoc } from '../../../common/types/anomalies';
 
 // Value of custom_url time_range property indicating drilldown time range is calculated automatically
 // depending on the context in which the URL is being opened.

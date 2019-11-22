@@ -6,15 +6,15 @@
 
 import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 import { IndexPattern } from 'ui/index_patterns';
-import { parseInterval } from '../../../../../common/util/parse_interval';
+import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { JobCreator } from './job_creator';
-import { Field, Aggregation, AggFieldPair } from '../../../../../common/types/fields';
+import { Field, Aggregation, AggFieldPair } from '../../../../../../common/types/fields';
 import { Job, Datafeed, Detector, BucketSpan } from './configs';
 import { createBasicDetector } from './util/default_configs';
 import {
   ML_JOB_AGGREGATION,
   ES_AGGREGATION,
-} from '../../../../../common/constants/aggregation_types';
+} from '../../../../../../common/constants/aggregation_types';
 import { JOB_TYPE, CREATED_BY_LABEL } from './util/constants';
 import { getRichDetectors } from './util/general';
 

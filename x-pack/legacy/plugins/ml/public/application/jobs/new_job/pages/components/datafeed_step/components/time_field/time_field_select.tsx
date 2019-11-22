@@ -7,7 +7,7 @@
 import React, { FC } from 'react';
 import { EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
 
-import { Field } from '../../../../../../../../common/types/fields';
+import { Field } from '../../../../../../../../../common/types/fields';
 import { createFieldOptions } from '../../../../../common/job_creator/util/general';
 
 interface Props {
