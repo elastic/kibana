@@ -28,23 +28,36 @@ export function getSuggestionsProvider(
   http: HttpServiceBase
 ): IGetSuggestions {
   const requestSuggestions = memoize(
-    (index: string, field: IFieldType, query: string, boolFilter: any = []) => {
+    (
+      index: string,
+      field: IFieldType,
+      query: string,
+      boolFilter: any = [],
+      signal?: AbortSignal
+    ) => {
       return http.fetch(`/api/kibana/suggestions/values/${index}`, {
         method: 'POST',
         body: JSON.stringify({ query, field: field.name, boolFilter }),
+        signal,
       });
     },
     resolver
   );
 
-  return async (index: string, field: IFieldType, query: string, boolFilter?: any) => {
+  return async (
+    index: string,
+    field: IFieldType,
+    query: string,
+    boolFilter?: any,
+    signal?: AbortSignal
+  ) => {
     const shouldSuggestValues = uiSettings.get('filterEditor:suggestValues');
     if (field.type === 'boolean') {
       return [true, false];
     } else if (!shouldSuggestValues || !field.aggregatable || field.type !== 'string') {
       return [];
     }
-    return await requestSuggestions(index, field, query, boolFilter);
+    return await requestSuggestions(index, field, query, boolFilter, signal);
   };
 }
 
