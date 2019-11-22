@@ -41,7 +41,7 @@ describe('ProxyConfigCollection', function () {
         protocol: 'https',
         host: 'localhost',
         port: 5601,
-        path: '/.kibana'
+        path: '/.kibana',
       },
 
       timeout: 1,
@@ -51,7 +51,7 @@ describe('ProxyConfigCollection', function () {
       match: {
         protocol: 'https',
         host: 'localhost',
-        port: 5601
+        port: 5601,
       },
 
       timeout: 2,
@@ -60,7 +60,7 @@ describe('ProxyConfigCollection', function () {
     {
       match: {
         host: 'localhost',
-        port: 5601
+        port: 5601,
       },
 
       timeout: 3,
@@ -68,7 +68,7 @@ describe('ProxyConfigCollection', function () {
 
     {
       match: {
-        host: 'localhost'
+        host: 'localhost',
       },
 
       timeout: 4,
@@ -77,8 +77,8 @@ describe('ProxyConfigCollection', function () {
     {
       match: {},
 
-      timeout: 5
-    }
+      timeout: 5,
+    },
   ];
 
   function getTimeout(uri) {
@@ -151,12 +151,12 @@ describe('ProxyConfigCollection', function () {
       return new ProxyConfigCollection([
         {
           match: { host: '*.internal.org' },
-          ssl: { ca: ['path/to/ca'] }
+          ssl: { ca: ['path/to/ca'] },
         },
         {
           match: { host: '*' },
-          ssl: { verify: false }
-        }
+          ssl: { verify: false },
+        },
       ]);
     }
 
