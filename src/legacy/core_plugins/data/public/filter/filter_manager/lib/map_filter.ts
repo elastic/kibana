@@ -20,6 +20,7 @@
 import { Filter } from '@kbn/es-query';
 import { reduceRight } from 'lodash';
 
+import { mapSpatialFilter } from './map_spatial_filter';
 import { mapMatchAll } from './map_match_all';
 import { mapPhrase } from './map_phrase';
 import { mapPhrases } from './map_phrases';
@@ -50,6 +51,7 @@ export function mapFilter(filter: Filter) {
   // that either handles the mapping operation or not
   // and add it here. ProTip: These are executed in order listed
   const mappers = [
+    mapSpatialFilter,
     mapMatchAll,
     mapRange,
     mapPhrase,
