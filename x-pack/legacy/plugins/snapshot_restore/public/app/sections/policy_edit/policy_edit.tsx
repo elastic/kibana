@@ -51,6 +51,7 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
       maxCount: '',
       minCount: '',
     },
+    isManagedPolicy: false,
   });
 
   const {

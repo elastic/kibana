@@ -43,6 +43,7 @@ export interface SnapshotDetails {
   shards: SnapshotDetailsShardsStatus;
   managedRepository?: string;
   policyName?: string;
+  isLastSuccessfulSnapshot?: boolean;
 }
 
 export interface SnapshotDetailsEs {

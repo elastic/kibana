@@ -110,8 +110,9 @@ export const getOneHandler: RouterRouteHandler = async (
 ): Promise<SnapshotDetails> => {
   const { repository, snapshot } = req.params;
   const managedRepository = await getManagedRepositoryName(callWithInternalUser);
+
   const {
-    responses: snapshotResponses,
+    responses: snapshotsResponse,
   }: {
     responses: Array<{
       repository: string;
@@ -120,19 +121,32 @@ export const getOneHandler: RouterRouteHandler = async (
     }>;
   } = await callWithRequest('snapshot.get', {
     repository,
-    snapshot,
+    snapshot: '_all',
+    ignore_unavailable: true,
   });
 
-  if (snapshotResponses && snapshotResponses[0] && snapshotResponses[0].snapshots) {
-    return deserializeSnapshotDetails(
-      repository,
-      snapshotResponses[0].snapshots[0],
-      managedRepository
-    );
+  const snapshotsList = snapshotsResponse && snapshotsResponse[0] && snapshotsResponse[0].snapshots;
+  const selectedSnapshot = snapshotsList.find(
+    ({ snapshot: snapshotName }) => snapshot === snapshotName
+  ) as SnapshotDetailsEs;
+
+  if (!selectedSnapshot) {
+    // If snapshot doesn't exist, manually throw 404 here
+    throw wrapCustomError(new Error('Snapshot not found'), 404);
   }
 
-  // If snapshot doesn't exist, ES will return 200 with an error object, so manually throw 404 here
-  throw wrapCustomError(new Error('Snapshot not found'), 404);
+  const successfulSnapshots = snapshotsList
+    .filter(({ state }) => state === 'SUCCESS')
+    .sort((a, b) => {
+      return +new Date(b.end_time) - +new Date(a.end_time);
+    });
+
+  return deserializeSnapshotDetails(
+    repository,
+    selectedSnapshot,
+    managedRepository,
+    successfulSnapshots
+  );
 };
 
 export const deleteHandler: RouterRouteHandler = async (req, callWithRequest) => {
