@@ -28,6 +28,7 @@ import {
 } from '../../../common/constants/agent';
 import { useLibs } from '../../hooks/use_libs';
 import { ConnectedLink } from '../../components/navigation/connected_link';
+import { CreatePolicyFlyout } from './components/create_policy';
 
 export const PolicyListPage: React.SFC<{}> = () => {
   const libs = useLibs();
@@ -35,7 +36,10 @@ export const PolicyListPage: React.SFC<{}> = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [policies, setPolicies] = useState<Policy[]>([]);
 
-  // Fetch agents method
+  // Agent enrollment flyout state
+  const [isCreatePolicyFlyoutOpen, setIsCreatePolicyFlyoutOpen] = useState<boolean>(false);
+
+  // Fetch policies method
   const fetchPolicies = async () => {
     setIsLoading(true);
     setPolicies(await libs.policies.getAll());
@@ -48,7 +52,7 @@ export const PolicyListPage: React.SFC<{}> = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Some agents retrieved, set up table props
+  // Some policies retrieved, set up table props
   const columns = [
     {
       field: 'name',
@@ -110,13 +114,13 @@ export const PolicyListPage: React.SFC<{}> = () => {
         <h2>
           <FormattedMessage
             id="xpack.fleet.policyList.noPoliciesPrompt"
-            defaultMessage="No policies set up"
+            defaultMessage="No agent policies"
           />
         </h2>
       }
       actions={
         libs.framework.capabilities.write ? (
-          <EuiButton fill iconType="plusInCircle">
+          <EuiButton fill iconType="plusInCircle" onClick={() => setIsCreatePolicyFlyoutOpen(true)}>
             <FormattedMessage
               id="xpack.fleet.policyList.addButton"
               defaultMessage="Create new policy"
@@ -153,7 +157,7 @@ export const PolicyListPage: React.SFC<{}> = () => {
           defaultMessage="Reload"
         />
       </EuiButton>,
-      <EuiButton fill iconType="plusInCircle">
+      <EuiButton fill iconType="plusInCircle" onClick={() => setIsCreatePolicyFlyoutOpen(true)}>
         <FormattedMessage
           id="xpack.fleet.policyList.addButton"
           defaultMessage="Create new policy"
@@ -169,6 +173,10 @@ export const PolicyListPage: React.SFC<{}> = () => {
   return (
     <EuiPageBody>
       <EuiPageContent>
+        {isCreatePolicyFlyoutOpen ? (
+          <CreatePolicyFlyout onClose={() => setIsCreatePolicyFlyoutOpen(false)} />
+        ) : null}
+
         <EuiTitle size="l">
           <h1>
             <FormattedMessage id="xpack.fleet.policyList.pageTitle" defaultMessage="Policies" />
