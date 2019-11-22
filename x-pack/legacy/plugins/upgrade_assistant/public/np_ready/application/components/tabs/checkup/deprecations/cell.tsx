@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { ReactNode, StatelessComponent } from 'react';
+import React, { ReactNode, FunctionComponent } from 'react';
 
 import {
   EuiFlexGroup,
@@ -31,7 +31,7 @@ interface DeprecationCellProps {
 /**
  * Used to display a deprecation with links to docs, a health indicator, and other descriptive information.
  */
-export const DeprecationCell: StatelessComponent<DeprecationCellProps> = ({
+export const DeprecationCell: FunctionComponent<DeprecationCellProps> = ({
   headline,
   healthColor,
   reindexIndexName,

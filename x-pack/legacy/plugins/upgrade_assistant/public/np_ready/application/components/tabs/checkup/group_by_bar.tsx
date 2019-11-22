@@ -26,7 +26,7 @@ interface GroupByBarProps {
   onGroupByChange: (groupBy: GroupByOption) => void;
 }
 
-export const GroupByBar: React.StatelessComponent<GroupByBarProps> = ({
+export const GroupByBar: React.FunctionComponent<GroupByBarProps> = ({
   availableGroupByOptions,
   currentGroupBy,
   onGroupByChange,
