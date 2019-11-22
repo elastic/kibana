@@ -101,7 +101,7 @@ export class AutocompleteField extends React.Component<
     }
   }
 
-  public componentDidUpdate(prevProps: AutocompleteFieldProps, prevState: AutocompleteFieldState) {
+  public componentDidUpdate(prevProps: AutocompleteFieldProps) {
     const hasNewValue = prevProps.value !== this.props.value;
     const hasNewSuggestions = prevProps.suggestions !== this.props.suggestions;
 
@@ -302,7 +302,7 @@ const withUnfocused = (state: AutocompleteFieldState) => ({
   isFocused: false,
 });
 
-const FixedEuiFieldSearch: React.SFC<React.InputHTMLAttributes<HTMLInputElement> &
+const FixedEuiFieldSearch: React.FC<React.InputHTMLAttributes<HTMLInputElement> &
   EuiFieldSearchProps & {
     inputRef?: (element: HTMLInputElement | null) => void;
     onSearch: (value: string) => void;
@@ -312,10 +312,10 @@ const AutocompleteContainer = euiStyled.div`
   position: relative;
 `;
 
-const SuggestionsPanel = euiStyled(EuiPanel).attrs({
+const SuggestionsPanel = euiStyled(EuiPanel).attrs(() => ({
   paddingSize: 'none',
   hasShadow: true,
-})`
+}))`
   position: absolute;
   width: 100%;
   margin-top: 2px;

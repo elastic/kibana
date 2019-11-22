@@ -27,15 +27,15 @@ export class SearchProfilerUIPlugin implements Plugin {
         notifications: ToastsStart;
         formatAngularHttpError: any;
       };
-      devTools: DevToolsSetup;
+      dev_tools: DevToolsSetup;
     }
   ) {
     const { http } = core;
     const {
       __LEGACY: { I18nContext, licenseEnabled, notifications, formatAngularHttpError },
-      devTools,
+      dev_tools,
     } = plugins;
-    devTools.register({
+    dev_tools.register({
       id: 'searchprofiler',
       title: i18n.translate('xpack.searchProfiler.pageDisplayName', {
         defaultMessage: 'Search Profiler',

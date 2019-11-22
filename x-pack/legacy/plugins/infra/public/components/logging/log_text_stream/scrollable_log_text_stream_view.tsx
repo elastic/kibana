@@ -180,7 +180,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                 />
                 <AutoSizer bounds content detectAnyWindowResize="height">
                   {({ measureRef, bounds: { height = 0 }, content: { width = 0 } }) => (
-                    <ScrollPanelSizeProbe innerRef={measureRef}>
+                    <ScrollPanelSizeProbe ref={measureRef}>
                       <VerticalScrollPanel
                         height={height}
                         width={width}
