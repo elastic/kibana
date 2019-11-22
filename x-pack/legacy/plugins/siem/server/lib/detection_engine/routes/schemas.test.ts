@@ -984,6 +984,82 @@ describe('schemas', () => {
         }).error
       ).toBeTruthy();
     });
+
+    test('You can have an empty query string when filters are present', () => {
+      expect(
+        createSignalsSchema.validate<
+          Partial<Omit<SignalAlertParamsRest, 'meta'> & { meta: string }>
+        >({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          immutable: true,
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: '',
+          language: 'kuery',
+          filters: [],
+          max_signals: 1,
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('You can omit the query string when filters are present', () => {
+      expect(
+        createSignalsSchema.validate<
+          Partial<Omit<SignalAlertParamsRest, 'meta'> & { meta: string }>
+        >({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          immutable: true,
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          language: 'kuery',
+          filters: [],
+          max_signals: 1,
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('query string defaults to empty string when present with filters', () => {
+      expect(
+        createSignalsSchema.validate<
+          Partial<Omit<SignalAlertParamsRest, 'meta'> & { meta: string }>
+        >({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          immutable: true,
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          language: 'kuery',
+          filters: [],
+          max_signals: 1,
+        }).value.query
+      ).toEqual('');
+    });
   });
 
   describe('update signals schema', () => {
