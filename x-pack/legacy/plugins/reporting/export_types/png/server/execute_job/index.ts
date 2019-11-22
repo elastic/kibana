@@ -5,7 +5,6 @@
  */
 
 import * as Rx from 'rxjs';
-import { i18n } from '@kbn/i18n';
 import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
 import { PLUGIN_ID, PNG_JOB_TYPE } from '../../../../common/constants';
 import { ServerFacade } from '../../../../types';
@@ -29,21 +28,8 @@ export function executeJobFactory(server: ServerFacade) {
     cancellationToken: any
   ) {
     const jobLogger = logger.clone([jobId]);
-    const process$ = Rx.of({ job: jobToExecute, server }).pipe(
+    const process$ = Rx.of({ job: jobToExecute, server, logger }).pipe(
       mergeMap(decryptJobHeaders),
-      catchError(err => {
-        jobLogger.error(err);
-        return Rx.throwError(
-          i18n.translate(
-            'xpack.reporting.exportTypes.png.compShim.failedToDecryptReportJobDataErrorMessage',
-            {
-              defaultMessage:
-                'Failed to decrypt report job data. Please ensure that {encryptionKey} is set and re-generate this report. {err}',
-              values: { encryptionKey: 'xpack.reporting.encryptionKey', err: err.toString() },
-            }
-          )
-        );
-      }),
       map(omitBlacklistedHeaders),
       map(getConditionalHeaders),
       mergeMap(getFullUrls),
@@ -61,8 +47,8 @@ export function executeJobFactory(server: ServerFacade) {
         throw new Error(typeof buffer);
         return {
           content_type: 'image/png',
-          content: buffer.toString('base64'),
-          size: buffer.byteLength,
+          content: buffer,
+          size: buffer.length,
         };
       }),
       catchError(err => {

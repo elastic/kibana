@@ -5,20 +5,30 @@
  */
 
 import { PLUGIN_ID, PDF_JOB_TYPE } from '../../../../common/constants';
+import { ServerFacade, RequestFacade, ConditionalHeaders } from '../../../../types';
 import { validateUrls } from '../../../../common/validate_urls';
 import { LevelLogger } from '../../../../server/lib';
 import { cryptoFactory } from '../../../../server/lib/crypto';
+// @ts-ignore untyped module
 import { compatibilityShimFactory } from './compatibility_shim';
 
-export function createJobFactory(server) {
+interface CreateJobFnOpts {
+  objectType: any;
+  title: string;
+  relativeUrls: string[];
+  browserTimezone: string;
+  layout: any;
+}
+
+export function createJobFactory(server: ServerFacade) {
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PDF_JOB_TYPE, 'create']);
   const compatibilityShim = compatibilityShimFactory(server, logger);
   const crypto = cryptoFactory(server);
 
   return compatibilityShim(async function createJobFn(
-    { objectType, title, relativeUrls, browserTimezone, layout },
-    headers,
-    request
+    { objectType, title, relativeUrls, browserTimezone, layout }: CreateJobFnOpts,
+    headers: ConditionalHeaders['headers'],
+    request: RequestFacade
   ) {
     const serializedEncryptedHeaders = await crypto.encrypt(headers);
 

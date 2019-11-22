@@ -31,7 +31,7 @@ export const decryptJobHeaders = async ({
 
     throw new Error(
       i18n.translate(
-        'xpack.reporting.exportTypes.printablePdf.compShim.failedToDecryptReportJobDataErrorMessage',
+        'xpack.reporting.exportTypes.common.failedToDecryptReportJobDataErrorMessage',
         {
           defaultMessage:
             'Failed to decrypt report job data. Please ensure that {encryptionKey} is set and re-generate this report. {err}',

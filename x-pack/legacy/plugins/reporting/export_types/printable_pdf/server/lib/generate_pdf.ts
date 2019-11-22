@@ -48,7 +48,7 @@ export function generatePdfObservableFactory(server: ServerFacade) {
     browserTimezone: string,
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams,
-    logo: string
+    logo?: string
   ) {
     const layout = createLayout(server, layoutParams) as LayoutInstance;
 

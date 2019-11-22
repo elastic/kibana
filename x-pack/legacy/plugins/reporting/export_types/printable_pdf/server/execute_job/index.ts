@@ -36,18 +36,20 @@ export function executeJobFactory(server: ServerFacade) {
       map(getConditionalHeaders),
       mergeMap(getCustomLogo),
       mergeMap(getFullUrls),
-      mergeMap(({ job, conditionalHeaders, logo, urls }) => {
-        return generatePdfObservable(
-          jobLogger,
-          job.title,
-          urls,
-          job.browserTimezone,
-          conditionalHeaders,
-          job.layout,
-          logo
-        );
-      }),
-      map(buffer => ({
+      mergeMap(
+        ({ job, conditionalHeaders, logo, urls }): Rx.Observable<Buffer> => {
+          return generatePdfObservable(
+            jobLogger,
+            job.title,
+            urls,
+            job.browserTimezone,
+            conditionalHeaders,
+            job.layout,
+            logo
+          );
+        }
+      ),
+      map((buffer: Buffer) => ({
         content_type: 'application/pdf',
         content: buffer.toString('base64'),
         size: buffer.byteLength,

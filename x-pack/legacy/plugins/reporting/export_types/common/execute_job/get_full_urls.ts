@@ -23,14 +23,12 @@ interface KeyedRelativeUrl {
 export async function getFullUrls({
   job,
   server,
-  conditionalHeaders,
-  logo,
   ...mergeValues // pass-throughs
 }: {
   job: JobDocPayloadPNG | JobDocPayloadPDF;
   server: ServerFacade;
   conditionalHeaders: ConditionalHeaders;
-  logo: string;
+  logo?: string;
 }) {
   const config = server.config();
 
@@ -97,5 +95,5 @@ export async function getFullUrls({
     });
   });
 
-  return { job, server, urls, logo, conditionalHeaders, ...mergeValues };
+  return { job, server, urls, ...mergeValues };
 }
