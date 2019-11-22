@@ -6,13 +6,12 @@
 
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { CapabilitiesModifier } from 'src/legacy/server/capabilities';
 import {
   SavedObjectsLegacyService,
   CoreSetup,
-  KibanaRequest,
   Logger,
   PluginInitializerContext,
+  CapabilitiesModifier,
 } from '../../../../src/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { PluginSetupContract as SecurityPluginSetup } from '../../security/server';
@@ -182,7 +181,7 @@ export class Plugin {
     );
     legacyAPI.capabilities.registerCapabilitiesModifier(async (request, uiCapabilities) => {
       try {
-        const activeSpace = await spacesService.getActiveSpace(KibanaRequest.from(request));
+        const activeSpace = await spacesService.getActiveSpace(request);
         const features = featuresSetup.getFeatures();
         return toggleUICapabilities(features, uiCapabilities, activeSpace);
       } catch (e) {

@@ -86,6 +86,12 @@ export interface App extends AppBase {
    * Takes precedence over chrome service visibility settings.
    */
   chromeless?: boolean;
+
+  /**
+   * Override the application's base routing path from `/app/${id}`.
+   * Must be unique across registered applications.
+   */
+  appBasePath?: string;
 }
 
 /** @internal */
@@ -191,6 +197,19 @@ export type AppUnmount = () => void;
 
 /** @internal */
 export type AppMounter = (params: AppMountParameters) => Promise<AppUnmount>;
+
+/** @internal */
+export type LegacyAppMounter = (params: AppMountParameters) => void;
+
+/** @internal */
+export type Mounter<T = App | LegacyApp> = SelectivePartial<
+  {
+    appBasePath: string;
+    mount: T extends LegacyApp ? LegacyAppMounter : AppMounter;
+    unmountBeforeMounting: T extends LegacyApp ? true : boolean;
+  },
+  T extends LegacyApp ? never : 'unmountBeforeMounting'
+>;
 
 /** @public */
 export interface ApplicationSetup {
@@ -314,3 +333,9 @@ export interface InternalApplicationStart
   currentAppId$: Subject<string | undefined>;
   getComponent(): JSX.Element | null;
 }
+
+/** @internal */
+type SelectivePartial<T, K extends keyof T> = Partial<Pick<T, K>> &
+  Required<Pick<T, Exclude<keyof T, K>>> extends infer U
+  ? { [P in keyof U]: U[P] }
+  : never;

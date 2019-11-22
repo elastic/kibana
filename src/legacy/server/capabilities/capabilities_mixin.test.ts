@@ -86,6 +86,32 @@ describe('capabilitiesMixin', () => {
     expect(mockRegisterCapabilitiesRoute.mock.calls[0][2]).toEqual([mockModifier1, mockModifier2]);
   });
 
+  it('exposes server#getCapabilitiesModifiers for getting modifiers from the server', async () => {
+    const kbnServer = getKbnServer();
+    await capabilitiesMixin(kbnServer, server);
+    const mockModifier1 = jest.fn();
+    const mockModifier2 = jest.fn();
+    server.registerCapabilitiesModifier(mockModifier1);
+    server.registerCapabilitiesModifier(mockModifier2);
+
+    expect(server.getCapabilitiesModifiers()).toEqual([mockModifier1, mockModifier2]);
+  });
+
+  it('exposes server#getDefaultCapabilities for getting default capabilities from the server', async () => {
+    const kbnServer = getKbnServer();
+    await capabilitiesMixin(kbnServer, server);
+
+    expect(server.getDefaultCapabilities()).toMatchInlineSnapshot(`
+      Object {
+        "catalogue": Object {},
+        "management": Object {},
+        "navLinks": Object {},
+      }
+    `);
+  });
+
+  // TODO need to also add integration tests for the application service
+
   it('exposes request#getCapabilities for retrieving legacy capabilities', async () => {
     const kbnServer = getKbnServer();
     jest.spyOn(server, 'decorate');

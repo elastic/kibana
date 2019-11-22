@@ -15,12 +15,12 @@ import {
   RecursiveReadonly,
   SavedObjectsLegacyService,
   LegacyRequest,
+  CapabilitiesModifier,
 } from '../../../../src/core/server';
 import { deepFreeze } from '../../../../src/core/utils';
 import { SpacesPluginSetup } from '../../spaces/server';
 import { PluginSetupContract as FeaturesSetupContract } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { CapabilitiesModifier } from '../../../../src/legacy/server/capabilities';
 
 import { Authentication, setupAuthentication } from './authentication';
 import { Authorization, setupAuthorization } from './authorization';
@@ -194,7 +194,7 @@ export class Plugin {
           });
 
           legacyAPI.capabilities.registerCapabilitiesModifier((request, capabilities) =>
-            authz.disableUnauthorizedCapabilities(KibanaRequest.from(request), capabilities)
+            authz.disableUnauthorizedCapabilities(request, capabilities)
           );
         },
 

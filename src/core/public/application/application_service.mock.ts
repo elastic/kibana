@@ -20,15 +20,13 @@
 import { Subject } from 'rxjs';
 
 import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
-import { ApplicationService } from './application_service';
 import {
   ApplicationSetup,
   InternalApplicationStart,
   ApplicationStart,
   InternalApplicationSetup,
 } from './types';
-
-type ApplicationServiceContract = PublicMethodsOf<ApplicationService>;
+import { ApplicationServiceContract } from './test_types';
 
 const createSetupContractMock = (): jest.Mocked<ApplicationSetup> => ({
   register: jest.fn(),
@@ -69,7 +67,6 @@ export const applicationServiceMock = {
   create: createMock,
   createSetupContract: createSetupContractMock,
   createStartContract: createStartContractMock,
-
   createInternalSetupContract: createInternalSetupContractMock,
   createInternalStartContract: createInternalStartContractMock,
 };

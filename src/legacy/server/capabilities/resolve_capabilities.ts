@@ -17,14 +17,12 @@
  * under the License.
  */
 
-import { Request } from 'hapi';
-
 import { Capabilities } from '../../../core/public';
+import { KibanaRequest, CapabilitiesModifier } from '../../../core/server';
 import { mergeCapabilities } from './merge_capabilities';
-import { CapabilitiesModifier } from './capabilities_mixin';
 
 export const resolveCapabilities = (
-  request: Request,
+  request: KibanaRequest,
   modifiers: CapabilitiesModifier[],
   ...capabilities: Array<Partial<Capabilities>>
 ) =>

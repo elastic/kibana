@@ -23,6 +23,7 @@ import { Type } from '@kbn/config-schema';
 import { ConfigService, Env, Config, ConfigPath } from './config';
 import { ElasticsearchService } from './elasticsearch';
 import { HttpService, InternalHttpServiceSetup } from './http';
+import { ApplicationService, ApplicationServiceSetup } from './application';
 import { LegacyService } from './legacy';
 import { Logger, LoggerFactory } from './logging';
 import { UiSettingsService } from './ui_settings';
@@ -49,6 +50,7 @@ export class Server {
   private readonly context: ContextService;
   private readonly elasticsearch: ElasticsearchService;
   private readonly http: HttpService;
+  private readonly application: ApplicationService;
   private readonly legacy: LegacyService;
   private readonly log: Logger;
   private readonly plugins: PluginsService;
@@ -66,6 +68,7 @@ export class Server {
     const core = { coreId, configService: this.configService, env, logger };
     this.context = new ContextService(core);
     this.http = new HttpService(core);
+    this.application = new ApplicationService(core);
     this.plugins = new PluginsService(core);
     this.legacy = new LegacyService(core);
     this.elasticsearch = new ElasticsearchService(core);
@@ -117,12 +120,18 @@ export class Server {
       plugins: mapToObject(pluginsSetup.contracts),
     });
 
+    const applicationSetup = await this.application.setup({
+      http: httpSetup,
+      plugins: pluginsSetup,
+      legacy: legacySetup,
+    });
+
     const savedObjectsSetup = await this.savedObjects.setup({
       elasticsearch: elasticsearchServiceSetup,
       legacy: legacySetup,
     });
 
-    this.registerCoreContext(coreSetup, savedObjectsSetup);
+    this.registerCoreContext(coreSetup, savedObjectsSetup, applicationSetup);
 
     return coreSetup;
   }
@@ -143,6 +152,7 @@ export class Server {
     });
 
     await this.http.start();
+    await this.application.start();
 
     return coreStart;
   }
@@ -155,6 +165,7 @@ export class Server {
     await this.savedObjects.stop();
     await this.elasticsearch.stop();
     await this.http.stop();
+    await this.application.stop();
   }
 
   private registerDefaultRoute(httpSetup: InternalHttpServiceSetup) {
@@ -166,17 +177,25 @@ export class Server {
 
   private registerCoreContext(
     coreSetup: InternalCoreSetup,
-    savedObjects: SavedObjectsServiceSetup
+    savedObjects: SavedObjectsServiceSetup,
+    application: ApplicationServiceSetup
   ) {
     coreSetup.http.registerRouteHandlerContext(
       coreId,
       'core',
-      async (context, req): Promise<RequestHandlerContext['core']> => {
+      async (context, req, res): Promise<RequestHandlerContext['core']> => {
         const adminClient = await coreSetup.elasticsearch.adminClient$.pipe(take(1)).toPromise();
         const dataClient = await coreSetup.elasticsearch.dataClient$.pipe(take(1)).toPromise();
         const savedObjectsClient = savedObjects.clientProvider.getClient(req);
+        const uiSettingsClient = coreSetup.uiSettings.asScopedToClient(savedObjectsClient);
+        const applicationProvider = await application.getCoreContextProvider({
+          request: req,
+          response: res,
+          uiSettingsClient,
+        });
 
         return {
+          application: applicationProvider,
           savedObjects: {
             // Note: the client provider doesn't support new ES clients
             // emitted from adminClient$
@@ -187,7 +206,7 @@ export class Server {
             dataClient: dataClient.asScoped(req),
           },
           uiSettings: {
-            client: coreSetup.uiSettings.asScopedToClient(savedObjectsClient),
+            client: uiSettingsClient,
           },
         };
       }

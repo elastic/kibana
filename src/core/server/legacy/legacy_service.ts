@@ -248,6 +248,7 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
         registerOnPostAuth: setupDeps.core.http.registerOnPostAuth,
         basePath: setupDeps.core.http.basePath,
         isTlsEnabled: setupDeps.core.http.isTlsEnabled,
+        csp: setupDeps.core.http.csp,
       },
       uiSettings: {
         register: setupDeps.core.uiSettings.register,

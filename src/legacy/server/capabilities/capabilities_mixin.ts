@@ -17,30 +17,30 @@
  * under the License.
  */
 
-import { Server, Request } from 'hapi';
+import { Server } from 'hapi';
 
 import { Capabilities } from '../../../core/public';
+import { KibanaRequest, CapabilitiesModifier } from '../../../core/server';
+import { deepFreeze } from '../../../core/utils';
 import KbnServer from '../kbn_server';
 import { registerCapabilitiesRoute } from './capabilities_route';
 import { mergeCapabilities } from './merge_capabilities';
 import { resolveCapabilities } from './resolve_capabilities';
 
-export type CapabilitiesModifier = (
-  request: Request,
-  uiCapabilities: Capabilities
-) => Capabilities | Promise<Capabilities>;
-
 export async function capabilitiesMixin(kbnServer: KbnServer, server: Server) {
   const modifiers: CapabilitiesModifier[] = [];
+  let defaultCapabilities: Capabilities;
 
   server.decorate('server', 'registerCapabilitiesModifier', (provider: CapabilitiesModifier) => {
     modifiers.push(provider);
   });
+  server.decorate('server', 'getDefaultCapabilities', () => deepFreeze(defaultCapabilities));
+  server.decorate('server', 'getCapabilitiesModifiers', () => deepFreeze(modifiers));
 
   // Some plugin capabilities are derived from data provided by other plugins,
   // so we need to wait until after all plugins have been init'd to fetch uiCapabilities.
   kbnServer.afterPluginsInit(async () => {
-    const defaultCapabilities = mergeCapabilities(
+    defaultCapabilities = mergeCapabilities(
       ...(await Promise.all(
         kbnServer.pluginSpecs
           .map(spec => spec.getUiCapabilitiesProvider())
@@ -59,7 +59,9 @@ export async function capabilitiesMixin(kbnServer: KbnServer, server: Server) {
         {} as Record<string, boolean>
       );
 
-      return resolveCapabilities(this, modifiers, defaultCapabilities, { navLinks });
+      return resolveCapabilities(KibanaRequest.from(this), modifiers, defaultCapabilities, {
+        navLinks,
+      });
     });
 
     registerCapabilitiesRoute(server, defaultCapabilities, modifiers);

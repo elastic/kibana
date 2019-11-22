@@ -41,6 +41,7 @@
 
 import { ElasticsearchServiceSetup, IScopedClusterClient } from './elasticsearch';
 import { HttpServiceSetup } from './http';
+import { IApplicationContextProvider } from './application';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { ContextSetup } from './context';
 import { IUiSettingsClient, UiSettingsServiceSetup } from './ui_settings';
@@ -118,6 +119,11 @@ export {
   SessionStorageCookieOptions,
   SessionStorageFactory,
 } from './http';
+export {
+  IApplicationContextProvider,
+  ApplicationServiceSetup,
+  CapabilitiesModifier,
+} from './application';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 
 export {
@@ -195,6 +201,8 @@ export { LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy';
  * Plugin specific context passed to a route handler.
  *
  * Provides the following clients:
+ *    - {@link ApplicationClient | application} - Application client
+ *      which uses the credentials of the incoming request
  *    - {@link SavedObjectsClient | savedObjects.client} - Saved Objects client
  *      which uses the credentials of the incoming request
  *    - {@link ScopedClusterClient | elasticsearch.dataClient} - Elasticsearch
@@ -206,6 +214,7 @@ export { LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy';
  */
 export interface RequestHandlerContext {
   core: {
+    application: IApplicationContextProvider;
     savedObjects: {
       client: SavedObjectsClientContract;
     };

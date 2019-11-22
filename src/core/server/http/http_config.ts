@@ -19,6 +19,7 @@
 
 import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
 import { Env } from '../config';
+import { DEFAULT_CSP_RULES, DEFAULT_CSP_STRICT, DEFAULT_CSP_WARN_LEGACY_BROWSERS } from '../csp';
 import { SslConfig, sslSchema } from './ssl_config';
 
 const validBasePathRegex = /(^$|^\/.*[^\/]$)/;
@@ -38,7 +39,20 @@ export const config = {
           validate: match(validBasePathRegex, "must start with a slash, don't end with one"),
         })
       ),
-      defaultRoute: schema.maybe(schema.string()),
+      csp: schema.object(
+        {
+          rules: schema.arrayOf(schema.string()),
+          strict: schema.boolean(),
+          warnLegacyBrowsers: schema.boolean(),
+        },
+        {
+          defaultValue: {
+            rules: [...DEFAULT_CSP_RULES],
+            strict: DEFAULT_CSP_STRICT,
+            warnLegacyBrowsers: DEFAULT_CSP_WARN_LEGACY_BROWSERS,
+          },
+        }
+      ),
       cors: schema.conditional(
         schema.contextRef('dev'),
         true,
@@ -54,6 +68,7 @@ export const config = {
         ),
         schema.boolean({ defaultValue: false })
       ),
+      defaultRoute: schema.maybe(schema.string()),
       host: schema.string({
         defaultValue: 'localhost',
         hostname: true,
@@ -102,6 +117,7 @@ export class HttpConfig {
   public keepaliveTimeout: number;
   public socketTimeout: number;
   public port: number;
+  public csp: HttpConfigType['csp'];
   public cors: boolean | { origin: string[] };
   public maxPayload: ByteSizeValue;
   public basePath?: string;
@@ -117,6 +133,7 @@ export class HttpConfig {
     this.autoListen = rawConfig.autoListen;
     this.host = rawConfig.host;
     this.port = rawConfig.port;
+    this.csp = rawConfig.csp;
     this.cors = rawConfig.cors;
     this.maxPayload = rawConfig.maxPayload;
     this.basePath = rawConfig.basePath;

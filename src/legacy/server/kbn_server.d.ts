@@ -20,8 +20,10 @@
 import { ResponseObject, Server } from 'hapi';
 import { UnwrapPromise } from '@kbn/utility-types';
 
-import { SavedObjectsClientProviderOptions, CoreSetup } from 'src/core/server';
 import {
+  SavedObjectsClientProviderOptions,
+  CoreSetup,
+  CapabilitiesModifier,
   ConfigService,
   ElasticsearchServiceSetup,
   EnvironmentMode,
@@ -30,16 +32,16 @@ import {
   SavedObjectsLegacyService,
   IUiSettingsClient,
   PackageInfo,
+  LegacyServiceSetupDeps,
+  LegacyServiceStartDeps,
 } from '../../core/server';
 
-import { LegacyServiceSetupDeps, LegacyServiceStartDeps } from '../../core/server/';
 // Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsManagement } from '../../core/server/saved_objects/management';
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 
-import { CapabilitiesModifier } from './capabilities';
 import { IndexPatternsServiceFactory } from './index_patterns';
 import { Capabilities } from '../../core/public';
 import { UiSettingsServiceFactoryOptions } from '../../legacy/ui/ui_settings/ui_settings_service_factory';
@@ -69,13 +71,16 @@ declare module 'hapi' {
     savedObjects: SavedObjectsLegacyService;
     usage: { collectorSet: any };
     injectUiAppVars: (pluginName: string, getAppVars: () => { [key: string]: any }) => void;
+    getUiAppById(appId: string): UiApp;
     getHiddenUiAppById(appId: string): UiApp;
     registerCapabilitiesModifier: (provider: CapabilitiesModifier) => void;
+    getCapabilitiesModifiers: () => Readonly<CapabilitiesModifier[]>;
+    getDefaultCapabilities: () => Readonly<Capabilities>;
     addScopedTutorialContextFactory: (
       scopedTutorialContextFactory: (...args: any[]) => any
     ) => void;
     savedObjectsManagement(): SavedObjectsManagement;
-    getInjectedUiAppVars: (pluginName: string) => { [key: string]: any };
+    getInjectedUiAppVars: (pluginName: string) => Promise<Record<string, any>>;
     getUiNavLinks(): Array<{ _id: string }>;
     addMemoizedFactoryToRequest: (
       name: string,

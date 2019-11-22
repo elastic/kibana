@@ -18,6 +18,7 @@
  */
 
 import { Server } from 'hapi';
+import { DEFAULT_CSP_RULES, DEFAULT_CSP_STRICT, DEFAULT_CSP_WARN_LEGACY_BROWSERS } from '../csp';
 import { InternalHttpServiceSetup } from './types';
 import { HttpService } from './http_service';
 import { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
@@ -26,13 +27,14 @@ import { sessionStorageMock } from './cookie_session_storage.mocks';
 import { IRouter } from './router';
 import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
 
+type BasePathMocked = jest.Mocked<InternalHttpServiceSetup['basePath']>;
 type ServiceSetupMockType = jest.Mocked<InternalHttpServiceSetup> & {
-  basePath: jest.Mocked<InternalHttpServiceSetup['basePath']>;
+  basePath: BasePathMocked;
 };
 
-const createBasePathMock = (): jest.Mocked<InternalHttpServiceSetup['basePath']> => ({
-  serverBasePath: '/mock-server-basepath',
-  get: jest.fn(),
+const createBasePathMock = (serverBasePath = '/mock-server-basepath'): BasePathMocked => ({
+  serverBasePath,
+  get: jest.fn().mockReturnValue(serverBasePath),
   set: jest.fn(),
   prepend: jest.fn(),
   remove: jest.fn(),
@@ -51,9 +53,16 @@ const createSetupContractMock = () => {
   const setupContract: ServiceSetupMockType = {
     // we can mock other hapi server methods when we need it
     server: ({
+      name: 'http-server-test',
+      version: 'kibana',
       route: jest.fn(),
       start: jest.fn(),
       stop: jest.fn(),
+      getUiAppById: jest.fn(), // ! legacy
+      getInjectedUiAppVars: jest.fn().mockResolvedValue({}), // ! legacy
+      getUiNavLinks: jest.fn().mockReturnValue([]), // ! legacy
+      getCapabilitiesModifiers: jest.fn().mockReturnValue([]), // ! legacy
+      getDefaultCapabilities: jest.fn().mockReturnValue({}), // ! legacy
     } as unknown) as jest.MockedClass<Server>,
     createCookieSessionStorageFactory: jest.fn(),
     registerOnPreAuth: jest.fn(),
@@ -68,6 +77,11 @@ const createSetupContractMock = () => {
       getAuthHeaders: jest.fn(),
     },
     isTlsEnabled: false,
+    csp: {
+      rules: [...DEFAULT_CSP_RULES],
+      strict: DEFAULT_CSP_STRICT,
+      warnLegacyBrowsers: DEFAULT_CSP_WARN_LEGACY_BROWSERS,
+    },
     config: {},
   };
   setupContract.createCookieSessionStorageFactory.mockResolvedValue(

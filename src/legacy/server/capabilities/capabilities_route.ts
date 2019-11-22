@@ -21,7 +21,7 @@ import Joi from 'joi';
 import { Server } from 'hapi';
 
 import { Capabilities } from '../../../core/public';
-import { CapabilitiesModifier } from './capabilities_mixin';
+import { CapabilitiesModifier, KibanaRequest } from '../../../core/server';
 import { resolveCapabilities } from './resolve_capabilities';
 
 export const registerCapabilitiesRoute = (
@@ -43,7 +43,7 @@ export const registerCapabilitiesRoute = (
       const { capabilities } = request.payload as { capabilities: Capabilities };
       return {
         capabilities: await resolveCapabilities(
-          request,
+          KibanaRequest.from(request),
           modifiers,
           defaultCapabilities,
           capabilities

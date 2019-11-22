@@ -18,12 +18,9 @@
  */
 
 import { deepFreeze, RecursiveReadonly } from '../../../utils';
-import { LegacyApp, App } from '../types';
 import { InjectedMetadataStart } from '../../injected_metadata';
 
 interface StartDeps {
-  apps: ReadonlyMap<string, App>;
-  legacyApps: ReadonlyMap<string, LegacyApp>;
   injectedMetadata: InjectedMetadataStart;
 }
 
@@ -31,7 +28,6 @@ interface StartDeps {
  * The read-only set of capabilities available for the current UI session.
  * Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID,
  * and the boolean is a flag indicating if the capability is enabled or disabled.
- *
  * @public
  */
 export interface Capabilities {
@@ -53,8 +49,6 @@ export interface Capabilities {
 /** @internal */
 export interface CapabilitiesStart {
   capabilities: RecursiveReadonly<Capabilities>;
-  availableApps: ReadonlyMap<string, App>;
-  availableLegacyApps: ReadonlyMap<string, LegacyApp>;
 }
 
 /**
@@ -62,30 +56,9 @@ export interface CapabilitiesStart {
  * @internal
  */
 export class CapabilitiesService {
-  public async start({
-    apps,
-    legacyApps,
-    injectedMetadata,
-  }: StartDeps): Promise<CapabilitiesStart> {
+  public async start({ injectedMetadata }: StartDeps): Promise<CapabilitiesStart> {
     const capabilities = deepFreeze(injectedMetadata.getCapabilities());
-    const availableApps = new Map(
-      [...apps].filter(
-        ([appId]) =>
-          capabilities.navLinks[appId] === undefined || capabilities.navLinks[appId] === true
-      )
-    );
 
-    const availableLegacyApps = new Map(
-      [...legacyApps].filter(
-        ([appId]) =>
-          capabilities.navLinks[appId] === undefined || capabilities.navLinks[appId] === true
-      )
-    );
-
-    return {
-      availableApps,
-      availableLegacyApps,
-      capabilities,
-    };
+    return { capabilities };
   }
 }

@@ -175,6 +175,15 @@ export interface HttpServiceSetup {
   isTlsEnabled: boolean;
 
   /**
+   * Config settings related to browser Content Security Policy.
+   */
+  csp: {
+    rules: string[];
+    strict: boolean;
+    warnLegacyBrowsers: boolean;
+  };
+
+  /**
    * Provides ability to declare a handler function for a particular path and HTTP request method.
    *
    * @remarks

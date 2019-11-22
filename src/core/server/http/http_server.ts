@@ -50,6 +50,7 @@ export interface HttpServerSetup {
   registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
   registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
   isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
+  csp: HttpServiceSetup['csp'];
   auth: {
     get: GetAuthState;
     isAuthenticated: IsAuthenticated;
@@ -111,6 +112,7 @@ export class HttpServer {
         getAuthHeaders: this.authRequestHeaders.get,
       },
       isTlsEnabled: config.ssl.enabled,
+      csp: config.csp,
       // Return server instance with the connection options so that we can properly
       // bridge core and the "legacy" Kibana internally. Once this bridge isn't
       // needed anymore we shouldn't return the instance from this method.

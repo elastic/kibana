@@ -17,30 +17,29 @@
  * under the License.
  */
 
-import { createBrowserHistory } from 'history';
-import { BehaviorSubject } from 'rxjs';
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
+import { createBrowserHistory, History } from 'history';
 
-import { InjectedMetadataStart } from '../injected_metadata';
-import { CapabilitiesService } from './capabilities';
-import { AppRouter } from './ui';
-import { HttpStart } from '../http';
+import { InjectedMetadataSetup, InjectedMetadataStart } from '../injected_metadata';
+import { HttpSetup } from '../http';
 import { ContextSetup, IContextContainer } from '../context';
+import { AppRouter } from './ui';
+import { CapabilitiesService, Capabilities } from './capabilities';
 import {
   App,
   LegacyApp,
   AppMounter,
+  LegacyAppMounter,
+  Mounter,
   InternalApplicationSetup,
   InternalApplicationStart,
 } from './types';
 
 interface SetupDeps {
   context: ContextSetup;
-}
-
-interface StartDeps {
-  http: HttpStart;
-  injectedMetadata: InjectedMetadataStart;
+  http: HttpSetup;
+  injectedMetadata: InjectedMetadataSetup;
   /**
    * Only necessary for redirecting to legacy apps
    * @deprecated
@@ -48,128 +47,124 @@ interface StartDeps {
   redirectTo?: (path: string) => void;
 }
 
-interface AppBox {
-  app: App;
-  mount: AppMounter;
+interface StartDeps {
+  injectedMetadata: InjectedMetadataStart;
 }
+
+const filterAvailable = (map: Map<string, any>, capabilities: Capabilities) =>
+  new Map(
+    [...map].filter(
+      ([id]) => capabilities.navLinks[id] === undefined || capabilities.navLinks[id] === true
+    )
+  );
+const hasAppBasePath = (mounters: Map<string, Mounter>, appBasePath?: string) =>
+  [...mounters.values()].some(mounter => mounter.appBasePath === appBasePath);
+const getAppUrl = (mounters: Map<string, Mounter>, appId: string, path: string = '') =>
+  `/${mounters.get(appId)?.appBasePath ?? `/app/${appId}`}/${path}`
+    .replace(/\/{2,}/g, '/') // Remove duplicate slashes
+    .replace(/\/$/, ''); // Remove trailing slash
 
 /**
  * Service that is responsible for registering new applications.
  * @internal
  */
 export class ApplicationService {
-  private readonly apps$ = new BehaviorSubject<ReadonlyMap<string, AppBox>>(new Map());
-  private readonly legacyApps$ = new BehaviorSubject<ReadonlyMap<string, LegacyApp>>(new Map());
+  private readonly apps = new Map<string, App>();
+  private readonly legacyApps = new Map<string, LegacyApp>();
+  private readonly mounters = new Map<string, Mounter>();
   private readonly capabilities = new CapabilitiesService();
+  private registrationClosed = false;
+  private history: History<any> | null = null;
   private mountContext?: IContextContainer<App['mount']>;
+  private currentAppId$?: BehaviorSubject<string | undefined>;
+  private navigate?: (url: string, state: any) => void;
 
-  public setup({ context }: SetupDeps): InternalApplicationSetup {
+  public setup({
+    context,
+    http: { basePath },
+    injectedMetadata,
+    redirectTo = (path: string) => (window.location.href = path),
+  }: SetupDeps): InternalApplicationSetup {
+    // Only setup history if we're not in legacy mode
+    if (!injectedMetadata.getLegacyMode()) {
+      this.history = createBrowserHistory({ basename: basePath.get() });
+    }
+
+    // If we do not have history available, use redirectTo to do a full page refresh.
+    this.navigate = (url, state) =>
+      this.history ? this.history.push(url, state) : redirectTo(basePath.prepend(url));
     this.mountContext = context.createContextContainer();
 
     return {
-      register: (plugin: symbol, app: App) => {
-        if (this.apps$.value.has(app.id)) {
-          throw new Error(`An application is already registered with the id "${app.id}"`);
-        }
-        if (this.apps$.isStopped) {
-          throw new Error(`Applications cannot be registered after "setup"`);
-        }
-
-        const appBox: AppBox = {
-          app,
-          mount: this.mountContext!.createHandler(plugin, app.mount),
-        };
-        this.apps$.next(new Map([...this.apps$.value.entries(), [app.id, appBox]]));
-      },
-      registerLegacyApp: (app: LegacyApp) => {
-        if (this.legacyApps$.value.has(app.id)) {
-          throw new Error(`A legacy application is already registered with the id "${app.id}"`);
-        }
-        if (this.legacyApps$.isStopped) {
-          throw new Error(`Applications cannot be registered after "setup"`);
-        }
-
-        this.legacyApps$.next(new Map([...this.legacyApps$.value.entries(), [app.id, app]]));
-      },
       registerMountContext: this.mountContext!.registerContext,
+      register: (plugin, app) => {
+        app = { appBasePath: `/app/${app.id}`, ...app };
+
+        if (this.registrationClosed) {
+          throw new Error(`Applications cannot be registered after "setup"`);
+        } else if (this.apps.has(app.id)) {
+          throw new Error(`An application is already registered with the id "${app.id}"`);
+        } else if (hasAppBasePath(this.mounters, app.appBasePath)) {
+          throw new Error(
+            `An application is already registered with the appBasePath "${app.appBasePath}"`
+          );
+        }
+
+        const handler = this.mountContext!.createHandler(plugin, app.mount);
+        const mount: AppMounter = async params => {
+          const unmount = await handler(params);
+          this.currentAppId$!.next(app.id);
+          return unmount;
+        };
+        this.apps.set(app.id, app);
+        this.mounters.set(app.id, { appBasePath: app.appBasePath!, mount });
+      },
+      registerLegacyApp: app => {
+        const appBasePath = `/app/${app.id.split(':')[0]}`;
+
+        if (this.registrationClosed) {
+          throw new Error(`Applications cannot be registered after "setup"`);
+        } else if (this.legacyApps.has(app.id)) {
+          throw new Error(`A legacy application is already registered with the id "${app.id}"`);
+        } else if (hasAppBasePath(this.mounters, appBasePath)) {
+          throw new Error(
+            `An application is already registered with the appBasePath "${appBasePath}"`
+          );
+        }
+
+        const mount: LegacyAppMounter = () => redirectTo(basePath.prepend(appBasePath));
+        this.legacyApps.set(app.id, app);
+        this.mounters.set(app.id, { appBasePath, mount, unmountBeforeMounting: true });
+      },
     };
   }
 
-  public async start({
-    http,
-    injectedMetadata,
-    redirectTo = (path: string) => (window.location.href = path),
-  }: StartDeps): Promise<InternalApplicationStart> {
+  public async start({ injectedMetadata }: StartDeps): Promise<InternalApplicationStart> {
     if (!this.mountContext) {
-      throw new Error(`ApplicationService#setup() must be invoked before start.`);
+      throw new Error('ApplicationService#setup() must be invoked before start.');
     }
 
-    // Disable registration of new applications
-    this.apps$.complete();
-    this.legacyApps$.complete();
-
-    const legacyMode = injectedMetadata.getLegacyMode();
-    const currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
-    const { availableApps, availableLegacyApps, capabilities } = await this.capabilities.start({
-      apps: new Map([...this.apps$.value].map(([id, { app }]) => [id, app])),
-      legacyApps: this.legacyApps$.value,
-      injectedMetadata,
-    });
-
-    // Only setup history if we're not in legacy mode
-    const history = legacyMode ? null : createBrowserHistory({ basename: http.basePath.get() });
+    this.registrationClosed = true;
+    this.currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
+    const { capabilities } = await this.capabilities.start({ injectedMetadata });
+    const availableMounters = filterAvailable(this.mounters, capabilities);
 
     return {
-      availableApps,
-      availableLegacyApps,
+      availableApps: filterAvailable(this.apps, capabilities),
+      availableLegacyApps: filterAvailable(this.legacyApps, capabilities),
       capabilities,
+      currentAppId$: this.currentAppId$,
       registerMountContext: this.mountContext.registerContext,
-      currentAppId$,
-
-      getUrlForApp: (appId, options: { path?: string } = {}) => {
-        return http.basePath.prepend(appPath(appId, options));
-      },
-
+      getUrlForApp: (appId, { path }: { path?: string } = {}) =>
+        getAppUrl(availableMounters, appId, path),
       navigateToApp: (appId, { path, state }: { path?: string; state?: any } = {}) => {
-        if (legacyMode) {
-          // If we're in legacy mode, do a full page refresh to load the NP app.
-          redirectTo(http.basePath.prepend(appPath(appId, { path })));
-        } else {
-          // basePath not needed here because `history` is configured with basename
-          history!.push(appPath(appId, { path }), state);
-        }
+        this.navigate!(getAppUrl(availableMounters, appId, path), state);
+        this.currentAppId$!.next(appId);
       },
-
-      getComponent: () => {
-        if (legacyMode) {
-          return null;
-        }
-
-        // Filter only available apps and map to just the mount function.
-        const appMounters = new Map<string, AppMounter>(
-          [...this.apps$.value]
-            .filter(([id]) => availableApps.has(id))
-            .map(([id, { mount }]) => [id, mount])
-        );
-
-        return (
-          <AppRouter
-            apps={appMounters}
-            legacyApps={availableLegacyApps}
-            basePath={http.basePath}
-            currentAppId$={currentAppId$}
-            history={history!}
-            redirectTo={redirectTo}
-          />
-        );
-      },
+      getComponent: () =>
+        this.history ? <AppRouter history={this.history} mounters={availableMounters} /> : null,
     };
   }
 
   public stop() {}
 }
-
-const appPath = (appId: string, { path }: { path?: string } = {}): string =>
-  path
-    ? `/app/${appId}/${path.replace(/^\//, '')}` // Remove preceding slash from path if present
-    : `/app/${appId}`;
