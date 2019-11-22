@@ -27,11 +27,9 @@ import {
   getPredictedFieldName,
   INDEX_STATUS,
   SEARCH_SIZE,
+  defaultSearchQuery,
+  SearchQuery,
 } from '../../../../common';
-
-export const defaultSearchQuery = {
-  match_all: {},
-};
 
 type TableItem = Record<string, any>;
 
@@ -47,11 +45,6 @@ export interface UseExploreDataReturnType {
   sortDirection: SortDirection;
   status: INDEX_STATUS;
   tableItems: TableItem[];
-}
-
-interface SearchQuery {
-  query: SavedSearchQuery;
-  sort?: any;
 }
 
 export const useExploreData = (

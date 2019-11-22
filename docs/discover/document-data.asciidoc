@@ -5,7 +5,7 @@ When you submit a search query, the 500 most recent documents that match the que
 are listed in the Documents table. You can configure the number of documents shown
 in the table by setting the `discover:sampleSize` property in <<advanced-options,
 Advanced Settings>>. By default, the table shows the localized version of the time
-field configured for the selected index pattern and the document `_source`. You can
+field configured for the selected <<index-patterns, index pattern>> and the document `_source`. You can
 <<adding-columns, add fields to the Documents table>> from the Fields list.
 You can <<sorting, sort the listed documents>> by any indexed field that's included
 in the table.

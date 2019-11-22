@@ -394,8 +394,72 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                             className="c8"
                           >
                             <SyntaxHighlighter
-                              CodeTag={[Function]}
-                              PreTag={[Function]}
+                              CodeTag={
+                                Object {
+                                  "$$typeof": Symbol(react.forward_ref),
+                                  "attrs": Array [],
+                                  "componentStyle": ComponentStyle {
+                                    "baseHash": 573909505,
+                                    "componentId": "sc-fzXfLO",
+                                    "isStatic": false,
+                                    "rules": Array [
+                                      "
+  position: relative;
+  padding: 0;
+  margin: 0;
+  white-space: pre;
+  z-index: 2;
+",
+                                    ],
+                                    "staticRulesId": "",
+                                  },
+                                  "displayName": "styled.code",
+                                  "foldedComponentIds": Array [],
+                                  "render": [Function],
+                                  "styledComponentId": "sc-fzXfLO",
+                                  "target": "code",
+                                  "toString": [Function],
+                                  "warnTooManyClasses": [Function],
+                                  "withComponent": [Function],
+                                }
+                              }
+                              PreTag={
+                                Object {
+                                  "$$typeof": Symbol(react.forward_ref),
+                                  "attrs": Array [],
+                                  "componentStyle": ComponentStyle {
+                                    "baseHash": 3487560131,
+                                    "componentId": "sc-AykKK",
+                                    "isStatic": false,
+                                    "rules": Array [
+                                      "
+  // Override all styles
+  margin: 0;
+  color: inherit;
+  background: inherit;
+  border: 0;
+  border-radius: 0;
+  overflow: initial;
+  padding: 0 ",
+                                      "18px",
+                                      ";
+  line-height: ",
+                                      "18px",
+                                      ";
+",
+                                    ],
+                                    "staticRulesId": "",
+                                  },
+                                  "displayName": "styled.pre",
+                                  "foldedComponentIds": Array [],
+                                  "render": [Function],
+                                  "styledComponentId": "sc-AykKK",
+                                  "target": "pre",
+                                  "toString": [Function],
+                                  "warnTooManyClasses": [Function],
+                                  "withComponent": [Function],
+                                }
+                              }
                               customStyle={
                                 Object {
                                   "overflowX": null,
@@ -553,8 +617,72 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                               </styled.pre>
                             </SyntaxHighlighter>
                             <SyntaxHighlighter
-                              CodeTag={[Function]}
-                              PreTag={[Function]}
+                              CodeTag={
+                                Object {
+                                  "$$typeof": Symbol(react.forward_ref),
+                                  "attrs": Array [],
+                                  "componentStyle": ComponentStyle {
+                                    "baseHash": 573909505,
+                                    "componentId": "sc-fzXfLO",
+                                    "isStatic": false,
+                                    "rules": Array [
+                                      "
+  position: relative;
+  padding: 0;
+  margin: 0;
+  white-space: pre;
+  z-index: 2;
+",
+                                    ],
+                                    "staticRulesId": "",
+                                  },
+                                  "displayName": "styled.code",
+                                  "foldedComponentIds": Array [],
+                                  "render": [Function],
+                                  "styledComponentId": "sc-fzXfLO",
+                                  "target": "code",
+                                  "toString": [Function],
+                                  "warnTooManyClasses": [Function],
+                                  "withComponent": [Function],
+                                }
+                              }
+                              PreTag={
+                                Object {
+                                  "$$typeof": Symbol(react.forward_ref),
+                                  "attrs": Array [],
+                                  "componentStyle": ComponentStyle {
+                                    "baseHash": 3487560131,
+                                    "componentId": "sc-AykKK",
+                                    "isStatic": false,
+                                    "rules": Array [
+                                      "
+  // Override all styles
+  margin: 0;
+  color: inherit;
+  background: inherit;
+  border: 0;
+  border-radius: 0;
+  overflow: initial;
+  padding: 0 ",
+                                      "18px",
+                                      ";
+  line-height: ",
+                                      "18px",
+                                      ";
+",
+                                    ],
+                                    "staticRulesId": "",
+                                  },
+                                  "displayName": "styled.pre",
+                                  "foldedComponentIds": Array [],
+                                  "render": [Function],
+                                  "styledComponentId": "sc-AykKK",
+                                  "target": "pre",
+                                  "toString": [Function],
+                                  "warnTooManyClasses": [Function],
+                                  "withComponent": [Function],
+                                }
+                              }
                               customStyle={
                                 Object {
                                   "overflowX": null,
@@ -713,8 +841,72 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                               </styled.pre>
                             </SyntaxHighlighter>
                             <SyntaxHighlighter
-                              CodeTag={[Function]}
-                              PreTag={[Function]}
+                              CodeTag={
+                                Object {
+                                  "$$typeof": Symbol(react.forward_ref),
+                                  "attrs": Array [],
+                                  "componentStyle": ComponentStyle {
+                                    "baseHash": 573909505,
+                                    "componentId": "sc-fzXfLO",
+                                    "isStatic": false,
+                                    "rules": Array [
+                                      "
+  position: relative;
+  padding: 0;
+  margin: 0;
+  white-space: pre;
+  z-index: 2;
+",
+                                    ],
+                                    "staticRulesId": "",
+                                  },
+                                  "displayName": "styled.code",
+                                  "foldedComponentIds": Array [],
+                                  "render": [Function],
+                                  "styledComponentId": "sc-fzXfLO",
+                                  "target": "code",
+                                  "toString": [Function],
+                                  "warnTooManyClasses": [Function],
+                                  "withComponent": [Function],
+                                }
+                              }
+                              PreTag={
+                                Object {
+                                  "$$typeof": Symbol(react.forward_ref),
+                                  "attrs": Array [],
+                                  "componentStyle": ComponentStyle {
+                                    "baseHash": 3487560131,
+                                    "componentId": "sc-AykKK",
+                                    "isStatic": false,
+                                    "rules": Array [
+                                      "
+  // Override all styles
+  margin: 0;
+  color: inherit;
+  background: inherit;
+  border: 0;
+  border-radius: 0;
+  overflow: initial;
+  padding: 0 ",
+                                      "18px",
+                                      ";
+  line-height: ",
+                                      "18px",
+                                      ";
+",
+                                    ],
+                                    "staticRulesId": "",
+                                  },
+                                  "displayName": "styled.pre",
+                                  "foldedComponentIds": Array [],
+                                  "render": [Function],
+                                  "styledComponentId": "sc-AykKK",
+                                  "target": "pre",
+                                  "toString": [Function],
+                                  "warnTooManyClasses": [Function],
+                                  "withComponent": [Function],
+                                }
+                              }
                               customStyle={
                                 Object {
                                   "overflowX": null,
@@ -883,8 +1075,72 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                               </styled.pre>
                             </SyntaxHighlighter>
                             <SyntaxHighlighter
-                              CodeTag={[Function]}
-                              PreTag={[Function]}
+                              CodeTag={
+                                Object {
+                                  "$$typeof": Symbol(react.forward_ref),
+                                  "attrs": Array [],
+                                  "componentStyle": ComponentStyle {
+                                    "baseHash": 573909505,
+                                    "componentId": "sc-fzXfLO",
+                                    "isStatic": false,
+                                    "rules": Array [
+                                      "
+  position: relative;
+  padding: 0;
+  margin: 0;
+  white-space: pre;
+  z-index: 2;
+",
+                                    ],
+                                    "staticRulesId": "",
+                                  },
+                                  "displayName": "styled.code",
+                                  "foldedComponentIds": Array [],
+                                  "render": [Function],
+                                  "styledComponentId": "sc-fzXfLO",
+                                  "target": "code",
+                                  "toString": [Function],
+                                  "warnTooManyClasses": [Function],
+                                  "withComponent": [Function],
+                                }
+                              }
+                              PreTag={
+                                Object {
+                                  "$$typeof": Symbol(react.forward_ref),
+                                  "attrs": Array [],
+                                  "componentStyle": ComponentStyle {
+                                    "baseHash": 3487560131,
+                                    "componentId": "sc-AykKK",
+                                    "isStatic": false,
+                                    "rules": Array [
+                                      "
+  // Override all styles
+  margin: 0;
+  color: inherit;
+  background: inherit;
+  border: 0;
+  border-radius: 0;
+  overflow: initial;
+  padding: 0 ",
+                                      "18px",
+                                      ";
+  line-height: ",
+                                      "18px",
+                                      ";
+",
+                                    ],
+                                    "staticRulesId": "",
+                                  },
+                                  "displayName": "styled.pre",
+                                  "foldedComponentIds": Array [],
+                                  "render": [Function],
+                                  "styledComponentId": "sc-AykKK",
+                                  "target": "pre",
+                                  "toString": [Function],
+                                  "warnTooManyClasses": [Function],
+                                  "withComponent": [Function],
+                                }
+                              }
                               customStyle={
                                 Object {
                                   "overflowX": null,
@@ -1070,8 +1326,72 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                               </styled.pre>
                             </SyntaxHighlighter>
                             <SyntaxHighlighter
-                              CodeTag={[Function]}
-                              PreTag={[Function]}
+                              CodeTag={
+                                Object {
+                                  "$$typeof": Symbol(react.forward_ref),
+                                  "attrs": Array [],
+                                  "componentStyle": ComponentStyle {
+                                    "baseHash": 573909505,
+                                    "componentId": "sc-fzXfLO",
+                                    "isStatic": false,
+                                    "rules": Array [
+                                      "
+  position: relative;
+  padding: 0;
+  margin: 0;
+  white-space: pre;
+  z-index: 2;
+",
+                                    ],
+                                    "staticRulesId": "",
+                                  },
+                                  "displayName": "styled.code",
+                                  "foldedComponentIds": Array [],
+                                  "render": [Function],
+                                  "styledComponentId": "sc-fzXfLO",
+                                  "target": "code",
+                                  "toString": [Function],
+                                  "warnTooManyClasses": [Function],
+                                  "withComponent": [Function],
+                                }
+                              }
+                              PreTag={
+                                Object {
+                                  "$$typeof": Symbol(react.forward_ref),
+                                  "attrs": Array [],
+                                  "componentStyle": ComponentStyle {
+                                    "baseHash": 3487560131,
+                                    "componentId": "sc-AykKK",
+                                    "isStatic": false,
+                                    "rules": Array [
+                                      "
+  // Override all styles
+  margin: 0;
+  color: inherit;
+  background: inherit;
+  border: 0;
+  border-radius: 0;
+  overflow: initial;
+  padding: 0 ",
+                                      "18px",
+                                      ";
+  line-height: ",
+                                      "18px",
+                                      ";
+",
+                                    ],
+                                    "staticRulesId": "",
+                                  },
+                                  "displayName": "styled.pre",
+                                  "foldedComponentIds": Array [],
+                                  "render": [Function],
+                                  "styledComponentId": "sc-AykKK",
+                                  "target": "pre",
+                                  "toString": [Function],
+                                  "warnTooManyClasses": [Function],
+                                  "withComponent": [Function],
+                                }
+                              }
                               customStyle={
                                 Object {
                                   "overflowX": null,

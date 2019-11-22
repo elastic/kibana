@@ -4,66 +4,166 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { performance } from 'perf_hooks';
-import { SignalHit } from '../../types';
-import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
+import { pickBy } from 'lodash/fp';
+import { SignalHit, Signal } from '../../types';
 import { Logger } from '../../../../../../../../src/core/server';
 import { AlertServices } from '../../../../../alerting/server/types';
-import { SignalSourceHit, SignalSearchResponse, SignalAlertParams, BulkResponse } from './types';
+import {
+  SignalSourceHit,
+  SignalSearchResponse,
+  BulkResponse,
+  AlertTypeParams,
+  OutputSignalES,
+} from './types';
 import { buildEventsSearchQuery } from './build_events_query';
 
-// format search_after result for signals index.
-export const buildBulkBody = (
-  doc: SignalSourceHit,
-  signalParams: SignalAlertParams,
-  id: string
-): SignalHit => {
+interface BuildRuleParams {
+  signalParams: AlertTypeParams;
+  name: string;
+  id: string;
+  enabled: boolean;
+  createdBy: string;
+  updatedBy: string;
+  interval: string;
+}
+
+export const buildRule = ({
+  signalParams,
+  name,
+  id,
+  enabled,
+  createdBy,
+  updatedBy,
+  interval,
+}: BuildRuleParams): Partial<OutputSignalES> => {
+  return pickBy<OutputSignalES>((value: unknown) => value != null, {
+    id,
+    status: 'open',
+    rule_id: signalParams.ruleId,
+    false_positives: signalParams.falsePositives,
+    saved_id: signalParams.savedId,
+    meta: signalParams.meta,
+    max_signals: signalParams.maxSignals,
+    risk_score: signalParams.riskScore,
+    output_index: signalParams.outputIndex,
+    description: signalParams.description,
+    filter: signalParams.filter,
+    from: signalParams.from,
+    immutable: signalParams.immutable,
+    index: signalParams.index,
+    interval,
+    language: signalParams.language,
+    name,
+    query: signalParams.query,
+    references: signalParams.references,
+    severity: signalParams.severity,
+    tags: signalParams.tags,
+    type: signalParams.type,
+    size: signalParams.size,
+    to: signalParams.to,
+    enabled,
+    filters: signalParams.filters,
+    created_by: createdBy,
+    updated_by: updatedBy,
+  });
+};
+
+export const buildSignal = (doc: SignalSourceHit, rule: Partial<OutputSignalES>): Signal => {
   return {
-    ...doc._source,
-    signal: {
-      '@timestamp': new Date().toISOString(),
-      id,
-      rule_revision: 1,
-      rule_id: signalParams.ruleId,
-      rule_type: signalParams.type,
-      parent: {
-        id: doc._id,
-        type: 'event',
-        index: doc._index,
-        depth: 1,
-      },
-      name: signalParams.name,
-      severity: signalParams.severity,
-      description: signalParams.description,
-      original_time: doc._source['@timestamp'],
-      index_patterns: signalParams.index,
-      references: signalParams.references,
+    parent: {
+      id: doc._id,
+      type: 'event',
+      index: doc._index,
+      depth: 1,
     },
+    original_time: doc._source['@timestamp'],
+    rule,
   };
 };
 
+interface BuildBulkBodyParams {
+  doc: SignalSourceHit;
+  signalParams: AlertTypeParams;
+  id: string;
+  name: string;
+  createdBy: string;
+  updatedBy: string;
+  interval: string;
+  enabled: boolean;
+}
+
+// format search_after result for signals index.
+export const buildBulkBody = ({
+  doc,
+  signalParams,
+  id,
+  name,
+  createdBy,
+  updatedBy,
+  interval,
+  enabled,
+}: BuildBulkBodyParams): SignalHit => {
+  const rule = buildRule({
+    signalParams,
+    id,
+    name,
+    enabled,
+    createdBy,
+    updatedBy,
+    interval,
+  });
+  const signal = buildSignal(doc, rule);
+  const signalHit: SignalHit = {
+    ...doc._source,
+    '@timestamp': new Date().toISOString(),
+    signal,
+  };
+  return signalHit;
+};
+
+interface SingleBulkIndexParams {
+  someResult: SignalSearchResponse;
+  signalParams: AlertTypeParams;
+  services: AlertServices;
+  logger: Logger;
+  id: string;
+  signalsIndex: string;
+  name: string;
+  createdBy: string;
+  updatedBy: string;
+  interval: string;
+  enabled: boolean;
+}
+
 // Bulk Index documents.
-export const singleBulkIndex = async (
-  sr: SignalSearchResponse,
-  params: SignalAlertParams,
-  service: AlertServices,
-  logger: Logger,
-  id: string
-): Promise<boolean> => {
-  if (sr.hits.hits.length === 0) {
+export const singleBulkIndex = async ({
+  someResult,
+  signalParams,
+  services,
+  logger,
+  id,
+  signalsIndex,
+  name,
+  createdBy,
+  updatedBy,
+  interval,
+  enabled,
+}: SingleBulkIndexParams): Promise<boolean> => {
+  if (someResult.hits.hits.length === 0) {
     return true;
   }
-  const bulkBody = sr.hits.hits.flatMap(doc => [
+  const bulkBody = someResult.hits.hits.flatMap(doc => [
     {
       index: {
-        _index: process.env.SIGNALS_INDEX || DEFAULT_SIGNALS_INDEX,
+        _index: signalsIndex,
         _id: doc._id,
       },
     },
-    buildBulkBody(doc, params, id),
+    buildBulkBody({ doc, signalParams, id, name, createdBy, updatedBy, interval, enabled }),
   ]);
   const time1 = performance.now();
-  const firstResult: BulkResponse = await service.callCluster('bulk', {
-    index: process.env.SIGNALS_INDEX || DEFAULT_SIGNALS_INDEX,
+  const firstResult: BulkResponse = await services.callCluster('bulk', {
+    index: signalsIndex,
     refresh: false,
     body: bulkBody,
   });
@@ -77,26 +177,33 @@ export const singleBulkIndex = async (
   return true;
 };
 
+interface SingleSearchAfterParams {
+  searchAfterSortId: string | undefined;
+  signalParams: AlertTypeParams;
+  services: AlertServices;
+  logger: Logger;
+}
+
 // utilize search_after for paging results into bulk.
-export const singleSearchAfter = async (
-  searchAfterSortId: string | undefined,
-  params: SignalAlertParams,
-  service: AlertServices,
-  logger: Logger
-): Promise<SignalSearchResponse> => {
+export const singleSearchAfter = async ({
+  searchAfterSortId,
+  signalParams,
+  services,
+  logger,
+}: SingleSearchAfterParams): Promise<SignalSearchResponse> => {
   if (searchAfterSortId == null) {
     throw Error('Attempted to search after with empty sort id');
   }
   try {
     const searchAfterQuery = buildEventsSearchQuery({
-      index: params.index,
-      from: params.from,
-      to: params.to,
-      filter: params.filter,
-      size: params.size ? params.size : 1000,
+      index: signalParams.index,
+      from: signalParams.from,
+      to: signalParams.to,
+      filter: signalParams.filter,
+      size: signalParams.size ? signalParams.size : 1000,
       searchAfterSortId,
     });
-    const nextSearchAfterResult: SignalSearchResponse = await service.callCluster(
+    const nextSearchAfterResult: SignalSearchResponse = await services.callCluster(
       'search',
       searchAfterQuery
     );
@@ -107,20 +214,52 @@ export const singleSearchAfter = async (
   }
 };
 
+interface SearchAfterAndBulkIndexParams {
+  someResult: SignalSearchResponse;
+  signalParams: AlertTypeParams;
+  services: AlertServices;
+  logger: Logger;
+  id: string;
+  signalsIndex: string;
+  name: string;
+  createdBy: string;
+  updatedBy: string;
+  interval: string;
+  enabled: boolean;
+}
+
 // search_after through documents and re-index using bulk endpoint.
-export const searchAfterAndBulkIndex = async (
-  someResult: SignalSearchResponse,
-  params: SignalAlertParams,
-  service: AlertServices,
-  logger: Logger,
-  id: string
-): Promise<boolean> => {
+export const searchAfterAndBulkIndex = async ({
+  someResult,
+  signalParams,
+  services,
+  logger,
+  id,
+  signalsIndex,
+  name,
+  createdBy,
+  updatedBy,
+  interval,
+  enabled,
+}: SearchAfterAndBulkIndexParams): Promise<boolean> => {
   if (someResult.hits.hits.length === 0) {
     return true;
   }
 
   logger.debug('[+] starting bulk insertion');
-  const firstBulkIndexSuccess = await singleBulkIndex(someResult, params, service, logger, id);
+  const firstBulkIndexSuccess = await singleBulkIndex({
+    someResult,
+    signalParams,
+    services,
+    logger,
+    id,
+    signalsIndex,
+    name,
+    createdBy,
+    updatedBy,
+    interval,
+    enabled,
+  });
   if (!firstBulkIndexSuccess) {
     logger.error('First bulk index was unsuccessful');
     return false;
@@ -132,7 +271,7 @@ export const searchAfterAndBulkIndex = async (
   // query for. If maxSignals is present we will only query
   // up to max signals - otherwise use the value
   // from track_total_hits.
-  const maxTotalHitsSize = params.maxSignals ? params.maxSignals : totalHits;
+  const maxTotalHitsSize = signalParams.maxSignals ? signalParams.maxSignals : totalHits;
 
   // number of docs in the current search result
   let hitsSize = someResult.hits.hits.length;
@@ -151,13 +290,15 @@ export const searchAfterAndBulkIndex = async (
   while (hitsSize < maxTotalHitsSize && hitsSize !== 0) {
     try {
       logger.debug(`sortIds: ${sortIds}`);
-      const searchAfterResult: SignalSearchResponse = await singleSearchAfter(
-        sortId,
-        params,
-        service,
-        logger
-      );
-      sortIds = searchAfterResult.hits.hits[0].sort;
+      const searchAfterResult: SignalSearchResponse = await singleSearchAfter({
+        searchAfterSortId: sortId,
+        signalParams,
+        services,
+        logger,
+      });
+      if (searchAfterResult.hits.hits.length === 0) {
+        return true;
+      }
       hitsSize += searchAfterResult.hits.hits.length;
       logger.debug(`size adjusted: ${hitsSize}`);
       sortIds = searchAfterResult.hits.hits[0].sort;
@@ -167,7 +308,19 @@ export const searchAfterAndBulkIndex = async (
       }
       sortId = sortIds[0];
       logger.debug('next bulk index');
-      const bulkSuccess = await singleBulkIndex(searchAfterResult, params, service, logger, id);
+      const bulkSuccess = await singleBulkIndex({
+        someResult: searchAfterResult,
+        signalParams,
+        services,
+        logger,
+        id,
+        signalsIndex,
+        name,
+        createdBy,
+        updatedBy,
+        interval,
+        enabled,
+      });
       logger.debug('finished next bulk index');
       if (!bulkSuccess) {
         logger.error('[-] bulk index failed but continuing');
