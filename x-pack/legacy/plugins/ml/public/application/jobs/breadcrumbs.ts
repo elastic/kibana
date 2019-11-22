@@ -10,7 +10,7 @@ import {
   ANOMALY_DETECTION_BREADCRUMB,
   DATA_VISUALIZER_BREADCRUMB,
   ML_BREADCRUMB,
-} from '../breadcrumbs';
+} from '../../breadcrumbs';
 
 export function getJobManagementBreadcrumbs(): Breadcrumb[] {
   // Whilst top level nav menu with tabs remains,

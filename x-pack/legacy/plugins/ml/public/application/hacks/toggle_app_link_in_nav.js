@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from '../../../../xpack_main/public/services/xpack_info';
 import { uiModules } from 'ui/modules';
 import { npStart } from 'ui/new_platform';
 

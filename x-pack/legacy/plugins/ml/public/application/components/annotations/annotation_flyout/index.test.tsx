@@ -10,7 +10,7 @@ import mockAnnotations from '../annotations_table/__mocks__/mock_annotations.jso
 import React, { ComponentType } from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import { Annotation } from '../../../../common/types/annotations';
+import { Annotation } from '../../../../../common/types/annotations';
 import { annotation$ } from '../../../services/annotations_service';
 
 import { AnnotationFlyout } from './index';

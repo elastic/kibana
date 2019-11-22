@@ -7,7 +7,7 @@
 
 
 import { ml } from '../../../services/ml_api_service';
-import { isJobIdValid } from '../../../../common/util/job_utils';
+import { isJobIdValid } from '../../../../../common/util/job_utils';
 import { i18n } from '@kbn/i18n';
 
 

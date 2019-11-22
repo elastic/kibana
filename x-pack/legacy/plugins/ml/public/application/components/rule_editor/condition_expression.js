@@ -25,7 +25,7 @@ import {
   EuiFieldNumber,
 } from '@elastic/eui';
 
-import { APPLIES_TO, OPERATOR } from '../../../common/constants/detector_rule';
+import { APPLIES_TO, OPERATOR } from '../../../../common/constants/detector_rule';
 import { appliesToText, operatorToText } from './utils';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 

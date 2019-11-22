@@ -9,19 +9,19 @@ import { i18n } from '@kbn/i18n';
 
 import { validateIndexPattern } from 'ui/index_patterns';
 
-import { isValidIndexName } from '../../../../../../common/util/es_utils';
+import { isValidIndexName } from '../../../../../../../common/util/es_utils';
 
 import { Action, ACTION } from './actions';
 import { getInitialState, getJobConfigFromFormState, State, JOB_TYPES } from './state';
 import {
   isJobIdValid,
   validateModelMemoryLimitUnits,
-} from '../../../../../../common/util/job_utils';
-import { maxLengthValidator } from '../../../../../../common/util/validators';
+} from '../../../../../../../common/util/job_utils';
+import { maxLengthValidator } from '../../../../../../../common/util/validators';
 import {
   JOB_ID_MAX_LENGTH,
   ALLOWED_DATA_UNITS,
-} from '../../../../../../common/constants/validation';
+} from '../../../../../../../common/constants/validation';
 import { getDependentVar, isRegressionAnalysis } from '../../../../common/analytics';
 
 const mmlAllowedUnitsStr = `${ALLOWED_DATA_UNITS.slice(0, ALLOWED_DATA_UNITS.length - 1).join(

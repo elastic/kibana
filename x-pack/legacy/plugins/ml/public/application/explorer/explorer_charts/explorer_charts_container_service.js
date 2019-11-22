@@ -19,8 +19,8 @@ import {
   getChartType
 } from '../../util/chart_utils';
 
-import { getEntityFieldList } from '../../../common/util/anomaly_utils';
-import { isSourceDataChartableForDetector, isModelPlotEnabled } from '../../../common/util/job_utils';
+import { getEntityFieldList } from '../../../../common/util/anomaly_utils';
+import { isSourceDataChartableForDetector, isModelPlotEnabled } from '../../../../common/util/job_utils';
 import { mlResultsService } from '../../services/results_service';
 import { mlJobService } from '../../services/job_service';
 import { severity$ } from '../../components/controls/select_severity/select_severity';

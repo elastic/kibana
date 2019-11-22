@@ -14,8 +14,8 @@ import {
   FieldId,
   NewJobCaps,
   EVENT_RATE_FIELD_ID,
-} from '../../common/types/fields';
-import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
+} from '../../../common/types/fields';
+import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 import { ml } from './ml_api_service';
 
 // called in the angular routing resolve block to initialize the

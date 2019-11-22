@@ -24,7 +24,7 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 
-import { FILTER_TYPE } from '../../../common/constants/detector_rule';
+import { FILTER_TYPE } from '../../../../common/constants/detector_rule';
 import { filterTypeToText } from './utils';
 import { FormattedMessage } from '@kbn/i18n/react';
 

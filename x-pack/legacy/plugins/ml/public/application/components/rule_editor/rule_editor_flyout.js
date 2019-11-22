@@ -47,8 +47,8 @@ import {
   addItemToFilter,
 } from './utils';
 
-import { ACTION, CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../../../common/constants/detector_rule';
-import { getPartitioningFieldNames } from '../../../common/util/job_utils';
+import { ACTION, CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../../../../common/constants/detector_rule';
+import { getPartitioningFieldNames } from '../../../../common/util/job_utils';
 import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
 import { metadata } from 'ui/metadata';

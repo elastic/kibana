@@ -18,12 +18,12 @@ import moment from 'moment-timezone';
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
-} from '../../common/constants/search';
+} from '../../../common/constants/search';
 import {
   isTimeSeriesViewJob,
   mlFunctionToESAggregation,
-} from '../../common/util/job_utils';
-import { parseInterval } from '../../common/util/parse_interval';
+} from '../../../common/util/job_utils';
+import { parseInterval } from '../../../common/util/parse_interval';
 
 import { ml } from '../services/ml_api_service';
 import { mlForecastService } from '../services/forecast_service';

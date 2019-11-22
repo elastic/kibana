@@ -12,8 +12,8 @@ import chrome from 'ui/chrome';
 import { npStart } from 'ui/new_platform';
 
 import { timeBucketsCalcAutoIntervalProvider } from './calc_auto_interval';
-import { parseInterval } from '../../common/util/parse_interval';
-import { FIELD_FORMAT_IDS } from '../../../../../../src/plugins/data/public';
+import { parseInterval } from '../../../common/util/parse_interval';
+import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/data/public';
 
 const unitsDesc = dateMath.unitsDesc;
 const largeMax = unitsDesc.indexOf('w');    // Multiple units of week or longer converted to days for ES intervals.

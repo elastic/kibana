@@ -28,7 +28,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import moment from 'moment';
-import { TIME_FORMAT } from '../events_table/';
+import { TIME_FORMAT } from '../events_table';
 import { generateTempId } from '../utils';
 
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';

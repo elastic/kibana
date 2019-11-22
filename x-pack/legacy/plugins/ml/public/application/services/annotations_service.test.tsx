@@ -6,7 +6,7 @@
 
 import mockAnnotations from '../components/annotations/annotations_table/__mocks__/mock_annotations.json';
 
-import { Annotation } from '../../common/types/annotations';
+import { Annotation } from '../../../common/types/annotations';
 import { annotation$, annotationsRefresh$ } from './annotations_service';
 
 describe('annotations_service', () => {

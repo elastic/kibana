@@ -22,7 +22,7 @@ import { CombinedJob } from '../../../../common/job_creator/configs';
 import { MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { JobCreatorContext } from '../../job_creator_context';
 import { mlJobService } from '../../../../../../services/job_service';
-import { ML_DATA_PREVIEW_COUNT } from '../../../../../../../common/util/job_utils';
+import { ML_DATA_PREVIEW_COUNT } from '../../../../../../../../common/util/job_utils';
 
 const EDITOR_HEIGHT = '800px';
 export enum EDITOR_MODE {

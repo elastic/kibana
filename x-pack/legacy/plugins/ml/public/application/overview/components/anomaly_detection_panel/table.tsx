@@ -27,12 +27,12 @@ import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
 import { ExplorerLink } from './actions';
 import { getJobsFromGroup } from './utils';
 import { GroupsDictionary, Group } from './anomaly_detection_panel';
-import { MlSummaryJobs } from '../../../../common/types/jobs';
+import { MlSummaryJobs } from '../../../../../common/types/jobs';
 import { StatsBar, JobStatsBarStats } from '../../../components/stats_bar';
 // @ts-ignore
-import { JobSelectorBadge } from '../../../components/job_selector/job_selector_badge';
+import { JobSelectorBadge } from '../../../components/job_selector/job_selector_badge/index';
 import { toLocaleString } from '../../../util/string_utils';
-import { getSeverityColor } from '../../../../common/util/anomaly_utils';
+import { getSeverityColor } from '../../../../../common/util/anomaly_utils';
 
 // Used to pass on attribute names to table columns
 export enum AnomalyDetectionListColumns {

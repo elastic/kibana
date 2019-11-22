@@ -17,7 +17,7 @@ import {
   getAdvancedJobConfigurationBreadcrumbs,
 } from '../../../breadcrumbs';
 
-import { Route } from '../../../../../common/types/kibana';
+import { Route } from '../../../../../../common/types/kibana';
 
 import { loadNewJobCapabilities } from '../../../../services/new_job_capabilities_service';
 

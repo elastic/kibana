@@ -22,11 +22,11 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ModuleJobUI } from '../page';
 import { usePartialState } from '../../../../components/custom_hooks';
-import { composeValidators, maxLengthValidator } from '../../../../../common/util/validators';
-import { isJobIdValid } from '../../../../../common/util/job_utils';
-import { JOB_ID_MAX_LENGTH } from '../../../../../common/constants/validation';
+import { composeValidators, maxLengthValidator } from '../../../../../../common/util/validators';
+import { isJobIdValid } from '../../../../../../common/util/job_utils';
+import { JOB_ID_MAX_LENGTH } from '../../../../../../common/constants/validation';
 import { JobGroupsInput } from '../../common/components';
-import { JobOverride } from '../../../../../common/types/modules';
+import { JobOverride } from '../../../../../../common/types/modules';
 
 interface EditJobProps {
   job: ModuleJobUI;

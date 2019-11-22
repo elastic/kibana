@@ -8,7 +8,7 @@ import React, { FC, useState, useContext, useEffect } from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
-import { calculateDatafeedFrequencyDefaultSeconds } from '../../../../../../../../common/util/job_utils';
+import { calculateDatafeedFrequencyDefaultSeconds } from '../../../../../../../../../common/util/job_utils';
 import { useStringifiedValue } from '../hooks';
 
 export const FrequencyInput: FC = () => {

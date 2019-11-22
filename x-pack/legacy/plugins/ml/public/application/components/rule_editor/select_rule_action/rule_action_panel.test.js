@@ -32,7 +32,7 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { RuleActionPanel } from './rule_action_panel';
-import { ACTION } from '../../../../common/constants/detector_rule';
+import { ACTION } from '../../../../../common/constants/detector_rule';
 
 describe('RuleActionPanel', () => {
 

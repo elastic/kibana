@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import 'plugins/ml/components/chart_tooltip';
+import '../../components/chart_tooltip';

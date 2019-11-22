@@ -9,7 +9,7 @@ import { ml } from '../../../../services/ml_api_service';
 import { mlJobService } from '../../../../services/job_service';
 import { JobCreator } from '../job_creator';
 import { DatafeedId, JobId } from '../job_creator/configs';
-import { DATAFEED_STATE } from '../../../../../common/constants/states';
+import { DATAFEED_STATE } from '../../../../../../common/constants/states';
 
 const REFRESH_INTERVAL_MS = 100;
 const TARGET_PROGRESS_DELTA = 2;

@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import sinon from 'sinon';
 
 // Import this way to be able to stub/mock functions later on in the tests using sinon.
-import * as indexUtils from 'plugins/ml/util/index_utils';
+import * as indexUtils from '../../../../../util/index_utils';
 
 describe('ML - Job Type Directive', () => {
   let $scope;

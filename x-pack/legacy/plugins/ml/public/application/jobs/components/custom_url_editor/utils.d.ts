@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaUrlConfig } from '../../../../common/types/custom_urls';
+import { KibanaUrlConfig } from '../../../../../common/types/custom_urls';
 import { Job } from '../../new_job/common/job_creator/configs';
 
 export function getTestUrl(job: Job, customUrl: KibanaUrlConfig): Promise<string>;

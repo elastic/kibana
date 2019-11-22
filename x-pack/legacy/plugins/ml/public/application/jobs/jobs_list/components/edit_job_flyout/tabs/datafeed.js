@@ -18,9 +18,9 @@ import {
   EuiFieldNumber,
 } from '@elastic/eui';
 
-import { calculateDatafeedFrequencyDefaultSeconds } from 'plugins/ml/../common/util/job_utils';
+import { calculateDatafeedFrequencyDefaultSeconds } from '../../../../../../../common/util/job_utils';
 import { getNewJobDefaults } from '../../../../../services/ml_server_info';
-import { parseInterval } from 'plugins/ml/../common/util/parse_interval';
+import { parseInterval } from '../../../../../../../common/util/parse_interval';
 import { MLJobEditor } from '../../ml_job_editor';
 import { FormattedMessage } from '@kbn/i18n/react';
 

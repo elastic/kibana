@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ML_BREADCRUMB } from '../breadcrumbs';
+import { ML_BREADCRUMB } from '../../breadcrumbs';
 
 export function getDataFrameAnalyticsBreadcrumbs() {
   return [

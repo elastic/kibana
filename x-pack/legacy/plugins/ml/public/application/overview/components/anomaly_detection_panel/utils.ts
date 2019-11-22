@@ -5,9 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { JOB_STATE, DATAFEED_STATE } from '../../../../common/constants/states';
+import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
 import { Group, GroupsDictionary } from './anomaly_detection_panel';
-import { MlSummaryJobs, MlSummaryJob } from '../../../../common/types/jobs';
+import { MlSummaryJobs, MlSummaryJob } from '../../../../../common/types/jobs';
 
 export function getGroupsFromJobs(
   jobs: MlSummaryJobs

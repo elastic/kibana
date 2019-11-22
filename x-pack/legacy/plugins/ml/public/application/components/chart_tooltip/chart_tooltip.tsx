@@ -10,7 +10,7 @@ import { TooltipValueFormatter } from '@elastic/charts';
 
 // TODO: Below import is temporary, use `react-use` lib instead.
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { useObservable } from '../../../../../../../src/plugins/kibana_react/public/util/use_observable';
+import { useObservable } from '../../../../../../../../src/plugins/kibana_react/public/util/use_observable';
 
 import { chartTooltip$, ChartTooltipValue } from './chart_tooltip_service';
 

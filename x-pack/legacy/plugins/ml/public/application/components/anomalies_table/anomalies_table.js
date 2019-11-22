@@ -30,7 +30,7 @@ import { getColumns } from './anomalies_table_columns';
 import { AnomalyDetails } from './anomaly_details';
 
 import { mlTableService } from '../../services/table_service';
-import { RuleEditorFlyout } from '../../components/rule_editor';
+import { RuleEditorFlyout } from '../rule_editor';
 import { ml } from '../../services/ml_api_service';
 import {
   INFLUENCERS_LIMIT,

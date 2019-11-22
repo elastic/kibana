@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
+import { ML_JOB_FIELD_TYPES } from '../../../../../common/constants/field_types';
 
 export interface FieldRequestConfig {
   fieldName?: string;

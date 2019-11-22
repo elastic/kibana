@@ -11,7 +11,7 @@ import React, {
   Fragment,
 } from 'react';
 
-import { ml } from 'plugins/ml/services/ml_api_service';
+import { ml } from '../../../../services/ml_api_service';
 import { JobGroup } from '../job_group';
 import { getSelectedJobIdFromUrl, clearSelectedJobIdFromUrl } from '../utils';
 
