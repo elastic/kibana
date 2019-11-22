@@ -5,8 +5,10 @@
  */
 
 import React from 'react';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import moment from 'moment-timezone';
 import { template, templateSettings } from 'lodash';
+import styled from 'styled-components';
 import { Redirect } from 'react-router-dom';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { useUrlParams } from '../../../hooks/useUrlParams';
@@ -19,6 +21,11 @@ interface RedirectType {
   pathname: string;
   search: string;
 }
+
+const CentralizedContainer = styled.div`
+  height: 100%;
+  display: flex;
+`;
 
 const getPathName = (routeName: string, pathParms?: object) => {
   const route = routes.find(({ name }) => name === routeName);
@@ -101,5 +108,9 @@ export const TraceLink = () => {
     return <Redirect to={to} />;
   }
 
-  return null;
+  return (
+    <CentralizedContainer>
+      <EuiEmptyPrompt iconType="apmTrace" title={<h2>Fetching trace...</h2>} />
+    </CentralizedContainer>
+  );
 };
