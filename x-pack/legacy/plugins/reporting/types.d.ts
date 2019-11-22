@@ -16,7 +16,12 @@ import { CancellationToken } from './common/cancellation_token';
 import { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
 import { BrowserType } from './server/browsers/types';
 
-type Job = EventEmitter & { id: string };
+export type Job = EventEmitter & {
+  id: string;
+  toJSON: () => {
+    id: string;
+  };
+};
 
 export interface ReportingPlugin {
   queue: {
@@ -193,9 +198,10 @@ export interface JobParamPostPayload {
 
 export interface JobDocPayload {
   headers?: Record<string, string>;
-  jobParams: object;
+  jobParams: any;
   title: string;
   type: string | null;
+  objects?: null | object[];
 }
 
 export interface JobSource {
@@ -245,11 +251,29 @@ export interface ESQueueWorker {
   on: (event: string, handler: any) => void;
 }
 
+type JobParamsUrl = object;
+
+interface JobParamsSavedObject {
+  savedObjectType: string;
+  savedObjectId: string;
+  isImmediate: boolean;
+}
+
 export type ESQueueCreateJobFn = (
-  jobParams: object,
-  headers: ConditionalHeaders,
+  jobParams: JobParamsSavedObject | JobParamsUrl,
+  headers: Record<string, string>,
   request: RequestFacade
-) => Promise<object>;
+) => Promise<JobParamsSavedObject | JobParamsUrl>;
+
+export type ImmediateCreateJobFn = (
+  jobParams: any,
+  headers: Record<string, string>,
+  req: RequestFacade
+) => Promise<{
+  type: string | null;
+  title: string;
+  jobParams: any;
+}>;
 
 export type ESQueueWorkerExecuteFn = (
   jobId: string,
@@ -258,9 +282,10 @@ export type ESQueueWorkerExecuteFn = (
 ) => void;
 
 export type JobIDForImmediate = null;
+
 export type ImmediateExecuteFn = (
   jobId: JobIDForImmediate,
-  jobDocPayload: JobDocPayload,
+  job: JobDocPayload,
   request: RequestFacade
 ) => Promise<JobDocOutputExecuted>;
 
@@ -279,9 +304,8 @@ export interface ESQueueInstance {
   ) => ESQueueWorker;
 }
 
-export type CreateJobFactory = (server: ServerFacade) => ESQueueCreateJobFn;
-export type ExecuteJobFactory = (server: ServerFacade) => ESQueueWorkerExecuteFn;
-export type ExecuteImmediateJobFactory = (server: ServerFacade) => ImmediateExecuteFn;
+export type CreateJobFactory = (server: ServerFacade) => ESQueueCreateJobFn | ImmediateCreateJobFn;
+export type ExecuteJobFactory = (server: ServerFacade) => ESQueueWorkerExecuteFn | ImmediateExecuteFn; // prettier-ignore
 
 export interface ExportTypeDefinition {
   id: string;
@@ -290,7 +314,7 @@ export interface ExportTypeDefinition {
   jobContentEncoding?: string;
   jobContentExtension: string;
   createJobFactory: CreateJobFactory;
-  executeJobFactory: ExecuteJobFactory | ExecuteImmediateJobFactory;
+  executeJobFactory: ExecuteJobFactory;
   validLicenses: string[];
 }
 

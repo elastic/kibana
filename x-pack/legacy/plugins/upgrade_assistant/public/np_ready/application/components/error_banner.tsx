@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { UpgradeAssistantTabProps } from './types';
 
-export const LoadingErrorBanner: React.StatelessComponent<Pick<
+export const LoadingErrorBanner: React.FunctionComponent<Pick<
   UpgradeAssistantTabProps,
   'loadingError'
 >> = ({ loadingError }) => {

@@ -31,7 +31,7 @@ import { CoreContext } from '../core_context';
 import { LegacyServiceDiscoverPlugins } from '../legacy/legacy_service';
 import { ElasticsearchServiceSetup, APICaller } from '../elasticsearch';
 import { KibanaConfigType } from '../kibana_config';
-import { retryCallCluster } from '../elasticsearch/retry_call_cluster';
+import { migrationsRetryCallCluster } from '../elasticsearch/retry_call_cluster';
 import { SavedObjectsConfigType } from './saved_objects_config';
 import { KibanaRequest } from '../http';
 import { SavedObjectsClientContract } from './types';
@@ -192,7 +192,10 @@ export class SavedObjectsService
     this.logger = coreContext.logger.get('savedobjects-service');
   }
 
-  public async setup(setupDeps: SavedObjectsSetupDeps): Promise<InternalSavedObjectsServiceSetup> {
+  public async setup(
+    setupDeps: SavedObjectsSetupDeps,
+    migrationsRetryDelay?: number
+  ): Promise<InternalSavedObjectsServiceSetup> {
     this.logger.debug('Setting up SavedObjects service');
 
     const {
@@ -226,7 +229,11 @@ export class SavedObjectsService
       config: setupDeps.legacyPlugins.pluginExtendedConfig,
       savedObjectsConfig,
       kibanaConfig,
-      callCluster: retryCallCluster(adminClient.callAsInternalUser),
+      callCluster: migrationsRetryCallCluster(
+        adminClient.callAsInternalUser,
+        this.coreContext.logger.get('migrations'),
+        migrationsRetryDelay
+      ),
     }));
 
     const createSORepository = (callCluster: APICaller, extraTypes: string[] = []) => {

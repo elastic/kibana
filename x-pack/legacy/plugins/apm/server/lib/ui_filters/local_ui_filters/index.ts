@@ -33,7 +33,7 @@ export async function getLocalUIFilters({
 
   delete projectionWithoutAggs.body.aggs;
 
-  const filterAggregations = await getFilterAggregations({
+  const filterAggregations = getFilterAggregations({
     indexPattern: dynamicIndexPattern,
     uiFilters,
     projection,

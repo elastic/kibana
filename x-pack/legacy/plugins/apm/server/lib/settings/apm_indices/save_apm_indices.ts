@@ -4,17 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ApmIndicesConfig, ScopedSavedObjectsClient } from './get_apm_indices';
 import {
   APM_INDICES_SAVED_OBJECT_TYPE,
   APM_INDICES_SAVED_OBJECT_ID
 } from '../../../../common/apm_saved_object_constants';
+import { ApmIndicesConfig } from './get_apm_indices';
+import { APMRequestHandlerContext } from '../../../routes/typings';
 
 export async function saveApmIndices(
-  savedObjectsClient: ScopedSavedObjectsClient,
+  context: APMRequestHandlerContext,
   apmIndicesSavedObject: Partial<ApmIndicesConfig>
 ) {
-  return await savedObjectsClient.create(
+  return await context.core.savedObjects.client.create(
     APM_INDICES_SAVED_OBJECT_TYPE,
     apmIndicesSavedObject,
     {

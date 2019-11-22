@@ -25,10 +25,17 @@ import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { PluginWrapper } from './plugin';
-import { DiscoveredPlugin, DiscoveredPluginInternal, PluginName } from './types';
+import {
+  DiscoveredPlugin,
+  DiscoveredPluginInternal,
+  PluginConfigDescriptor,
+  PluginName,
+} from './types';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 import { InternalCoreSetup, InternalCoreStart } from '../internal_types';
+import { IConfigService } from '../config';
+import { pick } from '../../utils';
 
 /** @public */
 export interface PluginsServiceSetup {
@@ -37,6 +44,7 @@ export interface PluginsServiceSetup {
     public: Map<PluginName, DiscoveredPlugin>;
     internal: Map<PluginName, DiscoveredPluginInternal>;
   };
+  uiPluginConfigs: Map<PluginName, Observable<unknown>>;
 }
 
 /** @public */
@@ -54,11 +62,14 @@ export type PluginsServiceStartDeps = InternalCoreStart;
 export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {
   private readonly log: Logger;
   private readonly pluginsSystem: PluginsSystem;
+  private readonly configService: IConfigService;
   private readonly config$: Observable<PluginsConfig>;
+  private readonly pluginConfigDescriptors = new Map<PluginName, PluginConfigDescriptor>();
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('plugins-service');
     this.pluginsSystem = new PluginsSystem(coreContext);
+    this.configService = coreContext.configService;
     this.config$ = coreContext.configService
       .atPath<PluginsConfigType>('plugins')
       .pipe(map(rawConfig => new PluginsConfig(rawConfig, coreContext.env)));
@@ -82,17 +93,18 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
 
     const config = await this.config$.pipe(first()).toPromise();
 
+    let contracts = new Map<PluginName, unknown>();
     if (!config.initialize || this.coreContext.env.isDevClusterMaster) {
       this.log.info('Plugin initialization disabled.');
-      return {
-        contracts: new Map(),
-        uiPlugins: this.pluginsSystem.uiPlugins(),
-      };
+    } else {
+      contracts = await this.pluginsSystem.setupPlugins(deps);
     }
 
+    const uiPlugins = this.pluginsSystem.uiPlugins();
     return {
-      contracts: await this.pluginsSystem.setupPlugins(deps),
-      uiPlugins: this.pluginsSystem.uiPlugins(),
+      contracts,
+      uiPlugins,
+      uiPluginConfigs: this.generateUiPluginsConfigs(uiPlugins.public),
     };
   }
 
@@ -105,6 +117,38 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   public async stop() {
     this.log.debug('Stopping plugins service');
     await this.pluginsSystem.stopPlugins();
+  }
+
+  private generateUiPluginsConfigs(
+    uiPlugins: Map<string, DiscoveredPlugin>
+  ): Map<PluginName, Observable<unknown>> {
+    return new Map(
+      [...uiPlugins]
+        .filter(([pluginId, _]) => {
+          const configDescriptor = this.pluginConfigDescriptors.get(pluginId);
+          return (
+            configDescriptor &&
+            configDescriptor.exposeToBrowser &&
+            Object.values(configDescriptor?.exposeToBrowser).some(exposed => exposed)
+          );
+        })
+        .map(([pluginId, plugin]) => {
+          const configDescriptor = this.pluginConfigDescriptors.get(pluginId)!;
+          return [
+            pluginId,
+            this.configService.atPath(plugin.configPath).pipe(
+              map((config: any) =>
+                pick(
+                  config || {},
+                  Object.entries(configDescriptor.exposeToBrowser!)
+                    .filter(([_, exposed]) => exposed)
+                    .map(([key, _]) => key)
+                )
+              )
+            ),
+          ];
+        })
+    );
   }
 
   private async handleDiscoveryErrors(error$: Observable<PluginDiscoveryError>) {
@@ -138,9 +182,13 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     await plugin$
       .pipe(
         mergeMap(async plugin => {
-          const schema = plugin.getConfigSchema();
-          if (schema) {
-            await this.coreContext.configService.setSchema(plugin.configPath, schema);
+          const configDescriptor = plugin.getConfigDescriptor();
+          if (configDescriptor) {
+            this.pluginConfigDescriptors.set(plugin.name, configDescriptor);
+            await this.coreContext.configService.setSchema(
+              plugin.configPath,
+              configDescriptor.schema
+            );
           }
           const isEnabled = await this.coreContext.configService.isEnabledAtPath(plugin.configPath);
 

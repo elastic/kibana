@@ -297,6 +297,7 @@ export class LegacyService implements CoreService {
           hapiServer: setupDeps.core.http.server,
           kibanaMigrator: startDeps.core.savedObjects.migrator,
           uiPlugins: setupDeps.core.plugins.uiPlugins,
+          uiPluginConfigs: setupDeps.core.plugins.uiPluginConfigs,
           elasticsearch: setupDeps.core.elasticsearch,
           uiSettings: setupDeps.core.uiSettings,
           savedObjectsClientProvider: startDeps.core.savedObjects.clientProvider,
