@@ -185,7 +185,7 @@ set your SPACE_URL to be:
 export SPACE_URL=/s/test-space
 ```
 
-So that the scripts append a `/s/test-space` in front of all the APIs to correctly create, modify, delete, and update
+So that the scripts prepend a `/s/test-space` in front of all the APIs to correctly create, modify, delete, and update
 them from within that space.
 
 See the scripts folder and the tools for more command line fun.
