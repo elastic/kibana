@@ -77,18 +77,18 @@ export interface AssetParts {
 }
 export type AssetTypeToParts = KibanaAssetTypeToParts & ElasticsearchAssetTypeToParts;
 export type AssetsGroupedByServiceByType = Record<
-  Extract<'kibana', ServiceName>,
+  Extract<ServiceName, 'kibana'>,
   KibanaAssetTypeToParts
 >;
-// & Record<Extract<'elasticsearch', ServiceName>, ElasticsearchAssetTypeToParts>;
+// & Record<Extract<ServiceName, 'elasticsearch'>, ElasticsearchAssetTypeToParts>;
 
 export type KibanaAssetParts = AssetParts & {
-  service: Extract<'kibana', ServiceName>;
+  service: Extract<ServiceName, 'kibana'>;
   type: KibanaAssetType;
 };
 
 export type ElasticsearchAssetParts = AssetParts & {
-  service: Extract<'elasticsearch', ServiceName>;
+  service: Extract<ServiceName, 'elasticsearch'>;
   type: ElasticsearchAssetType;
 };
 
