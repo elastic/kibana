@@ -36,7 +36,10 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
       `<rootDir>/dev-tools/jest/setup/polyfills.js`,
       `<rootDir>/dev-tools/jest/setup/enzyme.js`,
     ],
-    setupFilesAfterEnv: [`${kibanaDirectory}/src/dev/jest/setup/mocks.js`],
+    setupFilesAfterEnv: [
+      `<rootDir>/dev-tools/jest/setup/setup_test.js`,
+      `${kibanaDirectory}/src/dev/jest/setup/mocks.js`,
+    ],
     testMatch: ['**/*.test.{js,ts,tsx}'],
     transform: {
       '^.+\\.(js|tsx?)$': `${kibanaDirectory}/src/dev/jest/babel_transform.js`,
@@ -49,7 +52,7 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
     ],
     snapshotSerializers: [
       `${kibanaDirectory}/node_modules/enzyme-to-json/serializer`,
-      `${kibanaDirectory}/src/plugins/kibana_react/public/util/test_helpers/react_mount_serializer.ts`
+      `${kibanaDirectory}/src/plugins/kibana_react/public/util/test_helpers/react_mount_serializer.ts`,
     ],
     reporters: [
       'default',

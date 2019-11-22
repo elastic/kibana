@@ -24,7 +24,7 @@ interface LegendControlOptions {
   bounds: InfraWaffleMapBounds;
 }
 
-export const Legend: React.SFC<Props> = ({ dataBounds, legend, bounds, formatter }) => {
+export const Legend: React.FC<Props> = ({ dataBounds, legend, bounds, formatter }) => {
   return (
     <LegendContainer>
       <WithWaffleOptions>

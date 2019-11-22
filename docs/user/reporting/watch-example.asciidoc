@@ -26,8 +26,8 @@ PUT _watcher/watch/error_report
           "error_report.pdf" : {
             "reporting" : {
               "url": "http://0.0.0.0:5601/api/reporting/generate/printablePdf?jobParams=...", <2>
-              "retries":6, <3>
-              "interval":"1s", <4>
+              "retries":40, <3>
+              "interval":"15s", <4>
               "auth":{ <5>
                 "basic":{
                   "username":"elastic",
