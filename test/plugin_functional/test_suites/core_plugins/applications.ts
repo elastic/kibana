@@ -113,7 +113,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       await testSubjects.existOrFail('managementNav');
     });
 
-    it('can navigate from legacy apps to NP apps', async () => {
+    it.skip('can navigate from legacy apps to NP apps', async () => {
       await appsMenu.clickLink('Foo');
       await loadingScreenShown();
       await testSubjects.existOrFail('fooAppHome');
