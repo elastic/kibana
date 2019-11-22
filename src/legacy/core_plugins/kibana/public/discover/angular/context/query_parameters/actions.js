@@ -28,7 +28,8 @@ import {
 } from './constants';
 
 
-export function QueryParameterActionsProvider(queryFilter) {
+export function getQueryParameterActions() {
+  const filterManager = getServices().filterManager;
 
   const setPredecessorCount = (state) => (predecessorCount) => (
     state.queryParameters.predecessorCount = clamp(
@@ -54,13 +55,13 @@ export function QueryParameterActionsProvider(queryFilter) {
   );
 
   const updateFilters = () => filters => {
-    queryFilter.setFilters(filters);
+    filterManager.setFilters(filters);
   };
 
   const addFilter = (state) => async (field, values, operation) => {
     const indexPatternId = state.queryParameters.indexPatternId;
-    const newFilters = generateFilters(queryFilter, field, values, operation, indexPatternId);
-    queryFilter.addFilters(newFilters);
+    const newFilters = generateFilters(filterManager, field, values, operation, indexPatternId);
+    filterManager.addFilters(newFilters);
     const indexPattern = await getServices().indexPatterns.get(indexPatternId);
     indexPattern.popularizeField(field.name, 1);
   };

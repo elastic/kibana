@@ -61,7 +61,6 @@ import { createRenderCompleteDirective } from 'ui/render_complete/directive';
 import { StateManagementConfigProvider } from 'ui/state_management/config_provider';
 // @ts-ignore
 import { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
-import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 // @ts-ignore
 import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
 import { configureAppAngularModule } from 'ui/legacy_compat';
@@ -87,7 +86,6 @@ import { createIndexPatternSelectDirective } from './components/field_chooser/di
 import { createStringFieldProgressBarDirective } from './components/field_chooser/string_progress_bar';
 // @ts-ignore
 import { createFieldChooserDirective } from './components/field_chooser/field_chooser';
-// import { createFetchErrorDirective } from './components/fetch_error/fetch_error';
 
 // @ts-ignore
 import { createDiscoverFieldDirective } from './components/field_chooser/discover_field';
@@ -195,10 +193,7 @@ export function initializeInnerAngularModule(
     .directive('stringFieldProgressBar', createStringFieldProgressBarDirective)
     .directive('discoverField', createDiscoverFieldDirective)
     .directive('discFieldChooser', createFieldChooserDirective)
-    .service('debounce', ['$timeout', DebounceProviderTimeout])
-    .service('queryFilter', function(Private: any) {
-      return Private(FilterBarQueryFilterProvider);
-    });
+    .service('debounce', ['$timeout', DebounceProviderTimeout]);
 }
 
 export function createLocalGlobalStateModule() {

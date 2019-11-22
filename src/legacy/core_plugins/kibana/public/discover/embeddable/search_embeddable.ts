@@ -78,7 +78,7 @@ interface SearchEmbeddableConfig {
   editUrl: string;
   indexPatterns?: IndexPattern[];
   editable: boolean;
-  queryFilter: unknown;
+  filterManager: FilterManager;
 }
 
 export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
@@ -109,7 +109,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       editUrl,
       indexPatterns,
       editable,
-      queryFilter,
+      filterManager,
     }: SearchEmbeddableConfig,
     initialInput: SearchInput,
     private readonly executeTriggerActions: TExecuteTriggerActions,
@@ -121,7 +121,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       parent
     );
 
-    this.filterManager = queryFilter as FilterManager;
+    this.filterManager = filterManager;
     this.savedSearch = savedSearch;
     this.$rootScope = $rootScope;
     this.$compile = $compile;

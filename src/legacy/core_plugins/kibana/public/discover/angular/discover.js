@@ -64,6 +64,7 @@ const {
   core,
   chrome,
   docTitle,
+  filterManager,
   State,
   share,
   timefilter,
@@ -187,11 +188,11 @@ function discoverController(
   config,
   kbnUrl,
   localStorage,
-  uiCapabilities,
-  queryFilter
+  uiCapabilities
 ) {
   const responseHandler = vislibSeriesResponseHandlerProvider().handler;
   const getUnhashableStates = Private(getUnhashableStatesProvider);
+
 
   const inspectorAdapters = {
     requests: new RequestAdapter()
@@ -409,12 +410,12 @@ function discoverController(
 
   const $state = $scope.state = new AppState(getStateDefaults());
 
-  $scope.filters = queryFilter.getFilters();
+  $scope.filters = filterManager.getFilters();
   $scope.screenTitle = savedSearch.title;
 
   $scope.onFiltersUpdated = filters => {
-    // The filters will automatically be set when the queryFilter emits an update event (see below)
-    queryFilter.setFilters(filters);
+    // The filters will automatically be set when the filterManager emits an update event (see below)
+    filterManager.setFilters(filters);
   };
 
   const getFieldCounts = async () => {
@@ -575,9 +576,9 @@ function discoverController(
         });
 
         // update data source when filters update
-        subscriptions.add(subscribeWithScope($scope, queryFilter.getUpdates$(), {
+        subscriptions.add(subscribeWithScope($scope, filterManager.getUpdates$(), {
           next: () => {
-            $scope.filters = queryFilter.getFilters();
+            $scope.filters = filterManager.getFilters();
             $scope.updateDataSource().then(function () {
               $state.save();
             });
@@ -585,7 +586,7 @@ function discoverController(
         }));
 
         // fetch data when filters fire fetch event
-        subscriptions.add(subscribeWithScope($scope, queryFilter.getUpdates$(), {
+        subscriptions.add(subscribeWithScope($scope, filterManager.getUpdates$(), {
           next: $scope.fetch
         }));
 
@@ -871,7 +872,7 @@ function discoverController(
       .setField('size', $scope.opts.sampleSize)
       .setField('sort', getSortForSearchSource($state.sort, indexPattern))
       .setField('query', !$state.query ? null : $state.query)
-      .setField('filter', queryFilter.getFilters());
+      .setField('filter', filterManager.getFilters());
   });
 
   $scope.setSortOrder = function setSortOrder(sortPair) {
@@ -881,8 +882,8 @@ function discoverController(
   // TODO: On array fields, negating does not negate the combination, rather all terms
   $scope.filterQuery = function (field, values, operation) {
     $scope.indexPattern.popularizeField(field, 1);
-    const newFilters = generateFilters(queryFilter, field, values, operation, $scope.indexPattern.id);
-    return queryFilter.addFilters(newFilters);
+    const newFilters = generateFilters(filterManager, field, values, operation, $scope.indexPattern.id);
+    return filterManager.addFilters(newFilters);
   };
 
   $scope.addColumn = function addColumn(columnName) {
@@ -929,7 +930,7 @@ function discoverController(
       query: '',
       language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
     };
-    queryFilter.removeAll();
+    filterManager.removeAll();
     $state.save();
     $scope.fetch();
   };
@@ -937,7 +938,7 @@ function discoverController(
   const updateStateFromSavedQuery = (savedQuery) => {
     $state.query = savedQuery.attributes.query;
     $state.save();
-    queryFilter.setFilters(savedQuery.attributes.filters || []);
+    filterManager.setFilters(savedQuery.attributes.filters || []);
 
     if (savedQuery.attributes.timefilter) {
       timefilter.setTime({

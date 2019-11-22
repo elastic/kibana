@@ -22,18 +22,19 @@ import ngMock from 'ng_mock';
 import { pluginInstance } from 'plugins/kibana/discover/index';
 
 import { createStateStub } from './_utils';
-import { QueryParameterActionsProvider } from '../actions';
+import { getQueryParameterActions } from '../actions';
 
 
 describe('context app', function () {
   beforeEach(() => pluginInstance.initializeInnerAngular());
+  beforeEach(() => pluginInstance.initializeServices(true));
   beforeEach(ngMock.module('app/discover'));
 
   describe('action setQueryParameters', function () {
     let setQueryParameters;
 
-    beforeEach(ngMock.inject(function createPrivateStubs(Private) {
-      setQueryParameters = Private(QueryParameterActionsProvider).setQueryParameters;
+    beforeEach(ngMock.inject(function createPrivateStubs() {
+      setQueryParameters = getQueryParameterActions().setQueryParameters;
     }));
 
     it('should update the queryParameters with valid properties from the given object', function () {

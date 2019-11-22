@@ -24,7 +24,7 @@ import './context/components/action_bar';
 import { getFirstSortableField } from './context/api/utils/sorting';
 import {
   createInitialQueryParametersState,
-  QueryParameterActionsProvider,
+  getQueryParameterActions,
   QUERY_PARAMETER_KEYS,
 } from './context/query_parameters';
 import {
@@ -62,7 +62,7 @@ module.directive('contextApp', function ContextApp() {
 });
 
 function ContextAppController($scope, config, Private) {
-  const queryParameterActions = Private(QueryParameterActionsProvider);
+  const queryParameterActions = getQueryParameterActions();
   const queryActions = Private(QueryActionsProvider);
 
   timefilter.disableAutoRefreshSelector();

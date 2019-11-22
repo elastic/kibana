@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { IndexPattern } from '../../../../data/public/index_patterns';
+import { IIndexPattern } from '../../../../../../plugins/data/common/index_patterns';
 
 export function findIndexPatternById(
-  indexPatterns: IndexPattern[],
+  indexPatterns: IIndexPattern[],
   id: string
-): IndexPattern | undefined {
+): IIndexPattern | undefined {
   if (!Array.isArray(indexPatterns) || !id) {
     return;
   }
@@ -34,7 +34,7 @@ export function findIndexPatternById(
  * the first available index pattern id if not
  */
 export function getFallbackIndexPatternId(
-  indexPatterns: IndexPattern[],
+  indexPatterns: IIndexPattern[],
   defaultIndex: string = ''
 ): string {
   if (defaultIndex && findIndexPatternById(indexPatterns, defaultIndex)) {
@@ -45,12 +45,12 @@ export function getFallbackIndexPatternId(
 
 /**
  * A given index pattern id is checked for existence and a fallback is provided if it doesn't exist
- * The provided defaultIndex is usually configured in Advanced Setting, if it's also invalid
+ * The provided defaultIndex is usually configured in Advanced Settings, if it's also invalid
  * the first entry of the given list of Indexpatterns is used
  */
 export function getIndexPatternId(
   id: string = '',
-  indexPatterns: IndexPattern[],
+  indexPatterns: IIndexPattern[],
   defaultIndex: string = ''
 ): string {
   if (!id || !findIndexPatternById(indexPatterns, id)) {

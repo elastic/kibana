@@ -82,7 +82,7 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
 
     const $compile = $injector.get<ng.ICompileService>('$compile');
     const $rootScope = $injector.get<ng.IRootScopeService>('$rootScope');
-    const queryFilter = getServices().filterManager;
+    const filterManager = getServices().filterManager;
 
     const url = await getServices().getSavedSearchUrlById(savedObjectId);
     const editUrl = getServices().addBasePath(`/app/kibana${url}`);
@@ -94,7 +94,7 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
           $rootScope,
           $compile,
           editUrl,
-          queryFilter,
+          filterManager,
           editable: getServices().capabilities.discover.save as boolean,
           indexPatterns: _.compact([savedObject.searchSource.getField('index')]),
         },

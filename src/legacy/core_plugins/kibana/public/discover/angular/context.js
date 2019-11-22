@@ -67,7 +67,8 @@ getAngularModule().config($routeProvider => {
     });
 });
 
-function ContextAppRouteController($routeParams, $scope, AppState, config, $route, queryFilter) {
+function ContextAppRouteController($routeParams, $scope, AppState, config, $route) {
+  const filterManager = getServices().filterManager;
   const indexPattern = $route.current.locals.indexPattern.ip;
 
   this.state = new AppState(createDefaultAppState(config, indexPattern));
@@ -82,9 +83,9 @@ function ContextAppRouteController($routeParams, $scope, AppState, config, $rout
     () => this.state.save(true)
   );
 
-  const updateSubsciption = subscribeWithScope($scope, queryFilter.getUpdates$(), {
+  const updateSubsciption = subscribeWithScope($scope, filterManager.getUpdates$(), {
     next: () => {
-      this.filters = _.cloneDeep(queryFilter.getFilters());
+      this.filters = _.cloneDeep(filterManager.getFilters());
     },
   });
 
@@ -94,7 +95,7 @@ function ContextAppRouteController($routeParams, $scope, AppState, config, $rout
   this.anchorId = $routeParams.id;
   this.indexPattern = indexPattern;
   this.discoverUrl = chrome.navLinks.get('kibana:discover').url;
-  this.filters = _.cloneDeep(queryFilter.getFilters());
+  this.filters = _.cloneDeep(filterManager.getFilters());
 }
 
 function createDefaultAppState(config, indexPattern) {

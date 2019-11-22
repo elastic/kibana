@@ -36,7 +36,7 @@ import { createSavedSearchesService } from '../saved_searches/saved_searches';
 import { createSavedSearchFactory } from '../saved_searches/_saved_search';
 import { DiscoverStartPlugins } from '../plugin';
 import { start as legacyData } from '../../../../data/public/legacy';
-import { IndexPatterns } from '../../../../data/public/index_patterns/index_patterns';
+import { IndexPatterns } from '../../../../data/public';
 import { EuiUtilsStart } from '../../../../../../plugins/eui_utils/public';
 import { SavedSearch } from '../types';
 import { SharePluginStart } from '../../../../../../plugins/share/public';

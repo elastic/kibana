@@ -21,8 +21,6 @@ import _ from 'lodash';
 import $ from 'jquery';
 // @ts-ignore
 import rison from 'rison-node';
-// @ts-ignore
-import { disableFilter } from '@kbn/es-query';
 import '../../doc_viewer';
 // @ts-ignore
 import { noWhiteSpace } from '../../../../../common/utils/no_white_space';

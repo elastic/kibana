@@ -24,18 +24,18 @@ import { getServices, SearchSource } from '../../../kibana_services';
 
 import { fetchAnchorProvider } from '../api/anchor';
 import { fetchContextProvider } from '../api/context';
-import { QueryParameterActionsProvider } from '../query_parameters';
+import { getQueryParameterActions } from '../query_parameters';
 import { FAILURE_REASONS, LOADING_STATUS } from './constants';
 import { MarkdownSimple } from '../../../../../../kibana_react/public';
 
-export function QueryActionsProvider(Private, Promise) {
+export function QueryActionsProvider(Promise) {
   const fetchAnchor = fetchAnchorProvider(getServices().indexPatterns, new SearchSource());
   const { fetchSurroundingDocs } = fetchContextProvider(getServices().indexPatterns);
   const {
     setPredecessorCount,
     setQueryParameters,
     setSuccessorCount,
-  } = Private(QueryParameterActionsProvider);
+  } = getQueryParameterActions();
 
   const setFailedStatus = (state) => (subject, details = {}) => (
     state.loadingStatus[subject] = {
