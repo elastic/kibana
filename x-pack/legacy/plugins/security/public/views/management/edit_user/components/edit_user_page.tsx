@@ -374,7 +374,7 @@ class EditUserPageUI extends Component<Props, State> {
           <EuiPageContentHeader>
             <EuiPageContentHeaderSection>
               <EuiTitle>
-                <h2>
+                <h1>
                   {isNewUser ? (
                     <FormattedMessage
                       id="xpack.security.management.users.editUser.newUserTitle"
@@ -387,7 +387,7 @@ class EditUserPageUI extends Component<Props, State> {
                       values={{ userName: user.username }}
                     />
                   )}
-                </h2>
+                </h1>
               </EuiTitle>
             </EuiPageContentHeaderSection>
             {reserved && (
