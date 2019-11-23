@@ -5,75 +5,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Logger, SavedObject, SavedObjectAttributes } from 'src/core/server';
-import { defaultIndexPattern } from '../../../../default_index_pattern';
-import { AlertServices } from '../../../../../alerting/server/types';
-import {
-  SIGNALS_ID,
-  DEFAULT_INDEX_KEY,
-  DEFAULT_SIGNALS_INDEX_KEY,
-  DEFAULT_SIGNALS_INDEX,
-} from '../../../../common/constants';
+import { Logger } from 'src/core/server';
+import { SIGNALS_ID } from '../../../../common/constants';
 
 import { buildEventsSearchQuery } from './build_events_query';
 import { searchAfterAndBulkIndex } from './utils';
 import { SignalAlertTypeDefinition } from './types';
 import { getFilter } from './get_filter';
-
-interface IndexObjectAttributes extends SavedObjectAttributes {
-  [DEFAULT_INDEX_KEY]: string[];
-  [DEFAULT_SIGNALS_INDEX_KEY]: string;
-}
-
-export const getInputIndex = (
-  inputIndex: string[] | undefined | null,
-  configuration: SavedObject<IndexObjectAttributes>
-): string[] => {
-  if (inputIndex != null) {
-    return inputIndex;
-  } else {
-    if (configuration.attributes[DEFAULT_INDEX_KEY] != null) {
-      return configuration.attributes[DEFAULT_INDEX_KEY];
-    } else {
-      return defaultIndexPattern;
-    }
-  }
-};
-
-export const getOutputIndex = (
-  outputIndex: string | undefined | null,
-  configuration: SavedObject<IndexObjectAttributes>
-): string => {
-  if (outputIndex != null) {
-    return outputIndex;
-  } else {
-    if (configuration.attributes[DEFAULT_SIGNALS_INDEX_KEY] != null) {
-      return configuration.attributes[DEFAULT_SIGNALS_INDEX_KEY];
-    } else {
-      return DEFAULT_SIGNALS_INDEX;
-    }
-  }
-};
-
-export const getInputOutputIndex = async (
-  services: AlertServices,
-  version: string,
-  inputIndex: string[] | null | undefined,
-  outputIndex: string | null | undefined
-): Promise<{
-  inputIndex: string[];
-  outputIndex: string;
-}> => {
-  if (inputIndex != null && outputIndex != null) {
-    return { inputIndex, outputIndex };
-  } else {
-    const configuration = await services.savedObjectsClient.get('config', version);
-    return {
-      inputIndex: getInputIndex(inputIndex, configuration),
-      outputIndex: getOutputIndex(outputIndex, configuration),
-    };
-  }
-};
+import { getInputOutputIndex } from './get_input_output_index';
 
 export const signalsAlertType = ({
   logger,
@@ -94,9 +33,9 @@ export const signalsAlertType = ({
         filter: schema.nullable(schema.object({}, { allowUnknowns: true })),
         ruleId: schema.string(),
         immutable: schema.boolean({ defaultValue: false }),
-        index: schema.arrayOf(schema.string()),
+        index: schema.nullable(schema.arrayOf(schema.string())),
         language: schema.nullable(schema.string()),
-        outputIndex: schema.string(),
+        outputIndex: schema.nullable(schema.string()),
         savedId: schema.nullable(schema.string()),
         meta: schema.nullable(schema.object({}, { allowUnknowns: true })),
         query: schema.nullable(schema.string()),

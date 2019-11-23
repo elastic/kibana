@@ -174,7 +174,7 @@ describe('schemas', () => {
       ).toBeTruthy();
     });
 
-    test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score] does not validate', () => {
+    test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score] does validate', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
@@ -190,7 +190,7 @@ describe('schemas', () => {
           query: 'some query',
           language: 'kuery',
         }).error
-      ).toBeTruthy();
+      ).toBeFalsy();
     });
 
     test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score, output_index] does validate', () => {
@@ -213,7 +213,7 @@ describe('schemas', () => {
       ).toBeFalsy();
     });
 
-    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score] does not validate', () => {
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score] does validate', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
@@ -228,7 +228,7 @@ describe('schemas', () => {
           filter: {},
           risk_score: 50,
         }).error
-      ).toBeTruthy();
+      ).toBeFalsy();
     });
 
     test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index] does validate', () => {

@@ -68,7 +68,7 @@ export const createSignalsSchema = Joi.object({
   from: from.required(),
   rule_id,
   immutable: immutable.default(false),
-  index: index.required(),
+  index,
   interval: interval.default('5m'),
   query: Joi.when('type', {
     is: 'query',
@@ -95,7 +95,7 @@ export const createSignalsSchema = Joi.object({
       otherwise: Joi.forbidden(),
     }),
   }),
-  output_index: output_index.required(),
+  output_index,
   saved_id: saved_id.when('type', {
     is: 'saved_query',
     then: Joi.required(),
