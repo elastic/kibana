@@ -763,7 +763,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await testSubjects.existOrFail('saveVisualizationSuccess');
       const message =  await PageObjects.common.closeToast();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await this.waitForSaveModalToClose();
+      await PageObjects.common.waitForSaveModalToClose();
 
       return message;
     }
