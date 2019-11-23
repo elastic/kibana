@@ -104,6 +104,13 @@ You should also see the SIEM detect the feature flags and start the API endpoint
 server    log   [11:39:05.561] [info][siem] Detected feature flags for actions and alerting and enabling signals API endpoints
 ```
 
+Go into your SIEM Advanced settings and underneath the setting of `siem:defaultSignalsIndex`, set that to the same
+value as you did with the environment variable of SIGNALS_INDEX, which should be `.siem-signals-${your user id}`
+
+```
+.siem-signals-${your user id}
+```
+
 Open a terminal and go into the scripts folder `cd kibana/x-pack/legacy/plugins/siem/server/lib/detection_engine/scripts` and run:
 
 ```sh
