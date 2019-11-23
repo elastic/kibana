@@ -32,17 +32,7 @@ export const ArgLabel = props => {
         </EuiAccordion>
       ) : (
         simpleArg && (
-          <EuiFormRow
-            display="columnCompressed"
-            label={
-              <EuiToolTip content={help}>
-                <span>
-                  {label} <EuiIcon type="iInCircle" color="subdued" />
-                </span>
-              </EuiToolTip>
-            }
-            id={argId}
-          >
+          <EuiFormRow display="rowCompressed" label={label} helpText={help} id={argId}>
             {simpleArg}
           </EuiFormRow>
         )

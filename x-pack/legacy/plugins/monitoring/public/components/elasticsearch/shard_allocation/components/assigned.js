@@ -31,6 +31,8 @@ export class Assigned extends React.Component {
     const shardStats = get(this.props.shardStats.indices, key);
     if (shardStats) {
       initialClasses.push(shardStats.status);
+      console.log(initialClasses, 'classessss');
+      console.log(data, 'data');
     }
 
     const changeUrl = () => {

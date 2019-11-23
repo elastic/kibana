@@ -7,9 +7,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButton } from '@elastic/eui';
-import { ArgumentStrings } from '../../../../../i18n';
-
-const { ImageUpload: strings } = ArgumentStrings;
 
 export const LinkForm = ({ url, inputRef, onSubmit }) => (
   <EuiFormRow display="rowCompressed" onSubmit={onSubmit} className="eui-textRight">
