@@ -57,7 +57,7 @@ export class HorizontalLegend extends React.Component {
   }
 
   createSeries(row, rowIdx) {
-    const classes = ['monRhythmChart__legendItem'];
+    const classes = ['monRhythmChart__legendItem cxx'];
 
     if (!includes(this.props.seriesFilter, row.id)) {
       classes.push('monRhythmChart__legendItem-isDisabled');
