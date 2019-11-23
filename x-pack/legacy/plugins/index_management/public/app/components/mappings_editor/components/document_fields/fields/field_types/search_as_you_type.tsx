@@ -52,15 +52,21 @@ export const SearchAsYouType = React.memo(({ field }: Props) => {
       <AdvancedSettingsWrapper>
         {/* Analyzers */}
         <EditFieldSection
-          title={i18n.translate('xpack.idxMgmt.mappingsEditor.analyzersSectionTitle', {
-            defaultMessage: 'Analysers',
-          })}
+          title={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.searchAsYouType.analyzersSectionTitle',
+            {
+              defaultMessage: 'Analyzers',
+            }
+          )}
         >
           <AnalyzerParameter
             path="analyzer"
-            label={i18n.translate('xpack.idxMgmt.mappingsEditor.indexSearchAnalyzerFieldLabel', {
-              defaultMessage: 'Index + search analyzer',
-            })}
+            label={i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.searchAsYouType.indexSearchAnalyzerFieldLabel',
+              {
+                defaultMessage: 'Index + search analyzer',
+              }
+            )}
             defaultValue={field.source.analyzer}
           />
 
@@ -71,7 +77,7 @@ export const SearchAsYouType = React.memo(({ field }: Props) => {
             component={CheckBoxField}
             config={{
               label: i18n.translate(
-                'xpack.idxMgmt.mappingsEditor.analyzers.useSameAnalyzerIndexAnSearch',
+                'xpack.idxMgmt.mappingsEditor.searchAsYouType.useSameAnalyzerIndexAnSearch',
                 {
                   defaultMessage: 'Use the same analyzers for index and searching',
                 }
@@ -117,14 +123,20 @@ export const SearchAsYouType = React.memo(({ field }: Props) => {
           <EditFieldFormRow
             title={
               <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.termVectorFieldTitle', {
-                  defaultMessage: 'Set term vector',
-                })}
+                {i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.searchAsYouType.termVectorFieldTitle',
+                  {
+                    defaultMessage: 'Set term vector',
+                  }
+                )}
               </h3>
             }
-            description={i18n.translate('xpack.idxMgmt.mappingsEditor.termVectorFieldDescription', {
-              defaultMessage: 'Whether term vectors should be stored for an analyzed field.',
-            })}
+            description={i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.searchAsYouType.termVectorFieldDescription',
+              {
+                defaultMessage: 'Whether term vectors should be stored for an analyzed field.',
+              }
+            )}
             direction="column"
             toggleDefaultValue={getDefaultValueToggle('term_vector', field.source)}
           >
@@ -153,7 +165,7 @@ export const SearchAsYouType = React.memo(({ field }: Props) => {
                       <EuiCallOut color="warning">
                         <p>
                           {i18n.translate(
-                            'xpack.idxMgmt.mappingsEditor.termVectorFieldWarningMessage',
+                            'xpack.idxMgmt.mappingsEditor.searchAsYouType.termVectorFieldWarningMessage',
                             {
                               defaultMessage:
                                 'Setting "With positions & offsets" will double the size of a field’s index.',

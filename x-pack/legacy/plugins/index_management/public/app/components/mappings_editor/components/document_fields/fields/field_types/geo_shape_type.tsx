@@ -108,7 +108,7 @@ export const GeoShapeType = ({ field }: Props) => {
               </h3>
             }
             description={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.geoShape.ignoreZValueFieldDescription',
+              'xpack.idxMgmt.mappingsEditor.geoShape.pointsOnlyFieldDescription',
               {
                 defaultMessage: 'Configures the geo_shape field type for point shapes only.',
               }
