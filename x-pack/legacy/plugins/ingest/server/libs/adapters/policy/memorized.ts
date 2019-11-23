@@ -83,4 +83,19 @@ export class MemorizedPolicyAdapter {
       }
     );
   }
+
+  public async delete(user: FrameworkUser, id: string): Promise<void> {
+    return await memorize(
+      `delete - ${id}`,
+      async () => {
+        if (!this.adapter) {
+          throw new Error('An adapter must be provided when running tests online');
+        }
+        return await this.adapter.delete(user, id);
+      },
+      {
+        pure: true,
+      }
+    );
+  }
 }

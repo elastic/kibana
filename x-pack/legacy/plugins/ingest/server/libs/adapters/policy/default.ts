@@ -148,6 +148,9 @@ export class PolicyAdapter {
     return policy;
   }
 
+  public async delete(user: FrameworkUser, id: string): Promise<void> {
+    await this.so.delete(user, 'policies', id);
+  }
   // public async getBackup(id: string): Promise<BackupPolicyFile> {
   //   const policy = await this.so.get<BackupPolicyFile>('backup_policies', id);
 

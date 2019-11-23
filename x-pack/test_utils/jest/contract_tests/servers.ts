@@ -107,7 +107,7 @@ export function getSharedESServer(): ESServerConfig {
 export async function createKibanaServer(xpackOption = {}) {
   if (jest && jest.setTimeout) {
     // Allow kibana to start
-    jest.setTimeout(120000);
+    jest.setTimeout(240000);
   }
 
   const root = kbnTestServer.createRootWithCorePlugins(

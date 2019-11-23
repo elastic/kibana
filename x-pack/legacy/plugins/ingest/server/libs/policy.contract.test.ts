@@ -8,7 +8,7 @@ import { callWhenOnline } from '@mattapperson/slapshot/lib/call_when_online';
 import { compose } from './compose/memorized';
 import { ServerLibs } from './types';
 import * as elasticsearch from 'elasticsearch';
-import { FrameworkAuthenticatedUser } from './adapters/framework/adapter_types';
+import { FrameworkUser } from './adapters/framework/adapter_types';
 import { INDEX_NAMES } from '../../common/constants/index_names';
 
 jest.mock('uuid/v4', () => {
@@ -20,14 +20,7 @@ describe('Policies Lib', () => {
   let servers: any;
   let libs: ServerLibs;
   let es: elasticsearch.Client;
-  const TestUser: FrameworkAuthenticatedUser = {
-    kind: 'authenticated',
-    username: 'mattapperson',
-    roles: ['fleet_admin'],
-    full_name: null,
-    email: null,
-    enabled: true,
-  };
+  const TestUser: FrameworkUser = { kind: 'internal' };
 
   beforeAll(async () => {
     await callWhenOnline(async () => {
@@ -86,6 +79,7 @@ describe('Policies Lib', () => {
 
       const { items: policies } = await libs.policy.list(TestUser);
       expect(policies).toHaveLength(1);
+
       expect(policies[0].id).toBe('default');
     });
 
@@ -95,7 +89,6 @@ describe('Policies Lib', () => {
 
       const { items: policies } = await libs.policy.list(TestUser);
       expect(policies).toHaveLength(1);
-      expect(policies[0].id).toBe('default');
     });
   });
 
@@ -121,7 +114,6 @@ describe('Policies Lib', () => {
       const updated = await libs.policy.update(TestUser, newPolicy.id as string, {
         name: 'foo',
       });
-      expect(updated.id).not.toBe(newPolicy.id);
       expect(updated.name).toBe('foo');
 
       const gottenPolicy = await libs.policy.get(TestUser, updated.id as string);
@@ -134,10 +126,6 @@ describe('Policies Lib', () => {
   describe('delete', () => {
     it('Should delete the by the ID', async () => {
       const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
-
-      await libs.policy.update(TestUser, newPolicy.id as string, {
-        name: 'foo',
-      });
 
       try {
         await libs.policy.delete(TestUser, [newPolicy?.id as string]);

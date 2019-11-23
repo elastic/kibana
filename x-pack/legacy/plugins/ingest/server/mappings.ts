@@ -13,53 +13,16 @@ export const mappings = {
       description: {
         type: 'text',
       },
-      monitoring_enabled: {
-        type: 'boolean',
-      },
-      agent_version: {
+      label: {
         type: 'keyword',
       },
-      data_sources: {
-        properties: {
-          uuid: {
-            type: 'keyword',
-          },
-          meta: {
-            type: 'keyword',
-          },
-          output: {
-            type: 'keyword',
-          },
-          queue: {
-            type: 'keyword',
-          },
-          policy_id: {
-            type: 'keyword',
-          },
-          policy: {
-            type: 'keyword',
-          },
-          inputs: {
-            type: 'keyword',
-          },
-        },
+      datasources: {
+        type: 'keyword',
       },
       id: {
         type: 'keyword',
       },
-      shared_id: {
-        type: 'keyword',
-      },
-      version: {
-        type: 'integer',
-      },
       status: {
-        type: 'keyword',
-      },
-      created_on: {
-        type: 'keyword',
-      },
-      created_by: {
         type: 'keyword',
       },
       updated_on: {

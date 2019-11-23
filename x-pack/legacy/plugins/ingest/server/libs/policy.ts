@@ -13,7 +13,7 @@ import { FrameworkAuthenticatedUser, FrameworkUser } from './adapters/framework/
 import { DEFAULT_POLICY_ID } from '../../common/constants';
 import { OutputsLib } from './outputs';
 import { DatasourcesLib } from './datasources';
-import { ReturnTypeBulkDelete } from '../../../../../../data/.update_prs/x-pack/legacy/plugins/fleet/common/types/std_return_format';
+import { ReturnTypeBulkDelete } from '../../common/types/std_return_format';
 
 export class PolicyLib {
   public events: EventEmitter = new EventEmitter();
@@ -26,12 +26,7 @@ export class PolicyLib {
     }
   ) {}
 
-  public async create(
-    withUser: FrameworkAuthenticatedUser,
-    name: string,
-    description?: string,
-    label?: string
-  ) {
+  public async create(withUser: FrameworkUser, name: string, description?: string, label?: string) {
     const info = this.libs.framework.info;
     if (info === null) {
       throw new Error('Could not get version information about Kibana from xpack');
@@ -44,7 +39,7 @@ export class PolicyLib {
       datasources: [],
       label: label || name,
       updated_on: new Date().toISOString(),
-      updated_by: withUser.username,
+      updated_by: withUser.kind === 'authenticated' ? withUser.username : 'system (Fleet)',
     };
 
     return await this.adapter.create(withUser, newPolicy);
@@ -188,11 +183,8 @@ export class PolicyLib {
       throw new Error('Not allowed (impossible to delete default policy)');
     }
 
-    // TODO bulk delete
     for (const id of ids) {
-      await this.update(user, id, {
-        status: Status.Inactive,
-      });
+      await this.adapter.delete(user, id);
     }
 
     return {
@@ -230,12 +222,16 @@ export class PolicyLib {
   // }
 
   public async ensureDefaultPolicy() {
+    let defaultConfig;
     try {
-      await this.adapter.get(this.libs.framework.internalUser, DEFAULT_POLICY_ID);
+      defaultConfig = await this.adapter.get(this.libs.framework.internalUser, DEFAULT_POLICY_ID);
     } catch (err) {
       if (!err.isBoom || err.output.statusCode !== 404) {
         throw err;
       }
+    }
+
+    if (!defaultConfig) {
       const info = this.libs.framework.info;
       if (info === null) {
         throw new Error('Could not get version information about Kibana from xpack');
@@ -248,6 +244,7 @@ export class PolicyLib {
         updated_on: new Date().toISOString(),
         updated_by: 'Fleet (system action)',
       };
+
       await this.adapter.create(this.libs.framework.internalUser, newDefaultPolicy, {
         id: DEFAULT_POLICY_ID,
       });
