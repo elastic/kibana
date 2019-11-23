@@ -16,6 +16,8 @@ import {
 import { INDEX_DEFAULT } from '../constants';
 import { AliasOption, DataType } from '../types';
 
+import { ComboBoxOption } from '../types';
+
 const { toInt } = fieldFormatters;
 const { emptyField, containsCharsField } = fieldValidators;
 
@@ -166,6 +168,49 @@ export const PARAMETERS_DEFINITION = {
       ],
     },
   },
+  max_input_length: {
+    fieldConfig: {
+      defaultValue: 50,
+      type: FIELD_TYPES.NUMBER,
+      formatters: [toInt],
+      validations: [
+        {
+          validator: emptyField(
+            i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.validations.maxInputLengthFieldRequiredErrorMessage',
+              {
+                defaultMessage: 'Specify a max input length.',
+              }
+            )
+          ),
+        },
+      ],
+    },
+  },
+  locale: {
+    fieldConfig: {
+      defaultValue: 'ROOT',
+      type: FIELD_TYPES.TEXT,
+      validations: [
+        {
+          validator: emptyField(
+            i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.validations.localeFieldRequiredErrorMessage',
+              {
+                defaultMessage: 'Specify a locale.',
+              }
+            )
+          ),
+        },
+      ],
+    },
+  },
+  orientation: {
+    fieldConfig: {
+      defaultValue: 'ccw',
+      type: FIELD_TYPES.SUPER_SELECT,
+    },
+  },
   boost: {
     fieldConfig: {
       defaultValue: 1.0,
@@ -216,23 +261,16 @@ export const PARAMETERS_DEFINITION = {
       defaultValue: true,
     },
   },
-  locale: {
-    fieldConfig: {
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.localeFieldLabel', {
-        defaultMessage: 'Locale',
-      }),
-      defaultValue: '',
-    },
-  },
   format: {
     fieldConfig: {
-      label: 'Formats',
-      type: FIELD_TYPES.COMBO_BOX,
-      defaultValue: [],
-      serializer: (options: any[]): string | undefined =>
-        options.length ? options.join('||') : undefined,
-      deSerializer: (formats?: string | any[]): any[] =>
-        Array.isArray(formats) ? formats : (formats as string).split('||'),
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.formatFieldLabel', {
+        defaultMessage: 'Format',
+      }),
+      defaultValue: 'strict_date_optional_time||epoch_millis',
+      serializer: (format: ComboBoxOption[]): string | undefined =>
+        format.length ? format.map(({ label }) => label).join('||') : undefined,
+      deserializer: (formats: string): ComboBoxOption[] | undefined =>
+        formats.split('||').map(format => ({ label: format })),
     },
   },
   analyzer: {
@@ -331,6 +369,26 @@ export const PARAMETERS_DEFINITION = {
   index_phrases: {
     fieldConfig: {
       defaultValue: false,
+    },
+  },
+  preserve_separators: {
+    fieldConfig: {
+      defaultValue: true,
+    },
+  },
+  preserve_position_increments: {
+    fieldConfig: {
+      defaultValue: true,
+    },
+  },
+  ignore_z_value: {
+    fieldConfig: {
+      defaultValue: true,
+    },
+  },
+  points_only: {
+    fieldConfig: {
+      defaultValue: true,
     },
   },
   norms: {
@@ -444,6 +502,11 @@ export const PARAMETERS_DEFINITION = {
       ],
     },
   },
+  enable_position_increments: {
+    fieldConfig: {
+      defaultValue: true,
+    },
+  },
   depth_limit: {
     fieldConfig: {
       defaultValue: 20,
@@ -458,17 +521,6 @@ export const PARAMETERS_DEFINITION = {
           }) as ValidationFunc,
         },
       ],
-    },
-  },
-  orientation: {
-    fieldConfig: {
-      defaultValue: 'ccw',
-      type: FIELD_TYPES.SUPER_SELECT,
-    },
-  },
-  ignore_z_value: {
-    fieldConfig: {
-      defaultValue: true,
     },
   },
 };

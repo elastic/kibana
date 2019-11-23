@@ -9,18 +9,21 @@ import { i18n } from '@kbn/i18n';
 
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
-import { UseField, SelectField } from '../../../../shared_imports';
+import { UseField, NumericField, fieldFormatters } from '../../../../shared_imports';
+
 import {
   StoreParameter,
   IndexParameter,
   DocValuesParameter,
   BoostParameter,
+  AnalyzerParameter,
   NullValueParameter,
 } from '../../field_parameters';
-import { EditFieldSection, AdvancedSettingsWrapper } from '../edit_field';
+import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
 
 const getDefaultValueToggle = (param: string, field: FieldType) => {
   switch (param) {
+    case 'analyzer':
     case 'boost': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
     }
@@ -32,34 +35,20 @@ const getDefaultValueToggle = (param: string, field: FieldType) => {
   }
 };
 
-const mapIndexToValue = ['true', true, 'false', false];
-
-const nullValueOptions = [
-  {
-    value: 0,
-    text: `"true"`,
-  },
-  {
-    value: 1,
-    text: 'true',
-  },
-  {
-    value: 2,
-    text: `"false"`,
-  },
-  {
-    value: 3,
-    text: 'false',
-  },
-];
-
 interface Props {
   field: NormalizedField;
 }
 
-export const BooleanType = ({ field }: Props) => {
+export const TokenCountType = ({ field }: Props) => {
   return (
     <>
+      <EditFieldSection>
+        <AnalyzerParameter
+          path="analyzer"
+          defaultValue={field.source.analyzer}
+          allowsIndexDefaultOption={false}
+        />
+      </EditFieldSection>
       <EditFieldSection>
         <StoreParameter />
         <IndexParameter hasIndexOptions={false} />
@@ -75,28 +64,40 @@ export const BooleanType = ({ field }: Props) => {
           <NullValueParameter
             defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
             description={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.booleanNullValueFieldDescription',
+              'xpack.idxMgmt.mappingsEditor.tokenCount.nullValueFieldDescription',
               {
-                defaultMessage: 'Whether to substitute values for any explicit null values.',
+                defaultMessage:
+                  'Accepts a numeric value of the same type as the field which is substituted for any explicit null values.',
               }
             )}
           >
             <UseField
               path="null_value"
-              config={{
-                defaultValue: 'true',
-                deserializer: (value: string | boolean) => mapIndexToValue.indexOf(value),
-                serializer: (value: number) => mapIndexToValue[value],
-              }}
-              component={SelectField}
-              componentProps={{
-                euiFieldProps: {
-                  options: nullValueOptions,
-                  style: { maxWidth: 300 },
-                },
-              }}
+              component={NumericField}
+              config={{ formatters: [fieldFormatters.toInt] }}
             />
           </NullValueParameter>
+
+          {/* enable_position_increments */}
+          <EditFieldFormRow
+            title={
+              <h3>
+                {i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.tokenCount.enablePositionIncrementsFieldTitle',
+                  {
+                    defaultMessage: 'Enable position increments',
+                  }
+                )}
+              </h3>
+            }
+            description={i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.tokenCount.enablePositionIncrementsFieldDescription',
+              {
+                defaultMessage: 'Whether to count position increments.',
+              }
+            )}
+            formFieldPath="enable_position_increments"
+          />
         </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>

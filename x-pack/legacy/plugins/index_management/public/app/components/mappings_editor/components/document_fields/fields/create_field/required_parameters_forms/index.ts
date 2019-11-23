@@ -8,6 +8,7 @@ import { ComponentType } from 'react';
 import { MainType, SubType, DataType, NormalizedFields } from '../../../../../types';
 
 import { AliasTypeRequiredParameters } from './alias_type';
+import { TokenCountTypeRequiredParameters } from './token_count_type';
 
 export interface ComponentProps {
   allFields: NormalizedFields['byId'];
@@ -15,6 +16,7 @@ export interface ComponentProps {
 
 const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
   alias: AliasTypeRequiredParameters,
+  token_count: TokenCountTypeRequiredParameters,
 };
 
 export const getParametersFormForType = (

@@ -5,11 +5,9 @@
  */
 import React from 'react';
 
-import { i18n } from '@kbn/i18n';
-
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
-import { UseField, SelectField } from '../../../../shared_imports';
+
 import {
   StoreParameter,
   IndexParameter,
@@ -32,32 +30,11 @@ const getDefaultValueToggle = (param: string, field: FieldType) => {
   }
 };
 
-const mapIndexToValue = ['true', true, 'false', false];
-
-const nullValueOptions = [
-  {
-    value: 0,
-    text: `"true"`,
-  },
-  {
-    value: 1,
-    text: 'true',
-  },
-  {
-    value: 2,
-    text: `"false"`,
-  },
-  {
-    value: 3,
-    text: 'false',
-  },
-];
-
 interface Props {
   field: NormalizedField;
 }
 
-export const BooleanType = ({ field }: Props) => {
+export const IpType = ({ field }: Props) => {
   return (
     <>
       <EditFieldSection>
@@ -74,29 +51,7 @@ export const BooleanType = ({ field }: Props) => {
           {/* null_value */}
           <NullValueParameter
             defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
-            description={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.booleanNullValueFieldDescription',
-              {
-                defaultMessage: 'Whether to substitute values for any explicit null values.',
-              }
-            )}
-          >
-            <UseField
-              path="null_value"
-              config={{
-                defaultValue: 'true',
-                deserializer: (value: string | boolean) => mapIndexToValue.indexOf(value),
-                serializer: (value: number) => mapIndexToValue[value],
-              }}
-              component={SelectField}
-              componentProps={{
-                euiFieldProps: {
-                  options: nullValueOptions,
-                  style: { maxWidth: 300 },
-                },
-              }}
-            />
-          </NullValueParameter>
+          />
         </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>

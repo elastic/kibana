@@ -10,3 +10,5 @@
  * and let Elasticsearch handle it.
  */
 export const INDEX_DEFAULT = 'index_default';
+
+export const STANDARD = 'standard';

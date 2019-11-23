@@ -33,6 +33,7 @@ export {
   ToggleField,
   NumericField,
   CheckBoxField,
+  TextAreaField,
 } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/components';
 
 export {

@@ -11,7 +11,10 @@ import { PARAMETERS_DEFINITION } from './constants';
 export interface DataTypeDefinition {
   label: string;
   value: DataType;
-  docUri?: string;
+  documentation?: {
+    main: string;
+    [key: string]: string;
+  };
   subTypes?: { label: string; types: SubType[] };
 }
 
@@ -99,10 +102,15 @@ export type ParameterName =
   | 'ignore_above'
   | 'split_queries_on_whitespace'
   | 'scaling_factor'
-  | 'path'
-  | 'depth_limit'
+  | 'max_input_length'
+  | 'preserve_separators'
+  | 'preserve_position_increments'
+  | 'ignore_z_value'
+  | 'enable_position_increments'
   | 'orientation'
-  | 'ignore_z_value';
+  | 'points_only'
+  | 'path'
+  | 'depth_limit';
 
 export interface Parameter {
   fieldConfig: FieldConfig;
@@ -199,3 +207,7 @@ export interface IndexSettingsInterface {
  * ES always returns the settings wrapped under "index".
  */
 export type IndexSettings = IndexSettingsInterface | { index: IndexSettingsInterface };
+
+export interface ComboBoxOption {
+  label: string;
+}
