@@ -5,15 +5,83 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Logger } from 'src/core/server';
-import { SIGNALS_ID } from '../../../../common/constants';
+import { Logger, SavedObject, SavedObjectAttributes } from 'src/core/server';
+import { defaultIndexPattern } from '../../../../default_index_pattern';
+import { AlertServices } from '../../../../../alerting/server/types';
+import {
+  SIGNALS_ID,
+  DEFAULT_INDEX_KEY,
+  DEFAULT_SIGNALS_INDEX_KEY,
+  DEFAULT_SIGNALS_INDEX,
+} from '../../../../common/constants';
 
 import { buildEventsSearchQuery } from './build_events_query';
 import { searchAfterAndBulkIndex } from './utils';
 import { SignalAlertTypeDefinition } from './types';
 import { getFilter } from './get_filter';
 
-export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTypeDefinition => {
+interface IndexObjectAttributes extends SavedObjectAttributes {
+  [DEFAULT_INDEX_KEY]: string[];
+  [DEFAULT_SIGNALS_INDEX_KEY]: string;
+}
+
+export const getInputIndex = (
+  inputIndex: string[] | undefined | null,
+  configuration: SavedObject<IndexObjectAttributes>
+): string[] => {
+  if (inputIndex != null) {
+    return inputIndex;
+  } else {
+    if (configuration.attributes[DEFAULT_INDEX_KEY] != null) {
+      return configuration.attributes[DEFAULT_INDEX_KEY];
+    } else {
+      return defaultIndexPattern;
+    }
+  }
+};
+
+export const getOutputIndex = (
+  outputIndex: string | undefined | null,
+  configuration: SavedObject<IndexObjectAttributes>
+): string => {
+  if (outputIndex != null) {
+    return outputIndex;
+  } else {
+    if (configuration.attributes[DEFAULT_SIGNALS_INDEX_KEY] != null) {
+      return configuration.attributes[DEFAULT_SIGNALS_INDEX_KEY];
+    } else {
+      return DEFAULT_SIGNALS_INDEX;
+    }
+  }
+};
+
+export const getInputOutputIndex = async (
+  services: AlertServices,
+  version: string,
+  inputIndex: string[] | null | undefined,
+  outputIndex: string | null | undefined
+): Promise<{
+  inputIndex: string[];
+  outputIndex: string;
+}> => {
+  if (inputIndex != null && outputIndex != null) {
+    return { inputIndex, outputIndex };
+  } else {
+    const configuration = await services.savedObjectsClient.get('config', version);
+    return {
+      inputIndex: getInputIndex(inputIndex, configuration),
+      outputIndex: getOutputIndex(outputIndex, configuration),
+    };
+  }
+};
+
+export const signalsAlertType = ({
+  logger,
+  version,
+}: {
+  logger: Logger;
+  version: string;
+}): SignalAlertTypeDefinition => {
   return {
     id: SIGNALS_ID,
     name: 'SIEM Signals',
@@ -70,6 +138,12 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
 
       const searchAfterSize = size ? size : 1000;
 
+      const { inputIndex, outputIndex: signalsIndex } = await getInputOutputIndex(
+        services,
+        version,
+        index,
+        outputIndex
+      );
       const esFilter = await getFilter({
         type,
         filter,
@@ -78,11 +152,11 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         query,
         savedId,
         services,
-        index,
+        index: inputIndex,
       });
 
       const noReIndex = buildEventsSearchQuery({
-        index,
+        index: inputIndex,
         from,
         to,
         filter: esFilter,
@@ -98,7 +172,11 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         const noReIndexResult = await services.callCluster('search', noReIndex);
         if (noReIndexResult.hits.total.value !== 0) {
           logger.info(
-            `Total signals found from signal rule "id: ${alertId}", "ruleId: ${ruleId}": ${noReIndexResult.hits.total.value}`
+            `Found ${
+              noReIndexResult.hits.total.value
+            } signals from the indexes of "${inputIndex.join(
+              ', '
+            )}" using signal rule "id: ${alertId}", "ruleId: ${ruleId}", pushing signals to index ${signalsIndex}`
           );
         }
 
@@ -108,7 +186,7 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
           services,
           logger,
           id: alertId,
-          signalsIndex: outputIndex,
+          signalsIndex,
           name,
           createdBy,
           updatedBy,
