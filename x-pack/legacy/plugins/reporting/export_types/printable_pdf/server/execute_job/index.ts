@@ -6,7 +6,7 @@
 
 import * as Rx from 'rxjs';
 import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
-import { ServerFacade } from '../../../../types';
+import { ExecuteJobFactory, ServerFacade } from '../../../../types';
 import { JobDocPayloadPDF } from '../../types';
 import { PLUGIN_ID, PDF_JOB_TYPE } from '../../../../common/constants';
 import { LevelLogger } from '../../../../server/lib';
@@ -19,7 +19,9 @@ import {
   getCustomLogo,
 } from '../../../common/execute_job/';
 
-export const executeJobFactory = function executeJobFactoryFn(server: ServerFacade) {
+export const executeJobFactory: ExecuteJobFactory = function executeJobFactoryFn(
+  server: ServerFacade
+) {
   const generatePdfObservable = generatePdfObservableFactory(server);
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PDF_JOB_TYPE, 'execute']);
 

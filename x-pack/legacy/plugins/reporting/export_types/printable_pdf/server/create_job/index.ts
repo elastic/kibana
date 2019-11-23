@@ -5,7 +5,12 @@
  */
 
 import { PLUGIN_ID, PDF_JOB_TYPE } from '../../../../common/constants';
-import { ServerFacade, RequestFacade, ConditionalHeaders } from '../../../../types';
+import {
+  CreateJobFactory,
+  ServerFacade,
+  RequestFacade,
+  ConditionalHeaders,
+} from '../../../../types';
 import { validateUrls } from '../../../../common/validate_urls';
 import { LevelLogger } from '../../../../server/lib';
 import { cryptoFactory } from '../../../../server/lib/crypto';
@@ -20,7 +25,9 @@ interface CreateJobFnOpts {
   layout: any;
 }
 
-export const createJobFactory = function createJobFactoryFn(server: ServerFacade) {
+export const createJobFactory: CreateJobFactory = function createJobFactoryFn(
+  server: ServerFacade
+) {
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PDF_JOB_TYPE, 'create']);
   const compatibilityShim = compatibilityShimFactory(server, logger);
   const crypto = cryptoFactory(server);
