@@ -25,7 +25,7 @@ export const getInputIndex = (
   if (inputIndex != null) {
     return inputIndex;
   } else {
-    if (configuration.attributes[DEFAULT_INDEX_KEY] != null) {
+    if (configuration.attributes != null && configuration.attributes[DEFAULT_INDEX_KEY] != null) {
       return configuration.attributes[DEFAULT_INDEX_KEY];
     } else {
       return defaultIndexPattern;
@@ -40,7 +40,10 @@ export const getOutputIndex = (
   if (outputIndex != null) {
     return outputIndex;
   } else {
-    if (configuration.attributes[DEFAULT_SIGNALS_INDEX_KEY] != null) {
+    if (
+      configuration.attributes != null &&
+      configuration.attributes[DEFAULT_SIGNALS_INDEX_KEY] != null
+    ) {
       return configuration.attributes[DEFAULT_SIGNALS_INDEX_KEY];
     } else {
       return DEFAULT_SIGNALS_INDEX;
