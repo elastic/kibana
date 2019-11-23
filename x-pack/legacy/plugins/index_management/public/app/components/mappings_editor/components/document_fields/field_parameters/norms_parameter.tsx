@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -25,13 +24,5 @@ export const NormsParameter = () => (
     })}
     formFieldPath="norms"
     direction="column"
-  >
-    <EuiCallOut color="warning">
-      <p>
-        {i18n.translate('xpack.idxMgmt.mappingsEditor.useNormsFieldWarningMessage', {
-          defaultMessage: 'Enabling norms requires a lot of disk use.',
-        })}
-      </p>
-    </EuiCallOut>
-  </EditFieldFormRow>
+  />
 );

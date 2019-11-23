@@ -88,7 +88,7 @@ export const PARAMETERS_DEFINITION = {
   store: {
     fieldConfig: {
       type: FIELD_TYPES.CHECKBOX,
-      defaultValue: true,
+      defaultValue: false,
     },
     docs: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-store.html',
   },
@@ -161,6 +161,24 @@ export const PARAMETERS_DEFINITION = {
               'xpack.idxMgmt.mappingsEditor.parameters.validations.nullValueIsRequiredErrorMessage',
               {
                 defaultMessage: 'Specify a null value.',
+              }
+            )
+          ),
+        },
+      ],
+    },
+  },
+  copy_to: {
+    fieldConfig: {
+      defaultValue: '',
+      type: FIELD_TYPES.TEXT,
+      validations: [
+        {
+          validator: emptyField(
+            i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.validations.copyToIsRequiredErrorMessage',
+              {
+                defaultMessage: 'Specify a copy value.',
               }
             )
           ),
@@ -354,7 +372,7 @@ export const PARAMETERS_DEFINITION = {
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.indexOptionsLabel', {
         defaultMessage: 'Index options',
       }),
-      defaultValue: 'docs',
+      defaultValue: 'positions',
       type: FIELD_TYPES.SUPER_SELECT,
       helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.indexOptionsHelpText', {
         defaultMessage: 'Information that should be stored in the index.',
@@ -393,7 +411,7 @@ export const PARAMETERS_DEFINITION = {
   },
   norms: {
     fieldConfig: {
-      defaultValue: false,
+      defaultValue: true,
     },
   },
   term_vector: {

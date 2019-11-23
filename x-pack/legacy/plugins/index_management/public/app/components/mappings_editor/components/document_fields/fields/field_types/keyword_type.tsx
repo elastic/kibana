@@ -20,6 +20,7 @@ import {
   EagerGlobalOrdinalsParameter,
   NormsParameter,
   SimilarityParameter,
+  CopyToParameter,
 } from '../../field_parameters';
 import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
 
@@ -30,6 +31,7 @@ const getDefaultValueToggle = (param: string, field: FieldType) => {
     case 'ignore_above': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
     }
+    case 'copy_to':
     case 'null_value': {
       return field.null_value !== undefined && field.null_value !== '';
     }
@@ -51,44 +53,37 @@ export const KeywordType = ({ field }: Props) => {
       <EditFieldSection>
         <StoreParameter />
         <IndexParameter
+          config={{ ...getFieldConfig('index_options'), defaultValue: 'docs' }}
           indexOptions={(PARAMETERS_OPTIONS.index_options! as SuperSelectOption[]).filter(
             // keyword type do not allow "positions" for index_options
             option => option.value !== 'positions' && option.value !== 'offsets'
           )}
         />
         <DocValuesParameter />
+        {/* normalizer */}
+        <EditFieldFormRow
+          title={
+            <h3>
+              {i18n.translate('xpack.idxMgmt.mappingsEditor.normalizerFieldTitle', {
+                defaultMessage: 'Use index default normalizer',
+              })}
+            </h3>
+          }
+          description={i18n.translate('xpack.idxMgmt.mappingsEditor.normalizerFieldDescription', {
+            defaultMessage: 'How to pre-process the keyword prior to indexing.',
+          })}
+          toggleDefaultValue={getDefaultValueToggle('normalizer', field.source)}
+        >
+          {isOn =>
+            isOn === false && (
+              <UseField path="normalizer" config={getFieldConfig('normalizer')} component={Field} />
+            )
+          }
+        </EditFieldFormRow>
       </EditFieldSection>
 
       <AdvancedSettingsWrapper>
         <EditFieldSection>
-          {/* normalizer */}
-          <EditFieldFormRow
-            title={
-              <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.normalizerFieldTitle', {
-                  defaultMessage: 'Use index default normalizer',
-                })}
-              </h3>
-            }
-            description={i18n.translate('xpack.idxMgmt.mappingsEditor.normalizerFieldDescription', {
-              defaultMessage: 'How to pre-process the keyword prior to indexing.',
-            })}
-            toggleDefaultValue={getDefaultValueToggle('normalizer', field.source)}
-          >
-            {isOn =>
-              isOn === false && (
-                <UseField
-                  path="normalizer"
-                  config={getFieldConfig('normalizer')}
-                  component={Field}
-                />
-              )
-            }
-          </EditFieldFormRow>
-
-          {/* boost */}
-          <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
-
           {/* null_value */}
           <NullValueParameter
             defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
@@ -149,6 +144,12 @@ export const KeywordType = ({ field }: Props) => {
             )}
             formFieldPath="split_queries_on_whitespace"
           />
+
+          {/* copy_to */}
+          <CopyToParameter defaultToggleValue={getDefaultValueToggle('copy_to', field.source)} />
+
+          {/* boost */}
+          <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>

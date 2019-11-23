@@ -67,9 +67,6 @@ export const FlattenedType = React.memo(({ field }: Props) => {
 
       <AdvancedSettingsWrapper>
         <EditFieldSection>
-          {/* boost */}
-          <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
-
           {/* eager_global_ordinals */}
           <EagerGlobalOrdinalsParameter />
 
@@ -126,6 +123,9 @@ export const FlattenedType = React.memo(({ field }: Props) => {
           <NullValueParameter
             defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
           />
+
+          {/* boost */}
+          <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>

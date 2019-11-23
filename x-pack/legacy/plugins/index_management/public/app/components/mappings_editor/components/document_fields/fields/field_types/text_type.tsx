@@ -34,6 +34,7 @@ import {
   EagerGlobalOrdinalsParameter,
   NormsParameter,
   SimilarityParameter,
+  CopyToParameter,
 } from '../../field_parameters';
 import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
 
@@ -51,6 +52,9 @@ const getDefaultValueToggle = (param: string, field: FieldType) => {
     }
     case 'analyzers': {
       return field.search_analyzer !== undefined && field.search_analyzer !== field.analyzer;
+    }
+    case 'copy_to': {
+      return field.null_value !== undefined && field.null_value !== '';
     }
     case 'indexPrefixes': {
       if (field.index_prefixes === undefined) {
@@ -100,63 +104,13 @@ export const TextType = React.memo(({ field }: Props) => {
 
         {/* index */}
         <IndexParameter />
-
-        {/* fielddata */}
-        <EditFieldFormRow
-          title={
-            <h3>
-              {i18n.translate('xpack.idxMgmt.mappingsEditor.fielddataTitle', {
-                defaultMessage: 'Fielddata',
-              })}
-            </h3>
-          }
-          description={i18n.translate('xpack.idxMgmt.mappingsEditor.fielddataDescription', {
-            defaultMessage:
-              'Whether to use in-memory fielddata for sorting, aggregations, or scripting.',
-          })}
-          formFieldPath="fielddata"
-        >
-          {/* fielddata_frequency_filter */}
-          <EuiFormRow label={i18nTexts.rangeFieldLabel}>
-            <UseMultiFields
-              fields={{
-                min: {
-                  path: 'fielddata_frequency_filter.min',
-                  config: getFieldConfig('fielddata_frequency_filter', 'min'),
-                },
-                max: {
-                  path: 'fielddata_frequency_filter.max',
-                  config: getFieldConfig('fielddata_frequency_filter', 'max'),
-                },
-              }}
-            >
-              {({ min, max }) => (
-                <EuiDualRange
-                  min={0}
-                  max={100}
-                  value={[min.value as number, max.value as number]}
-                  onChange={onFrequencyFilterChange(min, max)}
-                  showInput
-                />
-              )}
-            </UseMultiFields>
-          </EuiFormRow>
-
-          <EuiSpacer />
-
-          <UseField
-            path="fielddata_frequency_filter.min_segment_size"
-            config={getFieldConfig('fielddata_frequency_filter', 'min_segment_size')}
-            component={Field}
-          />
-        </EditFieldFormRow>
       </EditFieldSection>
 
       <AdvancedSettingsWrapper>
         {/* Analyzers */}
         <EditFieldSection
           title={i18n.translate('xpack.idxMgmt.mappingsEditor.analyzersSectionTitle', {
-            defaultMessage: 'Analysers',
+            defaultMessage: 'Analyzers',
           })}
         >
           <FormDataProvider pathsToWatch="useSameAnalyzerForSearch">
@@ -220,9 +174,57 @@ export const TextType = React.memo(({ field }: Props) => {
         </EditFieldSection>
 
         <EditFieldSection>
-          {/* boost */}
-          <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
+          {/* fielddata */}
+          <EditFieldFormRow
+            title={
+              <h3>
+                {i18n.translate('xpack.idxMgmt.mappingsEditor.fielddataTitle', {
+                  defaultMessage: 'Fielddata',
+                })}
+              </h3>
+            }
+            description={i18n.translate('xpack.idxMgmt.mappingsEditor.fielddataDescription', {
+              defaultMessage:
+                'Whether to use in-memory fielddata for sorting, aggregations, or scripting.',
+            })}
+            formFieldPath="fielddata"
+          >
+            {/* fielddata_frequency_filter */}
+            <EuiFormRow label={i18nTexts.rangeFieldLabel}>
+              <UseMultiFields
+                fields={{
+                  min: {
+                    path: 'fielddata_frequency_filter.min',
+                    config: getFieldConfig('fielddata_frequency_filter', 'min'),
+                  },
+                  max: {
+                    path: 'fielddata_frequency_filter.max',
+                    config: getFieldConfig('fielddata_frequency_filter', 'max'),
+                  },
+                }}
+              >
+                {({ min, max }) => {
+                  return (
+                    <EuiDualRange
+                      min={0}
+                      max={100}
+                      value={[min.value as number, max.value as number]}
+                      onChange={onFrequencyFilterChange(min, max)}
+                      showInput
+                    />
+                  );
+                }}
+              </UseMultiFields>
+            </EuiFormRow>
 
+            <EuiSpacer />
+
+            <UseField
+              path="fielddata_frequency_filter.min_segment_size"
+              config={getFieldConfig('fielddata_frequency_filter', 'min_segment_size')}
+              component={Field}
+            />
+          </EditFieldFormRow>
           {/* eager_global_ordinals */}
           <EagerGlobalOrdinalsParameter />
 
@@ -239,7 +241,7 @@ export const TextType = React.memo(({ field }: Props) => {
               'xpack.idxMgmt.mappingsEditor.indexPhrasesFieldDescription',
               {
                 defaultMessage:
-                  'Whether to index two-term word combinations into a separate field.',
+                  'Whether to index two-term word combinations into a separate field. Activating this will speed up phrase queries, but could slow down indexing.',
               }
             )}
             formFieldPath="index_phrases"
@@ -258,7 +260,7 @@ export const TextType = React.memo(({ field }: Props) => {
               'xpack.idxMgmt.mappingsEditor.indexPrefixesFieldDescription',
               {
                 defaultMessage:
-                  'Whether to index prefixes of 2 and 5 characters into a separate field.',
+                  'Whether to index prefixes of 2 and 5 characters into a separate field. Activating this will speed up prefix queries, but could slow down indexing.',
               }
             )}
             toggleDefaultValue={getDefaultValueToggle('indexPrefixes', field.source)}
@@ -421,6 +423,12 @@ export const TextType = React.memo(({ field }: Props) => {
               )}
             </FormDataProvider>
           </EditFieldFormRow>
+
+          {/* copy_to */}
+          <CopyToParameter defaultToggleValue={getDefaultValueToggle('copy_to', field.source)} />
+
+          {/* boost */}
+          <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>
