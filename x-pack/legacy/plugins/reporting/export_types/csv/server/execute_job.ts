@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExecuteJobFactory, ServerFacade } from '../../../types';
+import { ExecuteJobFactory, ESQueueWorkerExecuteFn, ServerFacade } from '../../../types';
 import { CSV_JOB_TYPE, PLUGIN_ID } from '../../../common/constants';
 import { cryptoFactory, LevelLogger } from '../../../server/lib';
 import { JobDocPayloadDiscoverCsv } from '../types';
@@ -14,9 +14,10 @@ import { createGenerateCsv } from './lib/generate_csv';
 // @ts-ignore untyped module
 import { fieldFormatMapFactory } from './lib/field_format_map';
 
-export const executeJobFactory: ExecuteJobFactory = function executeJobFactoryFn(
-  server: ServerFacade
-) {
+export const executeJobFactory: ExecuteJobFactory<
+  JobDocPayloadDiscoverCsv,
+  ESQueueWorkerExecuteFn<JobDocPayloadDiscoverCsv>
+> = function executeJobFactoryFn(server: ServerFacade) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   const crypto = cryptoFactory(server);
   const config = server.config();
