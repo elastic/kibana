@@ -5,17 +5,20 @@
  */
 import singleEndpointData from './../fixtures/mapper_test/single_endpoint_data.json';
 import allEndpointData from './../fixtures/mapper_test/all_endpoints_data.json';
-import { IClusterClient, IScopedClusterClient, KibanaRequest } from 'kibana/server';
+import { IClusterClient, IScopedClusterClient } from 'kibana/server';
 import { EndpointHandler } from './endpoint_handler';
 import { SearchResponse } from 'elasticsearch';
 import { EndpointData } from '../types';
 import { elasticsearchServiceMock, httpServerMock } from '../../../../../src/core/server/mocks';
 import { ResponseToEndpointMapper } from './response_to_endpoint_mapper';
+import { EndpointConfigSchema } from '../config';
 
 describe('test endpoint handler', () => {
   let mockClusterClient: jest.Mocked<IClusterClient>;
   let mockScopedClient: jest.Mocked<IScopedClusterClient>;
   const responseToEndpointMapper: ResponseToEndpointMapper = new ResponseToEndpointMapper();
+  const singleEndpointResult = singleEndpointData as SearchResponse<EndpointData>;
+  const multipleEndpointsResult = allEndpointData as SearchResponse<EndpointData>;
   beforeEach(() => {
     mockClusterClient = elasticsearchServiceMock.createClusterClient() as jest.Mocked<
       IClusterClient
@@ -25,10 +28,13 @@ describe('test endpoint handler', () => {
   });
   describe('findEndpoint()', () => {
     it('test find endpoint', async () => {
-      mockScopedClient.callAsCurrentUser = jest.fn(
-        () => singleEndpointData as SearchResponse<EndpointData>
+      mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
+        Promise.resolve(singleEndpointResult)
       );
-      const testHandler = new EndpointHandler(mockClusterClient);
+      const testHandler = new EndpointHandler({
+        clusterClient: mockClusterClient,
+        config: () => Promise.resolve(EndpointConfigSchema.validate({})),
+      });
       const response = await testHandler.findEndpoint(
         'endpoint-id',
         httpServerMock.createKibanaRequest()
@@ -59,10 +65,14 @@ describe('test endpoint handler', () => {
 
   describe('findLatestOfAllEndpoints()', () => {
     it('test find the latest of all endpoints', async () => {
-      mockScopedClient.callAsCurrentUser = jest.fn(
-        () => allEndpointData as SearchResponse<EndpointData>
+      mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
+        Promise.resolve(multipleEndpointsResult)
       );
-      const testHandler = new EndpointHandler(mockClusterClient);
+
+      const testHandler = new EndpointHandler({
+        clusterClient: mockClusterClient,
+        config: () => Promise.resolve(EndpointConfigSchema.validate({})),
+      });
       const response = await testHandler.findLatestOfAllEndpoints(
         httpServerMock.createKibanaRequest()
       );
@@ -96,17 +106,19 @@ describe('test endpoint handler', () => {
     });
 
     it('test find the latest of all endpoints with params', async () => {
-      mockScopedClient.callAsCurrentUser = jest.fn(
-        () => allEndpointData as SearchResponse<EndpointData>
+      mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
+        Promise.resolve(multipleEndpointsResult)
       );
-      const testHandler = new EndpointHandler(mockClusterClient);
-      const mockRequest: KibanaRequest = {
+      const testHandler = new EndpointHandler({
+        clusterClient: mockClusterClient,
+        config: () => Promise.resolve(EndpointConfigSchema.validate({})),
+      });
+      const response = await testHandler.findLatestOfAllEndpoints({
         params: {
           pageIndex: 1,
           pageSize: 10,
         },
-      };
-      const response = await testHandler.findLatestOfAllEndpoints(mockRequest);
+      });
       const result = responseToEndpointMapper.mapInnerHits(response);
       expect(mockScopedClient.callAsCurrentUser).toBeCalledWith('search', {
         from: 10,

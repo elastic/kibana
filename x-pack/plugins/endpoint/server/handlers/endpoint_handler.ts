@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IClusterClient, KibanaRequest } from 'kibana/server';
+import { KibanaRequest } from 'kibana/server';
 import { SearchParams, SearchResponse } from 'elasticsearch';
-import { EndpointData } from '../types';
+import { EndpointAppContext, EndpointData } from '../types';
 
 export interface EndpointRequestContext {
   findEndpoint: (
@@ -17,10 +17,10 @@ export interface EndpointRequestContext {
 }
 
 export class EndpointHandler implements EndpointRequestContext {
-  private elasticSearchClient: IClusterClient;
+  private readonly endpointAppContext: EndpointAppContext;
 
-  constructor(elasticSearchClient: IClusterClient) {
-    this.elasticSearchClient = elasticSearchClient;
+  constructor(endpointAppContext: EndpointAppContext) {
+    this.endpointAppContext = endpointAppContext;
   }
 
   async findEndpoint(
@@ -49,8 +49,9 @@ export class EndpointHandler implements EndpointRequestContext {
   }
 
   async findLatestOfAllEndpoints(request: KibanaRequest): Promise<SearchResponse<EndpointData>> {
-    const pageSize: number = request.params.pageSize || 10;
-    const pageIndex: number = request.params.pageIndex || 0;
+    const config = await this.endpointAppContext.config();
+    const pageSize: number = request.params.pageSize || config.pageSize;
+    const pageIndex: number = request.params.pageIndex || config.defaultPageIndex;
     const searchParams: SearchParams = {
       from: pageIndex * pageSize,
       size: pageSize,
@@ -76,7 +77,7 @@ export class EndpointHandler implements EndpointRequestContext {
     clientParams: Record<string, any> = {},
     request: KibanaRequest
   ): Promise<SearchResponse<EndpointData>> {
-    const result = this.elasticSearchClient
+    const result = this.endpointAppContext.clusterClient
       .asScoped(request)
       .callAsCurrentUser('search', clientParams);
     return result as Promise<SearchResponse<EndpointData>>;
