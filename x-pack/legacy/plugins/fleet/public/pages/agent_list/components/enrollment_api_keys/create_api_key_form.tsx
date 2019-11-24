@@ -5,13 +5,22 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldText, EuiButton } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiFieldText,
+  EuiButton,
+  EuiSelect,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useInput } from '../../../../hooks/use_input';
 import { useLibs } from '../../../../hooks/use_libs';
+import { usePolicies } from './hooks';
 
 export const CreateApiKeyForm: React.SFC<{ onChange: () => void }> = ({ onChange }) => {
+  const { data: policies } = usePolicies();
   const { inputs, onSubmit, submitted } = useCreateApiKey(() => onChange());
 
   return (
@@ -31,7 +40,13 @@ export const CreateApiKeyForm: React.SFC<{ onChange: () => void }> = ({ onChange
             defaultMessage: 'Policy',
           })}
         >
-          <EuiFieldText autoComplete={'false'} {...inputs.policyIdInput.props} />
+          <EuiSelect
+            {...inputs.policyIdInput.props}
+            options={policies.map(policy => ({
+              value: policy.id,
+              text: policy.name,
+            }))}
+          />
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -50,7 +65,7 @@ function useCreateApiKey(onSuccess: () => void) {
   const [submitted, setSubmitted] = React.useState(false);
   const inputs = {
     nameInput: useInput(),
-    policyIdInput: useInput(),
+    policyIdInput: useInput('default'),
   };
 
   const onSubmit = async () => {

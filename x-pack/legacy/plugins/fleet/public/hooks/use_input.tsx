@@ -6,13 +6,13 @@
 
 import React from 'react';
 
-export function useInput() {
-  const [value, setValue] = React.useState<string>('');
+export function useInput(defaultValue = '') {
+  const [value, setValue] = React.useState<string>(defaultValue);
 
   return {
     value,
     props: {
-      onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+      onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setValue(e.target.value);
       },
       value,

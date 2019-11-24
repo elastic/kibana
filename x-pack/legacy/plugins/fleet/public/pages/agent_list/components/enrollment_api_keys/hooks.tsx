@@ -9,6 +9,7 @@ import { useLibs } from '../../../../hooks/use_libs';
 import { Pagination } from '../../../../hooks/use_pagination';
 import { ReturnTypeList, ReturnTypeGet } from '../../../../../common/return_types';
 import { EnrollmentApiKey } from '../../../../../common/types/domain_data';
+import { Policy } from '../../../../../scripts/mock_spec/types';
 
 export function useEnrollmentApiKeys(pagination: Pagination) {
   const { enrollmentApiKeys } = useLibs();
@@ -41,6 +42,41 @@ export function useEnrollmentApiKeys(pagination: Pagination) {
   return {
     ...state,
     refresh: () => fetchApiKeys(),
+  };
+}
+
+export function usePolicies() {
+  const { policies } = useLibs();
+  const [state, setState] = useState<{
+    data: Policy[];
+    isLoading: boolean;
+  }>({
+    isLoading: true,
+    data: [],
+  });
+
+  async function fetchPolicies() {
+    try {
+      const data = await policies.getAll();
+      setState({
+        data,
+        isLoading: false,
+      });
+    } catch (err) {
+      setState({
+        data: [],
+        isLoading: false,
+      });
+    }
+  }
+
+  useEffect(() => {
+    fetchPolicies();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return {
+    ...state,
   };
 }
 
