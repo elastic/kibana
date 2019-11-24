@@ -113,16 +113,18 @@ describe('test endpoint handler', () => {
         clusterClient: mockClusterClient,
         config: () => Promise.resolve(EndpointConfigSchema.validate({})),
       });
-      const response = await testHandler.findLatestOfAllEndpoints({
-        params: {
-          pageIndex: 1,
-          pageSize: 10,
-        },
-      });
+      const response = await testHandler.findLatestOfAllEndpoints(
+        httpServerMock.createKibanaRequest({
+          query: {
+            pageIndex: 1,
+            pageSize: 2,
+          },
+        })
+      );
       const result = responseToEndpointMapper.mapInnerHits(response);
       expect(mockScopedClient.callAsCurrentUser).toBeCalledWith('search', {
-        from: 10,
-        size: 10,
+        from: 2,
+        size: 2,
         body: {
           query: {
             match_all: {},

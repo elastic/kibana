@@ -31,7 +31,7 @@ export function registerEndpointRoutes(router: IRouter, endpointHandler: Endpoin
     {
       path: '/api/endpoint/endpoints',
       validate: {
-        params: schema.object({
+        query: schema.object({
           pageSize: schema.number({ defaultValue: 10 }),
           pageIndex: schema.number({ defaultValue: 0 }),
         }),
