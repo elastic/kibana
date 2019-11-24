@@ -50,28 +50,30 @@ interface Props {
   timelineId: string;
 }
 
-export const EventsSelect = React.memo<Props>(({ checkState, timelineId }) => (
-  <div data-test-subj="events-select">
-    <EuiSuperSelect
-      className="eventsSelectDropdown"
-      data-test-subj="events-select-dropdown"
-      itemClassName="eventsSelectItem"
-      onChange={noop}
-      options={getEventsSelectOptions()}
-    />
-    <CheckboxContainer data-test-subj="timeline-events-select-checkbox-container">
-      <PositionedCheckbox data-test-subj="timeline-events-select-positioned-checkbox">
-        <EuiCheckbox
-          checked={checkState === 'checked'}
-          data-test-subj="events-select-checkbox"
-          disabled
-          id={`timeline-${timelineId}-events-select`}
-          indeterminate={checkState === 'indeterminate'}
-          onChange={noop}
-        />
-      </PositionedCheckbox>
-    </CheckboxContainer>
-  </div>
-));
+export const EventsSelect = React.memo<Props>(({ checkState, timelineId }) => {
+  return (
+    <div data-test-subj="events-select">
+      <EuiSuperSelect
+        className="eventsSelectDropdown"
+        data-test-subj="events-select-dropdown"
+        itemClassName="eventsSelectItem"
+        onChange={noop}
+        options={getEventsSelectOptions()}
+      />
+      <CheckboxContainer data-test-subj="timeline-events-select-checkbox-container">
+        <PositionedCheckbox data-test-subj="timeline-events-select-positioned-checkbox">
+          <EuiCheckbox
+            checked={checkState === 'checked'}
+            data-test-subj="events-select-checkbox"
+            disabled
+            id={`timeline-${timelineId}-events-select`}
+            indeterminate={checkState === 'indeterminate'}
+            onChange={noop}
+          />
+        </PositionedCheckbox>
+      </CheckboxContainer>
+    </div>
+  );
+});
 
 EventsSelect.displayName = 'EventsSelect';

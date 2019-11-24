@@ -6,7 +6,6 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as React from 'react';
-
 import styled from 'styled-components';
 
 import { SourceDestination } from '../../source_destination';

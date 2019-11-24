@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, MouseEvent } from 'react';
+import React, { MouseEvent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiLink, EuiPanel } from '@elastic/eui';
 
@@ -20,11 +20,7 @@ interface Props {
   value?: string;
 }
 
-export const ShapePickerPopoverComponent: FunctionComponent<Props> = ({
-  shapes,
-  onChange,
-  value,
-}) => {
+export const ShapePickerPopoverComponent = ({ shapes, onChange, value }: Props) => {
   const button = (handleClick: (ev: MouseEvent) => void) => (
     <EuiPanel paddingSize="s" hasShadow={false}>
       <EuiLink style={{ fontSize: 0 }} onClick={handleClick}>

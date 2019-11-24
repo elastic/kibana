@@ -29,7 +29,9 @@ const iconType = 'popout';
  * Renders an icon that indicates following the hyperlink will navigate to
  * content external to the app
  */
-export const ExternalLinkIcon = React.memo<{ leftMargin?: boolean }>(({ leftMargin = true }) =>
+export const ExternalLinkIcon = React.memo<{
+  leftMargin?: boolean;
+}>(({ leftMargin = true }) =>
   leftMargin ? (
     <LinkIconWithMargin
       color={color}

@@ -21,7 +21,9 @@ NotePreviewsContainer.displayName = 'NotePreviewsContainer';
 /**
  * Renders a preview of a note in the All / Open Timelines table
  */
-export const NotePreviews = React.memo<{ notes?: TimelineResultNote[] | null }>(({ notes }) => {
+export const NotePreviews = React.memo<{
+  notes?: TimelineResultNote[] | null;
+}>(({ notes }) => {
   if (notes == null || notes.length === 0) {
     return null;
   }

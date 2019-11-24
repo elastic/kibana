@@ -38,7 +38,11 @@ const Wrapper = styled.aside<{ isSticky?: boolean }>`
 `;
 Wrapper.displayName = 'Wrapper';
 
-export const FiltersGlobal = React.memo<{ children: React.ReactNode }>(({ children }) => (
+export interface FiltersGlobalProps {
+  children: React.ReactNode;
+}
+
+export const FiltersGlobal = React.memo<FiltersGlobalProps>(({ children }) => (
   <Sticky disableCompensation={disableStickyMq.matches} topOffset={-offsetChrome}>
     {({ style, isSticky }) => (
       <Wrapper className="siemFiltersGlobal" isSticky={isSticky} style={style}>

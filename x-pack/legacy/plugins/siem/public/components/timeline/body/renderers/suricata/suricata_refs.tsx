@@ -17,11 +17,7 @@ const LinkEuiFlexItem = styled(EuiFlexItem)`
 
 LinkEuiFlexItem.displayName = 'LinkEuiFlexItem';
 
-interface SuricataRefsProps {
-  signatureId: number;
-}
-
-export const SuricataRefs = React.memo<SuricataRefsProps>(({ signatureId }) => {
+export const SuricataRefs = React.memo<{ signatureId: number }>(({ signatureId }) => {
   const links = getLinksFromSignature(signatureId);
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="center" wrap>

@@ -53,15 +53,13 @@ export const DataDrivenColumns = React.memo<Props>(
 
 DataDrivenColumns.displayName = 'DataDrivenColumns';
 
-interface GetMappedNonEcsValueProps {
-  data: TimelineNonEcsData[];
-  fieldName: string;
-}
-
 const getMappedNonEcsValue = ({
   data,
   fieldName,
-}: GetMappedNonEcsValueProps): string[] | undefined => {
+}: {
+  data: TimelineNonEcsData[];
+  fieldName: string;
+}): string[] | undefined => {
   const item = data.find(d => d.field === fieldName);
   if (item != null && item.value != null) {
     return item.value;

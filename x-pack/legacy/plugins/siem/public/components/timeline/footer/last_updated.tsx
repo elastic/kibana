@@ -15,24 +15,20 @@ interface LastUpdatedAtProps {
   updatedAt: number;
 }
 
-interface UpdatedProps {
-  date: number;
-  prefix: string;
-  updatedAt: number;
-}
-
-export const Updated = React.memo<UpdatedProps>(({ date, prefix, updatedAt }) => (
-  <>
-    {prefix}
-    {
-      <FormattedRelative
-        data-test-subj="last-updated-at-date"
-        key={`formatedRelative-${date}`}
-        value={new Date(updatedAt)}
-      />
-    }
-  </>
-));
+export const Updated = React.memo<{ date: number; prefix: string; updatedAt: number }>(
+  ({ date, prefix, updatedAt }) => (
+    <>
+      {prefix}
+      {
+        <FormattedRelative
+          data-test-subj="last-updated-at-date"
+          key={`formatedRelative-${date}`}
+          value={new Date(updatedAt)}
+        />
+      }
+    </>
+  )
+);
 
 Updated.displayName = 'Updated';
 

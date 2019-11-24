@@ -20,13 +20,13 @@ const Details = styled.div`
 
 Details.displayName = 'Details';
 
-interface Props {
+interface ZeekDetailsProps {
   browserFields: BrowserFields;
   data: Ecs;
   timelineId: string;
 }
 
-export const ZeekDetails = React.memo<Props>(({ data, timelineId }) =>
+export const ZeekDetails = React.memo<ZeekDetailsProps>(({ data, timelineId }) =>
   data.zeek != null ? (
     <Details>
       <ZeekSignature data={data} timelineId={timelineId} />

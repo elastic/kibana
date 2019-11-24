@@ -35,11 +35,7 @@ const ToolTipTableValue = styled.span`
 `;
 ToolTipTableValue.displayName = 'ToolTipTableValue';
 
-interface Props {
-  header: ColumnHeader;
-}
-
-export const HeaderToolTipContent = React.memo<Props>(({ header }) => (
+export const HeaderToolTipContent = React.memo<{ header: ColumnHeader }>(({ header }) => (
   <>
     {!isEmpty(header.category) && (
       <P>

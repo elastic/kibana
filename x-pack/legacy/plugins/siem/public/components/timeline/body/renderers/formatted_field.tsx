@@ -23,7 +23,7 @@ import {
   MESSAGE_FIELD_NAME,
 } from './constants';
 
-interface FormattedFieldValueProps {
+export const FormattedFieldValue = React.memo<{
   contextId: string;
   eventId: string;
   fieldFormat?: string;
@@ -31,80 +31,71 @@ interface FormattedFieldValueProps {
   fieldType: string;
   truncate?: boolean;
   value: string | number | undefined | null;
-}
+}>(({ contextId, eventId, fieldFormat, fieldName, fieldType, truncate, value }) => {
+  if (fieldType === IP_FIELD_TYPE) {
+    return (
+      <FormattedIp
+        eventId={eventId}
+        contextId={contextId}
+        fieldName={fieldName}
+        value={!isNumber(value) ? value : String(value)}
+      />
+    );
+  } else if (fieldType === DATE_FIELD_TYPE) {
+    return <FormattedDate fieldName={fieldName} value={value} />;
+  } else if (PORT_NAMES.some(portName => fieldName === portName)) {
+    return (
+      <Port contextId={contextId} eventId={eventId} fieldName={fieldName} value={`${value}`} />
+    );
+  } else if (fieldName === EVENT_DURATION_FIELD_NAME) {
+    return (
+      <Duration contextId={contextId} eventId={eventId} fieldName={fieldName} value={`${value}`} />
+    );
+  } else if (fieldName === HOST_NAME_FIELD_NAME) {
+    const hostname = `${value}`;
 
-export const FormattedFieldValue = React.memo<FormattedFieldValueProps>(
-  ({ contextId, eventId, fieldFormat, fieldName, fieldType, truncate, value }) => {
-    if (fieldType === IP_FIELD_TYPE) {
-      return (
-        <FormattedIp
-          eventId={eventId}
-          contextId={contextId}
-          fieldName={fieldName}
-          value={!isNumber(value) ? value : String(value)}
-        />
-      );
-    } else if (fieldType === DATE_FIELD_TYPE) {
-      return <FormattedDate fieldName={fieldName} value={value} />;
-    } else if (PORT_NAMES.some(portName => fieldName === portName)) {
-      return (
-        <Port contextId={contextId} eventId={eventId} fieldName={fieldName} value={`${value}`} />
-      );
-    } else if (fieldName === EVENT_DURATION_FIELD_NAME) {
-      return (
-        <Duration
-          contextId={contextId}
-          eventId={eventId}
-          fieldName={fieldName}
-          value={`${value}`}
-        />
-      );
-    } else if (fieldName === HOST_NAME_FIELD_NAME) {
-      const hostname = `${value}`;
-
-      return isString(value) && hostname.length > 0 ? (
-        <EuiToolTip content={value}>
-          <HostDetailsLink data-test-subj="host-details-link" hostName={hostname}>
-            {value}
-          </HostDetailsLink>
-        </EuiToolTip>
-      ) : (
-        getEmptyTagValue()
-      );
-    } else if (fieldFormat === BYTES_FORMAT) {
-      return (
-        <Bytes contextId={contextId} eventId={eventId} fieldName={fieldName} value={`${value}`} />
-      );
-    } else if (fieldName === MESSAGE_FIELD_NAME && value != null && value !== '') {
-      return (
-        <>
-          {truncate ? (
-            <TruncatableText data-test-subj="truncatable-message">
-              <EuiToolTip
-                data-test-subj="message-tool-tip"
-                content={
-                  <EuiFlexGroup direction="column" gutterSize="none">
-                    <EuiFlexItem grow={false}>
-                      <span>{fieldName}</span>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <span>{value}</span>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                }
-              >
-                <>{value}</>
-              </EuiToolTip>
-            </TruncatableText>
-          ) : (
-            <>{value}</>
-          )}
-        </>
-      );
-    } else {
-      return getOrEmptyTagFromValue(value);
-    }
+    return isString(value) && hostname.length > 0 ? (
+      <EuiToolTip content={value}>
+        <HostDetailsLink data-test-subj="host-details-link" hostName={hostname}>
+          {value}
+        </HostDetailsLink>
+      </EuiToolTip>
+    ) : (
+      getEmptyTagValue()
+    );
+  } else if (fieldFormat === BYTES_FORMAT) {
+    return (
+      <Bytes contextId={contextId} eventId={eventId} fieldName={fieldName} value={`${value}`} />
+    );
+  } else if (fieldName === MESSAGE_FIELD_NAME && value != null && value !== '') {
+    return (
+      <>
+        {truncate ? (
+          <TruncatableText data-test-subj="truncatable-message">
+            <EuiToolTip
+              data-test-subj="message-tool-tip"
+              content={
+                <EuiFlexGroup direction="column" gutterSize="none">
+                  <EuiFlexItem grow={false}>
+                    <span>{fieldName}</span>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <span>{value}</span>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+            >
+              <>{value}</>
+            </EuiToolTip>
+          </TruncatableText>
+        ) : (
+          <>{value}</>
+        )}
+      </>
+    );
+  } else {
+    return getOrEmptyTagFromValue(value);
   }
-);
+});
 
 FormattedFieldValue.displayName = 'FormattedFieldValue';

@@ -34,26 +34,22 @@ export const FormattedDurationTooltipContent = React.memo<{
 
 FormattedDurationTooltipContent.displayName = 'FormattedDurationTooltipContent';
 
-interface FormattedDurationTooltipProps {
+export const FormattedDurationTooltip = React.memo<{
   children: JSX.Element;
   maybeDurationNanoseconds: string | number | object | undefined | null;
   tooltipTitle?: string;
-}
-
-export const FormattedDurationTooltip = React.memo<FormattedDurationTooltipProps>(
-  ({ children, maybeDurationNanoseconds, tooltipTitle }) => (
-    <EuiToolTip
-      data-test-subj="formatted-duration-tooltip"
-      content={
-        <FormattedDurationTooltipContent
-          maybeDurationNanoseconds={maybeDurationNanoseconds}
-          tooltipTitle={tooltipTitle}
-        />
-      }
-    >
-      <>{children}</>
-    </EuiToolTip>
-  )
-);
+}>(({ children, maybeDurationNanoseconds, tooltipTitle }) => (
+  <EuiToolTip
+    data-test-subj="formatted-duration-tooltip"
+    content={
+      <FormattedDurationTooltipContent
+        maybeDurationNanoseconds={maybeDurationNanoseconds}
+        tooltipTitle={tooltipTitle}
+      />
+    }
+  >
+    <>{children}</>
+  </EuiToolTip>
+));
 
 FormattedDurationTooltip.displayName = 'FormattedDurationTooltip';

@@ -47,15 +47,13 @@ const usersViewing = ['elastic']; // TODO: get the users viewing this timeline f
 /** the global Kibana navigation at the top of every page */
 const globalHeaderHeightPx = 48;
 
-interface CalculateFlyoutHeightProps {
-  globalHeaderSize: number;
-  windowHeight: number;
-}
-
 const calculateFlyoutHeight = ({
   globalHeaderSize,
   windowHeight,
-}: CalculateFlyoutHeightProps): number => Math.max(0, windowHeight - globalHeaderSize);
+}: {
+  globalHeaderSize: number;
+  windowHeight: number;
+}): number => Math.max(0, windowHeight - globalHeaderSize);
 
 export const HomePage: React.FC = () => (
   <AutoSizer detectAnyWindowResize={true} content>

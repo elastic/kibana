@@ -20,14 +20,12 @@ interface Props {
   sort: Sort;
 }
 
-interface CloseButtonProps {
-  columnId: string;
-  onColumnRemoved: OnColumnRemoved;
-}
-
 /** Given a `header`, returns the `SortDirection` applicable to it */
 
-export const CloseButton = React.memo<CloseButtonProps>(({ columnId, onColumnRemoved }) => (
+export const CloseButton = React.memo<{
+  columnId: string;
+  onColumnRemoved: OnColumnRemoved;
+}>(({ columnId, onColumnRemoved }) => (
   <EuiButtonIcon
     aria-label={i18n.REMOVE_COLUMN}
     color="text"

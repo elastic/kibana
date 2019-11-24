@@ -18,16 +18,11 @@ const WithCopyToClipboardContainer = styled.div`
 
 WithCopyToClipboardContainer.displayName = 'WithCopyToClipboardContainer';
 
-interface WithCopyToClipboardProps {
-  text: string;
-  titleSummary?: string;
-}
-
 /**
  * Renders `children` with an adjacent icon that when clicked, copies `text` to
  * the clipboard and displays a confirmation toast
  */
-export const WithCopyToClipboard = React.memo<WithCopyToClipboardProps>(
+export const WithCopyToClipboard = React.memo<{ text: string; titleSummary?: string }>(
   ({ text, titleSummary, children }) => (
     <WithCopyToClipboardContainer>
       <>{children}</>

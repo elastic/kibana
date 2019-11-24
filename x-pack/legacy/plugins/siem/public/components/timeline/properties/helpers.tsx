@@ -46,31 +46,27 @@ type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }
 type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
 type UpdateDescription = ({ id, description }: { id: string; description: string }) => void;
 
-interface StarIconProps {
+export const StarIcon = React.memo<{
   isFavorite: boolean;
   timelineId: string;
   updateIsFavorite: UpdateIsFavorite;
-}
-
-export const StarIcon = React.memo<StarIconProps>(
-  ({ isFavorite, timelineId: id, updateIsFavorite }) => (
-    // TODO: 1 error is: Visible, non-interactive elements with click handlers must have at least one keyboard listener
-    // TODO: 2 error is: Elements with the 'button' interactive role must be focusable
-    // TODO: Investigate this error
-    // eslint-disable-next-line
-    <div role="button" onClick={() => updateIsFavorite({ id, isFavorite: !isFavorite })}>
-      {isFavorite ? (
-        <EuiToolTip data-test-subj="timeline-favorite-filled-star-tool-tip" content={i18n.FAVORITE}>
-          <StyledStar data-test-subj="timeline-favorite-filled-star" type="starFilled" size="l" />
-        </EuiToolTip>
-      ) : (
-        <EuiToolTip content={i18n.NOT_A_FAVORITE}>
-          <StyledStar data-test-subj="timeline-favorite-empty-star" type="starEmpty" size="l" />
-        </EuiToolTip>
-      )}
-    </div>
-  )
-);
+}>(({ isFavorite, timelineId: id, updateIsFavorite }) => (
+  // TODO: 1 error is: Visible, non-interactive elements with click handlers must have at least one keyboard listener
+  // TODO: 2 error is: Elements with the 'button' interactive role must be focusable
+  // TODO: Investigate this error
+  // eslint-disable-next-line
+  <div role="button" onClick={() => updateIsFavorite({ id, isFavorite: !isFavorite })}>
+    {isFavorite ? (
+      <EuiToolTip data-test-subj="timeline-favorite-filled-star-tool-tip" content={i18n.FAVORITE}>
+        <StyledStar data-test-subj="timeline-favorite-filled-star" type="starFilled" size="l" />
+      </EuiToolTip>
+    ) : (
+      <EuiToolTip content={i18n.NOT_A_FAVORITE}>
+        <StyledStar data-test-subj="timeline-favorite-empty-star" type="starEmpty" size="l" />
+      </EuiToolTip>
+    )}
+  </div>
+));
 StarIcon.displayName = 'StarIcon';
 
 interface DescriptionProps {

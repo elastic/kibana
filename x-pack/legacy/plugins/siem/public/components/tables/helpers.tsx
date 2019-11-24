@@ -20,7 +20,13 @@ const Subtext = styled.div`
   font-size: ${props => props.theme.eui.euiFontSizeXS};
 `;
 
-interface GetRowItemDraggableProps {
+export const getRowItemDraggable = ({
+  rowItem,
+  attrName,
+  idPrefix,
+  render,
+  dragDisplayValue,
+}: {
   rowItem: string | null | undefined;
   attrName: string;
   idPrefix: string;
@@ -28,15 +34,7 @@ interface GetRowItemDraggableProps {
   displayCount?: number;
   dragDisplayValue?: string;
   maxOverflow?: number;
-}
-
-export const getRowItemDraggable = ({
-  rowItem,
-  attrName,
-  idPrefix,
-  render,
-  dragDisplayValue,
-}: GetRowItemDraggableProps): JSX.Element => {
+}): JSX.Element => {
   if (rowItem != null) {
     const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}`);
     return (
@@ -72,16 +70,6 @@ export const getRowItemDraggable = ({
   }
 };
 
-interface GetRowItemDraggablesProps {
-  rowItems: string[] | null | undefined;
-  attrName: string;
-  idPrefix: string;
-  render?: (item: string) => JSX.Element;
-  displayCount?: number;
-  dragDisplayValue?: string;
-  maxOverflow?: number;
-}
-
 export const getRowItemDraggables = ({
   rowItems,
   attrName,
@@ -90,7 +78,15 @@ export const getRowItemDraggables = ({
   dragDisplayValue,
   displayCount = 5,
   maxOverflow = 5,
-}: GetRowItemDraggablesProps): JSX.Element => {
+}: {
+  rowItems: string[] | null | undefined;
+  attrName: string;
+  idPrefix: string;
+  render?: (item: string) => JSX.Element;
+  displayCount?: number;
+  dragDisplayValue?: string;
+  maxOverflow?: number;
+}): JSX.Element => {
   if (rowItems != null && rowItems.length > 0) {
     const draggables = rowItems.slice(0, displayCount).map((rowItem, index) => {
       const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}-${index}`);
@@ -181,13 +177,11 @@ export const getRowItemOverflow = (
   );
 };
 
-interface PopoverProps {
+export const Popover = React.memo<{
   children: React.ReactNode;
   count: number;
   idPrefix: string;
-}
-
-export const Popover = React.memo<PopoverProps>(({ children, count, idPrefix }) => {
+}>(({ children, count, idPrefix }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -206,29 +200,25 @@ export const Popover = React.memo<PopoverProps>(({ children, count, idPrefix }) 
 
 Popover.displayName = 'Popover';
 
-interface OverflowFieldProps {
+export const OverflowField = React.memo<{
   value: string;
   showToolTip?: boolean;
   overflowLength?: number;
-}
-
-export const OverflowField = React.memo<OverflowFieldProps>(
-  ({ value, showToolTip = true, overflowLength = 50 }) => (
-    <span>
-      {showToolTip ? (
-        <EuiToolTip data-test-subj={'message-tooltip'} content={'message'}>
-          <>{value.substring(0, overflowLength)}</>
-        </EuiToolTip>
-      ) : (
+}>(({ value, showToolTip = true, overflowLength = 50 }) => (
+  <span>
+    {showToolTip ? (
+      <EuiToolTip data-test-subj={'message-tooltip'} content={'message'}>
         <>{value.substring(0, overflowLength)}</>
-      )}
-      {value.length > overflowLength && (
-        <EuiToolTip content={value}>
-          <MoreRowItems type="boxesHorizontal" />
-        </EuiToolTip>
-      )}
-    </span>
-  )
-);
+      </EuiToolTip>
+    ) : (
+      <>{value.substring(0, overflowLength)}</>
+    )}
+    {value.length > overflowLength && (
+      <EuiToolTip content={value}>
+        <MoreRowItems type="boxesHorizontal" />
+      </EuiToolTip>
+    )}
+  </span>
+));
 
 OverflowField.displayName = 'OverflowField';

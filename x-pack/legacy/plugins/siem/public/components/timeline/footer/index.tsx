@@ -19,7 +19,7 @@ import {
   EuiPopoverProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { FunctionComponent, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { LoadingPanel } from '../../loading';
@@ -55,7 +55,7 @@ const LoadingPanelContainer = styled.div`
 
 LoadingPanelContainer.displayName = 'LoadingPanelContainer';
 
-const PopoverRowItems = styled(EuiPopover)<
+const PopoverRowItems = styled((EuiPopover as unknown) as FunctionComponent)<
   EuiPopoverProps & {
     className?: string;
     id?: string;
@@ -77,80 +77,72 @@ ServerSideEventCount.displayName = 'ServerSideEventCount';
 /** The height of the footer, exported for use in height calculations */
 export const footerHeight = 40; // px
 
-interface EventsCountProps {
+/** Displays the server-side count of events */
+export const EventsCount = React.memo<{
   closePopover: () => void;
   isOpen: boolean;
   items: React.ReactElement[];
   itemsCount: number;
   onClick: () => void;
   serverSideEventCount: number;
-}
-
-/** Displays the server-side count of events */
-export const EventsCount = React.memo<EventsCountProps>(
-  ({ closePopover, isOpen, items, itemsCount, onClick, serverSideEventCount }) => (
-    <h5>
-      <PopoverRowItems
-        className="footer-popover"
-        id="customizablePagination"
-        data-test-subj="timelineSizeRowPopover"
-        button={
-          <>
-            <EuiBadge data-test-subj="local-events-count" color="hollow">
-              {itemsCount}
-              <EuiButtonEmpty
-                size="s"
-                color="text"
-                iconType="arrowDown"
-                iconSide="right"
-                onClick={onClick}
-              />
-            </EuiBadge>
-            {` ${i18n.OF} `}
-          </>
-        }
-        isOpen={isOpen}
-        closePopover={closePopover}
-        panelPaddingSize="none"
-      >
-        <EuiContextMenuPanel items={items} data-test-subj="timelinePickSizeRow" />
-      </PopoverRowItems>
-      <EuiToolTip content={`${serverSideEventCount} ${i18n.TOTAL_COUNT_OF_EVENTS}`}>
-        <ServerSideEventCount>
-          <EuiBadge color="hollow" data-test-subj="server-side-event-count">
-            {serverSideEventCount}
-          </EuiBadge>{' '}
-          {i18n.EVENTS}
-        </ServerSideEventCount>
-      </EuiToolTip>
-    </h5>
-  )
-);
+}>(({ closePopover, isOpen, items, itemsCount, onClick, serverSideEventCount }) => (
+  <h5>
+    <PopoverRowItems
+      className="footer-popover"
+      id="customizablePagination"
+      data-test-subj="timelineSizeRowPopover"
+      button={
+        <>
+          <EuiBadge data-test-subj="local-events-count" color="hollow">
+            {itemsCount}
+            <EuiButtonEmpty
+              size="s"
+              color="text"
+              iconType="arrowDown"
+              iconSide="right"
+              onClick={onClick}
+            />
+          </EuiBadge>
+          {` ${i18n.OF} `}
+        </>
+      }
+      isOpen={isOpen}
+      closePopover={closePopover}
+      panelPaddingSize="none"
+    >
+      <EuiContextMenuPanel items={items} data-test-subj="timelinePickSizeRow" />
+    </PopoverRowItems>
+    <EuiToolTip content={`${serverSideEventCount} ${i18n.TOTAL_COUNT_OF_EVENTS}`}>
+      <ServerSideEventCount>
+        <EuiBadge color="hollow" data-test-subj="server-side-event-count">
+          {serverSideEventCount}
+        </EuiBadge>{' '}
+        {i18n.EVENTS}
+      </ServerSideEventCount>
+    </EuiToolTip>
+  </h5>
+));
 
 EventsCount.displayName = 'EventsCount';
 
-interface PagingControlProps {
+export const PagingControl = React.memo<{
   hasNextPage: boolean;
   isLoading: boolean;
   loadMore: () => void;
-}
-
-export const PagingControl = React.memo<PagingControlProps>(
-  ({ hasNextPage, isLoading, loadMore }) => (
-    <>
-      {hasNextPage && (
-        <EuiButton
-          data-test-subj="TimelineMoreButton"
-          isLoading={isLoading}
-          onClick={loadMore}
-          size="s"
-        >
-          {isLoading ? `${i18n.LOADING}...` : i18n.LOAD_MORE}
-        </EuiButton>
-      )}
-    </>
-  )
-);
+}>(({ hasNextPage, isLoading, loadMore }) => (
+  <>
+    {hasNextPage && (
+      <EuiButton
+        data-test-subj="TimelineMoreButton"
+        isLoading={isLoading}
+        onClick={loadMore}
+        size="s"
+      >
+        {isLoading ? `${i18n.LOADING}...` : i18n.LOAD_MORE}
+      </EuiButton>
+    )}
+  </>
+));
 
 PagingControl.displayName = 'PagingControl';
 

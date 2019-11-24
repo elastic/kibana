@@ -7,8 +7,8 @@
 import React from 'react';
 import { ColorPickerPopover, Props } from '../color_picker_popover';
 
-export const WorkpadColorPicker = React.memo<Props>(props => (
-  <ColorPickerPopover {...props} hasButtons={true} />
-));
+export const WorkpadColorPicker = React.memo<Props>(props => {
+  return <ColorPickerPopover {...props} hasButtons={true} />;
+});
 
 WorkpadColorPicker.displayName = 'WorkpadColorPicker';

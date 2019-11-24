@@ -64,49 +64,46 @@ export const md5StringRenderer: StringRenderer = (value: string) => `md5: ${valu
 export const sha1StringRenderer: StringRenderer = (value: string) =>
   `sha1: ${value.substr(0, 7)}...`;
 
-interface DraggableZeekElementProps {
+export const DraggableZeekElement = React.memo<{
   id: string;
   field: string;
   value: string | null | undefined;
   stringRenderer?: StringRenderer;
-}
-
-export const DraggableZeekElement = React.memo<DraggableZeekElementProps>(
-  ({ id, field, value, stringRenderer = defaultStringRenderer }) =>
-    value != null ? (
-      <TokensFlexItem grow={false}>
-        <DraggableWrapper
-          dataProvider={{
-            and: [],
-            enabled: true,
-            id: escapeDataProviderId(
-              `draggable-zeek-element-draggable-wrapper-${id}-${field}-${value}`
-            ),
-            name: value,
-            excluded: false,
-            kqlQuery: '',
-            queryMatch: {
-              field,
-              value,
-              operator: IS_OPERATOR,
-            },
-          }}
-          render={(dataProvider, _, snapshot) =>
-            snapshot.isDragging ? (
-              <DragEffects>
-                <Provider dataProvider={dataProvider} />
-              </DragEffects>
-            ) : (
-              <EuiToolTip data-test-subj="badge-tooltip" content={field}>
-                <Badge iconType="tag" color="hollow">
-                  {stringRenderer(value)}
-                </Badge>
-              </EuiToolTip>
-            )
-          }
-        />
-      </TokensFlexItem>
-    ) : null
+}>(({ id, field, value, stringRenderer = defaultStringRenderer }) =>
+  value != null ? (
+    <TokensFlexItem grow={false}>
+      <DraggableWrapper
+        dataProvider={{
+          and: [],
+          enabled: true,
+          id: escapeDataProviderId(
+            `draggable-zeek-element-draggable-wrapper-${id}-${field}-${value}`
+          ),
+          name: value,
+          excluded: false,
+          kqlQuery: '',
+          queryMatch: {
+            field,
+            value,
+            operator: IS_OPERATOR,
+          },
+        }}
+        render={(dataProvider, _, snapshot) =>
+          snapshot.isDragging ? (
+            <DragEffects>
+              <Provider dataProvider={dataProvider} />
+            </DragEffects>
+          ) : (
+            <EuiToolTip data-test-subj="badge-tooltip" content={field}>
+              <Badge iconType="tag" color="hollow">
+                {stringRenderer(value)}
+              </Badge>
+            </EuiToolTip>
+          )
+        }
+      />
+    </TokensFlexItem>
+  ) : null
 );
 
 DraggableZeekElement.displayName = 'DraggableZeekElement';

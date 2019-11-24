@@ -22,13 +22,11 @@ const Details = styled.div`
 
 Details.displayName = 'Details';
 
-interface SuricataDetailsProps {
+export const SuricataDetails = React.memo<{
   browserFields: BrowserFields;
   data: Ecs;
   timelineId: string;
-}
-
-export const SuricataDetails = React.memo<SuricataDetailsProps>(({ data, timelineId }) => {
+}>(({ data, timelineId }) => {
   const signature: string | null | undefined = get('suricata.eve.alert.signature[0]', data);
   const signatureId: number | null | undefined = get('suricata.eve.alert.signature_id[0]', data);
 

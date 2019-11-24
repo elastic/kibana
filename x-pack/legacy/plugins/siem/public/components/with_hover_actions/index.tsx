@@ -35,16 +35,13 @@ const HoverActionsPanelContainer = styled.div`
 
 HoverActionsPanelContainer.displayName = 'HoverActionsPanelContainer';
 
-interface HoverActionsPanelProps {
-  children: JSX.Element;
-  show: boolean;
-}
-
-const HoverActionsPanel = React.memo<HoverActionsPanelProps>(({ children, show }) => (
-  <HoverActionsPanelContainer data-test-subj="hover-actions-panel-container">
-    {show ? children : null}
-  </HoverActionsPanelContainer>
-));
+const HoverActionsPanel = React.memo<{ children: JSX.Element; show: boolean }>(
+  ({ children, show }) => (
+    <HoverActionsPanelContainer data-test-subj="hover-actions-panel-container">
+      {show ? children : null}
+    </HoverActionsPanelContainer>
+  )
+);
 
 HoverActionsPanel.displayName = 'HoverActionsPanel';
 

@@ -16,12 +16,16 @@ import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
 
 import * as i18n from './translations';
 
+interface MlCapabilitiesProvider extends MlCapabilities {
+  capabilitiesFetched: boolean;
+}
+
 const emptyMlCapabilitiesProvider = {
   ...emptyMlCapabilities,
   capabilitiesFetched: false,
 };
 
-export const MlCapabilitiesContext = React.createContext<{ capabilitiesFetched: boolean }>(
+export const MlCapabilitiesContext = React.createContext<MlCapabilitiesProvider>(
   emptyMlCapabilitiesProvider
 );
 

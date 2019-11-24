@@ -42,26 +42,28 @@ export const CertificateFingerprint = React.memo<{
   contextId: string;
   fieldName: string;
   value?: string | null;
-}>(({ eventId, certificateType, contextId, fieldName, value }) => (
-  <DraggableBadge
-    contextId={contextId}
-    data-test-subj={`${certificateType}-certificate-fingerprint`}
-    eventId={eventId}
-    field={fieldName}
-    iconType="snowflake"
-    tooltipContent={
-      <EuiText size="xs">
-        <span>{fieldName}</span>
-      </EuiText>
-    }
-    value={value}
-  >
-    <FingerprintLabel data-test-subj="fingerprint-label">
-      {certificateType === 'client' ? i18n.CLIENT_CERT : i18n.SERVER_CERT}
-    </FingerprintLabel>
-    <CertificateFingerprintLink certificateFingerprint={value || ''} />
-    <ExternalLinkIcon />
-  </DraggableBadge>
-));
+}>(({ eventId, certificateType, contextId, fieldName, value }) => {
+  return (
+    <DraggableBadge
+      contextId={contextId}
+      data-test-subj={`${certificateType}-certificate-fingerprint`}
+      eventId={eventId}
+      field={fieldName}
+      iconType="snowflake"
+      tooltipContent={
+        <EuiText size="xs">
+          <span>{fieldName}</span>
+        </EuiText>
+      }
+      value={value}
+    >
+      <FingerprintLabel data-test-subj="fingerprint-label">
+        {certificateType === 'client' ? i18n.CLIENT_CERT : i18n.SERVER_CERT}
+      </FingerprintLabel>
+      <CertificateFingerprintLink certificateFingerprint={value || ''} />
+      <ExternalLinkIcon />
+    </DraggableBadge>
+  );
+});
 
 CertificateFingerprint.displayName = 'CertificateFingerprint';
