@@ -224,3 +224,6 @@ export const DRAG_TYPE_FIELD = 'drag-type-field';
 
 /** This class is added to the document body while dragging */
 export const IS_DRAGGING_CLASS_NAME = 'is-dragging';
+
+/** This class is added to the document body while timeline field dragging */
+export const IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME = 'is-timeline-field-dragging';
