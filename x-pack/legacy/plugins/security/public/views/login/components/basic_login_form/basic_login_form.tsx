@@ -7,6 +7,7 @@
 import { EuiButton, EuiCallOut, EuiFieldText, EuiFormRow, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, FormEvent, Fragment, MouseEvent } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { LoginState } from '../../../../../common/login_state';
 
 interface Props {
@@ -16,6 +17,7 @@ interface Props {
   loginState: LoginState;
   next: string;
   intl: InjectedIntl;
+  loginAssistanceMessage: string;
 }
 
 interface State {
@@ -127,6 +129,19 @@ class BasicLoginFormUI extends Component<Props, State> {
             data-test-subj="loginInfoMessage"
             title={this.props.infoMessage}
             role="status"
+          />
+          <EuiSpacer size="l" />
+        </Fragment>
+      );
+    }
+
+    if (this.props.loginAssistanceMessage) {
+      return (
+        <Fragment>
+          <EuiCallOut
+            size="s"
+            color="primary"
+            children={<ReactMarkdown>{this.props.loginAssistanceMessage}</ReactMarkdown>}
           />
           <EuiSpacer size="l" />
         </Fragment>
