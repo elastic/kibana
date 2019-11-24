@@ -20,10 +20,12 @@ import { SavedQueryTimeFilter } from '../../../../../../../src/legacy/core_plugi
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
 
 export interface QueryBarComponentProps {
+  dataTestSubj?: string;
   dateRangeFrom?: string;
   dateRangeTo?: string;
   hideSavedQuery?: boolean;
   indexPattern: StaticIndexPattern;
+  isLoading?: boolean;
   isRefreshPaused?: boolean;
   filterQuery: Query;
   filterManager: FilterManager;
@@ -41,6 +43,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     dateRangeTo,
     hideSavedQuery = false,
     indexPattern,
+    isLoading = false,
     isRefreshPaused,
     filterQuery,
     filterManager,
@@ -50,6 +53,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     refreshInterval,
     savedQuery,
     onSavedQuery,
+    dataTestSubj,
   }) => {
     const [draftQuery, setDraftQuery] = useState(filterQuery);
 
@@ -123,6 +127,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
         dateRangeTo={dateRangeTo}
         filters={filters}
         indexPatterns={indexPatterns}
+        isLoading={isLoading}
         isRefreshPaused={isRefreshPaused}
         query={draftQuery}
         onClearSavedQuery={onClearSavedQuery}
@@ -139,6 +144,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
         showQueryInput={true}
         showSaveQuery={true}
         timeHistory={new TimeHistory(new Storage(localStorage))}
+        dataTestSubj={dataTestSubj}
         {...searchBarProps}
       />
     );
