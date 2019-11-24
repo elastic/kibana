@@ -12,4 +12,4 @@ set -e
 # Example: ./get_signal_by_rule_id.sh {rule_id}
 curl -s -k \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
- -X GET ${KIBANA_URL}/api/detection_engine/rules?rule_id="$1" | jq .
+ -X GET ${KIBANA_URL}${SPACE_URL}/api/detection_engine/rules?rule_id="$1" | jq .
