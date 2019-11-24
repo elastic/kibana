@@ -26,8 +26,7 @@ const searchOrFilterPopoverClassName = 'searchOrFilterPopover';
 const searchOrFilterPopoverWidth = '352px';
 
 // SIDE EFFECT: the following creates a global class selector
-// eslint-disable-next-line no-unused-expressions
-createGlobalStyle`
+const SearchOrFilterGlobalStyle = createGlobalStyle`
   .${timelineSelectModeItemsClassName} {
     width: 350px !important;
   }
@@ -110,48 +109,51 @@ export const SearchOrFilter = pure<Props>(
     updateKqlMode,
     updateReduxTime,
   }) => (
-    <SearchOrFilterContainer>
-      <EuiFlexGroup data-test-subj="timeline-search-or-filter" gutterSize="xs">
-        <ModeFlexItem grow={false}>
-          <EuiToolTip content={i18n.FILTER_OR_SEARCH_WITH_KQL}>
-            <EuiSuperSelect
-              data-test-subj="timeline-select-search-or-filter"
-              hasDividers={true}
-              itemLayoutAlign="top"
-              itemClassName={timelineSelectModeItemsClassName}
-              onChange={(mode: KqlMode) => updateKqlMode({ id: timelineId, kqlMode: mode })}
-              options={options}
-              popoverClassName={searchOrFilterPopoverClassName}
-              valueOfSelected={kqlMode}
+    <>
+      <SearchOrFilterContainer>
+        <EuiFlexGroup data-test-subj="timeline-search-or-filter" gutterSize="xs">
+          <ModeFlexItem grow={false}>
+            <EuiToolTip content={i18n.FILTER_OR_SEARCH_WITH_KQL}>
+              <EuiSuperSelect
+                data-test-subj="timeline-select-search-or-filter"
+                hasDividers={true}
+                itemLayoutAlign="top"
+                itemClassName={timelineSelectModeItemsClassName}
+                onChange={(mode: KqlMode) => updateKqlMode({ id: timelineId, kqlMode: mode })}
+                options={options}
+                popoverClassName={searchOrFilterPopoverClassName}
+                valueOfSelected={kqlMode}
+              />
+            </EuiToolTip>
+          </ModeFlexItem>
+          <EuiFlexItem data-test-subj="timeline-search-or-filter-search-container">
+            <QueryBarTimeline
+              applyKqlFilterQuery={applyKqlFilterQuery}
+              browserFields={browserFields}
+              dataProviders={dataProviders}
+              filters={filters}
+              filterQuery={filterQuery}
+              filterQueryDraft={filterQueryDraft}
+              from={from}
+              fromStr={fromStr}
+              kqlMode={kqlMode}
+              indexPattern={indexPattern}
+              isRefreshPaused={isRefreshPaused}
+              refreshInterval={refreshInterval}
+              savedQueryId={savedQueryId}
+              setFilters={setFilters}
+              setKqlFilterQueryDraft={setKqlFilterQueryDraft}
+              setSavedQueryId={setSavedQueryId}
+              timelineId={timelineId}
+              to={to}
+              toStr={toStr}
+              updateReduxTime={updateReduxTime}
             />
-          </EuiToolTip>
-        </ModeFlexItem>
-        <EuiFlexItem data-test-subj="timeline-search-or-filter-search-container">
-          <QueryBarTimeline
-            applyKqlFilterQuery={applyKqlFilterQuery}
-            browserFields={browserFields}
-            dataProviders={dataProviders}
-            filters={filters}
-            filterQuery={filterQuery}
-            filterQueryDraft={filterQueryDraft}
-            from={from}
-            fromStr={fromStr}
-            kqlMode={kqlMode}
-            indexPattern={indexPattern}
-            isRefreshPaused={isRefreshPaused}
-            refreshInterval={refreshInterval}
-            savedQueryId={savedQueryId}
-            setFilters={setFilters}
-            setKqlFilterQueryDraft={setKqlFilterQueryDraft}
-            setSavedQueryId={setSavedQueryId}
-            timelineId={timelineId}
-            to={to}
-            toStr={toStr}
-            updateReduxTime={updateReduxTime}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </SearchOrFilterContainer>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </SearchOrFilterContainer>
+      <SearchOrFilterGlobalStyle />
+    </>
   )
 );
 

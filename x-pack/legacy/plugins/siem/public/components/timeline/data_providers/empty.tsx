@@ -50,7 +50,7 @@ const HighlightedBackground = styled.span`
 HighlightedBackground.displayName = 'HighlightedBackground';
 
 const EmptyContainer = styled.div<{ showSmallMsg: boolean }>`
-  width: ${props => (props.showSmallMsg ? '60px' : 'auto')}
+  width: ${props => (props.showSmallMsg ? '60px' : 'auto')};
   align-items: center;
   display: flex;
   flex-direction: row;

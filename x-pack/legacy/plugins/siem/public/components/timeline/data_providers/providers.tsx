@@ -46,7 +46,7 @@ interface Props {
 const ROW_OF_DATA_PROVIDERS_HEIGHT = 43; // px
 
 const PanelProviders = styled.div`
-  position: relative
+  position: relative;
   display: flex;
   flex-direction: row;
   min-height: 100px;

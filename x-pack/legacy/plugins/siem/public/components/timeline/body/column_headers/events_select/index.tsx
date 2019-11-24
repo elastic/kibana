@@ -17,8 +17,7 @@ export const EVENTS_SELECT_WIDTH = 60; // px
 
 // SIDE EFFECT: the following `createGlobalStyle` overrides
 // the style of the select items
-// eslint-disable-next-line
-createGlobalStyle`
+const EventsSelectGlobalStyle = createGlobalStyle`
   .eventsSelectItem {
     width: 100% !important;
 
@@ -73,6 +72,7 @@ export const EventsSelect = pure<Props>(({ checkState, timelineId }) => {
           />
         </PositionedCheckbox>
       </CheckboxContainer>
+      <EventsSelectGlobalStyle />
     </div>
   );
 });

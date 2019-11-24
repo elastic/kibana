@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiAvatar, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import React, { useState, useCallback } from 'react';
-import styled, { createGlobalStyle } from 'styled-components';
 
 import { Note } from '../../../lib/note';
 import { InputsModelId } from '../../../store/inputs/constants';
@@ -21,43 +19,6 @@ type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }
 type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
 type UpdateDescription = ({ id, description }: { id: string; description: string }) => void;
 type ToggleLock = ({ linkToId }: { linkToId: InputsModelId }) => void;
-
-// SIDE EFFECT: the following `createGlobalStyle` overrides `EuiPopover`
-// and `EuiToolTip` global styles:
-// eslint-disable-next-line no-unused-expressions
-createGlobalStyle`
-  .euiPopover__panel.euiPopover__panel-isOpen {
-    z-index: 9900 !important;
-  }
-  .euiToolTip {
-    z-index: 9950 !important;
-  }
-`;
-
-const Avatar = styled(EuiAvatar)`
-  margin-left: 5px;
-`;
-
-Avatar.displayName = 'Avatar';
-
-const DescriptionPopoverMenuContainer = styled.div`
-  margin-top: 15px;
-`;
-
-DescriptionPopoverMenuContainer.displayName = 'DescriptionPopoverMenuContainer';
-
-const SettingsIcon = styled(EuiIcon)`
-  margin-left: 4px;
-  cursor: pointer;
-`;
-
-SettingsIcon.displayName = 'SettingsIcon';
-
-const HiddenFlexItem = styled(EuiFlexItem)`
-  display: none;
-`;
-
-HiddenFlexItem.displayName = 'HiddenFlexItem';
 
 interface Props {
   associateNote: AssociateNote;

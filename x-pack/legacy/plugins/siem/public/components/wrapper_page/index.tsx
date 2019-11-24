@@ -9,6 +9,7 @@ import React from 'react';
 import styled, { css } from 'styled-components';
 
 import { gutterTimeline } from '../../lib/helpers';
+import { AppGlobalStyle } from '../page/index';
 
 const Wrapper = styled.div`
   ${({ theme }) => css`
@@ -54,6 +55,7 @@ export const WrapperPage = React.memo<WrapperPageProps>(
     return (
       <Wrapper className={classes} style={customStyle || style}>
         {children}
+        <AppGlobalStyle />
       </Wrapper>
     );
   }
