@@ -14,7 +14,6 @@ import 'uiExports/visRequestHandlers';
 import 'uiExports/visEditorTypes';
 import 'uiExports/savedObjectTypes';
 import 'uiExports/spyModes';
-import 'uiExports/fieldFormats';
 import 'uiExports/embeddableFactories';
 import 'uiExports/interpreter';
 

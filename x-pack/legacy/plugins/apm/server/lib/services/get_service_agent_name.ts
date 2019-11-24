@@ -9,9 +9,12 @@ import {
   SERVICE_NAME
 } from '../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../helpers/range_filter';
-import { Setup } from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
-export async function getServiceAgentName(serviceName: string, setup: Setup) {
+export async function getServiceAgentName(
+  serviceName: string,
+  setup: Setup & SetupTimeRange
+) {
   const { start, end, client, indices } = setup;
 
   const params = {
