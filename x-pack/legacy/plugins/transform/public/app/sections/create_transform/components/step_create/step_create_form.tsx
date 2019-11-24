@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useContext, useEffect, useState } from 'react';
+import React, { Fragment, FC, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 
@@ -31,7 +31,7 @@ import {
 
 import { ToastNotificationText } from '../../../../components';
 import { useApi } from '../../../../hooks/use_api';
-import { isKibanaContextInitialized, KibanaContext } from '../../../../lib/kibana';
+import { useKibanaContext } from '../../../../lib/kibana';
 import { RedirectToTransformManagement } from '../../../../common/navigation';
 import { PROGRESS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants';
 
@@ -59,7 +59,7 @@ interface Props {
   onChange(s: StepDetailsExposedState): void;
 }
 
-export const StepCreateForm: SFC<Props> = React.memo(
+export const StepCreateForm: FC<Props> = React.memo(
   ({ createIndexPattern, transformConfig, transformId, onChange, overrides }) => {
     const defaults = { ...getDefaultStepCreateState(), ...overrides };
 
@@ -72,17 +72,13 @@ export const StepCreateForm: SFC<Props> = React.memo(
       undefined
     );
 
-    const kibanaContext = useContext(KibanaContext);
+    const kibanaContext = useKibanaContext();
 
     useEffect(() => {
       onChange({ created, started, indexPatternId });
     }, [created, started, indexPatternId]);
 
     const api = useApi();
-
-    if (!isKibanaContextInitialized(kibanaContext)) {
-      return null;
-    }
 
     async function createTransform() {
       setCreated(true);
@@ -148,8 +144,8 @@ export const StepCreateForm: SFC<Props> = React.memo(
     }
 
     async function createAndStartTransform() {
-      const success = await createTransform();
-      if (success) {
+      const acknowledged = await createTransform();
+      if (acknowledged) {
         await startTransform();
       }
     }
