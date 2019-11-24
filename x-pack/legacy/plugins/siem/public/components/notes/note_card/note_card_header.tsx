@@ -37,12 +37,7 @@ const User = styled.span`
   margin: 5px;
 `;
 
-interface NoteCardHeaderProps {
-  created: Date;
-  user: string;
-}
-
-export const NoteCardHeader = React.memo<NoteCardHeaderProps>(({ created, user }) => (
+export const NoteCardHeader = React.memo<{ created: Date; user: string }>(({ created, user }) => (
   <EuiPanel data-test-subj="note-card-header" hasShadow={false} paddingSize="s">
     <HeaderContainer>
       <Avatar data-test-subj="avatar" size="s" name={user} />

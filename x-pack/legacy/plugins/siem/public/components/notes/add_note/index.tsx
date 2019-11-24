@@ -33,11 +33,7 @@ const ButtonsContainer = styled(EuiFlexGroup)`
 
 ButtonsContainer.displayName = 'ButtonsContainer';
 
-interface CancelButtonProps {
-  onCancelAddNote: () => void;
-}
-
-export const CancelButton = React.memo<CancelButtonProps>(({ onCancelAddNote }) => (
+export const CancelButton = React.memo<{ onCancelAddNote: () => void }>(({ onCancelAddNote }) => (
   <EuiButtonEmpty data-test-subj="cancel" onClick={onCancelAddNote}>
     {i18n.CANCEL}
   </EuiButtonEmpty>
@@ -45,50 +41,46 @@ export const CancelButton = React.memo<CancelButtonProps>(({ onCancelAddNote }) 
 
 CancelButton.displayName = 'CancelButton';
 
-interface AddNoteProps {
+/** Displays an input for entering a new note, with an adjacent "Add" button */
+export const AddNote = React.memo<{
   associateNote: AssociateNote;
   getNewNoteId: GetNewNoteId;
   newNote: string;
   onCancelAddNote?: () => void;
   updateNewNote: UpdateInternalNewNote;
   updateNote: UpdateNote;
-}
-
-/** Displays an input for entering a new note, with an adjacent "Add" button */
-export const AddNote = React.memo<AddNoteProps>(
-  ({ associateNote, getNewNoteId, newNote, onCancelAddNote, updateNewNote, updateNote }) => (
-    <AddNotesContainer alignItems="flexEnd" direction="column" gutterSize="none">
-      <NewNote note={newNote} noteInputHeight={200} updateNewNote={updateNewNote} />
-      <EuiFlexItem grow={true}>
-        <MarkdownHint show={newNote.trim().length > 0} />
-      </EuiFlexItem>
-      <ButtonsContainer gutterSize="none">
-        {onCancelAddNote != null ? (
-          <EuiFlexItem grow={false}>
-            <CancelButton onCancelAddNote={onCancelAddNote} />
-          </EuiFlexItem>
-        ) : null}
+}>(({ associateNote, getNewNoteId, newNote, onCancelAddNote, updateNewNote, updateNote }) => (
+  <AddNotesContainer alignItems="flexEnd" direction="column" gutterSize="none">
+    <NewNote note={newNote} noteInputHeight={200} updateNewNote={updateNewNote} />
+    <EuiFlexItem grow={true}>
+      <MarkdownHint show={newNote.trim().length > 0} />
+    </EuiFlexItem>
+    <ButtonsContainer gutterSize="none">
+      {onCancelAddNote != null ? (
         <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="add-note"
-            isDisabled={newNote.trim().length === 0}
-            fill={true}
-            onClick={() =>
-              updateAndAssociateNode({
-                associateNote,
-                getNewNoteId,
-                newNote,
-                updateNewNote,
-                updateNote,
-              })
-            }
-          >
-            {i18n.ADD_NOTE}
-          </EuiButton>
+          <CancelButton onCancelAddNote={onCancelAddNote} />
         </EuiFlexItem>
-      </ButtonsContainer>
-    </AddNotesContainer>
-  )
-);
+      ) : null}
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          data-test-subj="add-note"
+          isDisabled={newNote.trim().length === 0}
+          fill={true}
+          onClick={() =>
+            updateAndAssociateNode({
+              associateNote,
+              getNewNoteId,
+              newNote,
+              updateNewNote,
+              updateNote,
+            })
+          }
+        >
+          {i18n.ADD_NOTE}
+        </EuiButton>
+      </EuiFlexItem>
+    </ButtonsContainer>
+  </AddNotesContainer>
+));
 
 AddNote.displayName = 'AddNote';

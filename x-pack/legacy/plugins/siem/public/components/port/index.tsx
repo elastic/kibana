@@ -25,14 +25,12 @@ export const PORT_NAMES = [
   URL_PORT_FIELD_NAME,
 ];
 
-interface PortProps {
+export const Port = React.memo<{
   contextId: string;
   eventId: string;
   fieldName: string;
   value: string | undefined | null;
-}
-
-export const Port = React.memo<PortProps>(({ contextId, eventId, fieldName, value }) => (
+}>(({ contextId, eventId, fieldName, value }) => (
   <DefaultDraggable
     data-test-subj="port"
     field={fieldName}

@@ -17,49 +17,46 @@ export enum FirstLastSeenHostType {
   LAST_SEEN = 'last-seen',
 }
 
-interface FirstLastSeenHostProps {
-  hostname: string;
-  type: FirstLastSeenHostType;
-}
-
-export const FirstLastSeenHost = React.memo<FirstLastSeenHostProps>(({ hostname, type }) => (
-  <ApolloConsumer>
-    {client => {
-      const { loading, firstSeen, lastSeen, errorMessage } = useFirstLastSeenHostQuery(
-        hostname,
-        'default',
-        client
-      );
-      if (errorMessage != null) {
-        return (
-          <EuiToolTip
-            position="top"
-            content={errorMessage}
-            data-test-subj="firstLastSeenErrorToolTip"
-            aria-label={`firstLastSeenError-${type}`}
-            id={`firstLastSeenError-${hostname}-${type}`}
-          >
-            <EuiIcon aria-describedby={`firstLastSeenError-${hostname}-${type}`} type="alert" />
-          </EuiToolTip>
+export const FirstLastSeenHost = React.memo<{ hostname: string; type: FirstLastSeenHostType }>(
+  ({ hostname, type }) => (
+    <ApolloConsumer>
+      {client => {
+        const { loading, firstSeen, lastSeen, errorMessage } = useFirstLastSeenHostQuery(
+          hostname,
+          'default',
+          client
         );
-      }
-      const valueSeen = type === FirstLastSeenHostType.FIRST_SEEN ? firstSeen : lastSeen;
-      return (
-        <>
-          {loading && <EuiLoadingSpinner size="m" />}
-          {!loading && valueSeen != null && new Date(valueSeen).toString() === 'Invalid Date'
-            ? valueSeen
-            : !loading &&
-              valueSeen != null && (
-                <EuiText size="s">
-                  <FormattedRelativePreferenceDate value={`${valueSeen}`} />
-                </EuiText>
-              )}
-          {!loading && valueSeen == null && getEmptyTagValue()}
-        </>
-      );
-    }}
-  </ApolloConsumer>
-));
+        if (errorMessage != null) {
+          return (
+            <EuiToolTip
+              position="top"
+              content={errorMessage}
+              data-test-subj="firstLastSeenErrorToolTip"
+              aria-label={`firstLastSeenError-${type}`}
+              id={`firstLastSeenError-${hostname}-${type}`}
+            >
+              <EuiIcon aria-describedby={`firstLastSeenError-${hostname}-${type}`} type="alert" />
+            </EuiToolTip>
+          );
+        }
+        const valueSeen = type === FirstLastSeenHostType.FIRST_SEEN ? firstSeen : lastSeen;
+        return (
+          <>
+            {loading && <EuiLoadingSpinner size="m" />}
+            {!loading && valueSeen != null && new Date(valueSeen).toString() === 'Invalid Date'
+              ? valueSeen
+              : !loading &&
+                valueSeen != null && (
+                  <EuiText size="s">
+                    <FormattedRelativePreferenceDate value={`${valueSeen}`} />
+                  </EuiText>
+                )}
+            {!loading && valueSeen == null && getEmptyTagValue()}
+          </>
+        );
+      }}
+    </ApolloConsumer>
+  )
+);
 
 FirstLastSeenHost.displayName = 'FirstLastSeenHost';

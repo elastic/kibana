@@ -13,18 +13,16 @@ export const DESTINATION_IP_FIELD_NAME = 'destination.ip';
 
 const IP_FIELD_TYPE = 'ip';
 
-interface IpProps {
-  contextId: string;
-  eventId: string;
-  fieldName: string;
-  value?: string | null;
-}
-
 /**
  * Renders text containing a draggable IP address (e.g. `source.ip`,
  * `destination.ip`) that contains a hyperlink
  */
-export const Ip = React.memo<IpProps>(({ contextId, eventId, fieldName, value }) => (
+export const Ip = React.memo<{
+  contextId: string;
+  eventId: string;
+  fieldName: string;
+  value?: string | null;
+}>(({ contextId, eventId, fieldName, value }) => (
   <FormattedFieldValue
     contextId={contextId}
     data-test-subj="formatted-ip"

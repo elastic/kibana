@@ -52,7 +52,7 @@ interface ProviderBadgeProps {
   isEnabled: boolean;
   isExcluded: boolean;
   providerId: string;
-  togglePopover?: () => void;
+  togglePopover: () => void;
   val: string | number;
   operator: QueryOperator;
 }

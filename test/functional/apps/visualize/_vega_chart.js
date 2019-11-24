@@ -25,9 +25,6 @@ export default function ({ getService, getPageObjects }) {
   const inspector = getService('inspector');
   const log = getService('log');
 
-  const fromTime = '2015-09-19 06:31:44.000';
-  const toTime = '2015-09-23 18:31:44.000';
-
   describe('visualize app', () => {
     before(async () => {
       log.debug('navigateToApp visualize');
@@ -64,7 +61,7 @@ export default function ({ getService, getPageObjects }) {
       describe('with filters', () => {
         before(async () => {
           log.debug('setAbsoluteRange');
-          await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+          await PageObjects.timePicker.setDefaultAbsoluteRange();
         });
 
         afterEach(async () => {

@@ -84,13 +84,11 @@ const WrappedCloseButton = styled.div`
 
 WrappedCloseButton.displayName = 'WrappedCloseButton';
 
-interface FlyoutHeaderWithCloseButtonProps {
+const FlyoutHeaderWithCloseButton = React.memo<{
   onClose: () => void;
   timelineId: string;
   usersViewing: string[];
-}
-
-const FlyoutHeaderWithCloseButton = React.memo<FlyoutHeaderWithCloseButtonProps>(
+}>(
   ({ onClose, timelineId, usersViewing }) => (
     <FlyoutHeaderContainer>
       <WrappedCloseButton>

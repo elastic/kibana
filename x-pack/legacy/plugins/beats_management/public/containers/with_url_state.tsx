@@ -90,10 +90,12 @@ export const WithURLState = withRouter(WithURLStateComponent);
 
 export function withUrlState<OP>(
   UnwrappedComponent: React.ComponentType<OP & URLStateProps>
-): React.SFC<any> {
-  return (origProps: OP) => (
-    <WithURLState>
-      {(URLProps: URLStateProps) => <UnwrappedComponent {...URLProps} {...origProps} />}
-    </WithURLState>
-  );
+): React.FC<any> {
+  return (origProps: OP) => {
+    return (
+      <WithURLState>
+        {(URLProps: URLStateProps) => <UnwrappedComponent {...URLProps} {...origProps} />}
+      </WithURLState>
+    );
+  };
 }

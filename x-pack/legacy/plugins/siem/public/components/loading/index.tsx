@@ -6,11 +6,11 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, EuiText } from '@elastic/eui';
 import * as React from 'react';
-import styled, { injectGlobal } from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 
-// SIDE EFFECT: the following `injectGlobal` overrides default styling in angular code that was not theme-friendly
+// SIDE EFFECT: the following `createGlobalStyle` overrides default styling in angular code that was not theme-friendly
 // eslint-disable-next-line no-unused-expressions
-injectGlobal`
+createGlobalStyle`
   .euiPanel-loading-hide-border {
     border: none;
   }

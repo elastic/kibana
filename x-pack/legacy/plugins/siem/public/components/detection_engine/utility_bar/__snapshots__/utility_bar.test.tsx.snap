@@ -1,6 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`UtilityBar it renders 1`] = `
+<<<<<<< HEAD
 <UtilityBar>
   <UtilityBarSection>
     <UtilityBarGroup>
@@ -31,4 +32,34 @@ exports[`UtilityBar it renders 1`] = `
     </UtilityBarGroup>
   </UtilityBarSection>
 </UtilityBar>
+=======
+<Component>
+  <UtilityBar>
+    <UtilityBarSection>
+      <UtilityBarGroup>
+        <UtilityBarText>
+          Test text
+        </UtilityBarText>
+      </UtilityBarGroup>
+      <UtilityBarGroup>
+        <UtilityBarAction
+          iconType=""
+          popoverContent={[Function]}
+        >
+          Test action
+        </UtilityBarAction>
+      </UtilityBarGroup>
+    </UtilityBarSection>
+    <UtilityBarSection>
+      <UtilityBarGroup>
+        <UtilityBarAction
+          iconType="cross"
+        >
+          Test action
+        </UtilityBarAction>
+      </UtilityBarGroup>
+    </UtilityBarSection>
+  </UtilityBar>
+</Component>
+>>>>>>> b5133b5a57e8187ee612197e034127d57d464ffc
 `;

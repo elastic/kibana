@@ -17,38 +17,28 @@ const offsetChrome = 49;
 const disableSticky = 'screen and (max-width: ' + euiLightVars.euiBreakpoints.s + ')';
 const disableStickyMq = window.matchMedia(disableSticky);
 
-interface WrapperProps {
-  isSticky?: boolean;
-}
+const Wrapper = styled.aside<{ isSticky?: boolean }>`
+  position: relative;
+  z-index: ${({ theme }) => theme.eui.euiZNavigation};
+  background: ${({ theme }) => theme.eui.euiColorEmptyShade};
+  border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
+  padding: ${({ theme }) => theme.eui.paddingSizes.m} ${gutterTimeline} ${({ theme }) =>
+  theme.eui.paddingSizes.m} ${({ theme }) => theme.eui.paddingSizes.l};
 
-const Wrapper = styled.aside<WrapperProps>`
-  ${props => css`
-    position: relative;
-    z-index: ${props.theme.eui.euiZNavigation};
-    background: ${props.theme.eui.euiColorEmptyShade};
-    border-bottom: ${props.theme.eui.euiBorderThin};
-    padding: ${props.theme.eui.paddingSizes.m} ${gutterTimeline} ${
-    props.theme.eui.paddingSizes.m
-  } ${props.theme.eui.paddingSizes.l};
-
-    ${props.isSticky &&
-      `
+  ${({ isSticky }) =>
+    isSticky &&
+    css`
       top: ${offsetChrome}px !important;
     `}
 
-    @media only ${disableSticky} {
-      position: static !important;
-      z-index: ${props.theme.eui.euiZContent} !important;
-    }
-  `}
+  @media only ${disableSticky} {
+    position: static !important;
+    z-index: ${({ theme }) => theme.eui.euiZContent} !important;
+  }
 `;
 Wrapper.displayName = 'Wrapper';
 
-export interface FiltersGlobalProps {
-  children: React.ReactNode;
-}
-
-export const FiltersGlobal = React.memo<FiltersGlobalProps>(({ children }) => (
+export const FiltersGlobal = React.memo<{ children: React.ReactNode }>(({ children }) => (
   <Sticky disableCompensation={disableStickyMq.matches} topOffset={-offsetChrome}>
     {({ style, isSticky }) => (
       <Wrapper className="siemFiltersGlobal" isSticky={isSticky} style={style}>

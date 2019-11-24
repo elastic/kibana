@@ -11,18 +11,16 @@ import { FormattedDuration } from '../formatted_duration';
 
 export const EVENT_DURATION_FIELD_NAME = 'event.duration';
 
-interface DurationProps {
-  contextId: string;
-  eventId: string;
-  fieldName: string;
-  value?: string | null;
-}
-
 /**
  * Renders draggable text containing the value of a field representing a
  * duration of time, (e.g. `event.duration`)
  */
-export const Duration = React.memo<DurationProps>(({ contextId, eventId, fieldName, value }) => (
+export const Duration = React.memo<{
+  contextId: string;
+  eventId: string;
+  fieldName: string;
+  value?: string | null;
+}>(({ contextId, eventId, fieldName, value }) => (
   <DefaultDraggable
     id={`duration-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
     name={name}

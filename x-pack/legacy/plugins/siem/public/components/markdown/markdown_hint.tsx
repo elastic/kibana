@@ -23,11 +23,7 @@ const Bold = styled.span`
 
 Bold.displayName = 'Bold';
 
-interface MarkdownHintContainerProps {
-  visibility: string;
-}
-
-const MarkdownHintContainer = styled(EuiText)<MarkdownHintContainerProps>`
+const MarkdownHintContainer = styled(EuiText)<{ visibility: string }>`
   visibility: ${({ visibility }) => visibility};
 `;
 
@@ -65,11 +61,7 @@ const TrailingWhitespace = styled.span`
 
 TrailingWhitespace.displayName = 'TrailingWhitespace';
 
-interface Props {
-  show: boolean;
-}
-
-export const MarkdownHint = React.memo<Props>(({ show }) => (
+export const MarkdownHint = React.memo<{ show: boolean }>(({ show }) => (
   <MarkdownHintContainer
     color="subdued"
     data-test-subj="markdown-hint"

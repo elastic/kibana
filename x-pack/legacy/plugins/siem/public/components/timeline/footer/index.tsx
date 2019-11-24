@@ -16,6 +16,7 @@ import {
   EuiPopover,
   EuiText,
   EuiToolTip,
+  EuiPopoverProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -54,7 +55,12 @@ const LoadingPanelContainer = styled.div`
 
 LoadingPanelContainer.displayName = 'LoadingPanelContainer';
 
-const PopoverRowItems = styled(EuiPopover)`
+const PopoverRowItems = styled(EuiPopover)<
+  EuiPopoverProps & {
+    className?: string;
+    id?: string;
+  }
+>`
   .euiButtonEmpty__content {
     padding: 0px 0px;
   }

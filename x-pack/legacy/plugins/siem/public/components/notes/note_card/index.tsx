@@ -17,17 +17,13 @@ const NoteCardContainer = styled(EuiPanel)`
 
 NoteCardContainer.displayName = 'NoteCardContainer';
 
-interface NoteCardProps {
-  created: Date;
-  rawNote: string;
-  user: string;
-}
-
-export const NoteCard = React.memo<NoteCardProps>(({ created, rawNote, user }) => (
-  <NoteCardContainer data-test-subj="note-card" hasShadow={false} paddingSize="none">
-    <NoteCardHeader created={created} user={user} />
-    <NoteCardBody rawNote={rawNote} />
-  </NoteCardContainer>
-));
+export const NoteCard = React.memo<{ created: Date; rawNote: string; user: string }>(
+  ({ created, rawNote, user }) => (
+    <NoteCardContainer data-test-subj="note-card" hasShadow={false} paddingSize="none">
+      <NoteCardHeader created={created} user={user} />
+      <NoteCardBody rawNote={rawNote} />
+    </NoteCardContainer>
+  )
+);
 
 NoteCard.displayName = 'NoteCard';

@@ -105,7 +105,7 @@ export const DroppableWrapper = React.memo<Props>(
       {(provided, snapshot) => (
         <ReactDndDropTarget
           height={height}
-          innerRef={provided.innerRef}
+          ref={provided.innerRef}
           {...provided.droppableProps}
           isDraggingOver={snapshot.isDraggingOver}
         >

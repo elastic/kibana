@@ -28,7 +28,7 @@ interface Props {
 }
 
 const HoverActionsPanelContainer = styled.div`
-  color: ${props => props.theme.eui.textColors.default}
+  color: ${({ theme }) => theme.eui.textColors.default};
   height: 100%;
   position: relative;
 `;

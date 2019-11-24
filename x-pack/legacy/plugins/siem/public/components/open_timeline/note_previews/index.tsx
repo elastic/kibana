@@ -18,14 +18,10 @@ const NotePreviewsContainer = styled.section`
 
 NotePreviewsContainer.displayName = 'NotePreviewsContainer';
 
-interface NotePreviewsProps {
-  notes?: TimelineResultNote[] | null;
-}
-
 /**
  * Renders a preview of a note in the All / Open Timelines table
  */
-export const NotePreviews = React.memo<NotePreviewsProps>(({ notes }) => {
+export const NotePreviews = React.memo<{ notes?: TimelineResultNote[] | null }>(({ notes }) => {
   if (notes == null || notes.length === 0) {
     return null;
   }

@@ -14,10 +14,13 @@ import { NarrowDateRange } from '../../../components/ml/types';
 import { GlobalTimeArgs } from '../../../containers/global_time';
 
 import { SetAbsoluteRangeDatePicker } from '../types';
+import { UpdateDateRange } from '../../../components/charts/common';
 
 interface QueryTabBodyProps {
   type: networkModel.NetworkType;
   filterQuery?: string | ESTermQuery;
+  updateDateRange?: UpdateDateRange;
+  narrowDateRange?: NarrowDateRange;
 }
 
 export type DnsQueryTabBodyProps = QueryTabBodyProps & GlobalTimeArgs;

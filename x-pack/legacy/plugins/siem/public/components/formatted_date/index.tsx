@@ -18,11 +18,7 @@ import { getOrEmptyTagFromValue } from '../empty_value';
 import { LocalizedDateTooltip } from '../localized_date_tooltip';
 import { getMaybeDate } from './maybe_date';
 
-interface PreferenceFormattedDateProps {
-  value: Date;
-}
-
-export const PreferenceFormattedDate = React.memo<PreferenceFormattedDateProps>(({ value }) => {
+export const PreferenceFormattedDate = React.memo<{ value: Date }>(({ value }) => {
   const [dateFormat] = useKibanaUiSetting(DEFAULT_DATE_FORMAT);
   const [dateFormatTz] = useKibanaUiSetting(DEFAULT_DATE_FORMAT_TZ);
   const [timezone] = useKibanaUiSetting(DEFAULT_TIMEZONE_BROWSER);
@@ -38,11 +34,6 @@ export const PreferenceFormattedDate = React.memo<PreferenceFormattedDateProps>(
 
 PreferenceFormattedDate.displayName = 'PreferenceFormattedDate';
 
-interface FormattedDateProps {
-  fieldName: string;
-  value?: string | number | null;
-}
-
 /**
  * Renders the specified date value in a format determined by the user's preferences,
  * with a tooltip that renders:
@@ -51,7 +42,10 @@ interface FormattedDateProps {
  * - a long representation of the date that includes the day of the week (e.g. Thursday, March 21, 2019 6:47pm)
  * - the raw date value (e.g. 2019-03-22T00:47:46Z)
  */
-export const FormattedDate = React.memo<FormattedDateProps>(
+export const FormattedDate = React.memo<{
+  fieldName: string;
+  value?: string | number | null;
+}>(
   ({ value, fieldName }): JSX.Element => {
     if (value == null) {
       return getOrEmptyTagFromValue(value);

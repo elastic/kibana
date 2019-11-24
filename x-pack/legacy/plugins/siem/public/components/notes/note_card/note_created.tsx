@@ -16,11 +16,7 @@ const NoteCreatedContainer = styled.span`
 
 NoteCreatedContainer.displayName = 'NoteCreatedContainer';
 
-interface NoteCreatedProps {
-  created: Date;
-}
-
-export const NoteCreated = React.memo<NoteCreatedProps>(({ created }) => (
+export const NoteCreated = React.memo<{ created: Date }>(({ created }) => (
   <NoteCreatedContainer data-test-subj="note-created">
     <LocalizedDateTooltip date={created}>
       <FormattedRelative value={created} />

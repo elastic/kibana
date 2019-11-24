@@ -9,22 +9,18 @@ import * as React from 'react';
 import { getFormattedDurationString } from './helpers';
 import { FormattedDurationTooltip } from './tooltip';
 
-interface FormattedDurationProps {
+export const FormattedDuration = React.memo<{
   maybeDurationNanoseconds: string | number | object | undefined | null;
   tooltipTitle?: string;
-}
-
-export const FormattedDuration = React.memo<FormattedDurationProps>(
-  ({ maybeDurationNanoseconds, tooltipTitle }) => (
-    <FormattedDurationTooltip
-      maybeDurationNanoseconds={maybeDurationNanoseconds}
-      tooltipTitle={tooltipTitle}
-    >
-      <div data-test-subj="formatted-duration">
-        {getFormattedDurationString(maybeDurationNanoseconds)}
-      </div>
-    </FormattedDurationTooltip>
-  )
-);
+}>(({ maybeDurationNanoseconds, tooltipTitle }) => (
+  <FormattedDurationTooltip
+    maybeDurationNanoseconds={maybeDurationNanoseconds}
+    tooltipTitle={tooltipTitle}
+  >
+    <div data-test-subj="formatted-duration">
+      {getFormattedDurationString(maybeDurationNanoseconds)}
+    </div>
+  </FormattedDurationTooltip>
+));
 
 FormattedDuration.displayName = 'FormattedDuration';

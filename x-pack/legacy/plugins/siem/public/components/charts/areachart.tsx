@@ -62,78 +62,72 @@ const checkIfAnyValidSeriesExist = (
 ): data is ChartSeriesData[] =>
   Array.isArray(data) && data.some(checkIfAllTheDataInTheSeriesAreValid);
 
-interface AreaChartBaseComponentProps {
+// https://ela.st/multi-areaseries
+export const AreaChartBaseComponent = React.memo<{
   data: ChartSeriesData[];
   width: string | null | undefined;
   height: string | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
-}
+}>(({ data, ...chartConfigs }) => {
+  const xTickFormatter = get('configs.axis.xTickFormatter', chartConfigs);
+  const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
+  const xAxisId = getAxisId(`group-${data[0].key}-x`);
+  const yAxisId = getAxisId(`group-${data[0].key}-y`);
+  const settings = {
+    ...chartDefaultSettings,
+    ...get('configs.settings', chartConfigs),
+  };
+  return chartConfigs.width && chartConfigs.height ? (
+    <div style={{ height: chartConfigs.height, width: chartConfigs.width, position: 'relative' }}>
+      <Chart>
+        <Settings {...settings} />
+        {data.map(series => {
+          const seriesKey = series.key;
+          const seriesSpecId = getSpecId(seriesKey);
+          return checkIfAllTheDataInTheSeriesAreValid(series) ? (
+            <AreaSeries
+              id={seriesSpecId}
+              key={seriesKey}
+              name={series.key.replace('Histogram', '')}
+              data={series.value || undefined}
+              xScaleType={getOr(ScaleType.Linear, 'configs.series.xScaleType', chartConfigs)}
+              yScaleType={getOr(ScaleType.Linear, 'configs.series.yScaleType', chartConfigs)}
+              timeZone={browserTimezone}
+              xAccessor="x"
+              yAccessors={['y']}
+              areaSeriesStyle={getSeriesLineStyle()}
+              customSeriesColors={getSeriesStyle(seriesKey, series.color)}
+            />
+          ) : null;
+        })}
 
-// https://ela.st/multi-areaseries
-export const AreaChartBaseComponent = React.memo<AreaChartBaseComponentProps>(
-  ({ data, ...chartConfigs }) => {
-    const xTickFormatter = get('configs.axis.xTickFormatter', chartConfigs);
-    const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
-    const xAxisId = getAxisId(`group-${data[0].key}-x`);
-    const yAxisId = getAxisId(`group-${data[0].key}-y`);
-    const settings = {
-      ...chartDefaultSettings,
-      ...get('configs.settings', chartConfigs),
-    };
-    return chartConfigs.width && chartConfigs.height ? (
-      <div style={{ height: chartConfigs.height, width: chartConfigs.width, position: 'relative' }}>
-        <Chart>
-          <Settings {...settings} />
-          {data.map(series => {
-            const seriesKey = series.key;
-            const seriesSpecId = getSpecId(seriesKey);
-            return checkIfAllTheDataInTheSeriesAreValid(series) ? (
-              <AreaSeries
-                id={seriesSpecId}
-                key={seriesKey}
-                name={series.key.replace('Histogram', '')}
-                data={series.value || undefined}
-                xScaleType={getOr(ScaleType.Linear, 'configs.series.xScaleType', chartConfigs)}
-                yScaleType={getOr(ScaleType.Linear, 'configs.series.yScaleType', chartConfigs)}
-                timeZone={browserTimezone}
-                xAccessor="x"
-                yAccessors={['y']}
-                areaSeriesStyle={getSeriesLineStyle()}
-                customSeriesColors={getSeriesStyle(seriesKey, series.color)}
-              />
-            ) : null;
-          })}
+        <Axis
+          id={xAxisId}
+          position={Position.Bottom}
+          showOverlappingTicks={false}
+          tickFormat={xTickFormatter}
+          tickSize={0}
+        />
 
-          <Axis
-            id={xAxisId}
-            position={Position.Bottom}
-            showOverlappingTicks={false}
-            tickFormat={xTickFormatter}
-            tickSize={0}
-          />
-
-          <Axis id={yAxisId} position={Position.Left} tickSize={0} tickFormat={yTickFormatter} />
-        </Chart>
-      </div>
-    ) : null;
-  }
-);
+        <Axis id={yAxisId} position={Position.Left} tickSize={0} tickFormat={yTickFormatter} />
+      </Chart>
+    </div>
+  ) : null;
+});
 
 AreaChartBaseComponent.displayName = 'AreaChartBaseComponent';
 
-interface AreaChartProps {
+export const AreaChart = React.memo<{
   areaChart: ChartSeriesData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
-}
-
-export const AreaChart = React.memo<AreaChartProps>(({ areaChart, configs }) => {
+}>(({ areaChart, configs }) => {
   const customHeight = get('customHeight', configs);
   const customWidth = get('customWidth', configs);
 
   return checkIfAnyValidSeriesExist(areaChart) ? (
     <AutoSizer detectAnyWindowResize={false} content>
       {({ measureRef, content: { height, width } }) => (
-        <WrappedByAutoSizer innerRef={measureRef} height={getChartHeight(customHeight, height)}>
+        <WrappedByAutoSizer ref={measureRef} height={getChartHeight(customHeight, height)}>
           <AreaChartBaseComponent
             data={areaChart}
             height={getChartHeight(customHeight, height)}

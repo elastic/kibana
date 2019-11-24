@@ -1,9 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Resizeable it renders 1`] = `
+<<<<<<< HEAD
 <Fragment>
   <ResizeHandleContainer
     data-test-subj="resize-handle-container"
+=======
+<Component>
+  <Resizeable
+    handle={
+      <ForwardRef(styled.div)
+        data-test-subj="test-resize-handle"
+      />
+    }
+>>>>>>> b5133b5a57e8187ee612197e034127d57d464ffc
     height="100%"
     innerRef={
       Object {

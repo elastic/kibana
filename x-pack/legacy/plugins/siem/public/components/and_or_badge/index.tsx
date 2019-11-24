@@ -37,13 +37,9 @@ RoundedBadge.displayName = 'RoundedBadge';
 
 export type AndOr = 'and' | 'or';
 
-interface AndOrBadgeProps {
-  type: AndOr;
-}
-
 /** Displays AND / OR in a round badge */
 // Ref: https://github.com/elastic/eui/issues/1655
-export const AndOrBadge = React.memo<AndOrBadgeProps>(({ type }) => (
+export const AndOrBadge = React.memo<{ type: AndOr }>(({ type }) => (
   <RoundedBadge data-test-subj="and-or-badge" color="hollow">
     {type === 'and' ? i18n.AND : i18n.OR}
   </RoundedBadge>

@@ -9,11 +9,7 @@ import * as React from 'react';
 import { NoteCard } from './note_card';
 import * as i18n from './translations';
 
-interface ColumnProps {
-  text: string;
-}
-
-const Column = React.memo<ColumnProps>(({ text }) => <span>{text}</span>);
+const Column = React.memo<{ text: string }>(({ text }) => <span>{text}</span>);
 Column.displayName = 'Column';
 
 interface Item {

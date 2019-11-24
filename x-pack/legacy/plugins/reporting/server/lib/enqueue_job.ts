@@ -7,8 +7,8 @@
 import { get } from 'lodash';
 // @ts-ignore
 import { events as esqueueEvents } from './esqueue';
-import { oncePerServer } from './once_per_server';
 import {
+  Job,
   ServerFacade,
   RequestFacade,
   Logger,
@@ -24,7 +24,7 @@ interface ConfirmedJob {
   _primary_term: number;
 }
 
-function enqueueJobFn(server: ServerFacade) {
+export function enqueueJobFactory(server: ServerFacade) {
   const config = server.config();
   const captureConfig: CaptureConfig = config.get('xpack.reporting.capture');
   const browserType = captureConfig.browser.type;
@@ -37,9 +37,9 @@ function enqueueJobFn(server: ServerFacade) {
     exportTypeId: string,
     jobParams: object,
     user: string,
-    headers: ConditionalHeaders,
+    headers: ConditionalHeaders['headers'],
     request: RequestFacade
-  ) {
+  ): Promise<Job> {
     const logger = parentLogger.clone(['queue-job']);
     const exportType = exportTypesRegistry.getById(exportTypeId);
     const createJob = exportType.createJobFactory(server);
@@ -65,5 +65,3 @@ function enqueueJobFn(server: ServerFacade) {
     });
   };
 }
-
-export const enqueueJobFactory = oncePerServer(enqueueJobFn);

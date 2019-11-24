@@ -33,11 +33,7 @@ const HoverActionsContainer = styled(EuiPanel)`
 
 HoverActionsContainer.displayName = 'HoverActionsContainer';
 
-interface NoteCardBodyProps {
-  rawNote: string;
-}
-
-export const NoteCardBody = React.memo<NoteCardBodyProps>(({ rawNote }) => (
+export const NoteCardBody = React.memo<{ rawNote: string }>(({ rawNote }) => (
   <BodyContainer data-test-subj="note-card-body" hasShadow={false} paddingSize="s">
     <WithHoverActions
       hoverContent={

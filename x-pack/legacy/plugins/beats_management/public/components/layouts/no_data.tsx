@@ -14,21 +14,21 @@ interface LayoutProps extends ComponentProps<any>, RouteComponentProps {
   modalClosePath?: string;
 }
 
-const NoDataLayoutComponent = React.memo<LayoutProps>(
-  ({ actionSection, title, modalClosePath, children, history }) => (
-    <EuiFlexGroup justifyContent="spaceAround">
-      <EuiFlexItem grow={false}>
-        <EuiPageContent>
-          <EuiEmptyPrompt
-            iconType="logoBeats"
-            title={<h2>{title}</h2>}
-            body={children}
-            actions={actionSection}
-          />
-        </EuiPageContent>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  )
+export const NoDataLayout: React.FC<LayoutProps> = withRouter(
+  ({ actionSection, title, modalClosePath, children, history }) => {
+    return (
+      <EuiFlexGroup justifyContent="spaceAround">
+        <EuiFlexItem grow={false}>
+          <EuiPageContent>
+            <EuiEmptyPrompt
+              iconType="logoBeats"
+              title={<h2>{title}</h2>}
+              body={children}
+              actions={actionSection}
+            />
+          </EuiPageContent>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
 );
-
-export const NoDataLayout = withRouter(NoDataLayoutComponent);

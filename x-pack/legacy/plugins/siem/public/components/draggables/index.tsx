@@ -46,17 +46,15 @@ export const getDefaultWhenTooltipIsUnspecified = ({
   tooltipContent?: React.ReactNode;
 }): React.ReactNode => (tooltipContent != null ? tooltipContent : field);
 
-interface ContentProps {
+/**
+ * Renders the content of the draggable, wrapped in a tooltip
+ */
+const Content = React.memo<{
   children?: React.ReactNode;
   field: string;
   tooltipContent?: React.ReactNode;
   value?: string | null;
-}
-
-/**
- * Renders the content of the draggable, wrapped in a tooltip
- */
-const Content = React.memo<ContentProps>(({ children, field, tooltipContent, value }) =>
+}>(({ children, field, tooltipContent, value }) =>
   !tooltipContentIsExplicitlyNull(tooltipContent) ? (
     <EuiToolTip
       data-test-subj={`${field}-tooltip`}

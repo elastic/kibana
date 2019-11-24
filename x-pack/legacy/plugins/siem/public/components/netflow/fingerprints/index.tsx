@@ -15,19 +15,17 @@ import {
 } from '../../certificate_fingerprint';
 import { JA3_HASH_FIELD_NAME, Ja3Fingerprint } from '../../ja3_fingerprint';
 
-interface FingerprintsProps {
+/**
+ * Renders rows of draggable badges containing ja3 and certificate fingerprints
+ * (i.e. sha1 hashes)
+ */
+export const Fingerprints = React.memo<{
   contextId: string;
   eventId: string;
   tlsClientCertificateFingerprintSha1?: string[] | null;
   tlsFingerprintsJa3Hash?: string[] | null;
   tlsServerCertificateFingerprintSha1?: string[] | null;
-}
-
-/**
- * Renders rows of draggable badges containing ja3 and certificate fingerprints
- * (i.e. sha1 hashes)
- */
-export const Fingerprints = React.memo<FingerprintsProps>(
+}>(
   ({
     contextId,
     eventId,

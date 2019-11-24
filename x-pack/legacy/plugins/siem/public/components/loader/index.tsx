@@ -16,20 +16,15 @@ import { rgba } from 'polished';
 import React from 'react';
 import styled, { css } from 'styled-components';
 
-interface AsideProps {
-  overlay?: boolean;
-  overlayBackground?: string;
-}
+const Aside = styled.aside<{ overlay?: boolean; overlayBackground?: string }>`
+  padding: ${({ theme }) => theme.eui.paddingSizes.m};
 
-const Aside = styled.aside<AsideProps>`
-  ${({ overlay, overlayBackground, theme }) => css`
-    padding: ${theme.eui.paddingSizes.m};
-
-    ${overlay &&
-      `
-      background: ${
-        overlayBackground ? rgba(overlayBackground, 0.9) : rgba(theme.eui.euiColorEmptyShade, 0.9)
-      };
+  ${({ overlay, overlayBackground, theme }) =>
+    overlay &&
+    css`
+      background: ${overlayBackground
+        ? rgba(overlayBackground, 0.9)
+        : rgba(theme.eui.euiColorEmptyShade, 0.9)};
       bottom: 0;
       left: 0;
       position: absolute;
@@ -37,22 +32,21 @@ const Aside = styled.aside<AsideProps>`
       top: 0;
       z-index: ${theme.eui.euiZLevel1};
     `}
-  `}
 `;
 
 Aside.displayName = 'Aside';
 
-const FlexGroup = styled(EuiFlexGroup).attrs({
+const FlexGroup = styled(EuiFlexGroup).attrs(() => ({
   alignItems: 'center',
   direction: 'column',
   gutterSize: 's',
   justifyContent: 'center',
-})<{ overlay: { overlay?: boolean } }>`
+}))<{ overlay: { overlay?: boolean } }>`
   ${({ overlay }) =>
     overlay &&
-    `
-    height: 100%;
-  `}
+    css`
+      height: 100%;
+    `}
 `;
 
 FlexGroup.displayName = 'FlexGroup';

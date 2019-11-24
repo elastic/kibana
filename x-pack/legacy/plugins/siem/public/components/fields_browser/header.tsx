@@ -92,13 +92,11 @@ const CountRow = React.memo<Pick<Props, 'filteredBrowserFields'>>(({ filteredBro
 
 CountRow.displayName = 'CountRow';
 
-interface TitleRowProps {
+const TitleRow = React.memo<{
   isEventViewer?: boolean;
   onOutsideClick: () => void;
   onUpdateColumns: OnUpdateColumns;
-}
-
-const TitleRow = React.memo<TitleRowProps>(({ isEventViewer, onOutsideClick, onUpdateColumns }) => (
+}>(({ isEventViewer, onOutsideClick, onUpdateColumns }) => (
   <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" direction="row" gutterSize="none">
     <EuiFlexItem grow={false}>
       <EuiTitle data-test-subj="field-browser-title" size="s">

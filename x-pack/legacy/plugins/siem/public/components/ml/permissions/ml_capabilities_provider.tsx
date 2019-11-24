@@ -16,26 +16,18 @@ import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
 
 import * as i18n from './translations';
 
-interface MlCapabilitiesProvider extends MlCapabilities {
-  capabilitiesFetched: boolean;
-}
-
 const emptyMlCapabilitiesProvider = {
   ...emptyMlCapabilities,
   capabilitiesFetched: false,
 };
 
-export const MlCapabilitiesContext = React.createContext<MlCapabilitiesProvider>(
+export const MlCapabilitiesContext = React.createContext<{ capabilitiesFetched: boolean }>(
   emptyMlCapabilitiesProvider
 );
 
 MlCapabilitiesContext.displayName = 'MlCapabilitiesContext';
 
-interface MlCapabilitiesProviderProps {
-  children: JSX.Element;
-}
-
-export const MlCapabilitiesProvider = React.memo<MlCapabilitiesProviderProps>(({ children }) => {
+export const MlCapabilitiesProvider = React.memo<{ children: JSX.Element }>(({ children }) => {
   const [capabilities, setCapabilities] = useState<MlCapabilitiesProvider>(
     emptyMlCapabilitiesProvider
   );

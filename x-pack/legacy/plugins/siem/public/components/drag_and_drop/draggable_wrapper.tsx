@@ -39,31 +39,43 @@ const Wrapper = styled.div`
 Wrapper.displayName = 'Wrapper';
 
 const ProviderContainer = styled.div<{ isDragging: boolean }>`
-  ${({ theme, isDragging }) => css`
-    &,
-    &::before,
-    &::after {
-      transition: background ${theme.eui.euiAnimSpeedFast} ease,
-        color ${theme.eui.euiAnimSpeedFast} ease;
-    }
+  &,
+  &::before,
+  &::after {
+    transition: background ${({ theme }) => theme.eui.euiAnimSpeedFast} ease,
+      color ${({ theme }) => theme.eui.euiAnimSpeedFast} ease;
+  }
 
-    ${!isDragging &&
-      `
+  ${({ isDragging }) =>
+    !isDragging &&
+    css`
       & {
         border-radius: 2px;
         padding: 0 4px 0 8px;
         position: relative;
-        z-index: ${theme.eui.euiZLevel0} !important;
+        z-index: ${({ theme }) => theme.eui.euiZLevel0} !important;
 
         &::before {
           background-image: linear-gradient(
               135deg,
-              ${theme.eui.euiColorMediumShade} 25%,
+              ${({ theme }) => theme.eui.euiColorMediumShade} 25%,
               transparent 25%
             ),
-            linear-gradient(-135deg, ${theme.eui.euiColorMediumShade} 25%, transparent 25%),
-            linear-gradient(135deg, transparent 75%, ${theme.eui.euiColorMediumShade} 75%),
-            linear-gradient(-135deg, transparent 75%, ${theme.eui.euiColorMediumShade} 75%);
+            linear-gradient(
+              -135deg,
+              ${({ theme }) => theme.eui.euiColorMediumShade} 25%,
+              transparent 25%
+            ),
+            linear-gradient(
+              135deg,
+              transparent 75%,
+              ${({ theme }) => theme.eui.euiColorMediumShade} 75%
+            ),
+            linear-gradient(
+              -135deg,
+              transparent 75%,
+              ${({ theme }) => theme.eui.euiColorMediumShade} 75%
+            );
           background-position: 0 0, 1px 0, 1px -1px, 0px 1px;
           background-size: 2px 2px;
           bottom: 2px;
@@ -87,17 +99,29 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
 
       .${STATEFUL_EVENT_CSS_CLASS_NAME}:hover &,
       tr:hover & {
-        background-color: ${theme.eui.euiColorLightShade};
+        background-color: ${({ theme }) => theme.eui.euiColorLightShade};
 
         &::before {
           background-image: linear-gradient(
               135deg,
-              ${theme.eui.euiColorDarkShade} 25%,
+              ${({ theme }) => theme.eui.euiColorDarkShade} 25%,
               transparent 25%
             ),
-            linear-gradient(-135deg, ${theme.eui.euiColorDarkShade} 25%, transparent 25%),
-            linear-gradient(135deg, transparent 75%, ${theme.eui.euiColorDarkShade} 75%),
-            linear-gradient(-135deg, transparent 75%, ${theme.eui.euiColorDarkShade} 75%);
+            linear-gradient(
+              -135deg,
+              ${({ theme }) => theme.eui.euiColorDarkShade} 25%,
+              transparent 25%
+            ),
+            linear-gradient(
+              135deg,
+              transparent 75%,
+              ${({ theme }) => theme.eui.euiColorDarkShade} 75%
+            ),
+            linear-gradient(
+              -135deg,
+              transparent 75%,
+              ${({ theme }) => theme.eui.euiColorDarkShade} 75%
+            );
         }
       }
 
@@ -107,34 +131,46 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
       .${STATEFUL_EVENT_CSS_CLASS_NAME}:focus &:focus,
       tr:hover &:hover,
       tr:hover &:focus {
-        background-color: ${theme.eui.euiColorPrimary};
+        background-color: ${({ theme }) => theme.eui.euiColorPrimary};
 
         &,
         & a,
         & a:hover {
-          color: ${theme.eui.euiColorEmptyShade};
+          color: ${({ theme }) => theme.eui.euiColorEmptyShade};
         }
 
         &::before {
           background-image: linear-gradient(
               135deg,
-              ${theme.eui.euiColorEmptyShade} 25%,
+              ${({ theme }) => theme.eui.euiColorEmptyShade} 25%,
               transparent 25%
             ),
-            linear-gradient(-135deg, ${theme.eui.euiColorEmptyShade} 25%, transparent 25%),
-            linear-gradient(135deg, transparent 75%, ${theme.eui.euiColorEmptyShade} 75%),
-            linear-gradient(-135deg, transparent 75%, ${theme.eui.euiColorEmptyShade} 75%);
+            linear-gradient(
+              -135deg,
+              ${({ theme }) => theme.eui.euiColorEmptyShade} 25%,
+              transparent 25%
+            ),
+            linear-gradient(
+              135deg,
+              transparent 75%,
+              ${({ theme }) => theme.eui.euiColorEmptyShade} 75%
+            ),
+            linear-gradient(
+              -135deg,
+              transparent 75%,
+              ${({ theme }) => theme.eui.euiColorEmptyShade} 75%
+            );
         }
       }
     `}
 
-    ${isDragging &&
-      `
+  ${({ isDragging }) =>
+    isDragging &&
+    css`
       & {
         z-index: 9999 !important;
       }
     `}
-  `}
 `;
 
 ProviderContainer.displayName = 'ProviderContainer';
@@ -192,7 +228,7 @@ const DraggableWrapperComponent = React.memo<Props>(
                     <ProviderContainer
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
-                      innerRef={provided.innerRef}
+                      ref={provided.innerRef}
                       data-test-subj="providerContainer"
                       isDragging={snapshot.isDragging}
                       style={{
@@ -237,19 +273,14 @@ export const DraggableWrapper = connect(null, {
 
 DraggableWrapper.displayName = 'DraggableWrapper';
 
-interface ConditionalPortalProps {
-  children: React.ReactNode;
-  usePortal: boolean;
-}
-
 /**
  * Conditionally wraps children in an EuiPortal to ensure drag offsets are correct when dragging
  * from containers that have css transforms
  *
  * See: https://github.com/atlassian/react-beautiful-dnd/issues/499
  */
-const ConditionalPortal = React.memo<ConditionalPortalProps>(({ children, usePortal }) =>
-  usePortal ? <EuiPortal>{children}</EuiPortal> : <>{children}</>
+const ConditionalPortal = React.memo<{ children: React.ReactNode; usePortal: boolean }>(
+  ({ children, usePortal }) => (usePortal ? <EuiPortal>{children}</EuiPortal> : <>{children}</>)
 );
 
 ConditionalPortal.displayName = 'ConditionalPortal';

@@ -220,14 +220,11 @@ export const DescriptionListDescription = styled(EuiDescriptionListDescription)`
 
 DescriptionListDescription.displayName = 'DescriptionListDescription';
 
-interface StatValueProps {
-  isLoading: boolean;
-  value: React.ReactNode | null | undefined;
-}
-
-const StatValue = React.memo<StatValueProps>(({ isLoading, value }) => (
-  <>{isLoading ? <EuiLoadingSpinner size="m" /> : value != null ? value : getEmptyTagValue()}</>
-));
+const StatValue = React.memo<{ isLoading: boolean; value: React.ReactNode | null | undefined }>(
+  ({ isLoading, value }) => (
+    <>{isLoading ? <EuiLoadingSpinner size="m" /> : value != null ? value : getEmptyTagValue()}</>
+  )
+);
 
 StatValue.displayName = 'StatValue';
 

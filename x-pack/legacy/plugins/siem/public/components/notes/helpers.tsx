@@ -54,12 +54,8 @@ const TitleText = styled.h3`
 
 TitleText.displayName = 'TitleText';
 
-interface NotesCountProps {
-  noteIds: string[];
-}
-
 /** Displays a count of the existing notes */
-export const NotesCount = React.memo<NotesCountProps>(({ noteIds }) => (
+export const NotesCount = React.memo<{ noteIds: string[] }>(({ noteIds }) => (
   <EuiFlexGroup alignItems="center" gutterSize="none">
     <EuiFlexItem grow={false}>
       <EuiIcon color="text" size="l" type="editorComment" />

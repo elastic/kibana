@@ -52,26 +52,22 @@ export const getDirectionIcon = (
   }
 };
 
-interface DirectionBadgeProps {
-  contextId: string;
-  direction?: string | null;
-  eventId: string;
-}
-
 /**
  * Renders a badge containing the value of `network.direction`
  */
-export const DirectionBadge = React.memo<DirectionBadgeProps>(
-  ({ contextId, eventId, direction }) => (
-    <DraggableBadge
-      contextId={contextId}
-      data-test-subj="network-direction"
-      eventId={eventId}
-      field={NETWORK_DIRECTION_FIELD_NAME}
-      iconType={getDirectionIcon(direction)}
-      value={direction}
-    />
-  )
-);
+export const DirectionBadge = React.memo<{
+  contextId: string;
+  direction?: string | null;
+  eventId: string;
+}>(({ contextId, eventId, direction }) => (
+  <DraggableBadge
+    contextId={contextId}
+    data-test-subj="network-direction"
+    eventId={eventId}
+    field={NETWORK_DIRECTION_FIELD_NAME}
+    iconType={getDirectionIcon(direction)}
+    value={direction}
+  />
+));
 
 DirectionBadge.displayName = 'DirectionBadge';

@@ -17,24 +17,20 @@ const P = styled.p`
 
 P.displayName = 'P';
 
-interface FormattedDurationTooltipContentProps {
+export const FormattedDurationTooltipContent = React.memo<{
   maybeDurationNanoseconds: string | number | object | undefined | null;
   tooltipTitle?: string;
-}
-
-export const FormattedDurationTooltipContent = React.memo<FormattedDurationTooltipContentProps>(
-  ({ maybeDurationNanoseconds, tooltipTitle }) => (
-    <>
-      {tooltipTitle != null ? <P data-test-subj="title">{tooltipTitle}</P> : null}
-      <P data-test-subj="humanized">{getHumanizedDuration(maybeDurationNanoseconds)}</P>
-      <P data-test-subj="raw-value">
-        <FormattedMessage id="xpack.siem.formattedDuration.tooltipLabel" defaultMessage="raw" />
-        {': '}
-        {maybeDurationNanoseconds}
-      </P>
-    </>
-  )
-);
+}>(({ maybeDurationNanoseconds, tooltipTitle }) => (
+  <>
+    {tooltipTitle != null ? <P data-test-subj="title">{tooltipTitle}</P> : null}
+    <P data-test-subj="humanized">{getHumanizedDuration(maybeDurationNanoseconds)}</P>
+    <P data-test-subj="raw-value">
+      <FormattedMessage id="xpack.siem.formattedDuration.tooltipLabel" defaultMessage="raw" />
+      {': '}
+      {maybeDurationNanoseconds}
+    </P>
+  </>
+));
 
 FormattedDurationTooltipContent.displayName = 'FormattedDurationTooltipContent';
 
