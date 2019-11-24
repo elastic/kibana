@@ -16,15 +16,17 @@ import {
   NetworkDnsEdges,
   NetworkDnsSortField,
   PageInfoPaginated,
+  MatrixOverOrdinalHistogramData,
 } from '../../graphql/types';
 import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } from '../../store';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
 import { networkDnsQuery } from './index.gql_query';
+import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../store/constants';
 
 const ID = 'networkDnsQuery';
-
+const HISTOGRAM_ID = 'networkDnsHistogramQuery';
 export interface NetworkDnsArgs {
   id: string;
   inspect: inputsModel.InspectQuery;
@@ -35,6 +37,7 @@ export interface NetworkDnsArgs {
   pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
   totalCount: number;
+  histogram: MatrixOverOrdinalHistogramData[];
 }
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
@@ -52,7 +55,7 @@ export interface NetworkDnsComponentReduxProps {
 
 type NetworkDnsProps = OwnProps & NetworkDnsComponentReduxProps;
 
-class NetworkDnsComponentQuery extends QueryTemplatePaginated<
+export class NetworkDnsComponentQuery extends QueryTemplatePaginated<
   NetworkDnsProps,
   GetNetworkDnsQuery.Query,
   GetNetworkDnsQuery.Variables
@@ -129,6 +132,7 @@ class NetworkDnsComponentQuery extends QueryTemplatePaginated<
             pageInfo: getOr({}, 'source.NetworkDns.pageInfo', data),
             refetch: this.memoizedRefetchQuery(variables, limit, refetch),
             totalCount: getOr(-1, 'source.NetworkDns.totalCount', data),
+            histogram: getOr(null, 'source.NetworkDns.histogram', data),
           });
         }}
       </Query>
@@ -144,6 +148,24 @@ const makeMapStateToProps = () => {
     return {
       ...getNetworkDnsSelector(state),
       isInspected,
+      id,
+    };
+  };
+
+  return mapStateToProps;
+};
+
+const makeMapHistogramStateToProps = () => {
+  const getNetworkDnsSelector = networkSelectors.dnsSelector();
+  const getQuery = inputsSelectors.globalQueryByIdSelector();
+  const mapStateToProps = (state: State, { id = HISTOGRAM_ID }: OwnProps) => {
+    const { isInspected } = getQuery(state, id);
+    return {
+      ...getNetworkDnsSelector(state),
+      activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+      limit: DEFAULT_TABLE_LIMIT,
+      isInspected,
+      id,
     };
   };
 
@@ -151,3 +173,6 @@ const makeMapStateToProps = () => {
 };
 
 export const NetworkDnsQuery = connect(makeMapStateToProps)(NetworkDnsComponentQuery);
+export const NetworkDnsHistogramQuery = connect(makeMapHistogramStateToProps)(
+  NetworkDnsComponentQuery
+);

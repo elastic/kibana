@@ -9,5 +9,5 @@
   "include": [
     "**/*"
   ],
-  "exclude": [],
+  "exclude": []
 }
