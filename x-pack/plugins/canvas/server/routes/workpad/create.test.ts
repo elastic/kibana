@@ -5,8 +5,12 @@
  */
 
 import sinon from 'sinon';
-import Sinon from 'sinon';
-import { savedObjectsClientMock, httpServiceMock, httpServerMock } from 'src/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  httpServiceMock,
+  httpServerMock,
+  loggingServiceMock,
+} from 'src/core/server/mocks';
 import { CANVAS_TYPE } from '../../../../../legacy/plugins/canvas/common/lib/constants';
 import { initializeCreateWorkpadRoute } from './create';
 import {
@@ -32,15 +36,17 @@ jest.mock('uuid/v4', () => jest.fn().mockReturnValue('123abc'));
 
 describe('POST workpad', () => {
   let routeHandler: RequestHandler<any, any, any>;
-  let clock: Sinon.SinonFakeTimers;
+  let clock: sinon.SinonFakeTimers;
 
   beforeEach(() => {
     clock = sinon.useFakeTimers(now);
 
     const httpService = httpServiceMock.createSetupContract();
+
     const router = httpService.createRouter('') as jest.Mocked<IRouter>;
     initializeCreateWorkpadRoute({
       router,
+      logger: loggingServiceMock.create().get(),
     });
 
     routeHandler = router.post.mock.calls[0][1];

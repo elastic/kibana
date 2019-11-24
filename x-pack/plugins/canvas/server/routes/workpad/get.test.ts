@@ -12,7 +12,12 @@ import {
   RequestHandlerContext,
   RequestHandler,
 } from 'src/core/server';
-import { savedObjectsClientMock, httpServiceMock, httpServerMock } from 'src/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  httpServiceMock,
+  httpServerMock,
+  loggingServiceMock,
+} from 'src/core/server/mocks';
 import { workpadWithGroupAsElement } from '../../../../../legacy/plugins/canvas/__tests__/fixtures/workpads';
 import { CanvasWorkpad } from '../../../../../legacy/plugins/canvas/types';
 
@@ -32,6 +37,7 @@ describe('GET workpad', () => {
     const router = httpService.createRouter('') as jest.Mocked<IRouter>;
     initializeGetWorkpadRoute({
       router,
+      logger: loggingServiceMock.create().get(),
     });
 
     routeHandler = router.get.mock.calls[0][1];

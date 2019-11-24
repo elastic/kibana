@@ -5,7 +5,6 @@
  */
 
 import sinon from 'sinon';
-import Sinon from 'sinon';
 import { CANVAS_TYPE } from '../../../../../legacy/plugins/canvas/common/lib/constants';
 import { initializeUpdateWorkpadRoute, initializeUpdateWorkpadAssetsRoute } from './update';
 import {
@@ -14,7 +13,12 @@ import {
   RequestHandlerContext,
   RequestHandler,
 } from 'src/core/server';
-import { savedObjectsClientMock, httpServiceMock, httpServerMock } from 'src/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  httpServiceMock,
+  httpServerMock,
+  loggingServiceMock,
+} from 'src/core/server/mocks';
 import { workpads } from '../../../../../legacy/plugins/canvas/__tests__/fixtures/workpads';
 import { okResponse } from './ok_response';
 
@@ -34,7 +38,7 @@ jest.mock('uuid/v4', () => jest.fn().mockReturnValue('123abc'));
 
 describe('PUT workpad', () => {
   let routeHandler: RequestHandler<any, any, any>;
-  let clock: Sinon.SinonFakeTimers;
+  let clock: sinon.SinonFakeTimers;
 
   beforeEach(() => {
     clock = sinon.useFakeTimers(now);
@@ -43,6 +47,7 @@ describe('PUT workpad', () => {
     const router = httpService.createRouter('') as jest.Mocked<IRouter>;
     initializeUpdateWorkpadRoute({
       router,
+      logger: loggingServiceMock.create().get(),
     });
 
     routeHandler = router.put.mock.calls[0][1];
@@ -148,7 +153,7 @@ describe('PUT workpad', () => {
 
 describe('update assets', () => {
   let routeHandler: RequestHandler<any, any, any>;
-  let clock: Sinon.SinonFakeTimers;
+  let clock: sinon.SinonFakeTimers;
 
   beforeEach(() => {
     clock = sinon.useFakeTimers(now);
@@ -156,6 +161,7 @@ describe('update assets', () => {
     const router = httpService.createRouter('') as jest.Mocked<IRouter>;
     initializeUpdateWorkpadAssetsRoute({
       router,
+      logger: loggingServiceMock.create().get(),
     });
 
     routeHandler = router.put.mock.calls[0][1];
