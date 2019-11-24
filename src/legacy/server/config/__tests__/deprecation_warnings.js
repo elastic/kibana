@@ -25,7 +25,8 @@ const RUN_KBN_SERVER_STARTUP = require.resolve('./fixtures/run_kbn_server_startu
 const SETUP_NODE_ENV = require.resolve('../../../../setup_node_env');
 const SECOND = 1000;
 
-describe('config/deprecation warnings', function () {
+// FLAKY: https://github.com/elastic/kibana/issues/51479
+describe.skip('config/deprecation warnings', function () {
   this.timeout(15 * SECOND);
 
   let stdio = '';
@@ -38,6 +39,7 @@ describe('config/deprecation warnings', function () {
     ], {
       stdio: ['ignore', 'pipe', 'pipe'],
       env: {
+        ...process.env,
         CREATE_SERVER_OPTS: JSON.stringify({
           logging: {
             quiet: false,
@@ -105,7 +107,11 @@ describe('config/deprecation warnings', function () {
         line.tags.includes('warning')
       );
 
-    expect(deprecationLines).to.have.length(1);
-    expect(deprecationLines[0]).to.have.property('message', 'uiSettings.enabled is deprecated and is no longer used');
+    try {
+      expect(deprecationLines).to.have.length(1);
+      expect(deprecationLines[0]).to.have.property('message', 'uiSettings.enabled is deprecated and is no longer used');
+    } catch (error) {
+      throw new Error(`Expected stdio to include deprecation message about uiSettings.enabled\n\nstdio:\n${stdio}\n\n`);
+    }
   });
 });
