@@ -20,6 +20,7 @@ import { DnsQueryTabBody } from './dns_query_tab_body';
 import { ConditionalFlexGroup } from './conditional_flex_group';
 import { NetworkRoutesProps, NetworkRouteType } from './types';
 import { TlsQueryTabBody } from './tls_query_tab_body';
+import { Anomaly } from '../../../components/ml/types';
 
 export const NetworkRoutes = ({
   networkPagePath,
@@ -33,7 +34,7 @@ export const NetworkRoutes = ({
   setAbsoluteRangeDatePicker,
 }: NetworkRoutesProps) => {
   const narrowDateRange = useCallback(
-    (score, interval) => {
+    (score: Anomaly, interval: string) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       setAbsoluteRangeDatePicker({
         id: 'global',
@@ -42,6 +43,12 @@ export const NetworkRoutes = ({
       });
     },
     [scoreIntervalToDateTime, setAbsoluteRangeDatePicker]
+  );
+  const updateDateRange = useCallback(
+    (min: number, max: number) => {
+      setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+    },
+    [from, to]
   );
 
   const networkAnomaliesFilterQuery = {
@@ -75,6 +82,7 @@ export const NetworkRoutes = ({
   const tabProps = {
     ...commonProps,
     indexPattern,
+    updateDateRange,
   };
 
   const anomaliesProps = {
