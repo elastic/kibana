@@ -50,8 +50,8 @@ export class EndpointHandler implements EndpointRequestContext {
 
   async findLatestOfAllEndpoints(request: KibanaRequest): Promise<SearchResponse<EndpointData>> {
     const config = await this.endpointAppContext.config();
-    const pageSize: number = request.params.pageSize || config.pageSize;
-    const pageIndex: number = request.params.pageIndex || config.defaultPageIndex;
+    const pageSize: number = request.params.pageSize || config.searchResultDefaultPageSize;
+    const pageIndex: number = request.params.pageIndex || config.searchResultDefaultFirstPageIndex;
     const searchParams: SearchParams = {
       from: pageIndex * pageSize,
       size: pageSize,

@@ -8,7 +8,7 @@ import { EndpointConfigSchema, EndpointConfigType } from './config';
 describe('test config schema', () => {
   it('test config defaults', () => {
     const config: EndpointConfigType = EndpointConfigSchema.validate({});
-    expect(config.pageSize).toEqual(10);
-    expect(config.defaultPageIndex).toEqual(0);
+    expect(config.searchResultDefaultPageSize).toEqual(10);
+    expect(config.searchResultDefaultFirstPageIndex).toEqual(0);
   });
 });
