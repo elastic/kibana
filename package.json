@@ -166,6 +166,7 @@
     "getos": "^3.1.0",
     "glob": "^7.1.2",
     "glob-all": "^3.1.0",
+    "global-agent": "^2.1.7",
     "globby": "^8.0.1",
     "good-squeeze": "2.1.0",
     "h2o2": "^8.1.2",
