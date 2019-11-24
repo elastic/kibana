@@ -35,7 +35,7 @@ import euiThemeDark from '@elastic/eui/dist/eui_theme_dark.json';
 
 import {
   ColumnType,
-  MlInMemoryTableBasic,
+  mlInMemoryTableBasicFactory,
   OnTableChangeArg,
   SortingPropType,
   SORT_DIRECTION,
@@ -59,7 +59,7 @@ import {
 } from '../../../../common';
 
 import { getOutlierScoreFieldName } from './common';
-import { useExploreData } from './use_explore_data';
+import { useExploreData, TableItem } from './use_explore_data';
 import {
   DATA_FRAME_TASK_STATE,
   Query as QueryType,
@@ -167,7 +167,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
     docFieldsCount = docFields.length;
   }
 
-  const columns: ColumnType[] = [];
+  const columns: Array<ColumnType<TableItem>> = [];
 
   if (jobConfig !== undefined && selectedFields.length > 0 && tableItems.length > 0) {
     // table cell color coding takes into account:
@@ -188,7 +188,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
 
     columns.push(
       ...selectedFields.sort(sortColumns(tableItems[0], jobConfig.dest.results_field)).map(k => {
-        const column: ColumnType = {
+        const column: ColumnType<TableItem> = {
           field: k,
           name: k,
           sortable: true,
@@ -424,6 +424,8 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
         'The query for the index returned no results. Please make sure the index contains documents and your query is not too restrictive.',
     });
   }
+
+  const MlInMemoryTableBasic = mlInMemoryTableBasicFactory<TableItem>();
 
   return (
     <EuiPanel grow={false}>

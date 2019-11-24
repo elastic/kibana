@@ -25,7 +25,7 @@ export {
   ExpanderColumnType,
   FieldDataColumnType,
   ColumnType,
-  MlInMemoryTableBasic,
+  mlInMemoryTableBasicFactory,
   OnTableChangeArg,
   SortingPropType,
   SortDirection,

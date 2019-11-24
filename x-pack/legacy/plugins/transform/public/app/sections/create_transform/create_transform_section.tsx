@@ -26,7 +26,7 @@ import { APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/cons
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
 import { documentationLinksService } from '../../services/documentation';
 import { PrivilegesWrapper } from '../../lib/authorization';
-import { KibanaProvider } from '../../lib/kibana';
+import { KibanaProvider, RenderOnlyWithInitializedKibanaContext } from '../../lib/kibana';
 
 import { Wizard } from './components/wizard';
 
@@ -82,7 +82,9 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
             </EuiTitle>
             <EuiPageContentBody>
               <EuiSpacer size="l" />
-              <Wizard />
+              <RenderOnlyWithInitializedKibanaContext>
+                <Wizard />
+              </RenderOnlyWithInitializedKibanaContext>
             </EuiPageContentBody>
           </EuiPageContent>
         </EuiPageBody>
