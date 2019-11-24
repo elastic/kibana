@@ -8,7 +8,7 @@ import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { FeatureProperty } from '../types';
-import { getRenderedFieldValue, PointToolTipContent } from './point_tool_tip_content';
+import { getRenderedFieldValue, PointToolTipContentComponent } from './point_tool_tip_content';
 import { TestProviders } from '../../../mock';
 import { getEmptyStringTag } from '../../empty_value';
 import { HostDetailsLink, IPDetailsLink } from '../../links';
@@ -39,7 +39,7 @@ describe('PointToolTipContent', () => {
 
     const wrapper = shallow(
       <TestProviders>
-        <PointToolTipContent
+        <PointToolTipContentComponent
           contextId={'contextId'}
           featureProps={mockFeatureProps}
           closeTooltip={closeTooltip}
@@ -54,7 +54,7 @@ describe('PointToolTipContent', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <PointToolTipContent
+        <PointToolTipContentComponent
           contextId={'contextId'}
           featureProps={mockFeaturePropsArrayValue}
           closeTooltip={closeTooltip}

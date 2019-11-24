@@ -7,7 +7,7 @@
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
+import { IndexPatternsMissingPromptComponent } from './index_patterns_missing_prompt';
 
 jest.mock('ui/documentation_links', () => ({
   ELASTIC_WEBSITE_URL: 'https://www.elastic.co',
@@ -16,7 +16,7 @@ jest.mock('ui/documentation_links', () => ({
 
 describe('IndexPatternsMissingPrompt', () => {
   test('renders correctly against snapshot', () => {
-    const wrapper = shallow(<IndexPatternsMissingPrompt />);
+    const wrapper = shallow(<IndexPatternsMissingPromptComponent />);
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 });

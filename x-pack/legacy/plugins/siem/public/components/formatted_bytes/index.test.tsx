@@ -11,7 +11,7 @@ import * as React from 'react';
 import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 import { mockFrameworks, getMockKibanaUiSetting } from '../../mock';
 
-import { PreferenceFormattedBytes } from '.';
+import { PreferenceFormattedBytesComponent } from '.';
 
 const mockUseKibanaUiSetting: jest.Mock = useKibanaUiSetting as jest.Mock;
 jest.mock('../../lib/settings/use_kibana_ui_setting', () => ({
@@ -27,13 +27,13 @@ describe('formatted_bytes', () => {
         mockUseKibanaUiSetting.mockImplementation(
           getMockKibanaUiSetting(mockFrameworks.default_browser)
         );
-        const wrapper = shallow(<PreferenceFormattedBytes value={bytes} />);
+        const wrapper = shallow(<PreferenceFormattedBytesComponent value={bytes} />);
         expect(toJson(wrapper)).toMatchSnapshot();
       });
 
       test('it renders bytes to hardcoded format when no configuration exists', () => {
         mockUseKibanaUiSetting.mockImplementation(() => [null]);
-        const wrapper = mount(<PreferenceFormattedBytes value={bytes} />);
+        const wrapper = mount(<PreferenceFormattedBytesComponent value={bytes} />);
         expect(wrapper.text()).toEqual('2.7MB');
       });
 
@@ -41,7 +41,7 @@ describe('formatted_bytes', () => {
         mockUseKibanaUiSetting.mockImplementation(
           getMockKibanaUiSetting(mockFrameworks.default_browser)
         );
-        const wrapper = mount(<PreferenceFormattedBytes value={bytes} />);
+        const wrapper = mount(<PreferenceFormattedBytesComponent value={bytes} />);
         expect(wrapper.text()).toEqual('2.7MB');
       });
 
@@ -49,7 +49,7 @@ describe('formatted_bytes', () => {
         mockUseKibanaUiSetting.mockImplementation(
           getMockKibanaUiSetting(mockFrameworks.default_browser)
         );
-        const wrapper = mount(<PreferenceFormattedBytes value={+bytes} />);
+        const wrapper = mount(<PreferenceFormattedBytesComponent value={+bytes} />);
         expect(wrapper.text()).toEqual('2.7MB');
       });
 
@@ -57,7 +57,7 @@ describe('formatted_bytes', () => {
         mockUseKibanaUiSetting.mockImplementation(
           getMockKibanaUiSetting(mockFrameworks.bytes_short)
         );
-        const wrapper = mount(<PreferenceFormattedBytes value={bytes} />);
+        const wrapper = mount(<PreferenceFormattedBytesComponent value={bytes} />);
         expect(wrapper.text()).toEqual('3MB');
       });
     });

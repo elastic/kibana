@@ -11,7 +11,7 @@ import { trackUiAction as track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../l
 import { getSearch } from '../helpers';
 import { TabNavigationProps } from './types';
 
-export const TabNavigation = React.memo<TabNavigationProps>(props => {
+export const TabNavigationComponent = (props: TabNavigationProps) => {
   const { display, navTabs, pageName, tabName } = props;
 
   const mapLocationToTab = (): string => {
@@ -51,5 +51,10 @@ export const TabNavigation = React.memo<TabNavigationProps>(props => {
     ));
 
   return <EuiTabs display={display}>{renderTabs()}</EuiTabs>;
-});
+};
+
+TabNavigationComponent.displayName = 'TabNavigationComponent';
+
+export const TabNavigation = React.memo(TabNavigationComponent);
+
 TabNavigation.displayName = 'TabNavigation';

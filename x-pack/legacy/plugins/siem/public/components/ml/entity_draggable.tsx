@@ -16,37 +16,43 @@ interface Props {
   entityValue: string;
 }
 
-export const EntityDraggable = React.memo<Props>(
-  ({ idPrefix, entityName, entityValue }): JSX.Element => {
-    const id = escapeDataProviderId(`entity-draggable-${idPrefix}-${entityName}-${entityValue}`);
-    return (
-      <DraggableWrapper
-        key={id}
-        dataProvider={{
-          and: [],
-          enabled: true,
-          id,
-          name: entityValue,
-          excluded: false,
-          kqlQuery: '',
-          queryMatch: {
-            field: entityName,
-            value: entityValue,
-            operator: IS_OPERATOR,
-          },
-        }}
-        render={(dataProvider, _, snapshot) =>
-          snapshot.isDragging ? (
-            <DragEffects>
-              <Provider dataProvider={dataProvider} />
-            </DragEffects>
-          ) : (
-            <>{`${entityName}: "${entityValue}"`}</>
-          )
-        }
-      />
-    );
-  }
-);
+export const EntityDraggableComponent = ({
+  idPrefix,
+  entityName,
+  entityValue,
+}: Props): JSX.Element => {
+  const id = escapeDataProviderId(`entity-draggable-${idPrefix}-${entityName}-${entityValue}`);
+  return (
+    <DraggableWrapper
+      key={id}
+      dataProvider={{
+        and: [],
+        enabled: true,
+        id,
+        name: entityValue,
+        excluded: false,
+        kqlQuery: '',
+        queryMatch: {
+          field: entityName,
+          value: entityValue,
+          operator: IS_OPERATOR,
+        },
+      }}
+      render={(dataProvider, _, snapshot) =>
+        snapshot.isDragging ? (
+          <DragEffects>
+            <Provider dataProvider={dataProvider} />
+          </DragEffects>
+        ) : (
+          <>{`${entityName}: "${entityValue}"`}</>
+        )
+      }
+    />
+  );
+};
+
+EntityDraggableComponent.displayName = 'EntityDraggableComponent';
+
+export const EntityDraggable = React.memo(EntityDraggableComponent);
 
 EntityDraggable.displayName = 'EntityDraggable';

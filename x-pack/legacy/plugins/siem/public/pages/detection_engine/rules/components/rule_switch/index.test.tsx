@@ -7,12 +7,17 @@
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { RuleSwitch } from './index';
+import { RuleSwitchComponent } from './index';
 
 describe('RuleSwitch', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
-      <RuleSwitch enabled={true} id={'7'} isLoading={false} onRuleStateChange={jest.fn()} />
+      <RuleSwitchComponent
+        enabled={true}
+        id={'7'}
+        isLoading={false}
+        onRuleStateChange={jest.fn()}
+      />
     );
     expect(toJson(wrapper)).toMatchSnapshot();
   });

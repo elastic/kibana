@@ -39,30 +39,41 @@ const FlexGroupSpinner = styled(EuiFlexGroup)`
 
 FlexGroupSpinner.displayName = 'FlexGroupSpinner';
 
-export const KpiHostsComponent = React.memo<KpiHostsProps | KpiHostDetailsProps>(
-  ({ data, from, loading, id, to, narrowDateRange }) => {
-    const mappings =
-      (data as KpiHostsData).hosts !== undefined ? kpiHostsMapping : kpiHostDetailsMapping;
-    const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(
-      mappings,
-      data,
-      id,
-      from,
-      to,
-      narrowDateRange
-    );
-    return loading ? (
-      <FlexGroupSpinner justifyContent="center" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="xl" />
-        </EuiFlexItem>
-      </FlexGroupSpinner>
-    ) : (
-      <EuiFlexGroup>
-        {statItemsProps.map((mappedStatItemProps, idx) => {
-          return <StatItemsComponent {...mappedStatItemProps} />;
-        })}
-      </EuiFlexGroup>
-    );
-  }
-);
+export const KpiHostsComponentBase = ({
+  data,
+  from,
+  loading,
+  id,
+  to,
+  narrowDateRange,
+}: KpiHostsProps | KpiHostDetailsProps) => {
+  const mappings =
+    (data as KpiHostsData).hosts !== undefined ? kpiHostsMapping : kpiHostDetailsMapping;
+  const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(
+    mappings,
+    data,
+    id,
+    from,
+    to,
+    narrowDateRange
+  );
+  return loading ? (
+    <FlexGroupSpinner justifyContent="center" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiLoadingSpinner size="xl" />
+      </EuiFlexItem>
+    </FlexGroupSpinner>
+  ) : (
+    <EuiFlexGroup>
+      {statItemsProps.map((mappedStatItemProps, idx) => {
+        return <StatItemsComponent {...mappedStatItemProps} />;
+      })}
+    </EuiFlexGroup>
+  );
+};
+
+KpiHostsComponentBase.displayName = 'KpiHostsComponentBase';
+
+export const KpiHostsComponent = React.memo(KpiHostsComponentBase);
+
+KpiHostsComponent.displayName = 'KpiHostsComponent';

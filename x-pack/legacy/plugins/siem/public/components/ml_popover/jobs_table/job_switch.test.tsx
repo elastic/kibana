@@ -8,7 +8,7 @@ import { shallow, mount } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
-import { isChecked, isFailure, isJobLoading, JobSwitch } from './job_switch';
+import { isChecked, isFailure, isJobLoading, JobSwitchComponent } from './job_switch';
 import { cloneDeep } from 'lodash/fp';
 import { mockSiemJobs } from '../__mocks__/api';
 import { SiemJob } from '../types';
@@ -23,7 +23,7 @@ describe('JobSwitch', () => {
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
-      <JobSwitch
+      <JobSwitchComponent
         job={siemJobs[0]}
         isSiemJobsLoading={false}
         onJobStateChange={onJobStateChangeMock}
@@ -34,7 +34,7 @@ describe('JobSwitch', () => {
 
   test('should call onJobStateChange when the switch is clicked to be true/open', () => {
     const wrapper = mount(
-      <JobSwitch
+      <JobSwitchComponent
         job={siemJobs[0]}
         isSiemJobsLoading={false}
         onJobStateChange={onJobStateChangeMock}
@@ -57,7 +57,7 @@ describe('JobSwitch', () => {
 
   test('should have a switch when it is not in the loading state', () => {
     const wrapper = mount(
-      <JobSwitch
+      <JobSwitchComponent
         isSiemJobsLoading={false}
         job={siemJobs[0]}
         onJobStateChange={onJobStateChangeMock}
@@ -68,7 +68,7 @@ describe('JobSwitch', () => {
 
   test('should not have a switch when it is in the loading state', () => {
     const wrapper = mount(
-      <JobSwitch
+      <JobSwitchComponent
         isSiemJobsLoading={true}
         job={siemJobs[0]}
         onJobStateChange={onJobStateChangeMock}

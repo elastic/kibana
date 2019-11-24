@@ -9,7 +9,7 @@ import toJson from 'enzyme-to-json';
 import { mockAnomalies } from '../mock';
 import { cloneDeep } from 'lodash/fp';
 import { shallow } from 'enzyme';
-import { DraggableScore } from './draggable_score';
+import { DraggableScoreComponent } from './draggable_score';
 
 describe('draggable_score', () => {
   let anomalies = cloneDeep(mockAnomalies);
@@ -20,13 +20,15 @@ describe('draggable_score', () => {
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
-      <DraggableScore id="some-id" index={0} score={anomalies.anomalies[0]} />
+      <DraggableScoreComponent id="some-id" index={0} score={anomalies.anomalies[0]} />
     );
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 
   test('renders correctly against snapshot when the index is not included', () => {
-    const wrapper = shallow(<DraggableScore id="some-id" score={anomalies.anomalies[0]} />);
+    const wrapper = shallow(
+      <DraggableScoreComponent id="some-id" score={anomalies.anomalies[0]} />
+    );
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 });

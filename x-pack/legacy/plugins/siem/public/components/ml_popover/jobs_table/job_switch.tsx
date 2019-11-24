@@ -41,32 +41,38 @@ export const isFailure = (jobState: string, datafeedState: string): boolean => {
   return failureStates.includes(jobState) || failureStates.includes(datafeedState);
 };
 
-export const JobSwitch = React.memo<JobSwitchProps>(
-  ({ job, isSiemJobsLoading, onJobStateChange }) => {
-    const [isLoading, setIsLoading] = useState(false);
+export const JobSwitchComponent = ({
+  job,
+  isSiemJobsLoading,
+  onJobStateChange,
+}: JobSwitchProps) => {
+  const [isLoading, setIsLoading] = useState(false);
 
-    return (
-      <EuiFlexGroup justifyContent="spaceAround">
-        <EuiFlexItem grow={false}>
-          {isSiemJobsLoading || isLoading || isJobLoading(job.jobState, job.datafeedId) ? (
-            <EuiLoadingSpinner size="m" data-test-subj="job-switch-loader" />
-          ) : (
-            <StaticSwitch
-              data-test-subj="job-switch"
-              disabled={isFailure(job.jobState, job.datafeedState)}
-              checked={isChecked(job.jobState, job.datafeedState)}
-              onChange={e => {
-                setIsLoading(true);
-                onJobStateChange(job, job.latestTimestampMs || 0, e.target.checked);
-              }}
-              showLabel={false}
-              label=""
-            />
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-);
+  return (
+    <EuiFlexGroup justifyContent="spaceAround">
+      <EuiFlexItem grow={false}>
+        {isSiemJobsLoading || isLoading || isJobLoading(job.jobState, job.datafeedId) ? (
+          <EuiLoadingSpinner size="m" data-test-subj="job-switch-loader" />
+        ) : (
+          <StaticSwitch
+            data-test-subj="job-switch"
+            disabled={isFailure(job.jobState, job.datafeedState)}
+            checked={isChecked(job.jobState, job.datafeedState)}
+            onChange={e => {
+              setIsLoading(true);
+              onJobStateChange(job, job.latestTimestampMs || 0, e.target.checked);
+            }}
+            showLabel={false}
+            label=""
+          />
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+JobSwitchComponent.displayName = 'JobSwitchComponent';
+
+export const JobSwitch = React.memo(JobSwitchComponent);
 
 JobSwitch.displayName = 'JobSwitch';

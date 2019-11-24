@@ -7,7 +7,7 @@
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { EmbeddedMap } from './embedded_map';
+import { EmbeddedMapComponent } from './embedded_map';
 import { SetQuery } from './types';
 import { useKibanaCore } from '../../lib/compose/kibana_core';
 import { useIndexPatterns } from '../../hooks/use_index_patterns';
@@ -39,7 +39,7 @@ jest.mock('ui/vis/lib/timezone', () => ({
   timezoneProvider: () => () => 'America/New_York',
 }));
 
-describe('EmbeddedMap', () => {
+describe('EmbeddedMapComponent', () => {
   let setQuery: SetQuery;
 
   beforeEach(() => {
@@ -48,7 +48,7 @@ describe('EmbeddedMap', () => {
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
-      <EmbeddedMap
+      <EmbeddedMapComponent
         endDate={new Date('2019-08-28T05:50:57.877Z').getTime()}
         filters={[]}
         query={{ query: '', language: 'kuery' }}

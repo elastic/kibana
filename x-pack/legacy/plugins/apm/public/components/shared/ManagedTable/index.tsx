@@ -119,4 +119,4 @@ const ManagedTable = React.memo(
   UnoptimizedManagedTable
 ) as typeof UnoptimizedManagedTable;
 
-export { ManagedTable };
+export { ManagedTable, UnoptimizedManagedTable };

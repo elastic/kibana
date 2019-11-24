@@ -10,11 +10,15 @@ import numeral from '@elastic/numeral';
 import { DEFAULT_BYTES_FORMAT } from '../../../common/constants';
 import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 
-export const PreferenceFormattedBytes = React.memo<{ value: string | number }>(({ value }) => {
+export const PreferenceFormattedBytesComponent = ({ value }: { value: string | number }) => {
   const [bytesFormat] = useKibanaUiSetting(DEFAULT_BYTES_FORMAT);
   return (
     <>{bytesFormat ? numeral(value).format(bytesFormat) : numeral(value).format('0,0.[0]b')}</>
   );
-});
+};
+
+PreferenceFormattedBytesComponent.displayName = 'PreferenceFormattedBytesComponent';
+
+export const PreferenceFormattedBytes = React.memo(PreferenceFormattedBytesComponent);
 
 PreferenceFormattedBytes.displayName = 'PreferenceFormattedBytes';

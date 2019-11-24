@@ -21,7 +21,7 @@ export interface ShowingCountProps {
   filterResultsLength: number;
 }
 
-export const ShowingCount = React.memo<ShowingCountProps>(({ filterResultsLength }) => (
+export const ShowingCountComponent = ({ filterResultsLength }: ShowingCountProps) => (
   <ShowingContainer data-test-subj="showing">
     <EuiText color="subdued" size="xs">
       <FormattedMessage
@@ -34,6 +34,10 @@ export const ShowingCount = React.memo<ShowingCountProps>(({ filterResultsLength
       />
     </EuiText>
   </ShowingContainer>
-));
+);
+
+ShowingCountComponent.displayName = 'ShowingCountComponent';
+
+export const ShowingCount = React.memo(ShowingCountComponent);
 
 ShowingCount.displayName = 'ShowingCount';

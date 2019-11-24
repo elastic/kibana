@@ -79,148 +79,156 @@ export interface EmbeddedMapProps {
   setQuery: SetQuery;
 }
 
-export const EmbeddedMap = React.memo<EmbeddedMapProps>(
-  ({ endDate, filters, query, setQuery, startDate }) => {
-    const [embeddable, setEmbeddable] = React.useState<MapEmbeddable | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isError, setIsError] = useState(false);
-    const [isIndexError, setIsIndexError] = useState(false);
+export const EmbeddedMapComponent = ({
+  endDate,
+  filters,
+  query,
+  setQuery,
+  startDate,
+}: EmbeddedMapProps) => {
+  const [embeddable, setEmbeddable] = React.useState<MapEmbeddable | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
+  const [isIndexError, setIsIndexError] = useState(false);
 
-    const [, dispatchToaster] = useStateToaster();
-    const [loadingKibanaIndexPatterns, kibanaIndexPatterns] = useIndexPatterns();
-    const [siemDefaultIndices] = useKibanaUiSetting(DEFAULT_INDEX_KEY);
+  const [, dispatchToaster] = useStateToaster();
+  const [loadingKibanaIndexPatterns, kibanaIndexPatterns] = useIndexPatterns();
+  const [siemDefaultIndices] = useKibanaUiSetting(DEFAULT_INDEX_KEY);
 
-    // This portalNode provided by react-reverse-portal allows us re-parent the MapToolTip within our
-    // own component tree instead of the embeddables (default). This is necessary to have access to
-    // the Redux store, theme provider, etc, which is required to register and un-register the draggable
-    // Search InPortal/OutPortal for implementation touch points
-    const portalNode = React.useMemo(() => createPortalNode(), []);
+  // This portalNode provided by react-reverse-portal allows us re-parent the MapToolTip within our
+  // own component tree instead of the embeddables (default). This is necessary to have access to
+  // the Redux store, theme provider, etc, which is required to register and un-register the draggable
+  // Search InPortal/OutPortal for implementation touch points
+  const portalNode = React.useMemo(() => createPortalNode(), []);
 
-    const plugins = useKibanaPlugins();
-    const core = useKibanaCore();
+  const plugins = useKibanaPlugins();
+  const core = useKibanaCore();
 
-    // Setup embeddables API (i.e. detach extra actions) useEffect
-    useEffect(() => {
-      try {
-        setupEmbeddablesAPI(plugins);
-      } catch (e) {
-        displayErrorToast(i18n.ERROR_CONFIGURING_EMBEDDABLES_API, e.message, dispatchToaster);
+  // Setup embeddables API (i.e. detach extra actions) useEffect
+  useEffect(() => {
+    try {
+      setupEmbeddablesAPI(plugins);
+    } catch (e) {
+      displayErrorToast(i18n.ERROR_CONFIGURING_EMBEDDABLES_API, e.message, dispatchToaster);
+      setIsLoading(false);
+      setIsError(true);
+    }
+  }, []);
+
+  // Initial Load useEffect
+  useEffect(() => {
+    let isSubscribed = true;
+    async function setupEmbeddable() {
+      // Ensure at least one `siem:defaultIndex` index pattern exists before trying to import
+      const matchingIndexPatterns = kibanaIndexPatterns.filter(ip =>
+        siemDefaultIndices.includes(ip.attributes.title)
+      );
+      if (matchingIndexPatterns.length === 0 && isSubscribed) {
         setIsLoading(false);
-        setIsError(true);
+        setIsIndexError(true);
+        return;
       }
-    }, []);
 
-    // Initial Load useEffect
-    useEffect(() => {
-      let isSubscribed = true;
-      async function setupEmbeddable() {
-        // Ensure at least one `siem:defaultIndex` index pattern exists before trying to import
-        const matchingIndexPatterns = kibanaIndexPatterns.filter(ip =>
-          siemDefaultIndices.includes(ip.attributes.title)
+      // Create & set Embeddable
+      try {
+        const embeddableObject = await createEmbeddable(
+          filters,
+          getIndexPatternTitleIdMapping(matchingIndexPatterns),
+          query,
+          startDate,
+          endDate,
+          setQuery,
+          portalNode,
+          plugins.embeddable
         );
-        if (matchingIndexPatterns.length === 0 && isSubscribed) {
-          setIsLoading(false);
-          setIsIndexError(true);
-          return;
-        }
-
-        // Create & set Embeddable
-        try {
-          const embeddableObject = await createEmbeddable(
-            filters,
-            getIndexPatternTitleIdMapping(matchingIndexPatterns),
-            query,
-            startDate,
-            endDate,
-            setQuery,
-            portalNode,
-            plugins.embeddable
-          );
-          if (isSubscribed) {
-            setEmbeddable(embeddableObject);
-          }
-        } catch (e) {
-          if (isSubscribed) {
-            displayErrorToast(i18n.ERROR_CREATING_EMBEDDABLE, e.message, dispatchToaster);
-            setIsError(true);
-          }
-        }
         if (isSubscribed) {
-          setIsLoading(false);
+          setEmbeddable(embeddableObject);
+        }
+      } catch (e) {
+        if (isSubscribed) {
+          displayErrorToast(i18n.ERROR_CREATING_EMBEDDABLE, e.message, dispatchToaster);
+          setIsError(true);
         }
       }
-
-      if (!loadingKibanaIndexPatterns) {
-        setupEmbeddable();
+      if (isSubscribed) {
+        setIsLoading(false);
       }
-      return () => {
-        isSubscribed = false;
+    }
+
+    if (!loadingKibanaIndexPatterns) {
+      setupEmbeddable();
+    }
+    return () => {
+      isSubscribed = false;
+    };
+  }, [loadingKibanaIndexPatterns, kibanaIndexPatterns]);
+
+  // queryExpression updated useEffect
+  useEffect(() => {
+    if (embeddable != null) {
+      embeddable.updateInput({ query });
+    }
+  }, [query]);
+
+  useEffect(() => {
+    if (embeddable != null) {
+      embeddable.updateInput({ filters });
+    }
+  }, [filters]);
+
+  // DateRange updated useEffect
+  useEffect(() => {
+    if (embeddable != null && startDate != null && endDate != null) {
+      const timeRange = {
+        from: new Date(startDate).toISOString(),
+        to: new Date(endDate).toISOString(),
       };
-    }, [loadingKibanaIndexPatterns, kibanaIndexPatterns]);
+      embeddable.updateInput({ timeRange });
+    }
+  }, [startDate, endDate]);
 
-    // queryExpression updated useEffect
-    useEffect(() => {
-      if (embeddable != null) {
-        embeddable.updateInput({ query });
-      }
-    }, [query]);
+  return isError ? null : (
+    <Embeddable>
+      <EmbeddableHeader title={i18n.EMBEDDABLE_HEADER_TITLE}>
+        <EuiText size="xs">
+          <EuiLink
+            href={`${ELASTIC_WEBSITE_URL}guide/en/siem/guide/${DOC_LINK_VERSION}/conf-map-ui.html`}
+            target="_blank"
+          >
+            {i18n.EMBEDDABLE_HEADER_HELP}
+          </EuiLink>
+        </EuiText>
+      </EmbeddableHeader>
 
-    useEffect(() => {
-      if (embeddable != null) {
-        embeddable.updateInput({ filters });
-      }
-    }, [filters]);
+      <InPortal node={portalNode}>
+        <MapToolTip />
+      </InPortal>
 
-    // DateRange updated useEffect
-    useEffect(() => {
-      if (embeddable != null && startDate != null && endDate != null) {
-        const timeRange = {
-          from: new Date(startDate).toISOString(),
-          to: new Date(endDate).toISOString(),
-        };
-        embeddable.updateInput({ timeRange });
-      }
-    }, [startDate, endDate]);
+      <EmbeddableMap maintainRatio={!isIndexError}>
+        {embeddable != null ? (
+          <EmbeddablePanel
+            data-test-subj="embeddable-panel"
+            embeddable={embeddable}
+            getActions={plugins.uiActions.getTriggerCompatibleActions}
+            getEmbeddableFactory={start.getEmbeddableFactory}
+            getAllEmbeddableFactories={start.getEmbeddableFactories}
+            notifications={core.notifications}
+            overlays={core.overlays}
+            inspector={plugins.inspector}
+            SavedObjectFinder={SavedObjectFinder}
+          />
+        ) : !isLoading && isIndexError ? (
+          <IndexPatternsMissingPrompt data-test-subj="missing-prompt" />
+        ) : (
+          <Loader data-test-subj="loading-panel" overlay size="xl" />
+        )}
+      </EmbeddableMap>
+    </Embeddable>
+  );
+};
 
-    return isError ? null : (
-      <Embeddable>
-        <EmbeddableHeader title={i18n.EMBEDDABLE_HEADER_TITLE}>
-          <EuiText size="xs">
-            <EuiLink
-              href={`${ELASTIC_WEBSITE_URL}guide/en/siem/guide/${DOC_LINK_VERSION}/conf-map-ui.html`}
-              target="_blank"
-            >
-              {i18n.EMBEDDABLE_HEADER_HELP}
-            </EuiLink>
-          </EuiText>
-        </EmbeddableHeader>
+EmbeddedMapComponent.displayName = 'EmbeddedMapComponent';
 
-        <InPortal node={portalNode}>
-          <MapToolTip />
-        </InPortal>
-
-        <EmbeddableMap maintainRatio={!isIndexError}>
-          {embeddable != null ? (
-            <EmbeddablePanel
-              data-test-subj="embeddable-panel"
-              embeddable={embeddable}
-              getActions={plugins.uiActions.getTriggerCompatibleActions}
-              getEmbeddableFactory={start.getEmbeddableFactory}
-              getAllEmbeddableFactories={start.getEmbeddableFactories}
-              notifications={core.notifications}
-              overlays={core.overlays}
-              inspector={plugins.inspector}
-              SavedObjectFinder={SavedObjectFinder}
-            />
-          ) : !isLoading && isIndexError ? (
-            <IndexPatternsMissingPrompt data-test-subj="missing-prompt" />
-          ) : (
-            <Loader data-test-subj="loading-panel" overlay size="xl" />
-          )}
-        </EmbeddableMap>
-      </Embeddable>
-    );
-  }
-);
+export const EmbeddedMap = React.memo(EmbeddedMapComponent);
 
 EmbeddedMap.displayName = 'EmbeddedMap';

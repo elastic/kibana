@@ -15,7 +15,7 @@ import { TestProviders } from '../../../mock/test_providers';
 import { mockUiSettings } from '../../../mock/ui_settings';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 
-import { TimelineHeader } from '.';
+import { TimelineHeaderComponent } from '.';
 
 const mockUseKibanaCore = useKibanaCore as jest.Mock;
 jest.mock('../../../lib/compose/kibana_core');
@@ -30,7 +30,7 @@ describe('Header', () => {
   describe('rendering', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
-        <TimelineHeader
+        <TimelineHeaderComponent
           browserFields={{}}
           dataProviders={mockDataProviders}
           id="foo"
@@ -55,7 +55,7 @@ describe('Header', () => {
     test('it renders the data providers', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineHeader
+          <TimelineHeaderComponent
             browserFields={{}}
             dataProviders={mockDataProviders}
             id="foo"
@@ -82,7 +82,7 @@ describe('Header', () => {
     test('it renders the unauthorized call out providers', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineHeader
+          <TimelineHeaderComponent
             browserFields={{}}
             dataProviders={mockDataProviders}
             id="foo"
