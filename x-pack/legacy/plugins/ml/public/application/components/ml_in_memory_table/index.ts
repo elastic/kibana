@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ProgressBar, MlInMemoryTable } from './ml_in_memory_table';
+export { ProgressBar, mlInMemoryTableFactory } from './ml_in_memory_table';
 export * from './types';

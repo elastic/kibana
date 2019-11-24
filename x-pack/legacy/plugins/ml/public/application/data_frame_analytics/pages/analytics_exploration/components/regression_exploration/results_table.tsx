@@ -30,7 +30,7 @@ import { Query as QueryType } from '../../../analytics_management/components/ana
 
 import {
   ColumnType,
-  MlInMemoryTableBasic,
+  mlInMemoryTableBasicFactory,
   OnTableChangeArg,
   SortingPropType,
   SORT_DIRECTION,
@@ -55,7 +55,7 @@ import {
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 
-import { useExploreData } from './use_explore_data';
+import { useExploreData, TableItem } from './use_explore_data';
 import { ExplorationTitle } from './regression_exploration';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
@@ -108,12 +108,12 @@ export const ResultsTable: FC<Props> = React.memo(
       docFieldsCount = docFields.length;
     }
 
-    const columns: ColumnType[] = [];
+    const columns: Array<ColumnType<TableItem>> = [];
 
     if (jobConfig !== undefined && selectedFields.length > 0 && tableItems.length > 0) {
       columns.push(
         ...selectedFields.sort(sortRegressionResultsColumns(tableItems[0], jobConfig)).map(k => {
-          const column: ColumnType = {
+          const column: ColumnType<TableItem> = {
             field: k,
             name: k,
             sortable: true,
@@ -362,6 +362,8 @@ export const ResultsTable: FC<Props> = React.memo(
       status === INDEX_STATUS.ERROR && errorMessage.includes('parsing_exception')
         ? errorMessage
         : searchError;
+
+    const MlInMemoryTableBasic = mlInMemoryTableBasicFactory<TableItem>();
 
     return (
       <EuiPanel grow={false}>
