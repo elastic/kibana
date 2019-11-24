@@ -19,6 +19,7 @@ import {
   AnomaliesQueryTabBody,
   EventsQueryTabBody,
 } from './navigation';
+import { AlertsQueryTabBody } from './navigation/alerts_query_tab_body';
 
 const HostsTabs = memo<HostsTabsProps>(
   ({
@@ -76,6 +77,10 @@ const HostsTabs = memo<HostsTabsProps>(
         <Route
           path={`${hostsPagePath}/:tabName(${HostsTableType.events})`}
           render={() => <EventsQueryTabBody {...tabProps} />}
+        />
+        <Route
+          path={`${hostsPagePath}/:tabName(${HostsTableType.alerts})`}
+          render={() => <AlertsQueryTabBody {...tabProps} />}
         />
       </Switch>
     );

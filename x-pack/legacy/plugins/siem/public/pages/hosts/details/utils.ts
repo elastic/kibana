@@ -21,6 +21,7 @@ const TabNameMappedToI18nKey = {
   [HostsTableType.uncommonProcesses]: i18n.NAVIGATION_UNCOMMON_PROCESSES_TITLE,
   [HostsTableType.anomalies]: i18n.NAVIGATION_ANOMALIES_TITLE,
   [HostsTableType.events]: i18n.NAVIGATION_EVENTS_TITLE,
+  [HostsTableType.alerts]: i18n.NAVIGATION_ALERTS_TITLE,
 };
 
 export const getBreadcrumbs = (params: RouteSpyState, search: string[]): Breadcrumb[] => {
