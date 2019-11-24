@@ -31,7 +31,7 @@ import {
   SearchQuery,
 } from '../../../../common';
 
-type TableItem = Record<string, any>;
+export type TableItem = Record<string, any>;
 
 interface LoadExploreDataArg {
   field: string;

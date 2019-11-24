@@ -34,7 +34,7 @@ import { getColumns } from './columns';
 import { ExpandedRow } from './expanded_row';
 import {
   ProgressBar,
-  MlInMemoryTable,
+  mlInMemoryTableFactory,
   OnTableChangeArg,
   SortDirection,
   SORT_DIRECTION,
@@ -325,6 +325,8 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     setSortField(field);
     setSortDirection(direction);
   };
+
+  const MlInMemoryTable = mlInMemoryTableFactory<DataFrameAnalyticsListRow>();
 
   return (
     <Fragment>
