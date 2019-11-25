@@ -15,6 +15,7 @@ export class Plugin {
     routes(core);
 
     const { serverFunctions } = plugins.interpreter.register({ serverFunctions: functions });
+    const { addSavedObjectsToSampleDataset, addAppLinksToSampleDataset } = plugins.home.sampleData;
 
     core.injectUiAppVars('canvas', async () => {
       const config = core.getServerConfig();
@@ -62,9 +63,6 @@ export class Plugin {
     });
 
     registerCanvasUsageCollector(core, plugins);
-    loadSampleData(
-      plugins.sampleData.addSavedObjectsToSampleDataset,
-      plugins.sampleData.addAppLinksToSampleDataset
-    );
+    loadSampleData(addSavedObjectsToSampleDataset, addAppLinksToSampleDataset);
   }
 }

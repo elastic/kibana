@@ -8,6 +8,7 @@ import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { Legacy } from 'kibana';
 
 import { CoreSetup as ExistingCoreSetup } from 'src/core/server';
+import { HomeServerPluginSetup, SampleDataRegistrySetup } from 'src/plugins/home/server';
 import { PluginSetupContract } from '../../../../plugins/features/server';
 
 export interface CoreSetup {
@@ -22,15 +23,15 @@ export interface CoreSetup {
 
 export interface PluginsSetup {
   features: PluginSetupContract;
+  // home: HomeServerPluginSetup;
+  home: {
+    sampleData: SampleDataRegistrySetup;
+  };
   interpreter: {
     register: (specs: any) => any;
   };
   kibana: {
     injectedUiAppVars: ReturnType<Legacy.Server['getInjectedUiAppVars']>;
-  };
-  sampleData: {
-    addSavedObjectsToSampleDataset: any;
-    addAppLinksToSampleDataset: any;
   };
   usage: Legacy.Server['usage'];
 }
@@ -57,16 +58,12 @@ export async function createSetupShim(
     pluginsSetup: {
       // @ts-ignore: New Platform not typed
       features: server.newPlatform.setup.plugins.features,
+
+      sampleData: server.newPlatform.setup.plugins.home,
       // @ts-ignore Interpreter plugin not typed on legacy server
       interpreter: server.plugins.interpreter,
       kibana: {
         injectedUiAppVars: await server.getInjectedUiAppVars('kibana'),
-      },
-      sampleData: {
-        // @ts-ignore: Missing from Legacy Server Type
-        addSavedObjectsToSampleDataset: server.addSavedObjectsToSampleDataset,
-        // @ts-ignore: Missing from Legacy Server Type
-        addAppLinksToSampleDataset: server.addAppLinksToSampleDataset,
       },
       usage: server.usage,
     },
