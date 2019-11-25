@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore untyped module
 import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
+// @ts-ignore untyped module
 import { KIBANA_STATS_TYPE_MONITORING } from '../../../monitoring/common/constants';
 import { ServerFacade, ESCallCluster } from '../../types';
 import { KIBANA_REPORTING_TYPE } from '../../common/constants';

@@ -18,9 +18,9 @@
  */
 
 import { snakeCase } from 'lodash';
-// @ts-ignore
 import { Logger } from 'kibana/server';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+// @ts-ignore
 import { Collector } from './collector';
 // @ts-ignore
 import { UsageCollector } from './usage_collector';
@@ -145,7 +145,7 @@ export class CollectorSet {
   };
 
   public bulkFetchUsage = async (callCluster: CallCluster) => {
-    const usageCollectors = this.getFilteredCollectorSet(c => c instanceof UsageCollector);
+    const usageCollectors = this.getFilteredCollectorSet((c: any) => c instanceof UsageCollector);
     return await this.bulkFetch(callCluster, usageCollectors);
   };
 

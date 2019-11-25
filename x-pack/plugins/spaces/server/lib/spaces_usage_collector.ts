@@ -7,8 +7,8 @@
 import { get } from 'lodash';
 import { CallAPIOptions } from 'src/core/server';
 import { take } from 'rxjs/operators';
-// @ts-ignore
 import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
+// @ts-ignore
 import { KIBANA_STATS_TYPE_MONITORING } from '../../../../legacy/plugins/monitoring/common/constants';
 import { KIBANA_SPACES_STATS_TYPE } from '../../common/constants';
 import { PluginsSetup } from '../plugin';
