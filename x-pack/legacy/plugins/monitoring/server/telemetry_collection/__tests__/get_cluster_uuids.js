@@ -8,9 +8,8 @@ import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { getClusterUuids, fetchClusterUuids, handleClusterUuidsResponse } from '../get_cluster_uuids';
 
-// FAILING: https://github.com/elastic/kibana/issues/51371
-describe.skip('get_cluster_uuids', () => {
-  const callWith = sinon.stub();
+describe('get_cluster_uuids', () => {
+  const callCluster = sinon.stub();
   const size = 123;
   const server = {
     config: sinon.stub().returns({
@@ -29,23 +28,23 @@ describe.skip('get_cluster_uuids', () => {
       }
     }
   };
-  const expectedUuids = response.aggregations.cluster_uuids.buckets.map(bucket => bucket.key);
+  const expectedUuids = response.aggregations.cluster_uuids.buckets
+    .map(bucket => bucket.key)
+    .map(expectedUuid => ({ clusterUuid: expectedUuid }));
   const start = new Date();
   const end = new Date();
 
   describe('getClusterUuids', () => {
     it('returns cluster UUIDs', async () => {
-      callWith.withArgs('search').returns(Promise.resolve(response));
-
-      expect(await getClusterUuids(server, callWith, start, end)).to.eql(expectedUuids);
+      callCluster.withArgs('search').returns(Promise.resolve(response));
+      expect(await getClusterUuids({ server, callCluster, start, end })).to.eql(expectedUuids);
     });
   });
 
   describe('fetchClusterUuids', () => {
     it('searches for clusters', async () => {
-      callWith.returns(Promise.resolve(response));
-
-      expect(await fetchClusterUuids(server, callWith, start, end)).to.be(response);
+      callCluster.returns(Promise.resolve(response));
+      expect(await fetchClusterUuids({ server, callCluster, start, end })).to.be(response);
     });
   });
 
@@ -53,13 +52,11 @@ describe.skip('get_cluster_uuids', () => {
     // filterPath makes it easy to ignore anything unexpected because it will come back empty
     it('handles unexpected response', () => {
       const clusterUuids = handleClusterUuidsResponse({});
-
       expect(clusterUuids.length).to.be(0);
     });
 
     it('handles valid response', () => {
       const clusterUuids = handleClusterUuidsResponse(response);
-
       expect(clusterUuids).to.eql(expectedUuids);
     });
 
