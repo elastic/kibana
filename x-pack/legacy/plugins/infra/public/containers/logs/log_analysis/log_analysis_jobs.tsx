@@ -94,8 +94,8 @@ export const useLogAnalysisJobs = ({
         dispatch({ type: 'fetchingJobStatuses' });
         return await callJobsSummaryAPI(spaceId, sourceId);
       },
-      onResolve: response => {
-        dispatch({ type: 'fetchedJobStatuses', payload: response, spaceId, sourceId });
+      onResolve: jobResponse => {
+        dispatch({ type: 'fetchedJobStatuses', payload: jobResponse, spaceId, sourceId });
       },
       onReject: err => {
         dispatch({ type: 'failedFetchingJobStatuses' });
@@ -158,6 +158,7 @@ export const useLogAnalysisJobs = ({
     setup: setupMlModule,
     setupMlModuleRequest,
     setupStatus: statusState.setupStatus,
+    timestampField: timeField,
     viewSetupForReconfiguration,
     viewSetupForUpdate,
     viewResults,
