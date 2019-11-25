@@ -37,8 +37,6 @@ export default function ({ getService }) {
       const entries = Array.from(parsed.entries());
       expect(entries).to.eql([
         [ 'script-src', [ '\'unsafe-eval\'', '\'self\'' ] ],
-        [ 'worker-src', [ 'blob:' ] ],
-        [ 'child-src', [ 'blob:' ] ],
         [ 'style-src', [ '\'unsafe-inline\'', '\'self\'' ] ]
       ]);
     });
