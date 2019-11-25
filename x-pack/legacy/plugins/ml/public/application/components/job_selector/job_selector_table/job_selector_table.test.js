@@ -125,22 +125,22 @@ describe('JobSelectorTable', () => {
 
   describe('Not Single Selection', () => {
     test('renders tabs when not singleSelection', () => {
-      const { getByRole } = render(<JobSelectorTable {...props} />);
-      const tabs = getByRole('tab');
+      const { getAllByRole } = render(<JobSelectorTable {...props} />);
+      const tabs = getAllByRole('tab');
       expect(tabs).toBeDefined();
     });
 
     test('toggles content when tabs clicked', () => {
       // Default is Jobs tab so select Groups tab
-      const { getByText } = render(<JobSelectorTable {...props} />);
+      const { getByText, getAllByText } = render(<JobSelectorTable {...props} />);
       const groupsTab = getByText('Groups');
       fireEvent.click(groupsTab);
-      const groupsTableHeader = getByText('jobs in group');
+      const groupsTableHeader = getAllByText('jobs in group');
       expect(groupsTableHeader).toBeDefined();
       // switch back to Jobs tab
       const jobsTab = getByText('Jobs');
       fireEvent.click(jobsTab);
-      const jobsTableHeader = getByText('job ID');
+      const jobsTableHeader = getAllByText('job ID');
       expect(jobsTableHeader).toBeDefined();
     });
 

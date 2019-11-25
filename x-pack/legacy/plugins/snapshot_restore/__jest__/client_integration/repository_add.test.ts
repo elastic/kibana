@@ -19,7 +19,9 @@ jest.mock('ui/i18n', () => {
   return { I18nContext };
 });
 
-describe('<RepositoryAdd />', () => {
+// We need to skip the tests until react 16.9.0 is released
+// which supports asynchronous code inside act()
+describe.skip('<RepositoryAdd />', () => {
   let testBed: RepositoryAddTestBed;
 
   const { server, httpRequestsMockHelpers } = setupEnvironment();

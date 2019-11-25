@@ -34,7 +34,9 @@ const removeWhiteSpaceOnArrayValues = (array: any[]) =>
     return value.trim();
   });
 
-describe('<SnapshotRestoreHome />', () => {
+// We need to skip the tests until react 16.9.0 is released
+// which supports asynchronous code inside act()
+describe.skip('<SnapshotRestoreHome />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: HomeTestBed;
 
