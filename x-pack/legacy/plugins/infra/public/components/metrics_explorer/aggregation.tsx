@@ -18,42 +18,41 @@ interface Props {
 }
 
 const isMetricsExplorerAggregation = (subject: any): subject is MetricsExplorerAggregation => {
-  return Object.keys(MetricsExplorerAggregation).includes(subject);
+  return (
+    subject === 'avg' ||
+    subject === 'max' ||
+    subject === 'min' ||
+    subject === 'cardinality' ||
+    subject === 'rate' ||
+    subject === 'count'
+  );
 };
 
 export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) => {
   const AGGREGATION_LABELS = {
-    [MetricsExplorerAggregation.avg]: i18n.translate(
-      'xpack.infra.metricsExplorer.aggregationLables.avg',
-      { defaultMessage: 'Average' }
-    ),
-    [MetricsExplorerAggregation.max]: i18n.translate(
-      'xpack.infra.metricsExplorer.aggregationLables.max',
-      { defaultMessage: 'Max' }
-    ),
-    [MetricsExplorerAggregation.min]: i18n.translate(
-      'xpack.infra.metricsExplorer.aggregationLables.min',
-      { defaultMessage: 'Min' }
-    ),
-    [MetricsExplorerAggregation.cardinality]: i18n.translate(
-      'xpack.infra.metricsExplorer.aggregationLables.cardinality',
-      { defaultMessage: 'Cardinality' }
-    ),
-    [MetricsExplorerAggregation.rate]: i18n.translate(
-      'xpack.infra.metricsExplorer.aggregationLables.rate',
-      { defaultMessage: 'Rate' }
-    ),
-    [MetricsExplorerAggregation.count]: i18n.translate(
-      'xpack.infra.metricsExplorer.aggregationLables.count',
-      { defaultMessage: 'Document count' }
-    ),
+    ['avg']: i18n.translate('xpack.infra.metricsExplorer.aggregationLables.avg', {
+      defaultMessage: 'Average',
+    }),
+    ['max']: i18n.translate('xpack.infra.metricsExplorer.aggregationLables.max', {
+      defaultMessage: 'Max',
+    }),
+    ['min']: i18n.translate('xpack.infra.metricsExplorer.aggregationLables.min', {
+      defaultMessage: 'Min',
+    }),
+    ['cardinality']: i18n.translate('xpack.infra.metricsExplorer.aggregationLables.cardinality', {
+      defaultMessage: 'Cardinality',
+    }),
+    ['rate']: i18n.translate('xpack.infra.metricsExplorer.aggregationLables.rate', {
+      defaultMessage: 'Rate',
+    }),
+    ['count']: i18n.translate('xpack.infra.metricsExplorer.aggregationLables.count', {
+      defaultMessage: 'Document count',
+    }),
   };
 
   const handleChange = useCallback(
     e => {
-      const aggregation =
-        (isMetricsExplorerAggregation(e.target.value) && e.target.value) ||
-        MetricsExplorerAggregation.avg;
+      const aggregation = (isMetricsExplorerAggregation(e.target.value) && e.target.value) || 'avg';
       onChange(aggregation);
     },
     [onChange]
@@ -66,7 +65,7 @@ export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) =
       })}
       fullWidth
       value={options.aggregation}
-      options={Object.keys(MetricsExplorerAggregation).map(k => ({
+      options={['avg', 'max', 'min', 'cardinality', 'rate', 'count'].map(k => ({
         text: AGGREGATION_LABELS[k as MetricsExplorerAggregation],
         value: k,
       }))}

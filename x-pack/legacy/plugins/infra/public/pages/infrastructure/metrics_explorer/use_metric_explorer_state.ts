@@ -99,10 +99,10 @@ export const useMetricsExplorerState = (
     (aggregation: MetricsExplorerAggregation) => {
       setAfterKey(null);
       const metrics =
-        aggregation === MetricsExplorerAggregation.count
+        aggregation === 'count'
           ? [{ aggregation }]
           : options.metrics
-              .filter(metric => metric.aggregation !== MetricsExplorerAggregation.count)
+              .filter(metric => metric.aggregation !== 'count')
               .map(metric => ({
                 ...metric,
                 aggregation,

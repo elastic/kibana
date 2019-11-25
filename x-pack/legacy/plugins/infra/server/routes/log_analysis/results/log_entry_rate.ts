@@ -36,12 +36,12 @@ export const initLogAnalysisGetLogEntryRateRoute = ({
       },
     },
     async (requestContext, request, response) => {
-      const payload = pipe(
-        getLogEntryRateRequestPayloadRT.decode(request.body),
-        fold(throwErrors(Boom.badRequest), identity)
-      );
-
       try {
+        const payload = pipe(
+          getLogEntryRateRequestPayloadRT.decode(request.body),
+          fold(throwErrors(Boom.badRequest), identity)
+        );
+
         const logEntryRateBuckets = await logAnalysis.getLogEntryRateBuckets(
           requestContext,
           payload.data.sourceId,

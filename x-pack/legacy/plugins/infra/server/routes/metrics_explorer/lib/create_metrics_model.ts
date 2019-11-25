@@ -5,7 +5,7 @@
  */
 
 import { InfraMetricModelMetricType } from '../../../lib/adapters/metrics';
-import { MetricsExplorerAggregation, MetricsExplorerRequestBody } from '../types';
+import { MetricsExplorerRequestBody } from '../types';
 import { InfraMetric } from '../../../graphql/types';
 import { TSVBMetricModel } from '../../../../common/inventory_models/types';
 export const createMetricModel = (options: MetricsExplorerRequestBody): TSVBMetricModel => {
@@ -20,7 +20,7 @@ export const createMetricModel = (options: MetricsExplorerRequestBody): TSVBMetr
     // when the responses are processed and combined with the grouping request.
     series: options.metrics.map((metric, index) => {
       // If the metric is a rate then we need to add TSVB metrics for calculating the derivative
-      if (metric.aggregation === MetricsExplorerAggregation.rate) {
+      if (metric.aggregation === 'rate') {
         const aggType = 'max';
         return {
           id: `metric_${index}`,
@@ -49,8 +49,7 @@ export const createMetricModel = (options: MetricsExplorerRequestBody): TSVBMetr
         };
       }
       // Create a basic TSVB series with a single metric
-      const aggregation =
-        MetricsExplorerAggregation[metric.aggregation] || MetricsExplorerAggregation.avg;
+      const aggregation = metric.aggregation || 'avg';
 
       return {
         id: `metric_${index}`,

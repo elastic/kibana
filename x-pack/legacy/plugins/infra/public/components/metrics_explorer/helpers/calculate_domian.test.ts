@@ -5,21 +5,17 @@
  */
 
 import { calculateDomain } from './calculate_domain';
-import {
-  MetricsExplorerSeries,
-  MetricsExplorerAggregation,
-  MetricsExplorerColumnType,
-} from '../../../../server/routes/metrics_explorer/types';
+import { MetricsExplorerSeries } from '../../../../server/routes/metrics_explorer/types';
 import { MetricsExplorerOptionsMetric } from '../../../containers/metrics_explorer/use_metrics_explorer_options';
 import { MetricsExplorerColor } from '../../../../common/color_palette';
 describe('calculateDomain()', () => {
   const series: MetricsExplorerSeries = {
     id: 'test-01',
     columns: [
-      { type: MetricsExplorerColumnType.date, name: 'timestamp' },
-      { type: MetricsExplorerColumnType.number, name: 'metric_0' },
-      { type: MetricsExplorerColumnType.number, name: 'metric_1' },
-      { type: MetricsExplorerColumnType.string, name: 'groupBy' },
+      { type: 'date', name: 'timestamp' },
+      { type: 'number', name: 'metric_0' },
+      { type: 'number', name: 'metric_1' },
+      { type: 'string', name: 'groupBy' },
     ],
     rows: [
       { timestamp: 1562860500000, metric_0: null, metric_1: null },
@@ -31,12 +27,12 @@ describe('calculateDomain()', () => {
   };
   const metrics: MetricsExplorerOptionsMetric[] = [
     {
-      aggregation: MetricsExplorerAggregation.avg,
+      aggregation: 'avg',
       field: 'system.memory.free',
       color: MetricsExplorerColor.color0,
     },
     {
-      aggregation: MetricsExplorerAggregation.avg,
+      aggregation: 'avg',
       field: 'system.memory.used.bytes',
       color: MetricsExplorerColor.color1,
     },

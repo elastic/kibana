@@ -8,11 +8,11 @@ import { createTSVBLink, createFilterFromOptions } from './create_tsvb_link';
 import { source, options, timeRange, chartOptions } from '../../../utils/fixtures/metrics_explorer';
 import uuid from 'uuid';
 import { OutputBuffer } from 'uuid/interfaces';
-import { MetricsExplorerAggregation } from '../../../../server/routes/metrics_explorer/types';
 import {
   MetricsExplorerYAxisMode,
   MetricsExplorerChartType,
 } from '../../../containers/metrics_explorer/use_metrics_explorer_options';
+import { MetricsExplorerOptions } from '../../../containers/metrics_explorer/use_metrics_explorer_options';
 
 jest.mock('uuid');
 const mockedUuid = uuid as jest.Mocked<typeof uuid>;
@@ -28,11 +28,9 @@ describe('createTSVBLink()', () => {
   });
 
   it('should work with rates', () => {
-    const customOptions = {
+    const customOptions: MetricsExplorerOptions = {
       ...options,
-      metrics: [
-        { aggregation: MetricsExplorerAggregation.rate, field: 'system.network.out.bytes' },
-      ],
+      metrics: [{ aggregation: 'rate', field: 'system.network.out.bytes' }],
     };
     const link = createTSVBLink(source, customOptions, series, timeRange, chartOptions);
     expect(link).toBe(
