@@ -4,7 +4,7 @@
     "xpack.actions": "legacy/plugins/actions",
     "xpack.advancedUiActions": "plugins/advanced_ui_actions",
     "xpack.alerting": "legacy/plugins/alerting",
-    "xpack.alertingUI": "legacy/plugins/alerting_ui",
+    "xpack.alertingUI": "legacy/plugins/triggers_actions_ui",
     "xpack.apm": "legacy/plugins/apm",
     "xpack.beatsManagement": "legacy/plugins/beats_management",
     "xpack.canvas": "legacy/plugins/canvas",

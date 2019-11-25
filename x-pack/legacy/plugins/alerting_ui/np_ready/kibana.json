@@ -1,6 +1,0 @@
-{
-    "id": "alerting_ui",
-    "version": "kibana",
-    "server": false,
-    "ui": true
-  }
