@@ -13,12 +13,12 @@ import { EXPLORER_ACTION } from '../explorer_constants';
 import { Action, ActionPayload } from '../explorer_dashboard_service';
 import { getDefaultViewBySwimlaneData, getInfluencers, SwimlaneData } from '../explorer_utils';
 
-import { appStateReducer, getExplorerDefaultAppState } from './app_state_reducer';
+import { appStateReducer, getExplorerDefaultAppState, ExplorerAppState } from './app_state_reducer';
 
 export interface ExplorerState {
   annotationsData: any[];
   anomalyChartRecords: any[];
-  appState: any;
+  appState: ExplorerAppState;
   chartsData: any;
   fieldFormatsLoading: boolean;
   filterActive: boolean;

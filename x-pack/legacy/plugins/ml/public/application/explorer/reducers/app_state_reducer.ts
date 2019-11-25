@@ -10,8 +10,19 @@ import { EXPLORER_ACTION } from '../explorer_constants';
 import { Action } from '../explorer_dashboard_service';
 
 export interface ExplorerAppState {
-  mlExplorerSwimlane: any;
-  mlExplorerFilter: any;
+  mlExplorerSwimlane: {
+    selectedType?: string;
+    selectedLanes?: string[];
+    selectedTimes?: number[];
+    showTopFieldValues?: boolean;
+    viewByFieldName?: string;
+  };
+  mlExplorerFilter: {
+    influencersFilterQuery?: unknown;
+    filterActive?: boolean;
+    filteredFields?: string[];
+    queryString?: string;
+  };
 }
 
 export function getExplorerDefaultAppState(): ExplorerAppState {
@@ -26,6 +37,13 @@ export const appStateReducer = (state: ExplorerAppState, nextAction: Action) => 
 
   const appState = cloneDeep(state);
 
+  if (appState.mlExplorerSwimlane === undefined) {
+    appState.mlExplorerSwimlane = {};
+  }
+  if (appState.mlExplorerFilter === undefined) {
+    appState.mlExplorerFilter = {};
+  }
+
   switch (type) {
     case EXPLORER_ACTION.APP_STATE_SET:
       return { ...appState, ...payload };
@@ -35,7 +53,7 @@ export const appStateReducer = (state: ExplorerAppState, nextAction: Action) => 
       delete appState.mlExplorerSwimlane.selectedLanes;
       delete appState.mlExplorerSwimlane.selectedTimes;
       delete appState.mlExplorerSwimlane.showTopFieldValues;
-      return appState;
+      break;
 
     case EXPLORER_ACTION.APP_STATE_SAVE_SELECTION:
       const swimlaneSelectedCells = payload.swimlaneSelectedCells;
@@ -44,27 +62,28 @@ export const appStateReducer = (state: ExplorerAppState, nextAction: Action) => 
       appState.mlExplorerSwimlane.selectedTimes = swimlaneSelectedCells.times;
       appState.mlExplorerSwimlane.showTopFieldValues = swimlaneSelectedCells.showTopFieldValues;
       appState.mlExplorerSwimlane.viewByFieldName = swimlaneSelectedCells.viewByFieldName;
-      return appState;
+      break;
 
     case EXPLORER_ACTION.APP_STATE_SAVE_VIEW_BY_SWIMLANE_FIELD_NAME:
       appState.mlExplorerSwimlane.viewByFieldName = payload.viewBySwimlaneFieldName;
-      return appState;
+      break;
 
     case EXPLORER_ACTION.APP_STATE_SAVE_INFLUENCER_FILTER_SETTINGS:
       appState.mlExplorerFilter.influencersFilterQuery = payload.influencersFilterQuery;
       appState.mlExplorerFilter.filterActive = payload.filterActive;
       appState.mlExplorerFilter.filteredFields = payload.filteredFields;
       appState.mlExplorerFilter.queryString = payload.queryString;
-      return appState;
+      break;
 
     case EXPLORER_ACTION.APP_STATE_CLEAR_INFLUENCER_FILTER_SETTINGS:
       delete appState.mlExplorerFilter.influencersFilterQuery;
       delete appState.mlExplorerFilter.filterActive;
       delete appState.mlExplorerFilter.filteredFields;
       delete appState.mlExplorerFilter.queryString;
-      return appState;
+      break;
 
     default:
-      return state;
   }
+
+  return state;
 };

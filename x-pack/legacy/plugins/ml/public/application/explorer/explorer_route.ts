@@ -16,7 +16,7 @@ import { loadIndexPatterns } from '../util/index_utils';
 import { getAnomalyExplorerBreadcrumbs } from './breadcrumbs';
 
 uiRoutes.when('/explorer/?', {
-  template: `<ml-explorer-directive class="ml-explorer" data-test-subj="mlPageAnomalyExplorer" />`,
+  template: `<ml-anomaly-explorer class="ml-explorer" data-test-subj="mlPageAnomalyExplorer" />`,
   k7Breadcrumbs: getAnomalyExplorerBreadcrumbs,
   resolve: {
     CheckLicense: checkFullLicense,

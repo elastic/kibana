@@ -41,7 +41,7 @@ interface ExplorerScope extends IScope {
   appState: IAppState;
 }
 
-module.directive('mlExplorerDirective', function(
+module.directive('mlAnomalyExplorer', function(
   globalState: State,
   $rootScope: IRootScopeService,
   AppState: AppStateClass
