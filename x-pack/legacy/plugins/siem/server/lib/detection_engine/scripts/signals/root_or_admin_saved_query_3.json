@@ -10,5 +10,5 @@
   "type": "saved_query",
   "from": "now-6m",
   "to": "now",
-  "saved_id": "Test Query From SIEM Three"
+  "saved_id": "test-saveid-3"
 }
