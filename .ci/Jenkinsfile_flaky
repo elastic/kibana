@@ -67,7 +67,7 @@ stage("Kibana Pipeline") {
 def getWorkerFromParams(isXpack, job, ciGroup) {
   if (!isXpack) {
     if (job == 'serverMocha') {
-      return {
+      return { workerNumber ->
         bash(
           """
             source src/dev/ci_setup/setup_env.sh
