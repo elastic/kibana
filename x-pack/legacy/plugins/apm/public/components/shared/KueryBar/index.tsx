@@ -16,7 +16,6 @@ import { getBoolFilter } from './get_bool_filter';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
-import { useDynamicIndexPattern } from '../../../hooks/useDynamicIndexPattern';
 import { usePlugins } from '../../../new-platform/plugin';
 import { useDynamicIndexPattern } from '../../../hooks/useDynamicIndexPattern';
 import {
