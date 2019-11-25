@@ -20,13 +20,12 @@ import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import { GRID_RESOLUTION } from '../../grid_resolution';
-import { SOURCE_DATA_ID_ORIGIN, ES_GEO_GRID } from '../../../../common/constants';
+import { SOURCE_DATA_ID_ORIGIN, ES_GEO_GRID, COUNT_PROP_LABEL, COUNT_PROP_NAME } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource } from '../es_agg_source';
+import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 
-const COUNT_PROP_LABEL = 'count';
-const COUNT_PROP_NAME = 'doc_count';
 const MAX_GEOTILE_LEVEL = 29;
 
 const aggSchemas = new Schemas([
@@ -85,6 +84,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
         metrics={this._descriptor.metrics}
         renderAs={this._descriptor.requestType}
         resolution={this._descriptor.resolution}
+        applyGlobalQuery={this._descriptor.applyGlobalQuery}
       />
     );
   }
@@ -92,7 +92,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
   async getImmutableProperties() {
     let indexPatternTitle = this._descriptor.indexPatternId;
     try {
-      const indexPattern = await this._getIndexPattern();
+      const indexPattern = await this.getIndexPattern();
       indexPatternTitle = indexPattern.title;
     } catch (error) {
       // ignore error, title will just default to id
@@ -121,6 +121,10 @@ export class ESGeoGridSource extends AbstractESAggSource {
         value: this._descriptor.requestType
       },
     ];
+  }
+
+  getFieldNames() {
+    return this.getMetricFields().map((esAggMetricField => esAggMetricField.getName()));
   }
 
   isGeoGridPrecisionAware() {
@@ -162,7 +166,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
   }
 
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
-    const indexPattern = await this._getIndexPattern();
+    const indexPattern = await this.getIndexPattern();
     const searchSource  = await this._makeSearchSource(searchFilters, 0);
     const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(searchFilters.geogridPrecision), aggSchemas.all);
     searchSource.setField('aggs', aggConfigs.toDsl());
@@ -224,7 +228,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
     });
     descriptor.style = VectorStyle.createDescriptor({
       [vectorStyles.FILL_COLOR]: {
-        type: VectorStyle.STYLE_TYPE.DYNAMIC,
+        type: DynamicStyleProperty.type,
         options: {
           field: {
             label: COUNT_PROP_LABEL,
@@ -235,7 +239,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
         }
       },
       [vectorStyles.ICON_SIZE]: {
-        type: VectorStyle.STYLE_TYPE.DYNAMIC,
+        type: DynamicStyleProperty.type,
         options: {
           field: {
             label: COUNT_PROP_LABEL,

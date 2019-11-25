@@ -9,12 +9,12 @@
 import { ReactWrapper } from 'enzyme';
 import enzymeToJson from 'enzyme-to-json';
 import { Location } from 'history';
-import 'jest-styled-components';
 import moment from 'moment';
 import { Moment } from 'moment-timezone';
 import React from 'react';
 import { render, waitForElement } from 'react-testing-library';
 import { MemoryRouter } from 'react-router-dom';
+import { APMConfig } from '../../../../../plugins/apm/server';
 import { LocationProvider } from '../context/LocationContext';
 import { PromiseReturnType } from '../../typings/common';
 import { ESFilter } from '../../typings/elasticsearch';
@@ -94,14 +94,12 @@ export function expectTextsInDocument(output: any, texts: string[]) {
 }
 
 interface MockSetup {
+  dynamicIndexPattern: any;
   start: number;
   end: number;
   client: any;
   internalClient: any;
-  config: {
-    get: any;
-    has: any;
-  };
+  config: APMConfig;
   uiFiltersES: ESFilter[];
   indices: {
     'apm_oss.sourcemapIndices': string;
@@ -110,7 +108,7 @@ interface MockSetup {
     'apm_oss.spanIndices': string;
     'apm_oss.transactionIndices': string;
     'apm_oss.metricsIndices': string;
-    'apm_oss.apmAgentConfigurationIndex': string;
+    apmAgentConfigurationIndex: string;
   };
 }
 
@@ -138,10 +136,12 @@ export async function inspectSearchParams(
     internalClient: {
       search: internalClientSpy
     } as any,
-    config: {
-      get: () => 'myIndex' as any,
-      has: () => true
-    },
+    config: new Proxy(
+      {},
+      {
+        get: () => 'myIndex'
+      }
+    ) as APMConfig,
     uiFiltersES: [
       {
         term: { 'service.environment': 'prod' }
@@ -154,8 +154,9 @@ export async function inspectSearchParams(
       'apm_oss.spanIndices': 'myIndex',
       'apm_oss.transactionIndices': 'myIndex',
       'apm_oss.metricsIndices': 'myIndex',
-      'apm_oss.apmAgentConfigurationIndex': 'myIndex'
-    }
+      apmAgentConfigurationIndex: 'myIndex'
+    },
+    dynamicIndexPattern: null as any
   };
   try {
     await fn(mockSetup);

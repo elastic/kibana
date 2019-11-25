@@ -6,8 +6,6 @@
 
 import { get } from 'lodash/fp';
 
-import Hapi from 'hapi';
-import { esFilters } from '../../../../../../../../src/plugins/data/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import {
   Alert,
@@ -17,7 +15,9 @@ import {
 } from '../../../../../alerting/server/types';
 import { AlertsClient } from '../../../../../alerting/server/alerts_client';
 import { ActionsClient } from '../../../../../actions/server/actions_client';
+import { RequestFacade } from '../../../types';
 import { SearchResponse } from '../../types';
+import { esFilters } from '../../../../../../../../src/plugins/data/server';
 
 export type PartialFilter = Partial<esFilters.Filter>;
 
@@ -25,21 +25,24 @@ export interface SignalAlertParams {
   description: string;
   enabled: boolean;
   falsePositives: string[];
-  filter: Record<string, {}> | undefined;
-  filters: PartialFilter[] | undefined;
+  filter: Record<string, {}> | undefined | null;
+  filters: PartialFilter[] | undefined | null;
   from: string;
   immutable: boolean;
   index: string[];
   interval: string;
-  id: string;
-  language: string | undefined;
+  ruleId: string | undefined | null;
+  language: string | undefined | null;
   maxSignals: number;
+  riskScore: number;
+  outputIndex: string;
   name: string;
-  query: string | undefined;
+  query: string | undefined | null;
   references: string[];
-  savedId: string | undefined;
+  savedId: string | undefined | null;
+  meta: Record<string, {}> | undefined | null;
   severity: string;
-  size: number | undefined;
+  size: number | undefined | null;
   tags: string[];
   to: string;
   type: 'filter' | 'query' | 'saved_query';
@@ -47,22 +50,38 @@ export interface SignalAlertParams {
 
 export type SignalAlertParamsRest = Omit<
   SignalAlertParams,
-  'falsePositives' | 'maxSignals' | 'saved_id'
+  'ruleId' | 'falsePositives' | 'maxSignals' | 'savedId' | 'riskScore' | 'outputIndex'
 > & {
+  rule_id: SignalAlertParams['ruleId'];
   false_positives: SignalAlertParams['falsePositives'];
   saved_id: SignalAlertParams['savedId'];
   max_signals: SignalAlertParams['maxSignals'];
+  risk_score: SignalAlertParams['riskScore'];
+  output_index: SignalAlertParams['outputIndex'];
 };
 
-export type UpdateSignalAlertParamsRest = Partial<Omit<SignalAlertParamsRest, 'id'>> & {
-  id: SignalAlertParams['id'];
+export type OutputSignalAlertRest = SignalAlertParamsRest & {
+  id: string;
+  created_by: string | undefined | null;
+  updated_by: string | undefined | null;
+};
+
+export type OutputSignalES = OutputSignalAlertRest & {
+  status: 'open' | 'closed';
+};
+
+export type UpdateSignalAlertParamsRest = Partial<SignalAlertParamsRest> & {
+  id: string | undefined;
+  rule_id: SignalAlertParams['ruleId'] | undefined;
 };
 
 export interface FindParamsRest {
   per_page: number;
   page: number;
   sort_field: string;
+  sort_order: 'asc' | 'desc';
   fields: string[];
+  filter: string;
 }
 
 export interface Clients {
@@ -72,19 +91,24 @@ export interface Clients {
 
 export type SignalParams = SignalAlertParams & Clients;
 
-export type UpdateSignalParams = Partial<Omit<SignalAlertParams, 'id'>> & {
-  id: SignalAlertParams['id'];
+export type UpdateSignalParams = Partial<SignalAlertParams> & {
+  id: string | undefined | null;
 } & Clients;
 
-export type DeleteSignalParams = Clients & { id: string };
+export type DeleteSignalParams = Clients & {
+  id: string | undefined;
+  ruleId: string | undefined | null;
+};
 
-export interface FindSignalsRequest extends Omit<Hapi.Request, 'query'> {
+export interface FindSignalsRequest extends Omit<RequestFacade, 'query'> {
   query: {
     per_page: number;
     page: number;
     search?: string;
     sort_field?: string;
+    filter?: string;
     fields?: string[];
+    sort_order?: 'asc' | 'desc';
   };
 }
 
@@ -93,24 +117,34 @@ export interface FindSignalParams {
   perPage?: number;
   page?: number;
   sortField?: string;
+  filter?: string;
   fields?: string[];
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface ReadSignalParams {
   alertsClient: AlertsClient;
-  id: string;
+  id?: string | undefined | null;
+  ruleId?: string | undefined | null;
 }
+
+export interface ReadSignalByRuleId {
+  alertsClient: AlertsClient;
+  ruleId: string;
+}
+
+export type AlertTypeParams = Omit<SignalAlertParams, 'name' | 'enabled' | 'interval'>;
 
 export type SignalAlertType = Alert & {
   id: string;
-  alertTypeParams: SignalAlertParams;
+  params: AlertTypeParams;
 };
 
-export interface SignalsRequest extends Hapi.Request {
+export interface SignalsRequest extends RequestFacade {
   payload: SignalAlertParamsRest;
 }
 
-export interface UpdateSignalsRequest extends Hapi.Request {
+export interface UpdateSignalsRequest extends RequestFacade {
   payload: UpdateSignalAlertParamsRest;
 }
 
@@ -145,6 +179,10 @@ export interface BulkResponse {
 export type SignalSearchResponse = SearchResponse<SignalSource>;
 export type SignalSourceHit = SignalSearchResponse['hits']['hits'][0];
 
+export type QueryRequest = Omit<RequestFacade, 'query'> & {
+  query: { id: string | undefined; rule_id: string | undefined };
+};
+
 // This returns true because by default a SignalAlertTypeDefinition is an AlertType
 // since we are only increasing the strictness of params.
 export const isAlertExecutor = (obj: SignalAlertTypeDefinition): obj is AlertType => {
@@ -153,6 +191,10 @@ export const isAlertExecutor = (obj: SignalAlertTypeDefinition): obj is AlertTyp
 
 export type SignalAlertTypeDefinition = Omit<AlertType, 'executor'> & {
   executor: ({ services, params, state }: SignalExecutorOptions) => Promise<State | void>;
+};
+
+export const isAlertTypes = (obj: unknown[]): obj is SignalAlertType[] => {
+  return obj.every(signal => isAlertType(signal));
 };
 
 export const isAlertType = (obj: unknown): obj is SignalAlertType => {

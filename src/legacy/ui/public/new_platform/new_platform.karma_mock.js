@@ -18,16 +18,32 @@
  */
 
 import sinon from 'sinon';
+import { getFieldFormatsRegistry } from '../../../../test_utils/public/stub_field_formats';
 
 const mockObservable = () => {
   return {
-    subscribe: () => {}
+    subscribe: () => {},
   };
+};
+
+export const mockUiSettings = {
+  get: (item) => {
+    return mockUiSettings[item];
+  },
+  getUpdate$: () => ({
+    subscribe: sinon.fake(),
+  }),
+  'query:allowLeadingWildcards': true,
+  'query:queryString:options': {},
+  'courier:ignoreFilterIfFieldNotInIndex': true,
+  'dateFormat:tz': 'Browser',
+  'format:defaultTypeMap': {},
 };
 
 export const npSetup = {
   core: {
-    chrome: {}
+    chrome: {},
+    uiSettings: mockUiSettings,
   },
   plugins: {
     embeddable: {
@@ -59,11 +75,19 @@ export const npSetup = {
         timefilter: {
           timefilter: sinon.fake(),
           history: sinon.fake(),
-        }
+        },
       },
+      fieldFormats: getFieldFormatsRegistry(mockUiSettings),
     },
-    devTools: {
+    share: {
       register: () => {},
+    },
+    dev_tools: {
+      register: () => {},
+    },
+    kibana_legacy: {
+      registerLegacyApp: () => {},
+      forwardApp: () => {},
     },
     inspector: {
       registerView: () => undefined,
@@ -78,6 +102,9 @@ export const npSetup = {
       registerAction: sinon.fake(),
       registerTrigger: sinon.fake(),
     },
+    feature_catalogue: {
+      register: sinon.fake(),
+    },
   },
 };
 
@@ -87,7 +114,7 @@ let isAutoRefreshSelectorEnabled = true;
 
 export const npStart = {
   core: {
-    chrome: {}
+    chrome: {},
   },
   plugins: {
     embeddable: {
@@ -100,8 +127,12 @@ export const npStart = {
       registerRenderer: sinon.fake(),
       registerType: sinon.fake(),
     },
-    devTools: {
+    dev_tools: {
       getSortedDevTools: () => [],
+    },
+    kibana_legacy: {
+      getApps: () => [],
+      getForwards: () => [],
     },
     data: {
       autocomplete: {
@@ -119,7 +150,6 @@ export const npStart = {
           setFilters: sinon.fake(),
           removeAll: sinon.fake(),
           getUpdates$: mockObservable,
-
         },
         timefilter: {
           timefilter: {
@@ -143,7 +173,7 @@ export const npStart = {
             getRefreshInterval: () => {
               return refreshInterval;
             },
-            setRefreshInterval: (interval) => {
+            setRefreshInterval: interval => {
               refreshInterval = interval;
             },
             enableTimeRangeSelector: () => {
@@ -161,6 +191,10 @@ export const npStart = {
           history: sinon.fake(),
         },
       },
+      fieldFormats: getFieldFormatsRegistry(mockUiSettings),
+    },
+    share: {
+      toggleShareContextMenu: () => {},
     },
     inspector: {
       isAvailable: () => false,
@@ -178,6 +212,9 @@ export const npStart = {
       getTrigger: sinon.fake(),
       getTriggerActions: sinon.fake(),
       getTriggerCompatibleActions: sinon.fake(),
+    },
+    feature_catalogue: {
+      register: sinon.fake(),
     },
   },
 };
