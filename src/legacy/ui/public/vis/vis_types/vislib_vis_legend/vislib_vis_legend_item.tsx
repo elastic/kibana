@@ -138,12 +138,18 @@ const VisLegendItemComponent = ({
         color={getColor(item.label)}
         data-test-subj={`legendSelectedColor-${getColor(item.label)}`}
       />
-      <span className="visLegend__valueLabel">&nbsp;{item.label}</span>
+      <span className="visLegend__valueLabel">{item.label}</span>
     </EuiButtonEmpty>
   );
 
   const renderDetails = () => (
-    <EuiPopover tabIndex={0} button={button} isOpen={selected} closePopover={onSelect(null)}>
+    <EuiPopover
+      ownFocus
+      display="block"
+      button={button}
+      isOpen={selected}
+      closePopover={onSelect(null)}
+    >
       <div className="visLegend__valueDetails">
         {canFilter && renderFilterBar()}
 

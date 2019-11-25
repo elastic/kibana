@@ -13,7 +13,7 @@ $visLegendLineHeight: $euiSize;
   left: 0;
   background-color: $euiColorEmptyShade;
   transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance,
-              background-color $euiAnimSpeedFast $euiAnimSlightResistance $euiAnimSpeedExtraSlow;
+    background-color $euiAnimSpeedFast $euiAnimSlightResistance $euiAnimSpeedExtraSlow;
 
   &:focus {
     box-shadow: none;
@@ -22,10 +22,9 @@ $visLegendLineHeight: $euiSize;
 }
 
 .visLegend__toggle--isOpen {
-  background-color: transparentize($euiColorDarkestShade, .9);
+  background-color: transparentize($euiColorDarkestShade, 0.9);
   opacity: 1;
 }
-
 
 .visLegend {
   @include euiFontSizeXS;
@@ -60,6 +59,15 @@ $visLegendLineHeight: $euiSize;
   flex-direction: column;
   overflow-x: hidden;
   overflow-y: auto;
+
+  .visLegend__value {
+    font-size: $euiFontSizeXS;
+    text-align: left;
+
+    .visLegend__valueLabel {
+      vertical-align: middle;
+    }
+  }
 
   .visLib--legend-top &,
   .visLib--legend-bottom & {
