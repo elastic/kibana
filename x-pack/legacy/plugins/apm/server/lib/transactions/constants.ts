@@ -4,9 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
-import { Plugin } from './plugin';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin();
-}
+export const MINIMUM_BUCKET_SIZE = 15;
+export const BUCKET_TARGET_COUNT = 15;
