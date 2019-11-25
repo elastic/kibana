@@ -3,40 +3,38 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, useEffect } from 'react';
-import useInterval from '@use-it/interval';
 import {
   EuiBasicTable,
-  EuiPageBody,
-  EuiPageContent,
-  EuiTitle,
-  EuiSpacer,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButton,
   EuiEmptyPrompt,
-  // @ts-ignore
-  EuiSearchBar,
-  EuiLink,
-  EuiSwitch,
-  EuiFilterGroup,
-  EuiPopover,
-  EuiFilterSelectItem,
   EuiFilterButton,
+  EuiFilterGroup,
+  EuiFilterSelectItem,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPageBody,
+  EuiPageContent,
+  EuiPopover,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import useInterval from '@use-it/interval';
+import React, { useEffect, useState } from 'react';
+import { AGENT_POLLING_INTERVAL } from '../../../common/constants/agent';
 import { Agent } from '../../../common/types/domain_data';
+import { Policy } from '../../../scripts/mock_spec/types';
 import { AgentHealth } from '../../components/agent_health';
 import { AgentUnenrollProvider } from '../../components/agent_unenroll_provider';
 import { ConnectedLink } from '../../components/navigation/connected_link';
-import { usePagination } from '../../hooks/use_pagination';
 import { SearchBar } from '../../components/search_bar';
-import { AgentEnrollmentFlyout } from './components/agent_enrollment';
 import { useLibs } from '../../hooks/use_libs';
-import { Policy } from '../../../scripts/mock_spec/types';
-import { AGENT_POLLING_INTERVAL } from '../../../common/constants/agent';
+import { usePagination } from '../../hooks/use_pagination';
+import { AgentEnrollmentFlyout } from './components/agent_enrollment';
 
 export const AgentListPage: React.SFC<{}> = () => {
   const libs = useLibs();
@@ -130,7 +128,7 @@ export const AgentListPage: React.SFC<{}> = () => {
     if (new Date().getTime() - lastPolledAgentsMs >= AGENT_POLLING_INTERVAL) {
       fetchAgents();
     }
-  }, 1000);
+  }, AGENT_POLLING_INTERVAL);
 
   // Some agents retrieved, set up table props
   const columns = [
