@@ -16,7 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { SavedObject } from 'ui/saved_objects/types';
+import { KbnUrl } from 'ui/url/kbn_url';
+import { Chrome } from 'ui/chrome';
+import { SavedObjectsClient } from 'kibana/public';
 import { StringUtils } from '../utils/string_utils';
 
 /**
@@ -28,7 +31,20 @@ import { StringUtils } from '../utils/string_utils';
  * to avoid pulling in extra functionality which isn't used.
  */
 export class SavedObjectLoader {
-  constructor(SavedObjectClass, kbnUrl, chrome, savedObjectClient) {
+  type: string;
+  Class: (id: string) => SavedObject;
+  lowercaseType: string;
+  kbnUrl: any;
+  chrome: any;
+  loaderProperties: Record<string, string>;
+  savedObjectsClient: SavedObjectsClient;
+
+  constructor(
+    SavedObjectClass: any,
+    kbnUrl: KbnUrl,
+    chrome: Chrome,
+    savedObjectClient: SavedObjectsClient
+  ) {
     this.type = SavedObjectClass.type;
     this.Class = SavedObjectClass;
     this.lowercaseType = this.type.toLowerCase();
@@ -36,9 +52,9 @@ export class SavedObjectLoader {
     this.chrome = chrome;
 
     this.loaderProperties = {
-      name: `${ this.lowercaseType }s`,
+      name: `${this.lowercaseType}s`,
       noun: StringUtils.upperFirst(this.type),
-      nouns: `${ this.lowercaseType }s`,
+      nouns: `${this.lowercaseType}s`,
     };
 
     this.savedObjectsClient = savedObjectClient;
@@ -50,18 +66,20 @@ export class SavedObjectLoader {
    * @param id
    * @returns {Promise<SavedObject>}
    */
-  get(id) {
-    return (new this.Class(id)).init();
+  get(id: string) {
+    // @ts-ignore
+    return new this.Class(id).init();
   }
 
-  urlFor(id) {
-    return this.kbnUrl.eval(`#/${ this.lowercaseType }/{{id}}`, { id: id });
+  urlFor(id: string) {
+    return this.kbnUrl.eval(`#/${this.lowercaseType}/{{id}}`, { id });
   }
 
-  delete(ids) {
+  delete(ids: string | string[]) {
     ids = !Array.isArray(ids) ? [ids] : ids;
 
     const deletions = ids.map(id => {
+      // @ts-ignore
       const savedObject = new this.Class(id);
       return savedObject.delete();
     });
@@ -80,7 +98,7 @@ export class SavedObjectLoader {
    * @param id
    * @returns {source} The modified source object, with an id and url field.
    */
-  mapHitSource(source, id) {
+  mapHitSource(source: any, id: string) {
     source.id = id;
     source.url = this.urlFor(id);
     return source;
@@ -92,7 +110,7 @@ export class SavedObjectLoader {
    * @param hit
    * @returns {hit.attributes} The modified hit.attributes object, with an id and url field.
    */
-  mapSavedObjectApiHits(hit) {
+  mapSavedObjectApiHits(hit: any) {
     return this.mapHitSource(hit.attributes, hit.id);
   }
 
@@ -102,11 +120,12 @@ export class SavedObjectLoader {
    *
    * @param searchString
    * @param size
+   * @param fields
    * @returns {Promise}
    */
-  findAll(search = '', size = 100, fields) {
-    return this.savedObjectsClient.find(
-      {
+  findAll(search: string = '', size = 100, fields?: string[]) {
+    return this.savedObjectsClient
+      .find({
         type: this.lowercaseType,
         search: search ? `${search}*` : undefined,
         perPage: size,
@@ -114,20 +133,20 @@ export class SavedObjectLoader {
         searchFields: ['title^3', 'description'],
         defaultSearchOperator: 'AND',
         fields,
-      }).then((resp) => {
-      return {
-        total: resp.total,
-        hits: resp.savedObjects
-          .map((savedObject) => this.mapSavedObjectApiHits(savedObject))
-      };
-    });
+      })
+      .then(resp => {
+        return {
+          total: resp.total,
+          hits: resp.savedObjects.map(savedObject => this.mapSavedObjectApiHits(savedObject)),
+        };
+      });
   }
 
   find(search = '', size = 100) {
     return this.findAll(search, size).then(resp => {
       return {
         total: resp.total,
-        hits: resp.hits.filter(savedObject => !savedObject.error)
+        hits: resp.hits.filter(savedObject => !savedObject.error),
       };
     });
   }

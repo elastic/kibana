@@ -27,7 +27,7 @@
  * This class seems to interface with ES primarily through the es Angular
  * service and the saved object api.
  */
-import _ from 'lodash';
+import { SavedObjectConfig } from 'ui/saved_objects/types';
 import { PromiseService } from 'ui/promises';
 import { buildSavedObject } from 'ui/saved_objects/helpers/build_saved_object';
 import { SavedObjectsClientProvider } from './saved_objects_client_provider';
@@ -62,9 +62,7 @@ export function SavedObjectProvider(
    * which returns instances of SimpleSavedObject which don't introduce additional type-specific complexity.
    * @param {*} config
    */
-  function SavedObject(config: any) {
-    if (!_.isObject(config)) config = {};
-
+  function SavedObject(config: SavedObjectConfig = {}) {
     return buildSavedObject(
       // @ts-ignore
       this,

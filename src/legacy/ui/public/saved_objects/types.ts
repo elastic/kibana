@@ -19,6 +19,7 @@
 
 import { SearchSource } from 'ui/courier';
 import { SavedObjectAttributes, SavedObjectReference } from 'kibana/server';
+import { IndexPattern } from '../../../core_plugins/data/public';
 
 export interface SaveOptions {
   confirmOverwrite: boolean;
@@ -51,9 +52,24 @@ export interface SavedObject {
   isSaving: boolean;
   isTitleChanged: any;
   lastSavedTitle: string;
-  migrationVersion: string;
+  migrationVersion?: Record<string, any>;
   save: (saveOptions: SaveOptions) => Promise<string>;
   searchSource?: SearchSource;
   showInRecentlyAccessed: boolean;
   title: string;
+}
+
+export interface SavedObjectConfig {
+  afterESResp?: () => any;
+  clearSavedIndexPattern?: boolean;
+  defaults?: any;
+  extractReferences?: any;
+  id?: string;
+  indexPattern?: IndexPattern;
+  init?: () => any;
+  injectReferences?: any;
+  mapping?: any;
+  migrationVersion?: Record<string, any>;
+  searchSource?: any;
+  type?: string;
 }

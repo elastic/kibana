@@ -29,9 +29,9 @@ import { IndexPatterns } from '../../../../core_plugins/data/public/index_patter
 export function hydrateIndexPattern(
   id: string,
   savedObject: SavedObject,
+  indexPatterns: IndexPatterns,
   clearSavedIndexPattern: boolean,
-  indexPattern: IIndexPattern,
-  indexPatterns: IndexPatterns
+  indexPattern?: IIndexPattern
 ) {
   if (!savedObject.searchSource) {
     return Promise.resolve(null);

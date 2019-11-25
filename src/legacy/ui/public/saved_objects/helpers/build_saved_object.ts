@@ -24,26 +24,11 @@ import { hydrateIndexPattern } from 'ui/saved_objects/helpers/hydrate_index_patt
 import { intializeSavedObject } from 'ui/saved_objects/helpers/initialize_saved_object';
 import { serializeSavedObject } from 'ui/saved_objects/helpers/serialize_saved_object';
 import { SavedObjectsClient } from 'kibana/public';
-import { SavedObject } from 'ui/saved_objects/types';
+import { SavedObject, SavedObjectConfig } from 'ui/saved_objects/types';
 import { applyEsResp } from 'ui/saved_objects/helpers/apply_es_resp';
 import { saveSavedObject } from 'ui/saved_objects/helpers/save_saved_object';
 import { expandShorthand } from '../../../../../plugins/kibana_utils/public';
 import { IndexPatterns } from '../../../../core_plugins/data/public';
-
-interface SavedObjectConfig {
-  id?: string;
-  type?: string;
-  defaults?: any;
-  mapping?: any;
-  afterESResp?: any;
-  extractReferences?: any;
-  injectReferences?: any;
-  searchSource?: any;
-  init?: any;
-  migrationVersion?: any;
-  clearSavedIndexPattern?: any;
-  indexPattern?: any;
-}
 
 export function buildSavedObject(
   savedObject: SavedObject,
@@ -101,9 +86,9 @@ export function buildSavedObject(
     return hydrateIndexPattern(
       id || '',
       savedObject,
-      config.clearSavedIndexPattern,
-      config.indexPattern,
-      indexPatterns
+      indexPatterns,
+      !!config.clearSavedIndexPattern,
+      config.indexPattern
     );
   };
 
