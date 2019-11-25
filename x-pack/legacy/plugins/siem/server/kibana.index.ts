@@ -34,7 +34,6 @@ export const initServerWithKibana = (core: CoreSetup, kbnServer: ServerFacade, l
       kbnServer.plugins.alerting.setup.registerType(type);
     }
   }
-  kbnServer.injectUiAppVars('siem', async () => kbnServer.getInjectedUiAppVars('kibana'));
 
   const libs = compose(core, kbnServer);
   initServer(libs);

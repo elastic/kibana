@@ -155,15 +155,7 @@ export const siem = (kibana: any) => {
       mappings: savedObjectMappings,
     },
     init(server: Server) {
-      const {
-        config,
-        getInjectedUiAppVars,
-        injectUiAppVars,
-        newPlatform,
-        plugins,
-        route,
-        savedObjects,
-      } = server;
+      const { config, newPlatform, plugins, route, savedObjects } = server;
 
       const {
         env,
@@ -174,8 +166,6 @@ export const siem = (kibana: any) => {
 
       const serverFacade = {
         config,
-        getInjectedUiAppVars,
-        injectUiAppVars,
         plugins: { alerting: plugins.alerting, xpack_main: plugins.xpack_main },
         route: route.bind(server),
         savedObjects,
