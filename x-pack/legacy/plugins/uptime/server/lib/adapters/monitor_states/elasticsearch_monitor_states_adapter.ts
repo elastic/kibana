@@ -74,7 +74,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       dateRangeEnd,
       pagination: CONTEXT_DEFAULTS.CURSOR_PAGINATION,
       filterClause: filters && filters !== '' ? JSON.parse(filters) : null,
-      size: 30000,
+      size: CONTEXT_DEFAULTS.MAX_MONITORS_FOR_SNAPSHOT_COUNT,
       statusFilter,
     };
     return getSnapshotCountHelper(new MonitorGroupIterator(context));
