@@ -5,7 +5,7 @@
  */
 
 import url from 'url';
-import { ServerFacade } from '../types';
+import { AbsoluteURLFactoryOptions } from '../types';
 
 export const getAbsoluteUrlFactory = ({
   protocol,
