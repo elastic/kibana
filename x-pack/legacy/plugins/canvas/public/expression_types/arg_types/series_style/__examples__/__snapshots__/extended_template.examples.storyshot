@@ -12,7 +12,7 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
 >
   <div>
     <div
-      className="euiFormRow euiFormRow--compressed"
+      className="euiFormRow euiFormRow--compressed euiFormRow--horizontal"
     >
       <div
         className="euiFormRow__labelWrapper"
@@ -21,7 +21,7 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
           className="euiFormLabel euiFormRow__label"
           htmlFor="generated-id"
         >
-          Series Identifier
+          Series id
         </label>
       </div>
       <div
@@ -45,7 +45,7 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
               <option
                 value=""
               >
-                Select Series
+                Select series
               </option>
               <option
                 value="label1"

@@ -8,7 +8,10 @@ import { TileLayer } from './tile_layer';
 import _ from 'lodash';
 import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE } from '../../common/constants';
 import { isRetina } from '../meta';
-import { addSpritesheetToMap } from '../connected_components/map/mb/utils';//todo move this implementation
+import {
+  addSpriteSheetToMapFromImageData,
+  loadSpriteSheetImageData
+} from '../connected_components/map/mb/utils';//todo move this implementation
 
 const MB_STYLE_TYPE_TO_OPACITY = {
   'fill': ['fill-opacity'],
@@ -21,10 +24,6 @@ const MB_STYLE_TYPE_TO_OPACITY = {
 export class VectorTileLayer extends TileLayer {
 
   static type = LAYER_TYPE.VECTOR_TILE;
-
-  constructor({ layerDescriptor, source, style }) {
-    super({ layerDescriptor, source, style });
-  }
 
   static createDescriptor(options) {
     const tileLayerDescriptor = super.createDescriptor(options);
@@ -45,7 +44,12 @@ export class VectorTileLayer extends TileLayer {
     startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, dataFilters);
     try {
       const styleAndSprites = await this._source.getVectorStyleSheetAndSpriteMeta(isRetina());
-      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, styleAndSprites, {});
+      const spriteSheetImageData = await loadSpriteSheetImageData(styleAndSprites.spriteMeta.png);
+      const data = {
+        ...styleAndSprites,
+        spriteSheetImageData
+      };
+      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, data, {});
     } catch(error) {
       onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
     }
@@ -74,6 +78,15 @@ export class VectorTileLayer extends TileLayer {
     }
     const vectorStyleAndSprites = sourceDataRequest.getData();
     return vectorStyleAndSprites.spriteMeta;
+  }
+
+  _getSpriteImageData() {
+    const sourceDataRequest = this.getSourceDataRequest();
+    if (!sourceDataRequest) {
+      return null;
+    }
+    const vectorStyleAndSprites = sourceDataRequest.getData();
+    return vectorStyleAndSprites.spriteSheetImageData;
   }
 
   getMbLayerIds() {
@@ -118,8 +131,6 @@ export class VectorTileLayer extends TileLayer {
     }
 
     let initialBootstrapCompleted = false;
-
-    //sync sources
     const sourceIds = Object.keys(vectorStyle.sources);
     sourceIds.forEach(sourceId => {
       if (initialBootstrapCompleted) {
@@ -149,7 +160,12 @@ export class VectorTileLayer extends TileLayer {
           newJson[namespacedImageId] = spriteMeta.json[imageId];
         }
       }
-      addSpritesheetToMap(newJson, spriteMeta.png, mbMap);
+
+      const imageData = this._getSpriteImageData();
+      if (!imageData) {
+        return;
+      }
+      addSpriteSheetToMapFromImageData(newJson, imageData, mbMap);
 
       //sync layers
       vectorStyle.layers.forEach(layer => {

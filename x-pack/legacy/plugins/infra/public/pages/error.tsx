@@ -28,7 +28,7 @@ interface Props {
   message: string;
 }
 
-export const Error: React.SFC<Props> = ({ message }) => {
+export const Error: React.FC<Props> = ({ message }) => {
   return (
     <ColumnarPage>
       <Header />
@@ -39,7 +39,7 @@ export const Error: React.SFC<Props> = ({ message }) => {
   );
 };
 
-export const ErrorPageBody: React.SFC<{ message: string }> = ({ message }) => {
+export const ErrorPageBody: React.FC<{ message: string }> = ({ message }) => {
   return (
     <EuiPage style={{ flex: '1 0 auto' }}>
       <EuiPageBody>

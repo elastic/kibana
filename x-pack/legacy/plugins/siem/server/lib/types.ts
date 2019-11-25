@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Anomalies } from './anomalies';
 import { Authentications } from './authentications';
 import { ConfigurationAdapter } from './configuration';
 import { Events } from './events';
@@ -22,10 +23,12 @@ import { Note } from './note/saved_object';
 import { PinnedEvent } from './pinned_event/saved_object';
 import { Timeline } from './timeline/saved_object';
 import { TLS } from './tls';
+import { SignalAlertParamsRest } from './detection_engine/alerts/types';
 
 export * from './hosts';
 
 export interface AppDomainLibs {
+  anomalies: Anomalies;
   authentications: Authentications;
   events: Events;
   fields: IndexFields;
@@ -62,25 +65,20 @@ export interface SiemContext {
   req: FrameworkRequest;
 }
 
-export interface SignalHit {
-  signal: {
-    '@timestamp': string;
-    rule_revision: number;
-    rule_id: string;
-    rule_type: string;
-    parent: {
-      id: string;
-      type: string;
-      index: string;
-      depth: number;
-    };
-    name: string;
-    severity: string;
-    description: string;
-    original_time: string;
-    index_patterns: string[];
-    references: string[];
+export interface Signal {
+  rule: Partial<SignalAlertParamsRest>;
+  parent: {
+    id: string;
+    type: string;
+    index: string;
+    depth: number;
   };
+  original_time: string;
+}
+
+export interface SignalHit {
+  '@timestamp': string;
+  signal: Partial<Signal>;
 }
 
 export interface TotalValue {

@@ -9,10 +9,12 @@ import { CoreSetup, CoreStart, Plugin, SavedObjectsClientContract } from 'src/co
 import { DataStart } from 'src/legacy/core_plugins/data/public';
 import { Plugin as DataPlugin } from 'src/plugins/data/public';
 import { LegacyAngularInjectedDependencies } from './render_app';
+import { NavigationStart } from '../../../../../src/legacy/core_plugins/navigation/public';
 
 export interface GraphPluginStartDependencies {
   data: DataStart;
   npData: ReturnType<DataPlugin['start']>;
+  navigation: NavigationStart;
 }
 
 export interface GraphPluginSetupDependencies {
@@ -30,6 +32,7 @@ export interface GraphPluginStartDependencies {
 
 export class GraphPlugin implements Plugin {
   private dataStart: DataStart | null = null;
+  private navigationStart: NavigationStart | null = null;
   private npDataStart: ReturnType<DataPlugin['start']> | null = null;
   private savedObjectsClient: SavedObjectsClientContract | null = null;
   private angularDependencies: LegacyAngularInjectedDependencies | null = null;
@@ -42,6 +45,7 @@ export class GraphPlugin implements Plugin {
         const { renderApp } = await import('./render_app');
         return renderApp({
           ...params,
+          navigation: this.navigationStart!,
           npData: this.npDataStart!,
           savedObjectsClient: this.savedObjectsClient!,
           xpackInfo,
@@ -66,9 +70,9 @@ export class GraphPlugin implements Plugin {
 
   start(
     core: CoreStart,
-    { data, npData, __LEGACY: { angularDependencies } }: GraphPluginStartDependencies
+    { data, npData, navigation, __LEGACY: { angularDependencies } }: GraphPluginStartDependencies
   ) {
-    // TODO is this really the right way? I though the app context would give us those
+    this.navigationStart = navigation;
     this.dataStart = data;
     this.npDataStart = npData;
     this.angularDependencies = angularDependencies;

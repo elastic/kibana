@@ -39,21 +39,11 @@
  * @packageDocumentation
  */
 
-import {
-  ElasticsearchServiceSetup,
-  InternalElasticsearchServiceSetup,
-  IScopedClusterClient,
-} from './elasticsearch';
-import { InternalHttpServiceSetup, HttpServiceSetup } from './http';
+import { ElasticsearchServiceSetup, IScopedClusterClient } from './elasticsearch';
+import { HttpServiceSetup } from './http';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { ContextSetup } from './context';
-import { SavedObjectsServiceStart } from './saved_objects';
-
-import {
-  InternalUiSettingsServiceSetup,
-  IUiSettingsClient,
-  UiSettingsServiceSetup,
-} from './ui_settings';
+import { IUiSettingsClient, UiSettingsServiceSetup } from './ui_settings';
 import { SavedObjectsClientContract } from './saved_objects/types';
 
 export { bootstrap } from './bootstrap';
@@ -133,6 +123,8 @@ export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 export {
   DiscoveredPlugin,
   Plugin,
+  PluginConfigDescriptor,
+  PluginConfigSchema,
   PluginInitializer,
   PluginInitializerContext,
   PluginManifest,
@@ -177,7 +169,6 @@ export {
 export {
   IUiSettingsClient,
   UiSettingsParams,
-  InternalUiSettingsServiceSetup,
   UiSettingsType,
   UiSettingsServiceSetup,
   UserProvidedValues,
@@ -250,20 +241,5 @@ export interface CoreSetup {
  * @public
  */
 export interface CoreStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
-
-/** @internal */
-export interface InternalCoreSetup {
-  context: ContextSetup;
-  http: InternalHttpServiceSetup;
-  elasticsearch: InternalElasticsearchServiceSetup;
-  uiSettings: InternalUiSettingsServiceSetup;
-}
-
-/**
- * @internal
- */
-export interface InternalCoreStart {
-  savedObjects: SavedObjectsServiceStart;
-}
 
 export { ContextSetup, PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId };

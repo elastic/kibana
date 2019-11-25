@@ -7,7 +7,7 @@
 import { defaults } from 'lodash/fp';
 import { AlertAction } from '../../../../../alerting/server/types';
 import { readSignals } from './read_signals';
-import { SignalParams } from './types';
+import { UpdateSignalParams } from './types';
 
 export const calculateInterval = (
   interval: string | undefined,
@@ -22,53 +22,85 @@ export const calculateInterval = (
   }
 };
 
+export const calculateName = ({
+  updatedName,
+  originalName,
+}: {
+  updatedName: string | undefined;
+  originalName: string | undefined;
+}): string => {
+  if (updatedName != null) {
+    return updatedName;
+  } else if (originalName != null) {
+    return originalName;
+  } else {
+    // You really should never get to this point. This is a fail safe way to send back
+    // the name of "untitled" just in case a signal rule name became null or undefined at
+    // some point since TypeScript allows it.
+    return 'untitled';
+  }
+};
+
 export const updateSignal = async ({
   alertsClient,
   actionsClient, // TODO: Use this whenever we add feature support for different action types
   description,
+  falsePositives,
   enabled,
   query,
   language,
+  outputIndex,
   savedId,
+  meta,
   filters,
   filter,
   from,
+  immutable,
   id,
+  ruleId,
   index,
   interval,
   maxSignals,
+  riskScore,
   name,
   severity,
+  tags,
   to,
   type,
   references,
-}: SignalParams) => {
-  // TODO: Error handling and abstraction. Right now if this is an error then what happens is we get the error of
-  // "message": "Saved object [alert/{id}] not found"
-  const signal = await readSignals({ alertsClient, id });
+}: UpdateSignalParams) => {
+  const signal = await readSignals({ alertsClient, ruleId, id });
+  if (signal == null) {
+    return null;
+  }
 
   // TODO: Remove this as cast as soon as signal.actions TypeScript bug is fixed
   // where it is trying to return AlertAction[] or RawAlertAction[]
   const actions = (signal.actions as AlertAction[] | undefined) || [];
 
-  const alertTypeParams = signal.alertTypeParams || {};
+  const params = signal.params || {};
 
-  const nextAlertTypeParams = defaults(
+  const nextParams = defaults(
     {
-      ...alertTypeParams,
+      ...params,
     },
     {
       description,
+      falsePositives,
       filter,
       from,
+      immutable,
       query,
       language,
+      outputIndex,
       savedId,
+      meta,
       filters,
       index,
       maxSignals,
-      name,
+      riskScore,
       severity,
+      tags,
       to,
       type,
       references,
@@ -84,10 +116,11 @@ export const updateSignal = async ({
   return alertsClient.update({
     id: signal.id,
     data: {
-      name: 'SIEM Alert',
+      tags: [],
+      name: calculateName({ updatedName: name, originalName: signal.name }),
       interval: calculateInterval(interval, signal.interval),
       actions,
-      alertTypeParams: nextAlertTypeParams,
+      params: nextParams,
     },
   });
 };

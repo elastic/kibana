@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { AlertExecutorOptions } from '../types';
 import { ConcreteTaskInstance } from '../../../task_manager';
 import { TaskRunnerContext, TaskRunnerFactory } from './task_runner_factory';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
+import { encryptedSavedObjectsMock } from '../../../../../plugins/encrypted_saved_objects/server/mocks';
 import {
   savedObjectsClientMock,
   loggingServiceMock,
@@ -52,7 +52,7 @@ beforeAll(() => {
 afterAll(() => fakeTimer.restore());
 
 const savedObjectsClient = savedObjectsClientMock.create();
-const encryptedSavedObjectsPlugin = encryptedSavedObjectsMock.create();
+const encryptedSavedObjectsPlugin = encryptedSavedObjectsMock.createStart();
 const services = {
   log: jest.fn(),
   callCluster: jest.fn(),
@@ -76,7 +76,7 @@ const mockedAlertTypeSavedObject = {
     alertTypeId: '123',
     interval: '10s',
     mutedInstanceIds: [],
-    alertTypeParams: {
+    params: {
       bar: true,
     },
     actions: [
@@ -253,7 +253,7 @@ test('validates params before executing the alert type', async () => {
     references: [],
   });
   await expect(taskRunner.run()).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"alertTypeParams invalid: [param1]: expected value of type [string] but got [undefined]"`
+    `"params invalid: [param1]: expected value of type [string] but got [undefined]"`
   );
 });
 

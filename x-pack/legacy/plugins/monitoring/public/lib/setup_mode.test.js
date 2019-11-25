@@ -4,46 +4,49 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  toggleSetupMode,
-  initSetupModeState,
-  getSetupModeState,
-  updateSetupModeData,
-  setSetupModeMenuItem
-} from './setup_mode';
+let toggleSetupMode;
+let initSetupModeState;
+let getSetupModeState;
+let updateSetupModeData;
+let setSetupModeMenuItem;
 
 jest.mock('./ajax_error_handler', () => ({
   ajaxErrorHandlersProvider: err => {
     throw err;
-  }
+  },
+}));
+
+jest.mock('react-dom', () => ({
+  render: jest.fn(),
 }));
 
 let data = {};
 
 const injectorModulesMock = {
   globalState: {
-    save: jest.fn()
+    save: jest.fn(),
   },
   Private: module => module,
   $http: {
     post: jest.fn().mockImplementation(() => {
       return { data };
-    })
+    }),
   },
   $executor: {
-    run: jest.fn()
-  }
+    run: jest.fn(),
+  },
 };
 
 const angularStateMock = {
   injector: {
     get: module => {
       return injectorModulesMock[module] || {};
-    }
+    },
   },
   scope: {
-    $apply: fn => fn && fn()
-  }
+    $apply: fn => fn && fn(),
+    $evalAsync: fn => fn && fn(),
+  },
 };
 
 // We are no longer waiting for setup mode data to be fetched when enabling
@@ -52,27 +55,43 @@ function waitForSetupModeData(action) {
   process.nextTick(action);
 }
 
-describe('setup_mode', () => {
-  describe('setup', () => {
-    afterEach(async () => {
-      try {
-        toggleSetupMode(false);
-      } catch (err) {
-        // Do nothing...
-      }
-    });
+function setModules() {
+  jest.resetModules();
+  injectorModulesMock.globalState.inSetupMode = false;
 
+  const setupMode = require('./setup_mode');
+  toggleSetupMode = setupMode.toggleSetupMode;
+  initSetupModeState = setupMode.initSetupModeState;
+  getSetupModeState = setupMode.getSetupModeState;
+  updateSetupModeData = setupMode.updateSetupModeData;
+  setSetupModeMenuItem = setupMode.setSetupModeMenuItem;
+}
+
+describe('setup_mode', () => {
+  beforeEach(async () => {
+    jest.doMock('ui/chrome', () => ({
+      getInjected: key => {
+        if (key === 'isOnCloud') {
+          return false;
+        }
+      },
+    }));
+    setModules();
+  });
+
+  describe('setup', () => {
     it('should require angular state', async () => {
       let error;
       try {
         toggleSetupMode(true);
-      }
-      catch (err) {
+      } catch (err) {
         error = err;
       }
-      expect(error).toEqual('Unable to interact with setup '
-      + 'mode because the angular injector was not previously set. This needs to be '
-      + 'set by calling `initSetupModeState`.');
+      expect(error).toEqual(
+        'Unable to interact with setup ' +
+          'mode because the angular injector was not previously set. This needs to be ' +
+          'set by calling `initSetupModeState`.'
+      );
     });
 
     it('should enable toggle mode', async () => {
@@ -88,54 +107,92 @@ describe('setup_mode', () => {
     });
 
     it('should set top nav config', async () => {
+      const render = require('react-dom').render;
       initSetupModeState(angularStateMock.scope, angularStateMock.injector);
       setSetupModeMenuItem();
-      expect(angularStateMock.scope.topNavMenu.length).toBe(1);
       await toggleSetupMode(true);
-      expect(angularStateMock.scope.topNavMenu.length).toBe(0);
+      expect(render.mock.calls.length).toBe(2);
     });
   });
 
   describe('in setup mode', () => {
     afterEach(async () => {
       data = {};
-      toggleSetupMode(false);
     });
 
-    it('should enable it through clicking top nav item', async () => {
-      initSetupModeState(angularStateMock.scope, angularStateMock.injector);
-      await angularStateMock.scope.topNavMenu[0].run();
-      expect(injectorModulesMock.globalState.inSetupMode).toBe(true);
-    });
-
-    it('should not fetch data if on cloud', async (done) => {
+    it('should not fetch data if on cloud', async done => {
+      const addDanger = jest.fn();
+      jest.doMock('ui/chrome', () => ({
+        getInjected: key => {
+          if (key === 'isOnCloud') {
+            return true;
+          }
+        },
+      }));
       data = {
         _meta: {
-          isOnCloud: true
-        }
+          hasPermissions: true,
+        },
       };
+      jest.doMock('ui/notify', () => ({
+        toastNotifications: {
+          addDanger,
+        },
+      }));
+      setModules();
       initSetupModeState(angularStateMock.scope, angularStateMock.injector);
       await toggleSetupMode(true);
       waitForSetupModeData(() => {
         const state = getSetupModeState();
         expect(state.enabled).toBe(false);
+        expect(addDanger).toHaveBeenCalledWith({
+          title: 'Setup mode is not available',
+          text: 'This feature is not available on cloud.',
+        });
         done();
       });
     });
 
-    it('should set the newly discovered cluster uuid', async (done) => {
+    it('should not fetch data if the user does not have sufficient permissions', async done => {
+      const addDanger = jest.fn();
+      jest.doMock('ui/notify', () => ({
+        toastNotifications: {
+          addDanger,
+        },
+      }));
+      data = {
+        _meta: {
+          hasPermissions: false,
+        },
+      };
+      setModules();
+      initSetupModeState(angularStateMock.scope, angularStateMock.injector);
+      await toggleSetupMode(true);
+      waitForSetupModeData(() => {
+        const state = getSetupModeState();
+        expect(state.enabled).toBe(false);
+        expect(addDanger).toHaveBeenCalledWith({
+          title: 'Setup mode is not available',
+          text: 'You do not have the necessary permissions to do this.',
+        });
+        done();
+      });
+    });
+
+    it('should set the newly discovered cluster uuid', async done => {
       const clusterUuid = '1ajy';
       data = {
         _meta: {
-          liveClusterUuid: clusterUuid
+          liveClusterUuid: clusterUuid,
+          hasPermissions: true,
         },
         elasticsearch: {
           byUuid: {
             123: {
-              isPartiallyMigrated: true
-            }
-          }
-        }
+              isPartiallyMigrated: true,
+            },
+          },
+        },
       };
       initSetupModeState(angularStateMock.scope, angularStateMock.injector);
       await toggleSetupMode(true);
@@ -145,19 +202,20 @@ describe('setup_mode', () => {
       });
     });
 
-    it('should fetch data for a given cluster', async (done) => {
+    it('should fetch data for a given cluster', async done => {
       const clusterUuid = '1ajy';
       data = {
         _meta: {
-          liveClusterUuid: clusterUuid
+          liveClusterUuid: clusterUuid,
+          hasPermissions: true,
         },
         elasticsearch: {
           byUuid: {
             123: {
-              isPartiallyMigrated: true
-            }
-          }
-        }
+              isPartiallyMigrated: true,
+            },
+          },
+        },
       };
 
       initSetupModeState(angularStateMock.scope, angularStateMock.injector);

@@ -18,9 +18,10 @@
  */
 
 import { NumeralFormat } from './numeral';
+import { FIELD_FORMAT_IDS } from '../types';
 
 export class NumberFormat extends NumeralFormat {
-  static id = 'number';
+  static id = FIELD_FORMAT_IDS.NUMBER;
   static title = 'Number';
 
   id = NumberFormat.id;

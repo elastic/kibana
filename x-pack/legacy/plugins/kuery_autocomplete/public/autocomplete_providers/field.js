@@ -7,7 +7,7 @@ import React from 'react';
 import { flatten } from 'lodash';
 import { escapeKuery } from './escape_kuery';
 import { sortPrefixFirst } from 'ui/utils/sort_prefix_first';
-import { isFilterable } from 'ui/index_patterns';
+import { isFilterable } from '../../../../../../src/plugins/data/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 

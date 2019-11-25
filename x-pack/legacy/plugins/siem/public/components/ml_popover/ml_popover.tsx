@@ -4,29 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiCallOut, EuiPopover, EuiPopoverTitle, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiCallOut, EuiPopover, EuiPopoverTitle, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import moment from 'moment';
 import React, { useContext, useReducer, useState } from 'react';
 import styled from 'styled-components';
-import moment from 'moment';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } from 'ui/documentation_links';
-import * as i18n from './translations';
-import { JobsFilters, JobSummary, SiemJob } from './types';
+
+import { DEFAULT_KBN_VERSION } from '../../../common/constants';
+import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
+import { METRIC_TYPE, TELEMETRY_EVENT, trackUiAction as track } from '../../lib/track_usage';
+import { errorToToaster } from '../ml/api/error_to_toaster';
 import { hasMlAdminPermissions } from '../ml/permissions/has_ml_admin_permissions';
 import { MlCapabilitiesContext } from '../ml/permissions/ml_capabilities_provider';
-import { JobsTable } from './jobs_table/jobs_table';
+import { useStateToaster } from '../toasters';
 import { setupMlJob, startDatafeeds, stopDatafeeds } from './api';
-import { UpgradeContents } from './upgrade_contents';
+import { filterJobs } from './helpers';
+import { useSiemJobs } from './hooks/use_siem_jobs';
 import { JobsTableFilters } from './jobs_table/filters/jobs_table_filters';
+import { JobsTable } from './jobs_table/jobs_table';
 import { ShowingCount } from './jobs_table/showing_count';
 import { PopoverDescription } from './popover_description';
-import { useStateToaster } from '../toasters';
-import { errorToToaster } from '../ml/api/error_to_toaster';
-import { METRIC_TYPE, TELEMETRY_EVENT, trackUiAction as track } from '../../lib/track_usage';
-import { useSiemJobs } from './hooks/use_siem_jobs';
-import { filterJobs } from './helpers';
-import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
-import { DEFAULT_KBN_VERSION } from '../../../common/constants';
+import * as i18n from './translations';
+import { JobsFilters, JobSummary, SiemJob } from './types';
+import { UpgradeContents } from './upgrade_contents';
 
 const PopoverContentsDiv = styled.div`
   max-width: 684px;
@@ -161,14 +162,14 @@ export const MlPopover = React.memo(() => {
         anchorPosition="downRight"
         id="integrations-popover"
         button={
-          <EuiButton
+          <EuiButtonEmpty
             data-test-subj="integrations-button"
             iconType="arrowDown"
             iconSide="right"
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
           >
             {i18n.ANOMALY_DETECTION}
-          </EuiButton>
+          </EuiButtonEmpty>
         }
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(!isPopoverOpen)}
@@ -183,7 +184,7 @@ export const MlPopover = React.memo(() => {
         anchorPosition="downRight"
         id="integrations-popover"
         button={
-          <EuiButton
+          <EuiButtonEmpty
             data-test-subj="integrations-button"
             iconType="arrowDown"
             iconSide="right"
@@ -193,7 +194,7 @@ export const MlPopover = React.memo(() => {
             }}
           >
             {i18n.ANOMALY_DETECTION}
-          </EuiButton>
+          </EuiButtonEmpty>
         }
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(!isPopoverOpen)}

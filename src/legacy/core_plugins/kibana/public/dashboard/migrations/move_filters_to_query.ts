@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { Query } from 'src/legacy/core_plugins/data/public';
-import { Filter } from '@kbn/es-query';
+import { esFilters, Query } from '../../../../../../plugins/data/public';
 
 export interface Pre600FilterQuery {
   // pre 6.0.0 global query:queryString:options were stored per dashboard and would
@@ -30,18 +29,18 @@ export interface Pre600FilterQuery {
 export interface SearchSourcePre600 {
   // I encountered at least one export from 7.0.0-alpha that was missing the filter property in here.
   // The maps data in esarchives actually has it, but I don't know how/when they created it.
-  filter?: Array<Filter | Pre600FilterQuery>;
+  filter?: Array<esFilters.Filter | Pre600FilterQuery>;
 }
 
 export interface SearchSource730 {
-  filter: Filter[];
+  filter: esFilters.Filter[];
   query: Query;
   highlightAll?: boolean;
   version?: boolean;
 }
 
-function isQueryFilter(filter: Filter | { query: unknown }): filter is Pre600FilterQuery {
-  return filter.query && !(filter as Filter).meta;
+function isQueryFilter(filter: esFilters.Filter | { query: unknown }): filter is Pre600FilterQuery {
+  return filter.query && !(filter as esFilters.Filter).meta;
 }
 
 export function moveFiltersToQuery(

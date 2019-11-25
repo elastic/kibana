@@ -72,11 +72,7 @@ export const Workpad = compose(
     router: PropTypes.object,
   }),
   withState('grid', 'setGrid', false),
-  connect(
-    mapStateToProps,
-    mapDispatchToProps,
-    mergeProps
-  ),
+  connect(mapStateToProps, mapDispatchToProps, mergeProps),
   withState('transition', 'setTransition', null),
   withState('prevSelectedPageNumber', 'setPrevSelectedPageNumber', 0),
   withProps(({ selectedPageNumber, prevSelectedPageNumber, transition }) => {

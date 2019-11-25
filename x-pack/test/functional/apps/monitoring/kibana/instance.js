@@ -17,8 +17,8 @@ export default function ({ getService, getPageObjects }) {
 
     before(async () => {
       await setup('monitoring/singlecluster-yellow-platinum', {
-        from: '2017-08-29 17:24:14.254',
-        to: '2017-08-29 17:25:44.142',
+        from: 'Aug 29, 2017 @ 17:24:14.254',
+        to: 'Aug 29, 2017 @ 17:25:44.142',
       });
 
       // go to kibana instance
