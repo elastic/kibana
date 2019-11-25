@@ -125,7 +125,9 @@ export class SampleDataRegistry {
           throw new Error(`Unable to find sample dataset with id: ${id}`);
         }
 
-        sampleDataset.appLinks = sampleDataset.appLinks!.concat(appLinks);
+        sampleDataset.appLinks = sampleDataset.appLinks
+          ? sampleDataset.appLinks.concat(appLinks)
+          : [];
       },
 
       replacePanelInSampleDatasetDashboard: (

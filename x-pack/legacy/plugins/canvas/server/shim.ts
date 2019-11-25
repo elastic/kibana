@@ -8,7 +8,7 @@ import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { Legacy } from 'kibana';
 
 import { CoreSetup as ExistingCoreSetup } from 'src/core/server';
-import { HomeServerPluginSetup, SampleDataRegistrySetup } from 'src/plugins/home/server';
+import { HomeServerPluginSetup } from 'src/plugins/home/server';
 import { PluginSetupContract } from '../../../../plugins/features/server';
 
 export interface CoreSetup {
@@ -23,10 +23,7 @@ export interface CoreSetup {
 
 export interface PluginsSetup {
   features: PluginSetupContract;
-  // home: HomeServerPluginSetup;
-  home: {
-    sampleData: SampleDataRegistrySetup;
-  };
+  home: HomeServerPluginSetup;
   interpreter: {
     register: (specs: any) => any;
   };
@@ -41,7 +38,6 @@ export async function createSetupShim(
 ): Promise<{ coreSetup: CoreSetup; pluginsSetup: PluginsSetup }> {
   // @ts-ignore: New Platform object not typed
   const setup: ExistingCoreSetup = server.newPlatform.setup.core;
-
   return {
     coreSetup: {
       ...setup,
@@ -58,8 +54,7 @@ export async function createSetupShim(
     pluginsSetup: {
       // @ts-ignore: New Platform not typed
       features: server.newPlatform.setup.plugins.features,
-
-      sampleData: server.newPlatform.setup.plugins.home,
+      home: server.newPlatform.setup.plugins.home,
       // @ts-ignore Interpreter plugin not typed on legacy server
       interpreter: server.plugins.interpreter,
       kibana: {
