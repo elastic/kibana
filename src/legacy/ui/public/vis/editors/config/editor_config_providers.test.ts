@@ -19,7 +19,6 @@
 
 import { EditorConfigProviderRegistry } from './editor_config_providers';
 import { EditorParamConfig, FixedParam, NumericIntervalParam, TimeIntervalParam } from './types';
-import { AggType } from '../../../agg_types';
 import { AggConfig } from '../..';
 
 jest.mock('ui/new_platform');
