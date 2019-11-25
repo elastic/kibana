@@ -6,6 +6,8 @@
 
 import { EnvironmentMode } from 'src/core/server';
 import { ServerFacade } from '../../types';
+import { Anomalies } from '../anomalies';
+import { ElasticsearchAnomaliesAdapter } from '../anomalies/elasticsearch_adapter';
 import { Authentications } from '../authentications';
 import { ElasticsearchAuthenticationAdapter } from '../authentications/elasticsearch_adapter';
 import { KibanaConfigurationAdapter } from '../configuration/kibana_configuration_adapter';
@@ -43,6 +45,7 @@ export function compose(server: ServerFacade, mode: EnvironmentMode): AppBackend
   const pinnedEvent = new PinnedEvent({ savedObjects: framework.getSavedObjectsService() });
 
   const domainLibs: AppDomainLibs = {
+    anomalies: new Anomalies(new ElasticsearchAnomaliesAdapter(framework)),
     authentications: new Authentications(new ElasticsearchAuthenticationAdapter(framework)),
     events: new Events(new ElasticsearchEventsAdapter(framework)),
     fields: new IndexFields(new ElasticsearchIndexFieldAdapter(framework)),
