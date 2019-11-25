@@ -82,6 +82,8 @@ export const deleteJobsResponsePayloadRT = rt.record(
   })
 );
 
+export type DeleteJobsResponsePayload = rt.TypeOf<typeof deleteJobsResponsePayloadRT>;
+
 export const getJobDeletionTasksResponsePayloadRT = rt.type({
   jobIds: rt.array(rt.string),
 });

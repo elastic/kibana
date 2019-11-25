@@ -6,14 +6,24 @@
 
 import * as rt from 'io-ts';
 
-export const LOG_ANALYSIS_VALIDATION_INDICES_PATH = '/api/infra/log_analysis/validation/indices';
+export const LOG_ANALYSIS_VALIDATE_INDICES_PATH =
+  '/api/infra/log_analysis/validation/log_entry_rate_indices';
 
 /**
  * Request types
  */
+export const validationIndicesFieldSpecificationRT = rt.type({
+  name: rt.string,
+  validTypes: rt.array(rt.string),
+});
+
+export type ValidationIndicesFieldSpecification = rt.TypeOf<
+  typeof validationIndicesFieldSpecificationRT
+>;
+
 export const validationIndicesRequestPayloadRT = rt.type({
   data: rt.type({
-    timestampField: rt.string,
+    fields: rt.array(validationIndicesFieldSpecificationRT),
     indices: rt.array(rt.string),
   }),
 });

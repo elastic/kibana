@@ -12,6 +12,10 @@ import { SetupStatus } from '../../../../../common/log_analysis';
 import { useAnalysisSetupState } from '../../../../containers/logs/log_analysis/log_analysis_setup_state';
 import { InitialConfigurationStep } from './initial_configuration_step';
 import { ProcessStep } from './process_step';
+import {
+  ModuleDescriptor,
+  ModuleSourceConfiguration,
+} from '../../../../containers/logs/log_analysis';
 
 type SetupHandler = (
   indices: string[],
@@ -19,25 +23,25 @@ type SetupHandler = (
   endTime: number | undefined
 ) => void;
 
-interface LogEntryRateSetupStepsProps {
-  availableIndices: string[];
+interface LogEntryRateSetupStepsProps<JobType extends string> {
   cleanupAndSetup: SetupHandler;
   errorMessages: string[];
   setup: SetupHandler;
   setupStatus: SetupStatus;
-  timestampField: string;
   viewResults: () => void;
+  moduleDescriptor: ModuleDescriptor<JobType>;
+  sourceConfiguration: ModuleSourceConfiguration;
 }
 
-export const LogEntryRateSetupSteps: React.FunctionComponent<LogEntryRateSetupStepsProps> = ({
-  availableIndices,
+export const LogEntryRateSetupSteps = <JobType extends string>({
   cleanupAndSetup: cleanupAndSetupModule,
   errorMessages,
   setup: setupModule,
   setupStatus,
-  timestampField,
   viewResults,
-}: LogEntryRateSetupStepsProps) => {
+  moduleDescriptor,
+  sourceConfiguration,
+}: LogEntryRateSetupStepsProps<JobType>) => {
   const {
     setup,
     cleanupAndSetup,
@@ -50,10 +54,10 @@ export const LogEntryRateSetupSteps: React.FunctionComponent<LogEntryRateSetupSt
     validatedIndices,
     setValidatedIndices,
   } = useAnalysisSetupState({
-    availableIndices,
-    setupModule,
     cleanupAndSetupModule,
-    timestampField,
+    moduleDescriptor,
+    setupModule,
+    sourceConfiguration,
   });
 
   const steps = [

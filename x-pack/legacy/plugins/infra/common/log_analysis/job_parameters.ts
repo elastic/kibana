@@ -8,6 +8,8 @@ import * as rt from 'io-ts';
 
 export const bucketSpan = 900000;
 
+export const partitionField = 'event.dataset';
+
 export const getJobIdPrefix = (spaceId: string, sourceId: string) =>
   `kibana-logs-ui-${spaceId}-${sourceId}-`;
 

@@ -11,7 +11,7 @@ import { identity } from 'fp-ts/lib/function';
 
 import { InfraBackendLibs } from '../../../lib/infra_types';
 import {
-  LOG_ANALYSIS_VALIDATION_INDICES_PATH,
+  LOG_ANALYSIS_VALIDATE_INDICES_PATH,
   validationIndicesRequestPayloadRT,
   validationIndicesResponsePayloadRT,
   ValidationIndicesError,
@@ -19,19 +19,17 @@ import {
 
 import { throwErrors } from '../../../../common/runtime_types';
 
-const partitionField = 'event.dataset';
-
-export const initIndexPatternsValidateRoute = ({ framework }: InfraBackendLibs) => {
+export const initValidateLogAnalysisIndicesRoute = ({ framework }: InfraBackendLibs) => {
   framework.registerRoute({
     method: 'POST',
-    path: LOG_ANALYSIS_VALIDATION_INDICES_PATH,
+    path: LOG_ANALYSIS_VALIDATE_INDICES_PATH,
     handler: async (req, res) => {
       const payload = pipe(
         validationIndicesRequestPayloadRT.decode(req.payload),
         fold(throwErrors(Boom.badRequest), identity)
       );
 
-      const { timestampField, indices } = payload.data;
+      const { fields, indices } = payload.data;
       const errors: ValidationIndicesError[] = [];
 
       // Query each pattern individually, to map correctly the errors
@@ -39,7 +37,7 @@ export const initIndexPatternsValidateRoute = ({ framework }: InfraBackendLibs) 
         indices.map(async index => {
           const fieldCaps = await framework.callWithRequest(req, 'fieldCaps', {
             index,
-            fields: `${timestampField},${partitionField}`,
+            fields: fields.map(field => field.name),
           });
 
           if (fieldCaps.indices.length === 0) {
@@ -50,26 +48,23 @@ export const initIndexPatternsValidateRoute = ({ framework }: InfraBackendLibs) 
             return;
           }
 
-          ([
-            [timestampField, 'date'],
-            [partitionField, 'keyword'],
-          ] as const).forEach(([field, fieldType]) => {
-            const fieldMetadata = fieldCaps.fields[field];
+          fields.forEach(({ name: fieldName, validTypes }) => {
+            const fieldMetadata = fieldCaps.fields[fieldName];
 
             if (fieldMetadata === undefined) {
               errors.push({
                 error: 'FIELD_NOT_FOUND',
                 index,
-                field,
+                field: fieldName,
               });
             } else {
               const fieldTypes = Object.keys(fieldMetadata);
 
-              if (fieldTypes.length > 1 || fieldTypes[0] !== fieldType) {
+              if (!fieldTypes.every(fieldType => validTypes.includes(fieldType))) {
                 errors.push({
                   error: `FIELD_NOT_VALID`,
                   index,
-                  field,
+                  field: fieldName,
                 });
               }
             }

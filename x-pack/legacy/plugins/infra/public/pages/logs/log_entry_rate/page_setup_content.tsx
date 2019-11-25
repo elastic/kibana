@@ -4,21 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
+  EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
-  EuiPageContentBody,
+  EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
+
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { SetupStatus } from '../../../../common/log_analysis';
+import { ModuleDescriptor, ModuleSourceConfiguration } from '../../../containers/logs/log_analysis';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
 import { LogEntryRateSetupSteps } from './setup';
 
@@ -28,25 +30,25 @@ type SetupHandler = (
   endTime: number | undefined
 ) => void;
 
-interface LogEntryRateSetupContentProps {
-  availableIndices: string[];
+interface LogEntryRateSetupContentProps<JobType extends string> {
   cleanupAndSetup: SetupHandler;
   errorMessages: string[];
+  moduleDescriptor: ModuleDescriptor<JobType>;
   setup: SetupHandler;
   setupStatus: SetupStatus;
-  timestampField: string;
+  sourceConfiguration: ModuleSourceConfiguration;
   viewResults: () => void;
 }
 
-export const LogEntryRateSetupContent: React.FunctionComponent<LogEntryRateSetupContentProps> = ({
-  availableIndices,
+export const LogEntryRateSetupContent = <JobType extends string>({
   cleanupAndSetup,
   errorMessages,
   setup,
   setupStatus,
-  timestampField,
   viewResults,
-}) => {
+  moduleDescriptor,
+  sourceConfiguration,
+}: LogEntryRateSetupContentProps<JobType>) => {
   useTrackPageview({ app: 'infra_logs', path: 'analysis_setup' });
   useTrackPageview({ app: 'infra_logs', path: 'analysis_setup', delay: 15000 });
 
@@ -79,13 +81,13 @@ export const LogEntryRateSetupContent: React.FunctionComponent<LogEntryRateSetup
             </EuiText>
             <EuiSpacer />
             <LogEntryRateSetupSteps
-              availableIndices={availableIndices}
               cleanupAndSetup={cleanupAndSetup}
               errorMessages={errorMessages}
               setup={setup}
               setupStatus={setupStatus}
-              timestampField={timestampField}
               viewResults={viewResults}
+              moduleDescriptor={moduleDescriptor}
+              sourceConfiguration={sourceConfiguration}
             />
           </EuiPageContentBody>
         </LogEntryRateSetupPageContent>

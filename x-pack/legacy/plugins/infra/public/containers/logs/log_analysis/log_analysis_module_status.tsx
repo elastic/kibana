@@ -402,7 +402,7 @@ const isIndexPatternSubset = (indexPatternSubset: string, indexPatternSuperset: 
 const hasError = <Value extends any>(value: Value): value is MandatoryProperty<Value, 'error'> =>
   value.error != null;
 
-export const useStatusState = <JobType extends string>(
+export const useModuleStatus = <JobType extends string>(
   jobTypes: JobType[],
   sourceConfiguration: JobSourceConfiguration
 ) => {

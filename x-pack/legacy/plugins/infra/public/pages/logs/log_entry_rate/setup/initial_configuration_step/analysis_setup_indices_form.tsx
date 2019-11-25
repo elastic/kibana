@@ -25,7 +25,7 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
       onChangeSelectedIndices(
         indices.map(index => {
           const checkbox = event.currentTarget;
-          return index.index === checkbox.id ? { ...index, isSelected: checkbox.checked } : index;
+          return index.name === checkbox.id ? { ...index, isSelected: checkbox.checked } : index;
         })
       );
     },
@@ -35,22 +35,21 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
   const choices = useMemo(
     () =>
       indices.map(index => {
-        const validIndex = index.errors.length === 0;
         const checkbox = (
           <EuiCheckbox
-            key={index.index}
-            id={index.index}
-            label={<EuiCode>{index.index}</EuiCode>}
+            key={index.name}
+            id={index.name}
+            label={<EuiCode>{index.name}</EuiCode>}
             onChange={handleCheckboxChange}
-            checked={index.isSelected}
-            disabled={!validIndex}
+            checked={index.validity === 'valid' && index.isSelected}
+            disabled={index.validity === 'invalid'}
           />
         );
 
-        return validIndex ? (
+        return index.validity === 'valid' ? (
           checkbox
         ) : (
-          <div key={index.index}>
+          <div key={index.name}>
             <EuiToolTip content={formatValidationError(index.errors)}>{checkbox}</EuiToolTip>
           </div>
         );

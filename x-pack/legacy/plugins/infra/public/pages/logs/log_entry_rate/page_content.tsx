@@ -15,23 +15,23 @@ import { LogEntryRateResultsContent } from './page_results_content';
 import { LogEntryRateSetupContent } from './page_setup_content';
 import { LogEntryRateUnavailableContent } from './page_unavailable_content';
 import { LogEntryRateSetupStatusUnknownContent } from './page_setup_status_unknown';
-import { useLogEntryRateJobsContext } from './use_log_entry_rate_jobs';
+import { useLogEntryRateModuleContext } from './use_log_entry_rate_module';
 
 export const LogEntryRatePageContent = () => {
   const { sourceId } = useContext(Source.Context);
   const { hasLogAnalysisCapabilites } = useContext(LogAnalysisCapabilities.Context);
 
   const {
-    availableIndices,
-    cleanupAndSetup,
+    cleanUpAndSetUpModule: cleanupAndSetup,
     fetchJobStatus,
     fetchModuleDefinition,
     lastSetupErrorMessages,
-    setup,
+    moduleDescriptor,
+    setUpModule,
     setupStatus,
-    timestampField,
+    sourceConfiguration,
     viewResults,
-  } = useLogEntryRateJobsContext();
+  } = useLogEntryRateModuleContext();
 
   useEffect(() => {
     fetchModuleDefinition();
@@ -60,12 +60,12 @@ export const LogEntryRatePageContent = () => {
   } else {
     return (
       <LogEntryRateSetupContent
-        availableIndices={availableIndices}
         cleanupAndSetup={cleanupAndSetup}
         errorMessages={lastSetupErrorMessages}
-        setup={setup}
+        moduleDescriptor={moduleDescriptor}
+        setup={setUpModule}
         setupStatus={setupStatus}
-        timestampField={timestampField}
+        sourceConfiguration={sourceConfiguration}
         viewResults={viewResults}
       />
     );

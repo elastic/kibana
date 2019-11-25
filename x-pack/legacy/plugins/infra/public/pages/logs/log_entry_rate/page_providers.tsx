@@ -8,20 +8,21 @@ import React from 'react';
 
 import { useSourceContext } from '../../../containers/source';
 import { useKibanaSpaceId } from '../../../utils/use_kibana_space_id';
-import { LogEntryRateJobsProvider } from './use_log_entry_rate_jobs';
+// import { LogEntryRateJobsProvider } from './use_log_entry_rate_jobs';
+import { LogEntryRateModuleProvider } from './use_log_entry_rate_module';
 
 export const LogEntryRatePageProviders: React.FunctionComponent = ({ children }) => {
   const { sourceId, source } = useSourceContext();
   const spaceId = useKibanaSpaceId();
 
   return (
-    <LogEntryRateJobsProvider
+    <LogEntryRateModuleProvider
       indexPattern={source ? source.configuration.logAlias : ''}
       sourceId={sourceId}
       spaceId={spaceId}
-      timeField={source ? source.configuration.fields.timestamp : ''}
+      timestampField={source ? source.configuration.fields.timestamp : ''}
     >
       {children}
-    </LogEntryRateJobsProvider>
+    </LogEntryRateModuleProvider>
   );
 };

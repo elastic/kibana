@@ -19,10 +19,7 @@ import {
 import { throwErrors } from '../../../../common/runtime_types';
 import { NoLogRateResultsIndexError } from '../../../lib/log_analysis';
 
-export const initLogAnalysisGetLogEntryRateRoute = ({
-  framework,
-  logAnalysis,
-}: InfraBackendLibs) => {
+export const initGetLogEntryRateRoute = ({ framework, logAnalysis }: InfraBackendLibs) => {
   framework.registerRoute({
     method: 'POST',
     path: LOG_ANALYSIS_GET_LOG_ENTRY_RATE_PATH,

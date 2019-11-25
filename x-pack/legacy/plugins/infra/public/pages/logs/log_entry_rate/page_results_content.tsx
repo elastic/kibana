@@ -29,7 +29,7 @@ import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
 import { FirstUseCallout } from './first_use';
 import { AnomaliesResults } from './sections/anomalies';
 import { LogRateResults } from './sections/log_rate';
-import { useLogEntryRateJobsContext } from './use_log_entry_rate_jobs';
+import { useLogEntryRateModuleContext } from './use_log_entry_rate_module';
 import { useLogEntryRateResults } from './use_log_entry_rate_results';
 import {
   StringTimeRange,
@@ -133,7 +133,7 @@ export const LogEntryRateResultsContent = ({
     viewSetupForReconfiguration,
     viewSetupForUpdate,
     jobIds,
-  } = useLogEntryRateJobsContext();
+  } = useLogEntryRateModuleContext();
 
   useEffect(() => {
     getLogEntryRate();

@@ -4,48 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useMemo } from 'react';
-
 import { getJobId } from '../../../../common/log_analysis';
-import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callDeleteJobs, callGetJobDeletionTasks, callStopDatafeeds } from './api/ml_cleanup';
 
-export const useLogAnalysisCleanup = <JobType extends string>({
-  sourceId,
-  spaceId,
-  jobTypes,
-}: {
-  sourceId: string;
-  spaceId: string;
-  jobTypes: JobType[];
-}) => {
-  const [cleanupMLResourcesRequest, cleanupMLResources] = useTrackedPromise(
-    {
-      cancelPreviousOn: 'resolution',
-      createPromise: async () => {
-        try {
-          await callStopDatafeeds(spaceId, sourceId, jobTypes);
-        } catch (err) {
-          // Proceed only if datafeed has been deleted or didn't exist in the first place
-          if (err?.res?.status !== 404) {
-            throw err;
-          }
-        }
+export const cleanUpJobsAndDatafeeds = async <JobType extends string>(
+  spaceId: string,
+  sourceId: string,
+  jobTypes: JobType[]
+) => {
+  try {
+    await callStopDatafeeds(spaceId, sourceId, jobTypes);
+  } catch (err) {
+    // Proceed only if datafeed has been deleted or didn't exist in the first place
+    if (err?.res?.status !== 404) {
+      throw err;
+    }
+  }
 
-        return await deleteJobs(spaceId, sourceId, jobTypes);
-      },
-    },
-    [spaceId, sourceId]
-  );
-
-  const isCleaningUp = useMemo(() => cleanupMLResourcesRequest.state === 'pending', [
-    cleanupMLResourcesRequest.state,
-  ]);
-
-  return {
-    cleanupMLResources,
-    isCleaningUp,
-  };
+  return await deleteJobs(spaceId, sourceId, jobTypes);
 };
 
 const deleteJobs = async <JobType extends string>(
