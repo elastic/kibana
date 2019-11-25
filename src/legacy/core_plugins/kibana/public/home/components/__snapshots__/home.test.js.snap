@@ -2,6 +2,7 @@
 
 exports[`home directories should not render directory entry when showOnHomePage is false 1`] = `
 <EuiPage
+  data-test-subj="homeApp"
   restrictWidth={1200}
 >
   <EuiPageBody
@@ -117,6 +118,7 @@ exports[`home directories should not render directory entry when showOnHomePage 
 
 exports[`home directories should render ADMIN directory entry in "Manage" panel 1`] = `
 <EuiPage
+  data-test-subj="homeApp"
   restrictWidth={1200}
 >
   <EuiPageBody
@@ -245,6 +247,7 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
 
 exports[`home directories should render DATA directory entry in "Explore Data" panel 1`] = `
 <EuiPage
+  data-test-subj="homeApp"
   restrictWidth={1200}
 >
   <EuiPageBody
@@ -373,6 +376,7 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
 
 exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
 <EuiPage
+  data-test-subj="homeApp"
   restrictWidth={1200}
 >
   <EuiPageBody
@@ -488,6 +492,7 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
 
 exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when there are index patterns 1`] = `
 <EuiPage
+  data-test-subj="homeApp"
   restrictWidth={1200}
 >
   <EuiPageBody
@@ -603,6 +608,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
 
 exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when there are no index patterns 1`] = `
 <EuiPage
+  data-test-subj="homeApp"
   restrictWidth={1200}
 >
   <EuiPageBody
@@ -718,6 +724,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
 
 exports[`home should render home component 1`] = `
 <EuiPage
+  data-test-subj="homeApp"
   restrictWidth={1200}
 >
   <EuiPageBody
@@ -833,6 +840,7 @@ exports[`home should render home component 1`] = `
 
 exports[`home welcome should show the normal home page if loading fails 1`] = `
 <EuiPage
+  data-test-subj="homeApp"
   restrictWidth={1200}
 >
   <EuiPageBody
@@ -948,6 +956,7 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
 
 exports[`home welcome should show the normal home page if welcome screen is disabled locally 1`] = `
 <EuiPage
+  data-test-subj="homeApp"
   restrictWidth={1200}
 >
   <EuiPageBody
@@ -1063,16 +1072,15 @@ exports[`home welcome should show the normal home page if welcome screen is disa
 
 exports[`home welcome should show the welcome screen if enabled, and there are no index patterns defined 1`] = `
 <Welcome
-  fetchTelemetry={[MockFunction]}
-  getTelemetryBannerId={[MockFunction]}
   onSkip={[Function]}
-  setOptIn={[MockFunction]}
+  showTelemetryDisclaimer=""
   urlBasePath="goober"
 />
 `;
 
 exports[`home welcome stores skip welcome setting if skipped 1`] = `
 <EuiPage
+  data-test-subj="homeApp"
   restrictWidth={1200}
 >
   <EuiPageBody

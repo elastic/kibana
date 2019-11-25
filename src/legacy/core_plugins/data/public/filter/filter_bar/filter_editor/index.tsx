@@ -30,42 +30,42 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
   EuiSwitch,
+  EuiSwitchEvent,
 } from '@elastic/eui';
-import { FieldFilter, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import React, { Component } from 'react';
-import { Field, IndexPattern } from '../../../index_patterns';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import {
-  buildCustomFilter,
-  buildFilter,
   getFieldFromFilter,
   getFilterableFields,
-  getFilterParams,
-  getIndexPatternFromFilter,
   getOperatorFromFilter,
   getOperatorOptions,
-  getQueryDslFromFilter,
   isFilterValid,
 } from './lib/filter_editor_utils';
 import { Operator } from './lib/filter_operators';
 import { PhraseValueInput } from './phrase_value_input';
 import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
+import {
+  esFilters,
+  utils,
+  IIndexPattern,
+  IFieldType,
+} from '../../../../../../../plugins/data/public';
 
 interface Props {
-  filter: Filter;
-  indexPatterns: IndexPattern[];
-  onSubmit: (filter: Filter) => void;
+  filter: esFilters.Filter;
+  indexPatterns: IIndexPattern[];
+  onSubmit: (filter: esFilters.Filter) => void;
   onCancel: () => void;
   intl: InjectedIntl;
 }
 
 interface State {
-  selectedIndexPattern?: IndexPattern;
-  selectedField?: Field;
+  selectedIndexPattern?: IIndexPattern;
+  selectedField?: IFieldType;
   selectedOperator?: Operator;
   params: any;
   useCustomLabel: boolean;
@@ -81,10 +81,10 @@ class FilterEditorUI extends Component<Props, State> {
       selectedIndexPattern: this.getIndexPatternFromFilter(),
       selectedField: this.getFieldFromFilter(),
       selectedOperator: this.getSelectedOperator(),
-      params: getFilterParams(props.filter),
+      params: esFilters.getFilterParams(props.filter),
       useCustomLabel: props.filter.meta.alias !== null,
       customLabel: props.filter.meta.alias,
-      queryDsl: JSON.stringify(getQueryDslFromFilter(props.filter), null, 2),
+      queryDsl: JSON.stringify(esFilters.cleanFilter(props.filter), null, 2),
       isCustomEditorOpen: this.isUnknownFilterType(),
     };
   }
@@ -245,6 +245,7 @@ class FilterEditorUI extends Component<Props, State> {
   private renderFieldInput() {
     const { selectedIndexPattern, selectedField } = this.state;
     const fields = selectedIndexPattern ? getFilterableFields(selectedIndexPattern) : [];
+
     return (
       <EuiFormRow
         label={this.props.intl.formatMessage({
@@ -265,6 +266,7 @@ class FilterEditorUI extends Component<Props, State> {
           onChange={this.onFieldChange}
           singleSelection={{ asPlainText: true }}
           isClearable={false}
+          className="globalFilterEditor__fieldInput"
           data-test-subj="filterFieldSuggestionList"
         />
       </EuiFormRow>
@@ -374,12 +376,14 @@ class FilterEditorUI extends Component<Props, State> {
   }
 
   private getIndexPatternFromFilter() {
-    return getIndexPatternFromFilter(this.props.filter, this.props.indexPatterns);
+    return utils.getIndexPatternFromFilter(this.props.filter, this.props.indexPatterns);
   }
 
   private getFieldFromFilter() {
     const indexPattern = this.getIndexPatternFromFilter();
-    return indexPattern && getFieldFromFilter(this.props.filter as FieldFilter, indexPattern);
+    return (
+      indexPattern && getFieldFromFilter(this.props.filter as esFilters.FieldFilter, indexPattern)
+    );
   }
 
   private getSelectedOperator() {
@@ -407,14 +411,14 @@ class FilterEditorUI extends Component<Props, State> {
     return isFilterValid(indexPattern, field, operator, params);
   }
 
-  private onIndexPatternChange = ([selectedIndexPattern]: IndexPattern[]) => {
+  private onIndexPatternChange = ([selectedIndexPattern]: IIndexPattern[]) => {
     const selectedField = undefined;
     const selectedOperator = undefined;
     const params = undefined;
     this.setState({ selectedIndexPattern, selectedField, selectedOperator, params });
   };
 
-  private onFieldChange = ([selectedField]: Field[]) => {
+  private onFieldChange = ([selectedField]: IFieldType[]) => {
     const selectedOperator = undefined;
     const params = undefined;
     this.setState({ selectedField, selectedOperator, params });
@@ -429,7 +433,7 @@ class FilterEditorUI extends Component<Props, State> {
     this.setState({ selectedOperator, params });
   };
 
-  private onCustomLabelSwitchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  private onCustomLabelSwitchChange = (event: EuiSwitchEvent) => {
     const useCustomLabel = event.target.checked;
     const customLabel = event.target.checked ? '' : null;
     this.setState({ useCustomLabel, customLabel });
@@ -470,13 +474,21 @@ class FilterEditorUI extends Component<Props, State> {
       const { index, disabled, negate } = this.props.filter.meta;
       const newIndex = index || this.props.indexPatterns[0].id!;
       const body = JSON.parse(queryDsl);
-      const filter = buildCustomFilter(newIndex, body, disabled, negate, alias, $state.store);
+      const filter = esFilters.buildCustomFilter(
+        newIndex,
+        body,
+        disabled,
+        negate,
+        alias,
+        $state.store
+      );
       this.props.onSubmit(filter);
     } else if (indexPattern && field && operator) {
-      const filter = buildFilter(
+      const filter = esFilters.buildFilter(
         indexPattern,
         field,
-        operator,
+        operator.type,
+        operator.negate,
         this.props.filter.meta.disabled,
         params,
         alias,
@@ -487,11 +499,11 @@ class FilterEditorUI extends Component<Props, State> {
   };
 }
 
-function IndexPatternComboBox(props: GenericComboBoxProps<IndexPattern>) {
+function IndexPatternComboBox(props: GenericComboBoxProps<IIndexPattern>) {
   return GenericComboBox(props);
 }
 
-function FieldComboBox(props: GenericComboBoxProps<Field>) {
+function FieldComboBox(props: GenericComboBoxProps<IFieldType>) {
   return GenericComboBox(props);
 }
 

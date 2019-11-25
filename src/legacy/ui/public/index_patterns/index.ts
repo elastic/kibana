@@ -38,7 +38,6 @@ export {
   CONTAINS_SPACES,
   getFromSavedObject,
   getRoutes,
-  isFilterable,
   validateIndexPattern,
   ILLEGAL_CHARACTERS,
   INDEX_PATTERN_ILLEGAL_CHARACTERS,
@@ -47,8 +46,6 @@ export {
   IndexPatternMissingIndices,
   NoDefaultIndexPattern,
   NoDefinedIndexPatterns,
-  mockFields,
-  mockIndexPattern,
 } from '../../../core_plugins/data/public';
 
 // types

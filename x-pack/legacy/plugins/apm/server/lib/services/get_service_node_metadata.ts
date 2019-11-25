@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx';
-import { Setup } from '../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../helpers/setup_request';
 import {
   HOST_NAME,
   CONTAINER_ID
@@ -21,7 +24,7 @@ export async function getServiceNodeMetadata({
 }: {
   serviceName: string;
   serviceNodeName: string;
-  setup: Setup;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
   const { client } = setup;
 
@@ -55,11 +58,8 @@ export async function getServiceNodeMetadata({
   const response = await client.search(query);
 
   return {
-    host:
-      idx(response, _ => _.aggregations.host.buckets[0].key) ||
-      NOT_AVAILABLE_LABEL,
+    host: response.aggregations?.host.buckets[0].key || NOT_AVAILABLE_LABEL,
     containerId:
-      idx(response, _ => _.aggregations.containerId.buckets[0].key) ||
-      NOT_AVAILABLE_LABEL
+      response.aggregations?.containerId.buckets[0].key || NOT_AVAILABLE_LABEL
   };
 }

@@ -19,10 +19,6 @@
 
 import { find, get } from 'lodash';
 
-import { Field, FieldType } from './fields';
-import { StaticIndexPattern } from './index_patterns';
-import { getFilterableKbnTypeNames } from '../../../../../plugins/data/public';
-
 import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
 
 export const ILLEGAL_CHARACTERS = 'ILLEGAL_CHARACTERS';
@@ -108,16 +104,6 @@ export function validateIndexPattern(indexPattern: string) {
   return errors;
 }
 
-const filterableTypes = getFilterableKbnTypeNames();
-
-export function isFilterable(field: Field): boolean {
-  return (
-    field.name === '_id' ||
-    field.scripted ||
-    Boolean(field.searchable && filterableTypes.includes(field.type))
-  );
-}
-
 export function getFromSavedObject(savedObject: any) {
   if (get(savedObject, 'attributes.fields') === undefined) {
     return;
@@ -139,69 +125,3 @@ export function getRoutes() {
     sourceFilters: '/management/kibana/index_patterns/{{id}}?_a=(tab:sourceFilters)',
   };
 }
-
-export const mockFields: FieldType[] = [
-  {
-    name: 'machine.os',
-    esTypes: ['text'],
-    type: 'string',
-    aggregatable: false,
-    searchable: false,
-    filterable: true,
-  },
-  {
-    name: 'machine.os.raw',
-    type: 'string',
-    esTypes: ['keyword'],
-    aggregatable: true,
-    searchable: true,
-    filterable: true,
-  },
-  {
-    name: 'not.filterable',
-    type: 'string',
-    esTypes: ['text'],
-    aggregatable: true,
-    searchable: false,
-    filterable: false,
-  },
-  {
-    name: 'bytes',
-    type: 'number',
-    esTypes: ['long'],
-    aggregatable: true,
-    searchable: true,
-    filterable: true,
-  },
-  {
-    name: '@timestamp',
-    type: 'date',
-    esTypes: ['date'],
-    aggregatable: true,
-    searchable: true,
-    filterable: true,
-  },
-  {
-    name: 'clientip',
-    type: 'ip',
-    esTypes: ['ip'],
-    aggregatable: true,
-    searchable: true,
-    filterable: true,
-  },
-  {
-    name: 'bool.field',
-    type: 'boolean',
-    esTypes: ['boolean'],
-    aggregatable: true,
-    searchable: true,
-    filterable: true,
-  },
-];
-
-export const mockIndexPattern: StaticIndexPattern = {
-  id: 'logstash-*',
-  fields: mockFields,
-  title: 'logstash-*',
-  timeFieldName: '@timestamp',
-};

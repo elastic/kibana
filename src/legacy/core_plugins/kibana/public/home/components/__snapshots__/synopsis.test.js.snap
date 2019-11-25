@@ -14,9 +14,7 @@ exports[`props iconType 1`] = `
     />
   }
   layout="horizontal"
-  textAlign="center"
   title="Great tutorial"
-  titleElement="span"
 />
 `;
 
@@ -35,9 +33,7 @@ exports[`props iconUrl 1`] = `
     />
   }
   layout="horizontal"
-  textAlign="center"
   title="Great tutorial"
-  titleElement="span"
 />
 `;
 
@@ -49,9 +45,7 @@ exports[`props isBeta 1`] = `
   description="this is a great tutorial about..."
   href="link_to_item"
   layout="horizontal"
-  textAlign="center"
   title="Great tutorial"
-  titleElement="span"
 />
 `;
 
@@ -63,8 +57,6 @@ exports[`render 1`] = `
   description="this is a great tutorial about..."
   href="link_to_item"
   layout="horizontal"
-  textAlign="center"
   title="Great tutorial"
-  titleElement="span"
 />
 `;

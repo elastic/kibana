@@ -21,13 +21,15 @@ import { uiModules } from '../../modules';
 
 import { directivesProvider } from '../directives';
 import { registerSubUrlHooks } from './sub_url_hooks';
+import { start as data } from '../../../../core_plugins/data/public/legacy';
 import { configureAppAngularModule } from 'ui/legacy_compat';
+import { npStart } from '../../new_platform/new_platform';
 
 export function initAngularApi(chrome, internals) {
   chrome.setupAngular = function () {
     const kibana = uiModules.get('kibana');
 
-    configureAppAngularModule(kibana);
+    configureAppAngularModule(kibana, npStart.core, data, false);
 
     kibana.value('chrome', chrome);
 

@@ -107,6 +107,7 @@ export default class KbnServer {
     __internals: {
       hapiServer: LegacyServiceSetupDeps['core']['http']['server'];
       uiPlugins: LegacyServiceSetupDeps['core']['plugins']['uiPlugins'];
+      uiPluginConfigs: LegacyServiceSetupDeps['core']['plugins']['uiPluginConfigs'];
       elasticsearch: LegacyServiceSetupDeps['core']['elasticsearch'];
       uiSettings: LegacyServiceSetupDeps['core']['uiSettings'];
       kibanaMigrator: LegacyServiceStartDeps['core']['savedObjects']['migrator'];
@@ -150,5 +151,5 @@ export default class KbnServer {
 export { Server, Request, ResponseToolkit } from 'hapi';
 
 // Re-export commonly accessed api types.
-export { IndexPatternsService } from './index_patterns';
+export { IndexPatternsFetcher as IndexPatternsService } from './index_patterns';
 export { SavedObjectsLegacyService, SavedObjectsClient } from 'src/core/server';

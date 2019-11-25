@@ -20,10 +20,10 @@ export const GlobalConfig: FunctionComponent = () => (
       <WorkpadConfig />
     </SidebarSection>
     <SidebarSection>
-      <PageConfig />
+      <ElementConfig />
     </SidebarSection>
     <SidebarSection>
-      <ElementConfig />
+      <PageConfig />
     </SidebarSection>
   </Fragment>
 );

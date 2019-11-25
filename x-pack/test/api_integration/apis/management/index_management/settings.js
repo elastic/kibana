@@ -11,7 +11,7 @@ import { registerHelpers } from './settings.helpers';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   const {
     createIndex,
@@ -37,7 +37,6 @@ export default function ({ getService }) {
         'max_terms_count',
         'lifecycle',
         'routing_partition_size',
-        'force_memory_term_dictionary',
         'max_docvalue_fields_search',
         'merge',
         'max_refresh_listeners',
@@ -57,7 +56,6 @@ export default function ({ getService }) {
         'priority',
         'codec',
         'max_rescore_window',
-        'max_adjacency_matrix_filters',
         'analyze',
         'gc_deletes',
         'max_ngram_diff',

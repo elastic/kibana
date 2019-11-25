@@ -38,7 +38,7 @@ export {
   IndexPatterns,
   StaticIndexPattern,
 } from './index_patterns';
-export { Query, QueryBarInput } from './query';
+export { QueryBarInput } from './query';
 export { SearchBar, SearchBarProps, SavedQueryAttributes, SavedQuery } from './search';
 
 /** @public static code */
@@ -48,7 +48,6 @@ export {
   CONTAINS_SPACES,
   getFromSavedObject,
   getRoutes,
-  isFilterable,
   IndexPatternSelect,
   validateIndexPattern,
   ILLEGAL_CHARACTERS,
@@ -58,15 +57,4 @@ export {
   IndexPatternMissingIndices,
   NoDefaultIndexPattern,
   NoDefinedIndexPatterns,
-  mockFields,
-  mockIndexPattern,
 } from './index_patterns';
-
-export {
-  TimeHistoryContract,
-  TimefilterContract,
-  getTime,
-  InputTimeRange,
-  extractTimeFilter,
-  changeTimeFilter,
-} from './timefilter';

@@ -132,7 +132,7 @@ export default function ({ getService }) {
         // Let's delete tokens from `.security` index directly to simulate the case when
         // Elasticsearch automatically removes access/refresh token document from the index
         // after some period of time.
-        const esResponse = await getService('es').deleteByQuery({
+        const esResponse = await getService('legacyEs').deleteByQuery({
           index: '.security-tokens',
           q: 'doc_type:token',
           refresh: true,

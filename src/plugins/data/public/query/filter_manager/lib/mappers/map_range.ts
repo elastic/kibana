@@ -17,18 +17,11 @@
  * under the License.
  */
 
-import {
-  Filter,
-  RangeFilter,
-  FILTERS,
-  isRangeFilter,
-  isScriptedRangeFilter,
-  FilterValueFormatter,
-} from '@kbn/es-query';
 import { get, has } from 'lodash';
+import { esFilters } from '../../../../../common';
 
 const getFormattedValueFn = (left: any, right: any) => {
-  return (formatter?: FilterValueFormatter) => {
+  return (formatter?: esFilters.FilterValueFormatter) => {
     let displayValue = `${left} to ${right}`;
     if (formatter) {
       const convert = formatter.getConverterFor('text');
@@ -38,11 +31,12 @@ const getFormattedValueFn = (left: any, right: any) => {
   };
 };
 
-const getFirstRangeKey = (filter: RangeFilter) => filter.range && Object.keys(filter.range)[0];
-const getRangeByKey = (filter: RangeFilter, key: string) => get(filter, ['range', key]);
+const getFirstRangeKey = (filter: esFilters.RangeFilter) =>
+  filter.range && Object.keys(filter.range)[0];
+const getRangeByKey = (filter: esFilters.RangeFilter, key: string) => get(filter, ['range', key]);
 
-function getParams(filter: RangeFilter) {
-  const isScriptedRange = isScriptedRangeFilter(filter);
+function getParams(filter: esFilters.RangeFilter) {
+  const isScriptedRange = esFilters.isScriptedRangeFilter(filter);
   const key: string = (isScriptedRange ? filter.meta.field : getFirstRangeKey(filter)) || '';
   const params: any = isScriptedRange
     ? get(filter, 'script.script.params')
@@ -56,13 +50,13 @@ function getParams(filter: RangeFilter) {
 
   const value = getFormattedValueFn(left, right);
 
-  return { type: FILTERS.RANGE, key, value, params };
+  return { type: esFilters.FILTERS.RANGE, key, value, params };
 }
 
-export const isMapRangeFilter = (filter: any): filter is RangeFilter =>
-  isRangeFilter(filter) || isScriptedRangeFilter(filter);
+export const isMapRangeFilter = (filter: any): filter is esFilters.RangeFilter =>
+  esFilters.isRangeFilter(filter) || esFilters.isScriptedRangeFilter(filter);
 
-export const mapRange = (filter: Filter) => {
+export const mapRange = (filter: esFilters.Filter) => {
   if (!isMapRangeFilter(filter)) {
     throw filter;
   }

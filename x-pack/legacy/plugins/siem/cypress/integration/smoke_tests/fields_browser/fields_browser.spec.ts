@@ -34,7 +34,7 @@ const defaultHeaders = [
   { id: 'user.name' },
 ];
 
-describe('Fields Browser', () => {
+describe.skip('Fields Browser', () => {
   beforeEach(() => {
     loginAndWaitForPage(HOSTS_PAGE);
   });
