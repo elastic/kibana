@@ -357,6 +357,11 @@ module.exports = {
                 allowSameFolder: true,
               },
               {
+                target: ['src/core/**/*'],
+                from: ['plugins/**/*', 'src/plugins/**/*'],
+                errorMessage: 'The core cannot depend on any plugins.',
+              },
+              {
                 from: ['src/legacy/ui/**/*', 'ui/**/*'],
                 target: [
                   'test/plugin_functional/plugins/**/public/np_ready/**/*',
