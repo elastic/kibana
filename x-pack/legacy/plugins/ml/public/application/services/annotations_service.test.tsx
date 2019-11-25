@@ -32,10 +32,10 @@ describe('annotations_service', () => {
 
     annotationsRefresh$.subscribe(subscriber);
 
-    expect(subscriber.mock.calls).toHaveLength(0);
+    expect(subscriber.mock.calls).toHaveLength(1);
 
     annotationsRefresh$.next(true);
 
-    expect(subscriber.mock.calls).toHaveLength(1);
+    expect(subscriber.mock.calls).toHaveLength(2);
   });
 });
