@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UrlConfig } from '../../../../../../common/types/custom_urls';
+import { UrlConfig } from '../../../../../../../common/types/custom_urls';
 import { CREATED_BY_LABEL } from '../util/constants';
 
 export type JobId = string;
