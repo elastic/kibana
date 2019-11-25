@@ -11,22 +11,22 @@ const path = require('path');
 
 /*
  * This script is used to parse a set of saved searches on a file system
- * and output signal data compatible json files.
+ * and output rule data compatible json files.
  * Example:
- * node saved_query_to_signals.js ${HOME}/saved_searches ${HOME}/saved_signals
+ * node saved_query_to_rules.js ${HOME}/saved_searches ${HOME}/saved_rules
  *
- * After editing any changes in the files of ${HOME}/saved_signals/*.json
- * you can then post the signals with a CURL post script such as:
+ * After editing any changes in the files of ${HOME}/saved_rules/*.json
+ * you can then post the rules with a CURL post script such as:
  *
- * ./post_signal.sh ${HOME}/saved_signals/*.json
+ * ./post_rule.sh ${HOME}/saved_rules/*.json
  *
  * Note: This script is recursive and but does not preserve folder structure
- * when it outputs the saved signals.
+ * when it outputs the saved rules.
  */
 
-// Defaults of the outputted signals since the saved KQL searches do not have
+// Defaults of the outputted rules since the saved KQL searches do not have
 // this type of information. You usually will want to make any hand edits after
-// doing a search to KQL conversion before posting it as a signal or checking it
+// doing a search to KQL conversion before posting it as a rule or checking it
 // into another repository.
 const INTERVAL = '5m';
 const SEVERITY = 'low';
@@ -36,8 +36,8 @@ const TO = 'now';
 const IMMUTABLE = true;
 const RISK_SCORE = 50;
 const ENABLED = false;
-let allSignals = '';
-const allSignalsNdJson = 'all_rules.ndjson';
+let allRules = '';
+const allRulesNdJson = 'all_rules.ndjson';
 
 // For converting, if you want to use these instead of rely on the defaults then
 // comment these in and use them for the script. Otherwise this is commented out
@@ -74,7 +74,7 @@ const cleanupFileName = file => {
 async function main() {
   if (process.argv.length !== 4) {
     throw new Error(
-      'usage: saved_query_to_signals [input directory with saved searches] [output directory]'
+      'usage: saved_query_to_rules [input directory with saved searches] [output directory]'
     );
   }
 
@@ -152,11 +152,11 @@ async function main() {
           `${outputDir}/${fileToWrite}.json`,
           JSON.stringify(outputMessage, null, 2)
         );
-        allSignals += `${JSON.stringify(outputMessage)}\n`;
+        allRules += `${JSON.stringify(outputMessage)}\n`;
       }
     }
   );
-  fs.writeFileSync(`${outputDir}/${allSignalsNdJson}`, allSignals);
+  fs.writeFileSync(`${outputDir}/${allRulesNdJson}`, allRules);
 }
 
 if (require.main === module) {
