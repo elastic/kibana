@@ -27,6 +27,7 @@ export const AnalysisPageContent = () => {
     lastSetupErrorMessages,
     setup,
     setupStatus,
+    timestampField,
     viewResults,
   } = useContext(LogAnalysisJobs.Context);
 
@@ -61,6 +62,7 @@ export const AnalysisPageContent = () => {
         errorMessages={lastSetupErrorMessages}
         setup={setup}
         setupStatus={setupStatus}
+        timestampField={timestampField}
         viewResults={viewResults}
       />
     );
