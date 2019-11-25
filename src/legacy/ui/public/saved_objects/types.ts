@@ -32,20 +32,28 @@ export interface CreationOpts {
 }
 
 export interface SavedObject {
-  index: string;
-  title: string;
-  getDisplayName: () => string;
-  save: (saveOptions: SaveOptions) => Promise<string>;
-  copyOnSave: boolean;
-  id?: string | null;
-  getEsType: () => string;
-  lastSavedTitle: string;
   _serialize: () => { attributes: SavedObjectAttributes; references: SavedObjectReference[] };
-  isSaving: boolean;
-  creationOpts: (opts: CreationOpts) => any;
-  showInRecentlyAccessed: boolean;
-  getFullPath: () => string;
-  searchSource: SearchSource;
   _source: Record<string, any>;
+  applyESResp: (resp: any) => any;
+  applyEsResp: () => any;
+  copyOnSave: boolean;
+  creationOpts: (opts: CreationOpts) => any;
   defaults: any;
+  delete: () => any;
+  destroy?: any;
+  getDisplayName: () => string;
+  getEsType: () => string;
+  getFullPath: () => string;
+  hydrateIndexPattern?: (id?: string) => Promise<any>;
+  id?: string | null;
+  index: string;
+  init?: () => void;
+  isSaving: boolean;
+  isTitleChanged: any;
+  lastSavedTitle: string;
+  migrationVersion: string;
+  save: (saveOptions: SaveOptions) => Promise<string>;
+  searchSource?: SearchSource;
+  showInRecentlyAccessed: boolean;
+  title: string;
 }

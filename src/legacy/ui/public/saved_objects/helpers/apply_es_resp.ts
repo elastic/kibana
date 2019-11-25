@@ -30,7 +30,7 @@ export async function applyEsResp(
   esType: string,
   config: any,
   mapping: any,
-  hydrateIndexPattern: () => void,
+  hydrateIndexPattern: (id?: string) => void,
   afterESResp: () => void,
   injectReferences: any,
   AngularPromise: PromiseService

@@ -38,11 +38,11 @@ export function hydrateIndexPattern(
   }
 
   if (clearSavedIndexPattern) {
-    savedObject.searchSource.setField('index', null);
+    savedObject.searchSource!.setField('index', null);
     return Promise.resolve(null);
   }
 
-  let index = id || indexPattern || savedObject.searchSource.getOwnField('index');
+  let index = id || indexPattern || savedObject.searchSource!.getOwnField('index');
 
   if (!index) {
     return Promise.resolve(null);
@@ -56,6 +56,6 @@ export function hydrateIndexPattern(
   // At savedObject point index will either be an IndexPattern, if cached, or a promise that
   // will return an IndexPattern, if not cached.
   return Promise.resolve(index).then((ip: IIndexPattern) => {
-    savedObject.searchSource.setField('index', ip);
+    savedObject.searchSource!.setField('index', ip);
   });
 }
