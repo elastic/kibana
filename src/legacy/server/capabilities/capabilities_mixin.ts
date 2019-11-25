@@ -28,17 +28,6 @@ export async function capabilitiesMixin(kbnServer: KbnServer, server: Server) {
         .filter(provider => !!provider)
         .map(provider => provider(server))
     );
-    // Get legacy nav links
-    const navLinks = server.getUiNavLinks().reduce(
-      (acc, spec) => ({
-        ...acc,
-        [spec._id]: true,
-      }),
-      {} as Record<string, boolean>
-    );
-    if (Object.keys(navLinks).length) {
-      capabilitiesList.push({ navLinks });
-    }
 
     capabilitiesList.forEach(capabilities => {
       kbnServer.newPlatform.setup.core.capabilities.registerCapabilitiesProvider(

@@ -85,25 +85,19 @@ describe('CapabilitiesService', () => {
     it('is exposed', async () => {
       const result = await supertest(httpSetup.server.listener)
         .post('/core/capabilities')
-        .send({})
+        .send({ applications: [] })
         .expect(200);
       expect(result.body).toMatchInlineSnapshot(`
               Object {
-                "capabilities": Object {
-                  "catalogue": Object {},
-                  "management": Object {},
-                  "navLinks": Object {},
-                },
+                "catalogue": Object {},
+                "management": Object {},
+                "navLinks": Object {},
               }
           `);
     });
 
     it('uses the service capabilities providers', async () => {
       serviceSetup.registerCapabilitiesProvider(() => ({
-        navLinks: {
-          app: true,
-          otherApp: true,
-        },
         catalogue: {
           something: true,
         },
@@ -111,20 +105,15 @@ describe('CapabilitiesService', () => {
 
       const result = await supertest(httpSetup.server.listener)
         .post('/core/capabilities')
-        .send({})
+        .send({ applications: [] })
         .expect(200);
       expect(result.body).toMatchInlineSnapshot(`
         Object {
-          "capabilities": Object {
-            "catalogue": Object {
-              "something": true,
-            },
-            "management": Object {},
-            "navLinks": Object {
-              "app": true,
-              "otherApp": true,
-            },
+          "catalogue": Object {
+            "something": true,
           },
+          "management": Object {},
+          "navLinks": Object {},
         }
       `);
     });

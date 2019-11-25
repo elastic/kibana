@@ -64,7 +64,6 @@ export interface CapabilitiesStart {
 export class CapabilitiesService {
   public async start({ apps, legacyApps, http }: StartDeps): Promise<CapabilitiesStart> {
     const capabilities = await this.fetchCapabilities(http, [...apps.keys(), ...legacyApps.keys()]);
-    // console.log('response:', capabilities);
 
     const availableApps = new Map(
       [...apps].filter(

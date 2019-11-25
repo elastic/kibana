@@ -20,21 +20,38 @@
 import { Capabilities, CapabilitiesSwitcher } from './types';
 import { KibanaRequest } from '../http';
 
-export type CapabilitiesResolver = (request: KibanaRequest) => Promise<Capabilities>;
+export type CapabilitiesResolver = (
+  request: KibanaRequest,
+  applications: string[]
+) => Promise<Capabilities>;
 
 export const getCapabilitiesResolver = (
   capabilities: () => Capabilities,
   switchers: () => CapabilitiesSwitcher[]
-): CapabilitiesResolver => async (request: KibanaRequest): Promise<Capabilities> => {
-  return resolveCapabilities(capabilities(), switchers(), request);
+): CapabilitiesResolver => async (
+  request: KibanaRequest,
+  applications: string[]
+): Promise<Capabilities> => {
+  return resolveCapabilities(capabilities(), switchers(), request, applications);
 };
 
 export const resolveCapabilities = async (
   capabilities: Capabilities,
   switchers: CapabilitiesSwitcher[],
-  request: KibanaRequest
+  request: KibanaRequest,
+  applications: string[]
 ): Promise<Capabilities> => {
+  const mergedCaps = {
+    ...capabilities,
+    navLinks: applications.reduce(
+      (acc, app) => ({
+        ...acc,
+        [app]: true,
+      }),
+      {}
+    ),
+  };
   return switchers.reduce(async (caps, switcher) => {
     return switcher(request, await caps);
-  }, Promise.resolve(capabilities));
+  }, Promise.resolve(mergedCaps));
 };

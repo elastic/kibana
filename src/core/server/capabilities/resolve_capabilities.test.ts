@@ -36,34 +36,34 @@ describe('resolveCapabilities', () => {
   });
 
   it('should returns the initial capabilities if no switcher are used', async () => {
-    const result = await resolveCapabilities(defaultCaps, [], request);
+    const result = await resolveCapabilities(defaultCaps, [], request, []);
     expect(result).toEqual(defaultCaps);
   });
 
   it('should apply the switcher to the capabilities ', async () => {
     const caps = {
       ...defaultCaps,
-      navLinks: {
+      catalogue: {
         A: true,
         B: true,
       },
     };
     const switcher = (req: KibanaRequest, capabilities: Capabilities) => ({
       ...capabilities,
-      navLinks: {
-        ...capabilities.navLinks,
+      catalogue: {
+        ...capabilities.catalogue,
         A: false,
       },
     });
-    const result = await resolveCapabilities(caps, [switcher], request);
+    const result = await resolveCapabilities(caps, [switcher], request, []);
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "catalogue": Object {},
-        "management": Object {},
-        "navLinks": Object {
+        "catalogue": Object {
           "A": false,
           "B": true,
         },
+        "management": Object {},
+        "navLinks": Object {},
       }
     `);
   });

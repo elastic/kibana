@@ -18,6 +18,7 @@
  */
 
 import { Server } from 'hapi';
+import { mockRouter } from './router/router.mock';
 import { InternalHttpServiceSetup } from './types';
 import { HttpService } from './http_service';
 import { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
@@ -26,7 +27,7 @@ import { sessionStorageMock } from './cookie_session_storage.mocks';
 import { IRouter } from './router';
 import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
 
-type ServiceSetupMockType = jest.Mocked<InternalHttpServiceSetup> & {
+export type HttpServiceSetupMock = jest.Mocked<InternalHttpServiceSetup> & {
   basePath: jest.Mocked<InternalHttpServiceSetup['basePath']>;
 };
 
@@ -49,7 +50,7 @@ const createRouterMock = (): jest.Mocked<IRouter> => ({
 });
 
 const createSetupContractMock = () => {
-  const setupContract: ServiceSetupMockType = {
+  const setupContract: HttpServiceSetupMock = {
     // we can mock other hapi server methods when we need it
     server: ({
       route: jest.fn(),
@@ -61,7 +62,7 @@ const createSetupContractMock = () => {
     registerAuth: jest.fn(),
     registerOnPostAuth: jest.fn(),
     registerRouteHandlerContext: jest.fn(),
-    createRouter: jest.fn(),
+    createRouter: jest.fn().mockImplementation(() => mockRouter.create({})),
     basePath: createBasePathMock(),
     auth: {
       get: jest.fn(),

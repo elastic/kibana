@@ -48,11 +48,11 @@ export class CapabilitiesService {
   private readonly logger: Logger;
   private readonly capabilitiesProviders: CapabilitiesProvider[] = [];
   private readonly capabilitiesSwitchers: CapabilitiesSwitcher[] = [];
-  private readonly resolver: CapabilitiesResolver;
+  private readonly resolveCapabilities: CapabilitiesResolver;
 
   constructor(core: CoreContext) {
     this.logger = core.logger.get('capabilities-service');
-    this.resolver = getCapabilitiesResolver(
+    this.resolveCapabilities = getCapabilitiesResolver(
       () =>
         mergeCapabilities(
           defaultCapabilities,
@@ -78,7 +78,7 @@ export class CapabilitiesService {
 
   public start(): CapabilitiesStart {
     return {
-      resolveCapabilities: request => this.resolver(request),
+      resolveCapabilities: request => this.resolveCapabilities(request, []),
     };
   }
 
@@ -94,8 +94,8 @@ export class CapabilitiesService {
         },
       },
       async (ctx, req, res) => {
-        // const { applications } = req.body;
-        const capabilities = await this.resolver(req);
+        const { applications } = req.body;
+        const capabilities = await this.resolveCapabilities(req, applications);
         return res.ok({
           body: capabilities,
         });

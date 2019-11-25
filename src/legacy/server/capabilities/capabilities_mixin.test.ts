@@ -62,18 +62,4 @@ describe('capabilitiesMixin', () => {
     expect(registerMock.mock.calls[0][0]()).toEqual(capaA);
     expect(registerMock.mock.calls[1][0]()).toEqual(capaB);
   });
-
-  it('calls capabilities#registerCapabilitiesProvider for navLinks', async () => {
-    const kbnServer = getKbnServer();
-    server.getUiNavLinks = () => [{ _id: 'A' }, { _id: 'B' }];
-    await capabilitiesMixin(kbnServer, server);
-
-    expect(registerMock).toHaveBeenCalledTimes(1);
-    expect(registerMock.mock.calls[0][0]()).toEqual({
-      navLinks: {
-        A: true,
-        B: true,
-      },
-    });
-  });
 });
