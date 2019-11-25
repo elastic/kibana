@@ -54,6 +54,11 @@ export async function createSetupShim(
     pluginsSetup: {
       // @ts-ignore: New Platform not typed
       features: server.newPlatform.setup.plugins.features,
+      /*
+      TODO: Fix Home plugin typing
+      Home not typed propperly, error is: Type '{}' is missing the following properties from type 'HomeServerPluginSetup': tutorials, sampleData
+      */
+      // @ts-ignore: Home plugin typing
       home: server.newPlatform.setup.plugins.home,
       // @ts-ignore Interpreter plugin not typed on legacy server
       interpreter: server.plugins.interpreter,
