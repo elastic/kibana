@@ -123,9 +123,16 @@ Visualize.
 `kibana.defaultAppId:`:: *Default: "home"* The default application to load.
 
 `kibana.index:`:: *Default: ".kibana"* Kibana uses an index in Elasticsearch to
-store saved searches, visualizations and dashboards. Kibana creates a new index
+store saved searches, visualizations, and dashboards. Kibana creates a new index
 if the index doesn’t already exist. If you configure a custom index, the name must
 be lowercase, and conform to {es} {ref}/indices-create-index.html[index name limitations].
++
+When running multiple tenants of {kib} by changing the `kibana.index` in your `kibana.yml`, 
+you cannot use the `kibana_user` or `kibana_dashboard_only_user` roles 
+to grant access to {kib}. 
+You must create custom roles that authorize the user for that specific tenant. 
+Although multi-tenant installations are supported, the recommended approach 
+to securing access to {kib} segments is to grant users access to specific spaces.
 
 `kibana.autocompleteTimeout:`:: *Default: "1000"* Time in milliseconds to wait
 for autocomplete suggestions from Elasticsearch. This value must be a whole number
