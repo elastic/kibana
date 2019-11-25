@@ -37,16 +37,9 @@ export { IRequestTypesMap, IResponseTypesMap } from './search';
 export * from './search';
 export * from './query';
 export {
-  Field,
-  FieldType,
-  FieldListInterface,
-  IndexPattern,
-  IndexPatterns,
-  StaticIndexPattern,
   CONTAINS_SPACES,
   getFromSavedObject,
   getRoutes,
-  isFilterable,
   validateIndexPattern,
   ILLEGAL_CHARACTERS,
   INDEX_PATTERN_ILLEGAL_CHARACTERS,

@@ -24,16 +24,10 @@ import {
   NotificationsStart,
 } from 'src/core/public';
 import { FieldFormatsStart } from '../field_formats_provider';
-import { Field, FieldList, FieldListInterface, FieldType } from './fields';
+import { Field, FieldList } from './fields';
 import { setNotifications, setFieldFormats } from './services';
 
-import {
-  createFlattenHitWrapper,
-  formatHitProvider,
-  IndexPattern,
-  IndexPatterns,
-  StaticIndexPattern,
-} from './index_patterns';
+import { createFlattenHitWrapper, formatHitProvider, IndexPatterns } from './index_patterns';
 
 export interface IndexPatternDependencies {
   uiSettings: UiSettingsClientContract;
@@ -96,7 +90,6 @@ export {
   ILLEGAL_CHARACTERS,
   INDEX_PATTERN_ILLEGAL_CHARACTERS,
   INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-  isFilterable,
   validateIndexPattern,
 } from './utils';
 
@@ -113,9 +106,6 @@ export {
 /** @internal */
 export type IndexPatternsSetup = ReturnType<IndexPatternsService['setup']>;
 export type IndexPatternsStart = ReturnType<IndexPatternsService['start']>;
-
-/** @public */
-export { IndexPattern, IndexPatterns, StaticIndexPattern, Field, FieldType, FieldListInterface };
 
 /** @public */
 export { getIndexPatternTitle, findIndexPatternByTitle } from './utils';
