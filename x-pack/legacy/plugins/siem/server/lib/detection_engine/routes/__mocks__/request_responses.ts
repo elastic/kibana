@@ -109,7 +109,7 @@ export const getCreateRequest = (): ServerInjectOptions => ({
 export const createActionResult = (): ActionResult => ({
   id: 'result-1',
   actionTypeId: 'action-id-1',
-  description: '',
+  name: '',
   config: {},
 });
 
@@ -156,6 +156,6 @@ export const getResult = (): SignalAlertType => ({
 export const updateActionResult = (): ActionResult => ({
   id: 'result-1',
   actionTypeId: 'action-id-1',
-  description: '',
+  name: '',
   config: {},
 });
