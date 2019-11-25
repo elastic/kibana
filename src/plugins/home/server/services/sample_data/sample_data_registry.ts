@@ -48,7 +48,7 @@ import {
   SampleDatasetProvider,
   SampleDatasetSchema,
   AppLinkSchema,
-  EmbeddableTypes,
+  SampleDatasetDashboardPanel,
 } from './lib/sample_dataset_registry_types';
 import { sampleDataSchema } from './lib/sample_dataset_schema';
 
@@ -130,19 +130,19 @@ export class SampleDataRegistry {
           : [];
       },
 
-      replacePanelInSampleDatasetDashboard: (
-        sampleDataId: string,
-        dashboardId: string,
-        oldEmbeddableId: string,
-        embeddableId: string,
-        embeddableType: EmbeddableTypes,
-        embeddableConfig: object = {}
-      ) => {
+      replacePanelInSampleDatasetDashboard: ({
+        sampleDataId,
+        dashboardId,
+        oldEmbeddableId,
+        embeddableId,
+        embeddableType,
+        embeddableConfig,
+      }: SampleDatasetDashboardPanel) => {
         const sampleDataset = this.sampleDatasets.find(dataset => {
           return dataset.id === sampleDataId;
         });
         if (!sampleDataset) {
-          throw new Error(`Unaable to find sample dataset with id: ${sampleDataId}`);
+          throw new Error(`Unable to find sample dataset with id: ${sampleDataId}`);
         }
 
         const dashboard = sampleDataset.savedObjects.find((savedObject: SavedObject) => {
