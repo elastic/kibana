@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './telemetry';
+import { npStart } from 'ui/new_platform';
+import { plugin } from '.';
+
+const pluginInstance = plugin();
+
+export const start = pluginInstance.start(npStart.core);
