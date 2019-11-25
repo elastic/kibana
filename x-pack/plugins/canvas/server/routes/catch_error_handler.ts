@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-
 import { ObjectType } from '@kbn/config-schema';
 import { RequestHandler } from 'src/core/server';
 
