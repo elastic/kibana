@@ -176,7 +176,7 @@ const VisLegendItemComponent = ({
               onKeyPress={setColor(item.label, color)}
               className={classNames(
                 'visLegend__valueColorPicker--dot',
-                color === getColor(item.label) ? 'fa-circle-o' : 'fa-circle'
+                color === getColor(item.label) ? 'visLegend__valueColorPicker--dot-isSelected' : ''
               )}
               style={{ color }}
               data-test-subj={`legendSelectColor-${color}`}
