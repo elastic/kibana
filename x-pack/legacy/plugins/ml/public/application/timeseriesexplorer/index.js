@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './timeseriesexplorer_directive.js';
-import './timeseriesexplorer_route.js';
-import './timeseries_search_service.js';
+import './timeseriesexplorer_directive';
+import './timeseriesexplorer_route';
+import './timeseries_search_service';
 import '../components/job_selector';
 import '../components/chart_tooltip';
