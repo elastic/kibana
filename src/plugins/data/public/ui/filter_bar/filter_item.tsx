@@ -24,7 +24,7 @@ import React, { Component } from 'react';
 import { UiSettingsClientContract } from 'src/core/public';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
-import { esFilters, utils, IIndexPattern } from '../../../../../../plugins/data/public';
+import { esFilters, utils, IIndexPattern } from '../..';
 
 interface Props {
   id: string;

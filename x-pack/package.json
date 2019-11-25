@@ -14,8 +14,7 @@
     "test:browser:dev": "gulp testbrowser-dev",
     "test:browser": "gulp testbrowser",
     "test:jest": "node scripts/jest",
-    "test:mocha": "node scripts/mocha",
-    "test:server": "gulp testserver"
+    "test:mocha": "node scripts/mocha"
   },
   "kibana": {
     "build": {
@@ -133,7 +132,6 @@
     "graphql-codegen-typescript-resolvers": "^0.18.2",
     "graphql-codegen-typescript-server": "^0.18.2",
     "gulp": "4.0.2",
-    "gulp-mocha": "^7.0.2",
     "hapi": "^17.5.3",
     "jest": "^24.9.0",
     "jest-cli": "^24.9.0",

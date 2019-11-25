@@ -18,14 +18,9 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { Ipv4Address } from '../../../../../../../../plugins/kibana_utils/public';
+import { Ipv4Address } from '../../../../../../kibana_utils/public';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
-import {
-  esFilters,
-  IIndexPattern,
-  IFieldType,
-  isFilterable,
-} from '../../../../../../../../plugins/data/public';
+import { esFilters, IIndexPattern, IFieldType, isFilterable } from '../../../..';
 
 export function getFieldFromFilter(filter: esFilters.FieldFilter, indexPattern: IIndexPattern) {
   return indexPattern.fields.find(field => field.name === filter.meta.key);

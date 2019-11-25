@@ -25,8 +25,8 @@ import React, { useState } from 'react';
 import { FilterEditor } from './filter_editor';
 import { FilterItem } from './filter_item';
 import { FilterOptions } from './filter_options';
-import { useKibana } from '../../../../../../plugins/kibana_react/public';
-import { IIndexPattern, esFilters } from '../../../../../../plugins/data/public';
+import { useKibana } from '../../../../kibana_react/public';
+import { IIndexPattern, esFilters } from '../..';
 
 interface Props {
   filters: esFilters.Filter[];

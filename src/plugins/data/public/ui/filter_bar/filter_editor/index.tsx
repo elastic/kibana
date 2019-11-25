@@ -48,12 +48,7 @@ import { Operator } from './lib/filter_operators';
 import { PhraseValueInput } from './phrase_value_input';
 import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
-import {
-  esFilters,
-  utils,
-  IIndexPattern,
-  IFieldType,
-} from '../../../../../../../plugins/data/public';
+import { esFilters, utils, IIndexPattern, IFieldType } from '../../..';
 
 interface Props {
   filter: esFilters.Filter;
