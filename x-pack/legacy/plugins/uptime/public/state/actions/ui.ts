@@ -28,11 +28,6 @@ interface TriggerAppRefreshAction {
   payload: number;
 }
 
-interface SetBasePathAction {
-  type: typeof SET_BASE_PATH;
-  payload: string;
-}
-
 export type UiActionTypes =
   | SetIntegrationPopoverAction
   | SetBasePathAction
