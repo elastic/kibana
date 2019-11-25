@@ -120,7 +120,6 @@ export function ServiceNodeMetrics() {
           <EuiFlexItem grow={false}>
             <EuiStat
               titleSize="s"
-              isLoading={isLoading}
               description={i18n.translate(
                 'xpack.apm.serviceNodeMetrics.serviceName',
                 {
