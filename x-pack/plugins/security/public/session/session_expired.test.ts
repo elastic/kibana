@@ -25,11 +25,12 @@ describe('Session Expiration', () => {
 
   describe('logout', () => {
     const mockCurrentUrl = (url: string) => window.history.pushState({}, '', url);
+    const tenant = '';
 
     it('redirects user to "/logout" when there is no basePath', async () => {
       const { basePath } = coreMock.createSetup().http;
       mockCurrentUrl('/foo/bar?baz=quz#quuz');
-      const sessionExpired = new SessionExpired(basePath);
+      const sessionExpired = new SessionExpired(basePath, tenant);
       const newUrlPromise = new Promise<string>(resolve => {
         jest.spyOn(window.location, 'assign').mockImplementation(url => {
           resolve(url);
@@ -47,7 +48,7 @@ describe('Session Expiration', () => {
     it('adds a provider parameter when an auth provider is saved in sessionStorage', async () => {
       const { basePath } = coreMock.createSetup().http;
       mockCurrentUrl('/foo/bar?baz=quz#quuz');
-      const sessionExpired = new SessionExpired(basePath);
+      const sessionExpired = new SessionExpired(basePath, tenant);
       const newUrlPromise = new Promise<string>(resolve => {
         jest.spyOn(window.location, 'assign').mockImplementation(url => {
           resolve(url);
@@ -68,7 +69,7 @@ describe('Session Expiration', () => {
     it('redirects user to "/${basePath}/logout" and removes basePath from next parameter when there is a basePath', async () => {
       const { basePath } = coreMock.createSetup({ basePath: '/foo' }).http;
       mockCurrentUrl('/foo/bar?baz=quz#quuz');
-      const sessionExpired = new SessionExpired(basePath);
+      const sessionExpired = new SessionExpired(basePath, tenant);
       const newUrlPromise = new Promise<string>(resolve => {
         jest.spyOn(window.location, 'assign').mockImplementation(url => {
           resolve(url);

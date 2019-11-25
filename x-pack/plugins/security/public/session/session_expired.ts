@@ -11,13 +11,13 @@ export interface ISessionExpired {
 }
 
 export class SessionExpired {
-  constructor(private basePath: HttpSetup['basePath']) {}
+  constructor(private basePath: HttpSetup['basePath'], private tenant: string) {}
 
   logout() {
     const next = this.basePath.remove(
       `${window.location.pathname}${window.location.search}${window.location.hash}`
     );
-    const key = this.basePath.prepend('/session_provider');
+    const key = `${this.tenant}/session_provider`;
     const providerName = sessionStorage.getItem(key);
     const provider = providerName ? `&provider=${encodeURIComponent(providerName)}` : '';
     window.location.assign(

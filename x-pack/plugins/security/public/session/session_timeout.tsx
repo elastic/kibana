@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NotificationsSetup, Toast, HttpSetup, ToastInput, IBasePath } from 'src/core/public';
+import { NotificationsSetup, Toast, HttpSetup, ToastInput } from 'src/core/public';
 import { BroadcastChannel } from 'broadcast-channel';
 import { createToast as createIdleTimeoutToast } from './session_idle_timeout_warning';
 import { createToast as createLifespanToast } from './session_lifespan_warning';
@@ -42,7 +42,6 @@ export interface ISessionTimeout {
 }
 
 export class SessionTimeout {
-  private basePath: IBasePath;
   private channel?: BroadcastChannel<SessionInfo>;
   private sessionInfo?: SessionInfo;
   private fetchTimer?: number;
@@ -53,10 +52,9 @@ export class SessionTimeout {
   constructor(
     private notifications: NotificationsSetup,
     private sessionExpired: ISessionExpired,
-    private http: HttpSetup
-  ) {
-    this.basePath = http.basePath;
-  }
+    private http: HttpSetup,
+    private tenant: string
+  ) {}
 
   start() {
     if (this.http.anonymousPaths.isAnonymous(window.location.pathname)) {
@@ -65,7 +63,7 @@ export class SessionTimeout {
 
     // subscribe to a broadcast channel for session timeout messages
     // this allows us to synchronize the UX across tabs and avoid repetitive API calls
-    const name = this.basePath.prepend('/session_timeout');
+    const name = `${this.tenant}/session_timeout`;
     this.channel = new BroadcastChannel(name, { webWorkerSupport: false });
     this.channel.onmessage = this.handleSessionInfoAndResetTimers;
 
@@ -129,7 +127,7 @@ export class SessionTimeout {
   private handleSessionInfoAndResetTimers = (sessionInfo: SessionInfo) => {
     this.sessionInfo = sessionInfo;
     // save the provider name in session storage, we will need it when we log out
-    const key = this.basePath.prepend('/session_provider');
+    const key = `${this.tenant}/session_provider`;
     sessionStorage.setItem(key, sessionInfo.provider);
 
     const { timeout, isLifespanTimeout } = this.getTimeout();

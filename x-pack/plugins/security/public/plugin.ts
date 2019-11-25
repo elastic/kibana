@@ -16,15 +16,16 @@ export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPlugi
   private sessionTimeout!: SessionTimeout;
 
   public setup(core: CoreSetup) {
-    const { http, notifications } = core;
+    const { http, notifications, injectedMetadata } = core;
     const { basePath, anonymousPaths } = http;
     anonymousPaths.register('/login');
     anonymousPaths.register('/logout');
     anonymousPaths.register('/logged_out');
 
-    const sessionExpired = new SessionExpired(basePath);
+    const tenant = `${injectedMetadata.getInjectedVar('session.tenant', '')}`;
+    const sessionExpired = new SessionExpired(basePath, tenant);
     http.intercept(new UnauthorizedResponseHttpInterceptor(sessionExpired, anonymousPaths));
-    this.sessionTimeout = new SessionTimeout(notifications, sessionExpired, http);
+    this.sessionTimeout = new SessionTimeout(notifications, sessionExpired, http, tenant);
     http.intercept(new SessionTimeoutHttpInterceptor(this.sessionTimeout, anonymousPaths));
 
     return {

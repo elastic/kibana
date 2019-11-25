@@ -93,6 +93,7 @@ export const security = (kibana) => new kibana.Plugin({
       return {
         secureCookies: securityPlugin.__legacyCompat.config.secureCookies,
         session: {
+          tenant: server.newPlatform.setup.core.http.basePath.serverBasePath,
           idleTimeout: securityPlugin.__legacyCompat.config.session.idleTimeout,
           lifespan: securityPlugin.__legacyCompat.config.session.lifespan,
         },

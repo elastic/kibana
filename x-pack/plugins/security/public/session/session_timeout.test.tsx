@@ -99,7 +99,8 @@ describe('Session Timeout', () => {
     http = setup.http;
     notifications.toasts.add.mockReturnValue(toast as any);
     sessionExpired = createSessionExpiredMock();
-    sessionTimeout = new SessionTimeout(notifications, sessionExpired, http);
+    const tenant = '';
+    sessionTimeout = new SessionTimeout(notifications, sessionExpired, http, tenant);
 
     // default mocked response for checking session info
     http.fetch.mockResolvedValue(defaultSessionInfo);
