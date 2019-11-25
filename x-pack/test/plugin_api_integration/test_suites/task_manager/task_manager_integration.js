@@ -213,6 +213,12 @@ export default function ({ getService }) {
     }
 
     it('should run tasks in parallel, allowing for long running tasks along side faster tasks', async () => {
+      /**
+       * It's worth noting this test relies on the /event endpoint that forces Task Manager to hold off
+       * on completing a task until a call is made by the test suite.
+       * If we begin testing with multiple Kibana instacnes in Parallel this will likely become flaky.
+       * If you end up here because the test is flaky, this might be why.
+       */
       const fastTask = await scheduleTask({
         taskType: 'sampleTask',
         interval: `1s`,
