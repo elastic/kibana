@@ -92,7 +92,7 @@ export const serviceMapRoute = createRoute(() => ({
     query: rangeRt
   },
   handler: async ({ context }) => {
-    if (context.config['xpack.apm.servicemapEnabled']) {
+    if (context.config['xpack.apm.serviceMapEnabled']) {
       return getServiceMap();
     }
     return new Boom('Not found', { statusCode: 404 });

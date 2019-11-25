@@ -8,7 +8,7 @@ import * as Rx from 'rxjs';
 import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID, PDF_JOB_TYPE } from '../../../../common/constants';
-import { LevelLogger, oncePerServer } from '../../../../server/lib';
+import { LevelLogger } from '../../../../server/lib';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
 import {
   decryptJobHeaders,
@@ -18,7 +18,7 @@ import {
   getCustomLogo,
 } from '../../../common/execute_job/';
 
-function executeJobFn(server) {
+export function executeJobFactory(server) {
   const generatePdfObservable = generatePdfObservableFactory(server);
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PDF_JOB_TYPE, 'execute']);
 
@@ -71,5 +71,3 @@ function executeJobFn(server) {
     return process$.pipe(takeUntil(stop$)).toPromise();
   };
 }
-
-export const executeJobFactory = oncePerServer(executeJobFn);
