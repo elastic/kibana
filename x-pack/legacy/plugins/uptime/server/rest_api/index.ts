@@ -9,6 +9,7 @@ import { createGetAllRoute } from './pings';
 import { createGetIndexPatternRoute } from './index_pattern';
 import { createLogMonitorPageRoute, createLogOverviewPageRoute } from './telemetry';
 import { UMRestApiRouteCreator } from './types';
+import { createGetMonitorDetailsRoute } from './monitors';
 
 export * from './types';
 export { createRouteWithAuth } from './create_route_with_auth';
@@ -18,4 +19,5 @@ export const restApiRoutes: UMRestApiRouteCreator[] = [
   createLogMonitorPageRoute,
   createLogOverviewPageRoute,
   createGetIndexPatternRoute,
+  createGetMonitorDetailsRoute,
 ];

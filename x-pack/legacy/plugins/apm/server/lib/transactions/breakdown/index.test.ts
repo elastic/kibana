@@ -8,6 +8,7 @@ import { getTransactionBreakdown } from '.';
 import * as constants from './constants';
 import noDataResponse from './mock-responses/noData.json';
 import dataResponse from './mock-responses/data.json';
+import { APMConfig } from '../../../../../../../plugins/apm/server';
 
 const mockIndices = {
   'apm_oss.sourcemapIndices': 'myIndex',
@@ -16,7 +17,7 @@ const mockIndices = {
   'apm_oss.spanIndices': 'myIndex',
   'apm_oss.transactionIndices': 'myIndex',
   'apm_oss.metricsIndices': 'myIndex',
-  'apm_oss.apmAgentConfigurationIndex': 'myIndex'
+  apmAgentConfigurationIndex: 'myIndex'
 };
 
 function getMockSetup(esResponse: any) {
@@ -26,10 +27,12 @@ function getMockSetup(esResponse: any) {
     end: 500000,
     client: { search: clientSpy } as any,
     internalClient: { search: clientSpy } as any,
-    config: {
-      get: () => 'myIndex' as any,
-      has: () => true
-    },
+    config: new Proxy(
+      {},
+      {
+        get: () => 'myIndex'
+      }
+    ) as APMConfig,
     uiFiltersES: [],
     indices: mockIndices,
     dynamicIndexPattern: null as any

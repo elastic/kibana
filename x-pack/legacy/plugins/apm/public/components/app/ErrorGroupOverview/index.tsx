@@ -21,7 +21,7 @@ import { useTrackPageview } from '../../../../../infra/public';
 import { PROJECTION } from '../../../../common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 
-const ErrorGroupOverview: React.SFC = () => {
+const ErrorGroupOverview: React.FC = () => {
   const { urlParams, uiFilters } = useUrlParams();
 
   const { serviceName, start, end, sortField, sortDirection } = urlParams;

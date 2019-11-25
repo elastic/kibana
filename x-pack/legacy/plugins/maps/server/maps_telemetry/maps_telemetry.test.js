@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as savedObjectsPayload from
-  './test_resources/sample_saved_objects.json';
+import mapSavedObjects from './test_resources/sample_map_saved_objects.json';
+import indexPatternSavedObjects from './test_resources/sample_index_pattern_saved_objects';
 import { buildMapsTelemetry } from './maps_telemetry';
 
 describe('buildMapsTelemetry', () => {
@@ -15,10 +15,10 @@ describe('buildMapsTelemetry', () => {
   test('returns zeroed telemetry data when there are no saved objects',
     async () => {
 
-      const gisMaps = [];
-      const result = buildMapsTelemetry(gisMaps, settings);
+      const result = buildMapsTelemetry({ mapSavedObjects: [], indexPatternSavedObjects: [], settings });
 
       expect(result).toMatchObject({
+        indexPatternsWithGeoFieldCount: 0,
         attributesPerMap: {
           dataSourcesCount: {
             avg: 0,
@@ -42,10 +42,10 @@ describe('buildMapsTelemetry', () => {
 
   test('returns expected telemetry data from saved objects', async () => {
 
-    const gisMaps = savedObjectsPayload.saved_objects;
-    const result = buildMapsTelemetry(gisMaps, settings);
+    const result = buildMapsTelemetry({ mapSavedObjects, indexPatternSavedObjects, settings });
 
     expect(result).toMatchObject({
+      indexPatternsWithGeoFieldCount: 2,
       attributesPerMap: {
         dataSourcesCount: {
           avg: 2.6666666666666665,

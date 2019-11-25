@@ -4,37 +4,58 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiCheckboxGroup, EuiCode, EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
+import { EuiCode, EuiDescribedFormGroup, EuiFormRow, EuiCheckbox, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
-
-export type IndicesSelection = Record<string, boolean>;
-
-export type IndicesValidationError = 'TOO_FEW_SELECTED_INDICES';
+import {
+  ValidatedIndex,
+  ValidationIndicesUIError,
+} from '../../../../../containers/logs/log_analysis/log_analysis_setup_state';
+import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
 
 export const AnalysisSetupIndicesForm: React.FunctionComponent<{
-  indices: IndicesSelection;
-  onChangeSelectedIndices: (selectedIndices: IndicesSelection) => void;
-  validationErrors?: IndicesValidationError[];
-}> = ({ indices, onChangeSelectedIndices, validationErrors = [] }) => {
-  const choices = useMemo(
-    () =>
-      Object.keys(indices).map(indexName => ({
-        id: indexName,
-        label: <EuiCode>{indexName}</EuiCode>,
-      })),
-    [indices]
-  );
-
-  const handleCheckboxGroupChange = useCallback(
-    indexName => {
-      onChangeSelectedIndices({
-        ...indices,
-        [indexName]: !indices[indexName],
-      });
+  indices: ValidatedIndex[];
+  isValidating: boolean;
+  onChangeSelectedIndices: (selectedIndices: ValidatedIndex[]) => void;
+  valid: boolean;
+}> = ({ indices, isValidating, onChangeSelectedIndices, valid }) => {
+  const handleCheckboxChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      onChangeSelectedIndices(
+        indices.map(index => {
+          const checkbox = event.currentTarget;
+          return index.index === checkbox.id ? { ...index, isSelected: checkbox.checked } : index;
+        })
+      );
     },
     [indices, onChangeSelectedIndices]
+  );
+
+  const choices = useMemo(
+    () =>
+      indices.map(index => {
+        const validIndex = index.errors.length === 0;
+        const checkbox = (
+          <EuiCheckbox
+            key={index.index}
+            id={index.index}
+            label={<EuiCode>{index.index}</EuiCode>}
+            onChange={handleCheckboxChange}
+            checked={index.isSelected}
+            disabled={!validIndex}
+          />
+        );
+
+        return validIndex ? (
+          checkbox
+        ) : (
+          <div key={index.index}>
+            <EuiToolTip content={formatValidationError(index.errors)}>{checkbox}</EuiToolTip>
+          </div>
+        );
+      }),
+    [indices]
   );
 
   return (
@@ -53,20 +74,17 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
         />
       }
     >
-      <EuiFormRow
-        describedByIds={['indices']}
-        error={validationErrors.map(formatValidationError)}
-        fullWidth
-        isInvalid={validationErrors.length > 0}
-        label={indicesSelectionLabel}
-        labelType="legend"
-      >
-        <EuiCheckboxGroup
-          options={choices}
-          idToSelectedMap={indices}
-          onChange={handleCheckboxGroupChange}
-        />
-      </EuiFormRow>
+      <LoadingOverlayWrapper isLoading={isValidating}>
+        <EuiFormRow
+          describedByIds={['indices']}
+          fullWidth
+          isInvalid={!valid}
+          label={indicesSelectionLabel}
+          labelType="legend"
+        >
+          <>{choices}</>
+        </EuiFormRow>
+      </LoadingOverlayWrapper>
     </EuiDescribedFormGroup>
   );
 };
@@ -75,14 +93,50 @@ const indicesSelectionLabel = i18n.translate('xpack.infra.analysisSetup.indicesS
   defaultMessage: 'Indices',
 });
 
-const formatValidationError = (validationError: IndicesValidationError) => {
-  switch (validationError) {
-    case 'TOO_FEW_SELECTED_INDICES':
-      return i18n.translate(
-        'xpack.infra.analysisSetup.indicesSelectionTooFewSelectedIndicesDescription',
-        {
-          defaultMessage: 'Select at least one index name.',
-        }
-      );
-  }
+const formatValidationError = (errors: ValidationIndicesUIError[]): React.ReactNode => {
+  return errors.map(error => {
+    switch (error.error) {
+      case 'INDEX_NOT_FOUND':
+        return (
+          <p key={`${error.error}-${error.index}`}>
+            <FormattedMessage
+              id="xpack.infra.analysisSetup.indicesSelectionIndexNotFound"
+              defaultMessage="No indices match the pattern {index}"
+              values={{ index: <EuiCode>{error.index}</EuiCode> }}
+            />
+          </p>
+        );
+
+      case 'FIELD_NOT_FOUND':
+        return (
+          <p key={`${error.error}-${error.index}-${error.field}`}>
+            <FormattedMessage
+              id="xpack.infra.analysisSetup.indicesSelectionNoTimestampField"
+              defaultMessage="At least one index matching {index} lacks a required field {field}."
+              values={{
+                index: <EuiCode>{error.index}</EuiCode>,
+                field: <EuiCode>{error.field}</EuiCode>,
+              }}
+            />
+          </p>
+        );
+
+      case 'FIELD_NOT_VALID':
+        return (
+          <p key={`${error.error}-${error.index}-${error.field}`}>
+            <FormattedMessage
+              id="xpack.infra.analysisSetup.indicesSelectionTimestampNotValid"
+              defaultMessage="At least one index matching {index} has a field called {field} without the correct type."
+              values={{
+                index: <EuiCode>{error.index}</EuiCode>,
+                field: <EuiCode>{error.field}</EuiCode>,
+              }}
+            />
+          </p>
+        );
+
+      default:
+        return '';
+    }
+  });
 };

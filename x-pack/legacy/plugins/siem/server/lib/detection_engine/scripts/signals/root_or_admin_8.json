@@ -1,5 +1,6 @@
 {
   "rule_id": "rule-8",
+  "risk_score": 8,
   "description": "Detecting root and admin users",
   "index": ["auditbeat-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"],
   "interval": "5m",
@@ -8,6 +9,7 @@
   "type": "query",
   "from": "now-6m",
   "to": "now",
+  "output_index": ".siem-signals",
   "query": "user.name: root or user.name: admin",
   "language": "kuery",
   "enabled": false,
