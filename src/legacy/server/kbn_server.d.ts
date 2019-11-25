@@ -89,7 +89,6 @@ declare module 'hapi' {
     getBasePath(): string;
     getDefaultRoute(): Promise<string>;
     getUiSettingsService(): IUiSettingsClient;
-    getCapabilities(): Promise<Capabilities>;
   }
 
   interface ResponseToolkit {

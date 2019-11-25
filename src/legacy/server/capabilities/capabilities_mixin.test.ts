@@ -48,17 +48,6 @@ describe('capabilitiesMixin', () => {
     registerMock = jest.fn();
   });
 
-  it('exposes request#getCapabilities for retrieving legacy capabilities', async () => {
-    const kbnServer = getKbnServer();
-    jest.spyOn(server, 'decorate');
-    await capabilitiesMixin(kbnServer, server);
-    expect(server.decorate).toHaveBeenCalledWith(
-      'request',
-      'getCapabilities',
-      expect.any(Function)
-    );
-  });
-
   it('calls capabilities#registerCapabilitiesProvider for each legacy plugin specs', async () => {
     const getPluginSpec = (provider: () => any) => ({
       getUiCapabilitiesProvider: () => provider,

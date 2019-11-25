@@ -19,12 +19,12 @@
 
 import { deepFreeze, RecursiveReadonly } from '../../../utils';
 import { LegacyApp, App } from '../types';
-import { InjectedMetadataStart } from '../../injected_metadata';
+import { HttpStart } from '../../http';
 
 interface StartDeps {
   apps: ReadonlyMap<string, App>;
   legacyApps: ReadonlyMap<string, LegacyApp>;
-  injectedMetadata: InjectedMetadataStart;
+  http: HttpStart;
 }
 
 /**
@@ -62,12 +62,10 @@ export interface CapabilitiesStart {
  * @internal
  */
 export class CapabilitiesService {
-  public async start({
-    apps,
-    legacyApps,
-    injectedMetadata,
-  }: StartDeps): Promise<CapabilitiesStart> {
-    const capabilities = deepFreeze(injectedMetadata.getCapabilities());
+  public async start({ apps, legacyApps, http }: StartDeps): Promise<CapabilitiesStart> {
+    const capabilities = await this.fetchCapabilities(http, [...apps.keys(), ...legacyApps.keys()]);
+    // console.log('response:', capabilities);
+
     const availableApps = new Map(
       [...apps].filter(
         ([appId]) =>
@@ -87,5 +85,15 @@ export class CapabilitiesService {
       availableLegacyApps,
       capabilities,
     };
+  }
+
+  private async fetchCapabilities(http: HttpStart, appIds: string[]): Promise<Capabilities> {
+    return deepFreeze(
+      await http.post('/core/capabilities', {
+        body: JSON.stringify({
+          applications: appIds,
+        }),
+      })
+    );
   }
 }

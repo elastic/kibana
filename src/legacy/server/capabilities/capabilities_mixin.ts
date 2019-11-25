@@ -18,7 +18,6 @@
  */
 
 import { Server } from 'hapi';
-import { KibanaRequest } from '../../../core/server';
 import KbnServer from '../kbn_server';
 
 export async function capabilitiesMixin(kbnServer: KbnServer, server: Server) {
@@ -52,11 +51,5 @@ export async function capabilitiesMixin(kbnServer: KbnServer, server: Server) {
   // so we need to wait until after all plugins have been init'd to fetch uiCapabilities.
   kbnServer.afterPluginsInit(async () => {
     await registerLegacyCapabilities();
-  });
-
-  server.decorate('request', 'getCapabilities', function() {
-    return kbnServer.newPlatform.start.core.capabilities.resolveCapabilities(
-      KibanaRequest.from(this)
-    );
   });
 }

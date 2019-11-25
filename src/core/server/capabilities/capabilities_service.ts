@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { schema } from '@kbn/config-schema';
 import { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
@@ -86,14 +87,17 @@ export class CapabilitiesService {
     router.post(
       {
         path: '',
-        validate: false,
+        validate: {
+          body: schema.object({
+            applications: schema.arrayOf(schema.string()),
+          }),
+        },
       },
       async (ctx, req, res) => {
+        // const { applications } = req.body;
         const capabilities = await this.resolver(req);
         return res.ok({
-          body: {
-            capabilities,
-          },
+          body: capabilities,
         });
       }
     );
