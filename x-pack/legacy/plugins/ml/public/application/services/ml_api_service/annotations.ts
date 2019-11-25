@@ -4,33 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import chrome from 'ui/chrome';
 
-import { http } from '../http_service';
+import { Annotation } from '../../../../common/types/annotations';
+import { http, http$ } from '../http_service';
 
 const basePath = chrome.addBasePath('/api/ml');
 
 export const annotations = {
-  getAnnotations(obj) {
-    return http({
-      url: `${basePath}/annotations`,
+  getAnnotations(obj: {
+    jobIds: string[];
+    earliestMs: number;
+    latestMs: number;
+    maxAnnotations: number;
+  }) {
+    return http$<{ annotations: Record<string, Annotation[]> }>(`${basePath}/annotations`, {
       method: 'POST',
-      data: obj
+      body: obj,
     });
   },
-  indexAnnotation(obj) {
+  indexAnnotation(obj: any) {
     return http({
       url: `${basePath}/annotations/index`,
       method: 'PUT',
-      data: obj
+      data: obj,
     });
   },
-  deleteAnnotation(id) {
+  deleteAnnotation(id: string) {
     return http({
       url: `${basePath}/annotations/delete/${id}`,
-      method: 'DELETE'
+      method: 'DELETE',
     });
-  }
+  },
 };
