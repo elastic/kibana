@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { AssetType, InputType } from '../../../epm/common/api_specs/ingest/types';
 import { Policy, Status } from '../../../ingest/server/libs/adapters/policy/adapter_types';
 import { FrameworkUser, internalAuthData } from '../adapters/framework/adapter_types';
 import { AgentPolicy } from '../repositories/policies/types';
@@ -55,13 +54,13 @@ describe('Policies Lib', () => {
                   description:
                     'CoreDNS logs and metrics integration.\nThe CoreDNS integrations allows to gather logs and metrics from the CoreDNS DNS server to get better insights.\n',
                   title: 'CoreDNS',
-                  assets: [{ id: 'string', type: AssetType.IndexTemplate }],
+                  assets: [{ id: 'string', type: 'index-template' as any }],
                 },
                 streams: [
                   {
                     id: 'string',
                     input: {
-                      type: InputType.Etc,
+                      type: 'etc' as any,
                       config: { paths: '/var/log/*.log' },
                       ingest_pipelines: ['string'],
                       id: 'string',

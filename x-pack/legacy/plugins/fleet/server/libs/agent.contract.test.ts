@@ -5,13 +5,13 @@
  */
 
 import Slapshot from '@mattapperson/slapshot';
-import { Agent } from '../repositories/agents/types';
+import { SavedObject } from 'kibana/server';
 import { FrameworkUser, internalAuthData } from '../adapters/framework/adapter_types';
-import { compose } from './compose/memorized';
-import { FleetServerLib } from './types';
 import { SODatabaseAdapter } from '../adapters/saved_objects_database/default';
 import { MemorizeSODatabaseAdapter } from '../adapters/saved_objects_database/memorize_adapter';
-import { SavedObject } from 'kibana/server';
+import { Agent } from '../repositories/agents/types';
+import { compose } from './compose/memorized';
+import { FleetServerLib } from './types';
 
 jest.mock('./api_keys');
 jest.mock('./policy');

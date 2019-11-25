@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten, unique } from 'lodash';
+import { flatten, uniq } from 'lodash';
 import { Datasource, Policy } from '../../../ingest/server/libs/adapters/policy/adapter_types';
-import { PoliciesRepository, AgentPolicy } from '../repositories/policies/types';
 import { FrameworkUser } from '../adapters/framework/adapter_types';
+import { AgentPolicy, PoliciesRepository } from '../repositories/policies/types';
 
 export class PolicyLib {
   constructor(private readonly policyAdapter: PoliciesRepository) {}
@@ -27,7 +27,7 @@ export class PolicyLib {
   }
 
   private outputIDsFromDatasources(datasources: Datasource[] = []): string[] {
-    return unique(
+    return uniq(
       flatten(
         datasources.map((ds: Datasource) => {
           return ds.streams.map(stream => stream.output_id);
