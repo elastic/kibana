@@ -33,15 +33,25 @@ export function assignFeatureIds(featureCollection) {
   }
 
   const randomizedIds = _.shuffle(ids);
+  const features = [];
   for (let i = 0; i < featureCollection.features.length; i++) {
     const numericId = randomizedIds[i];
     const feature = featureCollection.features[i];
-    feature.properties = {
-      // preserve feature id provided by source so features can be referenced across fetches
-      [FEATURE_ID_PROPERTY_NAME]: feature.id == null ? numericId : feature.id,
-      // create new object for properties so original is not polluted with kibana internal props
-      ...feature.properties,
-    };
-    feature.id = numericId; // Mapbox feature state id, must be integer
+    features.push({
+      type: 'Feature',
+      geometry: feature.geometry,  // do not copy geometry, this object can be massive
+      properties: {
+        // preserve feature id provided by source so features can be referenced across fetches
+        [FEATURE_ID_PROPERTY_NAME]: feature.id == null ? numericId : feature.id,
+        // create new object for properties so original is not polluted with kibana internal props
+        ...feature.properties,
+      },
+      id: numericId, // Mapbox feature state id, must be integer
+    });
   }
+
+  return {
+    type: 'FeatureCollection',
+    features
+  };
 }

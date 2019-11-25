@@ -21,9 +21,9 @@ test('should provide unique id when feature.id is not provided', () => {
     ]
   };
 
-  assignFeatureIds(featureCollection);
-  const feature1 = featureCollection.features[0];
-  const feature2 = featureCollection.features[1];
+  const updatedFeatureCollection = assignFeatureIds(featureCollection);
+  const feature1 = updatedFeatureCollection.features[0];
+  const feature2 = updatedFeatureCollection.features[1];
   expect(typeof feature1.id).toBe('number');
   expect(typeof feature2.id).toBe('number');
   expect(feature1.id).toBe(feature1.properties[FEATURE_ID_PROPERTY_NAME]);
@@ -40,8 +40,8 @@ test('should preserve feature id when provided', () => {
     ]
   };
 
-  assignFeatureIds(featureCollection);
-  const feature1 = featureCollection.features[0];
+  const updatedFeatureCollection = assignFeatureIds(featureCollection);
+  const feature1 = updatedFeatureCollection.features[0];
   expect(typeof feature1.id).toBe('number');
   expect(feature1.id).not.toBe(feature1.properties[FEATURE_ID_PROPERTY_NAME]);
   expect(feature1.properties[FEATURE_ID_PROPERTY_NAME]).toBe(featureId);
@@ -57,8 +57,8 @@ test('should preserve feature id for falsy value', () => {
     ]
   };
 
-  assignFeatureIds(featureCollection);
-  const feature1 = featureCollection.features[0];
+  const updatedFeatureCollection = assignFeatureIds(featureCollection);
+  const feature1 = updatedFeatureCollection.features[0];
   expect(typeof feature1.id).toBe('number');
   expect(feature1.id).not.toBe(feature1.properties[FEATURE_ID_PROPERTY_NAME]);
   expect(feature1.properties[FEATURE_ID_PROPERTY_NAME]).toBe(0);
@@ -75,8 +75,8 @@ test('should not modify original feature properties', () => {
     ]
   };
 
-  assignFeatureIds(featureCollection);
-  const feature1 = featureCollection.features[0];
+  const updatedFeatureCollection = assignFeatureIds(featureCollection);
+  const feature1 = updatedFeatureCollection.features[0];
   expect(feature1.properties[FEATURE_ID_PROPERTY_NAME]).toBe(featureId);
   expect(featureProperties).not.toHaveProperty(FEATURE_ID_PROPERTY_NAME);
 });

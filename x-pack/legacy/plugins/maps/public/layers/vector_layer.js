@@ -469,15 +469,15 @@ export class VectorLayer extends AbstractLayer {
     try {
       startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, searchFilters);
       const layerName = await this.getDisplayName();
-      const { data: featureCollection, meta } =
+      const { data: sourceFeatureCollection, meta } =
         await this._source.getGeoJsonWithMeta(layerName, searchFilters,
           registerCancelCallback.bind(null, requestToken)
         );
-      assignFeatureIds(featureCollection);
-      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, featureCollection, meta);
+      const layerFeatureCollection = assignFeatureIds(sourceFeatureCollection);
+      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, layerFeatureCollection, meta);
       return {
         refreshed: true,
-        featureCollection: featureCollection
+        featureCollection: layerFeatureCollection
       };
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {
