@@ -17,6 +17,7 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
+import { SAVE_DUPLICATE_REJECTED } from 'ui/saved_objects/constants';
 import { SavedObject } from '../types';
 
 export function displayDuplicateTitleConfirmModal(
@@ -24,8 +25,7 @@ export function displayDuplicateTitleConfirmModal(
   confirmModalPromise: (
     message: string,
     options: { confirmButtonText: string }
-  ) => Promise<React.Component>,
-  rejectMessage: string
+  ) => Promise<React.Component>
 ) {
   const confirmMessage = i18n.translate(
     'common.ui.savedObjects.confirmModal.saveDuplicateConfirmationMessage',
@@ -43,5 +43,5 @@ export function displayDuplicateTitleConfirmModal(
         values: { name: savedObject.getDisplayName() },
       }
     ),
-  }).catch(() => Promise.reject(new Error(rejectMessage)));
+  }).catch(() => Promise.reject(new Error(SAVE_DUPLICATE_REJECTED)));
 }

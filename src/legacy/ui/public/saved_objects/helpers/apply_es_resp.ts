@@ -17,13 +17,14 @@
  * under the License.
  */
 import _ from 'lodash';
+import { PromiseService } from 'ui/promises';
 import { SavedObject } from 'ui/saved_objects/types';
 import { parseSearchSource } from 'ui/saved_objects/helpers/parse_search_source';
 import { SavedObjectNotFound } from '../../../../../plugins/kibana_utils/public';
 
 type EsResponse = Record<string, any>;
 
-export async function applyESResp(
+export async function applyEsResp(
   resp: EsResponse,
   savedObject: SavedObject,
   esType: string,
@@ -32,7 +33,7 @@ export async function applyESResp(
   hydrateIndexPattern: () => void,
   afterESResp: () => void,
   injectReferences: any,
-  AngularPromise: any
+  AngularPromise: PromiseService
 ) {
   savedObject._source = _.cloneDeep(resp._source);
 

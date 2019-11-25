@@ -20,7 +20,7 @@ import _ from 'lodash';
 import angular from 'angular';
 import { SavedObject } from 'ui/saved_objects/types';
 
-export function serialize(savedObject: SavedObject, mapping: any) {
+export function serializeSavedObject(savedObject: SavedObject, mapping: any) {
   const attributes = {} as Record<string, any>;
   const references = [];
 

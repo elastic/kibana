@@ -39,6 +39,7 @@ export function createSource(
   savedObject: SavedObject,
   savedObjectsClient: SavedObjectsClient,
   esType: string,
+  AngularPromise: any,
   confirmModalPromise: any,
   options = {}
 ) {

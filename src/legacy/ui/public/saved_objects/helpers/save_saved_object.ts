@@ -43,7 +43,7 @@ const checkForDuplicateTitle = (
   savedObject: SavedObject,
   savedObjectsClient: SavedObjectsClient,
   isTitleDuplicateConfirmed: boolean,
-  onTitleDuplicate: () => void | undefined,
+  onTitleDuplicate: (() => void) | undefined,
   Promise: any,
   confirmModalPromise: any
 ) => {
@@ -70,11 +70,7 @@ const checkForDuplicateTitle = (
 
       // TODO: make onTitleDuplicate a required prop and remove UI components from this class
       // Need to leave here until all users pass onTitleDuplicate.
-      return displayDuplicateTitleConfirmModal(
-        savedObject,
-        confirmModalPromise,
-        SAVE_DUPLICATE_REJECTED
-      );
+      return displayDuplicateTitleConfirmModal(savedObject, confirmModalPromise);
     }
   );
 };
@@ -82,7 +78,7 @@ const checkForDuplicateTitle = (
 interface SaveOptions {
   confirmOverwrite?: boolean;
   isTitleDuplicateConfirmed?: boolean;
-  onTitleDuplicate?: () => void;
+  onTitleDuplicate?: () => void | undefined;
   extractReferences?: (opts: {
     attributes: SavedObjectAttributes;
     references: SavedObjectReference[];
@@ -105,7 +101,7 @@ interface SaveOptions {
  * @return {Promise}
  * @resolved {String} - The id of the doc
  */
-export function save(
+export function saveSavedObject(
   esType: string,
   savedObject: SavedObject,
   savedObjectsClient: SavedObjectsClient,
@@ -154,6 +150,8 @@ export function save(
           savedObject,
           savedObjectsClient,
           esType,
+          Promise,
+          confirmModalPromise,
           savedObject.creationOpts({ references })
         );
       } else {
