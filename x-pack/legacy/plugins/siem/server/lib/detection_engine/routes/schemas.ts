@@ -72,7 +72,14 @@ export const createSignalsSchema = Joi.object({
   interval: interval.default('5m'),
   query: Joi.when('type', {
     is: 'query',
-    then: query.required(),
+    then: Joi.when('filters', {
+      is: Joi.exist(),
+      then: query
+        .optional()
+        .allow('')
+        .default(''),
+      otherwise: Joi.required(),
+    }),
     otherwise: Joi.when('type', {
       is: 'saved_query',
       then: query.optional(),

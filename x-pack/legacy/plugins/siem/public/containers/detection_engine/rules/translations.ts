@@ -9,3 +9,10 @@ import { i18n } from '@kbn/i18n';
 export const RULE_FETCH_FAILURE = i18n.translate('xpack.siem.containers.detectionEngine.rules', {
   defaultMessage: 'Failed to fetch Rules',
 });
+
+export const RULE_ADD_FAILURE = i18n.translate(
+  'xpack.siem.containers.detectionEngine.addRuleFailDescription',
+  {
+    defaultMessage: 'Failed to add Rule',
+  }
+);
