@@ -23,6 +23,7 @@ import {
   isInvalidRoleTemplate,
 } from '../../services/role_template_type';
 import { documentationLinks } from '../../../services/documentation_links';
+import { RoleTemplateTypeSelect } from './role_template_type_select';
 
 interface Props {
   roleTemplate: RoleTemplate;
@@ -52,21 +53,11 @@ export const RoleTemplateEditor = ({
 
   function getTemplateFormatSwitch() {
     return (
-      <EuiFormRow
-        hasEmptyLabelSpace={true}
-        helpText={
-          <EuiLink
-            target="_blank"
-            external
-            href={documentationLinks.getRoleMappingJsonTemplateDocUrl()}
-          >
-            Learn More
-          </EuiLink>
-        }
-      >
+      <EuiFormRow label="Returns JSON">
         <EuiSwitch
           checked={roleTemplate.format === 'json'}
           label="returns JSON"
+          showLabel={false}
           onChange={e => {
             onChange({
               ...roleTemplate,
@@ -79,6 +70,18 @@ export const RoleTemplateEditor = ({
   }
 
   function getEditorForTemplate() {
+    const templateTypeComboBox = (
+      <EuiFlexItem grow={false}>
+        <EuiFormRow label="Template type">
+          <RoleTemplateTypeSelect
+            roleTemplate={roleTemplate}
+            canUseStoredScripts={canUseStoredScripts}
+            canUseInlineScripts={canUseInlineScripts}
+            onChange={onChange}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+    );
     if (isInlineRoleTemplate(roleTemplate)) {
       const extraProps: Record<string, any> = {};
       if (!canUseInlineScripts) {
@@ -91,12 +94,9 @@ export const RoleTemplateEditor = ({
       }
       return (
         <Fragment>
+          {templateTypeComboBox}
           <EuiFlexItem grow={1} style={{ maxWidth: '400px' }}>
-            <EuiFormRow
-              label="template"
-              helpText="You can specify mustache templates here!"
-              {...extraProps}
-            >
+            <EuiFormRow label="Template" {...extraProps}>
               <EuiFieldText
                 value={roleTemplate.template.source}
                 onChange={e => {
@@ -127,6 +127,7 @@ export const RoleTemplateEditor = ({
       }
       return (
         <Fragment>
+          {templateTypeComboBox}
           <EuiFlexItem grow={1} style={{ maxWidth: '400px' }}>
             <EuiFormRow
               label="Stored script id"

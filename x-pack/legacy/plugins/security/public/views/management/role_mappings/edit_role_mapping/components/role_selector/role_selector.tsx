@@ -68,7 +68,7 @@ export class RoleSelector extends React.Component<Props, State> {
     return (
       <EuiFlexGroup direction="column" alignItems="flexStart">
         {roleTemplates.map((rt, index) => (
-          <EuiFlexItem key={index} style={{ width: '100%' }}>
+          <EuiFlexItem key={index}>
             <RoleTemplateEditor
               canUseStoredScripts={this.props.canUseStoredScripts}
               canUseInlineScripts={this.props.canUseInlineScripts}

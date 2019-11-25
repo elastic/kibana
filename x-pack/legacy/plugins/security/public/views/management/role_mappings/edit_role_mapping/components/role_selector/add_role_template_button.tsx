@@ -4,15 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiPopover,
-  EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
-} from '@elastic/eui';
+import React from 'react';
+import { EuiButtonEmpty, EuiCallOut } from '@elastic/eui';
 
 interface Props {
   canUseStoredScripts: boolean;
@@ -21,8 +14,6 @@ interface Props {
 }
 
 export const AddRoleTemplateButton = (props: Props) => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
   if (!props.canUseStoredScripts && !props.canUseInlineScripts) {
     return (
       <EuiCallOut iconType="alert" color="danger" title={'Role templates unavailable'}>
@@ -31,7 +22,7 @@ export const AddRoleTemplateButton = (props: Props) => {
     );
   }
 
-  if (!props.canUseStoredScripts) {
+  if (props.canUseInlineScripts) {
     return (
       <EuiButtonEmpty iconType="plusInCircle" onClick={() => props.onClick('inline')}>
         Add role template
@@ -39,63 +30,9 @@ export const AddRoleTemplateButton = (props: Props) => {
     );
   }
 
-  if (!props.canUseInlineScripts) {
-    return (
-      <EuiButtonEmpty iconType="plusInCircle" onClick={() => props.onClick('stored')}>
-        Add role template
-      </EuiButtonEmpty>
-    );
-  }
-
-  const button = (
-    <EuiButtonEmpty
-      iconType="plusInCircle"
-      onClick={() => {
-        setIsMenuOpen(!isMenuOpen);
-      }}
-    >
+  return (
+    <EuiButtonEmpty iconType="plusInCircle" onClick={() => props.onClick('stored')}>
       Add role template
     </EuiButtonEmpty>
-  );
-
-  const options: EuiContextMenuPanelItemDescriptor[] = [
-    {
-      name: 'New template',
-      icon: 'editorCodeBlock',
-      onClick: () => {
-        setIsMenuOpen(false);
-        props.onClick('inline');
-      },
-    },
-    {
-      name: 'Stored script',
-      icon: 'database',
-      onClick: () => {
-        setIsMenuOpen(false);
-        props.onClick('stored');
-      },
-    },
-  ];
-
-  const panels: EuiContextMenuPanelDescriptor[] = [
-    {
-      id: 0,
-      title: 'Add role template',
-      items: options,
-    },
-  ];
-
-  return (
-    <EuiPopover
-      id="addRoleTemplateContextMenu"
-      button={button}
-      isOpen={isMenuOpen}
-      closePopover={() => setIsMenuOpen(false)}
-      panelPaddingSize="none"
-      withTitle
-      anchorPosition="downLeft"
-    >
-      <EuiContextMenu title="Add role template" initialPanelId={0} panels={panels} />
-    </EuiPopover>
   );
 };

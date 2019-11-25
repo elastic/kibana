@@ -228,35 +228,42 @@ export class EditRoleMappingPage extends Component<Props, State> {
         }
         description={
           <EuiText size="s" color="subdued">
-            <p>
+            <span>
               <FormattedMessage
                 id="xpack.security.management.editRoleMapping.roleMappingRolesFormRowHelpText"
                 defaultMessage="Choose which roles to assign to your users."
               />
-              {this.state.mode === 'templates' ? (
-                <EuiButtonEmpty
-                  size="xs"
-                  onClick={() => {
-                    this.setState({ mode: 'roles' });
-                  }}
-                >
-                  [switch to roles]
-                </EuiButtonEmpty>
-              ) : (
-                <EuiButtonEmpty
-                  size="xs"
-                  onClick={() => {
-                    this.setState({ mode: 'templates' });
-                  }}
-                >
-                  [switch to role templates]
-                </EuiButtonEmpty>
-              )}
-            </p>
+            </span>
+            <EuiSpacer size="xs" />
+            {this.state.mode === 'templates' ? (
+              <EuiButtonEmpty
+                size="xs"
+                onClick={() => {
+                  this.setState({ mode: 'roles' });
+                }}
+                iconType="inputOutput"
+                iconSide="right"
+                style={{ marginLeft: '0px' }}
+              >
+                Switch to roles
+              </EuiButtonEmpty>
+            ) : (
+              <EuiButtonEmpty
+                size="xs"
+                onClick={() => {
+                  this.setState({ mode: 'templates' });
+                }}
+                iconType="inputOutput"
+                iconSide="right"
+                style={{ marginLeft: '0px' }}
+              >
+                Switch to role remplates
+              </EuiButtonEmpty>
+            )}
           </EuiText>
         }
       >
-        <EuiFormRow>
+        <EuiFormRow fullWidth={true}>
           <RoleSelector
             roleMapping={this.state.roleMapping!}
             mode={this.state.mode}
