@@ -158,7 +158,6 @@ export const siem = (kibana: any) => {
       const {
         config,
         getInjectedUiAppVars,
-        indexPatternsServiceFactory,
         injectUiAppVars,
         newPlatform,
         plugins,
@@ -176,7 +175,6 @@ export const siem = (kibana: any) => {
       const serverFacade = {
         config,
         getInjectedUiAppVars,
-        indexPatternsServiceFactory,
         injectUiAppVars,
         plugins: { alerting: plugins.alerting, xpack_main: plugins.xpack_main },
         route: route.bind(server),

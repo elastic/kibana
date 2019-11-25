@@ -4,12 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { GenericParams } from 'elasticsearch';
 import * as GraphiQL from 'apollo-server-module-graphiql';
 import { GraphQLSchema } from 'graphql';
 import { runHttpQuery } from 'apollo-server-core';
 import { schema as configSchema } from '@kbn/config-schema';
-import { CoreSetup, IRouter, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
+import {
+  CoreSetup,
+  IRouter,
+  KibanaResponseFactory,
+  RequestHandlerContext,
+  APICaller,
+} from 'src/core/server';
+import { IndexPatternsFetcher } from '../../../../../../../src/plugins/data/server';
 import { ServerFacade, RequestFacade } from '../../types';
 
 import {
@@ -19,10 +25,6 @@ import {
   internalFrameworkRequest,
   WrappableRequest,
 } from './types';
-
-interface CallWithRequestParams extends GenericParams {
-  max_concurrent_shard_requests?: number;
-}
 
 export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   public version: string;
@@ -38,9 +40,8 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   public async callWithRequest(
     req: FrameworkRequest,
     endpoint: string,
-    params: CallWithRequestParams,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ...rest: any[]
+    params: Record<string, any>
   ) {
     const { elasticsearch, uiSettings } = req.context.core;
     const includeFrozen = await uiSettings.client.get('search:includeFrozen');
@@ -48,18 +49,14 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
       endpoint === 'msearch'
         ? await uiSettings.client.get('courier:maxConcurrentShardRequests')
         : 0;
-    const fields = await elasticsearch.dataClient.callAsCurrentUser(
-      endpoint,
-      {
-        ...params,
-        ignore_throttled: !includeFrozen,
-        ...(maxConcurrentShardRequests > 0
-          ? { max_concurrent_shard_requests: maxConcurrentShardRequests }
-          : {}),
-      },
-      ...rest
-    );
-    return fields;
+
+    return elasticsearch.dataClient.callAsCurrentUser(endpoint, {
+      ...params,
+      ignore_throttled: !includeFrozen,
+      ...(maxConcurrentShardRequests > 0
+        ? { max_concurrent_shard_requests: maxConcurrentShardRequests }
+        : {}),
+    });
   }
 
   public registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void {
@@ -178,18 +175,15 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   }
 
   public getIndexPatternsService(request: FrameworkRequest): FrameworkIndexPatternsService {
-    return this.__legacy.indexPatternsServiceFactory({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      callCluster: async (method: string, args: [GenericParams], ...rest: any[]) => {
-        const fieldCaps = await this.callWithRequest(
-          request,
-          method,
-          { ...args, allowNoIndices: true } as GenericParams,
-          ...rest
-        );
-        return fieldCaps;
-      },
-    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const callCluster: APICaller = async (endpoint: string, params?: Record<string, any>) => {
+      return this.callWithRequest(request, endpoint, {
+        ...params,
+        allowNoIndices: true,
+      });
+    };
+
+    return new IndexPatternsFetcher(callCluster);
   }
 
   public getSavedObjectsService() {

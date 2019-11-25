@@ -9,7 +9,6 @@ import { Legacy } from 'kibana';
 export interface ServerFacade {
   config: Legacy.Server['config'];
   getInjectedUiAppVars: Legacy.Server['getInjectedUiAppVars'];
-  indexPatternsServiceFactory: Legacy.Server['indexPatternsServiceFactory'];
   injectUiAppVars: Legacy.Server['injectUiAppVars'];
   plugins: {
     alerting?: Legacy.Server['plugins']['alerting'];
