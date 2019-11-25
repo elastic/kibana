@@ -25,9 +25,7 @@ const MAX_COUNT = '10';
 const EXPIRE_AFTER_VALUE = '30';
 const repository = fixtures.getRepository({ name: `a${getRandomString()}`, type: 'fs' });
 
-// We need to skip the tests until react 16.9.0 is released
-// which supports asynchronous code inside act()
-describe.skip('<PolicyAdd />', () => {
+describe('<PolicyAdd />', () => {
   let testBed: PolicyFormTestBed;
 
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -101,7 +99,6 @@ describe.skip('<PolicyAdd />', () => {
         test('should require at least one index', async () => {
           const { find, form, component } = testBed;
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             // Toggle "All indices" switch
             form.toggleEuiSwitch('allIndicesToggle', false);
@@ -166,7 +163,6 @@ describe.skip('<PolicyAdd />', () => {
       it('should send the correct payload', async () => {
         const { actions } = testBed;
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           actions.clickSubmitButton();
           await nextTick();
@@ -202,7 +198,6 @@ describe.skip('<PolicyAdd />', () => {
 
         httpRequestsMockHelpers.setAddPolicyResponse(undefined, { body: error });
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           actions.clickSubmitButton();
           await nextTick();

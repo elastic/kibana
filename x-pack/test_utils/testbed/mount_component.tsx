@@ -48,17 +48,8 @@ export const mountComponentSync = (config: Config): ReactWrapper => {
 export const mountComponentAsync = async (config: Config): Promise<ReactWrapper> => {
   const Comp = getCompFromConfig(config);
 
-  /**
-   * In order for hooks with effects to work in our tests
-   * we need to wrap the mounting under the new act "async"
-   * that ships with React 16.9.0
-   *
-   * https://github.com/facebook/react/pull/14853
-   * https://github.com/threepointone/react-act-examples/blob/master/sync.md
-   */
   let component: ReactWrapper;
 
-  // @ts-ignore
   await act(async () => {
     component = mountWithIntl(<Comp {...config.props} />);
   });

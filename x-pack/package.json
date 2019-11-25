@@ -24,8 +24,7 @@
     }
   },
   "resolutions": {
-    "**/@types/node": "10.12.27",
-    "**/react-test-renderer": "^16.12.0"
+    "**/@types/node": "10.12.27"
   },
   "devDependencies": {
     "@cypress/webpack-preprocessor": "^4.1.0",
@@ -44,6 +43,8 @@
     "@storybook/addon-storyshots": "^5.2.6",
     "@storybook/react": "^5.2.6",
     "@storybook/theming": "^5.2.6",
+    "@testing-library/react": "^9.3.2",
+    "@testing-library/jest-dom": "^4.2.4",
     "@types/angular": "^1.6.56",
     "@types/archiver": "^3.0.0",
     "@types/base64-js": "^1.2.5",
@@ -155,9 +156,7 @@
     "pixelmatch": "4.0.2",
     "proxyquire": "1.8.0",
     "react-docgen-typescript-loader": "^3.1.1",
-    "react-hooks-testing-library": "^0.3.8",
     "react-test-renderer": "^16.12.0",
-    "react-testing-library": "^6.0.0",
     "sass-loader": "^7.3.1",
     "sass-resources-loader": "^2.0.1",
     "simple-git": "1.116.0",
@@ -300,7 +299,7 @@
     "react-apollo": "^2.1.4",
     "react-beautiful-dnd": "^8.0.7",
     "react-datetime": "^2.14.0",
-    "react-dom": "^16.8.0",
+    "react-dom": "^16.12.0",
     "react-dropzone": "^4.2.9",
     "react-fast-compare": "^2.0.4",
     "react-markdown": "^3.4.1",

@@ -4,24 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/*
-  One test relies on react-dom at a version of 16.9... it can be enabled
-  once renovate completes the upgrade.  Relevant code has been commented out
-  in the meantime.
-*/
-
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
-// import { act } from 'react-dom/test-utils';
+import { act } from 'react-dom/test-utils';
 import { App } from '../app';
 import { sharedWorkpads, WorkpadNames, tick } from '../../test';
 import {
   getScrubber as scrubber,
   getScrubberSlideContainer as scrubberContainer,
   getPageControlsCenter as center,
-  // getAutoplayTextField as autoplayText,
-  // getAutoplayCheckbox as autoplayCheck,
-  // getAutoplaySubmit as autoplaySubmit,
+  getAutoplayTextField as autoplayText,
+  getAutoplayCheckbox as autoplayCheck,
+  getAutoplaySubmit as autoplaySubmit,
+  getContextMenuItems as menuItems,
+  getSettingsTrigger as trigger,
   getToolbarCheckbox as toolbarCheck,
   getCanvas as canvas,
   getFooter as footer,
@@ -131,7 +127,6 @@ describe('<App />', () => {
     expect(scrubber(wrapper).prop('isScrubberVisible')).toEqual(false);
   });
 
-  /*
   test('autoplay starts when triggered', async () => {
     const wrapper = getWrapper('austin');
     trigger(wrapper).simulate('click');
@@ -153,5 +148,4 @@ describe('<App />', () => {
     wrapper.update();
     expect(center(wrapper).text()).not.toEqual('Page 1 of 28');
   });
-*/
 });

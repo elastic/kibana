@@ -45,16 +45,6 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-// Suppress warnings about "act" until we use React 16.9
-/* eslint-disable no-console */
-const originalError = console.error;
-beforeAll(() => {
-  console.error = jest.fn();
-});
-afterAll(() => {
-  console.error = originalError;
-});
-
 export const waitForPromises = () => new Promise(resolve => setTimeout(resolve, 0));
 
 /**

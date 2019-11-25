@@ -18,7 +18,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { renderHook, act } from 'react-hooks-testing-library';
+import { renderHook, act } from '@testing-library/react-hooks';
 
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { EuiUtils } from './eui_utils';

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { render, cleanup } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import {
   withUnconnectedElementsLoadedTelemetry,
   WorkpadLoadedMetric,
@@ -62,8 +62,6 @@ describe('Elements Loaded Telemetry', () => {
   beforeEach(() => {
     trackMetric.mockReset();
   });
-
-  afterEach(cleanup);
 
   it('tracks when all resolvedArgs are completed', () => {
     const { rerender } = render(

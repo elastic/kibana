@@ -16,19 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { renderHook, act } from 'react-hooks-testing-library';
+import { renderHook, act } from '@testing-library/react-hooks';
 import { buildSearchBody, useEsDocSearch, ElasticRequestState } from './use_es_doc_search';
 import { DocProps } from './doc';
-
-// Suppress warnings about "act" until we use React 16.9
-/* eslint-disable no-console */
-const originalError = console.error;
-beforeAll(() => {
-  console.error = jest.fn();
-});
-afterAll(() => {
-  console.error = originalError;
-});
 
 describe('Test of <Doc /> helper / hook', () => {
   test('buildSearchBody', () => {

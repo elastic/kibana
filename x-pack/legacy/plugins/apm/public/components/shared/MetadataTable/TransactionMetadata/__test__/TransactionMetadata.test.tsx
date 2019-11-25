@@ -6,9 +6,8 @@
 
 import React from 'react';
 import { TransactionMetadata } from '..';
-import { render, cleanup } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import { Transaction } from '../../../../../../typings/es_schemas/ui/Transaction';
-import 'jest-dom/extend-expect';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument
@@ -37,8 +36,6 @@ function getTransaction() {
 }
 
 describe('TransactionMetadata', () => {
-  afterEach(cleanup);
-
   it('should render a transaction with all sections', () => {
     const transaction = getTransaction();
     const output = render(<TransactionMetadata transaction={transaction} />);

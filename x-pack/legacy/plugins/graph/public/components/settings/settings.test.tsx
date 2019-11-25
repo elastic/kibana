@@ -9,7 +9,7 @@ import { EuiTab, EuiListGroupItem, EuiButton, EuiAccordion, EuiFieldText } from 
 import * as Rx from 'rxjs';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { Settings, AngularProps } from './settings';
-import { act } from 'react-testing-library';
+import { act } from '@testing-library/react';
 import { ReactWrapper } from 'enzyme';
 import { UrlTemplateForm } from './url_template_form';
 import {

@@ -49,7 +49,6 @@ describe.skip('<WatchList />', () => {
         test('should display an empty prompt', async () => {
           const { component, exists } = await setup();
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             await nextTick();
             component.update();
@@ -86,7 +85,6 @@ describe.skip('<WatchList />', () => {
 
           testBed = await setup();
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             await nextTick();
             testBed.component.update();
@@ -219,7 +217,6 @@ describe.skip('<WatchList />', () => {
               },
             });
 
-            // @ts-ignore (remove when react 16.9.0 is released)
             await act(async () => {
               confirmButton!.click();
               await nextTick();

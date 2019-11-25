@@ -5,7 +5,7 @@
  */
 
 import { fetch } from '../../../utils/fetch';
-import { renderHook } from 'react-hooks-testing-library';
+import { renderHook } from '@testing-library/react-hooks';
 import { useMetricsExplorerState } from './use_metric_explorer_state';
 import { MetricsExplorerOptionsContainer } from '../../../containers/metrics_explorer/use_metrics_explorer_options';
 import React from 'react';

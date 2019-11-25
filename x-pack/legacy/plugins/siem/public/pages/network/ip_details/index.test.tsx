@@ -111,13 +111,8 @@ jest.mock('ui/documentation_links', () => ({
   },
 }));
 
-// Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
-/* eslint-disable no-console */
-const originalError = console.error;
-
 describe('Ip Details', () => {
   beforeAll(() => {
-    console.error = jest.fn();
     (global as GlobalWithFetch).fetch = jest.fn().mockImplementationOnce(() =>
       Promise.resolve({
         ok: true,
@@ -129,7 +124,6 @@ describe('Ip Details', () => {
   });
 
   afterAll(() => {
-    console.error = originalError;
     delete (global as GlobalWithFetch).fetch;
   });
   const state: State = mockGlobalState;

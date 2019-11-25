@@ -5,8 +5,7 @@
  */
 
 import React from 'react';
-import { cleanup, render } from 'react-testing-library';
-import 'jest-dom/extend-expect';
+import { render } from '@testing-library/react';
 
 import * as CheckPrivilige from '../../../../../privilege/check_privilege';
 import { queryByTestSubj } from '../../../../../util/test_utils';
@@ -22,8 +21,6 @@ jest.mock('../../../../../privilege/check_privilege', () => ({
 jest.mock('ui/new_platform');
 
 describe('DeleteAction', () => {
-  afterEach(cleanup);
-
   test('When canDeleteDataFrameAnalytics permission is false, button should be disabled.', () => {
     const { container } = render(<DeleteAction item={mockAnalyticsListItem} />);
     expect(queryByTestSubj(container, 'mlAnalyticsJobDeleteButton')).toHaveAttribute('disabled');

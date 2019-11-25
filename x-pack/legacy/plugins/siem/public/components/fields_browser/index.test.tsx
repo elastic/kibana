@@ -13,17 +13,8 @@ import { TestProviders } from '../../mock';
 import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from './helpers';
 
 import { StatefulFieldsBrowserComponent } from '.';
-// Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
-/* eslint-disable no-console */
-const originalError = console.error;
-describe('StatefulFieldsBrowser', () => {
-  beforeAll(() => {
-    console.error = jest.fn();
-  });
 
-  afterAll(() => {
-    console.error = originalError;
-  });
+describe('StatefulFieldsBrowser', () => {
   const timelineId = 'test';
 
   test('it renders the Fields button, which displays the fields browser on click', () => {

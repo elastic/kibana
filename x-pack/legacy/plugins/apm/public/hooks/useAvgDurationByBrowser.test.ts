@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { renderHook } from 'react-hooks-testing-library';
+import { renderHook } from '@testing-library/react-hooks';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import * as useFetcherModule from './useFetcher';
 import { useAvgDurationByBrowser } from './useAvgDurationByBrowser';

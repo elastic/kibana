@@ -60,7 +60,6 @@ describe.skip('<WatchStatus />', () => {
 
       testBed = await setup();
 
-      // @ts-ignore (remove when react 16.9.0 is released)
       await act(async () => {
         await nextTick();
         testBed.component.update();
@@ -180,7 +179,6 @@ describe.skip('<WatchStatus />', () => {
           },
         });
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           confirmButton!.click();
           await nextTick();

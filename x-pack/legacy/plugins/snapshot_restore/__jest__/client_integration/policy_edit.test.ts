@@ -22,9 +22,7 @@ jest.mock('ui/i18n', () => {
   return { I18nContext };
 });
 
-// We need to skip the tests until react 16.9.0 is released
-// which supports asynchronous code inside act()
-describe.skip('<PolicyEdit />', () => {
+describe('<PolicyEdit />', () => {
   let testBed: PolicyFormTestBed;
   let testBedPolicyAdd: PolicyFormTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -43,7 +41,6 @@ describe.skip('<PolicyEdit />', () => {
 
       testBed = await setup();
 
-      // @ts-ignore (remove when react 16.9.0 is released)
       await act(async () => {
         await nextTick();
         testBed.component.update();
@@ -64,7 +61,6 @@ describe.skip('<PolicyEdit />', () => {
     test('should use the same Form component as the "<PolicyAdd />" section', async () => {
       testBedPolicyAdd = await setupPolicyAdd();
 
-      // @ts-ignore (remove when react 16.9.0 is released)
       await act(async () => {
         await nextTick();
         testBedPolicyAdd.component.update();
@@ -108,7 +104,6 @@ describe.skip('<PolicyEdit />', () => {
       it('should send the correct payload with changed values', async () => {
         const { actions } = testBed;
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           actions.clickSubmitButton();
           await nextTick();

@@ -19,9 +19,7 @@ jest.mock('ui/i18n', () => {
   return { I18nContext };
 });
 
-// We need to skip the tests until react 16.9.0 is released
-// which supports asynchronous code inside act()
-describe.skip('<RepositoryAdd />', () => {
+describe('<RepositoryAdd />', () => {
   let testBed: RepositoryAddTestBed;
 
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -156,7 +154,6 @@ describe.skip('<RepositoryAdd />', () => {
           actions.selectRepositoryType(type);
           actions.clickNextButton();
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.clickSubmitButton();
             await nextTick();
@@ -176,7 +173,6 @@ describe.skip('<RepositoryAdd />', () => {
             }
           });
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.clickBackButton();
             await nextTick(100);
@@ -217,7 +213,6 @@ describe.skip('<RepositoryAdd />', () => {
         form.setInputValue('locationInput', repository.settings.location);
         form.selectCheckBox('compressToggle');
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           actions.clickSubmitButton();
           await nextTick();
@@ -251,7 +246,6 @@ describe.skip('<RepositoryAdd />', () => {
 
         httpRequestsMockHelpers.setSaveRepositoryResponse(undefined, { body: error });
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           actions.clickSubmitButton();
           await nextTick();
@@ -278,7 +272,6 @@ describe.skip('<RepositoryAdd />', () => {
         // Fill step 2
         form.setInputValue('locationInput', repository.settings.location);
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           actions.clickSubmitButton();
           await nextTick();
