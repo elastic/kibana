@@ -24,6 +24,7 @@ export const CustomUrlsSelection: FC = () => {
         job={jobCreator.jobConfig}
         jobCustomUrls={jobCreator.customUrls ?? []}
         setCustomUrls={setCustomUrls}
+        editMode="modal"
       />
     </Description>
   );

@@ -13,6 +13,12 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
+  EuiOverlayMask,
+  EuiModal,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiModalFooter,
 } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -40,6 +46,7 @@ interface CustomUrlsProps {
   job: Job;
   jobCustomUrls: UrlConfig[];
   setCustomUrls: (customUrls: UrlConfig[]) => void;
+  editMode: 'inline' | 'modal';
 }
 
 interface CustomUrlsState {
@@ -188,7 +195,7 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
     this.setState({ editorOpen: false });
   };
 
-  render() {
+  renderEditor() {
     const {
       customUrls,
       editorOpen,
@@ -198,69 +205,108 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
       queryEntityFieldNames,
     } = this.state;
 
+    const editMode = this.props.editMode ?? 'inline';
+    const editor = (
+      <CustomUrlEditor
+        customUrl={editorSettings}
+        setEditCustomUrl={this.setEditCustomUrl}
+        savedCustomUrls={customUrls}
+        dashboards={dashboards}
+        indexPatterns={indexPatterns}
+        queryEntityFieldNames={queryEntityFieldNames}
+      />
+    );
+
     const isValidEditorSettings =
-      editorOpen === true && editorSettings !== undefined
+      editorOpen && editorSettings !== undefined
         ? isValidCustomUrlSettings(editorSettings, customUrls)
         : true;
+
+    const addButton = (
+      <EuiButton onClick={this.addNewCustomUrl} isDisabled={!isValidEditorSettings}>
+        <FormattedMessage
+          id="xpack.ml.jobsList.editJobFlyout.customUrls.addButtonLabel"
+          defaultMessage="Add"
+        />
+      </EuiButton>
+    );
+
+    const testButton = (
+      <EuiButtonEmpty
+        iconType="popout"
+        iconSide="right"
+        onClick={this.onTestButtonClick}
+        isDisabled={!isValidEditorSettings}
+      >
+        <FormattedMessage
+          id="xpack.ml.jobsList.editJobFlyout.customUrls.testButtonLabel"
+          defaultMessage="Test"
+        />
+      </EuiButtonEmpty>
+    );
+
+    return editMode === 'inline' ? (
+      <EuiPanel className="edit-custom-url-panel">
+        <EuiButtonIcon
+          color="text"
+          onClick={this.closeEditor}
+          iconType="cross"
+          aria-label={i18n.translate(
+            'xpack.ml.jobsList.editJobFlyout.customUrls.closeEditorAriaLabel',
+            {
+              defaultMessage: 'Close custom URL editor',
+            }
+          )}
+          className="close-editor-button"
+        />
+
+        {editor}
+
+        <EuiSpacer size="m" />
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>{addButton}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{testButton}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    ) : (
+      <EuiOverlayMask>
+        <EuiModal onClose={this.closeEditor} initialFocus="[name=label]">
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>
+              <FormattedMessage
+                id="xpack.ml.jobsList.editJobFlyout.customUrls.addCustomUrlButtonLabel"
+                defaultMessage="Add custom URL"
+              />
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
+
+          <EuiModalBody>{editor}</EuiModalBody>
+
+          <EuiModalFooter>
+            {testButton}
+            {addButton}
+          </EuiModalFooter>
+        </EuiModal>
+      </EuiOverlayMask>
+    );
+  }
+
+  render() {
+    const { customUrls, editorOpen } = this.state;
+    const { editMode = 'inline' } = this.props;
 
     return (
       <>
         <EuiSpacer size="m" />
-        {editorOpen === false ? (
+        {(!editorOpen || editMode === 'modal') && (
           <EuiButton size="s" onClick={this.editNewCustomUrl}>
             <FormattedMessage
               id="xpack.ml.jobsList.editJobFlyout.customUrls.addCustomUrlButtonLabel"
               defaultMessage="Add custom URL"
             />
           </EuiButton>
-        ) : (
-          <EuiPanel className="edit-custom-url-panel">
-            <EuiButtonIcon
-              color="text"
-              onClick={this.closeEditor}
-              iconType="cross"
-              aria-label={i18n.translate(
-                'xpack.ml.jobsList.editJobFlyout.customUrls.closeEditorAriaLabel',
-                {
-                  defaultMessage: 'Close custom URL editor',
-                }
-              )}
-              className="close-editor-button"
-            />
-            <CustomUrlEditor
-              customUrl={editorSettings}
-              setEditCustomUrl={this.setEditCustomUrl}
-              savedCustomUrls={customUrls}
-              dashboards={dashboards}
-              indexPatterns={indexPatterns}
-              queryEntityFieldNames={queryEntityFieldNames}
-            />
-            <EuiSpacer size="m" />
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiButton onClick={this.addNewCustomUrl} isDisabled={!isValidEditorSettings}>
-                  <FormattedMessage
-                    id="xpack.ml.jobsList.editJobFlyout.customUrls.addButtonLabel"
-                    defaultMessage="Add"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  iconType="popout"
-                  iconSide="right"
-                  onClick={this.onTestButtonClick}
-                  isDisabled={!isValidEditorSettings}
-                >
-                  <FormattedMessage
-                    id="xpack.ml.jobsList.editJobFlyout.customUrls.testButtonLabel"
-                    defaultMessage="Test"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
         )}
+        {editorOpen && this.renderEditor()}
         <EuiSpacer size="l" />
         <CustomUrlList
           job={this.props.job}

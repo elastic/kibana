@@ -223,6 +223,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
           compressed
         >
           <EuiFieldText
+            name="label"
             value={label}
             onChange={onLabelChange}
             isInvalid={isInvalidLabel}
