@@ -13,7 +13,7 @@ interface Props {
   user: AuthenticatedUser;
 }
 
-export const AccountManagementPage: React.SFC<Props> = props => (
+export const AccountManagementPage: React.FC<Props> = props => (
   <EuiPage>
     <EuiPageBody restrictWidth>
       <EuiPanel>
