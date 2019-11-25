@@ -17,11 +17,12 @@
  * under the License.
  */
 
+import { map } from 'rxjs/operators';
 import { CoreContext } from '../core_context';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
 import { PluginInitializerContext, PluginManifest, PluginOpaqueId } from './types';
-import { CoreSetup, CoreStart } from '..';
+import { CoreSetup, CoreStart, ConfigPath } from '..';
 
 /**
  * This returns a facade for `CoreContext` that will be exposed to the plugin initializer.
@@ -70,7 +71,13 @@ export function createPluginInitializerContext(
        * Note: naming not final here, it will be renamed in a near future (https://github.com/elastic/kibana/issues/46240)
        * @deprecated
        */
-      globalConfig__deprecated$: coreContext.configService.getConfig$(),
+      globalConfig__deprecated$: coreContext.configService.getConfig$().pipe(
+        map(conf => ({
+          has: (configPath: ConfigPath) => conf.has(configPath),
+          get: (configPath: ConfigPath) => conf.get(configPath),
+          getFlattenedPaths: () => conf.getFlattenedPaths(),
+        }))
+      ),
 
       /**
        * Reads the subset of the config at the `configPath` defined in the plugin
@@ -88,6 +95,8 @@ export function createPluginInitializerContext(
     },
   };
 }
+
+// function exposeReadOnlyMethods(conf: )
 
 /**
  * This returns a facade for `CoreContext` that will be exposed to the plugin `setup` method.

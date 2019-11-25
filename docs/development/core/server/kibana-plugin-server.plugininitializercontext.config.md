@@ -8,7 +8,7 @@
 
 ```typescript
 config: {
-        globalConfig__deprecated$: Observable<Config>;
+        globalConfig__deprecated$: Observable<Pick<Config, 'has' | 'get' | 'getFlattenedPaths'>>;
         create: <T = ConfigSchema>() => Observable<T>;
         createIfExists: <T = ConfigSchema>() => Observable<T | undefined>;
     };

@@ -19,7 +19,7 @@
 
 import { createPluginInitializerContext } from './plugin_context';
 import { CoreContext } from '../core_context';
-import { Env, ObjectToConfigAdapter } from '../config';
+import { Env } from '../config';
 import { configServiceMock } from '../config/config_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { getEnvOptions } from '../config/__mocks__/env';
@@ -63,7 +63,6 @@ test('should return a globalConfig handler in the context (to be deprecated)', a
   const configObject = await pluginInitializerContext.config.globalConfig__deprecated$
     .pipe(first())
     .toPromise();
-  expect(configObject).toBeInstanceOf(ObjectToConfigAdapter);
 
   const configPaths = configObject.getFlattenedPaths();
   expect(configPaths).toHaveLength(1);
