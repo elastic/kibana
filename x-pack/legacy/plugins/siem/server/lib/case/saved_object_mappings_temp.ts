@@ -73,9 +73,6 @@ export const caseCommentSavedObjectMappings: {
 } = {
   [caseCommentSavedObjectType]: {
     properties: {
-      case_workflow_id: {
-        type: 'keyword',
-      },
       comment: {
         type: 'text',
       },

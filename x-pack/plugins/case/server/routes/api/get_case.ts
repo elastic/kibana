@@ -16,10 +16,14 @@ export function initGetCaseApi({ caseService, router }: RouteDeps) {
         params: schema.object({
           id: schema.string(),
         }),
+        query: schema.object({
+          includeComments: schema.string({ defaultValue: 'true' }),
+        }),
       },
     },
     async (context, request, response) => {
       let theCase;
+      const includeComments = JSON.parse(request.query.includeComments);
       try {
         theCase = await caseService.getCase({
           client: context.core.savedObjects.client,
@@ -28,12 +32,15 @@ export function initGetCaseApi({ caseService, router }: RouteDeps) {
       } catch (error) {
         return response.customError(wrapError(error));
       }
+      if (!includeComments) {
+        return response.ok({ body: theCase });
+      }
       try {
         const theComments = await caseService.getAllCaseComments({
           client: context.core.savedObjects.client,
           caseId: request.params.id,
         });
-        return response.ok({ body: { case: theCase, comments: theComments } });
+        return response.ok({ body: { ...theCase, comments: theComments } });
       } catch (error) {
         return response.customError(wrapError(error));
       }

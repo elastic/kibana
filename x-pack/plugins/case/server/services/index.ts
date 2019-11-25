@@ -12,6 +12,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
+  SavedObjectReference,
 } from 'kibana/server';
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../constants';
 import {
@@ -36,8 +37,10 @@ interface GetCommentArgs extends ClientArgs {
 interface PostCaseArgs extends ClientArgs {
   attributes: NewCaseFormatted;
 }
+
 interface PostCommentArgs extends ClientArgs {
   attributes: NewCommentFormatted;
+  references: SavedObjectReference[];
 }
 interface UpdateCaseArgs extends ClientArgs {
   caseId: string;
@@ -123,8 +126,7 @@ export class CaseService {
         this.log.debug(`Attempting to GET all comments for case ${caseId}`);
         return await client.find({
           type: CASE_COMMENT_SAVED_OBJECT,
-          search: caseId,
-          searchFields: ['case_workflow_id'],
+          hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
         });
       } catch (error) {
         this.log.debug(`Error on GET all comments for case ${caseId}: ${error}`);
@@ -162,10 +164,10 @@ export class CaseService {
         throw error;
       }
     },
-    postNewComment: async ({ client, attributes }: PostCommentArgs) => {
+    postNewComment: async ({ client, attributes, references }: PostCommentArgs) => {
       try {
         this.log.debug(`Attempting to POST a new comment`);
-        return await client.create(CASE_COMMENT_SAVED_OBJECT, { ...attributes });
+        return await client.create(CASE_COMMENT_SAVED_OBJECT, attributes, { references });
       } catch (error) {
         this.log.debug(`Error on POST a new comment: ${error}`);
         throw error;

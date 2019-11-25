@@ -8,6 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { formatNewComment, wrapError } from './utils';
 import { NewCommentSchema } from './schema';
 import { RouteDeps } from '.';
+import { CASE_SAVED_OBJECT } from '../../constants';
 
 export function initPostCommentApi({ caseService, router }: RouteDeps) {
   router.post(
@@ -35,8 +36,14 @@ export function initPostCommentApi({ caseService, router }: RouteDeps) {
             newComment: request.body,
             full_name: user.full_name,
             username: user.username,
-            case_workflow_id: request.params.id,
           }),
+          references: [
+            {
+              type: CASE_SAVED_OBJECT,
+              name: `associated-${CASE_SAVED_OBJECT}`,
+              id: request.params.id,
+            },
+          ],
         });
 
         return response.ok({ body: newComment });

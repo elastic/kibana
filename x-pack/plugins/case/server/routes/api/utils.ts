@@ -31,19 +31,16 @@ interface NewCommentArgs {
   newComment: NewCommentType;
   full_name?: UserType['full_name'];
   username: UserType['username'];
-  case_workflow_id: string;
 }
 export const formatNewComment = ({
   newComment,
   full_name,
   username,
-  case_workflow_id,
 }: NewCommentArgs): NewCommentFormatted => ({
   ...newComment,
   creation_date: new Date().valueOf(),
   last_edit_date: new Date().valueOf(),
   user: { full_name, username },
-  case_workflow_id,
 });
 
 export const formatUpdatedCase = (updateCase: UpdatedCaseType): UpdatedCaseFormatted => ({

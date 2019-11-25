@@ -20,7 +20,6 @@ export const CommentSchema = schema.object({
   creation_date: schema.number(),
   last_edit_date: schema.number(),
   user: UserSchema,
-  case_workflow_id: schema.string(),
 });
 
 export const UpdatedCommentSchema = schema.object({
