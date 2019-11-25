@@ -5,8 +5,27 @@
  */
 
 import { MonitorGroups, MonitorGroupIterator } from './search';
+import { Snapshot } from '../../../../common/runtime_types';
 
-export const getSnapshotCountHelper = async (iterator: MonitorGroupIterator) => {
+const reduceItemsToCounts = (items: MonitorGroups[]) => {
+  let down = 0;
+  let up = 0;
+  items.forEach(item => {
+    if (item.groups.some(group => group.status === 'down')) {
+      down++;
+    } else {
+      up++;
+    }
+  });
+  return {
+    down,
+    mixed: 0,
+    total: down + up,
+    up,
+  };
+};
+
+export const getSnapshotCountHelper = async (iterator: MonitorGroupIterator): Promise<Snapshot> => {
   const items: MonitorGroups[] = [];
   let res: MonitorGroups | null;
   // query the index to find the most recent check group for each monitor/location
@@ -16,30 +35,6 @@ export const getSnapshotCountHelper = async (iterator: MonitorGroupIterator) => 
       items.push(res);
     }
   } while (res !== null);
-  return (
-    items
-      // result is a list of 'up' | 'down', 1:1 per monitor
-      .map(({ groups }) =>
-        // for each location, infer a status
-        groups.reduce<'up' | 'down'>((acc, cur) => {
-          if (acc === 'down') {
-            return acc;
-          }
-          return cur.status === 'down' ? 'down' : 'up';
-        }, 'up')
-      )
-      // count each status up into a single object
-      .reduce(
-        (acc, cur) => {
-          if (cur === 'up') {
-            acc.up++;
-          } else {
-            acc.down++;
-          }
-          acc.total++;
-          return acc;
-        },
-        { up: 0, down: 0, mixed: 0, total: 0 }
-      )
-  );
+
+  return reduceItemsToCounts(items);
 };
