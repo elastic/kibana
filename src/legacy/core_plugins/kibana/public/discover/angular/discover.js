@@ -77,6 +77,7 @@ import { start as data } from '../../../../data/public/legacy';
 import { generateFilters } from '../../../../../../plugins/data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { registerTimefilterWithGlobalStateFactory } from '../../../../../ui/public/timefilter/setup_router';
+import { FilterStateManager } from '../../../../data/public/filter/filter_manager';
 
 const { savedQueryService } = data.search.services;
 
@@ -188,10 +189,13 @@ function discoverController(
   config,
   kbnUrl,
   localStorage,
-  uiCapabilities
+  uiCapabilities,
+  getAppState,
+  globalState,
 ) {
   const responseHandler = vislibSeriesResponseHandlerProvider().handler;
   const getUnhashableStates = Private(getUnhashableStatesProvider);
+  new FilterStateManager(globalState, getAppState, filterManager);
 
 
   const inspectorAdapters = {
