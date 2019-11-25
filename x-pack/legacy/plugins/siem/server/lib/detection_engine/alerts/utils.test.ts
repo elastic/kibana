@@ -112,10 +112,11 @@ describe('utils', () => {
         const findex = 'myfakeindex';
         const fid = 'somefakeid';
         const version = '1';
-        // 'myfakeindexsomefakeid1'
-        const generatedHash = '91309a297453bae2d02bf116e9c401be502254253f9add4a90f718fd4db7fa0b';
-        const firstHash = generateId(findex, fid, version);
-        const secondHash = generateId(findex, fid, version);
+        const ruleId = 'rule-1';
+        // 'myfakeindexsomefakeid1rule-1'
+        const generatedHash = '342404d620be4344d6d90dd0461d1d1848aec457944d5c5f40cc0cbfedb36679';
+        const firstHash = generateId(findex, fid, version, ruleId);
+        const secondHash = generateId(findex, fid, version, ruleId);
         expect(firstHash).toEqual(generatedHash);
         expect(secondHash).toEqual(generatedHash);
         expect(Buffer.byteLength(firstHash, 'utf8')).toBeLessThan(512); // 512 bytes is maximum size of _id field
@@ -126,14 +127,15 @@ describe('utils', () => {
         const findex2 = 'mysecondfakeindex';
         const fid = 'somefakeid';
         const version = '1';
-        // 'myfakeindexsomefakeid1'
+        const ruleId = 'rule-1';
+        // 'myfakeindexsomefakeid1rule-1'
         const firstGeneratedHash =
-          '91309a297453bae2d02bf116e9c401be502254253f9add4a90f718fd4db7fa0b';
-        // 'mysecondfakeindexsomefakeid1'
+          '342404d620be4344d6d90dd0461d1d1848aec457944d5c5f40cc0cbfedb36679';
+        // 'mysecondfakeindexsomefakeid1rule-1'
         const secondGeneratedHash =
-          '6f0968c02efd606b94bfc6dc3f3fc57aa4bc3cbbab569b7ad51e090a7e4b8040';
-        const firstHash = generateId(findex, fid, version);
-        const secondHash = generateId(findex2, fid, version);
+          'a852941273f805ffe9006e574601acc8ae1148d6c0b3f7f8c4785cba8f6b768a';
+        const firstHash = generateId(findex, fid, version, ruleId);
+        const secondHash = generateId(findex2, fid, version, ruleId);
         expect(firstHash).toEqual(firstGeneratedHash);
         expect(secondHash).toEqual(secondGeneratedHash);
         expect(Buffer.byteLength(firstHash, 'utf8')).toBeLessThan(512); // 512 bytes is maximum size of _id field
@@ -145,14 +147,15 @@ describe('utils', () => {
         const fid = 'somefakeid';
         const fid2 = 'somefakeid2';
         const version = '1';
-        // 'myfakeindexsomefakeid1'
+        const ruleId = 'rule-1';
+        // 'myfakeindexsomefakeid1rule-1'
         const firstGeneratedHash =
-          '91309a297453bae2d02bf116e9c401be502254253f9add4a90f718fd4db7fa0b';
-        // 'myfakeindexsomefakeid21'
+          '342404d620be4344d6d90dd0461d1d1848aec457944d5c5f40cc0cbfedb36679';
+        // 'myfakeindexsomefakeid21rule-1'
         const secondGeneratedHash =
-          '09dbae1c0dd2673daa17069723eadd3440ab0ac111e48b0ca079b2508525fb49';
-        const firstHash = generateId(findex, fid, version);
-        const secondHash = generateId(findex, fid2, version);
+          '7d33faea18159fd010c4b79890620e8b12cdc88ec1d370149d0e5552ce860255';
+        const firstHash = generateId(findex, fid, version, ruleId);
+        const secondHash = generateId(findex, fid2, version, ruleId);
         expect(firstHash).toEqual(firstGeneratedHash);
         expect(secondHash).toEqual(secondGeneratedHash);
         expect(Buffer.byteLength(firstHash, 'utf8')).toBeLessThan(512); // 512 bytes is maximum size of _id field
@@ -164,14 +167,15 @@ describe('utils', () => {
         const fid = 'somefakeid';
         const version = '1';
         const version2 = '2';
-        // 'myfakeindexsomefakeid1'
+        const ruleId = 'rule-1';
+        // 'myfakeindexsomefakeid1rule-1'
         const firstGeneratedHash =
-          '91309a297453bae2d02bf116e9c401be502254253f9add4a90f718fd4db7fa0b';
-        // myfakeindexsomefakeid2'
+          '342404d620be4344d6d90dd0461d1d1848aec457944d5c5f40cc0cbfedb36679';
+        // myfakeindexsomefakeid2rule-1'
         const secondGeneratedHash =
-          '4ff04fb2bffe36ec96b2f673f199292701df0faeb685d5a1c8b88ba54711b7bd';
-        const firstHash = generateId(findex, fid, version);
-        const secondHash = generateId(findex, fid, version2);
+          'f016f3071fa9df9221d2fb2ba92389d4d388a4347c6ec7a4012c01cb1c640a40';
+        const firstHash = generateId(findex, fid, version, ruleId);
+        const secondHash = generateId(findex, fid, version2, ruleId);
         expect(firstHash).toEqual(firstGeneratedHash);
         expect(secondHash).toEqual(secondGeneratedHash);
         expect(Buffer.byteLength(firstHash, 'utf8')).toBeLessThan(512); // 512 bytes is maximum size of _id field
@@ -183,8 +187,29 @@ describe('utils', () => {
           'myfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindex';
         const fid = 'somefakeid';
         const version = '1';
-        const firstHash = generateId(longIndexName, fid, version);
+        const ruleId = 'rule-1';
+        const firstHash = generateId(longIndexName, fid, version, ruleId);
         expect(Buffer.byteLength(firstHash, 'utf8')).toBeLessThan(512); // 512 bytes is maximum size of _id field
+      });
+      test('two docs with same index, same id, same version number, and different rule ids should have different id', () => {
+        const findex = 'myfakeindex';
+        const fid = 'somefakeid';
+        const version = '1';
+        const ruleId = 'rule-1';
+        const ruleId2 = 'rule-2';
+        // 'myfakeindexsomefakeid1rule-1'
+        const firstGeneratedHash =
+          '342404d620be4344d6d90dd0461d1d1848aec457944d5c5f40cc0cbfedb36679';
+        // myfakeindexsomefakeid1rule-2'
+        const secondGeneratedHash =
+          '1eb04f997086f8b3b143d4d9b18ac178c4a7423f71a5dad9ba8b9e92603c6863';
+        const firstHash = generateId(findex, fid, version, ruleId);
+        const secondHash = generateId(findex, fid, version, ruleId2);
+        expect(firstHash).toEqual(firstGeneratedHash);
+        expect(secondHash).toEqual(secondGeneratedHash);
+        expect(Buffer.byteLength(firstHash, 'utf8')).toBeLessThan(512); // 512 bytes is maximum size of _id field
+        expect(Buffer.byteLength(secondHash, 'utf8')).toBeLessThan(512);
+        expect(firstHash).not.toEqual(secondHash);
       });
     });
     test('create successful bulk create', async () => {

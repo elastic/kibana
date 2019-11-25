@@ -135,9 +135,14 @@ interface SingleBulkCreateParams {
   enabled: boolean;
 }
 
-export const generateId = (docIndex: string, docId: string, version: string): string =>
+export const generateId = (
+  docIndex: string,
+  docId: string,
+  version: string,
+  ruleId: string
+): string =>
   createHash('sha256')
-    .update(docIndex.concat(docId, version))
+    .update(docIndex.concat(docId, version, ruleId))
     .digest('hex');
 
 // Bulk Index documents.
@@ -170,7 +175,12 @@ export const singleBulkCreate = async ({
     {
       create: {
         _index: signalsIndex,
-        _id: generateId(doc._index, doc._id, doc._version ? doc._version.toString() : ''),
+        _id: generateId(
+          doc._index,
+          doc._id,
+          doc._version ? doc._version.toString() : '',
+          signalParams.ruleId ?? ''
+        ),
       },
     },
     buildBulkBody({ doc, signalParams, id, name, createdBy, updatedBy, interval, enabled }),
