@@ -47,36 +47,39 @@ jest.mock('../../services/job_service', () => ({
   }
 }));
 
-jest.mock('../../services/results_service', () => ({
-  mlResultsService: {
-    getMetricData(indices) {
+jest.mock('../../services/results_service', () => {
+  const { of } = require('rxjs');
+  return {
+    mlResultsService: {
+      getMetricData(indices) {
       // this is for 'call anomalyChangeListener with actual series config'
-      if (indices[0] === 'farequote-2017') {
-        return Promise.resolve(mockSeriesPromisesResponse[0][0]);
-      }
-      // this is for 'filtering should skip values of null'
-      return Promise.resolve(mockMetricClone);
-    },
-    getRecordsForCriteria() {
-      return Promise.resolve(mockSeriesPromisesResponse[0][1]);
-    },
-    getScheduledEventsByBucket() {
-      return Promise.resolve(mockSeriesPromisesResponse[0][2]);
-    },
-    getEventDistributionData(indices) {
+        if (indices[0] === 'farequote-2017') {
+          return of(mockSeriesPromisesResponse[0][0]);
+        }
+        // this is for 'filtering should skip values of null'
+        return of(mockMetricClone);
+      },
+      getRecordsForCriteria() {
+        return of(mockSeriesPromisesResponse[0][1]);
+      },
+      getScheduledEventsByBucket() {
+        return of(mockSeriesPromisesResponse[0][2]);
+      },
+      getEventDistributionData(indices) {
       // this is for 'call anomalyChangeListener with actual series config'
-      if (indices[0] === 'farequote-2017') {
-        return Promise.resolve([]);
+        if (indices[0] === 'farequote-2017') {
+          return Promise.resolve([]);
+        }
+        // this is for 'filtering should skip values of null' and
+        // resolves with a dummy object to trigger the processing
+        // of the event distribution chartdata filtering
+        return Promise.resolve([{
+          entity: 'mock'
+        }]);
       }
-      // this is for 'filtering should skip values of null' and
-      // resolves with a dummy object to trigger the processing
-      // of the event distribution chartdata filtering
-      return Promise.resolve([{
-        entity: 'mock'
-      }]);
     }
-  }
-}));
+  };
+});
 
 jest.mock('../../util/string_utils', () => ({
   mlEscape(d) { return d; }
