@@ -73,7 +73,7 @@ const overviewNetworkStats = (data: OverviewNetworkData) => [
     title: (
       <FormattedMessage
         id="xpack.siem.overview.filebeatPanwTitle"
-        defaultMessage="Filebeat Palo Alto Network"
+        defaultMessage="Filebeat Palo Alto Networks"
       />
     ),
     id: 'filebeatPanw',

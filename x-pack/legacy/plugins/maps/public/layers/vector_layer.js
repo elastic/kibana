@@ -15,8 +15,7 @@ import {
   SOURCE_DATA_ID_ORIGIN,
   FEATURE_VISIBLE_PROPERTY_NAME,
   EMPTY_FEATURE_COLLECTION,
-  LAYER_TYPE,
-  FIELD_ORIGIN,
+  LAYER_TYPE
 } from '../../common/constants';
 import _ from 'lodash';
 import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
@@ -82,9 +81,11 @@ export class VectorLayer extends AbstractLayer {
     this._joins = [];
     if (options.layerDescriptor.joins) {
       options.layerDescriptor.joins.forEach((joinDescriptor) => {
-        this._joins.push(new InnerJoin(joinDescriptor, this._source.getInspectorAdapters()));
+        const join = new InnerJoin(joinDescriptor, this._source);
+        this._joins.push(join);
       });
     }
+    this._style = new VectorStyle(this._descriptor.style, this._source, this);
   }
 
   destroy() {
@@ -172,26 +173,8 @@ export class VectorLayer extends AbstractLayer {
     return this._style.getDynamicPropertiesArray().length > 0;
   }
 
-  getLegendDetails() {
-    const getFieldLabel = async fieldName => {
-      const ordinalFields = await this._getOrdinalFields();
-      const field = ordinalFields.find(({ name }) => {
-        return name === fieldName;
-      });
-
-      return field ? field.label : fieldName;
-    };
-
-    const getFieldFormatter = async field => {
-      const source = this._getFieldSource(field);
-      if (!source) {
-        return null;
-      }
-
-      return await source.getFieldFormatter(field.name);
-    };
-
-    return this._style.getLegendDetails(getFieldLabel, getFieldFormatter);
+  renderLegendDetails() {
+    return this._style.renderLegendDetails();
   }
 
   _getBoundsBasedOnData() {
@@ -232,46 +215,24 @@ export class VectorLayer extends AbstractLayer {
     return this._source.getDisplayName();
   }
 
-
   async getDateFields() {
-    const timeFields = await this._source.getDateFields();
-    return timeFields.map(({ label, name }) => {
-      return {
-        label,
-        name,
-        origin: SOURCE_DATA_ID_ORIGIN
-      };
-    });
+    return await this._source.getDateFields();
   }
 
-
   async getNumberFields() {
-    const numberFields = await this._source.getNumberFields();
-    const numberFieldOptions = numberFields.map(({ label, name }) => {
-      return {
-        label,
-        name,
-        origin: FIELD_ORIGIN.SOURCE
-      };
-    });
+    const numberFieldOptions = await this._source.getNumberFields();
     const joinFields = [];
     this.getValidJoins().forEach(join => {
-      const fields = join.getJoinFields().map(joinField => {
-        return {
-          ...joinField,
-          origin: FIELD_ORIGIN.JOIN,
-        };
-      });
+      const fields = join.getJoinFields();
       joinFields.push(...fields);
     });
-
     return [...numberFieldOptions, ...joinFields];
   }
 
-  async _getOrdinalFields() {
+  async getOrdinalFields() {
     return [
-      ... await this.getDateFields(),
-      ... await this.getNumberFields()
+      ...await this.getDateFields(),
+      ...await this.getNumberFields()
     ];
   }
 
@@ -382,7 +343,7 @@ export class VectorLayer extends AbstractLayer {
 
     const joinSource = join.getRightJoinSource();
     const sourceDataId = join.getSourceId();
-    const requestToken = Symbol(`layer-join-refresh:${ this.getId()} - ${sourceDataId}`);
+    const requestToken = Symbol(`layer-join-refresh:${this.getId()} - ${sourceDataId}`);
 
     const searchFilters = {
       ...dataFilters,
@@ -409,7 +370,7 @@ export class VectorLayer extends AbstractLayer {
       } = await joinSource.getPropertiesMap(
         searchFilters,
         leftSourceName,
-        join.getLeftFieldName(),
+        join.getLeftField().getName(),
         registerCancelCallback.bind(null, requestToken));
       stopLoading(sourceDataId, requestToken, propertiesMap);
       return {
@@ -441,9 +402,7 @@ export class VectorLayer extends AbstractLayer {
     const fieldNames = [
       ...this._source.getFieldNames(),
       ...this._style.getSourceFieldNames(),
-      ...this.getValidJoins().map(join => {
-        return join.getLeftFieldName();
-      })
+      ...this.getValidJoins().map(join => join.getLeftField().getName())
     ];
 
     return {
@@ -475,9 +434,8 @@ export class VectorLayer extends AbstractLayer {
       let isFeatureVisible = true;
       for (let j = 0; j < joinStates.length; j++) {
         const joinState = joinStates[j];
-        const InnerJoin = joinState.join;
-        const rightMetricFields = InnerJoin.getRightMetricFields();
-        const canJoinOnCurrent = InnerJoin.joinPropertiesToFeature(feature, joinState.propertiesMap, rightMetricFields);
+        const innerJoin = joinState.join;
+        const canJoinOnCurrent = innerJoin.joinPropertiesToFeature(feature, joinState.propertiesMap);
         isFeatureVisible = isFeatureVisible && canJoinOnCurrent;
       }
 
@@ -497,7 +455,7 @@ export class VectorLayer extends AbstractLayer {
     startLoading, stopLoading, onLoadError, registerCancelCallback, dataFilters
   }) {
 
-    const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
+    const requestToken = Symbol(`layer-source-refresh:${this.getId()} - source`);
     const searchFilters = this._getSearchFilters(dataFilters);
     const canSkip = await this._canSkipSourceUpdate(this._source, SOURCE_DATA_ID_ORIGIN, searchFilters);
     if (canSkip) {
@@ -531,8 +489,6 @@ export class VectorLayer extends AbstractLayer {
     }
   }
 
-
-
   async syncData(syncContext) {
     if (!this.isVisible() || !this.showAtZoomLevel(syncContext.dataFilters.zoom)) {
       return;
@@ -545,7 +501,6 @@ export class VectorLayer extends AbstractLayer {
 
     const joinStates = await this._syncJoins(syncContext);
 
-    // _performInnerJoins sets feature FEATURE_VISIBLE_PROPERTY_NAME, even for sources without joins.
     await this._performInnerJoins(sourceResult, joinStates, syncContext.updateSourceData);
   }
 
@@ -739,7 +694,7 @@ export class VectorLayer extends AbstractLayer {
       const tooltipProperty = tooltipsFromSource[i];
       const matchingJoins = [];
       for (let j = 0; j < this._joins.length; j++) {
-        if (this._joins[j].getLeftFieldName() === tooltipProperty.getPropertyKey()) {
+        if (this._joins[j].getLeftField().getName() === tooltipProperty.getPropertyKey()) {
           matchingJoins.push(this._joins[j]);
         }
       }
@@ -775,28 +730,4 @@ export class VectorLayer extends AbstractLayer {
       return feature.properties[FEATURE_ID_PROPERTY_NAME] === id;
     });
   }
-
-  _getFieldSource(field) {
-    if (!field) {
-      return null;
-    }
-
-    if (field.origin === FIELD_ORIGIN.SOURCE) {
-      return this._source;
-    }
-
-    const join = this.getValidJoins().find(join => {
-      const matchingField = join.getJoinFields().find(joinField => {
-        return joinField.name === field.name;
-      });
-      return !!matchingField;
-    });
-
-    if (!join) {
-      return null;
-    }
-
-    return join.getRightJoinSource();
-  }
-
 }
