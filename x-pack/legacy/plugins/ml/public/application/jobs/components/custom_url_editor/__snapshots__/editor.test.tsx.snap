@@ -43,6 +43,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
         fullWidth={false}
         isInvalid={false}
         isLoading={false}
+        name="label"
         onChange={[Function]}
         value="Open Dashboard 1"
       />
@@ -248,6 +249,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
         fullWidth={false}
         isInvalid={false}
         isLoading={false}
+        name="label"
         onChange={[Function]}
         value="Open Discover"
       />
@@ -493,6 +495,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
         fullWidth={false}
         isInvalid={false}
         isLoading={false}
+        name="label"
         onChange={[Function]}
         value="Open Discover"
       />
@@ -738,6 +741,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
         fullWidth={false}
         isInvalid={true}
         isLoading={false}
+        name="label"
         onChange={[Function]}
         value=""
       />
@@ -947,6 +951,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
         fullWidth={false}
         isInvalid={true}
         isLoading={false}
+        name="label"
         onChange={[Function]}
         value="Show airline"
       />
@@ -1061,6 +1066,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
         fullWidth={false}
         isInvalid={false}
         isLoading={false}
+        name="label"
         onChange={[Function]}
         value="View airline"
       />
