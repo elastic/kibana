@@ -9,4 +9,4 @@
 set -e
 ./check_env_variables.sh
 
-node ../../../../scripts/convert_saved_search_to_signals.js $1 $2
+node ../../../../scripts/convert_saved_search_to_rules.js $1 $2

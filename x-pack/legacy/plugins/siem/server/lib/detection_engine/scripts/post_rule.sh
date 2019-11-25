@@ -10,20 +10,20 @@ set -e
 ./check_env_variables.sh
 
 # Uses a default if no argument is specified
-SIGNALS=(${@:-./signals/root_or_admin_update_1.json})
+RULES=(${@:-./rules/root_or_admin_1.json})
 
-# Example: ./update_signal.sh
-# Example: ./update_signal.sh ./signals/root_or_admin_1.json
-# Example glob: ./post_signal.sh ./signals/*
-for SIGNAL in "${SIGNALS[@]}"
+# Example: ./post_rule.sh
+# Example: ./post_rule.sh ./rules/root_or_admin_1.json
+# Example glob: ./post_rule.sh ./rules/*
+for RULE in "${RULES[@]}"
 do {
-  [ -e "$SIGNAL" ] || continue
+  [ -e "$RULE" ] || continue
   curl -s -k \
   -H 'Content-Type: application/json' \
   -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -X PUT ${KIBANA_URL}${SPACE_URL}/api/detection_engine/rules \
-  -d @${SIGNAL} \
+  -X POST ${KIBANA_URL}${SPACE_URL}/api/detection_engine/rules \
+   -d @${RULE} \
   | jq .;
 } &
 done
