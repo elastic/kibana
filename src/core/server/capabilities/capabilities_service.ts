@@ -88,6 +88,26 @@ export class CapabilitiesService {
       {
         path: '',
         options: {
+          authRequired: true,
+        },
+        validate: {
+          body: schema.object({
+            applications: schema.arrayOf(schema.string()),
+          }),
+        },
+      },
+      async (ctx, req, res) => {
+        const { applications } = req.body;
+        const capabilities = await this.resolveCapabilities(req, applications);
+        return res.ok({
+          body: capabilities,
+        });
+      }
+    );
+    router.post(
+      {
+        path: '/fallback',
+        options: {
           authRequired: false,
         },
         validate: {
