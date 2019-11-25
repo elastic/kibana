@@ -3,10 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
-import { fileUploadRoutes } from './server/routes/file_upload';
-import { registerFileUploadUsageCollector } from './server/telemetry';
-import mappings from './mappings';
+import { FileUploadPlugin } from './server/plugin';
+import { mappings } from './mappings';
 
 export const fileUpload = kibana => {
   return new kibana.Plugin({
@@ -23,12 +21,23 @@ export const fileUpload = kibana => {
     },
 
     init(server) {
-      const { xpack_main: xpackMainPlugin } = server.plugins;
-      const usageCollection = server.newPlatform.setup.plugins.usageCollection;
-      mirrorPluginStatus(xpackMainPlugin, this);
-      fileUploadRoutes(server);
+      const coreSetup = server.newPlatform.setup.core;
+      const pluginsSetup = {
+        usageCollection: server.newPlatform.setup.plugins.usageCollection,
+      };
 
-      registerFileUploadUsageCollector(usageCollection, server);
+      // legacy dependencies
+      const __LEGACY = {
+        route: server.route.bind(server),
+        plugins: {
+          elasticsearch: server.plugins.elasticsearch,
+        },
+        savedObjects: {
+          getSavedObjectsRepository: server.savedObjects.getSavedObjectsRepository
+        },
+      };
+
+      new FileUploadPlugin().setup(coreSetup, pluginsSetup, __LEGACY);
     }
   });
 };

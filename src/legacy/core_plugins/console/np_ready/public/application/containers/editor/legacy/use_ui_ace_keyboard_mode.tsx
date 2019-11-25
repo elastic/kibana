@@ -35,41 +35,40 @@ export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | n
   const overlayMountNode = useRef<HTMLDivElement | null>(null);
   const autoCompleteVisibleRef = useRef<boolean>(false);
 
-  function onDismissOverlay(event: KeyboardEvent) {
-    if (event.keyCode === keyCodes.ENTER) {
-      event.preventDefault();
-      aceTextAreaElement!.focus();
-    }
-  }
-
-  function enableOverlay() {
-    if (overlayMountNode.current) {
-      overlayMountNode.current.focus();
-    }
-  }
-
-  const isAutoCompleteVisible = () => {
-    const autoCompleter = document.querySelector<HTMLDivElement>('.ace_autocomplete');
-    if (!autoCompleter) {
-      return false;
-    }
-    // The autoComplete is just hidden when it's closed, not removed from the DOM.
-    return autoCompleter.style.display !== 'none';
-  };
-
-  const documentKeyDownListener = () => {
-    autoCompleteVisibleRef.current = isAutoCompleteVisible();
-  };
-
-  const aceKeydownListener = (event: KeyboardEvent) => {
-    if (event.keyCode === keyCodes.ESCAPE && !autoCompleteVisibleRef.current) {
-      event.preventDefault();
-      event.stopPropagation();
-      enableOverlay();
-    }
-  };
-
   useEffect(() => {
+    function onDismissOverlay(event: KeyboardEvent) {
+      if (event.keyCode === keyCodes.ENTER) {
+        event.preventDefault();
+        aceTextAreaElement!.focus();
+      }
+    }
+
+    function enableOverlay() {
+      if (overlayMountNode.current) {
+        overlayMountNode.current.focus();
+      }
+    }
+
+    const isAutoCompleteVisible = () => {
+      const autoCompleter = document.querySelector<HTMLDivElement>('.ace_autocomplete');
+      if (!autoCompleter) {
+        return false;
+      }
+      // The autoComplete is just hidden when it's closed, not removed from the DOM.
+      return autoCompleter.style.display !== 'none';
+    };
+
+    const documentKeyDownListener = () => {
+      autoCompleteVisibleRef.current = isAutoCompleteVisible();
+    };
+
+    const aceKeydownListener = (event: KeyboardEvent) => {
+      if (event.keyCode === keyCodes.ESCAPE && !autoCompleteVisibleRef.current) {
+        event.preventDefault();
+        event.stopPropagation();
+        enableOverlay();
+      }
+    };
     if (aceTextAreaElement) {
       // We don't control HTML elements inside of ace so we imperatively create an element
       // that acts as a container and insert it just before ace's textarea element

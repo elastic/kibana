@@ -4,18 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
 import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
-import { getTelemetry, initTelemetry, Telemetry } from './telemetry';
+import { getTelemetry, initTelemetry } from './telemetry';
+
+const TELEMETRY_TYPE = 'fileUploadTelemetry';
 
 export function registerFileUploadUsageCollector(
   usageCollection: UsageCollection,
-  server: Server
+  deps: {
+    elasticsearchPlugin: any;
+    getSavedObjectsRepository: any;
+  }
 ): void {
+  const { elasticsearchPlugin, getSavedObjectsRepository } = deps;
   const fileUploadUsageCollector = usageCollection.makeUsageCollector({
-    type: 'fileUploadTelemetry',
+    type: TELEMETRY_TYPE,
     isReady: () => true,
-    fetch: async (): Promise<Telemetry> => (await getTelemetry(server)) || initTelemetry(),
+    fetch: async () =>
+      (await getTelemetry(elasticsearchPlugin, getSavedObjectsRepository)) || initTelemetry(),
   });
 
   usageCollection.registerCollector(fileUploadUsageCollector);

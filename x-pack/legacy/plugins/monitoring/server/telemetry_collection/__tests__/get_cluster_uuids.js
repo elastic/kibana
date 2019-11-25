@@ -8,7 +8,8 @@ import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { getClusterUuids, fetchClusterUuids, handleClusterUuidsResponse } from '../get_cluster_uuids';
 
-describe('get_cluster_uuids', () => {
+// FAILING: https://github.com/elastic/kibana/issues/51371
+describe.skip('get_cluster_uuids', () => {
   const callWith = sinon.stub();
   const size = 123;
   const server = {

@@ -4,4 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { registerFileUploadUsageCollector } from './file_upload_usage_collector';
+export const mappings = {
+  'file-upload-telemetry': {
+    properties: {
+      filesUploadedTotalCount: {
+        type: 'long',
+      },
+    },
+  },
+};

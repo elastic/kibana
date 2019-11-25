@@ -17,6 +17,10 @@
  * under the License.
  */
 
+/**
+ * This function is considered legacy and should not be changed or updated before we have editor
+ * interfaces in place (it's using a customized version of Ace directly).
+ */
 export function restoreRequestFromHistory(input: any, req: any) {
   const session = input.getSession();
   let pos = input.getCursorPosition();
