@@ -145,13 +145,13 @@ describe.skip('<PolicyAdd />', () => {
         test('should not allow the minimum count be negative', () => {
           const { find, form } = testBed;
 
-          form.setInputValue('minCountInput', -1);
+          form.setInputValue('minCountInput', '-1');
           find('minCountInput').simulate('blur');
 
-          form.setInputValue('minCountInput', -1);
+          form.setInputValue('minCountInput', '-1');
           find('minCountInput').simulate('blur');
 
-          form.setInputValue('maxCountInput', -1);
+          form.setInputValue('maxCountInput', '-1');
           find('maxCountInput').simulate('blur');
 
           expect(form.getErrorsMessages()).toEqual([
