@@ -37,11 +37,12 @@ export const initServerWithKibana = (core: CoreSetup, kbnServer: ServerFacade, l
 
   const libs = compose(core, kbnServer);
   initServer(libs);
+
   if (
     kbnServer.config().has('xpack.actions.enabled') &&
     kbnServer.config().get('xpack.actions.enabled') === true &&
     kbnServer.config().has('xpack.alerting.enabled') &&
-    kbnServer.config().has('xpack.alerting.enabled') === true
+    kbnServer.config().get('xpack.alerting.enabled') === true
   ) {
     logger.info(
       'Detected feature flags for actions and alerting and enabling detection engine API endpoints'
