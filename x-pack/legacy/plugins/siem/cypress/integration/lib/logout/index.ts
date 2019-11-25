@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LOGOUT } from '../urls';
-
 export const logout = (): null => {
-  cy.visit(`${Cypress.config().baseUrl}${LOGOUT}`);
+  cy.request({
+    method: 'GET',
+    url: `${Cypress.config().baseUrl}/logout`,
+  }).then(response => {
+    expect(response.status).to.eq(200);
+  });
   return null;
 };
