@@ -23,7 +23,7 @@ interface IteratorInstance {
 
 type StoreActionsAndState = AsyncIterableIterator<QueuedAction>;
 
-export interface StoreContext {
+export interface SagaContext {
   actionsAndState: () => StoreActionsAndState;
   dispatch: Dispatch;
 }
@@ -32,7 +32,9 @@ export interface StoreContext {
  * See https://docs.microsoft.com/en-us/previous-versions/msp-n-p/jj591569(v%3dpandp.10)
  */
 // TODO: Type this library
-export function createSagaMiddleware(saga: () => Promise<void>): Middleware & { run: () => void } {
+export function createSagaMiddleware(
+  saga: (storeContext: SagaContext) => Promise<void>
+): Middleware & { run: () => void } {
   // Q. Are we following the Flux standard? https://github.com/redux-utilities/flux-standard-action
 
   const iteratorInstances = new Set<IteratorInstance>();
@@ -75,7 +77,7 @@ export function createSagaMiddleware(saga: () => Promise<void>): Middleware & { 
 
   let runSaga: () => void;
   function middleware({ getState, dispatch }: MiddlewareAPI) {
-    runSaga = saga.bind<null, StoreContext, any[], Promise<void>>(null, {
+    runSaga = saga.bind<null, SagaContext, any[], Promise<void>>(null, {
       actionsAndState: getActionsAndStateIterator,
       dispatch,
     });

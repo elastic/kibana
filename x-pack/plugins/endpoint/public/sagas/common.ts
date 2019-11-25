@@ -5,18 +5,21 @@
  */
 
 import { userNavigated } from '../concerns/routing';
-import { StoreContext } from '../lib/saga';
+import { SagaContext } from '../lib/saga';
 
 /**
  * This must be used for `withPageNavigationStatus`
  */
-export async function routingSaga({ dispatch, actionsAndState }: StoreContext) {
+export async function routingSaga({ dispatch, actionsAndState }: SagaContext) {
   // FIXME: this event listener needs to be removed when plugin unmount's
   window.addEventListener('popstate', emit);
   emit();
 
   for await (const { action } of actionsAndState()) {
-    if (action.type === 'LOCATION_CHANGE' && action.payload.action !== 'POP') {
+    if (
+      action.type === 'LOCATION_CHANGE' &&
+      ((action.payload as unknown) as { action: string }).action !== 'POP'
+    ) {
       emit();
     }
   }
@@ -33,7 +36,7 @@ export async function* withPageNavigationStatus({
     return false;
   },
 }: {
-  actionsAndState: StoreContext['actionsAndState'];
+  actionsAndState: SagaContext['actionsAndState'];
   isOnPage: (href: any) => boolean;
 }) {
   // TODO: do we need userIsLoggedIn?

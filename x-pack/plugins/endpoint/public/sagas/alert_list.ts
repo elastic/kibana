@@ -9,15 +9,13 @@ import { withPageNavigationStatus } from './common';
 import { hrefIsForPath } from '../concerns/routing';
 import { actions as alertListActions } from '../actions/alert_list';
 import * as alertListSelectors from '../selectors/alert_list';
-import { StoreContext } from '../lib/saga';
+import { SagaContext } from '../lib/saga';
 
-// TODO: type this properly
-export async function alertListSaga(storeContext: StoreContext, context: AppMountContext) {
-  await Promise.all([resourceSaga(storeContext, context)]);
+export async function alertListSaga(sagaContext: SagaContext, context: AppMountContext) {
+  await Promise.all([resourceSaga(sagaContext, context)]);
 }
 
-// TODO type actionsAndState, dispatch
-async function resourceSaga({ actionsAndState, dispatch }: StoreContext, context: AppMountContext) {
+async function resourceSaga({ actionsAndState, dispatch }: SagaContext, context: AppMountContext) {
   function isOnPage(href: any) {
     return hrefIsForPath(href, `${context.core.http.basePath.get()}/app/endpoint/alerts`);
   }
@@ -58,7 +56,7 @@ async function resourceSaga({ actionsAndState, dispatch }: StoreContext, context
         }
       } else if (action.type === alertListActions.userClickedArchiveItems.type) {
         try {
-          const idsToArchive = action.payload[0];
+          const idsToArchive = action.payload[0] as string[];
           await context.core.http.post('/alerts/archive', {
             query: {
               alerts: idsToArchive.join(','), // TODO: seems strange that we can't use lists in query params

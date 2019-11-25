@@ -9,20 +9,19 @@ import { AppMountContext } from 'kibana/public';
 import { withPageNavigationStatus } from './common';
 import { hrefIsForAlertDetail, alertIdFromHref } from '../concerns/alerts/routing';
 import { actions as alertDetailsActions } from '../actions/alert_details';
-import { StoreContext } from '../lib/saga';
+import { SagaContext } from '../lib/saga';
 
 // TODO: type this properly
 export async function alertDetailsSaga(
-  storeContext: StoreContext,
+  sagaContext: SagaContext,
   context: AppMountContext,
   history: History
 ) {
-  await Promise.all([resourceSaga(storeContext, context, history)]);
+  await Promise.all([resourceSaga(sagaContext, context, history)]);
 }
 
-// TODO type actionsAndState, dispatch
 async function resourceSaga(
-  { actionsAndState, dispatch }: StoreContext,
+  { actionsAndState, dispatch }: SagaContext,
   context: AppMountContext,
   history: History
 ) {

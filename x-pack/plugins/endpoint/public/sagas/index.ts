@@ -10,17 +10,17 @@ import { routingSaga } from './common';
 import { alertListSaga } from './alert_list';
 import { alertDetailsSaga } from './alert_details';
 import { endpointsListSaga } from './endpoints_list';
-import { StoreContext } from '../lib/saga';
+import { SagaContext } from '../lib/saga';
 
 // TODO: Type this properly
 // eslint-disable-next-line import/no-default-export
 export default function sagas(context: AppMountContext, history: History) {
-  return async function(storeContext: StoreContext) {
+  return async function(sagaContext: SagaContext) {
     await Promise.all([
-      routingSaga(storeContext),
-      alertListSaga(storeContext, context, history),
-      alertDetailsSaga(storeContext, context, history),
-      endpointsListSaga(storeContext, context),
+      routingSaga(sagaContext),
+      alertListSaga(sagaContext, context),
+      alertDetailsSaga(sagaContext, context, history),
+      endpointsListSaga(sagaContext, context),
     ]);
   };
 }

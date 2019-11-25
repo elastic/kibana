@@ -9,13 +9,13 @@ import { withPageNavigationStatus } from './common';
 import { hrefIsForPath } from '../concerns/routing';
 import { actions as endpointsListActions } from '../actions/endpoints_list';
 import * as endpointsListSelectors from '../selectors/endpoints_list';
-import { StoreContext } from '../lib/saga';
+import { SagaContext } from '../lib/saga';
 
-export async function endpointsListSaga(storeContext: StoreContext, context: AppMountContext) {
-  await Promise.all([resourceSaga(storeContext, context)]);
+export async function endpointsListSaga(sagaContext: SagaContext, context: AppMountContext) {
+  await Promise.all([resourceSaga(sagaContext, context)]);
 }
 
-async function resourceSaga({ actionsAndState, dispatch }: StoreContext, context: AppMountContext) {
+async function resourceSaga({ actionsAndState, dispatch }: SagaContext, context: AppMountContext) {
   function isOnPage(href: any) {
     const isOnPageResponse: boolean = hrefIsForPath(
       href,
