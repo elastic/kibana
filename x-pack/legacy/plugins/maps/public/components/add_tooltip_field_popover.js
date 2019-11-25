@@ -166,6 +166,7 @@ export class AddTooltipFieldPopover extends Component {
         button={this._renderAddButton()}
         isOpen={this.state.isPopoverOpen}
         closePopover={this._closePopover}
+        ownFocus
       >
         {this._renderContent()}
       </EuiPopover>

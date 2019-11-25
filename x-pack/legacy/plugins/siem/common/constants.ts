@@ -15,6 +15,7 @@ export const DEFAULT_TIME_RANGE = 'timepicker:timeDefaults';
 export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults';
 export const DEFAULT_SIEM_TIME_RANGE = 'siem:timeDefaults';
 export const DEFAULT_SIEM_REFRESH_INTERVAL = 'siem:refreshIntervalDefaults';
+export const DEFAULT_SIGNALS_INDEX_KEY = 'siem:defaultSignalsIndex';
 export const DEFAULT_SIGNALS_INDEX = '.siem-signals';
 export const DEFAULT_ANOMALY_SCORE = 'siem:defaultAnomalyScore';
 export const DEFAULT_MAX_TABLE_QUERY_SIZE = 10000;
