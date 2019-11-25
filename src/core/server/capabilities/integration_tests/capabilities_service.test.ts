@@ -84,7 +84,7 @@ describe('CapabilitiesService', () => {
   describe('/api/core/capabilities route', () => {
     it('is exposed', async () => {
       const result = await supertest(httpSetup.server.listener)
-        .post('/core/capabilities')
+        .post('/api/core/capabilities')
         .send({ applications: [] })
         .expect(200);
       expect(result.body).toMatchInlineSnapshot(`
