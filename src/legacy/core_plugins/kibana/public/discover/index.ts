@@ -19,7 +19,6 @@
 import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from 'ui/new_platform';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects';
-import { localApplicationService } from '../local_application_service';
 import { DiscoverPlugin, DiscoverSetup, DiscoverStart } from './plugin';
 import { start as navigation } from '../../../navigation/public/legacy';
 
@@ -33,10 +32,7 @@ export const plugin: PluginInitializer<DiscoverSetup, DiscoverStart> = (
 // Legacy compatiblity part - to be removed at cutover, replaced by a kibana.json file
 export const pluginInstance = plugin({} as PluginInitializerContext);
 (async () => {
-  pluginInstance.setup(npSetup.core, {
-    ...npSetup.plugins,
-    ...{ localApplicationService },
-  });
+  pluginInstance.setup(npSetup.core, npSetup.plugins);
   pluginInstance.start(npStart.core, { ...npStart.plugins, ...{ navigation } });
 })();
 

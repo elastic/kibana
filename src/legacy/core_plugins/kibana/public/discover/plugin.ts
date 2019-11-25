@@ -26,13 +26,13 @@ import {
   Start as EmbeddableStart,
   Setup as EmbeddableSetup,
 } from '../../../../../plugins/embeddable/public';
-import { LocalApplicationService } from '../local_application_service';
 import { getInnerAngularModule, getInnerAngularModuleEmbeddable } from './get_inner_angular';
 import { setAngularModule, setServices } from './kibana_services';
 import { NavigationStart } from '../../../navigation/public';
 import { EuiUtilsStart } from '../../../../../plugins/eui_utils/public';
 import { buildServices } from './helpers/build_services';
 import { SharePluginStart } from '../../../../../plugins/share/public';
+import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -44,7 +44,7 @@ export type DiscoverStart = void;
 export interface DiscoverSetupPlugins {
   uiActions: IUiActionsStart;
   embeddable: EmbeddableSetup;
-  localApplicationService: LocalApplicationService;
+  kibana_legacy: KibanaLegacySetup;
 }
 export interface DiscoverStartPlugins {
   uiActions: IUiActionsStart;
@@ -74,7 +74,7 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
   public initializeServices?: () => void;
   constructor(initializerContext: PluginInitializerContext) {}
   setup(core: CoreSetup, plugins: DiscoverSetupPlugins): DiscoverSetup {
-    plugins.localApplicationService.register({
+    plugins.kibana_legacy.registerLegacyApp({
       id: 'discover',
       title: 'Discover',
       order: -1004,
