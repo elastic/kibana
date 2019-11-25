@@ -100,7 +100,6 @@ export function maps(kibana) {
     },
 
     init(server) {
-      console.log('-----> MAPS using methods from the newPlatform home sampleData service');
       const mapsEnabled = server.config().get('xpack.maps.enabled');
 
       if (!mapsEnabled) {

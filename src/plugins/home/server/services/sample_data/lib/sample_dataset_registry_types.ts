@@ -71,7 +71,7 @@ export interface SampleDatasetSchema {
 
   // saved object id of main dashboard for sample data set
   overviewDashboard: string;
-  appLinks?: AppLinkSchema[];
+  appLinks: AppLinkSchema[];
 
   // saved object id of default index-pattern for sample data set
   defaultIndex: string;
