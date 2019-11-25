@@ -170,6 +170,7 @@ export default function findActionTests({ getService }: FtrProviderContext) {
                   {
                     group: 'default',
                     id: createdAction.id,
+                    actionTypeId: 'test.index-record',
                     params: {},
                   },
                 ],

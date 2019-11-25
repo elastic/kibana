@@ -49,12 +49,14 @@ export type AlertActionParams = SavedObjectAttributes;
 export interface AlertAction {
   group: string;
   id: string;
+  actionTypeId: string;
   params: AlertActionParams;
 }
 
 export interface RawAlertAction extends SavedObjectAttributes {
   group: string;
   actionRef: string;
+  actionTypeId: string;
   params: AlertActionParams;
 }
 

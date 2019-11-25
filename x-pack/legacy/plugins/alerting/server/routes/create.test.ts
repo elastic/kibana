@@ -22,6 +22,7 @@ const mockedAlert = {
     {
       group: 'default',
       id: '2',
+      actionTypeId: 'test',
       params: {
         foo: true,
       },
@@ -49,6 +50,7 @@ test('creates an alert with proper parameters', async () => {
     Object {
       "actions": Array [
         Object {
+          "actionTypeId": "test",
           "group": "default",
           "id": "2",
           "params": Object {
@@ -75,6 +77,7 @@ test('creates an alert with proper parameters', async () => {
         "data": Object {
           "actions": Array [
             Object {
+              "actionTypeId": "test",
               "group": "default",
               "id": "2",
               "params": Object {
@@ -104,6 +107,7 @@ test('creates an alert with proper parameters', async () => {
         "data": Object {
           "actions": Array [
             Object {
+              "actionTypeId": "test",
               "group": "default",
               "id": "2",
               "params": Object {

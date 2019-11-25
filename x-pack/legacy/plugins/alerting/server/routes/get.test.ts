@@ -21,6 +21,7 @@ const mockedAlert = {
     {
       group: 'default',
       id: '2',
+      actionTypeId: 'test',
       params: {
         foo: true,
       },

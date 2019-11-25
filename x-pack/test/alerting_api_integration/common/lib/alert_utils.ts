@@ -191,6 +191,7 @@ export class AlertUtils {
         {
           group: 'default',
           id: this.indexRecordActionId,
+          actionTypeId: 'test.index-record',
           params: {
             index: ES_TEST_INDEX_NAME,
             reference,

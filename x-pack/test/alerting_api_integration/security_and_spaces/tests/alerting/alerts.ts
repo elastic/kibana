@@ -174,6 +174,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                   {
                     group: 'default',
                     id: createdAction.id,
+                    actionTypeId: 'test.rate-limit',
                     params: {
                       reference,
                       index: ES_TEST_INDEX_NAME,
@@ -364,6 +365,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                   {
                     group: 'default',
                     id: createdAction.id,
+                    actionTypeId: 'test.authorization',
                     params: {
                       callClusterAuthorizationIndex: authorizationIndex,
                       savedObjectsClientType: 'dashboard',
@@ -500,6 +502,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 {
                   group: 'default',
                   id: indexRecordActionId,
+                  actionTypeId: 'test.index-record',
                   params: {
                     index: ES_TEST_INDEX_NAME,
                     reference,
@@ -509,6 +512,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 {
                   group: 'other',
                   id: indexRecordActionId,
+                  actionTypeId: 'test.index-record',
                   params: {
                     index: ES_TEST_INDEX_NAME,
                     reference,

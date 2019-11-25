@@ -25,6 +25,9 @@
           "actionRef": {
             "type": "keyword"
           },
+          "actionTypeId": {
+            "type": "keyword"
+          },
           "params": {
             "enabled": false,
             "type": "object"

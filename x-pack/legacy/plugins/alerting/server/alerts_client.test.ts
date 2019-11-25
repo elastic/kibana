@@ -55,6 +55,7 @@ function getMockData(overwrites: Record<string, any> = {}) {
       {
         group: 'default',
         id: '1',
+        actionTypeId: 'test',
         params: {
           foo: true,
         },
@@ -157,6 +158,7 @@ describe('create()', () => {
         "actions": Array [
           Object {
             "actionRef": "action_0",
+            "actionTypeId": "test",
             "group": "default",
             "params": Object {
               "foo": true,
@@ -506,6 +508,7 @@ describe('create()', () => {
           {
             actionRef: 'action_0',
             group: 'default',
+            actionTypeId: 'test',
             params: { foo: true },
           },
         ],
@@ -1190,6 +1193,7 @@ describe('update()', () => {
           {
             group: 'default',
             id: '1',
+            actionTypeId: 'test',
             params: {
               foo: true,
             },
@@ -1226,6 +1230,7 @@ describe('update()', () => {
         "actions": Array [
           Object {
             "actionRef": "action_0",
+            "actionTypeId": "test",
             "group": "default",
             "params": Object {
               "foo": true,
@@ -1327,6 +1332,7 @@ describe('update()', () => {
           {
             group: 'default',
             id: '1',
+            actionTypeId: 'test',
             params: {
               foo: true,
             },
@@ -1364,6 +1370,7 @@ describe('update()', () => {
         "actions": Array [
           Object {
             "actionRef": "action_0",
+            "actionTypeId": "test",
             "group": "default",
             "params": Object {
               "foo": true,
@@ -1435,6 +1442,7 @@ describe('update()', () => {
             {
               group: 'default',
               id: '1',
+              actionTypeId: 'test',
               params: {
                 foo: true,
               },
