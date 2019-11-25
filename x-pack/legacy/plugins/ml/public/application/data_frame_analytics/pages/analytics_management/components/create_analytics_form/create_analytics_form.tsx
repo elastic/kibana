@@ -118,7 +118,8 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       delete jobConfig.model_memory_limit;
       const resp = await ml.dataFrameAnalytics.estimateDataFrameAnalyticsMemoryUsage(jobConfig);
       setFormState({
-        modelMemoryLimit: resp.expected_memory_without_disk,
+        modelMemoryLimit:
+          resp.memory_estimation && resp.memory_estimation.expected_memory_without_disk,
       });
     } catch (e) {
       setFormState({
