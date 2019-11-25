@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useState } from 'react';
+import React, { useState } from 'react';
 
 import { EuiSpacer, EuiBasicTable } from '@elastic/eui';
 // @ts-ignore
@@ -143,7 +143,7 @@ export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
   };
 
   return (
-    <Fragment>
+    <div data-test-subj="transformMessagesTabContent">
       <EuiSpacer size="s" />
       <EuiBasicTable
         className="transform__TransformTable__messagesPaneTable"
@@ -155,6 +155,6 @@ export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
         pagination={pagination}
         onChange={onChange}
       />
-    </Fragment>
+    </div>
   );
 };

@@ -17,18 +17,13 @@
  * under the License.
  */
 
-import { npSetup, npStart } from 'ui/new_platform';
+// make sure all dev tools are loaded and registered.
+import 'uiExports/devTools';
 
-import { DevToolsPlugin } from './plugin';
-import { localApplicationService } from '../local_application_service';
+import { npStart } from 'ui/new_platform';
 
-const instance = new DevToolsPlugin();
-
-instance.setup(npSetup.core, {
-  __LEGACY: {
-    localApplicationService,
-  },
-});
-instance.start(npStart.core, {
-  newPlatformDevTools: npStart.plugins.devTools,
-});
+if (npStart.plugins.dev_tools.getSortedDevTools().length === 0) {
+  npStart.core.chrome.navLinks.update('kibana:dev_tools', {
+    hidden: true,
+  });
+}
