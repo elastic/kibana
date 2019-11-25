@@ -50,27 +50,29 @@ interface ExpandedRowDetailsPaneProps {
 
 export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ sections }) => {
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem style={{ width: '50%' }}>
-        {sections
-          .filter(s => s.position === 'left')
-          .map(s => (
-            <Fragment key={s.title}>
-              <EuiSpacer size="s" />
-              <Section section={s} />
-            </Fragment>
-          ))}
-      </EuiFlexItem>
-      <EuiFlexItem style={{ width: '50%' }}>
-        {sections
-          .filter(s => s.position === 'right')
-          .map(s => (
-            <Fragment key={s.title}>
-              <EuiSpacer size="s" />
-              <Section section={s} />
-            </Fragment>
-          ))}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <div data-test-subj="transformDetailsTabContent">
+      <EuiFlexGroup>
+        <EuiFlexItem style={{ width: '50%' }}>
+          {sections
+            .filter(s => s.position === 'left')
+            .map(s => (
+              <Fragment key={s.title}>
+                <EuiSpacer size="s" />
+                <Section section={s} />
+              </Fragment>
+            ))}
+        </EuiFlexItem>
+        <EuiFlexItem style={{ width: '50%' }}>
+          {sections
+            .filter(s => s.position === 'right')
+            .map(s => (
+              <Fragment key={s.title}>
+                <EuiSpacer size="s" />
+                <Section section={s} />
+              </Fragment>
+            ))}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
   );
 };
