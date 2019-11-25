@@ -15,7 +15,7 @@ import { inventoryViewSavedObjectType } from '../common/saved_objects/inventory_
 import { metricsExplorerViewSavedObjectType } from '../common/saved_objects/metrics_explorer_view';
 
 export const initServerWithKibana = (kbnServer: Server) => {
-  const usageCollection = server.newPlatform.setup.plugins.usageCollection as UsageCollection;
+  const usageCollection = kbnServer.newPlatform.setup.plugins.usageCollection as UsageCollection;
   const libs = compose(kbnServer);
   initInfraServer(libs);
 

@@ -339,8 +339,7 @@ export default function (kibana) {
       registerKqlTelemetryApi(server);
       registerFieldFormats(server);
       registerTutorials(server);
-      makeKQLUsageCollector(server);
-
+      makeKQLUsageCollector(usageCollecion, server);
       registerCspCollector(usageCollecion, server);
       server.expose('systemApi', systemApi);
       server.injectUiAppVars('kibana', () => injectVars(server));

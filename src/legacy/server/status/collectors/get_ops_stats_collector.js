@@ -50,6 +50,8 @@ export function getOpsStatsCollector(usageCollection, server, kbnServer) {
 }
 
 export function registerOpsStatsCollector(usageCollection, server, kbnServer) {
-  const collector = getOpsStatsCollector(usageCollection, server, kbnServer);
-  usageCollection.registerCollector(collector);
+  if (usageCollection) {
+    const collector = getOpsStatsCollector(usageCollection, server, kbnServer);
+    usageCollection.registerCollector(collector);
+  }
 }
