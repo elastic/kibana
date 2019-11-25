@@ -11,7 +11,7 @@ import {
 import React from 'react';
 import { ButtonProps } from '../types';
 
-export const SpacesHeaderNavButton: React.SFC<ButtonProps> = props => (
+export const SpacesHeaderNavButton: React.FC<ButtonProps> = props => (
   <EuiHeaderSectionItemButton
     aria-controls="headerSpacesMenuList"
     aria-expanded={props.spaceSelectorShown}

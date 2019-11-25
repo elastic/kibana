@@ -13,7 +13,11 @@ import {
 import { PromiseReturnType } from '../../../typings/common';
 import { APMError } from '../../../typings/es_schemas/ui/APMError';
 import { rangeFilter } from '../helpers/range_filter';
-import { Setup } from '../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../helpers/setup_request';
 import { getTransaction } from '../transactions/get_transaction';
 
 export type ErrorGroupAPIResponse = PromiseReturnType<typeof getErrorGroup>;
@@ -26,7 +30,7 @@ export async function getErrorGroup({
 }: {
   serviceName: string;
   groupId: string;
-  setup: Setup;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
   const { start, end, uiFiltersES, client, indices } = setup;
 

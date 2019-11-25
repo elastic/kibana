@@ -48,4 +48,5 @@ export enum FILTERS {
   RANGE = 'range',
   GEO_BOUNDING_BOX = 'geo_bounding_box',
   GEO_POLYGON = 'geo_polygon',
+  SPATIAL_FILTER = 'spatial_filter',
 }

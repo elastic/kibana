@@ -99,6 +99,7 @@ export const createMetricVisFn = (): ExpressionFunction<
     colorRange: {
       types: ['range'],
       multi: true,
+      default: '{range from=0 to=10000}',
       help: i18n.translate('visTypeMetric.function.colorRange.help', {
         defaultMessage:
           'A range object specifying groups of values to which different colors should be applied.',
