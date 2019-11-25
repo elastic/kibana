@@ -29,7 +29,7 @@ export function plugin() {
 /** @public types */
 export { DataSetup, DataStart };
 
-export { FilterBar, ApplyFiltersPopover } from './filter';
+export { ApplyFiltersPopover } from './filter';
 export {
   Field,
   FieldType,
