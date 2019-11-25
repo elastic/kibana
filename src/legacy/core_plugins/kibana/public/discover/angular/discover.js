@@ -195,7 +195,7 @@ function discoverController(
 ) {
   const responseHandler = vislibSeriesResponseHandlerProvider().handler;
   const getUnhashableStates = Private(getUnhashableStatesProvider);
-  new FilterStateManager(globalState, getAppState, filterManager);
+  const filterStateManager = new FilterStateManager(globalState, getAppState, filterManager);
 
 
   const inspectorAdapters = {
@@ -236,6 +236,7 @@ function discoverController(
     if (abortController) abortController.abort();
     savedSearch.destroy();
     subscriptions.unsubscribe();
+    filterStateManager.destroy();
   });
 
   const $appStatus = $scope.appStatus = this.appStatus = {

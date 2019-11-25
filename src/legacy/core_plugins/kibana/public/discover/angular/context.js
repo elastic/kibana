@@ -70,7 +70,7 @@ getAngularModule().config($routeProvider => {
 
 function ContextAppRouteController($routeParams, $scope, AppState, config, $route, getAppState, globalState) {
   const filterManager = getServices().filterManager;
-  new FilterStateManager(globalState, getAppState, filterManager);
+  const filterStateManager = new FilterStateManager(globalState, getAppState, filterManager);
   const indexPattern = $route.current.locals.indexPattern.ip;
 
   this.state = new AppState(createDefaultAppState(config, indexPattern));
@@ -92,6 +92,7 @@ function ContextAppRouteController($routeParams, $scope, AppState, config, $rout
   });
 
   $scope.$on('$destroy', () => {
+    filterStateManager.destroy();
     updateSubsciption.unsubscribe();
   });
   this.anchorId = $routeParams.id;
