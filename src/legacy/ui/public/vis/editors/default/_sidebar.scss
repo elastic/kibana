@@ -10,9 +10,7 @@
 
 .visEditorSidebar__form {
   @include flex-parent(1, 1, auto);
-
   max-width: 100%;
-  background-color: $euiColorLightestShade;
 }
 
 .visEditorSidebar__config {
@@ -38,13 +36,12 @@
 //
 
 .visEditorSidebar__indexPattern {
+  @include euiTextTruncate;
   font-weight: $euiFontWeightBold;
-  padding: $euiSizeXS $euiSizeS;
-  line-height: $euiSizeL;
+  padding: $euiSizeM $euiSizeXL $euiSizeM $euiSizeS; // Extra padding on the right for the collapse button
 }
 
 .visEditorSidebar__nav {
-  padding: 0 $euiSizeS;
   flex-grow: 0;
 }
 
@@ -61,7 +58,7 @@
     margin-top: $euiSizeS;
   }
 
-  label:not([class^="eui"]) {
+  label:not([class^='eui']) {
     @include __legacyLabelStyles__bad;
     display: block;
   }
@@ -83,7 +80,8 @@
 
 .visEditorSidebar__collapsibleButton {
   position: absolute;
-  left: -35px;
+  right: $euiSizeXS;
+  top: $euiSizeS;
 
   @include euiBreakpoint('xs', 's', 'm') {
     display: none;
@@ -116,7 +114,7 @@
 .visEditorSidebar__aggGroupAccordionButtonContent {
   font-size: $euiFontSizeS;
 
-   span {
+  span {
     color: $euiColorDarkShade;
   }
 }

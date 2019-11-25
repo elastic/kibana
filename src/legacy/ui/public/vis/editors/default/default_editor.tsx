@@ -97,14 +97,16 @@ function DefaultEditor({
   return (
     <PanelsContainer
       className="visEditor--default"
-      resizerClassName={`visEditor__resizer ${isCollapsed ? 'hidden' : ''}`}
+      resizerClassName={`visEditor__resizer ${isCollapsed ? 'visEditor__resizer-isHidden' : ''}`}
     >
       <Panel className="visEditor__visualization" initialWidth={100 - editorInitialWidth}>
         <div className="visEditor__canvas" ref={visRef} />
       </Panel>
 
       <Panel
-        className={`visEditor__collapsibleSidebar ${isCollapsed ? 'closed' : ''}`}
+        className={`visEditor__collapsibleSidebar ${
+          isCollapsed ? 'visEditor__collapsibleSidebar-isClosed' : ''
+        }`}
         initialWidth={editorInitialWidth}
       >
         <DefaultEditorSideBar

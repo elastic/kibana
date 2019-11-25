@@ -144,74 +144,83 @@ function DefaultEditorSideBar({
     setTouched,
   };
 
+  const headingAltText = i18n.translate('common.ui.vis.editors.sidebar.indexPatternAriaLabel', {
+    defaultMessage: 'Index pattern: {title}',
+    values: {
+      title: vis.indexPattern.title,
+    },
+  });
+
   return (
-    <EuiFlexGroup
-      className="visEditorSidebar"
-      direction="column"
-      justifyContent="spaceBetween"
-      gutterSize="none"
-      responsive={false}
-    >
-      <EuiFlexItem>
-        <form className="visEditorSidebar__form" name="visualizeEditor" onKeyDownCapture={onSubmit}>
-          {vis.type.requiresSearch && vis.type.options.showIndexSelection && (
-            <h2
-              aria-label={i18n.translate('common.ui.vis.editors.sidebar.indexPatternAriaLabel', {
-                defaultMessage: 'Index pattern: {title}',
-                values: {
-                  title: vis.indexPattern.title,
-                },
-              })}
-              className="visEditorSidebar__indexPattern"
-              tabIndex={0}
-            >
-              {vis.indexPattern.title}
-            </h2>
-          )}
+    <>
+      <EuiButtonIcon
+        aria-expanded={!isCollapsed}
+        aria-label={i18n.translate('common.ui.vis.editors.sidebar.collapseButtonAriaLabel', {
+          defaultMessage: 'Toggle sidebar',
+        })}
+        className="visEditorSidebar__collapsibleButton"
+        data-test-subj="collapseSideBarButton"
+        color="text"
+        iconType={isCollapsed ? 'menuLeft' : 'menuRight'}
+        onClick={onClickCollapse}
+      />
+      <EuiFlexGroup
+        className="visEditorSidebar"
+        direction="column"
+        justifyContent="spaceBetween"
+        gutterSize="none"
+        responsive={false}
+      >
+        <EuiFlexItem>
+          <form
+            className="visEditorSidebar__form"
+            name="visualizeEditor"
+            onKeyDownCapture={onSubmit}
+          >
+            {vis.type.requiresSearch && vis.type.options.showIndexSelection && (
+              <h2
+                aria-label={headingAltText}
+                title={headingAltText}
+                className="visEditorSidebar__indexPattern"
+                tabIndex={0}
+              >
+                {vis.indexPattern.title}
+              </h2>
+            )}
 
-          {optionTabs.length > 1 && (
-            <DefaultEditorNavBar
-              optionTabs={optionTabs}
-              selectedTab={selectedTab}
-              setSelectedTab={setSelectedTab}
-            />
-          )}
+            {optionTabs.length > 1 && (
+              <DefaultEditorNavBar
+                optionTabs={optionTabs}
+                selectedTab={selectedTab}
+                setSelectedTab={setSelectedTab}
+              />
+            )}
 
-          {optionTabs.map(({ editor: Editor, name }) => (
-            <div
-              key={name}
-              className={`visEditorSidebar__config ${
-                selectedTab === name ? '' : 'visEditorSidebar__config--hidden'
-              }`}
-            >
-              <Editor {...(name === 'data' ? dataTabProps : optionTabProps)} />
-            </div>
-          ))}
+            {optionTabs.map(({ editor: Editor, name }) => (
+              <div
+                key={name}
+                className={`visEditorSidebar__config ${
+                  selectedTab === name ? '' : 'visEditorSidebar__config--hidden'
+                }`}
+              >
+                <Editor {...(name === 'data' ? dataTabProps : optionTabProps)} />
+              </div>
+            ))}
+          </form>
+        </EuiFlexItem>
 
-          <EuiButtonIcon
-            aria-expanded={!isCollapsed}
-            aria-label={i18n.translate('common.ui.vis.editors.sidebar.collapseButtonAriaLabel', {
-              defaultMessage: 'Toggle sidebar',
-            })}
-            className="visEditorSidebar__collapsibleButton"
-            data-test-subj="collapseSideBarButton"
-            iconType={isCollapsed ? 'arrowLeft' : 'arrowRight'}
-            onClick={onClickCollapse}
+        <EuiFlexItem grow={false}>
+          <DefaultEditorControls
+            applyChanges={applyChanges}
+            dispatch={dispatch}
+            isDirty={isDirty}
+            isTouched={formState.touched}
+            isInvalid={formState.invalid}
+            vis={vis}
           />
-        </form>
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <DefaultEditorControls
-          applyChanges={applyChanges}
-          dispatch={dispatch}
-          isDirty={isDirty}
-          isTouched={formState.touched}
-          isInvalid={formState.invalid}
-          vis={vis}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 }
 

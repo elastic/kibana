@@ -12,6 +12,7 @@
  */
 
 .visEditor__collapsibleSidebar {
+  background: $euiColorLightestShade;
   min-width: $vis-editor-sidebar-min-width;
   max-width: 100%;
   position: relative;
@@ -27,9 +28,13 @@
   }
 }
 
-.visEditor__collapsibleSidebar.closed {
+.visEditor__collapsibleSidebar-isClosed {
   min-width: 0;
-  width: 0 !important;
+  width: $euiSizeXL !important; // Just enough room for the collapse button
+
+  .visEditorSidebar {
+    display: none;
+  }
 
   @include euiBreakpoint('xs', 's', 'm') {
     display: none !important;
@@ -45,10 +50,10 @@
   @include euiBreakpoint('xs', 's', 'm') {
     display: none;
   }
+}
 
-  &.hidden {
-    display: none;
-  }
+.visEditor__resizer-isHidden {
+  display: none;
 }
 
 /**
