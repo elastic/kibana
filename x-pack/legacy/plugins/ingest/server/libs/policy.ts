@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { unique, flatten } from 'lodash';
 import EventEmitter from 'events';
-import { PolicyAdapter } from './adapters/policy/default';
-import { BackendFrameworkLib } from './framework';
-import { Policy, Datasource, Status, StoredPolicy } from './adapters/policy/adapter_types';
-import { FrameworkAuthenticatedUser, FrameworkUser } from './adapters/framework/adapter_types';
+import { flatten, unique } from 'lodash';
 import { DEFAULT_POLICY_ID } from '../../common/constants';
-import { OutputsLib } from './outputs';
-import { DatasourcesLib } from './datasources';
 import { ReturnTypeBulkDelete } from '../../common/types/std_return_format';
+import { FrameworkAuthenticatedUser, FrameworkUser } from './adapters/framework/adapter_types';
+import { Datasource, Policy, Status, StoredPolicy } from './adapters/policy/adapter_types';
+import { PolicyAdapter } from './adapters/policy/default';
+import { DatasourcesLib } from './datasources';
+import { BackendFrameworkLib } from './framework';
+import { OutputsLib } from './outputs';
 
 export class PolicyLib {
   public events: EventEmitter = new EventEmitter();

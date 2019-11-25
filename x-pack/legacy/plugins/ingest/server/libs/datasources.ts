@@ -10,9 +10,7 @@ export class DatasourcesLib {
   private datasources: Datasource[] = [];
 
   public async getByIDs(_user: FrameworkUser, ids: string[]): Promise<Datasource[]> {
-    return this.datasources.filter(ds => ids.includes(ds.id))
-      resolve(this.datasources.filter(ds => ids.includes(ds.id)));
-    });
+    return this.datasources.filter(ds => ids.includes(ds.id));
   }
 
   public async add(_user: FrameworkUser, datasource: Datasource): Promise<Datasource> {
@@ -25,8 +23,5 @@ export class DatasourcesLib {
   public async delete(_user: FrameworkUser, ids: string[]): Promise<boolean> {
     this.datasources.filter(ds => !ids.includes(ds.id));
     return true;
-      this.datasources.filter(ds => !ids.includes(ds.id));
-      resolve(true);
-    });
   }
 }

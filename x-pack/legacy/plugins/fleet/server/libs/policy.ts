@@ -63,13 +63,11 @@ export class PolicyLib {
     return agentPolicy;
   }
 
-  public policyUpdated(
+  public async policyUpdated(
     policyId: string,
     type: 'added' | 'updated' | 'removed',
     payload: Policy | null
   ): Promise<{ success: boolean }> {
-    return { success: true }
-      resolve({ success: true });
-    });
+    return { success: true };
   }
 }

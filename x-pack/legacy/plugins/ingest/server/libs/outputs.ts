@@ -9,23 +9,13 @@ import { Output, OutputType } from './adapters/policy/adapter_types';
 export class OutputsLib {
   public async getByIDs(_user: FrameworkUser, _ids: string[]): Promise<Output[]> {
     return [
-        {
-          id: 'default',
-          name: 'default',
-          type: OutputType.Elasticsearch,
-          url: '<Kibana URL>',
-          ingest_pipeline: 'default',
-        },
-      ];
-      resolve([
-        {
-          id: 'default',
-          name: 'default',
-          type: OutputType.Elasticsearch,
-          url: '<Kibana URL>',
-          ingest_pipeline: 'default',
-        },
-      ]);
-    });
+      {
+        id: 'default',
+        name: 'default',
+        type: OutputType.Elasticsearch,
+        url: '<Kibana URL>',
+        ingest_pipeline: 'default',
+      },
+    ];
   }
 }
