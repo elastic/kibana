@@ -18,3 +18,4 @@
  */
 
 export { FilterBar } from './filter_bar';
+export { FilterLabel } from './filter_editor/lib/filter_label';
