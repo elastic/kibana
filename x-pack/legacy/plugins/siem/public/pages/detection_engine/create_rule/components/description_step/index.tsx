@@ -13,8 +13,8 @@ import {
   esFilters,
   Query,
   utils,
+  FilterLabel,
 } from '../../../../../../../../../../src/plugins/data/public';
-import { FilterLabel } from '../../../../../../../../../../src/legacy/core_plugins/data/public/filter/filter_bar/filter_editor/lib/filter_label';
 
 import { FormSchema } from '../shared_imports';
 import * as I18n from './translations';
