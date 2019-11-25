@@ -120,9 +120,11 @@
 }
 
 .visEditorSidebar__controls {
-  margin: $euiSizeS;
+  border-top: $euiBorderThin;
+  padding: $euiSizeS;
   display: flex;
   justify-content: flex-end;
+  align-items: center;
 
   .visEditorSidebar__autoApplyButton {
     margin-left: $euiSizeM;
