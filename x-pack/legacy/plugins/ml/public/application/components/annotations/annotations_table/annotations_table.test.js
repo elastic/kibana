@@ -24,13 +24,17 @@ jest.mock('../../../services/job_service', () => ({
   }
 }));
 
-jest.mock('../../../services/ml_api_service', () => ({
-  ml: {
-    annotations: {
-      getAnnotations: jest.fn().mockResolvedValue({ annotations: [] })
+jest.mock('../../../services/ml_api_service', () => {
+  const { of } = require('rxjs');
+  const mockAnnotations$ = of({ annotations: [] });
+  return {
+    ml: {
+      annotations: {
+        getAnnotations: jest.fn().mockReturnValue(mockAnnotations$)
+      }
     }
-  }
-}));
+  };}
+);
 
 describe('AnnotationsTable', () => {
   test('Minimal initialization without props.', () => {
