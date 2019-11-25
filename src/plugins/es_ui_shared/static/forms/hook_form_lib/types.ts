@@ -71,6 +71,7 @@ export interface FormOptions {
 export interface FieldHook {
   readonly path: string;
   readonly label?: string;
+  readonly labelAppend?: string | ReactNode;
   readonly helpText?: string | ReactNode;
   readonly type: string;
   readonly value: unknown;
@@ -98,6 +99,7 @@ export interface FieldHook {
 export interface FieldConfig<T extends object = any> {
   readonly path?: string;
   readonly label?: string;
+  readonly labelAppend?: string | ReactNode;
   readonly helpText?: string | ReactNode;
   readonly type?: HTMLInputElement['type'];
   readonly defaultValue?: unknown;
