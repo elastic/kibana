@@ -38,7 +38,11 @@ import {
   HomePublicPluginSetup,
   FeatureCatalogueCategory,
 } from '../../../../../plugins/home/public';
+<<<<<<< HEAD
+=======
+import { SharePluginStart } from '../../../../../plugins/share/public';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
+>>>>>>> 8af09faa72... Move local application service into Kibana platform (#50661)
 
 export interface LegacyAngularInjectedDependencies {
   dashboardConfig: any;
