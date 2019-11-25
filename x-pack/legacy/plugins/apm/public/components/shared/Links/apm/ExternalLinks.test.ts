@@ -5,14 +5,13 @@
  */
 import { getTraceUrl } from './ExternalLinks';
 
-jest.mock('../../../app/Main/route_config/utils', () => ({
-  generatePath: (
-    linkToTrace: string,
-    pathParam: { traceId: string | number }
-  ) => {
-    expect(linkToTrace).toBeDefined();
-    return `/link-to/trace/${pathParam.traceId}`;
-  }
+jest.mock('../../../app/Main/route_config/index.tsx', () => ({
+  routes: [
+    {
+      name: 'linkToTrace',
+      path: '/link-to/trace/:traceId'
+    }
+  ]
 }));
 
 describe('ExternalLinks', () => {

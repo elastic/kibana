@@ -24,7 +24,7 @@ export const generatePath = (routeName: string, pathParams?: object) => {
   if (route && route.path) {
     const { path } = route;
     // Matches any string with ':param/'
-    templateSettings.interpolate = /:([\s\S].+?(?=\/))/;
+    templateSettings.interpolate = /:(\w+)/;
     return pathParams ? template(path)(pathParams) : path;
   }
 
