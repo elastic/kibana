@@ -10,7 +10,7 @@ export class DatasourcesLib {
   private datasources: Datasource[] = [];
 
   public async getByIDs(_user: FrameworkUser, ids: string[]): Promise<Datasource[]> {
-    return new Promise(resolve => {
+    return this.datasources.filter(ds => ids.includes(ds.id))
       resolve(this.datasources.filter(ds => ids.includes(ds.id)));
     });
   }
