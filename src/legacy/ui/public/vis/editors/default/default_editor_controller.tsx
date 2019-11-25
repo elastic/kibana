@@ -26,7 +26,6 @@ import { EditorRenderProps } from '../../../../../core_plugins/kibana/public/vis
 import { VisSavedObject } from '../../../../../core_plugins/kibana/public/visualize/embeddable/visualize_embeddable';
 import { DefaultEditor } from './default_editor';
 import { DefaultEditorDataTab, OptionTab } from './components/sidebar';
-import { EditorStateContextProvider } from './state';
 
 export interface DefaultEditorControllerState {
   savedObj: VisSavedObject;
@@ -76,9 +75,7 @@ class DefaultEditorController {
   render(props: EditorRenderProps) {
     render(
       <I18nContext>
-        <EditorStateContextProvider>
-          <DefaultEditor {...this.state} {...props} />
-        </EditorStateContextProvider>
+        <DefaultEditor {...this.state} {...props} />
       </I18nContext>,
       this.el
     );

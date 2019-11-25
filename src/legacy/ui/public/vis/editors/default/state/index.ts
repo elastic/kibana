@@ -25,7 +25,6 @@ import { editorStateReducer, initEditorState } from './reducers';
 import { EditorStateActionTypes } from './constants';
 import { EditorAction, updateStateParams } from './actions';
 
-export * from './editor_state_context';
 export * from './editor_form_state';
 export * from './actions';
 

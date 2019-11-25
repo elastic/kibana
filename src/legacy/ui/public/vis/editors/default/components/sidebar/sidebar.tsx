@@ -26,13 +26,7 @@ import { Vis, VisState } from 'ui/vis';
 import { PersistedState } from 'ui/persisted_state';
 import { DefaultEditorNavBar, OptionTab } from './navbar';
 import { DefaultEditorControls } from './controls';
-import {
-  setStateParamValue,
-  EditorAction,
-  SetValidity,
-  SetTouched,
-  useEditorContext,
-} from '../../state';
+import { setStateParamValue, EditorAction, SetValidity, SetTouched } from '../../state';
 import { AggGroupNames } from '../../agg_groups';
 import { DefaultEditorAggCommonProps } from '../agg_common_props';
 
@@ -65,7 +59,7 @@ function DefaultEditorSideBar({
   vis,
 }: DefaultEditorSideBarProps) {
   const [selectedTab, setSelectedTab] = useState(optionTabs[0].name);
-  const { isDirty, setDirty } = useEditorContext();
+  const [isDirty, setDirty] = useState(false);
 
   const responseAggs = useMemo(() => state.aggs.getResponseAggs(), [state.aggs]);
   const metricAggs = useMemo(

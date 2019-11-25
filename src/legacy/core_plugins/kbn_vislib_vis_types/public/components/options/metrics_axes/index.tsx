@@ -22,7 +22,6 @@ import { cloneDeep, uniq, get } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
 import { AggConfig } from 'ui/vis';
-import { useEditorContext } from 'ui/vis/editors/default/state/editor_state_context';
 import { BasicVislibParams, ValueAxis, SeriesParam, Axis } from '../../../types';
 import { ValidationVisOptionsProps } from '../../common';
 import { SeriesPanel } from './series_panel';
@@ -247,13 +246,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
 
   const firstValueAxesId = stateParams.valueAxes[0].id;
 
-  const { isDirty } = useEditorContext();
-
   useEffect(() => {
-    if (!isDirty) {
-      return;
-    }
-
     const updatedSeries = metrics.map(agg => {
       const params = stateParams.seriesParams.find(param => param.data.id === agg.id);
       const label = agg.makeLabel();
@@ -279,7 +272,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
     });
 
     setValue('seriesParams', updatedSeries);
-  }, [isDirty, metrics, firstValueAxesId]);
+  }, [metrics, firstValueAxesId]);
 
   const visType = useMemo(() => {
     const types = uniq(stateParams.seriesParams.map(({ type }) => type));
@@ -290,13 +283,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
     vis.setVisType(visType);
   }, [vis, visType]);
 
-  useEffect(() => {
-    if (!isDirty) {
-      return;
-    }
-
-    updateAxisTitle();
-  }, [aggs, isDirty]);
+  useEffect(updateAxisTitle, [aggs]);
 
   return (
     <>
