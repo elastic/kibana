@@ -5,7 +5,7 @@
  */
 
 import { Dictionary } from '../../../common/types/common';
-import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
 
 import { AggName } from './aggregations';
 import { EsFieldName } from './fields';

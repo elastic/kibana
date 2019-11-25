@@ -4,36 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { groupBy, map, toPairs } from 'lodash/fp';
-
 import { ChartSeriesData } from '../../../charts/common';
-import { MatrixOverTimeHistogramData } from '../../../../graphql/types';
 import { KpiHostsChartColors } from '../kpi_hosts/types';
 
-const formatToChartDataItem = ([key, value]: [
-  string,
-  MatrixOverTimeHistogramData[]
-]): ChartSeriesData => ({
-  key,
-  value,
-});
+enum AuthMatrixDataGroup {
+  authSuccess = 'authentication_success',
+  authFailure = 'authentication_failure',
+}
 
-const addCustomColors = (item: ChartSeriesData) => {
-  if (item.key === 'authentication_success') {
-    item.color = KpiHostsChartColors.authSuccess;
-  }
+export interface AuthMatrixDataFields {
+  [AuthMatrixDataGroup.authSuccess]: ChartSeriesData;
+  [AuthMatrixDataGroup.authFailure]: ChartSeriesData;
+}
 
-  if (item.key === 'authentication_failure') {
-    item.color = KpiHostsChartColors.authFailure;
-  }
-
-  return item;
-};
-
-export const getCustomChartData = (data: MatrixOverTimeHistogramData[]): ChartSeriesData[] => {
-  const dataGroupedByEvent = groupBy('g', data);
-  const dataGroupedEntries = toPairs(dataGroupedByEvent);
-  const formattedChartData = map(formatToChartDataItem, dataGroupedEntries);
-
-  return map(addCustomColors, formattedChartData);
+export const authMatrixDataMappingFields: AuthMatrixDataFields = {
+  [AuthMatrixDataGroup.authSuccess]: {
+    key: AuthMatrixDataGroup.authSuccess,
+    value: null,
+    color: KpiHostsChartColors.authSuccess,
+  },
+  [AuthMatrixDataGroup.authFailure]: {
+    key: AuthMatrixDataGroup.authFailure,
+    value: null,
+    color: KpiHostsChartColors.authFailure,
+  },
 };

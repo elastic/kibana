@@ -8,25 +8,15 @@ import { callWithInternalUserFactory } from './call_with_internal_user_factory';
 
 describe('call_with_internal_user_factory', () => {
   describe('callWithInternalUserFactory', () => {
-    let server: any;
-    let callWithInternalUser: any;
-
-    beforeEach(() => {
-      callWithInternalUser = jest.fn();
-      server = {
-        plugins: {
-          elasticsearch: {
-            getCluster: jest.fn(() => ({ callWithInternalUser })),
-          },
-        },
-      };
-    });
-
     it('should use internal user "admin"', () => {
-      const callWithInternalUserInstance = callWithInternalUserFactory(server);
+      const callWithInternalUser: any = jest.fn();
+      const elasticsearchPlugin: any = {
+        getCluster: jest.fn(() => ({ callWithInternalUser })),
+      };
+      const callWithInternalUserInstance = callWithInternalUserFactory(elasticsearchPlugin);
       callWithInternalUserInstance();
 
-      expect(server.plugins.elasticsearch.getCluster).toHaveBeenCalledWith('admin');
+      expect(elasticsearchPlugin.getCluster).toHaveBeenCalledWith('admin');
     });
   });
 });

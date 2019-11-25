@@ -28,7 +28,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       const updatedData = {
         name: 'bcd',
         tags: ['bar'],
-        alertTypeParams: {
+        params: {
           foo: true,
         },
         interval: '12s',
@@ -68,7 +68,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         .send({
           name: 'bcd',
           tags: ['foo'],
-          alertTypeParams: {
+          params: {
             foo: true,
           },
           interval: '12s',
