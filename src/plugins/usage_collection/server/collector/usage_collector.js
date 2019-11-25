@@ -22,15 +22,15 @@ import { Collector } from './collector';
 
 export class UsageCollector extends Collector {
   /*
-   * @param {Object} server - server object
+   * @param {Object} logger - logger object
    * @param {String} options.type - property name as the key for the data
    * @param {Function} options.init (optional) - initialization function
    * @param {Function} options.fetch - function to query data
    * @param {Function} options.formatForBulkUpload - optional
    * @param {Function} options.rest - optional other properties
    */
-  constructor(server, { type, init, fetch, formatForBulkUpload = null, ...options } = {}) {
-    super(server, { type, init, fetch, formatForBulkUpload, ...options });
+  constructor(logger, { type, init, fetch, formatForBulkUpload = null, ...options } = {}) {
+    super(logger, { type, init, fetch, formatForBulkUpload, ...options });
 
     /*
      * Currently, for internal bulk uploading, usage stats are part of

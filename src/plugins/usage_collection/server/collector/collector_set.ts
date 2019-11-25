@@ -110,17 +110,12 @@ export class CollectorSet {
     return allReady;
   };
 
-  /*
-   * Call a bunch of fetch methods and then do them in bulk
-   * @param {CollectorSet} collectorSet - a set of collectors to fetch. Default to all registered collectors
-   */
-  public bulkFetch = async (callCluster: CallCluster, collectorSet: CollectorSet = this) => {
-    if (!(collectorSet instanceof CollectorSet)) {
-      throw new Error(`bulkFetch method given bad collectorSet parameter: ` + typeof collectorSet);
-    }
-
+  public bulkFetch = async (
+    callCluster: CallCluster,
+    collectors: Collector[] = this.collectors
+  ) => {
     const responses = [];
-    for (const collector of collectorSet.collectors) {
+    for (const collector of collectors) {
       this.logger.debug(`Fetching data from ${collector.type} collector`);
       try {
         responses.push({
@@ -146,7 +141,7 @@ export class CollectorSet {
 
   public bulkFetchUsage = async (callCluster: CallCluster) => {
     const usageCollectors = this.getFilteredCollectorSet((c: any) => c instanceof UsageCollector);
-    return await this.bulkFetch(callCluster, usageCollectors);
+    return await this.bulkFetch(callCluster, usageCollectors.collectors);
   };
 
   // convert an array of fetched stats results into key/object

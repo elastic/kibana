@@ -20,7 +20,7 @@
 
 export class Collector {
   /*
-   * @param {Object} server - server object
+   * @param {Object} logger - logger object
    * @param {String} options.type - property name as the key for the data
    * @param {Function} options.init (optional) - initialization function
    * @param {Function} options.fetch - function to query data
