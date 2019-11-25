@@ -33,7 +33,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           const updatedData = {
             name: 'bcd',
             tags: ['bar'],
-            alertTypeParams: {
+            params: {
               foo: true,
             },
             interval: '12s',
@@ -93,7 +93,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .send({
               name: 'bcd',
               tags: ['bar'],
-              alertTypeParams: {
+              params: {
                 foo: true,
               },
               interval: '12s',
@@ -142,7 +142,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               tags: ['bar'],
               throttle: '1m',
               alertTypeId: '1',
-              alertTypeParams: {
+              params: {
                 foo: true,
               },
               interval: '12s',
@@ -203,10 +203,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message:
-                  'child "throttle" fails because ["throttle" is required]. child "name" fails because ["name" is required]. child "tags" fails because ["tags" is required]. child "interval" fails because ["interval" is required]. child "alertTypeParams" fails because ["alertTypeParams" is required]. child "actions" fails because ["actions" is required]',
+                  'child "throttle" fails because ["throttle" is required]. child "name" fails because ["name" is required]. child "tags" fails because ["tags" is required]. child "interval" fails because ["interval" is required]. child "params" fails because ["params" is required]. child "actions" fails because ["actions" is required]',
                 validation: {
                   source: 'payload',
-                  keys: ['throttle', 'name', 'tags', 'interval', 'alertTypeParams', 'actions'],
+                  keys: ['throttle', 'name', 'tags', 'interval', 'params', 'actions'],
                 },
               });
               break;
@@ -222,7 +222,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .send(
               getTestAlertData({
                 alertTypeId: 'test.validation',
-                alertTypeParams: {
+                params: {
                   param1: 'test',
                 },
               })
@@ -239,7 +239,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               tags: ['bar'],
               interval: '1m',
               throttle: '1m',
-              alertTypeParams: {},
+              params: {},
               actions: [],
             });
 
@@ -261,7 +261,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message:
-                  'alertTypeParams invalid: [param1]: expected value of type [string] but got [undefined]',
+                  'params invalid: [param1]: expected value of type [string] but got [undefined]',
               });
               break;
             default:

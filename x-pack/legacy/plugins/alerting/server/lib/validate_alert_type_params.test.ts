@@ -61,6 +61,6 @@ test('should validate and throw error when params is invalid', () => {
       {}
     )
   ).toThrowErrorMatchingInlineSnapshot(
-    `"alertTypeParams invalid: [param1]: expected value of type [string] but got [undefined]"`
+    `"params invalid: [param1]: expected value of type [string] but got [undefined]"`
   );
 });
