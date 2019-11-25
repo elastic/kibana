@@ -527,7 +527,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
     try {
       // Prefer realm name if it's specified, otherwise fallback to ACS.
-      const preparePayload = this.realm ? { realm: this.realm } : { acs: this.getACS(request) };
+      const preparePayload = this.realm ? { realm: this.realm } : { acs: this.getACS() };
 
       // This operation should be performed on behalf of the user with a privilege that normal
       // user usually doesn't have `cluster:admin/xpack/security/saml/prepare`.
@@ -576,7 +576,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     this.logger.debug('Single logout has been initiated by the Identity Provider.');
 
     // Prefer realm name if it's specified, otherwise fallback to ACS.
-    const invalidatePayload = this.realm ? { realm: this.realm } : { acs: this.getACS(request) };
+    const invalidatePayload = this.realm ? { realm: this.realm } : { acs: this.getACS() };
 
     // This operation should be performed on behalf of the user with a privilege that normal
     // user usually doesn't have `cluster:admin/xpack/security/saml/invalidate`.
@@ -596,10 +596,10 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   /**
    * Constructs and returns Kibana's Assertion consumer service URL.
    */
-  private getACS(request: KibanaRequest) {
-    return `${this.options.getServerBaseURL()}${this.options.basePath.get(
-      request
-    )}/api/security/v1/saml`;
+  private getACS() {
+    return `${this.options.getServerBaseURL()}${
+      this.options.basePath.serverBasePath
+    }/api/security/v1/saml`;
   }
 
   /**
