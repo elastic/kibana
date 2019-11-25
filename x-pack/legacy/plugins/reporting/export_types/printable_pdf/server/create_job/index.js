@@ -6,11 +6,11 @@
 
 import { PLUGIN_ID, PDF_JOB_TYPE } from '../../../../common/constants';
 import { validateUrls } from '../../../../common/validate_urls';
-import { LevelLogger, oncePerServer } from '../../../../server/lib';
+import { LevelLogger } from '../../../../server/lib';
 import { cryptoFactory } from '../../../../server/lib/crypto';
 import { compatibilityShimFactory } from './compatibility_shim';
 
-function createJobFactoryFn(server) {
+export function createJobFactory(server) {
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PDF_JOB_TYPE, 'create']);
   const compatibilityShim = compatibilityShimFactory(server, logger);
   const crypto = cryptoFactory(server);
@@ -36,5 +36,3 @@ function createJobFactoryFn(server) {
     };
   });
 }
-
-export const createJobFactory = oncePerServer(createJobFactoryFn);
