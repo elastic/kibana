@@ -8,8 +8,6 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { EuiTitle, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
-import { RouteComponentProps } from 'react-router';
-import { AppMountContext } from 'kibana/public';
 import * as alertDetailsSelectors from '../selectors/alert_details';
 import { actions as alertDetailsActions } from '../actions/alert_details';
 

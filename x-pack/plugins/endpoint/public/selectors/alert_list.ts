@@ -4,38 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-function alertListState(state: any) {
+import { GlobalState } from '../types';
+
+function alertListState(state: GlobalState) {
   return state.alertList;
 }
-// TODO: type 'state' properly
-export function alertListData(state: any) {
+
+export function alertListData(state: GlobalState) {
   return alertListState(state).data.hits;
 }
 
-export function totalHits(state: any) {
+export function totalHits(state: GlobalState) {
   return alertListData(state).total.value;
 }
 
-export function pageIndex(state: any) {
+export function pageIndex(state: GlobalState) {
   return alertListState(state).pageIndex;
 }
 
-export function pageSize(state: any) {
+export function pageSize(state: GlobalState) {
   return alertListState(state).pageSize;
 }
 
-export function showPerPageOptions(state: any) {
+export function showPerPageOptions(state: GlobalState) {
   return alertListState(state).showPerPageOptions;
 }
 
-export function sortField(state: any) {
+export function sortField(state: GlobalState) {
   return alertListState(state).sortField;
 }
 
-export function sortDirection(state: any) {
+export function sortDirection(state: GlobalState) {
   return alertListState(state).sortDirection;
 }
 
-export function selectedItems(state: any) {
+export function selectedItems(state: GlobalState) {
   return alertListState(state).selectedItems;
 }
