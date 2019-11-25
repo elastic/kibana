@@ -4,9 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 
 import { isExampleDataIndex } from '../../../../common/log_analysis';
+import {
+  ValidationIndicesError,
+  ValidationIndicesResponsePayload,
+} from '../../../../common/http_api';
+import { useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { callIndexPatternsValidate } from './api/index_patterns_validate';
 
 type SetupHandler = (
   indices: string[],
@@ -14,15 +20,23 @@ type SetupHandler = (
   endTime: number | undefined
 ) => void;
 
+export type ValidationIndicesUIError =
+  | ValidationIndicesError
+  | { error: 'NETWORK_ERROR' }
+  | { error: 'TOO_FEW_SELECTED_INDICES' };
+
+export interface ValidatedIndex {
+  index: string;
+  errors: ValidationIndicesError[];
+  isSelected: boolean;
+}
+
 interface AnalysisSetupStateArguments {
   availableIndices: string[];
   cleanupAndSetupModule: SetupHandler;
   setupModule: SetupHandler;
+  timestampField: string;
 }
-
-type IndicesSelection = Record<string, boolean>;
-
-type ValidationErrors = 'TOO_FEW_SELECTED_INDICES';
 
 const fourWeeksInMs = 86400000 * 7 * 4;
 
@@ -30,26 +44,51 @@ export const useAnalysisSetupState = ({
   availableIndices,
   cleanupAndSetupModule,
   setupModule,
+  timestampField,
 }: AnalysisSetupStateArguments) => {
   const [startTime, setStartTime] = useState<number | undefined>(Date.now() - fourWeeksInMs);
   const [endTime, setEndTime] = useState<number | undefined>(undefined);
 
-  const [selectedIndices, setSelectedIndices] = useState<IndicesSelection>(
-    availableIndices.reduce(
-      (indexMap, indexName) => ({
-        ...indexMap,
-        [indexName]: !(availableIndices.length > 1 && isExampleDataIndex(indexName)),
-      }),
-      {}
-    )
+  // Prepare the validation
+  const [validatedIndices, setValidatedIndices] = useState<ValidatedIndex[]>(
+    availableIndices.map(index => ({
+      index,
+      errors: [],
+      isSelected: false,
+    }))
+  );
+  const [validateIndicesRequest, validateIndices] = useTrackedPromise(
+    {
+      cancelPreviousOn: 'resolution',
+      createPromise: async () => {
+        return await callIndexPatternsValidate(timestampField, availableIndices);
+      },
+      onResolve: ({ data }: ValidationIndicesResponsePayload) => {
+        setValidatedIndices(
+          availableIndices.map(index => {
+            const errors = data.errors.filter(error => error.index === index);
+            return {
+              index,
+              errors,
+              isSelected: errors.length === 0 && !isExampleDataIndex(index),
+            };
+          })
+        );
+      },
+      onReject: () => {
+        setValidatedIndices([]);
+      },
+    },
+    [availableIndices, timestampField]
   );
 
+  useEffect(() => {
+    validateIndices();
+  }, [validateIndices]);
+
   const selectedIndexNames = useMemo(
-    () =>
-      Object.entries(selectedIndices)
-        .filter(([_indexName, isSelected]) => isSelected)
-        .map(([indexName]) => indexName),
-    [selectedIndices]
+    () => validatedIndices.filter(i => i.isSelected).map(i => i.index),
+    [validatedIndices]
   );
 
   const setup = useCallback(() => {
@@ -60,24 +99,42 @@ export const useAnalysisSetupState = ({
     return cleanupAndSetupModule(selectedIndexNames, startTime, endTime);
   }, [cleanupAndSetupModule, selectedIndexNames, startTime, endTime]);
 
-  const validationErrors: ValidationErrors[] = useMemo(
+  const isValidating = useMemo(
     () =>
-      Object.values(selectedIndices).some(isSelected => isSelected)
-        ? []
-        : ['TOO_FEW_SELECTED_INDICES' as const],
-    [selectedIndices]
+      validateIndicesRequest.state === 'pending' ||
+      validateIndicesRequest.state === 'uninitialized',
+    [validateIndicesRequest.state]
   );
+
+  const validationErrors = useMemo<ValidationIndicesUIError[]>(() => {
+    if (isValidating) {
+      return [];
+    }
+
+    if (validateIndicesRequest.state === 'rejected') {
+      return [{ error: 'NETWORK_ERROR' }];
+    }
+
+    if (selectedIndexNames.length === 0) {
+      return [{ error: 'TOO_FEW_SELECTED_INDICES' }];
+    }
+
+    return validatedIndices.reduce<ValidationIndicesUIError[]>((errors, index) => {
+      return selectedIndexNames.includes(index.index) ? errors.concat(index.errors) : errors;
+    }, []);
+  }, [selectedIndexNames, validatedIndices, validateIndicesRequest.state]);
 
   return {
     cleanupAndSetup,
     endTime,
+    isValidating,
     selectedIndexNames,
-    selectedIndices,
     setEndTime,
-    setSelectedIndices,
     setStartTime,
     setup,
     startTime,
+    validatedIndices,
+    setValidatedIndices,
     validationErrors,
   };
 };
