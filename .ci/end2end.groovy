@@ -38,7 +38,7 @@ pipeline {
         script {
           dir("${BASE_DIR}"){
             def regexps =[ "^x-pack/legacy/plugins/apm/" ]
-            env.APM_UPDATED = isGitRegionMatch(regexps: regexps)
+            env.APM_UPDATED = isGitRegionMatch(patterns: regexps)
           }
         }
         dir("${APM_ITS}"){
