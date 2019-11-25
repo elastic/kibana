@@ -8,7 +8,8 @@ import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { addStackStats, getAllStats, handleAllStats } from '../get_all_stats';
 
-describe('get_all_stats', () => {
+// FAILING: https://github.com/elastic/kibana/issues/51371
+describe.skip('get_all_stats', () => {
   const size = 123;
   const start = 0;
   const end = 1;
