@@ -17,6 +17,4 @@
  * under the License.
  */
 
-export { FilterBar } from './filter_bar';
-
 export { ApplyFiltersPopover } from './apply_filters';

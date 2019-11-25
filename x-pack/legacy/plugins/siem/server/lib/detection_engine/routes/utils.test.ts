@@ -75,7 +75,7 @@ describe('utils', () => {
 
     test('should omit query if query is null', () => {
       const fullSignal = getResult();
-      fullSignal.alertTypeParams.query = null;
+      fullSignal.params.query = null;
       const signal = transformAlertToSignal(fullSignal);
       expect(signal).toEqual({
         created_by: 'elastic',
@@ -105,7 +105,7 @@ describe('utils', () => {
 
     test('should omit query if query is undefined', () => {
       const fullSignal = getResult();
-      fullSignal.alertTypeParams.query = undefined;
+      fullSignal.params.query = undefined;
       const signal = transformAlertToSignal(fullSignal);
       expect(signal).toEqual({
         created_by: 'elastic',
@@ -135,8 +135,8 @@ describe('utils', () => {
 
     test('should omit a mix of undefined, null, and missing fields', () => {
       const fullSignal = getResult();
-      fullSignal.alertTypeParams.query = undefined;
-      fullSignal.alertTypeParams.language = null;
+      fullSignal.params.query = undefined;
+      fullSignal.params.language = null;
       const { from, enabled, ...omitData } = transformAlertToSignal(fullSignal);
       expect(omitData).toEqual({
         created_by: 'elastic',
@@ -194,7 +194,7 @@ describe('utils', () => {
 
     test('should return immutable is equal to false', () => {
       const fullSignal = getResult();
-      fullSignal.alertTypeParams.immutable = false;
+      fullSignal.params.immutable = false;
       const signalWithEnabledFalse = transformAlertToSignal(fullSignal);
       expect(signalWithEnabledFalse).toEqual({
         created_by: 'elastic',
