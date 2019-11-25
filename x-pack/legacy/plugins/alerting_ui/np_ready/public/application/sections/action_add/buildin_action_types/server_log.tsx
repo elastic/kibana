@@ -6,7 +6,7 @@
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSelect, EuiTextArea } from '@elastic/eui';
-import { ActionTypeModel, ValidationResult, ActionParamsProps, Action } from '../../../../types';
+import { ActionTypeModel, ValidationResult, ActionParamsProps } from '../../../../types';
 import { ErrableFormRow } from '../../../components/page_error';
 
 export function getActionType(): ActionTypeModel {
@@ -22,7 +22,7 @@ export function getActionType(): ActionTypeModel {
     validate: (): ValidationResult => {
       return { errors: {} };
     },
-    validateParams: (action: Action): ValidationResult => {
+    validateParams: (actionParams: any): ValidationResult => {
       const validationResult = { errors: {} };
       return validationResult;
     },

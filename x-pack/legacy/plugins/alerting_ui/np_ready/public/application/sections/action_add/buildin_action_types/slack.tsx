@@ -44,7 +44,7 @@ export function getActionType(): ActionTypeModel {
       }
       return validationResult;
     },
-    validateParams: (action: Action): ValidationResult => {
+    validateParams: (actionParams: any): ValidationResult => {
       const validationResult = { errors: {} };
       return validationResult;
     },

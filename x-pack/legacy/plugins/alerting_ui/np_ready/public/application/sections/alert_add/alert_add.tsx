@@ -183,6 +183,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
   const closeFlyout = useCallback(() => {
     setAlertFlyoutVisibility(false);
     setAlertType(undefined);
+    setIsAddActionPanelOpen(true);
     setSelectedTabId('alert');
     setServerError(null);
   }, [setAlertFlyoutVisibility]);
@@ -215,7 +216,11 @@ export const AlertAdd = ({ refreshList }: Props) => {
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
 
   const actionErrors = alert.actions.reduce((acc: any, alertAction: AlertAction) => {
-    const actionType = actionTypeRegistry.get(alertAction.id);
+    const actionTypeConnectors = connectors.find(field => field.id === alertAction.id);
+    if (!actionTypeConnectors) {
+      return [];
+    }
+    const actionType = actionTypeRegistry.get(actionTypeConnectors.actionTypeId);
     if (!actionType) {
       return [];
     }
@@ -403,6 +408,11 @@ export const AlertAdd = ({ refreshList }: Props) => {
         const actionTypeRegisterd = actionTypeRegistry.get(actionConnector.actionTypeId);
         if (actionTypeRegisterd === null || actionItem.group !== selectedTabId) return null;
         const ParamsFieldsComponent = actionTypeRegisterd.actionParamsFields;
+        const actionParamsErrors =
+          Object.keys(actionErrors).length > 0 ? actionErrors[actionItem.id] : [];
+        const hasActionParamsErrors = !!Object.keys(actionParamsErrors).find(
+          errorKey => actionParamsErrors[errorKey].length >= 1
+        );
         return (
           <EuiAccordion
             initialIsOpen={true}
@@ -418,7 +428,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiTitle size="s">
-                    <h5 id="alertActionTypeEditTitle">
+                    <h5>
                       <FormattedMessage
                         defaultMessage={`Action: ${actionConnector.description}`}
                         id="xpack.alertingUI.sections.alertAdd.selectAlertActionTypeEditTitle"
@@ -449,8 +459,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
             }
             paddingSize="l"
           >
-            <ErrableFormRow
-              id="actionId"
+            <EuiFormRow
               label={
                 <FormattedMessage
                   id="xpack.alertingUI.sections.alertAdd.actionIdLabel"
@@ -462,9 +471,9 @@ export const AlertAdd = ({ refreshList }: Props) => {
                   }}
                 />
               }
-              errorKey="name"
-              isShowingErrors={hasErrors && alert.name !== undefined}
-              errors={errors}
+              //  errorKey="name"
+              //  isShowingErrors={hasErrors}
+              //   errors={errors}
             >
               <EuiComboBox
                 fullWidth
@@ -476,15 +485,15 @@ export const AlertAdd = ({ refreshList }: Props) => {
                 }}
                 isClearable={false}
               />
-            </ErrableFormRow>
+            </EuiFormRow>
             <EuiSpacer size="s" />
             {ParamsFieldsComponent ? (
               <ParamsFieldsComponent
                 action={actionItem.params}
                 index={index}
-                errors={{}}
+                errors={actionParamsErrors.errors}
                 editAction={setActionParamsProperty}
-                hasErrors={false}
+                hasErrors={hasActionParamsErrors}
               />
             ) : null}
           </EuiAccordion>
@@ -733,7 +742,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
             {alertTypeArea}
             <EuiSpacer size="xl" />
             {actionsListForGroup}
-            {isAddActionPanelOpen || alert.actions.length === 0 ? (
+            {isAddActionPanelOpen ? (
               <Fragment>
                 <EuiTitle size="s">
                   <h5 id="alertActionTypeTitle">

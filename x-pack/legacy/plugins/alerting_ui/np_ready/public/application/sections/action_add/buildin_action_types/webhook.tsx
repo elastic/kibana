@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
@@ -93,7 +93,7 @@ export function getActionType(): ActionTypeModel {
       }
       return validationResult;
     },
-    validateParams: (action: Action): ValidationResult => {
+    validateParams: (actionParams: any): ValidationResult => {
       const validationResult = { errors: {} };
       return validationResult;
     },

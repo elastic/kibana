@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, Fragment, useEffect, useCallback } from 'react';
+import React, { useState, Fragment, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -21,9 +21,9 @@ import {
   EuiText,
   EuiCallOut,
 } from '@elastic/eui';
-import { AlertTypeModel, AlertType, Alert, ValidationResult } from '../../../../../types';
+import { AlertTypeModel, Alert, ValidationResult } from '../../../../../types';
 import { Comparator, AggregationType, GroupByType } from '../types';
-import { COMPARATORS, AGGREGATION_TYPES, expressionFields } from '../../../../constants';
+import { COMPARATORS, AGGREGATION_TYPES } from '../../../../constants';
 import {
   getMatchingIndicesForThresholdAlertType,
   getThresholdAlertTypeFields,
@@ -58,6 +58,98 @@ const expressionFieldsWithValidation = [
   'threshold1',
   'timeWindowSize',
 ];
+
+const validateAlertType = (alert: Alert): ValidationResult => {
+  const {
+    index,
+    timeField,
+    triggerIntervalSize,
+    aggType,
+    aggField,
+    groupBy,
+    termSize,
+    termField,
+    threshold,
+    timeWindowSize,
+  } = alert.alertTypeParams;
+  const validationResult = { errors: {} };
+  const errors = {
+    aggField: new Array<string>(),
+    termSize: new Array<string>(),
+    termField: new Array<string>(),
+    timeWindowSize: new Array<string>(),
+    threshold0: new Array<string>(),
+    threshold1: new Array<string>(),
+    index: new Array<string>(),
+    timeField: new Array<string>(),
+    triggerIntervalSize: new Array<string>(),
+  };
+  validationResult.errors = errors;
+  if (!index) {
+    errors.index.push(
+      i18n.translate('xpack.alertingUI.sections.addAlert.error.requiredIndexText', {
+        defaultMessage: 'Index is required.',
+      })
+    );
+  }
+  if (!timeField) {
+    errors.timeField.push(
+      i18n.translate('xpack.alertingUI.sections.addAlert.error.requiredTimeFieldText', {
+        defaultMessage: 'Time field is required.',
+      })
+    );
+  }
+  if (!triggerIntervalSize) {
+    errors.triggerIntervalSize.push(
+      i18n.translate('xpack.alertingUI.sections.addAlert.error.requiredTriggerIntervalSizeText', {
+        defaultMessage: 'Trigger interval size is required.',
+      })
+    );
+  }
+  if (aggType && aggregationTypes[aggType].fieldRequired && !aggField) {
+    errors.aggField.push(
+      i18n.translate('xpack.alertingUI.sections.addAlert.error.requiredAggFieldText', {
+        defaultMessage: 'Aggregation field is required.',
+      })
+    );
+  }
+  if (!termSize) {
+    errors.termSize.push(
+      i18n.translate('xpack.alertingUI.sections.addAlert.error.requiredTermSizedText', {
+        defaultMessage: 'Term size is required.',
+      })
+    );
+  }
+  if (groupBy && groupByTypes[groupBy].sizeRequired && !termField) {
+    errors.termField.push(
+      i18n.translate('xpack.alertingUI.sections.addAlert.error.requiredtTermFieldText', {
+        defaultMessage: 'Term field is required.',
+      })
+    );
+  }
+  if (!timeWindowSize) {
+    errors.timeWindowSize.push(
+      i18n.translate('xpack.alertingUI.sections.addAlert.error.requiredTimeWindowSizeText', {
+        defaultMessage: 'Time window size is required.',
+      })
+    );
+  }
+  if (threshold && threshold.length > 0 && !threshold[0]) {
+    errors.threshold0.push(
+      i18n.translate('xpack.alertingUI.sections.addAlert.error.requiredThreshold0Text', {
+        defaultMessage: 'Threshold0, is required.',
+      })
+    );
+  }
+  if (threshold && threshold.length > 1 && !threshold[1]) {
+    errors.threshold1.push(
+      i18n.translate('xpack.alertingUI.sections.addAlert.error.requiredThreshold1Text', {
+        defaultMessage: 'Threshold1 is required.',
+      })
+    );
+  }
+  return validationResult;
+};
 
 export function getActionType(): AlertTypeModel {
   return {
@@ -177,98 +269,6 @@ interface Props {
   setAlertProperty: (key: string, value: any) => void;
   errors: { [key: string]: string[] };
   hasErrors?: boolean;
-}
-
-function validateAlertType(alert: Alert): ValidationResult {
-  const {
-    index,
-    timeField,
-    triggerIntervalSize,
-    aggType,
-    aggField,
-    groupBy,
-    termSize,
-    termField,
-    threshold,
-    timeWindowSize,
-  } = alert.alertTypeParams;
-  const validationResult = { errors: {} };
-  const errors = {
-    aggField: new Array<string>(),
-    termSize: new Array<string>(),
-    termField: new Array<string>(),
-    timeWindowSize: new Array<string>(),
-    threshold0: new Array<string>(),
-    threshold1: new Array<string>(),
-    index: new Array<string>(),
-    timeField: new Array<string>(),
-    triggerIntervalSize: new Array<string>(),
-  };
-  validationResult.errors = errors;
-  if (!index) {
-    errors.index.push(
-      i18n.translate('xpack.alertingUI.sections.addAlert.error.requiredIndexText', {
-        defaultMessage: 'Index is required.',
-      })
-    );
-  }
-  if (!timeField) {
-    errors.timeField.push(
-      i18n.translate('xpack.alertingUI.sections.addAlert.error.requiredTimeFieldText', {
-        defaultMessage: 'Time field is required.',
-      })
-    );
-  }
-  if (!triggerIntervalSize) {
-    errors.triggerIntervalSize.push(
-      i18n.translate('xpack.alertingUI.sections.addAlert.error.requiredTriggerIntervalSizeText', {
-        defaultMessage: 'Trigger interval size is required.',
-      })
-    );
-  }
-  if (aggType && aggregationTypes[aggType].fieldRequired && !aggField) {
-    errors.aggField.push(
-      i18n.translate('xpack.alertingUI.sections.addAlert.error.requiredAggFieldText', {
-        defaultMessage: 'Aggregation field is required.',
-      })
-    );
-  }
-  if (!termSize) {
-    errors.termSize.push(
-      i18n.translate('xpack.alertingUI.sections.addAlert.error.requiredTermSizedText', {
-        defaultMessage: 'Term size is required.',
-      })
-    );
-  }
-  if (groupBy && groupByTypes[groupBy].sizeRequired && !termField) {
-    errors.termField.push(
-      i18n.translate('xpack.alertingUI.sections.addAlert.error.requiredtTermFieldText', {
-        defaultMessage: 'Term field is required.',
-      })
-    );
-  }
-  if (!timeWindowSize) {
-    errors.timeWindowSize.push(
-      i18n.translate('xpack.alertingUI.sections.addAlert.error.requiredTimeWindowSizeText', {
-        defaultMessage: 'Time window size is required.',
-      })
-    );
-  }
-  if (threshold && threshold.length > 0 && !threshold[0]) {
-    errors.threshold0.push(
-      i18n.translate('xpack.alertingUI.sections.addAlert.error.requiredThreshold0Text', {
-        defaultMessage: 'Threshold0, is required.',
-      })
-    );
-  }
-  if (threshold && threshold.length > 1 && !threshold[1]) {
-    errors.threshold1.push(
-      i18n.translate('xpack.alertingUI.sections.addAlert.error.requiredThreshold1Text', {
-        defaultMessage: 'Threshold1 is required.',
-      })
-    );
-  }
-  return validationResult;
 }
 
 export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> = ({
@@ -449,7 +449,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
               isLoading={isIndiciesLoading}
               noSuggestions={!indexOptions.length}
               options={indexOptions}
-              data-test-subj="indicesComboBox"
+              data-test-subj="thresholdIndexesComboBox"
               selectedOptions={(index || []).map((anIndex: string) => {
                 return {
                   label: anIndex,

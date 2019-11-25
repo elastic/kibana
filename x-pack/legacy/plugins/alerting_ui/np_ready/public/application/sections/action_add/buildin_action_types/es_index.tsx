@@ -7,13 +7,7 @@ import React, { Fragment } from 'react';
 import { EuiFieldText, EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import {
-  ActionTypeModel,
-  Props,
-  Action,
-  ValidationResult,
-  ActionParamsProps,
-} from '../../../../types';
+import { ActionTypeModel, Props, ValidationResult, ActionParamsProps } from '../../../../types';
 import { ErrableFormRow } from '../../../components/page_error';
 
 export function getActionType(): ActionTypeModel {
@@ -31,7 +25,7 @@ export function getActionType(): ActionTypeModel {
     },
     actionFields: IndexActionFields,
     actionParamsFields: IndexParamsFields,
-    validateParams: (action: Action): ValidationResult => {
+    validateParams: (actionParams: any): ValidationResult => {
       const validationResult = { errors: {} };
       return validationResult;
     },

@@ -11,7 +11,6 @@ import {
   EuiFieldNumber,
   EuiFieldPassword,
   EuiComboBox,
-  EuiFormRow,
   EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -81,8 +80,46 @@ export function getActionType(): ActionTypeModel {
       }
       return validationResult;
     },
-    validateParams: (action: Action): ValidationResult => {
+    validateParams: (actionParams: any): ValidationResult => {
       const validationResult = { errors: {} };
+      const errors = {
+        to: new Array<string>(),
+        cc: new Array<string>(),
+        bcc: new Array<string>(),
+        message: new Array<string>(),
+        subject: new Array<string>(),
+      };
+      validationResult.errors = errors;
+      if (
+        ((!actionParams.to || actionParams.to.length === 0) &&
+          (!actionParams.cc || actionParams.cc.length === 0)) ||
+        !actionParams.bcc ||
+        actionParams.bcc.length === 0
+      ) {
+        const errorText = i18n.translate(
+          'xpack.alertingUI.sections.addAction.error.requiredEntryText',
+          {
+            defaultMessage: 'No [to], [cc], or [bcc] entries. At least one entry is required.',
+          }
+        );
+        errors.to.push(errorText);
+        errors.cc.push(errorText);
+        errors.bcc.push(errorText);
+      }
+      if (!actionParams.message) {
+        errors.message.push(
+          i18n.translate('xpack.alertingUI.sections.addAction.error.requiredMessageText', {
+            defaultMessage: 'Message is required.',
+          })
+        );
+      }
+      if (!actionParams.subject) {
+        errors.subject.push(
+          i18n.translate('xpack.alertingUI.sections.addAction.error.requiredSubjectText', {
+            defaultMessage: 'Subject is required.',
+          })
+        );
+      }
       return validationResult;
     },
     actionFields: EmailActionFields,
@@ -274,7 +311,6 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
   return (
     <Fragment>
       <ErrableFormRow
-        id="emailRecipient"
         errorKey="to"
         fullWidth
         errors={errors}
@@ -314,7 +350,6 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
         />
       </ErrableFormRow>
       <ErrableFormRow
-        id="emailCopyRecipient"
         errorKey="cc"
         fullWidth
         errors={errors}
@@ -354,7 +389,6 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
         />
       </ErrableFormRow>
       <ErrableFormRow
-        id="emailBccRecipient"
         errorKey="bcc"
         fullWidth
         errors={errors}
@@ -393,8 +427,11 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
           }}
         />
       </ErrableFormRow>
-      <EuiFormRow
+      <ErrableFormRow
+        errorKey="subject"
         fullWidth
+        errors={errors}
+        isShowingErrors={hasErrors && message !== undefined}
         label={i18n.translate(
           'xpack.alertingUI.sections.actionAdd.emailAction.subjectTextFieldLabel',
           {
@@ -411,9 +448,12 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
             editAction('subject', e.target.value, index);
           }}
         />
-      </EuiFormRow>
-      <EuiFormRow
+      </ErrableFormRow>
+      <ErrableFormRow
+        errorKey="message"
         fullWidth
+        errors={errors}
+        isShowingErrors={hasErrors && message !== undefined}
         label={i18n.translate(
           'xpack.alertingUI.sections.actionAdd.emailAction.messageTextAreaFieldLabel',
           {
@@ -430,7 +470,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
             editAction('message', e.target.value, index);
           }}
         />
-      </EuiFormRow>
+      </ErrableFormRow>
     </Fragment>
   );
 };
