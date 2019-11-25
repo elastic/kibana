@@ -33,11 +33,11 @@ export const RangeType = ({ field }: Props) => {
 
       <AdvancedSettingsWrapper>
         <EditFieldSection>
-          {/* boost */}
-          <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
-
           {/* coerce */}
           <CoerceParameter />
+
+          {/* boost */}
+          <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>

@@ -31,3 +31,5 @@ export * from './coerce_parameter';
 export * from './format_parameter';
 
 export * from './ignore_malformed';
+
+export * from './copy_to_parameter';

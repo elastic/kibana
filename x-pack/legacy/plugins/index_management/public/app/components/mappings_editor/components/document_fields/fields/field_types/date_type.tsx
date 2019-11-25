@@ -52,9 +52,6 @@ export const DateType = ({ field }: Props) => {
 
       <AdvancedSettingsWrapper>
         <EditFieldSection>
-          {/* boost */}
-          <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
-
           {/* null_value */}
           <NullValueParameter
             defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
@@ -91,6 +88,9 @@ export const DateType = ({ field }: Props) => {
             defaultValue={field.source.format}
             defaultToggleValue={getDefaultValueToggle('format', field.source)}
           />
+
+          {/* boost */}
+          <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>

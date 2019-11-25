@@ -45,13 +45,13 @@ export const IpType = ({ field }: Props) => {
 
       <AdvancedSettingsWrapper>
         <EditFieldSection>
-          {/* boost */}
-          <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
-
           {/* null_value */}
           <NullValueParameter
             defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
           />
+
+          {/* boost */}
+          <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>

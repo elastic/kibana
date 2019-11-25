@@ -82,6 +82,7 @@ export type ParameterName =
   | 'coerce'
   | 'ignore_malformed'
   | 'null_value'
+  | 'copy_to'
   | 'dynamic'
   | 'enabled'
   | 'boost'

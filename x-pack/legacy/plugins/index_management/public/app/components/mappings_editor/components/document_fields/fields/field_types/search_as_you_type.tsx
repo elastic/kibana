@@ -46,7 +46,9 @@ export const SearchAsYouType = React.memo(({ field }: Props) => {
         <StoreParameter />
 
         {/* index */}
-        <IndexParameter />
+        <IndexParameter
+          config={{ ...getFieldConfig('index_options'), defaultValue: 'positions' }}
+        />
       </EditFieldSection>
 
       <AdvancedSettingsWrapper>

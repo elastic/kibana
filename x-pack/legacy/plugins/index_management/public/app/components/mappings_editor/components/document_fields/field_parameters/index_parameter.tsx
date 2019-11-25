@@ -11,16 +11,18 @@ import { EditFieldFormRow } from '../fields/edit_field';
 import { PARAMETERS_OPTIONS } from '../../../constants';
 import { getFieldConfig } from '../../../lib';
 import { SuperSelectOption } from '../../../types';
-import { UseField, Field } from '../../../shared_imports';
+import { UseField, Field, FieldConfig } from '../../../shared_imports';
 
 interface Props {
   hasIndexOptions?: boolean;
   indexOptions?: SuperSelectOption[];
+  config?: FieldConfig;
 }
 
 export const IndexParameter = ({
   indexOptions = PARAMETERS_OPTIONS.index_options,
   hasIndexOptions = true,
+  config = getFieldConfig('index_options'),
 }: Props) => (
   <EditFieldFormRow
     title={
@@ -40,7 +42,7 @@ export const IndexParameter = ({
     {hasIndexOptions && (
       <UseField
         path="index_options"
-        config={getFieldConfig('index_options')}
+        config={config}
         component={Field}
         componentProps={{
           euiFieldProps: {

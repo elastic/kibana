@@ -68,9 +68,6 @@ export const BooleanType = ({ field }: Props) => {
 
       <AdvancedSettingsWrapper>
         <EditFieldSection>
-          {/* boost */}
-          <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
-
           {/* null_value */}
           <NullValueParameter
             defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
@@ -97,6 +94,9 @@ export const BooleanType = ({ field }: Props) => {
               }}
             />
           </NullValueParameter>
+
+          {/* boost */}
+          <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>

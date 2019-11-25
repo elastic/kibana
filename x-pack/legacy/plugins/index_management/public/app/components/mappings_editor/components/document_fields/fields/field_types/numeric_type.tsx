@@ -23,6 +23,7 @@ import {
   NullValueParameter,
   CoerceParameter,
   IgnoreMalformedParameter,
+  CopyToParameter,
 } from '../../field_parameters';
 import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
 
@@ -32,6 +33,7 @@ const getDefaultValueToggle = (param: string, field: FieldType) => {
     case 'ignore_malformed': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
     }
+    case 'copy_to':
     case 'null_value': {
       return field.null_value !== undefined && field.null_value !== '';
     }
@@ -55,6 +57,12 @@ export const NumericType = ({ field }: Props) => {
 
       <AdvancedSettingsWrapper>
         <EditFieldSection>
+          {/* coerce */}
+          <CoerceParameter />
+
+          {/* ignore_malformed */}
+          <IgnoreMalformedParameter />
+
           {/* scaling_factor */}
           <FormDataProvider pathsToWatch="subType">
             {formData =>
@@ -92,11 +100,15 @@ export const NumericType = ({ field }: Props) => {
             }
           </FormDataProvider>
 
-          {/* boost */}
-          <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
-
           {/* null_value */}
           <NullValueParameter
+            description={i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.numeric.nullValueFieldDescription',
+              {
+                defaultMessage:
+                  'Accepts a numeric value of the same type as the field which is substituted for any explicit null values.',
+              }
+            )}
             defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
           >
             <UseField
@@ -106,11 +118,11 @@ export const NumericType = ({ field }: Props) => {
             />
           </NullValueParameter>
 
-          {/* coerce */}
-          <CoerceParameter />
+          {/* copy_to */}
+          <CopyToParameter defaultToggleValue={getDefaultValueToggle('copy_to', field.source)} />
 
-          {/* ignore_malformed */}
-          <IgnoreMalformedParameter />
+          {/* boost */}
+          <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>

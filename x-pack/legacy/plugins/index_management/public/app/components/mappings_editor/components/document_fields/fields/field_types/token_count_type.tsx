@@ -57,9 +57,6 @@ export const TokenCountType = ({ field }: Props) => {
 
       <AdvancedSettingsWrapper>
         <EditFieldSection>
-          {/* boost */}
-          <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
-
           {/* null_value */}
           <NullValueParameter
             defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
@@ -98,6 +95,9 @@ export const TokenCountType = ({ field }: Props) => {
             )}
             formFieldPath="enable_position_increments"
           />
+
+          {/* boost */}
+          <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>
