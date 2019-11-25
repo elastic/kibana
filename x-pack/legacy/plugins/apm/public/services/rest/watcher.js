@@ -10,6 +10,6 @@ export async function createWatch(id, watch) {
   return callApi({
     method: 'PUT',
     pathname: `/api/watcher/watch/${id}`,
-    body: JSON.stringify({ type: 'json', id, watch })
+    body: { type: 'json', id, watch }
   });
 }

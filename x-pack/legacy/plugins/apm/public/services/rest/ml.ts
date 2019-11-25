@@ -61,7 +61,7 @@ export async function startMLJob({
   return callApi<StartedMLJobApiResponse>(http, {
     method: 'POST',
     pathname: `/api/ml/modules/setup/apm_transaction`,
-    body: JSON.stringify({
+    body: {
       prefix: getMlPrefix(serviceName, transactionType),
       groups,
       indexPatternName: transactionIndices,
@@ -71,7 +71,7 @@ export async function startMLJob({
           filter
         }
       }
-    })
+    }
   });
 }
 

@@ -20,6 +20,9 @@ describe('callApi', () => {
     http = ({
       get: jest.fn().mockReturnValue({
         my_key: 'hello_world'
+      }),
+      post: jest.fn().mockReturnValue({
+        my_key: 'hello_world'
       })
     } as unknown) as HttpMock;
 
@@ -156,6 +159,35 @@ describe('callApi', () => {
         });
 
         expect(http.get).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('when posting', () => {
+      it('it should correctly encode the request parameters', async () => {
+        await callApi(http, {
+          method: 'POST',
+          pathname: `/api/kibana`,
+          query: { start: '2010', end: '2011' },
+          body: {
+            foo: {
+              bar: 1
+            }
+          }
+        });
+
+        expect(http.post).toHaveBeenCalledTimes(1);
+
+        expect(http.post).toHaveBeenCalledWith('/api/kibana', {
+          query: {
+            start: '2010',
+            end: '2011'
+          },
+          body: JSON.stringify({
+            foo: {
+              bar: 1
+            }
+          })
+        });
       });
     });
   });
