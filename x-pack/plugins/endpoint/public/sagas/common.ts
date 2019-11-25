@@ -10,8 +10,8 @@ import { StoreContext } from '../lib/saga';
 /**
  * This must be used for `withPageNavigationStatus`
  */
-// TODO: type actionsAndState
 export async function routingSaga({ dispatch, actionsAndState }: StoreContext) {
+  // FIXME: this event listener needs to be removed when plugin unmount's
   window.addEventListener('popstate', emit);
   emit();
 
@@ -33,7 +33,7 @@ export async function* withPageNavigationStatus({
     return false;
   },
 }: {
-  actionsAndState: any;
+  actionsAndState: StoreContext['actionsAndState'];
   isOnPage: (href: any) => boolean;
 }) {
   // TODO: do we need userIsLoggedIn?
