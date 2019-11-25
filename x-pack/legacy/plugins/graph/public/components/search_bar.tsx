@@ -12,7 +12,10 @@ import { connect } from 'react-redux';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { IDataPluginServices, Query } from 'src/plugins/data/public';
 import { IndexPatternSavedObject, IndexPatternProvider } from '../types';
-import { QueryBarInput, IndexPattern } from '../../../../../../src/legacy/core_plugins/data/public';
+import {
+  QueryStringInput,
+  IndexPattern,
+} from '../../../../../../src/legacy/core_plugins/data/public';
 import { openSourceModal } from '../services/source_modal';
 
 import {
@@ -100,7 +103,7 @@ export function SearchBarComponent(props: SearchBarProps) {
     >
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem>
-          <QueryBarInput
+          <QueryStringInput
             disableAutoFocus
             bubbleSubmitEvent
             indexPatterns={currentIndexPattern ? [currentIndexPattern] : []}

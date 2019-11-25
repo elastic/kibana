@@ -20,7 +20,7 @@
 import { EuiIcon } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { FunctionComponent } from 'react';
-import { AutocompleteSuggestion } from '../../../../../../../../plugins/data/public';
+import { AutocompleteSuggestion } from '../..';
 
 function getEuiIconType(type: string) {
   switch (type) {

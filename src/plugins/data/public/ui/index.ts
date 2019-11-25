@@ -18,3 +18,4 @@
  */
 
 export * from './filter_bar';
+export { SuggestionsComponent } from './typeahead/suggestions_component';

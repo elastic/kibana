@@ -21,15 +21,19 @@ import {
   mockFetchIndexPatterns,
   mockPersistedLog,
   mockPersistedLogFactory,
-} from './query_bar_input.test.mocks';
+} from './query_string_input.test.mocks';
 
 import { EuiFieldText } from '@elastic/eui';
 import React from 'react';
 import { QueryLanguageSwitcher } from './language_switcher';
-import { QueryBarInput, QueryBarInputUI } from './query_bar_input';
+import { QueryStringInput, QueryStringInputUI } from './query_string_input';
 import { coreMock } from '../../../../../../../core/public/mocks';
 const startMock = coreMock.createStart();
-import { IndexPattern } from '../../../index';
+/* eslint-disable @kbn/eslint/no-restricted-paths */
+
+import { stubIndexPatternWithFields } from '../../../../../../../plugins/data/public/stubs';
+/* eslint-enable @kbn/eslint/no-restricted-paths */
+
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { I18nProvider } from '@kbn/i18n/react';
 import { mount } from 'enzyme';
@@ -65,22 +69,7 @@ const createMockStorage = () => ({
   clear: jest.fn(),
 });
 
-const mockIndexPattern = {
-  id: '1234',
-  title: 'logstash-*',
-  fields: [
-    {
-      name: 'response',
-      type: 'number',
-      esTypes: ['integer'],
-      aggregatable: true,
-      filterable: true,
-      searchable: true,
-    },
-  ],
-} as IndexPattern;
-
-function wrapQueryBarInputInContext(testProps: any, storage?: any) {
+function wrapQueryStringInputInContext(testProps: any, storage?: any) {
   const defaultOptions = {
     screenTitle: 'Another Screen',
     intl: null as any,
@@ -95,23 +84,23 @@ function wrapQueryBarInputInContext(testProps: any, storage?: any) {
   return (
     <I18nProvider>
       <KibanaContextProvider services={services}>
-        <QueryBarInput {...defaultOptions} {...testProps} />
+        <QueryStringInput {...defaultOptions} {...testProps} />
       </KibanaContextProvider>
     </I18nProvider>
   );
 }
 
-describe('QueryBarInput', () => {
+describe('QueryStringInput', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('Should render the given query', () => {
     const component = mount(
-      wrapQueryBarInputInContext({
+      wrapQueryStringInputInContext({
         query: kqlQuery,
         onSubmit: noop,
-        indexPatterns: [mockIndexPattern],
+        indexPatterns: [stubIndexPatternWithFields],
       })
     );
 
@@ -120,10 +109,10 @@ describe('QueryBarInput', () => {
 
   it('Should pass the query language to the language switcher', () => {
     const component = mount(
-      wrapQueryBarInputInContext({
+      wrapQueryStringInputInContext({
         query: luceneQuery,
         onSubmit: noop,
-        indexPatterns: [mockIndexPattern],
+        indexPatterns: [stubIndexPatternWithFields],
       })
     );
 
@@ -132,10 +121,10 @@ describe('QueryBarInput', () => {
 
   it('Should disable autoFocus on EuiFieldText when disableAutoFocus prop is true', () => {
     const component = mount(
-      wrapQueryBarInputInContext({
+      wrapQueryStringInputInContext({
         query: kqlQuery,
         onSubmit: noop,
-        indexPatterns: [mockIndexPattern],
+        indexPatterns: [stubIndexPatternWithFields],
         disableAutoFocus: true,
       })
     );
@@ -147,10 +136,10 @@ describe('QueryBarInput', () => {
     mockPersistedLogFactory.mockClear();
 
     mount(
-      wrapQueryBarInputInContext({
+      wrapQueryStringInputInContext({
         query: kqlQuery,
         onSubmit: noop,
-        indexPatterns: [mockIndexPattern],
+        indexPatterns: [stubIndexPatternWithFields],
         disableAutoFocus: true,
         appName: 'discover',
       })
@@ -162,11 +151,11 @@ describe('QueryBarInput', () => {
     const mockStorage = createMockStorage();
     const mockCallback = jest.fn();
     const component = mount(
-      wrapQueryBarInputInContext(
+      wrapQueryStringInputInContext(
         {
           query: kqlQuery,
           onSubmit: mockCallback,
-          indexPatterns: [mockIndexPattern],
+          indexPatterns: [stubIndexPatternWithFields],
           disableAutoFocus: true,
           appName: 'discover',
         },
@@ -186,15 +175,15 @@ describe('QueryBarInput', () => {
     const mockCallback = jest.fn();
 
     const component = mount(
-      wrapQueryBarInputInContext({
+      wrapQueryStringInputInContext({
         query: kqlQuery,
         onSubmit: mockCallback,
-        indexPatterns: [mockIndexPattern],
+        indexPatterns: [stubIndexPatternWithFields],
         disableAutoFocus: true,
       })
     );
 
-    const instance = component.find('QueryBarInputUI').instance() as QueryBarInputUI;
+    const instance = component.find('QueryStringInputUI').instance() as QueryStringInputUI;
     const input = instance.inputRef;
     const inputWrapper = component.find(EuiFieldText).find('input');
     inputWrapper.simulate('keyDown', { target: input, keyCode: 13, key: 'Enter', metaKey: true });
@@ -205,16 +194,16 @@ describe('QueryBarInput', () => {
 
   it('Should use PersistedLog for recent search suggestions', async () => {
     const component = mount(
-      wrapQueryBarInputInContext({
+      wrapQueryStringInputInContext({
         query: kqlQuery,
         onSubmit: noop,
-        indexPatterns: [mockIndexPattern],
+        indexPatterns: [stubIndexPatternWithFields],
         disableAutoFocus: true,
         persistedLog: mockPersistedLog,
       })
     );
 
-    const instance = component.find('QueryBarInputUI').instance() as QueryBarInputUI;
+    const instance = component.find('QueryStringInputUI').instance() as QueryStringInputUI;
     const input = instance.inputRef;
     const inputWrapper = component.find(EuiFieldText).find('input');
     inputWrapper.simulate('keyDown', { target: input, keyCode: 13, key: 'Enter', metaKey: true });
@@ -229,7 +218,7 @@ describe('QueryBarInput', () => {
   it('Should accept index pattern strings and fetch the full object', () => {
     mockFetchIndexPatterns.mockClear();
     mount(
-      wrapQueryBarInputInContext({
+      wrapQueryStringInputInContext({
         query: kqlQuery,
         onSubmit: noop,
         indexPatterns: ['logstash-*'],

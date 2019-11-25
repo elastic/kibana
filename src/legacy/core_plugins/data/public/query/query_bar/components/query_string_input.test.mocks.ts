@@ -17,20 +17,10 @@
  * under the License.
  */
 
-const mockIndexPattern = {
-  id: '1234',
-  title: 'logstash-*',
-  fields: [
-    {
-      name: 'response',
-      type: 'number',
-      esTypes: ['integer'],
-      aggregatable: true,
-      filterable: true,
-      searchable: true,
-    },
-  ],
-};
+/* eslint-disable @kbn/eslint/no-restricted-paths */
+
+import { stubIndexPatternWithFields } from '../../../../../../../plugins/data/public/stubs';
+/* eslint-enable @kbn/eslint/no-restricted-paths */
 
 export const mockPersistedLog = {
   add: jest.fn(),
@@ -43,7 +33,7 @@ export const mockPersistedLogFactory = jest.fn<jest.Mocked<typeof mockPersistedL
 
 export const mockFetchIndexPatterns = jest
   .fn()
-  .mockReturnValue(Promise.resolve([mockIndexPattern]));
+  .mockReturnValue(Promise.resolve([stubIndexPatternWithFields]));
 
 jest.mock('../../../../../../../plugins/data/public/query/persisted_log', () => ({
   PersistedLog: mockPersistedLogFactory,

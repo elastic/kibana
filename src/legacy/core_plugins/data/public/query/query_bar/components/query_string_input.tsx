@@ -38,7 +38,9 @@ import {
   AutocompleteSuggestion,
   AutocompleteSuggestionType,
   IDataPluginServices,
+  IIndexPattern,
   PersistedLog,
+  SuggestionsComponent,
   toUser,
   fromUser,
   matchPairs,
@@ -50,15 +52,13 @@ import {
   KibanaReactContextValue,
   toMountPoint,
 } from '../../../../../../../plugins/kibana_react/public';
-import { IndexPattern, StaticIndexPattern } from '../../../index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
-import { SuggestionsComponent } from './typeahead/suggestions_component';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 
 interface Props {
   kibana: KibanaReactContextValue<IDataPluginServices>;
   intl: InjectedIntl;
-  indexPatterns: Array<IndexPattern | string>;
+  indexPatterns: Array<IIndexPattern | string>;
   query: Query;
   disableAutoFocus?: boolean;
   screenTitle?: string;
@@ -79,7 +79,7 @@ interface State {
   suggestionLimit: number;
   selectionStart: number | null;
   selectionEnd: number | null;
-  indexPatterns: StaticIndexPattern[];
+  indexPatterns: IIndexPattern[];
 }
 
 const KEY_CODES = {
@@ -96,7 +96,7 @@ const KEY_CODES = {
 
 const recentSearchType: AutocompleteSuggestionType = 'recentSearch';
 
-export class QueryBarInputUI extends Component<Props, State> {
+export class QueryStringInputUI extends Component<Props, State> {
   public state: State = {
     isSuggestionsVisible: false,
     index: null,
@@ -123,13 +123,13 @@ export class QueryBarInputUI extends Component<Props, State> {
     ) as string[];
     const objectPatterns = this.props.indexPatterns.filter(
       indexPattern => typeof indexPattern !== 'string'
-    ) as IndexPattern[];
+    ) as IIndexPattern[];
 
     const objectPatternsFromStrings = (await fetchIndexPatterns(
       this.services.savedObjects!.client,
       stringPatterns,
       this.services.uiSettings!
-    )) as IndexPattern[];
+    )) as IIndexPattern[];
 
     this.setState({
       indexPatterns: [...objectPatterns, ...objectPatternsFromStrings],
@@ -589,4 +589,4 @@ export class QueryBarInputUI extends Component<Props, State> {
   }
 }
 
-export const QueryBarInput = injectI18n(withKibana(QueryBarInputUI));
+export const QueryStringInput = injectI18n(withKibana(QueryStringInputUI));

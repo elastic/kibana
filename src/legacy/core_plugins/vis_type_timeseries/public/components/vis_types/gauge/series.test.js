@@ -22,7 +22,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 jest.mock('plugins/data', () => {
   return {
-    QueryBarInput: () => <div className="queryBarInput" />,
+    QueryStringInput: () => <div className="queryStringInput" />,
   };
 });
 

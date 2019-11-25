@@ -9,7 +9,7 @@ import { SearchBar, OuterSearchBarProps } from './search_bar';
 import React, { ReactElement } from 'react';
 import { CoreStart } from 'src/core/public';
 import { act } from 'react-dom/test-utils';
-import { QueryBarInput, IndexPattern } from 'src/legacy/core_plugins/data/public';
+import { QueryStringInput, IndexPattern } from 'src/legacy/core_plugins/data/public';
 
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { I18nProvider } from '@kbn/i18n/react';
@@ -25,7 +25,7 @@ import { Provider } from 'react-redux';
 
 jest.mock('../services/source_modal', () => ({ openSourceModal: jest.fn() }));
 jest.mock('../../../../../../src/legacy/core_plugins/data/public', () => ({
-  QueryBarInput: () => null,
+  QueryStringInput: () => null,
 }));
 
 const waitForIndexPatternFetch = () => new Promise(r => setTimeout(r));
@@ -106,7 +106,7 @@ describe('search_bar', () => {
     await waitForIndexPatternFetch();
 
     act(() => {
-      instance.find(QueryBarInput).prop('onChange')!({ language: 'lucene', query: 'testQuery' });
+      instance.find(QueryStringInput).prop('onChange')!({ language: 'lucene', query: 'testQuery' });
     });
 
     act(() => {
@@ -122,7 +122,7 @@ describe('search_bar', () => {
     await waitForIndexPatternFetch();
 
     act(() => {
-      instance.find(QueryBarInput).prop('onChange')!({ language: 'kuery', query: 'test: abc' });
+      instance.find(QueryStringInput).prop('onChange')!({ language: 'kuery', query: 'test: abc' });
     });
 
     act(() => {
@@ -140,7 +140,9 @@ describe('search_bar', () => {
 
     // pick the button component out of the tree because
     // it's part of a popover and thus not covered by enzyme
-    (instance.find(QueryBarInput).prop('prepend') as ReactElement).props.children.props.onClick();
+    (instance
+      .find(QueryStringInput)
+      .prop('prepend') as ReactElement).props.children.props.onClick();
 
     expect(openSourceModal).toHaveBeenCalled();
   });
