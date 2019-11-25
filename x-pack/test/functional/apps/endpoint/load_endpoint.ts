@@ -10,14 +10,14 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'endpoint']);
 
-  describe.only('Landing page', function() {
+  describe('Landing page', function() {
     this.tags(['skipCloud']);
     before(async () => {
       await pageObjects.common.navigateToApp('endpoint');
     });
 
     it('Loads the app', async () => {
-      // this function call comes from what you defined in the endpoint_page.ts
+      // this function is called in the endpoint page object
       const welcomeEndpointMessage = await pageObjects.endpoint.welcomeEndpointMessage(); 
       expect(welcomeEndpointMessage).to.be('Welcome to Endpoint!');
     });
