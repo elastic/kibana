@@ -47,7 +47,6 @@ export {
   getFromSavedObject,
   getRoutes,
   isFilterable,
-  IndexPatternSelect,
   validateIndexPattern,
   ILLEGAL_CHARACTERS,
   INDEX_PATTERN_ILLEGAL_CHARACTERS,

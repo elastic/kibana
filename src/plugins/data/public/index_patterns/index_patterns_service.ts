@@ -25,7 +25,6 @@ import {
 } from 'src/core/public';
 import { FieldFormatsStart } from '../field_formats_provider';
 import { Field, FieldList, FieldListInterface, FieldType } from './fields';
-import { createIndexPatternSelect } from './components';
 import { setNotifications, setFieldFormats } from './services';
 
 import {
@@ -79,7 +78,6 @@ export class IndexPatternsService {
     return {
       ...this.setupApi,
       indexPatterns: new IndexPatterns(uiSettings, savedObjectsClient, http),
-      IndexPatternSelect: createIndexPatternSelect(savedObjectsClient),
     };
   }
 
@@ -91,7 +89,6 @@ export class IndexPatternsService {
 // static code
 
 /** @public */
-export { IndexPatternSelect } from './components';
 export {
   CONTAINS_SPACES,
   getFromSavedObject,
