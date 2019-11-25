@@ -12,10 +12,10 @@ import {
   ResponseFacade,
   ReportingResponseToolkit,
   Logger,
-  JobDocPayload,
   JobIDForImmediate,
   JobDocOutputExecuted,
 } from '../../types';
+import { JobDocPayloadPanelCsv } from '../../export_types/csv_from_savedobject/types';
 import { getRouteOptionsCsv } from './lib/route_config_factories';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
 
@@ -48,7 +48,11 @@ export function registerGenerateCsvFromSavedObjectImmediate(
       const jobParams = getJobParamsFromRequest(request, { isImmediate: true });
       const createJobFn = createJobFactory(server);
       const executeJobFn = executeJobFactory(server);
-      const jobDocPayload: JobDocPayload = await createJobFn(jobParams, request.headers, request);
+      const jobDocPayload: JobDocPayloadPanelCsv = await createJobFn(
+        jobParams,
+        request.headers,
+        request
+      );
       const {
         content_type: jobOutputContentType,
         content: jobOutputContent,

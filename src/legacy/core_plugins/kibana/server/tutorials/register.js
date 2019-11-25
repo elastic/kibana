@@ -79,6 +79,7 @@ import { emsBoundariesSpecProvider } from './ems';
 import { consulMetricsSpecProvider } from './consul_metrics';
 import { cockroachdbMetricsSpecProvider } from './cockroachdb_metrics';
 import { traefikMetricsSpecProvider } from './traefik_metrics';
+import { awsLogsSpecProvider } from './aws_logs';
 
 export function registerTutorials(server) {
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(systemLogsSpecProvider);
@@ -144,4 +145,5 @@ export function registerTutorials(server) {
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(consulMetricsSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(cockroachdbMetricsSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(traefikMetricsSpecProvider);
+  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(awsLogsSpecProvider);
 }

@@ -19,7 +19,7 @@ interface UpdateRequest extends Hapi.Request {
     tags: string[];
     interval: string;
     actions: AlertAction[];
-    alertTypeParams: Record<string, any>;
+    params: Record<string, any>;
     throttle: string | null;
   };
 }
@@ -43,7 +43,7 @@ export const updateAlertRoute = {
             .items(Joi.string())
             .required(),
           interval: getDurationSchema().required(),
-          alertTypeParams: Joi.object().required(),
+          params: Joi.object().required(),
           actions: Joi.array()
             .items(
               Joi.object().keys({

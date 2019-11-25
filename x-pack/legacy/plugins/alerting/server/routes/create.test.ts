@@ -15,7 +15,7 @@ const mockedAlert = {
   name: 'abc',
   interval: '10s',
   tags: ['foo'],
-  alertTypeParams: {
+  params: {
     bar: true,
   },
   actions: [
@@ -57,12 +57,12 @@ test('creates an alert with proper parameters', async () => {
         },
       ],
       "alertTypeId": "1",
-      "alertTypeParams": Object {
-        "bar": true,
-      },
       "id": "123",
       "interval": "10s",
       "name": "abc",
+      "params": Object {
+        "bar": true,
+      },
       "tags": Array [
         "foo",
       ],
@@ -83,12 +83,12 @@ test('creates an alert with proper parameters', async () => {
             },
           ],
           "alertTypeId": "1",
-          "alertTypeParams": Object {
-            "bar": true,
-          },
           "enabled": true,
           "interval": "10s",
           "name": "abc",
+          "params": Object {
+            "bar": true,
+          },
           "tags": Array [
             "foo",
           ],
@@ -112,12 +112,12 @@ test('creates an alert with proper parameters', async () => {
             },
           ],
           "alertTypeId": "1",
-          "alertTypeParams": Object {
-            "bar": true,
-          },
           "enabled": true,
           "interval": "10s",
           "name": "abc",
+          "params": Object {
+            "bar": true,
+          },
           "tags": Array [
             "foo",
           ],
