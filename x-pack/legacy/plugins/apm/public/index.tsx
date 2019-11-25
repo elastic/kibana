@@ -6,43 +6,18 @@
 
 import { npStart } from 'ui/new_platform';
 import 'react-vis/dist/style.css';
+import { PluginInitializerContext } from 'kibana/public';
 import 'ui/autoload/all';
 import chrome from 'ui/chrome';
-import { i18n } from '@kbn/i18n';
-import url from 'url';
-
-// @ts-ignore
-import { uiModules } from 'ui/modules';
 import { plugin } from './new-platform';
 import { REACT_APP_ROOT_ID } from './new-platform/plugin';
 import './style/global_overrides.css';
 import template from './templates/index.html';
 
-const { core } = npStart;
+const { core, plugins } = npStart;
 
-// render APM feedback link in global help menu
-core.chrome.setHelpExtension({
-  appName: i18n.translate('xpack.apm.feedbackMenu.appName', {
-    defaultMessage: 'APM'
-  }),
-  links: [
-    {
-      linkType: 'discuss',
-      href: 'https://discuss.elastic.co/c/apm'
-    },
-    {
-      linkType: 'custom',
-      href: url.format({
-        pathname: core.http.basePath.prepend('/app/kibana'),
-        hash: '/management/elasticsearch/upgrade_assistant'
-      }),
-      content: i18n.translate('xpack.apm.helpMenu.upgradeAssistantLink', {
-        defaultMessage: 'Upgrade assistant'
-      })
-    }
-  ]
-});
-
+// This will be moved to core.application.register when the new platform
+// migration is complete.
 // @ts-ignore
 chrome.setRootTemplate(template);
 
@@ -57,5 +32,5 @@ const checkForRoot = () => {
   });
 };
 checkForRoot().then(() => {
-  plugin().start(core);
+  plugin({} as PluginInitializerContext).start(core, plugins);
 });
