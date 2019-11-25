@@ -30,9 +30,34 @@ const renderUseMetricsExplorerStateHook = () =>
 jest.mock('../../../utils/fetch');
 const mockedFetch = fetch as jest.Mocked<typeof fetch>;
 
+interface LocalStore {
+  [key: string]: string;
+}
+
+interface LocalStorage {
+  getItem: (key: string) => string | null;
+  setItem: (key: string, value: string) => void;
+}
+
+const STORE: LocalStore = {};
+const localStorageMock: LocalStorage = {
+  getItem: (key: string) => {
+    return STORE[key] || null;
+  },
+  setItem: (key: string, value: any) => {
+    STORE[key] = value.toString();
+  },
+};
+
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock,
+});
+
 describe('useMetricsExplorerState', () => {
   beforeEach(() => {
     mockedFetch.post.mockResolvedValue({ data: resp } as any);
+    delete STORE.MetricsExplorerOptions;
+    delete STORE.MetricsExplorerTimeRange;
   });
 
   it('should just work', async () => {
@@ -147,7 +172,7 @@ describe('useMetricsExplorerState', () => {
 
   describe('handleLoadMore', () => {
     it('should load more based on the afterKey', async () => {
-      const { result, waitForNextUpdate } = renderUseMetricsExplorerStateHook();
+      const { result, waitForNextUpdate, rerender } = renderUseMetricsExplorerStateHook();
       expect(result.current.data).toBe(null);
       expect(result.current.loading).toBe(true);
       await waitForNextUpdate();
@@ -164,7 +189,7 @@ describe('useMetricsExplorerState', () => {
       } as any);
       const { handleLoadMore } = result.current;
       handleLoadMore(pageInfo.afterKey!);
-      await waitForNextUpdate();
+      await rerender();
       expect(result.current.loading).toBe(true);
       await waitForNextUpdate();
       expect(result.current.loading).toBe(false);
