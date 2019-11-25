@@ -6,6 +6,8 @@
 
 import { PluginInitializerContext } from 'kibana/server';
 import { EndpointPlugin } from './plugin';
+import { EndpointConfigSchema } from './config';
 
+export const config = { schema: EndpointConfigSchema };
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new EndpointPlugin(initializerContext);

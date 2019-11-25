@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreSetup, Logger, PluginInitializerContext, IClusterClient } from 'kibana/server';
+import { CoreSetup, IClusterClient, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
+import { first } from 'rxjs/operators';
 import { managementRoutes } from './routes/management';
 import { alertsRoutes } from './routes/alerts';
 import { registerEndpointRoutes } from './routes/endpoints';
-import { EndpointHandler } from './handlers/endpoint_handler';
-import { EndpointRequestContext } from './handlers/endpoint_handler';
+import { EndpointHandler, EndpointRequestContext } from './handlers/endpoint_handler';
+import { EndpointAppContext } from './types';
+import { createConfig$, EndpointConfigType } from './config';
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {
@@ -24,9 +26,14 @@ export class EndpointPlugin implements Plugin {
     this.logger = this.initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup, deps: {}) {
+  public async setup(core: CoreSetup, deps: {}) {
     this.clusterClient = core.elasticsearch.createClient('endpoint-plugin');
-    const endpointHandler: EndpointRequestContext = new EndpointHandler(this.clusterClient);
+    const endpointHandler: EndpointRequestContext = new EndpointHandler({
+      clusterClient: this.clusterClient,
+      config: (): Promise<EndpointConfigType> => {
+        return this.getConfig();
+      },
+    } as EndpointAppContext);
     core.http.registerRouteHandlerContext('endpointPlugin', () => endpointHandler);
     const router = core.http.createRouter();
     managementRoutes(router);
@@ -44,5 +51,11 @@ export class EndpointPlugin implements Plugin {
       this.clusterClient.close();
       this.clusterClient = undefined;
     }
+  }
+
+  private async getConfig(): Promise<EndpointConfigType> {
+    return createConfig$(this.initializerContext)
+      .pipe(first())
+      .toPromise();
   }
 }

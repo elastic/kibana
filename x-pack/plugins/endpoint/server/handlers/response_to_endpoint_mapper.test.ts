@@ -10,12 +10,12 @@ import { EndpointData } from '../types';
 import { ResponseToEndpointMapper } from './response_to_endpoint_mapper';
 
 describe('test response to endpoint data mapper', () => {
+  const responseToEndpointMapper: ResponseToEndpointMapper = new ResponseToEndpointMapper();
   describe('map hits()', () => {
     it('test map response hits', async () => {
       const response: SearchResponse<EndpointData> = (singleEndpointData as unknown) as SearchResponse<
         EndpointData
       >;
-      const responseToEndpointMapper = new ResponseToEndpointMapper();
       const result = await responseToEndpointMapper.mapHits(response);
       expect(result).toHaveLength(1);
       expect(result[0].machine_id).toEqual('9b28b63f-68d8-44ee-b8c0-49ba057a53ec');
@@ -27,7 +27,7 @@ describe('test response to endpoint data mapper', () => {
       const response: SearchResponse<EndpointData> = (allEndpointData as unknown) as SearchResponse<
         EndpointData
       >;
-      const responseToEndpointMapper = new ResponseToEndpointMapper();
+
       const result = await responseToEndpointMapper.mapInnerHits(response);
       expect(result).toHaveLength(3);
       const actualMachineIds = new Set(result.map(endpointData => endpointData.machine_id));
