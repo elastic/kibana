@@ -6,8 +6,7 @@
 
 import { compose, createStore, applyMiddleware } from 'redux';
 import createSagaMiddleware from 'redux-saga';
-import { rootSaga } from './effects';
-
+import { rootEffect } from './effects';
 import { rootReducer } from './reducers';
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
@@ -18,4 +17,4 @@ export const store = createStore(rootReducer, composeEnhancers(applyMiddleware(s
 
 export type AppState = ReturnType<typeof rootReducer>;
 
-sagaMW.run(rootSaga);
+sagaMW.run(rootEffect);
