@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAutoFocus prop is true 1`] = `
+exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableAutoFocus prop is true 1`] = `
 <I18nProvider>
   <IntlProvider
     defaultLocale="en"
@@ -514,7 +514,7 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
             }
             screenTitle="Another Screen"
           >
-            <QueryBarInputUI
+            <QueryStringInputUI
               disableAutoFocus={true}
               indexPatterns={
                 Array [
@@ -1105,7 +1105,7 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                   />
                 </div>
               </EuiOutsideClickDetector>
-            </QueryBarInputUI>
+            </QueryStringInputUI>
           </EnhancedType>
         </InjectIntl(EnhancedType)>
       </Provider>
@@ -1114,7 +1114,7 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
 </I18nProvider>
 `;
 
-exports[`QueryBarInput Should pass the query language to the language switcher 1`] = `
+exports[`QueryStringInput Should pass the query language to the language switcher 1`] = `
 <I18nProvider>
   <IntlProvider
     defaultLocale="en"
@@ -1626,7 +1626,7 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
             }
             screenTitle="Another Screen"
           >
-            <QueryBarInputUI
+            <QueryStringInputUI
               indexPatterns={
                 Array [
                   Object {
@@ -2216,7 +2216,7 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                   />
                 </div>
               </EuiOutsideClickDetector>
-            </QueryBarInputUI>
+            </QueryStringInputUI>
           </EnhancedType>
         </InjectIntl(EnhancedType)>
       </Provider>
@@ -2225,7 +2225,7 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
 </I18nProvider>
 `;
 
-exports[`QueryBarInput Should render the given query 1`] = `
+exports[`QueryStringInput Should render the given query 1`] = `
 <I18nProvider>
   <IntlProvider
     defaultLocale="en"
@@ -2737,7 +2737,7 @@ exports[`QueryBarInput Should render the given query 1`] = `
             }
             screenTitle="Another Screen"
           >
-            <QueryBarInputUI
+            <QueryStringInputUI
               indexPatterns={
                 Array [
                   Object {
@@ -3327,7 +3327,7 @@ exports[`QueryBarInput Should render the given query 1`] = `
                   />
                 </div>
               </EuiOutsideClickDetector>
-            </QueryBarInputUI>
+            </QueryStringInputUI>
           </EnhancedType>
         </InjectIntl(EnhancedType)>
       </Provider>
