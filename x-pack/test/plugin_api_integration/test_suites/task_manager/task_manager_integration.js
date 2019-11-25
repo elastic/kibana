@@ -212,9 +212,7 @@ export default function ({ getService }) {
       expect(Date.parse(currentTask.runAt) - originalRunAt).to.be.lessThan(expectedDiff + buffer);
     }
 
-    it('should run tasks in parallel, allowing for long ranning tasks along side faster tasks', async () => {
-
-      console.log(10);
+    it('should run tasks in parallel, allowing for long running tasks along side faster tasks', async () => {
       const fastTask = await scheduleTask({
         taskType: 'sampleTask',
         interval: `1s`,
