@@ -24,7 +24,7 @@ export declare class SearchSource {
   setField: (field: string, value: any) => SearchSource;
   getId: () => string;
   getFields: () => [any];
-  getField: (field: string) => Record<string, any>;
+  getField: (field: string) => any;
   getOwnField: (field: string) => any;
   create: () => SearchSource;
   createCopy: () => SearchSource;
