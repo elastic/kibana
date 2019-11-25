@@ -19,7 +19,7 @@ def worker = getWorkerFromParams(IS_XPACK, JOB, CI_GROUP)
 def workerFailures = []
 
 currentBuild.displayName += trunc(" ${params.GITHUB_OWNER}:${params.branch_specifier}", 24)
-currentBuild.description = "${CI_GROUP_PARAM}<br />Agents: ${AGENT_COUNT}<br />Executions: ${params.NUMBER_EXECUTIONS}"
+currentBuild.description = "${CI_GROUP_PARAM} (JOB = ${JOB}, IS_XPACK = ${IS_XPACK}, CI_GROUP = ${CI_GROUP}, NEED_BUILD = ${NEED_BUILD})<br />Agents: ${AGENT_COUNT}<br />Executions: ${params.NUMBER_EXECUTIONS}"
 
 stage("Kibana Pipeline") {
   timeout(time: 180, unit: 'MINUTES') {
