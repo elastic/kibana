@@ -208,13 +208,11 @@ export class ApiKeyLib {
   }
 
   private _getEnrollmentApiKeyName(id: string, name?: string, policyId?: string): string {
-    const generatedName = `Fleet:EnrollmentApiKey:${id}${policyId ? `:${policyId}` : ''}`;
-
-    return name ? `${name} (${generatedName})` : generatedName;
+    return name ? `${name} (${id})` : id;
   }
 
   private _getAccesstApiKeyName(agentId: string): string {
-    return `Fleet:AccessApiKey:${agentId}`;
+    return agentId;
   }
 
   public async addEnrollmentRule(

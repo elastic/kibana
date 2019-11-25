@@ -7,11 +7,13 @@
 import { useState } from 'react';
 import { DEFAULT_AGENTS_PAGE_SIZE, AGENTS_PAGE_SIZE_OPTIONS } from '../../common/constants';
 
+export interface Pagination {
+  currentPage: number;
+  pageSize: number;
+}
+
 export function usePagination() {
-  const [pagination, setPagination] = useState<{
-    currentPage: number;
-    pageSize: number;
-  }>({
+  const [pagination, setPagination] = useState<Pagination>({
     currentPage: 1,
     pageSize: DEFAULT_AGENTS_PAGE_SIZE,
   });
