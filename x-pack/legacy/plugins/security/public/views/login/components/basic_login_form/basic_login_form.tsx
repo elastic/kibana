@@ -109,7 +109,7 @@ class BasicLoginFormUI extends Component<Props, State> {
   private renderLoginAssistanceMessage = () => {
     return (
       <Fragment>
-        <EuiText>
+        <EuiText size="s">
           <ReactMarkdown>{this.props.loginAssistanceMessage}</ReactMarkdown>
         </EuiText>
       </Fragment>
