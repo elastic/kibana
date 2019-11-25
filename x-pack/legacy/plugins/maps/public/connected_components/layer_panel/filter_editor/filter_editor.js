@@ -90,6 +90,7 @@ export class FilterEditor extends Component {
         isOpen={this.state.isPopoverOpen}
         closePopover={this._close}
         anchorPosition="leftCenter"
+        ownFocus
       >
         <div className="mapFilterEditor" data-test-subj="mapFilterEditor">
           <SearchBar
