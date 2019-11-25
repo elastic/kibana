@@ -16,16 +16,12 @@ import { ServerFacade, ConditionalHeaders } from '../../../types';
 import { JobDocPayloadPNG } from '../../png/types';
 import { JobDocPayloadPDF } from '../../printable_pdf/types';
 
-interface KeyedRelativeUrl {
-  relativeUrl: string;
-}
-
 export async function getFullUrls({
   job,
   server,
   ...mergeValues // pass-throughs
 }: {
-  job: JobDocPayloadPNG | JobDocPayloadPDF;
+  job: JobDocPayloadPNG & JobDocPayloadPDF;
   server: ServerFacade;
   conditionalHeaders: ConditionalHeaders;
   logo?: string;
@@ -43,11 +39,11 @@ export async function getFullUrls({
   let relativeUrls: string[] = [];
 
   if (job.relativeUrl) {
-    // single page (png)
-    relativeUrls = [job.relativeUrl];
+    const pngJob: JobDocPayloadPNG = job; // single page (png)
+    relativeUrls = [pngJob.relativeUrl];
   } else if (job.objects) {
-    // multi page (pdf)
-    relativeUrls = job.objects.map((obj: KeyedRelativeUrl) => obj.relativeUrl);
+    const pdfJob: JobDocPayloadPDF = job; // multi page (pdf)
+    relativeUrls = pdfJob.objects.map(obj => obj.relativeUrl);
   } else {
     throw new Error(
       `No valid URL fields found in Job Params! Expected \`job.relativeUrl\` or \`job.objects[{ relativeUrl }]\``

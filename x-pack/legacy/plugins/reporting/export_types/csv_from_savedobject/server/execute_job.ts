@@ -26,7 +26,7 @@ import {
 } from '../types';
 import { createGenerateCsv } from './lib';
 
-export function executeJobFactory(server: ServerFacade): ImmediateExecuteFn {
+export function executeJobFactory(server: ServerFacade): ImmediateExecuteFn<JobParamsPanelCsv> {
   const crypto = cryptoFactory(server);
   const logger = LevelLogger.createForServer(server, [
     PLUGIN_ID,

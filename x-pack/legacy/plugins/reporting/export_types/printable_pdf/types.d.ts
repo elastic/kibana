@@ -21,7 +21,7 @@ export interface JobDocPayloadPDF extends JobDocPayload<JobParamsPDF> {
   basePath?: string;
   browserTimezone: string;
   forceNow?: string;
-  layout: any;
+  layout: LayoutInstance;
   objects: Array<{
     relativeUrl: string;
   }>;
