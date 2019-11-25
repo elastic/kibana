@@ -19,7 +19,7 @@ async function createAlerts(alertsClient, { selectedEmailActionId, clusterUuid }
   const ALERT_TYPES = {
     [ALERT_TYPE_LICENSE_EXPIRATION]: {
       interval: '1m',
-      alertTypeParams: {
+      params: {
         clusterUuid,
       },
       actions: [
