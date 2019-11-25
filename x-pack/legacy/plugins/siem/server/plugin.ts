@@ -18,7 +18,7 @@ export class Plugin {
     this.logger.debug('Shim plugin initialized');
   }
 
-  public setup(core: CoreSetup, dependencies: {}, __legacy: ServerFacade) {
+  public setup(core: CoreSetup, plugins: {}, __legacy: ServerFacade) {
     this.logger.debug('Shim plugin setup');
 
     initServerWithKibana(core, __legacy, this.logger);
