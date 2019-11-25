@@ -12,16 +12,20 @@ interface UptimeTelemetry {
 interface UptimeTelemetryCollector {
   [key: number]: UptimeTelemetry;
 }
-
+import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
 // seconds in an hour
 const BUCKET_SIZE = 3600;
 // take buckets in the last day
 const BUCKET_NUMBER = 24;
 
 export class KibanaTelemetryAdapter {
-  public static initUsageCollector(usageCollector: any) {
-    const { collectorSet } = usageCollector;
-    return collectorSet.makeUsageCollector({
+  public static registerUsageCollector = (usageCollector: UsageCollection) => {
+    const collector = KibanaTelemetryAdapter.initUsageCollector(usageCollector);
+    usageCollector.registerCollector(collector);
+  };
+
+  public static initUsageCollector(usageCollector: UsageCollection) {
+    return usageCollector.makeUsageCollector({
       type: 'uptime',
       fetch: async () => {
         const report = this.getReport();

@@ -9,12 +9,6 @@ import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
 
 export interface ServerShim {
-  usage: {
-    collectorSet: {
-      makeUsageCollector: any;
-      register: any;
-    };
-  };
   plugins: {
     elasticsearch: ElasticsearchPlugin;
     xpack_main: XPackMainPlugin;

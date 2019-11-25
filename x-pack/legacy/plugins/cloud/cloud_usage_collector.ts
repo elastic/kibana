@@ -5,21 +5,14 @@
  */
 
 import { Server } from 'hapi';
+import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
 import { KIBANA_CLOUD_STATS_TYPE } from './constants';
 
 export interface UsageStats {
   isCloudEnabled: boolean;
 }
 
-export interface KibanaHapiServer extends Server {
-  usage: {
-    collectorSet: {
-      makeUsageCollector: any;
-    };
-  };
-}
-
-export function createCollectorFetch(server: any) {
+export function createCollectorFetch(server: Server) {
   return async function fetchUsageStats(): Promise<UsageStats> {
     const { id } = server.config().get(`xpack.cloud`);
 
@@ -29,15 +22,15 @@ export function createCollectorFetch(server: any) {
   };
 }
 
-/*
- * @param {Object} server
- * @return {Object} kibana usage stats type collection object
- */
-export function getCloudUsageCollector(server: KibanaHapiServer) {
-  const { collectorSet } = server.usage;
-  return collectorSet.makeUsageCollector({
+export function createCloudUsageCollector(usageCollection: UsageCollection, server: Server) {
+  return usageCollection.makeUsageCollector({
     type: KIBANA_CLOUD_STATS_TYPE,
     isReady: () => true,
     fetch: createCollectorFetch(server),
   });
+}
+
+export function registerCloudUsageCollector(usageCollection: UsageCollection, server: Server) {
+  const collector = createCloudUsageCollector(usageCollection, server);
+  usageCollection.registerCollector(collector);
 }

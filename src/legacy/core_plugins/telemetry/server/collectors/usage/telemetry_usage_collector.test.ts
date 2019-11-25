@@ -25,20 +25,17 @@ import {
   createTelemetryUsageCollector,
   isFileReadable,
   readTelemetryFile,
-  KibanaHapiServer,
   MAX_FILE_SIZE,
 } from './telemetry_usage_collector';
+import { PluginSetupContract as UsageCollectionPluginSetupContract } from '../../../../../../plugins/usage_collection/server';
 
-const getMockServer = (): KibanaHapiServer =>
-  ({
-    usage: {
-      collectorSet: { makeUsageCollector: jest.fn().mockImplementationOnce((arg: object) => arg) },
-    },
-  } as KibanaHapiServer & Server);
+const mockUsageCollector = () =>
+  (({
+    makeUsageCollector: jest.fn().mockImplementationOnce((arg: object) => arg),
+  } as any) as UsageCollectionPluginSetupContract);
 
-const serverWithConfig = (configPath: string): KibanaHapiServer & Server => {
+const serverWithConfig = (configPath: string): Server => {
   return {
-    ...getMockServer(),
     config: () => ({
       get: (key: string) => {
         if (key !== 'telemetry.config' && key !== 'xpack.xpack_main.telemetry.config') {
@@ -48,7 +45,7 @@ const serverWithConfig = (configPath: string): KibanaHapiServer & Server => {
         return configPath;
       },
     }),
-  } as KibanaHapiServer & Server;
+  } as Server;
 };
 
 describe('telemetry_usage_collector', () => {
@@ -130,14 +127,14 @@ describe('telemetry_usage_collector', () => {
   });
 
   describe('createTelemetryUsageCollector', () => {
-    test('calls `collectorSet.makeUsageCollector`', async () => {
+    test('calls `makeUsageCollector`', async () => {
       // note: it uses the file's path to get the directory, then looks for 'telemetry.yml'
       // exclusively, which is indirectly tested by passing it the wrong "file" in the same
       // dir
-      const server: KibanaHapiServer & Server = serverWithConfig(tempFiles.unreadable);
+      const server: Server = serverWithConfig(tempFiles.unreadable);
 
       // the `makeUsageCollector` is mocked above to return the argument passed to it
-      const collectorOptions = createTelemetryUsageCollector(server);
+      const collectorOptions = createTelemetryUsageCollector(mockUsageCollector(), server);
 
       expect(collectorOptions.type).toBe('static_telemetry');
       expect(await collectorOptions.fetch()).toEqual(expectedObject);

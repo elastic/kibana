@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { getCollectorLogger } from './get_collector_logger';
+export const KIBANA_STATS_TYPE = 'kibana_stats';

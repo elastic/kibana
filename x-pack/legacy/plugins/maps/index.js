@@ -101,12 +101,12 @@ export function maps(kibana) {
 
     init(server) {
       const mapsEnabled = server.config().get('xpack.maps.enabled');
-
+      const usageCollection = server.newPlatform.setup.plugins.usageCollection;
       if (!mapsEnabled) {
         server.log(['info', 'maps'], 'Maps app disabled by configuration');
         return;
       }
-      initTelemetryCollection(server);
+      initTelemetryCollection(usageCollection, server);
 
       const xpackMainPlugin = server.plugins.xpack_main;
       let routesInitialized = false;

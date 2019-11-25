@@ -54,12 +54,6 @@ export interface HapiServer {
       }>;
     };
   };
-  usage: {
-    collectorSet: {
-      register: (collector: any) => void;
-      makeUsageCollector: (collectorOpts: any) => void;
-    };
-  };
   config: () => {
     get: (prop: string) => any;
   };

@@ -20,29 +20,30 @@
 import { makeKQLUsageCollector } from './make_kql_usage_collector';
 
 describe('makeKQLUsageCollector', () => {
-
   let server;
   let makeUsageCollectorStub;
   let registerStub;
+  let usageCollection;
 
   beforeEach(() => {
     makeUsageCollectorStub = jest.fn();
     registerStub = jest.fn();
+    usageCollection = {
+      makeUsageCollector: makeUsageCollectorStub,
+      registerCollector: registerStub,
+    };
     server = {
-      usage: {
-        collectorSet: { makeUsageCollector: makeUsageCollectorStub, register: registerStub },
-      },
       config: () => ({ get: () => '.kibana' })
     };
   });
 
-  it('should call collectorSet.register', () => {
-    makeKQLUsageCollector(server);
+  it('should call registerCollector', () => {
+    makeKQLUsageCollector(usageCollection, server);
     expect(registerStub).toHaveBeenCalledTimes(1);
   });
 
   it('should call makeUsageCollector with type = kql', () => {
-    makeKQLUsageCollector(server);
+    makeKQLUsageCollector(usageCollection, server);
     expect(makeUsageCollectorStub).toHaveBeenCalledTimes(1);
     expect(makeUsageCollectorStub.mock.calls[0][0].type).toBe('kql');
   });

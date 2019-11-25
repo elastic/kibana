@@ -5,4 +5,4 @@
  */
 
 export * from './telemetry';
-export { makeUsageCollector } from './make_usage_collector';
+export { registerFileUploadUsageCollector } from './file_upload_usage_collector';

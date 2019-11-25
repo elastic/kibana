@@ -49,14 +49,13 @@ class OpsMonitor {
 /*
  * Initialize a collector for Kibana Ops Stats
  */
-export function getOpsStatsCollector({
+export function getOpsStatsCollector(usageCollection, {
   elasticsearchPlugin,
   kbnServerConfig,
   log,
   config,
   getOSInfo,
   hapiServer,
-  collectorSet
 }) {
   const buffer = opsBuffer({ log, config, getOSInfo });
   const interval = kbnServerConfig.get('ops.interval');
@@ -85,7 +84,7 @@ export function getOpsStatsCollector({
     }, 5 * 1000); // wait 5 seconds to avoid race condition with reloading logging configuration
   });
 
-  return collectorSet.makeStatsCollector({
+  return usageCollection.makeStatsCollector({
     type: KIBANA_STATS_TYPE_MONITORING,
     init: opsMonitor.start,
     isReady: () => {

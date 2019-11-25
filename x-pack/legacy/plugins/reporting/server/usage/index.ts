@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getReportingUsageCollector } from './get_reporting_usage_collector';
+export { registerReportingUsageCollector } from './reporting_usage_collector';

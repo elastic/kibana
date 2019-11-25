@@ -5,7 +5,7 @@
  */
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { fileUploadRoutes } from './server/routes/file_upload';
-import { makeUsageCollector } from './server/telemetry/';
+import { registerFileUploadUsageCollector } from './server/telemetry';
 import mappings from './mappings';
 
 export const fileUpload = kibana => {
@@ -24,10 +24,11 @@ export const fileUpload = kibana => {
 
     init(server) {
       const { xpack_main: xpackMainPlugin } = server.plugins;
-
+      const usageCollection = server.newPlatform.setup.plugins.usageCollection;
       mirrorPluginStatus(xpackMainPlugin, this);
       fileUploadRoutes(server);
-      makeUsageCollector(server);
+
+      registerFileUploadUsageCollector(usageCollection, server);
     }
   });
 };

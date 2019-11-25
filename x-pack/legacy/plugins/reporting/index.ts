@@ -6,6 +6,7 @@
 
 import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
+import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
 import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
 // @ts-ignore untyped module defintition
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
@@ -20,7 +21,7 @@ import {
 import { config as reportingConfig } from './config';
 import { logConfiguration } from './log_configuration';
 import { createBrowserDriverFactory } from './server/browsers';
-import { getReportingUsageCollector } from './server/usage';
+import { registerReportingUsageCollector } from './server/usage';
 import { ReportingConfigOptions, ReportingPluginSpecOptions, ServerFacade } from './types.d';
 
 const kbToBase64Length = (kb: number) => {
@@ -76,9 +77,8 @@ export const reporting = (kibana: any) => {
     async init(server: ServerFacade) {
       let isCollectorReady = false;
       // Register a function with server to manage the collection of usage stats
-      server.usage.collectorSet.register(
-        getReportingUsageCollector(server, () => isCollectorReady)
-      );
+      const usageCollection = server.newPlatform.setup.plugins.usageCollection as UsageCollection;
+      registerReportingUsageCollector(usageCollection, server, () => isCollectorReady);
 
       const logger = LevelLogger.createForServer(server, [PLUGIN_ID]);
       const [exportTypesRegistry, browserFactory] = await Promise.all([

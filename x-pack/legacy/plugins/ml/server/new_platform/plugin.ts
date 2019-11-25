@@ -10,6 +10,7 @@ import { ServerRoute } from 'hapi';
 import { KibanaConfig, SavedObjectsLegacyService } from 'src/legacy/server/kbn_server';
 import { Logger, PluginInitializerContext, CoreSetup } from 'src/core/server';
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
+import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
 import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
 import { addLinksToSampleDatasets } from '../lib/sample_data_sets';
 import { checkLicense } from '../lib/check_license';
@@ -68,12 +69,6 @@ export interface MlCoreSetup {
   injectUiAppVars: (id: string, callback: () => {}) => any;
   http: MlHttpServiceSetup;
   savedObjects: SavedObjectsLegacyService;
-  usage: {
-    collectorSet: {
-      makeUsageCollector: any;
-      register: (collector: any) => void;
-    };
-  };
 }
 export interface MlInitializerContext extends PluginInitializerContext {
   legacyConfig: KibanaConfig;
@@ -84,6 +79,7 @@ export interface PluginsSetup {
   xpackMain: MlXpackMainPlugin;
   security: any;
   spaces: any;
+  usageCollection: UsageCollection;
   // TODO: this is temporary for `mirrorPluginStatus`
   ml: any;
 }
@@ -98,12 +94,6 @@ export interface RouteInitialization {
 }
 export interface UsageInitialization {
   elasticsearchPlugin: ElasticsearchPlugin;
-  usage: {
-    collectorSet: {
-      makeUsageCollector: any;
-      register: (collector: any) => void;
-    };
-  };
   savedObjects: SavedObjectsLegacyService;
 }
 
@@ -201,10 +191,8 @@ export class Plugin {
       savedObjects: core.savedObjects,
       spacesPlugin: plugins.spaces,
     };
-
     const usageInitializationDeps: UsageInitialization = {
       elasticsearchPlugin: plugins.elasticsearch,
-      usage: core.usage,
       savedObjects: core.savedObjects,
     };
 
@@ -231,7 +219,7 @@ export class Plugin {
     fileDataVisualizerRoutes(extendedRouteInitializationDeps);
 
     initMlServerLog(logInitializationDeps);
-    makeMlUsageCollector(usageInitializationDeps);
+    makeMlUsageCollector(plugins.usageCollection, usageInitializationDeps);
   }
 
   public stop() {}

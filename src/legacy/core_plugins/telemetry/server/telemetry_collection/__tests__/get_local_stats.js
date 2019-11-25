@@ -29,7 +29,12 @@ import {
   handleLocalStats,
 } from '../get_local_stats';
 
-const getMockServer = (getCluster = sinon.stub(), kibanaUsage = {}) => ({
+const mockUsageCollection = (kibanaUsage = {}) => ({
+  bulkFetch: () => kibanaUsage,
+  toObject: data => data,
+});
+
+const getMockServer = (getCluster = sinon.stub()) => ({
   log(tags, message) {
     console.log({ tags, message });
   },
@@ -43,7 +48,6 @@ const getMockServer = (getCluster = sinon.stub(), kibanaUsage = {}) => ({
       }
     };
   },
-  usage: { collectorSet: { bulkFetch: () => kibanaUsage, toObject: data => data } },
   plugins: {
     elasticsearch: { getCluster },
   },
@@ -155,15 +159,16 @@ describe('get_local_stats', () => {
   describe.skip('getLocalStats', () => {
     it('returns expected object without xpack data when X-Pack fails to respond', async () => {
       const callClusterUsageFailed = sinon.stub();
-
+      const usageCollection = mockUsageCollection();
       mockGetLocalStats(
         callClusterUsageFailed,
         Promise.resolve(clusterInfo),
         Promise.resolve(clusterStats),
       );
-      const result = await getLocalStats({
+      const result = await getLocalStats([], {
         server: getMockServer(),
         callCluster: callClusterUsageFailed,
+        usageCollection,
       });
       expect(result.cluster_uuid).to.eql(combinedStatsResult.cluster_uuid);
       expect(result.cluster_name).to.eql(combinedStatsResult.cluster_name);
@@ -178,15 +183,16 @@ describe('get_local_stats', () => {
 
     it('returns expected object with xpack and kibana data', async () => {
       const callCluster = sinon.stub();
-
+      const usageCollection = mockUsageCollection(kibana);
       mockGetLocalStats(
         callCluster,
         Promise.resolve(clusterInfo),
         Promise.resolve(clusterStats),
       );
 
-      const result = await getLocalStats({
-        server: getMockServer(callCluster, kibana),
+      const result = await getLocalStats([], {
+        server: getMockServer(callCluster),
+        usageCollection,
         callCluster,
       });
 

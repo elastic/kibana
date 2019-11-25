@@ -17,15 +17,8 @@
  * under the License.
  */
 
-const LOGGING_TAGS = ['stats-collection'];
-/*
- * @param {Object} server
- * @return {Object} helpful logger object
- */
-export function getCollectorLogger(server) {
-  return {
-    debug: message => server.log(['debug', ...LOGGING_TAGS], message),
-    info: message => server.log(['info', ...LOGGING_TAGS], message),
-    warn: message => server.log(['warning', ...LOGGING_TAGS], message)
-  };
-}
+export { CollectorSet } from './collector_set';
+// @ts-ignore
+export { Collector } from './collector';
+// @ts-ignore
+export { UsageCollector } from './usage_collector';

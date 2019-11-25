@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { createTelemetryPluginUsageCollector } from './telemetry_plugin_collector';
+export { registerTelemetryPluginUsageCollector } from './telemetry_plugin_collector';

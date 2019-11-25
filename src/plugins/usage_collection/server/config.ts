@@ -17,6 +17,8 @@
  * under the License.
  */
 
-export { CollectorSet } from './collector_set';
-export { Collector } from './collector';
-export { UsageCollector } from './usage_collector';
+import { schema } from '@kbn/config-schema';
+
+export const ConfigSchema = schema.object({
+  maximumWaitTimeForAllCollectorsInS: schema.number({ defaultValue: 60 }),
+});

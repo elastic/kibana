@@ -8,6 +8,7 @@ import * as Joi from 'joi';
 import { resolve } from 'path';
 import { LegacyPluginInitializer } from 'src/legacy/types';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
+import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
 import mappings from './mappings.json';
 import { PLUGIN_ID, getEditPath } from './common';
 import { lensServerPlugin } from './server';
@@ -58,10 +59,11 @@ export const lens: LegacyPluginInitializer = kibana => {
 
       // Set up with the new platform plugin lifecycle API.
       const plugin = lensServerPlugin();
+      const usageCollection = server.newPlatform.setup.plugins.usageCollection as UsageCollection;
       plugin.setup(kbnServer.newPlatform.setup.core, {
+        usageCollection,
         // Legacy APIs
         savedObjects: server.savedObjects,
-        usage: server.usage,
         config: server.config(),
         server,
       });

@@ -5,23 +5,18 @@
  */
 
 import { Server } from 'hapi';
+import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
 import { getTelemetry, initTelemetry, Telemetry } from './telemetry';
 
-// TODO this type should be defined by the platform
-interface KibanaHapiServer extends Server {
-  usage: {
-    collectorSet: {
-      makeUsageCollector: any;
-      register: any;
-    };
-  };
-}
-
-export function makeUsageCollector(server: KibanaHapiServer): void {
-  const fileUploadUsageCollector = server.usage.collectorSet.makeUsageCollector({
+export function registerFileUploadUsageCollector(
+  usageCollection: UsageCollection,
+  server: Server
+): void {
+  const fileUploadUsageCollector = usageCollection.makeUsageCollector({
     type: 'fileUploadTelemetry',
     isReady: () => true,
     fetch: async (): Promise<Telemetry> => (await getTelemetry(server)) || initTelemetry(),
   });
-  server.usage.collectorSet.register(fileUploadUsageCollector);
+
+  usageCollection.registerCollector(fileUploadUsageCollector);
 }

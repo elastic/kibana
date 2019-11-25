@@ -7,9 +7,9 @@
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { PluginInitializerContext } from 'src/core/server';
+import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
 import { PLUGIN } from './common/constants';
 import { KibanaServer, plugin } from './server';
-
 export const uptime = (kibana: any) =>
   new kibana.Plugin({
     configPrefix: 'xpack.uptime',
@@ -44,7 +44,7 @@ export const uptime = (kibana: any) =>
         {
           elasticsearch,
           savedObjects,
-          usageCollector: server.usage,
+          usageCollection: server.newPlatform.setup.plugins.usageCollection as UsageCollection,
           xpack: xpack_main,
         }
       );

@@ -163,10 +163,10 @@ async function fetchRollupVisualizations(kibanaIndex, callCluster, rollupIndexPa
   };
 }
 
-export function registerRollupUsageCollector(server) {
+export function registerRollupUsageCollector(usageCollection, server) {
   const kibanaIndex = server.config().get('kibana.index');
 
-  const collector = server.usage.collectorSet.makeUsageCollector({
+  const collector = usageCollection.makeUsageCollector({
     type: ROLLUP_USAGE_TYPE,
     isReady: () => true,
     fetch: async callCluster => {
@@ -198,5 +198,5 @@ export function registerRollupUsageCollector(server) {
     },
   });
 
-  server.usage.collectorSet.register(collector);
+  usageCollection.registerCollector(collector);
 }

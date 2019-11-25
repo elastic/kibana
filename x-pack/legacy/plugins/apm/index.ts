@@ -11,7 +11,7 @@ import { APMPluginContract } from '../../../plugins/apm/server/plugin';
 import { LegacyPluginInitializer } from '../../../../src/legacy/types';
 import mappings from './mappings.json';
 import { makeApmUsageCollector } from './server/lib/apm_telemetry';
-
+import { PluginSetupContract as UsageCollection } from '../../../../src/plugins/usage_collection/server';
 export const apm: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
     require: ['kibana', 'elasticsearch', 'xpack_main', 'apm_oss'],
@@ -108,7 +108,9 @@ export const apm: LegacyPluginInitializer = kibana => {
           }
         }
       });
-      makeApmUsageCollector(server);
+      const usageCollection = server.newPlatform.setup.plugins
+        .usageCollection as UsageCollection;
+      makeApmUsageCollector(usageCollection, server);
       const apmPlugin = server.newPlatform.setup.plugins
         .apm as APMPluginContract;
 

@@ -19,6 +19,7 @@
 
 import { encryptTelemetry } from './collectors';
 import { CallCluster } from '../../elasticsearch';
+import { PluginSetupContract as UsageCollection } from '../../../../plugins/usage_collection/server';
 
 export type EncryptedStatsGetterConfig = { unencrypted: false } & {
   server: any;
@@ -37,6 +38,7 @@ export interface ClusterDetails {
 }
 
 export interface StatsCollectionConfig {
+  usageCollection: UsageCollection;
   callCluster: CallCluster;
   server: any;
   start: string;
@@ -112,7 +114,8 @@ export class TelemetryCollectionManager {
       ? (...args: any[]) => callWithRequest(config.req, ...args)
       : callWithInternalUser;
 
-    return { server, callCluster, start, end };
+    const usageCollection = server.newPlatform.setup.plugins.usageCollection;
+    return { server, callCluster, start, end, usageCollection };
   };
 
   private getOptInStatsForCollection = async (

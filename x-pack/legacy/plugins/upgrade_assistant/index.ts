@@ -7,6 +7,7 @@ import _ from 'lodash';
 import Joi from 'joi';
 import { Legacy } from 'kibana';
 import { resolve } from 'path';
+import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
 import mappings from './mappings.json';
 import { plugin } from './server/np_ready';
 
@@ -44,10 +45,10 @@ export function upgradeAssistant(kibana: any) {
       // Add server routes and initialize the plugin here
       const instance = plugin({} as any);
       instance.setup(server.newPlatform.setup.core, {
+        usageCollection: server.newPlatform.setup.plugins.usageCollection as UsageCollection,
         __LEGACY: {
           // Legacy objects
           events: server.events,
-          usage: server.usage,
           savedObjects: server.savedObjects,
 
           // Legacy functions

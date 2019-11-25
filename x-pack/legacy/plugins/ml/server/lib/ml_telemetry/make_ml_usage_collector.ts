@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
 import {
   createMlTelemetry,
   getSavedObjectsClient,
@@ -14,12 +15,11 @@ import {
 
 import { UsageInitialization } from '../../new_platform/plugin';
 
-export function makeMlUsageCollector({
-  elasticsearchPlugin,
-  usage,
-  savedObjects,
-}: UsageInitialization): void {
-  const mlUsageCollector = usage.collectorSet.makeUsageCollector({
+export function makeMlUsageCollector(
+  usageCollection: UsageCollection,
+  { elasticsearchPlugin, savedObjects }: UsageInitialization
+): void {
+  const mlUsageCollector = usageCollection.makeUsageCollector({
     type: 'ml',
     isReady: () => true,
     fetch: async (): Promise<MlTelemetry> => {
@@ -35,5 +35,6 @@ export function makeMlUsageCollector({
       }
     },
   });
-  usage.collectorSet.register(mlUsageCollector);
+
+  usageCollection.registerCollector(mlUsageCollector);
 }

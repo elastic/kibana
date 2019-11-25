@@ -324,6 +324,7 @@ export default function (kibana) {
     },
 
     init: async function (server) {
+      const usageCollecion = server.newPlatform.setup.plugins.usageCollection;
       // uuid
       await manageUuid(server);
       // routes
@@ -339,7 +340,8 @@ export default function (kibana) {
       registerFieldFormats(server);
       registerTutorials(server);
       makeKQLUsageCollector(server);
-      registerCspCollector(server);
+
+      registerCspCollector(usageCollecion, server);
       server.expose('systemApi', systemApi);
       server.injectUiAppVars('kibana', () => injectVars(server));
     },

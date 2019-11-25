@@ -67,7 +67,6 @@ declare module 'hapi' {
     config: () => KibanaConfig;
     indexPatternsServiceFactory: IndexPatternsServiceFactory;
     savedObjects: SavedObjectsLegacyService;
-    usage: { collectorSet: any };
     injectUiAppVars: (pluginName: string, getAppVars: () => { [key: string]: any }) => void;
     getHiddenUiAppById(appId: string): UiApp;
     registerCapabilitiesModifier: (provider: CapabilitiesModifier) => void;

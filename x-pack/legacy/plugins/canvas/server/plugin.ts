@@ -61,7 +61,7 @@ export class Plugin {
       },
     });
 
-    registerCanvasUsageCollector(core, plugins);
+    registerCanvasUsageCollector(plugins.usageCollection, core);
     loadSampleData(
       plugins.sampleData.addSavedObjectsToSampleDataset,
       plugins.sampleData.addAppLinksToSampleDataset

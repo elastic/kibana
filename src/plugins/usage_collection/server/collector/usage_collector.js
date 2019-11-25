@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { KIBANA_STATS_TYPE } from '../../status/constants';
+import { KIBANA_STATS_TYPE } from '../../common/constants';
 import { Collector } from './collector';
 
 export class UsageCollector extends Collector {

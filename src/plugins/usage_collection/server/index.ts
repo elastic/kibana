@@ -17,15 +17,11 @@
  * under the License.
  */
 
-import { CollectorSet } from './classes';
+import { PluginInitializerContext } from '../../../../src/core/server';
+import { Plugin } from './plugin';
+import { ConfigSchema } from './config';
 
-export function usageMixin(kbnServer, server, config) {
-  const collectorSet = new CollectorSet(server, undefined, config);
-
-  /*
-   * expose the collector set object on the server
-   * provides factory methods for feature owners to create their own collector objects
-   * use collectorSet.register(collector) to register your feature's collector object(s)
-   */
-  server.decorate('server', 'usage', { collectorSet });
-}
+export { PluginSetupContract } from './plugin';
+export const config = { schema: ConfigSchema };
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new Plugin(initializerContext);

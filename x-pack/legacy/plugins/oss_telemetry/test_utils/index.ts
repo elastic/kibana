@@ -54,12 +54,6 @@ export const getMockKbnServer = (
       fetch: mockTaskFetch,
     },
   },
-  usage: {
-    collectorSet: {
-      makeUsageCollector: () => '',
-      register: () => undefined,
-    },
-  },
   config: () => mockConfig,
   log: () => undefined,
 });

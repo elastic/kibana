@@ -18,10 +18,13 @@
  */
 
 import { UI_METRIC_USAGE_TYPE } from '../../../common/constants';
+import { PluginSetupContract as UsageCollectionPluginSetupContract } from '../../../../../../plugins/usage_collection/server';
 
-export function createUiMetricUsageCollector(server: any) {
-  const { collectorSet } = server.usage;
-  return collectorSet.makeUsageCollector({
+export function registerUiMetricUsageCollector(
+  usageCollection: UsageCollectionPluginSetupContract,
+  server: any
+) {
+  const collector = usageCollection.makeUsageCollector({
     type: UI_METRIC_USAGE_TYPE,
     fetch: async () => {
       const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
@@ -55,4 +58,6 @@ export function createUiMetricUsageCollector(server: any) {
     },
     isReady: () => true,
   });
+
+  usageCollection.registerCollector(collector);
 }

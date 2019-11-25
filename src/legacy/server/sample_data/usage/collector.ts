@@ -17,26 +17,22 @@
  * under the License.
  */
 
-import * as Hapi from 'hapi';
+import { Server } from 'hapi';
 import { fetchProvider } from './collector_fetch';
+import { PluginSetupContract as UsageCollection } from '../../../../plugins/usage_collection/server';
 
-interface KbnServer extends Hapi.Server {
-  usage: any;
-}
-
-export function makeSampleDataUsageCollector(server: KbnServer) {
+export function makeSampleDataUsageCollector(usageCollection: UsageCollection, server: Server) {
   let index: string;
   try {
     index = server.config().get('kibana.index');
   } catch (err) {
     return; // kibana plugin is not enabled (test environment)
   }
+  const collector = usageCollection.makeUsageCollector({
+    type: 'sample-data',
+    fetch: fetchProvider(index),
+    isReady: () => true,
+  });
 
-  server.usage.collectorSet.register(
-    server.usage.collectorSet.makeUsageCollector({
-      type: 'sample-data',
-      fetch: fetchProvider(index),
-      isReady: () => true,
-    })
-  );
+  usageCollection.registerCollector(collector);
 }

@@ -7,6 +7,9 @@
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { CapabilitiesModifier } from 'src/legacy/server/capabilities';
+import { PluginSetupContract as UsageCollectionPluginSetup } from 'src/plugins/usage_collection/server';
+import { HomeServerPluginSetup } from 'src/plugins/home/server';
+import { PluginSetupContract as UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   SavedObjectsLegacyService,
   CoreSetup,
@@ -24,25 +27,19 @@ import { AuditLogger } from '../../../../server/lib/audit_logger';
 import { spacesSavedObjectsClientWrapperFactory } from './lib/saved_objects_client/saved_objects_client_wrapper_factory';
 import { SpacesAuditLogger } from './lib/audit_logger';
 import { createSpacesTutorialContextFactory } from './lib/spaces_tutorial_context_factory';
-import { getSpacesUsageCollector } from './lib/get_spaces_usage_collector';
+import { registerSpacesUsageCollector } from './lib/spaces_usage_collector';
 import { SpacesService } from './spaces_service';
 import { SpacesServiceSetup } from './spaces_service/spaces_service';
 import { ConfigType } from './config';
 import { toggleUICapabilities } from './lib/toggle_ui_capabilities';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
 import { initExternalSpacesApi } from './routes/api/external';
-import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 /**
  * Describes a set of APIs that is available in the legacy platform only and required by this plugin
  * to function properly.
  */
 export interface LegacyAPI {
   savedObjects: SavedObjectsLegacyService;
-  usage: {
-    collectorSet: {
-      register: (collector: any) => void;
-    };
-  };
   tutorial: {
     addScopedTutorialContextFactory: (factory: any) => void;
   };
@@ -62,6 +59,7 @@ export interface PluginsSetup {
   features: FeaturesPluginSetup;
   licensing: LicensingPluginSetup;
   security?: SecurityPluginSetup;
+  usageCollection: UsageCollectionSetup;
   home?: HomeServerPluginSetup;
 }
 
@@ -150,7 +148,12 @@ export class Plugin {
       __legacyCompat: {
         registerLegacyAPI: (legacyAPI: LegacyAPI) => {
           this.legacyAPI = legacyAPI;
-          this.setupLegacyComponents(spacesService, plugins.features, plugins.licensing);
+          this.setupLegacyComponents(
+            spacesService,
+            plugins.features,
+            plugins.licensing,
+            plugins.usageCollection
+          );
         },
         createDefaultSpace: async () => {
           const esClient = await core.elasticsearch.adminClient$.pipe(take(1)).toPromise();
@@ -168,7 +171,8 @@ export class Plugin {
   private setupLegacyComponents(
     spacesService: SpacesServiceSetup,
     featuresSetup: FeaturesPluginSetup,
-    licensingSetup: LicensingPluginSetup
+    licensingSetup: LicensingPluginSetup,
+    usageCollectionSetup: UsageCollectionPluginSetup
   ) {
     const legacyAPI = this.getLegacyAPI();
     const { addScopedSavedObjectsClientWrapperFactory, types } = legacyAPI.savedObjects;
@@ -180,6 +184,12 @@ export class Plugin {
     legacyAPI.tutorial.addScopedTutorialContextFactory(
       createSpacesTutorialContextFactory(spacesService)
     );
+    // Register a function with server to manage the collection of usage stats
+    registerSpacesUsageCollector(usageCollectionSetup, {
+      kibanaIndex: legacyAPI.legacyConfig.kibanaIndex,
+      features: featuresSetup,
+      licensing: licensingSetup,
+    });
     legacyAPI.capabilities.registerCapabilitiesModifier(async (request, uiCapabilities) => {
       try {
         const activeSpace = await spacesService.getActiveSpace(KibanaRequest.from(request));
@@ -189,14 +199,5 @@ export class Plugin {
         return uiCapabilities;
       }
     });
-    // Register a function with server to manage the collection of usage stats
-    legacyAPI.usage.collectorSet.register(
-      getSpacesUsageCollector({
-        kibanaIndex: legacyAPI.legacyConfig.kibanaIndex,
-        usage: legacyAPI.usage,
-        features: featuresSetup,
-        licensing: licensingSetup,
-      })
-    );
   }
 }

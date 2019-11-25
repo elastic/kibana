@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { createUiMetricUsageCollector } from './telemetry_ui_metric_collector';
+export { registerUiMetricUsageCollector } from './telemetry_ui_metric_collector';

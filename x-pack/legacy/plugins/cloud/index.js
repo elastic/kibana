@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getCloudUsageCollector } from './get_cloud_usage_collector';
+import { registerCloudUsageCollector } from './cloud_usage_collector';
 
 export const cloud = kibana => {
   return new kibana.Plugin({
@@ -40,7 +40,8 @@ export const cloud = kibana => {
       server.expose('config', {
         isCloudEnabled: !!config.id
       });
-      server.usage.collectorSet.register(getCloudUsageCollector(server));
+      const usageCollection = server.newPlatform.setup.plugins.usageCollection;
+      registerCloudUsageCollector(usageCollection, server);
     }
   });
 };
