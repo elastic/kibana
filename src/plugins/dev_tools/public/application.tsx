@@ -26,7 +26,7 @@ import ReactDOM from 'react-dom';
 import { useEffect, useRef } from 'react';
 
 import { AppMountContext } from 'kibana/public';
-import { DevTool } from '../../../../../plugins/dev_tools/public';
+import { DevTool } from './plugin';
 
 interface DevToolsWrapperProps {
   devTools: readonly DevTool[];
@@ -120,10 +120,10 @@ function setBadge(appMountContext: AppMountContext) {
     return;
   }
   appMountContext.core.chrome.setBadge({
-    text: i18n.translate('kbn.devTools.badge.readOnly.text', {
+    text: i18n.translate('devTools.badge.readOnly.text', {
       defaultMessage: 'Read only',
     }),
-    tooltip: i18n.translate('kbn.devTools.badge.readOnly.tooltip', {
+    tooltip: i18n.translate('devTools.badge.readOnly.tooltip', {
       defaultMessage: 'Unable to save',
     }),
     iconType: 'glasses',
@@ -133,7 +133,7 @@ function setBadge(appMountContext: AppMountContext) {
 function setBreadcrumbs(appMountContext: AppMountContext) {
   appMountContext.core.chrome.setBreadcrumbs([
     {
-      text: i18n.translate('kbn.devTools.k7BreadcrumbsDevToolsLabel', {
+      text: i18n.translate('devTools.k7BreadcrumbsDevToolsLabel', {
         defaultMessage: 'Dev Tools',
       }),
       href: '#/dev_tools',
