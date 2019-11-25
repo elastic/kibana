@@ -15,10 +15,10 @@ export interface JobParamPostPayloadDiscoverCsv extends JobParamPostPayload {
 
 export interface JobParamsDiscoverCsv {
   indexPatternId?: string;
-  post?: JobParamPostPayloadDiscoverCsv; // delete this
+  post?: JobParamPostPayloadDiscoverCsv; // delete this // FIXME
 }
 
-export interface JobDocPayloadDiscoverCsv extends JobDocPayload {
+export interface JobDocPayloadDiscoverCsv extends JobDocPayload<JobParamsDiscoverCsv> {
   basePath: string;
   searchRequest: any;
   fields: any;
@@ -26,9 +26,3 @@ export interface JobDocPayloadDiscoverCsv extends JobDocPayload {
   metaFields: any;
   conflictedTypesFields: any;
 }
-
-export type ESQueueCreateJobFnDiscoverCsv = (
-  jobParams: JobParamsDiscoverCsv,
-  headers: ConditionalHeaders,
-  request: RequestFacade
-) => Promise<JobParamsDiscoverCsv>;

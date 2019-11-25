@@ -17,17 +17,10 @@ export interface JobParamsPNG {
 }
 
 // Job payload: structure of stored job data provided by create_job
-export interface JobDocPayloadPNG extends JobDocPayload {
+export interface JobDocPayloadPNG extends JobDocPayload<JobParamsPNG> {
   basePath?: string;
   browserTimezone: string;
   forceNow?: string;
   layout: LayoutInstance;
   relativeUrl: string;
-  objects: undefined;
 }
-
-export type ESQueueCreateJobFnPNG = (
-  jobParams: JobParamsPNG,
-  headers: ConditionalHeaders,
-  request: RequestFacade
-) => Promise<JobParamsPNG>;

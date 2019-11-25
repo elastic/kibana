@@ -25,7 +25,7 @@ export interface JobParamsPanelCsv {
   visType?: string;
 }
 
-export interface JobDocPayloadPanelCsv extends JobDocPayload {
+export interface JobDocPayloadPanelCsv extends JobDocPayload<JobParamsPanelCsv> {
   type: string | null;
   jobParams: JobParamsPanelCsv;
 }

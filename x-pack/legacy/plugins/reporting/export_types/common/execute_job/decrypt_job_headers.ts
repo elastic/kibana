@@ -9,16 +9,16 @@ import { i18n } from '@kbn/i18n';
 import { cryptoFactory } from '../../../server/lib/crypto';
 import { CryptoFactory, JobDocPayload, ServerFacade, Logger } from '../../../types';
 
-export const decryptJobHeaders = async ({
+export const decryptJobHeaders = async <JobParamsType>({
   job,
   server,
   logger,
 }: {
-  job: JobDocPayload;
+  job: JobDocPayload<JobParamsType>;
   server: ServerFacade;
   logger: Logger;
 }): Promise<{
-  job: JobDocPayload;
+  job: JobDocPayload<JobParamsType>;
   server: ServerFacade;
   decryptedHeaders: Record<string, string>;
 }> => {

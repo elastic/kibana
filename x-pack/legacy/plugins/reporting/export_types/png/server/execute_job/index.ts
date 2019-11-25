@@ -7,7 +7,7 @@
 import * as Rx from 'rxjs';
 import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
 import { PLUGIN_ID, PNG_JOB_TYPE } from '../../../../common/constants';
-import { ServerFacade, ExecuteJobFactory, ESQueueCreateJobFn } from '../../../../types';
+import { ServerFacade, ExecuteJobFactory, ESQueueWorkerExecuteFn } from '../../../../types';
 import { LevelLogger } from '../../../../server/lib';
 import {
   decryptJobHeaders,
@@ -20,7 +20,7 @@ import { generatePngObservableFactory } from '../lib/generate_png';
 
 export const executeJobFactory: ExecuteJobFactory<
   JobDocPayloadPNG,
-  ESQueueCreateJobFn<JobDocPayloadPNG>
+  ESQueueWorkerExecuteFn<JobDocPayloadPNG>
 > = function executeJobFactoryFn(server: ServerFacade) {
   const generatePngObservable = generatePngObservableFactory(server);
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PNG_JOB_TYPE, 'execute']);

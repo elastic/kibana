@@ -198,17 +198,17 @@ export interface JobParamPostPayload {
   timerange: TimeRangeParams;
 }
 
-export interface JobDocPayload {
+export interface JobDocPayload<JobParamsType> {
   headers?: Record<string, string>;
-  jobParams: any;
+  jobParams: JobParamsType;
   title: string;
   type: string | null;
   objects?: null | object[];
 }
 
-export interface JobSource<T> {
+export interface JobSource<JobDocType> {
   _id: string;
-  _source: T;
+  _source: JobDocType;
 }
 
 export interface JobDocOutput {
@@ -216,10 +216,10 @@ export interface JobDocOutput {
   contentType: string;
 }
 
-export interface JobDocExecuted {
+export interface JobDocExecuted<JobParamsType> {
   jobtype: string;
   output: JobDocOutputExecuted;
-  payload: JobDocPayload;
+  payload: JobDocPayload<JobParamsType>;
   status: string; // completed, failed, etc
 }
 
@@ -254,35 +254,33 @@ interface JobParamsSavedObject {
 
 type JobParamsUrl = object;
 
-export type JobParams = JobParamsSavedObject | JobParamsUrl;
-
-export type ESQueueCreateJobFn<T> = (
-  jobParams: T,
+export type ESQueueCreateJobFn<JobParamsType> = (
+  jobParams: JobParamsType,
   headers: Record<string, string>,
   request: RequestFacade
-) => Promise<T>;
+) => Promise<JobParamsType>;
 
-export type ImmediateCreateJobFn<T> = (
-  jobParams: T,
+export type ImmediateCreateJobFn<JobParamsType> = (
+  jobParams: JobParamsType,
   headers: Record<string, string>,
   req: RequestFacade
 ) => Promise<{
   type: string | null;
   title: string;
-  jobParams: T;
+  jobParams: JobParamsType;
 }>;
 
-export type ESQueueWorkerExecuteFn<T> = (
+export type ESQueueWorkerExecuteFn<JobDocType> = (
   jobId: string,
-  job: T,
+  job: JobDocType,
   cancellationToken?: CancellationToken
 ) => void;
 
 export type JobIDForImmediate = null;
 
-export type ImmediateExecuteFn = (
+export type ImmediateExecuteFn<JobParamsType> = (
   jobId: JobIDForImmediate,
-  job: JobDocPayload,
+  job: JobDocPayload<JobParamsType>,
   request: RequestFacade
 ) => Promise<JobDocOutputExecuted>;
 
@@ -301,22 +299,38 @@ export interface ESQueueInstance {
   ) => ESQueueWorker;
 }
 
-export type CreateJobFactory<T, U> = (server: ServerFacade) => U;
-export type ExecuteJobFactory<T, U> = (server: ServerFacade) => U;
+export type CreateJobFactory<JobParamsType, CreateJobFnType> = (
+  server: ServerFacade
+) => CreateJobFnType;
+export type ExecuteJobFactory<JobPayloadType, ExecuteJobFnType> = (
+  server: ServerFacade
+) => ExecuteJobFnType;
 
-export interface ExportTypeDefinition<T, U, V, W> {
+export interface ExportTypeDefinition<
+  JobParamsType,
+  CreateJobFnType,
+  JobPayloadType,
+  ExecuteJobFnType
+> {
   id: string;
   name: string;
   jobType: string;
   jobContentEncoding?: string;
   jobContentExtension: string;
-  createJobFactory: CreateJobFactory<T, U>;
-  executeJobFactory: ExecuteJobFactory<V, W>;
+  createJobFactory: CreateJobFactory<JobParamsType, CreateJobFnType>;
+  executeJobFactory: ExecuteJobFactory<JobPayloadType, ExecuteJobFnType>;
   validLicenses: string[];
 }
 
 export interface ExportTypesRegistry {
-  register: <T, U, V, W>(exportTypeDefinition: ExportTypeDefinition<T, U, V, W>) => void;
+  register: <JobParamsType, CreateJobFnType, JobPayloadType, ExecuteJobFnType>(
+    exportTypeDefinition: ExportTypeDefinition<
+      JobParamsType,
+      CreateJobFnType,
+      JobPayloadType,
+      ExecuteJobFnType
+    >
+  ) => void;
 }
 
 export { CancellationToken } from './common/cancellation_token';

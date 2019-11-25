@@ -17,7 +17,7 @@ export interface JobParamsPDF {
 }
 
 // Job payload: structure of stored job data provided by create_job
-export interface JobDocPayloadPDF extends JobDocPayload {
+export interface JobDocPayloadPDF extends JobDocPayload<JobParamsPDF> {
   basePath?: string;
   browserTimezone: string;
   forceNow?: string;
@@ -25,13 +25,4 @@ export interface JobDocPayloadPDF extends JobDocPayload {
   objects: Array<{
     relativeUrl: string;
   }>;
-  relativeUrl: undefined;
 }
-
-export type ESQueueCreateJobFnPDF = (
-  jobParams: JobParamsPDF,
-  headers: ConditionalHeaders,
-  request: RequestFacade
-) => Promise<JobParamsPDF>;
-
-export type CreateJobFactoryPDF = (server: ServerFacade) => ESQueueCreateJobFnPDF;
