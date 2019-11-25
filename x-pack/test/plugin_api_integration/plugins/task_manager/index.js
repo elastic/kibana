@@ -4,9 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+const { EventEmitter } = require('events');
+
 import { initRoutes } from './init_routes';
 
+
+const once = function (emitter, event) {
+  return new Promise(resolve => {
+    emitter.once(event, resolve);
+  });
+};
+
 export default function TaskTestingAPI(kibana) {
+  const taskTestingEvents = new EventEmitter();
+
   return new kibana.Plugin({
     name: 'sampleTask',
     require: ['elasticsearch', 'task_manager'],
@@ -52,6 +63,10 @@ export default function TaskTestingAPI(kibana) {
                 refresh: true,
               });
 
+              if (params.waitForEvent) {
+                await once(taskTestingEvents, params.waitForEvent);
+              }
+
               return {
                 state: { count: (prevState.count || 0) + 1 },
                 runAt: millisecondsFromNow(params.nextRunMilliseconds),
@@ -88,7 +103,7 @@ export default function TaskTestingAPI(kibana) {
         },
       });
 
-      initRoutes(server);
+      initRoutes(server, taskTestingEvents);
     },
   });
 }
