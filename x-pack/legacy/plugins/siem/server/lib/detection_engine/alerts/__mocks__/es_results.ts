@@ -5,7 +5,6 @@
  */
 
 import { SignalSourceHit, SignalSearchResponse, AlertTypeParams } from '../types';
-import uuid from 'uuid';
 
 export const sampleSignalAlertParams = (
   maxSignals: number | undefined,
@@ -33,41 +32,41 @@ export const sampleSignalAlertParams = (
   meta: undefined,
 });
 
-export const sampleDocNoSortId: SignalSourceHit = {
+export const sampleDocNoSortId = (someUuid: string): SignalSourceHit => ({
   _index: 'myFakeSignalIndex',
   _type: 'doc',
   _score: 100,
   _version: 1,
-  _id: uuid.v4(),
+  _id: someUuid,
   _source: {
     someKey: 'someValue',
     '@timestamp': 'someTimeStamp',
   },
-};
+});
 
-export const sampleDocNoSortIdNoVersion: SignalSourceHit = {
+export const sampleDocNoSortIdNoVersion = (someUuid: string): SignalSourceHit => ({
   _index: 'myFakeSignalIndex',
   _type: 'doc',
   _score: 100,
-  _id: uuid.v4(),
+  _id: someUuid,
   _source: {
     someKey: 'someValue',
     '@timestamp': 'someTimeStamp',
   },
-};
+});
 
-export const sampleDocWithSortId: SignalSourceHit = {
+export const sampleDocWithSortId = (someUuid: string): SignalSourceHit => ({
   _index: 'myFakeSignalIndex',
   _type: 'doc',
   _score: 100,
   _version: 1,
-  _id: uuid.v4(),
+  _id: someUuid,
   _source: {
     someKey: 'someValue',
     '@timestamp': 'someTimeStamp',
   },
   sort: ['1234567891111'],
-};
+});
 
 export const sampleEmptyDocSearchResults: SignalSearchResponse = {
   took: 10,
@@ -139,7 +138,7 @@ export const sampleBulkCreateDuplicateResult = {
   ],
 };
 
-export const sampleDocSearchResultsNoSortId: SignalSearchResponse = {
+export const sampleDocSearchResultsNoSortId = (someUuid: string): SignalSearchResponse => ({
   took: 10,
   timed_out: false,
   _shards: {
@@ -153,13 +152,15 @@ export const sampleDocSearchResultsNoSortId: SignalSearchResponse = {
     max_score: 100,
     hits: [
       {
-        ...sampleDocNoSortId,
+        ...sampleDocNoSortId(someUuid),
       },
     ],
   },
-};
+});
 
-export const sampleDocSearchResultsNoSortIdNoVersion: SignalSearchResponse = {
+export const sampleDocSearchResultsNoSortIdNoVersion = (
+  someUuid: string
+): SignalSearchResponse => ({
   took: 10,
   timed_out: false,
   _shards: {
@@ -173,13 +174,13 @@ export const sampleDocSearchResultsNoSortIdNoVersion: SignalSearchResponse = {
     max_score: 100,
     hits: [
       {
-        ...sampleDocNoSortIdNoVersion,
+        ...sampleDocNoSortIdNoVersion(someUuid),
       },
     ],
   },
-};
+});
 
-export const sampleDocSearchResultsNoSortIdNoHits: SignalSearchResponse = {
+export const sampleDocSearchResultsNoSortIdNoHits = (someUuid: string): SignalSearchResponse => ({
   took: 10,
   timed_out: false,
   _shards: {
@@ -193,13 +194,17 @@ export const sampleDocSearchResultsNoSortIdNoHits: SignalSearchResponse = {
     max_score: 100,
     hits: [
       {
-        ...sampleDocNoSortId,
+        ...sampleDocNoSortId(someUuid),
       },
     ],
   },
-};
+});
 
-export const repeatedSearchResultsWithSortId = (total: number, pageSize: number) => ({
+export const repeatedSearchResultsWithSortId = (
+  total: number,
+  pageSize: number,
+  guids: string[]
+) => ({
   took: 10,
   timed_out: false,
   _shards: {
@@ -211,13 +216,13 @@ export const repeatedSearchResultsWithSortId = (total: number, pageSize: number)
   hits: {
     total,
     max_score: 100,
-    hits: Array.from({ length: pageSize }).map(x => ({
-      ...sampleDocWithSortId,
+    hits: Array.from({ length: pageSize }).map((x, index) => ({
+      ...sampleDocWithSortId(guids[index]),
     })),
   },
 });
 
-export const sampleDocSearchResultsWithSortId: SignalSearchResponse = {
+export const sampleDocSearchResultsWithSortId = (someUuid: string): SignalSearchResponse => ({
   took: 10,
   timed_out: false,
   _shards: {
@@ -231,10 +236,10 @@ export const sampleDocSearchResultsWithSortId: SignalSearchResponse = {
     max_score: 100,
     hits: [
       {
-        ...sampleDocWithSortId,
+        ...sampleDocWithSortId(someUuid),
       },
     ],
   },
-};
+});
 
 export const sampleSignalId = '04128c15-0d1b-4716-a4c5-46997ac7f3bd';

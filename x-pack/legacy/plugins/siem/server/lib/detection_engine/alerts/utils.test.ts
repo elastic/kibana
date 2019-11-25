@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import uuid from 'uuid';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 
 import { Logger } from '../../../../../../../../src/core/server';
@@ -49,9 +51,10 @@ describe('utils', () => {
   });
   describe('buildBulkBody', () => {
     test('if bulk body builds well-defined body', () => {
+      const fakeUuid = uuid.v4();
       const sampleParams = sampleSignalAlertParams(undefined);
       const fakeSignalSourceHit = buildBulkBody({
-        doc: sampleDocNoSortId,
+        doc: sampleDocNoSortId(fakeUuid),
         signalParams: sampleParams,
         id: sampleSignalId,
         name: 'rule-name',
@@ -109,17 +112,28 @@ describe('utils', () => {
         const findex = 'myfakeindex';
         const fid = 'somefakeid';
         const version = '1';
+        // 'myfakeindexsomefakeid1'
+        const generatedHash = '91309a297453bae2d02bf116e9c401be502254253f9add4a90f718fd4db7fa0b';
         const firstHash = generateId(findex, fid, version);
         const secondHash = generateId(findex, fid, version);
-        expect(firstHash).toEqual(secondHash);
+        expect(firstHash).toEqual(generatedHash);
+        expect(secondHash).toEqual(generatedHash);
       });
       test('two docs with different index, id, and version should have different id', () => {
         const findex = 'myfakeindex';
         const findex2 = 'mysecondfakeindex';
         const fid = 'somefakeid';
         const version = '1';
+        // 'myfakeindexsomefakeid1'
+        const firstGeneratedHash =
+          '91309a297453bae2d02bf116e9c401be502254253f9add4a90f718fd4db7fa0b';
+        // 'mysecondfakeindexsomefakeid1'
+        const secondGeneratedHash =
+          '6f0968c02efd606b94bfc6dc3f3fc57aa4bc3cbbab569b7ad51e090a7e4b8040';
         const firstHash = generateId(findex, fid, version);
         const secondHash = generateId(findex2, fid, version);
+        expect(firstHash).toEqual(firstGeneratedHash);
+        expect(secondHash).toEqual(secondGeneratedHash);
         expect(firstHash).not.toEqual(secondHash);
       });
       test('two docs with same index, different id, and same version should have different id', () => {
@@ -127,8 +141,16 @@ describe('utils', () => {
         const fid = 'somefakeid';
         const fid2 = 'somefakeid2';
         const version = '1';
+        // 'myfakeindexsomefakeid1'
+        const firstGeneratedHash =
+          '91309a297453bae2d02bf116e9c401be502254253f9add4a90f718fd4db7fa0b';
+        // 'myfakeindexsomefakeid21'
+        const secondGeneratedHash =
+          '09dbae1c0dd2673daa17069723eadd3440ab0ac111e48b0ca079b2508525fb49';
         const firstHash = generateId(findex, fid, version);
         const secondHash = generateId(findex, fid2, version);
+        expect(firstHash).toEqual(firstGeneratedHash);
+        expect(secondHash).toEqual(secondGeneratedHash);
         expect(firstHash).not.toEqual(secondHash);
       });
       test('two docs with same index, same id, and different version should have different id', () => {
@@ -136,12 +158,21 @@ describe('utils', () => {
         const fid = 'somefakeid';
         const version = '1';
         const version2 = '2';
+        // 'myfakeindexsomefakeid1'
+        const firstGeneratedHash =
+          '91309a297453bae2d02bf116e9c401be502254253f9add4a90f718fd4db7fa0b';
+        // myfakeindexsomefakeid2'
+        const secondGeneratedHash =
+          '4ff04fb2bffe36ec96b2f673f199292701df0faeb685d5a1c8b88ba54711b7bd';
         const firstHash = generateId(findex, fid, version);
         const secondHash = generateId(findex, fid, version2);
+        expect(firstHash).toEqual(firstGeneratedHash);
+        expect(secondHash).toEqual(secondGeneratedHash);
         expect(firstHash).not.toEqual(secondHash);
       });
     });
     test('create successful bulk create', async () => {
+      const fakeUuid = uuid.v4();
       const sampleParams = sampleSignalAlertParams(undefined);
       const sampleSearchResult = sampleDocSearchResultsNoSortId;
       mockService.callCluster.mockReturnValueOnce({
@@ -154,7 +185,7 @@ describe('utils', () => {
         ],
       });
       const successfulsingleBulkCreate = await singleBulkCreate({
-        someResult: sampleSearchResult,
+        someResult: sampleSearchResult(fakeUuid),
         signalParams: sampleParams,
         services: mockService,
         logger: mockLogger,
@@ -169,6 +200,7 @@ describe('utils', () => {
       expect(successfulsingleBulkCreate).toEqual(true);
     });
     test('create successful bulk create with docs with no versioning', async () => {
+      const fakeUuid = uuid.v4();
       const sampleParams = sampleSignalAlertParams(undefined);
       const sampleSearchResult = sampleDocSearchResultsNoSortIdNoVersion;
       mockService.callCluster.mockReturnValueOnce({
@@ -181,7 +213,7 @@ describe('utils', () => {
         ],
       });
       const successfulsingleBulkCreate = await singleBulkCreate({
-        someResult: sampleSearchResult,
+        someResult: sampleSearchResult(fakeUuid),
         signalParams: sampleParams,
         services: mockService,
         logger: mockLogger,
@@ -215,12 +247,12 @@ describe('utils', () => {
       expect(successfulsingleBulkCreate).toEqual(true);
     });
     test('create successful bulk create when bulk create has errors', async () => {
-      // need a sample search result, sample signal params, mock service, mock logger
+      const fakeUuid = uuid.v4();
       const sampleParams = sampleSignalAlertParams(undefined);
       const sampleSearchResult = sampleDocSearchResultsNoSortId;
       mockService.callCluster.mockReturnValue(sampleBulkCreateDuplicateResult);
       const successfulsingleBulkCreate = await singleBulkCreate({
-        someResult: sampleSearchResult,
+        someResult: sampleSearchResult(fakeUuid),
         signalParams: sampleParams,
         services: mockService,
         logger: mockLogger,
@@ -303,6 +335,7 @@ describe('utils', () => {
     });
     test('if successful iteration of while loop with maxDocs', async () => {
       const sampleParams = sampleSignalAlertParams(30);
+      const someGuids = Array.from({ length: 13 }).map(x => uuid.v4());
       mockService.callCluster
         .mockReturnValueOnce({
           took: 100,
@@ -313,7 +346,7 @@ describe('utils', () => {
             },
           ],
         })
-        .mockReturnValueOnce(repeatedSearchResultsWithSortId(3, 1))
+        .mockReturnValueOnce(repeatedSearchResultsWithSortId(3, 1, someGuids.splice(0, 3)))
         .mockReturnValueOnce({
           took: 100,
           errors: false,
@@ -323,7 +356,7 @@ describe('utils', () => {
             },
           ],
         })
-        .mockReturnValueOnce(repeatedSearchResultsWithSortId(3, 1))
+        .mockReturnValueOnce(repeatedSearchResultsWithSortId(3, 1, someGuids.splice(3, 6)))
         .mockReturnValueOnce({
           took: 100,
           errors: false,
@@ -334,7 +367,7 @@ describe('utils', () => {
           ],
         });
       const result = await searchAfterAndBulkCreate({
-        someResult: repeatedSearchResultsWithSortId(3, 1),
+        someResult: repeatedSearchResultsWithSortId(3, 1, someGuids.splice(6, 9)),
         signalParams: sampleParams,
         services: mockService,
         logger: mockLogger,
@@ -351,10 +384,11 @@ describe('utils', () => {
       expect(result).toEqual(true);
     });
     test('if unsuccessful first bulk create', async () => {
+      const someGuids = Array.from({ length: 4 }).map(x => uuid.v4());
       const sampleParams = sampleSignalAlertParams(10);
       mockService.callCluster.mockReturnValue(sampleBulkCreateDuplicateResult);
       const result = await searchAfterAndBulkCreate({
-        someResult: repeatedSearchResultsWithSortId(4, 1),
+        someResult: repeatedSearchResultsWithSortId(4, 1, someGuids),
         signalParams: sampleParams,
         services: mockService,
         logger: mockLogger,
@@ -372,7 +406,7 @@ describe('utils', () => {
     });
     test('if unsuccessful iteration of searchAfterAndBulkCreate due to empty sort ids', async () => {
       const sampleParams = sampleSignalAlertParams(undefined);
-
+      const someUuid = uuid.v4();
       mockService.callCluster.mockReturnValueOnce({
         took: 100,
         errors: false,
@@ -383,7 +417,7 @@ describe('utils', () => {
         ],
       });
       const result = await searchAfterAndBulkCreate({
-        someResult: sampleDocSearchResultsNoSortId,
+        someResult: sampleDocSearchResultsNoSortId(someUuid),
         signalParams: sampleParams,
         services: mockService,
         logger: mockLogger,
@@ -401,6 +435,7 @@ describe('utils', () => {
     });
     test('if unsuccessful iteration of searchAfterAndBulkCreate due to empty sort ids and 0 total hits', async () => {
       const sampleParams = sampleSignalAlertParams(undefined);
+      const someUuid = uuid.v4();
       mockService.callCluster.mockReturnValueOnce({
         took: 100,
         errors: false,
@@ -411,7 +446,7 @@ describe('utils', () => {
         ],
       });
       const result = await searchAfterAndBulkCreate({
-        someResult: sampleDocSearchResultsNoSortIdNoHits,
+        someResult: sampleDocSearchResultsNoSortIdNoHits(someUuid),
         signalParams: sampleParams,
         services: mockService,
         logger: mockLogger,
@@ -428,6 +463,8 @@ describe('utils', () => {
     });
     test('if successful iteration of while loop with maxDocs and search after returns results with no sort ids', async () => {
       const sampleParams = sampleSignalAlertParams(10);
+      const oneGuid = uuid.v4();
+      const someGuids = Array.from({ length: 4 }).map(x => uuid.v4());
       mockService.callCluster
         .mockReturnValueOnce({
           took: 100,
@@ -438,9 +475,9 @@ describe('utils', () => {
             },
           ],
         })
-        .mockReturnValueOnce(sampleDocSearchResultsNoSortId);
+        .mockReturnValueOnce(sampleDocSearchResultsNoSortId(oneGuid));
       const result = await searchAfterAndBulkCreate({
-        someResult: repeatedSearchResultsWithSortId(4, 1),
+        someResult: repeatedSearchResultsWithSortId(4, 1, someGuids),
         signalParams: sampleParams,
         services: mockService,
         logger: mockLogger,
@@ -457,6 +494,7 @@ describe('utils', () => {
     });
     test('if successful iteration of while loop with maxDocs and search after returns empty results with no sort ids', async () => {
       const sampleParams = sampleSignalAlertParams(10);
+      const someGuids = Array.from({ length: 4 }).map(x => uuid.v4());
       mockService.callCluster
         .mockReturnValueOnce({
           took: 100,
@@ -469,7 +507,7 @@ describe('utils', () => {
         })
         .mockReturnValueOnce(sampleEmptyDocSearchResults);
       const result = await searchAfterAndBulkCreate({
-        someResult: repeatedSearchResultsWithSortId(4, 1),
+        someResult: repeatedSearchResultsWithSortId(4, 1, someGuids),
         signalParams: sampleParams,
         services: mockService,
         logger: mockLogger,
@@ -486,6 +524,7 @@ describe('utils', () => {
     });
     test('if returns false when singleSearchAfter throws an exception', async () => {
       const sampleParams = sampleSignalAlertParams(10);
+      const someGuids = Array.from({ length: 4 }).map(x => uuid.v4());
       mockService.callCluster
         .mockReturnValueOnce({
           took: 100,
@@ -500,7 +539,7 @@ describe('utils', () => {
           throw Error('Fake Error');
         });
       const result = await searchAfterAndBulkCreate({
-        someResult: repeatedSearchResultsWithSortId(4, 1),
+        someResult: repeatedSearchResultsWithSortId(4, 1, someGuids),
         signalParams: sampleParams,
         services: mockService,
         logger: mockLogger,
