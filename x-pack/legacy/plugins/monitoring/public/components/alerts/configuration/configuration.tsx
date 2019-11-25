@@ -92,6 +92,14 @@ export const AlertsConfiguration: React.FC<AlertsConfigurationProps> = (
     onDone();
   }
 
+  function isStep2Disabled() {
+    return isStep2AndStep3Disabled();
+  }
+
+  function isStep3Disabled() {
+    return isStep2AndStep3Disabled() || !emailAddress || emailAddress.length === 0;
+  }
+
   function isStep2AndStep3Disabled() {
     return !!editAction || !selectedEmailActionId || selectedEmailActionId === NEW_ACTION_ID;
   }
@@ -107,7 +115,7 @@ export const AlertsConfiguration: React.FC<AlertsConfigurationProps> = (
       return 'complete' as const;
     }
 
-    return (status = 'incomplete' as const);
+    return 'incomplete' as const;
   }
 
   function getStep1Status() {
@@ -147,7 +155,7 @@ export const AlertsConfiguration: React.FC<AlertsConfigurationProps> = (
           setEmailAddress={setEmailAddress}
           showFormErrors={showFormErrors}
           formErrors={formErrors}
-          isDisabled={isStep2AndStep3Disabled()}
+          isDisabled={isStep2Disabled()}
         />
       ),
     },
@@ -156,7 +164,7 @@ export const AlertsConfiguration: React.FC<AlertsConfigurationProps> = (
         defaultMessage: 'Confirm and save',
       }),
       status: getStep2Status(),
-      children: <Step3 isSaving={isSaving} save={save} isDisabled={isStep2AndStep3Disabled()} />,
+      children: <Step3 isSaving={isSaving} save={save} isDisabled={isStep3Disabled()} />,
     },
   ];
 
