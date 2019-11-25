@@ -230,7 +230,7 @@ export const TELEMETRY_COLLECTION_INTERVAL = 86400000;
  * as the only way to see the new UI and actually run Kibana alerts. It will
  * be false until all alerts have been migrated, then it will be removed
  */
-export const KIBANA_ALERTING_ENABLED = true;
+export const KIBANA_ALERTING_ENABLED = false;
 
 /**
  * The prefix for all alert types used by monitoring
