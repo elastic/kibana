@@ -13,7 +13,7 @@ import { useFetcher } from '../../../hooks/useFetcher';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { convertTo, getDateDifference } from '../../../utils/formatters';
 import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
-import { generatePath } from '../Main/route_config';
+import { generatePath } from '../Main/route_config/utils';
 import { RouteName } from '../Main/route_config/route_names';
 
 interface RedirectType {

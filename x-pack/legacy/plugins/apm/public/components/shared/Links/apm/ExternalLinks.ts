@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { generatePath } from '../../../app/Main/route_config';
+import { generatePath } from '../../../app/Main/route_config/utils';
 import { RouteName } from '../../../app/Main/route_config/route_names';
 
-export const getTraceLinkUrl = (traceId: number) =>
+export const getTraceUrl = (traceId: number | string) =>
   generatePath(RouteName.LINK_TO_TRACE, { traceId });
