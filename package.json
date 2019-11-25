@@ -88,7 +88,8 @@
     "**/image-diff/gm/debug": "^2.6.9",
     "**/deepmerge": "^4.2.2",
     "**/react": "16.8.6",
-    "**/react-dom": "16.8.6"
+    "**/react-dom": "16.8.6",
+    "**/react-test-renderer": "16.8.6"
   },
   "workspaces": {
     "packages": [
