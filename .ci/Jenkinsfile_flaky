@@ -3,6 +3,8 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
+params.CI_GROUP = 'all:serverMocha'
+
 // Looks like 'oss:ciGroup:1', 'oss:firefoxSmoke', or 'all:serverMocha'
 def JOB_PARTS = params.CI_GROUP.split(':')
 def IS_XPACK = JOB_PARTS[0] == 'xpack'
