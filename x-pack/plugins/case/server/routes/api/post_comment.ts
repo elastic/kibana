@@ -39,7 +39,7 @@ export function initPostCommentApi({ caseService, router }: RouteDeps) {
           }),
         });
 
-        return response.ok({ body: { newComment } });
+        return response.ok({ body: newComment });
       } catch (error) {
         return response.customError(wrapError(error));
       }
