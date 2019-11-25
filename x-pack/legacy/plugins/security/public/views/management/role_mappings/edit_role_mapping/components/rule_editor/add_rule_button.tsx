@@ -4,25 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, ReactChild } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiPopover,
-  EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
-} from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiButtonEmpty, EuiPopover, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import { RoleMappingRule } from '../../../../../../../common/model';
 
 interface Props {
   onClick: (newRule: RoleMappingRule) => void;
-  children?: ReactChild;
-  allowExceptRule?: boolean;
 }
 
 const defaultValues = {
   field: () => ({ field: { username: '*' } }),
-  any: () => ({ any: [] }),
   all: () => ({ all: [] }),
 };
 
@@ -36,82 +27,34 @@ export const AddRuleButton = (props: Props) => {
         setIsMenuOpen(!isMenuOpen);
       }}
     >
-      {props.children || 'Add rule'}
+      Add
     </EuiButtonEmpty>
   );
 
-  const options: EuiContextMenuPanelItemDescriptor[] = [
-    {
-      name: 'User field matches value',
-      icon: 'user',
-      onClick: () => {
+  const options = [
+    <EuiContextMenuItem
+      key="rule"
+      name="Add rule"
+      icon="user"
+      onClick={() => {
         setIsMenuOpen(false);
         props.onClick(defaultValues.field());
-      },
-    },
-    {
-      name: 'Group: any of the following rules',
-      icon: 'partial',
-      onClick: () => {
-        setIsMenuOpen(false);
-        props.onClick(defaultValues.any());
-      },
-    },
-    {
-      name: 'Group: all of the following rules',
-      icon: 'asterisk',
-      onClick: () => {
+      }}
+    >
+      Add Rule
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="rule"
+      name="Add rule group"
+      icon="partial"
+      onClick={() => {
         setIsMenuOpen(false);
         props.onClick(defaultValues.all());
-      },
-    },
+      }}
+    >
+      Add rule group
+    </EuiContextMenuItem>,
   ];
-
-  const panels: EuiContextMenuPanelDescriptor[] = [
-    {
-      id: 0,
-      title: 'Add rule',
-      items: options,
-    },
-  ];
-
-  if (props.allowExceptRule) {
-    options.splice(1, 0, {
-      name: 'except',
-      icon: 'crossInACircleFilled',
-      panel: 1,
-    });
-    panels.push({
-      id: 1,
-      title: 'Add rule exception',
-      items: [
-        {
-          name: 'field',
-          icon: 'user',
-          onClick: () => {
-            setIsMenuOpen(false);
-            props.onClick({ except: defaultValues.field() });
-          },
-        },
-        {
-          name: 'any',
-          icon: 'partial',
-          onClick: () => {
-            setIsMenuOpen(false);
-            props.onClick({ except: defaultValues.any() });
-          },
-        },
-        {
-          name: 'all',
-          icon: 'asterisk',
-          onClick: () => {
-            setIsMenuOpen(false);
-            props.onClick({ except: defaultValues.all() });
-          },
-        },
-      ],
-    });
-  }
 
   return (
     <EuiPopover
@@ -123,7 +66,7 @@ export const AddRuleButton = (props: Props) => {
       withTitle
       anchorPosition="downLeft"
     >
-      <EuiContextMenu title="Add rule" initialPanelId={0} panels={panels} />
+      <EuiContextMenuPanel title="Add rule" items={options} />
     </EuiPopover>
   );
 };
