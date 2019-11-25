@@ -13,7 +13,7 @@ export function getTestAlertData(overwrites = {}) {
     interval: '1m',
     throttle: '1m',
     actions: [],
-    alertTypeParams: {},
+    params: {},
     ...overwrites,
   };
 }

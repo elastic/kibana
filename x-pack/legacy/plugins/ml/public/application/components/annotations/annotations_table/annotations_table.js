@@ -87,7 +87,7 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
         earliestMs: null,
         latestMs: null,
         maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE
-      }).then((resp) => {
+      }).toPromise().then((resp) => {
         this.setState((prevState, props) => ({
           annotations: resp.annotations[props.jobs[0].job_id] || [],
           errorMessage: undefined,
