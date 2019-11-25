@@ -68,7 +68,7 @@ def getWorkerFromParams(isXpack, job, ciGroup) {
   if (!isXpack) {
     if (job == 'serverMocha') {
       return kibanaPipeline.getPostBuildWorker('serverMocha', {
-        bash(
+        kibanaPipeline.bash(
           """
             source src/dev/ci_setup/setup_env.sh
             node scripts/mocha
