@@ -12,8 +12,15 @@ import { buildEventsSearchQuery } from './build_events_query';
 import { searchAfterAndBulkIndex } from './utils';
 import { SignalAlertTypeDefinition } from './types';
 import { getFilter } from './get_filter';
+import { getInputOutputIndex } from './get_input_output_index';
 
-export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTypeDefinition => {
+export const signalsAlertType = ({
+  logger,
+  version,
+}: {
+  logger: Logger;
+  version: string;
+}): SignalAlertTypeDefinition => {
   return {
     id: SIGNALS_ID,
     name: 'SIEM Signals',
@@ -26,9 +33,9 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         filter: schema.nullable(schema.object({}, { allowUnknowns: true })),
         ruleId: schema.string(),
         immutable: schema.boolean({ defaultValue: false }),
-        index: schema.arrayOf(schema.string()),
+        index: schema.nullable(schema.arrayOf(schema.string())),
         language: schema.nullable(schema.string()),
-        outputIndex: schema.string(),
+        outputIndex: schema.nullable(schema.string()),
         savedId: schema.nullable(schema.string()),
         meta: schema.nullable(schema.object({}, { allowUnknowns: true })),
         query: schema.nullable(schema.string()),
@@ -70,6 +77,12 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
 
       const searchAfterSize = size ? size : 1000;
 
+      const { inputIndex, outputIndex: signalsIndex } = await getInputOutputIndex(
+        services,
+        version,
+        index,
+        outputIndex
+      );
       const esFilter = await getFilter({
         type,
         filter,
@@ -78,11 +91,11 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         query,
         savedId,
         services,
-        index,
+        index: inputIndex,
       });
 
       const noReIndex = buildEventsSearchQuery({
-        index,
+        index: inputIndex,
         from,
         to,
         filter: esFilter,
@@ -98,7 +111,11 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         const noReIndexResult = await services.callCluster('search', noReIndex);
         if (noReIndexResult.hits.total.value !== 0) {
           logger.info(
-            `Total signals found from signal rule "id: ${alertId}", "ruleId: ${ruleId}": ${noReIndexResult.hits.total.value}`
+            `Found ${
+              noReIndexResult.hits.total.value
+            } signals from the indexes of "${inputIndex.join(
+              ', '
+            )}" using signal rule "id: ${alertId}", "ruleId: ${ruleId}", pushing signals to index ${signalsIndex}`
           );
         }
 
@@ -108,7 +125,7 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
           services,
           logger,
           id: alertId,
-          signalsIndex: outputIndex,
+          signalsIndex,
           name,
           createdBy,
           updatedBy,
