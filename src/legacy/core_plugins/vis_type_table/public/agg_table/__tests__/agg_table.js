@@ -30,7 +30,7 @@ import { round } from 'lodash';
 import { createTableVisTypeDefinition } from '../../table_vis_type';
 import { setup as visualizationsSetup } from '../../../../visualizations/public/np_ready/public/legacy';
 
-describe('Table Vis - AggTable Directive', function () {
+describe.skip('Table Vis - AggTable Directive', function () {
   let $rootScope;
   let $compile;
   let indexPattern;

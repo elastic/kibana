@@ -24,7 +24,7 @@ import fixtures from 'fixtures/fake_hierarchical_data';
 import { legacyResponseHandlerProvider, Vis, tabifyAggResponse } from '../../legacy_imports';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
-describe('Table Vis - AggTableGroup Directive', function () {
+describe.skip('Table Vis - AggTableGroup Directive', function () {
   let $rootScope;
   let $compile;
   let indexPattern;
