@@ -30,12 +30,12 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
 
   async setup({ notifications }: CoreSetup, pluginSet: XPluginSet) {
     const {
-      __LEGACY: { I18nContext, ResizeChecker },
-      devTools,
-      feature_catalogue,
+      __LEGACY: { I18nContext },
+      dev_tools,
+      home,
     } = pluginSet;
 
-    feature_catalogue.register({
+    home.featureCatalogue.register({
       id: 'console',
       title: i18n.translate('console.devToolsTitle', {
         defaultMessage: 'Console',
@@ -49,7 +49,7 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
       category: FeatureCatalogueCategory.ADMIN,
     });
 
-    devTools.register({
+    dev_tools.register({
       id: 'console',
       order: 1,
       title: i18n.translate('console.consoleDisplayName', {
@@ -62,7 +62,6 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
           boot({
             docLinkVersion: ctx.core.docLinks.DOC_LINK_VERSION,
             I18nContext,
-            ResizeChecker,
             notifications,
           }),
           element

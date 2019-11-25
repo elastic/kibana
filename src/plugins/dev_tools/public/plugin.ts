@@ -19,6 +19,7 @@
 
 import { App, CoreSetup, Plugin } from 'kibana/public';
 import { sortBy } from 'lodash';
+import { KibanaLegacySetup } from '../../kibana_legacy/public';
 
 export interface DevToolsSetup {
   /**
@@ -93,7 +94,24 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, DevToolsStart> {
     return sortBy([...this.devTools.values()], 'order');
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, { kibana_legacy }: { kibana_legacy: KibanaLegacySetup }) {
+    kibana_legacy.registerLegacyApp({
+      id: 'dev_tools',
+      title: 'Dev Tools',
+      mount: async (appMountContext, params) => {
+        if (!this.getSortedDevTools) {
+          throw new Error('not started yet');
+        }
+        const { renderApp } = await import('./application');
+        return renderApp(
+          params.element,
+          appMountContext,
+          params.appBasePath,
+          this.getSortedDevTools()
+        );
+      },
+    });
+
     return {
       register: (devTool: DevTool) => {
         if (this.devTools.has(devTool.id)) {

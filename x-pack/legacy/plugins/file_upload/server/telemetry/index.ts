@@ -5,4 +5,3 @@
  */
 
 export * from './telemetry';
-export { makeUsageCollector } from './make_usage_collector';

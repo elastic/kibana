@@ -34,6 +34,7 @@ interface AnalysisSetupContentProps {
   errorMessages: string[];
   setup: SetupHandler;
   setupStatus: SetupStatus;
+  timestampField: string;
   viewResults: () => void;
 }
 
@@ -43,6 +44,7 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
   errorMessages,
   setup,
   setupStatus,
+  timestampField,
   viewResults,
 }) => {
   useTrackPageview({ app: 'infra_logs', path: 'analysis_setup' });
@@ -82,6 +84,7 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
               errorMessages={errorMessages}
               setup={setup}
               setupStatus={setupStatus}
+              timestampField={timestampField}
               viewResults={viewResults}
             />
           </EuiPageContentBody>

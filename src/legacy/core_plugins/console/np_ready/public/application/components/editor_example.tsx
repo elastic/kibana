@@ -41,7 +41,7 @@ export function EditorExample(props: EditorExampleProps) {
     return () => {
       editor.destroy();
     };
-  }, []);
+  }, [elemId]);
 
   return <div id={elemId} className="conHelp__example" />;
 }

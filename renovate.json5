@@ -21,6 +21,7 @@
   ],
   labels: [
     'release_note:skip',
+    'Team:Operations',
     'renovate',
     'v8.0.0',
     'v7.6.0',
@@ -28,6 +29,7 @@
   major: {
     labels: [
       'release_note:skip',
+      'Team:Operations',
       'renovate',
       'v8.0.0',
       'v7.6.0',
@@ -228,6 +230,7 @@
         ],
         labels: [
           'release_note:skip',
+          'Team:Operations',
           'renovate',
           'v8.0.0',
           'v7.6.0',
@@ -511,6 +514,14 @@
         packageNames: [
           'podium',
           '@types/podium',
+        ],
+      },
+      {
+        groupSlug: '@reach/router',
+        groupName: '@reach/router related packages',
+        packageNames: [
+          '@reach/router',
+          '@types/reach__router',
         ],
       },
       {

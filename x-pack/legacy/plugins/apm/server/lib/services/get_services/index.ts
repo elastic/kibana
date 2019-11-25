@@ -6,26 +6,33 @@
 
 import { isEmpty } from 'lodash';
 import { PromiseReturnType } from '../../../../typings/common';
-import { Setup } from '../../helpers/setup_request';
-import { getAgentStatus } from './get_agent_status';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../helpers/setup_request';
+import { hasHistoricalAgentData } from './has_historical_agent_data';
 import { getLegacyDataStatus } from './get_legacy_data_status';
 import { getServicesItems } from './get_services_items';
 
 export type ServiceListAPIResponse = PromiseReturnType<typeof getServices>;
-export async function getServices(setup: Setup) {
-  const items = await getServicesItems(setup);
-  const hasLegacyData = await getLegacyDataStatus(setup);
 
-  // conditionally check for historical data if no services were found in the current time range
+export async function getServices(
+  setup: Setup & SetupTimeRange & SetupUIFilters
+) {
+  const [items, hasLegacyData] = await Promise.all([
+    getServicesItems(setup),
+    getLegacyDataStatus(setup)
+  ]);
+
   const noDataInCurrentTimeRange = isEmpty(items);
-  let hasHistorialAgentData = true;
-  if (noDataInCurrentTimeRange) {
-    hasHistorialAgentData = await getAgentStatus(setup);
-  }
+  const hasHistoricalData = noDataInCurrentTimeRange
+    ? await hasHistoricalAgentData(setup)
+    : true;
 
   return {
     items,
-    hasHistoricalData: hasHistorialAgentData,
+    hasHistoricalData,
     hasLegacyData
   };
 }

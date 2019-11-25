@@ -127,12 +127,9 @@ class ReportingPanelContentUi extends Component<Props, State> {
         </EuiText>
         <EuiSpacer size="s" />
 
-        <EuiCopy
-          textToCopy={this.state.absoluteUrl}
-          anchorClassName="kbnShareContextMenu__copyAnchor"
-        >
+        <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="eui-displayBlock">
           {copy => (
-            <EuiButton className="kbnShareContextMenu__copyButton" onClick={copy} size="s">
+            <EuiButton fullWidth onClick={copy} size="s">
               <FormattedMessage
                 id="xpack.reporting.panelContent.copyUrlButtonLabel"
                 defaultMessage="Copy POST URL"
@@ -147,8 +144,8 @@ class ReportingPanelContentUi extends Component<Props, State> {
   private renderGenerateReportButton = (isDisabled: boolean) => {
     return (
       <EuiButton
-        className="kbnShareContextMenu__copyButton"
         disabled={isDisabled}
+        fullWidth
         fill
         onClick={this.createReportingJob}
         data-test-subj="generateReportButton"

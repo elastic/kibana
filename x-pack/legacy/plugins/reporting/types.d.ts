@@ -8,19 +8,30 @@ import { ResponseObject } from 'hapi';
 import { EventEmitter } from 'events';
 import { Legacy } from 'kibana';
 import { XPackMainPlugin } from '../xpack_main/xpack_main';
-import { ElasticsearchPlugin } from '../../../../src/legacy/core_plugins/elasticsearch';
+import {
+  ElasticsearchPlugin,
+  CallCluster,
+} from '../../../../src/legacy/core_plugins/elasticsearch';
+import { CancellationToken } from './common/cancellation_token';
 import { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
 import { BrowserType } from './server/browsers/types';
 
-type Job = EventEmitter & { id: string };
+export type Job = EventEmitter & {
+  id: string;
+  toJSON: () => {
+    id: string;
+  };
+};
 
 export interface ReportingPlugin {
   queue: {
     addJob: (type: string, payload: object, options: object) => Job;
   };
+  // TODO: convert exportTypesRegistry to TS
   exportTypesRegistry: {
     getById: (id: string) => ExportTypeDefinition;
     getAll: () => ExportTypeDefinition[];
+    get: (callback: (item: ExportTypeDefinition) => boolean) => ExportTypeDefinition;
   };
   browserDriverFactory: HeadlessChromiumDriverFactory;
 }
@@ -52,18 +63,6 @@ export interface NetworkPolicy {
   rules: NetworkPolicyRule[];
 }
 
-// Tracks which parts of the legacy plugin system are being used
-export type ReportingPluginSpecOptions = Legacy.PluginSpecOptions;
-
-export type ServerFacade = Legacy.Server & {
-  plugins: {
-    reporting?: ReportingPlugin;
-    xpack_main?: XPackMainPlugin & {
-      status?: any;
-    };
-  };
-};
-
 interface ListQuery {
   page: string;
   size: string;
@@ -79,7 +78,21 @@ interface DownloadParams {
   docId: string;
 }
 
-// Tracks which parts of the legacy plugin system are being used
+/*
+ * Legacy System
+ */
+
+export type ReportingPluginSpecOptions = Legacy.PluginSpecOptions;
+
+export type ServerFacade = Legacy.Server & {
+  plugins: {
+    reporting?: ReportingPlugin;
+    xpack_main?: XPackMainPlugin & {
+      status?: any;
+    };
+  };
+};
+
 interface ReportingRequest {
   query: ListQuery & GenerateQuery;
   params: DownloadParams;
@@ -99,6 +112,12 @@ export type ResponseFacade = ResponseObject & {
 };
 
 export type ReportingResponseToolkit = Legacy.ResponseToolkit;
+
+export type ESCallCluster = CallCluster;
+
+/*
+ * Reporting Config
+ */
 
 export interface CaptureConfig {
   browser: {
@@ -179,9 +198,15 @@ export interface JobParamPostPayload {
 
 export interface JobDocPayload {
   headers?: Record<string, string>;
-  jobParams: object;
+  jobParams: any;
   title: string;
   type: string | null;
+  objects?: null | object[];
+}
+
+export interface JobSource {
+  _id: string;
+  _source: JobDoc;
 }
 
 export interface JobDocOutput {
@@ -196,9 +221,11 @@ export interface JobDoc {
   status: string; // completed, failed, etc
 }
 
-export interface JobSource {
-  _id: string;
-  _source: JobDoc;
+export interface JobDocExecuted {
+  jobtype: string;
+  output: JobDocOutputExecuted;
+  payload: JobDocPayload;
+  status: string; // completed, failed, etc
 }
 
 /*
@@ -224,18 +251,41 @@ export interface ESQueueWorker {
   on: (event: string, handler: any) => void;
 }
 
-export type ESQueueCreateJobFn = (
-  jobParams: object,
-  headers: ConditionalHeaders,
-  request: RequestFacade
-) => Promise<object>;
+type JobParamsUrl = object;
 
-export type ESQueueWorkerExecuteFn = (jobId: string, job: JobDoc, cancellationToken: any) => void;
+interface JobParamsSavedObject {
+  savedObjectType: string;
+  savedObjectId: string;
+  isImmediate: boolean;
+}
+
+export type ESQueueCreateJobFn = (
+  jobParams: JobParamsSavedObject | JobParamsUrl,
+  headers: Record<string, string>,
+  request: RequestFacade
+) => Promise<JobParamsSavedObject | JobParamsUrl>;
+
+export type ImmediateCreateJobFn = (
+  jobParams: any,
+  headers: Record<string, string>,
+  req: RequestFacade
+) => Promise<{
+  type: string | null;
+  title: string;
+  jobParams: any;
+}>;
+
+export type ESQueueWorkerExecuteFn = (
+  jobId: string,
+  job: JobDoc,
+  cancellationToken?: CancellationToken
+) => void;
 
 export type JobIDForImmediate = null;
+
 export type ImmediateExecuteFn = (
   jobId: JobIDForImmediate,
-  jobDocPayload: JobDocPayload,
+  job: JobDocPayload,
   request: RequestFacade
 ) => Promise<JobDocOutputExecuted>;
 
@@ -254,17 +304,17 @@ export interface ESQueueInstance {
   ) => ESQueueWorker;
 }
 
-export type CreateJobFactory = (server: ServerFacade) => ESQueueCreateJobFn;
-export type ExecuteJobFactory = (server: ServerFacade) => ESQueueWorkerExecuteFn;
-export type ExecuteImmediateJobFactory = (server: ServerFacade) => ImmediateExecuteFn;
+export type CreateJobFactory = (server: ServerFacade) => ESQueueCreateJobFn | ImmediateCreateJobFn;
+export type ExecuteJobFactory = (server: ServerFacade) => ESQueueWorkerExecuteFn | ImmediateExecuteFn; // prettier-ignore
 
 export interface ExportTypeDefinition {
   id: string;
   name: string;
   jobType: string;
+  jobContentEncoding?: string;
   jobContentExtension: string;
   createJobFactory: CreateJobFactory;
-  executeJobFactory: ExecuteJobFactory | ExecuteImmediateJobFactory;
+  executeJobFactory: ExecuteJobFactory;
   validLicenses: string[];
 }
 

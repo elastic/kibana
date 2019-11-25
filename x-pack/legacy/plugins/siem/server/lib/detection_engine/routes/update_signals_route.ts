@@ -5,27 +5,22 @@
  */
 
 import Hapi from 'hapi';
-import Joi from 'joi';
 import { isFunction } from 'lodash/fp';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 import { updateSignal } from '../alerts/update_signals';
 import { UpdateSignalsRequest } from '../alerts/types';
 import { updateSignalSchema } from './schemas';
+import { ServerFacade } from '../../../types';
+import { getIdError, transformOrError } from './utils';
 
 export const createUpdateSignalsRoute: Hapi.ServerRoute = {
   method: 'PUT',
-  path: '/api/siem/signals/{id?}',
+  path: DETECTION_ENGINE_RULES_URL,
   options: {
     tags: ['access:signals-all'],
     validate: {
       options: {
         abortEarly: false,
-      },
-      params: {
-        id: Joi.when(Joi.ref('$payload.id'), {
-          is: Joi.exist(),
-          then: Joi.string().optional(),
-          otherwise: Joi.string().required(),
-        }),
       },
       payload: updateSignalSchema,
     },
@@ -40,14 +35,16 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
       immutable,
       query,
       language,
-      // eslint-disable-next-line @typescript-eslint/camelcase
+      output_index: outputIndex,
       saved_id: savedId,
+      meta,
       filters,
+      rule_id: ruleId,
       id,
       index,
       interval,
-      // eslint-disable-next-line @typescript-eslint/camelcase
       max_signals: maxSignals,
+      risk_score: riskScore,
       name,
       severity,
       size,
@@ -63,7 +60,8 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
     if (!alertsClient || !actionsClient) {
       return headers.response().code(404);
     }
-    return updateSignal({
+
+    const signal = await updateSignal({
       alertsClient,
       actionsClient,
       description,
@@ -74,12 +72,16 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
       immutable,
       query,
       language,
+      outputIndex,
       savedId,
+      meta,
       filters,
-      id: request.params.id ? request.params.id : id,
+      id,
+      ruleId,
       index,
       interval,
       maxSignals,
+      riskScore,
       name,
       severity,
       size,
@@ -88,9 +90,14 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
       type,
       references,
     });
+    if (signal != null) {
+      return transformOrError(signal);
+    } else {
+      return getIdError({ id, ruleId });
+    }
   },
 };
 
-export const updateSignalsRoute = (server: Hapi.Server) => {
+export const updateSignalsRoute = (server: ServerFacade) => {
   server.route(createUpdateSignalsRoute);
 };

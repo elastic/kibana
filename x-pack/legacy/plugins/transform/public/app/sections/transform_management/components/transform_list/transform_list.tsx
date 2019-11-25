@@ -42,7 +42,7 @@ import { StopAction } from './action_stop';
 import { ItemIdToExpandedRowMap, Query, Clause } from './common';
 import { getColumns } from './columns';
 import { ExpandedRow } from './expanded_row';
-import { ProgressBar, TransformTable } from './transform_table';
+import { ProgressBar, transformTableFactory } from './transform_table';
 
 function getItemIdToExpandedRowMap(
   itemIds: TransformId[],
@@ -216,7 +216,11 @@ export const TransformList: FC<Props> = ({
             </h2>
           }
           actions={[
-            <EuiButtonEmpty onClick={onCreateTransform} isDisabled={disabled}>
+            <EuiButtonEmpty
+              onClick={onCreateTransform}
+              isDisabled={disabled}
+              data-test-subj="transformCreateFirstButton"
+            >
               {i18n.translate('xpack.transform.list.emptyPromptButtonText', {
                 defaultMessage: 'Create your first transform',
               })}
@@ -370,8 +374,10 @@ export const TransformList: FC<Props> = ({
     onSelectionChange: (selected: TransformListRow[]) => setTransformSelection(selected),
   };
 
+  const TransformTable = transformTableFactory<TransformListRow>();
+
   return (
-    <Fragment>
+    <div data-test-subj="transformListTableContainer">
       <ProgressBar isLoading={isLoading || transformsLoading} />
       <TransformTable
         allowNeutralSort={false}
@@ -386,11 +392,18 @@ export const TransformList: FC<Props> = ({
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         onTableChange={onTableChange}
         pagination={pagination}
+        rowProps={item => ({
+          'data-test-subj': `transformListRow row-${item.id}`,
+        })}
         selection={selection}
         sorting={sorting}
         search={search}
-        data-test-subj="transformTableTransforms"
+        data-test-subj={
+          isLoading || transformsLoading
+            ? 'transformListTable loading'
+            : 'transformListTable loaded'
+        }
       />
-    </Fragment>
+    </div>
   );
 };

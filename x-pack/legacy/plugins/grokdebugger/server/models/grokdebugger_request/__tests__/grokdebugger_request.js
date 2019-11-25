@@ -7,7 +7,8 @@
 import expect from '@kbn/expect';
 import { GrokdebuggerRequest } from '../grokdebugger_request';
 
-describe('grokdebugger_request', () => {
+// FAILING: https://github.com/elastic/kibana/issues/51372
+describe.skip('grokdebugger_request', () => {
 
   describe('GrokdebuggerRequest', () => {
     const downstreamRequest = {

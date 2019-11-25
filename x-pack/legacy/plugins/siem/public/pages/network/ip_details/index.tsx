@@ -5,7 +5,6 @@
  */
 
 import { EuiHorizontalRule, EuiSpacer, EuiFlexItem } from '@elastic/eui';
-import { getEsQueryConfig } from '@kbn/es-query';
 import React, { useCallback, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
@@ -40,6 +39,8 @@ import { NetworkTopNFlowQueryTable } from './network_top_n_flow_query_table';
 import { TlsQueryTable } from './tls_query_table';
 import { IPDetailsComponentProps } from './types';
 import { UsersQueryTable } from './users_query_table';
+import { AnomaliesQueryTabBody } from '../../../containers/anomalies/anomalies_query_tab_body';
+import { esQuery } from '../../../../../../../../src/plugins/data/public';
 
 export { getBreadcrumbs } from './utils';
 
@@ -58,6 +59,7 @@ export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
     setQuery,
     to,
   }) => {
+    const type = networkModel.NetworkType.details;
     const narrowDateRange = useCallback(
       (score, interval) => {
         const fromTo = scoreIntervalToDateTime(score, interval);
@@ -81,7 +83,7 @@ export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
           {({ indicesExist, indexPattern }) => {
             const ip = decodeIpv6(detailName);
             const filterQuery = convertToBuildEsQuery({
-              config: getEsQueryConfig(core.uiSettings),
+              config: esQuery.getEsQueryConfig(core.uiSettings),
               indexPattern,
               queries: [query],
               filters,
@@ -108,7 +110,7 @@ export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
                     skip={isInitializing}
                     sourceId="default"
                     filterQuery={filterQuery}
-                    type={networkModel.NetworkType.details}
+                    type={type}
                     ip={ip}
                   >
                     {({ id, inspect, ipOverviewData, loading, refetch }) => (
@@ -127,7 +129,7 @@ export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
                             anomaliesData={anomaliesData}
                             loading={loading}
                             isLoadingAnomaliesData={isLoadingAnomaliesData}
-                            type={networkModel.NetworkType.details}
+                            type={type}
                             flowTarget={flowTarget}
                             refetch={refetch}
                             setQuery={setQuery}
@@ -158,7 +160,7 @@ export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
                         ip={ip}
                         skip={isInitializing}
                         startDate={from}
-                        type={networkModel.NetworkType.details}
+                        type={type}
                         setQuery={setQuery}
                         indexPattern={indexPattern}
                       />
@@ -172,7 +174,7 @@ export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
                         ip={ip}
                         skip={isInitializing}
                         startDate={from}
-                        type={networkModel.NetworkType.details}
+                        type={type}
                         setQuery={setQuery}
                         indexPattern={indexPattern}
                       />
@@ -190,7 +192,7 @@ export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
                         ip={ip}
                         skip={isInitializing}
                         startDate={from}
-                        type={networkModel.NetworkType.details}
+                        type={type}
                         setQuery={setQuery}
                         indexPattern={indexPattern}
                       />
@@ -204,7 +206,7 @@ export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
                         ip={ip}
                         skip={isInitializing}
                         startDate={from}
-                        type={networkModel.NetworkType.details}
+                        type={type}
                         setQuery={setQuery}
                         indexPattern={indexPattern}
                       />
@@ -220,7 +222,7 @@ export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
                     ip={ip}
                     skip={isInitializing}
                     startDate={from}
-                    type={networkModel.NetworkType.details}
+                    type={type}
                     setQuery={setQuery}
                   />
 
@@ -232,7 +234,7 @@ export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
                     ip={ip}
                     skip={isInitializing}
                     startDate={from}
-                    type={networkModel.NetworkType.details}
+                    type={type}
                     setQuery={setQuery}
                   />
 
@@ -246,19 +248,23 @@ export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
                     setQuery={setQuery}
                     skip={isInitializing}
                     startDate={from}
-                    type={networkModel.NetworkType.details}
+                    type={type}
                   />
 
                   <EuiSpacer />
 
-                  <AnomaliesNetworkTable
+                  <AnomaliesQueryTabBody
+                    filterQuery={filterQuery}
+                    setQuery={setQuery}
                     startDate={from}
                     endDate={to}
                     skip={isInitializing}
                     ip={ip}
-                    type={networkModel.NetworkType.details}
+                    type={type}
                     flowTarget={flowTarget}
                     narrowDateRange={narrowDateRange}
+                    hideHistogramIfEmpty={true}
+                    AnomaliesTableComponent={AnomaliesNetworkTable}
                   />
                 </WrapperPage>
               </StickyContainer>

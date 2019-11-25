@@ -19,7 +19,7 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default function alertTests({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const es = getService('es');
+  const es = getService('legacyEs');
   const retry = getService('retry');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
@@ -125,7 +125,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           getTestAlertData({
             interval: '1m',
             alertTypeId: 'test.always-firing',
-            alertTypeParams: {
+            params: {
               index: ES_TEST_INDEX_NAME,
               reference: 'create-test-2',
             },
@@ -193,7 +193,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         .send(
           getTestAlertData({
             alertTypeId: 'test.authorization',
-            alertTypeParams: {
+            params: {
               callClusterAuthorizationIndex: authorizationIndex,
               savedObjectsClientType: 'dashboard',
               savedObjectsClientId: '1',
@@ -238,7 +238,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         .send(
           getTestAlertData({
             alertTypeId: 'test.always-firing',
-            alertTypeParams: {
+            params: {
               index: ES_TEST_INDEX_NAME,
               reference,
             },

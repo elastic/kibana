@@ -49,15 +49,19 @@ export const updateSignal = async ({
   enabled,
   query,
   language,
+  outputIndex,
   savedId,
+  meta,
   filters,
   filter,
   from,
   immutable,
   id,
+  ruleId,
   index,
   interval,
   maxSignals,
+  riskScore,
   name,
   severity,
   tags,
@@ -65,19 +69,20 @@ export const updateSignal = async ({
   type,
   references,
 }: UpdateSignalParams) => {
-  // TODO: Error handling and abstraction. Right now if this is an error then what happens is we get the error of
-  // "message": "Saved object [alert/{id}] not found"
-  const signal = await readSignals({ alertsClient, id });
+  const signal = await readSignals({ alertsClient, ruleId, id });
+  if (signal == null) {
+    return null;
+  }
 
   // TODO: Remove this as cast as soon as signal.actions TypeScript bug is fixed
   // where it is trying to return AlertAction[] or RawAlertAction[]
   const actions = (signal.actions as AlertAction[] | undefined) || [];
 
-  const alertTypeParams = signal.alertTypeParams || {};
+  const params = signal.params || {};
 
-  const nextAlertTypeParams = defaults(
+  const nextParams = defaults(
     {
-      ...alertTypeParams,
+      ...params,
     },
     {
       description,
@@ -87,10 +92,13 @@ export const updateSignal = async ({
       immutable,
       query,
       language,
+      outputIndex,
       savedId,
+      meta,
       filters,
       index,
       maxSignals,
+      riskScore,
       severity,
       tags,
       to,
@@ -108,10 +116,11 @@ export const updateSignal = async ({
   return alertsClient.update({
     id: signal.id,
     data: {
+      tags: [],
       name: calculateName({ updatedName: name, originalName: signal.name }),
       interval: calculateInterval(interval, signal.interval),
       actions,
-      alertTypeParams: nextAlertTypeParams,
+      params: nextParams,
     },
   });
 };
