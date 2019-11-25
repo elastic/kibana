@@ -52,6 +52,7 @@ describe('Security Plugin', () => {
                       ],
                     },
                     "cookieName": "sid",
+                    "loginAssistanceMessage": undefined,
                     "secureCookies": true,
                     "sessionTimeout": 1500,
                   },

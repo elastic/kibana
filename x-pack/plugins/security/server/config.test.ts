@@ -13,45 +13,48 @@ import { createConfig$, ConfigSchema } from './config';
 describe('config schema', () => {
   it('generates proper defaults', () => {
     expect(ConfigSchema.validate({})).toMatchInlineSnapshot(`
-                        Object {
-                          "authc": Object {
-                            "providers": Array [
-                              "basic",
-                            ],
-                          },
-                          "cookieName": "sid",
-                          "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                          "secureCookies": false,
-                          "sessionTimeout": null,
-                        }
-                `);
+      Object {
+        "authc": Object {
+          "providers": Array [
+            "basic",
+          ],
+        },
+        "cookieName": "sid",
+        "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "loginAssistanceMessage": "",
+        "secureCookies": false,
+        "sessionTimeout": null,
+      }
+    `);
 
     expect(ConfigSchema.validate({}, { dist: false })).toMatchInlineSnapshot(`
-                        Object {
-                          "authc": Object {
-                            "providers": Array [
-                              "basic",
-                            ],
-                          },
-                          "cookieName": "sid",
-                          "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                          "secureCookies": false,
-                          "sessionTimeout": null,
-                        }
-                `);
+      Object {
+        "authc": Object {
+          "providers": Array [
+            "basic",
+          ],
+        },
+        "cookieName": "sid",
+        "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "loginAssistanceMessage": "",
+        "secureCookies": false,
+        "sessionTimeout": null,
+      }
+    `);
 
     expect(ConfigSchema.validate({}, { dist: true })).toMatchInlineSnapshot(`
-                        Object {
-                          "authc": Object {
-                            "providers": Array [
-                              "basic",
-                            ],
-                          },
-                          "cookieName": "sid",
-                          "secureCookies": false,
-                          "sessionTimeout": null,
-                        }
-                `);
+      Object {
+        "authc": Object {
+          "providers": Array [
+            "basic",
+          ],
+        },
+        "cookieName": "sid",
+        "loginAssistanceMessage": "",
+        "secureCookies": false,
+        "sessionTimeout": null,
+      }
+    `);
   });
 
   it('should throw error if xpack.security.encryptionKey is less than 32 characters', () => {
