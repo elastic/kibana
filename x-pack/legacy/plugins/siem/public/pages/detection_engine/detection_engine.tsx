@@ -48,7 +48,7 @@ const OpenSignals = React.memo(() => {
             <UtilityBarAction
               iconSide="right"
               iconType="arrowDown"
-              popoverContent={<p>{'Batch actions context menu here.'}</p>}
+              popoverContent={() => <p>{'Batch actions context menu here.'}</p>}
             >
               {'Batch actions'}
             </UtilityBarAction>
@@ -70,7 +70,7 @@ const OpenSignals = React.memo(() => {
             <UtilityBarAction
               iconSide="right"
               iconType="arrowDown"
-              popoverContent={<p>{'Customize columns context menu here.'}</p>}
+              popoverContent={() => <p>{'Customize columns context menu here.'}</p>}
             >
               {'Customize columns'}
             </UtilityBarAction>
@@ -100,7 +100,7 @@ const ClosedSignals = React.memo(() => {
             <UtilityBarAction
               iconSide="right"
               iconType="arrowDown"
-              popoverContent={<p>{'Customize columns context menu here.'}</p>}
+              popoverContent={() => <p>{'Customize columns context menu here.'}</p>}
             >
               {'Customize columns'}
             </UtilityBarAction>

@@ -27,7 +27,7 @@ import { npStart } from 'ui/new_platform';
 export const I18nContext = npStart.core.i18n.Context;
 
 export function wrapInI18nContext<P>(ComponentToWrap: React.ComponentType<P>) {
-  const ContextWrapper: React.SFC<P> = props => {
+  const ContextWrapper: React.FC<P> = props => {
     return (
       <I18nContext>
         <ComponentToWrap {...props} />

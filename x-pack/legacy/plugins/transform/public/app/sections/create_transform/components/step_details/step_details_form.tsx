@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useContext, useEffect, useState } from 'react';
+import React, { Fragment, FC, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { metadata } from 'ui/metadata';
@@ -13,7 +13,7 @@ import { toastNotifications } from 'ui/notify';
 import { EuiLink, EuiSwitch, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
 
 import { toMountPoint } from '../../../../../../../../../../src/plugins/kibana_react/public';
-import { isKibanaContextInitialized, KibanaContext } from '../../../../lib/kibana';
+import { useKibanaContext } from '../../../../lib/kibana';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
 import { ToastNotificationText } from '../../../../components';
@@ -54,8 +54,8 @@ interface Props {
   onChange(s: StepDetailsExposedState): void;
 }
 
-export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange }) => {
-  const kibanaContext = useContext(KibanaContext);
+export const StepDetailsForm: FC<Props> = React.memo(({ overrides = {}, onChange }) => {
+  const kibanaContext = useKibanaContext();
 
   const defaults = { ...getDefaultStepDetailsState(), ...overrides };
 
@@ -80,55 +80,46 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
   useEffect(() => {
     // use an IIFE to avoid returning a Promise to useEffect.
     (async function() {
-      if (isKibanaContextInitialized(kibanaContext)) {
-        try {
-          setTransformIds(
-            (await api.getTransforms()).transforms.map(
-              (transform: TransformPivotConfig) => transform.id
-            )
-          );
-        } catch (e) {
-          toastNotifications.addDanger({
-            title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformList', {
-              defaultMessage: 'An error occurred getting the existing transform IDs:',
-            }),
-            text: toMountPoint(<ToastNotificationText text={e} />),
-          });
-        }
+      try {
+        setTransformIds(
+          (await api.getTransforms()).transforms.map(
+            (transform: TransformPivotConfig) => transform.id
+          )
+        );
+      } catch (e) {
+        toastNotifications.addDanger({
+          title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformList', {
+            defaultMessage: 'An error occurred getting the existing transform IDs:',
+          }),
+          text: toMountPoint(<ToastNotificationText text={e} />),
+        });
+      }
 
-        try {
-          setIndexNames((await api.getIndices()).map(index => index.name));
-        } catch (e) {
-          toastNotifications.addDanger({
-            title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingIndexNames', {
-              defaultMessage: 'An error occurred getting the existing index names:',
-            }),
-            text: toMountPoint(<ToastNotificationText text={e} />),
-          });
-        }
+      try {
+        setIndexNames((await api.getIndices()).map(index => index.name));
+      } catch (e) {
+        toastNotifications.addDanger({
+          title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingIndexNames', {
+            defaultMessage: 'An error occurred getting the existing index names:',
+          }),
+          text: toMountPoint(<ToastNotificationText text={e} />),
+        });
+      }
 
-        try {
-          setIndexPatternTitles(await kibanaContext.indexPatterns.getTitles());
-        } catch (e) {
-          toastNotifications.addDanger({
-            title: i18n.translate(
-              'xpack.transform.stepDetailsForm.errorGettingIndexPatternTitles',
-              {
-                defaultMessage: 'An error occurred getting the existing index pattern titles:',
-              }
-            ),
-            text: toMountPoint(<ToastNotificationText text={e} />),
-          });
-        }
+      try {
+        setIndexPatternTitles(await kibanaContext.indexPatterns.getTitles());
+      } catch (e) {
+        toastNotifications.addDanger({
+          title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingIndexPatternTitles', {
+            defaultMessage: 'An error occurred getting the existing index pattern titles:',
+          }),
+          text: toMountPoint(<ToastNotificationText text={e} />),
+        });
       }
     })();
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kibanaContext.initialized]);
-
-  if (!isKibanaContextInitialized(kibanaContext)) {
-    return null;
-  }
 
   const dateFieldNames = kibanaContext.currentIndexPattern.fields
     .filter(f => f.type === 'date')
