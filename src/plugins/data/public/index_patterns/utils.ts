@@ -19,8 +19,6 @@
 
 import { find, get } from 'lodash';
 import { SavedObjectsClientContract, SimpleSavedObject } from 'src/core/public';
-import { Field } from './fields';
-import { getFilterableKbnTypeNames } from '../../common';
 
 export const ILLEGAL_CHARACTERS = 'ILLEGAL_CHARACTERS';
 export const CONTAINS_SPACES = 'CONTAINS_SPACES';
@@ -103,16 +101,6 @@ export function validateIndexPattern(indexPattern: string) {
   }
 
   return errors;
-}
-
-const filterableTypes = getFilterableKbnTypeNames();
-
-export function isFilterable(field: Field): boolean {
-  return (
-    field.name === '_id' ||
-    field.scripted ||
-    Boolean(field.searchable && filterableTypes.includes(field.type))
-  );
 }
 
 export function getFromSavedObject(savedObject: any) {
