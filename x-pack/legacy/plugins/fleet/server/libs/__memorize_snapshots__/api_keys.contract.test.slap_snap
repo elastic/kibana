@@ -356,3 +356,459 @@ exports['ApiKeys Lib generateEnrollmentApiKey should generate a valid ApiKey - c
     "version": "WzMxNiwxXQ=="
   }
 }
+
+exports['ApiKeys Lib verifyAccessApiKey should verify a valid api key - find:"enrollment_api_keys" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['ApiKeys Lib verifyAccessApiKey should verify a valid api key - createApiKey (2)'] = {
+  "thrownError": "{\"msg\":\"[illegal_state_exception] api keys are not enabled\",\"path\":\"/_security/api_key\",\"body\":\"{\\\"name\\\":\\\"TEST API KEY: 400ef296-d069-4fd4-b7b4-94163e1f889f\\\"}\",\"statusCode\":500,\"response\":\"{\\\"error\\\":{\\\"root_cause\\\":[{\\\"type\\\":\\\"illegal_state_exception\\\",\\\"reason\\\":\\\"api keys are not enabled\\\"}],\\\"type\\\":\\\"illegal_state_exception\\\",\\\"reason\\\":\\\"api keys are not enabled\\\"},\\\"status\\\":500}\"}",
+  "results": null
+}
+
+exports['ApiKeys Lib verifyAccessApiKey should not verify invalid ApiKey - find:"enrollment_api_keys" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['ApiKeys Lib verifyAccessApiKey should not verify invalid ApiKey - authenticate (2)'] = {
+  "thrownError": "{\"msg\":\"[security_exception] missing authentication credentials for REST request [/_security/_authenticate], with { header={ WWW-Authenticate=\\\"Basic realm=\\\\\\\"security\\\\\\\" charset=\\\\\\\"UTF-8\\\\\\\"\\\" } }\",\"path\":\"/_security/_authenticate\",\"statusCode\":401,\"response\":\"{\\\"error\\\":{\\\"root_cause\\\":[{\\\"type\\\":\\\"security_exception\\\",\\\"reason\\\":\\\"missing authentication credentials for REST request [/_security/_authenticate]\\\",\\\"header\\\":{\\\"WWW-Authenticate\\\":\\\"Basic realm=\\\\\\\"security\\\\\\\" charset=\\\\\\\"UTF-8\\\\\\\"\\\"}}],\\\"type\\\":\\\"security_exception\\\",\\\"reason\\\":\\\"missing authentication credentials for REST request [/_security/_authenticate]\\\",\\\"header\\\":{\\\"WWW-Authenticate\\\":\\\"Basic realm=\\\\\\\"security\\\\\\\" charset=\\\\\\\"UTF-8\\\\\\\"\\\"}},\\\"status\\\":401}\",\"wwwAuthenticateDirective\":\"Basic realm=\\\"security\\\" charset=\\\"UTF-8\\\"\"}",
+  "results": null
+}
+
+exports['ApiKeys Lib verifyEnrollmentApiKey should verify a valid api key - find:"enrollment_api_keys" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['ApiKeys Lib verifyEnrollmentApiKey should verify a valid api key - createApiKey (2)'] = {
+  "thrownError": "{\"msg\":\"[illegal_state_exception] api keys are not enabled\",\"path\":\"/_security/api_key\",\"body\":\"{\\\"name\\\":\\\"TEST API KEY: 6f7189a3-2c0e-4823-97d9-e48889d348d3\\\"}\",\"statusCode\":500,\"response\":\"{\\\"error\\\":{\\\"root_cause\\\":[{\\\"type\\\":\\\"illegal_state_exception\\\",\\\"reason\\\":\\\"api keys are not enabled\\\"}],\\\"type\\\":\\\"illegal_state_exception\\\",\\\"reason\\\":\\\"api keys are not enabled\\\"},\\\"status\\\":500}\"}",
+  "results": null
+}
+
+exports['ApiKeys Lib verifyEnrollmentApiKey should not verify a inactive enrollemnt api key - find:"enrollment_api_keys" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['ApiKeys Lib verifyEnrollmentApiKey should not verify a inactive enrollemnt api key - createApiKey (2)'] = {
+  "thrownError": "{\"msg\":\"[illegal_state_exception] api keys are not enabled\",\"path\":\"/_security/api_key\",\"body\":\"{\\\"name\\\":\\\"TEST API KEY: 6b3b071b-7a0f-4ad2-b390-f43258861944\\\"}\",\"statusCode\":500,\"response\":\"{\\\"error\\\":{\\\"root_cause\\\":[{\\\"type\\\":\\\"illegal_state_exception\\\",\\\"reason\\\":\\\"api keys are not enabled\\\"}],\\\"type\\\":\\\"illegal_state_exception\\\",\\\"reason\\\":\\\"api keys are not enabled\\\"},\\\"status\\\":500}\"}",
+  "results": null
+}
+
+exports['ApiKeys Lib verifyEnrollmentApiKey should not verify a inactive an enrollemnt api key not persisted - find:"enrollment_api_keys" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['ApiKeys Lib verifyEnrollmentApiKey should not verify a inactive an enrollemnt api key not persisted - createApiKey (2)'] = {
+  "thrownError": "{\"msg\":\"[illegal_state_exception] api keys are not enabled\",\"path\":\"/_security/api_key\",\"body\":\"{\\\"name\\\":\\\"TEST API KEY: df703156-fdb0-43e1-95b0-b358e8834b05\\\"}\",\"statusCode\":500,\"response\":\"{\\\"error\\\":{\\\"root_cause\\\":[{\\\"type\\\":\\\"illegal_state_exception\\\",\\\"reason\\\":\\\"api keys are not enabled\\\"}],\\\"type\\\":\\\"illegal_state_exception\\\",\\\"reason\\\":\\\"api keys are not enabled\\\"},\\\"status\\\":500}\"}",
+  "results": null
+}
+
+exports['ApiKeys Lib verifyEnrollmentApiKey should not verify invalid ApiKey - find:"enrollment_api_keys" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['ApiKeys Lib verifyEnrollmentApiKey should not verify invalid ApiKey - authenticate (2)'] = {
+  "thrownError": "{\"msg\":\"[security_exception] missing authentication credentials for REST request [/_security/_authenticate], with { header={ WWW-Authenticate=\\\"Basic realm=\\\\\\\"security\\\\\\\" charset=\\\\\\\"UTF-8\\\\\\\"\\\" } }\",\"path\":\"/_security/_authenticate\",\"statusCode\":401,\"response\":\"{\\\"error\\\":{\\\"root_cause\\\":[{\\\"type\\\":\\\"security_exception\\\",\\\"reason\\\":\\\"missing authentication credentials for REST request [/_security/_authenticate]\\\",\\\"header\\\":{\\\"WWW-Authenticate\\\":\\\"Basic realm=\\\\\\\"security\\\\\\\" charset=\\\\\\\"UTF-8\\\\\\\"\\\"}}],\\\"type\\\":\\\"security_exception\\\",\\\"reason\\\":\\\"missing authentication credentials for REST request [/_security/_authenticate]\\\",\\\"header\\\":{\\\"WWW-Authenticate\\\":\\\"Basic realm=\\\\\\\"security\\\\\\\" charset=\\\\\\\"UTF-8\\\\\\\"\\\"}},\\\"status\\\":401}\",\"wwwAuthenticateDirective\":\"Basic realm=\\\"security\\\" charset=\\\"UTF-8\\\"\"}",
+  "results": null
+}
+
+exports['ApiKeys Lib generateEnrollmentApiKey should generate a valid ApiKey - find:"enrollment_api_keys" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['ApiKeys Lib generateEnrollmentApiKey should generate a valid ApiKey - createApiKey (2)'] = {
+  "thrownError": "{\"msg\":\"[illegal_state_exception] api keys are not enabled\",\"path\":\"/_security/api_key\",\"body\":\"{\\\"name\\\":\\\"Fleet:EnrollmentApiKey:5696dc78-4271-4ab9-8282-a47820d97177:policy1\\\"}\",\"statusCode\":500,\"response\":\"{\\\"error\\\":{\\\"root_cause\\\":[{\\\"type\\\":\\\"illegal_state_exception\\\",\\\"reason\\\":\\\"api keys are not enabled\\\"}],\\\"type\\\":\\\"illegal_state_exception\\\",\\\"reason\\\":\\\"api keys are not enabled\\\"},\\\"status\\\":500}\"}",
+  "results": null
+}
+
+exports['ApiKeys Lib verifyAccessApiKey should verify a valid api key - find:"enrollment_api_keys" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['ApiKeys Lib verifyAccessApiKey should verify a valid api key - createApiKey (2)'] = {
+  "results": {
+    "id": "Qc__o24B7IgcxoUvG13b",
+    "name": "TEST API KEY: 85ea84b5-99d8-4263-98fd-25072f78b22f",
+    "api_key": "TS3_RkaERR-u519WFhzR9Q"
+  }
+}
+
+exports['ApiKeys Lib verifyAccessApiKey should verify a valid api key - authenticate (3)'] = {
+  "results": {
+    "username": "elastic",
+    "roles": [],
+    "full_name": null,
+    "email": null,
+    "metadata": {
+      "_reserved": true
+    },
+    "enabled": true,
+    "authentication_realm": {
+      "name": "_es_api_key",
+      "type": "_es_api_key"
+    },
+    "lookup_realm": {
+      "name": "_es_api_key",
+      "type": "_es_api_key"
+    }
+  }
+}
+
+exports['ApiKeys Lib verifyAccessApiKey should not verify invalid ApiKey - find:"enrollment_api_keys" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['ApiKeys Lib verifyAccessApiKey should not verify invalid ApiKey - authenticate (2)'] = {
+  "thrownError": "{\"msg\":\"[security_exception] missing authentication credentials for REST request [/_security/_authenticate], with { header={ WWW-Authenticate={ 0=\\\"ApiKey\\\" & 1=\\\"Basic realm=\\\\\\\"security\\\\\\\" charset=\\\\\\\"UTF-8\\\\\\\"\\\" } } }\",\"path\":\"/_security/_authenticate\",\"statusCode\":401,\"response\":\"{\\\"error\\\":{\\\"root_cause\\\":[{\\\"type\\\":\\\"security_exception\\\",\\\"reason\\\":\\\"missing authentication credentials for REST request [/_security/_authenticate]\\\",\\\"header\\\":{\\\"WWW-Authenticate\\\":[\\\"ApiKey\\\",\\\"Basic realm=\\\\\\\"security\\\\\\\" charset=\\\\\\\"UTF-8\\\\\\\"\\\"]}}],\\\"type\\\":\\\"security_exception\\\",\\\"reason\\\":\\\"missing authentication credentials for REST request [/_security/_authenticate]\\\",\\\"header\\\":{\\\"WWW-Authenticate\\\":[\\\"ApiKey\\\",\\\"Basic realm=\\\\\\\"security\\\\\\\" charset=\\\\\\\"UTF-8\\\\\\\"\\\"]}},\\\"status\\\":401}\",\"wwwAuthenticateDirective\":\"ApiKey, Basic realm=\\\"security\\\" charset=\\\"UTF-8\\\"\"}",
+  "results": null
+}
+
+exports['ApiKeys Lib verifyEnrollmentApiKey should verify a valid api key - find:"enrollment_api_keys" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['ApiKeys Lib verifyEnrollmentApiKey should verify a valid api key - createApiKey (2)'] = {
+  "results": {
+    "id": "Qs__o24B7IgcxoUvHF3-",
+    "name": "TEST API KEY: 121af0b2-e3a4-4733-806e-8a14c9ad829b",
+    "api_key": "DzZDlabpSEiMFMhZRXBudQ"
+  }
+}
+
+exports['ApiKeys Lib verifyEnrollmentApiKey should verify a valid api key - create:enrollment_api_keys (3)'] = {
+  "results": {
+    "type": "enrollment_api_keys",
+    "id": "ea7c8201-3ca3-4d0c-8e11-3a605d51080f",
+    "attributes": {
+      "active": true,
+      "api_key_id": "Qs__o24B7IgcxoUvHF3-"
+    },
+    "references": [],
+    "updated_at": "2019-11-25T19:17:16.596Z",
+    "version": "WzIsMV0="
+  }
+}
+
+exports['ApiKeys Lib verifyEnrollmentApiKey should verify a valid api key - authenticate (4)'] = {
+  "results": {
+    "username": "elastic",
+    "roles": [],
+    "full_name": null,
+    "email": null,
+    "metadata": {
+      "_reserved": true
+    },
+    "enabled": true,
+    "authentication_realm": {
+      "name": "_es_api_key",
+      "type": "_es_api_key"
+    },
+    "lookup_realm": {
+      "name": "_es_api_key",
+      "type": "_es_api_key"
+    }
+  }
+}
+
+exports['ApiKeys Lib verifyEnrollmentApiKey should verify a valid api key - find:"enrollment_api_keys" (5)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "enrollment_api_keys",
+        "id": "ea7c8201-3ca3-4d0c-8e11-3a605d51080f",
+        "attributes": {
+          "active": true,
+          "api_key_id": "Qs__o24B7IgcxoUvHF3-",
+          "api_key": "j3nnMvEwvFnMq87sOWCLHsYYrC9od+GuTPVSO0K45ZFXydGRvxejKE0vE74hid3F1rEewEJ13n3tVAWVhdHRTkBH3Jo+rrxjouA8rjBBrkKr+i90fHFv7s247hOJaCIN049o6XEF6n2XHftWU6zjp/PCKC70BIarH9l6je9qW+g464Cw5axFoKvkMt/cY03LNlPkIwPPztFA8w=="
+        },
+        "references": [],
+        "updated_at": "2019-11-25T19:17:16.596Z",
+        "version": "WzIsMV0="
+      }
+    ]
+  }
+}
+
+exports['ApiKeys Lib verifyEnrollmentApiKey should verify a valid api key - getDecryptedAsInternalUser:enrollment_api_keys:ea7c8201-3ca3-4d0c-8e11-3a605d51080f (6)'] = {
+  "results": {
+    "id": "ea7c8201-3ca3-4d0c-8e11-3a605d51080f",
+    "type": "enrollment_api_keys",
+    "updated_at": "2019-11-25T19:17:16.596Z",
+    "version": "WzIsMV0=",
+    "attributes": {
+      "active": true,
+      "api_key_id": "Qs__o24B7IgcxoUvHF3-",
+      "api_key": "UXNfX28yNEI3SWdjeG9VdkhGMy06RHpaRGxhYnBTRWlNRk1oWlJYQnVkUQ=="
+    },
+    "references": []
+  }
+}
+
+exports['ApiKeys Lib verifyEnrollmentApiKey should not verify a inactive enrollemnt api key - find:"enrollment_api_keys" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "enrollment_api_keys",
+        "id": "ea7c8201-3ca3-4d0c-8e11-3a605d51080f",
+        "attributes": {
+          "active": true,
+          "api_key_id": "Qs__o24B7IgcxoUvHF3-"
+        },
+        "references": [],
+        "updated_at": "2019-11-25T19:17:16.596Z",
+        "version": "WzIsMV0="
+      }
+    ]
+  }
+}
+
+exports['ApiKeys Lib verifyEnrollmentApiKey should not verify a inactive enrollemnt api key - delete (2)'] = {
+  "results": {}
+}
+
+exports['ApiKeys Lib verifyEnrollmentApiKey should not verify a inactive enrollemnt api key - createApiKey (3)'] = {
+  "results": {
+    "id": "Q8__o24B7IgcxoUvJl07",
+    "name": "TEST API KEY: 9af30b98-15f3-43e9-90c8-f18a78557aa6",
+    "api_key": "L9b16RB2TOKAHLYfem2Nuw"
+  }
+}
+
+exports['ApiKeys Lib verifyEnrollmentApiKey should not verify a inactive enrollemnt api key - create:enrollment_api_keys (4)'] = {
+  "results": {
+    "type": "enrollment_api_keys",
+    "id": "fb272aba-237d-46bc-8fb2-55afd210cdf9",
+    "attributes": {
+      "active": false,
+      "api_key_id": "Q8__o24B7IgcxoUvJl07"
+    },
+    "references": [],
+    "updated_at": "2019-11-25T19:17:18.618Z",
+    "version": "WzQsMV0="
+  }
+}
+
+exports['ApiKeys Lib verifyEnrollmentApiKey should not verify a inactive enrollemnt api key - authenticate (5)'] = {
+  "results": {
+    "username": "elastic",
+    "roles": [],
+    "full_name": null,
+    "email": null,
+    "metadata": {
+      "_reserved": true
+    },
+    "enabled": true,
+    "authentication_realm": {
+      "name": "_es_api_key",
+      "type": "_es_api_key"
+    },
+    "lookup_realm": {
+      "name": "_es_api_key",
+      "type": "_es_api_key"
+    }
+  }
+}
+
+exports['ApiKeys Lib verifyEnrollmentApiKey should not verify a inactive enrollemnt api key - find:"enrollment_api_keys" (6)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "enrollment_api_keys",
+        "id": "fb272aba-237d-46bc-8fb2-55afd210cdf9",
+        "attributes": {
+          "active": false,
+          "api_key_id": "Q8__o24B7IgcxoUvJl07",
+          "api_key": "zdzGDZpkO2GjnHdVuvoCM4OnpKgB4sBSkZVyDHqBGTwsP8cIlfBlEaL+fKxTu3g10FTWlJRAuHA9bfxHZ0npV51PjGJzh+oeIEF2o4oEEtdKEidmsHmFiSw8Nl3czUZe3t6h3Fex3IEGN1Hb5f9UgNrEITjCsiu7RBgmurbGyO/BvTtGhPYoSHrbmicfapGPI2IT8+uywJNCag=="
+        },
+        "references": [],
+        "updated_at": "2019-11-25T19:17:18.618Z",
+        "version": "WzQsMV0="
+      }
+    ]
+  }
+}
+
+exports['ApiKeys Lib verifyEnrollmentApiKey should not verify a inactive enrollemnt api key - getDecryptedAsInternalUser:enrollment_api_keys:fb272aba-237d-46bc-8fb2-55afd210cdf9 (7)'] = {
+  "results": {
+    "id": "fb272aba-237d-46bc-8fb2-55afd210cdf9",
+    "type": "enrollment_api_keys",
+    "updated_at": "2019-11-25T19:17:18.618Z",
+    "version": "WzQsMV0=",
+    "attributes": {
+      "active": false,
+      "api_key_id": "Q8__o24B7IgcxoUvJl07",
+      "api_key": "UThfX28yNEI3SWdjeG9VdkpsMDc6TDliMTZSQjJUT0tBSExZZmVtMk51dw=="
+    },
+    "references": []
+  }
+}
+
+exports['ApiKeys Lib verifyEnrollmentApiKey should not verify a inactive an enrollemnt api key not persisted - find:"enrollment_api_keys" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "enrollment_api_keys",
+        "id": "fb272aba-237d-46bc-8fb2-55afd210cdf9",
+        "attributes": {
+          "active": false,
+          "api_key_id": "Q8__o24B7IgcxoUvJl07"
+        },
+        "references": [],
+        "updated_at": "2019-11-25T19:17:18.618Z",
+        "version": "WzQsMV0="
+      }
+    ]
+  }
+}
+
+exports['ApiKeys Lib verifyEnrollmentApiKey should not verify a inactive an enrollemnt api key not persisted - delete (2)'] = {
+  "results": {}
+}
+
+exports['ApiKeys Lib verifyEnrollmentApiKey should not verify a inactive an enrollemnt api key not persisted - createApiKey (3)'] = {
+  "results": {
+    "id": "RM__o24B7IgcxoUvLl0n",
+    "name": "TEST API KEY: 907726c7-483e-4668-8b87-266e9dd02b2c",
+    "api_key": "iOCKY7WaQ-a--vO4VHlGnw"
+  }
+}
+
+exports['ApiKeys Lib verifyEnrollmentApiKey should not verify a inactive an enrollemnt api key not persisted - authenticate (4)'] = {
+  "results": {
+    "username": "elastic",
+    "roles": [],
+    "full_name": null,
+    "email": null,
+    "metadata": {
+      "_reserved": true
+    },
+    "enabled": true,
+    "authentication_realm": {
+      "name": "_es_api_key",
+      "type": "_es_api_key"
+    },
+    "lookup_realm": {
+      "name": "_es_api_key",
+      "type": "_es_api_key"
+    }
+  }
+}
+
+exports['ApiKeys Lib verifyEnrollmentApiKey should not verify a inactive an enrollemnt api key not persisted - find:"enrollment_api_keys" (5)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['ApiKeys Lib verifyEnrollmentApiKey should not verify invalid ApiKey - find:"enrollment_api_keys" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['ApiKeys Lib verifyEnrollmentApiKey should not verify invalid ApiKey - authenticate (2)'] = {
+  "thrownError": "{\"msg\":\"[security_exception] missing authentication credentials for REST request [/_security/_authenticate], with { header={ WWW-Authenticate={ 0=\\\"ApiKey\\\" & 1=\\\"Basic realm=\\\\\\\"security\\\\\\\" charset=\\\\\\\"UTF-8\\\\\\\"\\\" } } }\",\"path\":\"/_security/_authenticate\",\"statusCode\":401,\"response\":\"{\\\"error\\\":{\\\"root_cause\\\":[{\\\"type\\\":\\\"security_exception\\\",\\\"reason\\\":\\\"missing authentication credentials for REST request [/_security/_authenticate]\\\",\\\"header\\\":{\\\"WWW-Authenticate\\\":[\\\"ApiKey\\\",\\\"Basic realm=\\\\\\\"security\\\\\\\" charset=\\\\\\\"UTF-8\\\\\\\"\\\"]}}],\\\"type\\\":\\\"security_exception\\\",\\\"reason\\\":\\\"missing authentication credentials for REST request [/_security/_authenticate]\\\",\\\"header\\\":{\\\"WWW-Authenticate\\\":[\\\"ApiKey\\\",\\\"Basic realm=\\\\\\\"security\\\\\\\" charset=\\\\\\\"UTF-8\\\\\\\"\\\"]}},\\\"status\\\":401}\",\"wwwAuthenticateDirective\":\"ApiKey, Basic realm=\\\"security\\\" charset=\\\"UTF-8\\\"\"}",
+  "results": null
+}
+
+exports['ApiKeys Lib generateEnrollmentApiKey should generate a valid ApiKey - find:"enrollment_api_keys" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['ApiKeys Lib generateEnrollmentApiKey should generate a valid ApiKey - createApiKey (2)'] = {
+  "results": {
+    "id": "Rc__o24B7IgcxoUvMF20",
+    "name": "Fleet:EnrollmentApiKey:4ba8f45d-405b-40a5-8f62-0e9fc3b5a0fa:policy1",
+    "api_key": "pZWRxpnoS3qUmxyUAW4xhA"
+  }
+}
+
+exports['ApiKeys Lib generateEnrollmentApiKey should generate a valid ApiKey - create:enrollment_api_keys (3)'] = {
+  "results": {
+    "type": "enrollment_api_keys",
+    "id": "e4908759-71c7-4bea-a4c7-e2000137faae",
+    "attributes": {
+      "created_at": "2019-11-25T19:17:21.645Z",
+      "api_key_id": "Rc__o24B7IgcxoUvMF20",
+      "policy_id": "policy1",
+      "active": true,
+      "enrollment_rules": [],
+      "name": "Fleet:EnrollmentApiKey:4ba8f45d-405b-40a5-8f62-0e9fc3b5a0fa:policy1"
+    },
+    "references": [],
+    "updated_at": "2019-11-25T19:17:21.661Z",
+    "version": "WzYsMV0="
+  }
+}

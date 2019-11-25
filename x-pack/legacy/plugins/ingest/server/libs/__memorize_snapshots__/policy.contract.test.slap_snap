@@ -32038,3 +32038,881 @@ exports['Policies Lib delete Should delete the by the ID - list - {"username":"i
     "perPage": 20
   }
 }
+
+exports['Policies Lib create should create a new policy - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1577299148848
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib create should create a new policy - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "64087ff0-0fb4-11ea-bf4e-b1edb775e9d6",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "datasources": [],
+    "label": "test",
+    "updated_on": "2019-11-25T18:50:03.468Z",
+    "updated_by": "system (Fleet)"
+  }
+}
+
+exports['Policies Lib create should create a new policy - get - "64087ff0-0fb4-11ea-bf4e-b1edb775e9d6" (3)'] = {
+  "results": {
+    "id": "64087ff0-0fb4-11ea-bf4e-b1edb775e9d6",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "datasources": [],
+    "label": "test",
+    "updated_on": "2019-11-25T18:50:03.468Z",
+    "updated_by": "system (Fleet)"
+  }
+}
+
+exports['Policies Lib ensureDefaultPolicy should create a new default policy if none exists - get - "default" (1)'] = {
+  "results": null
+}
+
+exports['Policies Lib ensureDefaultPolicy should create a new default policy if none exists - get info (2)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1577299148848
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib ensureDefaultPolicy should create a new default policy if none exists - create - {"name":"Default policy","description":"Default policy created by Kibana"} (3)'] = {
+  "results": {
+    "id": "default",
+    "name": "Default policy",
+    "description": "Default policy created by Kibana",
+    "status": "active",
+    "datasources": [],
+    "updated_on": "2019-11-25T18:50:04.209Z",
+    "updated_by": "Fleet (system action)"
+  }
+}
+
+exports['Policies Lib ensureDefaultPolicy should create a new default policy if none exists - list - {"username":"internal","options":{"page":1,"perPage":20}} (4)'] = {
+  "results": {
+    "items": [
+      {
+        "id": "default",
+        "name": "Default policy",
+        "description": "Default policy created by Kibana",
+        "status": "active",
+        "datasources": [],
+        "updated_on": "2019-11-25T18:50:04.209Z",
+        "updated_by": "Fleet (system action)"
+      }
+    ],
+    "total": 1,
+    "page": 1,
+    "perPage": 20
+  }
+}
+
+exports['Policies Lib ensureDefaultPolicy should not create the new default policy more than once - get - "default" (1)'] = {
+  "results": null
+}
+
+exports['Policies Lib ensureDefaultPolicy should not create the new default policy more than once - get info (2)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1577299148848
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib ensureDefaultPolicy should not create the new default policy more than once - create - {"name":"Default policy","description":"Default policy created by Kibana"} (3)'] = {
+  "results": {
+    "id": "default",
+    "name": "Default policy",
+    "description": "Default policy created by Kibana",
+    "status": "active",
+    "datasources": [],
+    "updated_on": "2019-11-25T18:50:05.227Z",
+    "updated_by": "Fleet (system action)"
+  }
+}
+
+exports['Policies Lib ensureDefaultPolicy should not create the new default policy more than once - get - "default" (4)'] = {
+  "results": {
+    "id": "default",
+    "name": "Default policy",
+    "description": "Default policy created by Kibana",
+    "status": "active",
+    "datasources": [],
+    "updated_on": "2019-11-25T18:50:05.227Z",
+    "updated_by": "Fleet (system action)"
+  }
+}
+
+exports['Policies Lib ensureDefaultPolicy should not create the new default policy more than once - list - {"username":"internal","options":{"page":1,"perPage":20}} (5)'] = {
+  "results": {
+    "items": [
+      {
+        "id": "default",
+        "name": "Default policy",
+        "description": "Default policy created by Kibana",
+        "status": "active",
+        "datasources": [],
+        "updated_on": "2019-11-25T18:50:05.227Z",
+        "updated_by": "Fleet (system action)"
+      }
+    ],
+    "total": 1,
+    "page": 1,
+    "perPage": 20
+  }
+}
+
+exports['Policies Lib list should list all active policies - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1577299148848
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should list all active policies - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "65b0b1b0-0fb4-11ea-bf4e-b1edb775e9d6",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "datasources": [],
+    "label": "test",
+    "updated_on": "2019-11-25T18:50:06.257Z",
+    "updated_by": "system (Fleet)"
+  }
+}
+
+exports['Policies Lib list should list all active policies - get info (3)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1577299148848
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should list all active policies - create - {"name":"test2","description":"test description"} (4)'] = {
+  "results": {
+    "id": "663e4bb0-0fb4-11ea-bf4e-b1edb775e9d6",
+    "name": "test2",
+    "description": "test description",
+    "status": "active",
+    "datasources": [],
+    "label": "test2",
+    "updated_on": "2019-11-25T18:50:07.184Z",
+    "updated_by": "system (Fleet)"
+  }
+}
+
+exports['Policies Lib list should list all active policies - get info (5)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1577299148848
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should list all active policies - create - {"name":"test3","description":"test description"} (6)'] = {
+  "results": {
+    "id": "66d81ab0-0fb4-11ea-bf4e-b1edb775e9d6",
+    "name": "test3",
+    "description": "test description",
+    "status": "active",
+    "datasources": [],
+    "label": "test3",
+    "updated_on": "2019-11-25T18:50:08.196Z",
+    "updated_by": "system (Fleet)"
+  }
+}
+
+exports['Policies Lib list should list all active policies - list - {"username":"internal","options":{"page":1,"perPage":20}} (7)'] = {
+  "results": {
+    "items": [
+      {
+        "id": "65b0b1b0-0fb4-11ea-bf4e-b1edb775e9d6",
+        "name": "test",
+        "description": "test description",
+        "status": "active",
+        "datasources": [],
+        "label": "test",
+        "updated_on": "2019-11-25T18:50:06.257Z",
+        "updated_by": "system (Fleet)"
+      },
+      {
+        "id": "663e4bb0-0fb4-11ea-bf4e-b1edb775e9d6",
+        "name": "test2",
+        "description": "test description",
+        "status": "active",
+        "datasources": [],
+        "label": "test2",
+        "updated_on": "2019-11-25T18:50:07.184Z",
+        "updated_by": "system (Fleet)"
+      },
+      {
+        "id": "66d81ab0-0fb4-11ea-bf4e-b1edb775e9d6",
+        "name": "test3",
+        "description": "test description",
+        "status": "active",
+        "datasources": [],
+        "label": "test3",
+        "updated_on": "2019-11-25T18:50:08.196Z",
+        "updated_by": "system (Fleet)"
+      }
+    ],
+    "total": 3,
+    "page": 1,
+    "perPage": 20
+  }
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1577299148848
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "677d5b60-0fb4-11ea-bf4e-b1edb775e9d6",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "datasources": [],
+    "label": "test",
+    "updated_on": "2019-11-25T18:50:09.277Z",
+    "updated_by": "system (Fleet)"
+  }
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - get - "677d5b60-0fb4-11ea-bf4e-b1edb775e9d6" (3)'] = {
+  "results": {
+    "id": "677d5b60-0fb4-11ea-bf4e-b1edb775e9d6",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "datasources": [],
+    "label": "test",
+    "updated_on": "2019-11-25T18:50:09.277Z",
+    "updated_by": "system (Fleet)"
+  }
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - update - {"name":"foo","description":"test description"} (4)'] = {
+  "results": {
+    "id": "677d5b60-0fb4-11ea-bf4e-b1edb775e9d6",
+    "name": "foo",
+    "description": "test description",
+    "status": "active",
+    "datasources": [],
+    "label": "test",
+    "updated_on": "Mon Nov 25 2019 13:50:10 GMT-0500 (Eastern Standard Time)",
+    "updated_by": "Fleet (system action)"
+  }
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - get - "677d5b60-0fb4-11ea-bf4e-b1edb775e9d6" (5)'] = {
+  "results": {
+    "id": "677d5b60-0fb4-11ea-bf4e-b1edb775e9d6",
+    "name": "foo",
+    "description": "test description",
+    "status": "active",
+    "datasources": [],
+    "label": "test",
+    "updated_on": "Mon Nov 25 2019 13:50:10 GMT-0500 (Eastern Standard Time)",
+    "updated_by": "Fleet (system action)"
+  }
+}
+
+exports['Policies Lib delete Should delete the by the ID - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1577299148848
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib delete Should delete the by the ID - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "68b4f100-0fb4-11ea-bf4e-b1edb775e9d6",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "datasources": [],
+    "label": "test",
+    "updated_on": "2019-11-25T18:50:11.321Z",
+    "updated_by": "system (Fleet)"
+  }
+}
+
+exports['Policies Lib delete Should delete the by the ID - delete - 68b4f100-0fb4-11ea-bf4e-b1edb775e9d6'] = {}
+
+exports['Policies Lib delete Should delete the by the ID - list - {"username":"internal","options":{"page":1,"perPage":20}} (3)'] = {
+  "results": {
+    "items": [],
+    "total": 0,
+    "page": 1,
+    "perPage": 20
+  }
+}
+
+exports['Policies Lib create should create a new policy - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1577301222978
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib create should create a new policy - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "0d43e060-0fb9-11ea-a987-d308a6bd374a",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "datasources": [],
+    "label": "test",
+    "updated_on": "2019-11-25T19:23:25.385Z",
+    "updated_by": "system (Fleet)"
+  }
+}
+
+exports['Policies Lib create should create a new policy - get - "0d43e060-0fb9-11ea-a987-d308a6bd374a" (3)'] = {
+  "results": {
+    "id": "0d43e060-0fb9-11ea-a987-d308a6bd374a",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "datasources": [],
+    "label": "test",
+    "updated_on": "2019-11-25T19:23:25.385Z",
+    "updated_by": "system (Fleet)"
+  }
+}
+
+exports['Policies Lib ensureDefaultPolicy should create a new default policy if none exists - get - "default" (1)'] = {
+  "results": null
+}
+
+exports['Policies Lib ensureDefaultPolicy should create a new default policy if none exists - get info (2)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1577301222978
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib ensureDefaultPolicy should create a new default policy if none exists - create - {"name":"Default policy","description":"Default policy created by Kibana"} (3)'] = {
+  "results": {
+    "id": "default",
+    "name": "Default policy",
+    "description": "Default policy created by Kibana",
+    "status": "active",
+    "datasources": [],
+    "updated_on": "2019-11-25T19:23:26.292Z",
+    "updated_by": "Fleet (system action)"
+  }
+}
+
+exports['Policies Lib ensureDefaultPolicy should create a new default policy if none exists - list - {"username":"internal","options":{"page":1,"perPage":20}} (4)'] = {
+  "results": {
+    "items": [
+      {
+        "id": "default",
+        "name": "Default policy",
+        "description": "Default policy created by Kibana",
+        "status": "active",
+        "datasources": [],
+        "updated_on": "2019-11-25T19:23:26.292Z",
+        "updated_by": "Fleet (system action)"
+      }
+    ],
+    "total": 1,
+    "page": 1,
+    "perPage": 20
+  }
+}
+
+exports['Policies Lib ensureDefaultPolicy should not create the new default policy more than once - get - "default" (1)'] = {
+  "results": null
+}
+
+exports['Policies Lib ensureDefaultPolicy should not create the new default policy more than once - get info (2)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1577301222978
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib ensureDefaultPolicy should not create the new default policy more than once - create - {"name":"Default policy","description":"Default policy created by Kibana"} (3)'] = {
+  "results": {
+    "id": "default",
+    "name": "Default policy",
+    "description": "Default policy created by Kibana",
+    "status": "active",
+    "datasources": [],
+    "updated_on": "2019-11-25T19:23:27.296Z",
+    "updated_by": "Fleet (system action)"
+  }
+}
+
+exports['Policies Lib ensureDefaultPolicy should not create the new default policy more than once - get - "default" (4)'] = {
+  "results": {
+    "id": "default",
+    "name": "Default policy",
+    "description": "Default policy created by Kibana",
+    "status": "active",
+    "datasources": [],
+    "updated_on": "2019-11-25T19:23:27.296Z",
+    "updated_by": "Fleet (system action)"
+  }
+}
+
+exports['Policies Lib ensureDefaultPolicy should not create the new default policy more than once - list - {"username":"internal","options":{"page":1,"perPage":20}} (5)'] = {
+  "results": {
+    "items": [
+      {
+        "id": "default",
+        "name": "Default policy",
+        "description": "Default policy created by Kibana",
+        "status": "active",
+        "datasources": [],
+        "updated_on": "2019-11-25T19:23:27.296Z",
+        "updated_by": "Fleet (system action)"
+      }
+    ],
+    "total": 1,
+    "page": 1,
+    "perPage": 20
+  }
+}
+
+exports['Policies Lib list should list all active policies - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1577301222978
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should list all active policies - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "0f01bd00-0fb9-11ea-a987-d308a6bd374a",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "datasources": [],
+    "label": "test",
+    "updated_on": "2019-11-25T19:23:28.312Z",
+    "updated_by": "system (Fleet)"
+  }
+}
+
+exports['Policies Lib list should list all active policies - get info (3)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1577301222978
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should list all active policies - create - {"name":"test2","description":"test description"} (4)'] = {
+  "results": {
+    "id": "0f91a0f0-0fb9-11ea-a987-d308a6bd374a",
+    "name": "test2",
+    "description": "test description",
+    "status": "active",
+    "datasources": [],
+    "label": "test2",
+    "updated_on": "2019-11-25T19:23:29.254Z",
+    "updated_by": "system (Fleet)"
+  }
+}
+
+exports['Policies Lib list should list all active policies - get info (5)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1577301222978
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib list should list all active policies - create - {"name":"test3","description":"test description"} (6)'] = {
+  "results": {
+    "id": "102cf690-0fb9-11ea-a987-d308a6bd374a",
+    "name": "test3",
+    "description": "test description",
+    "status": "active",
+    "datasources": [],
+    "label": "test3",
+    "updated_on": "2019-11-25T19:23:30.268Z",
+    "updated_by": "system (Fleet)"
+  }
+}
+
+exports['Policies Lib list should list all active policies - list - {"username":"internal","options":{"page":1,"perPage":20}} (7)'] = {
+  "results": {
+    "items": [
+      {
+        "id": "0f01bd00-0fb9-11ea-a987-d308a6bd374a",
+        "name": "test",
+        "description": "test description",
+        "status": "active",
+        "datasources": [],
+        "label": "test",
+        "updated_on": "2019-11-25T19:23:28.312Z",
+        "updated_by": "system (Fleet)"
+      },
+      {
+        "id": "0f91a0f0-0fb9-11ea-a987-d308a6bd374a",
+        "name": "test2",
+        "description": "test description",
+        "status": "active",
+        "datasources": [],
+        "label": "test2",
+        "updated_on": "2019-11-25T19:23:29.254Z",
+        "updated_by": "system (Fleet)"
+      },
+      {
+        "id": "102cf690-0fb9-11ea-a987-d308a6bd374a",
+        "name": "test3",
+        "description": "test description",
+        "status": "active",
+        "datasources": [],
+        "label": "test3",
+        "updated_on": "2019-11-25T19:23:30.268Z",
+        "updated_by": "system (Fleet)"
+      }
+    ],
+    "total": 3,
+    "page": 1,
+    "perPage": 20
+  }
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1577301222978
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "10cfed50-0fb9-11ea-a987-d308a6bd374a",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "datasources": [],
+    "label": "test",
+    "updated_on": "2019-11-25T19:23:31.337Z",
+    "updated_by": "system (Fleet)"
+  }
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - get - "10cfed50-0fb9-11ea-a987-d308a6bd374a" (3)'] = {
+  "results": {
+    "id": "10cfed50-0fb9-11ea-a987-d308a6bd374a",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "datasources": [],
+    "label": "test",
+    "updated_on": "2019-11-25T19:23:31.337Z",
+    "updated_by": "system (Fleet)"
+  }
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - update - {"name":"foo","description":"test description"} (4)'] = {
+  "results": {
+    "id": "10cfed50-0fb9-11ea-a987-d308a6bd374a",
+    "name": "foo",
+    "description": "test description",
+    "status": "active",
+    "datasources": [],
+    "label": "test",
+    "updated_on": "Mon Nov 25 2019 14:23:32 GMT-0500 (Eastern Standard Time)",
+    "updated_by": "Fleet (system action)"
+  }
+}
+
+exports['Policies Lib update should update a policy and invalidate the origional - get - "10cfed50-0fb9-11ea-a987-d308a6bd374a" (5)'] = {
+  "results": {
+    "id": "10cfed50-0fb9-11ea-a987-d308a6bd374a",
+    "name": "foo",
+    "description": "test description",
+    "status": "active",
+    "datasources": [],
+    "label": "test",
+    "updated_on": "Mon Nov 25 2019 14:23:32 GMT-0500 (Eastern Standard Time)",
+    "updated_by": "Fleet (system action)"
+  }
+}
+
+exports['Policies Lib delete Should delete the by the ID - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1577301222978
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Policies Lib delete Should delete the by the ID - create - {"name":"test","description":"test description"} (2)'] = {
+  "results": {
+    "id": "120511f0-0fb9-11ea-a987-d308a6bd374a",
+    "name": "test",
+    "description": "test description",
+    "status": "active",
+    "datasources": [],
+    "label": "test",
+    "updated_on": "2019-11-25T19:23:33.367Z",
+    "updated_by": "system (Fleet)"
+  }
+}
+
+exports['Policies Lib delete Should delete the by the ID - delete - 120511f0-0fb9-11ea-a987-d308a6bd374a'] = {}
+
+exports['Policies Lib delete Should delete the by the ID - list - {"username":"internal","options":{"page":1,"perPage":20}} (3)'] = {
+  "results": {
+    "items": [],
+    "total": 0,
+    "page": 1,
+    "perPage": 20
+  }
+}

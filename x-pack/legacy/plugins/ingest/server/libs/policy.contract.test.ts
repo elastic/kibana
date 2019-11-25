@@ -5,11 +5,12 @@
  */
 
 import { callWhenOnline } from '@mattapperson/slapshot/lib/call_when_online';
+import * as elasticsearch from 'elasticsearch';
+import { INDEX_NAMES } from '../../common/constants/index_names';
+import { FrameworkUser } from './adapters/framework/adapter_types';
+import { Policy } from './adapters/policy/adapter_types';
 import { compose } from './compose/memorized';
 import { ServerLibs } from './types';
-import * as elasticsearch from 'elasticsearch';
-import { FrameworkUser } from './adapters/framework/adapter_types';
-import { INDEX_NAMES } from '../../common/constants/index_names';
 
 jest.mock('uuid/v4', () => {
   let uuid = 1;
@@ -68,8 +69,8 @@ describe('Policies Lib', () => {
 
       expect(typeof newPolicy.id).toBe('string');
 
-      const gottenPolicy = await libs.policy.get(TestUser, newPolicy.id as string);
-      expect(gottenPolicy?.name).toBe('test');
+      const gottenPolicy = (await libs.policy.get(TestUser, newPolicy.id as string)) as Policy;
+      expect(gottenPolicy.name).toBe('test');
     });
   });
 
@@ -116,8 +117,8 @@ describe('Policies Lib', () => {
       });
       expect(updated.name).toBe('foo');
 
-      const gottenPolicy = await libs.policy.get(TestUser, updated.id as string);
-      expect(gottenPolicy?.name).toBe('foo');
+      const gottenPolicy = (await libs.policy.get(TestUser, newPolicy.id as string)) as Policy;
+      expect(gottenPolicy.name).toBe('foo');
     });
 
     describe.skip('finish update', () => {});
@@ -128,7 +129,7 @@ describe('Policies Lib', () => {
       const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
 
       try {
-        await libs.policy.delete(TestUser, [newPolicy?.id as string]);
+        await libs.policy.delete(TestUser, [newPolicy.id as string]);
       } catch (e) {
         expect(e).toBe(undefined);
       }
@@ -141,58 +142,6 @@ describe('Policies Lib', () => {
       expect(libs.policy.delete(TestUser, ['default'])).rejects.toThrowError(/Not allowed/);
     });
   });
-
-  // describe('getWithAgentFormating', () => {
-  //   it('Should return a policy with all datasource, formatted for agent', async () => {
-  //     const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
-
-  //     await libs.datasources.add(TestUser, {
-  //       name: 'prod_west',
-  //       package: {
-  //         name: 'coredns',
-  //         version: '1.0.1, 1.3.1',
-  //         description:
-  //           'CoreDNS logs and metrics integration.\nThe CoreDNS integrations allows to gather logs and metrics from the CoreDNS DNS server to get better insights.\n',
-  //         title: 'CoreDNS',
-  //         assets: [{ id: 'string', type: AssetType.IndexTemplate }],
-  //       },
-  //       streams: [
-  //         {
-  //           id: 'string',
-  //           input: {
-  //             type: InputType.Etc,
-  //             config: { paths: '/var/log/*.log' },
-  //             ingest_pipelines: ['string'],
-  //             id: 'string',
-  //             index_template: 'string',
-  //             ilm_policy: 'string',
-  //             fields: [{}],
-  //           },
-  //           config: { metricsets: ['container', 'cpu'] },
-  //           output_id: 'default',
-  //           processors: ['string'],
-  //         },
-  //       ],
-  //       id: 'foo-bar',
-  //       read_alias: 'string',
-  //     });
-
-  //     const updatedPolicyInfo = await libs.policy.assignDatasource(
-  //       TestUser,
-  //       newPolicy.id as string,
-  //       ['foo-bar']
-  //     );
-
-  //     const fullPolicy = await libs.policy.getWithAgentFormating(
-  //       TestUser,
-  //       updatedPolicyInfo.id as string
-  //     );
-
-  //     expect(fullPolicy?.streams.length).toBe(1);
-  //     expect(fullPolicy?.streams[0].id).toBe('string');
-  //     expect(fullPolicy).toMatchSnapshot();
-  //   });
-  // });
 
   describe.skip('update / change hooks', () => {});
 });
