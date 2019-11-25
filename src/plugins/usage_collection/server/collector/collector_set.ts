@@ -28,14 +28,17 @@ import { UsageCollector } from './usage_collector';
 interface CollectorSetConfig {
   logger: Logger;
   maximumWaitTimeForAllCollectorsInS: number;
+  collectors?: Collector[];
 }
+
 export class CollectorSet {
   private _waitingForAllCollectorsTimestamp?: number;
   private logger: Logger;
   private readonly maximumWaitTimeForAllCollectorsInS: number;
   private collectors: Collector[] = [];
-  constructor({ logger, maximumWaitTimeForAllCollectorsInS }: CollectorSetConfig) {
+  constructor({ logger, maximumWaitTimeForAllCollectorsInS, collectors = [] }: CollectorSetConfig) {
     this.logger = logger;
+    this.collectors = collectors;
     this.maximumWaitTimeForAllCollectorsInS = maximumWaitTimeForAllCollectorsInS || 60;
   }
 
@@ -197,13 +200,10 @@ export class CollectorSet {
   };
 
   private makeCollectorSetFromArray = (collectors: Collector[]) => {
-    const collectorSet = new CollectorSet({
+    return new CollectorSet({
       logger: this.logger,
       maximumWaitTimeForAllCollectorsInS: this.maximumWaitTimeForAllCollectorsInS,
+      collectors,
     });
-    collectors.forEach(collector => {
-      collectorSet.registerCollector(collector);
-    });
-    return collectorSet;
   };
 }
