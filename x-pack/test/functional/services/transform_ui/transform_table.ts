@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function TransformTableProvider({ getService }: FtrProviderContext) {
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
   return new (class TransformTable {
@@ -60,6 +61,51 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       return rows;
     }
 
+    async parseEuiInMemoryTable(tableSubj: string) {
+      const table = await testSubjects.find(`~${tableSubj}`);
+      const $ = await table.parseDomContent();
+      const rows = [];
+
+      // For each row, get the content of each cell and
+      // add its values as an array to each row.
+      for (const tr of $.findTestSubjects(`~${tableSubj}Row`).toArray()) {
+        rows.push(
+          $(tr)
+            .find('.euiTableCellContent')
+            .toArray()
+            .map(cell =>
+              $(cell)
+                .text()
+                .trim()
+            )
+        );
+      }
+
+      return rows;
+    }
+
+    async assertEuiInMemoryTableColumnValues(
+      tableSubj: string,
+      column: number,
+      expectedColumnValues: string[]
+    ) {
+      await retry.tryForTime(2000, async () => {
+        // get a 2D array of rows and cell values
+        const rows = await this.parseEuiInMemoryTable(tableSubj);
+
+        // reduce the rows data to an array of unique values in the specified column
+        const uniqueColumnValues = rows
+          .map(row => row[column])
+          .flat()
+          .filter((v, i, a) => a.indexOf(v) === i);
+
+        uniqueColumnValues.sort();
+
+        // check if the returned unique value matches the supplied filter value
+        expect(uniqueColumnValues).to.eql(expectedColumnValues);
+      });
+    }
+
     public async refreshTransformList() {
       await testSubjects.click('transformRefreshTransformListButton');
       await this.waitForTransformsToLoad();
@@ -82,6 +128,37 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       const rows = await this.parseTransformTable();
       const transformRow = rows.filter(row => row.id === transformId)[0];
       expect(transformRow).to.eql(expectedRow);
+    }
+
+    public async assertTransformExpandedRow() {
+      await testSubjects.click('transformListRowDetailsToggle');
+
+      // The expanded row should show the details tab content by default
+      await testSubjects.existOrFail('transformDetailsTab');
+      await testSubjects.existOrFail('~transformDetailsTabContent');
+
+      // Walk through the rest of the tabs and check if the corresponding content shows up
+      await testSubjects.existOrFail('transformJsonTab');
+      await testSubjects.click('transformJsonTab');
+      await testSubjects.existOrFail('~transformJsonTabContent');
+
+      await testSubjects.existOrFail('transformMessagesTab');
+      await testSubjects.click('transformMessagesTab');
+      await testSubjects.existOrFail('~transformMessagesTabContent');
+
+      await testSubjects.existOrFail('transformPreviewTab');
+      await testSubjects.click('transformPreviewTab');
+      await testSubjects.existOrFail('~transformPreviewTabContent');
+    }
+
+    public async waitForTransformsExpandedRowPreviewTabToLoad() {
+      await testSubjects.existOrFail('~transformPreviewTabContent', { timeout: 60 * 1000 });
+      await testSubjects.existOrFail('transformPreviewTabContent loaded', { timeout: 30 * 1000 });
+    }
+
+    async assertTransformsExpandedRowPreviewColumnValues(column: number, values: string[]) {
+      await this.waitForTransformsExpandedRowPreviewTabToLoad();
+      await this.assertEuiInMemoryTableColumnValues('transformPreviewTabContent', column, values);
     }
   })();
 }
