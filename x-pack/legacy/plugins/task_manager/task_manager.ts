@@ -90,7 +90,7 @@ export class TaskManager {
       this.logger.info(`TaskManager is identified by the Kibana UUID: ${taskManagerId}`);
     }
 
-    const store = new TaskStore({
+    this.store = new TaskStore({
       serializer: opts.serializer,
       savedObjectsRepository: opts.savedObjectsRepository,
       callCluster: opts.callWithInternalUser,
@@ -100,38 +100,43 @@ export class TaskManager {
       taskManagerId: `kibana:${taskManagerId}`,
     });
 
-    const pool = new TaskPool({
+    this.pool = new TaskPool({
       logger: this.logger,
       maxWorkers: this.maxWorkers,
     });
-    const createRunner = (instance: ConcreteTaskInstance) =>
-      new TaskManagerRunner({
-        logger: this.logger,
-        instance,
-        store,
-        definitions: this.definitions,
-        beforeRun: this.middleware.beforeRun,
-        beforeMarkRunning: this.middleware.beforeMarkRunning,
-      });
-    const poller = new TaskPoller<FillPoolResult>({
+
+    this.poller = new TaskPoller<FillPoolResult>({
       logger: this.logger,
       pollInterval: opts.config.get('xpack.task_manager.poll_interval'),
-      work: (): Promise<FillPoolResult> =>
-        fillPool(
-          async tasks => await pool.run(tasks),
-          () =>
-            claimAvailableTasks(
-              this.store.claimAvailableTasks.bind(this.store),
-              this.pool.availableWorkers,
-              this.logger
-            ),
-          createRunner
-        ),
+      work: this.work.bind(this),
     });
+  }
 
-    this.pool = pool;
-    this.store = store;
-    this.poller = poller;
+  private work(): Promise<FillPoolResult> {
+    return fillPool(
+      // claim available tasks
+      () =>
+        claimAvailableTasks(
+          this.store.claimAvailableTasks.bind(this.store),
+          this.pool.availableWorkers,
+          this.logger
+        ),
+      // wrap each task in a Task Runner
+      this.createTaskRunnerForTask.bind(this),
+      // place tasks in the Task Pool
+      async tasks => await this.pool.run(tasks)
+    );
+  }
+
+  private createTaskRunnerForTask(instance: ConcreteTaskInstance) {
+    return new TaskManagerRunner({
+      logger: this.logger,
+      instance,
+      store: this.store,
+      definitions: this.definitions,
+      beforeRun: this.middleware.beforeRun,
+      beforeMarkRunning: this.middleware.beforeMarkRunning,
+    });
   }
 
   /**

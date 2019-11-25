@@ -20,7 +20,7 @@ describe('fillPool', () => {
     const run = sinon.spy(async () => TaskPoolRunResult.RunningAllClaimedTasks);
     const converter = _.identity;
 
-    await fillPool(run, fetchAvailableTasks, converter);
+    await fillPool(fetchAvailableTasks, converter, run);
 
     expect(_.flattenDeep(run.args)).toEqual([1, 2, 3, 4, 5]);
   });
@@ -35,7 +35,7 @@ describe('fillPool', () => {
     const run = sinon.spy(async () => TaskPoolRunResult.RanOutOfCapacity);
     const converter = _.identity;
 
-    await fillPool(run, fetchAvailableTasks, converter);
+    await fillPool(fetchAvailableTasks, converter, run);
 
     expect(_.flattenDeep(run.args)).toEqual([1, 2, 3]);
   });
@@ -50,7 +50,7 @@ describe('fillPool', () => {
     const run = sinon.spy(async () => TaskPoolRunResult.RanOutOfCapacity);
     const converter = (x: number) => x.toString();
 
-    await fillPool(run, fetchAvailableTasks, converter);
+    await fillPool(fetchAvailableTasks, converter, run);
 
     expect(_.flattenDeep(run.args)).toEqual(['1', '2', '3']);
   });
@@ -63,7 +63,7 @@ describe('fillPool', () => {
       try {
         const fetchAvailableTasks = async () => Promise.reject('fetch is not working');
 
-        await fillPool(run, fetchAvailableTasks, converter);
+        await fillPool(fetchAvailableTasks, converter, run);
       } catch (err) {
         expect(err.toString()).toBe('fetch is not working');
         expect(run.called).toBe(false);
@@ -82,7 +82,7 @@ describe('fillPool', () => {
         let index = 0;
         const fetchAvailableTasks = async () => tasks[index++] || [];
 
-        await fillPool(run, fetchAvailableTasks, converter);
+        await fillPool(fetchAvailableTasks, converter, run);
       } catch (err) {
         expect(err.toString()).toBe('run is not working');
       }
@@ -101,7 +101,7 @@ describe('fillPool', () => {
           throw new Error(`can not convert ${x}`);
         };
 
-        await fillPool(run, fetchAvailableTasks, converter);
+        await fillPool(fetchAvailableTasks, converter, run);
       } catch (err) {
         expect(err.toString()).toBe('Error: can not convert 1');
       }

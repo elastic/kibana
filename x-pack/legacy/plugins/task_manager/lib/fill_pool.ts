@@ -29,9 +29,9 @@ type Converter<T1, T2> = (t: T1) => T2;
  * @param converter - a function that converts task records to the appropriate task runner
  */
 export async function fillPool<TRecord, TRunner>(
-  run: BatchRun<TRunner>,
   fetchAvailableTasks: Fetcher<TRecord>,
-  converter: Converter<TRecord, TRunner>
+  converter: Converter<TRecord, TRunner>,
+  run: BatchRun<TRunner>
 ): Promise<FillPoolResult> {
   performance.mark('fillPool.start');
   while (true) {
