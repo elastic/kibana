@@ -79,6 +79,8 @@ export enum LINE_MODE {
   UNKNOWN = 64,
 }
 
+export type CreateCoreEditor = (el: HTMLDivElement) => CoreEditor;
+
 /**
  * The CoreEditor is a component separate from the Editor implementation that provides Console
  * app specific business logic. The CoreEditor is an interface to the lower-level editor implementation
@@ -94,6 +96,11 @@ export interface CoreEditor {
    * Get the contents of the editor.
    */
   getValue(): string;
+
+  /**
+   * Sets the contents of the editor.
+   */
+  setValue(value: string): void;
 
   /**
    * Get the contents of the editor at a specific line.

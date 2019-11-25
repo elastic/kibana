@@ -19,8 +19,8 @@
 
 import ace from 'brace';
 import { Editor as IAceEditor } from 'brace';
-import { CoreEditor, Position, Range, Token, TokensProvider } from '../../types';
-import { AceTokensProvider } from '../../lib/ace_token_provider';
+import { CoreEditor, Position, Range, Token, TokensProvider } from '../../../types';
+import { AceTokensProvider } from '../../../lib/ace_token_provider';
 
 const _AceRange = ace.acequire('ace/range').Range;
 
@@ -49,6 +49,18 @@ export class LegacyEditor implements CoreEditor {
 
   getValue(): string {
     return this.editor.getValue();
+  }
+
+  setValue(text: string) {
+    const session = this.editor.getSession();
+    session.setValue(text);
+    // force update of tokens, but not on this thread to allow for ace rendering.
+    setTimeout(function() {
+      let i;
+      for (i = 0; i < session.getLength(); i++) {
+        session.getTokens(i);
+      }
+    });
   }
 
   getLineValue(lineNumber: number): string {

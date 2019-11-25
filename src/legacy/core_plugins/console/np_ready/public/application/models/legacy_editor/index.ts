@@ -17,4 +17,10 @@
  * under the License.
  */
 
-export * from './legacy_editor/legacy_editor';
+import 'brace';
+import 'brace/ext/language_tools';
+import 'brace/ext/searchbox';
+import 'brace/mode/json';
+import 'brace/mode/text';
+
+export * from './legacy_editor';

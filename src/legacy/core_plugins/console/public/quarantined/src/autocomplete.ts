@@ -37,7 +37,7 @@ import { URL_PATH_END_MARKER } from './autocomplete/components';
 import { createTokenIterator } from '../../../np_ready/public/application/factories';
 
 import { Position, Token, Range } from '../../../np_ready/public/types';
-import { LegacyEditor } from '../../../np_ready/public/application/models';
+import { CoreEditor } from '../../../np_ready/public/types/core_editor';
 
 let LAST_EVALUATED_TOKEN: any = null;
 
@@ -298,7 +298,7 @@ function getCurrentMethodAndTokenPaths(
   return ret;
 }
 export function getEndpointFromPosition(aceEditor: AceEditor, pos: AcePosition, parser: any) {
-  const editor = new LegacyEditor(aceEditor);
+  const editor = new CoreEditor(aceEditor);
   const context = {
     ...getCurrentMethodAndTokenPaths(
       editor,
@@ -322,7 +322,7 @@ export default function({
   addChangeListener,
   removeChangeListener,
 }: {
-  coreEditor: LegacyEditor;
+  coreEditor: CoreEditor;
   parser: any;
   execCommand: (cmd: string) => void;
   getCursorPosition: () => Position | null;
@@ -459,7 +459,7 @@ export default function({
     addChangeListener(editorChangeListener);
   }
 
-  function getAutoCompleteContext(ctxEditor: LegacyEditor, pos: Position) {
+  function getAutoCompleteContext(ctxEditor: CoreEditor, pos: Position) {
     // deduces all the parameters need to position and insert the auto complete
     const context: any = {
       autoCompleteSet: null, // instructions for what can be here
