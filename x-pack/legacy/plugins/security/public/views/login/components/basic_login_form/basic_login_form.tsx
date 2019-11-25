@@ -41,8 +41,8 @@ class BasicLoginFormUI extends Component<Props, State> {
   public render() {
     return (
       <Fragment>
-        {this.renderMessage()}
         {this.renderLoginAssistanceMessage()}
+        {this.renderMessage()}
         <EuiPanel>
           <form onSubmit={this.submit}>
             <EuiFormRow

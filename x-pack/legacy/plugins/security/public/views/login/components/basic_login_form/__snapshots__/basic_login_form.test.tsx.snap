@@ -2,7 +2,9 @@
 
 exports[`BasicLoginForm renders as expected 1`] = `
 <Fragment>
-  <EuiText>
+  <EuiText
+    size="s"
+  >
     <ReactMarkdown
       astPlugins={Array []}
       escapeHtml={true}
