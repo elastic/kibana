@@ -31,8 +31,7 @@ export const initIndexPatternsValidateRoute = ({ framework }: InfraBackendLibs) 
         fold(throwErrors(Boom.badRequest), identity)
       );
 
-      const { timestampField } = payload.data;
-      const indices = payload.data.indices;
+      const { timestampField, indices } = payload.data;
       const errors: ValidationIndicesError[] = [];
 
       // Query each pattern individually, to map correctly the errors
