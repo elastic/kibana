@@ -39,6 +39,7 @@ export const useKibanaUiSetting = (key: string, defaultValue?: GenericValue) => 
     return [uiInjectedMetadata.getKibanaVersion()];
   }
 
+  /* eslint-disable react-hooks/rules-of-hooks */
   if (key === DEFAULT_TIMEZONE_BROWSER) {
     return [useMemo(() => timezoneProvider(uiSettingsClient)(), [uiSettingsClient])];
   }
@@ -48,5 +49,7 @@ export const useKibanaUiSetting = (key: string, defaultValue?: GenericValue) => 
   const setUiSetting = useCallback((value: GenericValue) => uiSettingsClient.set(key, value), [
     uiSettingsClient,
   ]);
+  /* eslint-enable react-hooks/rules-of-hooks */
+
   return [uiSetting, setUiSetting];
 };

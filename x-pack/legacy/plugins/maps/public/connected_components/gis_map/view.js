@@ -21,12 +21,11 @@ import uuid from 'uuid/v4';
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
 export class GisMap extends Component {
-
   state = {
     isInitialLoadRenderTimeoutComplete: false,
     domId: uuid(),
     geoFields: [],
-  }
+  };
 
   componentDidMount() {
     this._isMounted = true;
@@ -65,9 +64,9 @@ export class GisMap extends Component {
     if (el) {
       el.dispatchEvent(new CustomEvent(RENDER_COMPLETE_EVENT, { bubbles: true }));
     }
-  }
+  };
 
-  _loadGeoFields = async (nextIndexPatternIds) => {
+  _loadGeoFields = async nextIndexPatternIds => {
     if (_.isEqual(nextIndexPatternIds, this._prevIndexPatternIds)) {
       // all ready loaded index pattern ids
       return;
@@ -78,19 +77,22 @@ export class GisMap extends Component {
     const geoFields = [];
     try {
       const indexPatterns = await getIndexPatternsFromIds(nextIndexPatternIds);
-      indexPatterns.forEach((indexPattern) => {
+      indexPatterns.forEach(indexPattern => {
         indexPattern.fields.forEach(field => {
-          if (field.type === ES_GEO_FIELD_TYPE.GEO_POINT || field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE) {
+          if (
+            field.type === ES_GEO_FIELD_TYPE.GEO_POINT ||
+            field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE
+          ) {
             geoFields.push({
               geoFieldName: field.name,
               geoFieldType: field.type,
               indexPatternTitle: indexPattern.title,
-              indexPatternId: indexPattern.id
+              indexPatternId: indexPattern.id,
             });
           }
         });
       });
-    } catch(e) {
+    } catch (e) {
       // swallow errors.
       // the Layer-TOC will indicate which layers are disfunctional on a per-layer basis
     }
@@ -100,7 +102,7 @@ export class GisMap extends Component {
     }
 
     this.setState({ geoFields });
-  }
+  };
 
   _setRefreshTimer = () => {
     const { isPaused, interval } = this.props.refreshConfig;
@@ -116,12 +118,9 @@ export class GisMap extends Component {
     this._clearRefreshTimer();
 
     if (!isPaused && interval > 0) {
-      this.refreshTimerId = setInterval(
-        () => {
-          this.props.triggerRefreshTimer();
-        },
-        interval
-      );
+      this.refreshTimerId = setInterval(() => {
+        this.props.triggerRefreshTimer();
+      }, interval);
     }
   };
 
@@ -134,16 +133,13 @@ export class GisMap extends Component {
   // Mapbox does not provide any feedback when rendering is complete.
   // Temporary solution is just to wait set period of time after data has loaded.
   _startInitialLoadRenderTimer = () => {
-    setTimeout(
-      () => {
-        if (this._isMounted) {
-          this.setState({ isInitialLoadRenderTimeoutComplete: true });
-          this._onInitialLoadRenderComplete();
-        }
-      },
-      5000
-    );
-  }
+    setTimeout(() => {
+      if (this._isMounted) {
+        this.setState({ isInitialLoadRenderTimeoutComplete: true });
+        this._onInitialLoadRenderComplete();
+      }
+    }, 5000);
+  };
 
   render() {
     const {
@@ -164,14 +160,12 @@ export class GisMap extends Component {
         <div data-render-complete data-shared-item>
           <EuiCallOut
             title={i18n.translate('xpack.maps.map.initializeErrorTitle', {
-              defaultMessage: 'Unable to initialize map'
+              defaultMessage: 'Unable to initialize map',
             })}
             color="danger"
             iconType="cross"
           >
-            <p>
-              {mapInitError}
-            </p>
+            <p>{mapInitError}</p>
           </EuiCallOut>
         </div>
       );
@@ -183,21 +177,15 @@ export class GisMap extends Component {
       currentPanel = null;
     } else if (addLayerVisible) {
       currentPanelClassName = 'mapMapLayerPanel-isVisible';
-      currentPanel = <AddLayerPanel/>;
+      currentPanel = <AddLayerPanel />;
     } else if (layerDetailsVisible) {
       currentPanelClassName = 'mapMapLayerPanel-isVisible';
-      currentPanel = (
-        <LayerPanel/>
-      );
+      currentPanel = <LayerPanel />;
     }
 
     let exitFullScreenButton;
     if (isFullScreen) {
-      exitFullScreenButton = (
-        <ExitFullScreenButton
-          onExitFullScreenMode={exitFullScreen}
-        />
-      );
+      exitFullScreenButton = <ExitFullScreenButton onExitFullScreenMode={exitFullScreen} />;
     }
     return (
       <EuiFlexGroup
@@ -213,10 +201,9 @@ export class GisMap extends Component {
             geoFields={this.state.geoFields}
             renderTooltipContent={renderTooltipContent}
           />
-          <ToolbarOverlay
-            addFilters={addFilters}
-            geoFields={this.state.geoFields}
-          />
+          {!this.props.hideToolbarOverlay && (
+            <ToolbarOverlay addFilters={addFilters} geoFields={this.state.geoFields} />
+          )}
           <WidgetOverlay/>
         </EuiFlexItem>
 

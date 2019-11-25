@@ -33,9 +33,6 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
 });
 
 export const WorkpadZoom = compose<ComponentProps, {}>(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  ),
+  connect(mapStateToProps, mapDispatchToProps),
   withHandlers(zoomHandlerCreators)
 )(Component);

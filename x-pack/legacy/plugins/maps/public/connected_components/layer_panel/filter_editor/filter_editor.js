@@ -43,7 +43,8 @@ export class FilterEditor extends Component {
   }
 
   _loadIndexPatterns = async () => {
-    const indexPatternIds = this.props.layer.getIndexPatternIds();
+    // Filter only effects source so only load source indices.
+    const indexPatternIds = this.props.layer.getSource().getIndexPatternIds();
     const indexPatterns = [];
     const getIndexPatternPromises = indexPatternIds.map(async indexPatternId => {
       try {
@@ -89,6 +90,7 @@ export class FilterEditor extends Component {
         isOpen={this.state.isPopoverOpen}
         closePopover={this._close}
         anchorPosition="leftCenter"
+        ownFocus
       >
         <div className="mapFilterEditor" data-test-subj="mapFilterEditor">
           <SearchBar

@@ -9,7 +9,7 @@ import { SavedObject } from 'src/core/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ getService }: FtrProviderContext) {
-  const es = getService('es');
+  const es = getService('legacyEs');
   const randomness = getService('randomness');
   const supertest = getService('supertest');
 
@@ -252,7 +252,10 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     describe('within a default space', () => {
-      runTests(() => '/api/saved_objects/', id => `${SAVED_OBJECT_WITH_SECRET_TYPE}:${id}`);
+      runTests(
+        () => '/api/saved_objects/',
+        id => `${SAVED_OBJECT_WITH_SECRET_TYPE}:${id}`
+      );
     });
 
     describe('within a custom space', () => {

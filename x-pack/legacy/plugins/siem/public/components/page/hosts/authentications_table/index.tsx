@@ -143,13 +143,10 @@ const makeMapStateToProps = () => {
   };
 };
 
-export const AuthenticationTable = connect(
-  makeMapStateToProps,
-  {
-    updateTableActivePage: hostsActions.updateTableActivePage,
-    updateTableLimit: hostsActions.updateTableLimit,
-  }
-)(AuthenticationTableComponent);
+export const AuthenticationTable = connect(makeMapStateToProps, {
+  updateTableActivePage: hostsActions.updateTableActivePage,
+  updateTableLimit: hostsActions.updateTableLimit,
+})(AuthenticationTableComponent);
 
 const getAuthenticationColumns = (): AuthTableColumns => [
   {
@@ -339,7 +336,10 @@ export const getAuthenticationColumnsCurated = (
   // Columns to exclude from host details pages
   if (pageType === hostsModel.HostsType.details) {
     return [i18n.LAST_FAILED_DESTINATION, i18n.LAST_SUCCESSFUL_DESTINATION].reduce((acc, name) => {
-      acc.splice(acc.findIndex(column => column.name === name), 1);
+      acc.splice(
+        acc.findIndex(column => column.name === name),
+        1
+      );
       return acc;
     }, columns);
   }

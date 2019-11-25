@@ -15,6 +15,7 @@ This list of plugins is not guaranteed to work on your version of Kibana. Instea
 * https://github.com/wtakase/kibana-own-home[Own Home] (wtakase) - enables multi-tenancy
 * https://github.com/asileon/kibana_shard_allocation[Shard Allocation] (asileon) - visualize elasticsearch shard allocation
 * https://github.com/samtecspg/conveyor[Conveyor] - Simple (GUI) interface for importing data into Elasticsearch.
+* https://github.com/wazuh/wazuh-kibana-app[Wazuh] - Wazuh provides host-based security visibility using lightweight multi-platform agents.
 * https://github.com/TrumanDu/indices_view[Indices View] - View indices related information.
 * https://github.com/johtani/analyze-api-ui-plugin[Analyze UI] (johtani) - UI for elasticsearch _analyze API
 * https://github.com/TrumanDu/cleaner[Cleaner] (TrumanDu)- Setting index ttl.

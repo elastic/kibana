@@ -148,8 +148,12 @@ export class TaskRunnerFactory {
         await Promise.all(
           Object.keys(alertInstances).map(alertInstanceId => {
             const alertInstance = alertInstances[alertInstanceId];
-            if (alertInstance.hasScheduledActions(throttle)) {
-              if (muteAll || mutedInstanceIds.includes(alertInstanceId)) {
+            if (alertInstance.hasScheduledActions()) {
+              if (
+                alertInstance.isThrottled(throttle) ||
+                muteAll ||
+                mutedInstanceIds.includes(alertInstanceId)
+              ) {
                 return;
               }
               const { actionGroup, context, state } = alertInstance.getScheduledActionOptions()!;

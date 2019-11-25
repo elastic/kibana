@@ -28,18 +28,21 @@ import {
   Start as InspectorStart,
 } from '../../../../plugins/inspector/public';
 import { EuiUtilsStart } from '../../../../plugins/eui_utils/public';
-import {
-  FeatureCatalogueSetup,
-  FeatureCatalogueStart,
-} from '../../../../plugins/feature_catalogue/public';
+import { DevToolsSetup, DevToolsStart } from '../../../../plugins/dev_tools/public';
+import { KibanaLegacySetup, KibanaLegacyStart } from '../../../../plugins/kibana_legacy/public';
+import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../plugins/home/public';
+import { SharePluginSetup, SharePluginStart } from '../../../../plugins/share/public';
 
 export interface PluginsSetup {
   data: ReturnType<DataPlugin['setup']>;
   embeddable: EmbeddableSetup;
   expressions: ReturnType<ExpressionsPlugin['setup']>;
-  feature_catalogue: FeatureCatalogueSetup;
+  home: HomePublicPluginSetup;
   inspector: InspectorSetup;
   uiActions: IUiActionsSetup;
+  dev_tools: DevToolsSetup;
+  kibana_legacy: KibanaLegacySetup;
+  share: SharePluginSetup;
 }
 
 export interface PluginsStart {
@@ -47,9 +50,12 @@ export interface PluginsStart {
   embeddable: EmbeddableStart;
   eui_utils: EuiUtilsStart;
   expressions: ReturnType<ExpressionsPlugin['start']>;
-  feature_catalogue: FeatureCatalogueStart;
+  home: HomePublicPluginStart;
   inspector: InspectorStart;
   uiActions: IUiActionsStart;
+  dev_tools: DevToolsStart;
+  kibana_legacy: KibanaLegacyStart;
+  share: SharePluginStart;
 }
 
 export const npSetup = {

@@ -5,7 +5,6 @@
  */
 
 import { EuiHorizontalRule, EuiSpacer, EuiFlexItem } from '@elastic/eui';
-import { getEsQueryConfig } from '@kbn/es-query';
 import React, { useCallback, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
@@ -40,6 +39,7 @@ import { NetworkTopNFlowQueryTable } from './network_top_n_flow_query_table';
 import { TlsQueryTable } from './tls_query_table';
 import { IPDetailsComponentProps } from './types';
 import { UsersQueryTable } from './users_query_table';
+import { esQuery } from '../../../../../../../../src/plugins/data/public';
 
 export { getBreadcrumbs } from './utils';
 
@@ -81,7 +81,7 @@ export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
           {({ indicesExist, indexPattern }) => {
             const ip = decodeIpv6(detailName);
             const filterQuery = convertToBuildEsQuery({
-              config: getEsQueryConfig(core.uiSettings),
+              config: esQuery.getEsQueryConfig(core.uiSettings),
               indexPattern,
               queries: [query],
               filters,
@@ -290,10 +290,7 @@ const makeMapStateToProps = () => {
   });
 };
 
-export const IPDetails = connect(
-  makeMapStateToProps,
-  {
-    setAbsoluteRangeDatePicker: dispatchAbsoluteRangeDatePicker,
-    setIpDetailsTablesActivePageToZero: dispatchIpDetailsTablesActivePageToZero,
-  }
-)(IPDetailsComponent);
+export const IPDetails = connect(makeMapStateToProps, {
+  setAbsoluteRangeDatePicker: dispatchAbsoluteRangeDatePicker,
+  setIpDetailsTablesActivePageToZero: dispatchIpDetailsTablesActivePageToZero,
+})(IPDetailsComponent);

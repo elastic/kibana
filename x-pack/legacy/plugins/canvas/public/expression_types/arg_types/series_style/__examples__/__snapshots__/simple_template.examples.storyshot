@@ -11,23 +11,22 @@ exports[`Storyshots arguments/SeriesStyle simple 1`] = `
   }
 >
   <div
-    className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive canvasArgSeries__colorPicker"
+    className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive canvasArgSeries__colorPicker"
   >
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--small"
+        className="euiText euiText--extraSmall"
       >
         Color
-         
       </div>
     </div>
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--small"
+        className="euiText euiText--extraSmall"
       >
         <button
           aria-label="Color: Auto"
@@ -35,16 +34,7 @@ exports[`Storyshots arguments/SeriesStyle simple 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Auto 
-          <svg
-            className="euiIcon euiIcon--medium euiIcon-isLoading"
-            focusable="false"
-            height={16}
-            style={null}
-            viewBox="0 0 16 16"
-            width={16}
-            xmlns="http://www.w3.org/2000/svg"
-          />
+          Auto
         </button>
       </div>
     </div>
@@ -63,23 +53,22 @@ exports[`Storyshots arguments/SeriesStyle/components simple: defaults 1`] = `
   }
 >
   <div
-    className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive canvasArgSeries__colorPicker"
+    className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive canvasArgSeries__colorPicker"
   >
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--small"
+        className="euiText euiText--extraSmall"
       >
         Color
-         
       </div>
     </div>
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--small"
+        className="euiText euiText--extraSmall"
       >
         <button
           aria-label="Color: Auto"
@@ -87,16 +76,7 @@ exports[`Storyshots arguments/SeriesStyle/components simple: defaults 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Auto 
-          <svg
-            className="euiIcon euiIcon--medium euiIcon-isLoading"
-            focusable="false"
-            height={16}
-            style={null}
-            viewBox="0 0 16 16"
-            width={16}
-            xmlns="http://www.w3.org/2000/svg"
-          />
+          Auto
         </button>
       </div>
     </div>
@@ -115,23 +95,22 @@ exports[`Storyshots arguments/SeriesStyle/components simple: no labels 1`] = `
   }
 >
   <div
-    className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive canvasArgSeries__colorPicker"
+    className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive canvasArgSeries__colorPicker"
   >
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--small"
+        className="euiText euiText--extraSmall"
       >
         Color
-         
       </div>
     </div>
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--small"
+        className="euiText euiText--extraSmall"
       >
         <button
           aria-label="Color: Auto"
@@ -139,16 +118,7 @@ exports[`Storyshots arguments/SeriesStyle/components simple: no labels 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Auto 
-          <svg
-            className="euiIcon euiIcon--medium euiIcon-isLoading"
-            focusable="false"
-            height={16}
-            style={null}
-            viewBox="0 0 16 16"
-            width={16}
-            xmlns="http://www.w3.org/2000/svg"
-          />
+          Auto
         </button>
       </div>
     </div>
@@ -167,23 +137,22 @@ exports[`Storyshots arguments/SeriesStyle/components simple: no series 1`] = `
   }
 >
   <div
-    className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive canvasArgSeries__colorPicker"
+    className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive canvasArgSeries__colorPicker"
   >
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--small"
+        className="euiText euiText--extraSmall"
       >
         Color
-         
       </div>
     </div>
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--small"
+        className="euiText euiText--extraSmall"
       >
         <button
           aria-label="Color: Auto"
@@ -191,16 +160,7 @@ exports[`Storyshots arguments/SeriesStyle/components simple: no series 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Auto 
-          <svg
-            className="euiIcon euiIcon--medium euiIcon-isLoading"
-            focusable="false"
-            height={16}
-            style={null}
-            viewBox="0 0 16 16"
-            width={16}
-            xmlns="http://www.w3.org/2000/svg"
-          />
+          Auto
         </button>
       </div>
     </div>
@@ -242,23 +202,22 @@ exports[`Storyshots arguments/SeriesStyle/components simple: with series 1`] = `
   }
 >
   <div
-    className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive canvasArgSeries__colorPicker"
+    className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive canvasArgSeries__colorPicker"
   >
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--small"
+        className="euiText euiText--extraSmall"
       >
         Color
-         
       </div>
     </div>
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--small"
+        className="euiText euiText--extraSmall"
       >
         <button
           aria-label="Color: Auto"
@@ -266,16 +225,7 @@ exports[`Storyshots arguments/SeriesStyle/components simple: with series 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Auto 
-          <svg
-            className="euiIcon euiIcon--medium euiIcon-isLoading"
-            focusable="false"
-            height={16}
-            style={null}
-            viewBox="0 0 16 16"
-            width={16}
-            xmlns="http://www.w3.org/2000/svg"
-          />
+          Auto
         </button>
       </div>
     </div>
