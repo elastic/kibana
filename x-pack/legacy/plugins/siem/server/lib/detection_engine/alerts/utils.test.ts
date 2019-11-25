@@ -118,6 +118,8 @@ describe('utils', () => {
         const secondHash = generateId(findex, fid, version);
         expect(firstHash).toEqual(generatedHash);
         expect(secondHash).toEqual(generatedHash);
+        expect(Buffer.byteLength(firstHash, 'utf8')).toBeLessThan(512); // 512 bytes is maximum size of _id field
+        expect(Buffer.byteLength(secondHash, 'utf8')).toBeLessThan(512);
       });
       test('two docs with different index, id, and version should have different id', () => {
         const findex = 'myfakeindex';
@@ -134,6 +136,8 @@ describe('utils', () => {
         const secondHash = generateId(findex2, fid, version);
         expect(firstHash).toEqual(firstGeneratedHash);
         expect(secondHash).toEqual(secondGeneratedHash);
+        expect(Buffer.byteLength(firstHash, 'utf8')).toBeLessThan(512); // 512 bytes is maximum size of _id field
+        expect(Buffer.byteLength(secondHash, 'utf8')).toBeLessThan(512);
         expect(firstHash).not.toEqual(secondHash);
       });
       test('two docs with same index, different id, and same version should have different id', () => {
@@ -151,6 +155,8 @@ describe('utils', () => {
         const secondHash = generateId(findex, fid2, version);
         expect(firstHash).toEqual(firstGeneratedHash);
         expect(secondHash).toEqual(secondGeneratedHash);
+        expect(Buffer.byteLength(firstHash, 'utf8')).toBeLessThan(512); // 512 bytes is maximum size of _id field
+        expect(Buffer.byteLength(secondHash, 'utf8')).toBeLessThan(512);
         expect(firstHash).not.toEqual(secondHash);
       });
       test('two docs with same index, same id, and different version should have different id', () => {
@@ -168,7 +174,17 @@ describe('utils', () => {
         const secondHash = generateId(findex, fid, version2);
         expect(firstHash).toEqual(firstGeneratedHash);
         expect(secondHash).toEqual(secondGeneratedHash);
+        expect(Buffer.byteLength(firstHash, 'utf8')).toBeLessThan(512); // 512 bytes is maximum size of _id field
+        expect(Buffer.byteLength(secondHash, 'utf8')).toBeLessThan(512);
         expect(firstHash).not.toEqual(secondHash);
+      });
+      test('Ensure generated id is less than 512 bytes, even for really really long strings', () => {
+        const longIndexName =
+          'myfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindexmyfakeindex';
+        const fid = 'somefakeid';
+        const version = '1';
+        const firstHash = generateId(longIndexName, fid, version);
+        expect(Buffer.byteLength(firstHash, 'utf8')).toBeLessThan(512); // 512 bytes is maximum size of _id field
       });
     });
     test('create successful bulk create', async () => {
