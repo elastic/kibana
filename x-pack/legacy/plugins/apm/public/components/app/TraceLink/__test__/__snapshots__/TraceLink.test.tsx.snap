@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TraceLink renders trace page when transaction is not found 1`] = `
+<Redirect
+  push={false}
+  to={
+    Object {
+      "pathname": "/traces",
+      "search": "?kuery=trace.id%20%3A%20%22123%22",
+    }
+  }
+/>
+`;
+
+exports[`TraceLink transaction page renders with date range params 1`] = `
+<Redirect
+  push={false}
+  to={
+    Object {
+      "pathname": "/services/foo/transactions/view",
+      "search": "?traceId=123&transactionId=456&transactionName=bar&transactionType=GET&rangeFrom=now-2d&rangeTo=now",
+    }
+  }
+/>
+`;
+
+exports[`TraceLink transaction page renders without date range 1`] = `
+<Redirect
+  push={false}
+  to={
+    Object {
+      "pathname": "/services/foo/transactions/view",
+      "search": "?traceId=123&transactionId=456&transactionName=bar&transactionType=GET",
+    }
+  }
+/>
+`;
