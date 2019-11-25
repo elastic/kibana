@@ -68,7 +68,7 @@ export class PolicyLib {
     type: 'added' | 'updated' | 'removed',
     payload: Policy | null
   ): Promise<{ success: boolean }> {
-    return new Promise(resolve => {
+    return { success: true }
       resolve({ success: true });
     });
   }
