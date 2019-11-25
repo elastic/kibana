@@ -39,10 +39,9 @@ export const getSearchStrategyByViability = (indexPattern: IndexPattern) => {
 };
 
 export const getSearchStrategyById = (searchStrategyId: string) => {
-  const searchStrategy = [...searchStrategies, noOpSearchStrategy].find(({ id }) => {
-    return id === searchStrategyId;
+  return [...searchStrategies, noOpSearchStrategy].find(searchStrategy => {
+    return searchStrategy.id === searchStrategyId;
   });
-  return searchStrategy ?? noOpSearchStrategy;
 };
 
 export const getSearchStrategyForSearchRequest = (

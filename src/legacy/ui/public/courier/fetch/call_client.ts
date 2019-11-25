@@ -49,7 +49,9 @@ export function callClient(
     const searchStrategy = getSearchStrategyById(searchStrategyId);
     const requests = searchStrategyMap[searchStrategyId];
 
-    const { searching, abort } = searchStrategy.search({
+    // There's no way `searchStrategy` could be undefined here because if we didn't get a matching strategy for this ID
+    // then an error would have been thrown above
+    const { searching, abort } = searchStrategy!.search({
       searchRequests: requests,
       es,
       config,

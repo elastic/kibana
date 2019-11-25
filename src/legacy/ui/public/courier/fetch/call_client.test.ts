@@ -54,18 +54,10 @@ describe('callClient', () => {
 
   test('Executes each search strategy with its group of matching requests', () => {
     const searchRequests = [
-      {
-        _searchStrategyId: 0,
-      },
-      {
-        _searchStrategyId: 1,
-      },
-      {
-        _searchStrategyId: 0,
-      },
-      {
-        _searchStrategyId: 1,
-      },
+      { _searchStrategyId: 0 },
+      { _searchStrategyId: 1 },
+      { _searchStrategyId: 0 },
+      { _searchStrategyId: 1 },
     ];
 
     callClient(searchRequests, [], {} as FetchHandlers);
@@ -83,11 +75,7 @@ describe('callClient', () => {
   });
 
   test('Passes the additional arguments it is given to the search strategy', () => {
-    const searchRequests = [
-      {
-        _searchStrategyId: 0,
-      },
-    ];
+    const searchRequests = [{ _searchStrategyId: 0 }];
     const args = { es: {}, config: {}, esShardTimeout: 0 } as FetchHandlers;
 
     callClient(searchRequests, [], args);
@@ -97,14 +85,7 @@ describe('callClient', () => {
   });
 
   test('Returns the responses in the original order', async () => {
-    const searchRequests = [
-      {
-        _searchStrategyId: 1,
-      },
-      {
-        _searchStrategyId: 0,
-      },
-    ];
+    const searchRequests = [{ _searchStrategyId: 1 }, { _searchStrategyId: 0 }];
 
     const responses = await Promise.all(callClient(searchRequests, [], {} as FetchHandlers));
 
@@ -112,14 +93,7 @@ describe('callClient', () => {
   });
 
   test('Calls handleResponse with each request and response', async () => {
-    const searchRequests = [
-      {
-        _searchStrategyId: 0,
-      },
-      {
-        _searchStrategyId: 1,
-      },
-    ];
+    const searchRequests = [{ _searchStrategyId: 0 }, { _searchStrategyId: 1 }];
 
     const responses = callClient(searchRequests, [], {} as FetchHandlers);
     await Promise.all(responses);
@@ -130,14 +104,7 @@ describe('callClient', () => {
   });
 
   test('If passed an abortSignal, calls abort on the strategy if the signal is aborted', () => {
-    const searchRequests = [
-      {
-        _searchStrategyId: 0,
-      },
-      {
-        _searchStrategyId: 1,
-      },
-    ];
+    const searchRequests = [{ _searchStrategyId: 0 }, { _searchStrategyId: 1 }];
     const abortController = new AbortController();
     const requestOptions = [
       {
