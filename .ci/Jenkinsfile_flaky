@@ -3,10 +3,10 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
-params.CI_GROUP = 'all:serverMocha'
+def CI_GROUP_PARAM = 'all:serverMocha' // params.CI_GROUP
 
 // Looks like 'oss:ciGroup:1', 'oss:firefoxSmoke', or 'all:serverMocha'
-def JOB_PARTS = params.CI_GROUP.split(':')
+def JOB_PARTS = CI_GROUP_PARAM.split(':')
 def IS_XPACK = JOB_PARTS[0] == 'xpack'
 def JOB = JOB_PARTS[1]
 def NEED_BUILD = JOB != 'serverMocha'
@@ -19,7 +19,7 @@ def worker = getWorkerFromParams(IS_XPACK, JOB, CI_GROUP)
 def workerFailures = []
 
 currentBuild.displayName += trunc(" ${params.GITHUB_OWNER}:${params.branch_specifier}", 24)
-currentBuild.description = "${params.CI_GROUP}<br />Agents: ${AGENT_COUNT}<br />Executions: ${params.NUMBER_EXECUTIONS}"
+currentBuild.description = "${CI_GROUP_PARAM}<br />Agents: ${AGENT_COUNT}<br />Executions: ${params.NUMBER_EXECUTIONS}"
 
 stage("Kibana Pipeline") {
   timeout(time: 180, unit: 'MINUTES') {
