@@ -25,7 +25,7 @@ jest.mock('../index.tsx', () => ({
       path: '/services/:serviceName/nodes/:serviceNodeName/metrics'
     },
     {
-      name: 'linkToTrace',
+      name: 'link_to_trace',
       path: '/link-to/trace/:traceId'
     }
   ]
@@ -68,7 +68,7 @@ describe('Route Utils', () => {
     });
     it('replaces path params in the end', () => {
       expect(
-        generatePath('linkToTrace', {
+        generatePath('link_to_trace', {
           traceId: 'foo'
         })
       ).toEqual('/link-to/trace/foo');

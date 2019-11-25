@@ -16,9 +16,9 @@ export const transactionByTraceIdRoute = createRoute(() => ({
       traceId: t.string
     })
   },
-  handler: async (req, { path }) => {
-    const { traceId } = path;
-    const setup = await setupRequest(req);
+  handler: async ({ context, request }) => {
+    const { traceId } = context.params.path;
+    const setup = await setupRequest(context, request);
     return getTransactionByTraceId(traceId, setup);
   }
 }));

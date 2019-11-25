@@ -8,7 +8,7 @@ import { getTraceUrl } from './ExternalLinks';
 jest.mock('../../../app/Main/route_config/index.tsx', () => ({
   routes: [
     {
-      name: 'linkToTrace',
+      name: 'link_to_trace',
       path: '/link-to/trace/:traceId'
     }
   ]
