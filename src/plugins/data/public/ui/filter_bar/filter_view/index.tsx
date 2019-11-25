@@ -21,7 +21,7 @@ import { EuiBadge, useInnerText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
 import { FilterLabel } from '../filter_editor/lib/filter_label';
-import { esFilters } from '../../../../../../../plugins/data/public';
+import { esFilters } from '../../..';
 
 interface Props {
   filter: esFilters.Filter;

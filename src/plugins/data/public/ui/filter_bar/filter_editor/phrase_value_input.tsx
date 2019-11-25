@@ -24,7 +24,7 @@ import React from 'react';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
 import { ValueInputType } from './value_input_type';
-import { withKibana } from '../../../../../../../plugins/kibana_react/public';
+import { withKibana } from '../../../../../kibana_react/public';
 
 interface Props extends PhraseSuggestorProps {
   value?: string;
