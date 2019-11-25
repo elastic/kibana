@@ -24,8 +24,7 @@ describe('Resizeable', () => {
     document.body.classList.remove(globalResizeCursorClassName);
   });
 
-  // styled-components issue
-  test.skip('it applies the provided height to the ResizeHandleContainer when a height is specified', () => {
+  test('it applies the provided height to the ResizeHandleContainer when a height is specified', () => {
     const wrapper = mount(
       <TestProviders>
         <Resizeable
@@ -44,8 +43,7 @@ describe('Resizeable', () => {
     );
   });
 
-  // styled-components issue
-  test.skip('it applies positioning styles to the ResizeHandleContainer when positionAbsolute is true and bottom/left/right/top is specified', () => {
+  test('it applies positioning styles to the ResizeHandleContainer when positionAbsolute is true and bottom/left/right/top is specified', () => {
     const wrapper = mount(
       <TestProviders>
         <Resizeable
@@ -72,8 +70,7 @@ describe('Resizeable', () => {
     expect(resizeHandleContainer).toHaveStyleRule('top', '0');
   });
 
-  // styled-components issue
-  test.skip('it DOES NOT apply positioning styles to the ResizeHandleContainer when positionAbsolute is false, regardless if bottom/left/right/top is specified', () => {
+  test('it DOES NOT apply positioning styles to the ResizeHandleContainer when positionAbsolute is false, regardless if bottom/left/right/top is specified', () => {
     const wrapper = mount(
       <TestProviders>
         <Resizeable

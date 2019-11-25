@@ -83,8 +83,7 @@ describe('StatefulFieldsBrowser', () => {
     });
   });
 
-  // styled-components issue
-  describe.skip('updateSelectedCategoryId', () => {
+  describe('updateSelectedCategoryId', () => {
     beforeEach(() => {
       jest.useFakeTimers();
     });

@@ -208,8 +208,7 @@ describe('AddNote', () => {
     expect(updateNote).toBeCalled();
   });
 
-  // styled-components issue
-  test.skip('it does NOT display the markdown formatting hint when a note has NOT been entered', () => {
+  test('it does NOT display the markdown formatting hint when a note has NOT been entered', () => {
     const wrapper = mount(
       <AddNote
         associateNote={jest.fn()}
@@ -227,8 +226,7 @@ describe('AddNote', () => {
     );
   });
 
-  // styled-components issue
-  test.skip('it displays the markdown formatting hint when a note has been entered', () => {
+  test('it displays the markdown formatting hint when a note has been entered', () => {
     const wrapper = mount(
       <AddNote
         associateNote={jest.fn()}

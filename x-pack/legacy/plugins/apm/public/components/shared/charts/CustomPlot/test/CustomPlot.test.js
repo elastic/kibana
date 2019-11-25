@@ -75,8 +75,7 @@ describe('when response has data', () => {
       expect(wrapper.find('Tooltip').length).toEqual(0);
     });
 
-    // styled-components issue
-    it.skip('should have correct markup', () => {
+    it('should have correct markup', () => {
       expect(toJson(wrapper)).toMatchSnapshot();
     });
   });
@@ -202,8 +201,7 @@ describe('when response has data', () => {
       expect(InteractivePlot.prototype.render.mock.calls.length).toEqual(3);
     });
 
-    // styled-components issue
-    it.skip('should match snapshots', () => {
+    it('should match snapshots', () => {
       expect(toJson(wrapper)).toMatchSnapshot();
       expect(wrapper.state()).toMatchSnapshot();
     });
@@ -324,8 +322,7 @@ describe('when response has no data', () => {
       expect(wrapper.find('Tooltip').length).toEqual(0);
     });
 
-    // styled-components issue
-    it.skip('should have correct markup', () => {
+    it('should have correct markup', () => {
       expect(toJson(wrapper)).toMatchSnapshot();
     });
 

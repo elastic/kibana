@@ -92,8 +92,7 @@ describe('getCategoryColumns', () => {
     ).toBe(true);
   });
 
-  // styled-components issue
-  test.skip('it renders the selected category with bold text', () => {
+  test('it renders the selected category with bold text', () => {
     const selectedCategoryId = 'auditd';
 
     const wrapper = mount(
@@ -115,8 +114,7 @@ describe('getCategoryColumns', () => {
     ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
   });
 
-  // styled-components issue
-  test.skip('it does NOT render an un-selected category with bold text', () => {
+  test('it does NOT render an un-selected category with bold text', () => {
     const selectedCategoryId = 'auditd';
     const notTheSelectedCategoryId = 'base';
 

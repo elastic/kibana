@@ -16,8 +16,7 @@ describe('Timeline', () => {
     mockMoment();
   });
 
-  // styled-components issue
-  it.skip('should render with data', () => {
+  it('should render with data', () => {
     const props = {
       traceRootDuration: 200000,
       width: 1000,

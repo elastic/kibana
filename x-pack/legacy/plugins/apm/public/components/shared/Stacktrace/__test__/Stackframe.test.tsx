@@ -18,8 +18,7 @@ describe('Stackframe', () => {
       wrapper = mount(<Stackframe id="test" stackframe={stackframe} />);
     });
 
-    // styled-components issue
-    it.skip('should render correctly', () => {
+    it('should render correctly', () => {
       expect(wrapper).toMatchSnapshot();
     });
 

@@ -25,8 +25,7 @@ jest.mock('@elastic/charts', () => {
   };
 });
 
-// styled-components issue
-describe.skip('WrappedByAutoSizer', () => {
+describe('WrappedByAutoSizer', () => {
   it('should render correct default height', () => {
     const wrapper = shallow(<WrappedByAutoSizer />);
     expect(wrapper).toHaveStyleRule('height', defaultChartHeight);

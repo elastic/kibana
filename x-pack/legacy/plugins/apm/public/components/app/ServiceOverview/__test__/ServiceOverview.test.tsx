@@ -60,8 +60,7 @@ describe('Service Overview -> View', () => {
     jest.resetAllMocks();
   });
 
-  // styled-components issue
-  it.skip('should render services, when list is not empty', async () => {
+  it('should render services, when list is not empty', async () => {
     // mock rest requests
     coreMock.http.get.mockResolvedValueOnce({
       hasLegacyData: false,

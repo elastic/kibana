@@ -303,8 +303,7 @@ describe('Header', () => {
     });
   });
 
-  // styled-components issue
-  describe.skip('text truncation styling', () => {
+  describe('text truncation styling', () => {
     test('truncates the header text with an ellipsis', () => {
       const wrapper = mount(
         <TestProviders>

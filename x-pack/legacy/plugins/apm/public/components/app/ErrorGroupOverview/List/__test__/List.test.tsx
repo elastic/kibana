@@ -29,8 +29,7 @@ const MockUrlParamsProvider: React.FC<{
   />
 );
 
-// styled-components issue
-describe.skip('ErrorGroupOverview -> List', () => {
+describe('ErrorGroupOverview -> List', () => {
   beforeAll(() => {
     mockMoment();
   });

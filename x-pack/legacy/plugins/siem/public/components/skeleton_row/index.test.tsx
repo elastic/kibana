@@ -31,8 +31,7 @@ describe('SkeletonRow', () => {
     expect(wrapper.find('.siemSkeletonRow__cell')).toHaveLength(10);
   });
 
-  // styled-components issue
-  test.skip('it applies row and cell styles when cellColor/cellMargin/rowHeight/rowPadding/style provided', () => {
+  test('it applies row and cell styles when cellColor/cellMargin/rowHeight/rowPadding/style provided', () => {
     const wrapper = mount(
       <TestProviders>
         <SkeletonRow

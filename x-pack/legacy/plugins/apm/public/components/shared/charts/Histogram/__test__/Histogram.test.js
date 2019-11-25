@@ -50,8 +50,7 @@ describe('Histogram', () => {
       expect(wrapper.state()).toEqual({ hoveredBucket: {} });
     });
 
-    // styled-components issue
-    it.skip('should have default markup', () => {
+    it('should have default markup', () => {
       expect(toJson(wrapper)).toMatchSnapshot();
     });
 
@@ -108,8 +107,7 @@ describe('Histogram', () => {
       });
     });
 
-    // styled-components issue
-    it.skip('should have correct markup for tooltip', () => {
+    it('should have correct markup for tooltip', () => {
       const tooltips = wrapper.find('Tooltip');
       expect(toJson(tooltips)).toMatchSnapshot();
     });

@@ -10,8 +10,7 @@ import { renderWithIntl } from 'test_utils/enzyme_helpers';
 import { PingTls } from '../../../../common/graphql/types';
 import { MonitorSSLCertificate } from '../monitor_status_bar';
 
-// styled-components issue
-describe.skip('MonitorStatusBar component', () => {
+describe('MonitorStatusBar component', () => {
   let monitorTls: PingTls;
 
   beforeEach(() => {

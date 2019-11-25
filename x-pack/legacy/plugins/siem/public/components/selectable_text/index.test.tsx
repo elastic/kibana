@@ -10,8 +10,7 @@ import * as React from 'react';
 
 import { SelectableText } from '.';
 
-// styled-components issue
-describe.skip('SelectableText', () => {
+describe('SelectableText', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(<SelectableText>{'You may select this text'}</SelectableText>);
     expect(toJson(wrapper)).toMatchSnapshot();

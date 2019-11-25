@@ -42,8 +42,7 @@ describe('Duration', () => {
     ).toEqual('popout');
   });
 
-  // styled-components issue
-  test.skip('it applies a margin-left style when the leftMargin prop is true', () => {
+  test('it applies a margin-left style when the leftMargin prop is true', () => {
     const wrapper = mount(
       <TestProviders>
         <ExternalLinkIcon leftMargin={true} />

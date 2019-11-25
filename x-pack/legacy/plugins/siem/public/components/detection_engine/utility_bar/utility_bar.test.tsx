@@ -50,8 +50,7 @@ describe('UtilityBar', () => {
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 
-  // styled-components issue
-  test.skip('it applies border styles when border is true', () => {
+  test('it applies border styles when border is true', () => {
     const wrapper = mount(
       <TestProviders>
         <UtilityBar border>

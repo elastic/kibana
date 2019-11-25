@@ -15,8 +15,7 @@ import { LinkIcon } from './index';
 jest.mock('../../lib/settings/use_kibana_ui_setting');
 
 describe('LinkIcon', () => {
-  // styled-components issue
-  test.skip('it renders', () => {
+  test('it renders', () => {
     const wrapper = shallow(
       <TestProviders>
         <LinkIcon href="#" iconSide="right" iconSize="xxl" iconType="alert">
@@ -77,8 +76,7 @@ describe('LinkIcon', () => {
     ).toBe(true);
   });
 
-  // styled-components issue
-  test.skip('it positions the icon to the right when iconSide is right', () => {
+  test('it positions the icon to the right when iconSide is right', () => {
     const wrapper = mount(
       <TestProviders>
         <LinkIcon iconSide="right" iconType="alert">

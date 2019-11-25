@@ -8,8 +8,7 @@ import { DonutChart } from '../donut_chart';
 import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
-// styled-components issue
-describe.skip('DonutChart component', () => {
+describe('DonutChart component', () => {
   it('passes correct props without errors for valid props', () => {
     const props = {
       down: 32,
