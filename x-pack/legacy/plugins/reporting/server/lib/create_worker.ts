@@ -11,9 +11,8 @@ import {
   QueueConfig,
   ExportTypeDefinition,
   ESQueueWorkerExecuteFn,
-  ImmediateExecuteFn,
-  JobDoc,
   JobDocPayload,
+  ImmediateExecuteFn,
   JobSource,
   RequestFacade,
   ServerFacade,
@@ -22,7 +21,10 @@ import {
 import { events as esqueueEvents } from './esqueue';
 import { LevelLogger } from './level_logger';
 
-export function createWorkerFactory(server: ServerFacade) {
+export function createWorkerFactory<JobParamsType>(server: ServerFacade) {
+  type JobSourceType = JobSource<JobParamsType>;
+  type ExecuteFnType = ESQueueWorkerExecuteFn<JobParamsType> | ImmediateExecuteFn<JobParamsType>;
+
   const config = server.config();
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'queue-worker']);
   const queueConfig: QueueConfig = config.get('xpack.reporting.queue');
@@ -33,30 +35,34 @@ export function createWorkerFactory(server: ServerFacade) {
   // Once more document types are added, this will need to be passed in
   return function createWorker(queue: ESQueueInstance) {
     // export type / execute job map
-    const jobExecutors: Map<string, ESQueueWorkerExecuteFn | ImmediateExecuteFn> = new Map();
+    const jobExecutors: Map<string, ExecuteFnType> = new Map();
 
-    for (const exportType of exportTypesRegistry.getAll() as ExportTypeDefinition[]) {
+    for (const exportType of exportTypesRegistry.getAll() as Array<
+      ExportTypeDefinition<JobParamsType, any, any, ExecuteFnType>
+    >) {
       const executeJobFactory = exportType.executeJobFactory(server);
       jobExecutors.set(exportType.jobType, executeJobFactory);
     }
 
     const workerFn = (
-      job: JobSource,
-      arg1: JobDocPayload | JobDoc,
+      { _id: jobId, _source: { jobtype: jobType } }: JobSourceType,
+      arg1: JobDocPayload<JobParamsType> | JobParamsType,
       arg2: CancellationToken | RequestFacade | undefined
     ) => {
       // pass the work to the jobExecutor
-      if (!jobExecutors.get(job._source.jobtype)) {
-        throw new Error(`Unable to find a job executor for the claimed job: [${job._id}]`);
+      if (!jobExecutors.get(jobType)) {
+        throw new Error(`Unable to find a job executor for the claimed job: [${jobId}]`);
       }
       // job executor function signature is different depending on whether it
       // is ESQueueWorkerExecuteFn or ImmediateExecuteFn
-      if (job._id) {
-        const jobExecutor = jobExecutors.get(job._source.jobtype) as ESQueueWorkerExecuteFn;
-        return jobExecutor(job._id, arg1 as JobDoc, arg2 as CancellationToken);
+      if (jobId) {
+        const jobExecutorWorker = jobExecutors.get(jobType) as ESQueueWorkerExecuteFn<
+          JobParamsType
+        >;
+        return jobExecutorWorker(jobId, arg1 as JobParamsType, arg2 as CancellationToken);
       } else {
-        const jobExecutor = jobExecutors.get(job._source.jobtype) as ImmediateExecuteFn;
-        return jobExecutor(null, arg1 as JobDocPayload, arg2 as RequestFacade);
+        const jobExecutor = jobExecutors.get(jobType) as ImmediateExecuteFn<JobParamsType>;
+        return jobExecutor(null, arg1 as JobDocPayload<JobParamsType>, arg2 as RequestFacade);
       }
     };
     const workerOptions = {

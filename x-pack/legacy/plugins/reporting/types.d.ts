@@ -206,11 +206,6 @@ export interface JobDocPayload<JobParamsType> {
   objects?: null | object[];
 }
 
-export interface JobSource<JobDocType> {
-  _id: string;
-  _source: JobDocType;
-}
-
 export interface JobDocOutput {
   content: string; // encoded content
   contentType: string;
@@ -221,6 +216,16 @@ export interface JobDocExecuted<JobParamsType> {
   output: JobDocOutputExecuted;
   payload: JobDocPayload<JobParamsType>;
   status: string; // completed, failed, etc
+}
+
+export interface JobSource<JobParamsType> {
+  _id: string;
+  _source: {
+    jobtype: string;
+    output: JobDocOutput;
+    payload: JobDocPayload<JobParamsType>;
+    status: string; // completed, failed, etc
+  };
 }
 
 /*
@@ -270,9 +275,9 @@ export type ImmediateCreateJobFn<JobParamsType> = (
   jobParams: JobParamsType;
 }>;
 
-export type ESQueueWorkerExecuteFn<JobDocType> = (
+export type ESQueueWorkerExecuteFn<JobParamsType> = (
   jobId: string,
-  job: JobDocType,
+  job: JobParamsType,
   cancellationToken?: CancellationToken
 ) => void;
 
