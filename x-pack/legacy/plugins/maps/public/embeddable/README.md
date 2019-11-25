@@ -4,6 +4,9 @@
 - **isLayerTOCOpen:** (Boolean) Set to false to render map with legend in collapsed state.
 - **openTOCDetails:** (Array of Strings) Array of layer ids. Add layer id to show layer details on initial render.
 - **mapCenter:** ({lat, lon, zoom }) Provide mapCenter to customize initial map location.
+- **disableInteractive:** (Boolean) Will disable map interactions, panning, zooming in the map.
+- **disableTooltipControl:** (Boolean) Will disable tooltip which shows relevant information on hover, like Continent name etc
+- **hideToolbarOverlay:** (Boolean) Will disable toolbar, which can be used to navigate to coordinate by entering lat/long and zoom values.
 
 ### Creating a Map embeddable from saved object
 ```

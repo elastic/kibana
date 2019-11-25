@@ -167,7 +167,6 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'x-pack/legacy/plugins/index_management/public/lib/editSettings.js',
   'x-pack/legacy/plugins/license_management/public/store/reducers/licenseManagement.js',
   'x-pack/legacy/plugins/monitoring/public/components/sparkline/__mocks__/plugins/xpack_main/jquery_flot.js',
-  'x-pack/legacy/plugins/ml/public/jobs/new_job/simple/components/watcher/email-influencers.html',
   'x-pack/legacy/plugins/monitoring/public/icons/alert-blue.svg',
   'x-pack/legacy/plugins/monitoring/public/icons/health-gray.svg',
   'x-pack/legacy/plugins/monitoring/public/icons/health-green.svg',

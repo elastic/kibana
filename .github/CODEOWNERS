@@ -40,6 +40,9 @@
 # ML team owns the transform plugin, ES team added here for visibility
 # because the plugin lives in Kibana's Elasticsearch management section.
 /x-pack/legacy/plugins/transform/  @elastic/ml-ui @elastic/es-ui
+/x-pack/test/functional/apps/transform/ @elastic/ml-ui
+/x-pack/test/functional/services/transform_ui/ @elastic/ml-ui
+/x-pack/test/functional/services/transform.ts @elastic/ml-ui
 
 # Operations
 /renovate.json5 @elastic/kibana-operations
@@ -71,6 +74,7 @@
 /x-pack/test/api_integration/apis/security/ @elastic/kibana-security
 
 # Kibana Stack Services
+/src/dev/i18n @elastic/kibana-stack-services
 /packages/kbn-analytics/ @elastic/kibana-stack-services
 /src/legacy/core_plugins/ui_metric/ @elastic/kibana-stack-services
 /x-pack/legacy/plugins/telemetry @elastic/kibana-stack-services

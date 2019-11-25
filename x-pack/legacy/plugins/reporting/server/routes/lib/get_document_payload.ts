@@ -13,7 +13,6 @@ import {
   JobDocExecuted,
   JobDocOutputExecuted,
 } from '../../../types';
-import { oncePerServer } from '../../lib/once_per_server';
 import { CSV_JOB_TYPE } from '../../../common/constants';
 
 interface ICustomHeaders {
@@ -39,7 +38,7 @@ const getReportingHeaders = (output: JobDocOutputExecuted, exportType: ExportTyp
   return metaDataHeaders;
 };
 
-function getDocumentPayloadFn(server: ServerFacade) {
+export function getDocumentPayloadFactory(server: ServerFacade) {
   const exportTypesRegistry = server.plugins.reporting!.exportTypesRegistry;
 
   function encodeContent(content: string | null, exportType: ExportTypeDefinition) {
@@ -105,5 +104,3 @@ function getDocumentPayloadFn(server: ServerFacade) {
     return getIncomplete(status);
   };
 }
-
-export const getDocumentPayloadFactory = oncePerServer(getDocumentPayloadFn);
