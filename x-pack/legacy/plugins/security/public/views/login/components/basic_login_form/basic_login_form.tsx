@@ -8,6 +8,7 @@ import { EuiButton, EuiCallOut, EuiFieldText, EuiFormRow, EuiPanel, EuiSpacer } 
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, FormEvent, Fragment, MouseEvent } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { EuiText } from '@elastic/eui';
 import { LoginState } from '../../../../../common/login_state';
 
 interface Props {
@@ -41,6 +42,7 @@ class BasicLoginFormUI extends Component<Props, State> {
     return (
       <Fragment>
         {this.renderMessage()}
+        {this.renderLoginAssistanceMessage()}
         <EuiPanel>
           <form onSubmit={this.submit}>
             <EuiFormRow
@@ -104,6 +106,16 @@ class BasicLoginFormUI extends Component<Props, State> {
     );
   }
 
+  private renderLoginAssistanceMessage = () => {
+    return (
+      <Fragment>
+        <EuiText>
+          <ReactMarkdown>{this.props.loginAssistanceMessage}</ReactMarkdown>
+        </EuiText>
+      </Fragment>
+    );
+  };
+
   private renderMessage = () => {
     if (this.state.message) {
       return (
@@ -135,18 +147,6 @@ class BasicLoginFormUI extends Component<Props, State> {
       );
     }
 
-    if (this.props.loginAssistanceMessage) {
-      return (
-        <Fragment>
-          <EuiCallOut
-            size="s"
-            color="primary"
-            children={<ReactMarkdown>{this.props.loginAssistanceMessage}</ReactMarkdown>}
-          />
-          <EuiSpacer size="l" />
-        </Fragment>
-      );
-    }
     return null;
   };
 
