@@ -21,7 +21,7 @@ import React, { Fragment } from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { existsOperator, isOneOfOperator } from './filter_operators';
-import { esFilters } from '../../../../../../../../plugins/data/public';
+import { esFilters } from '../../../..';
 
 interface Props {
   filter: esFilters.Filter;

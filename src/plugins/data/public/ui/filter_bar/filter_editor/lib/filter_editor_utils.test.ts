@@ -17,7 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
 import {
   existsFilter,
   phraseFilter,
@@ -25,8 +24,8 @@ import {
   rangeFilter,
   stubIndexPattern,
   stubFields,
-} from '../../../../../../../../plugins/data/public/stubs';
-import { IndexPattern, Field } from '../../../../index';
+} from '../../../../stubs';
+import { esFilters } from '../../../../index';
 import {
   getFieldFromFilter,
   getFilterableFields,
@@ -37,17 +36,12 @@ import {
 
 import { existsOperator, isBetweenOperator, isOneOfOperator, isOperator } from './filter_operators';
 
-import { esFilters } from '../../../../../../../../plugins/data/public';
-
 jest.mock('ui/new_platform');
-
-const mockedFields = stubFields as Field[];
-const mockedIndexPattern = stubIndexPattern as IndexPattern;
 
 describe('Filter editor utils', () => {
   describe('getFieldFromFilter', () => {
     it('should return the field from the filter', () => {
-      const field = getFieldFromFilter(phraseFilter, mockedIndexPattern);
+      const field = getFieldFromFilter(phraseFilter, stubIndexPattern);
       expect(field).not.toBeUndefined();
       expect(field && field.name).toBe(phraseFilter.meta.key);
     });
@@ -117,12 +111,12 @@ describe('Filter editor utils', () => {
 
   describe('getFilterableFields', () => {
     it('returns the list of fields from the given index pattern', () => {
-      const fieldOptions = getFilterableFields(mockedIndexPattern);
+      const fieldOptions = getFilterableFields(stubIndexPattern);
       expect(fieldOptions.length).toBeGreaterThan(0);
     });
 
     it('limits the fields to the filterable fields', () => {
-      const fieldOptions = getFilterableFields(mockedIndexPattern);
+      const fieldOptions = getFilterableFields(stubIndexPattern);
       const nonFilterableFields = fieldOptions.filter(field => !field.filterable);
       expect(nonFilterableFields.length).toBe(0);
     });
@@ -131,14 +125,14 @@ describe('Filter editor utils', () => {
   describe('getOperatorOptions', () => {
     it('returns range for number fields', () => {
       const [field] = stubFields.filter(({ type }) => type === 'number');
-      const operatorOptions = getOperatorOptions(field as Field);
+      const operatorOptions = getOperatorOptions(field);
       const rangeOperator = operatorOptions.find(operator => operator.type === 'range');
       expect(rangeOperator).not.toBeUndefined();
     });
 
     it('does not return range for string fields', () => {
       const [field] = stubFields.filter(({ type }) => type === 'string');
-      const operatorOptions = getOperatorOptions(field as Field);
+      const operatorOptions = getOperatorOptions(field);
       const rangeOperator = operatorOptions.find(operator => operator.type === 'range');
       expect(rangeOperator).toBeUndefined();
     });
@@ -146,49 +140,44 @@ describe('Filter editor utils', () => {
 
   describe('isFilterValid', () => {
     it('should return false if index pattern is not provided', () => {
-      const isValid = isFilterValid(undefined, mockedFields[0], isOperator, 'foo');
+      const isValid = isFilterValid(undefined, stubFields[0], isOperator, 'foo');
       expect(isValid).toBe(false);
     });
 
     it('should return false if field is not provided', () => {
-      const isValid = isFilterValid(mockedIndexPattern, undefined, isOperator, 'foo');
+      const isValid = isFilterValid(stubIndexPattern, undefined, isOperator, 'foo');
       expect(isValid).toBe(false);
     });
 
     it('should return false if operator is not provided', () => {
-      const isValid = isFilterValid(mockedIndexPattern, mockedFields[0], undefined, 'foo');
+      const isValid = isFilterValid(stubIndexPattern, stubFields[0], undefined, 'foo');
       expect(isValid).toBe(false);
     });
 
     it('should return false for phrases filter without phrases', () => {
-      const isValid = isFilterValid(mockedIndexPattern, mockedFields[0], isOneOfOperator, []);
+      const isValid = isFilterValid(stubIndexPattern, stubFields[0], isOneOfOperator, []);
       expect(isValid).toBe(false);
     });
 
     it('should return true for phrases filter with phrases', () => {
-      const isValid = isFilterValid(mockedIndexPattern, mockedFields[0], isOneOfOperator, ['foo']);
+      const isValid = isFilterValid(stubIndexPattern, stubFields[0], isOneOfOperator, ['foo']);
       expect(isValid).toBe(true);
     });
 
     it('should return false for range filter without range', () => {
-      const isValid = isFilterValid(
-        mockedIndexPattern,
-        mockedFields[0],
-        isBetweenOperator,
-        undefined
-      );
+      const isValid = isFilterValid(stubIndexPattern, stubFields[0], isBetweenOperator, undefined);
       expect(isValid).toBe(false);
     });
 
     it('should return true for range filter with from', () => {
-      const isValid = isFilterValid(mockedIndexPattern, mockedFields[0], isBetweenOperator, {
+      const isValid = isFilterValid(stubIndexPattern, stubFields[0], isBetweenOperator, {
         from: 'foo',
       });
       expect(isValid).toBe(true);
     });
 
     it('should return true for range filter with from/to', () => {
-      const isValid = isFilterValid(mockedIndexPattern, mockedFields[0], isBetweenOperator, {
+      const isValid = isFilterValid(stubIndexPattern, stubFields[0], isBetweenOperator, {
         from: 'foo',
         too: 'goo',
       });
@@ -196,7 +185,7 @@ describe('Filter editor utils', () => {
     });
 
     it('should return true for exists filter without params', () => {
-      const isValid = isFilterValid(mockedIndexPattern, mockedFields[0], existsOperator);
+      const isValid = isFilterValid(stubIndexPattern, stubFields[0], existsOperator);
       expect(isValid).toBe(true);
     });
   });
