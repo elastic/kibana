@@ -76,6 +76,7 @@ import { envoyproxyLogsSpecProvider } from './envoyproxy_logs';
 import { couchdbMetricsSpecProvider } from './couchdb_metrics';
 import { emsBoundariesSpecProvider } from './ems';
 import { consulMetricsSpecProvider } from './consul_metrics';
+import { traefikMetricsSpecProvider } from './traefik_metrics';
 
 export function registerTutorials(server) {
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(systemLogsSpecProvider);
@@ -138,4 +139,5 @@ export function registerTutorials(server) {
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(couchdbMetricsSpecProvider);
   server.registerTutorial(emsBoundariesSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(consulMetricsSpecProvider);
+  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(traefikMetricsSpecProvider);
 }

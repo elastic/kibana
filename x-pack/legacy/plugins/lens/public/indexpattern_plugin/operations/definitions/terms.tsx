@@ -37,7 +37,7 @@ function isSortableByColumn(column: IndexPatternColumn) {
 }
 
 const DEFAULT_SIZE = 3;
-const supportedTypes = new Set(['string', 'boolean', 'ip']);
+const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
 
 export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'terms';
