@@ -362,7 +362,7 @@ describe('utils', () => {
             },
           ],
         })
-        .mockReturnValueOnce(repeatedSearchResultsWithSortId(3, 1, someGuids.splice(0, 3)))
+        .mockReturnValueOnce(repeatedSearchResultsWithSortId(3, 1, someGuids.slice(0, 3)))
         .mockReturnValueOnce({
           took: 100,
           errors: false,
@@ -372,7 +372,7 @@ describe('utils', () => {
             },
           ],
         })
-        .mockReturnValueOnce(repeatedSearchResultsWithSortId(3, 1, someGuids.splice(3, 6)))
+        .mockReturnValueOnce(repeatedSearchResultsWithSortId(3, 1, someGuids.slice(3, 6)))
         .mockReturnValueOnce({
           took: 100,
           errors: false,
@@ -383,7 +383,7 @@ describe('utils', () => {
           ],
         });
       const result = await searchAfterAndBulkCreate({
-        someResult: repeatedSearchResultsWithSortId(3, 1, someGuids.splice(6, 9)),
+        someResult: repeatedSearchResultsWithSortId(3, 1, someGuids.slice(6, 9)),
         signalParams: sampleParams,
         services: mockService,
         logger: mockLogger,
