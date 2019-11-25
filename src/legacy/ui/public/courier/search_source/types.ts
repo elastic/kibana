@@ -17,8 +17,7 @@
  * under the License.
  */
 import { NameList } from 'elasticsearch';
-import { esFilters } from '../../../../../plugins/data/public';
-import { Query } from '../../../../../plugins/data/common/query';
+import { esFilters, Query } from '../../../../../plugins/data/public';
 import { IndexPattern } from '../../../../core_plugins/data/public/index_patterns';
 
 export type EsQuerySearchAfter = [string | number, string | number];

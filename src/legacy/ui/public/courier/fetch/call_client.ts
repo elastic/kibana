@@ -49,7 +49,7 @@ export function callClient(
     const searchStrategy = getSearchStrategyById(searchStrategyId);
     const requests = searchStrategyMap[searchStrategyId];
 
-    const { searching, abort } = searchStrategy!.search({
+    const { searching, abort } = searchStrategy.search({
       searchRequests: requests,
       es,
       config,

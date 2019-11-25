@@ -202,8 +202,8 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       return getTime(indexPattern, this.input.timeRange);
     });
 
-    this.filtersSearchSource = searchSource.create()!;
-    this.filtersSearchSource!.setParent(timeRangeSearchSource);
+    this.filtersSearchSource = searchSource.create();
+    this.filtersSearchSource.setParent(timeRangeSearchSource);
 
     searchSource.setParent(this.filtersSearchSource);
 

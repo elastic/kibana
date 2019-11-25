@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { SearchError } from '../../courier';
 import { KbnError } from '../../../../../plugins/kibana_utils/public';
 import { SearchResponse } from '../types';
 /**
@@ -26,9 +27,8 @@ import { SearchResponse } from '../types';
  */
 export class RequestFailure extends KbnError {
   public resp: SearchResponse;
-  constructor(err: any, resp?: SearchResponse) {
-    err = err || false;
-    super(`Request to Elasticsearch failed: ${JSON.stringify(resp || err.message)}`);
+  constructor(err: SearchError | null = null, resp?: SearchResponse) {
+    super(`Request to Elasticsearch failed: ${JSON.stringify(resp || err?.message)}`);
 
     this.resp = resp;
   }

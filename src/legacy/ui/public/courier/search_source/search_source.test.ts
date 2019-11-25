@@ -18,7 +18,7 @@
  */
 
 import { SearchSource } from '../search_source';
-import { IndexPattern } from '../../../../core_plugins/data/public/index_patterns';
+import { IndexPattern } from '../../../../core_plugins/data/public';
 
 jest.mock('ui/new_platform');
 

@@ -54,7 +54,7 @@ export class SearchError extends Error {
   }
 }
 
-export function getSearchErrorType({ message }: { message: string }) {
+export function getSearchErrorType({ message }: Pick<SearchError, 'message'>) {
   const msg = message.toLowerCase();
   if (msg.indexOf('unsupported query') > -1) {
     return 'UNSUPPORTED_QUERY';

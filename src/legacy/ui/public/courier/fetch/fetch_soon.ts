@@ -30,7 +30,7 @@ export async function fetchSoon(
   options: FetchOptions,
   { es, config, esShardTimeout }: FetchHandlers
 ) {
-  const msToDelay = config!.get('courier:batchSearches') ? 50 : 0;
+  const msToDelay = config.get('courier:batchSearches') ? 50 : 0;
   return delayedFetch(request, options, { es, config, esShardTimeout }, msToDelay);
 }
 
