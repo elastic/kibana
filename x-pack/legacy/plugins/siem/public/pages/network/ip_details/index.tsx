@@ -39,6 +39,7 @@ import { NetworkTopNFlowQueryTable } from './network_top_n_flow_query_table';
 import { TlsQueryTable } from './tls_query_table';
 import { IPDetailsComponentProps } from './types';
 import { UsersQueryTable } from './users_query_table';
+import { AnomaliesQueryTabBody } from '../../../containers/anomalies/anomalies_query_tab_body';
 import { esQuery } from '../../../../../../../../src/plugins/data/public';
 
 export { getBreadcrumbs } from './utils';
@@ -57,6 +58,7 @@ export const IPDetailsComponent = ({
   setQuery,
   to,
 }: IPDetailsComponentProps) => {
+  const type = networkModel.NetworkType.details;
   const narrowDateRange = useCallback(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
@@ -107,7 +109,7 @@ export const IPDetailsComponent = ({
                   skip={isInitializing}
                   sourceId="default"
                   filterQuery={filterQuery}
-                  type={networkModel.NetworkType.details}
+                  type={type}
                   ip={ip}
                 >
                   {({ id, inspect, ipOverviewData, loading, refetch }) => (
@@ -126,7 +128,7 @@ export const IPDetailsComponent = ({
                           anomaliesData={anomaliesData}
                           loading={loading}
                           isLoadingAnomaliesData={isLoadingAnomaliesData}
-                          type={networkModel.NetworkType.details}
+                          type={type}
                           flowTarget={flowTarget}
                           refetch={refetch}
                           setQuery={setQuery}
@@ -157,7 +159,7 @@ export const IPDetailsComponent = ({
                       ip={ip}
                       skip={isInitializing}
                       startDate={from}
-                      type={networkModel.NetworkType.details}
+                      type={type}
                       setQuery={setQuery}
                       indexPattern={indexPattern}
                     />
@@ -171,7 +173,7 @@ export const IPDetailsComponent = ({
                       ip={ip}
                       skip={isInitializing}
                       startDate={from}
-                      type={networkModel.NetworkType.details}
+                      type={type}
                       setQuery={setQuery}
                       indexPattern={indexPattern}
                     />
@@ -189,7 +191,7 @@ export const IPDetailsComponent = ({
                       ip={ip}
                       skip={isInitializing}
                       startDate={from}
-                      type={networkModel.NetworkType.details}
+                      type={type}
                       setQuery={setQuery}
                       indexPattern={indexPattern}
                     />
@@ -203,7 +205,7 @@ export const IPDetailsComponent = ({
                       ip={ip}
                       skip={isInitializing}
                       startDate={from}
-                      type={networkModel.NetworkType.details}
+                      type={type}
                       setQuery={setQuery}
                       indexPattern={indexPattern}
                     />
@@ -219,7 +221,7 @@ export const IPDetailsComponent = ({
                   ip={ip}
                   skip={isInitializing}
                   startDate={from}
-                  type={networkModel.NetworkType.details}
+                  type={type}
                   setQuery={setQuery}
                 />
 
@@ -231,7 +233,7 @@ export const IPDetailsComponent = ({
                   ip={ip}
                   skip={isInitializing}
                   startDate={from}
-                  type={networkModel.NetworkType.details}
+                  type={type}
                   setQuery={setQuery}
                 />
 
@@ -245,19 +247,23 @@ export const IPDetailsComponent = ({
                   setQuery={setQuery}
                   skip={isInitializing}
                   startDate={from}
-                  type={networkModel.NetworkType.details}
+                  type={type}
                 />
 
                 <EuiSpacer />
 
-                <AnomaliesNetworkTable
+                <AnomaliesQueryTabBody
+                  filterQuery={filterQuery}
+                  setQuery={setQuery}
                   startDate={from}
                   endDate={to}
                   skip={isInitializing}
                   ip={ip}
-                  type={networkModel.NetworkType.details}
+                  type={type}
                   flowTarget={flowTarget}
                   narrowDateRange={narrowDateRange}
+                  hideHistogramIfEmpty={true}
+                  AnomaliesTableComponent={AnomaliesNetworkTable}
                 />
               </WrapperPage>
             </StickyContainer>

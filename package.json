@@ -85,7 +85,8 @@
     "**/typescript": "3.7.2",
     "**/graphql-toolkit/lodash": "^4.17.13",
     "**/isomorphic-git/**/base64-js": "^1.2.1",
-    "**/image-diff/gm/debug": "^2.6.9"
+    "**/image-diff/gm/debug": "^2.6.9",
+    "**/deepmerge": "^4.2.2"
   },
   "workspaces": {
     "packages": [
@@ -155,6 +156,7 @@
     "custom-event-polyfill": "^0.3.0",
     "d3": "3.5.17",
     "d3-cloud": "1.2.5",
+    "deepmerge": "^4.2.2",
     "del": "^5.1.0",
     "elasticsearch": "^16.5.0",
     "elasticsearch-browser": "^16.5.0",
