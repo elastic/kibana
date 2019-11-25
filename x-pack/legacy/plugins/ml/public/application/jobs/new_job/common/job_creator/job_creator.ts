@@ -18,6 +18,8 @@ import { JobRunner, ProgressSubscriber } from '../job_runner';
 import { JOB_TYPE, CREATED_BY_LABEL, SHARED_RESULTS_INDEX_NAME } from './util/constants';
 import { isSparseDataJob } from './util/general';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
+import { ml } from '../../../../services/ml_api_service';
+import { Calendar } from '../../../../../../common/types/calendars';
 
 export class JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
@@ -189,11 +191,11 @@ export class JobCreator {
     this._job_config.groups = groups;
   }
 
-  public get calendars(): string[] {
+  public get calendars(): Calendar[] {
     return this._job_config.calendars || [];
   }
 
-  public set calendars(calendars: string[]) {
+  public set calendars(calendars: Calendar[]) {
     this._job_config.calendars = calendars;
   }
 
@@ -441,7 +443,19 @@ export class JobCreator {
 
   public async createJob(): Promise<object> {
     try {
-      const { success, resp } = await mlJobService.saveNewJob(this._job_config);
+      const { calendars, ...jobConfig } = this._job_config;
+      const { success, resp } = await mlJobService.saveNewJob(jobConfig);
+
+      if (calendars && calendars.length > 0) {
+        for (const calendar of calendars) {
+          await ml.updateCalendar({
+            ...calendar,
+            calendarId: calendar.calendar_id,
+            job_ids: [this.jobId],
+          });
+        }
+      }
+
       if (success === true) {
         return resp;
       } else {
