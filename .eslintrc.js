@@ -358,7 +358,12 @@ module.exports = {
               },
               {
                 target: ['src/core/**/*'],
-                from: ['plugins/**/*', 'src/plugins/**/*'],
+                from: [
+                  'plugins/**/*',
+                  'src/plugins/**/*',
+                  'src/legacy/core_plugins/**/*',
+                  'src/legacy/ui/**/*',
+                ],
                 errorMessage: 'The core cannot depend on any plugins.',
               },
               {
