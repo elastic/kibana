@@ -269,29 +269,4 @@ describe('QueryBarTopRowTopRow', () => {
     expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
     expect(component.find(TIMEPICKER_SELECTOR).length).toBe(0);
   });
-
-  it('Should render properly with an undefined time period in the time history', () => {
-    const customMockTimeHistory = {
-      get: () => {
-        return [
-          {
-            from: undefined,
-            to: undefined,
-          },
-        ];
-      },
-    };
-    const component = mount(
-      wrapQueryBarTopRowInContext({
-        isDirty: false,
-        screenTitle: 'Another Screen',
-        showDatePicker: true,
-        timeHistory: customMockTimeHistory,
-      })
-    );
-
-    const click = () =>
-      component.find('.euiQuickSelectPopover__anchor > EuiButtonEmpty').simulate('click');
-    expect(click).not.toThrow();
-  });
 });
