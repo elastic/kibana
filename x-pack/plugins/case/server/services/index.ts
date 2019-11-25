@@ -11,6 +11,7 @@ import {
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
+  SavedObjectsUpdateResponse,
 } from 'kibana/server';
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../constants';
 import {
@@ -20,6 +21,7 @@ import {
   UpdatedCommentType,
 } from '../routes/api/types';
 import { PluginSetupContract as SecurityPluginSetup } from '../../../security/server/plugin';
+import { AuthenticatedUser } from '../../../security/common/model';
 
 interface ClientArgs {
   client: SavedObjectsClientContract;
@@ -61,11 +63,11 @@ export interface CaseServiceSetup {
   getAllCaseComments(args: GetCaseArgs): Promise<SavedObjectsFindResponse>;
   getCase(args: GetCaseArgs): Promise<SavedObject>;
   getComment(args: GetCommentArgs): Promise<SavedObject>;
-  getUser(args: GetUserArgs): Promise<any>;
-  postNewCase(args: PostCaseArgs): Promise<any>;
-  postNewComment(args: PostCommentArgs): Promise<any>;
-  updateCase(args: UpdateCaseArgs): Promise<any>;
-  updateComment(args: UpdateCommentArgs): Promise<any>;
+  getUser(args: GetUserArgs): Promise<AuthenticatedUser>;
+  postNewCase(args: PostCaseArgs): Promise<SavedObject>;
+  postNewComment(args: PostCommentArgs): Promise<SavedObject>;
+  updateCase(args: UpdateCaseArgs): Promise<SavedObjectsUpdateResponse>;
+  updateComment(args: UpdateCommentArgs): Promise<SavedObjectsUpdateResponse>;
 }
 
 export class CaseService {
