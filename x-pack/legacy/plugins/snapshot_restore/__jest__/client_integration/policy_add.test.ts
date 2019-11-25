@@ -141,6 +141,25 @@ describe.skip('<PolicyAdd />', () => {
             'Minimum count cannot be greater than maximum count.',
           ]);
         });
+
+        test('should not allow the minimum count be negative', () => {
+          const { find, form } = testBed;
+
+          form.setInputValue('minCountInput', -1);
+          find('minCountInput').simulate('blur');
+
+          form.setInputValue('minCountInput', -1);
+          find('minCountInput').simulate('blur');
+
+          form.setInputValue('maxCountInput', -1);
+          find('maxCountInput').simulate('blur');
+
+          expect(form.getErrorsMessages()).toEqual([
+            'Delete after cannot be negative.',
+            'Minimum count cannot be negative.',
+            'Maximum count cannot be negative.',
+          ]);
+        });
       });
     });
 
