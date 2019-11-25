@@ -36,21 +36,21 @@ const metricExamples = [
 
 describe('getMetricFields', () => {
 
-  it('should add default "count" metric when no metrics are provided', () => {
+  it('should add default "count" metric when no metrics are provided', async () => {
     const source = new ESTermSource({
       indexPatternTitle: indexPatternTitle,
       term: termFieldName,
     });
     const metrics = source.getMetricFields();
     expect(metrics.length).toBe(1);
-    expect(metrics[0]).toEqual({
-      type: 'count',
-      propertyKey: '__kbnjoin__count_groupby_myIndex.myTermField',
-      propertyLabel: 'count of myIndex:myTermField',
-    });
+
+    expect(metrics[0].getAggType()).toEqual('count');
+    expect(metrics[0].getName()).toEqual('__kbnjoin__count_groupby_myIndex.myTermField');
+    expect(await metrics[0].getLabel()).toEqual('count of myIndex:myTermField');
+
   });
 
-  it('should remove incomplete metric configurations', () => {
+  it('should remove incomplete metric configurations', async () => {
     const source = new ESTermSource({
       indexPatternTitle: indexPatternTitle,
       term: termFieldName,
@@ -58,17 +58,16 @@ describe('getMetricFields', () => {
     });
     const metrics = source.getMetricFields();
     expect(metrics.length).toBe(2);
-    expect(metrics[0]).toEqual({
-      type: 'sum',
-      field: sumFieldName,
-      propertyKey: '__kbnjoin__sum_of_myFieldGettingSummed_groupby_myIndex.myTermField',
-      propertyLabel: 'my custom label',
-    });
-    expect(metrics[1]).toEqual({
-      type: 'count',
-      propertyKey: '__kbnjoin__count_groupby_myIndex.myTermField',
-      propertyLabel: 'count of myIndex:myTermField',
-    });
+
+    expect(metrics[0].getAggType()).toEqual('sum');
+    expect(metrics[0].getESDocFieldName()).toEqual(sumFieldName);
+    expect(metrics[0].getName()).toEqual('__kbnjoin__sum_of_myFieldGettingSummed_groupby_myIndex.myTermField');
+    expect(await metrics[0].getLabel()).toEqual('my custom label');
+
+    expect(metrics[1].getAggType()).toEqual('count');
+    expect(metrics[1].getName()).toEqual('__kbnjoin__count_groupby_myIndex.myTermField');
+    expect(await metrics[1].getLabel()).toEqual('count of myIndex:myTermField');
+
   });
 });
 

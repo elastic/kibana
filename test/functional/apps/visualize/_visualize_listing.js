@@ -22,7 +22,8 @@ import expect from '@kbn/expect';
 export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['visualize', 'header', 'common']);
 
-  describe('visualize listing page', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/40912
+  describe.skip('visualize listing page', function describeIndexTests() {
     const vizName = 'Visualize Listing Test';
 
     describe('create and delete', function () {

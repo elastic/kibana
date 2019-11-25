@@ -9,6 +9,7 @@ export default function({ loadTestFile }: FtrProviderContext) {
   describe('transform', function() {
     this.tags(['ciGroup9', 'transform']);
 
-    loadTestFile(require.resolve('./creation'));
+    loadTestFile(require.resolve('./creation_index_pattern'));
+    loadTestFile(require.resolve('./creation_saved_search'));
   });
 }
