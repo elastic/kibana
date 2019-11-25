@@ -8,7 +8,7 @@
 
 ```typescript
 uiPlugins: {
-        bundlePaths: Map<PluginName, string>;
+        internal: Map<PluginName, InternalPluginInfo>;
         public: Map<PluginName, DiscoveredPlugin>;
         browserConfigs: Map<PluginName, Observable<unknown>>;
     };

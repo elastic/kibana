@@ -231,7 +231,7 @@ describe('PluginsService', () => {
 
       expect(setup.contracts).toBeInstanceOf(Map);
       expect(setup.uiPlugins.public).toBeInstanceOf(Map);
-      expect(setup.uiPlugins.entryPointPaths).toBeInstanceOf(Map);
+      expect(setup.uiPlugins.internal).toBeInstanceOf(Map);
       expect(mockPluginSystem.addPlugin).not.toHaveBeenCalled();
       expect(mockPluginSystem.setupPlugins).toHaveBeenCalledTimes(1);
       expect(mockPluginSystem.setupPlugins).toHaveBeenCalledWith(setupDeps);
@@ -478,7 +478,7 @@ describe('PluginsService', () => {
   });
 
   describe('#setup()', () => {
-    describe('uiPlugins.entryPointPaths', () => {
+    describe('uiPlugins.internal', () => {
       it('includes disabled plugins', async () => {
         mockDiscover.mockReturnValue({
           error$: from([]),
@@ -504,10 +504,14 @@ describe('PluginsService', () => {
 
         await pluginsService.discover();
         const { uiPlugins } = await pluginsService.setup({} as any);
-        expect(uiPlugins.entryPointPaths).toMatchInlineSnapshot(`
+        expect(uiPlugins.internal).toMatchInlineSnapshot(`
           Map {
-            "plugin-1" => "path-1/public",
-            "plugin-2" => "path-2/public",
+            "plugin-1" => Object {
+              "entryPointPath": "path-1/public",
+            },
+            "plugin-2" => Object {
+              "entryPointPath": "path-2/public",
+            },
           }
         `);
       });

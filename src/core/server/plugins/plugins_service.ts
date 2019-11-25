@@ -25,7 +25,7 @@ import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { PluginWrapper } from './plugin';
-import { DiscoveredPlugin, PluginConfigDescriptor, PluginName } from './types';
+import { DiscoveredPlugin, PluginConfigDescriptor, PluginName, InternalPluginInfo } from './types';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 import { InternalCoreSetup } from '../internal_types';
@@ -40,7 +40,7 @@ export interface PluginsServiceSetup {
      * Paths to all discovered ui plugin entrypoints on the filesystem, even if
      * disabled.
      */
-    entryPointPaths: Map<PluginName, string>;
+    internal: Map<PluginName, InternalPluginInfo>;
 
     /**
      * Information needed by client-side to load plugins and wire dependencies.
@@ -72,7 +72,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   private readonly configService: IConfigService;
   private readonly config$: Observable<PluginsConfig>;
   private readonly pluginConfigDescriptors = new Map<PluginName, PluginConfigDescriptor>();
-  private readonly uiPluginBundlePaths = new Map<PluginName, string>();
+  private readonly uiPluginInternalInfo = new Map<PluginName, InternalPluginInfo>();
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('plugins-service');
@@ -112,7 +112,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     return {
       contracts,
       uiPlugins: {
-        entryPointPaths: this.uiPluginBundlePaths,
+        internal: this.uiPluginInternalInfo,
         public: uiPlugins,
         browserConfigs: this.generateUiPluginsConfigs(uiPlugins),
       },
@@ -208,7 +208,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
           }
 
           if (plugin.includesUiPlugin) {
-            this.uiPluginBundlePaths.set(plugin.name, `${plugin.path}/public`);
+            this.uiPluginInternalInfo.set(plugin.name, { entryPointPath: `${plugin.path}/public` });
           }
 
           pluginEnableStatuses.set(plugin.name, { plugin, isEnabled });

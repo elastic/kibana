@@ -169,6 +169,17 @@ export interface DiscoveredPlugin {
 }
 
 /**
+ * @internal
+ */
+export interface InternalPluginInfo {
+  /**
+   * Path to the client-side entrypoint file to be used to build the client-side
+   * bundle for a plugin.
+   */
+  readonly entryPointPath: string;
+}
+
+/**
  * The interface that should be returned by a `PluginInitializer`.
  *
  * @public
