@@ -111,7 +111,10 @@ export const legacyAppRegister = (app: App) => {
 
     // Root controller cannot return a Promise so use an internal async function and call it immediately
     (async () => {
-      const unmount = await app.mount({ core: npStart.core }, { element, appBasePath: '' });
+      const unmount = await app.mount(
+        { core: npStart.core },
+        { element, appBasePath: npSetup.core.http.basePath.prepend(`/app/${app.id}`) }
+      );
       $scope.$on('$destroy', () => {
         unmount();
       });
