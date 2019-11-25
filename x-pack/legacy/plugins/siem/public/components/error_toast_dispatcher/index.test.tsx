@@ -30,7 +30,7 @@ describe('Error Toast Dispatcher', () => {
           <ErrorToastDispatcher toastLifeTimeMs={9999999999} />
         </Provider>
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('Connect(ErrorToastDispatcherComponent)'))).toMatchSnapshot();
     });
   });
 });
