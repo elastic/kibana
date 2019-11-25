@@ -8,13 +8,7 @@ import * as GraphiQL from 'apollo-server-module-graphiql';
 import { GraphQLSchema } from 'graphql';
 import { runHttpQuery } from 'apollo-server-core';
 import { schema as configSchema } from '@kbn/config-schema';
-import {
-  CoreSetup,
-  IRouter,
-  KibanaResponseFactory,
-  RequestHandlerContext,
-  APICaller,
-} from 'src/core/server';
+import { CoreSetup, IRouter, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
 import { IndexPatternsFetcher } from '../../../../../../../src/plugins/data/server';
 import { ServerFacade, RequestFacade } from '../../types';
 
@@ -176,12 +170,11 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
 
   public getIndexPatternsService(request: FrameworkRequest): FrameworkIndexPatternsService {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const callCluster: APICaller = async (endpoint: string, params?: Record<string, any>) => {
-      return this.callWithRequest(request, endpoint, {
+    const callCluster = async (endpoint: string, params?: Record<string, any>) =>
+      this.callWithRequest(request, endpoint, {
         ...params,
         allowNoIndices: true,
       });
-    };
 
     return new IndexPatternsFetcher(callCluster);
   }
