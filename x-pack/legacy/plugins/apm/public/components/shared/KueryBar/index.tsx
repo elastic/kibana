@@ -7,7 +7,6 @@
 import React, { useState } from 'react';
 import { uniqueId, startsWith } from 'lodash';
 import styled from 'styled-components';
-import { npStart } from 'ui/new_platform';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -18,15 +17,16 @@ import { getBoolFilter } from './get_bool_filter';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
-import { AutocompleteSuggestion } from '../../../../../../../../src/plugins/data/public';
+import {
+  AutocompleteSuggestion,
+  AutocompleteProvider
+} from '../../../../../../../../src/plugins/data/public';
 import { useDynamicIndexPattern } from '../../../hooks/useDynamicIndexPattern';
+import { usePlugins } from '../../../new-platform/plugin';
 
 const Container = styled.div`
   margin-bottom: 10px;
 `;
-
-const getAutocompleteProvider = (language: string) =>
-  npStart.plugins.data.autocomplete.getProvider(language);
 
 interface State {
   suggestions: AutocompleteSuggestion[];
@@ -45,9 +45,9 @@ function getSuggestions(
   query: string,
   selectionStart: number,
   indexPattern: StaticIndexPattern,
-  boolFilter: unknown
+  boolFilter: unknown,
+  autocompleteProvider?: AutocompleteProvider
 ) {
-  const autocompleteProvider = getAutocompleteProvider('kuery');
   if (!autocompleteProvider) {
     return [];
   }
@@ -74,6 +74,8 @@ export function KueryBar() {
   });
   const { urlParams } = useUrlParams();
   const location = useLocation();
+  const { data } = usePlugins();
+  const autocompleteProvider = data.autocomplete.getProvider('kuery');
 
   let currentRequestCheck;
 
@@ -108,7 +110,8 @@ export function KueryBar() {
           inputValue,
           selectionStart,
           indexPattern,
-          boolFilter
+          boolFilter,
+          autocompleteProvider
         )
       )
         .filter(suggestion => !startsWith(suggestion.text, 'span.'))

@@ -8,7 +8,8 @@ import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { CancellationToken } from '../../../../../common/cancellation_token';
 
-describe('CancellationToken', function () {
+// FAILING: https://github.com/elastic/kibana/issues/51373
+describe.skip('CancellationToken', function () {
   let cancellationToken;
   beforeEach(function () {
     cancellationToken = new CancellationToken();

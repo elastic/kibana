@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { JsonUploadAndParse } from './components/json_upload_and_parse';
+import { FileUploadPlugin } from './plugin';
+
+export function plugin() {
+  return new FileUploadPlugin();
+}
