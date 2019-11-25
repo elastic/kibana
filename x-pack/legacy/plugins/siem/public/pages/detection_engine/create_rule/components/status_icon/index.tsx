@@ -9,8 +9,7 @@ import React, { memo } from 'react';
 import styled from 'styled-components';
 
 import { useEuiTheme } from '../../../../../lib/theme/use_eui_theme';
-
-export type RuleStatusType = 'passive' | 'active' | 'valid';
+import { RuleStatusType } from '../../types';
 
 export interface RuleStatusIconProps {
   name: string;

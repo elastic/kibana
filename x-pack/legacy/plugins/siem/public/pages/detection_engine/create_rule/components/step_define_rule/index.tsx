@@ -8,11 +8,13 @@ import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elasti
 import { isEqual } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useState } from 'react';
 
+import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 import { useFetchIndexPatterns } from '../../../../../containers/detection_engine/rules/fetch_index_patterns';
 import { DEFAULT_INDEX_KEY, DEFAULT_SIGNALS_INDEX_KEY } from '../../../../../../common/constants';
 import { useKibanaUiSetting } from '../../../../../lib/settings/use_kibana_ui_setting';
 import * as CreateRuleI18n from '../../translations';
-import { RuleStep, RuleStepProps } from '../../types';
+import { DefineStepRule, RuleStep, RuleStepProps } from '../../types';
+import { StepRuleDescription } from '../description_step';
 import { QueryBarDefineRule } from '../query_bar';
 import { Field, Form, FormDataProvider, getUseField, UseField, useForm } from '../shared_imports';
 import { schema } from './schema';
@@ -20,7 +22,7 @@ import * as I18n from './translations';
 
 const CommonUseField = getUseField({ component: Field });
 
-export const StepDefineRule = memo<RuleStepProps>(({ isLoading, setStepData }) => {
+export const StepDefineRule = memo<RuleStepProps>(({ isEditView, isLoading, setStepData }) => {
   const [initializeOutputIndex, setInitializeOutputIndex] = useState(true);
   const [localUseIndicesConfig, setLocalUseIndicesConfig] = useState('');
   const [
@@ -29,26 +31,28 @@ export const StepDefineRule = memo<RuleStepProps>(({ isLoading, setStepData }) =
   ] = useFetchIndexPatterns();
   const [indicesConfig] = useKibanaUiSetting(DEFAULT_INDEX_KEY);
   const [signalIndexConfig] = useKibanaUiSetting(DEFAULT_SIGNALS_INDEX_KEY);
-
+  const [myStepData, setMyStepData] = useState<DefineStepRule>({
+    index: indicesConfig || [],
+    isNew: true,
+    outputIndex: signalIndexConfig,
+    queryBar: {
+      query: { query: '', language: 'kuery' },
+      filters: [],
+      saved_id: null,
+    },
+    useIndicesConfig: 'true',
+  });
   const { form } = useForm({
     schema,
-    defaultValue: {
-      index: indicesConfig || [],
-      outputIndex: signalIndexConfig,
-      queryBar: {
-        query: { query: '', language: 'kuery' },
-        filters: [],
-        saved_id: null,
-      },
-      useIndicesConfig: 'true',
-    },
+    defaultValue: myStepData,
     options: { stripEmptyFields: false },
   });
 
   const onSubmit = useCallback(async () => {
-    const { isValid: newIsValid, data } = await form.submit();
-    if (newIsValid) {
-      setStepData(RuleStep.defineRule, data, newIsValid);
+    const { isValid, data } = await form.submit();
+    if (isValid) {
+      setStepData(RuleStep.defineRule, data, isValid);
+      setMyStepData({ ...data, isNew: false } as DefineStepRule);
     }
   }, [form]);
 
@@ -60,7 +64,13 @@ export const StepDefineRule = memo<RuleStepProps>(({ isLoading, setStepData }) =
     }
   }, [initializeOutputIndex, signalIndexConfig, form]);
 
-  return (
+  return isEditView && myStepData != null ? (
+    <StepRuleDescription
+      indexPatterns={indexPatternQueryBar as IIndexPattern}
+      schema={schema}
+      data={myStepData}
+    />
+  ) : (
     <>
       <Form form={form} data-test-subj="stepDefineRule">
         <CommonUseField
@@ -150,7 +160,7 @@ export const StepDefineRule = memo<RuleStepProps>(({ isLoading, setStepData }) =
       <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButton fill onClick={onSubmit} isDisabled={isLoading}>
-            {CreateRuleI18n.CONTINUE}
+            {myStepData.isNew ? CreateRuleI18n.CONTINUE : CreateRuleI18n.UPDATE}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
