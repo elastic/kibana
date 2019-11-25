@@ -5,6 +5,7 @@
  */
 
 import { AnyAction, Dispatch, Middleware, MiddlewareAPI } from 'redux';
+import { GlobalState } from '../../types';
 
 interface StoreAction extends AnyAction {
   payload: unknown[];
@@ -13,7 +14,7 @@ interface StoreAction extends AnyAction {
 
 interface QueuedAction {
   action: StoreAction;
-  state: unknown; // TODO: set to GlobalState once Pedro's commit is merged
+  state: GlobalState;
 }
 
 interface IteratorInstance {
