@@ -20,7 +20,7 @@ const ContentCollapseContainer = styled.div`
 `;
 const CollapseButtonContainer = styled.div`
   display: inline-block;
-  background-color: ${props => props.theme.eui.euiColorGhost};
+  background-color: ${props => props.theme.eui.euiColorEmptyShade};
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
