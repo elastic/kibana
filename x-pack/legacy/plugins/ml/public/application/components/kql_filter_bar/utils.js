@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { npStart } from 'ui/new_platform';
-import { esKuery } from '../../../../../../../src/plugins/data/public';
+import { esKuery } from '../../../../../../../../src/plugins/data/public';
 
 const getAutocompleteProvider = language => npStart.plugins.data.autocomplete.getProvider(language);
 
