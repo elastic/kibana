@@ -29,7 +29,6 @@ export function plugin() {
 /** @public types */
 export { DataSetup, DataStart };
 
-export { ApplyFiltersPopover } from './filter';
 export {
   Field,
   FieldType,

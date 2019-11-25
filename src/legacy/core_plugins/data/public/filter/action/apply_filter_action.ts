@@ -29,10 +29,10 @@ import {
   esFilters,
   FilterManager,
   TimefilterContract,
+  applyFiltersPopover,
   changeTimeFilter,
   extractTimeFilter,
 } from '../../../../../../plugins/data/public';
-import { applyFiltersPopover } from '../apply_filters/apply_filters_popover';
 import { IndexPatternsStart } from '../../index_patterns';
 export const GLOBAL_APPLY_FILTER_ACTION = 'GLOBAL_APPLY_FILTER_ACTION';
 

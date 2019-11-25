@@ -17,49 +17,15 @@
  * under the License.
  */
 
-import { EuiModal, EuiOverlayMask } from '@elastic/eui';
-import React, { Component } from 'react';
+import React from 'react';
 import { ApplyFiltersPopoverContent } from './apply_filter_popover_content';
-import { IndexPattern } from '../../index_patterns/index_patterns';
-import { esFilters } from '../../../../../../plugins/data/public';
-
-interface Props {
-  filters: esFilters.Filter[];
-  onCancel: () => void;
-  onSubmit: (filters: esFilters.Filter[]) => void;
-  indexPatterns: IndexPattern[];
-}
-
-interface State {
-  isFilterSelected: boolean[];
-}
-
-export class ApplyFiltersPopover extends Component<Props, State> {
-  public render() {
-    if (!this.props.filters || this.props.filters.length === 0) {
-      return '';
-    }
-
-    return (
-      <EuiOverlayMask>
-        <EuiModal onClose={this.props.onCancel}>
-          <ApplyFiltersPopoverContent
-            filters={this.props.filters}
-            onCancel={this.props.onCancel}
-            onSubmit={this.props.onSubmit}
-            indexPatterns={this.props.indexPatterns}
-          />
-        </EuiModal>
-      </EuiOverlayMask>
-    );
-  }
-}
+import { IIndexPattern, esFilters } from '../..';
 
 type cancelFunction = () => void;
 type submitFunction = (filters: esFilters.Filter[]) => void;
 export const applyFiltersPopover = (
   filters: esFilters.Filter[],
-  indexPatterns: IndexPattern[],
+  indexPatterns: IIndexPattern[],
   onCancel: cancelFunction,
   onSubmit: submitFunction
 ) => {

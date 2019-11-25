@@ -30,17 +30,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
-import { IndexPattern } from '../../index_patterns';
-import {
-  mapAndFlattenFilters,
-  esFilters,
-  utils,
-  FilterLabel,
-} from '../../../../../../plugins/data/public';
+import { mapAndFlattenFilters, esFilters, utils, IIndexPattern } from '../..';
+import { FilterLabel } from '../filter_bar';
 
 interface Props {
   filters: esFilters.Filter[];
-  indexPatterns: IndexPattern[];
+  indexPatterns: IIndexPattern[];
   onCancel: () => void;
   onSubmit: (filters: esFilters.Filter[]) => void;
 }

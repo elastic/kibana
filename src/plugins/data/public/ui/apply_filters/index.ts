@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { ApplyFiltersPopover } from './apply_filters_popover';
+export { applyFiltersPopover } from './apply_filters_popover';
