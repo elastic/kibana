@@ -25,6 +25,7 @@ import { getSuggestionsProvider } from './suggestions_provider';
 import { SearchService } from './search/search_service';
 import { FieldFormatsService } from './field_formats_provider';
 import { QueryService } from './query';
+import { createIndexPatternSelect } from './ui/index_pattern_select';
 
 export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPublicPluginStart> {
   private readonly autocomplete = new AutocompleteProviderRegister();
@@ -59,6 +60,9 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       search: this.searchService.start(core),
       fieldFormats: this.fieldFormatsService.start(),
       query: this.queryService.start(),
+      ui: {
+        IndexPatternSelect: createIndexPatternSelect(core.savedObjects.client),
+      },
     };
   }
 

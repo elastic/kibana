@@ -17,30 +17,17 @@
  * under the License.
  */
 
-import { dataPluginMock } from '../../../../core_plugins/data/public/mocks';
+import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
 
-const dataSetup = dataPluginMock.createSetup();
+export async function getIndexPatternTitle(
+  client: SavedObjectsClientContract,
+  indexPatternId: string
+): Promise<SimpleSavedObject<any>> {
+  const savedObject = (await client.get('index-pattern', indexPatternId)) as SimpleSavedObject<any>;
 
-// mocks for stateful code
-export const { FieldImpl } = dataSetup.indexPatterns!.__LEGACY;
-export const {
-  FieldList,
-  flattenHitWrapper,
-  formatHitProvider,
-  indexPatterns,
-} = dataSetup.indexPatterns!;
+  if (savedObject.error) {
+    throw new Error(`Unable to get index-pattern title: ${savedObject.error.message}`);
+  }
 
-// static code
-export {
-  CONTAINS_SPACES,
-  getFromSavedObject,
-  getRoutes,
-  validateIndexPattern,
-  ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-  IndexPatternAlreadyExists,
-  IndexPatternMissingIndices,
-  NoDefaultIndexPattern,
-  NoDefinedIndexPatterns,
-} from '../../../../core_plugins/data/public';
+  return savedObject.attributes.title;
+}

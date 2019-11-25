@@ -24,6 +24,7 @@ import { FieldFormatsSetup, FieldFormatsStart } from './field_formats_provider';
 import { ISearchSetup, ISearchStart } from './search';
 import { IGetSuggestions } from './suggestions_provider/types';
 import { QuerySetup, QueryStart } from './query';
+import { IndexPatternSelectProps } from './ui/index_pattern_select';
 
 export interface DataPublicPluginSetup {
   autocomplete: AutocompletePublicPluginSetup;
@@ -38,6 +39,9 @@ export interface DataPublicPluginStart {
   search: ISearchStart;
   fieldFormats: FieldFormatsStart;
   query: QueryStart;
+  ui: {
+    IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
+  };
 }
 
 export * from './autocomplete_provider/types';

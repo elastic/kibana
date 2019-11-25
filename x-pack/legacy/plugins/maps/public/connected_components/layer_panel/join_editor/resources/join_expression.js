@@ -16,7 +16,6 @@ import {
   EuiFormHelpText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IndexPatternSelect } from 'ui/index_patterns';
 import { SingleFieldSelect } from '../../../../components/single_field_select';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getTermsFields } from '../../../../index_pattern_util';
@@ -24,6 +23,9 @@ import { getTermsFields } from '../../../../index_pattern_util';
 import {
   indexPatternService,
 } from '../../../../kibana_services';
+
+import { npStart } from 'ui/new_platform';
+const { IndexPatternSelect } = npStart.plugins.data.ui;
 
 export class JoinExpression extends Component {
 

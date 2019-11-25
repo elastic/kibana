@@ -18,3 +18,4 @@
  */
 
 export * from './filter_bar';
+export { IndexPatternSelect } from './index_pattern_select';
