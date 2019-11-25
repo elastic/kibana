@@ -25,6 +25,7 @@ import { FrontendLibs } from '../types';
 import { PLUGIN } from '../../../common/constants/plugin';
 import { FrameworkLib } from '../framework';
 import { INDEX_NAMES } from '../../../common/constants';
+import { EnrollmentApiKeyLib } from '../enrollment_api_key';
 
 // A super early spot in kibana loading that we can use to hook before most other things
 const onKibanaReady = chrome.dangerouslyGetActiveInjector;
@@ -35,6 +36,7 @@ export function compose(): FrontendLibs {
   const elasticsearchLib = new ElasticsearchLib(esAdapter);
   const agents = new AgentsLib(new RestAgentAdapter(api));
   const policies = new PoliciesLib(new RestPolicyAdapter(api));
+  const enrollmentApiKeys = new EnrollmentApiKeyLib(api);
 
   const framework = new FrameworkLib(
     new KibanaFrameworkAdapter(
@@ -54,6 +56,7 @@ export function compose(): FrontendLibs {
     elasticsearch: elasticsearchLib,
     agents,
     policies,
+    enrollmentApiKeys,
   };
   return libs;
 }
