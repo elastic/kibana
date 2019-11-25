@@ -114,18 +114,50 @@ describe('Session Timeout', () => {
     delete (window as any).sessionStorage;
   });
 
+  describe('Lifecycle', () => {
+    test(`starts and initializes on a non-anonymous path`, async () => {
+      await sessionTimeout.start();
+      // eslint-disable-next-line dot-notation
+      expect(sessionTimeout['channel']).not.toBeUndefined();
+      expect(http.fetch).toHaveBeenCalledTimes(1);
+    });
+
+    test(`starts and does not initialize on an anonymous path`, async () => {
+      http.anonymousPaths.register(window.location.pathname);
+      await sessionTimeout.start();
+      // eslint-disable-next-line dot-notation
+      expect(sessionTimeout['channel']).toBeUndefined();
+      expect(http.fetch).not.toHaveBeenCalled();
+    });
+
+    test(`stops`, async () => {
+      await sessionTimeout.start();
+      // eslint-disable-next-line dot-notation
+      const close = jest.fn(sessionTimeout['channel']!.close);
+      // eslint-disable-next-line dot-notation
+      sessionTimeout['channel']!.close = close;
+      // eslint-disable-next-line dot-notation
+      const cleanup = jest.fn(sessionTimeout['cleanup']);
+      // eslint-disable-next-line dot-notation
+      sessionTimeout['cleanup'] = cleanup;
+
+      sessionTimeout.stop();
+      expect(close).toHaveBeenCalled();
+      expect(cleanup).toHaveBeenCalled();
+    });
+  });
+
   describe('API calls', () => {
     const methodName = 'handleSessionInfoAndResetTimers';
     let method: jest.Mock;
 
     beforeEach(() => {
-      // eslint-disable-next-line dot-notation
       method = jest.fn(sessionTimeout[methodName]);
       sessionTimeout[methodName] = method;
     });
 
     test(`handles success`, async () => {
-      await sessionTimeout.init();
+      await sessionTimeout.start();
 
       expect(http.fetch).toHaveBeenCalledTimes(1);
       // eslint-disable-next-line dot-notation
@@ -136,7 +168,7 @@ describe('Session Timeout', () => {
     test(`handles error`, async () => {
       const mockErrorResponse = new Error('some-error');
       http.fetch.mockRejectedValue(mockErrorResponse);
-      await sessionTimeout.init();
+      await sessionTimeout.start();
 
       expect(http.fetch).toHaveBeenCalledTimes(1);
       // eslint-disable-next-line dot-notation
@@ -147,7 +179,7 @@ describe('Session Timeout', () => {
 
   describe('warning toast', () => {
     test(`shows idle timeout warning toast`, async () => {
-      await sessionTimeout.init();
+      await sessionTimeout.start();
 
       // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
       jest.advanceTimersByTime(55 * 1000);
@@ -161,7 +193,7 @@ describe('Session Timeout', () => {
         lifespanExpiration: now + 2 * 60 * 1000,
       };
       http.fetch.mockResolvedValue(sessionInfo);
-      await sessionTimeout.init();
+      await sessionTimeout.start();
 
       // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
       jest.advanceTimersByTime(55 * 1000);
@@ -169,7 +201,7 @@ describe('Session Timeout', () => {
     });
 
     test(`extend only results in an HTTP call if a warning is shown`, async () => {
-      await sessionTimeout.init();
+      await sessionTimeout.start();
       expect(http.fetch).toHaveBeenCalledTimes(1);
 
       await sessionTimeout.extend('/foo');
@@ -194,7 +226,7 @@ describe('Session Timeout', () => {
         lifespanExpiration: now + 2 * 60 * 1000,
       };
       http.fetch.mockResolvedValue(sessionInfo);
-      await sessionTimeout.init();
+      await sessionTimeout.start();
 
       // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
       jest.advanceTimersByTime(55 * 1000);
@@ -206,7 +238,7 @@ describe('Session Timeout', () => {
     });
 
     test(`extend hides displayed warning toast`, async () => {
-      await sessionTimeout.init();
+      await sessionTimeout.start();
       expect(http.fetch).toHaveBeenCalledTimes(1);
 
       // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
@@ -225,7 +257,7 @@ describe('Session Timeout', () => {
     });
 
     test(`extend does nothing for session-related routes`, async () => {
-      await sessionTimeout.init();
+      await sessionTimeout.start();
       expect(http.fetch).toHaveBeenCalledTimes(1);
 
       // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
@@ -239,7 +271,7 @@ describe('Session Timeout', () => {
     });
 
     test(`checks for updated session info before the warning displays`, async () => {
-      await sessionTimeout.init();
+      await sessionTimeout.start();
       expect(http.fetch).toHaveBeenCalledTimes(1);
 
       // we check for updated session info 1 second before the warning is shown
@@ -249,7 +281,7 @@ describe('Session Timeout', () => {
     });
 
     test('clicking "extend" causes a new HTTP request (which implicitly extends the session)', async () => {
-      await sessionTimeout.init();
+      await sessionTimeout.start();
       expect(http.fetch).toHaveBeenCalledTimes(1);
 
       // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
@@ -271,7 +303,7 @@ describe('Session Timeout', () => {
         idleTimeoutExpiration: now + 64 * 1000,
         lifespanExpiration: null,
       });
-      await sessionTimeout.init();
+      await sessionTimeout.start();
       expect(http.fetch).toHaveBeenCalled();
 
       jest.advanceTimersByTime(0);
@@ -281,7 +313,7 @@ describe('Session Timeout', () => {
 
   describe('session expiration', () => {
     test(`expires the session 5 seconds before it really expires`, async () => {
-      await sessionTimeout.init();
+      await sessionTimeout.start();
 
       jest.advanceTimersByTime(114 * 1000);
       expect(sessionExpired.logout).not.toHaveBeenCalled();
@@ -291,7 +323,7 @@ describe('Session Timeout', () => {
     });
 
     test(`extend delays the expiration`, async () => {
-      await sessionTimeout.init();
+      await sessionTimeout.start();
       expect(http.fetch).toHaveBeenCalledTimes(1);
 
       const elapsed = 114 * 1000;
@@ -326,7 +358,7 @@ describe('Session Timeout', () => {
         idleTimeoutExpiration: now + 4 * 1000,
         lifespanExpiration: null,
       });
-      await sessionTimeout.init();
+      await sessionTimeout.start();
 
       jest.advanceTimersByTime(0);
       expect(sessionExpired.logout).toHaveBeenCalled();
@@ -334,7 +366,7 @@ describe('Session Timeout', () => {
 
     test(`'null' sessionTimeout never logs you out`, async () => {
       http.fetch.mockResolvedValue({ now, idleTimeoutExpiration: null, lifespanExpiration: null });
-      await sessionTimeout.init();
+      await sessionTimeout.start();
 
       jest.advanceTimersByTime(Number.MAX_VALUE);
       expect(sessionExpired.logout).not.toHaveBeenCalled();

@@ -34,7 +34,11 @@ export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPlugi
   }
 
   public start() {
-    this.sessionTimeout.init();
+    this.sessionTimeout.start();
+  }
+
+  public stop() {
+    this.sessionTimeout.stop();
   }
 }
 

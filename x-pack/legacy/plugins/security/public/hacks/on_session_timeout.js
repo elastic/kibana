@@ -7,7 +7,6 @@
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import { isSystemApiRequest } from 'ui/system_api';
-import { Path } from 'plugins/xpack_main/services/path';
 import { npSetup } from 'ui/new_platform';
 
 const module = uiModules.get('security', []);
@@ -16,11 +15,11 @@ module.config(($httpProvider) => {
     $q,
   ) => {
 
-    const isUnauthenticated = Path.isUnauthenticated();
+    const isAnonymous = npSetup.core.http.anonymousPaths.isAnonymous(window.location.pathname);
 
     function interceptorFactory(responseHandler) {
       return function interceptor(response) {
-        if (!isUnauthenticated && !isSystemApiRequest(response.config)) {
+        if (!isAnonymous && !isSystemApiRequest(response.config)) {
           npSetup.plugins.security.sessionTimeout.extend(response.config.url);
         }
         return responseHandler(response);

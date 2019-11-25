@@ -6784,10 +6784,10 @@ brfs@^2.0.2:
     static-module "^3.0.2"
     through2 "^2.0.0"
 
-broadcast-channel@^3.0.2:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/broadcast-channel/-/broadcast-channel-3.0.2.tgz#12a630b20161ce5728e7d43c4fbc7bd04feacb51"
-  integrity sha512-67X4MGoQ7kWSlbbEesIpGR6VW0Q9aciwxoTT8L1J/KIOUA13ehAvNhf712o9EUS6JPmfpKq2uQwOg6DyAuZvtA==
+broadcast-channel@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/broadcast-channel/-/broadcast-channel-3.0.3.tgz#e6668693af410f7dda007fd6f80e21992d51f3cc"
+  integrity sha512-ogRIiGDL0bdeOzPO13YQKX12IvRBDOxej2CJaEwuEOF011C9JBABz+8MJ/WZ34eGbXGrfVBeeeaMTWjBzxVKkw==
   dependencies:
     "@babel/runtime" "^7.7.2"
     detect-node "^2.0.4"

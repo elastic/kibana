@@ -28,7 +28,7 @@ const WARNING_MS = 60 * 1000;
  * warning toast shows. This will prevent the toast from being shown if the
  * session has already been extended.
  */
-const SESSION_CHECK_MS = 1 * 1000;
+const SESSION_CHECK_MS = 1000;
 
 /**
  * Route to get session info and extend session expiration
@@ -36,7 +36,8 @@ const SESSION_CHECK_MS = 1 * 1000;
 const SESSION_ROUTE = '/internal/security/session';
 
 export interface ISessionTimeout {
-  init(): void;
+  start(): void;
+  stop(): void;
   extend(url: string): void;
 }
 
@@ -57,7 +58,7 @@ export class SessionTimeout {
     this.basePath = http.basePath;
   }
 
-  init() {
+  start() {
     if (this.http.anonymousPaths.isAnonymous(window.location.pathname)) {
       return;
     }
@@ -73,6 +74,13 @@ export class SessionTimeout {
     return this.fetchSessionInfoAndResetTimers();
   }
 
+  stop() {
+    if (this.channel) {
+      this.channel.close();
+    }
+    this.cleanup();
+  }
+
   /**
    * When the user makes an authenticated, non-system API call, this function is used to check
    * and see if the session has been extended.
@@ -84,8 +92,8 @@ export class SessionTimeout {
       return;
     }
 
-    const { isMaximum } = this.getTimeout();
-    if (this.warningToast && !isMaximum) {
+    const { isLifespanTimeout } = this.getTimeout();
+    if (this.warningToast && !isLifespanTimeout) {
       // the idle timeout warning is currently showing and the user has clicked elsewhere on the page;
       // make a new call to get the latest session info
       return this.fetchSessionInfoAndResetTimers();
@@ -121,32 +129,19 @@ export class SessionTimeout {
   private handleSessionInfoAndResetTimers = (sessionInfo: SessionInfo) => {
     this.sessionInfo = sessionInfo;
     // save the provider name in session storage, we will need it when we log out
-    const key = this.basePath.prepend('/session.provider');
+    const key = this.basePath.prepend('/session_provider');
     sessionStorage.setItem(key, sessionInfo.provider);
 
-    const { timeout, isMaximum } = this.getTimeout();
+    const { timeout, isLifespanTimeout } = this.getTimeout();
     if (timeout == null) {
       return;
     }
 
-    // cleanup
-    if (this.fetchTimer) {
-      window.clearTimeout(this.fetchTimer);
-    }
-    if (this.warningTimer) {
-      window.clearTimeout(this.warningTimer);
-    }
-    if (this.expirationTimer) {
-      window.clearTimeout(this.expirationTimer);
-    }
-    if (this.warningToast) {
-      this.notifications.toasts.remove(this.warningToast);
-      this.warningToast = undefined;
-    }
+    this.cleanup();
 
     // set timers
     const timeoutVal = timeout - WARNING_MS - GRACE_PERIOD_MS - SESSION_CHECK_MS;
-    if (timeoutVal > 0 && !isMaximum) {
+    if (timeoutVal > 0 && !isLifespanTimeout) {
       // we should check for the latest session info before the warning displays
       this.fetchTimer = window.setTimeout(this.fetchSessionInfoAndResetTimers, timeoutVal);
     }
@@ -160,13 +155,29 @@ export class SessionTimeout {
     );
   };
 
+  private cleanup = () => {
+    if (this.fetchTimer) {
+      window.clearTimeout(this.fetchTimer);
+    }
+    if (this.warningTimer) {
+      window.clearTimeout(this.warningTimer);
+    }
+    if (this.expirationTimer) {
+      window.clearTimeout(this.expirationTimer);
+    }
+    if (this.warningToast) {
+      this.notifications.toasts.remove(this.warningToast);
+      this.warningToast = undefined;
+    }
+  };
+
   /**
    * Get the amount of time until the session times out, and whether or not the
    * session has reached it maximum lifespan.
    */
-  private getTimeout = (): { timeout: number | null; isMaximum: boolean } => {
+  private getTimeout = (): { timeout: number | null; isLifespanTimeout: boolean } => {
     let timeout = null;
-    let isMaximum = false;
+    let isLifespanTimeout = false;
     if (this.sessionInfo) {
       const { now, idleTimeoutExpiration, lifespanExpiration } = this.sessionInfo;
       if (idleTimeoutExpiration) {
@@ -177,20 +188,20 @@ export class SessionTimeout {
         (idleTimeoutExpiration === null || lifespanExpiration <= idleTimeoutExpiration)
       ) {
         timeout = lifespanExpiration - now;
-        isMaximum = true;
+        isLifespanTimeout = true;
       }
     }
-    return { timeout, isMaximum };
+    return { timeout, isLifespanTimeout };
   };
 
   /**
    * Show a warning toast depending on the session state.
    */
   private showWarning = () => {
-    const { timeout, isMaximum } = this.getTimeout();
+    const { timeout, isLifespanTimeout } = this.getTimeout();
     const toastLifeTimeMs = Math.min(timeout! - GRACE_PERIOD_MS, WARNING_MS);
     let toast: ToastInput;
-    if (!isMaximum) {
+    if (!isLifespanTimeout) {
       const refresh = () => this.fetchSessionInfoAndResetTimers(true);
       toast = createIdleTimeoutToast(toastLifeTimeMs, refresh);
     } else {

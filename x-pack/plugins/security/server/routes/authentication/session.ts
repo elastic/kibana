@@ -9,7 +9,7 @@ import { RouteDefinitionParams } from '..';
 /**
  * Defines routes required for all authentication realms.
  */
-export function defineCommonRoutes({ router, logger, authc, basePath }: RouteDefinitionParams) {
+export function defineSessionRoutes({ router, logger, authc, basePath }: RouteDefinitionParams) {
   router.get(
     {
       path: '/internal/security/session',
@@ -21,7 +21,7 @@ export function defineCommonRoutes({ router, logger, authc, basePath }: RouteDef
         // This is an authenticated request, so sessionInfo will always be non-null.
         return response.ok({ body: sessionInfo! });
       } catch (err) {
-        logger.error(err);
+        logger.error(`Error retrieving user session: ${err.message}`);
         return response.internalError();
       }
     }

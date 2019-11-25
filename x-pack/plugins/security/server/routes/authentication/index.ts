@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defineCommonRoutes } from './common';
+import { defineSessionRoutes } from './session';
 import { defineSAMLRoutes } from './saml';
 import { RouteDefinitionParams } from '..';
 
 export function defineAuthenticationRoutes(params: RouteDefinitionParams) {
-  defineCommonRoutes(params);
+  defineSessionRoutes(params);
   if (params.config.authc.providers.includes('saml')) {
     defineSAMLRoutes(params);
   }

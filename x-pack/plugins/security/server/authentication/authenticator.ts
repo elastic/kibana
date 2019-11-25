@@ -215,8 +215,8 @@ export class Authenticator {
     );
 
     // only set these vars if they are defined in options (otherwise coalesce to existing/default)
-    this.idleTimeout = this.options.config.session.idleTimeout || this.idleTimeout;
-    this.lifespan = this.options.config.session.lifespan || this.lifespan;
+    this.idleTimeout = this.options.config.session.idleTimeout;
+    this.lifespan = this.options.config.session.lifespan;
   }
 
   /**
