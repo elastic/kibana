@@ -8,13 +8,13 @@
 
 import { once } from 'lodash';
 
-const callWithRequest = once((server) => {
-  const cluster = server.plugins.elasticsearch.getCluster('data');
+const callWithRequest = once(elasticsearchPlugin => {
+  const cluster = elasticsearchPlugin.getCluster('data');
   return cluster.callWithRequest;
 });
 
-export const callWithRequestFactory = (server, request) => {
+export const callWithRequestFactory = (elasticsearchPlugin, request) => {
   return (...args) => {
-    return callWithRequest(server)(request, ...args);
+    return callWithRequest(elasticsearchPlugin)(request, ...args);
   };
 };
