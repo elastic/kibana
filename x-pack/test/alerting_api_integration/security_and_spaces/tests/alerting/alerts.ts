@@ -166,7 +166,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             .send(
               getTestAlertData({
                 alertTypeId: 'test.always-firing',
-                alertTypeParams: {
+                params: {
                   index: ES_TEST_INDEX_NAME,
                   reference: 'create-test-2',
                 },
@@ -258,7 +258,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             .send(
               getTestAlertData({
                 alertTypeId: 'test.authorization',
-                alertTypeParams: {
+                params: {
                   callClusterAuthorizationIndex: authorizationIndex,
                   savedObjectsClientType: 'dashboard',
                   savedObjectsClientId: '1',
@@ -356,7 +356,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             .send(
               getTestAlertData({
                 alertTypeId: 'test.always-firing',
-                alertTypeParams: {
+                params: {
                   index: ES_TEST_INDEX_NAME,
                   reference,
                 },
@@ -491,7 +491,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             reference,
             overwrites: {
               interval: '1s',
-              alertTypeParams: {
+              params: {
                 index: ES_TEST_INDEX_NAME,
                 reference,
                 groupsToScheduleActionsInSeries: ['default', 'other'],
@@ -560,7 +560,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             reference,
             overwrites: {
               interval: '1s',
-              alertTypeParams: {
+              params: {
                 index: ES_TEST_INDEX_NAME,
                 reference,
                 groupsToScheduleActionsInSeries: ['default', null, 'default'],

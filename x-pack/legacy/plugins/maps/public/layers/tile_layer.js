@@ -12,10 +12,6 @@ export class TileLayer extends AbstractLayer {
 
   static type = LAYER_TYPE.TILE;
 
-  constructor({ layerDescriptor, source, style }) {
-    super({ layerDescriptor, source, style });
-  }
-
   static createDescriptor(options) {
     const tileLayerDescriptor = super.createDescriptor(options);
     tileLayerDescriptor.type = TileLayer.type;

@@ -61,9 +61,6 @@
       },
       "apm_oss.metricsIndices": {
         "type": "keyword"
-      },
-      "apm_oss.apmAgentConfigurationIndex": {
-        "type": "keyword"
       }
     }
   }
