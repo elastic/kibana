@@ -145,8 +145,8 @@ describe.skip('<PolicyAdd />', () => {
         test('should not allow negative values for the delete after, minimum and maximum counts', () => {
           const { find, form } = testBed;
 
-          form.setInputValue('minCountInput', '-1');
-          find('minCountInput').simulate('blur');
+          form.setInputValue('expireAfterValueInput', '-1');
+          find('expireAfterValueInput').simulate('blur');
 
           form.setInputValue('minCountInput', '-1');
           find('minCountInput').simulate('blur');
