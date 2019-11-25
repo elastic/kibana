@@ -19,10 +19,10 @@ import {
 } from '../../common/constants';
 import _ from 'lodash';
 import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
-import { isRefreshOnlyQuery } from './util/is_refresh_only_query';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataRequestAbortError } from './util/data_request';
+import { canSkipSourceUpdate } from './util/can_skip_fetch';
 
 const VISIBILITY_FILTER_CLAUSE = ['all',
   [
@@ -265,109 +265,31 @@ export class VectorLayer extends AbstractLayer {
     return this._dataRequests.find(dataRequest => dataRequest.getDataId() === sourceDataId);
   }
 
-  async _canSkipSourceUpdate(source, sourceDataId, nextMeta) {
 
-    const timeAware = await source.isTimeAware();
-    const refreshTimerAware = await source.isRefreshTimerAware();
-    const extentAware = source.isFilterByMapBounds();
-    const isFieldAware = source.isFieldAware();
-    const isQueryAware = source.isQueryAware();
-    const isGeoGridPrecisionAware = source.isGeoGridPrecisionAware();
-
-    if (
-      !timeAware &&
-      !refreshTimerAware &&
-      !extentAware &&
-      !isFieldAware &&
-      !isQueryAware &&
-      !isGeoGridPrecisionAware
-    ) {
-      const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
-      return (sourceDataRequest && sourceDataRequest.hasDataOrRequestInProgress());
-    }
-
-    const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
-    if (!sourceDataRequest) {
-      return false;
-    }
-    const prevMeta = sourceDataRequest.getMeta();
-    if (!prevMeta) {
-      return false;
-    }
-
-    let updateDueToTime = false;
-    if (timeAware) {
-      updateDueToTime = !_.isEqual(prevMeta.timeFilters, nextMeta.timeFilters);
-    }
-
-    let updateDueToRefreshTimer = false;
-    if (refreshTimerAware && nextMeta.refreshTimerLastTriggeredAt) {
-      updateDueToRefreshTimer = !_.isEqual(prevMeta.refreshTimerLastTriggeredAt, nextMeta.refreshTimerLastTriggeredAt);
-    }
-
-    let updateDueToFields = false;
-    if (isFieldAware) {
-      updateDueToFields = !_.isEqual(prevMeta.fieldNames, nextMeta.fieldNames);
-    }
-
-    let updateDueToQuery = false;
-    let updateDueToFilters = false;
-    let updateDueToSourceQuery = false;
-    let updateDueToApplyGlobalQuery = false;
-    if (isQueryAware) {
-      updateDueToApplyGlobalQuery = prevMeta.applyGlobalQuery !== nextMeta.applyGlobalQuery;
-      updateDueToSourceQuery = !_.isEqual(prevMeta.sourceQuery, nextMeta.sourceQuery);
-      if (nextMeta.applyGlobalQuery) {
-        updateDueToQuery = !_.isEqual(prevMeta.query, nextMeta.query);
-        updateDueToFilters = !_.isEqual(prevMeta.filters, nextMeta.filters);
-      } else {
-        // Global filters and query are not applied to layer search request so no re-fetch required.
-        // Exception is "Refresh" query.
-        updateDueToQuery = isRefreshOnlyQuery(prevMeta.query, nextMeta.query);
-      }
-    }
-
-    let updateDueToPrecisionChange = false;
-    if (isGeoGridPrecisionAware) {
-      updateDueToPrecisionChange = !_.isEqual(prevMeta.geogridPrecision, nextMeta.geogridPrecision);
-    }
-
-    const updateDueToExtentChange = this.updateDueToExtent(source, prevMeta, nextMeta);
-
-    const updateDueToSourceMetaChange = !_.isEqual(prevMeta.sourceMeta, nextMeta.sourceMeta);
-
-    return !updateDueToTime
-      && !updateDueToRefreshTimer
-      && !updateDueToExtentChange
-      && !updateDueToFields
-      && !updateDueToQuery
-      && !updateDueToFilters
-      && !updateDueToSourceQuery
-      && !updateDueToApplyGlobalQuery
-      && !updateDueToPrecisionChange
-      && !updateDueToSourceMetaChange;
-  }
 
   async _syncJoin({ join, startLoading, stopLoading, onLoadError, registerCancelCallback, dataFilters }) {
 
     const joinSource = join.getRightJoinSource();
     const sourceDataId = join.getSourceId();
     const requestToken = Symbol(`layer-join-refresh:${this.getId()} - ${sourceDataId}`);
-
     const searchFilters = {
       ...dataFilters,
       fieldNames: joinSource.getFieldNames(),
       sourceQuery: joinSource.getWhereQuery(),
       applyGlobalQuery: joinSource.getApplyGlobalQuery(),
     };
-    const canSkip = await this._canSkipSourceUpdate(joinSource, sourceDataId, searchFilters);
-    if (canSkip) {
-      const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
-      const propertiesMap = sourceDataRequest ? sourceDataRequest.getData() : null;
+    const prevDataRequest = this._findDataRequestForSource(sourceDataId);
+
+    const canSkipFetch = await canSkipSourceUpdate({
+      source: joinSource,
+      prevDataRequest,
+      nextMeta: searchFilters,
+    });
+    if (canSkipFetch) {
       return {
         dataHasChanged: false,
         join: join,
-        propertiesMap: propertiesMap
+        propertiesMap: prevDataRequest.getData()
       };
     }
 
@@ -466,12 +388,17 @@ export class VectorLayer extends AbstractLayer {
 
     const requestToken = Symbol(`layer-source-refresh:${this.getId()} - source`);
     const searchFilters = this._getSearchFilters(dataFilters);
-    const canSkip = await this._canSkipSourceUpdate(this._source, SOURCE_DATA_ID_ORIGIN, searchFilters);
-    if (canSkip) {
-      const sourceDataRequest = this.getSourceDataRequest();
+    const prevDataRequest = this.getSourceDataRequest();
+
+    const canSkipFetch = await canSkipSourceUpdate({
+      source: this._source,
+      prevDataRequest,
+      nextMeta: searchFilters,
+    });
+    if (canSkipFetch) {
       return {
         refreshed: false,
-        featureCollection: sourceDataRequest.getData()
+        featureCollection: prevDataRequest.getData()
       };
     }
 
@@ -535,7 +462,6 @@ export class VectorLayer extends AbstractLayer {
 
     const joinStates = await this._syncJoins(syncContext);
     await this._performInnerJoins(sourceResult, joinStates, syncContext.updateSourceData);
-
   }
 
   _getSourceFeatureCollection() {

@@ -6,8 +6,6 @@
 import _ from 'lodash';
 import React from 'react';
 import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
-import turf from 'turf';
-import turfBooleanContains from '@turf/boolean-contains';
 import { DataRequest } from './util/data_request';
 import {
   MAX_ZOOM,
@@ -18,9 +16,6 @@ import {
 import uuid from 'uuid/v4';
 import { copyPersistentState } from '../reducers/util';
 import { i18n } from '@kbn/i18n';
-
-const SOURCE_UPDATE_REQUIRED = true;
-const NO_SOURCE_UPDATE_REQUIRED = false;
 
 export class AbstractLayer {
 
@@ -316,42 +311,7 @@ export class AbstractLayer {
     throw new Error('Should implement AbstractLayer#syncLayerWithMB');
   }
 
-  updateDueToExtent(source, prevMeta = {}, nextMeta = {}) {
-    const extentAware = source.isFilterByMapBounds();
-    if (!extentAware) {
-      return NO_SOURCE_UPDATE_REQUIRED;
-    }
 
-    const { buffer: previousBuffer } = prevMeta;
-    const { buffer: newBuffer } = nextMeta;
-
-    if (!previousBuffer) {
-      return SOURCE_UPDATE_REQUIRED;
-    }
-
-    if (_.isEqual(previousBuffer, newBuffer)) {
-      return NO_SOURCE_UPDATE_REQUIRED;
-    }
-
-    const previousBufferGeometry = turf.bboxPolygon([
-      previousBuffer.minLon,
-      previousBuffer.minLat,
-      previousBuffer.maxLon,
-      previousBuffer.maxLat
-    ]);
-    const newBufferGeometry = turf.bboxPolygon([
-      newBuffer.minLon,
-      newBuffer.minLat,
-      newBuffer.maxLon,
-      newBuffer.maxLat
-    ]);
-    const doesPreviousBufferContainNewBuffer = turfBooleanContains(previousBufferGeometry, newBufferGeometry);
-
-    const isTrimmed = _.get(prevMeta, 'areResultsTrimmed', false);
-    return doesPreviousBufferContainNewBuffer && !isTrimmed
-      ? NO_SOURCE_UPDATE_REQUIRED
-      : SOURCE_UPDATE_REQUIRED;
-  }
 
   getLayerTypeIconName() {
     throw new Error('should implement Layer#getLayerTypeIconName');
@@ -407,4 +367,3 @@ export class AbstractLayer {
   }
 
 }
-
