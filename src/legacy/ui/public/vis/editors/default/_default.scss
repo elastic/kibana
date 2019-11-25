@@ -3,7 +3,7 @@
   display: flex;
 
   @include euiBreakpoint('xs', 's', 'm') {
-    flex-direction: column-reverse;
+    flex-direction: column;
   }
 }
 
@@ -28,6 +28,7 @@
   }
 }
 
+// !importants on width are required to override resizable panel inline widths
 .visEditor__collapsibleSidebar-isClosed {
   min-width: 0;
   width: $euiSizeXL !important; // Just enough room for the collapse button
@@ -37,8 +38,15 @@
   }
 
   @include euiBreakpoint('xs', 's', 'm') {
-    display: none !important;
+    height: $euiSizeXXL; // Just enough room for the collapse button
+    width: 100% !important;
   }
+}
+
+.visEditor__collapsibleSidebarButton {
+  position: absolute;
+  right: $euiSizeXS;
+  top: $euiSizeS;
 }
 
 /**

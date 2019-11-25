@@ -214,7 +214,7 @@ function DefaultEditorSideBar({
         aria-label={i18n.translate('common.ui.vis.editors.sidebar.collapseButtonAriaLabel', {
           defaultMessage: 'Toggle sidebar',
         })}
-        className="visEditorSidebar__collapsibleButton"
+        className="visEditor__collapsibleSidebarButton"
         data-test-subj="collapseSideBarButton"
         color="text"
         iconType={isCollapsed ? 'menuLeft' : 'menuRight'}

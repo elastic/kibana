@@ -82,16 +82,6 @@
   margin-bottom: $euiSizeM;
 }
 
-.visEditorSidebar__collapsibleButton {
-  position: absolute;
-  right: $euiSizeXS;
-  top: $euiSizeS;
-
-  @include euiBreakpoint('xs', 's', 'm') {
-    display: none;
-  }
-}
-
 //
 // FORMS
 //
