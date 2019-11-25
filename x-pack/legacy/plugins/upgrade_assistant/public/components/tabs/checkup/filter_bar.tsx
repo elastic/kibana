@@ -31,7 +31,7 @@ interface FilterBarProps {
   onFilterChange(level: LevelFilterOption): void;
 }
 
-export const FilterBar: React.StatelessComponent<FilterBarProps> = ({
+export const FilterBar: React.FunctionComponent<FilterBarProps> = ({
   allDeprecations = [],
   currentFilter,
   onFilterChange,

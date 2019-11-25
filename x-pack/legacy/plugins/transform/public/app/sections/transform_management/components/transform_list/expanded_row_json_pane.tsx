@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC } from 'react';
+import React, { FC } from 'react';
 
 import {
   // @ts-ignore
@@ -18,20 +18,22 @@ interface Props {
   json: object;
 }
 
-export const ExpandedRowJsonPane: SFC<Props> = ({ json }) => {
+export const ExpandedRowJsonPane: FC<Props> = ({ json }) => {
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiSpacer size="s" />
-        <EuiCodeEditor
-          value={JSON.stringify(json, null, 2)}
-          readOnly={true}
-          mode="json"
-          style={{ width: '100%' }}
-          theme="textmate"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>&nbsp;</EuiFlexItem>
-    </EuiFlexGroup>
+    <div data-test-subj="transformJsonTabContent">
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiSpacer size="s" />
+          <EuiCodeEditor
+            value={JSON.stringify(json, null, 2)}
+            readOnly={true}
+            mode="json"
+            style={{ width: '100%' }}
+            theme="textmate"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>&nbsp;</EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
   );
 };

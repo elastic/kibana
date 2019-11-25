@@ -15,7 +15,7 @@ const defaultProps = {
   indexPatternId: 'indexPattern1',
   onChange: () => {},
   filterByMapBounds: true,
-  tooltipProperties: [],
+  tooltipFields: [],
   sortOrder: 'DESC',
   useTopHits: false,
   topHitsSplitField: 'trackId',

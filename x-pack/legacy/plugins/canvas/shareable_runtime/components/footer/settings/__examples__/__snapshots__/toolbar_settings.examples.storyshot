@@ -34,6 +34,7 @@ exports[`Storyshots shareables/Footer/Settings/ToolbarSettings component: off 1`
           <button
             aria-checked={false}
             aria-describedby="generated-id-help"
+            aria-labelledby="generated-id"
             className="euiSwitch__button"
             data-test-subj="hideToolbarSwitch"
             id="generated-id"
@@ -127,6 +128,7 @@ exports[`Storyshots shareables/Footer/Settings/ToolbarSettings component: on 1`]
           <button
             aria-checked={true}
             aria-describedby="generated-id-help"
+            aria-labelledby="generated-id"
             className="euiSwitch__button"
             data-test-subj="hideToolbarSwitch"
             id="generated-id"
@@ -220,6 +222,7 @@ exports[`Storyshots shareables/Footer/Settings/ToolbarSettings contextual 1`] = 
           <button
             aria-checked={false}
             aria-describedby="generated-id-help"
+            aria-labelledby="generated-id"
             className="euiSwitch__button"
             data-test-subj="hideToolbarSwitch"
             id="generated-id"
