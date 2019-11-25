@@ -31,7 +31,7 @@ export const security = (kibana) => new kibana.Plugin({
       encryptionKey: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
       sessionTimeout: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
       secureCookies: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
-      loginAssistanceMessage: Joi.string().default(''),
+      loginAssistanceMessage: Joi.string().default(),
       authorization: Joi.object({
         legacyFallback: Joi.object({
           enabled: Joi.boolean().default(true) // deprecated
