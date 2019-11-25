@@ -27,7 +27,7 @@ interface Props {
   timeRange: InfraTimerangeInput;
 }
 
-export const GroupOfNodes: React.SFC<Props> = ({
+export const GroupOfNodes: React.FC<Props> = ({
   group,
   options,
   formatter,

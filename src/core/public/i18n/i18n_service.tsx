@@ -65,6 +65,13 @@ export class I18nService {
             'Screen reader announcement that functionality is available in the page document',
         }
       ),
+      'euiBreadcrumbs.collapsedBadge.ariaLabel': i18n.translate(
+        'core.euiBreadcrumbs.collapsedBadge.ariaLabel',
+        {
+          defaultMessage: 'Show all breadcrumbs',
+          description: 'Displayed when one or more breadcrumbs are hidden.',
+        }
+      ),
       'euiCardSelect.select': i18n.translate('core.euiCardSelect.select', {
         defaultMessage: 'Select',
         description: 'Displayed button text when a card option can be selected.',
@@ -117,6 +124,80 @@ export class I18nService {
           description:
             'Screen reader text to describe the action and hex value of the selectable option',
         }),
+      'euiColorStopThumb.removeLabel': i18n.translate('core.euiColorStopThumb.removeLabel', {
+        defaultMessage: 'Remove this stop',
+        description: 'Label accompanying a button whose action will remove the color stop',
+      }),
+      'euiColorStopThumb.screenReaderAnnouncement': i18n.translate(
+        'core.euiColorStopThumb.screenReaderAnnouncement',
+        {
+          defaultMessage:
+            'A popup with a color stop edit form opened. Tab forward to cycle through form controls or press escape to close this popup.',
+          description:
+            'Message when the color picker popover has opened for an individual color stop thumb.',
+        }
+      ),
+      'euiColorStops.screenReaderAnnouncement': ({ label, readOnly, disabled }: EuiValues) =>
+        i18n.translate('core.euiColorStops.screenReaderAnnouncement', {
+          defaultMessage:
+            '{label}: {readOnly} {disabled} Color stop picker. Each stop consists of a number and corresponding color value. Use the Down and Up arrow keys to select individual stops. Press the Enter key to create a new stop.',
+          values: { label, readOnly, disabled },
+          description:
+            'Screen reader text to describe the composite behavior of the color stops component.',
+        }),
+      'euiColumnSelector.hideAll': i18n.translate('core.euiColumnSelector.hideAll', {
+        defaultMessage: 'Hide all',
+      }),
+      'euiColumnSelector.selectAll': i18n.translate('core.euiColumnSelector.selectAll', {
+        defaultMessage: 'Show all',
+      }),
+      'euiColumnSorting.clearAll': i18n.translate('core.euiColumnSorting.clearAll', {
+        defaultMessage: 'Clear sorting',
+      }),
+      'euiColumnSorting.emptySorting': i18n.translate('core.euiColumnSorting.emptySorting', {
+        defaultMessage: 'Currently no fields are sorted',
+      }),
+      'euiColumnSorting.pickFields': i18n.translate('core.euiColumnSorting.pickFields', {
+        defaultMessage: 'Pick fields to sort by',
+      }),
+      'euiColumnSorting.sortFieldAriaLabel': i18n.translate(
+        'core.euiColumnSorting.sortFieldAriaLabel',
+        {
+          defaultMessage: 'Sort by:',
+        }
+      ),
+      'euiColumnSortingDraggable.activeSortLabel': i18n.translate(
+        'core.euiColumnSortingDraggable.activeSortLabel',
+        {
+          defaultMessage: 'is sorting this data grid',
+        }
+      ),
+      'euiColumnSortingDraggable.defaultSortAsc': i18n.translate(
+        'core.euiColumnSortingDraggable.defaultSortAsc',
+        {
+          defaultMessage: 'A-Z',
+          description: 'Ascending sort label',
+        }
+      ),
+      'euiColumnSortingDraggable.defaultSortDesc': i18n.translate(
+        'core.euiColumnSortingDraggable.defaultSortDesc',
+        {
+          defaultMessage: 'Z-A',
+          description: 'Descending sort label',
+        }
+      ),
+      'euiColumnSortingDraggable.removeSortLabel': i18n.translate(
+        'core.euiColumnSortingDraggable.removeSortLabel',
+        {
+          defaultMessage: 'Remove from data grid sort:',
+        }
+      ),
+      'euiColumnSortingDraggable.toggleLegend': i18n.translate(
+        'core.euiColumnSortingDraggable.toggleLegend',
+        {
+          defaultMessage: 'Select sorting method for field:',
+        }
+      ),
       'euiComboBoxOptionsList.allOptionsSelected': i18n.translate(
         'core.euiComboBoxOptionsList.allOptionsSelected',
         {
@@ -163,6 +244,88 @@ export class I18nService {
           values: { children },
           description: 'ARIA label, `children` is the human-friendly value of an option',
         }),
+      'euiCommonlyUsedTimeRanges.legend': i18n.translate('core.euiCommonlyUsedTimeRanges.legend', {
+        defaultMessage: 'Commonly used',
+      }),
+      'euiDataGrid.screenReaderNotice': i18n.translate('core.euiDataGrid.screenReaderNotice', {
+        defaultMessage: 'Cell contains interactive content.',
+      }),
+      'euiDataGridCell.expandButtonTitle': i18n.translate(
+        'core.euiDataGridCell.expandButtonTitle',
+        {
+          defaultMessage: 'Click or hit enter to interact with cell content',
+        }
+      ),
+      'euiDataGridSchema.booleanSortTextAsc': i18n.translate(
+        'core.euiDataGridSchema.booleanSortTextAsc',
+        {
+          defaultMessage: 'True-False',
+          description: 'Ascending boolean label',
+        }
+      ),
+      'euiDataGridSchema.booleanSortTextDesc': i18n.translate(
+        'core.euiDataGridSchema.booleanSortTextDesc',
+        {
+          defaultMessage: 'False-True',
+          description: 'Descending boolean label',
+        }
+      ),
+      'euiDataGridSchema.currencySortTextAsc': i18n.translate(
+        'core.euiDataGridSchema.currencySortTextAsc',
+        {
+          defaultMessage: 'Low-High',
+          description: 'Ascending currency label',
+        }
+      ),
+      'euiDataGridSchema.currencySortTextDesc': i18n.translate(
+        'core.euiDataGridSchema.currencySortTextDesc',
+        {
+          defaultMessage: 'High-Low',
+          description: 'Descending currency label',
+        }
+      ),
+      'euiDataGridSchema.dateSortTextAsc': i18n.translate(
+        'core.euiDataGridSchema.dateSortTextAsc',
+        {
+          defaultMessage: 'New-Old',
+          description: 'Ascending date label',
+        }
+      ),
+      'euiDataGridSchema.dateSortTextDesc': i18n.translate(
+        'core.euiDataGridSchema.dateSortTextDesc',
+        {
+          defaultMessage: 'Old-New',
+          description: 'Descending date label',
+        }
+      ),
+      'euiDataGridSchema.numberSortTextAsc': i18n.translate(
+        'core.euiDataGridSchema.numberSortTextAsc',
+        {
+          defaultMessage: 'Low-High',
+          description: 'Ascending number label',
+        }
+      ),
+      'euiDataGridSchema.numberSortTextDesc': i18n.translate(
+        'core.euiDataGridSchema.numberSortTextDesc',
+        {
+          defaultMessage: 'High-Low',
+          description: 'Descending number label',
+        }
+      ),
+      'euiDataGridSchema.jsonSortTextAsc': i18n.translate(
+        'core.euiDataGridSchema.jsonSortTextAsc',
+        {
+          defaultMessage: 'Small-Large',
+          description: 'Ascending size label',
+        }
+      ),
+      'euiDataGridSchema.jsonSortTextDesc': i18n.translate(
+        'core.euiDataGridSchema.jsonSortTextDesc',
+        {
+          defaultMessage: 'Large-Small',
+          description: 'Descending size label',
+        }
+      ),
       'euiFilterButton.filterBadge': ({ count, hasActiveFilters }: EuiValues) =>
         i18n.translate('core.euiFilterButton.filterBadge', {
           defaultMessage: '${count} ${filterCountLabel} filters',
@@ -195,6 +358,19 @@ export class I18nService {
       'euiHue.label': i18n.translate('core.euiHue.label', {
         defaultMessage: 'Select the HSV color mode "hue" value',
       }),
+      'euiImage.closeImage': ({ alt }: EuiValues) =>
+        i18n.translate('core.euiImage.closeImage', {
+          defaultMessage: 'Close full screen {alt} image',
+          values: { alt },
+        }),
+      'euiImage.openImage': ({ alt }: EuiValues) =>
+        i18n.translate('core.euiImage.openImage', {
+          defaultMessage: 'Open full screen {alt} image',
+          values: { alt },
+        }),
+      'euiLink.external.ariaLabel': i18n.translate('core.euiLink.external.ariaLabel', {
+        defaultMessage: 'External link',
+      }),
       'euiModal.closeModal': i18n.translate('core.euiModal.closeModal', {
         defaultMessage: 'Closes this modal window',
       }),
@@ -217,9 +393,70 @@ export class I18nService {
       'euiPopover.screenReaderAnnouncement': i18n.translate(
         'core.euiPopover.screenReaderAnnouncement',
         {
-          defaultMessage: 'You are in a popup. To exit this popup, hit Escape.',
+          defaultMessage: 'You are in a dialog. To close this dialog, hit escape.',
         }
       ),
+      'euiQuickSelect.applyButton': i18n.translate('core.euiQuickSelect.applyButton', {
+        defaultMessage: 'Apply',
+      }),
+      'euiQuickSelect.fullDescription': ({ timeTense, timeValue, timeUnit }: EuiValues) =>
+        i18n.translate('core.euiQuickSelect.fullDescription', {
+          defaultMessage: 'Currently set to {timeTense} {timeValue} {timeUnit}.',
+          values: { timeTense, timeValue, timeUnit },
+        }),
+      'euiQuickSelect.legendText': i18n.translate('core.euiQuickSelect.legendText', {
+        defaultMessage: 'Quick select a time range',
+      }),
+      'euiQuickSelect.nextLabel': i18n.translate('core.euiQuickSelect.nextLabel', {
+        defaultMessage: 'Next time window',
+      }),
+      'euiQuickSelect.previousLabel': i18n.translate('core.euiQuickSelect.previousLabel', {
+        defaultMessage: 'Previous time window',
+      }),
+      'euiQuickSelect.quickSelectTitle': i18n.translate('core.euiQuickSelect.quickSelectTitle', {
+        defaultMessage: 'Quick select',
+      }),
+      'euiQuickSelect.tenseLabel': i18n.translate('core.euiQuickSelect.tenseLabel', {
+        defaultMessage: 'Time tense',
+      }),
+      'euiQuickSelect.unitLabel': i18n.translate('core.euiQuickSelect.unitLabel', {
+        defaultMessage: 'Time unit',
+      }),
+      'euiQuickSelect.valueLabel': i18n.translate('core.euiQuickSelect.valueLabel', {
+        defaultMessage: 'Time value',
+      }),
+      'euiRefreshInterval.fullDescription': ({ optionValue, optionText }: EuiValues) =>
+        i18n.translate('core.euiRefreshInterval.fullDescription', {
+          defaultMessage: 'Currently set to {optionValue} {optionText}.',
+          values: { optionValue, optionText },
+        }),
+      'euiRefreshInterval.legend': i18n.translate('core.euiRefreshInterval.legend', {
+        defaultMessage: 'Refresh every',
+      }),
+      'euiRefreshInterval.start': i18n.translate('core.euiRefreshInterval.start', {
+        defaultMessage: 'Start',
+      }),
+      'euiRefreshInterval.stop': i18n.translate('core.euiRefreshInterval.stop', {
+        defaultMessage: 'Stop',
+      }),
+      'euiRelativeTab.fullDescription': ({ unit }: EuiValues) =>
+        i18n.translate('core.euiRelativeTab.fullDescription', {
+          defaultMessage: 'The unit is changeable. Currently set to {unit}.',
+          values: { unit },
+        }),
+      'euiRelativeTab.relativeDate': ({ position }: EuiValues) =>
+        i18n.translate('core.euiRelativeTab.relativeDate', {
+          defaultMessage: '{position} date',
+          values: { position },
+        }),
+      'euiRelativeTab.roundingLabel': ({ unit }: EuiValues) =>
+        i18n.translate('core.euiRelativeTab.roundingLabel', {
+          defaultMessage: 'Round to the {unit}',
+          values: { unit },
+        }),
+      'euiRelativeTab.unitInputLabel': i18n.translate('core.euiRelativeTab.unitInputLabel', {
+        defaultMessage: 'Relative time span',
+      }),
       'euiSaturation.roleDescription': i18n.translate('core.euiSaturation.roleDescription', {
         defaultMessage: 'HSV color mode saturation and value selection',
       }),
@@ -247,22 +484,18 @@ export class I18nService {
       'euiStat.loadingText': i18n.translate('core.euiStat.loadingText', {
         defaultMessage: 'Statistic is loading',
       }),
-      'euiStep.completeStep': i18n.translate('core.euiStep.completeStep', {
-        defaultMessage: 'Step',
-        description:
-          'See https://elastic.github.io/eui/#/navigation/steps to know how Step control looks like',
-      }),
-      'euiStep.incompleteStep': i18n.translate('core.euiStep.incompleteStep', {
-        defaultMessage: 'Incomplete Step',
-      }),
+      'euiStep.ariaLabel': ({ status }: EuiValues) =>
+        i18n.translate('core.euiStep.ariaLabel', {
+          defaultMessage: '{stepStatus}',
+          values: { stepStatus: status === 'incomplete' ? 'Incomplete Step' : 'Step' },
+        }),
       'euiStepHorizontal.buttonTitle': ({ step, title, disabled, isComplete }: EuiValues) => {
         return i18n.translate('core.euiStepHorizontal.buttonTitle', {
-          defaultMessage:
-            'Step {step}: {title}{titleAppendix, select, completed { is completed} disabled { is disabled} other {}}',
+          defaultMessage: 'Step {step}: {title}{titleAppendix}',
           values: {
             step,
             title,
-            titleAppendix: disabled ? 'disabled' : isComplete ? 'completed' : '',
+            titleAppendix: disabled ? ' is disabled' : isComplete ? ' is complete' : '',
           },
         });
       },
@@ -284,6 +517,9 @@ export class I18nService {
         defaultMessage: 'complete',
         description:
           'Used as the title attribute on an image or svg icon to indicate a given process step is complete',
+      }),
+      'euiStyleSelector.buttonText': i18n.translate('core.euiStyleSelector.buttonText', {
+        defaultMessage: 'Density',
       }),
       'euiSuperDatePicker.showDatesButtonLabel': i18n.translate(
         'core.euiSuperDatePicker.showDatesButtonLabel',
@@ -362,6 +598,17 @@ export class I18nService {
         defaultMessage: 'Notification',
         description: 'ARIA label on an element containing a notification',
       }),
+      'euiTreeView.ariaLabel': ({ nodeLabel, ariaLabel }: EuiValues) =>
+        i18n.translate('core.euiTreeView.ariaLabel', {
+          defaultMessage: '{nodeLabel} child of {ariaLabel}',
+          values: { nodeLabel, ariaLabel },
+        }),
+      'euiTreeView.listNavigationInstructions': i18n.translate(
+        'core.euiTreeView.listNavigationInstructions',
+        {
+          defaultMessage: 'You can quickly navigate this list using arrow keys.',
+        }
+      ),
     };
 
     return {

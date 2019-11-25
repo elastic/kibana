@@ -8,7 +8,7 @@ import * as Rx from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
 import { PLUGIN_ID, PNG_JOB_TYPE } from '../../../../common/constants';
-import { LevelLogger, oncePerServer } from '../../../../server/lib';
+import { LevelLogger } from '../../../../server/lib';
 import { generatePngObservableFactory } from '../lib/generate_png';
 import {
   decryptJobHeaders,
@@ -17,7 +17,7 @@ import {
   getFullUrls,
 } from '../../../common/execute_job/';
 
-function executeJobFn(server) {
+export function executeJobFactory(server) {
   const generatePngObservable = generatePngObservableFactory(server);
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PNG_JOB_TYPE, 'execute']);
 
@@ -67,5 +67,3 @@ function executeJobFn(server) {
     return process$.pipe(takeUntil(stop$)).toPromise();
   };
 }
-
-export const executeJobFactory = oncePerServer(executeJobFn);

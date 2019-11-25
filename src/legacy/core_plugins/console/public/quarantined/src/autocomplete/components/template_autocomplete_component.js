@@ -21,7 +21,7 @@ import { ListComponent } from './list_component';
 
 export class TemplateAutocompleteComponent extends ListComponent {
   constructor(name, parent) {
-    super(name, mappings.getTemplates, parent);
+    super(name, mappings.getTemplates, parent, true, true);
   }
   getContextKey() {
     return 'template';
