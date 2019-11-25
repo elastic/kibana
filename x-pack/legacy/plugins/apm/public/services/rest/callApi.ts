@@ -21,7 +21,7 @@ function fetchOptionsWithDebug(fetchOptions: FetchOptions) {
     sessionStorage.getItem('apm_debug') === 'true' &&
     startsWith(fetchOptions.pathname, '/api/apm');
 
-  const isGet = !fetchOptions.method || fetchOptions.method === 'GET';
+  const isGetRequest = !fetchOptions.method || fetchOptions.method === 'GET';
 
   const { body, ...rest } = fetchOptions;
 

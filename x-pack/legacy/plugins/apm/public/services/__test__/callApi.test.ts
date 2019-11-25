@@ -35,6 +35,54 @@ describe('callApi', () => {
     clearCache();
   });
 
+  describe('encoding', () => {
+    describe('when getting', () => {
+      it('it should correctly encode the request parameters', async () => {
+        await callApi(http, {
+          pathname: `/api/kibana`,
+          query: { start: '2010', end: '2011' }
+        });
+
+        expect(http.get).toHaveBeenCalledTimes(1);
+
+        expect(http.get).toHaveBeenCalledWith('/api/kibana', {
+          query: {
+            start: '2010',
+            end: '2011'
+          }
+        });
+      });
+    });
+    describe('when posting', () => {
+      it('it should correctly encode the request parameters', async () => {
+        await callApi(http, {
+          method: 'POST',
+          pathname: `/api/kibana`,
+          query: { start: '2010', end: '2011' },
+          body: {
+            foo: {
+              bar: 1
+            }
+          }
+        });
+
+        expect(http.post).toHaveBeenCalledTimes(1);
+
+        expect(http.post).toHaveBeenCalledWith('/api/kibana', {
+          query: {
+            start: '2010',
+            end: '2011'
+          },
+          body: JSON.stringify({
+            foo: {
+              bar: 1
+            }
+          })
+        });
+      });
+    });
+  });
+
   describe('apm_debug', () => {
     beforeEach(() => {
       sessionStorage.setItem('apm_debug', 'true');
@@ -159,35 +207,6 @@ describe('callApi', () => {
         });
 
         expect(http.get).toHaveBeenCalledTimes(1);
-      });
-    });
-
-    describe('when posting', () => {
-      it('it should correctly encode the request parameters', async () => {
-        await callApi(http, {
-          method: 'POST',
-          pathname: `/api/kibana`,
-          query: { start: '2010', end: '2011' },
-          body: {
-            foo: {
-              bar: 1
-            }
-          }
-        });
-
-        expect(http.post).toHaveBeenCalledTimes(1);
-
-        expect(http.post).toHaveBeenCalledWith('/api/kibana', {
-          query: {
-            start: '2010',
-            end: '2011'
-          },
-          body: JSON.stringify({
-            foo: {
-              bar: 1
-            }
-          })
-        });
       });
     });
   });
