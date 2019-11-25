@@ -44,12 +44,12 @@ const controlParams = {
 };
 let handleFieldNameChange;
 let handleIndexPatternChange;
-let handleNumberOptionChange;
+let handleOptionsChange;
 
 beforeEach(() => {
   handleFieldNameChange = sinon.spy();
   handleIndexPatternChange = sinon.spy();
-  handleNumberOptionChange = sinon.spy();
+  handleOptionsChange = sinon.spy();
 });
 
 test('renders RangeControlEditor', () => {
@@ -59,35 +59,32 @@ test('renders RangeControlEditor', () => {
     controlParams={controlParams}
     handleFieldNameChange={handleFieldNameChange}
     handleIndexPatternChange={handleIndexPatternChange}
-    handleNumberOptionChange={handleNumberOptionChange}
+    handleOptionsChange={handleOptionsChange}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
-test('handleNumberOptionChange - step', () => {
+test('handleOptionsChange - step', () => {
   const component = mountWithIntl(<RangeControlEditor
     getIndexPattern={getIndexPatternMock}
     controlIndex={0}
     controlParams={controlParams}
     handleFieldNameChange={handleFieldNameChange}
     handleIndexPatternChange={handleIndexPatternChange}
-    handleNumberOptionChange={handleNumberOptionChange}
+    handleOptionsChange={handleOptionsChange}
   />);
-  findTestSubject(component, 'rangeControlSizeInput0').simulate('change', { target: { value: 0.5 } });
+  findTestSubject(component, 'rangeControlSizeInput0').simulate('change', { target: { valueAsNumber: 0.5 } });
   sinon.assert.notCalled(handleFieldNameChange);
   sinon.assert.notCalled(handleIndexPatternChange);
   const expectedControlIndex = 0;
   const expectedOptionName = 'step';
+  const expectedValue = 0.5;
   sinon.assert.calledWith(
-    handleNumberOptionChange,
+    handleOptionsChange,
     expectedControlIndex,
     expectedOptionName,
-    sinon.match((evt) => {
-      if (evt.target.value === 0.5) {
-        return true;
-      }
-      return false;
-    }, 'unexpected input event'));
+    expectedValue
+  );
 });
 
 test('handleNumberOptionChange - decimalPlaces', () => {
@@ -97,21 +94,19 @@ test('handleNumberOptionChange - decimalPlaces', () => {
     controlParams={controlParams}
     handleFieldNameChange={handleFieldNameChange}
     handleIndexPatternChange={handleIndexPatternChange}
-    handleNumberOptionChange={handleNumberOptionChange}
+    handleOptionsChange={handleOptionsChange}
   />);
-  findTestSubject(component, 'rangeControlDecimalPlacesInput0').simulate('change', { target: { value: 2 } });
+  findTestSubject(component, 'rangeControlDecimalPlacesInput0').simulate('change', { target: { valueAsNumber: 2 } });
   sinon.assert.notCalled(handleFieldNameChange);
   sinon.assert.notCalled(handleIndexPatternChange);
   const expectedControlIndex = 0;
   const expectedOptionName = 'decimalPlaces';
+  const expectedValue = 2;
+
   sinon.assert.calledWith(
-    handleNumberOptionChange,
+    handleOptionsChange,
     expectedControlIndex,
     expectedOptionName,
-    sinon.match((evt) => {
-      if (evt.target.value === 2) {
-        return true;
-      }
-      return false;
-    }, 'unexpected input event'));
+    expectedValue
+  );
 });

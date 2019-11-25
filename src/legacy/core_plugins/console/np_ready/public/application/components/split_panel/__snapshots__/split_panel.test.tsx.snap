@@ -8,13 +8,13 @@ exports[`Split panel should render correctly 1`] = `
         "panels": Array [
           Object {
             "getWidth": [Function],
-            "initialWidth": "100%",
             "setWidth": [Function],
+            "width": 100,
           },
           Object {
             "getWidth": [Function],
-            "initialWidth": "100%",
             "setWidth": [Function],
+            "width": 100,
           },
         ],
       }
@@ -55,15 +55,35 @@ exports[`Split panel should render correctly 1`] = `
       </Panel>
       <Resizer
         key="resizer"
+        onKeyDown={[Function]}
         onMouseDown={[Function]}
       >
-        <div
-          className="conApp__resizer"
+        <button
+          aria-label="Press left/right to adjust panels size"
           data-test-subj="splitPanelResizer"
+          onKeyDown={[Function]}
           onMouseDown={[Function]}
         >
-          ︙
-        </div>
+          <EuiIcon
+            type="boxesVertical"
+          >
+            <EuiIconEmpty
+              className="euiIcon euiIcon--medium euiIcon-isLoading"
+              focusable="false"
+              style={null}
+            >
+              <svg
+                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+            </EuiIconEmpty>
+          </EuiIcon>
+        </button>
       </Resizer>
       <Panel
         key=".1"

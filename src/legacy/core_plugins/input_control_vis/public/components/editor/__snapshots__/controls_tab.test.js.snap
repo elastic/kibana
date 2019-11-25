@@ -20,11 +20,10 @@ exports[`renders ControlsTab 1`] = `
       }
     }
     getIndexPattern={[Function]}
-    handleCheckboxOptionChange={[Function]}
     handleFieldNameChange={[Function]}
     handleIndexPatternChange={[Function]}
     handleLabelChange={[Function]}
-    handleNumberOptionChange={[Function]}
+    handleOptionsChange={[Function]}
     handleParentChange={[Function]}
     handleRemoveControl={[Function]}
     key="1"
@@ -53,11 +52,10 @@ exports[`renders ControlsTab 1`] = `
       }
     }
     getIndexPattern={[Function]}
-    handleCheckboxOptionChange={[Function]}
     handleFieldNameChange={[Function]}
     handleIndexPatternChange={[Function]}
     handleLabelChange={[Function]}
-    handleNumberOptionChange={[Function]}
+    handleOptionsChange={[Function]}
     handleParentChange={[Function]}
     handleRemoveControl={[Function]}
     key="2"

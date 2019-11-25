@@ -33,18 +33,12 @@ exports[`DefaultEditorAggParams component should init with the default set of pa
         "type": "string",
       }
     }
+    formIsTouched={false}
     key="customLabelundefined"
     setAggParamValue={[MockFunction]}
     setTouched={[Function]}
     setValidity={[Function]}
     showValidation={false}
-    subAggParams={
-      Object {
-        "formIsTouched": false,
-        "onAggTypeChange": [MockFunction],
-        "setAggParamValue": [MockFunction],
-      }
-    }
   />
   <EuiFormRow
     describedByIds={Array []}
@@ -72,18 +66,12 @@ exports[`DefaultEditorAggParams component should init with the default set of pa
             "type": "json",
           }
         }
+        formIsTouched={false}
         key="jsonundefined"
         setAggParamValue={[MockFunction]}
         setTouched={[Function]}
         setValidity={[Function]}
         showValidation={false}
-        subAggParams={
-          Object {
-            "formIsTouched": false,
-            "onAggTypeChange": [MockFunction],
-            "setAggParamValue": [MockFunction],
-          }
-        }
       />
     </EuiAccordion>
   </EuiFormRow>

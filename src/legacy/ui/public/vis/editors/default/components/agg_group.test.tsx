@@ -165,7 +165,7 @@ describe('DefaultEditorAgg component', () => {
         .setValidity(false);
     });
 
-    expect(setValidity).toBeCalledWith(false);
+    expect(setValidity).toHaveBeenLastCalledWith('aggGroup__metrics', false);
   });
 
   it('should last bucket has truthy isLastBucket prop', () => {
@@ -183,10 +183,10 @@ describe('DefaultEditorAgg component', () => {
       comp.props().onDragEnd({ source: { index: 0 }, destination: { index: 1 } });
     });
 
-    expect(reorderAggs).toHaveBeenCalledWith([
-      defaultProps.state.aggs.aggs[1],
+    expect(reorderAggs).toHaveBeenCalledWith(
       defaultProps.state.aggs.aggs[0],
-    ]);
+      defaultProps.state.aggs.aggs[1]
+    );
   });
 
   it('should show add button when schemas count is less than max', () => {

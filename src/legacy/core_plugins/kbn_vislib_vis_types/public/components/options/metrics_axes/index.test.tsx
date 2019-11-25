@@ -130,7 +130,7 @@ describe('MetricsAxisOptions component', () => {
       });
 
       const updatedSeries = [{ ...chart, data: { id: agg.id, label: agg.makeLabel() } }];
-      expect(setValue).toHaveBeenLastCalledWith(SERIES_PARAMS, updatedSeries);
+      expect(setValue).toHaveBeenCalledWith(SERIES_PARAMS, updatedSeries);
     });
 
     it('should update visType when one seriesParam', () => {

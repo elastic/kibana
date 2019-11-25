@@ -49,10 +49,9 @@ describe('EditorConfigProvider', () => {
     const provider = jest.fn<any, any>(() => ({}));
     registry.register(provider);
     expect(provider).not.toHaveBeenCalled();
-    const aggType = {} as AggType;
     const aggConfig = {} as AggConfig;
     registry.getConfigForAgg(indexPattern, aggConfig);
-    expect(provider).toHaveBeenCalledWith(aggType, indexPattern, aggConfig);
+    expect(provider).toHaveBeenCalledWith(indexPattern, aggConfig);
   });
 
   it('should call all registered providers with given parameters', () => {
@@ -62,11 +61,10 @@ describe('EditorConfigProvider', () => {
     registry.register(provider2);
     expect(provider).not.toHaveBeenCalled();
     expect(provider2).not.toHaveBeenCalled();
-    const aggType = {} as AggType;
     const aggConfig = {} as AggConfig;
     registry.getConfigForAgg(indexPattern, aggConfig);
-    expect(provider).toHaveBeenCalledWith(aggType, indexPattern, aggConfig);
-    expect(provider2).toHaveBeenCalledWith(aggType, indexPattern, aggConfig);
+    expect(provider).toHaveBeenCalledWith(indexPattern, aggConfig);
+    expect(provider2).toHaveBeenCalledWith(indexPattern, aggConfig);
   });
 
   describe('merging configs', () => {
