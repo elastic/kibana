@@ -34,6 +34,10 @@ import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationStart } from '../../../navigation/public';
 import { DashboardConstants } from './dashboard_constants';
 import { SharePluginStart } from '../../../../../plugins/share/public';
+import {
+  HomePublicPluginSetup,
+  FeatureCatalogueCategory,
+} from '../../../../../plugins/home/public';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 
 export interface LegacyAngularInjectedDependencies {
