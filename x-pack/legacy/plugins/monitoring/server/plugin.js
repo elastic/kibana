@@ -17,6 +17,7 @@ export class Plugin {
     const kbnServer = core._kbnServer;
     const config = core.config();
     const usageCollection = plugins.usageCollection;
+    registerMonitoringCollection();
     /*
     * Register collector objects for stats to show up in the APIs
     */
@@ -28,7 +29,7 @@ export class Plugin {
       getOSInfo: core.getOSInfo,
       hapiServer: core._hapi,
     });
-    registerMonitoringCollection();
+
 
     /*
     * Instantiate and start the internal background task that calls collector
