@@ -93,6 +93,16 @@ test('createAPIKey() returns { created: false } when security is disabled', asyn
   expect(createAPIKeyResult).toEqual({ created: false });
 });
 
+test('createAPIKey() returns { created: false } when security is enabled but ES security is disabled', async () => {
+  const factory = new AlertsClientFactory(alertsClientFactoryParams);
+  factory.create(KibanaRequest.from(fakeRequest), fakeRequest);
+  const constructorCall = jest.requireMock('../alerts_client').AlertsClient.mock.calls[0][0];
+
+  securityPluginSetup.authc.createAPIKey.mockResolvedValueOnce(null);
+  const createAPIKeyResult = await constructorCall.createAPIKey();
+  expect(createAPIKeyResult).toEqual({ created: false });
+});
+
 test('createAPIKey() returns an API key when security is enabled', async () => {
   const factory = new AlertsClientFactory({
     ...alertsClientFactoryParams,
