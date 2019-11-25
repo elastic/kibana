@@ -43,7 +43,8 @@ export function loadOverallDataActionCreator(
   swimlaneBucketInterval: TimeBucketsInterval,
   bounds: TimeRangeBounds,
   showOverallLoadingIndicator = true,
-  viewBySwimlaneOptions: any,
+  viewBySwimlaneFieldName: string,
+  viewBySwimlaneOptions: string[],
   influencersFilterQuery: any,
   timerange: any,
   swimlaneLimit: number,
@@ -66,7 +67,7 @@ export function loadOverallDataActionCreator(
             timerange.earliestMs,
             timerange.latestMs,
             selectedJobs,
-            viewBySwimlaneOptions.swimlaneViewByFieldName,
+            viewBySwimlaneFieldName,
             swimlaneLimit,
             noInfluencersConfigured
           )
@@ -92,7 +93,7 @@ export function loadOverallDataActionCreator(
             latest: overallState.overallSwimlaneData.latest,
           },
           selectedJobs,
-          viewBySwimlaneOptions.swimlaneViewByFieldName,
+          viewBySwimlaneFieldName,
           swimlaneLimit,
           influencersFilterQuery,
           noInfluencersConfigured
@@ -107,7 +108,8 @@ export function loadOverallDataActionCreator(
               ...overallState,
               ...viewBySwimlaneState,
               viewByLoadedForTimeFormatted: formatHumanReadableDateTime(timerange.earliestMs),
-              ...viewBySwimlaneOptions,
+              viewBySwimlaneFieldName,
+              viewBySwimlaneOptions,
             },
           };
         } else {
@@ -116,7 +118,8 @@ export function loadOverallDataActionCreator(
             payload: {
               ...overallState,
               ...viewBySwimlaneState,
-              ...viewBySwimlaneOptions,
+              viewBySwimlaneFieldName,
+              viewBySwimlaneOptions,
             },
           };
         }

@@ -46,8 +46,8 @@ export const appStateReducer = (state: ExplorerAppState, nextAction: Action) => 
       appState.mlExplorerSwimlane.viewByFieldName = swimlaneSelectedCells.viewByFieldName;
       return appState;
 
-    case EXPLORER_ACTION.APP_STATE_SAVE_SWIMLANE_VIEW_BY_FIELD_NAME:
-      appState.mlExplorerSwimlane.viewByFieldName = payload.swimlaneViewByFieldName;
+    case EXPLORER_ACTION.APP_STATE_SAVE_VIEW_BY_SWIMLANE_FIELD_NAME:
+      appState.mlExplorerSwimlane.viewByFieldName = payload.viewBySwimlaneFieldName;
       return appState;
 
     case EXPLORER_ACTION.APP_STATE_SAVE_INFLUENCER_FILTER_SETTINGS:

@@ -244,7 +244,7 @@ export function loadViewByTopFieldValuesForSelectedTime(
   earliestMs,
   latestMs,
   selectedJobs,
-  swimlaneViewByFieldName,
+  viewBySwimlaneFieldName,
   swimlaneLimit,
   noInfluencersConfigured
 ) {
@@ -253,19 +253,19 @@ export function loadViewByTopFieldValuesForSelectedTime(
   // Find the top field values for the selected time, and then load the 'view by'
   // swimlane over the full time range for those specific field values.
   return new Promise((resolve) => {
-    if (swimlaneViewByFieldName !== VIEW_BY_JOB_LABEL) {
+    if (viewBySwimlaneFieldName !== VIEW_BY_JOB_LABEL) {
       mlResultsService.getTopInfluencers(
         selectedJobIds,
         earliestMs,
         latestMs,
         swimlaneLimit
       ).then((resp) => {
-        if (resp.influencers[swimlaneViewByFieldName] === undefined) {
+        if (resp.influencers[viewBySwimlaneFieldName] === undefined) {
           resolve([]);
         }
 
         const topFieldValues = [];
-        const topInfluencers = resp.influencers[swimlaneViewByFieldName];
+        const topInfluencers = resp.influencers[viewBySwimlaneFieldName];
         topInfluencers.forEach((influencerData) => {
           if (influencerData.maxAnomalyScore > 0) {
             topFieldValues.push(influencerData.influencerFieldValue);
@@ -288,9 +288,9 @@ export function loadViewByTopFieldValuesForSelectedTime(
   });
 }
 
-// Obtain the list of 'View by' fields per job and swimlaneViewByFieldName
+// Obtain the list of 'View by' fields per job and viewBySwimlaneFieldName
 export function getViewBySwimlaneOptions({
-  currentSwimlaneViewByFieldName,
+  currentviewBySwimlaneFieldName,
   filterActive,
   filteredFields,
   isAndOperator,
@@ -314,19 +314,19 @@ export function getViewBySwimlaneOptions({
   viewByOptions.push(VIEW_BY_JOB_LABEL);
   let viewBySwimlaneOptions = viewByOptions;
 
-  let swimlaneViewByFieldName = undefined;
+  let viewBySwimlaneFieldName = undefined;
 
   if (
-    viewBySwimlaneOptions.indexOf(currentSwimlaneViewByFieldName) !== -1
+    viewBySwimlaneOptions.indexOf(currentviewBySwimlaneFieldName) !== -1
   ) {
     // Set the swimlane viewBy to that stored in the state (URL) if set.
     // This means we reset it to the current state because it was set by the listener
     // on initialization.
-    swimlaneViewByFieldName = currentSwimlaneViewByFieldName;
+    viewBySwimlaneFieldName = currentviewBySwimlaneFieldName;
   } else {
     if (selectedJobIds.length > 1) {
       // If more than one job selected, default to job ID.
-      swimlaneViewByFieldName = VIEW_BY_JOB_LABEL;
+      viewBySwimlaneFieldName = VIEW_BY_JOB_LABEL;
     } else {
       // For a single job, default to the first partition, over,
       // by or influencer field of the first selected job.
@@ -340,7 +340,7 @@ export function getViewBySwimlaneOptions({
           detector.partition_field_name !== undefined &&
           firstJobInfluencers.indexOf(detector.partition_field_name) !== -1
         ) {
-          swimlaneViewByFieldName = detector.partition_field_name;
+          viewBySwimlaneFieldName = detector.partition_field_name;
           return false;
         }
 
@@ -348,7 +348,7 @@ export function getViewBySwimlaneOptions({
           detector.over_field_name !== undefined &&
           firstJobInfluencers.indexOf(detector.over_field_name) !== -1
         ) {
-          swimlaneViewByFieldName = detector.over_field_name;
+          viewBySwimlaneFieldName = detector.over_field_name;
           return false;
         }
 
@@ -360,17 +360,17 @@ export function getViewBySwimlaneOptions({
           detector.over_field_name === undefined &&
           firstJobInfluencers.indexOf(detector.by_field_name) !== -1
         ) {
-          swimlaneViewByFieldName = detector.by_field_name;
+          viewBySwimlaneFieldName = detector.by_field_name;
           return false;
         }
       });
 
-      if (swimlaneViewByFieldName === undefined) {
+      if (viewBySwimlaneFieldName === undefined) {
         if (firstJobInfluencers.length > 0) {
-          swimlaneViewByFieldName = firstJobInfluencers[0];
+          viewBySwimlaneFieldName = firstJobInfluencers[0];
         } else {
           // No influencers for first selected job - set to first available option.
-          swimlaneViewByFieldName = viewBySwimlaneOptions.length > 0
+          viewBySwimlaneFieldName = viewBySwimlaneOptions.length > 0
             ? viewBySwimlaneOptions[0]
             : undefined;
         }
@@ -396,7 +396,7 @@ export function getViewBySwimlaneOptions({
   }
 
   return {
-    swimlaneViewByFieldName,
+    viewBySwimlaneFieldName,
     viewBySwimlaneOptions,
   };
 }
@@ -435,7 +435,7 @@ export function processViewByResults(
   scoresByInfluencerAndTime,
   sortedLaneValues,
   bounds,
-  swimlaneViewByFieldName,
+  viewBySwimlaneFieldName,
   interval,
 ) {
   // Processes the scores for the 'view by' swimlane.
@@ -443,7 +443,7 @@ export function processViewByResults(
   // values in the order in which they should be displayed,
   // or pass an empty array to sort lanes according to max score over all time.
   const dataset = {
-    fieldName: swimlaneViewByFieldName,
+    fieldName: viewBySwimlaneFieldName,
     points: [],
     interval
   };
@@ -718,7 +718,7 @@ export function loadViewBySwimlane(
   fieldValues,
   bounds,
   selectedJobs,
-  swimlaneViewByFieldName,
+  viewBySwimlaneFieldName,
   swimlaneLimit,
   influencersFilterQuery,
   noInfluencersConfigured
@@ -732,7 +732,7 @@ export function loadViewBySwimlane(
           resp.results,
           fieldValues,
           bounds,
-          swimlaneViewByFieldName,
+          viewBySwimlaneFieldName,
           getSwimlaneBucketInterval(selectedJobs, getSwimlaneContainerWidth(noInfluencersConfigured)).asSeconds(),
         );
         console.log('Explorer view by swimlane data set:', viewBySwimlaneData);
@@ -748,7 +748,7 @@ export function loadViewBySwimlane(
 
     if (
       selectedJobs === undefined ||
-      swimlaneViewByFieldName === undefined
+      viewBySwimlaneFieldName === undefined
     ) {
       finish();
       return;
@@ -770,10 +770,10 @@ export function loadViewBySwimlane(
         selectedJobs,
         getSwimlaneContainerWidth(noInfluencersConfigured)
       ).asSeconds()}s`;
-      if (swimlaneViewByFieldName !== VIEW_BY_JOB_LABEL) {
+      if (viewBySwimlaneFieldName !== VIEW_BY_JOB_LABEL) {
         mlResultsService.getInfluencerValueMaxScoreByTime(
           selectedJobIds,
-          swimlaneViewByFieldName,
+          viewBySwimlaneFieldName,
           fieldValues,
           searchBounds.min.valueOf(),
           searchBounds.max.valueOf(),

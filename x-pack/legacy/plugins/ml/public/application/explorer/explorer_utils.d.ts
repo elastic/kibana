@@ -68,7 +68,7 @@ export declare const loadViewBySwimlane: (
   fieldValues: string[],
   bounds: SwimlaneBounds,
   selectedJobs: ExplorerJob[],
-  swimlaneViewByFieldName: string,
+  viewBySwimlaneFieldName: string,
   swimlaneLimit: number,
   influencersFilterQuery: any,
   noInfluencersConfigured: boolean
@@ -78,7 +78,7 @@ export declare const loadViewByTopFieldValuesForSelectedTime: (
   earliestMs: number,
   latestMs: number,
   selectedJobs: ExplorerJob[],
-  swimlaneViewByFieldName: string,
+  viewBySwimlaneFieldName: string,
   swimlaneLimit: number,
   noInfluencersConfigured: boolean
 ) => Promise<any>;

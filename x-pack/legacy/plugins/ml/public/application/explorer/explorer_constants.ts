@@ -21,7 +21,7 @@ export const EXPLORER_ACTION = {
   APP_STATE_CLEAR_INFLUENCER_FILTER_SETTINGS: 'appStateClearInfluencerFilterSettings',
   APP_STATE_CLEAR_SELECTION: 'appStateClearSelection',
   APP_STATE_SAVE_SELECTION: 'appStateSaveSelection',
-  APP_STATE_SAVE_SWIMLANE_VIEW_BY_FIELD_NAME: 'appStateSaveSwimlaneViewByFieldName',
+  APP_STATE_SAVE_VIEW_BY_SWIMLANE_FIELD_NAME: 'appStateSaveViewBySwimlaneFieldName',
   APP_STATE_SAVE_INFLUENCER_FILTER_SETTINGS: 'appStateSaveInfluencerFilterSettings',
   IDLE: 'idle',
   INITIALIZE: 'initialize',
@@ -35,14 +35,6 @@ export const EXPLORER_ACTION = {
 export const FILTER_ACTION = {
   ADD: '+',
   REMOVE: '-',
-};
-
-export const APP_STATE_ACTION = {
-  CLEAR_INFLUENCER_FILTER_SETTINGS: 'clearInfluencerFilterSettings',
-  CLEAR_SELECTION: 'clearSelection',
-  SAVE_SELECTION: 'saveSelection',
-  SAVE_SWIMLANE_VIEW_BY_FIELD_NAME: 'saveSwimlaneViewByFieldName',
-  SAVE_INFLUENCER_FILTER_SETTINGS: 'saveInfluencerFilterSettings',
 };
 
 export const SWIMLANE_TYPE = {

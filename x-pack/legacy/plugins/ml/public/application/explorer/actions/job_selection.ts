@@ -43,7 +43,7 @@ export function jobSelectionActionCreator(
           noJobsFound,
           selectedCells,
           selectedJobs,
-          swimlaneViewByFieldName: appState.mlExplorerSwimlane.viewByFieldName,
+          viewBySwimlaneFieldName: appState.mlExplorerSwimlane.viewByFieldName,
           filterData,
         },
       };

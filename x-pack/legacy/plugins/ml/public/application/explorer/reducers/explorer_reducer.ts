@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
+import { ML_RESULTS_INDEX_PATTERN } from '../../../../common/constants/index_patterns';
 
 import { CombinedJob } from '../../jobs/new_job/common/job_creator/configs';
 
@@ -36,13 +36,13 @@ export interface ExplorerState {
   queryString: string;
   selectedCells: any;
   selectedJobs: CombinedJob[] | null;
-  swimlaneViewByFieldName: string | undefined;
   tableData: any;
   tableQueryString: string;
   viewByLoadedForTimeFormatted: any;
   viewBySwimlaneData: SwimlaneData;
   viewBySwimlaneDataLoading: boolean;
-  viewBySwimlaneOptions: any[];
+  viewBySwimlaneFieldName?: string;
+  viewBySwimlaneOptions: string[];
 }
 
 export function getExplorerDefaultState(): ExplorerState {
@@ -67,12 +67,12 @@ export function getExplorerDefaultState(): ExplorerState {
     queryString: '',
     selectedCells: null,
     selectedJobs: null,
-    swimlaneViewByFieldName: undefined,
     tableData: {},
     tableQueryString: '',
     viewByLoadedForTimeFormatted: null,
     viewBySwimlaneData: getDefaultViewBySwimlaneData(),
     viewBySwimlaneDataLoading: false,
+    viewBySwimlaneFieldName: undefined,
     viewBySwimlaneOptions: [],
   };
 }
@@ -92,12 +92,12 @@ function getIndexPattern(selectedJobs: CombinedJob[]) {
 }
 
 const initialize = (state: ExplorerState, payload: ActionPayload) => {
-  const { noJobsFound, selectedCells, selectedJobs, swimlaneViewByFieldName, filterData } = payload;
+  const { noJobsFound, selectedCells, selectedJobs, viewBySwimlaneFieldName, filterData } = payload;
   let currentSelectedCells = state.selectedCells;
-  let currentSwimlaneViewByFieldName = state.swimlaneViewByFieldName;
+  let currentviewBySwimlaneFieldName = state.viewBySwimlaneFieldName;
 
-  if (swimlaneViewByFieldName !== undefined) {
-    currentSwimlaneViewByFieldName = swimlaneViewByFieldName;
+  if (viewBySwimlaneFieldName !== undefined) {
+    currentviewBySwimlaneFieldName = viewBySwimlaneFieldName;
   }
 
   if (selectedCells !== undefined && currentSelectedCells === null) {
@@ -111,7 +111,7 @@ const initialize = (state: ExplorerState, payload: ActionPayload) => {
     noJobsFound,
     selectedCells: currentSelectedCells,
     selectedJobs,
-    swimlaneViewByFieldName: currentSwimlaneViewByFieldName,
+    viewBySwimlaneFieldName: currentviewBySwimlaneFieldName,
     ...(filterData.influencersFilterQuery !== undefined ? { ...filterData } : {}),
   };
 };
@@ -130,12 +130,22 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action) => {
     case EXPLORER_ACTION.APP_STATE_SET:
     case EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION:
     case EXPLORER_ACTION.APP_STATE_SAVE_SELECTION:
-    case EXPLORER_ACTION.APP_STATE_SAVE_SWIMLANE_VIEW_BY_FIELD_NAME:
+    case EXPLORER_ACTION.APP_STATE_SAVE_VIEW_BY_SWIMLANE_FIELD_NAME:
     case EXPLORER_ACTION.APP_STATE_SAVE_INFLUENCER_FILTER_SETTINGS:
     case EXPLORER_ACTION.APP_STATE_CLEAR_INFLUENCER_FILTER_SETTINGS:
       return { ...state, appState: appStateReducer(state.appState, nextAction) };
 
     case EXPLORER_ACTION.SET_STATE:
+      if (payload.viewBySwimlaneFieldName) {
+        return {
+          ...state,
+          ...payload,
+          appState: appStateReducer(state.appState, {
+            type: EXPLORER_ACTION.APP_STATE_SAVE_VIEW_BY_SWIMLANE_FIELD_NAME,
+            payload: { viewBySwimlaneFieldName: payload.viewBySwimlaneFieldName },
+          }),
+        };
+      }
       return { ...state, ...payload };
     default:
       return state;
