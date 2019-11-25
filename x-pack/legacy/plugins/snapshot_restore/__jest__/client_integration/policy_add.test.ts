@@ -142,7 +142,7 @@ describe.skip('<PolicyAdd />', () => {
           ]);
         });
 
-        test('should not allow the minimum count be negative', () => {
+        test('should not allow negative values for the delete after, minimum and maximum counts', () => {
           const { find, form } = testBed;
 
           form.setInputValue('minCountInput', '-1');
