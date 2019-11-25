@@ -25,8 +25,7 @@ const RUN_KBN_SERVER_STARTUP = require.resolve('./fixtures/run_kbn_server_startu
 const SETUP_NODE_ENV = require.resolve('../../../../setup_node_env');
 const SECOND = 1000;
 
-// FLAKY: https://github.com/elastic/kibana/issues/51479
-describe.skip('config/deprecation warnings', function () {
+describe('config/deprecation warnings', function () {
   this.timeout(15 * SECOND);
 
   let stdio = '';
@@ -52,9 +51,9 @@ describe.skip('config/deprecation warnings', function () {
       }
     });
 
-    // Either time out in 10 seconds, or resolve once the line is in our buffer
+    // Either time out in 60 seconds, or resolve once the line is in our buffer
     return Promise.race([
-      new Promise((resolve) => setTimeout(resolve, 10000)),
+      new Promise((resolve) => setTimeout(resolve, 60000)),
       new Promise((resolve, reject) => {
         proc.stdout.on('data', (chunk) => {
           stdio += chunk.toString('utf8');
