@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { Editor, EditorOutput, ConsoleHistory, autoIndent, getDocumentation } from './legacy';
-export { useEditorActionContext, useEditorReadContext, EditorContextProvider } from './context';
+export { autoIndent, getDocumentation } from './legacy';
+export { Editor } from './editor';

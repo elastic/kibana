@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
 import moment from 'moment';
@@ -32,9 +32,10 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
-import { useAppContext } from '../../../../context';
+import { useServicesContext } from '../../contexts';
 import { HistoryViewer } from './history_viewer';
-import { useEditorActionContext, useEditorReadContext } from '../../context';
+import { useEditorReadContext } from '../../contexts/editor_context';
+import { useRestoreRequestFromHistory } from '../../hooks';
 
 interface Props {
   close: () => void;
@@ -45,9 +46,8 @@ const CHILD_ELEMENT_PREFIX = 'historyReq';
 export function ConsoleHistory({ close }: Props) {
   const {
     services: { history },
-  } = useAppContext();
+  } = useServicesContext();
 
-  const dispatch = useEditorActionContext();
   const { settings: readOnlySettings } = useEditorReadContext();
 
   const [requests, setPastRequests] = useState<any[]>(history.getHistory());
@@ -55,7 +55,7 @@ export function ConsoleHistory({ close }: Props) {
   const clearHistory = useCallback(() => {
     history.clearHistory();
     setPastRequests(history.getHistory());
-  }, []);
+  }, [history]);
 
   const listRef = useRef<HTMLUListElement | null>(null);
 
@@ -63,14 +63,7 @@ export function ConsoleHistory({ close }: Props) {
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const selectedReq = useRef<any>(null);
 
-  const scrollIntoView = (idx: number) => {
-    const activeDescendant = listRef.current!.querySelector(`#${CHILD_ELEMENT_PREFIX}${idx}`);
-    if (activeDescendant) {
-      activeDescendant.scrollIntoView();
-    }
-  };
-
-  const [describeReq] = useState(() => {
+  const describeReq = useMemo(() => {
     const _describeReq = (req: any) => {
       const endpoint = req.endpoint;
       const date = moment(req.time);
@@ -86,34 +79,39 @@ export function ConsoleHistory({ close }: Props) {
     (_describeReq as any).cache = new WeakMap();
 
     return memoize(_describeReq);
-  });
+  }, []);
 
-  const initialize = () => {
+  const scrollIntoView = useCallback((idx: number) => {
+    const activeDescendant = listRef.current!.querySelector(`#${CHILD_ELEMENT_PREFIX}${idx}`);
+    if (activeDescendant) {
+      activeDescendant.scrollIntoView();
+    }
+  }, []);
+
+  const initialize = useCallback(() => {
     const nextSelectedIndex = 0;
     (describeReq as any).cache = new WeakMap();
     setViewingReq(requests[nextSelectedIndex]);
     selectedReq.current = requests[nextSelectedIndex];
     setSelectedIndex(nextSelectedIndex);
     scrollIntoView(nextSelectedIndex);
-  };
+  }, [describeReq, requests, scrollIntoView]);
 
   const clear = () => {
     clearHistory();
     initialize();
   };
 
-  const restore = (req: any = selectedReq.current) => {
-    dispatch({ type: 'restoreRequest', value: req });
-  };
+  const restoreRequestFromHistory = useRestoreRequestFromHistory();
 
   useEffect(() => {
     initialize();
-  }, [requests]);
+  }, [initialize]);
 
   useEffect(() => {
     const done = history.change(setPastRequests);
     return () => done();
-  }, []);
+  }, [history]);
 
   /* eslint-disable */
   return (
@@ -128,7 +126,7 @@ export function ConsoleHistory({ close }: Props) {
             ref={listRef}
             onKeyDown={(ev: React.KeyboardEvent) => {
               if (ev.keyCode === keyCodes.ENTER) {
-                restore();
+                restoreRequestFromHistory(selectedReq.current);
                 return;
               }
 
@@ -173,12 +171,11 @@ export function ConsoleHistory({ close }: Props) {
                     setViewingReq(req);
                     selectedReq.current = req;
                     setSelectedIndex(idx);
-                    scrollIntoView(idx);
                   }}
                   role="option"
                   onMouseEnter={() => setViewingReq(req)}
                   onMouseLeave={() => setViewingReq(selectedReq.current)}
-                  onDoubleClick={() => restore(req)}
+                  onDoubleClick={restoreRequestFromHistory}
                   aria-label={i18n.translate('console.historyPage.itemOfRequestListAriaLabel', {
                     defaultMessage: 'Request: {historyItem}',
                     values: { historyItem: reqDescription },
@@ -196,10 +193,7 @@ export function ConsoleHistory({ close }: Props) {
 
           <div className="conHistory__body__spacer" />
 
-          <HistoryViewer
-            settings={readOnlySettings}
-            req={viewingReq}
-          />
+          <HistoryViewer settings={readOnlySettings} req={viewingReq} />
         </div>
 
         <EuiSpacer size="s" />
@@ -224,7 +218,11 @@ export function ConsoleHistory({ close }: Props) {
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <EuiButton color="primary" disabled={!selectedReq} onClick={() => restore()}>
+                <EuiButton
+                  color="primary"
+                  disabled={!selectedReq}
+                  onClick={() => restoreRequestFromHistory(selectedReq.current)}
+                >
                   {i18n.translate('console.historyPage.applyHistoryButtonLabel', {
                     defaultMessage: 'Apply',
                   })}
