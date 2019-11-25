@@ -13,23 +13,23 @@ import { TlsQueryTabBodyProps } from './types';
 const TlsTableManage = manageQuery(TlsTable);
 
 export const TlsQueryTabBody = ({
-  to,
+  endDate,
   filterQuery,
   flowTarget,
   ip = '',
   setQuery,
-  isInitializing,
-  from,
+  skip,
+  startDate,
   type,
 }: TlsQueryTabBodyProps) => (
   <TlsQuery
-    endDate={to}
+    endDate={endDate}
     filterQuery={filterQuery}
     flowTarget={flowTarget}
     ip={ip}
-    skip={isInitializing}
+    skip={skip}
     sourceId="default"
-    startDate={from}
+    startDate={startDate}
     type={type}
   >
     {({ id, inspect, isInspected, tls, totalCount, pageInfo, loading, loadPage, refetch }) => (

@@ -33,7 +33,10 @@ const SEVERITY = 'low';
 const TYPE = 'query';
 const FROM = 'now-6m';
 const TO = 'now';
+const IMMUTABLE = true;
 const INDEX = ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'];
+const OUTPUT_INDEX = process.env.SIGNALS_INDEX || '.siem-signals';
+const RISK_SCORE = 50;
 
 const walk = dir => {
   const list = fs.readdirSync(dir);
@@ -117,8 +120,10 @@ async function main() {
 
       if (query != null && query.trim() !== '') {
         const outputMessage = {
-          id: fileToWrite,
+          rule_id: fileToWrite,
+          risk_score: RISK_SCORE,
           description: description || title,
+          immutable: IMMUTABLE,
           index: INDEX,
           interval: INTERVAL,
           name: title,
@@ -129,6 +134,7 @@ async function main() {
           query,
           language,
           filters: filter,
+          output_index: OUTPUT_INDEX,
         };
 
         fs.writeFileSync(

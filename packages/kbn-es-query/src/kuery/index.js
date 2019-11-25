@@ -18,6 +18,5 @@
  */
 
 export * from './ast';
-export * from './filter_migration';
 export { nodeTypes } from './node_types';
 export * from './errors';

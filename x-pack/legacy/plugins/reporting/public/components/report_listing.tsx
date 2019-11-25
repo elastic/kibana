@@ -6,7 +6,7 @@
 
 // TODO: Remove once typescript definitions are in EUI
 declare module '@elastic/eui' {
-  export const EuiBasicTable: React.SFC<any>;
+  export const EuiBasicTable: React.FC<any>;
 }
 
 import { i18n } from '@kbn/i18n';

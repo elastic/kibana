@@ -32,7 +32,7 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
-  const es = getService('es');
+  const es = getService('legacyEs');
   const retry = getService('retry');
   const scriptedFiledName = 'versionConflictScript';
   const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'header']);
@@ -56,7 +56,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.setScriptedFieldScript(`doc['bytes'].value`);
       const response = await es.update({
         index: '.kibana',
-        type: '_doc',
         id: 'index-pattern:logstash-*',
         body: {
           'doc': { 'index-pattern': { 'fieldFormatMap': '{"geo.src":{"id":"number"}}' } }
@@ -83,7 +82,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.setFieldFormat('url');
       const response = await es.update({
         index: '.kibana',
-        type: '_doc',
         id: 'index-pattern:logstash-*',
         body: {
           'doc': { 'index-pattern': { 'fieldFormatMap': '{"geo.dest":{"id":"number"}}' } }

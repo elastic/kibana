@@ -28,11 +28,6 @@
 # Canvas
 /x-pack/legacy/plugins/canvas/  @elastic/kibana-canvas
 
-# Code
-/x-pack/legacy/plugins/code/  @teams/code
-/x-pack/test/functional/apps/code/  @teams/code
-/x-pack/test/api_integration/apis/code/  @teams/code
-
 # Logs & Metrics UI
 /x-pack/legacy/plugins/infra/ @elastic/logs-metrics-ui
 /x-pack/legacy/plugins/integrations_manager/ @elastic/epm
@@ -45,9 +40,11 @@
 # ML team owns the transform plugin, ES team added here for visibility
 # because the plugin lives in Kibana's Elasticsearch management section.
 /x-pack/legacy/plugins/transform/  @elastic/ml-ui @elastic/es-ui
+/x-pack/test/functional/apps/transform/ @elastic/ml-ui
+/x-pack/test/functional/services/transform_ui/ @elastic/ml-ui
+/x-pack/test/functional/services/transform.ts @elastic/ml-ui
 
 # Operations
-/renovate.json5 @elastic/kibana-operations
 /src/dev/ @elastic/kibana-operations
 /src/setup_node_env/ @elastic/kibana-operations
 /src/optimize/ @elastic/kibana-operations
@@ -76,6 +73,7 @@
 /x-pack/test/api_integration/apis/security/ @elastic/kibana-security
 
 # Kibana Stack Services
+/src/dev/i18n @elastic/kibana-stack-services
 /packages/kbn-analytics/ @elastic/kibana-stack-services
 /src/legacy/core_plugins/ui_metric/ @elastic/kibana-stack-services
 /x-pack/legacy/plugins/telemetry @elastic/kibana-stack-services

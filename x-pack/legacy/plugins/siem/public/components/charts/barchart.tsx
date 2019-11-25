@@ -109,7 +109,7 @@ export const BarChart = React.memo<{
   return checkIfAnyValidSeriesExist(barChart) ? (
     <AutoSizer detectAnyWindowResize={false} content>
       {({ measureRef, content: { height, width } }) => (
-        <WrappedByAutoSizer innerRef={measureRef} height={getChartHeight(customHeight, height)}>
+        <WrappedByAutoSizer ref={measureRef} height={getChartHeight(customHeight, height)}>
           <BarChartBaseComponent
             height={getChartHeight(customHeight, height)}
             width={getChartWidth(customWidth, width)}

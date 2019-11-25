@@ -29,9 +29,7 @@ export function ServiceMetrics({ agentName }: ServiceMetricsProps) {
   const { data } = useServiceMetricCharts(urlParams, agentName);
   const { start, end } = urlParams;
 
-  const localFiltersConfig: React.ComponentProps<
-    typeof LocalUIFilters
-  > = useMemo(
+  const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(
     () => ({
       filterNames: ['host', 'containerId', 'podName'],
       params: {

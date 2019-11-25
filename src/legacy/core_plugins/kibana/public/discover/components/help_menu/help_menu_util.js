@@ -17,15 +17,20 @@
  * under the License.
  */
 
-import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
-import { HelpMenu } from './help_menu';
+import { i18n } from '@kbn/i18n';
+import { getServices } from '../../kibana_services';
+const { docLinks } = getServices();
 
 export function addHelpMenuToAppChrome(chrome) {
-  chrome.setHelpExtension(domElement => {
-    render(<HelpMenu/>, domElement);
-    return () => {
-      unmountComponentAtNode(domElement);
-    };
+  chrome.setHelpExtension({
+    appName: i18n.translate('kbn.discover.helpMenu.appName', {
+      defaultMessage: 'Discover',
+    }),
+    links: [
+      {
+        linkType: 'documentation',
+        href: `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/discover.html`,
+      },
+    ],
   });
 }

@@ -77,18 +77,15 @@ export class PluginsSystem {
 
       this.log.debug(`Setting up plugin "${pluginName}"...`);
       const pluginDeps = new Set([...plugin.requiredPlugins, ...plugin.optionalPlugins]);
-      const pluginDepContracts = Array.from(pluginDeps).reduce(
-        (depContracts, dependencyName) => {
-          // Only set if present. Could be absent if plugin does not have server-side code or is a
-          // missing optional dependency.
-          if (contracts.has(dependencyName)) {
-            depContracts[dependencyName] = contracts.get(dependencyName);
-          }
+      const pluginDepContracts = Array.from(pluginDeps).reduce((depContracts, dependencyName) => {
+        // Only set if present. Could be absent if plugin does not have server-side code or is a
+        // missing optional dependency.
+        if (contracts.has(dependencyName)) {
+          depContracts[dependencyName] = contracts.get(dependencyName);
+        }
 
-          return depContracts;
-        },
-        {} as Record<PluginName, unknown>
-      );
+        return depContracts;
+      }, {} as Record<PluginName, unknown>);
 
       contracts.set(
         pluginName,
@@ -116,18 +113,15 @@ export class PluginsSystem {
       this.log.debug(`Starting plugin "${pluginName}"...`);
       const plugin = this.plugins.get(pluginName)!;
       const pluginDeps = new Set([...plugin.requiredPlugins, ...plugin.optionalPlugins]);
-      const pluginDepContracts = Array.from(pluginDeps).reduce(
-        (depContracts, dependencyName) => {
-          // Only set if present. Could be absent if plugin does not have server-side code or is a
-          // missing optional dependency.
-          if (contracts.has(dependencyName)) {
-            depContracts[dependencyName] = contracts.get(dependencyName);
-          }
+      const pluginDepContracts = Array.from(pluginDeps).reduce((depContracts, dependencyName) => {
+        // Only set if present. Could be absent if plugin does not have server-side code or is a
+        // missing optional dependency.
+        if (contracts.has(dependencyName)) {
+          depContracts[dependencyName] = contracts.get(dependencyName);
+        }
 
-          return depContracts;
-        },
-        {} as Record<PluginName, unknown>
-      );
+        return depContracts;
+      }, {} as Record<PluginName, unknown>);
 
       contracts.set(
         pluginName,
