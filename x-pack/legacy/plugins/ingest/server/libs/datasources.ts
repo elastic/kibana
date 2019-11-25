@@ -23,7 +23,8 @@ export class DatasourcesLib {
   }
 
   public async delete(_user: FrameworkUser, ids: string[]): Promise<boolean> {
-    return new Promise(resolve => {
+    this.datasources.filter(ds => !ids.includes(ds.id));
+    return true;
       this.datasources.filter(ds => !ids.includes(ds.id));
       resolve(true);
     });
