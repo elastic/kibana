@@ -57,7 +57,6 @@ describe('getKpiHosts', () => {
     callWithRequest: mockCallWithRequest,
     registerGraphQLEndpoint: jest.fn(),
     getIndexPatternsService: jest.fn(),
-    getSavedObjectsService: jest.fn(),
   };
   let EsKpiHosts: ElasticsearchKpiHostsAdapter;
 
@@ -172,7 +171,6 @@ describe('getKpiHostDetails', () => {
     callWithRequest: mockCallWithRequest,
     registerGraphQLEndpoint: jest.fn(),
     getIndexPatternsService: jest.fn(),
-    getSavedObjectsService: jest.fn(),
   };
   let EsKpiHosts: ElasticsearchKpiHostsAdapter;
 

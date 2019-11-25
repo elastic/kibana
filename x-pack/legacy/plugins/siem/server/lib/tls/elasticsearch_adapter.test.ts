@@ -26,7 +26,6 @@ describe('elasticsearch_adapter', () => {
       callWithRequest: mockCallWithRequest,
       registerGraphQLEndpoint: jest.fn(),
       getIndexPatternsService: jest.fn(),
-      getSavedObjectsService: jest.fn(),
     };
 
     beforeAll(async () => {

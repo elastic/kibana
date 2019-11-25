@@ -31,7 +31,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   private isProductionMode: boolean;
   private router: IRouter;
 
-  constructor(core: CoreSetup, private __legacy: ServerFacade) {
+  constructor(core: CoreSetup, __legacy: ServerFacade) {
     this.version = __legacy.config().get('pkg.version');
     this.isProductionMode = process.env.NODE_ENV === 'production';
     this.router = core.http.createRouter();
@@ -184,10 +184,6 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
     };
 
     return new IndexPatternsFetcher(callCluster);
-  }
-
-  public getSavedObjectsService() {
-    return this.__legacy.savedObjects;
   }
 }
 

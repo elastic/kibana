@@ -7,7 +7,6 @@
 import { IndicesGetMappingParams } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
 import { RequestAuth } from 'hapi';
-import { Legacy } from 'kibana';
 
 import { RequestHandlerContext } from 'src/core/server';
 import { ESQuery } from '../../../common/typed_json';
@@ -43,7 +42,6 @@ export interface FrameworkAdapter {
     options?: IndicesGetMappingParams // eslint-disable-line
   ): Promise<MappingResponse>;
   getIndexPatternsService(req: FrameworkRequest): FrameworkIndexPatternsService;
-  getSavedObjectsService(): Legacy.SavedObjectsService;
 }
 
 export interface FrameworkRequest<InternalRequest extends WrappableRequest = RequestFacade> {

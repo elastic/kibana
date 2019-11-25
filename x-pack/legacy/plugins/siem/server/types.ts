@@ -13,7 +13,6 @@ export interface ServerFacade {
     xpack_main: Legacy.Server['plugins']['xpack_main'];
   };
   route: Legacy.Server['route'];
-  savedObjects: Legacy.Server['savedObjects'];
 }
 
 export interface RequestFacade {

@@ -38,7 +38,6 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source', () =
       version: 'mock',
       callWithRequest: mockCallWithRequest,
       getIndexPatternsService: jest.fn(),
-      getSavedObjectsService: jest.fn(),
       registerGraphQLEndpoint: jest.fn(),
     };
     jest.doMock('../framework', () => ({
@@ -66,7 +65,6 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source', () =
       callWithRequest: mockCallWithRequest,
       registerGraphQLEndpoint: jest.fn(),
       getIndexPatternsService: jest.fn(),
-      getSavedObjectsService: jest.fn(),
     };
     jest.doMock('../framework', () => ({
       callWithRequest: mockCallWithRequest,
@@ -106,7 +104,6 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source', () =
       version: 'mock',
       callWithRequest: mockCallWithRequest,
       getIndexPatternsService: jest.fn(),
-      getSavedObjectsService: jest.fn(),
       registerGraphQLEndpoint: jest.fn(),
     };
     jest.doMock('../framework', () => ({
@@ -139,7 +136,6 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source', () =
       callWithRequest: mockCallWithRequest,
       registerGraphQLEndpoint: jest.fn(),
       getIndexPatternsService: jest.fn(),
-      getSavedObjectsService: jest.fn(),
     };
     jest.doMock('../framework', () => ({
       callWithRequest: mockCallWithRequest,
@@ -162,7 +158,6 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source', () =
       version: 'mock',
       callWithRequest: mockCallWithRequest,
       getIndexPatternsService: jest.fn(),
-      getSavedObjectsService: jest.fn(),
       registerGraphQLEndpoint: jest.fn(),
     };
     jest.doMock('../framework', () => ({

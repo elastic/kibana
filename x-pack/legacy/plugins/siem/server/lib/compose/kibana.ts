@@ -40,9 +40,9 @@ export function compose(core: CoreSetup, server: ServerFacade): AppBackendLibs {
   const sources = new Sources(new ConfigurationSourcesAdapter(configuration));
   const sourceStatus = new SourceStatus(new ElasticsearchSourceStatusAdapter(framework));
 
-  const timeline = new Timeline({ savedObjects: framework.getSavedObjectsService() });
-  const note = new Note({ savedObjects: framework.getSavedObjectsService() });
-  const pinnedEvent = new PinnedEvent({ savedObjects: framework.getSavedObjectsService() });
+  const timeline = new Timeline();
+  const note = new Note();
+  const pinnedEvent = new PinnedEvent();
 
   const domainLibs: AppDomainLibs = {
     anomalies: new Anomalies(new ElasticsearchAnomaliesAdapter(framework)),

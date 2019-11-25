@@ -155,8 +155,7 @@ export const siem = (kibana: any) => {
       mappings: savedObjectMappings,
     },
     init(server: Server) {
-      const { config, newPlatform, plugins, route, savedObjects } = server;
-
+      const { config, newPlatform, plugins, route } = server;
       const {
         env,
         coreContext: { logger },
@@ -168,7 +167,6 @@ export const siem = (kibana: any) => {
         config,
         plugins: { alerting: plugins.alerting, xpack_main: plugins.xpack_main },
         route: route.bind(server),
-        savedObjects,
       };
 
       plugin(initializerContext as PluginInitializerContext).setup(

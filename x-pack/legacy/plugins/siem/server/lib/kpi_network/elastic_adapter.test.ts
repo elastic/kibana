@@ -52,7 +52,6 @@ describe('Network Kpi elasticsearch_adapter', () => {
     callWithRequest: mockCallWithRequest,
     registerGraphQLEndpoint: jest.fn(),
     getIndexPatternsService: jest.fn(),
-    getSavedObjectsService: jest.fn(),
   };
 
   let EsKpiNetwork: ElasticsearchKpiNetworkAdapter;

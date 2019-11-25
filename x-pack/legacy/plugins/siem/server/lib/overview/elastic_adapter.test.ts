@@ -40,7 +40,6 @@ describe('Siem Overview elasticsearch_adapter', () => {
         callWithRequest: mockCallWithRequest,
         registerGraphQLEndpoint: jest.fn(),
         getIndexPatternsService: jest.fn(),
-        getSavedObjectsService: jest.fn(),
       };
       jest.doMock('../framework', () => ({
         callWithRequest: mockCallWithRequest,
@@ -75,7 +74,6 @@ describe('Siem Overview elasticsearch_adapter', () => {
         callWithRequest: mockCallWithRequest,
         registerGraphQLEndpoint: jest.fn(),
         getIndexPatternsService: jest.fn(),
-        getSavedObjectsService: jest.fn(),
       };
       jest.doMock('../framework', () => ({
         callWithRequest: mockCallWithRequest,
@@ -114,7 +112,6 @@ describe('Siem Overview elasticsearch_adapter', () => {
         callWithRequest: mockCallWithRequest,
         registerGraphQLEndpoint: jest.fn(),
         getIndexPatternsService: jest.fn(),
-        getSavedObjectsService: jest.fn(),
       };
       jest.doMock('../framework', () => ({
         callWithRequest: mockCallWithRequest,
@@ -154,7 +151,6 @@ describe('Siem Overview elasticsearch_adapter', () => {
         callWithRequest: mockCallWithRequest,
         registerGraphQLEndpoint: jest.fn(),
         getIndexPatternsService: jest.fn(),
-        getSavedObjectsService: jest.fn(),
       };
       jest.doMock('../framework', () => ({
         callWithRequest: mockCallWithRequest,
