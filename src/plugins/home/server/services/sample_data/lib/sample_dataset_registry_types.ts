@@ -24,7 +24,7 @@ export interface SampleDatasetDashboardPanel {
   oldEmbeddableId: string;
   embeddableId: string;
   embeddableType: EmbeddableTypes;
-  embeddableConfig?: object;
+  embeddableConfig: object;
 }
 export enum EmbeddableTypes {
   MAP_SAVED_OBJECT_TYPE = 'map',
