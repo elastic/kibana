@@ -29,6 +29,7 @@ export const LogEntryRatePageContent = () => {
     lastSetupErrorMessages,
     setup,
     setupStatus,
+    timestampField,
     viewResults,
   } = useLogEntryRateJobsContext();
 
@@ -64,6 +65,7 @@ export const LogEntryRatePageContent = () => {
         errorMessages={lastSetupErrorMessages}
         setup={setup}
         setupStatus={setupStatus}
+        timestampField={timestampField}
         viewResults={viewResults}
       />
     );

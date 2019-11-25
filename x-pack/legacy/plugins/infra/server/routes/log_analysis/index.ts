@@ -5,3 +5,4 @@
  */
 
 export * from './results';
+export * from './index_patterns';
