@@ -64,12 +64,16 @@ export function http(options: any) {
   });
 }
 
-export function http$<T>(url: string, options: RequestInit): Observable<T> {
+interface RequestOptions extends RequestInit {
+  body: BodyInit | any;
+}
+
+export function http$<T>(url: string, options: RequestOptions): Observable<T> {
   const requestInit: RequestInit = {
     ...options,
     credentials: 'same-origin',
     method: options.method || 'GET',
-    ...(options.body ? { body: JSON.stringify(options.body) } : {}),
+    ...(options.body ? { body: JSON.stringify(options.body) as string } : {}),
     headers: getResultHeaders(options.headers ?? {}),
   };
 

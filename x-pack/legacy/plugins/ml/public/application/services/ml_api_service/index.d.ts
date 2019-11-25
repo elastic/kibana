@@ -16,6 +16,7 @@ import { DataFrameAnalyticsStats } from '../../data_frame_analytics/pages/analyt
 import { JobMessage } from '../../../../common/types/audit_message';
 import { DataFrameAnalyticsConfig } from '../../data_frame_analytics/common/analytics';
 import { DeepPartial } from '../../../../common/types/common';
+import { annotations } from './annotations';
 
 // TODO This is not a complete representation of all methods of `ml.*`.
 // It just satisfies needs for other parts of the code area which use
@@ -66,12 +67,7 @@ declare interface Ml {
   annotations: {
     deleteAnnotation(id: string | undefined): Promise<any>;
     indexAnnotation(annotation: Annotation): Promise<object>;
-    getAnnotations(obj: {
-      jobIds: string[];
-      earliestMs: number;
-      latestMs: number;
-      maxAnnotations: number;
-    }): Observable<{ annotations: Record<string, Annotation[]> }>;
+    getAnnotations: typeof annotations.getAnnotations;
   };
 
   dataFrameAnalytics: {

@@ -6,13 +6,19 @@
 
 import chrome from 'ui/chrome';
 
+import { Annotation } from '../../../../common/types/annotations';
 import { http, http$ } from '../http_service';
 
 const basePath = chrome.addBasePath('/api/ml');
 
 export const annotations = {
-  getAnnotations(obj: any) {
-    return http$(`${basePath}/annotations`, {
+  getAnnotations(obj: {
+    jobIds: string[];
+    earliestMs: number;
+    latestMs: number;
+    maxAnnotations: number;
+  }) {
+    return http$<{ annotations: Record<string, Annotation[]> }>(`${basePath}/annotations`, {
       method: 'POST',
       body: obj,
     });
