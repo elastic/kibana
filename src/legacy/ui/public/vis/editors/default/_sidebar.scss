@@ -27,7 +27,7 @@
   }
 }
 
-.visEditorSidebar__config--hidden {
+.visEditorSidebar__config-isHidden {
   display: none;
 }
 
@@ -37,8 +37,12 @@
 
 .visEditorSidebar__indexPattern {
   @include euiTextTruncate;
-  font-weight: $euiFontWeightBold;
-  padding: $euiSizeM $euiSizeXL $euiSizeM $euiSizeS; // Extra padding on the right for the collapse button
+  padding: $euiSizeS $euiSizeXL $euiSizeS $euiSizeS; // Extra padding on the right for the collapse button
+}
+
+.visEditorSidebar__indexPatternPlaceholder {
+  min-height: $euiSizeXXL;
+  border-bottom: $euiBorderThin;
 }
 
 .visEditorSidebar__nav {

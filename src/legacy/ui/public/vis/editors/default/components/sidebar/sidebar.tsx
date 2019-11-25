@@ -20,7 +20,7 @@
 import React, { useMemo, useState, useCallback, KeyboardEventHandler, useEffect } from 'react';
 import { get, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { keyCodes, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { keyCodes, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 
 import { Vis, VisState } from 'ui/vis';
 import { PersistedState } from 'ui/persisted_state';
@@ -144,26 +144,8 @@ function DefaultEditorSideBar({
     setTouched,
   };
 
-  const headingAltText = i18n.translate('common.ui.vis.editors.sidebar.indexPatternAriaLabel', {
-    defaultMessage: 'Index pattern: {title}',
-    values: {
-      title: vis.indexPattern.title,
-    },
-  });
-
   return (
     <>
-      <EuiButtonIcon
-        aria-expanded={!isCollapsed}
-        aria-label={i18n.translate('common.ui.vis.editors.sidebar.collapseButtonAriaLabel', {
-          defaultMessage: 'Toggle sidebar',
-        })}
-        className="visEditorSidebar__collapsibleButton"
-        data-test-subj="collapseSideBarButton"
-        color="text"
-        iconType={isCollapsed ? 'menuLeft' : 'menuRight'}
-        onClick={onClickCollapse}
-      />
       <EuiFlexGroup
         className="visEditorSidebar"
         direction="column"
@@ -177,15 +159,21 @@ function DefaultEditorSideBar({
             name="visualizeEditor"
             onKeyDownCapture={onSubmit}
           >
-            {vis.type.requiresSearch && vis.type.options.showIndexSelection && (
-              <h2
-                aria-label={headingAltText}
-                title={headingAltText}
-                className="visEditorSidebar__indexPattern"
-                tabIndex={0}
-              >
-                {vis.indexPattern.title}
-              </h2>
+            {vis.type.requiresSearch && vis.type.options.showIndexSelection ? (
+              <EuiTitle size="xs" className="visEditorSidebar__indexPattern">
+                <h2
+                  title={i18n.translate('common.ui.vis.editors.sidebar.indexPatternAriaLabel', {
+                    defaultMessage: 'Index pattern: {title}',
+                    values: {
+                      title: vis.indexPattern.title,
+                    },
+                  })}
+                >
+                  {vis.indexPattern.title}
+                </h2>
+              </EuiTitle>
+            ) : (
+              <div className="visEditorSidebar__indexPatternPlaceholder" />
             )}
 
             {optionTabs.length > 1 && (
@@ -200,7 +188,7 @@ function DefaultEditorSideBar({
               <div
                 key={name}
                 className={`visEditorSidebar__config ${
-                  selectedTab === name ? '' : 'visEditorSidebar__config--hidden'
+                  selectedTab === name ? '' : 'visEditorSidebar__config-isHidden'
                 }`}
               >
                 <Editor {...(name === 'data' ? dataTabProps : optionTabProps)} />
@@ -220,6 +208,18 @@ function DefaultEditorSideBar({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      <EuiButtonIcon
+        aria-expanded={!isCollapsed}
+        aria-label={i18n.translate('common.ui.vis.editors.sidebar.collapseButtonAriaLabel', {
+          defaultMessage: 'Toggle sidebar',
+        })}
+        className="visEditorSidebar__collapsibleButton"
+        data-test-subj="collapseSideBarButton"
+        color="text"
+        iconType={isCollapsed ? 'menuLeft' : 'menuRight'}
+        onClick={onClickCollapse}
+      />
     </>
   );
 }
