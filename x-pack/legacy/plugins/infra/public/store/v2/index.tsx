@@ -8,8 +8,10 @@ import React, { useEffect, useContext, createContext } from 'react';
 import {
   useLogEntriesStore,
   logEntriesInitialState,
+  logEntriesInitialCallbacks,
   logEntriesDependenciesSelector,
   LogEntriesState,
+  LogEntriesCallbacks,
 } from './log_entries';
 import { useLogFilterStore, logFilterInitialState, LogFilterState } from './log_filter';
 import { useLogPositionStore, logPositionInitialState, LogPositionState } from './log_position';
@@ -19,7 +21,10 @@ export interface State {
   logPosition: LogPositionState;
   logFilter: LogFilterState;
 }
-export { LogEntriesState, LogFilterState, LogPositionState };
+interface Callbacks {
+  logEntriesCallbacks: LogEntriesCallbacks;
+}
+export { LogEntriesState, LogFilterState, LogPositionState, LogEntriesCallbacks };
 
 const storeInitialState: State = {
   logEntries: logEntriesInitialState,
@@ -27,10 +32,15 @@ const storeInitialState: State = {
   logFilter: logFilterInitialState,
 };
 
+const storeInitialCallbacks = {
+  logEntriesCallbacks: logEntriesInitialCallbacks,
+};
+
 const StoreContext = createContext(storeInitialState);
+const StoreCallbackContext = createContext(storeInitialCallbacks);
 
 export const StoreProvider: React.FunctionComponent = ({ children }) => {
-  const [logEntriesState, updateLogEntriesState] = useLogEntriesStore();
+  const [logEntriesState, updateLogEntriesState, logEntriesCallbacks] = useLogEntriesStore();
   const logPositionState = useLogPositionStore();
   const logFilterState = useLogFilterStore();
 
@@ -40,12 +50,23 @@ export const StoreProvider: React.FunctionComponent = ({ children }) => {
     logFilter: logFilterState,
   };
 
+  const callbacks = {
+    logEntriesCallbacks,
+  };
+
   useEffect(() => updateLogEntriesState(logEntriesDependenciesSelector(store)), [
     logPositionState,
     logFilterState,
   ]);
 
-  return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>;
+  return (
+    <StoreContext.Provider value={store}>
+      <StoreCallbackContext.Provider value={callbacks}>{children}</StoreCallbackContext.Provider>
+    </StoreContext.Provider>
+  );
 };
 
-export const useStore = () => useContext(StoreContext);
+export const useStore: () => [State, Callbacks] = () => [
+  useContext(StoreContext),
+  useContext(StoreCallbackContext),
+];

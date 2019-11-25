@@ -6,7 +6,7 @@
 
 import { useContext, useMemo } from 'react';
 import { StreamItem, LogEntryStreamItem } from '../../components/logging/log_text_stream/item';
-import { useStore, LogEntriesState } from '../../store/v2';
+import { useStore, LogEntriesState, LogEntriesCallbacks } from '../../store/v2';
 import { LogEntry, LogEntryHighlight } from '../../utils/log_entry';
 import { RendererFunction } from '../../utils/typed_react';
 // deep inporting to avoid a circular import problem
@@ -15,13 +15,14 @@ import { UniqueTimeKey } from '../../../common/time';
 
 export const WithStreamItems: React.FunctionComponent<{
   children: RendererFunction<
-    LogEntriesState & {
-      currentHighlightKey: UniqueTimeKey | null;
-      items: StreamItem[];
-    }
+    LogEntriesState &
+      LogEntriesCallbacks & {
+        currentHighlightKey: UniqueTimeKey | null;
+        items: StreamItem[];
+      }
   >;
 }> = ({ children }) => {
-  const { logEntries, logPosition } = useStore();
+  const [{ logEntries, logPosition }, { logEntriesCallbacks }] = useStore();
   const { currentHighlightKey, logEntryHighlightsById } = useContext(LogHighlightsState.Context);
 
   const items = useMemo(
@@ -37,6 +38,7 @@ export const WithStreamItems: React.FunctionComponent<{
 
   return children({
     ...logEntries,
+    ...logEntriesCallbacks,
     items,
     currentHighlightKey,
   });

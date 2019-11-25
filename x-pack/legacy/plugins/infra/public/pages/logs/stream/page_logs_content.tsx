@@ -94,7 +94,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                 isReloading,
                 items,
                 lastLoadedTime,
-                loadNewerEntries,
+                fetchNewerEntries,
               }) => (
                 <ScrollableLogTextStreamView
                   columnConfigurations={(source && source.configuration.logColumns) || []}

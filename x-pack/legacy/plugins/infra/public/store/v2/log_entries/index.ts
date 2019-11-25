@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { useEffect, useState, useReducer } from 'react';
+import { useEffect, useState, useReducer, useCallback } from 'react';
 import { createStructuredSelector } from 'reselect';
 import { pick } from 'lodash';
 import { useGraphQLQueries } from './gql_queries';
@@ -73,6 +73,13 @@ export interface LogEntriesState {
   isLoadingMore: boolean;
   lastLoadedTime: Date | null;
 }
+
+export interface LogEntriesCallbacks {
+  fetchNewerEntries: () => Promise<void>;
+}
+export const logEntriesInitialCallbacks = {
+  fetchNewerEntries: async () => {},
+};
 
 export const logEntriesInitialState: LogEntriesState = {
   entries: [],
@@ -169,23 +176,32 @@ const useFetchEntriesEffect = (
         break;
     }
   };
-  return [
-    useEffect(fetchNewEntriesEffect, fetchNewEntriesEffectDependencies),
-    useEffect(fetchMoreEntriesEffect, fetchMoreEntriesEffectDependencies),
-  ];
+  useEffect(fetchNewEntriesEffect, fetchNewEntriesEffectDependencies);
+  useEffect(fetchMoreEntriesEffect, fetchMoreEntriesEffectDependencies);
+
+  return {
+    fetchNewerEntries: useCallback(() => runFetchMoreEntriesRequest(ShouldFetchMoreEntries.After), [
+      params,
+    ]),
+  };
 };
 
 export const useLogEntriesStore: () => [
   LogEntriesState,
-  (deps: LogEntriesDependencies) => void
+  (deps: LogEntriesDependencies) => void,
+  LogEntriesCallbacks
 ] = () => {
   const [state, dispatch] = useReducer(logEntriesStateReducer, logEntriesInitialState);
 
   const [dependencies, subscriber] = useState(logEntriesInitialDependencies);
 
-  useFetchEntriesEffect(dispatch, state, { ...dependencies, sourceId: 'default' });
+  const { fetchNewerEntries } = useFetchEntriesEffect(dispatch, state, {
+    ...dependencies,
+    sourceId: 'default',
+  });
+  const callbacks = { fetchNewerEntries };
 
-  return [state, subscriber];
+  return [state, subscriber, callbacks];
 };
 
 const logEntriesStateReducer = (prevState: LogEntriesState, action: ActionObj) => {
