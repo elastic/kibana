@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isRight } from 'fp-ts/lib/Either';
-import { SODatabaseAdapter } from '../so_database/default';
-import { StoredPolicy, RuntimeStoredPolicy } from './adapter_types';
+import { PathReporter } from 'io-ts/lib/PathReporter';
 import { ListOptions } from '../../../../../fleet/server/repositories/agents/types';
 import { FrameworkUser } from '../framework/adapter_types';
+import { SODatabaseAdapter } from '../so_database/default';
+import { RuntimeStoredPolicy, StoredPolicy } from './adapter_types';
 
 export class PolicyAdapter {
   constructor(private readonly so: SODatabaseAdapter) {}
@@ -63,17 +63,13 @@ export class PolicyAdapter {
     options: ListOptions = {}
   ): Promise<{ items: StoredPolicy[]; total: number; page: number; perPage: number }> {
     const { page = 1, perPage = 20, kuery } = options;
-    const filters = [];
-
-    if (kuery && kuery !== '') {
-      filters.push(kuery.replace(/policies\./g, 'policies.attributes.'));
-    }
 
     const policies = await this.so.find<any>(user, {
       type: 'policies',
       page,
       perPage,
-      filter: _joinFilters(filters),
+      // To ensure users dont need to know about SO data structure...
+      filter: kuery ? kuery.replace(/policies\./g, 'policies.attributes.') : undefined,
     });
 
     const storedPolicies = policies.saved_objects.map<StoredPolicy>(policySO => {
@@ -167,13 +163,4 @@ export class PolicyAdapter {
   //     throw new Error(`Invalid BackupPolicyFile data. == ${policy.attributes}`);
   //   }
   // }
-}
-function _joinFilters(filters: string[], operator = 'AND') {
-  return filters.reduce((acc: string | undefined, filter) => {
-    if (acc) {
-      return `${acc} ${operator} (${filter})`;
-    }
-
-    return `(${filter})`;
-  }, undefined);
 }

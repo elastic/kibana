@@ -7,20 +7,20 @@
 import { isEqual } from 'lodash';
 import { SavedObject } from 'src/core/server';
 import {
-  Agent,
-  NewAgent,
-  AgentsRepository as AgentsRepositoryType,
-  SortOptions,
-  SavedObjectAgentAttributes,
-  ListOptions,
-} from './types';
-import {
-  DEFAULT_AGENTS_PAGE_SIZE,
   AGENT_POLLING_THRESHOLD_MS,
   AGENT_TYPE_EPHEMERAL,
+  DEFAULT_AGENTS_PAGE_SIZE,
 } from '../../../common/constants';
-import { SODatabaseAdapter } from '../../adapters/saved_objects_database/adapter_types';
 import { FrameworkUser } from '../../adapters/framework/adapter_types';
+import { SODatabaseAdapter } from '../../adapters/saved_objects_database/adapter_types';
+import {
+  Agent,
+  AgentsRepository as AgentsRepositoryType,
+  ListOptions,
+  NewAgent,
+  SavedObjectAgentAttributes,
+  SortOptions,
+} from './types';
 
 export class AgentsRepository implements AgentsRepositoryType {
   constructor(private readonly soAdapter: SODatabaseAdapter) {}
@@ -182,6 +182,7 @@ export class AgentsRepository implements AgentsRepositoryType {
     const filters = [];
 
     if (kuery && kuery !== '') {
+      // To ensure users dont need to know about SO data structure...
       filters.push(kuery.replace(/agents\./g, 'agents.attributes.'));
     }
 
