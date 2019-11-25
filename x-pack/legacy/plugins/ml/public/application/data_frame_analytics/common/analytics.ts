@@ -32,7 +32,7 @@ interface RegressionAnalysis {
 }
 
 interface ClassificationAnalysis {
-  regression: {
+  classification: {
     dependent_variable: string;
     training_percent?: number;
     num_top_classes?: string;
@@ -113,6 +113,10 @@ export const getDependentVar = (analysis: AnalysisConfig) => {
   if (isRegressionAnalysis(analysis)) {
     depVar = analysis.regression.dependent_variable;
   }
+
+  if (isClassificationAnalysis(analysis)) {
+    depVar = analysis.classification.dependent_variable;
+  }
   return depVar;
 };
 
@@ -145,7 +149,7 @@ export const isRegressionAnalysis = (arg: any): arg is RegressionAnalysis => {
   return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.REGRESSION;
 };
 
-export const isClassificationAnalysis = (arg: any): arg is RegressionAnalysis => {
+export const isClassificationAnalysis = (arg: any): arg is ClassificationAnalysis => {
   const keys = Object.keys(arg);
   return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
 };
