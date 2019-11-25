@@ -10600,7 +10600,7 @@
     "xpack.siem.overview.feedbackTitle": "フィードバック",
     "xpack.siem.overview.filebeatCiscoTitle": "Filebeat Cisco",
     "xpack.siem.overview.filebeatNetflowTitle": "Filebeat Netflow",
-    "xpack.siem.overview.filebeatPanwTitle": "Filebeat Palo Alto Network",
+    "xpack.siem.overview.filebeatPanwTitle": "Filebeat Palo Alto Networks",
     "xpack.siem.overview.fileBeatSuricataTitle": "Filebeat Suricata",
     "xpack.siem.overview.filebeatSystemModuleTitle": "Filebeat システムモジュール",
     "xpack.siem.overview.fileBeatZeekTitle": "Filebeat Zeek",
