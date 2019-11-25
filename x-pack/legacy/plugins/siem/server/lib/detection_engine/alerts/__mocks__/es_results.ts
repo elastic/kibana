@@ -4,16 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SignalSourceHit, SignalSearchResponse, SignalAlertParams } from '../types';
+import { SignalSourceHit, SignalSearchResponse, AlertTypeParams } from '../types';
 
-export const sampleSignalAlertParams = (maxSignals: number | undefined): SignalAlertParams => ({
+export const sampleSignalAlertParams = (
+  maxSignals: number | undefined,
+  riskScore?: number | undefined
+): AlertTypeParams => ({
   ruleId: 'rule-1',
   description: 'Detecting root and admin users',
   falsePositives: [],
   immutable: false,
   index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-  interval: '5m',
-  name: 'Detect Root/Admin Users',
   type: 'query',
   from: 'now-6m',
   tags: ['some fake tag'],
@@ -21,12 +22,14 @@ export const sampleSignalAlertParams = (maxSignals: number | undefined): SignalA
   severity: 'high',
   query: 'user.name: root or user.name: admin',
   language: 'kuery',
+  outputIndex: '.siem-signals',
   references: ['http://google.com'],
+  riskScore: riskScore ? riskScore : 50,
   maxSignals: maxSignals ? maxSignals : 10000,
-  enabled: true,
   filter: undefined,
   filters: undefined,
   savedId: undefined,
+  meta: undefined,
   size: 1000,
 });
 
