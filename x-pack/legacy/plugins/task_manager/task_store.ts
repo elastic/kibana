@@ -24,6 +24,24 @@ import {
   TaskInstance,
 } from './task';
 
+import {
+  asUpdateByQuery,
+  shouldBeOneOf,
+  mustBeAllOf,
+  ExistsBoolClause,
+  TermBoolClause,
+  RangeBoolClause,
+} from './queries/query_clauses';
+
+import {
+  updateFields,
+  IdleTaskWithExpiredRunAt,
+  RunningOrClaimingTaskWithExpiredRetryAt,
+  RecuringTaskWithInterval,
+  taskWithLessThanMaxAttempts,
+  SortByRunAtAndRetryAt,
+} from './queries/mark_available_tasks_as_claimed';
+
 export interface StoreOpts {
   callCluster: ElasticJs;
   index: string;
@@ -174,87 +192,26 @@ export class TaskStore {
     claimOwnershipUntil,
   }: OwnershipClaimingOpts): Promise<number> {
     const { updated } = await this.updateByQuery(
-      {
-        query: {
-          bool: {
-            must: [
-              // Either a task with idle status and runAt <= now or
-              // status running or claiming with a retryAt <= now.
-              {
-                bool: {
-                  should: [
-                    {
-                      bool: {
-                        must: [
-                          { term: { 'task.status': 'idle' } },
-                          { range: { 'task.runAt': { lte: 'now' } } },
-                        ],
-                      },
-                    },
-                    {
-                      bool: {
-                        must: [
-                          {
-                            bool: {
-                              should: [
-                                { term: { 'task.status': 'running' } },
-                                { term: { 'task.status': 'claiming' } },
-                              ],
-                            },
-                          },
-                          { range: { 'task.retryAt': { lte: 'now' } } },
-                        ],
-                      },
-                    },
-                  ],
-                },
-              },
-              // Either task has an interval or the attempts < the maximum configured
-              {
-                bool: {
-                  should: [
-                    { exists: { field: 'task.interval' } },
-                    ...Object.entries(this.definitions).map(([type, definition]) => ({
-                      bool: {
-                        must: [
-                          { term: { 'task.taskType': type } },
-                          {
-                            range: {
-                              'task.attempts': {
-                                lt: definition.maxAttempts || this.maxAttempts,
-                              },
-                            },
-                          },
-                        ],
-                      },
-                    })),
-                  ],
-                },
-              },
-            ],
-          },
-        },
-        sort: {
-          _script: {
-            type: 'number',
-            order: 'asc',
-            script: {
-              lang: 'expression',
-              source: `doc['task.retryAt'].value || doc['task.runAt'].value`,
-            },
-          },
-        },
-        seq_no_primary_term: true,
-        script: {
-          source: `ctx._source.task.ownerId=params.ownerId; ctx._source.task.status=params.status; ctx._source.task.retryAt=params.retryAt;`,
-          lang: 'painless',
-          params: {
-            ownerId: this.taskManagerId,
-            retryAt: claimOwnershipUntil,
-            status: 'claiming',
-          },
-        },
-      },
+      asUpdateByQuery({
+        query: mustBeAllOf(
+          // Either a task with idle status and runAt <= now or
+          // status running or claiming with a retryAt <= now.
+          shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
+          // Either task has an interval or the attempts < the maximum configured
+          shouldBeOneOf<ExistsBoolClause | TermBoolClause | RangeBoolClause>(
+            RecuringTaskWithInterval,
+            ...Object.entries(this.definitions).map(([type, { maxAttempts }]) =>
+              taskWithLessThanMaxAttempts(type, maxAttempts || this.maxAttempts)
+            )
+          )
+        ),
+        update: updateFields({
+          ownerId: this.taskManagerId,
+          status: 'claiming',
+          retryAt: claimOwnershipUntil,
+        }),
+        sort: SortByRunAtAndRetryAt,
+      }),
       {
         max_docs: size,
       }
