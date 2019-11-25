@@ -25,6 +25,7 @@ export interface QueryBarComponentProps {
   dateRangeTo?: string;
   hideSavedQuery?: boolean;
   indexPattern: StaticIndexPattern;
+  isLoading?: boolean;
   isRefreshPaused?: boolean;
   filterQuery: Query;
   filterManager: FilterManager;
@@ -42,6 +43,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     dateRangeTo,
     hideSavedQuery = false,
     indexPattern,
+    isLoading = false,
     isRefreshPaused,
     filterQuery,
     filterManager,
@@ -125,6 +127,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
         dateRangeTo={dateRangeTo}
         filters={filters}
         indexPatterns={indexPatterns}
+        isLoading={isLoading}
         isRefreshPaused={isRefreshPaused}
         query={draftQuery}
         onClearSavedQuery={onClearSavedQuery}
