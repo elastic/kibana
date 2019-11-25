@@ -20,10 +20,13 @@
 // Field types
 export const FIELD_TYPES = {
   TEXT: 'text',
+  TEXTAREA: 'textarea',
   NUMBER: 'number',
   TOGGLE: 'toggle',
   CHECKBOX: 'checkbox',
   COMBO_BOX: 'comboBox',
+  RADIO_GROUP: 'radioGroup',
+  RANGE: 'range',
   SELECT: 'select',
   MULTI_SELECT: 'multiSelect',
 };

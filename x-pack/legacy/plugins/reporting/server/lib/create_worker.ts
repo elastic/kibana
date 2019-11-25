@@ -21,9 +21,8 @@ import {
 // @ts-ignore untyped dependency
 import { events as esqueueEvents } from './esqueue';
 import { LevelLogger } from './level_logger';
-import { oncePerServer } from './once_per_server';
 
-function createWorkerFn(server: ServerFacade) {
+export function createWorkerFactory(server: ServerFacade) {
   const config = server.config();
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'queue-worker']);
   const queueConfig: QueueConfig = config.get('xpack.reporting.queue');
@@ -79,5 +78,3 @@ function createWorkerFn(server: ServerFacade) {
     });
   };
 }
-
-export const createWorkerFactory = oncePerServer(createWorkerFn);

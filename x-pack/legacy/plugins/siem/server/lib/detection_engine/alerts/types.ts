@@ -34,10 +34,13 @@ export interface SignalAlertParams {
   ruleId: string | undefined | null;
   language: string | undefined | null;
   maxSignals: number;
+  riskScore: number;
+  outputIndex: string;
   name: string;
   query: string | undefined | null;
   references: string[];
   savedId: string | undefined | null;
+  meta: Record<string, {}> | undefined | null;
   severity: string;
   size: number | undefined | null;
   tags: string[];
@@ -47,18 +50,24 @@ export interface SignalAlertParams {
 
 export type SignalAlertParamsRest = Omit<
   SignalAlertParams,
-  'ruleId' | 'falsePositives' | 'maxSignals' | 'savedId'
+  'ruleId' | 'falsePositives' | 'maxSignals' | 'savedId' | 'riskScore' | 'outputIndex'
 > & {
   rule_id: SignalAlertParams['ruleId'];
   false_positives: SignalAlertParams['falsePositives'];
   saved_id: SignalAlertParams['savedId'];
   max_signals: SignalAlertParams['maxSignals'];
+  risk_score: SignalAlertParams['riskScore'];
+  output_index: SignalAlertParams['outputIndex'];
 };
 
 export type OutputSignalAlertRest = SignalAlertParamsRest & {
   id: string;
   created_by: string | undefined | null;
   updated_by: string | undefined | null;
+};
+
+export type OutputSignalES = OutputSignalAlertRest & {
+  status: 'open' | 'closed';
 };
 
 export type UpdateSignalAlertParamsRest = Partial<SignalAlertParamsRest> & {
@@ -70,7 +79,9 @@ export interface FindParamsRest {
   per_page: number;
   page: number;
   sort_field: string;
+  sort_order: 'asc' | 'desc';
   fields: string[];
+  filter: string;
 }
 
 export interface Clients {
@@ -95,7 +106,9 @@ export interface FindSignalsRequest extends Omit<RequestFacade, 'query'> {
     page: number;
     search?: string;
     sort_field?: string;
+    filter?: string;
     fields?: string[];
+    sort_order?: 'asc' | 'desc';
   };
 }
 
@@ -104,7 +117,9 @@ export interface FindSignalParams {
   perPage?: number;
   page?: number;
   sortField?: string;
+  filter?: string;
   fields?: string[];
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface ReadSignalParams {

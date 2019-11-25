@@ -17,7 +17,6 @@ import { EuiProgress } from '@elastic/eui';
 import { documentField } from './document_field';
 
 jest.mock('ui/new_platform');
-jest.mock('../../../../../../src/legacy/ui/public/registry/field_formats');
 
 const initialState: IndexPatternPrivateState = {
   indexPatternRefs: [],

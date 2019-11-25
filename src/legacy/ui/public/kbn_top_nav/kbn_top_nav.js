@@ -75,8 +75,7 @@ export function createTopNavDirective() {
 
 module.directive('kbnTopNav', createTopNavDirective);
 
-export function createTopNavHelper(reactDirective) {
-  const { TopNavMenu } = navigation.ui;
+export const createTopNavHelper = ({ TopNavMenu }) => (reactDirective) => {
   return reactDirective(
     wrapInI18nContext(TopNavMenu),
     [
@@ -116,6 +115,6 @@ export function createTopNavHelper(reactDirective) {
       'showAutoRefreshOnly',
     ],
   );
-}
+};
 
-module.directive('kbnTopNavHelper', createTopNavHelper);
+module.directive('kbnTopNavHelper', createTopNavHelper(navigation.ui));

@@ -19,8 +19,11 @@
 
 import React from 'react';
 import { FilterLabel } from './filter_label';
-import { phraseFilter } from './fixtures/phrase_filter';
 import { shallow } from 'enzyme';
+
+/* eslint-disable @kbn/eslint/no-restricted-paths */
+import { phraseFilter } from '../../../../../../../../plugins/data/public/stubs';
+/* eslint-enable @kbn/eslint/no-restricted-paths */
 
 test('alias', () => {
   const filter = {
