@@ -119,7 +119,8 @@ exports[`Step1 should render normally 1`] = `
       grow={false}
     >
       <EuiButton
-        iconType="cross"
+        color="danger"
+        iconType="trash"
         isLoading={false}
         onClick={[Function]}
         size="s"
@@ -129,6 +130,24 @@ exports[`Step1 should render normally 1`] = `
     </EuiFlexItem>
   </EuiFlexGroup>
 </Fragment>
+`;
+
+exports[`Step1 testing should should a tooltip if there is no email address 1`] = `
+<EuiToolTip
+  content="Please configure an email address below to test this action."
+  delay="regular"
+  position="top"
+>
+  <EuiButton
+    iconType="play"
+    isDisabled={true}
+    isLoading={false}
+    onClick={[Function]}
+    size="s"
+  >
+    Test
+  </EuiButton>
+</EuiToolTip>
 `;
 
 exports[`Step1 testing should show a failed test error 1`] = `
@@ -193,7 +212,8 @@ exports[`Step1 testing should show a failed test error 1`] = `
       grow={false}
     >
       <EuiButton
-        iconType="cross"
+        color="danger"
+        iconType="trash"
         isLoading={false}
         onClick={[Function]}
         size="s"
@@ -275,7 +295,8 @@ exports[`Step1 testing should show a successful test 1`] = `
       grow={false}
     >
       <EuiButton
-        iconType="cross"
+        color="danger"
+        iconType="trash"
         isLoading={false}
         onClick={[Function]}
         size="s"

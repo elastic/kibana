@@ -271,6 +271,14 @@ describe('Step1', () => {
           .prop('isDisabled')
       ).toBe(true);
     });
+
+    it('should should a tooltip if there is no email address', () => {
+      const customProps = {
+        emailAddress: '',
+      };
+      const component = shallow(<Step1 {...defaultProps} {...customProps} />);
+      expect(component.find('EuiToolTip')).toMatchSnapshot();
+    });
   });
 
   describe('deleting', () => {

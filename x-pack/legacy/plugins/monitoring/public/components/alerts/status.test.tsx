@@ -77,6 +77,6 @@ describe('Status', () => {
     const component = mount(<AlertsStatus {...defaultProps} />);
     component.find('EuiLink').simulate('click');
     await new Promise(resolve => process.nextTick(resolve));
-    expect(component.find('EuiFlyout').isEmpty()).toBe(true);
+    expect(component.find('EuiFlyout').exists()).toBe(false);
   });
 });

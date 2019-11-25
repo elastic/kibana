@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiSuperSelect,
+  EuiToolTip,
 } from '@elastic/eui';
 import { kfetch } from 'ui/kfetch';
 import { omit, pick } from 'lodash';
@@ -115,6 +116,41 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
       );
     }
     setIsTesting(false);
+  }
+
+  function getTestButton() {
+    const isTestingDisabled = !props.emailAddress || props.emailAddress.length === 0;
+    const testBtn = (
+      <EuiButton
+        size="s"
+        iconType="play"
+        onClick={testEmailAction}
+        isLoading={isTesting}
+        isDisabled={isTestingDisabled}
+      >
+        {i18n.translate('xpack.monitoring.alerts.configuration.testConfiguration.buttonText', {
+          defaultMessage: 'Test',
+        })}
+      </EuiButton>
+    );
+
+    if (isTestingDisabled) {
+      return (
+        <EuiToolTip
+          position="top"
+          content={i18n.translate(
+            'xpack.monitoring.alerts.configuration.testConfiguration.disabledTooltipText',
+            {
+              defaultMessage: 'Please configure an email address below to test this action.',
+            }
+          )}
+        >
+          {testBtn}
+        </EuiToolTip>
+      );
+    }
+
+    return testBtn;
   }
 
   if (props.editAction) {
@@ -248,26 +284,12 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
               )}
             </EuiButton>
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>{getTestButton()}</EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
               size="s"
-              iconType="play"
-              onClick={testEmailAction}
-              isLoading={isTesting}
-              isDisabled={!props.emailAddress || props.emailAddress.length === 0}
-            >
-              {i18n.translate(
-                'xpack.monitoring.alerts.configuration.testConfiguration.buttonText',
-                {
-                  defaultMessage: 'Test',
-                }
-              )}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              iconType="cross"
+              color="danger"
+              iconType="trash"
               onClick={() => deleteEmailAction(props.selectedEmailActionId)}
               isLoading={isDeleting}
             >
