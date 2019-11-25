@@ -129,11 +129,11 @@ describe('read_signals', () => {
     test('should return a single value of rule-1 with multiple values', async () => {
       const result1 = getResult();
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-      result1.alertTypeParams.ruleId = 'rule-1';
+      result1.params.ruleId = 'rule-1';
 
       const result2 = getResult();
       result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-      result2.alertTypeParams.ruleId = 'rule-2';
+      result2.params.ruleId = 'rule-2';
 
       const alertsClient = alertsClientMock.create();
       alertsClient.get.mockResolvedValue(getResult());
@@ -150,11 +150,11 @@ describe('read_signals', () => {
     test('should return a single value of rule-2 with multiple values', async () => {
       const result1 = getResult();
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-      result1.alertTypeParams.ruleId = 'rule-1';
+      result1.params.ruleId = 'rule-1';
 
       const result2 = getResult();
       result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-      result2.alertTypeParams.ruleId = 'rule-2';
+      result2.params.ruleId = 'rule-2';
 
       const alertsClient = alertsClientMock.create();
       alertsClient.get.mockResolvedValue(getResult());
@@ -171,11 +171,11 @@ describe('read_signals', () => {
     test('should return null for a made up value with multiple values', async () => {
       const result1 = getResult();
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-      result1.alertTypeParams.ruleId = 'rule-1';
+      result1.params.ruleId = 'rule-1';
 
       const result2 = getResult();
       result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-      result2.alertTypeParams.ruleId = 'rule-2';
+      result2.params.ruleId = 'rule-2';
 
       const alertsClient = alertsClientMock.create();
       alertsClient.get.mockResolvedValue(getResult());
@@ -194,8 +194,8 @@ describe('read_signals', () => {
     test('returns null if the objects are not of a signal rule type', () => {
       const signal = findSignalInArrayByRuleId(
         [
-          { alertTypeId: 'made up 1', alertTypeParams: { ruleId: '123' } },
-          { alertTypeId: 'made up 2', alertTypeParams: { ruleId: '456' } },
+          { alertTypeId: 'made up 1', params: { ruleId: '123' } },
+          { alertTypeId: 'made up 2', params: { ruleId: '456' } },
         ],
         '123'
       );
@@ -205,30 +205,30 @@ describe('read_signals', () => {
     test('returns correct type if the objects are of a signal rule type', () => {
       const signal = findSignalInArrayByRuleId(
         [
-          { alertTypeId: SIGNALS_ID, alertTypeParams: { ruleId: '123' } },
-          { alertTypeId: 'made up 2', alertTypeParams: { ruleId: '456' } },
+          { alertTypeId: SIGNALS_ID, params: { ruleId: '123' } },
+          { alertTypeId: 'made up 2', params: { ruleId: '456' } },
         ],
         '123'
       );
-      expect(signal).toEqual({ alertTypeId: 'siem.signals', alertTypeParams: { ruleId: '123' } });
+      expect(signal).toEqual({ alertTypeId: 'siem.signals', params: { ruleId: '123' } });
     });
 
     test('returns second correct type if the objects are of a signal rule type', () => {
       const signal = findSignalInArrayByRuleId(
         [
-          { alertTypeId: SIGNALS_ID, alertTypeParams: { ruleId: '123' } },
-          { alertTypeId: SIGNALS_ID, alertTypeParams: { ruleId: '456' } },
+          { alertTypeId: SIGNALS_ID, params: { ruleId: '123' } },
+          { alertTypeId: SIGNALS_ID, params: { ruleId: '456' } },
         ],
         '456'
       );
-      expect(signal).toEqual({ alertTypeId: 'siem.signals', alertTypeParams: { ruleId: '456' } });
+      expect(signal).toEqual({ alertTypeId: 'siem.signals', params: { ruleId: '456' } });
     });
 
     test('returns null with correct types but data does not exist', () => {
       const signal = findSignalInArrayByRuleId(
         [
-          { alertTypeId: SIGNALS_ID, alertTypeParams: { ruleId: '123' } },
-          { alertTypeId: SIGNALS_ID, alertTypeParams: { ruleId: '456' } },
+          { alertTypeId: SIGNALS_ID, params: { ruleId: '123' } },
+          { alertTypeId: SIGNALS_ID, params: { ruleId: '456' } },
         ],
         '892'
       );
