@@ -4,20 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Dispatch } from 'redux';
 import { userNavigated } from '../concerns/routing';
+import { StoreContext } from '../lib/saga';
 
 /**
  * This must be used for `withPageNavigationStatus`
  */
 // TODO: type actionsAndState
-export async function routingSaga({
-  dispatch,
-  actionsAndState,
-}: {
-  dispatch: Dispatch;
-  actionsAndState: any;
-}) {
+export async function routingSaga({ dispatch, actionsAndState }: StoreContext) {
   window.addEventListener('popstate', emit);
   emit();
 

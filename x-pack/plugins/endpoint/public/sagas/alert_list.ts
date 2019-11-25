@@ -9,17 +9,15 @@ import { withPageNavigationStatus } from './common';
 import { hrefIsForPath } from '../concerns/routing';
 import { actions as alertListActions } from '../actions/alert_list';
 import * as alertListSelectors from '../selectors/alert_list';
+import { StoreContext } from '../lib/saga';
 
 // TODO: type this properly
-export async function alertListSaga(...args: any[]) {
-  await Promise.all([resourceSaga(...args)]);
+export async function alertListSaga(storeContext: StoreContext, context: AppMountContext) {
+  await Promise.all([resourceSaga(storeContext, context)]);
 }
 
 // TODO type actionsAndState, dispatch
-async function resourceSaga(
-  { actionsAndState, dispatch }: { actionsAndState: any; dispatch: any },
-  context: AppMountContext
-) {
+async function resourceSaga({ actionsAndState, dispatch }: StoreContext, context: AppMountContext) {
   function isOnPage(href: any) {
     return hrefIsForPath(href, `${context.core.http.basePath.get()}/app/endpoint/alerts`);
   }
@@ -27,7 +25,6 @@ async function resourceSaga(
   for await (const {
     action,
     userIsOnPageAndLoggedIn,
-    href,
     state,
     shouldInitialize,
   } of withPageNavigationStatus({

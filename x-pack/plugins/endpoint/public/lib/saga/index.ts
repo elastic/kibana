@@ -23,6 +23,11 @@ interface IteratorInstance {
 
 type StoreActionsAndState = AsyncIterableIterator<QueuedAction>;
 
+export interface StoreContext {
+  actionsAndState: () => StoreActionsAndState;
+  dispatch: Dispatch;
+}
+
 /**
  * See https://docs.microsoft.com/en-us/previous-versions/msp-n-p/jj591569(v%3dpandp.10)
  */
@@ -70,7 +75,7 @@ export function createSagaMiddleware(saga: () => Promise<void>): Middleware & { 
 
   let runSaga: () => void;
   function middleware({ getState, dispatch }: MiddlewareAPI) {
-    runSaga = saga.bind(null, {
+    runSaga = saga.bind<null, StoreContext, any[], Promise<void>>(null, {
       actionsAndState: getActionsAndStateIterator,
       dispatch,
     });
