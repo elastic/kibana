@@ -39,6 +39,7 @@ describe.skip('config/deprecation warnings', function () {
     ], {
       stdio: ['ignore', 'pipe', 'pipe'],
       env: {
+        ...process.env,
         CREATE_SERVER_OPTS: JSON.stringify({
           logging: {
             quiet: false,
@@ -106,7 +107,11 @@ describe.skip('config/deprecation warnings', function () {
         line.tags.includes('warning')
       );
 
-    expect(deprecationLines).to.have.length(1);
-    expect(deprecationLines[0]).to.have.property('message', 'uiSettings.enabled is deprecated and is no longer used');
+    try {
+      expect(deprecationLines).to.have.length(1);
+      expect(deprecationLines[0]).to.have.property('message', 'uiSettings.enabled is deprecated and is no longer used');
+    } catch (error) {
+      throw new Error(`Expected stdio to include deprecation message about uiSettings.enabled\n\nstdio:\n${stdio}\n\n`);
+    }
   });
 });
