@@ -88,7 +88,7 @@ export class CapabilitiesService {
 
   private async fetchCapabilities(http: HttpStart, appIds: string[]): Promise<Capabilities> {
     return deepFreeze(
-      await http.post('/core/capabilities', {
+      await http.post('/api/core/capabilities', {
         body: JSON.stringify({
           applications: appIds,
         }),

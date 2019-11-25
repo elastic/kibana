@@ -83,10 +83,13 @@ export class CapabilitiesService {
   }
 
   private setupCapabilitiesRoute(http: InternalHttpServiceSetup) {
-    const router = http.createRouter('/core/capabilities');
+    const router = http.createRouter('/api/core/capabilities');
     router.post(
       {
         path: '',
+        options: {
+          authRequired: false,
+        },
         validate: {
           body: schema.object({
             applications: schema.arrayOf(schema.string()),
