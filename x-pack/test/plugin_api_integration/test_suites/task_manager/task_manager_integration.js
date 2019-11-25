@@ -12,7 +12,7 @@ import supertestAsPromised from 'supertest-as-promised';
 const { task: { properties: taskManagerIndexMapping } } = require('../../../../legacy/plugins/task_manager/mappings.json');
 
 export default function ({ getService }) {
-  const es = getService('es');
+  const es = getService('legacyEs');
   const log = getService('log');
   const retry = getService('retry');
   const config = getService('config');

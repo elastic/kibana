@@ -39,7 +39,6 @@ export class ExpressionLoader {
   private loadingSubject: Subject<void>;
   private data: Data;
   private params: IExpressionLoaderParams = {};
-  private ignoreNextResponse = false;
 
   constructor(
     element: HTMLElement,
@@ -134,15 +133,14 @@ export class ExpressionLoader {
     params: IExpressionLoaderParams
   ): Promise<void> => {
     if (this.dataHandler && this.dataHandler.isPending) {
-      this.ignoreNextResponse = true;
       this.dataHandler.cancel();
     }
     this.setParams(params);
     this.dataHandler = new ExpressionDataHandler(expression, params);
     if (!params.inspectorAdapters) params.inspectorAdapters = this.dataHandler.inspect();
-    const data = await this.dataHandler.getData();
-    if (this.ignoreNextResponse) {
-      this.ignoreNextResponse = false;
+    const prevDataHandler = this.dataHandler;
+    const data = await prevDataHandler.getData();
+    if (this.dataHandler !== prevDataHandler) {
       return;
     }
     this.dataSubject.next(data);

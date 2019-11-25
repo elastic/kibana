@@ -19,8 +19,6 @@
 
 import { expectExpressionProvider } from './helpers';
 
-// this file showcases how to use testing utilities defined in helpers.js together with the kbn_tp_run_pipeline
-// test plugin to write autmated tests for interprete
 export default function ({ getService, updateBaselines }) {
 
   let expectExpression;
@@ -29,8 +27,6 @@ export default function ({ getService, updateBaselines }) {
       expectExpression = expectExpressionProvider({ getService, updateBaselines });
     });
 
-    // we should not use this for tests like the ones below. this should be unit tested.
-    // - tests against a single function could easily be written as unit tests (and should be)
     describe('correctly renders tagcloud', () => {
       let dataContext;
       before(async () => {
@@ -43,7 +39,7 @@ export default function ({ getService, updateBaselines }) {
         dataContext = await expectExpression('partial_tagcloud_test', expression).getResponse();
       });
 
-      it.skip('with invalid data', async () => {
+      it('with invalid data', async () => {
         const expression = 'tagcloud metric={visdimension 0}';
         await (await expectExpression('tagcloud_invalid_data', expression).toMatchSnapshot()).toMatchScreenshot();
       });

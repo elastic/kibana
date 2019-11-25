@@ -29,15 +29,13 @@ export default function ({ getService, getPageObjects }) {
   const inspector = getService('inspector');
 
   async function initChart() {
-    const fromTime = '2015-09-19 06:31:44.000';
-    const toTime = '2015-09-23 18:31:44.000';
 
     log.debug('navigateToApp visualize');
     await PageObjects.visualize.navigateToNewVisualization();
     log.debug('clickLineChart');
     await PageObjects.visualize.clickLineChart();
     await PageObjects.visualize.clickNewSearch();
-    await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+    await PageObjects.timePicker.setDefaultAbsoluteRange();
     log.debug('Bucket = X-axis');
     await PageObjects.visualize.clickBucket('X-axis');
     log.debug('Aggregation = Date Histogram');
@@ -208,8 +206,8 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show different labels in different timezone', async function () {
-        const fromTime = '2015-09-22 09:05:47.415';
-        const toTime = '2015-09-22 16:08:34.554';
+        const fromTime = 'Sep 22, 2015 @ 09:05:47.415';
+        const toTime = 'Sep 22, 2015 @ 16:08:34.554';
         // note that we're setting the absolute time range while we're in 'America/Phoenix' tz
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualize.waitForRenderingCount();

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { StatelessComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 
 import { DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
 import { EnrichedDeprecationInfo } from '../../../../../../../server/np_ready/lib/es_migration_apis';
@@ -21,7 +21,7 @@ const sortByLevelDesc = (a: DeprecationInfo, b: DeprecationInfo) => {
 /**
  * Used to show a single deprecation message with any detailed information.
  */
-const MessageDeprecation: StatelessComponent<{ deprecation: EnrichedDeprecationInfo }> = ({
+const MessageDeprecation: FunctionComponent<{ deprecation: EnrichedDeprecationInfo }> = ({
   deprecation,
 }) => {
   const items = [];
@@ -44,7 +44,7 @@ const MessageDeprecation: StatelessComponent<{ deprecation: EnrichedDeprecationI
 /**
  * Used to show a single (simple) deprecation message with any detailed information.
  */
-const SimpleMessageDeprecation: StatelessComponent<{ deprecation: EnrichedDeprecationInfo }> = ({
+const SimpleMessageDeprecation: FunctionComponent<{ deprecation: EnrichedDeprecationInfo }> = ({
   deprecation,
 }) => {
   const items = [];
@@ -64,7 +64,7 @@ interface IndexDeprecationProps {
 /**
  * Shows a single deprecation and table of affected indices with details for each index.
  */
-const IndexDeprecation: StatelessComponent<IndexDeprecationProps> = ({ deprecation, indices }) => {
+const IndexDeprecation: FunctionComponent<IndexDeprecationProps> = ({ deprecation, indices }) => {
   return (
     <DeprecationCell docUrl={deprecation.url}>
       <IndexDeprecationTable indices={indices} />
@@ -76,7 +76,7 @@ const IndexDeprecation: StatelessComponent<IndexDeprecationProps> = ({ deprecati
  * A list of deprecations that is either shown as individual deprecation cells or as a
  * deprecation summary for a list of indices.
  */
-export const DeprecationList: StatelessComponent<{
+export const DeprecationList: FunctionComponent<{
   deprecations: EnrichedDeprecationInfo[];
   currentGroupBy: GroupByOption;
 }> = ({ deprecations, currentGroupBy }) => {

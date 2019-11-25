@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Setup } from '../../server/lib/helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../server/lib/helpers/setup_request';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
@@ -19,7 +23,7 @@ export function getTransactionsProjection({
   transactionName,
   transactionType
 }: {
-  setup: Setup;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
   serviceName?: string;
   transactionName?: string;
   transactionType?: string;
