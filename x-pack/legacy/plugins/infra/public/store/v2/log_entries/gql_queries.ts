@@ -18,16 +18,17 @@ type LogEntriesGetter = (
   countAfter: number
 ) => (params: {
   sourceId: string;
-  timeKey: TimeKey;
+  timeKey: TimeKey | null;
   filterQuery: SerializedFilterQuery | null;
-}) => Promise<false | LogEntriesState>;
+}) => Promise<LogEntriesState>;
 
 const getLogEntries: LogEntriesGetter = (client, countBefore, countAfter) => async ({
   sourceId,
   timeKey,
   filterQuery,
 }) => {
-  if (!timeKey || !client) return false;
+  if (!timeKey) throw new Error('TimeKey is null');
+  if (!client) throw new Error('Missing Apollo client');
   const result = await client.query({
     query: logEntriesQuery,
     variables: {
@@ -39,7 +40,11 @@ const getLogEntries: LogEntriesGetter = (client, countBefore, countAfter) => asy
     },
     fetchPolicy: 'no-cache',
   });
-  const { logEntriesAround } = result.data.source;
+  // Workaround for Typescript. Since we're removing the GraphQL API in another PR or two
+  // 7.6 goes out I don't think it's worth the effort to actually make this
+  // typecheck pass
+  const { source } = result.data as any;
+  const { logEntriesAround } = source;
   return {
     entries: logEntriesAround.entries,
     entriesStart: logEntriesAround.start,

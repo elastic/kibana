@@ -39,7 +39,7 @@ interface ScrollableLogTextStreamViewProps {
   hasMoreBeforeStart: boolean;
   hasMoreAfterEnd: boolean;
   isStreaming: boolean;
-  lastLoadedTime: number | null;
+  lastLoadedTime: Date | null;
   target: TimeKey | null;
   jumpToTarget: (target: TimeKey) => any;
   reportVisibleInterval: (params: {

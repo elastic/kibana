@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createSelector } from 'reselect';
-
-import { getLogEntryAtTime } from '../utils/log_entry';
 import { globalizeSelectors } from '../utils/typed_redux';
 import {
   logFilterSelectors as localLogFilterSelectors,

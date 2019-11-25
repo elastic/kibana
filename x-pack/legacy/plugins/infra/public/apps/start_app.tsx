@@ -22,7 +22,7 @@ import { PageRouter } from '../routes';
 import { createStore } from '../store';
 import { StoreProvider } from '../store/v2';
 import { ApolloClientContext } from '../utils/apollo_context';
-import { ReduxStateContextProvider } from '../utils/redux_context.tsx';
+import { ReduxStateContextProvider } from '../utils/redux_context';
 import { HistoryContext } from '../utils/history_context';
 import {
   useUiSetting$,

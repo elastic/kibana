@@ -85,7 +85,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
             scrollUnlockLiveStreaming,
             isScrollLocked,
           }) => (
-            <WithStreamItems sourceId={sourceId} initializeOnMount={!isAutoReloading}>
+            <WithStreamItems>
               {({
                 currentHighlightKey,
                 hasMoreAfterEnd,
@@ -138,7 +138,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                         visibleMidpointTime,
                         visibleTimeInterval,
                       }) => (
-                        <WithStreamItems initializeOnMount={!isAutoReloading}>
+                        <WithStreamItems>
                           {({ isReloading }) => (
                             <LogMinimap
                               height={height}
