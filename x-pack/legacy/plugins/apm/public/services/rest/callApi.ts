@@ -26,7 +26,7 @@ function fetchOptionsWithDebug(fetchOptions: FetchOptions) {
   const { body, ...rest } = fetchOptions;
 
   // Need an empty body to pass route validation
-  const bodyObject = isGet
+  const bodyObject = isGetRequest
     ? {}
     : {
         body: JSON.stringify(
