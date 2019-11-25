@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { searchSourceMock } from '../../../../../../../../src/legacy/ui/public/courier/search_source/mocks';
-import { SearchSourceContract } from '../../../../../../../../src/legacy/ui/public/courier';
+import { searchSourceMock } from '../../../../../../../../../src/legacy/ui/public/courier/search_source/mocks';
+import { SearchSourceContract } from '../../../../../../../../../src/legacy/ui/public/courier';
 
 export const savedSearchMock = {
   id: 'the-saved-search-id',
