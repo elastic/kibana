@@ -4,4 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './telemetry';
+export const mappings = {
+  'file-upload-telemetry': {
+    properties: {
+      filesUploadedTotalCount: {
+        type: 'long',
+      },
+    },
+  },
+};
