@@ -17,7 +17,7 @@ export const PositionSchema = schema.object({
 
 export const WorkpadElementSchema = schema.object({
   expression: schema.string(),
-  filter: schema.maybe(schema.string()),
+  filter: schema.maybe(schema.nullable(schema.string())),
   id: schema.string(),
   position: PositionSchema,
 });
@@ -32,12 +32,14 @@ export const WorkpadPageSchema = schema.object({
   ),
   id: schema.string(),
   style: schema.recordOf(schema.string(), schema.string()),
-  transition: schema.oneOf([
-    schema.object({}),
-    schema.object({
-      name: schema.string(),
-    }),
-  ]),
+  transition: schema.maybe(
+    schema.oneOf([
+      schema.object({}),
+      schema.object({
+        name: schema.string(),
+      }),
+    ])
+  ),
 });
 
 export const WorkpadAssetSchema = schema.object({
@@ -55,7 +57,7 @@ export const WorkpadSchema = schema.object({
   css: schema.string(),
   height: schema.number(),
   id: schema.string(),
-  isWriteable: schema.boolean(),
+  isWriteable: schema.maybe(schema.boolean()),
   name: schema.string(),
   page: schema.number(),
   pages: schema.arrayOf(WorkpadPageSchema),
