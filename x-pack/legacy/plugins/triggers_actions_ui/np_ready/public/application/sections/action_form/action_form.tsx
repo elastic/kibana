@@ -20,26 +20,27 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { saveAction } from '../../lib/api';
+import { createAction, updateAction } from '../../lib/api';
 import { SectionError, ErrableFormRow } from '../../components/page_error';
 import { useAppDependencies } from '../..';
 import { actionReducer } from './action_reducer';
 import { ActionsContext } from '../../context/actions_context';
-import { ActionType, Action, IErrorObject } from '../../../types';
+import { Action, IErrorObject } from '../../../types';
 
 interface Props {
-  actionType: ActionType;
+  initialAction: Action;
+  actionTypeName: string;
+  setFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const ActionAddForm = ({ actionType }: Props) => {
+export const ActionForm = ({ initialAction, actionTypeName, setFlyoutVisibility }: Props) => {
   const {
     core: { http },
     plugins: { toastNotifications },
     actionTypeRegistry,
   } = useAppDependencies();
-  const initialAction = { actionTypeId: actionType.id, config: {}, secrets: {} };
 
-  const { setFlyoutVisibility, loadActions } = useContext(ActionsContext);
+  const { loadActions } = useContext(ActionsContext);
 
   // hooks
   const [{ action }, dispatch] = useReducer(actionReducer, { action: initialAction });
@@ -57,12 +58,8 @@ export const ActionAddForm = ({ actionType }: Props) => {
   };
 
   useEffect(() => {
-    dispatch({
-      command: { type: 'setAction' },
-      payload: { key: 'action', value: { actionTypeId: actionType.id, config: {}, secrets: {} } },
-    });
     setServerError(null);
-  }, [actionType]);
+  }, []);
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [serverError, setServerError] = useState<{
@@ -85,7 +82,7 @@ export const ActionAddForm = ({ actionType }: Props) => {
     return validationResult;
   }
 
-  const actionTypeRegisterd = actionTypeRegistry.get(actionType.id);
+  const actionTypeRegisterd = actionTypeRegistry.get(initialAction.actionTypeId);
   if (actionTypeRegisterd === null) return null;
   const FieldsComponent = actionTypeRegisterd.actionFields;
   const errors = {
@@ -96,15 +93,29 @@ export const ActionAddForm = ({ actionType }: Props) => {
 
   async function onActionSave(): Promise<any> {
     try {
-      const newAction = await saveAction({ http, action });
-      toastNotifications.addSuccess(
-        i18n.translate('xpack.triggersActionsUI.sections.actionAdd.saveSuccessNotificationText', {
-          defaultMessage: "Saved '{actionName}'",
-          values: {
-            actionName: newAction.description,
-          },
-        })
-      );
+      let newAction;
+      if (action.id === undefined) {
+        newAction = await createAction({ http, action });
+        toastNotifications.addSuccess(
+          i18n.translate('xpack.triggersActionsUI.sections.actionAdd.saveSuccessNotificationText', {
+            defaultMessage: "Created '{actionName}'",
+            values: {
+              actionName: newAction.description,
+            },
+          })
+        );
+      } else {
+        newAction = await updateAction({ http, action, id: action.id });
+        toastNotifications.addSuccess(
+          i18n.translate('xpack.triggersActionsUI.sections.actionAdd.saveSuccessNotificationText', {
+            defaultMessage: "Updated '{actionName}'",
+            values: {
+              actionName: newAction.description,
+            },
+          })
+        );
+      }
+
       return newAction;
     } catch (error) {
       return {
@@ -168,7 +179,7 @@ export const ActionAddForm = ({ actionType }: Props) => {
               editActionSecrets={setActionSecretsProperty}
               hasErrors={hasErrors}
             >
-              {actionType.id === null ? (
+              {initialAction.actionTypeId === null ? (
                 <Fragment>
                   <EuiCallOut
                     title={i18n.translate(
@@ -186,7 +197,7 @@ export const ActionAddForm = ({ actionType }: Props) => {
                           id="xpack.triggersActionsUI.sections.actionAdd.actions.actionConfigurationWarningDescriptionText"
                           defaultMessage="To create this action, you must configure at least one {accountType} account. {docLink}"
                           values={{
-                            accountType: actionType.name,
+                            accountType: actionTypeName,
                             docLink: (
                               <EuiLink target="_blank">
                                 <FormattedMessage

@@ -5,7 +5,6 @@
  */
 import React, { Fragment } from 'react';
 import { EuiFieldText, EuiTextArea, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { ErrableFormRow } from '../../../components/page_error';
 import {
@@ -32,7 +31,7 @@ export function getActionType(): ActionTypeModel {
         webhookUrl: new Array<string>(),
       };
       validationResult.errors = errors;
-      if (!action.secrets.webhookUrl) {
+      if (action.secrets && !action.secrets.webhookUrl) {
         errors.webhookUrl.push(
           i18n.translate(
             'xpack.triggersActionsUI.sections.actionAdd.slackAction.error.requiredWebhookUrlText',
@@ -59,6 +58,10 @@ const SlackActionFields: React.FunctionComponent<Props> = ({
   errors,
   hasErrors,
 }) => {
+  if (!action.secrets) {
+    return null;
+  }
+
   const { webhookUrl } = action.secrets;
 
   return (

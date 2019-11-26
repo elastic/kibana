@@ -21,7 +21,7 @@ import { BASE_PATH } from './application/constants';
 import { breadcrumbService } from './application/lib/breadcrumb';
 import { docTitleService } from './application/lib/doc_title';
 import { ActionTypeRegistry } from './application/action_type_registry';
-import { registerBuiltInActionTypes } from './application/sections/action_add/buildin_action_types';
+import { registerBuiltInActionTypes } from './application/sections/action_form/buildin_action_types';
 import { AlertTypeRegistry } from './application/alert_type_registry';
 import { registerAlertTypes } from './application/sections/alert_add/alert_types';
 import { setSavedObjectsClient } from './application/lib/api';

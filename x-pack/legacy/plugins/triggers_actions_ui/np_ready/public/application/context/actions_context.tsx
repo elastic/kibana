@@ -5,12 +5,15 @@
  */
 
 import React from 'react';
-import { ActionType } from '../../types';
+import { ActionType, ActionTableItem } from '../../types';
 export const ActionsContext = React.createContext({} as IActionContext);
 
 export interface IActionContext {
-  flyoutVisible: boolean;
-  setFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  addFlyoutVisible: boolean;
+  editFlyoutVisible: boolean;
+  setEditFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
   actionTypesIndex: Record<string, ActionType> | undefined;
   loadActions: () => Promise<void>;
+  editedActionItem: ActionTableItem | undefined;
 }

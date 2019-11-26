@@ -15,21 +15,21 @@ import {
 } from '@elastic/eui';
 import { ActionsContext } from '../../context/actions_context';
 import { ActionTypeMenu } from './action_type_menu';
-import { ActionAddForm } from './action_add_form';
+import { ActionForm } from './action_form';
 import { ActionType } from '../../../types';
 import { useAppDependencies } from '../..';
 
 export const ActionAddFlyout = () => {
   const { actionTypeRegistry } = useAppDependencies();
-  const { flyoutVisible, setFlyoutVisibility } = useContext(ActionsContext);
+  const { addFlyoutVisible, setAddFlyoutVisibility } = useContext(ActionsContext);
   const [actionType, setActionType] = useState<ActionType | undefined>(undefined);
-  const closeFlyout = useCallback(() => setFlyoutVisibility(false), [setFlyoutVisibility]);
+  const closeFlyout = useCallback(() => setAddFlyoutVisibility(false), [setAddFlyoutVisibility]);
 
   useEffect(() => {
     setActionType(undefined);
-  }, [flyoutVisible]);
+  }, [addFlyoutVisible]);
 
-  if (!flyoutVisible) {
+  if (!addFlyoutVisible) {
     return null;
   }
 
@@ -39,7 +39,15 @@ export const ActionAddFlyout = () => {
     currentForm = <ActionTypeMenu setActionType={setActionType} />;
   } else {
     actionTypeModel = actionTypeRegistry.get(actionType.id);
-    currentForm = <ActionAddForm actionType={actionType} />;
+    const initialAction = { actionTypeId: actionType.id, config: {}, secrets: {} };
+
+    currentForm = (
+      <ActionForm
+        actionTypeName={actionType.name}
+        initialAction={initialAction}
+        setFlyoutVisibility={setAddFlyoutVisibility}
+      />
+    );
   }
 
   return (

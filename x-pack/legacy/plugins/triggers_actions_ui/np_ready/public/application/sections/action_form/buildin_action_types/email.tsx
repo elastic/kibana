@@ -64,14 +64,14 @@ export function getActionType(): ActionTypeModel {
           })
         );
       }
-      if (!action.secrets.user) {
+      if (action.secrets && !action.secrets.user) {
         errors.user.push(
           i18n.translate('xpack.triggersActionsUI.sections.addAction.error.requiredUserText', {
             defaultMessage: 'User is required.',
           })
         );
       }
-      if (!action.secrets.password) {
+      if (action.secrets && !action.secrets.password) {
         errors.password.push(
           i18n.translate('xpack.triggersActionsUI.sections.addAction.error.requiredPasswordText', {
             defaultMessage: 'Password is required.',
@@ -135,7 +135,6 @@ const EmailActionFields: React.FunctionComponent<Props> = ({
   hasErrors,
 }) => {
   const { from, host, port } = action.config;
-  const { user, password } = action.secrets;
 
   return (
     <Fragment>
@@ -230,68 +229,70 @@ const EmailActionFields: React.FunctionComponent<Props> = ({
           </ErrableFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem>
-          <ErrableFormRow
-            id="emailUser"
-            errorKey="user"
-            fullWidth
-            errors={errors}
-            isShowingErrors={hasErrors && user !== undefined}
-            label={i18n.translate(
-              'xpack.triggersActionsUI.sections.actionAdd.emailAction.userTextFieldLabel',
-              {
-                defaultMessage: 'User',
-              }
-            )}
-          >
-            <EuiFieldText
+      {action.secrets ? (
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem>
+            <ErrableFormRow
+              id="emailUser"
+              errorKey="user"
               fullWidth
-              name="user"
-              value={user || ''}
-              data-test-subj="emailUserInput"
-              onChange={e => {
-                editActionSecrets('user', e.target.value);
-              }}
-              onBlur={() => {
-                if (!user) {
-                  editActionSecrets('user', '');
+              errors={errors}
+              isShowingErrors={hasErrors && action.secrets.user !== undefined}
+              label={i18n.translate(
+                'xpack.triggersActionsUI.sections.actionAdd.emailAction.userTextFieldLabel',
+                {
+                  defaultMessage: 'User',
                 }
-              }}
-            />
-          </ErrableFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <ErrableFormRow
-            id="emailPassword"
-            errorKey="password"
-            fullWidth
-            errors={errors}
-            isShowingErrors={hasErrors && password !== undefined}
-            label={i18n.translate(
-              'xpack.triggersActionsUI.sections.actionAdd.emailAction.passwordFieldLabel',
-              {
-                defaultMessage: 'Password',
-              }
-            )}
-          >
-            <EuiFieldPassword
+              )}
+            >
+              <EuiFieldText
+                fullWidth
+                name="user"
+                value={action.secrets.user || ''}
+                data-test-subj="emailUserInput"
+                onChange={e => {
+                  editActionSecrets('user', e.target.value);
+                }}
+                onBlur={() => {
+                  if (!action.secrets.user) {
+                    editActionSecrets('user', '');
+                  }
+                }}
+              />
+            </ErrableFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <ErrableFormRow
+              id="emailPassword"
+              errorKey="password"
               fullWidth
-              name="password"
-              value={password || ''}
-              data-test-subj="emailPasswordInput"
-              onChange={e => {
-                editActionSecrets('password', e.target.value);
-              }}
-              onBlur={() => {
-                if (!password) {
-                  editActionSecrets('password', '');
+              errors={errors}
+              isShowingErrors={hasErrors && action.secrets.password !== undefined}
+              label={i18n.translate(
+                'xpack.triggersActionsUI.sections.actionAdd.emailAction.passwordFieldLabel',
+                {
+                  defaultMessage: 'Password',
                 }
-              }}
-            />
-          </ErrableFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+              )}
+            >
+              <EuiFieldPassword
+                fullWidth
+                name="password"
+                value={action.secrets.password || ''}
+                data-test-subj="emailPasswordInput"
+                onChange={e => {
+                  editActionSecrets('password', e.target.value);
+                }}
+                onBlur={() => {
+                  if (!action.secrets.password) {
+                    editActionSecrets('password', '');
+                  }
+                }}
+              />
+            </ErrableFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : null}
     </Fragment>
   );
 };

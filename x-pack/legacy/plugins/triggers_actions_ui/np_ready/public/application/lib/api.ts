@@ -49,7 +49,17 @@ export async function loadAllActions({ http }: LoadActionsOpts): Promise<LoadAct
   });
 }
 
-export async function saveAction({
+export async function getActionById({
+  id,
+  http,
+}: {
+  id: string;
+  http: HttpServiceBase;
+}): Promise<Action> {
+  return http.get(`${BASE_ACTION_API_PATH}/${id}`);
+}
+
+export async function createAction({
   http,
   action,
 }: {
@@ -58,6 +68,20 @@ export async function saveAction({
 }): Promise<Action> {
   return http.post(`${BASE_ACTION_API_PATH}`, {
     body: JSON.stringify(action),
+  });
+}
+
+export async function updateAction({
+  http,
+  action,
+  id,
+}: {
+  http: HttpServiceBase;
+  action: Action;
+  id: string;
+}): Promise<Action> {
+  return http.put(`${BASE_ACTION_API_PATH}/${id}`, {
+    body: JSON.stringify({ ...action, id: undefined, actionTypeId: undefined, secrets: undefined }),
   });
 }
 

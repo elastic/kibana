@@ -49,10 +49,10 @@ export interface ActionType {
 
 export interface Action {
   secrets: Record<string, any>;
-  id: string;
+  id?: string;
   actionTypeId: string;
-  description: string;
-  referencedByCount: number;
+  description?: string;
+  referencedByCount?: number;
   config: Record<string, any>;
 }
 

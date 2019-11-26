@@ -12,7 +12,7 @@ import { ActionsContext } from '../../../context/actions_context';
 import { useAppDependencies } from '../../../index';
 import { deleteActions, loadAllActions, loadActionTypes } from '../../../lib/api';
 import { Action, ActionTableItem, ActionTypeIndex } from '../../../../types';
-import { ActionAddFlyout } from '../../action_add';
+import { ActionAddFlyout, ActionEditFlyout } from '../../action_form';
 
 export const ActionsList: React.FunctionComponent = () => {
   const {
@@ -20,6 +20,7 @@ export const ActionsList: React.FunctionComponent = () => {
     plugins: { capabilities, toastNotifications },
   } = useAppDependencies();
   const canDelete = capabilities.get().actions.delete;
+  const canEdit = capabilities.get().actions.delete;
 
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
   const [actions, setActions] = useState<Action[]>([]);
@@ -28,10 +29,12 @@ export const ActionsList: React.FunctionComponent = () => {
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
   const [isLoadingActions, setIsLoadingActions] = useState<boolean>(false);
   const [isDeletingActions, setIsDeletingActions] = useState<boolean>(false);
-  const [flyoutVisible, setFlyoutVisibility] = useState<boolean>(false);
+  const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
+  const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
   const [actionTypesList, setActionTypesList] = useState<Array<{ value: string; name: string }>>(
     []
   );
+  const [editedActionItem, setEditedActionItem] = useState<ActionTableItem | undefined>(undefined);
 
   useEffect(() => {
     loadActions();
@@ -108,10 +111,10 @@ export const ActionsList: React.FunctionComponent = () => {
 
   async function deleteItems(items: ActionTableItem[]) {
     setIsDeletingActions(true);
-    const ids = items.map(item => item.id);
+    const ids = items.map(item => (item.id ? item.id : ''));
     try {
       await deleteActions({ http, ids });
-      const updatedActions = actions.filter(action => !ids.includes(action.id));
+      const updatedActions = actions.filter(action => action.id && !ids.includes(action.id));
       setActions(updatedActions);
     } catch (e) {
       toastNotifications.addDanger({
@@ -120,11 +123,16 @@ export const ActionsList: React.FunctionComponent = () => {
           { defaultMessage: 'Failed to delete action(s)' }
         ),
       });
-      // Refresh the actions from the server, some actions may have beend eleted
+      // Refresh the actions from the server, some actions may have beend deleted
       loadActions();
     } finally {
       setIsDeletingActions(false);
     }
+  }
+
+  async function editItem(actionTableItem: ActionTableItem) {
+    setEditedActionItem(actionTableItem);
+    setEditFlyoutVisibility(true);
   }
 
   async function deleteSelectedItems() {
@@ -170,6 +178,25 @@ export const ActionsList: React.FunctionComponent = () => {
       name: '',
       actions: [
         {
+          enabled: () => canEdit,
+          name: i18n.translate(
+            'xpack.triggersActionsUI.sections.actionsList.actionsListTable.columns.actions.editActionName',
+            { defaultMessage: 'Edit' }
+          ),
+          description: canEdit
+            ? i18n.translate(
+                'xpack.triggersActionsUI.sections.actionsList.actionsListTable.columns.actions.editActionDescription',
+                { defaultMessage: 'Edit this action' }
+              )
+            : i18n.translate(
+                'xpack.triggersActionsUI.sections.actionsList.actionsListTable.columns.actions.editActionDisabledDescription',
+                { defaultMessage: 'Unable to edit actions' }
+              ),
+          type: 'icon',
+          icon: 'pencil',
+          onClick: (item: ActionTableItem) => editItem(item),
+        },
+        {
           enabled: () => canDelete,
           name: i18n.translate(
             'xpack.triggersActionsUI.sections.actionsList.actionsListTable.columns.actions.deleteActionName',
@@ -198,10 +225,13 @@ export const ActionsList: React.FunctionComponent = () => {
         <EuiSpacer size="m" />
         <ActionsContext.Provider
           value={{
-            flyoutVisible,
-            setFlyoutVisibility,
+            addFlyoutVisible,
+            setAddFlyoutVisibility,
+            editFlyoutVisible,
+            setEditFlyoutVisibility,
             actionTypesIndex,
             loadActions,
+            editedActionItem,
           }}
         >
           <EuiInMemoryTable
@@ -272,7 +302,7 @@ export const ActionsList: React.FunctionComponent = () => {
                   fill
                   iconType="plusInCircle"
                   iconSide="left"
-                  onClick={() => setFlyoutVisibility(true)}
+                  onClick={() => setAddFlyoutVisibility(true)}
                 >
                   <FormattedMessage
                     id="xpack.triggersActionsUI.sections.actionsList.addActionButtonLabel"
@@ -283,6 +313,7 @@ export const ActionsList: React.FunctionComponent = () => {
             }}
           />
           <ActionAddFlyout />
+          <ActionEditFlyout />
         </ActionsContext.Provider>
       </Fragment>
     </section>

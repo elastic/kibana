@@ -32,7 +32,7 @@ export function getActionType(): ActionTypeModel {
         apiUrl: new Array<string>(),
       };
       validationResult.errors = errors;
-      if (!action.secrets.routingKey) {
+      if (action.secrets && !action.secrets.routingKey) {
         errors.routingKey.push(
           i18n.translate(
             'xpack.triggersActionsUI.sections.actionAdd.pagerDutyAction.error.requiredRoutingKeyText',
@@ -71,7 +71,6 @@ const PagerDutyActionFields: React.FunctionComponent<Props> = ({
   editActionSecrets,
 }) => {
   const { apiUrl } = action.config;
-  const { routingKey } = action.secrets;
   return (
     <Fragment>
       <ErrableFormRow
@@ -102,34 +101,36 @@ const PagerDutyActionFields: React.FunctionComponent<Props> = ({
           }}
         />
       </ErrableFormRow>
-      <ErrableFormRow
-        id="routingKey"
-        errorKey="routingKey"
-        fullWidth
-        errors={errors}
-        isShowingErrors={hasErrors === true && routingKey !== undefined}
-        label={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionAdd.pagerDutyAction.routingKeyTextFieldLabel',
-          {
-            defaultMessage: 'RoutingKey',
-          }
-        )}
-      >
-        <EuiFieldText
+      {action.secrets ? (
+        <ErrableFormRow
+          id="routingKey"
+          errorKey="routingKey"
           fullWidth
-          name="routingKey"
-          value={routingKey || ''}
-          data-test-subj="pagerdutyRoutingKeyInput"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            editActionSecrets('routingKey', e.target.value);
-          }}
-          onBlur={() => {
-            if (!routingKey) {
-              editActionSecrets('routingKey', '');
+          errors={errors}
+          isShowingErrors={hasErrors === true && action.secrets.routingKey !== undefined}
+          label={i18n.translate(
+            'xpack.triggersActionsUI.sections.actionAdd.pagerDutyAction.routingKeyTextFieldLabel',
+            {
+              defaultMessage: 'RoutingKey',
             }
-          }}
-        />
-      </ErrableFormRow>
+          )}
+        >
+          <EuiFieldText
+            fullWidth
+            name="routingKey"
+            value={action.secrets.routingKey || ''}
+            data-test-subj="pagerdutyRoutingKeyInput"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              editActionSecrets('routingKey', e.target.value);
+            }}
+            onBlur={() => {
+              if (!action.secrets.routingKey) {
+                editActionSecrets('routingKey', '');
+              }
+            }}
+          />
+        </ErrableFormRow>
+      ) : null}
     </Fragment>
   );
 };

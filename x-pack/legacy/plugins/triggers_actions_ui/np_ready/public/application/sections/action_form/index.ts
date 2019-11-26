@@ -5,3 +5,4 @@
  */
 
 export { ActionAddFlyout } from './action_add_flyout';
+export { ActionEditFlyout } from './action_edit_flyout';

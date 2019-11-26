@@ -25,7 +25,7 @@ interface Props {
 
 export const ActionTypeMenu = ({ setActionType }: Props) => {
   const { actionTypeRegistry } = useAppDependencies();
-  const { actionTypesIndex, setFlyoutVisibility } = useContext(ActionsContext);
+  const { actionTypesIndex, setAddFlyoutVisibility } = useContext(ActionsContext);
   if (!actionTypesIndex) {
     return null;
   }
@@ -63,7 +63,7 @@ export const ActionTypeMenu = ({ setActionType }: Props) => {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={() => setFlyoutVisibility(false)}>
+            <EuiButtonEmpty onClick={() => setAddFlyoutVisibility(false)}>
               {i18n.translate('xpack.triggersActionsUI.sections.actionAdd.cancelButtonLabel', {
                 defaultMessage: 'Cancel',
               })}
