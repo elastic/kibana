@@ -36,10 +36,10 @@ class Plugin {
 3. Creating and registering a Usage Collector. Ideally collectors would be defined in a separate director `server/collectors/register.ts`.
 
 ```ts
+// server/collectors/register.ts
 import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 
-// server/collectors/register.ts
 export function registerMyPluginUsageCollector(usageCollection?: UsageCollection): void {
   // usageCollection is an optional dependency, so make sure to return if it is not registered.
   if (!usageCollection) {
