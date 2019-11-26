@@ -41,7 +41,7 @@ import {
   trackUiEvent,
 } from '../lens_ui_telemetry';
 import { LocalApplicationService } from '../../../../../../src/legacy/core_plugins/kibana/public/local_application_service';
-import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../../index';
+import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../../common';
 
 export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
