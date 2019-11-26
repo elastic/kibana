@@ -29,7 +29,6 @@ export const createRules = async ({
   outputIndex,
   name,
   severity,
-  size,
   tags,
   to,
   type,

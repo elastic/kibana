@@ -5,6 +5,7 @@
  */
 
 import Joi from 'joi';
+import { DEFAULT_MAX_SIGNALS } from '../../../../common/constants';
 
 /* eslint-disable @typescript-eslint/camelcase */
 const description = Joi.string();
@@ -103,7 +104,7 @@ export const createRulesSchema = Joi.object({
   }),
   meta,
   risk_score: risk_score.required(),
-  max_signals: max_signals.default(100),
+  max_signals: max_signals.default(DEFAULT_MAX_SIGNALS),
   name: name.required(),
   severity: severity.required(),
   tags: tags.default([]),
