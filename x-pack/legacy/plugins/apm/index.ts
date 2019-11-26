@@ -11,10 +11,17 @@ import { APMPluginContract } from '../../../plugins/apm/server';
 import { LegacyPluginInitializer } from '../../../../src/legacy/types';
 import mappings from './mappings.json';
 import { makeApmUsageCollector } from './server/lib/apm_telemetry';
+import { initializeServiceMaps } from './server/lib/service_map/initialize_service_maps';
 
 export const apm: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'apm_oss'],
+    require: [
+      'kibana',
+      'elasticsearch',
+      'xpack_main',
+      'apm_oss',
+      'task_manager'
+    ],
     id: 'apm',
     configPrefix: 'xpack.apm',
     publicDir: resolve(__dirname, 'public'),
@@ -71,12 +78,18 @@ export const apm: LegacyPluginInitializer = kibana => {
         autocreateApmIndexPattern: Joi.boolean().default(true),
 
         // service map
-        serviceMapEnabled: Joi.boolean().default(false)
+
+        serviceMapEnabled: Joi.boolean().default(false),
+        serviceMapIndexPattern: Joi.string().default('apm-*'),
+        serviceMapDestinationIndex: Joi.string(),
+        serviceMapDestinationPipeline: Joi.string()
       }).default();
     },
 
     // TODO: get proper types
     init(server: Server) {
+      const config = server.config();
+
       server.plugins.xpack_main.registerFeature({
         id: 'apm',
         name: i18n.translate('xpack.apm.featureRegistry.apmFeatureName', {
@@ -113,6 +126,12 @@ export const apm: LegacyPluginInitializer = kibana => {
         .apm as APMPluginContract;
 
       apmPlugin.registerLegacyAPI({ server });
+
+      if (config.get('xpack.apm.serviceMapEnabled')) {
+        initializeServiceMaps(server).catch(error => {
+          throw error;
+        });
+      }
     }
   });
 };

@@ -58,7 +58,7 @@ import {
   uiFiltersEnvironmentsRoute
 } from './ui_filters';
 import { createApi } from './create_api';
-import { serviceMapRoute } from './services';
+import { serviceMapAllRoute, serviceMapRoute } from './services';
 
 const createApmApi = () => {
   const api = createApi()
@@ -76,6 +76,7 @@ const createApmApi = () => {
     .add(serviceTransactionTypesRoute)
     .add(servicesRoute)
     .add(serviceNodeMetadataRoute)
+    .add(serviceMapRoute)
     .add(serviceAnnotationsRoute)
 
     // Agent configuration
@@ -118,7 +119,6 @@ const createApmApi = () => {
     .add(transactionsLocalFiltersRoute)
     .add(serviceNodesLocalFiltersRoute)
     .add(uiFiltersEnvironmentsRoute)
-    .add(serviceMapRoute)
 
     // Transaction
     .add(transactionByTraceIdRoute);

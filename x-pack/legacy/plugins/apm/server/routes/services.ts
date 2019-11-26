@@ -18,7 +18,7 @@ import { getServiceTransactionTypes } from '../lib/services/get_service_transact
 import { getServiceNodeMetadata } from '../lib/services/get_service_node_metadata';
 import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
-import { getServiceMap } from '../lib/services/map';
+import { getServiceMap } from '../lib/service_map/get_service_map';
 import { getServiceAnnotations } from '../lib/services/annotations';
 
 export const servicesRoute = createRoute(() => ({
@@ -87,16 +87,49 @@ export const serviceNodeMetadataRoute = createRoute(() => ({
   }
 }));
 
-export const serviceMapRoute = createRoute(() => ({
-  path: '/api/apm/service-map',
+export const serviceMapAllRoute = createRoute(() => ({
+  path: '/api/apm/service-map/all',
   params: {
-    query: rangeRt
+    query: t.intersection([
+      t.partial({ environment: t.string }),
+      uiFiltersRt,
+      rangeRt
+    ])
   },
-  handler: async ({ context }) => {
-    if (context.config['xpack.apm.serviceMapEnabled']) {
-      return getServiceMap();
+  handler: async ({ context, request }) => {
+    if (!context.config['xpack.apm.serviceMapEnabled']) {
+      return new Boom('Not found', { statusCode: 404 });
     }
-    return new Boom('Not found', { statusCode: 404 });
+    const setup = await setupRequest(context, request);
+    const {
+      query: { environment }
+    } = context.params;
+    return getServiceMap({ setup, environment });
+  }
+}));
+
+export const serviceMapRoute = createRoute(() => ({
+  path: '/api/apm/service-map/{serviceName}',
+  params: {
+    path: t.type({
+      serviceName: t.string
+    }),
+    query: t.intersection([
+      t.partial({ environment: t.string }),
+      uiFiltersRt,
+      rangeRt
+    ])
+  },
+  handler: async ({ context, request }) => {
+    if (!context.config['xpack.apm.serviceMapEnabled']) {
+      return new Boom('Not found', { statusCode: 404 });
+    }
+    const setup = await setupRequest(context, request);
+    const {
+      path: { serviceName },
+      query: { environment }
+    } = context.params;
+    return getServiceMap({ setup, serviceName, environment });
   }
 }));
 

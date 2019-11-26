@@ -5,7 +5,7 @@
  */
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { useLicense } from '../../../hooks/useLicense';
 import { useUrlParams } from '../../../hooks/useUrlParams';
@@ -39,19 +39,51 @@ ${theme.euiColorLightShade}`,
 
 export function ServiceMap({ serviceName }: ServiceMapProps) {
   const {
-    urlParams: { start, end }
+    urlParams: { start, end, environment },
+    uiFilters
   } = useUrlParams();
+
+  const uiFiltersOmitEnv = useMemo(
+    () => ({
+      ...uiFilters,
+      environment: undefined
+    }),
+    [uiFilters]
+  );
 
   const { data } = useFetcher(
     callApmApi => {
+      if (serviceName && start && end) {
+        return callApmApi({
+          pathname: '/api/apm/service-map/{serviceName}',
+          params: {
+            path: {
+              serviceName
+            },
+            query: {
+              start,
+              end,
+              environment,
+              uiFilters: JSON.stringify(uiFiltersOmitEnv)
+            }
+          }
+        });
+      }
       if (start && end) {
         return callApmApi({
-          pathname: '/api/apm/service-map',
-          params: { query: { start, end } }
+          pathname: '/api/apm/service-map/all',
+          params: {
+            query: {
+              start,
+              end,
+              environment,
+              uiFilters: JSON.stringify(uiFiltersOmitEnv)
+            }
+          }
         });
       }
     },
-    [start, end]
+    [start, end, uiFiltersOmitEnv, environment, serviceName]
   );
 
   const elements = Array.isArray(data) ? data : [];
