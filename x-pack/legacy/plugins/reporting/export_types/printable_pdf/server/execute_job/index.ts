@@ -41,13 +41,14 @@ export const executeJobFactory: ExecuteJobFactory<
       mergeMap(getFullUrls),
       mergeMap(
         ({ job, conditionalHeaders, logo, urls }): Rx.Observable<Buffer> => {
+          const { browserTimezone, layout } = job as JobDocPayloadPDF;
           return generatePdfObservable(
             jobLogger,
             job.title,
             urls,
-            job.browserTimezone,
+            browserTimezone,
             conditionalHeaders,
-            job.layout,
+            layout,
             logo
           );
         }

@@ -6,18 +6,22 @@
 
 import { i18n } from '@kbn/i18n';
 import { cryptoFactory } from '../../../server/lib/crypto';
-import { CryptoFactory, JobDocPayload, ServerFacade, Logger } from '../../../types';
+import { CryptoFactory, ServerFacade, Logger } from '../../../types';
 
-export const decryptJobHeaders = async <JobParamsType>({
+interface HasHeaders {
+  headers?: Record<string, string>;
+}
+
+export const decryptJobHeaders = async <JobParamsType, JobDocPayloadType extends HasHeaders>({
   job,
   server,
   logger,
 }: {
-  job: JobDocPayload<JobParamsType>;
+  job: JobDocPayloadType;
   server: ServerFacade;
   logger: Logger;
 }): Promise<{
-  job: JobDocPayload<JobParamsType>;
+  job: JobDocPayloadType;
   server: ServerFacade;
   decryptedHeaders: Record<string, string>;
 }> => {

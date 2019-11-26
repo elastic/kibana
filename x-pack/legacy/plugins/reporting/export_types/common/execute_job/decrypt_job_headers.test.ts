@@ -17,6 +17,10 @@ const createMockLogger = () =>
     error: jest.fn(),
   } as unknown) as Logger);
 
+interface PayloadType {
+  headers?: Record<string, string>;
+}
+
 describe('headers', () => {
   let mockServer: any;
   const encryptHeaders = async (headers: Record<string, string>) => {
@@ -39,7 +43,7 @@ describe('headers', () => {
             isImmediate: false,
             savedObjectType: 'search',
           },
-        },
+        } as PayloadType,
         server: mockServer,
         logger: createMockLogger(),
       })
