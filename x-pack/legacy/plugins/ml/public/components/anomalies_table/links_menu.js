@@ -33,7 +33,7 @@ import { ml } from '../../services/ml_api_service';
 import { mlJobService } from '../../services/job_service';
 import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
 import { formatHumanReadableDateTimeSeconds } from '../../util/date_utils';
-import { getIndexPatterns } from '../../util/index_utils';
+import { getIndexPatternIdFromName } from '../../util/index_utils';
 import { replaceStringTokens } from '../../util/string_utils';
 
 
@@ -214,7 +214,6 @@ export const LinksMenu = injectI18n(class LinksMenu extends Component {
     const { intl } = this.props;
     const categoryId = this.props.anomaly.entityValue;
     const record = this.props.anomaly.source;
-    const indexPatterns = getIndexPatterns();
 
     const job = mlJobService.getJob(this.props.anomaly.jobId);
     if (job === undefined) {
@@ -260,13 +259,7 @@ export const LinksMenu = injectI18n(class LinksMenu extends Component {
       // index configured in the datafeed. If a Kibana index pattern has not been created
       // for this index, then the user will see a warning message on the Discover tab advising
       // them that no matching index pattern has been configured.
-      let indexPatternId = index;
-      for (let j = 0; j < indexPatterns.length; j++) {
-        if (indexPatterns[j].get('title') === index) {
-          indexPatternId = indexPatterns[j].id;
-          break;
-        }
-      }
+      const indexPatternId = getIndexPatternIdFromName(index) || index;
 
       // Get the definition of the category and use the terms or regex to view the
       // matching events in the Kibana Discover tab depending on whether the

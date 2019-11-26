@@ -17,6 +17,5 @@ export const kibanaContextValueMock = {
   currentIndexPattern: indexPatternMock,
   currentSavedSearch: savedSearchMock,
   indexPatterns: indexPatternsMock,
-  kbnBaseUrl: 'url',
   kibanaConfig: kibanaConfigMock,
 };

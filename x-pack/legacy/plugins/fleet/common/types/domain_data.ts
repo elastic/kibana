@@ -32,7 +32,11 @@ export interface ConfigurationBlock
   id: string;
 }
 
-export type Agent = t.TypeOf<typeof RuntimeAgent>;
+export type AgentStatus = 'offline' | 'error' | 'online' | 'inactive' | 'warning';
+
+export type Agent = t.TypeOf<typeof RuntimeAgent> & {
+  status: AgentStatus;
+};
 export type AgentAction = t.TypeOf<typeof RuntimeAgentAction>;
 export type AgentEvent = t.TypeOf<typeof RuntimeAgentEvent>;
 

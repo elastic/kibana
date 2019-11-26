@@ -6,9 +6,9 @@
 
 import uiRoutes from 'ui/routes';
 import { getMlNodeCount } from '../ml_nodes_check/check_ml_nodes';
-// @ts-ignore no declaration module
 import { checkFullLicense } from '../license/check_license';
 import { checkGetJobsPrivilege } from '../privilege/check_privilege';
+import { loadMlServerInfo } from '../services/ml_server_info';
 import { getOverviewBreadcrumbs } from './breadcrumbs';
 import './directive';
 
@@ -21,5 +21,6 @@ uiRoutes.when('/overview/?', {
     CheckLicense: checkFullLicense,
     privileges: checkGetJobsPrivilege,
     mlNodeCount: getMlNodeCount,
+    loadMlServerInfo,
   },
 });

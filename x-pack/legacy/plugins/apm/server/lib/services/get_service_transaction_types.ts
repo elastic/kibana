@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { idx } from '@kbn/elastic-idx';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
@@ -40,7 +39,7 @@ export async function getServiceTransactionTypes(
   };
 
   const { aggregations } = await client.search(params);
-  const buckets = idx(aggregations, _ => _.types.buckets) || [];
-  const transactionTypes = buckets.map(bucket => bucket.key as string);
+  const transactionTypes =
+    aggregations?.types.buckets.map(bucket => bucket.key as string) || [];
   return { transactionTypes };
 }

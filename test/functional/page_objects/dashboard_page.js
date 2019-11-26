@@ -305,7 +305,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     /**
      * Save the current dashboard with the specified name and options and
-     * verify that the save was successful
+     * verify that the save was successful, close the toast and return the
+     * toast message
      *
      * @param dashName {String}
      * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean, needsConfirm: false,  waitDialogIsClosed: boolean }}
@@ -319,8 +320,11 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
       // Confirm that the Dashboard has actually been saved
       await testSubjects.existOrFail('saveDashboardSuccess');
+      const message =  await PageObjects.common.closeToast();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await this.waitForSaveModalToClose();
+
+      return message;
     }
 
     async waitForSaveModalToClose() {

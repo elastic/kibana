@@ -9,7 +9,7 @@ import ReactMarkdown from 'react-markdown';
 import { getFileByPath } from '../../data';
 import { markdownRenderers } from './markdown_renderers';
 import { useLinks } from '../../hooks';
-import { ContentCollapse } from '../../components/content_collapse';
+import { ContentCollapse } from './content_collapse';
 
 export function Readme({
   readmePath,

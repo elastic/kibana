@@ -58,7 +58,7 @@ export class ToastsService {
   }
 
   public start({ i18n, overlays, targetDomElement }: StartDeps) {
-    this.api!.registerOverlays(overlays);
+    this.api!.start({ overlays, i18n });
     this.targetDomElement = targetDomElement;
 
     render(

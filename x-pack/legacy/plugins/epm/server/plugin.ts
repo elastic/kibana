@@ -7,7 +7,7 @@
 import { Observable } from 'rxjs';
 import { CoreSetup, CoreStart, IClusterClient, PluginInitializerContext } from 'src/core/server';
 import { PLUGIN } from '../common/constants';
-import { Server } from '../common/types';
+import { Server } from '../server/types';
 import { EPMConfigSchema, epmConfigStore } from './config';
 import { feature } from './feature';
 import { fetchList } from './registry';

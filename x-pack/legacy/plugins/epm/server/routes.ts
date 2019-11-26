@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { PLUGIN } from '../common/constants';
-import { ServerRoute } from '../common/types';
 import * as CommonRoutes from '../common/routes';
+import { ServerRoute } from './types';
 import * as Packages from './packages/handlers';
 
 // Manager public API paths

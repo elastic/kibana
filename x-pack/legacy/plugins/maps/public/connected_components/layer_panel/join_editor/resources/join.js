@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { JoinExpression } from './join_expression';
 import { MetricsExpression } from './metrics_expression';
 import { WhereExpression } from './where_expression';
+import { GlobalFilterCheckbox } from '../../../../components/global_filter_checkbox';
 
 import {
   indexPatternService,
@@ -168,6 +169,16 @@ export class Join extends Component {
     });
   }
 
+  _onApplyGlobalQueryChange = applyGlobalQuery => {
+    this.props.onChange({
+      leftField: this.props.join.leftField,
+      right: {
+        ...this.props.join.right,
+        applyGlobalQuery,
+      },
+    });
+  }
+
   render() {
     const {
       join,
@@ -184,6 +195,7 @@ export class Join extends Component {
     const isJoinConfigComplete = join.leftField && right.indexPatternId && right.term;
 
     let metricsExpression;
+    let globalFilterCheckbox;
     if (isJoinConfigComplete) {
       metricsExpression = (
         <EuiFlexItem grow={false}>
@@ -193,6 +205,15 @@ export class Join extends Component {
             onChange={this._onMetricsChange}
           />
         </EuiFlexItem>
+      );
+      globalFilterCheckbox = (
+        <GlobalFilterCheckbox
+          applyGlobalQuery={right.applyGlobalQuery}
+          setApplyGlobalQuery={this._onApplyGlobalQueryChange}
+          customLabel={i18n.translate('xpack.maps.layerPanel.join.applyGlobalQueryCheckboxLabel', {
+            defaultMessage: `Apply global filter to join`,
+          })}
+        />
       );
     }
 
@@ -233,6 +254,8 @@ export class Join extends Component {
           {metricsExpression}
 
           {whereExpression}
+
+          {globalFilterCheckbox}
 
           <EuiButtonIcon
             className="mapJoinItem__delete"

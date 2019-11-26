@@ -4,18 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import 'ui/autoload/all';
+// Used to run esaggs queries
+import 'uiExports/fieldFormats';
+import 'uiExports/search';
+import 'uiExports/visRequestHandlers';
+import 'uiExports/visResponseHandlers';
+// Used for kibana_context function
+import 'uiExports/savedObjectTypes';
+
 import React from 'react';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { HashRouter, Switch, Route, RouteComponentProps } from 'react-router-dom';
+import { render, unmountComponentAtNode } from 'react-dom';
 import chrome from 'ui/chrome';
 import { CoreSetup, CoreStart } from 'src/core/public';
-import { npSetup, npStart } from 'ui/new_platform';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { DataStart } from '../../../../../../src/legacy/core_plugins/data/public';
-import { start as dataShimStart } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { editorFrameSetup, editorFrameStart, editorFrameStop } from '../editor_frame_plugin';
 import { indexPatternDatasourceSetup, indexPatternDatasourceStop } from '../indexpattern_plugin';
+import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { SavedObjectIndexStore } from '../persistence';
 import { xyVisualizationSetup, xyVisualizationStop } from '../xy_visualization_plugin';
 import { metricVisualizationSetup, metricVisualizationStop } from '../metric_visualization_plugin';
@@ -31,10 +40,15 @@ import {
   stopReportManager,
   trackUiEvent,
 } from '../lens_ui_telemetry';
+import { LocalApplicationService } from '../../../../../../src/legacy/core_plugins/kibana/public/local_application_service';
+import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../../index';
 
 export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
   dataShim: DataStart;
+  __LEGACY: {
+    localApplicationService: LocalApplicationService;
+  };
 }
 export class AppPlugin {
   private instance: EditorFrameInstance | null = null;
@@ -58,10 +72,15 @@ export class AppPlugin {
     editorFrameSetupInterface.registerDatasource('indexpattern', indexPattern);
   }
 
-  start(core: CoreStart, { data, dataShim }: LensPluginStartDependencies) {
+  start(
+    core: CoreStart,
+    { data, dataShim, __LEGACY: { localApplicationService } }: LensPluginStartDependencies
+  ) {
     if (this.store === null) {
       throw new Error('Start lifecycle called before setup lifecycle');
     }
+
+    addHelpMenuToAppChrome(core.chrome);
 
     const store = this.store;
 
@@ -89,9 +108,9 @@ export class AppPlugin {
           docStorage={store}
           redirectTo={id => {
             if (!id) {
-              routeProps.history.push('/');
+              routeProps.history.push('/lens');
             } else {
-              routeProps.history.push(`/edit/${id}`);
+              routeProps.history.push(`/lens/edit/${id}`);
             }
           }}
         />
@@ -103,17 +122,27 @@ export class AppPlugin {
       return <FormattedMessage id="xpack.lens.app404" defaultMessage="404 Not Found" />;
     }
 
-    return (
-      <I18nProvider>
-        <HashRouter>
-          <Switch>
-            <Route exact path="/edit/:id" render={renderEditor} />
-            <Route exact path="/" render={renderEditor} />
-            <Route component={NotFound} />
-          </Switch>
-        </HashRouter>
-      </I18nProvider>
-    );
+    localApplicationService.register({
+      id: 'lens',
+      title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
+      mount: async (context, params) => {
+        render(
+          <I18nProvider>
+            <HashRouter>
+              <Switch>
+                <Route exact path="/lens/edit/:id" render={renderEditor} />
+                <Route exact path="/lens" render={renderEditor} />
+                <Route path="/lens" component={NotFound} />
+              </Switch>
+            </HashRouter>
+          </I18nProvider>,
+          params.element
+        );
+        return () => {
+          unmountComponentAtNode(params.element);
+        };
+      },
+    });
   }
 
   stop() {
@@ -131,10 +160,3 @@ export class AppPlugin {
     editorFrameStop();
   }
 }
-
-const app = new AppPlugin();
-
-export const appSetup = () => app.setup(npSetup.core, {});
-export const appStart = () =>
-  app.start(npStart.core, { dataShim: dataShimStart, data: npStart.plugins.data });
-export const appStop = () => app.stop();

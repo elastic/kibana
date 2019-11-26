@@ -118,7 +118,7 @@ async function main() {
 
       if (query != null && query.trim() !== '') {
         const outputMessage = {
-          id: fileToWrite,
+          rule_id: fileToWrite,
           description: description || title,
           immutable: IMMUTABLE,
           index: INDEX,

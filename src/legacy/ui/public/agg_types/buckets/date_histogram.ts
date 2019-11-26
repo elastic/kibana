@@ -34,7 +34,7 @@ import { writeParams } from '../agg_params';
 import { AggConfigs } from '../agg_configs';
 import { isMetricAggType } from '../metrics/metric_agg_type';
 
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
 // @ts-ignore
 import { TimeBuckets } from '../../time_buckets';

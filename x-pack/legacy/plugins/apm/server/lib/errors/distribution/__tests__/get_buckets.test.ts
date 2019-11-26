@@ -51,7 +51,8 @@ describe('timeseriesFetcher', () => {
           'apm_oss.transactionIndices': 'apm-*',
           'apm_oss.metricsIndices': 'apm-*',
           'apm_oss.apmAgentConfigurationIndex': '.apm-agent-configuration'
-        }
+        },
+        dynamicIndexPattern: null as any
       }
     });
   });

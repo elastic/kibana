@@ -124,7 +124,7 @@ export type ChromeHelpExtension = (element: HTMLDivElement) => () => void;
 // @public (undocumented)
 export interface ChromeNavControl {
     // (undocumented)
-    mount(targetDomElement: HTMLElement): () => void;
+    mount: MountPoint;
     // (undocumented)
     order?: number;
 }
@@ -620,7 +620,7 @@ export interface LegacyNavLink {
 }
 
 // @public
-export type MountPoint = (element: HTMLElement) => UnmountCallback;
+export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => UnmountCallback;
 
 // @public (undocumented)
 export interface NotificationsSetup {
@@ -657,17 +657,14 @@ export interface OverlayRef {
 export interface OverlayStart {
     // (undocumented)
     banners: OverlayBannersStart;
+    // Warning: (ae-forgotten-export) The symbol "OverlayFlyoutStart" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
-    openFlyout: (flyoutChildren: React.ReactNode, flyoutProps?: {
-        closeButtonAriaLabel?: string;
-        'data-test-subj'?: string;
-    }) => OverlayRef;
+    openFlyout: OverlayFlyoutStart['open'];
+    // Warning: (ae-forgotten-export) The symbol "OverlayModalStart" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
-    openModal: (modalChildren: React.ReactNode, modalProps?: {
-        className?: string;
-        closeButtonAriaLabel?: string;
-        'data-test-subj'?: string;
-    }) => OverlayRef;
+    openModal: OverlayModalStart['open'];
 }
 
 // @public (undocumented)
@@ -941,9 +938,12 @@ export class ToastsApi implements IToasts {
     addSuccess(toastOrTitle: ToastInput): Toast;
     addWarning(toastOrTitle: ToastInput): Toast;
     get$(): Rx.Observable<Toast[]>;
-    // @internal (undocumented)
-    registerOverlays(overlays: OverlayStart): void;
     remove(toastOrId: Toast | string): void;
+    // @internal (undocumented)
+    start({ overlays, i18n }: {
+        overlays: OverlayStart;
+        i18n: I18nStart;
+    }): void;
     }
 
 // @public (undocumented)

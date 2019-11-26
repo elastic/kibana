@@ -29,6 +29,7 @@ import {
   createDELETEEnrollmentApiKeyRoute,
   createGETEnrollmentApiKeyRoute,
 } from './enrollment_api_keys';
+import { createGETAgentsStatusRoute } from './agents/status';
 
 export function initRestApi(server: Server, libs: FleetServerLib) {
   const frameworkAdapter = new HapiFrameworkAdapter(server);
@@ -50,6 +51,8 @@ function createAgentsRoutes(adapter: HapiFrameworkAdapter, libs: FleetServerLib)
   adapter.registerRoute(createCheckinAgentsRoute(libs));
   adapter.registerRoute(createAgentsAddActionRoute(libs));
   adapter.registerRoute(createGETAgentEventsRoute(libs));
+
+  adapter.registerRoute(createGETAgentsStatusRoute(libs));
 }
 
 function createEnrollmentApiKeysRoutes(adapter: HapiFrameworkAdapter, libs: FleetServerLib) {

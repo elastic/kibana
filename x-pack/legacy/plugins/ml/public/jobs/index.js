@@ -7,4 +7,4 @@
 
 
 import './jobs_list';
-import './new_job_new';
+import './new_job';

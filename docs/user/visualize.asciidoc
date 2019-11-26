@@ -24,9 +24,10 @@ To create a visualization:
 . Click on *Visualize* in the side navigation.
 . Click the *Create new visualization* button or the **+** button.
 . Choose the visualization type:
-+
+
 * *Basic charts*
 [horizontal]
+<<lens,Lens>>:: Quickly build several types of basic visualizations by simply dragging and dropping the data fields you want to display.
 <<xy-chart,Line&comma; Area and Bar charts>>:: Compare different series in X/Y charts.
 <<heatmap-chart,Heat maps>>:: Shade cells within a matrix.
 <<pie-chart,Pie chart>>:: Display each source's contribution to a total.
@@ -141,6 +142,8 @@ Aggregation Execution Order, and You].
 include::{kib-repo-dir}/visualize/saving.asciidoc[]
 
 include::{kib-repo-dir}/visualize/visualize_rollup_data.asciidoc[]
+
+include::{kib-repo-dir}/visualize/lens.asciidoc[]
 
 include::{kib-repo-dir}/visualize/xychart.asciidoc[]
 

@@ -1,5 +1,5 @@
 {
-  "id": "rule-3",
+  "rule_id": "rule-3",
   "description": "Detecting root and admin users as an empty set",
   "index": ["auditbeat-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"],
   "interval": "5m",

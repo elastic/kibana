@@ -18,7 +18,13 @@ jest.mock('ui/index_patterns', () => ({
 
 type SourceIndex = DataFrameAnalyticsConfig['source']['index'];
 
-const getMockState = (index: SourceIndex) =>
+const getMockState = ({
+  index,
+  modelMemoryLimit,
+}: {
+  index: SourceIndex;
+  modelMemoryLimit?: string;
+}) =>
   merge(getInitialState(), {
     form: {
       jobIdEmpty: false,
@@ -30,6 +36,7 @@ const getMockState = (index: SourceIndex) =>
       source: { index },
       dest: { index: 'the-destination-index' },
       analysis: {},
+      model_memory_limit: modelMemoryLimit,
     },
   });
 
@@ -89,27 +96,50 @@ describe('useCreateAnalyticsForm', () => {
 
   test('validateAdvancedEditor(): check index pattern variations', () => {
     // valid single index pattern
-    expect(validateAdvancedEditor(getMockState('the-source-index')).isValid).toBe(true);
+    expect(validateAdvancedEditor(getMockState({ index: 'the-source-index' })).isValid).toBe(true);
     // valid array with one ES index pattern
-    expect(validateAdvancedEditor(getMockState(['the-source-index'])).isValid).toBe(true);
+    expect(validateAdvancedEditor(getMockState({ index: ['the-source-index'] })).isValid).toBe(
+      true
+    );
     // valid array with two ES index patterns
     expect(
-      validateAdvancedEditor(getMockState(['the-source-index-1', 'the-source-index-2'])).isValid
+      validateAdvancedEditor(getMockState({ index: ['the-source-index-1', 'the-source-index-2'] }))
+        .isValid
     ).toBe(true);
     // invalid comma-separated index pattern, this is only allowed in the simple form
     // but not the advanced editor.
     expect(
-      validateAdvancedEditor(getMockState('the-source-index-1,the-source-index-2')).isValid
+      validateAdvancedEditor(getMockState({ index: 'the-source-index-1,the-source-index-2' }))
+        .isValid
     ).toBe(false);
     expect(
       validateAdvancedEditor(
-        getMockState(['the-source-index-1,the-source-index-2', 'the-source-index-3'])
+        getMockState({ index: ['the-source-index-1,the-source-index-2', 'the-source-index-3'] })
       ).isValid
     ).toBe(false);
     // invalid formats ("fake" TS casting to get valid TS and be able to run the tests)
-    expect(validateAdvancedEditor(getMockState({} as SourceIndex)).isValid).toBe(false);
+    expect(validateAdvancedEditor(getMockState({ index: {} as SourceIndex })).isValid).toBe(false);
     expect(
-      validateAdvancedEditor(getMockState((undefined as unknown) as SourceIndex)).isValid
+      validateAdvancedEditor(getMockState({ index: (undefined as unknown) as SourceIndex })).isValid
+    ).toBe(false);
+  });
+
+  test('validateAdvancedEditor(): check model memory limit validation', () => {
+    // valid model_memory_limit units
+    expect(
+      validateAdvancedEditor(getMockState({ index: 'the-source-index', modelMemoryLimit: '100mb' }))
+        .isValid
+    ).toBe(true);
+    // invalid model_memory_limit units
+    expect(
+      validateAdvancedEditor(
+        getMockState({ index: 'the-source-index', modelMemoryLimit: '100bob' })
+      ).isValid
+    ).toBe(false);
+    // invalid model_memory_limit if empty
+    expect(
+      validateAdvancedEditor(getMockState({ index: 'the-source-index', modelMemoryLimit: '' }))
+        .isValid
     ).toBe(false);
   });
 });

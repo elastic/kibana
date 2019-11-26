@@ -23,6 +23,9 @@
               }
             }
           },
+          "id": {
+            "type": "keyword"
+          },
           "original_time": {
             "type": "date"
           },

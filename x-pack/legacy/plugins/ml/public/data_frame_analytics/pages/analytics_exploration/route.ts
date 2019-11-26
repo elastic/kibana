@@ -6,14 +6,12 @@
 
 import uiRoutes from 'ui/routes';
 
-// @ts-ignore
 import { checkFullLicense } from '../../../license/check_license';
 import { checkGetJobsPrivilege } from '../../../privilege/check_privilege';
 import {
   loadCurrentIndexPattern,
   loadCurrentSavedSearch,
   loadIndexPatterns,
-  // @ts-ignore
 } from '../../../util/index_utils';
 import { getDataFrameAnalyticsBreadcrumbs } from '../../breadcrumbs';
 

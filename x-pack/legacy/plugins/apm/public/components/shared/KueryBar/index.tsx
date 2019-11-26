@@ -19,7 +19,7 @@ import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
 import { AutocompleteSuggestion } from '../../../../../../../../src/plugins/data/public';
-import { useKueryBarIndexPattern } from '../../../hooks/useKueryBarIndexPattern';
+import { useDynamicIndexPattern } from '../../../hooks/useDynamicIndexPattern';
 
 const Container = styled.div`
   margin-bottom: 10px;
@@ -89,7 +89,7 @@ export function KueryBar() {
 
   const example = examples[processorEvent || 'defaults'];
 
-  const { indexPattern } = useKueryBarIndexPattern(processorEvent);
+  const { indexPattern } = useDynamicIndexPattern(processorEvent);
 
   async function onChange(inputValue: string, selectionStart: number) {
     if (indexPattern == null) {

@@ -17,8 +17,6 @@ type IndexPatternSavedObject = SimpleSavedObject<SavedObjectAttributes>;
 let indexPatternCache: IndexPatternSavedObject[] = [];
 let fullIndexPatterns: IndexPatterns | null = null;
 
-export let refreshIndexPatterns: (() => Promise<IndexPatternSavedObject[]>) | null = null;
-
 export function loadIndexPatterns() {
   fullIndexPatterns = data.indexPatterns.indexPatterns;
   const savedObjectsClient = chrome.getSavedObjectsClient();
@@ -30,20 +28,6 @@ export function loadIndexPatterns() {
     })
     .then(response => {
       indexPatternCache = response.savedObjects;
-      if (refreshIndexPatterns === null) {
-        refreshIndexPatterns = () => {
-          return new Promise((resolve, reject) => {
-            loadIndexPatterns()
-              .then(resp => {
-                resolve(resp);
-              })
-              .catch(error => {
-                reject(error);
-              });
-          });
-        };
-      }
-
       return indexPatternCache;
     });
 }
@@ -62,7 +46,7 @@ export function getIndexPatternIdFromName(name: string) {
       return indexPatternCache[j].id;
     }
   }
-  return name;
+  return null;
 }
 
 export function loadCurrentIndexPattern(indexPatterns: IndexPatterns, $route: Record<string, any>) {

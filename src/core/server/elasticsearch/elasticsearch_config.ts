@@ -19,6 +19,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { Duration } from 'moment';
+import { Logger } from '../logging';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 
@@ -39,7 +40,26 @@ export const config = {
       defaultValue: 'http://localhost:9200',
     }),
     preserveHost: schema.boolean({ defaultValue: true }),
-    username: schema.maybe(schema.string()),
+    username: schema.maybe(
+      schema.conditional(
+        schema.contextRef('dist'),
+        false,
+        schema.string({
+          validate: rawConfig => {
+            // FIXME_INGEST: Disabled because of https://github.com/elastic/kibana/pull/49037
+            // Temporary work around until we know how the stack wants to add the permissions we need.
+            // Either adding them to the kibana user or creating a new user.
+            // if (rawConfig === 'elastic') {
+            //   return (
+            //     'value of "elastic" is forbidden. This is a superuser account that can obfuscate ' +
+            //     'privilege-related issues. You should use the "kibana" user instead.'
+            //   );
+            // }
+          },
+        }),
+        schema.string()
+      )
+    ),
     password: schema.maybe(schema.string()),
     requestHeadersWhitelist: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
       defaultValue: ['authorization'],
@@ -166,7 +186,7 @@ export class ElasticsearchConfig {
    */
   public readonly customHeaders: ElasticsearchConfigType['customHeaders'];
 
-  constructor(rawConfig: ElasticsearchConfigType) {
+  constructor(rawConfig: ElasticsearchConfigType, log?: Logger) {
     this.ignoreVersionMismatch = rawConfig.ignoreVersionMismatch;
     this.apiVersion = rawConfig.apiVersion;
     this.logQueries = rawConfig.logQueries;
@@ -195,5 +215,14 @@ export class ElasticsearchConfig {
       ...rawConfig.ssl,
       certificateAuthorities,
     };
+
+    if (this.username === 'elastic' && log !== undefined) {
+      // logger is optional / not used during tests
+      // TODO: logger can be removed when issue #40255 is resolved to support deprecations in NP config service
+      log.warn(
+        `Setting the elasticsearch username to "elastic" is deprecated. You should use the "kibana" user instead.`,
+        { tags: ['deprecation'] }
+      );
+    }
   }
 }

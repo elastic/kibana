@@ -24,6 +24,13 @@ export class AbstractESSource extends AbstractVectorSource {
 
   static icon = 'logoElasticsearch';
 
+  constructor(descriptor, inspectorAdapters) {
+    super({
+      ...descriptor,
+      applyGlobalQuery: _.get(descriptor, 'applyGlobalQuery', true),
+    }, inspectorAdapters);
+  }
+
   isFieldAware() {
     return true;
   }
@@ -40,6 +47,13 @@ export class AbstractESSource extends AbstractVectorSource {
     return  [this._descriptor.indexPatternId];
   }
 
+  getQueryableIndexPatternIds() {
+    if (this.getApplyGlobalQuery()) {
+      return  [this._descriptor.indexPatternId];
+    }
+    return [];
+  }
+
   supportsElasticsearchFilters() {
     return true;
   }
@@ -54,7 +68,6 @@ export class AbstractESSource extends AbstractVectorSource {
     clonedDescriptor.id = uuid();
     return clonedDescriptor;
   }
-
 
   async _runEsQuery(requestName, searchSource, registerCancelCallback, requestDescription) {
     const abortController = new AbortController();

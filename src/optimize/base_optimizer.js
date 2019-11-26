@@ -543,7 +543,8 @@ export default class BaseOptimizer {
       `Optimizations failure.\n${details.split('\n').join('\n    ')}\n`,
       stats.toJson(defaults({
         warningsFilter: STATS_WARNINGS_FILTER,
-        ...Stats.presetToOptions('detailed')
+        ...Stats.presetToOptions('detailed'),
+        maxModules: 1000,
       }))
     );
   }

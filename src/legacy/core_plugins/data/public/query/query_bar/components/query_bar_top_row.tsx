@@ -53,6 +53,7 @@ interface Props {
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
+  dataTestSubj?: string;
   disableAutoFocus?: boolean;
   screenTitle?: string;
   indexPatterns?: Array<IndexPattern | string>;
@@ -189,6 +190,7 @@ function QueryBarTopRowUI(props: Props) {
           onChange={onQueryChange}
           onSubmit={onInputSubmit}
           persistedLog={persistedLog}
+          dataTestSubj={props.dataTestSubj}
         />
       </EuiFlexItem>
     );

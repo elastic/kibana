@@ -20,6 +20,7 @@ import { SavedQueryTimeFilter } from '../../../../../../../src/legacy/core_plugi
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
 
 export interface QueryBarComponentProps {
+  dataTestSubj?: string;
   dateRangeFrom?: string;
   dateRangeTo?: string;
   hideSavedQuery?: boolean;
@@ -50,6 +51,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     refreshInterval,
     savedQuery,
     onSavedQuery,
+    dataTestSubj,
   }) => {
     const [draftQuery, setDraftQuery] = useState(filterQuery);
 
@@ -139,6 +141,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
         showQueryInput={true}
         showSaveQuery={true}
         timeHistory={new TimeHistory(new Storage(localStorage))}
+        dataTestSubj={dataTestSubj}
         {...searchBarProps}
       />
     );

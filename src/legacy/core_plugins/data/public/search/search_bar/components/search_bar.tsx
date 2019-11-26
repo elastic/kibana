@@ -24,7 +24,6 @@ import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { get, isEqual } from 'lodash';
 
-import { TimeRange, Query, TimeHistoryContract } from 'src/plugins/data/public';
 import { IndexPattern, FilterBar } from '../../../../../data/public';
 import { QueryBarTopRow } from '../../../query';
 import { SavedQuery, SavedQueryAttributes } from '../index';
@@ -37,7 +36,12 @@ import {
   KibanaReactContextValue,
 } from '../../../../../../../plugins/kibana_react/public';
 import { IDataPluginServices } from '../../../types';
-import { esFilters } from '../../../../../../../plugins/data/public';
+import {
+  TimeRange,
+  Query,
+  esFilters,
+  TimeHistoryContract,
+} from '../../../../../../../plugins/data/public';
 
 interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
@@ -60,7 +64,7 @@ export interface SearchBarOwnProps {
   isLoading?: boolean;
   customSubmitButton?: React.ReactNode;
   screenTitle?: string;
-
+  dataTestSubj?: string;
   // Togglers
   showQueryBar?: boolean;
   showQueryInput?: boolean;
@@ -411,6 +415,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           customSubmitButton={
             this.props.customSubmitButton ? this.props.customSubmitButton : undefined
           }
+          dataTestSubj={this.props.dataTestSubj}
         />
       );
     }

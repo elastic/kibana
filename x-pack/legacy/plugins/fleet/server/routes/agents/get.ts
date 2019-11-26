@@ -9,6 +9,7 @@ import { FrameworkRequest } from '../../adapters/framework/adapter_types';
 import { ReturnTypeGet } from '../../../common/return_types';
 import { FleetServerLib } from '../../libs/types';
 import { Agent } from '../../../common/types/domain_data';
+import { AgentStatusHelper } from '../../libs/agent_status_helper';
 
 export const createGETAgentsRoute = (libs: FleetServerLib) => ({
   method: 'GET',
@@ -25,6 +26,6 @@ export const createGETAgentsRoute = (libs: FleetServerLib) => ({
       throw Boom.notFound('Agent not found');
     }
 
-    return { item: agent, success: true };
+    return { item: { ...agent, status: AgentStatusHelper.getAgentStatus(agent) }, success: true };
   },
 });

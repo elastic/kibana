@@ -9,6 +9,7 @@ import { FrameworkRequest } from '../../adapters/framework/adapter_types';
 import { ReturnTypeCreate } from '../../../common/return_types';
 import { FleetServerLib } from '../../libs/types';
 import { Agent } from '../../../common/types/domain_data';
+import { AgentStatusHelper } from '../../libs/agent_status_helper';
 
 export const createEnrollAgentsRoute = (libs: FleetServerLib) => ({
   method: 'POST',
@@ -54,7 +55,7 @@ export const createEnrollAgentsRoute = (libs: FleetServerLib) => ({
     return {
       action: 'created',
       success: true,
-      item: agent,
+      item: { ...agent, status: AgentStatusHelper.getAgentStatus(agent) },
     };
   },
 });

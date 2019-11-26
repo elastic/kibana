@@ -27,15 +27,9 @@ import { createTimelineResolvers } from './graphql/timeline';
 import { createUncommonProcessesResolvers } from './graphql/uncommon_processes';
 import { createWhoAmIResolvers } from './graphql/who_am_i';
 import { AppBackendLibs } from './lib/types';
-import { Logger } from './utils/logger';
 import { createTlsResolvers } from './graphql/tls';
 
-export interface Config {
-  mocking: boolean;
-  logger: Logger;
-}
-
-export const initServer = (libs: AppBackendLibs, config: Config) => {
+export const initServer = (libs: AppBackendLibs) => {
   const schema = makeExecutableSchema({
     resolvers: [
       createAuthenticationsResolvers(libs) as IResolvers,

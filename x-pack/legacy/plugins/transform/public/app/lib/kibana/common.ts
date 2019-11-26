@@ -4,15 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
-
 import { SavedObjectsClientContract, UiSettingsClientContract } from 'src/core/public';
-
 import {
   IndexPattern as IndexPatternType,
   IndexPatterns as IndexPatternsType,
 } from 'ui/index_patterns';
+import { esQuery } from '../../../../../../../../src/plugins/data/public';
 
 type IndexPatternId = string;
 type SavedSearchId = string;
@@ -106,8 +103,8 @@ export function createSearchItems(
 
     const filters = fs.length ? fs : [];
 
-    const esQueryConfigs = getEsQueryConfig(config);
-    combinedQuery = buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
+    const esQueryConfigs = esQuery.getEsQueryConfig(config);
+    combinedQuery = esQuery.buildEsQuery(indexPattern || null, [query], filters, esQueryConfigs);
   }
 
   return {

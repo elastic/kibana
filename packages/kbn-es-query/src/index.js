@@ -18,4 +18,3 @@
  */
 
 export * from './kuery';
-export * from './es_query';

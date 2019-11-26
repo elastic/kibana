@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import * as esQuery from './es_query';
 import * as esFilters from './filters';
+import * as utils from './utils';
 
-export { esFilters };
+export { esFilters, esQuery, utils };

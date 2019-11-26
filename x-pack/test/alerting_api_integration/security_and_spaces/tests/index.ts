@@ -18,11 +18,7 @@ export default function alertingApiIntegrationTests({
   const spacesService: SpacesService = getService('spaces');
   const esArchiver = getService('esArchiver');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/50079
-  // FLAKY: https://github.com/elastic/kibana/issues/50074
-  // FLAKY: https://github.com/elastic/kibana/issues/48709
-  // FLAKY: https://github.com/elastic/kibana/issues/50078
-  describe.skip('alerting api integration security and spaces enabled', function() {
+  describe('alerting api integration security and spaces enabled', function() {
     this.tags('ciGroup1');
 
     before(async () => {

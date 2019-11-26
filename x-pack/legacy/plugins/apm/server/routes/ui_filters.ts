@@ -80,26 +80,22 @@ function createLocalFiltersRoute<
         ? t.intersection([queryRt, localUiBaseQueryRt])
         : localUiBaseQueryRt
     },
-    handler: async (req, { query }: { query: t.TypeOf<BaseQueryType> }) => {
-      const setup = await setupRequest(req);
-
+    handler: async (request, { query }: { query: t.TypeOf<BaseQueryType> }) => {
+      const setup = await setupRequest(request);
       const { uiFilters, filterNames } = query;
-
       const parsedUiFilters = JSON.parse(uiFilters);
-
       const projection = getProjection({
         query,
         setup: {
           ...setup,
           uiFiltersES: await getUiFiltersES(
-            req.server,
+            setup.dynamicIndexPattern,
             omit(parsedUiFilters, filterNames)
           )
         }
       });
 
       return getLocalUIFilters({
-        server: req.server,
         projection,
         setup,
         uiFilters: parsedUiFilters,

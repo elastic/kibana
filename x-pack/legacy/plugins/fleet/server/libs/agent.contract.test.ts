@@ -12,6 +12,7 @@ import { FleetServerLib } from './types';
 import { SODatabaseAdapter } from '../adapters/saved_objects_database/default';
 import { MemorizeSODatabaseAdapter } from '../adapters/saved_objects_database/memorize_adapter';
 import { SavedObject } from 'kibana/server';
+import { AGENT_POLLING_THRESHOLD_MS } from '../../common/constants';
 
 jest.mock('./api_keys');
 jest.mock('./policy');
@@ -469,6 +470,75 @@ describe('Agent lib', () => {
           type: 'PAUSE',
         })
       ).rejects.toThrowError(/Agent not found/);
+    });
+  });
+
+  describe('getAgentsStatusForPolicy', () => {
+    it('should return all agents', async () => {
+      const { agents } = libs;
+      const policyId = 'policy:1';
+      await loadFixtures([
+        // Other policies
+        {
+          type: 'PERMANENT',
+          active: true,
+          policy_id: 'policy:2',
+        },
+        {
+          type: 'PERMANENT',
+          active: true,
+          policy_id: 'policy:3',
+        },
+        {
+          type: 'TEMPORARY',
+          active: true,
+          policy_id: 'policy:3',
+        },
+        // PERMANENT
+        // ERROR
+        {
+          type: 'PERMANENT',
+          active: true,
+          policy_id: policyId,
+          last_checkin: new Date(Date.now() - AGENT_POLLING_THRESHOLD_MS * 10).toISOString(),
+        },
+        // ACTIVE
+        {
+          type: 'PERMANENT',
+          active: true,
+          policy_id: policyId,
+          last_checkin: new Date().toISOString(),
+        },
+        {
+          type: 'PERMANENT',
+          active: true,
+          policy_id: policyId,
+          last_checkin: new Date().toISOString(),
+        },
+        // TEMPORARY
+        // OFFLINE
+        {
+          type: 'TEMPORARY',
+          active: true,
+          policy_id: policyId,
+          last_checkin: new Date(Date.now() - AGENT_POLLING_THRESHOLD_MS * 10).toISOString(),
+        },
+        // Active
+        {
+          type: 'TEMPORARY',
+          active: true,
+          policy_id: policyId,
+          last_checkin: new Date().toISOString(),
+        },
+      ]);
+
+      const res = await agents.getAgentsStatusForPolicy(getUser(), policyId);
+      expect(res).toMatchObject({
+        total: 5,
+        online: 3,
+        error: 1,
+        offline: 1,
+      });
     });
   });
 });

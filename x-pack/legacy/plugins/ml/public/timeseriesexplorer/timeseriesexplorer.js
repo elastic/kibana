@@ -32,7 +32,7 @@ import {
 
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
-import { ResizeChecker } from 'ui/resize_checker';
+import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
 
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../common/constants/search';
 import { parseInterval } from '../../common/util/parse_interval';
@@ -68,7 +68,6 @@ import { mlJobService } from '../services/job_service';
 import { mlResultsService } from '../services/results_service';
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 
-import { getIndexPatterns } from '../util/index_utils';
 import { getBoundsRoundedToInterval } from '../util/time_buckets';
 
 import { APP_STATE_ACTION, CHARTS_POINT_TARGET, TIME_FIELD_NAME } from './timeseriesexplorer_constants';
@@ -827,7 +826,7 @@ export class TimeSeriesExplorer extends React.Component {
       () => {
         this.updateControlsForDetector(() => {
           // Populate the map of jobs / detectors / field formatters for the selected IDs and refresh.
-          mlFieldFormatService.populateFormats([jobId], getIndexPatterns())
+          mlFieldFormatService.populateFormats([jobId])
             .catch((err) => { console.log('Error populating field formats:', err); })
           // Load the data - if the FieldFormats failed to populate
           // the default formatting will be used for metric values.

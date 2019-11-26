@@ -25,6 +25,10 @@ mockUseKibanaCore.mockImplementation(() => ({
   uiSettings: mockUiSettings,
 }));
 
+jest.mock('ui/vis/lib/timezone', () => ({
+  timezoneProvider: () => () => 'America/New_York',
+}));
+
 describe('Pane', () => {
   test('renders correctly against snapshot', () => {
     const EmptyComponent = shallow(

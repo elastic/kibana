@@ -31,10 +31,9 @@ import { applyCurrentSettings } from '../console_editor/apply_editor_settings';
 interface Props {
   settings: DevToolsSettings;
   req: any | null;
-  ResizeChecker: any;
 }
 
-export function HistoryViewer({ settings, ResizeChecker, req }: Props) {
+export function HistoryViewer({ settings, req }: Props) {
   const divRef = useRef<HTMLDivElement | null>(null);
   const viewerRef = useRef<any | null>(null);
 
@@ -43,7 +42,7 @@ export function HistoryViewer({ settings, ResizeChecker, req }: Props) {
     viewerRef.current = viewer;
     viewer.renderer.setShowPrintMargin(false);
     viewer.$blockScrolling = Infinity;
-    const unsubscribe = subscribeResizeChecker(ResizeChecker, divRef.current!, viewer);
+    const unsubscribe = subscribeResizeChecker(divRef.current!, viewer);
     return () => unsubscribe();
   }, []);
 

@@ -27,6 +27,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
       const updatedData = {
         name: 'bcd',
+        tags: ['bar'],
         alertTypeParams: {
           foo: true,
         },
@@ -41,6 +42,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         .expect(200, {
           ...updatedData,
           id: createdAlert.id,
+          tags: ['bar'],
           alertTypeId: 'test.noop',
           createdBy: null,
           enabled: true,
@@ -65,6 +67,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'bcd',
+          tags: ['foo'],
           alertTypeParams: {
             foo: true,
           },

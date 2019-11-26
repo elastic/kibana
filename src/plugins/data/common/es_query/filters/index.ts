@@ -17,6 +17,9 @@
  * under the License.
  */
 
+import { omit, get } from 'lodash';
+import { Filter } from './meta_filter';
+
 export * from './custom_filter';
 export * from './exists_filter';
 export * from './geo_bounding_box_filter';
@@ -30,3 +33,12 @@ export * from './query_string_filter';
 export * from './range_filter';
 
 export * from './types';
+
+/**
+ * Clean out any invalid attributes from the filters
+ * @param {object} filter The filter to clean
+ * @returns {object}
+ */
+export const cleanFilter = (filter: Filter): Filter => omit(filter, ['meta', '$state']);
+
+export const isFilterDisabled = (filter: Filter): boolean => get(filter, 'meta.disabled', false);

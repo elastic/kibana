@@ -86,7 +86,8 @@ export function SearchBarComponent(props: SearchBarProps) {
   }, [currentDatasource]);
 
   const kibana = useKibana<IDataPluginServices>();
-  const { overlays, savedObjects, uiSettings } = kibana.services;
+  const { services, overlays } = kibana;
+  const { savedObjects, uiSettings } = services;
   if (!overlays) return null;
 
   return (

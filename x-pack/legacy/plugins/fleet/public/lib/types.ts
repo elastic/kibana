@@ -10,12 +10,14 @@ import { AgentsLib } from './agent';
 import { PoliciesLib } from './policy';
 import { ElasticsearchLib } from './elasticsearch';
 import { FrameworkLib } from './framework';
+import { EnrollmentApiKeyLib } from './enrollment_api_key';
 
 export interface FrontendLibs {
   elasticsearch: ElasticsearchLib;
   framework: FrameworkLib;
   agents: AgentsLib;
   policies: PoliciesLib;
+  enrollmentApiKeys: EnrollmentApiKeyLib;
 }
 
 export type FramworkAdapterConstructable = new (uiModule: IModule) => FrameworkAdapter;

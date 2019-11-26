@@ -7,10 +7,9 @@
 import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-
 import { Query, TimeRange, esFilters } from 'src/plugins/data/public';
+import { ExpressionRenderer } from 'src/plugins/expressions/public';
 import { StaticIndexPattern } from 'src/legacy/core_plugins/data/public';
-import { ExpressionRenderer } from 'src/legacy/core_plugins/expressions/public';
 import { Subscription } from 'rxjs';
 import {
   Embeddable as AbstractEmbeddable,

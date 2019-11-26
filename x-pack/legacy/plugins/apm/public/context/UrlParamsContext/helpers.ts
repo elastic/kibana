@@ -7,9 +7,10 @@
 import { compact, pick } from 'lodash';
 import datemath from '@elastic/datemath';
 import { IUrlParams } from './types';
+import { ProcessorEvent } from '../../../common/processor_event';
 
 interface PathParams {
-  processorEvent?: 'error' | 'metric' | 'transaction';
+  processorEvent?: ProcessorEvent;
   serviceName?: string;
   errorGroupId?: string;
   serviceNodeName?: string;

@@ -25,7 +25,7 @@ import { ImportErrors } from '../import_errors';
 import { ImportSummary } from '../import_summary';
 import { ImportSettings } from '../import_settings';
 import { ExperimentalBadge } from '../experimental_badge';
-import { getIndexPatternNames, refreshIndexPatterns } from '../../../../util/index_utils';
+import { getIndexPatternNames, loadIndexPatterns } from '../../../../util/index_utils';
 import { ml } from '../../../../services/ml_api_service';
 import { hasImportPermission } from '../utils';
 
@@ -359,7 +359,7 @@ export class ImportView extends Component {
   }
 
   async loadIndexPatternNames() {
-    await refreshIndexPatterns();
+    await loadIndexPatterns();
     const indexPatternNames = getIndexPatternNames();
     this.setState({ indexPatternNames });
   }

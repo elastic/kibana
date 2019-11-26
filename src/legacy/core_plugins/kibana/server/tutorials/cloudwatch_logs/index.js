@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/functionbeat_instructions';
 
-export function cloudwatchLogsSpecProvider(server, context) {
+export function cloudwatchLogsSpecProvider(context) {
   return {
     id: 'cloudwatchLogs',
     name: i18n.translate('kbn.server.tutorials.cloudwatchLogs.nameTitle', {

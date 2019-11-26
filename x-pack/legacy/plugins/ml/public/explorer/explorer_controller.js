@@ -23,7 +23,7 @@ import {
 import { getAnomalyExplorerBreadcrumbs } from './breadcrumbs';
 import { checkFullLicense } from '../license/check_license';
 import { checkGetJobsPrivilege } from '../privilege/check_privilege';
-import { getIndexPatterns, loadIndexPatterns } from '../util/index_utils';
+import { loadIndexPatterns } from '../util/index_utils';
 import { TimeBuckets } from 'plugins/ml/util/time_buckets';
 import { explorer$ } from './explorer_dashboard_service';
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
@@ -114,7 +114,7 @@ module.controller('MlExplorerController', function (
     }
 
     // Populate the map of jobs / detectors / field formatters for the selected IDs.
-    mlFieldFormatService.populateFormats(selectedJobIds, getIndexPatterns())
+    mlFieldFormatService.populateFormats(selectedJobIds)
       .catch((err) => {
         console.log('Error populating field formats:', err);
       })

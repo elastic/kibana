@@ -64,11 +64,11 @@ let copiedLegacyCatalogue = false;
           const Private = injector.get<IPrivate>('Private');
           // Merge legacy registry with new registry
           (Private(FeatureCatalogueRegistryProvider as any) as any).inTitleOrder.map(
-            npSetup.plugins.feature_catalogue.register
+            npSetup.plugins.home.featureCatalogue.register
           );
           copiedLegacyCatalogue = true;
         }
-        return npStart.plugins.feature_catalogue.get();
+        return npStart.plugins.home.featureCatalogue.get();
       },
       getAngularDependencies,
       localApplicationService,

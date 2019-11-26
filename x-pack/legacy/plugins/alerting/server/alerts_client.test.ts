@@ -44,6 +44,7 @@ function getMockData(overwrites: Record<string, any> = {}) {
   return {
     enabled: true,
     name: 'abc',
+    tags: ['foo'],
     alertTypeId: '123',
     interval: '10s',
     throttle: null,
@@ -174,6 +175,9 @@ describe('create()', () => {
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
+        "tags": Array [
+          "foo",
+        ],
         "throttle": null,
         "updatedBy": "elastic",
       }
@@ -517,6 +521,7 @@ describe('create()', () => {
         throttle: null,
         muteAll: false,
         mutedInstanceIds: [],
+        tags: ['foo'],
       },
       {
         references: [
@@ -1177,6 +1182,7 @@ describe('update()', () => {
       data: {
         interval: '10s',
         name: 'abc',
+        tags: ['foo'],
         alertTypeParams: {
           bar: true,
         },
@@ -1236,6 +1242,9 @@ describe('update()', () => {
         "interval": "10s",
         "name": "abc",
         "scheduledTaskId": "task-123",
+        "tags": Array [
+          "foo",
+        ],
         "updatedBy": "elastic",
       }
     `);
@@ -1310,6 +1319,7 @@ describe('update()', () => {
       data: {
         interval: '10s',
         name: 'abc',
+        tags: ['foo'],
         alertTypeParams: {
           bar: true,
         },
@@ -1370,6 +1380,9 @@ describe('update()', () => {
         "interval": "10s",
         "name": "abc",
         "scheduledTaskId": "task-123",
+        "tags": Array [
+          "foo",
+        ],
         "updatedBy": "elastic",
       }
     `);
@@ -1414,6 +1427,7 @@ describe('update()', () => {
         data: {
           interval: '10s',
           name: 'abc',
+          tags: ['foo'],
           alertTypeParams: {
             bar: true,
           },

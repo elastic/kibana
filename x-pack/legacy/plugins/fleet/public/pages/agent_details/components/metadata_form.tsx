@@ -21,20 +21,7 @@ import { AxiosError } from 'axios';
 import { Agent } from '../../../../common/types/domain_data';
 import { useLibs } from '../../../hooks/use_libs';
 import { useAgentRefresh } from '../hooks/use_agent';
-
-function useInput() {
-  const [value, setValue] = useState<string>('');
-
-  return {
-    value,
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-      setValue(e.target.value);
-    },
-    clear: () => {
-      setValue('');
-    },
-  };
-}
+import { useInput } from '../../../hooks/use_input';
 
 function useAddMetadataForm(agent: Agent, done: () => void) {
   const libs = useLibs();
@@ -132,11 +119,7 @@ export const MetadataForm: SFC<{ agent: Agent }> = ({ agent }) => {
                     defaultMessage: 'Key',
                   })}
                 >
-                  <EuiFieldText
-                    required={true}
-                    onChange={keyInput.onChange}
-                    value={keyInput.value}
-                  />
+                  <EuiFieldText required={true} {...keyInput.props} />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
@@ -145,11 +128,7 @@ export const MetadataForm: SFC<{ agent: Agent }> = ({ agent }) => {
                     defaultMessage: 'Value',
                   })}
                 >
-                  <EuiFieldText
-                    required={true}
-                    onChange={valueInput.onChange}
-                    value={valueInput.value}
-                  />
+                  <EuiFieldText required={true} {...valueInput.props} />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

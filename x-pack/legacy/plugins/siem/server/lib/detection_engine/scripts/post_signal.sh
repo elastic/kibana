@@ -22,7 +22,7 @@ do {
   -H 'Content-Type: application/json' \
   -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -X POST ${KIBANA_URL}/api/siem/signals \
+  -X POST ${KIBANA_URL}/api/detection_engine/rules \
   -d @${SIGNAL} \
   | jq .;
 } &

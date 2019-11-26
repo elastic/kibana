@@ -29,7 +29,7 @@ export function DescriptionCell({ actual, typical }) {
   } = getMetricChangeDescription(actual, typical);
 
   return (
-    <EuiFlexGroup gutterSize="s">
+    <EuiFlexGroup gutterSize="s" alignItems="center">
       {iconType !== undefined &&
         <EuiFlexItem grow={false}>
           <EuiIcon

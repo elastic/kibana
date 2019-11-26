@@ -14,6 +14,7 @@ const mockedAlert = {
   alertTypeId: '1',
   name: 'abc',
   interval: '10s',
+  tags: ['foo'],
   alertTypeParams: {
     bar: true,
   },
@@ -62,6 +63,9 @@ test('creates an alert with proper parameters', async () => {
       "id": "123",
       "interval": "10s",
       "name": "abc",
+      "tags": Array [
+        "foo",
+      ],
     }
   `);
   expect(alertsClient.create).toHaveBeenCalledTimes(1);
@@ -85,6 +89,9 @@ test('creates an alert with proper parameters', async () => {
           "enabled": true,
           "interval": "10s",
           "name": "abc",
+          "tags": Array [
+            "foo",
+          ],
           "throttle": null,
         },
       },
@@ -111,6 +118,9 @@ test('creates an alert with proper parameters', async () => {
           "enabled": true,
           "interval": "10s",
           "name": "abc",
+          "tags": Array [
+            "foo",
+          ],
           "throttle": null,
         },
       },

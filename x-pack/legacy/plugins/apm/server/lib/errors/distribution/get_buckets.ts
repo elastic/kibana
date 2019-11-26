@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx';
 import { ESFilter } from '../../../../typings/elasticsearch';
 import {
   ERROR_GROUP_ID,
@@ -64,12 +63,12 @@ export async function getBuckets({
 
   const resp = await client.search(params);
 
-  const buckets = (
-    idx(resp.aggregations, _ => _.distribution.buckets) || []
-  ).map(bucket => ({
-    key: bucket.key,
-    count: bucket.doc_count
-  }));
+  const buckets = (resp.aggregations?.distribution.buckets || []).map(
+    bucket => ({
+      key: bucket.key,
+      count: bucket.doc_count
+    })
+  );
 
   return {
     noHits: resp.hits.total.value === 0,

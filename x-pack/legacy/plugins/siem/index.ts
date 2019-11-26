@@ -8,8 +8,8 @@ import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { Server } from 'hapi';
 
-import KbnServer from '../../../../src/legacy/server/kbn_server';
-import { initServerWithKibana } from './server/kibana.index';
+import { PluginInitializerContext } from 'src/core/server';
+import { plugin } from './server';
 import { savedObjectMappings } from './server/saved_objects';
 
 import {
@@ -24,9 +24,7 @@ import {
   DEFAULT_FROM,
   DEFAULT_TO,
 } from './common/constants';
-import { signalsAlertType } from './server/lib/detection_engine/alerts/signals_alert_type';
 import { defaultIndexPattern } from './default_index_pattern';
-import { isAlertExecutor } from './server/lib/detection_engine/alerts/types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const siem = (kibana: any) => {
@@ -125,17 +123,39 @@ export const siem = (kibana: any) => {
       mappings: savedObjectMappings,
     },
     init(server: Server) {
-      const newPlatform = ((server as unknown) as KbnServer).newPlatform;
-      if (server.plugins.alerting != null) {
-        const type = signalsAlertType({
-          logger: newPlatform.coreContext.logger.get('plugins', APP_ID),
-        });
-        if (isAlertExecutor(type)) {
-          server.plugins.alerting.setup.registerType(type);
-        }
-      }
-      server.injectUiAppVars('siem', async () => server.getInjectedUiAppVars('kibana'));
-      initServerWithKibana(server);
+      const {
+        config,
+        getInjectedUiAppVars,
+        indexPatternsServiceFactory,
+        injectUiAppVars,
+        newPlatform,
+        plugins,
+        route,
+        savedObjects,
+      } = server;
+
+      const {
+        env,
+        coreContext: { logger },
+        setup,
+      } = newPlatform;
+      const initializerContext = { logger, env };
+
+      const serverFacade = {
+        config,
+        getInjectedUiAppVars,
+        indexPatternsServiceFactory,
+        injectUiAppVars,
+        plugins: { alerting: plugins.alerting, xpack_main: plugins.xpack_main },
+        route: route.bind(server),
+        savedObjects,
+      };
+
+      plugin(initializerContext as PluginInitializerContext).setup(
+        setup.core,
+        setup.plugins,
+        serverFacade
+      );
     },
   });
 };

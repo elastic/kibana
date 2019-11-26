@@ -6,10 +6,8 @@
 
 // @ts-ignore
 import uiRoutes from 'ui/routes';
-// @ts-ignore
 import { checkBasicLicense } from '../../license/check_license';
 import { checkGetJobsPrivilege } from '../../privilege/check_privilege';
-// @ts-ignore
 import { loadCurrentIndexPattern, loadCurrentSavedSearch } from '../../util/index_utils';
 
 import { checkMlNodesAvailable } from '../../ml_nodes_check';

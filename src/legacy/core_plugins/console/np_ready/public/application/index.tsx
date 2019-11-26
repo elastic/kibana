@@ -32,10 +32,9 @@ export function legacyBackDoorToSettings() {
 export function boot(deps: {
   docLinkVersion: string;
   I18nContext: any;
-  ResizeChecker: any;
   notifications: NotificationsSetup;
 }) {
-  const { I18nContext, ResizeChecker, notifications, docLinkVersion } = deps;
+  const { I18nContext, notifications, docLinkVersion } = deps;
 
   const storage = createStorage({
     engine: window.localStorage,
@@ -51,7 +50,6 @@ export function boot(deps: {
         value={{
           docLinkVersion,
           services: { storage, history, settings, notifications },
-          ResizeChecker,
         }}
       >
         <EditorContextProvider settings={settings.toJSON()}>

@@ -14,7 +14,6 @@ import { FieldDataCardProps } from '../field_data_card';
 import { DisplayValue } from '../../../../../components/display_value';
 import { kibanaFieldFormat } from '../../../../../formatters/kibana_field_format';
 import { numberAsOrdinal } from '../../../../../formatters/number_as_ordinal';
-// @ts-ignore
 import { roundToDecimalPlace } from '../../../../../formatters/round_to_decimal_place';
 import {
   MetricDistributionChart,
