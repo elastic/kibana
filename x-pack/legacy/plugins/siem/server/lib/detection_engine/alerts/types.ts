@@ -21,7 +21,7 @@ import { esFilters } from '../../../../../../../../src/plugins/data/server';
 
 export type PartialFilter = Partial<esFilters.Filter>;
 
-export interface SignalAlertParams {
+export interface RuleAlertParams {
   description: string;
   enabled: boolean;
   falsePositives: string[];
@@ -48,19 +48,19 @@ export interface SignalAlertParams {
   type: 'filter' | 'query' | 'saved_query';
 }
 
-export type SignalAlertParamsRest = Omit<
-  SignalAlertParams,
+export type RuleAlertParamsRest = Omit<
+  RuleAlertParams,
   'ruleId' | 'falsePositives' | 'maxSignals' | 'savedId' | 'riskScore' | 'outputIndex'
 > & {
-  rule_id: SignalAlertParams['ruleId'];
-  false_positives: SignalAlertParams['falsePositives'];
-  saved_id: SignalAlertParams['savedId'];
-  max_signals: SignalAlertParams['maxSignals'];
-  risk_score: SignalAlertParams['riskScore'];
-  output_index: SignalAlertParams['outputIndex'];
+  rule_id: RuleAlertParams['ruleId'];
+  false_positives: RuleAlertParams['falsePositives'];
+  saved_id: RuleAlertParams['savedId'];
+  max_signals: RuleAlertParams['maxSignals'];
+  risk_score: RuleAlertParams['riskScore'];
+  output_index: RuleAlertParams['outputIndex'];
 };
 
-export type OutputSignalAlertRest = SignalAlertParamsRest & {
+export type OutputSignalAlertRest = RuleAlertParamsRest & {
   id: string;
   created_by: string | undefined | null;
   updated_by: string | undefined | null;
@@ -70,9 +70,9 @@ export type OutputSignalES = OutputSignalAlertRest & {
   status: 'open' | 'closed';
 };
 
-export type UpdateSignalAlertParamsRest = Partial<SignalAlertParamsRest> & {
+export type UpdateRuleAlertParamsRest = Partial<RuleAlertParamsRest> & {
   id: string | undefined;
-  rule_id: SignalAlertParams['ruleId'] | undefined;
+  rule_id: RuleAlertParams['ruleId'] | undefined;
 };
 
 export interface FindParamsRest {
@@ -89,9 +89,9 @@ export interface Clients {
   actionsClient: ActionsClient;
 }
 
-export type SignalParams = SignalAlertParams & Clients;
+export type SignalParams = RuleAlertParams & Clients;
 
-export type UpdateSignalParams = Partial<SignalAlertParams> & {
+export type UpdateSignalParams = Partial<RuleAlertParams> & {
   id: string | undefined | null;
 } & Clients;
 
@@ -133,7 +133,7 @@ export interface ReadSignalByRuleId {
   ruleId: string;
 }
 
-export type AlertTypeParams = Omit<SignalAlertParams, 'name' | 'enabled' | 'interval'>;
+export type AlertTypeParams = Omit<RuleAlertParams, 'name' | 'enabled' | 'interval'>;
 
 export type SignalAlertType = Alert & {
   id: string;
@@ -141,15 +141,15 @@ export type SignalAlertType = Alert & {
 };
 
 export interface SignalsRequest extends RequestFacade {
-  payload: SignalAlertParamsRest;
+  payload: RuleAlertParamsRest;
 }
 
 export interface UpdateSignalsRequest extends RequestFacade {
-  payload: UpdateSignalAlertParamsRest;
+  payload: UpdateRuleAlertParamsRest;
 }
 
 export type SignalExecutorOptions = Omit<AlertExecutorOptions, 'params'> & {
-  params: SignalAlertParams & {
+  params: RuleAlertParams & {
     scrollSize: number;
     scrollLock: string;
   };

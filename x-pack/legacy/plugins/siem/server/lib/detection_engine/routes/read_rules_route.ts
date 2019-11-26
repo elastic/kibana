@@ -9,12 +9,12 @@ import { isFunction } from 'lodash/fp';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 import { getIdError, transformOrError } from './utils';
 
-import { readSignals } from '../alerts/read_signals';
+import { readRules } from '../alerts/read_rules';
 import { ServerFacade } from '../../../types';
-import { querySignalSchema } from './schemas';
+import { queryRulesSchema } from './schemas';
 import { QueryRequest } from '../alerts/types';
 
-export const createReadSignalsRoute: Hapi.ServerRoute = {
+export const createReadRulesRoute: Hapi.ServerRoute = {
   method: 'GET',
   path: DETECTION_ENGINE_RULES_URL,
   options: {
@@ -23,7 +23,7 @@ export const createReadSignalsRoute: Hapi.ServerRoute = {
       options: {
         abortEarly: false,
       },
-      query: querySignalSchema,
+      query: queryRulesSchema,
     },
   },
   async handler(request: QueryRequest, headers) {
@@ -34,7 +34,7 @@ export const createReadSignalsRoute: Hapi.ServerRoute = {
     if (!alertsClient || !actionsClient) {
       return headers.response().code(404);
     }
-    const signal = await readSignals({
+    const signal = await readRules({
       alertsClient,
       id,
       ruleId,
@@ -47,6 +47,6 @@ export const createReadSignalsRoute: Hapi.ServerRoute = {
   },
 };
 
-export const readSignalsRoute = (server: ServerFacade) => {
-  server.route(createReadSignalsRoute);
+export const readRulesRoute = (server: ServerFacade) => {
+  server.route(createReadRulesRoute);
 };

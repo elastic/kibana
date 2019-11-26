@@ -5,7 +5,7 @@
  */
 
 import { AlertServices } from '../../../../../alerting/server/types';
-import { SignalAlertParams, PartialFilter } from './types';
+import { RuleAlertParams, PartialFilter } from './types';
 import { assertUnreachable } from '../../../utils/build_query';
 import {
   Query,
@@ -41,7 +41,7 @@ export const getQueryFilter = (
 };
 
 interface GetFilterArgs {
-  type: SignalAlertParams['type'];
+  type: RuleAlertParams['type'];
   filter: Record<string, {}> | undefined | null;
   filters: PartialFilter[] | undefined | null;
   language: string | undefined | null;

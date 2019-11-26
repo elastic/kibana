@@ -7,7 +7,7 @@
 import { SIGNALS_ID } from '../../../../common/constants';
 import { SignalParams } from './types';
 
-export const createSignals = async ({
+export const createRules = async ({
   alertsClient,
   actionsClient, // TODO: Use this actionsClient once we have actions such as email, etc...
   description,

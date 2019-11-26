@@ -14,7 +14,7 @@ import { SignalAlertTypeDefinition } from './types';
 import { getFilter } from './get_filter';
 import { getInputOutputIndex } from './get_input_output_index';
 
-export const signalsAlertType = ({
+export const rulesAlertType = ({
   logger,
   version,
 }: {

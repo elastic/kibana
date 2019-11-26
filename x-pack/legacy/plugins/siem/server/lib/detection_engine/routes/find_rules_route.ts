@@ -7,13 +7,13 @@
 import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
-import { findSignals } from '../alerts/find_signals';
+import { findRules } from '../alerts/find_rules';
 import { FindSignalsRequest } from '../alerts/types';
-import { findSignalsSchema } from './schemas';
+import { findRulesSchema } from './schemas';
 import { ServerFacade } from '../../../types';
 import { transformFindAlertsOrError } from './utils';
 
-export const createFindSignalRoute: Hapi.ServerRoute = {
+export const createFindRulesRoute: Hapi.ServerRoute = {
   method: 'GET',
   path: `${DETECTION_ENGINE_RULES_URL}/_find`,
   options: {
@@ -22,7 +22,7 @@ export const createFindSignalRoute: Hapi.ServerRoute = {
       options: {
         abortEarly: false,
       },
-      query: findSignalsSchema,
+      query: findRulesSchema,
     },
   },
   async handler(request: FindSignalsRequest, headers) {
@@ -34,7 +34,7 @@ export const createFindSignalRoute: Hapi.ServerRoute = {
       return headers.response().code(404);
     }
 
-    const signals = await findSignals({
+    const signals = await findRules({
       alertsClient,
       perPage: query.per_page,
       page: query.page,
@@ -46,6 +46,6 @@ export const createFindSignalRoute: Hapi.ServerRoute = {
   },
 };
 
-export const findSignalsRoute = (server: ServerFacade) => {
-  server.route(createFindSignalRoute);
+export const findRulesRoute = (server: ServerFacade) => {
+  server.route(createFindRulesRoute);
 };

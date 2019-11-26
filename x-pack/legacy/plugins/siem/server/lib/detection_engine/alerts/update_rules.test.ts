@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { calculateInterval, calculateName } from './update_signals';
+import { calculateInterval, calculateName } from './update_rules';
 
-describe('update_signals', () => {
+describe('update_rules', () => {
   describe('#calculateInterval', () => {
     test('given a undefined interval, it returns the signalInterval ', () => {
       const interval = calculateInterval(undefined, '10m');

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { findSignals } from './find_signals';
+import { findRules } from './find_rules';
 import { SignalAlertType, isAlertTypeArray, ReadSignalParams, ReadSignalByRuleId } from './types';
 
-export const findSignalInArrayByRuleId = (
+export const findRuleInArrayByRuleId = (
   objects: object[],
   ruleId: string
 ): SignalAlertType | null => {
@@ -31,12 +31,12 @@ export const findSignalInArrayByRuleId = (
 // not indexed and I cannot push in my own _id when I create an alert at the moment.
 // TODO: Once we can directly push in the _id, then we should no longer need this way.
 // TODO: This is meant to be _very_ temporary.
-export const readSignalByRuleId = async ({
+export const readRuleByRuleId = async ({
   alertsClient,
   ruleId,
 }: ReadSignalByRuleId): Promise<SignalAlertType | null> => {
-  const firstSignals = await findSignals({ alertsClient, page: 1 });
-  const firstSignal = findSignalInArrayByRuleId(firstSignals.data, ruleId);
+  const firstSignals = await findRules({ alertsClient, page: 1 });
+  const firstSignal = findRuleInArrayByRuleId(firstSignals.data, ruleId);
   if (firstSignal != null) {
     return firstSignal;
   } else {
@@ -45,11 +45,11 @@ export const readSignalByRuleId = async ({
       .fill({})
       .map((_, page) => {
         // page index never starts at zero. It always has to be 1 or greater
-        return findSignals({ alertsClient, page: page + 1 });
+        return findRules({ alertsClient, page: page + 1 });
       })
       .reduce<Promise<SignalAlertType | null>>(async (accum, findSignal) => {
         const signals = await findSignal;
-        const signal = findSignalInArrayByRuleId(signals.data, ruleId);
+        const signal = findRuleInArrayByRuleId(signals.data, ruleId);
         if (signal != null) {
           return signal;
         } else {
@@ -59,7 +59,7 @@ export const readSignalByRuleId = async ({
   }
 };
 
-export const readSignals = async ({ alertsClient, id, ruleId }: ReadSignalParams) => {
+export const readRules = async ({ alertsClient, id, ruleId }: ReadSignalParams) => {
   if (id != null) {
     try {
       const output = await alertsClient.get({ id });
@@ -73,7 +73,7 @@ export const readSignals = async ({ alertsClient, id, ruleId }: ReadSignalParams
       }
     }
   } else if (ruleId != null) {
-    return readSignalByRuleId({ alertsClient, ruleId });
+    return readRuleByRuleId({ alertsClient, ruleId });
   } else {
     // should never get here, and yet here we are.
     return null;

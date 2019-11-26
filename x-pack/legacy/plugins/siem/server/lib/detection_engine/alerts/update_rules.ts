@@ -6,7 +6,7 @@
 
 import { defaults } from 'lodash/fp';
 import { AlertAction } from '../../../../../alerting/server/types';
-import { readSignals } from './read_signals';
+import { readRules } from './read_rules';
 import { UpdateSignalParams } from './types';
 
 export const calculateInterval = (
@@ -41,7 +41,7 @@ export const calculateName = ({
   }
 };
 
-export const updateSignal = async ({
+export const updateRules = async ({
   alertsClient,
   actionsClient, // TODO: Use this whenever we add feature support for different action types
   description,
@@ -69,7 +69,7 @@ export const updateSignal = async ({
   type,
   references,
 }: UpdateSignalParams) => {
-  const signal = await readSignals({ alertsClient, ruleId, id });
+  const signal = await readRules({ alertsClient, ruleId, id });
   if (signal == null) {
     return null;
   }

@@ -7,13 +7,13 @@
 import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
-import { updateSignal } from '../alerts/update_signals';
+import { updateRules } from '../alerts/update_rules';
 import { UpdateSignalsRequest } from '../alerts/types';
-import { updateSignalSchema } from './schemas';
+import { updateRulesSchema } from './schemas';
 import { ServerFacade } from '../../../types';
 import { getIdError, transformOrError } from './utils';
 
-export const createUpdateSignalsRoute: Hapi.ServerRoute = {
+export const createUpdateRulesRoute: Hapi.ServerRoute = {
   method: 'PUT',
   path: DETECTION_ENGINE_RULES_URL,
   options: {
@@ -22,7 +22,7 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
       options: {
         abortEarly: false,
       },
-      payload: updateSignalSchema,
+      payload: updateRulesSchema,
     },
   },
   async handler(request: UpdateSignalsRequest, headers) {
@@ -61,7 +61,7 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
       return headers.response().code(404);
     }
 
-    const signal = await updateSignal({
+    const signal = await updateRules({
       alertsClient,
       actionsClient,
       description,
@@ -98,6 +98,6 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
   },
 };
 
-export const updateSignalsRoute = (server: ServerFacade) => {
-  server.route(createUpdateSignalsRoute);
+export const updateRulesRoute = (server: ServerFacade) => {
+  server.route(createUpdateRulesRoute);
 };

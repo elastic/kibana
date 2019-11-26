@@ -8,13 +8,13 @@ import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
-import { deleteSignals } from '../alerts/delete_signals';
+import { deleteRules } from '../alerts/delete_rules';
 import { ServerFacade } from '../../../types';
-import { querySignalSchema } from './schemas';
+import { queryRulesSchema } from './schemas';
 import { QueryRequest } from '../alerts/types';
 import { getIdError, transformOrError } from './utils';
 
-export const createDeleteSignalsRoute: Hapi.ServerRoute = {
+export const createDeleteRulesRoute: Hapi.ServerRoute = {
   method: 'DELETE',
   path: DETECTION_ENGINE_RULES_URL,
   options: {
@@ -23,7 +23,7 @@ export const createDeleteSignalsRoute: Hapi.ServerRoute = {
       options: {
         abortEarly: false,
       },
-      query: querySignalSchema,
+      query: queryRulesSchema,
     },
   },
   async handler(request: QueryRequest, headers) {
@@ -35,7 +35,7 @@ export const createDeleteSignalsRoute: Hapi.ServerRoute = {
       return headers.response().code(404);
     }
 
-    const signal = await deleteSignals({
+    const signal = await deleteRules({
       actionsClient,
       alertsClient,
       id,
@@ -50,6 +50,6 @@ export const createDeleteSignalsRoute: Hapi.ServerRoute = {
   },
 };
 
-export const deleteSignalsRoute = (server: ServerFacade): void => {
-  server.route(createDeleteSignalsRoute);
+export const deleteRulesRoute = (server: ServerFacade): void => {
+  server.route(createDeleteRulesRoute);
 };

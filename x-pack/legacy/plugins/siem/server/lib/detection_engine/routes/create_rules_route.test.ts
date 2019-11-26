@@ -10,7 +10,7 @@ import {
   createMockServerWithoutAlertClientDecoration,
   createMockServerWithoutActionOrAlertClientDecoration,
 } from './__mocks__/_mock_server';
-import { createSignalsRoute } from './create_signals_route';
+import { createRulesRoute } from './create_rules_route';
 import { ServerInjectOptions } from 'hapi';
 import {
   getFindResult,
@@ -21,13 +21,13 @@ import {
 } from './__mocks__/request_responses';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 
-describe('create_signals', () => {
+describe('create_rules', () => {
   let { server, alertsClient, actionsClient } = createMockServer();
 
   beforeEach(() => {
     jest.resetAllMocks();
     ({ server, alertsClient, actionsClient } = createMockServer());
-    createSignalsRoute(server);
+    createRulesRoute(server);
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -42,14 +42,14 @@ describe('create_signals', () => {
 
     test('returns 404 if actionClient is not available on the route', async () => {
       const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
-      createSignalsRoute(serverWithoutActionClient);
+      createRulesRoute(serverWithoutActionClient);
       const { statusCode } = await serverWithoutActionClient.inject(getCreateRequest());
       expect(statusCode).toBe(404);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
-      createSignalsRoute(serverWithoutAlertClient);
+      createRulesRoute(serverWithoutAlertClient);
       const { statusCode } = await serverWithoutAlertClient.inject(getCreateRequest());
       expect(statusCode).toBe(404);
     });
@@ -58,7 +58,7 @@ describe('create_signals', () => {
       const {
         serverWithoutActionOrAlertClient,
       } = createMockServerWithoutActionOrAlertClientDecoration();
-      createSignalsRoute(serverWithoutActionOrAlertClient);
+      createRulesRoute(serverWithoutActionOrAlertClient);
       const { statusCode } = await serverWithoutActionOrAlertClient.inject(getCreateRequest());
       expect(statusCode).toBe(404);
     });

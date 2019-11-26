@@ -5,7 +5,7 @@
  */
 
 import { alertsClientMock } from '../../../../../alerting/server/alerts_client.mock';
-import { readSignals, readSignalByRuleId, findSignalInArrayByRuleId } from './read_signals';
+import { readRules, readRuleByRuleId, findRuleInArrayByRuleId } from './read_rules';
 import { AlertsClient } from '../../../../../alerting';
 import {
   getResult,
@@ -14,14 +14,14 @@ import {
 } from '../routes/__mocks__/request_responses';
 import { SIGNALS_ID } from '../../../../common/constants';
 
-describe('read_signals', () => {
-  describe('readSignals', () => {
+describe('read_rules', () => {
+  describe('readRules', () => {
     test('should return the output from alertsClient if id is set but ruleId is undefined', async () => {
       const alertsClient = alertsClientMock.create();
       alertsClient.get.mockResolvedValue(getResult());
 
       const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
-      const signal = await readSignals({
+      const signal = await readRules({
         alertsClient: unsafeCast,
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         ruleId: undefined,
@@ -34,7 +34,7 @@ describe('read_signals', () => {
       alertsClient.get.mockResolvedValue(getResult());
 
       const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
-      const signal = await readSignals({
+      const signal = await readRules({
         alertsClient: unsafeCast,
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         ruleId: null,
@@ -48,7 +48,7 @@ describe('read_signals', () => {
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
       const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
-      const signal = await readSignals({
+      const signal = await readRules({
         alertsClient: unsafeCast,
         id: undefined,
         ruleId: 'rule-1',
@@ -62,7 +62,7 @@ describe('read_signals', () => {
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
       const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
-      const signal = await readSignals({
+      const signal = await readRules({
         alertsClient: unsafeCast,
         id: null,
         ruleId: 'rule-1',
@@ -76,7 +76,7 @@ describe('read_signals', () => {
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
       const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
-      const signal = await readSignals({
+      const signal = await readRules({
         alertsClient: unsafeCast,
         id: null,
         ruleId: null,
@@ -90,7 +90,7 @@ describe('read_signals', () => {
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
       const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
-      const signal = await readSignals({
+      const signal = await readRules({
         alertsClient: unsafeCast,
         id: undefined,
         ruleId: undefined,
@@ -106,7 +106,7 @@ describe('read_signals', () => {
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
       const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
-      const signal = await readSignalByRuleId({
+      const signal = await readRuleByRuleId({
         alertsClient: unsafeCast,
         ruleId: 'rule-1',
       });
@@ -119,7 +119,7 @@ describe('read_signals', () => {
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
       const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
-      const signal = await readSignalByRuleId({
+      const signal = await readRuleByRuleId({
         alertsClient: unsafeCast,
         ruleId: 'rule-that-should-not-match-anything',
       });
@@ -140,7 +140,7 @@ describe('read_signals', () => {
       alertsClient.find.mockResolvedValue(getFindResultWithMultiHits([result1, result2]));
 
       const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
-      const signal = await readSignalByRuleId({
+      const signal = await readRuleByRuleId({
         alertsClient: unsafeCast,
         ruleId: 'rule-1',
       });
@@ -161,7 +161,7 @@ describe('read_signals', () => {
       alertsClient.find.mockResolvedValue(getFindResultWithMultiHits([result1, result2]));
 
       const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
-      const signal = await readSignalByRuleId({
+      const signal = await readRuleByRuleId({
         alertsClient: unsafeCast,
         ruleId: 'rule-2',
       });
@@ -182,7 +182,7 @@ describe('read_signals', () => {
       alertsClient.find.mockResolvedValue(getFindResultWithMultiHits([result1, result2]));
 
       const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
-      const signal = await readSignalByRuleId({
+      const signal = await readRuleByRuleId({
         alertsClient: unsafeCast,
         ruleId: 'rule-that-should-not-match-anything',
       });
@@ -192,7 +192,7 @@ describe('read_signals', () => {
 
   describe('findSignalInArrayByRuleId', () => {
     test('returns null if the objects are not of a signal rule type', () => {
-      const signal = findSignalInArrayByRuleId(
+      const signal = findRuleInArrayByRuleId(
         [
           { alertTypeId: 'made up 1', params: { ruleId: '123' } },
           { alertTypeId: 'made up 2', params: { ruleId: '456' } },
@@ -203,7 +203,7 @@ describe('read_signals', () => {
     });
 
     test('returns correct type if the objects are of a signal rule type', () => {
-      const signal = findSignalInArrayByRuleId(
+      const signal = findRuleInArrayByRuleId(
         [
           { alertTypeId: SIGNALS_ID, params: { ruleId: '123' } },
           { alertTypeId: 'made up 2', params: { ruleId: '456' } },
@@ -214,7 +214,7 @@ describe('read_signals', () => {
     });
 
     test('returns second correct type if the objects are of a signal rule type', () => {
-      const signal = findSignalInArrayByRuleId(
+      const signal = findRuleInArrayByRuleId(
         [
           { alertTypeId: SIGNALS_ID, params: { ruleId: '123' } },
           { alertTypeId: SIGNALS_ID, params: { ruleId: '456' } },
@@ -225,7 +225,7 @@ describe('read_signals', () => {
     });
 
     test('returns null with correct types but data does not exist', () => {
-      const signal = findSignalInArrayByRuleId(
+      const signal = findRuleInArrayByRuleId(
         [
           { alertTypeId: SIGNALS_ID, params: { ruleId: '123' } },
           { alertTypeId: SIGNALS_ID, params: { ruleId: '456' } },

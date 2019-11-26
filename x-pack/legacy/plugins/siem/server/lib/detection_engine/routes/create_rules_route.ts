@@ -9,14 +9,14 @@ import { isFunction } from 'lodash/fp';
 import Boom from 'boom';
 import uuid from 'uuid';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
-import { createSignals } from '../alerts/create_signals';
+import { createRules } from '../alerts/create_rules';
 import { SignalsRequest } from '../alerts/types';
-import { createSignalsSchema } from './schemas';
+import { createRulesSchema } from './schemas';
 import { ServerFacade } from '../../../types';
-import { readSignals } from '../alerts/read_signals';
+import { readRules } from '../alerts/read_rules';
 import { transformOrError } from './utils';
 
-export const createCreateSignalsRoute: Hapi.ServerRoute = {
+export const createCreateRulesRoute: Hapi.ServerRoute = {
   method: 'POST',
   path: DETECTION_ENGINE_RULES_URL,
   options: {
@@ -25,7 +25,7 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
       options: {
         abortEarly: false,
       },
-      payload: createSignalsSchema,
+      payload: createRulesSchema,
     },
   },
   async handler(request: SignalsRequest, headers) {
@@ -64,13 +64,13 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
     }
 
     if (ruleId != null) {
-      const signal = await readSignals({ alertsClient, ruleId });
+      const signal = await readRules({ alertsClient, ruleId });
       if (signal != null) {
         return new Boom(`Signal rule_id ${ruleId} already exists`, { statusCode: 409 });
       }
     }
 
-    const createdSignal = await createSignals({
+    const createdSignal = await createRules({
       alertsClient,
       actionsClient,
       description,
@@ -102,6 +102,6 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
   },
 };
 
-export const createSignalsRoute = (server: ServerFacade) => {
-  server.route(createCreateSignalsRoute);
+export const createRulesRoute = (server: ServerFacade) => {
+  server.route(createCreateRulesRoute);
 };

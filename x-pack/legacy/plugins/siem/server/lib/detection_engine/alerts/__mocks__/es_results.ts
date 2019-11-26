@@ -6,7 +6,7 @@
 
 import { SignalSourceHit, SignalSearchResponse, AlertTypeParams } from '../types';
 
-export const sampleSignalAlertParams = (
+export const sampleRuleAlertParams = (
   maxSignals: number | undefined,
   riskScore?: number | undefined
 ): AlertTypeParams => ({
