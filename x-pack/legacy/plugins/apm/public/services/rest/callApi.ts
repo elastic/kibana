@@ -9,10 +9,11 @@ import LRU from 'lru-cache';
 import hash from 'object-hash';
 import { HttpServiceBase, HttpFetchOptions } from 'kibana/public';
 
-export type FetchOptions = HttpFetchOptions & {
+export type FetchOptions = Omit<HttpFetchOptions, 'body'> & {
   pathname: string;
   forceCache?: boolean;
   method?: string;
+  body?: any;
 };
 
 function fetchOptionsWithDebug(fetchOptions: FetchOptions) {
@@ -26,9 +27,7 @@ function fetchOptionsWithDebug(fetchOptions: FetchOptions) {
   const body = isGet
     ? {}
     : {
-        body: JSON.stringify(
-          fetchOptions.body || ({} as HttpFetchOptions['body'])
-        )
+        body: JSON.stringify(fetchOptions.body || {})
       };
 
   return {
