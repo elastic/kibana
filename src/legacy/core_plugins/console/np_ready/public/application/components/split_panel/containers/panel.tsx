@@ -41,7 +41,7 @@ export function Panel({ children, initialWidth = '100%', style = {} }: Props) {
         return divRef.current!.getBoundingClientRect().width;
       },
     });
-  }, []);
+  }, [initialWidth, registry]);
 
   return (
     <div ref={divRef} style={{ ...style, width, display: 'flex' }}>
