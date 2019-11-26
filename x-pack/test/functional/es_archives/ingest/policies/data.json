@@ -8,10 +8,6 @@
         "name": "Policy 1",
         "description": "Amazing policy",
         "status": "active",
-        "agent_version": "8.0.0",
-        "data_sources": [],
-        "created_on": "2019-09-20T17:35:09+0000",
-        "created_by": "nchaulet",
         "updated_on": "2019-09-20T17:35:09+0000",
         "updated_by": "nchaulet"
       },
@@ -31,11 +27,7 @@
       "policies": {
         "name": "Policy",
         "description": "Amazing policy",
-        "status": "locked",
-        "agent_version": "8.0.0",
-        "data_sources": [],
-        "created_on": "2019-09-20T17:35:09+0000",
-        "created_by": "nchaulet",
+        "status": "active",
         "updated_on": "2019-09-20T17:35:09+0000",
         "updated_by": "nchaulet"
       },
@@ -56,10 +48,6 @@
         "name": "Policy 3",
         "description": "Amazing policy",
         "status": "active",
-        "agent_version": "8.0.0",
-        "data_sources": [],
-        "created_on": "2019-09-20T17:35:09+0000",
-        "created_by": "nchaulet",
         "updated_on": "2019-09-20T17:35:09+0000",
         "updated_by": "nchaulet"
       },
