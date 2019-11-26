@@ -5,7 +5,6 @@
  */
 
 import expect from '@kbn/expect';
-import { Client } from 'elasticsearch';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { getPolicy, getIndexWithWithAlias } from '../../../legacy/plugins/epm/server/lib/ilm/ilm';
 
