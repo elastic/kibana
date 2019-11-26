@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiSwitch } from '@elastic/eui';
 
 import {
