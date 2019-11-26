@@ -1830,7 +1830,7 @@
         "ignore_above": 1024,
         "type": "keyword"
       },
-      "threats": {
+      "threat": {
         "properties": {
           "framework": {
             "ignore_above": 1024,

@@ -245,6 +245,28 @@ describe('schemas', () => {
         }).error
       ).toBeFalsy();
     });
+    test('You can send in an empty array to threats', () => {
+      expect(
+        createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          threats: [],
+        }).error
+      ).toBeFalsy();
+    });
     test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index, threats] does validate', () => {
       expect(
         createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
@@ -773,6 +795,7 @@ describe('schemas', () => {
         ).error
       ).toBeTruthy();
     });
+
     test('You cannot send in an array of threats that are missing "framework"', () => {
       expect(
         createRulesSchema.validate<
@@ -1957,6 +1980,198 @@ describe('schemas', () => {
         }).error
       ).toBeTruthy();
     });
+
+    test('threats is not defaulted to empty array on update', () => {
+      expect(
+        updateRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({
+          id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+        }).value.threats
+      ).toBe(undefined);
+    });
+  });
+  test('threats is not defaulted to undefined on update with empty array', () => {
+    expect(
+      updateRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({
+        id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'severity',
+        interval: '5m',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        threats: [],
+      }).value.threats
+    ).toMatchObject([]);
+  });
+  test('threats is valid when updated with all sub-objects', () => {
+    const expected: ThreatParams[] = [
+      {
+        framework: 'fake',
+        tactic: {
+          id: 'fakeId',
+          name: 'fakeName',
+          reference: 'fakeRef',
+        },
+        technique: {
+          id: 'techniqueId',
+          name: 'techniqueName',
+          reference: 'techniqueRef',
+        },
+      },
+    ];
+    expect(
+      updateRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({
+        id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'severity',
+        interval: '5m',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        threats: [
+          {
+            framework: 'fake',
+            tactic: {
+              id: 'fakeId',
+              name: 'fakeName',
+              reference: 'fakeRef',
+            },
+            technique: {
+              id: 'techniqueId',
+              name: 'techniqueName',
+              reference: 'techniqueRef',
+            },
+          },
+        ],
+      }).value.threats
+    ).toMatchObject(expected);
+  });
+  test('threats is invalid when updated with missing property framework', () => {
+    expect(
+      updateRulesSchema.validate<
+        Partial<Omit<UpdateRuleAlertParamsRest, 'threats'>> & {
+          threats: Array<Partial<Omit<ThreatParams, 'framework'>>>;
+        }
+      >({
+        id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'severity',
+        interval: '5m',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        threats: [
+          {
+            tactic: {
+              id: 'fakeId',
+              name: 'fakeName',
+              reference: 'fakeRef',
+            },
+            technique: {
+              id: 'techniqueId',
+              name: 'techniqueName',
+              reference: 'techniqueRef',
+            },
+          },
+        ],
+      }).error
+    ).toBeTruthy();
+  });
+  test('threats is invalid when updated with missing tactic sub-object', () => {
+    expect(
+      updateRulesSchema.validate<
+        Partial<Omit<UpdateRuleAlertParamsRest, 'threats'>> & {
+          threats: Array<Partial<Omit<ThreatParams, 'tactic'>>>;
+        }
+      >({
+        id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'severity',
+        interval: '5m',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        threats: [
+          {
+            framework: 'fake',
+            technique: {
+              id: 'techniqueId',
+              name: 'techniqueName',
+              reference: 'techniqueRef',
+            },
+          },
+        ],
+      }).error
+    ).toBeTruthy();
+  });
+  test('threats is invalid when updated with missing technique sub-object', () => {
+    expect(
+      updateRulesSchema.validate<
+        Partial<Omit<UpdateRuleAlertParamsRest, 'threats'>> & {
+          threats: Array<Partial<Omit<ThreatParams, 'technique'>>>;
+        }
+      >({
+        id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'severity',
+        interval: '5m',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        threats: [
+          {
+            framework: 'fake',
+            tactic: {
+              id: 'techniqueId',
+              name: 'techniqueName',
+              reference: 'techniqueRef',
+            },
+          },
+        ],
+      }).error
+    ).toBeTruthy();
   });
 
   describe('find rules schema', () => {

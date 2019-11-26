@@ -135,7 +135,7 @@ export const createRulesSchema = Joi.object({
   tags: tags.default([]),
   to: to.required(),
   type: type.required(),
-  threats,
+  threats: threats.default([]),
   references: references.default([]),
 });
 
@@ -191,7 +191,7 @@ export const updateRulesSchema = Joi.object({
   tags,
   to,
   type,
-  threats: threats.optional(),
+  threats,
   references,
 }).xor('id', 'rule_id');
 
