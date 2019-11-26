@@ -128,3 +128,17 @@ export async function canSkipSourceUpdate({ source, prevDataRequest, nextMeta })
     && !updateDueToPrecisionChange
     && !updateDueToSourceMetaChange;
 }
+
+export function canSkipStyleMetaUpdate({ prevDataRequest, nextMeta }) {
+  if (!prevDataRequest) {
+    return false;
+  }
+  const prevMeta = prevDataRequest.getMeta();
+  if (!prevMeta) {
+    return false;
+  }
+
+  const updateDueToFields = !_.isEqual(prevMeta.dynamicStyleFields, nextMeta.dynamicStyleFields);
+
+  return !updateDueToFields;
+}

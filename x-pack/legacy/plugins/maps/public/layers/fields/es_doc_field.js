@@ -45,7 +45,7 @@ export class ESDocField extends AbstractField {
         extendedStats.field = this._fieldName;
       }
       return {
-        [`${this._fieldName}_range_stats`]: {
+        [this._fieldName]: {
           extended_stats: extendedStats
         }
       };

@@ -22,6 +22,10 @@ export class DataRequest {
   }
 
   getMeta() {
+    if (!this.hasData()) {
+      return _.get(this._descriptor, 'dataMetaAtStart', {});
+    }
+
     return _.get(this._descriptor, 'dataMeta', {});
   }
 

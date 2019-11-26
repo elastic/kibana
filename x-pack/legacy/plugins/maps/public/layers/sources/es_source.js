@@ -307,7 +307,7 @@ export class AbstractESSource extends AbstractVectorSource {
       }),
       `${this.getId()}_styleMeta`);
 
-    return resp;
+    return resp.aggregations;
   }
 
 }

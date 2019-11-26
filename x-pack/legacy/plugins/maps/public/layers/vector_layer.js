@@ -23,7 +23,7 @@ import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataRequestAbortError } from './util/data_request';
-import { canSkipSourceUpdate } from './util/can_skip_fetch';
+import { canSkipSourceUpdate, canSkipStyleMetaUpdate } from './util/can_skip_fetch';
 import { assignFeatureIds } from './util/assign_feature_ids';
 import {
   getFillFilterExpression,
@@ -399,11 +399,6 @@ export class VectorLayer extends AbstractLayer {
       return;
     }
 
-    const sourceMetaDataRequest = this._findDataRequestForSource(SOURCE_META_ID_ORIGIN);
-    if (sourceMetaDataRequest) {
-      return;
-    }
-
     const dynamicStyleProps = this._style.getDynamicPropertiesArray()
       .filter(dynamicStyleProp => {
         return dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE && dynamicStyleProp.supportsFieldMeta();
@@ -412,14 +407,25 @@ export class VectorLayer extends AbstractLayer {
       return;
     }
 
+    const nextMeta = {
+      dynamicStyleFields: dynamicStyleProps.map(dynamicStyleProp => {
+        return dynamicStyleProp.getField().getName();
+      }),
+      // TODO include time range?, make this user configurable?
+    };
+    const prevDataRequest = this._findDataRequestForSource(SOURCE_META_ID_ORIGIN);
+    const canSkipFetch = canSkipStyleMetaUpdate({ prevDataRequest, nextMeta });
+    if (canSkipFetch) {
+      return;
+    }
+
     const requestToken = Symbol(`layer-source-meta:${this.getId()}`);
     try {
-      const requestMeta = {}; // TODO include time range?
-      startLoading(SOURCE_META_ID_ORIGIN, requestToken, requestMeta);
+      startLoading(SOURCE_META_ID_ORIGIN, requestToken, nextMeta);
       const layerName = await this.getDisplayName();
       const styleMeta = await this._source.loadStylePropsMeta(layerName, dynamicStyleProps, registerCancelCallback);
       console.log(styleMeta);
-      stopLoading(SOURCE_META_ID_ORIGIN, requestToken, styleMeta, requestMeta);
+      stopLoading(SOURCE_META_ID_ORIGIN, requestToken, styleMeta, nextMeta);
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {
         onLoadError(SOURCE_META_ID_ORIGIN, requestToken, error.message);
