@@ -25,7 +25,7 @@ import { dirname, join } from 'path';
 // look for telemetry.yml in the same places we expect kibana.yml
 import { ensureDeepObject } from './ensure_deep_object';
 import { getXpackConfigWithDeprecated } from '../../../common/get_xpack_config_with_deprecated';
-import { PluginSetupContract as UsageCollectionPluginSetupContract } from '../../../../../../plugins/usage_collection/server';
+import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/server';
 
 /**
  * The maximum file size before we ignore it (note: this limit is arbitrary).
@@ -77,7 +77,7 @@ export async function readTelemetryFile(path: string): Promise<object | undefine
 }
 
 export function createTelemetryUsageCollector(
-  usageCollection: UsageCollectionPluginSetupContract,
+  usageCollection: UsageCollectionSetup,
   server: Server
 ) {
   return usageCollection.makeUsageCollector({
@@ -93,7 +93,7 @@ export function createTelemetryUsageCollector(
 }
 
 export function registerTelemetryUsageCollector(
-  usageCollection: UsageCollectionPluginSetupContract,
+  usageCollection: UsageCollectionSetup,
   server: Server
 ) {
   const collector = createTelemetryUsageCollector(usageCollection, server);

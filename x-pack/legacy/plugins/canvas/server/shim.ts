@@ -69,7 +69,7 @@ export async function createSetupShim(
         // @ts-ignore: Missing from Legacy Server Type
         addAppLinksToSampleDataset: server.addAppLinksToSampleDataset,
       },
-      usageCollection: server.newPlatform.setup.plugins,
+      usageCollection: server.newPlatform.setup.plugins.usageCollection,
     },
   };
 }

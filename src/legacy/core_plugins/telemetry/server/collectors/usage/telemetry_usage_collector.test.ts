@@ -27,12 +27,10 @@ import {
   readTelemetryFile,
   MAX_FILE_SIZE,
 } from './telemetry_usage_collector';
-import { PluginSetupContract as UsageCollectionPluginSetupContract } from '../../../../../../plugins/usage_collection/server';
 
-const mockUsageCollector = () =>
-  (({
-    makeUsageCollector: jest.fn().mockImplementationOnce((arg: object) => arg),
-  } as any) as UsageCollectionPluginSetupContract);
+const mockUsageCollector = () => ({
+  makeUsageCollector: jest.fn().mockImplementationOnce((arg: object) => arg),
+});
 
 const serverWithConfig = (configPath: string): Server => {
   return {
@@ -134,7 +132,8 @@ describe('telemetry_usage_collector', () => {
       const server: Server = serverWithConfig(tempFiles.unreadable);
 
       // the `makeUsageCollector` is mocked above to return the argument passed to it
-      const collectorOptions = createTelemetryUsageCollector(mockUsageCollector(), server);
+      const usageCollector = mockUsageCollector() as any;
+      const collectorOptions = createTelemetryUsageCollector(usageCollector, server);
 
       expect(collectorOptions.type).toBe('static_telemetry');
       expect(await collectorOptions.fetch()).toEqual(expectedObject);

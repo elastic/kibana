@@ -72,7 +72,7 @@ describe('with a basic license', () => {
     const { features, licensing, usageCollecion } = setup({
       license: { isAvailable: true, type: 'basic' },
     });
-    const { fetch: getSpacesUsage } = getSpacesUsageCollector(usageCollecion, {
+    const { fetch: getSpacesUsage } = getSpacesUsageCollector(usageCollecion as any, {
       kibanaIndex: '.kibana',
       features,
       licensing,
@@ -106,7 +106,7 @@ describe('with no license', () => {
   let usageStats: UsageStats;
   beforeAll(async () => {
     const { features, licensing, usageCollecion } = setup({ license: { isAvailable: false } });
-    const { fetch: getSpacesUsage } = getSpacesUsageCollector(usageCollecion, {
+    const { fetch: getSpacesUsage } = getSpacesUsageCollector(usageCollecion as any, {
       kibanaIndex: '.kibana',
       features,
       licensing,

@@ -7,9 +7,8 @@
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { CapabilitiesModifier } from 'src/legacy/server/capabilities';
-import { PluginSetupContract as UsageCollectionPluginSetup } from 'src/plugins/usage_collection/server';
-import { HomeServerPluginSetup } from 'src/plugins/home/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { HomeServerPluginSetup } from 'src/plugins/home/server';
 import {
   SavedObjectsLegacyService,
   CoreSetup,
@@ -172,7 +171,7 @@ export class Plugin {
     spacesService: SpacesServiceSetup,
     featuresSetup: FeaturesPluginSetup,
     licensingSetup: LicensingPluginSetup,
-    usageCollectionSetup?: UsageCollectionPluginSetup
+    usageCollectionSetup?: UsageCollectionSetup
   ) {
     const legacyAPI = this.getLegacyAPI();
     const { addScopedSavedObjectsClientWrapperFactory, types } = legacyAPI.savedObjects;

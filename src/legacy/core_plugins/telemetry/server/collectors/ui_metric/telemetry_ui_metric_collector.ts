@@ -18,12 +18,9 @@
  */
 
 import { UI_METRIC_USAGE_TYPE } from '../../../common/constants';
-import { PluginSetupContract as UsageCollectionPluginSetupContract } from '../../../../../../plugins/usage_collection/server';
+import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/server';
 
-export function registerUiMetricUsageCollector(
-  usageCollection: UsageCollectionPluginSetupContract,
-  server: any
-) {
+export function registerUiMetricUsageCollector(usageCollection: UsageCollectionSetup, server: any) {
   const collector = usageCollection.makeUsageCollector({
     type: UI_METRIC_USAGE_TYPE,
     fetch: async () => {

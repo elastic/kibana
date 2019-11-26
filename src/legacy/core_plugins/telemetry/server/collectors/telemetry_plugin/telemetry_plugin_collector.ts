@@ -20,7 +20,7 @@
 import { TELEMETRY_STATS_TYPE } from '../../../common/constants';
 import { getTelemetrySavedObject, TelemetrySavedObject } from '../../telemetry_repository';
 import { getTelemetryOptIn, getTelemetrySendUsageFrom } from '../../telemetry_config';
-import { PluginSetupContract as UsageCollectionPluginSetupContract } from '../../../../../../plugins/usage_collection/server';
+import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/server';
 
 export interface TelemetryUsageStats {
   opt_in_status?: boolean | null;
@@ -64,7 +64,7 @@ export function createCollectorFetch(server: any) {
 }
 
 export function registerTelemetryPluginUsageCollector(
-  usageCollection: UsageCollectionPluginSetupContract,
+  usageCollection: UsageCollectionSetup,
   server: any
 ) {
   const collector = usageCollection.makeUsageCollector({

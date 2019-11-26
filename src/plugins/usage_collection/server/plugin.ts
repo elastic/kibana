@@ -31,7 +31,7 @@ export class Plugin {
     this.logger = this.initializerContext.logger.get();
   }
 
-  public async setup(): Promise<PluginSetupContract> {
+  public async setup(): Promise<UsageCollectionSetup> {
     const config = await this.initializerContext.config
       .create<TypeOf<typeof ConfigSchema>>()
       .pipe(first())

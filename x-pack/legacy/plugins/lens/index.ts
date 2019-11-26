@@ -8,7 +8,6 @@ import * as Joi from 'joi';
 import { resolve } from 'path';
 import { LegacyPluginInitializer } from 'src/legacy/types';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import mappings from './mappings.json';
 import { PLUGIN_ID, getEditPath } from './common';
 import { lensServerPlugin } from './server';
