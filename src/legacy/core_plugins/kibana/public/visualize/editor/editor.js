@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import angular from 'angular';
 import _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
@@ -77,7 +78,6 @@ function VisualizeAppController(
   globalState,
 ) {
   const {
-    angular,
     indexPatterns,
     localStorage,
     visualizeCapabilities,

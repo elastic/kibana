@@ -20,7 +20,7 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
-import { VisType } from 'ui/vis';
+import { VisType } from '../legacy_imports';
 import { TypesStart } from '../../../../visualizations/public/np_ready/public/types';
 
 jest.mock('../legacy_imports', () => ({

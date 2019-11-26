@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { IAngularStatic } from 'angular';
 import {
   ChromeStart,
   LegacyCoreStart,
@@ -25,40 +24,40 @@ import {
   ToastsStart,
   UiSettingsClientContract,
 } from 'kibana/public';
+import { StaticIndexPattern } from 'plugins/data';
 
 import { DataStart } from '../../../data/public';
 
-import { SavedQueryService } from '../../../data/public/search/search_bar/lib/saved_query_service';
 import { NavigationStart } from '../../../navigation/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
+import { VisualizationsStart } from '../../../visualizations/public';
 import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
 import { SavedVisualizations } from './types';
 
 export interface VisualizeKibanaServices {
   addBasePath: (url: string) => string;
-  angular: IAngularStatic;
   chrome: ChromeStart;
-  legacyChrome: any;
   core: LegacyCoreStart;
   dataStart: DataStart;
   editorTypes: any;
-  npDataStart: NpDataStart;
   embeddables: IEmbeddableStart;
   getBasePath: () => string;
-  indexPatterns: any;
+  indexPatterns: StaticIndexPattern[];
+  legacyChrome: any;
   localStorage: Storage;
   navigation: NavigationStart;
+  npDataStart: NpDataStart;
   toastNotifications: ToastsStart;
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectRegistry: any;
-  savedQueryService: SavedQueryService;
+  savedQueryService: DataStart['search']['services']['savedQueryService'];
   savedVisualizations: SavedVisualizations;
   share: SharePluginStart;
   uiSettings: UiSettingsClientContract;
   visualizeCapabilities: any;
-  visualizations: any;
+  visualizations: VisualizationsStart;
 }
 
 let services: VisualizeKibanaServices | null = null;

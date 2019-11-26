@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { IAngularStatic } from 'angular';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -28,6 +27,7 @@ import {
   Plugin,
   SavedObjectsClientContract,
 } from 'kibana/public';
+
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { DataStart } from '../../../data/public';
 import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
@@ -44,7 +44,7 @@ import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../../plugins/home/public';
-import { defaultEditor } from './legacy_imports';
+import { defaultEditor, VisEditorTypesRegistryProvider } from './legacy_imports';
 import { SavedVisualizations } from './types';
 
 export interface LegacyAngularInjectedDependencies {
@@ -65,10 +65,8 @@ export interface VisualizePluginStartDependencies {
 
 export interface VisualizePluginSetupDependencies {
   __LEGACY: {
-    angular: IAngularStatic;
     getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
   };
-  VisEditorTypesRegistryProvider: any;
   home: HomePublicPluginSetup;
   kibana_legacy: KibanaLegacySetup;
 }
@@ -86,12 +84,7 @@ export class VisualizePlugin implements Plugin {
 
   public async setup(
     core: CoreSetup,
-    {
-      home,
-      kibana_legacy,
-      VisEditorTypesRegistryProvider,
-      __LEGACY: { getAngularDependencies, angular },
-    }: VisualizePluginSetupDependencies
+    { home, kibana_legacy, __LEGACY: { getAngularDependencies } }: VisualizePluginSetupDependencies
   ) {
     const app: App = {
       id: '',
@@ -113,18 +106,17 @@ export class VisualizePlugin implements Plugin {
 
         const angularDependencies = await getAngularDependencies();
         const deps: VisualizeKibanaServices = {
-          angular,
           ...angularDependencies,
           addBasePath: contextCore.http.basePath.prepend,
           core: contextCore as LegacyCoreStart,
           chrome: contextCore.chrome,
           dataStart,
-          npDataStart,
           embeddables,
           getBasePath: core.http.basePath.get,
           indexPatterns: dataStart.indexPatterns.indexPatterns,
           localStorage: new Storage(localStorage),
           navigation,
+          npDataStart,
           savedObjectsClient,
           savedQueryService: dataStart.search.services.savedQueryService,
           share,

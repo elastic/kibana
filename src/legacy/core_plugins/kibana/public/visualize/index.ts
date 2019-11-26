@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import angular from 'angular';
-import 'angular-sanitize';
 import 'ui/collapsible_sidebar'; // used in default editor
 import 'ui/vis/editors/default/sidebar';
 
@@ -60,10 +58,7 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
   const instance = new VisualizePlugin();
   instance.setup(npSetup.core, {
     ...npSetup.plugins,
-    VisEditorTypesRegistryProvider,
     __LEGACY: {
-      // angular is passed to kibana_services since it's used in editor.js
-      angular,
       getAngularDependencies,
     },
   });

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IModule, IAngularStatic } from 'angular';
+import angular, { IModule } from 'angular';
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 
@@ -53,13 +53,13 @@ export const renderApp = async (
   deps: VisualizeKibanaServices
 ) => {
   if (!angularModuleInstance) {
-    angularModuleInstance = createLocalAngularModule(deps.core, deps.navigation, deps.angular);
+    angularModuleInstance = createLocalAngularModule(deps.core, deps.navigation);
     // global routing stuff
     configureAppAngularModule(angularModuleInstance, deps.core as LegacyCoreStart, true);
     // custom routing stuff
     initVisualizeApp(angularModuleInstance, deps);
   }
-  const $injector = mountVisualizeApp(appBasePath, element, deps.angular);
+  const $injector = mountVisualizeApp(appBasePath, element);
   return () => {
     $injector.get('$rootScope').$destroy();
   };
@@ -75,7 +75,7 @@ const moduleName = 'app/visualize';
 
 const thirdPartyAngularDependencies = ['ngSanitize', 'ngRoute', 'react'];
 
-function mountVisualizeApp(appBasePath: string, element: HTMLElement, angular: IAngularStatic) {
+function mountVisualizeApp(appBasePath: string, element: HTMLElement) {
   const mountpoint = document.createElement('div');
   mountpoint.setAttribute('style', 'height: 100%');
   mountpoint.innerHTML = mainTemplate(appBasePath);
@@ -88,20 +88,16 @@ function mountVisualizeApp(appBasePath: string, element: HTMLElement, angular: I
   return $injector;
 }
 
-function createLocalAngularModule(
-  core: AppMountContext['core'],
-  navigation: NavigationStart,
-  angular: IAngularStatic
-) {
-  createLocalI18nModule(angular);
-  createLocalPrivateModule(angular);
-  createLocalPromiseModule(angular);
-  createLocalConfigModule(core, angular);
-  createLocalKbnUrlModule(angular);
-  createLocalStateModule(angular);
-  createLocalPersistedStateModule(angular);
-  createLocalTopNavModule(navigation, angular);
-  createLocalConfirmModalModule(angular);
+function createLocalAngularModule(core: AppMountContext['core'], navigation: NavigationStart) {
+  createLocalI18nModule();
+  createLocalPrivateModule();
+  createLocalPromiseModule();
+  createLocalConfigModule(core);
+  createLocalKbnUrlModule();
+  createLocalStateModule();
+  createLocalPersistedStateModule();
+  createLocalTopNavModule(navigation);
+  createLocalConfirmModalModule();
 
   const visualizeAngularModule: IModule = angular.module(moduleName, [
     ...thirdPartyAngularDependencies,
@@ -116,14 +112,14 @@ function createLocalAngularModule(
   return visualizeAngularModule;
 }
 
-function createLocalConfirmModalModule(angular: IAngularStatic) {
+function createLocalConfirmModalModule() {
   angular
     .module('app/visualize/ConfirmModal', ['react'])
     .factory('confirmModal', confirmModalFactory)
     .directive('confirmModal', reactDirective => reactDirective(EuiConfirmModal));
 }
 
-function createLocalStateModule(angular: IAngularStatic) {
+function createLocalStateModule() {
   angular
     .module('app/visualize/State', [
       'app/visualize/Private',
@@ -143,7 +139,7 @@ function createLocalStateModule(angular: IAngularStatic) {
     });
 }
 
-function createLocalPersistedStateModule(angular: IAngularStatic) {
+function createLocalPersistedStateModule() {
   angular
     .module('app/visualize/PersistedState', ['app/visualize/Private', 'app/visualize/Promise'])
     .factory('PersistedState', (Private: IPrivate) => {
@@ -156,14 +152,14 @@ function createLocalPersistedStateModule(angular: IAngularStatic) {
     });
 }
 
-function createLocalKbnUrlModule(angular: IAngularStatic) {
+function createLocalKbnUrlModule() {
   angular
     .module('app/visualize/KbnUrl', ['app/visualize/Private', 'ngRoute'])
     .service('kbnUrl', (Private: IPrivate) => Private(KbnUrlProvider))
     .service('redirectWhenMissing', (Private: IPrivate) => Private(RedirectWhenMissingProvider));
 }
 
-function createLocalConfigModule(core: AppMountContext['core'], angular: IAngularStatic) {
+function createLocalConfigModule(core: AppMountContext['core']) {
   angular
     .module('app/visualize/Config', ['app/visualize/Private'])
     .provider('stateManagementConfig', StateManagementConfigProvider)
@@ -176,22 +172,22 @@ function createLocalConfigModule(core: AppMountContext['core'], angular: IAngula
     });
 }
 
-function createLocalPromiseModule(angular: IAngularStatic) {
+function createLocalPromiseModule() {
   angular.module('app/visualize/Promise', []).service('Promise', PromiseServiceCreator);
 }
 
-function createLocalPrivateModule(angular: IAngularStatic) {
+function createLocalPrivateModule() {
   angular.module('app/visualize/Private', []).provider('Private', PrivateProvider);
 }
 
-function createLocalTopNavModule(navigation: NavigationStart, angular: IAngularStatic) {
+function createLocalTopNavModule(navigation: NavigationStart) {
   angular
     .module('app/visualize/TopNav', ['react'])
     .directive('kbnTopNav', createTopNavDirective)
     .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui));
 }
 
-function createLocalI18nModule(angular: IAngularStatic) {
+function createLocalI18nModule() {
   angular
     .module('app/visualize/I18n', [])
     .provider('i18n', I18nProvider)

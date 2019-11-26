@@ -29,47 +29,48 @@ import chrome from 'ui/chrome';
 export const legacyChrome = chrome;
 
 export { State } from 'ui/state_management/state';
-export { AppState } from 'ui/state_management/app_state';
 // @ts-ignore
-export { AppStateProvider } from 'ui/state_management/app_state';
-export { npSetup, npStart } from 'ui/new_platform';
-export { SavedObjectRegistryProvider, SavedObjectsClientProvider } from 'ui/saved_objects';
-export { IPrivate } from 'ui/private';
-export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
-export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
-export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
+export { AppState, AppStateProvider } from 'ui/state_management/app_state';
 // @ts-ignore
 export { GlobalStateProvider } from 'ui/state_management/global_state';
 // @ts-ignore
 export { StateManagementConfigProvider } from 'ui/state_management/config_provider';
+export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
+export { unhashUrl } from 'ui/state_management/state_hashing';
+export { PersistedState } from 'ui/persisted_state';
+
+export { npSetup, npStart } from 'ui/new_platform';
+export { IPrivate } from 'ui/private';
 // @ts-ignore
 export { PrivateProvider } from 'ui/private/private';
+
+export { SavedObjectRegistryProvider } from 'ui/saved_objects';
+export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
+export { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
+export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
+
+export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
+export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 // @ts-ignore
 export { EventsProvider } from 'ui/events';
-export { PersistedState } from 'ui/persisted_state';
 // @ts-ignore
 export { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
 // @ts-ignore
 export { PromiseServiceCreator } from 'ui/promises/promises';
 // @ts-ignore
-export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
-// @ts-ignore
 export { confirmModalFactory } from 'ui/modals/confirm_modal';
-export { configureAppAngularModule } from 'ui/legacy_compat';
-
+export { configureAppAngularModule, ensureDefaultIndexPattern } from 'ui/legacy_compat';
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
-export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 // @ts-ignore
 export { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
 
+// @ts-ignore
+export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
 export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 export { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
-export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
+
 // @ts-ignore
 export { defaultEditor } from 'ui/vis/editors/default/default';
 export { VisType } from 'ui/vis';
-export { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 export { memoizeLast } from 'ui/utils/memoize';
 export { wrapInI18nContext } from 'ui/i18n';
-export { unhashUrl } from 'ui/state_management/state_hashing';
