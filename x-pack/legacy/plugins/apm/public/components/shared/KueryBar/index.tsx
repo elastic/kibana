@@ -7,7 +7,6 @@
 import React, { useState } from 'react';
 import { uniqueId, startsWith } from 'lodash';
 import styled from 'styled-components';
-import { StaticIndexPattern } from 'ui/index_patterns';
 import { i18n } from '@kbn/i18n';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 // @ts-ignore
@@ -21,7 +20,9 @@ import { useDynamicIndexPattern } from '../../../hooks/useDynamicIndexPattern';
 import {
   esKuery,
   AutocompleteProvider,
-  AutocompleteSuggestion
+  AutocompleteSuggestion,
+  esKuery,
+  IIndexPattern
 } from '../../../../../../../../src/plugins/data/public';
 
 const Container = styled.div`
@@ -35,7 +36,7 @@ interface State {
 
 function convertKueryToEsQuery(
   kuery: string,
-  indexPattern: StaticIndexPattern
+  indexPattern: IIndexPattern
 ) {
   const ast = esKuery.fromKueryExpression(kuery);
   return esKuery.toElasticsearchQuery(ast, indexPattern);
@@ -44,7 +45,7 @@ function convertKueryToEsQuery(
 function getSuggestions(
   query: string,
   selectionStart: number,
-  indexPattern: StaticIndexPattern,
+  indexPattern: IIndexPattern,
   boolFilter: unknown,
   autocompleteProvider?: AutocompleteProvider
 ) {
