@@ -328,24 +328,22 @@ export const FooterComponent = ({
     </>
   );
 };
-// TODO: check if it's necessary
-// (prevProps, nextProps) => {
-//   return (
-//     prevProps.compact === nextProps.compact &&
-//     prevProps.hasNextPage === nextProps.hasNextPage &&
-//     prevProps.height === nextProps.height &&
-//     prevProps.isEventViewer === nextProps.isEventViewer &&
-//     prevProps.isLive === nextProps.isLive &&
-//     prevProps.isLoading === nextProps.isLoading &&
-//     prevProps.itemsCount === nextProps.itemsCount &&
-//     prevProps.itemsPerPage === nextProps.itemsPerPage &&
-//     prevProps.itemsPerPageOptions === nextProps.itemsPerPageOptions &&
-//     prevProps.serverSideEventCount === nextProps.serverSideEventCount
-//   );
-// };
 
 FooterComponent.displayName = 'FooterComponent';
 
-export const Footer = React.memo(FooterComponent);
+export const Footer = React.memo(
+  FooterComponent,
+  (prevProps, nextProps) =>
+    prevProps.compact === nextProps.compact &&
+    prevProps.hasNextPage === nextProps.hasNextPage &&
+    prevProps.height === nextProps.height &&
+    prevProps.isEventViewer === nextProps.isEventViewer &&
+    prevProps.isLive === nextProps.isLive &&
+    prevProps.isLoading === nextProps.isLoading &&
+    prevProps.itemsCount === nextProps.itemsCount &&
+    prevProps.itemsPerPage === nextProps.itemsPerPage &&
+    prevProps.itemsPerPageOptions === nextProps.itemsPerPageOptions &&
+    prevProps.serverSideEventCount === nextProps.serverSideEventCount
+);
 
 Footer.displayName = 'Footer';
