@@ -18,7 +18,7 @@
  */
 
 import { HttpServiceBase } from 'src/core/public';
-import { IndexPatternMissingIndices } from '../errors';
+import { IndexPatternMissingIndices } from '../../';
 
 const API_BASE_URL: string = `/api/index_patterns/`;
 

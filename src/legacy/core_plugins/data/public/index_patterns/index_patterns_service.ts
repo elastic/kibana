@@ -92,23 +92,6 @@ export class IndexPatternsService {
 
 /** @public */
 export { IndexPatternSelect } from './components';
-export {
-  CONTAINS_SPACES,
-  getFromSavedObject,
-  getRoutes,
-  ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-  validateIndexPattern,
-} from './utils';
-
-/** @public */
-export {
-  IndexPatternAlreadyExists,
-  IndexPatternMissingIndices,
-  NoDefaultIndexPattern,
-  NoDefinedIndexPatterns,
-} from './errors';
 
 // types
 
@@ -118,6 +101,3 @@ export type IndexPatternsStart = ReturnType<IndexPatternsService['start']>;
 
 /** @public */
 export { IndexPattern, IndexPatterns, StaticIndexPattern, Field, FieldType, FieldListInterface };
-
-/** @public */
-export { getIndexPatternTitle, findIndexPatternByTitle } from './utils';

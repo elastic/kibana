@@ -30,7 +30,7 @@ import {
 
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
 
-import { findIndexPatternByTitle, getRoutes } from '../utils';
+import { findByTitle, getRoutes } from '../utils';
 import { errors } from '../errors';
 import { Field, FieldList, FieldListInterface } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
@@ -375,10 +375,7 @@ export class IndexPattern implements IIndexPattern {
       return response.id;
     };
 
-    const potentialDuplicateByTitle = await findIndexPatternByTitle(
-      this.savedObjectsClient,
-      this.title
-    );
+    const potentialDuplicateByTitle = await findByTitle(this.savedObjectsClient, this.title);
     // If there is potentially duplicate title, just create it
     if (!potentialDuplicateByTitle) {
       return await _create();

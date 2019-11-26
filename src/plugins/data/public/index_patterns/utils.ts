@@ -43,7 +43,7 @@ function findIllegalCharacters(indexPattern: string): string[] {
  * @param title {string}
  * @returns {Promise<SimpleSavedObject|undefined>}
  */
-export async function findIndexPatternByTitle(
+export async function findByTitle(
   client: SavedObjectsClientContract,
   title: string
 ): Promise<SimpleSavedObject<any> | void> {
@@ -65,7 +65,7 @@ export async function findIndexPatternByTitle(
   );
 }
 
-export async function getIndexPatternTitle(
+export async function getTitle(
   client: SavedObjectsClientContract,
   indexPatternId: string
 ): Promise<SimpleSavedObject<any>> {

@@ -18,7 +18,7 @@
  */
 import { isEmpty } from 'lodash';
 import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
-import { getFromSavedObject } from '../../../index_patterns';
+import { getFromSavedObject } from '../../../';
 
 export async function fetchIndexPatterns(
   savedObjectsClient: SavedObjectsClientContract,

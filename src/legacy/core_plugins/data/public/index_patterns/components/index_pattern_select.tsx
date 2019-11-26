@@ -22,7 +22,7 @@ import React, { Component } from 'react';
 
 import { EuiComboBox } from '@elastic/eui';
 import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../../core/public';
-import { getIndexPatternTitle } from '../utils';
+import { getIndexPatternTitle } from '../../';
 
 interface IndexPatternSelectProps {
   onChange: (opt: any) => void;

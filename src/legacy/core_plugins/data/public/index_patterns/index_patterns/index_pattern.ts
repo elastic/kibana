@@ -34,8 +34,7 @@ import {
   IIndexPattern,
 } from '../../../../../../plugins/data/public';
 
-import { findIndexPatternByTitle, getRoutes } from '../utils';
-import { IndexPatternMissingIndices } from '../errors';
+import { getRoutes, findIndexPatternByTitle, IndexPatternMissingIndices } from '../../';
 import { Field, FieldList, FieldListInterface, FieldType } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
