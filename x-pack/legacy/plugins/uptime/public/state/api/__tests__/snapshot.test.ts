@@ -28,11 +28,11 @@ describe('snapshot API', () => {
       basePath: '',
       dateRangeStart: 'now-15m',
       dateRangeEnd: 'now',
-      filters: 'monitor.id: baz',
+      filters: 'monitor.id:"auto-http-0X21EE76EAC459873F"',
       statusFilter: 'up',
     });
     expect(fetchMock).toHaveBeenCalledWith(
-      '/api/uptime/snapshot/count?dateRangeStart=now-15m&dateRangeEnd=now&filters=monitor.id:%20baz&statusFilter=up'
+      '/api/uptime/snapshot/count?dateRangeStart=now-15m&dateRangeEnd=now&filters=monitor.id%3A%22auto-http-0X21EE76EAC459873F%22&statusFilter=up'
     );
     expect(resp).toEqual({ up: 3, down: 12, mixed: 0, total: 15 });
   });
