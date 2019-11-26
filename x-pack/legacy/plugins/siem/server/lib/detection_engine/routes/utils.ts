@@ -50,7 +50,6 @@ export const transformAlertToSignal = (signal: SignalAlertType): Partial<OutputS
     saved_id: signal.params.savedId,
     meta: signal.params.meta,
     severity: signal.params.severity,
-    size: signal.params.size,
     updated_by: signal.updatedBy,
     tags: signal.params.tags,
     to: signal.params.to,
