@@ -18,6 +18,14 @@
  */
 import { SavedObject } from 'src/core/server';
 
+export interface SampleDatasetDashboardPanel {
+  sampleDataId: string;
+  dashboardId: string;
+  oldEmbeddableId: string;
+  embeddableId: string;
+  embeddableType: EmbeddableTypes;
+  embeddableConfig: object;
+}
 export enum EmbeddableTypes {
   MAP_SAVED_OBJECT_TYPE = 'map',
   SEARCH_EMBEDDABLE_TYPE = 'search',
@@ -63,7 +71,7 @@ export interface SampleDatasetSchema {
 
   // saved object id of main dashboard for sample data set
   overviewDashboard: string;
-  appLinks?: AppLinkSchema[];
+  appLinks: AppLinkSchema[];
 
   // saved object id of default index-pattern for sample data set
   defaultIndex: string;

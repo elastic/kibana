@@ -8,6 +8,7 @@ import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { Legacy } from 'kibana';
 
 import { CoreSetup as ExistingCoreSetup } from 'src/core/server';
+import { HomeServerPluginSetup } from 'src/plugins/home/server';
 import { PluginSetupContract } from '../../../../plugins/features/server';
 
 export interface CoreSetup {
@@ -22,15 +23,12 @@ export interface CoreSetup {
 
 export interface PluginsSetup {
   features: PluginSetupContract;
+  home: HomeServerPluginSetup;
   interpreter: {
     register: (specs: any) => any;
   };
   kibana: {
     injectedUiAppVars: ReturnType<Legacy.Server['getInjectedUiAppVars']>;
-  };
-  sampleData: {
-    addSavedObjectsToSampleDataset: any;
-    addAppLinksToSampleDataset: any;
   };
   usage: Legacy.Server['usage'];
 }
@@ -40,7 +38,6 @@ export async function createSetupShim(
 ): Promise<{ coreSetup: CoreSetup; pluginsSetup: PluginsSetup }> {
   // @ts-ignore: New Platform object not typed
   const setup: ExistingCoreSetup = server.newPlatform.setup.core;
-
   return {
     coreSetup: {
       ...setup,
@@ -57,16 +54,16 @@ export async function createSetupShim(
     pluginsSetup: {
       // @ts-ignore: New Platform not typed
       features: server.newPlatform.setup.plugins.features,
+      /*
+      TODO: Fix Home plugin typing
+      Home not typed propperly, error is: Type '{}' is missing the following properties from type 'HomeServerPluginSetup': tutorials, sampleData
+      */
+      // @ts-ignore: Home plugin typing
+      home: server.newPlatform.setup.plugins.home,
       // @ts-ignore Interpreter plugin not typed on legacy server
       interpreter: server.plugins.interpreter,
       kibana: {
         injectedUiAppVars: await server.getInjectedUiAppVars('kibana'),
-      },
-      sampleData: {
-        // @ts-ignore: Missing from Legacy Server Type
-        addSavedObjectsToSampleDataset: server.addSavedObjectsToSampleDataset,
-        // @ts-ignore: Missing from Legacy Server Type
-        addAppLinksToSampleDataset: server.addAppLinksToSampleDataset,
       },
       usage: server.usage,
     },

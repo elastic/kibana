@@ -107,6 +107,14 @@ export function createInstallRoute(
       */
       const validDate = Joi.validate(query, querySchema);
       if (!validDate) {
+        /*
+        TODO: add optional query item to @kbn/config-schema
+        Having to use a custom Joi validation and over-ride the IRouter config-schema requirements,
+        we end up with query: Readonly<{}>.
+        Once we have an optional query item in config-schema,
+        we can remove this ignore.Property 'now' does not exist on type 'Readonly<{}>'
+        */
+        //  @ts-ignore
         const errMsg = `Invalid date supplied "${query.now}", using current date`;
         initContext.logger.get().debug(errMsg, ['warning']);
       }
@@ -114,6 +122,7 @@ export function createInstallRoute(
       if (!sampleDataset) {
         return res.notFound();
       }
+      //  @ts-ignore Custom query validation used
       const now = query.now ? query.now : new Date();
       const nowReference = dateToIso8601IgnoringTime(now);
       const counts = {};
