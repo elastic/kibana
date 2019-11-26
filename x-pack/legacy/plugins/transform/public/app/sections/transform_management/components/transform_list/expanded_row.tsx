@@ -121,7 +121,8 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
 
   const tabs = [
     {
-      id: 'transform-details',
+      id: `transform-details-tab-${item.id}`,
+      'data-test-subj': 'transformDetailsTab',
       name: i18n.translate(
         'xpack.transform.transformList.transformDetails.tabs.transformSettingsLabel',
         {
@@ -131,12 +132,14 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       content: <ExpandedRowDetailsPane sections={[state, checkpointing, stats]} />,
     },
     {
-      id: 'transform-json',
+      id: `transform-json-tab-${item.id}`,
+      'data-test-subj': 'transformJsonTab',
       name: 'JSON',
       content: <ExpandedRowJsonPane json={item.config} />,
     },
     {
-      id: 'transform-messages',
+      id: `transform-messages-tab-${item.id}`,
+      'data-test-subj': 'transformMessagesTab',
       name: i18n.translate(
         'xpack.transform.transformList.transformDetails.tabs.transformMessagesLabel',
         {
@@ -146,7 +149,8 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       content: <ExpandedRowMessagesPane transformId={item.id} />,
     },
     {
-      id: 'transform-preview',
+      id: `transform-preview-tab-${item.id}`,
+      'data-test-subj': 'transformPreviewTab',
       name: i18n.translate(
         'xpack.transform.transformList.transformDetails.tabs.transformPreviewLabel',
         {

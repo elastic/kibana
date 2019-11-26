@@ -26,7 +26,7 @@ import { Filter } from '../filters';
  * change.
  */
 export function filterMatchesIndex(filter: Filter, indexPattern: IIndexPattern | null) {
-  if (!filter.meta || !indexPattern) {
+  if (!filter.meta?.key || !indexPattern) {
     return true;
   }
   return indexPattern.fields.some((field: IFieldType) => field.name === filter.meta.key);
