@@ -19,7 +19,8 @@ To grant read-only access to your custom {kib} instance,
 you must assign the read <<kibana-privileges, Kibana privilege>>.
 These privileges are available under *Management > Security > Roles*.
 
-For more information on roles and privileges, see {xpack-ref}/authorization.html[User Authorization].
+For more information on roles and privileges, see
+{ref}/authorization.html[User authorization].
 
 [role="screenshot"]
 image:management/dashboard_only_mode/images/custom_dashboard_mode_role.png["Custom dashboard mode role with read permissions on a custom kibana index"]
