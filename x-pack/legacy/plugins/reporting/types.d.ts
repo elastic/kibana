@@ -250,14 +250,6 @@ export interface ESQueueWorker {
   on: (event: string, handler: any) => void;
 }
 
-interface JobParamsSavedObject {
-  savedObjectType: string;
-  savedObjectId: string;
-  isImmediate: boolean;
-}
-
-type JobParamsUrl = object;
-
 export type ESQueueCreateJobFn<JobParamsType> = (
   jobParams: JobParamsType,
   headers: Record<string, string>,
@@ -274,16 +266,18 @@ export type ImmediateCreateJobFn<JobParamsType> = (
   jobParams: JobParamsType;
 }>;
 
-export type ESQueueWorkerExecuteFn<JobParamsType> = (
+export type ESQueueWorkerExecuteFn<JobDocPayloadType> = (
   jobId: string,
-  job: JobParamsType,
+  job: JobDocPayloadType,
   cancellationToken?: CancellationToken
 ) => void;
 
-export type JobIDForImmediate = null;
-
+/*
+ * ImmediateExecuteFn receives the job doc payload because the payload was
+ * generated in the CreateFn
+ */
 export type ImmediateExecuteFn<JobParamsType> = (
-  jobId: JobIDForImmediate,
+  jobId: null,
   job: JobDocPayload<JobParamsType>,
   request: RequestFacade
 ) => Promise<JobDocOutputExecuted>;
