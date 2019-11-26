@@ -54,7 +54,7 @@ export class AbstractESSource extends AbstractVectorSource {
     return [];
   }
 
-  supportsElasticsearchFilters() {
+  isElasticsearchSource() {
     return true;
   }
 
@@ -73,7 +73,7 @@ export class AbstractESSource extends AbstractVectorSource {
     return [];
   }
 
-  async _runEsQuery(requestName, searchSource, registerCancelCallback, requestDescription) {
+  async _runEsQuery(requestName, searchSource, registerCancelCallback, requestDescription, requestId) {
     const abortController = new AbortController();
     registerCancelCallback(() => abortController.abort());
 
@@ -82,7 +82,7 @@ export class AbstractESSource extends AbstractVectorSource {
         inspectorAdapters: this._inspectorAdapters,
         searchSource,
         requestName,
-        requestId: this.getId(),
+        requestId: requestId ? requestId : this.getId(),
         requestDesc: requestDescription,
         abortSignal: abortController.signal,
       });
@@ -269,6 +269,45 @@ export class AbstractESSource extends AbstractVectorSource {
     }
 
     return fieldFromIndexPattern.format.getConverterFor('text');
+  }
+
+  async loadStylePropsMeta(layerName, dynamicStyleProps, registerCancelCallback) {
+    const promises = dynamicStyleProps
+      .map(dynamicStyleProp => {
+        return dynamicStyleProp.getFieldMetaRequest();
+      });
+
+    const fieldAggRequests = await Promise.all(promises);
+    const aggs = fieldAggRequests.reduce((aggs, fieldAggRequest) => {
+      if (!fieldAggRequest) {
+        return aggs;
+      }
+
+      return {
+        ...aggs,
+        ...fieldAggRequest,
+      };
+    }, {});
+
+    const indexPattern = await this.getIndexPattern();
+    const searchSource = new SearchSource();
+    searchSource.setField('index', indexPattern);
+    searchSource.setField('size', 0);
+    searchSource.setField('aggs', aggs);
+
+    const resp = await this._runEsQuery(
+      i18n.translate('xpack.maps.source.esSource.stylePropsMetaRequestName', {
+        defaultMessage: '{layerName} - metadata',
+        values: { layerName }
+      }),
+      searchSource,
+      registerCancelCallback,
+      i18n.translate('xpack.maps.source.esSource.stylePropsMetaRequestDescription', {
+        defaultMessage: 'Elasticsearch request retrieving field metadata used for calculating symbolization bands.',
+      }),
+      `${this.getId()}_styleMeta`);
+
+    return resp;
   }
 
 }

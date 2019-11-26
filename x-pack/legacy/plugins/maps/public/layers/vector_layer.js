@@ -13,9 +13,11 @@ import {
   GEO_JSON_TYPE,
   FEATURE_ID_PROPERTY_NAME,
   SOURCE_DATA_ID_ORIGIN,
+  SOURCE_META_ID_ORIGIN,
   FEATURE_VISIBLE_PROPERTY_NAME,
   EMPTY_FEATURE_COLLECTION,
-  LAYER_TYPE
+  LAYER_TYPE,
+  FIELD_ORIGIN,
 } from '../../common/constants';
 import _ from 'lodash';
 import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
@@ -464,7 +466,7 @@ export class VectorLayer extends AbstractLayer {
     startLoading, stopLoading, onLoadError, registerCancelCallback, dataFilters
   }) {
 
-    const requestToken = Symbol(`layer-source-refresh:${this.getId()} - source`);
+    const requestToken = Symbol(`layer-source-data:${this.getId()}`);
     const searchFilters = this._getSearchFilters(dataFilters);
     const canSkip = await this._canSkipSourceUpdate(this._source, SOURCE_DATA_ID_ORIGIN, searchFilters);
     if (canSkip) {
@@ -495,6 +497,42 @@ export class VectorLayer extends AbstractLayer {
       return {
         refreshed: false
       };
+    }
+  }
+
+  async _syncSourceStyleMeta({
+    startLoading, stopLoading, onLoadError, registerCancelCallback
+  }) {
+
+    if (!this._source.isElasticsearchSource()) {
+      return;
+    }
+
+    const sourceMetaDataRequest = this._findDataRequestForSource(SOURCE_META_ID_ORIGIN);
+    if (sourceMetaDataRequest) {
+      return;
+    }
+
+    const dynamicStyleProps = this._style.getDynamicPropertiesArray()
+      .filter(dynamicStyleProp => {
+        return dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE && dynamicStyleProp.supportsFieldMeta();
+      });
+    if (dynamicStyleProps.length === 0) {
+      return;
+    }
+
+    const requestToken = Symbol(`layer-source-meta:${this.getId()}`);
+    try {
+      const requestMeta = {}; // TODO include time range?
+      startLoading(SOURCE_META_ID_ORIGIN, requestToken, requestMeta);
+      const layerName = await this.getDisplayName();
+      const styleMeta = await this._source.loadStylePropsMeta(layerName, dynamicStyleProps, registerCancelCallback);
+      console.log(styleMeta);
+      stopLoading(SOURCE_META_ID_ORIGIN, requestToken, styleMeta, requestMeta);
+    } catch (error) {
+      if (!(error instanceof DataRequestAbortError)) {
+        onLoadError(SOURCE_META_ID_ORIGIN, requestToken, error.message);
+      }
     }
   }
 
@@ -529,6 +567,7 @@ export class VectorLayer extends AbstractLayer {
     }
 
     const sourceResult = await this._syncSource(syncContext);
+    await this._syncSourceStyleMeta(syncContext);
     if (!sourceResult.featureCollection || !sourceResult.featureCollection.features.length) {
       return;
     }

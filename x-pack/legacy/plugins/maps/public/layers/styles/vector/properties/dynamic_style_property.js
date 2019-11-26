@@ -32,6 +32,14 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
       return this._field.getOrigin();
     }
 
+    supportsFieldMeta() {
+      return this._field.supportsFieldMeta();
+    }
+
+    async getFieldMetaRequest() {
+      return this._field.getFieldMetaRequest({ sigma: 3 });
+    }
+
     supportsFeatureState() {
       return true;
     }

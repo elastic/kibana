@@ -6,7 +6,7 @@
 
 
 import { AbstractField } from './field';
-import { COUNT_AGG_TYPE } from '../../../common/constants';
+import { COUNT_AGG_TYPE, METRIC_TYPE } from '../../../common/constants';
 import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_property';
 
 export class ESAggMetricField extends AbstractField {
@@ -55,7 +55,6 @@ export class ESAggMetricField extends AbstractField {
     );
   }
 
-
   makeMetricAggConfig() {
     const metricAggConfig = {
       id: this.getName(),
@@ -68,5 +67,14 @@ export class ESAggMetricField extends AbstractField {
       metricAggConfig.params = { field: this.getESDocFieldName() };
     }
     return metricAggConfig;
+  }
+
+  supportsFieldMeta() {
+    // count and sum aggregations are not within field bounds so they do not support field meta.
+    return ![METRIC_TYPE.COUNT, METRIC_TYPE.SUM, METRIC_TYPE.UNIQUE_COUNT].includes(this.getAggType());
+  }
+
+  async getFieldMetaRequest(config) {
+    return this._esDocField.getFieldMetaRequest(config);
   }
 }
