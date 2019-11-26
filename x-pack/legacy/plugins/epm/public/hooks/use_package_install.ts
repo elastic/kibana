@@ -20,6 +20,16 @@ function usePackageInstall() {
   const [packages, setPackage] = useState<PackagesInstall>({});
   const { notifications } = useCore();
 
+  const setPackageInstallStatus = useCallback(
+    ({ name, status }: { name: string; status: InstallStatus }) => {
+      setPackage((prev: PackagesInstall) => ({
+        ...prev,
+        [name]: { status },
+      }));
+    },
+    []
+  );
+
   const installPackage = useCallback(
     async ({ name, version, title }: { name: string; version: string; title: string }) => {
       setPackageInstallStatus({ name, status: InstallStatus.installing });
@@ -37,16 +47,6 @@ function usePackageInstall() {
       }
     },
     [notifications.toasts, setPackageInstallStatus]
-  );
-
-  const setPackageInstallStatus = useCallback(
-    ({ name, status }: { name: string; status: InstallStatus }) => {
-      setPackage((prev: PackagesInstall) => ({
-        ...prev,
-        [name]: { status },
-      }));
-    },
-    []
   );
 
   const getPackageInstallStatus = useCallback(
