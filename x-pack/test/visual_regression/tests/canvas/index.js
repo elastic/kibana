@@ -3,6 +3,9 @@
 * or more contributor license agreements. Licensed under the Elastic License;
 * you may not use this file except in compliance with the Elastic License.
 */
+import { DEFAULT_OPTIONS } from '../../../../../test/visual_regression/services/visual_testing/visual_testing';
+
+const [SCREEN_WIDTH] = DEFAULT_OPTIONS.widths || [];
 
 export default function ({ loadTestFile, getService }) {
   const esArchiver = getService('esArchiver');
@@ -13,7 +16,7 @@ export default function ({ loadTestFile, getService }) {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('canvas/default');
 
-      await browser.setWindowSize(1600, 1000);
+      await browser.setWindowSize(SCREEN_WIDTH, 1000);
     });
 
     after(async () => {
@@ -22,5 +25,6 @@ export default function ({ loadTestFile, getService }) {
 
     this.tags('ciGroup10');
     loadTestFile(require.resolve('./fullscreen'));
+    loadTestFile(require.resolve('./sample_data'));
   });
 }

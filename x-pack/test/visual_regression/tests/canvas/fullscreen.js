@@ -12,7 +12,7 @@ export default function ({ getPageObjects, getService }) {
   describe('fullscreen', () => {
     it('workpad should display properly in fullscreen mode', async () => {
       await PageObjects.common.navigateToApp('canvas', {
-        hash: 'workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31/page/1'
+        hash: '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31/page/1'
       });
 
       PageObjects.canvas.enterFullscreen();
