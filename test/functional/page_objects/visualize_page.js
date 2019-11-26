@@ -1227,7 +1227,9 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     async filterLegend(name) {
       await this.toggleLegend();
       await testSubjects.click(`legend-${name}`);
-      await testSubjects.click(`legend-${name}-filterIn`);
+      const filters = await testSubjects.find(`legend-${name}-filters`);
+      const [filterIn] = await filters.findAllByCssSelector(`input`);
+      await filterIn.click();
       await this.waitForVisualizationRenderingStabilized();
     }
 

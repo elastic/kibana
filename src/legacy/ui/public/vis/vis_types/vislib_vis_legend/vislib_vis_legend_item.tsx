@@ -111,6 +111,7 @@ const VisLegendItemComponent = ({
         })}
         options={filterOptions}
         onChange={handleFilterChange}
+        data-test-subj={`legend-${item.label}-filters`}
       />
       <EuiSpacer size="m" />
     </>
