@@ -3,3 +3,12 @@
 == Elastic Package Manager
 
 These are the docs for the Elastic Package Manager (EPM).
+
+
+=== Configuration
+
+The Elastic Package Manager by default access `epr.elastic.co` to retrieve the package. The url can be configured with:
+
+```
+xpack.epm.registryUrl: 'http://localhost:8080'
+```
