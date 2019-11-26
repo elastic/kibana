@@ -17,8 +17,9 @@
  * under the License.
  */
 
+import { SortDirection } from '../../../../../../../ui/public/courier';
 import { IndexPatterns, IndexPattern, getServices } from '../../../kibana_services';
-import { reverseSortDir, SortDirection } from './utils/sorting';
+import { reverseSortDir } from './utils/sorting';
 import { extractNanos, convertIsoToMillis } from './utils/date_conversion';
 import { fetchHitsInInterval } from './utils/fetch_hits_in_interval';
 import { generateIntervals } from './utils/generate_intervals';
@@ -114,7 +115,7 @@ function fetchContextProvider(indexPatterns: IndexPatterns) {
 
   async function createSearchSource(indexPattern: IndexPattern, filters: esFilters.Filter[]) {
     return new SearchSource()
-      .setParent(false)
+      .setParent(undefined)
       .setField('index', indexPattern)
       .setField('filter', filters);
   }
