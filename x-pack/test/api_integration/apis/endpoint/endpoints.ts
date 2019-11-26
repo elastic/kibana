@@ -35,6 +35,9 @@ export default function({ getService }: FtrProviderContext) {
           .then((response: Record<string, any>) => {
             expect(response.body.hits.total.value).to.eql(3);
             expect(response.body.hits.hits.length).to.eql(1);
+            expect(response.body.hits.hits[0]._source.machine_id).to.equal(
+              'bbac0ffe-db76-4864-bb8c-13b46fa524c3'
+            );
           });
       });
     });
