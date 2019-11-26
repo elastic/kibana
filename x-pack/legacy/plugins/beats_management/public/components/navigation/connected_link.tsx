@@ -4,17 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { ComponentProps } from 'react';
-import { EuiLink } from '@elastic/eui';
-import { Link, withRouter, RouteComponentProps } from 'react-router-dom';
+import React from 'react';
 
-interface ConnectedLinkComponentProps extends ComponentProps<any>, RouteComponentProps {
-  location: any;
-  path: string;
-  disabled: boolean;
-  query: any;
-  [key: string]: any;
-}
+import { EuiLink } from '@elastic/eui';
+import { Link, withRouter } from 'react-router-dom';
 
 export const ConnectedLinkComponent = ({
   location,
@@ -23,7 +16,13 @@ export const ConnectedLinkComponent = ({
   disabled,
   children,
   ...props
-}: ConnectedLinkComponentProps) => {
+}: {
+  location: any;
+  path: string;
+  disabled: boolean;
+  query: any;
+  [key: string]: any;
+}) => {
   if (disabled) {
     return <EuiLink aria-disabled="true" {...props} />;
   }
@@ -40,4 +39,4 @@ export const ConnectedLinkComponent = ({
   );
 };
 
-export const ConnectedLink = withRouter(ConnectedLinkComponent);
+export const ConnectedLink = withRouter<any>(ConnectedLinkComponent);

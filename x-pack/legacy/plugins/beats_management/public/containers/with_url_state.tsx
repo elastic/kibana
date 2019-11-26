@@ -6,7 +6,7 @@
 
 import { parse, stringify } from 'querystring';
 import React from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import { FlatObject } from '../frontend_types';
 import { RendererFunction } from '../utils/typed_react';
 
@@ -22,7 +22,7 @@ export interface URLStateProps<URLState = object> {
   ) => void;
   urlState: URLState;
 }
-interface ComponentProps<URLState extends object> extends RouteComponentProps {
+interface ComponentProps<URLState extends object> {
   history: any;
   match: any;
   children: RendererFunction<URLStateProps<URLState>>;
@@ -86,7 +86,7 @@ export class WithURLStateComponent<URLState extends object> extends React.Compon
     });
   };
 }
-export const WithURLState = withRouter(WithURLStateComponent);
+export const WithURLState = withRouter<any>(WithURLStateComponent);
 
 export function withUrlState<OP>(
   UnwrappedComponent: React.ComponentType<OP & URLStateProps>
