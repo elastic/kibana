@@ -33,6 +33,7 @@ export const security = (kibana) => new kibana.Plugin({
       sessionTimeout: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
       secureCookies: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
       public: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
+      loginAssistanceMessage: Joi.string().default(),
       authorization: Joi.object({
         legacyFallback: Joi.object({
           enabled: Joi.boolean().default(true) // deprecated
@@ -166,7 +167,9 @@ export const security = (kibana) => new kibana.Plugin({
 
     server.injectUiAppVars('login', () => {
       const { showLogin, allowLogin, layout = 'form' } = securityPlugin.__legacyCompat.license.getFeatures();
+      const { loginAssistanceMessage } = securityPlugin.__legacyCompat.config;
       return {
+        loginAssistanceMessage,
         loginState: {
           showLogin,
           allowLogin,
