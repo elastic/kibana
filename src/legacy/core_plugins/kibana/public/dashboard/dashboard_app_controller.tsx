@@ -41,6 +41,8 @@ import {
 import { FilterStateManager, IndexPattern, SavedQuery } from '../../../data/public';
 import { Query } from '../../../../../plugins/data/public';
 
+import './dashboard_empty_screen_directive';
+
 import {
   DashboardContainer,
   DASHBOARD_CONTAINER_TYPE,

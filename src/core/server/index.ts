@@ -114,6 +114,7 @@ export {
   IRouter,
   RouteMethod,
   RouteConfigOptions,
+  RouteRegistrar,
   SessionStorage,
   SessionStorageCookieOptions,
   SessionStorageFactory,
@@ -123,6 +124,8 @@ export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 export {
   DiscoveredPlugin,
   Plugin,
+  PluginConfigDescriptor,
+  PluginConfigSchema,
   PluginInitializer,
   PluginInitializerContext,
   PluginManifest,

@@ -21,10 +21,7 @@ import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/p
 import { IUiActionsStart } from 'src/plugins/ui_actions/public';
 import { registerFeature } from './helpers/register_feature';
 import './kibana_services';
-import {
-  Start as EmbeddableStart,
-  Setup as EmbeddableSetup,
-} from '../../../../../plugins/embeddable/public';
+import { IEmbeddableStart, IEmbeddableSetup } from '../../../../../plugins/embeddable/public';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -35,11 +32,11 @@ export type DiscoverSetup = void;
 export type DiscoverStart = void;
 interface DiscoverSetupPlugins {
   uiActions: IUiActionsStart;
-  embeddable: EmbeddableSetup;
+  embeddable: IEmbeddableSetup;
 }
 interface DiscoverStartPlugins {
   uiActions: IUiActionsStart;
-  embeddable: EmbeddableStart;
+  embeddable: IEmbeddableStart;
 }
 
 export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
