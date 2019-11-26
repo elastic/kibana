@@ -21,13 +21,14 @@ import React from 'react';
 import { ApplyFiltersPopoverContent } from './apply_filter_popover_content';
 import { IIndexPattern, esFilters } from '../..';
 
-type cancelFunction = () => void;
-type submitFunction = (filters: esFilters.Filter[]) => void;
+type CancelFnType = () => void;
+type SubmitFnType = (filters: esFilters.Filter[]) => void;
+
 export const applyFiltersPopover = (
   filters: esFilters.Filter[],
   indexPatterns: IIndexPattern[],
-  onCancel: cancelFunction,
-  onSubmit: submitFunction
+  onCancel: CancelFnType,
+  onSubmit: SubmitFnType
 ) => {
   return (
     <ApplyFiltersPopoverContent
