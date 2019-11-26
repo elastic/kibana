@@ -5,7 +5,15 @@
  */
 
 import React, { FC, useState, useContext, useEffect } from 'react';
-import { EuiComboBox, EuiComboBoxOptionProps, EuiComboBoxProps } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
+import {
+  EuiButton,
+  EuiComboBox,
+  EuiComboBoxOptionProps,
+  EuiComboBoxProps,
+  EuiSpacer,
+} from '@elastic/eui';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
 import { ml } from '../../../../../../../../../services/ml_api_service';
@@ -48,8 +56,17 @@ export const CalendarsSelection: FC = () => {
     },
   };
 
+  const manageCalendarsHref = `${chrome.getBasePath()}/app/ml#/settings/calendars_list`;
+
   return (
     <Description>
+      <EuiButton size="s" href={manageCalendarsHref} target="_blank">
+        <FormattedMessage
+          id="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.calendarsSelection.manageCalendarsButtonLabel"
+          defaultMessage="Manage calendars"
+        />
+      </EuiButton>
+      <EuiSpacer size="m" />
       <EuiComboBox {...comboBoxProps} />
     </Description>
   );
