@@ -121,7 +121,6 @@
     "@kbn/babel-code-parser": "1.0.0",
     "@kbn/babel-preset": "1.0.0",
     "@kbn/config-schema": "1.0.0",
-    "@kbn/es-query": "1.0.0",
     "@kbn/i18n": "1.0.0",
     "@kbn/interpreter": "1.0.0",
     "@kbn/pm": "1.0.0",
