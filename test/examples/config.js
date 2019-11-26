@@ -18,34 +18,14 @@
  */
 
 import path from 'path';
-import fs from 'fs';
-import { services } from './services';
+import { services } from '../plugin_functional/services';
 
 export default async function ({ readConfigFile }) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
-  // Find all folders in ./plugins since we treat all them as plugin folder
-  const allFiles = fs.readdirSync(path.resolve(__dirname, 'plugins'));
-  const plugins = allFiles.filter(file => fs.statSync(path.resolve(__dirname, 'plugins', file)).isDirectory());
-
   return {
     testFiles: [
-      require.resolve('./test_suites/app_plugins'),
-      require.resolve('./test_suites/custom_visualizations'),
-      require.resolve('./test_suites/panel_actions'),
-
-      /**
-       * @todo Work on re-enabling this test suite after this is merged. These tests pass
-       * locally but on CI they fail. The error on CI says "TypeError: Cannot read
-       * property 'overlays' of null". Possibly those are `overlays` from
-       * `npStart.core.overlays`, possibly `npStart.core` is `null` on CI, but
-       * available when this test suite is executed locally.
-       *
-       * See issue: https://github.com/elastic/kibana/issues/43087
-       */
-      // require.resolve('./test_suites/embeddable_explorer'),
-
-      require.resolve('./test_suites/core_plugins'),
+      require.resolve('./search'),
     ],
     services: {
       ...functionalConfig.get('services'),
@@ -60,14 +40,14 @@ export default async function ({ readConfigFile }) {
     },
     screenshots: functionalConfig.get('screenshots'),
     junit: {
-      reportName: 'Plugin Functional Tests',
+      reportName: 'Example plugin functional tests',
     },
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
-        ...plugins.map(pluginDir => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`),
-        // Required to load new platform plugins via `--plugin-path` flag.
+        '--run-examples',
+        // Required to run examples
         '--env.name=development',
       ],
     },
