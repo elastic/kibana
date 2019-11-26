@@ -36,6 +36,10 @@ interface RouterRoute {
   handler: (req: Request, responseToolkit: ResponseToolkit) => Promise<ResponseObject | Boom<any>>;
 }
 
+/**
+ * Handler to declare a route.
+ * @public
+ */
 export type RouteRegistrar = <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
   route: RouteConfig<P, Q, B>,
   handler: RequestHandler<P, Q, B>
@@ -85,7 +89,7 @@ export interface IRouter {
    * Wrap a router handler to catch and converts legacy boom errors to proper custom errors.
    * @param handler {@link RequestHandler} - a route handler to wrap
    */
-  wrapErrors: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+  handleLegacyErrors: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
     handler: RequestHandler<P, Q, B>
   ) => RequestHandler<P, Q, B>;
 
@@ -190,7 +194,7 @@ export class Router implements IRouter {
     return [...this.routes];
   }
 
-  public wrapErrors<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+  public handleLegacyErrors<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
     handler: RequestHandler<P, Q, B>
   ): RequestHandler<P, Q, B> {
     return wrapErrors(handler);

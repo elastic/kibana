@@ -298,7 +298,7 @@ class Plugin {
   }
 }
 ```
-If your plugin still relies on throwing Boom errors from routes, you can use the `router.wrapErrors` 
+If your plugin still relies on throwing Boom errors from routes, you can use the `router.handleLegacyErrors` 
 as a temporary solution until error migration is complete:
 ```ts
 // legacy/plugins/demoplugin/server/plugin.ts

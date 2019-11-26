@@ -720,10 +720,10 @@ export interface IRouter {
     // 
     // @internal
     getRoutes: () => RouterRoute[];
+    handleLegacyErrors: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(handler: RequestHandler<P, Q, B>) => RequestHandler<P, Q, B>;
     post: RouteRegistrar;
     put: RouteRegistrar;
     routerPath: string;
-    wrapErrors: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(handler: RequestHandler<P, Q, B>) => RequestHandler<P, Q, B>;
 }
 
 // @public
@@ -1100,9 +1100,7 @@ export interface RouteConfigOptions {
 // @public
 export type RouteMethod = 'get' | 'post' | 'put' | 'delete';
 
-// Warning: (ae-missing-release-tag) "RouteRegistrar" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
+// @public
 export type RouteRegistrar = <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) => void;
 
 // @public (undocumented)

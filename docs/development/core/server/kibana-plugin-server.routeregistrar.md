@@ -4,6 +4,8 @@
 
 ## RouteRegistrar type
 
+Handler to declare a route.
+
 <b>Signature:</b>
 
 ```typescript
