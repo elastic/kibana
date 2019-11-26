@@ -105,5 +105,13 @@ export const eventsSchema = gql`
       filterQuery: String
       defaultIndex: [String!]!
     ): EventsOverTimeData!
+    Alerts(
+      pagination: PaginationInput!
+      sortField: SortField!
+      fieldRequested: [String!]!
+      timerange: TimerangeInput
+      filterQuery: String
+      defaultIndex: [String!]!
+    ): TimelineData!
   }
 `;

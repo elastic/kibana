@@ -470,6 +470,8 @@ export interface Source {
   LastEventTime: LastEventTimeData;
 
   EventsOverTime: EventsOverTimeData;
+
+  Alerts: TimelineData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
 
@@ -2181,6 +2183,19 @@ export interface EventsOverTimeSourceArgs {
 
   defaultIndex: string[];
 }
+export interface AlertsSourceArgs {
+  pagination: PaginationInput;
+
+  sortField: SortField;
+
+  fieldRequested: string[];
+
+  timerange?: Maybe<TimerangeInput>;
+
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+}
 export interface HostsSourceArgs {
   id?: Maybe<string>;
 
@@ -2779,6 +2794,8 @@ export namespace SourceResolvers {
     LastEventTime?: LastEventTimeResolver<LastEventTimeData, TypeParent, TContext>;
 
     EventsOverTime?: EventsOverTimeResolver<EventsOverTimeData, TypeParent, TContext>;
+
+    Alerts?: AlertsResolver<TimelineData, TypeParent, TContext>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     Hosts?: HostsResolver<HostsData, TypeParent, TContext>;
 
@@ -2916,6 +2933,26 @@ export namespace SourceResolvers {
   > = Resolver<R, Parent, TContext, EventsOverTimeArgs>;
   export interface EventsOverTimeArgs {
     timerange: TimerangeInput;
+
+    filterQuery?: Maybe<string>;
+
+    defaultIndex: string[];
+  }
+
+  export type AlertsResolver<R = TimelineData, Parent = Source, TContext = SiemContext> = Resolver<
+    R,
+    Parent,
+    TContext,
+    AlertsArgs
+  >;
+  export interface AlertsArgs {
+    pagination: PaginationInput;
+
+    sortField: SortField;
+
+    fieldRequested: string[];
+
+    timerange?: Maybe<TimerangeInput>;
 
     filterQuery?: Maybe<string>;
 

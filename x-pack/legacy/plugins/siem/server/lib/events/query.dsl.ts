@@ -71,6 +71,25 @@ export const buildQuery = (options: RequestOptionsPaginated) => {
   return dslQuery;
 };
 
+export const buildAlertsQuery = (options: RequestOptions) => {
+  const eventsQuery = buildTimelineQuery(options);
+  const eventsFilter = eventsQuery.body.query.bool.filter;
+  const alertsFilter = [
+    ...createQueryFilterClauses({ match: { 'event.kind': { query: 'alert' } } }),
+  ];
+
+  return {
+    ...eventsQuery,
+    body: {
+      query: {
+        bool: {
+          filter: [...eventsFilter, ...alertsFilter],
+        },
+      },
+    },
+  };
+};
+
 export const buildTimelineQuery = (options: RequestOptions) => {
   const { limit, cursor, tiebreaker } = options.pagination;
   const { fields, filterQuery } = options;

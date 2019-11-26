@@ -9,7 +9,7 @@ import { createSelector } from 'reselect';
 import { isFromKueryExpressionValid } from '../../lib/keury';
 import { State } from '../reducer';
 
-import { eventsDefaults, timelineDefaults, TimelineModel } from './model';
+import { eventsDefaults, timelineDefaults, TimelineModel, alertsDefaults } from './model';
 import { TimelineById, AutoSavedWarningMsg } from './types';
 
 const selectTimelineById = (state: State): TimelineById => state.timeline.timelineById;
@@ -42,6 +42,9 @@ export const getTimelineByIdSelector = () =>
 
 export const getEventsByIdSelector = () =>
   createSelector(selectTimeline, timeline => timeline || eventsDefaults);
+
+export const getAlertsByIdSelector = () =>
+  createSelector(selectTimeline, timeline => timeline || alertsDefaults);
 
 export const getKqlFilterQuerySelector = () =>
   createSelector(selectTimeline, timeline =>

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { defaultHeaders as alertsDefaultHeaders } from '../../components/alerts_viewer/default_headers';
 import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { DataProvider } from '../../components/timeline/data_providers/data_provider';
@@ -165,3 +166,31 @@ export const eventsDefaults: Readonly<Pick<
   | 'savedObjectId'
   | 'version'
 >> = { ...timelineDefaults, columns: eventsDefaultHeaders };
+
+export const alertsDefaults: Readonly<Pick<
+  TimelineModel,
+  | 'columns'
+  | 'dataProviders'
+  | 'description'
+  | 'eventIdToNoteIds'
+  | 'highlightedDropAndProviderId'
+  | 'historyIds'
+  | 'isFavorite'
+  | 'isLive'
+  | 'itemsPerPage'
+  | 'itemsPerPageOptions'
+  | 'kqlMode'
+  | 'kqlQuery'
+  | 'title'
+  | 'noteIds'
+  | 'pinnedEventIds'
+  | 'pinnedEventsSaveObject'
+  | 'dateRange'
+  | 'show'
+  | 'sort'
+  | 'width'
+  | 'isSaving'
+  | 'isLoading'
+  | 'savedObjectId'
+  | 'version'
+>> = { ...timelineDefaults, columns: alertsDefaultHeaders };
