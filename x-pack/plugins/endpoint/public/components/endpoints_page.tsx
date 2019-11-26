@@ -151,10 +151,6 @@ export const EndpointsPage = () => {
             sorting={sortingSetup}
             onChange={handleTableChange}
           />
-          <EuiSpacer size="xxl" />
-          <code>
-            <pre>{JSON.stringify(endpoints, null, 4)}</pre>
-          </code>
         </EuiPageContentBody>
       </EuiPageContent>
     </EuiPageBody>
