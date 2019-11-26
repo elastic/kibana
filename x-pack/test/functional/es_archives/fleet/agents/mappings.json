@@ -780,6 +780,88 @@
         "namespace": {
           "type": "keyword"
         },
+        "datasources": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "package": {
+              "properties": {
+                "assets": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "description": {
+                  "type": "keyword"
+                },
+                "name": {
+                  "type": "keyword"
+                },
+                "title": {
+                  "type": "keyword"
+                },
+                "version": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "read_alias": {
+              "type": "keyword"
+            },
+            "streams": {
+              "properties": {
+                "config": { 
+                  "type": "flattened"
+                },
+                "id": {
+                  "type": "keyword"
+                },
+                "input": {
+                  "properties": {
+                    "config": { 
+                      "type": "flattened"
+                    },
+                    "fields": {
+                      "type": "flattened"
+
+                    },
+                    "id": {
+                      "type": "keyword"
+                    },
+                    "ilm_policy": {
+                      "type": "keyword"
+                    },
+                    "index_template": {
+                      "type": "keyword"
+                    },
+                    "ingest_pipelines": {
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "output_id": {
+                  "type": "keyword"
+                },
+                "processors": {
+                  "type": "keyword"
+                }
+              }
+            
+            }
+          }
+        },
         "policies": {
           "properties": {
             "agent_version": {
@@ -792,32 +874,7 @@
               "type": "keyword"
             },
             "datasources": {
-              "properties": {
-                "name": {
-                  "type": "text"
-                },
-                "description": {
-                  "type": "text"
-                },
-                "label": {
-                  "type": "keyword"
-                },
-                "datasources": {
-                  "type": "keyword"
-                },
-                "id": {
-                  "type": "keyword"
-                },
-                "status": {
-                  "type": "keyword"
-                },
-                "updated_on": {
-                  "type": "keyword"
-                },
-                "updated_by": {
-                  "type": "keyword"
-                }
-              }
+              "type": "keyword"
             },
             "description": {
               "type": "text"

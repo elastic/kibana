@@ -33,4 +33,84 @@ export const mappings = {
       },
     },
   },
+  datasources: {
+    properties: {
+      id: {
+        type: 'keyword',
+      },
+      name: {
+        type: 'keyword',
+      },
+      package: {
+        properties: {
+          assets: {
+            properties: {
+              id: {
+                type: 'keyword',
+              },
+              type: {
+                type: 'keyword',
+              },
+            },
+          },
+          description: {
+            type: 'keyword',
+          },
+          name: {
+            type: 'keyword',
+          },
+          title: {
+            type: 'keyword',
+          },
+          version: {
+            type: 'keyword',
+          },
+        },
+      },
+      read_alias: {
+        type: 'keyword',
+      },
+      streams: {
+        properties: {
+          config: {
+            type: 'flattened',
+          },
+          id: {
+            type: 'keyword',
+          },
+          input: {
+            properties: {
+              config: {
+                type: 'flattened',
+              },
+              fields: {
+                type: 'flattened',
+              },
+              id: {
+                type: 'keyword',
+              },
+              ilm_policy: {
+                type: 'keyword',
+              },
+              index_template: {
+                type: 'keyword',
+              },
+              ingest_pipelines: {
+                type: 'keyword',
+              },
+              type: {
+                type: 'keyword',
+              },
+            },
+          },
+          output_id: {
+            type: 'keyword',
+          },
+          processors: {
+            type: 'keyword',
+          },
+        },
+      },
+    },
+  },
 };
