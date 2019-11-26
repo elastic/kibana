@@ -30,8 +30,9 @@ export async function renderApp(moduleName: string, element: HTMLElement) {
 
 function mountDiscoverApp(moduleName: string, element: HTMLElement) {
   const mountpoint = document.createElement('div');
-  // eslint-disable-next-line
-  mountpoint.innerHTML = `<div ng-view></div>`;
+  const appWrapper = document.createElement('div');
+  appWrapper.setAttribute('ng-view', '');
+  mountpoint.appendChild(appWrapper);
   // bootstrap angular into detached element and attach it later to
   // make angular-within-angular possible
   const $injector = angular.bootstrap(mountpoint, [moduleName]);
