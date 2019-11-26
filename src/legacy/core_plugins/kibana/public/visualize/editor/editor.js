@@ -599,12 +599,4 @@ function VisualizeAppController(
   addHelpMenuToAppChrome(chrome, docLinks);
 
   init();
-
-  const visibleSubscription = chrome.getIsVisible$().subscribe(isVisible => {
-    $scope.isVisible = isVisible;
-  });
-
-  $scope.$on('$destroy', () => {
-    visibleSubscription.unsubscribe();
-  });
 }

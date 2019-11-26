@@ -83,7 +83,6 @@ function mountVisualizeApp(appBasePath: string, element: HTMLElement) {
   // make angular-within-angular possible
   const $injector = angular.bootstrap(mountpoint, [moduleName]);
   // initialize global state handler
-  // $injector.get('globalState');
   element.appendChild(mountpoint);
   return $injector;
 }

@@ -42,7 +42,7 @@ export function NewVisHelp(props: Props) {
             <strong>{t.promotion!.description}</strong>
           </p>
           <EuiButton
-            href={props.addBasePath!(t.aliasUrl)}
+            href={props.addBasePath(t.aliasUrl)}
             fill
             size="s"
             iconType="popout"

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { IModule } from 'angular';
 import { VisualizeKibanaServices } from './kibana_services';
 
 // @ts-ignore
@@ -24,7 +25,7 @@ import { initEditorDirective } from './editor/editor';
 // @ts-ignore
 import { initListingDirective } from './listing/visualize_listing';
 
-export function initVisualizeAppDirective(app: any, deps: VisualizeKibanaServices) {
+export function initVisualizeAppDirective(app: IModule, deps: VisualizeKibanaServices) {
   initEditorDirective(app, deps);
   initListingDirective(app);
 }

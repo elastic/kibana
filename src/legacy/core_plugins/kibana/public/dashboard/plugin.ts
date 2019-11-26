@@ -74,7 +74,7 @@ export class DashboardPlugin implements Plugin {
 
   public setup(
     core: CoreSetup,
-    { home, kibana_legacy, __LEGACY: { getAngularDependencies } }: DashboardPluginSetupDependencies
+    { __LEGACY: { getAngularDependencies }, home, kibana_legacy }: DashboardPluginSetupDependencies
   ) {
     const app: App = {
       id: '',
