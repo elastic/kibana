@@ -125,16 +125,16 @@ $visLegendLineHeight: $euiSize;
 .visLegend__valueColorPicker {
   width: 192px;
   cursor: pointer;
+}
 
-  &--dot {
-    &-isSelected,
-    &:focus,
-    &:hover {
-      transform: scale(1.4);
-    }
+.visLegend__valueColorPickerDot {
+  &--isSelected,
+  &:focus,
+  &:hover {
+    transform: scale(1.4);
+  }
 
-    &-isSelected {
-      background: $euiFocusBackgroundColor;
-    }
+  &--isSelected {
+    background: $euiFocusBackgroundColor;
   }
 }

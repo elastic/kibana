@@ -178,8 +178,8 @@ const VisLegendItemComponent = ({
               aria-selected={color === getColor(item.label)}
               onClick={setColor(item.label, color)}
               onKeyPress={setColor(item.label, color)}
-              className={classNames('visLegend__valueColorPicker--dot', {
-                'visLegend__valueColorPicker--dot-isSelected': color === getColor(item.label),
+              className={classNames('visLegend__valueColorPickerDot', {
+                'visLegend__valueColorPickerDot--isSelected': color === getColor(item.label),
               })}
               style={{ color }}
               data-test-subj={`legendSelectColor-${color}`}
@@ -190,11 +190,7 @@ const VisLegendItemComponent = ({
     </EuiPopover>
   );
 
-  return (
-    <li key={item.label} className="visLegend__value color">
-      {renderDetails()}
-    </li>
-  );
+  return <li key={item.label}>{renderDetails()}</li>;
 };
 
 export const VisLegendItem = memo(VisLegendItemComponent);

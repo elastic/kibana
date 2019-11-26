@@ -20,7 +20,9 @@
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { act } from 'react-hooks-testing-library';
+
 import { I18nProvider } from '@kbn/i18n/react';
+import { EuiButtonGroup } from '@elastic/eui';
 
 import { VisLegend, VisLegendProps } from '../vislib_vis_legend/vislib_vis_legend';
 import { legendColors } from './models';
@@ -108,7 +110,7 @@ const getWrapper = (props?: Partial<VisLegendProps>) =>
     </I18nProvider>
   );
 
-const getLegendItems = (wrapper: ReactWrapper) => wrapper.find('.visLegend__value--item');
+const getLegendItems = (wrapper: ReactWrapper) => wrapper.find('.visLegend__value');
 
 describe('VisLegend Component', () => {
   let wrapper: ReactWrapper;
@@ -205,8 +207,8 @@ describe('VisLegend Component', () => {
     it('should filter out when clicked', () => {
       const first = getLegendItems(wrapper).first();
       first.simulate('click');
-      const filterOut = wrapper.find('.visLegend__filterIn').first();
-      filterOut.simulate('click');
+      const filterGroup = wrapper.find(EuiButtonGroup).first();
+      filterGroup.getElement().props.onChange('filterIn');
 
       expect(vis.API.events.filter).toHaveBeenCalledWith({ data: ['valuesA'], negate: false });
       expect(vis.API.events.filter).toHaveBeenCalledTimes(1);
@@ -215,8 +217,8 @@ describe('VisLegend Component', () => {
     it('should filter in when clicked', () => {
       const first = getLegendItems(wrapper).first();
       first.simulate('click');
-      const filterOut = wrapper.find('.visLegend__filterOut').first();
-      filterOut.simulate('click');
+      const filterGroup = wrapper.find(EuiButtonGroup).first();
+      filterGroup.getElement().props.onChange('filterOut');
 
       expect(vis.API.events.filter).toHaveBeenCalledWith({ data: ['valuesA'], negate: true });
       expect(vis.API.events.filter).toHaveBeenCalledTimes(1);
@@ -229,42 +231,10 @@ describe('VisLegend Component', () => {
     });
 
     it('should show details when clicked', () => {
-      let first = getLegendItems(wrapper).first();
-      first.simulate('click');
-      first = getLegendItems(wrapper).first();
-
-      expect(first.exists('.visLegend__valueDetails')).toBe(true);
-    });
-
-    it('should hide details when escape is pressed', () => {
-      let first = getLegendItems(wrapper).first();
-      first.simulate('click');
-      first = getLegendItems(wrapper).first();
-
-      expect(first.exists('.visLegend__valueDetails')).toBe(true);
-
-      first.simulate('keyDown', { keyCode: 27 });
-      first = getLegendItems(wrapper).first();
-
-      expect(first.exists('.visLegend__valueDetails')).toBe(false);
-    });
-
-    it('clicking different item should hide details', () => {
-      let first = getLegendItems(wrapper).first();
-      let last = getLegendItems(wrapper).last();
+      const first = getLegendItems(wrapper).first();
       first.simulate('click');
 
-      first = getLegendItems(wrapper).first();
-
-      expect(first.exists('.visLegend__valueDetails')).toBe(true);
-
-      last.simulate('click');
-
-      first = getLegendItems(wrapper).first();
-      last = getLegendItems(wrapper).last();
-
-      expect(first.exists('.visLegend__valueDetails')).toBe(false);
-      expect(last.exists('.visLegend__valueDetails')).toBe(true);
+      expect(wrapper.exists('.visLegend__valueDetails')).toBe(true);
     });
   });
 
@@ -274,11 +244,11 @@ describe('VisLegend Component', () => {
     });
 
     it('sets the color in the UI state', () => {
-      let first = getLegendItems(wrapper).first();
+      const first = getLegendItems(wrapper).first();
       first.simulate('click');
 
-      first = getLegendItems(wrapper).first();
-      const firstColor = first.find('.visLegend__valueColorPickerDot').first();
+      const popover = wrapper.find('.visLegend__valueDetails').first();
+      const firstColor = popover.find('.visLegend__valueColorPickerDot').first();
       firstColor.simulate('click');
 
       const colors = mockState.get('vis.colors');

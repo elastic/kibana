@@ -242,7 +242,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
         <EuiButtonIcon
           iconType="list"
           onClick={this.toggleLegend}
-          className={classNames('kuiCollapseButton visLegend__toggle', {
+          className={classNames('visLegend__toggle', {
             'visLegend__toggle--isOpen': open,
           })}
           aria-label={i18n.translate('common.ui.vis.visTypes.legend.toggleLegendButtonAriaLabel', {

@@ -1186,7 +1186,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async getLegendEntries() {
-      const legendEntries = await find.allByCssSelector('.visLegend__valueTitle', defaultFindTimeout * 2);
+      const legendEntries = await find.allByCssSelector('.visLegend__value', defaultFindTimeout * 2);
       return await Promise.all(legendEntries.map(async chart => await chart.getAttribute('data-label')));
     }
 
@@ -1217,7 +1217,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async toggleLegend(show = true) {
       await retry.try(async () => {
-        const isVisible = find.byCssSelector('vislib-legend');
+        const isVisible = find.byCssSelector('.visLegend');
         if ((show && !isVisible) || (!show && isVisible)) {
           await testSubjects.click('vislibToggleLegend');
         }
