@@ -38,12 +38,12 @@ export const EditFieldFormRow = React.memo(
   ({
     title,
     description,
-    ariaId,
     withToggle = true,
     toggleDefaultValue,
     direction = 'row',
     sizeTitle = 'xs',
     formFieldPath,
+    ariaId = formFieldPath,
     children,
   }: Props) => {
     const form = useFormContext();
@@ -154,16 +154,13 @@ export const EditFieldFormRow = React.memo(
       </EuiFlexGroup>
     );
 
-    const renderChildren = useCallback(
-      formData => {
-        setIsContentVisible(formData[formFieldPath!]);
-        return renderContent();
-      },
-      [formFieldPath]
-    );
-
     return formFieldPath ? (
-      <FormDataProvider pathsToWatch={formFieldPath}>{renderChildren}</FormDataProvider>
+      <FormDataProvider pathsToWatch={formFieldPath}>
+        {formData => {
+          setIsContentVisible(formData[formFieldPath]);
+          return renderContent();
+        }}
+      </FormDataProvider>
     ) : (
       renderContent()
     );
