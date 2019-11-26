@@ -11,6 +11,10 @@ def withWorkers(name, preWorkerClosure = {}, workerClosures = [:]) {
           nextWorker++
 
           return {
+            // This delay helps smooth out CPU load caused by ES/Kibana instances starting up at the same time
+            def delay = (workerNumber-1)*20
+            sleep(delay)
+
             workerClosure(workerNumber)
           }
         }
@@ -47,9 +51,6 @@ def getPostBuildWorker(name, closure) {
     def kibanaPort = "61${workerNumber}1"
     def esPort = "61${workerNumber}2"
     def esTransportPort = "61${workerNumber}3"
-
-    def delay = (workerNumber-1)*20
-    sleep(delay)
 
     withEnv([
       "CI_WORKER_NUMBER=${workerNumber}",
