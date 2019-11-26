@@ -15,28 +15,31 @@ import {
 } from '@elastic/eui';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { TooltipSelector } from '../../../components/tooltip_selector';
+import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';
 
 import { indexPatternService } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
 import { getTermsFields, getSourceFields } from '../../../index_pattern_util';
 import { ValidatedRange } from '../../../components/validated_range';
 import { SORT_ORDER } from '../../../../common/constants';
+import { ESDocField } from '../../fields/es_doc_field';
 
 export class UpdateSourceEditor extends Component {
   static propTypes = {
     indexPatternId: PropTypes.string.isRequired,
     onChange: PropTypes.func.isRequired,
     filterByMapBounds: PropTypes.bool.isRequired,
-    tooltipProperties: PropTypes.arrayOf(PropTypes.string).isRequired,
+    tooltipFields: PropTypes.arrayOf(PropTypes.object).isRequired,
     sortField: PropTypes.string,
     sortOrder: PropTypes.string.isRequired,
     useTopHits: PropTypes.bool.isRequired,
     topHitsSplitField: PropTypes.string,
     topHitsSize: PropTypes.number.isRequired,
+    source: PropTypes.object
   };
 
   state = {
-    tooltipFields: null,
+    sourceFields: null,
     termFields: null,
     sortFields: null,
   };
@@ -72,10 +75,19 @@ export class UpdateSourceEditor extends Component {
       return;
     }
 
+    //todo move this all to the source
+    const rawTooltipFields = getSourceFields(indexPattern.fields);
+    const sourceFields = rawTooltipFields.map(field => {
+      return new ESDocField({
+        fieldName: field.name,
+        source: this.props.source
+      });
+    });
+
     this.setState({
-      tooltipFields: getSourceFields(indexPattern.fields),
-      termFields: getTermsFields(indexPattern.fields),
-      sortFields: indexPattern.fields.filter(field => field.sortable),
+      sourceFields: sourceFields,
+      termFields: getTermsFields(indexPattern.fields), //todo change term fields to use fields
+      sortFields: indexPattern.fields.filter(field => field.sortable), //todo change sort fields to use fields
     });
   }
   _onTooltipPropertiesChange = propertyNames => {
@@ -104,6 +116,10 @@ export class UpdateSourceEditor extends Component {
 
   onTopHitsSizeChange = size => {
     this.props.onChange({ propName: 'topHitsSize', value: size });
+  };
+
+  _onApplyGlobalQueryChange = applyGlobalQuery => {
+    this.props.onChange({ propName: 'applyGlobalQuery', value: applyGlobalQuery });
   };
 
   renderTopHitsForm() {
@@ -168,9 +184,9 @@ export class UpdateSourceEditor extends Component {
       <Fragment>
         <EuiFormRow>
           <TooltipSelector
-            tooltipProperties={this.props.tooltipProperties}
+            tooltipFields={this.props.tooltipFields}
             onChange={this._onTooltipPropertiesChange}
-            fields={this.state.tooltipFields}
+            fields={this.state.sourceFields}
           />
         </EuiFormRow>
 
@@ -235,6 +251,11 @@ export class UpdateSourceEditor extends Component {
             compressed
           />
         </EuiFormRow>
+
+        <GlobalFilterCheckbox
+          applyGlobalQuery={this.props.applyGlobalQuery}
+          setApplyGlobalQuery={this._onApplyGlobalQueryChange}
+        />
 
       </Fragment>
     );

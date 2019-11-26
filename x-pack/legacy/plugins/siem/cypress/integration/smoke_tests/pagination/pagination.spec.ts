@@ -23,7 +23,7 @@ describe('Pagination', () => {
     return logout();
   });
 
-  it('pagination updates results and page number', () => {
+  it.skip('pagination updates results and page number', () => {
     loginAndWaitForPage(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
     waitForTableLoad(UNCOMMON_PROCCESSES_TABLE);
     cy.get(getPageButtonSelector(0)).should('have.class', 'euiPaginationButton-isActive');
@@ -82,7 +82,7 @@ describe('Pagination', () => {
    * We only want to comment this code/test for now because it can be nondeterministic
    * when we figure out a way to really mock the data, we should come back to it
    */
-  it('pagination resets results and page number to first page when refresh is clicked', () => {
+  it.skip('pagination resets results and page number to first page when refresh is clicked', () => {
     loginAndWaitForPage(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
     cy.get(NUMBERED_PAGINATION, { timeout: DEFAULT_TIMEOUT });
     cy.get(getPageButtonSelector(0)).should('have.class', 'euiPaginationButton-isActive');

@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimeRange } from 'src/plugins/data/public';
 import { Filter } from '../../types';
 // @ts-ignore Untyped Local
 import { buildBoolArray } from './build_bool_array';
-import { esFilters } from '../../../../../../src/plugins/data/common';
+import { TimeRange, esFilters } from '../../../../../../src/plugins/data/server';
 
 export interface EmbeddableFilterInput {
   filters: esFilters.Filter[];

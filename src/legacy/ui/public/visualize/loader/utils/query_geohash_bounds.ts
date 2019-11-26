@@ -22,16 +22,15 @@ import { get } from 'lodash';
 import { toastNotifications } from 'ui/notify';
 
 import { AggConfig } from 'ui/vis';
-import { Query } from 'src/legacy/core_plugins/data/public';
 import { timefilter } from 'ui/timefilter';
 import { Vis } from '../../../vis';
-import { SearchSource } from '../../../courier';
-import { esFilters } from '../../../../../../plugins/data/public';
+import { SearchSource, SearchSourceContract } from '../../../courier';
+import { esFilters, Query } from '../../../../../../plugins/data/public';
 
 interface QueryGeohashBoundsParams {
   filters?: esFilters.Filter[];
   query?: Query;
-  searchSource?: SearchSource;
+  searchSource?: SearchSourceContract;
 }
 
 /**

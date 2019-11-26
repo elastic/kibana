@@ -40,7 +40,6 @@ import {
   KibanaParsedUrl,
   migrateLegacyQuery,
   SavedObjectSaveModal,
-  showShareContextMenu,
   showSaveModal,
   stateMonitorFactory,
   subscribeWithScope
@@ -178,14 +177,13 @@ function VisualizeAppController(
       const hasUnappliedChanges = vis.dirty;
       const hasUnsavedChanges = $appStatus.dirty;
       const getUnhashableStates = () => [getAppState(), globalState].filter(Boolean);
-      showShareContextMenu({
+      shareContextMenuExtensions.toggleShareContextMenu({
         anchorElement,
         allowEmbed: true,
         allowShortUrl: visualizeCapabilities.createShortUrl,
         getUnhashableStates,
         objectId: savedVis.id,
         objectType: 'visualization',
-        shareContextMenuExtensions,
         sharingData: {
           title: savedVis.title,
         },
@@ -357,6 +355,12 @@ function VisualizeAppController(
     }));
     subscriptions.add(subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
       next: updateTimeRange
+    }));
+
+    subscriptions.add(chrome.getIsVisible$().subscribe(isVisible => {
+      $scope.$evalAsync(() => {
+        $scope.isVisible = isVisible;
+      });
     }));
 
     // update the searchSource when query updates

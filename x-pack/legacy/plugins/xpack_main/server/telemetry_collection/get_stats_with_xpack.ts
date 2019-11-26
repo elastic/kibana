@@ -7,19 +7,16 @@
 // @ts-ignore
 import { getXPack } from './get_xpack';
 import { getLocalStats } from '../../../../../../src/legacy/core_plugins/telemetry/server/telemetry_collection';
-import {
-  StatsGetter,
-  getStatsCollectionConfig,
-} from '../../../../../../src/legacy/core_plugins/telemetry/server/collection_manager';
+import { StatsGetter } from '../../../../../../src/legacy/core_plugins/telemetry/server/collection_manager';
 
-export const getStatsWithXpack: StatsGetter = async function(config) {
-  const { server, callCluster } = getStatsCollectionConfig(config, 'data');
-
-  const localStats = await getLocalStats({ server, callCluster });
+export const getStatsWithXpack: StatsGetter = async function(clustersDetails, config) {
+  const { callCluster } = config;
+  const clustersLocalStats = await getLocalStats(clustersDetails, config);
   const { license, xpack } = await getXPack(callCluster);
 
-  localStats.license = license;
-  localStats.stack_stats.xpack = xpack;
-
-  return [localStats];
+  return clustersLocalStats.map(localStats => {
+    localStats.license = license;
+    localStats.stack_stats.xpack = xpack;
+    return localStats;
+  });
 };

@@ -23,35 +23,90 @@
               }
             }
           },
+          "rule": {
+            "properties": {
+              "id": {
+                "type": "keyword"
+              },
+              "rule_id": {
+                "type": "keyword"
+              },
+              "false_positives": {
+                "type": "keyword"
+              },
+              "saved_id": {
+                "type": "keyword"
+              },
+              "max_signals": {
+                "type": "keyword"
+              },
+              "risk_score": {
+                "type": "keyword"
+              },
+              "output_index": {
+                "type": "keyword"
+              },
+              "description": {
+                "type": "keyword"
+              },
+              "filter": {
+                "type": "object"
+              },
+              "from": {
+                "type": "keyword"
+              },
+              "immutable": {
+                "type": "keyword"
+              },
+              "index": {
+                "type": "keyword"
+              },
+              "interval": {
+                "type": "keyword"
+              },
+              "language": {
+                "type": "keyword"
+              },
+              "name": {
+                "type": "keyword"
+              },
+              "query": {
+                "type": "keyword"
+              },
+              "references": {
+                "type": "keyword"
+              },
+              "severity": {
+                "type": "keyword"
+              },
+              "tags": {
+                "type": "keyword"
+              },
+              "type": {
+                "type": "keyword"
+              },
+              "size": {
+                "type": "keyword"
+              },
+              "to": {
+                "type": "keyword"
+              },
+              "enabled": {
+                "type": "keyword"
+              },
+              "filters": {
+                "type": "object"
+              },
+              "created_by": {
+                "type": "keyword"
+              },
+              "updated_by": {
+                "type": "keyword"
+              }
+            }
+          },
           "original_time": {
             "type": "date"
-          },
-          "rule_revision": {
-            "type": "long"
-          },
-          "rule_id": {
-            "type": "keyword"
-          },
-          "rule_type": {
-            "type": "keyword"
-          },
-          "rule_query": {
-            "type": "keyword"
-          },
-          "index_patterns": {
-            "type": "keyword"
-          },
-          "name": {
-            "type": "keyword"
-          },
-          "description": {
-            "type": "text"
-          },
-          "severity": {
-            "type": "keyword"
-          },
-          "references": {
-            "type": "text"
           }
         }
       },

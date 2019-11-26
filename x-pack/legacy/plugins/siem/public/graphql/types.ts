@@ -122,6 +122,8 @@ export interface TimelineInput {
 
   description?: Maybe<string>;
 
+  filters?: Maybe<FilterTimelineInput[]>;
+
   kqlMode?: Maybe<string>;
 
   kqlQuery?: Maybe<SerializedFilterQueryInput>;
@@ -129,6 +131,8 @@ export interface TimelineInput {
   title?: Maybe<string>;
 
   dateRange?: Maybe<DateRangePickerInput>;
+
+  savedQueryId?: Maybe<string>;
 
   sort?: Maybe<SortTimelineInput>;
 }
@@ -183,6 +187,46 @@ export interface QueryMatchInput {
   displayValue?: Maybe<string>;
 
   operator?: Maybe<string>;
+}
+
+export interface FilterTimelineInput {
+  exists?: Maybe<string>;
+
+  meta?: Maybe<FilterMetaTimelineInput>;
+
+  match_all?: Maybe<string>;
+
+  missing?: Maybe<string>;
+
+  query?: Maybe<string>;
+
+  range?: Maybe<string>;
+
+  script?: Maybe<string>;
+}
+
+export interface FilterMetaTimelineInput {
+  alias?: Maybe<string>;
+
+  controlledBy?: Maybe<string>;
+
+  disabled?: Maybe<boolean>;
+
+  field?: Maybe<string>;
+
+  formattedValue?: Maybe<string>;
+
+  index?: Maybe<string>;
+
+  key?: Maybe<string>;
+
+  negate?: Maybe<boolean>;
+
+  params?: Maybe<string>;
+
+  type?: Maybe<string>;
+
+  value?: Maybe<string>;
 }
 
 export interface SerializedFilterQueryInput {
@@ -412,6 +456,8 @@ export interface Source {
   configuration: SourceConfiguration;
   /** The status of the source */
   status: SourceStatus;
+
+  AnomaliesOverTime: AnomaliesOverTimeData;
   /** Gets Authentication success and failures based on a timerange */
   Authentications: AuthenticationsData;
 
@@ -510,6 +556,28 @@ export interface IndexField {
   description?: Maybe<string>;
 
   format?: Maybe<string>;
+}
+
+export interface AnomaliesOverTimeData {
+  inspect?: Maybe<Inspect>;
+
+  anomaliesOverTime: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
+}
+
+export interface Inspect {
+  dsl: string[];
+
+  response: string[];
+}
+
+export interface MatrixOverTimeHistogramData {
+  x: number;
+
+  y: number;
+
+  g: string;
 }
 
 export interface AuthenticationsData {
@@ -646,26 +714,12 @@ export interface PageInfoPaginated {
   showMorePagesIndicator: boolean;
 }
 
-export interface Inspect {
-  dsl: string[];
-
-  response: string[];
-}
-
 export interface AuthenticationsOverTimeData {
   inspect?: Maybe<Inspect>;
 
   authenticationsOverTime: MatrixOverTimeHistogramData[];
 
   totalCount: number;
-}
-
-export interface MatrixOverTimeHistogramData {
-  x: number;
-
-  y: number;
-
-  g: string;
 }
 
 export interface TimelineData {
@@ -1582,6 +1636,8 @@ export interface NetworkDnsData {
   pageInfo: PageInfoPaginated;
 
   inspect?: Maybe<Inspect>;
+
+  histogram?: Maybe<MatrixOverOrdinalHistogramData[]>;
 }
 
 export interface NetworkDnsEdges {
@@ -1602,6 +1658,14 @@ export interface NetworkDnsItem {
   queryCount?: Maybe<number>;
 
   uniqueDomains?: Maybe<number>;
+}
+
+export interface MatrixOverOrdinalHistogramData {
+  x: string;
+
+  y: number;
+
+  g: string;
 }
 
 export interface NetworkHttpData {
@@ -1760,9 +1824,11 @@ export interface SayMyName {
 }
 
 export interface TimelineResult {
-  savedObjectId: string;
-
   columns?: Maybe<ColumnHeaderResult[]>;
+
+  created?: Maybe<number>;
+
+  createdBy?: Maybe<string>;
 
   dataProviders?: Maybe<DataProviderResult[]>;
 
@@ -1773,6 +1839,8 @@ export interface TimelineResult {
   eventIdToNoteIds?: Maybe<NoteResult[]>;
 
   favorite?: Maybe<FavoriteTimelineResult[]>;
+
+  filters?: Maybe<FilterTimelineResult[]>;
 
   kqlMode?: Maybe<string>;
 
@@ -1786,13 +1854,13 @@ export interface TimelineResult {
 
   pinnedEventsSaveObject?: Maybe<PinnedEvent[]>;
 
-  title?: Maybe<string>;
+  savedQueryId?: Maybe<string>;
+
+  savedObjectId: string;
 
   sort?: Maybe<SortTimelineResult>;
 
-  created?: Maybe<number>;
-
-  createdBy?: Maybe<string>;
+  title?: Maybe<string>;
 
   updated?: Maybe<number>;
 
@@ -1865,6 +1933,46 @@ export interface FavoriteTimelineResult {
   userName?: Maybe<string>;
 
   favoriteDate?: Maybe<number>;
+}
+
+export interface FilterTimelineResult {
+  exists?: Maybe<string>;
+
+  meta?: Maybe<FilterMetaTimelineResult>;
+
+  match_all?: Maybe<string>;
+
+  missing?: Maybe<string>;
+
+  query?: Maybe<string>;
+
+  range?: Maybe<string>;
+
+  script?: Maybe<string>;
+}
+
+export interface FilterMetaTimelineResult {
+  alias?: Maybe<string>;
+
+  controlledBy?: Maybe<string>;
+
+  disabled?: Maybe<boolean>;
+
+  field?: Maybe<string>;
+
+  formattedValue?: Maybe<string>;
+
+  index?: Maybe<string>;
+
+  key?: Maybe<string>;
+
+  negate?: Maybe<boolean>;
+
+  params?: Maybe<string>;
+
+  type?: Maybe<string>;
+
+  value?: Maybe<string>;
 }
 
 export interface SerializedFilterQueryResult {
@@ -2028,6 +2136,13 @@ export interface GetAllTimelineQueryArgs {
   sort?: Maybe<SortTimeline>;
 
   onlyUserFavorite?: Maybe<boolean>;
+}
+export interface AnomaliesOverTimeSourceArgs {
+  timerange: TimerangeInput;
+
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
 }
 export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
@@ -2322,6 +2437,58 @@ export interface DeleteTimelineMutationArgs {
 // ====================================================
 // Documents
 // ====================================================
+
+export namespace GetAnomaliesOverTimeQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    defaultIndex: string[];
+    filterQuery?: Maybe<string>;
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    AnomaliesOverTime: AnomaliesOverTime;
+  };
+
+  export type AnomaliesOverTime = {
+    __typename?: 'AnomaliesOverTimeData';
+
+    anomaliesOverTime: _AnomaliesOverTime[];
+
+    totalCount: number;
+
+    inspect: Maybe<Inspect>;
+  };
+
+  export type _AnomaliesOverTime = {
+    __typename?: 'MatrixOverTimeHistogramData';
+
+    x: number;
+
+    y: number;
+
+    g: string;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+}
 
 export namespace GetAuthenticationsOverTimeQuery {
   export type Variables = {
@@ -3223,6 +3390,8 @@ export namespace GetNetworkDnsQuery {
     pageInfo: PageInfo;
 
     inspect: Maybe<Inspect>;
+
+    histogram: Maybe<Histogram[]>;
   };
 
   export type Edges = {
@@ -3271,6 +3440,16 @@ export namespace GetNetworkDnsQuery {
     dsl: string[];
 
     response: string[];
+  };
+
+  export type Histogram = {
+    __typename?: 'MatrixOverOrdinalHistogramData';
+
+    x: string;
+
+    y: number;
+
+    g: string;
   };
 }
 
@@ -4874,6 +5053,8 @@ export namespace GetOneTimeline {
 
     favorite: Maybe<Favorite[]>;
 
+    filters: Maybe<Filters[]>;
+
     kqlMode: Maybe<string>;
 
     kqlQuery: Maybe<KqlQuery>;
@@ -4887,6 +5068,8 @@ export namespace GetOneTimeline {
     pinnedEventsSaveObject: Maybe<PinnedEventsSaveObject[]>;
 
     title: Maybe<string>;
+
+    savedQueryId: Maybe<string>;
 
     sort: Maybe<Sort>;
 
@@ -5029,6 +5212,50 @@ export namespace GetOneTimeline {
     favoriteDate: Maybe<number>;
   };
 
+  export type Filters = {
+    __typename?: 'FilterTimelineResult';
+
+    meta: Maybe<Meta>;
+
+    query: Maybe<string>;
+
+    exists: Maybe<string>;
+
+    match_all: Maybe<string>;
+
+    missing: Maybe<string>;
+
+    range: Maybe<string>;
+
+    script: Maybe<string>;
+  };
+
+  export type Meta = {
+    __typename?: 'FilterMetaTimelineResult';
+
+    alias: Maybe<string>;
+
+    controlledBy: Maybe<string>;
+
+    disabled: Maybe<boolean>;
+
+    field: Maybe<string>;
+
+    formattedValue: Maybe<string>;
+
+    index: Maybe<string>;
+
+    key: Maybe<string>;
+
+    negate: Maybe<boolean>;
+
+    params: Maybe<string>;
+
+    type: Maybe<string>;
+
+    value: Maybe<string>;
+  };
+
   export type KqlQuery = {
     __typename?: 'SerializedFilterQueryResult';
 
@@ -5142,6 +5369,8 @@ export namespace PersistTimelineMutation {
 
     favorite: Maybe<Favorite[]>;
 
+    filters: Maybe<Filters[]>;
+
     kqlMode: Maybe<string>;
 
     kqlQuery: Maybe<KqlQuery>;
@@ -5149,6 +5378,8 @@ export namespace PersistTimelineMutation {
     title: Maybe<string>;
 
     dateRange: Maybe<DateRange>;
+
+    savedQueryId: Maybe<string>;
 
     sort: Maybe<Sort>;
 
@@ -5255,6 +5486,50 @@ export namespace PersistTimelineMutation {
     userName: Maybe<string>;
 
     favoriteDate: Maybe<number>;
+  };
+
+  export type Filters = {
+    __typename?: 'FilterTimelineResult';
+
+    meta: Maybe<Meta>;
+
+    query: Maybe<string>;
+
+    exists: Maybe<string>;
+
+    match_all: Maybe<string>;
+
+    missing: Maybe<string>;
+
+    range: Maybe<string>;
+
+    script: Maybe<string>;
+  };
+
+  export type Meta = {
+    __typename?: 'FilterMetaTimelineResult';
+
+    alias: Maybe<string>;
+
+    controlledBy: Maybe<string>;
+
+    disabled: Maybe<boolean>;
+
+    field: Maybe<string>;
+
+    formattedValue: Maybe<string>;
+
+    index: Maybe<string>;
+
+    key: Maybe<string>;
+
+    negate: Maybe<boolean>;
+
+    params: Maybe<string>;
+
+    type: Maybe<string>;
+
+    value: Maybe<string>;
   };
 
   export type KqlQuery = {

@@ -25,18 +25,26 @@ import { JsonObject } from '..';
 
 export type KueryNode = any;
 
+export type DslQuery = any;
+
 export interface KueryParseOptions {
   helpers: {
     [key: string]: any;
   };
   startRule: string;
+  allowLeadingWildcards: boolean;
 }
 
 export function fromKueryExpression(
-  expression: string,
-  parseOptions?: KueryParseOptions
+  expression: string | DslQuery,
+  parseOptions?: Partial<KueryParseOptions>
 ): KueryNode;
 
-export function toElasticsearchQuery(node: KueryNode, indexPattern?: any): JsonObject;
+export function toElasticsearchQuery(
+  node: KueryNode,
+  indexPattern?: any,
+  config?: Record<string, any>,
+  context?: Record<string, any>
+): JsonObject;
 
 export function doesKueryExpressionHaveLuceneSyntaxError(expression: string): boolean;

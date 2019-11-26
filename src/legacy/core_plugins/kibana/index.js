@@ -62,10 +62,9 @@ export default function (kibana) {
 
     uiExports: {
       hacks: [
-        'plugins/kibana/dev_tools/hacks/hide_empty_tools',
-        'plugins/kibana/visualize'
+        'plugins/kibana/dev_tools',
+        'plugins/kibana/visualize',
       ],
-      fieldFormats: ['plugins/kibana/field_formats/register'],
       savedObjectTypes: [
         'plugins/kibana/visualize/saved_visualizations/saved_visualization_register',
         'plugins/kibana/discover/saved_searches/saved_search_register',

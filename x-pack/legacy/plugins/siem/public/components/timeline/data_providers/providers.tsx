@@ -61,6 +61,14 @@ PanelProviders.displayName = 'PanelProviders';
 const PanelProvidersGroupContainer = styled(EuiFlexGroup)`
   position: relative;
   flex-grow: unset;
+
+  .euiFlexItem {
+    flex: 1 0 auto;
+  }
+
+  .euiFlexItem--flexGrowZero {
+    flex: 0 0 auto;
+  }
 `;
 
 PanelProvidersGroupContainer.displayName = 'PanelProvidersGroupContainer';
@@ -68,6 +76,7 @@ PanelProvidersGroupContainer.displayName = 'PanelProvidersGroupContainer';
 /** A row of data providers in the timeline drop zone */
 const PanelProviderGroupContainer = styled(EuiFlexGroup)`
   height: ${ROW_OF_DATA_PROVIDERS_HEIGHT}px;
+  min-height: ${ROW_OF_DATA_PROVIDERS_HEIGHT}px;
   margin: 5px 0px;
 `;
 

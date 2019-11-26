@@ -17,6 +17,8 @@
  * under the License.
  */
 
+export * from './lib';
+
 export * from './query_service';
 export * from './filter_manager';
 

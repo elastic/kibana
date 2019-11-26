@@ -8,8 +8,6 @@ import { isEqual } from 'lodash/fp';
 import React, { useEffect, useState, useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
-import { Query } from 'src/plugins/data/common';
-
 import { WithSource } from '../../containers/source';
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
 import { timelineActions, inputsActions } from '../../store/actions';
@@ -18,7 +16,7 @@ import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { DataProvider } from '../timeline/data_providers/data_provider';
 import { Sort } from '../timeline/body/sort';
 import { OnChangeItemsPerPage } from '../timeline/events';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
 
 import { EventsViewer } from './events_viewer';
 import { InputsModelId } from '../../store/inputs/constants';
@@ -205,14 +203,11 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const StatefulEventsViewer = connect(
-  makeMapStateToProps,
-  {
-    createTimeline: timelineActions.createTimeline,
-    deleteEventQuery: inputsActions.deleteOneQuery,
-    updateItemsPerPage: timelineActions.updateItemsPerPage,
-    updateSort: timelineActions.updateSort,
-    removeColumn: timelineActions.removeColumn,
-    upsertColumn: timelineActions.upsertColumn,
-  }
-)(StatefulEventsViewerComponent);
+export const StatefulEventsViewer = connect(makeMapStateToProps, {
+  createTimeline: timelineActions.createTimeline,
+  deleteEventQuery: inputsActions.deleteOneQuery,
+  updateItemsPerPage: timelineActions.updateItemsPerPage,
+  updateSort: timelineActions.updateSort,
+  removeColumn: timelineActions.removeColumn,
+  upsertColumn: timelineActions.upsertColumn,
+})(StatefulEventsViewerComponent);

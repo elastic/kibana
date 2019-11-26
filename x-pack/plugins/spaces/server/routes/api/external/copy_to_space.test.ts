@@ -172,7 +172,10 @@ describe('copy to space', () => {
     it(`requires objects to be unique`, async () => {
       const payload = {
         spaces: ['a-space'],
-        objects: [{ type: 'foo', id: 'bar' }, { type: 'foo', id: 'bar' }],
+        objects: [
+          { type: 'foo', id: 'bar' },
+          { type: 'foo', id: 'bar' },
+        ],
       };
 
       const { copyToSpace } = await setup();
@@ -185,7 +188,10 @@ describe('copy to space', () => {
     it('does not allow namespace agnostic types to be copied (via "supportedTypes" property)', async () => {
       const payload = {
         spaces: ['a-space'],
-        objects: [{ type: 'globalType', id: 'bar' }, { type: 'visualization', id: 'bar' }],
+        objects: [
+          { type: 'globalType', id: 'bar' },
+          { type: 'visualization', id: 'bar' },
+        ],
       };
 
       const { copyToSpace, legacyAPI } = await setup();
@@ -307,7 +313,10 @@ describe('copy to space', () => {
     it(`requires objects to be unique`, async () => {
       const payload = {
         retries: {},
-        objects: [{ type: 'foo', id: 'bar' }, { type: 'foo', id: 'bar' }],
+        objects: [
+          { type: 'foo', id: 'bar' },
+          { type: 'foo', id: 'bar' },
+        ],
       };
 
       const { resolveConflicts } = await setup();

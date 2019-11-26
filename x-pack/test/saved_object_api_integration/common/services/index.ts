@@ -12,7 +12,7 @@ import { services as kibanaApiIntegrationServices } from '../../../../../test/ap
 import { services as kibanaFunctionalServices } from '../../../../../test/functional/services';
 
 export const services = {
-  es: LegacyEsProvider,
+  legacyEs: LegacyEsProvider,
   esSupertestWithoutAuth: apiIntegrationServices.esSupertestWithoutAuth,
   supertest: kibanaApiIntegrationServices.supertest,
   supertestWithoutAuth: apiIntegrationServices.supertestWithoutAuth,

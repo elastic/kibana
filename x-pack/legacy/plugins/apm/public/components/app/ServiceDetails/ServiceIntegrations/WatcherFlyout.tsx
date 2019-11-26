@@ -30,6 +30,7 @@ import { padLeft, range } from 'lodash';
 import moment from 'moment-timezone';
 import React, { Component } from 'react';
 import styled from 'styled-components';
+import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { KibanaCoreContext } from '../../../../../../observability/public';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { KibanaLink } from '../../../shared/Links/KibanaLink';
@@ -219,7 +220,7 @@ export class WatcherFlyout extends Component<
           defaultMessage: 'Watch creation failed'
         }
       ),
-      text: (
+      text: toMountPoint(
         <p>
           {i18n.translate(
             'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreationFailedNotificationText',
@@ -243,7 +244,7 @@ export class WatcherFlyout extends Component<
           defaultMessage: 'New watch created!'
         }
       ),
-      text: (
+      text: toMountPoint(
         <p>
           {i18n.translate(
             'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreatedNotificationText',

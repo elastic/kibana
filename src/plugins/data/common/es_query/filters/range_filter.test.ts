@@ -19,16 +19,16 @@
 
 import { each } from 'lodash';
 import { buildRangeFilter, RangeFilter } from './range_filter';
-import { IndexPattern, Field } from './types';
-import { getField } from '../__tests__/fields_mock';
+import { getField } from '../../index_patterns/mocks';
+import { IIndexPattern, IFieldType } from '../../index_patterns';
 
 describe('Range filter builder', () => {
-  let indexPattern: IndexPattern;
+  let indexPattern: IIndexPattern;
 
   beforeEach(() => {
     indexPattern = {
       id: 'id',
-    };
+    } as IIndexPattern;
   });
 
   it('should be a function', () => {
@@ -118,7 +118,7 @@ describe('Range filter builder', () => {
   });
 
   describe('when given params where one side is infinite', () => {
-    let field: Field;
+    let field: IFieldType;
     let filter: RangeFilter;
 
     beforeEach(() => {
@@ -148,7 +148,7 @@ describe('Range filter builder', () => {
   });
 
   describe('when given params where both sides are infinite', () => {
-    let field: Field;
+    let field: IFieldType;
     let filter: RangeFilter;
 
     beforeEach(() => {

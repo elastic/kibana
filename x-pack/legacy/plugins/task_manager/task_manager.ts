@@ -15,6 +15,7 @@ import {
   TaskDictionary,
   ConcreteTaskInstance,
   RunContext,
+  TaskInstanceWithId,
   TaskInstance,
 } from './task';
 import { TaskPoller } from './task_poller';
@@ -28,6 +29,8 @@ import {
   ClaimOwnershipResult,
 } from './task_store';
 import { identifyEsError } from './lib/identify_es_error';
+
+const VERSION_CONFLICT_STATUS = 409;
 
 export interface TaskManagerOpts {
   logger: Logger;
@@ -217,6 +220,26 @@ export class TaskManager {
     const result = await this.store.schedule(modifiedTask);
     this.poller.attemptWork();
     return result;
+  }
+
+  /**
+   * Schedules a task with an Id
+   *
+   * @param task - The task being scheduled.
+   * @returns {Promise<TaskInstanceWithId>}
+   */
+  public async ensureScheduled(
+    taskInstance: TaskInstanceWithId,
+    options?: any
+  ): Promise<TaskInstanceWithId> {
+    try {
+      return await this.schedule(taskInstance, options);
+    } catch (err) {
+      if (err.statusCode === VERSION_CONFLICT_STATUS) {
+        return taskInstance;
+      }
+      throw err;
+    }
   }
 
   /**

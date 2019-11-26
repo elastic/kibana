@@ -10,8 +10,10 @@ import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
 import { DataRequest } from './util/data_request';
 import {
+  MAX_ZOOM,
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
-  SOURCE_DATA_ID_ORIGIN
+  MIN_ZOOM,
+  SOURCE_DATA_ID_ORIGIN,
 } from '../../common/constants';
 import uuid from 'uuid/v4';
 import { copyPersistentState } from '../reducers/util';
@@ -22,10 +24,9 @@ const NO_SOURCE_UPDATE_REQUIRED = false;
 
 export class AbstractLayer {
 
-  constructor({ layerDescriptor, source, style }) {
+  constructor({ layerDescriptor, source }) {
     this._descriptor = AbstractLayer.createDescriptor(layerDescriptor);
     this._source = source;
-    this._style = style;
     if (this._descriptor.__dataRequests) {
       this._dataRequests = this._descriptor.__dataRequests.map(dataRequest => new DataRequest(dataRequest));
     } else {
@@ -44,11 +45,10 @@ export class AbstractLayer {
     layerDescriptor.__dataRequests = _.get(options, '__dataRequests', []);
     layerDescriptor.id = _.get(options, 'id', uuid());
     layerDescriptor.label = options.label && options.label.length > 0 ? options.label : null;
-    layerDescriptor.minZoom = _.get(options, 'minZoom', 0);
-    layerDescriptor.maxZoom = _.get(options, 'maxZoom', 24);
+    layerDescriptor.minZoom = _.get(options, 'minZoom', MIN_ZOOM);
+    layerDescriptor.maxZoom = _.get(options, 'maxZoom', MAX_ZOOM);
     layerDescriptor.alpha = _.get(options, 'alpha', 0.75);
     layerDescriptor.visible = _.get(options, 'visible', true);
-    layerDescriptor.applyGlobalQuery = _.get(options, 'applyGlobalQuery', true);
     layerDescriptor.style = _.get(options, 'style',  {});
 
     return layerDescriptor;
@@ -195,7 +195,7 @@ export class AbstractLayer {
     return false;
   }
 
-  getLegendDetails() {
+  renderLegendDetails() {
     return null;
   }
 
@@ -229,10 +229,6 @@ export class AbstractLayer {
 
   getQuery() {
     return this._descriptor.query;
-  }
-
-  getApplyGlobalQuery() {
-    return this._descriptor.applyGlobalQuery;
   }
 
   getZoomConfig() {
@@ -383,14 +379,10 @@ export class AbstractLayer {
   }
 
   getIndexPatternIds() {
-    return  [];
+    return [];
   }
 
   getQueryableIndexPatternIds() {
-    if (this.getApplyGlobalQuery()) {
-      return this.getIndexPatternIds();
-    }
-
     return [];
   }
 
@@ -399,6 +391,10 @@ export class AbstractLayer {
   }
 
   async getNumberFields() {
+    return [];
+  }
+
+  async getOrdinalFields() {
     return [];
   }
 

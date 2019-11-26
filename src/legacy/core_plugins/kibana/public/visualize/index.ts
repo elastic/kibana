@@ -63,7 +63,7 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
 (async () => {
   const instance = new VisualizePlugin();
   instance.setup(npSetup.core, {
-    feature_catalogue: npSetup.plugins.feature_catalogue,
+    feature_catalogue: npSetup.plugins.home.featureCatalogue,
     VisEditorTypesRegistryProvider,
     __LEGACY: {
       // angular is passed to kibana_services since it's used in editor.js

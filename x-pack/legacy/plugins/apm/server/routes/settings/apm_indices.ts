@@ -5,7 +5,6 @@
  */
 
 import * as t from 'io-ts';
-import { setupRequest } from '../../lib/helpers/setup_request';
 import { createRoute } from '../create_route';
 import {
   getApmIndices,
@@ -14,26 +13,25 @@ import {
 import { saveApmIndices } from '../../lib/settings/apm_indices/save_apm_indices';
 
 // get list of apm indices and values
-export const apmIndexSettingsRoute = createRoute((core, { server }) => ({
+export const apmIndexSettingsRoute = createRoute(() => ({
   method: 'GET',
   path: '/api/apm/settings/apm-index-settings',
-  handler: async req => {
-    const setup = await setupRequest(req);
-    return await getApmIndexSettings({ setup, server });
+  handler: async ({ context }) => {
+    return await getApmIndexSettings({ context });
   }
 }));
 
 // get apm indices configuration object
-export const apmIndicesRoute = createRoute((core, { server }) => ({
+export const apmIndicesRoute = createRoute(() => ({
   method: 'GET',
   path: '/api/apm/settings/apm-indices',
-  handler: async req => {
-    return await getApmIndices(server);
+  handler: async ({ context }) => {
+    return await getApmIndices(context);
   }
 }));
 
 // save ui indices
-export const saveApmIndicesRoute = createRoute((core, { server }) => ({
+export const saveApmIndicesRoute = createRoute(() => ({
   method: 'POST',
   path: '/api/apm/settings/apm-indices/save',
   params: {
@@ -43,11 +41,11 @@ export const saveApmIndicesRoute = createRoute((core, { server }) => ({
       'apm_oss.onboardingIndices': t.string,
       'apm_oss.spanIndices': t.string,
       'apm_oss.transactionIndices': t.string,
-      'apm_oss.metricsIndices': t.string,
-      'apm_oss.apmAgentConfigurationIndex': t.string
+      'apm_oss.metricsIndices': t.string
     })
   },
-  handler: async (req, { body }) => {
-    return await saveApmIndices(server, body);
+  handler: async ({ context, request }) => {
+    const { body } = context.params;
+    return await saveApmIndices(context, body);
   }
 }));

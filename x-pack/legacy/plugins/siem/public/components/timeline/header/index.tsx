@@ -84,7 +84,11 @@ export const TimelineHeader = React.memo<Props>(
         onToggleDataProviderExcluded={onToggleDataProviderExcluded}
         show={show}
       />
-      <StatefulSearchOrFilter timelineId={id} indexPattern={indexPattern} />
+      <StatefulSearchOrFilter
+        browserFields={browserFields}
+        indexPattern={indexPattern}
+        timelineId={id}
+      />
     </TimelineHeaderContainer>
   )
 );

@@ -10,6 +10,7 @@ import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { idx } from '@kbn/elastic-idx/target';
 import { KFetchError } from 'ui/kfetch/kfetch_error';
+import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { useTrackedPromise } from '../utils/use_tracked_promise';
 export function useHTTPRequest<Response>(
   pathname: string,
@@ -36,7 +37,7 @@ export function useHTTPRequest<Response>(
           title: i18n.translate('xpack.infra.useHTTPRequest.error.title', {
             defaultMessage: `Error while fetching resource`,
           }),
-          text: (
+          text: toMountPoint(
             <div>
               <h5>
                 {i18n.translate('xpack.infra.useHTTPRequest.error.status', {

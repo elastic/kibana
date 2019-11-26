@@ -1,7 +1,7 @@
 {
-  "id": "rule-8",
+  "rule_id": "rule-8",
+  "risk_score": 8,
   "description": "Detecting root and admin users",
-  "index": ["auditbeat-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"],
   "interval": "5m",
   "name": "Detect Root/Admin Users",
   "severity": "high",

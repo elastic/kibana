@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header']);
 
-  describe.skip('runPipeline', function () {
+  describe('runPipeline', function () {
     this.tags(['skipFirefox']);
 
     before(async () => {

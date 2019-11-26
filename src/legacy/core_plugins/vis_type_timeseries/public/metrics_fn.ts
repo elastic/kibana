@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { PersistedState } from 'ui/persisted_state';
 import chrome from 'ui/chrome';
 
-import { ExpressionFunction, KibanaContext, Render } from '../../interpreter/types';
+import { ExpressionFunction, KibanaContext, Render } from '../../../../plugins/expressions/public';
 
 // @ts-ignore
 import { createMetricsRequestHandler } from './request_handler';

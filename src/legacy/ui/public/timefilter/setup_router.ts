@@ -23,6 +23,7 @@ import moment from 'moment';
 import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import chrome from 'ui/chrome';
 import { RefreshInterval, TimeRange, TimefilterContract } from 'src/plugins/data/public';
+import { Subscription } from 'rxjs';
 
 // TODO
 // remove everything underneath once globalState is no longer an angular service
@@ -76,17 +77,21 @@ export const registerTimefilterWithGlobalStateFactory = (
     globalState.save();
   };
 
-  const sub1 = subscribeWithScope($rootScope, timefilter.getRefreshIntervalUpdate$(), {
-    next: updateGlobalStateWithTime,
-  });
+  const subscriptions = new Subscription();
+  subscriptions.add(
+    subscribeWithScope($rootScope, timefilter.getRefreshIntervalUpdate$(), {
+      next: updateGlobalStateWithTime,
+    })
+  );
 
-  const sub2 = subscribeWithScope($rootScope, timefilter.getTimeUpdate$(), {
-    next: updateGlobalStateWithTime,
-  });
+  subscriptions.add(
+    subscribeWithScope($rootScope, timefilter.getTimeUpdate$(), {
+      next: updateGlobalStateWithTime,
+    })
+  );
 
   $rootScope.$on('$destroy', () => {
-    sub1.unsubscribe();
-    sub2.unsubscribe();
+    subscriptions.unsubscribe();
   });
 };
 

@@ -14,7 +14,7 @@ export const encryptedSavedObjectsServiceMock = {
   create(registrations: EncryptedSavedObjectTypeRegistration[] = []) {
     const mock: jest.Mocked<EncryptedSavedObjectsService> = new (jest.requireMock(
       './encrypted_saved_objects_service'
-    )).EncryptedSavedObjectsService();
+    ).EncryptedSavedObjectsService)();
 
     function processAttributes<T extends Record<string, any>>(
       descriptor: Pick<SavedObjectDescriptor, 'type'>,

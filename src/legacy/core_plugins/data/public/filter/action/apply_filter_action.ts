@@ -19,6 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'src/core/public';
+import { toMountPoint } from '../../../../../../plugins/kibana_react/public';
 import {
   IAction,
   createAction,
@@ -79,17 +80,19 @@ export function createFilterAction(
 
         const filterSelectionPromise: Promise<esFilters.Filter[]> = new Promise(resolve => {
           const overlay = overlays.openModal(
-            applyFiltersPopover(
-              filters,
-              indexPatterns,
-              () => {
-                overlay.close();
-                resolve([]);
-              },
-              (filterSelection: esFilters.Filter[]) => {
-                overlay.close();
-                resolve(filterSelection);
-              }
+            toMountPoint(
+              applyFiltersPopover(
+                filters,
+                indexPatterns,
+                () => {
+                  overlay.close();
+                  resolve([]);
+                },
+                (filterSelection: esFilters.Filter[]) => {
+                  overlay.close();
+                  resolve(filterSelection);
+                }
+              )
             ),
             {
               'data-test-subj': 'test',

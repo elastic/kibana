@@ -31,9 +31,10 @@ const getCompFromConfig = ({ Component, memoryRouter, store, onRouter }: Config)
     const { componentRoutePath, initialEntries, initialIndex } = memoryRouter!;
 
     // Wrap the componenet with a MemoryRouter and attach it to a react-router <Route />
-    Comp = WithMemoryRouter(initialEntries, initialIndex)(
-      WithRoute(componentRoutePath, onRouter)(Comp)
-    );
+    Comp = WithMemoryRouter(
+      initialEntries,
+      initialIndex
+    )(WithRoute(componentRoutePath, onRouter)(Comp));
   }
 
   return Comp;

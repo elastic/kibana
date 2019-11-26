@@ -21,7 +21,7 @@ import $ from 'jquery';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 
-import { VisProvider } from 'ui/vis';
+import { Vis } from 'ui/vis';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 import { createMetricVisTypeDefinition } from '../metric_vis_type';
@@ -34,7 +34,6 @@ describe('metric_vis - createMetricVisTypeDefinition', () => {
   beforeEach(
     ngMock.inject(Private => {
       setup = () => {
-        const Vis = Private(VisProvider);
         const metricVisType = createMetricVisTypeDefinition();
         const indexPattern = Private(LogstashIndexPatternStubProvider);
 

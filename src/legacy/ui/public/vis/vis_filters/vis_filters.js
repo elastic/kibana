@@ -132,7 +132,6 @@ const VisFiltersProvider = () => {
     }
   };
 
-
   return {
     pushFilters,
   };

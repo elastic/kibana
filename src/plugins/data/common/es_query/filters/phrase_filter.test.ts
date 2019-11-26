@@ -18,16 +18,16 @@
  */
 
 import { buildInlineScriptForPhraseFilter, buildPhraseFilter } from './phrase_filter';
-import { IndexPattern } from './types';
-import { getField } from '../__tests__/fields_mock';
+import { getField } from '../../index_patterns/mocks';
+import { IIndexPattern } from '../../index_patterns';
 
 describe('Phrase filter builder', () => {
-  let indexPattern: IndexPattern;
+  let indexPattern: IIndexPattern;
 
   beforeEach(() => {
     indexPattern = {
       id: 'id',
-    };
+    } as IIndexPattern;
   });
 
   it('should be a function', () => {

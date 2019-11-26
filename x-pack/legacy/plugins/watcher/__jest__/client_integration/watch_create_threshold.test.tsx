@@ -33,7 +33,11 @@ const SETTINGS = {
 };
 
 const WATCH_VISUALIZE_DATA = {
-  count: [[1559404800000, 14], [1559448000000, 196], [1559491200000, 44]],
+  count: [
+    [1559404800000, 14],
+    [1559448000000, 196],
+    [1559491200000, 44],
+  ],
 };
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });

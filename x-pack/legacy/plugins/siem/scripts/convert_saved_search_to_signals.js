@@ -33,7 +33,18 @@ const SEVERITY = 'low';
 const TYPE = 'query';
 const FROM = 'now-6m';
 const TO = 'now';
-const INDEX = ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'];
+const IMMUTABLE = true;
+const RISK_SCORE = 50;
+const ENABLED = false;
+let allSignals = '';
+const allSignalsNdJson = 'all_rules.ndjson';
+
+// For converting, if you want to use these instead of rely on the defaults then
+// comment these in and use them for the script. Otherwise this is commented out
+// so we can utilize the defaults of input and output which are based on saved objects
+// of siem:defaultIndex and siem:defaultSignalsIndex
+// const INDEX = ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'];
+// const OUTPUT_INDEX = process.env.SIGNALS_INDEX || '.siem-signals';
 
 const walk = dir => {
   const list = fs.readdirSync(dir);
@@ -117,9 +128,10 @@ async function main() {
 
       if (query != null && query.trim() !== '') {
         const outputMessage = {
-          id: fileToWrite,
+          rule_id: fileToWrite,
+          risk_score: RISK_SCORE,
           description: description || title,
-          index: INDEX,
+          immutable: IMMUTABLE,
           interval: INTERVAL,
           name: title,
           severity: SEVERITY,
@@ -129,15 +141,22 @@ async function main() {
           query,
           language,
           filters: filter,
+          enabled: ENABLED,
+          // comment these in if you want to use these for input output, otherwise
+          // with these two commented out, we will use the default saved objects from spaces.
+          // index: INDEX,
+          // output_index: OUTPUT_INDEX,
         };
 
         fs.writeFileSync(
           `${outputDir}/${fileToWrite}.json`,
           JSON.stringify(outputMessage, null, 2)
         );
+        allSignals += `${JSON.stringify(outputMessage)}\n`;
       }
     }
   );
+  fs.writeFileSync(`${outputDir}/${allSignalsNdJson}`, allSignals);
 }
 
 if (require.main === module) {

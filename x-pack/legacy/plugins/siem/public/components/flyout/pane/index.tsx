@@ -179,9 +179,6 @@ const FlyoutPaneComponent = React.memo<Props>(
 
 FlyoutPaneComponent.displayName = 'FlyoutPaneComponent';
 
-export const Pane = connect(
-  null,
-  {
-    applyDeltaToWidth: timelineActions.applyDeltaToWidth,
-  }
-)(FlyoutPaneComponent);
+export const Pane = connect(null, {
+  applyDeltaToWidth: timelineActions.applyDeltaToWidth,
+})(FlyoutPaneComponent);

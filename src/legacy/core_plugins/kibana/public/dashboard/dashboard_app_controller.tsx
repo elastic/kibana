@@ -30,17 +30,18 @@ import {
   ConfirmationButtonTypes,
   showSaveModal,
   SaveResult,
-  showShareContextMenu,
   migrateLegacyQuery,
   State,
   AppStateClass as TAppStateClass,
   KbnUrl,
   SaveOptions,
   SavedObjectFinder,
+  unhashUrl,
 } from './legacy_imports';
+import { FilterStateManager, IndexPattern, SavedQuery } from '../../../data/public';
 import { Query } from '../../../../../plugins/data/public';
-import { FilterStateManager, IndexPattern } from '../../../data/public';
-import { SavedQuery } from '../../../data/public';
+
+import './dashboard_empty_screen_directive';
 
 import {
   DashboardContainer,
@@ -106,9 +107,9 @@ export class DashboardAppController {
     indexPatterns,
     config,
     confirmModal,
-    shareContextMenuExtensions,
     savedQueryService,
     embeddables,
+    share,
     dashboardCapabilities,
     npDataStart: {
       query: {
@@ -748,14 +749,13 @@ export class DashboardAppController {
       });
     };
     navActions[TopNavIds.SHARE] = anchorElement => {
-      showShareContextMenu({
+      share.toggleShareContextMenu({
         anchorElement,
         allowEmbed: true,
         allowShortUrl: !dashboardConfig.getHideWriteControls(),
-        getUnhashableStates,
+        shareableUrl: unhashUrl(window.location.href, getUnhashableStates()),
         objectId: dash.id,
         objectType: 'dashboard',
-        shareContextMenuExtensions: shareContextMenuExtensions.raw,
         sharingData: {
           title: dash.title,
         },
@@ -777,7 +777,9 @@ export class DashboardAppController {
     });
 
     const visibleSubscription = chrome.getIsVisible$().subscribe(isVisible => {
-      $scope.isVisible = isVisible;
+      $scope.$evalAsync(() => {
+        $scope.isVisible = isVisible;
+      });
     });
 
     $scope.$on('$destroy', () => {

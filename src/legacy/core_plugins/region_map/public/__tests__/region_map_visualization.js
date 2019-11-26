@@ -22,7 +22,7 @@ import ngMock from 'ng_mock';
 import _ from 'lodash';
 import ChoroplethLayer from '../choropleth_layer';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
-import * as visModule from 'ui/vis';
+import { Vis } from 'ui/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
 import worldJson from './world.json';
 import EMS_CATALOGUE from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_manifest.json';
@@ -50,7 +50,6 @@ const PIXEL_DIFF = 96;
 describe('RegionMapsVisualizationTests', function () {
   let domNode;
   let RegionMapsVisualization;
-  let Vis;
   let indexPattern;
   let vis;
   let dependencies;
@@ -113,7 +112,6 @@ describe('RegionMapsVisualizationTests', function () {
         visualizationsSetup.types.registerVisualization(() => createRegionMapTypeDefinition(dependencies));
       }
 
-      Vis = Private(visModule.VisProvider);
       RegionMapsVisualization = createRegionMapVisualization(dependencies);
       indexPattern = Private(LogstashIndexPatternStubProvider);
 

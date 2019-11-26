@@ -8,8 +8,8 @@ import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { Server } from 'hapi';
 
-import KbnServer from '../../../../src/legacy/server/kbn_server';
-import { initServerWithKibana } from './server/kibana.index';
+import { PluginInitializerContext } from 'src/core/server';
+import { plugin } from './server';
 import { savedObjectMappings } from './server/saved_objects';
 
 import {
@@ -23,10 +23,33 @@ import {
   DEFAULT_INTERVAL_VALUE,
   DEFAULT_FROM,
   DEFAULT_TO,
+  DEFAULT_SIGNALS_INDEX,
+  DEFAULT_SIGNALS_INDEX_KEY,
 } from './common/constants';
-import { signalsAlertType } from './server/lib/detection_engine/alerts/signals_alert_type';
 import { defaultIndexPattern } from './default_index_pattern';
-import { isAlertExecutor } from './server/lib/detection_engine/alerts/types';
+
+// This is VERY TEMPORARY as we need a way to turn on alerting and actions
+// for the server without having to manually edit this file. Once alerting
+// and actions has their enabled true by default this can be removed.
+// 'alerting', 'actions' are hidden behind feature flags at the moment so if you turn
+// these on without the feature flags turned on then Kibana will crash since we are a legacy plugin
+// and legacy plugins cannot have optional requirements.
+// This returns ['alerting', 'actions', 'kibana', 'elasticsearch'] iff alertingFeatureEnabled is true
+// or if the developer signalsIndex is setup. Otherwise this returns ['kibana', 'elasticsearch']
+export const getRequiredPlugins = (
+  alertingFeatureEnabled: string | null | undefined,
+  signalsIndex: string | null | undefined
+) => {
+  const baseRequire = ['kibana', 'elasticsearch'];
+  if (
+    (signalsIndex != null && signalsIndex.trim() !== '') ||
+    (alertingFeatureEnabled && alertingFeatureEnabled.toLowerCase() === 'true')
+  ) {
+    return [...baseRequire, 'alerting', 'actions'];
+  } else {
+    return baseRequire;
+  }
+};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const siem = (kibana: any) => {
@@ -34,12 +57,7 @@ export const siem = (kibana: any) => {
     id: APP_ID,
     configPrefix: 'xpack.siem',
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch'],
-    // Uncomment these lines to turn on alerting and action for detection engine and comment the other
-    // require statement out. These are hidden behind feature flags at the moment so if you turn
-    // these on without the feature flags turned on then Kibana will crash since we are a legacy plugin
-    // and legacy plugins cannot have optional requirements.
-    // require: ['kibana', 'elasticsearch', 'alerting', 'actions'],
+    require: getRequiredPlugins(process.env.ALERTING_FEATURE_ENABLED, process.env.SIGNALS_INDEX),
     uiExports: {
       app: {
         description: i18n.translate('xpack.siem.securityDescription', {
@@ -108,6 +126,18 @@ export const siem = (kibana: any) => {
           category: ['siem'],
           requiresPageReload: true,
         },
+        [DEFAULT_SIGNALS_INDEX_KEY]: {
+          name: i18n.translate('xpack.siem.uiSettings.defaultSignalsIndexLabel', {
+            defaultMessage: 'Elasticsearch signals index',
+          }),
+          value: DEFAULT_SIGNALS_INDEX,
+          description: i18n.translate('xpack.siem.uiSettings.defaultSignalsIndexDescription', {
+            defaultMessage:
+              '<p>Elasticsearch signals index from which outputted signals will appear by default</p>',
+          }),
+          category: ['siem'],
+          requiresPageReload: true,
+        },
         [DEFAULT_ANOMALY_SCORE]: {
           name: i18n.translate('xpack.siem.uiSettings.defaultAnomalyScoreLabel', {
             defaultMessage: 'Anomaly threshold',
@@ -125,17 +155,39 @@ export const siem = (kibana: any) => {
       mappings: savedObjectMappings,
     },
     init(server: Server) {
-      const newPlatform = ((server as unknown) as KbnServer).newPlatform;
-      if (server.plugins.alerting != null) {
-        const type = signalsAlertType({
-          logger: newPlatform.coreContext.logger.get('plugins', APP_ID),
-        });
-        if (isAlertExecutor(type)) {
-          server.plugins.alerting.setup.registerType(type);
-        }
-      }
-      server.injectUiAppVars('siem', async () => server.getInjectedUiAppVars('kibana'));
-      initServerWithKibana(server);
+      const {
+        config,
+        getInjectedUiAppVars,
+        indexPatternsServiceFactory,
+        injectUiAppVars,
+        newPlatform,
+        plugins,
+        route,
+        savedObjects,
+      } = server;
+
+      const {
+        env,
+        coreContext: { logger },
+        setup,
+      } = newPlatform;
+      const initializerContext = { logger, env };
+
+      const serverFacade = {
+        config,
+        getInjectedUiAppVars,
+        indexPatternsServiceFactory,
+        injectUiAppVars,
+        plugins: { alerting: plugins.alerting, xpack_main: plugins.xpack_main },
+        route: route.bind(server),
+        savedObjects,
+      };
+
+      plugin(initializerContext as PluginInitializerContext).setup(
+        setup.core,
+        setup.plugins,
+        serverFacade
+      );
     },
   });
 };

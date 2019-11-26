@@ -12,7 +12,7 @@ import mappings from './mappings.json';
 import { PLUGIN_ID, getEditPath } from './common';
 import { lensServerPlugin } from './server';
 
-const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
+export const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
 
 export const lens: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
@@ -26,10 +26,11 @@ export const lens: LegacyPluginInitializer = kibana => {
       app: {
         title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
         description: 'Explore and visualize data.',
-        main: `plugins/${PLUGIN_ID}/index`,
+        main: `plugins/${PLUGIN_ID}/redirect`,
         listed: false,
       },
-      embeddableFactories: ['plugins/lens/register_embeddable'],
+      visualize: [`plugins/${PLUGIN_ID}/legacy`],
+      embeddableFactories: [`plugins/${PLUGIN_ID}/legacy`],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       mappings,
       visTypes: ['plugins/lens/register_vis_type_alias'],
