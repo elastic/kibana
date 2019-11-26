@@ -29,7 +29,6 @@ export const createSignals = async ({
   outputIndex,
   name,
   severity,
-  size,
   tags,
   to,
   type,
