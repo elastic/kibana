@@ -32,7 +32,7 @@ export default function(kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSpec> 
       app: {
         title: 'Run Pipeline',
         description: 'This is a sample plugin to test running pipeline expressions',
-        main: 'plugins/kbn_tp_run_pipeline/index',
+        main: 'plugins/kbn_tp_run_pipeline/legacy',
       },
     },
 

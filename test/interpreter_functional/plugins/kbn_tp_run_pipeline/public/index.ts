@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from './legacy';
+export * from './np_ready';
