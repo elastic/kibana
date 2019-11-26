@@ -156,12 +156,8 @@ export const siem = (kibana: any) => {
     },
     init(server: Server) {
       const { config, newPlatform, plugins, route } = server;
-      const {
-        env,
-        coreContext: { logger },
-        setup,
-      } = newPlatform;
-      const initializerContext = { logger, env };
+      const { coreContext, env, setup } = newPlatform;
+      const initializerContext = { ...coreContext, env };
 
       const serverFacade = {
         config,

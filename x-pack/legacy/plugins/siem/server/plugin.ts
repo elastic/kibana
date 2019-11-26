@@ -11,9 +11,11 @@ import { initServerWithKibana } from './kibana.index';
 export class Plugin {
   readonly name = 'siem';
   private readonly logger: Logger;
+  private context: PluginInitializerContext;
 
-  constructor({ logger }: PluginInitializerContext) {
-    this.logger = logger.get('plugins', this.name);
+  constructor(context: PluginInitializerContext) {
+    this.context = context;
+    this.logger = context.logger.get('plugins', this.name);
 
     this.logger.debug('Shim plugin initialized');
   }
@@ -21,6 +23,6 @@ export class Plugin {
   public setup(core: CoreSetup, plugins: {}, __legacy: ServerFacade) {
     this.logger.debug('Shim plugin setup');
 
-    initServerWithKibana(core, __legacy, this.logger);
+    initServerWithKibana(this.context, core, __legacy);
   }
 }

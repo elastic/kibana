@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { CoreSetup, Logger } from 'src/core/server';
+import { PluginInitializerContext, CoreSetup } from 'src/core/server';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
 import {
@@ -27,11 +27,12 @@ import { ServerFacade } from './types';
 const APP_ID = 'siem';
 
 export const initServerWithKibana = (
+  context: PluginInitializerContext,
   core: CoreSetup,
-  { config, plugins: { alerting, xpack_main }, route }: ServerFacade,
-  logger: Logger
+  { config, plugins: { alerting, xpack_main }, route }: ServerFacade
 ) => {
-  const version = config().get<string>('pkg.version');
+  const logger = context.logger.get('plugins', APP_ID);
+  const version = context.env.packageInfo.version;
 
   if (alerting != null) {
     const type = rulesAlertType({ logger, version });
