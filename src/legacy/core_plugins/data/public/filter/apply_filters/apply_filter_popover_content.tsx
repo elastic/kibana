@@ -31,9 +31,12 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { IndexPattern } from '../../index_patterns';
-import { FilterLabel } from '../filter_bar/filter_editor/lib/filter_label';
-import { mapAndFlattenFilters, esFilters } from '../../../../../../plugins/data/public';
-import { getDisplayValueFromFilter } from '../filter_bar/filter_editor/lib/get_display_value';
+import {
+  mapAndFlattenFilters,
+  esFilters,
+  utils,
+  FilterLabel,
+} from '../../../../../../plugins/data/public';
 
 interface Props {
   filters: esFilters.Filter[];
@@ -58,7 +61,7 @@ export class ApplyFiltersPopoverContent extends Component<Props, State> {
     };
   }
   private getLabel(filter: esFilters.Filter) {
-    const valueLabel = getDisplayValueFromFilter(filter, this.props.indexPatterns);
+    const valueLabel = utils.getDisplayValueFromFilter(filter, this.props.indexPatterns);
     return <FilterLabel filter={filter} valueLabel={valueLabel} />;
   }
 

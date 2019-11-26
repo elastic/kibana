@@ -1,7 +1,7 @@
 {
   "rule_id": "rule-4",
+  "risk_score": 4,
   "description": "Detecting root and admin users with lucene",
-  "index": ["auditbeat-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"],
   "interval": "5m",
   "name": "Detect Root/Admin Users",
   "severity": "high",

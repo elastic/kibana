@@ -29,6 +29,7 @@ import {
 } from '../../../../plugins/inspector/public';
 import { EuiUtilsStart } from '../../../../plugins/eui_utils/public';
 import { DevToolsSetup, DevToolsStart } from '../../../../plugins/dev_tools/public';
+import { KibanaLegacySetup, KibanaLegacyStart } from '../../../../plugins/kibana_legacy/public';
 import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../plugins/home/public';
 import { SharePluginSetup, SharePluginStart } from '../../../../plugins/share/public';
 
@@ -39,8 +40,9 @@ export interface PluginsSetup {
   home: HomePublicPluginSetup;
   inspector: InspectorSetup;
   uiActions: IUiActionsSetup;
+  dev_tools: DevToolsSetup;
+  kibana_legacy: KibanaLegacySetup;
   share: SharePluginSetup;
-  devTools: DevToolsSetup;
 }
 
 export interface PluginsStart {
@@ -51,8 +53,9 @@ export interface PluginsStart {
   home: HomePublicPluginStart;
   inspector: InspectorStart;
   uiActions: IUiActionsStart;
+  dev_tools: DevToolsStart;
+  kibana_legacy: KibanaLegacyStart;
   share: SharePluginStart;
-  devTools: DevToolsStart;
 }
 
 export const npSetup = {
@@ -108,7 +111,10 @@ export const legacyAppRegister = (app: App) => {
 
     // Root controller cannot return a Promise so use an internal async function and call it immediately
     (async () => {
-      const unmount = await app.mount({ core: npStart.core }, { element, appBasePath: '' });
+      const unmount = await app.mount(
+        { core: npStart.core },
+        { element, appBasePath: npSetup.core.http.basePath.prepend(`/app/${app.id}`) }
+      );
       $scope.$on('$destroy', () => {
         unmount();
       });

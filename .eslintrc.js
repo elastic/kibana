@@ -65,12 +65,6 @@ module.exports = {
       },
     },
     {
-      files: ['src/legacy/core_plugins/console/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: ['src/legacy/core_plugins/data/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',

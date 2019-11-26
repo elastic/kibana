@@ -29,7 +29,7 @@ export function plugin() {
 /** @public types */
 export { DataSetup, DataStart };
 
-export { FilterBar, ApplyFiltersPopover } from './filter';
+export { ApplyFiltersPopover } from './filter';
 export {
   Field,
   FieldType,
@@ -48,7 +48,6 @@ export {
   CONTAINS_SPACES,
   getFromSavedObject,
   getRoutes,
-  isFilterable,
   IndexPatternSelect,
   validateIndexPattern,
   ILLEGAL_CHARACTERS,
