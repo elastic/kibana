@@ -16,6 +16,11 @@ export interface EndpointsListState {
         value: number;
       };
     };
+    aggregations: {
+      total: {
+        value: number;
+      };
+    };
   };
   isFiltered: boolean;
   filteredData: EndpointData[];
@@ -30,6 +35,11 @@ const initialState: EndpointsListState = {
   data: {
     hits: {
       hits: [],
+      total: {
+        value: 0,
+      },
+    },
+    aggregations: {
       total: {
         value: 0,
       },

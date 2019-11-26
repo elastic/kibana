@@ -24,7 +24,7 @@ export function filteredEndpointListData(state: GlobalState) {
 }
 
 export function totalHits(state: GlobalState) {
-  return endpointsListState(state).data.hits.total.value;
+  return endpointsListState(state).data.aggregations.total.value;
 }
 
 export function pageIndex(state: GlobalState) {
