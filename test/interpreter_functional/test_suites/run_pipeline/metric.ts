@@ -17,18 +17,21 @@
  * under the License.
  */
 
-import { expectExpressionProvider } from './helpers';
+import { ExpectExpression, expectExpressionProvider, ExpressionResult } from './helpers';
+import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
-export default function ({ getService, updateBaselines }) {
-
-  let expectExpression;
+export default function({
+  getService,
+  updateBaselines,
+}: FtrProviderContext & { updateBaselines: boolean }) {
+  let expectExpression: ExpectExpression;
   describe('metricVis pipeline expression tests', () => {
     before(() => {
       expectExpression = expectExpressionProvider({ getService, updateBaselines });
     });
 
     describe('correctly renders metric', () => {
-      let dataContext;
+      let dataContext: ExpressionResult;
       before(async () => {
         const expression = `kibana | kibana_context | esaggs index='logstash-*' aggConfigs='[
           {"id":"1","enabled":true,"type":"count","schema":"metric","params":{}},
@@ -44,27 +47,46 @@ export default function ({ getService, updateBaselines }) {
 
       it('with invalid data', async () => {
         const expression = 'metricVis metric={visdimension 0}';
-        await (await expectExpression('metric_invalid_data', expression).toMatchSnapshot()).toMatchScreenshot();
+        await (
+          await expectExpression('metric_invalid_data', expression).toMatchSnapshot()
+        ).toMatchScreenshot();
       });
 
       it('with single metric data', async () => {
         const expression = 'metricVis metric={visdimension 0}';
-        await (await expectExpression('metric_single_metric_data', expression, dataContext).toMatchSnapshot()).toMatchScreenshot();
+        await (
+          await expectExpression(
+            'metric_single_metric_data',
+            expression,
+            dataContext
+          ).toMatchSnapshot()
+        ).toMatchScreenshot();
       });
 
       it('with multiple metric data', async () => {
         const expression = 'metricVis metric={visdimension 0} metric={visdimension 1}';
-        await (await expectExpression('metric_multi_metric_data', expression, dataContext).toMatchSnapshot()).toMatchScreenshot();
+        await (
+          await expectExpression(
+            'metric_multi_metric_data',
+            expression,
+            dataContext
+          ).toMatchSnapshot()
+        ).toMatchScreenshot();
       });
 
       it('with metric and bucket data', async () => {
         const expression = 'metricVis metric={visdimension 0} bucket={visdimension 2}';
-        await (await expectExpression('metric_all_data', expression, dataContext).toMatchSnapshot()).toMatchScreenshot();
+        await (
+          await expectExpression('metric_all_data', expression, dataContext).toMatchSnapshot()
+        ).toMatchScreenshot();
       });
 
       it('with percentage option', async () => {
-        const expression = 'metricVis metric={visdimension 0} percentage=true colorRange={range from=0 to=1000}';
-        await (await expectExpression('metric_percentage', expression, dataContext).toMatchSnapshot()).toMatchScreenshot();
+        const expression =
+          'metricVis metric={visdimension 0} percentage=true colorRange={range from=0 to=1000}';
+        await (
+          await expectExpression('metric_percentage', expression, dataContext).toMatchSnapshot()
+        ).toMatchScreenshot();
       });
     });
   });

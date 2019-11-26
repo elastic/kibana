@@ -17,20 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
-import { ExpressionsPublicPlugin } from './plugin';
+import { createGetterSetter } from '../../../../../../src/plugins/kibana_utils/public/core';
+import { ExpressionsStart } from './types';
 
-export { ExpressionsPublicPlugin as Plugin };
-
-export * from './plugin';
-export * from './types';
-export * from '../common';
-export { interpreterProvider, ExpressionInterpret } from './interpreter_provider';
-export { ExpressionRenderer, ExpressionRendererProps } from './expression_renderer';
-export { ExpressionDataHandler } from './execute';
-
-export { RenderResult, ExpressionRenderHandler } from './render';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new ExpressionsPublicPlugin(initializerContext);
-}
+export const [getExpressions, setExpressions] = createGetterSetter<ExpressionsStart>('Expressions');
