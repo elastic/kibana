@@ -19,7 +19,7 @@
 
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
-import { SearchError } from 'ui/courier';
+import { SearchError } from '../../courier';
 import { dispatchRenderComplete } from '../../../../../plugins/kibana_utils/public';
 
 interface VisualizationRequestErrorProps {
@@ -32,7 +32,7 @@ export class VisualizationRequestError extends React.Component<VisualizationRequ
 
   public render() {
     const { error } = this.props;
-    const errorMessage = (error && error.message) || error;
+    const errorMessage = typeof error === 'string' ? error : error.message;
 
     return (
       <div className="visError" ref={this.containerDiv}>
