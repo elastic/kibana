@@ -7,7 +7,6 @@
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'canvas']);
   const visualTesting = getService('visualTesting');
-  const testSubjects = getService('testSubjects');
 
   describe('fullscreen', () => {
     it('workpad should display properly in fullscreen mode', async () => {
@@ -17,10 +16,7 @@ export default function ({ getPageObjects, getService }) {
 
       PageObjects.canvas.enterFullscreen();
 
-      // Wait for all elements to load
-      await testSubjects.findAll(
-        'canvasWorkpadPage > canvasWorkpadPageElementContent'
-      );
+      PageObjects.canvas.waitForWorkpadElements();
 
       await visualTesting.snapshot();
     });
