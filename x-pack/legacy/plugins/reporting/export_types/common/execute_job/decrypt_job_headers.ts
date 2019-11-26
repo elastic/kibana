@@ -5,7 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
 import { cryptoFactory } from '../../../server/lib/crypto';
 import { CryptoFactory, JobDocPayload, ServerFacade, Logger } from '../../../types';
 

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import { cryptoFactory } from '../../../server/lib/crypto';
 import { createMockServer } from '../../../test_helpers/create_mock_server';
 import { Logger } from '../../../types';
