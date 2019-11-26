@@ -125,5 +125,11 @@ export class MapPlugin {
       return await __LEGACY.getInjectedUiAppVars('kibana');
     });
 
+    return {
+      getMapConfig() {
+        return __LEGACY.mapConfig;
+      }
+    };
+
   }
 }
