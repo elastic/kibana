@@ -29,6 +29,7 @@ function create({ routerPath = '' }: { routerPath?: string } = {}): RouterMock {
     delete: jest.fn(),
     put: jest.fn(),
     getRoutes: jest.fn(),
+    handleLegacyErrors: jest.fn().mockImplementation(handler => handler),
   };
 }
 

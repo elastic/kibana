@@ -24,7 +24,6 @@ import { HttpService } from './http_service';
 import { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
 import { AuthToolkit } from './lifecycle/auth';
 import { sessionStorageMock } from './cookie_session_storage.mocks';
-import { IRouter } from './router';
 import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
 
 export type HttpServiceSetupMock = jest.Mocked<InternalHttpServiceSetup> & {
@@ -37,16 +36,6 @@ const createBasePathMock = (): jest.Mocked<InternalHttpServiceSetup['basePath']>
   set: jest.fn(),
   prepend: jest.fn(),
   remove: jest.fn(),
-});
-
-const createRouterMock = (): jest.Mocked<IRouter> => ({
-  routerPath: '/',
-  get: jest.fn(),
-  post: jest.fn(),
-  put: jest.fn(),
-  delete: jest.fn(),
-  getRoutes: jest.fn(),
-  handleLegacyErrors: jest.fn().mockImplementation(handler => handler),
 });
 
 const createSetupContractMock = () => {
@@ -75,7 +64,7 @@ const createSetupContractMock = () => {
   setupContract.createCookieSessionStorageFactory.mockResolvedValue(
     sessionStorageMock.createFactory()
   );
-  setupContract.createRouter.mockImplementation(createRouterMock);
+  setupContract.createRouter.mockImplementation(() => mockRouter.create());
   return setupContract;
 };
 
@@ -110,5 +99,5 @@ export const httpServiceMock = {
   createOnPreAuthToolkit: createOnPreAuthToolkitMock,
   createOnPostAuthToolkit: createOnPostAuthToolkitMock,
   createAuthToolkit: createAuthToolkitMock,
-  createRouter: createRouterMock,
+  createRouter: mockRouter.create,
 };
