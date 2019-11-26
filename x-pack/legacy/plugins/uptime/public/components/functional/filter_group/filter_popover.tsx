@@ -15,6 +15,7 @@ export interface FilterPopoverProps {
   fieldName: string;
   id: string;
   loading: boolean;
+  isDisabled?: boolean;
   items: string[];
   onFilterFieldChange: (fieldName: string, values: string[]) => void;
   selectedItems: string[];
@@ -27,6 +28,7 @@ const isItemSelected = (selectedItems: string[], item: string): 'on' | undefined
 export const FilterPopover = ({
   fieldName,
   id,
+  isDisabled,
   loading,
   items,
   onFilterFieldChange,
@@ -52,6 +54,7 @@ export const FilterPopover = ({
     <EuiPopover
       button={
         <UptimeFilterButton
+          isDisabled={isDisabled}
           isSelected={tempSelectedItems.length > 0}
           numFilters={items.length}
           numActiveFilters={tempSelectedItems.length}

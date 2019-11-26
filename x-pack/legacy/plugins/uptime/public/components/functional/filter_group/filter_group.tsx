@@ -91,6 +91,7 @@ export const PresentationalComponent: React.FC<PresentationalComponentProps> = (
     {
       fieldName: 'url.port',
       id: 'port',
+      isDisabled: ports.length === 0,
       loading,
       items: ports.map((p: number) => p.toString()),
       onFilterFieldChange,
@@ -100,6 +101,7 @@ export const PresentationalComponent: React.FC<PresentationalComponentProps> = (
     {
       fieldName: 'monitor.type',
       id: 'scheme',
+      isDisabled: schemes.length === 0,
       loading,
       items: schemes,
       onFilterFieldChange,
@@ -111,6 +113,7 @@ export const PresentationalComponent: React.FC<PresentationalComponentProps> = (
     {
       fieldName: 'tags',
       id: 'tags',
+      isDisabled: tags.length === 0,
       loading,
       items: tags,
       onFilterFieldChange,
