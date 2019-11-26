@@ -24,10 +24,9 @@ const NO_SOURCE_UPDATE_REQUIRED = false;
 
 export class AbstractLayer {
 
-  constructor({ layerDescriptor, source, style }) {
+  constructor({ layerDescriptor, source }) {
     this._descriptor = AbstractLayer.createDescriptor(layerDescriptor);
     this._source = source;
-    this._style = style;
     if (this._descriptor.__dataRequests) {
       this._dataRequests = this._descriptor.__dataRequests.map(dataRequest => new DataRequest(dataRequest));
     } else {
@@ -196,7 +195,7 @@ export class AbstractLayer {
     return false;
   }
 
-  getLegendDetails() {
+  renderLegendDetails() {
     return null;
   }
 
@@ -392,6 +391,10 @@ export class AbstractLayer {
   }
 
   async getNumberFields() {
+    return [];
+  }
+
+  async getOrdinalFields() {
     return [];
   }
 

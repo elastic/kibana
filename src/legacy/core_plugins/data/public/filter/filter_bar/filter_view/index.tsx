@@ -19,7 +19,7 @@
 
 import { EuiBadge, useInnerText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { SFC } from 'react';
+import React, { FC } from 'react';
 import { FilterLabel } from '../filter_editor/lib/filter_label';
 import { esFilters } from '../../../../../../../plugins/data/public';
 
@@ -29,7 +29,7 @@ interface Props {
   [propName: string]: any;
 }
 
-export const FilterView: SFC<Props> = ({
+export const FilterView: FC<Props> = ({
   filter,
   iconOnClick,
   onClick,

@@ -71,13 +71,26 @@ export const getFilter = async ({
     }
     case 'saved_query': {
       if (savedId != null && index != null) {
-        const savedObject = await services.savedObjectsClient.get('query', savedId);
-        return getQueryFilter(
-          savedObject.attributes.query.query,
-          savedObject.attributes.query.language,
-          savedObject.attributes.filters,
-          index
-        );
+        try {
+          // try to get the saved object first
+          const savedObject = await services.savedObjectsClient.get('query', savedId);
+          return getQueryFilter(
+            savedObject.attributes.query.query,
+            savedObject.attributes.query.language,
+            savedObject.attributes.filters,
+            index
+          );
+        } catch (err) {
+          // saved object does not exist, so try and fall back if the user pushed
+          // any additional language, query, filters, etc...
+          if (query != null && language != null && index != null) {
+            return getQueryFilter(query, language, filters || [], index);
+          } else {
+            // user did not give any additional fall back mechanism for generating a signal
+            // rethrow error for activity monitoring
+            throw err;
+          }
+        }
       } else {
         throw new TypeError('savedId parameter should be defined');
       }
