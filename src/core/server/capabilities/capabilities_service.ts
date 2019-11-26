@@ -70,8 +70,8 @@ export interface CapabilitiesSetup {
    * ```
    *
    * @remarks
-   * A capabilities switcher can only change the state of existing capabilities. Adding or removing
-   * capabilities when invoking the switcher will raise an error.
+   * A capabilities switcher can only change the state of existing capabilities.
+   * capabilities added or removed when invoking the switcher will be ignored.
    */
   registerCapabilitiesSwitcher(switcher: CapabilitiesSwitcher): void;
 }

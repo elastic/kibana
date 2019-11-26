@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { cloneDeep } from 'lodash';
 import { Capabilities, CapabilitiesSwitcher } from './types';
 import { KibanaRequest } from '../http';
 
@@ -41,7 +42,7 @@ export const resolveCapabilities = async (
   request: KibanaRequest,
   applications: string[]
 ): Promise<Capabilities> => {
-  const mergedCaps = {
+  const mergedCaps = cloneDeep({
     ...capabilities,
     navLinks: applications.reduce(
       (acc, app) => ({
@@ -50,8 +51,35 @@ export const resolveCapabilities = async (
       }),
       capabilities.navLinks
     ),
-  };
+  });
   return switchers.reduce(async (caps, switcher) => {
-    return switcher(request, await caps);
+    const resolvedCaps = await caps;
+    const changes = await switcher(request, resolvedCaps);
+    return recursiveApplyChanges(resolvedCaps, changes);
   }, Promise.resolve(mergedCaps));
 };
+
+function recursiveApplyChanges<
+  TDestination extends Record<string, any>,
+  TSource extends Record<string, any>
+>(destination: TDestination, source: TSource): TDestination {
+  return Object.keys(destination)
+    .map(key => {
+      const orig = destination[key];
+      const changed = source[key];
+      if (changed == null) {
+        return [key, orig];
+      }
+      if (typeof orig === 'object' && typeof changed === 'object') {
+        return [key, recursiveApplyChanges(orig, changed)];
+      }
+      return [key, typeof orig === typeof changed ? changed : orig];
+    })
+    .reduce(
+      (acc, [key, value]) => ({
+        ...acc,
+        [key]: value,
+      }),
+      {} as TDestination
+    );
+}
