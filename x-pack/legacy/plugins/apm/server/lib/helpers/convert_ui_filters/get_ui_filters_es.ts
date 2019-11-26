@@ -11,11 +11,13 @@ import {
   localUIFilters,
   localUIFilterNames
 } from '../../ui_filters/local_ui_filters/config';
-import { StaticIndexPattern } from '../../../../../../../../src/legacy/core_plugins/data/public';
-import { esKuery } from '../../../../../../../../src/plugins/data/public';
+import {
+  esKuery,
+  IIndexPattern
+} from '../../../../../../../../src/plugins/data/server';
 
 export function getUiFiltersES(
-  indexPattern: StaticIndexPattern | undefined,
+  indexPattern: IIndexPattern | undefined,
   uiFilters: UIFilters
 ) {
   const { kuery, environment, ...localFilterValues } = uiFilters;
@@ -43,7 +45,7 @@ export function getUiFiltersES(
 }
 
 function getKueryUiFilterES(
-  indexPattern: StaticIndexPattern | undefined,
+  indexPattern: IIndexPattern | undefined,
   kuery?: string
 ) {
   if (!kuery || !indexPattern) {
