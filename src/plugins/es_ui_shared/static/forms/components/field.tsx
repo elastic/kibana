@@ -29,10 +29,13 @@ interface Props {
 
 import {
   TextField,
+  TextAreaField,
   NumericField,
   CheckBoxField,
   ComboBoxField,
   MultiSelectField,
+  RadioGroupField,
+  RangeField,
   SelectField,
   SuperSelectField,
   ToggleField,
@@ -40,10 +43,13 @@ import {
 
 const mapTypeToFieldComponent: { [key: string]: ComponentType<any> } = {
   [FIELD_TYPES.TEXT]: TextField,
+  [FIELD_TYPES.TEXTAREA]: TextAreaField,
   [FIELD_TYPES.NUMBER]: NumericField,
   [FIELD_TYPES.CHECKBOX]: CheckBoxField,
   [FIELD_TYPES.COMBO_BOX]: ComboBoxField,
   [FIELD_TYPES.MULTI_SELECT]: MultiSelectField,
+  [FIELD_TYPES.RADIO_GROUP]: RadioGroupField,
+  [FIELD_TYPES.RANGE]: RangeField,
   [FIELD_TYPES.SELECT]: SelectField,
   [FIELD_TYPES.SUPER_SELECT]: SuperSelectField,
   [FIELD_TYPES.TOGGLE]: ToggleField,
