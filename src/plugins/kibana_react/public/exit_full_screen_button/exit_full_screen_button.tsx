@@ -21,9 +21,6 @@ import { i18n } from '@kbn/i18n';
 import React, { PureComponent } from 'react';
 import { EuiScreenReaderOnly, keyCodes } from '@elastic/eui';
 
-// @ts-ignore
-import { KuiButton } from '@kbn/ui-framework/components';
-
 export interface ExitFullScreenButtonProps {
   onExitFullScreenMode: () => void;
 }
@@ -54,8 +51,7 @@ class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
           </p>
         </EuiScreenReaderOnly>
         <div className="dshExitFullScreenButton">
-          <KuiButton
-            type="hollow"
+          <button
             aria-label={i18n.translate(
               'kibana-react.exitFullScreenButton.exitFullScreenModeButtonAreaLabel',
               {
@@ -75,7 +71,7 @@ class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
               })}
               <span className="kuiIcon fa fa-angle-left" />
             </span>
-          </KuiButton>
+          </button>
         </div>
       </div>
     );
