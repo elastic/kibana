@@ -23,7 +23,7 @@ import { ConfigSchema } from './config';
 import { PluginInitializerContext, Logger } from '../../../../src/core/server';
 import { CollectorSet } from './collector';
 
-export type PluginSetupContract = CollectorSet;
+export type UsageCollectionSetup = CollectorSet;
 
 export class Plugin {
   logger: Logger;

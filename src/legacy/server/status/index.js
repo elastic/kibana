@@ -27,7 +27,7 @@ import { getOSInfo } from './lib/get_os_info';
 
 export function statusMixin(kbnServer, server, config) {
   kbnServer.status = new ServerStatus(kbnServer.server);
-  const usageCollection = server.newPlatform.setup.plugins.usageCollection;
+  const { usageCollection } = server.newPlatform.setup.plugins;
   registerOpsStatsCollector(usageCollection, server, kbnServer);
 
   const metrics = new Metrics(config, server);

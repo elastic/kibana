@@ -6,7 +6,6 @@
 
 import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
-import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
 import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
 // @ts-ignore untyped module defintition
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
@@ -77,7 +76,7 @@ export const reporting = (kibana: any) => {
     async init(server: ServerFacade) {
       let isCollectorReady = false;
       // Register a function with server to manage the collection of usage stats
-      const usageCollection = server.newPlatform.setup.plugins.usageCollection as UsageCollection;
+      const { usageCollection } = server.newPlatform.setup.plugins;
       registerReportingUsageCollector(usageCollection, server, () => isCollectorReady);
 
       const logger = LevelLogger.createForServer(server, [PLUGIN_ID]);

@@ -57,7 +57,7 @@ export function rollup(kibana) {
       ],
     },
     init: function (server) {
-      const usageCollection = server.newPlatform.setup.plugins.usageCollection;
+      const { usageCollection } = server.newPlatform.setup.plugins;
       registerLicenseChecker(server);
       registerIndicesRoute(server);
       registerFieldsForWildcardRoute(server);

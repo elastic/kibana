@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { getTelemetry, initTelemetry } from './telemetry';
 
 const TELEMETRY_TYPE = 'fileUploadTelemetry';
 
 export function registerFileUploadUsageCollector(
-  usageCollection: UsageCollection,
+  usageCollection: UsageCollectionSetup,
   deps: {
     elasticsearchPlugin: any;
     getSavedObjectsRepository: any;

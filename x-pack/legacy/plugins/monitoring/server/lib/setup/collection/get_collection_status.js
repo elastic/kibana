@@ -377,7 +377,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
 
 
   const liveEsNodes = skipLiveData || !isLiveCluster ? [] : await getLivesNodes(req);
-  const usageCollection = req.server.newPlatform.setup.plugins.usageCollection;
+  const { usageCollection } = req.server.newPlatform.setup.plugins;
   const liveKibanaInstance = skipLiveData || !isLiveCluster ? {} : await getLiveKibanaInstance(usageCollection);
   const indicesBuckets = get(recentDocuments, 'aggregations.indices.buckets', []);
   const liveClusterInternalCollectionEnabled = await getLiveElasticsearchCollectionEnabled(req);

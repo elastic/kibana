@@ -15,7 +15,7 @@ export const ossTelemetry = (kibana) => {
     configPrefix: 'xpack.oss_telemetry',
 
     init(server) {
-      const usageCollection = server.newPlatform.setup.plugins.usageCollection;
+      const { usageCollection } = server.newPlatform.setup.plugins;
       registerCollectors(usageCollection, server);
       registerTasks(server);
       scheduleTasks(server);

@@ -7,13 +7,11 @@
 import moment from 'moment';
 import { get } from 'lodash';
 import { Server } from 'src/legacy/server/kbn_server';
-import { PluginSetupContract as UsageCollectionSetupContract } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+
 import { LensUsage, LensTelemetryState } from './types';
 
-export function registerLensUsageCollector(
-  usageCollection: UsageCollectionSetupContract,
-  server: Server
-) {
+export function registerLensUsageCollector(usageCollection: UsageCollectionSetup, server: Server) {
   let isCollectorReady = false;
   async function determineIfTaskManagerIsReady() {
     let isReady = false;

@@ -101,7 +101,7 @@ export function maps(kibana) {
 
     init(server) {
       const mapsEnabled = server.config().get('xpack.maps.enabled');
-      const usageCollection = server.newPlatform.setup.plugins.usageCollection;
+      const { usageCollection } = server.newPlatform.setup.plugins;
       if (!mapsEnabled) {
         server.log(['info', 'maps'], 'Maps app disabled by configuration');
         return;

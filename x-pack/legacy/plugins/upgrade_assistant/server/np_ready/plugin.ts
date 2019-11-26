@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Plugin, CoreSetup, CoreStart } from 'src/core/server';
-import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { ServerShim, ServerShimWithRouter } from './types';
 import { credentialStoreFactory } from './lib/reindexing/credential_store';
 import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
@@ -17,7 +17,7 @@ import { registerTelemetryRoutes } from './routes/telemetry';
 export class UpgradeAssistantServerPlugin implements Plugin<void, void, object, object> {
   setup(
     { http }: CoreSetup,
-    { __LEGACY, usageCollection }: { usageCollection: UsageCollection; __LEGACY: ServerShim }
+    { __LEGACY, usageCollection }: { usageCollection: UsageCollectionSetup; __LEGACY: ServerShim }
   ) {
     const router = http.createRouter();
     const shimWithRouter: ServerShimWithRouter = { ...__LEGACY, router };

@@ -19,9 +19,12 @@
 
 import { Server } from 'hapi';
 import { fetchProvider } from './collector_fetch';
-import { PluginSetupContract as UsageCollection } from '../../../../plugins/usage_collection/server';
+import { UsageCollectionSetup } from '../../../../plugins/usage_collection/server';
 
-export function makeSampleDataUsageCollector(usageCollection: UsageCollection, server: Server) {
+export function makeSampleDataUsageCollector(
+  usageCollection: UsageCollectionSetup,
+  server: Server
+) {
   let index: string;
   try {
     index = server.config().get('kibana.index');

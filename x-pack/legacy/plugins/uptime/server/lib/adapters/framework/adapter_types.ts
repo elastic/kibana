@@ -9,7 +9,7 @@ import { GraphQLSchema } from 'graphql';
 import { Lifecycle, ResponseToolkit } from 'hapi';
 import { RouteOptions } from 'hapi';
 import { SavedObjectsLegacyService } from 'src/core/server';
-import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 export interface UMFrameworkRequest {
   user: string;
@@ -38,7 +38,7 @@ export interface UptimeCoreSetup {
 export interface UptimeCorePlugins {
   elasticsearch: any;
   savedObjects: SavedObjectsLegacyService<any>;
-  usageCollection: UsageCollection;
+  usageCollection: UsageCollectionSetup;
   xpack: any;
 }
 

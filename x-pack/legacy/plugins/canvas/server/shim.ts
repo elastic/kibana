@@ -8,7 +8,7 @@ import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { Legacy } from 'kibana';
 
 import { CoreSetup as ExistingCoreSetup } from 'src/core/server';
-import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { PluginSetupContract } from '../../../../plugins/features/server';
 
 export interface CoreSetup {
@@ -33,7 +33,7 @@ export interface PluginsSetup {
     addSavedObjectsToSampleDataset: any;
     addAppLinksToSampleDataset: any;
   };
-  usageCollection: UsageCollection;
+  usageCollection: UsageCollectionSetup;
 }
 
 export async function createSetupShim(
@@ -69,7 +69,7 @@ export async function createSetupShim(
         // @ts-ignore: Missing from Legacy Server Type
         addAppLinksToSampleDataset: server.addAppLinksToSampleDataset,
       },
-      usageCollection: server.newPlatform.setup.plugins.usageCollection as UsageCollection,
+      usageCollection: server.newPlatform.setup.plugins,
     },
   };
 }

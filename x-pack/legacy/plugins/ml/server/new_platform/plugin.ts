@@ -10,7 +10,7 @@ import { ServerRoute } from 'hapi';
 import { KibanaConfig, SavedObjectsLegacyService } from 'src/legacy/server/kbn_server';
 import { Logger, PluginInitializerContext, CoreSetup } from 'src/core/server';
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
-import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
 import { addLinksToSampleDatasets } from '../lib/sample_data_sets';
 import { checkLicense } from '../lib/check_license';
@@ -79,7 +79,7 @@ export interface PluginsSetup {
   xpackMain: MlXpackMainPlugin;
   security: any;
   spaces: any;
-  usageCollection: UsageCollection;
+  usageCollection: UsageCollectionSetup;
   // TODO: this is temporary for `mirrorPluginStatus`
   ml: any;
 }

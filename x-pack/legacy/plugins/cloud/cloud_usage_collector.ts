@@ -5,7 +5,7 @@
  */
 
 import { Server } from 'hapi';
-import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { KIBANA_CLOUD_STATS_TYPE } from './constants';
 
 export interface UsageStats {
@@ -22,7 +22,7 @@ export function createCollectorFetch(server: Server) {
   };
 }
 
-export function createCloudUsageCollector(usageCollection: UsageCollection, server: Server) {
+export function createCloudUsageCollector(usageCollection: UsageCollectionSetup, server: Server) {
   return usageCollection.makeUsageCollector({
     type: KIBANA_CLOUD_STATS_TYPE,
     isReady: () => true,
@@ -30,7 +30,7 @@ export function createCloudUsageCollector(usageCollection: UsageCollection, serv
   });
 }
 
-export function registerCloudUsageCollector(usageCollection: UsageCollection, server: Server) {
+export function registerCloudUsageCollector(usageCollection: UsageCollectionSetup, server: Server) {
   const collector = createCloudUsageCollector(usageCollection, server);
   usageCollection.registerCollector(collector);
 }

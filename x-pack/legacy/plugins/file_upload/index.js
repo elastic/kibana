@@ -22,8 +22,9 @@ export const fileUpload = kibana => {
 
     init(server) {
       const coreSetup = server.newPlatform.setup.core;
+      const { usageCollection } = server.newPlatform.setup.plugins;
       const pluginsSetup = {
-        usageCollection: server.newPlatform.setup.plugins.usageCollection,
+        usageCollection,
       };
 
       // legacy dependencies

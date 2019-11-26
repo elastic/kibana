@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 // @ts-ignore untyped module
 import { KIBANA_STATS_TYPE_MONITORING } from '../../../monitoring/common/constants';
 import { ServerFacade, ESCallCluster } from '../../types';
@@ -17,7 +17,7 @@ import { RangeStats } from './types';
  * @return {Object} kibana usage stats type collection object
  */
 export function getReportingUsageCollector(
-  usageCollection: UsageCollection,
+  usageCollection: UsageCollectionSetup,
   server: ServerFacade,
   isReady: () => boolean
 ) {
@@ -47,7 +47,7 @@ export function getReportingUsageCollector(
 }
 
 export function registerReportingUsageCollector(
-  usageCollection: UsageCollection,
+  usageCollection: UsageCollectionSetup,
   server: ServerFacade,
   isReady: () => boolean
 ) {

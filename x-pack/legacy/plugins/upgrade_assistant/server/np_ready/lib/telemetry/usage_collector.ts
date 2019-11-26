@@ -7,7 +7,7 @@
 import { set } from 'lodash';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsRepository } from 'src/core/server/saved_objects/service/lib/repository';
-import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   UPGRADE_ASSISTANT_DOC_ID,
   UPGRADE_ASSISTANT_TYPE,
@@ -99,7 +99,7 @@ export async function fetchUpgradeAssistantMetrics(
 }
 
 export function registerUpgradeAssistantUsageCollector(
-  usageCollection: UsageCollection,
+  usageCollection: UsageCollectionSetup,
   server: ServerShim
 ) {
   const upgradeAssistantUsageCollector = usageCollection.makeUsageCollector({

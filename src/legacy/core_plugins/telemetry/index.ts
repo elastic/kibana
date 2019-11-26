@@ -116,6 +116,7 @@ const telemetry = (kibana: any) => {
       fetcherTask.start();
     },
     init(server: Server) {
+      const { usageCollection } = server.newPlatform.setup.plugins;
       const initializerContext = {
         env: {
           packageInfo: {
@@ -142,9 +143,9 @@ const telemetry = (kibana: any) => {
         log: server.log,
       } as any) as CoreSetup;
 
-      const pluginsSetup = {
-        usageCollection: server.newPlatform.setup.plugins.usageCollection,
-      } as PluginsSetup;
+      const pluginsSetup: PluginsSetup = {
+        usageCollection,
+      };
 
       telemetryPlugin(initializerContext).setup(coreSetup, pluginsSetup, server);
     },

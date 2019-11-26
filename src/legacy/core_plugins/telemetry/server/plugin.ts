@@ -21,7 +21,7 @@ import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { Server } from 'hapi';
 import { registerRoutes } from './routes';
 import { registerCollection } from './telemetry_collection';
-import { PluginSetupContract as UsageCollectionPluginSetupContract } from '../../../../plugins/usage_collection/server';
+import { UsageCollectionSetup } from '../../../../plugins/usage_collection/server';
 import {
   registerUiMetricUsageCollector,
   registerTelemetryUsageCollector,
@@ -30,7 +30,7 @@ import {
 } from './collectors';
 
 export interface PluginsSetup {
-  usageCollection: UsageCollectionPluginSetupContract;
+  usageCollection: UsageCollectionSetup;
 }
 
 export class TelemetryPlugin {

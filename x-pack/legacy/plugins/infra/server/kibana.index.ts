@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import { Server } from 'hapi';
 import JoiNamespace from 'joi';
-import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
 import { initInfraServer } from './infra_server';
 import { compose } from './lib/compose/kibana';
 import { UsageCollector } from './usage/usage_collector';
@@ -15,7 +14,7 @@ import { inventoryViewSavedObjectType } from '../common/saved_objects/inventory_
 import { metricsExplorerViewSavedObjectType } from '../common/saved_objects/metrics_explorer_view';
 
 export const initServerWithKibana = (kbnServer: Server) => {
-  const usageCollection = kbnServer.newPlatform.setup.plugins.usageCollection as UsageCollection;
+  const { usageCollection } = kbnServer.newPlatform.setup.plugins;
   const libs = compose(kbnServer);
   initInfraServer(libs);
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   createMlTelemetry,
   getSavedObjectsClient,
@@ -16,7 +16,7 @@ import {
 import { UsageInitialization } from '../../new_platform/plugin';
 
 export function makeMlUsageCollector(
-  usageCollection: UsageCollection,
+  usageCollection: UsageCollectionSetup,
   { elasticsearchPlugin, savedObjects }: UsageInitialization
 ): void {
   const mlUsageCollector = usageCollection.makeUsageCollector({

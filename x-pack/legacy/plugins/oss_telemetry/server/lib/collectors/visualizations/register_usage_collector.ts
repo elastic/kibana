@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { HapiServer } from '../../../../';
 import { getUsageCollector } from './get_usage_collector';
 
 export function registerVisualizationsCollector(
-  usageCollection: UsageCollection,
+  usageCollection: UsageCollectionSetup,
   server: HapiServer
 ): void {
   const collector = usageCollection.makeUsageCollector(getUsageCollector(server));

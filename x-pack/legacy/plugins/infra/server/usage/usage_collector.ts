@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { InfraNodeType } from '../graphql/types';
 const KIBANA_REPORTING_TYPE = 'infraops';
 
@@ -16,12 +16,12 @@ interface InfraopsSum {
 }
 
 export class UsageCollector {
-  public static registerUsageCollector(usageCollection: UsageCollection): void {
+  public static registerUsageCollector(usageCollection: UsageCollectionSetup): void {
     const collector = UsageCollector.getUsageCollector(usageCollection);
     usageCollection.registerCollector(collector);
   }
 
-  public static getUsageCollector(usageCollection: UsageCollection) {
+  public static getUsageCollector(usageCollection: UsageCollectionSetup) {
     return usageCollection.makeUsageCollector({
       type: KIBANA_REPORTING_TYPE,
       isReady: () => true,

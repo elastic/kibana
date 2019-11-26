@@ -40,7 +40,7 @@ export const cloud = kibana => {
       server.expose('config', {
         isCloudEnabled: !!config.id
       });
-      const usageCollection = server.newPlatform.setup.plugins.usageCollection;
+      const { usageCollection } = server.newPlatform.setup.plugins;
       registerCloudUsageCollector(usageCollection, server);
     }
   });

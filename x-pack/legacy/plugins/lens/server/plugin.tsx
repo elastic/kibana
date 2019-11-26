@@ -6,13 +6,13 @@
 
 import { Server, KibanaConfig } from 'src/legacy/server/kbn_server';
 import { Plugin, CoreSetup, SavedObjectsLegacyService } from 'src/core/server';
-import { PluginSetupContract as UsageCollectionSetupContract } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { setupRoutes } from './routes';
 import { registerLensUsageCollector, initializeLensTelemetry } from './usage';
 
 export interface PluginSetupContract {
   savedObjects: SavedObjectsLegacyService;
-  usageCollection: UsageCollectionSetupContract;
+  usageCollection: UsageCollectionSetup;
   config: KibanaConfig;
   server: Server;
 }

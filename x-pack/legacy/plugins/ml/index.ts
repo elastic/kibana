@@ -7,7 +7,6 @@
 import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
-import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
 import { plugin } from './server/new_platform';
 import {
   MlInitializerContext,
@@ -87,7 +86,7 @@ export const ml = (kibana: any) => {
         security: server.plugins.security,
         xpackMain: server.plugins.xpack_main,
         spaces: server.plugins.spaces,
-        usageCollection: kbnServer.newPlatform.setup.plugins.usageCollection as UsageCollection,
+        usageCollection: kbnServer.newPlatform.setup.plugins.usageCollection,
         ml: this,
       };
 

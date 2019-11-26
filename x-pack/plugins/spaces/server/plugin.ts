@@ -9,7 +9,7 @@ import { take } from 'rxjs/operators';
 import { CapabilitiesModifier } from 'src/legacy/server/capabilities';
 import { PluginSetupContract as UsageCollectionPluginSetup } from 'src/plugins/usage_collection/server';
 import { HomeServerPluginSetup } from 'src/plugins/home/server';
-import { PluginSetupContract as UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   SavedObjectsLegacyService,
   CoreSetup,

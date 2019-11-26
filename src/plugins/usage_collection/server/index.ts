@@ -21,7 +21,7 @@ import { PluginInitializerContext } from '../../../../src/core/server';
 import { Plugin } from './plugin';
 import { ConfigSchema } from './config';
 
-export { PluginSetupContract } from './plugin';
+export { UsageCollectionSetup } from './plugin';
 export const config = { schema: ConfigSchema };
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new Plugin(initializerContext);

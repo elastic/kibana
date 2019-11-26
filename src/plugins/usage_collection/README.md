@@ -33,14 +33,14 @@ class Plugin {
 }
 ```
 
-3. Creating and registering a Usage Collector. Ideally collectors would be defined in a separate director `server/collectors/register.ts`.
+3. Creating and registering a Usage Collector. Ideally collectors would be defined in a separate directory `server/collectors/register.ts`.
 
 ```ts
 // server/collectors/register.ts
-import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 
-export function registerMyPluginUsageCollector(usageCollection?: UsageCollection): void {
+export function registerMyPluginUsageCollector(usageCollection?: UsageCollectionSetup): void {
   // usageCollection is an optional dependency, so make sure to return if it is not registered.
   if (!usageCollection) {
     return;
@@ -81,7 +81,7 @@ Pass `usageCollection` to the setup NP plugin setup function under plugins. Insi
 export const myPlugin = (kibana: any) => {
   return new kibana.Plugin({
     init: async function (server) {
-      const usageCollection = server.newPlatform.setup.plugins.usageCollection;
+      const { usageCollection } = server.newPlatform.setup.plugins;
       const plugins = {
         usageCollection,
       };
@@ -100,8 +100,8 @@ Typically, a plugin will create the collector object and register it with the Te
 export const myPlugin = (kibana: any) => {
   return new kibana.Plugin({
     init: async function (server) {
-      const usageCollecion = server.newPlatform.setup.plugins.usageCollection;
-      registerMyPluginUsageCollector(usageCollecion);
+      const { usageCollection } = server.newPlatform.setup.plugins;
+      registerMyPluginUsageCollector(usageCollection);
     }
   });
 }

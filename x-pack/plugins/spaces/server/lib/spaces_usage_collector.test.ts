@@ -9,7 +9,6 @@ import * as Rx from 'rxjs';
 import { PluginsSetup } from '../plugin';
 import { Feature } from '../../../features/server';
 import { ILicense, LicensingPluginSetup } from '../../../licensing/server';
-import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
 
 interface SetupOpts {
   license?: Partial<ILicense>;
@@ -45,7 +44,7 @@ function setup({
     features: featuresSetup,
     usageCollecion: {
       makeUsageCollector: (options: any) => new MockUsageCollector(options),
-    } as UsageCollection,
+    },
   };
 }
 
@@ -138,7 +137,7 @@ describe('with platinum license', () => {
     const { features, licensing, usageCollecion } = setup({
       license: { isAvailable: true, type: 'platinum' },
     });
-    const { fetch: getSpacesUsage } = getSpacesUsageCollector(usageCollecion, {
+    const { fetch: getSpacesUsage } = getSpacesUsageCollector(usageCollecion as any, {
       kibanaIndex: '.kibana',
       features,
       licensing,
