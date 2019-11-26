@@ -75,9 +75,6 @@
             "id": {
               "type": "keyword"
             },
-            "monitoring_enabled": {
-              "type": "boolean"
-            },
             "name": {
               "type": "text"
             },
