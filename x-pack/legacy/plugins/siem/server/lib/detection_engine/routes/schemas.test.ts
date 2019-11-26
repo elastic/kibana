@@ -1045,7 +1045,7 @@ describe('schemas', () => {
     });
   });
 
-  describe('update signals schema', () => {
+  describe('update rules schema', () => {
     test('empty objects do not validate as they require at least id or rule_id', () => {
       expect(updateRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({}).error).toBeTruthy();
     });
@@ -1812,7 +1812,7 @@ describe('schemas', () => {
     });
   });
 
-  describe('find signals schema', () => {
+  describe('find rules schema', () => {
     test('empty objects do validate', () => {
       expect(findRulesSchema.validate<Partial<FindParamsRest>>({}).error).toBeFalsy();
     });

@@ -34,7 +34,7 @@ export const createFindRulesRoute: Hapi.ServerRoute = {
       return headers.response().code(404);
     }
 
-    const signals = await findRules({
+    const rules = await findRules({
       alertsClient,
       perPage: query.per_page,
       page: query.page,
@@ -42,7 +42,7 @@ export const createFindRulesRoute: Hapi.ServerRoute = {
       sortOrder: query.sort_order,
       filter: query.filter,
     });
-    return transformFindAlertsOrError(signals);
+    return transformFindAlertsOrError(rules);
   },
 };
 

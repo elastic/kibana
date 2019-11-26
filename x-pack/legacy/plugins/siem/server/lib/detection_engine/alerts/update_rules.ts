@@ -74,7 +74,7 @@ export const updateRules = async ({
     return null;
   }
 
-  // TODO: Remove this as cast as soon as signal.actions TypeScript bug is fixed
+  // TODO: Remove this as cast as soon as rule.actions TypeScript bug is fixed
   // where it is trying to return AlertAction[] or RawAlertAction[]
   const actions = (rule.actions as AlertAction[] | undefined) || [];
 

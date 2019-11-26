@@ -63,13 +63,13 @@ export const createCreateRulesRoute: Hapi.ServerRoute = {
     }
 
     if (ruleId != null) {
-      const signal = await readRules({ alertsClient, ruleId });
-      if (signal != null) {
-        return new Boom(`Signal rule_id ${ruleId} already exists`, { statusCode: 409 });
+      const rule = await readRules({ alertsClient, ruleId });
+      if (rule != null) {
+        return new Boom(`rule_id ${ruleId} already exists`, { statusCode: 409 });
       }
     }
 
-    const createdSignal = await createRules({
+    const createdRule = await createRules({
       alertsClient,
       actionsClient,
       description,
@@ -96,7 +96,7 @@ export const createCreateRulesRoute: Hapi.ServerRoute = {
       type,
       references,
     });
-    return transformOrError(createdSignal);
+    return transformOrError(createdRule);
   },
 };
 

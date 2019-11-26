@@ -26,49 +26,49 @@ export const getIdError = ({
 
 // Transforms the data but will remove any null or undefined it encounters and not include
 // those on the export
-export const transformAlertToRule = (signal: RuleAlertType): Partial<OutputRuleAlertRest> => {
+export const transformAlertToRule = (alert: RuleAlertType): Partial<OutputRuleAlertRest> => {
   return pickBy<OutputRuleAlertRest>((value: unknown) => value != null, {
-    created_by: signal.createdBy,
-    description: signal.params.description,
-    enabled: signal.enabled,
-    false_positives: signal.params.falsePositives,
-    filter: signal.params.filter,
-    filters: signal.params.filters,
-    from: signal.params.from,
-    id: signal.id,
-    immutable: signal.params.immutable,
-    index: signal.params.index,
-    interval: signal.interval,
-    rule_id: signal.params.ruleId,
-    language: signal.params.language,
-    output_index: signal.params.outputIndex,
-    max_signals: signal.params.maxSignals,
-    risk_score: signal.params.riskScore,
-    name: signal.name,
-    query: signal.params.query,
-    references: signal.params.references,
-    saved_id: signal.params.savedId,
-    meta: signal.params.meta,
-    severity: signal.params.severity,
-    updated_by: signal.updatedBy,
-    tags: signal.params.tags,
-    to: signal.params.to,
-    type: signal.params.type,
+    created_by: alert.createdBy,
+    description: alert.params.description,
+    enabled: alert.enabled,
+    false_positives: alert.params.falsePositives,
+    filter: alert.params.filter,
+    filters: alert.params.filters,
+    from: alert.params.from,
+    id: alert.id,
+    immutable: alert.params.immutable,
+    index: alert.params.index,
+    interval: alert.interval,
+    rule_id: alert.params.ruleId,
+    language: alert.params.language,
+    output_index: alert.params.outputIndex,
+    max_signals: alert.params.maxSignals,
+    risk_score: alert.params.riskScore,
+    name: alert.name,
+    query: alert.params.query,
+    references: alert.params.references,
+    saved_id: alert.params.savedId,
+    meta: alert.params.meta,
+    severity: alert.params.severity,
+    updated_by: alert.updatedBy,
+    tags: alert.params.tags,
+    to: alert.params.to,
+    type: alert.params.type,
   });
 };
 
 export const transformFindAlertsOrError = (findResults: { data: unknown[] }): unknown | Boom => {
   if (isAlertTypes(findResults.data)) {
-    findResults.data = findResults.data.map(signal => transformAlertToRule(signal));
+    findResults.data = findResults.data.map(alert => transformAlertToRule(alert));
     return findResults;
   } else {
     return new Boom('Internal error transforming', { statusCode: 500 });
   }
 };
 
-export const transformOrError = (signal: unknown): Partial<OutputRuleAlertRest> | Boom => {
-  if (isAlertType(signal)) {
-    return transformAlertToRule(signal);
+export const transformOrError = (alert: unknown): Partial<OutputRuleAlertRest> | Boom => {
+  if (isAlertType(alert)) {
+    return transformAlertToRule(alert);
   } else {
     return new Boom('Internal error transforming', { statusCode: 500 });
   }

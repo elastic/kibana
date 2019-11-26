@@ -22,7 +22,7 @@ import {
 } from './__mocks__/request_responses';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 
-describe('delete_signals', () => {
+describe('delete_rules', () => {
   let { server, alertsClient } = createMockServer();
 
   beforeEach(() => {
@@ -35,7 +35,7 @@ describe('delete_signals', () => {
   });
 
   describe('status codes with actionClient and alertClient', () => {
-    test('returns 200 when deleting a single signal with a valid actionClient and alertClient by alertId', async () => {
+    test('returns 200 when deleting a single rule with a valid actionClient and alertClient by alertId', async () => {
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       alertsClient.get.mockResolvedValue(getResult());
       alertsClient.delete.mockResolvedValue({});
@@ -43,7 +43,7 @@ describe('delete_signals', () => {
       expect(statusCode).toBe(200);
     });
 
-    test('returns 200 when deleting a single signal with a valid actionClient and alertClient by id', async () => {
+    test('returns 200 when deleting a single rule with a valid actionClient and alertClient by id', async () => {
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       alertsClient.get.mockResolvedValue(getResult());
       alertsClient.delete.mockResolvedValue({});
@@ -51,7 +51,7 @@ describe('delete_signals', () => {
       expect(statusCode).toBe(200);
     });
 
-    test('returns 404 when deleting a single signal that does not exist with a valid actionClient and alertClient', async () => {
+    test('returns 404 when deleting a single rule that does not exist with a valid actionClient and alertClient', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       alertsClient.delete.mockResolvedValue({});

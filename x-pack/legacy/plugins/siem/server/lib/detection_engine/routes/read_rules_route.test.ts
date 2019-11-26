@@ -34,7 +34,7 @@ describe('read_signals', () => {
   });
 
   describe('status codes with actionClient and alertClient', () => {
-    test('returns 200 when reading a single signal with a valid actionClient and alertClient', async () => {
+    test('returns 200 when reading a single rule with a valid actionClient and alertClient', async () => {
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       alertsClient.get.mockResolvedValue(getResult());
       const { statusCode } = await server.inject(getReadRequest());

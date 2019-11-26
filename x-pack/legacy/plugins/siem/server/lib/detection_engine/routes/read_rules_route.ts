@@ -34,13 +34,13 @@ export const createReadRulesRoute: Hapi.ServerRoute = {
     if (!alertsClient || !actionsClient) {
       return headers.response().code(404);
     }
-    const signal = await readRules({
+    const rule = await readRules({
       alertsClient,
       id,
       ruleId,
     });
-    if (signal != null) {
-      return transformOrError(signal);
+    if (rule != null) {
+      return transformOrError(rule);
     } else {
       return getIdError({ id, ruleId });
     }

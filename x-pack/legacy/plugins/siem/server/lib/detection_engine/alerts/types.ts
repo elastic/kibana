@@ -132,11 +132,11 @@ export interface ReadRuleByRuleId {
   ruleId: string;
 }
 
-export type AlertTypeParams = Omit<RuleAlertParams, 'name' | 'enabled' | 'interval'>;
+export type RuleTypeParams = Omit<RuleAlertParams, 'name' | 'enabled' | 'interval'>;
 
 export type RuleAlertType = Alert & {
   id: string;
-  params: AlertTypeParams;
+  params: RuleTypeParams;
 };
 
 export interface RulesRequest extends RequestFacade {

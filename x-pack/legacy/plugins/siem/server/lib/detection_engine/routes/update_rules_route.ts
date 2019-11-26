@@ -60,7 +60,7 @@ export const createUpdateRulesRoute: Hapi.ServerRoute = {
       return headers.response().code(404);
     }
 
-    const signal = await updateRules({
+    const rule = await updateRules({
       alertsClient,
       actionsClient,
       description,
@@ -88,8 +88,8 @@ export const createUpdateRulesRoute: Hapi.ServerRoute = {
       type,
       references,
     });
-    if (signal != null) {
-      return transformOrError(signal);
+    if (rule != null) {
+      return transformOrError(rule);
     } else {
       return getIdError({ id, ruleId });
     }

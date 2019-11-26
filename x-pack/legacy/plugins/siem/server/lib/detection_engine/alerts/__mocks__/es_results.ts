@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SignalSourceHit, SignalSearchResponse, AlertTypeParams } from '../types';
+import { SignalSourceHit, SignalSearchResponse, RuleTypeParams } from '../types';
 
 export const sampleRuleAlertParams = (
   maxSignals: number | undefined,
   riskScore?: number | undefined
-): AlertTypeParams => ({
+): RuleTypeParams => ({
   ruleId: 'rule-1',
   description: 'Detecting root and admin users',
   falsePositives: [],
@@ -242,4 +242,4 @@ export const sampleDocSearchResultsWithSortId = (someUuid: string): SignalSearch
   },
 });
 
-export const sampleSignalId = '04128c15-0d1b-4716-a4c5-46997ac7f3bd';
+export const sampleRuleGuid = '04128c15-0d1b-4716-a4c5-46997ac7f3bd';

@@ -13,13 +13,13 @@ import {
   SignalSourceHit,
   SignalSearchResponse,
   BulkResponse,
-  AlertTypeParams,
+  RuleTypeParams,
   OutputRuleES,
 } from './types';
 import { buildEventsSearchQuery } from './build_events_query';
 
 interface BuildRuleParams {
-  signalParams: AlertTypeParams;
+  ruleParams: RuleTypeParams;
   name: string;
   id: string;
   enabled: boolean;
@@ -29,7 +29,7 @@ interface BuildRuleParams {
 }
 
 export const buildRule = ({
-  signalParams,
+  ruleParams,
   name,
   id,
   enabled,
@@ -40,29 +40,29 @@ export const buildRule = ({
   return pickBy<OutputRuleES>((value: unknown) => value != null, {
     id,
     status: 'open',
-    rule_id: signalParams.ruleId,
-    false_positives: signalParams.falsePositives,
-    saved_id: signalParams.savedId,
-    meta: signalParams.meta,
-    max_signals: signalParams.maxSignals,
-    risk_score: signalParams.riskScore,
-    output_index: signalParams.outputIndex,
-    description: signalParams.description,
-    filter: signalParams.filter,
-    from: signalParams.from,
-    immutable: signalParams.immutable,
-    index: signalParams.index,
+    rule_id: ruleParams.ruleId,
+    false_positives: ruleParams.falsePositives,
+    saved_id: ruleParams.savedId,
+    meta: ruleParams.meta,
+    max_signals: ruleParams.maxSignals,
+    risk_score: ruleParams.riskScore,
+    output_index: ruleParams.outputIndex,
+    description: ruleParams.description,
+    filter: ruleParams.filter,
+    from: ruleParams.from,
+    immutable: ruleParams.immutable,
+    index: ruleParams.index,
     interval,
-    language: signalParams.language,
+    language: ruleParams.language,
     name,
-    query: signalParams.query,
-    references: signalParams.references,
-    severity: signalParams.severity,
-    tags: signalParams.tags,
-    type: signalParams.type,
-    to: signalParams.to,
+    query: ruleParams.query,
+    references: ruleParams.references,
+    severity: ruleParams.severity,
+    tags: ruleParams.tags,
+    type: ruleParams.type,
+    to: ruleParams.to,
     enabled,
-    filters: signalParams.filters,
+    filters: ruleParams.filters,
     created_by: createdBy,
     updated_by: updatedBy,
   });
@@ -83,7 +83,7 @@ export const buildSignal = (doc: SignalSourceHit, rule: Partial<OutputRuleES>): 
 
 interface BuildBulkBodyParams {
   doc: SignalSourceHit;
-  signalParams: AlertTypeParams;
+  ruleParams: RuleTypeParams;
   id: string;
   name: string;
   createdBy: string;
@@ -95,7 +95,7 @@ interface BuildBulkBodyParams {
 // format search_after result for signals index.
 export const buildBulkBody = ({
   doc,
-  signalParams,
+  ruleParams,
   id,
   name,
   createdBy,
@@ -104,7 +104,7 @@ export const buildBulkBody = ({
   enabled,
 }: BuildBulkBodyParams): SignalHit => {
   const rule = buildRule({
-    signalParams,
+    ruleParams,
     id,
     name,
     enabled,
@@ -123,7 +123,7 @@ export const buildBulkBody = ({
 
 interface SingleBulkCreateParams {
   someResult: SignalSearchResponse;
-  signalParams: AlertTypeParams;
+  ruleParams: RuleTypeParams;
   services: AlertServices;
   logger: Logger;
   id: string;
@@ -148,7 +148,7 @@ export const generateId = (
 // Bulk Index documents.
 export const singleBulkCreate = async ({
   someResult,
-  signalParams,
+  ruleParams,
   services,
   logger,
   id,
@@ -179,11 +179,11 @@ export const singleBulkCreate = async ({
           doc._index,
           doc._id,
           doc._version ? doc._version.toString() : '',
-          signalParams.ruleId ?? ''
+          ruleParams.ruleId ?? ''
         ),
       },
     },
-    buildBulkBody({ doc, signalParams, id, name, createdBy, updatedBy, interval, enabled }),
+    buildBulkBody({ doc, ruleParams, id, name, createdBy, updatedBy, interval, enabled }),
   ]);
   const time1 = performance.now();
   const firstResult: BulkResponse = await services.callCluster('bulk', {
@@ -222,7 +222,7 @@ export const singleBulkCreate = async ({
 
 interface SingleSearchAfterParams {
   searchAfterSortId: string | undefined;
-  signalParams: AlertTypeParams;
+  ruleParams: RuleTypeParams;
   services: AlertServices;
   logger: Logger;
   pageSize: number;
@@ -231,7 +231,7 @@ interface SingleSearchAfterParams {
 // utilize search_after for paging results into bulk.
 export const singleSearchAfter = async ({
   searchAfterSortId,
-  signalParams,
+  ruleParams,
   services,
   logger,
   pageSize,
@@ -241,10 +241,10 @@ export const singleSearchAfter = async ({
   }
   try {
     const searchAfterQuery = buildEventsSearchQuery({
-      index: signalParams.index,
-      from: signalParams.from,
-      to: signalParams.to,
-      filter: signalParams.filter,
+      index: ruleParams.index,
+      from: ruleParams.from,
+      to: ruleParams.to,
+      filter: ruleParams.filter,
       size: pageSize,
       searchAfterSortId,
     });
@@ -261,7 +261,7 @@ export const singleSearchAfter = async ({
 
 interface SearchAfterAndBulkCreateParams {
   someResult: SignalSearchResponse;
-  signalParams: AlertTypeParams;
+  ruleParams: RuleTypeParams;
   services: AlertServices;
   logger: Logger;
   id: string;
@@ -277,7 +277,7 @@ interface SearchAfterAndBulkCreateParams {
 // search_after through documents and re-index using bulk endpoint.
 export const searchAfterAndBulkCreate = async ({
   someResult,
-  signalParams,
+  ruleParams,
   services,
   logger,
   id,
@@ -296,7 +296,7 @@ export const searchAfterAndBulkCreate = async ({
   logger.debug('[+] starting bulk insertion');
   await singleBulkCreate({
     someResult,
-    signalParams,
+    ruleParams,
     services,
     logger,
     id,
@@ -314,8 +314,7 @@ export const searchAfterAndBulkCreate = async ({
   // If the total number of hits for the overall search result is greater than
   // maxSignals, default to requesting a total of maxSignals, otherwise use the
   // totalHits in the response from the searchAfter query.
-  const maxTotalHitsSize =
-    totalHits >= signalParams.maxSignals ? signalParams.maxSignals : totalHits;
+  const maxTotalHitsSize = totalHits >= ruleParams.maxSignals ? ruleParams.maxSignals : totalHits;
 
   // number of docs in the current search result
   let hitsSize = someResult.hits.hits.length;
@@ -336,7 +335,7 @@ export const searchAfterAndBulkCreate = async ({
       logger.debug(`sortIds: ${sortIds}`);
       const searchAfterResult: SignalSearchResponse = await singleSearchAfter({
         searchAfterSortId: sortId,
-        signalParams,
+        ruleParams,
         services,
         logger,
         pageSize, // maximum number of docs to receive per search result.
@@ -355,7 +354,7 @@ export const searchAfterAndBulkCreate = async ({
       logger.debug('next bulk index');
       await singleBulkCreate({
         someResult: searchAfterResult,
-        signalParams,
+        ruleParams,
         services,
         logger,
         id,

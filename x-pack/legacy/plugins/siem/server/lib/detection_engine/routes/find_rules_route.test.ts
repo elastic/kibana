@@ -29,7 +29,7 @@ describe('find_rules', () => {
   });
 
   describe('status codes with actionClient and alertClient', () => {
-    test('returns 200 when finding a single signal with a valid actionClient and alertClient', async () => {
+    test('returns 200 when finding a single rule with a valid actionClient and alertClient', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       actionsClient.find.mockResolvedValue({
         page: 1,

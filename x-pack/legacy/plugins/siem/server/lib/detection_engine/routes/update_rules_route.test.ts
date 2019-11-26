@@ -34,7 +34,7 @@ describe('update_rules', () => {
   });
 
   describe('status codes with actionClient and alertClient', () => {
-    test('returns 200 when updating a single signal with a valid actionClient and alertClient', async () => {
+    test('returns 200 when updating a single rule with a valid actionClient and alertClient', async () => {
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
@@ -43,7 +43,7 @@ describe('update_rules', () => {
       expect(statusCode).toBe(200);
     });
 
-    test('returns 404 when updating a single signal that does not exist', async () => {
+    test('returns 404 when updating a single rule that does not exist', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.update.mockResolvedValue(updateActionResult());

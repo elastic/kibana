@@ -49,7 +49,7 @@ export const initServerWithKibana = (
     kbnServer.config().has('xpack.alerting.enabled') === true
   ) {
     logger.info(
-      'Detected feature flags for actions and alerting and enabling signals API endpoints'
+      'Detected feature flags for actions and alerting and enabling detection engine API endpoints'
     );
     createRulesRoute(kbnServer);
     readRulesRoute(kbnServer);

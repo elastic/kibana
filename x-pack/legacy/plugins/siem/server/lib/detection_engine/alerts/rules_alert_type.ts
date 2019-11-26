@@ -127,7 +127,7 @@ export const rulesAlertType = ({
 
         const bulkIndexResult = await searchAfterAndBulkCreate({
           someResult: noReIndexResult,
-          signalParams: params,
+          ruleParams: params,
           services,
           logger,
           id: alertId,

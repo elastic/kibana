@@ -31,7 +31,7 @@ describe('create_rules', () => {
   });
 
   describe('status codes with actionClient and alertClient', () => {
-    test('returns 200 when creating a single signal with a valid actionClient and alertClient', async () => {
+    test('returns 200 when creating a single rule with a valid actionClient and alertClient', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());

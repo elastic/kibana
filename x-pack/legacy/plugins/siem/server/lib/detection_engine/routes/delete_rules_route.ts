@@ -35,15 +35,15 @@ export const createDeleteRulesRoute: Hapi.ServerRoute = {
       return headers.response().code(404);
     }
 
-    const signal = await deleteRules({
+    const rule = await deleteRules({
       actionsClient,
       alertsClient,
       id,
       ruleId,
     });
 
-    if (signal != null) {
-      return transformOrError(signal);
+    if (rule != null) {
+      return transformOrError(rule);
     } else {
       return getIdError({ id, ruleId });
     }
