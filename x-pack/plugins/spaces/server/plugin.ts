@@ -59,7 +59,7 @@ export interface PluginsSetup {
   features: FeaturesPluginSetup;
   licensing: LicensingPluginSetup;
   security?: SecurityPluginSetup;
-  usageCollection: UsageCollectionSetup;
+  usageCollection?: UsageCollectionSetup;
   home?: HomeServerPluginSetup;
 }
 
@@ -172,7 +172,7 @@ export class Plugin {
     spacesService: SpacesServiceSetup,
     featuresSetup: FeaturesPluginSetup,
     licensingSetup: LicensingPluginSetup,
-    usageCollectionSetup: UsageCollectionPluginSetup
+    usageCollectionSetup?: UsageCollectionPluginSetup
   ) {
     const legacyAPI = this.getLegacyAPI();
     const { addScopedSavedObjectsClientWrapperFactory, types } = legacyAPI.savedObjects;

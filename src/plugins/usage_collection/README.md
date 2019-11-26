@@ -33,7 +33,12 @@ import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collec
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 
 // server/collectors/register.ts
-export function registerMyPluginUsageCollector(usageCollection: UsageCollection): void {
+export function registerMyPluginUsageCollector(usageCollection?: UsageCollection): void {
+  // usageCollection is an optional dependency, so make sure to return if it is not registered.
+  if (!usageCollection) {
+    return;
+  }
+
   // create usage collector
   const myCollector = usageCollection.makeUsageCollector({
     type: MY_USAGE_TYPE,

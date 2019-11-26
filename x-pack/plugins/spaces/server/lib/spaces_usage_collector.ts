@@ -166,9 +166,12 @@ export function getSpacesUsageCollector(usageCollection: UsageCollection, deps: 
 }
 
 export function registerSpacesUsageCollector(
-  usageCollection: UsageCollection,
+  usageCollection: UsageCollection | undefined,
   deps: CollectorDeps
 ) {
+  if (!usageCollection) {
+    return;
+  }
   const collector = getSpacesUsageCollector(usageCollection, deps);
   usageCollection.registerCollector(collector);
 }
