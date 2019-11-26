@@ -31,7 +31,8 @@ import { DataStart } from '../../../data/public';
 import { SavedQueryService } from '../../../data/public/search/search_bar/lib/saved_query_service';
 import { NavigationStart } from '../../../navigation/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
-import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public';
+import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
+import { SharePluginStart } from '../../../../../plugins/share/public';
 import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
 import { SavedVisualizations } from './types';
 
@@ -44,7 +45,7 @@ export interface VisualizeKibanaServices {
   dataStart: DataStart;
   editorTypes: any;
   npDataStart: NpDataStart;
-  embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
+  embeddables: IEmbeddableStart;
   getBasePath: () => string;
   indexPatterns: any;
   localStorage: Storage;
@@ -54,6 +55,7 @@ export interface VisualizeKibanaServices {
   savedObjectRegistry: any;
   savedQueryService: SavedQueryService;
   savedVisualizations: SavedVisualizations;
+  share: SharePluginStart;
   uiSettings: UiSettingsClientContract;
   visualizeCapabilities: any;
   visualizations: any;

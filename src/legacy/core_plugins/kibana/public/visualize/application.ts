@@ -39,7 +39,6 @@ import {
   PromiseServiceCreator,
   StateManagementConfigProvider,
 } from './legacy_imports';
-import { createFilterBarDirective, createFilterBarHelper } from '../../../data/public';
 import { NavigationStart } from '../../../navigation/public';
 
 // @ts-ignore
@@ -103,7 +102,6 @@ function createLocalAngularModule(
   createLocalPersistedStateModule(angular);
   createLocalTopNavModule(navigation, angular);
   createLocalConfirmModalModule(angular);
-  createLocalFilterBarModule(angular);
 
   const visualizeAngularModule: IModule = angular.module(moduleName, [
     ...thirdPartyAngularDependencies,
@@ -114,7 +112,6 @@ function createLocalAngularModule(
     'app/visualize/TopNav',
     'app/visualize/State',
     'app/visualize/ConfirmModal',
-    'app/visualize/FilterBar',
   ]);
   return visualizeAngularModule;
 }
@@ -192,13 +189,6 @@ function createLocalTopNavModule(navigation: NavigationStart, angular: IAngularS
     .module('app/visualize/TopNav', ['react'])
     .directive('kbnTopNav', createTopNavDirective)
     .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui));
-}
-
-function createLocalFilterBarModule(angular: IAngularStatic) {
-  angular
-    .module('app/visualize/FilterBar', ['react'])
-    .directive('filterBar', createFilterBarDirective)
-    .directive('filterBarHelper', createFilterBarHelper);
 }
 
 function createLocalI18nModule(angular: IAngularStatic) {

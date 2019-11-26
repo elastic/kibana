@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import 'ui/registry/field_formats';
 import 'uiExports/contextMenuActions';
 import 'uiExports/devTools';
 import 'uiExports/docViews';

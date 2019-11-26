@@ -31,25 +31,25 @@ import {
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { DataStart } from '../../../data/public';
 import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
-import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public';
+import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
 import { NavigationStart } from '../../../navigation/public';
+import { SharePluginStart } from '../../../../../plugins/share/public';
+import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 import { VisualizationsStart } from '../../../visualizations/public';
-import { LocalApplicationService } from '../local_application_service';
 import { VisualizeEmbeddableFactory } from './embeddable/visualize_embeddable_factory';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './embeddable/constants';
 import { VisualizeConstants } from './visualize_constants';
 import { setServices, VisualizeKibanaServices } from './kibana_services';
 import {
   FeatureCatalogueCategory,
-  FeatureCatalogueSetup,
-} from '../../../../../plugins/feature_catalogue/public';
+  HomePublicPluginSetup,
+} from '../../../../../plugins/home/public';
 import { defaultEditor } from './legacy_imports';
 import { SavedVisualizations } from './types';
 
 export interface LegacyAngularInjectedDependencies {
   legacyChrome: any;
   editorTypes: any;
-  shareContextMenuExtensions: any;
   savedObjectRegistry: any;
   savedVisualizations: SavedVisualizations;
 }
@@ -57,37 +57,40 @@ export interface LegacyAngularInjectedDependencies {
 export interface VisualizePluginStartDependencies {
   data: DataStart;
   npData: NpDataStart;
-  embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
+  embeddables: IEmbeddableStart;
   navigation: NavigationStart;
+  share: SharePluginStart;
   visualizations: VisualizationsStart;
 }
 
 export interface VisualizePluginSetupDependencies {
-  feature_catalogue: FeatureCatalogueSetup;
   __LEGACY: {
     angular: IAngularStatic;
     getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
-    localApplicationService: LocalApplicationService;
   };
   VisEditorTypesRegistryProvider: any;
+  home: HomePublicPluginSetup;
+  kibana_legacy: KibanaLegacySetup;
 }
 
 export class VisualizePlugin implements Plugin {
   private startDependencies: {
     dataStart: DataStart;
     npDataStart: NpDataStart;
-    embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
+    embeddables: IEmbeddableStart;
     navigation: NavigationStart;
     savedObjectsClient: SavedObjectsClientContract;
+    share: SharePluginStart;
     visualizations: VisualizationsStart;
   } | null = null;
 
   public async setup(
     core: CoreSetup,
     {
-      feature_catalogue,
+      home,
+      kibana_legacy,
       VisEditorTypesRegistryProvider,
-      __LEGACY: { localApplicationService, getAngularDependencies, ...legacyServices },
+      __LEGACY: { getAngularDependencies, angular },
     }: VisualizePluginSetupDependencies
   ) {
     const app: App = {
@@ -105,11 +108,12 @@ export class VisualizePlugin implements Plugin {
           navigation,
           visualizations,
           npDataStart,
+          share,
         } = this.startDependencies;
 
         const angularDependencies = await getAngularDependencies();
         const deps: VisualizeKibanaServices = {
-          ...legacyServices,
+          angular,
           ...angularDependencies,
           addBasePath: contextCore.http.basePath.prepend,
           core: contextCore as LegacyCoreStart,
@@ -123,6 +127,7 @@ export class VisualizePlugin implements Plugin {
           navigation,
           savedObjectsClient,
           savedQueryService: dataStart.search.services.savedQueryService,
+          share,
           toastNotifications: contextCore.notifications.toasts,
           uiSettings: contextCore.uiSettings,
           visualizeCapabilities: contextCore.application.capabilities.visualize,
@@ -135,9 +140,9 @@ export class VisualizePlugin implements Plugin {
       },
     };
 
-    localApplicationService.register({ ...app, id: 'visualize' });
+    kibana_legacy.registerLegacyApp({ ...app, id: 'visualize' });
 
-    feature_catalogue.register({
+    home.featureCatalogue.register({
       id: 'visualize',
       title: 'Visualize',
       description: i18n.translate('kbn.visualize.visualizeDescription', {
@@ -159,8 +164,9 @@ export class VisualizePlugin implements Plugin {
       data: dataStart,
       embeddables,
       navigation,
-      visualizations,
       npData,
+      share,
+      visualizations,
     }: VisualizePluginStartDependencies
   ) {
     this.startDependencies = {
@@ -169,6 +175,7 @@ export class VisualizePlugin implements Plugin {
       embeddables,
       navigation,
       savedObjectsClient,
+      share,
       visualizations,
     };
 

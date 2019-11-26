@@ -28,11 +28,9 @@ import {
   npSetup,
   npStart,
   SavedObjectRegistryProvider,
-  ShareContextMenuExtensionsRegistryProvider,
   VisEditorTypesRegistryProvider,
 } from './legacy_imports';
 import { VisualizePlugin, LegacyAngularInjectedDependencies } from './plugin';
-import { localApplicationService } from '../local_application_service';
 import { start as data } from '../../../data/public/legacy';
 import { start as embeddables } from '../../../embeddable_api/public/np_ready/public/legacy';
 import { start as navigation } from '../../../navigation/public/legacy';
@@ -49,30 +47,28 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
 
   const editorTypes = Private(VisEditorTypesRegistryProvider);
   const savedObjectRegistry = Private(SavedObjectRegistryProvider);
-  const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
 
   return {
     legacyChrome,
     editorTypes,
     savedObjectRegistry,
     savedVisualizations: injector.get('savedVisualizations'),
-    shareContextMenuExtensions,
   };
 }
 
 (async () => {
   const instance = new VisualizePlugin();
   instance.setup(npSetup.core, {
-    feature_catalogue: npSetup.plugins.home.featureCatalogue,
+    ...npSetup.plugins,
     VisEditorTypesRegistryProvider,
     __LEGACY: {
       // angular is passed to kibana_services since it's used in editor.js
       angular,
       getAngularDependencies,
-      localApplicationService,
     },
   });
   instance.start(npStart.core, {
+    ...npStart.plugins,
     data,
     npData: npStart.plugins.data,
     embeddables,

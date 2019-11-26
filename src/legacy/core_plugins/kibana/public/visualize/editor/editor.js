@@ -42,7 +42,8 @@ import {
   SavedObjectSaveModal,
   showSaveModal,
   stateMonitorFactory,
-  subscribeWithScope
+  subscribeWithScope,
+  unhashUrl,
 } from '../legacy_imports';
 
 import { getServices } from '../kibana_services';
@@ -80,7 +81,7 @@ function VisualizeAppController(
     indexPatterns,
     localStorage,
     visualizeCapabilities,
-    shareContextMenuExtensions,
+    share,
     npDataStart: {
       query: {
         filterManager,
@@ -177,11 +178,11 @@ function VisualizeAppController(
       const hasUnappliedChanges = vis.dirty;
       const hasUnsavedChanges = $appStatus.dirty;
       const getUnhashableStates = () => [getAppState(), globalState].filter(Boolean);
-      shareContextMenuExtensions.toggleShareContextMenu({
+      share.toggleShareContextMenu({
         anchorElement,
         allowEmbed: true,
         allowShortUrl: visualizeCapabilities.createShortUrl,
-        getUnhashableStates,
+        shareableUrl: unhashUrl(window.location.href, getUnhashableStates()),
         objectId: savedVis.id,
         objectType: 'visualization',
         sharingData: {
