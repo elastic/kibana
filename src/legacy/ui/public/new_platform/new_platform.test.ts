@@ -18,13 +18,15 @@
  */
 
 import { setRootControllerMock } from './new_platform.test.mocks';
-import { legacyAppRegister, __reset__ } from './new_platform';
+import { legacyAppRegister, __reset__, __setup__ } from './new_platform';
+import { coreMock } from '../../../../core/public/mocks';
 
 describe('ui/new_platform', () => {
   describe('legacyAppRegister', () => {
     beforeEach(() => {
       setRootControllerMock.mockReset();
       __reset__();
+      __setup__(coreMock.createSetup({ basePath: '/test/base/path' }) as any, {} as any);
     });
 
     const registerApp = () => {
@@ -59,7 +61,7 @@ describe('ui/new_platform', () => {
       controller(scopeMock, elementMock);
       expect(mountMock).toHaveBeenCalledWith(expect.any(Object), {
         element: elementMock[0],
-        appBasePath: '',
+        appBasePath: '/test/base/path/app/test',
       });
     });
 
