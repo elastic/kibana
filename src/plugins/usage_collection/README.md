@@ -12,7 +12,7 @@ All you need to provide is a `type` for organizing your fields, and a `fetch` me
 
 ### New Platform:
 
-Make sure `usageCollection` is in your optional Plugins.
+1. Make sure `usageCollection` is in your optional Plugins:
 
 ```json
 // plugin/kibana.json
@@ -22,6 +22,8 @@ Make sure `usageCollection` is in your optional Plugins.
 }
 ```
 
+2. Register Usage collector in the `setup` function:
+
 ```ts
 // server/plugin.ts
 class Plugin {
@@ -29,6 +31,11 @@ class Plugin {
     registerMyPluginUsageCollector(plugins.usageCollection);
   }
 }
+```
+
+3. Creating and registering a Usage Collector. Ideally collectors would be defined in a separate director `server/collectors/register.ts`.
+
+```ts
 import { PluginSetupContract as UsageCollection } from 'src/plugins/usage_collection/server';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 
