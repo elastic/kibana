@@ -16,49 +16,71 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+/* eslint-disable @typescript-eslint/no-var-requires */
+import Joi from 'joi';
 import Bluebird from 'bluebird';
 import _ from 'lodash';
+import { Legacy } from 'kibana';
+// @ts-ignore
 import chainRunnerFn from '../handlers/chain_runner.js';
 const timelionDefaults = require('../lib/get_namespaced_settings')();
 
-function formatErrorResponse(e, h) {
-  return h.response({
-    title: e.toString(),
-    message: e.toString()
-  }).code(500);
+function formatErrorResponse(e: any, h: any) {
+  return h
+    .response({
+      title: e.toString(),
+      message: e.toString(),
+    })
+    .code(500);
 }
 
-export function runRoute(server) {
+export function runRoute(server: Legacy.Server) {
   server.route({
     method: ['POST', 'GET'],
     path: '/api/timelion/run',
-    handler: async (request, h) => {
+    options: {
+      validate: {
+        payload: Joi.string()
+          .allow(null)
+          .optional(),
+        query: Joi.object({
+          expression: Joi.string(),
+          from: Joi.string(),
+          to: Joi.string(),
+          interval: Joi.string(),
+          timezone: Joi.string(),
+        }).optional(),
+      },
+    },
+    handler: async (request: any, h: any) => {
       try {
         const uiSettings = await request.getUiSettingsService().getAll();
 
         const tlConfig = require('../handlers/lib/tl_config.js')({
           server,
           request,
-          settings: _.defaults(uiSettings, timelionDefaults) // Just in case they delete some setting.
+          settings: _.defaults(uiSettings, timelionDefaults), // Just in case they delete some setting.
         });
 
         const chainRunner = chainRunnerFn(tlConfig);
-        const sheet = await Bluebird.all(chainRunner.processRequest(request.payload || {
-          sheet: [request.query.expression],
-          time: {
-            from: request.query.from,
-            to: request.query.to,
-            interval: request.query.interval,
-            timezone: request.query.timezone
-          }
-        }));
+        const sheet = await Bluebird.all(
+          chainRunner.processRequest(
+            request.payload || {
+              sheet: [request.query.expression],
+              time: {
+                from: request.query.from,
+                to: request.query.to,
+                interval: request.query.interval,
+                timezone: request.query.timezone,
+              },
+            }
+          )
+        );
 
         return {
           sheet,
-          stats: chainRunner.getStats()
+          stats: chainRunner.getStats(),
         };
-
       } catch (err) {
         server.log(['timelion', 'error'], `${err.toString()}: ${err.stack}`);
         // TODO Maybe we should just replace everywhere we throw with Boom? Probably.
@@ -68,6 +90,6 @@ export function runRoute(server) {
           return formatErrorResponse(err, h);
         }
       }
-    }
+    },
   });
 }
