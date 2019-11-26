@@ -29,7 +29,7 @@ import {
   Context,
   ExpressionRenderHandler,
   ExpressionDataHandler,
-  RenderResult,
+  RenderId,
 } from '../../types';
 import { getExpressions } from '../../services';
 
@@ -40,7 +40,7 @@ declare global {
       context?: Context,
       initialContext?: Context
     ) => ReturnType<ExpressionDataHandler['getData']>;
-    renderPipelineResponse: (context?: Context) => Promise<RenderResult>;
+    renderPipelineResponse: (context?: Context) => Promise<RenderId>;
   }
 }
 
