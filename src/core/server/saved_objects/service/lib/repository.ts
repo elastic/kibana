@@ -155,6 +155,7 @@ export class SavedObjectsRepository {
    * @property {object} [options.migrationVersion=undefined]
    * @property {string} [options.namespace]
    * @property {array} [options.references=[]] - [{ name, type, id }]
+   * @property {fn} [options.predicate]
    * @returns {promise} - { id, type, version, attributes }
    */
   public async create<T extends SavedObjectAttributes>(
@@ -169,6 +170,7 @@ export class SavedObjectsRepository {
       namespace,
       references = [],
       refresh = DEFAULT_REFRESH_SETTING,
+      predicate,
     } = options;
 
     if (!this._allowedTypes.includes(type)) {
@@ -177,6 +179,25 @@ export class SavedObjectsRepository {
 
     const method = id && !overwrite ? 'create' : 'index';
     const time = this._getCurrentTime();
+
+    if (predicate) {
+      const response = await this._callCluster('get', {
+        id: this._serializer.generateRawId(options.namespace, type, id),
+        index: this.getIndexForType(type),
+        ignore: [404],
+      });
+      const documentFound = response.found === true;
+      const indexFound = response.status !== 404;
+      const { isValid, error } = predicate({
+        indexFound,
+        documentFound,
+        _source: response._source,
+      });
+
+      if (!isValid) {
+        throw error;
+      }
+    }
 
     try {
       const migrated = this._migrator.migrateDocument({

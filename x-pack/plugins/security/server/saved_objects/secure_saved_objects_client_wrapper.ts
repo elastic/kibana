@@ -53,6 +53,26 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   ) {
     await this.ensureAuthorized(type, 'create', options.namespace, { type, attributes, options });
 
+    if (type === 'alerting') {
+      options.predicate = ({ documentFound, indexFound, _source }) => {
+        if (!documentFound || !indexFound) {
+          return {
+            isValid: true,
+          };
+        }
+
+        if (_source.alerting.consumer === 'siem') {
+          return {
+            isValid: true,
+          };
+        }
+
+        return {
+          isValid: false,
+          error: this.errors.decorateForbiddenError(new Error(`GET OUTTA HERE YA TURKEY`)),
+        };
+      };
+    }
     return await this.baseClient.create(type, attributes, options);
   }
 
