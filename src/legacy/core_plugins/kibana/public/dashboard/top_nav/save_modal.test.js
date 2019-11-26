@@ -29,7 +29,7 @@ jest.mock('ui/new_platform');
 
 import { DashboardSaveModal } from './save_modal';
 
-test.skip('renders DashboardSaveModal', () => {
+test('renders DashboardSaveModal', () => {
   const component = shallowWithI18nProvider(
     <DashboardSaveModal
       onSave={() => {}}

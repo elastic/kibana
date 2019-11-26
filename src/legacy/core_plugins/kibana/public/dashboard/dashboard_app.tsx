@@ -28,13 +28,6 @@ import {
   KbnUrl,
 } from './legacy_imports';
 
-import {
-  AppStateClass as TAppStateClass,
-  AppState as TAppState,
-  IInjector,
-  KbnUrl,
-} from './legacy_imports';
-
 import { ViewMode } from '../../../embeddable_api/public/np_ready/public';
 import { SavedObjectDashboard } from './saved_dashboard/saved_dashboard';
 import { DashboardAppState, SavedDashboardPanel, ConfirmModalFn } from './types';

@@ -30,10 +30,6 @@ jest.mock('ui/state_management/state', () => ({
   State: {},
 }));
 
-jest.mock('ui/state_management/state', () => ({
-  State: {},
-}));
-
 describe('DashboardState', function() {
   let dashboardState: DashboardStateManager;
   const savedDashboard = getSavedDashboardMock();
@@ -46,7 +42,7 @@ describe('DashboardState', function() {
     setTime: (time: InputTimeRange) => {
       mockTime = time as TimeRange;
     },
-  } as Timefilter;
+  } as TimefilterContract;
 
   function initDashboardState() {
     dashboardState = new DashboardStateManager({
