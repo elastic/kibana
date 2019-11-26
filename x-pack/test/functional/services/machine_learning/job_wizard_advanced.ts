@@ -295,7 +295,7 @@ export function MachineLearningJobWizardAdvancedProvider({
     },
 
     async clickEditDetector(detectorIndex: number) {
-      retry.tryForTime(20 * 1000, async () => {
+      await retry.tryForTime(20 * 1000, async () => {
         await testSubjects.click(
           `mlAdvancedDetector ${detectorIndex} > mlAdvancedDetectorEditButton`
         );
