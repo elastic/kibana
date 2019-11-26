@@ -48,7 +48,7 @@ export const resolveCapabilities = async (
         ...acc,
         [app]: true,
       }),
-      {}
+      capabilities.navLinks
     ),
   };
   return switchers.reduce(async (caps, switcher) => {
