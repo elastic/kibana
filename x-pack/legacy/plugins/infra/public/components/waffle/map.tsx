@@ -30,7 +30,7 @@ interface Props {
   dataBounds: InfraWaffleMapBounds;
 }
 
-export const Map: React.SFC<Props> = ({
+export const Map: React.FC<Props> = ({
   nodes,
   options,
   timeRange,

@@ -4,16 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SignalSourceHit, SignalSearchResponse, SignalAlertParams } from '../types';
+import { SignalSourceHit, SignalSearchResponse, AlertTypeParams } from '../types';
 
-export const sampleSignalAlertParams = (maxSignals: number | undefined): SignalAlertParams => ({
+export const sampleSignalAlertParams = (
+  maxSignals: number | undefined,
+  riskScore?: number | undefined
+): AlertTypeParams => ({
   ruleId: 'rule-1',
   description: 'Detecting root and admin users',
   falsePositives: [],
   immutable: false,
   index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-  interval: '5m',
-  name: 'Detect Root/Admin Users',
   type: 'query',
   from: 'now-6m',
   tags: ['some fake tag'],
@@ -21,39 +22,51 @@ export const sampleSignalAlertParams = (maxSignals: number | undefined): SignalA
   severity: 'high',
   query: 'user.name: root or user.name: admin',
   language: 'kuery',
+  outputIndex: '.siem-signals',
   references: ['http://google.com'],
+  riskScore: riskScore ? riskScore : 50,
   maxSignals: maxSignals ? maxSignals : 10000,
-  enabled: true,
   filter: undefined,
   filters: undefined,
   savedId: undefined,
-  size: 1000,
+  meta: undefined,
 });
 
-export const sampleDocNoSortId: SignalSourceHit = {
+export const sampleDocNoSortId = (someUuid: string): SignalSourceHit => ({
   _index: 'myFakeSignalIndex',
   _type: 'doc',
   _score: 100,
   _version: 1,
-  _id: 'someFakeId',
+  _id: someUuid,
   _source: {
     someKey: 'someValue',
     '@timestamp': 'someTimeStamp',
   },
-};
+});
 
-export const sampleDocWithSortId: SignalSourceHit = {
+export const sampleDocNoSortIdNoVersion = (someUuid: string): SignalSourceHit => ({
+  _index: 'myFakeSignalIndex',
+  _type: 'doc',
+  _score: 100,
+  _id: someUuid,
+  _source: {
+    someKey: 'someValue',
+    '@timestamp': 'someTimeStamp',
+  },
+});
+
+export const sampleDocWithSortId = (someUuid: string): SignalSourceHit => ({
   _index: 'myFakeSignalIndex',
   _type: 'doc',
   _score: 100,
   _version: 1,
-  _id: 'someFakeId',
+  _id: someUuid,
   _source: {
     someKey: 'someValue',
     '@timestamp': 'someTimeStamp',
   },
   sort: ['1234567891111'],
-};
+});
 
 export const sampleEmptyDocSearchResults: SignalSearchResponse = {
   took: 10,
@@ -71,7 +84,61 @@ export const sampleEmptyDocSearchResults: SignalSearchResponse = {
   },
 };
 
-export const sampleDocSearchResultsNoSortId: SignalSearchResponse = {
+export const sampleBulkCreateDuplicateResult = {
+  took: 60,
+  errors: true,
+  items: [
+    {
+      create: {
+        _index: 'test',
+        _type: '_doc',
+        _id: '4',
+        _version: 1,
+        result: 'created',
+        _shards: {
+          total: 2,
+          successful: 1,
+          failed: 0,
+        },
+        _seq_no: 1,
+        _primary_term: 1,
+        status: 201,
+      },
+    },
+    {
+      create: {
+        _index: 'test',
+        _type: '_doc',
+        _id: '4',
+        status: 409,
+        error: {
+          type: 'version_conflict_engine_exception',
+          reason: '[4]: version conflict, document already exists (current version [1])',
+          index_uuid: 'cXmq4Rt3RGGswDTTwZFzvA',
+          shard: '0',
+          index: 'test',
+        },
+      },
+    },
+    {
+      create: {
+        _index: 'test',
+        _type: '_doc',
+        _id: '4',
+        status: 409,
+        error: {
+          type: 'version_conflict_engine_exception',
+          reason: '[4]: version conflict, document already exists (current version [1])',
+          index_uuid: 'cXmq4Rt3RGGswDTTwZFzvA',
+          shard: '0',
+          index: 'test',
+        },
+      },
+    },
+  ],
+};
+
+export const sampleDocSearchResultsNoSortId = (someUuid: string): SignalSearchResponse => ({
   took: 10,
   timed_out: false,
   _shards: {
@@ -85,13 +152,35 @@ export const sampleDocSearchResultsNoSortId: SignalSearchResponse = {
     max_score: 100,
     hits: [
       {
-        ...sampleDocNoSortId,
+        ...sampleDocNoSortId(someUuid),
       },
     ],
   },
-};
+});
 
-export const sampleDocSearchResultsNoSortIdNoHits: SignalSearchResponse = {
+export const sampleDocSearchResultsNoSortIdNoVersion = (
+  someUuid: string
+): SignalSearchResponse => ({
+  took: 10,
+  timed_out: false,
+  _shards: {
+    total: 10,
+    successful: 10,
+    failed: 0,
+    skipped: 0,
+  },
+  hits: {
+    total: 100,
+    max_score: 100,
+    hits: [
+      {
+        ...sampleDocNoSortIdNoVersion(someUuid),
+      },
+    ],
+  },
+});
+
+export const sampleDocSearchResultsNoSortIdNoHits = (someUuid: string): SignalSearchResponse => ({
   took: 10,
   timed_out: false,
   _shards: {
@@ -105,13 +194,17 @@ export const sampleDocSearchResultsNoSortIdNoHits: SignalSearchResponse = {
     max_score: 100,
     hits: [
       {
-        ...sampleDocNoSortId,
+        ...sampleDocNoSortId(someUuid),
       },
     ],
   },
-};
+});
 
-export const repeatedSearchResultsWithSortId = (repeat: number) => ({
+export const repeatedSearchResultsWithSortId = (
+  total: number,
+  pageSize: number,
+  guids: string[]
+) => ({
   took: 10,
   timed_out: false,
   _shards: {
@@ -121,15 +214,15 @@ export const repeatedSearchResultsWithSortId = (repeat: number) => ({
     skipped: 0,
   },
   hits: {
-    total: repeat,
+    total,
     max_score: 100,
-    hits: Array.from({ length: repeat }).map(x => ({
-      ...sampleDocWithSortId,
+    hits: Array.from({ length: pageSize }).map((x, index) => ({
+      ...sampleDocWithSortId(guids[index]),
     })),
   },
 });
 
-export const sampleDocSearchResultsWithSortId: SignalSearchResponse = {
+export const sampleDocSearchResultsWithSortId = (someUuid: string): SignalSearchResponse => ({
   took: 10,
   timed_out: false,
   _shards: {
@@ -143,10 +236,10 @@ export const sampleDocSearchResultsWithSortId: SignalSearchResponse = {
     max_score: 100,
     hits: [
       {
-        ...sampleDocWithSortId,
+        ...sampleDocWithSortId(someUuid),
       },
     ],
   },
-};
+});
 
 export const sampleSignalId = '04128c15-0d1b-4716-a4c5-46997ac7f3bd';

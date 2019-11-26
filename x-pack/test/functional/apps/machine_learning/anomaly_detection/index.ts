@@ -6,7 +6,8 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ loadTestFile }: FtrProviderContext) {
-  describe('anomaly detection', function() {
+  // FLAKY: https://github.com/elastic/kibana/issues/51669
+  describe.skip('anomaly detection', function() {
     loadTestFile(require.resolve('./single_metric_job'));
     loadTestFile(require.resolve('./multi_metric_job'));
     loadTestFile(require.resolve('./population_job'));

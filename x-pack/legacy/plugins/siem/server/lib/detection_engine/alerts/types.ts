@@ -34,12 +34,14 @@ export interface SignalAlertParams {
   ruleId: string | undefined | null;
   language: string | undefined | null;
   maxSignals: number;
+  riskScore: number;
+  outputIndex: string;
   name: string;
   query: string | undefined | null;
   references: string[];
   savedId: string | undefined | null;
+  meta: Record<string, {}> | undefined | null;
   severity: string;
-  size: number | undefined | null;
   tags: string[];
   to: string;
   type: 'filter' | 'query' | 'saved_query';
@@ -47,18 +49,24 @@ export interface SignalAlertParams {
 
 export type SignalAlertParamsRest = Omit<
   SignalAlertParams,
-  'ruleId' | 'falsePositives' | 'maxSignals' | 'savedId'
+  'ruleId' | 'falsePositives' | 'maxSignals' | 'savedId' | 'riskScore' | 'outputIndex'
 > & {
   rule_id: SignalAlertParams['ruleId'];
   false_positives: SignalAlertParams['falsePositives'];
   saved_id: SignalAlertParams['savedId'];
   max_signals: SignalAlertParams['maxSignals'];
+  risk_score: SignalAlertParams['riskScore'];
+  output_index: SignalAlertParams['outputIndex'];
 };
 
 export type OutputSignalAlertRest = SignalAlertParamsRest & {
   id: string;
   created_by: string | undefined | null;
   updated_by: string | undefined | null;
+};
+
+export type OutputSignalES = OutputSignalAlertRest & {
+  status: 'open' | 'closed';
 };
 
 export type UpdateSignalAlertParamsRest = Partial<SignalAlertParamsRest> & {
@@ -128,7 +136,7 @@ export type AlertTypeParams = Omit<SignalAlertParams, 'name' | 'enabled' | 'inte
 
 export type SignalAlertType = Alert & {
   id: string;
-  alertTypeParams: AlertTypeParams;
+  params: AlertTypeParams;
 };
 
 export interface SignalsRequest extends RequestFacade {
@@ -164,7 +172,46 @@ export interface SignalSource {
 export interface BulkResponse {
   took: number;
   errors: boolean;
-  items: unknown[];
+  items: [
+    {
+      create: {
+        _index: string;
+        _type?: string;
+        _id: string;
+        _version: number;
+        result?: string;
+        _shards?: {
+          total: number;
+          successful: number;
+          failed: number;
+        };
+        _seq_no?: number;
+        _primary_term?: number;
+        status: number;
+        error?: {
+          type: string;
+          reason: string;
+          index_uuid?: string;
+          shard: string;
+          index: string;
+        };
+      };
+    }
+  ];
+}
+
+export interface MGetResponse {
+  docs: GetResponse[];
+}
+export interface GetResponse {
+  _index: string;
+  _type: string;
+  _id: string;
+  _version: number;
+  _seq_no: number;
+  _primary_term: number;
+  found: boolean;
+  _source: SearchTypes;
 }
 
 export type SignalSearchResponse = SearchResponse<SignalSource>;

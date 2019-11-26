@@ -17,4 +17,4 @@ FILTER=${1:-'alert.attributes.enabled:%20true'}
 # Table of them for testing if needed: https://www.w3schools.com/tags/ref_urlencode.asp
 curl -s -k \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
- -X GET ${KIBANA_URL}/api/detection_engine/rules/_find?filter=$FILTER | jq .
+ -X GET ${KIBANA_URL}${SPACE_URL}/api/detection_engine/rules/_find?filter=$FILTER | jq .
