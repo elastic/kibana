@@ -73,7 +73,7 @@ export abstract class FieldFormat {
    */
   public type: any = this.constructor;
 
-  private readonly _params: any;
+  protected readonly _params: any;
   protected getConfig: Function | undefined;
 
   constructor(_params: any = {}, getConfig?: Function) {

@@ -23,7 +23,7 @@ import { Note } from './note/saved_object';
 import { PinnedEvent } from './pinned_event/saved_object';
 import { Timeline } from './timeline/saved_object';
 import { TLS } from './tls';
-import { SignalAlertParamsRest } from './detection_engine/alerts/types';
+import { RuleAlertParamsRest } from './detection_engine/alerts/types';
 
 export * from './hosts';
 
@@ -66,7 +66,7 @@ export interface SiemContext {
 }
 
 export interface Signal {
-  rule: Partial<SignalAlertParamsRest>;
+  rule: Partial<RuleAlertParamsRest>;
   parent: {
     id: string;
     type: string;
