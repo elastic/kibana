@@ -81,7 +81,7 @@ export async function setupAuthentication({
   const authenticator = new Authenticator({
     clusterClient,
     basePath: http.basePath,
-    config: { sessionTimeout: config.sessionTimeout, authc: config.authc },
+    config: { session: config.session, authc: config.authc },
     isSystemAPIRequest: (request: KibanaRequest) => getLegacyAPI().isSystemAPIRequest(request),
     getServerBaseURL,
     loggers,
@@ -89,8 +89,15 @@ export async function setupAuthentication({
       encryptionKey: config.encryptionKey,
       isSecure: config.secureCookies,
       name: config.cookieName,
-      validate: (sessionValue: ProviderSession) =>
-        !(sessionValue.expires && sessionValue.expires < Date.now()),
+      validate: (sessionValue: ProviderSession) => {
+        const { idleTimeoutExpiration, lifespanExpiration } = sessionValue;
+        if (idleTimeoutExpiration && idleTimeoutExpiration < Date.now()) {
+          return false;
+        } else if (lifespanExpiration && lifespanExpiration < Date.now()) {
+          return false;
+        }
+        return true;
+      },
     }),
   });
 
@@ -165,6 +172,7 @@ export async function setupAuthentication({
   return {
     login: authenticator.login.bind(authenticator),
     logout: authenticator.logout.bind(authenticator),
+    getSessionInfo: authenticator.getSessionInfo.bind(authenticator),
     getCurrentUser,
     createAPIKey: (request: KibanaRequest, params: CreateAPIKeyParams) =>
       apiKeys.create(request, params),
