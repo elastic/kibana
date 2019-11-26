@@ -33,7 +33,7 @@ interface Props {
   onSnapshotDeleted: (snapshotsDeleted: Array<{ snapshot: string; repository: string }>) => void;
 }
 
-const getLastSuccessfulManagedSnapshot = (snapshots: SnapshotDetails[]) => {
+const getLastSuccessfulManagedSnapshot = (snapshots: SnapshotDetails[]): SnapshotDetails | undefined => {
   const successfulSnapshots = snapshots
     .filter(
       ({ state, repository, managedRepository }) =>
