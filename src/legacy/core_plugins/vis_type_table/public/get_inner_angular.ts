@@ -79,6 +79,10 @@ function createLocalConfigModule(uiSettings: UiSettingsClientContract) {
           get: (value: string) => {
             return uiSettings ? uiSettings.get(value) : undefined;
           },
+          // set method is used in agg_table mocha test
+          set: (key: string, value: string) => {
+            return uiSettings ? uiSettings.set(key, value) : undefined;
+          },
         }),
       };
     });
