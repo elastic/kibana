@@ -20,6 +20,7 @@ import {
   InfraDatabaseMultiResponse,
   InfraDatabaseFieldCapsResponse,
   InfraDatabaseGetIndicesResponse,
+  InfraDatabaseGetIndicesAliasResponse,
 } from './adapter_types';
 import { TSVBMetricModel } from '../../../../common/inventory_models/types';
 import {
@@ -31,21 +32,6 @@ import {
 } from '../../../../../../../../src/core/server';
 import { RequestHandler } from '../../../../../../../../src/core/server';
 import { InfraConfig } from '../../../../../../../plugins/infra/server';
-
-// const anyObject = schema.object({}, { allowUnknowns: true });
-
-// type AnyObject = typeof anyObject;
-
-// interface BasicRoute<
-//   P extends ObjectType = AnyObject,
-//   Q extends ObjectType = AnyObject,
-//   B extends ObjectType = AnyObject
-// > {
-//   method: 'get' | 'put' | 'post' | 'delete';
-//   path: string;
-//   handler: RequestHandler<P, Q, B>;
-//   options?: any;
-// }
 
 export class KibanaFramework {
   public router: IRouter;
@@ -190,8 +176,13 @@ export class KibanaFramework {
   ): Promise<boolean>;
   callWithRequest(
     requestContext: RequestHandlerContext,
-    endpoint: 'indices.getAlias' | 'indices.get' | 'ml.getBuckets',
-    options?: CallWithRequestParams
+    method: 'indices.getAlias',
+    options?: object
+  ): Promise<InfraDatabaseGetIndicesAliasResponse>;
+  callWithRequest(
+    requestContext: RequestHandlerContext,
+    method: 'indices.get' | 'ml.getBuckets',
+    options?: object
   ): Promise<InfraDatabaseGetIndicesResponse>;
   callWithRequest(
     requestContext: RequestHandlerContext,

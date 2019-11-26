@@ -37,6 +37,7 @@ export interface CallWithRequestParams extends GenericParams {
   allow_no_indices?: boolean;
   size?: number;
   terminate_after?: number;
+  fields?: string;
 }
 
 export type InfraResponse = Lifecycle.ReturnValue;
