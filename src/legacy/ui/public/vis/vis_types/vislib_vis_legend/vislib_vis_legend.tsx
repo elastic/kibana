@@ -91,7 +91,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
     this.refresh();
   };
 
-  filter = ({ values: data }: LegendItem, negate: boolean) => () => {
+  filter = ({ values: data }: LegendItem, negate: boolean) => {
     this.props.vis.API.events.filter({ data, negate });
   };
 

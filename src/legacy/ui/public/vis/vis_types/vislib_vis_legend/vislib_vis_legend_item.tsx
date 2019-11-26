@@ -29,6 +29,8 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
   EuiPopoverProps,
+  EuiButtonGroup,
+  EuiButtonGroupOption,
 } from '@elastic/eui';
 
 import { legendColors, LegendItem } from './models';
@@ -39,7 +41,7 @@ interface Props {
   selected: boolean;
   canFilter: boolean;
   anchorPosition: EuiPopoverProps['anchorPosition'];
-  onFilter: (item: LegendItem, negate: boolean) => () => void;
+  onFilter: (item: LegendItem, negate: boolean) => void;
   onSelect: (label: string | null) => (event?: BaseSyntheticEvent) => void;
   onHighlight: (event: BaseSyntheticEvent) => void;
   onUnhighlight: (event: BaseSyntheticEvent) => void;
@@ -72,39 +74,44 @@ const VisLegendItemComponent = ({
     }
   };
 
+  const filterOptions: EuiButtonGroupOption[] = [
+    {
+      id: 'filterIn',
+      label: i18n.translate('common.ui.vis.visTypes.legend.filterForValueButtonAriaLabel', {
+        defaultMessage: 'Filter for value {legendDataLabel}',
+        values: { legendDataLabel: item.label },
+      }),
+      iconType: 'magnifyWithPlus',
+      'data-test-subj': `legend-${item.label}-filterIn`,
+    },
+    {
+      id: 'filterOut',
+      label: i18n.translate('common.ui.vis.visTypes.legend.filterOutValueButtonAriaLabel', {
+        defaultMessage: 'Filter out value {legendDataLabel}',
+        values: { legendDataLabel: item.label },
+      }),
+      iconType: 'magnifyWithMinus',
+      'data-test-subj': `legend-${item.label}-filterOut`,
+    },
+  ];
+
+  const handleFilterChange = (id: string) => {
+    onFilter(item, id !== 'filterIn');
+  };
+
   const renderFilterBar = () => (
     <>
-      <div className="kuiButtonGroup kuiButtonGroup--united kuiButtonGroup--fullWidth">
-        <button
-          className="visLegend__filterIn kuiButton kuiButton--basic kuiButton--small"
-          onClick={onFilter(item, false)}
-          aria-label={i18n.translate(
-            'common.ui.vis.visTypes.legend.filterForValueButtonAriaLabel',
-            {
-              defaultMessage: 'Filter for value {legendDataLabel}',
-              values: { legendDataLabel: item.label },
-            }
-          )}
-          data-test-subj={`legend-${item.label}-filterIn`}
-        >
-          <EuiIcon size="s" type="magnifyWithPlus" />
-        </button>
-
-        <button
-          className="visLegend__filterOut kuiButton kuiButton--basic kuiButton--small"
-          onClick={onFilter(item, true)}
-          aria-label={i18n.translate(
-            'common.ui.vis.visTypes.legend.filterOutValueButtonAriaLabel',
-            {
-              defaultMessage: 'Filter out value {legendDataLabel}',
-              values: { legendDataLabel: item.label },
-            }
-          )}
-          data-test-subj={`legend-${item.label}-filterOut`}
-        >
-          <EuiIcon size="s" type="magnifyWithMinus" />
-        </button>
-      </div>
+      <EuiButtonGroup
+        type="multi"
+        isIconOnly
+        isFullWidth
+        legend={i18n.translate('common.ui.vis.visTypes.legend.filterOptionsLegend', {
+          defaultMessage: '{legendDataLabel}, filter options',
+          values: { legendDataLabel: item.label },
+        })}
+        options={filterOptions}
+        onChange={handleFilterChange}
+      />
       <EuiSpacer size="m" />
     </>
   );
