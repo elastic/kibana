@@ -54,3 +54,4 @@ xpack.tilemap.enabled: false
 xpack.upgrade_assistant.enabled: false
 xpack.uptime.enabled: false
 xpack.watcher.enabled: false
+logging.verbose: true

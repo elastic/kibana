@@ -79,13 +79,6 @@ pipeline {
           sh script: "${CYPRESS_DIR}/ci/prepare-kibana.sh"
         }
       }
-      post {
-        always {
-          dir("${BASE_DIR}"){
-            archiveArtifacts(allowEmptyArchive: true, artifacts: "${CYPRESS_DIR}/ingest-data.log,kibana.log")
-          }
-        }
-      }
     }
     stage('Smoke Tests'){
       options { skipDefaultCheckout() }
@@ -98,6 +91,7 @@ pipeline {
       steps{
         dir("${BASE_DIR}"){
           sh '''
+            jobs -l
             docker build --tag cypress ${CYPRESS_DIR}/ci
             docker run --rm -t --user "$(id -u):$(id -g)" \
                     -v `pwd`:/app --network="host" \
@@ -116,6 +110,13 @@ pipeline {
             archiveArtifacts(allowEmptyArchive: false, artifacts: 'apm-its.log')
           }
         }
+      }
+    }
+  }
+  post {
+    always {
+      dir("${BASE_DIR}"){
+        archiveArtifacts(allowEmptyArchive: true, artifacts: "${CYPRESS_DIR}/ingest-data.log,kibana.log")
       }
     }
   }
