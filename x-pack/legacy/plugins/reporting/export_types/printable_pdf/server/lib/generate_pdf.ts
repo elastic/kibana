@@ -11,7 +11,6 @@ import { LevelLogger } from '../../../../server/lib';
 import { ServerFacade, ConditionalHeaders } from '../../../../types';
 // @ts-ignore untyped module
 import { pdf } from './pdf';
-import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
 import { createLayout } from '../../../common/layouts';
 import { TimeRange } from '../../../common/lib/screenshots/types';
@@ -38,7 +37,7 @@ const getTimeRange = (urlScreenshots: UrlScreenshot[]) => {
   return null;
 };
 
-function generatePdfObservableFn(server: ServerFacade) {
+export function generatePdfObservableFactory(server: ServerFacade) {
   const screenshotsObservable = screenshotsObservableFactory(server);
   const captureConcurrency = 1;
 
@@ -87,5 +86,3 @@ function generatePdfObservableFn(server: ServerFacade) {
     );
   };
 }
-
-export const generatePdfObservableFactory = oncePerServer(generatePdfObservableFn);
