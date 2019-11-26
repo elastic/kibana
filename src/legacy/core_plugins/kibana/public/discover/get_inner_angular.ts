@@ -200,7 +200,7 @@ export function createLocalGlobalStateModule() {
       'discoverKbnUrl',
       'discoverPromise',
     ])
-    .service('globalState', function(Private: any) {
+    .service('globalState', function(Private: IPrivate) {
       return Private(GlobalStateProvider);
     });
 }
@@ -272,7 +272,7 @@ function createLocalAppStateModule() {
       'discoverKbnUrl',
       'discoverPromise',
     ])
-    .service('AppState', function(Private: any) {
+    .service('AppState', function(Private: IPrivate) {
       return Private(AppStateProvider);
     })
     .service('getAppState', function(Private: any) {
