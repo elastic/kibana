@@ -17,7 +17,6 @@
  * under the License.
  */
 
-// @ts-ignore
 import memoizeIntlConstructor from 'intl-format-cache';
 import IntlMessageFormat from 'intl-messageformat';
 import IntlRelativeFormat from 'intl-relativeformat';
@@ -39,7 +38,6 @@ let currentLocale = EN_LOCALE;
 let formats = EN_FORMATS;
 
 IntlMessageFormat.defaultLocale = defaultLocale;
-// @ts-ignore
 IntlRelativeFormat.defaultLocale = defaultLocale;
 
 /**
@@ -125,7 +123,6 @@ export function setDefaultLocale(locale: string) {
 
   defaultLocale = normalizeLocale(locale);
   IntlMessageFormat.defaultLocale = defaultLocale;
-  // @ts-ignore
   IntlRelativeFormat.defaultLocale = defaultLocale;
 }
 
