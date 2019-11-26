@@ -30,7 +30,7 @@ xpack.beats.enabled: false
 xpack.canvas.enabled: false
 xpack.cloud.enabled: false
 xpack.code.enabled: false
-xpack.encrypted_saved_objects.enabled: false
+xpack.encryptedSavedObjects.enabled: false
 xpack.graph.enabled: false
 xpack.grokdebugger.enabled: false
 xpack.index_management.enabled: false
