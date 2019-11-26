@@ -19,6 +19,4 @@
 
 export { SuggestionsComponent } from './typeahead/suggestions_component';
 export { FilterBar } from './filter_bar';
-
 export { applyFiltersPopover } from './apply_filters';
-
