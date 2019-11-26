@@ -5,7 +5,12 @@
  */
 
 import { createRulesSchema, updateRulesSchema, findRulesSchema, queryRulesSchema } from './schemas';
-import { RuleAlertParamsRest, FindParamsRest, UpdateRuleAlertParamsRest } from '../alerts/types';
+import {
+  RuleAlertParamsRest,
+  FindParamsRest,
+  UpdateRuleAlertParamsRest,
+  ThreatParams,
+} from '../alerts/types';
 
 describe('schemas', () => {
   describe('create rules schema', () => {
@@ -237,6 +242,39 @@ describe('schemas', () => {
           interval: '5m',
           type: 'filter',
           filter: {},
+        }).error
+      ).toBeFalsy();
+    });
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index, threats] does validate', () => {
+      expect(
+        createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'filter',
+          filter: {},
+          threats: [
+            {
+              framework: 'someFramework',
+              tactic: {
+                id: 'fakeId',
+                name: 'fakeName',
+                reference: 'fakeRef',
+              },
+              technique: {
+                id: 'techniqueId',
+                name: 'techniqueName',
+                reference: 'techniqueRef',
+              },
+            },
+          ],
         }).error
       ).toBeFalsy();
     });
@@ -733,6 +771,115 @@ describe('schemas', () => {
             tags: [0, 1, 2],
           }
         ).error
+      ).toBeTruthy();
+    });
+    test('You cannot send in an array of threats that are missing "framework"', () => {
+      expect(
+        createRulesSchema.validate<
+          Partial<Omit<RuleAlertParamsRest, 'threats'>> & {
+            threats: Array<Partial<Omit<ThreatParams, 'framework'>>>;
+          }
+        >({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          threats: [
+            {
+              tactic: {
+                id: 'fakeId',
+                name: 'fakeName',
+                reference: 'fakeRef',
+              },
+              technique: {
+                id: 'techniqueId',
+                name: 'techniqueName',
+                reference: 'techniqueRef',
+              },
+            },
+          ],
+        }).error
+      ).toBeTruthy();
+    });
+    test('You cannot send in an array of threats that are missing "tactic"', () => {
+      expect(
+        createRulesSchema.validate<
+          Partial<Omit<RuleAlertParamsRest, 'threats'>> & {
+            threats: Array<Partial<Omit<ThreatParams, 'tactic'>>>;
+          }
+        >({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          threats: [
+            {
+              framework: 'fake',
+              technique: {
+                id: 'techniqueId',
+                name: 'techniqueName',
+                reference: 'techniqueRef',
+              },
+            },
+          ],
+        }).error
+      ).toBeTruthy();
+    });
+    test('You cannot send in an array of threats that are missing "techniques"', () => {
+      expect(
+        createRulesSchema.validate<
+          Partial<Omit<RuleAlertParamsRest, 'threats'>> & {
+            threats: Array<Partial<Omit<ThreatParams, 'technique'>>>;
+          }
+        >({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          threats: [
+            {
+              framework: 'fake',
+              tactic: {
+                id: 'fakeId',
+                name: 'fakeName',
+                reference: 'fakeRef',
+              },
+            },
+          ],
+        }).error
       ).toBeTruthy();
     });
 
