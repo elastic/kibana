@@ -50,33 +50,13 @@ export async function getObjects(
   return Array.from(objects.values());
 }
 
-// the assets from the registry are malformed
-// https://github.com/elastic/package-registry/issues/42
-function ensureJsonValues(obj: SavedObjectToBe) {
-  const { attributes } = obj;
-  if (
-    attributes.kibanaSavedObjectMeta &&
-    typeof attributes.kibanaSavedObjectMeta.searchSourceJSON !== 'string'
-  ) {
-    attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(
-      attributes.kibanaSavedObjectMeta.searchSourceJSON
-    );
-  }
-
-  ['optionsJSON', 'panelsJSON', 'uiStateJSON', 'visState']
-    .filter(key => typeof attributes[key] !== 'string')
-    .forEach(key => (attributes[key] = JSON.stringify(attributes[key])));
-
-  return obj;
-}
-
 function getObject(key: string) {
   const buffer = Registry.getAsset(key);
 
   // cache values are buffers. convert to string / JSON
   const json = buffer.toString('utf8');
   // convert that to an object & address issues with the formatting of some parts
-  const asset: ArchiveAsset = ensureJsonValues(JSON.parse(json));
+  const asset: ArchiveAsset = JSON.parse(json);
 
   const { type, file } = Registry.pathParts(key);
   const savedObject: SavedObjectToBe = {

@@ -20,6 +20,7 @@ import { AgentEvent, AgentEventsRepository } from '../repositories/agent_events/
 import { AgentPolicy } from '../repositories/policies/types';
 import { ApiKeyLib } from './api_keys';
 import { PolicyLib } from './policy';
+import { AgentStatusHelper } from './agent_status_helper';
 
 export class AgentLib {
   constructor(
@@ -271,10 +272,33 @@ export class AgentLib {
     return action;
   }
 
+  public async getAgentsStatusForPolicy(user: FrameworkUser, policyId: string) {
+    const [all, error, offline] = await Promise.all(
+      [
+        undefined,
+        AgentStatusHelper.buildKueryForErrorAgents(),
+        AgentStatusHelper.buildKueryForOfflineAgents(),
+      ].map(kuery => {
+        return this.agentsRepository.listForPolicy(user, policyId, {
+          perPage: 0,
+          kuery,
+        });
+      })
+    );
+
+    return {
+      total: all.total,
+      online: all.total - error.total - offline.total,
+      error: error.total,
+      offline: offline.total,
+    };
+  }
+
   /**
    * List agents
    *
    * @param sortOptions
+   *
    * @param page
    * @param perPage
    */
