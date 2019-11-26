@@ -46,10 +46,10 @@ export class Plugin {
   }
 
   public start() {
-    this.logger.info('Starting plugin');
+    this.logger.debug('Starting plugin');
   }
 
   public stop() {
-    this.logger.info('Stopping plugin');
+    this.logger.debug('Stopping plugin');
   }
 }
