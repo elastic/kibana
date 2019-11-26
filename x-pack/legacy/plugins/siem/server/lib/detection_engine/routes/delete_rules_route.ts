@@ -50,6 +50,6 @@ export const createDeleteRulesRoute: Hapi.ServerRoute = {
   },
 };
 
-export const deleteRulesRoute = (server: ServerFacade): void => {
-  server.route(createDeleteRulesRoute);
+export const deleteRulesRoute = ({ route }: Pick<ServerFacade, 'route'>): void => {
+  route(createDeleteRulesRoute);
 };

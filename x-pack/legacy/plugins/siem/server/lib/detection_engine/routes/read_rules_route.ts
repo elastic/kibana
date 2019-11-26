@@ -47,6 +47,6 @@ export const createReadRulesRoute: Hapi.ServerRoute = {
   },
 };
 
-export const readRulesRoute = (server: ServerFacade) => {
-  server.route(createReadRulesRoute);
+export const readRulesRoute = ({ route }: Pick<ServerFacade, 'route'>) => {
+  route(createReadRulesRoute);
 };

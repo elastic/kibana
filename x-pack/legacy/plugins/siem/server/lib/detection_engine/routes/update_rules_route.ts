@@ -96,6 +96,6 @@ export const createUpdateRulesRoute: Hapi.ServerRoute = {
   },
 };
 
-export const updateRulesRoute = (server: ServerFacade) => {
-  server.route(createUpdateRulesRoute);
+export const updateRulesRoute = ({ route }: Pick<ServerFacade, 'route'>) => {
+  route(createUpdateRulesRoute);
 };

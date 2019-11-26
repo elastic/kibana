@@ -10,7 +10,7 @@ import { runHttpQuery } from 'apollo-server-core';
 import { schema as configSchema } from '@kbn/config-schema';
 import { CoreSetup, IRouter, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
 import { IndexPatternsFetcher } from '../../../../../../../src/plugins/data/server';
-import { ServerFacade, RequestFacade } from '../../types';
+import { RequestFacade } from '../../types';
 
 import {
   FrameworkAdapter,
@@ -25,8 +25,8 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   private isProductionMode: boolean;
   private router: IRouter;
 
-  constructor(core: CoreSetup, __legacy: ServerFacade) {
-    this.version = __legacy.config().get('pkg.version');
+  constructor(core: CoreSetup, version: string) {
+    this.version = version;
     this.isProductionMode = process.env.NODE_ENV === 'production';
     this.router = core.http.createRouter();
   }

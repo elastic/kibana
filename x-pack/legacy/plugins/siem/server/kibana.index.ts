@@ -26,36 +26,40 @@ import { ServerFacade } from './types';
 
 const APP_ID = 'siem';
 
-export const initServerWithKibana = (core: CoreSetup, kbnServer: ServerFacade, logger: Logger) => {
-  if (kbnServer.plugins.alerting != null) {
-    const version = kbnServer.config().get<string>('pkg.version');
+export const initServerWithKibana = (
+  core: CoreSetup,
+  { config, plugins: { alerting, xpack_main }, route }: ServerFacade,
+  logger: Logger
+) => {
+  const version = config().get<string>('pkg.version');
+
+  if (alerting != null) {
     const type = rulesAlertType({ logger, version });
     if (isAlertExecutor(type)) {
-      kbnServer.plugins.alerting.setup.registerType(type);
+      alerting.setup.registerType(type);
     }
   }
 
-  const libs = compose(core, kbnServer);
+  const libs = compose(core, config, version);
   initServer(libs);
 
   if (
-    kbnServer.config().has('xpack.actions.enabled') &&
-    kbnServer.config().get('xpack.actions.enabled') === true &&
-    kbnServer.config().has('xpack.alerting.enabled') &&
-    kbnServer.config().get('xpack.alerting.enabled') === true
+    config().has('xpack.actions.enabled') &&
+    config().get('xpack.actions.enabled') === true &&
+    config().has('xpack.alerting.enabled') &&
+    config().get('xpack.alerting.enabled') === true
   ) {
     logger.info(
       'Detected feature flags for actions and alerting and enabling detection engine API endpoints'
     );
-    createRulesRoute(kbnServer);
-    readRulesRoute(kbnServer);
-    updateRulesRoute(kbnServer);
-    deleteRulesRoute(kbnServer);
-    findRulesRoute(kbnServer);
+    createRulesRoute({ route });
+    readRulesRoute({ route });
+    updateRulesRoute({ route });
+    deleteRulesRoute({ route });
+    findRulesRoute({ route });
   }
 
-  const xpackMainPlugin = kbnServer.plugins.xpack_main;
-  xpackMainPlugin.registerFeature({
+  xpack_main.registerFeature({
     id: APP_ID,
     name: i18n.translate('xpack.siem.featureRegistry.linkSiemTitle', {
       defaultMessage: 'SIEM',

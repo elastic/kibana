@@ -5,7 +5,7 @@
  */
 
 import { CoreSetup } from 'src/core/server';
-import { ServerFacade } from '../../types';
+import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { Anomalies } from '../anomalies';
 import { ElasticsearchAnomaliesAdapter } from '../anomalies/elasticsearch_adapter';
 import { Authentications } from '../authentications';
@@ -34,9 +34,13 @@ import { Note } from '../note/saved_object';
 import { PinnedEvent } from '../pinned_event/saved_object';
 import { Timeline } from '../timeline/saved_object';
 
-export function compose(core: CoreSetup, server: ServerFacade): AppBackendLibs {
-  const configuration = new KibanaConfigurationAdapter<Configuration>(server);
-  const framework = new KibanaBackendFrameworkAdapter(core, server);
+export function compose(
+  core: CoreSetup,
+  config: () => KibanaConfig,
+  version: string
+): AppBackendLibs {
+  const configuration = new KibanaConfigurationAdapter<Configuration>({ config });
+  const framework = new KibanaBackendFrameworkAdapter(core, version);
   const sources = new Sources(new ConfigurationSourcesAdapter(configuration));
   const sourceStatus = new SourceStatus(new ElasticsearchSourceStatusAdapter(framework));
 
