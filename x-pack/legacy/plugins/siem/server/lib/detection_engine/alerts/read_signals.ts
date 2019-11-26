@@ -14,7 +14,7 @@ export const findSignalInArrayByRuleId = (
   if (isAlertTypeArray(objects)) {
     const signals: SignalAlertType[] = objects;
     const signal: SignalAlertType[] = signals.filter(datum => {
-      return datum.alertTypeParams.ruleId === ruleId;
+      return datum.params.ruleId === ruleId;
     });
     if (signal.length !== 0) {
       return signal[0];

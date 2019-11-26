@@ -49,3 +49,5 @@ export {
   NoDefaultIndexPattern,
   NoDefinedIndexPatterns,
 } from './index_patterns';
+
+export * from './ui';
