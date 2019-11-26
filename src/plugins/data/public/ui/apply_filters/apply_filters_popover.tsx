@@ -17,4 +17,25 @@
  * under the License.
  */
 
-export { ApplyFiltersPopover } from './apply_filters_popover';
+import React from 'react';
+import { ApplyFiltersPopoverContent } from './apply_filter_popover_content';
+import { IIndexPattern, esFilters } from '../..';
+
+type CancelFnType = () => void;
+type SubmitFnType = (filters: esFilters.Filter[]) => void;
+
+export const applyFiltersPopover = (
+  filters: esFilters.Filter[],
+  indexPatterns: IIndexPattern[],
+  onCancel: CancelFnType,
+  onSubmit: SubmitFnType
+) => {
+  return (
+    <ApplyFiltersPopoverContent
+      indexPatterns={indexPatterns}
+      filters={filters}
+      onCancel={onCancel}
+      onSubmit={onSubmit}
+    />
+  );
+};
