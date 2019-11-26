@@ -89,7 +89,7 @@ export const getRowItemDraggables = ({
 }): JSX.Element => {
   if (rowItems != null && rowItems.length > 0) {
     const draggables = rowItems.slice(0, displayCount).map((rowItem, index) => {
-      const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}`);
+      const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}-${index}`);
       return (
         <React.Fragment key={id}>
           {index !== 0 && (

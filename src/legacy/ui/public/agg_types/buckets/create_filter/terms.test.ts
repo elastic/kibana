@@ -16,10 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ExistsFilter, Filter } from '@kbn/es-query';
+
 import { createFilterTerms } from './terms';
 import { AggConfigs } from '../../agg_configs';
 import { BUCKET_TYPES } from '../bucket_agg_types';
+import { esFilters } from '../../../../../../plugins/data/public';
 
 jest.mock('ui/new_platform');
 
@@ -48,7 +49,7 @@ describe('AggConfig Filters', () => {
         { type: BUCKET_TYPES.TERMS, schema: 'segment', params: { field: 'field' } },
       ]);
 
-      const filter = createFilterTerms(aggConfigs.aggs[0], 'apache', {}) as Filter;
+      const filter = createFilterTerms(aggConfigs.aggs[0], 'apache', {}) as esFilters.Filter;
 
       expect(filter).toHaveProperty('query');
       expect(filter.query).toHaveProperty('match_phrase');
@@ -63,14 +64,14 @@ describe('AggConfig Filters', () => {
         { type: BUCKET_TYPES.TERMS, schema: 'segment', params: { field: 'field' } },
       ]);
 
-      const filterFalse = createFilterTerms(aggConfigs.aggs[0], '', {}) as Filter;
+      const filterFalse = createFilterTerms(aggConfigs.aggs[0], '', {}) as esFilters.Filter;
 
       expect(filterFalse).toHaveProperty('query');
       expect(filterFalse.query).toHaveProperty('match_phrase');
       expect(filterFalse.query.match_phrase).toHaveProperty('field');
       expect(filterFalse.query.match_phrase.field).toBeFalsy();
 
-      const filterTrue = createFilterTerms(aggConfigs.aggs[0], '1', {}) as Filter;
+      const filterTrue = createFilterTerms(aggConfigs.aggs[0], '1', {}) as esFilters.Filter;
 
       expect(filterTrue).toHaveProperty('query');
       expect(filterTrue.query).toHaveProperty('match_phrase');
@@ -82,7 +83,11 @@ describe('AggConfig Filters', () => {
       const aggConfigs = getAggConfigs([
         { type: BUCKET_TYPES.TERMS, schema: 'segment', params: { field: 'field' } },
       ]);
-      const filter = createFilterTerms(aggConfigs.aggs[0], '__missing__', {}) as ExistsFilter;
+      const filter = createFilterTerms(
+        aggConfigs.aggs[0],
+        '__missing__',
+        {}
+      ) as esFilters.ExistsFilter;
 
       expect(filter).toHaveProperty('exists');
       expect(filter.exists).toHaveProperty('field', 'field');
@@ -98,7 +103,7 @@ describe('AggConfig Filters', () => {
 
       const [filter] = createFilterTerms(aggConfigs.aggs[0], '__other__', {
         terms: ['apache'],
-      }) as Filter[];
+      }) as esFilters.Filter[];
 
       expect(filter).toHaveProperty('query');
       expect(filter.query).toHaveProperty('bool');

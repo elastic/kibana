@@ -577,45 +577,6 @@ test('exposes route details of incoming request to a route handler', async () =>
     });
 });
 
-describe('conditional compression', () => {
-  test('disables compression when there is a referer', async () => {
-    const { registerRouter, server: innerServer } = await server.setup(config);
-
-    const router = new Router('', logger, enhanceWithContext);
-    router.get({ path: '/', validate: false }, (context, req, res) =>
-      // we need the large body here so that compression would normally be used
-      res.ok({ body: 'hello'.repeat(500), headers: { 'Content-Type': 'text/html; charset=UTF-8' } })
-    );
-    registerRouter(router);
-
-    await server.start();
-    const response = await supertest(innerServer.listener)
-      .get('/')
-      .set('accept-encoding', 'gzip')
-      .set('referer', 'http://some-other-site/');
-
-    expect(response.header).not.toHaveProperty('content-encoding');
-  });
-
-  test(`enables compression when there isn't a referer`, async () => {
-    const { registerRouter, server: innerServer } = await server.setup(config);
-
-    const router = new Router('', logger, enhanceWithContext);
-    router.get({ path: '/', validate: false }, (context, req, res) =>
-      // we need the large body here so that compression will be used
-      res.ok({ body: 'hello'.repeat(500), headers: { 'Content-Type': 'text/html; charset=UTF-8' } })
-    );
-    registerRouter(router);
-
-    await server.start();
-    const response = await supertest(innerServer.listener)
-      .get('/')
-      .set('accept-encoding', 'gzip');
-
-    expect(response.header).toHaveProperty('content-encoding', 'gzip');
-  });
-});
-
 describe('setup contract', () => {
   describe('#createSessionStorage', () => {
     it('creates session storage factory', async () => {

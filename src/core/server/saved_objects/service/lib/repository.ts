@@ -246,15 +246,17 @@ export class SavedObjectsRepository {
       const expectedResult = {
         esRequestIndex: requestIndexCounter++,
         requestedId: object.id,
-        rawMigratedDoc: this._serializer.savedObjectToRaw(this._migrator.migrateDocument({
-          id: object.id,
-          type: object.type,
-          attributes: object.attributes,
-          migrationVersion: object.migrationVersion,
-          namespace,
-          updated_at: time,
-          references: object.references || [],
-        }) as SanitizedSavedObjectDoc),
+        rawMigratedDoc: this._serializer.savedObjectToRaw(
+          this._migrator.migrateDocument({
+            id: object.id,
+            type: object.type,
+            attributes: object.attributes,
+            migrationVersion: object.migrationVersion,
+            namespace,
+            updated_at: time,
+            references: object.references || [],
+          }) as SanitizedSavedObjectDoc
+        ),
       };
 
       bulkCreateParams.push(
@@ -446,11 +448,11 @@ export class SavedObjectsRepository {
     }
 
     let kueryNode;
+
     try {
-      kueryNode =
-        filter && filter !== ''
-          ? validateConvertFilterToKueryNode(allowedTypes, filter, this._mappings)
-          : null;
+      if (filter) {
+        kueryNode = validateConvertFilterToKueryNode(allowedTypes, filter, this._mappings);
+      }
     } catch (e) {
       if (e.name === 'KQLSyntaxError') {
         throw SavedObjectsErrorHelpers.createBadRequestError('KQLSyntaxError: ' + e.message);

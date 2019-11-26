@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import http from 'http';
+import http, { ClientRequest } from 'http';
 import * as sinon from 'sinon';
 import { sendRequest } from './request';
 import { URL } from 'url';
@@ -24,7 +24,7 @@ import { fail } from 'assert';
 
 describe(`Console's send request`, () => {
   let sandbox: sinon.SinonSandbox;
-  let stub: sinon.SinonStub;
+  let stub: sinon.SinonStub<Parameters<typeof http['request']>, ClientRequest>;
   let fakeRequest: http.ClientRequest;
 
   beforeEach(() => {

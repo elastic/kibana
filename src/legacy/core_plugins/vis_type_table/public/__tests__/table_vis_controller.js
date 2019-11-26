@@ -21,7 +21,7 @@ import $ from 'jquery';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
-import { VisProvider } from 'ui/vis';
+import { Vis } from 'ui/vis';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { AppStateProvider } from 'ui/state_management/app_state';
@@ -36,7 +36,6 @@ describe('Table Vis - Controller', async function () {
   let Private;
   let $scope;
   let $el;
-  let Vis;
   let fixtures;
   let AppState;
   let tableAggResponse;
@@ -63,7 +62,6 @@ describe('Table Vis - Controller', async function () {
       $compile = $injector.get('$compile');
       fixtures = require('fixtures/fake_hierarchical_data');
       AppState = Private(AppStateProvider);
-      Vis = Private(VisProvider);
       tableAggResponse = legacyResponseHandlerProvider().handler;
     })
   );

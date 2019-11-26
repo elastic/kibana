@@ -115,13 +115,10 @@ export class FrameworkFieldsAdapter implements FieldsAdapter {
       handleAfterKey
     );
     const dataSets = buckets.map(bucket => bucket.key.dataset);
-    const modules = dataSets.reduce(
-      (acc, dataset) => {
-        const module = first(dataset.split(/\./));
-        return module ? uniq([...acc, module]) : acc;
-      },
-      [] as string[]
-    );
+    const modules = dataSets.reduce((acc, dataset) => {
+      const module = first(dataset.split(/\./));
+      return module ? uniq([...acc, module]) : acc;
+    }, [] as string[]);
     return { modules, dataSets };
   }
 }

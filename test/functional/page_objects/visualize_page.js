@@ -372,6 +372,28 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       }
     }
 
+    async isSwitchChecked(selector) {
+      const checkbox = await testSubjects.find(selector);
+      const isChecked = await checkbox.getAttribute('aria-checked');
+      return isChecked === 'true';
+    }
+
+    async checkSwitch(selector) {
+      const isChecked = await this.isSwitchChecked(selector);
+      if (!isChecked) {
+        log.debug(`checking switch ${selector}`);
+        await testSubjects.click(selector);
+      }
+    }
+
+    async uncheckSwitch(selector) {
+      const isChecked = await this.isSwitchChecked(selector);
+      if (isChecked) {
+        log.debug(`unchecking switch ${selector}`);
+        await testSubjects.click(selector);
+      }
+    }
+
     async setSelectByOptionText(selectId, optionText) {
       const selectField = await find.byCssSelector(`#${selectId}`);
       const options = await find.allByCssSelector(`#${selectId} > option`);
@@ -1005,6 +1027,16 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async toggleIsFilteredByCollarCheckbox() {
       await testSubjects.click('isFilteredByCollarCheckbox');
+    }
+
+    async setIsFilteredByCollarCheckbox(value = true) {
+      await retry.try(async () => {
+        const isChecked = await this.isSwitchChecked('isFilteredByCollarCheckbox');
+        if (isChecked !== value) {
+          await testSubjects.click('isFilteredByCollarCheckbox');
+          throw new Error('isFilteredByCollar not set correctly');
+        }
+      });
     }
 
     async getMarkdownData() {

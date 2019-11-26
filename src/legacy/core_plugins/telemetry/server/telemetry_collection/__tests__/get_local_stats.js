@@ -26,7 +26,6 @@ import { mockGetClusterStats } from './get_cluster_stats';
 import { omit } from 'lodash';
 import {
   getLocalStats,
-  getLocalStatsWithCaller,
   handleLocalStats,
 } from '../get_local_stats';
 
@@ -153,7 +152,7 @@ describe('get_local_stats', () => {
     });
   });
 
-  describe('getLocalStatsWithCaller', () => {
+  describe.skip('getLocalStats', () => {
     it('returns expected object without xpack data when X-Pack fails to respond', async () => {
       const callClusterUsageFailed = sinon.stub();
 
@@ -162,8 +161,10 @@ describe('get_local_stats', () => {
         Promise.resolve(clusterInfo),
         Promise.resolve(clusterStats),
       );
-
-      const result = await getLocalStatsWithCaller(getMockServer(), callClusterUsageFailed);
+      const result = await getLocalStats({
+        server: getMockServer(),
+        callCluster: callClusterUsageFailed,
+      });
       expect(result.cluster_uuid).to.eql(combinedStatsResult.cluster_uuid);
       expect(result.cluster_name).to.eql(combinedStatsResult.cluster_name);
       expect(result.cluster_stats).to.eql(combinedStatsResult.cluster_stats);
@@ -184,51 +185,13 @@ describe('get_local_stats', () => {
         Promise.resolve(clusterStats),
       );
 
-      const result = await getLocalStatsWithCaller(getMockServer(callCluster, kibana), callCluster);
+      const result = await getLocalStats({
+        server: getMockServer(callCluster, kibana),
+        callCluster,
+      });
+
       expect(result.stack_stats.xpack).to.eql(combinedStatsResult.stack_stats.xpack);
       expect(result.stack_stats.kibana).to.eql(combinedStatsResult.stack_stats.kibana);
-    });
-  });
-
-  describe('getLocalStats', () => {
-    it('uses callWithInternalUser from data cluster', async () => {
-      const getCluster = sinon.stub();
-      const req = { server: getMockServer(getCluster) };
-      const callWithInternalUser = sinon.stub();
-
-      getCluster.withArgs('data').returns({ callWithInternalUser });
-
-      mockGetLocalStats(
-        callWithInternalUser,
-        Promise.resolve(clusterInfo),
-        Promise.resolve(clusterStats),
-      );
-
-      const result = await getLocalStats(req, { useInternalUser: true });
-      expect(result.cluster_uuid).to.eql(combinedStatsResult.cluster_uuid);
-      expect(result.cluster_name).to.eql(combinedStatsResult.cluster_name);
-      expect(result.version).to.eql(combinedStatsResult.version);
-      expect(result.cluster_stats).to.eql(combinedStatsResult.cluster_stats);
-    });
-    it('uses callWithRequest from data cluster', async () => {
-      const getCluster = sinon.stub();
-      const req = { server: getMockServer(getCluster) };
-      const callWithRequest = sinon.stub();
-
-      getCluster.withArgs('data').returns({ callWithRequest });
-
-      mockGetLocalStats(
-        callWithRequest,
-        Promise.resolve(clusterInfo),
-        Promise.resolve(clusterStats),
-        req
-      );
-
-      const result = await getLocalStats(req, { useInternalUser: false });
-      expect(result.cluster_uuid).to.eql(combinedStatsResult.cluster_uuid);
-      expect(result.cluster_name).to.eql(combinedStatsResult.cluster_name);
-      expect(result.version).to.eql(combinedStatsResult.version);
-      expect(result.cluster_stats).to.eql(combinedStatsResult.cluster_stats);
     });
   });
 });

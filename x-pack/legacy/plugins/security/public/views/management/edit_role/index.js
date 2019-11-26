@@ -88,7 +88,7 @@ const routeDefinition = (action) => ({
       return kfetch({ method: 'get', pathname: '/api/security/privileges', query: { includeActions: true } });
     },
     builtinESPrivileges() {
-      return kfetch({ method: 'get', pathname: '/api/security/v1/esPrivileges/builtin' });
+      return kfetch({ method: 'get', pathname: '/internal/security/esPrivileges/builtin' });
     },
     features() {
       return kfetch({ method: 'get', pathname: '/api/features' }).catch(e => {

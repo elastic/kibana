@@ -29,11 +29,10 @@ export default function ({ getService, getPageObjects }) {
   const visualTesting = getService('visualTesting');
   const defaultSettings = {
     defaultIndex: 'logstash-*',
+    'discover:sampleSize': 1
   };
 
   describe('discover', function describeIndexTests() {
-    const fromTime = '2015-09-19 06:31:44.000';
-    const toTime = '2015-09-23 18:31:44.000';
 
     before(async function () {
       log.debug('load kibana index with default index pattern');
@@ -44,7 +43,7 @@ export default function ({ getService, getPageObjects }) {
       await kibanaServer.uiSettings.replace(defaultSettings);
       log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     describe('query', function () {
@@ -131,7 +130,7 @@ export default function ({ getService, getPageObjects }) {
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
         await browser.refresh();
         await PageObjects.header.awaitKibanaChrome();
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await visualTesting.snapshot({

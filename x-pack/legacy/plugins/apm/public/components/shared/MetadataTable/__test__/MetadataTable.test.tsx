@@ -21,7 +21,10 @@ describe('MetadataTable', () => {
         label: 'Bar',
         required: false,
         properties: ['props.A', 'props.B'],
-        rows: [{ key: 'props.A', value: 'A' }, { key: 'props.B', value: 'B' }]
+        rows: [
+          { key: 'props.A', value: 'A' },
+          { key: 'props.B', value: 'B' }
+        ]
       }
     ] as unknown) as SectionsWithRows;
     const output = render(<MetadataTable sections={sectionsWithRows} />);

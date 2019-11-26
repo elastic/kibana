@@ -6,7 +6,6 @@
 
 // legacy imports currently necessary to power Graph
 // for a cutover all of these have to be resolved
-import 'uiExports/fieldFormats';
 import 'uiExports/savedObjectTypes';
 import 'uiExports/autocompleteProviders';
 import 'ui/autoload/all';
@@ -20,6 +19,7 @@ import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_regis
 import { npSetup, npStart } from 'ui/new_platform';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { start as data } from '../../../../../src/legacy/core_plugins/data/public/legacy';
+import { start as navigation } from '../../../../../src/legacy/core_plugins/navigation/public/legacy';
 import { GraphPlugin } from './plugin';
 
 // @ts-ignore
@@ -36,7 +36,6 @@ async function getAngularInjectedDependencies(): Promise<LegacyAngularInjectedDe
   const Private = injector.get<IPrivate>('Private');
 
   return {
-    $http: injector.get('$http'),
     savedObjectRegistry: Private(SavedObjectRegistryProvider),
     kbnBaseUrl: injector.get('kbnBaseUrl'),
     savedGraphWorkspaces: Private(SavedWorkspacesProvider),
@@ -54,6 +53,7 @@ async function getAngularInjectedDependencies(): Promise<LegacyAngularInjectedDe
   instance.start(npStart.core, {
     data,
     npData: npStart.plugins.data,
+    navigation,
     __LEGACY: {
       angularDependencies: await getAngularInjectedDependencies(),
     },

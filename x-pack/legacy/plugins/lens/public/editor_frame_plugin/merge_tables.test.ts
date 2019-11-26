@@ -5,20 +5,32 @@
  */
 
 import { mergeTables } from './merge_tables';
-import { KibanaDatatable } from 'src/legacy/core_plugins/interpreter/public';
+import { KibanaDatatable } from 'src/plugins/expressions/public';
 
 describe('lens_merge_tables', () => {
   it('should produce a row with the nested table as defined', () => {
     const sampleTable1: KibanaDatatable = {
       type: 'kibana_datatable',
-      columns: [{ id: 'bucket', name: 'A' }, { id: 'count', name: 'Count' }],
-      rows: [{ bucket: 'a', count: 5 }, { bucket: 'b', count: 10 }],
+      columns: [
+        { id: 'bucket', name: 'A' },
+        { id: 'count', name: 'Count' },
+      ],
+      rows: [
+        { bucket: 'a', count: 5 },
+        { bucket: 'b', count: 10 },
+      ],
     };
 
     const sampleTable2: KibanaDatatable = {
       type: 'kibana_datatable',
-      columns: [{ id: 'bucket', name: 'C' }, { id: 'avg', name: 'Average' }],
-      rows: [{ bucket: 'a', avg: 2.5 }, { bucket: 'b', avg: 9 }],
+      columns: [
+        { id: 'bucket', name: 'C' },
+        { id: 'avg', name: 'Average' },
+      ],
+      rows: [
+        { bucket: 'a', avg: 2.5 },
+        { bucket: 'b', avg: 9 },
+      ],
     };
 
     expect(

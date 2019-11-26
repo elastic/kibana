@@ -185,10 +185,7 @@ const makeMapStateToProps = () => {
 };
 
 export const NetworkTopCountriesTable = compose<React.ComponentClass<OwnProps>>(
-  connect(
-    makeMapStateToProps,
-    {
-      updateNetworkTable: networkActions.updateNetworkTable,
-    }
-  )
+  connect(makeMapStateToProps, {
+    updateNetworkTable: networkActions.updateNetworkTable,
+  })
 )(NetworkTopCountriesTableComponent);

@@ -35,7 +35,10 @@ describe('NumberList utils', () => {
   let range: Range;
 
   beforeEach(() => {
-    modelList = [{ value: 1, id: '1', isInvalid: false }, { value: 2, id: '2', isInvalid: false }];
+    modelList = [
+      { value: 1, id: '1', isInvalid: false },
+      { value: 2, id: '2', isInvalid: false },
+    ];
     range = {
       min: 1,
       max: 10,

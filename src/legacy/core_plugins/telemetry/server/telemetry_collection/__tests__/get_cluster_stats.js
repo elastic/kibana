@@ -35,9 +35,9 @@ export function mockGetClusterStats(callCluster, clusterStats, req) {
     .returns(clusterStats);
 }
 
-describe('get_cluster_stats', () => {
+describe.skip('get_cluster_stats', () => {
 
-  it('uses callCluster to get cluster.stats API', () => {
+  it('uses callCluster to get cluster.stats API', async () => {
     const callCluster = sinon.stub();
     const response = Promise.resolve({});
 

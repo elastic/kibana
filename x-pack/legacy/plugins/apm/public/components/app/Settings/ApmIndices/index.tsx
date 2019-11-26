@@ -22,7 +22,6 @@ import {
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useCallApmApi } from '../../../../hooks/useCallApmApi';
 import { APMClient } from '../../../../services/rest/createCallApmApi';
-import { StringMap } from '../../../../../typings/common';
 import { useKibanaCore } from '../../../../../../observability/public';
 
 const APM_INDEX_LABELS = [
@@ -64,13 +63,6 @@ const APM_INDEX_LABELS = [
     label: i18n.translate('xpack.apm.settings.apmIndices.metricsIndicesLabel', {
       defaultMessage: 'Metrics Indices'
     })
-  },
-  {
-    configurationName: 'apm_oss.apmAgentConfigurationIndex',
-    label: i18n.translate(
-      'xpack.apm.settings.apmIndices.apmAgentConfigurationIndexLabel',
-      { defaultMessage: 'Agent Configuration Index' }
-    )
   }
 ];
 
@@ -79,7 +71,7 @@ async function saveApmIndices({
   apmIndices
 }: {
   callApmApi: APMClient;
-  apmIndices: StringMap<string>;
+  apmIndices: Record<string, string>;
 }) {
   await callApmApi({
     method: 'POST',
@@ -95,7 +87,7 @@ export function ApmIndices() {
     notifications: { toasts }
   } = useKibanaCore();
 
-  const [apmIndices, setApmIndices] = useState<StringMap<string>>({});
+  const [apmIndices, setApmIndices] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
 
   const callApmApiFromHook = useCallApmApi();

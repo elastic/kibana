@@ -21,10 +21,15 @@ import { FLYOUT_STATE } from '../reducers/ui';
 import {
   cancelRequest,
   registerCancelCallback,
-  unregisterCancelCallback
+  unregisterCancelCallback,
+  getEventHandlers,
 } from '../reducers/non_serializable_instances';
 import { updateFlyout } from '../actions/ui_actions';
-import { FEATURE_ID_PROPERTY_NAME, SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
+import {
+  FEATURE_ID_PROPERTY_NAME,
+  LAYER_TYPE,
+  SOURCE_DATA_ID_ORIGIN
+} from '../../common/constants';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const SET_TRANSIENT_LAYER = 'SET_TRANSIENT_LAYER';
@@ -62,6 +67,9 @@ export const SET_TOOLTIP_STATE = 'SET_TOOLTIP_STATE';
 export const UPDATE_DRAW_STATE = 'UPDATE_DRAW_STATE';
 export const SET_SCROLL_ZOOM = 'SET_SCROLL_ZOOM';
 export const SET_MAP_INIT_ERROR = 'SET_MAP_INIT_ERROR';
+export const SET_INTERACTIVE = 'SET_INTERACTIVE';
+export const DISABLE_TOOLTIP_CONTROL = 'DISABLE_TOOLTIP_CONTROL';
+export const HIDE_TOOLBAR_OVERLAY = 'HIDE_TOOLBAR_OVERLAY';
 
 function getLayerLoadingCallbacks(dispatch, layerId) {
   return {
@@ -456,6 +464,14 @@ export function startDataLoad(layerId, dataId, requestToken, meta = {}) {
       dispatch(cancelRequest(layer.getPrevRequestToken(dataId)));
     }
 
+    const eventHandlers = getEventHandlers(getState());
+    if (eventHandlers && eventHandlers.onDataLoad) {
+      eventHandlers.onDataLoad({
+        layerId,
+        dataId,
+      });
+    }
+
     dispatch({
       meta,
       type: LAYER_DATA_LOAD_STARTED,
@@ -480,9 +496,26 @@ export function updateSourceDataRequest(layerId, newData) {
 }
 
 export function endDataLoad(layerId, dataId, requestToken, data, meta) {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
     dispatch(unregisterCancelCallback(requestToken));
-    const features = data ? data.features : [];
+
+    const features = data && data.features ? data.features : [];
+
+    const eventHandlers = getEventHandlers(getState());
+    if (eventHandlers && eventHandlers.onDataLoadEnd) {
+      const layer = getLayerById(layerId, getState());
+      const resultMeta = {};
+      if (layer && layer.getType() === LAYER_TYPE.VECTOR) {
+        resultMeta.featuresCount = features.length;
+      }
+
+      eventHandlers.onDataLoadEnd({
+        layerId,
+        dataId,
+        resultMeta
+      });
+    }
+
     dispatch(cleanTooltipStateForLayer(layerId, features));
     dispatch({
       type: LAYER_DATA_LOAD_ENDED,
@@ -503,8 +536,18 @@ export function endDataLoad(layerId, dataId, requestToken, data, meta) {
 }
 
 export function onDataLoadError(layerId, dataId, requestToken, errorMessage) {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
     dispatch(unregisterCancelCallback(requestToken));
+
+    const eventHandlers = getEventHandlers(getState());
+    if (eventHandlers && eventHandlers.onDataLoadError) {
+      eventHandlers.onDataLoadError({
+        layerId,
+        dataId,
+        errorMessage,
+      });
+    }
+
     dispatch(cleanTooltipStateForLayer(layerId));
     dispatch({
       type: LAYER_DATA_LOAD_ERROR,
@@ -588,19 +631,6 @@ export function setLayerQuery(id, query) {
       id,
       propName: 'query',
       newValue: query,
-    });
-
-    dispatch(syncDataForLayer(id));
-  };
-}
-
-export function setLayerApplyGlobalQuery(id, applyGlobalQuery) {
-  return (dispatch) => {
-    dispatch({
-      type: UPDATE_LAYER_PROP,
-      id,
-      propName: 'applyGlobalQuery',
-      newValue: applyGlobalQuery,
     });
 
     dispatch(syncDataForLayer(id));
@@ -705,9 +735,7 @@ export function clearMissingStyleProperties(layerId) {
       return;
     }
 
-    const dateFields = await targetLayer.getDateFields();
-    const numberFields = await targetLayer.getNumberFields();
-    const ordinalFields = [...dateFields, ...numberFields];
+    const ordinalFields = await targetLayer.getOrdinalFields();
     const { hasChanges, nextStyleDescriptor } = style.getDescriptorWithMissingStylePropsRemoved(ordinalFields);
     if (hasChanges) {
       dispatch(updateLayerStyle(layerId, nextStyleDescriptor));
@@ -788,4 +816,16 @@ export function updateDrawState(drawState) {
       drawState: drawState
     });
   };
+}
+
+export function disableInteractive() {
+  return { type: SET_INTERACTIVE, disableInteractive: true };
+}
+
+export function disableTooltipControl() {
+  return { type: DISABLE_TOOLTIP_CONTROL, disableTooltipControl: true };
+}
+
+export function hideToolbarOverlay() {
+  return { type: HIDE_TOOLBAR_OVERLAY, hideToolbarOverlay: true };
 }

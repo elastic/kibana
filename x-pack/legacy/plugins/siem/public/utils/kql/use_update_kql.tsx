@@ -18,7 +18,6 @@ interface UseUpdateKqlProps {
   kueryFilterQuery: KueryFilterQuery | null;
   kueryFilterQueryDraft: KueryFilterQuery | null;
   storeType: 'timelineType';
-  type: null;
   timelineId?: string;
 }
 
@@ -28,7 +27,6 @@ export const useUpdateKql = ({
   kueryFilterQueryDraft,
   storeType,
   timelineId,
-  type,
 }: UseUpdateKqlProps): RefetchKql => {
   const updateKql: RefetchKql = (dispatch: Dispatch) => {
     if (kueryFilterQueryDraft != null && !isEqual(kueryFilterQuery, kueryFilterQueryDraft)) {
@@ -37,10 +35,7 @@ export const useUpdateKql = ({
           dispatchApplyTimelineFilterQuery({
             id: timelineId,
             filterQuery: {
-              kuery: {
-                kind: 'kuery',
-                expression: kueryFilterQueryDraft.expression,
-              },
+              kuery: kueryFilterQueryDraft,
               serializedQuery: convertKueryToElasticSearchQuery(
                 kueryFilterQueryDraft.expression,
                 indexPattern
@@ -49,7 +44,6 @@ export const useUpdateKql = ({
           })
         );
       }
-
       return true;
     }
     return false;

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { VisSavedObject } from 'ui/visualize/loader/types';
+import { VisSavedObject } from './kibana_services';
 
 export interface SavedVisualizations {
   urlFor: (id: string) => string;

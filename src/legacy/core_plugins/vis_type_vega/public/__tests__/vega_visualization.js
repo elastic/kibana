@@ -23,7 +23,7 @@ import ngMock from 'ng_mock';
 import $ from 'jquery';
 import { createVegaVisualization } from '../vega_visualization';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
-import * as visModule from 'ui/vis';
+import { Vis } from 'ui/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
 
 import vegaliteGraph from '!!raw-loader!./vegalite_graph.hjson';
@@ -50,7 +50,6 @@ const PIXEL_DIFF = 30;
 describe('VegaVisualizations', () => {
   let domNode;
   let VegaVisualization;
-  let Vis;
   let indexPattern;
   let vis;
   let imageComparator;
@@ -73,7 +72,6 @@ describe('VegaVisualizations', () => {
         );
       }
 
-      Vis = Private(visModule.VisProvider);
 
       VegaVisualization = createVegaVisualization(vegaVisualizationDependencies);
       indexPattern = Private(LogstashIndexPatternStubProvider);

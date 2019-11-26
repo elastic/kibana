@@ -39,7 +39,8 @@ import { config as uiSettingsConfig } from './ui_settings';
 import { mapToObject } from '../utils/';
 import { ContextService } from './context';
 import { SavedObjectsServiceSetup } from './saved_objects/saved_objects_service';
-import { RequestHandlerContext, InternalCoreSetup } from '.';
+import { RequestHandlerContext } from '.';
+import { InternalCoreSetup } from './internal_types';
 
 const coreId = Symbol('core');
 

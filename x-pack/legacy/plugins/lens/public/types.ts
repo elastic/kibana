@@ -6,14 +6,13 @@
 
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
-import { Filter } from '@kbn/es-query';
 import { CoreSetup } from 'src/core/public';
-import { Query } from 'src/plugins/data/common';
 import { SavedQuery } from 'src/legacy/core_plugins/data/public';
-import { KibanaDatatable } from '../../../../../src/legacy/core_plugins/interpreter/common';
+import { KibanaDatatable } from '../../../../../src/plugins/expressions/public';
 import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
 import { DateRange } from '../common';
+import { Query, esFilters } from '../../../../../src/plugins/data/public';
 
 // eslint-disable-next-line
 export interface EditorFrameOptions {}
@@ -32,7 +31,7 @@ export interface EditorFrameProps {
   doc?: Document;
   dateRange: DateRange;
   query: Query;
-  filters: Filter[];
+  filters: esFilters.Filter[];
   savedQuery?: SavedQuery;
 
   // Frame loader (app or embeddable) is expected to call this when it loads and updates
@@ -179,7 +178,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   query: Query;
   dateRange: DateRange;
-  filters: Filter[];
+  filters: esFilters.Filter[];
 }
 
 // The only way a visualization has to restrict the query building
@@ -309,7 +308,7 @@ export interface FramePublicAPI {
 
   dateRange: DateRange;
   query: Query;
-  filters: Filter[];
+  filters: esFilters.Filter[];
 
   // Adds a new layer. This has a side effect of updating the datasource state
   addNewLayer: () => string;

@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { uiModules } from 'ui/modules';
-import 'angular-sanitize';
-import { start as embeddables } from '../../../../../core_plugins/embeddable_api/public/np_ready/public/legacy';
+import { getServices } from '../kibana_services';
+
+const { embeddables, uiModules } = getServices();
 
 uiModules
   .get('kibana/directive', ['ngSanitize'])

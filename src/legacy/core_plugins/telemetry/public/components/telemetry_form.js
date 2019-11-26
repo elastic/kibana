@@ -33,6 +33,7 @@ import { getConfigTelemetryDesc, PRIVACY_STATEMENT_URL } from '../../common/cons
 import { OptInExampleFlyout } from './opt_in_details_component';
 import { Field } from 'ui/management';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 const SEARCH_TERMS = ['telemetry', 'usage', 'data', 'usage data'];
 
@@ -78,6 +79,10 @@ export class TelemetryForm extends Component {
       queryMatches,
     } = this.state;
 
+    if (!telemetryOptInProvider.canChangeOptInStatus()) {
+      return null;
+    }
+
     if (queryMatches !== null && !queryMatches) {
       return null;
     }
@@ -112,7 +117,8 @@ export class TelemetryForm extends Component {
                 type: 'boolean',
                 value: telemetryOptInProvider.getOptIn() || false,
                 description: this.renderDescription(),
-                defVal: false,
+                defVal: true,
+                ariaName: i18n.translate('telemetry.provideUsageStatisticsLabel', { defaultMessage: 'Provide usage statistics' })
               }}
               save={this.toggleOptIn}
               clear={this.toggleOptIn}

@@ -8,8 +8,7 @@ import { act } from 'react-dom/test-utils';
 import * as fixtures from '../../test/fixtures';
 import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
 import { IdxMgmtHomeTestBed } from './helpers/home.helpers';
-
-const API_PATH = '/api/index_management';
+import { API_BASE_PATH } from '../../common/constants';
 
 const { setup } = pageHelpers.home;
 
@@ -21,16 +20,7 @@ const removeWhiteSpaceOnArrayValues = (array: any[]) =>
     return value.trim();
   });
 
-jest.mock('ui/index_patterns', () => ({
-  ILLEGAL_CHARACTERS: '',
-  CONTAINS_SPACES: '',
-  validateIndexPattern: () => {},
-}));
-
-jest.mock('ui/chrome', () => ({
-  breadcrumbs: { set: () => {} },
-  addBasePath: (path: string) => path || '/api/index_management',
-}));
+jest.mock('ui/new_platform');
 
 // We need to skip the tests until react 16.9.0 is released
 // which supports asynchronous code inside act()
@@ -204,7 +194,9 @@ describe.skip('<IndexManagementHome />', () => {
           });
 
           expect(server.requests.length).toBe(totalRequests + 1);
-          expect(server.requests[server.requests.length - 1].url).toBe(`${API_PATH}/templates`);
+          expect(server.requests[server.requests.length - 1].url).toBe(
+            `${API_BASE_PATH}/templates`
+          );
         });
 
         test('should have a button to create a new template', () => {
@@ -346,7 +338,7 @@ describe.skip('<IndexManagementHome />', () => {
             const latestRequest = server.requests[server.requests.length - 1];
 
             expect(latestRequest.method).toBe('DELETE');
-            expect(latestRequest.url).toBe(`${API_PATH}/templates/${template1.name}`);
+            expect(latestRequest.url).toBe(`${API_BASE_PATH}/templates/${template1.name}`);
           });
         });
 

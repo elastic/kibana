@@ -89,7 +89,7 @@ export const autoDate: ExpressionFunction<
         ...c,
         params: {
           ...c.params,
-          interval: interval.expression,
+          interval,
         },
       };
     });

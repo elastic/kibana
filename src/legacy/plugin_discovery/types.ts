@@ -62,6 +62,7 @@ export interface LegacyPluginOptions {
     }>;
     apps: any;
     hacks: string[];
+    visualize: string[];
     devTools: string[];
     styleSheetPaths: string;
     injectDefaultVars: (server: Server) => Record<string, any>;
@@ -74,6 +75,7 @@ export interface LegacyPluginOptions {
     embeddableActions?: string[];
     embeddableFactories?: string[];
     uiSettingDefaults?: Record<string, any>;
+    interpreter: string | string[];
   }>;
   uiCapabilities?: Capabilities;
   publicDir: any;

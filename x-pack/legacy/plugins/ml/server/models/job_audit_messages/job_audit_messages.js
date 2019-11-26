@@ -48,6 +48,11 @@ export function jobAuditMessagesProvider(callWithRequest) {
                 term: {
                   level: 'activity'
                 }
+              },
+              must: {
+                term: {
+                  job_type: 'anomaly_detector'
+                }
               }
             }
           },

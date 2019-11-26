@@ -79,6 +79,7 @@ export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
           return;
         }
         if (precisionChange) {
+          updateGeohashAgg();
           this.vis.updateState();
         } else {
           //when we filter queries by collar

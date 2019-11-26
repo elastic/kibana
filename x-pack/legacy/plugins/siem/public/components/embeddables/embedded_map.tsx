@@ -5,10 +5,8 @@
  */
 
 import { EuiLink, EuiText } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
 import React, { useEffect, useState } from 'react';
 import { createPortalNode, InPortal } from 'react-reverse-portal';
-import { Query } from 'src/plugins/data/common';
 import styled, { css } from 'styled-components';
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
@@ -30,52 +28,52 @@ import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
 import { MapToolTip } from './map_tool_tip/map_tool_tip';
 import * as i18n from './translations';
 import { MapEmbeddable, SetQuery } from './types';
+import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
 
 interface EmbeddableMapProps {
   maintainRatio?: boolean;
 }
 
-const EmbeddableMap = styled.div.attrs({
+const EmbeddableMap = styled.div.attrs(() => ({
   className: 'siemEmbeddable__map',
-})<EmbeddableMapProps>`
-  ${({ maintainRatio, theme }) => css`
-    .embPanel {
-      border: none;
-      box-shadow: none;
-    }
+}))<EmbeddableMapProps>`
+  .embPanel {
+    border: none;
+    box-shadow: none;
+  }
 
-    .mapToolbarOverlay__button {
-      display: none;
-    }
+  .mapToolbarOverlay__button {
+    display: none;
+  }
 
-    ${maintainRatio &&
-      css`
-        padding-top: calc(3 / 4 * 100%); //4:3 (standard) ratio
-        position: relative;
+  ${({ maintainRatio }) =>
+    maintainRatio &&
+    css`
+      padding-top: calc(3 / 4 * 100%); //4:3 (standard) ratio
+      position: relative;
 
-        @media only screen and (min-width: ${theme.eui.euiBreakpoints.m}) {
-          padding-top: calc(9 / 32 * 100%); //32:9 (ultra widescreen) ratio
-        }
+      @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.m}) {
+        padding-top: calc(9 / 32 * 100%); //32:9 (ultra widescreen) ratio
+      }
 
-        @media only screen and (min-width: 1441px) and (min-height: 901px) {
-          padding-top: calc(9 / 21 * 100%); //21:9 (ultrawide) ratio
-        }
+      @media only screen and (min-width: 1441px) and (min-height: 901px) {
+        padding-top: calc(9 / 21 * 100%); //21:9 (ultrawide) ratio
+      }
 
-        .embPanel {
-          bottom: 0;
-          left: 0;
-          position: absolute;
-          right: 0;
-          top: 0;
-        }
-      `}
-  `}
+      .embPanel {
+        bottom: 0;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+      }
+    `}
 `;
 EmbeddableMap.displayName = 'EmbeddableMap';
 
 export interface EmbeddedMapProps {
   query: Query;
-  filters: Filter[];
+  filters: esFilters.Filter[];
   startDate: number;
   endDate: number;
   setQuery: SetQuery;

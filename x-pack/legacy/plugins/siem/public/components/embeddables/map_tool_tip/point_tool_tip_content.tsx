@@ -29,7 +29,7 @@ export const PointToolTipContent = React.memo<PointToolTipContentProps>(
         title: sourceDestinationFieldMappings[key],
         description: (
           <AddFilterToGlobalSearchBar
-            filter={createFilter(key, value)}
+            filter={createFilter(key, Array.isArray(value) ? value[0] : value)}
             onFilterAdded={closeTooltip}
             data-test-subj={`add-to-kql-${key}`}
           >

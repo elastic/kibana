@@ -96,7 +96,6 @@ export class HttpServer {
 
     const basePathService = new BasePath(config.basePath);
     this.setupBasePathRewrite(config, basePathService);
-    this.setupConditionalCompression();
 
     return {
       registerRouter: this.registerRouter.bind(this),
@@ -129,6 +128,8 @@ export class HttpServer {
       for (const route of router.getRoutes()) {
         this.log.debug(`registering route handler for [${route.path}]`);
         const { authRequired = true, tags } = route.options;
+        // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
+        const validate = ['head', 'get'].includes(route.method) ? undefined : { payload: true };
         this.server.route({
           handler: route.handler,
           method: route.method,
@@ -136,6 +137,11 @@ export class HttpServer {
           options: {
             auth: authRequired ? undefined : false,
             tags: tags ? Array.from(tags) : undefined,
+            // TODO: This 'validate' section can be removed once the legacy platform is completely removed.
+            // We are telling Hapi that NP routes can accept any payload, so that it can bypass the default
+            // validation applied in ./http_tools#getServerOptions
+            // (All NP routes are already required to specify their own validation in order to access the payload)
+            validate,
           },
         });
       }
@@ -173,23 +179,6 @@ export class HttpServer {
         return toolkit.rewriteUrl(newURL);
       }
       return response.notFound();
-    });
-  }
-
-  private setupConditionalCompression() {
-    if (this.server === undefined) {
-      throw new Error('Server is not created yet');
-    }
-
-    this.server.ext('onRequest', (request, h) => {
-      // whenever there is a referrer, don't use compression even if the client supports it
-      if (request.info.referrer !== '') {
-        this.log.debug(
-          `Not using compression because there is a referer: ${request.info.referrer}`
-        );
-        request.info.acceptEncoding = '';
-      }
-      return h.continue;
     });
   }
 

@@ -68,7 +68,7 @@ def getOssCiGroupWorker(ciGroup) {
       "CI_GROUP=${ciGroup}",
       "JOB=kibana-ciGroup${ciGroup}",
     ]) {
-      runbld "./test/scripts/jenkins_ci_group.sh"
+      runbld("./test/scripts/jenkins_ci_group.sh", "Execute kibana-ciGroup${ciGroup}")
     }
   })
 }
@@ -79,7 +79,7 @@ def getXpackCiGroupWorker(ciGroup) {
       "CI_GROUP=${ciGroup}",
       "JOB=xpack-kibana-ciGroup${ciGroup}",
     ]) {
-      runbld "./test/scripts/jenkins_xpack_ci_group.sh"
+      runbld("./test/scripts/jenkins_xpack_ci_group.sh", "Execute xpack-kibana-ciGroup${ciGroup}")
     }
   })
 }
@@ -93,7 +93,7 @@ def legacyJobRunner(name) {
         ]) {
           jobRunner('linux && immutable', false) {
             try {
-              runbld('.ci/run.sh', true)
+              runbld('.ci/run.sh', "Execute ${name}", true)
             } finally {
               catchError {
                 uploadAllGcsArtifacts(name)
@@ -118,16 +118,29 @@ def jobRunner(label, useRamDisk, closure) {
       // Move to a temporary workspace, so that we can symlink the real workspace into /dev/shm
       def originalWorkspace = env.WORKSPACE
       ws('/tmp/workspace') {
-        sh """
-          mkdir -p /dev/shm/workspace
-          mkdir -p '${originalWorkspace}' # create all of the directories leading up to the workspace, if they don't exist
-          rm --preserve-root -rf '${originalWorkspace}' # then remove just the workspace, just in case there's stuff in it
-          ln -s /dev/shm/workspace '${originalWorkspace}'
-        """
+        sh(
+          script: """
+            mkdir -p /dev/shm/workspace
+            mkdir -p '${originalWorkspace}' # create all of the directories leading up to the workspace, if they don't exist
+            rm --preserve-root -rf '${originalWorkspace}' # then remove just the workspace, just in case there's stuff in it
+            ln -s /dev/shm/workspace '${originalWorkspace}'
+          """,
+          label: "Move workspace to RAM - /dev/shm/workspace"
+        )
       }
     }
 
-    def scmVars = checkout scm
+    def scmVars
+
+    // Try to clone from Github up to 8 times, waiting 15 secs between attempts
+    retry(8) {
+      try {
+        scmVars = checkout scm
+      } catch (ex) {
+        sleep 15
+        throw ex
+      }
+    }
 
     withEnv([
       "CI=true",
@@ -225,27 +238,33 @@ def sendKibanaMail() {
   }
 }
 
-def bash(script) {
-  sh "#!/bin/bash\n${script}"
+def bash(script, label) {
+  sh(
+    script: "#!/bin/bash\n${script}",
+    label: label
+  )
 }
 
 def doSetup() {
-  runbld "./test/scripts/jenkins_setup.sh"
+  runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
 }
 
 def buildOss() {
-  runbld "./test/scripts/jenkins_build_kibana.sh"
+  runbld("./test/scripts/jenkins_build_kibana.sh", "Build OSS/Default Kibana")
 }
 
 def buildXpack() {
-  runbld "./test/scripts/jenkins_xpack_build_kibana.sh"
+  runbld("./test/scripts/jenkins_xpack_build_kibana.sh", "Build X-Pack Kibana")
 }
 
 def runErrorReporter() {
-  bash """
-    source src/dev/ci_setup/setup_env.sh
-    node scripts/report_failed_tests
-  """
+  bash(
+    """
+      source src/dev/ci_setup/setup_env.sh
+      node scripts/report_failed_tests
+    """,
+    "Report failed tests, if necessary"
+  )
 }
 
 return this

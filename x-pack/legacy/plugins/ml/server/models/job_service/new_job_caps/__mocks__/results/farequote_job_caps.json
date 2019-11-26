@@ -460,9 +460,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "responsetime"
-        ]
+        "fieldIds": []
       }
     ],
     "fields": [
@@ -513,8 +511,7 @@
           "low_non_null_sum",
           "info_content",
           "high_info_content",
-          "low_info_content",
-          "lat_long"
+          "low_info_content"
         ]
       }
     ]

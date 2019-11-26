@@ -130,7 +130,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
         <AutoSizer content bounds detectAnyWindowResize="height">
           {({ measureRef, bounds: { height = 0 }, content: { width = 0 } }) => {
             return (
-              <LogPageMinimapColumn innerRef={measureRef}>
+              <LogPageMinimapColumn ref={measureRef}>
                 <WithSummary>
                   {({ buckets }) => (
                     <WithLogPosition>

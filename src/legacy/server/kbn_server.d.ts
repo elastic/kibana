@@ -150,5 +150,5 @@ export default class KbnServer {
 export { Server, Request, ResponseToolkit } from 'hapi';
 
 // Re-export commonly accessed api types.
-export { IndexPatternsService } from './index_patterns';
+export { IndexPatternsFetcher as IndexPatternsService } from './index_patterns';
 export { SavedObjectsLegacyService, SavedObjectsClient } from 'src/core/server';
