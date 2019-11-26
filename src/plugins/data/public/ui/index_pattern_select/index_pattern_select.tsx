@@ -21,10 +21,10 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 
 import { EuiComboBox } from '@elastic/eui';
-import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../../core/public';
-import { getIndexPatternTitle } from '../utils';
+import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
+import { getIndexPatternTitle } from '../../index_patterns/lib';
 
-interface IndexPatternSelectProps {
+export interface IndexPatternSelectProps {
   onChange: (opt: any) => void;
   indexPatternId: string;
   placeholder: string;

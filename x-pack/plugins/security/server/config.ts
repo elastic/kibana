@@ -34,7 +34,11 @@ export const ConfigSchema = schema.object(
       schema.maybe(schema.string({ minLength: 32 })),
       schema.string({ minLength: 32, defaultValue: 'a'.repeat(32) })
     ),
-    sessionTimeout: schema.oneOf([schema.number(), schema.literal(null)], { defaultValue: null }),
+    sessionTimeout: schema.maybe(schema.oneOf([schema.number(), schema.literal(null)])), // DEPRECATED
+    session: schema.object({
+      idleTimeout: schema.oneOf([schema.number(), schema.literal(null)], { defaultValue: null }),
+      lifespan: schema.oneOf([schema.number(), schema.literal(null)], { defaultValue: null }),
+    }),
     secureCookies: schema.boolean({ defaultValue: false }),
     public: schema.object({
       protocol: schema.maybe(schema.oneOf([schema.literal('http'), schema.literal('https')])),
@@ -107,7 +111,23 @@ export function createConfig$(context: PluginInitializerContext, isTLSEnabled: b
         secureCookies = true;
       }
 
-      return { ...config, encryptionKey, secureCookies };
+      // "sessionTimeout" is deprecated and replaced with "session.idleTimeout"
+      // however, NP does not yet have a mechanism to automatically rename deprecated keys
+      // for the time being, we'll do it manually:
+      const sess = config.session;
+      const session = {
+        idleTimeout: (sess && sess.idleTimeout) || config.sessionTimeout || null,
+        lifespan: (sess && sess.lifespan) || null,
+      };
+
+      const val = {
+        ...config,
+        encryptionKey,
+        secureCookies,
+        session,
+      };
+      delete val.sessionTimeout; // DEPRECATED
+      return val;
     })
   );
 }
