@@ -2,12 +2,10 @@
   "rule_id": "rule-9999",
   "risk_score": 100,
   "description": "Detecting root and admin users",
-  "index": ["auditbeat-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"],
   "interval": "5m",
   "name": "Detect Root/Admin Users",
   "severity": "high",
   "type": "filter",
-  "output_index": ".siem-signals",
   "from": "now-6m",
   "to": "now",
   "filter": {

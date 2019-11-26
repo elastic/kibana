@@ -39,6 +39,7 @@ export interface CallWithRequestParams extends GenericParams {
   allow_no_indices?: boolean;
   size?: number;
   terminate_after?: number;
+  fields?: string;
 }
 
 export type InfraResponse = Lifecycle.ReturnValue;
@@ -76,7 +77,16 @@ export interface InfraDatabaseMultiResponse<Hit, Aggregation> extends InfraDatab
 }
 
 export interface InfraDatabaseFieldCapsResponse extends InfraDatabaseResponse {
+  indices: string[];
   fields: InfraFieldsResponse;
+}
+
+export interface InfraDatabaseGetIndicesAliasResponse {
+  [indexName: string]: {
+    aliases: {
+      [aliasName: string]: any;
+    };
+  };
 }
 
 export interface InfraDatabaseGetIndicesResponse {
@@ -84,6 +94,15 @@ export interface InfraDatabaseGetIndicesResponse {
     aliases: {
       [aliasName: string]: any;
     };
+    mappings: {
+      _meta: object;
+      dynamic_templates: any[];
+      date_detection: boolean;
+      properties: {
+        [fieldName: string]: any;
+      };
+    };
+    settings: { index: object };
   };
 }
 
