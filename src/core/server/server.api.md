@@ -714,14 +714,15 @@ export interface IndexSettingsDeprecationInfo {
 
 // @public
 export interface IRouter {
-    delete: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) => void;
-    get: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) => void;
+    delete: RouteRegistrar;
+    get: RouteRegistrar;
     // Warning: (ae-forgotten-export) The symbol "RouterRoute" needs to be exported by the entry point index.d.ts
     // 
     // @internal
     getRoutes: () => RouterRoute[];
-    post: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) => void;
-    put: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) => void;
+    handleLegacyErrors: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(handler: RequestHandler<P, Q, B>) => RequestHandler<P, Q, B>;
+    post: RouteRegistrar;
+    put: RouteRegistrar;
     routerPath: string;
 }
 
@@ -1098,6 +1099,9 @@ export interface RouteConfigOptions {
 
 // @public
 export type RouteMethod = 'get' | 'post' | 'put' | 'delete';
+
+// @public
+export type RouteRegistrar = <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) => void;
 
 // @public (undocumented)
 export interface SavedObject<T extends SavedObjectAttributes = any> {

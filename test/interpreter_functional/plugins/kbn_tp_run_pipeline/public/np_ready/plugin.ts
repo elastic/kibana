@@ -17,4 +17,29 @@
  * under the License.
  */
 
-export { ApplyFiltersPopover } from './apply_filters';
+import { CoreSetup, CoreStart, PluginInitializerContext } from 'src/core/public';
+import { ExpressionsStart } from './types';
+import { setExpressions } from './services';
+
+export interface StartDeps {
+  expressions: ExpressionsStart;
+}
+
+export class Plugin {
+  constructor(initializerContext: PluginInitializerContext) {}
+
+  public setup({ application }: CoreSetup) {
+    application.register({
+      id: 'kbn_tp_run_pipeline',
+      title: 'Run Pipeline',
+      async mount(context, params) {
+        const { renderApp } = await import('./app/app');
+        return renderApp(context, params);
+      },
+    });
+  }
+
+  public start(start: CoreStart, { expressions }: StartDeps) {
+    setExpressions(expressions);
+  }
+}

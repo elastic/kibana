@@ -137,8 +137,12 @@ export class ExpressionRenderHandler {
   };
 }
 
-export function render(element: HTMLElement, data: Data): ExpressionRenderHandler {
-  const handler = new ExpressionRenderHandler(element);
+export function render(
+  element: HTMLElement,
+  data: Data,
+  options?: Partial<ExpressionRenderHandlerParams>
+): ExpressionRenderHandler {
+  const handler = new ExpressionRenderHandler(element, options);
   handler.render(data);
   return handler;
 }

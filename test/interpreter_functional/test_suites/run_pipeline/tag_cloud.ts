@@ -17,18 +17,21 @@
  * under the License.
  */
 
-import { expectExpressionProvider } from './helpers';
+import { ExpectExpression, expectExpressionProvider, ExpressionResult } from './helpers';
+import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
-export default function ({ getService, updateBaselines }) {
-
-  let expectExpression;
+export default function({
+  getService,
+  updateBaselines,
+}: FtrProviderContext & { updateBaselines: boolean }) {
+  let expectExpression: ExpectExpression;
   describe('tag cloud pipeline expression tests', () => {
     before(() => {
       expectExpression = expectExpressionProvider({ getService, updateBaselines });
     });
 
     describe('correctly renders tagcloud', () => {
-      let dataContext;
+      let dataContext: ExpressionResult;
       before(async () => {
         const expression = `kibana | kibana_context | esaggs index='logstash-*' aggConfigs='[
           {"id":"1","enabled":true,"type":"count","schema":"metric","params":{}},
@@ -41,27 +44,39 @@ export default function ({ getService, updateBaselines }) {
 
       it('with invalid data', async () => {
         const expression = 'tagcloud metric={visdimension 0}';
-        await (await expectExpression('tagcloud_invalid_data', expression).toMatchSnapshot()).toMatchScreenshot();
+        await (
+          await expectExpression('tagcloud_invalid_data', expression).toMatchSnapshot()
+        ).toMatchScreenshot();
       });
 
       it('with just metric data', async () => {
         const expression = 'tagcloud metric={visdimension 0}';
-        await (await expectExpression('tagcloud_metric_data', expression, dataContext).toMatchSnapshot()).toMatchScreenshot();
+        await (
+          await expectExpression('tagcloud_metric_data', expression, dataContext).toMatchSnapshot()
+        ).toMatchScreenshot();
       });
 
       it('with metric and bucket data', async () => {
         const expression = 'tagcloud metric={visdimension 0} bucket={visdimension 1}';
-        await (await expectExpression('tagcloud_all_data', expression, dataContext).toMatchSnapshot()).toMatchScreenshot();
+        await (
+          await expectExpression('tagcloud_all_data', expression, dataContext).toMatchSnapshot()
+        ).toMatchScreenshot();
       });
 
       it('with font size options', async () => {
-        const expression = 'tagcloud metric={visdimension 0} bucket={visdimension 1} minFontSize=20 maxFontSize=40';
-        await (await expectExpression('tagcloud_fontsize', expression, dataContext).toMatchSnapshot()).toMatchScreenshot();
+        const expression =
+          'tagcloud metric={visdimension 0} bucket={visdimension 1} minFontSize=20 maxFontSize=40';
+        await (
+          await expectExpression('tagcloud_fontsize', expression, dataContext).toMatchSnapshot()
+        ).toMatchScreenshot();
       });
 
       it('with scale and orientation options', async () => {
-        const expression = 'tagcloud metric={visdimension 0} bucket={visdimension 1} scale="log" orientation="multiple"';
-        await (await expectExpression('tagcloud_options', expression, dataContext).toMatchSnapshot()).toMatchScreenshot();
+        const expression =
+          'tagcloud metric={visdimension 0} bucket={visdimension 1} scale="log" orientation="multiple"';
+        await (
+          await expectExpression('tagcloud_options', expression, dataContext).toMatchSnapshot()
+        ).toMatchScreenshot();
       });
     });
   });

@@ -18,14 +18,45 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../../functional/ftr_provider_context';
+import {
+  ExpressionDataHandler,
+  RenderResult,
+  Context,
+} from '../../plugins/kbn_tp_run_pipeline/public/np_ready/types';
+
+type UnWrapPromise<T> = T extends Promise<infer U> ? U : T;
+export type ExpressionResult = UnWrapPromise<ReturnType<ExpressionDataHandler['getData']>>;
+
+export type ExpectExpression = (
+  name: string,
+  expression: string,
+  context?: Context,
+  initialContext?: Context
+) => ExpectExpressionHandler;
+
+export interface ExpectExpressionHandler {
+  toReturn: (expectedResult: ExpressionResult) => Promise<void>;
+  getResponse: () => Promise<ExpressionResult>;
+  runExpression: (step?: string, stepContext?: Context) => Promise<ExpressionResult>;
+  steps: {
+    toMatchSnapshot: () => Promise<ExpectExpressionHandler>;
+  };
+  toMatchSnapshot: () => Promise<ExpectExpressionHandler>;
+  toMatchScreenshot: () => Promise<ExpectExpressionHandler>;
+}
 
 // helper for testing interpreter expressions
-export const expectExpressionProvider = ({ getService, updateBaselines }) => {
+export function expectExpressionProvider({
+  getService,
+  updateBaselines,
+}: Pick<FtrProviderContext, 'getService'> & { updateBaselines: boolean }): ExpectExpression {
   const browser = getService('browser');
   const screenshot = getService('screenshots');
   const snapshots = getService('snapshots');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
+
   /**
    * returns a handler object to test a given expression
    * @name: name of the test
@@ -34,20 +65,25 @@ export const expectExpressionProvider = ({ getService, updateBaselines }) => {
    * @initialContext: initialContext provided to the expression
    * @returns handler object
    */
-  return (name, expression, context = {}, initialContext = {}) => {
+  return (
+    name: string,
+    expression: string,
+    context: Context = {},
+    initialContext: Context = {}
+  ): ExpectExpressionHandler => {
     log.debug(`executing expression ${expression}`);
     const steps = expression.split('|'); // todo: we should actually use interpreter parser and get the ast
-    let responsePromise;
+    let responsePromise: Promise<ExpressionResult>;
 
-    const handler = {
+    const handler: ExpectExpressionHandler = {
       /**
        * checks if provided object matches expression result
        * @param result: expected expression result
        * @returns {Promise<void>}
        */
-      toReturn: async result => {
+      toReturn: async (expectedResult: ExpressionResult) => {
         const pipelineResponse = await handler.getResponse();
-        expect(pipelineResponse).to.eql(result);
+        expect(pipelineResponse).to.eql(expectedResult);
       },
       /**
        * returns expression response
@@ -63,16 +99,31 @@ export const expectExpressionProvider = ({ getService, updateBaselines }) => {
        * @param stepContext: context to provide to expression
        * @returns {Promise<*>} result of running expression
        */
-      runExpression: async (step, stepContext) => {
+      runExpression: async (
+        step: string = expression,
+        stepContext: Context = context
+      ): Promise<ExpressionResult> => {
         log.debug(`running expression ${step || expression}`);
-        const promise = browser.executeAsync((expression, context, initialContext, done) => {
-          if (!context) context = {};
-          if (!context.type) context.type = 'null';
-          window.runPipeline(expression, context, initialContext).then(result => {
-            done(result);
-          });
-        }, step || expression, stepContext || context, initialContext);
-        return await promise;
+        return browser.executeAsync<ExpressionResult>(
+          (
+            _expression: string,
+            _currentContext: Context & { type: string },
+            _initialContext: Context,
+            done: (expressionResult: ExpressionResult) => void
+          ) => {
+            if (!_currentContext) _currentContext = { type: 'null' };
+            if (!_currentContext.type) _currentContext.type = 'null';
+            return window
+              .runPipeline(_expression, _currentContext, _initialContext)
+              .then(expressionResult => {
+                done(expressionResult);
+                return expressionResult;
+              });
+          },
+          step,
+          stepContext,
+          initialContext
+        );
       },
       steps: {
         /**
@@ -80,17 +131,19 @@ export const expectExpressionProvider = ({ getService, updateBaselines }) => {
          * @returns {Promise<void>}
          */
         toMatchSnapshot: async () => {
-          let lastResponse;
+          let lastResponse: ExpressionResult;
           for (let i = 0; i < steps.length; i++) {
             const step = steps[i];
-            lastResponse = await handler.runExpression(step, lastResponse);
-            const diff = await snapshots.compareAgainstBaseline(name + i, toSerializable(lastResponse), updateBaselines);
+            lastResponse = await handler.runExpression(step, lastResponse!);
+            const diff = await snapshots.compareAgainstBaseline(
+              name + i,
+              toSerializable(lastResponse!),
+              updateBaselines
+            );
             expect(diff).to.be.lessThan(0.05);
           }
           if (!responsePromise) {
-            responsePromise = new Promise(resolve => {
-              resolve(lastResponse);
-            });
+            responsePromise = Promise.resolve(lastResponse!);
           }
           return handler;
         },
@@ -101,7 +154,11 @@ export const expectExpressionProvider = ({ getService, updateBaselines }) => {
        */
       toMatchSnapshot: async () => {
         const pipelineResponse = await handler.getResponse();
-        await snapshots.compareAgainstBaseline(name, toSerializable(pipelineResponse), updateBaselines);
+        await snapshots.compareAgainstBaseline(
+          name,
+          toSerializable(pipelineResponse),
+          updateBaselines
+        );
         return handler;
       },
       /**
@@ -111,24 +168,31 @@ export const expectExpressionProvider = ({ getService, updateBaselines }) => {
       toMatchScreenshot: async () => {
         const pipelineResponse = await handler.getResponse();
         log.debug('starting to render');
-        const result = await browser.executeAsync((context, done) => {
-          window.renderPipelineResponse(context).then(result => {
-            done(result);
-          });
-        }, pipelineResponse);
+        const result = await browser.executeAsync<RenderResult>(
+          (_context: ExpressionResult, done: (renderResult: RenderResult) => void) =>
+            window.renderPipelineResponse(_context).then(renderResult => {
+              done(renderResult);
+              return renderResult;
+            }),
+          pipelineResponse
+        );
         log.debug('response of rendering: ', result);
 
         const chartEl = await testSubjects.find('pluginChart');
-        const percentDifference = await screenshot.compareAgainstBaseline(name, updateBaselines, chartEl);
+        const percentDifference = await screenshot.compareAgainstBaseline(
+          name,
+          updateBaselines,
+          chartEl
+        );
         expect(percentDifference).to.be.lessThan(0.1);
         return handler;
-      }
+      },
     };
 
     return handler;
   };
 
-  function toSerializable(response) {
+  function toSerializable(response: ExpressionResult) {
     if (response.error) {
       // in case of error, pass through only message to the snapshot
       // as error could be expected and stack trace shouldn't be part of the snapshot
@@ -136,4 +200,4 @@ export const expectExpressionProvider = ({ getService, updateBaselines }) => {
     }
     return response;
   }
-};
+}

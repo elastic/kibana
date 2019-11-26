@@ -17,4 +17,21 @@
  * under the License.
  */
 
-export { ApplyFiltersPopover } from './apply_filters_popover';
+import {
+  ExpressionsStart,
+  Context,
+  ExpressionRenderHandler,
+  ExpressionDataHandler,
+  RenderResult,
+} from 'src/plugins/expressions/public';
+
+import { Adapters } from 'src/plugins/inspector/public';
+
+export {
+  ExpressionsStart,
+  Context,
+  ExpressionRenderHandler,
+  ExpressionDataHandler,
+  RenderResult,
+  Adapters,
+};
