@@ -23,11 +23,11 @@ echo ""
 echo ""
 
 # FAILING: https://github.com/elastic/kibana/issues/44250
-# echo " -> Running jest contracts tests"
-# cd "$XPACK_DIR"
-# SLAPSHOT_ONLINE=true CONTRACT_ONLINE=true node scripts/jest_contract.js --ci --verbose
-# echo ""
-# echo ""
+echo " -> Running jest contracts tests"
+cd "$XPACK_DIR"
+SLAPSHOT_ONLINE=true CONTRACT_ONLINE=true node scripts/jest_contract.js --ci --verbose
+echo ""
+echo ""
 
 # echo " -> Running jest integration tests"
 # cd "$XPACK_DIR"

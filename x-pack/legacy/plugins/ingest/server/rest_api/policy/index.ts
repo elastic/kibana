@@ -4,17 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Joi from 'joi';
 import Boom from 'boom';
+import * as Joi from 'joi';
+import {
+  ReturnTypeCreate,
+  ReturnTypeGet,
+  ReturnTypeList,
+} from '../../../common/types/std_return_format';
 import {
   FrameworkRequest,
   FrameworkRouteHandler,
 } from '../../libs/adapters/framework/adapter_types';
-import {
-  ReturnTypeList,
-  ReturnTypeCreate,
-  ReturnTypeGet,
-} from '../../../common/types/std_return_format';
+import { Policy } from '../../libs/adapters/policy/adapter_types';
 import { ServerLibs } from '../../libs/types';
 
 export const createGETPoliciyRoute = (libs: ServerLibs) => ({
@@ -24,7 +25,7 @@ export const createGETPoliciyRoute = (libs: ServerLibs) => ({
   handler: (async (
     request: FrameworkRequest<{ params: { policyId: string } }>
   ): Promise<ReturnTypeGet<any>> => {
-    const policy = await libs.policy.get(request.params.policyId);
+    const policy = await libs.policy.get(request.user, request.params.policyId);
 
     return { item: policy, success: true };
   }) as FrameworkRouteHandler,
@@ -37,17 +38,29 @@ export const createGETPoliciesRoute = (libs: ServerLibs) => ({
     validate: {
       query: {
         page: Joi.number().default(1),
+        perPage: Joi.number().default(20),
+        kuery: Joi.string()
+          .trim()
+          .optional(),
       },
     },
   },
-  handler: (async (
-    request: FrameworkRequest<{ query: { page: string } }>
-  ): Promise<ReturnTypeList<any>> => {
-    const page = parseInt(request.query.page, 10);
-    const { items, total } = await libs.policy.list(page, 100);
+  handler: async (request: FrameworkRequest<any>): Promise<ReturnTypeList<Policy>> => {
+    // TODO fix for types that broke in TS 3.7
+    const query: {
+      page: string;
+      perPage: string;
+      kuery: string;
+      showInactive: string;
+    } = request.query as any;
+    const { items, total, page, perPage } = await libs.policy.list(request.user, {
+      page: parseInt(query.page, 10),
+      perPage: parseInt(query.perPage, 10),
+      kuery: query.kuery,
+    });
 
-    return { list: items, success: true, page, total };
-  }) as FrameworkRouteHandler,
+    return { list: items, success: true, total, page, perPage };
+  },
 });
 
 export const createPOSTPoliciesRoute = (libs: ServerLibs) => ({

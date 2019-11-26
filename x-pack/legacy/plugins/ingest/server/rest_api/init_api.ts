@@ -5,9 +5,9 @@
  */
 
 import { Server } from 'hapi';
-import { ServerLibs } from '../libs/types';
 import { HapiFrameworkAdapter } from '../libs/adapters/framework/hapi_framework_adapter';
-import { createGETPoliciesRoute, createPOSTPoliciesRoute, createGETPoliciyRoute } from './policy';
+import { ServerLibs } from '../libs/types';
+import { createGETPoliciesRoute, createGETPoliciyRoute, createPOSTPoliciesRoute } from './policy';
 
 export function initRestApi(server: Server, libs: ServerLibs) {
   const frameworkAdapter = new HapiFrameworkAdapter(server);

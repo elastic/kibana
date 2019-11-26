@@ -3,40 +3,44 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFilterButton,
+  EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiSpacer,
-  EuiText,
-  EuiFilterGroup,
-  EuiFilterButton,
-  EuiSelect,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiHorizontalRule,
+  EuiSelect,
+  EuiSpacer,
+  EuiSuperSelect,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Fragment, useState } from 'react';
+import { Policy } from '../../../../scripts/mock_spec/types';
+import { useLibs } from '../../../hooks/use_libs';
+import { EnrollmentApiKeysTable } from './enrollment_api_keys';
+import { useEnrollmentApiKey, useEnrollmentApiKeys } from './enrollment_api_keys/hooks';
 import {
-  ShellEnrollmentInstructions,
   ContainerEnrollmentInstructions,
+  ShellEnrollmentInstructions,
   ToolsEnrollmentInstructions,
 } from './enrollment_instructions';
-import { useLibs } from '../../../hooks/use_libs';
-import { useEnrollmentApiKeys, useEnrollmentApiKey } from './enrollment_api_keys/hooks';
-import { EnrollmentApiKeysTable } from './enrollment_api_keys';
 
 interface RouterProps {
   onClose: () => void;
+  policies: Policy[];
 }
 
-export const AgentEnrollmentFlyout: React.SFC<RouterProps> = ({ onClose }) => {
+export const AgentEnrollmentFlyout: React.SFC<RouterProps> = ({ onClose, policies }) => {
   const libs = useLibs();
+  const [selectedPolicy, setSelectedPolicy] = useState('');
   const [quickInstallType, setQuickInstallType] = useState<'shell' | 'container' | 'tools'>(
     'shell'
   );
@@ -134,6 +138,21 @@ export const AgentEnrollmentFlyout: React.SFC<RouterProps> = ({ onClose }) => {
 
   const renderedInstructions = apiKey.data && (
     <Fragment>
+      <EuiText>
+        <h5>
+          <FormattedMessage
+            id="xpack.fleet.agentEnrollment.enrollIntoSelectionTitle"
+            defaultMessage="Enroll into policy:"
+          />
+        </h5>
+      </EuiText>
+      <EuiSuperSelect
+        options={policies.map(p => ({ value: p.id, inputDisplay: p.name }))}
+        valueOfSelected={selectedPolicy || ''}
+        onChange={value => setSelectedPolicy(value)}
+      />
+      <EuiSpacer size="s" />
+
       <EuiText>
         <h5>
           <FormattedMessage

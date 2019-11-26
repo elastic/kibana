@@ -29,28 +29,28 @@ exports['Agent lib Enroll Should enroll a new PERMANENT agent - find:"agents" (2
 exports['Agent lib Enroll Should enroll a new PERMANENT agent - create:agents (3)'] = {
   "results": {
     "type": "agents",
-    "id": "99314300-0fd3-11ea-af46-9724fc51c031",
+    "id": "938be600-1062-11ea-9b88-0f163d773341",
     "attributes": {
       "shared_id": "agent-1",
       "active": true,
       "policy_id": "policyId",
       "type": "PERMANENT",
-      "enrolled_at": "2019-11-25T22:33:27.086Z",
+      "enrolled_at": "2019-11-26T15:36:55.646Z",
       "user_provided_metadata": "{}",
       "local_metadata": "{}",
       "actions": []
     },
     "references": [],
-    "updated_at": "2019-11-25T22:33:27.087Z",
+    "updated_at": "2019-11-26T15:36:55.647Z",
     "version": "WzIsMV0="
   }
 }
 
 exports['Agent lib Enroll Should enroll a new PERMANENT agent - update:agents (4)'] = {
   "results": {
-    "id": "99314300-0fd3-11ea-af46-9724fc51c031",
+    "id": "938be600-1062-11ea-9b88-0f163d773341",
     "type": "agents",
-    "updated_at": "2019-11-25T22:33:27.203Z",
+    "updated_at": "2019-11-26T15:36:55.786Z",
     "version": "WzMsMV0=",
     "attributes": {
       "access_api_key_id": "mock-access-api-key-id-1"
@@ -66,20 +66,20 @@ exports['Agent lib Enroll Should allow to enroll a new PERMANENT agent again if 
     "saved_objects": [
       {
         "type": "agents",
-        "id": "99314300-0fd3-11ea-af46-9724fc51c031",
+        "id": "938be600-1062-11ea-9b88-0f163d773341",
         "attributes": {
           "shared_id": "agent-1",
           "active": true,
           "policy_id": "policyId",
           "type": "PERMANENT",
-          "enrolled_at": "2019-11-25T22:33:27.086Z",
+          "enrolled_at": "2019-11-26T15:36:55.646Z",
           "user_provided_metadata": "{}",
           "local_metadata": "{}",
           "actions": [],
           "access_api_key_id": "mock-access-api-key-id-1"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:33:27.203Z",
+        "updated_at": "2019-11-26T15:36:55.786Z",
         "version": "WzMsMV0="
       }
     ]
@@ -102,27 +102,27 @@ exports['Agent lib Enroll Should allow to enroll a new PERMANENT agent again if 
 exports['Agent lib Enroll Should allow to enroll a new PERMANENT agent again if this agent is active - create:agents (4)'] = {
   "results": {
     "type": "agents",
-    "id": "9a79efa0-0fd3-11ea-af46-9724fc51c031",
+    "id": "94da8610-1062-11ea-9b88-0f163d773341",
     "attributes": {
       "shared_id": "agent-1",
       "active": true,
       "type": "PERMANENT",
-      "enrolled_at": "2019-11-25T22:33:29.240Z",
+      "enrolled_at": "2019-11-26T15:36:57.840Z",
       "user_provided_metadata": "{}",
       "local_metadata": "{}",
       "actions": []
     },
     "references": [],
-    "updated_at": "2019-11-25T22:33:29.242Z",
+    "updated_at": "2019-11-26T15:36:57.841Z",
     "version": "WzUsMV0="
   }
 }
 
 exports['Agent lib Enroll Should allow to enroll a new PERMANENT agent again if this agent is active - update:agents (5)'] = {
   "results": {
-    "id": "9a79efa0-0fd3-11ea-af46-9724fc51c031",
+    "id": "94da8610-1062-11ea-9b88-0f163d773341",
     "type": "agents",
-    "updated_at": "2019-11-25T22:33:30.256Z",
+    "updated_at": "2019-11-26T15:36:58.860Z",
     "version": "WzYsMV0=",
     "attributes": {
       "access_api_key_id": "mock-access-api-key-id-1"
@@ -132,9 +132,9 @@ exports['Agent lib Enroll Should allow to enroll a new PERMANENT agent again if 
 
 exports['Agent lib Enroll Should allow to enroll a new PERMANENT agent again if this agent is active - update:agents (6)'] = {
   "results": {
-    "id": "9a79efa0-0fd3-11ea-af46-9724fc51c031",
+    "id": "94da8610-1062-11ea-9b88-0f163d773341",
     "type": "agents",
-    "updated_at": "2019-11-25T22:33:31.275Z",
+    "updated_at": "2019-11-26T15:36:59.883Z",
     "version": "WzcsMV0=",
     "attributes": {
       "active": false
@@ -150,19 +150,19 @@ exports['Agent lib Enroll Should allow to enroll a new PERMANENT agent again if 
     "saved_objects": [
       {
         "type": "agents",
-        "id": "9a79efa0-0fd3-11ea-af46-9724fc51c031",
+        "id": "94da8610-1062-11ea-9b88-0f163d773341",
         "attributes": {
           "shared_id": "agent-1",
           "active": false,
           "type": "PERMANENT",
-          "enrolled_at": "2019-11-25T22:33:29.240Z",
+          "enrolled_at": "2019-11-26T15:36:57.840Z",
           "user_provided_metadata": "{}",
           "local_metadata": "{}",
           "actions": [],
           "access_api_key_id": "mock-access-api-key-id-1"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:33:31.275Z",
+        "updated_at": "2019-11-26T15:36:59.883Z",
         "version": "WzcsMV0="
       }
     ]
@@ -171,24 +171,24 @@ exports['Agent lib Enroll Should allow to enroll a new PERMANENT agent again if 
 
 exports['Agent lib Enroll Should allow to enroll a new PERMANENT agent again if this agent is active - update:agents (8)'] = {
   "results": {
-    "id": "9a79efa0-0fd3-11ea-af46-9724fc51c031",
+    "id": "94da8610-1062-11ea-9b88-0f163d773341",
     "type": "agents",
-    "updated_at": "2019-11-25T22:33:32.304Z",
+    "updated_at": "2019-11-26T15:37:00.915Z",
     "version": "WzgsMV0=",
     "attributes": {
       "shared_id": "agent-1",
       "active": true,
       "type": "PERMANENT",
-      "enrolled_at": "2019-11-25T22:33:32.303Z"
+      "enrolled_at": "2019-11-26T15:37:00.913Z"
     }
   }
 }
 
 exports['Agent lib Enroll Should allow to enroll a new PERMANENT agent again if this agent is active - update:agents (9)'] = {
   "results": {
-    "id": "9a79efa0-0fd3-11ea-af46-9724fc51c031",
+    "id": "94da8610-1062-11ea-9b88-0f163d773341",
     "type": "agents",
-    "updated_at": "2019-11-25T22:33:33.319Z",
+    "updated_at": "2019-11-26T15:37:01.942Z",
     "version": "WzksMV0=",
     "attributes": {
       "access_api_key_id": "mock-access-api-key-id-2"
@@ -204,19 +204,19 @@ exports['Agent lib Enroll Should not enroll a new PERMANENT agent if this agent 
     "saved_objects": [
       {
         "type": "agents",
-        "id": "9a79efa0-0fd3-11ea-af46-9724fc51c031",
+        "id": "94da8610-1062-11ea-9b88-0f163d773341",
         "attributes": {
           "shared_id": "agent-1",
           "active": true,
           "type": "PERMANENT",
-          "enrolled_at": "2019-11-25T22:33:32.303Z",
+          "enrolled_at": "2019-11-26T15:37:00.913Z",
           "user_provided_metadata": "{}",
           "local_metadata": "{}",
           "actions": [],
           "access_api_key_id": "mock-access-api-key-id-2"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:33:33.319Z",
+        "updated_at": "2019-11-26T15:37:01.942Z",
         "version": "WzksMV0="
       }
     ]
@@ -239,27 +239,27 @@ exports['Agent lib Enroll Should not enroll a new PERMANENT agent if this agent 
 exports['Agent lib Enroll Should not enroll a new PERMANENT agent if this agent is already active - create:agents (4)'] = {
   "results": {
     "type": "agents",
-    "id": "9e20fea0-0fd3-11ea-af46-9724fc51c031",
+    "id": "98865000-1062-11ea-9b88-0f163d773341",
     "attributes": {
       "shared_id": "agent-1",
       "active": true,
       "type": "PERMANENT",
-      "enrolled_at": "2019-11-25T22:33:35.369Z",
+      "enrolled_at": "2019-11-26T15:37:03.999Z",
       "user_provided_metadata": "{}",
       "local_metadata": "{}",
       "actions": []
     },
     "references": [],
-    "updated_at": "2019-11-25T22:33:35.370Z",
+    "updated_at": "2019-11-26T15:37:04.000Z",
     "version": "WzExLDFd"
   }
 }
 
 exports['Agent lib Enroll Should not enroll a new PERMANENT agent if this agent is already active - update:agents (5)'] = {
   "results": {
-    "id": "9e20fea0-0fd3-11ea-af46-9724fc51c031",
+    "id": "98865000-1062-11ea-9b88-0f163d773341",
     "type": "agents",
-    "updated_at": "2019-11-25T22:33:36.377Z",
+    "updated_at": "2019-11-26T15:37:05.023Z",
     "version": "WzEyLDFd",
     "attributes": {
       "access_api_key_id": "mock-access-api-key-id-1"
@@ -275,19 +275,19 @@ exports['Agent lib Enroll Should not enroll a new PERMANENT agent if this agent 
     "saved_objects": [
       {
         "type": "agents",
-        "id": "9e20fea0-0fd3-11ea-af46-9724fc51c031",
+        "id": "98865000-1062-11ea-9b88-0f163d773341",
         "attributes": {
           "shared_id": "agent-1",
           "active": true,
           "type": "PERMANENT",
-          "enrolled_at": "2019-11-25T22:33:35.369Z",
+          "enrolled_at": "2019-11-26T15:37:03.999Z",
           "user_provided_metadata": "{}",
           "local_metadata": "{}",
           "actions": [],
           "access_api_key_id": "mock-access-api-key-id-1"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:33:36.377Z",
+        "updated_at": "2019-11-26T15:37:05.023Z",
         "version": "WzEyLDFd"
       }
     ]
@@ -302,19 +302,19 @@ exports['Agent lib Enroll Should enroll a new EPHEMERAL agent - find:"agents" (1
     "saved_objects": [
       {
         "type": "agents",
-        "id": "9e20fea0-0fd3-11ea-af46-9724fc51c031",
+        "id": "98865000-1062-11ea-9b88-0f163d773341",
         "attributes": {
           "shared_id": "agent-1",
           "active": true,
           "type": "PERMANENT",
-          "enrolled_at": "2019-11-25T22:33:35.369Z",
+          "enrolled_at": "2019-11-26T15:37:03.999Z",
           "user_provided_metadata": "{}",
           "local_metadata": "{}",
           "actions": [],
           "access_api_key_id": "mock-access-api-key-id-1"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:33:36.377Z",
+        "updated_at": "2019-11-26T15:37:05.023Z",
         "version": "WzEyLDFd"
       }
     ]
@@ -328,27 +328,27 @@ exports['Agent lib Enroll Should enroll a new EPHEMERAL agent - delete (2)'] = {
 exports['Agent lib Enroll Should enroll a new EPHEMERAL agent - create:agents (3)'] = {
   "results": {
     "type": "agents",
-    "id": "9ff39bc0-0fd3-11ea-af46-9724fc51c031",
+    "id": "9a659750-1062-11ea-9b88-0f163d773341",
     "attributes": {
       "active": true,
       "policy_id": "policyId",
       "type": "EPHEMERAL",
-      "enrolled_at": "2019-11-25T22:33:38.427Z",
+      "enrolled_at": "2019-11-26T15:37:07.140Z",
       "user_provided_metadata": "{}",
       "local_metadata": "{}",
       "actions": []
     },
     "references": [],
-    "updated_at": "2019-11-25T22:33:38.428Z",
+    "updated_at": "2019-11-26T15:37:07.141Z",
     "version": "WzE0LDFd"
   }
 }
 
 exports['Agent lib Enroll Should enroll a new EPHEMERAL agent - update:agents (4)'] = {
   "results": {
-    "id": "9ff39bc0-0fd3-11ea-af46-9724fc51c031",
+    "id": "9a659750-1062-11ea-9b88-0f163d773341",
     "type": "agents",
-    "updated_at": "2019-11-25T22:33:39.446Z",
+    "updated_at": "2019-11-26T15:37:08.163Z",
     "version": "WzE1LDFd",
     "attributes": {
       "access_api_key_id": "mock-access-api-key-id-1"
@@ -364,19 +364,19 @@ exports['Agent lib Delete should delete ephemeral instances - find:"agents" (1)'
     "saved_objects": [
       {
         "type": "agents",
-        "id": "9ff39bc0-0fd3-11ea-af46-9724fc51c031",
+        "id": "9a659750-1062-11ea-9b88-0f163d773341",
         "attributes": {
           "active": true,
           "policy_id": "policyId",
           "type": "EPHEMERAL",
-          "enrolled_at": "2019-11-25T22:33:38.427Z",
+          "enrolled_at": "2019-11-26T15:37:07.140Z",
           "user_provided_metadata": "{}",
           "local_metadata": "{}",
           "actions": [],
           "access_api_key_id": "mock-access-api-key-id-1"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:33:39.446Z",
+        "updated_at": "2019-11-26T15:37:08.163Z",
         "version": "WzE1LDFd"
       }
     ]
@@ -390,7 +390,7 @@ exports['Agent lib Delete should delete ephemeral instances - delete (2)'] = {
 exports['Agent lib Delete should delete ephemeral instances - create:agents (3)'] = {
   "results": {
     "type": "agents",
-    "id": "a1c5c3b0-0fd3-11ea-af46-9724fc51c031",
+    "id": "9c3a3040-1062-11ea-9b88-0f163d773341",
     "attributes": {
       "type": "EPHEMERAL",
       "active": true,
@@ -398,7 +398,7 @@ exports['Agent lib Delete should delete ephemeral instances - create:agents (3)'
       "user_provided_metadata": "{}"
     },
     "references": [],
-    "updated_at": "2019-11-25T22:33:41.483Z",
+    "updated_at": "2019-11-26T15:37:10.212Z",
     "version": "WzE3LDFd"
   }
 }
@@ -432,7 +432,7 @@ exports['Agent lib Delete should desactivate other agent - find:"agents" (1)'] =
 exports['Agent lib Delete should desactivate other agent - create:agents (2)'] = {
   "results": {
     "type": "agents",
-    "id": "a2fd3240-0fd3-11ea-af46-9724fc51c031",
+    "id": "9d759670-1062-11ea-9b88-0f163d773341",
     "attributes": {
       "type": "PERMANENT",
       "active": true,
@@ -440,16 +440,16 @@ exports['Agent lib Delete should desactivate other agent - create:agents (2)'] =
       "user_provided_metadata": "{}"
     },
     "references": [],
-    "updated_at": "2019-11-25T22:33:43.524Z",
+    "updated_at": "2019-11-26T15:37:12.279Z",
     "version": "WzE5LDFd"
   }
 }
 
 exports['Agent lib Delete should desactivate other agent - update:agents (3)'] = {
   "results": {
-    "id": "a2fd3240-0fd3-11ea-af46-9724fc51c031",
+    "id": "9d759670-1062-11ea-9b88-0f163d773341",
     "type": "agents",
-    "updated_at": "2019-11-25T22:33:44.534Z",
+    "updated_at": "2019-11-26T15:37:13.279Z",
     "version": "WzIwLDFd",
     "attributes": {
       "active": false
@@ -459,9 +459,9 @@ exports['Agent lib Delete should desactivate other agent - update:agents (3)'] =
 
 exports['Agent lib Delete should desactivate other agent - get:agents (4)'] = {
   "results": {
-    "id": "a2fd3240-0fd3-11ea-af46-9724fc51c031",
+    "id": "9d759670-1062-11ea-9b88-0f163d773341",
     "type": "agents",
-    "updated_at": "2019-11-25T22:33:44.534Z",
+    "updated_at": "2019-11-26T15:37:13.279Z",
     "version": "WzIwLDFd",
     "attributes": {
       "type": "PERMANENT",
@@ -481,7 +481,7 @@ exports['Agent lib list should return all agents - find:"agents" (1)'] = {
     "saved_objects": [
       {
         "type": "agents",
-        "id": "a2fd3240-0fd3-11ea-af46-9724fc51c031",
+        "id": "9d759670-1062-11ea-9b88-0f163d773341",
         "attributes": {
           "type": "PERMANENT",
           "active": false,
@@ -489,7 +489,7 @@ exports['Agent lib list should return all agents - find:"agents" (1)'] = {
           "user_provided_metadata": "{}"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:33:44.534Z",
+        "updated_at": "2019-11-26T15:37:13.279Z",
         "version": "WzIwLDFd"
       }
     ]
@@ -503,7 +503,7 @@ exports['Agent lib list should return all agents - delete (2)'] = {
 exports['Agent lib list should return all agents - create:agents (3)'] = {
   "results": {
     "type": "agents",
-    "id": "a4cfcf60-0fd3-11ea-af46-9724fc51c031",
+    "id": "9f491df0-1062-11ea-9b88-0f163d773341",
     "attributes": {
       "type": "PERMANENT",
       "active": true,
@@ -511,7 +511,7 @@ exports['Agent lib list should return all agents - create:agents (3)'] = {
       "user_provided_metadata": "{}"
     },
     "references": [],
-    "updated_at": "2019-11-25T22:33:46.582Z",
+    "updated_at": "2019-11-26T15:37:15.342Z",
     "version": "WzIyLDFd"
   }
 }
@@ -519,7 +519,7 @@ exports['Agent lib list should return all agents - create:agents (3)'] = {
 exports['Agent lib list should return all agents - create:agents (4)'] = {
   "results": {
     "type": "agents",
-    "id": "a569c570-0fd3-11ea-af46-9724fc51c031",
+    "id": "9fe4e8c0-1062-11ea-9b88-0f163d773341",
     "attributes": {
       "type": "PERMANENT",
       "active": true,
@@ -527,7 +527,7 @@ exports['Agent lib list should return all agents - create:agents (4)'] = {
       "user_provided_metadata": "{}"
     },
     "references": [],
-    "updated_at": "2019-11-25T22:33:47.591Z",
+    "updated_at": "2019-11-26T15:37:16.364Z",
     "version": "WzIzLDFd"
   }
 }
@@ -540,7 +540,7 @@ exports['Agent lib list should return all agents - find:"agents" (5)'] = {
     "saved_objects": [
       {
         "type": "agents",
-        "id": "a4cfcf60-0fd3-11ea-af46-9724fc51c031",
+        "id": "9f491df0-1062-11ea-9b88-0f163d773341",
         "attributes": {
           "type": "PERMANENT",
           "active": true,
@@ -548,12 +548,12 @@ exports['Agent lib list should return all agents - find:"agents" (5)'] = {
           "user_provided_metadata": "{}"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:33:46.582Z",
+        "updated_at": "2019-11-26T15:37:15.342Z",
         "version": "WzIyLDFd"
       },
       {
         "type": "agents",
-        "id": "a569c570-0fd3-11ea-af46-9724fc51c031",
+        "id": "9fe4e8c0-1062-11ea-9b88-0f163d773341",
         "attributes": {
           "type": "PERMANENT",
           "active": true,
@@ -561,7 +561,7 @@ exports['Agent lib list should return all agents - find:"agents" (5)'] = {
           "user_provided_metadata": "{}"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:33:47.591Z",
+        "updated_at": "2019-11-26T15:37:16.364Z",
         "version": "WzIzLDFd"
       }
     ]
@@ -576,7 +576,7 @@ exports['Agent lib checkin should throw if the agens do not exists - find:"agent
     "saved_objects": [
       {
         "type": "agents",
-        "id": "a4cfcf60-0fd3-11ea-af46-9724fc51c031",
+        "id": "9f491df0-1062-11ea-9b88-0f163d773341",
         "attributes": {
           "type": "PERMANENT",
           "active": true,
@@ -584,12 +584,12 @@ exports['Agent lib checkin should throw if the agens do not exists - find:"agent
           "user_provided_metadata": "{}"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:33:46.582Z",
+        "updated_at": "2019-11-26T15:37:15.342Z",
         "version": "WzIyLDFd"
       },
       {
         "type": "agents",
-        "id": "a569c570-0fd3-11ea-af46-9724fc51c031",
+        "id": "9fe4e8c0-1062-11ea-9b88-0f163d773341",
         "attributes": {
           "type": "PERMANENT",
           "active": true,
@@ -597,7 +597,7 @@ exports['Agent lib checkin should throw if the agens do not exists - find:"agent
           "user_provided_metadata": "{}"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:33:47.591Z",
+        "updated_at": "2019-11-26T15:37:16.364Z",
         "version": "WzIzLDFd"
       }
     ]
@@ -633,7 +633,7 @@ exports['Agent lib checkin should throw is the agent is not active - find:"agent
 exports['Agent lib checkin should throw is the agent is not active - create:agents (2)'] = {
   "results": {
     "type": "agents",
-    "id": "a73e1040-0fd3-11ea-af46-9724fc51c031",
+    "id": "a1bb0850-1062-11ea-9b88-0f163d773341",
     "attributes": {
       "actions": [],
       "active": false,
@@ -643,7 +643,7 @@ exports['Agent lib checkin should throw is the agent is not active - create:agen
       "user_provided_metadata": "{}"
     },
     "references": [],
-    "updated_at": "2019-11-25T22:33:50.660Z",
+    "updated_at": "2019-11-26T15:37:19.445Z",
     "version": "WzI2LDFd"
   }
 }
@@ -656,7 +656,7 @@ exports['Agent lib checkin should throw is the agent is not active - find:"agent
     "saved_objects": [
       {
         "type": "agents",
-        "id": "a73e1040-0fd3-11ea-af46-9724fc51c031",
+        "id": "a1bb0850-1062-11ea-9b88-0f163d773341",
         "attributes": {
           "actions": [],
           "active": false,
@@ -666,7 +666,7 @@ exports['Agent lib checkin should throw is the agent is not active - find:"agent
           "user_provided_metadata": "{}"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:33:50.660Z",
+        "updated_at": "2019-11-26T15:37:19.445Z",
         "version": "WzI2LDFd"
       }
     ]
@@ -681,7 +681,7 @@ exports['Agent lib checkin should persist new events - find:"agents" (1)'] = {
     "saved_objects": [
       {
         "type": "agents",
-        "id": "a73e1040-0fd3-11ea-af46-9724fc51c031",
+        "id": "a1bb0850-1062-11ea-9b88-0f163d773341",
         "attributes": {
           "actions": [],
           "active": false,
@@ -691,7 +691,7 @@ exports['Agent lib checkin should persist new events - find:"agents" (1)'] = {
           "user_provided_metadata": "{}"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:33:50.660Z",
+        "updated_at": "2019-11-26T15:37:19.445Z",
         "version": "WzI2LDFd"
       }
     ]
@@ -705,7 +705,7 @@ exports['Agent lib checkin should persist new events - delete (2)'] = {
 exports['Agent lib checkin should persist new events - create:agents (3)'] = {
   "results": {
     "type": "agents",
-    "id": "a870c3e0-0fd3-11ea-af46-9724fc51c031",
+    "id": "a2ed94e0-1062-11ea-9b88-0f163d773341",
     "attributes": {
       "actions": [],
       "active": true,
@@ -715,7 +715,7 @@ exports['Agent lib checkin should persist new events - create:agents (3)'] = {
       "user_provided_metadata": "{}"
     },
     "references": [],
-    "updated_at": "2019-11-25T22:33:52.670Z",
+    "updated_at": "2019-11-26T15:37:21.454Z",
     "version": "WzI4LDFd"
   }
 }
@@ -728,7 +728,7 @@ exports['Agent lib checkin should persist new events - find:"agents" (4)'] = {
     "saved_objects": [
       {
         "type": "agents",
-        "id": "a870c3e0-0fd3-11ea-af46-9724fc51c031",
+        "id": "a2ed94e0-1062-11ea-9b88-0f163d773341",
         "attributes": {
           "actions": [],
           "active": true,
@@ -738,7 +738,7 @@ exports['Agent lib checkin should persist new events - find:"agents" (4)'] = {
           "user_provided_metadata": "{}"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:33:52.670Z",
+        "updated_at": "2019-11-26T15:37:21.454Z",
         "version": "WzI4LDFd"
       }
     ]
@@ -747,12 +747,12 @@ exports['Agent lib checkin should persist new events - find:"agents" (4)'] = {
 
 exports['Agent lib checkin should persist new events - update:agents (5)'] = {
   "results": {
-    "id": "a870c3e0-0fd3-11ea-af46-9724fc51c031",
+    "id": "a2ed94e0-1062-11ea-9b88-0f163d773341",
     "type": "agents",
-    "updated_at": "2019-11-25T22:33:53.694Z",
+    "updated_at": "2019-11-26T15:37:22.478Z",
     "version": "WzI5LDFd",
     "attributes": {
-      "last_checkin": "2019-11-25T22:33:53.692Z",
+      "last_checkin": "2019-11-26T15:37:22.477Z",
       "actions": []
     }
   }
@@ -762,12 +762,12 @@ exports['Agent lib checkin should persist new events - bulkCreate (6)'] = {
   "results": {
     "saved_objects": [
       {
-        "id": "agent_events:a9a6f9f0-0fd3-11ea-af46-9724fc51c031",
+        "id": "agent_events:a424dc60-1062-11ea-9b88-0f163d773341",
         "type": "agent_events",
-        "updated_at": "2019-11-25T22:33:54.703Z",
+        "updated_at": "2019-11-26T15:37:23.493Z",
         "version": "WzMwLDFd",
         "attributes": {
-          "agent_id": "a870c3e0-0fd3-11ea-af46-9724fc51c031",
+          "agent_id": "a2ed94e0-1062-11ea-9b88-0f163d773341",
           "timestamp": "2019-09-05T15:41:26+0000",
           "type": "STATE",
           "subtype": "STARTING",
@@ -787,16 +787,16 @@ exports['Agent lib checkin should persist new events - find:"agent_events" (7)']
     "saved_objects": [
       {
         "type": "agent_events",
-        "id": "a9a6f9f0-0fd3-11ea-af46-9724fc51c031",
+        "id": "a424dc60-1062-11ea-9b88-0f163d773341",
         "attributes": {
-          "agent_id": "a870c3e0-0fd3-11ea-af46-9724fc51c031",
+          "agent_id": "a2ed94e0-1062-11ea-9b88-0f163d773341",
           "timestamp": "2019-09-05T15:41:26+0000",
           "type": "STATE",
           "subtype": "STARTING",
           "message": "State changed from PAUSE to STARTING"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:33:54.703Z",
+        "updated_at": "2019-11-26T15:37:23.493Z",
         "version": "WzMwLDFd"
       }
     ]
@@ -811,7 +811,7 @@ exports['Agent lib checkin should not update agent metadata if none are provided
     "saved_objects": [
       {
         "type": "agents",
-        "id": "a870c3e0-0fd3-11ea-af46-9724fc51c031",
+        "id": "a2ed94e0-1062-11ea-9b88-0f163d773341",
         "attributes": {
           "actions": [],
           "active": true,
@@ -819,10 +819,10 @@ exports['Agent lib checkin should not update agent metadata if none are provided
           "access_api_key_id": "key1",
           "local_metadata": "{}",
           "user_provided_metadata": "{}",
-          "last_checkin": "2019-11-25T22:33:53.692Z"
+          "last_checkin": "2019-11-26T15:37:22.477Z"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:33:53.694Z",
+        "updated_at": "2019-11-26T15:37:22.478Z",
         "version": "WzI5LDFd"
       }
     ]
@@ -836,7 +836,7 @@ exports['Agent lib checkin should not update agent metadata if none are provided
 exports['Agent lib checkin should not update agent metadata if none are provided - create:agents (3)'] = {
   "results": {
     "type": "agents",
-    "id": "aae06450-0fd3-11ea-af46-9724fc51c031",
+    "id": "a55e6dd0-1062-11ea-9b88-0f163d773341",
     "attributes": {
       "local_metadata": "{\"key\":\"local1\"}",
       "user_provided_metadata": "{\"key\":\"user1\"}",
@@ -846,7 +846,7 @@ exports['Agent lib checkin should not update agent metadata if none are provided
       "access_api_key_id": "key1"
     },
     "references": [],
-    "updated_at": "2019-11-25T22:33:56.757Z",
+    "updated_at": "2019-11-26T15:37:25.549Z",
     "version": "WzMyLDFd"
   }
 }
@@ -859,7 +859,7 @@ exports['Agent lib checkin should not update agent metadata if none are provided
     "saved_objects": [
       {
         "type": "agents",
-        "id": "aae06450-0fd3-11ea-af46-9724fc51c031",
+        "id": "a55e6dd0-1062-11ea-9b88-0f163d773341",
         "attributes": {
           "local_metadata": "{\"key\":\"local1\"}",
           "user_provided_metadata": "{\"key\":\"user1\"}",
@@ -869,7 +869,7 @@ exports['Agent lib checkin should not update agent metadata if none are provided
           "access_api_key_id": "key1"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:33:56.757Z",
+        "updated_at": "2019-11-26T15:37:25.549Z",
         "version": "WzMyLDFd"
       }
     ]
@@ -878,12 +878,12 @@ exports['Agent lib checkin should not update agent metadata if none are provided
 
 exports['Agent lib checkin should not update agent metadata if none are provided - update:agents (5)'] = {
   "results": {
-    "id": "aae06450-0fd3-11ea-af46-9724fc51c031",
+    "id": "a55e6dd0-1062-11ea-9b88-0f163d773341",
     "type": "agents",
-    "updated_at": "2019-11-25T22:33:57.775Z",
+    "updated_at": "2019-11-26T15:37:26.573Z",
     "version": "WzMzLDFd",
     "attributes": {
-      "last_checkin": "2019-11-25T22:33:57.774Z",
+      "last_checkin": "2019-11-26T15:37:26.572Z",
       "actions": []
     }
   }
@@ -891,9 +891,9 @@ exports['Agent lib checkin should not update agent metadata if none are provided
 
 exports['Agent lib checkin should not update agent metadata if none are provided - get:agents (6)'] = {
   "results": {
-    "id": "aae06450-0fd3-11ea-af46-9724fc51c031",
+    "id": "a55e6dd0-1062-11ea-9b88-0f163d773341",
     "type": "agents",
-    "updated_at": "2019-11-25T22:33:57.775Z",
+    "updated_at": "2019-11-26T15:37:26.573Z",
     "version": "WzMzLDFd",
     "attributes": {
       "local_metadata": "{\"key\":\"local1\"}",
@@ -902,7 +902,7 @@ exports['Agent lib checkin should not update agent metadata if none are provided
       "active": true,
       "policy_id": "policy:1",
       "access_api_key_id": "key1",
-      "last_checkin": "2019-11-25T22:33:57.774Z"
+      "last_checkin": "2019-11-26T15:37:26.572Z"
     },
     "references": []
   }
@@ -916,7 +916,7 @@ exports['Agent lib checkin should return the full policy for this agent - find:"
     "saved_objects": [
       {
         "type": "agents",
-        "id": "aae06450-0fd3-11ea-af46-9724fc51c031",
+        "id": "a55e6dd0-1062-11ea-9b88-0f163d773341",
         "attributes": {
           "local_metadata": "{\"key\":\"local1\"}",
           "user_provided_metadata": "{\"key\":\"user1\"}",
@@ -924,10 +924,10 @@ exports['Agent lib checkin should return the full policy for this agent - find:"
           "active": true,
           "policy_id": "policy:1",
           "access_api_key_id": "key1",
-          "last_checkin": "2019-11-25T22:33:57.774Z"
+          "last_checkin": "2019-11-26T15:37:26.572Z"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:33:57.775Z",
+        "updated_at": "2019-11-26T15:37:26.573Z",
         "version": "WzMzLDFd"
       }
     ]
@@ -941,7 +941,7 @@ exports['Agent lib checkin should return the full policy for this agent - delete
 exports['Agent lib checkin should return the full policy for this agent - create:agents (3)'] = {
   "results": {
     "type": "agents",
-    "id": "acb12cb0-0fd3-11ea-af46-9724fc51c031",
+    "id": "a74ad480-1062-11ea-9b88-0f163d773341",
     "attributes": {
       "local_metadata": "{\"key\":\"local1\"}",
       "user_provided_metadata": "{\"key\":\"user1\"}",
@@ -951,7 +951,7 @@ exports['Agent lib checkin should return the full policy for this agent - create
       "access_api_key_id": "key1"
     },
     "references": [],
-    "updated_at": "2019-11-25T22:33:59.803Z",
+    "updated_at": "2019-11-26T15:37:28.776Z",
     "version": "WzM1LDFd"
   }
 }
@@ -964,7 +964,7 @@ exports['Agent lib checkin should return the full policy for this agent - find:"
     "saved_objects": [
       {
         "type": "agents",
-        "id": "acb12cb0-0fd3-11ea-af46-9724fc51c031",
+        "id": "a74ad480-1062-11ea-9b88-0f163d773341",
         "attributes": {
           "local_metadata": "{\"key\":\"local1\"}",
           "user_provided_metadata": "{\"key\":\"user1\"}",
@@ -974,7 +974,7 @@ exports['Agent lib checkin should return the full policy for this agent - find:"
           "access_api_key_id": "key1"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:33:59.803Z",
+        "updated_at": "2019-11-26T15:37:28.776Z",
         "version": "WzM1LDFd"
       }
     ]
@@ -983,12 +983,12 @@ exports['Agent lib checkin should return the full policy for this agent - find:"
 
 exports['Agent lib checkin should return the full policy for this agent - update:agents (5)'] = {
   "results": {
-    "id": "acb12cb0-0fd3-11ea-af46-9724fc51c031",
+    "id": "a74ad480-1062-11ea-9b88-0f163d773341",
     "type": "agents",
-    "updated_at": "2019-11-25T22:34:00.827Z",
+    "updated_at": "2019-11-26T15:37:29.804Z",
     "version": "WzM2LDFd",
     "attributes": {
-      "last_checkin": "2019-11-25T22:34:00.825Z",
+      "last_checkin": "2019-11-26T15:37:29.802Z",
       "actions": []
     }
   }
@@ -1002,7 +1002,7 @@ exports['Agent lib checkin should update agent metadata if provided - find:"agen
     "saved_objects": [
       {
         "type": "agents",
-        "id": "acb12cb0-0fd3-11ea-af46-9724fc51c031",
+        "id": "a74ad480-1062-11ea-9b88-0f163d773341",
         "attributes": {
           "local_metadata": "{\"key\":\"local1\"}",
           "user_provided_metadata": "{\"key\":\"user1\"}",
@@ -1010,10 +1010,10 @@ exports['Agent lib checkin should update agent metadata if provided - find:"agen
           "active": true,
           "policy_id": "policy:1",
           "access_api_key_id": "key1",
-          "last_checkin": "2019-11-25T22:34:00.825Z"
+          "last_checkin": "2019-11-26T15:37:29.802Z"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:34:00.827Z",
+        "updated_at": "2019-11-26T15:37:29.804Z",
         "version": "WzM2LDFd"
       }
     ]
@@ -1027,7 +1027,7 @@ exports['Agent lib checkin should update agent metadata if provided - delete (2)
 exports['Agent lib checkin should update agent metadata if provided - create:agents (3)'] = {
   "results": {
     "type": "agents",
-    "id": "ae824330-0fd3-11ea-af46-9724fc51c031",
+    "id": "a91c8740-1062-11ea-9b88-0f163d773341",
     "attributes": {
       "local_metadata": "{\"key\":\"local1\"}",
       "user_provided_metadata": "{\"key\":\"user1\"}",
@@ -1037,7 +1037,7 @@ exports['Agent lib checkin should update agent metadata if provided - create:age
       "access_api_key_id": "key1"
     },
     "references": [],
-    "updated_at": "2019-11-25T22:34:02.851Z",
+    "updated_at": "2019-11-26T15:37:31.828Z",
     "version": "WzM4LDFd"
   }
 }
@@ -1050,7 +1050,7 @@ exports['Agent lib checkin should update agent metadata if provided - find:"agen
     "saved_objects": [
       {
         "type": "agents",
-        "id": "ae824330-0fd3-11ea-af46-9724fc51c031",
+        "id": "a91c8740-1062-11ea-9b88-0f163d773341",
         "attributes": {
           "local_metadata": "{\"key\":\"local1\"}",
           "user_provided_metadata": "{\"key\":\"user1\"}",
@@ -1060,7 +1060,7 @@ exports['Agent lib checkin should update agent metadata if provided - find:"agen
           "access_api_key_id": "key1"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:34:02.851Z",
+        "updated_at": "2019-11-26T15:37:31.828Z",
         "version": "WzM4LDFd"
       }
     ]
@@ -1069,12 +1069,12 @@ exports['Agent lib checkin should update agent metadata if provided - find:"agen
 
 exports['Agent lib checkin should update agent metadata if provided - update:agents (5)'] = {
   "results": {
-    "id": "ae824330-0fd3-11ea-af46-9724fc51c031",
+    "id": "a91c8740-1062-11ea-9b88-0f163d773341",
     "type": "agents",
-    "updated_at": "2019-11-25T22:34:03.866Z",
+    "updated_at": "2019-11-26T15:37:32.856Z",
     "version": "WzM5LDFd",
     "attributes": {
-      "last_checkin": "2019-11-25T22:34:03.865Z",
+      "last_checkin": "2019-11-26T15:37:32.854Z",
       "actions": [],
       "local_metadata": "{\"key\":\"local2\"}"
     }
@@ -1083,9 +1083,9 @@ exports['Agent lib checkin should update agent metadata if provided - update:age
 
 exports['Agent lib checkin should update agent metadata if provided - get:agents (6)'] = {
   "results": {
-    "id": "ae824330-0fd3-11ea-af46-9724fc51c031",
+    "id": "a91c8740-1062-11ea-9b88-0f163d773341",
     "type": "agents",
-    "updated_at": "2019-11-25T22:34:03.866Z",
+    "updated_at": "2019-11-26T15:37:32.856Z",
     "version": "WzM5LDFd",
     "attributes": {
       "local_metadata": "{\"key\":\"local2\"}",
@@ -1094,7 +1094,7 @@ exports['Agent lib checkin should update agent metadata if provided - get:agents
       "active": true,
       "policy_id": "policy:1",
       "access_api_key_id": "key1",
-      "last_checkin": "2019-11-25T22:34:03.865Z"
+      "last_checkin": "2019-11-26T15:37:32.854Z"
     },
     "references": []
   }
@@ -1108,7 +1108,7 @@ exports['Agent lib checkin should return new actions - find:"agents" (1)'] = {
     "saved_objects": [
       {
         "type": "agents",
-        "id": "ae824330-0fd3-11ea-af46-9724fc51c031",
+        "id": "a91c8740-1062-11ea-9b88-0f163d773341",
         "attributes": {
           "local_metadata": "{\"key\":\"local2\"}",
           "user_provided_metadata": "{\"key\":\"user1\"}",
@@ -1116,10 +1116,10 @@ exports['Agent lib checkin should return new actions - find:"agents" (1)'] = {
           "active": true,
           "policy_id": "policy:1",
           "access_api_key_id": "key1",
-          "last_checkin": "2019-11-25T22:34:03.865Z"
+          "last_checkin": "2019-11-26T15:37:32.854Z"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:34:03.866Z",
+        "updated_at": "2019-11-26T15:37:32.856Z",
         "version": "WzM5LDFd"
       }
     ]
@@ -1133,7 +1133,7 @@ exports['Agent lib checkin should return new actions - delete (2)'] = {
 exports['Agent lib checkin should return new actions - create:agents (3)'] = {
   "results": {
     "type": "agents",
-    "id": "b0546b20-0fd3-11ea-af46-9724fc51c031",
+    "id": "aaf1e380-1062-11ea-9b88-0f163d773341",
     "attributes": {
       "active": true,
       "policy_id": "policy:1",
@@ -1155,7 +1155,7 @@ exports['Agent lib checkin should return new actions - create:agents (3)'] = {
       "user_provided_metadata": "{}"
     },
     "references": [],
-    "updated_at": "2019-11-25T22:34:05.906Z",
+    "updated_at": "2019-11-26T15:37:34.904Z",
     "version": "WzQxLDFd"
   }
 }
@@ -1168,7 +1168,7 @@ exports['Agent lib checkin should return new actions - find:"agents" (4)'] = {
     "saved_objects": [
       {
         "type": "agents",
-        "id": "b0546b20-0fd3-11ea-af46-9724fc51c031",
+        "id": "aaf1e380-1062-11ea-9b88-0f163d773341",
         "attributes": {
           "active": true,
           "policy_id": "policy:1",
@@ -1190,7 +1190,7 @@ exports['Agent lib checkin should return new actions - find:"agents" (4)'] = {
           "user_provided_metadata": "{}"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:34:05.906Z",
+        "updated_at": "2019-11-26T15:37:34.904Z",
         "version": "WzQxLDFd"
       }
     ]
@@ -1199,18 +1199,18 @@ exports['Agent lib checkin should return new actions - find:"agents" (4)'] = {
 
 exports['Agent lib checkin should return new actions - update:agents (5)'] = {
   "results": {
-    "id": "b0546b20-0fd3-11ea-af46-9724fc51c031",
+    "id": "aaf1e380-1062-11ea-9b88-0f163d773341",
     "type": "agents",
-    "updated_at": "2019-11-25T22:34:06.926Z",
+    "updated_at": "2019-11-26T15:37:35.924Z",
     "version": "WzQyLDFd",
     "attributes": {
-      "last_checkin": "2019-11-25T22:34:06.923Z",
+      "last_checkin": "2019-11-26T15:37:35.922Z",
       "actions": [
         {
           "created_at": "2019-09-05T15:43:26+0000",
           "type": "PAUSE",
           "id": "this-a-unique-id",
-          "sent_at": "2019-11-25T22:34:06.923Z"
+          "sent_at": "2019-11-26T15:37:35.922Z"
         }
       ]
     }
@@ -1225,14 +1225,14 @@ exports['Agent lib unenroll should set the list of agents as inactive - find:"ag
     "saved_objects": [
       {
         "type": "agents",
-        "id": "b0546b20-0fd3-11ea-af46-9724fc51c031",
+        "id": "aaf1e380-1062-11ea-9b88-0f163d773341",
         "attributes": {
           "active": true,
           "policy_id": "policy:1",
           "access_api_key_id": "key1",
           "actions": [
             {
-              "sent_at": "2019-11-25T22:34:06.923Z",
+              "sent_at": "2019-11-26T15:37:35.922Z",
               "created_at": "2019-09-05T15:43:26+0000",
               "id": "this-a-unique-id",
               "type": "PAUSE"
@@ -1240,10 +1240,10 @@ exports['Agent lib unenroll should set the list of agents as inactive - find:"ag
           ],
           "local_metadata": "{}",
           "user_provided_metadata": "{}",
-          "last_checkin": "2019-11-25T22:34:06.923Z"
+          "last_checkin": "2019-11-26T15:37:35.922Z"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:34:06.926Z",
+        "updated_at": "2019-11-26T15:37:35.924Z",
         "version": "WzQyLDFd"
       }
     ]
@@ -1257,7 +1257,7 @@ exports['Agent lib unenroll should set the list of agents as inactive - delete (
 exports['Agent lib unenroll should set the list of agents as inactive - create:agents (3)'] = {
   "results": {
     "type": "agents",
-    "id": "b224be50-0fd3-11ea-af46-9724fc51c031",
+    "id": "acc39640-1062-11ea-9b88-0f163d773341",
     "attributes": {
       "local_metadata": "{\"key\":\"local1\"}",
       "user_provided_metadata": "{\"key\":\"user1\"}",
@@ -1266,7 +1266,7 @@ exports['Agent lib unenroll should set the list of agents as inactive - create:a
       "policy_id": "policy:1"
     },
     "references": [],
-    "updated_at": "2019-11-25T22:34:08.949Z",
+    "updated_at": "2019-11-26T15:37:37.956Z",
     "version": "WzQ0LDFd"
   }
 }
@@ -1274,7 +1274,7 @@ exports['Agent lib unenroll should set the list of agents as inactive - create:a
 exports['Agent lib unenroll should set the list of agents as inactive - create:agents (4)'] = {
   "results": {
     "type": "agents",
-    "id": "b2c06210-0fd3-11ea-af46-9724fc51c031",
+    "id": "ad784040-1062-11ea-9b88-0f163d773341",
     "attributes": {
       "local_metadata": "{\"key\":\"local1\"}",
       "user_provided_metadata": "{\"key\":\"user1\"}",
@@ -1283,16 +1283,16 @@ exports['Agent lib unenroll should set the list of agents as inactive - create:a
       "policy_id": "policy:1"
     },
     "references": [],
-    "updated_at": "2019-11-25T22:34:09.969Z",
+    "updated_at": "2019-11-26T15:37:39.140Z",
     "version": "WzQ1LDFd"
   }
 }
 
 exports['Agent lib unenroll should set the list of agents as inactive - update:agents (5)'] = {
   "results": {
-    "id": "b224be50-0fd3-11ea-af46-9724fc51c031",
+    "id": "acc39640-1062-11ea-9b88-0f163d773341",
     "type": "agents",
-    "updated_at": "2019-11-25T22:34:10.987Z",
+    "updated_at": "2019-11-26T15:37:40.163Z",
     "version": "WzQ2LDFd",
     "attributes": {
       "active": false
@@ -1302,9 +1302,9 @@ exports['Agent lib unenroll should set the list of agents as inactive - update:a
 
 exports['Agent lib unenroll should set the list of agents as inactive - update:agents (6)'] = {
   "results": {
-    "id": "b2c06210-0fd3-11ea-af46-9724fc51c031",
+    "id": "ad784040-1062-11ea-9b88-0f163d773341",
     "type": "agents",
-    "updated_at": "2019-11-25T22:34:12.012Z",
+    "updated_at": "2019-11-26T15:37:41.196Z",
     "version": "WzQ3LDFd",
     "attributes": {
       "active": false
@@ -1314,9 +1314,9 @@ exports['Agent lib unenroll should set the list of agents as inactive - update:a
 
 exports['Agent lib unenroll should set the list of agents as inactive - get:agents (7)'] = {
   "results": {
-    "id": "b224be50-0fd3-11ea-af46-9724fc51c031",
+    "id": "acc39640-1062-11ea-9b88-0f163d773341",
     "type": "agents",
-    "updated_at": "2019-11-25T22:34:10.987Z",
+    "updated_at": "2019-11-26T15:37:40.163Z",
     "version": "WzQ2LDFd",
     "attributes": {
       "local_metadata": "{\"key\":\"local1\"}",
@@ -1331,9 +1331,9 @@ exports['Agent lib unenroll should set the list of agents as inactive - get:agen
 
 exports['Agent lib unenroll should set the list of agents as inactive - get:agents (8)'] = {
   "results": {
-    "id": "b2c06210-0fd3-11ea-af46-9724fc51c031",
+    "id": "ad784040-1062-11ea-9b88-0f163d773341",
     "type": "agents",
-    "updated_at": "2019-11-25T22:34:12.012Z",
+    "updated_at": "2019-11-26T15:37:41.196Z",
     "version": "WzQ3LDFd",
     "attributes": {
       "local_metadata": "{\"key\":\"local1\"}",
@@ -1354,7 +1354,7 @@ exports['Agent lib unenrollForPolicy should set all the of agents for this polic
     "saved_objects": [
       {
         "type": "agents",
-        "id": "b224be50-0fd3-11ea-af46-9724fc51c031",
+        "id": "acc39640-1062-11ea-9b88-0f163d773341",
         "attributes": {
           "local_metadata": "{\"key\":\"local1\"}",
           "user_provided_metadata": "{\"key\":\"user1\"}",
@@ -1363,12 +1363,12 @@ exports['Agent lib unenrollForPolicy should set all the of agents for this polic
           "policy_id": "policy:1"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:34:10.987Z",
+        "updated_at": "2019-11-26T15:37:40.163Z",
         "version": "WzQ2LDFd"
       },
       {
         "type": "agents",
-        "id": "b2c06210-0fd3-11ea-af46-9724fc51c031",
+        "id": "ad784040-1062-11ea-9b88-0f163d773341",
         "attributes": {
           "local_metadata": "{\"key\":\"local1\"}",
           "user_provided_metadata": "{\"key\":\"user1\"}",
@@ -1377,7 +1377,7 @@ exports['Agent lib unenrollForPolicy should set all the of agents for this polic
           "policy_id": "policy:1"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:34:12.012Z",
+        "updated_at": "2019-11-26T15:37:41.196Z",
         "version": "WzQ3LDFd"
       }
     ]
@@ -1395,7 +1395,7 @@ exports['Agent lib unenrollForPolicy should set all the of agents for this polic
 exports['Agent lib unenrollForPolicy should set all the of agents for this policy as inactive - create:agents (4)'] = {
   "results": {
     "type": "agents",
-    "id": "b5cabbe0-0fd3-11ea-af46-9724fc51c031",
+    "id": "b0850b10-1062-11ea-9b88-0f163d773341",
     "attributes": {
       "local_metadata": "{\"key\":\"local1\"}",
       "user_provided_metadata": "{\"key\":\"user1\"}",
@@ -1404,7 +1404,7 @@ exports['Agent lib unenrollForPolicy should set all the of agents for this polic
       "policy_id": "policy:1"
     },
     "references": [],
-    "updated_at": "2019-11-25T22:34:15.070Z",
+    "updated_at": "2019-11-26T15:37:44.257Z",
     "version": "WzUwLDFd"
   }
 }
@@ -1412,7 +1412,7 @@ exports['Agent lib unenrollForPolicy should set all the of agents for this polic
 exports['Agent lib unenrollForPolicy should set all the of agents for this policy as inactive - create:agents (5)'] = {
   "results": {
     "type": "agents",
-    "id": "b6654e30-0fd3-11ea-af46-9724fc51c031",
+    "id": "b11fc470-1062-11ea-9b88-0f163d773341",
     "attributes": {
       "local_metadata": "{\"key\":\"local1\"}",
       "user_provided_metadata": "{\"key\":\"user1\"}",
@@ -1421,7 +1421,7 @@ exports['Agent lib unenrollForPolicy should set all the of agents for this polic
       "policy_id": "policy:1"
     },
     "references": [],
-    "updated_at": "2019-11-25T22:34:16.083Z",
+    "updated_at": "2019-11-26T15:37:45.271Z",
     "version": "WzUxLDFd"
   }
 }
@@ -1434,7 +1434,7 @@ exports['Agent lib unenrollForPolicy should set all the of agents for this polic
     "saved_objects": [
       {
         "type": "agents",
-        "id": "b5cabbe0-0fd3-11ea-af46-9724fc51c031",
+        "id": "b0850b10-1062-11ea-9b88-0f163d773341",
         "attributes": {
           "local_metadata": "{\"key\":\"local1\"}",
           "user_provided_metadata": "{\"key\":\"user1\"}",
@@ -1443,12 +1443,12 @@ exports['Agent lib unenrollForPolicy should set all the of agents for this polic
           "policy_id": "policy:1"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:34:15.070Z",
+        "updated_at": "2019-11-26T15:37:44.257Z",
         "version": "WzUwLDFd"
       },
       {
         "type": "agents",
-        "id": "b6654e30-0fd3-11ea-af46-9724fc51c031",
+        "id": "b11fc470-1062-11ea-9b88-0f163d773341",
         "attributes": {
           "local_metadata": "{\"key\":\"local1\"}",
           "user_provided_metadata": "{\"key\":\"user1\"}",
@@ -1457,7 +1457,7 @@ exports['Agent lib unenrollForPolicy should set all the of agents for this polic
           "policy_id": "policy:1"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:34:16.083Z",
+        "updated_at": "2019-11-26T15:37:45.271Z",
         "version": "WzUxLDFd"
       }
     ]
@@ -1466,9 +1466,9 @@ exports['Agent lib unenrollForPolicy should set all the of agents for this polic
 
 exports['Agent lib unenrollForPolicy should set all the of agents for this policy as inactive - update:agents (7)'] = {
   "results": {
-    "id": "b5cabbe0-0fd3-11ea-af46-9724fc51c031",
+    "id": "b0850b10-1062-11ea-9b88-0f163d773341",
     "type": "agents",
-    "updated_at": "2019-11-25T22:34:17.140Z",
+    "updated_at": "2019-11-26T15:37:46.344Z",
     "version": "WzUyLDFd",
     "attributes": {
       "active": false
@@ -1478,9 +1478,9 @@ exports['Agent lib unenrollForPolicy should set all the of agents for this polic
 
 exports['Agent lib unenrollForPolicy should set all the of agents for this policy as inactive - update:agents (8)'] = {
   "results": {
-    "id": "b6654e30-0fd3-11ea-af46-9724fc51c031",
+    "id": "b11fc470-1062-11ea-9b88-0f163d773341",
     "type": "agents",
-    "updated_at": "2019-11-25T22:34:18.112Z",
+    "updated_at": "2019-11-26T15:37:47.322Z",
     "version": "WzUzLDFd",
     "attributes": {
       "active": false
@@ -1499,9 +1499,9 @@ exports['Agent lib unenrollForPolicy should set all the of agents for this polic
 
 exports['Agent lib unenrollForPolicy should set all the of agents for this policy as inactive - get:agents (10)'] = {
   "results": {
-    "id": "b5cabbe0-0fd3-11ea-af46-9724fc51c031",
+    "id": "b0850b10-1062-11ea-9b88-0f163d773341",
     "type": "agents",
-    "updated_at": "2019-11-25T22:34:17.140Z",
+    "updated_at": "2019-11-26T15:37:46.344Z",
     "version": "WzUyLDFd",
     "attributes": {
       "local_metadata": "{\"key\":\"local1\"}",
@@ -1516,9 +1516,9 @@ exports['Agent lib unenrollForPolicy should set all the of agents for this polic
 
 exports['Agent lib unenrollForPolicy should set all the of agents for this policy as inactive - get:agents (11)'] = {
   "results": {
-    "id": "b6654e30-0fd3-11ea-af46-9724fc51c031",
+    "id": "b11fc470-1062-11ea-9b88-0f163d773341",
     "type": "agents",
-    "updated_at": "2019-11-25T22:34:18.112Z",
+    "updated_at": "2019-11-26T15:37:47.322Z",
     "version": "WzUzLDFd",
     "attributes": {
       "local_metadata": "{\"key\":\"local1\"}",
@@ -1539,7 +1539,7 @@ exports['Agent lib addAction should throw if the agent do not exists - find:"age
     "saved_objects": [
       {
         "type": "agents",
-        "id": "b5cabbe0-0fd3-11ea-af46-9724fc51c031",
+        "id": "b0850b10-1062-11ea-9b88-0f163d773341",
         "attributes": {
           "local_metadata": "{\"key\":\"local1\"}",
           "user_provided_metadata": "{\"key\":\"user1\"}",
@@ -1548,12 +1548,12 @@ exports['Agent lib addAction should throw if the agent do not exists - find:"age
           "policy_id": "policy:1"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:34:17.140Z",
+        "updated_at": "2019-11-26T15:37:46.344Z",
         "version": "WzUyLDFd"
       },
       {
         "type": "agents",
-        "id": "b6654e30-0fd3-11ea-af46-9724fc51c031",
+        "id": "b11fc470-1062-11ea-9b88-0f163d773341",
         "attributes": {
           "local_metadata": "{\"key\":\"local1\"}",
           "user_provided_metadata": "{\"key\":\"user1\"}",
@@ -1562,7 +1562,7 @@ exports['Agent lib addAction should throw if the agent do not exists - find:"age
           "policy_id": "policy:1"
         },
         "references": [],
-        "updated_at": "2019-11-25T22:34:18.112Z",
+        "updated_at": "2019-11-26T15:37:47.322Z",
         "version": "WzUzLDFd"
       }
     ]
@@ -1593,7 +1593,7 @@ exports['Agent lib getAgentsStatusForPolicy should return all agents - find:"age
 exports['Agent lib getAgentsStatusForPolicy should return all agents - create:agents (2)'] = {
   "results": {
     "type": "agents",
-    "id": "b96cc1d0-0fd3-11ea-af46-9724fc51c031",
+    "id": "b4312320-1062-11ea-9b88-0f163d773341",
     "attributes": {
       "type": "PERMANENT",
       "active": true,
@@ -1602,7 +1602,7 @@ exports['Agent lib getAgentsStatusForPolicy should return all agents - create:ag
       "user_provided_metadata": "{}"
     },
     "references": [],
-    "updated_at": "2019-11-25T22:34:21.165Z",
+    "updated_at": "2019-11-26T15:37:50.418Z",
     "version": "WzU2LDFd"
   }
 }
@@ -1610,7 +1610,7 @@ exports['Agent lib getAgentsStatusForPolicy should return all agents - create:ag
 exports['Agent lib getAgentsStatusForPolicy should return all agents - create:agents (3)'] = {
   "results": {
     "type": "agents",
-    "id": "ba1584f0-0fd3-11ea-af46-9724fc51c031",
+    "id": "b4c9b9a0-1062-11ea-9b88-0f163d773341",
     "attributes": {
       "type": "PERMANENT",
       "active": true,
@@ -1619,7 +1619,7 @@ exports['Agent lib getAgentsStatusForPolicy should return all agents - create:ag
       "user_provided_metadata": "{}"
     },
     "references": [],
-    "updated_at": "2019-11-25T22:34:22.271Z",
+    "updated_at": "2019-11-26T15:37:51.418Z",
     "version": "WzU3LDFd"
   }
 }
@@ -1627,7 +1627,7 @@ exports['Agent lib getAgentsStatusForPolicy should return all agents - create:ag
 exports['Agent lib getAgentsStatusForPolicy should return all agents - create:agents (4)'] = {
   "results": {
     "type": "agents",
-    "id": "bab26130-0fd3-11ea-af46-9724fc51c031",
+    "id": "b56891b0-1062-11ea-9b88-0f163d773341",
     "attributes": {
       "type": "TEMPORARY",
       "active": true,
@@ -1636,7 +1636,7 @@ exports['Agent lib getAgentsStatusForPolicy should return all agents - create:ag
       "user_provided_metadata": "{}"
     },
     "references": [],
-    "updated_at": "2019-11-25T22:34:23.299Z",
+    "updated_at": "2019-11-26T15:37:52.459Z",
     "version": "WzU4LDFd"
   }
 }
@@ -1644,17 +1644,17 @@ exports['Agent lib getAgentsStatusForPolicy should return all agents - create:ag
 exports['Agent lib getAgentsStatusForPolicy should return all agents - create:agents (5)'] = {
   "results": {
     "type": "agents",
-    "id": "bb4db6d0-0fd3-11ea-af46-9724fc51c031",
+    "id": "b60239a0-1062-11ea-9b88-0f163d773341",
     "attributes": {
       "type": "PERMANENT",
       "active": true,
       "policy_id": "policy:1",
-      "last_checkin": "2019-11-25T22:29:21.163Z",
+      "last_checkin": "2019-11-26T15:32:50.415Z",
       "local_metadata": "{}",
       "user_provided_metadata": "{}"
     },
     "references": [],
-    "updated_at": "2019-11-25T22:34:24.317Z",
+    "updated_at": "2019-11-26T15:37:53.466Z",
     "version": "WzU5LDFd"
   }
 }
@@ -1662,17 +1662,17 @@ exports['Agent lib getAgentsStatusForPolicy should return all agents - create:ag
 exports['Agent lib getAgentsStatusForPolicy should return all agents - create:agents (6)'] = {
   "results": {
     "type": "agents",
-    "id": "bbe87030-0fd3-11ea-af46-9724fc51c031",
+    "id": "b69e2b80-1062-11ea-9b88-0f163d773341",
     "attributes": {
       "type": "PERMANENT",
       "active": true,
       "policy_id": "policy:1",
-      "last_checkin": "2019-11-25T22:34:21.163Z",
+      "last_checkin": "2019-11-26T15:37:50.415Z",
       "local_metadata": "{}",
       "user_provided_metadata": "{}"
     },
     "references": [],
-    "updated_at": "2019-11-25T22:34:25.331Z",
+    "updated_at": "2019-11-26T15:37:54.488Z",
     "version": "WzYwLDFd"
   }
 }
@@ -1680,17 +1680,17 @@ exports['Agent lib getAgentsStatusForPolicy should return all agents - create:ag
 exports['Agent lib getAgentsStatusForPolicy should return all agents - create:agents (7)'] = {
   "results": {
     "type": "agents",
-    "id": "bc81ca00-0fd3-11ea-af46-9724fc51c031",
+    "id": "b739a830-1062-11ea-9b88-0f163d773341",
     "attributes": {
       "type": "PERMANENT",
       "active": true,
       "policy_id": "policy:1",
-      "last_checkin": "2019-11-25T22:34:21.163Z",
+      "last_checkin": "2019-11-26T15:37:50.415Z",
       "local_metadata": "{}",
       "user_provided_metadata": "{}"
     },
     "references": [],
-    "updated_at": "2019-11-25T22:34:26.336Z",
+    "updated_at": "2019-11-26T15:37:55.506Z",
     "version": "WzYxLDFd"
   }
 }
@@ -1698,17 +1698,17 @@ exports['Agent lib getAgentsStatusForPolicy should return all agents - create:ag
 exports['Agent lib getAgentsStatusForPolicy should return all agents - create:agents (8)'] = {
   "results": {
     "type": "agents",
-    "id": "bd1e5820-0fd3-11ea-af46-9724fc51c031",
+    "id": "b7d4fdd0-1062-11ea-9b88-0f163d773341",
     "attributes": {
       "type": "TEMPORARY",
       "active": true,
       "policy_id": "policy:1",
-      "last_checkin": "2019-11-25T22:29:21.163Z",
+      "last_checkin": "2019-11-26T15:32:50.415Z",
       "local_metadata": "{}",
       "user_provided_metadata": "{}"
     },
     "references": [],
-    "updated_at": "2019-11-25T22:34:27.361Z",
+    "updated_at": "2019-11-26T15:37:56.525Z",
     "version": "WzYyLDFd"
   }
 }
@@ -1716,17 +1716,17 @@ exports['Agent lib getAgentsStatusForPolicy should return all agents - create:ag
 exports['Agent lib getAgentsStatusForPolicy should return all agents - create:agents (9)'] = {
   "results": {
     "type": "agents",
-    "id": "bdba7110-0fd3-11ea-af46-9724fc51c031",
+    "id": "b86fb730-1062-11ea-9b88-0f163d773341",
     "attributes": {
       "type": "TEMPORARY",
       "active": true,
       "policy_id": "policy:1",
-      "last_checkin": "2019-11-25T22:34:21.163Z",
+      "last_checkin": "2019-11-26T15:37:50.415Z",
       "local_metadata": "{}",
       "user_provided_metadata": "{}"
     },
     "references": [],
-    "updated_at": "2019-11-25T22:34:28.385Z",
+    "updated_at": "2019-11-26T15:37:57.539Z",
     "version": "WzYzLDFd"
   }
 }
@@ -1740,20 +1740,20 @@ exports['Agent lib getAgentsStatusForPolicy should return all agents - find:"age
   }
 }
 
-exports['Agent lib getAgentsStatusForPolicy should return all agents - find:"agents" (11)'] = {
-  "results": {
-    "page": 1,
-    "per_page": 0,
-    "total": 1,
-    "saved_objects": []
-  }
-}
-
 exports['Agent lib getAgentsStatusForPolicy should return all agents - find:"agents" (10)'] = {
   "results": {
     "page": 1,
     "per_page": 0,
     "total": 5,
+    "saved_objects": []
+  }
+}
+
+exports['Agent lib getAgentsStatusForPolicy should return all agents - find:"agents" (11)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 0,
+    "total": 1,
     "saved_objects": []
   }
 }

@@ -3,15 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { SFC } from 'react';
+import { EuiCallOut, EuiPageBody, EuiPageContent, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiPageBody, EuiPageContent, EuiCallOut, EuiText, EuiSpacer } from '@elastic/eui';
+import useInterval from '@use-it/interval';
+import React, { SFC, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
+import { AGENT_POLLING_INTERVAL } from '../../../common/constants/agent';
 import { Loading } from '../../components/loading';
 import { AgentEventsTable } from './components/agent_events_table';
 import { AgentDetailSection } from './components/details_section';
-import { useGetAgent, AgentRefreshContext } from './hooks/use_agent';
+import { AgentRefreshContext, useGetAgent } from './hooks/use_agent';
 
 export const Layout: SFC = ({ children }) => (
   <EuiPageBody>
@@ -28,7 +30,16 @@ export const AgentDetailsPage: SFC<Props> = ({
     params: { agentId },
   },
 }) => {
+  const [lastPolledAgentsMs, setLastPolledAgentsMs] = useState<number>(0);
   const { agent, isLoading, error, refreshAgent } = useGetAgent(agentId);
+
+  // Poll for agents on interval
+  useInterval(() => {
+    if (new Date().getTime() - lastPolledAgentsMs >= AGENT_POLLING_INTERVAL) {
+      setLastPolledAgentsMs(new Date().getTime());
+      refreshAgent();
+    }
+  }, AGENT_POLLING_INTERVAL);
 
   if (isLoading) {
     return <Loading />;

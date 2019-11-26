@@ -5,6 +5,7 @@
  */
 
 import { IngestPlugin, PoliciesRepository as PoliciesRepositoryType } from './types';
+import { FrameworkUser } from '../../adapters/framework/adapter_types';
 
 export class PoliciesRepository implements PoliciesRepositoryType {
   constructor(private readonly plugin?: IngestPlugin) {}
@@ -14,9 +15,17 @@ export class PoliciesRepository implements PoliciesRepositoryType {
    *
    * @param id
    */
-  async getFullPolicy(id: string) {
+  async getPolicyOutputByIDs(user: FrameworkUser, ids: string[]) {
     if (this.plugin) {
-      return await this.plugin.getFull(id);
+      return await this.plugin.getPolicyOutputByIDs(user, ids);
+    }
+
+    return [];
+  }
+
+  async get(user: FrameworkUser, id: string) {
+    if (this.plugin) {
+      return await this.plugin.getPolicyById(user, id);
     }
 
     return null;

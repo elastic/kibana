@@ -5,13 +5,13 @@
  */
 
 import Slapshot from '@mattapperson/slapshot';
-import { Agent } from '../repositories/agents/types';
+import { SavedObject } from 'kibana/server';
 import { FrameworkUser, internalAuthData } from '../adapters/framework/adapter_types';
-import { compose } from './compose/memorized';
-import { FleetServerLib } from './types';
 import { SODatabaseAdapter } from '../adapters/saved_objects_database/default';
 import { MemorizeSODatabaseAdapter } from '../adapters/saved_objects_database/memorize_adapter';
-import { SavedObject } from 'kibana/server';
+import { Agent } from '../repositories/agents/types';
+import { compose } from './compose/memorized';
+import { FleetServerLib } from './types';
 import { AGENT_POLLING_THRESHOLD_MS } from '../../common/constants';
 
 jest.mock('./api_keys');
@@ -323,26 +323,6 @@ describe('Agent lib', () => {
         JSON.parse((refreshAgent as SavedObject).attributes.local_metadata as string)
       ).toMatchObject({
         key: 'local1',
-      });
-    });
-
-    it('should return the full policy for this agent', async () => {
-      const { agents } = libs;
-      await loadFixtures([
-        {
-          local_metadata: { key: 'local1' },
-          user_provided_metadata: { key: 'user1' },
-          actions: [],
-          active: true,
-          policy_id: 'policy:1',
-          access_api_key_id: 'key1',
-        },
-      ]);
-
-      const { policy } = await agents.checkin(getUser('VALID_KEY', 'key1'), []);
-
-      expect(policy).toMatchObject({
-        id: 'policy:1',
       });
     });
 
