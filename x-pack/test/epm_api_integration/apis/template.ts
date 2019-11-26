@@ -26,16 +26,11 @@ export default function({ getService }: FtrProviderContext) {
       });
       // Checks if template loading worked as expected
       expect(response).to.eql({ acknowledged: true });
-      const { body: indexTemplate } = await es.indices.getTemplate({ name: templateName });
-      expect(indexTemplate[templateName].index_patterns).to.eql([indexPattern]);
-
-      expect(response).to.eql({ acknowledged: true });
-
-      const { body: indexTemplate } = await es.indices.getTemplate({ name: templateName });
+      const { body } = await es.indices.getTemplate({ name: templateName });
       // Checks if the content of the template that was loaded is as expected
       // We already know based on the above test that the template was valid
       // but we check here also if we wrote the index pattern inside the template as expected
-      expect(indexTemplate[templateName].index_patterns).to.eql([indexPattern]);
+      expect(body[templateName].index_patterns).to.eql([indexPattern]);
     });
   });
 }
