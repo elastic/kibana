@@ -17,4 +17,6 @@
  * under the License.
  */
 
-export * from './filter_bar';
+export { IndexPatternSelect } from './index_pattern_select';
+export { FilterBar } from './filter_bar';
+export { applyFiltersPopover } from './apply_filters';
