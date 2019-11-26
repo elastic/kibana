@@ -23,7 +23,11 @@ export const useLogHighlightsState = ({
   sourceVersion: string | undefined;
 }) => {
   const [highlightTerms, setHighlightTerms] = useState<string[]>([]);
-  const { entriesStart: startKey, entriesEnd: endKey } = useStore().logEntries;
+  const [
+    {
+      logEntries: { entriesStart: startKey, entriesEnd: endKey },
+    },
+  ] = useStore();
   const {
     filterQuery,
     visibleMidpoint,

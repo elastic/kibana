@@ -106,7 +106,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                   items={items}
                   jumpToTarget={jumpToTargetPosition}
                   lastLoadedTime={lastLoadedTime}
-                  loadNewerItems={loadNewerEntries}
+                  loadNewerItems={fetchNewerEntries}
                   reportVisibleInterval={reportVisiblePositions}
                   scale={textScale}
                   target={targetPosition}
