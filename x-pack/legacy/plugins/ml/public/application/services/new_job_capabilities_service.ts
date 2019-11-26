@@ -38,7 +38,7 @@ export function loadNewJobCapabilities(
       // saved search is being used
       // load the index pattern from the saved search
       const savedSearch = await savedSearches.get(savedSearchId);
-      const indexPattern = savedSearch.searchSource.getField('index');
+      const indexPattern = savedSearch.searchSource.getField('index')!;
       await newJobCapsService.initializeFromIndexPattern(indexPattern);
       resolve(newJobCapsService.newJobCaps);
     } else {

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Observable } from 'rxjs';
 import { Annotation } from '../../../../common/types/annotations';
 import { AggFieldNamePair } from '../../../../common/types/fields';
 import { ExistingJobsAndGroups } from '../job_service';
@@ -15,6 +16,7 @@ import { DataFrameAnalyticsStats } from '../../data_frame_analytics/pages/analyt
 import { JobMessage } from '../../../../common/types/audit_message';
 import { DataFrameAnalyticsConfig } from '../../data_frame_analytics/common/analytics';
 import { DeepPartial } from '../../../../common/types/common';
+import { annotations } from './annotations';
 import { Calendar, UpdateCalendar } from '../../../../common/types/calendars';
 
 // TODO This is not a complete representation of all methods of `ml.*`.
@@ -66,6 +68,7 @@ declare interface Ml {
   annotations: {
     deleteAnnotation(id: string | undefined): Promise<any>;
     indexAnnotation(annotation: Annotation): Promise<object>;
+    getAnnotations: typeof annotations.getAnnotations;
   };
 
   dataFrameAnalytics: {
@@ -93,6 +96,7 @@ declare interface Ml {
   getJobStats(obj: object): Promise<any>;
   getDatafeedStats(obj: object): Promise<any>;
   esSearch(obj: object): any;
+  esSearch$(obj: object): Observable<any>;
   getIndices(): Promise<EsIndex[]>;
   dataRecognizerModuleJobsExist(obj: { moduleId: string }): Promise<any>;
   getDataRecognizerModule(obj: { moduleId: string }): Promise<any>;
@@ -154,6 +158,7 @@ declare interface Ml {
 
   mlNodeCount(): Promise<{ count: number }>;
   mlInfo(): Promise<MlInfoResponse>;
+  getCardinalityOfFields(obj: Record<string, any>): any;
 }
 
 declare const ml: Ml;
