@@ -4,7 +4,7 @@
 
 ## CapabilitiesSetup.registerCapabilitiesSwitcher() method
 
-Register a  to be used when resolving capabilities.
+Register a [CapabilitiesSwitcher](./kibana-plugin-server.capabilitiesswitcher.md) to be used when resolving capabilities.
 
 <b>Signature:</b>
 

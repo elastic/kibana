@@ -48,7 +48,7 @@ import { SavedObjectsClientContract } from './saved_objects/types';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 
 export { bootstrap } from './bootstrap';
-export { Capabilities } from './capabilities';
+export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
 export { ConfigPath, ConfigService, EnvironmentMode, PackageInfo } from './config';
 export {
   IContextContainer,

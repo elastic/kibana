@@ -16,6 +16,6 @@ export interface CapabilitiesSetup
 
 |  Method | Description |
 |  --- | --- |
-|  [registerCapabilitiesProvider(provider)](./kibana-plugin-server.capabilitiessetup.registercapabilitiesprovider.md) | Register a  to be used when resolving capabilities. |
-|  [registerCapabilitiesSwitcher(switcher)](./kibana-plugin-server.capabilitiessetup.registercapabilitiesswitcher.md) | Register a  to be used when resolving capabilities. |
+|  [registerCapabilitiesProvider(provider)](./kibana-plugin-server.capabilitiessetup.registercapabilitiesprovider.md) | Register a [CapabilitiesProvider](./kibana-plugin-server.capabilitiesprovider.md) to be used when resolving capabilities. |
+|  [registerCapabilitiesSwitcher(switcher)](./kibana-plugin-server.capabilitiessetup.registercapabilitiesswitcher.md) | Register a [CapabilitiesSwitcher](./kibana-plugin-server.capabilitiesswitcher.md) to be used when resolving capabilities. |
 

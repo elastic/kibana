@@ -138,6 +138,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AuthenticationHandler](./kibana-plugin-server.authenticationhandler.md) | See [AuthToolkit](./kibana-plugin-server.authtoolkit.md)<!-- -->. |
 |  [AuthHeaders](./kibana-plugin-server.authheaders.md) | Auth Headers map |
 |  [AuthResult](./kibana-plugin-server.authresult.md) |  |
+|  [CapabilitiesProvider](./kibana-plugin-server.capabilitiesprovider.md) | See [CapabilitiesSetup](./kibana-plugin-server.capabilitiessetup.md) |
+|  [CapabilitiesSwitcher](./kibana-plugin-server.capabilitiesswitcher.md) | See [CapabilitiesSetup](./kibana-plugin-server.capabilitiessetup.md) |
 |  [ConfigPath](./kibana-plugin-server.configpath.md) |  |
 |  [ElasticsearchClientConfig](./kibana-plugin-server.elasticsearchclientconfig.md) |  |
 |  [GetAuthHeaders](./kibana-plugin-server.getauthheaders.md) | Get headers to authenticate a user against Elasticsearch. |

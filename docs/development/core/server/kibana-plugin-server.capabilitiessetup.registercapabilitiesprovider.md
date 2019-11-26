@@ -4,7 +4,7 @@
 
 ## CapabilitiesSetup.registerCapabilitiesProvider() method
 
-Register a  to be used when resolving capabilities.
+Register a [CapabilitiesProvider](./kibana-plugin-server.capabilitiesprovider.md) to be used when resolving capabilities.
 
 <b>Signature:</b>
 
