@@ -71,7 +71,7 @@ export function getActionType(): ActionTypeModel {
           )
         );
       }
-      if (action.secrets && !action.secrets.user) {
+      if (!action.secrets.user) {
         errors.user.push(
           i18n.translate(
             'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredHostText',
@@ -81,7 +81,7 @@ export function getActionType(): ActionTypeModel {
           )
         );
       }
-      if (action.secrets && !action.secrets.password) {
+      if (!action.secrets.password) {
         errors.password.push(
           i18n.translate(
             'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredPasswordText',
@@ -113,6 +113,7 @@ const WebhookActionFields: React.FunctionComponent<Props> = ({
   const [headerValue, setHeaderValue] = useState<string>('');
   const [hasHeaders, setHasHeaders] = useState<boolean>(false);
 
+  const { user, password } = action.secrets;
   const { method, url, headers } = action.config;
 
   editActionConfig('method', 'post'); // set method to POST by default
@@ -281,70 +282,69 @@ const WebhookActionFields: React.FunctionComponent<Props> = ({
           </ErrableFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {action.secrets ? (
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem>
-            <ErrableFormRow
-              id="webhookUser"
-              errorKey="user"
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem>
+          <ErrableFormRow
+            id="webhookUser"
+            errorKey="user"
+            fullWidth
+            errors={errors}
+            isShowingErrors={hasErrors === true && user !== undefined}
+            label={i18n.translate(
+              'xpack.triggersActionsUI.sections.actionAdd.webhookAction.userTextFieldLabel',
+              {
+                defaultMessage: 'User',
+              }
+            )}
+          >
+            <EuiFieldText
               fullWidth
-              errors={errors}
-              isShowingErrors={hasErrors === true && action.secrets.user !== undefined}
-              label={i18n.translate(
-                'xpack.triggersActionsUI.sections.actionAdd.webhookAction.userTextFieldLabel',
-                {
-                  defaultMessage: 'User',
+              name="user"
+              value={user || ''}
+              data-test-subj="webhookUserInput"
+              onChange={e => {
+                editActionSecrets('user', e.target.value);
+              }}
+              onBlur={() => {
+                if (!user) {
+                  editActionSecrets('user', '');
                 }
-              )}
-            >
-              <EuiFieldText
-                fullWidth
-                name="user"
-                value={action.secrets.user || ''}
-                data-test-subj="webhookUserInput"
-                onChange={e => {
-                  editActionSecrets('user', e.target.value);
-                }}
-                onBlur={() => {
-                  if (!action.secrets.user) {
-                    editActionSecrets('user', '');
-                  }
-                }}
-              />
-            </ErrableFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <ErrableFormRow
-              id="webhookPassword"
-              errorKey="password"
+              }}
+            />
+          </ErrableFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <ErrableFormRow
+            id="webhookPassword"
+            errorKey="password"
+            fullWidth
+            errors={errors}
+            isShowingErrors={hasErrors === true && password !== undefined}
+            label={i18n.translate(
+              'xpack.triggersActionsUI.sections.actionAdd.webhookAction.passwordTextFieldLabel',
+              {
+                defaultMessage: 'Password',
+              }
+            )}
+          >
+            <EuiFieldPassword
               fullWidth
-              errors={errors}
-              isShowingErrors={hasErrors === true && action.secrets.password !== undefined}
-              label={i18n.translate(
-                'xpack.triggersActionsUI.sections.actionAdd.webhookAction.passwordTextFieldLabel',
-                {
-                  defaultMessage: 'Password',
+              name="password"
+              value={password || ''}
+              data-test-subj="webhookPasswordInput"
+              onChange={e => {
+                editActionSecrets('password', e.target.value);
+              }}
+              onBlur={() => {
+                if (!password) {
+                  editActionSecrets('password', '');
                 }
-              )}
-            >
-              <EuiFieldPassword
-                fullWidth
-                name="password"
-                value={action.secrets.password || ''}
-                data-test-subj="webhookPasswordInput"
-                onChange={e => {
-                  editActionSecrets('password', e.target.value);
-                }}
-                onBlur={() => {
-                  if (!action.secrets.password) {
-                    editActionSecrets('password', '');
-                  }
-                }}
-              />
-            </ErrableFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : null}
+              }}
+            />
+          </ErrableFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       <EuiSpacer size="s" />
       <EuiButton
         isDisabled={hasHeaders && (hasHeaderErrors || !headerKey || !headerValue)}

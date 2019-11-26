@@ -31,7 +31,7 @@ export function getActionType(): ActionTypeModel {
         webhookUrl: new Array<string>(),
       };
       validationResult.errors = errors;
-      if (action.secrets && !action.secrets.webhookUrl) {
+      if (!action.secrets.webhookUrl) {
         errors.webhookUrl.push(
           i18n.translate(
             'xpack.triggersActionsUI.sections.actionAdd.slackAction.error.requiredWebhookUrlText',
@@ -58,10 +58,6 @@ const SlackActionFields: React.FunctionComponent<Props> = ({
   errors,
   hasErrors,
 }) => {
-  if (!action.secrets) {
-    return null;
-  }
-
   const { webhookUrl } = action.secrets;
 
   return (

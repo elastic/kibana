@@ -42,7 +42,7 @@ export const ActionTypeMenu = ({ setActionType }: Props) => {
       };
     });
 
-  const cardNodes = actionTypes.map(function(item, index): any {
+  const cardNodes = actionTypes.map((item, index): any => {
     return (
       <EuiFlexItem key={index}>
         <EuiCard
