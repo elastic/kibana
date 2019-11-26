@@ -17,31 +17,14 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
-// @ts-ignore
-import exampleText from 'raw-loader!../constants/help_example.txt';
-import $ from 'jquery';
-// @ts-ignore
-import SenseEditor from '../../../../public/quarantined/src/sense_editor/editor';
+import { useEditorActionContext } from '../contexts/editor_context';
+import { instance as registry } from '../contexts/editor_context/editor_registry';
 
-interface EditorExampleProps {
-  panel: string;
-}
+export const useSetInputEditor = () => {
+  const dispatch = useEditorActionContext();
 
-export function EditorExample(props: EditorExampleProps) {
-  const elemId = `help-example-${props.panel}`;
-
-  useEffect(() => {
-    const el = $(`#${elemId}`);
-    el.text(exampleText.trim());
-    const editor = new SenseEditor(el);
-    editor.setReadOnly(true);
-    editor.$blockScrolling = Infinity;
-
-    return () => {
-      editor.destroy();
-    };
-  }, [elemId]);
-
-  return <div id={elemId} className="conHelp__example" />;
-}
+  return (editor: any) => {
+    dispatch({ type: 'setInputEditor', payload: editor });
+    registry.setInputEditor(editor);
+  };
+};

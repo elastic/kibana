@@ -17,52 +17,30 @@
  * under the License.
  */
 
-import React, { createContext, Dispatch, useContext, useReducer } from 'react';
-import { Action, reducer } from './reducer';
-import { DevToolsSettings } from '../../../../services';
+import React, { createContext, Dispatch, useReducer } from 'react';
+import * as editor from '../../stores/editor';
+import { DevToolsSettings } from '../../../services';
+import { createUseContext } from '../create_use_context';
 
-export interface ContextValue {
-  editorsReady: boolean;
-  settings: DevToolsSettings;
-}
-
-const EditorReadContext = createContext<ContextValue>(null as any);
-const EditorActionContext = createContext<Dispatch<Action>>(null as any);
+const EditorReadContext = createContext<editor.Store>(null as any);
+const EditorActionContext = createContext<Dispatch<editor.Action>>(null as any);
 
 export interface EditorContextArgs {
   children: any;
   settings: DevToolsSettings;
 }
 
-const initialValue: ContextValue = {
-  editorsReady: false,
-  settings: null as any,
-};
-
 export function EditorContextProvider({ children, settings }: EditorContextArgs) {
-  const [state, dispatch] = useReducer(reducer, initialValue, value => ({
+  const [state, dispatch] = useReducer(editor.reducer, editor.initialValue, value => ({
     ...value,
     settings,
   }));
   return (
-    <EditorReadContext.Provider value={state}>
+    <EditorReadContext.Provider value={state as any}>
       <EditorActionContext.Provider value={dispatch}>{children}</EditorActionContext.Provider>
     </EditorReadContext.Provider>
   );
 }
 
-export const useEditorActionContext = () => {
-  const context = useContext(EditorActionContext);
-  if (context === undefined) {
-    throw new Error('useEditorActionContext must be used inside EditorActionContext');
-  }
-  return context;
-};
-
-export const useEditorReadContext = () => {
-  const context = useContext(EditorReadContext);
-  if (context === undefined) {
-    throw new Error('useEditorReadContext must be used inside EditorContextProvider');
-  }
-  return context;
-};
+export const useEditorReadContext = createUseContext(EditorReadContext, 'EditorReadContext');
+export const useEditorActionContext = createUseContext(EditorActionContext, 'EditorActionContext');

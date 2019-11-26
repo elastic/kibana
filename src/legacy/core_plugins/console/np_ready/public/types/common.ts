@@ -17,31 +17,10 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
-// @ts-ignore
-import exampleText from 'raw-loader!../constants/help_example.txt';
-import $ from 'jquery';
-// @ts-ignore
-import SenseEditor from '../../../../public/quarantined/src/sense_editor/editor';
-
-interface EditorExampleProps {
-  panel: string;
-}
-
-export function EditorExample(props: EditorExampleProps) {
-  const elemId = `help-example-${props.panel}`;
-
-  useEffect(() => {
-    const el = $(`#${elemId}`);
-    el.text(exampleText.trim());
-    const editor = new SenseEditor(el);
-    editor.setReadOnly(true);
-    editor.$blockScrolling = Infinity;
-
-    return () => {
-      editor.destroy();
-    };
-  }, [elemId]);
-
-  return <div id={elemId} className="conHelp__example" />;
-}
+export type BaseResponseType =
+  | 'application/json'
+  | 'text/csv'
+  | 'text/tab-separated-values'
+  | 'text/plain'
+  | 'application/yaml'
+  | 'unknown';

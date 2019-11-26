@@ -18,36 +18,34 @@
  */
 
 // @ts-ignore
-import mappings from '../../../../../../../public/quarantined/src/mappings';
+import utils from '../../../../../public/quarantined/src/utils';
 // @ts-ignore
-import utils from '../../../../../../../public/quarantined/src/utils';
-// @ts-ignore
-import * as es from '../../../../../../../public/quarantined/src/es';
+import * as es from '../../../../../public/quarantined/src/es';
+import { BaseResponseType } from '../../../types/common';
 
 export interface EsRequestArgs {
-  callback: (esPath: any, esMethod: any, esData: any) => void;
-  input?: any;
-  output?: any;
-  isPolling: boolean;
-  isUsingTripleQuotes: boolean;
+  requests: any;
+}
+
+export interface ESRequestResult {
+  request: {
+    path: string;
+    data: any;
+    method: string;
+  };
+  response: {
+    contentType: BaseResponseType;
+    value: unknown;
+  };
 }
 
 let CURRENT_REQ_ID = 0;
-export function sendCurrentRequestToES({
-  callback,
-  input,
-  output,
-  isPolling,
-  isUsingTripleQuotes,
-}: EsRequestArgs) {
-  const reqId = ++CURRENT_REQ_ID;
-
-  input.getRequestsInRange((requests: any) => {
+export function sendRequestToES({ requests }: EsRequestArgs): Promise<ESRequestResult[]> {
+  return new Promise((resolve, reject) => {
+    const reqId = ++CURRENT_REQ_ID;
+    const results: ESRequestResult[] = [];
     if (reqId !== CURRENT_REQ_ID) {
       return;
-    }
-    if (output) {
-      output.update('');
     }
 
     if (requests.length === 0) {
@@ -55,18 +53,14 @@ export function sendCurrentRequestToES({
     }
 
     const isMultiRequest = requests.length > 1;
-    const finishChain = () => {
-      /* noop */
-    };
-
-    let isFirstRequest = true;
 
     const sendNextRequest = () => {
       if (reqId !== CURRENT_REQ_ID) {
+        resolve(results);
         return;
       }
       if (requests.length === 0) {
-        finishChain();
+        resolve(results);
         return;
       }
       const req = requests.shift();
@@ -85,41 +79,13 @@ export function sendCurrentRequestToES({
 
           const xhr = dataOrjqXHR.promise ? dataOrjqXHR : jqXhrORerrorThrown;
 
-          function modeForContentType(contentType: string) {
-            if (contentType.indexOf('text/plain') >= 0) {
-              return 'ace/mode/text';
-            } else if (contentType.indexOf('application/yaml') >= 0) {
-              return 'ace/mode/yaml';
-            }
-            return null;
-          }
-
           const isSuccess =
             typeof xhr.status === 'number' &&
             // Things like DELETE index where the index is not there are OK.
             ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 404);
 
           if (isSuccess) {
-            if (xhr.status !== 404 && isPolling) {
-              // If the user has submitted a request against ES, something in the fields, indices, aliases,
-              // or templates may have changed, so we'll need to update this data. Assume that if
-              // the user disables polling they're trying to optimize performance or otherwise
-              // preserve resources, so they won't want this request sent either.
-              mappings.retrieveAutoCompleteInfo();
-            }
-
             let value = xhr.responseText;
-            const mode = modeForContentType(xhr.getAllResponseHeaders('Content-Type') || '');
-
-            // Apply triple quotes to output.
-            if (isUsingTripleQuotes && mode === null) {
-              // assume json - auto pretty
-              try {
-                value = utils.expandLiteralStrings(value);
-              } catch (e) {
-                // nothing to do here
-              }
-            }
 
             const warnings = xhr.getResponseHeader('warning');
             if (warnings) {
@@ -131,47 +97,34 @@ export function sendCurrentRequestToES({
               value = '# ' + req.method + ' ' + req.url + '\n' + value;
             }
 
-            if (output) {
-              if (isFirstRequest) {
-                output.update(value, mode);
-              } else {
-                output.append('\n' + value);
-              }
-            }
+            results.push({
+              response: {
+                contentType: xhr.getResponseHeader('Content-Type'),
+                value,
+              },
+              request: {
+                data: esData,
+                method: esMethod,
+                path: esPath,
+              },
+            });
 
-            isFirstRequest = false;
             // single request terminate via sendNextRequest as well
-
-            callback(esPath, esMethod, esData);
             sendNextRequest();
           } else {
             let value;
-            let mode;
+            let contentType: string;
             if (xhr.responseText) {
               value = xhr.responseText; // ES error should be shown
-              mode = modeForContentType(xhr.getAllResponseHeaders('Content-Type') || '');
-              if (value[0] === '{') {
-                try {
-                  value = JSON.stringify(JSON.parse(value), null, 2);
-                } catch (e) {
-                  // nothing to do here
-                }
-              }
+              contentType = xhr.getResponseHeader('Content-Type');
             } else {
               value = 'Request failed to get to the server (status code: ' + xhr.status + ')';
-              mode = 'ace/mode/text';
+              contentType = 'text/plain';
             }
             if (isMultiRequest) {
               value = '# ' + req.method + ' ' + req.url + '\n' + value;
             }
-            if (output) {
-              if (isFirstRequest) {
-                output.update(value, mode);
-              } else {
-                output.append('\n' + value);
-              }
-            }
-            finishChain();
+            reject({ value, contentType });
           }
         }
       );

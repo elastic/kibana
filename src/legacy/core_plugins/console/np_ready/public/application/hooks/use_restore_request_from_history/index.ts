@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { useAppContext, AppContextProvider } from './app_context';
+export { useRestoreRequestFromHistory } from './use_restore_request_from_history';

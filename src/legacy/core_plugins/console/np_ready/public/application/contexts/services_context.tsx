@@ -18,7 +18,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { NotificationsSetup } from '../../../../../../../core/public';
+import { NotificationsSetup } from 'kibana/public';
 import { History, Storage, Settings } from '../../services';
 
 interface ContextValue {
@@ -36,14 +36,14 @@ interface ContextProps {
   children: any;
 }
 
-const AppContext = createContext<ContextValue>(null as any);
+const ServicesContext = createContext<ContextValue>(null as any);
 
-export function AppContextProvider({ children, value }: ContextProps) {
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+export function ServicesContextProvider({ children, value }: ContextProps) {
+  return <ServicesContext.Provider value={value}>{children}</ServicesContext.Provider>;
 }
 
-export const useAppContext = () => {
-  const context = useContext(AppContext);
+export const useServicesContext = () => {
+  const context = useContext(ServicesContext);
   if (context === undefined) {
     throw new Error('useAppContext must be used inside the AppContextProvider.');
   }

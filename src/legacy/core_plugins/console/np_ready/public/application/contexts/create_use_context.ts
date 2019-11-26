@@ -17,26 +17,14 @@
  * under the License.
  */
 
-export class EditorRegistry {
-  inputEditor: any;
-  outputEditor: any;
+import { Context, useContext } from 'react';
 
-  setInputEditor(inputEditor: any) {
-    this.inputEditor = inputEditor;
-  }
-
-  setOutputEditor(outputEditor: any) {
-    this.outputEditor = outputEditor;
-  }
-
-  getInputEditor() {
-    return this.inputEditor;
-  }
-
-  getOutputEditor() {
-    return this.outputEditor;
-  }
-}
-
-// Create a single instance of this and use as private state.
-export const instance = new EditorRegistry();
+export const createUseContext = <T>(Ctx: Context<T>, name: string) => {
+  return () => {
+    const ctx = useContext(Ctx);
+    if (!ctx) {
+      throw new Error(`${name} should be used inside of ${name}Provider!`);
+    }
+    return ctx;
+  };
+};
