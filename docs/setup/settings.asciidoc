@@ -171,7 +171,7 @@ on disk. Older files are deleted during log rotation. The default value is 7. Th
 option has to be in the range of 2 to 1024 files.
 
 `logging.rotate.pollingInterval:`:: *Default: 10* The number of seconds for the polling strategy in case 
-the `logging.rotate.usePolling` is enabled. That option option has to be in the range of 5 to 3600 files.
+the `logging.rotate.usePolling` is enabled. That option has to be in the range of 5 to 3600 files.
 
 `logging.rotate.usePolling:`:: *Default: false* By default we try to understand the best way to monitoring 
 the log file. However there is some systems where it could not be always accurate. In those cases, if needed, 
