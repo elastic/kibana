@@ -171,7 +171,7 @@ export const ActionsList: React.FunctionComponent = () => {
       sortable: false,
       truncateText: true,
       render: (value: number, item: ActionTableItem) => {
-        return <EuiBadge>{value}</EuiBadge>;
+        return <EuiBadge key={item.id}>{value}</EuiBadge>;
       },
     },
     {

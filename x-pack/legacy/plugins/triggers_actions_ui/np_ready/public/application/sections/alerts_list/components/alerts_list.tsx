@@ -8,13 +8,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment, useEffect, useState } from 'react';
 // @ts-ignore: EuiSearchBar not exported in TypeScript
-import { EuiBasicTable, EuiButton, EuiSearchBar, EuiSpacer } from '@elastic/eui';
+import { EuiBasicTable, EuiButton, EuiButtonEmpty, EuiSearchBar, EuiSpacer } from '@elastic/eui';
 import { AlertsContext } from '../../../context/alerts_context';
 import { useAppDependencies } from '../../../index';
 import { Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
 import { AlertAdd } from '../../alert_add';
+import { BulkActionPopover } from './bulk_action_popover';
 import { CollapsedItemActions } from './collapsed_item_actions';
-import { deleteAlerts, loadAlerts, loadAlertTypes } from '../../../lib/api';
+import { loadAlerts, loadAlertTypes } from '../../../lib/api';
 
 export const AlertsList: React.FunctionComponent = () => {
   const {
@@ -39,6 +40,19 @@ export const AlertsList: React.FunctionComponent = () => {
     loadAlertsData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, searchText]);
+
+  // The bulk action menu needs updated data within "selectedItems" when "data" changes
+  useEffect(() => {
+    const updatedSelectedItems: AlertTableItem[] = [];
+    selectedItems.forEach(item => {
+      const updatedItem = data.find(({ id }) => item.id === id);
+      if (updatedItem) {
+        updatedSelectedItems.push(updatedItem);
+      }
+    });
+    setSelectedItems(updatedSelectedItems);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
 
   useEffect(() => {
     (async () => {
@@ -99,32 +113,6 @@ export const AlertsList: React.FunctionComponent = () => {
     }
   }
 
-  async function deleteItems(items: AlertTableItem[]) {
-    setIsPerformingAction(true);
-    const ids = items.map(item => item.id);
-    try {
-      await deleteAlerts({ http, ids });
-      await loadAlertsData();
-    } catch (e) {
-      toastNotifications.addDanger({
-        title: i18n.translate(
-          'xpack.triggersActionsUI.sections.alertsList.failedToDeleteAlertsMessage',
-          {
-            defaultMessage: 'Failed to delete alert(s)',
-          }
-        ),
-      });
-      // Refresh the alerts from the server, some alerts may have been deleted
-      await loadAlertsData();
-    } finally {
-      setIsPerformingAction(false);
-    }
-  }
-
-  async function deleteSelectedItems() {
-    await deleteItems(selectedItems);
-  }
-
   const alertsTableColumns = [
     {
       field: 'name',
@@ -169,7 +157,9 @@ export const AlertsList: React.FunctionComponent = () => {
         }
       ),
       render(item: AlertTableItem) {
-        return <CollapsedItemActions item={item} onDeleted={() => loadAlertsData()} />;
+        return (
+          <CollapsedItemActions key={item.id} item={item} onAlertChanged={() => loadAlertsData()} />
+        );
       },
     },
   ];
@@ -198,27 +188,21 @@ export const AlertsList: React.FunctionComponent = () => {
                   .sort((a, b) => a.name.localeCompare(b.name)),
               },
             ]}
+            toolsLeft={
+              selectedItems.length === 0 || !canDelete
+                ? []
+                : [
+                    <BulkActionPopover
+                      selectedItems={selectedItems}
+                      onPerformingAction={() => setIsPerformingAction(true)}
+                      onActionPerformed={() => {
+                        loadAlertsData();
+                        setIsPerformingAction(false);
+                      }}
+                    />,
+                  ]
+            }
             toolsRight={[
-              <EuiButton
-                key="delete"
-                iconType="trash"
-                color="danger"
-                isDisabled={selectedItems.length === 0 || !canDelete}
-                onClick={deleteSelectedItems}
-                title={
-                  canDelete
-                    ? undefined
-                    : i18n.translate(
-                        'xpack.triggersActionsUI.sections.alertsList.buttons.deleteDisabledTitle',
-                        { defaultMessage: 'Unable to delete alerts' }
-                      )
-                }
-              >
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertsList.buttons.deleteLabel"
-                  defaultMessage="Delete"
-                />
-              </EuiButton>,
               <EuiButton
                 key="create-alert"
                 data-test-subj="createAlertButton"
@@ -255,11 +239,13 @@ export const AlertsList: React.FunctionComponent = () => {
               pageSize: page.size,
               totalItemCount,
             }}
-            selection={{
-              onSelectionChange(updatedSelectedItemsList: AlertTableItem[]) {
-                setSelectedItems(updatedSelectedItemsList);
-              },
-            }}
+            selection={
+              canDelete && {
+                onSelectionChange(updatedSelectedItemsList: AlertTableItem[]) {
+                  setSelectedItems(updatedSelectedItemsList);
+                },
+              }
+            }
             onChange={({ page: changedPage }: { page: Pagination }) => {
               setPage(changedPage);
             }}

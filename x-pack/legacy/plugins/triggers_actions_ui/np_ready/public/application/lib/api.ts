@@ -150,44 +150,44 @@ export async function saveAlert({
   });
 }
 
-export async function enableAlert({
-  id,
+export async function enableAlerts({
+  ids,
   http,
 }: {
-  id: string;
+  ids: string[];
   http: HttpServiceBase;
 }): Promise<void> {
-  await http.post(`${BASE_ALERT_API_PATH}/${id}/_enable`);
+  await Promise.all(ids.map(id => http.post(`${BASE_ALERT_API_PATH}/${id}/_enable`)));
 }
 
-export async function disableAlert({
-  id,
+export async function disableAlerts({
+  ids,
   http,
 }: {
-  id: string;
+  ids: string[];
   http: HttpServiceBase;
 }): Promise<void> {
-  await http.post(`${BASE_ALERT_API_PATH}/${id}/_disable`);
+  await Promise.all(ids.map(id => http.post(`${BASE_ALERT_API_PATH}/${id}/_disable`)));
 }
 
-export async function muteAllAlertInstances({
-  id,
+export async function muteAlerts({
+  ids,
   http,
 }: {
-  id: string;
+  ids: string[];
   http: HttpServiceBase;
 }): Promise<void> {
-  await http.post(`${BASE_ALERT_API_PATH}/${id}/_mute_all`);
+  await Promise.all(ids.map(id => http.post(`${BASE_ALERT_API_PATH}/${id}/_mute_all`)));
 }
 
-export async function unmuteAllAlertInstances({
-  id,
+export async function unmuteAlerts({
+  ids,
   http,
 }: {
-  id: string;
+  ids: string[];
   http: HttpServiceBase;
 }): Promise<void> {
-  await http.post(`${BASE_ALERT_API_PATH}/${id}/_unmute_all`);
+  await Promise.all(ids.map(id => http.post(`${BASE_ALERT_API_PATH}/${id}/_unmute_all`)));
 }
 
 // TODO: replace watcher api with the proper from alerts

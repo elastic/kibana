@@ -20,20 +20,20 @@ import { AlertTableItem } from '../../../../types';
 import { useAppDependencies } from '../../../index';
 import {
   deleteAlerts,
-  disableAlert,
-  enableAlert,
-  muteAllAlertInstances,
-  unmuteAllAlertInstances,
+  disableAlerts,
+  enableAlerts,
+  muteAlerts,
+  unmuteAlerts,
 } from '../../../lib/api';
 
 export interface ComponentOpts {
   item: AlertTableItem;
-  onDeleted: () => void;
+  onAlertChanged: () => void;
 }
 
 export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   item,
-  onDeleted,
+  onAlertChanged,
 }: ComponentOpts) => {
   const {
     core: { http },
@@ -66,14 +66,15 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           name="enable"
           disabled={!canSave}
           checked={isEnabled}
-          onChange={() => {
+          onChange={async () => {
             if (isEnabled) {
-              disableAlert({ http, id: item.id });
               setIsEnabled(false);
-              return;
+              await disableAlerts({ http, ids: [item.id] });
+            } else {
+              setIsEnabled(true);
+              await enableAlerts({ http, ids: [item.id] });
             }
-            enableAlert({ http, id: item.id });
-            setIsEnabled(true);
+            onAlertChanged();
           }}
           label={
             <FormattedMessage
@@ -88,14 +89,15 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           name="mute"
           checked={isMuted}
           disabled={!canSave || !isEnabled}
-          onChange={() => {
+          onChange={async () => {
             if (isMuted) {
-              unmuteAllAlertInstances({ http, id: item.id });
               setIsMuted(false);
-              return;
+              await unmuteAlerts({ http, ids: [item.id] });
+            } else {
+              setIsMuted(true);
+              await muteAlerts({ http, ids: [item.id] });
             }
-            muteAllAlertInstances({ http, id: item.id });
-            setIsMuted(true);
+            onAlertChanged();
           }}
           label={
             <FormattedMessage
@@ -113,7 +115,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
             color="text"
             onClick={async () => {
               await deleteAlerts({ http, ids: [item.id] });
-              onDeleted();
+              onAlertChanged();
             }}
           >
             <FormattedMessage
