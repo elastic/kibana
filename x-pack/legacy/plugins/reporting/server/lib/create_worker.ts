@@ -55,14 +55,16 @@ export function createWorkerFactory<JobParamsType>(server: ServerFacade) {
       }
       // job executor function signature is different depending on whether it
       // is ESQueueWorkerExecuteFn or ImmediateExecuteFn
+      const jobExecutorWorker = jobExecutors.get(jobType) as ESQueueWorkerExecuteFn<JobParamsType>;
+      const jobExecutorImmediate = jobExecutors.get(jobType) as ImmediateExecuteFn<JobParamsType>;
       if (jobId) {
-        const jobExecutorWorker = jobExecutors.get(jobType) as ESQueueWorkerExecuteFn<
-          JobParamsType
-        >;
         return jobExecutorWorker(jobId, arg1 as JobParamsType, arg2 as CancellationToken);
       } else {
-        const jobExecutor = jobExecutors.get(jobType) as ImmediateExecuteFn<JobParamsType>;
-        return jobExecutor(null, arg1 as JobDocPayload<JobParamsType>, arg2 as RequestFacade);
+        return jobExecutorImmediate(
+          null,
+          arg1 as JobDocPayload<JobParamsType>,
+          arg2 as RequestFacade
+        );
       }
     };
     const workerOptions = {
