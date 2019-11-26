@@ -50,6 +50,7 @@ export function ExpressionWrapper({
             padding="m"
             expression={expression}
             searchContext={{ ...context, type: 'kibana_context' }}
+            renderError={error => <div>{error}</div>}
           />
         </div>
       )}
