@@ -5,10 +5,9 @@
  */
 
 import url from 'url';
-import { oncePerServer } from '../server/lib/once_per_server';
 import { ServerFacade } from '../types';
 
-function getAbsoluteUrlFn(server: ServerFacade) {
+export function getAbsoluteUrlFactory(server: ServerFacade) {
   const config = server.config();
 
   return function getAbsoluteUrl({
@@ -27,5 +26,3 @@ function getAbsoluteUrlFn(server: ServerFacade) {
     });
   };
 }
-
-export const getAbsoluteUrlFactory = oncePerServer(getAbsoluteUrlFn);
