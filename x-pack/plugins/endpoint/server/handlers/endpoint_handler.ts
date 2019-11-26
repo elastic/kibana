@@ -50,8 +50,9 @@ export class EndpointHandler implements EndpointRequestContext {
 
   async findLatestOfAllEndpoints(request: KibanaRequest): Promise<SearchResponse<EndpointData>> {
     const config = await this.endpointAppContext.config();
-    const pageSize: number = request.query.pageSize || config.searchResultDefaultPageSize;
-    const pageIndex: number = request.query.pageIndex || config.searchResultDefaultFirstPageIndex;
+    const query = request.query as any;
+    const pageSize: number = query.pageSize || config.searchResultDefaultPageSize;
+    const pageIndex: number = query.pageIndex || config.searchResultDefaultFirstPageIndex;
     const searchParams: SearchParams = {
       from: pageIndex * pageSize,
       size: pageSize,
@@ -65,6 +66,13 @@ export class EndpointHandler implements EndpointRequestContext {
             name: 'most_recent',
             size: 1,
             sort: [{ created_at: 'desc' }],
+          },
+        },
+        aggs: {
+          total: {
+            cardinality: {
+              field: 'machine_id',
+            },
           },
         },
       },

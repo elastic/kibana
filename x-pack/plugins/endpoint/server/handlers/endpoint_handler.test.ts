@@ -92,6 +92,13 @@ describe('test endpoint handler', () => {
               sort: [{ created_at: 'desc' }],
             },
           },
+          aggs: {
+            total: {
+              cardinality: {
+                field: 'machine_id',
+              },
+            },
+          },
         },
         index: 'endpoint*',
       });
@@ -135,6 +142,13 @@ describe('test endpoint handler', () => {
               name: 'most_recent',
               size: 1,
               sort: [{ created_at: 'desc' }],
+            },
+          },
+          aggs: {
+            total: {
+              cardinality: {
+                field: 'machine_id',
+              },
             },
           },
         },
