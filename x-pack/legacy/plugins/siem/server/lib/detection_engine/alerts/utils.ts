@@ -14,7 +14,7 @@ import {
   SignalSearchResponse,
   BulkResponse,
   RuleTypeParams,
-  OutputRuleES,
+  OutputRuleAlertRest,
 } from './types';
 import { buildEventsSearchQuery } from './build_events_query';
 
@@ -36,10 +36,9 @@ export const buildRule = ({
   createdBy,
   updatedBy,
   interval,
-}: BuildRuleParams): Partial<OutputRuleES> => {
-  return pickBy<OutputRuleES>((value: unknown) => value != null, {
+}: BuildRuleParams): Partial<OutputRuleAlertRest> => {
+  return pickBy<OutputRuleAlertRest>((value: unknown) => value != null, {
     id,
-    status: 'open',
     rule_id: ruleParams.ruleId,
     false_positives: ruleParams.falsePositives,
     saved_id: ruleParams.savedId,
@@ -68,8 +67,8 @@ export const buildRule = ({
   });
 };
 
-export const buildSignal = (doc: SignalSourceHit, rule: Partial<OutputRuleES>): Signal => {
-  return {
+export const buildSignal = (doc: SignalSourceHit, rule: Partial<OutputRuleAlertRest>): Signal => {
+  const signal: Signal = {
     parent: {
       id: doc._id,
       type: 'event',
@@ -77,8 +76,13 @@ export const buildSignal = (doc: SignalSourceHit, rule: Partial<OutputRuleES>): 
       depth: 1,
     },
     original_time: doc._source['@timestamp'],
+    status: 'open',
     rule,
   };
+  if (doc._source.event != null) {
+    return { ...signal, original_event: doc._source.event };
+  }
+  return signal;
 };
 
 interface BuildBulkBodyParams {
@@ -91,6 +95,14 @@ interface BuildBulkBodyParams {
   interval: string;
   enabled: boolean;
 }
+
+export const buildEventTypeSignal = (doc: SignalSourceHit): object => {
+  if (doc._source.event != null && doc._source.event instanceof Object) {
+    return { ...doc._source.event, kind: 'signal' };
+  } else {
+    return { kind: 'signal' };
+  }
+};
 
 // format search_after result for signals index.
 export const buildBulkBody = ({
@@ -113,9 +125,11 @@ export const buildBulkBody = ({
     interval,
   });
   const signal = buildSignal(doc, rule);
+  const event = buildEventTypeSignal(doc);
   const signalHit: SignalHit = {
     ...doc._source,
     '@timestamp': new Date().toISOString(),
+    event,
     signal,
   };
   return signalHit;

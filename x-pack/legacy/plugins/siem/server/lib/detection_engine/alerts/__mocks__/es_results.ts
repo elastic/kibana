@@ -4,10 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SignalSourceHit, SignalSearchResponse, RuleTypeParams } from '../types';
+import {
+  SignalSourceHit,
+  SignalSearchResponse,
+  RuleTypeParams,
+  OutputRuleAlertRest,
+} from '../types';
 
 export const sampleRuleAlertParams = (
-  maxSignals: number | undefined,
+  maxSignals?: number | undefined,
   riskScore?: number | undefined
 ): RuleTypeParams => ({
   ruleId: 'rule-1',
@@ -32,7 +37,7 @@ export const sampleRuleAlertParams = (
   meta: undefined,
 });
 
-export const sampleDocNoSortId = (someUuid: string): SignalSourceHit => ({
+export const sampleDocNoSortId = (someUuid: string = sampleIdGuid): SignalSourceHit => ({
   _index: 'myFakeSignalIndex',
   _type: 'doc',
   _score: 100,
@@ -44,7 +49,7 @@ export const sampleDocNoSortId = (someUuid: string): SignalSourceHit => ({
   },
 });
 
-export const sampleDocNoSortIdNoVersion = (someUuid: string): SignalSourceHit => ({
+export const sampleDocNoSortIdNoVersion = (someUuid: string = sampleIdGuid): SignalSourceHit => ({
   _index: 'myFakeSignalIndex',
   _type: 'doc',
   _score: 100,
@@ -55,7 +60,7 @@ export const sampleDocNoSortIdNoVersion = (someUuid: string): SignalSourceHit =>
   },
 });
 
-export const sampleDocWithSortId = (someUuid: string): SignalSourceHit => ({
+export const sampleDocWithSortId = (someUuid: string = sampleIdGuid): SignalSourceHit => ({
   _index: 'myFakeSignalIndex',
   _type: 'doc',
   _score: 100,
@@ -138,7 +143,9 @@ export const sampleBulkCreateDuplicateResult = {
   ],
 };
 
-export const sampleDocSearchResultsNoSortId = (someUuid: string): SignalSearchResponse => ({
+export const sampleDocSearchResultsNoSortId = (
+  someUuid: string = sampleIdGuid
+): SignalSearchResponse => ({
   took: 10,
   timed_out: false,
   _shards: {
@@ -159,7 +166,7 @@ export const sampleDocSearchResultsNoSortId = (someUuid: string): SignalSearchRe
 });
 
 export const sampleDocSearchResultsNoSortIdNoVersion = (
-  someUuid: string
+  someUuid: string = sampleIdGuid
 ): SignalSearchResponse => ({
   took: 10,
   timed_out: false,
@@ -180,7 +187,9 @@ export const sampleDocSearchResultsNoSortIdNoVersion = (
   },
 });
 
-export const sampleDocSearchResultsNoSortIdNoHits = (someUuid: string): SignalSearchResponse => ({
+export const sampleDocSearchResultsNoSortIdNoHits = (
+  someUuid: string = sampleIdGuid
+): SignalSearchResponse => ({
   took: 10,
   timed_out: false,
   _shards: {
@@ -222,7 +231,9 @@ export const repeatedSearchResultsWithSortId = (
   },
 });
 
-export const sampleDocSearchResultsWithSortId = (someUuid: string): SignalSearchResponse => ({
+export const sampleDocSearchResultsWithSortId = (
+  someUuid: string = sampleIdGuid
+): SignalSearchResponse => ({
   took: 10,
   timed_out: false,
   _shards: {
@@ -243,3 +254,31 @@ export const sampleDocSearchResultsWithSortId = (someUuid: string): SignalSearch
 });
 
 export const sampleRuleGuid = '04128c15-0d1b-4716-a4c5-46997ac7f3bd';
+export const sampleIdGuid = 'e1e08ddc-5e37-49ff-a258-5393aa44435a';
+
+export const sampleRule = (): Partial<OutputRuleAlertRest> => {
+  return {
+    created_by: 'elastic',
+    description: 'Detecting root and admin users',
+    enabled: true,
+    false_positives: [],
+    from: 'now-6m',
+    id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+    immutable: false,
+    index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+    interval: '5m',
+    risk_score: 50,
+    rule_id: 'rule-1',
+    language: 'kuery',
+    max_signals: 100,
+    name: 'Detect Root/Admin Users',
+    output_index: '.siem-signals',
+    query: 'user.name: root or user.name: admin',
+    references: ['http://www.example.com', 'https://ww.example.com'],
+    severity: 'high',
+    updated_by: 'elastic',
+    tags: [],
+    to: 'now',
+    type: 'query',
+  };
+};
