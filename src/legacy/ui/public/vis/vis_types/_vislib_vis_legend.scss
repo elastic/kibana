@@ -27,7 +27,6 @@ $visLegendLineHeight: $euiSize;
 }
 
 .visLegend {
-  @include euiFontSizeXS;
   display: flex;
   min-height: 0;
   height: 100%;
@@ -45,24 +44,19 @@ $visLegendLineHeight: $euiSize;
   }
 }
 
-/**
- * 1. Position the .visLegend__valueDetails absolutely against the legend item
- * 2. Make sure the .visLegend__valueDetails is visible outside the list bounds
- * 3. Make sure the currently selected item is top most in z level
- */
 .visLegend__list {
   @include euiScrollBar;
   display: flex;
-  line-height: $visLegendLineHeight;
   width: $visLegendWidth; // Must be a hard-coded width for the chart to get its correct dimensions
   flex: 1 1 auto;
   flex-direction: column;
   overflow-x: hidden;
   overflow-y: auto;
 
-  .visLegend__value {
+  .visLegend__button {
     font-size: $euiFontSizeXS;
     text-align: left;
+    overflow: hidden; // Ensures scrollbars don't appear because EuiButton__text has a high line-height
 
     .visLegend__valueTitle {
       vertical-align: middle;
@@ -74,7 +68,6 @@ $visLegendLineHeight: $euiSize;
     width: auto;
     flex-direction: row;
     flex-wrap: wrap;
-    overflow: visible; /* 2 */
 
     .visLegend__value {
       flex-grow: 0;
@@ -87,54 +80,19 @@ $visLegendLineHeight: $euiSize;
   }
 }
 
-.visLegend__valueTitle {
-  @include euiTextTruncate; // ALWAYS truncate
-  color: $visTextColor;
-  user-select: none;
-
-  &:hover {
-    text-decoration: underline;
-  }
-}
-
-.visLegend__valueDetails {
-  background-color: $euiColorEmptyShade;
-
-  .visLib--legend-left &,
-  .visLib--legend-right & {
-    margin-top: $euiSizeXS;
-    border-bottom: $euiBorderThin;
-  }
-
-  .visLib--legend-top &,
-  .visLib--legend-bottom & {
-    @include euiBottomShadowMedium;
-    position: absolute; /* 1 */
-    border-radius: $euiBorderRadius;
-  }
-
-  .visLib--legend-bottom & {
-    bottom: $visLegendLineHeight + 2 * $euiSizeXS;
-  }
-
-  .visLib--legend-top & {
-    margin-top: $euiSizeXS;
-  }
-}
-
 .visLegend__valueColorPicker {
-  width: 192px;
-  cursor: pointer;
+  width: ($euiSizeL * 8); // 8 columns
 }
 
 .visLegend__valueColorPickerDot {
-  &--isSelected,
-  &:focus,
+  cursor: pointer;
+
   &:hover {
     transform: scale(1.4);
   }
 
-  &--isSelected {
-    background: $euiFocusBackgroundColor;
+  &-isSelected {
+    border: $euiSizeXS solid;
+    border-radius: 100%;
   }
 }

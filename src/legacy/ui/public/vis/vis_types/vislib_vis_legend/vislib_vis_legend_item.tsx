@@ -81,7 +81,7 @@ const VisLegendItemComponent = ({
         defaultMessage: 'Filter for value {legendDataLabel}',
         values: { legendDataLabel: item.label },
       }),
-      iconType: 'magnifyWithPlus',
+      iconType: 'plusInCircle',
       'data-test-subj': `legend-${item.label}-filterIn`,
     },
     {
@@ -90,7 +90,7 @@ const VisLegendItemComponent = ({
         defaultMessage: 'Filter out value {legendDataLabel}',
         values: { legendDataLabel: item.label },
       }),
-      iconType: 'magnifyWithMinus',
+      iconType: 'minusInCircle',
       'data-test-subj': `legend-${item.label}-filterOut`,
     },
   ];
@@ -113,7 +113,7 @@ const VisLegendItemComponent = ({
         onChange={handleFilterChange}
         data-test-subj={`legend-${item.label}-filters`}
       />
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
     </>
   );
 
@@ -121,7 +121,8 @@ const VisLegendItemComponent = ({
     <EuiButtonEmpty
       size="xs"
       color="text"
-      className="visLegend__value"
+      flush="left"
+      className="visLegend__button"
       onKeyDown={onLegendEntryKeydown}
       onMouseEnter={onHighlight}
       onFocus={onHighlight}
@@ -154,6 +155,7 @@ const VisLegendItemComponent = ({
       isOpen={selected}
       anchorPosition={anchorPosition}
       closePopover={onSelect(null)}
+      panelPaddingSize="s"
     >
       <div className="visLegend__valueDetails">
         {canFilter && renderFilterBar()}
@@ -180,7 +182,7 @@ const VisLegendItemComponent = ({
               onClick={setColor(item.label, color)}
               onKeyPress={setColor(item.label, color)}
               className={classNames('visLegend__valueColorPickerDot', {
-                'visLegend__valueColorPickerDot--isSelected': color === getColor(item.label),
+                'visLegend__valueColorPickerDot-isSelected': color === getColor(item.label),
               })}
               style={{ color }}
               data-test-subj={`legendSelectColor-${color}`}
@@ -191,7 +193,11 @@ const VisLegendItemComponent = ({
     </EuiPopover>
   );
 
-  return <li key={item.label}>{renderDetails()}</li>;
+  return (
+    <li key={item.label} className="visLegend__value">
+      {renderDetails()}
+    </li>
+  );
 };
 
 export const VisLegendItem = memo(VisLegendItemComponent);

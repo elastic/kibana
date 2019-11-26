@@ -1186,8 +1186,13 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async getLegendEntries() {
-      const legendEntries = await find.allByCssSelector('.visLegend__value', defaultFindTimeout * 2);
-      return await Promise.all(legendEntries.map(async chart => await chart.getAttribute('data-label')));
+      const legendEntries = await find.allByCssSelector(
+        '.visLegend__button',
+        defaultFindTimeout * 2
+      );
+      return await Promise.all(
+        legendEntries.map(async chart => await chart.getAttribute('data-label'))
+      );
     }
 
     async openLegendOptionColors(name) {

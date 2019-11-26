@@ -110,7 +110,7 @@ const getWrapper = (props?: Partial<VisLegendProps>) =>
     </I18nProvider>
   );
 
-const getLegendItems = (wrapper: ReactWrapper) => wrapper.find('.visLegend__value');
+const getLegendItems = (wrapper: ReactWrapper) => wrapper.find('.visLegend__button');
 
 describe('VisLegend Component', () => {
   let wrapper: ReactWrapper;

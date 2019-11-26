@@ -240,6 +240,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
     return (
       <div className="visLegend">
         <EuiButtonIcon
+          color="text"
           iconType="list"
           onClick={this.toggleLegend}
           className={classNames('visLegend__toggle', {
