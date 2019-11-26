@@ -105,7 +105,7 @@ describe('Table Vis - Controller', () => {
     })
   );
 
-  function getRangeVis(params?: any) {
+  function getRangeVis(params?: object) {
     // @ts-ignore
     return new Vis(stubIndexPattern, {
       type: 'table',
@@ -167,7 +167,7 @@ describe('Table Vis - Controller', () => {
   }
 
   // put a response into the controller
-  function attachEsResponseToScope(resp: any) {
+  function attachEsResponseToScope(resp: object) {
     $rootScope.esResponse = resp;
     $rootScope.$apply();
   }

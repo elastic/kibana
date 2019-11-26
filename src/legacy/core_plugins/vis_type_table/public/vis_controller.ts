@@ -19,10 +19,10 @@
 
 import angular, { IModule, auto, IRootScopeService, IScope, ICompileService } from 'angular';
 import $ from 'jquery';
+
+import { Vis, VisParams } from '../../visualizations/public';
 import { npStart } from './legacy_imports';
 import { getAngularModule } from './get_inner_angular';
-import { Vis, VisParams } from '../../visualizations/public';
-
 import { initTableVisLegacyModule } from './shim/table_vis_legacy_module';
 
 const innerAngularName = 'kibana/table_vis';
@@ -50,6 +50,13 @@ export class TableVisualizationController {
     }
 
     return this.injector;
+  }
+
+  initLocalAngular() {
+    if (!this.tableVisModule) {
+      this.tableVisModule = getAngularModule(innerAngularName, npStart.core);
+      initTableVisLegacyModule(this.tableVisModule);
+    }
   }
 
   async render(esResponse: object, visParams: VisParams, status: { [key: string]: boolean }) {
@@ -87,13 +94,6 @@ export class TableVisualizationController {
       }
     });
   }
-
-  initLocalAngular = () => {
-    if (!this.tableVisModule) {
-      this.tableVisModule = getAngularModule(innerAngularName, npStart.core);
-      initTableVisLegacyModule(this.tableVisModule);
-    }
-  };
 
   destroy() {
     if (this.$rootScope) {

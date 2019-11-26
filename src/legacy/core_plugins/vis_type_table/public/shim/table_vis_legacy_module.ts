@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { IModule } from 'angular';
+
 // @ts-ignore
 import { TableVisController } from '../table_vis_controller.js';
 // @ts-ignore
@@ -29,7 +31,7 @@ import { KbnRows } from '../paginated_table/rows';
 import { PaginatedTable } from '../paginated_table/paginated_table';
 
 /** @internal */
-export const initTableVisLegacyModule = (angularIns: any): void => {
+export const initTableVisLegacyModule = (angularIns: IModule): void => {
   angularIns
     .controller('KbnTableVisController', TableVisController)
     .directive('kbnAggTable', KbnAggTable)

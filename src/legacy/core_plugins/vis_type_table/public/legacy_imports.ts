@@ -19,36 +19,31 @@
 
 export { npSetup, npStart } from 'ui/new_platform';
 export { SchemaConfig } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
+export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
+export { Vis, AggConfig } from 'ui/vis';
 // @ts-ignore
 export { visFactory, VisFactoryProvider } from 'ui/vis/vis_factory';
-
-export { Vis, AggConfig } from 'ui/vis';
-
+export { AggGroupNames, VisOptionsProps } from 'ui/vis/editors/default';
 // @ts-ignore
 export { Schemas } from 'ui/vis/editors/default/schemas';
-export { AggGroupNames, VisOptionsProps } from 'ui/vis/editors/default';
-
 // @ts-ignore
 export { legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
+
 // @ts-ignore
 export { PrivateProvider } from 'ui/private/private';
 // @ts-ignore
+export { PaginateDirectiveProvider } from 'ui/directives/paginate';
+// @ts-ignore
+export { PaginateControlsDirectiveProvider } from 'ui/directives/paginate';
+// @ts-ignore
 export { watchMultiDecorator } from 'ui/directives/watch_multi/watch_multi';
+
 // @ts-ignore
 export { KbnAccessibleClickProvider } from 'ui/accessibility/kbn_accessible_click';
 // @ts-ignore
 export { StateManagementConfigProvider } from 'ui/state_management/config_provider';
 export { configureAppAngularModule } from 'ui/legacy_compat';
 
-// @ts-ignore
-export { PaginateDirectiveProvider } from 'ui/directives/paginate';
-// @ts-ignore
-export { PaginateControlsDirectiveProvider } from 'ui/directives/paginate';
-
 export { tabifyGetColumns } from 'ui/agg_response/tabify/_get_columns';
-
-export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
-// @ts-ignore
-export { AppStateProvider } from 'ui/state_management/app_state';
 // @ts-ignore
 export { tabifyAggResponse } from 'ui/agg_response/tabify';
