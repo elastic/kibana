@@ -68,25 +68,23 @@ export class HorizontalLegend extends React.Component {
 
     return (
       <EuiKeyboardAccessible key={rowIdx}>
-        <EuiFlexItem
-          grow={false}
-          className={classes.join(' ')}
-          onClick={event => this.props.onToggle(event, row.id)}
-        >
-          <span className="monRhythmChart__legendLabel">
-            <EuiIcon
-              className="monRhythmChart__legendIndicator"
-              aria-label={i18n.translate(
-                'xpack.monitoring.chart.horizontalLegend.toggleButtonAriaLabel',
-                { defaultMessage: 'toggle button' }
-              )}
-              size="l"
-              type="dot"
-              color={row.color}
-            />
-            {' ' + row.label + ' '}
-          </span>
-          {this.formatter(this.props.seriesValues[row.id], row)}
+        <EuiFlexItem grow={false}>
+          <div className={classes.join(' ')} onClick={event => this.props.onToggle(event, row.id)}>
+            <span className="monRhythmChart__legendLabel">
+              <EuiIcon
+                className="monRhythmChart__legendIndicator"
+                aria-label={i18n.translate(
+                  'xpack.monitoring.chart.horizontalLegend.toggleButtonAriaLabel',
+                  { defaultMessage: 'toggle button' }
+                )}
+                size="l"
+                type="dot"
+                color={row.color}
+              />
+              {' ' + row.label + ' '}
+            </span>
+            {this.formatter(this.props.seriesValues[row.id], row)}
+          </div>
         </EuiFlexItem>
       </EuiKeyboardAccessible>
     );
@@ -97,7 +95,7 @@ export class HorizontalLegend extends React.Component {
 
     return (
       <div className="monRhythmChart__legendHorizontal">
-        <EuiFlexGroup wrap={true} gutterSize="s" className="monRhythmChart__legend-series">
+        <EuiFlexGroup wrap={true} gutterSize="s" className="monRhythmChart__legendSeries">
           {rows}
         </EuiFlexGroup>
       </div>

@@ -11,16 +11,13 @@ monitoring-shard-allocation {
 
 // SASSTODO: This needs a full rewrite / redesign
 .monCluster {
-  cluster-view {
-    display: block;
-  }
-
   .monUnassigned {
     vertical-align: middle;
     width: 150px;
   }
 
-  .monChildren {
+  .monUnassigned__children,
+  .monAssigned__children {
     padding-top: $euiSizeL;
   }
 
@@ -36,11 +33,11 @@ monitoring-shard-allocation {
     &.index {
       border-left: $euiSizeXS solid $euiColorSuccess;
 
-      &.red {
+      &.monChild--danger {
         border-left: $euiSizeXS solid $euiColorDanger;
       }
 
-      &.yellow {
+      &.monChild--warning {
         border-left: $euiSizeXS solid $euiColorWarning;
       }
     }

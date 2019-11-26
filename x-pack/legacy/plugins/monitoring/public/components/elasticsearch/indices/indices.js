@@ -46,7 +46,7 @@ const columns = [
     field: 'status',
     sortable: true,
     render: value => (
-      <div className="monStatusColumn" title={`Index status: ${value}`}>
+      <div className="elasticsearchIndicesTable__status" title={`Index status: ${value}`}>
         <ElasticsearchStatusIcon status={value} />
         &nbsp;
         {capitalize(value)}

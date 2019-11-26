@@ -30,7 +30,14 @@ export class Assigned extends React.Component {
     const initialClasses = ['monChild'];
     const shardStats = get(this.props.shardStats.indices, key);
     if (shardStats) {
-      initialClasses.push(shardStats.status);
+      switch (shardStats.status) {
+        case 'red':
+          initialClasses.push('monChild--danger');
+          break;
+        case 'yellow':
+          initialClasses.push('monChild--warning');
+          break;
+      }
     }
 
     const changeUrl = () => {
@@ -73,8 +80,8 @@ export class Assigned extends React.Component {
   render() {
     const data = sortBy(this.props.data, sortByName).map(this.createChild);
     return (
-      <td>
-        <EuiFlexGroup wrap className="monChildren">
+      <td className="monAssigned">
+        <EuiFlexGroup wrap className="monAssigned__children">
           {data}
         </EuiFlexGroup>
       </td>
