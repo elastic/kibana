@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { findSignals } from './find_signals';
-import { SignalAlertType, isAlertTypeArray, ReadSignalParams, ReadSignalByRuleId } from './types';
+import { findRules } from './find_rules';
+import { RuleAlertType, isAlertTypeArray, ReadRuleParams, ReadRuleByRuleId } from './types';
 
-export const findSignalInArrayByRuleId = (
+export const findRuleInArrayByRuleId = (
   objects: object[],
   ruleId: string
-): SignalAlertType | null => {
+): RuleAlertType | null => {
   if (isAlertTypeArray(objects)) {
-    const signals: SignalAlertType[] = objects;
-    const signal: SignalAlertType[] = signals.filter(datum => {
+    const rules: RuleAlertType[] = objects;
+    const rule: RuleAlertType[] = rules.filter(datum => {
       return datum.params.ruleId === ruleId;
     });
-    if (signal.length !== 0) {
-      return signal[0];
+    if (rule.length !== 0) {
+      return rule[0];
     } else {
       return null;
     }
@@ -26,32 +26,32 @@ export const findSignalInArrayByRuleId = (
   }
 };
 
-// This an extremely slow and inefficient way of getting a signal by its id.
-// I have to manually query every single record since the Signal Params are
+// This an extremely slow and inefficient way of getting a rule by its id.
+// I have to manually query every single record since the rule Params are
 // not indexed and I cannot push in my own _id when I create an alert at the moment.
 // TODO: Once we can directly push in the _id, then we should no longer need this way.
 // TODO: This is meant to be _very_ temporary.
-export const readSignalByRuleId = async ({
+export const readRuleByRuleId = async ({
   alertsClient,
   ruleId,
-}: ReadSignalByRuleId): Promise<SignalAlertType | null> => {
-  const firstSignals = await findSignals({ alertsClient, page: 1 });
-  const firstSignal = findSignalInArrayByRuleId(firstSignals.data, ruleId);
-  if (firstSignal != null) {
-    return firstSignal;
+}: ReadRuleByRuleId): Promise<RuleAlertType | null> => {
+  const firstRules = await findRules({ alertsClient, page: 1 });
+  const firstRule = findRuleInArrayByRuleId(firstRules.data, ruleId);
+  if (firstRule != null) {
+    return firstRule;
   } else {
-    const totalPages = Math.ceil(firstSignals.total / firstSignals.perPage);
+    const totalPages = Math.ceil(firstRules.total / firstRules.perPage);
     return Array(totalPages)
       .fill({})
       .map((_, page) => {
         // page index never starts at zero. It always has to be 1 or greater
-        return findSignals({ alertsClient, page: page + 1 });
+        return findRules({ alertsClient, page: page + 1 });
       })
-      .reduce<Promise<SignalAlertType | null>>(async (accum, findSignal) => {
-        const signals = await findSignal;
-        const signal = findSignalInArrayByRuleId(signals.data, ruleId);
-        if (signal != null) {
-          return signal;
+      .reduce<Promise<RuleAlertType | null>>(async (accum, findRule) => {
+        const rules = await findRule;
+        const rule = findRuleInArrayByRuleId(rules.data, ruleId);
+        if (rule != null) {
+          return rule;
         } else {
           return accum;
         }
@@ -59,7 +59,7 @@ export const readSignalByRuleId = async ({
   }
 };
 
-export const readSignals = async ({ alertsClient, id, ruleId }: ReadSignalParams) => {
+export const readRules = async ({ alertsClient, id, ruleId }: ReadRuleParams) => {
   if (id != null) {
     try {
       const output = await alertsClient.get({ id });
@@ -73,7 +73,7 @@ export const readSignals = async ({ alertsClient, id, ruleId }: ReadSignalParams
       }
     }
   } else if (ruleId != null) {
-    return readSignalByRuleId({ alertsClient, ruleId });
+    return readRuleByRuleId({ alertsClient, ruleId });
   } else {
     // should never get here, and yet here we are.
     return null;

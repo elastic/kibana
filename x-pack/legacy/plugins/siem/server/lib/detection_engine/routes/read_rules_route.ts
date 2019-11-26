@@ -6,16 +6,16 @@
 
 import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
-
 import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
-import { deleteSignals } from '../alerts/delete_signals';
-import { ServerFacade } from '../../../types';
-import { querySignalSchema } from './schemas';
-import { QueryRequest } from '../alerts/types';
 import { getIdError, transformOrError } from './utils';
 
-export const createDeleteSignalsRoute: Hapi.ServerRoute = {
-  method: 'DELETE',
+import { readRules } from '../alerts/read_rules';
+import { ServerFacade } from '../../../types';
+import { queryRulesSchema } from './schemas';
+import { QueryRequest } from '../alerts/types';
+
+export const createReadRulesRoute: Hapi.ServerRoute = {
+  method: 'GET',
   path: DETECTION_ENGINE_RULES_URL,
   options: {
     tags: ['access:signals-all'],
@@ -23,7 +23,7 @@ export const createDeleteSignalsRoute: Hapi.ServerRoute = {
       options: {
         abortEarly: false,
       },
-      query: querySignalSchema,
+      query: queryRulesSchema,
     },
   },
   async handler(request: QueryRequest, headers) {
@@ -31,25 +31,22 @@ export const createDeleteSignalsRoute: Hapi.ServerRoute = {
     const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
     const actionsClient = isFunction(request.getActionsClient) ? request.getActionsClient() : null;
 
-    if (alertsClient == null || actionsClient == null) {
+    if (!alertsClient || !actionsClient) {
       return headers.response().code(404);
     }
-
-    const signal = await deleteSignals({
-      actionsClient,
+    const rule = await readRules({
       alertsClient,
       id,
       ruleId,
     });
-
-    if (signal != null) {
-      return transformOrError(signal);
+    if (rule != null) {
+      return transformOrError(rule);
     } else {
       return getIdError({ id, ruleId });
     }
   },
 };
 
-export const deleteSignalsRoute = (server: ServerFacade): void => {
-  server.route(createDeleteSignalsRoute);
+export const readRulesRoute = (server: ServerFacade) => {
+  server.route(createReadRulesRoute);
 };

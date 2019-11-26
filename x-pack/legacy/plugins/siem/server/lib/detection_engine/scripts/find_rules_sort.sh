@@ -9,7 +9,11 @@
 set -e
 ./check_env_variables.sh
 
-# Example: ./get_signal_by_rule_id.sh {rule_id}
+SORT=${1:-'enabled'}
+ORDER=${2:-'asc'}
+
+# Example: ./find_rules_sort.sh enabled asc
 curl -s -k \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
- -X GET ${KIBANA_URL}${SPACE_URL}/api/detection_engine/rules?rule_id="$1" | jq .
+ -X GET "${KIBANA_URL}${SPACE_URL}/api/detection_engine/rules/_find?sort_field=$SORT&sort_order=$ORDER" \
+ | jq .

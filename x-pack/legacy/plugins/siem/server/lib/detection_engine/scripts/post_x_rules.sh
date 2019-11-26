@@ -12,8 +12,8 @@ set -e
 # Uses a default of 100 if no argument is specified
 NUMBER=${1:-100}
 
-# Example: ./post_x_signals.sh
-# Example: ./post_x_signals.sh 200
+# Example: ./post_x_rules.sh
+# Example: ./post_x_rules.sh 200
 for i in $(seq 1 $NUMBER);
 do {
   curl -s -k \
