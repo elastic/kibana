@@ -32,7 +32,7 @@ describe('visualize_legend directive', function () {
   let indexPattern;
   let fixtures;
 
-  beforeEach(ngMock.module('kibana', 'kibana/table_vis'));
+  beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
     $rootScope = $injector.get('$rootScope');
     $compile = $injector.get('$compile');
