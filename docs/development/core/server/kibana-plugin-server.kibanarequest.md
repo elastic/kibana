@@ -9,7 +9,7 @@ Kibana specific abstraction for an incoming request.
 <b>Signature:</b>
 
 ```typescript
-export declare class KibanaRequest<Method extends RouteMethod = RouteMethod, Params = unknown, Query = unknown, Body = unknown> 
+export declare class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Method extends RouteMethod = any> 
 ```
 
 ## Constructors

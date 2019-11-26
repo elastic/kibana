@@ -449,11 +449,11 @@ export interface AuthToolkit {
 export class BasePath {
     // @internal
     constructor(serverBasePath?: string);
-    get: (request: KibanaRequest<import("hapi").Util.HTTP_METHODS_PARTIAL_LOWERCASE, unknown, unknown, unknown> | LegacyRequest) => string;
+    get: (request: KibanaRequest<unknown, unknown, unknown, any> | LegacyRequest) => string;
     prepend: (path: string) => string;
     remove: (path: string) => string;
     readonly serverBasePath: string;
-    set: (request: KibanaRequest<import("hapi").Util.HTTP_METHODS_PARTIAL_LOWERCASE, unknown, unknown, unknown> | LegacyRequest, requestSpecificBasePath: string) => void;
+    set: (request: KibanaRequest<unknown, unknown, unknown, any> | LegacyRequest, requestSpecificBasePath: string) => void;
 }
 
 // Warning: (ae-forgotten-export) The symbol "BootstrapArgs" needs to be exported by the entry point index.d.ts
@@ -714,13 +714,14 @@ export interface IndexSettingsDeprecationInfo {
 
 // @public
 export interface IRouter {
-    delete: RouterHandler<'delete'>;
-    get: RouterHandler<'get'>;
+    delete: RouteRegistrar<'delete'>;
+    get: RouteRegistrar<'get'>;
     // @internal
     getRoutes: () => RouterRoute[];
-    patch: RouterHandler<'patch'>;
-    post: RouterHandler<'post'>;
-    put: RouterHandler<'put'>;
+    handleLegacyErrors: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(handler: RequestHandler<P, Q, B>) => RequestHandler<P, Q, B>;
+    patch: RouteRegistrar<'patch'>;
+    post: RouteRegistrar<'post'>;
+    put: RouteRegistrar<'put'>;
     routerPath: string;
 }
 
@@ -744,14 +745,14 @@ export interface IUiSettingsClient {
 }
 
 // @public
-export class KibanaRequest<Method extends RouteMethod = RouteMethod, Params = unknown, Query = unknown, Body = unknown> {
+export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Method extends RouteMethod = any> {
     // @internal (undocumented)
     protected readonly [requestSymbol]: Request;
     constructor(request: Request, params: Params, query: Query, body: Body, withoutSecretHeaders: boolean);
     // (undocumented)
     readonly body: Body;
     // @internal
-    static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<import("hapi").Util.HTTP_METHODS_PARTIAL_LOWERCASE, P["type"], Q["type"], B["type"]>;
+    static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<P["type"], Q["type"], B["type"], import("hapi").Util.HTTP_METHODS_PARTIAL_LOWERCASE>;
     readonly headers: Headers;
     // (undocumented)
     readonly params: Params;
@@ -1013,11 +1014,10 @@ export interface PluginsServiceSetup {
     // (undocumented)
     contracts: Map<PluginName, unknown>;
     // (undocumented)
-    uiPluginConfigs: Map<PluginName, Observable<unknown>>;
-    // (undocumented)
     uiPlugins: {
+        internal: Map<PluginName, InternalPluginInfo>;
         public: Map<PluginName, DiscoveredPlugin>;
-        internal: Map<PluginName, DiscoveredPluginInternal>;
+        browserConfigs: Map<PluginName, Observable<unknown>>;
     };
 }
 
@@ -1042,7 +1042,7 @@ export type RedirectResponseOptions = HttpResponseOptions & {
 };
 
 // @public
-export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>, Method extends RouteMethod = RouteMethod> = (context: RequestHandlerContext, request: KibanaRequest<Method, TypeOf<P>, TypeOf<Q>, TypeOf<B>>, response: KibanaResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
+export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>, Method extends RouteMethod = any> = (context: RequestHandlerContext, request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>, Method>, response: KibanaResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 
 // @public
 export interface RequestHandlerContext {
@@ -1093,7 +1093,7 @@ export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B exten
 // @public
 export interface RouteConfigOptions<Method extends RouteMethod> {
     authRequired?: boolean;
-    body?: Method extends 'get' | 'options' ? never : RouteConfigOptionsBody;
+    body?: Method extends 'get' | 'options' ? undefined : RouteConfigOptionsBody;
     tags?: readonly string[];
 }
 
@@ -1112,7 +1112,7 @@ export type RouteContentType = 'application/json' | 'application/*+json' | 'appl
 export type RouteMethod = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options';
 
 // @public
-export type RouterHandler<Method extends RouteMethod> = <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<P, Q, B, Method>) => void;
+export type RouteRegistrar<Method extends RouteMethod> = <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<P, Q, B, Method>) => void;
 
 // @public
 export interface RouterRoute {
@@ -1669,6 +1669,6 @@ export const validBodyOutput: readonly ["data", "stream"];
 // Warnings were encountered during analysis:
 // 
 // src/core/server/http/router/response.ts:316:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/plugins_service.ts:45:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/plugins_service.ts:43:5 - (ae-forgotten-export) The symbol "InternalPluginInfo" needs to be exported by the entry point index.d.ts
 
 ```

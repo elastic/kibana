@@ -116,7 +116,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   /**
    * Additional body options {@link RouteConfigOptionsBody}.
    */
-  body?: Method extends 'get' | 'options' ? never : RouteConfigOptionsBody;
+  body?: Method extends 'get' | 'options' ? undefined : RouteConfigOptionsBody;
 }
 
 /**

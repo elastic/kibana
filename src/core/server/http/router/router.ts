@@ -34,6 +34,7 @@ import {
 } from './route';
 import { HapiResponseAdapter } from './response_adapter';
 import { RequestHandlerContext } from '../../../server';
+import { wrapErrors } from './error_wrapper';
 
 /**
  * Definition of a route
@@ -52,7 +53,7 @@ export interface RouterRoute {
  *
  * @public
  */
-export type RouterHandler<Method extends RouteMethod> = <
+export type RouteRegistrar<Method extends RouteMethod> = <
   P extends ObjectType,
   Q extends ObjectType,
   B extends ObjectType | Type<Buffer> | Type<Stream>
@@ -78,35 +79,43 @@ export interface IRouter {
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  get: RouterHandler<'get'>;
+  get: RouteRegistrar<'get'>;
 
   /**
    * Register a route handler for `POST` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  post: RouterHandler<'post'>;
+  post: RouteRegistrar<'post'>;
 
   /**
    * Register a route handler for `PUT` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  put: RouterHandler<'put'>;
+  put: RouteRegistrar<'put'>;
 
   /**
    * Register a route handler for `PATCH` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  patch: RouterHandler<'patch'>;
+  patch: RouteRegistrar<'patch'>;
 
   /**
    * Register a route handler for `DELETE` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  delete: RouterHandler<'delete'>;
+  delete: RouteRegistrar<'delete'>;
+
+  /**
+   * Wrap a router handler to catch and converts legacy boom errors to proper custom errors.
+   * @param handler {@link RequestHandler} - a route handler to wrap
+   */
+  handleLegacyErrors: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+    handler: RequestHandler<P, Q, B>
+  ) => RequestHandler<P, Q, B>;
 
   /**
    * Returns all routes registered with this router.
@@ -117,11 +126,11 @@ export interface IRouter {
 }
 
 export type ContextEnhancer<
-  Method extends RouteMethod,
   P extends ObjectType,
   Q extends ObjectType,
-  B extends ObjectType
-> = (handler: RequestHandler<P, Q, B, Method>) => RequestHandlerEnhanced<Method, P, Q, B>;
+  B extends ObjectType,
+  Method extends RouteMethod
+> = (handler: RequestHandler<P, Q, B, Method>) => RequestHandlerEnhanced<P, Q, B, Method>;
 
 function getRouteFullPath(routerPath: string, routePath: string) {
   // If router's path ends with slash and route's path starts with slash,
@@ -139,9 +148,8 @@ function getRouteFullPath(routerPath: string, routePath: string) {
 function routeSchemasFromRouteConfig<
   P extends ObjectType,
   Q extends ObjectType,
-  B extends ObjectType | Type<Buffer> | Type<Stream>,
-  Method extends RouteMethod
->(route: RouteConfig<P, Q, B, Method>, routeMethod: Method) {
+  B extends ObjectType | Type<Buffer> | Type<Stream>
+>(route: RouteConfig<P, Q, B, typeof routeMethod>, routeMethod: RouteMethod) {
   // The type doesn't allow `validate` to be undefined, but it can still
   // happen when it's used from JavaScript.
   if (route.validate === undefined) {
@@ -169,9 +177,14 @@ function routeSchemasFromRouteConfig<
  * @param method HTTP verb for these options
  * @param routeConfig The route config definition
  */
-function validOptions<Method extends RouteMethod>(
-  method: Method,
-  routeConfig: RouteConfig<ObjectType, ObjectType, ObjectType | Type<Buffer> | Type<Stream>, Method>
+function validOptions(
+  method: RouteMethod,
+  routeConfig: RouteConfig<
+    ObjectType,
+    ObjectType,
+    ObjectType | Type<Buffer> | Type<Stream>,
+    typeof method
+  >
 ) {
   const shouldNotHavePayload = ['head', 'get'].includes(method);
   const { options = {}, validate } = routeConfig;
@@ -252,6 +265,12 @@ export class Router implements IRouter {
     return [...this.routes];
   }
 
+  public handleLegacyErrors<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+    handler: RequestHandler<P, Q, B>
+  ): RequestHandler<P, Q, B> {
+    return wrapErrors(handler);
+  }
+
   private async handle<
     P extends ObjectType,
     Q extends ObjectType,
@@ -264,10 +283,10 @@ export class Router implements IRouter {
   }: {
     request: Request;
     responseToolkit: ResponseToolkit;
-    handler: RequestHandlerEnhanced<typeof request.method, P, Q, B>;
+    handler: RequestHandlerEnhanced<P, Q, B, typeof request.method>;
     routeSchemas?: RouteSchemas<P, Q, B>;
   }) {
-    let kibanaRequest: KibanaRequest<typeof request.method, TypeOf<P>, TypeOf<Q>, TypeOf<B>>;
+    let kibanaRequest: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>, typeof request.method>;
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
       kibanaRequest = KibanaRequest.from(request, routeSchemas);
@@ -290,10 +309,10 @@ type WithoutHeadArgument<T> = T extends (first: any, ...rest: infer Params) => i
   : never;
 
 type RequestHandlerEnhanced<
-  Method extends RouteMethod,
   P extends ObjectType,
   Q extends ObjectType,
-  B extends ObjectType | Type<Buffer> | Type<Stream>
+  B extends ObjectType | Type<Buffer> | Type<Stream>,
+  Method extends RouteMethod
 > = WithoutHeadArgument<RequestHandler<P, Q, B, Method>>;
 
 /**
@@ -333,9 +352,9 @@ export type RequestHandler<
   P extends ObjectType,
   Q extends ObjectType,
   B extends ObjectType | Type<Buffer> | Type<Stream>,
-  Method extends RouteMethod = RouteMethod
+  Method extends RouteMethod = any
 > = (
   context: RequestHandlerContext,
-  request: KibanaRequest<Method, TypeOf<P>, TypeOf<Q>, TypeOf<B>>,
+  request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>, Method>,
   response: KibanaResponseFactory
 ) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;

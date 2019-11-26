@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Anomalies } from './anomalies';
 import { Authentications } from './authentications';
 import { ConfigurationAdapter } from './configuration';
 import { Events } from './events';
@@ -27,6 +28,7 @@ import { SignalAlertParamsRest } from './detection_engine/alerts/types';
 export * from './hosts';
 
 export interface AppDomainLibs {
+  anomalies: Anomalies;
   authentications: Authentications;
   events: Events;
   fields: IndexFields;

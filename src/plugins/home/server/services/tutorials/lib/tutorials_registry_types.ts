@@ -17,7 +17,7 @@
  * under the License.
  */
 import { IconType } from '@elastic/eui';
-import { KibanaRequest, RouteMethod } from 'src/core/server';
+import { KibanaRequest } from 'src/core/server';
 
 /** @public */
 export enum TutorialsCategory {
@@ -96,7 +96,6 @@ export interface TutorialSchema {
 export type TutorialProvider = (context: { [key: string]: unknown }) => TutorialSchema;
 export type TutorialContextFactory = (
   req: KibanaRequest<
-    RouteMethod,
     Readonly<{
       [x: string]: any;
     }>,

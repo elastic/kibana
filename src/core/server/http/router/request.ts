@@ -56,10 +56,10 @@ export interface LegacyRequest extends Request {} // eslint-disable-line @typesc
  * @public
  */
 export class KibanaRequest<
-  Method extends RouteMethod = RouteMethod,
   Params = unknown,
   Query = unknown,
-  Body = unknown
+  Body = unknown,
+  Method extends RouteMethod = any
 > {
   /**
    * Factory for creating requests. Validates the request before creating an
@@ -72,7 +72,7 @@ export class KibanaRequest<
     B extends ObjectType | Type<Buffer> | Type<Stream>
   >(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders: boolean = true) {
     const requestParts = KibanaRequest.validate(req, routeSchemas);
-    return new KibanaRequest<typeof req.method, TypeOf<P>, TypeOf<Q>, TypeOf<B>>(
+    return new KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>, typeof req.method>(
       req,
       requestParts.params,
       requestParts.query,
@@ -192,10 +192,10 @@ export class KibanaRequest<
  * Returns underlying Hapi Request
  * @internal
  */
-export const ensureRawRequest = (request: KibanaRequest<RouteMethod> | LegacyRequest) =>
+export const ensureRawRequest = (request: KibanaRequest | LegacyRequest) =>
   isKibanaRequest(request) ? request[requestSymbol] : request;
 
-function isKibanaRequest(request: unknown): request is KibanaRequest<RouteMethod> {
+function isKibanaRequest(request: unknown): request is KibanaRequest {
   return request instanceof KibanaRequest;
 }
 
@@ -211,8 +211,6 @@ function isRequest(request: any): request is LegacyRequest {
  * Checks if an incoming request either KibanaRequest or Legacy.Request
  * @internal
  */
-export function isRealRequest(
-  request: unknown
-): request is KibanaRequest<RouteMethod> | LegacyRequest {
+export function isRealRequest(request: unknown): request is KibanaRequest | LegacyRequest {
   return isKibanaRequest(request) || isRequest(request);
 }

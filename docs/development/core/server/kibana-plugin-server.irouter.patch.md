@@ -9,5 +9,5 @@ Register a route handler for `PATCH` request.
 <b>Signature:</b>
 
 ```typescript
-patch: RouterHandler<'patch'>;
+patch: RouteRegistrar<'patch'>;
 ```

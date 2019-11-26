@@ -77,7 +77,7 @@ function createKibanaRequestMock({
       body: schema.object({}, { allowUnknowns: true }),
       query: schema.object({}, { allowUnknowns: true }),
     }
-  ) as KibanaRequest<any, Readonly<{}>, Readonly<{}>, Readonly<{}>>;
+  ) as KibanaRequest<Readonly<{}>, Readonly<{}>, Readonly<{}>>;
 }
 
 type DeepPartial<T> = T extends any[]

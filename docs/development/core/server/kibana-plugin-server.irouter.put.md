@@ -9,5 +9,5 @@ Register a route handler for `PUT` request.
 <b>Signature:</b>
 
 ```typescript
-put: RouterHandler<'put'>;
+put: RouteRegistrar<'put'>;
 ```

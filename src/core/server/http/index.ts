@@ -45,7 +45,7 @@ export {
   IRouter,
   RouterRoute,
   RouteMethod,
-  RouterHandler,
+  RouteRegistrar,
   RouteConfigOptions,
   RouteSchemas,
   RouteConfigOptionsBody,
