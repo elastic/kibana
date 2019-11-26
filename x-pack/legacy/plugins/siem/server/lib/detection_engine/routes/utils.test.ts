@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import {
-  transformAlertToSignal,
+  transformAlertToRule,
   getIdError,
   transformFindAlertsOrError,
   transformOrError,
@@ -17,7 +17,7 @@ describe('utils', () => {
   describe('transformAlertToSignal', () => {
     test('should work with a full data set', () => {
       const fullSignal = getResult();
-      const signal = transformAlertToSignal(fullSignal);
+      const signal = transformAlertToRule(fullSignal);
       expect(signal).toEqual({
         created_by: 'elastic',
         description: 'Detecting root and admin users',
@@ -46,7 +46,7 @@ describe('utils', () => {
 
     test('should work with a partial data set missing data', () => {
       const fullSignal = getResult();
-      const { from, language, ...omitData } = transformAlertToSignal(fullSignal);
+      const { from, language, ...omitData } = transformAlertToRule(fullSignal);
       expect(omitData).toEqual({
         created_by: 'elastic',
         description: 'Detecting root and admin users',
@@ -74,7 +74,7 @@ describe('utils', () => {
     test('should omit query if query is null', () => {
       const fullSignal = getResult();
       fullSignal.params.query = null;
-      const signal = transformAlertToSignal(fullSignal);
+      const signal = transformAlertToRule(fullSignal);
       expect(signal).toEqual({
         created_by: 'elastic',
         description: 'Detecting root and admin users',
@@ -103,7 +103,7 @@ describe('utils', () => {
     test('should omit query if query is undefined', () => {
       const fullSignal = getResult();
       fullSignal.params.query = undefined;
-      const signal = transformAlertToSignal(fullSignal);
+      const signal = transformAlertToRule(fullSignal);
       expect(signal).toEqual({
         created_by: 'elastic',
         description: 'Detecting root and admin users',
@@ -133,7 +133,7 @@ describe('utils', () => {
       const fullSignal = getResult();
       fullSignal.params.query = undefined;
       fullSignal.params.language = null;
-      const { from, enabled, ...omitData } = transformAlertToSignal(fullSignal);
+      const { from, enabled, ...omitData } = transformAlertToRule(fullSignal);
       expect(omitData).toEqual({
         created_by: 'elastic',
         description: 'Detecting root and admin users',
@@ -159,7 +159,7 @@ describe('utils', () => {
     test('should return enabled is equal to false', () => {
       const fullSignal = getResult();
       fullSignal.enabled = false;
-      const signalWithEnabledFalse = transformAlertToSignal(fullSignal);
+      const signalWithEnabledFalse = transformAlertToRule(fullSignal);
       expect(signalWithEnabledFalse).toEqual({
         created_by: 'elastic',
         description: 'Detecting root and admin users',
@@ -189,7 +189,7 @@ describe('utils', () => {
     test('should return immutable is equal to false', () => {
       const fullSignal = getResult();
       fullSignal.params.immutable = false;
-      const signalWithEnabledFalse = transformAlertToSignal(fullSignal);
+      const signalWithEnabledFalse = transformAlertToRule(fullSignal);
       expect(signalWithEnabledFalse).toEqual({
         created_by: 'elastic',
         description: 'Detecting root and admin users',

@@ -5,14 +5,14 @@
  */
 
 import { readRules } from './read_rules';
-import { DeleteSignalParams } from './types';
+import { DeleteRuleParams } from './types';
 
 export const deleteRules = async ({
   alertsClient,
   actionsClient, // TODO: Use this when we have actions such as email, etc...
   id,
   ruleId,
-}: DeleteSignalParams) => {
+}: DeleteRuleParams) => {
   const signal = await readRules({ alertsClient, id, ruleId });
   if (signal == null) {
     return null;

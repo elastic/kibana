@@ -8,7 +8,7 @@ import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 import { findRules } from '../alerts/find_rules';
-import { FindSignalsRequest } from '../alerts/types';
+import { FindRulesRequest } from '../alerts/types';
 import { findRulesSchema } from './schemas';
 import { ServerFacade } from '../../../types';
 import { transformFindAlertsOrError } from './utils';
@@ -25,7 +25,7 @@ export const createFindRulesRoute: Hapi.ServerRoute = {
       query: findRulesSchema,
     },
   },
-  async handler(request: FindSignalsRequest, headers) {
+  async handler(request: FindRulesRequest, headers) {
     const { query } = request;
     const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
     const actionsClient = isFunction(request.getActionsClient) ? request.getActionsClient() : null;

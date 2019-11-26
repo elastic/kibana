@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import { pickBy } from 'lodash/fp';
-import { SignalAlertType, isAlertType, OutputSignalAlertRest, isAlertTypes } from '../alerts/types';
+import { RuleAlertType, isAlertType, OutputRuleAlertRest, isAlertTypes } from '../alerts/types';
 
 export const getIdError = ({
   id,
@@ -26,8 +26,8 @@ export const getIdError = ({
 
 // Transforms the data but will remove any null or undefined it encounters and not include
 // those on the export
-export const transformAlertToSignal = (signal: SignalAlertType): Partial<OutputSignalAlertRest> => {
-  return pickBy<OutputSignalAlertRest>((value: unknown) => value != null, {
+export const transformAlertToRule = (signal: RuleAlertType): Partial<OutputRuleAlertRest> => {
+  return pickBy<OutputRuleAlertRest>((value: unknown) => value != null, {
     created_by: signal.createdBy,
     description: signal.params.description,
     enabled: signal.enabled,
@@ -59,16 +59,16 @@ export const transformAlertToSignal = (signal: SignalAlertType): Partial<OutputS
 
 export const transformFindAlertsOrError = (findResults: { data: unknown[] }): unknown | Boom => {
   if (isAlertTypes(findResults.data)) {
-    findResults.data = findResults.data.map(signal => transformAlertToSignal(signal));
+    findResults.data = findResults.data.map(signal => transformAlertToRule(signal));
     return findResults;
   } else {
     return new Boom('Internal error transforming', { statusCode: 500 });
   }
 };
 
-export const transformOrError = (signal: unknown): Partial<OutputSignalAlertRest> | Boom => {
+export const transformOrError = (signal: unknown): Partial<OutputRuleAlertRest> | Boom => {
   if (isAlertType(signal)) {
-    return transformAlertToSignal(signal);
+    return transformAlertToRule(signal);
   } else {
     return new Boom('Internal error transforming', { statusCode: 500 });
   }

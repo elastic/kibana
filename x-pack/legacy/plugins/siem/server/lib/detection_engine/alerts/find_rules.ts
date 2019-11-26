@@ -5,7 +5,7 @@
  */
 
 import { SIGNALS_ID } from '../../../../common/constants';
-import { FindSignalParams } from './types';
+import { FindRuleParams } from './types';
 
 export const getFilter = (filter: string | null | undefined) => {
   if (filter == null) {
@@ -23,7 +23,7 @@ export const findRules = async ({
   filter,
   sortField,
   sortOrder,
-}: FindSignalParams) => {
+}: FindRuleParams) => {
   return alertsClient.find({
     options: {
       fields,

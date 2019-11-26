@@ -14,7 +14,7 @@ import {
   SignalSearchResponse,
   BulkResponse,
   AlertTypeParams,
-  OutputSignalES,
+  OutputRuleES,
 } from './types';
 import { buildEventsSearchQuery } from './build_events_query';
 
@@ -36,8 +36,8 @@ export const buildRule = ({
   createdBy,
   updatedBy,
   interval,
-}: BuildRuleParams): Partial<OutputSignalES> => {
-  return pickBy<OutputSignalES>((value: unknown) => value != null, {
+}: BuildRuleParams): Partial<OutputRuleES> => {
+  return pickBy<OutputRuleES>((value: unknown) => value != null, {
     id,
     status: 'open',
     rule_id: signalParams.ruleId,
@@ -68,7 +68,7 @@ export const buildRule = ({
   });
 };
 
-export const buildSignal = (doc: SignalSourceHit, rule: Partial<OutputSignalES>): Signal => {
+export const buildSignal = (doc: SignalSourceHit, rule: Partial<OutputRuleES>): Signal => {
   return {
     parent: {
       id: doc._id,

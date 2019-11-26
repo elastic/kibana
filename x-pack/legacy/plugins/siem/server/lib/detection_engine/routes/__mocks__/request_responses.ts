@@ -6,7 +6,7 @@
 
 import { ServerInjectOptions } from 'hapi';
 import { ActionResult } from '../../../../../../actions/server/types';
-import { RuleAlertParamsRest, SignalAlertType } from '../../alerts/types';
+import { RuleAlertParamsRest, RuleAlertType } from '../../alerts/types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 
 // The Omit of filter is because of a Hapi Server Typing issue that I am unclear
@@ -64,7 +64,7 @@ interface FindHit {
   page: number;
   perPage: number;
   total: number;
-  data: SignalAlertType[];
+  data: RuleAlertType[];
 }
 
 export const getFindResult = (): FindHit => ({
@@ -81,7 +81,7 @@ export const getFindResultWithSingleHit = (): FindHit => ({
   data: [getResult()],
 });
 
-export const getFindResultWithMultiHits = (data: SignalAlertType[]): FindHit => ({
+export const getFindResultWithMultiHits = (data: RuleAlertType[]): FindHit => ({
   page: 1,
   perPage: 1,
   total: 2,
@@ -113,7 +113,7 @@ export const createActionResult = (): ActionResult => ({
   config: {},
 });
 
-export const getResult = (): SignalAlertType => ({
+export const getResult = (): RuleAlertType => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   name: 'Detect Root/Admin Users',
   tags: [],

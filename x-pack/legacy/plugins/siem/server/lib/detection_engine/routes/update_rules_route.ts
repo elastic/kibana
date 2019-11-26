@@ -8,7 +8,7 @@ import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 import { updateRules } from '../alerts/update_rules';
-import { UpdateSignalsRequest } from '../alerts/types';
+import { UpdateRulesRequest } from '../alerts/types';
 import { updateRulesSchema } from './schemas';
 import { ServerFacade } from '../../../types';
 import { getIdError, transformOrError } from './utils';
@@ -25,7 +25,7 @@ export const createUpdateRulesRoute: Hapi.ServerRoute = {
       payload: updateRulesSchema,
     },
   },
-  async handler(request: UpdateSignalsRequest, headers) {
+  async handler(request: UpdateRulesRequest, headers) {
     const {
       description,
       enabled,

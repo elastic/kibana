@@ -59,13 +59,13 @@ export type RuleAlertParamsRest = Omit<
   output_index: RuleAlertParams['outputIndex'];
 };
 
-export type OutputSignalAlertRest = RuleAlertParamsRest & {
+export type OutputRuleAlertRest = RuleAlertParamsRest & {
   id: string;
   created_by: string | undefined | null;
   updated_by: string | undefined | null;
 };
 
-export type OutputSignalES = OutputSignalAlertRest & {
+export type OutputRuleES = OutputRuleAlertRest & {
   status: 'open' | 'closed';
 };
 
@@ -88,18 +88,18 @@ export interface Clients {
   actionsClient: ActionsClient;
 }
 
-export type SignalParams = RuleAlertParams & Clients;
+export type RuleParams = RuleAlertParams & Clients;
 
-export type UpdateSignalParams = Partial<RuleAlertParams> & {
+export type UpdateRuleParams = Partial<RuleAlertParams> & {
   id: string | undefined | null;
 } & Clients;
 
-export type DeleteSignalParams = Clients & {
+export type DeleteRuleParams = Clients & {
   id: string | undefined;
   ruleId: string | undefined | null;
 };
 
-export interface FindSignalsRequest extends Omit<RequestFacade, 'query'> {
+export interface FindRulesRequest extends Omit<RequestFacade, 'query'> {
   query: {
     per_page: number;
     page: number;
@@ -111,7 +111,7 @@ export interface FindSignalsRequest extends Omit<RequestFacade, 'query'> {
   };
 }
 
-export interface FindSignalParams {
+export interface FindRuleParams {
   alertsClient: AlertsClient;
   perPage?: number;
   page?: number;
@@ -121,33 +121,33 @@ export interface FindSignalParams {
   sortOrder?: 'asc' | 'desc';
 }
 
-export interface ReadSignalParams {
+export interface ReadRuleParams {
   alertsClient: AlertsClient;
   id?: string | undefined | null;
   ruleId?: string | undefined | null;
 }
 
-export interface ReadSignalByRuleId {
+export interface ReadRuleByRuleId {
   alertsClient: AlertsClient;
   ruleId: string;
 }
 
 export type AlertTypeParams = Omit<RuleAlertParams, 'name' | 'enabled' | 'interval'>;
 
-export type SignalAlertType = Alert & {
+export type RuleAlertType = Alert & {
   id: string;
   params: AlertTypeParams;
 };
 
-export interface SignalsRequest extends RequestFacade {
+export interface RulesRequest extends RequestFacade {
   payload: RuleAlertParamsRest;
 }
 
-export interface UpdateSignalsRequest extends RequestFacade {
+export interface UpdateRulesRequest extends RequestFacade {
   payload: UpdateRuleAlertParamsRest;
 }
 
-export type SignalExecutorOptions = Omit<AlertExecutorOptions, 'params'> & {
+export type RuleExecutorOptions = Omit<AlertExecutorOptions, 'params'> & {
   params: RuleAlertParams & {
     scrollSize: number;
     scrollLock: string;
@@ -228,17 +228,17 @@ export const isAlertExecutor = (obj: SignalAlertTypeDefinition): obj is AlertTyp
 };
 
 export type SignalAlertTypeDefinition = Omit<AlertType, 'executor'> & {
-  executor: ({ services, params, state }: SignalExecutorOptions) => Promise<State | void>;
+  executor: ({ services, params, state }: RuleExecutorOptions) => Promise<State | void>;
 };
 
-export const isAlertTypes = (obj: unknown[]): obj is SignalAlertType[] => {
+export const isAlertTypes = (obj: unknown[]): obj is RuleAlertType[] => {
   return obj.every(signal => isAlertType(signal));
 };
 
-export const isAlertType = (obj: unknown): obj is SignalAlertType => {
+export const isAlertType = (obj: unknown): obj is RuleAlertType => {
   return get('alertTypeId', obj) === SIGNALS_ID;
 };
 
-export const isAlertTypeArray = (objArray: unknown[]): objArray is SignalAlertType[] => {
+export const isAlertTypeArray = (objArray: unknown[]): objArray is RuleAlertType[] => {
   return objArray.length === 0 || isAlertType(objArray[0]);
 };

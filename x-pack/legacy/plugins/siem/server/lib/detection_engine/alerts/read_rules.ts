@@ -5,15 +5,15 @@
  */
 
 import { findRules } from './find_rules';
-import { SignalAlertType, isAlertTypeArray, ReadSignalParams, ReadSignalByRuleId } from './types';
+import { RuleAlertType, isAlertTypeArray, ReadRuleParams, ReadRuleByRuleId } from './types';
 
 export const findRuleInArrayByRuleId = (
   objects: object[],
   ruleId: string
-): SignalAlertType | null => {
+): RuleAlertType | null => {
   if (isAlertTypeArray(objects)) {
-    const signals: SignalAlertType[] = objects;
-    const signal: SignalAlertType[] = signals.filter(datum => {
+    const signals: RuleAlertType[] = objects;
+    const signal: RuleAlertType[] = signals.filter(datum => {
       return datum.params.ruleId === ruleId;
     });
     if (signal.length !== 0) {
@@ -34,7 +34,7 @@ export const findRuleInArrayByRuleId = (
 export const readRuleByRuleId = async ({
   alertsClient,
   ruleId,
-}: ReadSignalByRuleId): Promise<SignalAlertType | null> => {
+}: ReadRuleByRuleId): Promise<RuleAlertType | null> => {
   const firstSignals = await findRules({ alertsClient, page: 1 });
   const firstSignal = findRuleInArrayByRuleId(firstSignals.data, ruleId);
   if (firstSignal != null) {
@@ -47,7 +47,7 @@ export const readRuleByRuleId = async ({
         // page index never starts at zero. It always has to be 1 or greater
         return findRules({ alertsClient, page: page + 1 });
       })
-      .reduce<Promise<SignalAlertType | null>>(async (accum, findSignal) => {
+      .reduce<Promise<RuleAlertType | null>>(async (accum, findSignal) => {
         const signals = await findSignal;
         const signal = findRuleInArrayByRuleId(signals.data, ruleId);
         if (signal != null) {
@@ -59,7 +59,7 @@ export const readRuleByRuleId = async ({
   }
 };
 
-export const readRules = async ({ alertsClient, id, ruleId }: ReadSignalParams) => {
+export const readRules = async ({ alertsClient, id, ruleId }: ReadRuleParams) => {
   if (id != null) {
     try {
       const output = await alertsClient.get({ id });

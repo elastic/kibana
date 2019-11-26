@@ -7,7 +7,7 @@
 import { defaults } from 'lodash/fp';
 import { AlertAction } from '../../../../../alerting/server/types';
 import { readRules } from './read_rules';
-import { UpdateSignalParams } from './types';
+import { UpdateRuleParams } from './types';
 
 export const calculateInterval = (
   interval: string | undefined,
@@ -68,7 +68,7 @@ export const updateRules = async ({
   to,
   type,
   references,
-}: UpdateSignalParams) => {
+}: UpdateRuleParams) => {
   const signal = await readRules({ alertsClient, ruleId, id });
   if (signal == null) {
     return null;
