@@ -18,6 +18,8 @@ jest.mock('ui/i18n', () => {
   return { I18nContext };
 });
 
+jest.mock('ui/new_platform');
+
 const POLICY_NAME = 'my_policy';
 const SNAPSHOT_NAME = 'my_snapshot';
 const MIN_COUNT = '5';
