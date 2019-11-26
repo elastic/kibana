@@ -4,6 +4,8 @@
 
 ## CapabilitiesStart.resolveCapabilities() method
 
+Resolve the [Capabilities](./kibana-plugin-server.capabilities.md) to be used for given request
+
 <b>Signature:</b>
 
 ```typescript

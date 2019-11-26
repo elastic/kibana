@@ -4,6 +4,8 @@
 
 ## CapabilitiesSetup.registerCapabilitiesSwitcher() method
 
+Register a  to be used when resolving capabilities.
+
 <b>Signature:</b>
 
 ```typescript
@@ -19,4 +21,24 @@ registerCapabilitiesSwitcher(switcher: CapabilitiesSwitcher): void;
 <b>Returns:</b>
 
 `void`
+
+## Remarks
+
+A capabilities switcher can only change the state of existing capabilities. Adding or removing capabilities when invoking the switcher will raise an error.
+
+## Example
+
+
+```ts
+// my-plugin/server/plugin.ts
+public setup(core: CoreSetup, deps: {}) {
+   core.capabilities.registerCapabilitiesSwitcher((request, capabilities) => {
+     if(myPluginApi.shouldRestrictBecauseOf(request)) {
+       return myPluginApi.restrictCapabilities(capabilities);
+     }
+     return capabilities;
+   })
+}
+
+```
 

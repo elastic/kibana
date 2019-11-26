@@ -4,6 +4,8 @@
 
 ## CapabilitiesStart interface
 
+APIs to access the application [Capabilities](./kibana-plugin-server.capabilities.md)<!-- -->.
+
 <b>Signature:</b>
 
 ```typescript
@@ -14,5 +16,5 @@ export interface CapabilitiesStart
 
 |  Method | Description |
 |  --- | --- |
-|  [resolveCapabilities(request)](./kibana-plugin-server.capabilitiesstart.resolvecapabilities.md) |  |
+|  [resolveCapabilities(request)](./kibana-plugin-server.capabilitiesstart.resolvecapabilities.md) | Resolve the [Capabilities](./kibana-plugin-server.capabilities.md) to be used for given request |
 

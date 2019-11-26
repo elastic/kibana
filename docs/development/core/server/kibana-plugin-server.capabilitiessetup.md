@@ -4,6 +4,8 @@
 
 ## CapabilitiesSetup interface
 
+APIs to manage the [Capabilities](./kibana-plugin-server.capabilities.md) that will be used by the application.
+
 <b>Signature:</b>
 
 ```typescript
@@ -14,6 +16,6 @@ export interface CapabilitiesSetup
 
 |  Method | Description |
 |  --- | --- |
-|  [registerCapabilitiesProvider(provider)](./kibana-plugin-server.capabilitiessetup.registercapabilitiesprovider.md) |  |
-|  [registerCapabilitiesSwitcher(switcher)](./kibana-plugin-server.capabilitiessetup.registercapabilitiesswitcher.md) |  |
+|  [registerCapabilitiesProvider(provider)](./kibana-plugin-server.capabilitiessetup.registercapabilitiesprovider.md) | Register a  to be used when resolving capabilities. |
+|  [registerCapabilitiesSwitcher(switcher)](./kibana-plugin-server.capabilitiessetup.registercapabilitiesswitcher.md) | Register a  to be used when resolving capabilities. |
 

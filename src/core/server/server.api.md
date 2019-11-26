@@ -477,25 +477,18 @@ export interface Capabilities {
     navLinks: Record<string, boolean>;
 }
 
-// Warning: (ae-missing-release-tag) "CapabilitiesSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
+// @public
 export interface CapabilitiesSetup {
     // Warning: (ae-forgotten-export) The symbol "CapabilitiesProvider" needs to be exported by the entry point index.d.ts
-    // 
-    // (undocumented)
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "CapabilitiesProvider"
     registerCapabilitiesProvider(provider: CapabilitiesProvider): void;
     // Warning: (ae-forgotten-export) The symbol "CapabilitiesSwitcher" needs to be exported by the entry point index.d.ts
-    // 
-    // (undocumented)
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "CapabilitiesSwitcher"
     registerCapabilitiesSwitcher(switcher: CapabilitiesSwitcher): void;
 }
 
-// Warning: (ae-missing-release-tag) "CapabilitiesStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
+// @public
 export interface CapabilitiesStart {
-    // (undocumented)
     resolveCapabilities(request: KibanaRequest): Promise<Capabilities>;
 }
 

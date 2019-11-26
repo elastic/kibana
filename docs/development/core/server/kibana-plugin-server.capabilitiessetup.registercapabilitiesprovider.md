@@ -4,6 +4,8 @@
 
 ## CapabilitiesSetup.registerCapabilitiesProvider() method
 
+Register a  to be used when resolving capabilities.
+
 <b>Signature:</b>
 
 ```typescript
@@ -19,4 +21,24 @@ registerCapabilitiesProvider(provider: CapabilitiesProvider): void;
 <b>Returns:</b>
 
 `void`
+
+## Example
+
+
+```ts
+// my-plugin/server/plugin.ts
+public setup(core: CoreSetup, deps: {}) {
+   core.capabilities.registerCapabilitiesProvider(() => {
+     return {
+       catalogue: {
+         myPlugin: true,
+       },
+       myPlugin: {
+         feature: true,
+       },
+     }
+   })
+}
+
+```
 

@@ -43,8 +43,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AuthToolkit](./kibana-plugin-server.authtoolkit.md) | A tool set defining an outcome of Auth interceptor for incoming request. |
 |  [CallAPIOptions](./kibana-plugin-server.callapioptions.md) | The set of options that defines how API call should be made and result be processed. |
 |  [Capabilities](./kibana-plugin-server.capabilities.md) | The read-only set of capabilities available for the current UI session. Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID, and the boolean is a flag indicating if the capability is enabled or disabled. |
-|  [CapabilitiesSetup](./kibana-plugin-server.capabilitiessetup.md) |  |
-|  [CapabilitiesStart](./kibana-plugin-server.capabilitiesstart.md) |  |
+|  [CapabilitiesSetup](./kibana-plugin-server.capabilitiessetup.md) | APIs to manage the [Capabilities](./kibana-plugin-server.capabilities.md) that will be used by the application. |
+|  [CapabilitiesStart](./kibana-plugin-server.capabilitiesstart.md) | APIs to access the application [Capabilities](./kibana-plugin-server.capabilities.md)<!-- -->. |
 |  [ContextSetup](./kibana-plugin-server.contextsetup.md) | An object that handles registration of context providers and configuring handlers with context. |
 |  [CoreSetup](./kibana-plugin-server.coresetup.md) | Context passed to the plugins <code>setup</code> method. |
 |  [CoreStart](./kibana-plugin-server.corestart.md) | Context passed to the plugins <code>start</code> method. |
