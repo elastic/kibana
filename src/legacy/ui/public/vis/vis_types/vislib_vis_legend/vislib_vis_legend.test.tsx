@@ -97,7 +97,14 @@ const uiState = {
 const getWrapper = (props?: Partial<VisLegendProps>) =>
   mount(
     <I18nProvider>
-      <VisLegend vis={vis} vislibVis={vislibVis} visData={visData} uiState={uiState} {...props} />
+      <VisLegend
+        position="top"
+        vis={vis}
+        vislibVis={vislibVis}
+        visData={visData}
+        uiState={uiState}
+        {...props}
+      />
     </I18nProvider>
   );
 
@@ -287,7 +294,7 @@ describe('VisLegend Component', () => {
       const toggleButton = wrapper.find('.visLegend__toggle').first();
       toggleButton.simulate('click');
 
-      expect(uiState.get('vis.legendOpen')).toBe(true);
+      expect(wrapper.exists('.visLegend__list')).toBe(true);
     });
 
     it('click should hide legend once toggled from shown', () => {
@@ -296,7 +303,7 @@ describe('VisLegend Component', () => {
       const toggleButton = wrapper.find('.visLegend__toggle').first();
       toggleButton.simulate('click');
 
-      expect(uiState.get('vis.legendOpen')).toBe(false);
+      expect(wrapper.exists('.visLegend__list')).toBe(false);
     });
   });
 });

@@ -21,7 +21,7 @@ import classNames from 'classnames';
 import { compact, uniq, map } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, keyCodes, htmlIdGenerator } from '@elastic/eui';
+import { EuiPopoverProps, EuiButtonIcon, keyCodes, htmlIdGenerator } from '@elastic/eui';
 
 // @ts-ignore
 import { Data } from '../../../vislib/lib/data';
@@ -36,9 +36,11 @@ export interface VisLegendProps {
   vislibVis: any;
   visData: any;
   uiState: any;
+  position: 'top' | 'bottom' | 'left' | 'right';
 }
 
 export interface VisLegendState {
+  open: boolean;
   labels: any[];
   tableAggs: any[];
   selectedLabel: string | null;
@@ -50,8 +52,10 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
 
   constructor(props: VisLegendProps) {
     super(props);
+    const open = props.uiState.get('vis.legendOpen', true);
 
     this.state = {
+      open,
       labels: [],
       tableAggs: [],
       selectedLabel: null,
@@ -66,7 +70,11 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
     const bwcAddLegend = this.props.vis.params.addLegend;
     const bwcLegendStateDefault = bwcAddLegend == null ? true : bwcAddLegend;
     const newOpen = !this.props.uiState.get('vis.legendOpen', bwcLegendStateDefault);
-    this.props.uiState.set('vis.legendOpen', newOpen);
+    this.setState({ open: newOpen });
+    // open should be applied on template before we update uiState
+    setTimeout(() => {
+      this.props.uiState.set('vis.legendOpen', newOpen);
+    });
   };
 
   setColor = (label: string, color: string) => (event: BaseSyntheticEvent) => {
@@ -83,7 +91,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
     this.refresh();
   };
 
-  filter = ({ values: data }: LegendItem, negate: boolean) => {
+  filter = ({ values: data }: LegendItem, negate: boolean) => () => {
     this.props.vis.API.events.filter({ data, negate });
   };
 
@@ -144,7 +152,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
       this.props.uiState.get('vis.legendOpen') == null &&
       this.props.vis.params.addLegend != null
     ) {
-      this.props.uiState.set('vis.legendOpen', this.props.vis.params.addLegend);
+      this.setState({ open: this.props.vis.params.addLegend });
     }
 
     if (CUSTOM_LEGEND_VIS_TYPES.includes(vislibVis.visConfigArgs.type)) {
@@ -189,12 +197,28 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
     handler.unHighlight.call(el, handler.el);
   };
 
-  renderLegend = () => (
+  getAnchorPosition = () => {
+    const { position } = this.props;
+
+    switch (position) {
+      case 'bottom':
+        return 'upCenter';
+      case 'left':
+        return 'rightUp';
+      case 'right':
+        return 'leftUp';
+      default:
+        return 'downCenter';
+    }
+  };
+
+  renderLegend = (anchorPosition: EuiPopoverProps['anchorPosition']) => (
     <ul className="visLegend__list" id={this.legendId}>
       {this.state.labels.map(item => (
         <VisLegendItem
           item={item}
           key={item.label}
+          anchorPosition={anchorPosition}
           selected={this.state.selectedLabel === item.label}
           canFilter={this.canFilter(item)}
           onFilter={this.filter}
@@ -210,12 +234,13 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
   );
 
   render() {
-    const open = this.props.uiState.get('vis.legendOpen', true);
+    const { open } = this.state;
+    const anchorPosition = this.getAnchorPosition();
 
     return (
       <div className="visLegend">
-        <button
-          type="button"
+        <EuiButtonIcon
+          iconType="list"
           onClick={this.toggleLegend}
           className={classNames('kuiCollapseButton visLegend__toggle', {
             'visLegend__toggle--isOpen': open,
@@ -229,10 +254,8 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
           title={i18n.translate('common.ui.vis.visTypes.legend.toggleLegendButtonTitle', {
             defaultMessage: 'Toggle legend',
           })}
-        >
-          <EuiIcon type="list" />
-        </button>
-        {open && this.renderLegend()}
+        />
+        {open && this.renderLegend(anchorPosition)}
       </div>
     );
   }

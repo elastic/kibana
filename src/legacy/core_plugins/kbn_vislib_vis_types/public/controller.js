@@ -83,7 +83,7 @@ export class vislibVisController {
           return cls.replace(/visLib--legend-\S+/g, '');
         }).addClass(legendClassName[visParams.legendPosition]);
 
-        this.mountLegend(esResponse);
+        this.mountLegend(esResponse, visParams.legendPosition);
       }
 
       this.vislibVis.render(esResponse, this.vis.getUiState());
@@ -93,19 +93,20 @@ export class vislibVisController {
       // provide data necessary for the legend only after a render cycle.
       if (visParams.addLegend && CUSTOM_LEGEND_VIS_TYPES.includes(this.vislibVis.visConfigArgs.type)) {
         this.unmountLegend();
-        this.mountLegend(esResponse);
+        this.mountLegend(esResponse, visParams.legendPosition);
         this.vislibVis.render(esResponse, this.vis.getUiState());
       }
     });
   }
 
-  mountLegend(visData) {
+  mountLegend(visData, position) {
     this.unmount = mountReactNode(
       <VisLegend
         ref={this.legendRef}
         vis={this.vis}
         vislibVis={this.vislibVis}
         visData={visData}
+        position={position}
         uiState={this.vis.getUiState()}
       />
     )(this.legendEl);

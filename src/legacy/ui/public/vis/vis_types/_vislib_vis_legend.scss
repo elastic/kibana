@@ -64,7 +64,7 @@ $visLegendLineHeight: $euiSize;
     font-size: $euiFontSizeXS;
     text-align: left;
 
-    .visLegend__valueLabel {
+    .visLegend__valueTitle {
       vertical-align: middle;
     }
   }
@@ -95,10 +95,6 @@ $visLegendLineHeight: $euiSize;
   &:hover {
     text-decoration: underline;
   }
-}
-
-.visLegend__valueTitle--full ~ .visLegend__valueDetails {
-  z-index: 2; /* 3 */
 }
 
 .visLegend__valueDetails {
@@ -136,9 +132,9 @@ $visLegendLineHeight: $euiSize;
     &:hover {
       transform: scale(1.4);
     }
-  }
-}
 
-.visLegend__valueColorPicker--dot-isSelected {
-  background: $euiFocusBackgroundColor;
+    &-isSelected {
+      background: $euiFocusBackgroundColor;
+    }
+  }
 }

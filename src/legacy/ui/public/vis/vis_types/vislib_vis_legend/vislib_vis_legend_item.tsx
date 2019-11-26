@@ -20,17 +20,17 @@
 import React, { memo, BaseSyntheticEvent, KeyboardEvent } from 'react';
 import classNames from 'classnames';
 
-import { keyCodes } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  EuiPopover,
+  keyCodes,
+  EuiIcon,
+  EuiSpacer,
+  EuiButtonEmpty,
+  EuiPopoverProps,
+} from '@elastic/eui';
 
-import { EuiPopover } from '@elastic/eui';
-import { EuiIcon } from '@elastic/eui';
-import { EuiButtonGroup } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
-import { EuiButtonGroupOption } from '@elastic/eui';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
 import { legendColors, LegendItem } from './models';
 
 interface Props {
@@ -38,7 +38,8 @@ interface Props {
   legendId: string;
   selected: boolean;
   canFilter: boolean;
-  onFilter: (item: LegendItem, negate: boolean) => void;
+  anchorPosition: EuiPopoverProps['anchorPosition'];
+  onFilter: (item: LegendItem, negate: boolean) => () => void;
   onSelect: (label: string | null) => (event?: BaseSyntheticEvent) => void;
   onHighlight: (event: BaseSyntheticEvent) => void;
   onUnhighlight: (event: BaseSyntheticEvent) => void;
@@ -51,6 +52,7 @@ const VisLegendItemComponent = ({
   legendId,
   selected,
   canFilter,
+  anchorPosition,
   onFilter,
   onSelect,
   onHighlight,
@@ -70,41 +72,39 @@ const VisLegendItemComponent = ({
     }
   };
 
-  const filterOptions: EuiButtonGroupOption[] = [
-    {
-      id: 'filterIn',
-      label: i18n.translate('common.ui.vis.visTypes.legend.filterForValueButtonAriaLabel', {
-        defaultMessage: 'Filter for value {legendDataLabel}',
-        values: { legendDataLabel: item.label },
-      }),
-      iconType: 'magnifyWithPlus',
-      'data-test-subj': `legend-${item.label}-filterIn`,
-    },
-    {
-      id: 'filterOut',
-      label: i18n.translate('common.ui.vis.visTypes.legend.filterOutValueButtonAriaLabel', {
-        defaultMessage: 'Filter out value {legendDataLabel}',
-        values: { legendDataLabel: item.label },
-      }),
-      iconType: 'magnifyWithMinus',
-      'data-test-subj': `legend-${item.label}-filterOut`,
-    },
-  ];
-
-  const handleFilterChange = (id: string) => {
-    onFilter(item, id !== 'filterIn');
-  };
-
   const renderFilterBar = () => (
     <>
-      <EuiButtonGroup
-        isIconOnly
-        isFullWidth
-        legend="add legend"
-        options={filterOptions}
-        onChange={handleFilterChange}
-        idSelected="null"
-      />
+      <div className="kuiButtonGroup kuiButtonGroup--united kuiButtonGroup--fullWidth">
+        <button
+          className="visLegend__filterIn kuiButton kuiButton--basic kuiButton--small"
+          onClick={onFilter(item, false)}
+          aria-label={i18n.translate(
+            'common.ui.vis.visTypes.legend.filterForValueButtonAriaLabel',
+            {
+              defaultMessage: 'Filter for value {legendDataLabel}',
+              values: { legendDataLabel: item.label },
+            }
+          )}
+          data-test-subj={`legend-${item.label}-filterIn`}
+        >
+          <EuiIcon size="s" type="magnifyWithPlus" />
+        </button>
+
+        <button
+          className="visLegend__filterOut kuiButton kuiButton--basic kuiButton--small"
+          onClick={onFilter(item, true)}
+          aria-label={i18n.translate(
+            'common.ui.vis.visTypes.legend.filterOutValueButtonAriaLabel',
+            {
+              defaultMessage: 'Filter out value {legendDataLabel}',
+              values: { legendDataLabel: item.label },
+            }
+          )}
+          data-test-subj={`legend-${item.label}-filterOut`}
+        >
+          <EuiIcon size="s" type="magnifyWithMinus" />
+        </button>
+      </div>
       <EuiSpacer size="m" />
     </>
   );
@@ -113,11 +113,7 @@ const VisLegendItemComponent = ({
     <EuiButtonEmpty
       size="xs"
       color="text"
-      tabIndex={0}
-      className={classNames('visLegend__value', {
-        'eui-textTruncate': !selected,
-        'eui-textBreakWord': selected,
-      })}
+      className="visLegend__value"
       onKeyDown={onLegendEntryKeydown}
       onMouseEnter={onHighlight}
       onFocus={onHighlight}
@@ -133,12 +129,12 @@ const VisLegendItemComponent = ({
       data-test-subj={`legend-${item.label}`}
     >
       <EuiIcon
-        type="dot"
         size="l"
+        type="dot"
         color={getColor(item.label)}
         data-test-subj={`legendSelectedColor-${getColor(item.label)}`}
       />
-      <span className="visLegend__valueLabel">{item.label}</span>
+      <span className="visLegend__valueTitle">{item.label}</span>
     </EuiButtonEmpty>
   );
 
@@ -148,6 +144,7 @@ const VisLegendItemComponent = ({
       display="block"
       button={button}
       isOpen={selected}
+      anchorPosition={anchorPosition}
       closePopover={onSelect(null)}
     >
       <div className="visLegend__valueDetails">
@@ -174,10 +171,9 @@ const VisLegendItemComponent = ({
               aria-selected={color === getColor(item.label)}
               onClick={setColor(item.label, color)}
               onKeyPress={setColor(item.label, color)}
-              className={classNames(
-                'visLegend__valueColorPicker--dot',
-                color === getColor(item.label) ? 'visLegend__valueColorPicker--dot-isSelected' : ''
-              )}
+              className={classNames('visLegend__valueColorPicker--dot', {
+                'visLegend__valueColorPicker--dot-isSelected': color === getColor(item.label),
+              })}
               style={{ color }}
               data-test-subj={`legendSelectColor-${color}`}
             />
