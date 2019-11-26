@@ -25,7 +25,7 @@ npm config set cache ${HOME}
 
 cd /app/x-pack/legacy/plugins/apm/cypress
 ## Install dependencies for cypress
-npm install
+CI=true npm install
 yarn install
 
 # Wait for the kibana to be up and running
