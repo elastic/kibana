@@ -13,7 +13,7 @@ import {
 import { fetchOverviewFilters } from '../api';
 import { fetchEffectFactory } from './fetch_effect';
 
-export function* fetchOverviewFiltersSaga() {
+export function* fetchOverviewFiltersEffect() {
   yield takeLatest(
     FETCH_OVERVIEW_FILTERS,
     fetchEffectFactory(fetchOverviewFilters, fetchOverviewFiltersSuccess, fetchOverviewFiltersFail)

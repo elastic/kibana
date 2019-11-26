@@ -13,7 +13,7 @@ import {
 import { fetchSnapshotCount } from '../api';
 import { fetchEffectFactory } from './fetch_effect';
 
-export function* fetchSnapshotCountSaga() {
+export function* fetchSnapshotCountEffect() {
   yield takeLatest(
     FETCH_SNAPSHOT_COUNT,
     fetchEffectFactory(fetchSnapshotCount, fetchSnapshotCountSuccess, fetchSnapshotCountFail)
