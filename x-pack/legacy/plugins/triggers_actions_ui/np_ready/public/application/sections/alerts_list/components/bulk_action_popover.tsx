@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiButtonEmpty, EuiFormRow, EuiPopover } from '@elastic/eui';
 
@@ -35,17 +35,22 @@ export const BulkActionPopover: React.FunctionComponent<ComponentOpts> = ({
     plugins: { toastNotifications },
   } = useAppDependencies();
 
-  const selectionContainsEnabledAlerts = selectedItems.some(isAlertEnabled);
-  const selectionContainsDisabledAlerts = selectedItems.some(isAlertDisabled);
-  const selectedContainsUnmutedAlerts = selectedItems.some(isAlertUnmuted);
-  const selectionContainsMutedAlerts = selectedItems.some(isAlertOrInstancesMuted);
-
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+  const [isMutingAlerts, setIsMutingAlerts] = useState<boolean>(false);
+  const [isUnmutingAlerts, setIsUnmutingAlerts] = useState<boolean>(false);
+  const [isEnablingAlerts, setIsEnablingAlerts] = useState<boolean>(false);
+  const [isDisablingAlerts, setIsDisablingAlerts] = useState<boolean>(false);
+  const [isDeletingAlerts, setIsDeletingAlerts] = useState<boolean>(false);
+
+  const allAlertsMuted = selectedItems.every(isAlertMuted);
+  const allAlertsDisabled = selectedItems.every(isAlertDisabled);
+  const isPerformingAction =
+    isMutingAlerts || isUnmutingAlerts || isEnablingAlerts || isDisablingAlerts || isDeletingAlerts;
 
   async function onmMuteAllClick() {
-    setIsPopoverOpen(false);
     onPerformingAction();
-    const ids = selectedItems.filter(isAlertUnmuted).map(item => item.id);
+    setIsMutingAlerts(true);
+    const ids = selectedItems.filter(item => !isAlertMuted(item)).map(item => item.id);
     try {
       await muteAlerts({ http, ids });
     } catch (e) {
@@ -58,14 +63,15 @@ export const BulkActionPopover: React.FunctionComponent<ComponentOpts> = ({
         ),
       });
     } finally {
+      setIsMutingAlerts(false);
       onActionPerformed();
     }
   }
 
   async function onUnmuteAllClick() {
-    setIsPopoverOpen(false);
     onPerformingAction();
-    const ids = selectedItems.filter(isAlertOrInstancesMuted).map(item => item.id);
+    setIsUnmutingAlerts(true);
+    const ids = selectedItems.filter(isAlertMuted).map(item => item.id);
     try {
       await unmuteAlerts({ http, ids });
     } catch (e) {
@@ -78,13 +84,14 @@ export const BulkActionPopover: React.FunctionComponent<ComponentOpts> = ({
         ),
       });
     } finally {
+      setIsUnmutingAlerts(false);
       onActionPerformed();
     }
   }
 
   async function onEnableAllClick() {
-    setIsPopoverOpen(false);
     onPerformingAction();
+    setIsEnablingAlerts(true);
     const ids = selectedItems.filter(isAlertDisabled).map(item => item.id);
     try {
       await enableAlerts({ http, ids });
@@ -98,14 +105,15 @@ export const BulkActionPopover: React.FunctionComponent<ComponentOpts> = ({
         ),
       });
     } finally {
+      setIsEnablingAlerts(false);
       onActionPerformed();
     }
   }
 
   async function onDisableAllClick() {
-    setIsPopoverOpen(false);
     onPerformingAction();
-    const ids = selectedItems.filter(isAlertEnabled).map(item => item.id);
+    setIsDisablingAlerts(true);
+    const ids = selectedItems.filter(item => !isAlertDisabled(item)).map(item => item.id);
     try {
       await disableAlerts({ http, ids });
     } catch (e) {
@@ -118,13 +126,14 @@ export const BulkActionPopover: React.FunctionComponent<ComponentOpts> = ({
         ),
       });
     } finally {
+      setIsDisablingAlerts(false);
       onActionPerformed();
     }
   }
 
   async function deleteSelectedItems() {
-    setIsPopoverOpen(false);
     onPerformingAction();
+    setIsDeletingAlerts(true);
     const ids = selectedItems.map(item => item.id);
     try {
       await deleteAlerts({ http, ids });
@@ -138,6 +147,7 @@ export const BulkActionPopover: React.FunctionComponent<ComponentOpts> = ({
         ),
       });
     } finally {
+      setIsDeletingAlerts(false);
       onActionPerformed();
     }
   }
@@ -159,9 +169,13 @@ export const BulkActionPopover: React.FunctionComponent<ComponentOpts> = ({
         </EuiButton>
       }
     >
-      {selectedContainsUnmutedAlerts && (
+      {!allAlertsMuted && (
         <EuiFormRow>
-          <EuiButtonEmpty onClick={onmMuteAllClick}>
+          <EuiButtonEmpty
+            onClick={onmMuteAllClick}
+            isLoading={isMutingAlerts}
+            isDisabled={isPerformingAction}
+          >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.muteAllTitle"
               defaultMessage="Mute all"
@@ -169,9 +183,13 @@ export const BulkActionPopover: React.FunctionComponent<ComponentOpts> = ({
           </EuiButtonEmpty>
         </EuiFormRow>
       )}
-      {selectionContainsMutedAlerts && (
+      {allAlertsMuted && (
         <EuiFormRow>
-          <EuiButtonEmpty onClick={onUnmuteAllClick}>
+          <EuiButtonEmpty
+            onClick={onUnmuteAllClick}
+            isLoading={isUnmutingAlerts}
+            isDisabled={isPerformingAction}
+          >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.unmuteAllTitle"
               defaultMessage="Unmute all"
@@ -179,9 +197,13 @@ export const BulkActionPopover: React.FunctionComponent<ComponentOpts> = ({
           </EuiButtonEmpty>
         </EuiFormRow>
       )}
-      {selectionContainsDisabledAlerts && (
+      {allAlertsDisabled && (
         <EuiFormRow>
-          <EuiButtonEmpty onClick={onEnableAllClick}>
+          <EuiButtonEmpty
+            onClick={onEnableAllClick}
+            isLoading={isEnablingAlerts}
+            isDisabled={isPerformingAction}
+          >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.enableAllTitle"
               defaultMessage="Enable all"
@@ -189,9 +211,13 @@ export const BulkActionPopover: React.FunctionComponent<ComponentOpts> = ({
           </EuiButtonEmpty>
         </EuiFormRow>
       )}
-      {selectionContainsEnabledAlerts && (
+      {!allAlertsDisabled && (
         <EuiFormRow>
-          <EuiButtonEmpty onClick={onDisableAllClick}>
+          <EuiButtonEmpty
+            onClick={onDisableAllClick}
+            isLoading={isDisablingAlerts}
+            isDisabled={isPerformingAction}
+          >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.disableAllTitle"
               defaultMessage="Disable all"
@@ -200,7 +226,11 @@ export const BulkActionPopover: React.FunctionComponent<ComponentOpts> = ({
         </EuiFormRow>
       )}
       <EuiFormRow>
-        <EuiButtonEmpty onClick={deleteSelectedItems}>
+        <EuiButtonEmpty
+          onClick={deleteSelectedItems}
+          isLoading={isDeletingAlerts}
+          isDisabled={isPerformingAction}
+        >
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.deleteAllTitle"
             defaultMessage="Delete all"
@@ -211,18 +241,10 @@ export const BulkActionPopover: React.FunctionComponent<ComponentOpts> = ({
   );
 };
 
-function isAlertEnabled(alert: AlertTableItem) {
-  return alert.enabled === true;
-}
-
 function isAlertDisabled(alert: AlertTableItem) {
   return alert.enabled === false;
 }
 
-function isAlertUnmuted(alert: AlertTableItem) {
-  return alert.muteAll === false;
-}
-
-function isAlertOrInstancesMuted(alert: AlertTableItem) {
-  return alert.muteAll === true || alert.mutedInstanceIds.length > 0;
+function isAlertMuted(alert: AlertTableItem) {
+  return alert.muteAll === true;
 }

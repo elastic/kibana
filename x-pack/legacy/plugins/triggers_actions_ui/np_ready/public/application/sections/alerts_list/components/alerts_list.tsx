@@ -27,7 +27,7 @@ export const AlertsList: React.FunctionComponent = () => {
   const [alertTypesIndex, setAlertTypesIndex] = useState<AlertTypeIndex | undefined>(undefined);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [data, setData] = useState<AlertTableItem[]>([]);
-  const [selectedItems, setSelectedItems] = useState<AlertTableItem[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isLoadingAlertTypes, setIsLoadingAlertTypes] = useState<boolean>(false);
   const [isLoadingAlerts, setIsLoadingAlerts] = useState<boolean>(false);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
@@ -40,19 +40,6 @@ export const AlertsList: React.FunctionComponent = () => {
     loadAlertsData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, searchText]);
-
-  // The bulk action menu needs updated data within "selectedItems" when "data" changes
-  useEffect(() => {
-    const updatedSelectedItems: AlertTableItem[] = [];
-    selectedItems.forEach(item => {
-      const updatedItem = data.find(({ id }) => item.id === id);
-      if (updatedItem) {
-        updatedSelectedItems.push(updatedItem);
-      }
-    });
-    setSelectedItems(updatedSelectedItems);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data]);
 
   useEffect(() => {
     (async () => {
@@ -189,11 +176,11 @@ export const AlertsList: React.FunctionComponent = () => {
               },
             ]}
             toolsLeft={
-              selectedItems.length === 0 || !canDelete
+              selectedIds.length === 0 || !canDelete
                 ? []
                 : [
                     <BulkActionPopover
-                      selectedItems={selectedItems}
+                      selectedItems={pickFromData(data, selectedIds)}
                       onPerformingAction={() => setIsPerformingAction(true)}
                       onActionPerformed={() => {
                         loadAlertsData();
@@ -242,7 +229,7 @@ export const AlertsList: React.FunctionComponent = () => {
             selection={
               canDelete && {
                 onSelectionChange(updatedSelectedItemsList: AlertTableItem[]) {
-                  setSelectedItems(updatedSelectedItemsList);
+                  setSelectedIds(updatedSelectedItemsList.map(item => item.id));
                 },
               }
             }
@@ -256,3 +243,14 @@ export const AlertsList: React.FunctionComponent = () => {
     </section>
   );
 };
+
+function pickFromData(data: AlertTableItem[], ids: string[]): AlertTableItem[] {
+  const result: AlertTableItem[] = [];
+  for (const id of ids) {
+    const match = data.find(item => item.id === id);
+    if (match) {
+      result.push(match);
+    }
+  }
+  return result;
+}
