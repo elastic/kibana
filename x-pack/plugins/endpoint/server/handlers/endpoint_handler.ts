@@ -68,6 +68,13 @@ export class EndpointHandler implements EndpointRequestContext {
             sort: [{ created_at: 'desc' }],
           },
         },
+        aggs: {
+          total: {
+            cardinality: {
+              field: 'machine_id',
+            },
+          },
+        },
       },
       index: 'endpoint*',
     };
