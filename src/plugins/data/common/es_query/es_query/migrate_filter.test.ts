@@ -40,7 +40,7 @@ describe('migrateFilter', function() {
   } as unknown) as PhraseFilter;
 
   it('should migrate match filters of type phrase', function() {
-    const migratedFilter = migrateFilter(oldMatchPhraseFilter, null);
+    const migratedFilter = migrateFilter(oldMatchPhraseFilter, undefined);
 
     expect(isEqual(migratedFilter, newMatchPhraseFilter)).toBe(true);
   });
@@ -48,7 +48,7 @@ describe('migrateFilter', function() {
   it('should not modify the original filter', function() {
     const oldMatchPhraseFilterCopy = clone(oldMatchPhraseFilter, true);
 
-    migrateFilter(oldMatchPhraseFilter, null);
+    migrateFilter(oldMatchPhraseFilter, undefined);
 
     expect(isEqual(oldMatchPhraseFilter, oldMatchPhraseFilterCopy)).toBe(true);
   });
@@ -57,7 +57,7 @@ describe('migrateFilter', function() {
     const originalFilter = {
       match_all: {},
     } as MatchAllFilter;
-    const migratedFilter = migrateFilter(originalFilter, null);
+    const migratedFilter = migrateFilter(originalFilter, undefined);
 
     expect(migratedFilter).toBe(originalFilter);
     expect(isEqual(migratedFilter, originalFilter)).toBe(true);

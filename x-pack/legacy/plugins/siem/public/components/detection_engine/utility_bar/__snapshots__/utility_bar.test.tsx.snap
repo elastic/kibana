@@ -12,11 +12,7 @@ exports[`UtilityBar it renders 1`] = `
       <UtilityBarGroup>
         <UtilityBarAction
           iconType=""
-          popoverContent={
-            <p>
-              Test popover
-            </p>
-          }
+          popoverContent={[Function]}
         >
           Test action
         </UtilityBarAction>

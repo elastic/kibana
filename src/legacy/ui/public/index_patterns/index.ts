@@ -30,7 +30,6 @@ export const {
   FieldList, // only used in Discover and StubIndexPattern
   flattenHitWrapper,
   formatHitProvider,
-  IndexPatternSelect, // only used in x-pack/plugin/maps and input control vis
 } = data.indexPatterns;
 
 // static code
