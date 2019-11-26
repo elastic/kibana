@@ -21,20 +21,25 @@ import path from 'path';
 import { i18n } from '@kbn/i18n';
 import { getSavedObjects } from './saved_objects';
 import { fieldMappings } from './field_mappings';
-import { SampleDatasetSchema } from '../../lib/sample_dataset_registry_types';
+import { SampleDatasetSchema, AppLinkSchema } from '../../lib/sample_dataset_registry_types';
+
+const logsName = i18n.translate('server.sampleData.logsSpecTitle', {
+  defaultMessage: 'Sample web logs',
+});
+const logsDescription = i18n.translate('server.sampleData.logsSpecDescription', {
+  defaultMessage: 'Sample data, visualizations, and dashboards for monitoring web logs.',
+});
+const initialAppLinks = [] as AppLinkSchema[];
 
 export const logsSpecProvider = function(): SampleDatasetSchema {
   return {
     id: 'logs',
-    name: i18n.translate('server.sampleData.logsSpecTitle', {
-      defaultMessage: 'Sample web logs',
-    }),
-    description: i18n.translate('server.sampleData.logsSpecDescription', {
-      defaultMessage: 'Sample data, visualizations, and dashboards for monitoring web logs.',
-    }),
+    name: logsName,
+    description: logsDescription,
     previewImagePath: '/plugins/kibana/home/sample_data_resources/logs/dashboard.png',
     darkPreviewImagePath: '/plugins/kibana/home/sample_data_resources/logs/dashboard_dark.png',
     overviewDashboard: 'edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b',
+    appLinks: initialAppLinks,
     defaultIndex: '90943e30-9a47-11e8-b64d-95841ca0b247',
     savedObjects: getSavedObjects(),
     dataIndices: [
@@ -47,5 +52,6 @@ export const logsSpecProvider = function(): SampleDatasetSchema {
         preserveDayOfWeekTimeOfDay: true,
       },
     ],
+    status: 'not_installed',
   };
 };

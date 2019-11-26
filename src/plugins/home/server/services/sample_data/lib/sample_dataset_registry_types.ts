@@ -18,6 +18,11 @@
  */
 import { SavedObject } from 'src/core/server';
 
+export enum DatasetStatusTypes {
+  NOT_INSTALLED = 'not_installed',
+  INSTALLED = 'installed',
+  UNKNOWN = 'unknown',
+}
 export interface SampleDatasetDashboardPanel {
   sampleDataId: string;
   dashboardId: string;
@@ -58,8 +63,8 @@ export interface DataIndexSchema {
 
 export interface AppLinkSchema {
   path: string;
-  label: string;
   icon: string;
+  label: string;
 }
 
 export interface SampleDatasetSchema {
@@ -80,7 +85,7 @@ export interface SampleDatasetSchema {
   // Should provide a nice demo of Kibana's functionality with the sample data set
   savedObjects: SavedObject[] | any[];
   dataIndices: DataIndexSchema[];
-  status?: unknown;
+  status?: string | undefined;
   statusMsg?: unknown;
 }
 

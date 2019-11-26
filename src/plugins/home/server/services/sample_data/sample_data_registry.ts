@@ -26,17 +26,10 @@
     addSavedObjectsToSampleDataset DONE
     addAppLinksToSampleDataset DONE
     replacePanelInSampleDatasetDashboard DONE
-  During the start phase of the sample_data_registry, we expose the methods that use the setup methods:
-  `getSampleDataSets returns the array of sample data sets, similarly to
-
-  Another question:
-  sample data is registered at the end of the file in src/legacy/server/sample_data/sample_data_mixin.js
-  Does this service need to do the registration itself? Yes, initialize the array with them!
   DONE
-
-  TODO:
     createListRoute
     createInstallRoute
+  TODO:
     createUninstallRoute
   They go into the setup phase before the return methods.
 
@@ -61,7 +54,6 @@ const ecommerceSampleDataset = ecommerceSpecProvider();
 
 export class SampleDataRegistry {
   constructor(private readonly initContext: PluginInitializerContext) {}
-  // use initContext for the loggin in install route, e.g.: installRouteForGet(router, this.initContext.logger).
   private readonly sampleDatasets: SampleDatasetSchema[] = [
     flightsSampleDataset,
     logsSampleDataset,
@@ -163,7 +155,7 @@ export class SampleDataRegistry {
 
           const panels = JSON.parse(dashboard.attributes.panelsJSON);
           const panel = panels.find((panelItem: any) => {
-            return (panelItem.panelRefName = reference.name);
+            return panelItem.panelRefName === reference.name;
           });
           if (!panel) {
             throw new Error(`Unable to find panel for reference: ${reference.name}`);

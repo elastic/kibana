@@ -26,35 +26,37 @@ const UNKNOWN = 'unknown';
 
 export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSchema[]) => {
   router.get({ path: '/api/sample_data', validate: false }, async (context, req, res) => {
-    const registeredSampleDatasets = sampleDatasets.map(dataset => {
+    const registeredSampleDatasets = sampleDatasets.map(sampleDataset => {
       return {
-        id: dataset.id,
-        name: dataset.name,
-        description: dataset.description,
-        oreviewImagePath: dataset.previewImagePath,
-        darkPreviewImagePath: dataset.darkPreviewImagePath,
-        overviewDashboard: dataset.overviewDashboard,
-        appLinks: dataset.appLinks,
-        defaultIndex: dataset.defaultIndex,
-        dataIndices: dataset.dataIndices.map(({ id }) => ({ id })),
+        id: sampleDataset.id,
+        name: sampleDataset.name,
+        description: sampleDataset.description,
+        previewImagePath: sampleDataset.previewImagePath,
+        darkPreviewImagePath: sampleDataset.darkPreviewImagePath,
+        overviewDashboard: sampleDataset.overviewDashboard,
+        appLinks: sampleDataset.appLinks,
+        defaultIndex: sampleDataset.defaultIndex,
+        dataIndices: sampleDataset.dataIndices.map(({ id }) => ({ id })),
+        status: sampleDataset.status,
+        statusMsg: sampleDataset.statusMsg,
       };
     });
-    const isInstalledPromises = sampleDatasets.map(async sampleDataset => {
+    const isInstalledPromises = registeredSampleDatasets.map(async sampleDataset => {
       for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
         const dataIndexConfig = sampleDataset.dataIndices[i];
-        const indexOfInterest = createIndexName(sampleDataset.id, dataIndexConfig.id);
+        const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
         try {
-          // indexExists is either a true or false response from elasticsearch
           const indexExists = await context.core.elasticsearch.dataClient.callAsCurrentUser(
             'indices.exists',
-            { index: indexOfInterest }
+            { index }
           );
           if (!indexExists) {
             sampleDataset.status = NOT_INSTALLED;
             return;
           }
+
           const { count } = await context.core.elasticsearch.dataClient.callAsCurrentUser('count', {
-            index: indexOfInterest,
+            index,
           });
           if (count === 0) {
             sampleDataset.status = NOT_INSTALLED;
@@ -63,6 +65,7 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
         } catch (err) {
           sampleDataset.status = UNKNOWN;
           sampleDataset.statusMsg = err.message;
+          return;
         }
       }
       try {
@@ -81,8 +84,8 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
 
       sampleDataset.status = INSTALLED;
     });
-    await Promise.all(isInstalledPromises);
 
+    await Promise.all(isInstalledPromises);
     return res.ok({ body: registeredSampleDatasets });
   });
 };
