@@ -6,10 +6,14 @@
 
 import { schema } from '@kbn/config-schema';
 import { Logger } from 'src/core/server';
-import { SIGNALS_ID } from '../../../../common/constants';
+import {
+  SIGNALS_ID,
+  DEFAULT_MAX_SIGNALS,
+  DEFAULT_SEARCH_AFTER_PAGE_SIZE,
+} from '../../../../common/constants';
 
 import { buildEventsSearchQuery } from './build_events_query';
-import { searchAfterAndBulkIndex } from './utils';
+import { searchAfterAndBulkCreate } from './utils';
 import { SignalAlertTypeDefinition } from './types';
 import { getFilter } from './get_filter';
 
@@ -33,14 +37,13 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         meta: schema.nullable(schema.object({}, { allowUnknowns: true })),
         query: schema.nullable(schema.string()),
         filters: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
-        maxSignals: schema.number({ defaultValue: 10000 }),
+        maxSignals: schema.number({ defaultValue: DEFAULT_MAX_SIGNALS }),
         riskScore: schema.number(),
         severity: schema.string(),
         tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
         to: schema.string(),
         type: schema.string(),
         references: schema.arrayOf(schema.string(), { defaultValue: [] }),
-        size: schema.maybe(schema.number()),
       }),
     },
     async executor({ alertId, services, params }) {
@@ -56,7 +59,6 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         query,
         to,
         type,
-        size,
       } = params;
 
       // TODO: Remove this hard extraction of name once this is fixed: https://github.com/elastic/kibana/issues/50522
@@ -68,7 +70,11 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
       const interval: string = savedObject.attributes.interval;
       const enabled: boolean = savedObject.attributes.enabled;
 
-      const searchAfterSize = size ? size : 1000;
+      // set searchAfter page size to be the lesser of default page size or maxSignals.
+      const searchAfterSize =
+        DEFAULT_SEARCH_AFTER_PAGE_SIZE <= params.maxSignals
+          ? DEFAULT_SEARCH_AFTER_PAGE_SIZE
+          : params.maxSignals;
 
       const esFilter = await getFilter({
         type,
@@ -102,7 +108,7 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
           );
         }
 
-        const bulkIndexResult = await searchAfterAndBulkIndex({
+        const bulkIndexResult = await searchAfterAndBulkCreate({
           someResult: noReIndexResult,
           signalParams: params,
           services,
@@ -114,6 +120,7 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
           updatedBy,
           interval,
           enabled,
+          pageSize: searchAfterSize,
         });
 
         if (bulkIndexResult) {
