@@ -66,6 +66,7 @@ const app = uiModules.get(MAP_APP_PATH, []);
 app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppState, globalState) => {
   const { filterManager } = npStart.plugins.data.query;
   const savedMap = $route.current.locals.map;
+  $scope.screenTitle = savedMap.title;
   let unsubscribe;
   let initialLayerListConfig;
   const $state = new AppState();

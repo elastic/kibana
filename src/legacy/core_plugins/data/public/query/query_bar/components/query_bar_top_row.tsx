@@ -36,6 +36,7 @@ import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Toast } from 'src/core/public';
 import {
+  IDataPluginServices,
   TimeRange,
   TimeHistoryContract,
   Query,
@@ -46,7 +47,6 @@ import { useKibana, toMountPoint } from '../../../../../../../plugins/kibana_rea
 
 import { IndexPattern } from '../../../index_patterns';
 import { QueryBarInput } from './query_bar_input';
-import { IDataPluginServices } from '../../../types';
 
 interface Props {
   query?: Query;

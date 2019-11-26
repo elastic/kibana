@@ -115,7 +115,7 @@ export const ColumnHeaders = React.memo<Props>(
             {dropProvided => (
               <EventsThGroupData
                 data-test-subj="headers-group"
-                innerRef={dropProvided.innerRef}
+                ref={dropProvided.innerRef}
                 {...dropProvided.droppableProps}
               >
                 {columnHeaders.map((header, i) => (
@@ -137,7 +137,7 @@ export const ColumnHeaders = React.memo<Props>(
                         {...dragProvided.draggableProps}
                         {...dragProvided.dragHandleProps}
                         data-test-subj="draggable-header"
-                        innerRef={dragProvided.innerRef}
+                        ref={dragProvided.innerRef}
                         isDragging={dragSnapshot.isDragging}
                         position="relative"
                         // Passing the styles directly to the component because the width is being calculated and is recommended by Styled Components for performance: https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
