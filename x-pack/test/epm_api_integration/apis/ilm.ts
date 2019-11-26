@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { Client } from 'elasticsearch';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { getPolicy, getIndexWithWithAlias } from '../../../legacy/plugins/epm/server/lib/ilm/ilm';
 
@@ -40,7 +41,15 @@ export default function({ getService }: FtrProviderContext) {
         expect(response.statusCode).to.eql(200);
       }
 
-      const data = await createIndexWithAlias(es, indexName, aliasName);
+      // Calls the given esClient, creates and index and sets it as write index on the given alias.
+      //
+      // This should be moved later to the ilm lib but have it here for now as passing the client
+      // does not work.
+      const body = getIndexWithWithAlias(aliasName);
+      const data = await es.indices.create({
+        index: indexName,
+        body,
+      });
 
       // Sanity checks to make sure ES confirmed the data we sent is sane
       // and the index with the alias was created.
@@ -52,20 +61,5 @@ export default function({ getService }: FtrProviderContext) {
       const indexData = await es.indices.get({ index: indexName });
       expect(indexData.body[indexName].aliases[aliasName].is_write_index).to.eql(true);
     });
-  });
-}
-
-/**
- * Calls the given esClient, creates and index and sets it as write index on the given alias.
- *
- * This should be moved later to the ilm lib but have it here for now as passing the client
- * does not work.
- */
-async function createIndexWithAlias(esClient: Client, indexName: string, aliasName: string) {
-  const body = getIndexWithWithAlias(aliasName);
-
-  return esClient.indices.create({
-    index: indexName,
-    body,
   });
 }
