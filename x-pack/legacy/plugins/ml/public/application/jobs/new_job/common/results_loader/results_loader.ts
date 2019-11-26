@@ -150,15 +150,17 @@ export class ResultsLoader {
     if (agg === null) {
       return { [dtrIndex]: [emptyModelItem] };
     }
-    const resp = await mlResultsService.getModelPlotOutput(
-      this._jobCreator.jobId,
-      dtrIndex,
-      [],
-      this._lastModelTimeStamp,
-      this._jobCreator.end,
-      `${this._chartInterval.getInterval().asMilliseconds()}ms`,
-      agg.mlModelPlotAgg
-    );
+    const resp = await mlResultsService
+      .getModelPlotOutput(
+        this._jobCreator.jobId,
+        dtrIndex,
+        [],
+        this._lastModelTimeStamp,
+        this._jobCreator.end,
+        `${this._chartInterval.getInterval().asMilliseconds()}ms`,
+        agg.mlModelPlotAgg
+      )
+      .toPromise();
 
     return this._createModel(resp, dtrIndex);
   }

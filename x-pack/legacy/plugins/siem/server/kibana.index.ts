@@ -32,7 +32,8 @@ export const initServerWithKibana = (
   mode: EnvironmentMode
 ) => {
   if (kbnServer.plugins.alerting != null) {
-    const type = signalsAlertType({ logger });
+    const version = kbnServer.config().get<string>('pkg.version');
+    const type = signalsAlertType({ logger, version });
     if (isAlertExecutor(type)) {
       kbnServer.plugins.alerting.setup.registerType(type);
     }
