@@ -16,12 +16,12 @@ import { ServerFacade, ConditionalHeaders } from '../../../types';
 import { JobDocPayloadPNG } from '../../png/types';
 import { JobDocPayloadPDF } from '../../printable_pdf/types';
 
-export async function getFullUrls({
+export async function getFullUrls<JobDocPayloadType>({
   job,
   server,
   ...mergeValues // pass-throughs
 }: {
-  job: JobDocPayloadPNG & JobDocPayloadPDF;
+  job: JobDocPayloadPDF | JobDocPayloadPNG;
   server: ServerFacade;
   conditionalHeaders: ConditionalHeaders;
   logo?: string;
@@ -38,11 +38,11 @@ export async function getFullUrls({
   // PDF and PNG job params put in the url differently
   let relativeUrls: string[] = [];
 
-  if (job.relativeUrl) {
-    const pngJob: JobDocPayloadPNG = job; // single page (png)
+  const pngJob = job as JobDocPayloadPNG; // single page (png)
+  const pdfJob = job as JobDocPayloadPDF; // multi page (pdf)
+  if (pngJob.relativeUrl) {
     relativeUrls = [pngJob.relativeUrl];
-  } else if (job.objects) {
-    const pdfJob: JobDocPayloadPDF = job; // multi page (pdf)
+  } else if (pdfJob.objects) {
     relativeUrls = pdfJob.objects.map(obj => obj.relativeUrl);
   } else {
     throw new Error(

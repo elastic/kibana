@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LayoutInstance } from '../common/layouts/layout';
+import { LayoutInstance, LayoutParams } from '../common/layouts/layout';
 import { ConditionalHeaders, JobDocPayload, RequestFacade } from '../../types';
 
 // Job params: structure of incoming user request data
@@ -21,6 +21,6 @@ export interface JobDocPayloadPNG extends JobDocPayload<JobParamsPNG> {
   basePath?: string;
   browserTimezone: string;
   forceNow?: string;
-  layout: LayoutInstance;
+  layout: LayoutParams;
   relativeUrl: string;
 }

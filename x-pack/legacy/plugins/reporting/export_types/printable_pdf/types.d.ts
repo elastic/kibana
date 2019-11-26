@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LayoutInstance } from '../common/layouts/layout';
+import { LayoutInstance, LayoutParams } from '../common/layouts/layout';
 import { ConditionalHeaders, JobDocPayload, ServerFacade, RequestFacade } from '../../types';
 
 // Job params: structure of incoming user request data, after being parsed from RISON
@@ -21,7 +21,7 @@ export interface JobDocPayloadPDF extends JobDocPayload<JobParamsPDF> {
   basePath?: string;
   browserTimezone: string;
   forceNow?: string;
-  layout: LayoutInstance;
+  layout: LayoutParams;
   objects: Array<{
     relativeUrl: string;
   }>;

@@ -203,7 +203,6 @@ export interface JobDocPayload<JobParamsType> {
   jobParams: JobParamsType;
   title: string;
   type: string | null;
-  objects?: null | object[];
 }
 
 export interface JobDocOutput {
