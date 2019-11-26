@@ -27,6 +27,8 @@ export class AgentLib {
     private readonly agentsRepository: AgentsRepository,
     private readonly agentEventsRepository: AgentEventsRepository,
     private readonly apiKeys: ApiKeyLib,
+    // TODO remove will be used later
+    // @ts-ignore
     private readonly policies: PolicyLib
   ) {}
 
@@ -237,15 +239,12 @@ export class AgentLib {
       updateData.local_metadata = localMetadata;
     }
 
-    const policy = agent.policy_id
-      ? await this.policies.getFullPolicy(internalUser, agent.policy_id)
-      : null;
     await this.agentsRepository.update(internalUser, agent.id, updateData);
     if (events.length > 0) {
       await this.agentEventsRepository.createEventsForAgent(internalUser, agent.id, events);
     }
 
-    return { actions, policy };
+    return { actions, policy: null };
   }
 
   public async addAction(

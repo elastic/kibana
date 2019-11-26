@@ -326,26 +326,6 @@ describe('Agent lib', () => {
       });
     });
 
-    it('should return the full policy for this agent', async () => {
-      const { agents } = libs;
-      await loadFixtures([
-        {
-          local_metadata: { key: 'local1' },
-          user_provided_metadata: { key: 'user1' },
-          actions: [],
-          active: true,
-          policy_id: 'policy:1',
-          access_api_key_id: 'key1',
-        },
-      ]);
-
-      const { policy } = await agents.checkin(getUser('VALID_KEY', 'key1'), []);
-
-      expect(policy).toMatchObject({
-        id: 'policy:1',
-      });
-    });
-
     it('should update agent metadata if provided', async () => {
       const { agents } = libs;
       const [agentId] = await loadFixtures([
