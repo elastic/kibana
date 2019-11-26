@@ -19,7 +19,6 @@ export function getUiFiltersES(
   uiFilters: UIFilters
 ) {
   const { kuery, environment, ...localFilterValues } = uiFilters;
-
   const mappedFilters = localUIFilterNames
     .filter(name => name in localFilterValues)
     .map(filterName => {
