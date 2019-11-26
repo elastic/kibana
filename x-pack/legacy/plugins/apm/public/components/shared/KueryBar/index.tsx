@@ -18,7 +18,6 @@ import { history } from '../../../utils/history';
 import { usePlugins } from '../../../new-platform/plugin';
 import { useDynamicIndexPattern } from '../../../hooks/useDynamicIndexPattern';
 import {
-  esKuery,
   AutocompleteProvider,
   AutocompleteSuggestion,
   esKuery,
@@ -34,10 +33,7 @@ interface State {
   isLoadingSuggestions: boolean;
 }
 
-function convertKueryToEsQuery(
-  kuery: string,
-  indexPattern: IIndexPattern
-) {
+function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
   const ast = esKuery.fromKueryExpression(kuery);
   return esKuery.toElasticsearchQuery(ast, indexPattern);
 }
