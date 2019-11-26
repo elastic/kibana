@@ -13,6 +13,7 @@ import euiLight from '@elastic/eui/dist/eui_theme_light.json';
 import { ChromeStart, CoreSetup, HttpStart, I18nStart, NotificationsStart } from 'src/core/public';
 import { CoreProvider } from './contexts/core';
 import { setClient } from './data';
+import { PackageInstallProvider } from './hooks/';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginInitializerContext {}
@@ -52,13 +53,15 @@ function App(props: { core: PluginCore }) {
   return (
     <EuiErrorBoundary>
       <CoreProvider core={props.core}>
-        <i18n.Context>
-          <ThemeProvider theme={props.core.theme}>
-            <HashRouter>
-              <Switch>{routes}</Switch>
-            </HashRouter>
-          </ThemeProvider>
-        </i18n.Context>
+        <PackageInstallProvider>
+          <i18n.Context>
+            <ThemeProvider theme={props.core.theme}>
+              <HashRouter>
+                <Switch>{routes}</Switch>
+              </HashRouter>
+            </ThemeProvider>
+          </i18n.Context>
+        </PackageInstallProvider>
       </CoreProvider>
     </EuiErrorBoundary>
   );

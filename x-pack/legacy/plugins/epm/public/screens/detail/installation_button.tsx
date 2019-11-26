@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 
 interface InstallationButtonProps {
-  isLoading: boolean;
-  isInstalled: boolean;
+  installationStatus: string;
   onClick: () => void;
 }
 export function InstallationButton(props: InstallationButtonProps) {
-  const { isLoading, isInstalled } = props;
+  const { installationStatus } = props;
+  const isInstalling = installationStatus === 'installing';
+  const isInstalled = installationStatus === 'installed';
 
   const installButton = (
-    <EuiButton isLoading={isLoading} fill={true} onClick={props.onClick}>
-      {isLoading ? 'Installing' : 'Install package'}
+    <EuiButton isLoading={isInstalling} fill={true} onClick={props.onClick}>
+      {isInstalling ? 'Installing' : 'Install package'}
     </EuiButton>
   );
 
