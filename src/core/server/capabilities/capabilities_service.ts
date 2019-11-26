@@ -25,12 +25,66 @@ import { InternalHttpServiceSetup, KibanaRequest } from '../http';
 import { mergeCapabilities } from './merge_capabilities';
 import { getCapabilitiesResolver, CapabilitiesResolver } from './resolve_capabilities';
 
+/**
+ * APIs to manage the {@link Capabilities} that will be used by the application.
+ *
+ * @public
+ */
 export interface CapabilitiesSetup {
+  /**
+   * Register a {@link CapabilitiesProvider} to be used when resolving capabilities.
+   *
+   * @example
+   * ```ts
+   * // my-plugin/server/plugin.ts
+   * public setup(core: CoreSetup, deps: {}) {
+   *    core.capabilities.registerCapabilitiesProvider(() => {
+   *      return {
+   *        catalogue: {
+   *          myPlugin: true,
+   *        },
+   *        myPlugin: {
+   *          feature: true,
+   *        },
+   *      }
+   *    })
+   * }
+   * ```
+   */
   registerCapabilitiesProvider(provider: CapabilitiesProvider): void;
+
+  /**
+   * Register a {@link CapabilitiesSwitcher} to be used when resolving capabilities.
+   *
+   * @example
+   * ```ts
+   * // my-plugin/server/plugin.ts
+   * public setup(core: CoreSetup, deps: {}) {
+   *    core.capabilities.registerCapabilitiesSwitcher((request, capabilities) => {
+   *      if(myPluginApi.shouldRestrictBecauseOf(request)) {
+   *        return myPluginApi.restrictCapabilities(capabilities);
+   *      }
+   *      return capabilities;
+   *    })
+   * }
+   * ```
+   *
+   * @remarks
+   * A capabilities switcher can only change the state of existing capabilities. Adding or removing
+   * capabilities when invoking the switcher will raise an error.
+   */
   registerCapabilitiesSwitcher(switcher: CapabilitiesSwitcher): void;
 }
 
+/**
+ * APIs to access the application {@link Capabilities}.
+ *
+ * @public
+ */
 export interface CapabilitiesStart {
+  /**
+   * Resolve the {@link Capabilities} to be used for given request
+   */
   resolveCapabilities(request: KibanaRequest): Promise<Capabilities>;
 }
 
@@ -44,6 +98,7 @@ const defaultCapabilities: Capabilities = {
   catalogue: {},
 };
 
+/** @internal */
 export class CapabilitiesService {
   private readonly logger: Logger;
   private readonly capabilitiesProviders: CapabilitiesProvider[] = [];

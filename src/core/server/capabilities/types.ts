@@ -42,8 +42,16 @@ export interface Capabilities {
   [key: string]: Record<string, boolean | Record<string, boolean>>;
 }
 
+/**
+ * See {@link CapabilitiesSetup}
+ * @public
+ */
 export type CapabilitiesProvider = () => Partial<Capabilities>;
 
+/**
+ * See {@link CapabilitiesSetup}
+ * @public
+ */
 export type CapabilitiesSwitcher = (
   request: KibanaRequest,
   uiCapabilities: Capabilities
