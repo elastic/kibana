@@ -6,25 +6,25 @@
 
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { EndpointListActions, actions } from '../actions/endpoints_list';
+import { EndpointData } from '../../server/types';
 
 // TODO: type hits properly
-interface EndpointsListState {
+export interface EndpointsListState {
   data: {
     hits: {
-      hits: any[];
+      hits: EndpointData[];
       total: {
         value: number;
       };
     };
   };
   isFiltered: boolean;
-  filteredData: any[];
+  filteredData: EndpointData[];
   pageIndex: number;
   pageSize: number;
   showPerPageOptions: boolean;
   sortField?: string;
   sortDirection?: Direction;
-  selectedItems: object[];
 }
 
 const initialState: EndpointsListState = {
@@ -41,7 +41,6 @@ const initialState: EndpointsListState = {
   pageIndex: 0,
   pageSize: 10,
   showPerPageOptions: true,
-  selectedItems: [],
 };
 
 export function endpointListReducer(

@@ -21,6 +21,7 @@ import {
   EuiTableCriteria,
   EuiSpacer,
 } from '@elastic/eui';
+import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { SearchBar } from './search_bar';
 import {
   endpointsListData,
@@ -99,10 +100,15 @@ export const EndpointsPage = () => {
     );
   };
   const handleTableChange = (tableState: EuiTableCriteria) => {
-    const newPageIndex = tableState?.page?.index ?? pageIndex;
+    let newPageIndex = tableState?.page?.index ?? pageIndex;
     const newPageSize = tableState?.page?.size ?? pageSize;
-    const newSortField = tableState?.sort?.field ?? sortField;
-    const newSortDirection = tableState?.sort?.direction ?? sortDirection;
+    const newSortField = (tableState?.sort?.field ?? sortField) as string;
+    const newSortDirection = (tableState?.sort?.direction ?? sortDirection) as Direction;
+
+    // If user changes page size, reset back to page 1
+    if (newPageSize !== pageSize) {
+      newPageIndex = 0;
+    }
 
     // FIXME: this should really be written to the route as url params in order to maintain state on refresh
     dispatch(
@@ -134,7 +140,7 @@ export const EndpointsPage = () => {
         </EuiPageContentHeader>
         <EuiPageContentBody>
           <SearchBar
-            searchItems={endpoints}
+            searchItems={endpoints as []}
             defaultFields={[`_source`]}
             updateOnChange={handleUserFilteredData}
           />
