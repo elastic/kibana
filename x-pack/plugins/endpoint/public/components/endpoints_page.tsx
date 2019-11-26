@@ -19,7 +19,6 @@ import {
   EuiPageContentBody,
   EuiPageContentHeaderSection,
   EuiTableCriteria,
-  EuiSpacer,
 } from '@elastic/eui';
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { SearchBar } from './search_bar';
