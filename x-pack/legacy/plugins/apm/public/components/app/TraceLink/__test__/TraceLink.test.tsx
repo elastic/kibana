@@ -41,7 +41,8 @@ describe('TraceLink', () => {
       }
     });
     spyOn(hooks, 'useFetcher').and.returnValue({
-      data: { total: { value: 0 } }
+      data: { transaction: undefined },
+      status: 'success'
     });
 
     const component = shallow(<TraceLink />);
@@ -65,10 +66,12 @@ describe('TraceLink', () => {
           name: 'bar',
           type: 'GET'
         },
+        trace: { id: 123 },
         timestamp: { us: moment('2019-11-23').valueOf() * 1000 }
       };
       spyOn(hooks, 'useFetcher').and.returnValue({
-        data: { total: { value: 1 }, hits: [{ _source: transaction }] }
+        data: { transaction },
+        status: 'success'
       });
       const component = shallow(<TraceLink />);
       expect(component).toMatchSnapshot();
@@ -82,10 +85,12 @@ describe('TraceLink', () => {
           name: 'bar',
           type: 'GET'
         },
+        trace: { id: 123 },
         timestamp: { us: moment('2019-11-25').valueOf() * 1000 }
       };
       spyOn(hooks, 'useFetcher').and.returnValue({
-        data: { total: { value: 1 }, hits: [{ _source: transaction }] }
+        data: { transaction },
+        status: 'success'
       });
       const component = shallow(<TraceLink />);
       expect(component).toMatchSnapshot();

@@ -51,7 +51,7 @@ export async function getTransactionByTraceId(traceId: string, setup: Setup) {
   const params = {
     index: indices['apm_oss.transactionIndices'],
     body: {
-      _source: ['timestamp', 'transaction', 'service.name'],
+      _source: ['timestamp', 'transaction', 'service.name', 'trace'],
       size: 1,
       query: {
         bool: {
@@ -84,5 +84,7 @@ export async function getTransactionByTraceId(traceId: string, setup: Setup) {
   };
 
   const resp = await client.search<Transaction>(params);
-  return resp.hits;
+  return {
+    transaction: resp.hits.hits[0]?._source
+  };
 }

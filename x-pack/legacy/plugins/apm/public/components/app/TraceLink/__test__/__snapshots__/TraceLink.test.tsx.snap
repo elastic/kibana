@@ -3,35 +3,20 @@
 exports[`TraceLink renders trace page when transaction is not found 1`] = `
 <Redirect
   push={false}
-  to={
-    Object {
-      "pathname": "/traces",
-      "search": "?kuery=trace.id%20%3A%20%22123%22",
-    }
-  }
+  to="/traces?kuery=trace.id%2520%253A%2520%2522123%2522"
 />
 `;
 
 exports[`TraceLink transaction page renders with date range params 1`] = `
 <Redirect
   push={false}
-  to={
-    Object {
-      "pathname": "/services/foo/transactions/view",
-      "search": "?traceId=123&transactionId=456&transactionName=bar&transactionType=GET&rangeFrom=now-2d&rangeTo=now",
-    }
-  }
+  to="/services/foo/transactions/view?traceId=123&transactionId=456&transactionName=bar&transactionType=GET"
 />
 `;
 
 exports[`TraceLink transaction page renders without date range 1`] = `
 <Redirect
   push={false}
-  to={
-    Object {
-      "pathname": "/services/foo/transactions/view",
-      "search": "?traceId=123&transactionId=456&transactionName=bar&transactionType=GET",
-    }
-  }
+  to="/services/foo/transactions/view?traceId=123&transactionId=456&transactionName=bar&transactionType=GET"
 />
 `;
