@@ -5,12 +5,11 @@
  */
 
 import boom from 'boom';
-import { oncePerServer } from '../../lib/once_per_server';
 import { jobsQueryFactory } from '../../lib/jobs_query';
 import { WHITELISTED_JOB_CONTENT_TYPES } from '../../../common/constants';
 import { getDocumentPayloadFactory } from './get_document_payload';
 
-function jobResponseHandlerFn(server) {
+export function jobResponseHandlerFactory(server) {
   const jobsQuery = jobsQueryFactory(server);
   const getDocumentPayload = getDocumentPayloadFactory(server);
 
@@ -45,5 +44,3 @@ function jobResponseHandlerFn(server) {
       });
   };
 }
-
-export const jobResponseHandlerFactory = oncePerServer(jobResponseHandlerFn);
