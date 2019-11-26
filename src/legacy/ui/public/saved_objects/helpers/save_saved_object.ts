@@ -16,19 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObject } from 'ui/saved_objects/types';
+import { SavedObject, SavedObjectConfig } from 'ui/saved_objects/types';
 import { npStart } from 'ui/new_platform';
 import { findObjectByTitle } from 'ui/saved_objects';
 import { displayDuplicateTitleConfirmModal } from 'ui/saved_objects/helpers/display_duplicate_title_confirm_modal';
-import {
-  SavedObjectAttributes,
-  SavedObjectReference,
-  SavedObjectsClient,
-  SimpleSavedObject,
-} from 'kibana/public';
+import { SavedObjectsClient, SimpleSavedObject } from 'kibana/public';
 import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from 'ui/saved_objects/constants';
 
 import { createSource } from 'ui/saved_objects/helpers/create_source';
+import { PromiseService } from 'ui/promises';
 
 /**
  * @param error {Error} the error
@@ -79,13 +75,6 @@ interface SaveOptions {
   confirmOverwrite?: boolean;
   isTitleDuplicateConfirmed?: boolean;
   onTitleDuplicate?: () => void | undefined;
-  extractReferences?: (opts: {
-    attributes: SavedObjectAttributes;
-    references: SavedObjectReference[];
-  }) => {
-    attributes: SavedObjectAttributes;
-    references: SavedObjectReference[];
-  };
 }
 /**
  * Saves this object.
@@ -102,18 +91,19 @@ interface SaveOptions {
  * @resolved {String} - The id of the doc
  */
 export function saveSavedObject(
-  esType: string,
   savedObject: SavedObject,
   savedObjectsClient: SavedObjectsClient,
-  confirmModalPromise: any,
-  AngularPromise: any,
+  config: SavedObjectConfig,
+  confirmModalPromise: Promise<any>,
+  AngularPromise: PromiseService,
   {
     confirmOverwrite = false,
     isTitleDuplicateConfirmed = false,
     onTitleDuplicate,
-    extractReferences,
   }: SaveOptions = {}
 ) {
+  const esType = config.type || '';
+  const extractReferences = config.extractReferences;
   // Save the original id in case the save fails.
   const originalId = savedObject.id;
   // Read https://github.com/elastic/kibana/issues/9056 and

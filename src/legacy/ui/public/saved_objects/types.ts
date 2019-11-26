@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { SearchSource } from 'ui/courier';
 import { SavedObjectAttributes, SavedObjectReference } from 'kibana/server';
 import { IndexPattern } from '../../../core_plugins/data/public';
@@ -34,18 +33,18 @@ export interface CreationOpts {
 
 export interface SavedObject {
   _serialize: () => { attributes: SavedObjectAttributes; references: SavedObjectReference[] };
-  _source: Record<string, any>;
-  applyESResp: (resp: any) => any;
+  _source: Record<string, unknown>;
+  applyESResp: (resp: EsResponse) => any;
   applyEsResp: () => any;
   copyOnSave: boolean;
-  creationOpts: (opts: CreationOpts) => any;
+  creationOpts: (opts: CreationOpts) => Record<string, unknown>;
   defaults: any;
-  delete: () => any;
-  destroy?: any;
+  delete?: () => Promise<{}>;
+  destroy?: () => void;
   getDisplayName: () => string;
   getEsType: () => string;
   getFullPath: () => string;
-  hydrateIndexPattern?: (id?: string) => Promise<any>;
+  hydrateIndexPattern?: (id?: string) => angular.IPromise<null | void>;
   id?: string | null;
   index: string;
   init?: () => void;
@@ -63,7 +62,13 @@ export interface SavedObjectConfig {
   afterESResp?: () => any;
   clearSavedIndexPattern?: boolean;
   defaults?: any;
-  extractReferences?: any;
+  extractReferences?: (opts: {
+    attributes: SavedObjectAttributes;
+    references: SavedObjectReference[];
+  }) => {
+    attributes: SavedObjectAttributes;
+    references: SavedObjectReference[];
+  };
   id?: string;
   indexPattern?: IndexPattern;
   init?: () => any;
@@ -72,4 +77,12 @@ export interface SavedObjectConfig {
   migrationVersion?: Record<string, any>;
   searchSource?: any;
   type?: string;
+}
+
+export type EsResponse = Record<string, any>;
+
+export interface SavedObjectSaveOptions {
+  confirmOverwrite: boolean;
+  isTitleDuplicateConfirmed: boolean;
+  onTitleDuplicate: () => void;
 }

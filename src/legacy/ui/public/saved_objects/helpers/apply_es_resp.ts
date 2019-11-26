@@ -18,24 +18,23 @@
  */
 import _ from 'lodash';
 import { PromiseService } from 'ui/promises';
-import { SavedObject } from 'ui/saved_objects/types';
+import { EsResponse, SavedObject, SavedObjectConfig } from 'ui/saved_objects/types';
 import { parseSearchSource } from 'ui/saved_objects/helpers/parse_search_source';
-import { SavedObjectNotFound } from '../../../../../plugins/kibana_utils/public';
-
-type EsResponse = Record<string, any>;
+import { expandShorthand, SavedObjectNotFound } from '../../../../../plugins/kibana_utils/public';
+import { IndexPattern } from '../../../../core_plugins/data/public';
 
 export async function applyEsResp(
   resp: EsResponse,
   savedObject: SavedObject,
-  esType: string,
-  config: any,
-  mapping: any,
-  hydrateIndexPattern: (id?: string) => void,
-  afterESResp: () => void,
-  injectReferences: any,
+  config: SavedObjectConfig,
   AngularPromise: PromiseService
 ) {
+  const mapping = expandShorthand(config.mapping);
+  const esType = config.type || '';
   savedObject._source = _.cloneDeep(resp._source);
+  const afterESResp = config.afterESResp || _.noop;
+  const injectReferences = config.injectReferences;
+  const hydrateIndexPattern = savedObject.hydrateIndexPattern!;
 
   if (resp.found != null && !resp.found) {
     throw new SavedObjectNotFound(esType, savedObject.id || '');
@@ -45,7 +44,7 @@ export async function applyEsResp(
   delete resp._source.kibanaSavedObjectMeta;
 
   if (!config.indexPattern && savedObject._source.indexPattern) {
-    config.indexPattern = savedObject._source.indexPattern;
+    config.indexPattern = savedObject._source.indexPattern as IndexPattern;
     delete savedObject._source.indexPattern;
   }
 
@@ -56,10 +55,7 @@ export async function applyEsResp(
   _.forOwn(mapping, (fieldMapping, fieldName) => {
     if (fieldMapping._deserialize && typeof fieldName === 'string') {
       savedObject._source[fieldName] = fieldMapping._deserialize(
-        savedObject._source[fieldName],
-        resp,
-        fieldName,
-        fieldMapping
+        savedObject._source[fieldName] as string
       );
     }
   });

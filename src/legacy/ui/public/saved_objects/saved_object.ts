@@ -27,20 +27,15 @@
  * This class seems to interface with ES primarily through the es Angular
  * service and the saved object api.
  */
-import { SavedObjectConfig } from 'ui/saved_objects/types';
+import { SavedObjectConfig, SavedObjectSaveOptions } from 'ui/saved_objects/types';
 import { PromiseService } from 'ui/promises';
 import { buildSavedObject } from 'ui/saved_objects/helpers/build_saved_object';
 import { SavedObjectsClientProvider } from './saved_objects_client_provider';
 import { IndexPatterns } from '../../../core_plugins/data/public/index_patterns/index_patterns';
-
-export interface SaveOptions {
-  confirmOverwrite: boolean;
-  isTitleDuplicateConfirmed: boolean;
-  onTitleDuplicate: () => void;
-}
+export { SaveOptions } from './types';
 
 export interface SavedObject {
-  save: (saveOptions: SaveOptions) => Promise<string>;
+  save: (saveOptions: SavedObjectSaveOptions) => Promise<string>;
   copyOnSave: boolean;
   id?: string;
 }

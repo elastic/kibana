@@ -18,20 +18,23 @@
  */
 
 import _ from 'lodash';
-import { SavedObject } from 'ui/saved_objects/types';
+import { SavedObject, SavedObjectConfig } from 'ui/saved_objects/types';
 import { SavedObjectsClient } from 'kibana/public';
+import { PromiseService } from 'ui/promises';
 
 export function intializeSavedObject(
-  esType: string,
   savedObject: SavedObject,
   savedObjectsClient: SavedObjectsClient,
-  afterESResp: any,
-  customInit: any
+  config: SavedObjectConfig,
+  AngularPromise: PromiseService
 ) {
+  const esType = config.type;
   // ensure that the esType is defined
   if (!esType) throw new Error('You must define a type name to use SavedObject objects.');
+  const customInit = config.init || _.noop;
+  const afterESResp = config.afterESResp || _.noop;
 
-  return Promise.resolve()
+  return AngularPromise.resolve(true)
     .then(() => {
       // If there is not id, then there is no document to fetch from elasticsearch
       if (!savedObject.id) {

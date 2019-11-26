@@ -18,9 +18,12 @@
  */
 import _ from 'lodash';
 import angular from 'angular';
-import { SavedObject } from 'ui/saved_objects/types';
+import { SavedObject, SavedObjectConfig } from 'ui/saved_objects/types';
+import { expandShorthand } from '../../../../../plugins/kibana_utils/public';
 
-export function serializeSavedObject(savedObject: SavedObject, mapping: any) {
+export function serializeSavedObject(savedObject: SavedObject, config: SavedObjectConfig) {
+  // mapping definition for the fields that this object will expose
+  const mapping = expandShorthand(config.mapping);
   const attributes = {} as Record<string, any>;
   const references = [];
 

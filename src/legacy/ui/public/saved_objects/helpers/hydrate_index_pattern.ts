@@ -16,7 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObject } from 'ui/saved_objects/types';
+import { PromiseService } from 'ui/promises';
+import { SavedObject, SavedObjectConfig } from 'ui/saved_objects/types';
 import { IIndexPattern } from '../../../../../plugins/data/common/index_patterns';
 import { IndexPatterns } from '../../../../core_plugins/data/public/index_patterns/index_patterns';
 
@@ -30,22 +31,25 @@ export function hydrateIndexPattern(
   id: string,
   savedObject: SavedObject,
   indexPatterns: IndexPatterns,
-  clearSavedIndexPattern: boolean,
-  indexPattern?: IIndexPattern
+  config: SavedObjectConfig,
+  AngularPromise: PromiseService
 ) {
+  const clearSavedIndexPattern = !!config.clearSavedIndexPattern;
+  const indexPattern = config.indexPattern;
+
   if (!savedObject.searchSource) {
-    return Promise.resolve(null);
+    return AngularPromise.resolve(null);
   }
 
   if (clearSavedIndexPattern) {
     savedObject.searchSource!.setField('index', null);
-    return Promise.resolve(null);
+    return AngularPromise.resolve(null);
   }
 
   let index = id || indexPattern || savedObject.searchSource!.getOwnField('index');
 
   if (!index) {
-    return Promise.resolve(null);
+    return AngularPromise.resolve(null);
   }
 
   // If index is not an IndexPattern object at savedObject point, then it's a string id of an index.
@@ -55,7 +59,7 @@ export function hydrateIndexPattern(
 
   // At savedObject point index will either be an IndexPattern, if cached, or a promise that
   // will return an IndexPattern, if not cached.
-  return Promise.resolve(index).then((ip: IIndexPattern) => {
+  return AngularPromise.resolve(index).then((ip: IIndexPattern) => {
     savedObject.searchSource!.setField('index', ip);
   });
 }

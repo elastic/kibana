@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import _ from 'lodash';
 import { PromiseService } from 'ui/promises';
 import { SearchSource } from 'ui/courier';
@@ -24,10 +23,9 @@ import { hydrateIndexPattern } from 'ui/saved_objects/helpers/hydrate_index_patt
 import { intializeSavedObject } from 'ui/saved_objects/helpers/initialize_saved_object';
 import { serializeSavedObject } from 'ui/saved_objects/helpers/serialize_saved_object';
 import { SavedObjectsClient } from 'kibana/public';
-import { SavedObject, SavedObjectConfig } from 'ui/saved_objects/types';
+import { EsResponse, SavedObject, SavedObjectConfig } from 'ui/saved_objects/types';
 import { applyEsResp } from 'ui/saved_objects/helpers/apply_es_resp';
 import { saveSavedObject } from 'ui/saved_objects/helpers/save_saved_object';
-import { expandShorthand } from '../../../../../plugins/kibana_utils/public';
 import { IndexPatterns } from '../../../../core_plugins/data/public';
 
 export function buildSavedObject(
@@ -35,7 +33,7 @@ export function buildSavedObject(
   config: SavedObjectConfig = {},
   indexPatterns: IndexPatterns,
   savedObjectsClient: SavedObjectsClient,
-  confirmModalPromise: any,
+  confirmModalPromise: Promise<unknown>,
   AngularPromise: PromiseService
 ) {
   // type name for this object, used as the ES-type
@@ -54,24 +52,12 @@ export function buildSavedObject(
    */
   savedObject.isSaving = false;
   savedObject.defaults = config.defaults || {};
-
-  // mapping definition for the fields that this object will expose
-  const mapping = expandShorthand(config.mapping);
-
-  const afterESResp = config.afterESResp || _.noop;
-  const customInit = config.init || _.noop;
-  const extractReferences = config.extractReferences;
-  const injectReferences = config.injectReferences;
-
   // optional search source which this object configures
   savedObject.searchSource = config.searchSource ? new SearchSource() : undefined;
-
   // the id of the document
   savedObject.id = config.id || void 0;
-
   // the migration version of the document, should only be set on imports
   savedObject.migrationVersion = config.migrationVersion;
-
   // Whether to create a copy when the object is saved. This should eventually go away
   // in favor of a better rename/save flow.
   savedObject.copyOnSave = false;
@@ -82,16 +68,8 @@ export function buildSavedObject(
    *
    * @return {Promise<IndexPattern | null>}
    */
-  savedObject.hydrateIndexPattern = (id?: string) => {
-    return hydrateIndexPattern(
-      id || '',
-      savedObject,
-      indexPatterns,
-      !!config.clearSavedIndexPattern,
-      config.indexPattern
-    );
-  };
-
+  savedObject.hydrateIndexPattern = (id?: string) =>
+    hydrateIndexPattern(id || '', savedObject, indexPatterns, config, Promise);
   /**
    * Asynchronously initialize this object - will only run
    * once even if called multiple times.
@@ -100,27 +78,17 @@ export function buildSavedObject(
    * @resolved {SavedObject}
    */
   savedObject.init = _.once(() =>
-    intializeSavedObject(esType, savedObject, savedObjectsClient, afterESResp, customInit)
+    intializeSavedObject(savedObject, savedObjectsClient, config, Promise)
   );
 
-  savedObject.applyESResp = (resp: any) =>
-    applyEsResp(
-      resp,
-      savedObject,
-      esType,
-      config,
-      mapping,
-      savedObject.hydrateIndexPattern!,
-      afterESResp,
-      injectReferences,
-      AngularPromise
-    );
+  savedObject.applyESResp = (resp: EsResponse) =>
+    applyEsResp(resp, savedObject, config, AngularPromise);
 
   /**
    * Serialize this object
    * @return {Object}
    */
-  savedObject._serialize = () => serializeSavedObject(savedObject, mapping);
+  savedObject._serialize = () => serializeSavedObject(savedObject, config);
 
   /**
    * Returns true if the object's original title has been changed. New objects return false.
@@ -137,9 +105,8 @@ export function buildSavedObject(
   });
 
   savedObject.save = (opts: any) => {
-    return saveSavedObject(esType, savedObject, savedObjectsClient, confirmModalPromise, Promise, {
+    return saveSavedObject(savedObject, savedObjectsClient, config, confirmModalPromise, Promise, {
       ...opts,
-      extractReferences,
     });
   };
 
@@ -150,8 +117,9 @@ export function buildSavedObject(
    * @return {promise}
    */
   savedObject.delete = () => {
-    if (savedObject.id) {
-      return savedObjectsClient.delete(esType, savedObject.id);
+    if (!savedObject.id) {
+      return Promise.reject(new Error('Deleting a saved Object requires type and id'));
     }
+    return savedObjectsClient.delete(esType, savedObject.id);
   };
 }
