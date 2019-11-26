@@ -17,20 +17,29 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
-import { ExpressionsPublicPlugin } from './plugin';
+import { CoreSetup, CoreStart, PluginInitializerContext } from 'src/core/public';
+import { ExpressionsStart } from './types';
+import { setExpressions } from './services';
 
-export { ExpressionsPublicPlugin as Plugin };
+export interface StartDeps {
+  expressions: ExpressionsStart;
+}
 
-export * from './plugin';
-export * from './types';
-export * from '../common';
-export { interpreterProvider, ExpressionInterpret } from './interpreter_provider';
-export { ExpressionRenderer, ExpressionRendererProps } from './expression_renderer';
-export { ExpressionDataHandler } from './execute';
+export class Plugin {
+  constructor(initializerContext: PluginInitializerContext) {}
 
-export { RenderResult, ExpressionRenderHandler } from './render';
+  public setup({ application }: CoreSetup) {
+    application.register({
+      id: 'kbn_tp_run_pipeline',
+      title: 'Run Pipeline',
+      async mount(context, params) {
+        const { renderApp } = await import('./app/app');
+        return renderApp(context, params);
+      },
+    });
+  }
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new ExpressionsPublicPlugin(initializerContext);
+  public start(start: CoreStart, { expressions }: StartDeps) {
+    setExpressions(expressions);
+  }
 }

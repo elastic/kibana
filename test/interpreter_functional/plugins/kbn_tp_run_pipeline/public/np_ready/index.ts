@@ -17,20 +17,12 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
-import { ExpressionsPublicPlugin } from './plugin';
+import { PluginInitializer, PluginInitializerContext } from 'src/core/public';
+import { Plugin, StartDeps } from './plugin';
+export { StartDeps };
 
-export { ExpressionsPublicPlugin as Plugin };
-
-export * from './plugin';
-export * from './types';
-export * from '../common';
-export { interpreterProvider, ExpressionInterpret } from './interpreter_provider';
-export { ExpressionRenderer, ExpressionRendererProps } from './expression_renderer';
-export { ExpressionDataHandler } from './execute';
-
-export { RenderResult, ExpressionRenderHandler } from './render';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new ExpressionsPublicPlugin(initializerContext);
-}
+export const plugin: PluginInitializer<void, void, {}, StartDeps> = (
+  initializerContext: PluginInitializerContext
+) => {
+  return new Plugin(initializerContext);
+};
