@@ -791,27 +791,30 @@
             "created_on": {
               "type": "keyword"
             },
-            "data_sources": {
+            "datasources": {
               "properties": {
-                "inputs": {
+                "name": {
+                  "type": "text"
+                },
+                "description": {
+                  "type": "text"
+                },
+                "label": {
                   "type": "keyword"
                 },
-                "meta": {
+                "datasources": {
                   "type": "keyword"
                 },
-                "output": {
+                "id": {
                   "type": "keyword"
                 },
-                "policy": {
+                "status": {
                   "type": "keyword"
                 },
-                "policy_id": {
+                "updated_on": {
                   "type": "keyword"
                 },
-                "queue": {
-                  "type": "keyword"
-                },
-                "uuid": {
+                "updated_by": {
                   "type": "keyword"
                 }
               }

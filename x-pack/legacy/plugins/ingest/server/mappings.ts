@@ -33,14 +33,4 @@ export const mappings = {
       },
     },
   },
-  inputs: {
-    properties: {
-      other: {
-        type: 'text',
-      },
-      data_source_id: {
-        type: 'keyword',
-      },
-    },
-  },
 };
