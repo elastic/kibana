@@ -10,6 +10,8 @@ import { PackageInfo } from '../../../common/types';
 import { DetailViewPanelName } from '../../';
 import { getPackageInfoByKey } from '../../data';
 import { useCore } from '../../hooks/use_core';
+import { useSetPackageInstallStatus } from '../../hooks';
+import { InstallStatus } from '../../types';
 import { Header } from './header';
 import { Content } from './content';
 
@@ -22,12 +24,16 @@ export interface DetailProps {
 
 export function Detail({ pkgkey, panel = DEFAULT_PANEL }: DetailProps) {
   const [info, setInfo] = useState<PackageInfo | null>(null);
+  const setPackageInstallStatus = useSetPackageInstallStatus();
   useEffect(() => {
     getPackageInfoByKey(pkgkey).then(response => {
-      const { title } = response;
+      const { title, name } = response;
+      const status: InstallStatus = response.status as any;
+      // track install status state
+      setPackageInstallStatus({ name, status });
       setInfo({ ...response, title });
     });
-  }, [pkgkey]);
+  }, [pkgkey, setPackageInstallStatus]);
 
   // don't have designs for loading/empty states
   if (!info) return null;
