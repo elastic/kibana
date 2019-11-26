@@ -42,7 +42,7 @@ monitoring-shard-allocation {
       }
     }
 
-    .monTitle {
+    .monChild__title {
       padding: $euiSizeXS $euiSizeS;
       text-align: center;
       font-size: $euiSizeM;
@@ -53,11 +53,6 @@ monitoring-shard-allocation {
 
       a {
         text-decoration: none;
-      }
-
-      .euiIcon,
-      i {
-        margin-left: $euiSizeXS;
       }
     }
 
