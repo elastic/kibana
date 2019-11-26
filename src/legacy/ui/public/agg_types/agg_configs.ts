@@ -33,6 +33,7 @@ import { Schema } from '../vis/editors/default/schemas';
 import { AggConfig, AggConfigOptions } from './agg_config';
 import { AggGroupNames } from '../vis/editors/default/agg_groups';
 import { IndexPattern } from '../../../core_plugins/data/public';
+import { SearchSourceContract, FetchOptions } from '../courier/types';
 
 function removeParentAggs(obj: any) {
   for (const prop in obj) {
@@ -301,7 +302,7 @@ export class AggConfigs {
     return _.find(reqAgg.getResponseAggs(), { id });
   }
 
-  onSearchRequestStart(searchSource: any, options: any) {
+  onSearchRequestStart(searchSource: SearchSourceContract, options?: FetchOptions) {
     return Promise.all(
       // @ts-ignore
       this.getRequestAggs().map((agg: AggConfig) => agg.onSearchRequestStart(searchSource, options))

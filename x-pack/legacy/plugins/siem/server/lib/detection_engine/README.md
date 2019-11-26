@@ -104,6 +104,13 @@ You should also see the SIEM detect the feature flags and start the API endpoint
 server    log   [11:39:05.561] [info][siem] Detected feature flags for actions and alerting and enabling signals API endpoints
 ```
 
+Go into your SIEM Advanced settings and underneath the setting of `siem:defaultSignalsIndex`, set that to the same
+value as you did with the environment variable of SIGNALS_INDEX, which should be `.siem-signals-${your user id}`
+
+```
+.siem-signals-${your user id}
+```
+
 Open a terminal and go into the scripts folder `cd kibana/x-pack/legacy/plugins/siem/server/lib/detection_engine/scripts` and run:
 
 ```sh
@@ -176,6 +183,17 @@ Every 5 minutes if you get positive hits you will see messages on info like so:
 ```sh
 server    log   [09:54:59.013] [info][plugins][siem] Total signals found from signal rule "id: a556065c-0656-4ba1-ad64-a77ca9d2013b", "ruleId: rule-1": 10000
 ```
+
+Signals are space aware and default to the "default" space for these scripts if you do not export
+the variable of SPACE_URL. For example, if you want to post rules to the space `test-space` you would
+set your SPACE_URL to be:
+
+```sh
+export SPACE_URL=/s/test-space
+```
+
+So that the scripts prepend a `/s/test-space` in front of all the APIs to correctly create, modify, delete, and update
+them from within that space.
 
 See the scripts folder and the tools for more command line fun.
 

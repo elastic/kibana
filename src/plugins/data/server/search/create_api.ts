@@ -30,7 +30,7 @@ export function createApi({
   caller: APICaller;
 }) {
   const api: IRouteHandlerSearchContext = {
-    search: async (request, strategyName) => {
+    search: async (request, options, strategyName) => {
       const name = strategyName ? strategyName : DEFAULT_SEARCH_STRATEGY;
       const strategyProvider = searchStrategies[name];
       if (!strategyProvider) {

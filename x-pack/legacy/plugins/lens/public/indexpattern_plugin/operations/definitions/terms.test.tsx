@@ -140,6 +140,24 @@ describe('terms', () => {
           aggregatable: true,
           searchable: true,
           name: 'test',
+          type: 'number',
+          aggregationRestrictions: {
+            terms: {
+              agg: 'terms',
+            },
+          },
+        })
+      ).toEqual({
+        dataType: 'number',
+        isBucketed: true,
+        scale: 'ordinal',
+      });
+
+      expect(
+        termsOperation.getPossibleOperationForField({
+          aggregatable: true,
+          searchable: true,
+          name: 'test',
           type: 'boolean',
         })
       ).toEqual({
