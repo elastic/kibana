@@ -27,8 +27,7 @@ export const Description: FC = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.calendarsSelection.description"
-          defaultMessage="Calendars contain a list of scheduled events for which you do not want to generate anomalies,
-              such as planned system outages or public holidays. The same calendar can be assigned to multiple jobs. {learnMoreLink}"
+          defaultMessage="Contain a list of scheduled events for which you do not want to generate anomalies, such as planned system outages or public holidays. {learnMoreLink}"
           values={{
             learnMoreLink: (
               <EuiLink href={docsUrl} target="_blank">
