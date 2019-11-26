@@ -33,7 +33,7 @@ export const plugin: PluginInitializer<DiscoverSetup, DiscoverStart> = (
 export const pluginInstance = plugin({} as PluginInitializerContext);
 (async () => {
   pluginInstance.setup(npSetup.core, npSetup.plugins);
-  pluginInstance.start(npStart.core, { ...npStart.plugins, ...{ navigation } });
+  pluginInstance.start(npStart.core, { ...npStart.plugins, navigation });
 })();
 
 SavedObjectRegistryProvider.register((savedSearches: any) => {

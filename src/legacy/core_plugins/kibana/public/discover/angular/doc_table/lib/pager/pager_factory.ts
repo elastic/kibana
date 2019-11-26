@@ -21,7 +21,7 @@ import { Pager } from './pager';
 
 export function createPagerFactory() {
   return {
-    create(...args: any) {
+    create(...args: unknown[]) {
       return new Pager(...args);
     },
   };

@@ -23,15 +23,15 @@ import angular from 'angular';
  * Here's where Discover's inner angular is mounted and rendered
  */
 export async function renderApp(moduleName: string, element: HTMLElement) {
-  require('./angular');
+  await import('./angular');
   const $injector = mountDiscoverApp(moduleName, element);
   return () => $injector.get('$rootScope').$destroy();
 }
 
 function mountDiscoverApp(moduleName: string, element: HTMLElement) {
-  const mountpoint = document.createElement('span');
+  const mountpoint = document.createElement('div');
   // eslint-disable-next-line
-  mountpoint.innerHTML = `<span ng-view></span>`;
+  mountpoint.innerHTML = `<div ng-view></div>`;
   // bootstrap angular into detached element and attach it later to
   // make angular-within-angular possible
   const $injector = angular.bootstrap(mountpoint, [moduleName]);

@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
+import { UiSettingsClient } from 'kibana/public';
 // @ts-ignore
 import rison from 'rison-node';
 import '../../doc_viewer';
@@ -36,11 +37,15 @@ import { esFilters } from '../../../../../../../../plugins/data/public';
 // guesstimate at the minimum number of chars wide cells in the table should be
 const MIN_LINE_LENGTH = 20;
 
+interface LazyScope extends ng.IScope {
+  [key: string]: any;
+}
+
 export function createTableRowDirective(
-  $compile: any,
+  $compile: ng.ICompileService,
   $httpParamSerializer: any,
   kbnUrl: any,
-  config: any
+  config: UiSettingsClient
 ) {
   const cellTemplate = _.template(noWhiteSpace(cellTemplateHtml));
   const truncateByHeightTemplate = _.template(noWhiteSpace(truncateByHeightTemplateHtml));
@@ -56,7 +61,7 @@ export function createTableRowDirective(
       onAddColumn: '=?',
       onRemoveColumn: '=?',
     },
-    link: ($scope: any, $el: any) => {
+    link: ($scope: LazyScope, $el: JQuery) => {
       $el.after('<tr data-test-subj="docTableDetailsRow" class="kbnDocTableDetails__row">');
       $el.empty();
 
