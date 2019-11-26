@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
-import { getPolicy, createIndexWithAlias } from '../../../legacy/plugins/epm/server/lib/ilm/ilm';
+import { getPolicy, getIndexWithWithAlias } from '../../../legacy/plugins/epm/server/lib/ilm/ilm';
 
 export default function({ getService }: FtrProviderContext) {
   describe('ilm', () => {
@@ -31,15 +31,17 @@ export default function({ getService }: FtrProviderContext) {
       const es = getService('es');
 
       // Delete index first if it exists as otherwise we get an error
-      const indexExists = await es.indices.exists({ index: indexName });
-      if (indexExists) {
+      const existsBody = await es.indices.exists({ index: indexName });
+      if (existsBody.statusCode === 200) {
         const response = await es.indices.delete({ index: indexName });
+
         // Sanity check to make sure removal work as expected
         // If it didn't we already know where the problem lays in the test
         expect(response.statusCode).to.eql(200);
       }
 
       const data = await createIndexWithAlias(es, indexName, aliasName);
+
       // Sanity checks to make sure ES confirmed the data we sent is sane
       // and the index with the alias was created.
       expect(data.body.acknowledged).to.eql(true);
@@ -50,5 +52,20 @@ export default function({ getService }: FtrProviderContext) {
       const indexData = await es.indices.get({ index: indexName });
       expect(indexData.body[indexName].aliases[aliasName].is_write_index).to.eql(true);
     });
+  });
+}
+
+/**
+ * Calls the given esClient, creates and index and sets it as write index on the given alias.
+ *
+ * This should be moved later to the ilm lib but have it here for now as passing the client
+ * does not work.
+ */
+async function createIndexWithAlias(esClient: Client, indexName: string, aliasName: string) {
+  const body = getIndexWithWithAlias(aliasName);
+
+  return esClient.indices.create({
+    index: indexName,
+    body,
   });
 }
