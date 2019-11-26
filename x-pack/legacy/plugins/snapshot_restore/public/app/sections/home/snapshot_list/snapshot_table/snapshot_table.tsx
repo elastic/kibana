@@ -220,7 +220,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
                         'xpack.snapshotRestore.snapshotList.table.deleteManagedRepositorySnapshotTooltip',
                         {
                           defaultMessage:
-                            'You must store at least the last successful snapshot in a managed repository.',
+                            'You must store the last successful snapshot in a managed repository.',
                         }
                       )
                     : i18n.translate(
