@@ -59,7 +59,7 @@ pipeline {
       }
       steps {
         dir("${APM_ITS}"){
-          sh './scripts/compose.py start master --no-kibana'
+          sh './scripts/compose.py start master --no-kibana --no-xpack-secure'
         }
       }
     }
