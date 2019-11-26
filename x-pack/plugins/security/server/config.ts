@@ -26,6 +26,7 @@ const providerOptionsSchema = (providerType: string, optionsSchema: Type<any>) =
 
 export const ConfigSchema = schema.object(
   {
+    loginAssistanceMessage: schema.string({ defaultValue: '' }),
     cookieName: schema.string({ defaultValue: 'sid' }),
     encryptionKey: schema.conditional(
       schema.contextRef('dist'),

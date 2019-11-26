@@ -21,6 +21,7 @@ describe('config schema', () => {
                           },
                           "cookieName": "sid",
                           "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "loginAssistanceMessage": "",
                           "secureCookies": false,
                           "session": Object {
                             "idleTimeout": null,
@@ -38,6 +39,7 @@ describe('config schema', () => {
                           },
                           "cookieName": "sid",
                           "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "loginAssistanceMessage": "",
                           "secureCookies": false,
                           "session": Object {
                             "idleTimeout": null,
@@ -54,6 +56,7 @@ describe('config schema', () => {
                             ],
                           },
                           "cookieName": "sid",
+                          "loginAssistanceMessage": "",
                           "secureCookies": false,
                           "session": Object {
                             "idleTimeout": null,
