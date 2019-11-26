@@ -188,8 +188,18 @@ describe('MetricsAxisOptions component', () => {
         aggs: createAggs([agg]),
       });
 
+      const updatedSeriesParams = [{ ...chart, data: { ...chart.data, label: agg.makeLabel() } }];
+      expect(setValue).toHaveBeenLastCalledWith(SERIES_PARAMS, updatedSeriesParams);
+
+      comp.setProps({
+        stateParams: {
+          ...defaultProps.stateParams,
+          seriesParams: updatedSeriesParams,
+        },
+      });
+
       const updatedValues = [{ ...axis, title: { text: agg.makeLabel() } }];
-      expect(setValue).toHaveBeenCalledWith(VALUE_AXES, updatedValues);
+      expect(setValue).toHaveBeenLastCalledWith(VALUE_AXES, updatedValues);
     });
 
     it('should not set the custom title to match the value axis label when more than one agg exists for that axis', () => {
@@ -219,41 +229,6 @@ describe('MetricsAxisOptions component', () => {
       });
 
       expect(setValue).not.toHaveBeenCalledWith(VALUE_AXES);
-    });
-
-    it('should overwrite the custom title when the agg type changes', () => {
-      defaultProps.stateParams.valueAxes[0].title.text = 'Custom title';
-      const comp = mount(<MetricsAxisOptions {...defaultProps} />);
-      const agg = {
-        id: aggCount.id,
-        type: { name: 'max' },
-        makeLabel: () => 'Max',
-      };
-      comp.setProps({
-        aggs: createAggs([agg]),
-      });
-
-      const updatedValues = [{ ...axis, title: { text: agg.makeLabel() } }];
-      expect(setValue).toHaveBeenCalledWith(VALUE_AXES, updatedValues);
-    });
-
-    it('should overwrite the custom title when the agg field changes', () => {
-      defaultProps.stateParams.valueAxes[0].title.text = 'Custom title';
-      const agg = {
-        id: aggCount.id,
-        type: { name: 'max' },
-        makeLabel: () => 'Max',
-      } as AggConfig;
-      defaultProps.aggs = createAggs([agg]) as any;
-      const comp = mount(<MetricsAxisOptions {...defaultProps} />);
-      agg.params = { field: { name: 'Field' } };
-      agg.makeLabel = () => 'Max, Field';
-      comp.setProps({
-        aggs: createAggs([agg]),
-      });
-
-      const updatedValues = [{ ...axis, title: { text: agg.makeLabel() } }];
-      expect(setValue).toHaveBeenCalledWith(VALUE_AXES, updatedValues);
     });
   });
 

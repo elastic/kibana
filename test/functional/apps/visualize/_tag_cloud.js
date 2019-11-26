@@ -63,12 +63,12 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should collapse the sidebar', async function () {
-      const editorSidebar = await find.byCssSelector('.visEditor__collapsibleSidebar');
+      const editorSidebar = await find.byCssSelector('.visEditorSidebar');
       await PageObjects.visualize.clickEditorSidebarCollapse();
       // Give d3 tag cloud some time to rearrange tags
       await PageObjects.common.sleep(1000);
-      const afterSize = await editorSidebar.getSize();
-      expect(afterSize.width).to.be(0);
+      const isDisplayed = await editorSidebar.isDisplayed();
+      expect(isDisplayed).to.be(false);
       await PageObjects.visualize.clickEditorSidebarCollapse();
     });
 

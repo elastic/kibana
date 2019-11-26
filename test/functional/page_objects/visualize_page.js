@@ -408,7 +408,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async getSideEditorExists() {
-      return await find.existsByCssSelector('.collapsible-sidebar');
+      return await find.existsByCssSelector('.visEditor__collapsibleSidebar');
     }
 
     async setInspectorTablePageSize(size) {
@@ -660,7 +660,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
       // this is a temporary solution, should be replaced with initial after fixing the EuiToggleButton
       // passing the data-test-subj attribute to a checkbox
-      await find.clickByCssSelector('.visEditorSidebar__controls input[title="Auto apply"]');
+      await find.clickByCssSelector('.visEditorSidebar__controls input[type="checkbox"]');
     }
 
     async sizeUpEditor() {

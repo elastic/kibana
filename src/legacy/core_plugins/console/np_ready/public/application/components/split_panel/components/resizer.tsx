@@ -42,7 +42,7 @@ export function Resizer(props: Props) {
         defaultMessage: 'Press left/right to adjust panels size',
       })}
     >
-      <EuiIcon type="boxesVertical" />
+      <EuiIcon type="grabHorizontal" />
     </button>
   );
 }

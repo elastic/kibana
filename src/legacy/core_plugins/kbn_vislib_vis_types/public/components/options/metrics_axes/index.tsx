@@ -283,7 +283,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
     vis.setVisType(visType);
   }, [vis, visType]);
 
-  useEffect(updateAxisTitle, [aggs]);
+  useEffect(updateAxisTitle, [stateParams.seriesParams]);
 
   return (
     <>

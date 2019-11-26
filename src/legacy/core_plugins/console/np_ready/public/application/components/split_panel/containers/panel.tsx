@@ -23,6 +23,10 @@ import { usePanelContext } from '../context';
 export interface Props {
   children: ReactNode[] | ReactNode;
   className?: string;
+
+  /**
+   * initial width of the panel in percents
+   */
   initialWidth?: number;
   style?: CSSProperties;
 }

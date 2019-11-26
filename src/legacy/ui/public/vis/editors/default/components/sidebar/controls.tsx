@@ -65,9 +65,6 @@ function DefaultEditorControls({
         <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              aria-label={i18n.translate('common.ui.vis.editors.sidebar.discardChangesAriaLabel', {
-                defaultMessage: 'Discard latest changes',
-              })}
               data-test-subj="visualizeEditorResetButton"
               disabled={!isDirty}
               iconType="cross"
@@ -82,45 +79,19 @@ function DefaultEditorControls({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            {isInvalid && isTouched ? (
-              <EuiToolTip
-                content={i18n.translate('common.ui.vis.editors.sidebar.errorButtonTooltip', {
-                  defaultMessage: 'Errors in the highlighted fields need to be resolved.',
-                })}
-              >
-                <EuiButton
-                  aria-label={i18n.translate('common.ui.vis.editors.sidebar.errorButtonAriaLabel', {
-                    defaultMessage: 'Errors in the highlighted fields need to be resolved.',
-                  })}
-                  color="danger"
-                  iconType="alert"
-                  size="s"
-                  disabled
-                >
-                  <FormattedMessage
-                    id="common.ui.vis.editors.sidebar.updateChartButtonLabel"
-                    defaultMessage="Update"
-                  />
-                </EuiButton>
-              </EuiToolTip>
-            ) : (
-              <EuiButton
-                aria-label={i18n.translate('common.ui.vis.editors.sidebar.applyChangesAriaLabel', {
-                  defaultMessage: 'Update the visualization with your changes',
-                })}
-                data-test-subj="visualizeEditorRenderButton"
-                disabled={!isDirty}
-                fill
-                iconType="play"
-                onClick={applyChanges}
-                size="s"
-              >
-                <FormattedMessage
-                  id="common.ui.vis.editors.sidebar.updateChartButtonLabel"
-                  defaultMessage="Update"
-                />
-              </EuiButton>
-            )}
+            <EuiButton
+              data-test-subj="visualizeEditorRenderButton"
+              disabled={(isInvalid && isTouched) || !isDirty}
+              fill
+              iconType={isInvalid && isTouched ? 'alert' : 'play'}
+              onClick={applyChanges}
+              size="s"
+            >
+              <FormattedMessage
+                id="common.ui.vis.editors.sidebar.updateChartButtonLabel"
+                defaultMessage="Update"
+              />
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       )}

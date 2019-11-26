@@ -2,12 +2,6 @@
   .visEditorSidebar__config {
     padding: 0;
   }
-
-  .visEditorSidebar__options {
-    @include euiScrollBar;
-    flex-shrink: 1;
-    overflow-y: auto;
-  }
 }
 
 .vgaEditor {
