@@ -231,8 +231,6 @@ export class VectorLayer extends AbstractLayer {
     return this._dataRequests.find(dataRequest => dataRequest.getDataId() === sourceDataId);
   }
 
-
-
   async _syncJoin({ join, startLoading, stopLoading, onLoadError, registerCancelCallback, dataFilters }) {
 
     const joinSource = join.getRightJoinSource();
@@ -400,6 +398,7 @@ export class VectorLayer extends AbstractLayer {
 
     return this._syncStyleMeta({
       source: this._source,
+      sourceQuery: this.getQuery(),
       dataRequestId: SOURCE_META_ID_ORIGIN,
       dynamicStyleProps,
       ...syncContext
@@ -418,6 +417,7 @@ export class VectorLayer extends AbstractLayer {
 
     return this._syncStyleMeta({
       source: joinSource,
+      sourceQuery: joinSource.getWhereQuery(),
       dataRequestId: join.getSourceMetaDataRequestId(),
       dynamicStyleProps,
       ...syncContext
@@ -425,7 +425,14 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async _syncStyleMeta({
-    source, dataRequestId, dynamicStyleProps, startLoading, stopLoading, onLoadError, registerCancelCallback
+    source,
+    sourceQuery,
+    dataRequestId,
+    dynamicStyleProps,
+    startLoading,
+    stopLoading,
+    onLoadError,
+    registerCancelCallback
   }) {
 
     if (!source.isElasticsearchSource() || dynamicStyleProps.length === 0) {
@@ -436,6 +443,7 @@ export class VectorLayer extends AbstractLayer {
       dynamicStyleFields: dynamicStyleProps.map(dynamicStyleProp => {
         return dynamicStyleProp.getField().getName();
       }),
+      sourceQuery,
       // TODO include time range?, make this user configurable?
     };
     const prevDataRequest = this._findDataRequestForSource(dataRequestId);
@@ -448,7 +456,7 @@ export class VectorLayer extends AbstractLayer {
     try {
       startLoading(dataRequestId, requestToken, nextMeta);
       const layerName = await this.getDisplayName();
-      const styleMeta = await source.loadStylePropsMeta(layerName, dynamicStyleProps, registerCancelCallback);
+      const styleMeta = await source.loadStylePropsMeta(layerName, dynamicStyleProps, registerCancelCallback, nextMeta);
       console.log(styleMeta);
       stopLoading(dataRequestId, requestToken, styleMeta, nextMeta);
     } catch (error) {

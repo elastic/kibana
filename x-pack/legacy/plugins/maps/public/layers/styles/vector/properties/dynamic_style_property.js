@@ -33,7 +33,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     }
 
     supportsFieldMeta() {
-      return this._field.supportsFieldMeta();
+      return this.isScaled() && this._field.supportsFieldMeta();
     }
 
     async getFieldMetaRequest() {

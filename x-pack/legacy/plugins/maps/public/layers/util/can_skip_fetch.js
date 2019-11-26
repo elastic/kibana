@@ -140,5 +140,7 @@ export function canSkipStyleMetaUpdate({ prevDataRequest, nextMeta }) {
 
   const updateDueToFields = !_.isEqual(prevMeta.dynamicStyleFields, nextMeta.dynamicStyleFields);
 
-  return !updateDueToFields;
+  const updateDueToSourceQuery = !_.isEqual(prevMeta.sourceQuery, nextMeta.sourceQuery);
+
+  return !updateDueToFields && !updateDueToSourceQuery;
 }

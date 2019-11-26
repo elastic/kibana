@@ -271,7 +271,7 @@ export class AbstractESSource extends AbstractVectorSource {
     return fieldFromIndexPattern.format.getConverterFor('text');
   }
 
-  async loadStylePropsMeta(layerName, dynamicStyleProps, registerCancelCallback) {
+  async loadStylePropsMeta(layerName, dynamicStyleProps, registerCancelCallback, searchFilters) {
     const promises = dynamicStyleProps
       .map(dynamicStyleProp => {
         return dynamicStyleProp.getFieldMetaRequest();
@@ -294,6 +294,9 @@ export class AbstractESSource extends AbstractVectorSource {
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 0);
     searchSource.setField('aggs', aggs);
+    if (searchFilters.sourceQuery) {
+      searchSource.setField('query', searchFilters.sourceQuery);
+    }
 
     const resp = await this._runEsQuery(
       i18n.translate('xpack.maps.source.esSource.stylePropsMetaRequestName', {
