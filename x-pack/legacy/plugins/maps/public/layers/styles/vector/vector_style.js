@@ -9,7 +9,7 @@ import React from 'react';
 import { VectorStyleEditor } from './components/vector_style_editor';
 import { getDefaultProperties, vectorStyles } from './vector_style_defaults';
 import { AbstractStyle } from '../abstract_style';
-import { GEO_JSON_TYPE, FIELD_ORIGIN, STYLE_TYPE } from '../../../../common/constants';
+import { GEO_JSON_TYPE, FIELD_ORIGIN, STYLE_TYPE, SOURCE_META_ID_ORIGIN } from '../../../../common/constants';
 import { VectorIcon } from './components/legend/vector_icon';
 import { VectorStyleLegend } from './components/legend/vector_style_legend';
 import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
@@ -271,6 +271,43 @@ export class VectorStyle extends AbstractStyle {
   }
 
   _getFieldRange = (fieldName) => {
+    const dynamicProps = this.getDynamicPropertiesArray();
+    const dynamicProp = dynamicProps.find(dynamicProp => {
+      return fieldName === dynamicProp.getField().getName();
+    });
+
+    let dataRequestId;
+    if (dynamicProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE) {
+      dataRequestId = SOURCE_META_ID_ORIGIN;
+    } else {
+      const join = this._layer.getValidJoins().find(join => {
+        const matchingField = join.getRightJoinSource().getMetricFieldForName(fieldName);
+        return !!matchingField;
+      });
+      if (join) {
+        dataRequestId = join.getSourceMetaDataRequestId();
+      }
+    }
+
+    if (dataRequestId) {
+      const styleMetaDataRequest = this._layer._findDataRequestForSource(dataRequestId);
+      if (styleMetaDataRequest && styleMetaDataRequest.hasData()) {
+        const data = styleMetaDataRequest.getData();
+        const field = dynamicProp.getField();
+        const realFieldName = field.getESDocFieldName ? field.getESDocFieldName() : field.getName();
+        const stats = data[realFieldName];
+        if (stats) {
+          const min = Math.max(stats.min, stats.std_deviation_bounds.lower);
+          const max = Math.min(stats.max, stats.std_deviation_bounds.upper);
+          return {
+            min,
+            max,
+            delta: max - min,
+          };
+        }
+      }
+    }
+
     return _.get(this._descriptor, ['__styleMeta', fieldName]);
   }
 
@@ -444,7 +481,6 @@ export class VectorStyle extends AbstractStyle {
   }
 
   _makeField(fieldDescriptor) {
-
     if (!fieldDescriptor || !fieldDescriptor.name) {
       return null;
     }
@@ -467,8 +503,6 @@ export class VectorStyle extends AbstractStyle {
     } else {
       throw new Error(`Unknown origin-type ${fieldDescriptor.origin}`);
     }
-
-
   }
 
   _makeSizeProperty(descriptor, styleName) {
