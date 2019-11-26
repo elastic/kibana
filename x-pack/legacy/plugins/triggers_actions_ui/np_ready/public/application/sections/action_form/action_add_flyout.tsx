@@ -26,7 +26,9 @@ export const ActionAddFlyout = () => {
   const closeFlyout = useCallback(() => setAddFlyoutVisibility(false), [setAddFlyoutVisibility]);
 
   useEffect(() => {
-    setActionType(undefined);
+    if (addFlyoutVisible) {
+      setActionType(undefined);
+    }
   }, [addFlyoutVisible]);
 
   if (!addFlyoutVisible) {

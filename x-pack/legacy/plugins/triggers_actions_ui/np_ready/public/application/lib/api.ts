@@ -81,7 +81,7 @@ export async function updateAction({
   id: string;
 }): Promise<Action> {
   return http.put(`${BASE_ACTION_API_PATH}/${id}`, {
-    body: JSON.stringify({ ...action, id: undefined, actionTypeId: undefined, secrets: undefined }),
+    body: JSON.stringify({ ...action, id: undefined, actionTypeId: undefined }),
   });
 }
 

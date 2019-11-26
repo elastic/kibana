@@ -36,7 +36,8 @@ export const ActionEditFlyout = () => {
   const closeFlyout = useCallback(() => setEditFlyoutVisibility(false), [setEditFlyoutVisibility]);
 
   useEffect(() => {
-    if (editedActionItem && editedActionItem.id) {
+    setAction(undefined);
+    if (editFlyoutVisible && editedActionItem && editedActionItem.id) {
       loadActionById(editedActionItem.id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -46,7 +47,7 @@ export const ActionEditFlyout = () => {
     setIsLoadingAction(true);
     try {
       const actionResponse = await getActionById({ id: actionItemId, http });
-      setAction(actionResponse);
+      setAction({ ...actionResponse, secrets: {} });
     } catch (e) {
       toastNotifications.addDanger({
         title: i18n.translate(
@@ -61,7 +62,7 @@ export const ActionEditFlyout = () => {
     }
   }
 
-  if (!editFlyoutVisible) {
+  if (!editFlyoutVisible && !action) {
     return null;
   }
 
@@ -100,7 +101,7 @@ export const ActionEditFlyout = () => {
       ) : (
         <SectionLoading>
           <FormattedMessage
-            id="xpack.watcher.sections.watchEdit.loadingWatchDescription"
+            id="xpack.triggersActionsUI.sections.actionAdd.loadingWatchDescription"
             defaultMessage="Loading watch…"
           />
         </SectionLoading>
