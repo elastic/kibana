@@ -19,6 +19,7 @@ export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPlugi
     anonymousPaths.register('/login');
     anonymousPaths.register('/logout');
     anonymousPaths.register('/logged_out');
+    anonymousPaths.register('/status');
 
     const sessionExpired = new SessionExpired(basePath);
     http.intercept(new UnauthorizedResponseHttpInterceptor(sessionExpired, anonymousPaths));

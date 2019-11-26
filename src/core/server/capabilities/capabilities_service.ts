@@ -106,7 +106,7 @@ export class CapabilitiesService {
     );
     router.post(
       {
-        path: '/fallback',
+        path: '/defaults',
         options: {
           authRequired: false,
         },

@@ -87,25 +87,16 @@ export class CapabilitiesService {
   }
 
   private async fetchCapabilities(http: HttpStart, appIds: string[]): Promise<Capabilities> {
-    let capabilities: Capabilities = {
-      navLinks: {},
-      catalogue: {},
-      management: {},
-    };
     const payload = JSON.stringify({
       applications: appIds,
     });
-    try {
-      capabilities = await http.post('/api/core/capabilities', {
-        body: payload,
-      });
-    } catch (e) {
-      if (e?.body?.statusCode === 401) {
-        capabilities = await http.post('/api/core/capabilities/fallback', {
-          body: payload,
-        });
-      }
-    }
+
+    const url = http.anonymousPaths.isAnonymous(window.location.pathname)
+      ? '/api/core/capabilities/defaults'
+      : '/api/core/capabilities';
+    const capabilities = await http.post(url, {
+      body: payload,
+    });
     return deepFreeze(capabilities);
   }
 }
