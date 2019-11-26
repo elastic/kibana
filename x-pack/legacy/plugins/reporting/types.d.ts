@@ -25,7 +25,7 @@ export type Job = EventEmitter & {
 
 export interface ReportingPlugin {
   queue: {
-    addJob: (type: string, payload: object, options: object) => Job;
+    addJob: <PayloadType>(type: string, payload: PayloadType, options: object) => Job;
   };
   // TODO: convert exportTypesRegistry to TS
   exportTypesRegistry: {

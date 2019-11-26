@@ -11,7 +11,7 @@ import { JobDocPayloadPDF } from '../../printable_pdf/types';
 import { getFullUrls } from './get_full_urls';
 
 interface FullUrlsOpts {
-  job: JobDocPayloadPNG | JobDocPayloadPDF;
+  job: JobDocPayloadPNG & JobDocPayloadPDF;
   server: ServerFacade;
   conditionalHeaders: any;
 }
@@ -24,7 +24,7 @@ beforeEach(() => {
 test(`fails if no URL is passed`, async () => {
   await expect(
     getFullUrls({
-      job: {} as JobDocPayloadPNG,
+      job: {},
       server: mockServer,
     } as FullUrlsOpts)
   ).rejects.toMatchInlineSnapshot(
@@ -40,7 +40,7 @@ test(`fails if URLs are file-protocols for PNGs`, async () => {
       job: {
         relativeUrl,
         forceNow,
-      } as JobDocPayloadPNG,
+      },
       server: mockServer,
     } as FullUrlsOpts)
   ).rejects.toMatchInlineSnapshot(
@@ -57,7 +57,7 @@ test(`fails if URLs are absolute for PNGs`, async () => {
       job: {
         relativeUrl,
         forceNow,
-      } as JobDocPayloadPNG,
+      },
       server: mockServer,
     } as FullUrlsOpts)
   ).rejects.toMatchInlineSnapshot(
@@ -77,7 +77,7 @@ test(`fails if URLs are file-protocols for PDF`, async () => {
           },
         ],
         forceNow,
-      } as JobDocPayloadPDF,
+      },
       server: mockServer,
     } as FullUrlsOpts)
   ).rejects.toMatchInlineSnapshot(
@@ -125,7 +125,7 @@ test(`fails if any URLs are absolute or file's for PDF`, async () => {
       job: {
         objects,
         forceNow,
-      } as JobDocPayloadPDF,
+      },
       server: mockServer,
     } as FullUrlsOpts)
   ).rejects.toMatchInlineSnapshot(
@@ -138,7 +138,7 @@ test(`fails if URL does not route to a visualization`, async () => {
     getFullUrls({
       job: {
         relativeUrl: '/app/phoney',
-      } as JobDocPayloadPNG,
+      },
       server: mockServer,
     } as FullUrlsOpts)
   ).rejects.toMatchInlineSnapshot(
@@ -152,7 +152,7 @@ test(`adds forceNow to hash's query, if it exists`, async () => {
     job: {
       relativeUrl: '/app/kibana#/something',
       forceNow,
-    } as JobDocPayloadPNG,
+    },
     server: mockServer,
   } as FullUrlsOpts);
 
@@ -168,7 +168,7 @@ test(`appends forceNow to hash's query, if it exists`, async () => {
     job: {
       relativeUrl: '/app/kibana#/something?_g=something',
       forceNow,
-    } as JobDocPayloadPNG,
+    },
     server: mockServer,
   } as FullUrlsOpts);
 
@@ -181,7 +181,7 @@ test(`doesn't append forceNow query to url, if it doesn't exists`, async () => {
   const { urls } = await getFullUrls({
     job: {
       relativeUrl: '/app/kibana#/something',
-    } as JobDocPayloadPNG,
+    },
     server: mockServer,
   } as FullUrlsOpts);
 
@@ -199,7 +199,7 @@ test(`adds forceNow to each of multiple urls`, async () => {
         { relativeUrl: '/app/kibana#/something_ddd' },
       ],
       forceNow,
-    } as JobDocPayloadPDF,
+    },
     server: mockServer,
   } as FullUrlsOpts);
 
