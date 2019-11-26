@@ -47,7 +47,7 @@ export function Panel({ children, className, initialWidth = 100, style = {} }: P
         return divRef.current!.getBoundingClientRect().width;
       },
     });
-  }, []);
+  }, [initialWidth, registry]);
 
   return (
     <div className={className} ref={divRef} style={{ ...style, width, display: 'flex' }}>

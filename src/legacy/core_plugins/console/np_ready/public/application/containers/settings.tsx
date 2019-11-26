@@ -22,9 +22,8 @@ import { AutocompleteOptions, DevToolsSettingsModal } from '../components';
 
 // @ts-ignore
 import mappings from '../../../../public/quarantined/src/mappings';
-import { useAppContext } from '../context';
+import { useServicesContext, useEditorActionContext } from '../contexts';
 import { DevToolsSettings } from '../../services';
-import { useEditorActionContext } from './editor/context';
 
 const getAutocompleteDiff = (newSettings: DevToolsSettings, prevSettings: DevToolsSettings) => {
   return Object.keys(newSettings.autocomplete).filter(key => {
@@ -76,7 +75,7 @@ export interface Props {
 export function Settings({ onClose }: Props) {
   const {
     services: { settings },
-  } = useAppContext();
+  } = useServicesContext();
 
   const dispatch = useEditorActionContext();
 
@@ -90,7 +89,7 @@ export function Settings({ onClose }: Props) {
     // Let the rest of the application know settings have updated.
     dispatch({
       type: 'updateSettings',
-      value: newSettings,
+      payload: newSettings,
     });
     onClose();
   };
