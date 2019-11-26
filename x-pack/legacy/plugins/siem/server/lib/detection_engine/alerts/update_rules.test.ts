@@ -8,17 +8,17 @@ import { calculateInterval, calculateName } from './update_rules';
 
 describe('update_rules', () => {
   describe('#calculateInterval', () => {
-    test('given a undefined interval, it returns the signalInterval ', () => {
+    test('given a undefined interval, it returns the ruleInterval ', () => {
       const interval = calculateInterval(undefined, '10m');
       expect(interval).toEqual('10m');
     });
 
-    test('given a undefined signalInterval, it returns a undefined interval ', () => {
+    test('given a undefined ruleInterval, it returns a undefined interval ', () => {
       const interval = calculateInterval('10m', undefined);
       expect(interval).toEqual('10m');
     });
 
-    test('given both an undefined signalInterval and a undefined interval, it returns 5m', () => {
+    test('given both an undefined ruleInterval and a undefined interval, it returns 5m', () => {
       const interval = calculateInterval(undefined, undefined);
       expect(interval).toEqual('5m');
     });

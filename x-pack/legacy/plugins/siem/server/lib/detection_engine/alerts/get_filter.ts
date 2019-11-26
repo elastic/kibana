@@ -86,7 +86,7 @@ export const getFilter = async ({
           if (query != null && language != null && index != null) {
             return getQueryFilter(query, language, filters || [], index);
           } else {
-            // user did not give any additional fall back mechanism for generating a signal
+            // user did not give any additional fall back mechanism for generating a rule
             // rethrow error for activity monitoring
             throw err;
           }

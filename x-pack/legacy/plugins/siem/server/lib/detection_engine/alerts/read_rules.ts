@@ -12,12 +12,12 @@ export const findRuleInArrayByRuleId = (
   ruleId: string
 ): RuleAlertType | null => {
   if (isAlertTypeArray(objects)) {
-    const signals: RuleAlertType[] = objects;
-    const signal: RuleAlertType[] = signals.filter(datum => {
+    const rules: RuleAlertType[] = objects;
+    const rule: RuleAlertType[] = rules.filter(datum => {
       return datum.params.ruleId === ruleId;
     });
-    if (signal.length !== 0) {
-      return signal[0];
+    if (rule.length !== 0) {
+      return rule[0];
     } else {
       return null;
     }
@@ -26,8 +26,8 @@ export const findRuleInArrayByRuleId = (
   }
 };
 
-// This an extremely slow and inefficient way of getting a signal by its id.
-// I have to manually query every single record since the Signal Params are
+// This an extremely slow and inefficient way of getting a rule by its id.
+// I have to manually query every single record since the rule Params are
 // not indexed and I cannot push in my own _id when I create an alert at the moment.
 // TODO: Once we can directly push in the _id, then we should no longer need this way.
 // TODO: This is meant to be _very_ temporary.
@@ -35,23 +35,23 @@ export const readRuleByRuleId = async ({
   alertsClient,
   ruleId,
 }: ReadRuleByRuleId): Promise<RuleAlertType | null> => {
-  const firstSignals = await findRules({ alertsClient, page: 1 });
-  const firstSignal = findRuleInArrayByRuleId(firstSignals.data, ruleId);
-  if (firstSignal != null) {
-    return firstSignal;
+  const firstRules = await findRules({ alertsClient, page: 1 });
+  const firstRule = findRuleInArrayByRuleId(firstRules.data, ruleId);
+  if (firstRule != null) {
+    return firstRule;
   } else {
-    const totalPages = Math.ceil(firstSignals.total / firstSignals.perPage);
+    const totalPages = Math.ceil(firstRules.total / firstRules.perPage);
     return Array(totalPages)
       .fill({})
       .map((_, page) => {
         // page index never starts at zero. It always has to be 1 or greater
         return findRules({ alertsClient, page: page + 1 });
       })
-      .reduce<Promise<RuleAlertType | null>>(async (accum, findSignal) => {
-        const signals = await findSignal;
-        const signal = findRuleInArrayByRuleId(signals.data, ruleId);
-        if (signal != null) {
-          return signal;
+      .reduce<Promise<RuleAlertType | null>>(async (accum, findRule) => {
+        const rules = await findRule;
+        const rule = findRuleInArrayByRuleId(rules.data, ruleId);
+        if (rule != null) {
+          return rule;
         } else {
           return accum;
         }

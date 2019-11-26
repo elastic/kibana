@@ -14,7 +14,7 @@ import {
 
 import { buildEventsSearchQuery } from './build_events_query';
 import { searchAfterAndBulkCreate } from './utils';
-import { SignalAlertTypeDefinition } from './types';
+import { RuleAlertTypeDefinition } from './types';
 import { getFilter } from './get_filter';
 import { getInputOutputIndex } from './get_input_output_index';
 
@@ -24,7 +24,7 @@ export const rulesAlertType = ({
 }: {
   logger: Logger;
   version: string;
-}): SignalAlertTypeDefinition => {
+}): RuleAlertTypeDefinition => {
   return {
     id: SIGNALS_ID,
     name: 'SIEM Signals',

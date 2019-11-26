@@ -221,18 +221,18 @@ export type QueryRequest = Omit<RequestFacade, 'query'> & {
   query: { id: string | undefined; rule_id: string | undefined };
 };
 
-// This returns true because by default a SignalAlertTypeDefinition is an AlertType
+// This returns true because by default a RuleAlertTypeDefinition is an AlertType
 // since we are only increasing the strictness of params.
-export const isAlertExecutor = (obj: SignalAlertTypeDefinition): obj is AlertType => {
+export const isAlertExecutor = (obj: RuleAlertTypeDefinition): obj is AlertType => {
   return true;
 };
 
-export type SignalAlertTypeDefinition = Omit<AlertType, 'executor'> & {
+export type RuleAlertTypeDefinition = Omit<AlertType, 'executor'> & {
   executor: ({ services, params, state }: RuleExecutorOptions) => Promise<State | void>;
 };
 
 export const isAlertTypes = (obj: unknown[]): obj is RuleAlertType[] => {
-  return obj.every(signal => isAlertType(signal));
+  return obj.every(rule => isAlertType(rule));
 };
 
 export const isAlertType = (obj: unknown): obj is RuleAlertType => {

@@ -11,12 +11,12 @@ import { UpdateRuleParams } from './types';
 
 export const calculateInterval = (
   interval: string | undefined,
-  signalInterval: string | undefined
+  ruleInterval: string | undefined
 ): string => {
   if (interval != null) {
     return interval;
-  } else if (signalInterval != null) {
-    return signalInterval;
+  } else if (ruleInterval != null) {
+    return ruleInterval;
   } else {
     return '5m';
   }
@@ -35,7 +35,7 @@ export const calculateName = ({
     return originalName;
   } else {
     // You really should never get to this point. This is a fail safe way to send back
-    // the name of "untitled" just in case a signal rule name became null or undefined at
+    // the name of "untitled" just in case a rule name became null or undefined at
     // some point since TypeScript allows it.
     return 'untitled';
   }
@@ -69,16 +69,16 @@ export const updateRules = async ({
   type,
   references,
 }: UpdateRuleParams) => {
-  const signal = await readRules({ alertsClient, ruleId, id });
-  if (signal == null) {
+  const rule = await readRules({ alertsClient, ruleId, id });
+  if (rule == null) {
     return null;
   }
 
   // TODO: Remove this as cast as soon as signal.actions TypeScript bug is fixed
   // where it is trying to return AlertAction[] or RawAlertAction[]
-  const actions = (signal.actions as AlertAction[] | undefined) || [];
+  const actions = (rule.actions as AlertAction[] | undefined) || [];
 
-  const params = signal.params || {};
+  const params = rule.params || {};
 
   const nextParams = defaults(
     {
@@ -107,18 +107,18 @@ export const updateRules = async ({
     }
   );
 
-  if (signal.enabled && !enabled) {
-    await alertsClient.disable({ id: signal.id });
-  } else if (!signal.enabled && enabled) {
-    await alertsClient.enable({ id: signal.id });
+  if (rule.enabled && !enabled) {
+    await alertsClient.disable({ id: rule.id });
+  } else if (!rule.enabled && enabled) {
+    await alertsClient.enable({ id: rule.id });
   }
 
   return alertsClient.update({
-    id: signal.id,
+    id: rule.id,
     data: {
       tags: [],
-      name: calculateName({ updatedName: name, originalName: signal.name }),
-      interval: calculateInterval(interval, signal.interval),
+      name: calculateName({ updatedName: name, originalName: rule.name }),
+      interval: calculateInterval(interval, rule.interval),
       actions,
       params: nextParams,
     },
