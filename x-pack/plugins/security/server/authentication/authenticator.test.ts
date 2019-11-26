@@ -28,7 +28,11 @@ function getMockOptions(config: Partial<AuthenticatorOptions['config']> = {}) {
     basePath: httpServiceMock.createSetupContract().basePath,
     loggers: loggingServiceMock.create(),
     isSystemAPIRequest: jest.fn(),
-    config: { sessionTimeout: null, authc: { providers: [], oidc: {}, saml: {} }, ...config },
+    config: {
+      session: { idleTimeout: null, lifespan: null },
+      authc: { providers: [], oidc: {}, saml: {} },
+      ...config,
+    },
     sessionStorageFactory: sessionStorageMock.createFactory<ProviderSession>(),
   };
 }
@@ -51,7 +55,9 @@ describe('Authenticator', () => {
 
   describe('initialization', () => {
     it('fails if authentication providers are not configured.', () => {
-      const mockOptions = getMockOptions({ authc: { providers: [], oidc: {}, saml: {} } });
+      const mockOptions = getMockOptions({
+        authc: { providers: [], oidc: {}, saml: {} },
+      });
       expect(() => new Authenticator(mockOptions)).toThrowError(
         'No authentication provider is configured. Verify `xpack.security.authc.providers` config value.'
       );
@@ -74,11 +80,14 @@ describe('Authenticator', () => {
     let mockSessionStorage: jest.Mocked<SessionStorage<ProviderSession>>;
     let mockSessVal: any;
     beforeEach(() => {
-      mockOptions = getMockOptions({ authc: { providers: ['basic'], oidc: {}, saml: {} } });
+      mockOptions = getMockOptions({
+        authc: { providers: ['basic'], oidc: {}, saml: {} },
+      });
       mockSessionStorage = sessionStorageMock.create();
       mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
       mockSessVal = {
-        expires: null,
+        idleTimeoutExpiration: null,
+        lifespanExpiration: null,
         state: { authorization: 'Basic xxx' },
         provider: 'basic',
         path: mockOptions.basePath.serverBasePath,
@@ -292,11 +301,14 @@ describe('Authenticator', () => {
     let mockSessionStorage: jest.Mocked<SessionStorage<ProviderSession>>;
     let mockSessVal: any;
     beforeEach(() => {
-      mockOptions = getMockOptions({ authc: { providers: ['basic'], oidc: {}, saml: {} } });
+      mockOptions = getMockOptions({
+        authc: { providers: ['basic'], oidc: {}, saml: {} },
+      });
       mockSessionStorage = sessionStorageMock.create<ProviderSession>();
       mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
       mockSessVal = {
-        expires: null,
+        idleTimeoutExpiration: null,
+        lifespanExpiration: null,
         state: { authorization: 'Basic xxx' },
         provider: 'basic',
         path: mockOptions.basePath.serverBasePath,
@@ -419,14 +431,17 @@ describe('Authenticator', () => {
       expect(mockSessionStorage.clear).not.toHaveBeenCalled();
     });
 
-    it('properly extends session timeout if it is defined.', async () => {
+    it('properly extends session expiration if it is defined.', async () => {
       const user = mockAuthenticatedUser();
       const request = httpServerMock.createKibanaRequest();
       const currentDate = new Date(Date.UTC(2019, 10, 10)).valueOf();
 
-      // Create new authenticator with non-null `sessionTimeout`.
+      // Create new authenticator with non-null session `idleTimeout`.
       mockOptions = getMockOptions({
-        sessionTimeout: 3600 * 24,
+        session: {
+          idleTimeout: 3600 * 24,
+          lifespan: null,
+        },
         authc: { providers: ['basic'], oidc: {}, saml: {} },
       });
 
@@ -449,9 +464,107 @@ describe('Authenticator', () => {
       expect(mockSessionStorage.set).toHaveBeenCalledTimes(1);
       expect(mockSessionStorage.set).toHaveBeenCalledWith({
         ...mockSessVal,
-        expires: currentDate + 3600 * 24,
+        idleTimeoutExpiration: currentDate + 3600 * 24,
       });
       expect(mockSessionStorage.clear).not.toHaveBeenCalled();
+    });
+
+    it('does not extend session lifespan expiration.', async () => {
+      const user = mockAuthenticatedUser();
+      const request = httpServerMock.createKibanaRequest();
+      const currentDate = new Date(Date.UTC(2019, 10, 10)).valueOf();
+      const hr = 1000 * 60 * 60;
+
+      // Create new authenticator with non-null session `idleTimeout` and `lifespan`.
+      mockOptions = getMockOptions({
+        session: {
+          idleTimeout: hr * 2,
+          lifespan: hr * 8,
+        },
+        authc: { providers: ['basic'], oidc: {}, saml: {} },
+      });
+
+      mockSessionStorage = sessionStorageMock.create();
+      mockSessionStorage.get.mockResolvedValue({
+        ...mockSessVal,
+        // this session was created 6.5 hrs ago (and has 1.5 hrs left in its lifespan)
+        // it was last extended 1 hour ago, which means it will expire in 1 hour
+        idleTimeoutExpiration: currentDate + hr * 1,
+        lifespanExpiration: currentDate + hr * 1.5,
+      });
+      mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
+
+      authenticator = new Authenticator(mockOptions);
+
+      mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+        AuthenticationResult.succeeded(user)
+      );
+
+      jest.spyOn(Date, 'now').mockImplementation(() => currentDate);
+
+      const authenticationResult = await authenticator.authenticate(request);
+      expect(authenticationResult.succeeded()).toBe(true);
+      expect(authenticationResult.user).toEqual(user);
+
+      expect(mockSessionStorage.set).toHaveBeenCalledTimes(1);
+      expect(mockSessionStorage.set).toHaveBeenCalledWith({
+        ...mockSessVal,
+        idleTimeoutExpiration: currentDate + hr * 2,
+        lifespanExpiration: currentDate + hr * 1.5,
+      });
+      expect(mockSessionStorage.clear).not.toHaveBeenCalled();
+    });
+
+    it('only updates the session lifespan expiration if it does not match the current server config.', async () => {
+      const user = mockAuthenticatedUser();
+      const request = httpServerMock.createKibanaRequest();
+      const hr = 1000 * 60 * 60;
+
+      async function createAndUpdateSession(
+        lifespan: number | null,
+        oldExpiration: number | null,
+        newExpiration: number | null
+      ) {
+        mockOptions = getMockOptions({
+          session: {
+            idleTimeout: null,
+            lifespan,
+          },
+          authc: { providers: ['basic'], oidc: {}, saml: {} },
+        });
+
+        mockSessionStorage = sessionStorageMock.create();
+        mockSessionStorage.get.mockResolvedValue({
+          ...mockSessVal,
+          idleTimeoutExpiration: 1,
+          lifespanExpiration: oldExpiration,
+        });
+        mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
+
+        authenticator = new Authenticator(mockOptions);
+
+        mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+          AuthenticationResult.succeeded(user)
+        );
+
+        const authenticationResult = await authenticator.authenticate(request);
+        expect(authenticationResult.succeeded()).toBe(true);
+        expect(authenticationResult.user).toEqual(user);
+
+        expect(mockSessionStorage.set).toHaveBeenCalledTimes(1);
+        expect(mockSessionStorage.set).toHaveBeenCalledWith({
+          ...mockSessVal,
+          idleTimeoutExpiration: 1,
+          lifespanExpiration: newExpiration,
+        });
+        expect(mockSessionStorage.clear).not.toHaveBeenCalled();
+      }
+      // do not change max expiration
+      createAndUpdateSession(hr * 8, 1234, 1234);
+      createAndUpdateSession(null, null, null);
+      // change max expiration
+      createAndUpdateSession(null, 1234, null);
+      createAndUpdateSession(hr * 8, null, hr * 8);
     });
 
     it('does not touch session for system API calls if authentication fails with non-401 reason.', async () => {
@@ -650,11 +763,14 @@ describe('Authenticator', () => {
     let mockSessionStorage: jest.Mocked<SessionStorage<ProviderSession>>;
     let mockSessVal: any;
     beforeEach(() => {
-      mockOptions = getMockOptions({ authc: { providers: ['basic'], oidc: {}, saml: {} } });
+      mockOptions = getMockOptions({
+        authc: { providers: ['basic'], oidc: {}, saml: {} },
+      });
       mockSessionStorage = sessionStorageMock.create();
       mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
       mockSessVal = {
-        expires: null,
+        idleTimeoutExpiration: null,
+        lifespanExpiration: null,
         state: { authorization: 'Basic xxx' },
         provider: 'basic',
         path: mockOptions.basePath.serverBasePath,
@@ -694,6 +810,32 @@ describe('Authenticator', () => {
       expect(deauthenticationResult.redirectURL).toBe('some-url');
     });
 
+    it('if session does not exist but provider name is valid, returns whatever authentication provider returns.', async () => {
+      const request = httpServerMock.createKibanaRequest({ query: { provider: 'basic' } });
+      mockSessionStorage.get.mockResolvedValue(null);
+
+      mockBasicAuthenticationProvider.logout.mockResolvedValue(
+        DeauthenticationResult.redirectTo('some-url')
+      );
+
+      const deauthenticationResult = await authenticator.logout(request);
+
+      expect(mockBasicAuthenticationProvider.logout).toHaveBeenCalledTimes(1);
+      expect(mockSessionStorage.clear).not.toHaveBeenCalled();
+      expect(deauthenticationResult.redirected()).toBe(true);
+      expect(deauthenticationResult.redirectURL).toBe('some-url');
+    });
+
+    it('returns `notHandled` if session does not exist and provider name is invalid', async () => {
+      const request = httpServerMock.createKibanaRequest({ query: { provider: 'foo' } });
+      mockSessionStorage.get.mockResolvedValue(null);
+
+      const deauthenticationResult = await authenticator.logout(request);
+
+      expect(deauthenticationResult.notHandled()).toBe(true);
+      expect(mockSessionStorage.clear).not.toHaveBeenCalled();
+    });
+
     it('only clears session if it belongs to not configured provider.', async () => {
       const request = httpServerMock.createKibanaRequest();
       const state = { authorization: 'Bearer xxx' };
@@ -704,6 +846,54 @@ describe('Authenticator', () => {
       expect(mockBasicAuthenticationProvider.logout).not.toHaveBeenCalled();
       expect(mockSessionStorage.clear).toHaveBeenCalled();
       expect(deauthenticationResult.notHandled()).toBe(true);
+    });
+  });
+
+  describe('`getSessionInfo` method', () => {
+    let authenticator: Authenticator;
+    let mockOptions: ReturnType<typeof getMockOptions>;
+    let mockSessionStorage: jest.Mocked<SessionStorage<ProviderSession>>;
+    beforeEach(() => {
+      mockOptions = getMockOptions({
+        authc: { providers: ['basic'], oidc: {}, saml: {} },
+      });
+      mockSessionStorage = sessionStorageMock.create();
+      mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
+
+      authenticator = new Authenticator(mockOptions);
+    });
+
+    it('returns current session info if session exists.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const state = { authorization: 'Basic xxx' };
+      const currentDate = new Date(Date.UTC(2019, 10, 10)).valueOf();
+      const mockInfo = {
+        now: currentDate,
+        idleTimeoutExpiration: currentDate + 60000,
+        lifespanExpiration: currentDate + 120000,
+        provider: 'basic',
+      };
+      mockSessionStorage.get.mockResolvedValue({
+        idleTimeoutExpiration: mockInfo.idleTimeoutExpiration,
+        lifespanExpiration: mockInfo.lifespanExpiration,
+        state,
+        provider: mockInfo.provider,
+        path: mockOptions.basePath.serverBasePath,
+      });
+      jest.spyOn(Date, 'now').mockImplementation(() => currentDate);
+
+      const sessionInfo = await authenticator.getSessionInfo(request);
+
+      expect(sessionInfo).toEqual(mockInfo);
+    });
+
+    it('returns `null` if session does not exist.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      mockSessionStorage.get.mockResolvedValue(null);
+
+      const sessionInfo = await authenticator.getSessionInfo(request);
+
+      expect(sessionInfo).toBe(null);
     });
   });
 });

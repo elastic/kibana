@@ -67,19 +67,24 @@ export async function setupAuthentication({
 
   const isValid = (sessionValue: ProviderSession) => {
     // ensure that this cookie was created with the current Kibana configuration
-    const { path, expires } = sessionValue;
+    const { path, idleTimeoutExpiration, lifespanExpiration } = sessionValue;
     if (path !== undefined && path !== (http.basePath.serverBasePath || '/')) {
       authLogger.debug(`Outdated session value with path "${sessionValue.path}"`);
       return false;
     }
     // ensure that this cookie is not expired
-    return !(expires && expires < Date.now());
+    if (idleTimeoutExpiration && idleTimeoutExpiration < Date.now()) {
+      return false;
+    } else if (lifespanExpiration && lifespanExpiration < Date.now()) {
+      return false;
+    }
+    return true;
   };
 
   const authenticator = new Authenticator({
     clusterClient,
     basePath: http.basePath,
-    config: { sessionTimeout: config.sessionTimeout, authc: config.authc },
+    config: { session: config.session, authc: config.authc },
     isSystemAPIRequest: (request: KibanaRequest) => getLegacyAPI().isSystemAPIRequest(request),
     loggers,
     sessionStorageFactory: await http.createCookieSessionStorageFactory({
@@ -169,6 +174,7 @@ export async function setupAuthentication({
   return {
     login: authenticator.login.bind(authenticator),
     logout: authenticator.logout.bind(authenticator),
+    getSessionInfo: authenticator.getSessionInfo.bind(authenticator),
     getCurrentUser,
     createAPIKey: (request: KibanaRequest, params: CreateAPIKeyParams) =>
       apiKeys.create(request, params),
