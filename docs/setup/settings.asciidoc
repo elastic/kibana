@@ -154,7 +154,7 @@ The following example shows a valid logging rotate configuration:
 --
     logging.rotate:
       enabled: true
-      everyBytes: 104857600
+      everyBytes: 10485760
       keepFiles: 10
 --
 
