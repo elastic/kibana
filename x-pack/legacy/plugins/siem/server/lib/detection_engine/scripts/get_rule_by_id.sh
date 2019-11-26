@@ -9,4 +9,7 @@
 set -e
 ./check_env_variables.sh
 
-node ../../../../scripts/convert_saved_search_to_signals.js $1 $2
+# Example: ./get_rule_by_id.sh {rule_id}
+curl -s -k \
+ -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
+ -X GET ${KIBANA_URL}${SPACE_URL}/api/detection_engine/rules?id="$1" | jq .

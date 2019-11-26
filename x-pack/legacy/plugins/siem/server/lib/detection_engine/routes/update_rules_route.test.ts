@@ -11,7 +11,7 @@ import {
   createMockServerWithoutActionOrAlertClientDecoration,
 } from './__mocks__/_mock_server';
 
-import { updateSignalsRoute } from './update_signals_route';
+import { updateRulesRoute } from './update_rules_route';
 import { ServerInjectOptions } from 'hapi';
 import {
   getFindResult,
@@ -24,17 +24,17 @@ import {
 } from './__mocks__/request_responses';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 
-describe('update_signals', () => {
+describe('update_rules', () => {
   let { server, alertsClient, actionsClient } = createMockServer();
 
   beforeEach(() => {
     jest.resetAllMocks();
     ({ server, alertsClient, actionsClient } = createMockServer());
-    updateSignalsRoute(server);
+    updateRulesRoute(server);
   });
 
   describe('status codes with actionClient and alertClient', () => {
-    test('returns 200 when updating a single signal with a valid actionClient and alertClient', async () => {
+    test('returns 200 when updating a single rule with a valid actionClient and alertClient', async () => {
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
@@ -43,7 +43,7 @@ describe('update_signals', () => {
       expect(statusCode).toBe(200);
     });
 
-    test('returns 404 when updating a single signal that does not exist', async () => {
+    test('returns 404 when updating a single rule that does not exist', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
@@ -54,14 +54,14 @@ describe('update_signals', () => {
 
     test('returns 404 if actionClient is not available on the route', async () => {
       const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
-      updateSignalsRoute(serverWithoutActionClient);
+      updateRulesRoute(serverWithoutActionClient);
       const { statusCode } = await serverWithoutActionClient.inject(getUpdateRequest());
       expect(statusCode).toBe(404);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
-      updateSignalsRoute(serverWithoutAlertClient);
+      updateRulesRoute(serverWithoutAlertClient);
       const { statusCode } = await serverWithoutAlertClient.inject(getUpdateRequest());
       expect(statusCode).toBe(404);
     });
@@ -70,7 +70,7 @@ describe('update_signals', () => {
       const {
         serverWithoutActionOrAlertClient,
       } = createMockServerWithoutActionOrAlertClientDecoration();
-      updateSignalsRoute(serverWithoutActionOrAlertClient);
+      updateRulesRoute(serverWithoutActionOrAlertClient);
       const { statusCode } = await serverWithoutActionOrAlertClient.inject(getUpdateRequest());
       expect(statusCode).toBe(404);
     });

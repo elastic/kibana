@@ -9,14 +9,14 @@ import { isFunction } from 'lodash/fp';
 import Boom from 'boom';
 import uuid from 'uuid';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
-import { createSignals } from '../alerts/create_signals';
-import { SignalsRequest } from '../alerts/types';
-import { createSignalsSchema } from './schemas';
+import { createRules } from '../alerts/create_rules';
+import { RulesRequest } from '../alerts/types';
+import { createRulesSchema } from './schemas';
 import { ServerFacade } from '../../../types';
-import { readSignals } from '../alerts/read_signals';
+import { readRules } from '../alerts/read_rules';
 import { transformOrError } from './utils';
 
-export const createCreateSignalsRoute: Hapi.ServerRoute = {
+export const createCreateRulesRoute: Hapi.ServerRoute = {
   method: 'POST',
   path: DETECTION_ENGINE_RULES_URL,
   options: {
@@ -25,10 +25,10 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
       options: {
         abortEarly: false,
       },
-      payload: createSignalsSchema,
+      payload: createRulesSchema,
     },
   },
-  async handler(request: SignalsRequest, headers) {
+  async handler(request: RulesRequest, headers) {
     const {
       description,
       enabled,
@@ -63,13 +63,13 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
     }
 
     if (ruleId != null) {
-      const signal = await readSignals({ alertsClient, ruleId });
-      if (signal != null) {
-        return new Boom(`Signal rule_id ${ruleId} already exists`, { statusCode: 409 });
+      const rule = await readRules({ alertsClient, ruleId });
+      if (rule != null) {
+        return new Boom(`rule_id ${ruleId} already exists`, { statusCode: 409 });
       }
     }
 
-    const createdSignal = await createSignals({
+    const createdRule = await createRules({
       alertsClient,
       actionsClient,
       description,
@@ -96,10 +96,10 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
       type,
       references,
     });
-    return transformOrError(createdSignal);
+    return transformOrError(createdRule);
   },
 };
 
-export const createSignalsRoute = (server: ServerFacade) => {
-  server.route(createCreateSignalsRoute);
+export const createRulesRoute = (server: ServerFacade) => {
+  server.route(createCreateRulesRoute);
 };

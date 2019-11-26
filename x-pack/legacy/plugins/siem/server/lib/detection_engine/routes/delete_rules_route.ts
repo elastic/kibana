@@ -6,46 +6,50 @@
 
 import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
-import { findSignals } from '../alerts/find_signals';
-import { FindSignalsRequest } from '../alerts/types';
-import { findSignalsSchema } from './schemas';
-import { ServerFacade } from '../../../types';
-import { transformFindAlertsOrError } from './utils';
 
-export const createFindSignalRoute: Hapi.ServerRoute = {
-  method: 'GET',
-  path: `${DETECTION_ENGINE_RULES_URL}/_find`,
+import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
+import { deleteRules } from '../alerts/delete_rules';
+import { ServerFacade } from '../../../types';
+import { queryRulesSchema } from './schemas';
+import { QueryRequest } from '../alerts/types';
+import { getIdError, transformOrError } from './utils';
+
+export const createDeleteRulesRoute: Hapi.ServerRoute = {
+  method: 'DELETE',
+  path: DETECTION_ENGINE_RULES_URL,
   options: {
     tags: ['access:signals-all'],
     validate: {
       options: {
         abortEarly: false,
       },
-      query: findSignalsSchema,
+      query: queryRulesSchema,
     },
   },
-  async handler(request: FindSignalsRequest, headers) {
-    const { query } = request;
+  async handler(request: QueryRequest, headers) {
+    const { id, rule_id: ruleId } = request.query;
     const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
     const actionsClient = isFunction(request.getActionsClient) ? request.getActionsClient() : null;
 
-    if (!alertsClient || !actionsClient) {
+    if (alertsClient == null || actionsClient == null) {
       return headers.response().code(404);
     }
 
-    const signals = await findSignals({
+    const rule = await deleteRules({
+      actionsClient,
       alertsClient,
-      perPage: query.per_page,
-      page: query.page,
-      sortField: query.sort_field,
-      sortOrder: query.sort_order,
-      filter: query.filter,
+      id,
+      ruleId,
     });
-    return transformFindAlertsOrError(signals);
+
+    if (rule != null) {
+      return transformOrError(rule);
+    } else {
+      return getIdError({ id, ruleId });
+    }
   },
 };
 
-export const findSignalsRoute = (server: ServerFacade) => {
-  server.route(createFindSignalRoute);
+export const deleteRulesRoute = (server: ServerFacade): void => {
+  server.route(createDeleteRulesRoute);
 };

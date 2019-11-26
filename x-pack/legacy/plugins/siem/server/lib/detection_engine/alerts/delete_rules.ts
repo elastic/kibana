@@ -4,27 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { readSignals } from './read_signals';
-import { DeleteSignalParams } from './types';
+import { readRules } from './read_rules';
+import { DeleteRuleParams } from './types';
 
-export const deleteSignals = async ({
+export const deleteRules = async ({
   alertsClient,
   actionsClient, // TODO: Use this when we have actions such as email, etc...
   id,
   ruleId,
-}: DeleteSignalParams) => {
-  const signal = await readSignals({ alertsClient, id, ruleId });
-  if (signal == null) {
+}: DeleteRuleParams) => {
+  const rule = await readRules({ alertsClient, id, ruleId });
+  if (rule == null) {
     return null;
   }
 
   if (ruleId != null) {
-    await alertsClient.delete({ id: signal.id });
-    return signal;
+    await alertsClient.delete({ id: rule.id });
+    return rule;
   } else if (id != null) {
     try {
       await alertsClient.delete({ id });
-      return signal;
+      return rule;
     } catch (err) {
       if (err.output.statusCode === 404) {
         return null;
