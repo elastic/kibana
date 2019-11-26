@@ -179,6 +179,7 @@ kibana_vars=(
     xpack.security.cookieName
     xpack.security.enabled
     xpack.security.encryptionKey
+    xpack.security.loginAssistanceMessage
     xpack.security.secureCookies
     xpack.security.sessionTimeout
     xpack.security.public.protocol
