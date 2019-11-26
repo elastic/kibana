@@ -9,13 +9,14 @@
  * components in the Explorer dashboard.
  */
 
-import { isEqual } from 'lodash';
+import { isEqual, pick } from 'lodash';
 
 import { from, isObservable, Observable, Subject } from 'rxjs';
-import { distinctUntilChanged, filter, flatMap, map, scan, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, flatMap, map, pairwise, scan, tap } from 'rxjs/operators';
 
-import { EXPLORER_ACTION } from './explorer_constants';
+import { loadOverallDataActionCreator } from './actions';
 import { explorerReducer, getExplorerDefaultState, ExplorerState } from './reducers';
+import { getSwimlaneBucketInterval } from './explorer_utils';
 
 export const ALLOW_CELL_RANGE_SELECTION = true;
 
@@ -50,35 +51,78 @@ export const explorerFilteredAction$ = explorerAction$.pipe(
   distinctUntilChanged(isEqual)
 );
 
-// filter actions which should not be propagated to the Explorer react component.
-// TODO this is work in progress. no raw actions should be propagated to the component
-// eventually. All actions should go through `scan()` to modify the state and components
-// should subscribe to explorerState$.
-export const explorer$ = explorerFilteredAction$.pipe(
-  filter((action: Action) => {
-    if (action === null) {
-      return true;
-    }
-
-    switch (action.type) {
-      case EXPLORER_ACTION.IDLE:
-      case EXPLORER_ACTION.INITIALIZE:
-      case EXPLORER_ACTION.JOB_SELECTION_CHANGE:
-      case EXPLORER_ACTION.RELOAD:
-        return true;
-      default:
-        return false;
-    }
-  }),
-  distinctUntilChanged(isEqual)
-);
-
 // applies action and returns state
 export const explorerState$ = explorerFilteredAction$.pipe(
-  scan(explorerReducer, getExplorerDefaultState())
+  scan(explorerReducer, getExplorerDefaultState()),
+  pairwise(),
+  map(([prev, curr]) => {
+    if (
+      curr.selectedJobs !== null &&
+      curr.bounds !== undefined &&
+      !isEqual(getCompareState(prev), getCompareState(curr))
+    ) {
+      explorerFetchSideEffect(curr);
+    }
+    return curr;
+  })
 );
 
 export const explorerAppState$ = explorerState$.pipe(
   map((state: ExplorerState) => state.appState),
   distinctUntilChanged(isEqual)
 );
+
+function getCompareState(state: ExplorerState) {
+  return pick(state, [
+    'bounds',
+    'filterActive',
+    'filteredFields',
+    'influencersFilterQuery',
+    'isAndOperator',
+    'noInfluencersConfigured',
+    'selectedCells',
+    'selectedJobs',
+    'swimlaneContainerWidth',
+    'swimlaneLimit',
+    'tableInterval',
+    'tableSeverity',
+    'viewBySwimlaneFieldName',
+  ]);
+}
+
+function explorerFetchSideEffect(state: ExplorerState) {
+  const {
+    bounds,
+    filterActive,
+    filteredFields,
+    influencersFilterQuery,
+    isAndOperator,
+    noInfluencersConfigured,
+    selectedCells,
+    selectedJobs,
+    swimlaneContainerWidth,
+    swimlaneLimit,
+    tableInterval,
+    tableSeverity,
+    viewBySwimlaneFieldName,
+  } = state;
+
+  // Load the overall data - if the FieldFormats failed to populate
+  explorerAction$.next(
+    loadOverallDataActionCreator(
+      selectedCells,
+      selectedJobs,
+      getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth),
+      bounds,
+      viewBySwimlaneFieldName,
+      influencersFilterQuery,
+      swimlaneLimit,
+      noInfluencersConfigured,
+      filterActive,
+      filteredFields,
+      tableInterval,
+      tableSeverity,
+      isAndOperator
+    )
+  );
+}

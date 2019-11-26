@@ -30,9 +30,50 @@ export declare interface OverallSwimlaneData extends SwimlaneData {
   latest: number;
 }
 
+export declare const getDateFormatTz: () => any;
+
 export declare const getDefaultSwimlaneData: () => SwimlaneData;
 
 export declare const getInfluencers: (selectedJobs: any[]) => string[];
+
+export declare const getSelectionInfluencers: (
+  selectedCells: SelectedCells,
+  fieldName: string
+) => any[];
+
+interface ViewBySwimlaneOptionsArgs {
+  currentViewBySwimlaneFieldName: string;
+  filterActive: boolean;
+  filteredFields: any[];
+  isAndOperator: boolean;
+  selectedCells: SelectedCells;
+  selectedJobs: ExplorerJob[];
+}
+
+interface ViewBySwimlaneOptions {
+  viewBySwimlaneFieldName: string;
+  viewBySwimlaneOptions: string[];
+}
+
+interface SelectionTimeRange {
+  earliestMs: number;
+  latestMs: number;
+}
+
+export declare const getSelectionTimeRange: (
+  selectedCells: SelectedCells,
+  interval: number,
+  bounds: TimeRangeBounds
+) => SelectionTimeRange;
+
+export declare const getSwimlaneBucketInterval: (
+  selectedJobs: ExplorerJob[],
+  swimlaneContainerWidth: number
+) => any;
+
+export declare const getViewBySwimlaneOptions: (
+  arg: ViewBySwimlaneOptionsArgs
+) => ViewBySwimlaneOptions;
 
 export declare interface ExplorerJob {
   id: string;
@@ -51,6 +92,53 @@ declare interface SwimlaneBounds {
   earliest: number;
   latest: number;
 }
+
+export declare const loadAnnotationsTableData: (
+  selectedCells: SelectedCells,
+  selectedJobs: ExplorerJob[],
+  interval: number,
+  bounds: TimeRangeBounds
+) => Promise<any[]>;
+
+export declare const loadAnomaliesTableData: (
+  selectedCells: SelectedCells,
+  selectedJobs: ExplorerJob[],
+  dateFormatTz: any,
+  interval: number,
+  bounds: TimeRangeBounds,
+  fieldName: string,
+  tableInterval: string,
+  tableSeverity: number,
+  influencersFilterQuery: any
+) => Promise<any[]>;
+
+export declare const loadDataForCharts: (
+  jobIds: string[],
+  earliestMs: number,
+  latestMs: number,
+  influencers: any[],
+  selectedCells: SelectedCells,
+  influencersFilterQuery: any
+) => Promise<any[] | undefined>;
+
+export declare const loadFilteredTopInfluencers: (
+  jobIds: string[],
+  earliestMs: number,
+  latestMs: number,
+  records: any[],
+  influencers: any[],
+  noInfluencersConfigured: boolean,
+  influencersFilterQuery: any
+) => Promise<any[]>;
+
+export declare const loadTopInfluencers: (
+  selectedJobIds: string[],
+  earliestMs: number,
+  latestMs: number,
+  influencers: any[],
+  noInfluencersConfigured?: boolean,
+  influencersFilterQuery?: any
+) => Promise<any[]>;
 
 declare interface LoadOverallDataResponse {
   hasResults: boolean;
@@ -90,14 +178,17 @@ declare interface FilterData {
   queryString: string;
 }
 
+declare interface SelectedCells {
+  type: string;
+  lanes: string[];
+  times: number[];
+  showTopFieldValues: boolean;
+  viewByFieldName: string;
+}
+
 declare interface RestoredAppState {
-  selectedCells?: {
-    type: string;
-    lanes: string[];
-    times: number[];
-    showTopFieldValues: boolean;
-    viewByFieldName: string;
-  };
+  selectedCells?: SelectedCells;
   filterData: {} | FilterData;
 }
+
 export declare const restoreAppState: (appState: any) => RestoredAppState;

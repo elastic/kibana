@@ -23,6 +23,7 @@ export const EXPLORER_ACTION = {
   APP_STATE_SAVE_SELECTION: 'appStateSaveSelection',
   APP_STATE_SAVE_VIEW_BY_SWIMLANE_FIELD_NAME: 'appStateSaveViewBySwimlaneFieldName',
   APP_STATE_SAVE_INFLUENCER_FILTER_SETTINGS: 'appStateSaveInfluencerFilterSettings',
+  CLEAR_INFLUENCER_FILTER_SETTINGS: 'clearInfluencerFilterSettings',
   IDLE: 'idle',
   INITIALIZE: 'initialize',
   JOB_SELECTION_CHANGE: 'jobSelectionChange',
@@ -30,7 +31,9 @@ export const EXPLORER_ACTION = {
   REDRAW: 'redraw',
   RELOAD: 'reload',
   SET_STATE: 'setState',
+  SET_INFLUENCER_FILTER_SETTINGS: 'setInfluencerFilterSettings',
   SET_SWIMLANE_CONTAINER_WIDTH: 'setSwimlaneContainerWidth',
+  SET_SWIMLANE_LIMIT: 'setSwimlaneLimit',
 };
 
 export const FILTER_ACTION = {

@@ -9,11 +9,14 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
+import { EuiLoadingChart, EuiSpacer } from '@elastic/eui';
+
 export function LoadingIndicator({ height, label }) {
   height = height ? +height : 100;
   return (
     <div className="ml-loading-indicator" style={{ height: `${height}px` }}>
-      <div className="loading-spinner"><i className="fa fa-spinner fa-spin" /></div>
+      <EuiLoadingChart size="xl" mono />
+      <EuiSpacer size="s" />
       {label &&
         <div ml-loading-indicator-label="true">{label}</div>
       }

@@ -4,11 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-declare interface DefaultChartsData {
+declare interface ExplorerChartsData {
   chartsPerRow: number;
   seriesToPlot: any[];
   tooManyBuckets: boolean;
   timeFieldName: string;
 }
 
-export declare const getDefaultChartsData: () => DefaultChartsData;
+export declare const getDefaultChartsData: () => ExplorerChartsData;
+
+export declare const explorerChartsContainerServiceFactory: (
+  callback: (data: ExplorerChartsData) => void
+) => (anomalyRecords: any[], earliestMs: number, latestMs: number) => void;

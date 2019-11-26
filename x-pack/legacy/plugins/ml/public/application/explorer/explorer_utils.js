@@ -65,7 +65,7 @@ export function getDefaultSwimlaneData() {
   };
 }
 
-export async function getFilteredTopInfluencers(
+export async function loadFilteredTopInfluencers(
   jobIds,
   earliestMs,
   latestMs,
@@ -643,7 +643,7 @@ export async function loadDataForCharts(jobIds, earliestMs, latestMs, influencer
       .then((resp) => {
         // Ignore this response if it's returned by an out of date promise
         if (newRequestCount < requestCount) {
-          resolve(undefined);
+          resolve([]);
         }
 
         if ((selectedCells !== null && Object.keys(selectedCells).length > 0) ||
@@ -652,7 +652,7 @@ export async function loadDataForCharts(jobIds, earliestMs, latestMs, influencer
           resolve(resp.records);
         }
 
-        resolve(undefined);
+        resolve([]);
       });
   });
 }

@@ -5,4 +5,9 @@
  */
 
 export { appStateReducer, getExplorerDefaultAppState, ExplorerAppState } from './app_state_reducer';
-export { explorerReducer, getExplorerDefaultState, ExplorerState } from './explorer_reducer';
+export {
+  explorerReducer,
+  getExplorerDefaultState,
+  getIndexPattern,
+  ExplorerState,
+} from './explorer_reducer';
