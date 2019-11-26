@@ -17,7 +17,7 @@ import {
 } from './utils';
 import {
   sampleDocNoSortId,
-  sampleSignalAlertParams,
+  sampleRuleAlertParams,
   sampleDocSearchResultsNoSortId,
   sampleDocSearchResultsNoSortIdNoHits,
   sampleDocSearchResultsNoSortIdNoVersion,
@@ -25,7 +25,7 @@ import {
   sampleEmptyDocSearchResults,
   repeatedSearchResultsWithSortId,
   sampleBulkCreateDuplicateResult,
-  sampleSignalId,
+  sampleRuleGuid,
 } from './__mocks__/es_results';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 
@@ -52,11 +52,11 @@ describe('utils', () => {
   describe('buildBulkBody', () => {
     test('if bulk body builds well-defined body', () => {
       const fakeUuid = uuid.v4();
-      const sampleParams = sampleSignalAlertParams(undefined);
+      const sampleParams = sampleRuleAlertParams(undefined);
       const fakeSignalSourceHit = buildBulkBody({
         doc: sampleDocNoSortId(fakeUuid),
-        signalParams: sampleParams,
-        id: sampleSignalId,
+        ruleParams: sampleParams,
+        id: sampleRuleGuid,
         name: 'rule-name',
         createdBy: 'elastic',
         updatedBy: 'elastic',
@@ -214,7 +214,7 @@ describe('utils', () => {
     });
     test('create successful bulk create', async () => {
       const fakeUuid = uuid.v4();
-      const sampleParams = sampleSignalAlertParams(undefined);
+      const sampleParams = sampleRuleAlertParams(undefined);
       const sampleSearchResult = sampleDocSearchResultsNoSortId;
       mockService.callCluster.mockReturnValueOnce({
         took: 100,
@@ -227,10 +227,10 @@ describe('utils', () => {
       });
       const successfulsingleBulkCreate = await singleBulkCreate({
         someResult: sampleSearchResult(fakeUuid),
-        signalParams: sampleParams,
+        ruleParams: sampleParams,
         services: mockService,
         logger: mockLogger,
-        id: sampleSignalId,
+        id: sampleRuleGuid,
         signalsIndex: DEFAULT_SIGNALS_INDEX,
         name: 'rule-name',
         createdBy: 'elastic',
@@ -242,7 +242,7 @@ describe('utils', () => {
     });
     test('create successful bulk create with docs with no versioning', async () => {
       const fakeUuid = uuid.v4();
-      const sampleParams = sampleSignalAlertParams(undefined);
+      const sampleParams = sampleRuleAlertParams(undefined);
       const sampleSearchResult = sampleDocSearchResultsNoSortIdNoVersion;
       mockService.callCluster.mockReturnValueOnce({
         took: 100,
@@ -255,10 +255,10 @@ describe('utils', () => {
       });
       const successfulsingleBulkCreate = await singleBulkCreate({
         someResult: sampleSearchResult(fakeUuid),
-        signalParams: sampleParams,
+        ruleParams: sampleParams,
         services: mockService,
         logger: mockLogger,
-        id: sampleSignalId,
+        id: sampleRuleGuid,
         signalsIndex: DEFAULT_SIGNALS_INDEX,
         name: 'rule-name',
         createdBy: 'elastic',
@@ -269,15 +269,15 @@ describe('utils', () => {
       expect(successfulsingleBulkCreate).toEqual(true);
     });
     test('create unsuccessful bulk create due to empty search results', async () => {
-      const sampleParams = sampleSignalAlertParams(undefined);
+      const sampleParams = sampleRuleAlertParams(undefined);
       const sampleSearchResult = sampleEmptyDocSearchResults;
       mockService.callCluster.mockReturnValue(false);
       const successfulsingleBulkCreate = await singleBulkCreate({
         someResult: sampleSearchResult,
-        signalParams: sampleParams,
+        ruleParams: sampleParams,
         services: mockService,
         logger: mockLogger,
-        id: sampleSignalId,
+        id: sampleRuleGuid,
         signalsIndex: DEFAULT_SIGNALS_INDEX,
         name: 'rule-name',
         createdBy: 'elastic',
@@ -289,15 +289,15 @@ describe('utils', () => {
     });
     test('create successful bulk create when bulk create has errors', async () => {
       const fakeUuid = uuid.v4();
-      const sampleParams = sampleSignalAlertParams(undefined);
+      const sampleParams = sampleRuleAlertParams(undefined);
       const sampleSearchResult = sampleDocSearchResultsNoSortId;
       mockService.callCluster.mockReturnValue(sampleBulkCreateDuplicateResult);
       const successfulsingleBulkCreate = await singleBulkCreate({
         someResult: sampleSearchResult(fakeUuid),
-        signalParams: sampleParams,
+        ruleParams: sampleParams,
         services: mockService,
         logger: mockLogger,
-        id: sampleSignalId,
+        id: sampleRuleGuid,
         signalsIndex: DEFAULT_SIGNALS_INDEX,
         name: 'rule-name',
         createdBy: 'elastic',
@@ -312,12 +312,12 @@ describe('utils', () => {
   describe('singleSearchAfter', () => {
     test('if singleSearchAfter works without a given sort id', async () => {
       let searchAfterSortId;
-      const sampleParams = sampleSignalAlertParams(undefined);
+      const sampleParams = sampleRuleAlertParams(undefined);
       mockService.callCluster.mockReturnValue(sampleDocSearchResultsNoSortId);
       await expect(
         singleSearchAfter({
           searchAfterSortId,
-          signalParams: sampleParams,
+          ruleParams: sampleParams,
           services: mockService,
           logger: mockLogger,
           pageSize: 1,
@@ -326,11 +326,11 @@ describe('utils', () => {
     });
     test('if singleSearchAfter works with a given sort id', async () => {
       const searchAfterSortId = '1234567891111';
-      const sampleParams = sampleSignalAlertParams(undefined);
+      const sampleParams = sampleRuleAlertParams(undefined);
       mockService.callCluster.mockReturnValue(sampleDocSearchResultsWithSortId);
       const searchAfterResult = await singleSearchAfter({
         searchAfterSortId,
-        signalParams: sampleParams,
+        ruleParams: sampleParams,
         services: mockService,
         logger: mockLogger,
         pageSize: 1,
@@ -339,14 +339,14 @@ describe('utils', () => {
     });
     test('if singleSearchAfter throws error', async () => {
       const searchAfterSortId = '1234567891111';
-      const sampleParams = sampleSignalAlertParams(undefined);
+      const sampleParams = sampleRuleAlertParams(undefined);
       mockService.callCluster.mockImplementation(async () => {
         throw Error('Fake Error');
       });
       await expect(
         singleSearchAfter({
           searchAfterSortId,
-          signalParams: sampleParams,
+          ruleParams: sampleParams,
           services: mockService,
           logger: mockLogger,
           pageSize: 1,
@@ -356,13 +356,13 @@ describe('utils', () => {
   });
   describe('searchAfterAndBulkCreate', () => {
     test('if successful with empty search results', async () => {
-      const sampleParams = sampleSignalAlertParams(undefined);
+      const sampleParams = sampleRuleAlertParams(undefined);
       const result = await searchAfterAndBulkCreate({
         someResult: sampleEmptyDocSearchResults,
-        signalParams: sampleParams,
+        ruleParams: sampleParams,
         services: mockService,
         logger: mockLogger,
-        id: sampleSignalId,
+        id: sampleRuleGuid,
         signalsIndex: DEFAULT_SIGNALS_INDEX,
         name: 'rule-name',
         createdBy: 'elastic',
@@ -375,7 +375,7 @@ describe('utils', () => {
       expect(result).toEqual(true);
     });
     test('if successful iteration of while loop with maxDocs', async () => {
-      const sampleParams = sampleSignalAlertParams(30);
+      const sampleParams = sampleRuleAlertParams(30);
       const someGuids = Array.from({ length: 13 }).map(x => uuid.v4());
       mockService.callCluster
         .mockReturnValueOnce({
@@ -409,10 +409,10 @@ describe('utils', () => {
         });
       const result = await searchAfterAndBulkCreate({
         someResult: repeatedSearchResultsWithSortId(3, 1, someGuids.slice(6, 9)),
-        signalParams: sampleParams,
+        ruleParams: sampleParams,
         services: mockService,
         logger: mockLogger,
-        id: sampleSignalId,
+        id: sampleRuleGuid,
         signalsIndex: DEFAULT_SIGNALS_INDEX,
         name: 'rule-name',
         createdBy: 'elastic',
@@ -426,14 +426,14 @@ describe('utils', () => {
     });
     test('if unsuccessful first bulk create', async () => {
       const someGuids = Array.from({ length: 4 }).map(x => uuid.v4());
-      const sampleParams = sampleSignalAlertParams(10);
+      const sampleParams = sampleRuleAlertParams(10);
       mockService.callCluster.mockReturnValue(sampleBulkCreateDuplicateResult);
       const result = await searchAfterAndBulkCreate({
         someResult: repeatedSearchResultsWithSortId(4, 1, someGuids),
-        signalParams: sampleParams,
+        ruleParams: sampleParams,
         services: mockService,
         logger: mockLogger,
-        id: sampleSignalId,
+        id: sampleRuleGuid,
         signalsIndex: DEFAULT_SIGNALS_INDEX,
         name: 'rule-name',
         createdBy: 'elastic',
@@ -446,7 +446,7 @@ describe('utils', () => {
       expect(result).toEqual(false);
     });
     test('if unsuccessful iteration of searchAfterAndBulkCreate due to empty sort ids', async () => {
-      const sampleParams = sampleSignalAlertParams(undefined);
+      const sampleParams = sampleRuleAlertParams(undefined);
       const someUuid = uuid.v4();
       mockService.callCluster.mockReturnValueOnce({
         took: 100,
@@ -459,10 +459,10 @@ describe('utils', () => {
       });
       const result = await searchAfterAndBulkCreate({
         someResult: sampleDocSearchResultsNoSortId(someUuid),
-        signalParams: sampleParams,
+        ruleParams: sampleParams,
         services: mockService,
         logger: mockLogger,
-        id: sampleSignalId,
+        id: sampleRuleGuid,
         signalsIndex: DEFAULT_SIGNALS_INDEX,
         name: 'rule-name',
         createdBy: 'elastic',
@@ -475,7 +475,7 @@ describe('utils', () => {
       expect(result).toEqual(false);
     });
     test('if unsuccessful iteration of searchAfterAndBulkCreate due to empty sort ids and 0 total hits', async () => {
-      const sampleParams = sampleSignalAlertParams(undefined);
+      const sampleParams = sampleRuleAlertParams(undefined);
       const someUuid = uuid.v4();
       mockService.callCluster.mockReturnValueOnce({
         took: 100,
@@ -488,10 +488,10 @@ describe('utils', () => {
       });
       const result = await searchAfterAndBulkCreate({
         someResult: sampleDocSearchResultsNoSortIdNoHits(someUuid),
-        signalParams: sampleParams,
+        ruleParams: sampleParams,
         services: mockService,
         logger: mockLogger,
-        id: sampleSignalId,
+        id: sampleRuleGuid,
         signalsIndex: DEFAULT_SIGNALS_INDEX,
         name: 'rule-name',
         createdBy: 'elastic',
@@ -503,7 +503,7 @@ describe('utils', () => {
       expect(result).toEqual(true);
     });
     test('if successful iteration of while loop with maxDocs and search after returns results with no sort ids', async () => {
-      const sampleParams = sampleSignalAlertParams(10);
+      const sampleParams = sampleRuleAlertParams(10);
       const oneGuid = uuid.v4();
       const someGuids = Array.from({ length: 4 }).map(x => uuid.v4());
       mockService.callCluster
@@ -519,10 +519,10 @@ describe('utils', () => {
         .mockReturnValueOnce(sampleDocSearchResultsNoSortId(oneGuid));
       const result = await searchAfterAndBulkCreate({
         someResult: repeatedSearchResultsWithSortId(4, 1, someGuids),
-        signalParams: sampleParams,
+        ruleParams: sampleParams,
         services: mockService,
         logger: mockLogger,
-        id: sampleSignalId,
+        id: sampleRuleGuid,
         signalsIndex: DEFAULT_SIGNALS_INDEX,
         name: 'rule-name',
         createdBy: 'elastic',
@@ -534,7 +534,7 @@ describe('utils', () => {
       expect(result).toEqual(true);
     });
     test('if successful iteration of while loop with maxDocs and search after returns empty results with no sort ids', async () => {
-      const sampleParams = sampleSignalAlertParams(10);
+      const sampleParams = sampleRuleAlertParams(10);
       const someGuids = Array.from({ length: 4 }).map(x => uuid.v4());
       mockService.callCluster
         .mockReturnValueOnce({
@@ -549,10 +549,10 @@ describe('utils', () => {
         .mockReturnValueOnce(sampleEmptyDocSearchResults);
       const result = await searchAfterAndBulkCreate({
         someResult: repeatedSearchResultsWithSortId(4, 1, someGuids),
-        signalParams: sampleParams,
+        ruleParams: sampleParams,
         services: mockService,
         logger: mockLogger,
-        id: sampleSignalId,
+        id: sampleRuleGuid,
         signalsIndex: DEFAULT_SIGNALS_INDEX,
         name: 'rule-name',
         createdBy: 'elastic',
@@ -564,7 +564,7 @@ describe('utils', () => {
       expect(result).toEqual(true);
     });
     test('if returns false when singleSearchAfter throws an exception', async () => {
-      const sampleParams = sampleSignalAlertParams(10);
+      const sampleParams = sampleRuleAlertParams(10);
       const someGuids = Array.from({ length: 4 }).map(x => uuid.v4());
       mockService.callCluster
         .mockReturnValueOnce({
@@ -581,10 +581,10 @@ describe('utils', () => {
         });
       const result = await searchAfterAndBulkCreate({
         someResult: repeatedSearchResultsWithSortId(4, 1, someGuids),
-        signalParams: sampleParams,
+        ruleParams: sampleParams,
         services: mockService,
         logger: mockLogger,
-        id: sampleSignalId,
+        id: sampleRuleGuid,
         signalsIndex: DEFAULT_SIGNALS_INDEX,
         name: 'rule-name',
         createdBy: 'elastic',
