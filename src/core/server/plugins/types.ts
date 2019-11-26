@@ -24,7 +24,51 @@ import { ConfigPath, EnvironmentMode, PackageInfo } from '../config';
 import { LoggerFactory } from '../logging';
 import { CoreSetup, CoreStart } from '..';
 
-export type PluginConfigSchema = Type<unknown> | null;
+/**
+ * Dedicated type for plugin configuration schema.
+ *
+ * @public
+ */
+export type PluginConfigSchema<T> = Type<T>;
+
+/**
+ * Describes a plugin configuration schema and capabilities.
+ *
+ * @example
+ * ```typescript
+ * // my_plugin/server/index.ts
+ * import { schema, TypeOf } from '@kbn/config-schema';
+ * import { PluginConfigDescriptor } from 'kibana/server';
+ *
+ * const configSchema = schema.object({
+ *   secret: schema.string({ defaultValue: 'Only on server' }),
+ *   uiProp: schema.string({ defaultValue: 'Accessible from client' }),
+ * });
+ *
+ * type ConfigType = TypeOf<typeof configSchema>;
+ *
+ * export const config: PluginConfigDescriptor<ConfigType> = {
+ *   exposeToBrowser: {
+ *     uiProp: true,
+ *   },
+ *   schema: configSchema,
+ * };
+ * ```
+ *
+ * @public
+ */
+export interface PluginConfigDescriptor<T = any> {
+  /**
+   * List of configuration properties that will be available on the client-side plugin.
+   */
+  exposeToBrowser?: { [P in keyof T]?: boolean };
+  /**
+   * Schema to use to validate the plugin configuration.
+   *
+   * {@link PluginConfigSchema}
+   */
+  schema: PluginConfigSchema<T>;
+}
 
 /**
  * Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays

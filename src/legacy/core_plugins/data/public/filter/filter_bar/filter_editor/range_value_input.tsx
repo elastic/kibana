@@ -22,7 +22,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import React from 'react';
 import { useKibana } from '../../../../../../../plugins/kibana_react/public';
-import { Field } from '../../../index_patterns';
+import { IFieldType } from '../../../../../../../plugins/data/public';
 import { ValueInputType } from './value_input_type';
 
 interface RangeParams {
@@ -33,7 +33,7 @@ interface RangeParams {
 type RangeParamsPartial = Partial<RangeParams>;
 
 interface Props {
-  field?: Field;
+  field?: IFieldType;
   value?: RangeParams;
   onChange: (params: RangeParamsPartial) => void;
   intl: InjectedIntl;

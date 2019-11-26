@@ -127,7 +127,7 @@ export const AreaChart = React.memo<{
   return checkIfAnyValidSeriesExist(areaChart) ? (
     <AutoSizer detectAnyWindowResize={false} content>
       {({ measureRef, content: { height, width } }) => (
-        <WrappedByAutoSizer innerRef={measureRef} height={getChartHeight(customHeight, height)}>
+        <WrappedByAutoSizer ref={measureRef} height={getChartHeight(customHeight, height)}>
           <AreaChartBaseComponent
             data={areaChart}
             height={getChartHeight(customHeight, height)}

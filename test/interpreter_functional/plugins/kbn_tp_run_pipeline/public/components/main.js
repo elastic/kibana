@@ -24,11 +24,10 @@ import {
   EuiPageContent,
   EuiPageContentHeader,
 } from '@elastic/eui';
+import { first } from 'rxjs/operators';
 
 class Main extends React.Component {
-
   chartDiv = React.createRef();
-  exprDiv = React.createRef();
 
   constructor(props) {
     super(props);
@@ -43,37 +42,26 @@ class Main extends React.Component {
         requests: new props.RequestAdapter(),
         data: new props.DataAdapter(),
       };
-      return await props.runPipeline(expression, context, {
+      return await props.expressions.execute(expression, {
         inspectorAdapters: adapters,
-        getInitialContext: () => initialContext,
-      });
+        context,
+        searchContext: initialContext,
+      }).getData();
     };
 
-    const handlers = {
-      onDestroy: () => { return; },
-    };
-
+    let lastRenderHandler;
     window.renderPipelineResponse = async (context = {}) => {
-      return new Promise(resolve => {
-        if (context.type !== 'render') {
-          this.setState({ expression: 'Expression did not return render type!\n\n' + JSON.stringify(context) });
-          return resolve();
-        }
-        const renderer = props.registries.renderers.get(context.as);
-        if (!renderer) {
-          this.setState({ expression: 'Renderer was not found in registry!\n\n' + JSON.stringify(context) });
-          return resolve();
-        }
-        const renderCompleteHandler = () => {
-          resolve('render complete');
-          this.chartDiv.removeEventListener('renderComplete', renderCompleteHandler);
-        };
-        this.chartDiv.addEventListener('renderComplete', renderCompleteHandler);
-        renderer.render(this.chartDiv, context.value, handlers);
-      });
+      if (lastRenderHandler) {
+        lastRenderHandler.destroy();
+      }
 
+      lastRenderHandler = props.expressions.render(this.chartDiv, context);
+      const renderResult = await lastRenderHandler.render$.pipe(first()).toPromise();
+
+      if (typeof renderResult === 'object' && renderResult.type === 'error') {
+        return this.setState({ expression: 'Render error!\n\n' + JSON.stringify(renderResult.error) });
+      }
     };
-
   }
 
 

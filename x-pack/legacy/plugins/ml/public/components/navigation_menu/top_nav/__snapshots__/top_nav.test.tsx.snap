@@ -69,6 +69,7 @@ exports[`Navigation Menu: <TopNav /> Minimal initialization. 1`] = `
       refreshInterval={0}
       showUpdateButton={true}
       start="Thu Aug 29 2019 02:04:19 GMT+0200"
+      timeFormat="HH:mm"
     />
   </div>
 </Fragment>

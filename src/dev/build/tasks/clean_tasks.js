@@ -169,7 +169,6 @@ export const CleanExtraFilesFromModulesTask = {
       await scanDelete({
         directory: build.resolvePath('node_modules'),
         regularExpressions,
-        excludePaths: [build.resolvePath('node_modules/@elastic/ctags-langserver/vendor')],
       })
     );
 

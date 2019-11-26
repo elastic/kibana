@@ -99,7 +99,6 @@ export {
   ILLEGAL_CHARACTERS,
   INDEX_PATTERN_ILLEGAL_CHARACTERS,
   INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-  isFilterable,
   validateIndexPattern,
 } from './utils';
 

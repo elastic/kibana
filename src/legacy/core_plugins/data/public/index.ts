@@ -48,7 +48,6 @@ export {
   CONTAINS_SPACES,
   getFromSavedObject,
   getRoutes,
-  isFilterable,
   IndexPatternSelect,
   validateIndexPattern,
   ILLEGAL_CHARACTERS,

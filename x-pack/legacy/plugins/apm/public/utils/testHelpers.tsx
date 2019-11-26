@@ -9,7 +9,6 @@
 import { ReactWrapper } from 'enzyme';
 import enzymeToJson from 'enzyme-to-json';
 import { Location } from 'history';
-import 'jest-styled-components';
 import moment from 'moment';
 import { Moment } from 'moment-timezone';
 import React from 'react';
