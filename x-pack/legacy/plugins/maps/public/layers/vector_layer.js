@@ -90,7 +90,7 @@ export class VectorLayer extends AbstractLayer {
 
     const joins = this.getValidJoins();
     for (let i = 0; i < joins.length; i++) {
-      const joinDataRequest = this.getDataRequest(joins[i].getSourceId());
+      const joinDataRequest = this.getDataRequest(joins[i].getSourceDataRequestId());
       if (!joinDataRequest || !joinDataRequest.hasData()) {
         return false;
       }
@@ -236,7 +236,7 @@ export class VectorLayer extends AbstractLayer {
   async _syncJoin({ join, startLoading, stopLoading, onLoadError, registerCancelCallback, dataFilters }) {
 
     const joinSource = join.getRightJoinSource();
-    const sourceDataId = join.getSourceId();
+    const sourceDataId = join.getSourceDataRequestId();
     const requestToken = Symbol(`layer-join-refresh:${this.getId()} - ${sourceDataId}`);
     const searchFilters = {
       ...dataFilters,
@@ -289,6 +289,7 @@ export class VectorLayer extends AbstractLayer {
 
   async _syncJoins(syncContext) {
     const joinSyncs = this.getValidJoins().map(async join => {
+      await this._syncJoinStyleMeta(syncContext, join);
       return this._syncJoin({ join, ...syncContext });
     });
 
@@ -391,19 +392,43 @@ export class VectorLayer extends AbstractLayer {
     }
   }
 
-  async _syncSourceStyleMeta({
-    startLoading, stopLoading, onLoadError, registerCancelCallback
-  }) {
-
-    if (!this._source.isElasticsearchSource()) {
-      return;
-    }
-
+  async _syncSourceStyleMeta(syncContext) {
     const dynamicStyleProps = this._style.getDynamicPropertiesArray()
       .filter(dynamicStyleProp => {
         return dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE && dynamicStyleProp.supportsFieldMeta();
       });
-    if (dynamicStyleProps.length === 0) {
+
+    return this._syncStyleMeta({
+      source: this._source,
+      dataRequestId: SOURCE_META_ID_ORIGIN,
+      dynamicStyleProps,
+      ...syncContext
+    });
+  }
+
+  async _syncJoinStyleMeta(syncContext, join) {
+    const joinSource = join.getRightJoinSource();
+    const dynamicStyleProps = this._style.getDynamicPropertiesArray()
+      .filter(dynamicStyleProp => {
+        const matchingField = joinSource.getMetricFieldForName(dynamicStyleProp.getField().getName());
+        return dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.JOIN
+          && !!matchingField
+          && dynamicStyleProp.supportsFieldMeta();
+      });
+
+    return this._syncStyleMeta({
+      source: joinSource,
+      dataRequestId: join.getSourceMetaDataRequestId(),
+      dynamicStyleProps,
+      ...syncContext
+    });
+  }
+
+  async _syncStyleMeta({
+    source, dataRequestId, dynamicStyleProps, startLoading, stopLoading, onLoadError, registerCancelCallback
+  }) {
+
+    if (!source.isElasticsearchSource() || dynamicStyleProps.length === 0) {
       return;
     }
 
@@ -413,22 +438,22 @@ export class VectorLayer extends AbstractLayer {
       }),
       // TODO include time range?, make this user configurable?
     };
-    const prevDataRequest = this._findDataRequestForSource(SOURCE_META_ID_ORIGIN);
+    const prevDataRequest = this._findDataRequestForSource(dataRequestId);
     const canSkipFetch = canSkipStyleMetaUpdate({ prevDataRequest, nextMeta });
     if (canSkipFetch) {
       return;
     }
 
-    const requestToken = Symbol(`layer-source-meta:${this.getId()}`);
+    const requestToken = Symbol(`layer-${this.getId()}-style-meta`);
     try {
-      startLoading(SOURCE_META_ID_ORIGIN, requestToken, nextMeta);
+      startLoading(dataRequestId, requestToken, nextMeta);
       const layerName = await this.getDisplayName();
-      const styleMeta = await this._source.loadStylePropsMeta(layerName, dynamicStyleProps, registerCancelCallback);
+      const styleMeta = await source.loadStylePropsMeta(layerName, dynamicStyleProps, registerCancelCallback);
       console.log(styleMeta);
-      stopLoading(SOURCE_META_ID_ORIGIN, requestToken, styleMeta, nextMeta);
+      stopLoading(dataRequestId, requestToken, styleMeta, nextMeta);
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {
-        onLoadError(SOURCE_META_ID_ORIGIN, requestToken, error.message);
+        onLoadError(dataRequestId, requestToken, error.message);
       }
     }
   }
@@ -438,8 +463,8 @@ export class VectorLayer extends AbstractLayer {
       return;
     }
 
-    const sourceResult = await this._syncSource(syncContext);
     await this._syncSourceStyleMeta(syncContext);
+    const sourceResult = await this._syncSource(syncContext);
     if (
       !sourceResult.featureCollection ||
       !sourceResult.featureCollection.features.length ||
