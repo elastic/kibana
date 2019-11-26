@@ -16,13 +16,12 @@ import { registerEndpointRoutes } from './endpoints';
 import { EndpointRequestContext } from '../handlers/endpoint_handler';
 import { SearchResponse } from 'elasticsearch';
 import { EndpointData } from '../types';
-import { ObjectType } from '@kbn/config-schema';
 
 describe('endpoints route test', () => {
   let routerMock: jest.Mocked<IRouter>;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
-  let routeHandler: RequestHandler<ObjectType<any>, ObjectType<any>, ObjectType<any>>;
-  let routeConfig: RouteConfig<ObjectType<any>, ObjectType<any>, ObjectType<any>>;
+  let routeHandler: RequestHandler<any, any, any>;
+  let routeConfig: RouteConfig<any, any, any>;
 
   beforeEach(() => {
     routerMock = httpServiceMock.createRouter();
