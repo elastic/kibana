@@ -50,7 +50,10 @@ export const explorerFilteredAction$ = explorerAction$.pipe(
   distinctUntilChanged(isEqual)
 );
 
-// filter events which should not be propagated to the Explorer react component.
+// filter actions which should not be propagated to the Explorer react component.
+// TODO this is work in progress. no raw actions should be propagated to the component
+// eventually. All actions should go through `scan()` to modify the state and components
+// should subscribe to explorerState$.
 export const explorer$ = explorerFilteredAction$.pipe(
   filter((action: Action) => {
     if (action === null) {
@@ -61,7 +64,6 @@ export const explorer$ = explorerFilteredAction$.pipe(
       case EXPLORER_ACTION.IDLE:
       case EXPLORER_ACTION.INITIALIZE:
       case EXPLORER_ACTION.JOB_SELECTION_CHANGE:
-      case EXPLORER_ACTION.REDRAW:
       case EXPLORER_ACTION.RELOAD:
         return true;
       default:

@@ -17,7 +17,7 @@ import { EXPLORER_ACTION, SWIMLANE_TYPE } from '../explorer_constants';
 import { explorerAction$ } from '../explorer_dashboard_service';
 import {
   getClearedSelectedAnomaliesState,
-  getDefaultViewBySwimlaneData,
+  getDefaultSwimlaneData,
   loadOverallData,
   loadViewBySwimlane,
   loadViewByTopFieldValuesForSelectedTime,
@@ -78,7 +78,7 @@ export function loadOverallDataActionCreator(
       explorerAction$.next({
         type: EXPLORER_ACTION.SET_STATE,
         payload: {
-          viewBySwimlaneData: getDefaultViewBySwimlaneData(),
+          viewBySwimlaneData: getDefaultSwimlaneData(),
           viewBySwimlaneDataLoading: true,
         },
       });
@@ -99,30 +99,19 @@ export function loadOverallDataActionCreator(
           noInfluencersConfigured
         ),
       ({ overallState }, viewBySwimlaneState) => {
-        if (selectedCells !== null && selectedCells.showTopFieldValues === true) {
-          // Click is in one of the cells in the Overall swimlane - reload the 'view by' swimlane
-          // to show the top 'view by' values for the selected time.
-          return {
-            type: EXPLORER_ACTION.SET_STATE,
-            payload: {
-              ...overallState,
-              ...viewBySwimlaneState,
-              viewByLoadedForTimeFormatted: formatHumanReadableDateTime(timerange.earliestMs),
-              viewBySwimlaneFieldName,
-              viewBySwimlaneOptions,
-            },
-          };
-        } else {
-          return {
-            type: EXPLORER_ACTION.SET_STATE,
-            payload: {
-              ...overallState,
-              ...viewBySwimlaneState,
-              viewBySwimlaneFieldName,
-              viewBySwimlaneOptions,
-            },
-          };
-        }
+        return {
+          type: EXPLORER_ACTION.SET_STATE,
+          payload: {
+            ...overallState,
+            ...viewBySwimlaneState,
+            viewByLoadedForTimeFormatted:
+              selectedCells !== null && selectedCells.showTopFieldValues === true
+                ? formatHumanReadableDateTime(timerange.earliestMs)
+                : null,
+            viewBySwimlaneFieldName,
+            viewBySwimlaneOptions,
+          },
+        };
       }
     ),
     // do a sanity check against selectedCells. It can happen that a previously

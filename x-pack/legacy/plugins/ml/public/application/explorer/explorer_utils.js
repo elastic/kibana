@@ -56,7 +56,7 @@ export function getClearedSelectedAnomaliesState() {
   };
 }
 
-export function getDefaultViewBySwimlaneData() {
+export function getDefaultSwimlaneData() {
   return {
     fieldName: '',
     laneLabels: [],
@@ -208,7 +208,7 @@ export function getSelectionInfluencers(selectedCells, fieldName) {
   return [];
 }
 
-export function getSwimlaneBucketInterval(selectedJobs, swimlaneWidth) {
+export function getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth) {
   // Bucketing interval should be the maximum of the chart related interval (i.e. time range related)
   // and the max bucket span for the jobs shown in the chart.
   const bounds = timefilter.getActiveBounds();
@@ -224,7 +224,7 @@ export function getSwimlaneBucketInterval(selectedJobs, swimlaneWidth) {
   // this has to be done at this stage so all searches use the same interval
   const timerangeSeconds = (bounds.max.valueOf() - bounds.min.valueOf()) / 1000;
   const numBuckets = parseInt(timerangeSeconds / intervalSeconds);
-  const cellWidth = Math.floor(swimlaneWidth / numBuckets * 100) / 100;
+  const cellWidth = Math.floor(swimlaneContainerWidth / numBuckets * 100) / 100;
 
   // if the cell width is going to be less than 8px, double the interval
   if (cellWidth < 8) {

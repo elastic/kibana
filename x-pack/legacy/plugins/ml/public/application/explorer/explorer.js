@@ -197,7 +197,10 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     resizeRef = createRef();
     resizeChecker = undefined;
     resizeHandler = () => {
-      explorerAction$.next({ type: EXPLORER_ACTION.REDRAW });
+      explorerAction$.next({
+        type: EXPLORER_ACTION.SET_SWIMLANE_CONTAINER_WIDTH,
+        payload: { swimlaneContainerWidth: getSwimlaneContainerWidth() }
+      });
     }
 
     subscriptions = new Subscription();
@@ -232,10 +235,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
       // Required to redraw the time series chart when the container is resized.
       this.resizeChecker = new ResizeChecker(this.resizeRef.current);
-      this.resizeChecker.on('resize', () => {
-        this.resizeHandler();
-      });
-      this.resizeHandler();
+      this.resizeChecker.on('resize', this.resizeHandler);
 
       // restore state stored in URL via AppState and subscribe to
       // job updates via job selector.
@@ -369,13 +369,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           explorerAction$.next({ type: EXPLORER_ACTION.IDLE });
           return;
         }
-
-        // REDRAW reloads Anomaly Explorer and tries to retain the selection.
-        if (type === EXPLORER_ACTION.REDRAW) {
-          this.updateExplorer({}, false);
-          explorerAction$.next({ type: EXPLORER_ACTION.IDLE });
-          return;
-        }
       } else if (this.previousSwimlaneLimit !== this.props.swimlaneLimit) {
         this.previousSwimlaneLimit = this.props.swimlaneLimit;
         explorerAction$.next({ type: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
@@ -416,10 +409,11 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     loadViewByTopFieldValuesForSelectedTime(earliestMs, latestMs, selectedJobs, viewBySwimlaneFieldName) {
       const selectedJobIds = selectedJobs.map(d => d.id);
       const { swimlaneLimit } = this.props;
+      const { swimlaneContainerWidth } = this.props.explorerState;
 
       const compareArgs = {
         earliestMs, latestMs, selectedJobIds, swimlaneLimit, viewBySwimlaneFieldName,
-        interval: getSwimlaneBucketInterval(selectedJobs, getSwimlaneContainerWidth(this.state.noInfluencersConfigured)).asSeconds()
+        interval: getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth).asSeconds()
       };
 
       // Find the top field values for the selected time, and then load the 'view by'
@@ -458,7 +452,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
             selectedJobIds,
             earliestMs,
             latestMs,
-            getSwimlaneBucketInterval(selectedJobs, getSwimlaneContainerWidth(this.state.noInfluencersConfigured)).asSeconds() + 's',
+            getSwimlaneBucketInterval(selectedJobs, this.props.explorerState.swimlaneContainerWidth).asSeconds() + 's',
             swimlaneLimit
           ).then((resp) => {
             const topFieldValues = Object.keys(resp.results);
@@ -489,6 +483,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         ...stateUpdate
       };
 
+      const { swimlaneContainerWidth } = this.props.explorerState;
+
       if (noJobsFound) {
         this.setState(stateUpdate);
         return;
@@ -501,7 +497,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       const bounds = timefilter.getActiveBounds();
       const timerange = getSelectionTimeRange(
         selectedCells,
-        getSwimlaneBucketInterval(selectedJobs, getSwimlaneContainerWidth(this.state.noInfluencersConfigured)).asSeconds(),
+        getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth).asSeconds(),
         bounds,
       );
 
@@ -519,7 +515,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       explorerAction$.next(loadOverallDataActionCreator(
         selectedCells,
         selectedJobs,
-        getSwimlaneBucketInterval(selectedJobs, getSwimlaneContainerWidth(this.state.noInfluencersConfigured)),
+        getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth),
         bounds,
         showOverallLoadingIndicator,
         viewBySwimlaneFieldName,
@@ -534,7 +530,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       const annotationsTableCompareArgs = {
         selectedCells,
         selectedJobs,
-        interval: getSwimlaneBucketInterval(selectedJobs, getSwimlaneContainerWidth(this.state.noInfluencersConfigured)),
+        interval: getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth),
         boundsMin: bounds.min.valueOf(),
         boundsMax: bounds.max.valueOf(),
       };
@@ -546,7 +542,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         stateUpdate.annotationsData = this.annotationsTablePreviousData = await loadAnnotationsTableData(
           selectedCells,
           selectedJobs,
-          getSwimlaneBucketInterval(selectedJobs, getSwimlaneContainerWidth(this.state.noInfluencersConfigured)).asSeconds(),
+          getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth).asSeconds(),
           bounds,
         );
       }
@@ -614,7 +610,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         selectedCells,
         selectedJobs,
         dateFormatTz,
-        interval: getSwimlaneBucketInterval(selectedJobs, getSwimlaneContainerWidth(this.state.noInfluencersConfigured)).asSeconds(),
+        interval: getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth).asSeconds(),
         boundsMin: bounds.min.valueOf(),
         boundsMax: bounds.max.valueOf(),
         viewBySwimlaneFieldName,
@@ -631,7 +627,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           selectedCells,
           selectedJobs,
           dateFormatTz,
-          getSwimlaneBucketInterval(selectedJobs, getSwimlaneContainerWidth(this.state.noInfluencersConfigured)).asSeconds(),
+          getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth).asSeconds(),
           bounds,
           viewBySwimlaneFieldName,
           tableInterval,
@@ -829,6 +825,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       const {
         hasResults,
         overallSwimlaneData,
+        swimlaneContainerWidth,
         viewByLoadedForTimeFormatted,
         viewBySwimlaneData,
         viewBySwimlaneDataLoading,
@@ -837,8 +834,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       } = this.props.explorerState;
 
       const loading = this.props.explorerState.loading;
-
-      const swimlaneWidth = getSwimlaneContainerWidth(noInfluencersConfigured);
 
       const { jobIds: selectedJobIds, selectedGroups } = getSelectedJobIds(globalState);
       const jobSelectorProps = {
@@ -947,7 +942,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
               >
                 {showOverallSwimlane && (
                   <ExplorerSwimlane
-                    chartWidth={swimlaneWidth}
+                    chartWidth={swimlaneContainerWidth}
                     filterActive={filterActive}
                     maskAll={maskAll}
                     TimeBuckets={TimeBuckets}
@@ -1026,7 +1021,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
                         data-test-subj="mlAnomalyExplorerSwimlaneViewBy"
                       >
                         <ExplorerSwimlane
-                          chartWidth={swimlaneWidth}
+                          chartWidth={swimlaneContainerWidth}
                           filterActive={filterActive}
                           maskAll={maskAll}
                           TimeBuckets={TimeBuckets}

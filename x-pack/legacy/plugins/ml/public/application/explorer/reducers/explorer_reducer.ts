@@ -11,7 +11,7 @@ import { CombinedJob } from '../../jobs/new_job/common/job_creator/configs';
 import { getDefaultChartsData } from '../explorer_charts/explorer_charts_container_service';
 import { EXPLORER_ACTION } from '../explorer_constants';
 import { Action, ActionPayload } from '../explorer_dashboard_service';
-import { getDefaultViewBySwimlaneData, getInfluencers, SwimlaneData } from '../explorer_utils';
+import { getDefaultSwimlaneData, getInfluencers, SwimlaneData } from '../explorer_utils';
 
 import { appStateReducer, getExplorerDefaultAppState, ExplorerAppState } from './app_state_reducer';
 
@@ -36,9 +36,11 @@ export interface ExplorerState {
   queryString: string;
   selectedCells: any;
   selectedJobs: CombinedJob[] | null;
+  swimlaneBucketInterval: any;
+  swimlaneContainerWidth: number;
   tableData: any;
   tableQueryString: string;
-  viewByLoadedForTimeFormatted: any;
+  viewByLoadedForTimeFormatted: string | null;
   viewBySwimlaneData: SwimlaneData;
   viewBySwimlaneDataLoading: boolean;
   viewBySwimlaneFieldName?: string;
@@ -63,14 +65,16 @@ export function getExplorerDefaultState(): ExplorerState {
     loading: true,
     noInfluencersConfigured: true,
     noJobsFound: true,
-    overallSwimlaneData: getDefaultViewBySwimlaneData(),
+    overallSwimlaneData: getDefaultSwimlaneData(),
     queryString: '',
     selectedCells: null,
     selectedJobs: null,
+    swimlaneBucketInterval: undefined,
+    swimlaneContainerWidth: 0,
     tableData: {},
     tableQueryString: '',
     viewByLoadedForTimeFormatted: null,
-    viewBySwimlaneData: getDefaultViewBySwimlaneData(),
+    viewBySwimlaneData: getDefaultSwimlaneData(),
     viewBySwimlaneDataLoading: false,
     viewBySwimlaneFieldName: undefined,
     viewBySwimlaneOptions: [],
@@ -147,6 +151,18 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action) => {
         };
       }
       return { ...state, ...payload };
+
+    case EXPLORER_ACTION.SET_SWIMLANE_CONTAINER_WIDTH:
+      if (state.noInfluencersConfigured === true) {
+        // swimlane is full width, minus 30 for the 'no influencers' info icon,
+        // minus 170 for the lane labels, minus 50 padding
+        return { ...state, swimlaneContainerWidth: payload.swimlaneContainerWidth - 250 };
+      } else {
+        // swimlane width is 5 sixths of the window,
+        // minus 170 for the lane labels, minus 50 padding
+        return { ...state, swimlaneContainerWidth: (payload.swimlaneContainerWidth / 6) * 5 - 220 };
+      }
+
     default:
       return state;
   }

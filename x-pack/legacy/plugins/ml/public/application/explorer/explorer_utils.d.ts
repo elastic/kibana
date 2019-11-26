@@ -30,7 +30,7 @@ export declare interface OverallSwimlaneData extends SwimlaneData {
   latest: number;
 }
 
-export declare const getDefaultViewBySwimlaneData: () => SwimlaneData;
+export declare const getDefaultSwimlaneData: () => SwimlaneData;
 
 export declare const getInfluencers: (selectedJobs: any[]) => string[];
 

@@ -30,6 +30,7 @@ export const EXPLORER_ACTION = {
   REDRAW: 'redraw',
   RELOAD: 'reload',
   SET_STATE: 'setState',
+  SET_SWIMLANE_CONTAINER_WIDTH: 'setSwimlaneContainerWidth',
 };
 
 export const FILTER_ACTION = {

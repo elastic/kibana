@@ -12,16 +12,7 @@ export function getChartContainerWidth() {
   return Math.floor((chartContainer && chartContainer.clientWidth) || 0);
 }
 
-export function getSwimlaneContainerWidth(noInfluencersConfigured = true) {
+export function getSwimlaneContainerWidth() {
   const explorerContainer = document.querySelector('.ml-explorer');
-  const explorerContainerWidth = (explorerContainer && explorerContainer.clientWidth) || 0;
-  if (noInfluencersConfigured === true) {
-    // swimlane is full width, minus 30 for the 'no influencers' info icon,
-    // minus 170 for the lane labels, minus 50 padding
-    return explorerContainerWidth - 250;
-  } else {
-    // swimlane width is 5 sixths of the window,
-    // minus 170 for the lane labels, minus 50 padding
-    return (explorerContainerWidth / 6) * 5 - 220;
-  }
+  return (explorerContainer && explorerContainer.clientWidth) || 0;
 }
