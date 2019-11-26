@@ -66,6 +66,9 @@ const createStartContract = (): Start => {
     search: { search: jest.fn() },
     fieldFormats: fieldFormatsMock as FieldFormatsStart,
     query: queryStartMock,
+    ui: {
+      IndexPatternSelect: jest.fn(),
+    },
   };
   return startContract;
 };

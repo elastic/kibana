@@ -27,7 +27,6 @@ import {
   getFromSavedObject,
   getRoutes,
   findByTitle,
-  getTitle,
 } from './utils';
 
 export const IndexPattern = {
@@ -40,5 +39,4 @@ export const IndexPattern = {
   getFromSavedObject,
   getRoutes,
   findByTitle,
-  getTitle,
 };

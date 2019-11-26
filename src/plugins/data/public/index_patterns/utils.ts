@@ -65,19 +65,6 @@ export async function findByTitle(
   );
 }
 
-export async function getTitle(
-  client: SavedObjectsClientContract,
-  indexPatternId: string
-): Promise<SimpleSavedObject<any>> {
-  const savedObject = (await client.get('index-pattern', indexPatternId)) as SimpleSavedObject<any>;
-
-  if (savedObject.error) {
-    throw new Error(`Unable to get index-pattern title: ${savedObject.error.message}`);
-  }
-
-  return savedObject.attributes.title;
-}
-
 function indexPatternContainsSpaces(indexPattern: string): boolean {
   return indexPattern.includes(' ');
 }

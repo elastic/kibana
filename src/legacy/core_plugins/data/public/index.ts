@@ -30,7 +30,6 @@ export function plugin() {
 /** @public types */
 export { DataSetup, DataStart };
 
-export { ApplyFiltersPopover } from './filter';
 export {
   Field,
   FieldType,
@@ -45,14 +44,12 @@ export { SearchBar, SearchBarProps, SavedQueryAttributes, SavedQuery } from './s
 /** @public static code */
 export * from '../common';
 export { FilterStateManager } from './filter/filter_manager';
-export { IndexPatternSelect } from './index_patterns';
 
 const CONTAINS_SPACES = npIndexPattern.CONTAINS_SPACES_KEY;
 const getFromSavedObject = npIndexPattern.getFromSavedObject;
 const getRoutes = npIndexPattern.getRoutes;
 const validateIndexPattern = npIndexPattern.validate;
 const findIndexPatternByTitle = npIndexPattern.findByTitle;
-const getIndexPatternTitle = npIndexPattern.getTitle;
 const IndexPatternAlreadyExists = npIndexPattern.errors.AlreadyExists;
 const IndexPatternMissingIndices = npIndexPattern.errors.MissingIndices;
 const NoDefaultIndexPattern = npIndexPattern.errors.NoDefault;
@@ -67,7 +64,6 @@ export {
   getRoutes,
   validateIndexPattern,
   findIndexPatternByTitle,
-  getIndexPatternTitle,
   ILLEGAL_CHARACTERS,
   INDEX_PATTERN_ILLEGAL_CHARACTERS,
   INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,

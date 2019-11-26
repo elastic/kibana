@@ -25,7 +25,6 @@ import {
 } from 'src/core/public';
 import { FieldFormatsStart } from '../../../../../plugins/data/public';
 import { Field, FieldList, FieldListInterface, FieldType } from './fields';
-import { createIndexPatternSelect } from './components';
 import { setNotifications, setFieldFormats } from './services';
 
 import {
@@ -79,7 +78,6 @@ export class IndexPatternsService {
     return {
       ...this.setupApi,
       indexPatterns: new IndexPatterns(uiSettings, savedObjectsClient, http),
-      IndexPatternSelect: createIndexPatternSelect(savedObjectsClient),
     };
   }
 
@@ -87,11 +85,6 @@ export class IndexPatternsService {
     // nothing to do here yet
   }
 }
-
-// static code
-
-/** @public */
-export { IndexPatternSelect } from './components';
 
 // types
 
