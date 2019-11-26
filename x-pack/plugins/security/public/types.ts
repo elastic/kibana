@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ISessionTimeout } from './session_timeout';
-
-export function createSessionTimeoutMock() {
-  return {
-    start: jest.fn(),
-    stop: jest.fn(),
-    extend: jest.fn(),
-  } as jest.Mocked<ISessionTimeout>;
+export interface SessionInfo {
+  now: number;
+  idleTimeoutExpiration: number | null;
+  lifespanExpiration: number | null;
+  provider: string;
 }

@@ -17,20 +17,23 @@
  * under the License.
  */
 
-export default function (kibana) {
-  return new kibana.Plugin({
-    uiExports: {
-      app: {
-        title: 'Server Status',
-        main: 'plugins/status_page/status_page',
-        hidden: true,
-        url: '/status',
-      },
-      injectDefaultVars(server) {
-        return {
-          isStatusPageAnonymous: server.config().get('status.allowAnonymous'),
-        };
-      }
+import { Plugin, CoreSetup } from 'kibana/public';
+
+export class StatusPagePlugin implements Plugin<StatusPagePluginSetup, StatusPagePluginStart> {
+  public setup(core: CoreSetup) {
+    const isStatusPageAnonymous = core.injectedMetadata.getInjectedVar(
+      'isStatusPageAnonymous'
+    ) as boolean;
+
+    if (isStatusPageAnonymous) {
+      core.http.anonymousPaths.register('/status');
     }
-  });
+  }
+
+  public start() {}
+
+  public stop() {}
 }
+
+export type StatusPagePluginSetup = ReturnType<StatusPagePlugin['setup']>;
+export type StatusPagePluginStart = ReturnType<StatusPagePlugin['start']>;
