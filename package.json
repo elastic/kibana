@@ -85,7 +85,8 @@
     "**/typescript": "3.7.2",
     "**/graphql-toolkit/lodash": "^4.17.13",
     "**/isomorphic-git/**/base64-js": "^1.2.1",
-    "**/image-diff/gm/debug": "^2.6.9"
+    "**/image-diff/gm/debug": "^2.6.9",
+    "**/deepmerge": "^4.2.2"
   },
   "workspaces": {
     "packages": [
@@ -120,7 +121,6 @@
     "@kbn/babel-code-parser": "1.0.0",
     "@kbn/babel-preset": "1.0.0",
     "@kbn/config-schema": "1.0.0",
-    "@kbn/es-query": "1.0.0",
     "@kbn/i18n": "1.0.0",
     "@kbn/interpreter": "1.0.0",
     "@kbn/pm": "1.0.0",
@@ -155,6 +155,7 @@
     "custom-event-polyfill": "^0.3.0",
     "d3": "3.5.17",
     "d3-cloud": "1.2.5",
+    "deepmerge": "^4.2.2",
     "del": "^5.1.0",
     "elasticsearch": "^16.5.0",
     "elasticsearch-browser": "^16.5.0",
@@ -169,7 +170,7 @@
     "globby": "^8.0.1",
     "good-squeeze": "2.1.0",
     "h2o2": "^8.1.2",
-    "handlebars": "4.3.5",
+    "handlebars": "4.5.3",
     "hapi": "^17.5.3",
     "hapi-auth-cookie": "^9.0.0",
     "history": "^4.9.0",
@@ -347,8 +348,8 @@
     "@types/uuid": "^3.4.4",
     "@types/vinyl-fs": "^2.4.11",
     "@types/zen-observable": "^0.8.0",
-    "@typescript-eslint/eslint-plugin": "^2.8.0",
-    "@typescript-eslint/parser": "^2.8.0",
+    "@typescript-eslint/eslint-plugin": "^2.9.0",
+    "@typescript-eslint/parser": "^2.9.0",
     "angular-mocks": "^1.7.8",
     "archiver": "^3.1.1",
     "axe-core": "^3.3.2",
