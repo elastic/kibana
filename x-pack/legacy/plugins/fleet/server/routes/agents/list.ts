@@ -10,6 +10,7 @@ import { ReturnTypeList } from '../../../common/return_types';
 import { FleetServerLib } from '../../libs/types';
 import { Agent } from '../../../common/types/domain_data';
 import { DEFAULT_AGENTS_PAGE_SIZE } from '../../../common/constants';
+import { AgentStatusHelper } from '../../libs/agent_status_helper';
 
 export const createListAgentsRoute = (libs: FleetServerLib) => ({
   method: 'GET',
@@ -39,6 +40,15 @@ export const createListAgentsRoute = (libs: FleetServerLib) => ({
       showInactive: Boolean(request.query.showInactive),
     });
 
-    return { list: agents, success: true, total, page, perPage };
+    return {
+      list: agents.map(agent => ({
+        ...agent,
+        status: AgentStatusHelper.getAgentStatus(agent),
+      })),
+      success: true,
+      total,
+      page,
+      perPage,
+    };
   },
 });
