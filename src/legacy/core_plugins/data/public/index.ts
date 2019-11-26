@@ -19,6 +19,7 @@
 
 // /// Define plugin function
 import { DataPlugin as Plugin, DataSetup, DataStart } from './plugin';
+import { IndexPattern as npIndexPattern } from '../../../../plugins/data/public';
 
 export function plugin() {
   return new Plugin();
@@ -44,11 +45,24 @@ export { SearchBar, SearchBarProps, SavedQueryAttributes, SavedQuery } from './s
 /** @public static code */
 export * from '../common';
 export { FilterStateManager } from './filter/filter_manager';
+export { IndexPatternSelect } from './index_patterns';
+
+const CONTAINS_SPACES = npIndexPattern.CONTAINS_SPACES_KEY;
+const getFromSavedObject = npIndexPattern.getFromSavedObject;
+const getRoutes = npIndexPattern.getRoutes;
+const validateIndexPattern = npIndexPattern.validate;
+const IndexPatternAlreadyExists = npIndexPattern.errors.AlreadyExists;
+const IndexPatternMissingIndices = npIndexPattern.errors.MissingIndices;
+const NoDefaultIndexPattern = npIndexPattern.errors.NoDefault;
+const NoDefinedIndexPatterns = npIndexPattern.errors.NoDefined;
+const ILLEGAL_CHARACTERS = npIndexPattern.ILLEGAL_CHARACTERS_KEY;
+const INDEX_PATTERN_ILLEGAL_CHARACTERS = npIndexPattern.ILLEGAL_CHARACTERS;
+const INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE = npIndexPattern.ILLEGAL_CHARACTERS_VISIBLE;
+
 export {
   CONTAINS_SPACES,
   getFromSavedObject,
   getRoutes,
-  IndexPatternSelect,
   validateIndexPattern,
   ILLEGAL_CHARACTERS,
   INDEX_PATTERN_ILLEGAL_CHARACTERS,
@@ -57,4 +71,4 @@ export {
   IndexPatternMissingIndices,
   NoDefaultIndexPattern,
   NoDefinedIndexPatterns,
-} from './index_patterns';
+};
