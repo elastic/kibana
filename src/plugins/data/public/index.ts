@@ -36,18 +36,6 @@ export * from './types';
 export { IRequestTypesMap, IResponseTypesMap } from './search';
 export * from './search';
 export * from './query';
-export {
-  CONTAINS_SPACES,
-  getFromSavedObject,
-  getRoutes,
-  validateIndexPattern,
-  ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-  IndexPatternAlreadyExists,
-  IndexPatternMissingIndices,
-  NoDefaultIndexPattern,
-  NoDefinedIndexPatterns,
-} from './index_patterns';
+export { IndexPattern } from './index_patterns';
 
 export * from './ui';

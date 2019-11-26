@@ -26,7 +26,6 @@ import {
 import { FieldFormatsStart } from '../field_formats_provider';
 import { Field, FieldList } from './fields';
 import { setNotifications, setFieldFormats } from './services';
-
 import { createFlattenHitWrapper, formatHitProvider, IndexPatterns } from './index_patterns';
 
 export interface IndexPatternDependencies {
@@ -80,32 +79,7 @@ export class IndexPatternsService {
   }
 }
 
-// static code
-
-/** @public */
-export {
-  CONTAINS_SPACES,
-  getFromSavedObject,
-  getRoutes,
-  ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-  validateIndexPattern,
-} from './utils';
-
-/** @public */
-export {
-  IndexPatternAlreadyExists,
-  IndexPatternMissingIndices,
-  NoDefaultIndexPattern,
-  NoDefinedIndexPatterns,
-} from './errors';
-
 // types
-
 /** @internal */
 export type IndexPatternsSetup = ReturnType<IndexPatternsService['setup']>;
 export type IndexPatternsStart = ReturnType<IndexPatternsService['start']>;
-
-/** @public */
-export { getIndexPatternTitle, findIndexPatternByTitle } from './utils';

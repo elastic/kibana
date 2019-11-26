@@ -18,28 +18,28 @@
  */
 
 import {
-  CONTAINS_SPACES,
-  ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-  validateIndexPattern,
+  CONTAINS_SPACES_KEY,
+  ILLEGAL_CHARACTERS_KEY,
+  ILLEGAL_CHARACTERS_VISIBLE,
+  validate,
 } from './utils';
 
 describe('Index Pattern Utils', () => {
   describe('Validation', () => {
     it('should not allow space in the pattern', () => {
-      const errors = validateIndexPattern('my pattern');
-      expect(errors[CONTAINS_SPACES]).toBe(true);
+      const errors = validate('my pattern');
+      expect(errors[CONTAINS_SPACES_KEY]).toBe(true);
     });
 
     it('should not allow illegal characters', () => {
-      INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.forEach(char => {
-        const errors = validateIndexPattern(`pattern${char}`);
-        expect(errors[ILLEGAL_CHARACTERS]).toEqual([char]);
+      ILLEGAL_CHARACTERS_VISIBLE.forEach(char => {
+        const errors = validate(`pattern${char}`);
+        expect(errors[ILLEGAL_CHARACTERS_KEY]).toEqual([char]);
       });
     });
 
     it('should return empty object when there are no errors', () => {
-      expect(validateIndexPattern('my-pattern-*')).toEqual({});
+      expect(validate('my-pattern-*')).toEqual({});
     });
   });
 });

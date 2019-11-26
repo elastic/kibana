@@ -17,4 +17,24 @@
  * under the License.
  */
 
-export * from './index_patterns_service';
+import { errors } from './errors';
+import {
+  ILLEGAL_CHARACTERS,
+  ILLEGAL_CHARACTERS_KEY,
+  CONTAINS_SPACES_KEY,
+  ILLEGAL_CHARACTERS_VISIBLE,
+  validate,
+  getFromSavedObject,
+  getRoutes,
+} from './utils';
+
+export const IndexPattern = {
+  errors,
+  CONTAINS_SPACES_KEY,
+  ILLEGAL_CHARACTERS,
+  ILLEGAL_CHARACTERS_KEY,
+  ILLEGAL_CHARACTERS_VISIBLE,
+  validate,
+  getFromSavedObject,
+  getRoutes,
+};

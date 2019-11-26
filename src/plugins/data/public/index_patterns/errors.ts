@@ -24,7 +24,7 @@ import { KbnError } from '../../../kibana_utils/public';
  * when a mapping already exists for a field the user is attempting to add
  * @param {String} name - the field name
  */
-export class IndexPatternAlreadyExists extends KbnError {
+class AlreadyExists extends KbnError {
   constructor(name: string) {
     super(`An index pattern of "${name}" already exists`);
   }
@@ -33,7 +33,7 @@ export class IndexPatternAlreadyExists extends KbnError {
 /**
  * Tried to call a method that relies on SearchSource having an indexPattern assigned
  */
-export class IndexPatternMissingIndices extends KbnError {
+class MissingIndices extends KbnError {
   constructor(message: string) {
     const defaultMessage = "IndexPattern's configured pattern does not match any indices";
 
@@ -44,7 +44,7 @@ export class IndexPatternMissingIndices extends KbnError {
 /**
  * Tried to call a method that relies on SearchSource having an indexPattern assigned
  */
-export class NoDefinedIndexPatterns extends KbnError {
+class NoDefined extends KbnError {
   constructor() {
     super('Define at least one index pattern to continue');
   }
@@ -53,8 +53,15 @@ export class NoDefinedIndexPatterns extends KbnError {
 /**
  * Tried to load a route besides management/kibana/index but you don't have a default index pattern!
  */
-export class NoDefaultIndexPattern extends KbnError {
+class NoDefault extends KbnError {
   constructor() {
     super('Please specify a default index pattern');
   }
 }
+
+export const errors = {
+  AlreadyExists,
+  MissingIndices,
+  NoDefined,
+  NoDefault,
+};

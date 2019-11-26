@@ -28,12 +28,7 @@ import { IFieldType, getKbnFieldType, IFieldSubType, FieldFormat } from '../../.
 
 export type FieldSpec = Record<string, any>;
 
-/** @deprecated
- *  Please use IFieldType instead
- * */
-export type FieldType = IFieldType;
-
-export class Field implements FieldType {
+export class Field implements IFieldType {
   name: string;
   type: string;
   script?: string;
