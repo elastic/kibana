@@ -15,7 +15,7 @@ export interface JobParamPostPayloadDiscoverCsv extends JobParamPostPayload {
 
 export interface JobParamsDiscoverCsv {
   indexPatternId?: string;
-  post?: JobParamPostPayloadDiscoverCsv; // delete this // FIXME
+  post?: JobParamPostPayloadDiscoverCsv;
 }
 
 export interface JobDocPayloadDiscoverCsv extends JobDocPayload<JobParamsDiscoverCsv> {
