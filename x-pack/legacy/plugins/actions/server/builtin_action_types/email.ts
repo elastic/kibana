@@ -7,7 +7,7 @@
 import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
-import nodemailerServices from 'nodemailer/lib/well-known/services.json';
+import nodemailerGetService from 'nodemailer/lib/well-known';
 
 import { sendEmail, JSON_TRANSPORT_SERVICE } from './lib/send_email';
 import { nullableType } from './lib/nullable';
@@ -191,24 +191,14 @@ async function executor(
 
 // utilities
 
-const ServiceNameHosts = getServiceNameHosts();
-
-// returns map of nodemailer service name: resulting host name
-function getServiceNameHosts(): Map<string, string> {
-  const result = new Map<string, string>();
-
-  for (const [serviceName, serviceValue] of Object.entries<any>(nodemailerServices)) {
-    if (serviceValue == null) continue;
-    if (serviceValue.host == null) continue;
-
-    result.set(serviceName.toLowerCase(), serviceValue.host);
-  }
-
-  return result;
-}
-
 function getServiceNameHost(service: string): string | null {
-  return ServiceNameHosts.get(service.toLowerCase()) || null;
+  const serviceEntry = nodemailerGetService(service);
+  if (serviceEntry === false) return null;
+
+  // in theory this won't happen, but it's JS, so just to be safe ...
+  if (serviceEntry == null) return null;
+
+  return serviceEntry.host || null;
 }
 
 // Returns the secure value - whether to use TLS or not.
