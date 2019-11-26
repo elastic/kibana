@@ -4,7 +4,7 @@ set -xe
 ## host.docker.internal is not available in native docker installations
 kibana=$(dig +short host.docker.internal)
 if [ -z "${kibana}" ] ; then
-  kibana=locahost
+  kibana=127.0.0.1
 fi
 
 export CYPRESS_BASE_URL=http://${kibana}:5601
