@@ -400,11 +400,11 @@ The first argument is always a [reference](#references) while the second one can
 The third argument is a schema that should be used if the result of the aforementioned comparison evaluates to `true`, otherwise `schema.conditional()` should fallback
 to the schema provided as the fourth argument.
 
-__Output type:__ `TConditional1 | TConditional2`
+__Output type:__ `TTrueResult | TFalseResult`
 
 __Options:__
-  * `defaultValue: TConditional1 | TConditional2 | Reference<TConditional1 | TConditional2> | (() => TConditional1 | TConditional2` - defines a default value, see [Default values](#default-values) section for more details.
-  * `validate: (value: TConditional1 | TConditional2) => string | void` - defines a custom validator function, see [Custom validation](#custom-validation) section for more details.
+  * `defaultValue: TTrueResult | TFalseResult | Reference<TTrueResult | TFalseResult> | (() => TTrueResult | TFalseResult` - defines a default value, see [Default values](#default-values) section for more details.
+  * `validate: (value: TTrueResult | TFalseResult) => string | void` - defines a custom validator function, see [Custom validation](#custom-validation) section for more details.
 
 __Usage:__
 ```typescript
