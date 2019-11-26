@@ -19,11 +19,21 @@ export const createGetMonitorDetailsRoute: UMRestApiRouteCreator = (libs: UMServ
   options: {
     tags: ['access:uptime'],
   },
-  handler: async (_context, request, response): Promise<any> => {
+  handler: async (
+    {
+      core: {
+        elasticsearch: {
+          dataClient: { callAsCurrentUser },
+        },
+      },
+    },
+    request,
+    response
+  ): Promise<any> => {
     const { monitorId } = request.query;
 
     return response.ok({
-      body: { ...(await libs.monitors.getMonitorDetails(request, monitorId)) },
+      body: { ...(await libs.monitors.getMonitorDetails(callAsCurrentUser, monitorId)) },
     });
   },
 });
