@@ -27,23 +27,27 @@
  * This class seems to interface with ES primarily through the es Angular
  * service and the saved object api.
  */
-import { SavedObjectConfig, SavedObjectSaveOptions } from 'ui/saved_objects/types';
+import { SavedObjectsClient } from 'kibana/public';
+import { IPrivate } from 'ui/private';
+import { SavedObjectConfig, SaveOptions } from 'ui/saved_objects/types';
 import { PromiseService } from 'ui/promises';
 import { buildSavedObject } from 'ui/saved_objects/helpers/build_saved_object';
 import { SavedObjectsClientProvider } from './saved_objects_client_provider';
 import { IndexPatterns } from '../../../core_plugins/data/public/index_patterns/index_patterns';
+import { ConfirmModalPromise } from './types';
+
 export { SaveOptions } from './types';
 
 export interface SavedObject {
-  save: (saveOptions: SavedObjectSaveOptions) => Promise<string>;
+  save: (saveOptions: SaveOptions) => Promise<string>;
   copyOnSave: boolean;
   id?: string;
 }
 
 export function SavedObjectProvider(
   Promise: PromiseService,
-  Private: any,
-  confirmModalPromise: any,
+  Private: IPrivate,
+  confirmModalPromise: ConfirmModalPromise,
   indexPatterns: IndexPatterns
 ) {
   const savedObjectsClient = Private(SavedObjectsClientProvider);
@@ -63,7 +67,7 @@ export function SavedObjectProvider(
       this,
       config,
       indexPatterns,
-      savedObjectsClient,
+      savedObjectsClient as SavedObjectsClient,
       confirmModalPromise,
       Promise
     );

@@ -23,7 +23,13 @@ import { hydrateIndexPattern } from 'ui/saved_objects/helpers/hydrate_index_patt
 import { intializeSavedObject } from 'ui/saved_objects/helpers/initialize_saved_object';
 import { serializeSavedObject } from 'ui/saved_objects/helpers/serialize_saved_object';
 import { SavedObjectsClient } from 'kibana/public';
-import { EsResponse, SavedObject, SavedObjectConfig } from 'ui/saved_objects/types';
+import {
+  ConfirmModalPromise,
+  EsResponse,
+  SavedObject,
+  SavedObjectConfig,
+  SaveOptions,
+} from 'ui/saved_objects/types';
 import { applyEsResp } from 'ui/saved_objects/helpers/apply_es_resp';
 import { saveSavedObject } from 'ui/saved_objects/helpers/save_saved_object';
 import { IndexPatterns } from '../../../../core_plugins/data/public';
@@ -33,7 +39,7 @@ export function buildSavedObject(
   config: SavedObjectConfig = {},
   indexPatterns: IndexPatterns,
   savedObjectsClient: SavedObjectsClient,
-  confirmModalPromise: Promise<unknown>,
+  confirmModalPromise: ConfirmModalPromise,
   AngularPromise: PromiseService
 ) {
   // type name for this object, used as the ES-type
@@ -69,7 +75,7 @@ export function buildSavedObject(
    * @return {Promise<IndexPattern | null>}
    */
   savedObject.hydrateIndexPattern = (id?: string) =>
-    hydrateIndexPattern(id || '', savedObject, indexPatterns, config, Promise);
+    hydrateIndexPattern(id || '', savedObject, indexPatterns, config);
   /**
    * Asynchronously initialize this object - will only run
    * once even if called multiple times.
@@ -78,7 +84,7 @@ export function buildSavedObject(
    * @resolved {SavedObject}
    */
   savedObject.init = _.once(() =>
-    intializeSavedObject(savedObject, savedObjectsClient, config, Promise)
+    AngularPromise.resolve(intializeSavedObject(savedObject, savedObjectsClient, config))
   );
 
   savedObject.applyESResp = (resp: EsResponse) =>
@@ -94,9 +100,8 @@ export function buildSavedObject(
    * Returns true if the object's original title has been changed. New objects return false.
    * @return {boolean}
    */
-  savedObject.isTitleChanged = () => {
-    return savedObject._source && savedObject._source.title !== savedObject.title;
-  };
+  savedObject.isTitleChanged = () =>
+    savedObject._source && savedObject._source.title !== savedObject.title;
 
   savedObject.creationOpts = (opts: Record<string, any> = {}) => ({
     id: savedObject.id,
@@ -104,13 +109,24 @@ export function buildSavedObject(
     ...opts,
   });
 
-  savedObject.save = (opts: any) => {
-    return saveSavedObject(savedObject, savedObjectsClient, config, confirmModalPromise, Promise, {
-      ...opts,
-    });
+  savedObject.save = async (opts: SaveOptions) => {
+    try {
+      const result = await saveSavedObject(
+        savedObject,
+        savedObjectsClient,
+        config,
+        opts,
+        confirmModalPromise
+      );
+      return AngularPromise.resolve(result);
+    } catch (e) {
+      return AngularPromise.reject(e);
+    }
   };
 
   savedObject.destroy = () => {};
+
+  savedObject.getFullPath = () => config.path + '/' + config.id;
 
   /**
    * Delete this object from Elasticsearch
@@ -118,7 +134,7 @@ export function buildSavedObject(
    */
   savedObject.delete = () => {
     if (!savedObject.id) {
-      return Promise.reject(new Error('Deleting a saved Object requires type and id'));
+      return AngularPromise.reject(new Error('Deleting a saved Object requires type and id'));
     }
     return savedObjectsClient.delete(esType, savedObject.id);
   };

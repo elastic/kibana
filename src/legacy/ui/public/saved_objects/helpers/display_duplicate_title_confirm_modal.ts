@@ -18,14 +18,11 @@
  */
 import { i18n } from '@kbn/i18n';
 import { SAVE_DUPLICATE_REJECTED } from 'ui/saved_objects/constants';
-import { SavedObject } from '../types';
+import { ConfirmModalPromise, SavedObject } from '../types';
 
 export function displayDuplicateTitleConfirmModal(
   savedObject: SavedObject,
-  confirmModalPromise: (
-    message: string,
-    options: { confirmButtonText: string }
-  ) => Promise<React.Component>
+  confirmModalPromise: ConfirmModalPromise
 ) {
   const confirmMessage = i18n.translate(
     'common.ui.savedObjects.confirmModal.saveDuplicateConfirmationMessage',

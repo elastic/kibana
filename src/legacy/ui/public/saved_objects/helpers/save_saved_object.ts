@@ -16,15 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObject, SavedObjectConfig } from 'ui/saved_objects/types';
+import {
+  ConfirmModalPromise,
+  SavedObject,
+  SavedObjectConfig,
+  SaveOptions,
+} from 'ui/saved_objects/types';
 import { npStart } from 'ui/new_platform';
-import { findObjectByTitle } from 'ui/saved_objects';
-import { displayDuplicateTitleConfirmModal } from 'ui/saved_objects/helpers/display_duplicate_title_confirm_modal';
-import { SavedObjectsClient, SimpleSavedObject } from 'kibana/public';
+import { SavedObjectsClient } from 'kibana/public';
 import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from 'ui/saved_objects/constants';
 
 import { createSource } from 'ui/saved_objects/helpers/create_source';
-import { PromiseService } from 'ui/promises';
+import { checkForDuplicateTitle } from 'ui/saved_objects/helpers/check_for_duplicate_title';
 
 /**
  * @param error {Error} the error
@@ -35,72 +38,33 @@ function isErrorNonFatal(error: { message: string }) {
   return error.message === OVERWRITE_REJECTED || error.message === SAVE_DUPLICATE_REJECTED;
 }
 
-const checkForDuplicateTitle = (
-  savedObject: SavedObject,
-  savedObjectsClient: SavedObjectsClient,
-  isTitleDuplicateConfirmed: boolean,
-  onTitleDuplicate: (() => void) | undefined,
-  Promise: any,
-  confirmModalPromise: any
-) => {
-  // Don't check for duplicates if user has already confirmed save with duplicate title
-  if (isTitleDuplicateConfirmed) {
-    return Promise.resolve();
-  }
-
-  // Don't check if the user isn't updating the title, otherwise that would become very annoying to have
-  // to confirm the save every time, except when copyOnSave is true, then we do want to check.
-  if (savedObject.title === savedObject.lastSavedTitle && !savedObject.copyOnSave) {
-    return Promise.resolve();
-  }
-
-  return findObjectByTitle(savedObjectsClient, savedObject.getEsType(), savedObject.title).then(
-    (duplicate: SimpleSavedObject<any> | void) => {
-      if (!duplicate) return true;
-      if (duplicate.id === savedObject.id) return true;
-
-      if (onTitleDuplicate) {
-        onTitleDuplicate();
-        return Promise.reject(new Error(SAVE_DUPLICATE_REJECTED));
-      }
-
-      // TODO: make onTitleDuplicate a required prop and remove UI components from this class
-      // Need to leave here until all users pass onTitleDuplicate.
-      return displayDuplicateTitleConfirmModal(savedObject, confirmModalPromise);
-    }
-  );
-};
-
-interface SaveOptions {
-  confirmOverwrite?: boolean;
-  isTitleDuplicateConfirmed?: boolean;
-  onTitleDuplicate?: () => void | undefined;
-}
 /**
  * Saves this object.
  *
  * @param {string} [esType]
- * @param {savedObject} [savedObject]
+ * @param {SavedObject} [savedObject]
+ * @param {SavedObjectsClient} [savedObjectsClient]
+ * @param {SavedObjectConfig} [config]
  * @param {object} [options={}]
  * @property {boolean} [options.confirmOverwrite=false] - If true, attempts to create the source so it
  * can confirm an overwrite if a document with the id already exists.
  * @property {boolean} [options.isTitleDuplicateConfirmed=false] - If true, save allowed with duplicate title
  * @property {func} [options.onTitleDuplicate] - function called if duplicate title exists.
  * When not provided, confirm modal will be displayed asking user to confirm or cancel save.
+ * @param {ConfirmModalPromise} [confirmModalPromise]
  * @return {Promise}
  * @resolved {String} - The id of the doc
  */
-export function saveSavedObject(
+export async function saveSavedObject(
   savedObject: SavedObject,
   savedObjectsClient: SavedObjectsClient,
   config: SavedObjectConfig,
-  confirmModalPromise: Promise<any>,
-  AngularPromise: PromiseService,
   {
     confirmOverwrite = false,
     isTitleDuplicateConfirmed = false,
     onTitleDuplicate,
-  }: SaveOptions = {}
+  }: SaveOptions = {},
+  confirmModalPromise: ConfirmModalPromise
 ) {
   const esType = config.type || '';
   const extractReferences = config.extractReferences;
@@ -130,7 +94,6 @@ export function saveSavedObject(
     savedObjectsClient,
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
-    AngularPromise,
     confirmModalPromise
   )
     .then(() => {
@@ -140,7 +103,6 @@ export function saveSavedObject(
           savedObject,
           savedObjectsClient,
           esType,
-          Promise,
           confirmModalPromise,
           savedObject.creationOpts({ references })
         );

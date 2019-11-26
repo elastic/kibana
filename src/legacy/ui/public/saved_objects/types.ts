@@ -20,17 +20,6 @@ import { SearchSource } from 'ui/courier';
 import { SavedObjectAttributes, SavedObjectReference } from 'kibana/server';
 import { IndexPattern } from '../../../core_plugins/data/public';
 
-export interface SaveOptions {
-  confirmOverwrite: boolean;
-  isTitleDuplicateConfirmed: boolean;
-  onTitleDuplicate: () => void;
-}
-
-export interface CreationOpts {
-  references?: SavedObjectReference[];
-  overwrite?: boolean;
-}
-
 export interface SavedObject {
   _serialize: () => { attributes: SavedObjectAttributes; references: SavedObjectReference[] };
   _source: Record<string, unknown>;
@@ -58,6 +47,17 @@ export interface SavedObject {
   title: string;
 }
 
+export interface SaveOptions {
+  confirmOverwrite?: boolean;
+  isTitleDuplicateConfirmed?: boolean;
+  onTitleDuplicate?: () => void;
+}
+
+export interface CreationOpts {
+  references?: SavedObjectReference[];
+  overwrite?: boolean;
+}
+
 export interface SavedObjectConfig {
   afterESResp?: () => any;
   clearSavedIndexPattern?: boolean;
@@ -75,14 +75,14 @@ export interface SavedObjectConfig {
   injectReferences?: any;
   mapping?: any;
   migrationVersion?: Record<string, any>;
-  searchSource?: any;
+  path?: string;
+  searchSource?: SearchSource;
   type?: string;
 }
 
 export type EsResponse = Record<string, any>;
 
-export interface SavedObjectSaveOptions {
-  confirmOverwrite: boolean;
-  isTitleDuplicateConfirmed: boolean;
-  onTitleDuplicate: () => void;
-}
+export type ConfirmModalPromise = (
+  message: string,
+  customOptions: Record<string, unknown>
+) => angular.IPromise<unknown>;
