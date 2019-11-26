@@ -7,14 +7,15 @@
 import { set } from 'lodash';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsRepository } from 'src/core/server/saved_objects/service/lib/repository';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   UPGRADE_ASSISTANT_DOC_ID,
   UPGRADE_ASSISTANT_TYPE,
   UpgradeAssistantTelemetry,
   UpgradeAssistantTelemetrySavedObject,
   UpgradeAssistantTelemetrySavedObjectAttributes,
-  UpgradeAssistantTelemetryServer,
 } from '../../../common/types';
+import { ServerShim } from '../../types';
 import { isDeprecationLoggingEnabled } from '../es_deprecation_logging_apis';
 
 async function getSavedObjectAttributesFromRepo(
@@ -43,7 +44,7 @@ async function getDeprecationLoggingStatusValue(callCluster: any): Promise<boole
 
 export async function fetchUpgradeAssistantMetrics(
   callCluster: any,
-  server: UpgradeAssistantTelemetryServer
+  server: ServerShim
 ): Promise<UpgradeAssistantTelemetry> {
   const { getSavedObjectsRepository } = server.savedObjects;
   const savedObjectsRepository = getSavedObjectsRepository(callCluster);
@@ -97,13 +98,15 @@ export async function fetchUpgradeAssistantMetrics(
   };
 }
 
-export function makeUpgradeAssistantUsageCollector(server: UpgradeAssistantTelemetryServer) {
-  const kbnServer = server as UpgradeAssistantTelemetryServer;
-  const upgradeAssistantUsageCollector = kbnServer.usage.collectorSet.makeUsageCollector({
+export function registerUpgradeAssistantUsageCollector(
+  usageCollection: UsageCollectionSetup,
+  server: ServerShim
+) {
+  const upgradeAssistantUsageCollector = usageCollection.makeUsageCollector({
     type: UPGRADE_ASSISTANT_TYPE,
     isReady: () => true,
     fetch: async (callCluster: any) => fetchUpgradeAssistantMetrics(callCluster, server),
   });
 
-  kbnServer.usage.collectorSet.register(upgradeAssistantUsageCollector);
+  usageCollection.registerCollector(upgradeAssistantUsageCollector);
 }

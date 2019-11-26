@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getSpacesUsageCollector, UsageStats } from './get_spaces_usage_collector';
+import { getSpacesUsageCollector, UsageStats } from './spaces_usage_collector';
 import * as Rx from 'rxjs';
 import { PluginsSetup } from '../plugin';
 import { Feature } from '../../../features/server';
@@ -42,10 +42,8 @@ function setup({
   return {
     licensing,
     features: featuresSetup,
-    usage: {
-      collectorSet: {
-        makeUsageCollector: (options: any) => new MockUsageCollector(options),
-      },
+    usageCollecion: {
+      makeUsageCollector: (options: any) => new MockUsageCollector(options),
     },
   };
 }
@@ -71,10 +69,11 @@ const defaultCallClusterMock = jest.fn().mockResolvedValue({
 describe('with a basic license', () => {
   let usageStats: UsageStats;
   beforeAll(async () => {
-    const { features, licensing, usage } = setup({ license: { isAvailable: true, type: 'basic' } });
-    const { fetch: getSpacesUsage } = getSpacesUsageCollector({
+    const { features, licensing, usageCollecion } = setup({
+      license: { isAvailable: true, type: 'basic' },
+    });
+    const { fetch: getSpacesUsage } = getSpacesUsageCollector(usageCollecion as any, {
       kibanaIndex: '.kibana',
-      usage,
       features,
       licensing,
     });
@@ -106,10 +105,9 @@ describe('with a basic license', () => {
 describe('with no license', () => {
   let usageStats: UsageStats;
   beforeAll(async () => {
-    const { features, licensing, usage } = setup({ license: { isAvailable: false } });
-    const { fetch: getSpacesUsage } = getSpacesUsageCollector({
+    const { features, licensing, usageCollecion } = setup({ license: { isAvailable: false } });
+    const { fetch: getSpacesUsage } = getSpacesUsageCollector(usageCollecion as any, {
       kibanaIndex: '.kibana',
-      usage,
       features,
       licensing,
     });
@@ -136,12 +134,11 @@ describe('with no license', () => {
 describe('with platinum license', () => {
   let usageStats: UsageStats;
   beforeAll(async () => {
-    const { features, licensing, usage } = setup({
+    const { features, licensing, usageCollecion } = setup({
       license: { isAvailable: true, type: 'platinum' },
     });
-    const { fetch: getSpacesUsage } = getSpacesUsageCollector({
+    const { fetch: getSpacesUsage } = getSpacesUsageCollector(usageCollecion as any, {
       kibanaIndex: '.kibana',
-      usage,
       features,
       licensing,
     });

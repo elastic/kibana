@@ -7,6 +7,7 @@
 import { get } from 'lodash';
 import { CallAPIOptions } from 'src/core/server';
 import { take } from 'rxjs/operators';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 // @ts-ignore
 import { KIBANA_STATS_TYPE_MONITORING } from '../../../../legacy/plugins/monitoring/common/constants';
 import { KIBANA_SPACES_STATS_TYPE } from '../../common/constants';
@@ -116,7 +117,6 @@ export interface UsageStats {
 
 interface CollectorDeps {
   kibanaIndex: string;
-  usage: { collectorSet: any };
   features: PluginsSetup['features'];
   licensing: PluginsSetup['licensing'];
 }
@@ -125,9 +125,11 @@ interface CollectorDeps {
  * @param {Object} server
  * @return {Object} kibana usage stats type collection object
  */
-export function getSpacesUsageCollector(deps: CollectorDeps) {
-  const { collectorSet } = deps.usage;
-  return collectorSet.makeUsageCollector({
+export function getSpacesUsageCollector(
+  usageCollection: UsageCollectionSetup,
+  deps: CollectorDeps
+) {
+  return usageCollection.makeUsageCollector({
     type: KIBANA_SPACES_STATS_TYPE,
     isReady: () => true,
     fetch: async (callCluster: CallCluster) => {
@@ -164,4 +166,15 @@ export function getSpacesUsageCollector(deps: CollectorDeps) {
       };
     },
   });
+}
+
+export function registerSpacesUsageCollector(
+  usageCollection: UsageCollectionSetup | undefined,
+  deps: CollectorDeps
+) {
+  if (!usageCollection) {
+    return;
+  }
+  const collector = getSpacesUsageCollector(usageCollection, deps);
+  usageCollection.registerCollector(collector);
 }
