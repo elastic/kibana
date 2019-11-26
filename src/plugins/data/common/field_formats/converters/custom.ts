@@ -18,13 +18,11 @@
  */
 
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert } from '../types';
-
-const ID = 'custom';
+import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 
 export const createCustomFieldFormat = (convert: TextContextTypeConvert) =>
   class CustomFieldFormat extends FieldFormat {
-    static id = ID;
+    static id = FIELD_FORMAT_IDS.CUSTOM;
 
     textConvert = convert;
   };

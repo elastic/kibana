@@ -19,7 +19,7 @@
 import { IScope } from 'angular';
 
 import { IUiActionsStart, IUiActionsSetup } from 'src/plugins/ui_actions/public';
-import { Start as EmbeddableStart, Setup as EmbeddableSetup } from 'src/plugins/embeddable/public';
+import { IEmbeddableStart, IEmbeddableSetup } from 'src/plugins/embeddable/public';
 import { LegacyCoreSetup, LegacyCoreStart, App } from '../../../../core/public';
 import { Plugin as DataPlugin } from '../../../../plugins/data/public';
 import { Plugin as ExpressionsPlugin } from '../../../../plugins/expressions/public';
@@ -29,33 +29,33 @@ import {
 } from '../../../../plugins/inspector/public';
 import { EuiUtilsStart } from '../../../../plugins/eui_utils/public';
 import { DevToolsSetup, DevToolsStart } from '../../../../plugins/dev_tools/public';
-import {
-  FeatureCatalogueSetup,
-  FeatureCatalogueStart,
-} from '../../../../plugins/feature_catalogue/public';
+import { KibanaLegacySetup, KibanaLegacyStart } from '../../../../plugins/kibana_legacy/public';
+import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../plugins/home/public';
 import { SharePluginSetup, SharePluginStart } from '../../../../plugins/share/public';
 
 export interface PluginsSetup {
   data: ReturnType<DataPlugin['setup']>;
-  embeddable: EmbeddableSetup;
+  embeddable: IEmbeddableSetup;
   expressions: ReturnType<ExpressionsPlugin['setup']>;
-  feature_catalogue: FeatureCatalogueSetup;
+  home: HomePublicPluginSetup;
   inspector: InspectorSetup;
   uiActions: IUiActionsSetup;
+  dev_tools: DevToolsSetup;
+  kibana_legacy: KibanaLegacySetup;
   share: SharePluginSetup;
-  devTools: DevToolsSetup;
 }
 
 export interface PluginsStart {
   data: ReturnType<DataPlugin['start']>;
-  embeddable: EmbeddableStart;
+  embeddable: IEmbeddableStart;
   eui_utils: EuiUtilsStart;
   expressions: ReturnType<ExpressionsPlugin['start']>;
-  feature_catalogue: FeatureCatalogueStart;
+  home: HomePublicPluginStart;
   inspector: InspectorStart;
   uiActions: IUiActionsStart;
+  dev_tools: DevToolsStart;
+  kibana_legacy: KibanaLegacyStart;
   share: SharePluginStart;
-  devTools: DevToolsStart;
 }
 
 export const npSetup = {
@@ -111,7 +111,10 @@ export const legacyAppRegister = (app: App) => {
 
     // Root controller cannot return a Promise so use an internal async function and call it immediately
     (async () => {
-      const unmount = await app.mount({ core: npStart.core }, { element, appBasePath: '' });
+      const unmount = await app.mount(
+        { core: npStart.core },
+        { element, appBasePath: npSetup.core.http.basePath.prepend(`/app/${app.id}`) }
+      );
       $scope.$on('$destroy', () => {
         unmount();
       });

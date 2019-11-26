@@ -17,8 +17,8 @@
  * under the License.
  */
 
+import { first, skip } from 'rxjs/operators';
 import { fromExpression } from '@kbn/interpreter/common';
-import { first } from 'rxjs/operators';
 import { loader, ExpressionLoader } from './loader';
 import { ExpressionDataHandler } from './execute';
 import { IInterpreterRenderHandlers } from './types';
@@ -124,7 +124,7 @@ describe('ExpressionLoader', () => {
     let response = await expressionLoader.render$.pipe(first()).toPromise();
     expect(response).toBe(1);
     expressionLoader.update('test');
-    response = await expressionLoader.render$.pipe(first()).toPromise();
+    response = await expressionLoader.render$.pipe(skip(1), first()).toPromise();
     expect(response).toBe(2);
   });
 

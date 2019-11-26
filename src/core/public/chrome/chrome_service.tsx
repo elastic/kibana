@@ -36,6 +36,7 @@ import { NavControlsService, ChromeNavControls } from './nav_controls';
 import { DocTitleService, ChromeDocTitle } from './doc_title';
 import { LoadingIndicator, HeaderWrapper as Header } from './ui';
 import { DocLinksStart } from '../doc_links';
+import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
 
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
@@ -58,7 +59,20 @@ export interface ChromeBrand {
 export type ChromeBreadcrumb = EuiBreadcrumb;
 
 /** @public */
-export type ChromeHelpExtension = (element: HTMLDivElement) => () => void;
+export interface ChromeHelpExtension {
+  /**
+   * Provide your plugin's name to create a header for separation
+   */
+  appName: string;
+  /**
+   * Creates unified links for sending users to documentation, GitHub, Discuss, or a custom link/button
+   */
+  links?: ChromeHelpExtensionMenuLink[];
+  /**
+   * Custom content to occur below the list of links
+   */
+  content?: (element: HTMLDivElement) => () => void;
+}
 
 interface ConstructorParams {
   browserSupportsCsp: boolean;

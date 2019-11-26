@@ -17,29 +17,35 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { Storage } from '../../kibana_utils/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from './types';
 import { AutocompleteProviderRegister } from './autocomplete_provider';
 import { getSuggestionsProvider } from './suggestions_provider';
 import { SearchService } from './search/search_service';
+import { FieldFormatsService } from './field_formats_provider';
 import { QueryService } from './query';
+import { createIndexPatternSelect } from './ui/index_pattern_select';
 
 export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPublicPluginStart> {
   private readonly autocomplete = new AutocompleteProviderRegister();
   private readonly searchService: SearchService;
+  private readonly fieldFormatsService: FieldFormatsService;
   private readonly queryService: QueryService;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.searchService = new SearchService(initializerContext);
     this.queryService = new QueryService();
+    this.fieldFormatsService = new FieldFormatsService();
   }
 
   public setup(core: CoreSetup): DataPublicPluginSetup {
     const storage = new Storage(window.localStorage);
+
     return {
       autocomplete: this.autocomplete,
       search: this.searchService.setup(core),
+      fieldFormats: this.fieldFormatsService.setup(core),
       query: this.queryService.setup({
         uiSettings: core.uiSettings,
         storage,
@@ -52,7 +58,11 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       autocomplete: this.autocomplete,
       getSuggestions: getSuggestionsProvider(core.uiSettings, core.http),
       search: this.searchService.start(core),
+      fieldFormats: this.fieldFormatsService.start(),
       query: this.queryService.start(),
+      ui: {
+        IndexPatternSelect: createIndexPatternSelect(core.savedObjects.client),
+      },
     };
   }
 

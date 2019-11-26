@@ -19,9 +19,6 @@
 
 import { find, get } from 'lodash';
 
-import { Field } from './fields';
-import { getFilterableKbnTypeNames } from '../../../../../plugins/data/public';
-
 import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
 
 export const ILLEGAL_CHARACTERS = 'ILLEGAL_CHARACTERS';
@@ -74,19 +71,6 @@ export async function findIndexPatternByTitle(
   );
 }
 
-export async function getIndexPatternTitle(
-  client: SavedObjectsClientContract,
-  indexPatternId: string
-): Promise<SimpleSavedObject<any>> {
-  const savedObject = (await client.get('index-pattern', indexPatternId)) as SimpleSavedObject<any>;
-
-  if (savedObject.error) {
-    throw new Error(`Unable to get index-pattern title: ${savedObject.error.message}`);
-  }
-
-  return savedObject.attributes.title;
-}
-
 function indexPatternContainsSpaces(indexPattern: string): boolean {
   return indexPattern.includes(' ');
 }
@@ -105,16 +89,6 @@ export function validateIndexPattern(indexPattern: string) {
   }
 
   return errors;
-}
-
-const filterableTypes = getFilterableKbnTypeNames();
-
-export function isFilterable(field: Field): boolean {
-  return (
-    field.name === '_id' ||
-    field.scripted ||
-    Boolean(field.searchable && filterableTypes.includes(field.type))
-  );
 }
 
 export function getFromSavedObject(savedObject: any) {

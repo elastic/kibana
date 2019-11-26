@@ -9,7 +9,9 @@ import './angular/config';
 import './angular/services';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
+import { documentationLinks } from './lib/documentation_links';
 import { CanvasRootController } from './angular/controllers';
 
 // Import the uiExports that the application uses
@@ -19,7 +21,6 @@ import 'uiExports/visRequestHandlers';
 import 'uiExports/visEditorTypes';
 import 'uiExports/savedObjectTypes';
 import 'uiExports/spyModes';
-import 'uiExports/fieldFormats';
 import 'uiExports/embeddableFactories';
 import 'uiExports/interpreter';
 
@@ -34,6 +35,17 @@ import { HelpMenu } from './components/help_menu/help_menu';
 chrome.setRootController('canvas', CanvasRootController);
 
 // add Canvas docs to help menu in global nav
-chrome.helpExtension.set(domNode => {
-  ReactDOM.render(<HelpMenu />, domNode);
+chrome.helpExtension.set({
+  appName: i18n.translate('xpack.canvas.helpMenu.appName', {
+    defaultMessage: 'Canvas',
+  }),
+  links: [
+    {
+      linkType: 'documentation',
+      href: documentationLinks.canvas,
+    },
+  ],
+  content: domNode => {
+    ReactDOM.render(<HelpMenu />, domNode);
+  },
 });

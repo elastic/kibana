@@ -13,11 +13,11 @@ import {
   EuiIcon,
   EuiPage,
 } from '@elastic/eui';
-import styled, { injectGlobal } from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 
-// SIDE EFFECT: the following `injectGlobal` overrides default styling in angular code that was not theme-friendly
+// SIDE EFFECT: the following `createGlobalStyle` overrides default styling in angular code that was not theme-friendly
 // eslint-disable-next-line no-unused-expressions
-injectGlobal`
+createGlobalStyle`
   div.app-wrapper {
     background-color: rgba(0,0,0,0);
   }

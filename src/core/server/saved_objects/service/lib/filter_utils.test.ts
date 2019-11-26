@@ -405,5 +405,29 @@ describe('Filter Utils', () => {
         },
       ]);
     });
+
+    test('Return Error if filter is using an non-existing key null key', () => {
+      const validationObject = validateFilterKueryNode(
+        fromKueryExpression('foo.attributes.description: hello AND bye'),
+        ['foo'],
+        mockMappings
+      );
+      expect(validationObject).toEqual([
+        {
+          astPath: 'arguments.0',
+          error: null,
+          isSavedObjectAttr: false,
+          key: 'foo.attributes.description',
+          type: 'foo',
+        },
+        {
+          astPath: 'arguments.1',
+          error: 'The key is empty and needs to be wrapped by a saved object type like foo',
+          isSavedObjectAttr: false,
+          key: null,
+          type: null,
+        },
+      ]);
+    });
   });
 });

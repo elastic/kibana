@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { pickBy, identity } from 'lodash/fp';
+import { pickBy } from 'lodash/fp';
 import { SignalAlertType, isAlertType, OutputSignalAlertRest, isAlertTypes } from '../alerts/types';
 
 export const getIdError = ({
@@ -27,31 +27,33 @@ export const getIdError = ({
 // Transforms the data but will remove any null or undefined it encounters and not include
 // those on the export
 export const transformAlertToSignal = (signal: SignalAlertType): Partial<OutputSignalAlertRest> => {
-  return pickBy<OutputSignalAlertRest>(identity, {
+  return pickBy<OutputSignalAlertRest>((value: unknown) => value != null, {
     created_by: signal.createdBy,
-    description: signal.alertTypeParams.description,
+    description: signal.params.description,
     enabled: signal.enabled,
-    false_positives: signal.alertTypeParams.falsePositives,
-    filter: signal.alertTypeParams.filter,
-    filters: signal.alertTypeParams.filters,
-    from: signal.alertTypeParams.from,
+    false_positives: signal.params.falsePositives,
+    filter: signal.params.filter,
+    filters: signal.params.filters,
+    from: signal.params.from,
     id: signal.id,
-    immutable: signal.alertTypeParams.immutable,
-    index: signal.alertTypeParams.index,
+    immutable: signal.params.immutable,
+    index: signal.params.index,
     interval: signal.interval,
-    rule_id: signal.alertTypeParams.ruleId,
-    language: signal.alertTypeParams.language,
-    max_signals: signal.alertTypeParams.maxSignals,
+    rule_id: signal.params.ruleId,
+    language: signal.params.language,
+    output_index: signal.params.outputIndex,
+    max_signals: signal.params.maxSignals,
+    risk_score: signal.params.riskScore,
     name: signal.name,
-    query: signal.alertTypeParams.query,
-    references: signal.alertTypeParams.references,
-    saved_id: signal.alertTypeParams.savedId,
-    severity: signal.alertTypeParams.severity,
-    size: signal.alertTypeParams.size,
+    query: signal.params.query,
+    references: signal.params.references,
+    saved_id: signal.params.savedId,
+    meta: signal.params.meta,
+    severity: signal.params.severity,
     updated_by: signal.updatedBy,
-    tags: signal.alertTypeParams.tags,
-    to: signal.alertTypeParams.to,
-    type: signal.alertTypeParams.type,
+    tags: signal.params.tags,
+    to: signal.params.to,
+    type: signal.params.type,
   });
 };
 

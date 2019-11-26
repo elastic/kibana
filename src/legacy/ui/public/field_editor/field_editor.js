@@ -28,16 +28,14 @@ import {
 } from 'ui/scripting_languages';
 
 import {
-  fieldFormats
-} from 'ui/registry/field_formats';
-
-import {
   getDocLink
 } from 'ui/documentation_links';
 
 import {
   toastNotifications
 } from 'ui/notify';
+
+import { npStart } from 'ui/new_platform';
 
 import {
   EuiBasicTable,
@@ -84,7 +82,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 // This loads Ace editor's "groovy" mode, used below to highlight the script.
 import 'brace/mode/groovy';
 
+const getFieldFormats = () => npStart.plugins.data.fieldFormats;
+
 export class FieldEditor extends PureComponent {
+
   static propTypes = {
     indexPattern: PropTypes.object.isRequired,
     field: PropTypes.object.isRequired,
@@ -141,9 +142,10 @@ export class FieldEditor extends PureComponent {
     const fieldTypes = get(FIELD_TYPES_BY_LANG, field.lang, DEFAULT_FIELD_TYPES);
     field.type = fieldTypes.includes(field.type) ? field.type : fieldTypes[0];
 
-    const DefaultFieldFormat = fieldFormats.getDefaultType(field.type, field.esTypes);
+    const fieldFormats = getFieldFormats();
+
     const fieldTypeFormats = [
-      getDefaultFormat(DefaultFieldFormat),
+      getDefaultFormat(fieldFormats.getDefaultType(field.type, field.esTypes)),
       ...fieldFormats.getByFieldType(field.type),
     ];
 
@@ -169,12 +171,14 @@ export class FieldEditor extends PureComponent {
   onTypeChange = (type) => {
     const { getConfig } = this.props.helpers;
     const { field } = this.state;
+    const fieldFormats = getFieldFormats();
     const DefaultFieldFormat = fieldFormats.getDefaultType(type);
+
     field.type = type;
 
     const fieldTypeFormats = [
       getDefaultFormat(DefaultFieldFormat),
-      ...fieldFormats.getByFieldType(field.type),
+      ...getFieldFormats().getByFieldType(field.type),
     ];
 
     const FieldFormat = fieldTypeFormats[0];
@@ -202,6 +206,7 @@ export class FieldEditor extends PureComponent {
     const { getConfig } = this.props.helpers;
     const { field, fieldTypeFormats } = this.state;
     const FieldFormat = fieldTypeFormats.find((format) => format.id === formatId) || fieldTypeFormats[0];
+
     field.format = new FieldFormat(params, getConfig);
 
     this.setState({
@@ -684,6 +689,7 @@ export class FieldEditor extends PureComponent {
   }
 
   saveField = async () => {
+    const fieldFormat = this.state.field.format;
     const field = this.state.field.toActualField();
     const { indexPattern } = this.props;
     const { fieldFormatId } = this.state;
@@ -721,7 +727,7 @@ export class FieldEditor extends PureComponent {
     if (!fieldFormatId) {
       indexPattern.fieldFormatMap[field.name] = undefined;
     } else {
-      indexPattern.fieldFormatMap[field.name] = field.format;
+      indexPattern.fieldFormatMap[field.name] = fieldFormat;
     }
 
     return indexPattern.save()
