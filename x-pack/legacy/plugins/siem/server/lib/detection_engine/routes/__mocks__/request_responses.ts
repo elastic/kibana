@@ -6,13 +6,13 @@
 
 import { ServerInjectOptions } from 'hapi';
 import { ActionResult } from '../../../../../../actions/server/types';
-import { SignalAlertParamsRest, SignalAlertType } from '../../alerts/types';
+import { RuleAlertParamsRest, RuleAlertType } from '../../alerts/types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 
 // The Omit of filter is because of a Hapi Server Typing issue that I am unclear
 // where it comes from. I would hope to remove the "filter" as an omit at some point
 // when we upgrade and Hapi Server is ok with the filter.
-export const typicalPayload = (): Partial<Omit<SignalAlertParamsRest, 'filter'>> => ({
+export const typicalPayload = (): Partial<Omit<RuleAlertParamsRest, 'filter'>> => ({
   rule_id: 'rule-1',
   description: 'Detecting root and admin users',
   index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
@@ -28,7 +28,7 @@ export const typicalPayload = (): Partial<Omit<SignalAlertParamsRest, 'filter'>>
   language: 'kuery',
 });
 
-export const typicalFilterPayload = (): Partial<SignalAlertParamsRest> => ({
+export const typicalFilterPayload = (): Partial<RuleAlertParamsRest> => ({
   rule_id: 'rule-1',
   description: 'Detecting root and admin users',
   index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
@@ -64,7 +64,7 @@ interface FindHit {
   page: number;
   perPage: number;
   total: number;
-  data: SignalAlertType[];
+  data: RuleAlertType[];
 }
 
 export const getFindResult = (): FindHit => ({
@@ -81,7 +81,7 @@ export const getFindResultWithSingleHit = (): FindHit => ({
   data: [getResult()],
 });
 
-export const getFindResultWithMultiHits = (data: SignalAlertType[]): FindHit => ({
+export const getFindResultWithMultiHits = (data: RuleAlertType[]): FindHit => ({
   page: 1,
   perPage: 1,
   total: 2,
@@ -113,12 +113,12 @@ export const createActionResult = (): ActionResult => ({
   config: {},
 });
 
-export const getResult = (): SignalAlertType => ({
+export const getResult = (): RuleAlertType => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   name: 'Detect Root/Admin Users',
   tags: [],
   alertTypeId: 'siem.signals',
-  alertTypeParams: {
+  params: {
     description: 'Detecting root and admin users',
     ruleId: 'rule-1',
     index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
