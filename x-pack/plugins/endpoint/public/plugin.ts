@@ -6,6 +6,12 @@
 
 import { Plugin, CoreSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
+import { ResolverEmbeddableFactory } from './embeddables/resolver';
+import { Plugin as EmbeddablePlugin } from '../../../../src/plugins/embeddable/public';
+
+interface StartDependencies {
+  embeddable: ReturnType<EmbeddablePlugin['start']>;
+}
 
 export class EndpointPlugin implements Plugin<{}, {}> {
   public setup(core: CoreSetup) {
@@ -22,7 +28,13 @@ export class EndpointPlugin implements Plugin<{}, {}> {
     return {};
   }
 
-  public start() {
+  public start(...args: [unknown, StartDependencies]) {
+    const [, plugins] = args;
+    const resolverEmbeddableFactory = new ResolverEmbeddableFactory();
+    plugins.embeddable.registerEmbeddableFactory(
+      resolverEmbeddableFactory.type,
+      resolverEmbeddableFactory
+    );
     return {};
   }
 
