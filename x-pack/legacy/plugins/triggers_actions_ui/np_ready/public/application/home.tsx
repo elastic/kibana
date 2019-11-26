@@ -12,6 +12,8 @@ import {
   EuiFlexItem,
   EuiPageBody,
   EuiPageContent,
+  EuiPageContentHeader,
+  EuiPageContentHeaderSection,
   EuiSpacer,
   EuiTab,
   EuiTabs,
@@ -84,18 +86,19 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   return (
     <EuiPageBody>
       <EuiPageContent>
-        <EuiTitle size="l">
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={true}>
+        <EuiPageContentHeader>
+          <EuiPageContentHeaderSection>
+            <EuiTitle size="l">
               <h1 data-test-subj="appTitle">
                 <FormattedMessage
                   id="xpack.triggersActionsUI.home.appTitle"
                   defaultMessage="Triggers and Actions"
                 />
               </h1>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiTitle>
+            </EuiTitle>
+          </EuiPageContentHeaderSection>
+        </EuiPageContentHeader>
+
         <EuiTabs>
           {tabs.map(tab => (
             <EuiTab
