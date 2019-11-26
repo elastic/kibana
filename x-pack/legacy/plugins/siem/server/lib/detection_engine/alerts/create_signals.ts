@@ -29,7 +29,6 @@ export const createSignals = async ({
   outputIndex,
   name,
   severity,
-  size,
   tags,
   to,
   type,
@@ -40,7 +39,7 @@ export const createSignals = async ({
       name,
       tags: [],
       alertTypeId: SIGNALS_ID,
-      alertTypeParams: {
+      params: {
         description,
         ruleId,
         index,

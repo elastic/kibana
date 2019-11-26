@@ -176,7 +176,7 @@ export const Page: FC = () => {
     const searchSource = currentSavedSearch.searchSource;
     const query = searchSource.getField('query');
     if (query !== undefined) {
-      const queryLanguage = query.language;
+      const queryLanguage = query.language as SEARCH_QUERY_LANGUAGE;
       const qryString = query.query;
       let qry;
       if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {

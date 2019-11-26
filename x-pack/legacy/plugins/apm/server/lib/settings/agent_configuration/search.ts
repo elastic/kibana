@@ -33,7 +33,7 @@ export async function searchConfigurations({
     : [];
 
   const params = {
-    index: indices['apm_oss.apmAgentConfigurationIndex'],
+    index: indices.apmAgentConfigurationIndex,
     body: {
       query: {
         bool: {

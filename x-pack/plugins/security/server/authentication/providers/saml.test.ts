@@ -537,7 +537,11 @@ describe('SAMLAuthenticationProvider', () => {
         sinon.assert.calledWithExactly(
           mockOptions.client.callAsInternalUser,
           'shield.samlPrepare',
-          { body: { acs: 'test-protocol://test-hostname:1234/base-path/api/security/v1/saml' } }
+          {
+            body: {
+              acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml',
+            },
+          }
         );
 
         expect(mockOptions.logger.warn).not.toHaveBeenCalled();
@@ -572,7 +576,11 @@ describe('SAMLAuthenticationProvider', () => {
         sinon.assert.calledWithExactly(
           mockOptions.client.callAsInternalUser,
           'shield.samlPrepare',
-          { body: { acs: 'test-protocol://test-hostname:1234/base-path/api/security/v1/saml' } }
+          {
+            body: {
+              acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml',
+            },
+          }
         );
 
         expect(mockOptions.logger.warn).toHaveBeenCalledTimes(1);
@@ -610,7 +618,11 @@ describe('SAMLAuthenticationProvider', () => {
         sinon.assert.calledWithExactly(
           mockOptions.client.callAsInternalUser,
           'shield.samlPrepare',
-          { body: { acs: 'test-protocol://test-hostname:1234/base-path/api/security/v1/saml' } }
+          {
+            body: {
+              acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml',
+            },
+          }
         );
 
         expect(mockOptions.logger.warn).toHaveBeenCalledTimes(1);
@@ -686,7 +698,11 @@ describe('SAMLAuthenticationProvider', () => {
         sinon.assert.calledWithExactly(
           mockOptions.client.callAsInternalUser,
           'shield.samlPrepare',
-          { body: { acs: 'test-protocol://test-hostname:1234/base-path/api/security/v1/saml' } }
+          {
+            body: {
+              acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml',
+            },
+          }
         );
 
         expect(authenticationResult.failed()).toBe(true);
@@ -752,7 +768,9 @@ describe('SAMLAuthenticationProvider', () => {
       const authenticationResult = await provider.authenticate(request);
 
       sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.samlPrepare', {
-        body: { acs: `test-protocol://test-hostname:1234/base-path/api/security/v1/saml` },
+        body: {
+          acs: `test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml`,
+        },
       });
 
       expect(authenticationResult.redirected()).toBe(true);
@@ -773,7 +791,9 @@ describe('SAMLAuthenticationProvider', () => {
       const authenticationResult = await provider.authenticate(request, null);
 
       sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.samlPrepare', {
-        body: { acs: `test-protocol://test-hostname:1234/base-path/api/security/v1/saml` },
+        body: {
+          acs: `test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml`,
+        },
       });
 
       expect(authenticationResult.failed()).toBe(true);
@@ -983,7 +1003,9 @@ describe('SAMLAuthenticationProvider', () => {
       const authenticationResult = await provider.authenticate(request, state);
 
       sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.samlPrepare', {
-        body: { acs: `test-protocol://test-hostname:1234/base-path/api/security/v1/saml` },
+        body: {
+          acs: `test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml`,
+        },
       });
 
       expect(mockOptions.logger.warn).toHaveBeenCalledTimes(1);
@@ -1053,7 +1075,9 @@ describe('SAMLAuthenticationProvider', () => {
       const authenticationResult = await provider.authenticate(request, state);
 
       sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.samlPrepare', {
-        body: { acs: `test-protocol://test-hostname:1234/base-path/api/security/v1/saml` },
+        body: {
+          acs: `test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml`,
+        },
       });
 
       expect(mockOptions.logger.warn).toHaveBeenCalledTimes(1);
@@ -1184,7 +1208,7 @@ describe('SAMLAuthenticationProvider', () => {
         {
           body: {
             queryString: 'SAMLRequest=xxx%20yyy',
-            acs: 'test-protocol://test-hostname:1234/base-path/api/security/v1/saml',
+            acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml',
           },
         }
       );
@@ -1287,7 +1311,7 @@ describe('SAMLAuthenticationProvider', () => {
         {
           body: {
             queryString: 'SAMLRequest=xxx%20yyy',
-            acs: 'test-protocol://test-hostname:1234/base-path/api/security/v1/saml',
+            acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml',
           },
         }
       );
@@ -1312,7 +1336,7 @@ describe('SAMLAuthenticationProvider', () => {
         {
           body: {
             queryString: 'SAMLRequest=xxx%20yyy',
-            acs: 'test-protocol://test-hostname:1234/base-path/api/security/v1/saml',
+            acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml',
           },
         }
       );
@@ -1364,7 +1388,7 @@ describe('SAMLAuthenticationProvider', () => {
         {
           body: {
             queryString: 'SAMLRequest=xxx%20yyy',
-            acs: 'test-protocol://test-hostname:1234/base-path/api/security/v1/saml',
+            acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml',
           },
         }
       );
