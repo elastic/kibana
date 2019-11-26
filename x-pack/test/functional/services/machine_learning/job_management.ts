@@ -15,7 +15,6 @@ export function MachineLearningJobManagementProvider(
   mlApi: ProvidedType<typeof MachineLearningAPIProvider>
 ) {
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
 
   return {
     async navigateToNewJobSourceSelection() {
