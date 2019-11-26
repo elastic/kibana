@@ -197,6 +197,7 @@ export class WatcherFlyout extends Component<
     ) as string;
 
     return createErrorGroupWatch({
+      http: core.http,
       emails,
       schedule,
       serviceName,
