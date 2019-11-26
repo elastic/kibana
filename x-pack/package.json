@@ -14,8 +14,7 @@
     "test:browser:dev": "gulp testbrowser-dev",
     "test:browser": "gulp testbrowser",
     "test:jest": "node scripts/jest",
-    "test:mocha": "node scripts/mocha",
-    "test:server": "gulp testserver"
+    "test:mocha": "node scripts/mocha"
   },
   "kibana": {
     "build": {
@@ -133,7 +132,6 @@
     "graphql-codegen-typescript-resolvers": "^0.18.2",
     "graphql-codegen-typescript-server": "^0.18.2",
     "gulp": "4.0.2",
-    "gulp-mocha": "^7.0.2",
     "hapi": "^17.5.3",
     "jest": "^24.9.0",
     "jest-cli": "^24.9.0",
@@ -244,7 +242,7 @@
     "graphql-tag": "^2.9.2",
     "graphql-tools": "^3.0.2",
     "h2o2": "^8.1.2",
-    "handlebars": "4.3.5",
+    "handlebars": "4.5.3",
     "history": "4.9.0",
     "history-extra": "^5.0.1",
     "i18n-iso-countries": "^4.3.1",
