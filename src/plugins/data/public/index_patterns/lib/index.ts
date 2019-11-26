@@ -17,30 +17,4 @@
  * under the License.
  */
 
-import { dataPluginMock } from '../../../../core_plugins/data/public/mocks';
-
-const dataSetup = dataPluginMock.createSetup();
-
-// mocks for stateful code
-export const { FieldImpl } = dataSetup.indexPatterns!.__LEGACY;
-export const {
-  FieldList,
-  flattenHitWrapper,
-  formatHitProvider,
-  indexPatterns,
-} = dataSetup.indexPatterns!;
-
-// static code
-export {
-  CONTAINS_SPACES,
-  getFromSavedObject,
-  getRoutes,
-  validateIndexPattern,
-  ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-  IndexPatternAlreadyExists,
-  IndexPatternMissingIndices,
-  NoDefaultIndexPattern,
-  NoDefinedIndexPatterns,
-} from '../../../../core_plugins/data/public';
+export { getIndexPatternTitle } from './get_index_pattern_title';
