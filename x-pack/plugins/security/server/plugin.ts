@@ -205,6 +205,7 @@ export class Plugin {
         // We should stop exposing this config as soon as only new platform plugin consumes it. The only
         // exception may be `sessionTimeout` as other parts of the app may want to know it.
         config: {
+          loginAssistanceMessage: config.loginAssistanceMessage,
           sessionTimeout: config.sessionTimeout,
           secureCookies: config.secureCookies,
           cookieName: config.cookieName,
