@@ -270,7 +270,7 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
       </EuiPanel>
     ) : (
       <EuiOverlayMask>
-        <EuiModal onClose={this.closeEditor} initialFocus="[name=label]">
+        <EuiModal onClose={this.closeEditor} initialFocus="[name=label]" style={{ width: 500 }}>
           <EuiModalHeader>
             <EuiModalHeaderTitle>
               <FormattedMessage
