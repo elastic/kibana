@@ -37,7 +37,6 @@ describe('utils', () => {
         query: 'user.name: root or user.name: admin',
         references: ['http://www.example.com', 'https://ww.example.com'],
         severity: 'high',
-        size: 1,
         updated_by: 'elastic',
         tags: [],
         to: 'now',
@@ -65,7 +64,6 @@ describe('utils', () => {
         query: 'user.name: root or user.name: admin',
         references: ['http://www.example.com', 'https://ww.example.com'],
         severity: 'high',
-        size: 1,
         updated_by: 'elastic',
         tags: [],
         to: 'now',
@@ -75,7 +73,7 @@ describe('utils', () => {
 
     test('should omit query if query is null', () => {
       const fullSignal = getResult();
-      fullSignal.alertTypeParams.query = null;
+      fullSignal.params.query = null;
       const signal = transformAlertToSignal(fullSignal);
       expect(signal).toEqual({
         created_by: 'elastic',
@@ -95,7 +93,6 @@ describe('utils', () => {
         name: 'Detect Root/Admin Users',
         references: ['http://www.example.com', 'https://ww.example.com'],
         severity: 'high',
-        size: 1,
         updated_by: 'elastic',
         tags: [],
         to: 'now',
@@ -105,7 +102,7 @@ describe('utils', () => {
 
     test('should omit query if query is undefined', () => {
       const fullSignal = getResult();
-      fullSignal.alertTypeParams.query = undefined;
+      fullSignal.params.query = undefined;
       const signal = transformAlertToSignal(fullSignal);
       expect(signal).toEqual({
         created_by: 'elastic',
@@ -125,7 +122,6 @@ describe('utils', () => {
         name: 'Detect Root/Admin Users',
         references: ['http://www.example.com', 'https://ww.example.com'],
         severity: 'high',
-        size: 1,
         updated_by: 'elastic',
         tags: [],
         to: 'now',
@@ -135,8 +131,8 @@ describe('utils', () => {
 
     test('should omit a mix of undefined, null, and missing fields', () => {
       const fullSignal = getResult();
-      fullSignal.alertTypeParams.query = undefined;
-      fullSignal.alertTypeParams.language = null;
+      fullSignal.params.query = undefined;
+      fullSignal.params.language = null;
       const { from, enabled, ...omitData } = transformAlertToSignal(fullSignal);
       expect(omitData).toEqual({
         created_by: 'elastic',
@@ -153,7 +149,6 @@ describe('utils', () => {
         name: 'Detect Root/Admin Users',
         references: ['http://www.example.com', 'https://ww.example.com'],
         severity: 'high',
-        size: 1,
         updated_by: 'elastic',
         tags: [],
         to: 'now',
@@ -184,7 +179,6 @@ describe('utils', () => {
         query: 'user.name: root or user.name: admin',
         references: ['http://www.example.com', 'https://ww.example.com'],
         severity: 'high',
-        size: 1,
         updated_by: 'elastic',
         tags: [],
         to: 'now',
@@ -194,7 +188,7 @@ describe('utils', () => {
 
     test('should return immutable is equal to false', () => {
       const fullSignal = getResult();
-      fullSignal.alertTypeParams.immutable = false;
+      fullSignal.params.immutable = false;
       const signalWithEnabledFalse = transformAlertToSignal(fullSignal);
       expect(signalWithEnabledFalse).toEqual({
         created_by: 'elastic',
@@ -215,7 +209,6 @@ describe('utils', () => {
         query: 'user.name: root or user.name: admin',
         references: ['http://www.example.com', 'https://ww.example.com'],
         severity: 'high',
-        size: 1,
         updated_by: 'elastic',
         tags: [],
         to: 'now',
@@ -297,7 +290,6 @@ describe('utils', () => {
             query: 'user.name: root or user.name: admin',
             references: ['http://www.example.com', 'https://ww.example.com'],
             severity: 'high',
-            size: 1,
             updated_by: 'elastic',
             tags: [],
             to: 'now',
@@ -335,7 +327,6 @@ describe('utils', () => {
         query: 'user.name: root or user.name: admin',
         references: ['http://www.example.com', 'https://ww.example.com'],
         severity: 'high',
-        size: 1,
         updated_by: 'elastic',
         tags: [],
         to: 'now',

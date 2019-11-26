@@ -617,8 +617,6 @@
     "core.euiSelectable.noAvailableOptions": "没有任何可用选项",
     "core.euiSelectable.noMatchingOptions": "{searchValue} 不匹配任何选项",
     "core.euiStat.loadingText": "统计正在加载",
-    "core.euiStep.completeStep": "步骤",
-    "core.euiStep.incompleteStep": "未完成步骤",
     "core.euiStepHorizontal.buttonTitle": "第 {step} 步：{title}{titleAppendix, select, completed {已完成} disabled {已禁用} other {}}",
     "core.euiStepHorizontal.step": "步骤",
     "core.euiStepNumber.hasErrors": "有错误",
