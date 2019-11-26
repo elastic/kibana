@@ -11,23 +11,22 @@ import {
   createMockServerWithoutActionOrAlertClientDecoration,
 } from './__mocks__/_mock_server';
 
-import { deleteSignalsRoute } from './delete_signals_route';
+import { readRulesRoute } from './read_rules_route';
 import { ServerInjectOptions } from 'hapi';
 import {
   getFindResult,
   getResult,
-  getDeleteRequest,
+  getReadRequest,
   getFindResultWithSingleHit,
-  getDeleteRequestById,
 } from './__mocks__/request_responses';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 
-describe('delete_signals', () => {
+describe('read_signals', () => {
   let { server, alertsClient } = createMockServer();
 
   beforeEach(() => {
     ({ server, alertsClient } = createMockServer());
-    deleteSignalsRoute(server);
+    readRulesRoute(server);
   });
 
   afterEach(() => {
@@ -35,41 +34,24 @@ describe('delete_signals', () => {
   });
 
   describe('status codes with actionClient and alertClient', () => {
-    test('returns 200 when deleting a single signal with a valid actionClient and alertClient by alertId', async () => {
+    test('returns 200 when reading a single rule with a valid actionClient and alertClient', async () => {
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       alertsClient.get.mockResolvedValue(getResult());
-      alertsClient.delete.mockResolvedValue({});
-      const { statusCode } = await server.inject(getDeleteRequest());
+      const { statusCode } = await server.inject(getReadRequest());
       expect(statusCode).toBe(200);
-    });
-
-    test('returns 200 when deleting a single signal with a valid actionClient and alertClient by id', async () => {
-      alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      alertsClient.get.mockResolvedValue(getResult());
-      alertsClient.delete.mockResolvedValue({});
-      const { statusCode } = await server.inject(getDeleteRequestById());
-      expect(statusCode).toBe(200);
-    });
-
-    test('returns 404 when deleting a single signal that does not exist with a valid actionClient and alertClient', async () => {
-      alertsClient.find.mockResolvedValue(getFindResult());
-      alertsClient.get.mockResolvedValue(getResult());
-      alertsClient.delete.mockResolvedValue({});
-      const { statusCode } = await server.inject(getDeleteRequest());
-      expect(statusCode).toBe(404);
     });
 
     test('returns 404 if actionClient is not available on the route', async () => {
       const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
-      deleteSignalsRoute(serverWithoutActionClient);
-      const { statusCode } = await serverWithoutActionClient.inject(getDeleteRequest());
+      readRulesRoute(serverWithoutActionClient);
+      const { statusCode } = await serverWithoutActionClient.inject(getReadRequest());
       expect(statusCode).toBe(404);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
-      deleteSignalsRoute(serverWithoutAlertClient);
-      const { statusCode } = await serverWithoutAlertClient.inject(getDeleteRequest());
+      readRulesRoute(serverWithoutAlertClient);
+      const { statusCode } = await serverWithoutAlertClient.inject(getReadRequest());
       expect(statusCode).toBe(404);
     });
 
@@ -77,8 +59,8 @@ describe('delete_signals', () => {
       const {
         serverWithoutActionOrAlertClient,
       } = createMockServerWithoutActionOrAlertClientDecoration();
-      deleteSignalsRoute(serverWithoutActionOrAlertClient);
-      const { statusCode } = await serverWithoutActionOrAlertClient.inject(getDeleteRequest());
+      readRulesRoute(serverWithoutActionOrAlertClient);
+      const { statusCode } = await serverWithoutActionOrAlertClient.inject(getReadRequest());
       expect(statusCode).toBe(404);
     });
   });
@@ -89,7 +71,7 @@ describe('delete_signals', () => {
       alertsClient.get.mockResolvedValue(getResult());
       alertsClient.delete.mockResolvedValue({});
       const request: ServerInjectOptions = {
-        method: 'DELETE',
+        method: 'GET',
         url: DETECTION_ENGINE_RULES_URL,
       };
       const { statusCode } = await server.inject(request);

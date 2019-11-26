@@ -14,17 +14,17 @@ import {
 
 import { buildEventsSearchQuery } from './build_events_query';
 import { searchAfterAndBulkCreate } from './utils';
-import { SignalAlertTypeDefinition } from './types';
+import { RuleAlertTypeDefinition } from './types';
 import { getFilter } from './get_filter';
 import { getInputOutputIndex } from './get_input_output_index';
 
-export const signalsAlertType = ({
+export const rulesAlertType = ({
   logger,
   version,
 }: {
   logger: Logger;
   version: string;
-}): SignalAlertTypeDefinition => {
+}): RuleAlertTypeDefinition => {
   return {
     id: SIGNALS_ID,
     name: 'SIEM Signals',
@@ -127,7 +127,7 @@ export const signalsAlertType = ({
 
         const bulkIndexResult = await searchAfterAndBulkCreate({
           someResult: noReIndexResult,
-          signalParams: params,
+          ruleParams: params,
           services,
           logger,
           id: alertId,

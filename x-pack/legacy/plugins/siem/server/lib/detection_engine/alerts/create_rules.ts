@@ -5,9 +5,9 @@
  */
 
 import { SIGNALS_ID } from '../../../../common/constants';
-import { SignalParams } from './types';
+import { RuleParams } from './types';
 
-export const createSignals = async ({
+export const createRules = async ({
   alertsClient,
   actionsClient, // TODO: Use this actionsClient once we have actions such as email, etc...
   description,
@@ -33,7 +33,7 @@ export const createSignals = async ({
   to,
   type,
   references,
-}: SignalParams) => {
+}: RuleParams) => {
   return alertsClient.create({
     data: {
       name,

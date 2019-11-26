@@ -7,46 +7,45 @@
 import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
-import { getIdError, transformOrError } from './utils';
-
-import { readSignals } from '../alerts/read_signals';
+import { findRules } from '../alerts/find_rules';
+import { FindRulesRequest } from '../alerts/types';
+import { findRulesSchema } from './schemas';
 import { ServerFacade } from '../../../types';
-import { querySignalSchema } from './schemas';
-import { QueryRequest } from '../alerts/types';
+import { transformFindAlertsOrError } from './utils';
 
-export const createReadSignalsRoute: Hapi.ServerRoute = {
+export const createFindRulesRoute: Hapi.ServerRoute = {
   method: 'GET',
-  path: DETECTION_ENGINE_RULES_URL,
+  path: `${DETECTION_ENGINE_RULES_URL}/_find`,
   options: {
     tags: ['access:signals-all'],
     validate: {
       options: {
         abortEarly: false,
       },
-      query: querySignalSchema,
+      query: findRulesSchema,
     },
   },
-  async handler(request: QueryRequest, headers) {
-    const { id, rule_id: ruleId } = request.query;
+  async handler(request: FindRulesRequest, headers) {
+    const { query } = request;
     const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
     const actionsClient = isFunction(request.getActionsClient) ? request.getActionsClient() : null;
 
     if (!alertsClient || !actionsClient) {
       return headers.response().code(404);
     }
-    const signal = await readSignals({
+
+    const rules = await findRules({
       alertsClient,
-      id,
-      ruleId,
+      perPage: query.per_page,
+      page: query.page,
+      sortField: query.sort_field,
+      sortOrder: query.sort_order,
+      filter: query.filter,
     });
-    if (signal != null) {
-      return transformOrError(signal);
-    } else {
-      return getIdError({ id, ruleId });
-    }
+    return transformFindAlertsOrError(rules);
   },
 };
 
-export const readSignalsRoute = (server: ServerFacade) => {
-  server.route(createReadSignalsRoute);
+export const findRulesRoute = (server: ServerFacade) => {
+  server.route(createFindRulesRoute);
 };
