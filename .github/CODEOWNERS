@@ -45,7 +45,6 @@
 /x-pack/test/functional/services/transform.ts @elastic/ml-ui
 
 # Operations
-/renovate.json5 @elastic/kibana-operations
 /src/dev/ @elastic/kibana-operations
 /src/setup_node_env/ @elastic/kibana-operations
 /src/optimize/ @elastic/kibana-operations
