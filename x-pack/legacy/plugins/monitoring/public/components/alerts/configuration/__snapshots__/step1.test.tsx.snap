@@ -2,28 +2,6 @@
 
 exports[`Step1 creating should render a create form 1`] = `
 <Fragment>
-  <EuiSuperSelect
-    compressed={false}
-    fullWidth={false}
-    hasDividers={true}
-    isInvalid={false}
-    onChange={[Function]}
-    options={
-      Array [
-        Object {
-          "dropdownDisplay": <EuiText>
-            Create new email action...
-          </EuiText>,
-          "inputDisplay": <EuiText>
-            Configure a new email action service
-          </EuiText>,
-          "value": "__new__",
-        },
-      ]
-    }
-    valueOfSelected="__new__"
-  />
-  <EuiSpacer />
   <EuiPanel>
     <ManageEmailAction
       createEmailAction={[Function]}
@@ -81,7 +59,7 @@ exports[`Step1 should render normally 1`] = `
             Create new email action...
           </EuiText>,
           "inputDisplay": <EuiText>
-            Configure a new email action service
+            Create new email action...
           </EuiText>,
           "value": "__new__",
         },
@@ -174,7 +152,7 @@ exports[`Step1 testing should show a failed test error 1`] = `
             Create new email action...
           </EuiText>,
           "inputDisplay": <EuiText>
-            Configure a new email action service
+            Create new email action...
           </EuiText>,
           "value": "__new__",
         },
@@ -257,7 +235,7 @@ exports[`Step1 testing should show a successful test 1`] = `
             Create new email action...
           </EuiText>,
           "inputDisplay": <EuiText>
-            Configure a new email action service
+            Create new email action...
           </EuiText>,
           "value": "__new__",
         },

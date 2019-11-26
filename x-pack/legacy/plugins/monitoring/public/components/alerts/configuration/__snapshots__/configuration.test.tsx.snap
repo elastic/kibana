@@ -15,7 +15,7 @@ exports[`Configuration shallow view should render step 1 1`] = `
             Create new email action...
           </EuiText>,
           "inputDisplay": <EuiText>
-            Configure a new email action service
+            Create new email action...
           </EuiText>,
           "value": "__new__",
         },
@@ -72,7 +72,7 @@ exports[`Configuration should render high level steps 1`] = `
     key="0"
     status="incomplete"
     step={1}
-    title="Select email action"
+    title="Create email action"
   >
     <Step1
       editAction={null}

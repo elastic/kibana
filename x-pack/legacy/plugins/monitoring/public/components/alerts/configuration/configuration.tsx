@@ -128,9 +128,13 @@ export const AlertsConfiguration: React.FC<AlertsConfigurationProps> = (
 
   const steps = [
     {
-      title: i18n.translate('xpack.monitoring.alerts.configuration.selectEmailAction', {
-        defaultMessage: 'Select email action',
-      }),
+      title: emailActions.length
+        ? i18n.translate('xpack.monitoring.alerts.configuration.selectEmailAction', {
+            defaultMessage: 'Select email action',
+          })
+        : i18n.translate('xpack.monitoring.alerts.configuration.createEmailAction', {
+            defaultMessage: 'Create email action',
+          }),
       children: (
         <Step1
           onActionDone={async () => await fetchEmailActions()}

@@ -174,6 +174,14 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
     );
   }
 
+  const newAction = (
+    <EuiText>
+      {i18n.translate('xpack.monitoring.alerts.configuration.newActionDropdownDisplay', {
+        defaultMessage: 'Create new email action...',
+      })}
+    </EuiText>
+  );
+
   const options = [
     ...props.emailActions.map(action => {
       const actionLabel = i18n.translate(
@@ -195,42 +203,49 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
     }),
     {
       value: NEW_ACTION_ID,
-      inputDisplay: (
-        <EuiText>
-          {i18n.translate('xpack.monitoring.alerts.configuration.newActionInputDisplay', {
-            defaultMessage: 'Configure a new email action service',
-          })}
-        </EuiText>
-      ),
-      dropdownDisplay: (
-        <EuiText>
-          {i18n.translate('xpack.monitoring.alerts.configuration.newActionDropdownDisplay', {
-            defaultMessage: 'Create new email action...',
-          })}
-        </EuiText>
-      ),
+      inputDisplay: newAction,
+      dropdownDisplay: newAction,
     },
   ];
 
+  let selectBox: React.ReactNode | null = (
+    <EuiSuperSelect
+      options={options}
+      valueOfSelected={props.selectedEmailActionId}
+      onChange={id => props.setSelectedEmailActionId(id)}
+      hasDividers
+    />
+  );
   let createNew = null;
   if (props.selectedEmailActionId === NEW_ACTION_ID) {
     createNew = (
-      <Fragment>
-        <EuiSpacer />
-        <EuiPanel>
-          <ManageEmailAction
-            createEmailAction={async (data: EmailActionData) => await createEmailAction(data)}
-            isNew={true}
-          />
-        </EuiPanel>
-      </Fragment>
+      <EuiPanel>
+        <ManageEmailAction
+          createEmailAction={async (data: EmailActionData) => await createEmailAction(data)}
+          isNew={true}
+        />
+      </EuiPanel>
     );
+
+    // If there are no actions, do not show the select box as there are no choices
+    if (props.emailActions.length === 0) {
+      selectBox = null;
+    } else {
+      // Otherwise, add a spacer
+      selectBox = (
+        <Fragment>
+          {selectBox}
+          <EuiSpacer />
+        </Fragment>
+      );
+    }
   }
 
   let manageConfiguration = null;
   const selectedEmailAction = props.emailActions.find(
     action => action.id === props.selectedEmailActionId
   );
+
   if (
     props.selectedEmailActionId !== NEW_ACTION_ID &&
     props.selectedEmailActionId &&
@@ -309,12 +324,7 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
 
   return (
     <Fragment>
-      <EuiSuperSelect
-        options={options}
-        valueOfSelected={props.selectedEmailActionId}
-        onChange={id => props.setSelectedEmailActionId(id)}
-        hasDividers
-      />
+      {selectBox}
       {manageConfiguration}
       {createNew}
     </Fragment>

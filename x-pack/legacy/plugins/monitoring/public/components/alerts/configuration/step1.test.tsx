@@ -75,6 +75,23 @@ describe('Step1', () => {
       expect(component).toMatchSnapshot();
     });
 
+    it('should render the select box if at least one action exists', () => {
+      const customProps = {
+        emailActions: [
+          {
+            id: 'foo',
+            actionTypeId: '.email',
+            description: '',
+            config: {},
+          },
+        ],
+        selectedEmailActionId: NEW_ACTION_ID,
+      };
+
+      const component = shallow(<Step1 {...defaultProps} {...customProps} />);
+      expect(component.find('EuiSuperSelect').exists()).toBe(true);
+    });
+
     it('should send up the create to the server', async () => {
       const kfetch = jest.fn().mockImplementation(() => {});
       jest.isolateModules(() => {

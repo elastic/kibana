@@ -78,6 +78,12 @@ describe('Configuration', () => {
     });
 
     it('reflect in Step1', async () => {
+      expect(
+        component
+          .find('EuiStep')
+          .at(0)
+          .prop('title')
+      ).toBe('Select email action');
       expect(component.find('Step1').prop('selectedEmailActionId')).toBe(actionId);
     });
 
