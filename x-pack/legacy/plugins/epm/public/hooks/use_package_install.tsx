@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useCallback, useState } from 'react';
+import React, { useCallback, useState, Fragment } from 'react';
 import createContainer from 'constate';
-import { useCore } from './';
+import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import { useCore, useLinks } from '.';
 import { installPackage as fetchInstallPackage } from '../data';
 import { InstallStatus } from '../types';
+import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 
 interface PackagesInstall {
   [key: string]: PackageInstallItem;
@@ -19,6 +21,7 @@ interface PackageInstallItem {
 function usePackageInstall() {
   const [packages, setPackage] = useState<PackagesInstall>({});
   const { notifications } = useCore();
+  const { toDetailView } = useLinks();
 
   const setPackageInstallStatus = useCallback(
     ({ name, status }: { name: string; status: InstallStatus }) => {
@@ -37,16 +40,30 @@ function usePackageInstall() {
       try {
         await fetchInstallPackage(pkgkey);
         setPackageInstallStatus({ name, status: InstallStatus.installed });
+        const packageDataSourceUrl = toDetailView({ name, version, panel: 'data-sources' });
+        const SuccessMsg = (
+          <Fragment>
+            <p>Next, create a data source to begin sending data to your Elasticsearch cluster.</p>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiButton href={packageDataSourceUrl} size="s">
+                  Add data source
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </Fragment>
+        );
+
         notifications.toasts.addSuccess({
-          title: `Installed ${title}`,
-          text: 'Next, create a data source to begin sending data to your Elasticsearch cluster.',
+          title: `Installed ${title} package`,
+          text: toMountPoint(SuccessMsg),
         });
       } catch (err) {
         setPackageInstallStatus({ name, status: InstallStatus.notInstalled });
         notifications.toasts.addDanger(`There was a problem installing ${title}`);
       }
     },
-    [notifications.toasts, setPackageInstallStatus]
+    [notifications.toasts, setPackageInstallStatus, toDetailView]
   );
 
   const getPackageInstallStatus = useCallback(
