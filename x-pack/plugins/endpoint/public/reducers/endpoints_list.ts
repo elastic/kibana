@@ -8,7 +8,6 @@ import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { EndpointListActions, actions } from '../actions/endpoints_list';
 import { EndpointData } from '../../server/types';
 
-// TODO: type hits properly
 export interface EndpointsListState {
   data: {
     hits: {
