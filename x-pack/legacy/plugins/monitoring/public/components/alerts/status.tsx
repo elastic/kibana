@@ -19,11 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Alert } from '../../../../alerting/server/types';
 import { getSetupModeState, addSetupModeCallback, toggleSetupMode } from '../../lib/setup_mode';
-import {
-  NUMBER_OF_MIGRATED_ALERTS,
-  KIBANA_ALERTING_ENABLED,
-  ALERT_TYPE_PREFIX,
-} from '../../../common/constants';
+import { NUMBER_OF_MIGRATED_ALERTS, ALERT_TYPE_PREFIX } from '../../../common/constants';
 import { AlertsConfiguration } from './configuration';
 
 export interface AlertsStatusProps {
@@ -141,10 +137,6 @@ export const AlertsStatus: React.FC<AlertsStatusProps> = (props: AlertsStatusPro
         </Fragment>
       );
     }
-  }
-
-  if (!KIBANA_ALERTING_ENABLED) {
-    return null;
   }
 
   const content = renderContent();

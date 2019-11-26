@@ -13,46 +13,55 @@ import { BeatsPanel } from './beats_panel';
 import { AlertsStatus } from '../../alerts/status';
 import { EuiPage, EuiPageBody } from '@elastic/eui';
 import { ApmPanel } from './apm_panel';
-import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
+import {
+  STANDALONE_CLUSTER_CLUSTER_UUID,
+  KIBANA_ALERTING_ENABLED,
+} from '../../../../common/constants';
 
 export function Overview(props) {
   const isFromStandaloneCluster = props.cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID;
 
+  const kibanaAlerts = KIBANA_ALERTING_ENABLED ? (
+    <AlertsStatus clusterUuid={props.cluster.cluster_uuid} emailAddress={props.emailAddress} />
+  ) : null;
+
   return (
     <EuiPage>
       <EuiPageBody>
-        <AlertsStatus
-          clusterUuid={props.cluster.cluster_uuid}
-          emailAddress={props.emailAddress}
-        />
+        {kibanaAlerts}
 
         <AlertsPanel alerts={props.cluster.alerts} changeUrl={props.changeUrl} />
 
-        { !isFromStandaloneCluster ?
-          (
-            <Fragment>
-              <ElasticsearchPanel
-                {...props.cluster.elasticsearch}
-                version={props.cluster.version}
-                ml={props.cluster.ml}
-                changeUrl={props.changeUrl}
-                license={props.cluster.license}
-                setupMode={props.setupMode}
-                showLicenseExpiration={props.showLicenseExpiration}
-              />
-              <KibanaPanel
-                {...props.cluster.kibana}
-                setupMode={props.setupMode}
-                changeUrl={props.changeUrl}
-              />
-            </Fragment>
-          )
-          : null
-        }
+        {!isFromStandaloneCluster ? (
+          <Fragment>
+            <ElasticsearchPanel
+              {...props.cluster.elasticsearch}
+              version={props.cluster.version}
+              ml={props.cluster.ml}
+              changeUrl={props.changeUrl}
+              license={props.cluster.license}
+              setupMode={props.setupMode}
+              showLicenseExpiration={props.showLicenseExpiration}
+            />
+            <KibanaPanel
+              {...props.cluster.kibana}
+              setupMode={props.setupMode}
+              changeUrl={props.changeUrl}
+            />
+          </Fragment>
+        ) : null}
 
-        <LogstashPanel {...props.cluster.logstash} setupMode={props.setupMode} changeUrl={props.changeUrl} />
+        <LogstashPanel
+          {...props.cluster.logstash}
+          setupMode={props.setupMode}
+          changeUrl={props.changeUrl}
+        />
 
-        <BeatsPanel {...props.cluster.beats} setupMode={props.setupMode} changeUrl={props.changeUrl} />
+        <BeatsPanel
+          {...props.cluster.beats}
+          setupMode={props.setupMode}
+          changeUrl={props.changeUrl}
+        />
 
         <ApmPanel {...props.cluster.apm} setupMode={props.setupMode} changeUrl={props.changeUrl} />
       </EuiPageBody>
