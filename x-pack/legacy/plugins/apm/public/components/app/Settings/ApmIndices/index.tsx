@@ -63,13 +63,6 @@ const APM_INDEX_LABELS = [
     label: i18n.translate('xpack.apm.settings.apmIndices.metricsIndicesLabel', {
       defaultMessage: 'Metrics Indices'
     })
-  },
-  {
-    configurationName: 'apm_oss.apmAgentConfigurationIndex',
-    label: i18n.translate(
-      'xpack.apm.settings.apmIndices.apmAgentConfigurationIndexLabel',
-      { defaultMessage: 'Agent Configuration Index' }
-    )
   }
 ];
 

@@ -24,21 +24,13 @@ import * as Rx from 'rxjs';
 
 import {
   // TODO: add type annotations
-  // @ts-ignore
   EuiHeader,
-  // @ts-ignore
   EuiHeaderLogo,
-  // @ts-ignore
   EuiHeaderSection,
-  // @ts-ignore
   EuiHeaderSectionItem,
-  // @ts-ignore
   EuiHeaderSectionItemButton,
-  // @ts-ignore
-  EuiHideFor,
   EuiHorizontalRule,
   EuiIcon,
-  // @ts-ignore
   EuiImage,
   // @ts-ignore
   EuiNavDrawer,

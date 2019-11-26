@@ -64,7 +64,7 @@ export const LogsPage = injectUICapabilities(({ match, uiCapabilities }: LogsPag
         <ColumnarPage>
           <DocumentTitle title={pageTitle} />
 
-          <HelpCenterContent feedbackLink={feedbackLinkUrl} feedbackLinkText={feedbackLinkText} />
+          <HelpCenterContent feedbackLink={feedbackLinkUrl} appName={pageTitle} />
 
           <Header
             breadcrumbs={[
@@ -128,10 +128,6 @@ const logRateTabTitle = i18n.translate('xpack.infra.logs.index.analysisBetaBadge
 
 const settingsTabTitle = i18n.translate('xpack.infra.logs.index.settingsTabTitle', {
   defaultMessage: 'Settings',
-});
-
-const feedbackLinkText = i18n.translate('xpack.infra.logsPage.logsHelpContent.feedbackLinkText', {
-  defaultMessage: 'Provide feedback for Logs',
 });
 
 const feedbackLinkUrl = 'https://discuss.elastic.co/c/logs';

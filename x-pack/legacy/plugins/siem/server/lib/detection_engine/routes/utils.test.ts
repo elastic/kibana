@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import {
-  transformAlertToSignal,
+  transformAlertToRule,
   getIdError,
   transformFindAlertsOrError,
   transformOrError,
@@ -14,11 +14,11 @@ import {
 import { getResult } from './__mocks__/request_responses';
 
 describe('utils', () => {
-  describe('transformAlertToSignal', () => {
+  describe('transformAlertToRule', () => {
     test('should work with a full data set', () => {
-      const fullSignal = getResult();
-      const signal = transformAlertToSignal(fullSignal);
-      expect(signal).toEqual({
+      const fullRule = getResult();
+      const rule = transformAlertToRule(fullRule);
+      expect(rule).toEqual({
         created_by: 'elastic',
         description: 'Detecting root and admin users',
         enabled: true,
@@ -28,14 +28,15 @@ describe('utils', () => {
         immutable: false,
         index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
         interval: '5m',
+        risk_score: 50,
         rule_id: 'rule-1',
         language: 'kuery',
         max_signals: 100,
         name: 'Detect Root/Admin Users',
+        output_index: '.siem-signals',
         query: 'user.name: root or user.name: admin',
         references: ['http://www.example.com', 'https://ww.example.com'],
         severity: 'high',
-        size: 1,
         updated_by: 'elastic',
         tags: [],
         to: 'now',
@@ -44,8 +45,8 @@ describe('utils', () => {
     });
 
     test('should work with a partial data set missing data', () => {
-      const fullSignal = getResult();
-      const { from, language, ...omitData } = transformAlertToSignal(fullSignal);
+      const fullRule = getResult();
+      const { from, language, ...omitData } = transformAlertToRule(fullRule);
       expect(omitData).toEqual({
         created_by: 'elastic',
         description: 'Detecting root and admin users',
@@ -54,14 +55,15 @@ describe('utils', () => {
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         immutable: false,
         index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+        output_index: '.siem-signals',
         interval: '5m',
+        risk_score: 50,
         rule_id: 'rule-1',
         max_signals: 100,
         name: 'Detect Root/Admin Users',
         query: 'user.name: root or user.name: admin',
         references: ['http://www.example.com', 'https://ww.example.com'],
         severity: 'high',
-        size: 1,
         updated_by: 'elastic',
         tags: [],
         to: 'now',
@@ -70,10 +72,10 @@ describe('utils', () => {
     });
 
     test('should omit query if query is null', () => {
-      const fullSignal = getResult();
-      fullSignal.alertTypeParams.query = null;
-      const signal = transformAlertToSignal(fullSignal);
-      expect(signal).toEqual({
+      const fullRule = getResult();
+      fullRule.params.query = null;
+      const rule = transformAlertToRule(fullRule);
+      expect(rule).toEqual({
         created_by: 'elastic',
         description: 'Detecting root and admin users',
         enabled: true,
@@ -82,14 +84,15 @@ describe('utils', () => {
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         immutable: false,
         index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+        output_index: '.siem-signals',
         interval: '5m',
+        risk_score: 50,
         rule_id: 'rule-1',
         language: 'kuery',
         max_signals: 100,
         name: 'Detect Root/Admin Users',
         references: ['http://www.example.com', 'https://ww.example.com'],
         severity: 'high',
-        size: 1,
         updated_by: 'elastic',
         tags: [],
         to: 'now',
@@ -98,10 +101,10 @@ describe('utils', () => {
     });
 
     test('should omit query if query is undefined', () => {
-      const fullSignal = getResult();
-      fullSignal.alertTypeParams.query = undefined;
-      const signal = transformAlertToSignal(fullSignal);
-      expect(signal).toEqual({
+      const fullRule = getResult();
+      fullRule.params.query = undefined;
+      const rule = transformAlertToRule(fullRule);
+      expect(rule).toEqual({
         created_by: 'elastic',
         description: 'Detecting root and admin users',
         enabled: true,
@@ -110,14 +113,15 @@ describe('utils', () => {
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         immutable: false,
         index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+        output_index: '.siem-signals',
         interval: '5m',
         rule_id: 'rule-1',
+        risk_score: 50,
         language: 'kuery',
         max_signals: 100,
         name: 'Detect Root/Admin Users',
         references: ['http://www.example.com', 'https://ww.example.com'],
         severity: 'high',
-        size: 1,
         updated_by: 'elastic',
         tags: [],
         to: 'now',
@@ -126,24 +130,25 @@ describe('utils', () => {
     });
 
     test('should omit a mix of undefined, null, and missing fields', () => {
-      const fullSignal = getResult();
-      fullSignal.alertTypeParams.query = undefined;
-      fullSignal.alertTypeParams.language = null;
-      const { from, enabled, ...omitData } = transformAlertToSignal(fullSignal);
+      const fullRule = getResult();
+      fullRule.params.query = undefined;
+      fullRule.params.language = null;
+      const { from, enabled, ...omitData } = transformAlertToRule(fullRule);
       expect(omitData).toEqual({
         created_by: 'elastic',
         description: 'Detecting root and admin users',
         false_positives: [],
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         immutable: false,
+        output_index: '.siem-signals',
         index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
         interval: '5m',
         rule_id: 'rule-1',
+        risk_score: 50,
         max_signals: 100,
         name: 'Detect Root/Admin Users',
         references: ['http://www.example.com', 'https://ww.example.com'],
         severity: 'high',
-        size: 1,
         updated_by: 'elastic',
         tags: [],
         to: 'now',
@@ -152,10 +157,10 @@ describe('utils', () => {
     });
 
     test('should return enabled is equal to false', () => {
-      const fullSignal = getResult();
-      fullSignal.enabled = false;
-      const signalWithEnabledFalse = transformAlertToSignal(fullSignal);
-      expect(signalWithEnabledFalse).toEqual({
+      const fullRule = getResult();
+      fullRule.enabled = false;
+      const ruleWithEnabledFalse = transformAlertToRule(fullRule);
+      expect(ruleWithEnabledFalse).toEqual({
         created_by: 'elastic',
         description: 'Detecting root and admin users',
         enabled: false,
@@ -163,16 +168,17 @@ describe('utils', () => {
         false_positives: [],
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         immutable: false,
+        output_index: '.siem-signals',
         index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
         interval: '5m',
         language: 'kuery',
+        risk_score: 50,
         rule_id: 'rule-1',
         max_signals: 100,
         name: 'Detect Root/Admin Users',
         query: 'user.name: root or user.name: admin',
         references: ['http://www.example.com', 'https://ww.example.com'],
         severity: 'high',
-        size: 1,
         updated_by: 'elastic',
         tags: [],
         to: 'now',
@@ -181,10 +187,10 @@ describe('utils', () => {
     });
 
     test('should return immutable is equal to false', () => {
-      const fullSignal = getResult();
-      fullSignal.alertTypeParams.immutable = false;
-      const signalWithEnabledFalse = transformAlertToSignal(fullSignal);
-      expect(signalWithEnabledFalse).toEqual({
+      const fullRule = getResult();
+      fullRule.params.immutable = false;
+      const ruleWithEnabledFalse = transformAlertToRule(fullRule);
+      expect(ruleWithEnabledFalse).toEqual({
         created_by: 'elastic',
         description: 'Detecting root and admin users',
         enabled: true,
@@ -192,16 +198,17 @@ describe('utils', () => {
         false_positives: [],
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         immutable: false,
+        output_index: '.siem-signals',
         index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
         interval: '5m',
         language: 'kuery',
+        risk_score: 50,
         rule_id: 'rule-1',
         max_signals: 100,
         name: 'Detect Root/Admin Users',
         query: 'user.name: root or user.name: admin',
         references: ['http://www.example.com', 'https://ww.example.com'],
         severity: 'high',
-        size: 1,
         updated_by: 'elastic',
         tags: [],
         to: 'now',
@@ -272,8 +279,10 @@ describe('utils', () => {
             from: 'now-6m',
             id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
             immutable: false,
+            output_index: '.siem-signals',
             index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             interval: '5m',
+            risk_score: 50,
             rule_id: 'rule-1',
             language: 'kuery',
             max_signals: 100,
@@ -281,7 +290,6 @@ describe('utils', () => {
             query: 'user.name: root or user.name: admin',
             references: ['http://www.example.com', 'https://ww.example.com'],
             severity: 'high',
-            size: 1,
             updated_by: 'elastic',
             tags: [],
             to: 'now',
@@ -308,16 +316,17 @@ describe('utils', () => {
         from: 'now-6m',
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         immutable: false,
+        output_index: '.siem-signals',
         index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
         interval: '5m',
         rule_id: 'rule-1',
+        risk_score: 50,
         language: 'kuery',
         max_signals: 100,
         name: 'Detect Root/Admin Users',
         query: 'user.name: root or user.name: admin',
         references: ['http://www.example.com', 'https://ww.example.com'],
         severity: 'high',
-        size: 1,
         updated_by: 'elastic',
         tags: [],
         to: 'now',
