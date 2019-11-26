@@ -18,5 +18,7 @@
  */
 
 export { CollectorSet } from './collector_set';
+// @ts-ignore
 export { Collector } from './collector';
+// @ts-ignore
 export { UsageCollector } from './usage_collector';

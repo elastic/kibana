@@ -24,22 +24,25 @@ import { Collector } from '../collector';
 import { CollectorSet } from '../collector_set';
 import { UsageCollector } from '../usage_collector';
 
+const mockLogger = () => ({
+  debug: sinon.spy(),
+  warn: sinon.spy(),
+});
+
 describe('CollectorSet', () => {
   describe('registers a collector set and runs lifecycle events', () => {
-    let server;
     let init;
     let fetch;
-
     beforeEach(() => {
-      server = { log: sinon.spy() };
       init = noop;
       fetch = noop;
     });
 
     it('should throw an error if non-Collector type of object is registered', () => {
-      const collectors = new CollectorSet(server);
+      const logger = mockLogger();
+      const collectors = new CollectorSet({ logger });
       const registerPojo = () => {
-        collectors.register({
+        collectors.registerCollector({
           type: 'type_collector_test',
           init,
           fetch,
@@ -53,17 +56,17 @@ describe('CollectorSet', () => {
 
     it('should log debug status of fetching from the collector', async () => {
       const mockCallCluster = () => Promise.resolve({ passTest: 1000 });
-      const collectors = new CollectorSet(server);
-      collectors.register(new Collector(server, {
+      const logger = mockLogger();
+      const collectors = new CollectorSet({ logger });
+      collectors.registerCollector(new Collector(logger, {
         type: 'MY_TEST_COLLECTOR',
         fetch: caller => caller()
       }));
 
       const result = await collectors.bulkFetch(mockCallCluster);
-      const calls = server.log.getCalls();
+      const calls = logger.debug.getCalls();
       expect(calls.length).to.be(1);
       expect(calls[0].args).to.eql([
-        ['debug', 'stats-collection'],
         'Fetching data from MY_TEST_COLLECTOR collector',
       ]);
       expect(result).to.eql([{
@@ -74,8 +77,9 @@ describe('CollectorSet', () => {
 
     it('should gracefully handle a collector fetch method throwing an error', async () => {
       const mockCallCluster = () => Promise.resolve({ passTest: 1000 });
-      const collectors = new CollectorSet(server);
-      collectors.register(new Collector(server, {
+      const logger = mockLogger();
+      const collectors = new CollectorSet({ logger });
+      collectors.registerCollector(new Collector(logger, {
         type: 'MY_TEST_COLLECTOR',
         fetch: () => new Promise((_resolve, reject) => reject())
       }));
@@ -95,7 +99,8 @@ describe('CollectorSet', () => {
     let collectorSet;
 
     beforeEach(() => {
-      collectorSet = new CollectorSet();
+      const logger = mockLogger();
+      collectorSet = new CollectorSet({ logger });
     });
 
     it('should snake_case and convert field names to api standards', () => {
@@ -161,14 +166,13 @@ describe('CollectorSet', () => {
   });
 
   describe('isUsageCollector', () => {
-    const server = { };
     const collectorOptions = { type: 'MY_TEST_COLLECTOR', fetch: () => {} };
 
     it('returns true only for UsageCollector instances', () => {
-      const collectors = new CollectorSet(server);
-
-      const usageCollector = new UsageCollector(server, collectorOptions);
-      const collector = new Collector(server, collectorOptions);
+      const logger = mockLogger();
+      const collectors = new CollectorSet({ logger });
+      const usageCollector = new UsageCollector(logger, collectorOptions);
+      const collector = new Collector(logger, collectorOptions);
       const randomClass = new (class Random {});
       expect(collectors.isUsageCollector(usageCollector)).to.be(true);
       expect(collectors.isUsageCollector(collector)).to.be(false);

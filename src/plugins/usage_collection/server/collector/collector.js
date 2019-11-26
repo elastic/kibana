@@ -17,18 +17,17 @@
  * under the License.
  */
 
-import { getCollectorLogger } from '../lib';
 
 export class Collector {
   /*
-   * @param {Object} server - server object
+   * @param {Object} logger - logger object
    * @param {String} options.type - property name as the key for the data
    * @param {Function} options.init (optional) - initialization function
    * @param {Function} options.fetch - function to query data
    * @param {Function} options.formatForBulkUpload - optional
    * @param {Function} options.rest - optional other properties
    */
-  constructor(server, { type, init, fetch, formatForBulkUpload = null, isReady = null, ...options } = {}) {
+  constructor(logger, { type, init, fetch, formatForBulkUpload = null, isReady = null, ...options } = {}) {
     if (type === undefined) {
       throw new Error('Collector must be instantiated with a options.type string property');
     }
@@ -39,7 +38,7 @@ export class Collector {
       throw new Error('Collector must be instantiated with a options.fetch function property');
     }
 
-    this.log = getCollectorLogger(server);
+    this.log = logger;
 
     Object.assign(this, options); // spread in other properties and mutate "this"
 

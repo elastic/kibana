@@ -17,15 +17,11 @@
  * under the License.
  */
 
-const LOGGING_TAGS = ['stats-collection'];
-/*
- * @param {Object} server
- * @return {Object} helpful logger object
- */
-export function getCollectorLogger(server) {
-  return {
-    debug: message => server.log(['debug', ...LOGGING_TAGS], message),
-    info: message => server.log(['info', ...LOGGING_TAGS], message),
-    warn: message => server.log(['warning', ...LOGGING_TAGS], message)
-  };
-}
+import { PluginInitializerContext } from '../../../../src/core/server';
+import { Plugin } from './plugin';
+import { ConfigSchema } from './config';
+
+export { UsageCollectionSetup } from './plugin';
+export const config = { schema: ConfigSchema };
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new Plugin(initializerContext);
