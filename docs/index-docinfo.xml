@@ -1,11 +1,13 @@
 <legalnotice>
     <simpara>
-      Welcome to the official documentation for Kibana!
+      Whether you're creating your first visualization or managing your deployment, this guide can get you through.
     </simpara>
-      <simpara>With Kibana, you can do anything from tracking query loads to understanding the way requests flow through your apps. These common tasks can help you get started. </simpara>
       <itemizedlist>
-        <listitem><simpara><ulink url="setup.html"><citetitle>Set up Kibana and get data in</citetitle></ulink></simpara></listitem>
-        <listitem><simpara><ulink url="visualize.html"><citetitle>Visualize and analyze</citetitle></ulink></simpara></listitem>
-        <listitem><simpara><ulink url="management.html"><citetitle>Manage the stack</citetitle></ulink></simpara></listitem>
+        <title>Top 5 things to do in Kibana</title>
+        <listitem><simpara><ulink url="getting-started.html"><citetitle>Get started</citetitle></ulink></simpara></listitem>
+        <listitem><simpara><ulink url="discover.html"><citetitle>Search your data</citetitle></ulink></simpara></listitem>
+        <listitem><simpara><ulink url="visualize.html"><citetitle>Visualize your data</citetitle></ulink></simpara></listitem>
+        <listitem><simpara><ulink url="dashboard.html"><citetitle>Build a dashboard</citetitle></ulink></simpara></listitem>
+        <listitem><simpara><ulink url="management.html"><citetitle>Manage cluster data</citetitle></ulink></simpara></listitem>
       </itemizedlist>
 </legalnotice>
