@@ -9,6 +9,7 @@ import { CustomUrls } from '../../../../../../../../jobs_list/components/edit_jo
 import { UrlConfig } from '../../../../../../../../../../../common/types/custom_urls';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
+import { CombinedJob } from '../../../../../../../common/job_creator/configs';
 
 export const CustomUrlsSelection: FC = () => {
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
@@ -18,10 +19,15 @@ export const CustomUrlsSelection: FC = () => {
     jobCreatorUpdate();
   };
 
+  const combinedJob: CombinedJob = {
+    ...jobCreator.jobConfig,
+    datafeed_config: jobCreator.datafeedConfig,
+  };
+
   return (
     <Description>
       <CustomUrls
-        job={jobCreator.jobConfig}
+        job={combinedJob}
         jobCustomUrls={jobCreator.customUrls ?? []}
         setCustomUrls={setCustomUrls}
         editMode="modal"
