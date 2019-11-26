@@ -58,6 +58,8 @@ UNAME=$(uname)
 OS="linux"
 if [[ "$UNAME" = *"MINGW64_NT"* ]]; then
   OS="win"
+elif [[ "$UNAME" == "Darwin" ]]; then
+  OS="darwin"
 fi
 echo " -- Running on OS: $OS"
 
@@ -69,7 +71,7 @@ if [[ "$OS" == "win" ]]; then
   nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v$nodeVersion/node-v$nodeVersion-win-x64.zip"
 else
   nodeBin="$nodeDir/bin"
-  nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v$nodeVersion/node-v$nodeVersion-linux-x64.tar.gz"
+  nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v$nodeVersion/node-v$nodeVersion-${OS}-x64.tar.gz"
 fi
 
 if [[ "$installNode" == "true" ]]; then
