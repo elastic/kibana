@@ -18,3 +18,5 @@
  */
 
 export * from './get_time_zone_from_settings';
+export * from './get_index_pattern_from_filter';
+export * from './get_display_value';

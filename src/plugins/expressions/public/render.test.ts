@@ -128,5 +128,19 @@ describe('ExpressionRenderHandler', () => {
         expressionRenderHandler.render({ type: 'render', as: 'test' });
       });
     });
+
+    // in case render$ subscription happen after render() got called
+    // we still want to be notified about sync render$ updates
+    it("doesn't swallow sync render errors", async () => {
+      const expressionRenderHandler = new ExpressionRenderHandler(element);
+      expressionRenderHandler.render(false);
+      const promise = expressionRenderHandler.render$.pipe(first()).toPromise();
+      await expect(promise).resolves.toEqual({
+        type: 'error',
+        error: {
+          message: 'invalid data provided to the expression renderer',
+        },
+      });
+    });
   });
 });

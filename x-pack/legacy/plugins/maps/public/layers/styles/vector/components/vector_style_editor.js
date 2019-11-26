@@ -52,20 +52,27 @@ export class VectorStyleEditor extends Component {
 
   async _loadOrdinalFields() {
 
+    const getFieldMeta = async (field) => {
+      return {
+        label: await field.getLabel(),
+        name: field.getName(),
+        origin: field.getOrigin()
+      };
+    };
     const dateFields = await this.props.layer.getDateFields();
-    if (!this._isMounted) {
-      return;
-    }
-    if (!_.isEqual(dateFields, this.state.dateFields)) {
-      this.setState({ dateFields });
+    const dateFieldPromises = dateFields.map(getFieldMeta);
+    const dateFieldsArray = await Promise.all(dateFieldPromises);
+
+    if (this._isMounted && !_.isEqual(dateFieldsArray, this.state.dateFields)) {
+      this.setState({ dateFields: dateFieldsArray });
     }
 
     const numberFields = await this.props.layer.getNumberFields();
-    if (!this._isMounted) {
-      return;
-    }
-    if (!_.isEqual(numberFields, this.state.numberFields)) {
-      this.setState({ numberFields });
+    const numberFieldPromises = numberFields.map(getFieldMeta);
+
+    const numberFieldsArray = await Promise.all(numberFieldPromises);
+    if (this._isMounted && !_.isEqual(numberFieldsArray, this.state.numberFields)) {
+      this.setState({ numberFields: numberFieldsArray });
     }
 
   }

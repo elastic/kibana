@@ -41,6 +41,7 @@ exports[`TooltipSelector should render component 1`] = `
             "type": "string",
           },
           Object {
+            "label": "foobar_label",
             "name": "iso3",
             "type": "string",
           },
@@ -50,7 +51,9 @@ exports[`TooltipSelector should render component 1`] = `
       selectedFields={
         Array [
           Object {
+            "label": "foobar_label",
             "name": "iso2",
+            "type": "foobar_type",
           },
         ]
       }
