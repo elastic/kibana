@@ -24,7 +24,6 @@ import { VisType } from '../legacy_imports';
 import { TypesStart } from '../../../../visualizations/public/np_ready/public/types';
 
 jest.mock('../legacy_imports', () => ({
-  memoizeLast: jest.requireActual('ui/utils/memoize').memoizeLast,
   State: () => null,
   AppState: () => null,
 }));
