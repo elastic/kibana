@@ -17,10 +17,10 @@ import { ActionsConnectorsContext } from '../../context/actions_connectors_conte
 import { ActionConnectorForm } from './action_connector_form';
 import { useAppDependencies } from '../../app_dependencies';
 import { SectionLoading } from '../../components/section_loading';
-import { ActionTableItem } from '../../../types';
+import { ActionConnectorTableItem } from '../../../types';
 
 export interface ConnectorEditProps {
-  connector: ActionTableItem;
+  connector: ActionConnectorTableItem;
 }
 
 export const ConnectorEditFlyout = ({ connector }: ConnectorEditProps) => {

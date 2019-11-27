@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionsConnectorsContext } from '../../../context/actions_connectors_context';
 import { useAppDependencies } from '../../../app_dependencies';
 import { deleteActions, loadAllActions, loadActionTypes } from '../../../lib/api';
-import { ActionConnector, ActionTableItem, ActionTypeIndex } from '../../../../types';
+import { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../../../../types';
 import { ConnectorAddFlyout, ConnectorEditFlyout } from '../../action_connector_form';
 
 export const ActionsConnectorsList: React.FunctionComponent = () => {
@@ -24,8 +24,8 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
 
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
   const [actions, setActions] = useState<ActionConnector[]>([]);
-  const [data, setData] = useState<ActionTableItem[]>([]);
-  const [selectedItems, setSelectedItems] = useState<ActionTableItem[]>([]);
+  const [data, setData] = useState<ActionConnectorTableItem[]>([]);
+  const [selectedItems, setSelectedItems] = useState<ActionConnectorTableItem[]>([]);
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
   const [isLoadingActions, setIsLoadingActions] = useState<boolean>(false);
   const [isDeletingActions, setIsDeletingActions] = useState<boolean>(false);
@@ -34,9 +34,9 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
   const [actionTypesList, setActionTypesList] = useState<Array<{ value: string; name: string }>>(
     []
   );
-  const [editedConnectorItem, setEditedConnectorItem] = useState<ActionTableItem | undefined>(
-    undefined
-  );
+  const [editedConnectorItem, setEditedConnectorItem] = useState<
+    ActionConnectorTableItem | undefined
+  >(undefined);
 
   useEffect(() => {
     loadActions();
@@ -111,7 +111,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     }
   }
 
-  async function deleteItems(items: ActionTableItem[]) {
+  async function deleteItems(items: ActionConnectorTableItem[]) {
     setIsDeletingActions(true);
     const ids = items.map(item => (item.id ? item.id : ''));
     try {
@@ -132,8 +132,8 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     }
   }
 
-  async function editItem(actionTableItem: ActionTableItem) {
-    setEditedConnectorItem(actionTableItem);
+  async function editItem(connectorTableItem: ActionConnectorTableItem) {
+    setEditedConnectorItem(connectorTableItem);
     setEditFlyoutVisibility(true);
   }
 
@@ -172,7 +172,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       ),
       sortable: false,
       truncateText: true,
-      render: (value: number, item: ActionTableItem) => {
+      render: (value: number, item: ActionConnectorTableItem) => {
         return <EuiBadge key={item.id}>{value}</EuiBadge>;
       },
     },
@@ -196,7 +196,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
               ),
           type: 'icon',
           icon: 'pencil',
-          onClick: (item: ActionTableItem) => editItem(item),
+          onClick: (item: ActionConnectorTableItem) => editItem(item),
         },
         {
           enabled: () => canDelete,
@@ -215,7 +215,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
               ),
           type: 'icon',
           icon: 'trash',
-          onClick: (item: ActionTableItem) => deleteItems([item]),
+          onClick: (item: ActionConnectorTableItem) => deleteItems([item]),
         },
       ],
     },
@@ -251,7 +251,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
             pagination={true}
             selection={
               canDelete && {
-                onSelectionChange(updatedSelectedItemsList: ActionTableItem[]) {
+                onSelectionChange(updatedSelectedItemsList: ActionConnectorTableItem[]) {
                   setSelectedItems(updatedSelectedItemsList);
                 },
               }

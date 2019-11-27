@@ -56,7 +56,7 @@ export interface ActionConnector {
   config: Record<string, any>;
 }
 
-export interface ActionTableItem extends ActionConnector {
+export interface ActionConnectorTableItem extends ActionConnector {
   actionType: ActionType['name'];
 }
 
