@@ -6,35 +6,29 @@
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { KIBANA_CLOUD_STATS_TYPE } from '../../common/constants';
-import { CoreSetup } from 'kibana/server';
 
-export interface UsageStats {
+interface Config {
   isCloudEnabled: boolean;
 }
 
-export function createCollectorFetch(core: CoreSetup) {
-  return async function fetchUsageStats(): Promise<UsageStats> {
-    const cloudId = core.getServerConfig().get<string>('xpack.cloud.id', null);
-
-    return {
-      isCloudEnabled: !!cloudId,
-    };
-  };
-}
-
-export function createCloudUsageCollector(usageCollection: UsageCollectionSetup, core: CoreSetup) {
+export function createCloudUsageCollector(usageCollection: UsageCollectionSetup, config: Config) {
+  const { isCloudEnabled } = config;
   return usageCollection.makeUsageCollector({
     type: KIBANA_CLOUD_STATS_TYPE,
     isReady: () => true,
-    fetch: createCollectorFetch(core),
+    fetch: () => {
+      return {
+        isCloudEnabled,
+      };
+    }
   });
 }
 
-export function registerCloudUsageCollector(usageCollection: UsageCollectionSetup, core: CoreSetup) {
+export function registerCloudUsageCollector(usageCollection: UsageCollectionSetup | undefined, config: Config) {
   if (!usageCollection) {
     return;
   }
 
-  const collector = createCloudUsageCollector(usageCollection, core);
+  const collector = createCloudUsageCollector(usageCollection, config);
   usageCollection.registerCollector(collector);
 }
