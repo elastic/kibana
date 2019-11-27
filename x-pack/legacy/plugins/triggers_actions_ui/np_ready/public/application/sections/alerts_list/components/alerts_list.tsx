@@ -175,6 +175,7 @@ export const AlertsList: React.FunctionComponent = () => {
             }
             toolsRight={[
               <TypeFilter
+                key="type-filter"
                 onChange={(types: string[]) => setTypesFilter(types)}
                 options={Object.values(alertTypesIndex || {})
                   .map(alertType => ({
@@ -183,7 +184,7 @@ export const AlertsList: React.FunctionComponent = () => {
                   }))
                   .sort((a, b) => a.name.localeCompare(b.name))}
               />,
-              <TagsFilter onChange={(tags: string[]) => setTagsFilter(tags)} />,
+              <TagsFilter key="tags-filter" onChange={(tags: string[]) => setTagsFilter(tags)} />,
               <EuiButton
                 key="create-alert"
                 data-test-subj="createAlertButton"
