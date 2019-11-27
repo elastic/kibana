@@ -91,7 +91,7 @@ function DefaultEditorSideBar({
     });
     setDirty(false);
     setTouched(false);
-  }, [vis, state, formState.invalid, setDirty, setTouched]);
+  }, [vis, state, formState.invalid, setDirty, setTouched, isDirty]);
 
   const onSubmit: KeyboardEventHandler<HTMLFormElement> = useCallback(
     event => {
