@@ -716,6 +716,8 @@ export interface IndexSettingsDeprecationInfo {
 export interface IRouter {
     delete: RouteRegistrar<'delete'>;
     get: RouteRegistrar<'get'>;
+    // Warning: (ae-forgotten-export) The symbol "RouterRoute" needs to be exported by the entry point index.d.ts
+    // 
     // @internal
     getRoutes: () => RouterRoute[];
     handleLegacyErrors: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(handler: RequestHandler<P, Q, B>) => RequestHandler<P, Q, B>;
@@ -768,13 +770,14 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
 export interface KibanaRequestRoute<Method extends RouteMethod> {
     // (undocumented)
     method: Method;
-    // Warning: (ae-forgotten-export) The symbol "KibanaRequestRouteOptions" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     options: KibanaRequestRouteOptions<Method>;
     // (undocumented)
     path: string;
 }
+
+// @public
+export type KibanaRequestRouteOptions<Method extends RouteMethod> = Method extends 'get' | 'options' ? Required<Omit<RouteConfigOptions<Method>, 'body'>> : Required<RouteConfigOptions<Method>>;
 
 // @public
 export type KibanaResponseFactory = typeof kibanaResponseFactory;
@@ -1113,18 +1116,6 @@ export type RouteMethod = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options
 
 // @public
 export type RouteRegistrar<Method extends RouteMethod> = <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<P, Q, B, Method>) => void;
-
-// @public
-export interface RouterRoute {
-    // (undocumented)
-    handler: (req: Request, responseToolkit: ResponseToolkit) => Promise<ResponseObject | Boom<any>>;
-    // (undocumented)
-    method: RouteMethod;
-    // (undocumented)
-    options: RouteConfigOptions<RouteMethod>;
-    // (undocumented)
-    path: string;
-}
 
 // @public
 export interface RouteSchemas<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>> {
@@ -1666,8 +1657,6 @@ export interface UserProvidedValues<T extends SavedObjectAttribute = any> {
     userValue?: T;
 }
 
-// Warning: (ae-missing-release-tag) "validBodyOutput" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
 // @public
 export const validBodyOutput: readonly ["data", "stream"];
 

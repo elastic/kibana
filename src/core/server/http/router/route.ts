@@ -28,6 +28,7 @@ export type RouteMethod = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options
 
 /**
  * The set of valid body.output
+ * @public
  */
 export const validBodyOutput = ['data', 'stream'] as const;
 

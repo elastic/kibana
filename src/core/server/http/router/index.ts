@@ -18,10 +18,11 @@
  */
 
 export { Headers, filterHeaders, ResponseHeaders, KnownHeaders } from './headers';
-export { Router, RequestHandler, IRouter, RouterRoute, RouteRegistrar } from './router';
+export { Router, RequestHandler, IRouter, RouteRegistrar } from './router';
 export {
   KibanaRequest,
   KibanaRequestRoute,
+  KibanaRequestRouteOptions,
   isRealRequest,
   LegacyRequest,
   ensureRawRequest,

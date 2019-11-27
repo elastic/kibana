@@ -84,7 +84,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [RouteConfig](./kibana-plugin-server.routeconfig.md) | Route specific configuration. |
 |  [RouteConfigOptions](./kibana-plugin-server.routeconfigoptions.md) | Additional route options. |
 |  [RouteConfigOptionsBody](./kibana-plugin-server.routeconfigoptionsbody.md) | Additional body options for a route |
-|  [RouterRoute](./kibana-plugin-server.routerroute.md) | Definition of a route |
 |  [RouteSchemas](./kibana-plugin-server.routeschemas.md) | RouteSchemas contains the schemas for validating the different parts of a request. |
 |  [SavedObject](./kibana-plugin-server.savedobject.md) |  |
 |  [SavedObjectAttributes](./kibana-plugin-server.savedobjectattributes.md) | The data for a Saved Object is stored as an object in the <code>attributes</code> property. |
@@ -154,6 +153,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IContextProvider](./kibana-plugin-server.icontextprovider.md) | A function that returns a context value for a specific key of given context type. |
 |  [IsAuthenticated](./kibana-plugin-server.isauthenticated.md) | Return authentication status for a request. |
 |  [IScopedClusterClient](./kibana-plugin-server.iscopedclusterclient.md) | Serves the same purpose as "normal" <code>ClusterClient</code> but exposes additional <code>callAsCurrentUser</code> method that doesn't use credentials of the Kibana internal user (as <code>callAsInternalUser</code> does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API.<!-- -->See [ScopedClusterClient](./kibana-plugin-server.scopedclusterclient.md)<!-- -->. |
+|  [KibanaRequestRouteOptions](./kibana-plugin-server.kibanarequestrouteoptions.md) | Route options: If 'GET' or 'OPTIONS' method, body options won't be returned. |
 |  [KibanaResponseFactory](./kibana-plugin-server.kibanaresponsefactory.md) | Creates an object containing request response payload, HTTP headers, error details, and other data transmitted to the client. |
 |  [KnownHeaders](./kibana-plugin-server.knownheaders.md) | Set of well-known HTTP headers. |
 |  [LifecycleResponseFactory](./kibana-plugin-server.lifecycleresponsefactory.md) | Creates an object containing redirection or error response with error details, HTTP headers, and other data transmitted to the client. |
