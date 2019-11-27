@@ -6,18 +6,20 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
+const apmSchema = schema.object({
+  url: schema.maybe(schema.string()),
+  secret_token: schema.maybe(schema.string()),
+  ui: schema.maybe(schema.object({
+    url: schema.maybe(schema.string()),
+  })),
+});
+
 export const config = {
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    id: schema.string(),
-    apm: schema.object({
-      url: schema.string(),
-      secret_token: schema.string(),
-      ui: schema.object({
-        url: schema.string(),
-      }),
-    }),
+    id: schema.maybe(schema.string()),
+    apm: schema.maybe(apmSchema),
   }),
 };
 
-export type CloudConfigType = TypeOf<typeof config.schema>;
+export type CloudConfigSchema = TypeOf<typeof config.schema>;
