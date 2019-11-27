@@ -20,9 +20,9 @@
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
-import { Vis } from '..';
+import { Vis } from '../..';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { start as visualizations } from '../../../../core_plugins/visualizations/public/np_ready/public/legacy';
+import { start as visualizations } from '../../legacy';
 
 describe('Vis Class', function () {
   let indexPattern;

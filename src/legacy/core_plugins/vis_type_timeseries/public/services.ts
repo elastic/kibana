@@ -17,28 +17,15 @@
  * under the License.
  */
 
-interface SetupDependecies {
-  VisFiltersProvider: any;
-  createFilter: any;
-}
+import { I18nStart, SavedObjectsStart, UiSettingsClientContract } from 'src/core/public';
+import { createGetterSetter } from '../../../../plugins/kibana_utils/public';
 
-/**
- * Vis Filters Service
- *
- * @internal
- */
-export class FiltersService {
-  public setup({ VisFiltersProvider, createFilter }: SetupDependecies) {
-    return {
-      VisFiltersProvider,
-      createFilter,
-    };
-  }
+export const [getUISettings, setUISettings] = createGetterSetter<UiSettingsClientContract>(
+  'UISettings'
+);
 
-  public stop() {
-    // nothing to do here yet
-  }
-}
+export const [getSavedObjectsClient, setSavedObjectsClient] = createGetterSetter<SavedObjectsStart>(
+  'SavedObjectsClient'
+);
 
-/** @public */
-export type FiltersSetup = ReturnType<FiltersService['setup']>;
+export const [getI18n, setI18n] = createGetterSetter<I18nStart>('I18n');

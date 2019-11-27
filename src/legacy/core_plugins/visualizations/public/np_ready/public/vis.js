@@ -29,16 +29,9 @@
 
 import { EventEmitter } from 'events';
 import _ from 'lodash';
-import '../render_complete/directive';
-import { AggConfigs } from '../agg_types/agg_configs';
-import { PersistedState } from '../persisted_state';
-import { updateVisualizationConfig } from './vis_update';
-import { SearchSource } from '../courier';
-import { start as visualizations } from '../../../core_plugins/visualizations/public/np_ready/public/legacy';
-
-import '../directives/bind';
-
-const visTypes = visualizations.types;
+import { AggConfigs, PersistedState } from '../../legacy_imports';
+import { updateVisualizationConfig } from './legacy/vis_update';
+import { getTypes } from './services';
 
 class Vis extends EventEmitter {
   constructor(indexPattern, visState) {
@@ -50,6 +43,7 @@ class Vis extends EventEmitter {
         type: visState
       };
     }
+
     this.indexPattern = indexPattern;
     this._setUiState(new PersistedState());
     this.setCurrentState(visState);
@@ -60,7 +54,6 @@ class Vis extends EventEmitter {
     this.sessionState = {};
 
     this.API = {
-      SearchSource: SearchSource,
       events: {
         filter: data => this.eventsSubject.next({ name: 'filterBucket', data }),
         brush: data => this.eventsSubject.next({ name: 'brush', data }),
@@ -72,7 +65,7 @@ class Vis extends EventEmitter {
     this.title = state.title || '';
     const type = state.type || this.type;
     if (_.isString(type)) {
-      this.type = visTypes.get(type);
+      this.type = getTypes().get(type);
       if (!this.type) {
         throw new Error(`Invalid type "${type}"`);
       }

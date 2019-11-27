@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { chromeServiceMock } from '../../../../../../../core/public/mocks';
 
-// TODO: should it be here or in vis filters (only place where it's used).
-// $newFilters is not defined by filter_bar as well.
-export function pushFilterBarFilters($state, filters) {
-  if (!_.isObject($state)) throw new Error('pushFilters requires a state object');
-  $state.$newFilters = filters;
-}
+jest.doMock('ui/new_platform', () => ({
+  npStart: {
+    core: {
+      chrome: chromeServiceMock.createStartContract(),
+    },
+  },
+}));
