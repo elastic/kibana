@@ -106,6 +106,7 @@ export interface LoadAlertsOpts {
   page: { index: number; size: number };
   searchText?: string;
   tagsFilter?: string[];
+  typesFilter?: string[];
 }
 
 export interface LoadAlertsResponse {
@@ -120,17 +121,22 @@ export async function loadAlerts({
   page,
   searchText,
   tagsFilter,
+  typesFilter,
 }: LoadAlertsOpts): Promise<LoadAlertsResponse> {
+  const filters = [];
+  if (tagsFilter && tagsFilter.length) {
+    filters.push(`alert.attributes.tags:(${tagsFilter.join(' and ')})`);
+  }
+  if (typesFilter && typesFilter.length) {
+    filters.push(`alert.attributes.alertTypeId:(${typesFilter.join(' or ')})`);
+  }
   return http.get(`${BASE_ALERT_API_PATH}/_find`, {
     query: {
       page: page.index + 1,
       per_page: page.size,
       search_fields: searchText ? 'name' : undefined,
       search: searchText,
-      filter:
-        tagsFilter && tagsFilter.length > 0
-          ? `alert.attributes.tags:(${tagsFilter.join(' and ')})`
-          : undefined,
+      filter: filters.length ? filters.join(' ') : undefined,
     },
   });
 }

@@ -17,6 +17,7 @@ import { AlertAdd } from '../../alert_add';
 import { BulkActionPopover } from './bulk_action_popover';
 import { CollapsedItemActions } from './collapsed_item_actions';
 import { TagsFilter } from './tags_filter';
+import { TypeFilter } from './type_filter';
 import { loadAlerts, loadAlertTypes } from '../../../lib/api';
 
 export const AlertsList: React.FunctionComponent = () => {
@@ -37,12 +38,13 @@ export const AlertsList: React.FunctionComponent = () => {
   const [page, setPage] = useState<Pagination>({ index: 0, size: 10 });
   const [searchText, setSearchText] = useState<string | undefined>(undefined);
   const [tagsFilter, setTagsFilter] = useState<string[]>([]);
+  const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
 
   useEffect(() => {
     loadAlertsData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, searchText, tagsFilter]);
+  }, [page, searchText, tagsFilter, typesFilter]);
 
   useEffect(() => {
     (async () => {
@@ -86,7 +88,7 @@ export const AlertsList: React.FunctionComponent = () => {
   async function loadAlertsData() {
     setIsLoadingAlerts(true);
     try {
-      const alertsResponse = await loadAlerts({ http, page, searchText, tagsFilter });
+      const alertsResponse = await loadAlerts({ http, page, searchText, tagsFilter, typesFilter });
       setAlerts(alertsResponse.data);
       setTotalItemCount(alertsResponse.total);
     } catch (e) {
@@ -157,23 +159,6 @@ export const AlertsList: React.FunctionComponent = () => {
         <AlertsContext.Provider value={{ alertFlyoutVisible, setAlertFlyoutVisibility }}>
           <EuiSearchBar
             onChange={({ queryText }: { queryText: string }) => setSearchText(queryText)}
-            filters={[
-              {
-                type: 'field_value_selection',
-                field: 'type',
-                name: i18n.translate(
-                  'xpack.triggersActionsUI.sections.alertsList.filters.alertTypeIdName',
-                  { defaultMessage: 'Type' }
-                ),
-                multiSelect: 'or',
-                options: Object.values(alertTypesIndex || {})
-                  .map(alertType => ({
-                    value: alertType.id,
-                    name: alertType.name,
-                  }))
-                  .sort((a, b) => a.name.localeCompare(b.name)),
-              },
-            ]}
             toolsLeft={
               selectedIds.length === 0 || !canDelete
                 ? []
@@ -189,6 +174,15 @@ export const AlertsList: React.FunctionComponent = () => {
                   ]
             }
             toolsRight={[
+              <TypeFilter
+                onChange={(types: string[]) => setTypesFilter(types)}
+                options={Object.values(alertTypesIndex || {})
+                  .map(alertType => ({
+                    value: alertType.id,
+                    name: alertType.name,
+                  }))
+                  .sort((a, b) => a.name.localeCompare(b.name))}
+              />,
               <TagsFilter onChange={(tags: string[]) => setTagsFilter(tags)} />,
               <EuiButton
                 key="create-alert"
