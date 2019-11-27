@@ -61,6 +61,7 @@ function validateBaseProperties(alertObject: Alert) {
     name: new Array<string>(),
     interval: new Array<string>(),
     alertTypeId: new Array<string>(),
+    actionConnectors: new Array<string>(),
   };
   validationResult.errors = errors;
   if (!alertObject.name) {
@@ -312,9 +313,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
           icon={<EuiIcon size="xl" type={item.iconClass} />}
           title={actionTypesIndex ? actionTypesIndex[item.id].name : item.name}
           description={''}
-          selectable={{
-            onClick: () => addActionType(item.actionType),
-          }}
+          onClick={() => addActionType(item.actionType)}
         />
       </EuiFlexItem>
     );
@@ -679,6 +678,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
                     <EuiFlexItem>
                       <EuiFieldNumber
                         fullWidth
+                        min={1}
                         compressed
                         value={alertInterval || 1}
                         name="interval"
@@ -712,6 +712,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
                     <EuiFlexItem>
                       <EuiFieldNumber
                         fullWidth
+                        min={1}
                         compressed
                         value={alertThrottle || ''}
                         name="throttle"
