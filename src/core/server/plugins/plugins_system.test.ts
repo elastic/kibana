@@ -34,7 +34,6 @@ import { capabilitiesServiceMock } from '../capabilities/capabilities_service.mo
 import { PluginWrapper } from './plugin';
 import { PluginName } from './types';
 import { PluginsSystem } from './plugins_system';
-
 import { coreMock } from '../mocks';
 
 const logger = loggingServiceMock.create();
@@ -69,10 +68,9 @@ const configService = configServiceMock.create();
 configService.atPath.mockReturnValue(new BehaviorSubject({ initialize: true }));
 let env: Env;
 let coreContext: CoreContext;
+
 const setupDeps = coreMock.createInternalSetup();
-const startDeps = {
-  capabilities: capabilitiesServiceMock.createStartContract(),
-};
+const startDeps = coreMock.createInternalStart();
 
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());

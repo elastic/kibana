@@ -63,9 +63,7 @@ export interface PluginsServiceStart {
 export type PluginsServiceSetupDeps = InternalCoreSetup;
 
 /** @internal */
-export interface PluginsServiceStartDeps {
-  capabilities: InternalCoreStart['capabilities'];
-}
+export type PluginsServiceStartDeps = InternalCoreStart;
 
 /** @internal */
 export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {
