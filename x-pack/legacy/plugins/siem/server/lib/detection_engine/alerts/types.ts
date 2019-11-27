@@ -65,10 +65,6 @@ export type OutputRuleAlertRest = RuleAlertParamsRest & {
   updated_by: string | undefined | null;
 };
 
-export type OutputRuleES = OutputRuleAlertRest & {
-  status: 'open' | 'closed';
-};
-
 export type UpdateRuleAlertParamsRest = Partial<RuleAlertParamsRest> & {
   id: string | undefined;
   rule_id: RuleAlertParams['ruleId'] | undefined;
