@@ -263,15 +263,15 @@ export class LegacyService implements CoreService {
       savedObjects: {
         setClientFactory: setupDeps.core.savedObjects.setClientFactory,
         addClientWrapper: setupDeps.core.savedObjects.addClientWrapper,
-        internalRepository: setupDeps.core.savedObjects.internalRepository,
-        scopedRepository: setupDeps.core.savedObjects.scopedRepository,
+        createInternalRepository: setupDeps.core.savedObjects.createInternalRepository,
+        createScopedRepository: setupDeps.core.savedObjects.createScopedRepository,
       },
       uiSettings: {
         register: setupDeps.core.uiSettings.register,
       },
     };
     const coreStart: CoreStart = {
-      savedObjects: { scopedClient: startDeps.core.savedObjects.scopedClient },
+      savedObjects: { getScopedClient: startDeps.core.savedObjects.getScopedClient },
     };
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires

@@ -126,8 +126,8 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     savedObjects: {
       setClientFactory: deps.savedObjects.setClientFactory,
       addClientWrapper: deps.savedObjects.addClientWrapper,
-      internalRepository: deps.savedObjects.internalRepository,
-      scopedRepository: deps.savedObjects.scopedRepository,
+      createInternalRepository: deps.savedObjects.createInternalRepository,
+      createScopedRepository: deps.savedObjects.createScopedRepository,
     },
     uiSettings: {
       register: deps.uiSettings.register,
@@ -153,6 +153,6 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
   plugin: PluginWrapper<TPlugin, TPluginDependencies>
 ): CoreStart {
   return {
-    savedObjects: { scopedClient: deps.savedObjects.scopedClient },
+    savedObjects: { getScopedClient: deps.savedObjects.getScopedClient },
   };
 }

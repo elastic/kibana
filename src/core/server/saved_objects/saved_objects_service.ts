@@ -55,7 +55,7 @@ import { Logger } from '..';
  * repository for use within your own plugin won't have any of the registered
  * wrappers applied and is considered an anti-pattern. Use the Saved Objects
  * client from the
- * {@link SavedObjectsServiceStart | SavedObjectsServiceStart#scopedClient }
+ * {@link SavedObjectsServiceStart | SavedObjectsServiceStart#getScopedClient }
  * method or the {@link RequestHandlerContext | route handler context} instead.
  *
  * When plugins access the Saved Objects client, a new client is created using
@@ -105,11 +105,11 @@ export interface SavedObjectsServiceSetup {
    * factory or client wrapper. Using the repository directly for interacting
    * with Saved Objects is an anti-pattern. Use the Saved Objects client from
    * the
-   * {@link SavedObjectsServiceStart | SavedObjectsServiceStart#scopedClient }
+   * {@link SavedObjectsServiceStart | SavedObjectsServiceStart#getScopedClient }
    * method or the {@link RequestHandlerContext | route handler context}
    * instead.
    */
-  scopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
+  createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
 
   /**
    * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
@@ -120,18 +120,18 @@ export interface SavedObjectsServiceSetup {
    * factory or client wrapper. Using the repository directly for interacting
    * with Saved Objects is an anti-pattern. Use the Saved Objects client from
    * the
-   * {@link SavedObjectsServiceStart | SavedObjectsServiceStart#scopedClient }
+   * {@link SavedObjectsServiceStart | SavedObjectsServiceStart#getScopedClient }
    * method or the {@link RequestHandlerContext | route handler context}
    * instead.
    */
-  internalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
+  createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
 }
 
 /**
  * @internal
  */
 export interface InternalSavedObjectsServiceSetup extends SavedObjectsServiceSetup {
-  scopedClient: (
+  getScopedClient: (
     req: KibanaRequest,
     options?: SavedObjectsClientProviderOptions
   ) => SavedObjectsClientContract;
@@ -155,7 +155,7 @@ export interface SavedObjectsServiceStart {
    * A client that is already scoped to the incoming request is also exposed
    * from the route handler context see {@link RequestHandlerContext}.
    */
-  scopedClient: (
+  getScopedClient: (
     req: KibanaRequest,
     options?: SavedObjectsClientProviderOptions
   ) => SavedObjectsClientContract;
@@ -255,12 +255,12 @@ export class SavedObjectsService
     });
 
     return {
-      scopedClient: this.clientProvider.getClient.bind(this.clientProvider),
+      getScopedClient: this.clientProvider.getClient.bind(this.clientProvider),
       setClientFactory: this.clientProvider.setClientFactory.bind(this.clientProvider),
       addClientWrapper: this.clientProvider.addClientWrapperFactory.bind(this.clientProvider),
-      internalRepository: (extraTypes?: string[]) =>
+      createInternalRepository: (extraTypes?: string[]) =>
         createSORepository(adminClient.callAsInternalUser, extraTypes),
-      scopedRepository: (req: KibanaRequest, extraTypes?: string[]) =>
+      createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) =>
         createSORepository(adminClient.asScoped(req).callAsCurrentUser, extraTypes),
     };
   }
@@ -293,7 +293,7 @@ export class SavedObjectsService
     return {
       migrator: this.migrator!,
       clientProvider: this.clientProvider,
-      scopedClient: this.clientProvider.getClient.bind(this.clientProvider),
+      getScopedClient: this.clientProvider.getClient.bind(this.clientProvider),
     };
   }
 

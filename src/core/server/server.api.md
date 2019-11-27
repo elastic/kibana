@@ -1608,14 +1608,14 @@ export class SavedObjectsSerializer {
 // @public
 export interface SavedObjectsServiceSetup {
     addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory<KibanaRequest>) => void;
-    internalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
-    scopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
+    createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
+    createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
     setClientFactory: (customClientFactory: SavedObjectsClientFactory<KibanaRequest>) => void;
 }
 
 // @public
 export interface SavedObjectsServiceStart {
-    scopedClient: (req: KibanaRequest, options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
+    getScopedClient: (req: KibanaRequest, options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
 }
 
 // @public (undocumented)

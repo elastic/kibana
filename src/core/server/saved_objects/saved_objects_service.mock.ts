@@ -32,7 +32,7 @@ type SavedObjectsServiceContract = PublicMethodsOf<SavedObjectsService>;
 const createStartContractMock = () => {
   const startContract: jest.Mocked<InternalSavedObjectsServiceStart> = {
     clientProvider: savedObjectsClientProviderMock.create(),
-    scopedClient: jest.fn(),
+    getScopedClient: jest.fn(),
     migrator: mockKibanaMigrator.create(),
   };
 
@@ -41,16 +41,16 @@ const createStartContractMock = () => {
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<InternalSavedObjectsServiceSetup> = {
-    scopedClient: jest.fn(),
+    getScopedClient: jest.fn(),
     setClientFactory: jest.fn(),
     addClientWrapper: jest.fn(),
-    internalRepository: jest.fn(),
-    scopedRepository: jest.fn(),
+    createInternalRepository: jest.fn(),
+    createScopedRepository: jest.fn(),
   };
 
-  setupContract.scopedClient.mockReturnValue(savedObjectsClientMock.create());
-  setupContract.internalRepository.mockReturnValue(savedObjectsRepositoryMock.create());
-  setupContract.scopedRepository.mockReturnValue(savedObjectsRepositoryMock.create());
+  setupContract.getScopedClient.mockReturnValue(savedObjectsClientMock.create());
+  setupContract.createInternalRepository.mockReturnValue(savedObjectsRepositoryMock.create());
+  setupContract.createScopedRepository.mockReturnValue(savedObjectsRepositoryMock.create());
 
   return setupContract;
 };
