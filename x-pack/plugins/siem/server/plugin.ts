@@ -12,6 +12,7 @@ import { createConfig$, ConfigType } from './config';
 export class Plugin {
   readonly name = 'siem';
   private readonly logger: Logger;
+  // @ts-ignore-next-line TODO(rylnd): use it or lose it
   private readonly config$: Observable<ConfigType>;
 
   constructor(context: PluginInitializerContext) {
