@@ -14,12 +14,8 @@ import { useBreadcrumbs, useLinks } from '../../hooks';
 import { CenterColumn, LeftColumn, RightColumn } from './layout';
 import { InstallationButton } from './installation_button';
 import { ConfirmPackageInstall } from './confirm_package_install';
-// TODO: either
-// * import from a shared point
-// * duplicate inside our folder
-import { useTrackedPromise } from '../../../../infra/public/utils/use_tracked_promise';
-import { installPackage } from '../../data';
 import { NavButtonBack } from './nav_button_back';
+import { useInstallPackage, useGetPackageInstallStatus } from '../../hooks';
 
 const FullWidthNavRow = styled(EuiPage)`
   /* no left padding so link is against column left edge  */
@@ -39,30 +35,21 @@ type HeaderProps = PackageInfo & { iconType?: IconType };
 
 export function Header(props: HeaderProps) {
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
-  const { iconType, title, version, assets } = props;
+  const { iconType, title, version, assets, name } = props;
   const { toListView } = useLinks();
   useBreadcrumbs([{ text: PLUGIN.TITLE, href: toListView() }, { text: title }]);
-  const [isInstalled, setInstalled] = useState<boolean>(props.status === 'installed');
-  const [installationRequest, attemptInstallation] = useTrackedPromise(
-    {
-      createPromise: async () => {
-        const pkgkey = `${props.name}-${props.version}`;
-        return installPackage(pkgkey);
-      },
-      onResolve: (value: PackageInfo) => setInstalled(value.status === 'installed'),
-    },
-    [props.name, props.version, installPackage]
-  );
-  const isLoading = installationRequest.state === 'pending';
+  const installPackage = useInstallPackage();
+  const getPackageInstallStatus = useGetPackageInstallStatus();
+  const installationStatus = getPackageInstallStatus(name);
 
   const toggleModal = useCallback(() => {
     setModalVisible(!isModalVisible);
   }, [isModalVisible]);
 
   const handleClickInstall = useCallback(() => {
-    attemptInstallation();
+    installPackage({ name, version, title });
     toggleModal();
-  }, [attemptInstallation, toggleModal]);
+  }, [installPackage, name, title, toggleModal, version]);
 
   const numOfAssets = useMemo(
     () =>
@@ -100,11 +87,7 @@ export function Header(props: HeaderProps) {
         <RightColumn>
           <EuiFlexGroup direction="column" alignItems="flexEnd">
             <EuiFlexItem grow={false}>
-              <InstallationButton
-                isLoading={isLoading}
-                isInstalled={isInstalled}
-                onClick={toggleModal}
-              />
+              <InstallationButton installationStatus={installationStatus} onClick={toggleModal} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </RightColumn>
