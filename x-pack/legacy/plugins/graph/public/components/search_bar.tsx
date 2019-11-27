@@ -9,15 +9,12 @@ import React, { useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { IDataPluginServices, Query } from 'src/plugins/data/public';
 import { IndexPatternSavedObject, IndexPatternProvider } from '../types';
 import {
   QueryStringInput,
   IndexPattern,
 } from '../../../../../../src/legacy/core_plugins/data/public';
 import { openSourceModal } from '../services/source_modal';
-
 import {
   GraphState,
   datasourceSelector,
@@ -26,6 +23,7 @@ import {
 } from '../state_management';
 
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { IDataPluginServices, Query, esKuery } from '../../../../../../src/plugins/data/public';
 
 export interface OuterSearchBarProps {
   isLoading: boolean;
@@ -47,7 +45,10 @@ export interface SearchBarProps extends OuterSearchBarProps {
 
 function queryToString(query: Query, indexPattern: IndexPattern) {
   if (query.language === 'kuery' && typeof query.query === 'string') {
-    const dsl = toElasticsearchQuery(fromKueryExpression(query.query as string), indexPattern);
+    const dsl = esKuery.toElasticsearchQuery(
+      esKuery.fromKueryExpression(query.query as string),
+      indexPattern
+    );
     // JSON representation of query will be handled by existing logic.
     // TODO clean this up and handle it in the data fetch layer once
     // it moved to typescript.
