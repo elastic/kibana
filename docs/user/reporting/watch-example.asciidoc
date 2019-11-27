@@ -56,7 +56,7 @@ report from the Kibana UI.
 //For more information, see <<secure-reporting>>.
 //<<reporting-app-users, Setting up a Reporting Role>>.
 
-NOTE: Reporting is integrated with Watcher only as an email attachment type.
+NOTE: Reporting is integrated with {watcher} only as an email attachment type.
 
 For more information about configuring watches, see
-{stack-ov}/how-watcher-works.html[How Watcher Works].
+{ref}/how-watcher-works.html[How {watcher} works].

@@ -39,7 +39,7 @@ This page has moved. Please see <<xpack-logs-configuring>>.
 == Creating {transforms}
 
 This page is deleted. Please see
-{stack-ov}/ecommerce-dataframes.html[Transforming the eCommerce sample data].
+{ref}/ecommerce-transforms.html[Transforming the eCommerce sample data].
 
 [role="exclude",id="ml-jobs"]
 == Creating {anomaly-jobs}
