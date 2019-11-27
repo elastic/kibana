@@ -95,11 +95,12 @@ export function maps(kibana) {
 
     init(server) {
       const mapsEnabled = server.config().get('xpack.maps.enabled');
-
+      const { usageCollection } = server.newPlatform.setup.plugins;
       if (!mapsEnabled) {
         server.log(['info', 'maps'], 'Maps app disabled by configuration');
         return;
       }
+      initTelemetryCollection(usageCollection, server);
 
       const coreSetup = server.newPlatform.setup.core;
       const newPlatformPlugins = server.newPlatform.setup.plugins;
@@ -132,9 +133,6 @@ export function maps(kibana) {
         injectUiAppVars: server.injectUiAppVars,
         getInjectedUiAppVars: server.getInjectedUiAppVars
       };
-
-      // TODO: Wait for telemetry NP updates before modifying
-      initTelemetryCollection(server);
 
       const mapPluginSetup = new MapPlugin().setup(coreSetup, pluginsSetup, __LEGACY);
       server.expose('getMapConfig', mapPluginSetup.getMapConfig);

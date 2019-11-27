@@ -6,7 +6,9 @@
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { rgba } from 'polished';
-import styled from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
+
+import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '../drag_and_drop/helpers';
 
 /**
  * OFFSET PIXEL VALUES
@@ -17,6 +19,13 @@ export const OFFSET_SCROLLBAR = 17;
 /**
  * TIMELINE BODY
  */
+
+// SIDE EFFECT: the following creates a global class selector
+export const TimelineBodyGlobalStyle = createGlobalStyle`
+  body.${IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME} .siemTimeline__body {
+    overflow: hidden;
+  }
+`;
 
 export const TimelineBody = styled.div.attrs(({ className }) => ({
   className: `siemTimeline__body ${className}`,

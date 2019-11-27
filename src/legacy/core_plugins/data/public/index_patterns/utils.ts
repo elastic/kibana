@@ -21,27 +21,6 @@ import { find, get } from 'lodash';
 
 import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
 
-export const ILLEGAL_CHARACTERS = 'ILLEGAL_CHARACTERS';
-export const CONTAINS_SPACES = 'CONTAINS_SPACES';
-export const INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE = ['\\', '/', '?', '"', '<', '>', '|'];
-export const INDEX_PATTERN_ILLEGAL_CHARACTERS = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.concat(
-  ' '
-);
-
-function findIllegalCharacters(indexPattern: string): string[] {
-  const illegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.reduce(
-    (chars: string[], char: string) => {
-      if (indexPattern.includes(char)) {
-        chars.push(char);
-      }
-      return chars;
-    },
-    []
-  );
-
-  return illegalCharacters;
-}
-
 /**
  * Returns an object matching a given title
  *
@@ -69,26 +48,6 @@ export async function findIndexPatternByTitle(
     savedObjects,
     (obj: SimpleSavedObject<any>) => obj.get('title').toLowerCase() === title.toLowerCase()
   );
-}
-
-function indexPatternContainsSpaces(indexPattern: string): boolean {
-  return indexPattern.includes(' ');
-}
-
-export function validateIndexPattern(indexPattern: string) {
-  const errors: Record<string, any> = {};
-
-  const illegalCharacters = findIllegalCharacters(indexPattern);
-
-  if (illegalCharacters.length) {
-    errors[ILLEGAL_CHARACTERS] = illegalCharacters;
-  }
-
-  if (indexPatternContainsSpaces(indexPattern)) {
-    errors[CONTAINS_SPACES] = true;
-  }
-
-  return errors;
 }
 
 export function getFromSavedObject(savedObject: any) {
