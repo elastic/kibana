@@ -29,7 +29,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { Vis } from 'ui/vis';
-import { discardChanges, EditorAction } from '../../state';
+import { discardChanges, EditorAction } from './state';
 
 interface DefaultEditorControlsProps {
   applyChanges(): void;
@@ -79,19 +79,34 @@ function DefaultEditorControls({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="visualizeEditorRenderButton"
-              disabled={(isInvalid && isTouched) || !isDirty}
-              fill
-              iconType={isInvalid && isTouched ? 'alert' : 'play'}
-              onClick={applyChanges}
-              size="s"
-            >
-              <FormattedMessage
-                id="common.ui.vis.editors.sidebar.updateChartButtonLabel"
-                defaultMessage="Update"
-              />
-            </EuiButton>
+            {isInvalid && isTouched ? (
+              <EuiToolTip
+                content={i18n.translate('common.ui.vis.editors.sidebar.errorButtonTooltip', {
+                  defaultMessage: 'Errors in the highlighted fields need to be resolved.',
+                })}
+              >
+                <EuiButton color="danger" iconType="alert" size="s" disabled>
+                  <FormattedMessage
+                    id="common.ui.vis.editors.sidebar.updateChartButtonLabel"
+                    defaultMessage="Update"
+                  />
+                </EuiButton>
+              </EuiToolTip>
+            ) : (
+              <EuiButton
+                data-test-subj="visualizeEditorRenderButton"
+                disabled={!isDirty}
+                fill
+                iconType="play"
+                onClick={applyChanges}
+                size="s"
+              >
+                <FormattedMessage
+                  id="common.ui.vis.editors.sidebar.updateChartButtonLabel"
+                  defaultMessage="Update"
+                />
+              </EuiButton>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       )}

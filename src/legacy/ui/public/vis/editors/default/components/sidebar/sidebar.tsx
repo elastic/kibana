@@ -22,44 +22,33 @@ import { get, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { keyCodes, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 
-import { Vis, VisState } from 'ui/vis';
+import { Vis } from 'ui/vis';
 import { PersistedState } from 'ui/persisted_state';
 import { DefaultEditorNavBar, OptionTab } from './navbar';
 import { DefaultEditorControls } from './controls';
-import { setStateParamValue, EditorAction, SetValidity, SetTouched } from '../../state';
+import { setStateParamValue, useEditorReducer, useEditorFormState } from './state';
 import { AggGroupNames } from '../../agg_groups';
 import { DefaultEditorAggCommonProps } from '../agg_common_props';
 
 interface DefaultEditorSideBarProps {
-  dispatch: React.Dispatch<EditorAction>;
   isCollapsed: boolean;
-  formState: {
-    touched: boolean;
-    invalid: boolean;
-  };
   onClickCollapse: () => void;
   optionTabs: OptionTab[];
-  setTouched: SetTouched;
-  setValidity: SetValidity;
-  state: VisState;
   uiState: PersistedState;
   vis: Vis;
 }
 
 function DefaultEditorSideBar({
-  dispatch,
   isCollapsed,
-  formState,
   onClickCollapse,
   optionTabs,
-  setTouched,
-  setValidity,
-  state,
   uiState,
   vis,
 }: DefaultEditorSideBarProps) {
   const [selectedTab, setSelectedTab] = useState(optionTabs[0].name);
   const [isDirty, setDirty] = useState(false);
+  const [state, dispatch] = useEditorReducer(vis);
+  const { formState, setTouched, setValidity, resetValidity } = useEditorFormState();
 
   const responseAggs = useMemo(() => state.aggs.getResponseAggs(), [state.aggs]);
   const metricAggs = useMemo(
@@ -119,6 +108,10 @@ function DefaultEditorSideBar({
   useEffect(() => {
     vis.on('dirtyStateChange', ({ isDirty: dirty }: { isDirty: boolean }) => {
       setDirty(dirty);
+
+      if (!dirty) {
+        resetValidity();
+      }
     });
   }, [vis]);
 

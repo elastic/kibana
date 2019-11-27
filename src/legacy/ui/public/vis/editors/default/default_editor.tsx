@@ -31,7 +31,6 @@ import {
 
 import './vis_type_agg_filter';
 import { DefaultEditorSideBar } from './components/sidebar';
-import { useEditorReducer, useEditorFormState } from './state';
 import { DefaultEditorControllerState } from './default_editor_controller';
 
 function DefaultEditor({
@@ -48,8 +47,6 @@ function DefaultEditor({
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [factory, setFactory] = useState<VisualizeEmbeddableFactory | null>(null);
   const { vis } = savedObj;
-  const [state, dispatch] = useEditorReducer(vis);
-  const { formState, setTouched, setValidity } = useEditorFormState();
 
   const onClickCollapse = useCallback(() => {
     setIsCollapsed(value => !value);
@@ -110,14 +107,9 @@ function DefaultEditor({
         initialWidth={editorInitialWidth}
       >
         <DefaultEditorSideBar
-          dispatch={dispatch}
-          formState={formState}
           isCollapsed={isCollapsed}
           onClickCollapse={onClickCollapse}
           optionTabs={optionTabs}
-          setTouched={setTouched}
-          setValidity={setValidity}
-          state={state}
           vis={vis}
           uiState={uiState}
         />

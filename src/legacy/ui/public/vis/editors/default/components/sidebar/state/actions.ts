@@ -19,7 +19,7 @@
 
 import { AggConfig, Vis, VisParams } from 'ui/vis';
 import { EditorStateActionTypes } from './constants';
-import { Schema } from '../schemas';
+import { Schema } from '../../../schemas';
 
 export interface ActionType<T, P> {
   type: T;

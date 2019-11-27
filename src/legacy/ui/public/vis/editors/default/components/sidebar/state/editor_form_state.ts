@@ -22,12 +22,14 @@ import { useState, useCallback } from 'react';
 export type SetValidity = (modelName: string, value: boolean) => void;
 export type SetTouched = (value: boolean) => void;
 
+const initialFormState = {
+  validity: {},
+  touched: false,
+  invalid: false,
+};
+
 function useEditorFormState() {
-  const [formState, setFormState] = useState({
-    validity: {},
-    touched: false,
-    invalid: false,
-  });
+  const [formState, setFormState] = useState(initialFormState);
 
   const setValidity: SetValidity = useCallback((modelName, value) => {
     setFormState(model => {
@@ -44,6 +46,10 @@ function useEditorFormState() {
     });
   }, []);
 
+  const resetValidity = useCallback(() => {
+    setFormState(initialFormState);
+  }, []);
+
   const setTouched = useCallback((touched: boolean) => {
     setFormState(model => ({
       ...model,
@@ -55,6 +61,7 @@ function useEditorFormState() {
     formState,
     setValidity,
     setTouched,
+    resetValidity,
   };
 }
 

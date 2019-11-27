@@ -35,7 +35,7 @@ import {
   setAggParamValue,
   changeAggType,
   toggleEnabledAgg,
-} from '../../state';
+} from './state';
 import { ISchemas } from '../../schemas';
 import { AddSchema, ReorderAggs, DefaultEditorAggCommonProps } from '../agg_common_props';
 

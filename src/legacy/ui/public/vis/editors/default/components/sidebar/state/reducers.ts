@@ -23,8 +23,8 @@ import { AggConfigs, AggConfig } from 'ui/agg_types';
 import { Vis, VisState } from 'ui/vis';
 import { move } from 'ui/utils/collection';
 import { EditorStateActionTypes } from './constants';
-import { AggGroupNames } from '../agg_groups';
-import { getEnabledMetricAggsCount } from '../components/agg_group_helper';
+import { AggGroupNames } from '../../../agg_groups';
+import { getEnabledMetricAggsCount } from '../../agg_group_helper';
 import { EditorAction } from './actions';
 
 function initEditorState(vis: Vis) {
