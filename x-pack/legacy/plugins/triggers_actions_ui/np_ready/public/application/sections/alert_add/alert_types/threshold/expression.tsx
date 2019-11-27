@@ -1065,7 +1065,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {hasErrors ? null : (
+      {hasExpressionErrors ? null : (
         <Fragment>
           <ThresholdVisualization alert={alert} />
         </Fragment>
