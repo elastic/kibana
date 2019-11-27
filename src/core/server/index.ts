@@ -101,6 +101,8 @@ export {
   OnPreAuthToolkit,
   OnPostAuthHandler,
   OnPostAuthToolkit,
+  OnPreResponseHandler,
+  OnPreResponseToolkit,
   RedirectResponseOptions,
   RequestHandler,
   RequestHandlerContextContainer,
