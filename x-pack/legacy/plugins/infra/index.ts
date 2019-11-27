@@ -120,7 +120,7 @@ export function infra(kibana: any) {
 
       const libs = infraPluginInstance.getLibs();
 
-      // NP_TODO how do we replace this? Answer: return from setup function.
+      // NP_NOTE: Left here for now for legacy plugins to consume
       legacyServer.expose(
         'defineInternalSourceConfiguration',
         libs.sources.defineInternalSourceConfiguration.bind(libs.sources)
