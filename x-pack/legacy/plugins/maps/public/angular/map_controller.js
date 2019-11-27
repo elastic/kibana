@@ -56,7 +56,7 @@ import {
 import { npStart } from 'ui/new_platform';
 import { esFilters } from '../../../../../../src/plugins/data/public';
 
-const { savedQueryService } = npStart.plugins.data.query.savedQueries;
+const savedQueryService = npStart.plugins.data.query.savedQueries;
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
