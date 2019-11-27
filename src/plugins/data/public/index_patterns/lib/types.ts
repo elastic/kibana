@@ -17,29 +17,7 @@
  * under the License.
  */
 
-import {
-  CONTAINS_SPACES,
-  ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-  validateIndexPattern,
-} from './utils';
-
-describe('Index Pattern Utils', () => {
-  describe('Validation', () => {
-    it('should not allow space in the pattern', () => {
-      const errors = validateIndexPattern('my pattern');
-      expect(errors[CONTAINS_SPACES]).toBe(true);
-    });
-
-    it('should not allow illegal characters', () => {
-      INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.forEach(char => {
-        const errors = validateIndexPattern(`pattern${char}`);
-        expect(errors[ILLEGAL_CHARACTERS]).toEqual([char]);
-      });
-    });
-
-    it('should return empty object when there are no errors', () => {
-      expect(validateIndexPattern('my-pattern-*')).toEqual({});
-    });
-  });
-});
+export const ILLEGAL_CHARACTERS_KEY = 'ILLEGAL_CHARACTERS';
+export const CONTAINS_SPACES_KEY = 'CONTAINS_SPACES';
+export const ILLEGAL_CHARACTERS_VISIBLE = ['\\', '/', '?', '"', '<', '>', '|'];
+export const ILLEGAL_CHARACTERS = ILLEGAL_CHARACTERS_VISIBLE.concat(' ');

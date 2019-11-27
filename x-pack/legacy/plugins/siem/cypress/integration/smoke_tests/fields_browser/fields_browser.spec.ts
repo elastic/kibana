@@ -196,7 +196,7 @@ describe('Fields Browser', () => {
     );
   });
 
-  it.skip('adds a field to the timeline when the user drags and drops a field', () => {
+  it('adds a field to the timeline when the user drags and drops a field', () => {
     const filterInput = 'host.geo.c';
     const toggleField = 'host.geo.city_name';
 
