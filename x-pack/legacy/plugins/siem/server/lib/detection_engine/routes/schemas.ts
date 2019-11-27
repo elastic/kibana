@@ -5,6 +5,7 @@
  */
 
 import Joi from 'joi';
+import { DEFAULT_MAX_SIGNALS } from '../../../../common/constants';
 
 /* eslint-disable @typescript-eslint/camelcase */
 const description = Joi.string();
@@ -51,7 +52,7 @@ const fields = Joi.array()
   .single();
 /* eslint-enable @typescript-eslint/camelcase */
 
-export const createSignalsSchema = Joi.object({
+export const createRulesSchema = Joi.object({
   description: description.required(),
   enabled: enabled.default(true),
   false_positives: false_positives.default([]),
@@ -68,7 +69,7 @@ export const createSignalsSchema = Joi.object({
   from: from.required(),
   rule_id,
   immutable: immutable.default(false),
-  index: index.required(),
+  index,
   interval: interval.default('5m'),
   query: Joi.when('type', {
     is: 'query',
@@ -95,7 +96,7 @@ export const createSignalsSchema = Joi.object({
       otherwise: Joi.forbidden(),
     }),
   }),
-  output_index: output_index.required(),
+  output_index,
   saved_id: saved_id.when('type', {
     is: 'saved_query',
     then: Joi.required(),
@@ -103,7 +104,7 @@ export const createSignalsSchema = Joi.object({
   }),
   meta,
   risk_score: risk_score.required(),
-  max_signals: max_signals.default(100),
+  max_signals: max_signals.default(DEFAULT_MAX_SIGNALS),
   name: name.required(),
   severity: severity.required(),
   tags: tags.default([]),
@@ -112,7 +113,7 @@ export const createSignalsSchema = Joi.object({
   references: references.default([]),
 });
 
-export const updateSignalSchema = Joi.object({
+export const updateRulesSchema = Joi.object({
   description,
   enabled,
   false_positives,
@@ -167,12 +168,12 @@ export const updateSignalSchema = Joi.object({
   references,
 }).xor('id', 'rule_id');
 
-export const querySignalSchema = Joi.object({
+export const queryRulesSchema = Joi.object({
   rule_id,
   id,
 }).xor('id', 'rule_id');
 
-export const findSignalsSchema = Joi.object({
+export const findRulesSchema = Joi.object({
   fields,
   filter: queryFilter,
   per_page,

@@ -18,6 +18,8 @@ jest.mock('ui/i18n', () => {
   return { I18nContext };
 });
 
+jest.mock('ui/new_platform');
+
 const POLICY_NAME = 'my_policy';
 const SNAPSHOT_NAME = 'my_snapshot';
 const MIN_COUNT = '5';
@@ -138,6 +140,25 @@ describe.skip('<PolicyAdd />', () => {
 
           expect(form.getErrorsMessages()).toEqual([
             'Minimum count cannot be greater than maximum count.',
+          ]);
+        });
+
+        test('should not allow negative values for the delete after, minimum and maximum counts', () => {
+          const { find, form } = testBed;
+
+          form.setInputValue('expireAfterValueInput', '-1');
+          find('expireAfterValueInput').simulate('blur');
+
+          form.setInputValue('minCountInput', '-1');
+          find('minCountInput').simulate('blur');
+
+          form.setInputValue('maxCountInput', '-1');
+          find('maxCountInput').simulate('blur');
+
+          expect(form.getErrorsMessages()).toEqual([
+            'Delete after cannot be negative.',
+            'Minimum count cannot be negative.',
+            'Maximum count cannot be negative.',
           ]);
         });
       });
