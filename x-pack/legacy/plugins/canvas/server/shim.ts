@@ -9,6 +9,7 @@ import { Legacy } from 'kibana';
 
 import { CoreSetup as ExistingCoreSetup } from 'src/core/server';
 import { HomeServerPluginSetup } from 'src/plugins/home/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { PluginSetupContract } from '../../../../plugins/features/server';
 
 export interface CoreSetup {
@@ -30,7 +31,11 @@ export interface PluginsSetup {
   kibana: {
     injectedUiAppVars: ReturnType<Legacy.Server['getInjectedUiAppVars']>;
   };
-  usage: Legacy.Server['usage'];
+  sampleData: {
+    addSavedObjectsToSampleDataset: any;
+    addAppLinksToSampleDataset: any;
+  };
+  usageCollection: UsageCollectionSetup;
 }
 
 export async function createSetupShim(
@@ -65,7 +70,13 @@ export async function createSetupShim(
       kibana: {
         injectedUiAppVars: await server.getInjectedUiAppVars('kibana'),
       },
-      usage: server.usage,
+      sampleData: {
+        // @ts-ignore: Missing from Legacy Server Type
+        addSavedObjectsToSampleDataset: server.addSavedObjectsToSampleDataset,
+        // @ts-ignore: Missing from Legacy Server Type
+        addAppLinksToSampleDataset: server.addAppLinksToSampleDataset,
+      },
+      usageCollection: server.newPlatform.setup.plugins.usageCollection,
     },
   };
 }
