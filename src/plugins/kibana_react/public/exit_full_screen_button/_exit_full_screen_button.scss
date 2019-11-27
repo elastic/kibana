@@ -51,6 +51,7 @@
   color: $euiColorEmptyShade;
   line-height: $euiSizeXXL;
   display: inline-block;
+  font-size: $euiFontSizeS;
   height: $euiSizeXXL;
   position: absolute;
   left: calc(100% + #{$euiSize}); /* 1 */
