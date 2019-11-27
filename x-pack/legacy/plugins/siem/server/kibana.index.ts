@@ -6,9 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { PluginInitializerContext, CoreSetup } from 'src/core/server';
-import { initServer } from './init_server';
-import { compose } from './lib/compose/kibana';
+import { PluginInitializerContext } from 'src/core/server';
 import {
   noteSavedObjectType,
   pinnedEventSavedObjectType,
@@ -28,7 +26,6 @@ const APP_ID = 'siem';
 
 export const initServerWithKibana = (
   context: PluginInitializerContext,
-  core: CoreSetup,
   { config, plugins: { alerting, xpack_main }, route }: ServerFacade
 ) => {
   const logger = context.logger.get('plugins', APP_ID);
@@ -40,9 +37,6 @@ export const initServerWithKibana = (
       alerting.setup.registerType(type);
     }
   }
-
-  const libs = compose(core, version);
-  initServer(libs);
 
   if (
     config().has('xpack.actions.enabled') &&

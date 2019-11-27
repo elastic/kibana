@@ -27,6 +27,7 @@ import {
   DEFAULT_SIGNALS_INDEX_KEY,
 } from './common/constants';
 import { defaultIndexPattern } from './default_index_pattern';
+import { initServerWithKibana } from './server/kibana.index';
 
 // This is VERY TEMPORARY as we need a way to turn on alerting and actions
 // for the server without having to manually edit this file. Once alerting
@@ -157,7 +158,7 @@ export const siem = (kibana: any) => {
     init(server: Server) {
       const { config, newPlatform, plugins, route } = server;
       const { coreContext, env, setup } = newPlatform;
-      const initializerContext = { ...coreContext, env };
+      const initializerContext = { ...coreContext, env } as PluginInitializerContext;
 
       const serverFacade = {
         config,
@@ -165,11 +166,9 @@ export const siem = (kibana: any) => {
         route: route.bind(server),
       };
 
-      plugin(initializerContext as PluginInitializerContext).setup(
-        setup.core,
-        setup.plugins,
-        serverFacade
-      );
+      plugin(initializerContext).setup(setup.core, setup.plugins);
+
+      initServerWithKibana(initializerContext, serverFacade);
     },
   });
 };

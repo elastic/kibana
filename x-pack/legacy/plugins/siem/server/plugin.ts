@@ -5,8 +5,8 @@
  */
 
 import { CoreSetup, PluginInitializerContext, Logger } from 'src/core/server';
-import { ServerFacade } from './types';
-import { initServerWithKibana } from './kibana.index';
+import { initServer } from './init_server';
+import { compose } from './lib/compose/kibana';
 
 export class Plugin {
   readonly name = 'siem';
@@ -20,9 +20,11 @@ export class Plugin {
     this.logger.debug('Shim plugin initialized');
   }
 
-  public setup(core: CoreSetup, plugins: {}, __legacy: ServerFacade) {
+  public setup(core: CoreSetup, plugins: {}) {
     this.logger.debug('Shim plugin setup');
+    const version = this.context.env.packageInfo.version;
 
-    initServerWithKibana(this.context, core, __legacy);
+    const libs = compose(core, version);
+    initServer(libs);
   }
 }
