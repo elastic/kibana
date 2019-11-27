@@ -98,3 +98,6 @@ export const createMockServerWithoutActionOrAlertClientDecoration = (
     serverWithoutActionOrAlertClient,
   };
 };
+
+export const getBoundRoute = (server: Hapi.Server): Hapi.Server['route'] =>
+  server.route.bind(server);

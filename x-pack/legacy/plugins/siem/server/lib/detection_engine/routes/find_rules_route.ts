@@ -46,6 +46,6 @@ export const createFindRulesRoute: Hapi.ServerRoute = {
   },
 };
 
-export const findRulesRoute = ({ route }: Pick<ServerFacade, 'route'>) => {
+export const findRulesRoute = (route: ServerFacade['route']) => {
   route(createFindRulesRoute);
 };

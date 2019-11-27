@@ -9,6 +9,7 @@ import {
   createMockServerWithoutActionClientDecoration,
   createMockServerWithoutAlertClientDecoration,
   createMockServerWithoutActionOrAlertClientDecoration,
+  getBoundRoute,
 } from './__mocks__/_mock_server';
 
 import { updateRulesRoute } from './update_rules_route';
@@ -30,7 +31,7 @@ describe('update_rules', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     ({ server, alertsClient, actionsClient } = createMockServer());
-    updateRulesRoute(server);
+    updateRulesRoute(getBoundRoute(server));
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -54,14 +55,14 @@ describe('update_rules', () => {
 
     test('returns 404 if actionClient is not available on the route', async () => {
       const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
-      updateRulesRoute(serverWithoutActionClient);
+      updateRulesRoute(getBoundRoute(serverWithoutActionClient));
       const { statusCode } = await serverWithoutActionClient.inject(getUpdateRequest());
       expect(statusCode).toBe(404);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
-      updateRulesRoute(serverWithoutAlertClient);
+      updateRulesRoute(getBoundRoute(serverWithoutAlertClient));
       const { statusCode } = await serverWithoutAlertClient.inject(getUpdateRequest());
       expect(statusCode).toBe(404);
     });
@@ -70,7 +71,7 @@ describe('update_rules', () => {
       const {
         serverWithoutActionOrAlertClient,
       } = createMockServerWithoutActionOrAlertClientDecoration();
-      updateRulesRoute(serverWithoutActionOrAlertClient);
+      updateRulesRoute(getBoundRoute(serverWithoutActionOrAlertClient));
       const { statusCode } = await serverWithoutActionOrAlertClient.inject(getUpdateRequest());
       expect(statusCode).toBe(404);
     });

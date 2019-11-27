@@ -9,6 +9,7 @@ import {
   createMockServerWithoutActionClientDecoration,
   createMockServerWithoutAlertClientDecoration,
   createMockServerWithoutActionOrAlertClientDecoration,
+  getBoundRoute,
 } from './__mocks__/_mock_server';
 
 import { deleteRulesRoute } from './delete_rules_route';
@@ -27,7 +28,7 @@ describe('delete_rules', () => {
 
   beforeEach(() => {
     ({ server, alertsClient } = createMockServer());
-    deleteRulesRoute(server);
+    deleteRulesRoute(getBoundRoute(server));
   });
 
   afterEach(() => {
@@ -61,14 +62,14 @@ describe('delete_rules', () => {
 
     test('returns 404 if actionClient is not available on the route', async () => {
       const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
-      deleteRulesRoute(serverWithoutActionClient);
+      deleteRulesRoute(getBoundRoute(serverWithoutActionClient));
       const { statusCode } = await serverWithoutActionClient.inject(getDeleteRequest());
       expect(statusCode).toBe(404);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
-      deleteRulesRoute(serverWithoutAlertClient);
+      deleteRulesRoute(getBoundRoute(serverWithoutAlertClient));
       const { statusCode } = await serverWithoutAlertClient.inject(getDeleteRequest());
       expect(statusCode).toBe(404);
     });
@@ -77,7 +78,7 @@ describe('delete_rules', () => {
       const {
         serverWithoutActionOrAlertClient,
       } = createMockServerWithoutActionOrAlertClientDecoration();
-      deleteRulesRoute(serverWithoutActionOrAlertClient);
+      deleteRulesRoute(getBoundRoute(serverWithoutActionOrAlertClient));
       const { statusCode } = await serverWithoutActionOrAlertClient.inject(getDeleteRequest());
       expect(statusCode).toBe(404);
     });

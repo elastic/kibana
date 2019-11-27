@@ -100,6 +100,6 @@ export const createCreateRulesRoute: Hapi.ServerRoute = {
   },
 };
 
-export const createRulesRoute = ({ route }: Pick<ServerFacade, 'route'>): void => {
+export const createRulesRoute = (route: ServerFacade['route']): void => {
   route(createCreateRulesRoute);
 };

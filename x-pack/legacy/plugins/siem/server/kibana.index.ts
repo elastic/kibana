@@ -47,11 +47,11 @@ export const initServerWithKibana = (
     logger.info(
       'Detected feature flags for actions and alerting and enabling detection engine API endpoints'
     );
-    createRulesRoute({ route });
-    readRulesRoute({ route });
-    updateRulesRoute({ route });
-    deleteRulesRoute({ route });
-    findRulesRoute({ route });
+    createRulesRoute(route);
+    readRulesRoute(route);
+    updateRulesRoute(route);
+    deleteRulesRoute(route);
+    findRulesRoute(route);
   }
 
   xpack_main.registerFeature({
