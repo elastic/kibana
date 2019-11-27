@@ -31,7 +31,7 @@ export const RuleStatusIcon = memo<RuleStatusIconProps>(({ name, type }) => {
   return (
     <RuleStatusIconStyled>
       <EuiAvatar color={color} name={type === 'valid' ? '' : name} size="l" />
-      {type === 'valid' ? <EuiIcon type="check" color="white" size="l" /> : null}
+      {type === 'valid' ? <EuiIcon type="check" color={theme.euiColorEmptyShade} size="l" /> : null}
     </RuleStatusIconStyled>
   );
 });

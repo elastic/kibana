@@ -49,28 +49,6 @@ const mockMappings = {
         },
       },
     },
-    alert: {
-      properties: {
-        actions: {
-          type: 'nested',
-          properties: {
-            group: {
-              type: 'keyword',
-            },
-            actionRef: {
-              type: 'keyword',
-            },
-            actionTypeId: {
-              type: 'keyword',
-            },
-            params: {
-              enabled: false,
-              type: 'object',
-            },
-          },
-        },
-      },
-    },
     hiddenType: {
       properties: {
         description: {
