@@ -38,9 +38,7 @@ export class BackendFrameworkLib {
     return this.adapter.getUser(request);
   }
 
-  public getSetting(
-    setting: 'defaultOutputHost' | 'defaultOutputUsername' | 'defaultOutputPassword'
-  ): string;
+  public getSetting(setting: 'defaultOutputHost'): string;
   public getSetting(setting: 'defaultUserRoles'): string[];
   public getSetting(setting: string): string | string[] {
     return this.adapter.getSetting(`xpack.ingest.${setting}`) as any;

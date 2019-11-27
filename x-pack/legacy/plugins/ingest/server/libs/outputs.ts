@@ -24,8 +24,6 @@ export class OutputsLib {
         name: 'default',
         type: OutputType.Elasticsearch,
         url: this.libs.framework.getSetting('defaultOutputHost'),
-        username: this.libs.framework.getSetting('defaultOutputUsername'),
-        password: this.libs.framework.getSetting('defaultOutputPassword'),
         ingest_pipeline: 'default',
       },
     ];
