@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'src/legacy/server/kbn_server';
 import { get } from 'lodash';
-import { BackendFrameworkAdapter } from './adapters/framework/default';
+import { Request } from 'src/legacy/server/kbn_server';
 import { LicenseType } from '../../common/types/security';
+import { BackendFrameworkAdapter } from './adapters/framework/default';
 
 export class BackendFrameworkLib {
   /**
@@ -37,9 +37,11 @@ export class BackendFrameworkLib {
   public getCurrentUser(request: Request) {
     return this.adapter.getUser(request);
   }
+
+  public getSetting(setting: 'defaultOutputHost'): string;
   public getSetting(setting: 'defaultUserRoles'): string[];
-  public getSetting(setting: 'defaultUserRoles') {
-    return this.adapter.getSetting(`xpack.ingest-do-not-disable.${setting}`);
+  public getSetting(setting: string): string | string[] {
+    return this.adapter.getSetting(`xpack.ingest.${setting}`) as any;
   }
   public expose(name: string, thing: any) {
     return this.adapter.expose(name, thing);

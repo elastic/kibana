@@ -5,15 +5,25 @@
  */
 import { FrameworkUser } from './adapters/framework/adapter_types';
 import { Output, OutputType } from './adapters/policy/adapter_types';
+import { BackendFrameworkLib } from './framework';
 
 export class OutputsLib {
-  public async getByIDs(_user: FrameworkUser, _ids: string[]): Promise<Output[]> {
+  constructor(
+    private readonly libs: {
+      framework: BackendFrameworkLib;
+    }
+  ) {}
+  public async getByIDs(_user: FrameworkUser, ids: string[]): Promise<Output[]> {
+    if (ids.length > 0 || ids[0] !== 'default') {
+      throw new Error('Currently, only a default output is supported');
+    }
+
     return [
       {
         id: 'default',
         name: 'default',
         type: OutputType.Elasticsearch,
-        url: '<Kibana URL>',
+        url: this.libs.framework.getSetting('defaultOutputHost'),
         ingest_pipeline: 'default',
       },
     ];

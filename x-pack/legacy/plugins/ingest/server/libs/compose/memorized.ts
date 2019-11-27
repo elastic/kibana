@@ -4,22 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { camelCase } from 'lodash';
 import { callWhenOnline } from '@mattapperson/slapshot/lib/call_when_online';
+import { camelCase } from 'lodash';
 import { PLUGIN } from '../../../common/constants';
 import { CONFIG_PREFIX } from '../../../common/constants/plugin';
 import { ESDatabaseAdapter } from '../adapters/es_database/default';
+import { KibanaLegacyServer } from '../adapters/framework/adapter_types';
 import { BackendFrameworkAdapter } from '../adapters/framework/default';
+import { MemorizedBackendFrameworkAdapter } from '../adapters/framework/memorized';
+import { PolicyAdapter } from '../adapters/policy/default';
+import { MemorizedPolicyAdapter } from '../adapters/policy/memorized';
+import { SODatabaseAdapter } from '../adapters/so_database/default';
+import { DatasourcesLib } from '../datasources';
+import { OutputsLib } from '../outputs';
+import { PolicyLib } from '../policy';
 import { ServerLibs } from '../types';
 import { BackendFrameworkLib } from './../framework';
-import { PolicyLib } from '../policy';
-import { PolicyAdapter } from '../adapters/policy/default';
-import { SODatabaseAdapter } from '../adapters/so_database/default';
-import { KibanaLegacyServer } from '../adapters/framework/adapter_types';
-import { MemorizedPolicyAdapter } from '../adapters/policy/memorized';
-import { MemorizedBackendFrameworkAdapter } from '../adapters/framework/memorized';
-import { OutputsLib } from '../outputs';
-import { DatasourcesLib } from '../datasources';
 
 export function compose(servers?: {
   shutdown: () => Promise<void>;
@@ -52,7 +52,7 @@ export function compose(servers?: {
   ) as BackendFrameworkAdapter;
   const framework = new BackendFrameworkLib(memorizedFrameworkAdapter);
 
-  const outputs = new OutputsLib();
+  const outputs = new OutputsLib({ framework });
 
   const datasources = new DatasourcesLib();
 
