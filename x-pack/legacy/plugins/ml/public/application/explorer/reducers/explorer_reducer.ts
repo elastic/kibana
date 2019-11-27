@@ -5,8 +5,7 @@
  */
 
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../common/constants/index_patterns';
-
-import { CombinedJob } from '../../jobs/new_job/common/job_creator/configs';
+import { Dictionary } from '../../../../common/types/common';
 
 import { getDefaultChartsData } from '../explorer_charts/explorer_charts_container_service';
 import { EXPLORER_ACTION, VIEW_BY_JOB_LABEL } from '../explorer_constants';
@@ -15,6 +14,7 @@ import {
   getClearedSelectedAnomaliesState,
   getDefaultSwimlaneData,
   getInfluencers,
+  ExplorerJob,
   SwimlaneData,
 } from '../explorer_utils';
 
@@ -32,16 +32,14 @@ export interface ExplorerState {
   filterPlaceHolder: any;
   indexPattern: { title: string; fields: any[] };
   influencersFilterQuery: any;
-  hasResults: boolean;
-  influencers: any;
+  influencers: Dictionary<unknown>;
   isAndOperator: boolean;
   loading: boolean;
   noInfluencersConfigured: boolean;
-  noJobsFound: boolean;
   overallSwimlaneData: SwimlaneData;
   queryString: string;
   selectedCells: any;
-  selectedJobs: CombinedJob[] | null;
+  selectedJobs: ExplorerJob[] | null;
   swimlaneBucketInterval: any;
   swimlaneContainerWidth: number;
   swimlaneLimit: number;
@@ -72,12 +70,10 @@ export function getExplorerDefaultState(): ExplorerState {
     filterPlaceHolder: undefined,
     indexPattern: getDefaultIndexPattern(),
     influencersFilterQuery: undefined,
-    hasResults: false,
     influencers: {},
     isAndOperator: false,
     loading: true,
     noInfluencersConfigured: true,
-    noJobsFound: true,
     overallSwimlaneData: getDefaultSwimlaneData(),
     queryString: '',
     selectedCells: null,
@@ -121,7 +117,7 @@ function clearInfluencerFilterSetting(state: ExplorerState) {
 
 // Creates index pattern in the format expected by the kuery bar/kuery autocomplete provider
 // Field objects required fields: name, type, aggregatable, searchable
-export function getIndexPattern(selectedJobs: CombinedJob[]) {
+export function getIndexPattern(selectedJobs: ExplorerJob[]) {
   return {
     title: ML_RESULTS_INDEX_PATTERN,
     fields: getInfluencers(selectedJobs).map(influencer => ({
@@ -134,7 +130,7 @@ export function getIndexPattern(selectedJobs: CombinedJob[]) {
 }
 
 const initialize = (state: ExplorerState, payload: ActionPayload) => {
-  const { noJobsFound, selectedCells, selectedJobs, viewBySwimlaneFieldName, filterData } = payload;
+  const { selectedCells, selectedJobs, viewBySwimlaneFieldName, filterData } = payload;
   let currentSelectedCells = state.selectedCells;
   let currentviewBySwimlaneFieldName = state.viewBySwimlaneFieldName;
 
@@ -150,7 +146,6 @@ const initialize = (state: ExplorerState, payload: ActionPayload) => {
     ...state,
     indexPattern: getIndexPattern(selectedJobs),
     noInfluencersConfigured: getInfluencers(selectedJobs).length === 0,
-    noJobsFound,
     selectedCells: currentSelectedCells,
     selectedJobs,
     viewBySwimlaneFieldName: currentviewBySwimlaneFieldName,
@@ -161,10 +156,13 @@ const initialize = (state: ExplorerState, payload: ActionPayload) => {
 const jobSelectionChange = (state: ExplorerState, payload: ActionPayload) => {
   const { selectedJobs } = payload;
   const stateUpdate: ExplorerState = {
-    ...getExplorerDefaultState(),
-    // appState: appStateReducer(getExplorerDefaultState().appState, { type: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION }),
-    // ...getClearedSelectedAnomaliesState(),
+    ...state,
+    appState: appStateReducer(getExplorerDefaultState().appState, {
+      type: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION,
+    }),
+    ...getClearedSelectedAnomaliesState(),
     noInfluencersConfigured: getInfluencers(selectedJobs).length === 0,
+    overallSwimlaneData: getDefaultSwimlaneData(),
     selectedJobs,
   };
 
@@ -191,10 +189,9 @@ const jobSelectionChange = (state: ExplorerState, payload: ActionPayload) => {
 
   if (selectedJobs.length > 1) {
     stateUpdate.viewBySwimlaneFieldName = VIEW_BY_JOB_LABEL;
-    return;
+    return stateUpdate;
   }
 
-  stateUpdate.hasResults = false;
   stateUpdate.loading = true;
   return stateUpdate;
 };

@@ -14,7 +14,7 @@ import React, { createRef } from 'react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import DragSelect from 'dragselect/dist/ds.min.js';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, map, takeUntil } from 'rxjs/operators';
 
 import {
   EuiFlexGroup,
@@ -173,8 +173,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       });
     }
 
-    jobSelectionUpdateInProgress = false;
-
     componentDidMount() {
       timefilter.enableTimeRangeSelector();
       timefilter.enableAutoRefreshSelector();
@@ -195,20 +193,26 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
       limit$.pipe(
         takeUntil(this._unsubscribeAll),
+        map(d => d.val),
+        distinctUntilChanged(),
       ).subscribe((swimlaneLimit) => {
-        explorerAction$.next({ type: EXPLORER_ACTION.SET_SWIMLANE_LIMIT, payload: swimlaneLimit.val });
+        explorerAction$.next({ type: EXPLORER_ACTION.SET_SWIMLANE_LIMIT, payload: { swimlaneLimit } });
       });
 
       interval$.pipe(
         takeUntil(this._unsubscribeAll),
-      ).subscribe((interval) => {
-        explorerAction$.next({ type: EXPLORER_ACTION.SET_STATE, payload: { tableInterval: interval.val } });
+        map(d => d.val),
+        distinctUntilChanged(),
+      ).subscribe((tableInterval) => {
+        explorerAction$.next({ type: EXPLORER_ACTION.SET_STATE, payload: { tableInterval } });
       });
 
       severity$.pipe(
         takeUntil(this._unsubscribeAll),
-      ).subscribe((severity) => {
-        explorerAction$.next({ type: EXPLORER_ACTION.SET_STATE, payload: { tableSeverity: severity.val } });
+        map(d => d.val),
+        distinctUntilChanged(),
+      ).subscribe((tableSeverity) => {
+        explorerAction$.next({ type: EXPLORER_ACTION.SET_STATE, payload: { tableSeverity } });
       });
 
 
@@ -228,12 +232,11 @@ export const Explorer = injectI18n(injectObservablesAsProps(
             initialized = true;
           }
         });
-
       } else {
         explorerAction$.next({ type: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
         explorerAction$.next({
           type: EXPLORER_ACTION.SET_STATE,
-          payload: { loading: false, noJobsFound: true, ...getClearedSelectedAnomaliesState() },
+          payload: { loading: false, selectedJobs: [], ...getClearedSelectedAnomaliesState() },
         });
       }
     }
@@ -271,8 +274,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       explorerAction$.next({
         type: EXPLORER_ACTION.SET_STATE, payload: {
           maskAll,
-          viewBySwimlaneFieldName,
           ...getClearedSelectedAnomaliesState(),
+          viewBySwimlaneFieldName,
         }
       });
     };
@@ -383,16 +386,15 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         chartsData,
         filterActive,
         filterPlaceHolder,
-        hasResults,
         indexPattern,
         influencers,
         loading,
         maskAll,
         noInfluencersConfigured,
-        noJobsFound,
         overallSwimlaneData,
         queryString,
         selectedCells,
+        selectedJobs,
         swimlaneContainerWidth,
         tableData,
         tableQueryString,
@@ -411,6 +413,9 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         selectedJobIds,
         selectedGroups,
       };
+
+      const noJobsFound = selectedJobs === null || selectedJobs.length === 0;
+      const hasResults = (overallSwimlaneData.points && overallSwimlaneData.points.length > 0);
 
       if (loading === true) {
         return (

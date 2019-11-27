@@ -41,20 +41,6 @@ export declare const getSelectionInfluencers: (
   fieldName: string
 ) => any[];
 
-interface ViewBySwimlaneOptionsArgs {
-  currentViewBySwimlaneFieldName: string;
-  filterActive: boolean;
-  filteredFields: any[];
-  isAndOperator: boolean;
-  selectedCells: SelectedCells;
-  selectedJobs: ExplorerJob[];
-}
-
-interface ViewBySwimlaneOptions {
-  viewBySwimlaneFieldName: string;
-  viewBySwimlaneOptions: string[];
-}
-
 interface SelectionTimeRange {
   earliestMs: number;
   latestMs: number;
@@ -70,6 +56,20 @@ export declare const getSwimlaneBucketInterval: (
   selectedJobs: ExplorerJob[],
   swimlaneContainerWidth: number
 ) => any;
+
+interface ViewBySwimlaneOptionsArgs {
+  currentViewBySwimlaneFieldName: string | undefined;
+  filterActive: boolean;
+  filteredFields: any[];
+  isAndOperator: boolean;
+  selectedCells: SelectedCells;
+  selectedJobs: ExplorerJob[];
+}
+
+interface ViewBySwimlaneOptions {
+  viewBySwimlaneFieldName: string;
+  viewBySwimlaneOptions: string[];
+}
 
 export declare const getViewBySwimlaneOptions: (
   arg: ViewBySwimlaneOptionsArgs
@@ -141,7 +141,6 @@ export declare const loadTopInfluencers: (
 ) => Promise<any[]>;
 
 declare interface LoadOverallDataResponse {
-  hasResults: boolean;
   loading: boolean;
   overallSwimlaneData: OverallSwimlaneData;
 }

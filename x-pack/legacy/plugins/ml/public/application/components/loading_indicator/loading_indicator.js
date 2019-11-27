@@ -16,10 +16,12 @@ export function LoadingIndicator({ height, label }) {
   return (
     <div className="ml-loading-indicator" style={{ height: `${height}px` }}>
       <EuiLoadingChart size="xl" mono />
-      <EuiSpacer size="s" />
-      {label &&
-        <div ml-loading-indicator-label="true">{label}</div>
-      }
+      {label && (
+        <>
+          <EuiSpacer size="s" />
+          <div ml-loading-indicator-label="true">{label}</div>
+        </>
+      )}
     </div>
   );
 }

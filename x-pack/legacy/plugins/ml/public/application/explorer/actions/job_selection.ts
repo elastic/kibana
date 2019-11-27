@@ -34,13 +34,10 @@ export function jobSelectionActionCreator(
 
       const selectedJobs = jobs.filter(job => job.selected);
 
-      const noJobsFound = jobs.length === 0;
-
       return {
         type: actionName,
         payload: {
           loading: false,
-          noJobsFound,
           selectedCells,
           selectedJobs,
           viewBySwimlaneFieldName: appState.mlExplorerSwimlane.viewByFieldName,

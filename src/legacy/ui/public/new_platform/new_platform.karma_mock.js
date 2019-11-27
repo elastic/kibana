@@ -184,6 +184,7 @@ export const npStart = {
             },
             getTime: sinon.fake(),
             setTime: sinon.fake(),
+            getActiveBounds: sinon.fake(),
             getBounds: sinon.fake(),
             calculateBounds: sinon.fake(),
             createFilter: sinon.fake(),

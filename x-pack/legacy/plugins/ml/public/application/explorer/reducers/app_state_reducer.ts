@@ -85,5 +85,5 @@ export const appStateReducer = (state: ExplorerAppState, nextAction: Action) => 
     default:
   }
 
-  return state;
+  return appState;
 };

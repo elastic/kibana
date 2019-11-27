@@ -290,7 +290,7 @@ export function loadViewByTopFieldValuesForSelectedTime(
 
 // Obtain the list of 'View by' fields per job and viewBySwimlaneFieldName
 export function getViewBySwimlaneOptions({
-  currentviewBySwimlaneFieldName,
+  currentViewBySwimlaneFieldName,
   filterActive,
   filteredFields,
   isAndOperator,
@@ -317,12 +317,12 @@ export function getViewBySwimlaneOptions({
   let viewBySwimlaneFieldName = undefined;
 
   if (
-    viewBySwimlaneOptions.indexOf(currentviewBySwimlaneFieldName) !== -1
+    viewBySwimlaneOptions.indexOf(currentViewBySwimlaneFieldName) !== -1
   ) {
     // Set the swimlane viewBy to that stored in the state (URL) if set.
     // This means we reset it to the current state because it was set by the listener
     // on initialization.
-    viewBySwimlaneFieldName = currentviewBySwimlaneFieldName;
+    viewBySwimlaneFieldName = currentViewBySwimlaneFieldName;
   } else {
     if (selectedJobIds.length > 1) {
       // If more than one job selected, default to job ID.
@@ -704,9 +704,7 @@ export function loadOverallData(selectedJobs, interval, bounds) {
       );
 
       console.log('Explorer overall swimlane data set:', overallSwimlaneData);
-      const hasResults = (overallSwimlaneData.points && overallSwimlaneData.points.length > 0);
       resolve({
-        hasResults,
         loading: false,
         overallSwimlaneData,
       });

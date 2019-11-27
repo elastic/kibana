@@ -49,8 +49,18 @@ export const uiTimefilterMock = {
   enableTimeRangeSelector() {
     this._isTimeRangeSelectorEnabled = true;
   },
+  getActiveBounds() {
+    return;
+  },
   getEnabledUpdated$() {
     return { subscribe: () => {} };
+  },
+  getFetch$() {
+    return {
+      pipe: () => ({
+        subscribe: () => {},
+      }),
+    };
   },
   getRefreshInterval() {
     return this.refreshInterval;

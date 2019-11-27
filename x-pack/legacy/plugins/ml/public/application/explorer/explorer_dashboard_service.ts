@@ -14,9 +14,8 @@ import { isEqual, pick } from 'lodash';
 import { from, isObservable, Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, flatMap, map, pairwise, scan, tap } from 'rxjs/operators';
 
-import { loadOverallDataActionCreator } from './actions';
+import { loadExplorerDataActionCreator } from './actions';
 import { explorerReducer, getExplorerDefaultState, ExplorerState } from './reducers';
-import { getSwimlaneBucketInterval } from './explorer_utils';
 
 export const ALLOW_CELL_RANGE_SELECTION = true;
 
@@ -61,7 +60,7 @@ export const explorerState$ = explorerFilteredAction$.pipe(
       curr.bounds !== undefined &&
       !isEqual(getCompareState(prev), getCompareState(curr))
     ) {
-      explorerFetchSideEffect(curr);
+      explorerAction$.next(loadExplorerDataActionCreator(curr));
     }
     return curr;
   })
@@ -88,41 +87,4 @@ function getCompareState(state: ExplorerState) {
     'tableSeverity',
     'viewBySwimlaneFieldName',
   ]);
-}
-
-function explorerFetchSideEffect(state: ExplorerState) {
-  const {
-    bounds,
-    filterActive,
-    filteredFields,
-    influencersFilterQuery,
-    isAndOperator,
-    noInfluencersConfigured,
-    selectedCells,
-    selectedJobs,
-    swimlaneContainerWidth,
-    swimlaneLimit,
-    tableInterval,
-    tableSeverity,
-    viewBySwimlaneFieldName,
-  } = state;
-
-  // Load the overall data - if the FieldFormats failed to populate
-  explorerAction$.next(
-    loadOverallDataActionCreator(
-      selectedCells,
-      selectedJobs,
-      getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth),
-      bounds,
-      viewBySwimlaneFieldName,
-      influencersFilterQuery,
-      swimlaneLimit,
-      noInfluencersConfigured,
-      filterActive,
-      filteredFields,
-      tableInterval,
-      tableSeverity,
-      isAndOperator
-    )
-  );
 }

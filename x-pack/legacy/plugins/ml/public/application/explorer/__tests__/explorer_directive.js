@@ -10,23 +10,26 @@ import expect from '@kbn/expect';
 
 import { uiChromeMock, uiTimefilterMock, uiTimeHistoryMock } from '../../contexts/ui/__mocks__/mocks_mocha';
 import * as useUiContextModule from '../../contexts/ui/use_ui_context';
+import * as UiTimefilterModule from 'ui/timefilter';
 
 describe('ML - Anomaly Explorer Directive', () => {
   let $scope;
   let $compile;
   let $element;
-  let stub;
+  let stubContext;
+  let stubTimefilterFetch;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(() => {
     ngMock.inject(function ($injector) {
-      stub = sinon.stub(useUiContextModule, 'useUiContext').callsFake(function fakeFn() {
+      stubContext = sinon.stub(useUiContextModule, 'useUiContext').callsFake(function fakeFn() {
         return {
           chrome: uiChromeMock,
           timefilter: uiTimefilterMock,
           timeHistory: uiTimeHistoryMock,
         };
       });
+      stubTimefilterFetch = sinon.stub(UiTimefilterModule.timefilter, 'getFetch$').callsFake(uiTimefilterMock.getFetch$);
 
       $compile = $injector.get('$compile');
       const $rootScope = $injector.get('$rootScope');
@@ -35,7 +38,8 @@ describe('ML - Anomaly Explorer Directive', () => {
   });
 
   afterEach(() => {
-    stub.restore();
+    stubContext.restore();
+    stubTimefilterFetch.restore();
     $scope.$destroy();
   });
 

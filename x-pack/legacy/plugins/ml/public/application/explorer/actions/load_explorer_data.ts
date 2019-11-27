@@ -13,7 +13,6 @@ import { map, mergeMap, tap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 
 import { formatHumanReadableDateTime } from '../../util/date_utils';
-import { TimeBucketsInterval } from '../../util/time_buckets';
 
 import {
   explorerChartsContainerServiceFactory,
@@ -27,6 +26,7 @@ import {
   getDefaultSwimlaneData,
   getSelectionInfluencers,
   getSelectionTimeRange,
+  getSwimlaneBucketInterval,
   getViewBySwimlaneOptions,
   loadAnnotationsTableData,
   loadAnomaliesTableData,
@@ -36,9 +36,8 @@ import {
   loadTopInfluencers,
   loadViewBySwimlane,
   loadViewByTopFieldValuesForSelectedTime,
-  ExplorerJob,
-  TimeRangeBounds,
 } from '../explorer_utils';
+import { ExplorerState } from '../reducers';
 
 interface SwimlanePoint {
   laneLabel: string;
@@ -59,21 +58,30 @@ const dateFormatTz = getDateFormatTz();
 
 // Load the overall data - if the FieldFormats failed to populate
 // the default formatting will be used for metric values.
-export function loadOverallDataActionCreator(
-  selectedCells: any,
-  selectedJobs: ExplorerJob[],
-  swimlaneBucketInterval: TimeBucketsInterval,
-  bounds: TimeRangeBounds,
-  currentViewBySwimlaneFieldName: string,
-  influencersFilterQuery: any,
-  swimlaneLimit: number,
-  noInfluencersConfigured: boolean,
-  filterActive: boolean,
-  filteredFields: any,
-  tableInterval: string,
-  tableSeverity: number,
-  isAndOperator: boolean
-) {
+export function loadExplorerDataActionCreator(state: ExplorerState) {
+  const {
+    bounds,
+    filterActive,
+    filteredFields,
+    influencersFilterQuery,
+    isAndOperator,
+    noInfluencersConfigured,
+    selectedCells,
+    selectedJobs,
+    swimlaneContainerWidth,
+    swimlaneLimit,
+    tableInterval,
+    tableSeverity,
+    viewBySwimlaneFieldName: currentViewBySwimlaneFieldName,
+  } = state;
+
+  if (selectedJobs === null) {
+    return null;
+  }
+
+  const swimlaneBucketInterval = getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth);
+
+  // Load the overall data
   const updateCharts = explorerChartsContainerServiceFactory(data => {
     explorerAction$.next({
       type: EXPLORER_ACTION.SET_STATE,
@@ -111,6 +119,18 @@ export function loadOverallDataActionCreator(
     bounds
   );
 
+  explorerAction$.next({
+    type: EXPLORER_ACTION.SET_STATE,
+    payload: {
+      viewByLoadedForTimeFormatted:
+        selectedCells !== null && selectedCells.showTopFieldValues === true
+          ? formatHumanReadableDateTime(timerange.earliestMs)
+          : null,
+      viewBySwimlaneFieldName,
+      viewBySwimlaneOptions,
+    },
+  });
+
   return forkJoin({
     annotationsData: memoizedLoadAnnotationsTableData(
       selectedCells,
@@ -127,7 +147,7 @@ export function loadOverallDataActionCreator(
       influencersFilterQuery
     ),
     influencers:
-      selectionInfluencers.length > 0
+      selectionInfluencers.length === 0
         ? memoizedLoadTopInfluencers(
             jobIds,
             timerange.earliestMs,
@@ -136,7 +156,7 @@ export function loadOverallDataActionCreator(
             noInfluencersConfigured,
             influencersFilterQuery
           )
-        : Promise.resolve([]),
+        : Promise.resolve({}),
     overallState: memoizedLoadOverallData(selectedJobs, swimlaneBucketInterval, bounds),
     tableData: memoizedLoadAnomaliesTableData(
       selectedCells,
@@ -162,11 +182,18 @@ export function loadOverallDataActionCreator(
         : Promise.resolve([]),
   }).pipe(
     // Trigger action to reset view-by swimlane and show loading indicator
-    tap(() => {
+    tap(({ annotationsData, overallState, tableData }) => {
       explorerAction$.next({
         type: EXPLORER_ACTION.SET_STATE,
         payload: {
-          viewBySwimlaneData: getDefaultSwimlaneData(),
+          annotationsData,
+          overallState,
+          tableData,
+          viewBySwimlaneFieldName,
+          viewBySwimlaneData: {
+            ...getDefaultSwimlaneData(),
+            fieldName: viewBySwimlaneFieldName,
+          },
           viewBySwimlaneDataLoading: true,
         },
       });
@@ -202,7 +229,7 @@ export function loadOverallDataActionCreator(
             noInfluencersConfigured
           ),
         }),
-      ({ annotationsData, influencers, overallState, tableData }, { viewBySwimlaneState }) => {
+      ({ annotationsData, overallState, tableData }, { influencers, viewBySwimlaneState }) => {
         return {
           type: EXPLORER_ACTION.SET_STATE,
           payload: {
@@ -211,12 +238,6 @@ export function loadOverallDataActionCreator(
             ...overallState,
             ...viewBySwimlaneState,
             tableData,
-            viewByLoadedForTimeFormatted:
-              selectedCells !== null && selectedCells.showTopFieldValues === true
-                ? formatHumanReadableDateTime(timerange.earliestMs)
-                : null,
-            viewBySwimlaneFieldName,
-            viewBySwimlaneOptions,
           },
         };
       }
@@ -280,7 +301,7 @@ export function loadOverallDataActionCreator(
     tap(action => {
       const { anomalyChartRecords } = action.payload;
 
-      if (selectedCells !== null) {
+      if (selectedCells !== null && Array.isArray(anomalyChartRecords)) {
         updateCharts(anomalyChartRecords, timerange.earliestMs, timerange.latestMs);
       } else {
         updateCharts([], timerange.earliestMs, timerange.latestMs);

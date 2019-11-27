@@ -5,4 +5,4 @@
  */
 
 export { jobSelectionActionCreator } from './job_selection';
-export { loadOverallDataActionCreator } from './load_overall_data';
+export { loadExplorerDataActionCreator } from './load_explorer_data';
