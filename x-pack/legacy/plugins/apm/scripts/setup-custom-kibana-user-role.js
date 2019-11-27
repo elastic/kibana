@@ -10,7 +10,7 @@
 /*
  * This scripts will create a role that has access to kibana and assign that role to select users
  * This makes it possible to use the existing cloud users locally
- * Usage: node setup-security-roles.js --username YOUR-GITHUB-USERNAME
+ * Usage: node setup-custom-kibana-user-role.js --username YOUR-GITHUB-USERNAME
  ******************************/
 const yaml = require('js-yaml');
 const axios = require('axios');
