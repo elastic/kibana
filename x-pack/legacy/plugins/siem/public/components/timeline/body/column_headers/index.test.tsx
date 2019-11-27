@@ -17,14 +17,6 @@ import { TestProviders } from '../../../../mock/test_providers';
 
 import { ColumnHeaders } from '.';
 
-jest.mock('../../../resize_handle/is_resizing', () => ({
-  ...jest.requireActual('../../../resize_handle/is_resizing'),
-  useIsContainerResizing: () => ({
-    isResizing: true,
-    setIsResizing: jest.fn(),
-  }),
-}));
-
 describe('ColumnHeaders', () => {
   describe('rendering', () => {
     const sort: Sort = {

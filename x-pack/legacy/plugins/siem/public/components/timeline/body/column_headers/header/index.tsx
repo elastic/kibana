@@ -6,10 +6,8 @@
 
 import { noop } from 'lodash/fp';
 import React from 'react';
-import { Resizable } from 're-resizable';
 
-// import { OnResize, Resizeable } from '../../../../resize_handle';
-import { OnColumnRemoved, OnColumnResized, OnColumnSorted, OnFilterChange } from '../../../events';
+import { OnColumnRemoved, OnColumnSorted, OnFilterChange } from '../../../events';
 import { EventsHeadingHandle } from '../../../styles';
 import { Sort } from '../../sort';
 import { Actions } from '../actions';
@@ -21,25 +19,14 @@ import { HeaderComponent } from './header_component';
 interface Props {
   header: ColumnHeader;
   onColumnRemoved: OnColumnRemoved;
-  onColumnResized: OnColumnResized;
   onColumnSorted: OnColumnSorted;
   onFilterChange?: OnFilterChange;
-  setIsResizing: (isResizing: boolean) => void;
   sort: Sort;
   timelineId: string;
 }
 
-/** Renders a header */
 export const Header = React.memo<Props>(
-  ({
-    header,
-    onColumnRemoved,
-    onColumnResized,
-    onColumnSorted,
-    onFilterChange = noop,
-    setIsResizing,
-    sort,
-  }) => {
+  ({ header, onColumnRemoved, onColumnSorted, onFilterChange = noop, sort }) => {
     const onClick = () => {
       onColumnSorted!({
         columnId: header.id,
@@ -48,23 +35,6 @@ export const Header = React.memo<Props>(
           currentSort: sort,
         }),
       });
-    };
-
-    const onResize: OnResize = ({ delta, id }) => {
-      onColumnResized({ columnId: id, delta });
-    };
-
-    const renderActions = (isResizing: boolean) => {
-      setIsResizing(isResizing);
-      return (
-        <>
-          <HeaderComponent header={header} isResizing={isResizing} onClick={onClick} sort={sort}>
-            <Actions header={header} onColumnRemoved={onColumnRemoved} sort={sort} />
-          </HeaderComponent>
-
-          <Filter header={header} onFilterChange={onFilterChange} />
-        </>
-      );
     };
 
     return (
@@ -76,21 +46,6 @@ export const Header = React.memo<Props>(
         <Filter header={header} onFilterChange={onFilterChange} />
       </>
     );
-
-    // return (
-    //   <div>Test</div>
-    //   // <Resizable enable={{ right: true }}>Test</Resizable>
-    //   // <Resizeable
-    //   //   bottom={0}
-    //   //   handle={<EventsHeadingHandle />}
-    //   //   id={header.id}
-    //   //   onResize={onResize}
-    //   //   positionAbsolute
-    //   //   render={renderActions}
-    //   //   right="-1px"
-    //   //   top={0}
-    //   // />
-    // );
   }
 );
 
