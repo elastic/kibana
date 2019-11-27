@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
 import { SavedObject, SavedObjectAttributes } from 'src/core/server';
 
 export enum ReindexStep {
@@ -46,12 +45,13 @@ export type ReindexSavedObject = SavedObject<ReindexOperation>;
 
 export enum ReindexWarning {
   // 6.0 -> 7.0 warnings, now unused
-  allField,
-  booleanFields,
+  allField = 0,
+  booleanFields = 1,
 
   // 7.0 -> 8.0 warnings
   apmReindex,
-  customTypeName,
+
+  // 8.0 -> 9.0 warnings
 }
 
 export enum IndexGroup {
@@ -76,15 +76,6 @@ export interface UIReindex {
   open: boolean;
   start: boolean;
   stop: boolean;
-}
-
-export interface UpgradeAssistantTelemetryServer extends Legacy.Server {
-  usage: {
-    collectorSet: {
-      makeUsageCollector: any;
-      register: any;
-    };
-  };
 }
 
 export interface UpgradeAssistantTelemetrySavedObject {

@@ -8,7 +8,7 @@ import Joi from 'joi';
 import { Legacy } from 'kibana';
 import { resolve } from 'path';
 import mappings from './mappings.json';
-import { plugin } from './server';
+import { plugin } from './server/np_ready';
 
 export function upgradeAssistant(kibana: any) {
   const publicSrc = resolve(__dirname, 'public');
