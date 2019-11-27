@@ -23,7 +23,7 @@ import { breadcrumbService } from './lib/breadcrumb';
 import { docTitleService } from './lib/doc_title';
 import { useAppDependencies } from './app_dependencies';
 
-import { ActionsList } from './sections/actions_list/components/actions_list';
+import { ActionsConnectorsList } from './sections/actions_connectors_list/components/actions_connectors_list';
 import { AlertsList } from './sections/alerts_list/components/alerts_list';
 
 interface MatchParams {
@@ -113,7 +113,9 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
         <EuiSpacer size="s" />
 
         <Switch>
-          {canShowActions && <Route exact path={routeToConnectors} component={ActionsList} />}
+          {canShowActions && (
+            <Route exact path={routeToConnectors} component={ActionsConnectorsList} />
+          )}
           {canShowAlerts && <Route exact path={routeToAlerts} component={AlertsList} />}
         </Switch>
       </EuiPageContent>

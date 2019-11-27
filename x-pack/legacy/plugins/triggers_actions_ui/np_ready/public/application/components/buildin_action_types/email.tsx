@@ -14,26 +14,26 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ErrableFormRow } from '../../../components/page_error';
+import { ErrableFormRow } from '../page_error';
 import {
   ActionTypeModel,
-  Props,
-  Action,
+  ActionConnectorFieldsProps,
+  ActionConnector,
   ValidationResult,
   ActionParamsProps,
-} from '../../../../types';
+} from '../../../types';
 
 export function getActionType(): ActionTypeModel {
   return {
     id: '.email',
     iconClass: 'email',
     selectMessage: i18n.translate(
-      'xpack.triggersActionsUI.sections.actionAdd.emailAction.selectMessageText',
+      'xpack.triggersActionsUI.components.buildin_action_types.emailAction.selectMessageText',
       {
         defaultMessage: 'Send an email.',
       }
     ),
-    validate: (action: Action): ValidationResult => {
+    validateConnector: (action: ActionConnector): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
         from: new Array<string>(),
@@ -45,37 +45,52 @@ export function getActionType(): ActionTypeModel {
       validationResult.errors = errors;
       if (!action.config.from) {
         errors.from.push(
-          i18n.translate('xpack.triggersActionsUI.sections.addAction.error.requiredFromText', {
-            defaultMessage: 'From is required.',
-          })
+          i18n.translate(
+            'xpack.triggersActionsUI.components.buildin_action_types.error.requiredFromText',
+            {
+              defaultMessage: 'From is required.',
+            }
+          )
         );
       }
       if (!action.config.port) {
         errors.port.push(
-          i18n.translate('xpack.triggersActionsUI.sections.addAction.error.requiredPortText', {
-            defaultMessage: 'Port is required.',
-          })
+          i18n.translate(
+            'xpack.triggersActionsUI.components.buildin_action_types.error.requiredPortText',
+            {
+              defaultMessage: 'Port is required.',
+            }
+          )
         );
       }
       if (!action.config.host) {
         errors.host.push(
-          i18n.translate('xpack.triggersActionsUI.sections.addAction.error.requiredHostText', {
-            defaultMessage: 'Host is required.',
-          })
+          i18n.translate(
+            'xpack.triggersActionsUI.components.buildin_action_types.error.requiredHostText',
+            {
+              defaultMessage: 'Host is required.',
+            }
+          )
         );
       }
       if (!action.secrets.user) {
         errors.user.push(
-          i18n.translate('xpack.triggersActionsUI.sections.addAction.error.requiredUserText', {
-            defaultMessage: 'User is required.',
-          })
+          i18n.translate(
+            'xpack.triggersActionsUI.components.buildin_action_types.error.requiredUserText',
+            {
+              defaultMessage: 'User is required.',
+            }
+          )
         );
       }
       if (!action.secrets.password) {
         errors.password.push(
-          i18n.translate('xpack.triggersActionsUI.sections.addAction.error.requiredPasswordText', {
-            defaultMessage: 'Password is required.',
-          })
+          i18n.translate(
+            'xpack.triggersActionsUI.components.buildin_action_types.error.requiredPasswordText',
+            {
+              defaultMessage: 'Password is required.',
+            }
+          )
         );
       }
       return validationResult;
@@ -97,7 +112,7 @@ export function getActionType(): ActionTypeModel {
         actionParams.bcc.length === 0
       ) {
         const errorText = i18n.translate(
-          'xpack.triggersActionsUI.sections.addAction.error.requiredEntryText',
+          'xpack.triggersActionsUI.components.buildin_action_types.error.requiredEntryText',
           {
             defaultMessage: 'No [to], [cc], or [bcc] entries. At least one entry is required.',
           }
@@ -108,26 +123,32 @@ export function getActionType(): ActionTypeModel {
       }
       if (!actionParams.message) {
         errors.message.push(
-          i18n.translate('xpack.triggersActionsUI.sections.addAction.error.requiredMessageText', {
-            defaultMessage: 'Message is required.',
-          })
+          i18n.translate(
+            'xpack.triggersActionsUI.components.buildin_action_types.error.requiredMessageText',
+            {
+              defaultMessage: 'Message is required.',
+            }
+          )
         );
       }
       if (!actionParams.subject) {
         errors.subject.push(
-          i18n.translate('xpack.triggersActionsUI.sections.addAction.error.requiredSubjectText', {
-            defaultMessage: 'Subject is required.',
-          })
+          i18n.translate(
+            'xpack.triggersActionsUI.components.buildin_action_types.error.requiredSubjectText',
+            {
+              defaultMessage: 'Subject is required.',
+            }
+          )
         );
       }
       return validationResult;
     },
-    actionFields: EmailActionFields,
+    actionConnectorFields: EmailActionConnectorFields,
     actionParamsFields: EmailParamsFields,
   };
 }
 
-const EmailActionFields: React.FunctionComponent<Props> = ({
+const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   action,
   editActionConfig,
   editActionSecrets,

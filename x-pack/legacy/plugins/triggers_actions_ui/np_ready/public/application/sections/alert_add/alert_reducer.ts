@@ -9,7 +9,7 @@ interface CommandType {
   type:
     | 'setAlert'
     | 'setProperty'
-    | 'setAlertTypeParams'
+    | 'setAlertParams'
     | 'setAlertActionParams'
     | 'setAlertActionProperty';
 }
@@ -18,7 +18,7 @@ export interface AlertState {
   alert: any;
 }
 
-export interface ActionAlertReducerItem {
+export interface AlertReducerAction {
   command: CommandType;
   payload: {
     key: string;
@@ -27,7 +27,7 @@ export interface ActionAlertReducerItem {
   };
 }
 
-export const alertReducer = (state: any, action: ActionAlertReducerItem) => {
+export const alertReducer = (state: any, action: AlertReducerAction) => {
   const { command, payload } = action;
   const { alert } = state;
 
@@ -57,17 +57,17 @@ export const alertReducer = (state: any, action: ActionAlertReducerItem) => {
         };
       }
     }
-    case 'setAlertTypeParams': {
+    case 'setAlertParams': {
       const { key, value } = payload;
-      if (isEqual(alert.alertTypeParams[key], value)) {
+      if (isEqual(alert.params[key], value)) {
         return state;
       } else {
         return {
           ...state,
           alert: {
             ...alert,
-            alertTypeParams: {
-              ...alert.alertTypeParams,
+            params: {
+              ...alert.params,
               [key]: value,
             },
           },

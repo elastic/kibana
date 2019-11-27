@@ -20,12 +20,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { createAction, updateAction } from '../../lib/api';
+import { createActionConnector, updateActionConnector } from '../../lib/api';
 import { SectionError, ErrableFormRow } from '../../components/page_error';
 import { useAppDependencies } from '../../app_dependencies';
-import { actionReducer } from './action_reducer';
-import { ActionsContext } from '../../context/actions_context';
-import { Action, IErrorObject } from '../../../types';
+import { connectorReducer } from './connector_reducer';
+import { ActionsConnectorsContext } from '../../context/actions_connectors_context';
+import { ActionConnector, IErrorObject } from '../../../types';
 
 interface Props {
   initialAction: any;
@@ -33,17 +33,21 @@ interface Props {
   setFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const ActionForm = ({ initialAction, actionTypeName, setFlyoutVisibility }: Props) => {
+export const ActionConnectorForm = ({
+  initialAction,
+  actionTypeName,
+  setFlyoutVisibility,
+}: Props) => {
   const {
     core: { http },
     plugins: { toastNotifications },
     actionTypeRegistry,
   } = useAppDependencies();
 
-  const { loadActions } = useContext(ActionsContext);
+  const { loadActions } = useContext(ActionsConnectorsContext);
 
   // hooks
-  const [{ action }, dispatch] = useReducer(actionReducer, { action: initialAction });
+  const [{ connector }, dispatch] = useReducer(connectorReducer, { connector: initialAction });
 
   const setActionProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
@@ -66,7 +70,7 @@ export const ActionForm = ({ initialAction, actionTypeName, setFlyoutVisibility 
     body: { message: string; error: string };
   } | null>(null);
 
-  function validateBaseProperties(actionObject: Action) {
+  function validateBaseProperties(actionObject: ActionConnector) {
     const validationResult = { errors: {} };
     const errors = {
       description: new Array<string>(),
@@ -84,18 +88,18 @@ export const ActionForm = ({ initialAction, actionTypeName, setFlyoutVisibility 
 
   const actionTypeRegisterd = actionTypeRegistry.get(initialAction.actionTypeId);
   if (actionTypeRegisterd === null) return null;
-  const FieldsComponent = actionTypeRegisterd.actionFields;
+  const FieldsComponent = actionTypeRegisterd.actionConnectorFields;
   const errors = {
-    ...actionTypeRegisterd.validate(action).errors,
-    ...validateBaseProperties(action).errors,
+    ...actionTypeRegisterd.validateConnector(connector).errors,
+    ...validateBaseProperties(connector).errors,
   } as IErrorObject;
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
 
   async function onActionSave(): Promise<any> {
     try {
       let newAction;
-      if (action.id === undefined) {
-        newAction = await createAction({ http, action });
+      if (connector.id === undefined) {
+        newAction = await createActionConnector({ http, connector });
         toastNotifications.addSuccess(
           i18n.translate('xpack.triggersActionsUI.sections.actionAdd.saveSuccessNotificationText', {
             defaultMessage: "Created '{actionName}'",
@@ -105,7 +109,7 @@ export const ActionForm = ({ initialAction, actionTypeName, setFlyoutVisibility 
           })
         );
       } else {
-        newAction = await updateAction({ http, action, id: action.id });
+        newAction = await updateActionConnector({ http, connector, id: connector.id });
         toastNotifications.addSuccess(
           i18n.translate('xpack.triggersActionsUI.sections.actionAdd.saveSuccessNotificationText', {
             defaultMessage: "Updated '{actionName}'",
@@ -152,19 +156,19 @@ export const ActionForm = ({ initialAction, actionTypeName, setFlyoutVisibility 
               />
             }
             errorKey="description"
-            isShowingErrors={hasErrors && action.description !== undefined}
+            isShowingErrors={hasErrors && connector.description !== undefined}
             errors={errors}
           >
             <EuiFieldText
               fullWidth
               name="description"
               data-test-subj="descriptionInput"
-              value={action.description || ''}
+              value={connector.description || ''}
               onChange={e => {
                 setActionProperty('description', e.target.value);
               }}
               onBlur={() => {
-                if (!action.description) {
+                if (!connector.description) {
                   setActionProperty('description', '');
                 }
               }}
@@ -173,7 +177,7 @@ export const ActionForm = ({ initialAction, actionTypeName, setFlyoutVisibility 
           <EuiSpacer size="s" />
           {FieldsComponent !== null ? (
             <FieldsComponent
-              action={action}
+              action={connector}
               errors={errors}
               editActionConfig={setActionConfigProperty}
               editActionSecrets={setActionSecretsProperty}

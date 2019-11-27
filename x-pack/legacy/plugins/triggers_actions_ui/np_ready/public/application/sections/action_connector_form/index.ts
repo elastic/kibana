@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ActionAddFlyout } from './action_add_flyout';
-export { ActionEditFlyout } from './action_edit_flyout';
+export { ConnectorAddFlyout } from './connector_add_flyout';
+export { ConnectorEditFlyout } from './connector_edit_flyout';

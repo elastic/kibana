@@ -5,7 +5,7 @@
  */
 import { HttpServiceBase } from 'kibana/public';
 import { BASE_ACTION_API_PATH, BASE_ALERT_API_PATH } from '../constants';
-import { Action, ActionType, Alert, AlertType } from '../../types';
+import { ActionConnector, ActionType, Alert, AlertType } from '../../types';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 100 or so.
@@ -27,7 +27,7 @@ interface LoadActionsResponse {
   page: number;
   perPage: number;
   total: number;
-  data: Action[];
+  data: ActionConnector[];
 }
 
 interface DeleteActionsOpts {
@@ -55,33 +55,33 @@ export async function getActionById({
 }: {
   id: string;
   http: HttpServiceBase;
-}): Promise<Action> {
+}): Promise<ActionConnector> {
   return http.get(`${BASE_ACTION_API_PATH}/${id}`);
 }
 
-export async function createAction({
+export async function createActionConnector({
   http,
-  action,
+  connector,
 }: {
   http: HttpServiceBase;
-  action: Action;
-}): Promise<Action> {
+  connector: ActionConnector;
+}): Promise<ActionConnector> {
   return http.post(`${BASE_ACTION_API_PATH}`, {
-    body: JSON.stringify(action),
+    body: JSON.stringify(connector),
   });
 }
 
-export async function updateAction({
+export async function updateActionConnector({
   http,
-  action,
+  connector,
   id,
 }: {
   http: HttpServiceBase;
-  action: Action;
+  connector: ActionConnector;
   id: string;
-}): Promise<Action> {
+}): Promise<ActionConnector> {
   return http.put(`${BASE_ACTION_API_PATH}/${id}`, {
-    body: JSON.stringify({ ...action, id: undefined, actionTypeId: undefined }),
+    body: JSON.stringify({ ...connector, id: undefined, actionTypeId: undefined }),
   });
 }
 

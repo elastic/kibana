@@ -6,9 +6,9 @@
 
 import React from 'react';
 import { ActionType, ActionTableItem } from '../../types';
-export const ActionsContext = React.createContext({} as IActionContext);
+export const ActionsConnectorsContext = React.createContext({} as IActionsConnectorsContext);
 
-export interface IActionContext {
+export interface IActionsConnectorsContext {
   addFlyoutVisible: boolean;
   editFlyoutVisible: boolean;
   setEditFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;

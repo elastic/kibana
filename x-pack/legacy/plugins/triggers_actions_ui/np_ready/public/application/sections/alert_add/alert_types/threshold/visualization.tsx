@@ -79,10 +79,10 @@ const getTimezone = (
   return tzOffset;
 };
 
-const getDomain = (alertTypeParams: any) => {
+const getDomain = (alertParams: any) => {
   const VISUALIZE_TIME_WINDOW_MULTIPLIER = 5;
-  const fromExpression = `now-${alertTypeParams.timeWindowSize * VISUALIZE_TIME_WINDOW_MULTIPLIER}${
-    alertTypeParams.timeWindowUnit
+  const fromExpression = `now-${alertParams.timeWindowSize * VISUALIZE_TIME_WINDOW_MULTIPLIER}${
+    alertParams.timeWindowUnit
   }`;
   const toExpression = 'now';
   const fromMoment = dateMath.parse(fromExpression);
@@ -95,15 +95,15 @@ const getDomain = (alertTypeParams: any) => {
   };
 };
 
-const getThreshold = (alertTypeParams: any) => {
-  return alertTypeParams.threshold.slice(
+const getThreshold = (alertParams: any) => {
+  return alertParams.threshold.slice(
     0,
-    comparators[alertTypeParams.thresholdComparator].requiredValues
+    comparators[alertParams.thresholdComparator].requiredValues
   );
 };
 
-const getTimeBuckets = (alertTypeParams: any) => {
-  const domain = getDomain(alertTypeParams);
+const getTimeBuckets = (alertParams: any) => {
+  const domain = getDomain(alertParams);
   const timeBuckets = new TimeBuckets();
   timeBuckets.setBounds(domain);
   return timeBuckets;
@@ -137,9 +137,9 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({ alert }
     timeWindowUnit,
     groupBy,
     threshold,
-  } = alert.alertTypeParams;
+  } = alert.params;
 
-  const domain = getDomain(alert.alertTypeParams);
+  const domain = getDomain(alert.params);
   const timeBuckets = new TimeBuckets();
   timeBuckets.setBounds(domain);
   const interval = timeBuckets.getInterval().expression;
@@ -151,7 +151,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({ alert }
   };
 
   // Fetching visualization data is independent of alert actions
-  const alertWithoutActions = { ...alert.alertTypeParams, actions: [], type: 'threshold' };
+  const alertWithoutActions = { ...alert.params, actions: [], type: 'threshold' };
 
   useEffect(() => {
     // Prevent sending a second request on initial render.
@@ -225,7 +225,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({ alert }
   if (visualizationData) {
     const alertVisualizationDataKeys = Object.keys(visualizationData);
     const timezone = getTimezone(uiSettings);
-    const actualThreshold = getThreshold(alert.alertTypeParams);
+    const actualThreshold = getThreshold(alert.params);
     let maxY = actualThreshold[actualThreshold.length - 1];
 
     (Object.values(visualizationData) as number[][][]).forEach(data => {
@@ -238,9 +238,9 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({ alert }
     const dateFormatter = (d: number) => {
       return moment(d)
         .tz(timezone)
-        .format(getTimeBuckets(alert.alertTypeParams).getScaledDateFormat());
+        .format(getTimeBuckets(alert.params).getScaledDateFormat());
     };
-    const aggLabel = aggregationTypes[alert.alertTypeParams.aggType].text;
+    const aggLabel = aggregationTypes[aggType].text;
     return (
       <div data-test-subj="alertVisualizationChart">
         <EuiSpacer size="l" />
@@ -249,7 +249,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({ alert }
             <Settings
               theme={[customTheme(), chartsTheme]}
               xDomain={domain}
-              showLegend={!!alert.alertTypeParams.termField}
+              showLegend={!!termField}
               legendPosition={Position.Bottom}
             />
             <Axis
@@ -285,7 +285,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({ alert }
                   key={specId}
                   annotationId={getAnnotationId(specId)}
                   domainType={AnnotationDomainTypes.YDomain}
-                  dataValues={[{ dataValue: alert.alertTypeParams.threshold[i], details: specId }]}
+                  dataValues={[{ dataValue: threshold[i], details: specId }]}
                 />
               );
             })}
