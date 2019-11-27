@@ -14,6 +14,8 @@ import { licenseMock } from '../common/license.mock';
 import { coreMock } from '../../../../src/core/public/mocks';
 import { HttpInterceptor } from 'src/core/public';
 
+const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+
 describe('licensing plugin', () => {
   let plugin: LicensingPlugin;
 
@@ -28,15 +30,30 @@ describe('licensing plugin', () => {
         plugin = new LicensingPlugin(coreMock.createPluginInitializerContext(), sessionStorage);
 
         const coreSetup = coreMock.createSetup();
-        const fetchedLicense = licenseMock.create({ license: { uid: 'fetched' } });
-        coreSetup.http.get.mockResolvedValue(fetchedLicense);
+        const firstLicense = licenseMock.create({ license: { uid: 'first', type: 'basic' } });
+        const secondLicense = licenseMock.create({ license: { uid: 'second', type: 'gold' } });
+        coreSetup.http.get
+          .mockImplementationOnce(async () => {
+            await delay(100);
+            return firstLicense;
+          })
+          .mockImplementationOnce(async () => {
+            await delay(100);
+            return secondLicense;
+          });
 
         const { license$, refresh } = await plugin.setup(coreSetup);
 
-        refresh();
-        const license = await license$.pipe(take(1)).toPromise();
+        let fromObservable;
+        license$.subscribe(license => (fromObservable = license));
 
-        expect(license.uid).toBe('fetched');
+        const licenseResult = await refresh();
+        expect(licenseResult.uid).toBe('first');
+        expect(licenseResult).toBe(fromObservable);
+
+        const secondResult = await refresh();
+        expect(secondResult.uid).toBe('second');
+        expect(secondResult).toBe(fromObservable);
       });
 
       it('data re-fetch call marked as a system api', async () => {
@@ -49,7 +66,7 @@ describe('licensing plugin', () => {
 
         const { refresh } = await plugin.setup(coreSetup);
 
-        refresh();
+        await refresh();
 
         expect(coreSetup.http.get.mock.calls[0][1]).toMatchObject({
           headers: {
@@ -119,7 +136,7 @@ describe('licensing plugin', () => {
 
         const { license$, refresh } = await plugin.setup(coreSetup);
 
-        refresh();
+        await refresh();
         const license = await license$.pipe(take(1)).toPromise();
 
         expect(license.uid).toBe('fresh');
@@ -143,7 +160,7 @@ describe('licensing plugin', () => {
         coreSetup.http.get.mockRejectedValue(new Error('reason'));
 
         const { license$, refresh } = await plugin.setup(coreSetup);
-        refresh();
+        await refresh();
 
         const license = await license$.pipe(take(1)).toPromise();
 
@@ -161,7 +178,7 @@ describe('licensing plugin', () => {
         const { license$, refresh } = await plugin.setup(coreSetup);
         expect(sessionStorage.removeItem).toHaveBeenCalledTimes(0);
 
-        refresh();
+        await refresh();
         await license$.pipe(take(1)).toPromise();
 
         expect(sessionStorage.removeItem).toHaveBeenCalledTimes(1);
@@ -201,7 +218,7 @@ describe('licensing plugin', () => {
         response: {
           headers: {
             get(name: string) {
-              if (name === 'kbn-xpack-sig') {
+              if (name === 'kbn-license-sig') {
                 return 'signature-1';
               }
               throw new Error('unexpected header');
@@ -249,7 +266,7 @@ describe('licensing plugin', () => {
         response: {
           headers: {
             get(name: string) {
-              if (name === 'kbn-xpack-sig') {
+              if (name === 'kbn-license-sig') {
                 return 'signature-1';
               }
               throw new Error('unexpected header');
@@ -281,19 +298,6 @@ describe('licensing plugin', () => {
 
       await plugin.stop();
       expect(completed).toBe(true);
-    });
-
-    it('refresh does not trigger data re-fetch', async () => {
-      const sessionStorage = coreMock.createStorage();
-      plugin = new LicensingPlugin(coreMock.createPluginInitializerContext(), sessionStorage);
-      const coreSetup = coreMock.createSetup();
-      const { refresh } = await plugin.setup(coreSetup);
-
-      await plugin.stop();
-
-      refresh();
-
-      expect(coreSetup.http.get).toHaveBeenCalledTimes(0);
     });
 
     it('removes http interceptor', async () => {

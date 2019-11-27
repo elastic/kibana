@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Subject, Subscription, merge } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Subject, Subscription } from 'rxjs';
 
 import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
 
@@ -30,7 +29,6 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
    * A function to execute once the plugin's HTTP interceptor needs to stop listening.
    */
   private removeInterceptor?: () => void;
-  private licenseFetchSubscription?: Subscription;
   private storageSubscription?: Subscription;
 
   private readonly infoEndpoint = '/api/licensing/info';
@@ -65,19 +63,16 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
   }
 
   public setup(core: CoreSetup) {
-    const manualRefresh$ = new Subject();
     const signatureUpdated$ = new Subject();
-    const refresh$ = merge(signatureUpdated$, manualRefresh$).pipe(takeUntil(this.stop$));
 
-    const savedLicense = this.getSaved();
-    const { update$, fetchSubscription } = createLicenseUpdate(
-      refresh$,
+    const { license$, refreshManually } = createLicenseUpdate(
+      signatureUpdated$,
+      this.stop$,
       () => this.fetchLicense(core),
-      savedLicense
+      this.getSaved()
     );
-    this.licenseFetchSubscription = fetchSubscription;
 
-    this.storageSubscription = update$.subscribe(license => {
+    this.storageSubscription = license$.subscribe(license => {
       if (license.isAvailable) {
         this.prevSignature = license.signature;
         this.save(license);
@@ -103,10 +98,8 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
     });
 
     return {
-      refresh: () => {
-        manualRefresh$.next();
-      },
-      license$: update$,
+      refresh: refreshManually,
+      license$,
     };
   }
 
@@ -118,10 +111,6 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
 
     if (this.removeInterceptor !== undefined) {
       this.removeInterceptor();
-    }
-    if (this.licenseFetchSubscription !== undefined) {
-      this.licenseFetchSubscription.unsubscribe();
-      this.licenseFetchSubscription = undefined;
     }
     if (this.storageSubscription !== undefined) {
       this.storageSubscription.unsubscribe();
