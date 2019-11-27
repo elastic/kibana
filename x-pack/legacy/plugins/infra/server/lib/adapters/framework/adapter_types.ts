@@ -7,6 +7,7 @@
 import { SearchResponse, GenericParams } from 'elasticsearch';
 import { Lifecycle } from 'hapi';
 import { ObjectType } from '@kbn/config-schema';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { RouteMethod, RouteConfig } from '../../../../../../../../src/core/server';
 
 interface ApmIndices {
@@ -15,6 +16,7 @@ interface ApmIndices {
 
 // NP_TODO: Compose real types from plugins we depend on, no "any"
 export interface InfraServerPluginDeps {
+  usageCollection: UsageCollectionSetup;
   spaces: any;
   metrics: {
     getVisData: any;

@@ -22,6 +22,7 @@ import { InfraSourceStatus } from './lib/source_status';
 import { InfraSources } from './lib/sources';
 import { InfraServerPluginDeps } from './lib/adapters/framework';
 import { METRICS_FEATURE, LOGS_FEATURE } from './features';
+import { UsageCollector } from './usage/usage_collector';
 
 export interface KbnServer extends Server {
   usage: any;
@@ -99,5 +100,8 @@ export class InfraServerPlugin {
     plugins.features.registerFeature(LOGS_FEATURE);
 
     initInfraServer(this.libs);
+
+    // Telemetry
+    UsageCollector.registerUsageCollector(plugins.usageCollection);
   }
 }

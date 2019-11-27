@@ -58,10 +58,12 @@ export const lens: LegacyPluginInitializer = kibana => {
 
       // Set up with the new platform plugin lifecycle API.
       const plugin = lensServerPlugin();
+      const { usageCollection } = server.newPlatform.setup.plugins;
+
       plugin.setup(kbnServer.newPlatform.setup.core, {
+        usageCollection,
         // Legacy APIs
         savedObjects: server.savedObjects,
-        usage: server.usage,
         config: server.config(),
         server,
       });
