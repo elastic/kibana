@@ -19,7 +19,7 @@ interface VarsEntry {
  * It returns the resolved template as a string.
  */
 export function createInput(manifest: Manifest, inputTemplate: string): string {
-  const view: any = {};
+  const view: Record<VarsEntry["name"], VarsEntry["default"]> = {}
 
   for (const v of manifest.vars) {
     view[v.name] = v.default;
