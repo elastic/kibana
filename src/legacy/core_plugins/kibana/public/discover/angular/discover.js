@@ -68,16 +68,17 @@ const {
   share,
   StateProvider,
   timefilter,
+  npData,
   toastNotifications,
   uiModules,
   uiRoutes,
 }  = getServices();
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
-import { start as data } from '../../../../data/public/legacy';
 import { generateFilters } from '../../../../../../plugins/data/public';
+import { start as data } from '../../../../data/public/legacy';
 
-const { savedQueryService } = data.search.services;
+const savedQueryService = npData.query.savedQueries;
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',

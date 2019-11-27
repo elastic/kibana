@@ -38,7 +38,7 @@ export {
   StaticIndexPattern,
 } from './index_patterns';
 export { QueryStringInput } from './query';
-export { SearchBar, SearchBarProps, SavedQueryAttributes, SavedQuery } from './search';
+export { SearchBar, SearchBarProps } from './search';
 
 /** @public static code */
 export * from '../common';

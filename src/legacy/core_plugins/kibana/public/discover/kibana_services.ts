@@ -34,7 +34,6 @@ import { StateProvider } from 'ui/state_management/state';
 import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
-import { timefilter } from 'ui/timefilter';
 // @ts-ignore
 import { IndexPattern, IndexPatterns } from 'ui/index_patterns';
 import { wrapInI18nContext } from 'ui/i18n';
@@ -58,7 +57,9 @@ const services = {
   uiSettings: npStart.core.uiSettings,
   uiActions: npStart.plugins.uiActions,
   embeddable: npStart.plugins.embeddable,
+  npData: npStart.plugins.data,
   share: npStart.plugins.share,
+  timefilter: npStart.plugins.data.query.timefilter,
   // legacy
   docTitle,
   docViewsRegistry,
@@ -70,7 +71,6 @@ const services = {
   SavedObjectProvider,
   SearchSource,
   StateProvider,
-  timefilter,
   uiModules,
   uiRoutes,
   wrapInI18nContext,

@@ -42,7 +42,7 @@ const {
 } = data;
 
 export const siemFilterManager = npStart.plugins.data.query.filterManager;
-export const savedQueryService = search.services.savedQueryService;
+export const savedQueryService = npStart.plugins.data.query.savedQueries;
 
 interface SiemSearchBarRedux {
   end: number;

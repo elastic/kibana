@@ -25,7 +25,7 @@ import {
 
 import { EuiFieldText } from '@elastic/eui';
 import React from 'react';
-import { QueryLanguageSwitcher } from './language_switcher';
+import { QueryLanguageSwitcher } from '../../../../../../../plugins/data/public';
 import { QueryStringInput, QueryStringInputUI } from './query_string_input';
 import { coreMock } from '../../../../../../../core/public/mocks';
 const startMock = coreMock.createStart();
