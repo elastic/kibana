@@ -20,11 +20,14 @@
 // /// Define plugin function
 import { DataPlugin as Plugin, DataSetup, DataStart } from './plugin';
 import {
-  IndexPattern as npIndexPattern,
-  Field,
-  FieldListInterface,
+  indexPattern,
   IFieldType,
+  IIndexPattern,
+  IndexPatterns,
+  IndexPattern,
+  Field,
   FieldList,
+  FieldListInterface,
 } from '../../../../plugins/data/public';
 
 export function plugin() {
@@ -36,7 +39,6 @@ export function plugin() {
 /** @public types */
 export { DataSetup, DataStart };
 
-export { IndexPattern, IndexPatterns, StaticIndexPattern } from './index_patterns';
 export { QueryStringInput } from './query';
 export { SearchBar, SearchBarProps, SavedQueryAttributes, SavedQuery } from './search';
 
@@ -44,20 +46,24 @@ export { SearchBar, SearchBarProps, SavedQueryAttributes, SavedQuery } from './s
 export * from '../common';
 export { FilterStateManager } from './filter/filter_manager';
 
-const CONTAINS_SPACES = npIndexPattern.CONTAINS_SPACES_KEY;
-const getFromSavedObject = npIndexPattern.getFromSavedObject;
-const getRoutes = npIndexPattern.getRoutes;
-const validateIndexPattern = npIndexPattern.validate;
-const findIndexPatternByTitle = npIndexPattern.findByTitle;
-const IndexPatternAlreadyExists = npIndexPattern.errors.AlreadyExists;
-const IndexPatternMissingIndices = npIndexPattern.errors.MissingIndices;
-const NoDefaultIndexPattern = npIndexPattern.errors.NoDefault;
-const NoDefinedIndexPatterns = npIndexPattern.errors.NoDefined;
-const ILLEGAL_CHARACTERS = npIndexPattern.ILLEGAL_CHARACTERS_KEY;
-const INDEX_PATTERN_ILLEGAL_CHARACTERS = npIndexPattern.ILLEGAL_CHARACTERS;
-const INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE = npIndexPattern.ILLEGAL_CHARACTERS_VISIBLE;
+const CONTAINS_SPACES = indexPattern.CONTAINS_SPACES_KEY;
+const getFromSavedObject = indexPattern.getFromSavedObject;
+const getRoutes = indexPattern.getRoutes;
+const validateIndexPattern = indexPattern.validate;
+const findIndexPatternByTitle = indexPattern.findByTitle;
+const createFlattenHitWrapper = indexPattern.createFlattenHitWrapper;
+const formatHitProvider = indexPattern.formatHitProvider;
+const IndexPatternAlreadyExists = indexPattern.errors.AlreadyExists;
+const IndexPatternMissingIndices = indexPattern.errors.MissingIndices;
+const NoDefaultIndexPattern = indexPattern.errors.NoDefault;
+const NoDefinedIndexPatterns = indexPattern.errors.NoDefined;
+const ILLEGAL_CHARACTERS = indexPattern.ILLEGAL_CHARACTERS_KEY;
+const INDEX_PATTERN_ILLEGAL_CHARACTERS = indexPattern.ILLEGAL_CHARACTERS;
+const INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE = indexPattern.ILLEGAL_CHARACTERS_VISIBLE;
+const flattenHitWrapper = indexPattern.flattenHitWrapper;
 
 export { IFieldType as FieldType };
+export { IIndexPattern as StaticIndexPattern };
 
 export {
   CONTAINS_SPACES,
@@ -75,4 +81,9 @@ export {
   Field,
   FieldListInterface,
   FieldList,
+  IndexPattern,
+  IndexPatterns,
+  createFlattenHitWrapper,
+  formatHitProvider,
+  flattenHitWrapper,
 };

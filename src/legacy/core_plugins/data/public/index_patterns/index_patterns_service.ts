@@ -33,7 +33,7 @@ import {
   IndexPattern,
   IndexPatterns,
   StaticIndexPattern,
-} from './index_patterns';
+} from '../';
 
 export interface IndexPatternDependencies {
   uiSettings: UiSettingsClientContract;

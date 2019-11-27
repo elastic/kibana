@@ -28,8 +28,9 @@ import {
   getRoutes,
   findByTitle,
 } from './utils';
+import { createFlattenHitWrapper, formatHitProvider, flattenHitWrapper } from './index_patterns';
 
-export const IndexPattern = {
+export const indexPattern = {
   errors,
   CONTAINS_SPACES_KEY,
   ILLEGAL_CHARACTERS,
@@ -39,7 +40,12 @@ export const IndexPattern = {
   getFromSavedObject,
   getRoutes,
   findByTitle,
+  createFlattenHitWrapper,
+  formatHitProvider,
+  flattenHitWrapper,
 };
 
 export { IndexPatternsService } from './index_patterns_service';
 export { IndexPatternsStart, IndexPatternsSetup } from './types';
+export { Field, FieldList, FieldListInterface } from './fields';
+export { IndexPattern, IndexPatterns } from './index_patterns';

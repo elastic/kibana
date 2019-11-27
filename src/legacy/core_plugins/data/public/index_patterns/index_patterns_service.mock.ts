@@ -18,7 +18,7 @@
  */
 
 import { IndexPatternsService, IndexPatternsSetup } from '.';
-import { flattenHitWrapper } from './index_patterns';
+import { flattenHitWrapper } from '../';
 
 type IndexPatternsServiceClientContract = PublicMethodsOf<IndexPatternsService>;
 
