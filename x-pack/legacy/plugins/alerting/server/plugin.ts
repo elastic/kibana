@@ -118,6 +118,13 @@ export class Plugin {
     core.http.route(muteAlertInstanceRoute);
     core.http.route(unmuteAlertInstanceRoute);
 
+    alertTypeRegistry.register({
+      id: 'test',
+      name: 'test',
+      actionGroups: ['default'],
+      executor(): any {},
+    });
+
     return {
       registerType: alertTypeRegistry.register.bind(alertTypeRegistry),
     };

@@ -105,6 +105,7 @@ export interface LoadAlertsOpts {
   http: HttpServiceBase;
   page: { index: number; size: number };
   searchText?: string;
+  tagsFilter?: string[];
 }
 
 export interface LoadAlertsResponse {
@@ -118,6 +119,7 @@ export async function loadAlerts({
   http,
   page,
   searchText,
+  tagsFilter,
 }: LoadAlertsOpts): Promise<LoadAlertsResponse> {
   return http.get(`${BASE_ALERT_API_PATH}/_find`, {
     query: {
@@ -125,6 +127,10 @@ export async function loadAlerts({
       per_page: page.size,
       search_fields: searchText ? 'name' : undefined,
       search: searchText,
+      filter:
+        tagsFilter && tagsFilter.length > 0
+          ? `alert.attributes.tags:(${tagsFilter.join(' and ')})`
+          : undefined,
     },
   });
 }

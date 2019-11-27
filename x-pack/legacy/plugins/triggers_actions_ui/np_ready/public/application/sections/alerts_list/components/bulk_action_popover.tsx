@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiButtonEmpty, EuiFormRow, EuiPopover } from '@elastic/eui';
 

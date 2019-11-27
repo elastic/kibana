@@ -8,13 +8,15 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment, useEffect, useState } from 'react';
 // @ts-ignore: EuiSearchBar not exported in TypeScript
-import { EuiBasicTable, EuiButton, EuiButtonEmpty, EuiSearchBar, EuiSpacer } from '@elastic/eui';
+import { EuiBasicTable, EuiButton, EuiSearchBar, EuiSpacer } from '@elastic/eui';
+
 import { AlertsContext } from '../../../context/alerts_context';
 import { useAppDependencies } from '../../../app_dependencies';
 import { Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
 import { AlertAdd } from '../../alert_add';
 import { BulkActionPopover } from './bulk_action_popover';
 import { CollapsedItemActions } from './collapsed_item_actions';
+import { TagsFilter } from './tags_filter';
 import { loadAlerts, loadAlertTypes } from '../../../lib/api';
 
 export const AlertsList: React.FunctionComponent = () => {
@@ -34,12 +36,13 @@ export const AlertsList: React.FunctionComponent = () => {
   const [totalItemCount, setTotalItemCount] = useState<number>(0);
   const [page, setPage] = useState<Pagination>({ index: 0, size: 10 });
   const [searchText, setSearchText] = useState<string | undefined>(undefined);
+  const [tagsFilter, setTagsFilter] = useState<string[]>([]);
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
 
   useEffect(() => {
     loadAlertsData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, searchText]);
+  }, [page, searchText, tagsFilter]);
 
   useEffect(() => {
     (async () => {
@@ -83,7 +86,7 @@ export const AlertsList: React.FunctionComponent = () => {
   async function loadAlertsData() {
     setIsLoadingAlerts(true);
     try {
-      const alertsResponse = await loadAlerts({ http, page, searchText });
+      const alertsResponse = await loadAlerts({ http, page, searchText, tagsFilter });
       setAlerts(alertsResponse.data);
       setTotalItemCount(alertsResponse.total);
     } catch (e) {
@@ -186,6 +189,7 @@ export const AlertsList: React.FunctionComponent = () => {
                   ]
             }
             toolsRight={[
+              <TagsFilter onChange={(tags: string[]) => setTagsFilter(tags)} />,
               <EuiButton
                 key="create-alert"
                 data-test-subj="createAlertButton"
