@@ -304,7 +304,7 @@
     "react-moment-proptypes": "^1.7.0",
     "react-monaco-editor": "~0.27.0",
     "react-portal": "^3.2.0",
-    "react-redux": "^5.1.1",
+    "react-redux": "^5.1.2",
     "react-resize-detector": "^4.2.0",
     "react-reverse-portal": "^1.0.4",
     "react-router-dom": "^4.3.1",
