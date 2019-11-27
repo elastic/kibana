@@ -8,13 +8,18 @@ import React, { FC, useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
 import {
+  EuiButtonIcon,
   EuiComboBox,
   EuiComboBoxOptionProps,
   EuiComboBoxProps,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLink,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
 import { ml } from '../../../../../../../../../services/ml_api_service';
@@ -61,7 +66,34 @@ export const CalendarsSelection: FC = () => {
 
   return (
     <Description>
-      <EuiComboBox {...comboBoxProps} />
+      <EuiFlexGroup gutterSize="xs" alignItems="center">
+        <EuiFlexItem>
+          <EuiComboBox {...comboBoxProps} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            position="right"
+            content={
+              <FormattedMessage
+                id="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.calendarsSelection.refreshCalendarsButtonLabel"
+                defaultMessage="Refresh calendars"
+              />
+            }
+          >
+            <EuiButtonIcon
+              iconType="refresh"
+              color="primary"
+              aria-label={i18n.translate(
+                'xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.calendarsSelection.refreshCalendarsButtonLabel',
+                {
+                  defaultMessage: 'Refresh calendars',
+                }
+              )}
+              onClick={loadCalendars}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="xs" />
       <EuiText size="s">
         <EuiLink href={manageCalendarsHref} target="_blank" external>
