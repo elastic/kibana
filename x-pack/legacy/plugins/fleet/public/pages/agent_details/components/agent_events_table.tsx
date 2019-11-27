@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, SFC } from 'react';
+import React, { useState, useEffect, FC } from 'react';
 import {
   EuiBasicTable,
   // @ts-ignore

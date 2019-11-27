@@ -7,7 +7,7 @@ import { EuiCallOut, EuiPageBody, EuiPageContent, EuiSpacer, EuiText } from '@el
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import useInterval from '@use-it/interval';
-import React, { SFC, useState } from 'react';
+import React, { FC, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { AGENT_POLLING_INTERVAL } from '../../../common/constants/agent';
 import { Loading } from '../../components/loading';

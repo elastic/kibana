@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC, useState } from 'react';
+import React, { FC, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,

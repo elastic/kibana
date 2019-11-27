@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC, useState, useEffect } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import {
   // @ts-ignore
   EuiSuggest,
