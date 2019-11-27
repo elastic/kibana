@@ -72,7 +72,7 @@ export class KibanaRequest<
     B extends ObjectType | Type<Buffer> | Type<Stream>
   >(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders: boolean = true) {
     const requestParts = KibanaRequest.validate(req, routeSchemas);
-    return new KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>, typeof req.method>(
+    return new KibanaRequest(
       req,
       requestParts.params,
       requestParts.query,

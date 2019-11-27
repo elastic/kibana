@@ -752,7 +752,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     // (undocumented)
     readonly body: Body;
     // @internal
-    static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<P["type"], Q["type"], B["type"], import("hapi").Util.HTTP_METHODS_PARTIAL_LOWERCASE>;
+    static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<P["type"], Q["type"], B["type"], any>;
     readonly headers: Headers;
     // (undocumented)
     readonly params: Params;
