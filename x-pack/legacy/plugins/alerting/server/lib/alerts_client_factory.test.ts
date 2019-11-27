@@ -115,3 +115,17 @@ test('createAPIKey() returns an API key when security is enabled', async () => {
   const createAPIKeyResult = await constructorCall.createAPIKey();
   expect(createAPIKeyResult).toEqual({ created: true, result: { api_key: '123', id: 'abc' } });
 });
+
+test('createAPIKey() throws when security plugin createAPIKey throws an error', async () => {
+  const factory = new AlertsClientFactory({
+    ...alertsClientFactoryParams,
+    securityPluginSetup: securityPluginSetup as any,
+  });
+  factory.create(KibanaRequest.from(fakeRequest), fakeRequest);
+  const constructorCall = jest.requireMock('../alerts_client').AlertsClient.mock.calls[0][0];
+
+  securityPluginSetup.authc.createAPIKey.mockRejectedValueOnce(new Error('TLS disabled'));
+  await expect(constructorCall.createAPIKey()).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"TLS disabled"`
+  );
+});
