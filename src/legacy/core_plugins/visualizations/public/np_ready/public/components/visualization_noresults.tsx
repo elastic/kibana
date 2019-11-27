@@ -19,30 +19,28 @@
 
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
-import { SearchError } from '../../courier';
-import { dispatchRenderComplete } from '../../../../../plugins/kibana_utils/public';
 
-interface VisualizationRequestErrorProps {
+interface VisualizationNoResultsProps {
   onInit?: () => void;
-  error: SearchError | string;
 }
 
-export class VisualizationRequestError extends React.Component<VisualizationRequestErrorProps> {
+export class VisualizationNoResults extends React.Component<VisualizationNoResultsProps> {
   private containerDiv = React.createRef<HTMLDivElement>();
 
   public render() {
-    const { error } = this.props;
-    const errorMessage = typeof error === 'string' ? error : error.message;
-
     return (
       <div className="visError" ref={this.containerDiv}>
-        <EuiText size="xs" color="subdued">
-          <EuiIcon type="alert" size="m" color="danger" aria-hidden="true" />
+        <div className="item top" />
+        <div className="item">
+          <EuiText size="xs" color="subdued">
+            <EuiIcon type="visualizeApp" size="m" color="subdued" aria-hidden="true" />
 
-          <EuiSpacer size="s" />
+            <EuiSpacer size="s" />
 
-          {errorMessage}
-        </EuiText>
+            <p>No results found</p>
+          </EuiText>
+        </div>
+        <div className="item bottom" />
       </div>
     );
   }
@@ -58,9 +56,6 @@ export class VisualizationRequestError extends React.Component<VisualizationRequ
   private afterRender() {
     if (this.props.onInit) {
       this.props.onInit();
-    }
-    if (this.containerDiv.current) {
-      dispatchRenderComplete(this.containerDiv.current);
     }
   }
 }

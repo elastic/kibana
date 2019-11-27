@@ -17,9 +17,30 @@
  * under the License.
  */
 
-import { Status } from '../update_status';
-import { Vis } from '..';
-export { VisType } from '../../../../core_plugins/visualizations/public';
+import { VisType } from './types';
+import { AggConfigs } from '../../legacy_imports';
+import { Status } from './legacy/update_status';
+
+export interface Vis {
+  type: VisType;
+
+  // Since we haven't typed everything here yet, we basically "any" the rest
+  // of that interface. This should be removed as soon as this type definition
+  // has been completed. But that way we at least have typing for a couple of
+  // properties on that type.
+  [key: string]: any;
+}
+
+export interface VisParams {
+  [key: string]: any;
+}
+
+export interface VisState {
+  title: string;
+  type: VisType;
+  params: VisParams;
+  aggs: AggConfigs;
+}
 
 export declare class VisualizationController {
   constructor(element: HTMLElement, vis: Vis);

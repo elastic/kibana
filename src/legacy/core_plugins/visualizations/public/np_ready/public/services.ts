@@ -17,4 +17,14 @@
  * under the License.
  */
 
-export { VisFiltersProvider, createFilter, createFiltersFromEvent, onBrushEvent } from './vis_filters';
+import { I18nStart, UiSettingsClientContract } from 'src/core/public';
+import { TypesStart } from './types';
+import { createGetterSetter } from '../../../../../../plugins/kibana_utils/public';
+
+export const [getUISettings, setUISettings] = createGetterSetter<UiSettingsClientContract>(
+  'UISettings'
+);
+
+export const [getTypes, setTypes] = createGetterSetter<TypesStart>('Types');
+
+export const [getI18n, setI18n] = createGetterSetter<I18nStart>('I18n');

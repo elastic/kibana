@@ -17,12 +17,4 @@
  * under the License.
  */
 
-import { chromeServiceMock } from '../../../../../core/public/mocks';
-
-jest.doMock('ui/new_platform', () => ({
-  npStart: {
-    core: {
-      chrome: chromeServiceMock.createStartContract(),
-    },
-  },
-}));
+export { searchSourceMock } from '../../../ui/public/courier/search_source/mocks';
