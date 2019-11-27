@@ -1,17 +1,9 @@
-.dshExitFullScreenButton {
-  text-align: center;
-  width: 100%;
-  height: 0;
-  bottom: 0;
-  position: absolute;
-}
-
 /**
  * 1. override the z-index: 1 applied to all non-eui elements that are in :focus via kui
  *      - see packages/kbn-ui-framework/src/global_styling/reset/_reset.scss
  */
 
-.dshExitFullScreenButton__mode {
+.dshExitFullScreenButton {
   height: $euiSizeXXL;
   left: 0;
   bottom: 0;

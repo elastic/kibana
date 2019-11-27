@@ -51,7 +51,7 @@ class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
             })}
           </p>
         </EuiScreenReaderOnly>
-        <div className="dshExitFullScreenButton">
+        <div>
           <button
             aria-label={i18n.translate(
               'kibana-react.exitFullScreenButton.exitFullScreenModeButtonAriaLabel',
@@ -59,7 +59,7 @@ class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
                 defaultMessage: 'Exit full screen mode',
               }
             )}
-            className="dshExitFullScreenButton__mode"
+            className="dshExitFullScreenButton"
             onClick={this.props.onExitFullScreenMode}
           >
             <span

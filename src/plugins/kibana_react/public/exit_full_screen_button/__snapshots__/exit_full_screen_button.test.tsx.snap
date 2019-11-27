@@ -13,12 +13,10 @@ exports[`is rendered 1`] = `
         In full screen mode, press ESC to exit.
       </p>
     </EuiScreenReaderOnly>
-    <div
-      className="dshExitFullScreenButton"
-    >
+    <div>
       <button
         aria-label="Exit full screen mode"
-        className="dshExitFullScreenButton__mode"
+        className="dshExitFullScreenButton"
         onClick={[Function]}
       >
         <span

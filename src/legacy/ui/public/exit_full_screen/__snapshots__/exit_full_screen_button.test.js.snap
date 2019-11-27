@@ -8,12 +8,10 @@ exports[`is rendered 1`] = `
   >
     In full screen mode, press ESC to exit.
   </p>
-  <div
-    class="dshExitFullScreenButton"
-  >
+  <div>
     <button
       aria-label="Exit full screen mode"
-      class="dshExitFullScreenButton__mode"
+      class="dshExitFullScreenButton"
     >
       <span
         class="dshExitFullScreenButton__logo"
