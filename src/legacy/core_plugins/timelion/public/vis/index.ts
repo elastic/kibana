@@ -18,8 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DefaultEditorSize } from 'ui/vis/editor_size';
-import { visFactory } from '../../../visualizations/public';
+import { DefaultEditorSize } from '../../../visualizations/public';
 import { getTimelionRequestHandler } from './timelion_request_handler';
 import visConfigTemplate from './timelion_vis.html';
 import editorConfigTemplate from './timelion_vis_params.html';
@@ -34,7 +33,7 @@ export function getTimelionVisualization(dependencies: TimelionVisualizationDepe
 
   // return the visType object, which kibana will use to display and configure new
   // Vis object of this type.
-  return visFactory.createBaseVisualization({
+  return {
     name: TIMELION_VIS_NAME,
     title: 'Timelion',
     icon: 'visTimelion',
@@ -60,5 +59,5 @@ export function getTimelionVisualization(dependencies: TimelionVisualizationDepe
       showQueryBar: false,
       showFilterBar: false,
     },
-  });
+  };
 }

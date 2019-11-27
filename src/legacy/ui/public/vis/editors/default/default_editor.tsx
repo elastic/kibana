@@ -18,7 +18,6 @@
  */
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { getInitialWidth } from 'ui/vis/editor_size';
 
 import { start as embeddables } from '../../../../../core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { VisualizeEmbeddable } from '../../../../../core_plugins/kibana/public/visualize/embeddable';
@@ -28,6 +27,7 @@ import {
   PanelsContainer,
   Panel,
 } from '../../../../../core_plugins/console/np_ready/public/application/components/split_panel';
+import { getInitialWidth } from '../../../../../core_plugins/visualizations/public';
 
 import './vis_type_agg_filter';
 import { DefaultEditorSideBar } from './components/sidebar';
