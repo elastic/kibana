@@ -8,6 +8,7 @@ import Boom from 'boom';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
+import { get } from 'lodash';
 
 import { throwErrors } from '../../../common/runtime_types';
 
@@ -18,31 +19,49 @@ import {
   logsEntriesResponseRT,
 } from '../../../common/http_api/logs';
 
-export const initLogsEntriesRoute = ({ framework }: InfraBackendLibs) => {
+export const initLogsEntriesRoute = ({ sources, framework }: InfraBackendLibs) => {
   framework.registerRoute({
     method: 'POST',
     path: LOGS_ENTRIES_PATH,
     handler: async (req, res) => {
+      // const space = framework.getSpaceId(req);
+      // FIXME -> Shouldn't this be the active space?
+      const source = await sources.getSourceConfiguration(req, 'default');
       const payload = pipe(
         logsEntriesRequestRT.decode(req.payload),
         fold(throwErrors(Boom.badRequest), identity)
       );
 
+      const timestampField = source.configuration.fields.timestamp;
+      const tiebreakerField = source.configuration.fields.tiebreaker;
+      const columns: string[] = source.configuration.logColumns.map((column): string => {
+        if ('timestampColumn' in column) {
+          return timestampField;
+        }
+        if ('messageColumn' in column) {
+          return 'message';
+        }
+        if ('fieldColumn' in column) {
+          return column.fieldColumn.field;
+        }
+        throw new Error('Unrecognised column type');
+      });
+
       const { startDate, endDate } = payload;
 
       const query = await framework.callWithRequest(req, 'search', {
-        index: 'filebeat-*',
+        index: source.configuration.logAlias,
         body: {
           size: 500,
           query: {
             range: {
-              '@timestamp': {
+              [timestampField]: {
                 lte: endDate,
                 gte: startDate,
               },
             },
           },
-          sort: [{ '@timestamp': 'asc' }, { _doc: 'asc' }],
+          sort: [{ [timestampField]: 'asc' }, { [tiebreakerField]: 'asc' }],
         },
       });
 
@@ -50,15 +69,17 @@ export const initLogsEntriesRoute = ({ framework }: InfraBackendLibs) => {
         logsEntriesResponseRT.encode({
           // @ts-ignore FIXME type the search query
           entries: query.hits.hits.map(hit => {
+            // FIXME treat "message" column as a special case
+            const columnValues = columns.reduce<Record<string, string>>((values, column) => {
+              // @ts-ignore
+              values[column] = get(hit._source, column);
+              return values;
+            }, {});
+
             return {
               // @ts-ignore
               id: hit._id,
-              // @ts-ignore
-              message: hit._source.message,
-              // @ts-ignore
-              timestamp: hit._source['@timestamp'],
-              // @ts-ignore
-              'event.dataset': hit._source.event?.dataset,
+              ...columnValues,
             };
           }),
         })
