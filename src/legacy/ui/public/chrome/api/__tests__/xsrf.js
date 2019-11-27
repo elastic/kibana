@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 import sinon from 'sinon';
 
 import { initChromeXsrfApi } from '../xsrf';
-import { version } from '../../../../../utils/package_json';
+import { version } from '../../../../../../core/utils/package_json';
 
 describe('chrome xsrf apis', function () {
   const sandbox = sinon.createSandbox();

@@ -23,7 +23,7 @@ import sinon from 'sinon';
 import ngMock from 'ng_mock';
 
 import { $setupXsrfRequestInterceptor } from '../angular_config';
-import { version } from '../../../../utils/package_json';
+import { version } from '../../../../../core/utils/package_json';
 
 const xsrfHeader = 'kbn-version';
 const newPlatform = {

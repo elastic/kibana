@@ -23,7 +23,7 @@ import _ from 'lodash';
 
 import testSubjSelector from '@kbn/test-subj-selector';
 
-import { pkg } from 'src/core/utils';
+import { pkg } from '../../../../src/core/utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 // @ts-ignore internal js that is passed to the browser as is
