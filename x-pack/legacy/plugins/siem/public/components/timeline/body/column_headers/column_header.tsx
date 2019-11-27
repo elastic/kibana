@@ -11,7 +11,7 @@ import { DragEffects } from '../../../drag_and_drop/draggable_wrapper';
 import { getDraggableFieldId, DRAG_TYPE_FIELD } from '../../../drag_and_drop/helpers';
 import { DraggableFieldBadge } from '../../../draggables/field_badge';
 import { OnColumnRemoved, OnColumnSorted, OnFilterChange, OnColumnResized } from '../../events';
-import { EventsTh, EventsThContent } from '../../styles';
+import { EventsTh, EventsThContent, EventsHeadingHandle } from '../../styles';
 import { Sort } from '../sort';
 
 import { Header } from './header';
@@ -60,6 +60,9 @@ export const ColumnHeader = React.memo<ColumneHeaderProps>(
       size={{
         width: header.width,
         height: 'auto',
+      }}
+      handleComponent={{
+        right: <EventsHeadingHandle />,
       }}
       minWidth={180}
       onResizeStop={(e, direction, ref, delta) => {

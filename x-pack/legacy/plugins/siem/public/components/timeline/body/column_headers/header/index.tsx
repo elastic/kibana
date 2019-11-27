@@ -8,7 +8,6 @@ import { noop } from 'lodash/fp';
 import React from 'react';
 
 import { OnColumnRemoved, OnColumnSorted, OnFilterChange } from '../../../events';
-import { EventsHeadingHandle } from '../../../styles';
 import { Sort } from '../../sort';
 import { Actions } from '../actions';
 import { ColumnHeader } from '../column_header';
