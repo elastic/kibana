@@ -7,7 +7,8 @@
 import React, { useCallback, useState, Fragment } from 'react';
 import createContainer from 'constate';
 import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
-import { useCore, useLinks } from '.';
+import { NotificationsStart } from 'src/core/public';
+import { useLinks } from '.';
 import { installPackage as fetchInstallPackage } from '../data';
 import { InstallStatus } from '../types';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
@@ -18,9 +19,8 @@ interface PackagesInstall {
 interface PackageInstallItem {
   status: InstallStatus;
 }
-function usePackageInstall() {
+function usePackageInstall({ notifications }: { notifications: NotificationsStart }) {
   const [packages, setPackage] = useState<PackagesInstall>({});
-  const { notifications } = useCore();
   const { toDetailView } = useLinks();
 
   const setPackageInstallStatus = useCallback(

@@ -48,12 +48,11 @@ export class Plugin {
 }
 
 function App(props: { core: PluginCore }) {
-  const { i18n, routes } = props.core;
-
+  const { i18n, routes, notifications } = props.core;
   return (
     <EuiErrorBoundary>
       <CoreProvider core={props.core}>
-        <PackageInstallProvider>
+        <PackageInstallProvider notifications={notifications}>
           <i18n.Context>
             <ThemeProvider theme={props.core.theme}>
               <HashRouter>
