@@ -59,7 +59,7 @@ const services = {
   embeddable: npStart.plugins.embeddable,
   npData: npStart.plugins.data,
   share: npStart.plugins.share,
-  timefilter: npStart.plugins.data.query.timefilter,
+  timefilter: npStart.plugins.data.query.timefilter.timefilter,
   // legacy
   docTitle,
   docViewsRegistry,
