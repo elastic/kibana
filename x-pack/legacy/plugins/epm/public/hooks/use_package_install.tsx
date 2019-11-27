@@ -15,9 +15,11 @@ import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public'
 interface PackagesInstall {
   [key: string]: PackageInstallItem;
 }
+
 interface PackageInstallItem {
   status: InstallStatus;
 }
+
 function usePackageInstall({ notifications }: { notifications: NotificationsStart }) {
   const [packages, setPackage] = useState<PackagesInstall>({});
 
