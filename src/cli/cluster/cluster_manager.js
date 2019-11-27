@@ -167,7 +167,7 @@ export default class ClusterManager {
 
   setupWatching(extraPaths, pluginInternalDirsIgnore) {
     const chokidar = require('chokidar');
-    const { fromRoot } = require('../../legacy/utils');
+    const { fromRoot } = require('../../core/utils');
 
     const watchPaths = [
       fromRoot('src/core'),

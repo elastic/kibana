@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { IS_KIBANA_DISTRIBUTABLE, fromRoot } from '../../utils';
+import { IS_KIBANA_DISTRIBUTABLE } from '../../utils';
+import { fromRoot } from '../../../core/utils';
 
 export async function sassMixin(kbnServer, server, config) {
   if (process.env.kbnWorkerType === 'optmzr') {

@@ -17,21 +17,24 @@
  * under the License.
  */
 
+import { duration } from 'moment';
+import { BehaviorSubject } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { createPluginInitializerContext } from './plugin_context';
 import { CoreContext } from '../core_context';
-import { Env } from '../config';
-import { configServiceMock } from '../config/config_service.mock';
+import { Env, ObjectToConfigAdapter } from '../config';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { PluginManifest } from './types';
-import { first } from 'rxjs/operators';
+import { Server } from '../server';
+import { fromRoot } from '../../utils';
 
 const logger = loggingServiceMock.create();
-const configService = configServiceMock.create({ getConfig$: { globalConfig: { subpath: 1 } } });
 
 let coreId: symbol;
 let env: Env;
 let coreContext: CoreContext;
+let server: Server;
 
 function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): PluginManifest {
   return {
@@ -47,10 +50,13 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
   };
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   coreId = Symbol('core');
   env = Env.createDefault(getEnvOptions());
-  coreContext = { coreId, env, logger, configService };
+  const config$ = new BehaviorSubject(new ObjectToConfigAdapter({}));
+  server = new Server(config$, env, logger);
+  await server.setupConfigSchemas();
+  coreContext = { coreId, env, logger, configService: server.configService };
 });
 
 test('should return a globalConfig handler in the context (to be deprecated)', async () => {
@@ -63,10 +69,14 @@ test('should return a globalConfig handler in the context (to be deprecated)', a
   const configObject = await pluginInitializerContext.config.globalConfig__deprecated$
     .pipe(first())
     .toPromise();
-
-  const configPaths = configObject.getFlattenedPaths();
-  expect(configPaths).toHaveLength(1);
-  expect(configPaths).toStrictEqual(['globalConfig.subpath']);
-  expect(configObject.has('globalConfig.subpath')).toBe(true);
-  expect(configObject.get('globalConfig.subpath')).toBe(1);
+  expect(configObject).toStrictEqual({
+    kibana: { defaultAppId: 'home', index: '.kibana' },
+    elasticsearch: {
+      shardTimeout: duration(30, 's'),
+      requestTimeout: duration(30, 's'),
+      pingTimeout: duration(30, 's'),
+      startupTimeout: duration(5, 's'),
+    },
+    path: { data: fromRoot('data') },
+  });
 });

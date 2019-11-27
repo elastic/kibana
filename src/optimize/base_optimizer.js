@@ -31,7 +31,8 @@ import WrapperPlugin from 'wrapper-webpack-plugin';
 
 import { defaults } from 'lodash';
 
-import { IS_KIBANA_DISTRIBUTABLE, fromRoot } from '../legacy/utils';
+import { IS_KIBANA_DISTRIBUTABLE } from '../legacy/utils';
+import { fromRoot } from '../core/utils';
 
 import { PUBLIC_PATH_PLACEHOLDER } from './public_path_placeholder';
 

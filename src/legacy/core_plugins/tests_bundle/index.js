@@ -23,7 +23,7 @@ import globby from 'globby';
 import MultiStream from 'multistream';
 import webpackMerge from 'webpack-merge';
 
-import { fromRoot } from '../../../legacy/utils';
+import { fromRoot } from '../../../core/utils';
 import { replacePlaceholder } from '../../../optimize/public_path_placeholder';
 import findSourceFiles from './find_source_files';
 import { createTestEntryTemplate } from './tests_entry_template';

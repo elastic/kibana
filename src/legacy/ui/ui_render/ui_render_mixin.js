@@ -26,7 +26,7 @@ import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { AppBootstrap } from './bootstrap';
 import { mergeVariables } from './lib';
-import { fromRoot } from '../../utils';
+import { fromRoot } from '../../../core/utils';
 import { createCSPRuleString } from '../../server/csp';
 
 export function uiRenderMixin(kbnServer, server, config) {

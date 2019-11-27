@@ -19,7 +19,7 @@
 
 import { configModel } from './dll_config_model';
 import { notInNodeModulesOrWebpackShims, notInNodeModules, inDllPluginPublic } from './dll_allowed_modules';
-import { fromRoot } from '../../legacy/utils';
+import { fromRoot } from '../../core/utils';
 import { PUBLIC_PATH_PLACEHOLDER } from '../public_path_placeholder';
 import fs from 'fs';
 import webpack from 'webpack';

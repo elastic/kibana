@@ -18,11 +18,24 @@
  */
 
 import { map } from 'rxjs/operators';
+import { zip } from 'rxjs';
 import { CoreContext } from '../core_context';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
-import { PluginInitializerContext, PluginManifest, PluginOpaqueId } from './types';
-import { CoreSetup, CoreStart, ConfigPath } from '..';
+import {
+  PluginInitializerContext,
+  PluginManifest,
+  PluginOpaqueId,
+  SharedGlobalConfigKeys,
+} from './types';
+import { PathConfigType, config as pathConfig } from '../path';
+import { KibanaConfigType, config as kibanaConfig } from '../kibana_config';
+import {
+  ElasticsearchConfigType,
+  config as elasticsearchConfig,
+} from '../elasticsearch/elasticsearch_config';
+import { pick } from '../../utils';
+import { CoreSetup, CoreStart } from '..';
 
 /**
  * This returns a facade for `CoreContext` that will be exposed to the plugin initializer.
@@ -71,11 +84,15 @@ export function createPluginInitializerContext(
        * Note: naming not final here, it will be renamed in a near future (https://github.com/elastic/kibana/issues/46240)
        * @deprecated
        */
-      globalConfig__deprecated$: coreContext.configService.getConfig$().pipe(
-        map(conf => ({
-          has: (configPath: ConfigPath) => conf.has(configPath),
-          get: (configPath: ConfigPath) => conf.get(configPath),
-          getFlattenedPaths: () => conf.getFlattenedPaths(),
+      globalConfig__deprecated$: zip(
+        coreContext.configService.atPath<KibanaConfigType>(kibanaConfig.path),
+        coreContext.configService.atPath<ElasticsearchConfigType>(elasticsearchConfig.path),
+        coreContext.configService.atPath<PathConfigType>(pathConfig.path)
+      ).pipe(
+        map(([kibana, elasticsearch, path]) => ({
+          kibana: pick(kibana, SharedGlobalConfigKeys.kibana),
+          elasticsearch: pick(elasticsearch, SharedGlobalConfigKeys.elasticsearch),
+          path: pick(path, SharedGlobalConfigKeys.path),
         }))
       ),
 
@@ -95,8 +112,6 @@ export function createPluginInitializerContext(
     },
   };
 }
-
-// function exposeReadOnlyMethods(conf: )
 
 /**
  * This returns a facade for `CoreContext` that will be exposed to the plugin `setup` method.

@@ -17,17 +17,17 @@
  * under the License.
  */
 
-import { getConfig, getData } from './';
-import { accessSync, R_OK } from 'fs';
+import { getConfigPath, getDataPath } from './path';
+import { accessSync, constants } from 'fs';
 
-describe('Default path finder', function () {
+describe('Default path finder', () => {
   it('should find a kibana.yml', () => {
-    const configPath = getConfig();
-    expect(() => accessSync(configPath, R_OK)).not.toThrow();
+    const configPath = getConfigPath();
+    expect(() => accessSync(configPath, constants.R_OK)).not.toThrow();
   });
 
   it('should find a data directory', () => {
-    const dataPath = getData();
-    expect(() => accessSync(dataPath, R_OK)).not.toThrow();
+    const dataPath = getDataPath();
+    expect(() => accessSync(dataPath, constants.R_OK)).not.toThrow();
   });
 });
