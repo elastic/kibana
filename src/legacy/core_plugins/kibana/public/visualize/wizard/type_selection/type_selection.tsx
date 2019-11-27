@@ -34,7 +34,8 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { memoizeLast, VisType } from '../../legacy_imports';
+import { VisType } from '../../legacy_imports';
+import { memoizeLast } from '../../../../../visualizations/public/np_ready/public/legacy/memoize';
 import { VisTypeAlias } from '../../../../../visualizations/public';
 import { NewVisHelp } from './new_vis_help';
 import { VisHelpText } from './vis_help_text';

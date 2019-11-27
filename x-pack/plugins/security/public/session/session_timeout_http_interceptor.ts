@@ -24,7 +24,7 @@ export class SessionTimeoutHttpInterceptor implements HttpInterceptor {
       return;
     }
 
-    this.sessionTimeout.extend();
+    this.sessionTimeout.extend(httpResponse.request.url);
   }
 
   responseError(httpErrorResponse: HttpErrorResponse) {
@@ -45,6 +45,6 @@ export class SessionTimeoutHttpInterceptor implements HttpInterceptor {
       return;
     }
 
-    this.sessionTimeout.extend();
+    this.sessionTimeout.extend(httpErrorResponse.request.url);
   }
 }

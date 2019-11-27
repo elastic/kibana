@@ -72,5 +72,4 @@ export { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 // @ts-ignore
 export { defaultEditor } from 'ui/vis/editors/default/default';
 export { VisType } from 'ui/vis';
-export { memoizeLast } from 'ui/utils/memoize';
 export { wrapInI18nContext } from 'ui/i18n';
