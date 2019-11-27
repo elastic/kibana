@@ -8,8 +8,7 @@ import React, { useCallback, useState, Fragment } from 'react';
 import createContainer from 'constate';
 import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { NotificationsStart } from 'src/core/public';
-import { useLinks } from '.';
-import { installPackage as fetchInstallPackage } from '../data';
+import { installPackage as fetchInstallPackage, installDatasource } from '../data';
 import { InstallStatus } from '../types';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 
@@ -21,7 +20,6 @@ interface PackageInstallItem {
 }
 function usePackageInstall({ notifications }: { notifications: NotificationsStart }) {
   const [packages, setPackage] = useState<PackagesInstall>({});
-  const { toDetailView } = useLinks();
 
   const setPackageInstallStatus = useCallback(
     ({ name, status }: { name: string; status: InstallStatus }) => {
@@ -37,16 +35,17 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
     async ({ name, version, title }: { name: string; version: string; title: string }) => {
       setPackageInstallStatus({ name, status: InstallStatus.installing });
       const pkgkey = `${name}-${version}`;
+
       try {
         await fetchInstallPackage(pkgkey);
         setPackageInstallStatus({ name, status: InstallStatus.installed });
-        const packageDataSourceUrl = toDetailView({ name, version, panel: 'data-sources' });
+
         const SuccessMsg = (
           <Fragment>
             <p>Next, create a data source to begin sending data to your Elasticsearch cluster.</p>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiButton href={packageDataSourceUrl} size="s">
+                <EuiButton onClick={() => installDatasource(pkgkey)} size="s">
                   Add data source
                 </EuiButton>
               </EuiFlexItem>
@@ -68,7 +67,7 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
         });
       }
     },
-    [notifications.toasts, setPackageInstallStatus, toDetailView]
+    [notifications.toasts, setPackageInstallStatus]
   );
 
   const getPackageInstallStatus = useCallback(

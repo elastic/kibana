@@ -48,7 +48,7 @@ export const routes: ServerRoute[] = [
   },
   {
     method: 'GET',
-    path: `${CommonRoutes.API_ROOT}/datasource/install/{pkgkey}`,
+    path: CommonRoutes.API_INSTALL_DATASOURCE_PATTERN,
     options: { tags: [`access:${PLUGIN.ID}`], json: { space: 2 } },
     handler: Packages.handleRequestInstallDatasource,
   },
