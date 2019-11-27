@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { combineReducers } from 'redux';
-import { uiReducer } from './ui';
-import { monitorReducer } from './monitor';
+import { fork } from 'redux-saga/effects';
+import { fetchMonitorDetailsEffect } from './monitor';
 
-export const rootReducer = combineReducers({
-  ui: uiReducer,
-  monitor: monitorReducer,
-});
+export function* rootEffect() {
+  yield fork(fetchMonitorDetailsEffect);
+}
