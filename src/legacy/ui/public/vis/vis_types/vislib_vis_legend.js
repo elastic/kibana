@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import html from './vislib_vis_legend.html';
 import { Data } from '../../vislib/lib/data';
 import { uiModules } from '../../modules';
-import { createFiltersFromEvent } from '../vis_filters';
+import { createFiltersFromEvent } from '../../../../core_plugins/visualizations/public';
 import { htmlIdGenerator, keyCodes } from '@elastic/eui';
 import { getTableAggs } from '../../visualize/loader/pipeline_helpers/utilities';
 

@@ -5,7 +5,7 @@
  */
 
 import { AlertServices } from '../../../../../alerting/server/types';
-import { SignalAlertParams, PartialFilter } from './types';
+import { RuleAlertParams, PartialFilter } from './types';
 import { assertUnreachable } from '../../../utils/build_query';
 import {
   Query,
@@ -41,7 +41,7 @@ export const getQueryFilter = (
 };
 
 interface GetFilterArgs {
-  type: SignalAlertParams['type'];
+  type: RuleAlertParams['type'];
   filter: Record<string, {}> | undefined | null;
   filters: PartialFilter[] | undefined | null;
   language: string | undefined | null;
@@ -71,13 +71,26 @@ export const getFilter = async ({
     }
     case 'saved_query': {
       if (savedId != null && index != null) {
-        const savedObject = await services.savedObjectsClient.get('query', savedId);
-        return getQueryFilter(
-          savedObject.attributes.query.query,
-          savedObject.attributes.query.language,
-          savedObject.attributes.filters,
-          index
-        );
+        try {
+          // try to get the saved object first
+          const savedObject = await services.savedObjectsClient.get('query', savedId);
+          return getQueryFilter(
+            savedObject.attributes.query.query,
+            savedObject.attributes.query.language,
+            savedObject.attributes.filters,
+            index
+          );
+        } catch (err) {
+          // saved object does not exist, so try and fall back if the user pushed
+          // any additional language, query, filters, etc...
+          if (query != null && language != null && index != null) {
+            return getQueryFilter(query, language, filters || [], index);
+          } else {
+            // user did not give any additional fall back mechanism for generating a rule
+            // rethrow error for activity monitoring
+            throw err;
+          }
+        }
       } else {
         throw new TypeError('savedId parameter should be defined');
       }

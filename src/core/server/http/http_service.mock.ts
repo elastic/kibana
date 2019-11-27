@@ -45,6 +45,7 @@ const createRouterMock = (): jest.Mocked<IRouter> => ({
   put: jest.fn(),
   delete: jest.fn(),
   getRoutes: jest.fn(),
+  handleLegacyErrors: jest.fn().mockImplementation(handler => handler),
 });
 
 const createSetupContractMock = () => {

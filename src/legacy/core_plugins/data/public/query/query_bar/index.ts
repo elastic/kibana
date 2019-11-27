@@ -18,4 +18,4 @@
  */
 
 export { QueryBarTopRow } from './components/query_bar_top_row';
-export { QueryBarInput } from './components/query_bar_input';
+export { QueryStringInput } from './components/query_string_input';

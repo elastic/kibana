@@ -25,6 +25,18 @@ type KeyHostsNavTab = KeyHostsNavTabWithoutMlPermission | KeyHostsNavTabWithMlPe
 
 export type HostsNavTab = Record<KeyHostsNavTab, NavTab>;
 
+export type SetQuery = ({
+  id,
+  inspect,
+  loading,
+  refetch,
+}: {
+  id: string;
+  inspect: InspectQuery | null;
+  loading: boolean;
+  refetch: Refetch;
+}) => void;
+
 interface QueryTabBodyProps {
   type: hostsModel.HostsType;
   startDate: number;
@@ -32,30 +44,13 @@ interface QueryTabBodyProps {
   filterQuery?: string | ESTermQuery;
 }
 
-export type AnomaliesQueryTabBodyProps = QueryTabBodyProps & {
-  skip: boolean;
-  narrowDateRange: NarrowDateRange;
-  hostName?: string;
-};
-
 export type HostsComponentsQueryProps = QueryTabBodyProps & {
   deleteQuery?: ({ id }: { id: string }) => void;
   indexPattern: StaticIndexPattern;
   skip: boolean;
-  setQuery: ({
-    id,
-    inspect,
-    loading,
-    refetch,
-  }: {
-    id: string;
-    inspect: InspectQuery | null;
-    loading: boolean;
-    refetch: Refetch;
-  }) => void;
+  setQuery: SetQuery;
   updateDateRange?: UpdateDateRange;
   narrowDateRange?: NarrowDateRange;
 };
 
 export type CommonChildren = (args: HostsComponentsQueryProps) => JSX.Element;
-export type AnomaliesChildren = (args: AnomaliesQueryTabBodyProps) => JSX.Element;
