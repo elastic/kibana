@@ -5,7 +5,6 @@
  */
 import { i18n } from '@kbn/i18n';
 import { APP_ID, APP_ICON, createMapPath, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
-import { watchStatusAndLicenseToInitialize } from '../../../server/lib/watch_status_and_license_to_initialize';
 import { initRoutes } from './routes';
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
 import { getFlightsSavedObjects } from './sample_data/flights_saved_objects.js';
@@ -15,9 +14,10 @@ import { checkLicense } from '../check_license';
 export class MapPlugin {
   setup(core, plugins, __LEGACY) {
     const { xpackMainPlugin } = __LEGACY.plugins;
+    const { featuresPlugin, licensing } = plugins;
     let routesInitialized = false;
 
-    xpackMainPlugin.registerFeature({
+    featuresPlugin.registerFeature({
       id: APP_ID,
       name: i18n.translate('xpack.maps.featureRegistry.mapsFeatureName', {
         defaultMessage: 'Maps',
@@ -44,17 +44,16 @@ export class MapPlugin {
       }
     });
 
-
-    watchStatusAndLicenseToInitialize(xpackMainPlugin, __LEGACY.pluginRef,
-      async license => {
-        if (license && license.maps && !routesInitialized) {
-          routesInitialized = true;
-          initRoutes(__LEGACY, license.uid);
-        }
-      });
+    licensing.license$.subscribe(license => {
+      const mapsFeature = license.getFeature('spatial');
+      if (!routesInitialized && mapsFeature.isEnabled) {
+        routesInitialized = true;
+        initRoutes(__LEGACY, license.uid);
+      }
+    });
 
     xpackMainPlugin.info
-      .feature(this.id)
+      .feature(APP_ID)
       .registerLicenseCheckResultsGenerator(checkLicense);
 
     const sampleDataLinkLabel = i18n.translate('xpack.maps.sampleDataLinkLabel', {

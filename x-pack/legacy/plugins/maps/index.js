@@ -102,7 +102,11 @@ export function maps(kibana) {
       }
 
       const coreSetup = server.newPlatform.setup.core;
-      const pluginsSetup = {};
+      const newPlatformPlugins = server.newPlatform.setup.plugins;
+      const pluginsSetup = {
+        featuresPlugin: newPlatformPlugins.features,
+        licensing: newPlatformPlugins.licensing,
+      };
 
       // legacy dependencies
       const __LEGACY = {
