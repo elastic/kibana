@@ -7,7 +7,7 @@
 import { SavedObjectsClientContract } from 'src/core/server/';
 import { SAVED_OBJECT_TYPE } from '../../common/constants';
 import { getInstallationObject, savedObjectTypes, CallESAsCurrentUser } from './index';
-import { AssetReference, AssetType } from '../../common/types';
+import { AssetReference, AssetType, ElasticsearchAssetType } from '../../common/types';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -27,7 +27,7 @@ export async function removeInstallation(options: {
     const assetType = type as AssetType;
     if (savedObjectTypes.includes(assetType)) {
       savedObjectsClient.delete(assetType, id);
-    } else if (assetType === 'ingest-pipeline') {
+    } else if (assetType === ElasticsearchAssetType.ingestPipeline) {
       deletePipeline(callCluster, id);
     }
   });

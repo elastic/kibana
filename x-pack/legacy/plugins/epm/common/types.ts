@@ -71,6 +71,7 @@ export interface CategorySummaryItem {
 export type RequirementsByServiceName = Record<ServiceName, ServiceRequirements>;
 export interface AssetParts {
   pkgkey: string;
+  dataset?: string;
   service: ServiceName;
   type: AssetType;
   file: string;

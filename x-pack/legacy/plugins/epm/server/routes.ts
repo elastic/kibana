@@ -46,4 +46,10 @@ export const routes: ServerRoute[] = [
     options: { tags: [`access:${PLUGIN.ID}`], json: { space: 2 } },
     handler: Packages.handleRequestDelete,
   },
+  {
+    method: 'GET',
+    path: `${CommonRoutes.API_ROOT}/datasource/install/{pkgkey}`,
+    options: { tags: [`access:${PLUGIN.ID}`], json: { space: 2 } },
+    handler: Packages.handleRequestInstallDatasource,
+  },
 ];

@@ -14,6 +14,7 @@ import {
   getPackageInfo,
   getPackages,
   installPackage,
+  installDatasource,
   removeInstallation,
 } from './index';
 import { PluginContext } from '../plugin';
@@ -87,4 +88,19 @@ export async function handleRequestDelete(req: InstallDeletePackageRequest, extr
   const savedObjectsClient = getClient(req);
   const callCluster = getClusterAccessor(extra.context.esClient, req);
   return removeInstallation({ savedObjectsClient, pkgkey, callCluster });
+}
+
+//   const pipelineResults = await installPipelines({ pkgkey, callCluster });
+export async function handleRequestInstallDatasource(
+  req: InstallDeletePackageRequest,
+  extra: Extra
+) {
+  const { pkgkey } = req.params;
+  const savedObjectsClient = getClient(req);
+  const callCluster = getClusterAccessor(extra.context.esClient, req);
+  return installDatasource({
+    savedObjectsClient,
+    pkgkey,
+    callCluster,
+  });
 }

@@ -75,10 +75,25 @@ export async function getArchiveInfo(
 }
 
 export function pathParts(path: string): AssetParts {
-  const [pkgkey, service, type, file] = path.split('/');
-  const parts = { pkgkey, service, type, file, path } as AssetParts;
+  let dataset;
+  let [pkgkey, service, type, file] = path.split('/');
 
-  return parts;
+  // if it's a dataset
+  if (service === 'dataset') {
+    // save the dataset name
+    dataset = type;
+    // drop the `dataset/dataset-name` portion & re-parse
+    [pkgkey, service, type, file] = path.replace(`dataset/${dataset}/`, '').split('/');
+  }
+
+  return {
+    pkgkey,
+    service,
+    type,
+    file,
+    dataset,
+    path,
+  } as AssetParts;
 }
 
 async function extract(
