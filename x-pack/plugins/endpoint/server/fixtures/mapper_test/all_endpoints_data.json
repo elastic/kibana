@@ -1,0 +1,340 @@
+{
+  "took" : 10,
+  "timed_out" : false,
+  "_shards" : {
+    "total" : 1,
+    "successful" : 1,
+    "skipped" : 0,
+    "failed" : 0
+  },
+  "hits" : {
+    "total" : {
+      "value" : 6,
+      "relation" : "eq"
+    },
+    "max_score" : null,
+    "hits" : [
+      {
+        "_index" : "endpoint",
+        "_type" : "_doc",
+        "_id" : "5SCueW4BAt2dZTpHTXHP",
+        "_score" : 1.0,
+        "_source" : {
+          "machine_id" : "3f148a0b-a33e-44f2-8834-9ebc1c073507",
+          "created_at" : "2019-11-17T14:04:55.993Z",
+          "host" : {
+            "name" : "bennir-1",
+            "hostname" : "bennir-1.example.com",
+            "ip" : "10.169.244.242",
+            "mac_address" : "59-31-eb-94-7b-80",
+            "os" : {
+              "name" : "windows 10.0",
+              "full" : "Windows 10"
+            }
+          },
+          "endpoint" : {
+            "domain" : "example.com",
+            "is_base_image" : false,
+            "active_directory_distinguished_name" : "CN=bennir-1,DC=example,DC=com",
+            "active_directory_hostname" : "bennir-1.example.com",
+            "upgrade" : {
+              "status" : null,
+              "updated_at" : null
+            },
+            "isolation" : {
+              "status" : false,
+              "request_status" : null,
+              "updated_at" : null
+            },
+            "policy" : {
+              "name" : "With Eventing",
+              "id" : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
+            },
+            "sensor" : {
+              "persistence" : true,
+              "status" : { }
+            }
+          }
+        },
+        "fields" : {
+          "machine_id" : [
+            "3f148a0b-a33e-44f2-8834-9ebc1c073507"
+          ]
+        },
+        "inner_hits" : {
+          "most_recent" : {
+            "hits" : {
+              "total" : {
+                "value" : 2,
+                "relation" : "eq"
+              },
+              "max_score" : null,
+              "hits" : [
+                {
+                  "_index" : "endpoint",
+                  "_type" : "_doc",
+                  "_id" : "5SCueW4BAt2dZTpHTXHP",
+                  "_score" : null,
+                  "_source" : {
+                    "machine_id" : "3f148a0b-a33e-44f2-8834-9ebc1c073507",
+                    "created_at" : "2019-11-17T14:04:55.993Z",
+                    "host" : {
+                      "name" : "bennir-1",
+                      "hostname" : "bennir-1.example.com",
+                      "ip" : "10.169.244.242",
+                      "mac_address" : "59-31-eb-94-7b-80",
+                      "os" : {
+                        "name" : "windows 10.0",
+                        "full" : "Windows 10"
+                      }
+                    },
+                    "endpoint" : {
+                      "domain" : "example.com",
+                      "is_base_image" : false,
+                      "active_directory_distinguished_name" : "CN=bennir-1,DC=example,DC=com",
+                      "active_directory_hostname" : "bennir-1.example.com",
+                      "upgrade" : {
+                        "status" : null,
+                        "updated_at" : null
+                      },
+                      "isolation" : {
+                        "status" : false,
+                        "request_status" : null,
+                        "updated_at" : null
+                      },
+                      "policy" : {
+                        "name" : "With Eventing",
+                        "id" : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
+                      },
+                      "sensor" : {
+                        "persistence" : true,
+                        "status" : { }
+                      }
+                    }
+                  },
+                  "sort" : [
+                    1573999495993
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "_index" : "endpoint",
+        "_type" : "_doc",
+        "_id" : "5yCueW4BAt2dZTpHTXHP",
+        "_score" : 1.0,
+        "_source" : {
+          "machine_id" : "c14a0771-7157-4f79-ac9e-013e6e9d1458",
+          "created_at" : "2019-11-17T14:04:56.022Z",
+          "host" : {
+            "name" : "lan-4",
+            "hostname" : "lan-4.example.com",
+            "ip" : "10.119.56.14",
+            "mac_address" : "df-d3-dd-4d-44-a5",
+            "os" : {
+              "name" : "windows 10.0",
+              "full" : "Windows 10"
+            }
+          },
+          "endpoint" : {
+            "domain" : "example.com",
+            "is_base_image" : false,
+            "active_directory_distinguished_name" : "CN=lan-4,DC=example,DC=com",
+            "active_directory_hostname" : "lan-4.example.com",
+            "upgrade" : {
+              "status" : null,
+              "updated_at" : null
+            },
+            "isolation" : {
+              "status" : false,
+              "request_status" : null,
+              "updated_at" : null
+            },
+            "policy" : {
+              "name" : "Default",
+              "id" : "00000000-0000-0000-0000-000000000000"
+            },
+            "sensor" : {
+              "persistence" : true,
+              "status" : { }
+            }
+          }
+        },
+        "fields" : {
+          "machine_id" : [
+            "c14a0771-7157-4f79-ac9e-013e6e9d1458"
+          ]
+        },
+        "inner_hits" : {
+          "most_recent" : {
+            "hits" : {
+              "total" : {
+                "value" : 2,
+                "relation" : "eq"
+              },
+              "max_score" : null,
+              "hits" : [
+                {
+                  "_index" : "endpoint",
+                  "_type" : "_doc",
+                  "_id" : "5yCueW4BAt2dZTpHTXHP",
+                  "_score" : null,
+                  "_source" : {
+                    "machine_id" : "c14a0771-7157-4f79-ac9e-013e6e9d1458",
+                    "created_at" : "2019-11-17T14:04:56.022Z",
+                    "host" : {
+                      "name" : "lan-4",
+                      "hostname" : "lan-4.example.com",
+                      "ip" : "10.119.56.14",
+                      "mac_address" : "df-d3-dd-4d-44-a5",
+                      "os" : {
+                        "name" : "windows 10.0",
+                        "full" : "Windows 10"
+                      }
+                    },
+                    "endpoint" : {
+                      "domain" : "example.com",
+                      "is_base_image" : false,
+                      "active_directory_distinguished_name" : "CN=lan-4,DC=example,DC=com",
+                      "active_directory_hostname" : "lan-4.example.com",
+                      "upgrade" : {
+                        "status" : null,
+                        "updated_at" : null
+                      },
+                      "isolation" : {
+                        "status" : false,
+                        "request_status" : null,
+                        "updated_at" : null
+                      },
+                      "policy" : {
+                        "name" : "Default",
+                        "id" : "00000000-0000-0000-0000-000000000000"
+                      },
+                      "sensor" : {
+                        "persistence" : true,
+                        "status" : { }
+                      }
+                    }
+                  },
+                  "sort" : [
+                    1573999496022
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "_index" : "endpoint",
+        "_type" : "_doc",
+        "_id" : "6CCueW4BAt2dZTpHTXHP",
+        "_score" : 1.0,
+        "_source" : {
+          "machine_id" : "be3b5b7c-e270-418f-90dd-ec51887c16ff",
+          "created_at" : "2019-11-17T14:04:56.022Z",
+          "host" : {
+            "name" : "tati-0",
+            "hostname" : "tati-0.example.com",
+            "ip" : "10.117.39.14",
+            "mac_address" : "92-43-8f-6c-9b-41",
+            "os" : {
+              "name" : "windows 10.0",
+              "full" : "Windows 10"
+            }
+          },
+          "endpoint" : {
+            "domain" : "example.com",
+            "is_base_image" : false,
+            "active_directory_distinguished_name" : "CN=tati-0,DC=example,DC=com",
+            "active_directory_hostname" : "tati-0.example.com",
+            "upgrade" : {
+              "status" : null,
+              "updated_at" : null
+            },
+            "isolation" : {
+              "status" : false,
+              "request_status" : null,
+              "updated_at" : null
+            },
+            "policy" : {
+              "name" : "With Eventing",
+              "id" : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
+            },
+            "sensor" : {
+              "persistence" : true,
+              "status" : { }
+            }
+          }
+        },
+        "fields" : {
+          "machine_id" : [
+            "be3b5b7c-e270-418f-90dd-ec51887c16ff"
+          ]
+        },
+        "inner_hits" : {
+          "most_recent" : {
+            "hits" : {
+              "total" : {
+                "value" : 2,
+                "relation" : "eq"
+              },
+              "max_score" : null,
+              "hits" : [
+                {
+                  "_index" : "endpoint",
+                  "_type" : "_doc",
+                  "_id" : "6CCueW4BAt2dZTpHTXHP",
+                  "_score" : null,
+                  "_source" : {
+                    "machine_id" : "be3b5b7c-e270-418f-90dd-ec51887c16ff",
+                    "created_at" : "2019-11-17T14:04:56.022Z",
+                    "host" : {
+                      "name" : "tati-0",
+                      "hostname" : "tati-0.example.com",
+                      "ip" : "10.117.39.14",
+                      "mac_address" : "92-43-8f-6c-9b-41",
+                      "os" : {
+                        "name" : "windows 10.0",
+                        "full" : "Windows 10"
+                      }
+                    },
+                    "endpoint" : {
+                      "domain" : "example.com",
+                      "is_base_image" : false,
+                      "active_directory_distinguished_name" : "CN=tati-0,DC=example,DC=com",
+                      "active_directory_hostname" : "tati-0.example.com",
+                      "upgrade" : {
+                        "status" : null,
+                        "updated_at" : null
+                      },
+                      "isolation" : {
+                        "status" : false,
+                        "request_status" : null,
+                        "updated_at" : null
+                      },
+                      "policy" : {
+                        "name" : "With Eventing",
+                        "id" : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
+                      },
+                      "sensor" : {
+                        "persistence" : true,
+                        "status" : { }
+                      }
+                    }
+                  },
+                  "sort" : [
+                    1573999496022
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  }
+}

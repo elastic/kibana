@@ -4,26 +4,69 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreSetup, PluginInitializerContext, LoggerFactory } from 'kibana/server';
+import {
+  CoreSetup,
+  IClusterClient,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+  LoggerFactory,
+} from 'kibana/server';
+import { first } from 'rxjs/operators';
 import { managementRoutes } from './routes/management';
 import { alertsRoutes } from './routes/alerts';
-import { endpointsApi } from './routes/endpoints';
+import { registerEndpointRoutes } from './routes/endpoints';
+import { EndpointHandler, EndpointRequestContext } from './handlers/endpoint_handler';
+import { EndpointAppContext } from './types';
+import { createConfig$, EndpointConfigType } from './config';
 import { addRoutes } from './routes/bootstrap';
 
+declare module 'kibana/server' {
+  interface RequestHandlerContext {
+    endpointPlugin?: EndpointRequestContext;
+  }
+}
+
 export class EndpointPlugin implements Plugin {
-  private readonly factory: LoggerFactory;
+  private readonly logger: Logger;
+  private readonly logFactory: LoggerFactory;
+  private clusterClient?: IClusterClient;
   constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.factory = this.initializerContext.logger;
+    this.logger = this.initializerContext.logger.get();
+    this.logFactory = this.initializerContext.logger;
   }
 
-  public setup(core: CoreSetup, deps: {}) {
+  public async setup(core: CoreSetup, deps: {}) {
+    this.clusterClient = core.elasticsearch.createClient('endpoint-plugin');
+    const endpointHandler: EndpointRequestContext = new EndpointHandler({
+      clusterClient: this.clusterClient,
+      config: (): Promise<EndpointConfigType> => {
+        return this.getConfig();
+      },
+    } as EndpointAppContext);
+    core.http.registerRouteHandlerContext('endpointPlugin', () => endpointHandler);
     const router = core.http.createRouter();
     managementRoutes(router);
     alertsRoutes(router);
-    endpointsApi(router);
-    addRoutes(router, this.factory);
+    registerEndpointRoutes(router, endpointHandler);
+    addRoutes(router, this.logFactory);
   }
 
-  public start() {}
-  public stop() {}
+  public start() {
+    this.logger.debug('Starting plugin');
+  }
+
+  public stop() {
+    this.logger.debug('Starting plugin');
+    if (this.clusterClient) {
+      this.clusterClient.close();
+      this.clusterClient = undefined;
+    }
+  }
+
+  private async getConfig(): Promise<EndpointConfigType> {
+    return createConfig$(this.initializerContext)
+      .pipe(first())
+      .toPromise();
+  }
 }

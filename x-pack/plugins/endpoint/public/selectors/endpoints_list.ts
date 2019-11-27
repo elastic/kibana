@@ -4,38 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-function endpointsListState(state: any) {
+import { GlobalState } from '../types';
+
+function endpointsListState(state: GlobalState) {
   return state.endpointsList;
 }
-// TODO: type 'state' properly
-export function endpointsListData(state: any) {
+
+export function endpointsListData(state: GlobalState) {
   return endpointsListState(state).data.hits.hits;
 }
 
-export function isFiltered(state: any) {
+export function isFiltered(state: GlobalState) {
   return endpointsListState(state).isFiltered;
 }
 
-export function filteredEndpointListData(state: any) {
+export function filteredEndpointListData(state: GlobalState) {
   return endpointsListState(state).filteredData;
 }
 
-export function totalHits(state: any) {
-  return endpointsListState(state).total.value;
+export function totalHits(state: GlobalState) {
+  return endpointsListState(state).data.hits.total.value;
 }
 
-export function pageIndex(state: any) {
+export function pageIndex(state: GlobalState) {
   return endpointsListState(state).pageIndex;
 }
 
-export function pageSize(state: any) {
+export function pageSize(state: GlobalState) {
   return endpointsListState(state).pageSize;
 }
 
-export function sortField(state: any) {
+export function sortField(state: GlobalState) {
   return endpointsListState(state).sortField;
 }
 
-export function sortDirection(state: any) {
+export function sortDirection(state: GlobalState) {
   return endpointsListState(state).sortDirection;
 }
