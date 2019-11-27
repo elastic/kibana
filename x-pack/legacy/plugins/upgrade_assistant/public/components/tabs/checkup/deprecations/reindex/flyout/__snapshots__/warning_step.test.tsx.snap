@@ -1,0 +1,127 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WarningsFlyoutStep renders 1`] = `
+<Fragment>
+  <EuiFlyoutBody>
+    <EuiCallOut
+      color="danger"
+      iconType="alert"
+      title={
+        <FormattedMessage
+          defaultMessage="This index requires destructive changes that can't be undone"
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.destructiveCallout.calloutTitle"
+          values={Object {}}
+        />
+      }
+    >
+      <p>
+        <FormattedMessage
+          defaultMessage="Back up your index, then proceed with the reindex by accepting each breaking change."
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.destructiveCallout.calloutDetail"
+          values={Object {}}
+        />
+      </p>
+    </EuiCallOut>
+    <EuiSpacer />
+    <WarningCheckbox
+      checkedIds={
+        Object {
+          "reindexWarning-2": false,
+          "reindexWarning-3": false,
+        }
+      }
+      description={
+        <FormattedMessage
+          defaultMessage="Mapping types are no longer supported in 8.x. This index mapping does not use the default type name, {defaultType}, and will be updated when reindexed. Ensure no application code or scripts rely on a different type."
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningDetail"
+          values={
+            Object {
+              "defaultType": <EuiCode>
+                _doc
+              </EuiCode>,
+            }
+          }
+        />
+      }
+      documentationUrl="https://www.elastic.co/guide/en/elasticsearch/reference/7.0/removal-of-types.html"
+      label={
+        <FormattedMessage
+          defaultMessage="Mapping type will be changed to {defaultType}"
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningTitle"
+          values={
+            Object {
+              "defaultType": <EuiCode>
+                _doc
+              </EuiCode>,
+            }
+          }
+        />
+      }
+      onChange={[Function]}
+      warning={3}
+    />
+    <WarningCheckbox
+      checkedIds={
+        Object {
+          "reindexWarning-2": false,
+          "reindexWarning-3": false,
+        }
+      }
+      description={
+        <FormattedMessage
+          defaultMessage="Starting in version 7.0.0, APM data will be represented in the Elastic Common Schema. Historical APM data will not visible until it's reindexed."
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.apmReindexWarningDetail"
+          values={Object {}}
+        />
+      }
+      documentationUrl="https://www.elastic.co/guide/en/apm/get-started/master/apm-release-notes.html"
+      label={
+        <FormattedMessage
+          defaultMessage="This index will be converted to ECS format"
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.apmReindexWarningTitle"
+          values={Object {}}
+        />
+      }
+      onChange={[Function]}
+      warning={2}
+    />
+  </EuiFlyoutBody>
+  <EuiFlyoutFooter>
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          flush="left"
+          iconType="cross"
+          onClick={[MockFunction]}
+        >
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.cancelButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          color="danger"
+          disabled={true}
+          fill={true}
+          onClick={[MockFunction]}
+        >
+          <FormattedMessage
+            defaultMessage="Continue with reindex"
+            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.continueButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutFooter>
+</Fragment>
+`;
