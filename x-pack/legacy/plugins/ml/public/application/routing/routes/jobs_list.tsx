@@ -5,7 +5,6 @@
  */
 
 import React, { FC } from 'react';
-import { Redirect } from 'react-router-dom';
 import { MlRoute, PageLoader } from '../router';
 import { useResolver } from '../router';
 import { KibanaConfigTypeFix } from '../../contexts/kibana';

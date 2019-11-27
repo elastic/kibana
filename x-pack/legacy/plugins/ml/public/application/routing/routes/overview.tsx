@@ -16,7 +16,7 @@ import { checkGetJobsPrivilege } from '../../privilege/check_privilege';
 import { getMlNodeCount } from '../../ml_nodes_check';
 import { loadMlServerInfo } from '../../services/ml_server_info';
 
-export const jobListRoute: MlRoute = {
+export const overviewRoute: MlRoute = {
   path: '/overview',
   render: (props: any, config: any) => <PageWrapper config={config} />,
 };
