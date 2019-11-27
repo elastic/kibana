@@ -21,9 +21,9 @@ export function licenseManagement(kibana)  {
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch'],
     uiExports: {
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      styleSheetPaths: resolve(__dirname, 'public/np_ready/application/index.scss'),
       managementSections: [
-        'plugins/license_management',
+        'plugins/license_management/legacy',
       ]
     },
     init: (server) => {

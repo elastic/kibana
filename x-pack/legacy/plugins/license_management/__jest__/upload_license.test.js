@@ -7,9 +7,9 @@
 import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
 import React from 'react';
 import { Provider } from 'react-redux';
-import { uploadLicense } from '../public/store/actions/upload_license';
-import { licenseManagementStore } from '../public/store/store';
-import { UploadLicense } from '../public/sections/upload_license';
+import { uploadLicense } from '../public/np_ready/application/store/actions/upload_license';
+import { licenseManagementStore } from '../public/np_ready/application/store/store';
+import { UploadLicense } from '../public/np_ready/application/sections/upload_license';
 import { BASE_PATH } from '../common/constants';
 import {
   UPLOAD_LICENSE_EXPIRED,

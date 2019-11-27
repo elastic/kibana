@@ -5,7 +5,7 @@
  */
 
 import { Provider } from 'react-redux';
-import { licenseManagementStore } from '../../public/store/store';
+import { licenseManagementStore } from '../../public/np_ready/application/store/store';
 import React from 'react';
 import { mountWithIntl } from '../../../../../test_utils/enzyme_helpers';
 
