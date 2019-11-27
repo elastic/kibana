@@ -111,6 +111,7 @@ export function maps(kibana) {
       // legacy dependencies
       const __LEGACY = {
         pluginRef: this,
+        config: server.config,
         mapConfig: server.config().get('map'),
         route: server.route.bind(server),
         plugins: {
