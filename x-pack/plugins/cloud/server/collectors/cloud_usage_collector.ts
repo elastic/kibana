@@ -4,33 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { KIBANA_CLOUD_STATS_TYPE } from './constants';
+import { KIBANA_CLOUD_STATS_TYPE } from '../../common/constants';
+import { CoreSetup } from 'kibana/server';
 
 export interface UsageStats {
   isCloudEnabled: boolean;
 }
 
-export function createCollectorFetch(server: Server) {
+export function createCollectorFetch(core: CoreSetup) {
   return async function fetchUsageStats(): Promise<UsageStats> {
-    const { id } = server.config().get(`xpack.cloud`);
+    const cloudId = core.getServerConfig().get<string>('xpack.cloud.id', null);
 
     return {
-      isCloudEnabled: !!id,
+      isCloudEnabled: !!cloudId,
     };
   };
 }
 
-export function createCloudUsageCollector(usageCollection: UsageCollectionSetup, server: Server) {
+export function createCloudUsageCollector(usageCollection: UsageCollectionSetup, core: CoreSetup) {
   return usageCollection.makeUsageCollector({
     type: KIBANA_CLOUD_STATS_TYPE,
     isReady: () => true,
-    fetch: createCollectorFetch(server),
+    fetch: createCollectorFetch(core),
   });
 }
 
-export function registerCloudUsageCollector(usageCollection: UsageCollectionSetup, server: Server) {
-  const collector = createCloudUsageCollector(usageCollection, server);
+export function registerCloudUsageCollector(usageCollection: UsageCollectionSetup, core: CoreSetup) {
+  if (!usageCollection) {
+    return;
+  }
+
+  const collector = createCloudUsageCollector(usageCollection, core);
   usageCollection.registerCollector(collector);
 }

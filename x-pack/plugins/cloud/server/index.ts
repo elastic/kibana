@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface CloudPlugin {
-  config: {
-    isCloudEnabled: boolean;
-  };
-}
+import { PluginInitializerContext } from 'src/core/server';
+import { CloudPlugin } from './plugin';
+
+export { config } from './config';
+export const plugin = (context: PluginInitializerContext) => new CloudPlugin(context);
