@@ -37,7 +37,7 @@ export function plugin() {
 export { DataSetup, DataStart };
 
 export { IndexPattern, IndexPatterns, StaticIndexPattern } from './index_patterns';
-export { QueryBarInput } from './query';
+export { QueryStringInput } from './query';
 export { SearchBar, SearchBarProps, SavedQueryAttributes, SavedQuery } from './search';
 
 /** @public static code */
