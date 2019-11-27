@@ -73,3 +73,17 @@ export const transformOrError = (alert: unknown): Partial<OutputRuleAlertRest> |
     return new Boom('Internal error transforming', { statusCode: 500 });
   }
 };
+
+export const transformError = (err: Error & { statusCode?: number }) => {
+  if (Boom.isBoom(err)) {
+    return err;
+  } else {
+    if (err.statusCode != null) {
+      return new Boom(err.message, { statusCode: err.statusCode });
+    } else {
+      // natively return the err and allow the regular framework
+      // to deal with the error when it is a non Boom
+      return err;
+    }
+  }
+};
