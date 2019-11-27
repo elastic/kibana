@@ -658,7 +658,7 @@
     "kibana-react.tableListView.listing.table.editActionDescription": "編集",
     "kibana-react.tableListView.listing.table.editActionName": "編集",
     "kibana-react.tableListView.listing.unableToDeleteDangerMessage": "{entityName} を削除できません",
-    "kibana-react.exitFullScreenButton.exitFullScreenModeButtonAreaLabel": "全画面モードを終了",
+    "kibana-react.exitFullScreenButton.exitFullScreenModeButtonAriaLabel": "全画面モードを終了",
     "kibana-react.exitFullScreenButton.exitFullScreenModeButtonLabel": "全画面を終了",
     "kibana-react.exitFullScreenButton.fullScreenModeDescription": "ESC キーで全画面モードを終了します。",
     "kibana-react.savedObjects.finder.filterButtonLabel": "タイプ",
