@@ -6,7 +6,12 @@
 
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import { getApiPath } from '../../lib/helper';
-import { MonitorDetailsType, MonitorDetails } from '../../../common/runtime_types';
+import {
+  MonitorDetailsType,
+  MonitorDetails,
+  MonitorLocations,
+  MonitorLocationsType,
+} from '../../../common/runtime_types';
 
 interface ApiRequest {
   monitorId: string;
@@ -24,6 +29,21 @@ export const fetchMonitorDetails = async ({
   }
   return response.json().then(data => {
     ThrowReporter.report(MonitorDetailsType.decode(data));
+    return data;
+  });
+};
+
+export const fetchMonitorLocations = async ({
+  monitorId,
+  basePath,
+}: ApiRequest): Promise<MonitorLocations> => {
+  const url = getApiPath(`/api/uptime/monitor/locations?monitorId=${monitorId}`, basePath);
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+  return response.json().then(data => {
+    ThrowReporter.report(MonitorLocationsType.decode(data));
     return data;
   });
 };

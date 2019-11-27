@@ -27,7 +27,7 @@ import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../infra/public';
 import { getTitle } from '../lib/helper/get_title';
-import { LocationMap } from '../components/functional/map/map';
+import { LocationMap } from '../components/functional/location_map';
 
 interface MonitorPageProps {
   logMonitorPageLoad: () => void;
@@ -100,11 +100,9 @@ export const MonitorPage = ({
       <EuiSpacer size="s" />
       <EuiPanel>
         <EuiFlexGroup>
-          <EuiFlexItem grow={1}>
-            <LocationMap />
-          </EuiFlexItem>
+          <EuiFlexItem grow={1} />
           <EuiFlexItem grow={false}>
-            <LocationMap />
+            <LocationMap monitorId={monitorId} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
