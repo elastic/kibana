@@ -2,7 +2,7 @@
 [[xpack-security-authorization]]
 
 === Granting access to {kib}
-The Elastic Stack comes with the `kibana_user` {stack-ov}/built-in-roles.html[built-in role], which you can use to grant access to all Kibana features in all spaces. To grant users access to a subset of spaces or features, you can create a custom role that grants the desired Kibana privileges. 
+The Elastic Stack comes with the `kibana_user` {ref}/built-in-roles.html[built-in role], which you can use to grant access to all Kibana features in all spaces. To grant users access to a subset of spaces or features, you can create a custom role that grants the desired Kibana privileges. 
 
 When you assign a user multiple roles, the user receives a union of the roles’ privileges. Therefore, assigning the `kibana_user` role in addition to a custom role that grants Kibana privileges is ineffective because `kibana_user` has access to all the features in all spaces.
 
