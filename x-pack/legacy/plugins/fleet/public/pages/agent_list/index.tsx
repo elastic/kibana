@@ -3,45 +3,46 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, useEffect } from 'react';
-import useInterval from '@use-it/interval';
 import {
   EuiBasicTable,
-  EuiPageBody,
-  EuiPageContent,
-  EuiTitle,
-  EuiSpacer,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButton,
   EuiEmptyPrompt,
-  // @ts-ignore
-  EuiSearchBar,
-  EuiLink,
-  EuiSwitch,
-  EuiFilterGroup,
-  EuiPopover,
-  EuiFilterSelectItem,
   EuiFilterButton,
+  EuiFilterGroup,
+  EuiFilterSelectItem,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPageBody,
+  EuiPageContent,
+  EuiPopover,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AGENT_POLLING_THRESHOLD_MS } from '../../../common/constants';
+import useInterval from '@use-it/interval';
+import React, { useEffect, useState } from 'react';
+import { AGENT_POLLING_INTERVAL } from '../../../common/constants/agent';
 import { Agent } from '../../../common/types/domain_data';
+import { Policy } from '../../../scripts/mock_spec/types';
 import { AgentHealth } from '../../components/agent_health';
 import { AgentUnenrollProvider } from '../../components/agent_unenroll_provider';
 import { ConnectedLink } from '../../components/navigation/connected_link';
-import { usePagination } from '../../hooks/use_pagination';
 import { SearchBar } from '../../components/search_bar';
-import { AgentEnrollmentFlyout } from './components/agent_enrollment';
 import { useLibs } from '../../hooks/use_libs';
+import { usePagination } from '../../hooks/use_pagination';
+import { AgentEnrollmentFlyout } from './components/agent_enrollment';
 
-export const AgentListPage: React.SFC<{}> = () => {
+export const AgentListPage: React.FC<{}> = () => {
   const libs = useLibs();
   // Agent data states
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [agents, setAgents] = useState<Agent[]>([]);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+
   const [lastPolledAgentsMs, setLastPolledAgentsMs] = useState<number>(0);
   const [totalAgents, setTotalAgents] = useState<number>(0);
   const [showInactive, setShowInactive] = useState<boolean>(false);
@@ -53,7 +54,7 @@ export const AgentListPage: React.SFC<{}> = () => {
   const [areAllAgentsSelected, setAreAllAgentsSelected] = useState<boolean>(false);
 
   // Policies state (for filtering)
-  const [policies, setPolicies] = useState<any[]>([]);
+  const [policies, setPolicies] = useState<Policy[]>([]);
   const [isPoliciesLoading, setIsPoliciesLoading] = useState<boolean>(false);
   const [isPoliciesFilterOpen, setIsPoliciesFilterOpen] = useState<boolean>(false);
   const [selectedPolicies, setSelectedPolicies] = useState<string[]>([]);
@@ -73,7 +74,9 @@ export const AgentListPage: React.SFC<{}> = () => {
 
   // Fetch agents method
   const fetchAgents = async () => {
-    setIsLoading(true);
+    if (isInitialLoad) {
+      setIsLoading(true);
+    }
     setLastPolledAgentsMs(new Date().getTime());
 
     // Build kuery from current search and policy filter states
@@ -97,6 +100,7 @@ export const AgentListPage: React.SFC<{}> = () => {
     setAgents(list);
     setTotalAgents(total);
     setIsLoading(false);
+    setIsInitialLoad(false);
   };
 
   // Fetch policies method
@@ -121,10 +125,10 @@ export const AgentListPage: React.SFC<{}> = () => {
 
   // Poll for agents on interval
   useInterval(() => {
-    if (new Date().getTime() - lastPolledAgentsMs >= AGENT_POLLING_THRESHOLD_MS) {
+    if (new Date().getTime() - lastPolledAgentsMs >= AGENT_POLLING_INTERVAL) {
       fetchAgents();
     }
-  }, AGENT_POLLING_THRESHOLD_MS);
+  }, AGENT_POLLING_INTERVAL);
 
   // Some agents retrieved, set up table props
   const columns = [
@@ -181,9 +185,9 @@ export const AgentListPage: React.SFC<{}> = () => {
         defaultMessage: 'Policy',
       }),
       truncateText: true,
-      render: (policy: string) => (
-        <ConnectedLink color="primary" path={`/policies/${policy}`}>
-          {policy}
+      render: (policyId: string) => (
+        <ConnectedLink color="primary" path={`/policies/${policyId}`}>
+          {(policies.find(p => p.id === policyId) || ({} as Policy)).name || `Policy: ${policyId}`}
         </ConnectedLink>
       ),
     },
@@ -244,9 +248,11 @@ export const AgentListPage: React.SFC<{}> = () => {
     <EuiPageBody>
       <EuiPageContent>
         {isEnrollmentFlyoutOpen ? (
-          <AgentEnrollmentFlyout onClose={() => setIsEnrollmentFlyoutOpen(false)} />
+          <AgentEnrollmentFlyout
+            policies={policies}
+            onClose={() => setIsEnrollmentFlyoutOpen(false)}
+          />
         ) : null}
-
         <EuiTitle size="l">
           <h1>
             <FormattedMessage id="xpack.fleet.agentList.pageTitle" defaultMessage="Agents" />

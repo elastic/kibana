@@ -13,53 +13,16 @@ export const mappings = {
       description: {
         type: 'text',
       },
-      monitoring_enabled: {
-        type: 'boolean',
-      },
-      agent_version: {
+      label: {
         type: 'keyword',
       },
-      data_sources: {
-        properties: {
-          uuid: {
-            type: 'keyword',
-          },
-          meta: {
-            type: 'keyword',
-          },
-          output: {
-            type: 'keyword',
-          },
-          queue: {
-            type: 'keyword',
-          },
-          policy_id: {
-            type: 'keyword',
-          },
-          policy: {
-            type: 'keyword',
-          },
-          inputs: {
-            type: 'keyword',
-          },
-        },
+      datasources: {
+        type: 'keyword',
       },
       id: {
         type: 'keyword',
       },
-      shared_id: {
-        type: 'keyword',
-      },
-      version: {
-        type: 'integer',
-      },
       status: {
-        type: 'keyword',
-      },
-      created_on: {
-        type: 'keyword',
-      },
-      created_by: {
         type: 'keyword',
       },
       updated_on: {
@@ -70,13 +33,83 @@ export const mappings = {
       },
     },
   },
-  inputs: {
+  datasources: {
     properties: {
-      other: {
-        type: 'text',
-      },
-      data_source_id: {
+      id: {
         type: 'keyword',
+      },
+      name: {
+        type: 'keyword',
+      },
+      package: {
+        properties: {
+          assets: {
+            properties: {
+              id: {
+                type: 'keyword',
+              },
+              type: {
+                type: 'keyword',
+              },
+            },
+          },
+          description: {
+            type: 'keyword',
+          },
+          name: {
+            type: 'keyword',
+          },
+          title: {
+            type: 'keyword',
+          },
+          version: {
+            type: 'keyword',
+          },
+        },
+      },
+      read_alias: {
+        type: 'keyword',
+      },
+      streams: {
+        properties: {
+          config: {
+            type: 'flattened',
+          },
+          id: {
+            type: 'keyword',
+          },
+          input: {
+            properties: {
+              config: {
+                type: 'flattened',
+              },
+              fields: {
+                type: 'flattened',
+              },
+              id: {
+                type: 'keyword',
+              },
+              ilm_policy: {
+                type: 'keyword',
+              },
+              index_template: {
+                type: 'keyword',
+              },
+              ingest_pipelines: {
+                type: 'keyword',
+              },
+              type: {
+                type: 'keyword',
+              },
+            },
+          },
+          output_id: {
+            type: 'keyword',
+          },
+          processors: {
+            type: 'keyword',
+          },
+        },
       },
     },
   },

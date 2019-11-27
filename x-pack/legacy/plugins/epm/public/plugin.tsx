@@ -10,9 +10,10 @@ import { HashRouter, Switch } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 import { EuiErrorBoundary } from '@elastic/eui';
 import euiLight from '@elastic/eui/dist/eui_theme_light.json';
-import { ChromeStart, CoreSetup, HttpStart, I18nStart } from 'src/core/public';
+import { ChromeStart, CoreSetup, HttpStart, I18nStart, NotificationsStart } from 'src/core/public';
 import { CoreProvider } from './contexts/core';
 import { setClient } from './data';
+import { PackageInstallProvider } from './hooks/';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginInitializerContext {}
@@ -31,6 +32,7 @@ export interface PluginCore {
   routes: JSX.Element[];
   theme: PluginTheme;
   renderTo: HTMLElement;
+  notifications: NotificationsStart;
 }
 
 export class Plugin {
@@ -46,16 +48,17 @@ export class Plugin {
 }
 
 function App(props: { core: PluginCore }) {
-  const { i18n, routes } = props.core;
-
+  const { i18n, routes, notifications } = props.core;
   return (
     <EuiErrorBoundary>
       <CoreProvider core={props.core}>
         <i18n.Context>
           <ThemeProvider theme={props.core.theme}>
-            <HashRouter>
-              <Switch>{routes}</Switch>
-            </HashRouter>
+            <PackageInstallProvider notifications={notifications}>
+              <HashRouter>
+                <Switch>{routes}</Switch>
+              </HashRouter>
+            </PackageInstallProvider>
           </ThemeProvider>
         </i18n.Context>
       </CoreProvider>

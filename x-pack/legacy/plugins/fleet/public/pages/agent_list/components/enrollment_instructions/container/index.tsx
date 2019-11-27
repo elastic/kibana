@@ -5,6 +5,6 @@
  */
 import React from 'react';
 
-export const ContainerEnrollmentInstructions: React.SFC = () => {
+export const ContainerEnrollmentInstructions: React.FC = () => {
   return <div>Container instructions</div>;
 };

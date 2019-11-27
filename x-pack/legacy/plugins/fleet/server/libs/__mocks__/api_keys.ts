@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FrameworkUser, internalAuthData } from '../../adapters/framework/adapter_types';
 import {
-  EnrollmentApiKeyVerificationResponse,
   AccessApiKeyVerificationResponse,
   EnrollmentApiKey,
-  EnrollmentRuleData,
+  EnrollmentApiKeyVerificationResponse,
   EnrollmentRule,
+  EnrollmentRuleData,
 } from '../../repositories/enrollment_api_keys/types';
-import { FrameworkUser, internalAuthData } from '../../adapters/framework/adapter_types';
 import { ApiKeyLib as ApiKeyLibType } from '../api_keys';
 
 type Interface<T> = {

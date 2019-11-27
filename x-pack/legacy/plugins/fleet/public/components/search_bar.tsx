@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC, useState, useEffect } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import {
   // @ts-ignore
   EuiSuggest,
@@ -32,7 +32,7 @@ interface Props {
   onChange: (newValue: string) => void;
 }
 
-export const SearchBar: SFC<Props> = ({ value, fieldPrefix, onChange }) => {
+export const SearchBar: FC<Props> = ({ value, fieldPrefix, onChange }) => {
   const { suggestions } = useSuggestions(fieldPrefix, value);
 
   const onAutocompleteClick = (suggestion: Suggestion) => {

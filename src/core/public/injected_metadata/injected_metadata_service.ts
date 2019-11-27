@@ -38,6 +38,14 @@ export interface LegacyNavLink {
   euiIconType?: string;
 }
 
+export interface InjectedPluginMetadata {
+  id: PluginName;
+  plugin: DiscoveredPlugin;
+  config?: {
+    [key: string]: unknown;
+  };
+}
+
 /** @internal */
 export interface InjectedMetadataParams {
   injectedMetadata: {
@@ -55,10 +63,7 @@ export interface InjectedMetadataParams {
       mode: Readonly<EnvironmentMode>;
       packageInfo: Readonly<PackageInfo>;
     };
-    uiPlugins: Array<{
-      id: PluginName;
-      plugin: DiscoveredPlugin;
-    }>;
+    uiPlugins: InjectedPluginMetadata[];
     capabilities: Capabilities;
     legacyMode: boolean;
     legacyMetadata: {
@@ -165,10 +170,7 @@ export interface InjectedMetadataSetup {
   /**
    * An array of frontend plugins in topological order.
    */
-  getPlugins: () => Array<{
-    id: string;
-    plugin: DiscoveredPlugin;
-  }>;
+  getPlugins: () => InjectedPluginMetadata[];
   /** Indicates whether or not we are rendering a known legacy app. */
   getLegacyMode: () => boolean;
   getLegacyMetadata: () => {

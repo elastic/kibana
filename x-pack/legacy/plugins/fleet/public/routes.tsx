@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import React, { useState, useEffect, SFC } from 'react';
+import React, { useState, useEffect, FC } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { Loading } from './components/loading';
 import { ChildRoutes } from './components/navigation/child_routes';
@@ -34,7 +34,7 @@ function useWaitUntilFrameworkReady() {
   return { isLoading };
 }
 
-export const AppRoutes: SFC = () => {
+export const AppRoutes: FC = () => {
   const { isLoading } = useWaitUntilFrameworkReady();
   const libs = useLibs();
 

@@ -17,15 +17,14 @@
  * under the License.
  */
 
-import {
-  AutocompletePublicPluginSetup,
-  AutocompletePublicPluginStart,
-} from './autocomplete_provider/types';
-
+import { CoreStart } from 'src/core/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
 import { FieldFormatsSetup, FieldFormatsStart } from './field_formats_provider';
 import { ISearchSetup, ISearchStart } from './search';
 import { IGetSuggestions } from './suggestions_provider/types';
 import { QuerySetup, QueryStart } from './query';
+import { IndexPatternSelectProps } from './ui/index_pattern_select';
 
 export interface DataPublicPluginSetup {
   autocomplete: AutocompletePublicPluginSetup;
@@ -40,7 +39,20 @@ export interface DataPublicPluginStart {
   search: ISearchStart;
   fieldFormats: FieldFormatsStart;
   query: QueryStart;
+  ui: {
+    IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
+  };
 }
 
 export * from './autocomplete_provider/types';
 export { IGetSuggestions } from './suggestions_provider/types';
+
+export interface IDataPluginServices extends Partial<CoreStart> {
+  appName: string;
+  uiSettings: CoreStart['uiSettings'];
+  savedObjects: CoreStart['savedObjects'];
+  notifications: CoreStart['notifications'];
+  http: CoreStart['http'];
+  storage: IStorageWrapper;
+  data: DataPublicPluginStart;
+}

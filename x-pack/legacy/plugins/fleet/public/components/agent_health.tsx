@@ -55,7 +55,7 @@ function getStatusComponent(agent: Agent): React.ReactElement {
   }
 }
 
-export const AgentHealth: React.SFC<Props> = ({ agent }) => {
+export const AgentHealth: React.FC<Props> = ({ agent }) => {
   const { last_checkin: lastCheckIn } = agent;
   const msLastCheckIn = new Date(lastCheckIn || 0).getTime();
 

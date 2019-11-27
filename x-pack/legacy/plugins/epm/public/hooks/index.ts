@@ -7,3 +7,9 @@
 export { useBreadcrumbs } from './use_breadcrumbs';
 export { useCore } from './use_core';
 export { useLinks } from './use_links';
+export {
+  PackageInstallProvider,
+  useInstallPackage,
+  useSetPackageInstallStatus,
+  useGetPackageInstallStatus,
+} from './use_package_install';

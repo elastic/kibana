@@ -18,7 +18,7 @@ export type ManualEnrollmentInstructions = Array<{
   commandsLang?: 'bash' | 'yaml';
 }>;
 
-export const ManualEnrollmentSteps: React.SFC<{ instructions: ManualEnrollmentInstructions }> = ({
+export const ManualEnrollmentSteps: React.FC<{ instructions: ManualEnrollmentInstructions }> = ({
   instructions,
 }) => (
   <EuiSteps

@@ -8,7 +8,7 @@ import React, { createContext } from 'react';
 import { PluginCore } from '../plugin';
 
 const CoreContext = createContext<PluginCore>({} as PluginCore);
-const CoreProvider: React.SFC<{ core: PluginCore }> = props => {
+const CoreProvider: React.FC<{ core: PluginCore }> = props => {
   const { core, ...restProps } = props;
   return <CoreContext.Provider value={core} {...restProps} />;
 };

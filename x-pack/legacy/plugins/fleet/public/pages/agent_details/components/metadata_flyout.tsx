@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC } from 'react';
+import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -23,7 +23,7 @@ interface Props {
   agent: Agent;
   flyout: { hide: () => void };
 }
-export const AgentMetadataFlyout: SFC<Props> = ({ agent, flyout }) => {
+export const AgentMetadataFlyout: FC<Props> = ({ agent, flyout }) => {
   const mapMetadata = (obj: { [key: string]: string } | undefined) => {
     return Object.keys(obj || {}).map(key => ({
       title: key,
