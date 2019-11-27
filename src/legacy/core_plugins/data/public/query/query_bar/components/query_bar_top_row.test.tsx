@@ -17,12 +17,16 @@
  * under the License.
  */
 
-import { mockPersistedLogFactory } from './query_bar_input.test.mocks';
+import { mockPersistedLogFactory } from './query_string_input.test.mocks';
 
 import React from 'react';
 import { mount } from 'enzyme';
 import { QueryBarTopRow } from './query_bar_top_row';
-import { IndexPattern } from '../../../index';
+
+/* eslint-disable @kbn/eslint/no-restricted-paths */
+
+import { stubIndexPatternWithFields } from '../../../../../../../plugins/data/public/stubs';
+/* eslint-enable @kbn/eslint/no-restricted-paths */
 
 import { coreMock } from '../../../../../../../core/public/mocks';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
@@ -85,21 +89,6 @@ const createMockStorage = () => ({
   clear: jest.fn(),
 });
 
-const mockIndexPattern = {
-  id: '1234',
-  title: 'logstash-*',
-  fields: [
-    {
-      name: 'response',
-      type: 'number',
-      esTypes: ['integer'],
-      aggregatable: true,
-      filterable: true,
-      searchable: true,
-    },
-  ],
-} as IndexPattern;
-
 function wrapQueryBarTopRowInContext(testProps: any) {
   const defaultOptions = {
     screenTitle: 'Another Screen',
@@ -124,7 +113,7 @@ function wrapQueryBarTopRowInContext(testProps: any) {
 }
 
 describe('QueryBarTopRowTopRow', () => {
-  const QUERY_INPUT_SELECTOR = 'QueryBarInputUI';
+  const QUERY_INPUT_SELECTOR = 'QueryStringInputUI';
   const TIMEPICKER_SELECTOR = 'EuiSuperDatePicker';
   const TIMEPICKER_DURATION = '[data-shared-timefilter-duration]';
 
@@ -138,7 +127,7 @@ describe('QueryBarTopRowTopRow', () => {
         query: kqlQuery,
         screenTitle: 'Another Screen',
         isDirty: false,
-        indexPatterns: [mockIndexPattern],
+        indexPatterns: [stubIndexPatternWithFields],
         timeHistory: mockTimeHistory,
       })
     );
@@ -152,7 +141,7 @@ describe('QueryBarTopRowTopRow', () => {
       wrapQueryBarTopRowInContext({
         query: kqlQuery,
         screenTitle: 'Another Screen',
-        indexPatterns: [mockIndexPattern],
+        indexPatterns: [stubIndexPatternWithFields],
         timeHistory: mockTimeHistory,
         disableAutoFocus: true,
         isDirty: false,
@@ -225,7 +214,7 @@ describe('QueryBarTopRowTopRow', () => {
     const component = mount(
       wrapQueryBarTopRowInContext({
         query: kqlQuery,
-        indexPatterns: [mockIndexPattern],
+        indexPatterns: [stubIndexPatternWithFields],
         isDirty: false,
         screenTitle: 'Another Screen',
         showDatePicker: false,
@@ -245,7 +234,7 @@ describe('QueryBarTopRowTopRow', () => {
         query: kqlQuery,
         isDirty: false,
         screenTitle: 'Another Screen',
-        indexPatterns: [mockIndexPattern],
+        indexPatterns: [stubIndexPatternWithFields],
         showQueryInput: false,
         showDatePicker: false,
         timeHistory: mockTimeHistory,
