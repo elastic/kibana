@@ -112,7 +112,7 @@ export function maps(kibana) {
       const __LEGACY = {
         pluginRef: this,
         config: server.config,
-        mapConfig: server.config().get('map'),
+        mapConfig() { return server.config().get('map'); },
         route: server.route.bind(server),
         plugins: {
           elasticsearch: server.plugins.elasticsearch,
@@ -136,7 +136,8 @@ export function maps(kibana) {
       // TODO: Wait for telemetry NP updates before modifying
       initTelemetryCollection(server);
 
-      new MapPlugin().setup(coreSetup, pluginsSetup, __LEGACY);
+      const mapPluginSetup = new MapPlugin().setup(coreSetup, pluginsSetup, __LEGACY);
+      server.expose('getMapConfig', mapPluginSetup.getMapConfig);
     }
   });
 }

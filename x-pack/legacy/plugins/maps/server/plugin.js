@@ -126,7 +126,7 @@ export class MapPlugin {
 
     return {
       getMapConfig() {
-        return __LEGACY.mapConfig;
+        return __LEGACY.mapConfig();
       }
     };
 
