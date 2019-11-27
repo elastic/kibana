@@ -65,7 +65,7 @@ exports[`Split panel should render correctly 1`] = `
           onMouseDown={[Function]}
         >
           <EuiIcon
-            type="boxesVertical"
+            type="grabHorizontal"
           >
             <EuiIconEmpty
               className="euiIcon euiIcon--medium euiIcon-isLoading"

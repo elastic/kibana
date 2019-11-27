@@ -130,15 +130,6 @@ describe('FieldParamEditor component', () => {
     expect(setValidity).toHaveBeenCalledWith(false);
   });
 
-  it('should call setTouched when the control is invalid', () => {
-    defaultProps.value = field;
-    const comp = mount(<FieldParamEditor {...defaultProps} />);
-    expect(setTouched).not.toHaveBeenCalled();
-    comp.setProps({ customError: 'customError' });
-
-    expect(setTouched).toHaveBeenCalled();
-  });
-
   it('should call onChange when a field selected', () => {
     const comp = mount(<FieldParamEditor {...defaultProps} />);
     act(() => {

@@ -27,11 +27,11 @@ import {
   PanelsContainer,
   Panel,
 } from '../../../../../core_plugins/console/np_ready/public/application/components/split_panel';
-import { getInitialWidth } from '../../../../../core_plugins/visualizations/public';
 
 import './vis_type_agg_filter';
 import { DefaultEditorSideBar } from './components/sidebar';
 import { DefaultEditorControllerState } from './default_editor_controller';
+import { getInitialWidth } from '../../editor_size';
 
 function DefaultEditor({
   savedObj,

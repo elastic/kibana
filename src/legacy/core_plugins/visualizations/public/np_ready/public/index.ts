@@ -45,7 +45,6 @@ export function plugin(initializerContext: PluginInitializerContext) {
 /** @public static code */
 export { Vis, VisParams, VisState } from './vis';
 export * from './filters';
-export * from './editor_size';
 
 export { Status } from './legacy/update_status';
 export { buildPipeline, buildVislibDimensions, SchemaConfig } from './legacy/build_pipeline';
