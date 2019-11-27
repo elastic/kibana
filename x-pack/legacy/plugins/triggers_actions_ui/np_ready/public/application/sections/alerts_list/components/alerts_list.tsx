@@ -10,7 +10,7 @@ import React, { Fragment, useEffect, useState } from 'react';
 // @ts-ignore: EuiSearchBar not exported in TypeScript
 import { EuiBasicTable, EuiButton, EuiButtonEmpty, EuiSearchBar, EuiSpacer } from '@elastic/eui';
 import { AlertsContext } from '../../../context/alerts_context';
-import { useAppDependencies } from '../../../index';
+import { useAppDependencies } from '../../../app_dependencies';
 import { Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
 import { AlertAdd } from '../../alert_add';
 import { BulkActionPopover } from './bulk_action_popover';

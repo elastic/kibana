@@ -22,13 +22,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { createAction, updateAction } from '../../lib/api';
 import { SectionError, ErrableFormRow } from '../../components/page_error';
-import { useAppDependencies } from '../..';
+import { useAppDependencies } from '../../app_dependencies';
 import { actionReducer } from './action_reducer';
 import { ActionsContext } from '../../context/actions_context';
 import { Action, IErrorObject } from '../../../types';
 
 interface Props {
-  initialAction: Action;
+  initialAction: any;
   actionTypeName: string;
   setFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
 }

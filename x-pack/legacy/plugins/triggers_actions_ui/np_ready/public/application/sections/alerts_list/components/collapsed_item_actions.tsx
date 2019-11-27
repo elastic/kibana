@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 
 import { AlertTableItem } from '../../../../types';
-import { useAppDependencies } from '../../../index';
+import { useAppDependencies } from '../../../app_dependencies';
 import {
   deleteAlerts,
   disableAlerts,

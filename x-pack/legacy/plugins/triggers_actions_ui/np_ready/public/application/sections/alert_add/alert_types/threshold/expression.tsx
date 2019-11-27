@@ -29,7 +29,7 @@ import {
   getThresholdAlertTypeFields,
   loadIndexPatterns,
 } from '../../../../lib/api';
-import { useAppDependencies } from '../../../..';
+import { useAppDependencies } from '../../../../app_dependencies';
 import { ErrableFormRow } from '../../../../components/page_error';
 import { getTimeOptions, getTimeFieldOptions } from '../../../../lib/get_time_options';
 import { getTimeUnitLabel } from '../../../../lib/get_time_unit_label';

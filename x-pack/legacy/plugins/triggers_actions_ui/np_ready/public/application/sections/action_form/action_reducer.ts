@@ -17,7 +17,7 @@ export interface ActionReducerItem {
   command: CommandType;
   payload: {
     key: string;
-    value: {};
+    value: any;
   };
 }
 

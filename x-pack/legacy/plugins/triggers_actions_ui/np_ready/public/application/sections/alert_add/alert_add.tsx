@@ -34,7 +34,7 @@ import {
   EuiAccordion,
   EuiButtonIcon,
 } from '@elastic/eui';
-import { useAppDependencies } from '../..';
+import { useAppDependencies } from '../../app_dependencies';
 import { saveAlert, loadActionTypes, loadAllActions } from '../../lib/api';
 import { AlertsContext } from '../../context/alerts_context';
 import { alertReducer } from './alert_reducer';

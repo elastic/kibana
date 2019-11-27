@@ -17,7 +17,7 @@ import { ActionsContext } from '../../context/actions_context';
 import { ActionTypeMenu } from './action_type_menu';
 import { ActionForm } from './action_form';
 import { ActionType } from '../../../types';
-import { useAppDependencies } from '../..';
+import { useAppDependencies } from '../../app_dependencies';
 
 export const ActionAddFlyout = () => {
   const { actionTypeRegistry } = useAppDependencies();

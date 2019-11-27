@@ -8,8 +8,6 @@ import React, { useEffect } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiPageBody,
   EuiPageContent,
   EuiPageContentHeader,
@@ -23,7 +21,7 @@ import {
 import { BASE_PATH, Section, routeToConnectors, routeToAlerts } from './constants';
 import { breadcrumbService } from './lib/breadcrumb';
 import { docTitleService } from './lib/doc_title';
-import { useAppDependencies } from './index';
+import { useAppDependencies } from './app_dependencies';
 
 import { ActionsList } from './sections/actions_list/components/actions_list';
 import { AlertsList } from './sections/alerts_list/components/alerts_list';

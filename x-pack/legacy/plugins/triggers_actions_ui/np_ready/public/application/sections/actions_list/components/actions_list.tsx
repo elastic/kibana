@@ -9,7 +9,7 @@ import { EuiBadge, EuiInMemoryTable, EuiSpacer, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionsContext } from '../../../context/actions_context';
-import { useAppDependencies } from '../../../index';
+import { useAppDependencies } from '../../../app_dependencies';
 import { deleteActions, loadAllActions, loadActionTypes } from '../../../lib/api';
 import { Action, ActionTableItem, ActionTypeIndex } from '../../../../types';
 import { ActionAddFlyout, ActionEditFlyout } from '../../action_form';

@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ActionType } from '../../../types';
 import { ActionsContext } from '../../context/actions_context';
-import { useAppDependencies } from '../..';
+import { useAppDependencies } from '../../app_dependencies';
 
 interface Props {
   setActionType: React.Dispatch<React.SetStateAction<ActionType | undefined>>;
