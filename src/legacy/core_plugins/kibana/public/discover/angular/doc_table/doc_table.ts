@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { UiSettingsClient } from 'kibana/public';
 import html from './doc_table.html';
 import './infinite_scroll';
 import './components/table_header';
@@ -28,8 +29,12 @@ import './lib/pager';
 // @ts-ignore
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 
+interface LazyScope extends ng.IScope {
+  [key: string]: any;
+}
+
 export function createDocTableDirective(
-  config: any,
+  config: UiSettingsClient,
   getAppState: any,
   pagerFactory: any,
   $filter: any
@@ -54,7 +59,7 @@ export function createDocTableDirective(
       onRemoveColumn: '=?',
       inspectorAdapters: '=?',
     },
-    link: ($scope: any, $el: any) => {
+    link: ($scope: LazyScope, $el: JQuery) => {
       $scope.$watch('minimumVisibleRows', (minimumVisibleRows: number) => {
         $scope.limit = Math.max(minimumVisibleRows || 50, $scope.limit || 50);
       });

@@ -281,7 +281,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     });
     const inspectorRequest = this.inspectorAdaptors.requests.start(title, { description });
     inspectorRequest.stats(getRequestInspectorStats(searchSource));
-    searchSource.getSearchRequestBody().then((body: any) => {
+    searchSource.getSearchRequestBody().then((body: Record<string, unknown>) => {
       inspectorRequest.json(body);
     });
     this.searchScope.isLoading = true;

@@ -21,6 +21,11 @@ import { getAngularModule, wrapInI18nContext, getServices } from '../kibana_serv
 import { getRootBreadcrumbs } from '../helpers/breadcrumbs';
 import html from './doc.html';
 import { Doc } from '../components/doc/doc';
+
+interface LazyScope extends ng.IScope {
+  [key: string]: any;
+}
+
 const { timefilter } = getServices();
 const app = getAngularModule();
 app.directive('discoverDoc', function(reactDirective: any) {
@@ -44,7 +49,7 @@ app.config(($routeProvider: any) => {
     })
     // the new route, es 7 deprecated types, es 8 removed them
     .when('/discover/doc/:indexPattern/:index', {
-      controller: ($scope: any, $route: any, es: any) => {
+      controller: ($scope: LazyScope, $route: any, es: any) => {
         timefilter.disableAutoRefreshSelector();
         timefilter.disableTimeRangeSelector();
         $scope.esClient = es;

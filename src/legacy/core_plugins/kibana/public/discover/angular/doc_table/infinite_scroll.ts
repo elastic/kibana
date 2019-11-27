@@ -19,13 +19,17 @@
 
 import $ from 'jquery';
 
+interface LazyScope extends ng.IScope {
+  [key: string]: any;
+}
+
 export function createInfiniteScrollDirective() {
   return {
     restrict: 'E',
     scope: {
       more: '=',
     },
-    link: ($scope: any, $element: any) => {
+    link: ($scope: LazyScope, $element: JQuery) => {
       const $window = $(window);
       let checkTimer: any;
 
@@ -34,7 +38,8 @@ export function createInfiniteScrollDirective() {
 
         const winHeight = Number($window.height());
         const winBottom = Number(winHeight) + Number($window.scrollTop());
-        const elTop = $element.offset().top;
+        const offset = $element.offset();
+        const elTop = offset ? offset.top : 0;
         const remaining = elTop - winBottom;
 
         if (remaining <= winHeight * 0.5) {

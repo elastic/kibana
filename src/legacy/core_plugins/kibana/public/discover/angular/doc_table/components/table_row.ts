@@ -66,7 +66,7 @@ export function createTableRowDirective(
       $el.empty();
 
       // when we compile the details, we use this $scope
-      let $detailsScope: any;
+      let $detailsScope: LazyScope;
 
       // when we compile the toggle button in the summary, we use this $scope
       let $toggleScope;
