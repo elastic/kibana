@@ -20,8 +20,7 @@
 import Joi from 'joi';
 import Bluebird from 'bluebird';
 import _ from 'lodash';
-// import { Legacy } from 'kibana';
-import { Server } from 'hapi';
+import { Legacy } from 'kibana';
 // @ts-ignore
 import chainRunnerFn from '../handlers/chain_runner.js';
 const timelionDefaults = require('../lib/get_namespaced_settings')();
@@ -58,15 +57,39 @@ const requestPayload = {
     }),
   }),
 };
+interface TimelionRequestQuery {
+  payload?: {
+    sheet: string[];
+    extended: {
+      es: {
+        filter: {
+          bool: {
+            filter: string[] | object;
+            must: string[];
+            should: string[];
+            must_not: string[];
+          };
+        };
+      };
+    };
+  };
+  query?: {
+    expression: string[];
+    from: string;
+    interval: string;
+    to: string;
+    timezone: string;
+  };
+}
 
-export function runRoute(server: Server) {
+export function runRoute(server: Legacy.Server) {
   server.route({
     method: 'POST',
     path: '/api/timelion/run',
     options: {
       validate: requestPayload,
     },
-    handler: async (request: any, h: any) => {
+    handler: async (request: Legacy.Request & TimelionRequestQuery, h: Legacy.ResponseToolkit) => {
       try {
         const uiSettings = await request.getUiSettingsService().getAll();
 
@@ -75,52 +98,6 @@ export function runRoute(server: Server) {
           request,
           settings: _.defaults(uiSettings, timelionDefaults), // Just in case they delete some setting.
         });
-        const chainRunner = chainRunnerFn(tlConfig);
-        const sheet = await Bluebird.all(
-          chainRunner.processRequest(
-            request.payload || {
-              sheet: [request.query.expression],
-              time: {
-                from: request.query.from,
-                to: request.query.to,
-                interval: request.query.interval,
-                timezone: request.query.timezone,
-              },
-            }
-          )
-        );
-
-        return {
-          sheet,
-          stats: chainRunner.getStats(),
-        };
-      } catch (err) {
-        server.log(['timelion', 'error'], `${err.toString()}: ${err.stack}`);
-        // TODO Maybe we should just replace everywhere we throw with Boom? Probably.
-        if (err.isBoom) {
-          return err;
-        } else {
-          return formatErrorResponse(err, h);
-        }
-      }
-    },
-  });
-}
-
-export function runGetRoute(server: Server) {
-  server.route({
-    method: 'GET',
-    path: '/api/timelion/run',
-    handler: async (request: any, h: any) => {
-      try {
-        const uiSettings = await request.getUiSettingsService().getAll();
-
-        const tlConfig = require('../handlers/lib/tl_config.js')({
-          server,
-          request,
-          settings: _.defaults(uiSettings, timelionDefaults), // Just in case they delete some setting.
-        });
-
         const chainRunner = chainRunnerFn(tlConfig);
         const sheet = await Bluebird.all(
           chainRunner.processRequest(
