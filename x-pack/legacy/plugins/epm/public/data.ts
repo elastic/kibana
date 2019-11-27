@@ -8,6 +8,7 @@ import { HttpHandler } from 'src/core/public';
 import {
   getCategoriesPath,
   getInfoPath,
+  getInstallDatasourcePath,
   getInstallPath,
   getListPath,
   getRemovePath,
@@ -82,6 +83,6 @@ export async function getFileByPath(filePath: string): Promise<string> {
 }
 
 export async function installDatasource(pkgkey: string): Promise<AssetReference[]> {
-  const path = getInstallPath(pkgkey);
+  const path = getInstallDatasourcePath(pkgkey);
   return _fetch(path);
 }

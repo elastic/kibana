@@ -8,9 +8,10 @@ import React, { useCallback, useState, Fragment } from 'react';
 import createContainer from 'constate';
 import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { NotificationsStart } from 'src/core/public';
+import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
+import { PackageInfo } from '../../common/types';
 import { installPackage as fetchInstallPackage, installDatasource } from '../data';
 import { InstallStatus } from '../types';
-import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 
 interface PackagesInstall {
   [key: string]: PackageInstallItem;
@@ -24,7 +25,7 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
   const [packages, setPackage] = useState<PackagesInstall>({});
 
   const setPackageInstallStatus = useCallback(
-    ({ name, status }: { name: string; status: InstallStatus }) => {
+    ({ name, status }: { name: PackageInfo['name']; status: InstallStatus }) => {
       setPackage((prev: PackagesInstall) => ({
         ...prev,
         [name]: { status },
@@ -34,7 +35,7 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
   );
 
   const installPackage = useCallback(
-    async ({ name, version, title }: { name: string; version: string; title: string }) => {
+    async ({ name, version, title }: Pick<PackageInfo, 'name' | 'version' | 'title'>) => {
       setPackageInstallStatus({ name, status: InstallStatus.installing });
       const pkgkey = `${name}-${version}`;
 
