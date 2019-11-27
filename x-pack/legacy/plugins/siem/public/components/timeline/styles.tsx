@@ -105,7 +105,7 @@ EventsThGroupData.displayName = 'EventsThGroupData';
 export const EventsTh = styled.div.attrs(({ className }) => ({
   className: `siemEventsTable__th ${className}`,
   role: 'columnheader',
-}))<{ isDragging?: boolean; position?: string }>`
+}))<{ position?: string }>`
   align-items: center;
   display: flex;
   flex-shrink: 0;
@@ -120,6 +120,10 @@ export const EventsTh = styled.div.attrs(({ className }) => ({
     background-color: ${({ theme }) => theme.eui.euiTableHoverColor};
     cursor: move; //Fallback for IE11
     cursor: grab;
+  }
+
+  [data-rbd-placeholder-context-id] {
+    display: none !important;
   }
 `;
 EventsTh.displayName = 'EventsTh';
