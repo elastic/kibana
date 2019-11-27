@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBadge, EuiDescriptionList, EuiFlexGroup, EuiFlexItem, EuiTextArea } from '@elastic/eui';
 import { isEmpty, chunk, get, pick } from 'lodash/fp';
 import React, { memo, ReactNode } from 'react';
+import styled from 'styled-components';
 
 import {
   IIndexPattern,
@@ -25,17 +26,27 @@ interface StepRuleDescriptionProps {
   schema: FormSchema;
 }
 
+const EuiBadgeWrap = styled(EuiBadge)`
+  .euiBadge__text {
+    white-space: pre-wrap !important;
+  }
+`;
+
+const EuiFlexItemWidth = styled(EuiFlexItem)`
+  width: 50%;
+`;
+
 export const StepRuleDescription = memo<StepRuleDescriptionProps>(
   ({ data, indexPatterns, schema }) => {
     const keys = Object.keys(schema);
     return (
       <EuiFlexGroup gutterSize="none" direction="row" justifyContent="spaceAround">
         {chunk(keys.includes('queryBar') ? 3 : Math.ceil(keys.length / 2), keys).map(key => (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItemWidth grow={false}>
             <EuiDescriptionList
               listItems={buildListItems(data, pick(key, schema), indexPatterns)}
             />
-          </EuiFlexItem>
+          </EuiFlexItemWidth>
         ))}
       </EuiFlexGroup>
     );
@@ -80,12 +91,12 @@ const getDescriptionItem = (
             <EuiFlexGroup wrap responsive={false} gutterSize="xs">
               {filters.map((filter, index) => (
                 <EuiFlexItem grow={false} key={`${field}-filter-${index}`}>
-                  <EuiBadge color="hollow">
+                  <EuiBadgeWrap color="hollow">
                     <FilterLabel
                       filter={filter}
                       valueLabel={utils.getDisplayValueFromFilter(filter, [indexPatterns])}
                     />
-                  </EuiBadge>
+                  </EuiBadgeWrap>
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>
@@ -112,15 +123,22 @@ const getDescriptionItem = (
       ];
     }
     return items;
-  } else if (Array.isArray(value)) {
+  } else if (field === 'description') {
+    return [
+      {
+        title: label,
+        description: <EuiTextArea value={get(field, value)} readOnly={true} />,
+      },
+    ];
+  } else if (Array.isArray(get(field, value))) {
     return [
       {
         title: label,
         description: (
           <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-            {value.map(val => (
+            {get(field, value).map((val: string) => (
               <EuiFlexItem grow={false} key={`${field}-${val}`}>
-                <EuiBadge color="hollow">{val}</EuiBadge>
+                <EuiBadgeWrap color="hollow">{val}</EuiBadgeWrap>
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>

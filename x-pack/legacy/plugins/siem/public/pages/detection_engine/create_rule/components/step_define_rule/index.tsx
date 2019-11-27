@@ -144,7 +144,7 @@ export const StepDefineRule = memo<RuleStepProps>(({ isEditView, isLoading, setS
               } else if (
                 indexField != null &&
                 useIndicesConfig === 'false' &&
-                !isEqual(indexField.value, [])
+                isEqual(indexField.value, indicesConfig)
               ) {
                 indexField.setValue([]);
                 setIndices([]);

@@ -21,15 +21,22 @@ interface AddItemProps {
 
 export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: AddItemProps) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-  const [items, setItems] = useState(['']);
-  const [haveBeenKeyboardDeleted, setHaveBeenKeyboardDeleted] = useState(false);
+  // const [items, setItems] = useState(['']);
+  const [haveBeenKeyboardDeleted, setHaveBeenKeyboardDeleted] = useState(-1);
 
-  const lastInputRef = useRef<HTMLInputElement | null>(null);
+  const inputsRef = useRef<HTMLInputElement[]>([]);
 
   const removeItem = useCallback(
     (index: number) => {
       const values = field.value as string[];
       field.setValue([...values.slice(0, index), ...values.slice(index + 1)]);
+      inputsRef.current = [
+        ...inputsRef.current.slice(0, index),
+        ...inputsRef.current.slice(index + 1),
+      ];
+      if (inputsRef.current[index] != null) {
+        inputsRef.current[index].value = 'rerender';
+      }
     },
     [field]
   );
@@ -38,16 +45,26 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
     const values = field.value as string[];
     if (!isEmpty(values[values.length - 1])) {
       field.setValue([...values, '']);
+    } else {
+      field.setValue(['']);
     }
   }, [field]);
 
   const updateItem = useCallback(
     (event: ChangeEvent<HTMLInputElement>, index: number) => {
+      event.persist();
       const values = field.value as string[];
       const value = event.target.value;
       if (isEmpty(value)) {
-        setHaveBeenKeyboardDeleted(true);
         field.setValue([...values.slice(0, index), ...values.slice(index + 1)]);
+        inputsRef.current = [
+          ...inputsRef.current.slice(0, index),
+          ...inputsRef.current.slice(index + 1),
+        ];
+        setHaveBeenKeyboardDeleted(inputsRef.current.length - 1);
+        if (inputsRef.current[index] != null) {
+          inputsRef.current[index].value = 'rerender';
+        }
       } else {
         field.setValue([...values.slice(0, index), value, ...values.slice(index + 1)]);
       }
@@ -56,31 +73,30 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
   );
 
   const handleLastInputRef = useCallback(
-    (element: HTMLInputElement | null) => {
-      lastInputRef.current = element;
+    (index: number, element: HTMLInputElement | null) => {
+      if (element != null) {
+        inputsRef.current = [
+          ...inputsRef.current.slice(0, index),
+          element,
+          ...inputsRef.current.slice(index + 1),
+        ];
+      }
     },
-    [lastInputRef]
+    [inputsRef]
   );
 
   useEffect(() => {
-    if (!isEqual(field.value, items)) {
-      setItems(
-        isEmpty(field.value)
-          ? ['']
-          : haveBeenKeyboardDeleted
-          ? [...(field.value as string[]), '']
-          : (field.value as string[])
-      );
-      setHaveBeenKeyboardDeleted(false);
+    if (
+      haveBeenKeyboardDeleted !== -1 &&
+      !isEmpty(inputsRef.current) &&
+      inputsRef.current[haveBeenKeyboardDeleted] != null
+    ) {
+      inputsRef.current[haveBeenKeyboardDeleted].focus();
+      setHaveBeenKeyboardDeleted(-1);
     }
-  }, [field.value]);
+  }, [haveBeenKeyboardDeleted, inputsRef.current]);
 
-  useEffect(() => {
-    if (!haveBeenKeyboardDeleted && lastInputRef != null && lastInputRef.current != null) {
-      lastInputRef.current.focus();
-    }
-  }, [haveBeenKeyboardDeleted, lastInputRef]);
-
+  const values = field.value as string[];
   return (
     <EuiFormRow
       label={field.label}
@@ -92,10 +108,15 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
       describedByIds={idAria ? [idAria] : undefined}
     >
       <>
-        {items.map((item, index) => {
+        {values.map((item, index) => {
           const euiFieldProps = {
             disabled: isDisabled,
-            ...(index === items.length - 1 ? { inputRef: handleLastInputRef } : {}),
+            ...(index === values.length - 1
+              ? { inputRef: handleLastInputRef.bind(null, index) }
+              : {}),
+            ...(inputsRef.current[index] != null && inputsRef.current[index].value !== item
+              ? { value: item }
+              : {}),
           };
           return (
             <div key={index}>
@@ -109,13 +130,12 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
                     aria-label={I18n.DELETE}
                   />
                 }
-                value={item}
                 onChange={e => updateItem(e, index)}
                 compressed
                 fullWidth
                 {...euiFieldProps}
               />
-              {items.length - 1 !== index && <EuiSpacer size="s" />}
+              {values.length - 1 !== index && <EuiSpacer size="s" />}
             </div>
           );
         })}

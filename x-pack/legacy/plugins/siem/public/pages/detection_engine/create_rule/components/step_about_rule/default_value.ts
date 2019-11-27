@@ -12,7 +12,7 @@ export const defaultValue: AboutStepRule = {
   isNew: true,
   severity: 'low',
   riskScore: 50,
-  references: [],
-  falsePositives: [],
+  references: [''],
+  falsePositives: [''],
   tags: [],
 };
