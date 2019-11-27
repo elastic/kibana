@@ -34,7 +34,9 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
   const [actionTypesList, setActionTypesList] = useState<Array<{ value: string; name: string }>>(
     []
   );
-  const [editedActionItem, setEditedActionItem] = useState<ActionTableItem | undefined>(undefined);
+  const [editedConnectorItem, setEditedConnectorItem] = useState<ActionTableItem | undefined>(
+    undefined
+  );
 
   useEffect(() => {
     loadActions();
@@ -131,7 +133,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
   }
 
   async function editItem(actionTableItem: ActionTableItem) {
-    setEditedActionItem(actionTableItem);
+    setEditedConnectorItem(actionTableItem);
     setEditFlyoutVisibility(true);
   }
 
@@ -231,7 +233,6 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
             setEditFlyoutVisibility,
             actionTypesIndex,
             loadActions,
-            editedActionItem,
           }}
         >
           <EuiInMemoryTable
@@ -313,7 +314,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
             }}
           />
           <ConnectorAddFlyout />
-          <ConnectorEditFlyout />
+          {editedConnectorItem ? <ConnectorEditFlyout connector={editedConnectorItem} /> : null}
         </ActionsConnectorsContext.Provider>
       </Fragment>
     </section>

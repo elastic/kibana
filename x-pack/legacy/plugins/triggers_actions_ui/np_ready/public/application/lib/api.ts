@@ -49,16 +49,6 @@ export async function loadAllActions({ http }: LoadActionsOpts): Promise<LoadAct
   });
 }
 
-export async function getActionById({
-  id,
-  http,
-}: {
-  id: string;
-  http: HttpServiceBase;
-}): Promise<ActionConnector> {
-  return http.get(`${BASE_ACTION_API_PATH}/${id}`);
-}
-
 export async function createActionConnector({
   http,
   connector,

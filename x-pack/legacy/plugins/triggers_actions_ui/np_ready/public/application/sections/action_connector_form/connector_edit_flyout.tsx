@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useContext, useCallback, useEffect, useState } from 'react';
+import React, { useContext, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -13,63 +13,26 @@ import {
   EuiFlexItem,
   EuiIcon,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { ActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { ActionConnectorForm } from './action_connector_form';
 import { useAppDependencies } from '../../app_dependencies';
-import { getActionById } from '../../lib/api';
-import { ActionConnector } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
+import { ActionTableItem } from '../../../types';
 
-export const ConnectorEditFlyout = () => {
-  const {
-    core: { http },
-    plugins: { toastNotifications },
-    actionTypeRegistry,
-  } = useAppDependencies();
-  const { editFlyoutVisible, setEditFlyoutVisibility, editedActionItem } = useContext(
-    ActionsConnectorsContext
-  );
-  const [isLoadingAction, setIsLoadingAction] = useState<boolean>(false);
-  const [action, setAction] = useState<ActionConnector | undefined>(undefined);
+export interface ConnectorEditProps {
+  connector: ActionTableItem;
+}
 
+export const ConnectorEditFlyout = ({ connector }: ConnectorEditProps) => {
+  const { actionTypeRegistry } = useAppDependencies();
+  const { editFlyoutVisible, setEditFlyoutVisibility } = useContext(ActionsConnectorsContext);
   const closeFlyout = useCallback(() => setEditFlyoutVisibility(false), [setEditFlyoutVisibility]);
 
-  useEffect(() => {
-    setAction(undefined);
-    if (editFlyoutVisible && editedActionItem && editedActionItem.id) {
-      loadActionById(editedActionItem.id);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editFlyoutVisible]);
-
-  async function loadActionById(actionItemId: string) {
-    setIsLoadingAction(true);
-    try {
-      const actionResponse = await getActionById({ id: actionItemId, http });
-      setAction({ ...actionResponse, secrets: {} });
-    } catch (e) {
-      toastNotifications.addDanger({
-        title: i18n.translate(
-          'xpack.triggersActionsUI.sections.actionEdit.unableToLoadActionMessage',
-          {
-            defaultMessage: 'Unable to load action',
-          }
-        ),
-      });
-    } finally {
-      setIsLoadingAction(false);
-    }
-  }
-
-  if (!editFlyoutVisible && !action) {
+  if (!editFlyoutVisible) {
     return null;
   }
 
-  let actionTypeModel;
-  if (editedActionItem) {
-    actionTypeModel = actionTypeRegistry.get(editedActionItem.actionTypeId);
-  }
+  const actionTypeModel = actionTypeRegistry.get(connector.actionTypeId);
 
   return (
     <EuiFlyout onClose={closeFlyout} aria-labelledby="flyoutActionAddTitle" size="m">
@@ -92,10 +55,15 @@ export const ConnectorEditFlyout = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
-      {action && editedActionItem ? (
+      {connector ? (
         <ActionConnectorForm
-          initialAction={action}
-          actionTypeName={editedActionItem.actionType}
+          initialAction={{
+            ...connector,
+            referencedByCount: undefined,
+            actionType: undefined,
+            secrets: {},
+          }}
+          actionTypeName={connector.actionType}
           setFlyoutVisibility={setEditFlyoutVisibility}
         />
       ) : (

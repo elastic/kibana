@@ -27,7 +27,7 @@ import { connectorReducer } from './connector_reducer';
 import { ActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { ActionConnector, IErrorObject } from '../../../types';
 
-interface Props {
+interface ActionConnectorProps {
   initialAction: any;
   actionTypeName: string;
   setFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
@@ -37,7 +37,7 @@ export const ActionConnectorForm = ({
   initialAction,
   actionTypeName,
   setFlyoutVisibility,
-}: Props) => {
+}: ActionConnectorProps) => {
   const {
     core: { http },
     plugins: { toastNotifications },

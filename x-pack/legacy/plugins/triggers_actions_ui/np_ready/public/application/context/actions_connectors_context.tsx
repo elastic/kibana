@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { ActionType, ActionTableItem } from '../../types';
+import { ActionType } from '../../types';
 export const ActionsConnectorsContext = React.createContext({} as IActionsConnectorsContext);
 
 export interface IActionsConnectorsContext {
@@ -15,5 +15,4 @@ export interface IActionsConnectorsContext {
   setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
   actionTypesIndex: Record<string, ActionType> | undefined;
   loadActions: () => Promise<void>;
-  editedActionItem: ActionTableItem | undefined;
 }
