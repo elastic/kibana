@@ -27,7 +27,7 @@ export function registerQueryDefaultFieldRoutes(server: ServerShimWithRouter) {
         }),
         body: schema.object({
           fieldTypes: schema.arrayOf(schema.string()),
-          otherFields: schema.arrayOf(schema.string()),
+          otherFields: schema.arrayOf(schema.string(), { defaultValue: undefined }),
         }),
       },
     },

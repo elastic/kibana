@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 import minimatch from 'minimatch';
-import { SemVer } from 'semver';
+import { SemVer, valid } from 'semver';
 import { CallClusterWithRequest } from 'src/legacy/core_plugins/elasticsearch';
 
 import { EnrichedDeprecationInfo } from '../es_migration_apis';
@@ -46,7 +46,9 @@ export const isLegacyApmIndex = (
   apmIndexPatterns: string[] = [],
   mappings: FlatSettings['mappings']
 ) => {
-  const clientVersion = new SemVer(get(mappings, '_meta.version', '0.0.0'));
+  const defaultValue = '0.0.0';
+  const version = get(mappings, '_meta.version', defaultValue);
+  const clientVersion = new SemVer(valid(version) ? version : defaultValue);
 
   if (clientVersion.compareMain('7.0.0') > -1) {
     return false;
