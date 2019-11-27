@@ -17,12 +17,5 @@
  * under the License.
  */
 
-import { AppState } from '../app_state';
-import { GlobalState } from '../global_state';
-import { State } from '../state';
-
-export function getUnhashableStatesProvider(getAppState: () => AppState, globalState: GlobalState) {
-  return function getUnhashableStates(): State[] {
-    return [getAppState(), globalState].filter(Boolean);
-  };
-}
+export { hashUrl, unhashUrl } from './hash_unhash_url';
+export { createStateHash, isStateHash } from './state_hash';

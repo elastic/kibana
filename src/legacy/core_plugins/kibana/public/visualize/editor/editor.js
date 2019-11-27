@@ -39,7 +39,6 @@ import {
   getServices,
   angular,
   absoluteToParsedUrl,
-  getUnhashableStatesProvider,
   KibanaParsedUrl,
   migrateLegacyQuery,
   SavedObjectSaveModal,
@@ -165,7 +164,6 @@ function VisEditor(
   localStorage,
 ) {
   const queryFilter = Private(FilterBarQueryFilterProvider);
-  const getUnhashableStates = Private(getUnhashableStatesProvider);
 
   // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;
@@ -249,7 +247,7 @@ function VisEditor(
         anchorElement,
         allowEmbed: true,
         allowShortUrl: capabilities.visualize.createShortUrl,
-        shareableUrl: unhashUrl(window.location.href, getUnhashableStates()),
+        shareableUrl: unhashUrl(window.location.href),
         objectId: savedVis.id,
         objectType: 'visualization',
         sharingData: {

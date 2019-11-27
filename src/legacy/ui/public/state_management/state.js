@@ -37,10 +37,12 @@ import { createLegacyClass } from '../utils/legacy_class';
 import { callEach } from '../utils/function';
 
 import {
-  createStateHash,
   HashedItemStoreSingleton,
-  isStateHash,
 } from './state_storage';
+import {
+  createStateHash,
+  isStateHash
+} from './state_hashing';
 
 export function StateProvider(Private, $rootScope, $location, stateManagementConfig, config, kbnUrl, $injector) {
   const Events = Private(EventsProvider);
