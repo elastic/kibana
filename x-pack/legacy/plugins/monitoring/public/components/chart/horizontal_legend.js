@@ -69,7 +69,10 @@ export class HorizontalLegend extends React.Component {
     return (
       <EuiKeyboardAccessible key={rowIdx}>
         <EuiFlexItem grow={false}>
-          <div className={classes.join(' ')} onClick={event => this.props.onToggle(event, row.id)}>
+          <button
+            className={classes.join(' ')}
+            onClick={event => this.props.onToggle(event, row.id)}
+          >
             <span className="monRhythmChart__legendLabel">
               <EuiIcon
                 className="monRhythmChart__legendIndicator"
@@ -84,7 +87,7 @@ export class HorizontalLegend extends React.Component {
               {' ' + row.label + ' '}
             </span>
             {this.formatter(this.props.seriesValues[row.id], row)}
-          </div>
+          </button>
         </EuiFlexItem>
       </EuiKeyboardAccessible>
     );

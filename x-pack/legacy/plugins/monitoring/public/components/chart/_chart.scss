@@ -1,7 +1,5 @@
 @mixin monitoringNoUserSelect {
   user-select: none;
-  -webkit-touch-callout: none; // sass-lint:disable-line no-vendor-prefixes
-  -webkit-tap-highlight-color: transparent; // sass-lint:disable-line no-vendor-prefixes
 }
 
 .monRhythmChart__wrapper .monRhythmChart__zoom {

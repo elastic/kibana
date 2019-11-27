@@ -87,7 +87,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
           <div className="monTableCell__name">
             <EuiText size="m">
               <EuiToolTip position="bottom" content={node.nodeTypeLabel}>
-                <EuiIcon type={node.nodeTypeClass} />
+                {node.nodeTypeClass && <EuiIcon type={node.nodeTypeClass} />}
               </EuiToolTip>
               &nbsp;
               <span data-test-subj="name">{nameLink}</span>
@@ -109,11 +109,11 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
     render: value => {
       const status = value
         ? i18n.translate('xpack.monitoring.elasticsearch.nodes.statusColumn.onlineLabel', {
-            defaultMessage: 'Online',
-          })
+          defaultMessage: 'Online',
+        })
         : i18n.translate('xpack.monitoring.elasticsearch.nodes.statusColumn.offlineLabel', {
-            defaultMessage: 'Offline',
-          });
+          defaultMessage: 'Offline',
+        });
       return (
         <div className="monTableCell__status">
           <NodeStatusIcon isOnline={value} status={status} /> {status}

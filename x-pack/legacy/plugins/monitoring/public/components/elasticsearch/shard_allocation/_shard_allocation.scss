@@ -23,7 +23,7 @@
     border: 1px solid $euiColorMediumShade;
     border-radius: $euiSizeXS;
     padding: $euiSizeXS/2 0;
-
+    // SASS-TODO: Rename this class following Eui conventions
     &.index {
       border-left: $euiSizeXS solid $euiColorSuccess;
 
@@ -39,7 +39,7 @@
     .monChild__title {
       padding: $euiSizeXS $euiSizeS;
       text-align: center;
-      font-size: $euiSizeM;
+      font-size: $euiFontSizeXS;
       color: $euiColorGhost;
       display: flex;
       flex-direction: row;
@@ -60,11 +60,11 @@
   td:first-child {
     width: 200px;
   }
-
+  // SASS-TODO: Rename this class following Eui conventions
   .shard {
     align-self: center;
     padding: $euiSizeXS $euiSizeS;
-    font-size: $euiSizeM;
+    font-size: $euiFontSizeXS;
     position: relative;
     display: inline-block;
   }
