@@ -15,13 +15,13 @@ import {
   timelineSavedObjectType,
 } from './saved_objects';
 
-import { signalsAlertType } from './lib/detection_engine/alerts/signals_alert_type';
+import { rulesAlertType } from './lib/detection_engine/alerts/rules_alert_type';
 import { isAlertExecutor } from './lib/detection_engine/alerts/types';
-import { createSignalsRoute } from './lib/detection_engine/routes/create_signals_route';
-import { readSignalsRoute } from './lib/detection_engine/routes/read_signals_route';
-import { findSignalsRoute } from './lib/detection_engine/routes/find_signals_route';
-import { deleteSignalsRoute } from './lib/detection_engine/routes/delete_signals_route';
-import { updateSignalsRoute } from './lib/detection_engine/routes/update_signals_route';
+import { createRulesRoute } from './lib/detection_engine/routes/create_rules_route';
+import { readRulesRoute } from './lib/detection_engine/routes/read_rules_route';
+import { findRulesRoute } from './lib/detection_engine/routes/find_rules_route';
+import { deleteRulesRoute } from './lib/detection_engine/routes/delete_rules_route';
+import { updateRulesRoute } from './lib/detection_engine/routes/update_rules_route';
 import { ServerFacade } from './types';
 
 const APP_ID = 'siem';
@@ -33,7 +33,7 @@ export const initServerWithKibana = (
 ) => {
   if (kbnServer.plugins.alerting != null) {
     const version = kbnServer.config().get<string>('pkg.version');
-    const type = signalsAlertType({ logger, version });
+    const type = rulesAlertType({ logger, version });
     if (isAlertExecutor(type)) {
       kbnServer.plugins.alerting.setup.registerType(type);
     }
@@ -49,13 +49,13 @@ export const initServerWithKibana = (
     kbnServer.config().has('xpack.alerting.enabled') === true
   ) {
     logger.info(
-      'Detected feature flags for actions and alerting and enabling signals API endpoints'
+      'Detected feature flags for actions and alerting and enabling detection engine API endpoints'
     );
-    createSignalsRoute(kbnServer);
-    readSignalsRoute(kbnServer);
-    updateSignalsRoute(kbnServer);
-    deleteSignalsRoute(kbnServer);
-    findSignalsRoute(kbnServer);
+    createRulesRoute(kbnServer);
+    readRulesRoute(kbnServer);
+    updateRulesRoute(kbnServer);
+    deleteRulesRoute(kbnServer);
+    findRulesRoute(kbnServer);
   }
 
   const xpackMainPlugin = kbnServer.plugins.xpack_main;

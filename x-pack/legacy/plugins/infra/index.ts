@@ -8,11 +8,11 @@ import { i18n } from '@kbn/i18n';
 import JoiNamespace from 'joi';
 import { resolve } from 'path';
 import { PluginInitializerContext } from 'src/core/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import KbnServer from 'src/legacy/server/kbn_server';
 import { getConfigSchema } from './server/kibana.index';
 import { savedObjectMappings } from './server/saved_objects';
 import { plugin, InfraServerPluginDeps } from './server/new_platform_index';
-import { UsageCollector } from './server/usage/usage_collector';
 import { InfraSetup } from '../../../plugins/infra/server';
 import { getApmIndices } from '../apm/server/lib/settings/apm_indices/get_apm_indices';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../plugins/features/server';
@@ -88,6 +88,7 @@ export function infra(kibana: any) {
       } as unknown) as PluginInitializerContext;
       // NP_TODO: Use real types from the other plugins as they are migrated
       const pluginDeps: InfraServerPluginDeps = {
+        usageCollection: plugins.usageCollection as UsageCollectionSetup,
         indexPatterns: {
           indexPatternsServiceFactory: legacyServer.indexPatternsServiceFactory,
         },
@@ -115,7 +116,7 @@ export function infra(kibana: any) {
       const infraPluginInstance = plugin(initContext);
       infraPluginInstance.setup(core, pluginDeps);
 
-      // NP_TODO: EVERYTHING BELOW HERE IS LEGACY, MIGHT NEED TO MOVE SOME OF IT TO NP, NOT SURE HOW
+      // NP_TODO: EVERYTHING BELOW HERE IS LEGACY
 
       const libs = infraPluginInstance.getLibs();
 
@@ -124,9 +125,6 @@ export function infra(kibana: any) {
         'defineInternalSourceConfiguration',
         libs.sources.defineInternalSourceConfiguration.bind(libs.sources)
       );
-
-      // Register a function with server to manage the collection of usage stats
-      legacyServer.usage.collectorSet.register(UsageCollector.getUsageCollector(legacyServer));
 
       // NP_TODO: How do we move this to new platform?
       legacyServer.addAppLinksToSampleDataset('logs', [
