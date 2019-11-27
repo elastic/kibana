@@ -17,11 +17,20 @@
  * under the License.
  */
 
-export * from './saved_objects';
-export * from './exit_full_screen_button';
-export * from './context';
-export * from './overlays';
-export * from './ui_settings';
-export * from './field_icon';
-export * from './table_list_view';
-export { toMountPoint, useShallowCompareEffect } from './util';
+import { i18n } from '@kbn/i18n';
+import { RenderErrorHandlerFnType, IInterpreterRenderHandlers, RenderError } from './types';
+import { getNotifications } from './services';
+
+export const renderErrorHandler: RenderErrorHandlerFnType = (
+  element: HTMLElement,
+  error: RenderError,
+  handlers: IInterpreterRenderHandlers
+) => {
+  getNotifications().toasts.addError(error, {
+    title: i18n.translate('expressions.defaultErrorRenderer.errorTitle', {
+      defaultMessage: 'Error in visualisation',
+    }),
+    toastMessage: error.message,
+  });
+  handlers.done();
+};
