@@ -31,7 +31,7 @@ import { Vis } from '../../../../visualizations/public';
 import { tableVisTypeDefinition } from '../../table_vis_type';
 import { setup as visualizationsSetup } from '../../../../visualizations/public/np_ready/public/legacy';
 import { getAngularModule } from '../../get_inner_angular';
-import { initTableVisLegacyModule } from '../../shim/table_vis_legacy_module';
+import { initTableVisLegacyModule } from '../../angular/table_vis_legacy_module';
 
 describe('Table Vis - AggTable Directive', function () {
   let $rootScope;

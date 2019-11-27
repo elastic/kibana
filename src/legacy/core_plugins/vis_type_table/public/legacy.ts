@@ -23,15 +23,10 @@ import { plugin } from '.';
 
 import { TablePluginSetupDependencies } from './plugin';
 import { setup as visualizationsSetup } from '../../visualizations/public/np_ready/public/legacy';
-import { LegacyDependenciesPlugin } from './shim';
 
 const plugins: Readonly<TablePluginSetupDependencies> = {
   expressions: npSetup.plugins.expressions,
   visualizations: visualizationsSetup,
-
-  // Temporary solution
-  // It will be removed when all dependent services are migrated to the new platform.
-  __LEGACY: new LegacyDependenciesPlugin(),
 };
 
 const pluginInstance = plugin({} as PluginInitializerContext);

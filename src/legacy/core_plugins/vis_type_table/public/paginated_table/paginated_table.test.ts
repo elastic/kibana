@@ -25,7 +25,7 @@ import 'angular-mocks';
 import '../table_vis.mock';
 
 import { getAngularModule } from '../get_inner_angular';
-import { initTableVisLegacyModule } from '../shim/table_vis_legacy_module';
+import { initTableVisLegacyModule } from '../angular/table_vis_legacy_module';
 import { npStart } from '../legacy_imports';
 
 interface Sort {
