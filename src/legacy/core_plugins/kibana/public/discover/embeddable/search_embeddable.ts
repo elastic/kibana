@@ -22,6 +22,7 @@ import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
 import { npStart } from 'ui/new_platform';
+import { SearchSourceContract } from '../../../../../ui/public/courier';
 import {
   esFilters,
   TimeRange,
@@ -51,7 +52,6 @@ import {
   getServices,
   IndexPattern,
   RequestAdapter,
-  SearchSource,
 } from '../kibana_services';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 
@@ -92,7 +92,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   private inspectorAdaptors: Adapters;
   private searchScope?: SearchScope;
   private panelTitle: string = '';
-  private filtersSearchSource?: SearchSource;
+  private filtersSearchSource?: SearchSourceContract;
   private searchInstance?: JQLite;
   private autoRefreshFetchSubscription?: Subscription;
   private subscription?: Subscription;
@@ -194,13 +194,11 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     searchScope.inspectorAdapters = this.inspectorAdaptors;
 
     const { searchSource } = this.savedSearch;
-    const indexPattern = (searchScope.indexPattern = searchSource.getField('index'));
+    const indexPattern = (searchScope.indexPattern = searchSource.getField('index'))!;
 
     const timeRangeSearchSource = searchSource.create();
     timeRangeSearchSource.setField('filter', () => {
-      if (!this.searchScope || !this.input.timeRange) {
-        return;
-      }
+      if (!this.searchScope || !this.input.timeRange) return;
       return getTime(indexPattern, this.input.timeRange);
     });
 
@@ -241,7 +239,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     };
 
     searchScope.filter = async (field, value, operator) => {
-      let filters = generateFilters(this.filterManager, field, value, operator, indexPattern.id);
+      let filters = generateFilters(this.filterManager, field, value, operator, indexPattern.id!);
       filters = filters.map(filter => ({
         ...filter,
         $state: { store: esFilters.FilterStateStore.APP_STATE },

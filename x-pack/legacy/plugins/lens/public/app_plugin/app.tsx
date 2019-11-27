@@ -10,7 +10,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { Query, DataPublicPluginStart } from 'src/plugins/data/public';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
-import { CoreStart, NotificationsStart } from 'src/core/public';
+import { AppMountContext, NotificationsStart } from 'src/core/public';
 import {
   DataStart,
   IndexPattern as IndexPatternInstance,
@@ -55,7 +55,7 @@ export function App({
 }: {
   editorFrame: EditorFrameInstance;
   data: DataPublicPluginStart;
-  core: CoreStart;
+  core: AppMountContext['core'];
   dataShim: DataStart;
   storage: IStorageWrapper;
   docId?: string;

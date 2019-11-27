@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, SFC } from 'react';
+import React, { useState, useEffect, FC } from 'react';
 import {
   EuiBasicTable,
   // @ts-ignore
@@ -97,7 +97,7 @@ function useGetAgentEvents(
   return { ...state, refresh: fetchAgentEvents };
 }
 
-export const AgentEventsTable: SFC<{ agent: Agent }> = ({ agent }) => {
+export const AgentEventsTable: FC<{ agent: Agent }> = ({ agent }) => {
   const { pageSizeOptions, pagination, setPagination } = usePagination();
   const { search, setSearch } = useSearch();
 

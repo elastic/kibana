@@ -69,10 +69,12 @@ export interface ReturnTypeBulkUpsert extends BaseReturnType {
 }
 
 // list
+
 export interface ReturnTypeList<T> extends BaseReturnType {
   list: T[];
   page: number;
   total: number;
+  perPage: number;
 }
 
 // get

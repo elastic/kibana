@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Policies Lib getWithAgentFormating Should return a policy with all datasource, formatted for agent 1`] = `
+Object {
+  "outputs": Object {
+    "default": Object {
+      "api_token": "slfhsdlfhjjkshfkjh:sdfsdfsdfsdf",
+      "id": "default",
+      "name": "Default",
+      "tlsCert": "ldsjfldsjfljsdalkfjl;ksadh;kjsdha;kjhslgkjhsdalkghasdkgh",
+      "type": "elasticsearch",
+      "url": "https://localhost:9200",
+    },
+  },
+  "streams": Array [
+    Object {
+      "id": "string",
+      "metricsets": Array [
+        "container",
+        "cpu",
+      ],
+      "output": Object {
+        "use_output": "default",
+      },
+      "type": "etc",
+    },
+  ],
+}
+`;

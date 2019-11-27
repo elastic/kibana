@@ -44,14 +44,7 @@ export default function({ getService }: FtrProviderContext) {
 
         expect(apiResponse.success).to.eql(true);
         expect(apiResponse).to.have.keys('success', 'item', 'action');
-        expect(apiResponse.item).to.have.keys(
-          'id',
-          'shared_id',
-          'version',
-          'name',
-          'status',
-          'description'
-        );
+        expect(apiResponse.item).to.have.keys('id', 'name', 'status', 'description');
       });
     });
     describe('GET /api/ingest/policies', () => {
@@ -61,7 +54,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(apiResponse).to.have.keys('success', 'page', 'total', 'list');
         expect(apiResponse.success).to.eql(true);
         const policiesIds = (apiResponse.list as Array<{ id: string }>).map(i => i.id);
-        expect(policiesIds.length).to.eql(2);
+        expect(policiesIds.length).to.eql(3);
         expect(policiesIds).to.contain('1');
         expect(policiesIds).to.contain('3');
       });

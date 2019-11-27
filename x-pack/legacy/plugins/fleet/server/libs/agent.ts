@@ -6,26 +6,29 @@
 
 import Boom from 'boom';
 import uuid from 'uuid/v4';
+import { FrameworkUser } from '../adapters/framework/adapter_types';
 import {
-  AgentsRepository,
   Agent,
-  SortOptions,
-  NewAgent,
-  AgentType,
   AgentAction,
   AgentActionType,
+  AgentsRepository,
+  AgentType,
+  NewAgent,
+  SortOptions,
 } from '../repositories/agents/types';
+import { AgentEvent, AgentEventsRepository } from '../repositories/agent_events/types';
+import { AgentPolicy } from '../repositories/policies/types';
 import { ApiKeyLib } from './api_keys';
 import { PolicyLib } from './policy';
-import { FullPolicyFile } from '../repositories/policies/types';
-import { FrameworkUser } from '../adapters/framework/adapter_types';
-import { AgentEventsRepository, AgentEvent } from '../repositories/agent_events/types';
+import { AgentStatusHelper } from './agent_status_helper';
 
 export class AgentLib {
   constructor(
     private readonly agentsRepository: AgentsRepository,
     private readonly agentEventsRepository: AgentEventsRepository,
     private readonly apiKeys: ApiKeyLib,
+    // TODO remove will be used later
+    // @ts-ignore
     private readonly policies: PolicyLib
   ) {}
 
@@ -204,7 +207,7 @@ export class AgentLib {
     user: FrameworkUser,
     events: AgentEvent[],
     localMetadata?: any
-  ): Promise<{ actions: AgentAction[]; policy: FullPolicyFile | null }> {
+  ): Promise<{ actions: AgentAction[]; policy: AgentPolicy | null }> {
     const res = await this.apiKeys.verifyAccessApiKey(user);
     if (!res.valid) {
       throw Boom.unauthorized('Invalid apiKey');
@@ -236,13 +239,12 @@ export class AgentLib {
       updateData.local_metadata = localMetadata;
     }
 
-    const policy = agent.policy_id ? await this.policies.getFullPolicy(agent.policy_id) : null;
     await this.agentsRepository.update(internalUser, agent.id, updateData);
     if (events.length > 0) {
       await this.agentEventsRepository.createEventsForAgent(internalUser, agent.id, events);
     }
 
-    return { actions, policy };
+    return { actions, policy: null };
   }
 
   public async addAction(
@@ -269,10 +271,33 @@ export class AgentLib {
     return action;
   }
 
+  public async getAgentsStatusForPolicy(user: FrameworkUser, policyId: string) {
+    const [all, error, offline] = await Promise.all(
+      [
+        undefined,
+        AgentStatusHelper.buildKueryForErrorAgents(),
+        AgentStatusHelper.buildKueryForOfflineAgents(),
+      ].map(kuery => {
+        return this.agentsRepository.listForPolicy(user, policyId, {
+          perPage: 0,
+          kuery,
+        });
+      })
+    );
+
+    return {
+      total: all.total,
+      online: all.total - error.total - offline.total,
+      error: error.total,
+      offline: offline.total,
+    };
+  }
+
   /**
    * List agents
    *
    * @param sortOptions
+   *
    * @param page
    * @param perPage
    */

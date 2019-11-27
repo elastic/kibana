@@ -48,7 +48,7 @@ import {
 // @ts-ignore
 import { initDashboardApp } from './legacy_app';
 import { DataStart } from '../../../data/public';
-import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public';
+import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
 import { NavigationStart } from '../../../navigation/public';
 import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
@@ -68,7 +68,7 @@ export interface RenderDeps {
   chrome: ChromeStart;
   addBasePath: (path: string) => string;
   savedQueryService: DataStart['search']['services']['savedQueryService'];
-  embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
+  embeddables: IEmbeddableStart;
   localStorage: Storage;
   share: SharePluginStart;
 }
@@ -134,6 +134,7 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
     'app/dashboard/State',
     'app/dashboard/ConfirmModal',
     'app/dashboard/icon',
+    'app/dashboard/emptyScreen',
   ]);
   return dashboardAngularModule;
 }

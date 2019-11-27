@@ -5,13 +5,14 @@
  */
 
 import Slapshot from '@mattapperson/slapshot';
-import { Agent } from '../repositories/agents/types';
+import { SavedObject } from 'kibana/server';
 import { FrameworkUser, internalAuthData } from '../adapters/framework/adapter_types';
-import { compose } from './compose/memorized';
-import { FleetServerLib } from './types';
 import { SODatabaseAdapter } from '../adapters/saved_objects_database/default';
 import { MemorizeSODatabaseAdapter } from '../adapters/saved_objects_database/memorize_adapter';
-import { SavedObject } from 'kibana/server';
+import { Agent } from '../repositories/agents/types';
+import { compose } from './compose/memorized';
+import { FleetServerLib } from './types';
+import { AGENT_POLLING_THRESHOLD_MS } from '../../common/constants';
 
 jest.mock('./api_keys');
 jest.mock('./policy');
@@ -325,26 +326,6 @@ describe('Agent lib', () => {
       });
     });
 
-    it('should return the full policy for this agent', async () => {
-      const { agents } = libs;
-      await loadFixtures([
-        {
-          local_metadata: { key: 'local1' },
-          user_provided_metadata: { key: 'user1' },
-          actions: [],
-          active: true,
-          policy_id: 'policy:1',
-          access_api_key_id: 'key1',
-        },
-      ]);
-
-      const { policy } = await agents.checkin(getUser('VALID_KEY', 'key1'), []);
-
-      expect(policy).toMatchObject({
-        id: 'policy:1',
-      });
-    });
-
     it('should update agent metadata if provided', async () => {
       const { agents } = libs;
       const [agentId] = await loadFixtures([
@@ -469,6 +450,75 @@ describe('Agent lib', () => {
           type: 'PAUSE',
         })
       ).rejects.toThrowError(/Agent not found/);
+    });
+  });
+
+  describe('getAgentsStatusForPolicy', () => {
+    it('should return all agents', async () => {
+      const { agents } = libs;
+      const policyId = 'policy:1';
+      await loadFixtures([
+        // Other policies
+        {
+          type: 'PERMANENT',
+          active: true,
+          policy_id: 'policy:2',
+        },
+        {
+          type: 'PERMANENT',
+          active: true,
+          policy_id: 'policy:3',
+        },
+        {
+          type: 'TEMPORARY',
+          active: true,
+          policy_id: 'policy:3',
+        },
+        // PERMANENT
+        // ERROR
+        {
+          type: 'PERMANENT',
+          active: true,
+          policy_id: policyId,
+          last_checkin: new Date(Date.now() - AGENT_POLLING_THRESHOLD_MS * 10).toISOString(),
+        },
+        // ACTIVE
+        {
+          type: 'PERMANENT',
+          active: true,
+          policy_id: policyId,
+          last_checkin: new Date().toISOString(),
+        },
+        {
+          type: 'PERMANENT',
+          active: true,
+          policy_id: policyId,
+          last_checkin: new Date().toISOString(),
+        },
+        // TEMPORARY
+        // OFFLINE
+        {
+          type: 'TEMPORARY',
+          active: true,
+          policy_id: policyId,
+          last_checkin: new Date(Date.now() - AGENT_POLLING_THRESHOLD_MS * 10).toISOString(),
+        },
+        // Active
+        {
+          type: 'TEMPORARY',
+          active: true,
+          policy_id: policyId,
+          last_checkin: new Date().toISOString(),
+        },
+      ]);
+
+      const res = await agents.getAgentsStatusForPolicy(getUser(), policyId);
+      expect(res).toMatchObject({
+        total: 5,
+        online: 3,
+        error: 1,
+        offline: 1,
+      });
     });
   });
 });

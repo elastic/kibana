@@ -16,3 +16,26 @@ exports['AgentsEventsRepository Api Keys allow to create and delete an api key -
     "error_count": 0
   }
 }
+
+exports['AgentsEventsRepository Api Keys allow to create and delete an api key - createApiKey (1)'] = {
+  "thrownError": "{\"msg\":\"[illegal_state_exception] api keys are not enabled\",\"path\":\"/_security/api_key\",\"body\":\"{\\\"name\\\":\\\"test api key\\\"}\",\"statusCode\":500,\"response\":\"{\\\"error\\\":{\\\"root_cause\\\":[{\\\"type\\\":\\\"illegal_state_exception\\\",\\\"reason\\\":\\\"api keys are not enabled\\\"}],\\\"type\\\":\\\"illegal_state_exception\\\",\\\"reason\\\":\\\"api keys are not enabled\\\"},\\\"status\\\":500}\"}",
+  "results": null
+}
+
+exports['AgentsEventsRepository Api Keys allow to create and delete an api key - createApiKey (1)'] = {
+  "results": {
+    "id": "QM_-o24B7IgcxoUv9V2g",
+    "name": "test api key",
+    "api_key": "5LiA_OxcRY6Cj5yFNf-pJw"
+  }
+}
+
+exports['AgentsEventsRepository Api Keys allow to create and delete an api key - deleteApiKey (2)'] = {
+  "results": {
+    "invalidated_api_keys": [
+      "QM_-o24B7IgcxoUv9V2g"
+    ],
+    "previously_invalidated_api_keys": [],
+    "error_count": 0
+  }
+}

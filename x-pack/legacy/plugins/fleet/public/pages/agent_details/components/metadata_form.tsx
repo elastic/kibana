@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC, useState } from 'react';
+import React, { FC, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
@@ -86,7 +86,7 @@ function useAddMetadataForm(agent: Agent, done: () => void) {
   };
 }
 
-export const MetadataForm: SFC<{ agent: Agent }> = ({ agent }) => {
+export const MetadataForm: FC<{ agent: Agent }> = ({ agent }) => {
   const [isOpen, setOpen] = useState(false);
 
   const form = useAddMetadataForm(agent, () => {

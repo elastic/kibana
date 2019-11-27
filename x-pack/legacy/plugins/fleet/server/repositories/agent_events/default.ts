@@ -46,7 +46,7 @@ export class AgentEventsRepository implements AgentEventsRepositoryType {
       perPage?: number;
     } = {
       page: 1,
-      perPage: 25,
+      perPage: 20,
     }
   ) {
     const { page, perPage, search } = options;

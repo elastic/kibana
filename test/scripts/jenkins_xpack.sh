@@ -6,7 +6,7 @@ export TEST_BROWSER_HEADLESS=1
 
 echo " -> Running mocha tests"
 cd "$XPACK_DIR"
-checks-reporter-with-killswitch "X-Pack Mocha" yarn test
+checks-reporter-with-killswitch "X-Pack Karma Tests" yarn test:browser
 echo ""
 echo ""
 
@@ -23,11 +23,11 @@ echo ""
 echo ""
 
 # FAILING: https://github.com/elastic/kibana/issues/44250
-# echo " -> Running jest contracts tests"
-# cd "$XPACK_DIR"
-# SLAPSHOT_ONLINE=true CONTRACT_ONLINE=true node scripts/jest_contract.js --ci --verbose
-# echo ""
-# echo ""
+echo " -> Running jest contracts tests"
+cd "$XPACK_DIR"
+SLAPSHOT_ONLINE=true CONTRACT_ONLINE=true node scripts/jest_contract.js --ci --verbose
+echo ""
+echo ""
 
 # echo " -> Running jest integration tests"
 # cd "$XPACK_DIR"

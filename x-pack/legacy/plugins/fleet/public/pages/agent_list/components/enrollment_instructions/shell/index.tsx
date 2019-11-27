@@ -3,21 +3,21 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, Fragment } from 'react';
 import {
-  EuiFieldText,
-  EuiCopy,
   EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiCopy,
+  EuiFieldText,
   EuiPopover,
   EuiSpacer,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Fragment, useState } from 'react';
 import { ManualEnrollmentInstructions, ManualEnrollmentSteps } from '../';
-import * as MAC_COMMANDS from './mac_commands';
 import { EnrollmentApiKey } from '../../../../../../common/types/domain_data';
+import * as MAC_COMMANDS from './mac_commands';
 
 // No need for i18n as these are platform names
 const PLATFORMS = {
@@ -60,7 +60,7 @@ interface Props {
   apiKey: EnrollmentApiKey;
 }
 
-export const ShellEnrollmentInstructions: React.SFC<Props> = ({ kibanaUrl, apiKey }) => {
+export const ShellEnrollmentInstructions: React.FC<Props> = ({ kibanaUrl, apiKey }) => {
   // Platform state
   const [currentPlatform, setCurrentPlatform] = useState<keyof typeof PLATFORMS>('macos');
   const [isPlatformOptionsOpen, setIsPlatformOptionsOpen] = useState<boolean>(false);

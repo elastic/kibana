@@ -14,7 +14,7 @@ import { usePagination } from '../../../../hooks/use_pagination';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 import { CreateApiKeyForm } from './create_api_key_form';
 
-export const EnrollmentApiKeysTable: React.SFC = () => {
+export const EnrollmentApiKeysTable: React.FC = () => {
   const { enrollmentApiKeys } = useLibs();
   const [confirmDeleteApiKeyId, setConfirmDeleteApiKeyId] = useState<string | null>(null);
   const { pagination } = usePagination();
@@ -85,7 +85,7 @@ export const EnrollmentApiKeysTable: React.SFC = () => {
   );
 };
 
-const CreateApiKeyButton: React.SFC<{ onChange: () => void }> = ({ onChange }) => {
+const CreateApiKeyButton: React.FC<{ onChange: () => void }> = ({ onChange }) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
   return (
@@ -118,7 +118,7 @@ const CreateApiKeyButton: React.SFC<{ onChange: () => void }> = ({ onChange }) =
   return <></>;
 };
 
-const ApiKeyField: React.SFC<{ apiKeyId: string }> = ({ apiKeyId }) => {
+const ApiKeyField: React.FC<{ apiKeyId: string }> = ({ apiKeyId }) => {
   const [visible, setVisible] = useState(false);
   const { data } = useEnrollmentApiKey(apiKeyId);
 

@@ -44,7 +44,7 @@ export class HapiFrameworkAdapter {
     return isAuthenticated
       ? {
           kind: 'authenticated',
-          [internalAuthData]: request.headers,
+          [internalAuthData]: request,
           username: 'elastic',
           roles: ['superuser'],
           full_name: null,
