@@ -19,7 +19,13 @@
 
 // /// Define plugin function
 import { DataPlugin as Plugin, DataSetup, DataStart } from './plugin';
-import { IndexPattern as npIndexPattern } from '../../../../plugins/data/public';
+import {
+  IndexPattern as npIndexPattern,
+  Field,
+  FieldListInterface,
+  IFieldType,
+  FieldList,
+} from '../../../../plugins/data/public';
 
 export function plugin() {
   return new Plugin();
@@ -30,14 +36,7 @@ export function plugin() {
 /** @public types */
 export { DataSetup, DataStart };
 
-export {
-  Field,
-  FieldType,
-  FieldListInterface,
-  IndexPattern,
-  IndexPatterns,
-  StaticIndexPattern,
-} from './index_patterns';
+export { IndexPattern, IndexPatterns, StaticIndexPattern } from './index_patterns';
 export { QueryBarInput } from './query';
 export { SearchBar, SearchBarProps, SavedQueryAttributes, SavedQuery } from './search';
 
@@ -58,6 +57,8 @@ const ILLEGAL_CHARACTERS = npIndexPattern.ILLEGAL_CHARACTERS_KEY;
 const INDEX_PATTERN_ILLEGAL_CHARACTERS = npIndexPattern.ILLEGAL_CHARACTERS;
 const INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE = npIndexPattern.ILLEGAL_CHARACTERS_VISIBLE;
 
+export { IFieldType as FieldType };
+
 export {
   CONTAINS_SPACES,
   getFromSavedObject,
@@ -71,4 +72,7 @@ export {
   IndexPatternMissingIndices,
   NoDefaultIndexPattern,
   NoDefinedIndexPatterns,
+  Field,
+  FieldListInterface,
+  FieldList,
 };

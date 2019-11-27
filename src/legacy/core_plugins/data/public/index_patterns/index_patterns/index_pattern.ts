@@ -34,8 +34,15 @@ import {
   IIndexPattern,
 } from '../../../../../../plugins/data/public';
 
-import { getRoutes, findIndexPatternByTitle, IndexPatternMissingIndices } from '../../';
-import { Field, FieldList, FieldListInterface, FieldType } from '../fields';
+import {
+  getRoutes,
+  findIndexPatternByTitle,
+  IndexPatternMissingIndices,
+  Field,
+  FieldList,
+  FieldListInterface,
+  FieldType,
+} from '../../';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
@@ -113,6 +120,7 @@ export class IndexPattern implements IIndexPattern {
     this.shortDotsEnable = this.getConfig('shortDots:enable');
     this.metaFields = this.getConfig('metaFields');
 
+    // @ts-ignore
     this.fields = new FieldList(this, [], this.shortDotsEnable);
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, this.getConfig('metaFields'));
     this.flattenHit = flattenHitWrapper(this, this.getConfig('metaFields'));
@@ -138,6 +146,7 @@ export class IndexPattern implements IIndexPattern {
   private initFields(input?: any) {
     const newValue = input || this.fields;
 
+    // @ts-ignore
     this.fields = new FieldList(this, newValue, this.shortDotsEnable);
   }
 
@@ -277,6 +286,7 @@ export class IndexPattern implements IIndexPattern {
 
     this.fields.add(
       new Field(
+        // @ts-ignore
         this,
         {
           name,

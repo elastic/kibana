@@ -24,7 +24,7 @@ import {
   NotificationsStart,
 } from 'src/core/public';
 import { FieldFormatsStart } from '../../../../../plugins/data/public';
-import { Field, FieldList, FieldListInterface, FieldType } from './fields';
+import { Field, FieldList } from '../';
 import { setNotifications, setFieldFormats } from './services';
 
 import {
@@ -93,4 +93,4 @@ export type IndexPatternsSetup = ReturnType<IndexPatternsService['setup']>;
 export type IndexPatternsStart = ReturnType<IndexPatternsService['start']>;
 
 /** @public */
-export { IndexPattern, IndexPatterns, StaticIndexPattern, Field, FieldType, FieldListInterface };
+export { IndexPattern, IndexPatterns, StaticIndexPattern };

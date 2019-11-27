@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { IndexPatternsService, IndexPatternsSetup } from './index_patterns_service';
+import { IndexPatternsService } from './index_patterns_service';
 import { flattenHitWrapper } from './index_patterns';
+import { IndexPatternsSetup } from './types';
 
 type IndexPatternsServiceClientContract = PublicMethodsOf<IndexPatternsService>;
 

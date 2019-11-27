@@ -37,5 +37,9 @@ export { IRequestTypesMap, IResponseTypesMap } from './search';
 export * from './search';
 export * from './query';
 export { IndexPattern } from './index_patterns';
+/**
+ * TODO: Temporary
+ */
+export { Field, FieldListInterface, FieldList } from './index_patterns/fields';
 
 export * from './ui';
