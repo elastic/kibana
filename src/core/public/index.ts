@@ -87,7 +87,7 @@ export {
   AppMountParameters,
   AppStatus,
   AppUpdatableFields,
-  AppStatusUpdater,
+  AppUpdater,
 } from './application';
 
 export {

@@ -21,8 +21,8 @@ export interface AppBase
 |  [icon](./kibana-plugin-public.appbase.icon.md) | <code>string</code> | A URL to an image file used as an icon. Used as a fallback if <code>euiIconType</code> is not provided. |
 |  [id](./kibana-plugin-public.appbase.id.md) | <code>string</code> | The unique identifier of the application |
 |  [order](./kibana-plugin-public.appbase.order.md) | <code>number</code> | An ordinal used to sort nav links relative to one another for display. |
-|  [status](./kibana-plugin-public.appbase.status.md) | <code>AppStatus</code> | The status of the application. |
-|  [statusUpdater$](./kibana-plugin-public.appbase.statusupdater_.md) | <code>Observable&lt;AppStatusUpdater&gt;</code> | An [AppStatusUpdater](./kibana-plugin-public.appstatusupdater.md) observable that can be used to update the application [AppUpdatableFields](./kibana-plugin-public.appupdatablefields.md) at runtime. |
+|  [status](./kibana-plugin-public.appbase.status.md) | <code>AppStatus</code> | The initial status of the application. Defaulting to <code>accessible</code> |
 |  [title](./kibana-plugin-public.appbase.title.md) | <code>string</code> | The title of the application. |
 |  [tooltip](./kibana-plugin-public.appbase.tooltip.md) | <code>string</code> | A tooltip shown when hovering over app link. |
+|  [updater$](./kibana-plugin-public.appbase.updater_.md) | <code>Observable&lt;AppUpdater&gt;</code> | An [AppUpdater](./kibana-plugin-public.appupdater.md) observable that can be used to update the application [AppUpdatableFields](./kibana-plugin-public.appupdatablefields.md) at runtime. |
 

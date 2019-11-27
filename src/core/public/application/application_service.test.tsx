@@ -27,7 +27,7 @@ import { contextServiceMock } from '../context/context_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { take } from 'rxjs/operators';
 import { BehaviorSubject, of } from 'rxjs';
-import { AppStatus, AppStatusUpdater, InternalApplicationSetup } from './types';
+import { AppStatus, AppUpdater, InternalApplicationSetup } from './types';
 import { ContextSetup, HttpSetup } from 'kibana/public';
 import { InjectedMetadataSetup } from '../injected_metadata';
 
@@ -70,8 +70,8 @@ describe('ApplicationService', () => {
         const setup = service.setup({ context });
 
         const pluginId = Symbol('plugin');
-        const statusUpdater$ = new BehaviorSubject<AppStatusUpdater>(app => ({}));
-        setup.register(pluginId, { id: 'app1', statusUpdater$ } as any);
+        const updater$ = new BehaviorSubject<AppUpdater>(app => ({}));
+        setup.register(pluginId, { id: 'app1', updater$ } as any);
         setup.register(pluginId, { id: 'app2' } as any);
         const { availableApps$ } = await service.start({ http, injectedMetadata });
 
@@ -90,7 +90,7 @@ describe('ApplicationService', () => {
           }
         `);
 
-        statusUpdater$.next(app => ({
+        updater$.next(app => ({
           status: AppStatus.inaccessibleWithDisabledNavLink,
           tooltip: 'App inaccessible due to reason',
         }));
@@ -142,8 +142,8 @@ describe('ApplicationService', () => {
         const pluginId = Symbol('plugin');
         setup.register(pluginId, { id: 'app1' } as any);
         setup.register(pluginId, { id: 'app2' } as any);
-        setup.registerAppStatusUpdater(
-          new BehaviorSubject<AppStatusUpdater>(app => {
+        setup.registerAppUpdater(
+          new BehaviorSubject<AppUpdater>(app => {
             if (app.id === 'app1') {
               return {
                 status: AppStatus.inaccessibleWithDisabledNavLink,
@@ -172,18 +172,18 @@ describe('ApplicationService', () => {
         `);
       });
 
-      it('properly combine with application statusUpdater$', async () => {
+      it(`properly combine with application's updater$`, async () => {
         const setup = service.setup({ context });
 
         const pluginId = Symbol('plugin');
-        const appStatusUpdater$ = new BehaviorSubject<AppStatusUpdater>(app => ({
+        const appStatusUpdater$ = new BehaviorSubject<AppUpdater>(app => ({
           status: AppStatus.inaccessibleWithDisabledNavLink,
         }));
-        setup.register(pluginId, { id: 'app1', statusUpdater$: appStatusUpdater$ } as any);
+        setup.register(pluginId, { id: 'app1', updater$: appStatusUpdater$ } as any);
         setup.register(pluginId, { id: 'app2' } as any);
 
-        setup.registerAppStatusUpdater(
-          new BehaviorSubject<AppStatusUpdater>(app => {
+        setup.registerAppUpdater(
+          new BehaviorSubject<AppUpdater>(app => {
             if (app.id === 'app1') {
               return {
                 tooltip: 'App inaccessible due to reason',
@@ -215,8 +215,8 @@ describe('ApplicationService', () => {
         const pluginId = Symbol('plugin');
         setup.register(pluginId, { id: 'app1' } as any);
         setup.register(pluginId, { id: 'app2' } as any);
-        setup.registerAppStatusUpdater(
-          new BehaviorSubject<AppStatusUpdater>(app => {
+        setup.registerAppUpdater(
+          new BehaviorSubject<AppUpdater>(app => {
             if (app.id === 'app1') {
               return {
                 status: AppStatus.inaccessible,
@@ -243,15 +243,15 @@ describe('ApplicationService', () => {
 
         const pluginId = Symbol('plugin');
         setup.register(pluginId, { id: 'app1' } as any);
-        setup.registerAppStatusUpdater(
-          new BehaviorSubject<AppStatusUpdater>(app => {
+        setup.registerAppUpdater(
+          new BehaviorSubject<AppUpdater>(app => {
             return {
               status: AppStatus.inaccessibleWithDisabledNavLink,
             };
           })
         );
-        setup.registerAppStatusUpdater(
-          new BehaviorSubject<AppStatusUpdater>(app => {
+        setup.registerAppUpdater(
+          new BehaviorSubject<AppUpdater>(app => {
             return {
               status: AppStatus.accessible,
             };
@@ -277,12 +277,12 @@ describe('ApplicationService', () => {
         const pluginId = Symbol('plugin');
         setup.register(pluginId, { id: 'app1' } as any);
 
-        const statusUpdater = new BehaviorSubject<AppStatusUpdater>(app => {
+        const statusUpdater = new BehaviorSubject<AppUpdater>(app => {
           return {
             status: AppStatus.inaccessibleWithDisabledNavLink,
           };
         });
-        setup.registerAppStatusUpdater(statusUpdater);
+        setup.registerAppUpdater(statusUpdater);
 
         const start = await service.start({ http, injectedMetadata });
 
@@ -324,8 +324,8 @@ describe('ApplicationService', () => {
 
         setup.registerLegacyApp({ id: 'app1' } as any);
 
-        setup.registerAppStatusUpdater(
-          new BehaviorSubject<AppStatusUpdater>(app => {
+        setup.registerAppUpdater(
+          new BehaviorSubject<AppUpdater>(app => {
             return {
               status: AppStatus.inaccessibleWithDisabledNavLink,
               tooltip: 'App inaccessible due to reason',
@@ -481,7 +481,7 @@ describe('ApplicationService', () => {
 
       //
       it('throws if application is inaccessible', async () => {
-        setup.registerAppStatusUpdater(
+        setup.registerAppUpdater(
           of(app => {
             if (app.id === 'myTestApp') {
               return {

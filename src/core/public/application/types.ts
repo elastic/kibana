@@ -44,15 +44,16 @@ export interface AppBase {
   title: string;
 
   /**
-   * The status of the application.
+   * The initial status of the application.
+   * Defaulting to `accessible`
    */
   status?: AppStatus;
 
   /**
-   * An {@link AppStatusUpdater} observable that can be used to update
+   * An {@link AppUpdater} observable that can be used to update
    * the application {@link AppUpdatableFields} at runtime.
    */
-  statusUpdater$?: Observable<AppStatusUpdater>;
+  updater$?: Observable<AppUpdater>;
 
   /**
    * An ordinal used to sort nav links relative to one another for display.
@@ -117,16 +118,17 @@ export enum AppStatus {
 }
 
 /**
- * Defines the list of fields that can be updated via an {@link AppStatusUpdater}.
+ * Defines the list of fields that can be updated via an {@link AppUpdater}.
  * @public
  */
 export type AppUpdatableFields = Pick<AppBase, 'status' | 'tooltip'>;
 
 /**
- * Status updater for applications.
+ * Updater for applications.
+ * see {@link ApplicationSetup}∏
  * @public
  */
-export type AppStatusUpdater = (app: AppBase) => Partial<AppUpdatableFields> | undefined;
+export type AppUpdater = (app: AppBase) => Partial<AppUpdatableFields> | undefined;
 
 /**
  * Extension of {@link AppBase | common app properties} with the mount function.
@@ -255,12 +257,12 @@ export interface ApplicationSetup {
   register(app: App): void;
 
   /**
-   * Register an application status updater that can be used to change the {@link AppUpdatableFields} fields
+   * Register an application updater that can be used to change the {@link AppUpdatableFields} fields
    * of all applications at runtime.
    *
-   * @param statusUpdater$
+   * @param appUpdater$
    */
-  registerAppStatusUpdater(statusUpdater$: Observable<AppStatusUpdater>): void;
+  registerAppUpdater(appUpdater$: Observable<AppUpdater>): void;
 
   /**
    * Register a context provider for application mounting. Will only be available to applications that depend on the
@@ -276,19 +278,13 @@ export interface ApplicationSetup {
 }
 
 /** @internal */
-export interface InternalApplicationSetup {
+export interface InternalApplicationSetup extends Pick<ApplicationSetup, 'registerAppUpdater'> {
   /**
    * Register an mountable application to the system.
    * @param plugin - opaque ID of the plugin that registers this application
    * @param app
    */
   register(plugin: PluginOpaqueId, app: App): void;
-
-  /**
-   * TODO
-   * @param statusUpdater$
-   */
-  registerAppStatusUpdater(statusUpdater$: Observable<AppStatusUpdater>): void;
 
   /**
    * Register metadata about legacy applications. Legacy apps will not be mounted when navigated to.

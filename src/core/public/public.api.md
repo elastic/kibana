@@ -32,15 +32,15 @@ export interface AppBase {
     legacy?: boolean;
     order?: number;
     status?: AppStatus;
-    statusUpdater$?: Observable<AppStatusUpdater>;
     title: string;
     tooltip?: string;
+    updater$?: Observable<AppUpdater>;
 }
 
 // @public (undocumented)
 export interface ApplicationSetup {
     register(app: App): void;
-    registerAppStatusUpdater(statusUpdater$: Observable<AppStatusUpdater>): void;
+    registerAppUpdater(appUpdater$: Observable<AppUpdater>): void;
     registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<App['mount'], T>): void;
 }
 
@@ -88,13 +88,13 @@ export enum AppStatus {
 }
 
 // @public
-export type AppStatusUpdater = (app: AppBase) => Partial<AppUpdatableFields> | undefined;
-
-// @public
 export type AppUnmount = () => void;
 
 // @public
 export type AppUpdatableFields = Pick<AppBase, 'status' | 'tooltip'>;
+
+// @public
+export type AppUpdater = (app: AppBase) => Partial<AppUpdatableFields> | undefined;
 
 // @public
 export interface Capabilities {

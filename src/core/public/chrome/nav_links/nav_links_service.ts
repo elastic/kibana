@@ -22,7 +22,7 @@ import { BehaviorSubject, ReplaySubject, Observable, combineLatest } from 'rxjs'
 import { map, takeUntil } from 'rxjs/operators';
 import { NavLinkWrapper, ChromeNavLinkUpdateableFields, ChromeNavLink } from './nav_link';
 import { App, AppStatus, InternalApplicationStart, LegacyApp } from '../../application';
-import { HttpStart } from '../../http';
+import { HttpStart, IBasePath } from '../../http';
 
 interface StartDeps {
   application: InternalApplicationStart;
@@ -106,20 +106,7 @@ export class NavLinksService {
         return new Map(
           [...apps]
             .filter(([, app]) => !app.chromeless)
-            .map(
-              ([appId, app]) =>
-                [
-                  appId,
-                  new NavLinkWrapper({
-                    ...app,
-                    disabled: app.status === AppStatus.inaccessibleWithDisabledNavLink,
-                    legacy: isLegacyApp(app),
-                    baseUrl: isLegacyApp(app)
-                      ? relativeToAbsolute(http.basePath.prepend(app.appUrl))
-                      : relativeToAbsolute(http.basePath.prepend(`/app/${appId}`)),
-                  }),
-                ] as [string, NavLinkWrapper]
-            )
+            .map(([appId, app]) => [appId, toNavLink(app, http.basePath)])
         );
       })
     );
@@ -199,6 +186,17 @@ export class NavLinksService {
   public stop() {
     this.stop$.next();
   }
+}
+
+function toNavLink(app: App | LegacyApp, basePath: IBasePath): NavLinkWrapper {
+  return new NavLinkWrapper({
+    ...app,
+    disabled: app.status === AppStatus.inaccessibleWithDisabledNavLink,
+    legacy: isLegacyApp(app),
+    baseUrl: isLegacyApp(app)
+      ? relativeToAbsolute(basePath.prepend(app.appUrl))
+      : relativeToAbsolute(basePath.prepend(`/app/${app.id}`)),
+  });
 }
 
 function sortNavLinks(navLinks: ReadonlyMap<string, NavLinkWrapper>) {

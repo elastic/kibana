@@ -32,7 +32,7 @@ import {
   AppBase,
   AppMounter,
   AppStatus,
-  AppStatusUpdater,
+  AppUpdater,
   AppUpdatableFields,
   InternalApplicationSetup,
   InternalApplicationStart,
@@ -64,9 +64,9 @@ function isLegacyApp(app: AppBox | LegacyApp): app is LegacyApp {
 
 const allApplicationsFilter = '__ALL__';
 
-interface AppStatusUpdaterWrapper {
+interface AppUpdaterWrapper {
   application: string;
-  updater: AppStatusUpdater;
+  updater: AppUpdater;
 }
 
 /**
@@ -76,9 +76,7 @@ interface AppStatusUpdaterWrapper {
 export class ApplicationService {
   private started = false;
   private readonly apps = new Map<string, AppBox | LegacyApp>();
-  private readonly statusUpdaters$ = new BehaviorSubject<Map<symbol, AppStatusUpdaterWrapper>>(
-    new Map()
-  );
+  private readonly statusUpdaters$ = new BehaviorSubject<Map<symbol, AppUpdaterWrapper>>(new Map());
 
   private readonly capabilities = new CapabilitiesService();
   private mountContext?: IContextContainer<App['mount']>;
@@ -86,7 +84,7 @@ export class ApplicationService {
   public setup({ context }: SetupDeps): InternalApplicationSetup {
     this.mountContext = context.createContextContainer();
 
-    const registerStatusUpdater = (application: string, updater$: Observable<AppStatusUpdater>) => {
+    const registerStatusUpdater = (application: string, updater$: Observable<AppUpdater>) => {
       const updaterId = Symbol();
       updater$.subscribe(updater => {
         const nextValue = new Map(this.statusUpdaters$.getValue());
@@ -106,7 +104,7 @@ export class ApplicationService {
         if (this.started) {
           throw new Error(`Applications cannot be registered after "setup"`);
         }
-        const { status, statusUpdater$, ...appProps } = app;
+        const { status, updater$, ...appProps } = app;
         const appBox: AppBox = {
           app: {
             ...appProps,
@@ -116,8 +114,8 @@ export class ApplicationService {
           mount: this.mountContext!.createHandler(plugin, app.mount),
         };
         this.apps.set(app.id, appBox);
-        if (statusUpdater$) {
-          registerStatusUpdater(app.id, statusUpdater$);
+        if (updater$) {
+          registerStatusUpdater(app.id, updater$);
         }
       },
       registerLegacyApp: (app: LegacyApp) => {
@@ -127,18 +125,18 @@ export class ApplicationService {
         if (this.started) {
           throw new Error(`Applications cannot be registered after "setup"`);
         }
-        const { status, statusUpdater$, ...appProps } = app;
+        const { status, updater$, ...appProps } = app;
         this.apps.set(app.id, {
           ...appProps,
           status: app.status !== undefined ? app.status : AppStatus.accessible,
           legacy: true,
         });
-        if (statusUpdater$) {
-          registerStatusUpdater(app.id, statusUpdater$);
+        if (updater$) {
+          registerStatusUpdater(app.id, updater$);
         }
       },
-      registerAppStatusUpdater: (statusUpdater$: Observable<AppStatusUpdater>) =>
-        registerStatusUpdater(allApplicationsFilter, statusUpdater$),
+      registerAppUpdater: (appUpdater$: Observable<AppUpdater>) =>
+        registerStatusUpdater(allApplicationsFilter, appUpdater$),
       registerMountContext: this.mountContext!.registerContext,
     };
   }
@@ -157,7 +155,7 @@ export class ApplicationService {
 
     const legacyMode = injectedMetadata.getLegacyMode();
     const currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
-    const { availableApps, capabilities } = await this.capabilities.start({
+    const { availableApps: enabledApps, capabilities } = await this.capabilities.start({
       apps: new Map(
         [...this.apps].map(([id, appBox]) => [
           id,
@@ -170,10 +168,10 @@ export class ApplicationService {
     // Only setup history if we're not in legacy mode
     const history = legacyMode ? null : createBrowserHistory({ basename: http.basePath.get() });
 
-    const availableApps$ = new BehaviorSubject<ReadonlyMap<string, App | LegacyApp>>(availableApps);
+    const availableApps$ = new BehaviorSubject<ReadonlyMap<string, App | LegacyApp>>(enabledApps);
 
     combineLatest([
-      of(availableApps),
+      of(enabledApps),
       this.statusUpdaters$.pipe(map(statusUpdaters => [...statusUpdaters.values()])),
     ])
       .pipe(
@@ -222,13 +220,13 @@ export class ApplicationService {
         // Filter only available apps and map to just the mount function.
         const appMounters = new Map<string, AppMounter>(
           [...this.apps]
-            .filter(([id, app]) => availableApps.has(id) && !isLegacyApp(app))
+            .filter(([id, app]) => enabledApps.has(id) && !isLegacyApp(app))
             .map(([id, app]) => [id, (app as AppBox).mount])
         );
 
         const legacyApps = new Map<string, LegacyApp>(
           [...this.apps]
-            .filter(([id, app]) => availableApps.has(id) && isLegacyApp(app))
+            .filter(([id, app]) => enabledApps.has(id) && isLegacyApp(app))
             .map(([id, app]) => [id, app as LegacyApp])
         );
 
@@ -249,7 +247,7 @@ export class ApplicationService {
   public stop() {}
 }
 
-const updateStatus = <T extends AppBase>(app: T, statusUpdaters: AppStatusUpdaterWrapper[]): T => {
+const updateStatus = <T extends AppBase>(app: T, statusUpdaters: AppUpdaterWrapper[]): T => {
   let changes: Partial<AppUpdatableFields> = {};
   statusUpdaters.forEach(wrapper => {
     if (wrapper.application !== allApplicationsFilter && wrapper.application !== app.id) {

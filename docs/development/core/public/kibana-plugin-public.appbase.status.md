@@ -4,7 +4,7 @@
 
 ## AppBase.status property
 
-The status of the application.
+The initial status of the application. Defaulting to `accessible`
 
 <b>Signature:</b>
 

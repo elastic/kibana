@@ -4,7 +4,7 @@
 
 ## AppUpdatableFields type
 
-Defines the list of fields that can be updated via an [AppStatusUpdater](./kibana-plugin-public.appstatusupdater.md)<!-- -->.
+Defines the list of fields that can be updated via an [AppUpdater](./kibana-plugin-public.appupdater.md)<!-- -->.
 
 <b>Signature:</b>
 
