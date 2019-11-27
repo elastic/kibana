@@ -79,7 +79,7 @@ export interface Alert {
   alertTypeId: string;
   interval: string;
   actions: AlertAction[];
-  alertTypeParams: Record<string, any>;
+  params: Record<string, any>;
   scheduledTaskId?: string;
   createdBy: string | null;
   updatedBy: string | null;
@@ -99,7 +99,7 @@ export interface AlertTypeModel {
   name: string;
   iconClass: string;
   validate: (alert: Alert) => ValidationResult;
-  alertTypeParamsExpression: React.FunctionComponent<any>;
+  alertParamsExpression: React.FunctionComponent<any>;
 }
 
 export interface IErrorObject {

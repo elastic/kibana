@@ -71,7 +71,7 @@ const validateAlertType = (alert: Alert): ValidationResult => {
     termField,
     threshold,
     timeWindowSize,
-  } = alert.alertTypeParams;
+  } = alert.params;
   const validationResult = { errors: {} };
   const errors = {
     aggField: new Array<string>(),
@@ -159,7 +159,7 @@ export function getActionType(): AlertTypeModel {
     id: 'threshold',
     name: 'Index Threshold',
     iconClass: 'alert',
-    alertTypeParamsExpression: IndexThresholdAlertTypeExpression,
+    alertParamsExpression: IndexThresholdAlertTypeExpression,
     validate: validateAlertType,
   };
 }
@@ -277,7 +277,7 @@ export const groupByTypes: { [key: string]: GroupByType } = {
 
 interface Props {
   alert: Alert;
-  setAlertTypeParams: (property: string, value: any) => void;
+  setAlertParams: (property: string, value: any) => void;
   setAlertProperty: (key: string, value: any) => void;
   errors: { [key: string]: string[] };
   hasErrors?: boolean;
@@ -285,7 +285,7 @@ interface Props {
 
 export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> = ({
   alert,
-  setAlertTypeParams,
+  setAlertParams,
   setAlertProperty,
   errors,
   hasErrors,
@@ -308,7 +308,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
     threshold,
     timeWindowSize,
     timeWindowUnit,
-  } = alert.alertTypeParams;
+  } = alert.params;
 
   const firstFieldOption = {
     text: i18n.translate(
@@ -357,7 +357,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
   );
 
   const setDefaultExpressionValues = () => {
-    setAlertProperty('alertTypeParams', {
+    setAlertProperty('params', {
       aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
       termSize: DEFAULT_VALUES.TERM_SIZE,
       thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
@@ -475,7 +475,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                 };
               })}
               onChange={async (selected: EuiComboBoxOptionProps[]) => {
-                setAlertTypeParams(
+                setAlertParams(
                   'index',
                   selected.map(aSelected => aSelected.value)
                 );
@@ -484,7 +484,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                 // reset time field and expression fields if indices are deleted
                 if (indices.length === 0) {
                   setTimeFieldOptions(getTimeFieldOptions([], firstFieldOption));
-                  setAlertTypeParams('timeFields', []);
+                  setAlertParams('timeFields', []);
 
                   setDefaultExpressionValues();
                   return;
@@ -493,7 +493,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                 const timeFields = getTimeFieldOptions(currentEsFields, firstFieldOption);
 
                 setEsFields(currentEsFields);
-                setAlertTypeParams('timeFields', timeFields);
+                setAlertParams('timeFields', timeFields);
                 setTimeFieldOptions(timeFields);
               }}
               onSearchChange={async search => {
@@ -503,7 +503,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
               }}
               onBlur={() => {
                 if (!index) {
-                  setAlertTypeParams('index', []);
+                  setAlertParams('index', []);
                 }
               }}
             />
@@ -530,11 +530,11 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
               data-test-subj="watchTimeFieldSelect"
               value={timeField}
               onChange={e => {
-                setAlertTypeParams('timeField', e.target.value);
+                setAlertParams('timeField', e.target.value);
               }}
               onBlur={() => {
                 if (timeField === undefined) {
-                  setAlertTypeParams('timeField', '');
+                  setAlertParams('timeField', '');
                 }
               }}
             />
@@ -564,11 +564,11 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                   onChange={e => {
                     const { value } = e.target;
                     const triggerIntervalSizeVal = value !== '' ? parseInt(value, 10) : value;
-                    setAlertTypeParams('triggerIntervalSize', triggerIntervalSizeVal);
+                    setAlertParams('triggerIntervalSize', triggerIntervalSizeVal);
                   }}
                   onBlur={e => {
                     if (triggerIntervalSize === undefined) {
-                      setAlertTypeParams('triggerIntervalSize', '');
+                      setAlertParams('triggerIntervalSize', '');
                     }
                   }}
                 />
@@ -584,7 +584,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                     }
                   )}
                   onChange={e => {
-                    setAlertTypeParams('triggerIntervalUnit', e.target.value);
+                    setAlertParams('triggerIntervalUnit', e.target.value);
                   }}
                   options={getTimeOptions(triggerIntervalSize)}
                 />
@@ -689,7 +689,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
               <EuiSelect
                 value={aggType || ''}
                 onChange={e => {
-                  setAlertTypeParams('aggType', e.target.value);
+                  setAlertParams('aggType', e.target.value);
                   setAggTypePopoverOpen(false);
                 }}
                 options={Object.values(aggregationTypes).map(({ text, value }) => {
@@ -761,7 +761,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                         }, [])}
                         selectedOptions={aggField ? [{ label: aggField }] : []}
                         onChange={selectedOptions => {
-                          setAlertTypeParams(
+                          setAlertParams(
                             'aggField',
                             selectedOptions.length === 1 ? selectedOptions[0].label : undefined
                           );
@@ -829,9 +829,9 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                   <EuiSelect
                     value={groupBy}
                     onChange={e => {
-                      setAlertTypeParams('termSize', null);
-                      setAlertTypeParams('termField', null);
-                      setAlertTypeParams('groupBy', e.target.value);
+                      setAlertParams('termSize', null);
+                      setAlertParams('termField', null);
+                      setAlertParams('groupBy', e.target.value);
                     }}
                     options={Object.values(groupByTypes).map(({ text, value }) => {
                       return {
@@ -853,7 +853,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                         <EuiFieldNumber
                           value={termSize || 0}
                           onChange={e => {
-                            setAlertTypeParams('termSize', e.target.value);
+                            setAlertParams('termSize', e.target.value);
                           }}
                           min={1}
                         />
@@ -868,7 +868,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                         <EuiSelect
                           value={termField || ''}
                           onChange={e => {
-                            setAlertTypeParams('termField', e.target.value);
+                            setAlertParams('termField', e.target.value);
                           }}
                           options={esFields.reduce(
                             (options: any, field: any) => {
@@ -944,7 +944,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                   <EuiSelect
                     value={thresholdComparator}
                     onChange={e => {
-                      setAlertTypeParams('thresholdComparator', e.target.value);
+                      setAlertParams('thresholdComparator', e.target.value);
                     }}
                     options={Object.values(comparators).map(({ text, value }) => {
                       return { text, value };
@@ -984,7 +984,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                               const thresholdVal = value !== '' ? parseFloat(value) : value;
                               const newThreshold = [...threshold];
                               newThreshold[i] = thresholdVal;
-                              setAlertTypeParams('threshold', newThreshold);
+                              setAlertParams('threshold', newThreshold);
                             }}
                           />
                         </ErrableFormRow>
@@ -1046,7 +1046,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                       onChange={e => {
                         const { value } = e.target;
                         const timeWindowSizeVal = value !== '' ? parseInt(value, 10) : value;
-                        setAlertTypeParams('timeWindowSize', timeWindowSizeVal);
+                        setAlertParams('timeWindowSize', timeWindowSizeVal);
                       }}
                     />
                   </ErrableFormRow>
@@ -1055,7 +1055,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                   <EuiSelect
                     value={timeWindowUnit}
                     onChange={e => {
-                      setAlertTypeParams('timeWindowUnit', e.target.value);
+                      setAlertParams('timeWindowUnit', e.target.value);
                     }}
                     options={getTimeOptions(timeWindowSize)}
                   />

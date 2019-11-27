@@ -97,7 +97,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
     actionTypeRegistry,
   } = useAppDependencies();
   const initialAlert = {
-    alertTypeParams: {},
+    params: {},
     alertTypeId: null,
     interval: '1m',
     actions: [],
@@ -151,7 +151,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
       payload: {
         key: 'alert',
         value: {
-          alertTypeParams: {},
+          params: {},
           alertTypeId: null,
           interval: '1m',
           actions: [],
@@ -170,8 +170,8 @@ export const AlertAdd = ({ refreshList }: Props) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
   };
 
-  const setAlertTypeParams = (key: string, value: any) => {
-    dispatch({ command: { type: 'setAlertTypeParams' }, payload: { key, value } });
+  const setAlertParams = (key: string, value: any) => {
+    dispatch({ command: { type: 'setAlertParams' }, payload: { key, value } });
   };
 
   const setActionParamsProperty = (key: string, value: any, index: number) => {
@@ -212,7 +212,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
     }
   }
 
-  const AlertTypeParamsExpressionComponent = alertType ? alertType.alertTypeParamsExpression : null;
+  const AlertParamsExpressionComponent = alertType ? alertType.alertParamsExpression : null;
 
   const errors = {
     ...(alertType ? alertType.validate(alert).errors : []),
@@ -368,11 +368,11 @@ export const AlertAdd = ({ refreshList }: Props) => {
           </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {AlertTypeParamsExpressionComponent ? (
-        <AlertTypeParamsExpressionComponent
+      {AlertParamsExpressionComponent ? (
+        <AlertParamsExpressionComponent
           alert={alert}
           errors={errors}
-          setAlertTypeParams={setAlertTypeParams}
+          setAlertParams={setAlertParams}
           setAlertProperty={setAlertProperty}
           hasErrors={hasErrors}
         />
