@@ -6,7 +6,6 @@
 
 import { UrlConfig } from '../../../../../../../common/types/custom_urls';
 import { CREATED_BY_LABEL } from '../util/constants';
-import { Calendar } from '../../../../../../../common/types/calendars';
 
 export type JobId = string;
 export type BucketSpan = string;
@@ -25,7 +24,6 @@ export interface Job {
   data_description: DataDescription;
   description: string;
   groups: string[];
-  calendars?: Calendar[];
   model_plot_config?: ModelPlotConfig;
   model_snapshot_retention_days?: number;
   renormalization_window_days?: number;

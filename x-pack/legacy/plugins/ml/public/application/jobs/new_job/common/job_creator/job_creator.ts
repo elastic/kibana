@@ -18,8 +18,8 @@ import { JobRunner, ProgressSubscriber } from '../job_runner';
 import { JOB_TYPE, CREATED_BY_LABEL, SHARED_RESULTS_INDEX_NAME } from './util/constants';
 import { isSparseDataJob } from './util/general';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
-import { ml } from '../../../../services/ml_api_service';
 import { Calendar } from '../../../../../../common/types/calendars';
+import { mlCalendarService } from '../../../../services/calendar_service';
 
 export class JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
@@ -27,6 +27,7 @@ export class JobCreator {
   protected _savedSearch: SavedSearch;
   protected _indexPatternTitle: IndexPatternTitle = '';
   protected _job_config: Job;
+  protected _calendars: Calendar[] | null;
   protected _datafeed_config: Datafeed;
   protected _detectors: Detector[];
   protected _influencers: string[];
@@ -49,6 +50,7 @@ export class JobCreator {
     this._indexPatternTitle = indexPattern.title;
 
     this._job_config = createEmptyJob();
+    this._calendars = null;
     this._datafeed_config = createEmptyDatafeed(this._indexPatternTitle);
     this._detectors = this._job_config.analysis_config.detectors;
     this._influencers = this._job_config.analysis_config.influencers;
@@ -192,11 +194,11 @@ export class JobCreator {
   }
 
   public get calendars(): Calendar[] {
-    return this._job_config.calendars || [];
+    return this._calendars || [];
   }
 
   public set calendars(calendars: Calendar[]) {
-    this._job_config.calendars = calendars;
+    this._calendars = calendars;
   }
 
   public set modelPlot(enable: boolean) {
@@ -361,6 +363,20 @@ export class JobCreator {
     });
   }
 
+  /**
+   * Extends assigned calendars with created job id.
+   * @private
+   */
+  private async _updateCalendars() {
+    if (!this._calendars || this._calendars.length === 0) {
+      return;
+    }
+
+    for (const calendar of this._calendars) {
+      await mlCalendarService.assignNewJobId(calendar, this.jobId);
+    }
+  }
+
   public setTimeRange(start: number, end: number) {
     this._start = start;
     this._end = end;
@@ -443,18 +459,8 @@ export class JobCreator {
 
   public async createJob(): Promise<object> {
     try {
-      const { calendars, ...jobConfig } = this._job_config;
-      const { success, resp } = await mlJobService.saveNewJob(jobConfig);
-
-      if (calendars && calendars.length > 0) {
-        for (const calendar of calendars) {
-          await ml.updateCalendar({
-            ...calendar,
-            calendarId: calendar.calendar_id,
-            job_ids: [this.jobId],
-          });
-        }
-      }
+      const { success, resp } = await mlJobService.saveNewJob(this._job_config);
+      await this._updateCalendars();
 
       if (success === true) {
         return resp;
