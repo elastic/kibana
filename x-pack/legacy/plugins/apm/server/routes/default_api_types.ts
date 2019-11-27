@@ -13,3 +13,8 @@ export const rangeRt = t.type({
 });
 
 export const uiFiltersRt = t.type({ uiFilters: t.string });
+
+export const paginationRt = t.type({
+  size: t.string,
+  from: t.string
+});

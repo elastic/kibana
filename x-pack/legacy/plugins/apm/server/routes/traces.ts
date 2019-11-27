@@ -9,7 +9,7 @@ import { setupRequest } from '../lib/helpers/setup_request';
 import { getTrace } from '../lib/traces/get_trace';
 import { getTransactionGroupList } from '../lib/transaction_groups';
 import { createRoute } from './create_route';
-import { rangeRt, uiFiltersRt } from './default_api_types';
+import { rangeRt, uiFiltersRt, paginationRt } from './default_api_types';
 
 export const tracesRoute = createRoute(() => ({
   path: '/api/apm/traces',
@@ -28,10 +28,12 @@ export const tracesByIdRoute = createRoute(() => ({
     path: t.type({
       traceId: t.string
     }),
-    query: rangeRt
+    query: t.intersection([rangeRt, paginationRt])
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    return getTrace(context.params.path.traceId, setup);
+    const { traceId } = context.params.path;
+    const { from, size } = context.params.query;
+    return getTrace({ traceId, size, from }, setup);
   }
 }));

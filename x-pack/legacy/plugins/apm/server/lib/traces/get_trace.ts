@@ -10,10 +10,18 @@ import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getTraceItems } from './get_trace_items';
 
 export type TraceAPIResponse = PromiseReturnType<typeof getTrace>;
-export async function getTrace(traceId: string, setup: Setup & SetupTimeRange) {
+export interface TraceParams {
+  traceId: string;
+  size: string;
+  from: string;
+}
+export async function getTrace(
+  params: TraceParams,
+  setup: Setup & SetupTimeRange
+) {
   const [trace, errorsPerTransaction] = await Promise.all([
-    getTraceItems(traceId, setup),
-    getTraceErrorsPerTransaction(traceId, setup)
+    getTraceItems(params, setup),
+    getTraceErrorsPerTransaction(params.traceId, setup)
   ]);
 
   return {

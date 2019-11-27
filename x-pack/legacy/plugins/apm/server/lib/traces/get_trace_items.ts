@@ -15,9 +15,10 @@ import { Span } from '../../../typings/es_schemas/ui/Span';
 import { Transaction } from '../../../typings/es_schemas/ui/Transaction';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { TraceParams } from './get_trace';
 
 export async function getTraceItems(
-  traceId: string,
+  { traceId, size, from }: TraceParams,
   setup: Setup & SetupTimeRange
 ) {
   const { start, end, client, config, indices } = setup;
@@ -29,7 +30,8 @@ export async function getTraceItems(
       indices['apm_oss.transactionIndices']
     ],
     body: {
-      size: maxTraceItems,
+      size,
+      from,
       query: {
         bool: {
           filter: [
@@ -55,6 +57,6 @@ export async function getTraceItems(
 
   return {
     items: resp.hits.hits.map(hit => hit._source),
-    exceedsMax: resp.hits.total.value > maxTraceItems
+    exceedsMax: resp.hits.total.value > maxTraceItems // TODO: caue check if it is still needed
   };
 }

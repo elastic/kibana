@@ -26,7 +26,9 @@ export function useWaterfall(urlParams: IUrlParams) {
             path: { traceId },
             query: {
               start,
-              end
+              end,
+              size: '10',
+              from: '0'
             }
           }
         });

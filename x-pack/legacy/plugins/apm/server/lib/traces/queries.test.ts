@@ -18,7 +18,9 @@ describe('trace queries', () => {
   });
 
   it('fetches a trace', async () => {
-    mock = await inspectSearchParams(setup => getTraceItems('foo', setup));
+    mock = await inspectSearchParams(setup =>
+      getTraceItems({ traceId: 'foo', size: '10', from: '0' }, setup)
+    );
 
     expect(mock.params).toMatchSnapshot();
   });
