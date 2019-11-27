@@ -16,7 +16,7 @@ import { KibanaObjects } from './page';
  * Redirects to the Anomaly Explorer to view the jobs if they have been created,
  * or the recognizer job wizard for the module if not.
  */
-export function checkViewOrCreateJobs($route: any) {
+export function checkViewOrCreateJobs($route: any): Promise<any> {
   return new Promise((resolve, reject) => {
     const moduleId = $route.current.params.id;
     const indexPatternId = $route.current.params.index;

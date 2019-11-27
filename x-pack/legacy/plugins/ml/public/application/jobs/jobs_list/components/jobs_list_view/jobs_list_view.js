@@ -69,12 +69,12 @@ export class JobsListView extends Component {
     } else {
       // The advanced job wizard is still angularjs based and triggers
       // broadcast events which it expects the jobs list to be subscribed to.
-      this.props.angularWrapperScope.$on('jobsUpdated', () => {
-        this.refreshJobSummaryList(true);
-      });
-      this.props.angularWrapperScope.$on('openCreateWatchWindow', (e, job) => {
-        this.showCreateWatchFlyout(job.job_id);
-      });
+      // this.props.angularWrapperScope.$on('jobsUpdated', () => {
+      //   this.refreshJobSummaryList(true);
+      // });
+      // this.props.angularWrapperScope.$on('openCreateWatchWindow', (e, job) => {
+      //   this.showCreateWatchFlyout(job.job_id);
+      // });
 
       timefilter.disableTimeRangeSelector();
       timefilter.enableAutoRefreshSelector();

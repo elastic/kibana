@@ -35,7 +35,7 @@ declare interface JobService {
     end: number | undefined
   ): Promise<any>;
   createResultsUrl(jobId: string[], start: number, end: number, location: string): string;
-  getJobAndGroupIds(): ExistingJobsAndGroups;
+  getJobAndGroupIds(): Promise<ExistingJobsAndGroups>;
   searchPreview(job: CombinedJob): Promise<SearchResponse<any>>;
   getJob(jobId: string): CombinedJob;
   loadJobsWrapper(): Promise<any>;

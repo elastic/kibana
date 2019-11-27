@@ -4,15 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 
 import { NavigationMenu } from '../../components/navigation_menu';
 
+// @ts-ignore
 import { JobsListView } from './components/jobs_list_view';
 
-export const JobsPage = (props) => (
-  <>
-    <NavigationMenu tabId="jobs" />
-    <JobsListView {...props} />
-  </>
-);
+export const JobsPage: FC<{ props?: any }> = props => {
+  return (
+    <>
+      <NavigationMenu tabId="jobs" />
+      <JobsListView {...props} />
+    </>
+  );
+};

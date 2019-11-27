@@ -4,10 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FC } from 'react';
-
-declare const NewCalendar: FC<{
-  calendarId?: string;
-  canCreateCalendar: boolean;
-  canDeleteCalendar: boolean;
-}>;
+export { NewCalendar } from './edit';
+export { CalendarsList } from './list';

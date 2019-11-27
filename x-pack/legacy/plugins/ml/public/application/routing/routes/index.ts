@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FC } from 'react';
-
-declare const NewCalendar: FC<{
-  calendarId?: string;
-  canCreateCalendar: boolean;
-  canDeleteCalendar: boolean;
-}>;
+export * from './jobs_list';
+export * from './new_job';
+export * from './datavisualizer';
+export * from './settings';

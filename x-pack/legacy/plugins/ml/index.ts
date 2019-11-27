@@ -31,7 +31,7 @@ export const ml = (kibana: any) => {
     publicDir: resolve(__dirname, 'public'),
 
     uiExports: {
-      managementSections: ['plugins/ml/application/management'],
+      // managementSections: ['plugins/ml/management'],
       app: {
         title: i18n.translate('xpack.ml.mlNavTitle', {
           defaultMessage: 'Machine Learning',
@@ -41,10 +41,10 @@ export const ml = (kibana: any) => {
         }),
         icon: 'plugins/ml/application/ml.svg',
         euiIconType: 'machineLearningApp',
-        main: 'plugins/ml/application/app',
+        main: 'plugins/ml/legacy',
       },
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      hacks: ['plugins/ml/application/hacks/toggle_app_link_in_nav'],
+      styleSheetPaths: resolve(__dirname, 'public/application/index.scss'),
+      // hacks: ['plugins/ml/hacks/toggle_app_link_in_nav'],
       savedObjectSchemas: {
         'ml-telemetry': {
           isNamespaceAgnostic: true,

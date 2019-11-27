@@ -36,6 +36,10 @@ export function getIndexPatterns() {
   return indexPatternCache;
 }
 
+export function getFullIndexPatterns() {
+  return fullIndexPatterns;
+}
+
 export function getIndexPatternNames() {
   return indexPatternCache.map(i => i.attributes && i.attributes.title);
 }

@@ -5,7 +5,6 @@
  */
 
 import './pages/new_job/route';
-import './pages/new_job/directive';
 import './pages/job_type/route';
 import './pages/job_type/directive';
 import './pages/index_or_search/route';

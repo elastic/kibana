@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-import './list';
-import './edit';
+export const API_BASE_PATH = '/api/transform/';
