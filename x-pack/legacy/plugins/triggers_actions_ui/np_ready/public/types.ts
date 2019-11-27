@@ -7,8 +7,8 @@
 export type ActionTypeIndex = Record<string, ActionType>;
 export type AlertTypeIndex = Record<string, AlertType>;
 
-export interface Props {
-  action: Action;
+export interface ActionConnectorFieldsProps {
+  action: ActionConnector;
   editActionConfig: (property: string, value: any) => void;
   editActionSecrets: (property: string, value: any) => void;
   errors: { [key: string]: string[] };
@@ -32,9 +32,9 @@ export interface ActionTypeModel {
   id: string;
   iconClass: string;
   selectMessage: string;
-  validate: (action: Action) => ValidationResult;
+  validateConnector: (action: ActionConnector) => ValidationResult;
   validateParams: (actionParams: any) => ValidationResult;
-  actionFields: React.FunctionComponent<Props> | null;
+  actionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> | null;
   actionParamsFields: React.FunctionComponent<ActionParamsProps> | null;
 }
 
@@ -47,7 +47,7 @@ export interface ActionType {
   name: string;
 }
 
-export interface Action {
+export interface ActionConnector {
   secrets: Record<string, any>;
   id: string;
   actionTypeId: string;
@@ -56,7 +56,7 @@ export interface Action {
   config: Record<string, any>;
 }
 
-export interface ActionTableItem extends Action {
+export interface ActionTableItem extends ActionConnector {
   actionType: ActionType['name'];
 }
 

@@ -6,26 +6,26 @@
 import React, { Fragment } from 'react';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ErrableFormRow } from '../../../components/page_error';
+import { ErrableFormRow } from '../page_error';
 import {
   ActionTypeModel,
-  Props,
-  Action,
+  ActionConnectorFieldsProps,
+  ActionConnector,
   ValidationResult,
   ActionParamsProps,
-} from '../../../../types';
+} from '../../../types';
 
 export function getActionType(): ActionTypeModel {
   return {
     id: '.pagerduty',
     iconClass: 'apps',
     selectMessage: i18n.translate(
-      'xpack.triggersActionsUI.sections.actionAdd.pagerDutyAction.selectMessageText',
+      'xpack.triggersActionsUI.components.buildin_action_types.pagerDutyAction.selectMessageText',
       {
         defaultMessage: 'Create an event in PagerDuty.',
       }
     ),
-    validate: (action: Action): ValidationResult => {
+    validateConnector: (action: ActionConnector): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
         routingKey: new Array<string>(),
@@ -35,7 +35,7 @@ export function getActionType(): ActionTypeModel {
       if (!action.secrets.routingKey) {
         errors.routingKey.push(
           i18n.translate(
-            'xpack.triggersActionsUI.sections.actionAdd.pagerDutyAction.error.requiredRoutingKeyText',
+            'xpack.triggersActionsUI.components.buildin_action_types.pagerDutyAction.error.requiredRoutingKeyText',
             {
               defaultMessage: 'Routing Key is required.',
             }
@@ -45,7 +45,7 @@ export function getActionType(): ActionTypeModel {
       if (!action.config.apiUrl) {
         errors.apiUrl.push(
           i18n.translate(
-            'xpack.triggersActionsUI.sections.actionAdd.pagerDutyAction.error.requiredApiUrlText',
+            'xpack.triggersActionsUI.components.buildin_action_types.pagerDutyAction.error.requiredApiUrlText',
             {
               defaultMessage: 'ApiUrl is required.',
             }
@@ -58,12 +58,12 @@ export function getActionType(): ActionTypeModel {
       const validationResult = { errors: {} };
       return validationResult;
     },
-    actionFields: PagerDutyActionFields,
+    actionConnectorFields: PagerDutyActionConnectorFields,
     actionParamsFields: PagerDutyParamsFields,
   };
 }
 
-const PagerDutyActionFields: React.FunctionComponent<Props> = ({
+const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   errors,
   hasErrors,
   action,
@@ -81,7 +81,7 @@ const PagerDutyActionFields: React.FunctionComponent<Props> = ({
         errors={errors}
         isShowingErrors={hasErrors === true && apiUrl !== undefined}
         label={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionAdd.pagerDutyAction.apiUrlTextFieldLabel',
+          'xpack.triggersActionsUI.components.buildin_action_types.pagerDutyAction.apiUrlTextFieldLabel',
           {
             defaultMessage: 'ApiUrl',
           }
@@ -109,7 +109,7 @@ const PagerDutyActionFields: React.FunctionComponent<Props> = ({
         errors={errors}
         isShowingErrors={hasErrors === true && routingKey !== undefined}
         label={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionAdd.pagerDutyAction.routingKeyTextFieldLabel',
+          'xpack.triggersActionsUI.components.buildin_action_types.pagerDutyAction.routingKeyTextFieldLabel',
           {
             defaultMessage: 'RoutingKey',
           }
@@ -160,7 +160,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps> = ({
           <EuiFormRow
             fullWidth
             label={i18n.translate(
-              'xpack.triggersActionsUI.sections.actionAdd.pagerDutyAction.severitySelectFieldLabel',
+              'xpack.triggersActionsUI.components.buildin_action_types.pagerDutyAction.severitySelectFieldLabel',
               {
                 defaultMessage: 'Severity (optional)',
               }
@@ -181,7 +181,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps> = ({
           <EuiFormRow
             fullWidth
             label={i18n.translate(
-              'xpack.triggersActionsUI.sections.actionAdd.pagerDutyAction.eventActionSelectFieldLabel',
+              'xpack.triggersActionsUI.components.buildin_action_types.pagerDutyAction.eventActionSelectFieldLabel',
               {
                 defaultMessage: 'Event action (optional)',
               }
@@ -204,7 +204,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps> = ({
           <EuiFormRow
             fullWidth
             label={i18n.translate(
-              'xpack.triggersActionsUI.sections.actionAdd.pagerDutyAction.dedupKeyTextFieldLabel',
+              'xpack.triggersActionsUI.components.buildin_action_types.pagerDutyAction.dedupKeyTextFieldLabel',
               {
                 defaultMessage: 'DedupKey (optional)',
               }
@@ -230,7 +230,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps> = ({
           <EuiFormRow
             fullWidth
             label={i18n.translate(
-              'xpack.triggersActionsUI.sections.actionAdd.pagerDutyAction.timestampTextFieldLabel',
+              'xpack.triggersActionsUI.components.buildin_action_types.pagerDutyAction.timestampTextFieldLabel',
               {
                 defaultMessage: 'Timestamp (optional)',
               }
@@ -256,7 +256,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       <EuiFormRow
         fullWidth
         label={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionAdd.pagerDutyAction.componentTextFieldLabel',
+          'xpack.triggersActionsUI.components.buildin_action_types.pagerDutyAction.componentTextFieldLabel',
           {
             defaultMessage: 'Component (optional)',
           }
@@ -280,7 +280,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       <EuiFormRow
         fullWidth
         label={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionAdd.pagerDutyAction.groupTextFieldLabel',
+          'xpack.triggersActionsUI.components.buildin_action_types.pagerDutyAction.groupTextFieldLabel',
           {
             defaultMessage: 'Group (optional)',
           }
@@ -304,7 +304,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       <EuiFormRow
         fullWidth
         label={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionAdd.pagerDutyAction.sourceTextFieldLabel',
+          'xpack.triggersActionsUI.components.buildin_action_types.pagerDutyAction.sourceTextFieldLabel',
           {
             defaultMessage: 'Source (optional)',
           }
@@ -332,7 +332,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps> = ({
         errors={errors}
         isShowingErrors={hasErrors === true && summary !== undefined}
         label={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionAdd.pagerDutyAction.summaryFieldLabel',
+          'xpack.triggersActionsUI.components.buildin_action_types.pagerDutyAction.summaryFieldLabel',
           {
             defaultMessage: 'Summary',
           }

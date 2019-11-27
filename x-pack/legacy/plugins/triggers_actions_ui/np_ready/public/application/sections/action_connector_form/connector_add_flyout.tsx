@@ -13,15 +13,15 @@ import {
   EuiFlexItem,
   EuiIcon,
 } from '@elastic/eui';
-import { ActionsContext } from '../../context/actions_context';
+import { ActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { ActionTypeMenu } from './action_type_menu';
-import { ActionForm } from './action_form';
+import { ActionConnectorForm } from './action_connector_form';
 import { ActionType } from '../../../types';
 import { useAppDependencies } from '../../app_dependencies';
 
-export const ActionAddFlyout = () => {
+export const ConnectorAddFlyout = () => {
   const { actionTypeRegistry } = useAppDependencies();
-  const { addFlyoutVisible, setAddFlyoutVisibility } = useContext(ActionsContext);
+  const { addFlyoutVisible, setAddFlyoutVisibility } = useContext(ActionsConnectorsContext);
   const [actionType, setActionType] = useState<ActionType | undefined>(undefined);
   const closeFlyout = useCallback(() => setAddFlyoutVisibility(false), [setAddFlyoutVisibility]);
 
@@ -44,7 +44,7 @@ export const ActionAddFlyout = () => {
     const initialAction = { actionTypeId: actionType.id, config: {}, secrets: {} };
 
     currentForm = (
-      <ActionForm
+      <ActionConnectorForm
         actionTypeName={actionType.name}
         initialAction={initialAction}
         setFlyoutVisibility={setAddFlyoutVisibility}

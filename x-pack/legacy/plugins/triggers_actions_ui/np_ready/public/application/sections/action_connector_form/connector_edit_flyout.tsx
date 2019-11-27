@@ -14,24 +14,24 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ActionsContext } from '../../context/actions_context';
-import { ActionForm } from './action_form';
+import { ActionsConnectorsContext } from '../../context/actions_connectors_context';
+import { ActionConnectorForm } from './action_connector_form';
 import { useAppDependencies } from '../../app_dependencies';
 import { getActionById } from '../../lib/api';
-import { Action } from '../../../types';
+import { ActionConnector } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
 
-export const ActionEditFlyout = () => {
+export const ConnectorEditFlyout = () => {
   const {
     core: { http },
     plugins: { toastNotifications },
     actionTypeRegistry,
   } = useAppDependencies();
   const { editFlyoutVisible, setEditFlyoutVisibility, editedActionItem } = useContext(
-    ActionsContext
+    ActionsConnectorsContext
   );
   const [isLoadingAction, setIsLoadingAction] = useState<boolean>(false);
-  const [action, setAction] = useState<Action | undefined>(undefined);
+  const [action, setAction] = useState<ActionConnector | undefined>(undefined);
 
   const closeFlyout = useCallback(() => setEditFlyoutVisibility(false), [setEditFlyoutVisibility]);
 
@@ -93,7 +93,7 @@ export const ActionEditFlyout = () => {
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       {action && editedActionItem ? (
-        <ActionForm
+        <ActionConnectorForm
           initialAction={action}
           actionTypeName={editedActionItem.actionType}
           setFlyoutVisibility={setEditFlyoutVisibility}

@@ -6,27 +6,27 @@
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSelect, EuiTextArea } from '@elastic/eui';
-import { ActionTypeModel, ValidationResult, ActionParamsProps } from '../../../../types';
-import { ErrableFormRow } from '../../../components/page_error';
+import { ActionTypeModel, ValidationResult, ActionParamsProps } from '../../../types';
+import { ErrableFormRow } from '../page_error';
 
 export function getActionType(): ActionTypeModel {
   return {
     id: '.server-log',
     iconClass: 'logsApp',
     selectMessage: i18n.translate(
-      'xpack.triggersActionsUI.sections.actionAdd.serverLogAction.selectMessageText',
+      'xpack.triggersActionsUI.components.buildin_action_types.serverLogAction.selectMessageText',
       {
         defaultMessage: 'Add an item to the logs.',
       }
     ),
-    validate: (): ValidationResult => {
+    validateConnector: (): ValidationResult => {
       return { errors: {} };
     },
     validateParams: (actionParams: any): ValidationResult => {
       const validationResult = { errors: {} };
       return validationResult;
     },
-    actionFields: null,
+    actionConnectorFields: null,
     actionParamsFields: ServerLogParamsFields,
   };
 }
@@ -57,7 +57,7 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps> =
         errors={errors}
         isShowingErrors={hasErrors && level !== undefined}
         label={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionAdd.serverLogAction.logLevelFieldLabel',
+          'xpack.triggersActionsUI.components.buildin_action_types.serverLogAction.logLevelFieldLabel',
           {
             defaultMessage: 'Level',
           }
@@ -81,7 +81,7 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps> =
         errors={errors}
         isShowingErrors={hasErrors && message !== undefined}
         label={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionAdd.serverLogAction.logMessageFieldLabel',
+          'xpack.triggersActionsUI.components.buildin_action_types.serverLogAction.logMessageFieldLabel',
           {
             defaultMessage: 'Message',
           }

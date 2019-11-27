@@ -18,7 +18,7 @@ export interface AlertState {
   alert: any;
 }
 
-export interface ActionAlertReducerItem {
+export interface AlertReducerAction {
   command: CommandType;
   payload: {
     key: string;
@@ -27,7 +27,7 @@ export interface ActionAlertReducerItem {
   };
 }
 
-export const alertReducer = (state: any, action: ActionAlertReducerItem) => {
+export const alertReducer = (state: any, action: AlertReducerAction) => {
   const { command, payload } = action;
   const { alert } = state;
 

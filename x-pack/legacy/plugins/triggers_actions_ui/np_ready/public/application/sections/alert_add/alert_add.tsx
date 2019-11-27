@@ -33,6 +33,7 @@ import {
   EuiPortal,
   EuiAccordion,
   EuiButtonIcon,
+  EuiComboBoxOptionProps,
 } from '@elastic/eui';
 import { useAppDependencies } from '../../app_dependencies';
 import { saveAlert, loadActionTypes, loadAllActions } from '../../lib/api';
@@ -46,7 +47,7 @@ import {
   ActionTypeModel,
   AlertAction,
   ActionTypeIndex,
-  Action,
+  ActionConnector,
 } from '../../../types';
 import { ACTION_GROUPS } from '../../constants/action_groups';
 import { getTimeOptions } from '../../lib/get_time_options';
@@ -119,7 +120,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
     body: { message: string; error: string };
   } | null>(null);
   const [isAddActionPanelOpen, setIsAddActionPanelOpen] = useState<boolean>(true);
-  const [connectors, setConnectors] = useState<Action[]>([]);
+  const [connectors, setConnectors] = useState<ActionConnector[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -404,7 +405,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
           .filter(field => field.actionTypeId === actionConnector.actionTypeId)
           .map(({ description, id }) => ({
             label: description,
-            value: description,
+            key: id,
             id,
           }));
         const actionTypeRegisterd = actionTypeRegistry.get(actionConnector.actionTypeId);

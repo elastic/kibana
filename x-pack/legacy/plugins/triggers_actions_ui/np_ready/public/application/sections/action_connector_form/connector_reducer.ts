@@ -6,14 +6,14 @@
 import { isEqual } from 'lodash';
 
 interface CommandType {
-  type: 'setAction' | 'setProperty' | 'setConfigProperty' | 'setSecretsProperty';
+  type: 'setConnector' | 'setProperty' | 'setConfigProperty' | 'setSecretsProperty';
 }
 
 export interface ActionState {
-  action: any;
+  connector: any;
 }
 
-export interface ActionReducerItem {
+export interface ReducerAction {
   command: CommandType;
   payload: {
     key: string;
@@ -21,17 +21,17 @@ export interface ActionReducerItem {
   };
 }
 
-export const actionReducer = (state: ActionState, actionItem: ActionReducerItem) => {
-  const { command, payload } = actionItem;
-  const { action } = state;
+export const connectorReducer = (state: ActionState, action: ReducerAction) => {
+  const { command, payload } = action;
+  const { connector } = state;
 
   switch (command.type) {
-    case 'setAction': {
+    case 'setConnector': {
       const { key, value } = payload;
-      if (key === 'action') {
+      if (key === 'connector') {
         return {
           ...state,
-          action: value,
+          connector: value,
         };
       } else {
         return state;
@@ -39,13 +39,13 @@ export const actionReducer = (state: ActionState, actionItem: ActionReducerItem)
     }
     case 'setProperty': {
       const { key, value } = payload;
-      if (isEqual(action[key], value)) {
+      if (isEqual(connector[key], value)) {
         return state;
       } else {
         return {
           ...state,
-          action: {
-            ...action,
+          connector: {
+            ...connector,
             [key]: value,
           },
         };
@@ -53,15 +53,15 @@ export const actionReducer = (state: ActionState, actionItem: ActionReducerItem)
     }
     case 'setConfigProperty': {
       const { key, value } = payload;
-      if (isEqual(action.config[key], value)) {
+      if (isEqual(connector.config[key], value)) {
         return state;
       } else {
         return {
           ...state,
-          action: {
-            ...action,
+          connector: {
+            ...connector,
             config: {
-              ...action.config,
+              ...connector.config,
               [key]: value,
             },
           },
@@ -70,15 +70,15 @@ export const actionReducer = (state: ActionState, actionItem: ActionReducerItem)
     }
     case 'setSecretsProperty': {
       const { key, value } = payload;
-      if (isEqual(action.secrets[key], value)) {
+      if (isEqual(connector.secrets[key], value)) {
         return state;
       } else {
         return {
           ...state,
-          action: {
-            ...action,
+          connector: {
+            ...connector,
             secrets: {
-              ...action.secrets,
+              ...connector.secrets,
               [key]: value,
             },
           },

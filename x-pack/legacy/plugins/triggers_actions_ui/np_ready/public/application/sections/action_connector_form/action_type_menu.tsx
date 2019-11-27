@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionType } from '../../../types';
-import { ActionsContext } from '../../context/actions_context';
+import { ActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { useAppDependencies } from '../../app_dependencies';
 
 interface Props {
@@ -25,7 +25,7 @@ interface Props {
 
 export const ActionTypeMenu = ({ setActionType }: Props) => {
   const { actionTypeRegistry } = useAppDependencies();
-  const { actionTypesIndex, setAddFlyoutVisibility } = useContext(ActionsContext);
+  const { actionTypesIndex, setAddFlyoutVisibility } = useContext(ActionsConnectorsContext);
   if (!actionTypesIndex) {
     return null;
   }

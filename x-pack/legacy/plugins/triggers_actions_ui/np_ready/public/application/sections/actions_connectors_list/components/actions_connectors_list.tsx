@@ -8,13 +8,13 @@ import React, { Fragment, useState, useEffect } from 'react';
 import { EuiBadge, EuiInMemoryTable, EuiSpacer, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ActionsContext } from '../../../context/actions_context';
+import { ActionsConnectorsContext } from '../../../context/actions_connectors_context';
 import { useAppDependencies } from '../../../app_dependencies';
 import { deleteActions, loadAllActions, loadActionTypes } from '../../../lib/api';
-import { Action, ActionTableItem, ActionTypeIndex } from '../../../../types';
-import { ActionAddFlyout, ActionEditFlyout } from '../../action_form';
+import { ActionConnector, ActionTableItem, ActionTypeIndex } from '../../../../types';
+import { ConnectorAddFlyout, ConnectorEditFlyout } from '../../action_connector_form';
 
-export const ActionsList: React.FunctionComponent = () => {
+export const ActionsConnectorsList: React.FunctionComponent = () => {
   const {
     core: { http },
     plugins: { capabilities, toastNotifications },
@@ -23,7 +23,7 @@ export const ActionsList: React.FunctionComponent = () => {
   const canSave = capabilities.get().actions.save;
 
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
-  const [actions, setActions] = useState<Action[]>([]);
+  const [actions, setActions] = useState<ActionConnector[]>([]);
   const [data, setData] = useState<ActionTableItem[]>([]);
   const [selectedItems, setSelectedItems] = useState<ActionTableItem[]>([]);
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
@@ -223,7 +223,7 @@ export const ActionsList: React.FunctionComponent = () => {
     <section data-test-subj="actionsList">
       <Fragment>
         <EuiSpacer size="m" />
-        <ActionsContext.Provider
+        <ActionsConnectorsContext.Provider
           value={{
             addFlyoutVisible,
             setAddFlyoutVisibility,
@@ -312,14 +312,14 @@ export const ActionsList: React.FunctionComponent = () => {
               ],
             }}
           />
-          <ActionAddFlyout />
-          <ActionEditFlyout />
-        </ActionsContext.Provider>
+          <ConnectorAddFlyout />
+          <ConnectorEditFlyout />
+        </ActionsConnectorsContext.Provider>
       </Fragment>
     </section>
   );
 };
 
-function getActionsCountByActionType(actions: Action[], actionTypeId: string) {
+function getActionsCountByActionType(actions: ActionConnector[], actionTypeId: string) {
   return actions.filter(action => action.actionTypeId === actionTypeId).length;
 }

@@ -7,23 +7,28 @@ import React, { Fragment } from 'react';
 import { EuiFieldText, EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { ActionTypeModel, Props, ValidationResult, ActionParamsProps } from '../../../../types';
-import { ErrableFormRow } from '../../../components/page_error';
+import {
+  ActionTypeModel,
+  ActionConnectorFieldsProps,
+  ValidationResult,
+  ActionParamsProps,
+} from '../../../types';
+import { ErrableFormRow } from '../page_error';
 
 export function getActionType(): ActionTypeModel {
   return {
     id: '.index',
     iconClass: 'indexOpen',
     selectMessage: i18n.translate(
-      'xpack.triggersActionsUI.sections.actionAdd.indexAction.selectMessageText',
+      'xpack.triggersActionsUI.components.buildin_action_types.indexAction.selectMessageText',
       {
         defaultMessage: 'Index data into Elasticsearch.',
       }
     ),
-    validate: (): ValidationResult => {
+    validateConnector: (): ValidationResult => {
       return { errors: {} };
     },
-    actionFields: IndexActionFields,
+    actionConnectorFields: IndexActionConnectorFields,
     actionParamsFields: IndexParamsFields,
     validateParams: (actionParams: any): ValidationResult => {
       const validationResult = { errors: {} };
@@ -32,13 +37,16 @@ export function getActionType(): ActionTypeModel {
   };
 }
 
-const IndexActionFields: React.FunctionComponent<Props> = ({ action, editActionConfig }) => {
+const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
+  action,
+  editActionConfig,
+}) => {
   const { index } = action.config;
   return (
     <EuiFormRow
       fullWidth
       label={i18n.translate(
-        'xpack.triggersActionsUI.sections.actionAdd.indexAction.indexTextFieldLabel',
+        'xpack.triggersActionsUI.components.buildin_action_types.indexAction.indexTextFieldLabel',
         {
           defaultMessage: 'Index (optional)',
         }
@@ -79,7 +87,7 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps> = ({
         errors={errors}
         isShowingErrors={hasErrors === true && action.index !== undefined}
         label={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionAdd.indexAction.indexFieldLabel',
+          'xpack.triggersActionsUI.components.buildin_action_types.indexAction.indexFieldLabel',
           {
             defaultMessage: 'Index',
           }
@@ -108,7 +116,7 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps> = ({
         }}
         label={
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.actionAdd.indexAction.refreshLabel"
+            id="xpack.triggersActionsUI.components.buildin_action_types.indexAction.refreshLabel"
             defaultMessage="Refresh"
           />
         }
