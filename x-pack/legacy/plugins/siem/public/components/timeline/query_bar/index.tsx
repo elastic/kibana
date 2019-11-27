@@ -9,9 +9,13 @@ import React, { memo, useCallback, useState, useEffect } from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { Subscription } from 'rxjs';
 
-import { SavedQueryTimeFilter } from '../../../../../../../../src/legacy/core_plugins/data/public/search';
-import { SavedQuery } from '../../../../../../../../src/legacy/core_plugins/data/public';
-import { Query, esFilters, FilterManager } from '../../../../../../../../src/plugins/data/public';
+import {
+  Query,
+  esFilters,
+  FilterManager,
+  SavedQuery,
+  SavedQueryTimeFilter,
+} from '../../../../../../../../src/plugins/data/public';
 
 import { BrowserFields } from '../../../containers/source';
 import { convertKueryToElasticSearchQuery } from '../../../lib/keury';

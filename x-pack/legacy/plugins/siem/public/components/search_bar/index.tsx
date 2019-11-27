@@ -38,7 +38,6 @@ import { TimeRange, Query, esFilters } from '../../../../../../../src/plugins/da
 
 const {
   ui: { SearchBar },
-  search,
 } = data;
 
 export const siemFilterManager = npStart.plugins.data.query.filterManager;

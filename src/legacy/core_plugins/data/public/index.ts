@@ -39,6 +39,11 @@ export {
 } from './index_patterns';
 export { QueryStringInput } from './query';
 export { SearchBar, SearchBarProps } from './search';
+export {
+  SavedQueryAttributes,
+  SavedQuery,
+  SavedQueryTimeFilter,
+} from '../../../../plugins/data/public';
 
 /** @public static code */
 export * from '../common';
