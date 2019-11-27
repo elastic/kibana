@@ -27,7 +27,7 @@ export class JobCreator {
   protected _savedSearch: SavedSearch;
   protected _indexPatternTitle: IndexPatternTitle = '';
   protected _job_config: Job;
-  protected _calendars: Calendar[] | null;
+  protected _calendars: Calendar[];
   protected _datafeed_config: Datafeed;
   protected _detectors: Detector[];
   protected _influencers: string[];
@@ -50,7 +50,7 @@ export class JobCreator {
     this._indexPatternTitle = indexPattern.title;
 
     this._job_config = createEmptyJob();
-    this._calendars = null;
+    this._calendars = [];
     this._datafeed_config = createEmptyDatafeed(this._indexPatternTitle);
     this._detectors = this._job_config.analysis_config.detectors;
     this._influencers = this._job_config.analysis_config.influencers;

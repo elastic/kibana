@@ -6,7 +6,6 @@
 
 import React, { FC, useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import chrome from 'ui/chrome';
 import {
   EuiButtonIcon,
   EuiComboBox,
@@ -58,11 +57,11 @@ export const CalendarsSelection: FC = () => {
     isLoading,
     onChange: optionsIn => {
       setSelectedOptions(optionsIn);
-      setSelectedCalendars(optionsIn.map(o => o.value as Calendar));
+      setSelectedCalendars(optionsIn.map(o => o.value!));
     },
   };
 
-  const manageCalendarsHref = `${chrome.getBasePath()}/app/ml#/settings/calendars_list`;
+  const manageCalendarsHref = '#/settings/calendars_list';
 
   return (
     <Description>
