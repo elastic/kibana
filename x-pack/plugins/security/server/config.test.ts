@@ -13,48 +13,60 @@ import { createConfig$, ConfigSchema } from './config';
 describe('config schema', () => {
   it('generates proper defaults', () => {
     expect(ConfigSchema.validate({})).toMatchInlineSnapshot(`
-                        Object {
-                          "authc": Object {
-                            "providers": Array [
-                              "basic",
-                            ],
-                          },
-                          "cookieName": "sid",
-                          "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                          "public": Object {},
-                          "secureCookies": false,
-                          "sessionTimeout": null,
-                        }
-                `);
+      Object {
+        "authc": Object {
+          "providers": Array [
+            "basic",
+          ],
+        },
+        "cookieName": "sid",
+        "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "loginAssistanceMessage": "",
+        "public": Object {},
+        "secureCookies": false,
+        "session": Object {
+          "idleTimeout": null,
+          "lifespan": null,
+        },
+      }
+    `);
 
     expect(ConfigSchema.validate({}, { dist: false })).toMatchInlineSnapshot(`
-                        Object {
-                          "authc": Object {
-                            "providers": Array [
-                              "basic",
-                            ],
-                          },
-                          "cookieName": "sid",
-                          "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                          "public": Object {},
-                          "secureCookies": false,
-                          "sessionTimeout": null,
-                        }
-                `);
+      Object {
+        "authc": Object {
+          "providers": Array [
+            "basic",
+          ],
+        },
+        "cookieName": "sid",
+        "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "loginAssistanceMessage": "",
+        "public": Object {},
+        "secureCookies": false,
+        "session": Object {
+          "idleTimeout": null,
+          "lifespan": null,
+        },
+      }
+    `);
 
     expect(ConfigSchema.validate({}, { dist: true })).toMatchInlineSnapshot(`
-                        Object {
-                          "authc": Object {
-                            "providers": Array [
-                              "basic",
-                            ],
-                          },
-                          "cookieName": "sid",
-                          "public": Object {},
-                          "secureCookies": false,
-                          "sessionTimeout": null,
-                        }
-                `);
+      Object {
+        "authc": Object {
+          "providers": Array [
+            "basic",
+          ],
+        },
+        "cookieName": "sid",
+        "loginAssistanceMessage": "",
+        "public": Object {},
+        "secureCookies": false,
+        "session": Object {
+          "idleTimeout": null,
+          "lifespan": null,
+        },
+      }
+    `);
   });
 
   it('should throw error if xpack.security.encryptionKey is less than 32 characters', () => {
@@ -479,17 +491,8 @@ describe('createConfig$()', () => {
     const config = await createConfig$(contextMock, true)
       .pipe(first())
       .toPromise();
-    expect(config).toMatchInlineSnapshot(`
-            Object {
-              "authc": Object {
-                "providers": Array [
-                  "basic",
-                ],
-              },
-              "encryptionKey": "abababababababababababababababab",
-              "secureCookies": true,
-            }
-        `);
+    expect(config.encryptionKey).toEqual('ab'.repeat(16));
+    expect(config.secureCookies).toEqual(true);
 
     expect(loggingServiceMock.collect(contextMock.logger).warn).toMatchInlineSnapshot(`
                         Array [
@@ -510,17 +513,7 @@ describe('createConfig$()', () => {
     const config = await createConfig$(contextMock, false)
       .pipe(first())
       .toPromise();
-    expect(config).toMatchInlineSnapshot(`
-            Object {
-              "authc": Object {
-                "providers": Array [
-                  "basic",
-                ],
-              },
-              "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-              "secureCookies": false,
-            }
-        `);
+    expect(config.secureCookies).toEqual(false);
 
     expect(loggingServiceMock.collect(contextMock.logger).warn).toMatchInlineSnapshot(`
                         Array [
@@ -541,17 +534,7 @@ describe('createConfig$()', () => {
     const config = await createConfig$(contextMock, false)
       .pipe(first())
       .toPromise();
-    expect(config).toMatchInlineSnapshot(`
-            Object {
-              "authc": Object {
-                "providers": Array [
-                  "basic",
-                ],
-              },
-              "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-              "secureCookies": true,
-            }
-        `);
+    expect(config.secureCookies).toEqual(true);
 
     expect(loggingServiceMock.collect(contextMock.logger).warn).toMatchInlineSnapshot(`
                         Array [
@@ -572,17 +555,7 @@ describe('createConfig$()', () => {
     const config = await createConfig$(contextMock, true)
       .pipe(first())
       .toPromise();
-    expect(config).toMatchInlineSnapshot(`
-      Object {
-        "authc": Object {
-          "providers": Array [
-            "basic",
-          ],
-        },
-        "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "secureCookies": true,
-      }
-    `);
+    expect(config.secureCookies).toEqual(true);
 
     expect(loggingServiceMock.collect(contextMock.logger).warn).toEqual([]);
   });

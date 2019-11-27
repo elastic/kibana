@@ -206,7 +206,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
 
   cols.push({
     name: i18n.translate('xpack.monitoring.elasticsearch.nodes.jvmMemoryColumnTitle', {
-      defaultMessage: '{javaVirtualMachine} Memory',
+      defaultMessage: '{javaVirtualMachine} Heap',
       values: {
         javaVirtualMachine: 'JVM'
       }

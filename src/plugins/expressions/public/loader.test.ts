@@ -18,11 +18,11 @@
  */
 
 import { fromExpression } from '@kbn/interpreter/common';
-import { first } from 'rxjs/operators';
+import { first, skip } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { loader, ExpressionLoader } from './loader';
 import { ExpressionDataHandler } from './execute';
 import { IInterpreterRenderHandlers } from './types';
-import { Observable } from 'rxjs';
 import { ExpressionAST } from '../common/types';
 
 const element: HTMLElement = null as any;
@@ -123,8 +123,8 @@ describe('ExpressionLoader', () => {
     const expressionLoader = new ExpressionLoader(element, expressionString, {});
     let response = await expressionLoader.render$.pipe(first()).toPromise();
     expect(response).toBe(1);
-    expressionLoader.update('test2', {});
-    response = await expressionLoader.render$.pipe(first()).toPromise();
+    expressionLoader.update('test');
+    response = await expressionLoader.render$.pipe(skip(1), first()).toPromise();
     expect(response).toBe(2);
   });
 

@@ -17,8 +17,8 @@ export default function ({ getService, getPageObjects }) {
 
     before(async () => {
       await setup('monitoring/singlecluster-red-platinum', {
-        from: '2017-10-06 19:53:06.748',
-        to: '2017-10-06 20:15:30.212',
+        from: 'Oct 6, 2017 @ 19:53:06.748',
+        to: 'Oct 6, 2017 @ 20:15:30.212',
       });
 
       // go to indices listing
@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }) {
       expect(await esClusterSummaryStatus.getContent()).to.eql({
         nodesCount: 'Nodes\n1',
         indicesCount: 'Indices\n19',
-        memory: 'Memory\n267.7 MB / 676.8 MB',
+        memory: 'JVM Heap\n267.7 MB / 676.8 MB',
         totalShards: 'Total shards\n46',
         unassignedShards: 'Unassigned shards\n23',
         documentCount: 'Documents\n4,535',

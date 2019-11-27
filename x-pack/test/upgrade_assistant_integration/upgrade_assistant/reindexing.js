@@ -12,7 +12,7 @@ import { ReindexStatus, ReindexWarning, REINDEX_OP_TYPE } from '../../../legacy/
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   // Utility function that keeps polling API until reindex operation has completed or failed.
   const waitForReindexToComplete = async (indexName) => {

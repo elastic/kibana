@@ -36,7 +36,6 @@ import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
-import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { timefilter } from 'ui/timefilter';
 
 // Saved objects
@@ -61,7 +60,9 @@ const services = {
   savedObjectsClient: npStart.core.savedObjects.client,
   toastNotifications: npStart.core.notifications.toasts,
   uiSettings: npStart.core.uiSettings,
+  core: npStart.core,
 
+  share: npStart.plugins.share,
   data,
   embeddables,
   visualizations,
@@ -77,7 +78,6 @@ const services = {
   SavedObjectProvider,
   SavedObjectRegistryProvider,
   SavedObjectsClientProvider,
-  ShareContextMenuExtensionsRegistryProvider,
   timefilter,
   uiModules,
   uiRoutes,
@@ -99,13 +99,13 @@ export { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
 // @ts-ignore
 export { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-export { showShareContextMenu } from 'ui/share';
 export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 export { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
+export { unhashUrl } from 'ui/state_management/state_hashing';
 export {
   Container,
   Embeddable,

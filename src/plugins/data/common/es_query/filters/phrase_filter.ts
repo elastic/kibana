@@ -25,6 +25,12 @@ export type PhraseFilterMeta = FilterMeta & {
   params?: {
     query: string; // The unformatted value
   };
+  field?: any;
+  index?: any;
+};
+
+export type PhraseFilter = Filter & {
+  meta: PhraseFilterMeta;
   script?: {
     script: {
       source?: any;
@@ -32,12 +38,6 @@ export type PhraseFilterMeta = FilterMeta & {
       params: any;
     };
   };
-  field?: any;
-  index?: any;
-};
-
-export type PhraseFilter = Filter & {
-  meta: PhraseFilterMeta;
 };
 
 type PhraseFilterValue = string | number | boolean;
@@ -79,7 +79,7 @@ export const buildPhraseFilter = (
     return {
       meta: { index: indexPattern.id, field: field.name } as PhraseFilterMeta,
       script: getPhraseScript(field, value),
-    } as PhraseFilter;
+    };
   } else {
     return {
       meta: { index: indexPattern.id },

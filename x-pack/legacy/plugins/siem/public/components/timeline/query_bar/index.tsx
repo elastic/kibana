@@ -157,15 +157,24 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       let isSubscribed = true;
       async function setSavedQueryByServices() {
         if (savedQueryId != null && savedQueryServices != null) {
-          const mySavedQuery = await savedQueryServices.getSavedQuery(savedQueryId);
-          if (isSubscribed) {
-            setSavedQuery({
-              ...mySavedQuery,
-              attributes: {
-                ...mySavedQuery.attributes,
-                filters: filters.filter(f => f.meta.controlledBy !== timelineFilterDropArea),
-              },
-            });
+          try {
+            // The getSavedQuery function will throw a promise rejection in
+            // src/legacy/core_plugins/data/public/search/search_bar/lib/saved_query_service.ts
+            // if the savedObjectsClient is undefined. This is happening in a test
+            // so I wrapped this in a try catch to keep the unhandled promise rejection
+            // warning from appearing in tests.
+            const mySavedQuery = await savedQueryServices.getSavedQuery(savedQueryId);
+            if (isSubscribed && mySavedQuery != null) {
+              setSavedQuery({
+                ...mySavedQuery,
+                attributes: {
+                  ...mySavedQuery.attributes,
+                  filters: filters.filter(f => f.meta.controlledBy !== timelineFilterDropArea),
+                },
+              });
+            }
+          } catch (exc) {
+            setSavedQuery(null);
           }
         } else if (isSubscribed) {
           setSavedQuery(null);
@@ -279,6 +288,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
         refreshInterval={refreshInterval}
         savedQuery={savedQuery}
         onSavedQuery={onSavedQuery}
+        dataTestSubj={'timelineQueryInput'}
       />
     );
   }

@@ -5,6 +5,7 @@
  */
 
 import { LocalUIFilterName } from '../../../server/lib/ui_filters/local_ui_filters/config';
+import { ProcessorEvent } from '../../../common/processor_event';
 
 export type IUrlParams = {
   detailTab?: string;
@@ -29,6 +30,6 @@ export type IUrlParams = {
   page?: number;
   pageSize?: number;
   serviceNodeName?: string;
-  processorEvent?: 'transaction' | 'error' | 'metric';
   searchTerm?: string;
+  processorEvent?: ProcessorEvent;
 } & Partial<Record<LocalUIFilterName, string>>;

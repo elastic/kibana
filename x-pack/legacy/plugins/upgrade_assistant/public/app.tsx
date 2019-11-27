@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { NEXT_MAJOR_VERSION } from '../common/version';
 import { UpgradeAssistantTabs } from './components/tabs';
 
-export const RootComponent: React.StatelessComponent = () => (
+export const RootComponent: React.FunctionComponent = () => (
   <div data-test-subj="upgradeAssistantRoot">
     <EuiPageHeader>
       <EuiPageHeaderSection>

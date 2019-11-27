@@ -94,6 +94,7 @@ export class DataPlugin implements Plugin<DataSetup, DataStart, {}, DataPluginSt
       savedObjectsClient: savedObjects.client,
       http,
       notifications,
+      fieldFormats: data.fieldFormats,
     });
 
     initLegacyModule(indexPatternsService.indexPatterns);

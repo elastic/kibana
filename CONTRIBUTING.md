@@ -347,13 +347,19 @@ Test runner arguments:
  - `[test path]` is the relative path to the test file.
 
  Examples:
-  - Run the entire elasticsearch_service test suite with yarn:
-    `node scripts/jest src/core/server/elasticsearch/elasticsearch_service.test.ts`
-  - Run the jest test case whose description matches 'stops both admin and data clients':
-    `node scripts/jest -t 'stops both admin and data clients' src/core/server/elasticsearch/elasticsearch_service.test.ts`
+  - Run the entire elasticsearch_service test suite:
+    ```
+    node scripts/jest src/core/server/elasticsearch/elasticsearch_service.test.ts
+    ```
+  - Run the jest test case whose description matches `stops both admin and data clients`:
+    ```
+    node scripts/jest -t 'stops both admin and data clients' src/core/server/elasticsearch/elasticsearch_service.test.ts
+    ```
   - Run the api integration test case whose description matches the given string:
-    `node scripts/functional_tests_server --config test/api_integration/config.js`
-    `node scripts/functional_test_runner --config test/api_integration/config.js --grep='should return 404 if id does not match any sample data sets'`
+    ```
+    node scripts/functional_tests_server --config test/api_integration/config.js
+    node scripts/functional_test_runner --config test/api_integration/config.js --grep='should return 404 if id does not match any sample data sets'
+    ```
 
 ### Debugging Unit Tests
 

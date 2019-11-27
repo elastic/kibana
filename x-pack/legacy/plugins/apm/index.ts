@@ -7,10 +7,10 @@
 import { i18n } from '@kbn/i18n';
 import { Server } from 'hapi';
 import { resolve } from 'path';
-import { PluginInitializerContext } from '../../../../src/core/server';
+import { APMPluginContract } from '../../../plugins/apm/server/plugin';
 import { LegacyPluginInitializer } from '../../../../src/legacy/types';
 import mappings from './mappings.json';
-import { plugin } from './server/new-platform';
+import { makeApmUsageCollector } from './server/lib/apm_telemetry';
 
 export const apm: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
@@ -68,9 +68,8 @@ export const apm: LegacyPluginInitializer = kibana => {
         // enable plugin
         enabled: Joi.boolean().default(true),
 
-        // buckets
-        minimumBucketSize: Joi.number().default(15),
-        bucketTargetCount: Joi.number().default(15),
+        // index patterns
+        autocreateApmIndexPattern: Joi.boolean().default(true),
 
         // service map
         serviceMapEnabled: Joi.boolean().default(false)
@@ -109,15 +108,11 @@ export const apm: LegacyPluginInitializer = kibana => {
           }
         }
       });
+      makeApmUsageCollector(server);
+      const apmPlugin = server.newPlatform.setup.plugins
+        .apm as APMPluginContract;
 
-      const initializerContext = {} as PluginInitializerContext;
-      const legacySetup = {
-        server
-      };
-      plugin(initializerContext).setup(
-        server.newPlatform.setup.core,
-        legacySetup
-      );
+      apmPlugin.registerLegacyAPI({ server });
     }
   });
 };
