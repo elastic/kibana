@@ -132,6 +132,8 @@ export enum InputType {
  */
 export interface Output {
   api_token?: string;
+  username?: string;
+  password?: string;
   /**
    * contains everything not otherwise specified (e.g. TLS, etc)
    */
