@@ -28,7 +28,7 @@ import { Field, FieldList } from './fields';
 import { setNotifications, setFieldFormats } from './services';
 import { createFlattenHitWrapper, formatHitProvider, IndexPatterns } from './index_patterns';
 
-export interface IndexPatternDependencies {
+interface IndexPatternDependencies {
   uiSettings: UiSettingsClientContract;
   savedObjectsClient: SavedObjectsClientContract;
   http: HttpServiceBase;
@@ -78,8 +78,3 @@ export class IndexPatternsService {
     // nothing to do here yet
   }
 }
-
-// types
-/** @internal */
-export type IndexPatternsSetup = ReturnType<IndexPatternsService['setup']>;
-export type IndexPatternsStart = ReturnType<IndexPatternsService['start']>;

@@ -17,29 +17,7 @@
  * under the License.
  */
 
-import { errors } from './errors';
-import {
-  ILLEGAL_CHARACTERS,
-  ILLEGAL_CHARACTERS_KEY,
-  CONTAINS_SPACES_KEY,
-  ILLEGAL_CHARACTERS_VISIBLE,
-  validate,
-  getFromSavedObject,
-  getRoutes,
-  findByTitle,
-} from './utils';
+import { IndexPatternsService } from './index_patterns_service';
 
-export const IndexPattern = {
-  errors,
-  CONTAINS_SPACES_KEY,
-  ILLEGAL_CHARACTERS,
-  ILLEGAL_CHARACTERS_KEY,
-  ILLEGAL_CHARACTERS_VISIBLE,
-  validate,
-  getFromSavedObject,
-  getRoutes,
-  findByTitle,
-};
-
-export { IndexPatternsService } from './index_patterns_service';
-export { IndexPatternsStart, IndexPatternsSetup } from './types';
+export type IndexPatternsSetup = ReturnType<IndexPatternsService['setup']>;
+export type IndexPatternsStart = ReturnType<IndexPatternsService['start']>;
