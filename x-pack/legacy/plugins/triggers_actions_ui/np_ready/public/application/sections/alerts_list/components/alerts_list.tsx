@@ -137,12 +137,8 @@ export const AlertsList: React.FunctionComponent = () => {
       truncateText: false,
     },
     {
-      name: i18n.translate(
-        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actions',
-        {
-          defaultMessage: 'Actions',
-        }
-      ),
+      name: '',
+      width: '40px',
       render(item: AlertTableItem) {
         return (
           <CollapsedItemActions key={item.id} item={item} onAlertChanged={() => loadAlertsData()} />
