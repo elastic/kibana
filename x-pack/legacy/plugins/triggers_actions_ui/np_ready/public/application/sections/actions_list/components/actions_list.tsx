@@ -20,7 +20,7 @@ export const ActionsList: React.FunctionComponent = () => {
     plugins: { capabilities, toastNotifications },
   } = useAppDependencies();
   const canDelete = capabilities.get().actions.delete;
-  const canEdit = capabilities.get().actions.delete;
+  const canSave = capabilities.get().actions.save;
 
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
   const [actions, setActions] = useState<Action[]>([]);
@@ -178,12 +178,12 @@ export const ActionsList: React.FunctionComponent = () => {
       name: '',
       actions: [
         {
-          enabled: () => canEdit,
+          enabled: () => canSave,
           name: i18n.translate(
             'xpack.triggersActionsUI.sections.actionsList.actionsListTable.columns.actions.editActionName',
             { defaultMessage: 'Edit' }
           ),
-          description: canEdit
+          description: canSave
             ? i18n.translate(
                 'xpack.triggersActionsUI.sections.actionsList.actionsListTable.columns.actions.editActionDescription',
                 { defaultMessage: 'Edit this action' }
