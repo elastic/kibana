@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-import './jobs_list';
-import './new_job';
+export { JobsPage } from './jobs';

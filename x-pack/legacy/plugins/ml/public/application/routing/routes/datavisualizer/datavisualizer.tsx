@@ -15,7 +15,7 @@ import React, { FC } from 'react';
 import queryString from 'query-string';
 import { MlRoute, PageLoader } from '../../router';
 import { useResolver } from '../../router';
-import { DatavisualizerSelector } from '../../../datavisualizer/datavisualizer_selector';
+import { DatavisualizerSelector } from '../../../datavisualizer';
 
 import { checkBasicLicense } from '../../../license/check_license';
 import { checkFindFileStructurePrivilege } from '../../../privilege/check_privilege';

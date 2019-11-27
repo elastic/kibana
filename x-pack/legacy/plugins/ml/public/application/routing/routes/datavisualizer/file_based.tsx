@@ -15,7 +15,7 @@ import React, { FC } from 'react';
 import queryString from 'query-string';
 import { MlRoute, PageLoader } from '../../router';
 import { useResolver } from '../../router';
-import { FileDataVisualizerPage } from '../../../datavisualizer/file_based/file_datavisualizer';
+import { FileDataVisualizerPage } from '../../../datavisualizer/file_based';
 
 import { checkBasicLicense } from '../../../license/check_license';
 import { checkFindFileStructurePrivilege } from '../../../privilege/check_privilege';

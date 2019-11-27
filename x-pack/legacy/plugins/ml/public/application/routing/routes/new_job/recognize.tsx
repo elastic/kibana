@@ -11,7 +11,7 @@ import queryString from 'query-string';
 import { useResolver } from '../../router';
 import { basicResolvers } from '../../resolvers';
 import { MlRoute, PageLoader } from '../../router';
-import { Page } from '../../../jobs/new_job/recognize/page';
+import { Page } from '../../../jobs/new_job/recognize';
 // import { checkViewOrCreateJobs } from '../../../jobs/new_job/recognize/resolvers';
 import { mlJobService } from '../../../services/job_service';
 

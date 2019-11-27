@@ -17,7 +17,7 @@ import { useResolver } from '../../router';
 import { checkFullLicense } from '../../../license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check_privilege';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
-import { FilterLists } from '../../../settings';
+import { FilterLists } from '../../../settings/filter_lists';
 
 export const filterListRoute: MlRoute = {
   path: '/settings/filter_lists',

@@ -10,7 +10,7 @@ import React, { FC } from 'react';
 import queryString from 'query-string';
 import { MlRoute, PageLoader } from '../../router';
 import { useResolver } from '../../router';
-import { Page } from '../../../datavisualizer/index_based/page';
+import { Page } from '../../../datavisualizer/index_based';
 
 import { checkBasicLicense } from '../../../license/check_license';
 import { checkGetJobsPrivilege } from '../../../privilege/check_privilege';

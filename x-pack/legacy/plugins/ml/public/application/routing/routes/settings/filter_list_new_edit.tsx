@@ -19,7 +19,7 @@ import { useResolver } from '../../router';
 import { checkFullLicense } from '../../../license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check_privilege';
 import { checkMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
-import { EditFilterList } from '../../../settings';
+import { EditFilterList } from '../../../settings/filter_lists';
 
 enum MODE {
   NEW,

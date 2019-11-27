@@ -11,7 +11,7 @@ import queryString from 'query-string';
 import { MlRoute, PageLoader } from '../../router';
 import { useResolver } from '../../router';
 import { basicResolvers } from '../../resolvers';
-import { Page } from '../../../jobs/new_job/pages/job_type/page';
+import { Page } from '../../../jobs/new_job/pages/job_type';
 
 export const jobTypeRoute: MlRoute = {
   path: '/jobs/new_job/step/job_type',

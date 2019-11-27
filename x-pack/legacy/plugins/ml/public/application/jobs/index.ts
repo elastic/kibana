@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-import './directive';
+export { JobsPage } from './jobs_list';
+export {} from './new_job';

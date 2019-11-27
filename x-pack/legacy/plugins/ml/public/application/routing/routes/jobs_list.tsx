@@ -10,7 +10,7 @@ import { MlRoute, PageLoader } from '../router';
 import { useResolver } from '../router';
 import { KibanaConfigTypeFix } from '../../contexts/kibana';
 import { basicResolvers } from '../resolvers';
-import { JobsPage } from '../../jobs/jobs_list/jobs';
+import { JobsPage } from '../../jobs/jobs_list';
 
 export const jobListRoute: MlRoute = {
   path: '/jobs',

@@ -8,7 +8,7 @@ import React, { FC } from 'react';
 import { MlRoute, PageLoader } from '../../router';
 import { useResolver } from '../../router';
 import { basicResolvers } from '../../resolvers';
-import { Page } from '../../../jobs/new_job/pages/index_or_search/page';
+import { Page } from '../../../jobs/new_job/pages/index_or_search';
 
 export const indexOrSearchRoute: MlRoute = {
   path: '/jobs/new_job/step/index_or_search',
