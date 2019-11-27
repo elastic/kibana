@@ -52,7 +52,7 @@ const fields = Joi.array()
   .single();
 /* eslint-enable @typescript-eslint/camelcase */
 
-export const createSignalsSchema = Joi.object({
+export const createRulesSchema = Joi.object({
   description: description.required(),
   enabled: enabled.default(true),
   false_positives: false_positives.default([]),
@@ -113,7 +113,7 @@ export const createSignalsSchema = Joi.object({
   references: references.default([]),
 });
 
-export const updateSignalSchema = Joi.object({
+export const updateRulesSchema = Joi.object({
   description,
   enabled,
   false_positives,
@@ -168,12 +168,12 @@ export const updateSignalSchema = Joi.object({
   references,
 }).xor('id', 'rule_id');
 
-export const querySignalSchema = Joi.object({
+export const queryRulesSchema = Joi.object({
   rule_id,
   id,
 }).xor('id', 'rule_id');
 
-export const findSignalsSchema = Joi.object({
+export const findRulesSchema = Joi.object({
   fields,
   filter: queryFilter,
   per_page,
