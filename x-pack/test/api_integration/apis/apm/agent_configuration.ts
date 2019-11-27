@@ -39,7 +39,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     return supertest
       .delete(`/api/apm/settings/agent-configuration/${configurationId}`)
       .set('kbn-xsrf', 'foo')
-      .then(response => {
+      .then((response: any) => {
         createdConfigIds = createdConfigIds.filter(id => id === configurationId);
         return response;
       });
@@ -47,7 +47,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
   describe('agent configuration', () => {
     describe('when creating one configuration', () => {
-      let createdConfigId;
+      let createdConfigId: string;
 
       const parameters = {
         service: { name: 'myservice', environment: 'development' },
