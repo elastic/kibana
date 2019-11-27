@@ -14,6 +14,9 @@ import { mappings } from './server/mappings';
 
 export const config = Joi.object({
   enabled: Joi.boolean().default(true),
+  defaultOutputUsername: Joi.string().default('elastic'),
+  defaultOutputPassword: Joi.string().default('changeme'),
+  defaultOutputHost: Joi.string().default('http://localhost:9200'),
 }).default();
 
 export function ingest(kibana: any) {
