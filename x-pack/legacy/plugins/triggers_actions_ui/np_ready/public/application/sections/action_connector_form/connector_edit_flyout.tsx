@@ -48,7 +48,7 @@ export const ConnectorEditFlyout = ({ connector }: ConnectorEditProps) => {
               <h3 id="flyoutTitle">
                 <FormattedMessage
                   defaultMessage={'Edit connector'}
-                  id="xpack.triggersActionsUI.sections.actionAdd.flyoutTitle"
+                  id="xpack.triggersActionsUI.sections.actionConnectorForm.flyoutTitle"
                 />
               </h3>
             </EuiTitle>
@@ -69,7 +69,7 @@ export const ConnectorEditFlyout = ({ connector }: ConnectorEditProps) => {
       ) : (
         <SectionLoading>
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.actionAdd.loadingWatchDescription"
+            id="xpack.triggersActionsUI.sections.actionConnectorForm.loadingWatchDescription"
             defaultMessage="Loading watch…"
           />
         </SectionLoading>

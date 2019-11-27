@@ -66,7 +66,7 @@ export const ConnectorAddFlyout = () => {
               <h3 id="flyoutTitle">
                 <FormattedMessage
                   defaultMessage={'Create connector'}
-                  id="xpack.triggersActionsUI.sections.actionAdd.flyoutTitle"
+                  id="xpack.triggersActionsUI.sections.actionConnectorForm.flyoutTitle"
                 />
               </h3>
             </EuiTitle>

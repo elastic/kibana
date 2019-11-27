@@ -78,9 +78,12 @@ export const ActionConnectorForm = ({
     validationResult.errors = errors;
     if (!actionObject.description) {
       errors.description.push(
-        i18n.translate('xpack.triggersActionsUI.sections.actionAdd.error.requiredNameText', {
-          defaultMessage: 'Description is required.',
-        })
+        i18n.translate(
+          'xpack.triggersActionsUI.sections.actionConnectorForm.error.requiredNameText',
+          {
+            defaultMessage: 'Description is required.',
+          }
+        )
       );
     }
     return validationResult;
@@ -101,22 +104,28 @@ export const ActionConnectorForm = ({
       if (connector.id === undefined) {
         newAction = await createActionConnector({ http, connector });
         toastNotifications.addSuccess(
-          i18n.translate('xpack.triggersActionsUI.sections.actionAdd.saveSuccessNotificationText', {
-            defaultMessage: "Created '{actionName}'",
-            values: {
-              actionName: newAction.description,
-            },
-          })
+          i18n.translate(
+            'xpack.triggersActionsUI.sections.actionConnectorForm.saveSuccessNotificationText',
+            {
+              defaultMessage: "Created '{actionName}'",
+              values: {
+                actionName: newAction.description,
+              },
+            }
+          )
         );
       } else {
         newAction = await updateActionConnector({ http, connector, id: connector.id });
         toastNotifications.addSuccess(
-          i18n.translate('xpack.triggersActionsUI.sections.actionAdd.saveSuccessNotificationText', {
-            defaultMessage: "Updated '{actionName}'",
-            values: {
-              actionName: newAction.description,
-            },
-          })
+          i18n.translate(
+            'xpack.triggersActionsUI.sections.actionConnectorForm.saveSuccessNotificationText',
+            {
+              defaultMessage: "Updated '{actionName}'",
+              values: {
+                actionName: newAction.description,
+              },
+            }
+          )
         );
       }
 
@@ -137,7 +146,7 @@ export const ActionConnectorForm = ({
               <SectionError
                 title={
                   <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.actionAdd.saveActionErrorTitle"
+                    id="xpack.triggersActionsUI.sections.actionConnectorForm.saveActionErrorTitle"
                     defaultMessage="Error saving action"
                   />
                 }
@@ -151,7 +160,7 @@ export const ActionConnectorForm = ({
             fullWidth
             label={
               <FormattedMessage
-                id="xpack.triggersActionsUI.sections.actionAdd.actionDescritionLabel"
+                id="xpack.triggersActionsUI.sections.actionConnectorForm.actionDescritionLabel"
                 defaultMessage="Description"
               />
             }
@@ -187,7 +196,7 @@ export const ActionConnectorForm = ({
                 <Fragment>
                   <EuiCallOut
                     title={i18n.translate(
-                      'xpack.triggersActionsUI.sections.actionAdd.actions.actionConfigurationWarningTitleText',
+                      'xpack.triggersActionsUI.sections.actionConnectorForm.actions.actionConfigurationWarningTitleText',
                       {
                         defaultMessage: 'Account may not be configured',
                       }
@@ -198,14 +207,14 @@ export const ActionConnectorForm = ({
                     <EuiText>
                       <p>
                         <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.actionAdd.actions.actionConfigurationWarningDescriptionText"
+                          id="xpack.triggersActionsUI.sections.actionConnectorForm.actions.actionConfigurationWarningDescriptionText"
                           defaultMessage="To create this action, you must configure at least one {accountType} account. {docLink}"
                           values={{
                             accountType: actionTypeName,
                             docLink: (
                               <EuiLink target="_blank">
                                 <FormattedMessage
-                                  id="xpack.triggersActionsUI.sections.actionAdd.actions.actionConfigurationWarningHelpLinkText"
+                                  id="xpack.triggersActionsUI.sections.actionConnectorForm.actions.actionConfigurationWarningHelpLinkText"
                                   defaultMessage="Learn more."
                                 />
                               </EuiLink>
@@ -226,9 +235,12 @@ export const ActionConnectorForm = ({
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={() => setFlyoutVisibility(false)}>
-              {i18n.translate('xpack.triggersActionsUI.sections.actionAdd.cancelButtonLabel', {
-                defaultMessage: 'Cancel',
-              })}
+              {i18n.translate(
+                'xpack.triggersActionsUI.sections.actionConnectorForm.cancelButtonLabel',
+                {
+                  defaultMessage: 'Cancel',
+                }
+              )}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -252,7 +264,7 @@ export const ActionConnectorForm = ({
               }}
             >
               <FormattedMessage
-                id="xpack.triggersActionsUI.sections.actionAdd.saveButtonLabel"
+                id="xpack.triggersActionsUI.sections.actionConnectorForm.saveButtonLabel"
                 defaultMessage="Save"
               />
             </EuiButton>

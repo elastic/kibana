@@ -56,7 +56,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       } catch (e) {
         toastNotifications.addDanger({
           title: i18n.translate(
-            'xpack.triggersActionsUI.sections.actionsList.unableToLoadActionTypesMessage',
+            'xpack.triggersActionsUI.sections.actionsConnectorsList.unableToLoadActionTypesMessage',
             { defaultMessage: 'Unable to load action types' }
           ),
         });
@@ -100,7 +100,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     } catch (e) {
       toastNotifications.addDanger({
         title: i18n.translate(
-          'xpack.triggersActionsUI.sections.actionsList.unableToLoadActionsMessage',
+          'xpack.triggersActionsUI.sections.actionsConnectorsList.unableToLoadActionsMessage',
           {
             defaultMessage: 'Unable to load actions',
           }
@@ -121,7 +121,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     } catch (e) {
       toastNotifications.addDanger({
         title: i18n.translate(
-          'xpack.triggersActionsUI.sections.actionsList.failedToDeleteActionsMessage',
+          'xpack.triggersActionsUI.sections.actionsConnectorsList.failedToDeleteActionsMessage',
           { defaultMessage: 'Failed to delete action(s)' }
         ),
       });
@@ -145,7 +145,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     {
       field: 'actionType',
       name: i18n.translate(
-        'xpack.triggersActionsUI.sections.actionsList.actionsListTable.columns.actionTypeTitle',
+        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actionTypeTitle',
         {
           defaultMessage: 'Type',
         }
@@ -156,7 +156,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     {
       field: 'description',
       name: i18n.translate(
-        'xpack.triggersActionsUI.sections.actionsList.actionsListTable.columns.descriptionTitle',
+        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.descriptionTitle',
         {
           defaultMessage: 'Name',
         }
@@ -167,7 +167,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     {
       field: 'referencedByCount',
       name: i18n.translate(
-        'xpack.triggersActionsUI.sections.actionsList.actionsListTable.columns.referencedByCountTitle',
+        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.referencedByCountTitle',
         { defaultMessage: 'Attached actions' }
       ),
       sortable: false,
@@ -182,16 +182,16 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
         {
           enabled: () => canSave,
           name: i18n.translate(
-            'xpack.triggersActionsUI.sections.actionsList.actionsListTable.columns.actions.editActionName',
+            'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.editActionName',
             { defaultMessage: 'Edit' }
           ),
           description: canSave
             ? i18n.translate(
-                'xpack.triggersActionsUI.sections.actionsList.actionsListTable.columns.actions.editActionDescription',
+                'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.editActionDescription',
                 { defaultMessage: 'Edit this action' }
               )
             : i18n.translate(
-                'xpack.triggersActionsUI.sections.actionsList.actionsListTable.columns.actions.editActionDisabledDescription',
+                'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.editActionDisabledDescription',
                 { defaultMessage: 'Unable to edit actions' }
               ),
           type: 'icon',
@@ -201,16 +201,16 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
         {
           enabled: () => canDelete,
           name: i18n.translate(
-            'xpack.triggersActionsUI.sections.actionsList.actionsListTable.columns.actions.deleteActionName',
+            'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionName',
             { defaultMessage: 'Delete' }
           ),
           description: canDelete
             ? i18n.translate(
-                'xpack.triggersActionsUI.sections.actionsList.actionsListTable.columns.actions.deleteActionDescription',
+                'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionDescription',
                 { defaultMessage: 'Delete this action' }
               )
             : i18n.translate(
-                'xpack.triggersActionsUI.sections.actionsList.actionsListTable.columns.actions.deleteActionDisabledDescription',
+                'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionDisabledDescription',
                 { defaultMessage: 'Unable to delete actions' }
               ),
           type: 'icon',
@@ -262,7 +262,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
                   type: 'field_value_selection',
                   field: 'actionTypeId',
                   name: i18n.translate(
-                    'xpack.triggersActionsUI.sections.actionsList.filters.actionTypeIdName',
+                    'xpack.triggersActionsUI.sections.actionsConnectorsList.filters.actionTypeIdName',
                     { defaultMessage: 'Type' }
                   ),
                   multiSelect: 'or',
@@ -282,13 +282,13 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
                           canDelete
                             ? undefined
                             : i18n.translate(
-                                'xpack.triggersActionsUI.sections.actionsList.buttons.deleteDisabledTitle',
+                                'xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteDisabledTitle',
                                 { defaultMessage: 'Unable to delete actions' }
                               )
                         }
                       >
                         <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.actionsList.buttons.deleteLabel"
+                          id="xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteLabel"
                           defaultMessage="Delete ({count})"
                           values={{
                             count: selectedItems.length,
@@ -306,7 +306,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
                   onClick={() => setAddFlyoutVisibility(true)}
                 >
                   <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.actionsList.addActionButtonLabel"
+                    id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionButtonLabel"
                     defaultMessage="Create"
                   />
                 </EuiButton>,
