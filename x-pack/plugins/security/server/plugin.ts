@@ -151,7 +151,7 @@ export class Plugin {
       featuresService: features,
     });
 
-    core.capabilities.registerCapabilitiesSwitcher(authz.disableUnauthorizedCapabilities);
+    core.capabilities.registerSwitcher(authz.disableUnauthorizedCapabilities);
 
     defineRoutes({
       router: core.http.createRouter(),

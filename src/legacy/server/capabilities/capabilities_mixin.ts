@@ -30,9 +30,7 @@ export async function capabilitiesMixin(kbnServer: KbnServer, server: Server) {
     );
 
     capabilitiesList.forEach(capabilities => {
-      kbnServer.newPlatform.setup.core.capabilities.registerCapabilitiesProvider(
-        () => capabilities
-      );
+      kbnServer.newPlatform.setup.core.capabilities.registerProvider(() => capabilities);
     });
   };
 

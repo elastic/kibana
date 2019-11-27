@@ -33,7 +33,7 @@ describe('capabilitiesMixin', () => {
         setup: {
           core: {
             capabilities: {
-              registerCapabilitiesProvider: registerMock,
+              registerProvider: registerMock,
             },
           },
         },

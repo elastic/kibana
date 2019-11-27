@@ -130,7 +130,7 @@ export class Plugin {
       features: plugins.features,
     });
 
-    core.capabilities.registerCapabilitiesSwitcher(async (request, uiCapabilities) => {
+    core.capabilities.registerSwitcher(async (request, uiCapabilities) => {
       try {
         const activeSpace = await spacesService.getActiveSpace(request);
         const features = plugins.features.getFeatures();

@@ -97,7 +97,7 @@ describe('CapabilitiesService', () => {
     });
 
     it('uses the service capabilities providers', async () => {
-      serviceSetup.registerCapabilitiesProvider(() => ({
+      serviceSetup.registerProvider(() => ({
         catalogue: {
           something: true,
         },

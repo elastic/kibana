@@ -103,8 +103,8 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
 ): CoreSetup {
   return {
     capabilities: {
-      registerCapabilitiesProvider: deps.capabilities.registerCapabilitiesProvider,
-      registerCapabilitiesSwitcher: deps.capabilities.registerCapabilitiesSwitcher,
+      registerProvider: deps.capabilities.registerProvider,
+      registerSwitcher: deps.capabilities.registerSwitcher,
     },
     context: {
       createContextContainer: deps.context.createContextContainer,

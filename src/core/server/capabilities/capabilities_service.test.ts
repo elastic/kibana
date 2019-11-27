@@ -47,7 +47,7 @@ describe('CapabilitiesService', () => {
     });
 
     it('allows to register capabilities providers', async () => {
-      setup.registerCapabilitiesProvider(() => ({
+      setup.registerProvider(() => ({
         navLinks: { myLink: true },
         catalogue: { myPlugin: true },
       }));
@@ -66,10 +66,10 @@ describe('CapabilitiesService', () => {
     });
 
     it('allows to register capabilities switchers', async () => {
-      setup.registerCapabilitiesProvider(() => ({
+      setup.registerProvider(() => ({
         catalogue: { a: true, b: true, c: true },
       }));
-      setup.registerCapabilitiesSwitcher((req, capabilities) => {
+      setup.registerSwitcher((req, capabilities) => {
         return {
           ...capabilities,
           catalogue: {

@@ -482,8 +482,8 @@ export type CapabilitiesProvider = () => Partial<Capabilities>;
 
 // @public
 export interface CapabilitiesSetup {
-    registerCapabilitiesProvider(provider: CapabilitiesProvider): void;
-    registerCapabilitiesSwitcher(switcher: CapabilitiesSwitcher): void;
+    registerProvider(provider: CapabilitiesProvider): void;
+    registerSwitcher(switcher: CapabilitiesSwitcher): void;
 }
 
 // @public

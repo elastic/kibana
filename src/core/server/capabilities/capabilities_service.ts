@@ -38,7 +38,7 @@ export interface CapabilitiesSetup {
    * ```ts
    * // my-plugin/server/plugin.ts
    * public setup(core: CoreSetup, deps: {}) {
-   *    core.capabilities.registerCapabilitiesProvider(() => {
+   *    core.capabilities.registerProvider(() => {
    *      return {
    *        catalogue: {
    *          myPlugin: true,
@@ -51,7 +51,7 @@ export interface CapabilitiesSetup {
    * }
    * ```
    */
-  registerCapabilitiesProvider(provider: CapabilitiesProvider): void;
+  registerProvider(provider: CapabilitiesProvider): void;
 
   /**
    * Register a {@link CapabilitiesSwitcher} to be used when resolving capabilities.
@@ -60,9 +60,9 @@ export interface CapabilitiesSetup {
    * ```ts
    * // my-plugin/server/plugin.ts
    * public setup(core: CoreSetup, deps: {}) {
-   *    core.capabilities.registerCapabilitiesSwitcher((request, capabilities) => {
+   *    core.capabilities.registerSwitcher((request, capabilities) => {
    *      if(myPluginApi.shouldRestrictBecauseOf(request)) {
-   *        return myPluginApi.restrictCapabilities(capabilities);
+   *        return myPluginApi.disableSomeCapabilities(capabilities);
    *      }
    *      return capabilities;
    *    })
@@ -73,7 +73,7 @@ export interface CapabilitiesSetup {
    * A capabilities switcher can only change the state of existing capabilities.
    * capabilities added or removed when invoking the switcher will be ignored.
    */
-  registerCapabilitiesSwitcher(switcher: CapabilitiesSwitcher): void;
+  registerSwitcher(switcher: CapabilitiesSwitcher): void;
 }
 
 /**
@@ -122,10 +122,10 @@ export class CapabilitiesService {
     this.setupCapabilitiesRoute(setupDeps.http);
 
     return {
-      registerCapabilitiesProvider: (provider: CapabilitiesProvider) => {
+      registerProvider: (provider: CapabilitiesProvider) => {
         this.capabilitiesProviders.push(provider);
       },
-      registerCapabilitiesSwitcher: (switcher: CapabilitiesSwitcher) => {
+      registerSwitcher: (switcher: CapabilitiesSwitcher) => {
         this.capabilitiesSwitchers.push(switcher);
       },
     };
