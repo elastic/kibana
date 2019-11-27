@@ -94,7 +94,26 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
     const { refresh, license$ } = this.createLicensePoller(dataClient, config.pollingFrequency);
 
     core.http.registerRouteHandlerContext('licensing', createRouteHandlerContext(license$));
+
     registerRoutes(core.http.createRouter());
+    core.http.registerOnPreResponse(async (req, res, t) => {
+      // If we're returning an error response, refresh license info from
+      // Elasticsearch in case the error is due to a change in license information
+      // in Elasticsearch.
+      if (res.statusCode >= 400) {
+        // await info.refreshNow();
+        // fetching should be a blocking call
+      }
+      const license = await license$.pipe(take(1)).toPromise();
+      if (license.isAvailable) {
+        return t.next({
+          headers: {
+            'kbn-license-sig': license.signature,
+          },
+        });
+      }
+      return t.next();
+    });
 
     return {
       refresh,

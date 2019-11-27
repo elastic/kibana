@@ -91,7 +91,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
     this.removeInterceptor = core.http.intercept({
       response: async httpResponse => {
         if (httpResponse.response) {
-          const signatureHeader = httpResponse.response.headers.get('kbn-xpack-sig');
+          const signatureHeader = httpResponse.response.headers.get('kbn-license-sig');
           if (this.prevSignature !== signatureHeader) {
             if (!httpResponse.request!.url.includes(this.infoEndpoint)) {
               signatureUpdated$.next();
