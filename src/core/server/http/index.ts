@@ -64,6 +64,7 @@ export {
   AuthResultType,
 } from './lifecycle/auth';
 export { OnPostAuthHandler, OnPostAuthToolkit } from './lifecycle/on_post_auth';
+export { OnPreResponseHandler, OnPreResponseToolkit } from './lifecycle/on_pre_response';
 export { SessionStorageFactory, SessionStorage } from './session_storage';
 export {
   SessionStorageCookieOptions,
