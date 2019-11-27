@@ -26,7 +26,6 @@ import { SerializedFieldFormat } from 'src/plugins/expressions/public';
 import { IFieldFormatId, FieldFormat } from '../../../../../../plugins/data/public';
 
 import { tabifyGetColumns } from '../../../agg_response/tabify/_get_columns';
-import chrome from '../../../chrome';
 import { dateRange } from '../../../utils/date_range';
 import { ipRange } from '../../../utils/ip_range';
 import { DateRangeKey } from '../../../agg_types/buckets/date_range';
@@ -146,7 +145,7 @@ export const getFormat: FormatFactory = mapping => {
           const parsedUrl = {
             origin: window.location.origin,
             pathname: window.location.pathname,
-            basePath: chrome.getBasePath(),
+            basePath: npStart.core.http.basePath,
           };
           // @ts-ignore
           return format.convert(val, undefined, undefined, parsedUrl);
@@ -163,7 +162,7 @@ export const getFormat: FormatFactory = mapping => {
         const parsedUrl = {
           origin: window.location.origin,
           pathname: window.location.pathname,
-          basePath: chrome.getBasePath(),
+          basePath: npStart.core.http.basePath,
         };
         // @ts-ignore
         return format.convert(val, type, undefined, parsedUrl);

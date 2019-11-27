@@ -50,7 +50,7 @@ export function setServices(newServices: any) {
 // EXPORT legacy static dependencies, should be migrated when available in a new version;
 export { angular };
 export { wrapInI18nContext } from 'ui/i18n';
-export { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
+export { buildVislibDimensions } from '../../../visualizations/public';
 // @ts-ignore
 export { callAfterBindingsWorkaround } from 'ui/compat';
 export {
