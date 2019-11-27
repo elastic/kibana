@@ -40,8 +40,9 @@ describe('CapabilitiesService', () => {
       setup = service.setup({ http });
     });
 
-    it('registers the capabilities route', async () => {
+    it('registers the capabilities routes', async () => {
       expect(http.createRouter).toHaveBeenCalledWith('/api/core/capabilities');
+      expect(router.post).toHaveBeenCalledTimes(2);
       expect(router.post).toHaveBeenCalledWith(expect.any(Object), expect.any(Function));
     });
 

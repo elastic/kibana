@@ -139,45 +139,27 @@ export class CapabilitiesService {
 
   private setupCapabilitiesRoute(http: InternalHttpServiceSetup) {
     const router = http.createRouter('/api/core/capabilities');
-    router.post(
-      {
-        path: '',
-        options: {
-          authRequired: true,
+    [true, false].forEach(authRequired => {
+      router.post(
+        {
+          path: authRequired ? '' : '/defaults',
+          options: {
+            authRequired,
+          },
+          validate: {
+            body: schema.object({
+              applications: schema.arrayOf(schema.string()),
+            }),
+          },
         },
-        validate: {
-          body: schema.object({
-            applications: schema.arrayOf(schema.string()),
-          }),
-        },
-      },
-      async (ctx, req, res) => {
-        const { applications } = req.body;
-        const capabilities = await this.resolveCapabilities(req, applications);
-        return res.ok({
-          body: capabilities,
-        });
-      }
-    );
-    router.post(
-      {
-        path: '/defaults',
-        options: {
-          authRequired: false,
-        },
-        validate: {
-          body: schema.object({
-            applications: schema.arrayOf(schema.string()),
-          }),
-        },
-      },
-      async (ctx, req, res) => {
-        const { applications } = req.body;
-        const capabilities = await this.resolveCapabilities(req, applications);
-        return res.ok({
-          body: capabilities,
-        });
-      }
-    );
+        async (ctx, req, res) => {
+          const { applications } = req.body;
+          const capabilities = await this.resolveCapabilities(req, applications);
+          return res.ok({
+            body: capabilities,
+          });
+        }
+      );
+    });
   }
 }
