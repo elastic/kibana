@@ -26,7 +26,7 @@ import './table_vis.mock';
 // @ts-ignore
 import StubIndexPattern from 'test_utils/stub_index_pattern';
 import { getAngularModule } from './get_inner_angular';
-import { initTableVisLegacyModule } from './angular/table_vis_legacy_module';
+import { initTableVisLegacyModule } from './table_vis_legacy_module';
 import {
   npStart,
   legacyResponseHandlerProvider,

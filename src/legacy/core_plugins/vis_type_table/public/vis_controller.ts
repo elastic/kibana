@@ -23,7 +23,7 @@ import $ from 'jquery';
 import { Vis, VisParams } from '../../visualizations/public';
 import { npStart } from './legacy_imports';
 import { getAngularModule } from './get_inner_angular';
-import { initTableVisLegacyModule } from './angular/table_vis_legacy_module';
+import { initTableVisLegacyModule } from './table_vis_legacy_module';
 
 const innerAngularName = 'kibana/table_vis';
 
