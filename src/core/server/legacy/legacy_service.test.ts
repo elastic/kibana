@@ -41,7 +41,7 @@ import { configServiceMock } from '../config/config_service.mock';
 
 import { BasePathProxyServer } from '../http';
 import { loggingServiceMock } from '../logging/logging_service.mock';
-import { DiscoveredPlugin, DiscoveredPluginInternal } from '../plugins';
+import { DiscoveredPlugin } from '../plugins';
 
 import { httpServiceMock } from '../http/http_service.mock';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
@@ -83,9 +83,9 @@ beforeEach(() => {
         contracts: new Map([['plugin-id', 'plugin-value']]),
         uiPlugins: {
           public: new Map([['plugin-id', {} as DiscoveredPlugin]]),
-          internal: new Map([['plugin-id', {} as DiscoveredPluginInternal]]),
+          internal: new Map([['plugin-id', { entryPointPath: 'path/to/plugin/public' }]]),
+          browserConfigs: new Map(),
         },
-        uiPluginConfigs: new Map(),
       },
     },
     plugins: { 'plugin-id': 'plugin-value' },

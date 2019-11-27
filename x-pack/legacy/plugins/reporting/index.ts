@@ -20,7 +20,7 @@ import {
 import { config as reportingConfig } from './config';
 import { logConfiguration } from './log_configuration';
 import { createBrowserDriverFactory } from './server/browsers';
-import { getReportingUsageCollector } from './server/usage';
+import { registerReportingUsageCollector } from './server/usage';
 import { ReportingConfigOptions, ReportingPluginSpecOptions, ServerFacade } from './types.d';
 
 const kbToBase64Length = (kb: number) => {
@@ -76,9 +76,8 @@ export const reporting = (kibana: any) => {
     async init(server: ServerFacade) {
       let isCollectorReady = false;
       // Register a function with server to manage the collection of usage stats
-      server.usage.collectorSet.register(
-        getReportingUsageCollector(server, () => isCollectorReady)
-      );
+      const { usageCollection } = server.newPlatform.setup.plugins;
+      registerReportingUsageCollector(usageCollection, server, () => isCollectorReady);
 
       const logger = LevelLogger.createForServer(server, [PLUGIN_ID]);
       const [exportTypesRegistry, browserFactory] = await Promise.all([
