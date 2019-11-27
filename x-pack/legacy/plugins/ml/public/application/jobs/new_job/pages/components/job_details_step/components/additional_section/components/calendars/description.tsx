@@ -21,7 +21,7 @@ export const Description: FC = memo(({ children }) => {
   );
   return (
     <EuiDescribedFormGroup
-      idAria="description"
+      idAria="calendars_description"
       title={<h3>{title}</h3>}
       description={
         <FormattedMessage
@@ -40,7 +40,7 @@ export const Description: FC = memo(({ children }) => {
         />
       }
     >
-      <EuiFormRow describedByIds={['description']}>
+      <EuiFormRow describedByIds={['calendars_description']}>
         <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>
