@@ -11,7 +11,6 @@ import { hrefIsForAlertDetail, alertIdFromHref } from '../concerns/alerts/routin
 import { actions as alertDetailsActions } from '../actions/alert_details';
 import { SagaContext } from '../lib/saga';
 
-// TODO: type this properly
 export async function alertDetailsSaga(
   sagaContext: SagaContext,
   context: AppMountContext,
