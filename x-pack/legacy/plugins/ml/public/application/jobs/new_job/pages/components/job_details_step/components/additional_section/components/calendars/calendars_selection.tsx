@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState, useContext, useEffect } from 'react';
+import React, { FC, useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
 import {
-  EuiButton,
   EuiComboBox,
   EuiComboBoxOptionProps,
   EuiComboBoxProps,
+  EuiLink,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
@@ -60,14 +61,16 @@ export const CalendarsSelection: FC = () => {
 
   return (
     <Description>
-      <EuiButton size="s" href={manageCalendarsHref} target="_blank">
-        <FormattedMessage
-          id="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.calendarsSelection.manageCalendarsButtonLabel"
-          defaultMessage="Manage calendars"
-        />
-      </EuiButton>
-      <EuiSpacer size="m" />
       <EuiComboBox {...comboBoxProps} />
+      <EuiSpacer size="xs" />
+      <EuiText size="s">
+        <EuiLink href={manageCalendarsHref} target="_blank" external>
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.calendarsSelection.manageCalendarsButtonLabel"
+            defaultMessage="Manage calendars"
+          />
+        </EuiLink>
+      </EuiText>
     </Description>
   );
 };
