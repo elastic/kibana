@@ -17,6 +17,20 @@
  * under the License.
  */
 
-export { getIndexPatternTitle } from './get_index_pattern_title';
-export * from './types';
-export { validateIndexPattern } from './validate_index_pattern';
+import { IndexPatternMissingIndices } from './errors';
+import {
+  ILLEGAL_CHARACTERS_KEY,
+  CONTAINS_SPACES_KEY,
+  ILLEGAL_CHARACTERS_VISIBLE,
+  ILLEGAL_CHARACTERS,
+  validateIndexPattern,
+} from './lib';
+
+export const indexPatterns = {
+  ILLEGAL_CHARACTERS_KEY,
+  CONTAINS_SPACES_KEY,
+  ILLEGAL_CHARACTERS_VISIBLE,
+  ILLEGAL_CHARACTERS,
+  IndexPatternMissingIndices,
+  validate: validateIndexPattern,
+};
