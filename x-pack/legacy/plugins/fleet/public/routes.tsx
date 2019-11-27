@@ -34,7 +34,7 @@ function useWaitUntilFrameworkReady() {
   return { isLoading };
 }
 
-export const AppRoutes: SFC = () => {
+export const AppRoutes: FC = () => {
   const { isLoading } = useWaitUntilFrameworkReady();
   const libs = useLibs();
 

@@ -12,7 +12,7 @@ interface RouteConfig {
   routes?: RouteConfig[];
 }
 
-export const ChildRoutes: SFC<{
+export const ChildRoutes: FC<{
   routes?: RouteConfig[];
   useSwitch?: boolean;
   [other: string]: any;

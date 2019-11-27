@@ -97,7 +97,7 @@ function useGetAgentEvents(
   return { ...state, refresh: fetchAgentEvents };
 }
 
-export const AgentEventsTable: SFC<{ agent: Agent }> = ({ agent }) => {
+export const AgentEventsTable: FC<{ agent: Agent }> = ({ agent }) => {
   const { pageSizeOptions, pagination, setPagination } = usePagination();
   const { search, setSearch } = useSearch();
 

@@ -60,7 +60,7 @@ interface Props {
   apiKey: EnrollmentApiKey;
 }
 
-export const ShellEnrollmentInstructions: React.SFC<Props> = ({ kibanaUrl, apiKey }) => {
+export const ShellEnrollmentInstructions: React.FC<Props> = ({ kibanaUrl, apiKey }) => {
   // Platform state
   const [currentPlatform, setCurrentPlatform] = useState<keyof typeof PLATFORMS>('macos');
   const [isPlatformOptionsOpen, setIsPlatformOptionsOpen] = useState<boolean>(false);

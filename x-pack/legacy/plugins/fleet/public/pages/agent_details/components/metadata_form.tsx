@@ -86,7 +86,7 @@ function useAddMetadataForm(agent: Agent, done: () => void) {
   };
 }
 
-export const MetadataForm: SFC<{ agent: Agent }> = ({ agent }) => {
+export const MetadataForm: FC<{ agent: Agent }> = ({ agent }) => {
   const [isOpen, setOpen] = useState(false);
 
   const form = useAddMetadataForm(agent, () => {

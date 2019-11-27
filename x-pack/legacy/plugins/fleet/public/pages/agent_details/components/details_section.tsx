@@ -25,7 +25,7 @@ import { AgentUnenrollProvider } from '../../../components/agent_unenroll_provid
 import { AgentMetadataFlyout } from './metadata_flyout';
 import { useAgentRefresh } from '../hooks/use_agent';
 
-const Item: SFC<{ label: string }> = ({ label, children }) => {
+const Item: FC<{ label: string }> = ({ label, children }) => {
   return (
     <EuiFlexItem grow={false}>
       <EuiDescriptionList compressed>
@@ -48,7 +48,7 @@ function useFlyout() {
 interface Props {
   agent: Agent;
 }
-export const AgentDetailSection: SFC<Props> = ({ agent }) => {
+export const AgentDetailSection: FC<Props> = ({ agent }) => {
   const metadataFlyout = useFlyout();
   const refreshAgent = useAgentRefresh();
 

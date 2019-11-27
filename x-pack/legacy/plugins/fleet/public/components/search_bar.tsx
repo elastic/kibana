@@ -32,7 +32,7 @@ interface Props {
   onChange: (newValue: string) => void;
 }
 
-export const SearchBar: SFC<Props> = ({ value, fieldPrefix, onChange }) => {
+export const SearchBar: FC<Props> = ({ value, fieldPrefix, onChange }) => {
   const { suggestions } = useSuggestions(fieldPrefix, value);
 
   const onAutocompleteClick = (suggestion: Suggestion) => {

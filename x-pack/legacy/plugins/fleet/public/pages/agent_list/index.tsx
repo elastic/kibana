@@ -36,7 +36,7 @@ import { useLibs } from '../../hooks/use_libs';
 import { usePagination } from '../../hooks/use_pagination';
 import { AgentEnrollmentFlyout } from './components/agent_enrollment';
 
-export const AgentListPage: React.SFC<{}> = () => {
+export const AgentListPage: React.FC<{}> = () => {
   const libs = useLibs();
   // Agent data states
   const [isLoading, setIsLoading] = useState<boolean>(true);

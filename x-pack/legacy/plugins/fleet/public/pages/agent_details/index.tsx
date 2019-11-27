@@ -15,7 +15,7 @@ import { AgentEventsTable } from './components/agent_events_table';
 import { AgentDetailSection } from './components/details_section';
 import { AgentRefreshContext, useGetAgent } from './hooks/use_agent';
 
-export const Layout: SFC = ({ children }) => (
+export const Layout: FC = ({ children }) => (
   <EuiPageBody>
     <EuiPageContent>{children}</EuiPageContent>
   </EuiPageBody>
@@ -25,7 +25,7 @@ type Props = RouteComponentProps<{
   agentId: string;
 }>;
 
-export const AgentDetailsPage: SFC<Props> = ({
+export const AgentDetailsPage: FC<Props> = ({
   match: {
     params: { agentId },
   },
