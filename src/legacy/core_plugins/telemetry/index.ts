@@ -29,14 +29,7 @@ import { getConfigPath } from '../../../core/server/path';
 import mappings from './mappings.json';
 import { CONFIG_TELEMETRY, getConfigTelemetryDesc } from './common/constants';
 import { getXpackConfigWithDeprecated } from './common/get_xpack_config_with_deprecated';
-import { telemetryPlugin, replaceTelemetryInjectedVars, FetcherTask } from './server';
-
-import {
-  createLocalizationUsageCollector,
-  createTelemetryUsageCollector,
-  createUiMetricUsageCollector,
-  createTelemetryPluginUsageCollector,
-} from './server/collectors';
+import { telemetryPlugin, replaceTelemetryInjectedVars, FetcherTask, PluginsSetup } from './server';
 
 const ENDPOINT_VERSION = 'v2';
 
@@ -125,6 +118,7 @@ const telemetry = (kibana: any) => {
       fetcherTask.start();
     },
     init(server: Server) {
+      const { usageCollection } = server.newPlatform.setup.plugins;
       const initializerContext = {
         env: {
           packageInfo: {
@@ -151,12 +145,11 @@ const telemetry = (kibana: any) => {
         log: server.log,
       } as any) as CoreSetup;
 
-      telemetryPlugin(initializerContext).setup(coreSetup);
-      // register collectors
-      server.usage.collectorSet.register(createTelemetryPluginUsageCollector(server));
-      server.usage.collectorSet.register(createLocalizationUsageCollector(server));
-      server.usage.collectorSet.register(createTelemetryUsageCollector(server));
-      server.usage.collectorSet.register(createUiMetricUsageCollector(server));
+      const pluginsSetup: PluginsSetup = {
+        usageCollection,
+      };
+
+      telemetryPlugin(initializerContext).setup(coreSetup, pluginsSetup, server);
     },
   });
 };

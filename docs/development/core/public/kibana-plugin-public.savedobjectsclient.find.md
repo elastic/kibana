@@ -9,5 +9,5 @@ Search for objects
 <b>Signature:</b>
 
 ```typescript
-find: <T extends SavedObjectAttributes>(options: Pick<SavedObjectFindOptionsServer, "search" | "filter" | "type" | "page" | "searchFields" | "defaultSearchOperator" | "hasReference" | "sortField" | "perPage" | "fields">) => Promise<SavedObjectsFindResponsePublic<T>>;
+find: <T extends SavedObjectAttributes>(options: Pick<SavedObjectFindOptionsServer, "search" | "filter" | "type" | "fields" | "searchFields" | "defaultSearchOperator" | "hasReference" | "sortField" | "page" | "perPage">) => Promise<SavedObjectsFindResponsePublic<T>>;
 ```
