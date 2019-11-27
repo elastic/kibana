@@ -52,15 +52,15 @@ function App(props: { core: PluginCore }) {
   return (
     <EuiErrorBoundary>
       <CoreProvider core={props.core}>
-        <PackageInstallProvider notifications={notifications}>
-          <i18n.Context>
-            <ThemeProvider theme={props.core.theme}>
+        <i18n.Context>
+          <ThemeProvider theme={props.core.theme}>
+            <PackageInstallProvider notifications={notifications}>
               <HashRouter>
                 <Switch>{routes}</Switch>
               </HashRouter>
-            </ThemeProvider>
-          </i18n.Context>
-        </PackageInstallProvider>
+            </PackageInstallProvider>
+          </ThemeProvider>
+        </i18n.Context>
       </CoreProvider>
     </EuiErrorBoundary>
   );
