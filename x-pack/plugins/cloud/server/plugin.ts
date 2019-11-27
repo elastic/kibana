@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { first, Observable } from 'rxjs/operators';
+import { first } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { CloudConfigSchema } from './config';
+import { CloudConfigType } from './config';
 import { registerCloudUsageCollector } from './collectors';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import {
   CoreSetup,
   Logger,
@@ -25,18 +26,18 @@ export interface CloudSetup {
 
 export class CloudPlugin implements Plugin<CloudSetup> {
   private readonly logger: Logger;
-  private readonly config$: Observable<CloudConfigSchema>;
+  private readonly config$: Observable<CloudConfigType>;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();
-    this.config$ = this.context.config.create<CloudConfigSchema>();
+    this.config$ = this.context.config.create<CloudConfigType>();
   }
 
   public async setup(core: CoreSetup, { usageCollection }: PluginsSetup) {
     this.logger.debug('Setting up Cloud plugin');
     const config = await this.config$.pipe(first()).toPromise();
-    const isCloudEnabled = !!config.id;
-    registerCloudUsageCollector(usageCollection, { isCloudEnabled })
+    const isCloudEnabled = getIsCloudEnabled(config.id);
+    registerCloudUsageCollector(usageCollection, { isCloudEnabled });
 
     return {
       isCloudEnabled,

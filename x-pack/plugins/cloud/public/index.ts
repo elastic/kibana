@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
+import { PluginInitializerContext } from '../../../../src/core/public';
 import { CloudPlugin } from './plugin';
 
 export { CloudSetup } from './plugin';
-export { config } from './config';
-export const plugin = (initializerContext: PluginInitializerContext) => {
+export function plugin(initializerContext: PluginInitializerContext) {
   return new CloudPlugin(initializerContext);
 }

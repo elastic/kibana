@@ -11,13 +11,19 @@ import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { registerClusterCheckupRoutes } from './routes/cluster_checkup';
 import { registerDeprecationLoggingRoutes } from './routes/deprecation_logging';
 import { registerReindexIndicesRoutes, registerReindexWorker } from './routes/reindex_indices';
-
+import { CloudSetup } from '../../../../../plugins/cloud/server';
 import { registerTelemetryRoutes } from './routes/telemetry';
+
+interface PluginsSetup {
+  __LEGACY: ServerShim
+  usageCollection: UsageCollectionSetup;
+  cloud: CloudSetup;
+}
 
 export class UpgradeAssistantServerPlugin implements Plugin<void, void, object, object> {
   setup(
     { http }: CoreSetup,
-    { __LEGACY, usageCollection }: { usageCollection: UsageCollectionSetup; __LEGACY: ServerShim }
+    { __LEGACY, usageCollection, cloud }: PluginsSetup
   ) {
     const router = http.createRouter();
     const shimWithRouter: ServerShimWithRouter = { ...__LEGACY, router };
