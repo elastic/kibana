@@ -21,7 +21,7 @@ import classNames from 'classnames';
 import { compact, uniq, map } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
-import { EuiPopoverProps, EuiButtonIcon, keyCodes, htmlIdGenerator } from '@elastic/eui';
+import { EuiPopoverProps, EuiIcon, keyCodes, htmlIdGenerator } from '@elastic/eui';
 
 // @ts-ignore
 import { Data } from '../../../vislib/lib/data';
@@ -239,9 +239,8 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
 
     return (
       <div className="visLegend">
-        <EuiButtonIcon
-          color="text"
-          iconType="list"
+        <button
+          type="button"
           onClick={this.toggleLegend}
           className={classNames('visLegend__toggle', {
             'visLegend__toggle--isOpen': open,
@@ -255,7 +254,9 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
           title={i18n.translate('common.ui.vis.visTypes.legend.toggleLegendButtonTitle', {
             defaultMessage: 'Toggle legend',
           })}
-        />
+        >
+          <EuiIcon color="text" type="list" />
+        </button>
         {open && this.renderLegend(anchorPosition)}
       </div>
     );
