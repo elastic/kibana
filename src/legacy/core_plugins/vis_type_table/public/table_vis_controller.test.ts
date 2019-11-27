@@ -30,11 +30,11 @@ import { initTableVisLegacyModule } from './shim/table_vis_legacy_module';
 import {
   npStart,
   legacyResponseHandlerProvider,
-  Vis,
   AggConfig,
   tabifyAggResponse,
 } from './legacy_imports';
-import { createTableVisTypeDefinition } from './table_vis_type';
+import { tableVisTypeDefinition } from './table_vis_type';
+import { Vis } from '../../visualizations/public';
 import { setup as visualizationsSetup } from '../../visualizations/public/np_ready/public/legacy';
 // eslint-disable-next-line
 import { stubFields } from '../../../../plugins/data/public/stubs';
@@ -93,7 +93,7 @@ describe('Table Vis - Controller', () => {
 
   beforeEach(initLocalAngular);
   beforeAll(() => {
-    visualizationsSetup.types.registerVisualization(() => createTableVisTypeDefinition());
+    visualizationsSetup.types.createBaseVisualization(tableVisTypeDefinition);
   });
   beforeEach(angular.mock.module('kibana/table_vis'));
 

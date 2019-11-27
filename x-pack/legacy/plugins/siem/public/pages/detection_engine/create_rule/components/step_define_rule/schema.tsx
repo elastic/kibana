@@ -6,7 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
-import { fromKueryExpression } from '@kbn/es-query';
 import { isEmpty } from 'lodash/fp';
 import React from 'react';
 
@@ -17,6 +16,7 @@ import {
 } from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 import { fieldValidators } from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/helpers';
 import { ERROR_CODE } from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/helpers/field_validators/types';
+import { esKuery } from '../../../../../../../../../../src/plugins/data/public';
 
 import * as CreateRuleI18n from '../../translations';
 
@@ -106,7 +106,7 @@ export const schema: FormSchema = {
           const { query } = value as FieldValueQueryBar;
           if (!isEmpty(query.query as string) && query.language === 'kuery') {
             try {
-              fromKueryExpression(query.query);
+              esKuery.fromKueryExpression(query.query);
             } catch (err) {
               return {
                 code: 'ERR_FIELD_FORMAT',

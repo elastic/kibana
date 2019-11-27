@@ -21,7 +21,7 @@ import $ from 'jquery';
 import _ from 'lodash';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { Vis } from '../../vis';
+import { Vis } from '../../../../../core_plugins/visualizations/public/np_ready/public/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('visualize_legend directive', function () {

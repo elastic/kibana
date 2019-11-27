@@ -34,6 +34,10 @@ export const useDraggablePortalContext = () => useContext(DraggablePortalContext
 const Wrapper = styled.div`
   display: inline-block;
   max-width: 100%;
+
+  [data-rbd-placeholder-context-id] {
+    display: none !important;
+  }
 `;
 
 Wrapper.displayName = 'Wrapper';

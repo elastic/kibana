@@ -21,8 +21,9 @@ import $ from 'jquery';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import fixtures from 'fixtures/fake_hierarchical_data';
-import { legacyResponseHandlerProvider, Vis, tabifyAggResponse, npStart } from '../../legacy_imports';
+import { legacyResponseHandlerProvider, tabifyAggResponse, npStart } from '../../legacy_imports';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { Vis } from '../../../../visualizations/public';
 import { getAngularModule } from '../../get_inner_angular';
 import { initTableVisLegacyModule } from '../../shim/table_vis_legacy_module';
 

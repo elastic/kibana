@@ -18,11 +18,8 @@
  */
 
 export { npSetup, npStart } from 'ui/new_platform';
-export { SchemaConfig } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
-export { Vis, AggConfig } from 'ui/vis';
-// @ts-ignore
-export { visFactory, VisFactoryProvider } from 'ui/vis/vis_factory';
+export { AggConfig } from 'ui/vis';
 export { AggGroupNames, VisOptionsProps } from 'ui/vis/editors/default';
 // @ts-ignore
 export { Schemas } from 'ui/vis/editors/default/schemas';
