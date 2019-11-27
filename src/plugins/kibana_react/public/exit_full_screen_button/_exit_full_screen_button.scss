@@ -65,12 +65,12 @@
   top: 0px;
   bottom: 0px;
   white-space: nowrap;
-  padding: 0px $euiSizeS 0px $euiSizeM;
+  padding: 0px $euiSizeXS 0px $euiSizeM;
   transition: all .2s ease;
   transform: translateX(-100%);
   z-index: -1;
-
-  .kuiIcon {
-    margin-left: $euiSizeS;
+  
+  .euiIcon {
+    margin-left: $euiSizeXS;
   }
 }
