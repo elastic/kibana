@@ -9,20 +9,38 @@ import { Redirect } from 'react-router-dom';
 import { MlRoute, PageLoader } from '../router';
 import { useResolver } from '../router';
 import { KibanaConfigTypeFix } from '../../contexts/kibana';
-import { basicResolvers } from '../resolvers';
-import { JobsPage } from '../../jobs/jobs_list';
+import { OverviewPage } from '../../overview';
+
+import { checkFullLicense } from '../../license/check_license';
+import { checkGetJobsPrivilege } from '../../privilege/check_privilege';
+import { getMlNodeCount } from '../../ml_nodes_check';
+import { loadMlServerInfo } from '../../services/ml_server_info';
 
 export const jobListRoute: MlRoute = {
-  path: '/jobs',
+  path: '/overview',
   render: (props: any, config: any) => <PageWrapper config={config} />,
 };
 
 const PageWrapper: FC<{ config: KibanaConfigTypeFix }> = ({ config }) => {
-  const { context } = useResolver(undefined, config, basicResolvers);
+  const { context } = useResolver(undefined, config, {
+    checkFullLicense,
+    checkGetJobsPrivilege,
+    getMlNodeCount,
+    loadMlServerInfo,
+  });
 
   return (
     <PageLoader context={context}>
-      <JobsPage />
+      <OverviewPage />
     </PageLoader>
   );
+};
+
+export const appRootRoute: MlRoute = {
+  path: '/',
+  render: () => <Page />,
+};
+
+const Page: FC = () => {
+  return <Redirect to="/overview" />;
 };

@@ -55,6 +55,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           ...params,
           indexPatterns: data!.indexPatterns.indexPatterns,
           npData: npData!,
+          data,
         });
       },
     });
