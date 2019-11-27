@@ -46,6 +46,10 @@ interface SwimlanePoint {
 
 const memoizeIsEqual = (newArgs: any[], lastArgs: any[]) => isEqual(newArgs, lastArgs);
 
+// Memoize the data fetching methods
+// TODO: We need to track an attribute that allows refetching when the date picker
+// triggers a refresh, otherwise we'll get back the stale data. Note this was also
+// an issue with the previous version and the custom caching done within the component.
 const memoizedLoadAnnotationsTableData = memoizeOne(loadAnnotationsTableData, memoizeIsEqual);
 const memoizedLoadDataForCharts = memoizeOne(loadDataForCharts, memoizeIsEqual);
 const memoizedLoadFilteredTopInfluencers = memoizeOne(loadFilteredTopInfluencers, memoizeIsEqual);
@@ -56,8 +60,13 @@ const memoizedLoadAnomaliesTableData = memoizeOne(loadAnomaliesTableData, memoiz
 
 const dateFormatTz = getDateFormatTz();
 
-// Load the overall data - if the FieldFormats failed to populate
-// the default formatting will be used for metric values.
+/**
+ * Fetches the data necessary for the Anomaly Explorer using observables.
+ *
+ * @param state ExplorerState
+ *
+ * @return action observable
+ */
 export function loadExplorerDataActionCreator(state: ExplorerState) {
   const {
     bounds,
@@ -81,7 +90,7 @@ export function loadExplorerDataActionCreator(state: ExplorerState) {
 
   const swimlaneBucketInterval = getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth);
 
-  // Load the overall data
+  // TODO This factory should be refactored so we can load the charts using memoization.
   const updateCharts = explorerChartsContainerServiceFactory(data => {
     explorerAction$.next({
       type: EXPLORER_ACTION.SET_STATE,
@@ -97,6 +106,8 @@ export function loadExplorerDataActionCreator(state: ExplorerState) {
     });
   });
 
+  // Does a sanity check on the selected `currentViewBySwimlaneFieldName`
+  // and returns the available `viewBySwimlaneOptions`.
   const { viewBySwimlaneFieldName, viewBySwimlaneOptions } = getViewBySwimlaneOptions({
     currentViewBySwimlaneFieldName,
     filterActive,
@@ -119,6 +130,7 @@ export function loadExplorerDataActionCreator(state: ExplorerState) {
     bounds
   );
 
+  // Trigger a side effect to pass on updated information to the state.
   explorerAction$.next({
     type: EXPLORER_ACTION.SET_STATE,
     payload: {
@@ -131,6 +143,8 @@ export function loadExplorerDataActionCreator(state: ExplorerState) {
     },
   });
 
+  // First get the data where we have all necessary args at hand using forkJoin:
+  // annotationsData, anomalyChartRecords, influencers, overallState, tableData, topFieldValues
   return forkJoin({
     annotationsData: memoizedLoadAnnotationsTableData(
       selectedCells,
@@ -181,7 +195,9 @@ export function loadExplorerDataActionCreator(state: ExplorerState) {
           )
         : Promise.resolve([]),
   }).pipe(
-    // Trigger action to reset view-by swimlane and show loading indicator
+    // Trigger a side-effect action to reset view-by swimlane,
+    // show the view-by loading indicator
+    // and pass on the data we already fetched.
     tap(({ annotationsData, overallState, tableData }) => {
       explorerAction$.next({
         type: EXPLORER_ACTION.SET_STATE,
@@ -189,7 +205,6 @@ export function loadExplorerDataActionCreator(state: ExplorerState) {
           annotationsData,
           overallState,
           tableData,
-          viewBySwimlaneFieldName,
           viewBySwimlaneData: {
             ...getDefaultSwimlaneData(),
             fieldName: viewBySwimlaneFieldName,
@@ -198,7 +213,18 @@ export function loadExplorerDataActionCreator(state: ExplorerState) {
         },
       });
     }),
-    // Load view-by swimlane data and filtered top influencers
+    // Trigger a side-effect to update the charts.
+    tap(({ anomalyChartRecords }) => {
+      if (selectedCells !== null && Array.isArray(anomalyChartRecords)) {
+        updateCharts(anomalyChartRecords, timerange.earliestMs, timerange.latestMs);
+      } else {
+        updateCharts([], timerange.earliestMs, timerange.latestMs);
+      }
+    }),
+    // Load view-by swimlane data and filtered top influencers.
+    // mergeMap is used to have access to the already fetched data and act on it in arg #1.
+    // In arg #2 of mergeMap we combine the data and pass it on in the action format
+    // which can be consumed by explorerReducer() later on.
     mergeMap(
       ({ anomalyChartRecords, influencers, overallState, topFieldValues }) =>
         forkJoin({
@@ -296,16 +322,6 @@ export function loadExplorerDataActionCreator(state: ExplorerState) {
       }
 
       return action;
-    }),
-    // Update charts
-    tap(action => {
-      const { anomalyChartRecords } = action.payload;
-
-      if (selectedCells !== null && Array.isArray(anomalyChartRecords)) {
-        updateCharts(anomalyChartRecords, timerange.earliestMs, timerange.latestMs);
-      } else {
-        updateCharts([], timerange.earliestMs, timerange.latestMs);
-      }
     })
   );
 }
