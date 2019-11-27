@@ -73,8 +73,6 @@ export const ColumnHeader = React.memo<ColumneHeaderProps>(
   }) => {
     const [isDragging, setIsDragging] = React.useState(false);
 
-    console.error('aa', isDragging);
-
     return (
       <Resizable
         enable={{ right: true }}
@@ -85,7 +83,6 @@ export const ColumnHeader = React.memo<ColumneHeaderProps>(
         handleComponent={{
           right: <EventsHeadingHandle />,
         }}
-        // minWidth={180}
         onResizeStop={(e, direction, ref, delta) => {
           onColumnResized({ columnId: header.id, delta: delta.width });
         }}
@@ -102,20 +99,20 @@ export const ColumnHeader = React.memo<ColumneHeaderProps>(
           key={header.id}
           type={DRAG_TYPE_FIELD}
         >
-          {(dragProvided, dragSnapshot) => (
-            <EventsTh
-              {...dragProvided.draggableProps}
-              {...dragProvided.dragHandleProps}
-              data-test-subj="draggable-header"
-              ref={dragProvided.innerRef}
-              position="relative"
-              // Passing the styles directly to the component because the width is being calculated and is recommended by Styled Components for performance: https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-              style={{
-                flexBasis: header.width + 'px',
-                ...dragProvided.draggableProps.style,
-              }}
-            >
-              {!dragSnapshot.isDragging ? (
+          {(dragProvided, dragSnapshot) =>
+            !dragSnapshot.isDragging ? (
+              <EventsTh
+                {...dragProvided.draggableProps}
+                {...dragProvided.dragHandleProps}
+                data-test-subj="draggable-header"
+                ref={dragProvided.innerRef}
+                position="relative"
+                // Passing the styles directly to the component because the width is being calculated and is recommended by Styled Components for performance: https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
+                style={{
+                  flexBasis: header.width + 'px',
+                  ...dragProvided.draggableProps.style,
+                }}
+              >
                 <EventsThContent>
                   <Header
                     timelineId={timelineId}
@@ -126,13 +123,15 @@ export const ColumnHeader = React.memo<ColumneHeaderProps>(
                     sort={sort}
                   />
                 </EventsThContent>
-              ) : (
-                <DraggedContainer onDragging={setIsDragging}>
+              </EventsTh>
+            ) : (
+              <DraggedContainer onDragging={setIsDragging}>
+                <DragEffects>
                   <DraggableFieldBadge fieldId={header.id} fieldWidth={header.width + 'px'} />
-                </DraggedContainer>
-              )}
-            </EventsTh>
-          )}
+                </DragEffects>
+              </DraggedContainer>
+            )
+          }
         </Draggable>
       </Resizable>
     );
