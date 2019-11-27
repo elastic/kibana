@@ -29,7 +29,7 @@ import {
   UiSettingsState,
 } from 'kibana/public';
 import { UiStatsMetricType } from '@kbn/analytics';
-import { FeatureCatalogueEntry } from '../../../../../plugins/feature_catalogue/public';
+import { FeatureCatalogueEntry } from '../../../../../plugins/home/public';
 
 export interface HomeKibanaServices {
   indexPatternService: any;

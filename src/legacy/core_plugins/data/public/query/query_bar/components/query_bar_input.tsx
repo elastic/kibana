@@ -37,6 +37,7 @@ import { Toast } from 'src/core/public';
 import {
   AutocompleteSuggestion,
   AutocompleteSuggestionType,
+  IDataPluginServices,
   PersistedLog,
   toUser,
   fromUser,
@@ -52,7 +53,6 @@ import {
 import { IndexPattern, StaticIndexPattern } from '../../../index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
-import { IDataPluginServices } from '../../../types';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 
 interface Props {

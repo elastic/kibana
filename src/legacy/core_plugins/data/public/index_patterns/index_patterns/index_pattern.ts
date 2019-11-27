@@ -19,8 +19,6 @@
 
 import _, { each, reject } from 'lodash';
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { fieldFormats } from 'ui/registry/field_formats';
 import { SavedObjectsClientContract } from 'src/core/public';
 import {
   DuplicateField,
@@ -30,6 +28,12 @@ import {
   MappingObject,
 } from '../../../../../../plugins/kibana_utils/public';
 
+import {
+  ES_FIELD_TYPES,
+  KBN_FIELD_TYPES,
+  IIndexPattern,
+} from '../../../../../../plugins/data/public';
+
 import { findIndexPatternByTitle, getRoutes } from '../utils';
 import { IndexPatternMissingIndices } from '../errors';
 import { Field, FieldList, FieldListInterface, FieldType } from '../fields';
@@ -37,8 +41,7 @@ import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { IIndexPatternsApiClient } from './index_patterns_api_client';
-import { ES_FIELD_TYPES, IIndexPattern } from '../../../../../../plugins/data/public';
-import { getNotifications } from '../services';
+import { getNotifications, getFieldFormats } from '../services';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
@@ -114,7 +117,10 @@ export class IndexPattern implements IIndexPattern {
     this.fields = new FieldList(this, [], this.shortDotsEnable);
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, this.getConfig('metaFields'));
     this.flattenHit = flattenHitWrapper(this, this.getConfig('metaFields'));
-    this.formatHit = formatHitProvider(this, fieldFormats.getDefaultInstance('string'));
+    this.formatHit = formatHitProvider(
+      this,
+      getFieldFormats().getDefaultInstance(KBN_FIELD_TYPES.STRING)
+    );
     this.formatField = this.formatHit.formatField;
   }
 
@@ -125,12 +131,14 @@ export class IndexPattern implements IIndexPattern {
   }
 
   private deserializeFieldFormatMap(mapping: any) {
-    const FieldFormat = fieldFormats.getType(mapping.id);
+    const FieldFormat = getFieldFormats().getType(mapping.id);
+
     return FieldFormat && new FieldFormat(mapping.params, this.getConfig);
   }
 
   private initFields(input?: any) {
     const newValue = input || this.fields;
+
     this.fields = new FieldList(this, newValue, this.shortDotsEnable);
   }
 
@@ -451,6 +459,7 @@ export class IndexPattern implements IIndexPattern {
               const { toasts } = getNotifications();
 
               toasts.addDanger(message);
+
               throw err;
             }
 
@@ -492,6 +501,7 @@ export class IndexPattern implements IIndexPattern {
 
         if (err instanceof IndexPatternMissingIndices) {
           toasts.addDanger((err as any).message);
+
           return [];
         }
 
