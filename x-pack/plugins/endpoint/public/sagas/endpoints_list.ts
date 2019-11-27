@@ -59,20 +59,6 @@ async function resourceSaga({ actionsAndState, dispatch }: SagaContext, context:
           throw new Error(error);
         }
       }
-      // else if (action.type === endpointsListActions.userClickedArchiveItems.type) {
-      //   try {
-      //     const idsToArchive = action.payload[0];
-      //     await context.core.http.post('/alerts/archive', {
-      //       query: {
-      //         alerts: idsToArchive.join(','), // TODO: seems strange that we can't use lists in query params
-      //       },
-      //     });
-      //     dispatch(endpointsListActions.serverReturnedArchiveItems());
-      //   } catch (error) {
-      //     // TODO: dispatch an error action
-      //     throw new Error(error);
-      //   }
-      // }
     }
   }
 }
