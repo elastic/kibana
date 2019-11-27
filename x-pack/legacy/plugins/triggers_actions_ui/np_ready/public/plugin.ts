@@ -32,10 +32,16 @@ export type Start = void;
 const REACT_ROOT_ID = 'triggersActionsRoot';
 
 export class Plugin implements CorePlugin<Setup, Start> {
-  private actionTypeRegistry?: ActionTypeRegistry;
-  private alertTypeRegistry?: AlertTypeRegistry;
+  private actionTypeRegistry: ActionTypeRegistry;
+  private alertTypeRegistry: AlertTypeRegistry;
 
-  constructor(initializerContext: PluginInitializerContext) {}
+  constructor(initializerContext: PluginInitializerContext) {
+    const actionTypeRegistry = new ActionTypeRegistry();
+    this.actionTypeRegistry = actionTypeRegistry;
+
+    const alertTypeRegistry = new AlertTypeRegistry();
+    this.alertTypeRegistry = alertTypeRegistry;
+  }
 
   public setup(core: CoreSetup, plugins: any): Setup {
     /*
@@ -52,23 +58,17 @@ export class Plugin implements CorePlugin<Setup, Start> {
     const canShowActions = capabilities.get().actions.show;
     const canShowAlerts = capabilities.get().alerting.show;
     if (canShowActions || canShowAlerts) {
-      const actionTypeRegistry = new ActionTypeRegistry();
-      this.actionTypeRegistry = actionTypeRegistry;
-
-      const alertTypeRegistry = new AlertTypeRegistry();
-      this.alertTypeRegistry = alertTypeRegistry;
-
       registerBuiltInActionTypes({
-        actionTypeRegistry,
+        actionTypeRegistry: this.actionTypeRegistry,
       });
 
       registerAlertTypes({
-        alertTypeRegistry,
+        alertTypeRegistry: this.alertTypeRegistry,
       });
 
       const kbnSection = getSection('kibana');
       kbnSection.register('triggersActions', {
-        display: i18n.translate('xpack.alertingUI.managementSection.displayName', {
+        display: i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
           defaultMessage: 'Triggers and Actions',
         }),
         order: 7,
@@ -81,6 +81,13 @@ export class Plugin implements CorePlugin<Setup, Start> {
     const { capabilities } = plugins;
     const canShowActions = capabilities.get().actions.show;
     const canShowAlerts = capabilities.get().alerting.show;
+    // AppCore/AppPlugins to be passed on as React context
+    const AppDependencies = {
+      core,
+      plugins,
+      actionTypeRegistry: this.actionTypeRegistry,
+      alertTypeRegistry: this.alertTypeRegistry,
+    };
 
     // Don't register routes when user doesn't have access to the application
     if (!canShowActions && !canShowAlerts) {
@@ -107,11 +114,11 @@ export class Plugin implements CorePlugin<Setup, Start> {
             const currentRoute = $route.current;
             const isNavigationInApp = currentRoute.$$route.template === appRoute.$$route.template;
 
-            // When we navigate within SR, prevent Angular from re-matching the route and rebuild the app
+            // When we navigate within Transform, prevent Angular from re-matching the route and rebuild the app
             if (isNavigationInApp) {
               $route.current = appRoute;
             } else {
-              // Any clean up when user leaves SR
+              // Any clean up when user leaves Transform
             }
 
             $scope.$on('$destroy', () => {
@@ -125,14 +132,8 @@ export class Plugin implements CorePlugin<Setup, Start> {
           $scope.$$postDigest(() => {
             unmountReactApp();
             const elReactRoot = document.getElementById(REACT_ROOT_ID);
-            if (elReactRoot && this.actionTypeRegistry && this.alertTypeRegistry) {
-              renderReact(
-                elReactRoot,
-                core,
-                plugins,
-                this.actionTypeRegistry,
-                this.alertTypeRegistry
-              );
+            if (elReactRoot) {
+              renderReact(elReactRoot, AppDependencies);
             }
           });
         };
