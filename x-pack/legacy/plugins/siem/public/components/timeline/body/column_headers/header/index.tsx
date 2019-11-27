@@ -4,80 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React from 'react';
+import { Resizable } from 're-resizable';
 
-import { OnResize, Resizeable } from '../../../../resize_handle';
-import { TruncatableText } from '../../../../truncatable_text';
+// import { OnResize, Resizeable } from '../../../../resize_handle';
 import { OnColumnRemoved, OnColumnResized, OnColumnSorted, OnFilterChange } from '../../../events';
-import {
-  EventsHeading,
-  EventsHeadingHandle,
-  EventsHeadingTitleButton,
-  EventsHeadingTitleSpan,
-} from '../../../styles';
-import { useTimelineContext } from '../../../timeline_context';
+import { EventsHeadingHandle } from '../../../styles';
 import { Sort } from '../../sort';
-import { SortIndicator } from '../../sort/sort_indicator';
 import { Actions } from '../actions';
 import { ColumnHeader } from '../column_header';
 import { Filter } from '../filter';
-import { HeaderToolTipContent } from '../header_tooltip_content';
-import { getNewSortDirectionOnClick, getSortDirection } from './helpers';
-
-interface HeaderCompProps {
-  children: React.ReactNode;
-  header: ColumnHeader;
-  isResizing: boolean;
-  onClick: () => void;
-  sort: Sort;
-}
-
-const HeaderComp = React.memo<HeaderCompProps>(
-  ({ children, header, isResizing, onClick, sort }) => {
-    const isLoading = useTimelineContext();
-
-    return (
-      <EventsHeading data-test-subj="header" isLoading={isLoading}>
-        {header.aggregatable ? (
-          <EventsHeadingTitleButton
-            data-test-subj="header-sort-button"
-            onClick={!isResizing && !isLoading ? onClick : noop}
-          >
-            <TruncatableText data-test-subj={`header-text-${header.id}`}>
-              <EuiToolTip
-                data-test-subj="header-tooltip"
-                content={<HeaderToolTipContent header={header} />}
-              >
-                <>{header.id}</>
-              </EuiToolTip>
-            </TruncatableText>
-
-            <SortIndicator
-              data-test-subj="header-sort-indicator"
-              sortDirection={getSortDirection({ header, sort })}
-            />
-          </EventsHeadingTitleButton>
-        ) : (
-          <EventsHeadingTitleSpan>
-            <TruncatableText data-test-subj={`header-text-${header.id}`}>
-              <EuiToolTip
-                data-test-subj="header-tooltip"
-                content={<HeaderToolTipContent header={header} />}
-              >
-                <>{header.id}</>
-              </EuiToolTip>
-            </TruncatableText>
-          </EventsHeadingTitleSpan>
-        )}
-
-        {children}
-      </EventsHeading>
-    );
-  }
-);
-HeaderComp.displayName = 'HeaderComp';
+import { getNewSortDirectionOnClick } from './helpers';
+import { HeaderComponent } from './header_component';
 
 interface Props {
   header: ColumnHeader;
@@ -119,9 +58,9 @@ export const Header = React.memo<Props>(
       setIsResizing(isResizing);
       return (
         <>
-          <HeaderComp header={header} isResizing={isResizing} onClick={onClick} sort={sort}>
+          <HeaderComponent header={header} isResizing={isResizing} onClick={onClick} sort={sort}>
             <Actions header={header} onColumnRemoved={onColumnRemoved} sort={sort} />
-          </HeaderComp>
+          </HeaderComponent>
 
           <Filter header={header} onFilterChange={onFilterChange} />
         </>
@@ -129,17 +68,29 @@ export const Header = React.memo<Props>(
     };
 
     return (
-      <Resizeable
-        bottom={0}
-        handle={<EventsHeadingHandle />}
-        id={header.id}
-        onResize={onResize}
-        positionAbsolute
-        render={renderActions}
-        right="-1px"
-        top={0}
-      />
+      <>
+        <HeaderComponent header={header} isResizing={false} onClick={onClick} sort={sort}>
+          <Actions header={header} onColumnRemoved={onColumnRemoved} sort={sort} />
+        </HeaderComponent>
+
+        <Filter header={header} onFilterChange={onFilterChange} />
+      </>
     );
+
+    // return (
+    //   <div>Test</div>
+    //   // <Resizable enable={{ right: true }}>Test</Resizable>
+    //   // <Resizeable
+    //   //   bottom={0}
+    //   //   handle={<EventsHeadingHandle />}
+    //   //   id={header.id}
+    //   //   onResize={onResize}
+    //   //   positionAbsolute
+    //   //   render={renderActions}
+    //   //   right="-1px"
+    //   //   top={0}
+    //   // />
+    // );
   }
 );
 

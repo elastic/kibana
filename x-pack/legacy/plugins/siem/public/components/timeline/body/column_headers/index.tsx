@@ -7,6 +7,7 @@
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { Draggable, Droppable } from 'react-beautiful-dnd';
+import { Resizable } from 're-resizable';
 
 import { BrowserFields } from '../../../../containers/source';
 import { DragEffects } from '../../../drag_and_drop/draggable_wrapper';
@@ -119,57 +120,69 @@ export const ColumnHeaders = React.memo<Props>(
                 {...dropProvided.droppableProps}
               >
                 {columnHeaders.map((header, i) => (
-                  <Draggable
-                    data-test-subj="draggable"
-                    // Required for drag events while hovering the sort button to work: https://github.com/atlassian/react-beautiful-dnd/blob/master/docs/api/draggable.md#interactive-child-elements-within-a-draggable-
-                    disableInteractiveElementBlocking
-                    draggableId={getDraggableFieldId({
-                      contextId: `timeline-column-headers-${timelineId}`,
-                      fieldId: header.id,
-                    })}
-                    index={i}
-                    isDragDisabled={isResizing}
-                    key={header.id}
-                    type={DRAG_TYPE_FIELD}
+                  <Resizable
+                    enable={{ right: true }}
+                    defaultSize={{
+                      width: header.width,
+                      height: 'auto',
+                    }}
+                    minWidth={180}
+                    onResizeStop={(e, direction, ref, delta) => {
+                      onColumnResized({ columnId: header.id, delta: delta.width });
+                    }}
                   >
-                    {(dragProvided, dragSnapshot) => (
-                      <EventsTh
-                        {...dragProvided.draggableProps}
-                        {...dragProvided.dragHandleProps}
-                        data-test-subj="draggable-header"
-                        ref={dragProvided.innerRef}
-                        isDragging={dragSnapshot.isDragging}
-                        position="relative"
-                        // Passing the styles directly to the component because the width is being calculated and is recommended by Styled Components for performance: https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-                        style={{
-                          flexBasis: header.width + 'px',
-                          ...dragProvided.draggableProps.style,
-                        }}
-                      >
-                        {!dragSnapshot.isDragging ? (
-                          <EventsThContent>
-                            <Header
-                              timelineId={timelineId}
-                              header={header}
-                              onColumnRemoved={onColumnRemoved}
-                              onColumnResized={onColumnResized}
-                              onColumnSorted={onColumnSorted}
-                              onFilterChange={onFilterChange}
-                              setIsResizing={setIsResizing}
-                              sort={sort}
-                            />
-                          </EventsThContent>
-                        ) : (
-                          <DragEffects>
-                            <DraggableFieldBadge
-                              fieldId={header.id}
-                              fieldWidth={header.width + 'px'}
-                            />
-                          </DragEffects>
-                        )}
-                      </EventsTh>
-                    )}
-                  </Draggable>
+                    <Draggable
+                      data-test-subj="draggable"
+                      // Required for drag events while hovering the sort button to work: https://github.com/atlassian/react-beautiful-dnd/blob/master/docs/api/draggable.md#interactive-child-elements-within-a-draggable-
+                      disableInteractiveElementBlocking
+                      draggableId={getDraggableFieldId({
+                        contextId: `timeline-column-headers-${timelineId}`,
+                        fieldId: header.id,
+                      })}
+                      index={i}
+                      isDragDisabled={isResizing}
+                      key={header.id}
+                      type={DRAG_TYPE_FIELD}
+                    >
+                      {(dragProvided, dragSnapshot) => (
+                        <EventsTh
+                          {...dragProvided.draggableProps}
+                          {...dragProvided.dragHandleProps}
+                          data-test-subj="draggable-header"
+                          ref={dragProvided.innerRef}
+                          isDragging={dragSnapshot.isDragging}
+                          position="relative"
+                          // Passing the styles directly to the component because the width is being calculated and is recommended by Styled Components for performance: https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
+                          style={{
+                            flexBasis: header.width + 'px',
+                            ...dragProvided.draggableProps.style,
+                          }}
+                        >
+                          {!dragSnapshot.isDragging ? (
+                            <EventsThContent>
+                              <Header
+                                timelineId={timelineId}
+                                header={header}
+                                onColumnRemoved={onColumnRemoved}
+                                onColumnResized={onColumnResized}
+                                onColumnSorted={onColumnSorted}
+                                onFilterChange={onFilterChange}
+                                setIsResizing={setIsResizing}
+                                sort={sort}
+                              />
+                            </EventsThContent>
+                          ) : (
+                            <DragEffects>
+                              <DraggableFieldBadge
+                                fieldId={header.id}
+                                fieldWidth={header.width + 'px'}
+                              />
+                            </DragEffects>
+                          )}
+                        </EventsTh>
+                      )}
+                    </Draggable>
+                  </Resizable>
                 ))}
               </EventsThGroupData>
             )}

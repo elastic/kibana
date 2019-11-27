@@ -129,7 +129,7 @@ export const EventsThContent = styled.div.attrs(({ className }) => ({
 }))<{ textAlign?: string }>`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
-  line-height: $({ theme }) =>theme.eui.euiLineHeight};
+  line-height: ${({ theme }) => theme.eui.euiLineHeight};
   min-width: 0;
   padding: ${({ theme }) => theme.eui.paddingSizes.xs};
   text-align: ${({ textAlign }) => textAlign};
