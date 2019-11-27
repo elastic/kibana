@@ -5,13 +5,14 @@
  */
 
 import { GlobalState } from '../types';
+import { EndpointsListState } from '../reducers/endpoints_list';
 
 function endpointsListState(state: GlobalState) {
-  return state.endpointsList;
+  return state.endpointsList as EndpointsListState;
 }
 
 export function endpointsListData(state: GlobalState) {
-  return endpointsListState(state).data.hits.hits;
+  return endpointsListState(state)?.data?.hits?.hits ?? [];
 }
 
 export function isFiltered(state: GlobalState) {
@@ -23,7 +24,7 @@ export function filteredEndpointListData(state: GlobalState) {
 }
 
 export function totalHits(state: GlobalState) {
-  return endpointsListState(state).data.hits.total.value;
+  return endpointsListState(state).data.aggregations.total.value;
 }
 
 export function pageIndex(state: GlobalState) {

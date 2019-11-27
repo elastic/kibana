@@ -15,11 +15,7 @@ import saga from './sagas';
 export function storeFactory(context: AppMountContext, history: History) {
   const sagaMiddleware = createSagaMiddleware(saga(context, history));
   const middlewares = [sagaMiddleware];
-  const store = createStore(
-    reducers,
-    undefined,
-    composeWithDevTools(applyMiddleware(...middlewares))
-  );
+  const store = createStore(reducers, {}, composeWithDevTools(applyMiddleware(...middlewares)));
   sagaMiddleware.run();
   return store;
 }
