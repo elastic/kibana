@@ -17,10 +17,14 @@
  * under the License.
  */
 
-export * from './query';
-export * from './field_formats';
-export * from './kbn_field_types';
-export * from './index_patterns';
-export * from './es_query';
-export * from './utils';
-export * from './types';
+const DOT_PREFIX_RE = /(.).+?\./g;
+
+/**
+ * Convert a dot.notated.string into a short
+ * version (d.n.string)
+ *
+ * @return {any}
+ */
+export function shortenDottedString(input: any) {
+  return typeof input !== 'string' ? input : input.replace(DOT_PREFIX_RE, '$1.');
+}

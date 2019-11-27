@@ -17,10 +17,18 @@
  * under the License.
  */
 
-export * from './query';
-export * from './field_formats';
-export * from './kbn_field_types';
-export * from './index_patterns';
-export * from './es_query';
-export * from './utils';
-export * from './types';
+import { shortenDottedString } from './shorten_dotted_string';
+
+describe('shortenDottedString', () => {
+  test('should convert a dot.notated.string into a short string', () => {
+    expect(shortenDottedString('dot.notated.string')).toBe('d.n.string');
+  });
+
+  test('should ignore non-string values', () => {
+    const obj = { key: 'val' };
+
+    expect(shortenDottedString(true)).toBe(true);
+    expect(shortenDottedString(123)).toBe(123);
+    expect(shortenDottedString(obj)).toBe(obj);
+  });
+});
