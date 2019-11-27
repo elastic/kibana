@@ -26,7 +26,7 @@ class CalendarService {
       });
     } catch (e) {
       throw new Error(
-        i18n.translate('xpack.ml.newJob.jobCreator.updateCalendarsErrorMessage', {
+        i18n.translate('xpack.ml.calendarService.assignNewJobIdErrorMessage', {
           defaultMessage: 'Unable to assign {jobId} to {calendarId}',
           values: { calendarId, jobId },
         })
