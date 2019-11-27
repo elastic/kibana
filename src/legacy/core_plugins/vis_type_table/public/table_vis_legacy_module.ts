@@ -20,15 +20,15 @@
 import { IModule } from 'angular';
 
 // @ts-ignore
-import { TableVisController } from '../table_vis_controller.js';
+import { TableVisController } from './table_vis_controller.js';
 // @ts-ignore
-import { KbnAggTable } from '../agg_table/agg_table';
+import { KbnAggTable } from './agg_table/agg_table';
 // @ts-ignore
-import { KbnAggTableGroup } from '../agg_table/agg_table_group';
+import { KbnAggTableGroup } from './agg_table/agg_table_group';
 // @ts-ignore
-import { KbnRows } from '../paginated_table/rows';
+import { KbnRows } from './paginated_table/rows';
 // @ts-ignore
-import { PaginatedTable } from '../paginated_table/paginated_table';
+import { PaginatedTable } from './paginated_table/paginated_table';
 
 /** @internal */
 export const initTableVisLegacyModule = (angularIns: IModule): void => {
