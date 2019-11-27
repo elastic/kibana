@@ -111,7 +111,6 @@ export function maps(kibana) {
 
       // legacy dependencies
       const __LEGACY = {
-        pluginRef: this,
         config: server.config,
         mapConfig() { return server.config().get('map'); },
         route: server.route.bind(server),
@@ -121,11 +120,6 @@ export function maps(kibana) {
         },
         savedObjects: {
           getSavedObjectsRepository: server.savedObjects.getSavedObjectsRepository
-        },
-        usage: {
-          collectorSet: {
-            makeUsageCollector: server.usage.collectorSet.makeUsageCollector
-          }
         },
         addSavedObjectsToSampleDataset: server.addSavedObjectsToSampleDataset,
         addAppLinksToSampleDataset: server.addAppLinksToSampleDataset,
