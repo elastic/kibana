@@ -19,7 +19,7 @@
 import { Legacy } from 'kibana';
 
 // @ts-ignore
-import { runRoute } from './run';
+import { runRoute, runGetRoute } from './run';
 // @ts-ignore
 import { functionsRoute } from './functions';
 // @ts-ignore
@@ -27,6 +27,7 @@ import { validateEsRoute } from './validate_es';
 
 export function initRoutes(server: Legacy.Server) {
   runRoute(server);
+  runGetRoute(server);
   functionsRoute(server);
   validateEsRoute(server);
 }
