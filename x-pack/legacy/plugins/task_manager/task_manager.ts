@@ -3,9 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Subject } from 'rxjs';
+import { partial } from 'lodash';
 import { performance } from 'perf_hooks';
 import { SavedObjectsClientContract, SavedObjectsSerializer } from 'src/core/server';
 import { Logger } from './types';
+import { TaskEvent } from './task_events';
 import { fillPool, FillPoolResult } from './lib/fill_pool';
 import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './lib/middleware';
 import { sanitizeTaskDefinitions } from './lib/sanitize_task_definitions';
@@ -20,7 +23,7 @@ import {
 } from './task';
 import { TaskPoller } from './task_poller';
 import { TaskPool } from './task_pool';
-import { TaskManagerRunner } from './task_runner';
+import { TaskManagerRunner, TaskRunner } from './task_runner';
 import {
   FetchOpts,
   FetchResult,
@@ -62,6 +65,7 @@ export class TaskManager {
   private poller: TaskPoller<FillPoolResult>;
   private logger: Logger;
   private pool: TaskPool;
+  private taskEvent$: Subject<TaskEvent>;
   private startQueue: Array<() => void> = [];
   private middleware = {
     beforeSave: async (saveOpts: BeforeSaveMiddlewareParams) => saveOpts,
@@ -79,6 +83,7 @@ export class TaskManager {
     this.pollerInterval = opts.config.get('xpack.task_manager.poll_interval');
     this.definitions = {};
     this.logger = opts.logger;
+    this.taskEvent$ = new Subject<TaskEvent>();
 
     const taskManagerId = opts.config.get('server.uuid');
     if (!taskManagerId) {
@@ -108,27 +113,24 @@ export class TaskManager {
     this.poller = new TaskPoller<FillPoolResult>({
       logger: this.logger,
       pollInterval: opts.config.get('xpack.task_manager.poll_interval'),
-      work: this.work.bind(this),
+      work: partial(
+        fillPool,
+        // claim available tasks
+        () =>
+          claimAvailableTasks(
+            this.store.claimAvailableTasks,
+            this.pool.availableWorkers,
+            this.logger
+          ),
+        // wrap each task in a Task Runner
+        this.createTaskRunnerForTask,
+        // place tasks in the Task Pool
+        async (tasks: TaskRunner[]) => await this.pool.run(tasks)
+      ),
     });
   }
 
-  private work(): Promise<FillPoolResult> {
-    return fillPool(
-      // claim available tasks
-      () =>
-        claimAvailableTasks(
-          this.store.claimAvailableTasks.bind(this.store),
-          this.pool.availableWorkers,
-          this.logger
-        ),
-      // wrap each task in a Task Runner
-      this.createTaskRunnerForTask.bind(this),
-      // place tasks in the Task Pool
-      async tasks => await this.pool.run(tasks)
-    );
-  }
-
-  private createTaskRunnerForTask(instance: ConcreteTaskInstance) {
+  private createTaskRunnerForTask = (instance: ConcreteTaskInstance) => {
     return new TaskManagerRunner({
       logger: this.logger,
       instance,
@@ -137,7 +139,7 @@ export class TaskManager {
       beforeRun: this.middleware.beforeRun,
       beforeMarkRunning: this.middleware.beforeMarkRunning,
     });
-  }
+  };
 
   /**
    * Starts up the task manager and starts picking up tasks.

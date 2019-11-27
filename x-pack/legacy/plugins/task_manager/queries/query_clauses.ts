@@ -5,7 +5,7 @@
  */
 
 export interface TermBoolClause {
-  term: { [field: string]: string };
+  term: { [field: string]: string | string[] };
 }
 export interface RangeBoolClause {
   range: { [field: string]: { lte: string | number } | { lt: string | number } };
@@ -30,6 +30,7 @@ export interface SortClause {
     script: {
       lang: string;
       source: string;
+      params?: { [param: string]: string | string[] };
     };
   };
 }

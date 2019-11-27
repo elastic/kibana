@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { defaultsDeep } from 'lodash';
 import {
   BoolClause,
   SortClause,
@@ -40,6 +40,12 @@ export const IdleTaskWithExpiredRunAt: BoolClause<TermBoolClause | RangeBoolClau
   },
 };
 
+export const idleTaskWithIDs = (claimTasksById: string[]): BoolClause<TermBoolClause> => ({
+  bool: {
+    must: [{ term: { 'task.status': 'idle' } }, { term: { 'task.id': claimTasksById } }],
+  },
+});
+
 export const RunningOrClaimingTaskWithExpiredRetryAt: BoolClause<
   TermBoolClause | RangeBoolClause
 > = {
@@ -64,6 +70,26 @@ export const SortByRunAtAndRetryAt: SortClause = {
       source: `doc['task.retryAt'].value || doc['task.runAt'].value`,
     },
   },
+};
+
+const SORT_VALUE_TO_BE_FIRST = 0;
+export const sortByIdsThenByScheduling = (claimTasksById: string[]): SortClause => {
+  const {
+    _script: {
+      script: { source },
+    },
+  } = SortByRunAtAndRetryAt;
+  return defaultsDeep(
+    {
+      _script: {
+        script: {
+          source: `params.ids.contains(doc['task.id']) ? ${SORT_VALUE_TO_BE_FIRST} : (${source})`,
+          params: { ids: claimTasksById },
+        },
+      },
+    },
+    SortByRunAtAndRetryAt
+  );
 };
 
 export const updateFields = (fieldUpdates: {

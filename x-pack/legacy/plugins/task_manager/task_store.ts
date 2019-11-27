@@ -7,8 +7,9 @@
 /*
  * This module contains helpers for managing the task manager storage layer.
  */
+import { Subject, Observable } from 'rxjs';
+import { omit, difference, indexBy } from 'lodash';
 
-import { omit } from 'lodash';
 import {
   SavedObjectsClientContract,
   SavedObject,
@@ -16,6 +17,9 @@ import {
   SavedObjectsSerializer,
   SavedObjectsRawDoc,
 } from 'src/core/server';
+
+import { asOk, asErr } from './lib/result_type';
+
 import {
   ConcreteTaskInstance,
   ElasticJs,
@@ -23,6 +27,8 @@ import {
   TaskDictionary,
   TaskInstance,
 } from './task';
+
+import { TaskEvent, asTaskClaimEvent } from './task_events';
 
 import {
   asUpdateByQuery,
@@ -40,6 +46,8 @@ import {
   RecuringTaskWithInterval,
   taskWithLessThanMaxAttempts,
   SortByRunAtAndRetryAt,
+  idleTaskWithIDs,
+  sortByIdsThenByScheduling,
 } from './queries/mark_available_tasks_as_claimed';
 
 export interface StoreOpts {
@@ -50,6 +58,7 @@ export interface StoreOpts {
   definitions: TaskDictionary<TaskDefinition>;
   savedObjectsRepository: SavedObjectsClientContract;
   serializer: SavedObjectsSerializer;
+  onEvent?: (event: TaskEvent) => void;
 }
 
 export interface SearchOpts {
@@ -75,6 +84,7 @@ export interface UpdateByQueryOpts extends SearchOpts {
 
 export interface OwnershipClaimingOpts {
   claimOwnershipUntil: Date;
+  claimTasksById?: string[];
   size: number;
 }
 
@@ -107,10 +117,13 @@ export class TaskStore {
   public readonly maxAttempts: number;
   public readonly index: string;
   public readonly taskManagerId: string;
+
   private callCluster: ElasticJs;
   private definitions: TaskDictionary<TaskDefinition>;
   private savedObjectsRepository: SavedObjectsClientContract;
   private serializer: SavedObjectsSerializer;
+  private events$: Subject<TaskEvent>;
+  private onEvent: (event: TaskEvent) => void;
 
   /**
    * Constructs a new TaskStore.
@@ -130,7 +143,17 @@ export class TaskStore {
     this.definitions = opts.definitions;
     this.serializer = opts.serializer;
     this.savedObjectsRepository = opts.savedObjectsRepository;
+    this.onEvent = opts.onEvent || ((e: TaskEvent) => {});
+    this.events$ = new Subject<TaskEvent>();
   }
+
+  public get events(): Observable<TaskEvent> {
+    return this.events$;
+  }
+
+  private emitEvent = (event: TaskEvent) => {
+    this.events$.next(event);
+  };
 
   /**
    * Schedules a task.
@@ -178,39 +201,70 @@ export class TaskStore {
    * @param {OwnershipClaimingOpts} options
    * @returns {Promise<ClaimOwnershipResult>}
    */
-  public async claimAvailableTasks(opts: OwnershipClaimingOpts): Promise<ClaimOwnershipResult> {
+  public claimAvailableTasks = async (
+    opts: OwnershipClaimingOpts
+  ): Promise<ClaimOwnershipResult> => {
+    const { claimTasksById } = opts;
+
     const claimedTasks = await this.markAvailableTasksAsClaimed(opts);
     const docs = claimedTasks > 0 ? await this.sweepForClaimedTasks(opts) : [];
+
+    // emit success/fail events for claimed tasks by id
+    if (claimTasksById && claimTasksById.length) {
+      docs.map(doc => asTaskClaimEvent(doc.id, asOk(doc))).forEach(this.emitEvent);
+
+      difference(
+        claimTasksById,
+        docs.map(doc => doc.id)
+      )
+        .map(id => asTaskClaimEvent(id, asErr(new Error(`failed to claim task '${id}'`))))
+        .forEach(this.emitEvent);
+    }
+
     return {
       claimedTasks,
       docs,
     };
-  }
+  };
 
   private async markAvailableTasksAsClaimed({
     size,
     claimOwnershipUntil,
+    claimTasksById,
   }: OwnershipClaimingOpts): Promise<number> {
+    const queryForScheduledTasks = mustBeAllOf(
+      // Either a task with idle status and runAt <= now or
+      // status running or claiming with a retryAt <= now.
+      shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
+      // Either task has an interval or the attempts < the maximum configured
+      shouldBeOneOf<ExistsBoolClause | TermBoolClause | RangeBoolClause>(
+        RecuringTaskWithInterval,
+        ...Object.entries(this.definitions).map(([type, { maxAttempts }]) =>
+          taskWithLessThanMaxAttempts(type, maxAttempts || this.maxAttempts)
+        )
+      )
+    );
+
+    const { query, sort } =
+      claimTasksById && claimTasksById.length
+        ? {
+            query: shouldBeOneOf(queryForScheduledTasks, idleTaskWithIDs(claimTasksById)),
+            sort: sortByIdsThenByScheduling(claimTasksById),
+          }
+        : {
+            query: queryForScheduledTasks,
+            sort: SortByRunAtAndRetryAt,
+          };
+
     const { updated } = await this.updateByQuery(
       asUpdateByQuery({
-        query: mustBeAllOf(
-          // Either a task with idle status and runAt <= now or
-          // status running or claiming with a retryAt <= now.
-          shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
-          // Either task has an interval or the attempts < the maximum configured
-          shouldBeOneOf<ExistsBoolClause | TermBoolClause | RangeBoolClause>(
-            RecuringTaskWithInterval,
-            ...Object.entries(this.definitions).map(([type, { maxAttempts }]) =>
-              taskWithLessThanMaxAttempts(type, maxAttempts || this.maxAttempts)
-            )
-          )
-        ),
+        query,
         update: updateFields({
           ownerId: this.taskManagerId,
           status: 'claiming',
           retryAt: claimOwnershipUntil,
         }),
-        sort: SortByRunAtAndRetryAt,
+        sort,
       }),
       {
         max_docs: size,
@@ -224,6 +278,7 @@ export class TaskStore {
    */
   private async sweepForClaimedTasks({
     size,
+    claimTasksById,
   }: OwnershipClaimingOpts): Promise<ConcreteTaskInstance[]> {
     const { docs } = await this.search({
       query: {
@@ -239,16 +294,10 @@ export class TaskStore {
         },
       },
       size,
-      sort: {
-        _script: {
-          type: 'number',
-          order: 'asc',
-          script: {
-            lang: 'expression',
-            source: `doc['task.retryAt'].value || doc['task.runAt'].value`,
-          },
-        },
-      },
+      sort:
+        claimTasksById && claimTasksById.length
+          ? sortByIdsThenByScheduling(claimTasksById)
+          : SortByRunAtAndRetryAt,
       seq_no_primary_term: true,
     });
 
@@ -363,7 +412,7 @@ function taskInstanceToAttributes(doc: TaskInstance): SavedObjectAttributes {
   };
 }
 
-function savedObjectToConcreteTaskInstance(
+export function savedObjectToConcreteTaskInstance(
   savedObject: Omit<SavedObject, 'references'>
 ): ConcreteTaskInstance {
   return {
