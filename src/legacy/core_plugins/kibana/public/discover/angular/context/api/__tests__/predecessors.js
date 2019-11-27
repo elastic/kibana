@@ -198,7 +198,7 @@ describe('context app', function () {
       )
         .then(() => {
           const setParentSpy = searchSourceStub.setParent;
-          expect(setParentSpy.alwaysCalledWith(false)).to.be(true);
+          expect(setParentSpy.alwaysCalledWith(undefined)).to.be(true);
           expect(setParentSpy.called).to.be(true);
         });
     });

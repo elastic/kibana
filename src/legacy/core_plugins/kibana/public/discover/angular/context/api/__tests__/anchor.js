@@ -60,7 +60,7 @@ describe('context app', function () {
         .then(() => {
           const setParentSpy = searchSourceStub.setParent;
           expect(setParentSpy.calledOnce).to.be(true);
-          expect(setParentSpy.firstCall.args[0]).to.eql(false);
+          expect(setParentSpy.firstCall.args[0]).to.be(undefined);
         });
     });
 

@@ -112,7 +112,7 @@ function fetchContextProvider(indexPatterns: IndexPatterns) {
 
   async function createSearchSource(indexPattern: IndexPattern, filters: esFilters.Filter[]) {
     return new SearchSource()
-      .setParent(false)
+      .setParent(undefined)
       .setField('index', indexPattern)
       .setField('filter', filters);
   }

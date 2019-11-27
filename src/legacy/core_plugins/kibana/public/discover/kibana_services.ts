@@ -56,9 +56,10 @@ export { callAfterBindingsWorkaround } from 'ui/compat';
 export {
   getRequestInspectorStats,
   getResponseInspectorStats,
-} from 'ui/courier/utils/courier_inspector_utils';
-// @ts-ignore
-export { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
+  hasSearchStategyForIndexPattern,
+  isDefaultTypeIndexPattern,
+  SearchSource,
+} from '../../../../ui/public/courier';
 // @ts-ignore
 export { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
 // @ts-ignore
@@ -84,7 +85,6 @@ export { unhashUrl } from 'ui/state_management/state_hashing';
 // EXPORT types
 export { Vis } from 'ui/vis';
 export { StaticIndexPattern, IndexPatterns, IndexPattern, FieldType } from 'ui/index_patterns';
-export { SearchSource } from 'ui/courier';
 export { ElasticSearchHit } from 'ui/registry/doc_views_types';
 export { DocViewRenderProps, DocViewRenderFn } from 'ui/registry/doc_views';
 export { Adapters } from 'ui/inspector/types';

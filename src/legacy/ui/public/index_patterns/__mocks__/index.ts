@@ -35,7 +35,6 @@ export {
   CONTAINS_SPACES,
   getFromSavedObject,
   getRoutes,
-  IndexPatternSelect,
   validateIndexPattern,
   ILLEGAL_CHARACTERS,
   INDEX_PATTERN_ILLEGAL_CHARACTERS,

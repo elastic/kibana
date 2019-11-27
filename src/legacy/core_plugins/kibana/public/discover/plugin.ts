@@ -22,10 +22,7 @@ import { IUiActionsStart } from 'src/plugins/ui_actions/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { registerFeature } from './helpers/register_feature';
 import './kibana_services';
-import {
-  Start as EmbeddableStart,
-  Setup as EmbeddableSetup,
-} from '../../../../../plugins/embeddable/public';
+import { IEmbeddableStart, IEmbeddableSetup } from '../../../../../plugins/embeddable/public';
 import { getInnerAngularModule, getInnerAngularModuleEmbeddable } from './get_inner_angular';
 import { setAngularModule, setServices } from './kibana_services';
 import { NavigationStart } from '../../../navigation/public';
@@ -43,12 +40,12 @@ export type DiscoverSetup = void;
 export type DiscoverStart = void;
 export interface DiscoverSetupPlugins {
   uiActions: IUiActionsStart;
-  embeddable: EmbeddableSetup;
+  embeddable: IEmbeddableSetup;
   kibana_legacy: KibanaLegacySetup;
 }
 export interface DiscoverStartPlugins {
   uiActions: IUiActionsStart;
-  embeddable: EmbeddableStart;
+  embeddable: IEmbeddableStart;
   navigation: NavigationStart;
   eui_utils: EuiUtilsStart;
   data: DataPublicPluginStart;

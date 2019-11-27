@@ -28,7 +28,7 @@ export function fetchAnchorProvider(indexPatterns, searchSource) {
   ) {
     const indexPattern = await indexPatterns.get(indexPatternId);
     searchSource
-      .setParent(false)
+      .setParent(undefined)
       .setField('index', indexPattern)
       .setField('version', true)
       .setField('size', 1)
