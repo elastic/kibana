@@ -21,19 +21,21 @@ const config = yaml.safeLoad(
   fs.readFileSync('../../../../../config/kibana.dev.yml', 'utf8')
 );
 
-const githubUsername = argv.username;
-const kibanaIndex = config['kibana.index'];
-const elasticsearchUsername = 'superuser';
-const elasticsearchPassword = config['elasticsearch.password'];
+const GITHUB_USERNAME = argv.username;
+const KIBANA_INDEX = config['kibana.index'];
+const ELASTICSEARCH_USERNAME = argv.esUsername || 'superuser';
+const ELASTICSEARCH_PASSWORD =
+  argv.esPassword || config['elasticsearch.password'];
+const BASE_URL = argv.baseUrl || 'http://localhost:5601';
 
 async function callKibana(options) {
   try {
     const { data } = await axios({
       ...options,
-      baseURL: 'http://localhost:5601',
+      baseURL: BASE_URL,
       auth: {
-        username: elasticsearchUsername,
-        password: elasticsearchPassword
+        username: ELASTICSEARCH_USERNAME,
+        password: ELASTICSEARCH_PASSWORD
       },
       headers: { 'kbn-xsrf': 'true', ...options.headers }
     });
@@ -48,28 +50,28 @@ async function callKibana(options) {
 
 async function init() {
   // kibana.index must be different from `.kibana`
-  if (kibanaIndex === '.kibana') {
+  if (KIBANA_INDEX === '.kibana') {
     console.log(
       'Please use a custom `kibana.index` in kibana.dev.yml. Example: "kibana.index: .kibana-john"'
     );
     return;
   }
 
-  if (!kibanaIndex.startsWith('.kibana')) {
+  if (!KIBANA_INDEX.startsWith('.kibana')) {
     console.log(
       'Your `kibana.index` must be prefixed with `.kibana`. Example: "kibana.index: .kibana-john"'
     );
-    githubUsername;
+    GITHUB_USERNAME;
   }
 
-  if (!githubUsername) {
+  if (!GITHUB_USERNAME) {
     console.log(
       'Please specify your github username with `--username <username>` '
     );
     return;
   }
 
-  const ROLE_NAME = `kibana_user_${githubUsername}`;
+  const ROLE_NAME = `kibana_user_${GITHUB_USERNAME}`;
 
   // create role
   await callKibana({
@@ -81,7 +83,7 @@ async function init() {
       kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }]
     }
   });
-  console.log(`Created role "${ROLE_NAME}" with permissions to kibana`);
+  console.log(`Created role "${ROLE_NAME}"`);
 
   const usersToUpdate = ['apm', 'kibana_user'];
   usersToUpdate.map(async userToUpdate => {
@@ -105,6 +107,8 @@ async function init() {
       url: `/api/security/v1/users/${userToUpdate}`,
       data: { ...user, roles: [...user.roles, ROLE_NAME] }
     });
+
+    console.log(`Congratulations! You are now able to login to your local Kibana with 'apm' and 'kibana_user'`);
   });
 }
 
