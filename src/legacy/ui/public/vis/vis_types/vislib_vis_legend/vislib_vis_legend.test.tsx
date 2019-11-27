@@ -35,7 +35,7 @@ jest.mock('@elastic/eui', () => ({
 jest.mock('../../../visualize/loader/pipeline_helpers/utilities', () => ({
   getTableAggs: jest.fn(),
 }));
-jest.mock('../../vis_filters', () => ({
+jest.mock('../../../../../core_plugins/visualizations/public', () => ({
   createFiltersFromEvent: jest.fn().mockReturnValue(['yes']),
 }));
 
