@@ -17,18 +17,18 @@
  * under the License.
  */
 
-import { fromKueryExpression, KueryNode, nodeTypes } from '@kbn/es-query';
 import { get, set } from 'lodash';
 import { SavedObjectsErrorHelpers } from './errors';
 import { IndexMapping } from '../../mappings';
+import { esKuery } from '../../../../../plugins/data/server';
 
 export const validateConvertFilterToKueryNode = (
   allowedTypes: string[],
   filter: string,
   indexMapping: IndexMapping
-): KueryNode => {
+): esKuery.KueryNode | undefined => {
   if (filter && filter.length > 0 && indexMapping) {
-    const filterKueryNode = fromKueryExpression(filter);
+    const filterKueryNode = esKuery.fromKueryExpression(filter);
 
     const validationFilterKuery = validateFilterKueryNode(
       filterKueryNode,
@@ -54,7 +54,7 @@ export const validateConvertFilterToKueryNode = (
 
     validationFilterKuery.forEach(item => {
       const path: string[] = item.astPath.length === 0 ? [] : item.astPath.split('.');
-      const existingKueryNode: KueryNode =
+      const existingKueryNode: esKuery.KueryNode =
         path.length === 0 ? filterKueryNode : get(filterKueryNode, path);
       if (item.isSavedObjectAttr) {
         existingKueryNode.arguments[0].value = existingKueryNode.arguments[0].value.split('.')[1];
@@ -63,8 +63,8 @@ export const validateConvertFilterToKueryNode = (
           set(
             filterKueryNode,
             path,
-            nodeTypes.function.buildNode('and', [
-              nodeTypes.function.buildNode('is', 'type', itemType[0]),
+            esKuery.nodeTypes.function.buildNode('and', [
+              esKuery.nodeTypes.function.buildNode('is', 'type', itemType[0]),
               existingKueryNode,
             ])
           );
@@ -79,7 +79,6 @@ export const validateConvertFilterToKueryNode = (
     });
     return filterKueryNode;
   }
-  return null;
 };
 
 interface ValidateFilterKueryNode {
@@ -91,41 +90,44 @@ interface ValidateFilterKueryNode {
 }
 
 export const validateFilterKueryNode = (
-  astFilter: KueryNode,
+  astFilter: esKuery.KueryNode,
   types: string[],
   indexMapping: IndexMapping,
   storeValue: boolean = false,
   path: string = 'arguments'
 ): ValidateFilterKueryNode[] => {
-  return astFilter.arguments.reduce((kueryNode: string[], ast: KueryNode, index: number) => {
-    if (ast.arguments) {
-      const myPath = `${path}.${index}`;
-      return [
-        ...kueryNode,
-        ...validateFilterKueryNode(
-          ast,
-          types,
-          indexMapping,
-          ast.type === 'function' && ['is', 'range'].includes(ast.function),
-          `${myPath}.arguments`
-        ),
-      ];
-    }
-    if (storeValue && index === 0) {
-      const splitPath = path.split('.');
-      return [
-        ...kueryNode,
-        {
-          astPath: splitPath.slice(0, splitPath.length - 1).join('.'),
-          error: hasFilterKeyError(ast.value, types, indexMapping),
-          isSavedObjectAttr: isSavedObjectAttr(ast.value, indexMapping),
-          key: ast.value,
-          type: getType(ast.value),
-        },
-      ];
-    }
-    return kueryNode;
-  }, []);
+  return astFilter.arguments.reduce(
+    (kueryNode: string[], ast: esKuery.KueryNode, index: number) => {
+      if (ast.arguments) {
+        const myPath = `${path}.${index}`;
+        return [
+          ...kueryNode,
+          ...validateFilterKueryNode(
+            ast,
+            types,
+            indexMapping,
+            ast.type === 'function' && ['is', 'range'].includes(ast.function),
+            `${myPath}.arguments`
+          ),
+        ];
+      }
+      if (storeValue && index === 0) {
+        const splitPath = path.split('.');
+        return [
+          ...kueryNode,
+          {
+            astPath: splitPath.slice(0, splitPath.length - 1).join('.'),
+            error: hasFilterKeyError(ast.value, types, indexMapping),
+            isSavedObjectAttr: isSavedObjectAttr(ast.value, indexMapping),
+            key: ast.value,
+            type: getType(ast.value),
+          },
+        ];
+      }
+      return kueryNode;
+    },
+    []
+  );
 };
 
 const getType = (key: string | undefined | null) =>
