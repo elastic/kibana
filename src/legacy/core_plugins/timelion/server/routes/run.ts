@@ -23,8 +23,32 @@ import _ from 'lodash';
 import { Legacy } from 'kibana';
 // @ts-ignore
 import chainRunnerFn from '../handlers/chain_runner.js';
-import { TimelionRequestQuery } from '../types';
 const timelionDefaults = require('../lib/get_namespaced_settings')();
+
+export interface TimelionRequestQuery {
+  payload?: {
+    sheet: string[];
+    extended: {
+      es: {
+        filter: {
+          bool: {
+            filter: string[] | object;
+            must: string[];
+            should: string[];
+            must_not: string[];
+          };
+        };
+      };
+    };
+  };
+  query?: {
+    expression: string[];
+    from: string;
+    interval: string;
+    to: string;
+    timezone: string;
+  };
+}
 
 function formatErrorResponse(e: any, h: any) {
   return h
