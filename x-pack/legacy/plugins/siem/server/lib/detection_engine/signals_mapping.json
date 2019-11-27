@@ -107,6 +107,78 @@
           },
           "original_time": {
             "type": "date"
+          },
+          "original_event": {
+            "properties": {
+              "action": {
+                "type": "keyword"
+              },
+              "category": {
+                "type": "keyword"
+              },
+              "code": {
+                "type": "keyword"
+              },
+              "created": {
+                "type": "date"
+              },
+              "dataset": {
+                "type": "keyword"
+              },
+              "duration": {
+                "type": "long"
+              },
+              "end": {
+                "type": "date"
+              },
+              "hash": {
+                "type": "keyword"
+              },
+              "id": {
+                "type": "keyword"
+              },
+              "kind": {
+                "type": "keyword"
+              },
+              "module": {
+                "type": "keyword"
+              },
+              "original": {
+                "doc_values": false,
+                "index": false,
+                "type": "keyword"
+              },
+              "outcome": {
+                "type": "keyword"
+              },
+              "provider": {
+                "type": "keyword"
+              },
+              "risk_score": {
+                "type": "float"
+              },
+              "risk_score_norm": {
+                "type": "float"
+              },
+              "sequence": {
+                "type": "long"
+              },
+              "severity": {
+                "type": "long"
+              },
+              "start": {
+                "type": "date"
+              },
+              "timezone": {
+                "type": "keyword"
+              },
+              "type": {
+                "type": "keyword"
+              }
+            }
+          },
+          "status": {
+            "type": "keyword"
           }
         }
       },

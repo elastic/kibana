@@ -27,6 +27,7 @@ import { KibanaResponseFactory, kibanaResponseFactory, IKibanaResponse } from '.
 import { RouteConfig, RouteConfigOptions, RouteMethod, RouteSchemas } from './route';
 import { HapiResponseAdapter } from './response_adapter';
 import { RequestHandlerContext } from '../../../server';
+import { wrapErrors } from './error_wrapper';
 
 interface RouterRoute {
   method: RouteMethod;
@@ -34,6 +35,15 @@ interface RouterRoute {
   options: RouteConfigOptions;
   handler: (req: Request, responseToolkit: ResponseToolkit) => Promise<ResponseObject | Boom<any>>;
 }
+
+/**
+ * Handler to declare a route.
+ * @public
+ */
+export type RouteRegistrar = <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+  route: RouteConfig<P, Q, B>,
+  handler: RequestHandler<P, Q, B>
+) => void;
 
 /**
  * Registers route handlers for specified resource path and method.
@@ -52,40 +62,36 @@ export interface IRouter {
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  get: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-    route: RouteConfig<P, Q, B>,
-    handler: RequestHandler<P, Q, B>
-  ) => void;
+  get: RouteRegistrar;
 
   /**
    * Register a route handler for `POST` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  post: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-    route: RouteConfig<P, Q, B>,
-    handler: RequestHandler<P, Q, B>
-  ) => void;
+  post: RouteRegistrar;
 
   /**
    * Register a route handler for `PUT` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  put: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-    route: RouteConfig<P, Q, B>,
-    handler: RequestHandler<P, Q, B>
-  ) => void;
+  put: RouteRegistrar;
 
   /**
    * Register a route handler for `DELETE` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  delete: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-    route: RouteConfig<P, Q, B>,
+  delete: RouteRegistrar;
+
+  /**
+   * Wrap a router handler to catch and converts legacy boom errors to proper custom errors.
+   * @param handler {@link RequestHandler} - a route handler to wrap
+   */
+  handleLegacyErrors: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
     handler: RequestHandler<P, Q, B>
-  ) => void;
+  ) => RequestHandler<P, Q, B>;
 
   /**
    * Returns all routes registered with the this router.
@@ -186,6 +192,12 @@ export class Router implements IRouter {
 
   public getRoutes() {
     return [...this.routes];
+  }
+
+  public handleLegacyErrors<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+    handler: RequestHandler<P, Q, B>
+  ): RequestHandler<P, Q, B> {
+    return wrapErrors(handler);
   }
 
   private async handle<P extends ObjectType, Q extends ObjectType, B extends ObjectType>({
