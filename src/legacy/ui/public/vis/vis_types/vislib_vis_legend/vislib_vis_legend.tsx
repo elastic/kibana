@@ -26,7 +26,7 @@ import { EuiPopoverProps, EuiIcon, keyCodes, htmlIdGenerator } from '@elastic/eu
 // @ts-ignore
 import { Data } from '../../../vislib/lib/data';
 // @ts-ignore
-import { createFiltersFromEvent } from '../../vis_filters';
+import { createFiltersFromEvent } from '../../../../../core_plugins/visualizations/public';
 import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
 import { VisLegendItem } from './vislib_vis_legend_item';
 import { getTableAggs } from '../../../visualize/loader/pipeline_helpers/utilities';
@@ -242,7 +242,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
         <button
           type="button"
           onClick={this.toggleLegend}
-          className={classNames('visLegend__toggle', {
+          className={classNames('visLegend__toggle kbn-resetFocusState', {
             'visLegend__toggle--isOpen': open,
           })}
           aria-label={i18n.translate('common.ui.vis.visTypes.legend.toggleLegendButtonAriaLabel', {

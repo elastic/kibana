@@ -32,20 +32,16 @@ export const {
   formatHitProvider,
 } = data.indexPatterns;
 
+import { indexPatterns } from '../../../../plugins/data/public';
+
 // static code
-export {
-  CONTAINS_SPACES,
-  getFromSavedObject,
-  getRoutes,
-  validateIndexPattern,
-  ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-  IndexPatternAlreadyExists,
-  IndexPatternMissingIndices,
-  NoDefaultIndexPattern,
-  NoDefinedIndexPatterns,
-} from '../../../core_plugins/data/public';
+export { getFromSavedObject, getRoutes } from '../../../core_plugins/data/public';
+
+export const INDEX_PATTERN_ILLEGAL_CHARACTERS = indexPatterns.ILLEGAL_CHARACTERS;
+export const INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE;
+export const ILLEGAL_CHARACTERS = indexPatterns.ILLEGAL_CHARACTERS_KEY;
+export const CONTAINS_SPACES = indexPatterns.CONTAINS_SPACES_KEY;
+export const validateIndexPattern = indexPatterns.validate;
 
 // types
 export {
