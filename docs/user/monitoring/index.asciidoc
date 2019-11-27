@@ -21,7 +21,7 @@ NOTE: Watcher must be enabled to view cluster alerts. If you have a Basic
 license, Top Cluster Alerts are not displayed.
 
 For more information, see <<configuring-monitoring>> and 
-{stack-ov}/xpack-monitoring.html[Monitoring the {stack}].  
+{ref}/monitor-elasticsearch-cluster.html[Monitor a cluster].  
 
 --
 
