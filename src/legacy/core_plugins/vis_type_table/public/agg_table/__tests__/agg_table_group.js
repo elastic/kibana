@@ -25,7 +25,7 @@ import { legacyResponseHandlerProvider, tabifyAggResponse, npStart } from '../..
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { Vis } from '../../../../visualizations/public';
 import { getAngularModule } from '../../get_inner_angular';
-import { initTableVisLegacyModule } from '../../angular/table_vis_legacy_module';
+import { initTableVisLegacyModule } from '../../table_vis_legacy_module';
 
 describe('Table Vis - AggTableGroup Directive', function () {
   let $rootScope;
