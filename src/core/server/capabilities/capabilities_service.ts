@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
 import { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { InternalHttpServiceSetup, KibanaRequest } from '../http';
 import { mergeCapabilities } from './merge_capabilities';
 import { getCapabilitiesResolver, CapabilitiesResolver } from './resolve_capabilities';
+import { registerRoutes } from './routes';
 
 /**
  * APIs to manage the {@link Capabilities} that will be used by the application.
@@ -32,7 +32,8 @@ import { getCapabilitiesResolver, CapabilitiesResolver } from './resolve_capabil
  */
 export interface CapabilitiesSetup {
   /**
-   * Register a {@link CapabilitiesProvider} to be used when resolving capabilities.
+   * Register a {@link CapabilitiesProvider} to be used to provide {@link Capabilities}
+   * when resolving them.
    *
    * @example
    * ```ts
@@ -54,7 +55,8 @@ export interface CapabilitiesSetup {
   registerProvider(provider: CapabilitiesProvider): void;
 
   /**
-   * Register a {@link CapabilitiesSwitcher} to be used when resolving capabilities.
+   * Register a {@link CapabilitiesSwitcher} to be used to change the default state
+   * of the {@link Capabilities} entries when resolving them.
    *
    * @example
    * ```ts
@@ -119,7 +121,8 @@ export class CapabilitiesService {
 
   public setup(setupDeps: SetupDeps): CapabilitiesSetup {
     this.logger.debug('Setting up capabilities service');
-    this.setupCapabilitiesRoute(setupDeps.http);
+
+    registerRoutes(setupDeps.http, this.resolveCapabilities);
 
     return {
       registerProvider: (provider: CapabilitiesProvider) => {
@@ -135,31 +138,5 @@ export class CapabilitiesService {
     return {
       resolveCapabilities: request => this.resolveCapabilities(request, []),
     };
-  }
-
-  private setupCapabilitiesRoute(http: InternalHttpServiceSetup) {
-    const router = http.createRouter('/api/core/capabilities');
-    [true, false].forEach(authRequired => {
-      router.post(
-        {
-          path: authRequired ? '' : '/defaults',
-          options: {
-            authRequired,
-          },
-          validate: {
-            body: schema.object({
-              applications: schema.arrayOf(schema.string()),
-            }),
-          },
-        },
-        async (ctx, req, res) => {
-          const { applications } = req.body;
-          const capabilities = await this.resolveCapabilities(req, applications);
-          return res.ok({
-            body: capabilities,
-          });
-        }
-      );
-    });
   }
 }

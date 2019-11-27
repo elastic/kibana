@@ -46,7 +46,7 @@ describe('CapabilitiesService', () => {
       expect(router.post).toHaveBeenCalledWith(expect.any(Object), expect.any(Function));
     });
 
-    it('allows to register capabilities providers', async () => {
+    it('allows to register a capabilities provider', async () => {
       setup.registerProvider(() => ({
         navLinks: { myLink: true },
         catalogue: { myPlugin: true },
@@ -60,6 +60,41 @@ describe('CapabilitiesService', () => {
           "management": Object {},
           "navLinks": Object {
             "myLink": true,
+          },
+        }
+      `);
+    });
+
+    it('allows to register multiple capabilities providers', async () => {
+      setup.registerProvider(() => ({
+        navLinks: { A: true },
+        catalogue: { A: true },
+      }));
+      setup.registerProvider(() => ({
+        navLinks: { B: true },
+        catalogue: { B: true },
+      }));
+      setup.registerProvider(() => ({
+        navLinks: { C: true },
+        customSection: {
+          C: true,
+        },
+      }));
+      const start = service.start();
+      expect(await start.resolveCapabilities({} as any)).toMatchInlineSnapshot(`
+        Object {
+          "catalogue": Object {
+            "A": true,
+            "B": true,
+          },
+          "customSection": Object {
+            "C": true,
+          },
+          "management": Object {},
+          "navLinks": Object {
+            "A": true,
+            "B": true,
+            "C": true,
           },
         }
       `);
@@ -88,6 +123,64 @@ describe('CapabilitiesService', () => {
           },
           "management": Object {},
           "navLinks": Object {},
+        }
+      `);
+    });
+
+    it('allows to register multiple providers and switchers', async () => {
+      setup.registerProvider(() => ({
+        navLinks: { a: true },
+        catalogue: { a: true },
+      }));
+      setup.registerProvider(() => ({
+        navLinks: { b: true },
+        catalogue: { b: true },
+      }));
+      setup.registerProvider(() => ({
+        navLinks: { c: true },
+        catalogue: { c: true },
+        customSection: {
+          c: true,
+        },
+      }));
+      setup.registerSwitcher((req, capabilities) => {
+        return {
+          catalogue: {
+            b: false,
+          },
+        };
+      });
+
+      setup.registerSwitcher((req, capabilities) => {
+        return {
+          navLinks: { c: false },
+        };
+      });
+      setup.registerSwitcher((req, capabilities) => {
+        return {
+          customSection: {
+            c: false,
+          },
+        };
+      });
+
+      const start = service.start();
+      expect(await start.resolveCapabilities({} as any)).toMatchInlineSnapshot(`
+        Object {
+          "catalogue": Object {
+            "a": true,
+            "b": false,
+            "c": true,
+          },
+          "customSection": Object {
+            "c": false,
+          },
+          "management": Object {},
+          "navLinks": Object {
+            "a": true,
+            "b": true,
+            "c": false,
+          },
         }
       `);
     });

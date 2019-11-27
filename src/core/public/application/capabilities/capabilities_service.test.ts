@@ -45,6 +45,7 @@ describe('#start', () => {
   const apps = new Map([
     ['app1', { id: 'app1' }],
     ['app2', { id: 'app2', capabilities: { app2: { feature: true } } }],
+    ['appMissingInCapabilities', { id: 'appMissingInCapabilities' }],
   ] as Array<[string, App]>);
   const legacyApps = new Map([
     ['legacyApp1', { id: 'legacyApp1' }],
@@ -54,7 +55,12 @@ describe('#start', () => {
   it('filters available apps based on returned navLinks', async () => {
     const service = new CapabilitiesService();
     const startContract = await service.start({ apps, legacyApps, http });
-    expect(startContract.availableApps).toEqual(new Map([['app1', { id: 'app1' }]]));
+    expect(startContract.availableApps).toEqual(
+      new Map([
+        ['app1', { id: 'app1' }],
+        ['appMissingInCapabilities', { id: 'appMissingInCapabilities' }],
+      ])
+    );
     expect(startContract.availableLegacyApps).toEqual(
       new Map([['legacyApp1', { id: 'legacyApp1' }]])
     );
