@@ -17,8 +17,8 @@ import {
   ReindexWarning,
 } from '../../../../common/types';
 import { CURRENT_MAJOR_VERSION } from '../../../../common/version';
-import { apmReindexScript, isLegacyApmIndex } from '../../../lib/apm';
-import apmMappings from '../../../lib/apm/mapping.json';
+import { apmReindexScript, isLegacyApmIndex } from '../apm';
+import apmMappings from '../apm/mapping.json';
 
 import {
   generateNewIndexName,

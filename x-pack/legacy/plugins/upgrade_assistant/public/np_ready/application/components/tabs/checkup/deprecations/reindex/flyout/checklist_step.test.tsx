@@ -8,9 +8,9 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 
-import { ReindexStatus, ReindexWarning } from '../../../../../../../common/types';
-import { LoadingState } from '../../../../../../np_ready/application/components/types';
-import { ReindexState } from '../../../../../../np_ready/application/components/tabs/checkup/deprecations/reindex/polling_service';
+import { ReindexStatus, ReindexWarning } from '../../../../../../../../../common/types';
+import { LoadingState } from '../../../../../types';
+import { ReindexState } from '../polling_service';
 import { ChecklistFlyoutStep } from './checklist_step';
 
 describe('ChecklistFlyout', () => {
@@ -21,6 +21,11 @@ describe('ChecklistFlyout', () => {
     onConfirmInputChange: jest.fn(),
     startReindex: jest.fn(),
     cancelReindex: jest.fn(),
+    http: {
+      basePath: {
+        prepend: jest.fn(),
+      },
+    } as any,
     reindexState: {
       loadingState: LoadingState.Success,
       lastCompletedStep: undefined,

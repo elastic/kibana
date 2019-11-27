@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiBasicTable } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
-import { FixDefaultFieldsButton } from '../../../../../../components/tabs/checkup/deprecations/default_fields/button';
+import { FixDefaultFieldsButton } from './default_fields/button';
 import { ReindexButton } from './reindex';
 import { AppContext } from '../../../../app_context';
 
@@ -157,7 +157,11 @@ export class IndexDeprecationTableUI extends React.Component<
                 </AppContext.Consumer>
               );
             } else {
-              return <FixDefaultFieldsButton indexName={indexDep.index!} />;
+              return (
+                <AppContext.Consumer>
+                  {({ http }) => <FixDefaultFieldsButton indexName={indexDep.index!} http={http} />}
+                </AppContext.Consumer>
+              );
             }
           },
         },

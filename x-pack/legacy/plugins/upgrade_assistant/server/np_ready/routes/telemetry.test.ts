@@ -80,7 +80,7 @@ describe('Upgrade Assistant Telemetry API', () => {
       })(
         ctxMock,
         createRequestMock({
-          payload: {
+          body: {
             overview: true,
             cluster: true,
             indices: true,
@@ -101,7 +101,7 @@ describe('Upgrade Assistant Telemetry API', () => {
       })(
         ctxMock,
         createRequestMock({
-          payload: {
+          body: {
             overview: false,
           },
         }),
@@ -129,7 +129,7 @@ describe('Upgrade Assistant Telemetry API', () => {
       })(
         ctxMock,
         createRequestMock({
-          payload: {
+          body: {
             overview: false,
           },
         }),
@@ -155,7 +155,7 @@ describe('Upgrade Assistant Telemetry API', () => {
       })(
         ctxMock,
         createRequestMock({
-          payload: {
+          body: {
             close: true,
             open: true,
             start: true,
@@ -177,7 +177,7 @@ describe('Upgrade Assistant Telemetry API', () => {
       })(
         ctxMock,
         createRequestMock({
-          payload: {
+          body: {
             start: false,
           },
         }),

@@ -16,7 +16,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { FixDefaultFieldsButton } from '../../../../../../components/tabs/checkup/deprecations/default_fields/button';
+import { FixDefaultFieldsButton } from './default_fields/button';
 import { ReindexButton } from './reindex';
 import { AppContext } from '../../../../app_context';
 
@@ -91,7 +91,9 @@ export const DeprecationCell: FunctionComponent<DeprecationCellProps> = ({
 
       {needsDefaultFields && (
         <EuiFlexItem grow={false}>
-          <FixDefaultFieldsButton indexName={indexName!} />
+          <AppContext.Consumer>
+            {({ http }) => <FixDefaultFieldsButton indexName={indexName!} http={http} />}
+          </AppContext.Consumer>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

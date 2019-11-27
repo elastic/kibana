@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
 import { get } from 'lodash';
 import minimatch from 'minimatch';
 import { SemVer } from 'semver';
 import { CallClusterWithRequest } from 'src/legacy/core_plugins/elasticsearch';
 
-import { EnrichedDeprecationInfo } from '../../np_ready/lib/es_migration_apis';
-import { FlatSettings } from '../../np_ready/lib/reindexing/types';
+import { EnrichedDeprecationInfo } from '../es_migration_apis';
+import { FlatSettings } from '../reindexing/types';
+import { RequestShim } from '../../types';
 
 export async function getDeprecatedApmIndices(
   callWithRequest: CallClusterWithRequest,
-  request: Request,
+  request: RequestShim,
   indexPatterns: string[] = []
 ): Promise<EnrichedDeprecationInfo[]> {
   const indices = await callWithRequest(request, 'indices.getMapping', {

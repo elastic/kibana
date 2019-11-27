@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../lib/es_version_precheck');
-
 export const mockAddDefaultField = jest.fn();
 jest.mock('../lib/query_default_field', () => ({
   addDefaultField: mockAddDefaultField,

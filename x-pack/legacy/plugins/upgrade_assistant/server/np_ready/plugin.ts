@@ -10,7 +10,7 @@ import { makeUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { registerClusterCheckupRoutes } from './routes/cluster_checkup';
 import { registerDeprecationLoggingRoutes } from './routes/deprecation_logging';
 import { registerReindexIndicesRoutes, registerReindexWorker } from './routes/reindex_indices';
-import { registerQueryDefaultFieldRoutes } from '../routes/query_default_field';
+import { registerQueryDefaultFieldRoutes } from './routes/query_default_field';
 
 import { registerTelemetryRoutes } from './routes/telemetry';
 
@@ -20,7 +20,7 @@ export class UpgradeAssistantServerPlugin implements Plugin<void, void, object, 
     const shimWithRouter: ServerShimWithRouter = { ...__LEGACY, router };
     registerClusterCheckupRoutes(shimWithRouter);
     registerDeprecationLoggingRoutes(shimWithRouter);
-    registerQueryDefaultFieldRoutes(shimWithRouter as any);
+    registerQueryDefaultFieldRoutes(shimWithRouter);
 
     // The ReindexWorker uses a map of request headers that contain the authentication credentials
     // for a given reindex. We cannot currently store these in an the .kibana index b/c we do not

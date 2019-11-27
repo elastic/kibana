@@ -9,7 +9,7 @@ import { Request } from 'hapi';
 import { get } from 'lodash';
 
 import { CallClusterWithRequest } from 'src/legacy/core_plugins/elasticsearch';
-import { MappingProperties } from '../np_ready/lib/reindexing/types';
+import { MappingProperties } from './reindexing/types';
 
 /**
  * Adds the index.query.default_field setting, generated from the index's mapping.
@@ -43,7 +43,7 @@ export const addDefaultField = async (
   const generatedDefaultFields = new Set(generateDefaultFields(mapping, fieldTypes));
 
   // Update the setting with the generated default_field
-  return await callWithRequest(request, 'indices.putSettings', {
+  return callWithRequest(request, 'indices.putSettings', {
     index: indexName,
     body: {
       index: { query: { default_field: [...generatedDefaultFields, ...otherFields] } },

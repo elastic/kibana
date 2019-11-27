@@ -7,7 +7,7 @@
 import { flow, omit } from 'lodash';
 import { ReindexWarning } from '../../../../common/types';
 import { CURRENT_MAJOR_VERSION, PREV_MAJOR_VERSION } from '../../../../common/version';
-import { isLegacyApmIndex } from '../../../lib/apm';
+import { isLegacyApmIndex } from '../apm';
 import { FlatSettings, FlatSettingsWithTypeName } from './types';
 
 export const DEFAULT_TYPE_NAME = '_doc';

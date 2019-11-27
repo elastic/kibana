@@ -11,7 +11,8 @@ import {
 } from 'src/legacy/core_plugins/elasticsearch';
 import { isSystemIndex } from './reindexing';
 
-import { getDeprecatedApmIndices } from '../../lib/apm';
+import { getDeprecatedApmIndices } from './apm';
+import { RequestShim } from '../types';
 
 export interface EnrichedDeprecationInfo extends DeprecationInfo {
   index?: string;
@@ -28,7 +29,7 @@ export interface UpgradeAssistantStatus {
 
 export async function getUpgradeAssistantStatus(
   callWithRequest: CallClusterWithRequest,
-  req: Request,
+  req: RequestShim,
   isCloudEnabled: boolean,
   apmIndices: string[]
 ): Promise<UpgradeAssistantStatus> {
@@ -37,7 +38,7 @@ export async function getUpgradeAssistantStatus(
       path: '/_migration/deprecations',
       method: 'GET',
     })) as DeprecationAPIResponse,
-    getDeprecatedApmIndices(callWithRequest, req as any, apmIndices),
+    getDeprecatedApmIndices(callWithRequest, req, apmIndices),
   ]);
 
   const cluster = getClusterDeprecations(deprecations, isCloudEnabled);

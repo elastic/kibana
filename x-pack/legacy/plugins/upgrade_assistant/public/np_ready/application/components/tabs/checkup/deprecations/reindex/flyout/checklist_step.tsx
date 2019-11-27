@@ -6,6 +6,7 @@
 
 import React, { Fragment } from 'react';
 
+import { HttpSetup } from 'src/core/public';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -19,12 +20,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import chrome from 'ui/chrome';
 
-import { ReindexStatus, ReindexWarning } from '../../../../../../../common/types';
-import { LoadingState } from '../../../../../../np_ready/application/components/types';
-import { ReindexState } from '../../../../../../np_ready/application/components/tabs/checkup/deprecations/reindex/polling_service';
-import { ReindexProgress } from '../../../../../../np_ready/application/components/tabs/checkup/deprecations/reindex/flyout/progress';
+import { ReindexStatus, ReindexWarning } from '../../../../../../../../../common/types';
+import { LoadingState } from '../../../../../types';
+import { ReindexState } from '../polling_service';
+import { ReindexProgress } from './progress';
 
 const buttonLabel = (status?: ReindexStatus) => {
   switch (status) {
@@ -74,7 +74,8 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
   reindexState: ReindexState;
   startReindex: () => void;
   cancelReindex: () => void;
-}> = ({ closeFlyout, reindexState, startReindex, cancelReindex }) => {
+  http: HttpSetup;
+}> = ({ closeFlyout, reindexState, startReindex, cancelReindex, http }) => {
   const { loadingState, status, hasRequiredPrivileges, reindexWarnings } = reindexState;
   const loading = loadingState === LoadingState.Loading || status === ReindexStatus.inProgress;
 
@@ -142,7 +143,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
                   values={{
                     apmSetupLink: (
                       <EuiLink
-                        href={chrome.addBasePath(`/app/kibana#/home/tutorial/apm`)}
+                        href={http.basePath.prepend(`/app/kibana#/home/tutorial/apm`)}
                         target="_blank"
                       >
                         <FormattedMessage

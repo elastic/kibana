@@ -6,11 +6,12 @@
 
 import React from 'react';
 
+import { HttpSetup } from 'src/core/public';
 import { EuiFlyout, EuiFlyoutHeader, EuiPortal, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ReindexState } from '../polling_service';
-import { ChecklistFlyoutStep } from '../../../../../../../../components/tabs/checkup/deprecations/reindex/flyout/checklist_step';
+import { ChecklistFlyoutStep } from './checklist_step';
 import { WarningsFlyoutStep } from './warnings_step';
 
 enum ReindexFlyoutStep {
@@ -20,6 +21,7 @@ enum ReindexFlyoutStep {
 
 interface ReindexFlyoutProps {
   indexName: string;
+  http: HttpSetup;
   closeFlyout: () => void;
   reindexState: ReindexState;
   startReindex: () => void;
@@ -65,6 +67,7 @@ export class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFl
       case ReindexFlyoutStep.checklist:
         flyoutContents = (
           <ChecklistFlyoutStep
+            http={this.props.http}
             closeFlyout={closeFlyout}
             reindexState={reindexState}
             startReindex={startReindex}

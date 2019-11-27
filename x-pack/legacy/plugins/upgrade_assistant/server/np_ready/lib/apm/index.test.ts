@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getDeprecatedApmIndices, isLegacyApmIndex } from './';
+import { getDeprecatedApmIndices, isLegacyApmIndex } from './index';
 
 function mockedCallWithRequest() {
   return jest.fn().mockImplementation(async () => {

@@ -27,7 +27,7 @@ export function registerClusterCheckupRoutes(server: ServerShimWithRouter) {
         return response.ok({
           body: await getUpgradeAssistantStatus(
             callWithRequest,
-            reqShim as any,
+            reqShim,
             isCloudEnabled,
             apmIndexPatterns
           ),

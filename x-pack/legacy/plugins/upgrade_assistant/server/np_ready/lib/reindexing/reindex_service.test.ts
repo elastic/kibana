@@ -13,8 +13,8 @@ import {
 } from '../../../../common/types';
 
 import { CURRENT_MAJOR_VERSION, PREV_MAJOR_VERSION } from '../../../../common/version';
-import { apmReindexScript } from '../../../lib/apm';
-import apmMappings from '../../../lib/apm/mapping.json';
+import { apmReindexScript } from '../apm';
+import apmMappings from '../apm/mapping.json';
 
 import {
   isMlIndex,

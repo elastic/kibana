@@ -5,11 +5,11 @@
  */
 
 import React, { ReactNode } from 'react';
+import { HttpSetup } from 'src/core/public';
 
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { kfetch } from 'ui/kfetch';
-import { LoadingState } from '../../../../../np_ready/application/components/types';
+import { LoadingState } from '../../../../types';
 
 /**
  * Field types used by Metricbeat to generate the default_field setting.
@@ -20,6 +20,7 @@ const BEAT_DEFAULT_FIELD_TYPES: ReadonlySet<string> = new Set(['keyword', 'text'
 const BEAT_OTHER_DEFAULT_FIELDS: ReadonlySet<string> = new Set(['fields.*']);
 
 interface FixDefaultFieldsButtonProps {
+  http: HttpSetup;
   indexName: string;
 }
 
@@ -109,14 +110,15 @@ export class FixDefaultFieldsButton extends React.Component<
     });
 
     try {
-      await kfetch({
-        pathname: `/api/upgrade_assistant/add_query_default_field/${this.props.indexName}`,
-        method: 'POST',
-        body: JSON.stringify({
-          fieldTypes: [...BEAT_DEFAULT_FIELD_TYPES],
-          otherFields: [...BEAT_OTHER_DEFAULT_FIELDS],
-        }),
-      });
+      await this.props.http.post(
+        `/api/upgrade_assistant/add_query_default_field/${this.props.indexName}`,
+        {
+          body: JSON.stringify({
+            fieldTypes: [...BEAT_DEFAULT_FIELD_TYPES],
+            otherFields: [...BEAT_OTHER_DEFAULT_FIELDS],
+          }),
+        }
+      );
 
       this.setState({
         fixLoadingState: LoadingState.Success,

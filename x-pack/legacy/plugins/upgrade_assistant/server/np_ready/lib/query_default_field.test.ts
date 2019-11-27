@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { MappingProperties } from '../np_ready/lib/reindexing/types';
+import { MappingProperties } from './reindexing/types';
 
 import { addDefaultField, generateDefaultFields } from './query_default_field';
 
