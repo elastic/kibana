@@ -41,7 +41,7 @@ export const initServerWithKibana = (
     }
   }
 
-  const libs = compose(core, config, version);
+  const libs = compose(core, version);
   initServer(libs);
 
   if (

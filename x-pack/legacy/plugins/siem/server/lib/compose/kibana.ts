@@ -5,12 +5,10 @@
  */
 
 import { CoreSetup } from 'src/core/server';
-import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { Anomalies } from '../anomalies';
 import { ElasticsearchAnomaliesAdapter } from '../anomalies/elasticsearch_adapter';
 import { Authentications } from '../authentications';
 import { ElasticsearchAuthenticationAdapter } from '../authentications/elasticsearch_adapter';
-import { KibanaConfigurationAdapter } from '../configuration/kibana_configuration_adapter';
 import { ElasticsearchEventsAdapter, Events } from '../events';
 import { KibanaBackendFrameworkAdapter } from '../framework/kibana_framework_adapter';
 import { ElasticsearchHostsAdapter, Hosts } from '../hosts';
@@ -28,20 +26,15 @@ import { Overview } from '../overview';
 import { ElasticsearchOverviewAdapter } from '../overview/elasticsearch_adapter';
 import { ElasticsearchSourceStatusAdapter, SourceStatus } from '../source_status';
 import { ConfigurationSourcesAdapter, Sources } from '../sources';
-import { AppBackendLibs, AppDomainLibs, Configuration } from '../types';
+import { AppBackendLibs, AppDomainLibs } from '../types';
 import { ElasticsearchUncommonProcessesAdapter, UncommonProcesses } from '../uncommon_processes';
 import { Note } from '../note/saved_object';
 import { PinnedEvent } from '../pinned_event/saved_object';
 import { Timeline } from '../timeline/saved_object';
 
-export function compose(
-  core: CoreSetup,
-  config: () => KibanaConfig,
-  version: string
-): AppBackendLibs {
-  const configuration = new KibanaConfigurationAdapter<Configuration>({ config });
+export function compose(core: CoreSetup, version: string): AppBackendLibs {
   const framework = new KibanaBackendFrameworkAdapter(core, version);
-  const sources = new Sources(new ConfigurationSourcesAdapter(configuration));
+  const sources = new Sources(new ConfigurationSourcesAdapter());
   const sourceStatus = new SourceStatus(new ElasticsearchSourceStatusAdapter(framework));
 
   const timeline = new Timeline();
@@ -64,7 +57,6 @@ export function compose(
   };
 
   const libs: AppBackendLibs = {
-    configuration,
     framework,
     sourceStatus,
     sources,
