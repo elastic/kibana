@@ -22,6 +22,7 @@ export default function({ getService }: FtrProviderContext) {
           .then((response: Record<string, any>) => {
             expect(response.body.hits.total.value).to.eql(9);
             expect(response.body.hits.hits.length).to.eql(3);
+            expect(response.body.aggregations.total.value).to.eql(3);
           });
       });
     });
