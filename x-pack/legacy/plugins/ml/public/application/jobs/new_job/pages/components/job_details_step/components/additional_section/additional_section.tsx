@@ -5,7 +5,7 @@
  */
 
 import React, { FC, Fragment } from 'react';
-import { EuiAccordion, EuiSpacer } from '@elastic/eui';
+import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { CalendarsSelection } from './components/calendars';
 import { CustomUrlsSelection } from './components/custom_urls';
 
@@ -28,7 +28,13 @@ export const AdditionalSection: FC<Props> = ({ additionalExpanded, setAdditional
       >
         <EuiSpacer />
         <CustomUrlsSelection />
-        <CalendarsSelection />
+
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <CalendarsSelection />
+          </EuiFlexItem>
+          <EuiFlexItem />
+        </EuiFlexGroup>
       </EuiAccordion>
     </Fragment>
   );
