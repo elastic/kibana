@@ -17,30 +17,20 @@
  * under the License.
  */
 
-// /// Define plugin function
-import { DataPlugin as Plugin, DataSetup, DataStart } from './plugin';
+import { IndexPatternMissingIndices } from './errors';
+import {
+  ILLEGAL_CHARACTERS_KEY,
+  CONTAINS_SPACES_KEY,
+  ILLEGAL_CHARACTERS_VISIBLE,
+  ILLEGAL_CHARACTERS,
+  validateIndexPattern,
+} from './lib';
 
-export function plugin() {
-  return new Plugin();
-}
-
-// /// Export types & static code
-
-/** @public types */
-export { DataSetup, DataStart };
-
-export {
-  Field,
-  FieldType,
-  FieldListInterface,
-  IndexPattern,
-  IndexPatterns,
-  StaticIndexPattern,
-} from './index_patterns';
-export { QueryStringInput } from './query';
-export { SearchBar, SearchBarProps, SavedQueryAttributes, SavedQuery } from './search';
-
-/** @public static code */
-export * from '../common';
-export { FilterStateManager } from './filter/filter_manager';
-export { getFromSavedObject, getRoutes } from './index_patterns';
+export const indexPatterns = {
+  ILLEGAL_CHARACTERS_KEY,
+  CONTAINS_SPACES_KEY,
+  ILLEGAL_CHARACTERS_VISIBLE,
+  ILLEGAL_CHARACTERS,
+  IndexPatternMissingIndices,
+  validate: validateIndexPattern,
+};
