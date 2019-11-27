@@ -10,11 +10,10 @@ import {
   UIReindexOption,
   UPGRADE_ASSISTANT_DOC_ID,
   UPGRADE_ASSISTANT_TYPE,
-  UpgradeAssistantTelemetryServer,
 } from '../../../common/types';
 
 async function incrementUIReindexOptionCounter(
-  server: UpgradeAssistantTelemetryServer,
+  server: Legacy.Server,
   uiOpenOptionCounter: UIReindexOption
 ) {
   const { getSavedObjectsRepository } = server.savedObjects;
@@ -29,7 +28,7 @@ async function incrementUIReindexOptionCounter(
 }
 
 export async function upsertUIReindexOption(
-  server: UpgradeAssistantTelemetryServer,
+  server: Legacy.Server,
   req: Legacy.Request
 ): Promise<UIReindex> {
   const { close, open, start, stop } = req.payload as UIReindex;

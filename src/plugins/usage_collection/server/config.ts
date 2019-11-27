@@ -17,15 +17,8 @@
  * under the License.
  */
 
-import { CollectorSet } from './classes';
+import { schema } from '@kbn/config-schema';
 
-export function usageMixin(kbnServer, server, config) {
-  const collectorSet = new CollectorSet(server, undefined, config);
-
-  /*
-   * expose the collector set object on the server
-   * provides factory methods for feature owners to create their own collector objects
-   * use collectorSet.register(collector) to register your feature's collector object(s)
-   */
-  server.decorate('server', 'usage', { collectorSet });
-}
+export const ConfigSchema = schema.object({
+  maximumWaitTimeForAllCollectorsInS: schema.number({ defaultValue: 60 }),
+});

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 // @ts-ignore untyped module
 import { KIBANA_STATS_TYPE_MONITORING } from '../../../monitoring/common/constants';
 import { ServerFacade, ESCallCluster } from '../../types';
@@ -15,9 +16,12 @@ import { RangeStats } from './types';
  * @param {Object} server
  * @return {Object} kibana usage stats type collection object
  */
-export function getReportingUsageCollector(server: ServerFacade, isReady: () => boolean) {
-  const { collectorSet } = server.usage;
-  return collectorSet.makeUsageCollector({
+export function getReportingUsageCollector(
+  usageCollection: UsageCollectionSetup,
+  server: ServerFacade,
+  isReady: () => boolean
+) {
+  return usageCollection.makeUsageCollector({
     type: KIBANA_REPORTING_TYPE,
     isReady,
     fetch: (callCluster: ESCallCluster) => getReportingUsage(server, callCluster),
@@ -40,4 +44,13 @@ export function getReportingUsageCollector(server: ServerFacade, isReady: () => 
       };
     },
   });
+}
+
+export function registerReportingUsageCollector(
+  usageCollection: UsageCollectionSetup,
+  server: ServerFacade,
+  isReady: () => boolean
+) {
+  const collector = getReportingUsageCollector(usageCollection, server, isReady);
+  usageCollection.registerCollector(collector);
 }

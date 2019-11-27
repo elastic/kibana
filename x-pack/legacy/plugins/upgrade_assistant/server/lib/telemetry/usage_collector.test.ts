@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as usageCollector from './usage_collector';
+import { registerUpgradeAssistantUsageCollector } from './usage_collector';
 
 /**
  * Since these route callbacks are so thin, these serve simply as integration tests
@@ -16,15 +16,16 @@ describe('Upgrade Assistant Usage Collector', () => {
   let registerStub: any;
   let server: any;
   let callClusterStub: any;
+  let usageCollector: any;
 
   beforeEach(() => {
     makeUsageCollectorStub = jest.fn();
     registerStub = jest.fn();
+    usageCollector = {
+      makeUsageCollector: makeUsageCollectorStub,
+      registerCollector: registerStub,
+    };
     server = jest.fn().mockReturnValue({
-      usage: {
-        collectorSet: { makeUsageCollector: makeUsageCollectorStub, register: registerStub },
-        register: {},
-      },
       savedObjects: {
         getSavedObjectsRepository: jest.fn().mockImplementation(() => {
           return {
@@ -57,18 +58,18 @@ describe('Upgrade Assistant Usage Collector', () => {
 
   describe('makeUpgradeAssistantUsageCollector', () => {
     it('should call collectorSet.register', () => {
-      usageCollector.makeUpgradeAssistantUsageCollector(server());
+      registerUpgradeAssistantUsageCollector(usageCollector, server());
       expect(registerStub).toHaveBeenCalledTimes(1);
     });
 
     it('should call makeUsageCollector with type = upgrade-assistant', () => {
-      usageCollector.makeUpgradeAssistantUsageCollector(server());
+      registerUpgradeAssistantUsageCollector(usageCollector, server());
       expect(makeUsageCollectorStub).toHaveBeenCalledTimes(1);
       expect(makeUsageCollectorStub.mock.calls[0][0].type).toBe('upgrade-assistant-telemetry');
     });
 
     it('fetchUpgradeAssistantMetrics should return correct info', async () => {
-      usageCollector.makeUpgradeAssistantUsageCollector(server());
+      registerUpgradeAssistantUsageCollector(usageCollector, server());
       const upgradeAssistantStats = await makeUsageCollectorStub.mock.calls[0][0].fetch(
         callClusterStub
       );

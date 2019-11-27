@@ -10,11 +10,10 @@ import {
   UIOpenOption,
   UPGRADE_ASSISTANT_DOC_ID,
   UPGRADE_ASSISTANT_TYPE,
-  UpgradeAssistantTelemetryServer,
 } from '../../../common/types';
 
 async function incrementUIOpenOptionCounter(
-  server: UpgradeAssistantTelemetryServer,
+  server: Legacy.Server,
   uiOpenOptionCounter: UIOpenOption
 ) {
   const { getSavedObjectsRepository } = server.savedObjects;
@@ -29,7 +28,7 @@ async function incrementUIOpenOptionCounter(
 }
 
 export async function upsertUIOpenOption(
-  server: UpgradeAssistantTelemetryServer,
+  server: Legacy.Server,
   req: Legacy.Request
 ): Promise<UIOpen> {
   const { overview, cluster, indices } = req.payload as UIOpen;
