@@ -48,9 +48,6 @@ export function createMockDatasource(): DatasourceMock {
     getOperationForColumnId: jest.fn(),
     renderDimensionPanel: jest.fn(),
     renderLayerPanel: jest.fn(),
-    removeColumnInTableSpec: jest.fn(),
-    moveColumnTo: jest.fn(),
-    duplicateColumn: jest.fn(),
   };
 
   return {

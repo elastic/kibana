@@ -268,22 +268,6 @@ export function getIndexPatternDatasource({
             domElement
           );
         },
-
-        removeColumnInTableSpec: (columnId: string) => {
-          setState({
-            ...state,
-            layers: {
-              ...state.layers,
-              [layerId]: {
-                ...state.layers[layerId],
-                columnOrder: state.layers[layerId].columnOrder.filter(id => id !== columnId),
-                columns: removeProperty(columnId, state.layers[layerId].columns),
-              },
-            },
-          });
-        },
-        moveColumnTo: () => {},
-        duplicateColumn: () => [],
       };
     },
     getDatasourceSuggestionsForField(state, draggedField) {
