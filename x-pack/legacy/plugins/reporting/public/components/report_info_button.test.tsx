@@ -45,7 +45,7 @@ describe('ReportInfoButton', () => {
     const wrapper = mountWithIntl(<ReportInfoButton jobId="abc-789" />);
     const input = wrapper.find('[data-test-subj="reportInfoButton"]').hostNodes();
 
-    input.simulate('click');
+    input.simulate('click'); // TODO: The error thrown above will result in an unhandled promise rejection error when this line is executed
 
     const flyout = wrapper.find('[data-test-subj="reportInfoFlyout"]');
     expect(flyout).toMatchSnapshot();

@@ -266,7 +266,7 @@ export class ReportInfoButton extends Component<Props, State> {
           info: null,
           error: kfetchError,
         });
-        throw kfetchError;
+        throw kfetchError; // TODO: The error from the test file is re-thrown here which it self is called by the `showFlyout` function below
       }
     }
   };

@@ -154,14 +154,19 @@ export class IndexPrivileges extends Component<Props, State> {
 
     const fetchRequests = patternsToFetch.map(this.loadFieldsForPattern);
 
-    Promise.all(fetchRequests).then(response => {
-      this.setState({
-        availableFields: {
-          ...this.state.availableFields,
-          ...response.reduce((acc, o) => ({ ...acc, ...o }), {}),
-        },
+    Promise.all(fetchRequests)
+      .then(response => {
+        this.setState({
+          availableFields: {
+            ...this.state.availableFields,
+            ...response.reduce((acc, o) => ({ ...acc, ...o }), {}),
+          },
+        });
+      })
+      .catch(err => {
+        // TODO: Handle this error
+        throw err;
       });
-    });
   }
 
   public loadFieldsForPattern = async (pattern: string) => {
