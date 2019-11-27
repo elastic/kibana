@@ -28,7 +28,7 @@ export const ml = (kibana: any) => {
     publicDir: resolve(__dirname, 'public'),
 
     uiExports: {
-      managementSections: ['plugins/ml/management'],
+      managementSections: ['plugins/ml/application/management'],
       app: {
         title: i18n.translate('xpack.ml.mlNavTitle', {
           defaultMessage: 'Machine Learning',
@@ -36,12 +36,12 @@ export const ml = (kibana: any) => {
         description: i18n.translate('xpack.ml.mlNavDescription', {
           defaultMessage: 'Machine Learning for the Elastic Stack',
         }),
-        icon: 'plugins/ml/ml.svg',
+        icon: 'plugins/ml/application/ml.svg',
         euiIconType: 'machineLearningApp',
-        main: 'plugins/ml/app',
+        main: 'plugins/ml/application/app',
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      hacks: ['plugins/ml/hacks/toggle_app_link_in_nav'],
+      hacks: ['plugins/ml/application/hacks/toggle_app_link_in_nav'],
       savedObjectSchemas: {
         'ml-telemetry': {
           isNamespaceAgnostic: true,
@@ -79,7 +79,6 @@ export const ml = (kibana: any) => {
         injectUiAppVars: server.injectUiAppVars,
         http: mlHttpService,
         savedObjects: server.savedObjects,
-        usage: server.usage,
       };
 
       const plugins = {
@@ -87,6 +86,7 @@ export const ml = (kibana: any) => {
         security: server.plugins.security,
         xpackMain: server.plugins.xpack_main,
         spaces: server.plugins.spaces,
+        usageCollection: kbnServer.newPlatform.setup.plugins.usageCollection,
         ml: this,
       };
 

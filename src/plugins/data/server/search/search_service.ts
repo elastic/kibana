@@ -77,7 +77,7 @@ export class SearchService implements Plugin<ISearchSetup, void> {
             caller,
             searchStrategies: this.searchStrategies,
           });
-          return searchAPI.search(request, strategyName);
+          return searchAPI.search(request, {}, strategyName);
         },
       },
     };
