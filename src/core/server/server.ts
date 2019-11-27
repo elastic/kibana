@@ -140,9 +140,8 @@ export class Server {
     const capabilitiesStart = this.capabilities.start();
     const pluginsStart = await this.plugins.start({
       capabilities: capabilitiesStart,
+      savedObjects: savedObjectsStart,
     });
-
-    const pluginsStart = await this.plugins.start({ savedObjects: savedObjectsStart });
 
     const coreStart = {
       capabilities: capabilitiesStart,

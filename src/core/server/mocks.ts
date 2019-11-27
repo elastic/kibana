@@ -121,6 +121,7 @@ function createInternalCoreSetupMock() {
 
 function createInternalCoreStartMock() {
   const startDeps: InternalCoreStart = {
+    capabilities: capabilitiesServiceMock.createStartContract(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
   };
   return startDeps;

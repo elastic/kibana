@@ -29,7 +29,6 @@ import { getEnvOptions } from '../config/__mocks__/env';
 import { CoreContext } from '../core_context';
 import { configServiceMock } from '../config/config_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
-import { capabilitiesServiceMock } from '../capabilities/capabilities_service.mock';
 
 import { PluginWrapper } from './plugin';
 import { PluginName } from './types';
