@@ -1578,6 +1578,12 @@ export class ScopedClusterClient implements IScopedClusterClient {
     }
 
 // @public
+export interface SessionCookieValidationResult {
+    isValid: boolean;
+    path?: string;
+}
+
+// @public
 export interface SessionStorage<T> {
     clear(): void;
     get(): Promise<T | null>;
@@ -1589,7 +1595,7 @@ export interface SessionStorageCookieOptions<T> {
     encryptionKey: string;
     isSecure: boolean;
     name: string;
-    validate: (sessionValue: T) => boolean | Promise<boolean>;
+    validate: (sessionValue: T | T[]) => SessionCookieValidationResult;
 }
 
 // @public
