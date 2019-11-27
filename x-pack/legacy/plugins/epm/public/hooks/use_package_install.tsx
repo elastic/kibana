@@ -60,7 +60,12 @@ function usePackageInstall() {
         });
       } catch (err) {
         setPackageInstallStatus({ name, status: InstallStatus.notInstalled });
-        notifications.toasts.addDanger(`There was a problem installing ${title}`);
+        notifications.toasts.addWarning({
+          title: `Failed to install ${title} package`,
+          text:
+            'Something went wrong while trying to install this package. Please try again later.',
+          iconType: 'alert',
+        });
       }
     },
     [notifications.toasts, setPackageInstallStatus, toDetailView]
