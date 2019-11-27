@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { fromKueryExpression } from '@kbn/es-query';
+import { esKuery } from '../../../../../plugins/data/server';
 
 import { validateFilterKueryNode, validateConvertFilterToKueryNode } from './filter_utils';
 
@@ -49,6 +49,28 @@ const mockMappings = {
         },
       },
     },
+    alert: {
+      properties: {
+        actions: {
+          type: 'nested',
+          properties: {
+            group: {
+              type: 'keyword',
+            },
+            actionRef: {
+              type: 'keyword',
+            },
+            actionTypeId: {
+              type: 'keyword',
+            },
+            params: {
+              enabled: false,
+              type: 'object',
+            },
+          },
+        },
+      },
+    },
     hiddenType: {
       properties: {
         description: {
@@ -64,7 +86,7 @@ describe('Filter Utils', () => {
     test('Validate a simple filter', () => {
       expect(
         validateConvertFilterToKueryNode(['foo'], 'foo.attributes.title: "best"', mockMappings)
-      ).toEqual(fromKueryExpression('foo.title: "best"'));
+      ).toEqual(esKuery.fromKueryExpression('foo.title: "best"'));
     });
     test('Assemble filter kuery node saved object attributes with one saved object type', () => {
       expect(
@@ -74,7 +96,7 @@ describe('Filter Utils', () => {
           mockMappings
         )
       ).toEqual(
-        fromKueryExpression(
+        esKuery.fromKueryExpression(
           '(type: foo and updatedAt: 5678654567) and foo.bytes > 1000 and foo.bytes < 8000 and foo.title: "best" and (foo.description: t* or foo.description :*)'
         )
       );
@@ -88,7 +110,7 @@ describe('Filter Utils', () => {
           mockMappings
         )
       ).toEqual(
-        fromKueryExpression(
+        esKuery.fromKueryExpression(
           '(type: foo and updatedAt: 5678654567) and foo.bytes > 1000 and foo.bytes < 8000 and foo.title: "best" and (foo.description: t* or foo.description :*)'
         )
       );
@@ -102,7 +124,7 @@ describe('Filter Utils', () => {
           mockMappings
         )
       ).toEqual(
-        fromKueryExpression(
+        esKuery.fromKueryExpression(
           '((type: bar and updatedAt: 5678654567) or (type: foo and updatedAt: 5678654567)) and foo.bytes > 1000 and foo.bytes < 8000 and foo.title: "best" and (foo.description: t* or bar.description :*)'
         )
       );
@@ -130,7 +152,7 @@ describe('Filter Utils', () => {
   describe('#validateFilterKueryNode', () => {
     test('Validate filter query through KueryNode - happy path', () => {
       const validationObject = validateFilterKueryNode(
-        fromKueryExpression(
+        esKuery.fromKueryExpression(
           'foo.updatedAt: 5678654567 and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or foo.attributes.description :*)'
         ),
         ['foo'],
@@ -185,7 +207,7 @@ describe('Filter Utils', () => {
 
     test('Return Error if key is not wrapper by a saved object type', () => {
       const validationObject = validateFilterKueryNode(
-        fromKueryExpression(
+        esKuery.fromKueryExpression(
           'updatedAt: 5678654567 and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or foo.attributes.description :*)'
         ),
         ['foo'],
@@ -240,7 +262,7 @@ describe('Filter Utils', () => {
 
     test('Return Error if key of a saved object type is not wrapped with attributes', () => {
       const validationObject = validateFilterKueryNode(
-        fromKueryExpression(
+        esKuery.fromKueryExpression(
           'foo.updatedAt: 5678654567 and foo.attributes.bytes > 1000 and foo.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or foo.description :*)'
         ),
         ['foo'],
@@ -297,7 +319,7 @@ describe('Filter Utils', () => {
 
     test('Return Error if filter is not using an allowed type', () => {
       const validationObject = validateFilterKueryNode(
-        fromKueryExpression(
+        esKuery.fromKueryExpression(
           'bar.updatedAt: 5678654567 and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or foo.attributes.description :*)'
         ),
         ['foo'],
@@ -352,7 +374,7 @@ describe('Filter Utils', () => {
 
     test('Return Error if filter is using an non-existing key in the index patterns of the saved object type', () => {
       const validationObject = validateFilterKueryNode(
-        fromKueryExpression(
+        esKuery.fromKueryExpression(
           'foo.updatedAt33: 5678654567 and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.header: "best" and (foo.attributes.description: t* or foo.attributes.description :*)'
         ),
         ['foo'],
@@ -408,7 +430,7 @@ describe('Filter Utils', () => {
 
     test('Return Error if filter is using an non-existing key null key', () => {
       const validationObject = validateFilterKueryNode(
-        fromKueryExpression('foo.attributes.description: hello AND bye'),
+        esKuery.fromKueryExpression('foo.attributes.description: hello AND bye'),
         ['foo'],
         mockMappings
       );

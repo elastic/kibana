@@ -26,6 +26,10 @@ const mockObservable = () => {
   };
 };
 
+const mockComponent = () => {
+  return null;
+};
+
 export const mockUiSettings = {
   get: (item) => {
     return mockUiSettings[item];
@@ -139,6 +143,9 @@ export const npStart = {
         getProvider: sinon.fake(),
       },
       getSuggestions: sinon.fake(),
+      ui: {
+        IndexPatternSelect: mockComponent,
+      },
       query: {
         filterManager: {
           getFetches$: sinon.fake(),

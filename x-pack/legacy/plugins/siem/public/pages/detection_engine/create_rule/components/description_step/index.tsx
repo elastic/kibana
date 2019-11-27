@@ -14,9 +14,9 @@ import {
   esFilters,
   Query,
   utils,
-  FilterLabel,
 } from '../../../../../../../../../../src/plugins/data/public';
 
+import { FilterLabel } from './filter_label';
 import { FormSchema } from '../shared_imports';
 import * as I18n from './translations';
 

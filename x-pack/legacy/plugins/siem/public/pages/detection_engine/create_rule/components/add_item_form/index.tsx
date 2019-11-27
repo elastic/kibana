@@ -5,7 +5,7 @@
  */
 
 import { EuiButtonEmpty, EuiButtonIcon, EuiFormRow, EuiFieldText, EuiSpacer } from '@elastic/eui';
-import { isEmpty, isEqual } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import React, { ChangeEvent, useCallback, useEffect, useState, useRef } from 'react';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../shared_imports';
@@ -35,7 +35,7 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
         ...inputsRef.current.slice(index + 1),
       ];
       if (inputsRef.current[index] != null) {
-        inputsRef.current[index].value = 'rerender';
+        inputsRef.current[index].value = 're-render';
       }
     },
     [field]
@@ -63,7 +63,7 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
         ];
         setHaveBeenKeyboardDeleted(inputsRef.current.length - 1);
         if (inputsRef.current[index] != null) {
-          inputsRef.current[index].value = 'rerender';
+          inputsRef.current[index].value = 're-render';
         }
       } else {
         field.setValue([...values.slice(0, index), value, ...values.slice(index + 1)]);

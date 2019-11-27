@@ -61,6 +61,7 @@
 /config/kibana.yml @elastic/kibana-platform
 /x-pack/plugins/features/  @elastic/kibana-platform
 /x-pack/plugins/licensing/  @elastic/kibana-platform
+/packages/kbn-config-schema/ @elastic/kibana-platform
 
 # Security
 /x-pack/legacy/plugins/security/  @elastic/kibana-security
@@ -76,6 +77,7 @@
 /src/dev/i18n @elastic/kibana-stack-services
 /packages/kbn-analytics/ @elastic/kibana-stack-services
 /src/legacy/core_plugins/ui_metric/ @elastic/kibana-stack-services
+/src/plugins/usage_collection/ @elastic/kibana-stack-services
 /x-pack/legacy/plugins/telemetry @elastic/kibana-stack-services
 /x-pack/legacy/plugins/alerting @elastic/kibana-stack-services
 /x-pack/legacy/plugins/actions @elastic/kibana-stack-services
