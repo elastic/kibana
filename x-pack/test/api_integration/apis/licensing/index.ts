@@ -9,5 +9,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function licensingIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('Licensing', () => {
     loadTestFile(require.resolve('./info'));
+    loadTestFile(require.resolve('./header'));
   });
 }
