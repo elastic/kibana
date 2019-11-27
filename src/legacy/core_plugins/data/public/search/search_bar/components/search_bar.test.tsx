@@ -35,9 +35,14 @@ const mockTimeHistory = {
   },
 };
 
-jest.mock('../../../../../data/public', () => {
+jest.mock('../../../../../../../plugins/data/public', () => {
   return {
     FilterBar: () => <div className="filterBar" />,
+  };
+});
+
+jest.mock('../../../../../data/public', () => {
+  return {
     QueryBarInput: () => <div className="queryBar" />,
   };
 });

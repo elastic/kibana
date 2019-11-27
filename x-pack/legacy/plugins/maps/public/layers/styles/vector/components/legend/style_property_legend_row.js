@@ -5,70 +5,12 @@
  */
 
 import _ from 'lodash';
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import { styleOptionShapes, rangeShape } from '../style_option_shapes';
-import { VectorStyle } from '../../vector_style';
-import { ColorGradient } from '../../../components/color_gradient';
-import { CircleIcon } from './circle_icon';
+import { rangeShape } from '../style_option_shapes';
 import { getVectorStyleLabel } from '../get_vector_style_label';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { StyleLegendRow } from '../../../components/style_legend_row';
-
-function getLineWidthIcons() {
-  const defaultStyle = {
-    stroke: 'grey',
-    fill: 'none',
-    width: '12px',
-  };
-  return [
-    <CircleIcon style={{ ...defaultStyle, strokeWidth: '1px' }}/>,
-    <CircleIcon style={{ ...defaultStyle, strokeWidth: '2px' }}/>,
-    <CircleIcon style={{ ...defaultStyle, strokeWidth: '3px' }}/>,
-  ];
-}
-
-function getSymbolSizeIcons() {
-  const defaultStyle = {
-    stroke: 'grey',
-    strokeWidth: 'none',
-    fill: 'grey',
-  };
-  return [
-    <CircleIcon style={{ ...defaultStyle, width: '4px' }}/>,
-    <CircleIcon style={{ ...defaultStyle, width: '8px' }}/>,
-    <CircleIcon style={{ ...defaultStyle, width: '12px' }}/>,
-  ];
-}
-
-function renderHeaderWithIcons(icons) {
-  return (
-    <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
-      {
-        icons.map((icon, index) => {
-          const isLast = index === icons.length - 1;
-          let spacer;
-          if (!isLast) {
-            spacer = (
-              <EuiFlexItem>
-                <EuiHorizontalRule margin="xs" />
-              </EuiFlexItem>
-            );
-          }
-          return (
-            <Fragment key={index}>
-              <EuiFlexItem grow={false}>
-                {icon}
-              </EuiFlexItem>
-              {spacer}
-            </Fragment>
-          );
-        })
-      }
-    </EuiFlexGroup>
-  );
-}
 
 const EMPTY_VALUE = '';
 
@@ -97,19 +39,25 @@ export class StylePropertyLegendRow extends Component {
   }
 
   async _loadFieldFormatter() {
-    this._fieldValueFormatter = await this.props.getFieldFormatter(this.props.options.field);
+    if (this.props.style.isDynamic() && this.props.style.isComplete() && this.props.style.getField().getSource()) {
+      const field = this.props.style.getField();
+      const source = field.getSource();
+      this._fieldValueFormatter = await source.getFieldFormatter(field.getName());
+    } else {
+      this._fieldValueFormatter = null;
+    }
     if (this._isMounted) {
       this.setState({ hasLoadedFieldFormatter: true });
     }
   }
 
   _loadLabel = async () => {
-    if (this._isStatic()) {
+    if (this._excludeFromHeader()) {
       return;
     }
 
     // have to load label and then check for changes since field name stays constant while label may change
-    const label = await this.props.getFieldLabel(this.props.options.field.name);
+    const label = await this.props.style.getField().getLabel();
     if (this._prevLabel === label) {
       return;
     }
@@ -120,9 +68,8 @@ export class StylePropertyLegendRow extends Component {
     }
   }
 
-  _isStatic() {
-    return this.props.type === VectorStyle.STYLE_TYPE.STATIC ||
-        !this.props.options.field || !this.props.options.field.name;
+  _excludeFromHeader() {
+    return !this.props.style.isDynamic() || !this.props.style.isComplete() || !this.props.style.getField().getName();
   }
 
   _formatValue = value => {
@@ -134,26 +81,19 @@ export class StylePropertyLegendRow extends Component {
   }
 
   render() {
-    const { name, options, range } = this.props;
-    if (this._isStatic()) {
+
+    const { range, style } = this.props;
+    if (this._excludeFromHeader()) {
       return null;
     }
 
-    let header;
-    if (options.color) {
-      header = <ColorGradient colorRampName={options.color}/>;
-    } else if (name === 'lineWidth') {
-      header = renderHeaderWithIcons(getLineWidthIcons());
-    } else if (name === 'iconSize') {
-      header = renderHeaderWithIcons(getSymbolSizeIcons());
-    }
-
+    const header = style.renderHeader();
     return (
       <StyleLegendRow
         header={header}
         minLabel={this._formatValue(_.get(range, 'min', EMPTY_VALUE))}
         maxLabel={this._formatValue(_.get(range, 'max', EMPTY_VALUE))}
-        propertyLabel={getVectorStyleLabel(name)}
+        propertyLabel={getVectorStyleLabel(style.getStyleName())}
         fieldLabel={this.state.label}
       />
     );
@@ -161,10 +101,6 @@ export class StylePropertyLegendRow extends Component {
 }
 
 StylePropertyLegendRow.propTypes = {
-  name: PropTypes.string.isRequired,
-  type: PropTypes.string,
-  options: PropTypes.oneOfType(styleOptionShapes).isRequired,
   range: rangeShape,
-  getFieldLabel: PropTypes.func.isRequired,
-  getFieldFormatter: PropTypes.func.isRequired,
+  style: PropTypes.object
 };

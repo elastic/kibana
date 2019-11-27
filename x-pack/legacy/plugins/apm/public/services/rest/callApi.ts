@@ -9,10 +9,11 @@ import LRU from 'lru-cache';
 import hash from 'object-hash';
 import { HttpServiceBase, HttpFetchOptions } from 'kibana/public';
 
-export type FetchOptions = HttpFetchOptions & {
+export type FetchOptions = Omit<HttpFetchOptions, 'body'> & {
   pathname: string;
   forceCache?: boolean;
   method?: string;
+  body?: any;
 };
 
 function fetchOptionsWithDebug(fetchOptions: FetchOptions) {
@@ -20,15 +21,21 @@ function fetchOptionsWithDebug(fetchOptions: FetchOptions) {
     sessionStorage.getItem('apm_debug') === 'true' &&
     startsWith(fetchOptions.pathname, '/api/apm');
 
-  if (!debugEnabled) {
-    return fetchOptions;
-  }
+  const isGet = !fetchOptions.method || fetchOptions.method === 'GET';
+
+  // Need an empty body to pass route validation
+  const body = isGet
+    ? {}
+    : {
+        body: JSON.stringify(fetchOptions.body || {})
+      };
 
   return {
     ...fetchOptions,
+    ...body,
     query: {
       ...fetchOptions.query,
-      _debug: true
+      ...(debugEnabled ? { _debug: true } : {})
     }
   };
 }

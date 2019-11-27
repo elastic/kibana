@@ -32,8 +32,6 @@ export function anomalySeriesTransform(
   timeSeriesDates: number[]
 ) {
   const buckets =
-    // TODO(TS-3.7-ESLINT)
-    // eslint-disable-next-line @typescript-eslint/camelcase
     response.aggregations?.ml_avg_response_times.buckets.map(getBucket) || [];
 
   const bucketSizeInMillis = Math.max(bucketSize, mlBucketSize) * 1000;

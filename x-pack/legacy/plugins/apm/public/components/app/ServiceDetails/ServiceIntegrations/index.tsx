@@ -148,8 +148,6 @@ export class ServiceIntegrations extends React.Component<Props, State> {
                 panels={[
                   {
                     id: 0,
-                    // TODO(TS-3.7-ESLINT)
-                    // eslint-disable-next-line @typescript-eslint/camelcase
                     items: this.getPanelItems(license.features.ml?.is_available)
                   }
                 ]}

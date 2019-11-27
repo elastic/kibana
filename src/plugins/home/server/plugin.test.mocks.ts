@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { tutorialsRegistryMock } from './services/tutorials_registry.mock';
+import { tutorialsRegistryMock } from './services/tutorials/tutorials_registry.mock';
 
 export const registryMock = tutorialsRegistryMock.create();
 jest.doMock('./services', () => ({

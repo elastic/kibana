@@ -714,14 +714,15 @@ export interface IndexSettingsDeprecationInfo {
 
 // @public
 export interface IRouter {
-    delete: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) => void;
-    get: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) => void;
+    delete: RouteRegistrar;
+    get: RouteRegistrar;
     // Warning: (ae-forgotten-export) The symbol "RouterRoute" needs to be exported by the entry point index.d.ts
     // 
     // @internal
     getRoutes: () => RouterRoute[];
-    post: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) => void;
-    put: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) => void;
+    handleLegacyErrors: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(handler: RequestHandler<P, Q, B>) => RequestHandler<P, Q, B>;
+    post: RouteRegistrar;
+    put: RouteRegistrar;
     routerPath: string;
 }
 
@@ -960,6 +961,17 @@ export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends obje
 }
 
 // @public
+export interface PluginConfigDescriptor<T = any> {
+    exposeToBrowser?: {
+        [P in keyof T]?: boolean;
+    };
+    schema: PluginConfigSchema<T>;
+}
+
+// @public
+export type PluginConfigSchema<T> = Type<T>;
+
+// @public
 export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 // @public
@@ -1004,8 +1016,9 @@ export interface PluginsServiceSetup {
     contracts: Map<PluginName, unknown>;
     // (undocumented)
     uiPlugins: {
+        internal: Map<PluginName, InternalPluginInfo>;
         public: Map<PluginName, DiscoveredPlugin>;
-        internal: Map<PluginName, DiscoveredPluginInternal>;
+        browserConfigs: Map<PluginName, Observable<unknown>>;
     };
 }
 
@@ -1086,6 +1099,9 @@ export interface RouteConfigOptions {
 
 // @public
 export type RouteMethod = 'get' | 'post' | 'put' | 'delete';
+
+// @public
+export type RouteRegistrar = <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) => void;
 
 // @public (undocumented)
 export interface SavedObject<T extends SavedObjectAttributes = any> {
@@ -1615,6 +1631,6 @@ export interface UserProvidedValues<T extends SavedObjectAttribute = any> {
 // Warnings were encountered during analysis:
 // 
 // src/core/server/http/router/response.ts:316:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/plugins_service.ts:38:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/plugins_service.ts:43:5 - (ae-forgotten-export) The symbol "InternalPluginInfo" needs to be exported by the entry point index.d.ts
 
 ```

@@ -19,7 +19,7 @@
 
 import angular from 'angular';
 import { InternalCoreSetup, InternalCoreStart } from '../core_system';
-import { LegacyCoreSetup, LegacyCoreStart } from '../';
+import { LegacyCoreSetup, LegacyCoreStart, MountPoint } from '../';
 
 /** @internal */
 export interface LegacyPlatformParams {
@@ -40,7 +40,7 @@ interface StartDeps {
 }
 
 interface BootstrapModule {
-  bootstrap: (targetDomElement: HTMLElement) => void;
+  bootstrap: MountPoint;
 }
 
 /**
