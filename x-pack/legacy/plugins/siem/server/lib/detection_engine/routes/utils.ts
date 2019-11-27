@@ -54,6 +54,7 @@ export const transformAlertToRule = (alert: RuleAlertType): Partial<OutputRuleAl
     tags: alert.params.tags,
     to: alert.params.to,
     type: alert.params.type,
+    threats: alert.params.threats,
   });
 };
 

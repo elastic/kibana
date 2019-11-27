@@ -13,8 +13,11 @@ export const config = {
   schema: schema.object({
     serviceMapEnabled: schema.boolean({ defaultValue: false }),
     autocreateApmIndexPattern: schema.boolean({ defaultValue: true }),
-    'ui.transactionGroupBucketSize': schema.number({ defaultValue: 100 }),
-    'ui.maxTraceItems': schema.number({ defaultValue: 1000 }),
+    ui: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+      transactionGroupBucketSize: schema.number({ defaultValue: 100 }),
+      maxTraceItems: schema.number({ defaultValue: 1000 }),
+    }),
   }),
 };
 
@@ -30,8 +33,9 @@ export function mergeConfigs(apmOssConfig: APMOSSConfig, apmConfig: APMXPackConf
     'apm_oss.onboardingIndices': apmOssConfig.onboardingIndices,
     'apm_oss.indexPattern': apmOssConfig.indexPattern,
     'xpack.apm.serviceMapEnabled': apmConfig.serviceMapEnabled,
-    'xpack.apm.ui.maxTraceItems': apmConfig['ui.maxTraceItems'],
-    'xpack.apm.ui.transactionGroupBucketSize': apmConfig['ui.transactionGroupBucketSize'],
+    'xpack.apm.ui.enabled': apmConfig.ui.enabled,
+    'xpack.apm.ui.maxTraceItems': apmConfig.ui.maxTraceItems,
+    'xpack.apm.ui.transactionGroupBucketSize': apmConfig.ui.transactionGroupBucketSize,
     'xpack.apm.autocreateApmIndexPattern': apmConfig.autocreateApmIndexPattern,
   };
 }

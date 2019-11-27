@@ -50,11 +50,11 @@ export const createCreateRulesRoute: Hapi.ServerRoute = {
       name,
       severity,
       tags,
+      threats,
       to,
       type,
       references,
     } = request.payload;
-
     const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
     const actionsClient = isFunction(request.getActionsClient) ? request.getActionsClient() : null;
 
@@ -95,6 +95,7 @@ export const createCreateRulesRoute: Hapi.ServerRoute = {
         tags,
         to,
         type,
+        threats,
         references,
       });
       return transformOrError(createdRule);
