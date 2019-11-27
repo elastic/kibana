@@ -40,6 +40,7 @@ export { getFromSavedObject, getRoutes } from '../../../core_plugins/data/public
 export const INDEX_PATTERN_ILLEGAL_CHARACTERS = indexPatterns.ILLEGAL_CHARACTERS;
 export const INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE;
 export const ILLEGAL_CHARACTERS = indexPatterns.ILLEGAL_CHARACTERS_KEY;
+export const CONTAINS_SPACES = indexPatterns.CONTAINS_SPACES_KEY;
 export const validateIndexPattern = indexPatterns.validate;
 
 // types
