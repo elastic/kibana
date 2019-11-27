@@ -6,7 +6,7 @@
 import { Plugin, CoreSetup, CoreStart } from 'src/core/server';
 import { ServerShim, ServerShimWithRouter } from './types';
 import { credentialStoreFactory } from './lib/reindexing/credential_store';
-import { makeUpgradeAssistantUsageCollector } from './lib/telemetry';
+import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { registerClusterCheckupRoutes } from './routes/cluster_checkup';
 import { registerDeprecationLoggingRoutes } from './routes/deprecation_logging';
 import { registerReindexIndicesRoutes, registerReindexWorker } from './routes/reindex_indices';
@@ -35,7 +35,7 @@ export class UpgradeAssistantServerPlugin implements Plugin<void, void, object, 
 
     // Bootstrap the needed routes and the collector for the telemetry
     registerTelemetryRoutes(shimWithRouter);
-    makeUpgradeAssistantUsageCollector(__LEGACY);
+    registerUpgradeAssistantUsageCollector(__LEGACY.plugins.usage, __LEGACY);
   }
 
   start(core: CoreStart, plugins: any) {}

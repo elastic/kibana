@@ -89,23 +89,7 @@ export class IndexPatternsService {
 // static code
 
 /** @public */
-export {
-  CONTAINS_SPACES,
-  getFromSavedObject,
-  getRoutes,
-  ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-  validateIndexPattern,
-} from './utils';
-
-/** @public */
-export {
-  IndexPatternAlreadyExists,
-  IndexPatternMissingIndices,
-  NoDefaultIndexPattern,
-  NoDefinedIndexPatterns,
-} from './errors';
+export { getFromSavedObject, getRoutes } from './utils';
 
 // types
 

@@ -22,7 +22,7 @@ import {
   Context,
   ExpressionRenderHandler,
   ExpressionDataHandler,
-  RenderResult,
+  RenderId,
 } from 'src/plugins/expressions/public';
 
 import { Adapters } from 'src/plugins/inspector/public';
@@ -32,6 +32,6 @@ export {
   Context,
   ExpressionRenderHandler,
   ExpressionDataHandler,
-  RenderResult,
+  RenderId,
   Adapters,
 };

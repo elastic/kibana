@@ -43,7 +43,7 @@ jest.mock('../../../../../../../plugins/data/public', () => {
 
 jest.mock('../../../../../data/public', () => {
   return {
-    QueryBarInput: () => <div className="queryBar" />,
+    QueryStringInput: () => <div className="queryBar" />,
   };
 });
 

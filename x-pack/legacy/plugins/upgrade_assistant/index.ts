@@ -47,7 +47,6 @@ export function upgradeAssistant(kibana: any) {
         __LEGACY: {
           // Legacy objects
           events: server.events,
-          usage: server.usage,
           savedObjects: server.savedObjects,
 
           // Legacy functions
@@ -63,6 +62,7 @@ export function upgradeAssistant(kibana: any) {
                 isCloudEnabled: _.get(server.plugins, 'cloud.config.isCloudEnabled', false),
               },
             },
+            usage: server.newPlatform.setup.plugins.usageCollection,
           },
         } as any,
       });

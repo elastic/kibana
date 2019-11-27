@@ -66,6 +66,12 @@ export const getWaitingForMapReadyLayerListRaw = ({ map }) => map.waitingForMapR
 
 export const getScrollZoom = ({ map }) => map.mapState.scrollZoom;
 
+export const isInteractiveDisabled = ({ map }) => map.mapState.disableInteractive;
+
+export const isTooltipControlDisabled = ({ map }) => map.mapState.disableTooltipControl;
+
+export const isToolbarOverlayHidden = ({ map }) => map.mapState.hideToolbarOverlay;
+
 export const getMapExtent = ({ map }) => map.mapState.extent ?
   map.mapState.extent : {};
 
