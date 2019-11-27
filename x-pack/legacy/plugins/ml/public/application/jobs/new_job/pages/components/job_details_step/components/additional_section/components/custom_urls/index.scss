@@ -1,7 +1,12 @@
 .ml-custom-urls-selection {
   > .euiFlexGroup {
-    > .euiFlexItem:last-child {
-      flex-basis: 50%;
+    > .euiFlexItem {
+      &:first-child {
+        max-width: 388px;
+      }
+      &:last-child {
+        flex-basis: 50%;
+      }
     }
   }
 }
