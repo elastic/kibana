@@ -108,7 +108,9 @@ async function init() {
       data: { ...user, roles: [...user.roles, ROLE_NAME] }
     });
 
-    console.log(`Congratulations! You are now able to login to your local Kibana with 'apm' and 'kibana_user'`);
+    console.log(
+      `Congratulations! You are now able to login to your local Kibana with 'apm' and 'kibana_user'`
+    );
   });
 }
 
