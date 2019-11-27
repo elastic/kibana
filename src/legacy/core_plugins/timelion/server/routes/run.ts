@@ -35,34 +35,36 @@ function formatErrorResponse(e: any, h: any) {
     .code(500);
 }
 
+const requestPayload = {
+  payload: Joi.object({
+    sheet: Joi.array().items(Joi.string()),
+    extended: Joi.object({
+      es: Joi.object({
+        filter: Joi.object({
+          bool: Joi.object({
+            filter: Joi.array().allow(null),
+            must: Joi.array().allow(null),
+            should: Joi.array().allow(null),
+            must_not: Joi.array().allow(null),
+          }),
+        }),
+      }),
+    }),
+    time: Joi.object({
+      from: Joi.string(),
+      interval: Joi.string(),
+      timezone: Joi.string(),
+      to: Joi.string(),
+    }),
+  }),
+};
+
 export function runRoute(server: Server) {
   server.route({
     method: 'POST',
     path: '/api/timelion/run',
     options: {
-      validate: {
-        payload: Joi.object({
-          sheet: Joi.array().items(Joi.string()),
-          extended: Joi.object({
-            es: Joi.object({
-              filter: Joi.object({
-                bool: Joi.object({
-                  filter: Joi.array().allow(null),
-                  must: Joi.array().allow(null),
-                  should: Joi.array().allow(null),
-                  must_not: Joi.array().allow(null),
-                }),
-              }),
-            }),
-          }),
-          time: Joi.object({
-            from: Joi.string(),
-            interval: Joi.string(),
-            timezone: Joi.string(),
-            to: Joi.string(),
-          }),
-        }),
-      },
+      validate: requestPayload,
     },
     handler: async (request: any, h: any) => {
       try {
@@ -73,7 +75,6 @@ export function runRoute(server: Server) {
           request,
           settings: _.defaults(uiSettings, timelionDefaults), // Just in case they delete some setting.
         });
-
         const chainRunner = chainRunnerFn(tlConfig);
         const sheet = await Bluebird.all(
           chainRunner.processRequest(
