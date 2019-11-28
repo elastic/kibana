@@ -234,7 +234,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       // TODO migrate annotations update
       if (this.props.annotationsRefresh === true) {
         annotationsRefresh$.next(false);
-        // this.updateExplorer();
       }
     }
 
