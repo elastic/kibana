@@ -31,7 +31,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
-import { useKibana } from '../../../../../../../plugins/kibana_react/public';
+import { useKibana } from '../../../../kibana_react/public';
 
 interface Props {
   language: string;
