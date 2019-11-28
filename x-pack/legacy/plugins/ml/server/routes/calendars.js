@@ -63,7 +63,7 @@ export function calendars({ commonRouteConfig, elasticsearchPlugin, route }) {
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const calendarIds = request.params.calendarIds.split(',');
-      if (calendarIds.leading === 1) {
+      if (calendarIds.length === 1) {
         return getCalendar(callWithRequest, calendarIds[0])
           .catch(resp => wrapError(resp));
       } else {

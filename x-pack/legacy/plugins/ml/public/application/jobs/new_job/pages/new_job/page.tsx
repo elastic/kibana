@@ -89,6 +89,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
     if (mlJobService.tempJobCloningObjects.calendars) {
       jobCreator.calendars = mlJobService.tempJobCloningObjects.calendars;
+      mlJobService.tempJobCloningObjects.calendars = undefined;
     }
   } else {
     // creating a new job
