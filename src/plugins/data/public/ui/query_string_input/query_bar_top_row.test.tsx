@@ -117,7 +117,7 @@ describe('QueryBarTopRowTopRow', () => {
     jest.clearAllMocks();
   });
 
-  it('Should render the given query', () => {
+  it.skip('Should render the given query', () => {
     const component = mount(
       wrapQueryBarTopRowInContext({
         query: kqlQuery,
@@ -132,7 +132,7 @@ describe('QueryBarTopRowTopRow', () => {
     expect(component.find(TIMEPICKER_SELECTOR).length).toBe(1);
   });
 
-  it('Should create a unique PersistedLog based on the appName and query language', () => {
+  it.skip('Should create a unique PersistedLog based on the appName and query language', () => {
     mount(
       wrapQueryBarTopRowInContext({
         query: kqlQuery,
@@ -206,7 +206,7 @@ describe('QueryBarTopRowTopRow', () => {
     );
   });
 
-  it('Should render only query input bar', () => {
+  it.skip('Should render only query input bar', () => {
     const component = mount(
       wrapQueryBarTopRowInContext({
         query: kqlQuery,
