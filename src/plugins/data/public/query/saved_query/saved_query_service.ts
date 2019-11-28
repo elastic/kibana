@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import { SavedObjectAttributes } from 'src/core/server';
-import { SavedObjectsClientContract } from 'src/core/public';
-import { SavedQueryAttributes, SavedQuery } from '../index';
+import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/core/public';
+import { SavedQueryAttributes, SavedQuery, SavedQueryService } from './types';
 
 type SerializedSavedQueryAttributes = SavedObjectAttributes &
   SavedQueryAttributes & {
@@ -28,22 +27,6 @@ type SerializedSavedQueryAttributes = SavedObjectAttributes &
       language: string;
     };
   };
-
-export interface SavedQueryService {
-  saveQuery: (
-    attributes: SavedQueryAttributes,
-    config?: { overwrite: boolean }
-  ) => Promise<SavedQuery>;
-  getAllSavedQueries: () => Promise<SavedQuery[]>;
-  findSavedQueries: (
-    searchText?: string,
-    perPage?: number,
-    activePage?: number
-  ) => Promise<SavedQuery[]>;
-  getSavedQuery: (id: string) => Promise<SavedQuery>;
-  deleteSavedQuery: (id: string) => Promise<{}>;
-  getSavedQueryCount: () => Promise<number>;
-}
 
 export const createSavedQueryService = (
   savedObjectsClient: SavedObjectsClientContract

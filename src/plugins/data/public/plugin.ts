@@ -65,7 +65,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       getSuggestions: getSuggestionsProvider(core.uiSettings, core.http),
       search: this.searchService.start(core),
       fieldFormats,
-      query: this.queryService.start(),
+      query: this.queryService.start(core.savedObjects),
       ui: {
         IndexPatternSelect: createIndexPatternSelect(core.savedObjects.client),
       },

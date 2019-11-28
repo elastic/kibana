@@ -6,9 +6,8 @@
 
 import React from 'react';
 import { ErrorMetadata } from '..';
-import { render, cleanup } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import { APMError } from '../../../../../../typings/es_schemas/ui/APMError';
-import 'jest-dom/extend-expect';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument
@@ -37,8 +36,6 @@ function getError() {
 }
 
 describe('ErrorMetadata', () => {
-  afterEach(cleanup);
-
   it('should render a error with all sections', () => {
     const error = getError();
     const output = render(<ErrorMetadata error={error} />);

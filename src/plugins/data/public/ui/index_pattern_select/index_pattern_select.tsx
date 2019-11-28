@@ -88,7 +88,7 @@ export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
     this.fetchSelectedIndexPattern(this.props.indexPatternId);
   }
 
-  componentWillReceiveProps(nextProps: IndexPatternSelectProps) {
+  UNSAFE_componentWillReceiveProps(nextProps: IndexPatternSelectProps) {
     if (nextProps.indexPatternId !== this.props.indexPatternId) {
       this.fetchSelectedIndexPattern(nextProps.indexPatternId);
     }

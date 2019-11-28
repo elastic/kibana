@@ -52,7 +52,7 @@ export class TelemetryForm extends Component {
     queryMatches: null,
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     const {
       query
     } = nextProps;

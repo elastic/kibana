@@ -22,7 +22,7 @@ import { EuiListGroupItem, EuiConfirmModal, EuiOverlayMask, EuiIconTip } from '@
 import React, { Fragment, useState } from 'react';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
-import { SavedQuery } from '../../index';
+import { SavedQuery } from '../../../../../../../../plugins/data/public';
 
 interface Props {
   savedQuery: SavedQuery;
