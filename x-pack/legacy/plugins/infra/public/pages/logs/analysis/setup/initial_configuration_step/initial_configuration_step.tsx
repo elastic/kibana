@@ -4,24 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer, EuiForm } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import { EuiSpacer, EuiForm, EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
 
-import {
-  AnalysisSetupIndicesForm,
-  IndicesSelection,
-  IndicesValidationError,
-} from './analysis_setup_indices_form';
+import { AnalysisSetupIndicesForm } from './analysis_setup_indices_form';
 import { AnalysisSetupTimerangeForm } from './analysis_setup_timerange_form';
+import {
+  ValidatedIndex,
+  ValidationIndicesUIError,
+} from '../../../../../containers/logs/log_analysis/log_analysis_setup_state';
 
 interface InitialConfigurationStepProps {
   setStartTime: (startTime: number | undefined) => void;
   setEndTime: (endTime: number | undefined) => void;
   startTime: number | undefined;
   endTime: number | undefined;
-  selectedIndices: IndicesSelection;
-  setSelectedIndices: (selectedIndices: IndicesSelection) => void;
-  validationErrors?: IndicesValidationError[];
+  isValidating: boolean;
+  validatedIndices: ValidatedIndex[];
+  setValidatedIndices: (selectedIndices: ValidatedIndex[]) => void;
+  validationErrors?: ValidationIndicesUIError[];
 }
 
 export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurationStepProps> = ({
@@ -29,16 +32,11 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
   setEndTime,
   startTime,
   endTime,
-  selectedIndices,
-  setSelectedIndices,
+  isValidating,
+  validatedIndices,
+  setValidatedIndices,
   validationErrors = [],
 }: InitialConfigurationStepProps) => {
-  const indicesFormValidationErrors = useMemo(
-    () =>
-      validationErrors.filter(validationError => validationError === 'TOO_FEW_SELECTED_INDICES'),
-    [validationErrors]
-  );
-
   return (
     <>
       <EuiSpacer size="m" />
@@ -50,11 +48,63 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
           endTime={endTime}
         />
         <AnalysisSetupIndicesForm
-          indices={selectedIndices}
-          onChangeSelectedIndices={setSelectedIndices}
-          validationErrors={indicesFormValidationErrors}
+          indices={validatedIndices}
+          isValidating={isValidating}
+          onChangeSelectedIndices={setValidatedIndices}
+          valid={validationErrors.length === 0}
         />
+
+        <ValidationErrors errors={validationErrors} />
       </EuiForm>
     </>
   );
+};
+
+const errorCalloutTitle = i18n.translate(
+  'xpack.infra.analysisSetup.steps.initialConfigurationStep.errorCalloutTitle',
+  {
+    defaultMessage: 'Your index configuration is not valid',
+  }
+);
+
+const ValidationErrors: React.FC<{ errors: ValidationIndicesUIError[] }> = ({ errors }) => {
+  if (errors.length === 0) {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiCallOut color="danger" iconType="alert" title={errorCalloutTitle}>
+        <ul>
+          {errors.map((error, i) => (
+            <li key={i}>{formatValidationError(error)}</li>
+          ))}
+        </ul>
+      </EuiCallOut>
+      <EuiSpacer />
+    </>
+  );
+};
+
+const formatValidationError = (error: ValidationIndicesUIError): React.ReactNode => {
+  switch (error.error) {
+    case 'NETWORK_ERROR':
+      return (
+        <FormattedMessage
+          id="xpack.infra.analysisSetup.indicesSelectionNetworkError"
+          defaultMessage="We couldn't load your index configuration"
+        />
+      );
+
+    case 'TOO_FEW_SELECTED_INDICES':
+      return (
+        <FormattedMessage
+          id="xpack.infra.analysisSetup.indicesSelectionTooFewSelectedIndicesDescription"
+          defaultMessage="Select at least one index name."
+        />
+      );
+
+    default:
+      return '';
+  }
 };

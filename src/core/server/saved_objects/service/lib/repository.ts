@@ -42,7 +42,6 @@ import {
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateOptions,
   SavedObjectsDeleteOptions,
-  SavedObjectsDeleteByNamespaceOptions,
 } from '../saved_objects_client';
 import {
   SavedObject,
@@ -75,6 +74,7 @@ const isLeft = <L, R>(either: Either<L, R>): either is Left<L> => {
 
 export interface SavedObjectsRepositoryOptions {
   index: string;
+  /** @deprecated Will be removed once SavedObjectsSchema is exposed from Core */
   config: Config;
   mappings: IndexMapping;
   callCluster: APICaller;
@@ -82,17 +82,38 @@ export interface SavedObjectsRepositoryOptions {
   serializer: SavedObjectsSerializer;
   migrator: KibanaMigrator;
   allowedTypes: string[];
-  onBeforeWrite?: (...args: Parameters<APICaller>) => Promise<void>;
 }
 
-export interface IncrementCounterOptions extends SavedObjectsBaseOptions {
+/**
+ * @public
+ */
+export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOptions {
   migrationVersion?: SavedObjectsMigrationVersion;
+  /** The Elasticsearch Refresh setting for this operation */
+  refresh?: MutatingOperationRefreshSetting;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOptions {
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
 }
 
 const DEFAULT_REFRESH_SETTING = 'wait_for';
 
+/**
+ * See {@link SavedObjectsRepository}
+ *
+ * @public
+ */
+export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedObjectsRepository>;
+
+/**
+ * @public
+ */
 export class SavedObjectsRepository {
   private _migrator: KibanaMigrator;
   private _index: string;
@@ -100,10 +121,10 @@ export class SavedObjectsRepository {
   private _mappings: IndexMapping;
   private _schema: SavedObjectsSchema;
   private _allowedTypes: string[];
-  private _onBeforeWrite: (...args: Parameters<APICaller>) => Promise<void>;
   private _unwrappedCallCluster: APICaller;
   private _serializer: SavedObjectsSerializer;
 
+  /** @internal */
   constructor(options: SavedObjectsRepositoryOptions) {
     const {
       index,
@@ -114,7 +135,6 @@ export class SavedObjectsRepository {
       serializer,
       migrator,
       allowedTypes = [],
-      onBeforeWrite = () => Promise.resolve(),
     } = options;
 
     // It's important that we migrate documents / mark them as up-to-date
@@ -133,8 +153,6 @@ export class SavedObjectsRepository {
       throw new Error('Empty or missing types for saved object repository!');
     }
     this._allowedTypes = allowedTypes;
-
-    this._onBeforeWrite = onBeforeWrite;
 
     this._unwrappedCallCluster = async (...args: Parameters<APICaller>) => {
       await migrator.runMigrations();
@@ -448,11 +466,11 @@ export class SavedObjectsRepository {
     }
 
     let kueryNode;
+
     try {
-      kueryNode =
-        filter && filter !== ''
-          ? validateConvertFilterToKueryNode(allowedTypes, filter, this._mappings)
-          : null;
+      if (filter) {
+        kueryNode = validateConvertFilterToKueryNode(allowedTypes, filter, this._mappings);
+      }
     } catch (e) {
       if (e.name === 'KQLSyntaxError') {
         throw SavedObjectsErrorHelpers.createBadRequestError('KQLSyntaxError: ' + e.message);
@@ -805,7 +823,7 @@ export class SavedObjectsRepository {
     type: string,
     id: string,
     counterFieldName: string,
-    options: IncrementCounterOptions = {}
+    options: SavedObjectsIncrementCounterOptions = {}
   ) {
     if (typeof type !== 'string') {
       throw new Error('"type" argument must be a string');
@@ -869,16 +887,15 @@ export class SavedObjectsRepository {
     };
   }
 
-  private async _writeToCluster(...args: Parameters<CallCluster>) {
+  private async _writeToCluster(...args: Parameters<APICaller>) {
     try {
-      await this._onBeforeWrite(...args);
       return await this._callCluster(...args);
     } catch (err) {
       throw decorateEsError(err);
     }
   }
 
-  private async _callCluster(...args: Parameters<CallCluster>) {
+  private async _callCluster(...args: Parameters<APICaller>) {
     try {
       return await this._unwrappedCallCluster(...args);
     } catch (err) {

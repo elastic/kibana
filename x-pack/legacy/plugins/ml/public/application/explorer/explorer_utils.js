@@ -417,7 +417,7 @@ export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, 
       earliestMs: timeRange.earliestMs,
       latestMs: timeRange.latestMs,
       maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE
-    }).then((resp) => {
+    }).toPromise().then((resp) => {
       if (resp.error !== undefined || resp.annotations === undefined) {
         return resolve([]);
       }
@@ -477,7 +477,7 @@ export async function loadAnomaliesTableData(
       ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
       MAX_CATEGORY_EXAMPLES,
       influencersFilterQuery
-    ).then((resp) => {
+    ).toPromise().then((resp) => {
       const anomalies = resp.anomalies;
       const detectorsByJob = mlJobService.detectorsByJob;
       anomalies.forEach((anomaly) => {
