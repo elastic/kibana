@@ -30,7 +30,6 @@ import 'uiExports/inspectorViews';
 import 'uiExports/savedObjectTypes';
 import 'uiExports/search';
 import 'uiExports/shareContextMenuExtensions';
-import 'uiExports/visEditorTypes';
 import 'uiExports/visTypes';
 import 'uiExports/visualize';
 

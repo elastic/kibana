@@ -28,7 +28,6 @@ import chrome from 'ui/chrome';
 
 export const legacyChrome = chrome;
 
-export { State } from 'ui/state_management/state';
 // @ts-ignore
 export { AppState, AppStateProvider } from 'ui/state_management/app_state';
 // @ts-ignore

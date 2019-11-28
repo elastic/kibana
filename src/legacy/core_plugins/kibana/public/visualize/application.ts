@@ -60,9 +60,7 @@ export const renderApp = async (
     initVisualizeApp(angularModuleInstance, deps);
   }
   const $injector = mountVisualizeApp(appBasePath, element);
-  return () => {
-    $injector.get('$rootScope').$destroy();
-  };
+  return () => $injector.get('$rootScope').$destroy();
 };
 
 const mainTemplate = (basePath: string) => `<div style="height: 100%">
