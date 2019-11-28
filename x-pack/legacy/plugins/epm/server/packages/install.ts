@@ -7,14 +7,9 @@
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server/';
 import { safeLoad } from 'js-yaml';
 import { SAVED_OBJECT_TYPE_PACKAGES } from '../../common/constants';
-import {
-  AssetReference,
-  ElasticsearchAssetType,
-  InstallationAttributes,
-  KibanaAssetType,
-} from '../../common/types';
+import { AssetReference, InstallationAttributes, KibanaAssetType } from '../../common/types';
 import * as Registry from '../registry';
-import { CallESAsCurrentUser, getInstallationObject } from './index';
+import { getInstallationObject } from './index';
 import { getObject } from './get_objects';
 import { Field } from '../lib/fields/field';
 import {

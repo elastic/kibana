@@ -6,7 +6,8 @@
 
 import { SavedObjectsClientContract } from 'src/core/server/';
 import { SAVED_OBJECT_TYPE_PACKAGES } from '../../common/constants';
-import { getInstallationObject, savedObjectTypes, CallESAsCurrentUser } from './index';
+import { getInstallationObject, savedObjectTypes } from './index';
+import { CallESAsCurrentUser } from '../lib/cluster_access';
 import { AssetReference, AssetType, ElasticsearchAssetType } from '../../common/types';
 
 export async function removeInstallation(options: {
