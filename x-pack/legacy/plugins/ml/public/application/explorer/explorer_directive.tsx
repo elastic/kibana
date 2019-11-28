@@ -8,8 +8,6 @@
  * AngularJS directive wrapper for rendering Anomaly Explorer's React component.
  */
 
-import { merge } from 'lodash';
-
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -33,9 +31,8 @@ import { showCharts$ } from '../components/controls/checkbox_showcharts';
 import { subscribeAppStateToObservable } from '../util/app_state_utils';
 
 import { Explorer } from './explorer';
-import { EXPLORER_ACTION } from './explorer_constants';
-import { explorerAction$, explorerAppState$ } from './explorer_dashboard_service';
-import { getExplorerDefaultAppState } from './reducers';
+import { explorerService } from './explorer_dashboard_service';
+import { getExplorerDefaultAppState, ExplorerAppState } from './reducers';
 
 interface ExplorerScope extends IScope {
   appState: IAppState;
@@ -71,22 +68,15 @@ module.directive('mlAnomalyExplorer', function(
     // Pass the current URL AppState on to anomaly explorer's reactive state.
     // After this hand-off, the appState stored in explorerState$ is the single
     // source of truth.
-    explorerAction$.next({
-      type: EXPLORER_ACTION.APP_STATE_SET,
-      payload: { mlExplorerSwimlane, mlExplorerFilter },
-    });
-
-    // This is temporary and can be removed once explorer.js migrated fully
-    // from explorer$ to explorerState$. This needs to be done only once
-    // the original URL AppState has been passed on to the observable state above.
-    explorerAction$.next(null);
+    explorerService.setAppState({ mlExplorerSwimlane, mlExplorerFilter });
 
     // Now that appState in explorerState$ is the single source of truth,
     // subscribe to it and update the actual URL appState on changes.
     subscriptions.add(
-      explorerAppState$.subscribe((appState: IAppState) => {
+      explorerService.appState$.subscribe((appState: ExplorerAppState) => {
         $scope.appState.fetch();
-        $scope.appState = merge($scope.appState, appState);
+        $scope.appState.mlExplorerFilter = appState.mlExplorerFilter;
+        $scope.appState.mlExplorerSwimlane = appState.mlExplorerSwimlane;
         $scope.appState.save();
         $scope.$applyAsync();
       })

@@ -7,27 +7,16 @@
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
 
-import { forkJoin } from 'rxjs';
-import { map, mergeMap, tap } from 'rxjs/operators';
+import { forkJoin, of } from 'rxjs';
+import { mergeMap, tap } from 'rxjs/operators';
 
-import { i18n } from '@kbn/i18n';
-
-import { formatHumanReadableDateTime } from '../../util/date_utils';
-
+import { explorerChartsContainerServiceFactory } from '../explorer_charts/explorer_charts_container_service';
+import { VIEW_BY_JOB_LABEL } from '../explorer_constants';
+import { explorerService } from '../explorer_dashboard_service';
 import {
-  explorerChartsContainerServiceFactory,
-  getDefaultChartsData,
-} from '../explorer_charts/explorer_charts_container_service';
-import { EXPLORER_ACTION, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '../explorer_constants';
-import { explorerAction$ } from '../explorer_dashboard_service';
-import {
-  getClearedSelectedAnomaliesState,
   getDateFormatTz,
-  getDefaultSwimlaneData,
   getSelectionInfluencers,
   getSelectionTimeRange,
-  getSwimlaneBucketInterval,
-  getViewBySwimlaneOptions,
   loadAnnotationsTableData,
   loadAnomaliesTableData,
   loadDataForCharts,
@@ -38,11 +27,6 @@ import {
   loadViewByTopFieldValuesForSelectedTime,
 } from '../explorer_utils';
 import { ExplorerState } from '../reducers';
-
-interface SwimlanePoint {
-  laneLabel: string;
-  time: number;
-}
 
 const memoizeIsEqual = (newArgs: any[], lastArgs: any[]) => isEqual(newArgs, lastArgs);
 
@@ -65,57 +49,28 @@ const dateFormatTz = getDateFormatTz();
  *
  * @param state ExplorerState
  *
- * @return action observable
+ * @return Partial<ExplorerState>
  */
-export function loadExplorerDataActionCreator(state: ExplorerState) {
+export function loadExplorerData(state: ExplorerState) {
   const {
     bounds,
-    filterActive,
-    filteredFields,
     influencersFilterQuery,
-    isAndOperator,
     noInfluencersConfigured,
     selectedCells,
     selectedJobs,
-    swimlaneContainerWidth,
+    swimlaneBucketInterval,
     swimlaneLimit,
     tableInterval,
     tableSeverity,
-    viewBySwimlaneFieldName: currentViewBySwimlaneFieldName,
+    viewBySwimlaneFieldName,
   } = state;
 
-  if (selectedJobs === null) {
-    return null;
+  if (selectedJobs === null || bounds === undefined || viewBySwimlaneFieldName === undefined) {
+    return of({});
   }
 
-  const swimlaneBucketInterval = getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth);
-
   // TODO This factory should be refactored so we can load the charts using memoization.
-  const updateCharts = explorerChartsContainerServiceFactory(data => {
-    explorerAction$.next({
-      type: EXPLORER_ACTION.SET_STATE,
-      payload: {
-        chartsData: {
-          ...getDefaultChartsData(),
-          chartsPerRow: data.chartsPerRow,
-          seriesToPlot: data.seriesToPlot,
-          // convert truthy/falsy value to Boolean
-          tooManyBuckets: !!data.tooManyBuckets,
-        },
-      },
-    });
-  });
-
-  // Does a sanity check on the selected `currentViewBySwimlaneFieldName`
-  // and returns the available `viewBySwimlaneOptions`.
-  const { viewBySwimlaneFieldName, viewBySwimlaneOptions } = getViewBySwimlaneOptions({
-    currentViewBySwimlaneFieldName,
-    filterActive,
-    filteredFields,
-    isAndOperator,
-    selectedJobs,
-    selectedCells,
-  });
+  const updateCharts = explorerChartsContainerServiceFactory(explorerService.setCharts);
 
   const selectionInfluencers = getSelectionInfluencers(selectedCells, viewBySwimlaneFieldName);
 
@@ -129,19 +84,6 @@ export function loadExplorerDataActionCreator(state: ExplorerState) {
     swimlaneBucketInterval.asSeconds(),
     bounds
   );
-
-  // Trigger a side effect to pass on updated information to the state.
-  explorerAction$.next({
-    type: EXPLORER_ACTION.SET_STATE,
-    payload: {
-      viewByLoadedForTimeFormatted:
-        selectedCells !== null && selectedCells.showTopFieldValues === true
-          ? formatHumanReadableDateTime(timerange.earliestMs)
-          : null,
-      viewBySwimlaneFieldName,
-      viewBySwimlaneOptions,
-    },
-  });
 
   // First get the data where we have all necessary args at hand using forkJoin:
   // annotationsData, anomalyChartRecords, influencers, overallState, tableData, topFieldValues
@@ -198,21 +140,7 @@ export function loadExplorerDataActionCreator(state: ExplorerState) {
     // Trigger a side-effect action to reset view-by swimlane,
     // show the view-by loading indicator
     // and pass on the data we already fetched.
-    tap(({ annotationsData, overallState, tableData }) => {
-      explorerAction$.next({
-        type: EXPLORER_ACTION.SET_STATE,
-        payload: {
-          annotationsData,
-          overallState,
-          tableData,
-          viewBySwimlaneData: {
-            ...getDefaultSwimlaneData(),
-            fieldName: viewBySwimlaneFieldName,
-          },
-          viewBySwimlaneDataLoading: true,
-        },
-      });
-    }),
+    tap(explorerService.setViewBySwimlaneLoading),
     // Trigger a side-effect to update the charts.
     tap(({ anomalyChartRecords }) => {
       if (selectedCells !== null && Array.isArray(anomalyChartRecords)) {
@@ -257,71 +185,13 @@ export function loadExplorerDataActionCreator(state: ExplorerState) {
         }),
       ({ annotationsData, overallState, tableData }, { influencers, viewBySwimlaneState }) => {
         return {
-          type: EXPLORER_ACTION.SET_STATE,
-          payload: {
-            annotationsData,
-            influencers,
-            ...overallState,
-            ...viewBySwimlaneState,
-            tableData,
-          },
+          annotationsData,
+          influencers,
+          ...overallState,
+          ...viewBySwimlaneState,
+          tableData,
         };
       }
-    ),
-    // do a sanity check against selectedCells. It can happen that a previously
-    // selected lane loaded via URL/AppState is not available anymore.
-    // If filter is active - selectedCell may not be available due to swimlane view by change to filter fieldName
-    // Ok to keep cellSelection in this case
-    map(action => {
-      const { viewBySwimlaneData } = action.payload;
-
-      let clearSelection = false;
-      if (selectedCells !== null && selectedCells.type === SWIMLANE_TYPE.VIEW_BY) {
-        clearSelection =
-          filterActive === false &&
-          !selectedCells.lanes.some((lane: string) => {
-            return viewBySwimlaneData.points.some((point: SwimlanePoint) => {
-              return (
-                point.laneLabel === lane &&
-                point.time >= selectedCells.times[0] &&
-                point.time <= selectedCells.times[1]
-              );
-            });
-          });
-      }
-
-      if (clearSelection === true) {
-        explorerAction$.next({ type: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
-        action.payload = { ...action.payload, ...getClearedSelectedAnomaliesState() };
-      }
-
-      return action;
-    }),
-    // Set the KQL query bar placeholder value
-    map(action => {
-      const { influencers } = action.payload;
-
-      if (influencers !== undefined && !noInfluencersConfigured) {
-        for (const influencerName in influencers) {
-          if (
-            influencers[influencerName][0] &&
-            influencers[influencerName][0].influencerFieldValue
-          ) {
-            action.payload.filterPlaceHolder = i18n.translate(
-              'xpack.ml.explorer.kueryBar.filterPlaceholder',
-              {
-                defaultMessage: 'Filter by influencer fields… ({queryExample})',
-                values: {
-                  queryExample: `${influencerName} : ${influencers[influencerName][0].influencerFieldValue}`,
-                },
-              }
-            );
-            break;
-          }
-        }
-      }
-
-      return action;
-    })
+    )
   );
 }

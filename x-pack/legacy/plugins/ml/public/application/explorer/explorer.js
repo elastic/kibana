@@ -8,13 +8,12 @@
  * React component for rendering Explorer dashboard swimlanes.
  */
 
-import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { createRef } from 'react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import DragSelect from 'dragselect/dist/ds.min.js';
-import { Subject } from 'rxjs';
-import { distinctUntilChanged, map, takeUntil } from 'rxjs/operators';
+import { merge, Subject } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
 
 import {
   EuiFlexGroup,
@@ -42,8 +41,7 @@ import { InfluencersList } from '../components/influencers_list';
 import {
   ALLOW_CELL_RANGE_SELECTION,
   dragSelect$,
-  explorerAction$,
-  explorerState$,
+  explorerService,
 } from './explorer_dashboard_service';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
 import { NavigationMenu } from '../components/navigation_menu';
@@ -62,16 +60,14 @@ import {
 } from '../components/kql_filter_bar/utils';
 import { mlJobService } from '../services/job_service';
 
-import { jobSelectionActionCreator } from './actions';
 import {
-  getClearedSelectedAnomaliesState,
   getDateFormatTz,
+  restoreAppState,
 } from './explorer_utils';
 import { getSwimlaneContainerWidth } from './legacy_utils';
 
 import {
   DRAG_SELECT_ACTION,
-  EXPLORER_ACTION,
   FILTER_ACTION,
   SWIMLANE_TYPE,
   VIEW_BY_JOB_LABEL,
@@ -107,7 +103,7 @@ const ExplorerPage = ({ children, jobSelectorProps, resizeRef }) => (
 export const Explorer = injectI18n(injectObservablesAsProps(
   {
     annotationsRefresh: annotationsRefresh$,
-    explorerState: explorerState$,
+    explorerState: explorerService.state$,
     showCharts: showCharts$,
   },
   class Explorer extends React.Component {
@@ -167,54 +163,38 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     resizeRef = createRef();
     resizeChecker = undefined;
     resizeHandler = () => {
-      explorerAction$.next({
-        type: EXPLORER_ACTION.SET_SWIMLANE_CONTAINER_WIDTH,
-        payload: { swimlaneContainerWidth: getSwimlaneContainerWidth() }
-      });
+      explorerService.setSwimlaneContainerWidth(getSwimlaneContainerWidth());
     }
 
     componentDidMount() {
       timefilter.enableTimeRangeSelector();
       timefilter.enableAutoRefreshSelector();
 
-      mlTimefilterRefresh$.pipe(takeUntil(this._unsubscribeAll)).subscribe(() => {
-        const bounds = timefilter.getActiveBounds();
-        explorerAction$.next({ type: EXPLORER_ACTION.SET_STATE, payload: { bounds } });
-      });
+      explorerService.setBounds(timefilter.getActiveBounds());
 
       // Refresh all the data when the time range is altered.
-      timefilter.getFetch$().pipe(takeUntil(this._unsubscribeAll)).subscribe(() => {
-        const bounds = timefilter.getActiveBounds();
-        explorerAction$.next({ type: EXPLORER_ACTION.SET_STATE, payload: { bounds } });
+      merge(
+        mlTimefilterRefresh$,
+        timefilter.getFetch$()
+      ).pipe(takeUntil(this._unsubscribeAll)).subscribe(() => {
+        explorerService.setBounds(timefilter.getActiveBounds());
       });
 
-      const bounds = timefilter.getActiveBounds();
-      explorerAction$.next({ type: EXPLORER_ACTION.SET_STATE, payload: { bounds } });
 
       limit$.pipe(
         takeUntil(this._unsubscribeAll),
         map(d => d.val),
-        distinctUntilChanged(),
-      ).subscribe((swimlaneLimit) => {
-        explorerAction$.next({ type: EXPLORER_ACTION.SET_SWIMLANE_LIMIT, payload: { swimlaneLimit } });
-      });
+      ).subscribe(explorerService.setSwimlaneLimit);
 
       interval$.pipe(
         takeUntil(this._unsubscribeAll),
-        map(d => d.val),
-        distinctUntilChanged(),
-      ).subscribe((tableInterval) => {
-        explorerAction$.next({ type: EXPLORER_ACTION.SET_STATE, payload: { tableInterval } });
-      });
+        map(d => ({ tableInterval: d.val })),
+      ).subscribe(explorerService.setState);
 
       severity$.pipe(
         takeUntil(this._unsubscribeAll),
-        map(d => d.val),
-        distinctUntilChanged(),
-      ).subscribe((tableSeverity) => {
-        explorerAction$.next({ type: EXPLORER_ACTION.SET_STATE, payload: { tableSeverity } });
-      });
-
+        map(d => ({ tableSeverity: d.val })),
+      ).subscribe(explorerService.setState);
 
       // Required to redraw the time series chart when the container is resized.
       this.resizeChecker = new ResizeChecker(this.resizeRef.current);
@@ -227,17 +207,16 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
         this.props.jobSelectService$.pipe(takeUntil(this._unsubscribeAll)).subscribe(({ selection }) => {
           if (selection !== undefined) {
-            const actionType = initialized ? EXPLORER_ACTION.JOB_SELECTION_CHANGE : EXPLORER_ACTION.INITIALIZE;
-            explorerAction$.next(jobSelectionActionCreator(actionType, selection, this.props.explorerState.appState));
-            initialized = true;
+            if (!initialized) {
+              explorerService.initialize(selection, restoreAppState(this.props.explorerState.appState));
+              initialized = true;
+            } else {
+              explorerService.updateJobSelection(selection, restoreAppState(this.props.explorerState.appState));
+            }
           }
         });
       } else {
-        explorerAction$.next({ type: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
-        explorerAction$.next({
-          type: EXPLORER_ACTION.SET_STATE,
-          payload: { loading: false, selectedJobs: [], ...getClearedSelectedAnomaliesState() },
-        });
+        explorerService.clearJobs();
       }
     }
 
@@ -259,26 +238,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       }
     }
 
-    viewByChangeHandler = e => this.setSwimlaneViewBy(e.target.value);
-    setSwimlaneViewBy = (viewBySwimlaneFieldName) => {
-      const { filteredFields, influencersFilterQuery } = this.props.explorerState;
-
-      let maskAll = false;
-
-      if (influencersFilterQuery !== undefined) {
-        maskAll = (viewBySwimlaneFieldName === VIEW_BY_JOB_LABEL ||
-          filteredFields.includes(viewBySwimlaneFieldName) === false);
-      }
-
-      explorerAction$.next({ type: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
-      explorerAction$.next({
-        type: EXPLORER_ACTION.SET_STATE, payload: {
-          maskAll,
-          ...getClearedSelectedAnomaliesState(),
-          viewBySwimlaneFieldName,
-        }
-      });
-    };
+    viewByChangeHandler = e => explorerService.setViewBySwimlaneFieldName(e.target.value);
 
     isSwimlaneSelectActive = false;
     onSwimlaneEnterHandler = () => this.setSwimlaneSelectActive(true);
@@ -298,29 +258,13 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     };
 
     // Listener for click events in the swimlane to load corresponding anomaly data.
-    swimlaneCellClick = (swimlaneSelectedCells) => {
+    swimlaneCellClick = (selectedCells) => {
       // If selectedCells is an empty object we clear any existing selection,
       // otherwise we save the new selection in AppState and update the Explorer.
-      if (Object.keys(swimlaneSelectedCells).length === 0) {
-        explorerAction$.next({ type: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
-        explorerAction$.next({ type: EXPLORER_ACTION.SET_STATE, payload: getClearedSelectedAnomaliesState() });
+      if (Object.keys(selectedCells).length === 0) {
+        explorerService.clearSelection();
       } else {
-        swimlaneSelectedCells.showTopFieldValues = false;
-
-        const currentSwimlaneType = _.get(this.props.explorerState, 'selectedCells.type');
-        const currentShowTopFieldValues = _.get(this.props.explorerState, 'selectedCells.showTopFieldValues', false);
-        const newSwimlaneType = _.get(swimlaneSelectedCells, 'type');
-
-        if (
-          (currentSwimlaneType === SWIMLANE_TYPE.OVERALL && newSwimlaneType === SWIMLANE_TYPE.VIEW_BY) ||
-          newSwimlaneType === SWIMLANE_TYPE.OVERALL ||
-          currentShowTopFieldValues === true
-        ) {
-          swimlaneSelectedCells.showTopFieldValues = true;
-        }
-
-        explorerAction$.next({ type: EXPLORER_ACTION.APP_STATE_SAVE_SELECTION, payload: { swimlaneSelectedCells } });
-        explorerAction$.next({ type: EXPLORER_ACTION.SET_STATE, payload: { selectedCells: swimlaneSelectedCells } });
+        explorerService.setSelectedCells(selectedCells);
       }
     }
     // Escape regular parens from fieldName as that portion of the query is not wrapped in double quotes
@@ -365,10 +309,9 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       const { filterQuery: influencersFilterQuery } = payload;
 
       if (influencersFilterQuery.match_all && Object.keys(influencersFilterQuery.match_all).length === 0) {
-        explorerAction$.next({ type: EXPLORER_ACTION.CLEAR_INFLUENCER_FILTER_SETTINGS });
+        explorerService.clearInfluencerFilterSettings();
       } else {
-        explorerAction$.next({
-          type: EXPLORER_ACTION.SET_INFLUENCER_FILTER_SETTINGS, payload });
+        explorerService.setInfluencerFilterSettings(payload);
       }
     }
 

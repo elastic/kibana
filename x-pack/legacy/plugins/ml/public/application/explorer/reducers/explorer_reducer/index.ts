@@ -4,5 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { jobSelectionActionCreator } from './job_selection';
-export { loadExplorerData } from './load_explorer_data';
+export { getIndexPattern } from './get_index_pattern';
+export { explorerReducer } from './reducer';
+export { getExplorerDefaultState, ExplorerState } from './state';

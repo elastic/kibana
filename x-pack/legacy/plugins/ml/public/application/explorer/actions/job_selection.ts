@@ -10,13 +10,12 @@ import { map } from 'rxjs/operators';
 import { mlFieldFormatService } from '../../services/field_format_service';
 import { mlJobService } from '../../services/job_service';
 
-import { ExplorerAppState } from '../reducers';
-import { createJobs, restoreAppState } from '../explorer_utils';
+import { createJobs, RestoredAppState } from '../explorer_utils';
 
 export function jobSelectionActionCreator(
   actionName: string,
   selectedJobIds: string[],
-  appState: ExplorerAppState
+  { filterData, selectedCells, viewBySwimlaneFieldName }: RestoredAppState
 ) {
   return from(mlFieldFormatService.populateFormats(selectedJobIds)).pipe(
     map(resp => {
@@ -24,8 +23,6 @@ export function jobSelectionActionCreator(
         console.log('Error populating field formats:', resp.err); // eslint-disable-line no-console
         return null;
       }
-
-      const { selectedCells, filterData } = restoreAppState(appState);
 
       const jobs = createJobs(mlJobService.jobs).map(job => {
         job.selected = selectedJobIds.some(id => job.id === id);
@@ -40,7 +37,7 @@ export function jobSelectionActionCreator(
           loading: false,
           selectedCells,
           selectedJobs,
-          viewBySwimlaneFieldName: appState.mlExplorerSwimlane.viewByFieldName,
+          viewBySwimlaneFieldName,
           filterData,
         },
       };

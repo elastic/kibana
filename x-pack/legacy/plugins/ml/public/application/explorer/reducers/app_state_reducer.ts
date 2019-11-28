@@ -56,7 +56,7 @@ export const appStateReducer = (state: ExplorerAppState, nextAction: Action) => 
       break;
 
     case EXPLORER_ACTION.APP_STATE_SAVE_SELECTION:
-      const swimlaneSelectedCells = payload.swimlaneSelectedCells;
+      const swimlaneSelectedCells = payload;
       appState.mlExplorerSwimlane.selectedType = swimlaneSelectedCells.type;
       appState.mlExplorerSwimlane.selectedLanes = swimlaneSelectedCells.lanes;
       appState.mlExplorerSwimlane.selectedTimes = swimlaneSelectedCells.times;

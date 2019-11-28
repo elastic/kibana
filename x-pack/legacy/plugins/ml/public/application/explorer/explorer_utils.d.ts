@@ -100,6 +100,14 @@ export declare const loadAnnotationsTableData: (
   bounds: TimeRangeBounds
 ) => Promise<any[]>;
 
+export declare interface AnomaliesTableData {
+  anomalies: any[];
+  interval: number;
+  examplesByJobId: string[];
+  showViewSeriesLink: boolean;
+  jobIds: string[];
+}
+
 export declare const loadAnomaliesTableData: (
   selectedCells: SelectedCells,
   selectedJobs: ExplorerJob[],
@@ -110,7 +118,7 @@ export declare const loadAnomaliesTableData: (
   tableInterval: string,
   tableSeverity: number,
   influencersFilterQuery: any
-) => Promise<any[]>;
+) => Promise<AnomaliesTableData>;
 
 export declare const loadDataForCharts: (
   jobIds: string[],
@@ -185,9 +193,10 @@ declare interface SelectedCells {
   viewByFieldName: string;
 }
 
-declare interface RestoredAppState {
+export declare interface RestoredAppState {
   selectedCells?: SelectedCells;
   filterData: {} | FilterData;
+  viewBySwimlaneFieldName: string;
 }
 
 export declare const restoreAppState: (appState: any) => RestoredAppState;

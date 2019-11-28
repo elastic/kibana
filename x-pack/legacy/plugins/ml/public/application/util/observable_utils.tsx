@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEqual } from 'lodash';
 import React, { Component, ComponentType } from 'react';
-
 import { BehaviorSubject, Subscription } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
 import { Dictionary } from '../../../common/types/common';
 
 // Sets up a ObservableComponent which subscribes to given observable updates and
@@ -30,7 +31,9 @@ export function injectObservablesAsProps(
 
     public componentDidMount() {
       observableKeys.forEach(k => {
-        this.subscriptions[k] = observables[k].subscribe(v => this.setState({ [k]: v }));
+        this.subscriptions[k] = observables[k]
+          .pipe(distinctUntilChanged(isEqual))
+          .subscribe(v => this.setState({ [k]: v }));
       });
     }
 

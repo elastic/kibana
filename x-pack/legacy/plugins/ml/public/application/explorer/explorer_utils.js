@@ -847,5 +847,5 @@ export function restoreAppState(appState) {
     };
   }
 
-  return { selectedCells, filterData };
+  return { filterData, selectedCells, viewBySwimlaneFieldName: appState.mlExplorerSwimlane.viewByFieldName };
 }
