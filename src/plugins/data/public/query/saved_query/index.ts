@@ -17,30 +17,5 @@
  * under the License.
  */
 
-import { SavedObjectsClientContract } from 'src/core/public';
-import { createSavedQueryService } from './search_bar/lib/saved_query_service';
-
-/**
- * Search Service
- * @internal
- */
-
-export class SearchService {
-  public setup() {
-    // Service requires index patterns, which are only available in `start`
-  }
-
-  public start(savedObjectsClient: SavedObjectsClientContract) {
-    return {
-      services: {
-        savedQueryService: createSavedQueryService(savedObjectsClient),
-      },
-    };
-  }
-
-  public stop() {}
-}
-
-/** @public */
-
-export type SearchStart = ReturnType<SearchService['start']>;
+export { SavedQuery, SavedQueryAttributes, SavedQueryService, SavedQueryTimeFilter } from './types';
+export { createSavedQueryService } from './saved_query_service';

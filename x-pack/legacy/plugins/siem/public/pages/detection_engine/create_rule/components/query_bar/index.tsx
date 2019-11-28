@@ -11,12 +11,12 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
 
-import { SavedQueryTimeFilter } from '../../../../../../../../../../src/legacy/core_plugins/data/public/search';
-import { SavedQuery } from '../../../../../../../../../../src/legacy/core_plugins/data/public';
 import {
   esFilters,
   Query,
   FilterManager,
+  SavedQuery,
+  SavedQueryTimeFilter,
 } from '../../../../../../../../../../src/plugins/data/public';
 
 import { QueryBar } from '../../../../../components/query_bar';
