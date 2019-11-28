@@ -36,9 +36,10 @@ class CalendarService {
    * Fetches calendars by the list of ids.
    * @param calendarIds
    */
-  async fetchCalendarsByIds(calendarIds: CalendarId[]) {
+  async fetchCalendarsByIds(calendarIds: CalendarId[]): Promise<Calendar[]> {
     try {
-      return await ml.calendars({ calendarIds });
+      const calendars = await ml.calendars({ calendarIds });
+      return Array.isArray(calendars) ? calendars : [calendars];
     } catch (e) {
       throw new Error(
         i18n.translate('xpack.ml.calendarService.fetchCalendarsByIdsErrorMessage', {
