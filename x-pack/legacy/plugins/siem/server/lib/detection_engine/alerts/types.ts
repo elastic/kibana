@@ -21,6 +21,19 @@ import { esFilters } from '../../../../../../../../src/plugins/data/server';
 
 export type PartialFilter = Partial<esFilters.Filter>;
 
+export interface ThreatParams {
+  framework: string;
+  tactic: {
+    id: string;
+    name: string;
+    reference: string;
+  };
+  technique: {
+    id: string;
+    name: string;
+    reference: string;
+  };
+}
 export interface RuleAlertParams {
   description: string;
   enabled: boolean;
@@ -44,6 +57,7 @@ export interface RuleAlertParams {
   severity: string;
   tags: string[];
   to: string;
+  threats: ThreatParams[] | undefined | null;
   type: 'filter' | 'query' | 'saved_query';
 }
 
@@ -63,10 +77,6 @@ export type OutputRuleAlertRest = RuleAlertParamsRest & {
   id: string;
   created_by: string | undefined | null;
   updated_by: string | undefined | null;
-};
-
-export type OutputRuleES = OutputRuleAlertRest & {
-  status: 'open' | 'closed';
 };
 
 export type UpdateRuleAlertParamsRest = Partial<RuleAlertParamsRest> & {

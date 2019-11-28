@@ -61,7 +61,7 @@ const TrailingWhitespace = styled.span`
 
 TrailingWhitespace.displayName = 'TrailingWhitespace';
 
-export const MarkdownHint = React.memo<{ show: boolean }>(({ show }) => (
+export const MarkdownHintComponent = ({ show }: { show: boolean }) => (
   <MarkdownHintContainer
     color="subdued"
     data-test-subj="markdown-hint"
@@ -83,6 +83,10 @@ export const MarkdownHint = React.memo<{ show: boolean }>(({ show }) => (
     {'~~'}
     <ImageUrl>{i18n.MARKDOWN_HINT_IMAGE_URL}</ImageUrl>
   </MarkdownHintContainer>
-));
+);
+
+MarkdownHintComponent.displayName = 'MarkdownHintComponent';
+
+export const MarkdownHint = React.memo(MarkdownHintComponent);
 
 MarkdownHint.displayName = 'MarkdownHint';

@@ -8,7 +8,7 @@ import {
   getRowItemDraggables,
   getRowItemOverflow,
   getRowItemDraggable,
-  OverflowField,
+  OverflowFieldComponent,
 } from './helpers';
 import * as React from 'react';
 import { mount, shallow } from 'enzyme';
@@ -210,19 +210,21 @@ describe('Table Helpers', () => {
   describe('OverflowField', () => {
     test('it returns correctly against snapshot', () => {
       const overflowString = 'This string is exactly fifty-one chars in length!!!';
-      const wrapper = shallow(<OverflowField value={overflowString} showToolTip={false} />);
+      const wrapper = shallow(
+        <OverflowFieldComponent value={overflowString} showToolTip={false} />
+      );
       expect(toJson(wrapper)).toMatchSnapshot();
     });
 
     test('it does not truncates as per custom overflowLength value', () => {
       const overflowString = 'This string is short';
-      const wrapper = mount(<OverflowField value={overflowString} overflowLength={20} />);
+      const wrapper = mount(<OverflowFieldComponent value={overflowString} overflowLength={20} />);
       expect(wrapper.text()).toBe('This string is short');
     });
 
     test('it truncates as per custom overflowLength value', () => {
       const overflowString = 'This string is exactly fifty-one chars in length!!!';
-      const wrapper = mount(<OverflowField value={overflowString} overflowLength={20} />);
+      const wrapper = mount(<OverflowFieldComponent value={overflowString} overflowLength={20} />);
       expect(wrapper.text()).toBe('This string is exact');
     });
   });
