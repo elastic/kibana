@@ -26,6 +26,10 @@ const mockObservable = () => {
   };
 };
 
+const mockComponent = () => {
+  return null;
+};
+
 export const mockUiSettings = {
   get: (item) => {
     return mockUiSettings[item];
@@ -76,6 +80,14 @@ export const npSetup = {
           timefilter: sinon.fake(),
           history: sinon.fake(),
         },
+        savedQueries: {
+          saveQuery: sinon.fake(),
+          getAllSavedQueries: sinon.fake(),
+          findSavedQueries: sinon.fake(),
+          getSavedQuery: sinon.fake(),
+          deleteSavedQuery: sinon.fake(),
+          getSavedQueryCount: sinon.fake(),
+        }
       },
       fieldFormats: getFieldFormatsRegistry(mockUiSettings),
     },
@@ -139,6 +151,9 @@ export const npStart = {
         getProvider: sinon.fake(),
       },
       getSuggestions: sinon.fake(),
+      ui: {
+        IndexPatternSelect: mockComponent,
+      },
       query: {
         filterManager: {
           getFetches$: sinon.fake(),

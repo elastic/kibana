@@ -42,7 +42,7 @@ import {
 } from '../../../../../ui/public/filter_manager/query_filter';
 
 import { buildTabularInspectorData } from '../../../../../ui/public/inspector/build_tabular_inspector_data';
-import { calculateObjectHash } from '../../../../../ui/public/vis/lib/calculate_object_hash';
+import { calculateObjectHash } from '../../../../visualizations/public';
 import { getTime } from '../../../../../ui/public/timefilter';
 // @ts-ignore
 import { tabifyAggResponse } from '../../../../../ui/public/agg_response/tabify/tabify';
