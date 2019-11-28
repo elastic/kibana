@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const defaultValue = {
+import { AboutStepRule } from '../../types';
+
+export const defaultValue: AboutStepRule = {
   name: '',
   description: '',
+  isNew: true,
   severity: 'low',
   riskScore: 50,
-  references: [],
-  falsePositives: [],
+  references: [''],
+  falsePositives: [''],
   tags: [],
 };
