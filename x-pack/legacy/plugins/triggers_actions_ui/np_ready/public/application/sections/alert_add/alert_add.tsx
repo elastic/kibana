@@ -33,7 +33,6 @@ import {
   EuiPortal,
   EuiAccordion,
   EuiButtonIcon,
-  EuiComboBoxOptionProps,
 } from '@elastic/eui';
 import { useAppDependencies } from '../../app_dependencies';
 import { saveAlert, loadActionTypes, loadAllActions } from '../../lib/api';

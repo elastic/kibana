@@ -77,7 +77,7 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps> = ({
   errors,
   hasErrors,
 }) => {
-  const { refresh, executionTimeField, documents } = action;
+  const { refresh } = action;
   return (
     <Fragment>
       <ErrableFormRow
