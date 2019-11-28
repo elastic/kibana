@@ -51,7 +51,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
   </DescriptionListDescription>
   <EuiDescriptionListTitle>
     <FormattedMessage
-      defaultMessage="Filebeat Palo Alto Network"
+      defaultMessage="Filebeat Palo Alto Networks"
       id="xpack.siem.overview.filebeatPanwTitle"
       values={Object {}}
     />

@@ -3,7 +3,7 @@
 exports[`AddFilterToGlobalSearchBar Component Rendering 1`] = `
 <WithHoverActions
   hoverContent={
-    <Styled(EuiPanel)
+    <ForwardRef(Styled(EuiPanel))
       data-test-subj="hover-actions-container"
       paddingSize="none"
     >
@@ -18,7 +18,7 @@ exports[`AddFilterToGlobalSearchBar Component Rendering 1`] = `
           type="filter"
         />
       </EuiToolTip>
-    </Styled(EuiPanel)>
+    </ForwardRef(Styled(EuiPanel))>
   }
   render={[Function]}
 />

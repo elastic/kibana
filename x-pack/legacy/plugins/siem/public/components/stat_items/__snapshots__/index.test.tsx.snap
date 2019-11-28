@@ -105,10 +105,9 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                               showInspect={false}
                             >
                               <div
-                                className="sc-bxivhb fEneUz"
+                                className="sc-AykKF cUIXEb"
                                 data-test-subj="transparent-inspect-container"
                               >
-<<<<<<< HEAD
                                 <EuiButtonIcon
                                   aria-label="Inspect"
                                   data-test-subj="inspect-icon-button"
@@ -116,11 +115,6 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                                   iconType="inspect"
                                   onClick={[Function]}
                                   title="Inspect"
-=======
-                                <div
-                                  className="sc-AykKF cUIXEb"
-                                  data-test-subj="transparent-inspect-container"
->>>>>>> b5133b5a57e8187ee612197e034127d57d464ffc
                                 >
                                   <button
                                     aria-label="Inspect"
@@ -351,10 +345,9 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                               showInspect={false}
                             >
                               <div
-                                className="sc-bxivhb fEneUz"
+                                className="sc-AykKF cUIXEb"
                                 data-test-subj="transparent-inspect-container"
                               >
-<<<<<<< HEAD
                                 <EuiButtonIcon
                                   aria-label="Inspect"
                                   data-test-subj="inspect-icon-button"
@@ -362,11 +355,6 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                                   iconType="inspect"
                                   onClick={[Function]}
                                   title="Inspect"
-=======
-                                <div
-                                  className="sc-AykKF cUIXEb"
-                                  data-test-subj="transparent-inspect-container"
->>>>>>> b5133b5a57e8187ee612197e034127d57d464ffc
                                 >
                                   <button
                                     aria-label="Inspect"
@@ -667,10 +655,9 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                             showInspect={false}
                           >
                             <div
-                              className="sc-bxivhb fGGQew"
+                              className="sc-AykKF gGhbbL"
                               data-test-subj="transparent-inspect-container"
                             >
-<<<<<<< HEAD
                               <EuiButtonIcon
                                 aria-label="Inspect"
                                 data-test-subj="inspect-icon-button"
@@ -678,11 +665,6 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                 iconType="inspect"
                                 onClick={[Function]}
                                 title="Inspect"
-=======
-                              <div
-                                className="sc-AykKF gGhbbL"
-                                data-test-subj="transparent-inspect-container"
->>>>>>> b5133b5a57e8187ee612197e034127d57d464ffc
                               >
                                 <button
                                   aria-label="Inspect"

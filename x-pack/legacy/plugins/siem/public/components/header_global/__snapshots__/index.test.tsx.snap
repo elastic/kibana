@@ -34,6 +34,13 @@ exports[`HeaderGlobal it renders 1`] = `
             display="condensed"
             navTabs={
               Object {
+                "detection-engine": Object {
+                  "disabled": false,
+                  "href": "#/link-to/detection-engine",
+                  "id": "detection-engine",
+                  "name": "Detection engine",
+                  "urlKey": "detection-engine",
+                },
                 "hosts": Object {
                   "disabled": false,
                   "href": "#/link-to/hosts",

@@ -5,7 +5,7 @@ exports[`NewNote renders correctly 1`] = `
   data-test-subj="new-note-tabs"
   initialSelectedTab={
     Object {
-      "content": <TextArea
+      "content": <ForwardRef(Styled(EuiTextArea))
         aria-label="Note"
         autoFocus={true}
         data-test-subj="add-a-note"
@@ -23,7 +23,7 @@ exports[`NewNote renders correctly 1`] = `
   tabs={
     Array [
       Object {
-        "content": <TextArea
+        "content": <ForwardRef(Styled(EuiTextArea))
           aria-label="Note"
           autoFocus={true}
           data-test-subj="add-a-note"
@@ -38,7 +38,7 @@ exports[`NewNote renders correctly 1`] = `
         "name": "Note",
       },
       Object {
-        "content": <MarkdownContainer
+        "content": <ForwardRef(Styled(EuiPanel))
           data-test-subj="markdown-container"
           height={200}
           paddingSize="s"
@@ -46,7 +46,7 @@ exports[`NewNote renders correctly 1`] = `
           <Memo(Markdown)
             raw="The contents of a new note"
           />
-        </MarkdownContainer>,
+        </ForwardRef(Styled(EuiPanel))>,
         "id": "preview",
         "name": "Preview (Markdown)",
       },
