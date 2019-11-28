@@ -38,7 +38,14 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
     async ({ name, version, title }: Pick<PackageInfo, 'name' | 'version' | 'title'>) => {
       setPackageInstallStatus({ name, status: InstallStatus.installing });
       const pkgkey = `${name}-${version}`;
-
+      const handleRequestInstallDatasource = () => {
+        installDatasource(pkgkey).then(() => {
+          notifications.toasts.addSuccess({
+            title: `Installed Datasource`,
+            text: 'Successfully installed Datasource',
+          });
+        });
+      };
       try {
         await fetchInstallPackage(pkgkey);
         setPackageInstallStatus({ name, status: InstallStatus.installed });
@@ -48,7 +55,9 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
             <p>Next, create a data source to begin sending data to your Elasticsearch cluster.</p>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={() => installDatasource(pkgkey)} size="s">
+                {/* Would like to add a loading indicator here but, afaict,
+                 notifications are static. i.e. they won't re-render with new state */}
+                <EuiButton onClick={handleRequestInstallDatasource} size="s">
                   Add data source
                 </EuiButton>
               </EuiFlexItem>

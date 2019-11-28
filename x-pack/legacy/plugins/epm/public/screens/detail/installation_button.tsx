@@ -69,6 +69,9 @@ export function InstallationButton(props: InstallationButtonProps) {
 
   const deletionModal = (
     <ConfirmPackageDelete
+      // this is number of which would be installed
+      // deleted includes ingest-pipelines etc so could be larger
+      // not sure how to do this at the moment so using same value
       numOfAssets={numOfAssets}
       packageName={title}
       onCancel={toggleModal}
