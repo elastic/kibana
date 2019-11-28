@@ -76,6 +76,7 @@ export async function getArchiveInfo(
 
 export function pathParts(path: string): AssetParts {
   let dataset;
+
   let [pkgkey, service, type, file] = path.split('/');
 
   // if it's a dataset
@@ -91,6 +92,7 @@ export function pathParts(path: string): AssetParts {
     file = type;
     type = 'fields';
     service = '';
+
   }
 
   return {
