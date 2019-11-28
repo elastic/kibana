@@ -15,15 +15,23 @@ export default function({ getService }: FtrProviderContext) {
   // This test was inspired by https://github.com/elastic/kibana/blob/master/x-pack/test/api_integration/apis/monitoring/common/mappings_exist.js
   describe('template', async () => {
     it('can be loaded', async () => {
-      const body = getTemplate(indexPattern);
+      const template = getTemplate(indexPattern);
 
-      const { body: response } = await es.indices.putTemplate({
+      // This test is not an API integration test with Kibana
+      // We want to test here if the template is valid and for this we need a running ES instance.
+      // If the ES instance takes the template, we assume it is a valid template.
+      const { body: response1 } = await es.indices.putTemplate({
         name: templateName,
-        body,
+        body: template,
       });
-      expect(response).to.eql({ acknowledged: true });
-      const { body: indexTemplate } = await es.indices.getTemplate({ name: templateName });
-      expect(indexTemplate[templateName].index_patterns).to.eql([indexPattern]);
+      // Checks if template loading worked as expected
+      expect(response1).to.eql({ acknowledged: true });
+
+      const { body: response2 } = await es.indices.getTemplate({ name: templateName });
+      // Checks if the content of the template that was loaded is as expected
+      // We already know based on the above test that the template was valid
+      // but we check here also if we wrote the index pattern inside the template as expected
+      expect(response2[templateName].index_patterns).to.eql([indexPattern]);
     });
   });
 }
