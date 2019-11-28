@@ -79,7 +79,7 @@ beforeEach(async () => {
   }
 });
 
-test('Executes the replace panel action', async () => {
+test.skip('Executes the replace panel action', async () => {
   let core: any;
   let SavedObjectFinder: any;
   let notifications: any;
