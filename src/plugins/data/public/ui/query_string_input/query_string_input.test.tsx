@@ -87,7 +87,7 @@ function wrapQueryStringInputInContext(testProps: any, storage?: any) {
   );
 }
 
-describe('QueryStringInput', () => {
+describe.skip('QueryStringInput', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
