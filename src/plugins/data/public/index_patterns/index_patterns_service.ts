@@ -60,7 +60,6 @@ export class IndexPatternsService {
     setFieldFormats(fieldFormats);
 
     return {
-      ...this.setupApi,
       indexPatterns: new IndexPatterns(uiSettings, savedObjectsClient, http),
     };
   }
