@@ -75,7 +75,7 @@ export const uploadLicense = (licenseString, currentLicenseType, acknowledge) =>
     ));
   }
   try {
-    const response = await putLicense(licenseString, acknowledge);
+    const response = await putLicense(services.http, licenseString, acknowledge);
     await dispatchFromResponse(response, dispatch, currentLicenseType, newLicenseType, services);
   } catch (err) {
     const message = (err.responseJSON && err.responseJSON.error.reason) ? err.responseJSON.error.reason : i18n.translate(

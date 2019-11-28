@@ -6,7 +6,7 @@
 
 import { HttpSetup } from 'src/core/public';
 
-export function putLicense(http: HttpSetup, license: any, acknowledge: any) {
+export function putLicense(http: HttpSetup, license: any, acknowledge: boolean) {
   return http.put('/api/license', {
     query: {
       acknowledge: acknowledge ? 'true' : '',
@@ -19,7 +19,7 @@ export function putLicense(http: HttpSetup, license: any, acknowledge: any) {
   });
 }
 
-export function startBasic(http: HttpSetup, acknowledge: any) {
+export function startBasic(http: HttpSetup, acknowledge: boolean) {
   return http.post('/api/license/start_basic', {
     query: {
       acknowledge: acknowledge ? 'true' : '',

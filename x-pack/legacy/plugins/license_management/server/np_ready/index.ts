@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { putLicense } from '../../../lib/license';
+import { PluginInitializerContext } from 'src/core/server';
+import { LicenseManagementServerPlugin } from './plugin';
 
-export function registerLicenseRoute(router, xpackInfo) {
-  router.put('', (request) => {
-    return putLicense(request, xpackInfo);
-  });
-}
+export const plugin = (ctx: PluginInitializerContext) => new LicenseManagementServerPlugin();
