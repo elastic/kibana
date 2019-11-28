@@ -66,15 +66,17 @@ export function InstallationButton(props: InstallationButtonProps) {
       {isInstalling ? 'Deleting' : 'Delete package'}
     </EuiButton>
   );
-  const button = isInstalled ? installedButton : installButton;
-  const modal = isInstalled ? (
+
+  const deletionModal = (
     <ConfirmPackageDelete
       numOfAssets={numOfAssets}
       packageName={title}
       onCancel={toggleModal}
       onConfirm={handleClickDelete}
     />
-  ) : (
+  );
+
+  const installationModal = (
     <ConfirmPackageInstall
       numOfAssets={numOfAssets}
       packageName={title}
@@ -82,10 +84,11 @@ export function InstallationButton(props: InstallationButtonProps) {
       onConfirm={handleClickInstall}
     />
   );
+
   return (
     <Fragment>
-      {button}
-      {isModalVisible && modal}
+      {isInstalled ? installedButton : installButton}
+      {isModalVisible && (isInstalled ? deletionModal : installationModal)}
     </Fragment>
   );
 }
