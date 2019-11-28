@@ -35,11 +35,11 @@ import 'uiExports/visualize';
 
 import { i18n } from '@kbn/i18n';
 
-import { Legacy } from 'kibana';
-
 import { capabilities } from 'ui/capabilities';
 
 import chrome from 'ui/chrome';
+
+import { Legacy } from 'kibana';
 
 import { SavedObjectAttributes } from 'kibana/server';
 import {

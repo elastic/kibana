@@ -77,7 +77,3 @@ export function getServices() {
 export function clearServices() {
   services = null;
 }
-
-// export types
-export { VisSavedObject } from './embeddable/visualize_embeddable';
-export { EmbeddableFactory, ErrorEmbeddable } from '../../../../../plugins/embeddable/public';

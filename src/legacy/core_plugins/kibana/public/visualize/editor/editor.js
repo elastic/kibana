@@ -97,7 +97,7 @@ function VisualizeAppController(
     uiSettings,
   } = getServices();
 
-  new FilterStateManager(globalState, getAppState, filterManager);
+  const filterStateManager = new FilterStateManager(globalState, getAppState, filterManager);
   const queryFilter = filterManager;
   // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;
@@ -390,12 +390,13 @@ function VisualizeAppController(
       }
     }));
 
-    $scope.$on('$destroy', function () {
+    $scope.$on('$destroy', () => {
       if ($scope._handler) {
         $scope._handler.destroy();
       }
       savedVis.destroy();
       stateMonitor.destroy();
+      filterStateManager.destroy();
       subscriptions.unsubscribe();
     });
 

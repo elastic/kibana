@@ -72,3 +72,5 @@ export { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 export { defaultEditor } from 'ui/vis/editors/default/default';
 export { VisType } from 'ui/vis';
 export { wrapInI18nContext } from 'ui/i18n';
+
+export { VisSavedObject } from './embeddable/visualize_embeddable';
