@@ -45,11 +45,4 @@ export class Events {
   ): Promise<EventsOverTimeData> {
     return this.adapter.getEventsOverTime(req, options);
   }
-
-  public async getAlertsData(
-    req: FrameworkRequest,
-    options: TimelineRequestOptions
-  ): Promise<TimelineData> {
-    return this.adapter.getAlertsData(req, options);
-  }
 }

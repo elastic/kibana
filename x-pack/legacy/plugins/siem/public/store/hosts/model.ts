@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Direction, HostsFields } from '../../graphql/types';
+import { Direction, HostsFields, AlertsFields } from '../../graphql/types';
 
 export enum HostsType {
   page = 'page',
@@ -28,6 +28,11 @@ export interface BasicQueryPaginated {
 export interface HostsQuery extends BasicQueryPaginated {
   direction: Direction;
   sortField: HostsFields;
+}
+
+export interface AlertsQuery extends BasicQueryPaginated {
+  direction: Direction;
+  sortField: AlertsFields;
 }
 
 export interface Queries {

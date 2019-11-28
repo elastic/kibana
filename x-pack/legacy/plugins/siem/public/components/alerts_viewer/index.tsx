@@ -15,7 +15,7 @@ import { KqlMode, TimelineModel } from '../../store/timeline/model';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { DataProvider } from '../timeline/data_providers/data_provider';
 import { Sort } from '../timeline/body/sort';
-import { OnChangeItemsPerPage } from '../timeline/alerts';
+import { OnChangeItemsPerPage } from '../timeline/events';
 import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
 
 import { AlertsViewer } from './alerts_viewer';

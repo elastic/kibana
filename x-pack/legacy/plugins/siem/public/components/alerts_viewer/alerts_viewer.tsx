@@ -120,7 +120,7 @@ export const AlertsViewer = React.memo<Props>(
                   sourceId="default"
                 >
                   {({
-                    events,
+                    alerts,
                     getUpdatedAt,
                     inspect,
                     loading,
@@ -154,7 +154,7 @@ export const AlertsViewer = React.memo<Props>(
 
                           <StatefulBody
                             browserFields={browserFields}
-                            data={events}
+                            data={alerts}
                             id={id}
                             isEventViewer={true}
                             height={height}
@@ -170,7 +170,7 @@ export const AlertsViewer = React.memo<Props>(
                             isEventViewer={true}
                             isLive={isLive}
                             isLoading={loading}
-                            itemsCount={events.length}
+                            itemsCount={alerts.length}
                             itemsPerPage={itemsPerPage}
                             itemsPerPageOptions={itemsPerPageOptions}
                             onChangeItemsPerPage={onChangeItemsPerPage}

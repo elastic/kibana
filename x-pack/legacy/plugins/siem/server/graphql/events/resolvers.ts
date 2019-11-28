@@ -37,11 +37,6 @@ type QueryEventsOverTimeResolver = ChildResolverOf<
   QuerySourceResolver
 >;
 
-type QueryAlertsResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.TimelineResolver>,
-  QuerySourceResolver
->;
-
 export const createEventsResolvers = (
   libs: EventsResolversDeps
 ): {
@@ -50,7 +45,6 @@ export const createEventsResolvers = (
     TimelineDetails: QueryTimelineDetailsResolver;
     LastEventTime: QueryLastEventTimeResolver;
     EventsOverTime: QueryEventsOverTimeResolver;
-    Alerts: QueryAlertsResolver;
   };
 } => ({
   Source: {
@@ -83,13 +77,6 @@ export const createEventsResolvers = (
         defaultIndex: args.defaultIndex,
       };
       return libs.events.getEventsOverTime(req, options);
-    },
-    async Alerts(source, args, { req }, info) {
-      const options = createOptions(source, args, info, 'edges.node.ecs.');
-      return libs.events.getAlertsData(req, {
-        ...options,
-        fieldRequested: args.fieldRequested,
-      });
     },
   },
 });

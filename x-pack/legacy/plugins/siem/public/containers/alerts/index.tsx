@@ -15,18 +15,18 @@ import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   GetAlertsQuery,
   PageInfo,
+  TimelineItem,
   SortField,
   TimelineEdges,
-  TimelineItem,
 } from '../../graphql/types';
 import { inputsModel, State, inputsSelectors } from '../../store';
 import { createFilter } from '../helpers';
-import { QueryTemplate, QueryTemplateProps } from '../query_template';
 
 import { alertsQuery } from './index.gql_query';
+import { QueryTemplate, QueryTemplateProps } from '../query_template';
 
-export interface TimelineArgs {
-  events: TimelineItem[];
+export interface AlertsArgs {
+  alerts: TimelineItem[];
   id: string;
   inspect: inputsModel.InspectQuery;
   loading: boolean;
@@ -37,18 +37,18 @@ export interface TimelineArgs {
   getUpdatedAt: () => number;
 }
 
-export interface TimelineQueryReduxProps {
+export interface AlertsComponentReduxProps {
   isInspected: boolean;
 }
 
 export interface OwnProps extends QueryTemplateProps {
-  children?: (args: TimelineArgs) => React.ReactNode;
+  children: (args: AlertsArgs) => React.ReactNode;
   id: string;
   limit: number;
   sortField: SortField;
   fields: string[];
 }
-type AlertsQueryProps = OwnProps & TimelineQueryReduxProps;
+type AlertsQueryProps = OwnProps & AlertsComponentReduxProps;
 
 class AlertsQueryComponent extends QueryTemplate<
   AlertsQueryProps,
@@ -56,11 +56,11 @@ class AlertsQueryComponent extends QueryTemplate<
   GetAlertsQuery.Variables
 > {
   private updatedDate: number = Date.now();
-  private memoizedTimelineEvents: (variables: string, events: TimelineEdges[]) => TimelineItem[];
+  private memoizedAlerts: (variables: string, data: TimelineEdges[]) => TimelineItem[];
 
   constructor(props: AlertsQueryProps) {
     super(props);
-    this.memoizedTimelineEvents = memoizeOne(this.getTimelineEvents);
+    this.memoizedAlerts = memoizeOne(this.getAlerts);
   }
 
   public render() {
@@ -91,7 +91,7 @@ class AlertsQueryComponent extends QueryTemplate<
         variables={variables}
       >
         {({ data, loading, fetchMore, refetch }) => {
-          const timelineEdges = getOr([], 'source.Alerts.edges', data);
+          const alertsEdges = getOr([], 'source.Alerts.edges', data);
           this.setFetchMore(fetchMore);
           this.setFetchMoreOptions((newCursor: string, tiebreaker?: string) => ({
             variables: {
@@ -109,7 +109,7 @@ class AlertsQueryComponent extends QueryTemplate<
                 ...fetchMoreResult,
                 source: {
                   ...fetchMoreResult.source,
-                  Timeline: {
+                  Alerts: {
                     ...fetchMoreResult.source.Alerts,
                     edges: [...prev.source.Alerts.edges, ...fetchMoreResult.source.Alerts.edges],
                   },
@@ -125,7 +125,7 @@ class AlertsQueryComponent extends QueryTemplate<
             loading,
             totalCount: getOr(0, 'source.Alerts.totalCount', data),
             pageInfo: getOr({}, 'source.Alerts.pageInfo', data),
-            events: this.memoizedTimelineEvents(JSON.stringify(variables), timelineEdges),
+            alerts: this.memoizedAlerts(JSON.stringify(variables), alertsEdges),
             loadMore: this.wrappedLoadMore,
             getUpdatedAt: this.getUpdatedAt,
           });
@@ -136,7 +136,7 @@ class AlertsQueryComponent extends QueryTemplate<
 
   private getUpdatedAt = () => this.updatedDate;
 
-  private getTimelineEvents = (variables: string, timelineEdges: TimelineEdges[]): TimelineItem[] =>
+  private getAlerts = (variables: string, timelineEdges: TimelineEdges[]): TimelineItem[] =>
     timelineEdges.map((e: TimelineEdges) => e.node);
 }
 

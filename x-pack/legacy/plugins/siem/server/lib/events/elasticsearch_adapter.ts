@@ -32,9 +32,9 @@ import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { mergeFieldsWithHit, inspectStringifyObject } from '../../utils/build_query';
 import { eventFieldsMap } from '../ecs_fields';
 import { FrameworkAdapter, FrameworkRequest, RequestBasicOptions } from '../framework';
-import { TermAggregation } from '../types';
+import { TermAggregation, SearchHit } from '../types';
 
-import { buildDetailsQuery, buildTimelineQuery, buildAlertsQuery } from './query.dsl';
+import { buildDetailsQuery, buildTimelineQuery } from './query.dsl';
 import { buildLastEventTimeQuery } from './query.last_event_time.dsl';
 import {
   EventHit,
@@ -61,7 +61,6 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
       ...reduceFields(queryOptions.fields, eventFieldsMap),
     ]);
     delete queryOptions.fieldRequested;
-
     const dsl = buildTimelineQuery(queryOptions);
     const response = await this.framework.callWithRequest<EventHit, TermAggregation>(
       request,
@@ -152,40 +151,6 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
       totalCount,
     };
   }
-
-  public async getAlertsData(
-    request: FrameworkRequest,
-    options: TimelineRequestOptions
-  ): Promise<TimelineData> {
-    const queryOptions = cloneDeep(options);
-    queryOptions.fields = uniq([
-      ...queryOptions.fieldRequested,
-      ...reduceFields(queryOptions.fields, eventFieldsMap),
-    ]);
-    delete queryOptions.fieldRequested;
-
-    const dsl = buildAlertsQuery(queryOptions);
-    const response = await this.framework.callWithRequest<EventHit, TermAggregation>(
-      request,
-      'search',
-      dsl
-    );
-    const { limit } = options.pagination;
-    const totalCount = getOr(0, 'hits.total.value', response);
-    const hits = response.hits.hits;
-    const timelineEdges: TimelineEdges[] = hits.map(hit =>
-      formatTimelineData(options.fieldRequested, options.fields, hit, eventFieldsMap)
-    );
-    const hasNextPage = timelineEdges.length === limit + 1;
-    const edges = hasNextPage ? timelineEdges.splice(0, limit) : timelineEdges;
-    const lastCursor = get('cursor', last(edges));
-    const inspect = {
-      dsl: [inspectStringifyObject(dsl)],
-      response: [inspectStringifyObject(response)],
-    };
-
-    return { edges, inspect, pageInfo: { hasNextPage, endCursor: lastCursor }, totalCount };
-  }
 }
 
 /**
@@ -249,7 +214,7 @@ export const formatEventsData = (
 export const formatTimelineData = (
   dataFields: readonly string[],
   ecsFields: readonly string[],
-  hit: EventHit,
+  hit: EventHit | SearchHit,
   fieldMap: Readonly<Record<string, string>>
 ) =>
   uniq([...ecsFields, ...dataFields]).reduce<TimelineEdges>(

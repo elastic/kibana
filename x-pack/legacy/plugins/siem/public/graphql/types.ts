@@ -20,6 +20,21 @@ export interface SortNote {
   sortOrder: Direction;
 }
 
+export interface PaginationInput {
+  /** The limit parameter allows you to configure the maximum amount of items to be returned */
+  limit: number;
+  /** The cursor parameter defines the next result you want to fetch */
+  cursor?: Maybe<string>;
+  /** The tiebreaker parameter allow to be more precise to fetch the next item */
+  tiebreaker?: Maybe<string>;
+}
+
+export interface SortField {
+  sortFieldId: string;
+
+  direction: Direction;
+}
+
 export interface TimerangeInput {
   /** The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan. */
   interval: string;
@@ -38,21 +53,6 @@ export interface PaginationInputPaginated {
   fakePossibleCount: number;
   /** The querySize parameter is the number of items to be returned */
   querySize: number;
-}
-
-export interface PaginationInput {
-  /** The limit parameter allows you to configure the maximum amount of items to be returned */
-  limit: number;
-  /** The cursor parameter defines the next result you want to fetch */
-  cursor?: Maybe<string>;
-  /** The tiebreaker parameter allow to be more precise to fetch the next item */
-  tiebreaker?: Maybe<string>;
-}
-
-export interface SortField {
-  sortFieldId: string;
-
-  direction: Direction;
 }
 
 export interface LastTimeDetails {
@@ -257,6 +257,12 @@ export interface SortTimelineInput {
   sortDirection?: Maybe<string>;
 }
 
+export interface AlertsSortField {
+  field: AlertsFields;
+
+  direction: Direction;
+}
+
 export interface FavoriteTimelineInput {
   fullName?: Maybe<string>;
 
@@ -331,6 +337,10 @@ export enum SortFieldTimeline {
   created = 'created',
 }
 
+export enum AlertsFields {
+  hostName = 'hostName',
+}
+
 export enum NetworkDirectionEcs {
   inbound = 'inbound',
   outbound = 'outbound',
@@ -359,13 +369,13 @@ export enum FlowDirection {
 
 export type ToStringArray = string[];
 
-export type Date = string;
-
 export type ToNumberArray = number[];
 
 export type ToDateArray = string[];
 
 export type ToBooleanArray = boolean[];
+
+export type Date = string;
 
 export type EsValue = any;
 
@@ -456,6 +466,8 @@ export interface Source {
   configuration: SourceConfiguration;
   /** The status of the source */
   status: SourceStatus;
+
+  Alerts: AlertsData;
   /** Gets Authentication success and failures based on a timerange */
   Authentications: AuthenticationsData;
 
@@ -468,8 +480,6 @@ export interface Source {
   LastEventTime: LastEventTimeData;
 
   EventsOverTime: EventsOverTimeData;
-
-  Alerts: TimelineData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
 
@@ -558,164 +568,8 @@ export interface IndexField {
   format?: Maybe<string>;
 }
 
-export interface AuthenticationsData {
-  edges: AuthenticationsEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Maybe<Inspect>;
-}
-
-export interface AuthenticationsEdges {
-  node: AuthenticationItem;
-
-  cursor: CursorType;
-}
-
-export interface AuthenticationItem {
-  _id: string;
-
-  failures: number;
-
-  successes: number;
-
-  user: UserEcsFields;
-
-  lastSuccess?: Maybe<LastSourceHost>;
-
-  lastFailure?: Maybe<LastSourceHost>;
-}
-
-export interface UserEcsFields {
-  domain?: Maybe<string[]>;
-
-  id?: Maybe<string[]>;
-
-  name?: Maybe<string[]>;
-
-  full_name?: Maybe<string[]>;
-
-  email?: Maybe<string[]>;
-
-  hash?: Maybe<string[]>;
-
-  group?: Maybe<string[]>;
-}
-
-export interface LastSourceHost {
-  timestamp?: Maybe<string>;
-
-  source?: Maybe<SourceEcsFields>;
-
-  host?: Maybe<HostEcsFields>;
-}
-
-export interface SourceEcsFields {
-  bytes?: Maybe<number[]>;
-
-  ip?: Maybe<string[]>;
-
-  port?: Maybe<number[]>;
-
-  domain?: Maybe<string[]>;
-
-  geo?: Maybe<GeoEcsFields>;
-
-  packets?: Maybe<number[]>;
-}
-
-export interface GeoEcsFields {
-  city_name?: Maybe<string[]>;
-
-  continent_name?: Maybe<string[]>;
-
-  country_iso_code?: Maybe<string[]>;
-
-  country_name?: Maybe<string[]>;
-
-  location?: Maybe<Location>;
-
-  region_iso_code?: Maybe<string[]>;
-
-  region_name?: Maybe<string[]>;
-}
-
-export interface Location {
-  lon?: Maybe<number[]>;
-
-  lat?: Maybe<number[]>;
-}
-
-export interface HostEcsFields {
-  architecture?: Maybe<string[]>;
-
-  id?: Maybe<string[]>;
-
-  ip?: Maybe<string[]>;
-
-  mac?: Maybe<string[]>;
-
-  name?: Maybe<string[]>;
-
-  os?: Maybe<OsEcsFields>;
-
-  type?: Maybe<string[]>;
-}
-
-export interface OsEcsFields {
-  platform?: Maybe<string[]>;
-
-  name?: Maybe<string[]>;
-
-  full?: Maybe<string[]>;
-
-  family?: Maybe<string[]>;
-
-  version?: Maybe<string[]>;
-
-  kernel?: Maybe<string[]>;
-}
-
-export interface CursorType {
-  value?: Maybe<string>;
-
-  tiebreaker?: Maybe<string>;
-}
-
-export interface PageInfoPaginated {
-  activePage: number;
-
-  fakeTotalCount: number;
-
-  showMorePagesIndicator: boolean;
-}
-
-export interface Inspect {
-  dsl: string[];
-
-  response: string[];
-}
-
-export interface AuthenticationsOverTimeData {
-  inspect?: Maybe<Inspect>;
-
-  authenticationsOverTime: MatrixOverTimeHistogramData[];
-
-  totalCount: number;
-}
-
-export interface MatrixOverTimeHistogramData {
-  x: number;
-
-  y: number;
-
-  g: string;
-}
-
-export interface TimelineData {
-  edges: TimelineEdges[];
+export interface AlertsData {
+  edges: AlertsEdges[];
 
   totalCount: number;
 
@@ -724,7 +578,7 @@ export interface TimelineData {
   inspect?: Maybe<Inspect>;
 }
 
-export interface TimelineEdges {
+export interface AlertsEdges {
   node: TimelineItem;
 
   cursor: CursorType;
@@ -848,6 +702,28 @@ export interface DestinationEcsFields {
   packets?: Maybe<number[]>;
 }
 
+export interface GeoEcsFields {
+  city_name?: Maybe<string[]>;
+
+  continent_name?: Maybe<string[]>;
+
+  country_iso_code?: Maybe<string[]>;
+
+  country_name?: Maybe<string[]>;
+
+  location?: Maybe<Location>;
+
+  region_iso_code?: Maybe<string[]>;
+
+  region_name?: Maybe<string[]>;
+}
+
+export interface Location {
+  lon?: Maybe<number[]>;
+
+  lat?: Maybe<number[]>;
+}
+
 export interface DnsEcsFields {
   question?: Maybe<DnsQuestionData>;
 
@@ -930,6 +806,36 @@ export interface EventEcsFields {
   type?: Maybe<string[]>;
 }
 
+export interface HostEcsFields {
+  architecture?: Maybe<string[]>;
+
+  id?: Maybe<string[]>;
+
+  ip?: Maybe<string[]>;
+
+  mac?: Maybe<string[]>;
+
+  name?: Maybe<string[]>;
+
+  os?: Maybe<OsEcsFields>;
+
+  type?: Maybe<string[]>;
+}
+
+export interface OsEcsFields {
+  platform?: Maybe<string[]>;
+
+  name?: Maybe<string[]>;
+
+  full?: Maybe<string[]>;
+
+  family?: Maybe<string[]>;
+
+  version?: Maybe<string[]>;
+
+  kernel?: Maybe<string[]>;
+}
+
 export interface NetworkEcsField {
   bytes?: Maybe<number[]>;
 
@@ -942,6 +848,20 @@ export interface NetworkEcsField {
   protocol?: Maybe<string[]>;
 
   transport?: Maybe<string[]>;
+}
+
+export interface SourceEcsFields {
+  bytes?: Maybe<number[]>;
+
+  ip?: Maybe<string[]>;
+
+  port?: Maybe<number[]>;
+
+  domain?: Maybe<string[]>;
+
+  geo?: Maybe<GeoEcsFields>;
+
+  packets?: Maybe<number[]>;
 }
 
 export interface SuricataEcsFields {
@@ -1160,6 +1080,22 @@ export interface UrlEcsFields {
   password?: Maybe<string[]>;
 }
 
+export interface UserEcsFields {
+  domain?: Maybe<string[]>;
+
+  id?: Maybe<string[]>;
+
+  name?: Maybe<string[]>;
+
+  full_name?: Maybe<string[]>;
+
+  email?: Maybe<string[]>;
+
+  hash?: Maybe<string[]>;
+
+  group?: Maybe<string[]>;
+}
+
 export interface WinlogEcsFields {
   event_id?: Maybe<number[]>;
 }
@@ -1264,10 +1200,100 @@ export interface SshEcsFields {
   signature?: Maybe<string[]>;
 }
 
+export interface CursorType {
+  value?: Maybe<string>;
+
+  tiebreaker?: Maybe<string>;
+}
+
 export interface PageInfo {
   endCursor?: Maybe<CursorType>;
 
   hasNextPage?: Maybe<boolean>;
+}
+
+export interface Inspect {
+  dsl: string[];
+
+  response: string[];
+}
+
+export interface AuthenticationsData {
+  edges: AuthenticationsEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfoPaginated;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface AuthenticationsEdges {
+  node: AuthenticationItem;
+
+  cursor: CursorType;
+}
+
+export interface AuthenticationItem {
+  _id: string;
+
+  failures: number;
+
+  successes: number;
+
+  user: UserEcsFields;
+
+  lastSuccess?: Maybe<LastSourceHost>;
+
+  lastFailure?: Maybe<LastSourceHost>;
+}
+
+export interface LastSourceHost {
+  timestamp?: Maybe<string>;
+
+  source?: Maybe<SourceEcsFields>;
+
+  host?: Maybe<HostEcsFields>;
+}
+
+export interface PageInfoPaginated {
+  activePage: number;
+
+  fakeTotalCount: number;
+
+  showMorePagesIndicator: boolean;
+}
+
+export interface AuthenticationsOverTimeData {
+  inspect?: Maybe<Inspect>;
+
+  authenticationsOverTime: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
+}
+
+export interface MatrixOverTimeHistogramData {
+  x: number;
+
+  y: number;
+
+  g: string;
+}
+
+export interface TimelineData {
+  edges: TimelineEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface TimelineEdges {
+  node: TimelineItem;
+
+  cursor: CursorType;
 }
 
 export interface TimelineDetailsData {
@@ -2044,6 +2070,22 @@ export interface ResponseFavoriteTimeline {
   favorite?: Maybe<FavoriteTimelineResult[]>;
 }
 
+export interface ObserverFields {
+  name?: Maybe<string[]>;
+}
+
+export interface AlertsItem {
+  _id?: Maybe<string>;
+
+  event?: Maybe<EventEcsFields>;
+
+  host?: Maybe<HostEcsFields>;
+
+  observer?: Maybe<ObserverFields>;
+
+  inspect?: Maybe<Inspect>;
+}
+
 export interface EcsEdges {
   node: Ecs;
 
@@ -2129,6 +2171,19 @@ export interface GetAllTimelineQueryArgs {
 
   onlyUserFavorite?: Maybe<boolean>;
 }
+export interface AlertsSourceArgs {
+  pagination: PaginationInput;
+
+  sortField: SortField;
+
+  fieldRequested: string[];
+
+  timerange?: Maybe<TimerangeInput>;
+
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+}
 export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
 
@@ -2176,19 +2231,6 @@ export interface LastEventTimeSourceArgs {
 }
 export interface EventsOverTimeSourceArgs {
   timerange: TimerangeInput;
-
-  filterQuery?: Maybe<string>;
-
-  defaultIndex: string[];
-}
-export interface AlertsSourceArgs {
-  pagination: PaginationInput;
-
-  sortField: SortField;
-
-  fieldRequested: string[];
-
-  timerange?: Maybe<TimerangeInput>;
 
   filterQuery?: Maybe<string>;
 
@@ -2462,7 +2504,7 @@ export namespace GetAlertsQuery {
   };
 
   export type Alerts = {
-    __typename?: 'TimelineData';
+    __typename?: 'AlertsData';
 
     totalCount: number;
 
@@ -2498,7 +2540,7 @@ export namespace GetAlertsQuery {
   };
 
   export type Edges = {
-    __typename?: 'TimelineEdges';
+    __typename?: 'AlertsEdges';
 
     node: Node;
   };

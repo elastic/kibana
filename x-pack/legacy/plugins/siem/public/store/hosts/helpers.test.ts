@@ -31,6 +31,10 @@ export const mockHostsState: HostsModel = {
         limit: DEFAULT_TABLE_LIMIT,
       },
       [HostsTableType.anomalies]: null,
+      [HostsTableType.alerts]: {
+        activePage: 4,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
     },
   },
   details: {
@@ -54,6 +58,10 @@ export const mockHostsState: HostsModel = {
         limit: DEFAULT_TABLE_LIMIT,
       },
       [HostsTableType.anomalies]: null,
+      [HostsTableType.alerts]: {
+        activePage: 4,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
     },
   },
 };

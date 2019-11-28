@@ -42,6 +42,7 @@ import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 
 import * as i18n from './translations';
 import { Panel } from '../panel';
+import { AlertsTableColumns } from '../page/hosts/alerts_table';
 
 const DEFAULT_DATA_TEST_SUBJ = 'paginated-table';
 
@@ -80,7 +81,8 @@ declare type BasicTableColumns =
   | NetworkTopNFlowColumnsIpDetails
   | TlsColumns
   | UncommonProcessTableColumns
-  | UsersColumns;
+  | UsersColumns
+  | AlertsTableColumns;
 
 declare type SiemTables = BasicTableProps<BasicTableColumns>;
 

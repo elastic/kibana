@@ -23,10 +23,12 @@ import { PinnedEvent } from './pinned_event/saved_object';
 import { Timeline } from './timeline/saved_object';
 import { TLS } from './tls';
 import { SignalAlertParamsRest } from './detection_engine/alerts/types';
+import { Alerts } from './alerts';
 
 export * from './hosts';
 
 export interface AppDomainLibs {
+  alerts: Alerts;
   authentications: Authentications;
   events: Events;
   fields: IndexFields;

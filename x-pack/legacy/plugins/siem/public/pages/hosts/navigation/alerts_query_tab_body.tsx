@@ -5,23 +5,22 @@
  */
 
 import React from 'react';
+import { AlertsComponentsQueryProps } from './types';
 import { StatefulAlertsViewer } from '../../../components/alerts_viewer';
-import { HostsComponentsQueryProps } from './types';
 
-const HOSTS_PAGE_TIMELINE_ID = 'hosts-page-alerts';
+const ALERTS_TABLE_ID = 'timeline-alerts-table';
 
 export const AlertsQueryTabBody = ({
+  deleteQuery,
   endDate,
   filterQuery,
+  indexPattern,
+  skip,
   setQuery,
   startDate,
-  updateDateRange = () => {},
-}: HostsComponentsQueryProps) => {
-  return (
-    <>
-      <StatefulAlertsViewer end={endDate} id={HOSTS_PAGE_TIMELINE_ID} start={startDate} />
-    </>
-  );
-};
+  type,
+}: AlertsComponentsQueryProps) => (
+  <StatefulAlertsViewer end={endDate} id={ALERTS_TABLE_ID} start={startDate} />
+);
 
 AlertsQueryTabBody.displayName = 'AlertsQueryTabBody';

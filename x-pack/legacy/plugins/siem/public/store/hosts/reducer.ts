@@ -15,6 +15,7 @@ import {
   updateHostsSort,
   updateTableActivePage,
   updateTableLimit,
+  updateAlertsSort,
 } from './actions';
 import {
   setHostPageQueriesActivePageToZero,
@@ -73,6 +74,10 @@ export const initialHostsState: HostsState = {
         limit: DEFAULT_TABLE_LIMIT,
       },
       [HostsTableType.anomalies]: null,
+      [HostsTableType.alerts]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
     },
   },
 };
@@ -130,6 +135,20 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
         ...state[hostsType].queries,
         [HostsTableType.hosts]: {
           ...state[hostsType].queries[HostsTableType.hosts],
+          direction: sort.direction,
+          sortField: sort.field,
+        },
+      },
+    },
+  }))
+  .case(updateAlertsSort, (state, { sort, hostsType }) => ({
+    ...state,
+    [hostsType]: {
+      ...state[hostsType],
+      queries: {
+        ...state[hostsType].queries,
+        [HostsTableType.alerts]: {
+          ...state[hostsType].queries[HostsTableType.alerts],
           direction: sort.direction,
           sortField: sort.field,
         },

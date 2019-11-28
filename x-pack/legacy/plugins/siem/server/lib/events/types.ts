@@ -35,7 +35,6 @@ export interface EventsAdapter {
     req: FrameworkRequest,
     options: RequestBasicOptions
   ): Promise<EventsOverTimeData>;
-  getAlertsData(req: FrameworkRequest, options: TimelineRequestOptions): Promise<TimelineData>;
 }
 
 export interface TimelineRequestOptions extends RequestOptions {

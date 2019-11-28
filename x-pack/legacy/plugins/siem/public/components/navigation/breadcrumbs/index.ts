@@ -32,7 +32,7 @@ export const siemRootBreadcrumb: Breadcrumb[] = [
   },
 ];
 
-const getBreadcrumbsForRoute = (
+export const getBreadcrumbsForRoute = (
   object: RouteSpyState & TabNavigationProps
 ): Breadcrumb[] | null => {
   if (object != null && object.navTabs && object.pageName === SiemPageName.hosts) {
