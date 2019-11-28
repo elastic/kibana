@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ReturnTypeList } from '../../../../common/return_types';
+import { ReturnTypeList, ReturnTypeCreate } from '../../../../common/return_types';
 import { Policy } from '../../../../scripts/mock_spec/types';
 import { RestAPIAdapter } from '../rest_api/adapter_types';
 import { PolicyAdapter } from './memory_policy_adapter';
@@ -34,5 +34,9 @@ export class RestPolicyAdapter extends PolicyAdapter {
         perPage,
       };
     }
+  }
+
+  public async create(policy: Partial<Policy>) {
+    return await this.REST.post<ReturnTypeCreate<Policy>>(`/api/ingest/policies`, policy);
   }
 }

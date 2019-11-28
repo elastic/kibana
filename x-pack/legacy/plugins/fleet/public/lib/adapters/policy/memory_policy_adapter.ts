@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ReturnTypeList } from '../../../../common/return_types';
+import { ReturnTypeList, ReturnTypeCreate } from '../../../../common/return_types';
 import { Policy } from '../../../../scripts/mock_spec/types';
 
 export class PolicyAdapter {
@@ -24,5 +24,16 @@ export class PolicyAdapter {
   ): Promise<ReturnTypeList<Policy>> {
     const list = this.memoryDB;
     return { list, success: true, page, perPage, total: list.length };
+  }
+
+  public async create(policy: Partial<Policy>): Promise<ReturnTypeCreate<Policy>> {
+    const item = {
+      ...policy,
+      id: `policy_${this.memoryDB.length}`,
+      status: 'active',
+    } as Policy;
+    // @ts-ignore
+    this.memoryDB.push(item);
+    return { item, success: true, action: 'created' };
   }
 }

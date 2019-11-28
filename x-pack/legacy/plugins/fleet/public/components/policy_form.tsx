@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiFieldText,
   EuiForm,
@@ -24,22 +24,13 @@ import { Policy } from '../../scripts/mock_spec/types';
 
 interface Props {
   policy: Partial<Policy>;
-  onCancel: () => void;
-  onSubmit: (newPolicy: Policy) => void;
+  updatePolicy: (u: Partial<Policy>) => void;
 }
 
-export const PolicyForm: SFC<Props> = ({ policy: originalPolicy, onCancel, onSubmit }) => {
-  const [policy, setPolicy] = useState<Partial<Policy>>({ ...originalPolicy });
-  const updatePolicy = (updatedFields: Partial<Policy>) => {
-    setPolicy({
-      ...policy,
-      ...updatedFields,
-    });
-  };
-
+export const PolicyForm: React.FC<Props> = ({ policy, updatePolicy }) => {
   // TODO: Replace with real policy meta
   const [meta, setMeta] = useState<{ [key: string]: string }>(
-    originalPolicy.id
+    policy.id
       ? {
           env: 'test',
           region: 'us-east',

@@ -134,7 +134,12 @@ export const PolicyListPage: React.FC<{}> = () => {
     <EuiPageBody>
       <EuiPageContent>
         {isCreatePolicyFlyoutOpen ? (
-          <CreatePolicyFlyout onClose={() => setIsCreatePolicyFlyoutOpen(false)} />
+          <CreatePolicyFlyout
+            onClose={() => {
+              setIsCreatePolicyFlyoutOpen(false);
+              fetchPolicies();
+            }}
+          />
         ) : null}
 
         <EuiTitle size="l">

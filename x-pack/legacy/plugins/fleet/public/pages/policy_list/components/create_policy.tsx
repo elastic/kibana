@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlyout,
@@ -17,12 +18,25 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { PolicyForm } from '../../../components/policy_form';
+import { useLibs } from '../../../hooks/use_libs';
+import { Policy } from '../../../../scripts/mock_spec/types';
 
 interface RouterProps {
   onClose: () => void;
 }
 
 export const CreatePolicyFlyout: React.FC<RouterProps> = ({ onClose }) => {
+  const libs = useLibs();
+
+  const [policy, setPolicy] = useState<Partial<Policy>>({ name: '', description: '' });
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const updatePolicy = (updatedFields: Partial<Policy>) => {
+    setPolicy({
+      ...policy,
+      ...updatedFields,
+    });
+  };
+
   const renderHeader = () => (
     <EuiFlyoutHeader hasBorder aria-labelledby="FleetCreatePolicyFlyoutTitle">
       <EuiTitle size="m">
@@ -38,14 +52,7 @@ export const CreatePolicyFlyout: React.FC<RouterProps> = ({ onClose }) => {
 
   const renderBody = () => (
     <EuiFlyoutBody>
-      <PolicyForm
-        policy={{ name: '', description: '' }}
-        onCancel={onClose}
-        onSubmit={() => {
-          // TODO: add create here
-          onClose();
-        }}
-      />
+      <PolicyForm policy={policy} updatePolicy={updatePolicy} />
     </EuiFlyoutBody>
   );
 
@@ -61,7 +68,40 @@ export const CreatePolicyFlyout: React.FC<RouterProps> = ({ onClose }) => {
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton fill onClick={onClose}>
+          <EuiButton
+            fill
+            isLoading={isLoading}
+            onClick={async () => {
+              setIsLoading(true);
+              try {
+                const { success, error } = await libs.policies.create(policy);
+                if (success) {
+                  libs.framework.notifications.addSuccess(
+                    i18n.translate('xpack.fleet.createPolicy.successNotificationTitle', {
+                      defaultMessage: "Policy '{name}' created",
+                      values: { name: policy.name },
+                    })
+                  );
+                } else {
+                  libs.framework.notifications.addDanger(
+                    error
+                      ? error.message
+                      : i18n.translate('xpack.fleet.createPolicy.errorNotificationTitle', {
+                          defaultMessage: 'Unable to create policy',
+                        })
+                  );
+                }
+              } catch (e) {
+                libs.framework.notifications.addDanger(
+                  i18n.translate('xpack.fleet.createPolicy.errorNotificationTitle', {
+                    defaultMessage: 'Unable to create policy',
+                  })
+                );
+              }
+              setIsLoading(false);
+              onClose();
+            }}
+          >
             <FormattedMessage
               id="xpack.fleet.createPolicy.submitButtonLabel"
               defaultMessage="Continue"
