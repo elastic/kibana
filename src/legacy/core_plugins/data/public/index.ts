@@ -35,7 +35,6 @@ export {
   FieldListInterface,
   IndexPattern,
   IndexPatterns,
-  StaticIndexPattern,
 } from './index_patterns';
 export { QueryStringInput } from './query';
 export { SearchBar, SearchBarProps } from './search';

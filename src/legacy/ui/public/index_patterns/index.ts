@@ -50,5 +50,4 @@ export {
   FieldListInterface,
   IndexPattern,
   IndexPatterns,
-  StaticIndexPattern,
 } from '../../../core_plugins/data/public';

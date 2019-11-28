@@ -32,7 +32,6 @@ import {
   formatHitProvider,
   IndexPattern,
   IndexPatterns,
-  StaticIndexPattern,
 } from './index_patterns';
 
 export interface IndexPatternDependencies {
@@ -98,7 +97,7 @@ export type IndexPatternsSetup = ReturnType<IndexPatternsService['setup']>;
 export type IndexPatternsStart = ReturnType<IndexPatternsService['start']>;
 
 /** @public */
-export { IndexPattern, IndexPatterns, StaticIndexPattern, Field, FieldType, FieldListInterface };
+export { IndexPattern, IndexPatterns, Field, FieldType, FieldListInterface };
 
 /** @public */
 export { findIndexPatternByTitle } from './utils';

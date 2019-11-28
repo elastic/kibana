@@ -46,11 +46,6 @@ import { getNotifications, getFieldFormats } from '../services';
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
 
-/** @deprecated
- *  Please use IIndexPattern instead
- * */
-export type StaticIndexPattern = IIndexPattern;
-
 export class IndexPattern implements IIndexPattern {
   [key: string]: any;
 
