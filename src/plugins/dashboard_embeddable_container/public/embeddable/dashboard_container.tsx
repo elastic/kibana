@@ -30,7 +30,7 @@ import {
   ViewMode,
   EmbeddableFactory,
   IEmbeddable,
-  Start as EmbeddableStartContract,
+  IEmbeddableStart,
 } from '../embeddable_plugin';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import { createPanelState } from './panel';
@@ -77,7 +77,7 @@ export interface DashboardContainerOptions {
   application: CoreStart['application'];
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
-  embeddable: EmbeddableStartContract;
+  embeddable: IEmbeddableStart;
   inspector: InspectorStartContract;
   SavedObjectFinder: React.ComponentType<any>;
   ExitFullScreenButton: React.ComponentType<any>;

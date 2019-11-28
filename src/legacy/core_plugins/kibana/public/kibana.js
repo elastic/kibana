@@ -31,7 +31,6 @@ import 'uiExports/visTypes';
 import 'uiExports/visEditorTypes';
 import 'uiExports/visualize';
 import 'uiExports/savedObjectTypes';
-import 'uiExports/fieldFormats';
 import 'uiExports/fieldFormatEditors';
 import 'uiExports/navbarExtensions';
 import 'uiExports/contextMenuActions';

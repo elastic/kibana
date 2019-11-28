@@ -19,31 +19,7 @@
 
 import { find, get } from 'lodash';
 
-import { Field } from './fields';
-import { getFilterableKbnTypeNames } from '../../../../../plugins/data/public';
-
 import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
-
-export const ILLEGAL_CHARACTERS = 'ILLEGAL_CHARACTERS';
-export const CONTAINS_SPACES = 'CONTAINS_SPACES';
-export const INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE = ['\\', '/', '?', '"', '<', '>', '|'];
-export const INDEX_PATTERN_ILLEGAL_CHARACTERS = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.concat(
-  ' '
-);
-
-function findIllegalCharacters(indexPattern: string): string[] {
-  const illegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.reduce(
-    (chars: string[], char: string) => {
-      if (indexPattern.includes(char)) {
-        chars.push(char);
-      }
-      return chars;
-    },
-    []
-  );
-
-  return illegalCharacters;
-}
 
 /**
  * Returns an object matching a given title
@@ -71,49 +47,6 @@ export async function findIndexPatternByTitle(
   return find(
     savedObjects,
     (obj: SimpleSavedObject<any>) => obj.get('title').toLowerCase() === title.toLowerCase()
-  );
-}
-
-export async function getIndexPatternTitle(
-  client: SavedObjectsClientContract,
-  indexPatternId: string
-): Promise<SimpleSavedObject<any>> {
-  const savedObject = (await client.get('index-pattern', indexPatternId)) as SimpleSavedObject<any>;
-
-  if (savedObject.error) {
-    throw new Error(`Unable to get index-pattern title: ${savedObject.error.message}`);
-  }
-
-  return savedObject.attributes.title;
-}
-
-function indexPatternContainsSpaces(indexPattern: string): boolean {
-  return indexPattern.includes(' ');
-}
-
-export function validateIndexPattern(indexPattern: string) {
-  const errors: Record<string, any> = {};
-
-  const illegalCharacters = findIllegalCharacters(indexPattern);
-
-  if (illegalCharacters.length) {
-    errors[ILLEGAL_CHARACTERS] = illegalCharacters;
-  }
-
-  if (indexPatternContainsSpaces(indexPattern)) {
-    errors[CONTAINS_SPACES] = true;
-  }
-
-  return errors;
-}
-
-const filterableTypes = getFilterableKbnTypeNames();
-
-export function isFilterable(field: Field): boolean {
-  return (
-    field.name === '_id' ||
-    field.scripted ||
-    Boolean(field.searchable && filterableTypes.includes(field.type))
   );
 }
 

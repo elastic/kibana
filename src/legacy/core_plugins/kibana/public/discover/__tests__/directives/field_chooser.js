@@ -241,7 +241,6 @@ describe('discover field chooser directives', function () {
       $scope.computeDetails(field);
       expect(field.details.buckets).to.not.be(undefined);
       expect(field.details.buckets[0].value).to.be(40.141592);
-      expect(field.details.buckets[0].display).to.be('40.142');
     });
 
 

@@ -24,8 +24,6 @@ import {
   IUiSettingsClient,
   HttpServiceBase,
 } from 'src/core/public';
-// @ts-ignore
-import { fieldFormats } from 'ui/registry/field_formats';
 
 import { createIndexPatternCache } from './_pattern_cache';
 import { IndexPattern } from './index_pattern';
@@ -34,8 +32,6 @@ import { IndexPatternsApiClient, GetFieldsOptions } from './index_patterns_api_c
 const indexPatternCache = createIndexPatternCache();
 
 export class IndexPatterns {
-  fieldFormats: fieldFormats;
-
   private config: IUiSettingsClient;
   private savedObjectsClient: SavedObjectsClientContract;
   private savedObjectsCache?: Array<SimpleSavedObject<Record<string, any>>> | null;

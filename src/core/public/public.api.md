@@ -5,7 +5,9 @@
 ```ts
 
 import { Breadcrumb } from '@elastic/eui';
+import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
+import { ExclusiveUnion } from '@elastic/eui';
 import { IconType } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import React from 'react';
@@ -119,7 +121,39 @@ export interface ChromeDocTitle {
 }
 
 // @public (undocumented)
-export type ChromeHelpExtension = (element: HTMLDivElement) => () => void;
+export interface ChromeHelpExtension {
+    appName: string;
+    content?: (element: HTMLDivElement) => () => void;
+    links?: ChromeHelpExtensionMenuLink[];
+}
+
+// @public (undocumented)
+export type ChromeHelpExtensionMenuCustomLink = EuiButtonEmptyProps & {
+    linkType: 'custom';
+    content: React.ReactNode;
+};
+
+// @public (undocumented)
+export type ChromeHelpExtensionMenuDiscussLink = EuiButtonEmptyProps & {
+    linkType: 'discuss';
+    href: string;
+};
+
+// @public (undocumented)
+export type ChromeHelpExtensionMenuDocumentationLink = EuiButtonEmptyProps & {
+    linkType: 'documentation';
+    href: string;
+};
+
+// @public (undocumented)
+export type ChromeHelpExtensionMenuGitHubLink = EuiButtonEmptyProps & {
+    linkType: 'github';
+    labels: string[];
+    title?: string;
+};
+
+// @public (undocumented)
+export type ChromeHelpExtensionMenuLink = ExclusiveUnion<ChromeHelpExtensionMenuGitHubLink, ExclusiveUnion<ChromeHelpExtensionMenuDiscussLink, ExclusiveUnion<ChromeHelpExtensionMenuDocumentationLink, ChromeHelpExtensionMenuCustomLink>>>;
 
 // @public (undocumented)
 export interface ChromeNavControl {
@@ -720,7 +754,11 @@ export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends obje
 export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 // @public
-export interface PluginInitializerContext {
+export interface PluginInitializerContext<ConfigSchema extends object = object> {
+    // (undocumented)
+    readonly config: {
+        get: <T extends object = ConfigSchema>() => T;
+    };
     // (undocumented)
     readonly env: {
         mode: Readonly<EnvironmentMode>;
@@ -833,7 +871,7 @@ export class SavedObjectsClient {
     bulkUpdate<T extends SavedObjectAttributes>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<SavedObjectAttributes>>;
     create: <T extends SavedObjectAttributes>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
     delete: (type: string, id: string) => Promise<{}>;
-    find: <T extends SavedObjectAttributes>(options: Pick<SavedObjectsFindOptions, "search" | "filter" | "type" | "searchFields" | "defaultSearchOperator" | "hasReference" | "sortField" | "page" | "perPage" | "fields">) => Promise<SavedObjectsFindResponsePublic<T>>;
+    find: <T extends SavedObjectAttributes>(options: Pick<SavedObjectsFindOptions, "search" | "filter" | "type" | "fields" | "searchFields" | "defaultSearchOperator" | "hasReference" | "sortField" | "page" | "perPage">) => Promise<SavedObjectsFindResponsePublic<T>>;
     get: <T extends SavedObjectAttributes>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
     update<T extends SavedObjectAttributes>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
 }

@@ -29,7 +29,6 @@ export function plugin() {
 /** @public types */
 export { DataSetup, DataStart };
 
-export { FilterBar, ApplyFiltersPopover } from './filter';
 export {
   Field,
   FieldType,
@@ -38,24 +37,10 @@ export {
   IndexPatterns,
   StaticIndexPattern,
 } from './index_patterns';
-export { QueryBarInput } from './query';
+export { QueryStringInput } from './query';
 export { SearchBar, SearchBarProps, SavedQueryAttributes, SavedQuery } from './search';
 
 /** @public static code */
 export * from '../common';
 export { FilterStateManager } from './filter/filter_manager';
-export {
-  CONTAINS_SPACES,
-  getFromSavedObject,
-  getRoutes,
-  isFilterable,
-  IndexPatternSelect,
-  validateIndexPattern,
-  ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-  IndexPatternAlreadyExists,
-  IndexPatternMissingIndices,
-  NoDefaultIndexPattern,
-  NoDefinedIndexPatterns,
-} from './index_patterns';
+export { getFromSavedObject, getRoutes } from './index_patterns';

@@ -18,11 +18,8 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { doesKueryExpressionHaveLuceneSyntaxError } from '@kbn/es-query';
-
 import classNames from 'classnames';
 import React, { useState } from 'react';
-
 import {
   EuiButton,
   EuiFlexGroup,
@@ -36,26 +33,27 @@ import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Toast } from 'src/core/public';
 import {
+  IDataPluginServices,
+  IIndexPattern,
   TimeRange,
   TimeHistoryContract,
   Query,
   PersistedLog,
   getQueryLog,
+  esKuery,
 } from '../../../../../../../plugins/data/public';
 import { useKibana, toMountPoint } from '../../../../../../../plugins/kibana_react/public';
-
-import { IndexPattern } from '../../../index_patterns';
-import { QueryBarInput } from './query_bar_input';
-import { IDataPluginServices } from '../../../types';
+import { QueryStringInput } from './query_string_input';
 
 interface Props {
   query?: Query;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
+  dataTestSubj?: string;
   disableAutoFocus?: boolean;
   screenTitle?: string;
-  indexPatterns?: Array<IndexPattern | string>;
+  indexPatterns?: Array<IIndexPattern | string>;
   intl: InjectedIntl;
   isLoading?: boolean;
   prepend?: React.ReactNode;
@@ -180,7 +178,7 @@ function QueryBarTopRowUI(props: Props) {
     if (!shouldRenderQueryInput()) return;
     return (
       <EuiFlexItem>
-        <QueryBarInput
+        <QueryStringInput
           disableAutoFocus={props.disableAutoFocus}
           indexPatterns={props.indexPatterns!}
           prepend={props.prepend}
@@ -189,6 +187,7 @@ function QueryBarTopRowUI(props: Props) {
           onChange={onQueryChange}
           onSubmit={onInputSubmit}
           persistedLog={persistedLog}
+          dataTestSubj={props.dataTestSubj}
         />
       </EuiFlexItem>
     );
@@ -298,7 +297,7 @@ function QueryBarTopRowUI(props: Props) {
       language === 'kuery' &&
       typeof query === 'string' &&
       (!storage || !storage.get('kibana.luceneSyntaxWarningOptOut')) &&
-      doesKueryExpressionHaveLuceneSyntaxError(query)
+      esKuery.doesKueryExpressionHaveLuceneSyntaxError(query)
     ) {
       const toast = notifications!.toasts.addWarning({
         title: intl.formatMessage({

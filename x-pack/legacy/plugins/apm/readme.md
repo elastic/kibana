@@ -8,7 +8,7 @@
 git clone git@github.com:elastic/kibana.git
 cd kibana/
 yarn kbn bootstrap
-yarn start
+yarn start --no-base-path
 ```
 
 #### APM Server, Elasticsearch and data

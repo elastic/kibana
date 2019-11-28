@@ -76,7 +76,7 @@ export class TimelionPlugin implements Plugin<Promise<void>, void> {
     this.registerPanels(dependencies);
 
     expressions.registerFunction(() => getTimelionVisualizationConfig(dependencies));
-    visualizations.types.registerVisualization(() => getTimelionVisualization(dependencies));
+    visualizations.types.createBaseVisualization(getTimelionVisualization(dependencies));
   }
 
   private registerPanels(dependencies: TimelionVisualizationDependencies) {

@@ -14,15 +14,18 @@ import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { createMockedIndexPattern } from '../../mocks';
 import { IndexPatternPrivateState } from '../../types';
 
-jest.mock('ui/new_platform');
-jest.mock('ui/chrome', () => ({
-  getUiSettingsClient: () => ({
-    get(path: string) {
-      if (path === 'histogram:maxBars') {
-        return 10;
-      }
+jest.mock('ui/new_platform', () => ({
+  npStart: {
+    core: {
+      uiSettings: {
+        get: (path: string) => {
+          if (path === 'histogram:maxBars') {
+            return 10;
+          }
+        },
+      },
     },
-  }),
+  },
 }));
 
 const defaultOptions = {
