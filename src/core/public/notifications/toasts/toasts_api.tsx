@@ -17,19 +17,44 @@
  * under the License.
  */
 
-import { Toast } from '@elastic/eui';
+import { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 import React from 'react';
 import * as Rx from 'rxjs';
 
 import { ErrorToast } from './error_toast';
-import { UiSettingsSetup } from '../../ui_settings';
+import { MountPoint } from '../../types';
+import { mountReactNode } from '../../utils';
+import { UiSettingsClientContract } from '../../ui_settings';
 import { OverlayStart } from '../../overlays';
+import { I18nStart } from '../../i18n';
 
-type ToastInputFields = Pick<Toast, Exclude<keyof Toast, 'id'>>;
+/**
+ * Allowed fields for {@link ToastInput}.
+ *
+ * @remarks
+ * `id` cannot be specified.
+ *
+ * @public
+ */
+export type ToastInputFields = Pick<EuiToast, Exclude<keyof EuiToast, 'id' | 'text' | 'title'>> & {
+  title?: string | MountPoint;
+  text?: string | MountPoint;
+};
 
-/** @public */
-export type ToastInput = string | ToastInputFields | Promise<ToastInputFields>;
+export type Toast = ToastInputFields & {
+  id: string;
+};
 
+/**
+ * Inputs for {@link IToasts} APIs.
+ * @public
+ */
+export type ToastInput = string | ToastInputFields;
+
+/**
+ * Options available for {@link IToasts} APIs.
+ * @public
+ */
 export interface ErrorToastOptions {
   /**
    * The title of the toast and the dialog when expanding the message.
@@ -44,36 +69,57 @@ export interface ErrorToastOptions {
   toastMessage?: string;
 }
 
-const normalizeToast = (toastOrTitle: ToastInput) => {
+const normalizeToast = (toastOrTitle: ToastInput): ToastInputFields => {
   if (typeof toastOrTitle === 'string') {
     return {
       title: toastOrTitle,
     };
   }
-
   return toastOrTitle;
 };
 
-/** @public */
-export class ToastsApi {
+/**
+ * Methods for adding and removing global toast messages. See {@link ToastsApi}.
+ * @public
+ */
+export type IToasts = Pick<
+  ToastsApi,
+  'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
+>;
+
+/**
+ * Methods for adding and removing global toast messages.
+ * @public
+ */
+export class ToastsApi implements IToasts {
   private toasts$ = new Rx.BehaviorSubject<Toast[]>([]);
   private idCounter = 0;
-  private uiSettings: UiSettingsSetup;
+  private uiSettings: UiSettingsClientContract;
 
   private overlays?: OverlayStart;
+  private i18n?: I18nStart;
 
-  constructor(deps: { uiSettings: UiSettingsSetup }) {
+  constructor(deps: { uiSettings: UiSettingsClientContract }) {
     this.uiSettings = deps.uiSettings;
   }
 
-  public registerOverlays(overlays: OverlayStart) {
+  /** @internal */
+  public start({ overlays, i18n }: { overlays: OverlayStart; i18n: I18nStart }) {
     this.overlays = overlays;
+    this.i18n = i18n;
   }
 
+  /** Observable of the toast messages to show to the user. */
   public get$() {
     return this.toasts$.asObservable();
   }
 
+  /**
+   * Adds a new toast to current array of toast.
+   *
+   * @param toastOrTitle - a {@link ToastInput}
+   * @returns a {@link Toast}
+   */
   public add(toastOrTitle: ToastInput) {
     const toast: Toast = {
       id: String(this.idCounter++),
@@ -86,14 +132,25 @@ export class ToastsApi {
     return toast;
   }
 
-  public remove(toast: Toast) {
+  /**
+   * Removes a toast from the current array of toasts if present.
+   * @param toastOrId - a {@link Toast} returned by {@link ToastsApi.add} or its id
+   */
+  public remove(toastOrId: Toast | string) {
+    const toRemove = typeof toastOrId === 'string' ? toastOrId : toastOrId.id;
     const list = this.toasts$.getValue();
-    const listWithoutToast = list.filter(t => t !== toast);
+    const listWithoutToast = list.filter(t => t.id !== toRemove);
     if (listWithoutToast.length !== list.length) {
       this.toasts$.next(listWithoutToast);
     }
   }
 
+  /**
+   * Adds a new toast pre-configured with the success color and check icon.
+   *
+   * @param toastOrTitle - a {@link ToastInput}
+   * @returns a {@link Toast}
+   */
   public addSuccess(toastOrTitle: ToastInput) {
     return this.add({
       color: 'success',
@@ -102,6 +159,12 @@ export class ToastsApi {
     });
   }
 
+  /**
+   * Adds a new toast pre-configured with the warning color and help icon.
+   *
+   * @param toastOrTitle - a {@link ToastInput}
+   * @returns a {@link Toast}
+   */
   public addWarning(toastOrTitle: ToastInput) {
     return this.add({
       color: 'warning',
@@ -111,6 +174,12 @@ export class ToastsApi {
     });
   }
 
+  /**
+   * Adds a new toast pre-configured with the danger color and alert icon.
+   *
+   * @param toastOrTitle - a {@link ToastInput}
+   * @returns a {@link Toast}
+   */
   public addDanger(toastOrTitle: ToastInput) {
     return this.add({
       color: 'danger',
@@ -120,6 +189,13 @@ export class ToastsApi {
     });
   }
 
+  /**
+   * Adds a new toast that displays an exception message with a button to open the full stacktrace in a modal.
+   *
+   * @param error - an `Error` instance.
+   * @param options - {@link ErrorToastOptions}
+   * @returns a {@link Toast}
+   */
   public addError(error: Error, options: ErrorToastOptions) {
     const message = options.toastMessage || error.message;
     return this.add({
@@ -127,12 +203,13 @@ export class ToastsApi {
       iconType: 'alert',
       title: options.title,
       toastLifeTimeMs: this.uiSettings.get('notifications:lifetime:error'),
-      text: (
+      text: mountReactNode(
         <ErrorToast
           openModal={this.openModal.bind(this)}
           error={error}
           title={options.title}
           toastMessage={message}
+          i18nContext={() => this.i18n!.Context}
         />
       ),
     });

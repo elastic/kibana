@@ -5,10 +5,9 @@
  */
 
 import { SecurityService, SpacesService } from '../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function securityTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function securityTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const security: SecurityService = getService('security');
   const spaces: SpacesService = getService('spaces');

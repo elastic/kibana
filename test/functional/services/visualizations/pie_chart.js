@@ -44,6 +44,12 @@ export function PieChartProvider({ getService }) {
       }
     }
 
+    async filterByLegendItem(label) {
+      log.debug(`PieChart.filterByLegendItem(${label})`);
+      await testSubjects.click(`legend-${label}`);
+      await testSubjects.click(`legend-${label}-filterIn`);
+    }
+
     async getPieSlice(name) {
       return await testSubjects.find(`pieSlice-${name.split(' ').join('-')}`);
     }
@@ -87,7 +93,7 @@ export function PieChartProvider({ getService }) {
     async getPieSliceCount() {
       log.debug('PieChart.getPieSliceCount');
       return await retry.try(async () => {
-        const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
+        const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice', 2500);
         return slices.length;
       });
     }

@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Header renders correctly against snapshot 1`] = `
+<Resizeable
+  bottom={0}
+  handle={<ForwardRef(styled.div) />}
+  id="@timestamp"
+  onResize={[Function]}
+  positionAbsolute={true}
+  render={[Function]}
+  right="-1px"
+  top={0}
+/>
+`;

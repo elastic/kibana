@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { run } from '../run';
+import { run } from '@kbn/dev-utils';
 import { REPO_ROOT } from '../constants';
 import { buildSass } from './build_sass';
 

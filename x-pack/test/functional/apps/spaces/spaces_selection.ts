@@ -3,13 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function spaceSelectorFunctonalTests({
   getService,
   getPageObjects,
-}: KibanaFunctionalTestDefaultProviders) {
+}: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects([
     'common',
@@ -20,7 +19,8 @@ export default function spaceSelectorFunctonalTests({
     'spaceSelector',
   ]);
 
-  describe('Spaces', () => {
+  describe('Spaces', function() {
+    this.tags('smoke');
     describe('Space Selector', () => {
       before(async () => await esArchiver.load('spaces/selector'));
       after(async () => await esArchiver.unload('spaces/selector'));
@@ -91,7 +91,7 @@ export default function spaceSelectorFunctonalTests({
         await esArchiver.unload('spaces/selector');
       });
 
-      describe('displays separate data for each space', async () => {
+      describe('displays separate data for each space', () => {
         it('in the default space', async () => {
           await PageObjects.common.navigateToApp('dashboard');
           await expectDashboardRenders('[Logs] Web Traffic');

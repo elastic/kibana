@@ -38,6 +38,7 @@ exports.help = (defaults = {}) => {
       --password.[user] Sets password for native realm user [default: ${password}]
       -E                Additional key=value settings to pass to Elasticsearch
       --download-only   Download the snapshot but don't actually start it
+      --ssl             Sets up SSL on Elasticsearch
 
     Example:
 
@@ -55,12 +56,14 @@ exports.run = async (defaults = {}) => {
       esArgs: 'E',
     },
 
+    string: ['version'],
+
     boolean: ['download-only'],
 
     default: defaults,
   });
 
-  const cluster = new Cluster();
+  const cluster = new Cluster({ ssl: options.ssl });
   if (options['download-only']) {
     await cluster.downloadSnapshot(options);
   } else {
@@ -69,6 +72,8 @@ exports.run = async (defaults = {}) => {
     if (options.dataArchive) {
       await cluster.extractDataDirectory(installPath, options.dataArchive);
     }
+
+    options.bundledJDK = true;
 
     await cluster.run(installPath, options);
   }

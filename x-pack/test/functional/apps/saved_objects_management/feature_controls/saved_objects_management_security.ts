@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
@@ -116,7 +115,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             'kibana',
             '/management/kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
             {
-              loginIfPrompted: false,
+              shouldLoginIfPrompted: false,
             }
           );
         });
@@ -234,7 +233,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             'kibana',
             '/management/kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
             {
-              loginIfPrompted: false,
+              shouldLoginIfPrompted: false,
             }
           );
           await testSubjects.existOrFail('savedObjectsEdit');
@@ -317,7 +316,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             'kibana',
             '/management/kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
             {
-              loginIfPrompted: false,
+              shouldLoginIfPrompted: false,
               ensureCurrentUrl: false,
             }
           );

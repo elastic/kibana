@@ -1,0 +1,45 @@
+.canvasDataTable {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: $euiFontSizeS;
+
+  .canvasDataTable__tableWrapper {
+    @include euiScrollBar;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+
+    // removes white square in the scrollbar corner
+    // sass-lint:disable no-vendor-prefixes
+    &::-webkit-scrollbar-corner {
+      background: transparent;
+    }
+  }
+
+  .canvasDataTable__footer {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    padding: $euiSizeS;
+    border-top: $euiBorderThin;
+  }
+
+  .canvasDataTable__table {
+    min-width: 100%;
+  }
+
+  .canvasDataTable__th,
+  .canvasDataTable__td {
+    text-align: left;
+    padding: $euiSizeS $euiSizeXS;
+    border-bottom: $euiBorderThin;
+  }
+
+  .canvasDataTable__th {
+    white-space: nowrap;
+    font-weight: bold;
+  }
+}

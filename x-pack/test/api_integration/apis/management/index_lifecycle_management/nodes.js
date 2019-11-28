@@ -13,7 +13,7 @@ import { initElasticsearchHelpers } from './lib';
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   const { getNodesStats } = initElasticsearchHelpers(es);
   const { loadNodes, getNodeDetails } = registerHelpers({ supertest });
@@ -33,7 +33,7 @@ export default function ({ getService }) {
       });
     });
 
-    describe('detail', async () => {
+    describe('detail', () => {
       it('should return the node stats when providing a custom node attribute', async () => {
         // Load the stats from ES js client
         const nodeStats = await getNodesStats();

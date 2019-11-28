@@ -25,8 +25,7 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
 
   const ensureFieldsAreSorted = resp => {
-    expect(resp.body.fields)
-      .to.eql(sortBy(resp.body.fields, 'name'));
+    expect(resp.body.fields).to.eql(sortBy(resp.body.fields, 'name'));
   };
 
   describe('response', () => {
@@ -45,7 +44,7 @@ export default function ({ getService }) {
               searchable: true,
               aggregatable: true,
               name: 'bar',
-              readFromDocValues: true
+              readFromDocValues: true,
             },
             {
               type: 'string',
@@ -53,7 +52,7 @@ export default function ({ getService }) {
               searchable: true,
               aggregatable: false,
               name: 'baz',
-              readFromDocValues: false
+              readFromDocValues: false,
             },
             {
               type: 'string',
@@ -62,8 +61,7 @@ export default function ({ getService }) {
               aggregatable: true,
               name: 'baz.keyword',
               readFromDocValues: true,
-              parent: 'baz',
-              subType: 'multi',
+              subType: { multi: { parent: 'baz' } }
             },
             {
               type: 'number',
@@ -71,23 +69,33 @@ export default function ({ getService }) {
               searchable: true,
               aggregatable: true,
               name: 'foo',
-              readFromDocValues: true
-            }
-          ]
+              readFromDocValues: true,
+            },
+            {
+              aggregatable: true,
+              esTypes: [
+                'keyword'
+              ],
+              name: 'nestedField.child',
+              readFromDocValues: true,
+              searchable: true,
+              subType: {
+                nested: {
+                  path: 'nestedField'
+                }
+              },
+              type: 'string',
+            },
+          ],
         })
-        .then(ensureFieldsAreSorted)
-    );
+        .then(ensureFieldsAreSorted));
 
     it('always returns a field for all passed meta fields', () =>
       supertest
         .get('/api/index_patterns/_fields_for_wildcard')
         .query({
           pattern: 'basic_index',
-          meta_fields: JSON.stringify([
-            '_id',
-            '_source',
-            'crazy_meta_field'
-          ])
+          meta_fields: JSON.stringify(['_id', '_source', 'crazy_meta_field']),
         })
         .expect(200, {
           fields: [
@@ -113,7 +121,7 @@ export default function ({ getService }) {
               searchable: true,
               aggregatable: true,
               name: 'bar',
-              readFromDocValues: true
+              readFromDocValues: true,
             },
             {
               aggregatable: false,
@@ -130,8 +138,7 @@ export default function ({ getService }) {
               aggregatable: true,
               name: 'baz.keyword',
               readFromDocValues: true,
-              parent: 'baz',
-              subType: 'multi',
+              subType: { multi: { parent: 'baz' } }
             },
             {
               aggregatable: false,
@@ -146,11 +153,33 @@ export default function ({ getService }) {
               searchable: true,
               aggregatable: true,
               name: 'foo',
-              readFromDocValues: true
-            }
-          ]
+              readFromDocValues: true,
+            },
+            {
+              aggregatable: true,
+              esTypes: [
+                'keyword'
+              ],
+              name: 'nestedField.child',
+              readFromDocValues: true,
+              searchable: true,
+              subType: {
+                nested: {
+                  path: 'nestedField'
+                }
+              },
+              type: 'string',
+            },
+          ],
         })
-        .then(ensureFieldsAreSorted)
-    );
+        .then(ensureFieldsAreSorted));
+
+    it('returns 404 when the pattern does not exist', () =>
+      supertest
+        .get('/api/index_patterns/_fields_for_wildcard')
+        .query({
+          pattern: '[non-existing-pattern]its-invalid-*',
+        })
+        .expect(404));
   });
 }

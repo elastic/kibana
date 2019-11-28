@@ -21,11 +21,19 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const PageObjects = getPageObjects(['dashboard']);
+  const PageObjects = getPageObjects(['common', 'dashboard']);
 
-  describe('empty dashboard', async () => {
+  describe('empty dashboard', () => {
     before(async () => {
+      await esArchiver.load('dashboard/current/kibana');
+      await kibanaServer.uiSettings.replace({
+        'defaultIndex': '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      });
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.clickNewDashboard();
     });
 
@@ -39,7 +47,8 @@ export default function ({ getService, getPageObjects }) {
       expect(addButtonExists).to.be(true);
     });
 
-    it('should open add panel when add button is clicked', async () => {
+    // Flaky test: https://github.com/elastic/kibana/issues/48236
+    it.skip('should open add panel when add button is clicked', async () => {
       await testSubjects.click('emptyDashboardAddPanelButton');
       const isAddPanelOpen = await dashboardAddPanel.isAddPanelOpen();
       expect(isAddPanelOpen).to.be(true);

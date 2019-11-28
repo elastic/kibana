@@ -5,11 +5,11 @@
  */
 
 import expect from '@kbn/expect';
-import { kpiNetworkQuery } from '../../../../plugins/siem/public/containers/kpi_network/index.gql_query';
-import { GetKpiNetworkQuery } from '../../../../plugins/siem/public/graphql/types';
-import { KbnTestProvider } from './types';
+import { kpiNetworkQuery } from '../../../../legacy/plugins/siem/public/containers/kpi_network/index.gql_query';
+import { GetKpiNetworkQuery } from '../../../../legacy/plugins/siem/public/graphql/types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
   describe('Kpi Network', () => {
@@ -21,27 +21,27 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
       const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
       const expectedResult = {
         __typename: 'KpiNetworkData',
-        networkEvents: 6157,
+        networkEvents: 6158,
         uniqueFlowId: 712,
         uniqueSourcePrivateIps: 8,
         uniqueSourcePrivateIpsHistogram: [
           {
-            x: '2019-02-09T16:00:00.000Z',
+            x: new Date('2019-02-09T16:00:00.000Z').valueOf(),
             y: 8,
             __typename: 'KpiNetworkHistogramData',
           },
           {
-            x: '2019-02-09T19:00:00.000Z',
+            x: new Date('2019-02-09T19:00:00.000Z').valueOf(),
             y: 0,
             __typename: 'KpiNetworkHistogramData',
           },
           {
-            x: '2019-02-09T22:00:00.000Z',
+            x: new Date('2019-02-09T22:00:00.000Z').valueOf(),
             y: 8,
             __typename: 'KpiNetworkHistogramData',
           },
           {
-            x: '2019-02-10T01:00:00.000Z',
+            x: new Date('2019-02-10T01:00:00.000Z').valueOf(),
             y: 7,
             __typename: 'KpiNetworkHistogramData',
           },
@@ -50,22 +50,22 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
         uniqueDestinationPrivateIpsHistogram: [
           {
             __typename: 'KpiNetworkHistogramData',
-            x: '2019-02-09T16:00:00.000Z',
+            x: new Date('2019-02-09T16:00:00.000Z').valueOf(),
             y: 8,
           },
           {
             __typename: 'KpiNetworkHistogramData',
-            x: '2019-02-09T19:00:00.000Z',
+            x: new Date('2019-02-09T19:00:00.000Z').valueOf(),
             y: 0,
           },
           {
             __typename: 'KpiNetworkHistogramData',
-            x: '2019-02-09T22:00:00.000Z',
+            x: new Date('2019-02-09T22:00:00.000Z').valueOf(),
             y: 8,
           },
           {
             __typename: 'KpiNetworkHistogramData',
-            x: '2019-02-10T01:00:00.000Z',
+            x: new Date('2019-02-10T01:00:00.000Z').valueOf(),
             y: 8,
           },
         ],
@@ -85,6 +85,7 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -102,27 +103,27 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
       const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
       const expectedResult = {
         __typename: 'KpiNetworkData',
-        networkEvents: 6157,
+        networkEvents: 6158,
         uniqueFlowId: 712,
         uniqueSourcePrivateIps: 8,
         uniqueSourcePrivateIpsHistogram: [
           {
-            x: '2019-02-09T16:00:00.000Z',
+            x: new Date('2019-02-09T16:00:00.000Z').valueOf(),
             y: 8,
             __typename: 'KpiNetworkHistogramData',
           },
           {
-            x: '2019-02-09T19:00:00.000Z',
+            x: new Date('2019-02-09T19:00:00.000Z').valueOf(),
             y: 0,
             __typename: 'KpiNetworkHistogramData',
           },
           {
-            x: '2019-02-09T22:00:00.000Z',
+            x: new Date('2019-02-09T22:00:00.000Z').valueOf(),
             y: 8,
             __typename: 'KpiNetworkHistogramData',
           },
           {
-            x: '2019-02-10T01:00:00.000Z',
+            x: new Date('2019-02-10T01:00:00.000Z').valueOf(),
             y: 7,
             __typename: 'KpiNetworkHistogramData',
           },
@@ -131,22 +132,22 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
         uniqueDestinationPrivateIpsHistogram: [
           {
             __typename: 'KpiNetworkHistogramData',
-            x: '2019-02-09T16:00:00.000Z',
+            x: new Date('2019-02-09T16:00:00.000Z').valueOf(),
             y: 8,
           },
           {
             __typename: 'KpiNetworkHistogramData',
-            x: '2019-02-09T19:00:00.000Z',
+            x: new Date('2019-02-09T19:00:00.000Z').valueOf(),
             y: 0,
           },
           {
             __typename: 'KpiNetworkHistogramData',
-            x: '2019-02-09T22:00:00.000Z',
+            x: new Date('2019-02-09T22:00:00.000Z').valueOf(),
             y: 8,
           },
           {
             __typename: 'KpiNetworkHistogramData',
-            x: '2019-02-10T01:00:00.000Z',
+            x: new Date('2019-02-10T01:00:00.000Z').valueOf(),
             y: 8,
           },
         ],
@@ -165,6 +166,7 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -174,7 +176,4 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
       });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default kpiNetworkTests;
+}

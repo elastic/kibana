@@ -41,7 +41,7 @@ describe('wrapRouteWithPrep fn', function () {
     const delayUserWork = opts.delayUserWork ? 50 : 0;
 
     return function () {
-      ngMock.module('kibana', 'kibana/notify');
+      ngMock.module('kibana');
       let setupComplete = false;
       let userWorkComplete = false;
       let route;

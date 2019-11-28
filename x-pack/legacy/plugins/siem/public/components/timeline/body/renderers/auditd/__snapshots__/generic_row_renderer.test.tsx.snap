@@ -1,0 +1,273 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly against snapshot 1`] = `
+<span>
+  <span>
+    some children
+  </span>
+  <RowRendererContainer>
+    <AuditdGenericDetails
+      browserFields={Object {}}
+      contextId="connected-to-test"
+      data={
+        Object {
+          "_id": "27",
+          "auditd": Object {
+            "data": null,
+            "result": Array [
+              "success",
+            ],
+            "session": Array [
+              "246",
+            ],
+            "summary": Object {
+              "actor": Object {
+                "primary": Array [
+                  "alice",
+                ],
+                "secondary": Array [
+                  "alice",
+                ],
+              },
+              "how": Array [
+                "/usr/bin/wget",
+              ],
+              "message_type": null,
+              "object": Object {
+                "primary": Array [
+                  "93.184.216.34",
+                ],
+                "secondary": Array [
+                  "80",
+                ],
+                "type": Array [
+                  "socket",
+                ],
+              },
+              "sequence": null,
+            },
+          },
+          "destination": Object {
+            "ip": Array [
+              "93.184.216.34",
+            ],
+            "port": Array [
+              80,
+            ],
+          },
+          "event": Object {
+            "action": Array [
+              "connected-to",
+            ],
+            "category": Array [
+              "audit-rule",
+            ],
+            "dataset": null,
+            "id": null,
+            "module": Array [
+              "auditd",
+            ],
+            "severity": null,
+          },
+          "geo": null,
+          "host": Object {
+            "id": Array [
+              "7c21f5ed03b04d0299569d221fe18bbc",
+            ],
+            "ip": Array [
+              "46.101.3.136",
+              "10.16.0.5",
+              "fe80::4066:42ff:fe19:b3b9",
+            ],
+            "name": Array [
+              "zeek-london",
+            ],
+          },
+          "http": null,
+          "network": null,
+          "process": Object {
+            "args": null,
+            "executable": Array [
+              "/usr/bin/wget",
+            ],
+            "name": Array [
+              "wget",
+            ],
+            "pid": Array [
+              1490,
+            ],
+            "ppid": Array [
+              1476,
+            ],
+            "title": Array [
+              "wget www.example.com",
+            ],
+            "working_directory": null,
+          },
+          "source": null,
+          "suricata": null,
+          "timestamp": "2019-03-22T19:13:11.026Z",
+          "url": null,
+          "user": Object {
+            "name": Array [
+              "alice",
+            ],
+          },
+          "zeek": null,
+        }
+      }
+      text="some text"
+      timelineId="test"
+    />
+  </RowRendererContainer>
+</span>
+`;
+
+exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly against snapshot 1`] = `
+<span>
+  <span>
+    some children
+  </span>
+  <RowRendererContainer>
+    <AuditdGenericFileDetails
+      browserFields={Object {}}
+      contextId="opened-file-test"
+      data={
+        Object {
+          "_id": "28",
+          "auditd": Object {
+            "data": null,
+            "result": Array [
+              "success",
+            ],
+            "session": Array [
+              "unset",
+            ],
+            "summary": Object {
+              "actor": Object {
+                "primary": Array [
+                  "unset",
+                ],
+                "secondary": Array [
+                  "root",
+                ],
+              },
+              "how": Array [
+                "/lib/systemd/systemd-journald",
+              ],
+              "message_type": null,
+              "object": Object {
+                "primary": Array [
+                  "/proc/15990/attr/current",
+                ],
+                "secondary": null,
+                "type": Array [
+                  "file",
+                ],
+              },
+              "sequence": null,
+            },
+          },
+          "destination": null,
+          "event": Object {
+            "action": Array [
+              "opened-file",
+            ],
+            "category": Array [
+              "audit-rule",
+            ],
+            "dataset": null,
+            "id": null,
+            "module": Array [
+              "auditd",
+            ],
+            "severity": null,
+          },
+          "file": Object {
+            "ctime": null,
+            "device": Array [
+              "00:00",
+            ],
+            "extension": null,
+            "gid": Array [
+              "0",
+            ],
+            "group": Array [
+              "root",
+            ],
+            "inode": Array [
+              "27672309",
+            ],
+            "mode": Array [
+              "0666",
+            ],
+            "mtime": null,
+            "owner": Array [
+              "root",
+            ],
+            "path": Array [
+              "/proc/15990/attr/current",
+            ],
+            "size": null,
+            "target_path": null,
+            "type": null,
+            "uid": Array [
+              "0",
+            ],
+          },
+          "geo": null,
+          "host": Object {
+            "id": Array [
+              "7c21f5ed03b04d0299569d221fe18bbc",
+            ],
+            "ip": Array [
+              "46.101.3.136",
+              "10.16.0.5",
+              "fe80::4066:42ff:fe19:b3b9",
+            ],
+            "name": Array [
+              "zeek-london",
+            ],
+          },
+          "http": null,
+          "network": null,
+          "process": Object {
+            "args": null,
+            "executable": Array [
+              "/lib/systemd/systemd-journald",
+            ],
+            "name": Array [
+              "systemd-journal",
+            ],
+            "pid": Array [
+              27244,
+            ],
+            "ppid": Array [
+              1,
+            ],
+            "title": Array [
+              "/lib/systemd/systemd-journald",
+            ],
+            "working_directory": Array [
+              "/",
+            ],
+          },
+          "source": null,
+          "suricata": null,
+          "timestamp": "2019-03-26T22:12:18.609Z",
+          "url": null,
+          "user": Object {
+            "name": Array [
+              "root",
+            ],
+          },
+          "zeek": null,
+        }
+      }
+      fileIcon="document"
+      text="some text"
+      timelineId="test"
+    />
+  </RowRendererContainer>
+</span>
+`;

@@ -20,6 +20,10 @@
 /**
  * The Kibana Core APIs for server-side plugins.
  *
+ * A plugin requires a `kibana.json` file at it's root directory that follows
+ * {@link PluginManifest | the manfiest schema} to define static plugin
+ * information required to load the plugin.
+ *
  * A plugin's `server/index` file must contain a named import, `plugin`, that
  * implements {@link PluginInitializer} which returns an object that implements
  * {@link Plugin}.
@@ -35,47 +39,200 @@
  * @packageDocumentation
  */
 
-import { Observable } from 'rxjs';
-import { ClusterClient, ElasticsearchServiceSetup } from './elasticsearch';
-import { HttpServiceSetup, HttpServiceStart } from './http';
-import { PluginsServiceSetup, PluginsServiceStart } from './plugins';
+import { ElasticsearchServiceSetup, IScopedClusterClient } from './elasticsearch';
+import { HttpServiceSetup } from './http';
+import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
+import { ContextSetup } from './context';
+import { IUiSettingsClient, UiSettingsServiceSetup } from './ui_settings';
+import { SavedObjectsClientContract } from './saved_objects/types';
+import { SavedObjectsServiceSetup, SavedObjectsServiceStart } from './saved_objects';
 
 export { bootstrap } from './bootstrap';
-export { ConfigService } from './config';
+export { ConfigPath, ConfigService, EnvironmentMode, PackageInfo } from './config';
 export {
-  CallAPIOptions,
+  IContextContainer,
+  IContextProvider,
+  HandlerFunction,
+  HandlerContextType,
+  HandlerParameters,
+} from './context';
+export { CoreId } from './core_context';
+export {
   ClusterClient,
+  IClusterClient,
   Headers,
   ScopedClusterClient,
+  IScopedClusterClient,
   ElasticsearchClientConfig,
+  ElasticsearchError,
+  ElasticsearchErrorHelpers,
+  ElasticsearchServiceSetup,
   APICaller,
+  FakeRequest,
 } from './elasticsearch';
+export * from './elasticsearch/api_types';
 export {
   AuthenticationHandler,
+  AuthHeaders,
+  AuthResultParams,
+  AuthStatus,
   AuthToolkit,
+  AuthResult,
+  AuthResultType,
+  Authenticated,
+  BasePath,
+  IBasePath,
+  CustomHttpResponseOptions,
+  GetAuthHeaders,
+  GetAuthState,
+  HttpResponseOptions,
+  HttpResponsePayload,
+  HttpServiceSetup,
+  HttpServiceStart,
+  ErrorHttpResponseOptions,
+  IKibanaSocket,
+  IsAuthenticated,
   KibanaRequest,
   KibanaRequestRoute,
+  KibanaRequestRouteOptions,
+  IKibanaResponse,
+  LifecycleResponseFactory,
+  KnownHeaders,
+  LegacyRequest,
   OnPreAuthHandler,
   OnPreAuthToolkit,
   OnPostAuthHandler,
   OnPostAuthToolkit,
-  Router,
+  RedirectResponseOptions,
+  RequestHandler,
+  RequestHandlerContextContainer,
+  RequestHandlerContextProvider,
+  ResponseError,
+  ResponseErrorAttributes,
+  ResponseHeaders,
+  kibanaResponseFactory,
+  KibanaResponseFactory,
+  RouteConfig,
+  IRouter,
+  RouteRegistrar,
   RouteMethod,
   RouteConfigOptions,
-  SessionStorageFactory,
+  RouteSchemas,
+  RouteConfigOptionsBody,
+  RouteContentType,
+  validBodyOutput,
   SessionStorage,
+  SessionStorageCookieOptions,
+  SessionCookieValidationResult,
+  SessionStorageFactory,
 } from './http';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 
 export {
   DiscoveredPlugin,
   Plugin,
+  PluginConfigDescriptor,
+  PluginConfigSchema,
   PluginInitializer,
   PluginInitializerContext,
+  PluginManifest,
   PluginName,
 } from './plugins';
 
+export {
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBulkGetObject,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkUpdateOptions,
+  SavedObjectsBulkResponse,
+  SavedObjectsBulkUpdateResponse,
+  SavedObjectsClient,
+  SavedObjectsClientProviderOptions,
+  SavedObjectsClientWrapperFactory,
+  SavedObjectsClientWrapperOptions,
+  SavedObjectsClientFactory,
+  SavedObjectsCreateOptions,
+  SavedObjectsErrorHelpers,
+  SavedObjectsExportOptions,
+  SavedObjectsExportResultDetails,
+  SavedObjectsFindResponse,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportError,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportOptions,
+  SavedObjectsImportResponse,
+  SavedObjectsImportRetry,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsMigrationLogger,
+  SavedObjectsRawDoc,
+  SavedObjectsResolveImportErrorsOptions,
+  SavedObjectsSchema,
+  SavedObjectsSerializer,
+  SavedObjectsLegacyService,
+  SavedObjectsUpdateOptions,
+  SavedObjectsUpdateResponse,
+  SavedObjectsServiceStart,
+  SavedObjectsServiceSetup,
+  SavedObjectsDeleteOptions,
+  ISavedObjectsRepository,
+  SavedObjectsRepository,
+  SavedObjectsDeleteByNamespaceOptions,
+  SavedObjectsIncrementCounterOptions,
+} from './saved_objects';
+
+export {
+  IUiSettingsClient,
+  UiSettingsParams,
+  UiSettingsType,
+  UiSettingsServiceSetup,
+  UserProvidedValues,
+} from './ui_settings';
+
 export { RecursiveReadonly } from '../utils';
+
+export {
+  SavedObject,
+  SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectAttributeSingle,
+  SavedObjectReference,
+  SavedObjectsBaseOptions,
+  MutatingOperationRefreshSetting,
+  SavedObjectsClientContract,
+  SavedObjectsFindOptions,
+  SavedObjectsMigrationVersion,
+} from './types';
+
+export { LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy';
+
+/**
+ * Plugin specific context passed to a route handler.
+ *
+ * Provides the following clients:
+ *    - {@link SavedObjectsClient | savedObjects.client} - Saved Objects client
+ *      which uses the credentials of the incoming request
+ *    - {@link ScopedClusterClient | elasticsearch.dataClient} - Elasticsearch
+ *      data client which uses the credentials of the incoming request
+ *    - {@link ScopedClusterClient | elasticsearch.adminClient} - Elasticsearch
+ *      admin client which uses the credentials of the incoming request
+ *
+ * @public
+ */
+export interface RequestHandlerContext {
+  core: {
+    savedObjects: {
+      client: SavedObjectsClientContract;
+    };
+    elasticsearch: {
+      dataClient: IScopedClusterClient;
+      adminClient: IScopedClusterClient;
+    };
+    uiSettings: {
+      client: IUiSettingsClient;
+    };
+  };
+}
 
 /**
  * Context passed to the plugins `setup` method.
@@ -83,18 +240,16 @@ export { RecursiveReadonly } from '../utils';
  * @public
  */
 export interface CoreSetup {
-  elasticsearch: {
-    adminClient$: Observable<ClusterClient>;
-    dataClient$: Observable<ClusterClient>;
-  };
-  http: {
-    registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
-    registerAuth: HttpServiceSetup['registerAuth'];
-    registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
-    getBasePathFor: HttpServiceSetup['getBasePathFor'];
-    setBasePathFor: HttpServiceSetup['setBasePathFor'];
-    createNewServer: HttpServiceSetup['createNewServer'];
-  };
+  /** {@link ContextSetup} */
+  context: ContextSetup;
+  /** {@link ElasticsearchServiceSetup} */
+  elasticsearch: ElasticsearchServiceSetup;
+  /** {@link HttpServiceSetup} */
+  http: HttpServiceSetup;
+  /** {@link SavedObjectsServiceSetup} */
+  savedObjects: SavedObjectsServiceSetup;
+  /** {@link UiSettingsServiceSetup} */
+  uiSettings: UiSettingsServiceSetup;
 }
 
 /**
@@ -102,27 +257,9 @@ export interface CoreSetup {
  *
  * @public
  */
-export interface CoreStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
-
-/** @internal */
-export interface InternalCoreSetup {
-  http: HttpServiceSetup;
-  elasticsearch: ElasticsearchServiceSetup;
-  plugins: PluginsServiceSetup;
+export interface CoreStart {
+  /** {@link SavedObjectsServiceStart} */
+  savedObjects: SavedObjectsServiceStart;
 }
 
-/**
- * @public
- */
-export interface InternalCoreStart {
-  http: HttpServiceStart;
-  plugins: PluginsServiceStart;
-}
-
-export {
-  HttpServiceSetup,
-  HttpServiceStart,
-  ElasticsearchServiceSetup,
-  PluginsServiceSetup,
-  PluginsServiceStart,
-};
+export { ContextSetup, PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId };

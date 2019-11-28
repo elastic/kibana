@@ -38,7 +38,7 @@ export function noIndexPatternMsg(indexPatternId) {
 }
 
 export class Control {
-  constructor(controlParams, filterManager, kbnApi, useTimeFilter) {
+  constructor(controlParams, filterManager, useTimeFilter, SearchSource) {
     this.id = controlParams.id;
     this.controlParams = controlParams;
     this.options = controlParams.options;
@@ -46,7 +46,7 @@ export class Control {
     this.label = controlParams.label ? controlParams.label : controlParams.fieldName;
     this.useTimeFilter = useTimeFilter;
     this.filterManager = filterManager;
-    this.kbnApi = kbnApi;
+    this.SearchSource = SearchSource;
 
     // restore state from kibana filter context
     this.reset();
@@ -58,6 +58,10 @@ export class Control {
 
   async fetch() {
     throw new Error('fetch method not defined, subclass are required to implement');
+  }
+
+  destroy() {
+    throw new Error('destroy method not defined, subclass are required to implement');
   }
 
   format = (value) => {

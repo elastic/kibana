@@ -31,14 +31,14 @@
 import angular from 'angular';
 import _ from 'lodash';
 
-import { InvalidJSONProperty, SavedObjectNotFound } from '../errors';
-import { expandShorthand } from '../utils/mapping_setup';
 
-import { SearchSourceProvider } from '../courier/search_source';
+import { InvalidJSONProperty, SavedObjectNotFound, expandShorthand } from '../../../../plugins/kibana_utils/public';
+
+import { SearchSource } from '../courier';
 import { findObjectByTitle } from './find_object_by_title';
 import { SavedObjectsClientProvider } from './saved_objects_client_provider';
 import { migrateLegacyQuery } from '../utils/migrate_legacy_query';
-import { recentlyAccessed } from '../persisted_log';
+import { npStart } from 'ui/new_platform';
 import { i18n } from '@kbn/i18n';
 
 /**
@@ -68,7 +68,6 @@ function isErrorNonFatal(error) {
 
 export function SavedObjectProvider(Promise, Private, confirmModalPromise, indexPatterns) {
   const savedObjectsClient = Private(SavedObjectsClientProvider);
-  const SearchSource = Private(SearchSourceProvider);
 
   /**
    * The SavedObject class is a base class for saved objects loaded from the server and
@@ -321,7 +320,10 @@ export function SavedObjectProvider(Promise, Private, confirmModalPromise, index
       if (this.searchSource) {
         let searchSourceFields = _.omit(this.searchSource.getFields(), ['sort', 'size']);
         if (searchSourceFields.index) {
-          const { id: indexId } = searchSourceFields.index;
+          // searchSourceFields.index will normally be an IndexPattern, but can be a string in two scenarios:
+          // (1) `init()` (and by extension `hydrateIndexPattern()`) hasn't been called on this Saved Object
+          // (2) The IndexPattern doesn't exist, so we fail to resolve it in `hydrateIndexPattern()`
+          const indexId = typeof (searchSourceFields.index) === 'string' ? searchSourceFields.index : searchSourceFields.index.id;
           const refName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
           references.push({
             name: refName,
@@ -508,7 +510,7 @@ export function SavedObjectProvider(Promise, Private, confirmModalPromise, index
         })
         .then(() => {
           if (this.showInRecentlyAccessed && this.getFullPath) {
-            recentlyAccessed.add(this.getFullPath(), this.title, this.id);
+            npStart.core.chrome.recentlyAccessed.add(this.getFullPath(), this.title, this.id);
           }
           this.isSaving = false;
           this.lastSavedTitle = this.title;
@@ -524,11 +526,7 @@ export function SavedObjectProvider(Promise, Private, confirmModalPromise, index
         });
     };
 
-    this.destroy = () => {
-      if (this.searchSource) {
-        this.searchSource.cancelQueued();
-      }
-    };
+    this.destroy = () => {};
 
     /**
      * Delete this object from Elasticsearch

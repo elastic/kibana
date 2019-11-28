@@ -13,10 +13,10 @@ exports[`props exportedFieldsUrl 1`] = `
         <EuiTitle
           size="l"
         >
-          <h2>
+          <h1>
             Great tutorial
               
-          </h2>
+          </h1>
         </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -26,14 +26,9 @@ exports[`props exportedFieldsUrl 1`] = `
     <div>
       <EuiSpacer />
       <EuiButton
-        color="primary"
-        fill={false}
         href="exported_fields_url"
-        iconSide="left"
         rel="noopener"
-        size="m"
         target="_blank"
-        type="button"
       >
         <FormattedMessage
           defaultMessage="View exported fields"
@@ -70,10 +65,10 @@ exports[`props iconType 1`] = `
         <EuiTitle
           size="l"
         >
-          <h2>
+          <h1>
             Great tutorial
               
-          </h2>
+          </h1>
         </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -100,14 +95,13 @@ exports[`props isBeta 1`] = `
         <EuiTitle
           size="l"
         >
-          <h2>
+          <h1>
             Great tutorial
               
             <EuiBetaBadge
               label="Beta"
-              tooltipPosition="top"
             />
-          </h2>
+          </h1>
         </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -134,10 +128,10 @@ exports[`props previewUrl 1`] = `
         <EuiTitle
           size="l"
         >
-          <h2>
+          <h1>
             Great tutorial
               
-          </h2>
+          </h1>
         </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -173,10 +167,10 @@ exports[`render 1`] = `
         <EuiTitle
           size="l"
         >
-          <h2>
+          <h1>
             Great tutorial
               
-          </h2>
+          </h1>
         </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>

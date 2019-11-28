@@ -36,6 +36,7 @@ export async function exec(log, cmd, args, options = {}) {
     stdio: ['ignore', 'pipe', 'pipe'],
     cwd,
     env,
+    preferLocal: true,
   });
 
   await watchStdioForLine(proc, line => log[level](line), exitAfter);

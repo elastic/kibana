@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FullTimeRangeSelector renders the selector 1`] = `
+<EuiButton
+  data-test-subj="mlButtonUseFullData"
+  fill={true}
+  isDisabled={false}
+  onClick={[Function]}
+>
+  <FormattedMessage
+    defaultMessage="Use full {indexPatternTitle} data"
+    id="xpack.ml.fullTimeRangeSelector.useFullDataButtonLabel"
+    values={
+      Object {
+        "indexPatternTitle": "test-index-pattern",
+      }
+    }
+  />
+</EuiButton>
+`;

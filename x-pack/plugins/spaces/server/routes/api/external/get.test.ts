@@ -3,84 +3,124 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import * as Rx from 'rxjs';
+import {
+  createSpaces,
+  createLegacyAPI,
+  createMockSavedObjectsRepository,
+  mockRouteContextWithInvalidLicense,
+  mockRouteContext,
+} from '../__fixtures__';
+import { initGetSpaceApi } from './get';
+import { CoreSetup, IRouter, kibanaResponseFactory } from 'src/core/server';
+import {
+  loggingServiceMock,
+  elasticsearchServiceMock,
+  httpServiceMock,
+  httpServerMock,
+} from 'src/core/server/mocks';
+import { SpacesService } from '../../../spaces_service';
+import { SpacesAuditLogger } from '../../../lib/audit_logger';
+import { SpacesClient } from '../../../lib/spaces_client';
+import { spacesConfig } from '../../../lib/__fixtures__';
+import { securityMock } from '../../../../../security/server/mocks';
 
-jest.mock('../../../lib/route_pre_check_license', () => {
-  return {
-    routePreCheckLicense: () => (request: any, h: any) => h.continue,
-  };
-});
+describe('GET space', () => {
+  const spacesSavedObjects = createSpaces();
+  const spaces = spacesSavedObjects.map(s => ({ id: s.id, ...s.attributes }));
 
-jest.mock('../../../../../../server/lib/get_client_shield', () => {
-  return {
-    getClient: () => {
-      return {
-        callWithInternalUser: jest.fn(() => {
-          return;
-        }),
-      };
-    },
-  };
-});
-import Boom from 'boom';
-import { Space } from '../../../../common/model/space';
-import { createSpaces, createTestHandler, RequestRunner, TeardownFn } from '../__fixtures__';
-import { initGetSpacesApi } from './get';
+  const setup = async () => {
+    const httpService = httpServiceMock.createSetupContract();
+    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
 
-describe('GET spaces', () => {
-  let request: RequestRunner;
-  let teardowns: TeardownFn[];
-  const spaces = createSpaces();
+    const legacyAPI = createLegacyAPI({ spaces });
 
-  beforeEach(() => {
-    const setup = createTestHandler(initGetSpacesApi);
+    const savedObjectsRepositoryMock = createMockSavedObjectsRepository(spacesSavedObjects);
 
-    request = setup.request;
-    teardowns = setup.teardowns;
-  });
+    const log = loggingServiceMock.create().get('spaces');
 
-  afterEach(async () => {
-    await Promise.all(teardowns.splice(0).map(fn => fn()));
-  });
-
-  test(`'GET spaces' returns all available spaces`, async () => {
-    const { response } = await request('GET', '/api/spaces/space');
-
-    const { statusCode, payload } = response;
-
-    expect(statusCode).toEqual(200);
-    const resultSpaces: Space[] = JSON.parse(payload);
-    expect(resultSpaces.map(s => s.id)).toEqual(spaces.map(s => s.id));
-  });
-
-  test(`returns result of routePreCheckLicense`, async () => {
-    const { response } = await request('GET', '/api/spaces/space', {
-      preCheckLicenseImpl: () => Boom.forbidden('test forbidden message'),
-      expectSpacesClientCall: false,
+    const service = new SpacesService(log, () => legacyAPI);
+    const spacesService = await service.setup({
+      http: (httpService as unknown) as CoreSetup['http'],
+      elasticsearch: elasticsearchServiceMock.createSetupContract(),
+      authorization: securityMock.createSetup().authz,
+      getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
+      config$: Rx.of(spacesConfig),
     });
 
-    const { statusCode, payload } = response;
+    spacesService.scopedClient = jest.fn((req: any) => {
+      return Promise.resolve(
+        new SpacesClient(
+          null as any,
+          () => null,
+          null,
+          savedObjectsRepositoryMock,
+          spacesConfig,
+          savedObjectsRepositoryMock,
+          req
+        )
+      );
+    });
 
-    expect(statusCode).toEqual(403);
-    expect(JSON.parse(payload)).toMatchObject({
-      message: 'test forbidden message',
+    initGetSpaceApi({
+      externalRouter: router,
+      getSavedObjects: () => legacyAPI.savedObjects,
+      log,
+      spacesService,
+    });
+
+    return {
+      routeHandler: router.get.mock.calls[0][1],
+    };
+  };
+
+  it(`returns http/403 when the license is invalid`, async () => {
+    const { routeHandler } = await setup();
+
+    const request = httpServerMock.createKibanaRequest({
+      method: 'get',
+    });
+
+    const response = await routeHandler(
+      mockRouteContextWithInvalidLicense,
+      request,
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toEqual(403);
+    expect(response.payload).toEqual({
+      message: 'License is invalid for spaces',
     });
   });
 
-  test(`'GET spaces/{id}' returns the space with that id`, async () => {
-    const { response } = await request('GET', '/api/spaces/space/default');
+  it(`returns the space with that id`, async () => {
+    const { routeHandler } = await setup();
 
-    const { statusCode, payload } = response;
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        id: 'default',
+      },
+      method: 'get',
+    });
 
-    expect(statusCode).toEqual(200);
-    const resultSpace = JSON.parse(payload);
-    expect(resultSpace.id).toEqual('default');
+    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+    expect(response.status).toEqual(200);
+    expect(response.payload).toEqual(spaces.find(s => s.id === 'default'));
   });
 
-  test(`'GET spaces/{id}' returns 404 when retrieving a non-existent space`, async () => {
-    const { response } = await request('GET', '/api/spaces/space/not-a-space');
+  it(`'GET spaces/{id}' returns 404 when retrieving a non-existent space`, async () => {
+    const { routeHandler } = await setup();
 
-    const { statusCode } = response;
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        id: 'not-a-space',
+      },
+      method: 'get',
+    });
 
-    expect(statusCode).toEqual(404);
+    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+    expect(response.status).toEqual(404);
   });
 });

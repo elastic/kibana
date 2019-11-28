@@ -17,4 +17,3 @@
  * under the License.
  */
 
-export { FilterManagerProvider } from './filter_manager';

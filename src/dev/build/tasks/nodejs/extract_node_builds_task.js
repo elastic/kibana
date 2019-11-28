@@ -20,13 +20,11 @@
 import { dirname, resolve } from 'path';
 import fs from 'fs';
 import { promisify } from 'util';
-import mkdirp from 'mkdirp';
 
-import { untar } from '../../lib';
+import { untar, mkdirp } from '../../lib';
 import { getNodeDownloadInfo } from './node_download_info';
 
 const statAsync = promisify(fs.stat);
-const mkdirpAsync = promisify(mkdirp);
 const copyFileAsync = promisify(fs.copyFile);
 
 export const ExtractNodeBuildsTask = {
@@ -50,7 +48,7 @@ export const ExtractNodeBuildsTask = {
   async copyWindows(source, destination) {
     // ensure source exists before creating destination directory
     await statAsync(source);
-    await mkdirpAsync(dirname(destination));
+    await mkdirp(dirname(destination));
     // for performance reasons, do a copy-on-write by using the fs.constants.COPYFILE_FICLONE flag
     return await copyFileAsync(source, destination, fs.constants.COPYFILE_FICLONE);
   },

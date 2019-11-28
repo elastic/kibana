@@ -17,9 +17,24 @@
  * under the License.
  */
 
+jest.mock('ui/new_platform', () => ({
+  npStart: {
+    plugins: {
+      data: {
+        ui: {
+          IndexPatternSelect: () => {
+            return <div/>;
+          }
+        }
+      }
+    },
+  },
+}));
+
 import React from 'react';
 import sinon from 'sinon';
 import { shallow } from 'enzyme';
+
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { getIndexPatternMock } from './__tests__/get_index_pattern_mock';
@@ -233,7 +248,7 @@ test('handleCheckboxOptionChange - multiselect', async () => {
   component.update();
 
   const checkbox = findTestSubject(component, 'listControlMultiselectInput');
-  checkbox.simulate('change', { target: { checked: true } });
+  checkbox.simulate('click');
   sinon.assert.notCalled(handleFieldNameChange);
   sinon.assert.notCalled(handleIndexPatternChange);
   sinon.assert.notCalled(handleNumberOptionChange);
@@ -244,7 +259,9 @@ test('handleCheckboxOptionChange - multiselect', async () => {
     expectedControlIndex,
     expectedOptionName,
     sinon.match((evt) => {
-      if (evt.target.checked === true) {
+      // Synthetic `evt.target.checked` does not get altered by EuiSwitch,
+      // but its aria attribute is correctly updated
+      if (evt.target.getAttribute('aria-checked') === 'true') {
         return true;
       }
       return false;
@@ -325,13 +342,7 @@ test('field name change', async () => {
   // ensure that after async loading is complete the DynamicOptionsSwitch is disabled, because this is not a "string" field
   expect(component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=true]')).toHaveLength(0);
   await update();
-
-
-  /*
-  The issue with enzyme@3.9.0 -> the fix has not been released yet -> https://github.com/airbnb/enzyme/pull/2027
-  TODO: Enable the expectation after the next patch released
   expect(component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=true]')).toHaveLength(1);
-  */
 
   component.setProps({
     controlParams

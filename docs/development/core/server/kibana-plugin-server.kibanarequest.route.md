@@ -4,8 +4,10 @@
 
 ## KibanaRequest.route property
 
+matched route details
+
 <b>Signature:</b>
 
 ```typescript
-readonly route: RecursiveReadonly<KibanaRequestRoute>;
+readonly route: RecursiveReadonly<KibanaRequestRoute<Method>>;
 ```

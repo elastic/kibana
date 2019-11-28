@@ -119,62 +119,12 @@
 // Collapsible section
 
 .visEditorSidebar__collapsible {
-  background-color: transparentize($euiColorLightShade, .85);
-}
-
-.visEditorSidebar__collapsible--margin {
-  margin-top: $euiSizeM;
+  background-color: lightOrDarkTheme($euiPageBackgroundColor, $euiColorLightestShade);
 }
 
 .visEditorSidebar__collapsible--marginBottom {
   margin-bottom: $euiSizeM;
 }
-
-.visEditorSidebar__collapsibleTitle {
-  @include euiFontSizeS;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  white-space: nowrap;
-
-  + * {
-    margin-top: $euiSize;
-    display: block;
-  }
-
-  + .form-group {
-    margin-top: $euiSizeXS;
-  }
-
-  label {
-    margin-bottom: 0 !important; // For filters
-  }
-}
-
-.visEditorSidebar__collapsibleTitleLabel {
-  color: $euiColorPrimary;
-  display: flex;
-  align-items: center;
-  margin-right: $euiSizeXS;
-  line-height: $euiLineHeight;
-}
-
-.visEditorSidebar__collapsibleTitleText {
-  @include euiTextTruncate;
-  margin-left: $euiSizeS;
-}
-
-.visEditorSidebar__collapsibleTitleDescription {
-  flex: 1 1 0;
-  @include euiTextTruncate;
-}
-
-.visEditorSidebar__collapsibleTitleDescription--danger {
-  color: $euiColorDanger;
-  font-weight: $euiFontWeightBold;
-}
-
 
 //
 // FORMS
@@ -187,11 +137,6 @@
 
 .visEditorSidebar__select {
   @include __legacySelectStyles__bad;
-}
-
-.visEditorSidebar__formTitle {
-  @include euiTitle('xxs');
-  margin: $euiSizeS 0;
 }
 
 .visEditorSidebar__formRow {
@@ -221,7 +166,10 @@
   }
 }
 
-.visEditorSidebar__aggParamFormRow {
-  margin-top: $euiSizeS;
-  margin-bottom: $euiSizeS;
+.visEditorSidebar__aggGroupAccordionButtonContent {
+  font-size: $euiFontSizeS;
+
+   span {
+    color: $euiColorDarkShade;
+  }
 }

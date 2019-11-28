@@ -1,8 +1,8 @@
 [role="xpack"]
 [[maps-getting-started]]
-== Getting started with Maps
+== Getting started with Elastic Maps
 
-You work with *Maps* by adding layers. The data for a layer can come from
+You work with *Elastic Maps* by adding layers. The data for a layer can come from
 sources such as {es} documents, vector sources, tile map services, web map
 services, and more. You can symbolize the data in different ways.
 For example, you might show which airports have the longest flight
@@ -13,10 +13,19 @@ light to dark.
 [role="screenshot"]
 image::maps/images/sample_data_web_logs.png[]
 
+[[maps-read-only-access]]
+NOTE: If you have insufficient privileges to create or save maps, a read-only icon
+appears in the application header. The buttons to create new maps or edit
+existing maps won't be visible. For more information on granting access to
+Kibana see <<xpack-security-authorization>>.
+
+[role="screenshot"]
+image::maps/images/read-only-badge.png[Example of Maps' read only access indicator in Kibana's header]
+
 [float]
 === Prerequisites
 Before you start this tutorial, <<add-sample-data, add the web logs sample data set>>. Each
-sample data set includes a map to go along with the data. Once you've added the data, open *Maps* and
+sample data set includes a map to go along with the data. Once you've added the data, open *Elastic Maps* and
 explore the different layers of the *[Logs] Total Requests and Bytes* map.
 You'll re-create this map in this tutorial.
 
@@ -35,7 +44,7 @@ In this tutorial, you'll learn to:
 
 The first thing to do is to create a new map.
 
-. If you haven't already, open *Maps*.
+. If you haven't already, open *Elastic Maps*.
 . On the maps list page, click *Create map*.
 . Set the time range to *Last 7 days*.
 +
@@ -56,7 +65,7 @@ and lighter shades symbolize countries with less traffic.
 ==== Add a vector layer from the Elastic Maps Service source
 
 . In the map legend, click *Add layer*.
-. Click the *Vector shapes* data source.
+. Click the *EMS Boundaries* data source.
 . From the *Layer* dropdown menu, select *World Countries*.
 . Click the *Add layer* button.
 . Set *Layer name* to `Total Requests by Country`.
@@ -75,7 +84,7 @@ the {es} index `kibana_sample_data_logs` on the shared key iso2 = geo.src.
 . Set *Right source* to *kibana_sample_data_logs*.
 . Set *Right field* to *geo.src*.
 
-===== Set the vector style
+===== Set the layer style
 
 All of the world countries are still a single color because the layer is using <<maps-vector-style-static, static styling>>.
 To shade the world countries based on which country is sending the most requests, you'll need to use <<maps-vector-style-data-driven, data driven styling>>.
@@ -141,6 +150,7 @@ image::maps/images/grid_metrics_both.png[]
 . In the map legend, click *Add layer*.
 . Click the *Grid aggregation* data source.
 . Set *Index pattern* to *kibana_sample_data_logs*.
+. Set *Show as* to *points*.
 . Click the *Add layer* button.
 . Set *Layer name* to `Total Requests and Bytes`.
 . Set *Zoom range for layer visibility* to the range [0, 9].
@@ -152,9 +162,9 @@ image::maps/images/grid_metrics_both.png[]
 . Select *Sum* in the aggregation select.
 . Select *bytes* in the field select.
 
-===== Set the vector style
+===== Set the layer style
 
-. In *Vector style*, change *Symbol size*:
+. In *Layer style*, change *Symbol size*:
   .. Set *Min size* to 1.
   .. Set *Max size* to 25.
   .. In the field select, select *sum of bytes*.
@@ -172,7 +182,7 @@ Now that your map is complete, you'll want to save it so others can use it.
 
 . In the application toolbar, click *Save*.
 . Enter `Tutorial web logs map` for the title.
-. Click *Confirm Save*.
+. Click *Save*.
 +
 You have completed the steps for re-creating the sample data map.
 

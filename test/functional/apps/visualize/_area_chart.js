@@ -30,8 +30,6 @@ export default function ({ getService, getPageObjects }) {
     const vizName1 = 'Visualization AreaChart Name Test';
 
     const initAreaChart = async () => {
-      const fromTime = '2015-09-19 06:31:44.000';
-      const toTime = '2015-09-23 18:31:44.000';
 
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();
@@ -39,9 +37,9 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickAreaChart();
       log.debug('clickNewSearch');
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      log.debug('Click X-Axis');
-      await PageObjects.visualize.clickBucket('X-Axis');
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      log.debug('Click X-axis');
+      await PageObjects.visualize.clickBucket('X-axis');
       log.debug('Click Date Histogram');
       await PageObjects.visualize.selectAggregation('Date Histogram');
       log.debug('Check field value');
@@ -132,15 +130,124 @@ export default function ({ getService, getPageObjects }) {
       await inspector.open();
       await inspector.setTablePageSize(50);
       await inspector.expectTableData(expectedTableData);
+      await inspector.close();
     });
 
-    it('should hide side editor if embed is set to true in url', async () => {
-      const url = await browser.getCurrentUrl();
-      const embedUrl = url.split('/visualize/').pop().replace('?_g=', '?embed=true&_g=');
-      await PageObjects.common.navigateToUrl('visualize', embedUrl);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const sideEditorExists = await PageObjects.visualize.getSideEditorExists();
-      expect(sideEditorExists).to.be(false);
+    describe('axis scaling', () => {
+      it('does not scale by default', async () => {
+        const expectedTableData = [
+          [ '2015-09-20 00:00', '6' ],
+          [ '2015-09-20 01:00', '9' ],
+          [ '2015-09-20 02:00', '22' ],
+          [ '2015-09-20 03:00', '31' ],
+          [ '2015-09-20 04:00', '52' ],
+          [ '2015-09-20 05:00', '119' ],
+          [ '2015-09-20 06:00', '181' ],
+          [ '2015-09-20 07:00', '218' ],
+          [ '2015-09-20 08:00', '341' ],
+          [ '2015-09-20 09:00', '440' ],
+          [ '2015-09-20 10:00', '480' ],
+          [ '2015-09-20 11:00', '517' ],
+          [ '2015-09-20 12:00', '522' ],
+          [ '2015-09-20 13:00', '446' ],
+          [ '2015-09-20 14:00', '403' ],
+          [ '2015-09-20 15:00', '321' ],
+          [ '2015-09-20 16:00', '258' ],
+          [ '2015-09-20 17:00', '172' ],
+          [ '2015-09-20 18:00', '95' ],
+          [ '2015-09-20 19:00', '55' ],
+        ];
+
+        await PageObjects.visualize.toggleOpenEditor(2);
+        await PageObjects.visualize.setInterval('Second');
+        await PageObjects.visualize.clickGo();
+        await inspector.open();
+        await inspector.expectTableData(expectedTableData);
+        await inspector.close();
+      });
+
+      it('scales when enabled count agg', async () => {
+        const expectedTableData = [
+          [ '2015-09-20 00:00', '0.002' ],
+          [ '2015-09-20 01:00', '0.003' ],
+          [ '2015-09-20 02:00', '0.006' ],
+          [ '2015-09-20 03:00', '0.009' ],
+          [ '2015-09-20 04:00', '0.014' ],
+          [ '2015-09-20 05:00', '0.033' ],
+          [ '2015-09-20 06:00', '0.05' ],
+          [ '2015-09-20 07:00', '0.061' ],
+          [ '2015-09-20 08:00', '0.095' ],
+          [ '2015-09-20 09:00', '0.122' ],
+          [ '2015-09-20 10:00', '0.133' ],
+          [ '2015-09-20 11:00', '0.144' ],
+          [ '2015-09-20 12:00', '0.145' ],
+          [ '2015-09-20 13:00', '0.124' ],
+          [ '2015-09-20 14:00', '0.112' ],
+          [ '2015-09-20 15:00', '0.089' ],
+          [ '2015-09-20 16:00', '0.072' ],
+          [ '2015-09-20 17:00', '0.048' ],
+          [ '2015-09-20 18:00', '0.026' ],
+          [ '2015-09-20 19:00', '0.015' ],
+        ];
+
+        await PageObjects.visualize.toggleAdvancedParams('2');
+        await PageObjects.visualize.toggleScaleMetrics();
+        await PageObjects.visualize.clickGo();
+        await inspector.open();
+        await inspector.expectTableData(expectedTableData);
+        await inspector.close();
+      });
+
+      it('does not scale top hit agg', async () => {
+        const expectedTableData = [
+          [ '2015-09-20 00:00', '6', '9.035KB' ],
+          [ '2015-09-20 01:00', '9', '5.854KB' ],
+          [ '2015-09-20 02:00', '22', '4.588KB' ],
+          [ '2015-09-20 03:00', '31', '8.349KB' ],
+          [ '2015-09-20 04:00', '52', '2.637KB' ],
+          [ '2015-09-20 05:00', '119', '1.712KB' ],
+          [ '2015-09-20 06:00', '181', '9.157KB' ],
+          [ '2015-09-20 07:00', '218', '8.192KB' ],
+          [ '2015-09-20 08:00', '341', '12.384KB' ],
+          [ '2015-09-20 09:00', '440', '4.482KB' ],
+          [ '2015-09-20 10:00', '480', '9.449KB' ],
+          [ '2015-09-20 11:00', '517', '213B' ],
+          [ '2015-09-20 12:00', '522', '638B' ],
+          [ '2015-09-20 13:00', '446', '7.421KB' ],
+          [ '2015-09-20 14:00', '403', '4.854KB' ],
+          [ '2015-09-20 15:00', '321', '4.132KB' ],
+          [ '2015-09-20 16:00', '258', '601B' ],
+          [ '2015-09-20 17:00', '172', '4.239KB' ],
+          [ '2015-09-20 18:00', '95', '6.272KB' ],
+          [ '2015-09-20 19:00', '55', '2.053KB' ]
+        ];
+
+        await PageObjects.visualize.clickBucket('Y-axis', 'metrics');
+        await PageObjects.visualize.selectAggregation('Top Hit', 'metrics');
+        await PageObjects.visualize.selectField('bytes', 'metrics');
+        await PageObjects.visualize.selectAggregateWith('average');
+        await PageObjects.visualize.clickGo();
+        await inspector.open();
+        await inspector.expectTableData(expectedTableData);
+        await inspector.close();
+      });
+    });
+
+    describe('embedded mode', () => {
+      it('should hide side editor if embed is set to true in url', async () => {
+        const url = await browser.getCurrentUrl();
+        const embedUrl = url.split('/visualize/').pop().replace('?_g=', '?embed=true&_g=');
+        await PageObjects.common.navigateToUrl('visualize', embedUrl);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const sideEditorExists = await PageObjects.visualize.getSideEditorExists();
+        expect(sideEditorExists).to.be(false);
+      });
+
+      after(async () => {
+        const url = await browser.getCurrentUrl();
+        const embedUrl = url.split('/visualize/').pop().replace('?embed=true&', '?');
+        await PageObjects.common.navigateToUrl('visualize', embedUrl);
+      });
     });
 
     describe.skip('switch between Y axis scale types', () => {
@@ -218,8 +325,8 @@ export default function ({ getService, getPageObjects }) {
     });
     describe('date histogram with long time range', () => {
       // that dataset spans from Oct 26, 2013 @ 06:10:17.855	to Apr 18, 2019 @ 11:38:12.790
-      const fromTime = '2013-01-01 00:00:00.000';
-      const toTime = '2020-01-01 00:00:00.000';
+      const fromTime = 'Jan 1, 2013 @ 00:00:00.000';
+      const toTime = 'Jan 1, 2020 @ 00:00:00.000';
       it('should render a yearly area with 12 svg paths', async () => {
         log.debug('navigateToApp visualize');
         await PageObjects.visualize.navigateToNewVisualization();
@@ -228,8 +335,8 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clickNewSearch');
         await PageObjects.visualize.clickNewSearch('long-window-logstash-*');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        log.debug('Click X-Axis');
-        await PageObjects.visualize.clickBucket('X-Axis');
+        log.debug('Click X-axis');
+        await PageObjects.visualize.clickBucket('X-axis');
         log.debug('Click Date Histogram');
         await PageObjects.visualize.selectAggregation('Date Histogram');
         await PageObjects.visualize.selectField('@timestamp');
@@ -251,8 +358,8 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clickNewSearch');
         await PageObjects.visualize.clickNewSearch('long-window-logstash-*');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        log.debug('Click X-Axis');
-        await PageObjects.visualize.clickBucket('X-Axis');
+        log.debug('Click X-axis');
+        await PageObjects.visualize.clickBucket('X-axis');
         log.debug('Click Date Histogram');
         await PageObjects.visualize.selectAggregation('Date Histogram');
         await PageObjects.visualize.selectField('@timestamp');

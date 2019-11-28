@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export const UptimeProvider = ({ getService }: KibanaFunctionalTestDefaultProviders) => {
+export function UptimeProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+
   return {
     async assertExists(key: string) {
       if (!(await testSubjects.exists(key))) {
@@ -17,6 +18,13 @@ export const UptimeProvider = ({ getService }: KibanaFunctionalTestDefaultProvid
     },
     async monitorIdExists(key: string) {
       await testSubjects.existOrFail(key);
+    },
+    async monitorPageLinkExists(monitorId: string) {
+      await testSubjects.existOrFail(`monitor-page-link-${monitorId}`);
+    },
+    async urlContains(expected: string) {
+      const url = await browser.getCurrentUrl();
+      return url.indexOf(expected) >= 0;
     },
     async navigateToMonitorWithId(monitorId: string) {
       await testSubjects.click(`monitor-page-link-${monitorId}`);
@@ -29,5 +37,17 @@ export const UptimeProvider = ({ getService }: KibanaFunctionalTestDefaultProvid
       await testSubjects.setValue('xpack.uptime.filterBar', filterQuery);
       await browser.pressKeys(browser.keys.ENTER);
     },
+    async goToNextPage() {
+      await testSubjects.click('xpack.uptime.monitorList.nextButton');
+    },
+    async goToPreviousPage() {
+      await testSubjects.click('xpack.uptime.monitorList.prevButton');
+    },
+    async setStatusFilterUp() {
+      await testSubjects.click('xpack.uptime.filterBar.filterStatusUp');
+    },
+    async setStatusFilterDown() {
+      await testSubjects.click('xpack.uptime.filterBar.filterStatusDown');
+    },
   };
-};
+}

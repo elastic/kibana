@@ -26,12 +26,12 @@ import { assert } from 'chai';
 import {
   DocumentMigrator,
   IndexMigrator,
-} from '../../../../src/legacy/server/saved_objects/migrations/core';
-import { SavedObjectsSerializer } from '../../../../src/legacy/server/saved_objects/serialization';
-import { SavedObjectsSchema } from '../../../../src/legacy/server/saved_objects/schema';
+} from '../../../../src/core/server/saved_objects/migrations/core';
+import { SavedObjectsSerializer } from '../../../../src/core/server/saved_objects/serialization';
+import { SavedObjectsSchema } from '../../../../src/core/server/saved_objects/schema';
 
 export default ({ getService }) => {
-  const es = getService('es');
+  const es = getService('legacyEs');
   const callCluster = (path, ...args) => _.get(es, path).call(es, ...args);
 
   describe('Kibana index migration', () => {
@@ -285,7 +285,7 @@ async function migrateIndex({ callCluster, index, migrations, mappingProperties,
     obsoleteIndexTemplatePattern,
     mappingProperties,
     batchSize: 10,
-    log: _.noop,
+    log: { info: _.noop, debug: _.noop, warn: _.noop },
     pollInterval: 50,
     scrollDuration: '5m',
     serializer: new SavedObjectsSerializer(new SavedObjectsSchema()),

@@ -19,6 +19,7 @@
 import { mockInitializer, mockPlugin, mockPluginLoader } from './plugin.test.mocks';
 
 import { DiscoveredPlugin } from '../../server';
+import { coreMock } from '../mocks';
 import { PluginWrapper } from './plugin';
 
 function createManifest(
@@ -35,7 +36,8 @@ function createManifest(
 }
 
 let plugin: PluginWrapper<unknown, Record<string, unknown>>;
-const initializerContext = {};
+const opaqueId = Symbol();
+const initializerContext = coreMock.createPluginInitializerContext();
 const addBasePath = (path: string) => path;
 
 beforeEach(() => {
@@ -43,7 +45,7 @@ beforeEach(() => {
   mockPlugin.setup.mockClear();
   mockPlugin.start.mockClear();
   mockPlugin.stop.mockClear();
-  plugin = new PluginWrapper(createManifest('plugin-a'), initializerContext);
+  plugin = new PluginWrapper(createManifest('plugin-a'), opaqueId, initializerContext);
 });
 
 describe('PluginWrapper', () => {

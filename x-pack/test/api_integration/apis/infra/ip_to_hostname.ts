@@ -5,10 +5,10 @@
  */
 
 import expect from '@kbn/expect';
-import { KbnTestProvider } from './types';
-import { IpToHostResponse } from '../../../../plugins/infra/server/routes/ip_to_hostname';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { IpToHostResponse } from '../../../../legacy/plugins/infra/server/routes/ip_to_hostname';
 
-const ipToHostNameTest: KbnTestProvider = ({ getService }) => {
+export default function ipToHostNameTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -43,7 +43,4 @@ const ipToHostNameTest: KbnTestProvider = ({ getService }) => {
         .expect(404);
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default ipToHostNameTest;
+}

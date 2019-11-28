@@ -26,6 +26,8 @@ const validBasePathRegex = /(^$|^\/.*[^\/]$)/;
 const match = (regex: RegExp, errorMsg: string) => (str: string) =>
   regex.test(str) ? undefined : errorMsg;
 
+// before update to make sure it's in sync with validation rules in Legacy
+// https://github.com/elastic/kibana/blob/master/src/legacy/server/config/schema.js
 export const config = {
   path: 'server',
   schema: schema.object(
@@ -36,6 +38,7 @@ export const config = {
           validate: match(validBasePathRegex, "must start with a slash, don't end with one"),
         })
       ),
+      defaultRoute: schema.maybe(schema.string()),
       cors: schema.conditional(
         schema.contextRef('dev'),
         true,
@@ -63,6 +66,12 @@ export const config = {
       }),
       rewriteBasePath: schema.boolean({ defaultValue: false }),
       ssl: sslSchema,
+      keepaliveTimeout: schema.number({
+        defaultValue: 120000,
+      }),
+      socketTimeout: schema.number({
+        defaultValue: 120000,
+      }),
     },
     {
       validate: rawConfig => {
@@ -90,12 +99,15 @@ export type HttpConfigType = TypeOf<typeof config.schema>;
 export class HttpConfig {
   public autoListen: boolean;
   public host: string;
+  public keepaliveTimeout: number;
+  public socketTimeout: number;
   public port: number;
   public cors: boolean | { origin: string[] };
   public maxPayload: ByteSizeValue;
   public basePath?: string;
   public rewriteBasePath: boolean;
   public publicDir: string;
+  public defaultRoute?: string;
   public ssl: SslConfig;
 
   /**
@@ -108,8 +120,11 @@ export class HttpConfig {
     this.cors = rawConfig.cors;
     this.maxPayload = rawConfig.maxPayload;
     this.basePath = rawConfig.basePath;
+    this.keepaliveTimeout = rawConfig.keepaliveTimeout;
+    this.socketTimeout = rawConfig.socketTimeout;
     this.rewriteBasePath = rawConfig.rewriteBasePath;
     this.publicDir = env.staticFilesDir;
     this.ssl = new SslConfig(rawConfig.ssl || {});
+    this.defaultRoute = rawConfig.defaultRoute;
   }
 }

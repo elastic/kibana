@@ -5,10 +5,9 @@
  */
 
 import expect from '@kbn/expect/expect.js';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('Index Fields', () => {

@@ -17,9 +17,11 @@
  * under the License.
  */
 
-import { Field } from 'ui/index_patterns/_field';
+import { setup as data } from '../../../../../../../data/public/legacy';
+const { FieldImpl: Field } = data.indexPatterns.__LEGACY;
+
 import { RegistryFieldFormatEditorsProvider } from 'ui/registry/field_format_editors';
-import { DocTitleProvider } from 'ui/doc_title';
+import { docTitle } from 'ui/doc_title';
 import { KbnUrlProvider } from 'ui/url';
 import uiRoutes from 'ui/routes';
 import { toastNotifications } from 'ui/notify';
@@ -104,7 +106,6 @@ uiRoutes
     controllerAs: 'fieldSettings',
     controller: function FieldEditorPageController($scope, $route, $timeout, $http, Private, config) {
       const getConfig = (...args) => config.get(...args);
-      const docTitle = Private(DocTitleProvider);
       const fieldFormatEditors = Private(RegistryFieldFormatEditorsProvider);
       const kbnUrl = Private(KbnUrlProvider);
 
@@ -114,7 +115,7 @@ uiRoutes
 
       if (this.mode === 'edit') {
         const fieldName = $route.current.params.fieldName;
-        this.field = this.indexPattern.fields.byName[fieldName];
+        this.field = this.indexPattern.fields.getByName(fieldName);
 
         if (!this.field) {
           const message = i18n.translate('kbn.management.editIndexPattern.scripted.noFieldLabel',

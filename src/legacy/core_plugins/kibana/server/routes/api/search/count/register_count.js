@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-import handleESError from '../../../../lib/handle_es_error';
 
 export default function registerCount(server) {
   server.route({
@@ -36,7 +35,7 @@ export default function registerCount(server) {
 
         return { count: res.count };
       } catch (err) {
-        throw handleESError(err);
+        throw server.plugins.elasticsearch.handleESError(err);
       }
     }
   });

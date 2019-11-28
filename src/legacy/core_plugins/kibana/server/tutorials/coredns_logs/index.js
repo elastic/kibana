@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/filebeat_instructions';
 
 export function corednsLogsSpecProvider(server, context) {
   const moduleName = 'coredns';
@@ -29,37 +33,41 @@ export function corednsLogsSpecProvider(server, context) {
     name: i18n.translate('kbn.server.tutorials.corednsLogs.nameTitle', {
       defaultMessage: 'CoreDNS logs',
     }),
-    category: TUTORIAL_CATEGORY.SECURITY,
+    category: TUTORIAL_CATEGORY.SIEM,
     shortDescription: i18n.translate('kbn.server.tutorials.corednsLogs.shortDescription', {
       defaultMessage: 'Collect the logs created by Coredns.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.corednsLogs.longDescription', {
-      defaultMessage: 'The `coredns` Filebeat module collects the logs from \
+      defaultMessage:
+        'The `coredns` Filebeat module collects the logs from \
 [CoreDNS](https://coredns.io/manual/toc/). \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-coredns.html',
       },
     }),
-    //TODO: euiIconType: 'logoCoredns',
+    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/coredns.svg',
     artifacts: {
       dashboards: [
         {
           id: '53aa1f70-443e-11e9-8548-ab7fbe04f038',
-          linkLabel: i18n.translate('kbn.server.tutorials.corednsLogs.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'CoreDNS logs dashboard',
-          }),
-          isOverview: true
-        }
+          linkLabel: i18n.translate(
+            'kbn.server.tutorials.corednsLogs.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'CoreDNS logs dashboard',
+            }
+          ),
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-coredns.html'
-      }
+        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-coredns.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/coredns_logs/screenshot.jpg',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
   };
 }

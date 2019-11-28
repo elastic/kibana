@@ -1,0 +1,211 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`it renders without crashing 1`] = `
+<CollapsiblePanel
+  iconType="logoElasticsearch"
+  title="Elasticsearch"
+>
+  <EuiDescribedFormGroup
+    description={
+      <p>
+        <FormattedMessage
+          defaultMessage="Manage the actions this role can perform against your cluster. "
+          id="xpack.security.management.editRole.elasticSearchPrivileges.manageRoleActionsDescription"
+          values={Object {}}
+        />
+        <ForwardRef
+          className="editRole__learnMore"
+          href="undefinedguide/en/elastic-stack-overview/undefined/security-privileges.html#privileges-list-cluster"
+          target="_blank"
+        >
+          <FormattedMessage
+            defaultMessage="Learn more"
+            id="xpack.security.management.editRole.elasticSearchPrivileges.learnMoreLinkText"
+            values={Object {}}
+          />
+        </ForwardRef>
+      </p>
+    }
+    fullWidth={false}
+    gutterSize="l"
+    title={
+      <h3>
+        <FormattedMessage
+          defaultMessage="Cluster privileges"
+          id="xpack.security.management.editRole.elasticSearchPrivileges.clusterPrivilegesTitle"
+          values={Object {}}
+        />
+      </h3>
+    }
+    titleSize="xs"
+  >
+    <EuiFormRow
+      describedByIds={Array []}
+      display="row"
+      fullWidth={true}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={true}
+      labelType="label"
+    >
+      <ClusterPrivileges
+        builtinClusterPrivileges={
+          Array [
+            "all",
+            "manage",
+            "monitor",
+          ]
+        }
+        onChange={[Function]}
+        role={
+          Object {
+            "elasticsearch": Object {
+              "cluster": Array [],
+              "indices": Array [],
+              "run_as": Array [],
+            },
+            "kibana": Array [],
+            "name": "",
+          }
+        }
+      />
+    </EuiFormRow>
+  </EuiDescribedFormGroup>
+  <EuiSpacer />
+  <EuiDescribedFormGroup
+    description={
+      <p>
+        <FormattedMessage
+          defaultMessage="Allow requests to be submitted on the behalf of other users. "
+          id="xpack.security.management.editRole.elasticSearchPrivileges.howToBeSubmittedOnBehalfOfOtherUsersDescription"
+          values={Object {}}
+        />
+        <ForwardRef
+          className="editRole__learnMore"
+          href="undefinedguide/en/elastic-stack-overview/undefined/security-privileges.html#_run_as_privilege"
+          target="_blank"
+        >
+          <FormattedMessage
+            defaultMessage="Learn more"
+            id="xpack.security.management.editRole.elasticSearchPrivileges.learnMoreLinkText"
+            values={Object {}}
+          />
+        </ForwardRef>
+      </p>
+    }
+    fullWidth={false}
+    gutterSize="l"
+    title={
+      <h3>
+        <FormattedMessage
+          defaultMessage="Run As privileges"
+          id="xpack.security.management.editRole.elasticSearchPrivileges.runAsPrivilegesTitle"
+          values={Object {}}
+        />
+      </h3>
+    }
+    titleSize="xs"
+  >
+    <EuiFormRow
+      describedByIds={Array []}
+      display="row"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={true}
+      labelType="label"
+    >
+      <EuiComboBox
+        compressed={false}
+        fullWidth={false}
+        isClearable={true}
+        isDisabled={false}
+        onChange={[Function]}
+        onCreateOption={[Function]}
+        options={Array []}
+        placeholder="Add a user…"
+        selectedOptions={Array []}
+        singleSelection={false}
+      />
+    </EuiFormRow>
+  </EuiDescribedFormGroup>
+  <EuiSpacer />
+  <EuiTitle
+    size="xs"
+  >
+    <h3>
+      <FormattedMessage
+        defaultMessage="Index privileges"
+        id="xpack.security.management.editRole.elasticSearchPrivileges.indexPrivilegesTitle"
+        values={Object {}}
+      />
+    </h3>
+  </EuiTitle>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiText
+    color="subdued"
+    size="s"
+  >
+    <p>
+      <FormattedMessage
+        defaultMessage="Control access to the data in your cluster. "
+        id="xpack.security.management.editRole.elasticSearchPrivileges.controlAccessToClusterDataDescription"
+        values={Object {}}
+      />
+      <EuiLink
+        className="editRole__learnMore"
+        href="undefinedguide/en/elastic-stack-overview/undefined/security-privileges.html#privileges-list-indices"
+        target="_blank"
+      >
+        <FormattedMessage
+          defaultMessage="Learn more"
+          id="xpack.security.management.editRole.elasticSearchPrivileges.learnMoreLinkText"
+          values={Object {}}
+        />
+      </EuiLink>
+    </p>
+  </EuiText>
+  <IndexPrivileges
+    allowDocumentLevelSecurity={true}
+    allowFieldLevelSecurity={true}
+    availableIndexPrivileges={
+      Array [
+        "all",
+        "read",
+        "write",
+        "index",
+      ]
+    }
+    httpClient={[MockFunction]}
+    indexPatterns={Array []}
+    onChange={[MockFunction]}
+    role={
+      Object {
+        "elasticsearch": Object {
+          "cluster": Array [],
+          "indices": Array [],
+          "run_as": Array [],
+        },
+        "kibana": Array [],
+        "name": "",
+      }
+    }
+    validator={
+      RoleValidator {
+        "shouldValidate": undefined,
+      }
+    }
+  />
+  <EuiHorizontalRule />
+  <EuiButton
+    iconType="plusInCircleFilled"
+    onClick={[Function]}
+  >
+    <FormattedMessage
+      defaultMessage="Add index privilege"
+      id="xpack.security.management.editRole.elasticSearchPrivileges.addIndexPrivilegesButtonLabel"
+      values={Object {}}
+    />
+  </EuiButton>
+</CollapsiblePanel>
+`;

@@ -18,36 +18,50 @@
  */
 
 import _ from 'lodash';
-import chrome from 'ui/chrome';
+import { getServices } from './kibana_services';
 import { i18n } from '@kbn/i18n';
-import { toastNotifications } from 'ui/notify';
 
-const baseUrl = chrome.addBasePath('/api/kibana/home/tutorials');
+const baseUrlLP = getServices().addBasePath('/api/kibana/home/tutorials_LP');
+const baseUrl = getServices().addBasePath('/api/kibana/home/tutorials');
 const headers = new Headers();
 headers.append('Accept', 'application/json');
 headers.append('Content-Type', 'application/json');
 headers.append('kbn-xsrf', 'kibana');
 
 let tutorials = [];
+let tutorialsLegacyPlatform = [];
+let tutorialsNewPlatform = [];
 let tutorialsLoaded = false;
 
 async function loadTutorials() {
   try {
-    const response = await fetch(baseUrl, {
+    const responseLegacyPlatform = await fetch(baseUrlLP, {
       method: 'get',
       credentials: 'include',
       headers: headers,
     });
-    if (response.status >= 300) {
+    if (responseLegacyPlatform.status >= 300) {
       throw new Error(i18n.translate('kbn.home.loadTutorials.requestFailedErrorMessage', {
-        defaultMessage: 'Request failed with status code: {status}', values: { status: response.status } }
+        defaultMessage: 'Request failed with status code: {status}', values: { status: responseLegacyPlatform.status } }
+      ));
+    }
+    const responseNewPlatform = await fetch(baseUrl, {
+      method: 'get',
+      credentials: 'include',
+      headers: headers,
+    });
+    if (responseNewPlatform.status >= 300) {
+      throw new Error(i18n.translate('kbn.home.loadTutorials.requestFailedErrorMessage', {
+        defaultMessage: 'Request failed with status code: {status}', values: { status: responseNewPlatform.status } }
       ));
     }
 
-    tutorials = await response.json();
+    tutorialsLegacyPlatform = await responseLegacyPlatform.json();
+    tutorialsNewPlatform = await responseNewPlatform.json();
+    tutorials = tutorialsLegacyPlatform.concat(tutorialsNewPlatform);
     tutorialsLoaded = true;
   } catch(err) {
-    toastNotifications.addDanger({
+    getServices().toastNotifications.addDanger({
       title: i18n.translate('kbn.home.loadTutorials.unableToLoadErrorMessage', {
         defaultMessage: 'Unable to load tutorials' }
       ),

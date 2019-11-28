@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HeaderSection it renders 1`] = `
+<Component>
+  <HeaderSection
+    title="Test title"
+  />
+</Component>
+`;

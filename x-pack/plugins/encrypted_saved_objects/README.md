@@ -9,17 +9,16 @@ security and spaces filtering as well as performing audit logging.
 
 ## Usage
 
-Follow these steps to use `encrypted_saved_objects` in your plugin: 
+Follow these steps to use `encryptedSavedObjects` in your plugin: 
 
-1. Declare `encrypted_saved_objects` as a dependency:
+1. Declare `encryptedSavedObjects` as a dependency in `kibana.json`:
 
-```typescript
-...
-new kibana.Plugin({
+```json
+{
   ...
-  require: ['encrypted_saved_objects'],
+  "requiredPlugins": ["encryptedSavedObjects"],
   ...
-});
+}
 ```
 
 2. Add attributes to be encrypted in `mappings.json` file for the respective Saved Object type. These attributes should
@@ -37,13 +36,17 @@ searchable or analyzed:
 }
 ```
 
-3. Register Saved Object type using the provided API:
+3. Register Saved Object type using the provided API at the `setup` stage:
 
 ```typescript
-server.plugins.encrypted_saved_objects.registerType({
-  type: 'my-saved-object-type',
-  attributesToEncrypt: new Set(['mySecret']),
-});
+...
+public setup(core: CoreSetup, { encryptedSavedObjects }: PluginSetupDependencies) {
+  encryptedSavedObjects.registerType({
+    type: 'my-saved-object-type',
+    attributesToEncrypt: new Set(['mySecret']),
+  });
+}
+...
 ```
 
 4. For any Saved Object operation that does not require retrieval of decrypted content, use standard REST or 
@@ -51,11 +54,17 @@ programmatic Saved Object API, e.g.:
 
 ```typescript
 ...
-async handler(request: Request) {
-  return await server.savedObjects
-    .getScopedSavedObjectsClient(request)
-    .create('my-saved-object-type', { name: 'some name', mySecret: 'non encrypted secret' });
-}
+router.get(
+  { path: '/some-path', validate: false },
+  async (context, req, res) => {
+    return res.ok({ 
+      body: await context.core.savedObjects.client.create(
+        'my-saved-object-type',
+         { name: 'some name', mySecret: 'non encrypted secret' }
+      ),
+    });
+  }
+);
 ...
 ```
 
@@ -63,12 +72,12 @@ async handler(request: Request) {
 
 **Note:** As name suggests the method will retrieve the encrypted values and decrypt them on behalf of the internal Kibana
 user to make it possible to use this method even when user request context is not available (e.g. in background tasks).
-Hence this method should only be used wherever consumers would otherwise feel comfortable using `callWithInternalUser`
+Hence this method should only be used wherever consumers would otherwise feel comfortable using `callAsInternalUser`
 and preferably only as a part of the Kibana server routines that are outside of the lifecycle of a HTTP request that a 
 user has control over.
 
 ```typescript
-const savedObjectWithDecryptedContent =  await server.plugins.encrypted_saved_objects.getDecryptedAsInternalUser(
+const savedObjectWithDecryptedContent =  await encryptedSavedObjects.getDecryptedAsInternalUser(
   'my-saved-object-type',
   'saved-object-id'
 );

@@ -1,0 +1,29 @@
+.visEditor--vega {
+  .visEditorSidebar__config {
+    padding: 0;
+    position: relative;
+  }
+
+  .visEditorSidebar__options {
+    @include euiScrollBar;
+    flex-shrink: 1;
+    overflow-y: auto;
+  }
+}
+
+.vgaEditor {
+  @include euiBreakpoint('xs', 's', 'm') {
+    @include euiScrollBar;
+    max-height: $euiSize * 15;
+    overflow-y: auto;
+  }
+}
+
+.vgaEditor__aceEditorActions {
+  position: absolute;
+  z-index: $euiZLevel1;
+  top: 0;
+  // Adjust for possible scrollbars
+  right: $euiSize;
+  line-height: 1;
+}

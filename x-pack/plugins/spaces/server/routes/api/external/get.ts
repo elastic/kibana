@@ -4,62 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import { Space } from '../../../../common/model/space';
+import { schema } from '@kbn/config-schema';
 import { wrapError } from '../../../lib/errors';
-import { SpacesClient } from '../../../lib/spaces_client';
+import { ExternalRouteDeps } from '.';
+import { createLicensedRouteHandler } from '../../lib';
 
-export function initGetSpacesApi(server: any, routePreCheckLicenseFn: any) {
-  server.route({
-    method: 'GET',
-    path: '/api/spaces/space',
-    async handler(request: any) {
-      server.log(['spaces', 'debug'], `Inside GET /api/spaces/space`);
+export function initGetSpaceApi(deps: ExternalRouteDeps) {
+  const { externalRouter, spacesService, getSavedObjects } = deps;
 
-      const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
-        request
-      );
-
-      let spaces: Space[];
-
-      try {
-        server.log(['spaces', 'debug'], `Attempting to retrieve all spaces`);
-        spaces = await spacesClient.getAll();
-        server.log(['spaces', 'debug'], `Retrieved ${spaces.length} spaces`);
-      } catch (error) {
-        server.log(['spaces', 'debug'], `Error retrieving spaces: ${error}`);
-        return wrapError(error);
-      }
-
-      return spaces;
+  externalRouter.get(
+    {
+      path: '/api/spaces/space/{id}',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
     },
-    config: {
-      pre: [routePreCheckLicenseFn],
-    },
-  });
-
-  server.route({
-    method: 'GET',
-    path: '/api/spaces/space/{id}',
-    async handler(request: any) {
+    createLicensedRouteHandler(async (context, request, response) => {
       const spaceId = request.params.id;
 
-      const { SavedObjectsClient } = server.savedObjects;
-      const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
-        request
-      );
+      const { SavedObjectsClient } = getSavedObjects();
+      const spacesClient = await spacesService.scopedClient(request);
 
       try {
-        return await spacesClient.get(spaceId);
+        const space = await spacesClient.get(spaceId);
+        return response.ok({ body: space });
       } catch (error) {
         if (SavedObjectsClient.errors.isNotFoundError(error)) {
-          return Boom.notFound();
+          return response.notFound();
         }
-        return wrapError(error);
+        return response.customError(wrapError(error));
       }
-    },
-    config: {
-      pre: [routePreCheckLicenseFn],
-    },
-  });
+    })
+  );
 }

@@ -5,11 +5,11 @@
  */
 
 import expect from '@kbn/expect';
-import { ipOverviewQuery } from '../../../../plugins/siem/public/containers/ip_overview/index.gql_query';
-import { GetIpOverviewQuery } from '../../../../plugins/siem/public/graphql/types';
-import { KbnTestProvider } from './types';
+import { ipOverviewQuery } from '../../../../legacy/plugins/siem/public/containers/ip_overview/index.gql_query';
+import { GetIpOverviewQuery } from '../../../../legacy/plugins/siem/public/graphql/types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-const ipOverviewTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
   describe('IP Overview', () => {
@@ -25,6 +25,7 @@ const ipOverviewTests: KbnTestProvider = ({ getService }) => {
               sourceId: 'default',
               ip: '151.205.0.17',
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -51,6 +52,7 @@ const ipOverviewTests: KbnTestProvider = ({ getService }) => {
               sourceId: 'default',
               ip: '185.53.91.88',
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -62,7 +64,4 @@ const ipOverviewTests: KbnTestProvider = ({ getService }) => {
       });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default ipOverviewTests;
+}

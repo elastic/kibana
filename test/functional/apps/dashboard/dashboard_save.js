@@ -23,15 +23,12 @@ export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
 
   describe('dashboard save', function describeIndexTests() {
+    this.tags('smoke');
     const dashboardName = 'Dashboard Save Test';
     const dashboardNameEnterKey = 'Dashboard Save Test with Enter Key';
 
     before(async function () {
       await PageObjects.dashboard.initTests();
-    });
-
-    after(async function () {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
     it('warns on duplicate name for new dashboard', async function () {

@@ -19,7 +19,7 @@
 
 import { createGunzip } from 'zlib';
 import { PassThrough } from 'stream';
-
+import { createFilterStream } from  '../../../legacy/utils/streams/filter_stream';
 import {
   createSplitStream,
   createReplaceStream,
@@ -33,6 +33,7 @@ export function createParseArchiveStreams({ gzip = false } = {}) {
     gzip ? createGunzip() : new PassThrough(),
     createReplaceStream('\r\n', '\n'),
     createSplitStream(RECORD_SEPARATOR),
+    createFilterStream(l => l.match(/[^\s]/)),
     createMapStream(json => JSON.parse(json.trim())),
   ];
 }

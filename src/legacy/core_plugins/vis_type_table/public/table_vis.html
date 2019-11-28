@@ -1,0 +1,29 @@
+<div ng-controller="KbnTableVisController" class="table-vis">
+  <div ng-if="!hasSomeRows && hasSomeRows !== null" class="visError">
+    <div class="euiText euiText--extraSmall euiTextColor euiTextColor--subdued">
+      <icon type="'visualizeApp'" size="'m'" color="'subdued'"></icon>
+
+      <br>
+      <br>
+
+      <p
+        i18n-id="visTypeTable.vis.noResultsFoundTitle"
+        i18n-default-message="No results found">
+      </p>
+    </div>
+  </div>
+
+  <div ng-if="tableGroups" class="table-vis-container" data-test-subj="tableVis">
+    <kbn-agg-table-group
+      filter="vis.API.events.filter"
+      dimensions="dimensions"
+      group="tableGroups"
+      export-title="visState.title"
+      per-page="visState.params.perPage"
+      sort="sort"
+      percentage-col="visState.params.percentageCol"
+      show-total="visState.params.showTotal"
+      total-func="visState.params.totalFunc">
+    </kbn-agg-table-group>
+  </div>
+</div>

@@ -1,0 +1,6 @@
+{
+  "id": "uiActions",
+  "version": "kibana",
+  "server": false,
+  "ui": true
+}

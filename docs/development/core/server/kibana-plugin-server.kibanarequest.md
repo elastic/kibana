@@ -9,29 +9,24 @@ Kibana specific abstraction for an incoming request.
 <b>Signature:</b>
 
 ```typescript
-export declare class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> 
+export declare class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Method extends RouteMethod = any> 
 ```
 
 ## Constructors
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(request, params, query, body)](./kibana-plugin-server.kibanarequest.(constructor).md) |  | Constructs a new instance of the <code>KibanaRequest</code> class |
+|  [(constructor)(request, params, query, body, withoutSecretHeaders)](./kibana-plugin-server.kibanarequest._constructor_.md) |  | Constructs a new instance of the <code>KibanaRequest</code> class |
 
 ## Properties
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [body](./kibana-plugin-server.kibanarequest.body.md) |  | <code>Body</code> |  |
-|  [headers](./kibana-plugin-server.kibanarequest.headers.md) |  | <code>Headers</code> |  |
+|  [headers](./kibana-plugin-server.kibanarequest.headers.md) |  | <code>Headers</code> | Readonly copy of incoming request headers. |
 |  [params](./kibana-plugin-server.kibanarequest.params.md) |  | <code>Params</code> |  |
 |  [query](./kibana-plugin-server.kibanarequest.query.md) |  | <code>Query</code> |  |
-|  [route](./kibana-plugin-server.kibanarequest.route.md) |  | <code>RecursiveReadonly&lt;KibanaRequestRoute&gt;</code> |  |
-|  [url](./kibana-plugin-server.kibanarequest.url.md) |  | <code>Url</code> |  |
-
-## Methods
-
-|  Method | Modifiers | Description |
-|  --- | --- | --- |
-|  [getFilteredHeaders(headersToKeep)](./kibana-plugin-server.kibanarequest.getfilteredheaders.md) |  |  |
+|  [route](./kibana-plugin-server.kibanarequest.route.md) |  | <code>RecursiveReadonly&lt;KibanaRequestRoute&lt;Method&gt;&gt;</code> | matched route details |
+|  [socket](./kibana-plugin-server.kibanarequest.socket.md) |  | <code>IKibanaSocket</code> |  |
+|  [url](./kibana-plugin-server.kibanarequest.url.md) |  | <code>Url</code> | a WHATWG URL standard object. |
 

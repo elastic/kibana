@@ -17,8 +17,8 @@
  * under the License.
  */
 
-export function mapToObject(map: Map<string, unknown>) {
-  const result: Record<string, unknown> = Object.create(null);
+export function mapToObject<V = unknown>(map: ReadonlyMap<string, V>) {
+  const result: Record<string, V> = Object.create(null);
   for (const [key, value] of map) {
     result[key] = value;
   }

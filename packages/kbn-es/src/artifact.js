@@ -22,7 +22,6 @@ const AbortController = require('abort-controller');
 const fs = require('fs');
 const { promisify } = require('util');
 const { pipeline, Transform } = require('stream');
-const mkdirp = require('mkdirp');
 const chalk = require('chalk');
 const { createHash } = require('crypto');
 const path = require('path');
@@ -31,6 +30,7 @@ const asyncPipeline = promisify(pipeline);
 const V1_VERSIONS_API = 'https://artifacts-api.elastic.co/v1/versions';
 
 const { cache } = require('./utils');
+const { resolveCustomSnapshotUrl } = require('./custom_snapshots');
 const { createCliError, isCliError } = require('./errors');
 
 const TEST_ES_SNAPSHOT_VERSION = process.env.TEST_ES_SNAPSHOT_VERSION
@@ -94,6 +94,12 @@ exports.Artifact = class Artifact {
    */
   static async getSnapshot(license, version, log) {
     const urlVersion = `${encodeURIComponent(version)}-SNAPSHOT`;
+
+    const customSnapshotArtifactSpec = resolveCustomSnapshotUrl(urlVersion, license);
+    if (customSnapshotArtifactSpec) {
+      return new Artifact(customSnapshotArtifactSpec, log);
+    }
+
     const urlBuild = encodeURIComponent(TEST_ES_SNAPSHOT_VERSION);
     const url = `${V1_VERSIONS_API}/${urlVersion}/builds/${urlBuild}/projects/elasticsearch`;
 
@@ -278,7 +284,8 @@ exports.Artifact = class Artifact {
     let first500Bytes = Buffer.alloc(0);
     let contentLength = 0;
 
-    mkdirp.sync(path.dirname(tmpPath));
+    fs.mkdirSync(path.dirname(tmpPath), { recursive: true });
+
     await asyncPipeline(
       resp.body,
       new Transform({

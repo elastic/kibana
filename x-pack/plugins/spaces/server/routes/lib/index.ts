@@ -5,4 +5,4 @@
  */
 
 export { convertSavedObjectToSpace } from './convert_saved_object_to_space';
-export { getSpaceById } from './get_space_by_id';
+export { createLicensedRouteHandler } from './licensed_route_handler';

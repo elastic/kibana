@@ -1,0 +1,57 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`IndexPatternsMissingPrompt renders correctly against snapshot 1`] = `
+<EuiEmptyPrompt
+  actions={
+    <EuiButton
+      color="primary"
+      fill={true}
+      href="/test/base/path/app/kibana#/management/kibana/index_patterns"
+      target="_blank"
+    >
+      Configure index patterns
+    </EuiButton>
+  }
+  body={
+    <React.Fragment>
+      <p>
+        <FormattedMessage
+          defaultMessage="An ECS compliant Kibana index pattern must be configured to view events on the map. When using {beats}, you can run the {setup} command on your hosts to automatically create the index patterns. For example: {example}."
+          id="xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorDescription1"
+          values={
+            Object {
+              "beats": <a
+                href="https://www.elastic.coguide/en/beats/libbeat/current/getting-started.html"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                beats
+              </a>,
+              "example": <EuiCode>
+                ./packetbeat setup
+              </EuiCode>,
+              "setup": <EuiCode>
+                setup
+              </EuiCode>,
+            }
+          }
+        />
+      </p>
+      <p>
+        <FormattedMessage
+          defaultMessage="You can also configure them manually in Kibana."
+          id="xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorDescription2"
+          values={Object {}}
+        />
+      </p>
+    </React.Fragment>
+  }
+  iconType="gisApp"
+  title={
+    <h2>
+      Required index patterns not configured
+    </h2>
+  }
+  titleSize="xs"
+/>
+`;

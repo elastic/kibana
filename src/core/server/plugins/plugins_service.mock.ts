@@ -22,6 +22,7 @@ import { PluginsService } from './plugins_service';
 type ServiceContract = PublicMethodsOf<PluginsService>;
 const createServiceMock = () => {
   const mocked: jest.Mocked<ServiceContract> = {
+    discover: jest.fn(),
     setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
@@ -29,8 +30,9 @@ const createServiceMock = () => {
   mocked.setup.mockResolvedValue({
     contracts: new Map(),
     uiPlugins: {
-      public: new Map(),
+      browserConfigs: new Map(),
       internal: new Map(),
+      public: new Map(),
     },
   });
   mocked.start.mockResolvedValue({ contracts: new Map() });

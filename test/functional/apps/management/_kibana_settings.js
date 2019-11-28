@@ -35,8 +35,7 @@ export default function ({ getService, getPageObjects }) {
     after(async function afterAll() {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.clickIndexPatternLogstash();
-      await PageObjects.settings.removeIndexPattern();
+      await PageObjects.settings.removeLogstashIndexPatternIfExist();
     });
 
     it('should allow setting advanced settings', async function () {
@@ -47,16 +46,16 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('state:storeInSessionStorage', () => {
-      it ('defaults to false', async () => {
+      it ('defaults to null', async () => {
         await PageObjects.settings.clickKibanaSettings();
         const storeInSessionStorage = await PageObjects.settings.getAdvancedSettingCheckbox('state:storeInSessionStorage');
-        expect(storeInSessionStorage).to.be(false);
+        expect(storeInSessionStorage).to.be(null);
       });
 
       it('when false, dashboard state is unhashed', async function () {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.timePicker.setAbsoluteRange('2015-09-19 06:31:44.000', '2015-09-23 18:31:44.000');
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         const currentUrl = await browser.getCurrentUrl();
         const urlPieces = currentUrl.match(/(.*)?_g=(.*)&_a=(.*)/);
         const globalState = urlPieces[2];
@@ -73,13 +72,13 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.clickKibanaSettings();
         await PageObjects.settings.toggleAdvancedSettingCheckbox('state:storeInSessionStorage');
         const storeInSessionStorage = await PageObjects.settings.getAdvancedSettingCheckbox('state:storeInSessionStorage');
-        expect(storeInSessionStorage).to.be(true);
+        expect(storeInSessionStorage).to.be('true');
       });
 
       it('when true, dashboard state is hashed', async function () {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.timePicker.setAbsoluteRange('2015-09-19 06:31:44.000', '2015-09-23 18:31:44.000');
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         const currentUrl = await browser.getCurrentUrl();
         const urlPieces = currentUrl.match(/(.*)?_g=(.*)&_a=(.*)/);
         const globalState = urlPieces[2];
@@ -99,8 +98,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     after(async function () {
-      await PageObjects.settings.clickKibanaSettings();
-      await PageObjects.settings.setAdvancedSettingsSelect('dateFormat:tz', 'UTC');
+      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
+      await browser.refresh();
     });
   });
 }

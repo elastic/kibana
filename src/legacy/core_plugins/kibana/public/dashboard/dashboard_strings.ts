@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DashboardViewMode } from './dashboard_view_mode';
+import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
 
 /**
  * @param title {string} the current title of the dashboard
@@ -29,24 +29,29 @@ import { DashboardViewMode } from './dashboard_view_mode';
  */
 export function getDashboardTitle(
   title: string,
-  viewMode: DashboardViewMode,
-  isDirty: boolean
+  viewMode: ViewMode,
+  isDirty: boolean,
+  isNew: boolean
 ): string {
-  const isEditMode = viewMode === DashboardViewMode.EDIT;
+  const isEditMode = viewMode === ViewMode.EDIT;
   let displayTitle: string;
+  const newDashboardTitle = i18n.translate('kbn.dashboard.savedDashboard.newDashboardTitle', {
+    defaultMessage: 'New Dashboard',
+  });
+  const dashboardTitle = isNew ? newDashboardTitle : title;
 
   if (isEditMode && isDirty) {
     displayTitle = i18n.translate('kbn.dashboard.strings.dashboardUnsavedEditTitle', {
       defaultMessage: 'Editing {title} (unsaved)',
-      values: { title },
+      values: { title: dashboardTitle },
     });
   } else if (isEditMode) {
     displayTitle = i18n.translate('kbn.dashboard.strings.dashboardEditTitle', {
       defaultMessage: 'Editing {title}',
-      values: { title },
+      values: { title: dashboardTitle },
     });
   } else {
-    displayTitle = title;
+    displayTitle = dashboardTitle;
   }
 
   return displayTitle;

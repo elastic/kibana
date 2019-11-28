@@ -37,7 +37,7 @@ import { keyCodes } from '@elastic/eui';
 
 test('is rendered', () => {
   const component = renderWithIntl(
-    <ExitFullScreenButton.WrappedComponent onExitFullScreenMode={() => {}}/>
+    <ExitFullScreenButton onExitFullScreenMode={() => {}}/>
   );
 
   expect(component)
@@ -49,7 +49,7 @@ describe('onExitFullScreenMode', () => {
     const onExitHandler = sinon.stub();
 
     const component = mountWithIntl(
-      <ExitFullScreenButton.WrappedComponent onExitFullScreenMode={onExitHandler} />
+      <ExitFullScreenButton onExitFullScreenMode={onExitHandler} />
     );
 
     component.find('button').simulate('click');
@@ -60,7 +60,7 @@ describe('onExitFullScreenMode', () => {
   test('is called when the ESC key is pressed', () => {
     const onExitHandler = sinon.stub();
 
-    mountWithIntl(<ExitFullScreenButton.WrappedComponent onExitFullScreenMode={onExitHandler} />);
+    mountWithIntl(<ExitFullScreenButton onExitFullScreenMode={onExitHandler} />);
 
     const escapeKeyEvent = new KeyboardEvent('keydown', { keyCode: keyCodes.ESCAPE });
     document.dispatchEvent(escapeKeyEvent);
@@ -74,7 +74,7 @@ describe('chrome.setVisible', () => {
     chrome.setVisible = sinon.stub();
 
     const component = mountWithIntl(
-      <ExitFullScreenButton.WrappedComponent onExitFullScreenMode={() => {}} />
+      <ExitFullScreenButton onExitFullScreenMode={() => {}} />
     );
 
     component.find('button').simulate('click');
@@ -85,7 +85,7 @@ describe('chrome.setVisible', () => {
 
   test('is called with true the component is unmounted', () => {
     const component = mountWithIntl(
-      <ExitFullScreenButton.WrappedComponent onExitFullScreenMode={() => {}} />
+      <ExitFullScreenButton onExitFullScreenMode={() => {}} />
     );
 
     chrome.setVisible = sinon.stub();

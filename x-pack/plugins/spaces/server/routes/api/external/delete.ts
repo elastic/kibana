@@ -4,37 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import { schema } from '@kbn/config-schema';
 import { wrapError } from '../../../lib/errors';
 import { SpacesClient } from '../../../lib/spaces_client';
+import { ExternalRouteDeps } from '.';
+import { createLicensedRouteHandler } from '../../lib';
 
-export function initDeleteSpacesApi(server: any, routePreCheckLicenseFn: any) {
-  server.route({
-    method: 'DELETE',
-    path: '/api/spaces/space/{id}',
-    async handler(request: any, h: any) {
-      const { SavedObjectsClient } = server.savedObjects;
-      const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
-        request
-      );
+export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
+  const { externalRouter, getSavedObjects, spacesService } = deps;
+
+  externalRouter.delete(
+    {
+      path: '/api/spaces/space/{id}',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    createLicensedRouteHandler(async (context, request, response) => {
+      const { SavedObjectsClient } = getSavedObjects();
+      const spacesClient: SpacesClient = await spacesService.scopedClient(request);
 
       const id = request.params.id;
 
-      let result;
-
       try {
-        result = await spacesClient.delete(id);
+        await spacesClient.delete(id);
       } catch (error) {
         if (SavedObjectsClient.errors.isNotFoundError(error)) {
-          return Boom.notFound();
+          return response.notFound();
         }
-        return wrapError(error);
+        return response.customError(wrapError(error));
       }
 
-      return h.response(result).code(204);
-    },
-    config: {
-      pre: [routePreCheckLicenseFn],
-    },
-  });
+      return response.noContent();
+    })
+  );
 }

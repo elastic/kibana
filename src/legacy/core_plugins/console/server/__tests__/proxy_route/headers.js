@@ -20,13 +20,13 @@
 import { request } from 'http';
 
 import sinon from 'sinon';
-import Wreck from '@hapi/wreck';
 import expect from '@kbn/expect';
 import { Server } from 'hapi';
+import * as requestModule from '../../request';
 
 import { createProxyRoute } from '../../';
 
-import { createWreckResponseStub } from './stubs';
+import { createResponseStub } from './stubs';
 
 describe('Console Proxy Route', () => {
   const sandbox = sinon.createSandbox();
@@ -34,13 +34,13 @@ describe('Console Proxy Route', () => {
   let setup;
 
   beforeEach(() => {
-    sandbox.stub(Wreck, 'request').callsFake(createWreckResponseStub());
+    sandbox.stub(requestModule, 'sendRequest').callsFake(createResponseStub());
 
     setup = () => {
       const server = new Server();
       server.route(
         createProxyRoute({
-          baseUrl: 'http://localhost:9200',
+          hosts: ['http://localhost:9200'],
         })
       );
 
@@ -77,8 +77,8 @@ describe('Console Proxy Route', () => {
 
       resp.destroy();
 
-      sinon.assert.calledOnce(Wreck.request);
-      const { headers } = Wreck.request.getCall(0).args[2];
+      sinon.assert.calledOnce(requestModule.sendRequest);
+      const { headers } = requestModule.sendRequest.getCall(0).args[0];
       expect(headers)
         .to.have.property('x-forwarded-for')
         .and.not.be('');

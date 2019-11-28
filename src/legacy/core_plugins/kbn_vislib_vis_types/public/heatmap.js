@@ -17,108 +17,94 @@
  * under the License.
  */
 
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import heatmapTemplate from './editors/heatmap.html';
-import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
+import { AggGroupNames } from 'ui/vis/editors/default';
+import { ColorSchemas } from 'ui/vislib/components/color/colormaps';
+import { AxisTypes, getHeatmapCollections, Positions, ScaleTypes } from './utils/collections';
+import { HeatmapOptions } from './components/options';
+import { vislibVisController } from './controller';
 
-export default function HeatmapVisType(Private) {
-  const VisFactory = Private(VisFactoryProvider);
-
-  return VisFactory.createVislibVisualization({
-    name: 'heatmap',
-    title: i18n.translate('kbnVislibVisTypes.heatmap.heatmapTitle', { defaultMessage: 'Heat Map' }),
-    icon: 'visHeatmap',
-    description: i18n.translate('kbnVislibVisTypes.heatmap.heatmapDescription', { defaultMessage: 'Shade cells within a matrix' }),
-    visConfig: {
-      defaults: {
-        type: 'heatmap',
-        addTooltip: true,
-        addLegend: true,
-        enableHover: false,
-        legendPosition: 'right',
-        times: [],
-        colorsNumber: 4,
-        colorSchema: 'Greens',
-        setColorRange: false,
-        colorsRange: [],
-        invertColors: false,
-        percentageMode: false,
-        valueAxes: [{
+export const heatmapDefinition = {
+  name: 'heatmap',
+  title: i18n.translate('kbnVislibVisTypes.heatmap.heatmapTitle', { defaultMessage: 'Heat Map' }),
+  icon: 'visHeatmap',
+  description: i18n.translate('kbnVislibVisTypes.heatmap.heatmapDescription', { defaultMessage: 'Shade cells within a matrix' }),
+  visualization: vislibVisController,
+  visConfig: {
+    defaults: {
+      type: 'heatmap',
+      addTooltip: true,
+      addLegend: true,
+      enableHover: false,
+      legendPosition: Positions.RIGHT,
+      times: [],
+      colorsNumber: 4,
+      colorSchema: ColorSchemas.Greens,
+      setColorRange: false,
+      colorsRange: [],
+      invertColors: false,
+      percentageMode: false,
+      valueAxes: [{
+        show: false,
+        id: 'ValueAxis-1',
+        type: AxisTypes.VALUE,
+        scale: {
+          type: ScaleTypes.LINEAR,
+          defaultYExtents: false,
+        },
+        labels: {
           show: false,
-          id: 'ValueAxis-1',
-          type: 'value',
-          scale: {
-            type: 'linear',
-            defaultYExtents: false,
-          },
-          labels: {
-            show: false,
-            rotate: 0,
-            overwriteColor: false,
-            color: 'black',
-          }
-        }]
-      },
-    },
-    editorConfig: {
-      collections: {
-        legendPositions: [{
-          value: 'left',
-          text: 'left',
-        }, {
-          value: 'right',
-          text: 'right',
-        }, {
-          value: 'top',
-          text: 'top',
-        }, {
-          value: 'bottom',
-          text: 'bottom',
-        }],
-        scales: ['linear', 'log', 'square root'],
-        colorSchemas: Object.values(vislibColorMaps).map(value => ({ id: value.id, label: value.label })),
-      },
-      optionsTemplate: heatmapTemplate,
-      schemas: new Schemas([
-        {
-          group: 'metrics',
-          name: 'metric',
-          title: i18n.translate('kbnVislibVisTypes.heatmap.metricTitle', { defaultMessage: 'Value' }),
-          min: 1,
-          max: 1,
-          aggFilter: ['count', 'avg', 'median', 'sum', 'min', 'max', 'cardinality', 'std_dev', 'top_hits'],
-          defaults: [
-            { schema: 'metric', type: 'count' }
-          ]
-        },
-        {
-          group: 'buckets',
-          name: 'segment',
-          title: i18n.translate('kbnVislibVisTypes.heatmap.segmentTitle', { defaultMessage: 'X-Axis' }),
-          min: 0,
-          max: 1,
-          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
-        },
-        {
-          group: 'buckets',
-          name: 'group',
-          title: i18n.translate('kbnVislibVisTypes.heatmap.groupTitle', { defaultMessage: 'Y-Axis' }),
-          min: 0,
-          max: 1,
-          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
-        },
-        {
-          group: 'buckets',
-          name: 'split',
-          title: i18n.translate('kbnVislibVisTypes.heatmap.splitTitle', { defaultMessage: 'Split Chart' }),
-          min: 0,
-          max: 1,
-          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
+          rotate: 0,
+          overwriteColor: false,
+          color: 'black',
         }
-      ])
-    }
+      }]
+    },
+  },
+  events: {
+    brush: { disabled: false },
+  },
+  editorConfig: {
+    collections: getHeatmapCollections(),
+    optionsTemplate: HeatmapOptions,
+    schemas: new Schemas([
+      {
+        group: AggGroupNames.Metrics,
+        name: 'metric',
+        title: i18n.translate('kbnVislibVisTypes.heatmap.metricTitle', { defaultMessage: 'Value' }),
+        min: 1,
+        max: 1,
+        aggFilter: ['count', 'avg', 'median', 'sum', 'min', 'max', 'cardinality', 'std_dev', 'top_hits'],
+        defaults: [
+          { schema: 'metric', type: 'count' }
+        ]
+      },
+      {
+        group: AggGroupNames.Buckets,
+        name: 'segment',
+        title: i18n.translate('kbnVislibVisTypes.heatmap.segmentTitle', { defaultMessage: 'X-axis' }),
+        min: 0,
+        max: 1,
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
+      },
+      {
+        group: AggGroupNames.Buckets,
+        name: 'group',
+        title: i18n.translate('kbnVislibVisTypes.heatmap.groupTitle', { defaultMessage: 'Y-axis' }),
+        min: 0,
+        max: 1,
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
+      },
+      {
+        group: AggGroupNames.Buckets,
+        name: 'split',
+        title: i18n.translate('kbnVislibVisTypes.heatmap.splitTitle', { defaultMessage: 'Split chart' }),
+        min: 0,
+        max: 1,
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
+      }
+    ])
+  }
 
-  });
-}
+};

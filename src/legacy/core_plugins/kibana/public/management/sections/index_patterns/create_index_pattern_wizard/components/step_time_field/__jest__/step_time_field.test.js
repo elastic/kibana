@@ -18,9 +18,9 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
-import { StepTimeFieldComponent } from '../step_time_field';
+import { StepTimeField } from '../step_time_field';
 
 jest.mock('../components/header', () => ({ Header: 'Header' }));
 jest.mock('../components/time_field', () => ({ TimeField: 'TimeField' }));
@@ -30,24 +30,27 @@ jest.mock('../../../lib/extract_time_fields', () => ({
   extractTimeFields: fields => fields,
 }));
 jest.mock('ui/chrome', () => ({
-  addBasePath: () => { },
+  addBasePath: () => {},
 }));
 
 const mockIndexPatternCreationType = {
   getIndexPatternType: () => 'default',
-  getIndexPatternName: () => 'name'
+  getIndexPatternName: () => 'name',
+  getFetchForWildcardOptions: () => {},
 };
 const noop = () => {};
 const indexPatternsService = {
-  fieldsFetcher: {
-    fetchForWildcard: noop,
-  }
+  make: async () => ({
+    fieldsFetcher: {
+      fetch: noop,
+    },
+  }),
 };
 
 describe('StepTimeField', () => {
   it('should render normally', () => {
-    const component = shallowWithIntl(
-      <StepTimeFieldComponent
+    const component = shallowWithI18nProvider(
+      <StepTimeField
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
@@ -60,8 +63,8 @@ describe('StepTimeField', () => {
   });
 
   it('should render timeFields', () => {
-    const component = shallowWithIntl(
-      <StepTimeFieldComponent
+    const component = shallowWithI18nProvider(
+      <StepTimeField
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
@@ -74,15 +77,15 @@ describe('StepTimeField', () => {
       timeFields: [
         { display: '@timestamp', fieldName: '@timestamp' },
         { display: 'name', fieldName: 'name' },
-      ]
+      ],
     });
 
     expect(component).toMatchSnapshot();
   });
 
   it('should render a selected timeField', () => {
-    const component = shallowWithIntl(
-      <StepTimeFieldComponent
+    const component = shallowWithI18nProvider(
+      <StepTimeField
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
@@ -104,8 +107,8 @@ describe('StepTimeField', () => {
   });
 
   it('should ensure disabled time field options work properly', () => {
-    const component = shallowWithIntl(
-      <StepTimeFieldComponent
+    const component = shallowWithI18nProvider(
+      <StepTimeField
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
@@ -133,8 +136,8 @@ describe('StepTimeField', () => {
   });
 
   it('should disable the action button if an invalid time field is selected', () => {
-    const component = shallowWithIntl(
-      <StepTimeFieldComponent
+    const component = shallowWithI18nProvider(
+      <StepTimeField
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
@@ -157,8 +160,8 @@ describe('StepTimeField', () => {
   });
 
   it('should enable the action button if the user decides to not select a time field', () => {
-    const component = shallowWithIntl(
-      <StepTimeFieldComponent
+    const component = shallowWithI18nProvider(
+      <StepTimeField
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
@@ -181,8 +184,8 @@ describe('StepTimeField', () => {
   });
 
   it('should render advanced options', () => {
-    const component = shallowWithIntl(
-      <StepTimeFieldComponent
+    const component = shallowWithI18nProvider(
+      <StepTimeField
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
@@ -197,8 +200,8 @@ describe('StepTimeField', () => {
   });
 
   it('should render advanced options with an index pattern id', () => {
-    const component = shallowWithIntl(
-      <StepTimeFieldComponent
+    const component = shallowWithI18nProvider(
+      <StepTimeField
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
@@ -216,8 +219,8 @@ describe('StepTimeField', () => {
   });
 
   it('should render a loading state when creating the index pattern', () => {
-    const component = shallowWithIntl(
-      <StepTimeFieldComponent
+    const component = shallowWithI18nProvider(
+      <StepTimeField
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
@@ -232,8 +235,8 @@ describe('StepTimeField', () => {
   });
 
   it('should render any error message', () => {
-    const component = shallowWithIntl(
-      <StepTimeFieldComponent
+    const component = shallowWithI18nProvider(
+      <StepTimeField
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
@@ -248,8 +251,8 @@ describe('StepTimeField', () => {
   });
 
   it('should render "Custom index pattern ID already exists" when error is "Conflict"', () => {
-    const component = shallowWithIntl(
-      <StepTimeFieldComponent
+    const component = shallowWithI18nProvider(
+      <StepTimeField
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
@@ -267,8 +270,8 @@ describe('StepTimeField', () => {
     const createIndexPattern = async () => {
       throw new Error('foobar');
     };
-    const component = shallowWithIntl(
-      <StepTimeFieldComponent
+    const component = shallowWithI18nProvider(
+      <StepTimeField
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
@@ -281,7 +284,7 @@ describe('StepTimeField', () => {
     component.update();
 
     expect(component.instance().state).toMatchObject({
-      error: 'foobar'
+      error: 'foobar',
     });
   });
 });

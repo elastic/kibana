@@ -4,9 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+const { EventEmitter } = require('events');
+
 import { initRoutes } from './init_routes';
 
-export default function (kibana) {
+
+const once = function (emitter, event) {
+  return new Promise(resolve => {
+    emitter.once(event, resolve);
+  });
+};
+
+export default function TaskTestingAPI(kibana) {
+  const taskTestingEvents = new EventEmitter();
+
   return new kibana.Plugin({
     name: 'sampleTask',
     require: ['elasticsearch', 'task_manager'],
@@ -18,20 +29,19 @@ export default function (kibana) {
     },
 
     init(server) {
-      const { taskManager } = server;
+      const taskManager = server.plugins.task_manager;
 
       taskManager.registerTaskDefinitions({
         sampleTask: {
           title: 'Sample Task',
           description: 'A sample task for testing the task_manager.',
           timeout: '1m',
-          numWorkers: 2,
 
           // This task allows tests to specify its behavior (whether it reschedules itself, whether it errors, etc)
           // taskInstance.params has the following optional fields:
           // nextRunMilliseconds: number - If specified, the run method will return a runAt that is now + nextRunMilliseconds
           // failWith: string - If specified, the task will throw an error with the specified message
-          createTaskRunner: ({ kbnServer, taskInstance }) => ({
+          createTaskRunner: ({ taskInstance }) => ({
             async run() {
               const { params, state } = taskInstance;
               const prevState = state || { count: 0 };
@@ -40,9 +50,9 @@ export default function (kibana) {
                 throw new Error(params.failWith);
               }
 
-              const callCluster = kbnServer.server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
+              const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
               await callCluster('index', {
-                index: '.task_manager_test_result',
+                index: '.kibana_task_manager_test_result',
                 body: {
                   type: 'task',
                   taskId: taskInstance.id,
@@ -52,6 +62,10 @@ export default function (kibana) {
                 },
                 refresh: true,
               });
+
+              if (params.waitForEvent) {
+                await once(taskTestingEvents, params.waitForEvent);
+              }
 
               return {
                 state: { count: (prevState.count || 0) + 1 },
@@ -89,7 +103,7 @@ export default function (kibana) {
         },
       });
 
-      initRoutes(server);
+      initRoutes(server, taskTestingEvents);
     },
   });
 }

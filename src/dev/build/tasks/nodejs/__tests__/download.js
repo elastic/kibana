@@ -196,7 +196,7 @@ describe('src/dev/build/tasks/nodejs/download', () => {
       } catch (error) {
         expect(error)
           .to.have.property('message')
-          .contain('Unexpected status code 500');
+          .contain('Request failed with status code 500');
         expect(reqCount).to.be(6);
       }
     });

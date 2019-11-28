@@ -22,9 +22,7 @@ import { uiModules } from '../modules';
 
 const module = uiModules.get('kibana');
 
-// Provides a tiny subset of the excellent API from
-// bluebird, reimplemented using the $q service
-module.service('Promise', function ($q, $timeout) {
+export function PromiseServiceCreator($q, $timeout) {
   function Promise(fn) {
     if (typeof this === 'undefined') throw new Error('Promise constructor must be called with "new"');
 
@@ -49,7 +47,6 @@ module.service('Promise', function ($q, $timeout) {
     return defer.promise;
   };
   Promise.cast = $q.when;
-  Promise.defer = $q.defer;
   Promise.delay = function (ms) {
     return $timeout(_.noop, ms);
   };
@@ -123,4 +120,8 @@ module.service('Promise', function ($q, $timeout) {
   };
 
   return Promise;
-});
+}
+
+// Provides a tiny subset of the excellent API from
+// bluebird, reimplemented using the $q service
+module.service('Promise', PromiseServiceCreator);

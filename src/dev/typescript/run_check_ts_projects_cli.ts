@@ -21,7 +21,7 @@ import { resolve } from 'path';
 
 import execa from 'execa';
 
-import { run } from '../run';
+import { run } from '@kbn/dev-utils';
 
 const REPO_ROOT = resolve(__dirname, '../../../');
 import { File } from '../file';
@@ -30,7 +30,7 @@ import { PROJECTS } from './projects';
 export async function runCheckTsProjectsCli() {
   run(
     async ({ log }) => {
-      const files = await execa.stdout('git', ['ls-tree', '--name-only', '-r', 'HEAD'], {
+      const { stdout: files } = await execa('git', ['ls-tree', '--name-only', '-r', 'HEAD'], {
         cwd: REPO_ROOT,
       });
 

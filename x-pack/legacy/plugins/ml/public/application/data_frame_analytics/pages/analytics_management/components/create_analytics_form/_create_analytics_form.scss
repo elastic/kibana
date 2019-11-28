@@ -1,0 +1,31 @@
+/*
+ The job creation form displayed in the modal adapts its height dynamically
+ if the content changes. If a form element changes to show/hide error messages,
+ this results in a changing height of the modal. If you type quickly e.g.
+ in the job ID input field and type chars which are invalid only for example
+ at the end of the string, this will result in an unwanted height toggling
+ effect. The following CSS avoids this by 1) delaying the visilibity of the
+ error message by 500ms and 2) animating the height and opacity to create
+ a fade-in effect after that so the modal grows smoothly and doesn't
+ toggle its height.
+ */
+
+@keyframes mlDelayedShow {
+  0%, 50% {
+    max-height: 0;
+    opacity: 0;
+    padding: 0;
+    visibility: hidden;
+  }
+  100% {
+    max-height: 300px;
+    opacity: 1;
+    padding-top: $euiSizeS;
+  }
+}
+
+.mlDataFrameAnalyticsCreateForm {
+  .euiFormErrorText {
+    animation: mlDelayedShow 1s;
+  }
+}

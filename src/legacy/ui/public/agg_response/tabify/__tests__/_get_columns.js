@@ -20,15 +20,13 @@
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { tabifyGetColumns } from '../_get_columns';
-import { VisProvider } from '../../../vis';
+import { Vis } from '../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('get columns', function () {
-  let Vis;
   let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 
@@ -48,7 +46,7 @@ describe('get columns', function () {
     const vis = new Vis(indexPattern, {
       type: 'pie',
       aggs: [
-        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp' } }
+        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp', interval: '10s' } }
       ]
     });
 
@@ -63,10 +61,10 @@ describe('get columns', function () {
     const vis = new Vis(indexPattern, {
       type: 'pie',
       aggs: [
-        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp' } },
-        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp' } },
-        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp' } },
-        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp' } }
+        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp', interval: '10s' } },
+        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp', interval: '10s' } },
+        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp', interval: '10s' } },
+        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp', interval: '10s' } }
       ]
     });
 
@@ -83,12 +81,12 @@ describe('get columns', function () {
     const vis = new Vis(indexPattern, {
       type: 'pie',
       aggs: [
-        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp' } },
+        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp', interval: '10s' } },
         { type: 'avg',            schema: 'metric',   params: { field: 'bytes' } },
-        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp' } },
-        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp' } },
+        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp', interval: '10s' } },
+        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp', interval: '10s' } },
         { type: 'sum',            schema: 'metric',   params: { field: 'bytes' } },
-        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp' } }
+        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp', interval: '10s' } }
       ]
     });
 
@@ -119,12 +117,12 @@ describe('get columns', function () {
     const vis = new Vis(indexPattern, {
       type: 'histogram',
       aggs: [
-        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp' } },
+        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp', interval: '10s' } },
         { type: 'avg',            schema: 'metric',   params: { field: 'bytes' } },
-        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp' } },
-        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp' } },
+        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp', interval: '10s' } },
+        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp', interval: '10s' } },
         { type: 'sum',            schema: 'metric',   params: { field: 'bytes' } },
-        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp' } }
+        { type: 'date_histogram', schema: 'segment',  params: { field: '@timestamp', interval: '10s' } }
       ]
     });
 

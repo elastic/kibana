@@ -17,46 +17,46 @@
  * under the License.
  */
 
-import { Vis } from 'ui/vis';
+import { Field } from 'ui/index_patterns';
+import { IndexedArray } from 'ui/indexed_array';
 import { AggTypeFieldFilters } from './field_filters';
+import { AggConfig } from 'ui/vis';
 
 describe('AggTypeFieldFilters', () => {
   let registry: AggTypeFieldFilters;
-  const fieldParamType = {};
-  const aggConfig = {};
-  const vis = {} as Vis;
+  const aggConfig = {} as AggConfig;
 
   beforeEach(() => {
     registry = new AggTypeFieldFilters();
   });
 
   it('should filter nothing without registered filters', async () => {
-    const fields = [{ name: 'foo' }, { name: 'bar' }];
-    const filtered = registry.filter(fields, fieldParamType, aggConfig, vis);
+    const fields = [{ name: 'foo' }, { name: 'bar' }] as IndexedArray<Field>;
+    const filtered = registry.filter(fields, aggConfig);
     expect(filtered).toEqual(fields);
   });
 
   it('should pass all fields to the registered filter', async () => {
-    const fields = [{ name: 'foo' }, { name: 'bar' }];
+    const fields = [{ name: 'foo' }, { name: 'bar' }] as IndexedArray<Field>;
     const filter = jest.fn();
     registry.addFilter(filter);
-    registry.filter(fields, fieldParamType, aggConfig, vis);
-    expect(filter).toHaveBeenCalledWith(fields[0], fieldParamType, aggConfig, vis);
-    expect(filter).toHaveBeenCalledWith(fields[1], fieldParamType, aggConfig, vis);
+    registry.filter(fields, aggConfig);
+    expect(filter).toHaveBeenCalledWith(fields[0], aggConfig);
+    expect(filter).toHaveBeenCalledWith(fields[1], aggConfig);
   });
 
   it('should allow registered filters to filter out fields', async () => {
-    const fields = [{ name: 'foo' }, { name: 'bar' }];
-    let filtered = registry.filter(fields, fieldParamType, aggConfig, vis);
+    const fields = [{ name: 'foo' }, { name: 'bar' }] as IndexedArray<Field>;
+    let filtered = registry.filter(fields, aggConfig);
     expect(filtered).toEqual(fields);
 
     registry.addFilter(() => true);
     registry.addFilter(field => field.name !== 'foo');
-    filtered = registry.filter(fields, fieldParamType, aggConfig, vis);
+    filtered = registry.filter(fields, aggConfig);
     expect(filtered).toEqual([fields[1]]);
 
     registry.addFilter(field => field.name !== 'bar');
-    filtered = registry.filter(fields, fieldParamType, aggConfig, vis);
+    filtered = registry.filter(fields, aggConfig);
     expect(filtered).toEqual([]);
   });
 });

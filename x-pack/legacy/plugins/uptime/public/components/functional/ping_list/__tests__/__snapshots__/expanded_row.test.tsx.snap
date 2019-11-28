@@ -1,0 +1,77 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PingListExpandedRow doesn't render list items if the body field is undefined 1`] = `
+<EuiDescriptionList
+  listItems={Array []}
+/>
+`;
+
+exports[`PingListExpandedRow doesn't render list items if the http field is undefined 1`] = `
+<EuiDescriptionList
+  listItems={Array []}
+/>
+`;
+
+exports[`PingListExpandedRow doesn't render list items if the response field is undefined 1`] = `
+<EuiDescriptionList
+  listItems={Array []}
+/>
+`;
+
+exports[`PingListExpandedRow renders error information when an error field is present 1`] = `
+<EuiDescriptionList
+  listItems={
+    Array [
+      Object {
+        "description": <EuiText>
+          Forbidden
+        </EuiText>,
+        "title": "Error",
+      },
+      Object {
+        "description": <React.Fragment>
+          <BodyDescription
+            body={
+              Object {
+                "bytes": 1200000,
+                "content": "<http><head><title>The Title</title></head><body></body></http>",
+                "hash": "testhash",
+              }
+            }
+          />
+          <BodyExcerpt
+            content="<http><head><title>The Title</title></head><body></body></http>"
+          />
+        </React.Fragment>,
+        "title": "Response Body",
+      },
+    ]
+  }
+/>
+`;
+
+exports[`PingListExpandedRow renders expected elements for valid props 1`] = `
+<EuiDescriptionList
+  listItems={
+    Array [
+      Object {
+        "description": <React.Fragment>
+          <BodyDescription
+            body={
+              Object {
+                "bytes": 1200000,
+                "content": "<http><head><title>The Title</title></head><body></body></http>",
+                "hash": "testhash",
+              }
+            }
+          />
+          <BodyExcerpt
+            content="<http><head><title>The Title</title></head><body></body></http>"
+          />
+        </React.Fragment>,
+        "title": "Response Body",
+      },
+    ]
+  }
+/>
+`;

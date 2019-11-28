@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
 
-export function natsLogsSpecProvider(server, context) {
+export function natsLogsSpecProvider(context) {
   const moduleName = 'nats';
   const geoipRequired = false;
   const uaRequired = false;
@@ -29,7 +29,7 @@ export function natsLogsSpecProvider(server, context) {
   return {
     id: 'natsLogs',
     name: i18n.translate('kbn.server.tutorials.natsLogs.nameTitle', {
-      defaultMessage: 'Nats logs',
+      defaultMessage: 'NATS logs',
     }),
     category: TUTORIAL_CATEGORY.LOGGING,
     isBeta: true,
@@ -43,13 +43,13 @@ export function natsLogsSpecProvider(server, context) {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-nats.html',
       },
     }),
-    // euiIconType: 'logoNats',
+    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/nats.svg',
     artifacts: {
       dashboards: [
         {
           id: 'Filebeat-nats-overview-ecs',
           linkLabel: i18n.translate('kbn.server.tutorials.natsLogs.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Nats logs dashboard',
+            defaultMessage: 'NATS logs dashboard',
           }),
           isOverview: true
         }

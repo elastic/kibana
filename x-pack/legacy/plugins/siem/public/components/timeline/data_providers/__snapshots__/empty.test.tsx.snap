@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Empty rendering renders correctly against snapshot 1`] = `
+<Component>
+  <Empty />
+</Component>
+`;

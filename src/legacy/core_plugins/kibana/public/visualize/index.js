@@ -17,25 +17,22 @@
  * under the License.
  */
 
+import { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 import './editor/editor';
 import { i18n } from '@kbn/i18n';
 import './saved_visualizations/_saved_vis';
 import './saved_visualizations/saved_visualizations';
-import uiRoutes from 'ui/routes';
-import 'ui/capabilities/route_setup';
 import visualizeListingTemplate from './listing/visualize_listing.html';
 import { VisualizeListingController } from './listing/visualize_listing';
 import { VisualizeConstants } from './visualize_constants';
-import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { getLandingBreadcrumbs, getWizardStep1Breadcrumbs } from './breadcrumbs';
 
-import { data } from 'plugins/data/setup';
-data.search.loadLegacyDirectives();
-data.filter.loadLegacyDirectives();
+import { getServices, FeatureCatalogueCategory } from './kibana_services';
+
+const { FeatureCatalogueRegistryProvider, uiRoutes } = getServices();
 
 uiRoutes
   .defaults(/visualize/, {
-    requireDefaultIndex: true,
     requireUICapability: 'visualize.show',
     badge: uiCapabilities => {
       if (uiCapabilities.visualize.save) {
@@ -60,6 +57,7 @@ uiRoutes
     controllerAs: 'listingController',
     resolve: {
       createNewVis: () => false,
+      hasDefaultIndex: ($rootScope, kbnUrl) => ensureDefaultIndexPattern(getServices().core, getServices().data, $rootScope, kbnUrl)
     },
   })
   .when(VisualizeConstants.WIZARD_STEP_1_PAGE_PATH, {
@@ -69,6 +67,7 @@ uiRoutes
     controllerAs: 'listingController',
     resolve: {
       createNewVis: () => true,
+      hasDefaultIndex: ($rootScope, kbnUrl) => ensureDefaultIndexPattern(getServices().core, getServices().data, $rootScope, kbnUrl)
     },
   });
 

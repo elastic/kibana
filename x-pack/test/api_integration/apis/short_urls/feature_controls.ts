@@ -6,10 +6,9 @@
 
 import expect from '@kbn/expect';
 import { SecurityService } from '../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function featureControlsTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function featureControlsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const security: SecurityService = getService('security');
 

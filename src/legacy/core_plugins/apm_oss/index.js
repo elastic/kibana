@@ -48,7 +48,7 @@ export default function apmOss(kibana) {
         'transactionIndices',
         'spanIndices',
         'metricsIndices',
-        'onboardingIndices'
+        'onboardingIndices',
       ].map(type => server.config().get(`apm_oss.${type}`))));
     }
   });

@@ -24,7 +24,6 @@ import d3 from 'd3';
 import { i18n } from '@kbn/i18n';
 import { KibanaMapLayer } from 'ui/vis/map/kibana_map_layer';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
-import { uiModules } from 'ui/modules';
 import * as topojson from 'topojson-client';
 import { toastNotifications } from 'ui/notify';
 import * as colorUtil from 'ui/vis/map/color_util';
@@ -35,15 +34,6 @@ const EMPTY_STYLE = {
   color: 'rgb(200,200,200)',
   fillOpacity: 0
 };
-
-
-const emsServiceSettings = new Promise((resolve) => {
-  uiModules.get('kibana').run(($injector) => {
-    const serviceSttings = $injector.get('serviceSettings');
-    resolve(serviceSttings);
-  });
-});
-
 
 export default class ChoroplethLayer extends KibanaMapLayer {
 
@@ -78,10 +68,10 @@ export default class ChoroplethLayer extends KibanaMapLayer {
   }
 
 
-  constructor(name, attribution, format, showAllShapes, meta, layerConfig) {
+  constructor(name, attribution, format, showAllShapes, meta, layerConfig, serviceSettings) {
 
     super();
-
+    this._serviceSettings = serviceSettings;
     this._metrics = null;
     this._joinField = null;
     this._colorRamp = truncatedColorMaps[Object.keys(truncatedColorMaps)[0]].value;
@@ -193,8 +183,7 @@ CORS configuration of the server permits requests from the Kibana application on
 
   //This method is stubbed in the tests to avoid network request during unit tests.
   async _makeJsonAjaxCall() {
-    const serviceSettings = await emsServiceSettings;
-    return serviceSettings.getJsonForRegionLayer(this._layerConfig);
+    return this._serviceSettings.getJsonForRegionLayer(this._layerConfig);
   }
 
   _invalidateJoin() {
@@ -262,8 +251,8 @@ CORS configuration of the server permits requests from the Kibana application on
     this._setStyle();
   }
 
-  cloneChoroplethLayerForNewData(name, attribution, format, showAllData, meta, layerConfig) {
-    const clonedLayer = new ChoroplethLayer(name, attribution, format, showAllData, meta, layerConfig);
+  cloneChoroplethLayerForNewData(name, attribution, format, showAllData, meta, layerConfig, serviceSettings) {
+    const clonedLayer = new ChoroplethLayer(name, attribution, format, showAllData, meta, layerConfig, serviceSettings);
     clonedLayer.setJoinField(this._joinField);
     clonedLayer.setColorRamp(this._colorRamp);
     clonedLayer.setLineWeight(this._lineWeight);

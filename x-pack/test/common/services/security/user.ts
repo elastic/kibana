@@ -5,13 +5,13 @@
  */
 import axios, { AxiosInstance } from 'axios';
 import util from 'util';
-import { LogService } from '../../../types/services';
+import { ToolingLog } from '@kbn/dev-utils';
 
 export class User {
-  private log: LogService;
+  private log: ToolingLog;
   private axios: AxiosInstance;
 
-  constructor(url: string, log: LogService) {
+  constructor(url: string, log: ToolingLog) {
     this.log = log;
     this.axios = axios.create({
       headers: { 'kbn-xsrf': 'x-pack/ftr/services/security/user' },

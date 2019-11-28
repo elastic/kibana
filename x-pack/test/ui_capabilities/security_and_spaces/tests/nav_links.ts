@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { NavLinksBuilder } from '../../common/nav_links_builder';
 import { FeaturesService } from '../../common/services';
 import {
@@ -14,8 +14,7 @@ import {
 } from '../../common/services/ui_capabilities';
 import { UserAtSpaceScenarios } from '../scenarios';
 
-// eslint-disable-next-line import/no-default-export
-export default function navLinksTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function navLinksTests({ getService }: FtrProviderContext) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
   const featuresService: FeaturesService = getService('features');
 
@@ -63,6 +62,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.only('management'));
             break;
+          // if we don't have access at the space itself, security interceptor responds with 404.
           case 'no_kibana_privileges at everything_space':
           case 'no_kibana_privileges at nothing_space':
           case 'legacy_all at everything_space':
@@ -72,9 +72,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           case 'nothing_space_all at everything_space':
           case 'nothing_space_read at everything_space':
             expect(uiCapabilities.success).to.be(false);
-            expect(uiCapabilities.failureReason).to.be(
-              GetUICapabilitiesFailureReason.RedirectedToRoot
-            );
+            expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
             break;
           default:
             throw new UnreachableError(scenario);

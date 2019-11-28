@@ -4,17 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
+import { Logger, SavedObjectsLegacyService, IRouter } from 'src/core/server';
 import { initDeleteSpacesApi } from './delete';
-import { initGetSpacesApi } from './get';
+import { initGetSpaceApi } from './get';
+import { initGetAllSpacesApi } from './get_all';
 import { initPostSpacesApi } from './post';
 import { initPutSpacesApi } from './put';
+import { SpacesServiceSetup } from '../../../spaces_service/spaces_service';
+import { initCopyToSpacesApi } from './copy_to_space';
 
-export function initExternalSpacesApi(server: any) {
-  const routePreCheckLicenseFn = routePreCheckLicense(server);
+export interface ExternalRouteDeps {
+  externalRouter: IRouter;
+  getSavedObjects: () => SavedObjectsLegacyService;
+  spacesService: SpacesServiceSetup;
+  log: Logger;
+}
 
-  initDeleteSpacesApi(server, routePreCheckLicenseFn);
-  initGetSpacesApi(server, routePreCheckLicenseFn);
-  initPostSpacesApi(server, routePreCheckLicenseFn);
-  initPutSpacesApi(server, routePreCheckLicenseFn);
+export function initExternalSpacesApi(deps: ExternalRouteDeps) {
+  initDeleteSpacesApi(deps);
+  initGetSpaceApi(deps);
+  initGetAllSpacesApi(deps);
+  initPostSpacesApi(deps);
+  initPutSpacesApi(deps);
+  initCopyToSpacesApi(deps);
 }

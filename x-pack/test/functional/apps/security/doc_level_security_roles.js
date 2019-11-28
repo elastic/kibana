@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
     before('initialize tests', async () => {
       await esArchiver.load('empty_kibana');
       await esArchiver.loadIfNeeded('security/dlstest');
-      browser.setWindowSize(1600, 1000);
+      await browser.setWindowSize(1600, 1000);
 
       await PageObjects.settings.createIndexPattern('dlstest', null);
 
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }) {
         expect(hitCount).to.be('1');
       });
       const rowData = await PageObjects.discover.getDocTableIndex(1);
-      expect(rowData).to.be('name:ABC Company region:EAST _id:doc1 _type:_doc _index:dlstest _score:0');
+      expect(rowData).to.be('name:ABC Company region:EAST _id:doc1 _type: - _index:dlstest _score:0');
     });
     after('logout', async () => {
       await PageObjects.security.logout();

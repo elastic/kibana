@@ -27,16 +27,9 @@ export default function(kibana: any) {
       app: {
         title: 'Embeddable Explorer',
         order: 1,
-        main: 'plugins/kbn_tp_embeddable_explorer',
+        main: 'plugins/kbn_tp_embeddable_explorer/np_ready/public/legacy',
       },
-      embeddableActions: [
-        'plugins/embeddable_api/test_samples/actions/hello_world_action',
-        'plugins/embeddable_api/test_samples/actions/say_hello_action',
-        'plugins/embeddable_api/test_samples/actions/send_message_action',
-      ],
-      embeddableFactories: [
-        'plugins/embeddable_api/test_samples/embeddables/hello_world/hello_world_embeddable_factory',
-      ],
+      hacks: ['plugins/dashboard_embeddable_container/initialize'],
     },
     init(server: Legacy.Server) {
       server.injectUiAppVars('kbn_tp_embeddable_explorer', async () =>

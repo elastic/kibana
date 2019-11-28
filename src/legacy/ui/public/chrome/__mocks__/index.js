@@ -27,10 +27,14 @@ const uiSettingsClient = {
 };
 
 const chrome = {
+  addBasePath: path => path ? path : 'test/base/path',
+  breadcrumbs: {
+    set: () => ({}),
+  },
   getBasePath: () => '/test/base/path',
-  addBasePath: path => path,
   getInjected: jest.fn(),
   getUiSettingsClient: () => uiSettingsClient,
+  getSavedObjectsClient: () => '',
   getXsrfToken: () => 'kbn-xsrf-token',
 };
 

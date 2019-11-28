@@ -161,6 +161,17 @@ describe('esArchiver createParseArchiveStreams', () => {
       });
     });
 
+    it('parses blank files', async () => {
+      const output = await createPromiseFromStreams([
+        createListStream([]),
+        createGzip(),
+        ...createParseArchiveStreams(({ gzip: true })),
+        createConcatStream([])
+      ]);
+
+      expect(output).to.eql([]);
+    });
+
     describe('stream errors', () => {
       it('stops when the input is not valid gzip archive', async () => {
         try {

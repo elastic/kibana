@@ -17,27 +17,11 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
-import { EnvironmentMode } from '../config';
 import { CoreContext } from '../core_context';
-import { LoggerFactory } from '../logging';
-import { PluginWrapper, PluginManifest } from './plugin';
+import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
+import { PluginInitializerContext, PluginManifest, PluginOpaqueId } from './types';
 import { CoreSetup, CoreStart } from '..';
-
-/**
- * Context that's available to plugins during initialization stage.
- *
- * @public
- */
-export interface PluginInitializerContext {
-  env: { mode: EnvironmentMode };
-  logger: LoggerFactory;
-  config: {
-    create: <Schema>() => Observable<Schema>;
-    createIfExists: <Schema>() => Observable<Schema | undefined>;
-  };
-}
 
 /**
  * This returns a facade for `CoreContext` that will be exposed to the plugin initializer.
@@ -54,13 +38,19 @@ export interface PluginInitializerContext {
  */
 export function createPluginInitializerContext(
   coreContext: CoreContext,
+  opaqueId: PluginOpaqueId,
   pluginManifest: PluginManifest
 ): PluginInitializerContext {
   return {
+    opaqueId,
+
     /**
      * Environment information that is safe to expose to plugins and may be beneficial for them.
      */
-    env: { mode: coreContext.env.mode },
+    env: {
+      mode: coreContext.env.mode,
+      packageInfo: coreContext.env.packageInfo,
+    },
 
     /**
      * Plugin-scoped logger
@@ -112,17 +102,35 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
   plugin: PluginWrapper<TPlugin, TPluginDependencies>
 ): CoreSetup {
   return {
+    context: {
+      createContextContainer: deps.context.createContextContainer,
+    },
     elasticsearch: {
       adminClient$: deps.elasticsearch.adminClient$,
       dataClient$: deps.elasticsearch.dataClient$,
+      createClient: deps.elasticsearch.createClient,
     },
     http: {
+      createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,
+      registerRouteHandlerContext: deps.http.registerRouteHandlerContext.bind(
+        null,
+        plugin.opaqueId
+      ),
+      createRouter: () => deps.http.createRouter('', plugin.opaqueId),
       registerOnPreAuth: deps.http.registerOnPreAuth,
       registerAuth: deps.http.registerAuth,
       registerOnPostAuth: deps.http.registerOnPostAuth,
-      getBasePathFor: deps.http.getBasePathFor,
-      setBasePathFor: deps.http.setBasePathFor,
-      createNewServer: deps.http.createNewServer,
+      basePath: deps.http.basePath,
+      isTlsEnabled: deps.http.isTlsEnabled,
+    },
+    savedObjects: {
+      setClientFactory: deps.savedObjects.setClientFactory,
+      addClientWrapper: deps.savedObjects.addClientWrapper,
+      createInternalRepository: deps.savedObjects.createInternalRepository,
+      createScopedRepository: deps.savedObjects.createScopedRepository,
+    },
+    uiSettings: {
+      register: deps.uiSettings.register,
     },
   };
 }
@@ -144,5 +152,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
   deps: PluginsServiceStartDeps,
   plugin: PluginWrapper<TPlugin, TPluginDependencies>
 ): CoreStart {
-  return {};
+  return {
+    savedObjects: { getScopedClient: deps.savedObjects.getScopedClient },
+  };
 }

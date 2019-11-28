@@ -19,7 +19,7 @@
 
 import $ from 'jquery';
 import _ from 'lodash';
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 import { keyMap } from 'ui/utils/key_map';
 const reverseKeyMap = _.mapValues(_.invert(keyMap), _.ary(_.parseInt, 1));
 
@@ -70,7 +70,7 @@ export default function ($el, sequence) {
   }
 
   function doList(list) {
-    return Promise.try(function () {
+    return Bluebird.try(function () {
       if (!list || !list.length) return;
 
       let event = list[0];
@@ -80,20 +80,20 @@ export default function ($el, sequence) {
 
       switch (event.type) {
         case 'press':
-          return Promise.resolve()
+          return Bluebird.resolve()
             .then(_.partial(fire, 'keydown', event.key))
             .then(_.partial(fire, 'keypress', event.key))
             .then(_.partial(doList, event.events))
             .then(_.partial(fire, 'keyup', event.key));
 
         case 'wait':
-          return Promise.delay(event.ms);
+          return Bluebird.delay(event.ms);
 
         case 'repeat':
           return (function again(remaining) {
-            if (!remaining) return Promise.resolve();
+            if (!remaining) return Bluebird.resolve();
             remaining = remaining - 1;
-            return Promise.resolve()
+            return Bluebird.resolve()
               .then(_.partial(fire, 'keydown', event.key, true))
               .then(_.partial(fire, 'keypress', event.key, true))
               .then(_.partial(again, remaining));

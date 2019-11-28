@@ -17,9 +17,11 @@
  * under the License.
  */
 
+export * from './assert_never';
+export * from './context';
+export * from './deep_freeze';
 export * from './get';
 export * from './map_to_object';
+export * from './merge';
 export * from './pick';
-export * from './assert_never';
 export * from './url';
-export * from './deep_freeze';

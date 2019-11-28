@@ -1,0 +1,268 @@
+[role="xpack"]
+[[element-intro]]
+== Showcase your data with elements
+
+Canvas _elements_ are the building blocks of your workpad. With elements, you can combine images, text, and visualizations to tell a story about your data.
+
+When you add elements to your workpad, you can:
+
+* <<connect-element-data,Connect the elements to your live data>>
+
+* <<configure-display-options,Choose how you want the element to appear on your workpad>>
+
+* <<configure-auto-refresh-interval,Change the data refresh interval>>
+
+* <<organize-element,Move and arrange elements on your workpad>>
+
+* <<element-save,Save your elements>>
+
+[float]
+[[add-canvas-element]]
+=== Add elements to your workpad
+
+Choose the elements to display on your workpad, then familiarize yourself with the element using the preconfigured demo data.
+
+. Click *Add element*.
+
+. In the *Elements* window, select the element you want to use. 
++
+[role="screenshot"]
+image::images/canvas-element-select.gif[Canvas elements]
+
+. Play around with the default settings and see what the element can do. 
+
+TIP: Want to use a different element? You can delete the element by selecting it, clicking the *Element options* icon in the top right corner, then selecting *Delete*.
+
+[float]
+[[connect-element-data]]
+=== Connect the element to your data
+
+When you are ready to move on from the demo data, connect the element to your own data.
+
+. Make sure that the element is selected, then select *Data*.
+
+. Click *Change your data source*.
+
+[float]
+[[elasticsearch-sql-data-source]]
+==== Connect to Elasticsearch SQL
+
+Access your data in Elasticsearch using the Elasticsearch SQL syntax.
+
+Unfamiliar with writing Elasticsearch SQL queries? For more information, refer to {ref}/sql-spec.html[SQL language].
+
+. Click *Elasticsearch SQL*.
+
+. In the *Elasticearch SQL query* box, enter your query, then *Preview* it.
+
+. If everything looks correct, *Save* it. 
+
+[float]
+[[elasticsearch-raw-doc-data-source]]
+==== Connect to Elasticsearch raw data
+
+Use the Lucene query syntax to use your raw data in Elasticsearch.
+
+For for more information about the Lucene query string sytax, refer to <<lucene-query,Lucene Query Syntax>>.
+
+. Click *Elasticsearch raw documents*.
+
+. In the *Index* field, enter the index pattern that you want to display. 
+
+. From the *Fields* dropdown, select the associated fields you want to display.
+
+. To sort the data, select an option from the *Sort Field* and *Sort Order* dropdowns.
+
+. For more targeted queries, enter a *Query* using the Lucene query string syntax. 
+
+. *Preview* the query. 
+
+. If your query looks correct, *Save* it. 
+
+[float]
+[[timelion-data-source]]
+==== Connect to Timelion
+
+Use <<timelion,Timelion>> queries to use your time series data. 
+
+. Click *Timelion*.
+
+. Enter a *Query* using the Lucene query string syntax. 
++
+For for more information about the Lucene query string syntax, refer to <<lucene-query,Lucene Query Syntax>>.
+
+. Enter the *Interval*, then *Preview* the query.
+
+. If your query looks correct, *Save* it. 
+
+[float]
+[[configure-display-options]]
+=== Choose the display options
+
+Choose how you want the elements to appear on your workpad.
+
+[float]
+[[data-display]]
+==== Specify how to display the data
+
+When you connect your element to a data source, the element often appears as a warning. To remove the error, specify the display options.
+
+. Click *Display*
+
+. Change the display options for the element. 
+
+[float]
+[[element-display-container]]
+==== Change the appearance of the element container
+
+Further define the appearance of the element container and border.
+
+. Next to *Element style*, click *+*, then select *Container style*.
+
+. Expand *Container style*.
+
+. Change the *Appearance* and *Border* options.
+ 
+[float]
+[[apply-element-styles]]
+==== Apply a set of styles
+
+To make your element look exactly the way you want, apply CSS overrides.
+
+. Next to *Element style*, click *+*, then select *CSS*.
+
+. Enter the *CSS*. For example, to center the Markdown element, enter:
++
+[source,js]
+--------------------------------------------------
+.canvasRenderEl h1 {
+text.align: center;
+}
+--------------------------------------------------
+
+. Click *Apply stylesheet*.
+
+[float]
+[[configure-auto-refresh-interval]]
+==== Change the data auto-refresh interval
+
+Increase or decrease how often your data refreshes on your workpad.
+
+. In the top left corner, click the *Control settings* icon.
+
+. Under *Change auto-refresh interval*, select the interval you want to use.
++
+[role="screenshot"]
+image::images/canvas-refresh-interval.png[Element data refresh interval]
+
+TIP: To manually refresh the data, click the *Refresh data* icon. 
+
+[float]
+[[organize-element]]
+=== Organize the elements on your workpad
+
+Choose where you want the elements to appear on your workpad.
+
+[float]
+[[move-canvas-elements]]
+==== Move elements
+
+Move the element to a preferred location on your workpad. As you move the element, notice the alignment lines that appear to help you place the element exactly where you want it.
+
+* Click and drag the element to your preferred location.
+
+* To move the element by 1 pixel, select the element, press and hold Shift, then use your arrow keys.
+
+* To move the element by 10 pixels, select the element, then use your arrow keys.
+
+[float]
+[[resize-canvas-elements]]
+==== Resize elements
+
+Make your elements bigger or smaller than the default size.
+
+. Select the element.
+
+. Click and drag the resize handles to the size you want.
+
+[float]
+[[align-canvas-elements]]
+==== Align elements
+
+Align two or more elements on your workpad.
+
+. Press and hold Shift, then select the elements you want to align.
+
+. Click the *Element options* icon in the top right corner, then select *Align elements*.
+
+. From the *Alignment* menu, select how you want to align the elements on the workpad.
++
+[role="screenshot"]
+image::images/canvas-align-elements.gif[Align elements]
+
+[float]
+[[distribute-canvas-elements]]
+==== Distribute elements
+
+Distribute three or more elements on your workpad.
+
+. Press and hold Shift, then select the elements you want to distribute.
+
+. Click the *Element options* icon in the top right corner, then select *Distribute elements*.
+
+. From the *Distribution* menu, select how you want to distribute the elements on the workpad.
++
+[role="screenshot"]
+image::images/canvas-distribute-elements.gif[Distribute elements]
+
+[float]
+[[change-element-order]]
+==== Change the element order
+
+Change the order of how the elements are displayed on your workpad.
+
+. Select an element.
+
+. In the top right corder, click the *Element options* icon. 
+
+. Select *Order*, then select the order that you want the element to appear.
+
+[float]
+[[zoom-in-out]]
+=== Use the zoom options
+
+In the upper left corner, click the *Zoom controls* icon, then select one of the options.
+
+[role="screenshot"]
+image::images/canvas-zoom-controls.png[Zoom controls]
+
+[float]
+[[element-save]]
+=== Save elements
+
+After you have made changes to elements, save them so that you can reuse them across all of your workpads.
+
+. Select the element that you want to save.
++
+To save a group of elements, press and hold Shift, then select the elements you want to save.
+
+. Click the *Save as new element* icon.
+
+. In the *Create new element* window, enter a *Name*.
+
+. Enter an optional *Description*, then click *Save*.
+
+. To access the element, click *Add element*, then select *My elements*.
+
+[float]
+[[add-more-pages]]
+=== Add pages
+
+When you have run out of room on your workpad page, add more pages.
+
+. Click *Page 1*, then click *+*.
+
+. On the *Page* editor panel on the right, select the page transition from the *Transition* dropdown. 
++
+[role="screenshot"]
+image::images/canvas-add-pages.gif[Add pages]

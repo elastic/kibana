@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
+import { DEFAULT_SPACE_ID } from '../../../../legacy/plugins/spaces/common/constants';
 import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -18,6 +18,7 @@ interface DeleteTest {
 interface DeleteTests {
   spaceAware: DeleteTest;
   notSpaceAware: DeleteTest;
+  hiddenType: DeleteTest;
   invalidId: DeleteTest;
 }
 
@@ -47,6 +48,14 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     });
   };
 
+  const expectGenericNotFound = (resp: { [key: string]: any }) => {
+    expect(resp.body).to.eql({
+      statusCode: 404,
+      error: 'Not Found',
+      message: `Not Found`,
+    });
+  };
+
   const createExpectSpaceAwareNotFound = (spaceId: string = DEFAULT_SPACE_ID) => (resp: {
     [key: string]: any;
   }) => {
@@ -69,6 +78,8 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
   const expectRbacSpaceAwareForbidden = createExpectRbacForbidden('dashboard');
 
+  const expectRbacHiddenTypeForbidden = createExpectRbacForbidden('hiddentype');
+
   const makeDeleteTest = (describeFn: DescribeFn) => (
     description: string,
     definition: DeleteTestDefinition
@@ -90,9 +101,7 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
           .expect(tests.spaceAware.statusCode)
           .then(tests.spaceAware.response));
 
-      it(`should return ${
-        tests.notSpaceAware.statusCode
-      } when deleting a non-space-aware doc`, async () =>
+      it(`should return ${tests.notSpaceAware.statusCode} when deleting a non-space-aware doc`, async () =>
         await supertest
           .delete(
             `${getUrlPrefix(
@@ -102,6 +111,13 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
           .auth(user.username, user.password)
           .expect(tests.notSpaceAware.statusCode)
           .then(tests.notSpaceAware.response));
+
+      it(`should return ${tests.hiddenType.statusCode} when deleting a hiddentype doc`, async () =>
+        await supertest
+          .delete(`${getUrlPrefix(spaceId)}/api/saved_objects/hiddentype/hiddentype_1`)
+          .auth(user.username, user.password)
+          .expect(tests.hiddenType.statusCode)
+          .then(tests.hiddenType.response));
 
       it(`should return ${tests.invalidId.statusCode} when deleting an unknown doc`, async () =>
         await supertest
@@ -121,6 +137,7 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   deleteTest.only = makeDeleteTest(describe.only);
 
   return {
+    expectGenericNotFound,
     createExpectSpaceAwareNotFound,
     createExpectUnknownDocNotFound,
     deleteTest,
@@ -128,5 +145,6 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expectRbacInvalidIdForbidden,
     expectRbacNotSpaceAwareForbidden,
     expectRbacSpaceAwareForbidden,
+    expectRbacHiddenTypeForbidden,
   };
 }

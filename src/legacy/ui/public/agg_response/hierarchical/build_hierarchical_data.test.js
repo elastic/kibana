@@ -20,14 +20,7 @@
 import { buildHierarchicalData } from './build_hierarchical_data';
 import { legacyResponseHandlerProvider } from '../../vis/response_handlers/legacy';
 
-jest.mock('../../registry/field_formats', () => ({
-  fieldFormats: {
-    byId: {
-      '1': jest.fn(),
-      agg_1: jest.fn(),
-    }
-  }
-}));
+jest.mock('ui/new_platform');
 
 jest.mock('../../chrome', () => ({
   getUiSettingsClient: jest.fn()

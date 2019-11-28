@@ -4,23 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import { schema } from '@kbn/config-schema';
 import { Space } from '../../../../common/model/space';
 import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
-import { SpacesClient } from '../../../lib/spaces_client';
+import { ExternalRouteDeps } from '.';
+import { createLicensedRouteHandler } from '../../lib';
 
-export function initPutSpacesApi(server: any, routePreCheckLicenseFn: any) {
-  server.route({
-    method: 'PUT',
-    path: '/api/spaces/space/{id}',
-    async handler(request: any) {
-      const { SavedObjectsClient } = server.savedObjects;
-      const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
-        request
-      );
+export function initPutSpacesApi(deps: ExternalRouteDeps) {
+  const { externalRouter, spacesService, getSavedObjects } = deps;
 
-      const space: Space = request.payload;
+  externalRouter.put(
+    {
+      path: '/api/spaces/space/{id}',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+        body: spaceSchema,
+      },
+    },
+    createLicensedRouteHandler(async (context, request, response) => {
+      const { SavedObjectsClient } = getSavedObjects();
+      const spacesClient = await spacesService.scopedClient(request);
+
+      const space = request.body;
       const id = request.params.id;
 
       let result: Space;
@@ -28,18 +36,12 @@ export function initPutSpacesApi(server: any, routePreCheckLicenseFn: any) {
         result = await spacesClient.update(id, { ...space });
       } catch (error) {
         if (SavedObjectsClient.errors.isNotFoundError(error)) {
-          return Boom.notFound();
+          return response.notFound();
         }
-        return wrapError(error);
+        return response.customError(wrapError(error));
       }
 
-      return result;
-    },
-    config: {
-      validate: {
-        payload: spaceSchema,
-      },
-      pre: [routePreCheckLicenseFn],
-    },
-  });
+      return response.ok({ body: result });
+    })
+  );
 }

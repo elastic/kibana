@@ -304,52 +304,71 @@ export const createRackAgentInstructions = (apmServerUrl = '', secretToken = '')
 export const createJsAgentInstructions = (apmServerUrl = '') => [
   {
     title: i18n.translate('kbn.server.tutorials.apm.jsClient.enableRealUserMonitoring.title', {
-      defaultMessage: 'Enable Real User Monitoring support in the APM server',
+      defaultMessage: 'Enable Real User Monitoring support in APM server',
     }),
     textPre: i18n.translate('kbn.server.tutorials.apm.jsClient.enableRealUserMonitoring.textPre', {
-      defaultMessage: 'Please refer to [the documentation]({documentationLink}).',
-      values: { documentationLink: '{config.docs.base_url}guide/en/apm/server/{config.docs.version}/rum.html' },
+      defaultMessage: 'APM Server disables RUM support by default. See the [documentation]({documentationLink}) \
+for details on how to enable RUM support.',
+      values: { documentationLink: '{config.docs.base_url}guide/en/apm/server/{config.docs.version}/configuration-rum.html' },
     }),
   },
   {
-    title: i18n.translate('kbn.server.tutorials.apm.jsClient.install.title', {
-      defaultMessage: 'Install the APM agent',
+    title: i18n.translate('kbn.server.tutorials.apm.jsClient.installDependency.title', {
+      defaultMessage: 'Set up the Agent as a dependency',
     }),
-    textPre: i18n.translate('kbn.server.tutorials.apm.jsClient.install.textPre', {
-      defaultMessage: 'Install the APM agent for JavaScript as a dependency to your application:',
-    }),
-    commands: [`npm install @elastic/apm-rum --save`],
-  },
-  {
-    title: i18n.translate('kbn.server.tutorials.apm.jsClient.configure.title', {
-      defaultMessage: 'Configure the agent',
-    }),
-    textPre: i18n.translate('kbn.server.tutorials.apm.jsClient.configure.textPre', {
-      defaultMessage: 'Agents are libraries that run inside of your application.',
+    textPre: i18n.translate('kbn.server.tutorials.apm.jsClient.installDependency.textPre', {
+      defaultMessage: 'You can install the Agent as a dependency to your application with \
+`npm install @elastic/apm-rum --save`.\n\n\
+The Agent can then be initialized and configured in your application like this:',
     }),
     commands: `import {curlyOpen} init as initApm {curlyClose} from '@elastic/apm-rum'
 var apm = initApm({curlyOpen}
 
-  // ${i18n.translate('kbn.server.tutorials.apm.jsClient.configure.commands.setRequiredServiceNameComment', {
+  // ${i18n.translate('kbn.server.tutorials.apm.jsClient.installDependency.commands.setRequiredServiceNameComment', {
     defaultMessage: 'Set required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)',
   })}
-  serviceName: '',
+  serviceName: 'your-app-name',
 
-  // ${i18n.translate('kbn.server.tutorials.apm.jsClient.configure.commands.setCustomApmServerUrlComment', {
+  // ${i18n.translate('kbn.server.tutorials.apm.jsClient.installDependency.commands.setCustomApmServerUrlComment', {
     defaultMessage: 'Set custom APM Server URL (default: {defaultApmServerUrl})',
     values: { defaultApmServerUrl: 'http://localhost:8200' },
   })}
   serverUrl: '${apmServerUrl}',
 
-  // ${i18n.translate('kbn.server.tutorials.apm.jsClient.configure.commands.setServiceVersionComment', {
-    defaultMessage: 'Set service version (required for sourcemap feature)',
+  // ${i18n.translate('kbn.server.tutorials.apm.jsClient.installDependency.commands.setServiceVersionComment', {
+    defaultMessage: 'Set service version (required for source map feature)',
   })}
   serviceVersion: ''
 {curlyClose})`.split('\n'),
-    textPost: i18n.translate('kbn.server.tutorials.apm.jsClient.configure.textPost', {
-      defaultMessage: 'See the [documentation]({documentationLink}) for advanced usage.',
-      values: { documentationLink: '{config.docs.base_url}guide/en/apm/agent/js-base/current/index.html' },
+    textPost: i18n.translate('kbn.server.tutorials.apm.jsClient.installDependency.textPost', {
+      defaultMessage: 'Framework integrations, like React or Angular, have custom dependencies. \
+See the [integration documentation]({docLink}) for more information.',
+      values: { docLink: '{config.docs.base_url}guide/en/apm/agent/rum-js/{config.docs.version}/framework-integrations.html' },
     }),
+  },
+  {
+    title: i18n.translate('kbn.server.tutorials.apm.jsClient.scriptTags.title', {
+      defaultMessage: 'Set up the Agent with Script Tags',
+    }),
+    textPre: i18n.translate('kbn.server.tutorials.apm.jsClient.scriptTags.textPre', {
+      defaultMessage: 'Alternatively, you can use Script tags to set up and configure the Agent. \
+Add a `<script>` tag to the HTML page and use the `elasticApm` global object to load and initialize the agent. \
+Don\'t forget to download the latest version of the RUM Agent from [GitHub]({GitHubLink}) or [UNPKG]({UnpkgLink}), \
+and host the file on your Server/CDN before deploying to production.',
+      values: {
+        GitHubLink: 'https://github.com/elastic/apm-agent-rum-js/releases/latest',
+        UnpkgLink: 'https://unpkg.com/@elastic/apm-rum/dist/bundles/elastic-apm-rum.umd.min.js'
+      },
+    }),
+    commands: `\
+<script src="https://your-cdn-host.com/path/to/elastic-apm-rum.umd.min.js" crossorigin></script>
+<script>
+  elasticApm.init({curlyOpen}
+    serviceName: 'your-app-name',
+    serverUrl: 'http://localhost:8200',
+  {curlyClose})
+</script>
+`.split('\n')
   },
 ];
 
@@ -472,17 +491,16 @@ export const createDotNetAgentInstructions = (apmServerUrl = '', secretToken = '
       defaultMessage: 'Download the APM agent',
     }),
     textPre: i18n.translate('kbn.server.tutorials.apm.dotNetClient.download.textPre', {
-      defaultMessage: '**Warning: The .NET agent is currently in Beta and not meant for production use.** \n\n \
-      Add the the agent package(s) from [NuGet]({allNuGetPacakgesLink}) to your .NET application. There are multiple \
-      NuGet packages available for different use cases. \n\n  For an ASP.NET Core application with Entity Framework \
-      Core download the [Elastic.Apm.All]({allApmPackageLink}) package. This package will automatically add every agent component to \
-      your application. \n\n In case you would like to to minimize the dependencies, you can use the \
+      defaultMessage: 'Add the the agent package(s) from [NuGet]({allNuGetPackagesLink}) to your .NET application. There are multiple \
+      NuGet packages available for different use cases. \n\nFor an ASP.NET Core application with Entity Framework \
+      Core download the [Elastic.Apm.NetCoreAll]({netCoreAllApmPackageLink}) package. This package will automatically add every \
+      agent component to your application. \n\n In case you would like to to minimize the dependencies, you can use the \
       [Elastic.Apm.AspNetCore]({aspNetCorePackageLink}) package for just \
       ASP.NET Core monitoring or the [Elastic.Apm.EfCore]({efCorePackageLink}) package for just Entity Framework Core monitoring. \n\n \
       In case you only want to use the public Agent API for manual instrumentation use the [Elastic.Apm]({elasticApmPackageLink}) package.',
       values: {
-        allNuGetPacakgesLink: 'https://www.nuget.org/packages?q=Elastic.apm',
-        allApmPackageLink: 'https://www.nuget.org/packages/Elastic.Apm.All',
+        allNuGetPackagesLink: 'https://www.nuget.org/packages?q=Elastic.apm',
+        netCoreAllApmPackageLink: 'https://www.nuget.org/packages/Elastic.Apm.NetCoreAll',
         aspNetCorePackageLink: 'https://www.nuget.org/packages/Elastic.Apm.AspNetCore',
         efCorePackageLink: 'https://www.nuget.org/packages/Elastic.Apm.EntityFrameworkCore',
         elasticApmPackageLink: 'https://www.nuget.org/packages/Elastic.Apm',
@@ -494,13 +512,14 @@ export const createDotNetAgentInstructions = (apmServerUrl = '', secretToken = '
       defaultMessage: 'Add the agent to the application',
     }),
     textPre: i18n.translate('kbn.server.tutorials.apm.dotNetClient.configureApplication.textPre', {
-      defaultMessage: 'In case of ASP.NET Core, call the `UseElasticApm` method in the `Configure` method within the `Startup.cs` file.'
+      defaultMessage: 'In case of ASP.NET Core with the `Elastic.Apm.NetCoreAll` package, call the `UseAllElasticApm` \
+      method in the `Configure` method within the `Startup.cs` file.'
     }),
     commands: `public class Startup
 {curlyOpen}
   public void Configure(IApplicationBuilder app, IHostingEnvironment env)
   {curlyOpen}
-    app.UseElasticApm(Configuration);
+    app.UseAllElasticApm(Configuration);
     //…rest of the method
   {curlyClose}
   //…rest of the class
@@ -515,8 +534,7 @@ export const createDotNetAgentInstructions = (apmServerUrl = '', secretToken = '
       defaultMessage: 'Sample appsettings.json file:',
     }),
     commands: `{curlyOpen}
-  "ElasticApm": {curlyOpen}
-    "LogLevel": "Error",
+    "ElasticApm": {curlyOpen}
     "SecretToken": "${secretToken}",
     "ServerUrls": "${apmServerUrl || 'http://localhost:8200'}", //Set custom APM Server URL (default: http://localhost:8200)
     "ServiceName" : "MyApp", //allowed characters: a-z, A-Z, 0-9, -, _, and space. Default is the entry assembly of the application

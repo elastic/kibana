@@ -128,6 +128,7 @@ test('properly iterates through plugin search locations', async () => {
     .pipe(first())
     .toPromise();
   const { plugin$, error$ } = discover(new PluginsConfig(rawConfig, env), {
+    coreId: Symbol(),
     configService,
     env,
     logger,

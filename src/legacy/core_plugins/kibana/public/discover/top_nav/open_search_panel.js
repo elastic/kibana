@@ -19,11 +19,9 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 import rison from 'rison-node';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-
 import {
   EuiButton,
   EuiFlexGroup,
@@ -34,6 +32,7 @@ import {
   EuiFlyoutBody,
   EuiTitle,
 } from '@elastic/eui';
+import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 
 const SEARCH_OBJECT_TYPE = 'search';
 
@@ -76,6 +75,7 @@ export function OpenSearchPanel(props) {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
+            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiButton
               fill
               onClick={props.onClose}

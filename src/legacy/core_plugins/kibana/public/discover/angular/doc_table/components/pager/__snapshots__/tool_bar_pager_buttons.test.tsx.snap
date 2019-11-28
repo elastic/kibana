@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`it renders ToolBarPagerButtons 1`] = `
+<div
+  className="kuiButtonGroup"
+>
+  <button
+    className="kuiButton kuiButton--basic kuiButton--icon"
+    data-test-subj="btnPrevPage"
+    disabled={false}
+    onClick={[Function]}
+  >
+    <span
+      className="kuiButton__icon kuiIcon fa-chevron-left"
+    />
+  </button>
+  <button
+    className="kuiButton kuiButton--basic kuiButton--icon"
+    data-test-subj="btnNextPage"
+    disabled={false}
+    onClick={[Function]}
+  >
+    <span
+      className="kuiButton__icon kuiIcon fa-chevron-right"
+    />
+  </button>
+</div>
+`;

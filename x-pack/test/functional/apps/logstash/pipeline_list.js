@@ -22,6 +22,9 @@ export default function ({ getService, getPageObjects }) {
       originalWindowSize = await browser.getWindowSize();
       await browser.setWindowSize(1600, 1000);
       await esArchiver.load('logstash/example_pipelines');
+    });
+
+    beforeEach(async () => {
       await PageObjects.logstash.gotoPipelineList();
     });
 
@@ -86,10 +89,6 @@ export default function ({ getService, getPageObjects }) {
         await pipelineEditor.assertExists();
         await pipelineEditor.assertDefaultInputs();
       });
-
-      after(async () => {
-        await PageObjects.logstash.gotoPipelineList();
-      });
     });
 
     describe('delete button', () => {
@@ -122,14 +121,11 @@ export default function ({ getService, getPageObjects }) {
 
     describe('row links', () => {
       it('opens the selected row in the editor', async () => {
+        await PageObjects.logstash.gotoPipelineList();
         await pipelineList.setFilter('tweets_and_beats');
         await pipelineList.clickFirstRowId();
         await pipelineEditor.assertExists();
         await pipelineEditor.assertEditorId('tweets_and_beats');
-      });
-
-      after(async () => {
-        await PageObjects.logstash.gotoPipelineList();
       });
     });
 
@@ -224,10 +220,6 @@ export default function ({ getService, getPageObjects }) {
           queueMaxBytesUnits,
           queueCheckpointWrites,
         });
-      });
-
-      after(async () => {
-        await PageObjects.logstash.gotoPipelineList();
       });
     });
   });

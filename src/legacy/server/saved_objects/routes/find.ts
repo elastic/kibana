@@ -19,12 +19,12 @@
 
 import Hapi from 'hapi';
 import Joi from 'joi';
-import { SavedObjectsClient } from '../';
+import { SavedObjectsClientContract } from 'src/core/server';
 import { Prerequisites, WithoutQueryAndParams } from './types';
 
 interface FindRequest extends WithoutQueryAndParams<Hapi.Request> {
   pre: {
-    savedObjectsClient: SavedObjectsClient;
+    savedObjectsClient: SavedObjectsClientContract;
   };
   query: {
     per_page: number;
@@ -39,6 +39,7 @@ interface FindRequest extends WithoutQueryAndParams<Hapi.Request> {
       id: string;
     };
     fields?: string[];
+    filter?: string;
   };
 }
 
@@ -79,6 +80,9 @@ export const createFindRoute = (prereqs: Prerequisites) => ({
           fields: Joi.array()
             .items(Joi.string())
             .single(),
+          filter: Joi.string()
+            .allow('')
+            .optional(),
         })
         .default(),
     },
@@ -94,6 +98,7 @@ export const createFindRoute = (prereqs: Prerequisites) => ({
         sortField: query.sort_field,
         hasReference: query.has_reference,
         fields: query.fields,
+        filter: query.filter,
       });
     },
   },

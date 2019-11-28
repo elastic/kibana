@@ -18,29 +18,16 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
 jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
 
-jest.mock('ui/errors', () => ({
-  SavedObjectNotFound: class SavedObjectNotFound extends Error {
-    constructor(options) {
-      super();
-      for (const option in options) {
-        if (options.hasOwnProperty(option)) {
-          this[option] = options[option];
-        }
-      }
-    }
-  },
-}));
-
 jest.mock('ui/chrome', () => ({
-  addBasePath: () => ''
+  addBasePath: () => '',
 }));
 
-jest.mock('../../../../../lib/fetch_export_by_type', () => ({
-  fetchExportByType: jest.fn(),
+jest.mock('../../../../../lib/fetch_export_by_type_and_search', () => ({
+  fetchExportByTypeAndSearch: jest.fn(),
 }));
 
 jest.mock('../../../../../lib/fetch_export_objects', () => ({
@@ -50,11 +37,10 @@ jest.mock('../../../../../lib/fetch_export_objects', () => ({
 import { Relationships } from '../relationships';
 
 describe('Relationships', () => {
-
   it('should render index patterns normally', async () => {
     const props = {
       goInspectObject: () => {},
-      getRelationships: jest.fn().mockImplementation(() => ([
+      getRelationships: jest.fn().mockImplementation(() => [
         {
           type: 'search',
           id: '1',
@@ -83,7 +69,7 @@ describe('Relationships', () => {
             title: 'My Visualization Title',
           },
         },
-      ])),
+      ]),
       savedObject: {
         id: '1',
         type: 'index-pattern',
@@ -100,11 +86,7 @@ describe('Relationships', () => {
       close: jest.fn(),
     };
 
-    const component = shallowWithIntl(
-      <Relationships.WrappedComponent
-        {...props}
-      />
-    );
+    const component = shallowWithI18nProvider(<Relationships {...props} />);
 
     // Make sure we are showing loading
     expect(component.find('EuiLoadingKibana').length).toBe(1);
@@ -121,7 +103,7 @@ describe('Relationships', () => {
   it('should render searches normally', async () => {
     const props = {
       goInspectObject: () => {},
-      getRelationships: jest.fn().mockImplementation(() => ([
+      getRelationships: jest.fn().mockImplementation(() => [
         {
           type: 'index-pattern',
           id: '1',
@@ -150,7 +132,7 @@ describe('Relationships', () => {
             title: 'My Visualization Title',
           },
         },
-      ])),
+      ]),
       savedObject: {
         id: '1',
         type: 'search',
@@ -167,11 +149,7 @@ describe('Relationships', () => {
       close: jest.fn(),
     };
 
-    const component = shallowWithIntl(
-      <Relationships.WrappedComponent
-        {...props}
-      />
-    );
+    const component = shallowWithI18nProvider(<Relationships {...props} />);
 
     // Make sure we are showing loading
     expect(component.find('EuiLoadingKibana').length).toBe(1);
@@ -188,7 +166,7 @@ describe('Relationships', () => {
   it('should render visualizations normally', async () => {
     const props = {
       goInspectObject: () => {},
-      getRelationships: jest.fn().mockImplementation(() => ([
+      getRelationships: jest.fn().mockImplementation(() => [
         {
           type: 'dashboard',
           id: '1',
@@ -217,7 +195,7 @@ describe('Relationships', () => {
             title: 'My Dashboard 2',
           },
         },
-      ])),
+      ]),
       savedObject: {
         id: '1',
         type: 'visualization',
@@ -234,11 +212,7 @@ describe('Relationships', () => {
       close: jest.fn(),
     };
 
-    const component = shallowWithIntl(
-      <Relationships.WrappedComponent
-        {...props}
-      />
-    );
+    const component = shallowWithI18nProvider(<Relationships {...props} />);
 
     // Make sure we are showing loading
     expect(component.find('EuiLoadingKibana').length).toBe(1);
@@ -255,7 +229,7 @@ describe('Relationships', () => {
   it('should render dashboards normally', async () => {
     const props = {
       goInspectObject: () => {},
-      getRelationships: jest.fn().mockImplementation(() => ([
+      getRelationships: jest.fn().mockImplementation(() => [
         {
           type: 'visualization',
           id: '1',
@@ -284,7 +258,7 @@ describe('Relationships', () => {
             title: 'My Visualization Title 2',
           },
         },
-      ])),
+      ]),
       savedObject: {
         id: '1',
         type: 'dashboard',
@@ -301,11 +275,7 @@ describe('Relationships', () => {
       close: jest.fn(),
     };
 
-    const component = shallowWithIntl(
-      <Relationships.WrappedComponent
-        {...props}
-      />
-    );
+    const component = shallowWithI18nProvider(<Relationships {...props} />);
 
     // Make sure we are showing loading
     expect(component.find('EuiLoadingKibana').length).toBe(1);
@@ -341,11 +311,7 @@ describe('Relationships', () => {
       close: jest.fn(),
     };
 
-    const component = shallowWithIntl(
-      <Relationships.WrappedComponent
-        {...props}
-      />
-    );
+    const component = shallowWithI18nProvider(<Relationships {...props} />);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
