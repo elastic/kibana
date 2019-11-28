@@ -5,36 +5,36 @@
  */
 
 import _ from 'lodash';
-import { Subject } from 'rxjs';
+import { interval } from 'rxjs';
 import { TaskPoller } from './task_poller';
-import { mockLogger, resolvable } from './test_utils';
-import { fakeSchedulers } from 'rxjs-marbles/jest';
+import { mockLogger } from './test_utils';
+
+jest.mock('rxjs', () => ({
+  Subject: jest.fn(() => ({
+    pipe: jest.fn(() => ({
+      pipe: jest.fn(),
+      subscribe: jest.fn(),
+    })),
+  })),
+  Subscription: jest.fn(),
+  Observable: jest.fn(() => ({
+    pipe: jest.fn(),
+  })),
+  interval: jest.fn(() => ({
+    pipe: jest.fn(),
+  })),
+}));
 
 describe('TaskPoller Intervals', () => {
-  beforeEach(() => jest.useFakeTimers());
-  test(
-    'runs the work function on an interval',
-    fakeSchedulers(async advance => {
-      jest.useFakeTimers();
-      const pollInterval = _.random(10, 20);
-      const done = resolvable();
-      const work = jest.fn(async () => {
-        done.resolve();
-        return true;
-      });
-      const poller = new TaskPoller<boolean, void>({
-        pollInterval,
-        work,
-        logger: mockLogger(),
-      });
-      poller.start();
-      advance(pollInterval);
-      expect(work).toHaveBeenCalledTimes(1);
-      await done;
-      advance(pollInterval - 1);
-      expect(work).toHaveBeenCalledTimes(1);
-      advance(1);
-      expect(work).toHaveBeenCalledTimes(2);
-    })
-  );
+  test('intializes with the provided interval', () => {
+    const pollInterval = _.random(10, 20);
+
+    new TaskPoller<void, void>({
+      pollInterval,
+      work: async () => {},
+      logger: mockLogger(),
+    });
+
+    expect(interval).toHaveBeenCalledWith(pollInterval);
+  });
 });
