@@ -13,7 +13,7 @@ export function triggersActionsUI(kibana: any) {
     id: 'triggersActionsUI',
     configPrefix: 'xpack.triggers_actions_ui',
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'actions'],
+    require: ['kibana'],
     isEnabled(config: Legacy.KibanaConfig) {
       return (
         config.get('xpack.triggers_actions_ui.enabled') &&
