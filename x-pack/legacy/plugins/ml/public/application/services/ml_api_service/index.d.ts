@@ -17,7 +17,7 @@ import { JobMessage } from '../../../../common/types/audit_message';
 import { DataFrameAnalyticsConfig } from '../../data_frame_analytics/common/analytics';
 import { DeepPartial } from '../../../../common/types/common';
 import { annotations } from './annotations';
-import { Calendar, UpdateCalendar } from '../../../../common/types/calendars';
+import { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
 
 // TODO This is not a complete representation of all methods of `ml.*`.
 // It just satisfies needs for other parts of the code area which use
@@ -103,7 +103,7 @@ declare interface Ml {
   setupDataRecognizerConfig(obj: object): Promise<any>;
   getTimeFieldRange(obj: object): Promise<GetTimeFieldRangeResponse>;
   calculateModelMemoryLimit(obj: object): Promise<{ modelMemoryLimit: string }>;
-  calendars(): Promise<Calendar[]>;
+  calendars(obj?: { calendarId?: CalendarId; calendarIds?: CalendarId[] }): Promise<Calendar[]>;
   updateCalendar(obj: UpdateCalendar): Promise<any>;
 
   getVisualizerFieldStats(obj: object): Promise<any>;

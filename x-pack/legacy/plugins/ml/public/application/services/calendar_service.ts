@@ -5,11 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
 import { ml } from './ml_api_service';
-import { Calendar } from '../../../common/types/calendars';
+import { Calendar, CalendarId } from '../../../common/types/calendars';
 import { JobId } from '../jobs/new_job/common/job_creator/configs';
-
 class CalendarService {
   /**
    * Assigns a job id to the calendar.
@@ -29,6 +27,23 @@ class CalendarService {
         i18n.translate('xpack.ml.calendarService.assignNewJobIdErrorMessage', {
           defaultMessage: 'Unable to assign {jobId} to {calendarId}',
           values: { calendarId, jobId },
+        })
+      );
+    }
+  }
+
+  /**
+   * Fetches calendars by the list of ids.
+   * @param calendarIds
+   */
+  async fetchCalendarsByIds(calendarIds: CalendarId[]) {
+    try {
+      return await ml.calendars({ calendarIds });
+    } catch (e) {
+      throw new Error(
+        i18n.translate('xpack.ml.calendarService.fetchCalendarsByIdsErrorMessage', {
+          defaultMessage: 'Unable to fetch calendars: {calendarIds}',
+          values: { calendarIds: calendarIds.join(', ') },
         })
       );
     }
