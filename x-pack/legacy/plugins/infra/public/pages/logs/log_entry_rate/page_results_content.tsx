@@ -45,8 +45,8 @@ export const LogEntryRateResultsContent = ({
   sourceId: string;
   isFirstUse: boolean;
 }) => {
-  useTrackPageview({ app: 'infra_logs', path: 'analysis_results' });
-  useTrackPageview({ app: 'infra_logs', path: 'analysis_results', delay: 15000 });
+  useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results' });
+  useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results', delay: 15000 });
 
   const [dateFormat] = useKibanaUiSetting('dateFormat', 'MMMM D, YYYY h:mm A');
 

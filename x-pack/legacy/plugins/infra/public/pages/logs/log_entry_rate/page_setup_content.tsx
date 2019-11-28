@@ -49,8 +49,8 @@ export const LogEntryRateSetupContent = <JobType extends string>({
   moduleDescriptor,
   sourceConfiguration,
 }: LogEntryRateSetupContentProps<JobType>) => {
-  useTrackPageview({ app: 'infra_logs', path: 'analysis_setup' });
-  useTrackPageview({ app: 'infra_logs', path: 'analysis_setup', delay: 15000 });
+  useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_setup' });
+  useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_setup', delay: 15000 });
 
   return (
     <LogEntryRateSetupPage>
