@@ -49,7 +49,15 @@ function findFile(paths: string[]) {
   return availablePath || paths[0];
 }
 
+/**
+ * Get the path where the config files are stored
+ * @internal
+ */
 export const getConfigPath = () => findFile(CONFIG_PATHS);
+/**
+ * Get the path where the data can be stored
+ * @internal
+ */
 export const getDataPath = () => findFile(DATA_PATHS);
 
 export type PathConfigType = TypeOf<typeof config.schema>;

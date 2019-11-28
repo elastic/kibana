@@ -18,7 +18,7 @@
  */
 
 import { map } from 'rxjs/operators';
-import { zip } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { CoreContext } from '../core_context';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
@@ -84,7 +84,7 @@ export function createPluginInitializerContext(
        * Note: naming not final here, it will be renamed in a near future (https://github.com/elastic/kibana/issues/46240)
        * @deprecated
        */
-      globalConfig__deprecated$: zip(
+      globalConfig__deprecated$: combineLatest(
         coreContext.configService.atPath<KibanaConfigType>(kibanaConfig.path),
         coreContext.configService.atPath<ElasticsearchConfigType>(elasticsearchConfig.path),
         coreContext.configService.atPath<PathConfigType>(pathConfig.path)
