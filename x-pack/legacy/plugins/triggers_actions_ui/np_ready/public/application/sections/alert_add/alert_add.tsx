@@ -35,7 +35,7 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { useAppDependencies } from '../../app_dependencies';
-import { saveAlert, loadActionTypes, loadAllActions } from '../../lib/api';
+import { createAlert, loadActionTypes, loadAllActions } from '../../lib/api';
 import { AlertsContext } from '../../context/alerts_context';
 import { alertReducer } from './alert_reducer';
 import { ErrableFormRow, SectionError } from '../../components/page_error';
@@ -263,7 +263,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
 
   async function onSaveAlert(): Promise<any> {
     try {
-      const newAlert = await saveAlert({ http, alert });
+      const newAlert = await createAlert({ http, alert });
       toastNotifications.addSuccess(
         i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveSuccessNotificationText', {
           defaultMessage: "Saved '{alertName}'",

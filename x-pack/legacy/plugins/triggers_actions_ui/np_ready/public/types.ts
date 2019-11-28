@@ -56,6 +56,8 @@ export interface ActionConnector {
   config: Record<string, any>;
 }
 
+export type ActionConnectorWithoutId = Omit<ActionConnector, 'id'>;
+
 export interface ActionConnectorTableItem extends ActionConnector {
   actionType: ActionType['name'];
 }
@@ -88,6 +90,8 @@ export interface Alert {
   muteAll: boolean;
   mutedInstanceIds: string[];
 }
+
+export type AlertWithoutId = Omit<Alert, 'id'>;
 
 export interface AlertTableItem extends Alert {
   alertType: AlertType['name'];

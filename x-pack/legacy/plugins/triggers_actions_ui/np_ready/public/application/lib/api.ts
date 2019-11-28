@@ -5,7 +5,14 @@
  */
 import { HttpServiceBase } from 'kibana/public';
 import { BASE_ACTION_API_PATH, BASE_ALERT_API_PATH } from '../constants';
-import { ActionConnector, ActionType, Alert, AlertType } from '../../types';
+import {
+  ActionConnector,
+  ActionConnectorWithoutId,
+  ActionType,
+  Alert,
+  AlertType,
+  AlertWithoutId,
+} from '../../types';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 100 or so.
@@ -14,7 +21,7 @@ const MAX_ACTIONS_RETURNED = 10000;
 const WATCHER_API_ROOT = '/api/watcher';
 
 export async function loadActionTypes({ http }: { http: HttpServiceBase }): Promise<ActionType[]> {
-  return http.get(`${BASE_ACTION_API_PATH}/types`);
+  return await http.get(`${BASE_ACTION_API_PATH}/types`);
 }
 
 export async function loadAllActions({
@@ -27,7 +34,7 @@ export async function loadAllActions({
   total: number;
   data: ActionConnector[];
 }> {
-  return http.get(`${BASE_ACTION_API_PATH}/_find`, {
+  return await http.get(`${BASE_ACTION_API_PATH}/_find`, {
     query: {
       per_page: MAX_ACTIONS_RETURNED,
     },
@@ -39,9 +46,9 @@ export async function createActionConnector({
   connector,
 }: {
   http: HttpServiceBase;
-  connector: ActionConnector;
+  connector: Omit<ActionConnectorWithoutId, 'referencedByCount'>;
 }): Promise<ActionConnector> {
-  return http.post(`${BASE_ACTION_API_PATH}`, {
+  return await http.post(`${BASE_ACTION_API_PATH}`, {
     body: JSON.stringify(connector),
   });
 }
@@ -52,10 +59,10 @@ export async function updateActionConnector({
   id,
 }: {
   http: HttpServiceBase;
-  connector: ActionConnector;
+  connector: Pick<ActionConnectorWithoutId, 'description' | 'config' | 'secrets'>;
   id: string;
 }): Promise<ActionConnector> {
-  return http.put(`${BASE_ACTION_API_PATH}/${id}`, {
+  return await http.put(`${BASE_ACTION_API_PATH}/${id}`, {
     body: JSON.stringify({ ...connector, id: undefined, actionTypeId: undefined }),
   });
 }
@@ -71,7 +78,7 @@ export async function deleteActions({
 }
 
 export async function loadAlertTypes({ http }: { http: HttpServiceBase }): Promise<AlertType[]> {
-  return http.get(`${BASE_ALERT_API_PATH}/types`);
+  return await http.get(`${BASE_ALERT_API_PATH}/types`);
 }
 
 export async function loadAlerts({
@@ -99,13 +106,13 @@ export async function loadAlerts({
   if (typesFilter && typesFilter.length) {
     filters.push(`alert.attributes.alertTypeId:(${typesFilter.join(' or ')})`);
   }
-  return http.get(`${BASE_ALERT_API_PATH}/_find`, {
+  return await http.get(`${BASE_ALERT_API_PATH}/_find`, {
     query: {
       page: page.index + 1,
       per_page: page.size,
       search_fields: searchText ? 'name' : undefined,
       search: searchText,
-      filter: filters.length ? filters.join(' ') : undefined,
+      filter: filters.length ? filters.join(' and ') : undefined,
     },
   });
 }
@@ -120,14 +127,28 @@ export async function deleteAlerts({
   await Promise.all(ids.map(id => http.delete(`${BASE_ALERT_API_PATH}/${id}`)));
 }
 
-export async function saveAlert({
+export async function createAlert({
   http,
   alert,
 }: {
   http: HttpServiceBase;
-  alert: Alert;
+  alert: Omit<AlertWithoutId, 'createdBy' | 'updatedBy' | 'muteAll' | 'mutedInstanceIds'>;
 }): Promise<Alert> {
-  return http.post(`${BASE_ALERT_API_PATH}`, {
+  return await http.post(`${BASE_ALERT_API_PATH}`, {
+    body: JSON.stringify(alert),
+  });
+}
+
+export async function updateAlert({
+  http,
+  alert,
+  id,
+}: {
+  http: HttpServiceBase;
+  alert: Pick<AlertWithoutId, 'throttle' | 'name' | 'tags' | 'interval' | 'params' | 'actions'>;
+  id: string;
+}): Promise<Alert> {
+  return await http.put(`${BASE_ALERT_API_PATH}/${id}`, {
     body: JSON.stringify(alert),
   });
 }
