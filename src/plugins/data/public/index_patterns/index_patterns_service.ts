@@ -24,7 +24,7 @@ import {
   NotificationsStart,
 } from 'src/core/public';
 import { FieldFormatsStart } from '../field_formats_provider';
-import { Field, FieldList } from './fields';
+import { FieldList } from './fields';
 import { setNotifications, setFieldFormats } from './services';
 import { createFlattenHitWrapper, formatHitProvider, IndexPatterns } from './index_patterns';
 
@@ -49,11 +49,6 @@ export class IndexPatternsService {
       FieldList,
       flattenHitWrapper: createFlattenHitWrapper(),
       formatHitProvider,
-      __LEGACY: {
-        // For BWC we must temporarily export the class implementation of Field,
-        // which is only used externally by the Index Pattern UI.
-        FieldImpl: Field,
-      },
     };
     return this.setupApi;
   }
