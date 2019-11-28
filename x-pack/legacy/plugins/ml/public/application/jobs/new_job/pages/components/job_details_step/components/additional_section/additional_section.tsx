@@ -27,9 +27,14 @@ export const AdditionalSection: FC<Props> = ({ additionalExpanded, setAdditional
         initialIsOpen={additionalExpanded}
       >
         <EuiSpacer />
-        <CustomUrlsSelection />
 
-        <EuiFlexGroup>
+        <EuiFlexGroup gutterSize="xl" style={{ marginLeft: '0px', marginRight: '0px' }}>
+          <EuiFlexItem>
+            <CustomUrlsSelection />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiFlexGroup gutterSize="xl" style={{ marginLeft: '0px', marginRight: '0px' }}>
           <EuiFlexItem>
             <CalendarsSelection />
           </EuiFlexItem>
