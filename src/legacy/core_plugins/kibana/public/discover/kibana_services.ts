@@ -28,14 +28,12 @@ import angular from 'angular'; // just used in embeddables and discover controll
 import uiRoutes from 'ui/routes';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
-import { SearchSource } from 'ui/courier';
 // @ts-ignore
 import { StateProvider } from 'ui/state_management/state';
 // @ts-ignore
 import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
-import { timefilter } from 'ui/timefilter';
 // @ts-ignore
 import { IndexPattern, IndexPatterns } from 'ui/index_patterns';
 import { wrapInI18nContext } from 'ui/i18n';
@@ -43,6 +41,7 @@ import { wrapInI18nContext } from 'ui/i18n';
 import { docTitle } from 'ui/doc_title';
 // @ts-ignore
 import * as docViewsRegistry from 'ui/registry/doc_views';
+import { SearchSource } from '../../../../ui/public/courier';
 
 const services = {
   // new plattform
@@ -58,7 +57,9 @@ const services = {
   uiSettings: npStart.core.uiSettings,
   uiActions: npStart.plugins.uiActions,
   embeddable: npStart.plugins.embeddable,
+  npData: npStart.plugins.data,
   share: npStart.plugins.share,
+  timefilter: npStart.plugins.data.query.timefilter.timefilter,
   // legacy
   docTitle,
   docViewsRegistry,
@@ -70,7 +71,6 @@ const services = {
   SavedObjectProvider,
   SearchSource,
   StateProvider,
-  timefilter,
   uiModules,
   uiRoutes,
   wrapInI18nContext,
@@ -81,15 +81,16 @@ export function getServices() {
 
 // EXPORT legacy static dependencies
 export { angular };
-export { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
+export { buildVislibDimensions } from '../../../visualizations/public';
 // @ts-ignore
 export { callAfterBindingsWorkaround } from 'ui/compat';
 export {
   getRequestInspectorStats,
   getResponseInspectorStats,
-} from 'ui/courier/utils/courier_inspector_utils';
-// @ts-ignore
-export { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
+  hasSearchStategyForIndexPattern,
+  isDefaultTypeIndexPattern,
+  SearchSource,
+} from '../../../../ui/public/courier';
 // @ts-ignore
 export { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
 // @ts-ignore
@@ -115,7 +116,6 @@ export { unhashUrl } from 'ui/state_management/state_hashing';
 // EXPORT types
 export { Vis } from 'ui/vis';
 export { StaticIndexPattern, IndexPatterns, IndexPattern, FieldType } from 'ui/index_patterns';
-export { SearchSource } from 'ui/courier';
 export { ElasticSearchHit } from 'ui/registry/doc_views_types';
 export { DocViewRenderProps, DocViewRenderFn } from 'ui/registry/doc_views';
 export { Adapters } from 'ui/inspector/types';

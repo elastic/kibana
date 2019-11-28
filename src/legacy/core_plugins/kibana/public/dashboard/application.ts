@@ -48,7 +48,7 @@ import {
 // @ts-ignore
 import { initDashboardApp } from './legacy_app';
 import { DataStart } from '../../../data/public';
-import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public';
+import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
 import { NavigationStart } from '../../../navigation/public';
 import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
@@ -67,8 +67,8 @@ export interface RenderDeps {
   uiSettings: UiSettingsClientContract;
   chrome: ChromeStart;
   addBasePath: (path: string) => string;
-  savedQueryService: DataStart['search']['services']['savedQueryService'];
-  embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
+  savedQueryService: NpDataStart['query']['savedQueries'];
+  embeddables: IEmbeddableStart;
   localStorage: Storage;
   share: SharePluginStart;
 }

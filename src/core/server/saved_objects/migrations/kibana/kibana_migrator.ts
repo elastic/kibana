@@ -25,7 +25,7 @@
 import { Logger } from 'src/core/server/logging';
 import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { MappingProperties, SavedObjectsMapping, IndexMapping } from '../../mappings';
-import { SavedObjectsSchema, SavedObjectsSchemaDefinition } from '../../schema';
+import { SavedObjectsSchema } from '../../schema';
 import { RawSavedObjectDoc, SavedObjectsSerializer } from '../../serialization';
 import { docValidator, PropertyValidators } from '../../validation';
 import { buildActiveMappings, CallCluster, IndexMigrator } from '../core';
@@ -47,7 +47,7 @@ export interface KibanaMigratorOptions {
   logger: Logger;
   savedObjectMappings: SavedObjectsMapping[];
   savedObjectMigrations: MigrationDefinition;
-  savedObjectSchemas: SavedObjectsSchemaDefinition;
+  savedObjectSchemas: SavedObjectsSchema;
   savedObjectValidations: PropertyValidators;
 }
 
@@ -87,7 +87,7 @@ export class KibanaMigrator {
     this.callCluster = callCluster;
     this.kibanaConfig = kibanaConfig;
     this.savedObjectsConfig = savedObjectsConfig;
-    this.schema = new SavedObjectsSchema(savedObjectSchemas);
+    this.schema = savedObjectSchemas;
     this.serializer = new SavedObjectsSerializer(this.schema);
     this.mappingProperties = mergeProperties(savedObjectMappings || []);
     this.log = logger;
