@@ -11,6 +11,7 @@ const testPaths = [
   {
     path: 'foo-1.1.0/service/type/file.yml',
     assetParts: {
+      dataset: undefined,
       file: 'file.yml',
       path: 'foo-1.1.0/service/type/file.yml',
       pkgkey: 'foo-1.1.0',
@@ -21,6 +22,7 @@ const testPaths = [
   {
     path: 'iptables-1.0.4/kibana/visualization/683402b0-1f29-11e9-8ec4-cf5d91a864b3-ecs.json',
     assetParts: {
+      dataset: undefined,
       file: '683402b0-1f29-11e9-8ec4-cf5d91a864b3-ecs.json',
       path: 'iptables-1.0.4/kibana/visualization/683402b0-1f29-11e9-8ec4-cf5d91a864b3-ecs.json',
       pkgkey: 'iptables-1.0.4',
