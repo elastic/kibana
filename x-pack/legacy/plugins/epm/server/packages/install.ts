@@ -14,7 +14,7 @@ import {
 } from '../../common/types';
 import * as Registry from '../registry';
 import { CallESAsCurrentUser, getInstallationObject } from './index';
-import { getObjects } from './get_objects';
+import { getObject } from './get_objects';
 
 export async function installPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -28,11 +28,13 @@ export async function installPackage(options: {
   });
 
   // Save those references in the package manager's state saved object
-  return saveInstallationReferences({
+  await saveInstallationReferences({
     savedObjectsClient,
     pkgkey,
     toSave,
   });
+
+  return toSave;
 }
 
 // the function which how to install each of the various asset types
@@ -44,8 +46,7 @@ export async function installAssets(options: {
 }) {
   const { savedObjectsClient, pkgkey } = options;
 
-  // Only install certain Kibana assets during package installation.
-  // All other asset types need special handling
+  // Only install Kibana assets during package installation.
   const kibanaAssetTypes = Object.values(KibanaAssetType);
   const installationPromises = kibanaAssetTypes.map(async assetType =>
     installKibanaSavedObjects({ savedObjectsClient, pkgkey, assetType })
@@ -92,7 +93,8 @@ async function installKibanaSavedObjects({
 }) {
   const isSameType = ({ path }: Registry.ArchiveEntry) =>
     assetType === Registry.pathParts(path).type;
-  const toBeSavedObjects = await getObjects(pkgkey, isSameType);
+  const paths = await Registry.getArchiveInfo(pkgkey, isSameType);
+  const toBeSavedObjects = await Promise.all(paths.map(getObject));
 
   if (toBeSavedObjects.length === 0) {
     return [];
@@ -127,11 +129,13 @@ export async function installDatasource(options: {
 
   // currently saving to the EPM state Saved Object
   // /api/ingest/datasource/add (or whatever) will use separate Saved Object
-  return saveInstallationReferences({
+  await saveInstallationReferences({
     savedObjectsClient,
     pkgkey,
     toSave,
   });
+
+  return toSave;
 }
 
 async function installPipelines({
