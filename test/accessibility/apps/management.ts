@@ -21,6 +21,8 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'settings']);
+  const kibanaServer = getService('kibanaServer');
+  const testSubjects = getService('testSubjects');
   const a11y = getService('a11y');
 
   describe('Management', () => {
@@ -39,6 +41,12 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
     it('Single indexpattern view', async () => {
       await PageObjects.settings.clickIndexPatternLogstash();
+      await a11y.testAppSnapshot();
+    });
+
+    it('Create Index pattern wizard', async () => {
+      await PageObjects.settings.clickKibanaIndexPatterns();
+      await (await testSubjects.find('createIndexPatternButton')).click();
       await a11y.testAppSnapshot();
     });
 
