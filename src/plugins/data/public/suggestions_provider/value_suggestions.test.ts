@@ -17,9 +17,6 @@
  * under the License.
  */
 
-// TODO: remove when index patterns are moved here.
-jest.mock('ui/new_platform');
-
 import { stubIndexPattern, stubFields } from '../stubs';
 import { getSuggestionsProvider } from './value_suggestions';
 import { UiSettingsClientContract } from 'kibana/public';

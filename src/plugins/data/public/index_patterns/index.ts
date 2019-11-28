@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { IndexPatternMissingIndices } from './errors';
 import {
   ILLEGAL_CHARACTERS_KEY,
   CONTAINS_SPACES_KEY,
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
+  IndexPatternMissingIndices,
   validateIndexPattern,
 } from './lib';
 
