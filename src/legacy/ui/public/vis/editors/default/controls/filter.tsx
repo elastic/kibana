@@ -20,7 +20,7 @@
 import React, { useState } from 'react';
 import { EuiForm, EuiButtonIcon, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { QueryBarInput } from 'plugins/data';
+import { QueryStringInput } from 'plugins/data';
 import { Query } from 'src/plugins/data/public';
 import { AggConfig } from '../../..';
 import { npStart } from '../../../../new_platform';
@@ -100,7 +100,7 @@ function FilterRow({
             ...npStart.core,
           }}
         >
-          <QueryBarInput
+          <QueryStringInput
             query={value}
             indexPatterns={[agg.getIndexPattern()]}
             onChange={(query: Query) => onChangeValue(id, query, customLabel)}

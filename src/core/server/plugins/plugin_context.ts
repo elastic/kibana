@@ -124,6 +124,12 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       basePath: deps.http.basePath,
       isTlsEnabled: deps.http.isTlsEnabled,
     },
+    savedObjects: {
+      setClientFactory: deps.savedObjects.setClientFactory,
+      addClientWrapper: deps.savedObjects.addClientWrapper,
+      createInternalRepository: deps.savedObjects.createInternalRepository,
+      createScopedRepository: deps.savedObjects.createScopedRepository,
+    },
     uiSettings: {
       register: deps.uiSettings.register,
     },
@@ -147,5 +153,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
   deps: PluginsServiceStartDeps,
   plugin: PluginWrapper<TPlugin, TPluginDependencies>
 ): CoreStart {
-  return {};
+  return {
+    savedObjects: { getScopedClient: deps.savedObjects.getScopedClient },
+  };
 }

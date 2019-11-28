@@ -34,6 +34,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Toast } from 'src/core/public';
 import {
   IDataPluginServices,
+  IIndexPattern,
   TimeRange,
   TimeHistoryContract,
   Query,
@@ -42,8 +43,7 @@ import {
   esKuery,
 } from '../../../../../../../plugins/data/public';
 import { useKibana, toMountPoint } from '../../../../../../../plugins/kibana_react/public';
-import { IndexPattern } from '../../../index_patterns';
-import { QueryBarInput } from './query_bar_input';
+import { QueryStringInput } from './query_string_input';
 
 interface Props {
   query?: Query;
@@ -53,7 +53,7 @@ interface Props {
   dataTestSubj?: string;
   disableAutoFocus?: boolean;
   screenTitle?: string;
-  indexPatterns?: Array<IndexPattern | string>;
+  indexPatterns?: Array<IIndexPattern | string>;
   intl: InjectedIntl;
   isLoading?: boolean;
   prepend?: React.ReactNode;
@@ -178,7 +178,7 @@ function QueryBarTopRowUI(props: Props) {
     if (!shouldRenderQueryInput()) return;
     return (
       <EuiFlexItem>
-        <QueryBarInput
+        <QueryStringInput
           disableAutoFocus={props.disableAutoFocus}
           indexPatterns={props.indexPatterns!}
           prepend={props.prepend}

@@ -408,7 +408,7 @@ describe('Auth', () => {
   const cookieOptions = {
     name: 'sid',
     encryptionKey: 'something_at_least_32_characters',
-    validate: () => true,
+    validate: () => ({ isValid: true }),
     isSecure: false,
   };
 
