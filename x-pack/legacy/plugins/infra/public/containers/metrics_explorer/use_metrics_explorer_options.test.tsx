@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { renderHook, act } from 'react-hooks-testing-library';
+import { renderHook, act } from '@testing-library/react-hooks';
 import {
   useMetricsExplorerOptions,
   MetricsExplorerOptionsContainer,
@@ -64,7 +64,7 @@ describe('useMetricExplorerOptions', () => {
   });
 
   it('should change the store when options update', () => {
-    const { result, waitForNextUpdate } = renderUseMetricsExplorerOptionsHook();
+    const { result, rerender } = renderUseMetricsExplorerOptionsHook();
     const newOptions: MetricsExplorerOptions = {
       ...DEFAULT_OPTIONS,
       metrics: [{ aggregation: 'count' }],
@@ -72,13 +72,13 @@ describe('useMetricExplorerOptions', () => {
     act(() => {
       result.current.setOptions(newOptions);
     });
-    waitForNextUpdate();
+    rerender();
     expect(result.current.options).toEqual(newOptions);
     expect(STORE.MetricsExplorerOptions).toEqual(JSON.stringify(newOptions));
   });
 
   it('should change the store when timerange update', () => {
-    const { result, waitForNextUpdate } = renderUseMetricsExplorerOptionsHook();
+    const { result, rerender } = renderUseMetricsExplorerOptionsHook();
     const newTimeRange: MetricsExplorerTimeOptions = {
       ...DEFAULT_TIMERANGE,
       from: 'now-15m',
@@ -86,7 +86,7 @@ describe('useMetricExplorerOptions', () => {
     act(() => {
       result.current.setTimeRange(newTimeRange);
     });
-    waitForNextUpdate();
+    rerender();
     expect(result.current.currentTimerange).toEqual(newTimeRange);
     expect(STORE.MetricsExplorerTimeRange).toEqual(JSON.stringify(newTimeRange));
   });
