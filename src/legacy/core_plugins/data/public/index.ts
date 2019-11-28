@@ -37,23 +37,15 @@ export {
   IndexPatterns,
   StaticIndexPattern,
 } from './index_patterns';
-export { QueryBarInput } from './query';
-export { SearchBar, SearchBarProps, SavedQueryAttributes, SavedQuery } from './search';
+export { QueryStringInput } from './query';
+export { SearchBar, SearchBarProps } from './search';
+export {
+  SavedQueryAttributes,
+  SavedQuery,
+  SavedQueryTimeFilter,
+} from '../../../../plugins/data/public';
 
 /** @public static code */
 export * from '../common';
 export { FilterStateManager } from './filter/filter_manager';
-export {
-  CONTAINS_SPACES,
-  getFromSavedObject,
-  getRoutes,
-  IndexPatternSelect,
-  validateIndexPattern,
-  ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-  IndexPatternAlreadyExists,
-  IndexPatternMissingIndices,
-  NoDefaultIndexPattern,
-  NoDefinedIndexPatterns,
-} from './index_patterns';
+export { getFromSavedObject, getRoutes } from './index_patterns';

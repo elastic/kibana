@@ -34,7 +34,7 @@ export class StartTrial extends React.PureComponent {
     super(props);
     this.state = { showConfirmation: false };
   }
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.props.loadTrialStatus();
   }
   startLicenseTrial = () => {

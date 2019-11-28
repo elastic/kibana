@@ -26,11 +26,9 @@ import { get, isEqual } from 'lodash';
 
 import { IndexPattern } from '../../../../../data/public';
 import { QueryBarTopRow } from '../../../query';
-import { SavedQuery, SavedQueryAttributes } from '../index';
 import { SavedQueryMeta, SaveQueryForm } from './saved_query_management/save_query_form';
 import { SavedQueryManagementComponent } from './saved_query_management/saved_query_management_component';
-import { SavedQueryService } from '../lib/saved_query_service';
-import { createSavedQueryService } from '../lib/saved_query_service';
+
 import {
   withKibana,
   KibanaReactContextValue,
@@ -42,6 +40,10 @@ import {
   esFilters,
   TimeHistoryContract,
   FilterBar,
+  SavedQueryService,
+  createSavedQueryService,
+  SavedQuery,
+  SavedQueryAttributes,
 } from '../../../../../../../plugins/data/public';
 
 interface SearchBarInjectedDeps {
