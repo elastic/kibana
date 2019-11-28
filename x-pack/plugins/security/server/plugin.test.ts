@@ -20,7 +20,10 @@ describe('Security Plugin', () => {
     plugin = new Plugin(
       coreMock.createPluginInitializerContext({
         cookieName: 'sid',
-        sessionTimeout: 1500,
+        session: {
+          idleTimeout: 1500,
+          lifespan: null,
+        },
         authc: {
           providers: ['saml', 'token'],
           saml: { realm: 'saml1', maxRedirectURLSize: new ByteSizeValue(2048) },
@@ -52,8 +55,12 @@ describe('Security Plugin', () => {
                       ],
                     },
                     "cookieName": "sid",
+                    "loginAssistanceMessage": undefined,
                     "secureCookies": true,
-                    "sessionTimeout": 1500,
+                    "session": Object {
+                      "idleTimeout": 1500,
+                      "lifespan": null,
+                    },
                   },
                   "license": Object {
                     "getFeatures": [Function],
@@ -65,6 +72,7 @@ describe('Security Plugin', () => {
                 "authc": Object {
                   "createAPIKey": [Function],
                   "getCurrentUser": [Function],
+                  "getSessionInfo": [Function],
                   "invalidateAPIKey": [Function],
                   "isAuthenticated": [Function],
                   "login": [Function],

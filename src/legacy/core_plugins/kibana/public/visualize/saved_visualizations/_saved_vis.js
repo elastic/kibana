@@ -27,7 +27,7 @@
 
 import { Vis } from 'ui/vis';
 import { uiModules } from 'ui/modules';
-import { updateOldState } from 'ui/vis/vis_update_state';
+import { updateOldState } from '../../../../visualizations/public';
 import { VisualizeConstants } from '../visualize_constants';
 import { createLegacyClass } from 'ui/utils/legacy_class';
 import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
