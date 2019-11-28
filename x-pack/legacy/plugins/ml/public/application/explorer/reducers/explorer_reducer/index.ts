@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiChromeMock, uiTimefilterMock, uiTimeHistoryMock } from './mocks_jest';
-
-export const useUiContext = () => ({
-  chrome: uiChromeMock,
-  timefilter: uiTimefilterMock,
-  timeHistory: uiTimeHistoryMock,
-});
+export { getIndexPattern } from './get_index_pattern';
+export { explorerReducer } from './reducer';
+export { getExplorerDefaultState, ExplorerState } from './state';
