@@ -24,9 +24,8 @@ import {
   NotificationsStart,
 } from 'src/core/public';
 import { FieldFormatsStart } from '../field_formats_provider';
-import { FieldList } from './fields';
 import { setNotifications, setFieldFormats } from './services';
-import { createFlattenHitWrapper, formatHitProvider, IndexPatterns } from './index_patterns';
+import { IndexPatterns } from './index_patterns';
 
 interface IndexPatternDependencies {
   uiSettings: UiSettingsClientContract;
@@ -45,11 +44,8 @@ export class IndexPatternsService {
   private setupApi: any;
 
   public setup() {
-    this.setupApi = {
-      FieldList,
-      flattenHitWrapper: createFlattenHitWrapper(),
-      formatHitProvider,
-    };
+    this.setupApi = {};
+
     return this.setupApi;
   }
 

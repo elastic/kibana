@@ -26,7 +26,7 @@ import {
   validateIndexPattern,
 } from './lib';
 import { getRoutes, getFromSavedObject } from './utils';
-import { flattenHitWrapper } from './index_patterns';
+import { flattenHitWrapper, formatHitProvider } from './index_patterns';
 
 export const indexPatterns = {
   ILLEGAL_CHARACTERS_KEY,
@@ -38,6 +38,7 @@ export const indexPatterns = {
   getRoutes,
   getFromSavedObject,
   flattenHitWrapper,
+  formatHitProvider,
 };
 
 export { IndexPatternsService } from './index_patterns_service';
