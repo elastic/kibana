@@ -88,7 +88,7 @@ function getProps(
   };
 }
 
-test('renders DashboardViewport', () => {
+test.skip('renders DashboardViewport', () => {
   const { props, options } = getProps();
   const component = mount(
     <I18nProvider>
@@ -117,7 +117,7 @@ test('renders DashboardViewport with no visualizations', () => {
   component.unmount();
 });
 
-test('renders exit full screen button when in full screen mode', async () => {
+test.skip('renders exit full screen button when in full screen mode', async () => {
   const { props, options } = getProps();
   props.container.updateInput({ isFullScreenMode: true });
   const component = mount(
