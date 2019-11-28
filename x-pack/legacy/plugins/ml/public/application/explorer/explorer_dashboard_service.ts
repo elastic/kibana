@@ -12,7 +12,7 @@
 import { isEqual, pick } from 'lodash';
 
 import { from, isObservable, BehaviorSubject, Observable, Subject } from 'rxjs';
-import { distinctUntilChanged, filter, flatMap, map, pairwise, scan, tap } from 'rxjs/operators';
+import { distinctUntilChanged, flatMap, map, pairwise, scan } from 'rxjs/operators';
 
 import { DeepPartial } from '../../../common/types/common';
 
@@ -41,21 +41,11 @@ export interface Action {
   payload?: ActionPayload;
 }
 
-const triggerSideEffect = (nextAction: Action) => {
-  if (isObservable(nextAction.payload)) {
-    explorerAction$.next({ type: nextAction.type });
-    explorerAction$.next(nextAction.payload);
-  }
-};
-
-const filterSideEffect = (nextAction: Action) => !isObservable(nextAction.payload);
-
 const explorerFilteredAction$ = explorerAction$.pipe(
+  // consider observables as side-effects
   flatMap((action: ExplorerAction) =>
     isObservable(action) ? action : (from([action]) as Observable<ExplorerAction>)
   ),
-  tap(triggerSideEffect),
-  filter(filterSideEffect),
   distinctUntilChanged(isEqual)
 );
 
