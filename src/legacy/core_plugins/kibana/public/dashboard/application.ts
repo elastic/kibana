@@ -26,7 +26,7 @@ import {
   ChromeStart,
   LegacyCoreStart,
   SavedObjectsClientContract,
-  UiSettingsClientContract,
+  IUiSettingsClient,
 } from 'kibana/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import {
@@ -64,7 +64,7 @@ export interface RenderDeps {
   dashboardConfig: any;
   savedDashboards: any;
   dashboardCapabilities: any;
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
   chrome: ChromeStart;
   addBasePath: (path: string) => string;
   savedQueryService: DataStart['search']['services']['savedQueryService'];
