@@ -36,7 +36,7 @@ const PageWrapper: FC<{ config: any }> = ({ config }) => {
 
   return (
     <PageLoader context={context}>
-      <FilterLists canCreateFilter={canCreateFilter} canDeleteFilter={canDeleteFilter} />
+      <FilterLists {...{ canCreateFilter, canDeleteFilter }} />
     </PageLoader>
   );
 };

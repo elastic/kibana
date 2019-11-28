@@ -36,7 +36,7 @@ const PageWrapper: FC<{ config: any }> = ({ config }) => {
 
   return (
     <PageLoader context={context}>
-      <CalendarsList canCreateCalendar={canCreateCalendar} canDeleteCalendar={canDeleteCalendar} />
+      <CalendarsList {...{ canCreateCalendar, canDeleteCalendar }} />
     </PageLoader>
   );
 };

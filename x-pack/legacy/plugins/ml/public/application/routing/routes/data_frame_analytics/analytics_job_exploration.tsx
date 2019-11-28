@@ -38,7 +38,7 @@ const PageWrapper: FC<{ location: any; config: any }> = ({ location, config }) =
 
   return (
     <PageLoader context={context}>
-      <Page jobId={jobId} analysisType={analysisType} jobStatus={jobStatus} />
+      <Page {...{ jobId, analysisType, jobStatus }} />
     </PageLoader>
   );
 };

@@ -28,7 +28,7 @@ const PageWrapper: FC<{ config: any; nextStepPath: string }> = ({ config, nextSt
   const { context } = useResolver(undefined, config, basicResolvers);
   return (
     <PageLoader context={context}>
-      <Page nextStepPath={nextStepPath} />
+      <Page {...{ nextStepPath }} />
     </PageLoader>
   );
 };

@@ -59,9 +59,11 @@ const PageWrapper: FC<{ location: any; config: any; mode: MODE }> = ({
   return (
     <PageLoader context={context}>
       <EditFilterList
-        filterId={filterId}
-        canCreateFilter={canCreateFilter}
-        canDeleteFilter={canDeleteFilter}
+        {...{
+          filterId,
+          canCreateFilter,
+          canDeleteFilter,
+        }}
       />
     </PageLoader>
   );

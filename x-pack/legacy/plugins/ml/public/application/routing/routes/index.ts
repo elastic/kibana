@@ -10,3 +10,4 @@ export * from './new_job';
 export * from './datavisualizer';
 export * from './settings';
 export * from './data_frame_analytics';
+export * from './timeseriesexplorer';

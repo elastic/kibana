@@ -4,8 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './timeseriesexplorer_directive';
-import './timeseriesexplorer_route';
-import './timeseries_search_service';
-import '../components/job_selector';
-import '../components/chart_tooltip';
+import { FC } from 'react';
+
+// declare const TimeSeriesExplorer: FC<{
+//   appStateHandler: any;
+//   dateFormatTz: any;
+//   globalState: any;
+//   timefilter: any;
+// }>;
+
+export function TimeSeriesExplorer(props: any): any;
