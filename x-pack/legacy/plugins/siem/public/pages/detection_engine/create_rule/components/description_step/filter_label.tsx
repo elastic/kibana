@@ -18,7 +18,7 @@ interface Props {
 
 export const FilterLabel = memo<Props>(({ filter, valueLabel }) => {
   const prefixText = filter.meta.negate
-    ? ` ${i18n.translate('data.filter.filterBar.negatedFilterPrefix', {
+    ? ` ${i18n.translate('xpack.siem.detectionEngine.createRule.filterLabel.negatedFilterPrefix', {
         defaultMessage: 'NOT ',
       })}`
     : '';
