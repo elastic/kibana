@@ -20,11 +20,11 @@
 import { cloneDeep, get } from 'lodash';
 // @ts-ignore
 import { setBounds } from 'ui/agg_types';
-import { SearchSource } from 'ui/courier';
 import { AggConfig, Vis, VisParams, VisState } from 'ui/vis';
 import { isDateHistogramBucketAggConfig } from 'ui/agg_types/buckets/date_histogram';
 import moment from 'moment';
 import { SerializedFieldFormat } from 'src/plugins/expressions/public';
+import { SearchSourceContract } from '../../../courier/types';
 import { createFormat } from './utilities';
 
 interface SchemaConfigParams {
@@ -462,7 +462,7 @@ export const buildVislibDimensions = async (
 // take a Vis object and decorate it with the necessary params (dimensions, bucket, metric, etc)
 export const getVisParams = async (
   vis: Vis,
-  params: { searchSource: SearchSource; timeRange?: any; abortSignal?: AbortSignal }
+  params: { searchSource: SearchSourceContract; timeRange?: any; abortSignal?: AbortSignal }
 ) => {
   const schemas = getSchemas(vis, params.timeRange);
   let visConfig = cloneDeep(vis.params);
@@ -479,7 +479,10 @@ export const getVisParams = async (
 
 export const buildPipeline = async (
   vis: Vis,
-  params: { searchSource: SearchSource; timeRange?: any }
+  params: {
+    searchSource: SearchSourceContract;
+    timeRange?: any;
+  }
 ) => {
   const { searchSource } = params;
   const { indexPattern } = vis;
