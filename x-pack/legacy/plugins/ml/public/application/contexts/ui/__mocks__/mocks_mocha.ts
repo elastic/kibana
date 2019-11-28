@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Subject } from 'rxjs';
+
 export const uiChromeMock = {
   getBasePath: () => 'basePath',
   getUiSettingsClient: () => {
@@ -56,11 +58,7 @@ export const uiTimefilterMock = {
     return { subscribe: () => {} };
   },
   getFetch$() {
-    return {
-      pipe: () => ({
-        subscribe: () => {},
-      }),
-    };
+    return new Subject();
   },
   getRefreshInterval() {
     return this.refreshInterval;
