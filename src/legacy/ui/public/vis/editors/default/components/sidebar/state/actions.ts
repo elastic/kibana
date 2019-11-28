@@ -35,7 +35,7 @@ type ChangeAggType = ActionType<
   EditorStateActionTypes.CHANGE_AGG_TYPE,
   { aggId: AggId; value: AggConfig['type'] }
 >;
-type SetAggParamValue<T extends AggParams = any> = ActionType<
+type SetAggParamValue<T extends AggParams = AggParams> = ActionType<
   EditorStateActionTypes.SET_AGG_PARAM_VALUE,
   {
     aggId: AggId;
@@ -43,7 +43,7 @@ type SetAggParamValue<T extends AggParams = any> = ActionType<
     value: AggParams[T];
   }
 >;
-type SetStateParamValue<T extends keyof AggParams = any> = ActionType<
+type SetStateParamValue<T extends keyof AggParams = keyof AggParams> = ActionType<
   EditorStateActionTypes.SET_STATE_PARAM_VALUE,
   { paramName: T; value: AggParams[T] }
 >;

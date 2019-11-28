@@ -89,7 +89,6 @@ function DefaultEditorSideBar({
     vis.emit('dirtyStateChange', {
       isDirty: false,
     });
-    setDirty(false);
     setTouched(false);
   }, [vis, state, formState.invalid, setDirty, setTouched, isDirty]);
 
@@ -113,7 +112,7 @@ function DefaultEditorSideBar({
         resetValidity();
       }
     });
-  }, [vis]);
+  }, [resetValidity, vis]);
 
   const dataTabProps = {
     dispatch,

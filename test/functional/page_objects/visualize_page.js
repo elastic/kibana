@@ -664,8 +664,12 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async sizeUpEditor() {
-      await testSubjects.click('splitPanelResizer');
-      await browser.pressKeys(browser.keys.ARROW_LEFT);
+      const resizerPanel = await testSubjects.find('splitPanelResizer');
+      // Drag panel 100 px left
+      await browser.dragAndDrop(
+        { location: resizerPanel },
+        { location: { x: -100, y: 0 } }
+      );
     }
 
     async changeHeatmapColorNumbers(value = 6) {

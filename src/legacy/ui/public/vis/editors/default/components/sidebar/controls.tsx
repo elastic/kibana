@@ -57,7 +57,7 @@ function DefaultEditorControls({
     if (autoApplyEnabled && isDirty) {
       applyChanges();
     }
-  }, [isDirty, autoApplyEnabled]);
+  }, [isDirty, autoApplyEnabled, applyChanges]);
 
   return (
     <div className="visEditorSidebar__controls">
@@ -112,10 +112,15 @@ function DefaultEditorControls({
       )}
       {enableAutoApply && (
         <EuiToolTip
-          title={i18n.translate('common.ui.vis.editors.sidebar.autoApplyChangesLabel', {
-            defaultMessage: 'Auto apply is {autoApplyState}',
-            values: { autoApplyState: autoApplyEnabled ? 'on' : 'off' },
-          })}
+          title={
+            autoApplyEnabled
+              ? i18n.translate('common.ui.vis.editors.sidebar.autoApplyChangesOnLabel', {
+                  defaultMessage: 'Auto apply is on',
+                })
+              : i18n.translate('common.ui.vis.editors.sidebar.autoApplyChangesOffLabel', {
+                  defaultMessage: 'Auto apply is off',
+                })
+          }
           content={i18n.translate('common.ui.vis.editors.sidebar.autoApplyChangesTooltip', {
             defaultMessage: 'Auto updates the visualization on every change.',
           })}

@@ -117,18 +117,6 @@ class Vis extends EventEmitter {
     };
   }
 
-  getSerializableState(state) {
-    return {
-      title: state.title,
-      type: state.type,
-      params: _.cloneDeep(state.params),
-      aggs: state.aggs.aggs
-        .map(agg => agg.toJSON())
-        .filter(agg => agg.enabled)
-        .filter(Boolean)
-    };
-  }
-
   copyCurrentState(includeDisabled = false) {
     const state = this.getCurrentState(includeDisabled);
     state.aggs = new AggConfigs(this.indexPattern, state.aggs.aggs || state.aggs, this.type.schemas.all);

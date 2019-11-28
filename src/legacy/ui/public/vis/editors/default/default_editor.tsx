@@ -43,7 +43,7 @@ function DefaultEditor({
   query,
 }: DefaultEditorControllerState & EditorRenderProps) {
   const visRef = useRef<HTMLDivElement>(null);
-  const [visHandler, setVisHandler] = useState<VisualizeEmbeddable | null>(null);
+  const visHandler = useRef<VisualizeEmbeddable | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [factory, setFactory] = useState<VisualizeEmbeddableFactory | null>(null);
   const { vis } = savedObj;
@@ -54,17 +54,17 @@ function DefaultEditor({
 
   useEffect(() => {
     async function visualize() {
-      if (!visRef.current || (!visHandler && factory)) {
+      if (!visRef.current || (!visHandler.current && factory)) {
         return;
       }
 
-      if (!visHandler) {
+      if (!visHandler.current) {
         const embeddableFactory = embeddables.getEmbeddableFactory(
           'visualization'
         ) as VisualizeEmbeddableFactory;
         setFactory(embeddableFactory);
 
-        const handler = (await embeddableFactory.createFromObject(savedObj, {
+        visHandler.current = (await embeddableFactory.createFromObject(savedObj, {
           // should be look through createFromObject interface again because of "id" param
           id: '',
           uiState,
@@ -74,11 +74,9 @@ function DefaultEditor({
           query,
         })) as VisualizeEmbeddable;
 
-        setVisHandler(handler);
-
-        handler.render(visRef.current);
+        visHandler.current.render(visRef.current);
       } else {
-        visHandler.updateInput({
+        visHandler.current.updateInput({
           timeRange,
           filters,
           query,
@@ -87,7 +85,15 @@ function DefaultEditor({
     }
 
     visualize();
-  }, [visRef.current, visHandler, uiState, savedObj, timeRange, filters, appState, query]);
+  }, [uiState, savedObj, timeRange, filters, appState, query, factory]);
+
+  useEffect(() => {
+    return () => {
+      if (visHandler.current) {
+        visHandler.current.destroy();
+      }
+    };
+  }, []);
 
   const editorInitialWidth = getInitialWidth(vis.type.editorConfig.defaultSize);
 

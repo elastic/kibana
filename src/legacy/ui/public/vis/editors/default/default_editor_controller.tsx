@@ -20,8 +20,8 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
+import { I18nProvider } from '@kbn/i18n/react';
 
-import { I18nContext } from 'ui/i18n';
 import { EditorRenderProps } from '../../../../../core_plugins/kibana/public/visualize/types';
 import { VisSavedObject } from '../../../../../core_plugins/kibana/public/visualize/embeddable/visualize_embeddable';
 import { DefaultEditor } from './default_editor';
@@ -74,9 +74,9 @@ class DefaultEditorController {
 
   render(props: EditorRenderProps) {
     render(
-      <I18nContext>
+      <I18nProvider>
         <DefaultEditor {...this.state} {...props} />
-      </I18nContext>,
+      </I18nProvider>,
       this.el
     );
   }
