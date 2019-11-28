@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
-import { act } from 'react-hooks-testing-library';
+import { act } from '@testing-library/react-hooks';
 
 import { I18nProvider } from '@kbn/i18n/react';
 import { EuiButtonGroup } from '@elastic/eui';
