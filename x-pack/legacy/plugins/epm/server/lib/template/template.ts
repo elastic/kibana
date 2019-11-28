@@ -4,16 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/**
- * getTemplate retrieves the default template but overwrites the index pattern with the given value.
- *
- * @param indexPattern String with the index pattern
- */
-export function getTemplate(indexPattern: string): Template {
-  const template = getBaseTemplate();
-  template.index_patterns = [indexPattern];
-  return template;
-}
+import { Field } from '../field';
 
 export interface Template {
   order: number;
@@ -23,7 +14,48 @@ export interface Template {
   aliases: object;
 }
 
-function getBaseTemplate(): Template {
+interface Properties {
+  [key: string]: any;
+}
+
+export interface Mappings {
+  properties: any;
+}
+
+/**
+ * getTemplate retrieves the default template but overwrites the index pattern with the given value.
+ *
+ * @param indexPattern String with the index pattern
+ */
+export function getTemplate(indexPattern: string, mappings: Mappings): Template {
+  const template = getBaseTemplate(mappings);
+  template.index_patterns = [indexPattern];
+  return template;
+}
+
+/**
+ * Generate mapping takes the given fields array and creates the Elasticsearch
+ * mapping properties out of it.
+ *
+ * @param fields
+ */
+export function generateMappings(fields: Field[]): Mappings {
+  const props: Properties = {};
+  fields.forEach(field => {
+    // Are there more fields inside this field? Build them recursively
+    if (field.fields && field.fields.length > 0) {
+      props[field.name] = generateMappings(field.fields);
+      return;
+    }
+
+    // If not type is defined, take keyword
+    const type = field.type || 'keyword';
+    props[field.name] = { type };
+  });
+  return { properties: props };
+}
+
+function getBaseTemplate(mappings: Mappings): Template {
   return {
     // We need to decide which order we use for the templates
     order: 1,
@@ -89,20 +121,7 @@ function getBaseTemplate(): Template {
       // This makes sure all the fields are mapped to keyword by default to prevent mapping conflicts
       date_detection: false,
       // All the properties we know from the fields.yml file
-      properties: {
-        container: {
-          properties: {
-            image: {
-              properties: {
-                name: {
-                  ignore_above: 1024,
-                  type: 'keyword',
-                },
-              },
-            },
-          },
-        },
-      },
+      properties: mappings.properties,
     },
     // To be filled with the aliases that we need
     aliases: {},
