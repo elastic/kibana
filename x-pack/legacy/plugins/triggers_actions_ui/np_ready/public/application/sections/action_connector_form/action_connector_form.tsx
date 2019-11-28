@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { createActionConnector, updateActionConnector } from '../../lib/api';
+import { createActionConnector, updateActionConnector } from '../../lib/action_connector_api';
 import { SectionError, ErrableFormRow } from '../../components/page_error';
 import { useAppDependencies } from '../../app_dependencies';
 import { connectorReducer } from './connector_reducer';

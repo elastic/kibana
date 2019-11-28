@@ -35,7 +35,8 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { useAppDependencies } from '../../app_dependencies';
-import { createAlert, loadActionTypes, loadAllActions } from '../../lib/api';
+import { createAlert } from '../../lib/alert_api';
+import { loadActionTypes, loadAllActions } from '../../lib/action_connector_api';
 import { AlertsContext } from '../../context/alerts_context';
 import { alertReducer } from './alert_reducer';
 import { ErrableFormRow, SectionError } from '../../components/page_error';

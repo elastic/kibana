@@ -18,7 +18,7 @@ import { BulkActionPopover } from './bulk_action_popover';
 import { CollapsedItemActions } from './collapsed_item_actions';
 import { TagsFilter } from './tags_filter';
 import { TypeFilter } from './type_filter';
-import { loadAlerts, loadAlertTypes } from '../../../lib/api';
+import { loadAlerts, loadAlertTypes } from '../../../lib/alert_api';
 
 export const AlertsList: React.FunctionComponent = () => {
   const {

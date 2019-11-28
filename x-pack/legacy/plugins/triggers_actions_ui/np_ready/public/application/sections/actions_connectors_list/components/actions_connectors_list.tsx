@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionsConnectorsContext } from '../../../context/actions_connectors_context';
 import { useAppDependencies } from '../../../app_dependencies';
-import { deleteActions, loadAllActions, loadActionTypes } from '../../../lib/api';
+import { deleteActions, loadAllActions, loadActionTypes } from '../../../lib/action_connector_api';
 import { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../../../../types';
 import { ConnectorAddFlyout, ConnectorEditFlyout } from '../../action_connector_form';
 

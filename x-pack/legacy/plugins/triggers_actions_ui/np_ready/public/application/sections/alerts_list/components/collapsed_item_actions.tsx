@@ -24,7 +24,7 @@ import {
   enableAlerts,
   muteAlerts,
   unmuteAlerts,
-} from '../../../lib/api';
+} from '../../../lib/alert_api';
 
 export interface ComponentOpts {
   item: AlertTableItem;
