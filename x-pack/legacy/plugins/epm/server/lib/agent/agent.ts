@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Mustache from 'mustache';
+import Handlebars from 'handlebars';
 
 interface Manifest {
   vars: VarsEntry[];
@@ -25,12 +25,6 @@ export function createInput(manifest: Manifest, inputTemplate: string): string {
     view[v.name] = v.default;
   }
 
-  // This disables escaping. All our configs should be never escaped.
-  // Otherwise the creator would have to prefix all variables with &
-  // which is not very user friendly.
-  Mustache.escape = function(v) {
-    return v;
-  };
-  // Mustache.parse(inputTemplate);
-  return Mustache.render(inputTemplate, view);
+  const template = Handlebars.compile(inputTemplate);
+  return template(view);
 }

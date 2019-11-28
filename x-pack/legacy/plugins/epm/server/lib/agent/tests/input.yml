@@ -1,7 +1,7 @@
 type: log
 paths:
-{{#paths}}
-  - "{{.}}"
-{{/paths}}
+{{#each paths}}
+  - "{{this}}"
+{{/each}}
 
 tags: {{tags}}
