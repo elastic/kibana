@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { SFC, Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -19,6 +19,7 @@ import {
   EuiButton,
   EuiTitle,
   EuiHealth,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { RouteComponentProps } from 'react-router-dom';
 import {
@@ -27,11 +28,12 @@ import {
 } from '../../../common/constants/agent';
 import { Datasource } from '../../../scripts/mock_spec/types';
 import { Loading } from '../../components/loading';
+import { ConnectedLink } from '../../components/navigation/connected_link';
 import { useGetPolicy, PolicyRefreshContext } from './hooks/use_policy';
 import { DonutChart } from './components/donut_chart';
-import { ConnectedLink } from '../../components/navigation/connected_link';
+import { EditPolicyFlyout } from './components/edit_policy';
 
-export const Layout: SFC = ({ children }) => (
+export const Layout: React.FC = ({ children }) => (
   <EuiPageBody>
     <EuiPageContent>{children}</EuiPageContent>
   </EuiPageBody>
@@ -41,12 +43,15 @@ type Props = RouteComponentProps<{
   policyId: string;
 }>;
 
-export const PolicyDetailsPage: SFC<Props> = ({
+export const PolicyDetailsPage: React.FC<Props> = ({
   match: {
     params: { policyId },
   },
 }) => {
   const { policy, isLoading, error, refreshPolicy } = useGetPolicy(policyId);
+
+  // Edit policy flyout state
+  const [isEditPolicyFlyoutOpen, setIsEditPolicyFlyoutOpen] = useState<boolean>(false);
 
   if (isLoading) {
     return <Loading />;
@@ -87,6 +92,9 @@ export const PolicyDetailsPage: SFC<Props> = ({
   return (
     <PolicyRefreshContext.Provider value={{ refresh: refreshPolicy }}>
       <Layout>
+        {isEditPolicyFlyoutOpen ? (
+          <EditPolicyFlyout onClose={() => setIsEditPolicyFlyoutOpen(false)} policy={policy} />
+        ) : null}
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
@@ -103,6 +111,14 @@ export const PolicyDetailsPage: SFC<Props> = ({
                 <EuiText color="subdued">{policy.description}</EuiText>
               </Fragment>
             ) : null}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={() => setIsEditPolicyFlyoutOpen(true)}>
+              <FormattedMessage
+                id="xpack.fleet.policyDetails.editPolicyButtonLabel"
+                defaultMessage="Edit"
+              />
+            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="l" />

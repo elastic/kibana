@@ -17,20 +17,19 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { PolicyForm } from '../../../components/policy_form';
+import { Policy } from '../../../../scripts/mock_spec/types';
 
 interface RouterProps {
+  policy: Policy;
   onClose: () => void;
 }
 
-export const CreatePolicyFlyout: React.FC<RouterProps> = ({ onClose }) => {
+export const EditPolicyFlyout: React.FC<RouterProps> = ({ policy, onClose }) => {
   const renderHeader = () => (
-    <EuiFlyoutHeader hasBorder aria-labelledby="FleetCreatePolicyFlyoutTitle">
+    <EuiFlyoutHeader hasBorder aria-labelledby="FleetEditPolicyFlyoutTitle">
       <EuiTitle size="m">
-        <h2 id="FleetCreatePolicyFlyoutTitle">
-          <FormattedMessage
-            id="xpack.fleet.createPolicy.flyoutTitle"
-            defaultMessage="Create new policy"
-          />
+        <h2 id="FleetEditPolicyFlyoutTitle">
+          <FormattedMessage id="xpack.fleet.editPolicy.flyoutTitle" defaultMessage="Edit policy" />
         </h2>
       </EuiTitle>
     </EuiFlyoutHeader>
@@ -39,7 +38,7 @@ export const CreatePolicyFlyout: React.FC<RouterProps> = ({ onClose }) => {
   const renderBody = () => (
     <EuiFlyoutBody>
       <PolicyForm
-        policy={{ name: '', description: '' }}
+        policy={policy}
         onCancel={onClose}
         onSubmit={() => {
           // TODO: add create here
@@ -55,7 +54,7 @@ export const CreatePolicyFlyout: React.FC<RouterProps> = ({ onClose }) => {
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
             <FormattedMessage
-              id="xpack.fleet.createPolicy.cancelButtonLabel"
+              id="xpack.fleet.editPolicy.cancelButtonLabel"
               defaultMessage="Cancel"
             />
           </EuiButtonEmpty>
@@ -63,7 +62,7 @@ export const CreatePolicyFlyout: React.FC<RouterProps> = ({ onClose }) => {
         <EuiFlexItem grow={false}>
           <EuiButton fill onClick={onClose}>
             <FormattedMessage
-              id="xpack.fleet.createPolicy.submitButtonLabel"
+              id="xpack.fleet.editPolicy.submitButtonLabel"
               defaultMessage="Continue"
             />
           </EuiButton>

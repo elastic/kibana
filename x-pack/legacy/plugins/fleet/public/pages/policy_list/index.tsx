@@ -5,7 +5,6 @@
  */
 import React, { useState, useEffect } from 'react';
 import {
-  EuiInMemoryTable,
   EuiPageBody,
   EuiPageContent,
   EuiTitle,
@@ -15,34 +14,46 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiEmptyPrompt,
-  EuiHealth,
   // @ts-ignore
   EuiSearchBar,
+  EuiBasicTable,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Policy, Status as PolicyStatus } from '../../../scripts/mock_spec/types';
-import {
-  DEFAULT_AGENTS_PAGE_SIZE,
-  AGENTS_PAGE_SIZE_OPTIONS,
-} from '../../../common/constants/agent';
+import { Policy } from '../../../scripts/mock_spec/types';
 import { useLibs } from '../../hooks/use_libs';
+import { usePagination } from '../../hooks/use_pagination';
 import { ConnectedLink } from '../../components/navigation/connected_link';
+import { SearchBar } from '../../components/search_bar';
 import { CreatePolicyFlyout } from './components/create_policy';
 
-export const PolicyListPage: React.SFC<{}> = () => {
+export const PolicyListPage: React.FC<{}> = () => {
   const libs = useLibs();
-  // Agent data states
+  // Policy data states
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [policies, setPolicies] = useState<Policy[]>([]);
+  const [totalPolicies, setTotalPolicies] = useState<number>(0);
 
-  // Agent enrollment flyout state
+  // Create policy flyout state
   const [isCreatePolicyFlyoutOpen, setIsCreatePolicyFlyoutOpen] = useState<boolean>(false);
+
+  // Table and search states
+  const [search, setSearch] = useState<string>('');
+  const { pagination, pageSizeOptions, setPagination } = usePagination();
 
   // Fetch policies method
   const fetchPolicies = async () => {
     setIsLoading(true);
-    setPolicies(await libs.policies.getAll());
+
+    const { list, total } = await libs.policies.getAll(
+      pagination.currentPage,
+      pagination.pageSize,
+      search.trim()
+    );
+
+    setPolicies(list);
+    setTotalPolicies(total);
     setIsLoading(false);
   };
 
@@ -66,18 +77,6 @@ export const PolicyListPage: React.SFC<{}> = () => {
       name: i18n.translate('xpack.fleet.policyList.descriptionColumnTitle', {
         defaultMessage: 'Description',
       }),
-    },
-    {
-      field: 'name',
-      name: i18n.translate('xpack.fleet.policyList.agentsCountColumnTitle', {
-        defaultMessage: 'Agents enrolled',
-      }),
-      render: () => (
-        // TODO: Make this link to filtered agents list and change to real agent count
-        <ConnectedLink color="primary" path={`/agents`}>
-          {'78'}
-        </ConnectedLink>
-      ),
     },
     {
       field: 'datasources',
@@ -131,45 +130,6 @@ export const PolicyListPage: React.SFC<{}> = () => {
     />
   );
 
-  const sorting = {
-    sort: {
-      field: 'name',
-      direction: 'asc',
-    },
-  };
-
-  const pagination = {
-    initialPageSize: DEFAULT_AGENTS_PAGE_SIZE,
-    pageSizeOptions: AGENTS_PAGE_SIZE_OPTIONS,
-  };
-
-  const search = {
-    toolsRight: [
-      <EuiButton
-        key="reloadPolicies"
-        color="secondary"
-        iconType="refresh"
-        onClick={fetchPolicies}
-        data-test-subj="reloadButton"
-      >
-        <FormattedMessage
-          id="xpack.fleet.policyList.reloadPoliciesButtonText"
-          defaultMessage="Reload"
-        />
-      </EuiButton>,
-      <EuiButton fill iconType="plusInCircle" onClick={() => setIsCreatePolicyFlyoutOpen(true)}>
-        <FormattedMessage
-          id="xpack.fleet.policyList.addButton"
-          defaultMessage="Create new policy"
-        />
-      </EuiButton>,
-    ],
-    box: {
-      incremental: true,
-      schema: true,
-    },
-  };
-
   return (
     <EuiPageBody>
       <EuiPageContent>
@@ -196,24 +156,91 @@ export const PolicyListPage: React.SFC<{}> = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        <EuiInMemoryTable
+
+        <EuiFlexGroup alignItems={'center'} gutterSize="m">
+          <EuiFlexItem grow={4}>
+            <SearchBar
+              value={search}
+              onChange={newSearch => {
+                setPagination({
+                  ...pagination,
+                  currentPage: 1,
+                });
+                setSearch(newSearch);
+              }}
+              fieldPrefix="policies"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton color="secondary" iconType="refresh" onClick={() => fetchPolicies()}>
+              <FormattedMessage
+                id="xpack.fleet.policyList.reloadPoliciesButtonText"
+                defaultMessage="Reload"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+          {libs.framework.capabilities.write && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                iconType="plusInCircle"
+                onClick={() => setIsCreatePolicyFlyoutOpen(true)}
+              >
+                <FormattedMessage
+                  id="xpack.fleet.policyList.addButton"
+                  defaultMessage="Create new policy"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+
+        <EuiSpacer size="m" />
+        <EuiBasicTable
           loading={isLoading}
-          message={
-            isLoading && (!policies || policies.length === 0) ? (
+          noItemsMessage={
+            isLoading ? (
               <FormattedMessage
                 id="xpack.fleet.policyList.loadingPoliciesMessage"
                 defaultMessage="Loading policies…"
               />
-            ) : (
+            ) : !search.trim() && totalPolicies === 0 ? (
               emptyPrompt
+            ) : (
+              <FormattedMessage
+                id="xpack.fleet.policyList.noFilteredPoliciesPrompt"
+                defaultMessage="No policies found. {clearFiltersLink}"
+                values={{
+                  clearFiltersLink: (
+                    <EuiLink onClick={() => setSearch('')}>
+                      <FormattedMessage
+                        id="xpack.fleet.policyList.clearFiltersLinkText"
+                        defaultMessage="Clear filters"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
             )
           }
+          items={totalPolicies ? policies : []}
           itemId="id"
-          items={policies}
           columns={columns}
-          sorting={sorting}
-          pagination={pagination}
-          search={search}
+          isSelectable={true}
+          pagination={{
+            pageIndex: pagination.currentPage - 1,
+            pageSize: pagination.pageSize,
+            totalItemCount: totalPolicies,
+            pageSizeOptions,
+          }}
+          onChange={({ page }: { page: { index: number; size: number } }) => {
+            const newPagination = {
+              ...pagination,
+              currentPage: page.index + 1,
+              pageSize: page.size,
+            };
+            setPagination(newPagination);
+          }}
         />
       </EuiPageContent>
     </EuiPageBody>

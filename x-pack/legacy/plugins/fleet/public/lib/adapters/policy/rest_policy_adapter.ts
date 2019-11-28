@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ReturnTypeList } from '../../../../common/return_types';
 import { Policy } from '../../../../scripts/mock_spec/types';
 import { RestAPIAdapter } from '../rest_api/adapter_types';
 import { PolicyAdapter } from './memory_policy_adapter';
-
-const POLICIES_SERVER_HOST = `${window.location.protocol}//${window.location.hostname}:4010`;
 
 export class RestPolicyAdapter extends PolicyAdapter {
   constructor(private readonly REST: RestAPIAdapter) {
@@ -17,17 +16,23 @@ export class RestPolicyAdapter extends PolicyAdapter {
 
   public async get(id: string): Promise<Policy | null> {
     try {
-      return await this.REST.get<Policy>(`${POLICIES_SERVER_HOST}/policy/${id}`);
+      return await this.REST.get<Policy>(`/api/ingest/policy/${id}`);
     } catch (e) {
       return null;
     }
   }
 
-  public async getAll() {
+  public async getAll(page: number, perPage: number, kuery?: string) {
     try {
-      return await this.REST.get<Policy[]>(`${POLICIES_SERVER_HOST}/policies`);
+      return await this.REST.get<ReturnTypeList<Policy>>(`/api/ingest/policies`);
     } catch (e) {
-      return [];
+      return {
+        list: [],
+        success: false,
+        page,
+        total: 0,
+        perPage,
+      };
     }
   }
 }
