@@ -82,6 +82,9 @@
               "tags": {
                 "type": "keyword"
               },
+              "threats": {
+                "type": "object"
+              },
               "type": {
                 "type": "keyword"
               },

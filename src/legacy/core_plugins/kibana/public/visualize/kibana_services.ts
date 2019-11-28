@@ -52,7 +52,7 @@ export interface VisualizeKibanaServices {
   toastNotifications: ToastsStart;
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectRegistry: any;
-  savedQueryService: DataStart['search']['services']['savedQueryService'];
+  savedQueryService: NpDataStart['query']['savedQueries'];
   savedVisualizations: SavedVisualizations;
   share: SharePluginStart;
   uiSettings: UiSettingsClientContract;

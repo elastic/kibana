@@ -8,6 +8,6 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@elastic/eui": "16.0.0",
-    "react": "^16.8.6"
+    "react": "^16.12.0"
   }
 }
