@@ -17,30 +17,18 @@
  * under the License.
  */
 
-import { SavedObjectsClientContract } from 'src/core/public';
-import { createSavedQueryService } from './search_bar/lib/saved_query_service';
+import typeDetect from 'type-detect';
+import { internals } from '../internals';
+import { Type, TypeOptions } from './type';
 
-/**
- * Search Service
- * @internal
- */
-
-export class SearchService {
-  public setup() {
-    // Service requires index patterns, which are only available in `start`
+export class BufferType extends Type<Buffer> {
+  constructor(options?: TypeOptions<Buffer>) {
+    super(internals.binary(), options);
   }
 
-  public start(savedObjectsClient: SavedObjectsClientContract) {
-    return {
-      services: {
-        savedQueryService: createSavedQueryService(savedObjectsClient),
-      },
-    };
+  protected handleError(type: string, { value }: Record<string, any>) {
+    if (type === 'any.required' || type === 'binary.base') {
+      return `expected value of type [Buffer] but got [${typeDetect(value)}]`;
+    }
   }
-
-  public stop() {}
 }
-
-/** @public */
-
-export type SearchStart = ReturnType<SearchService['start']>;

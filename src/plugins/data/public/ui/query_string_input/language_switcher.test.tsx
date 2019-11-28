@@ -20,7 +20,7 @@
 import React from 'react';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
-import { coreMock } from '../../../../../../../core/public/mocks';
+import { coreMock } from '../../../../../core/public/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 const startMock = coreMock.createStart();
 
