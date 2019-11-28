@@ -81,7 +81,7 @@ export function getServices() {
 
 // EXPORT legacy static dependencies
 export { angular };
-export { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
+export { buildVislibDimensions } from '../../../visualizations/public';
 // @ts-ignore
 export { callAfterBindingsWorkaround } from 'ui/compat';
 export {

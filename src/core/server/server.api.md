@@ -512,11 +512,15 @@ export interface CoreSetup {
     // (undocumented)
     http: HttpServiceSetup;
     // (undocumented)
+    savedObjects: SavedObjectsServiceSetup;
+    // (undocumented)
     uiSettings: UiSettingsServiceSetup;
 }
 
 // @public
 export interface CoreStart {
+    // (undocumented)
+    savedObjects: SavedObjectsServiceStart;
 }
 
 // @public
@@ -714,19 +718,23 @@ export interface IndexSettingsDeprecationInfo {
 
 // @public
 export interface IRouter {
-    delete: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) => void;
-    get: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) => void;
+    delete: RouteRegistrar;
+    get: RouteRegistrar;
     // Warning: (ae-forgotten-export) The symbol "RouterRoute" needs to be exported by the entry point index.d.ts
     // 
     // @internal
     getRoutes: () => RouterRoute[];
-    post: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) => void;
-    put: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) => void;
+    handleLegacyErrors: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(handler: RequestHandler<P, Q, B>) => RequestHandler<P, Q, B>;
+    post: RouteRegistrar;
+    put: RouteRegistrar;
     routerPath: string;
 }
 
 // @public
 export type IsAuthenticated = (request: KibanaRequest | LegacyRequest) => boolean;
+
+// @public
+export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedObjectsRepository>;
 
 // @public
 export type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
@@ -1099,6 +1107,9 @@ export interface RouteConfigOptions {
 // @public
 export type RouteMethod = 'get' | 'post' | 'put' | 'delete';
 
+// @public
+export type RouteRegistrar = <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) => void;
+
 // @public (undocumented)
 export interface SavedObject<T extends SavedObjectAttributes = any> {
     attributes: T;
@@ -1196,8 +1207,8 @@ export interface SavedObjectsBulkUpdateResponse<T extends SavedObjectAttributes 
 
 // @public (undocumented)
 export class SavedObjectsClient {
-    // Warning: (ae-forgotten-export) The symbol "SavedObjectsRepository" needs to be exported by the entry point index.d.ts
-    constructor(repository: SavedObjectsRepository);
+    // @internal
+    constructor(repository: ISavedObjectsRepository);
     bulkCreate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkGet<T extends SavedObjectAttributes = any>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkUpdate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
@@ -1214,6 +1225,11 @@ export class SavedObjectsClient {
 
 // @public
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
+
+// @public
+export type SavedObjectsClientFactory<Request = unknown> = ({ request, }: {
+    request: Request;
+}) => SavedObjectsClientContract;
 
 // @public
 export interface SavedObjectsClientProviderOptions {
@@ -1239,6 +1255,11 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
     overwrite?: boolean;
     // (undocumented)
     references?: SavedObjectReference[];
+    refresh?: MutatingOperationRefreshSetting;
+}
+
+// @public (undocumented)
+export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOptions {
     refresh?: MutatingOperationRefreshSetting;
 }
 
@@ -1452,6 +1473,13 @@ export interface SavedObjectsImportUnsupportedTypeError {
     type: 'unsupported_type';
 }
 
+// @public (undocumented)
+export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOptions {
+    // (undocumented)
+    migrationVersion?: SavedObjectsMigrationVersion;
+    refresh?: MutatingOperationRefreshSetting;
+}
+
 // @internal @deprecated (undocumented)
 export interface SavedObjectsLegacyService<Request = any> {
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsClientProvider" needs to be exported by the entry point index.d.ts
@@ -1511,6 +1539,32 @@ export interface SavedObjectsRawDoc {
     _type?: string;
 }
 
+// @public (undocumented)
+export class SavedObjectsRepository {
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsRepositoryOptions" needs to be exported by the entry point index.d.ts
+    // 
+    // @internal
+    constructor(options: SavedObjectsRepositoryOptions);
+    bulkCreate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
+    bulkGet<T extends SavedObjectAttributes = any>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
+    bulkUpdate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
+    create<T extends SavedObjectAttributes>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
+    delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
+    deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
+    // (undocumented)
+    find<T extends SavedObjectAttributes = any>({ search, defaultSearchOperator, searchFields, hasReference, page, perPage, sortField, sortOrder, fields, namespace, type, filter, }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
+    get<T extends SavedObjectAttributes = any>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
+    incrementCounter(type: string, id: string, counterFieldName: string, options?: SavedObjectsIncrementCounterOptions): Promise<{
+        id: string;
+        type: string;
+        updated_at: string;
+        references: any;
+        version: string;
+        attributes: any;
+    }>;
+    update<T extends SavedObjectAttributes = any>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
+    }
+
 // @public
 export interface SavedObjectsResolveImportErrorsOptions {
     // (undocumented)
@@ -1551,6 +1605,19 @@ export class SavedObjectsSerializer {
     savedObjectToRaw(savedObj: SanitizedSavedObjectDoc): SavedObjectsRawDoc;
     }
 
+// @public
+export interface SavedObjectsServiceSetup {
+    addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory<KibanaRequest>) => void;
+    createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
+    createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
+    setClientFactory: (customClientFactory: SavedObjectsClientFactory<KibanaRequest>) => void;
+}
+
+// @public
+export interface SavedObjectsServiceStart {
+    getScopedClient: (req: KibanaRequest, options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
+}
+
 // @public (undocumented)
 export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
     references?: SavedObjectReference[];
@@ -1574,6 +1641,12 @@ export class ScopedClusterClient implements IScopedClusterClient {
     }
 
 // @public
+export interface SessionCookieValidationResult {
+    isValid: boolean;
+    path?: string;
+}
+
+// @public
 export interface SessionStorage<T> {
     clear(): void;
     get(): Promise<T | null>;
@@ -1585,7 +1658,7 @@ export interface SessionStorageCookieOptions<T> {
     encryptionKey: string;
     isSecure: boolean;
     name: string;
-    validate: (sessionValue: T) => boolean | Promise<boolean>;
+    validate: (sessionValue: T | T[]) => SessionCookieValidationResult;
 }
 
 // @public

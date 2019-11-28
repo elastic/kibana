@@ -32,10 +32,10 @@ import {
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   IIndexPattern,
+  indexPatterns,
 } from '../../../../../../plugins/data/public';
 
 import { findIndexPatternByTitle, getRoutes } from '../utils';
-import { IndexPatternMissingIndices } from '../errors';
 import { Field, FieldList, FieldListInterface, FieldType } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
@@ -499,7 +499,7 @@ export class IndexPattern implements IIndexPattern {
         // so do not rethrow the error here
         const { toasts } = getNotifications();
 
-        if (err instanceof IndexPatternMissingIndices) {
+        if (err instanceof indexPatterns.IndexPatternMissingIndices) {
           toasts.addDanger((err as any).message);
 
           return [];
