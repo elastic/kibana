@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import { SavedQueryAttributes } from '../index';
 import { createSavedQueryService } from './saved_query_service';
-import { esFilters } from '../../../../../../../plugins/data/public';
+import { esFilters, SavedQueryAttributes } from '../..';
 
 const savedQueryAttributes: SavedQueryAttributes = {
   title: 'foo',
