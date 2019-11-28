@@ -4,9 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './overview';
-export * from './jobs_list';
-export * from './new_job';
-export * from './datavisualizer';
-export * from './settings';
-export * from './data_frame_analytics';
+export { Page } from './page';
