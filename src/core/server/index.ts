@@ -45,6 +45,7 @@ import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plug
 import { ContextSetup } from './context';
 import { IUiSettingsClient, UiSettingsServiceSetup } from './ui_settings';
 import { SavedObjectsClientContract } from './saved_objects/types';
+import { SavedObjectsServiceSetup, SavedObjectsServiceStart } from './saved_objects';
 
 export { bootstrap } from './bootstrap';
 export { ConfigPath, ConfigService, EnvironmentMode, PackageInfo } from './config';
@@ -93,6 +94,7 @@ export {
   IsAuthenticated,
   KibanaRequest,
   KibanaRequestRoute,
+  KibanaRequestRouteOptions,
   IKibanaResponse,
   LifecycleResponseFactory,
   KnownHeaders,
@@ -112,11 +114,16 @@ export {
   KibanaResponseFactory,
   RouteConfig,
   IRouter,
+  RouteRegistrar,
   RouteMethod,
   RouteConfigOptions,
-  RouteRegistrar,
+  RouteSchemas,
+  RouteConfigOptionsBody,
+  RouteContentType,
+  validBodyOutput,
   SessionStorage,
   SessionStorageCookieOptions,
+  SessionCookieValidationResult,
   SessionStorageFactory,
 } from './http';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
@@ -143,6 +150,7 @@ export {
   SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
+  SavedObjectsClientFactory,
   SavedObjectsCreateOptions,
   SavedObjectsErrorHelpers,
   SavedObjectsExportOptions,
@@ -164,7 +172,13 @@ export {
   SavedObjectsLegacyService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
+  SavedObjectsServiceStart,
+  SavedObjectsServiceSetup,
   SavedObjectsDeleteOptions,
+  ISavedObjectsRepository,
+  SavedObjectsRepository,
+  SavedObjectsDeleteByNamespaceOptions,
+  SavedObjectsIncrementCounterOptions,
 } from './saved_objects';
 
 export {
@@ -232,6 +246,8 @@ export interface CoreSetup {
   elasticsearch: ElasticsearchServiceSetup;
   /** {@link HttpServiceSetup} */
   http: HttpServiceSetup;
+  /** {@link SavedObjectsServiceSetup} */
+  savedObjects: SavedObjectsServiceSetup;
   /** {@link UiSettingsServiceSetup} */
   uiSettings: UiSettingsServiceSetup;
 }
@@ -241,6 +257,9 @@ export interface CoreSetup {
  *
  * @public
  */
-export interface CoreStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
+export interface CoreStart {
+  /** {@link SavedObjectsServiceStart} */
+  savedObjects: SavedObjectsServiceStart;
+}
 
 export { ContextSetup, PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId };
