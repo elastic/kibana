@@ -17,34 +17,21 @@
  * under the License.
  */
 
-import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
+import { mockSessionStorage } from '../state_storage/mock';
 import { HashedItemStore } from '../state_storage/hashed_item_store';
-const originalSessionStorage: Storage = (window as any).sessionStorage;
-function mockSessionStorage() {
-  (window.sessionStorage as any) = new StubBrowserStorage();
-}
-function restoreSessionStorage() {
-  (window.sessionStorage as any) = originalSessionStorage;
-}
-mockSessionStorage();
+import { hashUrl, unhashUrl } from './hash_unhash_url';
 
 describe('hash unhash url', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { hashUrl, unhashUrl } = require('./hash_unhash_url');
-
-  afterAll(() => {
-    restoreSessionStorage();
-  });
-
   beforeEach(() => {
-    window.sessionStorage.clear();
-    (window.sessionStorage as StubBrowserStorage).setStubbedSizeLimit(5000000);
+    mockSessionStorage.clear();
+    mockSessionStorage.setStubbedSizeLimit(5000000);
   });
 
   describe('hash url', () => {
     describe('does nothing', () => {
       it('if missing input', () => {
         expect(() => {
+          // @ts-ignore
           hashUrl();
         }).not.toThrowError();
       });
@@ -109,8 +96,8 @@ describe('hash unhash url', () => {
         expect(result).toMatchInlineSnapshot(
           `"https://localhost:5601/app/kibana#/discover?foo=bar&_g=h@4e60e02"`
         );
-        expect(sessionStorage.getItem('kbn.hashedItemsIndex.v1')).toBeTruthy();
-        expect(sessionStorage.getItem('h@4e60e02')).toEqual(JSON.stringify({ yes: true }));
+        expect(mockSessionStorage.getItem('kbn.hashedItemsIndex.v1')).toBeTruthy();
+        expect(mockSessionStorage.getItem('h@4e60e02')).toEqual(JSON.stringify({ yes: true }));
       });
 
       it('if uses multiple states params', () => {
@@ -125,15 +112,15 @@ describe('hash unhash url', () => {
         expect(result).toMatchInlineSnapshot(
           `"https://localhost:5601/app/kibana#/discover?foo=bar&_g=h@4e60e02&_a=h@61fa078&_b=(yes:!f)"`
         );
-        expect(sessionStorage.getItem('h@4e60e02')).toEqual(JSON.stringify({ yes: true }));
-        expect(sessionStorage.getItem('h@61fa078')).toEqual(JSON.stringify({ yes: false }));
+        expect(mockSessionStorage.getItem('h@4e60e02')).toEqual(JSON.stringify({ yes: true }));
+        expect(mockSessionStorage.getItem('h@61fa078')).toEqual(JSON.stringify({ yes: false }));
         if (!HashedItemStore.PERSISTED_INDEX_KEY) {
           // This is very brittle and depends upon HashedItemStore implementation details,
           // so let's protect ourselves from accidentally breaking this test.
           throw new Error('Missing HashedItemStore.PERSISTED_INDEX_KEY');
         }
-        expect(sessionStorage.getItem(HashedItemStore.PERSISTED_INDEX_KEY)).toBeTruthy();
-        expect(sessionStorage.length).toBe(3);
+        expect(mockSessionStorage.getItem(HashedItemStore.PERSISTED_INDEX_KEY)).toBeTruthy();
+        expect(mockSessionStorage.length).toBe(3);
       });
 
       it('hashes only whitelisted properties', () => {
@@ -149,14 +136,14 @@ describe('hash unhash url', () => {
           `"https://localhost:5601/app/kibana#/discover?foo=bar&_g=h@4e60e02&_a=h@61fa078&_someother=(yes:!f)"`
         );
 
-        expect(sessionStorage.length).toBe(3); // 2 hashes + HashedItemStoreSingleton.PERSISTED_INDEX_KEY
+        expect(mockSessionStorage.length).toBe(3); // 2 hashes + HashedItemStoreSingleton.PERSISTED_INDEX_KEY
       });
     });
 
     it('throws error if unable to hash url', () => {
       const stateParamKey1 = '_g';
       const stateParamValue1 = '(yes:!t)';
-      (window.sessionStorage as StubBrowserStorage).setStubbedSizeLimit(1);
+      mockSessionStorage.setStubbedSizeLimit(1);
 
       const url = `https://localhost:5601/app/kibana#/discover?foo=bar&${stateParamKey1}=${stateParamValue1}`;
       expect(() => hashUrl(url)).toThrowError();
@@ -167,7 +154,7 @@ describe('hash unhash url', () => {
     describe('does nothing', () => {
       it('if missing input', () => {
         expect(() => {
-          unhashUrl();
+          // @ts-ignore
         }).not.toThrowError();
       });
 
@@ -219,7 +206,7 @@ describe('hash unhash url', () => {
         const stateParamKey = '_g';
         const stateParamValueHashed = 'h@4e60e02';
         const state = { yes: true };
-        sessionStorage.setItem(stateParamValueHashed, JSON.stringify(state));
+        mockSessionStorage.setItem(stateParamValueHashed, JSON.stringify(state));
 
         const url = `https://localhost:5601/app/kibana#/discover?foo=bar&${stateParamKey}=${stateParamValueHashed}`;
         const result = unhashUrl(url);
@@ -237,8 +224,8 @@ describe('hash unhash url', () => {
         const stateParamValueHashed2 = 'h@61fa078';
         const state2 = { yes: false };
 
-        sessionStorage.setItem(stateParamValueHashed1, JSON.stringify(state1));
-        sessionStorage.setItem(stateParamValueHashed2, JSON.stringify(state2));
+        mockSessionStorage.setItem(stateParamValueHashed1, JSON.stringify(state1));
+        mockSessionStorage.setItem(stateParamValueHashed2, JSON.stringify(state2));
 
         const url = `https://localhost:5601/app/kibana#/discover?foo=bar&${stateParamKey1}=${stateParamValueHashed1}&${stateParamKey2}=${stateParamValueHashed2}`;
         const result = unhashUrl(url);
@@ -260,9 +247,9 @@ describe('hash unhash url', () => {
         const stateParamValueHashed3 = 'h@61fa078';
         const state3 = { yes: false };
 
-        sessionStorage.setItem(stateParamValueHashed1, JSON.stringify(state1));
-        sessionStorage.setItem(stateParamValueHashed2, JSON.stringify(state2));
-        sessionStorage.setItem(stateParamValueHashed3, JSON.stringify(state3));
+        mockSessionStorage.setItem(stateParamValueHashed1, JSON.stringify(state1));
+        mockSessionStorage.setItem(stateParamValueHashed2, JSON.stringify(state2));
+        mockSessionStorage.setItem(stateParamValueHashed3, JSON.stringify(state3));
 
         const url = `https://localhost:5601/app/kibana#/discover?foo=bar&${stateParamKey1}=${stateParamValueHashed1}&${stateParamKey2}=${stateParamValueHashed2}&${stateParamKey3}=${stateParamValueHashed3}`;
         const result = unhashUrl(url);

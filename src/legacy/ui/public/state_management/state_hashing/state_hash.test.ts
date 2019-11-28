@@ -18,25 +18,13 @@
  */
 
 import { encode as encodeRison } from 'rison-node';
-import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
-const originalSessionStorage: Storage = (window as any).sessionStorage;
-function mockSessionStorage() {
-  (window.sessionStorage as any) = new StubBrowserStorage();
-}
-function restoreSessionStorage() {
-  (window.sessionStorage as any) = originalSessionStorage;
-}
-mockSessionStorage();
+import { mockSessionStorage } from '../state_storage/mock';
+import { createStateHash, isStateHash } from '../state_hashing';
 
 describe('stateHash', () => {
   beforeEach(() => {
-    sessionStorage.clear();
+    mockSessionStorage.clear();
   });
-  afterAll(() => {
-    restoreSessionStorage();
-  });
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { createStateHash, isStateHash } = require('./state_hash');
 
   describe('#createStateHash', () => {
     it('returns a hash', () => {
