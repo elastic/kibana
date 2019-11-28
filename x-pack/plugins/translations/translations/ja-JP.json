@@ -529,6 +529,7 @@
     "common.ui.vis.kibanaMap.zoomWarning": "ズームレベルが最大に達しました。完全にズームインするには、Elasticsearch と Kibana の {defaultDistribution} にアップグレードしてください。{ems} でより多くのズームレベルが利用できます。または、独自のマップサーバーを構成できます。詳細は { wms } または { configSettings} をご覧ください。",
     "common.ui.vis.visTypes.legend.filterForValueButtonAriaLabel": "値 {legendDataLabel} でフィルタリング",
     "common.ui.vis.visTypes.legend.filterOutValueButtonAriaLabel": "値 {legendDataLabel} を除外",
+    "common.ui.vis.visTypes.legend.filterOptionsLegend": "{legendDataLabel}, フィルターオプション",
     "common.ui.vis.visTypes.legend.loadingLabel": "読み込み中…",
     "common.ui.vis.visTypes.legend.setColorScreenReaderDescription": "値 {legendDataLabel} の色を設定",
     "common.ui.vis.visTypes.legend.toggleLegendButtonAriaLabel": "凡例を切り替える",
