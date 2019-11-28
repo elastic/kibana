@@ -22,8 +22,12 @@ import { getFieldFormatsRegistry } from '../../../../test_utils/public/stub_fiel
 
 const mockObservable = () => {
   return {
-    subscribe: () => {}
+    subscribe: () => {},
   };
+};
+
+const mockComponent = () => {
+  return null;
 };
 
 export const mockUiSettings = {
@@ -75,6 +79,14 @@ export const npSetup = {
         timefilter: {
           timefilter: sinon.fake(),
           history: sinon.fake(),
+        },
+        savedQueries: {
+          saveQuery: sinon.fake(),
+          getAllSavedQueries: sinon.fake(),
+          findSavedQueries: sinon.fake(),
+          getSavedQuery: sinon.fake(),
+          deleteSavedQuery: sinon.fake(),
+          getSavedQueryCount: sinon.fake(),
         }
       },
       fieldFormats: getFieldFormatsRegistry(mockUiSettings),
@@ -82,8 +94,12 @@ export const npSetup = {
     share: {
       register: () => {},
     },
-    devTools: {
+    dev_tools: {
       register: () => {},
+    },
+    kibana_legacy: {
+      registerLegacyApp: () => {},
+      forwardApp: () => {},
     },
     inspector: {
       registerView: () => undefined,
@@ -110,7 +126,7 @@ let isAutoRefreshSelectorEnabled = true;
 
 export const npStart = {
   core: {
-    chrome: {}
+    chrome: {},
   },
   plugins: {
     embeddable: {
@@ -123,14 +139,21 @@ export const npStart = {
       registerRenderer: sinon.fake(),
       registerType: sinon.fake(),
     },
-    devTools: {
+    dev_tools: {
       getSortedDevTools: () => [],
+    },
+    kibana_legacy: {
+      getApps: () => [],
+      getForwards: () => [],
     },
     data: {
       autocomplete: {
         getProvider: sinon.fake(),
       },
       getSuggestions: sinon.fake(),
+      ui: {
+        IndexPatternSelect: mockComponent,
+      },
       query: {
         filterManager: {
           getFetches$: sinon.fake(),
@@ -142,7 +165,6 @@ export const npStart = {
           setFilters: sinon.fake(),
           removeAll: sinon.fake(),
           getUpdates$: mockObservable,
-
         },
         timefilter: {
           timefilter: {
@@ -166,7 +188,7 @@ export const npStart = {
             getRefreshInterval: () => {
               return refreshInterval;
             },
-            setRefreshInterval: (interval) => {
+            setRefreshInterval: interval => {
               refreshInterval = interval;
             },
             enableTimeRangeSelector: () => {

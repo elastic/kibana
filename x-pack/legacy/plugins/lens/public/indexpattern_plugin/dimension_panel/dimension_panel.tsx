@@ -43,7 +43,7 @@ export interface OperationFieldSupportMatrix {
   fieldByOperation: Partial<Record<OperationType, string[]>>;
 }
 
-export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPanel(
+export const IndexPatternDimensionPanelComponent = function IndexPatternDimensionPanel(
   props: IndexPatternDimensionPanelProps
 ) {
   const layerId = props.layerId;
@@ -188,4 +188,6 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
       </DragDrop>
     </ChildDragDropProvider>
   );
-});
+};
+
+export const IndexPatternDimensionPanel = memo(IndexPatternDimensionPanelComponent);
