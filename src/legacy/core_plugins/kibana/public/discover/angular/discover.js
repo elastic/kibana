@@ -63,6 +63,7 @@ import {
 const {
   core,
   chrome,
+  data,
   docTitle,
   filterManager,
   State,
@@ -73,13 +74,13 @@ const {
 } = getServices();
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
-import { start as data } from '../../../../data/public/legacy';
+import { start as dataLP } from '../../../../data/public/legacy';
 import { generateFilters } from '../../../../../../plugins/data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { registerTimefilterWithGlobalStateFactory } from '../../../../../ui/public/timefilter/setup_router';
 import { FilterStateManager } from '../../../../data/public/filter/filter_manager';
 
-const { savedQueryService } = data.search.services;
+const { savedQueryService } = data.query.savedQueries;
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -123,9 +124,9 @@ app.config($routeProvider => {
     reloadOnSearch: false,
     resolve: {
       savedObjects: function (redirectWhenMissing, $route, kbnUrl, Promise, $rootScope) {
-        const indexPatterns = data.indexPatterns.indexPatterns;
+        const indexPatterns = dataLP.indexPatterns.indexPatterns;
         const savedSearchId = $route.current.params.id;
-        return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl).then(() => {
+        return ensureDefaultIndexPattern(core, dataLP, $rootScope, kbnUrl).then(() => {
           return Promise.props({
             ip: indexPatterns.getCache().then((indexPatternList) => {
               /**
@@ -424,7 +425,7 @@ function discoverController(
   };
 
   const getFieldCounts = async () => {
-    // the field counts aren't set until we have the data back,
+    // the field counts aren't set until we have the dataLP back,
     // so we wait for the fetch to be done before proceeding
     if ($scope.fetchStatus === fetchStatuses.COMPLETE) {
       return $scope.fieldCounts;
@@ -580,7 +581,7 @@ function discoverController(
           if (!angular.equals(sort, currentSort)) $scope.fetch();
         });
 
-        // update data source when filters update
+        // update dataLP source when filters update
         subscriptions.add(subscribeWithScope($scope, filterManager.getUpdates$(), {
           next: () => {
             $scope.filters = filterManager.getFilters();
@@ -590,12 +591,12 @@ function discoverController(
           }
         }));
 
-        // fetch data when filters fire fetch event
+        // fetch dataLP when filters fire fetch event
         subscriptions.add(subscribeWithScope($scope, filterManager.getUpdates$(), {
           next: $scope.fetch
         }));
 
-        // update data source when hitting forward/back and the query changes
+        // update dataLP source when hitting forward/back and the query changes
         $scope.$listen($state, 'fetch_with_changes', function (diff) {
           if (diff.indexOf('query') >= 0) $scope.fetch();
         });
@@ -635,7 +636,7 @@ function discoverController(
           let prev = {};
           const status = {
             UNINITIALIZED: 'uninitialized',
-            LOADING: 'loading', // initial data load
+            LOADING: 'loading', // initial dataLP load
             READY: 'ready', // results came back
             NO_RESULTS: 'none' // no results came back
           };
@@ -706,7 +707,7 @@ function discoverController(
                 savedSearchTitle: savedSearch.title,
               }
             }),
-            'data-test-subj': 'saveSearchSuccess',
+            'dataLP-test-subj': 'saveSearchSuccess',
           });
 
           if (savedSearch.id !== $route.current.params.id) {
@@ -767,7 +768,7 @@ function discoverController(
         } else {
           toastNotifications.addError(error, {
             title: i18n.translate('kbn.discover.errorLoadingData', {
-              defaultMessage: 'Error loading data',
+              defaultMessage: 'Error loading dataLP',
             }),
           });
         }
@@ -815,10 +816,10 @@ function discoverController(
   function logInspectorRequest() {
     inspectorAdapters.requests.reset();
     const title = i18n.translate('kbn.discover.inspectorRequestDataTitle', {
-      defaultMessage: 'Data',
+      defaultMessage: 'dataLP',
     });
     const description = i18n.translate('kbn.discover.inspectorRequestDescription', {
-      defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
+      defaultMessage: 'This request queries Elasticsearch to fetch the dataLP for the search.',
     });
     inspectorRequest = inspectorAdapters.requests.start(title, { description });
     inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));

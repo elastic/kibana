@@ -36,7 +36,7 @@ import { createSavedSearchesService } from '../saved_searches/saved_searches';
 import { createSavedSearchFactory } from '../saved_searches/_saved_search';
 import { DiscoverStartPlugins } from '../plugin';
 import { start as legacyData } from '../../../../data/public/legacy';
-import { IndexPatterns } from '../../../../data/public';
+import { DataStart, IndexPatterns } from '../../../../data/public';
 import { EuiUtilsStart } from '../../../../../../plugins/eui_utils/public';
 import { SavedSearch } from '../types';
 import { SharePluginStart } from '../../../../../../plugins/share/public';
@@ -46,6 +46,7 @@ export interface DiscoverServices {
   capabilities: Capabilities;
   chrome: ChromeStart;
   core: CoreStart;
+  data: DataStart;
   docLinks: DocLinksStart;
   docViewsRegistry: docViewsRegistry.DocViewsRegistry;
   eui_utils: EuiUtilsStart;
@@ -92,6 +93,7 @@ export async function buildServices(core: CoreStart, plugins: DiscoverStartPlugi
     capabilities: core.application.capabilities,
     chrome: core.chrome,
     core,
+    data: plugins.data,
     docLinks: core.docLinks,
     docViewsRegistry,
     eui_utils: plugins.eui_utils,
