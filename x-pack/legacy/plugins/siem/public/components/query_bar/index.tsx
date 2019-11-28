@@ -15,8 +15,8 @@ import {
   Query,
   TimeHistory,
   TimeRange,
+  SavedQueryTimeFilter,
 } from '../../../../../../../src/plugins/data/public';
-import { SavedQueryTimeFilter } from '../../../../../../../src/legacy/core_plugins/data/public/search';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
 
 export interface QueryBarComponentProps {

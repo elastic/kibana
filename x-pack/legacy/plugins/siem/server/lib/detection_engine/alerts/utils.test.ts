@@ -14,6 +14,9 @@ import {
   singleBulkCreate,
   singleSearchAfter,
   searchAfterAndBulkCreate,
+  buildEventTypeSignal,
+  buildSignal,
+  buildRule,
 } from './utils';
 import {
   sampleDocNoSortId,
@@ -26,8 +29,12 @@ import {
   repeatedSearchResultsWithSortId,
   sampleBulkCreateDuplicateResult,
   sampleRuleGuid,
+  sampleRule,
+  sampleIdGuid,
 } from './__mocks__/es_results';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
+import { OutputRuleAlertRest } from './types';
+import { Signal } from '../../types';
 
 const mockLogger: Logger = {
   log: jest.fn(),
@@ -51,10 +58,9 @@ describe('utils', () => {
   });
   describe('buildBulkBody', () => {
     test('if bulk body builds well-defined body', () => {
-      const fakeUuid = uuid.v4();
-      const sampleParams = sampleRuleAlertParams(undefined);
+      const sampleParams = sampleRuleAlertParams();
       const fakeSignalSourceHit = buildBulkBody({
-        doc: sampleDocNoSortId(fakeUuid),
+        doc: sampleDocNoSortId(),
         ruleParams: sampleParams,
         id: sampleRuleGuid,
         name: 'rule-name',
@@ -65,18 +71,20 @@ describe('utils', () => {
       });
       // Timestamp will potentially always be different so remove it for the test
       delete fakeSignalSourceHit['@timestamp'];
-      if (fakeSignalSourceHit.signal.parent) {
-        delete fakeSignalSourceHit.signal.parent.id;
-      }
       expect(fakeSignalSourceHit).toEqual({
         someKey: 'someValue',
+        event: {
+          kind: 'signal',
+        },
         signal: {
           parent: {
+            id: sampleIdGuid,
             type: 'event',
             index: 'myFakeSignalIndex',
             depth: 1,
           },
           original_time: 'someTimeStamp',
+          status: 'open',
           rule: {
             id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
             rule_id: 'rule-1',
@@ -96,7 +104,211 @@ describe('utils', () => {
             severity: 'high',
             tags: ['some fake tag'],
             type: 'query',
-            status: 'open',
+            to: 'now',
+            enabled: true,
+            created_by: 'elastic',
+            updated_by: 'elastic',
+          },
+        },
+      });
+    });
+
+    test('if bulk body builds original_event if it exists on the event to begin with', () => {
+      const sampleParams = sampleRuleAlertParams();
+      const doc = sampleDocNoSortId();
+      doc._source.event = {
+        action: 'socket_opened',
+        module: 'system',
+        dataset: 'socket',
+        kind: 'event',
+      };
+      const fakeSignalSourceHit = buildBulkBody({
+        doc,
+        ruleParams: sampleParams,
+        id: sampleRuleGuid,
+        name: 'rule-name',
+        createdBy: 'elastic',
+        updatedBy: 'elastic',
+        interval: '5m',
+        enabled: true,
+      });
+      // Timestamp will potentially always be different so remove it for the test
+      delete fakeSignalSourceHit['@timestamp'];
+      expect(fakeSignalSourceHit).toEqual({
+        someKey: 'someValue',
+        event: {
+          action: 'socket_opened',
+          dataset: 'socket',
+          kind: 'signal',
+          module: 'system',
+        },
+        signal: {
+          original_event: {
+            action: 'socket_opened',
+            dataset: 'socket',
+            kind: 'event',
+            module: 'system',
+          },
+          parent: {
+            id: sampleIdGuid,
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 1,
+          },
+          original_time: 'someTimeStamp',
+          status: 'open',
+          rule: {
+            id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+            rule_id: 'rule-1',
+            false_positives: [],
+            max_signals: 10000,
+            risk_score: 50,
+            output_index: '.siem-signals',
+            description: 'Detecting root and admin users',
+            from: 'now-6m',
+            immutable: false,
+            index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            interval: '5m',
+            language: 'kuery',
+            name: 'rule-name',
+            query: 'user.name: root or user.name: admin',
+            references: ['http://google.com'],
+            severity: 'high',
+            tags: ['some fake tag'],
+            type: 'query',
+            to: 'now',
+            enabled: true,
+            created_by: 'elastic',
+            updated_by: 'elastic',
+          },
+        },
+      });
+    });
+
+    test('if bulk body builds original_event if it exists on the event to begin with but no kind information', () => {
+      const sampleParams = sampleRuleAlertParams();
+      const doc = sampleDocNoSortId();
+      doc._source.event = {
+        action: 'socket_opened',
+        module: 'system',
+        dataset: 'socket',
+      };
+      const fakeSignalSourceHit = buildBulkBody({
+        doc,
+        ruleParams: sampleParams,
+        id: sampleRuleGuid,
+        name: 'rule-name',
+        createdBy: 'elastic',
+        updatedBy: 'elastic',
+        interval: '5m',
+        enabled: true,
+      });
+      // Timestamp will potentially always be different so remove it for the test
+      delete fakeSignalSourceHit['@timestamp'];
+      expect(fakeSignalSourceHit).toEqual({
+        someKey: 'someValue',
+        event: {
+          action: 'socket_opened',
+          dataset: 'socket',
+          kind: 'signal',
+          module: 'system',
+        },
+        signal: {
+          original_event: {
+            action: 'socket_opened',
+            dataset: 'socket',
+            module: 'system',
+          },
+          parent: {
+            id: sampleIdGuid,
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 1,
+          },
+          original_time: 'someTimeStamp',
+          status: 'open',
+          rule: {
+            id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+            rule_id: 'rule-1',
+            false_positives: [],
+            max_signals: 10000,
+            risk_score: 50,
+            output_index: '.siem-signals',
+            description: 'Detecting root and admin users',
+            from: 'now-6m',
+            immutable: false,
+            index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            interval: '5m',
+            language: 'kuery',
+            name: 'rule-name',
+            query: 'user.name: root or user.name: admin',
+            references: ['http://google.com'],
+            severity: 'high',
+            tags: ['some fake tag'],
+            type: 'query',
+            to: 'now',
+            enabled: true,
+            created_by: 'elastic',
+            updated_by: 'elastic',
+          },
+        },
+      });
+    });
+
+    test('if bulk body builds original_event if it exists on the event to begin with with only kind information', () => {
+      const sampleParams = sampleRuleAlertParams();
+      const doc = sampleDocNoSortId();
+      doc._source.event = {
+        kind: 'event',
+      };
+      const fakeSignalSourceHit = buildBulkBody({
+        doc,
+        ruleParams: sampleParams,
+        id: sampleRuleGuid,
+        name: 'rule-name',
+        createdBy: 'elastic',
+        updatedBy: 'elastic',
+        interval: '5m',
+        enabled: true,
+      });
+      // Timestamp will potentially always be different so remove it for the test
+      delete fakeSignalSourceHit['@timestamp'];
+      expect(fakeSignalSourceHit).toEqual({
+        someKey: 'someValue',
+        event: {
+          kind: 'signal',
+        },
+        signal: {
+          original_event: {
+            kind: 'event',
+          },
+          parent: {
+            id: sampleIdGuid,
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 1,
+          },
+          original_time: 'someTimeStamp',
+          status: 'open',
+          rule: {
+            id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+            rule_id: 'rule-1',
+            false_positives: [],
+            max_signals: 10000,
+            risk_score: 50,
+            output_index: '.siem-signals',
+            description: 'Detecting root and admin users',
+            from: 'now-6m',
+            immutable: false,
+            index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            interval: '5m',
+            language: 'kuery',
+            name: 'rule-name',
+            query: 'user.name: root or user.name: admin',
+            references: ['http://google.com'],
+            severity: 'high',
+            tags: ['some fake tag'],
+            type: 'query',
             to: 'now',
             enabled: true,
             created_by: 'elastic',
@@ -213,8 +425,7 @@ describe('utils', () => {
       });
     });
     test('create successful bulk create', async () => {
-      const fakeUuid = uuid.v4();
-      const sampleParams = sampleRuleAlertParams(undefined);
+      const sampleParams = sampleRuleAlertParams();
       const sampleSearchResult = sampleDocSearchResultsNoSortId;
       mockService.callCluster.mockReturnValueOnce({
         took: 100,
@@ -226,7 +437,7 @@ describe('utils', () => {
         ],
       });
       const successfulsingleBulkCreate = await singleBulkCreate({
-        someResult: sampleSearchResult(fakeUuid),
+        someResult: sampleSearchResult(),
         ruleParams: sampleParams,
         services: mockService,
         logger: mockLogger,
@@ -241,8 +452,7 @@ describe('utils', () => {
       expect(successfulsingleBulkCreate).toEqual(true);
     });
     test('create successful bulk create with docs with no versioning', async () => {
-      const fakeUuid = uuid.v4();
-      const sampleParams = sampleRuleAlertParams(undefined);
+      const sampleParams = sampleRuleAlertParams();
       const sampleSearchResult = sampleDocSearchResultsNoSortIdNoVersion;
       mockService.callCluster.mockReturnValueOnce({
         took: 100,
@@ -254,7 +464,7 @@ describe('utils', () => {
         ],
       });
       const successfulsingleBulkCreate = await singleBulkCreate({
-        someResult: sampleSearchResult(fakeUuid),
+        someResult: sampleSearchResult(),
         ruleParams: sampleParams,
         services: mockService,
         logger: mockLogger,
@@ -269,7 +479,7 @@ describe('utils', () => {
       expect(successfulsingleBulkCreate).toEqual(true);
     });
     test('create unsuccessful bulk create due to empty search results', async () => {
-      const sampleParams = sampleRuleAlertParams(undefined);
+      const sampleParams = sampleRuleAlertParams();
       const sampleSearchResult = sampleEmptyDocSearchResults;
       mockService.callCluster.mockReturnValue(false);
       const successfulsingleBulkCreate = await singleBulkCreate({
@@ -288,12 +498,11 @@ describe('utils', () => {
       expect(successfulsingleBulkCreate).toEqual(true);
     });
     test('create successful bulk create when bulk create has errors', async () => {
-      const fakeUuid = uuid.v4();
-      const sampleParams = sampleRuleAlertParams(undefined);
+      const sampleParams = sampleRuleAlertParams();
       const sampleSearchResult = sampleDocSearchResultsNoSortId;
       mockService.callCluster.mockReturnValue(sampleBulkCreateDuplicateResult);
       const successfulsingleBulkCreate = await singleBulkCreate({
-        someResult: sampleSearchResult(fakeUuid),
+        someResult: sampleSearchResult(),
         ruleParams: sampleParams,
         services: mockService,
         logger: mockLogger,
@@ -312,7 +521,7 @@ describe('utils', () => {
   describe('singleSearchAfter', () => {
     test('if singleSearchAfter works without a given sort id', async () => {
       let searchAfterSortId;
-      const sampleParams = sampleRuleAlertParams(undefined);
+      const sampleParams = sampleRuleAlertParams();
       mockService.callCluster.mockReturnValue(sampleDocSearchResultsNoSortId);
       await expect(
         singleSearchAfter({
@@ -326,7 +535,7 @@ describe('utils', () => {
     });
     test('if singleSearchAfter works with a given sort id', async () => {
       const searchAfterSortId = '1234567891111';
-      const sampleParams = sampleRuleAlertParams(undefined);
+      const sampleParams = sampleRuleAlertParams();
       mockService.callCluster.mockReturnValue(sampleDocSearchResultsWithSortId);
       const searchAfterResult = await singleSearchAfter({
         searchAfterSortId,
@@ -339,7 +548,7 @@ describe('utils', () => {
     });
     test('if singleSearchAfter throws error', async () => {
       const searchAfterSortId = '1234567891111';
-      const sampleParams = sampleRuleAlertParams(undefined);
+      const sampleParams = sampleRuleAlertParams();
       mockService.callCluster.mockImplementation(async () => {
         throw Error('Fake Error');
       });
@@ -356,7 +565,7 @@ describe('utils', () => {
   });
   describe('searchAfterAndBulkCreate', () => {
     test('if successful with empty search results', async () => {
-      const sampleParams = sampleRuleAlertParams(undefined);
+      const sampleParams = sampleRuleAlertParams();
       const result = await searchAfterAndBulkCreate({
         someResult: sampleEmptyDocSearchResults,
         ruleParams: sampleParams,
@@ -446,8 +655,7 @@ describe('utils', () => {
       expect(result).toEqual(false);
     });
     test('if unsuccessful iteration of searchAfterAndBulkCreate due to empty sort ids', async () => {
-      const sampleParams = sampleRuleAlertParams(undefined);
-      const someUuid = uuid.v4();
+      const sampleParams = sampleRuleAlertParams();
       mockService.callCluster.mockReturnValueOnce({
         took: 100,
         errors: false,
@@ -458,7 +666,7 @@ describe('utils', () => {
         ],
       });
       const result = await searchAfterAndBulkCreate({
-        someResult: sampleDocSearchResultsNoSortId(someUuid),
+        someResult: sampleDocSearchResultsNoSortId(),
         ruleParams: sampleParams,
         services: mockService,
         logger: mockLogger,
@@ -475,8 +683,7 @@ describe('utils', () => {
       expect(result).toEqual(false);
     });
     test('if unsuccessful iteration of searchAfterAndBulkCreate due to empty sort ids and 0 total hits', async () => {
-      const sampleParams = sampleRuleAlertParams(undefined);
-      const someUuid = uuid.v4();
+      const sampleParams = sampleRuleAlertParams();
       mockService.callCluster.mockReturnValueOnce({
         took: 100,
         errors: false,
@@ -487,7 +694,7 @@ describe('utils', () => {
         ],
       });
       const result = await searchAfterAndBulkCreate({
-        someResult: sampleDocSearchResultsNoSortIdNoHits(someUuid),
+        someResult: sampleDocSearchResultsNoSortIdNoHits(),
         ruleParams: sampleParams,
         services: mockService,
         logger: mockLogger,
@@ -504,7 +711,6 @@ describe('utils', () => {
     });
     test('if successful iteration of while loop with maxDocs and search after returns results with no sort ids', async () => {
       const sampleParams = sampleRuleAlertParams(10);
-      const oneGuid = uuid.v4();
       const someGuids = Array.from({ length: 4 }).map(x => uuid.v4());
       mockService.callCluster
         .mockReturnValueOnce({
@@ -516,7 +722,7 @@ describe('utils', () => {
             },
           ],
         })
-        .mockReturnValueOnce(sampleDocSearchResultsNoSortId(oneGuid));
+        .mockReturnValueOnce(sampleDocSearchResultsNoSortId());
       const result = await searchAfterAndBulkCreate({
         someResult: repeatedSearchResultsWithSortId(4, 1, someGuids),
         ruleParams: sampleParams,
@@ -594,6 +800,278 @@ describe('utils', () => {
         pageSize: 1,
       });
       expect(result).toEqual(false);
+    });
+  });
+
+  describe('buildEventTypeSignal', () => {
+    test('it returns the event appended of kind signal if it does not exist', () => {
+      const doc = sampleDocNoSortId();
+      delete doc._source.event;
+      const eventType = buildEventTypeSignal(doc);
+      const expected: object = { kind: 'signal' };
+      expect(eventType).toEqual(expected);
+    });
+
+    test('it returns the event appended of kind signal if it is an empty object', () => {
+      const doc = sampleDocNoSortId();
+      doc._source.event = {};
+      const eventType = buildEventTypeSignal(doc);
+      const expected: object = { kind: 'signal' };
+      expect(eventType).toEqual(expected);
+    });
+
+    test('it returns the event with kind signal and other properties if they exist', () => {
+      const doc = sampleDocNoSortId();
+      doc._source.event = {
+        action: 'socket_opened',
+        module: 'system',
+        dataset: 'socket',
+      };
+      const eventType = buildEventTypeSignal(doc);
+      const expected: object = {
+        action: 'socket_opened',
+        module: 'system',
+        dataset: 'socket',
+        kind: 'signal',
+      };
+      expect(eventType).toEqual(expected);
+    });
+  });
+
+  describe('buildSignal', () => {
+    test('it builds a signal as expected without original_event if event does not exist', () => {
+      const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+      delete doc._source.event;
+      const rule: Partial<OutputRuleAlertRest> = sampleRule();
+      const signal = buildSignal(doc, rule);
+      const expected: Signal = {
+        parent: {
+          id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+          type: 'event',
+          index: 'myFakeSignalIndex',
+          depth: 1,
+        },
+        original_time: 'someTimeStamp',
+        status: 'open',
+        rule: {
+          created_by: 'elastic',
+          description: 'Detecting root and admin users',
+          enabled: true,
+          false_positives: [],
+          from: 'now-6m',
+          id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+          immutable: false,
+          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          interval: '5m',
+          risk_score: 50,
+          rule_id: 'rule-1',
+          language: 'kuery',
+          max_signals: 100,
+          name: 'Detect Root/Admin Users',
+          output_index: '.siem-signals',
+          query: 'user.name: root or user.name: admin',
+          references: ['http://www.example.com', 'https://ww.example.com'],
+          severity: 'high',
+          updated_by: 'elastic',
+          tags: [],
+          to: 'now',
+          type: 'query',
+        },
+      };
+      expect(signal).toEqual(expected);
+    });
+
+    test('it builds a signal as expected with original_event if is present', () => {
+      const doc = sampleDocNoSortId('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
+      doc._source.event = {
+        action: 'socket_opened',
+        dataset: 'socket',
+        kind: 'event',
+        module: 'system',
+      };
+      const rule: Partial<OutputRuleAlertRest> = sampleRule();
+      const signal = buildSignal(doc, rule);
+      const expected: Signal = {
+        parent: {
+          id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+          type: 'event',
+          index: 'myFakeSignalIndex',
+          depth: 1,
+        },
+        original_time: 'someTimeStamp',
+        original_event: {
+          action: 'socket_opened',
+          dataset: 'socket',
+          kind: 'event',
+          module: 'system',
+        },
+        status: 'open',
+        rule: {
+          created_by: 'elastic',
+          description: 'Detecting root and admin users',
+          enabled: true,
+          false_positives: [],
+          from: 'now-6m',
+          id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+          immutable: false,
+          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          interval: '5m',
+          risk_score: 50,
+          rule_id: 'rule-1',
+          language: 'kuery',
+          max_signals: 100,
+          name: 'Detect Root/Admin Users',
+          output_index: '.siem-signals',
+          query: 'user.name: root or user.name: admin',
+          references: ['http://www.example.com', 'https://ww.example.com'],
+          severity: 'high',
+          updated_by: 'elastic',
+          tags: [],
+          to: 'now',
+          type: 'query',
+        },
+      };
+      expect(signal).toEqual(expected);
+    });
+  });
+
+  describe('buildRule', () => {
+    test('it builds a rule as expected with filters present', () => {
+      const ruleParams = sampleRuleAlertParams();
+      ruleParams.filters = [
+        {
+          query: 'host.name: Rebecca',
+        },
+        {
+          query: 'host.name: Evan',
+        },
+        {
+          query: 'host.name: Braden',
+        },
+      ];
+      const rule = buildRule({
+        ruleParams,
+        name: 'some-name',
+        id: sampleRuleGuid,
+        enabled: false,
+        createdBy: 'elastic',
+        updatedBy: 'elastic',
+        interval: 'some interval',
+      });
+      const expected: Partial<OutputRuleAlertRest> = {
+        created_by: 'elastic',
+        description: 'Detecting root and admin users',
+        enabled: false,
+        false_positives: [],
+        from: 'now-6m',
+        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+        immutable: false,
+        index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+        interval: 'some interval',
+        language: 'kuery',
+        max_signals: 10000,
+        name: 'some-name',
+        output_index: '.siem-signals',
+        query: 'user.name: root or user.name: admin',
+        references: ['http://google.com'],
+        risk_score: 50,
+        rule_id: 'rule-1',
+        severity: 'high',
+        tags: ['some fake tag'],
+        to: 'now',
+        type: 'query',
+        updated_by: 'elastic',
+        filters: [
+          {
+            query: 'host.name: Rebecca',
+          },
+          {
+            query: 'host.name: Evan',
+          },
+          {
+            query: 'host.name: Braden',
+          },
+        ],
+      };
+      expect(rule).toEqual(expected);
+    });
+
+    test('it omits a null value such as if enabled is null if is present', () => {
+      const ruleParams = sampleRuleAlertParams();
+      ruleParams.filters = undefined;
+      const rule = buildRule({
+        ruleParams,
+        name: 'some-name',
+        id: sampleRuleGuid,
+        enabled: true,
+        createdBy: 'elastic',
+        updatedBy: 'elastic',
+        interval: 'some interval',
+      });
+      const expected: Partial<OutputRuleAlertRest> = {
+        created_by: 'elastic',
+        description: 'Detecting root and admin users',
+        enabled: true,
+        false_positives: [],
+        from: 'now-6m',
+        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+        immutable: false,
+        index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+        interval: 'some interval',
+        language: 'kuery',
+        max_signals: 10000,
+        name: 'some-name',
+        output_index: '.siem-signals',
+        query: 'user.name: root or user.name: admin',
+        references: ['http://google.com'],
+        risk_score: 50,
+        rule_id: 'rule-1',
+        severity: 'high',
+        tags: ['some fake tag'],
+        to: 'now',
+        type: 'query',
+        updated_by: 'elastic',
+      };
+      expect(rule).toEqual(expected);
+    });
+
+    test('it omits a null value such as if filters is undefined if is present', () => {
+      const ruleParams = sampleRuleAlertParams();
+      ruleParams.filters = undefined;
+      const rule = buildRule({
+        ruleParams,
+        name: 'some-name',
+        id: sampleRuleGuid,
+        enabled: true,
+        createdBy: 'elastic',
+        updatedBy: 'elastic',
+        interval: 'some interval',
+      });
+      const expected: Partial<OutputRuleAlertRest> = {
+        created_by: 'elastic',
+        description: 'Detecting root and admin users',
+        enabled: true,
+        false_positives: [],
+        from: 'now-6m',
+        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+        immutable: false,
+        index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+        interval: 'some interval',
+        language: 'kuery',
+        max_signals: 10000,
+        name: 'some-name',
+        output_index: '.siem-signals',
+        query: 'user.name: root or user.name: admin',
+        references: ['http://google.com'],
+        risk_score: 50,
+        rule_id: 'rule-1',
+        severity: 'high',
+        tags: ['some fake tag'],
+        to: 'now',
+        type: 'query',
+        updated_by: 'elastic',
+      };
+      expect(rule).toEqual(expected);
     });
   });
 });
