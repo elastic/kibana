@@ -99,39 +99,42 @@ export const ColumnHeader = React.memo<ColumneHeaderProps>(
           key={header.id}
           type={DRAG_TYPE_FIELD}
         >
-          {(dragProvided, dragSnapshot) =>
-            !dragSnapshot.isDragging ? (
-              <EventsTh
-                {...dragProvided.draggableProps}
-                {...dragProvided.dragHandleProps}
-                data-test-subj="draggable-header"
-                ref={dragProvided.innerRef}
-                position="relative"
-                // Passing the styles directly to the component because the width is being calculated and is recommended by Styled Components for performance: https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-                style={{
-                  flexBasis: header.width + 'px',
-                  ...dragProvided.draggableProps.style,
-                }}
-              >
-                <EventsThContent>
-                  <Header
-                    timelineId={timelineId}
-                    header={header}
-                    onColumnRemoved={onColumnRemoved}
-                    onColumnSorted={onColumnSorted}
-                    onFilterChange={onFilterChange}
-                    sort={sort}
-                  />
-                </EventsThContent>
-              </EventsTh>
-            ) : (
-              <DraggedContainer onDragging={setIsDragging}>
-                <DragEffects>
-                  <DraggableFieldBadge fieldId={header.id} fieldWidth={header.width + 'px'} />
-                </DragEffects>
-              </DraggedContainer>
-            )
-          }
+          {(dragProvided, dragSnapshot) => (
+            <div
+              {...dragProvided.draggableProps}
+              {...dragProvided.dragHandleProps}
+              ref={dragProvided.innerRef}
+            >
+              {!dragSnapshot.isDragging ? (
+                <EventsTh
+                  data-test-subj="draggable-header"
+                  position="relative"
+                  // Passing the styles directly to the component because the width is being calculated and is recommended by Styled Components for performance: https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
+                  style={{
+                    flexBasis: header.width + 'px',
+                    ...dragProvided.draggableProps.style,
+                  }}
+                >
+                  <EventsThContent>
+                    <Header
+                      timelineId={timelineId}
+                      header={header}
+                      onColumnRemoved={onColumnRemoved}
+                      onColumnSorted={onColumnSorted}
+                      onFilterChange={onFilterChange}
+                      sort={sort}
+                    />
+                  </EventsThContent>
+                </EventsTh>
+              ) : (
+                <DraggedContainer onDragging={setIsDragging}>
+                  <DragEffects>
+                    <DraggableFieldBadge fieldId={header.id} fieldWidth={'180px'} />
+                  </DragEffects>
+                </DraggedContainer>
+              )}
+            </div>
+          )}
         </Draggable>
       </Resizable>
     );
