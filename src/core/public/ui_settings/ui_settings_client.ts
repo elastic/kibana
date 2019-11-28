@@ -198,7 +198,7 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     }
   }
 
-  private setLocally(key: string, newValue: unknown) {
+  private setLocally(key: string, newValue: any) {
     this.assertUpdateAllowed(key);
 
     if (!this.isDeclared(key)) {

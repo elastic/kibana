@@ -1258,20 +1258,21 @@ uiExports: {
       name: 'just-work',
       value: true,
       description: 'make it work',
-      category: ['my-categoty'],
+      category: ['my-category'],
     },
   }
 }
 ```
 After:
 ```ts
+// src/plugins/my-plugin/server/plugin.ts
 setup(core: CoreSetup){
   core.uiSettings.register({
     'my-plugin:my-setting': {
       name: 'just-work',
       value: true,
       description: 'make it work',
-      category: ['my-categoty'],
+      category: ['my-category'],
     },
   })
 }
