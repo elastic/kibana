@@ -25,10 +25,6 @@ import {
   HttpServiceBase,
 } from 'kibana/public';
 
-jest.mock('../errors', () => ({
-  IndexPatternMissingIndices: jest.fn(),
-}));
-
 jest.mock('./index_pattern', () => {
   class IndexPattern {
     init = async () => {

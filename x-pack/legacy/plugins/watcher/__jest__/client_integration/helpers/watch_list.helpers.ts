@@ -51,7 +51,6 @@ export const setup = async (): Promise<WatchListTestBed> => {
     const { rows } = testBed.table.getMetaData('watchesTable');
     const watchesLink = findTestSubject(rows[index].reactWrapper, 'watchesLink');
 
-    // @ts-ignore (remove when react 16.9.0 is released)
     await act(async () => {
       const { href } = watchesLink.props();
       testBed.router.navigateTo(href!);
@@ -67,7 +66,6 @@ export const setup = async (): Promise<WatchListTestBed> => {
     const lastColumn = currentRow.columns[currentRow.columns.length - 1].reactWrapper;
     const button = findTestSubject(lastColumn, `${action}WatchButton`);
 
-    // @ts-ignore (remove when react 16.9.0 is released)
     await act(async () => {
       button.simulate('click');
       component.update();

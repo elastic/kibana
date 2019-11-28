@@ -7,8 +7,6 @@
 import React, { useState } from 'react';
 import { uniqueId, startsWith } from 'lodash';
 import styled from 'styled-components';
-import { StaticIndexPattern } from 'ui/index_patterns';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 // @ts-ignore
@@ -17,12 +15,14 @@ import { getBoolFilter } from './get_bool_filter';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
-import {
-  AutocompleteSuggestion,
-  AutocompleteProvider
-} from '../../../../../../../../src/plugins/data/public';
-import { useDynamicIndexPattern } from '../../../hooks/useDynamicIndexPattern';
 import { usePlugins } from '../../../new-platform/plugin';
+import { useDynamicIndexPattern } from '../../../hooks/useDynamicIndexPattern';
+import {
+  AutocompleteProvider,
+  AutocompleteSuggestion,
+  esKuery,
+  IIndexPattern
+} from '../../../../../../../../src/plugins/data/public';
 
 const Container = styled.div`
   margin-bottom: 10px;
@@ -33,18 +33,15 @@ interface State {
   isLoadingSuggestions: boolean;
 }
 
-function convertKueryToEsQuery(
-  kuery: string,
-  indexPattern: StaticIndexPattern
-) {
-  const ast = fromKueryExpression(kuery);
-  return toElasticsearchQuery(ast, indexPattern);
+function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
+  const ast = esKuery.fromKueryExpression(kuery);
+  return esKuery.toElasticsearchQuery(ast, indexPattern);
 }
 
 function getSuggestions(
   query: string,
   selectionStart: number,
-  indexPattern: StaticIndexPattern,
+  indexPattern: IIndexPattern,
   boolFilter: unknown,
   autocompleteProvider?: AutocompleteProvider
 ) {
