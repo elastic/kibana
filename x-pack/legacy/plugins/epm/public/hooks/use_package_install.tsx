@@ -8,23 +8,24 @@ import React, { useCallback, useState, Fragment } from 'react';
 import createContainer from 'constate';
 import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { NotificationsStart } from 'src/core/public';
-import { useLinks } from '.';
-import { installPackage as fetchInstallPackage } from '../data';
-import { InstallStatus } from '../types';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
+import { PackageInfo } from '../../common/types';
+import { installPackage as fetchInstallPackage, installDatasource, removePackage } from '../data';
+import { InstallStatus } from '../types';
 
 interface PackagesInstall {
   [key: string]: PackageInstallItem;
 }
+
 interface PackageInstallItem {
   status: InstallStatus;
 }
+
 function usePackageInstall({ notifications }: { notifications: NotificationsStart }) {
   const [packages, setPackage] = useState<PackagesInstall>({});
-  const { toDetailView } = useLinks();
 
   const setPackageInstallStatus = useCallback(
-    ({ name, status }: { name: string; status: InstallStatus }) => {
+    ({ name, status }: { name: PackageInfo['name']; status: InstallStatus }) => {
       setPackage((prev: PackagesInstall) => ({
         ...prev,
         [name]: { status },
@@ -34,19 +35,29 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
   );
 
   const installPackage = useCallback(
-    async ({ name, version, title }: { name: string; version: string; title: string }) => {
+    async ({ name, version, title }: Pick<PackageInfo, 'name' | 'version' | 'title'>) => {
       setPackageInstallStatus({ name, status: InstallStatus.installing });
       const pkgkey = `${name}-${version}`;
+      const handleRequestInstallDatasource = () => {
+        installDatasource(pkgkey).then(() => {
+          notifications.toasts.addSuccess({
+            title: `Installed Datasource`,
+            text: 'Successfully installed Datasource',
+          });
+        });
+      };
       try {
         await fetchInstallPackage(pkgkey);
         setPackageInstallStatus({ name, status: InstallStatus.installed });
-        const packageDataSourceUrl = toDetailView({ name, version, panel: 'data-sources' });
+
         const SuccessMsg = (
           <Fragment>
             <p>Next, create a data source to begin sending data to your Elasticsearch cluster.</p>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiButton href={packageDataSourceUrl} size="s">
+                {/* Would like to add a loading indicator here but, afaict,
+                 notifications are static. i.e. they won't re-render with new state */}
+                <EuiButton onClick={handleRequestInstallDatasource} size="s">
                   Add data source
                 </EuiButton>
               </EuiFlexItem>
@@ -68,7 +79,7 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
         });
       }
     },
-    [notifications.toasts, setPackageInstallStatus, toDetailView]
+    [notifications.toasts, setPackageInstallStatus]
   );
 
   const getPackageInstallStatus = useCallback(
@@ -78,7 +89,40 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
     [packages]
   );
 
-  return { packages, installPackage, setPackageInstallStatus, getPackageInstallStatus };
+  const deletePackage = useCallback(
+    async ({ name, version, title }: Pick<PackageInfo, 'name' | 'version' | 'title'>) => {
+      setPackageInstallStatus({ name, status: InstallStatus.uninstalling });
+      const pkgkey = `${name}-${version}`;
+
+      try {
+        await removePackage(pkgkey);
+        setPackageInstallStatus({ name, status: InstallStatus.notInstalled });
+
+        const SuccessMsg = <p>Successfully deleted {title}</p>;
+
+        notifications.toasts.addSuccess({
+          title: `Deleted ${title} package`,
+          text: toMountPoint(SuccessMsg),
+        });
+      } catch (err) {
+        setPackageInstallStatus({ name, status: InstallStatus.installed });
+        notifications.toasts.addWarning({
+          title: `Failed to delete ${title} package`,
+          text: 'Something went wrong while trying to delete this package. Please try again later.',
+          iconType: 'alert',
+        });
+      }
+    },
+    [notifications.toasts, setPackageInstallStatus]
+  );
+
+  return {
+    packages,
+    installPackage,
+    setPackageInstallStatus,
+    getPackageInstallStatus,
+    deletePackage,
+  };
 }
 
 export const [
@@ -86,9 +130,11 @@ export const [
   useInstallPackage,
   useSetPackageInstallStatus,
   useGetPackageInstallStatus,
+  useDeletePackage,
 ] = createContainer(
   usePackageInstall,
   value => value.installPackage,
   value => value.setPackageInstallStatus,
-  value => value.getPackageInstallStatus
+  value => value.getPackageInstallStatus,
+  value => value.deletePackage
 );

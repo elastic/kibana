@@ -6,15 +6,20 @@
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server/';
 import { SAVED_OBJECT_TYPE } from '../../common/constants';
-import { AssetReference, KibanaAssetType, InstallationAttributes } from '../../common/types';
+import {
+  AssetReference,
+  ElasticsearchAssetType,
+  InstallationAttributes,
+  KibanaAssetType,
+} from '../../common/types';
 import * as Registry from '../registry';
-import { getInstallationObject } from './index';
-import { getObjects } from './get_objects';
+import { CallESAsCurrentUser, getInstallationObject } from './index';
+import { getObject } from './get_objects';
 
 export async function installPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
-}): Promise<AssetReference[] | []> {
+}): Promise<AssetReference[]> {
   const { savedObjectsClient, pkgkey } = options;
 
   const toSave = await installAssets({
@@ -22,16 +27,14 @@ export async function installPackage(options: {
     pkgkey,
   });
 
-  if (toSave.length) {
-    // Save those references in the package manager's state saved object
-    return saveInstallationReferences({
-      savedObjectsClient,
-      pkgkey,
-      toSave,
-    });
-  }
+  // Save those references in the package manager's state saved object
+  await saveInstallationReferences({
+    savedObjectsClient,
+    pkgkey,
+    toSave,
+  });
 
-  return [];
+  return toSave;
 }
 
 // the function which how to install each of the various asset types
@@ -43,10 +46,9 @@ export async function installAssets(options: {
 }) {
   const { savedObjectsClient, pkgkey } = options;
 
-  // Only install certain Kibana assets during package installation.
-  // All other asset types need special handling
-  const typesToInstall = Object.values(KibanaAssetType);
-  const installationPromises = typesToInstall.map(async assetType =>
+  // Only install Kibana assets during package installation.
+  const kibanaAssetTypes = Object.values(KibanaAssetType);
+  const installationPromises = kibanaAssetTypes.map(async assetType =>
     installKibanaSavedObjects({ savedObjectsClient, pkgkey, assetType })
   );
 
@@ -91,8 +93,9 @@ async function installKibanaSavedObjects({
 }) {
   const isSameType = ({ path }: Registry.ArchiveEntry) =>
     assetType === Registry.pathParts(path).type;
+  const paths = await Registry.getArchiveInfo(pkgkey, isSameType);
+  const toBeSavedObjects = await Promise.all(paths.map(getObject));
 
-  const toBeSavedObjects = await getObjects(pkgkey, isSameType);
   if (toBeSavedObjects.length === 0) {
     return [];
   } else {
@@ -109,4 +112,58 @@ function toAssetReference({ id, type }: SavedObject) {
   const reference: AssetReference = { id, type };
 
   return reference;
+}
+
+const isDirectory = ({ path }: Registry.ArchiveEntry) => path.endsWith('/');
+const isPipeline = ({ path }: Registry.ArchiveEntry) =>
+  !isDirectory({ path }) && Registry.pathParts(path).type === ElasticsearchAssetType.ingestPipeline;
+
+// *Not really a datasource* but it'll do for now
+export async function installDatasource(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgkey: string;
+  callCluster: CallESAsCurrentUser;
+}) {
+  const { savedObjectsClient, pkgkey, callCluster } = options;
+  const toSave = await installPipelines({ pkgkey, callCluster });
+
+  // currently saving to the EPM state Saved Object
+  // /api/ingest/datasource/add (or whatever) will use separate Saved Object
+  await saveInstallationReferences({
+    savedObjectsClient,
+    pkgkey,
+    toSave,
+  });
+
+  return toSave;
+}
+
+async function installPipelines({
+  callCluster,
+  pkgkey,
+}: {
+  callCluster: CallESAsCurrentUser;
+  pkgkey: string;
+}) {
+  const paths = await Registry.getArchiveInfo(pkgkey, isPipeline);
+  const installationPromises = paths.map(path => installPipeline({ callCluster, path }));
+
+  return Promise.all(installationPromises);
+}
+
+async function installPipeline({
+  callCluster,
+  path,
+}: {
+  callCluster: CallESAsCurrentUser;
+  path: string;
+}): Promise<AssetReference> {
+  const buffer = Registry.getAsset(path);
+  const parts = Registry.pathParts(path);
+  const id = path.replace(/\W/g, '_'); // TODO: replace with "real" pipeline id
+  const pipeline = buffer.toString('utf8');
+
+  await callCluster('ingest.putPipeline', { id, body: pipeline });
+
+  return { id, type: parts.type };
 }

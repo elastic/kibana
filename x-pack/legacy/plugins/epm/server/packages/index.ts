@@ -7,7 +7,7 @@
 import { IClusterClient, ScopedClusterClient } from 'src/core/server/';
 import {
   AssetType,
-  ElasticsearchAssetType,
+  // ElasticsearchAssetType,
   Installable,
   Installation,
   InstallationStatus,
@@ -22,12 +22,8 @@ export * from './handlers';
 
 export type CallESAsCurrentUser = ScopedClusterClient['callAsCurrentUser'];
 
-// merge the values of the two types together, currently encompasses all types
-// can add a `.filter` or create from individual `enum` members if/when that changes
-export const savedObjectTypes: AssetType[] = [
-  ...Object.values(KibanaAssetType),
-  ...Object.values(ElasticsearchAssetType),
-];
+// only Kibana Assets use Saved Objects at this point
+export const savedObjectTypes: AssetType[] = Object.values(KibanaAssetType);
 
 export function getClusterAccessor(esClient: IClusterClient, req: Request) {
   return esClient.asScoped(req).callAsCurrentUser;

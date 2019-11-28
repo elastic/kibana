@@ -8,6 +8,7 @@ import { HttpHandler } from 'src/core/public';
 import {
   getCategoriesPath,
   getInfoPath,
+  getInstallDatasourcePath,
   getInstallPath,
   getListPath,
   getRemovePath,
@@ -15,6 +16,7 @@ import {
   getFilePath,
 } from '../common/routes';
 import {
+  AssetReference,
   CategorySummaryList,
   PackageInfo,
   PackageList,
@@ -65,17 +67,22 @@ export async function getPackageInfoByKey(pkgkey: string): Promise<PackageInfo> 
   return _fetch(path);
 }
 
-export async function installPackage(pkgkey: string): Promise<PackageInfo> {
+export async function installPackage(pkgkey: string): Promise<AssetReference[]> {
   const path = getInstallPath(pkgkey);
   return _fetch(path);
 }
 
-export async function removePackage(pkgkey: string): Promise<PackageInfo> {
+export async function removePackage(pkgkey: string): Promise<AssetReference[]> {
   const path = getRemovePath(pkgkey);
   return _fetch(path);
 }
 
 export async function getFileByPath(filePath: string): Promise<string> {
   const path = getFilePath(filePath);
+  return _fetch(path);
+}
+
+export async function installDatasource(pkgkey: string): Promise<AssetReference[]> {
+  const path = getInstallDatasourcePath(pkgkey);
   return _fetch(path);
 }

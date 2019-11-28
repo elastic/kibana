@@ -12,6 +12,7 @@ export const API_INFO_PATTERN = `${API_ROOT}/package/{pkgkey}`;
 export const API_INSTALL_PATTERN = `${API_ROOT}/install/{pkgkey}`;
 export const API_DELETE_PATTERN = `${API_ROOT}/delete/{pkgkey}`;
 export const API_CATEGORIES_PATTERN = `${API_ROOT}/categories`;
+export const API_INSTALL_DATASOURCE_PATTERN = `${API_ROOT}/datasource/install/{pkgkey}`;
 
 export interface ListParams {
   category?: CategoryId;
@@ -38,4 +39,8 @@ export function getInstallPath(pkgkey: string) {
 
 export function getRemovePath(pkgkey: string) {
   return API_DELETE_PATTERN.replace('{pkgkey}', pkgkey).replace(/\/$/, ''); // trim trailing slash
+}
+
+export function getInstallDatasourcePath(pkgkey: string) {
+  return API_INSTALL_DATASOURCE_PATTERN.replace('{pkgkey}', pkgkey).replace(/\/$/, ''); // trim trailing slash
 }

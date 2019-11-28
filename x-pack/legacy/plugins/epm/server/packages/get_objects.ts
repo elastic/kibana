@@ -21,7 +21,7 @@ export async function getObjects(
   const paths = await Registry.getArchiveInfo(pkgkey, filter);
 
   // Get all objects which matched filter. Add them to the Map
-  const rootObjects = paths.map(getObject);
+  const rootObjects = await Promise.all(paths.map(getObject));
   rootObjects.forEach(obj => objects.set(obj.id, obj));
 
   // Each of those objects might have `references` property like [{id, type, name}]
@@ -50,12 +50,12 @@ export async function getObjects(
   return Array.from(objects.values());
 }
 
-function getObject(key: string) {
+export async function getObject(key: string) {
   const buffer = Registry.getAsset(key);
 
   // cache values are buffers. convert to string / JSON
   const json = buffer.toString('utf8');
-  // convert that to an object & address issues with the formatting of some parts
+  // convert that to an object
   const asset: ArchiveAsset = JSON.parse(json);
 
   const { type, file } = Registry.pathParts(key);
