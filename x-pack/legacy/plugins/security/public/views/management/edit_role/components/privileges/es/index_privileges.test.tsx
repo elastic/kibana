@@ -10,7 +10,7 @@ import { RoleValidator } from '../../../lib/validate_role';
 import { IndexPrivilegeForm } from './index_privilege_form';
 import { IndexPrivileges } from './index_privileges';
 
-test('it renders without crashing', () => {
+test.skip('it renders without crashing', () => {
   const props = {
     role: {
       name: '',
