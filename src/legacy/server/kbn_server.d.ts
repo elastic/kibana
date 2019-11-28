@@ -131,9 +131,6 @@ export default class KbnServer {
       plugins: Record<string, object>;
     };
     stop: null;
-    params: {
-      handledConfigPaths: UnwrapPromise<ReturnType<ConfigService['getUsedPaths']>>;
-    };
   };
   public server: Server;
   public inject: Server['inject'];

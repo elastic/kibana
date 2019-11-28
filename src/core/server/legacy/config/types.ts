@@ -17,8 +17,12 @@
  * under the License.
  */
 
-export default async function (kbnServer, server) {
-  server.decorate('server', 'config', function () {
-    return kbnServer.config;
-  });
+/**
+ * New platform representation of the legacy configuration (KibanaConfig)
+ *
+ * @internal
+ */
+export interface LegacyConfig {
+  get<T>(key?: string): T;
+  has(key: string): boolean;
 }

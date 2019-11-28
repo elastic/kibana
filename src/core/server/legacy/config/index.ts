@@ -17,8 +17,6 @@
  * under the License.
  */
 
-export default async function (kbnServer, server) {
-  server.decorate('server', 'config', function () {
-    return kbnServer.config;
-  });
-}
+export { ensureValidConfiguration } from './ensure_valid_configuration';
+export { LegacyObjectToConfigAdapter } from './legacy_object_to_config_adapter';
+export { LegacyConfig } from './types';
