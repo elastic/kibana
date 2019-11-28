@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, useCallback, useState, useMemo } from 'react';
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { PackageInfo } from '../../../common/types';
 import { InstallStatus } from '../../types';
 import { ConfirmPackageInstall } from './confirm_package_install';
-import { useInstallPackage, useGetPackageInstallStatus } from '../../hooks';
+import { ConfirmPackageDelete } from './confirm_package_delete';
+import { useDeletePackage, useInstallPackage, useGetPackageInstallStatus } from '../../hooks';
 
 interface InstallationButtonProps {
   package: PackageInfo;
@@ -17,10 +18,12 @@ interface InstallationButtonProps {
 export function InstallationButton(props: InstallationButtonProps) {
   const { assets, name, title, version } = props.package;
   const installPackage = useInstallPackage();
+  const deletePackage = useDeletePackage();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const installationStatus = getPackageInstallStatus(name);
 
   const isInstalling = installationStatus === InstallStatus.installing;
+  const isRemoving = installationStatus === InstallStatus.uninstalling;
   const isInstalled = installationStatus === InstallStatus.installed;
 
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
@@ -32,6 +35,11 @@ export function InstallationButton(props: InstallationButtonProps) {
     installPackage({ name, version, title });
     toggleModal();
   }, [installPackage, name, title, toggleModal, version]);
+
+  const handleClickDelete = useCallback(() => {
+    deletePackage({ name, version, title });
+    toggleModal();
+  }, [deletePackage, name, title, toggleModal, version]);
 
   const numOfAssets = useMemo(
     () =>
@@ -53,23 +61,31 @@ export function InstallationButton(props: InstallationButtonProps) {
     </EuiButton>
   );
 
+  const installedButton = (
+    <EuiButton isLoading={isRemoving} fill={true} onClick={toggleModal} color="danger">
+      {isInstalling ? 'Deleting' : 'Delete package'}
+    </EuiButton>
+  );
+  const button = isInstalled ? installedButton : installButton;
+  const modal = isInstalled ? (
+    <ConfirmPackageDelete
+      numOfAssets={numOfAssets}
+      packageName={title}
+      onCancel={toggleModal}
+      onConfirm={handleClickDelete}
+    />
+  ) : (
+    <ConfirmPackageInstall
+      numOfAssets={numOfAssets}
+      packageName={title}
+      onCancel={toggleModal}
+      onConfirm={handleClickInstall}
+    />
+  );
   return (
     <Fragment>
-      {isInstalled ? installedButton : installButton}
-      {isModalVisible && (
-        <ConfirmPackageInstall
-          numOfAssets={numOfAssets}
-          packageName={title}
-          onCancel={toggleModal}
-          onConfirm={handleClickInstall}
-        />
-      )}
+      {button}
+      {isModalVisible && modal}
     </Fragment>
   );
 }
-
-const installedButton = (
-  <EuiButtonEmpty iconType="check" disabled>
-    This package is installed
-  </EuiButtonEmpty>
-);

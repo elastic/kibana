@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { NotificationsStart } from 'src/core/public';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { PackageInfo } from '../../common/types';
-import { installPackage as fetchInstallPackage, installDatasource } from '../data';
+import { installPackage as fetchInstallPackage, installDatasource, removePackage } from '../data';
 import { InstallStatus } from '../types';
 
 interface PackagesInstall {
@@ -80,7 +80,40 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
     [packages]
   );
 
-  return { packages, installPackage, setPackageInstallStatus, getPackageInstallStatus };
+  const deletePackage = useCallback(
+    async ({ name, version, title }: Pick<PackageInfo, 'name' | 'version' | 'title'>) => {
+      setPackageInstallStatus({ name, status: InstallStatus.uninstalling });
+      const pkgkey = `${name}-${version}`;
+
+      try {
+        await removePackage(pkgkey);
+        setPackageInstallStatus({ name, status: InstallStatus.notInstalled });
+
+        const SuccessMsg = <p>Successfully deleted {title}</p>;
+
+        notifications.toasts.addSuccess({
+          title: `Deleted ${title} package`,
+          text: toMountPoint(SuccessMsg),
+        });
+      } catch (err) {
+        setPackageInstallStatus({ name, status: InstallStatus.installed });
+        notifications.toasts.addWarning({
+          title: `Failed to delete ${title} package`,
+          text: 'Something went wrong while trying to delete this package. Please try again later.',
+          iconType: 'alert',
+        });
+      }
+    },
+    [notifications.toasts, setPackageInstallStatus]
+  );
+
+  return {
+    packages,
+    installPackage,
+    setPackageInstallStatus,
+    getPackageInstallStatus,
+    deletePackage,
+  };
 }
 
 export const [
@@ -88,9 +121,11 @@ export const [
   useInstallPackage,
   useSetPackageInstallStatus,
   useGetPackageInstallStatus,
+  useDeletePackage,
 ] = createContainer(
   usePackageInstall,
   value => value.installPackage,
   value => value.setPackageInstallStatus,
-  value => value.getPackageInstallStatus
+  value => value.getPackageInstallStatus,
+  value => value.deletePackage
 );

@@ -12,4 +12,5 @@ export {
   useInstallPackage,
   useSetPackageInstallStatus,
   useGetPackageInstallStatus,
+  useDeletePackage,
 } from './use_package_install';
