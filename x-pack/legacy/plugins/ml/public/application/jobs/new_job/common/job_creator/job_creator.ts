@@ -194,7 +194,7 @@ export class JobCreator {
   }
 
   public get calendars(): Calendar[] {
-    return this._calendars || [];
+    return this._calendars;
   }
 
   public set calendars(calendars: Calendar[]) {
@@ -368,7 +368,7 @@ export class JobCreator {
    * @private
    */
   private async _updateCalendars() {
-    if (!this._calendars || this._calendars.length === 0) {
+    if (this._calendars.length === 0) {
       return;
     }
 
