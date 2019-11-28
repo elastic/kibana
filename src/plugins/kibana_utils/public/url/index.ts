@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import { parse as parseUrl, format as formatUrl } from 'url';
+import { format as formatUrl, parse as parseUrl } from 'url';
 // @ts-ignore
 import rison from 'rison-node';
 // @ts-ignore
 import encodeUriQuery from 'encode-uri-query';
+import { createBrowserHistory } from 'history';
 import { stringify as stringifyQueryString } from 'querystring';
 import { BaseState } from '../store/sync';
 
@@ -67,4 +68,28 @@ export function generateStateUrl<T extends BaseState>(state: T): string {
   });
 }
 
-export const updateHash = (url: string) => window.history.pushState({}, '', url);
+export const createUrlControls = () => {
+  const history = createBrowserHistory();
+  return {
+    listen: (cb: () => void) =>
+      history.listen(() => {
+        cb();
+      }),
+    update: (url: string, replace = false) => {
+      const { pathname, hash, search } = parseUrl(url);
+      if (replace) {
+        history.replace({
+          pathname,
+          hash,
+          search,
+        });
+      } else {
+        history.push({
+          pathname,
+          hash,
+          search,
+        });
+      }
+    },
+  };
+};

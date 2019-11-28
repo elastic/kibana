@@ -19,7 +19,7 @@
 
 import { Observable, Subscription } from 'rxjs';
 import { IStorage, IStorageWrapper, Storage } from '../storage';
-import { updateHash, readStateUrl, generateStateUrl } from '../url';
+import { createUrlControls, readStateUrl, generateStateUrl } from '../url';
 
 export type BaseState = Record<string, unknown>;
 
@@ -30,69 +30,123 @@ export interface IState<State extends BaseState = BaseState> {
 }
 
 export interface StateSyncConfig {
-  syncToUrl?: boolean;
-  syncToStorage?: boolean;
-  storageProvider?: IStorage;
-  watchUrl?: boolean;
+  syncToUrl: boolean;
+  syncToStorage: boolean;
+  storageProvider: IStorage;
+  initialTruthSource: InitialTruthSource;
 }
 
-function updateStorage<T extends BaseState>(state: T, storage: IStorageWrapper): void {
-  // TODO
-  return;
+export enum InitialTruthSource {
+  State,
+  // eslint-disable-next-line no-shadow
+  Storage,
+  None,
 }
 
 export function syncState(
-  states: Record<string, IState[]>,
+  states: Record<string, IState>,
   {
     syncToUrl = true,
     syncToStorage = true,
     storageProvider = window.sessionStorage,
-    watchUrl = false,
-  }: StateSyncConfig = {}
+    initialTruthSource = InitialTruthSource.Storage,
+  }: Partial<StateSyncConfig> = {}
 ) {
   const subscriptions: Subscription[] = [];
   const storage: IStorageWrapper = new Storage(storageProvider);
+  const { update: updateUrl, listen: listenUrl } = createUrlControls();
 
-  const keysToStateIndex: Map<string, number> = new Map();
-  const queryKeys: string[] = [];
-  const statesList: IState[] = Object.entries(states).flatMap(([key, vals]) => {
-    vals.forEach(v => queryKeys.push(key));
-    return vals;
+  const keyToState = new Map<string, IState>();
+  const stateToKey = new Map<IState, string>();
+
+  Object.entries(states).forEach(([key, state]) => {
+    keyToState.set(key, state);
+    stateToKey.set(state, key);
   });
 
-  const handleEvent = (stateIndex: number, state: BaseState) => {
-    if (syncToUrl) {
-      const urlState = readStateUrl();
-      const queryKey = queryKeys[stateIndex];
-      urlState[queryKey] = {
-        ...urlState[queryKey],
-        ...state,
-      };
-      updateHash(generateStateUrl(urlState));
-    }
+  let ignoreStateUpdate = false;
+  let ignoreStorageUpdate = false;
 
-    if (syncToStorage) {
-      updateStorage(state, storage);
-    }
+  const updateState = (state$: IState): boolean => {
+    if (ignoreStateUpdate) return false;
+    const update = () => {
+      if (syncToUrl) {
+        const urlState = readStateUrl();
+        const key = stateToKey.get(state$);
+        if (!key || !urlState[key]) {
+          ignoreStorageUpdate = false;
+          return false;
+        }
+
+        if (key && urlState[key]) {
+          state$.set(urlState[key]);
+          return true;
+        }
+      }
+
+      return false;
+    };
+
+    ignoreStorageUpdate = true;
+    const updated = update();
+    ignoreStorageUpdate = false;
+    return updated;
   };
 
-  statesList.forEach((state, stateIndex) => {
-    Object.keys(state.get()).forEach(key => {
-      keysToStateIndex.set(key, stateIndex);
-    });
-    subscriptions.push(
-      state.state$.subscribe((val: BaseState) => {
-        handleEvent(stateIndex, val);
-      })
-    );
+  const updateStorage = (state$: IState, { replace = false } = {}): boolean => {
+    if (ignoreStorageUpdate) return false;
+
+    const update = () => {
+      if (syncToUrl) {
+        const urlState = readStateUrl();
+        const key = stateToKey.get(state$);
+        if (!key) return false;
+        urlState[key] = state$.get();
+        updateUrl(generateStateUrl(urlState), replace);
+        return true;
+      }
+
+      return false;
+    };
+
+    ignoreStateUpdate = true;
+    const hasUpdated = update();
+    ignoreStateUpdate = false;
+    return hasUpdated;
+  };
+
+  Object.values(states).forEach(state => {
+    if (initialTruthSource === InitialTruthSource.Storage) {
+      const hasUpdated = updateState(state);
+      // if there is nothing by state key in storage
+      // then we should fallback and consider state source of truth
+      if (!hasUpdated) {
+        updateStorage(state, { replace: true });
+      }
+    } else if (initialTruthSource === InitialTruthSource.State) {
+      updateStorage(state);
+    }
   });
 
-  if (watchUrl) {
-    // TODO subscribe to url updates and push updates back to the service
+  subscriptions.push(
+    ...Object.values(states).map(s =>
+      s.state$.subscribe(() => {
+        updateStorage(s);
+      })
+    )
+  );
+
+  let unlistenUrlChange: () => void;
+  if (syncToUrl) {
+    unlistenUrlChange = listenUrl(() => {
+      Object.values(states).forEach(state$ => updateState(state$));
+    });
   }
 
   return () => {
+    keyToState.clear();
+    stateToKey.clear();
     subscriptions.forEach(sub => sub.unsubscribe());
-    // TODO unsubscribe url watch
+    if (unlistenUrlChange) unlistenUrlChange();
   };
 }

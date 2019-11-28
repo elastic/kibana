@@ -154,11 +154,11 @@ function handleTabChange($scope, newTab) {
 
   switch(newTab) {
     case 'indexedFields':
-      updateIndexedFieldsTable($scope);
+      return updateIndexedFieldsTable($scope);
     case 'scriptedFields':
-      updateScriptedFieldsTable($scope);
+      return updateScriptedFieldsTable($scope);
     case 'sourceFilters':
-      updateSourceFiltersTable($scope);
+      return updateSourceFiltersTable($scope);
   }
 }
 
@@ -179,10 +179,23 @@ uiModules
   .get('apps/management')
   .controller('managementIndexPatternsEdit', function (
     $scope, $location, $route, Promise, config, indexPatterns, Private, confirmModal) {
+    const $stateContainer = createStore({ tab: 'indexedFields' });
+    Object.defineProperty($scope, 'state', {
+      get() {
+        return $stateContainer.get;
+      }
+    });
+    const stateContainerSub = $stateContainer.state$.subscribe(s => {
+      handleTabChange($scope, s.tab);
+      if ($scope.$$phase !== '$apply' && $scope.$$phase !== '$digest') {
+        $scope.$apply();
+      }
+    });
+    handleTabChange($scope, $stateContainer.get().tab);
 
-    const $stateContainer = $scope.stateContainer = createStore({ tab: 'indexedFields' });
-    $scope.destroyStateContainer = $stateContainer.state$.subscribe(s => handleTabChange($scope, s.tab));
-    $scope.destroyStateSync = syncState({ _a: [$stateContainer] });
+    $scope.$$postDigest(() => {
+      $scope.destroyStateSync = syncState({ _a: $stateContainer });
+    });
 
     const indexPatternListProvider = Private(IndexPatternListFactory)();
 
@@ -236,10 +249,6 @@ uiModules
     $scope.changeTab = function (obj) {
       $stateContainer.set({ tab: obj.index });
     };
-
-    $scope.$watch('state.tab', function (tab) {
-      if (!tab) $scope.changeTab($scope.editSections[0]);
-    });
 
     $scope.$watchCollection('indexPattern.fields', function () {
       $scope.conflictFields = $scope.indexPattern.fields.filter(field => field.type === 'conflict');
@@ -325,8 +334,8 @@ uiModules
       destroyIndexedFieldsTable();
       destroyScriptedFieldsTable();
       destroySourceFiltersTable();
-      $scope.destroyStateSync();
-      $scope.destroyStateContainer();
+      if(stateContainerSub) stateContainerSub.unsubscribe();
+      if ($scope.destroyStateSync) $scope.destroyStateSync();
     });
 
   });
