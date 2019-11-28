@@ -17,35 +17,30 @@
  * under the License.
  */
 
-import { errors } from './errors';
+import { IndexPatternMissingIndices } from './errors';
 import {
-  ILLEGAL_CHARACTERS,
   ILLEGAL_CHARACTERS_KEY,
   CONTAINS_SPACES_KEY,
   ILLEGAL_CHARACTERS_VISIBLE,
-  validate,
-  getFromSavedObject,
-  getRoutes,
-  findByTitle,
-} from './utils';
-import { createFlattenHitWrapper, formatHitProvider, flattenHitWrapper } from './index_patterns';
+  ILLEGAL_CHARACTERS,
+  validateIndexPattern,
+} from './lib';
+import { getRoutes, getFromSavedObject } from './utils';
+import { flattenHitWrapper } from './index_patterns';
 
-export const indexPattern = {
-  errors,
-  CONTAINS_SPACES_KEY,
-  ILLEGAL_CHARACTERS,
+export const indexPatterns = {
   ILLEGAL_CHARACTERS_KEY,
+  CONTAINS_SPACES_KEY,
   ILLEGAL_CHARACTERS_VISIBLE,
-  validate,
-  getFromSavedObject,
+  ILLEGAL_CHARACTERS,
+  IndexPatternMissingIndices,
+  validate: validateIndexPattern,
   getRoutes,
-  findByTitle,
-  createFlattenHitWrapper,
-  formatHitProvider,
+  getFromSavedObject,
   flattenHitWrapper,
 };
 
 export { IndexPatternsService } from './index_patterns_service';
-export { IndexPatternsStart, IndexPatternsSetup } from './types';
 export { Field, FieldList, FieldListInterface } from './fields';
 export { IndexPattern, IndexPatterns } from './index_patterns';
+export { IndexPatternsStart, IndexPatternsSetup } from './types';

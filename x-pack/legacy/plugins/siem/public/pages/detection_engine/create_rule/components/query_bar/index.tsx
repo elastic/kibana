@@ -28,7 +28,7 @@ import { FieldHook, getFieldValidityAndErrorMessage } from '../shared_imports';
 export interface FieldValueQueryBar {
   filters: esFilters.Filter[];
   query: Query;
-  saved_id: string;
+  saved_id: string | null;
 }
 interface QueryBarDefineRuleProps {
   dataTestSubj: string;

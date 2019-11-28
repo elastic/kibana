@@ -19,16 +19,6 @@
 
 // /// Define plugin function
 import { DataPlugin as Plugin, DataSetup, DataStart } from './plugin';
-import {
-  indexPattern,
-  IFieldType,
-  IIndexPattern,
-  IndexPatterns,
-  IndexPattern,
-  Field,
-  FieldList,
-  FieldListInterface,
-} from '../../../../plugins/data/public';
 
 export function plugin() {
   return new Plugin();
@@ -39,51 +29,18 @@ export function plugin() {
 /** @public types */
 export { DataSetup, DataStart };
 
+export {
+  Field,
+  FieldType,
+  FieldListInterface,
+  IndexPattern,
+  IndexPatterns,
+  StaticIndexPattern,
+} from './index_patterns';
 export { QueryStringInput } from './query';
 export { SearchBar, SearchBarProps, SavedQueryAttributes, SavedQuery } from './search';
 
 /** @public static code */
 export * from '../common';
 export { FilterStateManager } from './filter/filter_manager';
-
-const CONTAINS_SPACES = indexPattern.CONTAINS_SPACES_KEY;
-const getFromSavedObject = indexPattern.getFromSavedObject;
-const getRoutes = indexPattern.getRoutes;
-const validateIndexPattern = indexPattern.validate;
-const findIndexPatternByTitle = indexPattern.findByTitle;
-const createFlattenHitWrapper = indexPattern.createFlattenHitWrapper;
-const formatHitProvider = indexPattern.formatHitProvider;
-const IndexPatternAlreadyExists = indexPattern.errors.AlreadyExists;
-const IndexPatternMissingIndices = indexPattern.errors.MissingIndices;
-const NoDefaultIndexPattern = indexPattern.errors.NoDefault;
-const NoDefinedIndexPatterns = indexPattern.errors.NoDefined;
-const ILLEGAL_CHARACTERS = indexPattern.ILLEGAL_CHARACTERS_KEY;
-const INDEX_PATTERN_ILLEGAL_CHARACTERS = indexPattern.ILLEGAL_CHARACTERS;
-const INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE = indexPattern.ILLEGAL_CHARACTERS_VISIBLE;
-const flattenHitWrapper = indexPattern.flattenHitWrapper;
-
-export { IFieldType as FieldType };
-export { IIndexPattern as StaticIndexPattern };
-
-export {
-  CONTAINS_SPACES,
-  getFromSavedObject,
-  getRoutes,
-  validateIndexPattern,
-  findIndexPatternByTitle,
-  ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-  IndexPatternAlreadyExists,
-  IndexPatternMissingIndices,
-  NoDefaultIndexPattern,
-  NoDefinedIndexPatterns,
-  Field,
-  FieldListInterface,
-  FieldList,
-  IndexPattern,
-  IndexPatterns,
-  createFlattenHitWrapper,
-  formatHitProvider,
-  flattenHitWrapper,
-};
+export { getFromSavedObject, getRoutes, flattenHitWrapper } from './index_patterns';

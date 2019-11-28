@@ -32,8 +32,9 @@ import {
   applyFiltersPopover,
   changeTimeFilter,
   extractTimeFilter,
+  IndexPatternsStart,
 } from '../../../../../../plugins/data/public';
-import { IndexPatternsStart } from '../../index_patterns';
+
 export const GLOBAL_APPLY_FILTER_ACTION = 'GLOBAL_APPLY_FILTER_ACTION';
 
 interface ActionContext {

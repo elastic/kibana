@@ -20,22 +20,6 @@
 import { find, get } from 'lodash';
 import { SavedObjectsClientContract, SimpleSavedObject } from 'src/core/public';
 
-export const ILLEGAL_CHARACTERS_KEY = 'ILLEGAL_CHARACTERS';
-export const CONTAINS_SPACES_KEY = 'CONTAINS_SPACES';
-export const ILLEGAL_CHARACTERS_VISIBLE = ['\\', '/', '?', '"', '<', '>', '|'];
-export const ILLEGAL_CHARACTERS = ILLEGAL_CHARACTERS_VISIBLE.concat(' ');
-
-function findIllegalCharacters(indexPattern: string): string[] {
-  const illegalCharacters = ILLEGAL_CHARACTERS_VISIBLE.reduce((chars: string[], char: string) => {
-    if (indexPattern.includes(char)) {
-      chars.push(char);
-    }
-    return chars;
-  }, []);
-
-  return illegalCharacters;
-}
-
 /**
  * Returns an object matching a given title
  *
@@ -63,26 +47,6 @@ export async function findByTitle(
     savedObjects,
     (obj: SimpleSavedObject<any>) => obj.get('title').toLowerCase() === title.toLowerCase()
   );
-}
-
-function indexPatternContainsSpaces(indexPattern: string): boolean {
-  return indexPattern.includes(' ');
-}
-
-export function validate(indexPattern: string) {
-  const errors: Record<string, any> = {};
-
-  const illegalCharacters = findIllegalCharacters(indexPattern);
-
-  if (illegalCharacters.length) {
-    errors[ILLEGAL_CHARACTERS_KEY] = illegalCharacters;
-  }
-
-  if (indexPatternContainsSpaces(indexPattern)) {
-    errors[CONTAINS_SPACES_KEY] = true;
-  }
-
-  return errors;
 }
 
 export function getFromSavedObject(savedObject: any) {

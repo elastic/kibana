@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { dataPluginMock } from '../../../../core_plugins/data/public/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { dataPluginMock } from '../../../../../plugins/data/public/mocks';
 
-const dataSetup = dataPluginMock.createSetup();
+const dataSetup = dataPluginMock.createSetupContract();
 
 // mocks for stateful code
 export const { FieldImpl } = dataSetup.indexPatterns!.__LEGACY;
@@ -31,16 +32,4 @@ export const {
 } = dataSetup.indexPatterns!;
 
 // static code
-export {
-  CONTAINS_SPACES,
-  getFromSavedObject,
-  getRoutes,
-  validateIndexPattern,
-  ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-  IndexPatternAlreadyExists,
-  IndexPatternMissingIndices,
-  NoDefaultIndexPattern,
-  NoDefinedIndexPatterns,
-} from '../../../../core_plugins/data/public';
+export { getFromSavedObject, getRoutes } from '../../../../core_plugins/data/public';

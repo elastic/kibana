@@ -17,19 +17,7 @@
  * under the License.
  */
 
-import { indexPatternsServiceMock } from './index_patterns/index_patterns_service.mock';
-
-function createDataSetupMock() {
-  return {
-    indexPatterns: indexPatternsServiceMock.createSetupContract(),
-  };
-}
-
-function createDataStartMock() {
-  return {};
-}
-
-export const dataPluginMock = {
-  createSetup: createDataSetupMock,
-  createStart: createDataStartMock,
-};
+export const ILLEGAL_CHARACTERS_KEY = 'ILLEGAL_CHARACTERS';
+export const CONTAINS_SPACES_KEY = 'CONTAINS_SPACES';
+export const ILLEGAL_CHARACTERS_VISIBLE = ['\\', '/', '?', '"', '<', '>', '|'];
+export const ILLEGAL_CHARACTERS = ILLEGAL_CHARACTERS_VISIBLE.concat(' ');

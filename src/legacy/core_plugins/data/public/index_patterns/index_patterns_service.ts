@@ -17,80 +17,21 @@
  * under the License.
  */
 
-import {
-  UiSettingsClientContract,
-  SavedObjectsClientContract,
-  HttpServiceBase,
-  NotificationsStart,
-} from 'src/core/public';
-import { FieldFormatsStart } from '../../../../../plugins/data/public';
-import { Field, FieldList } from '../';
-import { setNotifications, setFieldFormats } from './services';
+import { IFieldType, IIndexPattern, indexPatterns } from '../../../../../plugins/data/public';
 
-import {
-  createFlattenHitWrapper,
-  formatHitProvider,
+const getFromSavedObject = indexPatterns.getFromSavedObject;
+const getRoutes = indexPatterns.getRoutes;
+const flattenHitWrapper = indexPatterns.flattenHitWrapper;
+
+export { getFromSavedObject, getRoutes, flattenHitWrapper };
+export { IFieldType as FieldType };
+export { IIndexPattern as StaticIndexPattern };
+export {
+  Field,
+  FieldListInterface,
   IndexPattern,
   IndexPatterns,
-  StaticIndexPattern,
-} from '../';
-
-export interface IndexPatternDependencies {
-  uiSettings: UiSettingsClientContract;
-  savedObjectsClient: SavedObjectsClientContract;
-  http: HttpServiceBase;
-  notifications: NotificationsStart;
-  fieldFormats: FieldFormatsStart;
-}
-
-/**
- * Index Patterns Service
- *
- * @internal
- */
-export class IndexPatternsService {
-  private setupApi: any;
-
-  public setup() {
-    this.setupApi = {
-      FieldList,
-      flattenHitWrapper: createFlattenHitWrapper(),
-      formatHitProvider,
-      __LEGACY: {
-        // For BWC we must temporarily export the class implementation of Field,
-        // which is only used externally by the Index Pattern UI.
-        FieldImpl: Field,
-      },
-    };
-    return this.setupApi;
-  }
-
-  public start({
-    uiSettings,
-    savedObjectsClient,
-    http,
-    notifications,
-    fieldFormats,
-  }: IndexPatternDependencies) {
-    setNotifications(notifications);
-    setFieldFormats(fieldFormats);
-
-    return {
-      ...this.setupApi,
-      indexPatterns: new IndexPatterns(uiSettings, savedObjectsClient, http),
-    };
-  }
-
-  public stop() {
-    // nothing to do here yet
-  }
-}
-
-// types
-
-/** @internal */
-export type IndexPatternsSetup = ReturnType<IndexPatternsService['setup']>;
-export type IndexPatternsStart = ReturnType<IndexPatternsService['start']>;
-
-/** @public */
-export { IndexPattern, IndexPatterns, StaticIndexPattern };
+  IndexPatternsStart,
+  IndexPatternsSetup,
+  IndexPatternsService,
+} from '../../../../../plugins/data/public';

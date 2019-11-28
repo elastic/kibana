@@ -25,10 +25,6 @@ import {
   HttpServiceBase,
 } from 'src/core/public';
 
-jest.mock('../errors', () => ({
-  IndexPatternMissingIndices: jest.fn(),
-}));
-
 jest.mock('./index_pattern', () => {
   class IndexPattern {
     init = async () => {
