@@ -35,11 +35,6 @@ const createSetupContractMock = () => {
     formatHitProvider: jest.fn(),
     indexPatterns: jest.fn() as any,
     IndexPatternSelect: jest.fn(),
-    __LEGACY: {
-      // For BWC we must temporarily export the class implementation of Field,
-      // which is only used externally by the Index Pattern UI.
-      FieldImpl: jest.fn(),
-    },
   };
 
   return setupContract;

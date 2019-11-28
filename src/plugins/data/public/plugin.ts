@@ -52,7 +52,6 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
         uiSettings: core.uiSettings,
         storage,
       }),
-      indexPatterns: this.indexPatterns.setup(),
     };
   }
 

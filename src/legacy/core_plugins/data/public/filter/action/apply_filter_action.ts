@@ -75,7 +75,7 @@ export function createFilterAction(
       if (selectedFilters.length > 1) {
         const indexPatterns = await Promise.all(
           filters.map(filter => {
-            return indexPatternsService.indexPatterns.get(filter.meta.index as string);
+            return indexPatternsService.indexPatterns.get(filter.meta.index!);
           })
         );
 
