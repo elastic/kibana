@@ -36,43 +36,43 @@ interface OwnProps extends AllTimelinesVariables {
   children?: (args: AllTimelinesArgs) => React.ReactNode;
 }
 
-const getAllTimeline = (variables: string, timelines: TimelineResult[]): OpenTimelineResult[] =>
-  timelines.map(timeline => ({
-    created: timeline.created,
-    description: timeline.description,
-    eventIdToNoteIds:
-      timeline.eventIdToNoteIds != null
-        ? timeline.eventIdToNoteIds.reduce((acc, note) => {
-            if (note.eventId != null) {
-              const notes = getOr([], note.eventId, acc);
-              return { ...acc, [note.eventId]: [...notes, note.noteId] };
-            }
-            return acc;
-          }, {})
-        : null,
-    favorite: timeline.favorite,
-    noteIds: timeline.noteIds,
-    notes:
-      timeline.notes != null
-        ? timeline.notes.map(note => ({ ...note, savedObjectId: note.noteId }))
-        : null,
-    pinnedEventIds:
-      timeline.pinnedEventIds != null
-        ? timeline.pinnedEventIds.reduce(
-            (acc, pinnedEventId) => ({ ...acc, [pinnedEventId]: true }),
-            {}
-          )
-        : null,
-    savedObjectId: timeline.savedObjectId,
-    title: timeline.title,
-    updated: timeline.updated,
-    updatedBy: timeline.updatedBy,
-  }));
+const getAllTimeline = memoizeOne(
+  (variables: string, timelines: TimelineResult[]): OpenTimelineResult[] =>
+    timelines.map(timeline => ({
+      created: timeline.created,
+      description: timeline.description,
+      eventIdToNoteIds:
+        timeline.eventIdToNoteIds != null
+          ? timeline.eventIdToNoteIds.reduce((acc, note) => {
+              if (note.eventId != null) {
+                const notes = getOr([], note.eventId, acc);
+                return { ...acc, [note.eventId]: [...notes, note.noteId] };
+              }
+              return acc;
+            }, {})
+          : null,
+      favorite: timeline.favorite,
+      noteIds: timeline.noteIds,
+      notes:
+        timeline.notes != null
+          ? timeline.notes.map(note => ({ ...note, savedObjectId: note.noteId }))
+          : null,
+      pinnedEventIds:
+        timeline.pinnedEventIds != null
+          ? timeline.pinnedEventIds.reduce(
+              (acc, pinnedEventId) => ({ ...acc, [pinnedEventId]: true }),
+              {}
+            )
+          : null,
+      savedObjectId: timeline.savedObjectId,
+      title: timeline.title,
+      updated: timeline.updated,
+      updatedBy: timeline.updatedBy,
+    }))
+);
 
 export const AllTimelinesQuery = React.memo<OwnProps>(
   ({ children, onlyUserFavorite, pageInfo, search, sort }) => {
-    const memoizedAllTimeline = memoizeOne(getAllTimeline);
-
     const variables: GetAllTimeline.Variables = {
       onlyUserFavorite,
       pageInfo,
@@ -90,7 +90,7 @@ export const AllTimelinesQuery = React.memo<OwnProps>(
           return children!({
             loading,
             totalCount: getOr(0, 'getAllTimeline.totalCount', data),
-            timelines: memoizedAllTimeline(
+            timelines: getAllTimeline(
               JSON.stringify(variables),
               getOr([], 'getAllTimeline.timeline', data)
             ),

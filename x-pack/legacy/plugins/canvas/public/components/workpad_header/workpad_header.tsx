@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiButtonIcon,
   EuiButton,
+  EuiButtonEmpty,
   EuiOverlayMask,
   EuiModal,
   EuiModalFooter,
@@ -193,14 +194,11 @@ export class WorkpadHeader extends React.PureComponent<Props, State> {
                 <EuiFlexItem grow={false}>
                   <AssetManager />
                 </EuiFlexItem>
-                {/*
-                TODO: elastic/kibana#44822 Disabling pending filters work
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty onClick={this._showEmbeddablePanel}>
                     {strings.getEmbedObjectButtonLabel()}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
-                */}
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     fill

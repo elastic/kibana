@@ -21,10 +21,28 @@ import { mount, shallow } from 'enzyme';
 import { DocViewer } from './doc_viewer';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { addDocView, emptyDocViews, DocViewRenderProps } from 'ui/registry/doc_views';
+import {
+  addDocView,
+  emptyDocViews,
+  DocViewRenderProps,
+  getDocViewsSorted as mockGetDocViewsSorted,
+} from 'ui/registry/doc_views';
+
+jest.mock('../kibana_services', () => {
+  return {
+    getServices: () => ({
+      docViewsRegistry: {
+        getDocViewsSorted: (hit: any) => {
+          return mockGetDocViewsSorted(hit);
+        },
+      },
+    }),
+  };
+});
 
 beforeEach(() => {
   emptyDocViews();
+  jest.clearAllMocks();
 });
 
 test('Render <DocViewer/> with 3 different tabs', () => {

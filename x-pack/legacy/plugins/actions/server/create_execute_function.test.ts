@@ -6,10 +6,10 @@
 
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 import { createExecuteFunction } from './create_execute_function';
-import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 
 const mockTaskManager = taskManagerMock.create();
-const savedObjectsClient = SavedObjectsClientMock.create();
+const savedObjectsClient = savedObjectsClientMock.create();
 const getBasePath = jest.fn();
 
 beforeEach(() => jest.resetAllMocks());

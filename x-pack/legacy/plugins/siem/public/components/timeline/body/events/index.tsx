@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
+import React from 'react';
 
 import { BrowserFields } from '../../../../containers/source';
 import { TimelineItem } from '../../../../graphql/types';
@@ -17,6 +17,7 @@ import { ColumnHeader } from '../column_headers/column_header';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { RowRenderer } from '../renderers/row_renderer';
 import { StatefulEvent } from './stateful_event';
+import { eventIsPinned } from '../helpers';
 
 interface Props {
   actionsColumnWidth: number;
@@ -74,6 +75,7 @@ export const Events = React.memo<Props>(
           event={event}
           eventIdToNoteIds={eventIdToNoteIds}
           getNotesByIds={getNotesByIds}
+          isEventPinned={eventIsPinned({ eventId: event._id, pinnedEventIds })}
           isEventViewer={isEventViewer}
           key={event._id}
           maxDelay={maxDelay(i)}
@@ -81,7 +83,6 @@ export const Events = React.memo<Props>(
           onPinEvent={onPinEvent}
           onUnPinEvent={onUnPinEvent}
           onUpdateColumns={onUpdateColumns}
-          pinnedEventIds={pinnedEventIds}
           rowRenderers={rowRenderers}
           timelineId={id}
           toggleColumn={toggleColumn}

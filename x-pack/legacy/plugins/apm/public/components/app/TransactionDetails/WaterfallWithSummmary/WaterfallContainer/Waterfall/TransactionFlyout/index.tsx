@@ -11,7 +11,8 @@ import {
   EuiFlyoutHeader,
   EuiPortal,
   EuiSpacer,
-  EuiTitle
+  EuiTitle,
+  EuiHorizontalRule
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -40,7 +41,6 @@ function TransactionPropertiesTable({
       <EuiTitle size="s">
         <h4>Metadata</h4>
       </EuiTitle>
-      <EuiSpacer />
       <TransactionMetadata transaction={transaction} />
     </div>
   );
@@ -87,7 +87,7 @@ export function TransactionFlyout({
             totalDuration={traceRootDuration}
             errorCount={errorCount}
           />
-          <EuiSpacer size="m" />
+          <EuiHorizontalRule margin="m" />
           <DroppedSpansWarning transactionDoc={transactionDoc} />
           <TransactionPropertiesTable transaction={transactionDoc} />
         </EuiFlyoutBody>

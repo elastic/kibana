@@ -31,20 +31,4 @@ export const {
 } = dataSetup.indexPatterns!;
 
 // static code
-export {
-  CONTAINS_SPACES,
-  getFromSavedObject,
-  getRoutes,
-  isFilterable,
-  IndexPatternSelect,
-  validateIndexPattern,
-  ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-  IndexPatternAlreadyExists,
-  IndexPatternMissingIndices,
-  NoDefaultIndexPattern,
-  NoDefinedIndexPatterns,
-  mockFields,
-  mockIndexPattern,
-} from '../../../../core_plugins/data/public';
+export { getFromSavedObject, getRoutes } from '../../../../core_plugins/data/public';

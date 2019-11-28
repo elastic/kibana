@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { NotificationsSetup } from 'kibana/public';
 import { findIndex } from 'lodash';
 import { IndexPattern } from '../index_patterns';
 import { Field, FieldType, FieldSpec } from './field';
@@ -36,7 +35,6 @@ export class FieldList extends Array<Field> implements FieldListInterface {
   private groups: Map<Field['type'], FieldMap> = new Map();
   private indexPattern: IndexPattern;
   private shortDotsEnable: boolean;
-  private notifications: NotificationsSetup;
   private setByName = (field: Field) => this.byName.set(field.name, field);
   private setByGroup = (field: Field) => {
     if (typeof this.groups.get(field.type) === 'undefined') {
@@ -45,23 +43,19 @@ export class FieldList extends Array<Field> implements FieldListInterface {
     this.groups.get(field.type)!.set(field.name, field);
   };
   private removeByGroup = (field: FieldType) => this.groups.get(field.type)!.delete(field.name);
-  constructor(
-    indexPattern: IndexPattern,
-    specs: FieldSpec[] = [],
-    shortDotsEnable = false,
-    notifications: NotificationsSetup
-  ) {
+
+  constructor(indexPattern: IndexPattern, specs: FieldSpec[] = [], shortDotsEnable = false) {
     super();
     this.indexPattern = indexPattern;
     this.shortDotsEnable = shortDotsEnable;
-    this.notifications = notifications;
+
     specs.map(field => this.add(field));
   }
 
   getByName = (name: Field['name']) => this.byName.get(name);
   getByType = (type: Field['type']) => [...(this.groups.get(type) || new Map()).values()];
   add = (field: FieldSpec) => {
-    const newField = new Field(this.indexPattern, field, this.shortDotsEnable, this.notifications);
+    const newField = new Field(this.indexPattern, field, this.shortDotsEnable);
     this.push(newField);
     this.setByName(newField);
     this.setByGroup(newField);

@@ -4,10 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiModules } from 'ui/modules';
+import { start as data } from '../../../../../src/legacy/core_plugins/data/public/legacy';
+import { DEFAULT_KBN_VERSION } from '../common/constants/file_import';
 
-export let indexPatternService;
+export const indexPatternService = data.indexPatterns.indexPatterns;
 
-uiModules.get('app/file_upload').run(($injector) => {
-  indexPatternService = $injector.get('indexPatterns');
-});
+export let savedObjectsClient;
+export let basePath;
+export let apiBasePath;
+export let kbnVersion;
+
+export const initServicesAndConstants = ({ savedObjects, http, injectedMetadata }) => {
+  savedObjectsClient = savedObjects.client;
+  basePath = http.basePath.basePath;
+  apiBasePath = http.basePath.prepend('/api');
+  kbnVersion = injectedMetadata.getKibanaVersion(DEFAULT_KBN_VERSION);
+};

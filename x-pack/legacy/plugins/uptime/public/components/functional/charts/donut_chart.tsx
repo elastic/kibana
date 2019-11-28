@@ -25,6 +25,10 @@ export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
     colors: { danger, gray },
   } = useContext(UptimeSettingsContext);
 
+  let upCount = up;
+  if (up === 0 && down === 0) {
+    upCount = 1;
+  }
   useEffect(() => {
     if (chartElement.current !== null) {
       // we must remove any existing paths before painting
@@ -50,7 +54,7 @@ export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
         .data(
           // @ts-ignore pie generator expects param of type number[], but only works with
           // output of d3.entries, which is like Array<{ key: string, value: number }>
-          pieGenerator(d3.entries({ up, down }))
+          pieGenerator(d3.entries({ up: upCount, down }))
         )
         .enter()
         .append('path')
@@ -64,7 +68,7 @@ export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
         )
         .attr('fill', (d: any) => color(d.data.key));
     }
-  }, [chartElement.current, up, down]);
+  }, [chartElement.current, upCount, down]);
   return (
     <EuiFlexGroup alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>

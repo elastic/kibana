@@ -5,21 +5,24 @@
  */
 
 import { GraphQLSchema } from 'graphql';
-import { Server } from 'hapi';
+import { Request, ResponseToolkit } from 'hapi';
+import { runHttpQuery } from 'apollo-server-core';
+import { UptimeCorePlugins, UptimeCoreSetup } from './adapter_types';
 import {
   UMBackendFrameworkAdapter,
   UMFrameworkRequest,
   UMFrameworkResponse,
   UMFrameworkRouteOptions,
-  UMHapiGraphQLPluginOptions,
 } from './adapter_types';
-import { uptimeGraphQLHapiPlugin } from './apollo_framework_adapter';
+import { DEFAULT_GRAPHQL_PATH } from '../../../graphql';
 
 export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapter {
-  private server: Server;
-
-  constructor(hapiServer: Server) {
-    this.server = hapiServer;
+  constructor(
+    private readonly server: UptimeCoreSetup,
+    private readonly plugins: UptimeCorePlugins
+  ) {
+    this.server = server;
+    this.plugins = plugins;
   }
 
   public registerRoute<
@@ -30,24 +33,53 @@ export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapte
   }
 
   public registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void {
-    this.server.register<UMHapiGraphQLPluginOptions>({
-      options: {
-        graphQLOptions: (req: any) => ({
-          context: { req },
-          schema,
-        }),
-        path: routePath,
-        route: {
-          tags: ['access:uptime'],
-        },
+    const options = {
+      graphQLOptions: (req: any) => ({
+        context: { req },
+        schema,
+      }),
+      path: routePath,
+      route: {
+        tags: ['access:uptime'],
       },
-      plugin: uptimeGraphQLHapiPlugin,
+    };
+    this.server.route({
+      options: options.route,
+      handler: async (request: Request, h: ResponseToolkit) => {
+        try {
+          const { method } = request;
+          const query =
+            method === 'post'
+              ? (request.payload as Record<string, any>)
+              : (request.query as Record<string, any>);
+
+          const graphQLResponse = await runHttpQuery([request], {
+            method: method.toUpperCase(),
+            options: options.graphQLOptions,
+            query,
+          });
+
+          return h.response(graphQLResponse).type('application/json');
+        } catch (error) {
+          if (error.isGraphQLError === true) {
+            return h
+              .response(error.message)
+              .code(error.statusCode)
+              .type('application/json');
+          }
+          return h.response(error).type('application/json');
+        }
+      },
+      method: ['get', 'post'],
+      path: options.path || DEFAULT_GRAPHQL_PATH,
+      vhost: undefined,
     });
   }
 
   public getSavedObjectsClient() {
-    const { SavedObjectsClient, getSavedObjectsRepository } = this.server.savedObjects;
-    const { callWithInternalUser } = this.server.plugins.elasticsearch.getCluster('admin');
+    const { elasticsearch, savedObjects } = this.plugins;
+    const { SavedObjectsClient, getSavedObjectsRepository } = savedObjects;
+    const { callWithInternalUser } = elasticsearch.getCluster('admin');
     const internalRepository = getSavedObjectsRepository(callWithInternalUser);
     return new SavedObjectsClient(internalRepository);
   }

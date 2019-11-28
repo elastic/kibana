@@ -19,17 +19,12 @@
 
 import chrome from 'ui/chrome';
 import { noop } from 'lodash';
-import { SearchSource } from 'ui/courier';
 import { i18n } from '@kbn/i18n';
+import { SearchSource, getRequestInspectorStats, getResponseInspectorStats } from '../../courier';
 import { BucketAggType, BucketAggParam } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
 import { AggConfigOptions } from '../agg_config';
 import { IBucketAggConfig } from './_bucket_agg_type';
-import {
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-} from '../../courier/utils/courier_inspector_utils';
 import { createFilterTerms } from './create_filter/terms';
 import { wrapWithInlineComp } from './inline_comp_wrapper';
 import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
@@ -39,10 +34,10 @@ import { OrderByParamEditor, aggFilter } from '../../vis/editors/default/control
 import { SizeParamEditor } from '../../vis/editors/default/controls/size';
 import { MissingBucketParamEditor } from '../../vis/editors/default/controls/missing_bucket';
 import { OtherBucketParamEditor } from '../../vis/editors/default/controls/other_bucket';
-import { ContentType } from '../../../../../plugins/data/common';
 import { AggConfigs } from '../agg_configs';
 
 import { Adapters } from '../../../../../plugins/inspector/public';
+import { ContentType, FieldFormat, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
 // @ts-ignore
 import { Schemas } from '../../vis/editors/default/schemas';
@@ -76,7 +71,7 @@ export const termsBucketAgg = new BucketAggType({
     const params = agg.params;
     return agg.getFieldDisplayName() + ': ' + params.order.text;
   },
-  getFormat(bucket) {
+  getFormat(bucket): FieldFormat {
     return {
       getConverterFor: (type: ContentType) => {
         return (val: any) => {
@@ -92,10 +87,11 @@ export const termsBucketAgg = new BucketAggType({
             basePath: chrome.getBasePath(),
           };
           const converter = bucket.params.field.format.getConverterFor(type);
+
           return converter(val, undefined, undefined, parsedUrl);
         };
       },
-    };
+    } as FieldFormat;
   },
   createFilter: createFilterTerms,
   postFlightRequest: async (
@@ -111,9 +107,6 @@ export const termsBucketAgg = new BucketAggType({
     if (aggConfig.params.otherBucket) {
       const filterAgg = buildOtherBucketAgg(aggConfigs, aggConfig, resp);
       if (!filterAgg) return resp;
-      if (abortSignal) {
-        abortSignal.addEventListener('abort', () => nestedSearchSource.cancelQueued());
-      }
 
       nestedSearchSource.setField('aggs', filterAgg);
 
@@ -134,7 +127,7 @@ export const termsBucketAgg = new BucketAggType({
       });
       request.stats(getRequestInspectorStats(nestedSearchSource));
 
-      const response = await nestedSearchSource.fetch();
+      const response = await nestedSearchSource.fetch({ abortSignal });
       request.stats(getResponseInspectorStats(nestedSearchSource, response)).ok({ json: response });
       resp = mergeOtherBucketAggResponse(aggConfigs, resp, response, aggConfig, filterAgg());
     }

@@ -7,8 +7,10 @@
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { EmbeddedMap } from './embedded_map';
+import { EmbeddedMapComponent } from './embedded_map';
 import { SetQuery } from './types';
+import { useKibanaCore } from '../../lib/compose/kibana_core';
+import { useIndexPatterns } from '../../hooks/use_index_patterns';
 
 jest.mock('../search_bar', () => ({
   siemFilterManager: {
@@ -16,30 +18,28 @@ jest.mock('../search_bar', () => ({
   },
 }));
 
-jest.mock('ui/new_platform', () => ({
-  npStart: {
-    core: {
-      injectedMetadata: {
-        getKibanaVersion: () => '8.0.0',
-      },
-    },
-    plugins: {
-      uiActions: require('../../../../../../../src/plugins/ui_actions/public/mocks').uiActionsPluginMock.createSetupContract(),
-    },
+const mockUseIndexPatterns = useIndexPatterns as jest.Mock;
+jest.mock('../../hooks/use_index_patterns');
+mockUseIndexPatterns.mockImplementation(() => [true, []]);
+
+const mockUseKibanaCore = useKibanaCore as jest.Mock;
+jest.mock('../../lib/compose/kibana_core');
+mockUseKibanaCore.mockImplementation(() => ({
+  uiSettings: {
+    get$: () => 'world',
   },
-  npSetup: {
-    core: {
-      uiSettings: {
-        get$: () => 'world',
-      },
-    },
-    plugins: {
-      uiActions: require('../../../../../../../src/plugins/ui_actions/public/mocks').uiActionsPluginMock.createStartContract(),
-    },
+  injectedMetadata: {
+    getKibanaVersion: () => '8.0.0',
   },
 }));
 
-describe('EmbeddedMap', () => {
+jest.mock('../../lib/compose/kibana_plugins');
+
+jest.mock('ui/vis/lib/timezone', () => ({
+  timezoneProvider: () => () => 'America/New_York',
+}));
+
+describe('EmbeddedMapComponent', () => {
   let setQuery: SetQuery;
 
   beforeEach(() => {
@@ -48,7 +48,7 @@ describe('EmbeddedMap', () => {
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
-      <EmbeddedMap
+      <EmbeddedMapComponent
         endDate={new Date('2019-08-28T05:50:57.877Z').getTime()}
         filters={[]}
         query={{ query: '', language: 'kuery' }}

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { ValueAxis } from '../../../types';
@@ -38,21 +38,18 @@ function CustomExtentsOptions({
   setValueAxis,
   setValueAxisScale,
 }: CustomExtentsOptionsProps) {
-  const [isBoundsMarginValid, setIsBoundsMarginValid] = useState(true);
   const invalidBoundsMarginMessage = i18n.translate(
     'kbnVislibVisTypes.controls.pointSeries.valueAxes.scaleToDataBounds.minNeededBoundsMargin',
     { defaultMessage: 'Bounds margin must be greater than or equal to 0.' }
   );
 
-  const setBoundsMargin = useCallback(
-    (paramName: 'boundsMargin', value: number | '') => {
-      const isValid = value === '' ? true : value >= 0;
-      setIsBoundsMarginValid(isValid);
-      setMultipleValidity('boundsMargin', isValid);
+  const isBoundsMarginValid =
+    !axis.scale.defaultYExtents || !axis.scale.boundsMargin || axis.scale.boundsMargin >= 0;
 
-      setValueAxisScale(paramName, value);
-    },
-    [setMultipleValidity, setValueAxisScale]
+  const setBoundsMargin = useCallback(
+    (paramName: 'boundsMargin', value: number | '') =>
+      setValueAxisScale(paramName, value === '' ? undefined : value),
+    [setValueAxisScale]
   );
 
   const onDefaultYExtentsChange = useCallback(
@@ -60,7 +57,6 @@ function CustomExtentsOptions({
       const scale = { ...axis.scale, [paramName]: value };
       if (!scale.defaultYExtents) {
         delete scale.boundsMargin;
-        setMultipleValidity('boundsMargin', true);
       }
       setValueAxis('scale', scale);
     },
@@ -78,6 +74,12 @@ function CustomExtentsOptions({
     },
     [setValueAxis, axis.scale]
   );
+
+  useEffect(() => {
+    setMultipleValidity('boundsMargin', isBoundsMarginValid);
+
+    return () => setMultipleValidity('boundsMargin', true);
+  }, [isBoundsMarginValid, setMultipleValidity]);
 
   return (
     <>

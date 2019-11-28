@@ -9,16 +9,12 @@ import React, { useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { IDataPluginServices } from 'src/legacy/core_plugins/data/public/types';
 import { IndexPatternSavedObject, IndexPatternProvider } from '../types';
 import {
-  QueryBarInput,
-  Query,
+  QueryStringInput,
   IndexPattern,
 } from '../../../../../../src/legacy/core_plugins/data/public';
 import { openSourceModal } from '../services/source_modal';
-
 import {
   GraphState,
   datasourceSelector,
@@ -27,13 +23,18 @@ import {
 } from '../state_management';
 
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { IDataPluginServices, Query, esKuery } from '../../../../../../src/plugins/data/public';
 
 export interface OuterSearchBarProps {
   isLoading: boolean;
   initialQuery?: string;
   onQuerySubmit: (query: string) => void;
 
-  confirmWipeWorkspace: (onConfirm: () => void) => void;
+  confirmWipeWorkspace: (
+    onConfirm: () => void,
+    text?: string,
+    options?: { confirmButtonText: string; title: string }
+  ) => void;
   indexPatternProvider: IndexPatternProvider;
 }
 
@@ -44,7 +45,10 @@ export interface SearchBarProps extends OuterSearchBarProps {
 
 function queryToString(query: Query, indexPattern: IndexPattern) {
   if (query.language === 'kuery' && typeof query.query === 'string') {
-    const dsl = toElasticsearchQuery(fromKueryExpression(query.query as string), indexPattern);
+    const dsl = esKuery.toElasticsearchQuery(
+      esKuery.fromKueryExpression(query.query as string),
+      indexPattern
+    );
     // JSON representation of query will be handled by existing logic.
     // TODO clean this up and handle it in the data fetch layer once
     // it moved to typescript.
@@ -85,7 +89,8 @@ export function SearchBarComponent(props: SearchBarProps) {
   }, [currentDatasource]);
 
   const kibana = useKibana<IDataPluginServices>();
-  const { overlays, savedObjects, uiSettings } = kibana.services;
+  const { services, overlays } = kibana;
+  const { savedObjects, uiSettings } = services;
   if (!overlays) return null;
 
   return (
@@ -99,7 +104,7 @@ export function SearchBarComponent(props: SearchBarProps) {
     >
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem>
-          <QueryBarInput
+          <QueryStringInput
             disableAutoFocus
             bubbleSubmitEvent
             indexPatterns={currentIndexPattern ? [currentIndexPattern] : []}
@@ -118,11 +123,27 @@ export function SearchBarComponent(props: SearchBarProps) {
                   className="gphSearchBar__datasourceButton"
                   data-test-subj="graphDatasourceButton"
                   onClick={() => {
-                    confirmWipeWorkspace(() =>
-                      openSourceModal(
-                        { overlays, savedObjects, uiSettings },
-                        onIndexPatternSelected
-                      )
+                    confirmWipeWorkspace(
+                      () =>
+                        openSourceModal(
+                          { overlays, savedObjects, uiSettings },
+                          onIndexPatternSelected
+                        ),
+                      i18n.translate('xpack.graph.clearWorkspace.confirmText', {
+                        defaultMessage:
+                          'If you change data sources, your current fields and vertices will be reset.',
+                      }),
+                      {
+                        confirmButtonText: i18n.translate(
+                          'xpack.graph.clearWorkspace.confirmButtonLabel',
+                          {
+                            defaultMessage: 'Change data source',
+                          }
+                        ),
+                        title: i18n.translate('xpack.graph.clearWorkspace.modalTitle', {
+                          defaultMessage: 'Unsaved changes',
+                        }),
+                      }
                     );
                   }}
                 >

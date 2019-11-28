@@ -4,17 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request, ResponseToolkit } from 'hapi';
-import { JobDocPayload } from '../../types';
+import { RequestFacade, ReportingResponseToolkit, JobDocPayload } from '../../types';
 
 export type HandlerFunction = (
-  exportType: any,
-  jobParams: any,
-  request: Request,
-  h: ResponseToolkit
+  exportType: string,
+  jobParams: object,
+  request: RequestFacade,
+  h: ReportingResponseToolkit
 ) => any;
 
-export type HandlerErrorFunction = (exportType: any, err: Error) => any;
+export type HandlerErrorFunction = (exportType: string, err: Error) => any;
 
 export interface QueuedJobPayload {
   error?: boolean;

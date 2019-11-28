@@ -15,7 +15,7 @@ import { EventsTrData } from '../../styles';
 import { Actions } from '../actions';
 import { ColumnHeader } from '../column_headers/column_header';
 import { DataDrivenColumns } from '../data_driven_columns';
-import { eventHasNotes, eventIsPinned, getPinOnClick } from '../helpers';
+import { eventHasNotes, getPinOnClick } from '../helpers';
 import { ColumnRenderer } from '../renderers/column_renderer';
 
 interface Props {
@@ -28,13 +28,13 @@ interface Props {
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   expanded: boolean;
   getNotesByIds: (noteIds: string[]) => Note[];
+  isEventPinned: boolean;
   isEventViewer?: boolean;
   loading: boolean;
   onColumnResized: OnColumnResized;
   onEventToggled: () => void;
   onPinEvent: OnPinEvent;
   onUnPinEvent: OnUnPinEvent;
-  pinnedEventIds: Readonly<Record<string, boolean>>;
   showNotes: boolean;
   timelineId: string;
   toggleShowNotes: () => void;
@@ -56,13 +56,13 @@ export const EventColumnView = React.memo<Props>(
     eventIdToNoteIds,
     expanded,
     getNotesByIds,
+    isEventPinned = false,
     isEventViewer = false,
     loading,
     onColumnResized,
     onEventToggled,
     onPinEvent,
     onUnPinEvent,
-    pinnedEventIds,
     showNotes,
     timelineId,
     toggleShowNotes,
@@ -76,10 +76,7 @@ export const EventColumnView = React.memo<Props>(
         expanded={expanded}
         data-test-subj="actions"
         eventId={id}
-        eventIsPinned={eventIsPinned({
-          eventId: id,
-          pinnedEventIds,
-        })}
+        eventIsPinned={isEventPinned}
         getNotesByIds={getNotesByIds}
         isEventViewer={isEventViewer}
         loading={loading}
@@ -90,7 +87,7 @@ export const EventColumnView = React.memo<Props>(
           eventId: id,
           onPinEvent,
           onUnPinEvent,
-          pinnedEventIds,
+          isEventPinned,
         })}
         showCheckboxes={false}
         showNotes={showNotes}
@@ -118,7 +115,7 @@ export const EventColumnView = React.memo<Props>(
       prevProps.eventIdToNoteIds === nextProps.eventIdToNoteIds &&
       prevProps.expanded === nextProps.expanded &&
       prevProps.loading === nextProps.loading &&
-      prevProps.pinnedEventIds === nextProps.pinnedEventIds &&
+      prevProps.isEventPinned === nextProps.isEventPinned &&
       prevProps.showNotes === nextProps.showNotes &&
       prevProps.timelineId === nextProps.timelineId
     );

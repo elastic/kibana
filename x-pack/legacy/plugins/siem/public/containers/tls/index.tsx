@@ -8,6 +8,7 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
+import { compose } from 'redux';
 
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
@@ -49,7 +50,7 @@ export interface TlsComponentReduxProps {
   activePage: number;
   isInspected: boolean;
   limit: number;
-  tlsSortField: TlsSortField;
+  sort: TlsSortField;
 }
 
 type TlsProps = OwnProps & TlsComponentReduxProps;
@@ -73,7 +74,7 @@ class TlsComponentQuery extends QueryTemplatePaginated<
       skip,
       sourceId,
       startDate,
-      tlsSortField,
+      sort,
     } = this.props;
     const variables: GetTlsQuery.Variables = {
       defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
@@ -82,7 +83,7 @@ class TlsComponentQuery extends QueryTemplatePaginated<
       inspect: isInspected,
       ip,
       pagination: generateTablePaginationOptions(activePage, limit),
-      sort: tlsSortField,
+      sort,
       sourceId,
       timerange: {
         interval: '12h',
@@ -139,15 +140,18 @@ class TlsComponentQuery extends QueryTemplatePaginated<
   }
 }
 
-const mapStateToProps = (state: State, { id = ID, type }: OwnProps) => {
-  const getTlsSelector = networkSelectors.tlsSelector(type);
+const makeMapStateToProps = () => {
+  const getTlsSelector = networkSelectors.tlsSelector();
   const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const { isInspected } = getQuery(state, id);
-
-  return {
-    ...getTlsSelector(state),
-    isInspected,
+  return (state: State, { flowTarget, id = ID, type }: OwnProps) => {
+    const { isInspected } = getQuery(state, id);
+    return {
+      ...getTlsSelector(state, type, flowTarget),
+      isInspected,
+    };
   };
 };
 
-export const TlsQuery = connect(mapStateToProps)(TlsComponentQuery);
+export const TlsQuery = compose<React.ComponentClass<OwnProps>>(connect(makeMapStateToProps))(
+  TlsComponentQuery
+);

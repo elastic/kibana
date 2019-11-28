@@ -88,12 +88,12 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
     <EuiDescribedFormGroup
       title={
         <EuiTitle size="s">
-          <h3>
+          <h2>
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryForm.fields.nameDescriptionTitle"
               defaultMessage="Repository name"
             />
-          </h3>
+          </h2>
         </EuiTitle>
       }
       description={
@@ -227,12 +227,12 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
     return (
       <Fragment>
         <EuiTitle size="s">
-          <h3>
+          <h2>
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryForm.fields.typeDescriptionTitle"
               defaultMessage="Repository type"
             />
-          </h3>
+          </h2>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText id="repositoryTypeDescription" size="s" color="subdued">
@@ -274,12 +274,12 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
     <EuiDescribedFormGroup
       title={
         <EuiTitle size="s">
-          <h3>
+          <h2>
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryForm.fields.sourceOnlyDescriptionTitle"
               defaultMessage="Source-only snapshots"
             />
-          </h3>
+          </h2>
         </EuiTitle>
       }
       description={

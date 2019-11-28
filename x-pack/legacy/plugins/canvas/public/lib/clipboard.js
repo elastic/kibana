@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Storage } from 'ui/storage';
+import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { LOCALSTORAGE_CLIPBOARD } from '../../common/lib/constants';
 import { getWindow } from './get_window';
 

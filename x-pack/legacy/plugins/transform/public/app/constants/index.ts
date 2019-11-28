@@ -14,6 +14,7 @@ export enum SECTION_SLUG {
 export enum TRANSFORM_DOC_PATHS {
   default = 'docs.html',
   plugins = 'plugins.html',
+  transforms = 'transforms.html',
 }
 
 // UI Metric constants

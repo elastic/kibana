@@ -7,11 +7,9 @@
 import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-
-import { TimeRange } from 'src/plugins/data/public';
-import { Query, StaticIndexPattern } from 'src/legacy/core_plugins/data/public';
-import { ExpressionRenderer } from 'src/legacy/core_plugins/expressions/public';
-import { Filter } from '@kbn/es-query';
+import { Query, TimeRange, esFilters } from 'src/plugins/data/public';
+import { ExpressionRenderer } from 'src/plugins/expressions/public';
+import { StaticIndexPattern } from 'src/legacy/core_plugins/data/public';
 import { Subscription } from 'rxjs';
 import {
   Embeddable as AbstractEmbeddable,
@@ -32,7 +30,7 @@ export interface LensEmbeddableConfiguration {
 export interface LensEmbeddableInput extends EmbeddableInput {
   timeRange?: TimeRange;
   query?: Query;
-  filters?: Filter[];
+  filters?: esFilters.Filter[];
 }
 
 export interface LensEmbeddableOutput extends EmbeddableOutput {
@@ -50,7 +48,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
   private currentContext: {
     timeRange?: TimeRange;
     query?: Query;
-    filters?: Filter[];
+    filters?: esFilters.Filter[];
     lastReloadRequestTime?: number;
   } = {};
 

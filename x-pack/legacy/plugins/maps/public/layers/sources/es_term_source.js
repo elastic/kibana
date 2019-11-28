@@ -6,27 +6,20 @@
 
 import _ from 'lodash';
 
-import { AbstractESSource } from './es_source';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggConfigs } from 'ui/agg_types';
 import { i18n } from '@kbn/i18n';
-import { ESTooltipProperty } from '../tooltips/es_tooltip_property';
-import { ES_SIZE_LIMIT } from '../../../common/constants';
+import { ES_SIZE_LIMIT, FIELD_ORIGIN, METRIC_TYPE } from '../../../common/constants';
+import { ESDocField } from '../fields/es_doc_field';
+import { AbstractESAggSource } from './es_agg_source';
 
 const TERMS_AGG_NAME = 'join';
 
+const FIELD_NAME_PREFIX = '__kbnjoin__';
+const GROUP_BY_DELIMITER = '_groupby_';
+
 const aggSchemas = new Schemas([
-  {
-    group: 'metrics',
-    name: 'metric',
-    title: 'Value',
-    min: 1,
-    max: Infinity,
-    aggFilter: ['avg', 'count', 'max', 'min', 'sum'],
-    defaults: [
-      { schema: 'metric', type: 'count' }
-    ]
-  },
+  AbstractESAggSource.METRIC_SCHEMA_CONFIG,
   {
     group: 'buckets',
     name: 'segment',
@@ -54,10 +47,14 @@ export function extractPropertiesMap(rawEsData, propertyNames, countPropertyName
   return propertiesMap;
 }
 
-export class ESTermSource extends AbstractESSource {
+export class ESTermSource extends AbstractESAggSource {
 
   static type = 'ES_TERM_SOURCE';
 
+  constructor(descriptor, inspectorAdapters) {
+    super(descriptor, inspectorAdapters);
+    this._termField = new ESDocField({ fieldName: descriptor.term, source: this, origin: this.getOriginForField() });
+  }
 
   static renderEditor({}) {
     //no need to localize. this editor is never rendered.
@@ -72,22 +69,26 @@ export class ESTermSource extends AbstractESSource {
     return  [this._descriptor.indexPatternId];
   }
 
-  getTerm() {
-    return this._descriptor.term;
+  getTermField() {
+    return this._termField;
+  }
+
+  getOriginForField() {
+    return FIELD_ORIGIN.JOIN;
   }
 
   getWhereQuery() {
     return this._descriptor.whereQuery;
   }
 
-  _formatMetricKey(metric) {
-    const metricKey = metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : metric.type;
-    return `__kbnjoin__${metricKey}_groupby_${this._descriptor.indexPatternTitle}.${this._descriptor.term}`;
+  formatMetricKey(aggType, fieldName) {
+    const metricKey = aggType !== METRIC_TYPE.COUNT ? `${aggType}_of_${fieldName}` : aggType;
+    return `${FIELD_NAME_PREFIX}${metricKey}${GROUP_BY_DELIMITER}${this._descriptor.indexPatternTitle}.${this._termField.getName()}`;
   }
 
-  _formatMetricLabel(metric) {
-    const metricLabel = metric.type !== 'count' ? `${metric.type} ${metric.field}` : 'count';
-    return `${metricLabel} of ${this._descriptor.indexPatternTitle}:${this._descriptor.term}`;
+  formatMetricLabel(type, fieldName) {
+    const metricLabel = type !== METRIC_TYPE.COUNT ? `${type} ${fieldName}` : 'count';
+    return `${metricLabel} of ${this._descriptor.indexPatternTitle}:${this._termField.getName()}`;
   }
 
   async getPropertiesMap(searchFilters, leftSourceName, leftFieldName, registerCancelCallback) {
@@ -96,25 +97,25 @@ export class ESTermSource extends AbstractESSource {
       return [];
     }
 
-    const indexPattern = await this._getIndexPattern();
+    const indexPattern = await this.getIndexPattern();
     const searchSource  = await this._makeSearchSource(searchFilters, 0);
     const configStates = this._makeAggConfigs();
     const aggConfigs = new AggConfigs(indexPattern, configStates, aggSchemas.all);
     searchSource.setField('aggs', aggConfigs.toDsl());
 
-    const requestName = `${this._descriptor.indexPatternTitle}.${this._descriptor.term}`;
+    const requestName = `${this._descriptor.indexPatternTitle}.${this._termField.getName()}`;
     const requestDesc = this._getRequestDescription(leftSourceName, leftFieldName);
     const rawEsData = await this._runEsQuery(requestName, searchSource, registerCancelCallback, requestDesc);
 
     const metricPropertyNames = configStates
       .filter(configState => {
-        return configState.schema === 'metric' && configState.type !== 'count';
+        return configState.schema === 'metric' && configState.type !== METRIC_TYPE.COUNT;
       })
       .map(configState => {
         return configState.id;
       });
     const countConfigState = configStates.find(configState => {
-      return configState.type === 'count';
+      return configState.type === METRIC_TYPE.COUNT;
     });
     const countPropertyName = _.get(countConfigState, 'id');
     return {
@@ -127,15 +128,13 @@ export class ESTermSource extends AbstractESSource {
   }
 
   _getRequestDescription(leftSourceName, leftFieldName) {
-    const metrics = this._getValidMetrics().map(metric => {
-      return metric.type !== 'count' ? `${metric.type} ${metric.field}` : 'count';
-    });
+    const metrics = this.getMetricFields().map(esAggMetric => esAggMetric.getRequestDescription());
     const joinStatement = [];
     joinStatement.push(i18n.translate('xpack.maps.source.esJoin.joinLeftDescription', {
       defaultMessage: `Join {leftSourceName}:{leftFieldName} with`,
       values: { leftSourceName, leftFieldName }
     }));
-    joinStatement.push(`${this._descriptor.indexPatternTitle}:${this._descriptor.term}`);
+    joinStatement.push(`${this._descriptor.indexPatternTitle}:${this._termField.getName()}`);
     joinStatement.push(i18n.translate('xpack.maps.source.esJoin.joinMetricsDescription', {
       defaultMessage: `for metrics {metrics}`,
       values: { metrics: metrics.join(',') }
@@ -149,20 +148,7 @@ export class ESTermSource extends AbstractESSource {
   }
 
   _makeAggConfigs() {
-    const metricAggConfigs = this.getMetricFields().map(metric => {
-      const metricAggConfig = {
-        id: metric.propertyKey,
-        enabled: true,
-        type: metric.type,
-        schema: 'metric',
-        params: {}
-      };
-      if (metric.type !== 'count') {
-        metricAggConfig.params = { field: metric.field };
-      }
-      return metricAggConfig;
-    });
-
+    const metricAggConfigs = this.createMetricAggConfigs();
     return [
       ...metricAggConfigs,
       {
@@ -171,7 +157,7 @@ export class ESTermSource extends AbstractESSource {
         type: 'terms',
         schema: 'segment',
         params: {
-          field: this._descriptor.term,
+          field: this._termField.getName(),
           size: ES_SIZE_LIMIT
         }
       }
@@ -187,21 +173,7 @@ export class ESTermSource extends AbstractESSource {
     return await this.filterAndFormatPropertiesToHtmlForMetricFields(properties);
   }
 
-  async createESTooltipProperty(propertyName, rawValue) {
-    try {
-      const indexPattern = await this._getIndexPattern();
-      if (!indexPattern) {
-        return null;
-      }
-      return new ESTooltipProperty(propertyName, propertyName, rawValue, indexPattern);
-    } catch (e) {
-      return null;
-    }
-  }
-
   getFieldNames() {
-    return this.getMetricFields().map(({ propertyKey }) => {
-      return propertyKey;
-    });
+    return this.getMetricFields().map(esAggMetricField => esAggMetricField.getName());
   }
 }

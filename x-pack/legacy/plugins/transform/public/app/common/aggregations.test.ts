@@ -18,5 +18,12 @@ describe('Transform: Aggregations', () => {
     expect(isAggName('avg responsetime ')).toEqual(false);
     expect(isAggName(' avg responsetime ')).toEqual(false);
     expect(isAggName('date_histogram(@timestamp')).toEqual(true);
+    expect(isAggName('os')).toEqual(true);
+    expect(isAggName('v')).toEqual(true);
+    expect(isAggName(' v')).toEqual(false);
+    expect(isAggName('v ')).toEqual(false);
+    expect(isAggName(' os ')).toEqual(false);
+    expect(isAggName('[os]')).toEqual(false);
+    expect(isAggName('>os]')).toEqual(false);
   });
 });

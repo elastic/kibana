@@ -54,12 +54,12 @@ export class HotPhase extends PureComponent {
         <EuiDescribedFormGroup
           title={
             <div>
-              <span className="eui-displayInlineBlock eui-alignMiddle">
+              <h2 className="eui-displayInlineBlock eui-alignMiddle">
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.hotPhaseLabel"
                   defaultMessage="Hot phase"
                 />
-              </span>{' '}
+              </h2>{' '}
               {isShowingErrors ? null : <ActiveBadge />}
               <PhaseErrorMessage isShowingErrors={isShowingErrors} />
             </div>

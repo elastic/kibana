@@ -23,7 +23,7 @@ import { MockUiSettingsClientConstructor } from './ui_settings_service.test.mock
 import { UiSettingsService } from './ui_settings_service';
 import { httpServiceMock } from '../http/http_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
-import { SavedObjectsClientMock } from '../mocks';
+import { savedObjectsClientMock } from '../mocks';
 import { mockCoreContext } from '../core_context.mock';
 
 const overrides = {
@@ -43,7 +43,7 @@ const coreContext = mockCoreContext.create();
 coreContext.configService.atPath.mockReturnValue(new BehaviorSubject({ overrides }));
 const httpSetup = httpServiceMock.createSetupContract();
 const setupDeps = { http: httpSetup };
-const savedObjectsClient = SavedObjectsClientMock.create();
+const savedObjectsClient = savedObjectsClientMock.create();
 
 afterEach(() => {
   MockUiSettingsClientConstructor.mockClear();
@@ -52,6 +52,14 @@ afterEach(() => {
 describe('uiSettings', () => {
   describe('#setup', () => {
     describe('#asScopedToClient', () => {
+      it('passes saved object type "config" to UiSettingsClient', async () => {
+        const service = new UiSettingsService(coreContext);
+        const setup = await service.setup(setupDeps);
+        setup.asScopedToClient(savedObjectsClient);
+        expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
+        expect(MockUiSettingsClientConstructor.mock.calls[0][0].type).toBe('config');
+      });
+
       it('passes overrides to UiSettingsClient', async () => {
         const service = new UiSettingsService(coreContext);
         const setup = await service.setup(setupDeps);
@@ -86,7 +94,7 @@ describe('uiSettings', () => {
         const service = new UiSettingsService(coreContext);
         const setup = await service.setup(setupDeps);
 
-        setup.setDefaults(defaults);
+        setup.register(defaults);
         setup.asScopedToClient(savedObjectsClient);
         expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
 
@@ -95,13 +103,13 @@ describe('uiSettings', () => {
       });
     });
 
-    describe('#setDefaults', () => {
-      it('throws if set defaults for the same key twice', async () => {
+    describe('#register', () => {
+      it('throws if registers the same key twice', async () => {
         const service = new UiSettingsService(coreContext);
         const setup = await service.setup(setupDeps);
-        setup.setDefaults(defaults);
-        expect(() => setup.setDefaults(defaults)).toThrowErrorMatchingInlineSnapshot(
-          `"uiSettings defaults for key [foo] has been already set"`
+        setup.register(defaults);
+        expect(() => setup.register(defaults)).toThrowErrorMatchingInlineSnapshot(
+          `"uiSettings for the key [foo] has been already registered"`
         );
       });
     });

@@ -23,7 +23,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import lightEuiTheme from '@elastic/eui/dist/eui_theme_light.json';
 import darkEuiTheme from '@elastic/eui/dist/eui_theme_dark.json';
-import { npStart } from 'ui/new_platform';
 
 import {
   AnnotationDomainTypes,
@@ -44,12 +43,9 @@ import {
 } from '@elastic/charts';
 
 import { i18n } from '@kbn/i18n';
-
-import chrome from 'ui/chrome';
-// @ts-ignore: path dynamic for kibana
-import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { EuiChartThemeType } from '@elastic/eui/src/themes/charts/themes';
 import { Subscription } from 'rxjs';
+import { getServices, timezoneProvider } from '../../kibana_services';
 
 export interface DiscoverHistogramProps {
   chartData: any;
@@ -68,12 +64,12 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
 
   private subscription?: Subscription;
   public state = {
-    chartsTheme: npStart.plugins.eui_utils.getChartsThemeDefault(),
+    chartsTheme: getServices().eui_utils.getChartsThemeDefault(),
   };
 
   componentDidMount() {
-    this.subscription = npStart.plugins.eui_utils
-      .getChartsTheme$()
+    this.subscription = getServices()
+      .eui_utils.getChartsTheme$()
       .subscribe(chartsTheme => this.setState({ chartsTheme }));
   }
 
@@ -145,7 +141,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
   };
 
   public render() {
-    const uiSettings = chrome.getUiSettingsClient();
+    const uiSettings = getServices().uiSettings;
     const timeZone = timezoneProvider(uiSettings)();
     const { chartData } = this.props;
     const { chartsTheme } = this.state;

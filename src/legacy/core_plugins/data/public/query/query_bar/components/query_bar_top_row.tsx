@@ -17,34 +17,43 @@
  * under the License.
  */
 
-import { doesKueryExpressionHaveLuceneSyntaxError } from '@kbn/es-query';
-
+import dateMath from '@elastic/datemath';
 import classNames from 'classnames';
-import React, { useState, useEffect } from 'react';
-
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSuperDatePicker } from '@elastic/eui';
+import React, { useState } from 'react';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiSuperDatePicker,
+  prettyDuration,
+} from '@elastic/eui';
 // @ts-ignore
 import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Toast } from 'src/core/public';
-import { TimeRange } from 'src/plugins/data/public';
-import { useKibana } from '../../../../../../../plugins/kibana_react/public';
-
-import { IndexPattern } from '../../../index_patterns';
-import { QueryBarInput } from './query_bar_input';
-import { Query, getQueryLog } from '../index';
-import { TimeHistoryContract } from '../../../timefilter';
-import { IDataPluginServices } from '../../../types';
-import { PersistedLog } from '../../persisted_log';
+import {
+  IDataPluginServices,
+  IIndexPattern,
+  TimeRange,
+  TimeHistoryContract,
+  Query,
+  PersistedLog,
+  getQueryLog,
+  esKuery,
+} from '../../../../../../../plugins/data/public';
+import { useKibana, toMountPoint } from '../../../../../../../plugins/kibana_react/public';
+import { QueryStringInput } from './query_string_input';
 
 interface Props {
   query?: Query;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
+  dataTestSubj?: string;
   disableAutoFocus?: boolean;
   screenTitle?: string;
-  indexPatterns?: Array<IndexPattern | string>;
+  indexPatterns?: Array<IIndexPattern | string>;
   intl: InjectedIntl;
   isLoading?: boolean;
   prepend?: React.ReactNode;
@@ -65,17 +74,18 @@ function QueryBarTopRowUI(props: Props) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
 
   const kibana = useKibana<IDataPluginServices>();
-  const { uiSettings, notifications, store, appName, docLinks } = kibana.services;
+  const { uiSettings, notifications, storage, appName, docLinks } = kibana.services;
 
   const kueryQuerySyntaxLink: string = docLinks!.links.query.kueryQuerySyntax;
 
   const queryLanguage = props.query && props.query.language;
-  let persistedLog: PersistedLog | undefined;
-
-  useEffect(() => {
-    if (!props.query) return;
-    persistedLog = getQueryLog(uiSettings!, store, appName, props.query.language);
-  }, [queryLanguage]);
+  const persistedLog: PersistedLog | undefined = React.useMemo(
+    () =>
+      queryLanguage && uiSettings && storage && appName
+        ? getQueryLog(uiSettings!, storage, appName, queryLanguage)
+        : undefined,
+    [appName, queryLanguage, uiSettings, storage]
+  );
 
   function onClickSubmitButton(event: React.MouseEvent<HTMLButtonElement>) {
     if (persistedLog && props.query) {
@@ -156,11 +166,19 @@ function QueryBarTopRowUI(props: Props) {
     });
   }
 
+  function toAbsoluteString(value: string, roundUp = false) {
+    const valueAsMoment = dateMath.parse(value, { roundUp });
+    if (!valueAsMoment) {
+      return value;
+    }
+    return valueAsMoment.toISOString();
+  }
+
   function renderQueryInput() {
     if (!shouldRenderQueryInput()) return;
     return (
       <EuiFlexItem>
-        <QueryBarInput
+        <QueryStringInput
           disableAutoFocus={props.disableAutoFocus}
           indexPatterns={props.indexPatterns!}
           prepend={props.prepend}
@@ -169,8 +187,25 @@ function QueryBarTopRowUI(props: Props) {
           onChange={onQueryChange}
           onSubmit={onInputSubmit}
           persistedLog={persistedLog}
+          dataTestSubj={props.dataTestSubj}
         />
       </EuiFlexItem>
+    );
+  }
+
+  function renderSharingMetaFields() {
+    const { from, to } = getDateRange();
+    const dateRangePretty = prettyDuration(
+      toAbsoluteString(from),
+      toAbsoluteString(to),
+      [],
+      uiSettings.get('dateFormat')
+    );
+    return (
+      <div
+        data-shared-timefilter-duration={dateRangePretty}
+        data-test-subj="dataSharedTimefilterDuration"
+      />
     );
   }
 
@@ -179,7 +214,7 @@ function QueryBarTopRowUI(props: Props) {
   }
 
   function shouldRenderQueryInput(): boolean {
-    return Boolean(props.showQueryInput && props.indexPatterns && props.query && store);
+    return Boolean(props.showQueryInput && props.indexPatterns && props.query && storage);
   }
 
   function renderUpdateButton() {
@@ -261,15 +296,15 @@ function QueryBarTopRowUI(props: Props) {
     if (
       language === 'kuery' &&
       typeof query === 'string' &&
-      (!store || !store.get('kibana.luceneSyntaxWarningOptOut')) &&
-      doesKueryExpressionHaveLuceneSyntaxError(query)
+      (!storage || !storage.get('kibana.luceneSyntaxWarningOptOut')) &&
+      esKuery.doesKueryExpressionHaveLuceneSyntaxError(query)
     ) {
       const toast = notifications!.toasts.addWarning({
         title: intl.formatMessage({
           id: 'data.query.queryBar.luceneSyntaxWarningTitle',
           defaultMessage: 'Lucene syntax warning',
         }),
-        text: (
+        text: toMountPoint(
           <div>
             <p>
               <FormattedMessage
@@ -305,8 +340,8 @@ function QueryBarTopRowUI(props: Props) {
   }
 
   function onLuceneSyntaxWarningOptOut(toast: Toast) {
-    if (!store) return;
-    store.set('kibana.luceneSyntaxWarningOptOut', true);
+    if (!storage) return;
+    storage.set('kibana.luceneSyntaxWarningOptOut', true);
     notifications!.toasts.remove(toast);
   }
 
@@ -322,6 +357,7 @@ function QueryBarTopRowUI(props: Props) {
       justifyContent="flexEnd"
     >
       {renderQueryInput()}
+      {renderSharingMetaFields()}
       <EuiFlexItem grow={false}>{renderUpdateButton()}</EuiFlexItem>
     </EuiFlexGroup>
   );

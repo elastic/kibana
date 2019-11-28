@@ -12,17 +12,10 @@ const getTabsOnNetworkUrl = (tabName: NetworkRouteType) => `#/network/${tabName}
 
 export const navTabsNetwork = (hasMlUserPermissions: boolean): NetworkNavTab => {
   const networkNavTabs = {
-    [NetworkRouteType.ips]: {
-      id: NetworkRouteType.ips,
-      name: i18n.NAVIGATION_IPS_TITLE,
-      href: getTabsOnNetworkUrl(NetworkRouteType.ips),
-      disabled: false,
-      urlKey: 'network',
-    },
-    [NetworkRouteType.countries]: {
-      id: NetworkRouteType.countries,
-      name: i18n.NAVIGATION_COUNTRIES_TITLE,
-      href: getTabsOnNetworkUrl(NetworkRouteType.countries),
+    [NetworkRouteType.flows]: {
+      id: NetworkRouteType.flows,
+      name: i18n.NAVIGATION_FLOWS_TITLE,
+      href: getTabsOnNetworkUrl(NetworkRouteType.flows),
       disabled: false,
       urlKey: 'network',
     },
@@ -30,6 +23,13 @@ export const navTabsNetwork = (hasMlUserPermissions: boolean): NetworkNavTab => 
       id: NetworkRouteType.dns,
       name: i18n.NAVIGATION_DNS_TITLE,
       href: getTabsOnNetworkUrl(NetworkRouteType.dns),
+      disabled: false,
+      urlKey: 'network',
+    },
+    [NetworkRouteType.http]: {
+      id: NetworkRouteType.http,
+      name: i18n.NAVIGATION_HTTP_TITLE,
+      href: getTabsOnNetworkUrl(NetworkRouteType.http),
       disabled: false,
       urlKey: 'network',
     },

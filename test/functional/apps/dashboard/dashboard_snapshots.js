@@ -23,11 +23,17 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common']);
   const screenshot = getService('screenshots');
   const browser = getService('browser');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('dashboard snapshots', function describeIndexTests() {
     before(async function () {
+      await esArchiver.load('dashboard/current/kibana');
+      await kibanaServer.uiSettings.replace({
+        'defaultIndex': '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      });
       // We use a really small window to minimize differences across os's and browsers.
       await browser.setScreenshotSize(1000, 500);
       // adding this navigate adds the timestamp hash to the url which invalidates previous
@@ -47,7 +53,6 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.common.closeToast();
 
       await PageObjects.dashboard.saveDashboard('tsvb');
-      await PageObjects.common.closeToast();
       await PageObjects.dashboard.clickFullScreenMode();
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickExpandPanelToggle();
@@ -68,7 +73,6 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.common.closeToast();
 
       await PageObjects.dashboard.saveDashboard('area');
-      await PageObjects.common.closeToast();
       await PageObjects.dashboard.clickFullScreenMode();
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickExpandPanelToggle();

@@ -1,0 +1,8 @@
+{
+  "id": "reporting",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "requiredPlugins": [],
+  "server": false,
+  "ui": true
+}

@@ -4,8 +4,8 @@ exports[`Transform: <TransformManagementSection /> Minimal initialization 1`] = 
 <PrivilegesWrapper
   privileges={
     Array [
-      "cluster.cluster:monitor/data_frame/get",
-      "cluster.cluster:monitor/data_frame/stats/get",
+      "cluster.cluster:monitor/transform/get",
+      "cluster.cluster:monitor/transform/stats/get",
     ]
   }
 >

@@ -9,7 +9,7 @@ Deletes a SavedObject
 <b>Signature:</b>
 
 ```typescript
-delete(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<{}>;
+delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
 ```
 
 ## Parameters
@@ -18,7 +18,7 @@ delete(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<{}>
 |  --- | --- | --- |
 |  type | <code>string</code> |  |
 |  id | <code>string</code> |  |
-|  options | <code>SavedObjectsBaseOptions</code> |  |
+|  options | <code>SavedObjectsDeleteOptions</code> |  |
 
 <b>Returns:</b>
 

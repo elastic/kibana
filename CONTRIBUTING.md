@@ -325,7 +325,7 @@ Note that for VSCode, to enable "live" linting of TypeScript (and other) file ty
   "eslint.autoFixOnSave": true,
 ```
 
-It is **not** recommended to use `prettier` plugin on Kibana project. Because settings are in `eslintrc.js` file and it is applied to too many files that shouldn't be prettier-ized. 
+:warning: It is **not** recommended to use the [`Prettier` extension/IDE plugin](https://prettier.io/) while maintaining the Kibana project. Formatting and styling roles are set in the multiple `.eslintrc.js` files across the project and some of them use the [NPM version of Prettier](https://www.npmjs.com/package/prettier). Using the IDE extension might cause conflicts, applying the formatting to too many files that shouldn't be prettier-ized and/or highlighting errors that are actually OK.
 
 ### Internationalization
 
@@ -399,13 +399,19 @@ Test runner arguments:
  - `[test path]` is the relative path to the test file.
 
  Examples:
-  - Run the entire elasticsearch_service test suite with yarn:
-    `node scripts/jest src/core/server/elasticsearch/elasticsearch_service.test.ts`
-  - Run the jest test case whose description matches 'stops both admin and data clients':
-    `node scripts/jest -t 'stops both admin and data clients' src/core/server/elasticsearch/elasticsearch_service.test.ts`
+  - Run the entire elasticsearch_service test suite:
+    ```
+    node scripts/jest src/core/server/elasticsearch/elasticsearch_service.test.ts
+    ```
+  - Run the jest test case whose description matches `stops both admin and data clients`:
+    ```
+    node scripts/jest -t 'stops both admin and data clients' src/core/server/elasticsearch/elasticsearch_service.test.ts
+    ```
   - Run the api integration test case whose description matches the given string:
-    `node scripts/functional_tests_server --config test/api_integration/config.js`
-    `node scripts/functional_test_runner --config test/api_integration/config.js --grep='should return 404 if id does not match any sample data sets'`
+    ```
+    node scripts/functional_tests_server --config test/api_integration/config.js
+    node scripts/functional_test_runner --config test/api_integration/config.js --grep='should return 404 if id does not match any sample data sets'
+    ```
 
 ### Debugging Unit Tests
 

@@ -18,7 +18,7 @@
  */
 import React from 'react';
 import { EuiTabbedContent } from '@elastic/eui';
-import { getDocViewsSorted, DocViewRenderProps } from 'ui/registry/doc_views';
+import { getServices, DocViewRenderProps } from '../kibana_services';
 import { DocViewerTab } from './doc_viewer_tab';
 
 /**
@@ -28,21 +28,24 @@ import { DocViewerTab } from './doc_viewer_tab';
  * a `render` function.
  */
 export function DocViewer(renderProps: DocViewRenderProps) {
-  const tabs = getDocViewsSorted(renderProps.hit).map(({ title, render, component }, idx) => {
-    return {
-      id: title,
-      name: title,
-      content: (
-        <DocViewerTab
-          id={idx}
-          title={title}
-          component={component}
-          renderProps={renderProps}
-          render={render}
-        />
-      ),
-    };
-  });
+  const { docViewsRegistry } = getServices();
+  const tabs = docViewsRegistry
+    .getDocViewsSorted(renderProps.hit)
+    .map(({ title, render, component }, idx) => {
+      return {
+        id: title,
+        name: title,
+        content: (
+          <DocViewerTab
+            id={idx}
+            title={title}
+            component={component}
+            renderProps={renderProps}
+            render={render}
+          />
+        ),
+      };
+    });
 
   if (!tabs.length) {
     // There there's a minimum of 2 tabs active in Discover.

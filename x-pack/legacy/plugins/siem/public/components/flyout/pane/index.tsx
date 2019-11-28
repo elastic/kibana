@@ -5,7 +5,7 @@
  */
 
 import { EuiButtonIcon, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiToolTip } from '@elastic/eui';
-import * as React from 'react';
+import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
@@ -122,19 +122,22 @@ const FlyoutPaneComponent = React.memo<Props>(
     usersViewing,
     width,
   }) => {
-    const renderFlyout = () => <></>;
+    const renderFlyout = useCallback(() => <></>, []);
 
-    const onResize: OnResize = ({ delta, id }) => {
-      const bodyClientWidthPixels = document.body.clientWidth;
+    const onResize: OnResize = useCallback(
+      ({ delta, id }) => {
+        const bodyClientWidthPixels = document.body.clientWidth;
 
-      applyDeltaToWidth({
-        bodyClientWidthPixels,
-        delta,
-        id,
-        maxWidthPercent,
-        minWidthPixels,
-      });
-    };
+        applyDeltaToWidth({
+          bodyClientWidthPixels,
+          delta,
+          id,
+          maxWidthPercent,
+          minWidthPixels,
+        });
+      },
+      [applyDeltaToWidth, maxWidthPercent, minWidthPixels]
+    );
     return (
       <EuiFlyoutContainer headerHeight={headerHeight} data-test-subj="flyout-pane" width={width}>
         <EuiFlyout
@@ -176,9 +179,6 @@ const FlyoutPaneComponent = React.memo<Props>(
 
 FlyoutPaneComponent.displayName = 'FlyoutPaneComponent';
 
-export const Pane = connect(
-  null,
-  {
-    applyDeltaToWidth: timelineActions.applyDeltaToWidth,
-  }
-)(FlyoutPaneComponent);
+export const Pane = connect(null, {
+  applyDeltaToWidth: timelineActions.applyDeltaToWidth,
+})(FlyoutPaneComponent);

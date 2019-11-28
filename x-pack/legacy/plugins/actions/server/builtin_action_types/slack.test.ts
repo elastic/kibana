@@ -6,7 +6,7 @@
 
 import { ActionType, Services, ActionTypeExecutorOptions } from '../types';
 import { ActionTypeRegistry } from '../action_type_registry';
-import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { ActionExecutor, validateParams, validateSecrets, TaskRunnerFactory } from '../lib';
 import { getActionType } from './slack';
 import { taskManagerMock } from '../../../task_manager/task_manager.mock';
@@ -15,7 +15,7 @@ const ACTION_TYPE_ID = '.slack';
 
 const services: Services = {
   callCluster: async (path: string, opts: any) => {},
-  savedObjectsClient: SavedObjectsClientMock.create(),
+  savedObjectsClient: savedObjectsClientMock.create(),
 };
 
 let actionTypeRegistry: ActionTypeRegistry;

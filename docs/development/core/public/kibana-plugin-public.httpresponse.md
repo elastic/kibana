@@ -8,14 +8,12 @@
 <b>Signature:</b>
 
 ```typescript
-export interface HttpResponse 
+export interface HttpResponse extends InterceptedHttpResponse 
 ```
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [body](./kibana-plugin-public.httpresponse.body.md) | <code>HttpBody</code> |  |
-|  [request](./kibana-plugin-public.httpresponse.request.md) | <code>Request</code> |  |
-|  [response](./kibana-plugin-public.httpresponse.response.md) | <code>Response</code> |  |
+|  [request](./kibana-plugin-public.httpresponse.request.md) | <code>Readonly&lt;Request&gt;</code> |  |
 

@@ -7,8 +7,7 @@
 import * as Rx from 'rxjs';
 import { toArray, mergeMap } from 'rxjs/operators';
 import { LevelLogger } from '../../../../server/lib';
-import { KbnServer, ConditionalHeaders } from '../../../../types';
-import { oncePerServer } from '../../../../server/lib/once_per_server';
+import { ServerFacade, ConditionalHeaders } from '../../../../types';
 import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
 import { PreserveLayout } from '../../../common/layouts/preserve_layout';
 import { LayoutParams } from '../../../common/layouts/layout';
@@ -21,12 +20,12 @@ interface UrlScreenshot {
   screenshots: ScreenshotData[];
 }
 
-function generatePngObservableFn(server: KbnServer) {
+export function generatePngObservableFactory(server: ServerFacade) {
   const screenshotsObservable = screenshotsObservableFactory(server);
   const captureConcurrency = 1;
 
   // prettier-ignore
-  const createPngWithScreenshots = async ({ urlScreenshots }: { urlScreenshots: UrlScreenshot[] }) => {
+  const createPngWithScreenshots = async ({ urlScreenshots }: { urlScreenshots: UrlScreenshot[] }): Promise<string> => {
     if (urlScreenshots.length !== 1) {
       throw new Error(
         `Expected there to be 1 URL screenshot, but there are ${urlScreenshots.length}`
@@ -47,7 +46,7 @@ function generatePngObservableFn(server: KbnServer) {
     browserTimezone: string,
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams
-  ) {
+  ): Rx.Observable<string> {
     if (!layoutParams || !layoutParams.dimensions) {
       throw new Error(`LayoutParams.Dimensions is undefined.`);
     }
@@ -68,5 +67,3 @@ function generatePngObservableFn(server: KbnServer) {
     );
   };
 }
-
-export const generatePngObservableFactory = oncePerServer(generatePngObservableFn);

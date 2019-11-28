@@ -17,9 +17,8 @@
  * under the License.
  */
 import { useEffect, useState } from 'react';
-import { ElasticSearchHit } from 'ui/registry/doc_views_types';
+import { ElasticSearchHit, IndexPattern } from '../kibana_services';
 import { DocProps } from './doc';
-import { IndexPattern } from '../../../../data/public/index_patterns';
 
 export enum ElasticRequestState {
   Loading,

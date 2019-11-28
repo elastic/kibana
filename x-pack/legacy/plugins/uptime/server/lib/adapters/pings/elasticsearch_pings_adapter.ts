@@ -6,17 +6,12 @@
 
 import { get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
-import {
-  DocCount,
-  HistogramDataPoint,
-  HttpBody,
-  Ping,
-  PingResults,
-} from '../../../../common/graphql/types';
-import { formatEsBucketsForHistogram, parseFilterQuery, getFilterClause } from '../../helper';
+import { DocCount, HttpBody, Ping, PingResults } from '../../../../common/graphql/types';
+import { parseFilterQuery, getFilterClause, getHistogramIntervalFormatted } from '../../helper';
 import { DatabaseAdapter, HistogramQueryResult } from '../database';
 import { UMPingsAdapter } from './adapter_types';
 import { getHistogramInterval } from '../../helper/get_histogram_interval';
+import { HistogramResult } from '../../../../common/domain_types';
 
 export class ElasticsearchPingsAdapter implements UMPingsAdapter {
   private database: DatabaseAdapter;
@@ -171,13 +166,19 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     const buckets: any[] = get(result, 'aggregations.by_id.buckets', []);
 
     // @ts-ignore TODO fix destructuring implicit any
-    return buckets.map(({ latest: { hits: { hits } } }) => {
-      const timestamp = hits[0]._source[`@timestamp`];
-      return {
-        ...hits[0]._source,
-        timestamp,
-      };
-    });
+    return buckets.map(
+      ({
+        latest: {
+          hits: { hits },
+        },
+      }) => {
+        const timestamp = hits[0]._source[`@timestamp`];
+        return {
+          ...hits[0]._source,
+          timestamp,
+        };
+      }
+    );
   }
 
   /**
@@ -195,7 +196,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     filters?: string | null,
     monitorId?: string | null,
     statusFilter?: string | null
-  ): Promise<HistogramDataPoint[]> {
+  ): Promise<HistogramResult> {
     const boolFilters = parseFilterQuery(filters);
     const additionaFilters = [];
     if (monitorId) {
@@ -205,6 +206,8 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
       additionaFilters.push(boolFilters);
     }
     const filter = getFilterClause(dateRangeStart, dateRangeEnd, additionaFilters);
+    const interval = getHistogramInterval(dateRangeStart, dateRangeEnd);
+    const intervalFormatted = getHistogramIntervalFormatted(dateRangeStart, dateRangeEnd);
 
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
@@ -219,7 +222,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
           timeseries: {
             date_histogram: {
               field: '@timestamp',
-              fixed_interval: getHistogramInterval(dateRangeStart, dateRangeEnd),
+              fixed_interval: intervalFormatted,
             },
             aggs: {
               down: {
@@ -244,19 +247,21 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
 
     const result = await this.database.search(request, params);
     const buckets: HistogramQueryResult[] = get(result, 'aggregations.timeseries.buckets', []);
-    const mappedBuckets = buckets.map(bucket => {
-      const key: number = get(bucket, 'key');
+    const histogram = buckets.map(bucket => {
+      const x: number = get(bucket, 'key');
       const downCount: number = get(bucket, 'down.doc_count');
       const upCount: number = get(bucket, 'up.doc_count');
       return {
-        key,
+        x,
         downCount: statusFilter && statusFilter !== 'down' ? 0 : downCount,
         upCount: statusFilter && statusFilter !== 'up' ? 0 : upCount,
         y: 1,
       };
     });
-
-    return formatEsBucketsForHistogram(mappedBuckets);
+    return {
+      histogram,
+      interval,
+    };
   }
 
   /**

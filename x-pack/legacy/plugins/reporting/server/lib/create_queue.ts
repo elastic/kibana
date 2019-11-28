@@ -5,17 +5,16 @@
  */
 
 import { PLUGIN_ID } from '../../common/constants';
-import { KbnServer } from '../../types';
+import { ServerFacade, QueueConfig } from '../../types';
 // @ts-ignore
 import { Esqueue } from './esqueue';
 import { createWorkerFactory } from './create_worker';
-import { oncePerServer } from './once_per_server';
 import { LevelLogger } from './level_logger';
 // @ts-ignore
 import { createTaggedLogger } from './create_tagged_logger'; // TODO remove createTaggedLogger once esqueue is removed
 
-function createQueueFn(server: KbnServer): Esqueue {
-  const queueConfig = server.config().get('xpack.reporting.queue');
+export function createQueueFactory(server: ServerFacade): Esqueue {
+  const queueConfig: QueueConfig = server.config().get('xpack.reporting.queue');
   const index = server.config().get('xpack.reporting.index');
 
   const queueOptions = {
@@ -45,5 +44,3 @@ function createQueueFn(server: KbnServer): Esqueue {
 
   return queue;
 }
-
-export const createQueueFactory = oncePerServer(createQueueFn);

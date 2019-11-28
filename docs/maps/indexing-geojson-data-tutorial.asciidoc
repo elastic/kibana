@@ -2,7 +2,7 @@
 [[indexing-geojson-data-tutorial]]
 == Indexing GeoJSON data tutorial
 
-In this tutorial, you'll build a customized map that shows the flight path between 
+In this tutorial, you'll build a customized map that shows the flight path between
 two airports, and the lightning hot spots on that route. You'll learn to:
 
 * Import GeoJSON files into Kibana
@@ -15,7 +15,7 @@ two airports, and the lightning hot spots on that route. You'll learn to:
 This tutorial requires you to download the following GeoJSON sample data files.
 These files are good examples of the types
 of vector data that you can upload to Kibana and index in
-Elasticsearch for display in *Elastic Maps*. 
+Elasticsearch for display in *Elastic Maps*.
 
 * https://raw.githubusercontent.com/elastic/examples/master/Maps/Getting%20Started%20Examples/geojson_upload_and_styling/logan_international_airport.geojson[Logan International Airport]
 * https://raw.githubusercontent.com/elastic/examples/master/Maps/Getting%20Started%20Examples/geojson_upload_and_styling/bangor_international_airport.geojson[Bangor International Airport]
@@ -23,7 +23,7 @@ Elasticsearch for display in *Elastic Maps*.
 * https://raw.githubusercontent.com/elastic/examples/master/Maps/Getting%20Started%20Examples/geojson_upload_and_styling/original_flight_path.geojson[Original flight path]
 * https://raw.githubusercontent.com/elastic/examples/master/Maps/Getting%20Started%20Examples/geojson_upload_and_styling/modified_flight_path.geojson[Modified flight path]
 
-The data represents two real airports, two fictitious flight routes, and 
+The data represents two real airports, two fictitious flight routes, and
 fictitious lightning reports. You don't need to use all of
 these files. Feel free to work with as many files as you'd like, or use valid GeoJSON
 files of your own.
@@ -47,12 +47,12 @@ image::maps/images/fu_gs_new_england_map.png[]
 For each GeoJSON file you downloaded, complete the following steps:
 
 . Below the map legend, click *Add layer*.
-. From the list of layer types, click *Upload GeoJSON vector file*.
+. From the list of layer types, click *Uploaded GeoJSON*.
 . Using the File Picker, upload the GeoJSON file.
 +
-Depending on the geometry type of your features, this will 
+Depending on the geometry type of your features, this will
 auto-populate *Index type* with either {ref}/geo-point.html[geo_point] or
- {ref}/geo-shape.html[geo_shape] and *Index name* with 
+ {ref}/geo-shape.html[geo_shape] and *Index name* with
 `<file name>`.
 
 . Click *Import file* in the lower right.
@@ -60,7 +60,7 @@ auto-populate *Index type* with either {ref}/geo-point.html[geo_point] or
 You'll see activity as the GeoJSON Upload utility creates a new index
 and index pattern for the data set. When the process is complete, you should
 receive messages that the creation of the new index and index pattern
-were successful. 
+were successful.
 
 . Click *Add layer* in the bottom right.
 
@@ -69,7 +69,7 @@ were successful.
 . Once you've added all of the sample files,
 <<maps-save, save your map>>.
 +
-At this point, you could consider the map complete, 
+At this point, you could consider the map complete,
 but there are a few additions and tweaks that you can make to tell a
 better story with your data.
 +
@@ -80,18 +80,18 @@ image::maps/images/fu_gs_flight_paths.png[]
 === Add a heatmap aggregation layer
 
 Looking at the `Lightning detected` layer, it's clear where lightning has
-struck. What's less clear, is if there have been more lightning 
-strikes in some areas than others, in other words, where the lightning 
+struck. What's less clear, is if there have been more lightning
+strikes in some areas than others, in other words, where the lightning
 hot spots are. An advantage of having indexed
-{ref}/geo-point.html[geo_point] data for the 
-lightning strikes is that you can perform aggregations on the data. 
+{ref}/geo-point.html[geo_point] data for the
+lightning strikes is that you can perform aggregations on the data.
 
 . Below the map legend, click *Add layer*.
 . From the list of layer types, click *Grid aggregation*.
 +
-Because you indexed `lightning_detected.geojson` using the index name and 
+Because you indexed `lightning_detected.geojson` using the index name and
 pattern `lightning_detected`, that data is available as a {ref}/geo-point.html[geo_point]
-aggregation. 
+aggregation.
 
 . Select `lightning_detected`.
 . Click *Show as* and select `heat map`.
@@ -99,15 +99,15 @@ aggregation.
 "Lightning intensity".
 +
 The remaining default settings are good, but there are a couple of
-settings that you might want to change. 
+settings that you might want to change.
 
-. Under *Source settings* > *Grid resolution*, select from the different heat map resolutions. 
+. Under *Source settings* > *Grid resolution*, select from the different heat map resolutions.
 +
 The default "Coarse" looks
 good, but feel free to select a different resolution.
 
 . Play around with the *Layer Style* >
-*Color range* setting. 
+*Color range* setting.
 +
 Again the default looks good, but feel free to choose a
 different color range.
@@ -125,14 +125,14 @@ image::maps/images/fu_gs_lightning_intensity.png[]
 === Organize the layers
 
 Consider ways you might improve the appearance of the final map.
-Small changes in how and when layers are shown can help tell a 
+Small changes in how and when layers are shown can help tell a
 better story with your data. Here are a few final tweaks
 you might make:
 
 * Update layer names
 * Adjust styles for each layer
 * Adjust the layer order
-* Decide which layers to show at different zoom levels 
+* Decide which layers to show at different zoom levels
 
 When you've finished, again be sure to <<maps-save, save your work >>.
 

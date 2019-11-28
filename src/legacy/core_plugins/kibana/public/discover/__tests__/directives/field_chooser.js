@@ -23,7 +23,6 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import $ from 'jquery';
-import 'ui/private';
 import '../../components/field_chooser/field_chooser';
 import FixturesHitsProvider from 'fixtures/hits';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
@@ -242,7 +241,6 @@ describe('discover field chooser directives', function () {
       $scope.computeDetails(field);
       expect(field.details.buckets).to.not.be(undefined);
       expect(field.details.buckets[0].value).to.be(40.141592);
-      expect(field.details.buckets[0].display).to.be('40.142');
     });
 
 

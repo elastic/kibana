@@ -17,16 +17,16 @@
  * under the License.
  */
 
-export {
-  IUiSettingsClient,
-  UiSettingsClient,
-  UiSettingsServiceOptions,
-} from './ui_settings_client';
+export { UiSettingsClient, UiSettingsServiceOptions } from './ui_settings_client';
 
 export { config } from './ui_settings_config';
+export { UiSettingsService } from './ui_settings_service';
+
 export {
+  UiSettingsServiceSetup,
+  IUiSettingsClient,
   UiSettingsParams,
-  UiSettingsService,
   InternalUiSettingsServiceSetup,
   UiSettingsType,
-} from './ui_settings_service';
+  UserProvidedValues,
+} from './types';

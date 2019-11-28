@@ -8,39 +8,28 @@ import React from 'react';
 import uuid from 'uuid/v4';
 
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
-import { AbstractESSource } from '../es_source';
 import { HeatmapLayer } from '../../heatmap_layer';
 import { VectorLayer } from '../../vector_layer';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggConfigs } from 'ui/agg_types';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { convertToGeoJson } from './convert_to_geojson';
-import { VectorStyle } from '../../styles/vector_style';
-import { vectorStyles } from '../../styles/vector_style_defaults';
+import { VectorStyle } from '../../styles/vector/vector_style';
+import { vectorStyles } from '../../styles/vector/vector_style_defaults';
 import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import { GRID_RESOLUTION } from '../../grid_resolution';
-import { SOURCE_DATA_ID_ORIGIN, ES_GEO_GRID } from '../../../../common/constants';
+import { SOURCE_DATA_ID_ORIGIN, ES_GEO_GRID, COUNT_PROP_LABEL, COUNT_PROP_NAME } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
+import { AbstractESAggSource } from '../es_agg_source';
+import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 
-const COUNT_PROP_LABEL = 'count';
-const COUNT_PROP_NAME = 'doc_count';
 const MAX_GEOTILE_LEVEL = 29;
 
 const aggSchemas = new Schemas([
-  {
-    group: 'metrics',
-    name: 'metric',
-    title: 'Value',
-    min: 1,
-    max: Infinity,
-    aggFilter: ['avg', 'count', 'max', 'min', 'sum'],
-    defaults: [
-      { schema: 'metric', type: 'count' }
-    ]
-  },
+  AbstractESAggSource.METRIC_SCHEMA_CONFIG,
   {
     group: 'buckets',
     name: 'segment',
@@ -51,7 +40,7 @@ const aggSchemas = new Schemas([
   }
 ]);
 
-export class ESGeoGridSource extends AbstractESSource {
+export class ESGeoGridSource extends AbstractESAggSource {
 
   static type = ES_GEO_GRID;
   static title = i18n.translate('xpack.maps.source.esGridTitle', {
@@ -95,6 +84,7 @@ export class ESGeoGridSource extends AbstractESSource {
         metrics={this._descriptor.metrics}
         renderAs={this._descriptor.requestType}
         resolution={this._descriptor.resolution}
+        applyGlobalQuery={this._descriptor.applyGlobalQuery}
       />
     );
   }
@@ -102,7 +92,7 @@ export class ESGeoGridSource extends AbstractESSource {
   async getImmutableProperties() {
     let indexPatternTitle = this._descriptor.indexPatternId;
     try {
-      const indexPattern = await this._getIndexPattern();
+      const indexPattern = await this.getIndexPattern();
       indexPatternTitle = indexPattern.title;
     } catch (error) {
       // ignore error, title will just default to id
@@ -134,9 +124,7 @@ export class ESGeoGridSource extends AbstractESSource {
   }
 
   getFieldNames() {
-    return this.getMetricFields().map(({ propertyKey }) => {
-      return propertyKey;
-    });
+    return this.getMetricFields().map((esAggMetricField => esAggMetricField.getName()));
   }
 
   isGeoGridPrecisionAware() {
@@ -177,14 +165,8 @@ export class ESGeoGridSource extends AbstractESSource {
     }));
   }
 
-  async getNumberFields() {
-    return this.getMetricFields().map(({ propertyKey: name, propertyLabel: label }) => {
-      return { label, name };
-    });
-  }
-
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
-    const indexPattern = await this._getIndexPattern();
+    const indexPattern = await this.getIndexPattern();
     const searchSource  = await this._makeSearchSource(searchFilters, 0);
     const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(searchFilters.geogridPrecision), aggSchemas.all);
     searchSource.setField('aggs', aggConfigs.toDsl());
@@ -214,29 +196,8 @@ export class ESGeoGridSource extends AbstractESSource {
     return true;
   }
 
-  _formatMetricKey(metric) {
-    return metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : COUNT_PROP_NAME;
-  }
-
-  _formatMetricLabel(metric) {
-    return metric.type !== 'count' ? `${metric.type} of ${metric.field}` : COUNT_PROP_LABEL;
-  }
-
   _makeAggConfigs(precision) {
-    const metricAggConfigs = this.getMetricFields().map(metric => {
-      const metricAggConfig = {
-        id: metric.propertyKey,
-        enabled: true,
-        type: metric.type,
-        schema: 'metric',
-        params: {}
-      };
-      if (metric.type !== 'count') {
-        metricAggConfig.params = { field: metric.field };
-      }
-      return metricAggConfig;
-    });
-
+    const metricAggConfigs = this.createMetricAggConfigs();
     return [
       ...metricAggConfigs,
       {
@@ -267,7 +228,7 @@ export class ESGeoGridSource extends AbstractESSource {
     });
     descriptor.style = VectorStyle.createDescriptor({
       [vectorStyles.FILL_COLOR]: {
-        type: VectorStyle.STYLE_TYPE.DYNAMIC,
+        type: DynamicStyleProperty.type,
         options: {
           field: {
             label: COUNT_PROP_LABEL,
@@ -278,7 +239,7 @@ export class ESGeoGridSource extends AbstractESSource {
         }
       },
       [vectorStyles.ICON_SIZE]: {
-        type: VectorStyle.STYLE_TYPE.DYNAMIC,
+        type: DynamicStyleProperty.type,
         options: {
           field: {
             label: COUNT_PROP_LABEL,

@@ -7,7 +7,11 @@
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { METRIC_JAVA_GC_COUNT } from '../../../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../../../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../../../helpers/setup_request';
 import { fetchAndTransformGcMetrics } from './fetchAndTransformGcMetrics';
 import { ChartBase } from '../../../types';
 
@@ -22,7 +26,7 @@ const series = {
 
 const chartBase: ChartBase = {
   title: i18n.translate('xpack.apm.agentMetrics.java.gcRateChartTitle', {
-    defaultMessage: 'Garbage collection rate per minute'
+    defaultMessage: 'Garbage collection per minute'
   }),
   key: 'gc_rate_line_chart',
   type: 'linemark',
@@ -31,7 +35,7 @@ const chartBase: ChartBase = {
 };
 
 const getGcRateChart = (
-  setup: Setup,
+  setup: Setup & SetupTimeRange & SetupUIFilters,
   serviceName: string,
   serviceNodeName?: string
 ) => {

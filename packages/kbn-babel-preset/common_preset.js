@@ -27,18 +27,25 @@ const plugins = [
   //
   // See https://github.com/babel/proposals/issues/12 for progress
   require.resolve('@babel/plugin-proposal-class-properties'),
+
+  // Optional Chaining proposal is stage 3 (https://github.com/tc39/proposal-optional-chaining)
+  // Need this since we are using TypeScript 3.7+
+  require.resolve('@babel/plugin-proposal-optional-chaining'),
+  // Nullish coalescing proposal is stage 3 (https://github.com/tc39/proposal-nullish-coalescing)
+  // Need this since we are using TypeScript 3.7+
+  require.resolve('@babel/plugin-proposal-nullish-coalescing-operator'),
 ];
+const isTestEnv = process.env.BABEL_ENV === 'test' || process.env.NODE_ENV === 'test';
+
+// Only load the idx plugin in non-test environments, since it conflicts with
+// Jest's coverage mapping.
+if (!isTestEnv) {
+  plugins.push(require.resolve('@kbn/elastic-idx/babel'));
+}
 
 module.exports = {
   presets: [require.resolve('@babel/preset-typescript'), require.resolve('@babel/preset-react')],
-  plugins: plugins.concat(require.resolve('@kbn/elastic-idx/babel')),
-  // Do not use the idx plugin in the test environment because it causes
-  // causes conflicts with Jest's coverage mapping.
-  env: {
-    test: {
-      plugins,
-    },
-  },
+  plugins,
   overrides: [
     {
       // Babel 7 don't support the namespace feature on typescript code.

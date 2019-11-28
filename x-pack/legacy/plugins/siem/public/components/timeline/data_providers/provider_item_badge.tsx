@@ -5,7 +5,7 @@
  */
 
 import { noop } from 'lodash/fp';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { BrowserFields } from '../../../containers/source';
 
@@ -51,23 +51,23 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
   }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-    function togglePopover() {
+    const togglePopover = useCallback(() => {
       setIsPopoverOpen(!isPopoverOpen);
-    }
+    }, [isPopoverOpen]);
 
-    function closePopover() {
+    const closePopover = useCallback(() => {
       setIsPopoverOpen(false);
-    }
+    }, []);
 
-    function onToggleEnabledProvider() {
+    const onToggleEnabledProvider = useCallback(() => {
       toggleEnabledProvider();
       closePopover();
-    }
+    }, [toggleEnabledProvider]);
 
-    function onToggleExcludedProvider() {
+    const onToggleExcludedProvider = useCallback(() => {
       toggleExcludedProvider();
       closePopover();
-    }
+    }, [toggleExcludedProvider]);
 
     return (
       <TimelineContext.Consumer>

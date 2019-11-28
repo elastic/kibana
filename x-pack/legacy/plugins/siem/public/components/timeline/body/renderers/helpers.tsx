@@ -43,7 +43,7 @@ export function isNillEmptyOrNotFinite<T>(value: string | number | T[] | null | 
   return isNumber(value) ? !isFinite(value) : isEmpty(value);
 }
 
-export const isFimEvent = ({
+export const isFileEvent = ({
   eventCategory,
   eventDataset,
 }: {
@@ -53,8 +53,11 @@ export const isFimEvent = ({
   (eventCategory != null && eventCategory.toLowerCase() === 'file') ||
   (eventDataset != null && eventDataset.toLowerCase() === 'file');
 
-export const isProcessStoppedOrTerminationEvent = (eventAction: string | null | undefined) =>
-  eventAction === 'process_stopped' || eventAction === 'termination_event';
+export const isProcessStoppedOrTerminationEvent = (
+  eventAction: string | null | undefined
+): boolean => ['process_stopped', 'termination_event'].includes(`${eventAction}`.toLowerCase());
 
-export const showVia = (eventAction: string | null | undefined) =>
-  ['file_create_event', 'created', 'file_delete_event', 'deleted'].includes(`${eventAction}`);
+export const showVia = (eventAction: string | null | undefined): boolean =>
+  ['file_create_event', 'created', 'file_delete_event', 'deleted'].includes(
+    `${eventAction}`.toLowerCase()
+  );

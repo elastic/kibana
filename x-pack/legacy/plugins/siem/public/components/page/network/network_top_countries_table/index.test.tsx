@@ -57,7 +57,7 @@ describe('NetworkTopCountries Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('Connect(NetworkTopCountriesTableComponent)'))).toMatchSnapshot();
     });
     test('it renders the IP Details NetworkTopCountries table', () => {
       const wrapper = shallow(
@@ -82,7 +82,7 @@ describe('NetworkTopCountries Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('Connect(NetworkTopCountriesTableComponent)'))).toMatchSnapshot();
     });
   });
 
@@ -111,7 +111,7 @@ describe('NetworkTopCountries Table Component', () => {
           </TestProviders>
         </MockedProvider>
       );
-      expect(store.getState().network.page.queries.topCountriesSource.topCountriesSort).toEqual({
+      expect(store.getState().network.page.queries.topCountriesSource.sort).toEqual({
         direction: 'desc',
         field: 'bytes_out',
       });
@@ -123,7 +123,7 @@ describe('NetworkTopCountries Table Component', () => {
 
       wrapper.update();
 
-      expect(store.getState().network.page.queries.topCountriesSource.topCountriesSort).toEqual({
+      expect(store.getState().network.page.queries.topCountriesSource.sort).toEqual({
         direction: 'asc',
         field: 'bytes_out',
       });

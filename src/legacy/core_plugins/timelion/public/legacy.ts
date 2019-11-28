@@ -26,6 +26,7 @@ import { LegacyDependenciesPlugin } from './shim';
 
 const setupPlugins: Readonly<TimelionPluginSetupDependencies> = {
   visualizations,
+  data: npSetup.plugins.data,
   expressions: npSetup.plugins.expressions,
 
   // Temporary solution

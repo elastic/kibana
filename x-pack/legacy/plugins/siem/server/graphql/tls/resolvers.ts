@@ -31,7 +31,7 @@ export const createTlsResolvers = (
       const options: TlsRequestOptions = {
         ...createOptionsPaginated(source, args, info),
         ip: args.ip,
-        tlsSortField: args.sort,
+        sort: args.sort,
         flowTarget: args.flowTarget,
       };
       return libs.tls.getTls(req, options);

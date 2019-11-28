@@ -66,7 +66,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToActualUrl('infraLogs', 'logs/stream');
         const columnHeaderLabels = await infraLogStream.getColumnHeaderLabels();
 
-        expect(columnHeaderLabels).to.eql(['Timestamp', 'event.dataset', 'Message']);
+        expect(columnHeaderLabels).to.eql(['Oct 17, 2018', 'event.dataset', 'Message']);
 
         const logStreamEntries = await infraLogStream.getStreamEntries();
         expect(logStreamEntries.length).to.be.greaterThan(0);
@@ -98,7 +98,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // TODO: make test more robust
         // expect(columnHeaderLabels).to.eql(['host.name', 'Timestamp']);
-        expect(columnHeaderLabels).to.eql(['Timestamp', 'host.name']);
+        expect(columnHeaderLabels).to.eql(['Oct 17, 2018', 'host.name']);
 
         const logStreamEntries = await infraLogStream.getStreamEntries();
 

@@ -15,6 +15,7 @@ import {
   EuiButtonIcon,
   EuiCallOut,
   EuiCheckbox,
+  EuiCodeBlock,
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
@@ -30,7 +31,7 @@ import {
 
 import {
   ColumnType,
-  MlInMemoryTableBasic,
+  mlInMemoryTableBasicFactory,
   SortingPropType,
   SORT_DIRECTION,
 } from '../../../../../shared_imports';
@@ -60,7 +61,7 @@ const CELL_CLICK_ENABLED = false;
 interface SourceIndexPreviewTitle {
   indexPatternTitle: string;
 }
-const SourceIndexPreviewTitle: React.SFC<SourceIndexPreviewTitle> = ({ indexPatternTitle }) => (
+const SourceIndexPreviewTitle: React.FC<SourceIndexPreviewTitle> = ({ indexPatternTitle }) => (
   <EuiTitle size="xs">
     <span>
       {i18n.translate('xpack.transform.sourceIndexPreview.sourceIndexPatternTitle', {
@@ -76,7 +77,7 @@ interface Props {
   cellClick?(search: string): void;
 }
 
-export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, query }) => {
+export const SourceIndexPreview: React.FC<Props> = React.memo(({ cellClick, query }) => {
   const [clearTable, setClearTable] = useState(false);
 
   const indexPattern = useCurrentIndexPattern();
@@ -133,7 +134,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
 
   if (status === SOURCE_INDEX_STATUS.ERROR) {
     return (
-      <EuiPanel grow={false}>
+      <EuiPanel grow={false} data-test-subj="transformSourceIndexPreview error">
         <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
         <EuiCallOut
           title={i18n.translate('xpack.transform.sourceIndexPreview.sourceIndexPatternError', {
@@ -142,7 +143,9 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
           color="danger"
           iconType="cross"
         >
-          <p>{errorMessage}</p>
+          <EuiCodeBlock language="json" fontSize="s" paddingSize="s" isCopyable>
+            {errorMessage}
+          </EuiCodeBlock>
         </EuiCallOut>
       </EuiPanel>
     );
@@ -150,7 +153,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
 
   if (status === SOURCE_INDEX_STATUS.LOADED && tableItems.length === 0) {
     return (
-      <EuiPanel grow={false}>
+      <EuiPanel grow={false} data-test-subj="transformSourceIndexPreview empty">
         <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
         <EuiCallOut
           title={i18n.translate(
@@ -164,7 +167,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
           <p>
             {i18n.translate('xpack.transform.sourceIndexPreview.SourceIndexNoDataCalloutBody', {
               defaultMessage:
-                'The query for the source index returned no results. Please make sure the index contains documents and your query is not too restrictive.',
+                'The query for the source index returned no results. Please make sure you have sufficient permissions, the index contains documents and your query is not too restrictive.',
             })}
           </p>
         </EuiCallOut>
@@ -180,8 +183,8 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     docFieldsCount = docFields.length;
   }
 
-  const columns: ColumnType[] = selectedFields.map(k => {
-    const column: ColumnType = {
+  const columns: Array<ColumnType<EsDoc>> = selectedFields.map(k => {
+    const column: ColumnType<EsDoc> = {
       field: `_source["${k}"]`,
       name: k,
       sortable: true,
@@ -316,8 +319,10 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     defaultMessage: 'Copy Dev Console statement of the source index preview to the clipboard.',
   });
 
+  const MlInMemoryTableBasic = mlInMemoryTableBasicFactory<EsDoc>();
+
   return (
-    <EuiPanel grow={false}>
+    <EuiPanel grow={false} data-test-subj="transformSourceIndexPreview loaded">
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
@@ -407,6 +412,9 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
           itemId="_id"
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           isExpandable={true}
+          rowProps={item => ({
+            'data-test-subj': `transformSourceIndexPreviewRow row-${item._id}`,
+          })}
           sorting={sorting}
         />
       )}

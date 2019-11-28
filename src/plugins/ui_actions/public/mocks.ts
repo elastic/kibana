@@ -28,6 +28,7 @@ export type Start = jest.Mocked<IUiActionsStart>;
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     attachAction: jest.fn(),
+    detachAction: jest.fn(),
     registerAction: jest.fn(),
     registerTrigger: jest.fn(),
   };

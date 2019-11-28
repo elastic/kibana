@@ -147,7 +147,7 @@ export const mockEndgameIpv4ConnectionAcceptEvent: Ecs = {
   },
   timestamp: '1569555676000',
   network: {
-    community_id: ['1:PFLzPy11bhJJZCUQhIVPEBoDLG4='],
+    community_id: ['1:network-community_id'],
     transport: ['tcp'],
   },
   process: {
@@ -193,7 +193,7 @@ export const mockEndgameIpv6ConnectionAcceptEvent: Ecs = {
   },
   timestamp: '1569553566000',
   network: {
-    community_id: ['1:bUcbuDIApRZPr7rMsEG5Ngk/ids='],
+    community_id: ['1:network-community_id'],
     transport: ['tcp'],
   },
   process: {
@@ -253,7 +253,7 @@ export const mockEndgameIpv4DisconnectReceivedEvent: Ecs = {
   },
   destination: {
     port: [443],
-    ip: ['54.156.162.53'],
+    ip: ['10.156.162.53'],
     bytes: [6193],
   },
   endgame: {
@@ -563,8 +563,8 @@ export const mockEndgameTerminationEvent: Ecs = {
   process: {
     hash: {
       md5: ['bd4401441a21bf1abce6404f4231db4d'],
-      sha1: ['797255e72d5ed5c058d4785950eba7abaa057653]'],
-      sha256: ['87976f3430cc99bc939e0694247c0759961a49832b87218f4313d6fc0bc3a776]'],
+      sha1: ['797255e72d5ed5c058d4785950eba7abaa057653'],
+      sha256: ['87976f3430cc99bc939e0694247c0759961a49832b87218f4313d6fc0bc3a776'],
     },
     pid: [442384],
     ppid: [8],

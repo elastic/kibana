@@ -22,7 +22,6 @@ import _ from 'lodash';
 import ngMock from 'ng_mock';
 import { fieldCalculator } from '../../components/field_chooser/lib/field_calculator';
 import expect from '@kbn/expect';
-import 'ui/private';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 // Load the kibana app dependencies.

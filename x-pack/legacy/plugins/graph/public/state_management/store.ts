@@ -6,8 +6,8 @@
 
 import createSagaMiddleware, { SagaMiddleware } from 'redux-saga';
 import { combineReducers, createStore, Store, AnyAction, Dispatch, applyMiddleware } from 'redux';
+import { ChromeStart } from 'kibana/public';
 import { CoreStart } from 'src/core/public';
-import { Chrome } from 'ui/chrome';
 import {
   fieldsReducer,
   FieldsState,
@@ -61,7 +61,7 @@ export interface GraphStoreDependencies {
   setLiveResponseFields: (fields: WorkspaceField[]) => void;
   setUrlTemplates: (templates: UrlTemplate[]) => void;
   setWorkspaceInitialized: () => void;
-  chrome: Chrome;
+  chrome: ChromeStart;
 }
 
 export function createRootReducer(basePath: string) {

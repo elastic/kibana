@@ -11,7 +11,7 @@
 @import 'components/fetch_error/index';
 @import 'components/field_chooser/index';
 @import 'angular/directives/index';
-@import 'doc_table/index';
+@import 'angular/doc_table/index';
 
 @import 'hacks';
 
@@ -23,4 +23,4 @@
 @import 'doc_viewer/index';
 
 // Context styles
-@import 'context/index';
+@import 'angular/context/index';

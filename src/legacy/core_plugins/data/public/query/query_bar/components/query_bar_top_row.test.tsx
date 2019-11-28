@@ -17,24 +17,27 @@
  * under the License.
  */
 
-import { mockPersistedLogFactory } from './query_bar_input.test.mocks';
+import { mockPersistedLogFactory } from './query_string_input.test.mocks';
 
 import React from 'react';
 import { mount } from 'enzyme';
 import { QueryBarTopRow } from './query_bar_top_row';
-import { IndexPattern } from '../../../index';
+
+/* eslint-disable @kbn/eslint/no-restricted-paths */
+
+import { stubIndexPatternWithFields } from '../../../../../../../plugins/data/public/stubs';
+/* eslint-enable @kbn/eslint/no-restricted-paths */
 
 import { coreMock } from '../../../../../../../core/public/mocks';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { I18nProvider } from '@kbn/i18n/react';
 const startMock = coreMock.createStart();
 
-import { timefilterServiceMock } from '../../../timefilter/timefilter_service.mock';
-const timefilterSetupMock = timefilterServiceMock.createSetupContract();
-
-timefilterSetupMock.history.get.mockImplementation(() => {
-  return [];
-});
+const mockTimeHistory = {
+  get: () => {
+    return [];
+  },
+};
 
 startMock.uiSettings.get.mockImplementation((key: string) => {
   switch (key) {
@@ -47,9 +50,14 @@ startMock.uiSettings.get.mockImplementation((key: string) => {
         },
       ];
     case 'dateFormat':
-      return 'YY';
+      return 'MMM D, YYYY @ HH:mm:ss.SSS';
     case 'history:limit':
       return 10;
+    case 'timepicker:timeDefaults':
+      return {
+        from: 'now-15m',
+        to: 'now',
+      };
     default:
       throw new Error(`Unexpected config key: ${key}`);
   }
@@ -74,27 +82,12 @@ const createMockWebStorage = () => ({
 });
 
 const createMockStorage = () => ({
-  store: createMockWebStorage(),
+  storage: createMockWebStorage(),
   get: jest.fn(),
   set: jest.fn(),
   remove: jest.fn(),
   clear: jest.fn(),
 });
-
-const mockIndexPattern = {
-  id: '1234',
-  title: 'logstash-*',
-  fields: [
-    {
-      name: 'response',
-      type: 'number',
-      esTypes: ['integer'],
-      aggregatable: true,
-      filterable: true,
-      searchable: true,
-    },
-  ],
-} as IndexPattern;
 
 function wrapQueryBarTopRowInContext(testProps: any) {
   const defaultOptions = {
@@ -107,7 +100,7 @@ function wrapQueryBarTopRowInContext(testProps: any) {
   const services = {
     ...startMock,
     appName: 'discover',
-    store: createMockStorage(),
+    storage: createMockStorage(),
   };
 
   return (
@@ -120,8 +113,9 @@ function wrapQueryBarTopRowInContext(testProps: any) {
 }
 
 describe('QueryBarTopRowTopRow', () => {
-  const QUERY_INPUT_SELECTOR = 'QueryBarInputUI';
+  const QUERY_INPUT_SELECTOR = 'QueryStringInputUI';
   const TIMEPICKER_SELECTOR = 'EuiSuperDatePicker';
+  const TIMEPICKER_DURATION = '[data-shared-timefilter-duration]';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -133,8 +127,8 @@ describe('QueryBarTopRowTopRow', () => {
         query: kqlQuery,
         screenTitle: 'Another Screen',
         isDirty: false,
-        indexPatterns: [mockIndexPattern],
-        timeHistory: timefilterSetupMock.history,
+        indexPatterns: [stubIndexPatternWithFields],
+        timeHistory: mockTimeHistory,
       })
     );
 
@@ -147,8 +141,8 @@ describe('QueryBarTopRowTopRow', () => {
       wrapQueryBarTopRowInContext({
         query: kqlQuery,
         screenTitle: 'Another Screen',
-        indexPatterns: [mockIndexPattern],
-        timeHistory: timefilterSetupMock.history,
+        indexPatterns: [stubIndexPatternWithFields],
+        timeHistory: mockTimeHistory,
         disableAutoFocus: true,
         isDirty: false,
       })
@@ -161,7 +155,7 @@ describe('QueryBarTopRowTopRow', () => {
     const component = mount(
       wrapQueryBarTopRowInContext({
         isDirty: false,
-        timeHistory: timefilterSetupMock.history,
+        timeHistory: mockTimeHistory,
       })
     );
 
@@ -173,7 +167,7 @@ describe('QueryBarTopRowTopRow', () => {
     const component = mount(
       wrapQueryBarTopRowInContext({
         showDatePicker: false,
-        timeHistory: timefilterSetupMock.history,
+        timeHistory: mockTimeHistory,
         isDirty: false,
       })
     );
@@ -190,7 +184,7 @@ describe('QueryBarTopRowTopRow', () => {
         showDatePicker: true,
         dateRangeFrom: 'now-7d',
         dateRangeTo: 'now',
-        timeHistory: timefilterSetupMock.history,
+        timeHistory: mockTimeHistory,
       })
     );
 
@@ -198,17 +192,35 @@ describe('QueryBarTopRowTopRow', () => {
     expect(component.find(TIMEPICKER_SELECTOR).length).toBe(1);
   });
 
+  it('Should render the timefilter duration container for sharing', () => {
+    const component = mount(
+      wrapQueryBarTopRowInContext({
+        isDirty: false,
+        screenTitle: 'Another Screen',
+        showDatePicker: true,
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+        timeHistory: mockTimeHistory,
+      })
+    );
+
+    // match the data attribute rendered in the in the ReactHTML object
+    expect(component.find(TIMEPICKER_DURATION)).toMatchObject(
+      /<div\b.*\bdata-shared-timefilter-duration\b/
+    );
+  });
+
   it('Should render only query input bar', () => {
     const component = mount(
       wrapQueryBarTopRowInContext({
         query: kqlQuery,
-        indexPatterns: [mockIndexPattern],
+        indexPatterns: [stubIndexPatternWithFields],
         isDirty: false,
         screenTitle: 'Another Screen',
         showDatePicker: false,
         dateRangeFrom: 'now-7d',
         dateRangeTo: 'now',
-        timeHistory: timefilterSetupMock.history,
+        timeHistory: mockTimeHistory,
       })
     );
 
@@ -222,10 +234,10 @@ describe('QueryBarTopRowTopRow', () => {
         query: kqlQuery,
         isDirty: false,
         screenTitle: 'Another Screen',
-        indexPatterns: [mockIndexPattern],
+        indexPatterns: [stubIndexPatternWithFields],
         showQueryInput: false,
         showDatePicker: false,
-        timeHistory: timefilterSetupMock.history,
+        timeHistory: mockTimeHistory,
       })
     );
 
@@ -239,7 +251,7 @@ describe('QueryBarTopRowTopRow', () => {
         isDirty: false,
         screenTitle: 'Another Screen',
         showDatePicker: false,
-        timeHistory: timefilterSetupMock.history,
+        timeHistory: mockTimeHistory,
       })
     );
 

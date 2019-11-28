@@ -6,7 +6,7 @@
 
 import { resolve as pathResolve } from 'path';
 import glob from 'glob';
-import { KbnServer } from '../../types';
+import { ServerFacade } from '../../types';
 import { PLUGIN_ID } from '../../common/constants';
 import { oncePerServer } from './once_per_server';
 import { LevelLogger } from './level_logger';
@@ -26,7 +26,7 @@ function scan(pattern: string) {
 }
 
 const pattern = pathResolve(__dirname, '../../export_types/*/server/index.[jt]s');
-async function exportTypesRegistryFn(server: KbnServer) {
+async function exportTypesRegistryFn(server: ServerFacade) {
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'exportTypes']);
   const exportTypesRegistry = new ExportTypesRegistry();
   const files: string[] = (await scan(pattern)) as string[];

@@ -19,6 +19,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { Duration } from 'moment';
+import { Logger } from '../logging';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 
@@ -39,7 +40,23 @@ export const config = {
       defaultValue: 'http://localhost:9200',
     }),
     preserveHost: schema.boolean({ defaultValue: true }),
-    username: schema.maybe(schema.string()),
+    username: schema.maybe(
+      schema.conditional(
+        schema.contextRef('dist'),
+        false,
+        schema.string({
+          validate: rawConfig => {
+            if (rawConfig === 'elastic') {
+              return (
+                'value of "elastic" is forbidden. This is a superuser account that can obfuscate ' +
+                'privilege-related issues. You should use the "kibana" user instead.'
+              );
+            }
+          },
+        }),
+        schema.string()
+      )
+    ),
     password: schema.maybe(schema.string()),
     requestHeadersWhitelist: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
       defaultValue: ['authorization'],
@@ -65,6 +82,7 @@ export const config = {
     }),
     apiVersion: schema.string({ defaultValue: DEFAULT_API_VERSION }),
     healthCheck: schema.object({ delay: schema.duration({ defaultValue: 2500 }) }),
+    ignoreVersionMismatch: schema.boolean({ defaultValue: false }),
   }),
 };
 
@@ -73,6 +91,11 @@ export class ElasticsearchConfig {
    * The interval between health check requests Kibana sends to the Elasticsearch.
    */
   public readonly healthCheckDelay: Duration;
+
+  /**
+   * Whether to allow kibana to connect to a non-compatible elasticsearch node.
+   */
+  public readonly ignoreVersionMismatch: boolean;
 
   /**
    * Version of the Elasticsearch (6.7, 7.1 or `master`) client will be connecting to.
@@ -160,7 +183,8 @@ export class ElasticsearchConfig {
    */
   public readonly customHeaders: ElasticsearchConfigType['customHeaders'];
 
-  constructor(rawConfig: ElasticsearchConfigType) {
+  constructor(rawConfig: ElasticsearchConfigType, log?: Logger) {
+    this.ignoreVersionMismatch = rawConfig.ignoreVersionMismatch;
     this.apiVersion = rawConfig.apiVersion;
     this.logQueries = rawConfig.logQueries;
     this.hosts = Array.isArray(rawConfig.hosts) ? rawConfig.hosts : [rawConfig.hosts];
@@ -188,5 +212,14 @@ export class ElasticsearchConfig {
       ...rawConfig.ssl,
       certificateAuthorities,
     };
+
+    if (this.username === 'elastic' && log !== undefined) {
+      // logger is optional / not used during tests
+      // TODO: logger can be removed when issue #40255 is resolved to support deprecations in NP config service
+      log.warn(
+        `Setting the elasticsearch username to "elastic" is deprecated. You should use the "kibana" user instead.`,
+        { tags: ['deprecation'] }
+      );
+    }
   }
 }

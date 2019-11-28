@@ -5,7 +5,7 @@
  */
 import { omit } from 'lodash';
 import { KBN_SCREENSHOT_HEADER_BLACKLIST } from '../../../common/constants';
-import { JobDocPayload, KbnServer } from '../../../types';
+import { JobDocPayload, ServerFacade } from '../../../types';
 
 export const omitBlacklistedHeaders = ({
   job,
@@ -14,7 +14,7 @@ export const omitBlacklistedHeaders = ({
 }: {
   job: JobDocPayload;
   decryptedHeaders: Record<string, string>;
-  server: KbnServer;
+  server: ServerFacade;
 }) => {
   const filteredHeaders: Record<string, string> = omit(
     decryptedHeaders,

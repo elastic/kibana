@@ -6,13 +6,11 @@
 
 import * as Rx from 'rxjs';
 import { toArray, mergeMap } from 'rxjs/operators';
-import moment from 'moment-timezone';
 import { groupBy } from 'lodash';
 import { LevelLogger } from '../../../../server/lib';
-import { KbnServer, ConditionalHeaders } from '../../../../types';
+import { ServerFacade, ConditionalHeaders } from '../../../../types';
 // @ts-ignore untyped module
 import { pdf } from './pdf';
-import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
 import { createLayout } from '../../../common/layouts';
 import { TimeRange } from '../../../common/lib/screenshots/types';
@@ -39,11 +37,7 @@ const getTimeRange = (urlScreenshots: UrlScreenshot[]) => {
   return null;
 };
 
-const formatDate = (date: Date, timezone: string) => {
-  return moment.tz(date, timezone).format('llll');
-};
-
-function generatePdfObservableFn(server: KbnServer) {
+export function generatePdfObservableFactory(server: ServerFacade) {
   const screenshotsObservable = screenshotsObservableFactory(server);
   const captureConcurrency = 1;
 
@@ -72,12 +66,7 @@ function generatePdfObservableFn(server: KbnServer) {
 
         if (title) {
           const timeRange = getTimeRange(urlScreenshots);
-          title += timeRange
-            ? ` — ${formatDate(timeRange.from, browserTimezone)} to ${formatDate(
-                timeRange.to,
-                browserTimezone
-              )}`
-            : '';
+          title += timeRange ? ` - ${timeRange.duration}` : '';
           pdfOutput.setTitle(title);
         }
 
@@ -97,5 +86,3 @@ function generatePdfObservableFn(server: KbnServer) {
     );
   };
 }
-
-export const generatePdfObservableFactory = oncePerServer(generatePdfObservableFn);

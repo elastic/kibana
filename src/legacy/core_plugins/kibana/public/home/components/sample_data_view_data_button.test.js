@@ -17,18 +17,17 @@
  * under the License.
  */
 
-jest.mock('ui/chrome', () => {
-  return {
-    addBasePath: (path) => {
-      return `root${path}`;
-    },
-  };
-});
 
 import React from 'react';
 import { shallow } from 'enzyme';
 
 import { SampleDataViewDataButton } from './sample_data_view_data_button';
+
+jest.mock('../kibana_services', () =>({
+  getServices: () =>({
+    addBasePath: path => `root${path}`
+  })
+}));
 
 test('should render simple button when appLinks is empty', () => {
   const component = shallow(<SampleDataViewDataButton

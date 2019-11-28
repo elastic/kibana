@@ -1079,5 +1079,522 @@ describe('SystemGenericFileDetails', () => {
         '[username-123]\\[userDomain-123]@[hostname-123]in[working-directory-123][text-123][processName-123](123)[arg-1][arg-2][arg-3][process-title-123]with exit code[endgameExitCode-123]via parent process[endgameParentProcessName-123](456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
       );
     });
+
+    test('it renders a FileDraggable when endgameFileName and endgameFilePath are provided, but fileName and filePath are NOT provided', () => {
+      const wrapper = mountWithIntl(
+        <TestProviders>
+          <div>
+            <SystemGenericFileLine
+              contextId="[context-123]"
+              endgameExitCode={undefined}
+              endgameFileName="[endgameFileName]"
+              endgameFilePath="[endgameFilePath]"
+              endgameParentProcessName={undefined}
+              endgamePid={undefined}
+              endgameProcessName={undefined}
+              eventAction={undefined}
+              fileName={undefined}
+              filePath={undefined}
+              hostName={undefined}
+              id="[id-123]"
+              message={undefined}
+              outcome={undefined}
+              packageName={undefined}
+              packageSummary={undefined}
+              packageVersion={undefined}
+              processExecutable={undefined}
+              processHashMd5={undefined}
+              processHashSha1={undefined}
+              processHashSha256={undefined}
+              processPid={undefined}
+              processPpid={undefined}
+              processName={undefined}
+              showMessage={true}
+              sshMethod={undefined}
+              processTitle={undefined}
+              args={undefined}
+              sshSignature={undefined}
+              text={undefined}
+              userDomain={undefined}
+              userName={undefined}
+              workingDirectory={undefined}
+            />
+          </div>
+        </TestProviders>
+      );
+      expect(wrapper.text()).toEqual('[endgameFileName]in[endgameFilePath]an unknown process');
+    });
+
+    test('it prefers to render fileName and filePath over endgameFileName and endgameFilePath respectfully when all of those fields are provided', () => {
+      const wrapper = mountWithIntl(
+        <TestProviders>
+          <div>
+            <SystemGenericFileLine
+              contextId="[context-123]"
+              endgameExitCode={undefined}
+              endgameFileName="[endgameFileName]"
+              endgameFilePath="[endgameFilePath]"
+              endgameParentProcessName={undefined}
+              endgamePid={undefined}
+              endgameProcessName={undefined}
+              eventAction={undefined}
+              fileName="[fileName]"
+              filePath="[filePath]"
+              hostName={undefined}
+              id="[id-123]"
+              message={undefined}
+              outcome={undefined}
+              packageName={undefined}
+              packageSummary={undefined}
+              packageVersion={undefined}
+              processExecutable={undefined}
+              processHashMd5={undefined}
+              processHashSha1={undefined}
+              processHashSha256={undefined}
+              processPid={undefined}
+              processPpid={undefined}
+              processName={undefined}
+              showMessage={true}
+              sshMethod={undefined}
+              processTitle={undefined}
+              args={undefined}
+              sshSignature={undefined}
+              text={undefined}
+              userDomain={undefined}
+              userName={undefined}
+              workingDirectory={undefined}
+            />
+          </div>
+        </TestProviders>
+      );
+
+      expect(wrapper.text()).toEqual('[fileName]in[filePath]an unknown process');
+    });
+
+    ['file_create_event', 'created', 'file_delete_event', 'deleted'].forEach(eventAction => {
+      test(`it renders the text "via" when eventAction is ${eventAction}`, () => {
+        const wrapper = mountWithIntl(
+          <TestProviders>
+            <div>
+              <SystemGenericFileLine
+                contextId="[context-123]"
+                endgameExitCode={undefined}
+                endgameFileName={undefined}
+                endgameFilePath={undefined}
+                endgameParentProcessName={undefined}
+                endgamePid={undefined}
+                endgameProcessName={undefined}
+                eventAction={eventAction}
+                fileName={undefined}
+                filePath={undefined}
+                hostName={undefined}
+                id="[id-123]"
+                message={undefined}
+                outcome={undefined}
+                packageName={undefined}
+                packageSummary={undefined}
+                packageVersion={undefined}
+                processExecutable={undefined}
+                processHashMd5={undefined}
+                processHashSha1={undefined}
+                processHashSha256={undefined}
+                processPid={undefined}
+                processPpid={undefined}
+                processName={undefined}
+                showMessage={true}
+                sshMethod={undefined}
+                processTitle={undefined}
+                args={undefined}
+                sshSignature={undefined}
+                text={undefined}
+                userDomain={undefined}
+                userName={undefined}
+                workingDirectory={undefined}
+              />
+            </div>
+          </TestProviders>
+        );
+
+        expect(wrapper.text().includes('via')).toBe(true);
+      });
+    });
+
+    test('it does NOT render the text "via" when eventAction is not a whitelisted action', () => {
+      const eventAction = 'a_non_whitelisted_event_action';
+
+      const wrapper = mountWithIntl(
+        <TestProviders>
+          <div>
+            <SystemGenericFileLine
+              contextId="[context-123]"
+              endgameExitCode={undefined}
+              endgameFileName={undefined}
+              endgameFilePath={undefined}
+              endgameParentProcessName={undefined}
+              endgamePid={undefined}
+              endgameProcessName={undefined}
+              eventAction={eventAction}
+              fileName={undefined}
+              filePath={undefined}
+              hostName={undefined}
+              id="[id-123]"
+              message={undefined}
+              outcome={undefined}
+              packageName={undefined}
+              packageSummary={undefined}
+              packageVersion={undefined}
+              processExecutable={undefined}
+              processHashMd5={undefined}
+              processHashSha1={undefined}
+              processHashSha256={undefined}
+              processPid={undefined}
+              processPpid={undefined}
+              processName={undefined}
+              showMessage={true}
+              sshMethod={undefined}
+              processTitle={undefined}
+              args={undefined}
+              sshSignature={undefined}
+              text={undefined}
+              userDomain={undefined}
+              userName={undefined}
+              workingDirectory={undefined}
+            />
+          </div>
+        </TestProviders>
+      );
+
+      expect(wrapper.text().includes('via')).toBe(false);
+    });
+
+    test('it renders a ParentProcessDraggable when eventAction is NOT "process_stopped" and NOT "termination_event"', () => {
+      const eventAction = 'something_else';
+
+      const wrapper = mountWithIntl(
+        <TestProviders>
+          <div>
+            <SystemGenericFileLine
+              contextId="[context-123]"
+              endgameExitCode={undefined}
+              endgameFileName={undefined}
+              endgameFilePath={undefined}
+              endgameParentProcessName="[endgameParentProcessName]"
+              endgamePid={undefined}
+              endgameProcessName={undefined}
+              eventAction={eventAction}
+              fileName={undefined}
+              filePath={undefined}
+              hostName={undefined}
+              id="[id-123]"
+              message={undefined}
+              outcome={undefined}
+              packageName={undefined}
+              packageSummary={undefined}
+              packageVersion={undefined}
+              processExecutable={undefined}
+              processHashMd5={undefined}
+              processHashSha1={undefined}
+              processHashSha256={undefined}
+              processPid={undefined}
+              processPpid={456}
+              processName={undefined}
+              showMessage={true}
+              sshMethod={undefined}
+              processTitle={undefined}
+              args={undefined}
+              sshSignature={undefined}
+              text={undefined}
+              userDomain={undefined}
+              userName={undefined}
+              workingDirectory={undefined}
+            />
+          </div>
+        </TestProviders>
+      );
+
+      expect(wrapper.text()).toEqual(
+        'an unknown processvia parent process[endgameParentProcessName](456)'
+      );
+    });
+
+    test('it does NOT render a ParentProcessDraggable when eventAction is "process_stopped"', () => {
+      const eventAction = 'process_stopped';
+
+      const wrapper = mountWithIntl(
+        <TestProviders>
+          <div>
+            <SystemGenericFileLine
+              contextId="[context-123]"
+              endgameExitCode={undefined}
+              endgameFileName={undefined}
+              endgameFilePath={undefined}
+              endgameParentProcessName="[endgameParentProcessName]"
+              endgamePid={undefined}
+              endgameProcessName={undefined}
+              eventAction={eventAction}
+              fileName={undefined}
+              filePath={undefined}
+              hostName={undefined}
+              id="[id-123]"
+              message={undefined}
+              outcome={undefined}
+              packageName={undefined}
+              packageSummary={undefined}
+              packageVersion={undefined}
+              processExecutable={undefined}
+              processHashMd5={undefined}
+              processHashSha1={undefined}
+              processHashSha256={undefined}
+              processPid={undefined}
+              processPpid={456}
+              processName={undefined}
+              showMessage={true}
+              sshMethod={undefined}
+              processTitle={undefined}
+              args={undefined}
+              sshSignature={undefined}
+              text={undefined}
+              userDomain={undefined}
+              userName={undefined}
+              workingDirectory={undefined}
+            />
+          </div>
+        </TestProviders>
+      );
+
+      expect(wrapper.text()).toEqual('an unknown process');
+    });
+
+    test('it does NOT render a ParentProcessDraggable when eventAction is "termination_event"', () => {
+      const eventAction = 'termination_event';
+
+      const wrapper = mountWithIntl(
+        <TestProviders>
+          <div>
+            <SystemGenericFileLine
+              contextId="[context-123]"
+              endgameExitCode={undefined}
+              endgameFileName={undefined}
+              endgameFilePath={undefined}
+              endgameParentProcessName="[endgameParentProcessName]"
+              endgamePid={undefined}
+              endgameProcessName={undefined}
+              eventAction={eventAction}
+              fileName={undefined}
+              filePath={undefined}
+              hostName={undefined}
+              id="[id-123]"
+              message={undefined}
+              outcome={undefined}
+              packageName={undefined}
+              packageSummary={undefined}
+              packageVersion={undefined}
+              processExecutable={undefined}
+              processHashMd5={undefined}
+              processHashSha1={undefined}
+              processHashSha256={undefined}
+              processPid={undefined}
+              processPpid={456}
+              processName={undefined}
+              showMessage={true}
+              sshMethod={undefined}
+              processTitle={undefined}
+              args={undefined}
+              sshSignature={undefined}
+              text={undefined}
+              userDomain={undefined}
+              userName={undefined}
+              workingDirectory={undefined}
+            />
+          </div>
+        </TestProviders>
+      );
+
+      expect(wrapper.text()).toEqual('an unknown process');
+    });
+
+    test('it returns renders the message when showMessage is true', () => {
+      const wrapper = mountWithIntl(
+        <TestProviders>
+          <div>
+            <SystemGenericFileLine
+              contextId="[context-123]"
+              endgameExitCode={undefined}
+              endgameFileName={undefined}
+              endgameFilePath={undefined}
+              endgameParentProcessName={undefined}
+              endgamePid={undefined}
+              endgameProcessName={undefined}
+              eventAction={undefined}
+              fileName={undefined}
+              filePath={undefined}
+              hostName={undefined}
+              id="[id-123]"
+              message="[message]"
+              outcome={undefined}
+              packageName={undefined}
+              packageSummary={undefined}
+              packageVersion={undefined}
+              processExecutable={undefined}
+              processHashMd5={undefined}
+              processHashSha1={undefined}
+              processHashSha256={undefined}
+              processPid={undefined}
+              processPpid={undefined}
+              processName={undefined}
+              showMessage={true}
+              sshMethod={undefined}
+              processTitle={undefined}
+              args={undefined}
+              sshSignature={undefined}
+              text={undefined}
+              userDomain={undefined}
+              userName={undefined}
+              workingDirectory={undefined}
+            />
+          </div>
+        </TestProviders>
+      );
+
+      expect(wrapper.text()).toEqual('an unknown process[message]');
+    });
+
+    test('it does NOT render the message when showMessage is false', () => {
+      const wrapper = mountWithIntl(
+        <TestProviders>
+          <div>
+            <SystemGenericFileLine
+              contextId="[context-123]"
+              endgameExitCode={undefined}
+              endgameFileName={undefined}
+              endgameFilePath={undefined}
+              endgameParentProcessName={undefined}
+              endgamePid={undefined}
+              endgameProcessName={undefined}
+              eventAction={undefined}
+              fileName={undefined}
+              filePath={undefined}
+              hostName={undefined}
+              id="[id-123]"
+              message="[message]"
+              outcome={undefined}
+              packageName={undefined}
+              packageSummary={undefined}
+              packageVersion={undefined}
+              processExecutable={undefined}
+              processHashMd5={undefined}
+              processHashSha1={undefined}
+              processHashSha256={undefined}
+              processPid={undefined}
+              processPpid={undefined}
+              processName={undefined}
+              showMessage={false}
+              sshMethod={undefined}
+              processTitle={undefined}
+              args={undefined}
+              sshSignature={undefined}
+              text={undefined}
+              userDomain={undefined}
+              userName={undefined}
+              workingDirectory={undefined}
+            />
+          </div>
+        </TestProviders>
+      );
+
+      expect(wrapper.text()).toEqual('an unknown process');
+    });
+
+    test('it renders a ProcessDraggableWithNonExistentProcess when endgamePid and endgameProcessName are provided, but processPid and processName are NOT provided', () => {
+      const wrapper = mountWithIntl(
+        <TestProviders>
+          <div>
+            <SystemGenericFileLine
+              contextId="[context-123]"
+              endgameExitCode={undefined}
+              endgameFileName={undefined}
+              endgameFilePath={undefined}
+              endgameParentProcessName={undefined}
+              endgamePid={789}
+              endgameProcessName="[endgameProcessName]"
+              eventAction={undefined}
+              fileName={undefined}
+              filePath={undefined}
+              hostName={undefined}
+              id="[id-123]"
+              message={undefined}
+              outcome={undefined}
+              packageName={undefined}
+              packageSummary={undefined}
+              packageVersion={undefined}
+              processExecutable={undefined}
+              processHashMd5={undefined}
+              processHashSha1={undefined}
+              processHashSha256={undefined}
+              processPid={undefined}
+              processPpid={undefined}
+              processName={undefined}
+              showMessage={true}
+              sshMethod={undefined}
+              processTitle={undefined}
+              args={undefined}
+              sshSignature={undefined}
+              text={undefined}
+              userDomain={undefined}
+              userName={undefined}
+              workingDirectory={undefined}
+            />
+          </div>
+        </TestProviders>
+      );
+
+      expect(wrapper.text()).toEqual('[endgameProcessName](789)');
+    });
+
+    test('it prefers to render processName and processPid over endgameProcessName and endgamePid respectfully when all of those fields are provided', () => {
+      const wrapper = mountWithIntl(
+        <TestProviders>
+          <div>
+            <SystemGenericFileLine
+              contextId="[context-123]"
+              endgameExitCode={undefined}
+              endgameFileName={undefined}
+              endgameFilePath={undefined}
+              endgameParentProcessName={undefined}
+              endgamePid={789}
+              endgameProcessName="[endgameProcessName]"
+              eventAction={undefined}
+              fileName={undefined}
+              filePath={undefined}
+              hostName={undefined}
+              id="[id-123]"
+              message={undefined}
+              outcome={undefined}
+              packageName={undefined}
+              packageSummary={undefined}
+              packageVersion={undefined}
+              processExecutable={undefined}
+              processHashMd5={undefined}
+              processHashSha1={undefined}
+              processHashSha256={undefined}
+              processPid={123}
+              processPpid={undefined}
+              processName="[processName]"
+              showMessage={true}
+              sshMethod={undefined}
+              processTitle={undefined}
+              args={undefined}
+              sshSignature={undefined}
+              text={undefined}
+              userDomain={undefined}
+              userName={undefined}
+              workingDirectory={undefined}
+            />
+          </div>
+        </TestProviders>
+      );
+
+      expect(wrapper.text()).toEqual('[processName](123)');
+    });
   });
 });

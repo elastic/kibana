@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import moment from 'moment';
-import { get } from 'lodash';
+import { get, uniq } from 'lodash';
 import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
 
@@ -74,5 +74,6 @@ export async function getLogstashPipelineIds(req, logstashIndexPattern, { cluste
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);
-  return get(response, 'aggregations.nested_context.composite_data.buckets', []).map(bucket => bucket.key);
+  const data = get(response, 'aggregations.nested_context.composite_data.buckets', []).map(bucket => bucket.key);
+  return uniq(data, item => item.id);
 }

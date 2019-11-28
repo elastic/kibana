@@ -12,7 +12,7 @@ import {
 } from 'url';
 import { getAbsoluteUrlFactory } from '../../../common/get_absolute_url';
 import { validateUrls } from '../../../common/validate_urls';
-import { KbnServer } from '../../../types';
+import { ServerFacade } from '../../../types';
 import { JobDocPayloadPNG } from '../../png/types';
 import { JobDocPayloadPDF } from '../../printable_pdf/types';
 
@@ -26,9 +26,16 @@ export async function getFullUrls({
   ...mergeValues // pass-throughs
 }: {
   job: JobDocPayloadPNG | JobDocPayloadPDF;
-  server: KbnServer;
+  server: ServerFacade;
 }) {
-  const getAbsoluteUrl = getAbsoluteUrlFactory(server);
+  const config = server.config();
+
+  const getAbsoluteUrl = getAbsoluteUrlFactory({
+    defaultBasePath: config.get('server.basePath'),
+    protocol: config.get('xpack.reporting.kibanaServer.protocol') || server.info.protocol,
+    hostname: config.get('xpack.reporting.kibanaServer.hostname') || config.get('server.host'),
+    port: config.get('xpack.reporting.kibanaServer.port') || config.get('server.port'),
+  });
 
   // PDF and PNG job params put in the url differently
   let relativeUrls: string[] = [];

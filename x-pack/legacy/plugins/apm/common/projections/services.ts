@@ -4,18 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Setup } from '../../server/lib/helpers/setup_request';
+import {
+  Setup,
+  SetupUIFilters,
+  SetupTimeRange
+} from '../../server/lib/helpers/setup_request';
 import { SERVICE_NAME, PROCESSOR_EVENT } from '../elasticsearch_fieldnames';
 import { rangeFilter } from '../../server/lib/helpers/range_filter';
 
-export function getServicesProjection({ setup }: { setup: Setup }) {
-  const { start, end, uiFiltersES, config } = setup;
+export function getServicesProjection({
+  setup
+}: {
+  setup: Setup & SetupTimeRange & SetupUIFilters;
+}) {
+  const { start, end, uiFiltersES, indices } = setup;
 
   return {
     index: [
-      config.get<string>('apm_oss.metricsIndices'),
-      config.get<string>('apm_oss.errorIndices'),
-      config.get<string>('apm_oss.transactionIndices')
+      indices['apm_oss.metricsIndices'],
+      indices['apm_oss.errorIndices'],
+      indices['apm_oss.transactionIndices']
     ],
     body: {
       size: 0,

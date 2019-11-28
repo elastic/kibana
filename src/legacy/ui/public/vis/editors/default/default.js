@@ -34,10 +34,11 @@ import { parentPipelineAggHelper } from 'ui/agg_types/metrics/lib/parent_pipelin
 import { DefaultEditorSize } from '../../editor_size';
 
 import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_types';
-import { getVisualizeLoader } from '../../../visualize/loader/visualize_loader';
 import { AggGroupNames } from './agg_groups';
 
-const defaultEditor = function ($rootScope, $compile) {
+import { start as embeddables } from '../../../../../core_plugins/embeddable_api/public/np_ready/public/legacy';
+
+const defaultEditor = function ($rootScope, $compile, getAppState) {
   return class DefaultEditor {
     static key = 'default';
 
@@ -57,7 +58,7 @@ const defaultEditor = function ($rootScope, $compile) {
       }
     }
 
-    render({ uiState, timeRange, filters, appState }) {
+    render({ uiState, timeRange, filters, query }) {
       let $scope;
 
       const updateScope = () => {
@@ -66,7 +67,7 @@ const defaultEditor = function ($rootScope, $compile) {
         //$scope.$apply();
       };
 
-      return new Promise(resolve => {
+      return new Promise(async (resolve) => {
         if (!this.$scope) {
           this.$scope = $scope = $rootScope.$new();
 
@@ -157,23 +158,21 @@ const defaultEditor = function ($rootScope, $compile) {
 
         if (!this._handler) {
           const visualizationEl = this.el.find('.visEditor__canvas')[0];
-          getVisualizeLoader().then(loader => {
-            if (!visualizationEl) {
-              return;
-            }
-            this._loader = loader;
-            this._handler = this._loader.embedVisualizationWithSavedObject(visualizationEl, this.savedObj, {
-              uiState: uiState,
-              listenOnChange: false,
-              timeRange: timeRange,
-              filters: filters,
-              appState: appState,
-            });
-          });
-        } else {
-          this._handler.update({
+
+          this._handler = await embeddables.getEmbeddableFactory('visualization').createFromObject(this.savedObj, {
+            uiState: uiState,
+            appState: getAppState(),
             timeRange: timeRange,
-            filters: filters,
+            filters: filters || [],
+            query: query,
+          });
+          this._handler.render(visualizationEl);
+
+        } else {
+          this._handler.updateInput({
+            timeRange: timeRange,
+            filters: filters || [],
+            query: query,
           });
         }
 

@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { ExpressionFunction, KibanaContext, Render } from 'src/plugins/expressions/public';
 import { getTimelionRequestHandler } from './vis/timelion_request_handler';
 import { TimelionVisualizationDependencies } from './plugin';
+import { TIMELION_VIS_NAME } from './vis';
 
 const name = 'timelion_vis';
 
@@ -32,7 +33,7 @@ interface Arguments {
 
 interface RenderValue {
   visData: Context;
-  visType: typeof name;
+  visType: 'timelion';
   visParams: VisParams;
 }
 
@@ -77,14 +78,14 @@ export const getTimelionVisualizationConfig = (
       forceFetch: true,
     });
 
-    response.visType = 'timelion';
+    response.visType = TIMELION_VIS_NAME;
 
     return {
       type: 'render',
       as: 'visualization',
       value: {
         visParams,
-        visType: name,
+        visType: TIMELION_VIS_NAME,
         visData: response,
       },
     };

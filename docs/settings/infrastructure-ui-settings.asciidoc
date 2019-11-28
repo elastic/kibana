@@ -1,14 +1,14 @@
 [role="xpack"]
 [[infrastructure-ui-settings-kb]]
-=== Metrics UI settings in Kibana
+=== Metrics settings in Kibana
 ++++
-<titleabbrev>Metrics UI settings</titleabbrev>
+<titleabbrev>Metrics settings</titleabbrev>
 ++++
 
-You do not need to configure any settings to use the Metrics UI. It is enabled by default.
+You do not need to configure any settings to use the Metrics app in {kib}. It is enabled by default.
 
 [float]
 [[general-infra-ui-settings-kb]]
-==== General Metrics UI settings
+==== General Metrics settings
 
 include::general-infra-logs-ui-settings.asciidoc[]

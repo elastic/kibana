@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useContext, useRef, useState } from 'react';
+import React, { Fragment, FC, useEffect, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 
-import { isKibanaContextInitialized, KibanaContext } from '../../../../lib/kibana';
+import { useKibanaContext } from '../../../../lib/kibana';
 
 import { getCreateRequestBody } from '../../../../common';
 
@@ -23,6 +23,11 @@ import {
 import { getDefaultStepCreateState, StepCreateForm, StepCreateSummary } from '../step_create';
 import { getDefaultStepDetailsState, StepDetailsForm, StepDetailsSummary } from '../step_details';
 import { WizardNav } from '../wizard_nav';
+
+enum KBN_MANAGEMENT_PAGE_CLASSNAME {
+  DEFAULT_BODY = 'mgtPage__body',
+  TRANSFORM_BODY_MODIFIER = 'mgtPage__body--transformWizard',
+}
 
 enum WIZARD_STEPS {
   DEFINE,
@@ -37,7 +42,7 @@ interface DefinePivotStepProps {
   setStepDefineState: React.Dispatch<React.SetStateAction<StepDefineExposedState>>;
 }
 
-const StepDefine: SFC<DefinePivotStepProps> = ({
+const StepDefine: FC<DefinePivotStepProps> = ({
   isCurrentStep,
   stepDefineState,
   setCurrentStep,
@@ -62,8 +67,8 @@ const StepDefine: SFC<DefinePivotStepProps> = ({
   );
 };
 
-export const Wizard: SFC = React.memo(() => {
-  const kibanaContext = useContext(KibanaContext);
+export const Wizard: FC = React.memo(() => {
+  const kibanaContext = useKibanaContext();
 
   // The current WIZARD_STEP
   const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.DEFINE);
@@ -84,10 +89,24 @@ export const Wizard: SFC = React.memo(() => {
   // The CREATE state
   const [stepCreateState, setStepCreateState] = useState(getDefaultStepCreateState);
 
-  if (!isKibanaContextInitialized(kibanaContext)) {
-    // TODO proper loading indicator
-    return null;
-  }
+  useEffect(() => {
+    // The transform plugin doesn't control the wrapping management page via React
+    // so we use plain JS to add and remove a custom CSS class to set the full
+    // page width to 100% for the transform wizard. It's done to replicate the layout
+    // as it was when transforms were part of the ML plugin. This will be revisited
+    // to come up with an approach that's more in line with the overall layout
+    // of the Kibana management section.
+    const managementBody = document.getElementsByClassName(
+      KBN_MANAGEMENT_PAGE_CLASSNAME.DEFAULT_BODY
+    );
+
+    if (managementBody.length > 0) {
+      managementBody[0].classList.add(KBN_MANAGEMENT_PAGE_CLASSNAME.TRANSFORM_BODY_MODIFIER);
+      return () => {
+        managementBody[0].classList.remove(KBN_MANAGEMENT_PAGE_CLASSNAME.TRANSFORM_BODY_MODIFIER);
+      };
+    }
+  }, []);
 
   const indexPattern = kibanaContext.currentIndexPattern;
 
@@ -109,18 +128,6 @@ export const Wizard: SFC = React.memo(() => {
     ) : (
       <StepCreateSummary />
     );
-
-  // scroll to the currently selected wizard step
-  /*
-  function scrollToRef() {
-    if (definePivotRef !== null && definePivotRef.current !== null) {
-      // TODO Fix types
-      const dummy = definePivotRef as any;
-      const headerOffset = 70;
-      window.scrollTo(0, dummy.current.offsetTop - headerOffset);
-    }
-  }
-  */
 
   const stepsConfig = [
     {
@@ -147,7 +154,6 @@ export const Wizard: SFC = React.memo(() => {
             <WizardNav
               previous={() => {
                 setCurrentStep(WIZARD_STEPS.DEFINE);
-                // scrollToRef();
               }}
               next={() => setCurrentStep(WIZARD_STEPS.CREATE)}
               nextActive={stepDetailsState.valid}
@@ -173,5 +179,5 @@ export const Wizard: SFC = React.memo(() => {
     },
   ];
 
-  return <EuiSteps steps={stepsConfig} />;
+  return <EuiSteps className="transform__steps" steps={stepsConfig} />;
 });

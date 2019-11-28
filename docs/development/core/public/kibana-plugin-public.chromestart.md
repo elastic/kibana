@@ -16,6 +16,7 @@ export interface ChromeStart
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [docTitle](./kibana-plugin-public.chromestart.doctitle.md) | <code>ChromeDocTitle</code> | APIs for accessing and updating the document title. |
 |  [navControls](./kibana-plugin-public.chromestart.navcontrols.md) | <code>ChromeNavControls</code> | [APIs](./kibana-plugin-public.chromenavcontrols.md) for registering new controls to be displayed in the navigation bar. |
 |  [navLinks](./kibana-plugin-public.chromestart.navlinks.md) | <code>ChromeNavLinks</code> | [APIs](./kibana-plugin-public.chromenavlinks.md) for manipulating nav links. |
 |  [recentlyAccessed](./kibana-plugin-public.chromestart.recentlyaccessed.md) | <code>ChromeRecentlyAccessed</code> | [APIs](./kibana-plugin-public.chromerecentlyaccessed.md) for recently accessed history. |

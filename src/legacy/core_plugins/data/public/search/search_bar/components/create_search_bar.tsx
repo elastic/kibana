@@ -19,52 +19,44 @@
 
 import React, { useState, useEffect } from 'react';
 import { Subscription } from 'rxjs';
-import { Filter } from '@kbn/es-query';
 import { CoreStart } from 'src/core/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { Storage } from '../../../types';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
-import { TimefilterSetup } from '../../../timefilter';
-import { FilterManager, SearchBar } from '../../../';
+import { SearchBar } from '../../../';
 import { SearchBarOwnProps } from '.';
+import { DataPublicPluginStart, esFilters } from '../../../../../../../plugins/data/public';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
   data: DataPublicPluginStart;
-  store: Storage;
-  timefilter: TimefilterSetup;
-  filterManager: FilterManager;
+  storage: IStorageWrapper;
 }
 
 export type StatetfulSearchBarProps = SearchBarOwnProps & {
   appName: string;
 };
 
-const defaultFiltersUpdated = (filterManager: FilterManager) => {
-  return (filters: Filter[]) => {
-    filterManager.setFilters(filters);
+const defaultFiltersUpdated = (data: DataPublicPluginStart) => {
+  return (filters: esFilters.Filter[]) => {
+    data.query.filterManager.setFilters(filters);
   };
 };
 
-const defaultOnRefreshChange = (timefilter: TimefilterSetup) => {
+const defaultOnRefreshChange = (data: DataPublicPluginStart) => {
+  const { timefilter } = data.query.timefilter;
   return (options: { isPaused: boolean; refreshInterval: number }) => {
-    timefilter.timefilter.setRefreshInterval({
+    timefilter.setRefreshInterval({
       value: options.refreshInterval,
       pause: options.isPaused,
     });
   };
 };
 
-export function createSearchBar({
-  core,
-  store,
-  timefilter,
-  filterManager,
-  data,
-}: StatefulSearchBarDeps) {
+export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return (props: StatetfulSearchBarProps) => {
+    const { filterManager, timefilter } = data.query;
     const tfRefreshInterval = timefilter.timefilter.getRefreshInterval();
     const fmFilters = filterManager.getFilters();
     const [refreshInterval, setRefreshInterval] = useState(tfRefreshInterval.value);
@@ -113,7 +105,7 @@ export function createSearchBar({
         services={{
           appName: props.appName,
           data,
-          store,
+          storage,
           ...core,
         }}
       >
@@ -124,8 +116,8 @@ export function createSearchBar({
           refreshInterval={refreshInterval}
           isRefreshPaused={refreshPaused}
           filters={filters}
-          onFiltersUpdated={defaultFiltersUpdated(filterManager)}
-          onRefreshChange={defaultOnRefreshChange(timefilter)}
+          onFiltersUpdated={defaultFiltersUpdated(data)}
+          onRefreshChange={defaultOnRefreshChange(data)}
           {...props}
         />
       </KibanaContextProvider>

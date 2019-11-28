@@ -19,7 +19,7 @@
 
 import { mkdir, symlink } from 'fs';
 import { join, resolve } from 'path';
-import rmdir from 'rimraf';
+import del from 'del';
 import { promisify } from 'util';
 
 import { getProjectPaths } from '../config';
@@ -33,20 +33,20 @@ import {
   topologicallyBatchProjects,
 } from './projects';
 
-const rootPath = resolve(`${__dirname}/__fixtures__/kibana`);
+const rootPath = resolve(__dirname, '__fixtures__/kibana');
 const rootPlugins = join(rootPath, 'plugins');
 
 describe('#getProjects', () => {
   beforeAll(async () => {
     await promisify(mkdir)(rootPlugins);
 
-    return promisify(symlink)(
+    await promisify(symlink)(
       join(__dirname, '__fixtures__/symlinked-plugins/corge'),
       join(rootPlugins, 'corge')
     );
   });
 
-  afterAll(() => promisify(rmdir)(rootPlugins));
+  afterAll(async () => await del(rootPlugins));
 
   test('find all packages in the packages directory', async () => {
     const projects = await getProjects(rootPath, ['packages/*']);

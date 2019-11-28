@@ -274,7 +274,7 @@ export default function({ getService }: FtrProviderContext) {
   describe('saved search', function() {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.load('ml/farequote');
     });
 
     after(async () => {
@@ -283,45 +283,45 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     for (const testData of testDataList) {
-      describe(`job creation ${testData.suiteTitle}`, function() {
-        it('loads the job management page', async () => {
+      describe(` ${testData.suiteTitle}`, function() {
+        it('job creation loads the job management page', async () => {
           await ml.navigation.navigateToMl();
           await ml.navigation.navigateToJobManagement();
         });
 
-        it('loads the new job source selection page', async () => {
+        it('job creation loads the new job source selection page', async () => {
           await ml.jobManagement.navigateToNewJobSourceSelection();
         });
 
-        it('loads the job type selection page', async () => {
+        it('job creation loads the job type selection page', async () => {
           await ml.jobSourceSelection.selectSource(testData.jobSource);
         });
 
-        it('loads the multi metric job wizard page', async () => {
+        it('job creation loads the multi metric job wizard page', async () => {
           await ml.jobTypeSelection.selectMultiMetricJob();
         });
 
-        it('displays the time range step', async () => {
+        it('job creation displays the time range step', async () => {
           await ml.jobWizardCommon.assertTimeRangeSectionExists();
         });
 
-        it('sets the timerange', async () => {
+        it('job creation sets the timerange', async () => {
           await ml.jobWizardCommon.clickUseFullDataButton(
             'Feb 7, 2016 @ 00:00:00.000',
             'Feb 11, 2016 @ 23:59:54.000'
           );
         });
 
-        it('displays the event rate chart', async () => {
+        it('job creation displays the event rate chart', async () => {
           await ml.jobWizardCommon.assertEventRateChartExists();
           await ml.jobWizardCommon.assertEventRateChartHasData();
         });
 
-        it('displays the pick fields step', async () => {
+        it('job creation displays the pick fields step', async () => {
           await ml.jobWizardCommon.advanceToPickFieldsSection();
         });
 
-        it('selects detectors and displays detector previews', async () => {
+        it('job creation selects detectors and displays detector previews', async () => {
           for (const [index, aggAndFieldIdentifier] of testData.aggAndFieldIdentifiers.entries()) {
             await ml.jobWizardCommon.assertAggAndFieldInputExists();
             await ml.jobWizardCommon.selectAggAndField(aggAndFieldIdentifier, false);
@@ -333,7 +333,7 @@ export default function({ getService }: FtrProviderContext) {
           }
         });
 
-        it('inputs the split field and displays split cards', async () => {
+        it('job creation inputs the split field and displays split cards', async () => {
           await ml.jobWizardMultiMetric.assertSplitFieldInputExists();
           await ml.jobWizardMultiMetric.selectSplitField(testData.splitField);
 
@@ -348,31 +348,31 @@ export default function({ getService }: FtrProviderContext) {
           await ml.jobWizardCommon.assertInfluencerSelection([testData.splitField]);
         });
 
-        it('displays the influencer field', async () => {
+        it('job creation displays the influencer field', async () => {
           await ml.jobWizardCommon.assertInfluencerInputExists();
           await ml.jobWizardCommon.assertInfluencerSelection([testData.splitField]);
         });
 
-        it('inputs the bucket span', async () => {
+        it('job creation inputs the bucket span', async () => {
           await ml.jobWizardCommon.assertBucketSpanInputExists();
           await ml.jobWizardCommon.setBucketSpan(testData.bucketSpan);
         });
 
-        it('displays the job details step', async () => {
+        it('job creation displays the job details step', async () => {
           await ml.jobWizardCommon.advanceToJobDetailsSection();
         });
 
-        it('inputs the job id', async () => {
+        it('job creation inputs the job id', async () => {
           await ml.jobWizardCommon.assertJobIdInputExists();
           await ml.jobWizardCommon.setJobId(testData.jobId);
         });
 
-        it('inputs the job description', async () => {
+        it('job creation inputs the job description', async () => {
           await ml.jobWizardCommon.assertJobDescriptionInputExists();
           await ml.jobWizardCommon.setJobDescription(testData.jobDescription);
         });
 
-        it('inputs job groups', async () => {
+        it('job creation inputs job groups', async () => {
           await ml.jobWizardCommon.assertJobGroupInputExists();
           for (const jobGroup of testData.jobGroups) {
             await ml.jobWizardCommon.addJobGroup(jobGroup);
@@ -380,38 +380,38 @@ export default function({ getService }: FtrProviderContext) {
           await ml.jobWizardCommon.assertJobGroupSelection(testData.jobGroups);
         });
 
-        it('opens the advanced section', async () => {
+        it('job creation opens the advanced section', async () => {
           await ml.jobWizardCommon.ensureAdvancedSectionOpen();
         });
 
-        it('displays the model plot switch', async () => {
+        it('job creation displays the model plot switch', async () => {
           await ml.jobWizardCommon.assertModelPlotSwitchExists();
         });
 
-        it('enables the dedicated index switch', async () => {
+        it('job creation enables the dedicated index switch', async () => {
           await ml.jobWizardCommon.assertDedicatedIndexSwitchExists();
           await ml.jobWizardCommon.activateDedicatedIndexSwitch();
         });
 
-        it('inputs the model memory limit', async () => {
+        it('job creation inputs the model memory limit', async () => {
           await ml.jobWizardCommon.assertModelMemoryLimitInputExists();
           await ml.jobWizardCommon.setModelMemoryLimit(testData.memoryLimit);
         });
 
-        it('displays the validation step', async () => {
+        it('job creation displays the validation step', async () => {
           await ml.jobWizardCommon.advanceToValidationSection();
         });
 
-        it('displays the summary step', async () => {
+        it('job creation displays the summary step', async () => {
           await ml.jobWizardCommon.advanceToSummarySection();
         });
 
-        it('creates the job and finishes processing', async () => {
+        it('job creation creates the job and finishes processing', async () => {
           await ml.jobWizardCommon.assertCreateJobButtonExists();
           await ml.jobWizardCommon.createJobAndWaitForCompletion();
         });
 
-        it('displays the created job in the job list', async () => {
+        it('job creation displays the created job in the job list', async () => {
           await ml.navigation.navigateToMl();
           await ml.navigation.navigateToJobManagement();
 
@@ -421,7 +421,7 @@ export default function({ getService }: FtrProviderContext) {
           expect(rows.filter(row => row.id === testData.jobId)).to.have.length(1);
         });
 
-        it('displays details for the created job in the job list', async () => {
+        it('job creation displays details for the created job in the job list', async () => {
           await ml.jobTable.assertJobRowFields(testData.jobId, {
             id: testData.jobId,
             description: testData.jobDescription,
@@ -467,6 +467,12 @@ export default function({ getService }: FtrProviderContext) {
               timestamp: testData.expected.modelSizeStats.timestamp,
             }
           );
+        });
+
+        it('has detector results', async () => {
+          for (let i = 0; i < testData.aggAndFieldIdentifiers.length; i++) {
+            await ml.api.assertDetectorResultsExist(testData.jobId, i);
+          }
         });
       });
     }

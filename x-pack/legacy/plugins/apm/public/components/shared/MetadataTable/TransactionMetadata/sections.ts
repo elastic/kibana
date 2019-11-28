@@ -22,8 +22,8 @@ import {
 } from '../sections';
 
 export const TRANSACTION_METADATA_SECTIONS: Section[] = [
-  TRANSACTION,
   { ...LABELS, required: true },
+  TRANSACTION,
   HTTP,
   HOST,
   CONTAINER,

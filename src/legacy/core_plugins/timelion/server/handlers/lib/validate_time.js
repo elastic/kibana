@@ -18,12 +18,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 
-import parseDateMath from '../../lib/date_math.js';
 import toMS from '../../lib/to_milliseconds.js';
 
 export default function validateTime(time, tlConfig) {
-  const span = parseDateMath(time.to, true) - parseDateMath(time.from);
+  const span = moment.duration(moment(time.to).diff(moment(time.from))).asMilliseconds();
   const interval = toMS(time.interval);
   const bucketCount = span / interval;
   const maxBuckets = tlConfig.settings['timelion:max_buckets'];

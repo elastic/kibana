@@ -1,10 +1,10 @@
 [[saved-objects-api-create]]
-=== Create saved object API
+=== Create saved objects API
 ++++
-<titleabbrev>Create object</titleabbrev>
+<titleabbrev>Create saved objects</titleabbrev>
 ++++
 
-experimental[] Create a {kib} saved object.
+experimental[] Create {kib} saved objects.
 
 [[saved-objects-api-create-request]]
 ==== Request
@@ -13,8 +13,13 @@ experimental[] Create a {kib} saved object.
 
 `POST /api/saved_objects/<type>/<id>`
 
+`POST /s/<space_id>/saved_objects/<type>`
+
 [[saved-objects-api-create-path-params]]
 ==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 `<type>`::
   (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`.
@@ -44,9 +49,9 @@ any data that you send to the API is properly formed.
 [[saved-objects-api-create-request-codes]]
 ==== Response code
 
-`200`:: 
+`200`::
     Indicates a successful call.
-    
+
 [[saved-objects-api-create-example]]
 ==== Example
 

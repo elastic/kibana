@@ -20,6 +20,7 @@
 import { defaults } from 'lodash';
 
 import { SavedObjectsClientContract, SavedObjectAttribute } from '../../saved_objects/types';
+import { SavedObjectsErrorHelpers } from '../../saved_objects/';
 import { Logger } from '../../logging';
 
 import { getUpgradeableConfig } from './get_upgradeable_config';
@@ -29,15 +30,13 @@ interface Options {
   version: string;
   buildNum: number;
   log: Logger;
-  onWriteError?: <T extends SavedObjectAttribute = any>(
-    error: Error,
-    attributes: Record<string, any>
-  ) => Record<string, T> | undefined;
+  handleWriteErrors: boolean;
 }
+
 export async function createOrUpgradeSavedConfig<T extends SavedObjectAttribute = any>(
   options: Options
 ): Promise<Record<string, T> | undefined> {
-  const { savedObjectsClient, version, buildNum, log, onWriteError } = options;
+  const { savedObjectsClient, version, buildNum, log, handleWriteErrors } = options;
 
   // try to find an older config we can upgrade
   const upgradeableConfig = await getUpgradeableConfig({
@@ -52,8 +51,17 @@ export async function createOrUpgradeSavedConfig<T extends SavedObjectAttribute 
     // create the new SavedConfig
     await savedObjectsClient.create('config', attributes, { id: version });
   } catch (error) {
-    if (onWriteError) {
-      return onWriteError(error, attributes);
+    if (handleWriteErrors) {
+      if (SavedObjectsErrorHelpers.isConflictError(error)) {
+        return;
+      }
+
+      if (
+        SavedObjectsErrorHelpers.isNotAuthorizedError(error) ||
+        SavedObjectsErrorHelpers.isForbiddenError(error)
+      ) {
+        return attributes;
+      }
     }
 
     throw error;

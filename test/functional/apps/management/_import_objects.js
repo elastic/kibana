@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }) {
       it('should import saved objects', async function () {
         await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects.ndjson'));
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
         await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
         const objects = await PageObjects.settings.getSavedObjectsInTable();
@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }) {
       it('should provide dialog to allow the importing of saved objects with index pattern conflicts', async function () {
         await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_conflicts.ndjson'));
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.checkImportConflictsWarning();
         await PageObjects.settings.associateIndexPattern('d1e4c910-a2e6-11e7-bb30-233be9be6a15', 'logstash-*');
         await PageObjects.settings.clickConfirmChanges();
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }) {
         // so that we can override the existing visualization.
         await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_exists.ndjson'), false);
 
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.checkImportConflictsWarning();
         await PageObjects.settings.associateIndexPattern('logstash-*', 'logstash-*');
         await PageObjects.settings.clickConfirmChanges();
 
@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }) {
         // so that we can be prompted to override the existing visualization.
         await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_exists.ndjson'), false);
 
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.checkImportConflictsWarning();
         await PageObjects.settings.associateIndexPattern('logstash-*', 'logstash-*');
         await PageObjects.settings.clickConfirmChanges();
 
@@ -103,13 +103,13 @@ export default function ({ getService, getPageObjects }) {
       it('should import saved objects linked to saved searches', async function () {
         await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_saved_search.ndjson'));
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
 
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.ndjson'));
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
         await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
@@ -122,7 +122,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.ndjson'));
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.checkNoneImported();
         await PageObjects.settings.clickImportDone();
         await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
@@ -140,7 +140,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_with_saved_search.ndjson'));
         // Wait for all the saves to happen
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.checkImportConflictsWarning();
         await PageObjects.settings.clickConfirmChanges();
         await PageObjects.settings.clickImportDone();
         await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
@@ -154,7 +154,7 @@ export default function ({ getService, getPageObjects }) {
         // First, import the objects
         await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_with_index_patterns.ndjson'));
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
         // Wait for all the saves to happen
         await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
@@ -173,7 +173,7 @@ export default function ({ getService, getPageObjects }) {
         // Then, import the objects
         await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_with_index_patterns.ndjson'));
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
         // Wait for all the saves to happen
         await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
@@ -199,7 +199,7 @@ export default function ({ getService, getPageObjects }) {
       it('should import saved objects', async function () {
         await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects.json'));
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
         await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
         const objects = await PageObjects.settings.getSavedObjectsInTable();
@@ -210,7 +210,8 @@ export default function ({ getService, getPageObjects }) {
       it('should provide dialog to allow the importing of saved objects with index pattern conflicts', async function () {
         await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects-conflicts.json'));
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.checkImportLegacyWarning();
+        await PageObjects.settings.checkImportConflictsWarning();
         await PageObjects.settings.associateIndexPattern('d1e4c910-a2e6-11e7-bb30-233be9be6a15', 'logstash-*');
         await PageObjects.settings.clickConfirmChanges();
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -228,7 +229,8 @@ export default function ({ getService, getPageObjects }) {
         // so that we can override the existing visualization.
         await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_exists.json'), false);
 
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.checkImportLegacyWarning();
+        await PageObjects.settings.checkImportConflictsWarning();
         await PageObjects.settings.associateIndexPattern('logstash-*', 'logstash-*');
         await PageObjects.settings.clickConfirmChanges();
 
@@ -246,7 +248,8 @@ export default function ({ getService, getPageObjects }) {
         // so that we can be prompted to override the existing visualization.
         await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_exists.json'), false);
 
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.checkImportLegacyWarning();
+        await PageObjects.settings.checkImportConflictsWarning();
         await PageObjects.settings.associateIndexPattern('logstash-*', 'logstash-*');
         await PageObjects.settings.clickConfirmChanges();
 
@@ -260,13 +263,13 @@ export default function ({ getService, getPageObjects }) {
       it('should import saved objects linked to saved searches', async function () {
         await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_saved_search.json'));
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
 
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json'));
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
         await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
@@ -279,7 +282,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json'));
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.checkImportFailedWarning();
         await PageObjects.settings.clickImportDone();
         await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
@@ -293,7 +296,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_saved_search.json'));
         // Wait for all the saves to happen
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
 
         // Second, we need to delete the index pattern
@@ -307,7 +310,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json'));
         // Wait for all the saves to happen
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.checkNoneImported();
         await PageObjects.settings.clickImportDone();
         await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
@@ -320,7 +323,7 @@ export default function ({ getService, getPageObjects }) {
         // First, import the objects
         await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_with_index_patterns.json'));
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.checkImportFailedWarning();
         await PageObjects.settings.clickImportDone();
         // Wait for all the saves to happen
         await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
@@ -339,7 +342,7 @@ export default function ({ getService, getPageObjects }) {
         // Then, import the objects
         await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_with_index_patterns.json'));
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
         // Wait for all the saves to happen
         await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();

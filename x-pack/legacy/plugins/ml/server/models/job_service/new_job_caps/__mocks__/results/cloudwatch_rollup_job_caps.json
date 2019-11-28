@@ -3,7 +3,6 @@
     "aggs": [
       {
         "dslName": "count",
-        "fieldIds": [],
         "id": "count",
         "kibanaName": "count",
         "mlModelPlotAgg": {
@@ -15,7 +14,6 @@
       },
       {
         "dslName": "count",
-        "fieldIds": [],
         "id": "high_count",
         "kibanaName": "count",
         "mlModelPlotAgg": {
@@ -27,7 +25,6 @@
       },
       {
         "dslName": "count",
-        "fieldIds": [],
         "id": "low_count",
         "kibanaName": "count",
         "mlModelPlotAgg": {
@@ -183,7 +180,6 @@
       },
       {
         "dslName": null,
-        "fieldIds": [],
         "id": "non_zero_count",
         "kibanaName": null,
         "mlModelPlotAgg": {
@@ -195,7 +191,6 @@
       },
       {
         "dslName": null,
-        "fieldIds": [],
         "id": "high_non_zero_count",
         "kibanaName": null,
         "mlModelPlotAgg": {
@@ -207,7 +202,6 @@
       },
       {
         "dslName": null,
-        "fieldIds": [],
         "id": "low_non_zero_count",
         "kibanaName": null,
         "mlModelPlotAgg": {
@@ -327,7 +321,6 @@
       },
       {
         "dslName": null,
-        "fieldIds": [],
         "id": "rare",
         "kibanaName": null,
         "mlModelPlotAgg": {
@@ -339,7 +332,6 @@
       },
       {
         "dslName": null,
-        "fieldIds": [],
         "id": "freq_rare",
         "kibanaName": null,
         "mlModelPlotAgg": {
@@ -387,7 +379,6 @@
       },
       {
         "dslName": null,
-        "fieldIds": [],
         "id": "time_of_day",
         "kibanaName": null,
         "mlModelPlotAgg": {
@@ -399,7 +390,6 @@
       },
       {
         "dslName": null,
-        "fieldIds": [],
         "id": "time_of_week",
         "kibanaName": null,
         "mlModelPlotAgg": {

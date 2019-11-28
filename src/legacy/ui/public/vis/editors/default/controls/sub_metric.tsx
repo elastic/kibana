@@ -21,7 +21,7 @@ import React, { useEffect, useState } from 'react';
 import { EuiFormLabel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggParamType } from '../../../../agg_types/param_types/agg';
-import { AggConfig } from '../../..';
+import { AggConfig } from '../../../../agg_types/agg_config';
 import { AggParamEditorProps, DefaultEditorAggParams, AggGroupNames } from '..';
 
 function SubMetricParamEditor({

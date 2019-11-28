@@ -80,6 +80,12 @@ export interface App extends AppBase {
    * @returns An unmounting function that will be called to unmount the application.
    */
   mount: (context: AppMountContext, params: AppMountParameters) => AppUnmount | Promise<AppUnmount>;
+
+  /**
+   * Hide the UI chrome when the application is mounted. Defaults to `false`.
+   * Takes precedence over chrome service visibility settings.
+   */
+  chromeless?: boolean;
 }
 
 /** @internal */
@@ -145,12 +151,13 @@ export interface AppMountParameters {
    * export class MyPlugin implements Plugin {
    *   setup({ application }) {
    *     application.register({
-   *     id: 'my-app',
-   *     async mount(context, params) {
-   *       const { renderApp } = await import('./application');
-   *       return renderApp(context, params);
-   *     },
-   *   });
+   *      id: 'my-app',
+   *      async mount(context, params) {
+   *        const { renderApp } = await import('./application');
+   *        return renderApp(context, params);
+   *      },
+   *    });
+   *  }
    * }
    * ```
    *

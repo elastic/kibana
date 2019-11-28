@@ -4,18 +4,11 @@
 
 ## SavedObjectsClient class
 
-
 <b>Signature:</b>
 
 ```typescript
 export declare class SavedObjectsClient 
 ```
-
-## Constructors
-
-|  Constructor | Modifiers | Description |
-|  --- | --- | --- |
-|  [(constructor)(repository)](./kibana-plugin-server.savedobjectsclient._constructor_.md) |  | Constructs a new instance of the <code>SavedObjectsClient</code> class |
 
 ## Properties
 
@@ -30,9 +23,14 @@ export declare class SavedObjectsClient
 |  --- | --- | --- |
 |  [bulkCreate(objects, options)](./kibana-plugin-server.savedobjectsclient.bulkcreate.md) |  | Persists multiple documents batched together as a single request |
 |  [bulkGet(objects, options)](./kibana-plugin-server.savedobjectsclient.bulkget.md) |  | Returns an array of objects by id |
+|  [bulkUpdate(objects, options)](./kibana-plugin-server.savedobjectsclient.bulkupdate.md) |  | Bulk Updates multiple SavedObject at once |
 |  [create(type, attributes, options)](./kibana-plugin-server.savedobjectsclient.create.md) |  | Persists a SavedObject |
 |  [delete(type, id, options)](./kibana-plugin-server.savedobjectsclient.delete.md) |  | Deletes a SavedObject |
 |  [find(options)](./kibana-plugin-server.savedobjectsclient.find.md) |  | Find all SavedObjects matching the search query |
 |  [get(type, id, options)](./kibana-plugin-server.savedobjectsclient.get.md) |  | Retrieves a single object |
 |  [update(type, id, attributes, options)](./kibana-plugin-server.savedobjectsclient.update.md) |  | Updates an SavedObject |
+
+## Remarks
+
+The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `SavedObjectsClient` class.
 

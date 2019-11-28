@@ -658,6 +658,6 @@ export const mockOptions = {
     'inspect.response',
   ],
   ip: '',
-  tlsSortField: { field: TlsFields._id, direction: Direction.desc },
+  sort: { field: TlsFields._id, direction: Direction.desc },
   flowTarget: FlowTargetSourceDest.source,
 };

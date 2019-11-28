@@ -25,9 +25,9 @@
  * NOTE: It's a type of SavedObject, but specific to visualizations.
  */
 
-import { VisProvider } from 'ui/vis';
+import { Vis } from 'ui/vis';
 import { uiModules } from 'ui/modules';
-import { updateOldState } from 'ui/vis/vis_update_state';
+import { updateOldState } from '../../../../visualizations/public';
 import { VisualizeConstants } from '../visualize_constants';
 import { createLegacyClass } from 'ui/utils/legacy_class';
 import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
@@ -39,7 +39,6 @@ import {
 uiModules
   .get('app/visualize')
   .factory('SavedVis', function (Promise, savedSearches, Private) {
-    const Vis = Private(VisProvider);
     const SavedObject = Private(SavedObjectProvider);
     createLegacyClass(SavedVis).inherits(SavedObject);
     function SavedVis(opts) {

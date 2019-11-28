@@ -5,11 +5,15 @@
  */
 
 import React from 'react';
-import { ExpressionRendererProps } from 'src/legacy/core_plugins/expressions/public';
 import {
+  ExpressionRendererProps,
   ExpressionsSetup,
   ExpressionsStart,
-} from '../../../../../../src/legacy/core_plugins/expressions/public';
+} from '../../../../../../src/plugins/expressions/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { embeddablePluginMock } from '../../../../../../src/plugins/embeddable/public/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
 import { DatasourcePublicAPI, FramePublicAPI, Visualization, Datasource } from '../types';
 import { EditorFrameSetupPlugins, EditorFrameStartPlugins } from './plugin';
 
@@ -53,7 +57,7 @@ export function createMockDatasource(): DatasourceMock {
     getDatasourceSuggestionsForField: jest.fn((_state, item) => []),
     getDatasourceSuggestionsFromCurrentState: jest.fn(_state => []),
     getPersistableState: jest.fn(),
-    getPublicAPI: jest.fn((_state, _setState, _layerId) => publicAPIMock),
+    getPublicAPI: jest.fn().mockReturnValue(publicAPIMock),
     initialize: jest.fn((_state?) => Promise.resolve()),
     renderDataPanel: jest.fn(),
     toExpression: jest.fn((_frame, _state) => null),
@@ -101,10 +105,8 @@ export function createExpressionRendererMock(): jest.Mock<
 export function createMockSetupDependencies() {
   return ({
     data: {},
-    expressions: {
-      registerFunction: jest.fn(),
-      registerRenderer: jest.fn(),
-    },
+    embeddable: embeddablePluginMock.createSetupContract(),
+    expressions: expressionsPluginMock.createSetupContract(),
     chrome: {
       getSavedObjectsClient: () => {},
     },
@@ -118,11 +120,7 @@ export function createMockStartDependencies() {
         indexPatterns: {},
       },
     },
-    expressions: {
-      ExpressionRenderer: jest.fn(() => null),
-    },
-    embeddables: {
-      registerEmbeddableFactory: jest.fn(),
-    },
+    embeddable: embeddablePluginMock.createStartContract(),
+    expressions: expressionsPluginMock.createStartContract(),
   } as unknown) as MockedStartDependencies;
 }

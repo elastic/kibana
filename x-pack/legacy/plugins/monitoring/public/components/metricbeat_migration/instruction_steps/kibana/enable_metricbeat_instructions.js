@@ -20,7 +20,7 @@ export function getKibanaInstructionsForEnablingMetricbeat(product, _meta, {
   esMonitoringUrl,
 }) {
   const securitySetup = getSecurityStep(
-    `${ELASTIC_WEBSITE_URL}guide/en/kibana/reference/${DOC_LINK_VERSION}/configuring-metricbeat.html`
+    `${ELASTIC_WEBSITE_URL}guide/en/kibana/reference/${DOC_LINK_VERSION}/monitoring-metricbeat.html`
   );
 
   const installMetricbeatStep = {

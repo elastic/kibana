@@ -20,22 +20,23 @@
 import Hapi from 'hapi';
 import { createMockServer } from './_mock_server';
 import { createUpdateRoute } from './update';
+import { savedObjectsClientMock } from '../../../../core/server/mocks';
 
 describe('PUT /api/saved_objects/{type}/{id?}', () => {
   let server: Hapi.Server;
-  const savedObjectsClient = {
-    errors: {} as any,
-    bulkCreate: jest.fn(),
-    bulkGet: jest.fn(),
-    create: jest.fn(),
-    delete: jest.fn(),
-    find: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-  };
+  const savedObjectsClient = savedObjectsClientMock.create();
 
   beforeEach(() => {
-    savedObjectsClient.update.mockImplementation(() => Promise.resolve(''));
+    const clientResponse = {
+      id: 'logstash-*',
+      title: 'logstash-*',
+      type: 'logstash-type',
+      attributes: {},
+      timeFieldName: '@timestamp',
+      notExpandable: true,
+      references: [],
+    };
+    savedObjectsClient.update.mockImplementation(() => Promise.resolve(clientResponse));
     server = createMockServer();
 
     const prereqs = {
@@ -69,8 +70,10 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
     const clientResponse = {
       id: 'logstash-*',
       title: 'logstash-*',
+      type: 'logstash-type',
       timeFieldName: '@timestamp',
       notExpandable: true,
+      attributes: {},
       references: [],
     };
 

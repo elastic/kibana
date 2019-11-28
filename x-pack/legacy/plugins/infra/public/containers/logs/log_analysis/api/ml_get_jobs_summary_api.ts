@@ -39,6 +39,7 @@ export type FetchJobStatusRequestPayload = rt.TypeOf<typeof fetchJobStatusReques
 const datafeedStateRT = rt.keyof({
   started: null,
   stopped: null,
+  '': null,
 });
 
 const jobStateRT = rt.keyof({

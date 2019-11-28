@@ -114,8 +114,14 @@ export const IpOverview = pure<IpOverviewProps>(
     const descriptionLists: Readonly<DescriptionList[][]> = [
       firstColumn,
       [
-        { title: i18n.FIRST_SEEN, description: dateRenderer('firstSeen', typeData) },
-        { title: i18n.LAST_SEEN, description: dateRenderer('lastSeen', typeData) },
+        {
+          title: i18n.FIRST_SEEN,
+          description: typeData ? dateRenderer(typeData.firstSeen) : getEmptyTagValue(),
+        },
+        {
+          title: i18n.LAST_SEEN,
+          description: typeData ? dateRenderer(typeData.lastSeen) : getEmptyTagValue(),
+        },
       ],
       [
         {

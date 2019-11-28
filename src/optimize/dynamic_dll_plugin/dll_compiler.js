@@ -25,13 +25,12 @@ import fs from 'fs';
 import webpack from 'webpack';
 import { promisify } from 'util';
 import path from 'path';
-import rimraf from 'rimraf';
+import del from 'del';
 
 const readFileAsync = promisify(fs.readFile);
 const mkdirAsync = promisify(fs.mkdir);
 const existsAsync = promisify(fs.exists);
 const writeFileAsync = promisify(fs.writeFile);
-const rimrafAsync = promisify(rimraf);
 
 export class DllCompiler {
   static getRawDllConfig(uiBundles = {}, babelLoaderCacheDir = '', threadLoaderPoolConfig = {}) {
@@ -267,7 +266,7 @@ export class DllCompiler {
           // Delete the built dll, as it contains invalid modules, and reject listing
           // all the not allowed modules
           try {
-            await rimrafAsync(this.rawDllConfig.outputPath);
+            await del(this.rawDllConfig.outputPath);
           } catch (e) {
             return reject(e);
           }

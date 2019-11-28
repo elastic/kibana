@@ -99,7 +99,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
           <h1>
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryList.emptyPromptTitle"
-              defaultMessage="You don't have any repositories yet"
+              defaultMessage="Register your first repository"
             />
           </h1>
         }
@@ -108,7 +108,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
             <p>
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryList.emptyPromptDescription"
-                defaultMessage="You need a repository to store your snapshots."
+                defaultMessage="Create a place where your snapshots will live."
               />
             </p>
           </Fragment>

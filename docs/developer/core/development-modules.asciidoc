@@ -13,15 +13,6 @@ To prevent this from being an issue the ui module provides "autoloading"
 modules. The sole purpose of these modules is to extend the environment with
 certain components. Here is a breakdown of those modules:
 
-- *`import 'ui/autoload/styles'`*
-    Imports all styles at the root of `src/legacy/ui/public/styles`
-
-- *`import 'ui/autoload/directives'`*
-    Imports all directives in `src/legacy/ui/public/directives`
-
-- *`import 'ui/autoload/filters'`*
-    Imports all filters in `src/legacy/ui/public/filters`
-
 - *`import 'ui/autoload/modules'`*
     Imports angular and several ui services and "components" which Kibana
     depends on without importing. The full list of imports is hard coded in the

@@ -39,7 +39,7 @@ export default function({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .set('Cookie', sessionCookie.cookieString())
         .send({ password: wrongPassword, newPassword })
-        .expect(401);
+        .expect(403);
 
       // Let's check that we can't login with wrong password, just in case.
       await supertest

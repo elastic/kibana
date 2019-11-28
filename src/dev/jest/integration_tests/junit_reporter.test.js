@@ -52,7 +52,7 @@ it(
       }
     );
 
-    expect(result.code).toBe(1);
+    expect(result.exitCode).toBe(1);
     await expect(parseXml(readFileSync(XML_PATH, 'utf8'))).resolves.toEqual({
       testsuites: {
         $: {

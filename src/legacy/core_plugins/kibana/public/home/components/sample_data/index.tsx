@@ -42,7 +42,7 @@ interface Props {
 export function SampleDataCard({ urlBasePath, onDecline, onConfirm }: Props) {
   return (
     <EuiCard
-      image={`${urlBasePath}/plugins/kibana/assets/illo_dashboard.png`}
+      image={`${urlBasePath}/plugins/kibana/home/assets/illo_dashboard.png`}
       textAlign="left"
       title={<FormattedMessage id="kbn.home.letsStartTitle" defaultMessage="Let's get started" />}
       description={

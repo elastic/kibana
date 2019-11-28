@@ -19,7 +19,7 @@
 
 import sinon from 'sinon';
 import glob from 'glob-all';
-import rimraf from 'rimraf';
+import del from 'del';
 import Logger from '../lib/logger';
 import remove from './remove';
 import { join } from 'path';
@@ -40,7 +40,7 @@ describe('kibana cli', function () {
       logger = new Logger(settings);
       sinon.stub(logger, 'log');
       sinon.stub(logger, 'error');
-      rimraf.sync(pluginDir);
+      del.sync(pluginDir);
       mkdirSync(pluginDir, { recursive: true });
     });
 
@@ -48,7 +48,7 @@ describe('kibana cli', function () {
       processExitStub.restore();
       logger.log.restore();
       logger.error.restore();
-      rimraf.sync(pluginDir);
+      del.sync(pluginDir);
     });
 
     it('throw an error if the plugin is not installed.', function () {

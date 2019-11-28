@@ -9,5 +9,5 @@ title in the UI
 <b>Signature:</b>
 
 ```typescript
-name: string;
+name?: string;
 ```

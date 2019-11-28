@@ -11,6 +11,8 @@ import { QueryString } from 'ui/utils/query_string';
 import { addEntitiesToKql } from './add_entities_to_kql';
 import { replaceKQLParts } from './replace_kql_parts';
 import { emptyEntity, multipleEntities, getMultipleEntities } from './entity_helpers';
+import { SiemPageName } from '../../../pages/home/types';
+import { HostsTableType } from '../../../store/hosts/model';
 
 interface QueryStringType {
   '?_g': string;
@@ -34,7 +36,7 @@ export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ 
           queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
         }
         const reEncoded = QueryString.encode(queryStringDecoded);
-        return <Redirect to={`/hosts?${reEncoded}`} />;
+        return <Redirect to={`/${SiemPageName.hosts}?${reEncoded}`} />;
       }}
     />
     <Route
@@ -53,7 +55,9 @@ export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ 
         }
         if (emptyEntity(hostName)) {
           const reEncoded = QueryString.encode(queryStringDecoded);
-          return <Redirect to={`/hosts/anomalies?${reEncoded}`} />;
+          return (
+            <Redirect to={`/${SiemPageName.hosts}/${HostsTableType.anomalies}?${reEncoded}`} />
+          );
         } else if (multipleEntities(hostName)) {
           const hosts: string[] = getMultipleEntities(hostName);
           queryStringDecoded.query = addEntitiesToKql(
@@ -62,10 +66,16 @@ export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ 
             queryStringDecoded.query || ''
           );
           const reEncoded = QueryString.encode(queryStringDecoded);
-          return <Redirect to={`/hosts/anomalies?${reEncoded}`} />;
+          return (
+            <Redirect to={`/${SiemPageName.hosts}/${HostsTableType.anomalies}?${reEncoded}`} />
+          );
         } else {
           const reEncoded = QueryString.encode(queryStringDecoded);
-          return <Redirect to={`/hosts/${hostName}/anomalies?${reEncoded}`} />;
+          return (
+            <Redirect
+              to={`/${SiemPageName.hosts}/${hostName}/${HostsTableType.anomalies}?${reEncoded}`}
+            />
+          );
         }
       }}
     />
