@@ -93,7 +93,7 @@ afterAll(() => {
   sizeMe.noPlaceholders = false;
 });
 
-test('renders DashboardGrid', () => {
+test.skip('renders DashboardGrid', () => {
   const { props, options } = prepare();
   const component = mountWithIntl(
     <KibanaContextProvider services={options}>
@@ -119,7 +119,7 @@ test('renders DashboardGrid with no visualizations', async () => {
   expect(component.find('EmbeddableChildPanel').length).toBe(0);
 });
 
-test('DashboardGrid removes panel when removed from container', async () => {
+test.skip('DashboardGrid removes panel when removed from container', async () => {
   const { props, options } = prepare();
   const component = mountWithIntl(
     <KibanaContextProvider services={options}>
@@ -137,7 +137,7 @@ test('DashboardGrid removes panel when removed from container', async () => {
   expect(panelElements.length).toBe(1);
 });
 
-test('DashboardGrid renders expanded panel', async () => {
+test.skip('DashboardGrid renders expanded panel', async () => {
   const { props, options } = prepare();
   const component = mountWithIntl(
     <KibanaContextProvider services={options}>
