@@ -6,7 +6,7 @@
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server/';
 import { safeLoad } from 'js-yaml';
-import { SAVED_OBJECT_TYPE } from '../../common/constants';
+import { SAVED_OBJECT_TYPE_PACKAGES } from '../../common/constants';
 import {
   AssetReference,
   ElasticsearchAssetType,
@@ -81,7 +81,7 @@ export async function saveInstallationReferences(options: {
   const toInstall = toSave.reduce(mergeRefsReducer, savedRefs || []);
 
   await savedObjectsClient.create<InstallationAttributes>(
-    SAVED_OBJECT_TYPE,
+    SAVED_OBJECT_TYPE_PACKAGES,
     { installed: toInstall },
     { id: pkgkey, overwrite: true }
   );
