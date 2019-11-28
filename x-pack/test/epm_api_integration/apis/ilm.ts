@@ -6,7 +6,10 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
-import { getPolicy, getIndexWithWithAlias } from '../../../legacy/plugins/epm/server/lib/ilm/ilm';
+import {
+  getPolicy,
+  getIndexWithWithAlias,
+} from '../../../legacy/plugins/epm/server/lib/elasticsearch/ilm/ilm';
 
 export default function({ getService }: FtrProviderContext) {
   describe('ilm', () => {
