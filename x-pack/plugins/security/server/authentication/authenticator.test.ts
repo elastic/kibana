@@ -515,7 +515,7 @@ describe('Authenticator', () => {
       expect(mockSessionStorage.clear).not.toHaveBeenCalled();
     });
 
-    it('only updates the session lifespan expiration if it does not match the current server config.', async () => {
+    it.skip('only updates the session lifespan expiration if it does not match the current server config.', async () => {
       const user = mockAuthenticatedUser();
       const request = httpServerMock.createKibanaRequest();
       const hr = 1000 * 60 * 60;
