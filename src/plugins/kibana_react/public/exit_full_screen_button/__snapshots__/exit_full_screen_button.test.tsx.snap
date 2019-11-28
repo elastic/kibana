@@ -28,9 +28,26 @@ exports[`is rendered 1`] = `
           data-test-subj="exitFullScreenModeText"
         >
           Exit full screen
-          <span
-            className="kuiIcon fa fa-angle-left"
-          />
+          <EuiIcon
+            size="s"
+            type="arrowLeft"
+          >
+            <EuiIconEmpty
+              className="euiIcon euiIcon--small euiIcon-isLoading"
+              focusable="false"
+              style={null}
+            >
+              <svg
+                className="euiIcon euiIcon--small euiIcon-isLoading"
+                focusable="false"
+                height={16}
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+            </EuiIconEmpty>
+          </EuiIcon>
         </span>
       </button>
     </div>
