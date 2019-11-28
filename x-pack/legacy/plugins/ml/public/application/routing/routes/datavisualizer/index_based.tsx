@@ -15,7 +15,6 @@ import { Page } from '../../../datavisualizer/index_based';
 import { checkBasicLicense } from '../../../license/check_license';
 import { checkGetJobsPrivilege } from '../../../privilege/check_privilege';
 import { loadIndexPatterns } from '../../../util/index_utils';
-
 import { checkMlNodesAvailable } from '../../../ml_nodes_check';
 
 export const indexBasedRoute: MlRoute = {
