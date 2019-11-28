@@ -37,7 +37,7 @@ export function getActionType(): ActionTypeModel {
     id: '.webhook',
     iconClass: 'logoWebhook',
     selectMessage: i18n.translate(
-      'xpack.triggersActionsUI.components.buildin_action_types.webhookAction.selectMessageText',
+      'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.selectMessageText',
       {
         defaultMessage: 'Send a request to a web service.',
       }
@@ -54,7 +54,7 @@ export function getActionType(): ActionTypeModel {
       if (!action.config.url) {
         errors.url.push(
           i18n.translate(
-            'xpack.triggersActionsUI.components.buildin_action_types.webhookAction.error.requiredUrlText',
+            'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.error.requiredUrlText',
             {
               defaultMessage: 'Url is required.',
             }
@@ -182,7 +182,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
             errors={headerErrors}
             isShowingErrors={hasHeaderErrors && headerKey !== undefined}
             label={i18n.translate(
-              'xpack.triggersActionsUI.components.buildin_action_types.webhookAction.keyTextFieldLabel',
+              'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.keyTextFieldLabel',
               {
                 defaultMessage: 'Header Key',
               }
@@ -207,7 +207,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
             errors={headerErrors}
             isShowingErrors={hasHeaderErrors && headerValue !== undefined}
             label={i18n.translate(
-              'xpack.triggersActionsUI.components.buildin_action_types.webhookAction.valueTextFieldLabel',
+              'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.valueTextFieldLabel',
               {
                 defaultMessage: 'Header Value',
               }
@@ -234,7 +234,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
         <EuiFlexItem grow={false}>
           <EuiFormRow
             label={i18n.translate(
-              'xpack.triggersActionsUI.components.buildin_action_types.webhookAction.methodTextFieldLabel',
+              'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.methodTextFieldLabel',
               {
                 defaultMessage: 'Method',
               }
@@ -259,7 +259,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
             errors={errors}
             isShowingErrors={hasErrors === true && url !== undefined}
             label={i18n.translate(
-              'xpack.triggersActionsUI.components.buildin_action_types.webhookAction.urlTextFieldLabel',
+              'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.urlTextFieldLabel',
               {
                 defaultMessage: 'Url',
               }
@@ -291,7 +291,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
             errors={errors}
             isShowingErrors={hasErrors === true && user !== undefined}
             label={i18n.translate(
-              'xpack.triggersActionsUI.components.buildin_action_types.webhookAction.userTextFieldLabel',
+              'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.userTextFieldLabel',
               {
                 defaultMessage: 'User',
               }
@@ -321,7 +321,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
             errors={errors}
             isShowingErrors={hasErrors === true && password !== undefined}
             label={i18n.translate(
-              'xpack.triggersActionsUI.components.buildin_action_types.webhookAction.passwordTextFieldLabel',
+              'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.passwordTextFieldLabel',
               {
                 defaultMessage: 'Password',
               }
@@ -353,7 +353,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
       >
         <FormattedMessage
           defaultMessage={'Add HTTP header'}
-          id="xpack.triggersActionsUI.components.buildin_action_types.addHeaderButton"
+          id="xpack.triggersActionsUI.components.builtinActionTypes.addHeaderButton"
         />
       </EuiButton>
 
@@ -366,7 +366,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
             <h5>
               <FormattedMessage
                 defaultMessage={'HTTP headers list:'}
-                id="xpack.triggersActionsUI.components.buildin_action_types.webhookAction.httpHeadersTitle"
+                id="xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.httpHeadersTitle"
               />
             </h5>
           </EuiTitle>
@@ -405,7 +405,7 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       <ErrableFormRow
         id="webhookBody"
         label={i18n.translate(
-          'xpack.triggersActionsUI.components.buildin_action_types.webhookAction.bodyFieldLabel',
+          'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.bodyFieldLabel',
           {
             defaultMessage: 'Body',
           }
@@ -423,7 +423,7 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps> = ({
           theme="github"
           data-test-subj="webhookBodyEditor"
           aria-label={i18n.translate(
-            'xpack.triggersActionsUI.components.buildin_action_types.webhookAction.bodyCodeEditorAriaLabel',
+            'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.bodyCodeEditorAriaLabel',
             {
               defaultMessage: 'Code editor',
             }

@@ -20,7 +20,7 @@ export function getActionType(): ActionTypeModel {
     id: '.pagerduty',
     iconClass: 'apps',
     selectMessage: i18n.translate(
-      'xpack.triggersActionsUI.components.buildin_action_types.pagerDutyAction.selectMessageText',
+      'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.selectMessageText',
       {
         defaultMessage: 'Create an event in PagerDuty.',
       }
@@ -35,7 +35,7 @@ export function getActionType(): ActionTypeModel {
       if (!action.secrets.routingKey) {
         errors.routingKey.push(
           i18n.translate(
-            'xpack.triggersActionsUI.components.buildin_action_types.pagerDutyAction.error.requiredRoutingKeyText',
+            'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.error.requiredRoutingKeyText',
             {
               defaultMessage: 'Routing Key is required.',
             }
@@ -45,7 +45,7 @@ export function getActionType(): ActionTypeModel {
       if (!action.config.apiUrl) {
         errors.apiUrl.push(
           i18n.translate(
-            'xpack.triggersActionsUI.components.buildin_action_types.pagerDutyAction.error.requiredApiUrlText',
+            'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.error.requiredApiUrlText',
             {
               defaultMessage: 'ApiUrl is required.',
             }
@@ -81,7 +81,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
         errors={errors}
         isShowingErrors={hasErrors === true && apiUrl !== undefined}
         label={i18n.translate(
-          'xpack.triggersActionsUI.components.buildin_action_types.pagerDutyAction.apiUrlTextFieldLabel',
+          'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.apiUrlTextFieldLabel',
           {
             defaultMessage: 'ApiUrl',
           }
@@ -109,7 +109,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
         errors={errors}
         isShowingErrors={hasErrors === true && routingKey !== undefined}
         label={i18n.translate(
-          'xpack.triggersActionsUI.components.buildin_action_types.pagerDutyAction.routingKeyTextFieldLabel',
+          'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.routingKeyTextFieldLabel',
           {
             defaultMessage: 'RoutingKey',
           }
@@ -160,7 +160,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps> = ({
           <EuiFormRow
             fullWidth
             label={i18n.translate(
-              'xpack.triggersActionsUI.components.buildin_action_types.pagerDutyAction.severitySelectFieldLabel',
+              'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectFieldLabel',
               {
                 defaultMessage: 'Severity (optional)',
               }
@@ -181,7 +181,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps> = ({
           <EuiFormRow
             fullWidth
             label={i18n.translate(
-              'xpack.triggersActionsUI.components.buildin_action_types.pagerDutyAction.eventActionSelectFieldLabel',
+              'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.eventActionSelectFieldLabel',
               {
                 defaultMessage: 'Event action (optional)',
               }
@@ -204,7 +204,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps> = ({
           <EuiFormRow
             fullWidth
             label={i18n.translate(
-              'xpack.triggersActionsUI.components.buildin_action_types.pagerDutyAction.dedupKeyTextFieldLabel',
+              'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.dedupKeyTextFieldLabel',
               {
                 defaultMessage: 'DedupKey (optional)',
               }
@@ -230,7 +230,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps> = ({
           <EuiFormRow
             fullWidth
             label={i18n.translate(
-              'xpack.triggersActionsUI.components.buildin_action_types.pagerDutyAction.timestampTextFieldLabel',
+              'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.timestampTextFieldLabel',
               {
                 defaultMessage: 'Timestamp (optional)',
               }
@@ -256,7 +256,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       <EuiFormRow
         fullWidth
         label={i18n.translate(
-          'xpack.triggersActionsUI.components.buildin_action_types.pagerDutyAction.componentTextFieldLabel',
+          'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.componentTextFieldLabel',
           {
             defaultMessage: 'Component (optional)',
           }
@@ -280,7 +280,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       <EuiFormRow
         fullWidth
         label={i18n.translate(
-          'xpack.triggersActionsUI.components.buildin_action_types.pagerDutyAction.groupTextFieldLabel',
+          'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.groupTextFieldLabel',
           {
             defaultMessage: 'Group (optional)',
           }
@@ -304,7 +304,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       <EuiFormRow
         fullWidth
         label={i18n.translate(
-          'xpack.triggersActionsUI.components.buildin_action_types.pagerDutyAction.sourceTextFieldLabel',
+          'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.sourceTextFieldLabel',
           {
             defaultMessage: 'Source (optional)',
           }
@@ -332,7 +332,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps> = ({
         errors={errors}
         isShowingErrors={hasErrors === true && summary !== undefined}
         label={i18n.translate(
-          'xpack.triggersActionsUI.components.buildin_action_types.pagerDutyAction.summaryFieldLabel',
+          'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.summaryFieldLabel',
           {
             defaultMessage: 'Summary',
           }

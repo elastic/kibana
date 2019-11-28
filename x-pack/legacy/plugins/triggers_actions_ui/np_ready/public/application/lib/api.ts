@@ -13,35 +13,20 @@ import { ActionConnector, ActionType, Alert, AlertType } from '../../types';
 const MAX_ACTIONS_RETURNED = 10000;
 const WATCHER_API_ROOT = '/api/watcher';
 
-interface LoadActionTypesOpts {
-  http: HttpServiceBase;
+export async function loadActionTypes({ http }: { http: HttpServiceBase }): Promise<ActionType[]> {
+  return http.get(`${BASE_ACTION_API_PATH}/types`);
 }
 
-type LoadActionTypesResponse = ActionType[];
-
-interface LoadActionsOpts {
+export async function loadAllActions({
+  http,
+}: {
   http: HttpServiceBase;
-}
-
-interface LoadActionsResponse {
+}): Promise<{
   page: number;
   perPage: number;
   total: number;
   data: ActionConnector[];
-}
-
-interface DeleteActionsOpts {
-  ids: string[];
-  http: HttpServiceBase;
-}
-
-export async function loadActionTypes({
-  http,
-}: LoadActionTypesOpts): Promise<LoadActionTypesResponse> {
-  return http.get(`${BASE_ACTION_API_PATH}/types`);
-}
-
-export async function loadAllActions({ http }: LoadActionsOpts): Promise<LoadActionsResponse> {
+}> {
   return http.get(`${BASE_ACTION_API_PATH}/_find`, {
     query: {
       per_page: MAX_ACTIONS_RETURNED,
@@ -75,35 +60,18 @@ export async function updateActionConnector({
   });
 }
 
-export async function deleteActions({ ids, http }: DeleteActionsOpts): Promise<void> {
+export async function deleteActions({
+  ids,
+  http,
+}: {
+  ids: string[];
+  http: HttpServiceBase;
+}): Promise<void> {
   await Promise.all(ids.map(id => http.delete(`${BASE_ACTION_API_PATH}/${id}`)));
 }
 
-export interface LoadAlertTypesOpts {
-  http: HttpServiceBase;
-}
-
-export type LoadAlertTypesResponse = AlertType[];
-
-export async function loadAlertTypes({
-  http,
-}: LoadAlertTypesOpts): Promise<LoadAlertTypesResponse> {
+export async function loadAlertTypes({ http }: { http: HttpServiceBase }): Promise<AlertType[]> {
   return http.get(`${BASE_ALERT_API_PATH}/types`);
-}
-
-export interface LoadAlertsOpts {
-  http: HttpServiceBase;
-  page: { index: number; size: number };
-  searchText?: string;
-  tagsFilter?: string[];
-  typesFilter?: string[];
-}
-
-export interface LoadAlertsResponse {
-  page: number;
-  perPage: number;
-  total: number;
-  data: Alert[];
 }
 
 export async function loadAlerts({
@@ -112,7 +80,18 @@ export async function loadAlerts({
   searchText,
   tagsFilter,
   typesFilter,
-}: LoadAlertsOpts): Promise<LoadAlertsResponse> {
+}: {
+  http: HttpServiceBase;
+  page: { index: number; size: number };
+  searchText?: string;
+  tagsFilter?: string[];
+  typesFilter?: string[];
+}): Promise<{
+  page: number;
+  perPage: number;
+  total: number;
+  data: Alert[];
+}> {
   const filters = [];
   if (tagsFilter && tagsFilter.length) {
     filters.push(`alert.attributes.tags:(${tagsFilter.join(' and ')})`);
@@ -131,12 +110,13 @@ export async function loadAlerts({
   });
 }
 
-export interface DeleteAlertsOpts {
+export async function deleteAlerts({
+  ids,
+  http,
+}: {
   ids: string[];
   http: HttpServiceBase;
-}
-
-export async function deleteAlerts({ ids, http }: DeleteAlertsOpts): Promise<void> {
+}): Promise<void> {
   await Promise.all(ids.map(id => http.delete(`${BASE_ALERT_API_PATH}/${id}`)));
 }
 

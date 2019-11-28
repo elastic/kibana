@@ -20,7 +20,7 @@ export function getActionType(): ActionTypeModel {
     id: '.slack',
     iconClass: 'logoSlack',
     selectMessage: i18n.translate(
-      'xpack.triggersActionsUI.components.buildin_action_types.slackAction.selectMessageText',
+      'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.selectMessageText',
       {
         defaultMessage: 'Send a message to a Slack user or channel.',
       }
@@ -34,7 +34,7 @@ export function getActionType(): ActionTypeModel {
       if (!action.secrets.webhookUrl) {
         errors.webhookUrl.push(
           i18n.translate(
-            'xpack.triggersActionsUI.components.buildin_action_types.slackAction.error.requiredWebhookUrlText',
+            'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.error.requiredWebhookUrlText',
             {
               defaultMessage: 'WebhookUrl is required.',
             }
@@ -69,7 +69,7 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps> = (
         errors={errors}
         isShowingErrors={hasErrors === true && webhookUrl !== undefined}
         label={i18n.translate(
-          'xpack.triggersActionsUI.components.buildin_action_types.slackAction.webhookUrlTextFieldLabel',
+          'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.webhookUrlTextFieldLabel',
           {
             defaultMessage: 'WebhookUrl',
           }
@@ -121,7 +121,7 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps> = ({
         errors={errors}
         isShowingErrors={hasErrors && message !== undefined}
         label={i18n.translate(
-          'xpack.triggersActionsUI.components.buildin_action_types.slackAction.messageTextAreaFieldLabel',
+          'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.messageTextAreaFieldLabel',
           {
             defaultMessage: 'Message',
           }

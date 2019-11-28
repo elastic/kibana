@@ -28,7 +28,7 @@ export function getActionType(): ActionTypeModel {
     id: '.email',
     iconClass: 'email',
     selectMessage: i18n.translate(
-      'xpack.triggersActionsUI.components.buildin_action_types.emailAction.selectMessageText',
+      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.selectMessageText',
       {
         defaultMessage: 'Send an email.',
       }
@@ -46,7 +46,7 @@ export function getActionType(): ActionTypeModel {
       if (!action.config.from) {
         errors.from.push(
           i18n.translate(
-            'xpack.triggersActionsUI.components.buildin_action_types.error.requiredFromText',
+            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredFromText',
             {
               defaultMessage: 'From is required.',
             }
@@ -56,7 +56,7 @@ export function getActionType(): ActionTypeModel {
       if (!action.config.port) {
         errors.port.push(
           i18n.translate(
-            'xpack.triggersActionsUI.components.buildin_action_types.error.requiredPortText',
+            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredPortText',
             {
               defaultMessage: 'Port is required.',
             }
@@ -66,7 +66,7 @@ export function getActionType(): ActionTypeModel {
       if (!action.config.host) {
         errors.host.push(
           i18n.translate(
-            'xpack.triggersActionsUI.components.buildin_action_types.error.requiredHostText',
+            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredHostText',
             {
               defaultMessage: 'Host is required.',
             }
@@ -76,7 +76,7 @@ export function getActionType(): ActionTypeModel {
       if (!action.secrets.user) {
         errors.user.push(
           i18n.translate(
-            'xpack.triggersActionsUI.components.buildin_action_types.error.requiredUserText',
+            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredUserText',
             {
               defaultMessage: 'User is required.',
             }
@@ -86,7 +86,7 @@ export function getActionType(): ActionTypeModel {
       if (!action.secrets.password) {
         errors.password.push(
           i18n.translate(
-            'xpack.triggersActionsUI.components.buildin_action_types.error.requiredPasswordText',
+            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredPasswordText',
             {
               defaultMessage: 'Password is required.',
             }
@@ -112,7 +112,7 @@ export function getActionType(): ActionTypeModel {
         actionParams.bcc.length === 0
       ) {
         const errorText = i18n.translate(
-          'xpack.triggersActionsUI.components.buildin_action_types.error.requiredEntryText',
+          'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredEntryText',
           {
             defaultMessage: 'No [to], [cc], or [bcc] entries. At least one entry is required.',
           }
@@ -124,7 +124,7 @@ export function getActionType(): ActionTypeModel {
       if (!actionParams.message) {
         errors.message.push(
           i18n.translate(
-            'xpack.triggersActionsUI.components.buildin_action_types.error.requiredMessageText',
+            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredMessageText',
             {
               defaultMessage: 'Message is required.',
             }
@@ -134,7 +134,7 @@ export function getActionType(): ActionTypeModel {
       if (!actionParams.subject) {
         errors.subject.push(
           i18n.translate(
-            'xpack.triggersActionsUI.components.buildin_action_types.error.requiredSubjectText',
+            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredSubjectText',
             {
               defaultMessage: 'Subject is required.',
             }

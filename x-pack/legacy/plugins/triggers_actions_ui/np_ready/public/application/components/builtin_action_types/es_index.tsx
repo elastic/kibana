@@ -20,7 +20,7 @@ export function getActionType(): ActionTypeModel {
     id: '.index',
     iconClass: 'indexOpen',
     selectMessage: i18n.translate(
-      'xpack.triggersActionsUI.components.buildin_action_types.indexAction.selectMessageText',
+      'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.selectMessageText',
       {
         defaultMessage: 'Index data into Elasticsearch.',
       }
@@ -46,7 +46,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
     <EuiFormRow
       fullWidth
       label={i18n.translate(
-        'xpack.triggersActionsUI.components.buildin_action_types.indexAction.indexTextFieldLabel',
+        'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.indexTextFieldLabel',
         {
           defaultMessage: 'Index (optional)',
         }
@@ -87,7 +87,7 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps> = ({
         errors={errors}
         isShowingErrors={hasErrors === true && action.index !== undefined}
         label={i18n.translate(
-          'xpack.triggersActionsUI.components.buildin_action_types.indexAction.indexFieldLabel',
+          'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.indexFieldLabel',
           {
             defaultMessage: 'Index',
           }
@@ -116,7 +116,7 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps> = ({
         }}
         label={
           <FormattedMessage
-            id="xpack.triggersActionsUI.components.buildin_action_types.indexAction.refreshLabel"
+            id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.refreshLabel"
             defaultMessage="Refresh"
           />
         }
