@@ -15,11 +15,21 @@
 const yaml = require('js-yaml');
 const axios = require('axios');
 const fs = require('fs');
+const path = require('path');
 const { argv } = require('yargs');
 
 const config = yaml.safeLoad(
-  fs.readFileSync('../../../../../config/kibana.dev.yml', 'utf8')
+  fs.readFileSync(
+    path.join(__filename, '../../../../../../config/kibana.dev.yml'),
+    'utf8'
+  )
 );
+
+const USERS_TO_UPDATE = [
+  'apm_read_user', // read access to all apps + apm index access
+  'apm_admin_user', // read/write access to all apps + apm index access
+  'kibana_admin_user' // read/write access to all apps (no apm index access)
+];
 
 const GITHUB_USERNAME = argv.username;
 const KIBANA_INDEX = config['kibana.index'];
@@ -42,7 +52,13 @@ async function callKibana(options) {
     return data;
   } catch (e) {
     if (e.response) {
-      throw new Error(e.response.data);
+      throw new Error(
+        JSON.stringify(
+          { request: e.config, response: e.response.data },
+          null,
+          2
+        )
+      );
     }
     throw e;
   }
@@ -85,8 +101,7 @@ async function init() {
   });
   console.log(`Created role "${ROLE_NAME}"`);
 
-  const usersToUpdate = ['apm', 'kibana_user'];
-  usersToUpdate.map(async userToUpdate => {
+  const promises = USERS_TO_UPDATE.map(async userToUpdate => {
     // get user
     const user = await callKibana({
       url: `/api/security/v1/users/${userToUpdate}`
@@ -109,9 +124,14 @@ async function init() {
     });
 
     console.log(
-      `Congratulations! You are now able to login to your local Kibana with 'apm' and 'kibana_user'`
+      `Congratulations! You are now able to login to your local Kibana with: ${USERS_TO_UPDATE.join(
+        ', '
+      )}`
     );
   });
+
+  // ensure rejections are caught by awaiting
+  await Promise.all(promises);
 }
 
 init().catch(e => {
