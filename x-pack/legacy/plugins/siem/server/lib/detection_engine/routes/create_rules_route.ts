@@ -14,13 +14,13 @@ import { RulesRequest } from '../alerts/types';
 import { createRulesSchema } from './schemas';
 import { ServerFacade } from '../../../types';
 import { readRules } from '../alerts/read_rules';
-import { transformOrError } from './utils';
+import { transformOrError, transformError } from './utils';
 
 export const createCreateRulesRoute: Hapi.ServerRoute = {
   method: 'POST',
   path: DETECTION_ENGINE_RULES_URL,
   options: {
-    tags: ['access:signals-all'],
+    tags: ['access:siem'],
     validate: {
       options: {
         abortEarly: false,
@@ -62,42 +62,46 @@ export const createCreateRulesRoute: Hapi.ServerRoute = {
       return headers.response().code(404);
     }
 
-    if (ruleId != null) {
-      const rule = await readRules({ alertsClient, ruleId });
-      if (rule != null) {
-        return new Boom(`rule_id ${ruleId} already exists`, { statusCode: 409 });
+    try {
+      if (ruleId != null) {
+        const rule = await readRules({ alertsClient, ruleId });
+        if (rule != null) {
+          return new Boom(`rule_id ${ruleId} already exists`, { statusCode: 409 });
+        }
       }
-    }
 
-    const createdRule = await createRules({
-      alertsClient,
-      actionsClient,
-      description,
-      enabled,
-      falsePositives,
-      filter,
-      from,
-      immutable,
-      query,
-      language,
-      outputIndex,
-      savedId,
-      meta,
-      filters,
-      ruleId: ruleId != null ? ruleId : uuid.v4(),
-      index,
-      interval,
-      maxSignals,
-      riskScore,
-      name,
-      severity,
-      tags,
-      to,
-      type,
-      threats,
-      references,
-    });
-    return transformOrError(createdRule);
+      const createdRule = await createRules({
+        alertsClient,
+        actionsClient,
+        description,
+        enabled,
+        falsePositives,
+        filter,
+        from,
+        immutable,
+        query,
+        language,
+        outputIndex,
+        savedId,
+        meta,
+        filters,
+        ruleId: ruleId != null ? ruleId : uuid.v4(),
+        index,
+        interval,
+        maxSignals,
+        riskScore,
+        name,
+        severity,
+        tags,
+        to,
+        type,
+        threats,
+        references,
+      });
+      return transformOrError(createdRule);
+    } catch (err) {
+      return transformError(err);
+    }
   },
 };
 
