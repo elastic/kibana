@@ -149,8 +149,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
     this.vis._setUiState(this.uiState);
 
-    this.appState = appState;
-
     this.subscriptions.push(
       Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
         this.handleChanges();
