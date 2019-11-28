@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Subject } from 'rxjs';
-import { partial } from 'lodash';
+import { Option, none } from 'fp-ts/lib/Option';
 import { performance } from 'perf_hooks';
 import { SavedObjectsClientContract, SavedObjectsSerializer } from 'src/core/server';
 import { Logger } from './types';
@@ -59,13 +59,16 @@ export interface TaskManagerOpts {
 export class TaskManager {
   private isStarted = false;
   private maxWorkers: number;
-  private readonly pollerInterval: number;
   private definitions: TaskDictionary<TaskDefinition>;
   private store: TaskStore;
-  private poller: TaskPoller<FillPoolResult>;
+  // private poller: TaskPoller<FillPoolResult>;
   private logger: Logger;
   private pool: TaskPool;
+
   private taskEvent$: Subject<TaskEvent>;
+
+  private poller: TaskPoller<FillPoolResult, Option<string>>;
+
   private startQueue: Array<() => void> = [];
   private middleware = {
     beforeSave: async (saveOpts: BeforeSaveMiddlewareParams) => saveOpts,
@@ -80,7 +83,6 @@ export class TaskManager {
    */
   constructor(opts: TaskManagerOpts) {
     this.maxWorkers = opts.config.get('xpack.task_manager.max_workers');
-    this.pollerInterval = opts.config.get('xpack.task_manager.poll_interval');
     this.definitions = {};
     this.logger = opts.logger;
     this.taskEvent$ = new Subject<TaskEvent>();
@@ -110,24 +112,31 @@ export class TaskManager {
       maxWorkers: this.maxWorkers,
     });
 
-    this.poller = new TaskPoller<FillPoolResult>({
+    this.poller = new TaskPoller<FillPoolResult, Option<string>>({
       logger: this.logger,
       pollInterval: opts.config.get('xpack.task_manager.poll_interval'),
-      work: partial(
-        fillPool,
-        // claim available tasks
-        () =>
-          claimAvailableTasks(
-            this.store.claimAvailableTasks,
-            this.pool.availableWorkers,
-            this.logger
-          ),
-        // wrap each task in a Task Runner
-        this.createTaskRunnerForTask,
-        // place tasks in the Task Pool
-        async (tasks: TaskRunner[]) => await this.pool.run(tasks)
-      ),
+      work: this.pollForWork,
     });
+  }
+
+  private pollForWork = async (): Promise<FillPoolResult> => {
+    return fillPool(
+      // claim available tasks
+      () =>
+        claimAvailableTasks(
+          this.store.claimAvailableTasks,
+          this.pool.availableWorkers,
+          this.logger
+        ),
+      // wrap each task in a Task Runner
+      this.createTaskRunnerForTask,
+      // place tasks in the Task Pool
+      async (tasks: TaskRunner[]) => await this.pool.run(tasks)
+    );
+  };
+
+  private attemptWork() {
+    this.poller.queueWork(none);
   }
 
   private createTaskRunnerForTask = (instance: ConcreteTaskInstance) => {
@@ -145,24 +154,16 @@ export class TaskManager {
    * Starts up the task manager and starts picking up tasks.
    */
   public start() {
+    if (this.isStarted) {
+      return;
+    }
     this.isStarted = true;
+
     // Some calls are waiting until task manager is started
     this.startQueue.forEach(fn => fn());
     this.startQueue = [];
-    const startPoller = async () => {
-      try {
-        await this.poller.start();
-      } catch (err) {
-        // FIXME: check the type of error to make sure it's actually an ES error
-        this.logger.warn(`PollError ${err.message}`);
 
-        // rety again to initialize store and poller, using the timing of
-        // task_manager's configurable poll interval
-        const retryInterval = this.pollerInterval;
-        setTimeout(() => startPoller(), retryInterval);
-      }
-    };
-    startPoller();
+    this.poller.start();
   }
 
   private async waitUntilStarted() {
@@ -225,7 +226,7 @@ export class TaskManager {
       taskInstance,
     });
     const result = await this.store.schedule(modifiedTask);
-    this.poller.attemptWork();
+    this.attemptWork();
     return result;
   }
 

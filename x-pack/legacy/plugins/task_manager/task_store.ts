@@ -8,7 +8,7 @@
  * This module contains helpers for managing the task manager storage layer.
  */
 import { Subject, Observable } from 'rxjs';
-import { omit, difference, indexBy } from 'lodash';
+import { omit, difference } from 'lodash';
 
 import {
   SavedObjectsClientContract,
@@ -58,7 +58,6 @@ export interface StoreOpts {
   definitions: TaskDictionary<TaskDefinition>;
   savedObjectsRepository: SavedObjectsClientContract;
   serializer: SavedObjectsSerializer;
-  onEvent?: (event: TaskEvent) => void;
 }
 
 export interface SearchOpts {
@@ -123,7 +122,6 @@ export class TaskStore {
   private savedObjectsRepository: SavedObjectsClientContract;
   private serializer: SavedObjectsSerializer;
   private events$: Subject<TaskEvent>;
-  private onEvent: (event: TaskEvent) => void;
 
   /**
    * Constructs a new TaskStore.
@@ -143,7 +141,6 @@ export class TaskStore {
     this.definitions = opts.definitions;
     this.serializer = opts.serializer;
     this.savedObjectsRepository = opts.savedObjectsRepository;
-    this.onEvent = opts.onEvent || ((e: TaskEvent) => {});
     this.events$ = new Subject<TaskEvent>();
   }
 

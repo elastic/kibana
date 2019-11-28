@@ -8,28 +8,30 @@
  * This module contains the logic for polling the task manager index for new work.
  */
 
-import { performance } from 'perf_hooks';
+import { Subject, Subscription, Observable, interval } from 'rxjs';
+import { buffer, throttle } from 'rxjs/operators';
+import { Result, asOk, asErr } from './lib/result_type';
 import { Logger } from './types';
 
-type WorkFn<T> = () => Promise<T>;
+type WorkFn<H, T> = (...params: H[]) => Promise<T>;
 
-interface Opts<T> {
+interface Opts<T, H> {
   pollInterval: number;
   logger: Logger;
-  work: WorkFn<T>;
+  work: WorkFn<H, T>;
 }
 
 /**
  * Performs work on a scheduled interval, logging any errors. This waits for work to complete
  * (or error) prior to attempting another run.
  */
-export class TaskPoller<T> {
-  private isStarted = false;
-  private isWorking = false;
-  private timeout: any;
-  private pollInterval: number;
+export class TaskPoller<T, H> {
   private logger: Logger;
-  private work: WorkFn<T>;
+  private work: WorkFn<H, T>;
+  private poller$: Observable<H[]>;
+  private pollPhaseResults$: Subject<Result<T, Error>>;
+  private claimRequestQueue$: Subject<H>;
+  private pollingSubscription: Subscription;
 
   /**
    * Constructs a new TaskPoller.
@@ -39,77 +41,52 @@ export class TaskPoller<T> {
    * @prop {Logger} logger - The task manager logger
    * @prop {WorkFn} work - An empty, asynchronous function that performs the desired work
    */
-  constructor(opts: Opts<T>) {
-    this.pollInterval = opts.pollInterval;
+  constructor(opts: Opts<T, H>) {
     this.logger = opts.logger;
     this.work = opts.work;
+
+    this.pollingSubscription = Subscription.EMPTY;
+    this.pollPhaseResults$ = new Subject();
+    this.claimRequestQueue$ = new Subject<H>();
+    this.poller$ = this.claimRequestQueue$.pipe(
+      buffer(interval(opts.pollInterval).pipe(throttle(ev => this.pollPhaseResults$)))
+    );
   }
 
   /**
    * Starts the poller. If the poller is already running, this has no effect.
    */
   public async start() {
-    if (this.isStarted) {
+    if (this.pollingSubscription && !this.pollingSubscription.closed) {
       return;
     }
 
-    this.isStarted = true;
-
-    const poll = async () => {
-      await this.attemptWork();
-
-      performance.mark('TaskPoller.sleep');
-      if (this.isStarted) {
-        this.timeout = setTimeout(
-          tryAndLogOnError(() => {
-            performance.mark('TaskPoller.poll');
-            performance.measure('TaskPoller.sleepDuration', 'TaskPoller.sleep', 'TaskPoller.poll');
-            poll();
-          }, this.logger),
-          this.pollInterval
-        );
-      }
-    };
-
-    poll();
+    this.pollingSubscription = this.poller$.subscribe(requests => {
+      // console.log({ requests });
+      this.attemptWork(...requests);
+    });
   }
 
   /**
    * Stops the poller.
    */
   public stop() {
-    this.isStarted = false;
-    clearTimeout(this.timeout);
-    this.timeout = undefined;
+    this.pollingSubscription.unsubscribe();
+  }
+
+  public queueWork(request: H) {
+    this.claimRequestQueue$.next(request);
   }
 
   /**
-   * Runs the work function. If the work function is currently running,
-   * this has no effect.
+   * Runs the work function, this is called in respose to the polling stream
    */
-  public async attemptWork() {
-    if (!this.isStarted || this.isWorking) {
-      return;
-    }
-
-    this.isWorking = true;
-
+  private attemptWork = async (...requests: H[]) => {
     try {
-      await this.work();
+      this.pollPhaseResults$.next(asOk(await this.work(...requests)));
     } catch (err) {
       this.logger.error(`Failed to poll for work: ${err}`);
-    } finally {
-      this.isWorking = false;
-    }
-  }
-}
-
-function tryAndLogOnError(fn: Function, logger: Logger): Function {
-  return () => {
-    try {
-      fn();
-    } catch (err) {
-      logger.error(`Task Poller polling phase failed: ${err}`);
+      this.pollPhaseResults$.next(asErr(err));
     }
   };
 }
