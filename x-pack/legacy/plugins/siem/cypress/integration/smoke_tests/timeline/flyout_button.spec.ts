@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { logout } from '../../lib/logout';
 import {
   TIMELINE_FLYOUT_BODY,
   TIMELINE_NOT_READY_TO_DROP_BUTTON,
@@ -22,7 +21,7 @@ describe('timeline flyout button', () => {
   });
 
   afterEach(() => {
-    return logout();
+    cy.logout();
   });
 
   it('toggles open the timeline', () => {

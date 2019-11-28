@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { logout } from '../../lib/logout';
 import {
   ABSOLUTE_DATE_RANGE,
   DATE_PICKER_ABSOLUTE_INPUT,
@@ -34,7 +33,7 @@ import { NAVIGATION_HOSTS_ALL_HOSTS, NAVIGATION_HOSTS_ANOMALIES } from '../../li
 
 describe('url state', () => {
   afterEach(() => {
-    return logout();
+    cy.logout();
   });
 
   it('sets the global start and end dates from the url', () => {

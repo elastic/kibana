@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { logout } from '../../lib/logout';
 import { HOSTS_PAGE_TAB_URLS } from '../../lib/urls';
 import {
   AUTHENTICATIONS_TABLE,
@@ -20,7 +19,7 @@ import { DEFAULT_TIMEOUT, loginAndWaitForPage, waitForTableLoad } from '../../li
 
 describe('Pagination', () => {
   afterEach(() => {
-    return logout();
+    cy.logout();
   });
 
   it('pagination updates results and page number', () => {

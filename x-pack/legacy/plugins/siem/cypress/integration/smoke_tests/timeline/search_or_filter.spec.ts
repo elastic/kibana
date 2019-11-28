@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { logout } from '../../lib/logout';
 import {
   assertAtLeastOneEventMatchesSearch,
   executeKQL,
@@ -20,7 +19,7 @@ describe('timeline search or filter KQL bar', () => {
   });
 
   afterEach(() => {
-    return logout();
+    cy.logout();
   });
 
   it('executes a KQL query', () => {

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { logout } from '../../lib/logout';
 import { HOSTS_PAGE } from '../../lib/urls';
 import {
   INSPECT_BUTTON_ICON,
@@ -19,7 +18,7 @@ import { executeKQL, hostExistsQuery, toggleTimelineVisibility } from '../../lib
 describe('Inspect', () => {
   describe('Hosts and network stats and tables', () => {
     afterEach(() => {
-      return logout();
+      cy.logout();
     });
     INSPECT_BUTTONS_IN_SIEM.map(table =>
       it(`inspects the ${table.title}`, () => {
@@ -37,7 +36,7 @@ describe('Inspect', () => {
 
   describe('Timeline', () => {
     afterEach(() => {
-      return logout();
+      cy.logout();
     });
 
     it('inspects the timeline', () => {

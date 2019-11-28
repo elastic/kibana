@@ -29,3 +29,12 @@
 //
 // -- This is will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
+
+Cypress.Commands.add('logout', () => {
+  cy.request({
+    method: 'GET',
+    url: `${Cypress.config().baseUrl}/logout`,
+  }).then(response => {
+    expect(response.status).to.eq(200);
+  });
+});
