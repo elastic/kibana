@@ -352,6 +352,11 @@ module.exports = {
               },
               {
                 target: ['src/core/**/*'],
+                from: ['x-pack/**/*'],
+                errorMessage: 'OSS cannot import x-pack files.',
+              },
+              {
+                target: ['src/core/**/*'],
                 from: [
                   'plugins/**/*',
                   'src/plugins/**/*',
