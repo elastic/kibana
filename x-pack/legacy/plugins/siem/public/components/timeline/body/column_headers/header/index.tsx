@@ -24,28 +24,36 @@ interface Props {
   timelineId: string;
 }
 
-export const Header = React.memo<Props>(
-  ({ header, onColumnRemoved, onColumnSorted, onFilterChange = noop, sort }) => {
-    const onClick = () => {
-      onColumnSorted!({
-        columnId: header.id,
-        sortDirection: getNewSortDirectionOnClick({
-          clickedHeader: header,
-          currentSort: sort,
-        }),
-      });
-    };
+export const HeaderContent = ({
+  header,
+  onColumnRemoved,
+  onColumnSorted,
+  onFilterChange = noop,
+  sort,
+}: Props) => {
+  const onClick = () => {
+    onColumnSorted!({
+      columnId: header.id,
+      sortDirection: getNewSortDirectionOnClick({
+        clickedHeader: header,
+        currentSort: sort,
+      }),
+    });
+  };
 
-    return (
-      <>
-        <HeaderComponent header={header} isResizing={false} onClick={onClick} sort={sort}>
-          <Actions header={header} onColumnRemoved={onColumnRemoved} sort={sort} />
-        </HeaderComponent>
+  return (
+    <>
+      <HeaderComponent header={header} isResizing={false} onClick={onClick} sort={sort}>
+        <Actions header={header} onColumnRemoved={onColumnRemoved} sort={sort} />
+      </HeaderComponent>
 
-        <Filter header={header} onFilterChange={onFilterChange} />
-      </>
-    );
-  }
-);
+      <Filter header={header} onFilterChange={onFilterChange} />
+    </>
+  );
+};
+
+HeaderComponent.displayName = 'HeaderComponent';
+
+export const Header = React.memo(HeaderContent);
 
 Header.displayName = 'Header';

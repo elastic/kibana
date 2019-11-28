@@ -94,7 +94,7 @@ module.exports = {
           '@typescript-eslint/camelcase': ['error', {
             'properties': 'never',
             'ignoreDestructuring': true,
-            'allow': ['^[A-Z0-9_]+$']
+            'allow': ['^[A-Z0-9_]+$', '^UNSAFE_']
           }],
           '@typescript-eslint/class-name-casing': 'error',
           '@typescript-eslint/explicit-member-accessibility': ['error',
