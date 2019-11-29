@@ -47,6 +47,7 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
       startupTimeout: duration('30s'),
     },
     path: {
+      config: '/tmp',
       data: '/tmp',
     },
   };
