@@ -17,43 +17,17 @@
  * under the License.
  */
 
-import { BehaviorSubject } from 'rxjs';
-import { ByteSizeValue } from '@kbn/config-schema';
 import supertest from 'supertest';
-
 import { HttpService, InternalHttpServiceSetup } from '../../http';
-import { configServiceMock } from '../../config/config_service.mock';
 import { contextServiceMock } from '../../context/context_service.mock';
 import { loggingServiceMock } from '../../logging/logging_service.mock';
 import { Env } from '../../config';
 import { getEnvOptions } from '../../config/__mocks__/env';
 import { CapabilitiesService, CapabilitiesSetup } from '..';
+import { createHttpServer } from '../../http/test_utils';
 
 const coreId = Symbol('core');
 const env = Env.createDefault(getEnvOptions());
-
-const createHttpServer = (): HttpService => {
-  const logger = loggingServiceMock.create();
-
-  const configService = configServiceMock.create();
-  configService.atPath.mockReturnValue(
-    new BehaviorSubject({
-      hosts: ['localhost'],
-      maxPayload: new ByteSizeValue(1024),
-      autoListen: true,
-      ssl: {
-        enabled: false,
-      },
-    } as any)
-  );
-  const coreContext = {
-    coreId,
-    env,
-    logger,
-    configService: configService as any,
-  };
-  return new HttpService(coreContext);
-};
 
 describe('CapabilitiesService', () => {
   let server: HttpService;
