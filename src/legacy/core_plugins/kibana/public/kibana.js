@@ -37,7 +37,6 @@ import 'uiExports/contextMenuActions';
 import 'uiExports/managementSections';
 import 'uiExports/indexManagement';
 import 'uiExports/docViews';
-import 'uiExports/embeddableFactories';
 import 'uiExports/embeddableActions';
 import 'uiExports/inspectorViews';
 import 'uiExports/search';

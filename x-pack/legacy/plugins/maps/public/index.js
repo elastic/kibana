@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 // import the uiExports that we want to "use"
 import 'uiExports/inspectorViews';
 import 'uiExports/search';
-import 'uiExports/embeddableFactories';
 import 'uiExports/embeddableActions';
 import 'ui/agg_types';
 
