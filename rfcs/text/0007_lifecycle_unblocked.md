@@ -147,12 +147,35 @@ export class Plugin {
 *(4.2) Exposing an API from a plugin's setup lifecycle*
 ```ts
 export class Plugin {
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
+  private async initSavedConfig(core: CoreSetup) {
+    // Note: pulling a config value here means our code isn't reactive to
+    // changes, but this is equivalent to doing it in an async setup lifecycle.
+    const config = await this.initializerContext.config
+          .create<TypeOf<typeof ConfigSchema>>()
+          .pipe(first())
+          .toPromise();
+    try {
+      const savedConfig = await core.savedObjects.internalRepository.get({...});
+      return Object.assign({}, config, savedConfig);
+    } catch (e) {
+      if (SavedObjectErrorHelpers.isNotFoundError(e)) {
+        return await core.savedObjects.internalRepository.create(config, {...});
+      }
+    }
+  }
   public setup(core: CoreSetup) {
+    // savedConfigPromise resolves with the same kind of "setup state" that a
+    // plugin would have constructed in an async setup lifecycle.
+    const savedConfigPromise = initSavedConfig(core);
     return {
       ping: async () => {
-        // async & await isn't necessary here, but makes example a bit clearer.
-        // Note that the elasticsearch client no longer exposes an adminClient$
-        // observable.
+        const savedConfig = await savedConfigPromise;
+        if (config.allowPing === false || savedConfig.allowPing === false) {
+          throw new Error('ping() has been disabled');
+        }
+        // Note: the elasticsearch client no longer exposes an adminClient$
+        // observable, improving the ergonomics of consuming the API.
         return await core.elasticsearch.adminClient.callAsInternalUser('ping', ...);
       }
     };
