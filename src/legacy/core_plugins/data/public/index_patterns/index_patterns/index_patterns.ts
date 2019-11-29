@@ -21,7 +21,7 @@ import { idx } from '@kbn/elastic-idx';
 import {
   SavedObjectsClientContract,
   SimpleSavedObject,
-  UiSettingsClientContract,
+  IUiSettingsClient,
   HttpServiceBase,
 } from 'src/core/public';
 
@@ -32,13 +32,13 @@ import { IndexPatternsApiClient, GetFieldsOptions } from './index_patterns_api_c
 const indexPatternCache = createIndexPatternCache();
 
 export class IndexPatterns {
-  private config: UiSettingsClientContract;
+  private config: IUiSettingsClient;
   private savedObjectsClient: SavedObjectsClientContract;
   private savedObjectsCache?: Array<SimpleSavedObject<Record<string, any>>> | null;
   private apiClient: IndexPatternsApiClient;
 
   constructor(
-    config: UiSettingsClientContract,
+    config: IUiSettingsClient,
     savedObjectsClient: SavedObjectsClientContract,
     http: HttpServiceBase
   ) {
