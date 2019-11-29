@@ -6,13 +6,11 @@
 
 import { useState } from 'react';
 
-import { LogSummary as LogSummaryQuery } from '../../../graphql/types';
 import { useCancellableEffect } from '../../../utils/cancellable_effect';
 import { useLogSummaryBufferInterval } from './use_log_summary_buffer_interval';
 import { fetchLogSummary } from './api/log_summary';
 import { LogsSummaryResponse } from '../../../../common/http_api';
 
-export type LogSummaryBetween = LogSummaryQuery.Query['source']['logSummaryBetween'];
 export type LogSummaryBuckets = LogsSummaryResponse['buckets'];
 
 export const useLogSummary = (
@@ -21,7 +19,7 @@ export const useLogSummary = (
   intervalSize: number,
   filterQuery: string | null
 ) => {
-  const [logSummaryBetween, setLogSummaryBetween] = useState<LogSummaryBetween>({ buckets: [] });
+  const [logSummaryBuckets, setLogSummaryBuckets] = useState<LogSummaryBuckets>([]);
   const { start: bufferStart, end: bufferEnd, bucketSize } = useLogSummaryBufferInterval(
     midpointTime,
     intervalSize
@@ -40,7 +38,7 @@ export const useLogSummary = (
         query: filterQuery,
       }).then(response => {
         if (!getIsCancelled()) {
-          setLogSummaryBetween(response);
+          setLogSummaryBuckets(response.buckets);
         }
       });
     },
@@ -48,7 +46,7 @@ export const useLogSummary = (
   );
 
   return {
-    buckets: logSummaryBetween.buckets,
+    buckets: logSummaryBuckets,
     start: bufferStart,
     end: bufferEnd,
   };
