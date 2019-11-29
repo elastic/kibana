@@ -6,7 +6,7 @@
 
 import * as t from 'io-ts';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { getTransactionByTraceId } from '../lib/transactions/get_transaction';
+import { getTransactionByTraceId } from '../lib/transactions/get_transaction_by_trace';
 import { createRoute } from './create_route';
 
 export const transactionByTraceIdRoute = createRoute(() => ({

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import * as urlParamsHooks from '../../../../hooks/useUrlParams';
 import * as hooks from '../../../../hooks/useFetcher';
@@ -46,7 +46,9 @@ describe('TraceLink', () => {
     });
 
     const component = shallow(<TraceLink />);
-    expect(component).toMatchSnapshot();
+    expect(component.prop('to')).toEqual(
+      '/traces?kuery=trace.id%2520%253A%2520%2522123%2522'
+    );
   });
 
   describe('transaction page', () => {
@@ -56,7 +58,7 @@ describe('TraceLink', () => {
           traceIdLink: '123'
         }
       });
-      mockNow(moment('2019-11-25').valueOf());
+      mockNow('2019-11-25'.valueOf());
     });
     it('renders with date range params', () => {
       const transaction = {
@@ -74,7 +76,9 @@ describe('TraceLink', () => {
         status: 'success'
       });
       const component = shallow(<TraceLink />);
-      expect(component).toMatchSnapshot();
+      expect(component.prop('to')).toEqual(
+        '/services/foo/transactions/view?traceId=123&transactionId=456&transactionName=bar&transactionType=GET'
+      );
     });
 
     it('renders without date range', () => {
@@ -93,7 +97,9 @@ describe('TraceLink', () => {
         status: 'success'
       });
       const component = shallow(<TraceLink />);
-      expect(component).toMatchSnapshot();
+      expect(component.prop('to')).toEqual(
+        '/services/foo/transactions/view?traceId=123&transactionId=456&transactionName=bar&transactionType=GET'
+      );
     });
   });
 });
