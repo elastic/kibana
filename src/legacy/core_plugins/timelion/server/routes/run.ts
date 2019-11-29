@@ -41,6 +41,12 @@ export interface TimelionRequestQuery {
       };
     };
   };
+  time?: {
+    from?: string;
+    interval: string;
+    timezone: string;
+    to?: string;
+  };
   query?: {
     expression: string[];
     from: string;
@@ -61,7 +67,9 @@ function formatErrorResponse(e: any, h: any) {
 
 const requestPayload = {
   payload: Joi.object({
-    sheet: Joi.array().items(Joi.string()),
+    sheet: Joi.array()
+      .items(Joi.string())
+      .required(),
     extended: Joi.object({
       es: Joi.object({
         filter: Joi.object({
@@ -76,8 +84,8 @@ const requestPayload = {
     }),
     time: Joi.object({
       from: Joi.string(),
-      interval: Joi.string(),
-      timezone: Joi.string(),
+      interval: Joi.string().required(),
+      timezone: Joi.string().required(),
       to: Joi.string(),
     }),
   }),
