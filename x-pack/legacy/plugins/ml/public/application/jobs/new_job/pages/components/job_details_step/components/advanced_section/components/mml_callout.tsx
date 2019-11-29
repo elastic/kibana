@@ -7,7 +7,7 @@
 import React, { FC, useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiText } from '@elastic/eui';
-import { Subject } from 'rxjs';
+import { Observable, ReplaySubject, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap, takeUntil } from 'rxjs/operators';
 import { JobCreatorContext } from '../../../../job_creator_context';
 import {
@@ -15,7 +15,7 @@ import {
   CardinalityValidationResult,
   ml,
 } from '../../../../../../../../services/ml_api_service';
-import { Datafeed, Detector, Job } from '../../../../../../common/job_creator/configs';
+import { Datafeed, Job } from '../../../../../../common/job_creator/configs';
 
 export function isCardinalityModelPlotHigh(
   cardinalityValidationResult: CardinalityValidationResult
@@ -25,25 +25,27 @@ export function isCardinalityModelPlotHigh(
   );
 }
 
-const modelPlotConfig$ = new Subject<{
+const modelPlotConfig$ = new ReplaySubject<{
   isModelPlotEnabled: boolean;
   jobConfig: Job;
   datafeedConfig: Datafeed;
-  detectors: Detector[];
-}>();
+}>(1);
 
-const modelPlotCardinality$ = modelPlotConfig$.pipe(
+const modelPlotCardinality$: Observable<number | undefined> = modelPlotConfig$.pipe(
   filter(value => value.isModelPlotEnabled),
   // No need to perform an API call if the detectors haven't been changed
   distinctUntilChanged((prev, curr) => {
-    return prev.detectors === curr.detectors || prev.isModelPlotEnabled === curr.isModelPlotEnabled;
+    return (
+      prev.jobConfig.analysis_config === curr.jobConfig.analysis_config ||
+      prev.isModelPlotEnabled === curr.isModelPlotEnabled
+    );
   }),
-  switchMap(({ jobConfig, datafeedConfig }) =>
-    ml.validateCardinality$({
+  switchMap(({ jobConfig, datafeedConfig }) => {
+    return ml.validateCardinality$({
       ...jobConfig,
       datafeed_config: datafeedConfig,
-    })
-  ),
+    });
+  }),
   map(validationResults => {
     for (const validationResult of validationResults) {
       if (isCardinalityModelPlotHigh(validationResult)) {
@@ -75,9 +77,8 @@ export const MMLCallout: FC = () => {
       isModelPlotEnabled: jobCreator.modelPlot,
       jobConfig: jobCreator.jobConfig,
       datafeedConfig: jobCreator.datafeedConfig,
-      detectors: jobCreator.detectors,
     });
-  }, [jobCreator.modelPlot, jobCreator.detectors]);
+  }, [jobCreator.modelPlot, jobCreator.jobConfig.analysis_config]);
 
   return jobCreator.modelPlot === true && highCardinality !== null ? (
     <EuiCallOut
