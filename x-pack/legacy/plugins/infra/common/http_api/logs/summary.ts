@@ -14,6 +14,7 @@ export const logsSummaryRequestRT = rt.type({
   startDate: rt.number,
   endDate: rt.number,
   bucketSize: rt.number,
+  query: rt.union([rt.string, rt.null]),
 });
 
 export type LogsSummaryRequest = rt.TypeOf<typeof logsSummaryRequestRT>;

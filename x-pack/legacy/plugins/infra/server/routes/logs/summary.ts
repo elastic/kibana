@@ -18,6 +18,7 @@ import {
   logsSummaryRequestRT,
   logsSummaryResponseRT,
 } from '../../../common/http_api/logs';
+import { parseFilterQuery } from '../../utils/serialized_query';
 
 // FIXME: move to a shared place, or to the elasticsearch-js repo
 interface DateRangeAggregation {
@@ -48,47 +49,53 @@ export const initLogsSummaryRoute = ({ framework, sources }: InfraBackendLibs) =
         );
 
         const timestampField = source.configuration.fields.timestamp;
-        const { startDate, endDate, bucketSize } = payload;
+        const { startDate, endDate, bucketSize, query } = payload;
 
         const ranges = [];
         for (let start = startDate as number; start <= endDate; start += bucketSize) {
           ranges.push({ from: start, to: start + bucketSize });
         }
 
-        const query = await framework.callWithRequest<{}, { log_summary: DateRangeAggregation }>(
-          req,
-          'search',
-          {
-            index: source.configuration.logAlias,
-            body: {
-              size: 0,
-              query: {
-                range: {
-                  [timestampField]: {
-                    lte: endDate,
-                    gte: startDate,
+        const esResults = await framework.callWithRequest<
+          {},
+          { log_summary: DateRangeAggregation }
+        >(req, 'search', {
+          index: source.configuration.logAlias,
+          body: {
+            size: 0,
+            query: {
+              bool: {
+                filter: [
+                  ...(query ? [parseFilterQuery(query)] : []),
+                  {
+                    range: {
+                      [timestampField]: {
+                        lte: endDate,
+                        gte: startDate,
+                      },
+                    },
                   },
-                },
+                ],
               },
-              aggs: {
-                log_summary: {
-                  date_range: {
-                    field: timestampField,
-                    ranges,
-                  },
-                },
-              },
-              sort: [{ [timestampField]: 'asc' }],
             },
-          }
-        );
+            aggs: {
+              log_summary: {
+                date_range: {
+                  field: timestampField,
+                  ranges,
+                },
+              },
+            },
+            sort: [{ [timestampField]: 'asc' }],
+          },
+        });
 
         return res.response(
           logsSummaryResponseRT.encode({
             start: startDate,
             end: endDate,
             buckets:
-              query.aggregations?.log_summary.buckets.map(bucket => ({
+              esResults.aggregations?.log_summary.buckets.map(bucket => ({
                 start: bucket.from,
                 end: bucket.to,
                 entriesCount: bucket.doc_count,

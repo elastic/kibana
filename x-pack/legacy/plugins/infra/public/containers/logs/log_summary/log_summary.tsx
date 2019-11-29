@@ -37,7 +37,7 @@ export const useLogSummary = (
         startDate: bufferStart,
         endDate: bufferEnd,
         bucketSize,
-        // filterQuery
+        query: filterQuery,
       }).then(response => {
         if (!getIsCancelled()) {
           setLogSummaryBetween(response);
