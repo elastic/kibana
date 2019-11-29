@@ -26,6 +26,7 @@ import editorConfigTemplate from './timelion_vis_params.html';
 import { TimelionVisualizationDependencies } from '../plugin';
 // @ts-ignore
 import { AngularVisController } from '../../../../ui/public/vis/vis_types/angular_vis_type';
+import { TimelionVisController } from './timelion_controller';
 
 export const TIMELION_VIS_NAME = 'timelion';
 
@@ -41,7 +42,7 @@ export function getTimelionVisualization(dependencies: TimelionVisualizationDepe
     description: i18n.translate('timelion.timelionDescription', {
       defaultMessage: 'Build time-series using functional expressions',
     }),
-    visualization: AngularVisController,
+    visualization: TimelionVisController,
     visConfig: {
       defaults: {
         expression: '.es(*)',
