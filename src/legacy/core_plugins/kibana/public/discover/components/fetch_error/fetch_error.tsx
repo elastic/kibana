@@ -19,10 +19,18 @@
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiCallOut, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
-import { getServices } from '../../kibana_services';
-const { uiModules, wrapInI18nContext, chrome } = getServices();
+import { getAngularModule, wrapInI18nContext, getServices } from '../../kibana_services';
 
-const DiscoverFetchError = ({ fetchError }) => {
+interface Props {
+  fetchError: {
+    lang: string;
+    script: string;
+    message: string;
+    error: string;
+  };
+}
+
+const DiscoverFetchError = ({ fetchError }: Props) => {
   if (!fetchError) {
     return null;
   }
@@ -30,7 +38,9 @@ const DiscoverFetchError = ({ fetchError }) => {
   let body;
 
   if (fetchError.lang === 'painless') {
-    const managementUrl = chrome.navLinks.get('kibana:management').url;
+    const { chrome } = getServices();
+    const mangagementUrlObj = chrome.navLinks.get('kibana:management');
+    const managementUrl = mangagementUrlObj ? mangagementUrlObj.url : '';
     const url = `${managementUrl}/kibana/index_patterns`;
 
     body = (
@@ -80,8 +90,8 @@ const DiscoverFetchError = ({ fetchError }) => {
   );
 };
 
-const app = uiModules.get('apps/discover', ['react']);
+export function createFetchErrorDirective(reactDirective: any) {
+  return reactDirective(wrapInI18nContext(DiscoverFetchError));
+}
 
-app.directive('discoverFetchError', reactDirective =>
-  reactDirective(wrapInI18nContext(DiscoverFetchError))
-);
+getAngularModule().directive('discoverFetchError', createFetchErrorDirective);
