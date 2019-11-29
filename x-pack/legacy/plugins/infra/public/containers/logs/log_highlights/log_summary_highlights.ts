@@ -37,7 +37,7 @@ export const useLogSummaryHighlights = (
           endDate: end,
           bucketSize,
           query: filterQuery,
-          highlights: [highlightTerms[0]],
+          highlightTerms,
         });
       },
       onResolve: response => {

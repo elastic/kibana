@@ -134,7 +134,7 @@ export const initLogsSummaryRoute = ({ framework, sources }: InfraBackendLibs) =
 
         const timestampField = source.configuration.fields.timestamp;
         const tiebreakerField = source.configuration.fields.tiebreaker;
-        const { startDate, endDate, bucketSize, query, highlights } = payload;
+        const { startDate, endDate, bucketSize, query, highlightTerms } = payload;
 
         const ranges: Array<{ from: number; to: number }> = [];
         for (let start = startDate as number; start <= endDate; start += bucketSize) {
@@ -147,7 +147,7 @@ export const initLogsSummaryRoute = ({ framework, sources }: InfraBackendLibs) =
         const requiredFields = getRequiredFields(source.configuration, messageFormattingRules);
 
         const summaries = await Promise.all(
-          highlights.map(async highlight => {
+          highlightTerms.map(async highlight => {
             const highlightQuery = createHighlightQueryDsl(highlight, requiredFields);
 
             const esResults = await framework.callWithRequest<

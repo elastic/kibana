@@ -21,7 +21,7 @@ export const logsSummaryRequestRT = rt.type({
 export const logsSummaryHighlightsRequestRT = rt.intersection([
   logsSummaryRequestRT,
   rt.type({
-    highlights: rt.array(rt.string),
+    highlightTerms: rt.array(rt.string),
   }),
 ]);
 
