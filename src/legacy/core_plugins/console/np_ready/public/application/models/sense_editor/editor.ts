@@ -22,7 +22,7 @@ import $ from 'jquery';
 import * as curl from './curl';
 import RowParser from './row_parser';
 import InputMode from './mode/input';
-import utils from './utils';
+import * as utils from './utils';
 // @ts-ignore
 import * as es from '../../../../../public/quarantined/src/es';
 // const chrome = require('ui/chrome');
@@ -185,10 +185,10 @@ export class SenseEditor {
     this.coreEditor.setValue(data);
   };
 
-  editor.replaceRequestRange = function(newRequest, requestRange) {
+  replaceRequestRange = (newRequest: any, requestRange: any) => {
     const text = utils.textFromRequest(newRequest);
     if (requestRange) {
-      const pos = editor.getCursorPosition();
+      const pos = this.editor.getCursorPosition();
       editor.getSession().replace(requestRange, text);
       const maxRow = Math.max(requestRange.start.row + text.split('\n').length - 1, 0);
       pos.row = Math.min(pos.row, maxRow);
