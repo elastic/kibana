@@ -17,8 +17,9 @@ for each plugin's lifecycle/context provider function to resolve before
 calling the next. This allows plugins to depend on the API's returned from
 other plugins.
 
-With the current design, a single lifecycle method or context provider that
-blocks will block all of Kibana from starting up. Plugins (including legacy
+With the current design, a single lifecycle method that blocks will block all
+of Kibana from starting up. Similarly, a blocking context provider will block
+all the handlers that depend on that context. Plugins (including legacy
 plugins) rely heavily on this blocking behaviour to ensure that all conditions
 required for their plugin's operation are met before their plugin is started
 and exposes it's API's. This means a single plugin with a network error that
