@@ -73,7 +73,7 @@ describe('uiSettingsMixin()', () => {
       newPlatform: {
         __internals: {
           uiSettings: {
-            setDefaults: sinon.stub(),
+            register: sinon.stub(),
           },
         },
       },
@@ -93,9 +93,9 @@ describe('uiSettingsMixin()', () => {
 
   it('passes uiSettingsDefaults to the new platform', () => {
     const { kbnServer } = setup();
-    sinon.assert.calledOnce(kbnServer.newPlatform.__internals.uiSettings.setDefaults);
+    sinon.assert.calledOnce(kbnServer.newPlatform.__internals.uiSettings.register);
     sinon.assert.calledWithExactly(
-      kbnServer.newPlatform.__internals.uiSettings.setDefaults,
+      kbnServer.newPlatform.__internals.uiSettings.register,
       uiSettingDefaults
     );
   });

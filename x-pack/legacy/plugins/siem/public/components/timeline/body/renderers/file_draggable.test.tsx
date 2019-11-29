@@ -22,7 +22,7 @@ describe('FileDraggable', () => {
           eventId="1"
           fileName="[fileName]"
           filePath="[filePath]"
-        ></FileDraggable>
+        />
       </TestProviders>
     );
     expect(wrapper.text()).toEqual('[fileName]in[filePath]');
@@ -38,7 +38,7 @@ describe('FileDraggable', () => {
           eventId="1"
           fileName={undefined}
           filePath={undefined}
-        ></FileDraggable>
+        />
       </TestProviders>
     );
     expect(wrapper.text()).toEqual('');

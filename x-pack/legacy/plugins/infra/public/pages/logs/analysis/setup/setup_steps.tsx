@@ -25,6 +25,7 @@ interface AnalysisSetupStepsProps {
   errorMessages: string[];
   setup: SetupHandler;
   setupStatus: SetupStatus;
+  timestampField: string;
   viewResults: () => void;
 }
 
@@ -34,6 +35,7 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
   errorMessages,
   setup: setupModule,
   setupStatus,
+  timestampField,
   viewResults,
 }: AnalysisSetupStepsProps) => {
   const {
@@ -43,13 +45,15 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
     setEndTime,
     startTime,
     endTime,
-    selectedIndices,
-    setSelectedIndices,
+    isValidating,
     validationErrors,
+    validatedIndices,
+    setValidatedIndices,
   } = useAnalysisSetupState({
     availableIndices,
     setupModule,
     cleanupAndSetupModule,
+    timestampField,
   });
 
   const steps = [
@@ -63,8 +67,9 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
           setEndTime={setEndTime}
           startTime={startTime}
           endTime={endTime}
-          selectedIndices={selectedIndices}
-          setSelectedIndices={setSelectedIndices}
+          isValidating={isValidating}
+          validatedIndices={validatedIndices}
+          setValidatedIndices={setValidatedIndices}
           validationErrors={validationErrors}
         />
       ),

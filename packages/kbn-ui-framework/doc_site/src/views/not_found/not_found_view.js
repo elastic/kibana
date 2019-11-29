@@ -19,9 +19,7 @@
 
 import React from 'react';
 
-import {
-  Link,
-} from 'react-router';
+import { Link } from 'react-router'; // eslint-disable-line
 
 export const NotFoundView = () => (
   <div className="guideContentPage">

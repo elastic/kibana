@@ -24,6 +24,28 @@ jest.mock('ui/timefilter', () => ({
   createFilter: jest.fn(),
 }));
 
+jest.mock('ui/new_platform', () => ({
+  npStart: {
+    plugins: {
+      data: {
+        query: {
+          filterManager: {
+            fieldName: 'myNumberField',
+            getIndexPattern: () => ({
+              fields: { getByName: name => {
+                const fields = { myField: { name: 'myField' } };
+                return fields[name];
+              } }
+            }),
+            getAppFilters: jest.fn().mockImplementation(() => ([])),
+            getGlobalFilters: jest.fn().mockImplementation(() => ([])),
+          }
+        }
+      }
+    },
+  },
+}));
+
 jest.mock('../../../../core_plugins/data/public/legacy', () => ({
   start: {
     indexPatterns: {
@@ -36,19 +58,6 @@ jest.mock('../../../../core_plugins/data/public/legacy', () => ({
         }),
       }
     },
-    filter: {
-      filterManager: {
-        fieldName: 'myNumberField',
-        getIndexPattern: () => ({
-          fields: { getByName: name => {
-            const fields = { myField: { name: 'myField' } };
-            return fields[name];
-          } }
-        }),
-        getAppFilters: jest.fn().mockImplementation(() => ([])),
-        getGlobalFilters: jest.fn().mockImplementation(() => ([])),
-      }
-    }
   }
 }));
 

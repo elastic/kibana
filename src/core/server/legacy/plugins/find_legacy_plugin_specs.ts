@@ -25,6 +25,7 @@ import {
   // @ts-ignore
 } from '../../../../legacy/plugin_discovery/find_plugin_specs.js';
 import { LoggerFactory } from '../../logging';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { collectUiExports as collectLegacyUiExports } from '../../../../legacy/ui/ui_exports/collect_ui_exports';
 import { Config } from '../../config';
 
@@ -54,7 +55,7 @@ export async function findLegacyPluginSpecs(settings: unknown, loggerFactory: Lo
     invalidDirectoryError$: Observable<{ path: string }>;
     invalidPackError$: Observable<{ path: string }>;
     otherError$: Observable<unknown>;
-    deprecation$: Observable<unknown>;
+    deprecation$: Observable<{ spec: LegacyPluginSpec; message: string }>;
     invalidVersionSpec$: Observable<LegacyPluginSpec>;
     spec$: Observable<LegacyPluginSpec>;
     disabledSpec$: Observable<LegacyPluginSpec>;

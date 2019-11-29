@@ -22,6 +22,7 @@ import {
   ActionsCoreStart,
   ActionsPluginsSetup,
   ActionsPluginsStart,
+  KibanaConfig,
 } from './shim';
 import {
   createActionRoute,
@@ -44,6 +45,7 @@ export interface PluginStartContract {
 }
 
 export class Plugin {
+  private readonly kibana$: Observable<KibanaConfig>;
   private readonly config$: Observable<ActionsConfigType>;
   private readonly logger: Logger;
   private serverBasePath?: string;
@@ -51,10 +53,12 @@ export class Plugin {
   private taskRunnerFactory?: TaskRunnerFactory;
   private actionTypeRegistry?: ActionTypeRegistry;
   private actionExecutor?: ActionExecutor;
+  private defaultKibanaIndex?: string;
 
   constructor(initializerContext: ActionsPluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'alerting');
     this.config$ = initializerContext.config.create();
+    this.kibana$ = initializerContext.config.kibana$;
   }
 
   public async setup(
@@ -63,6 +67,7 @@ export class Plugin {
   ): Promise<PluginSetupContract> {
     const config = await this.config$.pipe(first()).toPromise();
     this.adminClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
+    this.defaultKibanaIndex = (await this.kibana$.pipe(first()).toPromise()).index;
 
     plugins.xpack_main.registerFeature({
       id: 'actions',
@@ -92,12 +97,12 @@ export class Plugin {
     // - `secrets` properties will be encrypted
     // - `config` will be included in AAD
     // - everything else excluded from AAD
-    plugins.encrypted_saved_objects.registerType({
+    plugins.encryptedSavedObjects.registerType({
       type: 'action',
       attributesToEncrypt: new Set(['secrets']),
       attributesToExcludeFromAAD: new Set(['description']),
     });
-    plugins.encrypted_saved_objects.registerType({
+    plugins.encryptedSavedObjects.registerType({
       type: 'action_task_params',
       attributesToEncrypt: new Set(['apiKey']),
     });
@@ -141,6 +146,7 @@ export class Plugin {
       adminClient,
       serverBasePath,
       taskRunnerFactory,
+      defaultKibanaIndex,
     } = this;
 
     function getServices(request: any): Services {
@@ -163,11 +169,11 @@ export class Plugin {
       logger,
       spaces: plugins.spaces,
       getServices,
-      encryptedSavedObjectsPlugin: plugins.encrypted_saved_objects,
+      encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
       actionTypeRegistry: actionTypeRegistry!,
     });
     taskRunnerFactory!.initialize({
-      encryptedSavedObjectsPlugin: plugins.encrypted_saved_objects,
+      encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
       getBasePath,
       spaceIdToNamespace,
     });
@@ -186,6 +192,8 @@ export class Plugin {
         return new ActionsClient({
           savedObjectsClient,
           actionTypeRegistry: actionTypeRegistry!,
+          defaultKibanaIndex: defaultKibanaIndex!,
+          scopedClusterClient: adminClient!.asScoped(request),
         });
       },
     };

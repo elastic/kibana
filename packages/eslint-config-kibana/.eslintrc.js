@@ -3,6 +3,7 @@ module.exports = {
     './javascript.js',
     './typescript.js',
     './jest.js',
+    './react.js',
   ],
   plugins: ['@kbn/eslint-plugin-eslint'],
 
@@ -30,6 +31,10 @@ module.exports = {
         {
           from: 'x-pack',
           toRelative: 'x-pack',
+        },
+        {
+          from: 'react-router',
+          to: 'react-router-dom',
         },
       ],
     ],

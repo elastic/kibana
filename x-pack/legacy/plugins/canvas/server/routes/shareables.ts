@@ -16,7 +16,6 @@ import {
   SHAREABLE_RUNTIME_FILE,
   SHAREABLE_RUNTIME_NAME,
   SHAREABLE_RUNTIME_SRC,
-  SHAREABLE_RUNTIME_OUTPUT,
 } from '../../shareable_runtime/constants';
 
 import { CoreSetup } from '../shim';
@@ -26,14 +25,13 @@ export function shareableWorkpads(route: CoreSetup['http']['route']) {
   route({
     method: 'GET',
     path: API_ROUTE_SHAREABLE_RUNTIME,
-    options: {
-      files: {
-        relativeTo: SHAREABLE_RUNTIME_OUTPUT,
-      },
-    },
+
     handler: {
       file: {
         path: SHAREABLE_RUNTIME_FILE,
+        // The option setting is not for typical use.  We're using it here to avoid
+        // problems in Cloud environments.  See elastic/kibana#47405.
+        confine: false,
       },
     },
   });
@@ -42,14 +40,12 @@ export function shareableWorkpads(route: CoreSetup['http']['route']) {
   route({
     method: 'GET',
     path: API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD,
-    options: {
-      files: {
-        relativeTo: SHAREABLE_RUNTIME_OUTPUT,
-      },
-    },
+
     handler(_request, handler) {
+      // The option setting is not for typical use.  We're using it here to avoid
+      // problems in Cloud environments.  See elastic/kibana#47405.
       // @ts-ignore No type for inert Hapi handler
-      const file = handler.file(SHAREABLE_RUNTIME_FILE);
+      const file = handler.file(SHAREABLE_RUNTIME_FILE, { confine: false });
       file.type('application/octet-stream');
       return file;
     },

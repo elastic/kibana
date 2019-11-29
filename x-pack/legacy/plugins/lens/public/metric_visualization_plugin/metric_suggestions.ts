@@ -16,11 +16,14 @@ import chartMetricSVG from '../assets/chart_metric.svg';
 export function getSuggestions({
   table,
   state,
+  keptLayerIds,
 }: SuggestionRequest<State>): Array<VisualizationSuggestion<State>> {
   // We only render metric charts for single-row queries. We require a single, numeric column.
   if (
     table.isMultiRow ||
-    table.columns.length > 1 ||
+    keptLayerIds.length > 1 ||
+    (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
+    table.columns.length !== 1 ||
     table.columns[0].operation.dataType !== 'number'
   ) {
     return [];

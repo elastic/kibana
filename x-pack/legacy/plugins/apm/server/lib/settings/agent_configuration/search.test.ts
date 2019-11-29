@@ -15,7 +15,19 @@ describe('search configurations', () => {
       environment: 'production',
       setup: ({
         config: { get: () => '' },
-        client: { search: async () => searchMocks }
+        client: { search: async () => searchMocks },
+        internalClient: { search: async () => searchMocks },
+        indices: {
+          apm_oss: {
+            sourcemapIndices: 'myIndex',
+            errorIndices: 'myIndex',
+            onboardingIndices: 'myIndex',
+            spanIndices: 'myIndex',
+            transactionIndices: 'myIndex',
+            metricsIndices: 'myIndex',
+            apmAgentConfigurationIndex: 'myIndex'
+          }
+        }
       } as unknown) as Setup
     });
 
@@ -29,7 +41,19 @@ describe('search configurations', () => {
       environment: 'production',
       setup: ({
         config: { get: () => '' },
-        client: { search: async () => searchMocks }
+        client: { search: async () => searchMocks },
+        internalClient: { search: async () => searchMocks },
+        indices: {
+          apm_oss: {
+            sourcemapIndices: 'myIndex',
+            errorIndices: 'myIndex',
+            onboardingIndices: 'myIndex',
+            spanIndices: 'myIndex',
+            transactionIndices: 'myIndex',
+            metricsIndices: 'myIndex',
+            apmAgentConfigurationIndex: 'myIndex'
+          }
+        }
       } as unknown) as Setup
     });
 

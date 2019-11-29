@@ -22,7 +22,6 @@ import React, { Component } from 'react';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
 import { isEqual, isEmpty, debounce } from 'lodash';
-import { fromKueryExpression } from '@kbn/es-query';
 import { VisEditorVisualization } from './vis_editor_visualization';
 import { Visualization } from './visualization';
 import { VisPicker } from './vis_picker';
@@ -30,12 +29,13 @@ import { PanelConfig } from './panel_config';
 import { createBrushHandler } from '../lib/create_brush_handler';
 import { fetchFields } from '../lib/fetch_fields';
 import { extractIndexPatterns } from '../../common/extract_index_patterns';
+import { esKuery } from '../../../../../plugins/data/public';
 
 import { npStart } from 'ui/new_platform';
-import { Storage } from 'ui/storage';
+
 import { CoreStartContextProvider } from '../contexts/query_input_bar_context';
 import { KibanaContextProvider } from '../../../../../plugins/kibana_react/public';
-const localStorage = new Storage(window.localStorage);
+import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { timefilter } from 'ui/timefilter';
 
 const VIS_STATE_DEBOUNCE_DELAY = 200;
@@ -44,8 +44,8 @@ const APP_NAME = 'VisEditor';
 export class VisEditor extends Component {
   constructor(props) {
     super(props);
-    const { vis } = props;
-    this.appState = vis.API.getAppState();
+    this.appState = props.appState;
+    this.localStorage = new Storage(window.localStorage);
     this.state = {
       model: props.visParams,
       dirty: false,
@@ -63,7 +63,7 @@ export class VisEditor extends Component {
       appName: APP_NAME,
       uiSettings: npStart.core.uiSettings,
       savedObjectsClient: npStart.core.savedObjects.client,
-      store: localStorage,
+      store: this.localStorage,
     };
   }
 
@@ -88,7 +88,7 @@ export class VisEditor extends Component {
     if (filterQuery && filterQuery.language === 'kuery') {
       try {
         const queryOptions = this.coreContext.uiSettings.get('query:allowLeadingWildcards');
-        fromKueryExpression(filterQuery.query, { allowLeadingWildcards: queryOptions });
+        esKuery.fromKueryExpression(filterQuery.query, { allowLeadingWildcards: queryOptions });
       } catch (error) {
         return false;
       }
@@ -169,7 +169,7 @@ export class VisEditor extends Component {
         <KibanaContextProvider
           services={{
             appName: APP_NAME,
-            store: localStorage,
+            storage: this.localStorage,
             data: npStart.plugins.data,
             ...npStart.core,
           }}
@@ -182,7 +182,6 @@ export class VisEditor extends Component {
               dirty={this.state.dirty}
               autoApply={this.state.autoApply}
               model={model}
-              appState={this.appState}
               savedObj={this.props.savedObj}
               timeRange={this.props.timeRange}
               uiState={this.uiState}
@@ -238,4 +237,5 @@ VisEditor.propTypes = {
   isEditorMode: PropTypes.bool,
   savedObj: PropTypes.object,
   timeRange: PropTypes.object,
+  appState: PropTypes.object,
 };

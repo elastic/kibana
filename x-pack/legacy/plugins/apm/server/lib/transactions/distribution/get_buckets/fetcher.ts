@@ -16,7 +16,11 @@ import {
   TRANSACTION_TYPE
 } from '../../../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../../helpers/range_filter';
-import { Setup } from '../../../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../../helpers/setup_request';
 
 export async function bucketFetcher(
   serviceName: string,
@@ -26,12 +30,12 @@ export async function bucketFetcher(
   traceId: string,
   distributionMax: number,
   bucketSize: number,
-  setup: Setup
+  setup: Setup & SetupTimeRange & SetupUIFilters
 ) {
-  const { start, end, uiFiltersES, client, config } = setup;
+  const { start, end, uiFiltersES, client, indices } = setup;
 
   const params = {
-    index: config.get<string>('apm_oss.transactionIndices'),
+    index: indices['apm_oss.transactionIndices'],
     body: {
       size: 0,
       query: {

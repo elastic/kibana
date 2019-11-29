@@ -83,5 +83,5 @@ export const SearchApiPage = () => (
         ],
       },
     ]}
-  ></GuideSection>
+  />
 );

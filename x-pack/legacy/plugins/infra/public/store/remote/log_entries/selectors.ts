@@ -11,9 +11,8 @@ import { LogEntriesRemoteState } from './state';
 
 const entriesGraphlStateSelectors = createGraphqlStateSelectors<LogEntriesRemoteState>();
 
-export const selectEntries = createSelector(
-  entriesGraphlStateSelectors.selectData,
-  data => (data ? data.entries : [])
+export const selectEntries = createSelector(entriesGraphlStateSelectors.selectData, data =>
+  data ? data.entries : []
 );
 
 export const selectIsLoadingEntries = entriesGraphlStateSelectors.selectIsLoading;
@@ -32,14 +31,12 @@ export const selectIsLoadingMoreEntries = createSelector(
     isLoading && operationInfo ? operationInfo.operationKey === 'load_more' : false
 );
 
-export const selectEntriesStart = createSelector(
-  entriesGraphlStateSelectors.selectData,
-  data => (data && data.start ? data.start : null)
+export const selectEntriesStart = createSelector(entriesGraphlStateSelectors.selectData, data =>
+  data && data.start ? data.start : null
 );
 
-export const selectEntriesEnd = createSelector(
-  entriesGraphlStateSelectors.selectData,
-  data => (data && data.end ? data.end : null)
+export const selectEntriesEnd = createSelector(entriesGraphlStateSelectors.selectData, data =>
+  data && data.end ? data.end : null
 );
 
 export const selectHasMoreBeforeStart = createSelector(
@@ -47,9 +44,8 @@ export const selectHasMoreBeforeStart = createSelector(
   data => (data ? data.hasMoreBefore : true)
 );
 
-export const selectHasMoreAfterEnd = createSelector(
-  entriesGraphlStateSelectors.selectData,
-  data => (data ? data.hasMoreAfter : true)
+export const selectHasMoreAfterEnd = createSelector(entriesGraphlStateSelectors.selectData, data =>
+  data ? data.hasMoreAfter : true
 );
 
 export const selectEntriesLastLoadedTime = entriesGraphlStateSelectors.selectLoadingResultTime;
@@ -58,14 +54,12 @@ export const selectEntriesStartLoadingState = entriesGraphlStateSelectors.select
 
 export const selectEntriesEndLoadingState = entriesGraphlStateSelectors.selectLoadingState;
 
-export const selectFirstEntry = createSelector(
-  selectEntries,
-  entries => (entries.length > 0 ? entries[0] : null)
+export const selectFirstEntry = createSelector(selectEntries, entries =>
+  entries.length > 0 ? entries[0] : null
 );
 
-export const selectLastEntry = createSelector(
-  selectEntries,
-  entries => (entries.length > 0 ? entries[entries.length - 1] : null)
+export const selectLastEntry = createSelector(selectEntries, entries =>
+  entries.length > 0 ? entries[entries.length - 1] : null
 );
 
 export const selectLoadedEntriesTimeInterval = createSelector(

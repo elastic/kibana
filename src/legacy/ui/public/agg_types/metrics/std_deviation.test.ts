@@ -18,8 +18,8 @@
  */
 
 import { IStdDevAggConfig, stdDeviationMetricAgg } from './std_deviation';
-import { AggConfigs } from 'ui/agg_types';
-import { METRIC_TYPES } from 'ui/agg_types/metrics/metric_agg_types';
+import { AggConfigs } from '../agg_configs';
+import { METRIC_TYPES } from './metric_agg_types';
 
 jest.mock('ui/new_platform');
 
@@ -58,8 +58,9 @@ describe('AggTypeMetricStandardDeviationProvider class', () => {
 
   it('uses the custom label if it is set', () => {
     const aggConfigs = getAggConfigs('custom label');
-    const responseAggs: any = stdDeviationMetricAgg.getResponseAggs(aggConfigs
-      .aggs[0] as IStdDevAggConfig);
+    const responseAggs: any = stdDeviationMetricAgg.getResponseAggs(
+      aggConfigs.aggs[0] as IStdDevAggConfig
+    );
 
     const lowerStdDevLabel = responseAggs[0].makeLabel();
     const upperStdDevLabel = responseAggs[1].makeLabel();
@@ -71,8 +72,9 @@ describe('AggTypeMetricStandardDeviationProvider class', () => {
   it('uses the default labels if custom label is not set', () => {
     const aggConfigs = getAggConfigs();
 
-    const responseAggs: any = stdDeviationMetricAgg.getResponseAggs(aggConfigs
-      .aggs[0] as IStdDevAggConfig);
+    const responseAggs: any = stdDeviationMetricAgg.getResponseAggs(
+      aggConfigs.aggs[0] as IStdDevAggConfig
+    );
 
     const lowerStdDevLabel = responseAggs[0].makeLabel();
     const upperStdDevLabel = responseAggs[1].makeLabel();

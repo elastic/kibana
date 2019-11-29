@@ -22,6 +22,9 @@ import { loggingServiceMock } from './logging/logging_service.mock';
 import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
 import { httpServiceMock } from './http/http_service.mock';
 import { contextServiceMock } from './context/context_service.mock';
+import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
+import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
+import { InternalCoreSetup, InternalCoreStart } from './internal_types';
 
 export { httpServerMock } from './http/http_server.mocks';
 export { sessionStorageMock } from './http/cookie_session_storage.mocks';
@@ -79,23 +82,50 @@ function createCoreSetupMock() {
   };
   httpMock.createRouter.mockImplementation(() => httpService.createRouter(''));
 
+  const uiSettingsMock = {
+    register: uiSettingsServiceMock.createSetupContract().register,
+  };
   const mock: MockedKeys<CoreSetup> = {
     context: contextServiceMock.createSetupContract(),
     elasticsearch: elasticsearchServiceMock.createSetupContract(),
     http: httpMock,
+    savedObjects: savedObjectsServiceMock.createSetupContract(),
+    uiSettings: uiSettingsMock,
   };
 
   return mock;
 }
 
 function createCoreStartMock() {
-  const mock: MockedKeys<CoreStart> = {};
+  const mock: MockedKeys<CoreStart> = {
+    savedObjects: savedObjectsServiceMock.createStartContract(),
+  };
 
   return mock;
+}
+
+function createInternalCoreSetupMock() {
+  const setupDeps: InternalCoreSetup = {
+    context: contextServiceMock.createSetupContract(),
+    elasticsearch: elasticsearchServiceMock.createSetupContract(),
+    http: httpServiceMock.createSetupContract(),
+    uiSettings: uiSettingsServiceMock.createSetupContract(),
+    savedObjects: savedObjectsServiceMock.createSetupContract(),
+  };
+  return setupDeps;
+}
+
+function createInternalCoreStartMock() {
+  const startDeps: InternalCoreStart = {
+    savedObjects: savedObjectsServiceMock.createStartContract(),
+  };
+  return startDeps;
 }
 
 export const coreMock = {
   createSetup: createCoreSetupMock,
   createStart: createCoreStartMock,
+  createInternalSetup: createInternalCoreSetupMock,
+  createInternalStart: createInternalCoreStartMock,
   createPluginInitializerContext: pluginInitializerContextMock,
 };

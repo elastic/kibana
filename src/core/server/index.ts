@@ -39,18 +39,13 @@
  * @packageDocumentation
  */
 
-import {
-  ElasticsearchServiceSetup,
-  InternalElasticsearchServiceSetup,
-  IScopedClusterClient,
-} from './elasticsearch';
-import { InternalHttpServiceSetup, HttpServiceSetup } from './http';
+import { ElasticsearchServiceSetup, IScopedClusterClient } from './elasticsearch';
+import { HttpServiceSetup } from './http';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { ContextSetup } from './context';
-import { SavedObjectsServiceStart } from './saved_objects';
-
-import { InternalUiSettingsServiceSetup } from './ui_settings';
+import { IUiSettingsClient, UiSettingsServiceSetup } from './ui_settings';
 import { SavedObjectsClientContract } from './saved_objects/types';
+import { SavedObjectsServiceSetup, SavedObjectsServiceStart } from './saved_objects';
 
 export { bootstrap } from './bootstrap';
 export { ConfigPath, ConfigService, EnvironmentMode, PackageInfo } from './config';
@@ -99,6 +94,7 @@ export {
   IsAuthenticated,
   KibanaRequest,
   KibanaRequestRoute,
+  KibanaRequestRouteOptions,
   IKibanaResponse,
   LifecycleResponseFactory,
   KnownHeaders,
@@ -118,10 +114,16 @@ export {
   KibanaResponseFactory,
   RouteConfig,
   IRouter,
+  RouteRegistrar,
   RouteMethod,
   RouteConfigOptions,
+  RouteSchemas,
+  RouteConfigOptionsBody,
+  RouteContentType,
+  validBodyOutput,
   SessionStorage,
   SessionStorageCookieOptions,
+  SessionCookieValidationResult,
   SessionStorageFactory,
 } from './http';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
@@ -129,6 +131,8 @@ export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 export {
   DiscoveredPlugin,
   Plugin,
+  PluginConfigDescriptor,
+  PluginConfigSchema,
   PluginInitializer,
   PluginInitializerContext,
   PluginManifest,
@@ -146,6 +150,7 @@ export {
   SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
+  SavedObjectsClientFactory,
   SavedObjectsCreateOptions,
   SavedObjectsErrorHelpers,
   SavedObjectsExportOptions,
@@ -167,14 +172,21 @@ export {
   SavedObjectsLegacyService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
+  SavedObjectsServiceStart,
+  SavedObjectsServiceSetup,
   SavedObjectsDeleteOptions,
+  ISavedObjectsRepository,
+  SavedObjectsRepository,
+  SavedObjectsDeleteByNamespaceOptions,
+  SavedObjectsIncrementCounterOptions,
 } from './saved_objects';
 
 export {
   IUiSettingsClient,
   UiSettingsParams,
-  InternalUiSettingsServiceSetup,
   UiSettingsType,
+  UiSettingsServiceSetup,
+  UserProvidedValues,
 } from './ui_settings';
 
 export { RecursiveReadonly } from '../utils';
@@ -216,6 +228,9 @@ export interface RequestHandlerContext {
       dataClient: IScopedClusterClient;
       adminClient: IScopedClusterClient;
     };
+    uiSettings: {
+      client: IUiSettingsClient;
+    };
   };
 }
 
@@ -231,6 +246,10 @@ export interface CoreSetup {
   elasticsearch: ElasticsearchServiceSetup;
   /** {@link HttpServiceSetup} */
   http: HttpServiceSetup;
+  /** {@link SavedObjectsServiceSetup} */
+  savedObjects: SavedObjectsServiceSetup;
+  /** {@link UiSettingsServiceSetup} */
+  uiSettings: UiSettingsServiceSetup;
 }
 
 /**
@@ -238,20 +257,8 @@ export interface CoreSetup {
  *
  * @public
  */
-export interface CoreStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
-
-/** @internal */
-export interface InternalCoreSetup {
-  context: ContextSetup;
-  http: InternalHttpServiceSetup;
-  elasticsearch: InternalElasticsearchServiceSetup;
-  uiSettings: InternalUiSettingsServiceSetup;
-}
-
-/**
- * @internal
- */
-export interface InternalCoreStart {
+export interface CoreStart {
+  /** {@link SavedObjectsServiceStart} */
   savedObjects: SavedObjectsServiceStart;
 }
 

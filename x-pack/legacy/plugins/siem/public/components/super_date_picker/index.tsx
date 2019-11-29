@@ -12,11 +12,13 @@ import {
   OnRefreshProps,
   OnTimeChangeProps,
 } from '@elastic/eui';
-import { getOr, take } from 'lodash/fp';
+import { getOr, take, isEmpty } from 'lodash/fp';
 import React, { useState, useCallback } from 'react';
 import { connect } from 'react-redux';
-
 import { Dispatch } from 'redux';
+
+import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../common/constants';
+import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 import { inputsModel, State } from '../../store';
 import { inputsActions, timelineActions } from '../../store/actions';
 import { InputsModelId } from '../../store/inputs/constants';
@@ -55,13 +57,18 @@ interface UpdateReduxTime extends OnTimeChangeProps {
   timelineId?: string;
 }
 
+interface ReturnUpdateReduxTime {
+  kqlHaveBeenUpdated: boolean;
+}
+
 export type DispatchUpdateReduxTime = ({
   end,
   id,
   isQuickSelection,
+  kql,
   start,
   timelineId,
-}: UpdateReduxTime) => void;
+}: UpdateReduxTime) => ReturnUpdateReduxTime;
 
 interface SuperDatePickerDispatchProps {
   setDuration: ({ id, duration }: { id: InputsModelId; duration: number }) => void;
@@ -105,7 +112,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
     );
     const onRefresh = useCallback(
       ({ start: newStart, end: newEnd }: OnRefreshProps): void => {
-        updateReduxTime({
+        const { kqlHaveBeenUpdated } = updateReduxTime({
           end: newEnd,
           id,
           isInvalid: false,
@@ -118,7 +125,10 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
         const currentEnd = isQuickSelection
           ? formatDate(newEnd, { roundUp: true })
           : formatDate(newEnd);
-        if (!isQuickSelection || (start === currentStart && end === currentEnd)) {
+        if (
+          !kqlHaveBeenUpdated &&
+          (!isQuickSelection || (start === currentStart && end === currentEnd))
+        ) {
           refetchQuery(queries);
         }
       },
@@ -186,8 +196,18 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
     const endDate = kind === 'relative' ? toStr : new Date(end).toISOString();
     const startDate = kind === 'relative' ? fromStr : new Date(start).toISOString();
 
+    const [quickRanges] = useKibanaUiSetting(DEFAULT_TIMEPICKER_QUICK_RANGES);
+    const commonlyUsedRanges = isEmpty(quickRanges)
+      ? []
+      : quickRanges.map(({ from, to, display }: { from: string; to: string; display: string }) => ({
+          start: from,
+          end: to,
+          label: display,
+        }));
+
     return (
       <EuiSuperDatePicker
+        commonlyUsedRanges={commonlyUsedRanges}
         end={endDate}
         isLoading={isLoading}
         isPaused={policy === 'manual'}
@@ -217,9 +237,10 @@ export const dispatchUpdateReduxTime = (dispatch: Dispatch) => ({
   end,
   id,
   isQuickSelection,
+  kql,
   start,
   timelineId,
-}: UpdateReduxTime): void => {
+}: UpdateReduxTime): ReturnUpdateReduxTime => {
   const fromDate = formatDate(start);
   let toDate = formatDate(end, { roundUp: true });
   if (isQuickSelection) {
@@ -251,6 +272,15 @@ export const dispatchUpdateReduxTime = (dispatch: Dispatch) => ({
       })
     );
   }
+  if (kql) {
+    return {
+      kqlHaveBeenUpdated: kql.refetch(dispatch),
+    };
+  }
+
+  return {
+    kqlHaveBeenUpdated: false,
+  };
 };
 
 export const makeMapStateToProps = () => {

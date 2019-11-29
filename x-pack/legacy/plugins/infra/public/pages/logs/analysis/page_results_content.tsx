@@ -6,23 +6,23 @@
 
 import datemath from '@elastic/datemath';
 import {
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPage,
   EuiPanel,
   EuiSuperDatePicker,
-  EuiBadge,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
+
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 import { bucketSpan } from '../../../../common/log_analysis';
-import { LoadingPage } from '../../../components/loading_page';
+import { LoadingOverlayWrapper } from '../../../components/loading_overlay_wrapper';
 import {
   LogAnalysisJobs,
   StringTimeRange,
@@ -82,15 +82,15 @@ export const AnalysisResultsContent = ({
     return roundedResult < bucketSpan ? bucketSpan : roundedResult;
   }, [queryTimeRange.value.startTime, queryTimeRange.value.endTime]);
 
-  const { isLoading, logEntryRate } = useLogAnalysisResults({
+  const { isLoading, logRateResults } = useLogAnalysisResults({
     sourceId,
     startTime: queryTimeRange.value.startTime,
     endTime: queryTimeRange.value.endTime,
     bucketDuration,
     lastRequestTime: queryTimeRange.lastChangedTime,
   });
-  const hasResults = useMemo(() => logEntryRate && logEntryRate.histogramBuckets.length > 0, [
-    logEntryRate,
+  const hasResults = useMemo(() => logRateResults && logRateResults.histogramBuckets.length > 0, [
+    logRateResults,
   ]);
 
   const handleQueryTimeRangeChange = useCallback(
@@ -162,89 +162,77 @@ export const AnalysisResultsContent = ({
   );
 
   return (
-    <>
-      {isLoading && !logEntryRate ? (
-        <LoadingPage
-          message={i18n.translate('xpack.infra.logs.logsAnalysisResults.loadingMessage', {
-            defaultMessage: 'Loading results...',
-          })}
-        />
-      ) : (
-        <>
-          <ResultsContentPage>
-            <EuiFlexGroup direction="column">
+    <ResultsContentPage>
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem grow={false}>
+          <EuiPanel paddingSize="l">
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiPanel paddingSize="l">
-                  <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      {!isLoading && logEntryRate ? (
-                        <EuiText size="s">
-                          <FormattedMessage
-                            id="xpack.infra.logs.analysis.logRateResultsToolbarText"
-                            defaultMessage="Analyzed {numberOfLogs} log entries from {startTime} to {endTime}"
-                            values={{
-                              numberOfLogs: (
-                                <EuiBadge color="primary">
-                                  <EuiText size="s" color="ghost">
-                                    {numeral(logEntryRate.totalNumberOfLogEntries).format('0.00a')}
-                                  </EuiText>
-                                </EuiBadge>
-                              ),
-                              startTime: (
-                                <b>{moment(queryTimeRange.value.startTime).format(dateFormat)}</b>
-                              ),
-                              endTime: (
-                                <b>{moment(queryTimeRange.value.endTime).format(dateFormat)}</b>
-                              ),
-                            }}
-                          />
-                        </EuiText>
-                      ) : null}
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiSuperDatePicker
-                        start={selectedTimeRange.startTime}
-                        end={selectedTimeRange.endTime}
-                        onTimeChange={handleSelectedTimeRangeChange}
-                        isPaused={autoRefresh.isPaused}
-                        refreshInterval={autoRefresh.interval}
-                        onRefreshChange={handleAutoRefreshChange}
+                {logRateResults ? (
+                  <LoadingOverlayWrapper isLoading={isLoading}>
+                    <EuiText size="s">
+                      <FormattedMessage
+                        id="xpack.infra.logs.analysis.logRateResultsToolbarText"
+                        defaultMessage="Analyzed {numberOfLogs} log entries from {startTime} to {endTime}"
+                        values={{
+                          numberOfLogs: (
+                            <EuiBadge color="primary">
+                              <EuiText size="s" color="ghost">
+                                {numeral(logRateResults.totalNumberOfLogEntries).format('0.00a')}
+                              </EuiText>
+                            </EuiBadge>
+                          ),
+                          startTime: (
+                            <b>{moment(queryTimeRange.value.startTime).format(dateFormat)}</b>
+                          ),
+                          endTime: <b>{moment(queryTimeRange.value.endTime).format(dateFormat)}</b>,
+                        }}
                       />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiPanel>
+                    </EuiText>
+                  </LoadingOverlayWrapper>
+                ) : null}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiPanel paddingSize="l">
-                  {isFirstUse && !hasResults ? <FirstUseCallout /> : null}
-                  <LogRateResults
-                    isLoading={isLoading}
-                    results={logEntryRate}
-                    setTimeRange={handleChartTimeRangeChange}
-                    timeRange={queryTimeRange.value}
-                  />
-                </EuiPanel>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiPanel paddingSize="l">
-                  <AnomaliesResults
-                    isLoading={isLoading}
-                    jobStatus={jobStatus['log-entry-rate']}
-                    viewSetupForReconfiguration={viewSetupForReconfiguration}
-                    viewSetupForUpdate={viewSetupForUpdate}
-                    results={logEntryRate}
-                    setTimeRange={handleChartTimeRangeChange}
-                    setupStatus={setupStatus}
-                    timeRange={queryTimeRange.value}
-                    jobId={jobIds['log-entry-rate']}
-                  />
-                </EuiPanel>
+                <EuiSuperDatePicker
+                  start={selectedTimeRange.startTime}
+                  end={selectedTimeRange.endTime}
+                  onTimeChange={handleSelectedTimeRangeChange}
+                  isPaused={autoRefresh.isPaused}
+                  refreshInterval={autoRefresh.interval}
+                  onRefreshChange={handleAutoRefreshChange}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
-          </ResultsContentPage>
-        </>
-      )}
-    </>
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiPanel paddingSize="l">
+            {isFirstUse && !hasResults ? <FirstUseCallout /> : null}
+            <LogRateResults
+              isLoading={isLoading}
+              results={logRateResults}
+              setTimeRange={handleChartTimeRangeChange}
+              timeRange={queryTimeRange.value}
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiPanel paddingSize="l">
+            <AnomaliesResults
+              isLoading={isLoading}
+              jobStatus={jobStatus['log-entry-rate']}
+              viewSetupForReconfiguration={viewSetupForReconfiguration}
+              viewSetupForUpdate={viewSetupForUpdate}
+              results={logRateResults}
+              setTimeRange={handleChartTimeRangeChange}
+              setupStatus={setupStatus}
+              timeRange={queryTimeRange.value}
+              jobId={jobIds['log-entry-rate']}
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </ResultsContentPage>
   );
 };
 

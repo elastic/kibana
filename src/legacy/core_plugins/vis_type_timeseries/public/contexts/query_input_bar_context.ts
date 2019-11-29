@@ -18,14 +18,14 @@
  */
 
 import React from 'react';
-import { Storage } from 'ui/storage';
-import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
+import { IUiSettingsClient, SavedObjectsClientContract } from 'src/core/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 
 export interface ICoreStartContext {
   appName: string;
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
   savedObjectsClient: SavedObjectsClientContract;
-  store: Storage;
+  storage: IStorageWrapper;
 }
 
 export const CoreStartContext = React.createContext<ICoreStartContext | null>(null);

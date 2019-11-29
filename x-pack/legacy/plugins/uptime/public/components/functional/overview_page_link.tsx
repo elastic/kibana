@@ -10,13 +10,15 @@ import { i18n } from '@kbn/i18n';
 import { useUrlParams } from '../../hooks';
 
 interface OverviewPageLinkProps {
-  pagination: string;
+  dataTestSubj: string;
   direction: string;
+  pagination: string;
 }
 
 export const OverviewPageLink: FunctionComponent<OverviewPageLinkProps> = ({
-  pagination,
+  dataTestSubj,
   direction,
+  pagination,
 }) => {
   const [, updateUrlParams] = useUrlParams();
   const icon = direction === 'prev' ? 'arrowLeft' : 'arrowRight';
@@ -34,6 +36,7 @@ export const OverviewPageLink: FunctionComponent<OverviewPageLinkProps> = ({
   return !!pagination ? (
     <EuiLink
       aria-label={ariaLabel}
+      data-test-subj={dataTestSubj}
       onClick={() => {
         updateUrlParams({ pagination });
       }}

@@ -123,6 +123,7 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
     input,
     parent,
     renderTooltipContent,
+    eventHandlers,
   ) {
     const layerList = state && state.layerList ? state.layerList : getInitialLayers();
     const indexPatterns = await this._getIndexPatterns(layerList);
@@ -137,7 +138,8 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
       },
       input,
       parent,
-      renderTooltipContent
+      renderTooltipContent,
+      eventHandlers,
     );
   }
 

@@ -209,11 +209,8 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const HostsTable = connect(
-  makeMapStateToProps,
-  {
-    updateHostsSort: hostsActions.updateHostsSort,
-    updateTableActivePage: hostsActions.updateTableActivePage,
-    updateTableLimit: hostsActions.updateTableLimit,
-  }
-)(HostsTableComponent);
+export const HostsTable = connect(makeMapStateToProps, {
+  updateHostsSort: hostsActions.updateHostsSort,
+  updateTableActivePage: hostsActions.updateTableActivePage,
+  updateTableLimit: hostsActions.updateTableLimit,
+})(HostsTableComponent);

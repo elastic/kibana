@@ -4,7 +4,7 @@
 
 ## IAnonymousPaths.register() method
 
-Register `path` as not requiring authentication
+Register `path` as not requiring authentication. `path` should not include the current basePath.
 
 <b>Signature:</b>
 

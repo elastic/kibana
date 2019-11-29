@@ -17,34 +17,4 @@
  * under the License.
  */
 
-/**
- * Autoload this file if we want some of the top level settings applied to a plugin.
- * Currently this file makes sure the following settings are applied globally:
- * - dateFormat:tz (meaning the Kibana time zone will be used in your plugin)
- * - dateFormat:dow (meaning the Kibana configured start of the week will be used in your plugin)
- */
-
-import moment from 'moment-timezone';
-import chrome from '../chrome';
-
-function setDefaultTimezone(tz) {
-  moment.tz.setDefault(tz);
-}
-
-function setStartDayOfWeek(day) {
-  const dow = moment.weekdays().indexOf(day);
-  moment.updateLocale(moment.locale(), { week: { dow } });
-}
-
-const uiSettings = chrome.getUiSettingsClient();
-
-setDefaultTimezone(uiSettings.get('dateFormat:tz'));
-setStartDayOfWeek(uiSettings.get('dateFormat:dow'));
-
-uiSettings.getUpdate$().subscribe(({ key, newValue }) => {
-  if (key === 'dateFormat:tz') {
-    setDefaultTimezone(newValue);
-  } else if (key === 'dateFormat:dow') {
-    setStartDayOfWeek(newValue);
-  }
-});
+/** Left intentionally empty to avoid breaking plugins that import this file during the NP migration */

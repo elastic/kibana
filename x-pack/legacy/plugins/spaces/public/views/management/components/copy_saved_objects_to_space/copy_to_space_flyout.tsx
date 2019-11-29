@@ -72,7 +72,7 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
           }),
         });
       });
-  }, []);
+  }, [spacesManager, toastNotifications]);
   const eligibleSpaces = spaces.filter(space => space.id !== props.activeSpace.id);
 
   const [copyInProgress, setCopyInProgress] = useState(false);

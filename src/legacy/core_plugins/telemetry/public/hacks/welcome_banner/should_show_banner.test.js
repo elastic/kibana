@@ -38,7 +38,7 @@ const getMockInjector = () => {
 };
 
 const getTelemetryOptInProvider = ({ telemetryOptedIn = null } = {}) => {
-  mockInjectedMetadata({ telemetryOptedIn });
+  mockInjectedMetadata({ telemetryOptedIn, allowChangingOptInStatus: true });
   const injector = getMockInjector();
   const chrome = {
     addBasePath: (url) => url

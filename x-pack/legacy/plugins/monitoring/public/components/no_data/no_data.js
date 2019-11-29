@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiSpacer,
@@ -43,7 +43,7 @@ function NoDataMessage(props) {
 
 export function NoData(props) {
   const [isLoading, setIsLoading] = useState(false);
-  const [useInternalCollection, setUseInternalCollection] = useState(false);
+  const [useInternalCollection, setUseInternalCollection] = useState(props.isOnCloud);
 
   async function startSetup() {
     setIsLoading(true);
@@ -64,15 +64,19 @@ export function NoData(props) {
             <EuiSpacer size="m" />
             <NoDataMessage {...props} />
             <CheckerErrors errors={props.errors} />
-            <EuiHorizontalRule size="half" />
-            <EuiButtonEmpty isDisabled={props.isCollectionEnabledUpdated} onClick={() => setUseInternalCollection(false)}>
-              <EuiTextColor color="default">
-                <FormattedMessage
-                  id="xpack.monitoring.noData.setupMetricbeatInstead"
-                  defaultMessage="Or, set up with Metricbeat (recommended)"
-                />
-              </EuiTextColor>
-            </EuiButtonEmpty>
+            { !props.isOnCloud ? (
+              <Fragment>
+                <EuiHorizontalRule size="half" />
+                <EuiButtonEmpty isDisabled={props.isCollectionEnabledUpdated} onClick={() => setUseInternalCollection(false)}>
+                  <EuiTextColor color="default">
+                    <FormattedMessage
+                      id="xpack.monitoring.noData.setupMetricbeatInstead"
+                      defaultMessage="Or, set up with Metricbeat (recommended)"
+                    />
+                  </EuiTextColor>
+                </EuiButtonEmpty>
+              </Fragment>
+            ) : null }
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>

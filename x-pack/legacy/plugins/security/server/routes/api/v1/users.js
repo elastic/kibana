@@ -13,7 +13,7 @@ import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
 import { wrapError } from '../../../../../../../plugins/security/server';
 import { KibanaRequest } from '../../../../../../../../src/core/server';
 
-export function initUsersApi({ authc: { login }, config }, server) {
+export function initUsersApi({ authc: { login }, __legacyCompat: { config } }, server) {
   const callWithRequest = getClient(server).callWithRequest;
   const routePreCheckLicenseFn = routePreCheckLicense(server);
 
@@ -96,19 +96,15 @@ export function initUsersApi({ authc: { login }, config }, server) {
       // If user tries to change own password, let's check if old password is valid first by trying
       // to login.
       if (isCurrentUser) {
-        try {
-          const authenticationResult = await login(KibanaRequest.from(request), {
-            provider: providerToLoginWith,
-            value: { username, password },
-            // We shouldn't alter authentication state just yet.
-            stateless: true,
-          });
+        const authenticationResult = await login(KibanaRequest.from(request), {
+          provider: providerToLoginWith,
+          value: { username, password },
+          // We shouldn't alter authentication state just yet.
+          stateless: true,
+        });
 
-          if (!authenticationResult.succeeded()) {
-            return Boom.unauthorized(authenticationResult.error);
-          }
-        } catch(err) {
-          throw Boom.forbidden(err);
+        if (!authenticationResult.succeeded()) {
+          return Boom.forbidden(authenticationResult.error);
         }
       }
 

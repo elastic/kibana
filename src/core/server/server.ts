@@ -21,7 +21,7 @@ import { take } from 'rxjs/operators';
 import { Type } from '@kbn/config-schema';
 
 import { ConfigService, Env, Config, ConfigPath } from './config';
-import { ElasticsearchService, ElasticsearchServiceSetup } from './elasticsearch';
+import { ElasticsearchService } from './elasticsearch';
 import { HttpService, InternalHttpServiceSetup } from './http';
 import { LegacyService } from './legacy';
 import { Logger, LoggerFactory } from './logging';
@@ -38,8 +38,8 @@ import { config as savedObjectsConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
 import { mapToObject } from '../utils/';
 import { ContextService } from './context';
-import { SavedObjectsServiceSetup } from './saved_objects/saved_objects_service';
 import { RequestHandlerContext } from '.';
+import { InternalCoreSetup } from './internal_types';
 
 const coreId = Symbol('core');
 
@@ -77,6 +77,7 @@ export class Server {
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
     const pluginDependencies = await this.plugins.discover();
+    const legacyPlugins = await this.legacy.discoverPlugins();
     const contextServiceSetup = this.context.setup({
       // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
       // 1) Can access context from any NP plugin
@@ -102,40 +103,41 @@ export class Server {
       http: httpSetup,
     });
 
-    const coreSetup = {
+    const savedObjectsSetup = await this.savedObjects.setup({
+      elasticsearch: elasticsearchServiceSetup,
+      legacyPlugins,
+    });
+
+    const coreSetup: InternalCoreSetup = {
       context: contextServiceSetup,
       elasticsearch: elasticsearchServiceSetup,
       http: httpSetup,
       uiSettings: uiSettingsSetup,
+      savedObjects: savedObjectsSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
 
-    const legacySetup = await this.legacy.setup({
+    await this.legacy.setup({
       core: { ...coreSetup, plugins: pluginsSetup },
       plugins: mapToObject(pluginsSetup.contracts),
     });
 
-    const savedObjectsSetup = await this.savedObjects.setup({
-      elasticsearch: elasticsearchServiceSetup,
-      legacy: legacySetup,
-    });
-
-    this.registerCoreContext({ ...coreSetup, savedObjects: savedObjectsSetup });
+    this.registerCoreContext(coreSetup);
 
     return coreSetup;
   }
 
   public async start() {
     this.log.debug('starting server');
-    const pluginsStart = await this.plugins.start({});
     const savedObjectsStart = await this.savedObjects.start({});
+
+    const pluginsStart = await this.plugins.start({ savedObjects: savedObjectsStart });
 
     const coreStart = {
       savedObjects: savedObjectsStart,
       plugins: pluginsStart,
     };
-
     await this.legacy.start({
       core: coreStart,
       plugins: mapToObject(pluginsStart.contracts),
@@ -163,26 +165,27 @@ export class Server {
     );
   }
 
-  private registerCoreContext(coreSetup: {
-    http: InternalHttpServiceSetup;
-    elasticsearch: ElasticsearchServiceSetup;
-    savedObjects: SavedObjectsServiceSetup;
-  }) {
+  private registerCoreContext(coreSetup: InternalCoreSetup) {
     coreSetup.http.registerRouteHandlerContext(
       coreId,
       'core',
       async (context, req): Promise<RequestHandlerContext['core']> => {
         const adminClient = await coreSetup.elasticsearch.adminClient$.pipe(take(1)).toPromise();
         const dataClient = await coreSetup.elasticsearch.dataClient$.pipe(take(1)).toPromise();
+        const savedObjectsClient = coreSetup.savedObjects.getScopedClient(req);
+
         return {
           savedObjects: {
             // Note: the client provider doesn't support new ES clients
             // emitted from adminClient$
-            client: coreSetup.savedObjects.clientProvider.getClient(req),
+            client: savedObjectsClient,
           },
           elasticsearch: {
             adminClient: adminClient.asScoped(req),
             dataClient: dataClient.asScoped(req),
+          },
+          uiSettings: {
+            client: coreSetup.uiSettings.asScopedToClient(savedObjectsClient),
           },
         };
       }

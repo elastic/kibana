@@ -24,18 +24,18 @@ import { EuiScreenReaderOnly, keyCodes } from '@elastic/eui';
 // @ts-ignore
 import { KuiButton } from '@kbn/ui-framework/components';
 
-interface Props {
+export interface ExitFullScreenButtonProps {
   onExitFullScreenMode: () => void;
 }
 
-class ExitFullScreenButtonUi extends PureComponent<Props> {
+class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
   public onKeyDown = (e: KeyboardEvent) => {
     if (e.keyCode === keyCodes.ESCAPE) {
       this.props.onExitFullScreenMode();
     }
   };
 
-  public componentWillMount() {
+  public UNSAFE_componentWillMount() {
     document.addEventListener('keydown', this.onKeyDown, false);
   }
 

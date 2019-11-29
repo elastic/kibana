@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
-import * as visModule from 'ui/vis';
+import { Vis } from 'ui/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
 import dummyESResponse from './dummy_es_response.json';
 import initial from './initial.png';
@@ -65,7 +65,6 @@ let visRegComplete = false;
 describe('CoordinateMapsVisualizationTest', function () {
   let domNode;
   let CoordinateMapsVisualization;
-  let Vis;
   let indexPattern;
   let vis;
   let dependencies;
@@ -87,11 +86,10 @@ describe('CoordinateMapsVisualizationTest', function () {
 
       if(!visRegComplete) {
         visRegComplete = true;
-        visualizationsSetup.types.registerVisualization(() => createTileMapTypeDefinition(dependencies));
+        visualizationsSetup.types.createBaseVisualization(createTileMapTypeDefinition(dependencies));
       }
 
 
-      Vis = Private(visModule.VisProvider);
       CoordinateMapsVisualization = createTileMapVisualization(dependencies);
       indexPattern = Private(LogstashIndexPatternStubProvider);
 

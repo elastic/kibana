@@ -35,8 +35,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { sortBy, isEqual } from 'lodash';
-import { SavedQuery, SavedQueryAttributes } from '../../index';
-import { SavedQueryService } from '../../lib/saved_query_service';
+import {
+  SavedQuery,
+  SavedQueryAttributes,
+  SavedQueryService,
+} from '../../../../../../../../plugins/data/public';
 
 interface Props {
   savedQuery?: SavedQueryAttributes;
@@ -83,7 +86,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
       setSavedQueries(sortedAllSavedQueries);
     };
     fetchQueries();
-  }, []);
+  }, [savedQueryService]);
 
   const savedQueryDescriptionText = i18n.translate(
     'data.search.searchBar.savedQueryDescriptionText',

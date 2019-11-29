@@ -24,7 +24,7 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../..
 import { LegacyDependenciesPlugin } from './shim';
 
 import { createTableVisFn } from './table_vis_fn';
-import { createTableVisTypeDefinition } from './table_vis_type';
+import { tableVisTypeDefinition } from './table_vis_type';
 
 /** @internal */
 export interface TablePluginSetupDependencies {
@@ -48,7 +48,7 @@ export class TableVisPlugin implements Plugin<Promise<void>, void> {
     __LEGACY.setup();
     expressions.registerFunction(createTableVisFn);
 
-    visualizations.types.registerVisualization(createTableVisTypeDefinition);
+    visualizations.types.createBaseVisualization(tableVisTypeDefinition);
   }
 
   public start(core: CoreStart) {

@@ -52,6 +52,14 @@ afterEach(() => {
 describe('uiSettings', () => {
   describe('#setup', () => {
     describe('#asScopedToClient', () => {
+      it('passes saved object type "config" to UiSettingsClient', async () => {
+        const service = new UiSettingsService(coreContext);
+        const setup = await service.setup(setupDeps);
+        setup.asScopedToClient(savedObjectsClient);
+        expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
+        expect(MockUiSettingsClientConstructor.mock.calls[0][0].type).toBe('config');
+      });
+
       it('passes overrides to UiSettingsClient', async () => {
         const service = new UiSettingsService(coreContext);
         const setup = await service.setup(setupDeps);
@@ -86,7 +94,7 @@ describe('uiSettings', () => {
         const service = new UiSettingsService(coreContext);
         const setup = await service.setup(setupDeps);
 
-        setup.setDefaults(defaults);
+        setup.register(defaults);
         setup.asScopedToClient(savedObjectsClient);
         expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
 
@@ -95,13 +103,13 @@ describe('uiSettings', () => {
       });
     });
 
-    describe('#setDefaults', () => {
-      it('throws if set defaults for the same key twice', async () => {
+    describe('#register', () => {
+      it('throws if registers the same key twice', async () => {
         const service = new UiSettingsService(coreContext);
         const setup = await service.setup(setupDeps);
-        setup.setDefaults(defaults);
-        expect(() => setup.setDefaults(defaults)).toThrowErrorMatchingInlineSnapshot(
-          `"uiSettings defaults for key [foo] has been already set"`
+        setup.register(defaults);
+        expect(() => setup.register(defaults)).toThrowErrorMatchingInlineSnapshot(
+          `"uiSettings for the key [foo] has been already registered"`
         );
       });
     });
