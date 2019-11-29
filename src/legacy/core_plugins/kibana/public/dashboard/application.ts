@@ -67,7 +67,7 @@ export interface RenderDeps {
   uiSettings: UiSettingsClientContract;
   chrome: ChromeStart;
   addBasePath: (path: string) => string;
-  savedQueryService: DataStart['search']['services']['savedQueryService'];
+  savedQueryService: NpDataStart['query']['savedQueries'];
   embeddables: IEmbeddableStart;
   localStorage: Storage;
   share: SharePluginStart;

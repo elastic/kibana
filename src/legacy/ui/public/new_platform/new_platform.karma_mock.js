@@ -80,6 +80,14 @@ export const npSetup = {
           timefilter: sinon.fake(),
           history: sinon.fake(),
         },
+        savedQueries: {
+          saveQuery: sinon.fake(),
+          getAllSavedQueries: sinon.fake(),
+          findSavedQueries: sinon.fake(),
+          getSavedQuery: sinon.fake(),
+          deleteSavedQuery: sinon.fake(),
+          getSavedQueryCount: sinon.fake(),
+        }
       },
       fieldFormats: getFieldFormatsRegistry(mockUiSettings),
     },

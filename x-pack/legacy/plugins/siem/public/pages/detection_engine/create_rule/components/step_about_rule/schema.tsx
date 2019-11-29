@@ -8,13 +8,8 @@ import { EuiText } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import {
-  FormSchema,
-  FIELD_TYPES,
-} from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
-import { fieldValidators } from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/helpers';
-
 import * as CreateRuleI18n from '../../translations';
+import { FIELD_TYPES, fieldValidators, FormSchema } from '../shared_imports';
 
 const { emptyField } = fieldValidators;
 
