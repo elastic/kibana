@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { CoreEditor } from '../../../types';
+import { CoreEditor, Token } from '../../../types';
+import { TokenIterator } from '../../../lib/token_iterator';
 
 const MODE = {
   REQUEST_START: 2,
@@ -27,25 +28,19 @@ const MODE = {
   BETWEEN_REQUESTS: 32,
 };
 
-/**
- * The RowParser is still using Ace editor directly for now.
- *
- * This will be cleaned up when we implement the editor interface everywhere
- * in the next pass.
- */
-function RowParser(editor: CoreEditor) {
-  const defaultEditor = editor;
+// eslint-disable-next-line import/no-default-export
+export default class RowParser {
+  constructor(private readonly editor: CoreEditor) {}
 
-  this.getRowParseMode = function(row) {
-    if (row === null || typeof row === 'undefined') {
-      row = editor.getCursorPosition().row;
-    }
+  static MODE = MODE;
 
-    const session = editor.getSession();
-    if (row >= session.getLength() || row < 0) {
+  getRowParseMode(lineNumber = this.editor.getCurrentPosition().lineNumber) {
+    const linesCount = this.editor.getValue().split('\n').length;
+
+    if (lineNumber >= linesCount || lineNumber < 1) {
       return MODE.BETWEEN_REQUESTS;
     }
-    const mode = session.getState(row);
+    const mode = this.editor.getLineState(lineNumber);
     if (!mode) {
       return MODE.BETWEEN_REQUESTS;
     } // shouldn't really happen
@@ -53,103 +48,103 @@ function RowParser(editor: CoreEditor) {
     if (mode !== 'start') {
       return MODE.IN_REQUEST;
     }
-    let line = (session.getLine(row) || '').trim();
+    let line = (this.editor.getLineValue(lineNumber) || '').trim();
     if (!line || line[0] === '#') {
       return MODE.BETWEEN_REQUESTS;
     } // empty line or a comment waiting for a new req to start
 
     if (line.indexOf('}', line.length - 1) >= 0) {
       // check for a multi doc request (must start a new json doc immediately after this one end.
-      row++;
-      if (row < session.getLength()) {
-        line = (session.getLine(row) || '').trim();
+      lineNumber++;
+      if (lineNumber < linesCount) {
+        line = (this.editor.getLineValue(lineNumber) || '').trim();
         if (line.indexOf('{') === 0) {
           // next line is another doc in a multi doc
+          // eslint-disable-next-line no-bitwise
           return MODE.MULTI_DOC_CUR_DOC_END | MODE.IN_REQUEST;
         }
       }
+      // eslint-disable-next-line no-bitwise
       return MODE.REQUEST_END | MODE.MULTI_DOC_CUR_DOC_END; // end of request
     }
 
     // check for single line requests
-    row++;
-    if (row >= session.getLength()) {
+    lineNumber++;
+    if (lineNumber >= linesCount) {
+      // eslint-disable-next-line no-bitwise
       return MODE.REQUEST_START | MODE.REQUEST_END;
     }
-    line = (session.getLine(row) || '').trim();
+    line = (this.editor.getLineValue(lineNumber) || '').trim();
     if (line.indexOf('{') !== 0) {
       // next line is another request
+      // eslint-disable-next-line no-bitwise
       return MODE.REQUEST_START | MODE.REQUEST_END;
     }
 
     return MODE.REQUEST_START;
-  };
+  }
 
-  this.rowPredicate = function(row, editor, value) {
-    const mode = this.getRowParseMode(row, editor);
+  rowPredicate(lineNumber: number, editor: CoreEditor, value: any) {
+    const mode = this.getRowParseMode(lineNumber);
+    // eslint-disable-next-line no-bitwise
     return (mode & value) > 0;
-  };
+  }
 
-  this.isEndRequestRow = function(row, _e) {
-    const editor = _e || defaultEditor;
+  isEndRequestRow(row: number, _e: CoreEditor) {
+    const editor = _e || this.editor;
     return this.rowPredicate(row, editor, MODE.REQUEST_END);
-  };
+  }
 
-  this.isRequestEdge = function(row, _e) {
-    const editor = _e || defaultEditor;
+  isRequestEdge(row: number, _e: CoreEditor) {
+    const editor = _e || this.editor;
+    // eslint-disable-next-line no-bitwise
     return this.rowPredicate(row, editor, MODE.REQUEST_END | MODE.REQUEST_START);
-  };
+  }
 
-  this.isStartRequestRow = function(row, _e) {
-    const editor = _e || defaultEditor;
+  isStartRequestRow(row: number, _e: CoreEditor) {
+    const editor = _e || this.editor;
     return this.rowPredicate(row, editor, MODE.REQUEST_START);
-  };
+  }
 
-  this.isInBetweenRequestsRow = function(row, _e) {
-    const editor = _e || defaultEditor;
+  isInBetweenRequestsRow(row: number, _e: CoreEditor) {
+    const editor = _e || this.editor;
     return this.rowPredicate(row, editor, MODE.BETWEEN_REQUESTS);
-  };
+  }
 
-  this.isInRequestsRow = function(row, _e) {
-    const editor = _e || defaultEditor;
+  isInRequestsRow(row: number, _e: CoreEditor) {
+    const editor = _e || this.editor;
     return this.rowPredicate(row, editor, MODE.IN_REQUEST);
-  };
+  }
 
-  this.isMultiDocDocEndRow = function(row, _e) {
-    const editor = _e || defaultEditor;
+  isMultiDocDocEndRow(row: number, _e: CoreEditor) {
+    const editor = _e || this.editor;
     return this.rowPredicate(row, editor, MODE.MULTI_DOC_CUR_DOC_END);
-  };
+  }
 
-  this.isEmptyToken = function(tokenOrTokenIter) {
+  isEmptyToken(tokenOrTokenIter: TokenIterator | Token | null) {
     const token =
-      tokenOrTokenIter && tokenOrTokenIter.getCurrentToken
-        ? tokenOrTokenIter.getCurrentToken()
+      tokenOrTokenIter && (tokenOrTokenIter as TokenIterator).getCurrentToken
+        ? (tokenOrTokenIter as TokenIterator).getCurrentToken()
         : tokenOrTokenIter;
-    return !token || token.type === 'whitespace';
-  };
+    return !token || (token as Token).type === 'whitespace';
+  }
 
-  this.isUrlOrMethodToken = function(tokenOrTokenIter) {
-    const t = tokenOrTokenIter.getCurrentToken
-      ? tokenOrTokenIter.getCurrentToken()
-      : tokenOrTokenIter;
+  isUrlOrMethodToken(tokenOrTokenIter: TokenIterator | Token) {
+    const t = (tokenOrTokenIter as TokenIterator)?.getCurrentToken() ?? (tokenOrTokenIter as Token);
     return t && t.type && (t.type === 'method' || t.type.indexOf('url') === 0);
-  };
+  }
 
-  this.nextNonEmptyToken = function(tokenIter) {
+  nextNonEmptyToken(tokenIter: TokenIterator) {
     let t = tokenIter.stepForward();
     while (t && this.isEmptyToken(t)) t = tokenIter.stepForward();
     return t;
-  };
+  }
 
-  this.prevNonEmptyToken = function(tokenIter) {
+  prevNonEmptyToken(tokenIter: TokenIterator) {
     let t = tokenIter.stepBackward();
     // empty rows return null token.
     while ((t || tokenIter.getCurrentPosition().lineNumber > 1) && this.isEmptyToken(t))
       t = tokenIter.stepBackward();
     return t;
-  };
+  }
 }
-
-RowParser.prototype.MODE = MODE;
-
-export default RowParser;

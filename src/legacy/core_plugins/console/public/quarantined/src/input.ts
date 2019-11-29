@@ -20,7 +20,7 @@
 // @ts-ignore
 import Autocomplete from './autocomplete';
 
-import { LegacyEditor } from '../../../np_ready/public/application/models';
+import { LegacyCoreEditor } from '../../../np_ready/public/application/models';
 
 // @ts-ignore
 import SenseEditor from './sense_editor/editor';
@@ -33,7 +33,7 @@ export function initializeEditor($el: JQuery<HTMLElement>, $actionsEl: JQuery<HT
   // Autocomplete should not use any Ace functionality directly
   // so we build a shim here.
   const editorShim = {
-    coreEditor: new LegacyEditor(input),
+    coreEditor: new LegacyCoreEditor(input),
     parser: input.parser,
     execCommand: (cmd: string) => input.execCommand(cmd),
     getCursorPosition: (): Position | null => {

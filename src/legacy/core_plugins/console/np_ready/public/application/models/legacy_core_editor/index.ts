@@ -23,4 +23,4 @@ import 'brace/ext/searchbox';
 import 'brace/mode/json';
 import 'brace/mode/text';
 
-export * from './legacy_editor';
+export * from './legacy_core_editor';

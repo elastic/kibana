@@ -18,7 +18,7 @@
  */
 
 import { Range as AceRange } from 'brace';
-import { LegacyEditor } from './legacy_editor';
+import { LegacyCoreEditor } from './legacy_core_editor';
 
 describe('Legacy Editor', () => {
   const aceMock: any = {
@@ -53,7 +53,7 @@ describe('Legacy Editor', () => {
 
   // This is to ensure that we are correctly importing Ace's Range component
   it('smoke tests for updates to ranges', () => {
-    const legacyEditor = new LegacyEditor(aceMock);
+    const legacyEditor = new LegacyCoreEditor(aceMock);
     legacyEditor.getValueInRange({
       start: { lineNumber: 1, column: 1 },
       end: { lineNumber: 2, column: 2 },

@@ -24,7 +24,7 @@ import { AceTokensProvider } from '../../../lib/ace_token_provider';
 
 const _AceRange = ace.acequire('ace/range').Range;
 
-export class LegacyEditor implements CoreEditor {
+export class LegacyCoreEditor implements CoreEditor {
   constructor(private readonly editor: IAceEditor) {}
 
   getLineState(lineNumber: number) {

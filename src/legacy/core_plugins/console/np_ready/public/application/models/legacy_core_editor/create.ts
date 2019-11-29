@@ -18,10 +18,10 @@
  */
 
 import ace from 'brace';
-import { LegacyEditor } from './legacy_editor';
+import { LegacyCoreEditor } from './legacy_core_editor';
 import { CreateCoreEditor } from '../../../types';
 
 export const create: CreateCoreEditor = el => {
   const aceEditor = ace.edit(el);
-  return new LegacyEditor(aceEditor);
+  return new LegacyCoreEditor(aceEditor);
 };

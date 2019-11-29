@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from './legacy_editor/legacy_editor';
+export * from './legacy_core_editor/legacy_core_editor';
