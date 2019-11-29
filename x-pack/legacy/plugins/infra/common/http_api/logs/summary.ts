@@ -16,6 +16,8 @@ export const logsSummaryRequestRT = rt.type({
   bucketSize: rt.number,
 });
 
+export type LogsSummaryRequest = rt.TypeOf<typeof logsSummaryRequestRT>;
+
 export const logsSummaryResponseRT = rt.type({
   start: rt.number,
   end: rt.number,
@@ -27,3 +29,5 @@ export const logsSummaryResponseRT = rt.type({
     })
   ),
 });
+
+export type LogsSummaryResponse = rt.TypeOf<typeof logsSummaryResponseRT>;
