@@ -18,14 +18,13 @@
  */
 
 import {
-  UiSettingsClientContract,
+  IUiSettingsClient,
   SavedObjectsClientContract,
   HttpServiceBase,
   NotificationsStart,
 } from 'src/core/public';
 import { FieldFormatsStart } from '../../../../../plugins/data/public';
 import { Field, FieldList, FieldListInterface, FieldType } from './fields';
-import { createIndexPatternSelect } from './components';
 import { setNotifications, setFieldFormats } from './services';
 
 import {
@@ -37,7 +36,7 @@ import {
 } from './index_patterns';
 
 export interface IndexPatternDependencies {
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
   savedObjectsClient: SavedObjectsClientContract;
   http: HttpServiceBase;
   notifications: NotificationsStart;
@@ -79,7 +78,6 @@ export class IndexPatternsService {
     return {
       ...this.setupApi,
       indexPatterns: new IndexPatterns(uiSettings, savedObjectsClient, http),
-      IndexPatternSelect: createIndexPatternSelect(savedObjectsClient),
     };
   }
 
@@ -91,24 +89,7 @@ export class IndexPatternsService {
 // static code
 
 /** @public */
-export { IndexPatternSelect } from './components';
-export {
-  CONTAINS_SPACES,
-  getFromSavedObject,
-  getRoutes,
-  ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-  validateIndexPattern,
-} from './utils';
-
-/** @public */
-export {
-  IndexPatternAlreadyExists,
-  IndexPatternMissingIndices,
-  NoDefaultIndexPattern,
-  NoDefinedIndexPatterns,
-} from './errors';
+export { getFromSavedObject, getRoutes } from './utils';
 
 // types
 
@@ -120,4 +101,4 @@ export type IndexPatternsStart = ReturnType<IndexPatternsService['start']>;
 export { IndexPattern, IndexPatterns, StaticIndexPattern, Field, FieldType, FieldListInterface };
 
 /** @public */
-export { getIndexPatternTitle, findIndexPatternByTitle } from './utils';
+export { findIndexPatternByTitle } from './utils';

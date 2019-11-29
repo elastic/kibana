@@ -5,20 +5,22 @@
  */
 
 import Boom from 'boom';
+
 import {
-  transformAlertToSignal,
+  transformAlertToRule,
   getIdError,
   transformFindAlertsOrError,
   transformOrError,
+  transformError,
 } from './utils';
 import { getResult } from './__mocks__/request_responses';
 
 describe('utils', () => {
-  describe('transformAlertToSignal', () => {
+  describe('transformAlertToRule', () => {
     test('should work with a full data set', () => {
-      const fullSignal = getResult();
-      const signal = transformAlertToSignal(fullSignal);
-      expect(signal).toEqual({
+      const fullRule = getResult();
+      const rule = transformAlertToRule(fullRule);
+      expect(rule).toEqual({
         created_by: 'elastic',
         description: 'Detecting root and admin users',
         enabled: true,
@@ -37,17 +39,31 @@ describe('utils', () => {
         query: 'user.name: root or user.name: admin',
         references: ['http://www.example.com', 'https://ww.example.com'],
         severity: 'high',
-        size: 1,
         updated_by: 'elastic',
         tags: [],
+        threats: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: 'TA0040',
+              name: 'impact',
+              reference: 'https://attack.mitre.org/tactics/TA0040/',
+            },
+            technique: {
+              id: 'T1499',
+              name: 'endpoint denial of service',
+              reference: 'https://attack.mitre.org/techniques/T1499/',
+            },
+          },
+        ],
         to: 'now',
         type: 'query',
       });
     });
 
     test('should work with a partial data set missing data', () => {
-      const fullSignal = getResult();
-      const { from, language, ...omitData } = transformAlertToSignal(fullSignal);
+      const fullRule = getResult();
+      const { from, language, ...omitData } = transformAlertToRule(fullRule);
       expect(omitData).toEqual({
         created_by: 'elastic',
         description: 'Detecting root and admin users',
@@ -65,19 +81,33 @@ describe('utils', () => {
         query: 'user.name: root or user.name: admin',
         references: ['http://www.example.com', 'https://ww.example.com'],
         severity: 'high',
-        size: 1,
         updated_by: 'elastic',
         tags: [],
+        threats: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: 'TA0040',
+              name: 'impact',
+              reference: 'https://attack.mitre.org/tactics/TA0040/',
+            },
+            technique: {
+              id: 'T1499',
+              name: 'endpoint denial of service',
+              reference: 'https://attack.mitre.org/techniques/T1499/',
+            },
+          },
+        ],
         to: 'now',
         type: 'query',
       });
     });
 
     test('should omit query if query is null', () => {
-      const fullSignal = getResult();
-      fullSignal.params.query = null;
-      const signal = transformAlertToSignal(fullSignal);
-      expect(signal).toEqual({
+      const fullRule = getResult();
+      fullRule.params.query = null;
+      const rule = transformAlertToRule(fullRule);
+      expect(rule).toEqual({
         created_by: 'elastic',
         description: 'Detecting root and admin users',
         enabled: true,
@@ -95,19 +125,33 @@ describe('utils', () => {
         name: 'Detect Root/Admin Users',
         references: ['http://www.example.com', 'https://ww.example.com'],
         severity: 'high',
-        size: 1,
         updated_by: 'elastic',
         tags: [],
+        threats: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: 'TA0040',
+              name: 'impact',
+              reference: 'https://attack.mitre.org/tactics/TA0040/',
+            },
+            technique: {
+              id: 'T1499',
+              name: 'endpoint denial of service',
+              reference: 'https://attack.mitre.org/techniques/T1499/',
+            },
+          },
+        ],
         to: 'now',
         type: 'query',
       });
     });
 
     test('should omit query if query is undefined', () => {
-      const fullSignal = getResult();
-      fullSignal.params.query = undefined;
-      const signal = transformAlertToSignal(fullSignal);
-      expect(signal).toEqual({
+      const fullRule = getResult();
+      fullRule.params.query = undefined;
+      const rule = transformAlertToRule(fullRule);
+      expect(rule).toEqual({
         created_by: 'elastic',
         description: 'Detecting root and admin users',
         enabled: true,
@@ -125,19 +169,33 @@ describe('utils', () => {
         name: 'Detect Root/Admin Users',
         references: ['http://www.example.com', 'https://ww.example.com'],
         severity: 'high',
-        size: 1,
         updated_by: 'elastic',
         tags: [],
+        threats: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: 'TA0040',
+              name: 'impact',
+              reference: 'https://attack.mitre.org/tactics/TA0040/',
+            },
+            technique: {
+              id: 'T1499',
+              name: 'endpoint denial of service',
+              reference: 'https://attack.mitre.org/techniques/T1499/',
+            },
+          },
+        ],
         to: 'now',
         type: 'query',
       });
     });
 
     test('should omit a mix of undefined, null, and missing fields', () => {
-      const fullSignal = getResult();
-      fullSignal.params.query = undefined;
-      fullSignal.params.language = null;
-      const { from, enabled, ...omitData } = transformAlertToSignal(fullSignal);
+      const fullRule = getResult();
+      fullRule.params.query = undefined;
+      fullRule.params.language = null;
+      const { from, enabled, ...omitData } = transformAlertToRule(fullRule);
       expect(omitData).toEqual({
         created_by: 'elastic',
         description: 'Detecting root and admin users',
@@ -153,19 +211,33 @@ describe('utils', () => {
         name: 'Detect Root/Admin Users',
         references: ['http://www.example.com', 'https://ww.example.com'],
         severity: 'high',
-        size: 1,
         updated_by: 'elastic',
         tags: [],
+        threats: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: 'TA0040',
+              name: 'impact',
+              reference: 'https://attack.mitre.org/tactics/TA0040/',
+            },
+            technique: {
+              id: 'T1499',
+              name: 'endpoint denial of service',
+              reference: 'https://attack.mitre.org/techniques/T1499/',
+            },
+          },
+        ],
         to: 'now',
         type: 'query',
       });
     });
 
     test('should return enabled is equal to false', () => {
-      const fullSignal = getResult();
-      fullSignal.enabled = false;
-      const signalWithEnabledFalse = transformAlertToSignal(fullSignal);
-      expect(signalWithEnabledFalse).toEqual({
+      const fullRule = getResult();
+      fullRule.enabled = false;
+      const ruleWithEnabledFalse = transformAlertToRule(fullRule);
+      expect(ruleWithEnabledFalse).toEqual({
         created_by: 'elastic',
         description: 'Detecting root and admin users',
         enabled: false,
@@ -184,19 +256,33 @@ describe('utils', () => {
         query: 'user.name: root or user.name: admin',
         references: ['http://www.example.com', 'https://ww.example.com'],
         severity: 'high',
-        size: 1,
         updated_by: 'elastic',
         tags: [],
+        threats: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: 'TA0040',
+              name: 'impact',
+              reference: 'https://attack.mitre.org/tactics/TA0040/',
+            },
+            technique: {
+              id: 'T1499',
+              name: 'endpoint denial of service',
+              reference: 'https://attack.mitre.org/techniques/T1499/',
+            },
+          },
+        ],
         to: 'now',
         type: 'query',
       });
     });
 
     test('should return immutable is equal to false', () => {
-      const fullSignal = getResult();
-      fullSignal.params.immutable = false;
-      const signalWithEnabledFalse = transformAlertToSignal(fullSignal);
-      expect(signalWithEnabledFalse).toEqual({
+      const fullRule = getResult();
+      fullRule.params.immutable = false;
+      const ruleWithEnabledFalse = transformAlertToRule(fullRule);
+      expect(ruleWithEnabledFalse).toEqual({
         created_by: 'elastic',
         description: 'Detecting root and admin users',
         enabled: true,
@@ -215,9 +301,23 @@ describe('utils', () => {
         query: 'user.name: root or user.name: admin',
         references: ['http://www.example.com', 'https://ww.example.com'],
         severity: 'high',
-        size: 1,
         updated_by: 'elastic',
         tags: [],
+        threats: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: 'TA0040',
+              name: 'impact',
+              reference: 'https://attack.mitre.org/tactics/TA0040/',
+            },
+            technique: {
+              id: 'T1499',
+              name: 'endpoint denial of service',
+              reference: 'https://attack.mitre.org/techniques/T1499/',
+            },
+          },
+        ],
         to: 'now',
         type: 'query',
       });
@@ -297,11 +397,25 @@ describe('utils', () => {
             query: 'user.name: root or user.name: admin',
             references: ['http://www.example.com', 'https://ww.example.com'],
             severity: 'high',
-            size: 1,
             updated_by: 'elastic',
             tags: [],
             to: 'now',
             type: 'query',
+            threats: [
+              {
+                framework: 'MITRE ATT&CK',
+                tactic: {
+                  id: 'TA0040',
+                  name: 'impact',
+                  reference: 'https://attack.mitre.org/tactics/TA0040/',
+                },
+                technique: {
+                  id: 'T1499',
+                  name: 'endpoint denial of service',
+                  reference: 'https://attack.mitre.org/techniques/T1499/',
+                },
+              },
+            ],
           },
         ],
       });
@@ -335,17 +449,68 @@ describe('utils', () => {
         query: 'user.name: root or user.name: admin',
         references: ['http://www.example.com', 'https://ww.example.com'],
         severity: 'high',
-        size: 1,
         updated_by: 'elastic',
         tags: [],
         to: 'now',
         type: 'query',
+        threats: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: 'TA0040',
+              name: 'impact',
+              reference: 'https://attack.mitre.org/tactics/TA0040/',
+            },
+            technique: {
+              id: 'T1499',
+              name: 'endpoint denial of service',
+              reference: 'https://attack.mitre.org/techniques/T1499/',
+            },
+          },
+        ],
       });
     });
 
     test('returns 500 if the data is not of type siem alert', () => {
       const output = transformOrError({ data: [{ random: 1 }] });
       expect((output as Boom).message).toEqual('Internal error transforming');
+    });
+  });
+
+  describe('transformError', () => {
+    test('returns boom if it is a boom object', () => {
+      const boom = new Boom('');
+      const transformed = transformError(boom);
+      expect(transformed).toBe(boom);
+    });
+
+    test('returns a boom if it is some non boom object that has a statusCode', () => {
+      const error: Error & { statusCode?: number } = {
+        statusCode: 403,
+        name: 'some name',
+        message: 'some message',
+      };
+      const transformed = transformError(error);
+      expect(Boom.isBoom(transformed)).toBe(true);
+    });
+
+    test('returns a boom with the message set', () => {
+      const error: Error & { statusCode?: number } = {
+        statusCode: 403,
+        name: 'some name',
+        message: 'some message',
+      };
+      const transformed = transformError(error);
+      expect(transformed.message).toBe('some message');
+    });
+
+    test('does not return a boom if it is some non boom object but it does not have a status Code.', () => {
+      const error: Error = {
+        name: 'some name',
+        message: 'some message',
+      };
+      const transformed = transformError(error);
+      expect(Boom.isBoom(transformed)).toBe(false);
     });
   });
 });

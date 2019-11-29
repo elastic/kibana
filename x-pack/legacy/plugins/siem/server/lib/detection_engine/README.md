@@ -24,10 +24,10 @@ xpack.alerting.enabled: true
 xpack.actions.enabled: true
 ```
 
-Start Kibana and you will see these messages indicating signals is activated like so:
+Start Kibana and you will see these messages indicating detection engine is activated like so:
 
 ```sh
-server    log   [11:39:05.561] [info][siem] Detected feature flags for actions and alerting and enabling signals API endpoints
+server    log   [11:39:05.561] [info][siem] Detected feature flags for actions and alerting and enabling detection engine API endpoints
 ```
 
 If you see crashes like this:
@@ -98,10 +98,17 @@ server    log   [22:05:22.277] [info][status][plugin:alerting@8.0.0] Status chan
 server    log   [22:05:22.270] [info][status][plugin:actions@8.0.0] Status changed from uninitialized to green - Ready
 ```
 
-You should also see the SIEM detect the feature flags and start the API endpoints for signals
+You should also see the SIEM detect the feature flags and start the API endpoints for detection engine
 
 ```sh
-server    log   [11:39:05.561] [info][siem] Detected feature flags for actions and alerting and enabling signals API endpoints
+server    log   [11:39:05.561] [info][siem] Detected feature flags for actions and alerting and enabling detection engine API endpoints
+```
+
+Go into your SIEM Advanced settings and underneath the setting of `siem:defaultSignalsIndex`, set that to the same
+value as you did with the environment variable of SIGNALS_INDEX, which should be `.siem-signals-${your user id}`
+
+```
+.siem-signals-${your user id}
 ```
 
 Open a terminal and go into the scripts folder `cd kibana/x-pack/legacy/plugins/siem/server/lib/detection_engine/scripts` and run:
@@ -118,16 +125,16 @@ which will:
 - Delete any existing alert tasks you have
 - Delete any existing signal mapping you might have had.
 - Add the latest signal index and its mappings using your settings from `SIGNALS_INDEX` environment variable.
-- Posts the sample signal from `signals/root_or_admin_1.json` by replacing its `output_index` with your `SIGNALS_INDEX` environment variable
-- The sample signal checks for root or admin every 5 minutes and reports that as a signal if it is a positive hit
+- Posts the sample rule from `rules/root_or_admin_1.json` by replacing its `output_index` with your `SIGNALS_INDEX` environment variable
+- The sample rule checks for root or admin every 5 minutes and reports that as a signal if it is a positive hit
 
 Now you can run
 
 ```sh
-./find_signals.sh
+./find_rules.sh
 ```
 
-You should see the new signals created like so:
+You should see the new rules created like so:
 
 ```sh
 {
@@ -177,7 +184,7 @@ Every 5 minutes if you get positive hits you will see messages on info like so:
 server    log   [09:54:59.013] [info][plugins][siem] Total signals found from signal rule "id: a556065c-0656-4ba1-ad64-a77ca9d2013b", "ruleId: rule-1": 10000
 ```
 
-Signals are space aware and default to the "default" space for these scripts if you do not export
+Rules are space aware and default to the "default" space for these scripts if you do not export
 the variable of SPACE_URL. For example, if you want to post rules to the space `test-space` you would
 set your SPACE_URL to be:
 

@@ -5,5 +5,6 @@
  */
 
 export * from './common';
+export * from './snapshot';
 export * from './monitor/monitor_details';
 export * from './monitor/monitor_locations';
