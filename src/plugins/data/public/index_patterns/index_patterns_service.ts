@@ -18,7 +18,7 @@
  */
 
 import {
-  UiSettingsClientContract,
+  IUiSettingsClient,
   SavedObjectsClientContract,
   HttpServiceBase,
   NotificationsStart,
@@ -28,7 +28,7 @@ import { setNotifications, setFieldFormats } from './services';
 import { IndexPatterns } from './index_patterns';
 
 interface IndexPatternDependencies {
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
   savedObjectsClient: SavedObjectsClientContract;
   http: HttpServiceBase;
   notifications: NotificationsStart;
