@@ -17,7 +17,7 @@ export async function canStartTrial(
     path: '/_license/trial_status',
   };
   try {
-    const response = await callWithRequest(req, 'transport.request', options);
+    const response = await callWithRequest(req as any, 'transport.request', options);
     return response.eligible_to_start_trial;
   } catch (error) {
     return error.body;
@@ -35,7 +35,7 @@ export async function startTrial(
     path: '/_license/start_trial?acknowledge=true',
   };
   try {
-    const response = await callWithRequest(req, 'transport.request', options);
+    const response = await callWithRequest(req as any, 'transport.request', options);
     const { trial_was_started: trialWasStarted } = response;
     if (trialWasStarted) {
       await xpackInfo.refreshNow();
