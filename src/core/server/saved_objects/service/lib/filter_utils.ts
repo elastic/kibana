@@ -20,6 +20,7 @@
 import { get, set } from 'lodash';
 import { SavedObjectsErrorHelpers } from './errors';
 import { IndexMapping } from '../../mappings';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { esKuery } from '../../../../../plugins/data/server';
 
 export const validateConvertFilterToKueryNode = (

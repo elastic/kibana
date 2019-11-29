@@ -48,15 +48,15 @@ export function KbnAccessibleClickProvider() {
     restrict: 'A',
     controller: $element => {
       $element.on('keydown', e => {
-      // Prevent a scroll from occurring if the user has hit space.
+        // Prevent a scroll from occurring if the user has hit space.
         if (e.keyCode === keyCodes.SPACE) {
           e.preventDefault();
         }
       });
     },
     link: (scope, element, attrs) => {
-    // The whole point of this directive is to hack in functionality that native buttons provide
-    // by default.
+      // The whole point of this directive is to hack in functionality that native buttons provide
+      // by default.
       const elementType = element.prop('tagName');
 
       if (elementType === 'BUTTON') {
@@ -82,9 +82,9 @@ export function KbnAccessibleClickProvider() {
       }
 
       element.on('keyup', e => {
-      // Support keyboard accessibility by emulating mouse click on ENTER or SPACE keypress.
+        // Support keyboard accessibility by emulating mouse click on ENTER or SPACE keypress.
         if (accessibleClickKeys[e.keyCode]) {
-        // Delegate to the click handler on the element (assumed to be ng-click).
+          // Delegate to the click handler on the element (assumed to be ng-click).
           element.click();
         }
       });
