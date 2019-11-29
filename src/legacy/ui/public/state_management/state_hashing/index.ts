@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { hashUrl, unhashUrl } from './hash_unhash_url';
+export { hashUrl, unhashUrl, hashQuery, unhashQuery } from './hash_unhash_url';
 export { createStateHash, isStateHash } from './state_hash';
