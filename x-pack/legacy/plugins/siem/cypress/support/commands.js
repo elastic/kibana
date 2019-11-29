@@ -4,31 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// ***********************************************
-// This example commands.js shows you how to
-// create various custom commands and overwrite
-// existing commands.
-//
-// For more comprehensive examples of custom
-// commands please read more here:
-// https://on.cypress.io/custom-commands
-// ***********************************************
-//
-//
-// -- This is a parent command --
-// Cypress.Commands.add("login", (email, password) => { ... })
-//
-//
-// -- This is a child command --
-// Cypress.Commands.add("drag", { prevSubject: 'element'}, (subject, options) => { ... })
-//
-//
-// -- This is a dual command --
-// Cypress.Commands.add("dismiss", { prevSubject: 'optional'}, (subject, options) => { ... })
-//
-//
-// -- This is will overwrite an existing command --
-// Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
+import * as yaml from 'js-yaml';
+
+/**
+ * Credentials in the `kibana.dev.yml` config file will be used to authenticate
+ * with Kibana when credentials are not provided via environment variables
+ */
+
+const KIBANA_DEV_YML_PATH = '../../../../config/kibana.dev.yml';
+
 
 Cypress.Commands.add('logout', () => {
   cy.request({
@@ -37,4 +21,35 @@ Cypress.Commands.add('logout', () => {
   }).then(response => {
     expect(response.status).to.eq(200);
   });
+});
+
+Cypress.Commands.add('loginRequest', (username, password) => {
+  cy.request({
+    body: {
+      username: username,
+      password: password,
+    },
+    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+    method: 'POST',
+    url: `${Cypress.config().baseUrl}/api/security/v1/login`,
+  });
+});
+
+Cypress.Commands.add('loginViaEnvironmentCredentials', () => {
+  cy.loginRequest(Cypress.env('ELASTICSEARCH_USERNAME'), Cypress.env('ELASTICSEARCH_PASSWORD'));
+});
+
+Cypress.Commands.add('loginViaConfig', () => {
+  cy.readFile(KIBANA_DEV_YML_PATH).then(kibanaDevYml => {
+    const config = yaml.safeLoad(kibanaDevYml);
+    cy.loginRequest(config.elasticsearch.username, config.elasticsearch.password);
+  });
+});
+
+Cypress.Commands.add('login', () => {
+  if (Cypress.env('ELASTICSEARCH_USERNAME') != null && Cypress.env('ELASTICSEARCH_PASSWORD') != null) {
+    cy.loginViaEnvironmentCredentials();
+  } else {
+    cy.loginViaConfig();
+  }
 });

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { login } from '../login/helpers';
-
 /** The default time in ms to wait for a Cypress command to complete */
 export const DEFAULT_TIMEOUT = 30 * 1000;
 
@@ -14,7 +12,7 @@ export const DEFAULT_TIMEOUT = 30 * 1000;
  * Kibana logo to be displayed before continuing
  */
 export const loginAndWaitForPage = (url: string) => {
-  login();
+  cy.login();
 
   cy.visit(`${Cypress.config().baseUrl}${url}`);
 
