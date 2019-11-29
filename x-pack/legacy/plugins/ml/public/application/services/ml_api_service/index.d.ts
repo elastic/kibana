@@ -172,7 +172,7 @@ declare interface Ml {
   mlNodeCount(): Promise<{ count: number }>;
   mlInfo(): Promise<MlInfoResponse>;
   getCardinalityOfFields(obj: Record<string, any>): any;
-  validateCardinality(job: CombinedJob): Promise<CardinalityValidationResults>;
+  validateCardinality$(job: CombinedJob): Observable<CardinalityValidationResults>;
 }
 
 declare const ml: Ml;
