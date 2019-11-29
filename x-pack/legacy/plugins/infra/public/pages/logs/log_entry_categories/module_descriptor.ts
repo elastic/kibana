@@ -6,7 +6,7 @@
 
 import {
   bucketSpan,
-  categorizationMessageField,
+  categoriesMessageField,
   getJobId,
   partitionField,
 } from '../../../../common/log_analysis';
@@ -21,8 +21,8 @@ import { callGetMlModuleAPI } from '../../../containers/logs/log_analysis/api/ml
 import { callSetupMlModuleAPI } from '../../../containers/logs/log_analysis/api/ml_setup_module_api';
 import { callValidateIndicesAPI } from '../../../containers/logs/log_analysis/api/validate_indices';
 
-const jobTypes = ['log-entry-categorization-count'];
-const moduleId = 'logs_ui_categorization';
+const jobTypes = ['log-entry-categories-count'];
+const moduleId = 'logs_ui_categories';
 
 type JobType = typeof jobTypes[0];
 
@@ -54,7 +54,7 @@ const setUpModule = async (
   const indexNamePattern = indices.join(',');
   const jobOverrides = [
     {
-      job_id: 'log-entry-categorization-count' as const,
+      job_id: 'log-entry-categories-count' as const,
       analysis_config: {
         bucket_span: `${bucketSpan}ms`,
       },
@@ -97,13 +97,13 @@ const validateSetupIndices = async ({ indices, timestampField }: ModuleSourceCon
       validTypes: ['keyword'],
     },
     {
-      name: categorizationMessageField,
+      name: categoriesMessageField,
       validTypes: ['text'],
     },
   ]);
 };
 
-export const logEntryCategorizationModule: ModuleDescriptor<JobType> = {
+export const logEntryCategoriesModule: ModuleDescriptor<JobType> = {
   moduleId,
   jobTypes,
   bucketSpan,

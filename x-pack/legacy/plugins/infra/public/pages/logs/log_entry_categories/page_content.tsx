@@ -15,11 +15,11 @@ import {
 } from '../../../components/logging/log_analysis_setup';
 import { LogAnalysisCapabilities } from '../../../containers/logs/log_analysis';
 // import { Source } from '../../../containers/source';
-// import { LogEntryCategorizationResultsContent } from './page_results_content';
-// import { LogEntryCategorizationSetupContent } from './page_setup_content';
-import { useLogEntryCategorizationModuleContext } from './use_log_entry_categorization_module';
+// import { LogEntryCategoriesResultsContent } from './page_results_content';
+// import { LogEntryCategoriesSetupContent } from './page_setup_content';
+import { useLogEntryCategoriesModuleContext } from './use_log_entry_categories_module';
 
-export const LogEntryCategorizationPageContent = () => {
+export const LogEntryCategoriesPageContent = () => {
   // const { sourceId } = useContext(Source.Context);
   const { hasLogAnalysisCapabilites } = useContext(LogAnalysisCapabilities.Context);
 
@@ -33,7 +33,7 @@ export const LogEntryCategorizationPageContent = () => {
     setupStatus,
     // sourceConfiguration,
     // viewResults,
-  } = useLogEntryCategorizationModuleContext();
+  } = useLogEntryCategoriesModuleContext();
 
   useEffect(() => {
     fetchModuleDefinition();
@@ -55,7 +55,7 @@ export const LogEntryCategorizationPageContent = () => {
   } else if (isSetupStatusWithResults(setupStatus)) {
     return null;
     // return (
-    //   <LogEntryCategorizationResultsContent
+    //   <LogEntryCategoriesResultsContent
     //     sourceId={sourceId}
     //     isFirstUse={setupStatus === 'hiddenAfterSuccess'}
     //   />
@@ -63,7 +63,7 @@ export const LogEntryCategorizationPageContent = () => {
   } else {
     return null;
     // return (
-    //   <LogEntryCategorizationSetupContent
+    //   <LogEntryCategoriesSetupContent
     //     cleanupAndSetup={cleanupAndSetup}
     //     errorMessages={lastSetupErrorMessages}
     //     moduleDescriptor={moduleDescriptor}

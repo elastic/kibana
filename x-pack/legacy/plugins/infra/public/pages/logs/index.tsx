@@ -53,14 +53,14 @@ export const LogsPage = injectUICapabilities(({ match, uiCapabilities }: LogsPag
     path: `${match.path}/log-rate`,
   };
 
-  const logCategorizationTab = {
+  const logCategoriesTab = {
     title: (
       <>
-        {logCategorizationTabTitle}
-        <TabBetaBadge title={logCategorizationTabTitle} />
+        {logCategoriesTabTitle}
+        <TabBetaBadge title={logCategoriesTabTitle} />
       </>
     ),
-    path: `${match.path}/log-categorization`,
+    path: `${match.path}/log-categories`,
   };
 
   const settingsTab = {
@@ -100,7 +100,7 @@ export const LogsPage = injectUICapabilities(({ match, uiCapabilities }: LogsPag
                 <RoutedTabs
                   tabs={
                     logAnalysisCapabilities.hasLogAnalysisCapabilites
-                      ? [streamTab, logRateTab, logCategorizationTab, settingsTab]
+                      ? [streamTab, logRateTab, logCategoriesTab, settingsTab]
                       : [streamTab, settingsTab]
                   }
                 />
@@ -109,6 +109,7 @@ export const LogsPage = injectUICapabilities(({ match, uiCapabilities }: LogsPag
               <Switch>
                 <Route path={streamTab.path} component={StreamPage} />
                 <Route path={logRateTab.path} component={LogEntryRatePage} />
+                <Route path={logCategoriesTab.path} component={LogEntryRatePage} />
                 <Route path={settingsTab.path} component={SettingsPage} />
                 <RedirectWithQueryParams
                   from={`${match.path}/analysis`}
@@ -136,12 +137,9 @@ const logRateTabTitle = i18n.translate('xpack.infra.logs.index.logRateBetaBadgeT
   defaultMessage: 'Log Rate',
 });
 
-const logCategorizationTabTitle = i18n.translate(
-  'xpack.infra.logs.index.logCategorizationBetaBadgeTitle',
-  {
-    defaultMessage: 'Categories',
-  }
-);
+const logCategoriesTabTitle = i18n.translate('xpack.infra.logs.index.logCategoriesBetaBadgeTitle', {
+  defaultMessage: 'Categories',
+});
 
 const settingsTabTitle = i18n.translate('xpack.infra.logs.index.settingsTabTitle', {
   defaultMessage: 'Settings',

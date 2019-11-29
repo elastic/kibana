@@ -8,20 +8,20 @@ import React from 'react';
 
 import { useSourceContext } from '../../../containers/source';
 import { useKibanaSpaceId } from '../../../utils/use_kibana_space_id';
-import { LogEntryCategorizationModuleProvider } from './use_log_entry_categorization_module';
+import { LogEntryCategoriesModuleProvider } from './use_log_entry_categories_module';
 
-export const LogEntryCategorizationPageProviders: React.FunctionComponent = ({ children }) => {
+export const LogEntryCategoriesPageProviders: React.FunctionComponent = ({ children }) => {
   const { sourceId, source } = useSourceContext();
   const spaceId = useKibanaSpaceId();
 
   return (
-    <LogEntryCategorizationModuleProvider
+    <LogEntryCategoriesModuleProvider
       indexPattern={source ? source.configuration.logAlias : ''}
       sourceId={sourceId}
       spaceId={spaceId}
       timestampField={source ? source.configuration.fields.timestamp : ''}
     >
       {children}
-    </LogEntryCategorizationModuleProvider>
+    </LogEntryCategoriesModuleProvider>
   );
 };

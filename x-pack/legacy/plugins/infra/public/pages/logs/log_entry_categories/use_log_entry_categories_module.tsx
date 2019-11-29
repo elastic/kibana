@@ -11,9 +11,9 @@ import {
   useLogAnalysisModule,
   ModuleSourceConfiguration,
 } from '../../../containers/logs/log_analysis';
-import { logEntryCategorizationModule } from './module_descriptor';
+import { logEntryCategoriesModule } from './module_descriptor';
 
-export const useLogEntryCategorizationModule = ({
+export const useLogEntryCategoriesModule = ({
   indexPattern,
   sourceId,
   spaceId,
@@ -35,12 +35,12 @@ export const useLogEntryCategorizationModule = ({
   );
 
   return useLogAnalysisModule({
-    moduleDescriptor: logEntryCategorizationModule,
+    moduleDescriptor: logEntryCategoriesModule,
     sourceConfiguration,
   });
 };
 
 export const [
-  LogEntryCategorizationModuleProvider,
-  useLogEntryCategorizationModuleContext,
-] = createContainer(useLogEntryCategorizationModule);
+  LogEntryCategoriesModuleProvider,
+  useLogEntryCategoriesModuleContext,
+] = createContainer(useLogEntryCategoriesModule);

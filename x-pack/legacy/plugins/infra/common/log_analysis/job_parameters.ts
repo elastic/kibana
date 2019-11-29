@@ -8,7 +8,7 @@ import * as rt from 'io-ts';
 
 export const bucketSpan = 900000;
 
-export const categorizationMessageField = 'message';
+export const categoriesMessageField = 'message';
 
 export const partitionField = 'event.dataset';
 
