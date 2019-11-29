@@ -34,7 +34,7 @@ import {
   ElasticsearchConfigType,
   config as elasticsearchConfig,
 } from '../elasticsearch/elasticsearch_config';
-import { pick } from '../../utils';
+import { pick, deepFreeze } from '../../utils';
 import { CoreSetup, CoreStart } from '..';
 
 /**
@@ -89,11 +89,13 @@ export function createPluginInitializerContext(
         coreContext.configService.atPath<ElasticsearchConfigType>(elasticsearchConfig.path),
         coreContext.configService.atPath<PathConfigType>(pathConfig.path)
       ).pipe(
-        map(([kibana, elasticsearch, path]) => ({
-          kibana: pick(kibana, SharedGlobalConfigKeys.kibana),
-          elasticsearch: pick(elasticsearch, SharedGlobalConfigKeys.elasticsearch),
-          path: pick(path, SharedGlobalConfigKeys.path),
-        }))
+        map(([kibana, elasticsearch, path]) =>
+          deepFreeze({
+            kibana: pick(kibana, SharedGlobalConfigKeys.kibana),
+            elasticsearch: pick(elasticsearch, SharedGlobalConfigKeys.elasticsearch),
+            path: pick(path, SharedGlobalConfigKeys.path),
+          })
+        )
       ),
 
       /**
