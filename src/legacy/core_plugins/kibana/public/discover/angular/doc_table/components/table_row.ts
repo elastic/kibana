@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
-import { UiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient } from 'kibana/public';
 // @ts-ignore
 import rison from 'rison-node';
 import '../../doc_viewer';
@@ -45,7 +45,7 @@ export function createTableRowDirective(
   $compile: ng.ICompileService,
   $httpParamSerializer: any,
   kbnUrl: any,
-  config: UiSettingsClient
+  config: IUiSettingsClient
 ) {
   const cellTemplate = _.template(noWhiteSpace(cellTemplateHtml));
   const truncateByHeightTemplate = _.template(noWhiteSpace(truncateByHeightTemplateHtml));
