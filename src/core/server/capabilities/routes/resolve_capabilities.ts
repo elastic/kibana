@@ -22,6 +22,10 @@ import { IRouter } from '../../http';
 import { CapabilitiesResolver } from '../resolve_capabilities';
 
 export function registerCapabilitiesRoutes(router: IRouter, resolver: CapabilitiesResolver) {
+  // Capabilities are fetched on both authenticated and anonymous routes.
+  // However when `authRequired` is false, authentication is not performed
+  // and only default capabilities are returned (all disabled), even for authenticated users.
+  // So we need two endpoints to handle both scenarios.
   [true, false].forEach(authRequired => {
     router.post(
       {
