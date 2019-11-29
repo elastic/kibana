@@ -10,28 +10,30 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
 import { metadata } from 'ui/metadata';
 
-const docsUrl = `https://www.elastic.co/guide/en/elastic-stack-overview/${metadata.branch}/ml-calendars.html`;
+const docsUrl = `https://www.elastic.co/guide/en/elastic-stack-overview/${metadata.branch}/ml-configuring-url.html`;
 
 export const Description: FC = memo(({ children }) => {
   const title = i18n.translate(
-    'xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.calendarsSelection.title',
+    'xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.customUrls.title',
     {
-      defaultMessage: 'Calendars',
+      defaultMessage: 'Custom URLs',
     }
   );
   return (
     <EuiDescribedFormGroup
-      idAria="calendars_description"
+      fullWidth
+      className="ml-custom-urls-selection"
+      idAria="custom_urls_description"
       title={<h3>{title}</h3>}
       description={
         <FormattedMessage
-          id="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.calendarsSelection.description"
-          defaultMessage="Contains a list of scheduled events that you want to ignore, such as planned system outages or public holidays. {learnMoreLink}"
+          id="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.customUrlsSelection.description"
+          defaultMessage="Provide links from anomalies to Kibana dashboards, the Discovery page, or other web pages. {learnMoreLink}"
           values={{
             learnMoreLink: (
               <EuiLink href={docsUrl} target="_blank">
                 <FormattedMessage
-                  id="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.calendarsSelection.learnMoreLinkText"
+                  id="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.customUrlsSelection.learnMoreLinkText"
                   defaultMessage="Learn more"
                 />
               </EuiLink>
@@ -40,7 +42,7 @@ export const Description: FC = memo(({ children }) => {
         />
       }
     >
-      <EuiFormRow describedByIds={['calendars_description']}>
+      <EuiFormRow describedByIds={['custom_urls_description']} fullWidth>
         <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>

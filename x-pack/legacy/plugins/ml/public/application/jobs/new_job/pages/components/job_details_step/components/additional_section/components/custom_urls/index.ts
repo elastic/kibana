@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-export { CustomUrlList } from './list';
-export { CustomUrlEditor } from './editor';
+export { CustomUrlsSelection } from './custom_urls_selection';
