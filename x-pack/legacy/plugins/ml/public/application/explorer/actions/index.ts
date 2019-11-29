@@ -4,10 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiChromeMock, uiTimefilterMock, uiTimeHistoryMock } from './mocks_jest';
-
-export const useUiContext = () => ({
-  chrome: uiChromeMock,
-  timefilter: uiTimefilterMock,
-  timeHistory: uiTimeHistoryMock,
-});
+export { jobSelectionActionCreator } from './job_selection';
+export { loadExplorerData } from './load_explorer_data';

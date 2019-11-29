@@ -13,6 +13,7 @@ export interface ExistingJobsAndGroups {
 }
 
 declare interface JobService {
+  jobs: CombinedJob[];
   createResultsUrlForJobs: (jobs: any[], target: string) => string;
   tempJobCloningObjects: {
     job: any;
@@ -35,6 +36,7 @@ declare interface JobService {
   getJobAndGroupIds(): ExistingJobsAndGroups;
   searchPreview(job: CombinedJob): Promise<SearchResponse<any>>;
   getJob(jobId: string): CombinedJob;
+  loadJobsWrapper(): Promise<any>;
 }
 
 export const mlJobService: JobService;
