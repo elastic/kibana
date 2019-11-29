@@ -42,6 +42,7 @@ import {
   KibanaReactContext,
   KibanaReactContextValue,
 } from '../../../kibana_react/public';
+import { DashboardEmptyScreenProps } from '../../../../legacy/core_plugins/kibana/public/dashboard/dashboard_empty_screen';
 
 export interface DashboardContainerInput extends ContainerInput {
   viewMode: ViewMode;
@@ -57,6 +58,8 @@ export interface DashboardContainerInput extends ContainerInput {
   panels: {
     [panelId: string]: DashboardPanelState;
   };
+  isEmptyState?: boolean;
+  emptyScreenProps: DashboardEmptyScreenProps;
 }
 
 interface IndexSignature {

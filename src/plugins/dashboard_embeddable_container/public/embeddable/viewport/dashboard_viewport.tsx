@@ -23,6 +23,10 @@ import { PanelState } from '../../embeddable_plugin';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
 import { context } from '../../../../kibana_react/public';
+import {
+  DashboardEmptyScreen,
+  DashboardEmptyScreenProps,
+} from '../../../../../legacy/core_plugins/kibana/public/dashboard/dashboard_empty_screen';
 
 export interface DashboardViewportProps {
   container: DashboardContainer;
@@ -34,6 +38,8 @@ interface State {
   title: string;
   description?: string;
   panels: { [key: string]: PanelState };
+  isEmptyState?: boolean;
+  emptyScreenProps?: DashboardEmptyScreenProps;
 }
 
 export class DashboardViewport extends React.Component<DashboardViewportProps, State> {
@@ -44,26 +50,40 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   private mounted: boolean = false;
   constructor(props: DashboardViewportProps) {
     super(props);
-    const { isFullScreenMode, panels, useMargins, title } = this.props.container.getInput();
+    const {
+      isFullScreenMode,
+      panels,
+      useMargins,
+      title,
+      isEmptyState,
+    } = this.props.container.getInput();
 
     this.state = {
       isFullScreenMode,
       panels,
       useMargins,
       title,
+      isEmptyState,
     };
   }
 
   public componentDidMount() {
     this.mounted = true;
     this.subscription = this.props.container.getInput$().subscribe(() => {
-      const { isFullScreenMode, useMargins, title, description } = this.props.container.getInput();
+      const {
+        isFullScreenMode,
+        useMargins,
+        title,
+        description,
+        isEmptyState,
+      } = this.props.container.getInput();
       if (this.mounted) {
         this.setState({
           isFullScreenMode,
           description,
           useMargins,
           title,
+          isEmptyState,
         });
       }
     });
@@ -82,24 +102,33 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
     });
   };
 
+  private renderEmptyScreen() {
+    const emptyScreenProps: DashboardEmptyScreenProps = this.props.container.getInput()
+      .emptyScreenProps;
+    return <DashboardEmptyScreen {...emptyScreenProps} />;
+  }
+
   public render() {
     const { container } = this.props;
     return (
-      <div
-        data-shared-items-count={Object.values(this.state.panels).length}
-        data-shared-items-container
-        data-title={this.state.title}
-        data-description={this.state.description}
-        className={
-          this.state.useMargins ? 'dshDashboardViewport-withMargins' : 'dshDashboardViewport'
-        }
-      >
-        {this.state.isFullScreenMode && (
-          <this.context.services.ExitFullScreenButton
-            onExitFullScreenMode={this.onExitFullScreenMode}
-          />
-        )}
-        <DashboardGrid container={container} />
+      <div>
+        {this.state.isEmptyState ? this.renderEmptyScreen() : null}
+        <div
+          data-shared-items-count={Object.values(this.state.panels).length}
+          data-shared-items-container={false}
+          data-title={this.state.title}
+          data-description={this.state.description}
+          className={
+            this.state.useMargins ? 'dshDashboardViewport-withMargins' : 'dshDashboardViewport'
+          }
+        >
+          {this.state.isFullScreenMode && (
+            <this.context.services.ExitFullScreenButton
+              onExitFullScreenMode={this.onExitFullScreenMode}
+            />
+          )}
+          <DashboardGrid container={container} />
+        </div>
       </div>
     );
   }

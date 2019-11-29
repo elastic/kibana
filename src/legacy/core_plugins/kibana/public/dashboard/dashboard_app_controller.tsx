@@ -21,7 +21,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import angular from 'angular';
-import { uniq } from 'lodash';
+import { uniq, noop } from 'lodash';
 
 import { Subscription } from 'rxjs';
 
@@ -42,6 +42,7 @@ import { FilterStateManager, IndexPattern } from '../../../data/public';
 import { Query, SavedQuery } from '../../../../../plugins/data/public';
 
 import './dashboard_empty_screen_directive';
+import { DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
 import {
   DashboardContainer,
@@ -55,6 +56,7 @@ import {
   ErrorEmbeddable,
   ViewMode,
   openAddPanelFlyout,
+  EmbeddableFactoryNotFoundError,
 } from '../../../embeddable_api/public/np_ready/public';
 import { DashboardAppState, NavAction, ConfirmModalFn, SavedDashboardPanel } from './types';
 
@@ -149,6 +151,16 @@ export class DashboardAppController {
     }
     $scope.showSaveQuery = dashboardCapabilities.saveQuery as boolean;
 
+    $scope.getShouldShowEditHelp = () =>
+      !dashboardStateManager.getPanels().length &&
+      dashboardStateManager.getIsEditMode() &&
+      !dashboardConfig.getHideWriteControls();
+
+    $scope.getShouldShowViewHelp = () =>
+      !dashboardStateManager.getPanels().length &&
+      dashboardStateManager.getIsViewMode() &&
+      !dashboardConfig.getHideWriteControls();
+
     const updateIndexPatterns = (container?: DashboardContainer) => {
       if (!container || isErrorEmbeddable(container)) {
         return;
@@ -177,6 +189,17 @@ export class DashboardAppController {
       }
     };
 
+    const getEmptyScreenProps = (shouldShowEditHelp: boolean): DashboardEmptyScreenProps => {
+      const emptyScreenProps: DashboardEmptyScreenProps = {
+        onLinkClick: shouldShowEditHelp ? $scope.showAddPanel : $scope.enterEditMode,
+        showLinkToVisualize: shouldShowEditHelp,
+      };
+      if (shouldShowEditHelp) {
+        emptyScreenProps.onVisualizeClick = noop;
+      }
+      return emptyScreenProps;
+    };
+
     const getDashboardInput = (): DashboardContainerInput => {
       const embeddablesMap: {
         [key: string]: DashboardPanelState;
@@ -188,6 +211,9 @@ export class DashboardAppController {
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
         expandedPanelId = dashboardContainer.getInput().expandedPanelId;
       }
+      const shouldShowEditHelp = $scope.getShouldShowEditHelp();
+      const shouldShowViewHelp = $scope.getShouldShowViewHelp();
+
       return {
         id: dashboardStateManager.savedDashboard.id || '',
         filters: queryFilter.getFilters(),
@@ -200,6 +226,8 @@ export class DashboardAppController {
         viewMode: dashboardStateManager.getViewMode(),
         panels: embeddablesMap,
         isFullScreenMode: dashboardStateManager.getFullScreenMode(),
+        isEmptyState: shouldShowEditHelp || shouldShowViewHelp,
+        emptyScreenProps: getEmptyScreenProps(shouldShowEditHelp),
         useMargins: dashboardStateManager.getUseMargins(),
         lastReloadRequestTime,
         title: dashboardStateManager.getTitle(),
@@ -231,15 +259,14 @@ export class DashboardAppController {
     let outputSubscription: Subscription | undefined;
 
     const dashboardDom = document.getElementById('dashboardViewport');
-    const dashboardFactory = embeddables.getEmbeddableFactory(
+    const dahsboardFactory = embeddables.getEmbeddableFactory(
       DASHBOARD_CONTAINER_TYPE
     ) as DashboardContainerFactory;
-    dashboardFactory
+    dahsboardFactory
       .create(getDashboardInput())
       .then((container: DashboardContainer | ErrorEmbeddable) => {
         if (!isErrorEmbeddable(container)) {
           dashboardContainer = container;
-
           updateIndexPatterns(dashboardContainer);
 
           outputSubscription = dashboardContainer.getOutput$().subscribe(() => {
@@ -339,15 +366,6 @@ export class DashboardAppController {
 
     updateBreadcrumbs();
     dashboardStateManager.registerChangeListener(updateBreadcrumbs);
-
-    $scope.getShouldShowEditHelp = () =>
-      !dashboardStateManager.getPanels().length &&
-      dashboardStateManager.getIsEditMode() &&
-      !dashboardConfig.getHideWriteControls();
-    $scope.getShouldShowViewHelp = () =>
-      !dashboardStateManager.getPanels().length &&
-      dashboardStateManager.getIsViewMode() &&
-      !dashboardConfig.getHideWriteControls();
 
     const getChangesFromAppStateForContainerState = () => {
       const appStateDashboardInput = getDashboardInput();
@@ -734,6 +752,8 @@ export class DashboardAppController {
         });
       }
     };
+
+    navActions[TopNavIds.VISUALIZE] = async () => {};
 
     navActions[TopNavIds.OPTIONS] = anchorElement => {
       showOptionsPopover({

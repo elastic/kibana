@@ -26,5 +26,7 @@ angular
     return reactDirective(DashboardEmptyScreen, [
       ['showLinkToVisualize', { watchDepth: 'value' }],
       ['onLinkClick', { watchDepth: 'reference' }],
+      ['onVisualizeClick', { watchDepth: 'reference' }],
+      ['isAddingVisualization', { watchDepth: 'value' }],
     ]);
   });
