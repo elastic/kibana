@@ -22,7 +22,7 @@ import {
   CoreStart,
   DocLinksStart,
   ToastsStart,
-  UiSettingsClientContract,
+  IUiSettingsClient,
 } from 'kibana/public';
 import * as docViewsRegistry from 'ui/registry/doc_views';
 import chromeLegacy from 'ui/chrome';
@@ -61,7 +61,7 @@ export interface DiscoverServices {
   getSavedSearchById: (id: string) => Promise<SavedSearch>;
   getSavedSearchUrlById: (id: string) => Promise<string>;
   State: unknown;
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
 }
 
 export async function buildGlobalAngularServices() {
