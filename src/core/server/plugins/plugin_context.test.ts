@@ -50,33 +50,39 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
   };
 }
 
-beforeEach(async () => {
-  coreId = Symbol('core');
-  env = Env.createDefault(getEnvOptions());
-  const config$ = new BehaviorSubject(new ObjectToConfigAdapter({}));
-  server = new Server(config$, env, logger);
-  await server.setupConfigSchemas();
-  coreContext = { coreId, env, logger, configService: server.configService };
-});
+describe('Plugin Context', () => {
+  beforeEach(async () => {
+    coreId = Symbol('core');
+    env = Env.createDefault(getEnvOptions());
+    const config$ = new BehaviorSubject(new ObjectToConfigAdapter({}));
+    server = new Server(config$, env, logger);
+    await server.setupConfigSchemas();
+    coreContext = { coreId, env, logger, configService: server.configService };
+  });
 
-test('should return a globalConfig handler in the context (to be deprecated)', async () => {
-  const manifest = createPluginManifest();
-  const opaqueId = Symbol();
-  const pluginInitializerContext = createPluginInitializerContext(coreContext, opaqueId, manifest);
+  it('should return a globalConfig handler in the context', async () => {
+    const manifest = createPluginManifest();
+    const opaqueId = Symbol();
+    const pluginInitializerContext = createPluginInitializerContext(
+      coreContext,
+      opaqueId,
+      manifest
+    );
 
-  expect(pluginInitializerContext.config.globalConfig__deprecated$).toBeDefined();
+    expect(pluginInitializerContext.config.globalConfig__deprecated$).toBeDefined();
 
-  const configObject = await pluginInitializerContext.config.globalConfig__deprecated$
-    .pipe(first())
-    .toPromise();
-  expect(configObject).toStrictEqual({
-    kibana: { defaultAppId: 'home', index: '.kibana' },
-    elasticsearch: {
-      shardTimeout: duration(30, 's'),
-      requestTimeout: duration(30, 's'),
-      pingTimeout: duration(30, 's'),
-      startupTimeout: duration(5, 's'),
-    },
-    path: { data: fromRoot('data') },
+    const configObject = await pluginInitializerContext.config.globalConfig__deprecated$
+      .pipe(first())
+      .toPromise();
+    expect(configObject).toStrictEqual({
+      kibana: { defaultAppId: 'home', index: '.kibana' },
+      elasticsearch: {
+        shardTimeout: duration(30, 's'),
+        requestTimeout: duration(30, 's'),
+        pingTimeout: duration(30, 's'),
+        startupTimeout: duration(5, 's'),
+      },
+      path: { data: fromRoot('data') },
+    });
   });
 });
