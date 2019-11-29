@@ -172,7 +172,7 @@ coreSetup.http.registerRouteHandlerContext(coreId, 'core', async (context, req) 
 });
 ```
 
-### 4. Core should expose a status signal for Core services & plugins
+### 5. Core should expose a status signal for Core services & plugins
 Core should expose a global mechanism for core services and plugins to signal
 their status. This is equivalent to the legacy status API
 `kibana.Plugin.status` which allowed plugins to set their status to e.g. 'red'
