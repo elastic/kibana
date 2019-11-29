@@ -7,6 +7,7 @@
 import * as rt from 'io-ts';
 
 export const LOGS_SUMMARY_PATH = '/api/logs/summary';
+export const LOGS_SUMMARY_HIGHLIGHTS_PATH = '/api/logs/summary/highlights';
 
 // const esDate = rt.union([rt.string, rt.number]);
 
@@ -14,10 +15,18 @@ export const logsSummaryRequestRT = rt.type({
   startDate: rt.number,
   endDate: rt.number,
   bucketSize: rt.number,
-  query: rt.union([rt.string, rt.null]),
+  query: rt.union([rt.string, rt.undefined, rt.null]),
 });
 
+export const logsSummaryHighlightsRequestRT = rt.intersection([
+  logsSummaryRequestRT,
+  rt.type({
+    highlights: rt.array(rt.string),
+  }),
+]);
+
 export type LogsSummaryRequest = rt.TypeOf<typeof logsSummaryRequestRT>;
+export type LogsSummaryHighlightsRequest = rt.TypeOf<typeof logsSummaryHighlightsRequestRT>;
 
 export const logsSummaryResponseRT = rt.type({
   start: rt.number,
@@ -31,4 +40,23 @@ export const logsSummaryResponseRT = rt.type({
   ),
 });
 
+export const logsSummaryHighlightsResponseRT = rt.array(
+  rt.type({
+    start: rt.number,
+    end: rt.number,
+    buckets: rt.array(
+      rt.type({
+        start: rt.number,
+        end: rt.number,
+        entriesCount: rt.number,
+        representativeKey: rt.type({
+          time: rt.number,
+          tiebreaker: rt.number,
+        }),
+      })
+    ),
+  })
+);
+
 export type LogsSummaryResponse = rt.TypeOf<typeof logsSummaryResponseRT>;
+export type LogsSummaryHighlightsResponse = rt.TypeOf<typeof logsSummaryHighlightsResponseRT>;
