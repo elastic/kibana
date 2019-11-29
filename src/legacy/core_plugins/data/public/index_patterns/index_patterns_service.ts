@@ -18,7 +18,7 @@
  */
 
 import {
-  UiSettingsClientContract,
+  IUiSettingsClient,
   SavedObjectsClientContract,
   HttpServiceBase,
   NotificationsStart,
@@ -36,7 +36,7 @@ import {
 } from './index_patterns';
 
 export interface IndexPatternDependencies {
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
   savedObjectsClient: SavedObjectsClientContract;
   http: HttpServiceBase;
   notifications: NotificationsStart;
