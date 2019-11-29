@@ -6,6 +6,7 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { ML_JOB_FIELD_TYPES } from '../../../../legacy/plugins/ml/common/constants/field_types';
 
 export function MachineLearningDataVisualizerIndexBasedProvider({
   getService,
@@ -33,10 +34,10 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
 
     async assertFieldsPanelsExist(expectedPanelCount: number) {
       const allPanels = await testSubjects.findAll('~mlDataVisualizerFieldsPanel');
-      expect(allPanels).to.have.length(2);
+      expect(allPanels).to.have.length(expectedPanelCount);
     },
 
-    async assertFieldsPanelForTypesExist(fieldTypes: string[]) {
+    async assertFieldsPanelForTypesExist(fieldTypes: ML_JOB_FIELD_TYPES[]) {
       await testSubjects.existOrFail(`mlDataVisualizerFieldsPanel ${fieldTypes}`);
     },
 
@@ -45,10 +46,21 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
     },
 
     async assertFieldsPanelCardCount(panelFieldTypes: string[], expectedCardCount: number) {
-      const filteredCards = await testSubjects.findAll(
-        `mlDataVisualizerFieldsPanel ${panelFieldTypes} > ~mlFieldDataCard`
+      await retry.tryForTime(5000, async () => {
+        const filteredCards = await testSubjects.findAll(
+          `mlDataVisualizerFieldsPanel ${panelFieldTypes} > ~mlFieldDataCard`
+        );
+        expect(filteredCards).to.have.length(expectedCardCount);
+      });
+    },
+
+    async assertFieldsPanelSearchInputValue(fieldTypes: string[], expectedSearchValue: string) {
+      const searchBar = await testSubjects.find(
+        `mlDataVisualizerFieldsPanel ${fieldTypes} > mlDataVisualizerFieldsSearchBarDiv`
       );
-      expect(filteredCards).to.have.length(expectedCardCount);
+      const searchBarInput = await searchBar.findByTagName('input');
+      const actualSearchValue = await searchBarInput.getAttribute('value');
+      expect(actualSearchValue).to.eql(expectedSearchValue);
     },
 
     async filterFieldsPanelWithSearchString(
@@ -63,6 +75,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
       await searchBarInput.clearValueWithKeyboard();
       await searchBarInput.type(filter);
       await searchBarInput.pressKeys(browser.keys.ENTER);
+      await this.assertFieldsPanelSearchInputValue(fieldTypes, filter);
 
       await this.assertFieldsPanelCardCount(fieldTypes, expectedCardCount);
     },
@@ -86,12 +99,6 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
       filterFieldType: string,
       expectedCardCount: number
     ) {
-      const searchBar = await testSubjects.find(
-        `mlDataVisualizerFieldsPanel ${panelFieldTypes} > mlDataVisualizerFieldsSearchBarDiv`
-      );
-      const searchBarInput = await searchBar.findByTagName('input');
-      await searchBarInput.clearValueWithKeyboard();
-
       await testSubjects.selectValue('mlDataVisualizerFieldTypesSelect', filterFieldType);
       await this.assertFieldsPanelTypeInputValue(filterFieldType);
       await this.assertFieldsPanelCardCount(panelFieldTypes, expectedCardCount);

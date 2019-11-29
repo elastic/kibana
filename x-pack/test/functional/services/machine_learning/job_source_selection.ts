@@ -30,7 +30,7 @@ export function MachineLearningJobSourceSelectionProvider({ getService }: FtrPro
     async selectSourceForIndexBasedDataVisualizer(sourceName: string) {
       await this.filterSourceSelection(sourceName);
       await testSubjects.clickWhenNotDisabled(`savedObjectTitle${sourceName}`);
-      await testSubjects.existOrFail('mlPageDataVisualizer');
+      await testSubjects.existOrFail('mlPageIndexDataVisualizer', { timeout: 10 * 1000 });
     },
   };
 }

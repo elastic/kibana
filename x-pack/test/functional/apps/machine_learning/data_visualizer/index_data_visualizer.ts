@@ -5,14 +5,11 @@
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { ML_JOB_FIELD_TYPES } from '../../../../../legacy/plugins/ml/common/constants/field_types';
+import { FieldVisConfig } from '../../../../../legacy/plugins/ml/public/application/datavisualizer/index_based/common';
 
-interface FieldCard {
-  fieldName?: string;
-  type: string;
-}
-
-function getFieldTypes(cards: FieldCard[]) {
-  const fieldTypes: string[] = [];
+function getFieldTypes(cards: FieldVisConfig[]) {
+  const fieldTypes: ML_JOB_FIELD_TYPES[] = [];
   cards.forEach(card => {
     const fieldType = card.type;
     if (fieldTypes.includes(fieldType) === false) {
@@ -40,37 +37,61 @@ export default function({ getService }: FtrProviderContext) {
         fieldsPanelCount: 2, // Metrics panel and Fields panel
         metricCards: [
           {
-            type: 'number', // document count card
+            type: ML_JOB_FIELD_TYPES.NUMBER, // document count card
+            existsInDocs: true,
+            aggregatable: true,
+            loading: false,
           },
           {
             fieldName: 'responsetime',
-            type: 'number',
+            type: ML_JOB_FIELD_TYPES.NUMBER,
+            existsInDocs: true,
+            aggregatable: true,
+            loading: false,
           },
         ],
         nonMetricCards: [
           {
             fieldName: '@timestamp',
-            type: 'date',
+            type: ML_JOB_FIELD_TYPES.DATE,
+            existsInDocs: true,
+            aggregatable: true,
+            loading: false,
           },
           {
             fieldName: '@version',
-            type: 'text',
+            type: ML_JOB_FIELD_TYPES.TEXT,
+            existsInDocs: true,
+            aggregatable: false,
+            loading: false,
           },
           {
             fieldName: '@version.keyword',
-            type: 'keyword',
+            type: ML_JOB_FIELD_TYPES.KEYWORD,
+            existsInDocs: true,
+            aggregatable: true,
+            loading: false,
           },
           {
-            fieldName: '@timestamp',
-            type: 'date',
+            fieldName: 'airline',
+            type: ML_JOB_FIELD_TYPES.KEYWORD,
+            existsInDocs: true,
+            aggregatable: true,
+            loading: false,
           },
           {
-            fieldName: '@timestamp',
-            type: 'date',
+            fieldName: 'type',
+            type: ML_JOB_FIELD_TYPES.TEXT,
+            existsInDocs: true,
+            aggregatable: false,
+            loading: false,
           },
           {
-            fieldName: '@timestamp',
-            type: 'date',
+            fieldName: 'type.keyword',
+            type: ML_JOB_FIELD_TYPES.KEYWORD,
+            existsInDocs: true,
+            aggregatable: true,
+            loading: false,
           },
         ],
         nonMetricFieldsTypeFilterCardCount: 3,
@@ -89,37 +110,61 @@ export default function({ getService }: FtrProviderContext) {
         fieldsPanelCount: 2, // Metrics panel and Fields panel
         metricCards: [
           {
-            type: 'number', // document count card
+            type: ML_JOB_FIELD_TYPES.NUMBER, // document count card
+            existsInDocs: true,
+            aggregatable: true,
+            loading: false,
           },
           {
             fieldName: 'responsetime',
-            type: 'number',
+            type: ML_JOB_FIELD_TYPES.NUMBER,
+            existsInDocs: true,
+            aggregatable: true,
+            loading: false,
           },
         ],
         nonMetricCards: [
           {
             fieldName: '@timestamp',
-            type: 'date',
+            type: ML_JOB_FIELD_TYPES.DATE,
+            existsInDocs: true,
+            aggregatable: true,
+            loading: false,
           },
           {
             fieldName: '@version',
-            type: 'text',
+            type: ML_JOB_FIELD_TYPES.TEXT,
+            existsInDocs: true,
+            aggregatable: false,
+            loading: false,
           },
           {
             fieldName: '@version.keyword',
-            type: 'keyword',
+            type: ML_JOB_FIELD_TYPES.KEYWORD,
+            existsInDocs: true,
+            aggregatable: true,
+            loading: false,
           },
           {
-            fieldName: '@timestamp',
-            type: 'date',
+            fieldName: 'airline',
+            type: ML_JOB_FIELD_TYPES.KEYWORD,
+            existsInDocs: true,
+            aggregatable: true,
+            loading: false,
           },
           {
-            fieldName: '@timestamp',
-            type: 'date',
+            fieldName: 'type',
+            type: ML_JOB_FIELD_TYPES.TEXT,
+            existsInDocs: true,
+            aggregatable: false,
+            loading: false,
           },
           {
-            fieldName: '@timestamp',
-            type: 'date',
+            fieldName: 'type.keyword',
+            type: ML_JOB_FIELD_TYPES.KEYWORD,
+            existsInDocs: true,
+            aggregatable: true,
+            loading: false,
           },
         ],
         nonMetricFieldsTypeFilterCardCount: 3,
@@ -143,6 +188,7 @@ export default function({ getService }: FtrProviderContext) {
     //  - validating metrics displayed inside the cards
     //  - selecting a document sample size
     //  - clicking on the link to the Advanced job wizard
+    //  - a test suite using a KQL based saved search
     for (const testData of testDataList) {
       describe(`${testData.suiteTitle}`, function() {
         it('loads the data visualizer selector page', async () => {
@@ -160,26 +206,28 @@ export default function({ getService }: FtrProviderContext) {
           );
         });
 
-        it('index data visualizer displays the time range step', async () => {
+        it('displays the time range step', async () => {
           await ml.dataVisualizerIndexBased.assertTimeRangeSelectorSectionExists();
         });
 
-        it('index data visualizer loads data for full time range', async () => {
+        it('loads data for full time range', async () => {
           await ml.dataVisualizerIndexBased.clickUseFullDataButton(testData.expected.totalDocCount);
         });
 
-        it('index data visualizer displays the panels of fields', async () => {
+        it('displays the panels of fields', async () => {
           await ml.dataVisualizerIndexBased.assertFieldsPanelsExist(
             testData.expected.fieldsPanelCount
           );
         });
 
         if (testData.expected.metricCards && testData.expected.metricCards.length > 0) {
-          it('index data visualizer displays the Metrics panel', async () => {
-            await ml.dataVisualizerIndexBased.assertFieldsPanelForTypesExist(['number']); // document_count not exposed as a type in the panel
+          it('displays the Metrics panel', async () => {
+            await ml.dataVisualizerIndexBased.assertFieldsPanelForTypesExist([
+              ML_JOB_FIELD_TYPES.NUMBER,
+            ]); // document_count not exposed as a type in the panel
           });
 
-          it('index data visualizer displays the expected metric field cards', async () => {
+          it('displays the expected metric field cards', async () => {
             for (const fieldCard of testData.expected.metricCards) {
               await ml.dataVisualizerIndexBased.assertCardExists(
                 fieldCard.type,
@@ -188,7 +236,7 @@ export default function({ getService }: FtrProviderContext) {
             }
           });
 
-          it('index data visualizer filters metric fields cards with search', async () => {
+          it('filters metric fields cards with search', async () => {
             await ml.dataVisualizerIndexBased.filterFieldsPanelWithSearchString(
               ['number'],
               testData.metricFieldsFilter,
@@ -198,13 +246,13 @@ export default function({ getService }: FtrProviderContext) {
         }
 
         if (testData.expected.nonMetricCards && testData.expected.nonMetricCards.length > 0) {
-          it('index data visualizer displays the non-metric Fields panel', async () => {
+          it('displays the non-metric Fields panel', async () => {
             await ml.dataVisualizerIndexBased.assertFieldsPanelForTypesExist(
               getFieldTypes(testData.expected.nonMetricCards)
             );
           });
 
-          it('index data visualizer displays the expected non-metric field cards', async () => {
+          it('displays the expected non-metric field cards', async () => {
             for (const fieldCard of testData.expected.nonMetricCards) {
               await ml.dataVisualizerIndexBased.assertCardExists(
                 fieldCard.type,
@@ -213,8 +261,10 @@ export default function({ getService }: FtrProviderContext) {
             }
           });
 
-          it('index data visualizer sets the non metric field types input', async () => {
-            const fieldTypes: string[] = getFieldTypes(testData.expected.nonMetricCards);
+          it('sets the non metric field types input', async () => {
+            const fieldTypes: ML_JOB_FIELD_TYPES[] = getFieldTypes(
+              testData.expected.nonMetricCards
+            );
             await ml.dataVisualizerIndexBased.assertFieldsPanelTypeInputExists(fieldTypes);
             await ml.dataVisualizerIndexBased.setFieldsPanelTypeInputValue(
               fieldTypes,
@@ -223,7 +273,7 @@ export default function({ getService }: FtrProviderContext) {
             );
           });
 
-          it('index data visualizer filters non-metric fields cards with search', async () => {
+          it('filters non-metric fields cards with search', async () => {
             await ml.dataVisualizerIndexBased.filterFieldsPanelWithSearchString(
               getFieldTypes(testData.expected.nonMetricCards),
               testData.nonMetricFieldsFilter,
