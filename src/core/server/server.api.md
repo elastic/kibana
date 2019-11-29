@@ -666,6 +666,7 @@ export interface HttpServiceSetup {
     registerAuth: (handler: AuthenticationHandler) => void;
     registerOnPostAuth: (handler: OnPostAuthHandler) => void;
     registerOnPreAuth: (handler: OnPreAuthHandler) => void;
+    registerOnPreResponse: (handler: OnPreResponseHandler) => void;
     registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(contextName: T, provider: RequestHandlerContextProvider<T>) => RequestHandlerContextContainer;
 }
 
@@ -945,6 +946,16 @@ export interface OnPreAuthToolkit {
     rewriteUrl: (url: string) => OnPreAuthResult;
 }
 
+// Warning: (ae-forgotten-export) The symbol "OnPreResponseResult" needs to be exported by the entry point index.d.ts
+// 
+// @public
+export type OnPreResponseHandler = (request: KibanaRequest, response: ResponseInfo, toolkit: OnPreResponseToolkit) => OnPreResponseResult | Promise<OnPreResponseResult>;
+
+// @public
+export interface OnPreResponseToolkit {
+    next: (responseExtensions?: ResponseExtensions) => OnPreResponseResult;
+}
+
 // @public (undocumented)
 export interface PackageInfo {
     // (undocumented)
@@ -1087,11 +1098,23 @@ export type ResponseError = string | Error | {
 export type ResponseErrorAttributes = Record<string, any>;
 
 // @public
+export interface ResponseExtensions {
+    // (undocumented)
+    headers?: ResponseHeaders;
+}
+
+// @public
 export type ResponseHeaders = {
     [header in KnownHeaders]?: string | string[];
 } & {
     [header: string]: string | string[];
 };
+
+// @public
+export interface ResponseInfo {
+    // (undocumented)
+    statusCode: number;
+}
 
 // @public
 export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>, Method extends RouteMethod> {

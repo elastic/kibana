@@ -22,6 +22,7 @@ import Boom from 'boom';
 import { Logger } from '../../logging';
 
 import { HapiResponseAdapter, KibanaRequest, ResponseHeaders } from '../router';
+
 enum ResultType {
   next = 'next',
 }
@@ -31,6 +32,9 @@ interface Next {
   headers?: ResponseHeaders;
 }
 
+/**
+ * @internal
+ */
 type OnPreResponseResult = Next;
 
 /**
@@ -39,6 +43,14 @@ type OnPreResponseResult = Next;
  */
 export interface ResponseExtensions {
   headers?: ResponseHeaders;
+}
+
+/**
+ * Response status code.
+ * @public
+ */
+export interface ResponseInfo {
+  statusCode: number;
 }
 
 const preResponseResult = {
@@ -63,9 +75,6 @@ const toolkit: OnPreResponseToolkit = {
   next: preResponseResult.next,
 };
 
-interface ResponseInfo {
-  statusCode: number; // body? header?
-}
 /**
  * See {@link OnPreAuthToolkit}.
  * @public
