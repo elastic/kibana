@@ -239,7 +239,7 @@ export const MonitorListComponent = (props: Props) => {
           ]}
         />
         <EuiSpacer size="s" />
-        <EuiFlexGroup>
+        <EuiFlexGroup responsive={false}>
           <EuiFlexItem grow={false}>
             <OverviewPageLink
               dataTestSubj="xpack.uptime.monitorList.prevButton"
