@@ -33,7 +33,7 @@ import { MonitorListDrawer } from './monitor_list_drawer';
 import { MonitorBarSeries } from '../charts';
 import { MonitorPageLink } from './monitor_page_link';
 import { MonitorListActionsPopover } from './monitor_list_actions_popover';
-import { OverviewPageLink } from '../overview_page_link';
+import { OverviewPageLink } from './overview_page_link';
 
 interface MonitorListQueryResult {
   monitorStates?: MonitorSummaryResult;
@@ -238,7 +238,7 @@ export const MonitorListComponent = (props: Props) => {
             },
           ]}
         />
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
         <EuiFlexGroup responsive={false}>
           <EuiFlexItem grow={false}>
             <OverviewPageLink

@@ -7,7 +7,7 @@
 import { EuiLink, EuiIcon, EuiButtonIcon } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useUrlParams } from '../../hooks';
+import { useUrlParams } from '../../../hooks';
 
 interface OverviewPageLinkProps {
   dataTestSubj: string;
@@ -23,7 +23,7 @@ export const OverviewPageLink: FunctionComponent<OverviewPageLinkProps> = ({
   const [, updateUrlParams] = useUrlParams();
   const icon = direction === 'prev' ? 'arrowLeft' : 'arrowRight';
 
-  const color = pagination ? 'primary' : 'ghost';
+  const color = pagination ? 'text' : 'ghost';
   const ariaLabel =
     direction === 'next'
       ? i18n.translate('xpack.uptime.overviewPageLink.next.ariaLabel', {
