@@ -28,7 +28,7 @@ jest.mock('../doc_viewer/doc_viewer', () => ({
   DocViewer: 'test',
 }));
 
-jest.mock('../kibana_services', () => {
+jest.mock('../../kibana_services', () => {
   return {
     getServices: () => ({
       metadata: {

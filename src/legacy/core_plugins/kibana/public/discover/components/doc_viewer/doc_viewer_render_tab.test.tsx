@@ -16,16 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
+import { mount } from 'enzyme';
+import { DocViewRenderTab } from './doc_viewer_render_tab';
+import { DocViewRenderProps } from '../../kibana_services';
 
-import { getServices } from '../../../../kibana_services';
-import { Pager } from './pager';
-
-const app = getServices().uiModules.get('kibana');
-
-app.factory('pagerFactory', () => {
-  return {
-    create(...args) {
-      return new Pager(...args);
-    }
+test('Mounting and unmounting DocViewerRenderTab', () => {
+  const unmountFn = jest.fn();
+  const renderFn = jest.fn(() => unmountFn);
+  const renderProps = {
+    hit: {},
   };
+
+  const wrapper = mount(
+    <DocViewRenderTab render={renderFn} renderProps={renderProps as DocViewRenderProps} />
+  );
+
+  expect(renderFn).toMatchSnapshot();
+
+  wrapper.unmount();
+
+  expect(unmountFn).toBeCalled();
 });
