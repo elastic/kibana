@@ -40,8 +40,6 @@ import {
 } from './legacy_imports';
 import { FilterStateManager, IndexPattern } from '../../../data/public';
 import { Query, SavedQuery } from '../../../../../plugins/data/public';
-
-import './dashboard_empty_screen_directive';
 import { DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
 import {
