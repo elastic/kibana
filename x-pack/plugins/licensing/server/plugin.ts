@@ -6,7 +6,7 @@
 
 import { Observable, Subject, Subscription, timer } from 'rxjs';
 import { take } from 'rxjs/operators';
-import moment from 'moment';
+import moment, { Duration } from 'moment';
 import { createHash } from 'crypto';
 import stringify from 'json-stable-stringify';
 
@@ -104,8 +104,8 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
     };
   }
 
-  private createLicensePoller(clusterClient: IClusterClient, pollingFrequency: number) {
-    const intervalRefresh$ = timer(0, pollingFrequency);
+  private createLicensePoller(clusterClient: IClusterClient, pollingFrequency: Duration) {
+    const intervalRefresh$ = timer(0, pollingFrequency.asMilliseconds());
 
     const { license$, refreshManually } = createLicenseUpdate(intervalRefresh$, this.stop$, () =>
       this.fetchLicense(clusterClient)
@@ -138,8 +138,13 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
         path: '/_xpack',
       });
 
-      const normalizedLicense = normalizeServerLicense(response.license);
-      const normalizedFeatures = normalizeFeatures(response.features);
+      const normalizedLicense = response.license
+        ? normalizeServerLicense(response.license)
+        : undefined;
+      const normalizedFeatures = response.features
+        ? normalizeFeatures(response.features)
+        : undefined;
+
       const signature = sign({
         license: normalizedLicense,
         features: normalizedFeatures,

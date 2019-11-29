@@ -6,6 +6,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { take, toArray } from 'rxjs/operators';
+import moment from 'moment';
 import { LicenseType } from '../common/types';
 import { ElasticsearchError, RawLicense } from './types';
 import { LicensingPlugin } from './plugin';
@@ -24,7 +25,7 @@ function buildRawLicense(options: Partial<RawLicense> = {}): RawLicense {
   };
   return Object.assign(defaultRawLicense, options);
 }
-const pollingFrequency = 100;
+const pollingFrequency = moment.duration(100);
 
 const flushPromises = (ms = 50) => new Promise(res => setTimeout(res, ms));
 
@@ -199,7 +200,7 @@ describe('licensing plugin', () => {
         plugin = new LicensingPlugin(
           coreMock.createPluginInitializerContext({
             // disable polling mechanism
-            pollingFrequency: 50000,
+            pollingFrequency: moment.duration(50000),
           })
         );
         const dataClient = elasticsearchServiceMock.createClusterClient();
@@ -225,7 +226,11 @@ describe('licensing plugin', () => {
       let plugin: LicensingPlugin;
 
       beforeEach(() => {
-        plugin = new LicensingPlugin(coreMock.createPluginInitializerContext());
+        plugin = new LicensingPlugin(
+          coreMock.createPluginInitializerContext({
+            pollingFrequency,
+          })
+        );
       });
 
       afterEach(async () => {
@@ -252,7 +257,7 @@ describe('licensing plugin', () => {
       let plugin: LicensingPlugin;
 
       beforeEach(() => {
-        plugin = new LicensingPlugin(coreMock.createPluginInitializerContext());
+        plugin = new LicensingPlugin(coreMock.createPluginInitializerContext({ pollingFrequency }));
       });
 
       afterEach(async () => {
