@@ -18,6 +18,7 @@
  */
 import { KibanaRequest } from './request';
 import { httpServerMock } from '../http_server.mocks';
+import { schema, SchemaTypeError } from '@kbn/config-schema';
 
 describe('KibanaRequest', () => {
   describe('get all headers', () => {
@@ -62,6 +63,54 @@ describe('KibanaRequest', () => {
         custom: 'one',
         authorization: 'token',
       });
+    });
+  });
+
+  describe('RouteSchema type inferring', () => {
+    it('should work with config-schema', () => {
+      const body = new Buffer('body!');
+      const request = httpServerMock.createRawRequest({
+        params: { id: 'params' },
+        query: { search: 'query' },
+        payload: body,
+      });
+      const kibanaRequest = KibanaRequest.from(request, {
+        params: schema.object({ id: schema.string() }),
+        query: schema.object({ search: schema.string() }),
+        body: schema.buffer(),
+      });
+      expect(kibanaRequest.params).toStrictEqual({ id: 'params' });
+      expect(kibanaRequest.params.id.toUpperCase()).toEqual('PARAMS'); // infers it's a string
+      expect(kibanaRequest.query).toStrictEqual({ search: 'query' });
+      expect(kibanaRequest.query.search.toUpperCase()).toEqual('QUERY'); // infers it's a string
+      expect(kibanaRequest.body).toEqual(body);
+      expect(kibanaRequest.body.byteLength).toBeGreaterThan(0); // infers it's a buffer
+    });
+
+    it('should work with ValidationFunction', () => {
+      const body = new Buffer('body!');
+      const request = httpServerMock.createRawRequest({
+        params: { id: 'params' },
+        query: { search: 'query' },
+        payload: body,
+      });
+      const kibanaRequest = KibanaRequest.from(request, {
+        params: schema.object({ id: schema.string() }),
+        query: schema.object({ search: schema.string() }),
+        body: data => {
+          if (Buffer.isBuffer(data)) {
+            return { value: data };
+          } else {
+            return { error: new SchemaTypeError('It should be a Buffer', []) };
+          }
+        },
+      });
+      expect(kibanaRequest.params).toStrictEqual({ id: 'params' });
+      expect(kibanaRequest.params.id.toUpperCase()).toEqual('PARAMS'); // infers it's a string
+      expect(kibanaRequest.query).toStrictEqual({ search: 'query' });
+      expect(kibanaRequest.query.search.toUpperCase()).toEqual('QUERY'); // infers it's a string
+      expect(kibanaRequest.body).toEqual(body);
+      expect(kibanaRequest.body.byteLength).toBeGreaterThan(0); // infers it's a buffer
     });
   });
 });

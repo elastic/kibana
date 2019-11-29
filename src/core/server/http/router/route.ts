@@ -19,6 +19,7 @@
 
 import { ObjectType, Type } from '@kbn/config-schema';
 import { Stream } from 'stream';
+import { ValidateFunction } from './validator';
 
 /**
  * The set of common HTTP methods supported by Kibana routing.
@@ -125,9 +126,9 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
  * @public
  */
 export interface RouteConfig<
-  P extends ObjectType,
-  Q extends ObjectType,
-  B extends ObjectType | Type<Buffer> | Type<Stream>,
+  P extends ObjectType | ValidateFunction<unknown>,
+  Q extends ObjectType | ValidateFunction<unknown>,
+  B extends ObjectType | Type<Buffer> | Type<Stream> | ValidateFunction<unknown>,
   Method extends RouteMethod
 > {
   /**
@@ -215,9 +216,9 @@ export interface RouteConfig<
  * @public
  */
 export interface RouteSchemas<
-  P extends ObjectType,
-  Q extends ObjectType,
-  B extends ObjectType | Type<Buffer> | Type<Stream>
+  P extends ObjectType | ValidateFunction<unknown>,
+  Q extends ObjectType | ValidateFunction<unknown>,
+  B extends ObjectType | Type<Buffer> | Type<Stream> | ValidateFunction<unknown>
 > {
   params?: P;
   query?: Q;

@@ -18,19 +18,25 @@
  */
 
 import Boom from 'boom';
-import { ObjectType, TypeOf } from '@kbn/config-schema';
+import { ObjectType, Type } from '@kbn/config-schema';
+import { Stream } from 'stream';
 import { KibanaRequest } from './request';
 import { KibanaResponseFactory } from './response';
 import { RequestHandler } from './router';
 import { RequestHandlerContext } from '../../../server';
 import { RouteMethod } from './route';
+import { ValidateFunction, ValidatedType } from './validator';
 
-export const wrapErrors = <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+export const wrapErrors = <
+  P extends ObjectType | ValidateFunction<unknown>,
+  Q extends ObjectType | ValidateFunction<unknown>,
+  B extends ObjectType | Type<Buffer> | Type<Stream> | ValidateFunction<unknown>
+>(
   handler: RequestHandler<P, Q, B, RouteMethod>
 ): RequestHandler<P, Q, B, RouteMethod> => {
   return async (
     context: RequestHandlerContext,
-    request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>, RouteMethod>,
+    request: KibanaRequest<ValidatedType<P>, ValidatedType<Q>, ValidatedType<B>, RouteMethod>,
     response: KibanaResponseFactory
   ) => {
     try {

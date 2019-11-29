@@ -20,13 +20,14 @@
 import { Url } from 'url';
 import { Request } from 'hapi';
 
-import { ObjectType, Type, TypeOf } from '@kbn/config-schema';
+import { ObjectType, Type } from '@kbn/config-schema';
 
 import { Stream } from 'stream';
 import { deepFreeze, RecursiveReadonly } from '../../../utils';
 import { Headers } from './headers';
 import { RouteMethod, RouteSchemas, RouteConfigOptions, validBodyOutput } from './route';
 import { KibanaSocket, IKibanaSocket } from './socket';
+import { validate, ValidateFunction, ValidatedType } from './validator';
 
 const requestSymbol = Symbol('request');
 
@@ -71,9 +72,9 @@ export class KibanaRequest<
    * @internal
    */
   public static from<
-    P extends ObjectType,
-    Q extends ObjectType,
-    B extends ObjectType | Type<Buffer> | Type<Stream>
+    P extends ObjectType | ValidateFunction<any>,
+    Q extends ObjectType | ValidateFunction<any>,
+    B extends ObjectType | Type<Buffer> | Type<Stream> | ValidateFunction<any>
   >(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders: boolean = true) {
     const requestParts = KibanaRequest.validate(req, routeSchemas);
     return new KibanaRequest(
@@ -92,39 +93,39 @@ export class KibanaRequest<
    * @internal
    */
   private static validate<
-    P extends ObjectType,
-    Q extends ObjectType,
-    B extends ObjectType | Type<Buffer> | Type<Stream>
+    P extends ObjectType | ValidateFunction<any>,
+    Q extends ObjectType | ValidateFunction<any>,
+    B extends ObjectType | Type<Buffer> | Type<Stream> | ValidateFunction<any>
   >(
     req: Request,
     routeSchemas: RouteSchemas<P, Q, B> | undefined
   ): {
-    params: TypeOf<P>;
-    query: TypeOf<Q>;
-    body: TypeOf<B>;
+    params: ValidatedType<P>;
+    query: ValidatedType<Q>;
+    body: ValidatedType<B>;
   } {
     if (routeSchemas === undefined) {
       return {
-        body: {},
-        params: {},
-        query: {},
+        params: {} as ValidatedType<P>,
+        query: {} as ValidatedType<Q>,
+        body: {} as ValidatedType<B>,
       };
     }
 
     const params =
       routeSchemas.params === undefined
-        ? {}
-        : routeSchemas.params.validate(req.params, {}, 'request params');
+        ? ({} as ValidatedType<P>)
+        : validate<ValidatedType<P>>(routeSchemas.params, req.params, 'request params');
 
     const query =
       routeSchemas.query === undefined
-        ? {}
-        : routeSchemas.query.validate(req.query, {}, 'request query');
+        ? ({} as ValidatedType<Q>)
+        : validate<ValidatedType<Q>>(routeSchemas.query, req.query, 'request query');
 
     const body =
       routeSchemas.body === undefined
-        ? {}
-        : routeSchemas.body.validate(req.payload, {}, 'request body');
+        ? ({} as ValidatedType<B>)
+        : validate<ValidatedType<B>>(routeSchemas.body as any, req.payload, 'request body');
 
     return { query, params, body };
   }
