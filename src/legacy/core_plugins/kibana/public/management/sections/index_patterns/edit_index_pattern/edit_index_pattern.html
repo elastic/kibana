@@ -112,6 +112,7 @@
               type="text"
               aria-label="{{::'kbn.management.editIndexPattern.fields.filterAria' | i18n: {defaultMessage: 'Filter'} }}"
               ng-model="fieldFilter"
+              ng-change="onFieldFilterInputChange(fieldFilter)"
               placeholder="{{::'kbn.management.editIndexPattern.fields.filterPlaceholder' | i18n: {defaultMessage: 'Filter'} }}"
               data-test-subj="indexPatternFieldFilter"
             >

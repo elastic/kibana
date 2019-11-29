@@ -17,22 +17,31 @@
  * under the License.
  */
 
-import { format as formatUrl, parse as parseUrl } from 'url';
+import { format as formatUrl, parse as _parseUrl } from 'url';
 // @ts-ignore
 import rison from 'rison-node';
 // @ts-ignore
 import encodeUriQuery from 'encode-uri-query';
 import { createBrowserHistory } from 'history';
-import { stringify as stringifyQueryString } from 'querystring';
+import { stringify as _stringifyQueryString, ParsedUrlQuery } from 'querystring';
 import { BaseState } from '../store/sync';
 
-const parseCurrentUrl = () => parseUrl(window.location.href, true);
-const parseCurrentUrlHash = () => parseUrl(parseCurrentUrl().hash!.slice(1), true);
+const parseUrl = (url: string) => _parseUrl(url, true);
+const parseUrlHash = (url: string) => parseUrl(parseUrl(url).hash!.slice(1));
+const parseCurrentUrl = () => parseUrl(window.location.href);
+const parseCurrentUrlHash = () => parseUrlHash(window.location.href);
 
-export function readStateUrl() {
-  const { query } = parseCurrentUrlHash();
+// encodeUriQuery implements the less-aggressive encoding done naturally by
+// the browser. We use it to generate the same urls the browser would
+const stringifyQueryString = (query: ParsedUrlQuery) =>
+  _stringifyQueryString(query, undefined, undefined, {
+    encodeURIComponent: encodeUriQuery,
+  });
 
-  const decoded: Record<string, any> = {};
+export function getStatesFromUrl(url: string = window.location.href): Record<string, BaseState> {
+  const { query } = parseUrlHash(url);
+
+  const decoded: Record<string, BaseState> = {};
   try {
     Object.keys(query).forEach(q => (decoded[q] = rison.decode(query[q])));
   } catch (e) {
@@ -42,22 +51,16 @@ export function readStateUrl() {
   return decoded;
 }
 
-export function generateStateUrl<T extends BaseState>(state: T): string {
+export function getStateFromUrl(key: string, url: string = window.location.href): BaseState {
+  return getStatesFromUrl(url)[key] || null;
+}
+
+export function setStateToUrl<T extends BaseState>(key: string, state: T): string {
   const url = parseCurrentUrl();
   const hash = parseCurrentUrlHash();
 
-  const encoded: Record<string, any> = {};
-  try {
-    Object.keys(state).forEach(s => (encoded[s] = rison.encode(state[s])));
-  } catch (e) {
-    throw new Error('oops');
-  }
-
-  // encodeUriQuery implements the less-aggressive encoding done naturally by
-  // the browser. We use it to generate the same urls the browser would
-  const searchQueryString = stringifyQueryString(encoded, undefined, undefined, {
-    encodeURIComponent: encodeUriQuery,
-  });
+  const encoded = rison.encode(state);
+  const searchQueryString = stringifyQueryString({ ...hash.query, [key]: encoded });
 
   return formatUrl({
     ...url,
@@ -76,19 +79,21 @@ export const createUrlControls = () => {
         cb();
       }),
     update: (url: string, replace = false) => {
-      const { pathname, hash, search } = parseUrl(url);
+      const { pathname, search } = parseUrl(url);
+      const parsedHash = parseUrlHash(url);
+      const searchQueryString = stringifyQueryString(parsedHash.query);
+      const location = {
+        pathname,
+        hash: formatUrl({
+          pathname: parsedHash.pathname,
+          search: searchQueryString,
+        }),
+        search,
+      };
       if (replace) {
-        history.replace({
-          pathname,
-          hash,
-          search,
-        });
+        history.replace(location);
       } else {
-        history.push({
-          pathname,
-          hash,
-          search,
-        });
+        history.push(location);
       }
     },
   };

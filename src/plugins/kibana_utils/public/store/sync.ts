@@ -18,8 +18,8 @@
  */
 
 import { Observable, Subscription } from 'rxjs';
-import { IStorage, IStorageWrapper, Storage } from '../storage';
-import { createUrlControls, readStateUrl, generateStateUrl } from '../url';
+import { distinctUntilChanged, map, share, skip, startWith } from 'rxjs/operators';
+import { createUrlControls, getStateFromUrl, setStateToUrl } from '../url';
 
 export type BaseState = Record<string, unknown>;
 
@@ -29,124 +29,186 @@ export interface IState<State extends BaseState = BaseState> {
   state$: Observable<State>;
 }
 
-export interface StateSyncConfig {
-  syncToUrl: boolean;
-  syncToStorage: boolean;
-  storageProvider: IStorage;
-  initialTruthSource: InitialTruthSource;
-}
-
 export enum InitialTruthSource {
   State,
-  // eslint-disable-next-line no-shadow
   Storage,
   None,
 }
 
-export function syncState(
-  states: Record<string, IState>,
-  {
-    syncToUrl = true,
-    syncToStorage = true,
-    storageProvider = window.sessionStorage,
-    initialTruthSource = InitialTruthSource.Storage,
-  }: Partial<StateSyncConfig> = {}
-) {
-  const subscriptions: Subscription[] = [];
-  const storage: IStorageWrapper = new Storage(storageProvider);
+export type SyncStrategyType = 'url' | 'hashed-url' | string;
+
+export interface StateSyncConfig<
+  State extends BaseState = BaseState,
+  StorageState extends BaseState = BaseState
+> {
+  syncKey: string;
+  state: IState<State>;
+  syncStrategy: SyncStrategyType;
+  toStorageMapper?: (state: State) => StorageState;
+  fromStorageMapper?: (storageState: StorageState) => Partial<State>;
+  initialTruthSource?: InitialTruthSource;
+}
+
+interface SyncStrategy<State extends BaseState = BaseState> {
+  // TODO: replace sounds like something url specific ...
+  toStorage: (state: State, opts: { replace: boolean }) => void;
+  fromStorage: () => State;
+  storageChange$: Observable<void>;
+}
+
+const createUrlSyncStrategy = (key: string): SyncStrategy => {
   const { update: updateUrl, listen: listenUrl } = createUrlControls();
+  return {
+    toStorage: (state: BaseState, { replace = false } = { replace: false }) => {
+      updateUrl(setStateToUrl(key, state), replace);
+    },
+    fromStorage: () => getStateFromUrl(key),
+    storageChange$: new Observable(observer => {
+      const unlisten = listenUrl(() => {
+        observer.next();
+      });
 
-  const keyToState = new Map<string, IState>();
-  const stateToKey = new Map<IState, string>();
+      return () => {
+        unlisten();
+      };
+    }).pipe(
+      startWith(),
+      map(() => getStateFromUrl(key)),
+      distinctUntilChanged(shallowEqual),
+      skip(1),
+      share()
+    ),
+  };
+};
 
-  Object.entries(states).forEach(([key, state]) => {
-    keyToState.set(key, state);
-    stateToKey.set(state, key);
-  });
-
+export function syncState(config: StateSyncConfig[] | StateSyncConfig) {
+  const stateSyncConfigs = Array.isArray(config) ? config : [config];
+  const subscriptions: Subscription[] = [];
   let ignoreStateUpdate = false;
   let ignoreStorageUpdate = false;
 
-  const updateState = (state$: IState): boolean => {
-    if (ignoreStateUpdate) return false;
-    const update = () => {
-      if (syncToUrl) {
-        const urlState = readStateUrl();
-        const key = stateToKey.get(state$);
-        if (!key || !urlState[key]) {
+  stateSyncConfigs.forEach(stateSyncConfig => {
+    const { toStorage, fromStorage, storageChange$ } = createUrlSyncStrategy(
+      stateSyncConfig.syncKey
+    );
+
+    const updateState = (): boolean => {
+      if (ignoreStateUpdate) return false;
+      const update = () => {
+        const storageState = fromStorage();
+        if (!storageState) {
           ignoreStorageUpdate = false;
           return false;
         }
 
-        if (key && urlState[key]) {
-          state$.set(urlState[key]);
+        const fromStorageMapper = stateSyncConfig.fromStorageMapper || (s => s);
+
+        if (storageState) {
+          stateSyncConfig.state.set({
+            ...stateSyncConfig.state.get(),
+            ...fromStorageMapper(storageState),
+          });
           return true;
         }
-      }
 
-      return false;
+        return false;
+      };
+
+      ignoreStorageUpdate = true;
+      const updated = update();
+      ignoreStorageUpdate = false;
+      return updated;
     };
 
-    ignoreStorageUpdate = true;
-    const updated = update();
-    ignoreStorageUpdate = false;
-    return updated;
-  };
+    const updateStorage = ({ replace = false } = {}): boolean => {
+      if (ignoreStorageUpdate) return false;
 
-  const updateStorage = (state$: IState, { replace = false } = {}): boolean => {
-    if (ignoreStorageUpdate) return false;
-
-    const update = () => {
-      if (syncToUrl) {
-        const urlState = readStateUrl();
-        const key = stateToKey.get(state$);
-        if (!key) return false;
-        urlState[key] = state$.get();
-        updateUrl(generateStateUrl(urlState), replace);
+      const update = () => {
+        const toStorageMapper = stateSyncConfig.toStorageMapper || (s => s);
+        const newStorageState = toStorageMapper(stateSyncConfig.state.get());
+        toStorage(newStorageState, { replace });
         return true;
-      }
+      };
 
-      return false;
+      ignoreStateUpdate = true;
+      const hasUpdated = update();
+      ignoreStateUpdate = false;
+      return hasUpdated;
     };
 
-    ignoreStateUpdate = true;
-    const hasUpdated = update();
-    ignoreStateUpdate = false;
-    return hasUpdated;
-  };
-
-  Object.values(states).forEach(state => {
+    const initialTruthSource = stateSyncConfig.initialTruthSource ?? InitialTruthSource.Storage;
     if (initialTruthSource === InitialTruthSource.Storage) {
-      const hasUpdated = updateState(state);
+      const hasUpdated = updateState();
       // if there is nothing by state key in storage
       // then we should fallback and consider state source of truth
       if (!hasUpdated) {
-        updateStorage(state, { replace: true });
+        updateStorage({ replace: true });
       }
     } else if (initialTruthSource === InitialTruthSource.State) {
-      updateStorage(state);
+      updateStorage({ replace: true });
     }
+
+    subscriptions.push(
+      stateSyncConfig.state.state$
+        .pipe(
+          startWith(stateSyncConfig.state.get()),
+          map(stateSyncConfig.toStorageMapper || (s => s)),
+          distinctUntilChanged(shallowEqual),
+          skip(1)
+        )
+        .subscribe(() => {
+          // TODO: batch storage updates
+          updateStorage();
+        }),
+      storageChange$.subscribe(() => {
+        // TODO: batch state updates? or should it be handled by state containers instead?
+        updateState();
+      })
+    );
   });
 
-  subscriptions.push(
-    ...Object.values(states).map(s =>
-      s.state$.subscribe(() => {
-        updateStorage(s);
-      })
-    )
-  );
+  return () => {
+    subscriptions.forEach(sub => sub.unsubscribe());
+  };
+}
 
-  let unlistenUrlChange: () => void;
-  if (syncToUrl) {
-    unlistenUrlChange = listenUrl(() => {
-      Object.values(states).forEach(state$ => updateState(state$));
-    });
+// https://github.com/facebook/fbjs/blob/master/packages/fbjs/src/core/shallowEqual.js
+function shallowEqual(objA: any, objB: any): boolean {
+  if (is(objA, objB)) {
+    return true;
   }
 
-  return () => {
-    keyToState.clear();
-    stateToKey.clear();
-    subscriptions.forEach(sub => sub.unsubscribe());
-    if (unlistenUrlChange) unlistenUrlChange();
-  };
+  if (typeof objA !== 'object' || objA === null || typeof objB !== 'object' || objB === null) {
+    return false;
+  }
+
+  const keysA = Object.keys(objA);
+  const keysB = Object.keys(objB);
+
+  if (keysA.length !== keysB.length) {
+    return false;
+  }
+
+  // Test for A's keys different from B.
+  for (let i = 0; i < keysA.length; i++) {
+    if (
+      !Object.prototype.hasOwnProperty.call(objB, keysA[i]) ||
+      !is(objA[keysA[i]], objB[keysA[i]])
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ * IE11 does not support Object.is
+ */
+function is(x: any, y: any): boolean {
+  if (x === y) {
+    return x !== 0 || y !== 0 || 1 / x === 1 / y;
+  } else {
+    return x !== x && y !== y;
+  }
 }
