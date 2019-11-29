@@ -7,12 +7,7 @@
 import { EuiIconTip, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
-import React, {
-  FunctionComponent,
-  useCallback,
-  Dispatch,
-  SetStateAction
-} from 'react';
+import React, { FunctionComponent, useCallback } from 'react';
 import { isEmpty } from 'lodash';
 import { TransactionDistributionAPIResponse } from '../../../../../server/lib/transactions/distribution';
 import { IBucket } from '../../../../../server/lib/transactions/distribution/get_buckets/transform';
@@ -99,7 +94,7 @@ interface Props {
   distribution?: TransactionDistributionAPIResponse;
   urlParams: IUrlParams;
   isLoading: boolean;
-  onBucketSelected: Dispatch<SetStateAction<number>>;
+  onBucketSelected(index: number): void;
 }
 
 export const TransactionDistribution: FunctionComponent<Props> = (

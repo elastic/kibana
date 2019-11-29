@@ -50,8 +50,7 @@ export async function bucketFetcher(
           ],
           should: [
             { term: { [TRACE_ID]: traceId } },
-            { term: { [TRANSACTION_ID]: transactionId } },
-            { term: { [TRANSACTION_SAMPLED]: true } }
+            { term: { [TRANSACTION_ID]: transactionId } }
           ]
         }
       },
