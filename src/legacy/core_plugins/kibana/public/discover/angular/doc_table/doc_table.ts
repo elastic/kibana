@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { UiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient } from 'kibana/public';
 import html from './doc_table.html';
 import './infinite_scroll';
 import './components/table_header';
@@ -34,7 +34,7 @@ interface LazyScope extends ng.IScope {
 }
 
 export function createDocTableDirective(
-  config: UiSettingsClient,
+  config: IUiSettingsClient,
   getAppState: any,
   pagerFactory: any,
   $filter: any
