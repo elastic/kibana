@@ -100,19 +100,7 @@ export function runRoute(server: Legacy.Server) {
           settings: _.defaults(uiSettings, timelionDefaults), // Just in case they delete some setting.
         });
         const chainRunner = chainRunnerFn(tlConfig);
-        const sheet = await Bluebird.all(
-          chainRunner.processRequest(
-            request.payload || {
-              sheet: [request.query.expression],
-              time: {
-                from: request.query.from,
-                to: request.query.to,
-                interval: request.query.interval,
-                timezone: request.query.timezone,
-              },
-            }
-          )
-        );
+        const sheet = await Bluebird.all(chainRunner.processRequest(request.payload));
 
         return {
           sheet,
