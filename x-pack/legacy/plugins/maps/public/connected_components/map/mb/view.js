@@ -115,7 +115,6 @@ export class MBMapContainer extends React.Component {
       }
 
       const options = {
-        zoomControl: false,
         attributionControl: false,
         container: this.refs.mapContainer,
         style: mbStyle,
