@@ -18,7 +18,7 @@
  */
 
 import { omit } from 'lodash';
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { APICaller } from '../../../elasticsearch/';
 
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import { getSearchDsl } from './search_dsl';
@@ -77,12 +77,12 @@ export interface SavedObjectsRepositoryOptions {
   index: string;
   config: Config;
   mappings: IndexMapping;
-  callCluster: CallCluster;
+  callCluster: APICaller;
   schema: SavedObjectsSchema;
   serializer: SavedObjectsSerializer;
   migrator: KibanaMigrator;
   allowedTypes: string[];
-  onBeforeWrite?: (...args: Parameters<CallCluster>) => Promise<void>;
+  onBeforeWrite?: (...args: Parameters<APICaller>) => Promise<void>;
 }
 
 export interface IncrementCounterOptions extends SavedObjectsBaseOptions {
@@ -100,8 +100,9 @@ export class SavedObjectsRepository {
   private _mappings: IndexMapping;
   private _schema: SavedObjectsSchema;
   private _allowedTypes: string[];
-  private _onBeforeWrite: (...args: Parameters<CallCluster>) => Promise<void>;
-  private _unwrappedCallCluster: CallCluster;
+
+  private _onBeforeWrite: (...args: Parameters<APICaller>) => Promise<void>;
+  private _unwrappedCallCluster: APICaller;
   private _serializer: SavedObjectsSerializer;
 
   constructor(options: SavedObjectsRepositoryOptions) {
@@ -136,7 +137,7 @@ export class SavedObjectsRepository {
 
     this._onBeforeWrite = onBeforeWrite;
 
-    this._unwrappedCallCluster = async (...args: Parameters<CallCluster>) => {
+    this._unwrappedCallCluster = async (...args: Parameters<APICaller>) => {
       await migrator.runMigrations();
       return callCluster(...args);
     };
@@ -869,7 +870,7 @@ export class SavedObjectsRepository {
     };
   }
 
-  private async _writeToCluster(...args: Parameters<CallCluster>) {
+  private async _writeToCluster(...args: Parameters<APICaller>) {
     try {
       await this._onBeforeWrite(...args);
       return await this._callCluster(...args);
@@ -878,7 +879,7 @@ export class SavedObjectsRepository {
     }
   }
 
-  private async _callCluster(...args: Parameters<CallCluster>) {
+  private async _callCluster(...args: Parameters<APICaller>) {
     try {
       return await this._unwrappedCallCluster(...args);
     } catch (err) {
