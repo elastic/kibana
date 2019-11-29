@@ -67,10 +67,17 @@ export async function bucketFetcher(
             }
           },
           aggs: {
-            sample: {
-              top_hits: {
-                _source: [TRANSACTION_ID, TRANSACTION_SAMPLED, TRACE_ID],
-                size: 1
+            samples: {
+              filter: {
+                term: { [TRANSACTION_SAMPLED]: true }
+              },
+              aggs: {
+                items: {
+                  top_hits: {
+                    _source: [TRANSACTION_ID, TRACE_ID],
+                    size: 10
+                  }
+                }
               }
             }
           }

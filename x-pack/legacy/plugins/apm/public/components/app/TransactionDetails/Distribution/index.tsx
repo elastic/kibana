@@ -7,7 +7,13 @@
 import { EuiIconTip, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
-import React, { FunctionComponent, useCallback } from 'react';
+import React, {
+  FunctionComponent,
+  useCallback,
+  Dispatch,
+  SetStateAction
+} from 'react';
+import { isEmpty } from 'lodash';
 import { TransactionDistributionAPIResponse } from '../../../../../server/lib/transactions/distribution';
 import { IBucket } from '../../../../../server/lib/transactions/distribution/get_buckets/transform';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
@@ -20,7 +26,7 @@ import { history } from '../../../../utils/history';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 
 interface IChartPoint {
-  sample?: IBucket['sample'];
+  samples: IBucket['samples'];
   x0: number;
   x: number;
   y: number;
@@ -35,13 +41,15 @@ export function getFormattedBuckets(buckets: IBucket[], bucketSize: number) {
   }
 
   return buckets.map(
-    ({ sample, count, key }): IChartPoint => {
+    ({ samples, count, key }): IChartPoint => {
       return {
-        sample,
+        samples,
         x0: key,
         x: key + bucketSize,
         y: count,
-        style: { cursor: count > 0 && sample ? 'pointer' : 'default' }
+        style: {
+          cursor: count > 0 && !isEmpty(samples) ? 'pointer' : 'default'
+        }
       };
     }
   );
@@ -91,6 +99,7 @@ interface Props {
   distribution?: TransactionDistributionAPIResponse;
   urlParams: IUrlParams;
   isLoading: boolean;
+  onBucketSelected: Dispatch<SetStateAction<number>>;
 }
 
 export const TransactionDistribution: FunctionComponent<Props> = (
@@ -99,7 +108,8 @@ export const TransactionDistribution: FunctionComponent<Props> = (
   const {
     distribution,
     urlParams: { transactionId, traceId, transactionType },
-    isLoading
+    isLoading,
+    onBucketSelected
   } = props;
 
   const formatYShort = useCallback(getFormatYShort(transactionType), [
@@ -134,12 +144,15 @@ export const TransactionDistribution: FunctionComponent<Props> = (
   const xMax = d3.max(buckets, d => d.x) || 0;
   const timeFormatter = getDurationFormatter(xMax);
 
-  const bucketIndex = buckets.findIndex(
-    bucket =>
-      bucket.sample != null &&
-      bucket.sample.transactionId === transactionId &&
-      bucket.sample.traceId === traceId
-  );
+  const bucketIndex = buckets.findIndex(bucket => {
+    const sampleFound = bucket.samples.findIndex(
+      sample =>
+        sample.transactionId === transactionId && sample.traceId === traceId
+    );
+    return sampleFound === -1 ? false : true;
+  });
+
+  onBucketSelected(bucketIndex);
 
   return (
     <div>
@@ -175,13 +188,14 @@ export const TransactionDistribution: FunctionComponent<Props> = (
         bucketSize={distribution.bucketSize}
         bucketIndex={bucketIndex}
         onClick={(bucket: IChartPoint) => {
-          if (bucket.sample && bucket.y > 0) {
+          if (!isEmpty(bucket.samples) && bucket.y > 0) {
+            const sample = bucket.samples[0];
             history.push({
               ...history.location,
               search: fromQuery({
                 ...toQuery(history.location.search),
-                transactionId: bucket.sample.transactionId,
-                traceId: bucket.sample.traceId
+                transactionId: sample.transactionId,
+                traceId: sample.traceId
               })
             });
           }
@@ -190,16 +204,18 @@ export const TransactionDistribution: FunctionComponent<Props> = (
         formatYShort={formatYShort}
         formatYLong={formatYLong}
         verticalLineHover={(bucket: IChartPoint) =>
-          bucket.y > 0 && !bucket.sample
+          bucket.y > 0 && isEmpty(bucket.samples)
         }
-        backgroundHover={(bucket: IChartPoint) => bucket.y > 0 && bucket.sample}
+        backgroundHover={(bucket: IChartPoint) =>
+          bucket.y > 0 && !isEmpty(bucket.samples)
+        }
         tooltipHeader={(bucket: IChartPoint) => {
           const xFormatted = timeFormatter(bucket.x);
           const x0Formatted = timeFormatter(bucket.x0);
           return `${x0Formatted.value} - ${xFormatted.value} ${xFormatted.unit}`;
         }}
         tooltipFooter={(bucket: IChartPoint) =>
-          !bucket.sample &&
+          isEmpty(bucket.samples) &&
           i18n.translate(
             'xpack.apm.transactionDetails.transactionsDurationDistributionChart.noSampleTooltip',
             {

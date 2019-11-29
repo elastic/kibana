@@ -13,7 +13,7 @@ import {
   EuiFlexItem
 } from '@elastic/eui';
 import _ from 'lodash';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { useTransactionDistribution } from '../../../hooks/useTransactionDistribution';
 import { useWaterfall } from '../../../hooks/useWaterfall';
@@ -29,6 +29,7 @@ import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 import { useTrackPageview } from '../../../../../infra/public';
 import { PROJECTION } from '../../../../common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
+import { HeightRetainer } from '../../shared/HeightRetainer';
 
 export function TransactionDetails() {
   const location = useLocation();
@@ -59,6 +60,9 @@ export function TransactionDetails() {
     };
     return config;
   }, [transactionName, transactionType, serviceName]);
+
+  const [selectedBucket, setSelectedBucket] = useState(-1);
+  const traceSamples = distributionData.buckets[selectedBucket]?.samples;
 
   return (
     <div>
@@ -93,18 +97,22 @@ export function TransactionDetails() {
               distribution={distributionData}
               isLoading={distributionStatus === FETCH_STATUS.LOADING}
               urlParams={urlParams}
+              onBucketSelected={setSelectedBucket}
             />
           </EuiPanel>
 
           <EuiSpacer size="s" />
 
-          <WaterfallWithSummmary
-            location={location}
-            urlParams={urlParams}
-            waterfall={waterfall}
-            isLoading={waterfallStatus === FETCH_STATUS.LOADING}
-            exceedsMax={exceedsMax}
-          />
+          <HeightRetainer>
+            <WaterfallWithSummmary
+              location={location}
+              urlParams={urlParams}
+              waterfall={waterfall}
+              isLoading={waterfallStatus === FETCH_STATUS.LOADING}
+              exceedsMax={exceedsMax}
+              traceSamples={traceSamples}
+            />
+          </HeightRetainer>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
