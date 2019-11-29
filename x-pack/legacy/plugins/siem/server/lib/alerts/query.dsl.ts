@@ -18,6 +18,7 @@ export const buildAlertsQuery = (options: RequestOptions) => {
   return {
     ...eventsQuery,
     body: {
+      ...eventsQuery.body,
       query: {
         bool: {
           filter: [...eventsFilter, ...alertsFilter],
