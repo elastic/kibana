@@ -121,6 +121,8 @@ export {
   RouteConfigOptionsBody,
   RouteContentType,
   validBodyOutput,
+  ValidateFunctionReturn,
+  ValidateFunction,
   SessionStorage,
   SessionStorageCookieOptions,
   SessionCookieValidationResult,

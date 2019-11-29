@@ -19,6 +19,10 @@
 
 import { SchemaTypeError, ValidationError, ObjectType, Type, TypeOf } from '@kbn/config-schema';
 
+/**
+ * Allowed returned format of the custom validate function
+ * @public
+ */
 export type ValidateFunctionReturn<T> =
   | {
       value: T;
@@ -29,6 +33,10 @@ export type ValidateFunctionReturn<T> =
       error: SchemaTypeError;
     };
 
+/**
+ * Custom validate function (only if @kbn/config-schema is not a valid option in your plugin)
+ * @public
+ */
 export type ValidateFunction<T> = (data: any) => ValidateFunctionReturn<T>;
 
 export type TypeOfFunctionReturn<T extends ValidateFunction<unknown>> = NonNullable<

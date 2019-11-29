@@ -9,7 +9,7 @@ Route specific configuration.
 <b>Signature:</b>
 
 ```typescript
-export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>, Method extends RouteMethod> 
+export interface RouteConfig<P extends ObjectType | ValidateFunction<unknown>, Q extends ObjectType | ValidateFunction<unknown>, B extends ObjectType | Type<Buffer> | Type<Stream> | ValidateFunction<unknown>, Method extends RouteMethod> 
 ```
 
 ## Properties

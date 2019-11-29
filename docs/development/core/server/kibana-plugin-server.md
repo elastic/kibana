@@ -189,4 +189,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsClientFactory](./kibana-plugin-server.savedobjectsclientfactory.md) | Describes the factory used to create instances of the Saved Objects Client. |
 |  [SavedObjectsClientWrapperFactory](./kibana-plugin-server.savedobjectsclientwrapperfactory.md) | Describes the factory used to create instances of Saved Objects Client Wrappers. |
 |  [UiSettingsType](./kibana-plugin-server.uisettingstype.md) | UI element type to represent the settings. |
+|  [ValidateFunction](./kibana-plugin-server.validatefunction.md) | Custom validate function (only if @<!-- -->kbn/config-schema is not a valid option in your plugin) |
+|  [ValidateFunctionReturn](./kibana-plugin-server.validatefunctionreturn.md) | Allowed returned format of the custom validate function |
 

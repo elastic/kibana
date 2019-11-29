@@ -114,6 +114,7 @@ import { RenderSearchTemplateParams } from 'elasticsearch';
 import { Request } from 'hapi';
 import { ResponseObject } from 'hapi';
 import { ResponseToolkit } from 'hapi';
+import { SchemaTypeError } from '@kbn/config-schema';
 import { ScrollParams } from 'elasticsearch';
 import { SearchParams } from 'elasticsearch';
 import { SearchResponse } from 'elasticsearch';
@@ -759,8 +760,10 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     constructor(request: Request, params: Params, query: Query, body: Body, withoutSecretHeaders: boolean);
     // (undocumented)
     readonly body: Body;
+    // Warning: (ae-forgotten-export) The symbol "ValidatedType" needs to be exported by the entry point index.d.ts
+    // 
     // @internal
-    static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<P["type"], Q["type"], B["type"], any>;
+    static from<P extends ObjectType | ValidateFunction<any>, Q extends ObjectType | ValidateFunction<any>, B extends ObjectType | Type<Buffer> | Type<Stream> | ValidateFunction<any>>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<ValidatedType<P>, ValidatedType<Q>, ValidatedType<B>, any>;
     readonly headers: Headers;
     // (undocumented)
     readonly params: Params;
@@ -1051,7 +1054,7 @@ export type RedirectResponseOptions = HttpResponseOptions & {
 };
 
 // @public
-export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>, Method extends RouteMethod = any> = (context: RequestHandlerContext, request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>, Method>, response: KibanaResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
+export type RequestHandler<P extends ObjectType | ValidateFunction<unknown>, Q extends ObjectType | ValidateFunction<unknown>, B extends ObjectType | Type<Buffer> | Type<Stream> | ValidateFunction<unknown>, Method extends RouteMethod = any> = (context: RequestHandlerContext, request: KibanaRequest<ValidatedType<P>, ValidatedType<Q>, ValidatedType<B>, Method>, response: KibanaResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 
 // @public
 export interface RequestHandlerContext {
@@ -1093,7 +1096,7 @@ export type ResponseHeaders = {
 };
 
 // @public
-export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>, Method extends RouteMethod> {
+export interface RouteConfig<P extends ObjectType | ValidateFunction<unknown>, Q extends ObjectType | ValidateFunction<unknown>, B extends ObjectType | Type<Buffer> | Type<Stream> | ValidateFunction<unknown>, Method extends RouteMethod> {
     options?: RouteConfigOptions<Method>;
     path: string;
     validate: RouteSchemas<P, Q, B> | false;
@@ -1121,10 +1124,10 @@ export type RouteContentType = 'application/json' | 'application/*+json' | 'appl
 export type RouteMethod = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options';
 
 // @public
-export type RouteRegistrar<Method extends RouteMethod> = <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<P, Q, B, Method>) => void;
+export type RouteRegistrar<Method extends RouteMethod> = <P extends ObjectType | ValidateFunction<unknown>, Q extends ObjectType | ValidateFunction<unknown>, B extends ObjectType | Type<Buffer> | Type<Stream> | ValidateFunction<unknown>>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<P, Q, B, Method>) => void;
 
 // @public
-export interface RouteSchemas<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>> {
+export interface RouteSchemas<P extends ObjectType | ValidateFunction<unknown>, Q extends ObjectType | ValidateFunction<unknown>, B extends ObjectType | Type<Buffer> | Type<Stream> | ValidateFunction<unknown>> {
     // (undocumented)
     body?: B;
     // (undocumented)
@@ -1718,6 +1721,18 @@ export interface UserProvidedValues<T = any> {
     // (undocumented)
     userValue?: T;
 }
+
+// @public
+export type ValidateFunction<T> = (data: any) => ValidateFunctionReturn<T>;
+
+// @public
+export type ValidateFunctionReturn<T> = {
+    value: T;
+    error?: undefined;
+} | {
+    value?: undefined;
+    error: SchemaTypeError;
+};
 
 // @public
 export const validBodyOutput: readonly ["data", "stream"];

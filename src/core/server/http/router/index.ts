@@ -55,3 +55,5 @@ export {
 } from './response';
 
 export { IKibanaSocket } from './socket';
+
+export { ValidateFunctionReturn, ValidateFunction } from './validator';
