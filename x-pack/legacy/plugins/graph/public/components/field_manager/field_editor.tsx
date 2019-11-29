@@ -24,6 +24,7 @@ import {
   EuiForm,
   EuiSpacer,
   EuiIconTip,
+  EuiComboBoxOptionProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
@@ -221,7 +222,9 @@ export function FieldEditor({
                     }}
                     singleSelection={{ asPlainText: true }}
                     isClearable={false}
-                    options={toOptions(allFields, initialField)}
+                    options={
+                      toOptions(allFields, initialField) as Array<EuiComboBoxOptionProps<string>>
+                    }
                     selectedOptions={[
                       {
                         value: currentField.name,
