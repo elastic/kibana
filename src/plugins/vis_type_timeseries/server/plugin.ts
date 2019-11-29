@@ -17,11 +17,19 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/server';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  RequestHandlerContext,
+  KibanaRequest,
+} from 'src/core/server';
 import { Observable, AsyncSubject } from 'rxjs';
 import { Server } from 'hapi';
 import { once } from 'lodash';
 import { VisTypeTimeseriesConfig } from '.';
+import { init, getVisData } from '../../../legacy/core_plugins/vis_type_timeseries/server';
 
 export interface LegacySetup {
   server: Server;
@@ -42,20 +50,24 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
     this.legacySetup$ = new AsyncSubject();
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, plugins: any) {
     const logger = this.initializerContext.logger.get('visTypeTimeseries');
+    const config$ = this.initializerContext.config.create<VisTypeTimeseriesConfig>();
 
-    this.legacySetup$.subscribe(__LEGACY => {
-      // Create vis type timeseries API
+    this.legacySetup$.subscribe((__LEGACY: LegacySetup) => {
+      init(core, plugins, config$, logger, __LEGACY);
     });
 
     return {
       __legacy: {
-        config$: this.initializerContext.config.create<VisTypeTimeseriesConfig>(),
+        config$,
         registerLegacyAPI: once((__LEGACY: LegacySetup) => {
           this.legacySetup$.next(__LEGACY);
           this.legacySetup$.complete();
         }),
+      },
+      getVisData: async (requestContext: RequestHandlerContext, request: KibanaRequest) => {
+        return await getVisData(requestContext, request);
       },
     };
   }

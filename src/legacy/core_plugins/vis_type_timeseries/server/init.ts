@@ -17,14 +17,30 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { getPanelData } from './vis_data/get_panel_data';
+import { CoreSetup } from 'src/core/server';
+import { take } from 'rxjs/operators';
 
-export function getVisData(req) {
-  const promises = req.payload.panels.map(getPanelData(req));
-  return Promise.all(promises).then(res => {
-    return res.reduce((acc, data) => {
-      return _.assign(acc, data);
-    }, {});
-  });
-}
+// @ts-ignore
+import { fieldsRoutes } from './routes/fields';
+// @ts-ignore
+import { visDataRoutes } from './routes/vis';
+// @ts-ignore
+import { SearchStrategiesRegister } from './lib/search_strategies/search_strategies_register';
+// @ts-ignore
+import { getVisData } from './lib/get_vis_data';
+
+export const init = async (
+  core: CoreSetup,
+  plugins: any,
+  config$: any,
+  logger: any,
+  __LEGACY: any
+) => {
+  const router = core.http.createRouter();
+
+  visDataRoutes(__LEGACY.server);
+
+  // [LEGACY_TODO]
+  fieldsRoutes(__LEGACY.server);
+  SearchStrategiesRegister.init(__LEGACY.server);
+};

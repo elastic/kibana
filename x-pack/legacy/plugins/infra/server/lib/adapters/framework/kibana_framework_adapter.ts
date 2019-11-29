@@ -261,27 +261,12 @@ export class KibanaFramework {
     // are available along with our overriden values
     const requestCopy = Object.assign(request, {
       url,
-      method: 'POST',
-      payload: {
+      body: {
         timerange,
         panels: [model],
         filters,
       },
-      // NP_NOTE: [TSVB_GROUP] Huge hack to make TSVB (getVisData()) work with raw requests that
-      // originate from the New Platform router (and are very different to the old request object).
-      // Once TSVB has migrated over to NP, and can work with the new raw requests, or ideally just
-      // the requestContext, this can be removed.
-      server: {
-        plugins: {
-          elasticsearch: this.plugins.___legacy.tsvb.elasticsearch,
-        },
-        newPlatform: {
-          __internals: this.plugins.___legacy.tsvb.__internals,
-        },
-      },
-      getUiSettingsService: () => requestContext.core.uiSettings.client,
-      getSavedObjectsClient: () => requestContext.core.savedObjects.client,
     });
-    return getVisData(requestCopy);
+    return getVisData(requestContext, requestCopy);
   }
 }

@@ -19,6 +19,8 @@
 import { first, map } from 'rxjs/operators';
 
 export async function getEsShardTimeout(req) {
+  // TODO: Investigate if this is needed using the new requestContext scoped data client
+  return undefined;
   return await req.server.newPlatform.__internals.elasticsearch.legacy.config$
     .pipe(
       first(),
