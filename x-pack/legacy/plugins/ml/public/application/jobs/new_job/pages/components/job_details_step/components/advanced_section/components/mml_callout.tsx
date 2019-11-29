@@ -33,7 +33,7 @@ const modelPlotConfig$ = new ReplaySubject<{
 
 const modelPlotCardinality$: Observable<number | undefined> = modelPlotConfig$.pipe(
   filter(value => value.isModelPlotEnabled),
-  // No need to perform an API call if the detectors haven't been changed
+  // No need to perform an API call if the analysis configuration hasn't been changed
   distinctUntilChanged((prev, curr) => {
     return (
       prev.jobConfig.analysis_config === curr.jobConfig.analysis_config ||
