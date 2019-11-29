@@ -16,18 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { getServices } from '../../../../kibana_services';
-import { ToolBarPagerText } from './tool_bar_pager_text';
-import { ToolBarPagerButtons } from './tool_bar_pager_buttons';
 
-const { wrapInI18nContext, uiModules } = getServices();
+import React from 'react';
+import { shallow } from 'enzyme';
 
-const app = uiModules.get('kibana');
-
-app.directive('toolBarPagerText', function (reactDirective) {
-  return reactDirective(wrapInI18nContext(ToolBarPagerText));
+jest.mock('../../kibana_services', () => {
+  return {
+    getServices: () => ({
+      SavedObjectFinder: jest.fn()
+    }),
+  };
 });
 
-app.directive('toolBarPagerButtons', function (reactDirective) {
-  return reactDirective(wrapInI18nContext(ToolBarPagerButtons));
+import {
+  OpenSearchPanel,
+} from './open_search_panel';
+
+test('render', () => {
+  const component = shallow(<OpenSearchPanel
+    onClose={() => {}}
+    makeUrl={() => {}}
+  />);
+  expect(component).toMatchSnapshot();
 });

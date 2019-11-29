@@ -18,30 +18,32 @@
  */
 
 import $ from 'jquery';
-import { getServices } from '../../kibana_services';
 
-const module = getServices().uiModules.get('app/discover');
+interface LazyScope extends ng.IScope {
+  [key: string]: any;
+}
 
-module.directive('kbnInfiniteScroll', function () {
+export function createInfiniteScrollDirective() {
   return {
     restrict: 'E',
     scope: {
-      more: '='
+      more: '=',
     },
-    link: function ($scope, $element) {
+    link: ($scope: LazyScope, $element: JQuery) => {
       const $window = $(window);
-      let checkTimer;
+      let checkTimer: any;
 
       function onScroll() {
         if (!$scope.more) return;
 
-        const winHeight = $window.height();
-        const winBottom = winHeight + $window.scrollTop();
-        const elTop = $element.offset().top;
+        const winHeight = Number($window.height());
+        const winBottom = Number(winHeight) + Number($window.scrollTop());
+        const offset = $element.offset();
+        const elTop = offset ? offset.top : 0;
         const remaining = elTop - winBottom;
 
-        if (remaining <= winHeight * 0.50) {
-          $scope[$scope.$$phase ? '$eval' : '$apply'](function () {
+        if (remaining <= winHeight * 0.5) {
+          $scope[$scope.$$phase ? '$eval' : '$apply'](function() {
             $scope.more();
           });
         }
@@ -49,18 +51,18 @@ module.directive('kbnInfiniteScroll', function () {
 
       function scheduleCheck() {
         if (checkTimer) return;
-        checkTimer = setTimeout(function () {
+        checkTimer = setTimeout(function() {
           checkTimer = null;
           onScroll();
         }, 50);
       }
 
       $window.on('scroll', scheduleCheck);
-      $scope.$on('$destroy', function () {
+      $scope.$on('$destroy', function() {
         clearTimeout(checkTimer);
         $window.off('scroll', scheduleCheck);
       });
       scheduleCheck();
-    }
+    },
   };
-});
+}

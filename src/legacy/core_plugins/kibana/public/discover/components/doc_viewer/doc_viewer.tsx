@@ -17,8 +17,9 @@
  * under the License.
  */
 import React from 'react';
+import { DocView } from 'ui/registry/doc_views_types';
 import { EuiTabbedContent } from '@elastic/eui';
-import { getServices, DocViewRenderProps } from '../kibana_services';
+import { getServices, DocViewRenderProps } from '../../kibana_services';
 import { DocViewerTab } from './doc_viewer_tab';
 
 /**
@@ -31,7 +32,7 @@ export function DocViewer(renderProps: DocViewRenderProps) {
   const { docViewsRegistry } = getServices();
   const tabs = docViewsRegistry
     .getDocViewsSorted(renderProps.hit)
-    .map(({ title, render, component }, idx) => {
+    .map(({ title, render, component }: DocView, idx: number) => {
       return {
         id: title,
         name: title,
