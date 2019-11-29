@@ -53,6 +53,16 @@ export const LogsPage = injectUICapabilities(({ match, uiCapabilities }: LogsPag
     path: `${match.path}/log-rate`,
   };
 
+  const logCategorizationTab = {
+    title: (
+      <>
+        {logCategorizationTabTitle}
+        <TabBetaBadge title={logCategorizationTabTitle} />
+      </>
+    ),
+    path: `${match.path}/log-categorization`,
+  };
+
   const settingsTab = {
     title: settingsTabTitle,
     path: `${match.path}/settings`,
@@ -90,7 +100,7 @@ export const LogsPage = injectUICapabilities(({ match, uiCapabilities }: LogsPag
                 <RoutedTabs
                   tabs={
                     logAnalysisCapabilities.hasLogAnalysisCapabilites
-                      ? [streamTab, logRateTab, settingsTab]
+                      ? [streamTab, logRateTab, logCategorizationTab, settingsTab]
                       : [streamTab, settingsTab]
                   }
                 />
@@ -122,9 +132,16 @@ const streamTabTitle = i18n.translate('xpack.infra.logs.index.streamTabTitle', {
   defaultMessage: 'Stream',
 });
 
-const logRateTabTitle = i18n.translate('xpack.infra.logs.index.analysisBetaBadgeTitle', {
+const logRateTabTitle = i18n.translate('xpack.infra.logs.index.logRateBetaBadgeTitle', {
   defaultMessage: 'Log Rate',
 });
+
+const logCategorizationTabTitle = i18n.translate(
+  'xpack.infra.logs.index.logCategorizationBetaBadgeTitle',
+  {
+    defaultMessage: 'Categories',
+  }
+);
 
 const settingsTabTitle = i18n.translate('xpack.infra.logs.index.settingsTabTitle', {
   defaultMessage: 'Settings',
