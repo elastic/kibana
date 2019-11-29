@@ -11,7 +11,6 @@ import {
   NAVIGATION_OVERVIEW,
   NAVIGATION_TIMELINES,
 } from '../../lib/navigation/selectors';
-import { loginAndWaitForPage } from '../../lib/util/helpers';
 
 describe('top-level navigation common to all pages in the SIEM app', () => {
   afterEach(() => {
@@ -19,7 +18,7 @@ describe('top-level navigation common to all pages in the SIEM app', () => {
   });
 
   it('navigates to the Overview page', () => {
-    loginAndWaitForPage(TIMELINES_PAGE);
+    cy.visitSiem(TIMELINES_PAGE);
 
     cy.get(NAVIGATION_OVERVIEW).click({ force: true });
 
@@ -27,7 +26,7 @@ describe('top-level navigation common to all pages in the SIEM app', () => {
   });
 
   it('navigates to the Hosts page', () => {
-    loginAndWaitForPage(TIMELINES_PAGE);
+    cy.visitSiem(TIMELINES_PAGE);
 
     cy.get(NAVIGATION_HOSTS).click({ force: true });
 
@@ -35,7 +34,7 @@ describe('top-level navigation common to all pages in the SIEM app', () => {
   });
 
   it('navigates to the Network page', () => {
-    loginAndWaitForPage(TIMELINES_PAGE);
+    cy.visitSiem(TIMELINES_PAGE);
 
     cy.get(NAVIGATION_NETWORK).click({ force: true });
 
@@ -43,7 +42,7 @@ describe('top-level navigation common to all pages in the SIEM app', () => {
   });
 
   it('navigates to the Timelines page', () => {
-    loginAndWaitForPage(OVERVIEW_PAGE);
+    cy.visitSiem(OVERVIEW_PAGE);
 
     cy.get(NAVIGATION_TIMELINES).click({ force: true });
 

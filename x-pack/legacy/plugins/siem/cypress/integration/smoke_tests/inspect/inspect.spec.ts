@@ -12,7 +12,7 @@ import {
   TIMELINE_SETTINGS_ICON,
   TIMELINE_INSPECT_BUTTON,
 } from '../../lib/inspect/selectors';
-import { DEFAULT_TIMEOUT, loginAndWaitForPage } from '../../lib/util/helpers';
+import { DEFAULT_TIMEOUT } from '../../lib/util/helpers';
 import { executeKQL, hostExistsQuery, toggleTimelineVisibility } from '../../lib/timeline/helpers';
 
 describe('Inspect', () => {
@@ -22,7 +22,7 @@ describe('Inspect', () => {
     });
     INSPECT_BUTTONS_IN_SIEM.map(table =>
       it(`inspects the ${table.title}`, () => {
-        loginAndWaitForPage(table.url);
+        cy.visitSiem(table.url);
         cy.get(table.id, { timeout: DEFAULT_TIMEOUT });
         if (table.altInspectId) {
           cy.get(table.altInspectId).trigger('click', { force: true });
@@ -40,7 +40,7 @@ describe('Inspect', () => {
     });
 
     it('inspects the timeline', () => {
-      loginAndWaitForPage(HOSTS_PAGE);
+      cy.visitSiem(HOSTS_PAGE);
       toggleTimelineVisibility();
       executeKQL(hostExistsQuery);
       cy.get(TIMELINE_SETTINGS_ICON).trigger('click', { force: true });

@@ -11,7 +11,7 @@ import {
   FIELDS_BROWSER_TITLE,
 } from '../../lib/fields_browser/selectors';
 import { HOSTS_PAGE } from '../../lib/urls';
-import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../../lib/util/helpers';
+import { DEFAULT_TIMEOUT } from '../../lib/util/helpers';
 import {
   clickOutsideFieldsBrowser,
   openEventsViewerFieldsBrowser,
@@ -39,8 +39,7 @@ const defaultHeadersInDefaultEcsCategory = [
 
 describe('Events Viewer', () => {
   beforeEach(() => {
-    loginAndWaitForPage(HOSTS_PAGE);
-
+    cy.visitSiem(HOSTS_PAGE);
     clickEventsTab();
   });
 

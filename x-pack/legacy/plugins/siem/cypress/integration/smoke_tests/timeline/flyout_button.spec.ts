@@ -11,13 +11,12 @@ import {
 import { ALL_HOSTS_WIDGET_DRAGGABLE_HOSTS } from '../../lib/hosts/selectors';
 import { HOSTS_PAGE } from '../../lib/urls';
 import { waitForAllHostsWidget } from '../../lib/hosts/helpers';
-import { loginAndWaitForPage } from '../../lib/util/helpers';
 import { drag } from '../../lib/drag_n_drop/helpers';
 import { toggleTimelineVisibility } from '../../lib/timeline/helpers';
 
 describe('timeline flyout button', () => {
   beforeEach(() => {
-    loginAndWaitForPage(HOSTS_PAGE);
+    cy.visitSiem(HOSTS_PAGE);
   });
 
   afterEach(() => {

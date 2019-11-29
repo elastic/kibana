@@ -7,19 +7,5 @@
 /** The default time in ms to wait for a Cypress command to complete */
 export const DEFAULT_TIMEOUT = 30 * 1000;
 
-/**
- * Authenticates with Kibana, visits the specified `url`, and waits for the
- * Kibana logo to be displayed before continuing
- */
-export const loginAndWaitForPage = (url: string) => {
-  cy.login();
-
-  cy.visit(`${Cypress.config().baseUrl}${url}`);
-
-  cy.viewport('macbook-15');
-
-  cy.contains('a', 'SIEM', { timeout: DEFAULT_TIMEOUT });
-};
-
 export const waitForTableLoad = (dataTestSubj: string) =>
   cy.get(dataTestSubj, { timeout: DEFAULT_TIMEOUT });

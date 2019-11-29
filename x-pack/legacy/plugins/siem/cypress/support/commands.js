@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as yaml from 'js-yaml';
+import yaml from 'js-yaml';
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -52,4 +52,11 @@ Cypress.Commands.add('login', () => {
   } else {
     cy.loginViaConfig();
   }
+});
+
+Cypress.Commands.add('visitSiem', (url) => {
+  cy.login();
+  cy.visit(`${Cypress.config().baseUrl}${url}`);
+  cy.viewport('macbook-15');
+  cy.contains('a', 'SIEM', { timeout: 30000 });
 });

@@ -7,13 +7,12 @@
 import { OVERVIEW_PAGE } from '../../lib/urls';
 import { clearFetch, stubApi } from '../../lib/fixtures/helpers';
 import { HOST_STATS, NETWORK_STATS, STAT_AUDITD } from '../../lib/overview/selectors';
-import { loginAndWaitForPage } from '../../lib/util/helpers';
 
 describe('Overview Page', () => {
   beforeEach(() => {
     clearFetch();
     stubApi('overview');
-    loginAndWaitForPage(OVERVIEW_PAGE);
+    cy.visitSiem(OVERVIEW_PAGE);
   });
 
   afterEach(() => {

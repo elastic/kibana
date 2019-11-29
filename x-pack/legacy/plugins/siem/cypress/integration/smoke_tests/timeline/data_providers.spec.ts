@@ -13,12 +13,12 @@ import { dragFromAllHostsToTimeline, toggleTimelineVisibility } from '../../lib/
 import { ALL_HOSTS_WIDGET_DRAGGABLE_HOSTS } from '../../lib/hosts/selectors';
 import { HOSTS_PAGE } from '../../lib/urls';
 import { waitForAllHostsWidget } from '../../lib/hosts/helpers';
-import { DEFAULT_TIMEOUT, loginAndWaitForPage } from '../../lib/util/helpers';
+import { DEFAULT_TIMEOUT } from '../../lib/util/helpers';
 import { drag, dragWithoutDrop } from '../../lib/drag_n_drop/helpers';
 
 describe('timeline data providers', () => {
   beforeEach(() => {
-    loginAndWaitForPage(HOSTS_PAGE);
+    cy.visitSiem(HOSTS_PAGE);
   });
 
   afterEach(() => {

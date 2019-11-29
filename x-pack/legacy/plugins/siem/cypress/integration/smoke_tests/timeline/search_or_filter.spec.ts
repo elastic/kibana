@@ -11,11 +11,10 @@ import {
   toggleTimelineVisibility,
 } from '../../lib/timeline/helpers';
 import { HOSTS_PAGE } from '../../lib/urls';
-import { loginAndWaitForPage } from '../../lib/util/helpers';
 
 describe('timeline search or filter KQL bar', () => {
   beforeEach(() => {
-    loginAndWaitForPage(HOSTS_PAGE);
+    cy.visitSiem(HOSTS_PAGE);
   });
 
   afterEach(() => {
