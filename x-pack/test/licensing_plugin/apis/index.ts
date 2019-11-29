@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../services';
 
-export default function licensingIntegrationTests({ loadTestFile }: FtrProviderContext) {
-  describe('Licensing', () => {
+export default function({ loadTestFile }: FtrProviderContext) {
+  describe('Licensing plugin', function() {
     loadTestFile(require.resolve('./info'));
     loadTestFile(require.resolve('./header'));
+
+    // MUST BE LAST! CHANGES LICENSE TYPE!
+    loadTestFile(require.resolve('./changes'));
   });
 }
