@@ -81,9 +81,9 @@ export class VisEditor extends Component {
   updateVisState = debounce(() => {
     this.props.vis.params = this.state.model;
     this.props.vis.updateState();
+    // This check should be redundant, since this method should only be called when we're in editor
+    // mode where there's also an appState passed into us.
     if (this.props.appState) {
-      // This should actually never happen, since this method should only be called when we're in editor
-      // mode where there's also an appState passed into us.
       this.props.appState.vis = this.props.vis.getState();
       this.props.appState.save();
     }
