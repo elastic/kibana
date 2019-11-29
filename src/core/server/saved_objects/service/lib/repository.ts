@@ -18,7 +18,8 @@
  */
 
 import { omit } from 'lodash';
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { APICaller } from '../../../elasticsearch/';
+
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
@@ -76,7 +77,7 @@ export interface SavedObjectsRepositoryOptions {
   /** @deprecated Will be removed once SavedObjectsSchema is exposed from Core */
   config: LegacyConfig;
   mappings: IndexMapping;
-  callCluster: CallCluster;
+  callCluster: APICaller;
   schema: SavedObjectsSchema;
   serializer: SavedObjectsSerializer;
   migrator: KibanaMigrator;
@@ -120,7 +121,7 @@ export class SavedObjectsRepository {
   private _mappings: IndexMapping;
   private _schema: SavedObjectsSchema;
   private _allowedTypes: string[];
-  private _unwrappedCallCluster: CallCluster;
+  private _unwrappedCallCluster: APICaller;
   private _serializer: SavedObjectsSerializer;
 
   /** @internal */
@@ -153,7 +154,7 @@ export class SavedObjectsRepository {
     }
     this._allowedTypes = allowedTypes;
 
-    this._unwrappedCallCluster = async (...args: Parameters<CallCluster>) => {
+    this._unwrappedCallCluster = async (...args: Parameters<APICaller>) => {
       await migrator.runMigrations();
       return callCluster(...args);
     };
@@ -886,7 +887,7 @@ export class SavedObjectsRepository {
     };
   }
 
-  private async _writeToCluster(...args: Parameters<CallCluster>) {
+  private async _writeToCluster(...args: Parameters<APICaller>) {
     try {
       return await this._callCluster(...args);
     } catch (err) {
@@ -894,7 +895,7 @@ export class SavedObjectsRepository {
     }
   }
 
-  private async _callCluster(...args: Parameters<CallCluster>) {
+  private async _callCluster(...args: Parameters<APICaller>) {
     try {
       return await this._unwrappedCallCluster(...args);
     } catch (err) {
