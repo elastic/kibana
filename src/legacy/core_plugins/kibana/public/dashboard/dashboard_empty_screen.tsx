@@ -40,7 +40,7 @@ export function DashboardEmptyScreen({
   onLinkClick,
 }: DashboardEmptyScreenProps) {
   const linkToVisualizeParagraph = (
-    <EuiText className="linkToVisualizeParagraph">
+    <EuiText data-test-subj="linkToVisualizeParagraph">
       <FormattedMessage
         id="kbn.dashboard.addVisualizationDescription3"
         defaultMessage="If you haven't set up any visualizations yet, {visualizeAppLink} to create your first visualization"
