@@ -243,6 +243,40 @@ describe('licensing plugin', () => {
       expect(coreSetup.http.get).toHaveBeenCalledTimes(1);
     });
 
+    it('http interceptor does not trigger license re-fetch for anonymous pages', async () => {
+      const sessionStorage = coreMock.createStorage();
+      plugin = new LicensingPlugin(coreMock.createPluginInitializerContext(), sessionStorage);
+
+      const coreSetup = coreMock.createSetup();
+      coreSetup.http.anonymousPaths.isAnonymous.mockReturnValue(true);
+
+      let registeredInterceptor: HttpInterceptor;
+      coreSetup.http.intercept.mockImplementation((interceptor: HttpInterceptor) => {
+        registeredInterceptor = interceptor;
+        return () => undefined;
+      });
+
+      await plugin.setup(coreSetup);
+      const httpResponse = {
+        response: {
+          headers: {
+            get(name: string) {
+              if (name === 'kbn-license-sig') {
+                return 'signature-1';
+              }
+              throw new Error('unexpected header');
+            },
+          },
+        },
+        request: {
+          url: 'http://10.10.10.10:5601/api/hello',
+        },
+      };
+      await registeredInterceptor!.response!(httpResponse as any, null as any);
+
+      expect(coreSetup.http.get).toHaveBeenCalledTimes(0);
+    });
+
     it('http interceptor does not trigger re-fetch if requested x-pack/info endpoint', async () => {
       const sessionStorage = coreMock.createStorage();
       plugin = new LicensingPlugin(coreMock.createPluginInitializerContext(), sessionStorage);

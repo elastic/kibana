@@ -85,6 +85,8 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
 
     this.removeInterceptor = core.http.intercept({
       response: async httpResponse => {
+        // we don't track license as anon users do not have one.
+        if (core.http.anonymousPaths.isAnonymous(window.location.pathname)) return httpResponse;
         if (httpResponse.response) {
           const signatureHeader = httpResponse.response.headers.get('kbn-license-sig');
           if (this.prevSignature !== signatureHeader) {
