@@ -51,7 +51,7 @@ export const UI_EXPORT_DEFAULTS = {
       'ui/field_editor/components/field_format_editor/register'
     ],
     embeddableFactories: [
-      'plugins/kibana/discover/embeddable/search_embeddable_factory',
+      'plugins/kibana/visualize/embeddable/visualize_embeddable_factory',
     ],
     search: [
       'ui/courier/search_strategy/default_search_strategy',

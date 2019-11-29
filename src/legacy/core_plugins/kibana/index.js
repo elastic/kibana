@@ -62,12 +62,12 @@ export default function (kibana) {
 
     uiExports: {
       hacks: [
+        'plugins/kibana/discover',
         'plugins/kibana/dev_tools',
         'plugins/kibana/visualize',
       ],
       savedObjectTypes: [
         'plugins/kibana/visualize/saved_visualizations/saved_visualization_register',
-        'plugins/kibana/discover/saved_searches/saved_search_register',
         'plugins/kibana/dashboard/saved_dashboard/saved_dashboard_register',
       ],
       app: {
