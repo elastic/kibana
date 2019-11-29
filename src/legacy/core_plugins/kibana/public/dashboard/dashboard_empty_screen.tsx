@@ -41,18 +41,18 @@ export function DashboardEmptyScreen({
 }: DashboardEmptyScreenProps) {
   const linkToVisualizeParagraph = (
     <EuiText className="linkToVisualizeParagraph">
-        <FormattedMessage
-          id="kbn.dashboard.addVisualizationDescription3"
-          defaultMessage="If you haven't set up any visualizations yet, {visualizeAppLink} to create your first visualization"
-          values={{
-            visualizeAppLink: (
-              <a className="euiLink" href="#/visualize">
-                {constants.visualizeAppLinkTest}
-              </a>
-            ),
-          }}
-        />
-      </EuiText>
+      <FormattedMessage
+        id="kbn.dashboard.addVisualizationDescription3"
+        defaultMessage="If you haven't set up any visualizations yet, {visualizeAppLink} to create your first visualization"
+        values={{
+          visualizeAppLink: (
+            <a className="euiLink" href="#/visualize">
+              {constants.visualizeAppLinkTest}
+            </a>
+          ),
+        }}
+      />
+    </EuiText>
   );
   const paragraph = (
     description1: string,
