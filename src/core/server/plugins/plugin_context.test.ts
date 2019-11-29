@@ -82,7 +82,7 @@ describe('Plugin Context', () => {
         pingTimeout: duration(30, 's'),
         startupTimeout: duration(5, 's'),
       },
-      path: { data: fromRoot('data') },
+      path: { config: fromRoot('config'), data: fromRoot('data') },
     });
   });
 });

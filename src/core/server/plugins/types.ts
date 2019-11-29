@@ -203,7 +203,7 @@ export const SharedGlobalConfigKeys = {
   // We can add more if really needed
   kibana: ['defaultAppId', 'index'] as const,
   elasticsearch: ['shardTimeout', 'requestTimeout', 'pingTimeout', 'startupTimeout'] as const,
-  path: ['data'] as const,
+  path: ['config', 'data'] as const,
 };
 
 export type SharedGlobalConfig = RecursiveReadonly<{

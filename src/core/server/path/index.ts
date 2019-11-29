@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { join } from 'path';
+import { join, resolve } from 'path';
 import { accessSync, constants } from 'fs';
 import { TypeOf, schema } from '@kbn/config-schema';
-import { fromRoot } from '../utils';
+import { fromRoot } from '../../utils';
 
 const isString = (v: any): v is string => typeof v === 'string';
 
@@ -65,6 +65,8 @@ export type PathConfigType = TypeOf<typeof config.schema>;
 export const config = {
   path: 'path',
   schema: schema.object({
+    // getConfigPath returns the path until the kibana.yml config. We need to move 1 level up for the dir
+    config: schema.string({ defaultValue: () => resolve(getConfigPath(), '..') }),
     data: schema.string({ defaultValue: () => getDataPath() }),
   }),
 };

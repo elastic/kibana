@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { getConfigPath, getDataPath } from './path';
 import { accessSync, constants } from 'fs';
+import { getConfigPath, getDataPath } from './';
 
 describe('Default path finder', () => {
   it('should find a kibana.yml', () => {
