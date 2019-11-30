@@ -17,7 +17,6 @@
  * under the License.
  */
 import _ from 'lodash';
-import { PromiseService } from 'ui/promises';
 import { EsResponse, SavedObject, SavedObjectConfig } from 'ui/saved_objects/types';
 import { parseSearchSource } from 'ui/saved_objects/helpers/parse_search_source';
 import { expandShorthand, SavedObjectNotFound } from '../../../../../plugins/kibana_utils/public';
@@ -26,8 +25,7 @@ import { IndexPattern } from '../../../../core_plugins/data/public';
 export async function applyEsResp(
   resp: EsResponse,
   savedObject: SavedObject,
-  config: SavedObjectConfig,
-  AngularPromise: PromiseService
+  config: SavedObjectConfig
 ) {
   const mapping = expandShorthand(config.mapping);
   const esType = config.type || '';
@@ -64,17 +62,15 @@ export async function applyEsResp(
   _.assign(savedObject, savedObject._source);
   savedObject.lastSavedTitle = savedObject.title;
 
-  return AngularPromise.try(() => {
-    parseSearchSource(savedObject, esType, meta.searchSourceJSON, resp.references);
-    return hydrateIndexPattern();
-  })
-    .then(() => {
-      if (injectReferences && resp.references && resp.references.length > 0) {
-        injectReferences(savedObject, resp.references);
-      }
-      return savedObject;
-    })
-    .then(() => {
-      return AngularPromise.cast(afterESResp.call(savedObject));
-    });
+  try {
+    await parseSearchSource(savedObject, esType, meta.searchSourceJSON, resp.references);
+    await hydrateIndexPattern();
+    if (injectReferences && resp.references && resp.references.length > 0) {
+      injectReferences(savedObject, resp.references);
+    }
+    await afterESResp.call(savedObject);
+    return savedObject;
+  } catch (e) {
+    throw e;
+  }
 }

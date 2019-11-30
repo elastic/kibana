@@ -27,13 +27,14 @@ export interface SavedObject {
   applyEsResp: () => any;
   copyOnSave: boolean;
   creationOpts: (opts: CreationOpts) => Record<string, unknown>;
+  columns?: string[];
   defaults: any;
   delete?: () => Promise<{}>;
   destroy?: () => void;
   getDisplayName: () => string;
   getEsType: () => string;
   getFullPath: () => string;
-  hydrateIndexPattern?: (id?: string) => angular.IPromise<null | void>;
+  hydrateIndexPattern?: (id?: string) => Promise<null | void>;
   id?: string | null;
   index: string;
   init?: () => void;
@@ -45,6 +46,7 @@ export interface SavedObject {
   searchSource?: SearchSource;
   showInRecentlyAccessed: boolean;
   title: string;
+  sort?: any;
 }
 
 export interface SaveOptions {
@@ -76,7 +78,7 @@ export interface SavedObjectConfig {
   mapping?: any;
   migrationVersion?: Record<string, any>;
   path?: string;
-  searchSource?: SearchSource;
+  searchSource?: SearchSource | boolean;
   type?: string;
 }
 

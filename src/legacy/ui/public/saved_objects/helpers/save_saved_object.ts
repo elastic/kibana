@@ -22,12 +22,12 @@ import {
   SavedObjectConfig,
   SaveOptions,
 } from 'ui/saved_objects/types';
-import { npStart } from 'ui/new_platform';
 import { SavedObjectsClient } from 'kibana/public';
 import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from 'ui/saved_objects/constants';
 
 import { createSource } from 'ui/saved_objects/helpers/create_source';
 import { checkForDuplicateTitle } from 'ui/saved_objects/helpers/check_for_duplicate_title';
+import { npStart } from 'ui/new_platform';
 
 /**
  * @param error {Error} the error

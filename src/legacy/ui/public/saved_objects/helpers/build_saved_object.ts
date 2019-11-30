@@ -17,7 +17,6 @@
  * under the License.
  */
 import _ from 'lodash';
-import { PromiseService } from 'ui/promises';
 import { SearchSource } from 'ui/courier';
 import { hydrateIndexPattern } from 'ui/saved_objects/helpers/hydrate_index_pattern';
 import { intializeSavedObject } from 'ui/saved_objects/helpers/initialize_saved_object';
@@ -39,8 +38,7 @@ export function buildSavedObject(
   config: SavedObjectConfig = {},
   indexPatterns: IndexPatterns,
   savedObjectsClient: SavedObjectsClient,
-  confirmModalPromise: ConfirmModalPromise,
-  AngularPromise: PromiseService
+  confirmModalPromise: ConfirmModalPromise
 ) {
   // type name for this object, used as the ES-type
   const esType = config.type || '';
@@ -83,12 +81,9 @@ export function buildSavedObject(
    * @return {Promise}
    * @resolved {SavedObject}
    */
-  savedObject.init = _.once(() =>
-    AngularPromise.resolve(intializeSavedObject(savedObject, savedObjectsClient, config))
-  );
+  savedObject.init = _.once(() => intializeSavedObject(savedObject, savedObjectsClient, config));
 
-  savedObject.applyESResp = (resp: EsResponse) =>
-    applyEsResp(resp, savedObject, config, AngularPromise);
+  savedObject.applyESResp = (resp: EsResponse) => applyEsResp(resp, savedObject, config);
 
   /**
    * Serialize this object
@@ -118,15 +113,15 @@ export function buildSavedObject(
         opts,
         confirmModalPromise
       );
-      return AngularPromise.resolve(result);
+      return Promise.resolve(result);
     } catch (e) {
-      return AngularPromise.reject(e);
+      return Promise.reject(e);
     }
   };
 
   savedObject.destroy = () => {};
 
-  savedObject.getFullPath = () => config.path + '/' + config.id;
+  // savedObject.getFullPath = () => config.path + '/' + config.id;
 
   /**
    * Delete this object from Elasticsearch
@@ -134,7 +129,7 @@ export function buildSavedObject(
    */
   savedObject.delete = () => {
     if (!savedObject.id) {
-      return AngularPromise.reject(new Error('Deleting a saved Object requires type and id'));
+      return Promise.reject(new Error('Deleting a saved Object requires type and id'));
     }
     return savedObjectsClient.delete(esType, savedObject.id);
   };

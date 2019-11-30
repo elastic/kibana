@@ -31,9 +31,9 @@ savedObjectManagementRegistry.register({
   title: 'searches'
 });
 
-module.service('savedSearches', function (Private, SavedSearch, kbnUrl, chrome) {
+module.service('savedSearches', function (Private, SavedSearch) {
   const savedObjectClient = Private(SavedObjectsClientProvider);
-  const savedSearchLoader = new SavedObjectLoader(SavedSearch, kbnUrl, chrome, savedObjectClient);
+  const savedSearchLoader = new SavedObjectLoader(SavedSearch, savedObjectClient);
   // Customize loader properties since adding an 's' on type doesn't work for type 'search' .
   savedSearchLoader.loaderProperties = {
     name: 'searches',
@@ -42,7 +42,7 @@ module.service('savedSearches', function (Private, SavedSearch, kbnUrl, chrome) 
   };
 
   savedSearchLoader.urlFor = function (id) {
-    return kbnUrl.eval('#/discover/{{id}}', { id: id });
+    return `/discover/${encodeURIComponent(id)}`;
   };
 
   return savedSearchLoader;

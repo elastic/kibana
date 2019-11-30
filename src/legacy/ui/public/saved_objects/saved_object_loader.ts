@@ -17,8 +17,7 @@
  * under the License.
  */
 import { SavedObject } from 'ui/saved_objects/types';
-import { KbnUrl } from 'ui/url/kbn_url';
-import { Chrome } from 'ui/chrome';
+import chrome from 'ui/chrome';
 import { SavedObjectsClient } from 'kibana/public';
 import { StringUtils } from '../utils/string_utils';
 
@@ -34,22 +33,13 @@ export class SavedObjectLoader {
   type: string;
   Class: (id: string) => SavedObject;
   lowercaseType: string;
-  kbnUrl: any;
-  chrome: any;
   loaderProperties: Record<string, string>;
   savedObjectsClient: SavedObjectsClient;
 
-  constructor(
-    SavedObjectClass: any,
-    kbnUrl: KbnUrl,
-    chrome: Chrome,
-    savedObjectClient: SavedObjectsClient
-  ) {
+  constructor(SavedObjectClass: any, savedObjectClient: SavedObjectsClient) {
     this.type = SavedObjectClass.type;
     this.Class = SavedObjectClass;
     this.lowercaseType = this.type.toLowerCase();
-    this.kbnUrl = kbnUrl;
-    this.chrome = chrome;
 
     this.loaderProperties = {
       name: `${this.lowercaseType}s`,
@@ -72,22 +62,20 @@ export class SavedObjectLoader {
   }
 
   urlFor(id: string) {
-    return this.kbnUrl.eval(`#/${this.lowercaseType}/{{id}}`, { id });
+    return `#/${this.lowercaseType}/${encodeURIComponent(id)}`;
   }
 
   delete(ids: string | string[]) {
-    ids = !Array.isArray(ids) ? [ids] : ids;
+    const idsUsed = !Array.isArray(ids) ? [ids] : ids;
 
-    const deletions = ids.map(id => {
+    const deletions = idsUsed.map(id => {
       // @ts-ignore
       const savedObject = new this.Class(id);
       return savedObject.delete();
     });
 
     return Promise.all(deletions).then(() => {
-      if (this.chrome) {
-        this.chrome.untrackNavLinksForDeletedSavedObjects(ids);
-      }
+      chrome.untrackNavLinksForDeletedSavedObjects(idsUsed);
     });
   }
 
@@ -118,7 +106,7 @@ export class SavedObjectLoader {
    * TODO: Rather than use a hardcoded limit, implement pagination. See
    * https://github.com/elastic/kibana/issues/8044 for reference.
    *
-   * @param searchString
+   * @param search
    * @param size
    * @param fields
    * @returns {Promise}

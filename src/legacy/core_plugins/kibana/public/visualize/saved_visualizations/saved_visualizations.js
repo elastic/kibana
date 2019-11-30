@@ -34,13 +34,11 @@ savedObjectManagementRegistry.register({
   title: 'visualizations',
 });
 
-app.service('savedVisualizations', function (SavedVis, Private, kbnUrl, chrome) {
+app.service('savedVisualizations', function (SavedVis, Private, kbnUrl) {
   const visTypes = visualizations.types;
   const savedObjectClient = Private(SavedObjectsClientProvider);
   const saveVisualizationLoader = new SavedObjectLoader(
     SavedVis,
-    kbnUrl,
-    chrome,
     savedObjectClient
   );
 

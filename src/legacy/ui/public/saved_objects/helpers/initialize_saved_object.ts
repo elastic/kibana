@@ -24,7 +24,7 @@ import { SavedObjectsClient } from 'kibana/public';
 /**
  * Initialize saved object
  */
-export function intializeSavedObject(
+export async function intializeSavedObject(
   savedObject: SavedObject,
   savedObjectsClient: SavedObjectsClient,
   config: SavedObjectConfig
@@ -35,33 +35,27 @@ export function intializeSavedObject(
   const customInit = config.init || _.noop;
   const afterESResp = config.afterESResp || _.noop;
 
-  return Promise.resolve()
-    .then(() => {
-      // If there is not id, then there is no document to fetch from elasticsearch
-      if (!savedObject.id) {
-        // just assign the defaults and be done
-        _.assign(savedObject, savedObject.defaults);
-        return savedObject.hydrateIndexPattern!().then(() => {
-          return afterESResp.call(savedObject);
-        });
-      }
+  if (!savedObject.id) {
+    // just assign the defaults and be done
+    _.assign(savedObject, savedObject.defaults);
+    await savedObject.hydrateIndexPattern!();
+    afterESResp.call(savedObject);
+    return savedObject;
+  }
 
-      // fetch the object from ES
-      return savedObjectsClient
-        .get(esType, savedObject.id)
-        .then(resp => {
-          // temporary compatability for savedObjectsClient
-          return {
-            _id: resp.id,
-            _type: resp.type,
-            _source: _.cloneDeep(resp.attributes),
-            references: resp.references,
-            found: !!resp._version,
-          };
-        })
-        .then(savedObject.applyESResp)
-        .catch(savedObject.applyEsResp);
-    })
-    .then(() => customInit.call(savedObject))
-    .then(() => savedObject);
+  try {
+    const resp = await savedObjectsClient.get(esType, savedObject.id);
+    const respMapped = {
+      _id: resp.id,
+      _type: resp.type,
+      _source: _.cloneDeep(resp.attributes),
+      references: resp.references,
+      found: !!resp._version,
+    };
+    await savedObject.applyESResp(respMapped);
+  } catch (e) {
+    await savedObject.applyEsResp();
+  }
+  await customInit.call(savedObject);
+  return savedObject;
 }

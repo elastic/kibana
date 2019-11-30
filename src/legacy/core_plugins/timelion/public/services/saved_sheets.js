@@ -32,9 +32,9 @@ savedObjectManagementRegistry.register({
 });
 
 // This is the only thing that gets injected into controllers
-module.service('savedSheets', function (Private, SavedSheet, kbnUrl, chrome) {
+module.service('savedSheets', function (Private, SavedSheet, kbnUrl) {
   const savedObjectClient = Private(SavedObjectsClientProvider);
-  const savedSheetLoader = new SavedObjectLoader(SavedSheet, kbnUrl, chrome, savedObjectClient);
+  const savedSheetLoader = new SavedObjectLoader(SavedSheet, savedObjectClient);
   savedSheetLoader.urlFor = function (id) {
     return kbnUrl.eval('#/{{id}}', { id: id });
   };

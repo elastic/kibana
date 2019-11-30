@@ -30,7 +30,6 @@
 import { SavedObjectsClient } from 'kibana/public';
 import { IPrivate } from 'ui/private';
 import { SavedObjectConfig, SaveOptions } from 'ui/saved_objects/types';
-import { PromiseService } from 'ui/promises';
 import { buildSavedObject } from 'ui/saved_objects/helpers/build_saved_object';
 import { SavedObjectsClientProvider } from './saved_objects_client_provider';
 import { IndexPatterns } from '../../../core_plugins/data/public/index_patterns/index_patterns';
@@ -45,7 +44,6 @@ export interface SavedObject {
 }
 
 export function SavedObjectProvider(
-  Promise: PromiseService,
   Private: IPrivate,
   confirmModalPromise: ConfirmModalPromise,
   indexPatterns: IndexPatterns
@@ -68,8 +66,7 @@ export function SavedObjectProvider(
       config,
       indexPatterns,
       savedObjectsClient as SavedObjectsClient,
-      confirmModalPromise,
-      Promise
+      confirmModalPromise
     );
   }
 
