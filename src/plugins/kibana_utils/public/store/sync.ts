@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Observable, Subscription } from 'rxjs';
+import { MonoTypeOperatorFunction, Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, map, share, skip, startWith } from 'rxjs/operators';
 import { createUrlControls, getStateFromUrl, setStateToUrl } from '../url';
 
@@ -53,7 +53,14 @@ interface SyncStrategy<State extends BaseState = BaseState> {
   // TODO: replace sounds like something url specific ...
   toStorage: (state: State, opts: { replace: boolean }) => void;
   fromStorage: () => State;
-  storageChange$: Observable<void>;
+  storageChange$: Observable<State>;
+}
+
+function distinctUntilChangedWithInitialValue<T>(
+  initialValue: T,
+  compare?: (x: T, y: T) => boolean
+): MonoTypeOperatorFunction<T> {
+  return input$ => input$.pipe(startWith(initialValue), distinctUntilChanged(compare), skip(1));
 }
 
 const createUrlSyncStrategy = (key: string): SyncStrategy => {
@@ -72,10 +79,8 @@ const createUrlSyncStrategy = (key: string): SyncStrategy => {
         unlisten();
       };
     }).pipe(
-      startWith(),
       map(() => getStateFromUrl(key)),
-      distinctUntilChanged(shallowEqual),
-      skip(1),
+      distinctUntilChangedWithInitialValue(getStateFromUrl(key), shallowEqual),
       share()
     ),
   };
@@ -88,6 +93,9 @@ export function syncState(config: StateSyncConfig[] | StateSyncConfig) {
   let ignoreStorageUpdate = false;
 
   stateSyncConfigs.forEach(stateSyncConfig => {
+    const toStorageMapper = stateSyncConfig.toStorageMapper || (s => s);
+    const fromStorageMapper = stateSyncConfig.fromStorageMapper || (s => s);
+
     const { toStorage, fromStorage, storageChange$ } = createUrlSyncStrategy(
       stateSyncConfig.syncKey
     );
@@ -100,8 +108,6 @@ export function syncState(config: StateSyncConfig[] | StateSyncConfig) {
           ignoreStorageUpdate = false;
           return false;
         }
-
-        const fromStorageMapper = stateSyncConfig.fromStorageMapper || (s => s);
 
         if (storageState) {
           stateSyncConfig.state.set({
@@ -124,7 +130,6 @@ export function syncState(config: StateSyncConfig[] | StateSyncConfig) {
       if (ignoreStorageUpdate) return false;
 
       const update = () => {
-        const toStorageMapper = stateSyncConfig.toStorageMapper || (s => s);
         const newStorageState = toStorageMapper(stateSyncConfig.state.get());
         toStorage(newStorageState, { replace });
         return true;
@@ -151,10 +156,11 @@ export function syncState(config: StateSyncConfig[] | StateSyncConfig) {
     subscriptions.push(
       stateSyncConfig.state.state$
         .pipe(
-          startWith(stateSyncConfig.state.get()),
-          map(stateSyncConfig.toStorageMapper || (s => s)),
-          distinctUntilChanged(shallowEqual),
-          skip(1)
+          map(toStorageMapper),
+          distinctUntilChangedWithInitialValue(
+            toStorageMapper(stateSyncConfig.state.get()),
+            shallowEqual
+          )
         )
         .subscribe(() => {
           // TODO: batch storage updates
