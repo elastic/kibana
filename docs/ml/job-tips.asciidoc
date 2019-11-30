@@ -22,7 +22,7 @@ see {ref}/ml-job-resource.html#ml-analysisconfig[Analysis configuration objects]
 If you choose a value that is larger than one day or is significantly different 
 than the estimated value, you receive an informational message. For more 
 information about choosing an appropriate bucket span, see 
-{xpack-ref}/ml-buckets.html[Buckets].
+{stack-ov}/ml-buckets.html[Buckets].
 
 [[cardinality]]
 ==== Cardinality
@@ -40,7 +40,7 @@ job uses more memory resources. In particular, if the cardinality of the
 Likewise if you are performing population analysis and the cardinality of the
 `over_field_name` is below 10, you are advised that this might not be a suitable
 field to use. For more information, see
-{xpack-ref}/ml-configuring-pop.html[Performing Population Analysis].
+{stack-ov}/ml-configuring-pop.html[Performing population analysis].
 
 [[detectors]]
 ==== Detectors
