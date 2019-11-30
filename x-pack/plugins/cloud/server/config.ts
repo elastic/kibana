@@ -10,9 +10,11 @@ import { PluginConfigDescriptor } from 'kibana/server';
 const apmConfigSchema = schema.object({
   url: schema.maybe(schema.string()),
   secret_token: schema.maybe(schema.string()),
-  ui: schema.maybe(schema.object({
-    url: schema.maybe(schema.string()),
-  })),
+  ui: schema.maybe(
+    schema.object({
+      url: schema.maybe(schema.string()),
+    })
+  ),
 });
 
 const configSchema = schema.object({
