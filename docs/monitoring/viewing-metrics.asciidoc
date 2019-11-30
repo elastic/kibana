@@ -18,7 +18,7 @@ Beats:
 
 . {ref}/configuring-monitoring.html[Configure monitoring in {es}]. If you want
 to use a separate monitoring cluster, see
-{xpack-ref}/monitoring-production.html[Monitoring in a Production Environment].
+{ref}/monitoring-production.html[Monitoring in a production environment].
 
 . <<monitoring-xpack-kibana,Configure monitoring in {kib}>>.
 

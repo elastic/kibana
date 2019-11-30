@@ -9,7 +9,8 @@
 
 . To visualize monitoring data from across the Elastic Stack. You can view
 health and performance data for {es}, Logstash, and Beats in real time, as well
-as analyze past performance. For more information, see {xpack-ref}/xpack-monitoring.html[Monitoring the Elastic Stack].
+as analyze past performance. For more information, see
+{ref}/monitor-elasticsearch-cluster.html[Monitor a cluster].
 
 . To monitor {kib} itself and route that data to the monitoring cluster.
 

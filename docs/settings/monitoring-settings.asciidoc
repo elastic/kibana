@@ -22,7 +22,7 @@ from Logstash, you configure
 in `logstash.yml`.
 
 For more information, see
-{xpack-ref}/xpack-monitoring.html[Monitoring the Elastic Stack].
+{ref}/monitor-elasticsearch-cluster.html[Monitor a cluster].
 
 [float]
 [[monitoring-general-settings]]
