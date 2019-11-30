@@ -6,7 +6,7 @@ Array [
     class="euiText euiText--extraSmall"
   >
     <h3>
-      Most recent error
+      Most recent error (25 minutes ago)
     </h3>
   </div>,
   <button
@@ -54,6 +54,7 @@ exports[`MostRecentError component validates props with shallow render 1`] = `
       }
     }
     monitorId="bad-ssl"
+    timestamp="2019-11-30T01:57:37.792Z"
   />
 </Router>
 `;
