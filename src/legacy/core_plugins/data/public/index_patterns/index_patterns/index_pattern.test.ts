@@ -20,23 +20,24 @@
 import { defaults, pluck, last, get } from 'lodash';
 import { IndexPattern } from './index_pattern';
 
-import { DuplicateField } from '../../../../kibana_utils/public';
+import { DuplicateField } from '../../../../../../plugins/kibana_utils/public';
 // @ts-ignore
-import mockLogStashFields from '../../../../../fixtures/logstash_fields';
+import mockLogStashFields from '../../../../../../fixtures/logstash_fields';
 // @ts-ignore
-import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
-import { Field } from '../fields';
+
+import { stubbedSavedObjectIndexPattern } from '../../../../../../fixtures/stubbed_saved_object_index_pattern';
+import { Field } from '../index_patterns_service';
 import { setNotifications, setFieldFormats } from '../services';
 
 // Temporary disable eslint, will be removed after moving to new platform folder
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { notificationServiceMock } from '../../../../../core/public/notifications/notifications_service.mock';
-import { FieldFormatRegisty } from '../../field_formats_provider';
+import { notificationServiceMock } from '../../../../../../core/public/notifications/notifications_service.mock';
+import { FieldFormatRegisty } from '../../../../../../plugins/data/public';
 
 jest.mock('ui/new_platform');
 
-jest.mock('../../../../kibana_utils/public', () => {
-  const originalModule = jest.requireActual('../../../../kibana_utils/public');
+jest.mock('../../../../../../plugins/kibana_utils/public', () => {
+  const originalModule = jest.requireActual('../../../../../../plugins/kibana_utils/public');
 
   return {
     ...originalModule,

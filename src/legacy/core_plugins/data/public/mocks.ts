@@ -17,17 +17,19 @@
  * under the License.
  */
 
-import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
+import { indexPatternsServiceMock } from './index_patterns/index_patterns_service.mock';
 
-export async function getTitle(
-  client: SavedObjectsClientContract,
-  indexPatternId: string
-): Promise<SimpleSavedObject<any>> {
-  const savedObject = (await client.get('index-pattern', indexPatternId)) as SimpleSavedObject<any>;
-
-  if (savedObject.error) {
-    throw new Error(`Unable to get index-pattern title: ${savedObject.error.message}`);
-  }
-
-  return savedObject.attributes.title;
+function createDataSetupMock() {
+  return {
+    indexPatterns: indexPatternsServiceMock.createSetupContract(),
+  };
 }
+
+function createDataStartMock() {
+  return {};
+}
+
+export const dataPluginMock = {
+  createSetup: createDataSetupMock,
+  createStart: createDataStartMock,
+};

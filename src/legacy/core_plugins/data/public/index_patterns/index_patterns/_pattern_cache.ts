@@ -17,7 +17,35 @@
  * under the License.
  */
 
-import { IndexPatternsService } from './index_patterns_service';
+import { IndexPattern } from './index_pattern';
 
-export type IndexPatternsSetup = ReturnType<IndexPatternsService['setup']>;
-export type IndexPatternsStart = ReturnType<IndexPatternsService['start']>;
+export interface PatternCache {
+  get: (id: string) => IndexPattern;
+  set: (id: string, value: IndexPattern) => IndexPattern;
+  clear: (id: string) => void;
+  clearAll: () => void;
+}
+
+export function createIndexPatternCache(): PatternCache {
+  const vals: Record<string, any> = {};
+  const cache: PatternCache = {
+    get: (id: string) => {
+      return vals[id];
+    },
+    set: (id: string, prom: any) => {
+      vals[id] = prom;
+      return prom;
+    },
+    clear: (id: string) => {
+      delete vals[id];
+    },
+    clearAll: () => {
+      for (const id in vals) {
+        if (vals.hasOwnProperty(id)) {
+          delete vals[id];
+        }
+      }
+    },
+  };
+  return cache;
+}

@@ -21,7 +21,7 @@ import sinon from 'sinon';
 // TODO: We should not be importing from the data plugin directly here; this is only necessary
 // because it is one of the few places that we need to access the IndexPattern class itself, rather
 // than just the type. Doing this as a temporary measure; it will be left behind when migrating to NP.
-import { IndexPattern } from '../../legacy/core_plugins/data/public/';
+import { IndexPattern } from '../../legacy/core_plugins/data/public/index_patterns/index_patterns';
 import {
   FieldList,
   getRoutes,

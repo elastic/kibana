@@ -24,6 +24,14 @@
  * from ui/index_patterns for backwards compatibility.
  */
 
+import { start as data } from '../../../core_plugins/data/public/legacy';
+
+export const {
+  FieldList, // only used in Discover and StubIndexPattern
+  flattenHitWrapper,
+  formatHitProvider,
+} = data.indexPatterns;
+
 import { indexPatterns } from '../../../../plugins/data/public';
 
 // static code
@@ -34,8 +42,6 @@ export const INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE = indexPatterns.ILLEGAL_CH
 export const ILLEGAL_CHARACTERS = indexPatterns.ILLEGAL_CHARACTERS_KEY;
 export const CONTAINS_SPACES = indexPatterns.CONTAINS_SPACES_KEY;
 export const validateIndexPattern = indexPatterns.validate;
-export const flattenHitWrapper = indexPatterns.flattenHitWrapper;
-export const formatHitProvider = indexPatterns.formatHitProvider;
 
 // types
 export {
@@ -46,5 +52,3 @@ export {
   IndexPatterns,
   StaticIndexPattern,
 } from '../../../core_plugins/data/public';
-
-export { FieldList } from '../../../../plugins/data/public';

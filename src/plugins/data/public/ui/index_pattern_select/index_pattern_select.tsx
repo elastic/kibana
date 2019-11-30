@@ -22,7 +22,7 @@ import React, { Component } from 'react';
 
 import { EuiComboBox } from '@elastic/eui';
 import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
-import { getTitle } from '../../index_patterns/lib';
+import { getIndexPatternTitle } from '../../index_patterns/lib';
 
 export interface IndexPatternSelectProps {
   onChange: (opt: any) => void;
@@ -104,7 +104,7 @@ export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
 
     let indexPatternTitle;
     try {
-      indexPatternTitle = await getTitle(this.props.savedObjectsClient, indexPatternId);
+      indexPatternTitle = await getIndexPatternTitle(this.props.savedObjectsClient, indexPatternId);
     } catch (err) {
       // index pattern no longer exists
       return;

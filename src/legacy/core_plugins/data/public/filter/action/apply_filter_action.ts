@@ -32,9 +32,8 @@ import {
   applyFiltersPopover,
   changeTimeFilter,
   extractTimeFilter,
-  IndexPatternsStart,
 } from '../../../../../../plugins/data/public';
-
+import { IndexPatternsStart } from '../../index_patterns';
 export const GLOBAL_APPLY_FILTER_ACTION = 'GLOBAL_APPLY_FILTER_ACTION';
 
 interface ActionContext {
@@ -75,7 +74,7 @@ export function createFilterAction(
       if (selectedFilters.length > 1) {
         const indexPatterns = await Promise.all(
           filters.map(filter => {
-            return indexPatternsService.indexPatterns.get(filter.meta.index!);
+            return indexPatternsService.indexPatterns.get(filter.meta.index);
           })
         );
 

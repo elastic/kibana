@@ -18,7 +18,7 @@
  */
 import { isEmpty } from 'lodash';
 import { IUiSettingsClient, SavedObjectsClientContract } from 'src/core/public';
-import { getFromSavedObject } from '../../../';
+import { getFromSavedObject } from '../../../index_patterns';
 
 export async function fetchIndexPatterns(
   savedObjectsClient: SavedObjectsClientContract,

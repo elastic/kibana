@@ -26,13 +26,17 @@ import {
   expandShorthand,
   FieldMappingSpec,
   MappingObject,
-} from '../../../../kibana_utils/public';
+} from '../../../../../../plugins/kibana_utils/public';
 
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
+import {
+  ES_FIELD_TYPES,
+  KBN_FIELD_TYPES,
+  IIndexPattern,
+  indexPatterns,
+} from '../../../../../../plugins/data/public';
 
-import { findByTitle, getRoutes } from '../utils';
-import { indexPatterns } from '../';
-import { Field, FieldList, FieldListInterface } from '../fields';
+import { findIndexPatternByTitle, getRoutes } from '../utils';
+import { Field, FieldList, FieldListInterface, FieldType } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
@@ -41,6 +45,11 @@ import { getNotifications, getFieldFormats } from '../services';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
+
+/** @deprecated
+ *  Please use IIndexPattern instead
+ * */
+export type StaticIndexPattern = IIndexPattern;
 
 export class IndexPattern implements IIndexPattern {
   [key: string]: any;
@@ -287,7 +296,7 @@ export class IndexPattern implements IIndexPattern {
     await this.save();
   }
 
-  removeScriptedField(field: IFieldType) {
+  removeScriptedField(field: FieldType) {
     this.fields.remove(field);
     return this.save();
   }
@@ -375,7 +384,10 @@ export class IndexPattern implements IIndexPattern {
       return response.id;
     };
 
-    const potentialDuplicateByTitle = await findByTitle(this.savedObjectsClient, this.title);
+    const potentialDuplicateByTitle = await findIndexPatternByTitle(
+      this.savedObjectsClient,
+      this.title
+    );
     // If there is potentially duplicate title, just create it
     if (!potentialDuplicateByTitle) {
       return await _create();

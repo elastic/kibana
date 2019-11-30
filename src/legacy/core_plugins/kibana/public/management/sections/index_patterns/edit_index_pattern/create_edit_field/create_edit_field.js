@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { Field } from '../../../../../../../../../plugins/data/public';
+import { setup as data } from '../../../../../../../data/public/legacy';
+const { FieldImpl: Field } = data.indexPatterns.__LEGACY;
+
 import { RegistryFieldFormatEditorsProvider } from 'ui/registry/field_format_editors';
 import { docTitle } from 'ui/doc_title';
 import { KbnUrlProvider } from 'ui/url';
