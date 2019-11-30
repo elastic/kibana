@@ -174,7 +174,7 @@ export function systemRoutes({
 
       try {
         const info = await callWithRequest('ml.info');
-        const cloudId = cloud && cloud.has('cloudId') && cloud.get('cloudId');
+        const cloudId = cloud && cloud.cloudId;
         return { ...info, cloudId };
       } catch (error) {
         return wrapError(error);

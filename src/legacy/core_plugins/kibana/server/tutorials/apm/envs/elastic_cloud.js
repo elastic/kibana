@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { get, has } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { INSTRUCTION_VARIANT } from '../../../../common/tutorials/instruction_variant';
 
@@ -33,7 +34,7 @@ import {
 } from '../instructions/apm_agent_instructions';
 
 function getIfExists(obj, key) {
-  return obj && obj.has(key) && obj.get(key);
+  return has(obj, key) && get(obj, key);
 }
 
 export function createElasticCloudInstructions(cloudSetup) {
