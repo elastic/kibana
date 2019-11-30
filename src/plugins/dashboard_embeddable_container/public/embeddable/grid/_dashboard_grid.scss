@@ -32,7 +32,7 @@
  * otherwise the height is set inline.
  */
  .dshLayout-isMaximizedPanel {
-  height: 100% !important; /* 1. */
+  height: 100vh !important; /* 1. */
   width: 100%;
   position: absolute;
 }
