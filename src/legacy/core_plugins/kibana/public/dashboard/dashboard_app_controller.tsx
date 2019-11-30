@@ -256,10 +256,10 @@ export class DashboardAppController {
     let outputSubscription: Subscription | undefined;
 
     const dashboardDom = document.getElementById('dashboardViewport');
-    const dahsboardFactory = embeddables.getEmbeddableFactory(
+    const dashboardFactory = embeddables.getEmbeddableFactory(
       DASHBOARD_CONTAINER_TYPE
     ) as DashboardContainerFactory;
-    dahsboardFactory
+    dashboardFactory
       .create(getDashboardInput())
       .then((container: DashboardContainer | ErrorEmbeddable) => {
         if (!isErrorEmbeddable(container)) {

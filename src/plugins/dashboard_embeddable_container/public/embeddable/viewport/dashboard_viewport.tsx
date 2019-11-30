@@ -23,9 +23,7 @@ import { PanelState } from '../../embeddable_plugin';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
 import { context } from '../../../../kibana_react/public';
-import {
-  DashboardEmptyScreen,
-} from '../../../../../legacy/core_plugins/kibana/public/dashboard/dashboard_empty_screen';
+import { DashboardEmptyScreen } from '../../../../../legacy/core_plugins/kibana/public/dashboard/dashboard_empty_screen';
 
 export interface DashboardViewportProps {
   container: DashboardContainer;

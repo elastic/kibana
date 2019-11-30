@@ -82,8 +82,6 @@ export interface DashboardAppScope extends ng.IScope {
   enterEditMode: () => void;
   timefilterSubscriptions$: Subscription;
   isVisible: boolean;
-  addVisualization: () => void;
-  successToastTitle: string;
 }
 
 export function initDashboardAppDirective(app: any, deps: RenderDeps) {
