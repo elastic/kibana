@@ -48,7 +48,7 @@ downloaded from the Elastic Docker Registry.
 <<docker,Running Kibana on Docker>>
 
 IMPORTANT: If your Elasticsearch installation is protected by
-{ref}/secure-cluster.html[{security}] see
+{ref}/secure-cluster.html[{security-features}] see
 {kibana-ref}/using-kibana-with-security.html[Configuring security in Kibana] for
 additional setup instructions.
 
