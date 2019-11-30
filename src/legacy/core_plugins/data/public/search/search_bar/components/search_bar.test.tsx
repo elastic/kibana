@@ -38,12 +38,13 @@ const mockTimeHistory = {
 jest.mock('../../../../../../../plugins/data/public', () => {
   return {
     FilterBar: () => <div className="filterBar" />,
+    createSavedQueryService: () => {},
   };
 });
 
 jest.mock('../../../../../data/public', () => {
   return {
-    QueryBarInput: () => <div className="queryBar" />,
+    QueryStringInput: () => <div className="queryBar" />,
   };
 });
 

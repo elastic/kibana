@@ -1169,7 +1169,7 @@ import { setup, start } from '../core_plugins/visualizations/public/legacy';
 | ------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `import 'ui/apply_filters'`                       | `import { applyFiltersPopover } from '../data/public'`       | Directive is deprecated.                                                                                 |
 | `import 'ui/filter_bar'`                          | `import { FilterBar } from '../data/public'`                 | Directive is deprecated.                                                                                   |
-| `import 'ui/query_bar'`                           | `import { QueryBarInput } from '../data/public'`   | Directives are deprecated.                                                                                                                                             |
+| `import 'ui/query_bar'`                           | `import { QueryStringInput } from '../data/public'`          | Directives are deprecated.                                                                                                                                             |
 | `import 'ui/search_bar'`                          | `import { SearchBar } from '../data/public'`                 | Directive is deprecated.                                                                                                                                     |
 | `import 'ui/kbn_top_nav'`                         | `import { TopNavMenu } from '../navigation/public'`          | Directive is still available in `ui/kbn_top_nav`.                                                                                                            |
 | `ui/saved_objects/components/saved_object_finder` | `import { SavedObjectFinder } from '../kibana_react/public'` |                                                                                                                                                              |
@@ -1245,6 +1245,38 @@ This table shows where these uiExports have moved to in the New Platform. In mos
 | `visTypeEnhancers`           |                                                                                                                           |                                                                                                                                       |
 | `visTypes`                   |                                                                                                                           |                                                                                                                                       |
 | `visualize`                  |                                                                                                                           |                                                                                                                                       |
+
+Examples:
+
+- **uiSettingDefaults**
+
+Before:
+```js
+uiExports: {
+  uiSettingDefaults: {
+    'my-plugin:my-setting': {
+      name: 'just-work',
+      value: true,
+      description: 'make it work',
+      category: ['my-category'],
+    },
+  }
+}
+```
+After:
+```ts
+// src/plugins/my-plugin/server/plugin.ts
+setup(core: CoreSetup){
+  core.uiSettings.register({
+    'my-plugin:my-setting': {
+      name: 'just-work',
+      value: true,
+      description: 'make it work',
+      category: ['my-category'],
+    },
+  })
+}
+```
 
 ## How to
 
