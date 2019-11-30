@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Legacy } from 'kibana';
 import { createRouter, Router } from '../../server/lib/create_router';
