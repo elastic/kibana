@@ -7,7 +7,7 @@ what users see when they log in to {kib}. The `kibana_dashboard_only_user` role 
 preconfigured with read-only permissions to {kib}.
 
 IMPORTANT: You must also assign roles that grant the user appropriate access to the data indices.
-For information on roles and privileges, see {xpack-ref}/authorization.html[User Authorization].
+For information on roles and privileges, see {ref}/authorization.html[User authorization].
 
 Users assigned this role are only able to see the Dashboard app in the navigation
 pane. When users open a dashboard, they will have a limited visual experience. 

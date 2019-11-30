@@ -23,7 +23,7 @@ highlighted in yellow or red.
 TIP: Conditions that require your attention are listed at the top of the
 Clusters page. You can also set up watches to alert you when the status
 of your cluster changes. To learn how, see
-{xpack-ref}/watch-cluster-status.html[Watch Your Cluster Health].
+{ref}/watch-cluster-status.html[Watch your cluster health].
 
 The panel at the top shows the current cluster statistics, the charts show the
 search and indexing performance over time, and the table at the bottom shows
