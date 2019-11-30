@@ -39,7 +39,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       patch: () => {},
     },
     {
-      cloud: { config: { isCloudEnabled: false } },
+      cloud: { isCloudEnabled: false },
       elasticsearch: { getCluster: () => ({ callWithInternalUser: mockCallWithInternalUser }) },
     }
   );

@@ -32,27 +32,27 @@ import {
   createDotNetAgentInstructions,
 } from '../instructions/apm_agent_instructions';
 
-function getIfExists(config, key) {
-  return config.has(key) && config.get(key);
+function getIfExists(obj, key) {
+  return obj && obj.has(key) && obj.get(key);
 }
 
-export function createElasticCloudInstructions(config) {
-  const apmServerUrl = getIfExists(config, 'xpack.cloud.apm.url');
+export function createElasticCloudInstructions(cloudSetup) {
+  const apmServerUrl = getIfExists(cloudSetup, 'apm.url');
   const instructionSets = [];
 
   if (!apmServerUrl) {
-    instructionSets.push(getApmServerInstructionSet(config));
+    instructionSets.push(getApmServerInstructionSet(cloudSetup));
   }
 
-  instructionSets.push(getApmAgentInstructionSet(config));
+  instructionSets.push(getApmAgentInstructionSet(cloudSetup));
 
   return {
     instructionSets,
   };
 }
 
-function getApmServerInstructionSet(config) {
-  const cloudId = getIfExists(config, 'xpack.cloud.id');
+function getApmServerInstructionSet(cloudSetup) {
+  const cloudId = getIfExists(cloudSetup, 'cloudId');
   return {
     title: i18n.translate('kbn.server.tutorials.apm.apmServer.title', {
       defaultMessage: 'APM Server',
@@ -75,9 +75,9 @@ function getApmServerInstructionSet(config) {
   };
 }
 
-function getApmAgentInstructionSet(config) {
-  const apmServerUrl = getIfExists(config, 'xpack.cloud.apm.url');
-  const secretToken = getIfExists(config, 'xpack.cloud.apm.secret_token');
+function getApmAgentInstructionSet(cloudSetup) {
+  const apmServerUrl = getIfExists(cloudSetup, 'apm.url');
+  const secretToken = getIfExists(cloudSetup, 'apm.secret_token');
 
   return {
     title: i18n.translate('kbn.server.tutorials.apm.elasticCloudInstructions.title', {

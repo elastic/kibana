@@ -24,6 +24,7 @@ import { parse } from 'url';
 
 import { i18n } from '@kbn/i18n';
 import { IconType, Breadcrumb as EuiBreadcrumb } from '@elastic/eui';
+import { npSetup } from 'ui/new_platform';
 
 import { InjectedMetadataStart } from '../injected_metadata';
 import { NotificationsStart } from '../notifications';
@@ -152,6 +153,8 @@ export class ChromeService {
     const navLinks = this.navLinks.start({ application, http });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start({ document: window.document });
+    const { cloud } = npSetup.plugins as any;
+    const isCloudEnabled = !!(cloud && cloud.isCloudEnabled);
 
     if (!this.params.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
       notifications.toasts.addWarning(
@@ -172,7 +175,7 @@ export class ChromeService {
           <LoadingIndicator loadingCount$={http.getLoadingCount$()} />
 
           <Header
-            isCloudEnabled={injectedMetadata.getInjectedVar('isCloudEnabled') as boolean}
+            isCloudEnabled={isCloudEnabled}
             application={application}
             appTitle$={appTitle$.pipe(takeUntil(this.stop$))}
             badge$={badge$.pipe(takeUntil(this.stop$))}

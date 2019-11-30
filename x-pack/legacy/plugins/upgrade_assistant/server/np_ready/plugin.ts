@@ -15,19 +15,16 @@ import { CloudSetup } from '../../../../../plugins/cloud/server';
 import { registerTelemetryRoutes } from './routes/telemetry';
 
 interface PluginsSetup {
-  __LEGACY: ServerShim
+  __LEGACY: ServerShim;
   usageCollection: UsageCollectionSetup;
-  cloud: CloudSetup;
+  cloud?: CloudSetup;
 }
 
-export class UpgradeAssistantServerPlugin implements Plugin<void, void, object, object> {
-  setup(
-    { http }: CoreSetup,
-    { __LEGACY, usageCollection, cloud }: PluginsSetup
-  ) {
+export class UpgradeAssistantServerPlugin implements Plugin {
+  setup({ http }: CoreSetup, { __LEGACY, usageCollection, cloud }: PluginsSetup) {
     const router = http.createRouter();
     const shimWithRouter: ServerShimWithRouter = { ...__LEGACY, router };
-    registerClusterCheckupRoutes(shimWithRouter);
+    registerClusterCheckupRoutes(shimWithRouter, { cloud });
     registerDeprecationLoggingRoutes(shimWithRouter);
 
     // The ReindexWorker uses a map of request headers that contain the authentication credentials

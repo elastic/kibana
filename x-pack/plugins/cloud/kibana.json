@@ -5,5 +5,5 @@
   "configPath": ["xpack", "cloud"],
   "optionalPlugins": ["usageCollection"],
   "server": true,
-  "ui": false
+  "ui": true
 }

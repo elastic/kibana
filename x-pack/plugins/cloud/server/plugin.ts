@@ -6,22 +6,23 @@
 
 import { first } from 'rxjs/operators';
 import { Observable } from 'rxjs';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
 import { CloudConfigType } from './config';
 import { registerCloudUsageCollector } from './collectors';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
-import {
-  CoreSetup,
-  Logger,
-  Plugin,
-  PluginInitializerContext,
-} from 'src/core/server';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
 }
+
 export interface CloudSetup {
+  cloudId?: string;
   isCloudEnabled: boolean;
+  apm: {
+    url?: string;
+    secret_token?: string;
+  };
 }
 
 export class CloudPlugin implements Plugin<CloudSetup> {
@@ -39,8 +40,15 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     const isCloudEnabled = getIsCloudEnabled(config.id);
     registerCloudUsageCollector(usageCollection, { isCloudEnabled });
 
+    const { url, secret_token: secretToken } = config.apm || {};
+
     return {
+      cloudId: config.id,
       isCloudEnabled,
+      apm: {
+        url,
+        secretToken,
+      },
     };
   }
 

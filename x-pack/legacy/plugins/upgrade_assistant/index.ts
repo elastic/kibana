@@ -9,6 +9,7 @@ import { Legacy } from 'kibana';
 import { resolve } from 'path';
 import mappings from './mappings.json';
 import { plugin } from './server/np_ready';
+import { CloudSetup } from '../../../plugins/cloud/server';
 
 export function upgradeAssistant(kibana: any) {
   const publicSrc = resolve(__dirname, 'public');
@@ -47,7 +48,7 @@ export function upgradeAssistant(kibana: any) {
       const { usageCollection, cloud } = server.newPlatform.setup.plugins;
       instance.setup(server.newPlatform.setup.core, {
         usageCollection,
-        cloud,
+        cloud: cloud as CloudSetup,
         __LEGACY: {
           // Legacy objects
           events: server.events,
