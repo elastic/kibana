@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  CoreSetup,
-  Plugin,
-  PluginInitializerContext,
-} from 'src/core/public';
+import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 
 interface CloudConfigType {
@@ -30,7 +26,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     return {
       cloudId: id,
       isCloudEnabled,
-    }
+    };
   }
 
   public start() {}

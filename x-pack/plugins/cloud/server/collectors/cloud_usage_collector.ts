@@ -20,11 +20,14 @@ export function createCloudUsageCollector(usageCollection: UsageCollectionSetup,
       return {
         isCloudEnabled,
       };
-    }
+    },
   });
 }
 
-export function registerCloudUsageCollector(usageCollection: UsageCollectionSetup | undefined, config: Config) {
+export function registerCloudUsageCollector(
+  usageCollection: UsageCollectionSetup | undefined,
+  config: Config
+) {
   if (!usageCollection) {
     return;
   }

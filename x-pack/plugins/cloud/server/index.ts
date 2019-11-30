@@ -11,4 +11,4 @@ export { CloudSetup } from './plugin';
 export { config } from './config';
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new CloudPlugin(initializerContext);
-}
+};

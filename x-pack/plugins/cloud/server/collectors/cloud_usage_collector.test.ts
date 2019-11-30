@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
- import { createCloudUsageCollector } from './cloud_usage_collector';
+import { createCloudUsageCollector } from './cloud_usage_collector';
 
 const mockUsageCollection = () => ({
   makeUsageCollector: jest.fn(),
 });
 
-const getMockConfigs = (isCloudEnabled: boolean) => ({
-  isCloudEnabled: isCloudEnabled,
-})
+const getMockConfigs = (isCloudEnabled: boolean) => ({ isCloudEnabled });
 
 describe('createCloudUsageCollector', () => {
   it('calls `makeUsageCollector`', () => {
@@ -29,6 +27,6 @@ describe('createCloudUsageCollector', () => {
       const collector = createCloudUsageCollector(usageCollection, mockConfigs);
 
       expect(collector.fetch().isCloudEnabled).toBe(true);
-    })
-  })
+    });
+  });
 });
