@@ -39,7 +39,7 @@ web browser so that it does not block pop-up windows or create an exception for
 your Kibana URL.
 
 For more information about {ml}, see
-{xpack-ref}/xpack-ml.html[Machine Learning in the Elastic Stack].
+{stack-ov}/xpack-ml.html[Machine learning in the Elastic Stack].
 
 --
 

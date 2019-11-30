@@ -28,7 +28,7 @@ The following parameters can be specified in the body of a PUT request to add or
 that begin with `_` are reserved for system usage.
 
 `elasticsearch`:: (object) Optional {es} cluster and index privileges, valid keys are 
-`cluster`, `indices` and `run_as`. For more information, see {xpack-ref}/defining-roles.html[Defining Roles].
+`cluster`, `indices` and `run_as`. For more information, see {ref}/defining-roles.html[Defining roles].
 
 `kibana`:: (list) A list of objects that specify the <<kibana-privileges>>.
 
