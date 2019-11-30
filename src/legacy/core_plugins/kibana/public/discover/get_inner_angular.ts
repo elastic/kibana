@@ -34,7 +34,7 @@ import { createEsService } from 'ui/es';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 // @ts-ignore
 import { PrivateProvider } from 'ui/private/private';
-import { CoreStart, LegacyCoreStart, UiSettingsClientContract } from 'kibana/public';
+import { CoreStart, LegacyCoreStart, IUiSettingsClient } from 'kibana/public';
 // @ts-ignore
 import { watchMultiDecorator } from 'ui/directives/watch_multi/watch_multi';
 // @ts-ignore
@@ -225,7 +225,7 @@ function createLocalKbnUrlModule() {
     .service('redirectWhenMissing', (Private: IPrivate) => Private(RedirectWhenMissingProvider));
 }
 
-function createLocalConfigModule(uiSettings: UiSettingsClientContract) {
+function createLocalConfigModule(uiSettings: IUiSettingsClient) {
   angular
     .module('discoverConfig', ['discoverPrivate'])
     .provider('stateManagementConfig', StateManagementConfigProvider)
