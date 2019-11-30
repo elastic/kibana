@@ -18,7 +18,7 @@ estimate a bucket span value based on your data characteristics. Typically, the
 estimated value is between 5 minutes to 1 hour. If you choose a value that is
 larger than one day or is significantly different than the estimated value, you
 receive an informational message. For more information about choosing an
-appropriate bucket span, see {xpack-ref}/ml-buckets.html[Buckets].
+appropriate bucket span, see {stack-ov}/ml-buckets.html[Buckets].
 
 [[cardinality]]
 ==== Cardinality
@@ -38,7 +38,7 @@ Likewise if you are performing population analysis and the cardinality of the
 field to use.
 
 For more information, see
-{xpack-ref}/ml-configuring-pop.html[Performing Population Analysis].
+{stack-ov}/ml-configuring-pop.html[Performing population analysis].
 
 [[influencers]]
 ==== Influencers

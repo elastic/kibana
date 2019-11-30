@@ -49,7 +49,7 @@ as `https://<your_monitoring_cluster>:9200` in this setting.
 
 To learn more about typical monitoring architectures with separate
 production and monitoring clusters, see
-{xpack-ref}/how-monitoring-works.html[How Monitoring Works].
+{ref}/how-monitoring-works.html[How monitoring works].
 --
 
 . If {security} is enabled on the production cluster:
