@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { get } from 'lodash';
 import { first } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
@@ -40,14 +40,12 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     const isCloudEnabled = getIsCloudEnabled(config.id);
     registerCloudUsageCollector(usageCollection, { isCloudEnabled });
 
-    const { url, secret_token: secretToken } = config.apm || {};
-
     return {
       cloudId: config.id,
       isCloudEnabled,
       apm: {
-        url,
-        secretToken,
+        url: get(config, 'apm.url'),
+        secretToken: get(config, 'apm.secret_token'),
       },
     };
   }
