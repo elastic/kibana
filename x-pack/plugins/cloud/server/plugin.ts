@@ -44,8 +44,8 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       cloudId: config.id,
       isCloudEnabled,
       apm: {
-        url: get(config, 'apm.url'),
-        secretToken: get(config, 'apm.secret_token'),
+        url: get<string | undefined>(config, 'apm.url'),
+        secretToken: get<string | undefined>(config, 'apm.secret_token'),
       },
     };
   }
