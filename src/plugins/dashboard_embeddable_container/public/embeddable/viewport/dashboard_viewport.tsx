@@ -25,7 +25,6 @@ import { DashboardGrid } from '../grid';
 import { context } from '../../../../kibana_react/public';
 import {
   DashboardEmptyScreen,
-  DashboardEmptyScreenProps,
 } from '../../../../../legacy/core_plugins/kibana/public/dashboard/dashboard_empty_screen';
 
 export interface DashboardViewportProps {
@@ -39,7 +38,6 @@ interface State {
   description?: string;
   panels: { [key: string]: PanelState };
   isEmptyState?: boolean;
-  emptyScreenProps?: DashboardEmptyScreenProps;
 }
 
 export class DashboardViewport extends React.Component<DashboardViewportProps, State> {
@@ -103,26 +101,27 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   };
 
   private renderEmptyScreen() {
-    const emptyScreenProps: DashboardEmptyScreenProps = this.props.container.getInput()
-      .emptyScreenProps;
+    const emptyScreenProps = this.props.container.getInput().emptyScreenProps;
+    if (!emptyScreenProps) {
+      return null;
+    }
     return <DashboardEmptyScreen {...emptyScreenProps} />;
   }
 
   public render() {
     const { container } = this.props;
+    const { isFullScreenMode, isEmptyState, panels, title, description, useMargins } = this.state;
     return (
       <div>
-        {this.state.isEmptyState ? this.renderEmptyScreen() : null}
+        {isEmptyState ? this.renderEmptyScreen() : null}
         <div
-          data-shared-items-count={Object.values(this.state.panels).length}
-          data-shared-items-container={false}
-          data-title={this.state.title}
-          data-description={this.state.description}
-          className={
-            this.state.useMargins ? 'dshDashboardViewport-withMargins' : 'dshDashboardViewport'
-          }
+          data-shared-items-count={Object.values(panels).length}
+          data-shared-items-container
+          data-title={title}
+          data-description={description}
+          className={useMargins ? 'dshDashboardViewport-withMargins' : 'dshDashboardViewport'}
         >
-          {this.state.isFullScreenMode && (
+          {isFullScreenMode && (
             <this.context.services.ExitFullScreenButton
               onExitFullScreenMode={this.onExitFullScreenMode}
             />

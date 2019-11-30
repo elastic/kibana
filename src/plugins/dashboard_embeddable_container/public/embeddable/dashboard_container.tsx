@@ -59,7 +59,7 @@ export interface DashboardContainerInput extends ContainerInput {
     [panelId: string]: DashboardPanelState;
   };
   isEmptyState?: boolean;
-  emptyScreenProps: DashboardEmptyScreenProps;
+  emptyScreenProps?: DashboardEmptyScreenProps;
 }
 
 interface IndexSignature {

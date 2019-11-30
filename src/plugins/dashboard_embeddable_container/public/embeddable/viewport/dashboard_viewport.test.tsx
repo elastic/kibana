@@ -33,6 +33,10 @@ import {
   ContactCardEmbeddableFactory,
 } from '../../embeddable_plugin_test_samples';
 import { KibanaContextProvider } from '../../../../../plugins/kibana_react/public';
+import {
+  DashboardEmptyScreen,
+  DashboardEmptyScreenProps,
+} from '../../../../../legacy/core_plugins/kibana/public/dashboard/dashboard_empty_screen';
 
 let dashboardContainer: DashboardContainer | undefined;
 
@@ -113,6 +117,26 @@ test('renders DashboardViewport with no visualizations', () => {
   );
   const panels = findTestSubject(component, 'dashboardPanel');
   expect(panels.length).toBe(0);
+
+  component.unmount();
+});
+
+test('renders DashboardEmptyScreen', () => {
+  const { props, options } = getProps();
+  const emptyScreenProps: DashboardEmptyScreenProps = {
+    onLinkClick: jest.fn(),
+    showLinkToVisualize: true,
+  };
+  props.container.updateInput({ isEmptyState: true, emptyScreenProps });
+  const component = mount(
+    <I18nProvider>
+      <KibanaContextProvider services={options}>
+        <DashboardViewport {...props} />
+      </KibanaContextProvider>
+    </I18nProvider>
+  );
+  const dashboardEmptyScreen = component.find(DashboardEmptyScreen);
+  expect(dashboardEmptyScreen.length).toBe(1);
 
   component.unmount();
 });
