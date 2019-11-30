@@ -7,7 +7,7 @@
 import { createCloudUsageCollector } from './cloud_usage_collector';
 
 const mockUsageCollection = () => ({
-  makeUsageCollector: jest.fn(),
+  makeUsageCollector: jest.fn().mockImplementation((args: any) => ({ ...args })),
 });
 
 const getMockConfigs = (isCloudEnabled: boolean) => ({ isCloudEnabled });
