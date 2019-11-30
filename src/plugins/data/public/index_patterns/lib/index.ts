@@ -18,3 +18,5 @@
  */
 
 export { getIndexPatternTitle } from './get_index_pattern_title';
+export * from './types';
+export { validateIndexPattern } from './validate_index_pattern';

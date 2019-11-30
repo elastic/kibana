@@ -21,8 +21,8 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 import {
   ExpressionDataHandler,
-  RenderResult,
   Context,
+  RenderId,
 } from '../../plugins/kbn_tp_run_pipeline/public/np_ready/types';
 
 type UnWrapPromise<T> = T extends Promise<infer U> ? U : T;
@@ -168,8 +168,8 @@ export function expectExpressionProvider({
       toMatchScreenshot: async () => {
         const pipelineResponse = await handler.getResponse();
         log.debug('starting to render');
-        const result = await browser.executeAsync<RenderResult>(
-          (_context: ExpressionResult, done: (renderResult: RenderResult) => void) =>
+        const result = await browser.executeAsync<RenderId>(
+          (_context: ExpressionResult, done: (renderResult: RenderId) => void) =>
             window.renderPipelineResponse(_context).then(renderResult => {
               done(renderResult);
               return renderResult;
