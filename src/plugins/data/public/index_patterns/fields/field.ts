@@ -20,26 +20,19 @@
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { ObjDefine } from './obj_define';
-// @ts-ignore
-import { shortenDottedString } from '../../../../../core_plugins/kibana/common/utils/shorten_dotted_string';
 import { IndexPattern } from '../index_patterns';
 import { getNotifications, getFieldFormats } from '../services';
-
 import {
-  FieldFormat,
-  getKbnFieldType,
   IFieldType,
+  getKbnFieldType,
   IFieldSubType,
-} from '../../../../../../plugins/data/public';
+  FieldFormat,
+  shortenDottedString,
+} from '../../../common';
 
 export type FieldSpec = Record<string, any>;
 
-/** @deprecated
- *  Please use IFieldType instead
- * */
-export type FieldType = IFieldType;
-
-export class Field implements FieldType {
+export class Field implements IFieldType {
   name: string;
   type: string;
   script?: string;

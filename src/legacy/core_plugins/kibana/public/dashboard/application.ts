@@ -47,7 +47,7 @@ import {
 
 // @ts-ignore
 import { initDashboardApp } from './legacy_app';
-import { DataStart } from '../../../data/public';
+import { DataStart, IndexPatterns } from '../../../data/public';
 import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
 import { NavigationStart } from '../../../navigation/public';
 import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
@@ -55,7 +55,7 @@ import { SharePluginStart } from '../../../../../plugins/share/public';
 
 export interface RenderDeps {
   core: LegacyCoreStart;
-  indexPatterns: DataStart['indexPatterns']['indexPatterns'];
+  indexPatterns: IndexPatterns;
   dataStart: DataStart;
   npDataStart: NpDataStart;
   navigation: NavigationStart;

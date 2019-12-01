@@ -17,14 +17,18 @@
  * under the License.
  */
 
-import { NotificationsStart } from 'src/core/public';
-import { createGetterSetter } from '../../../../../plugins/kibana_utils/public';
-import { FieldFormatsStart } from '../../../../../plugins/data/public';
+import { shortenDottedString } from './shorten_dotted_string';
 
-export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
-  'Notifications'
-);
+describe('shortenDottedString', () => {
+  test('should convert a dot.notated.string into a short string', () => {
+    expect(shortenDottedString('dot.notated.string')).toBe('d.n.string');
+  });
 
-export const [getFieldFormats, setFieldFormats] = createGetterSetter<FieldFormatsStart>(
-  'FieldFormats'
-);
+  test('should ignore non-string values', () => {
+    const obj = { key: 'val' };
+
+    expect(shortenDottedString(true)).toBe(true);
+    expect(shortenDottedString(123)).toBe(123);
+    expect(shortenDottedString(obj)).toBe(obj);
+  });
+});
