@@ -62,7 +62,7 @@ export function DashboardEmptyScreen({
     dataTestSubj?: string
   ) => {
     return (
-      <EuiText size={'m'}>
+      <EuiText size="m">
         <span>
           {description1}
           <EuiLink onClick={onLinkClick} aria-label={ariaLabel} data-test-subj={dataTestSubj || ''}>
