@@ -19,9 +19,13 @@
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { createSearchBar, StatetfulSearchBarProps } from './search';
-import { IndexPatternsService, IndexPatternsSetup, IndexPatternsStart } from './index_patterns';
 import { Storage, IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
-import { DataPublicPluginStart } from '../../../../plugins/data/public';
+import {
+  DataPublicPluginStart,
+  IndexPatternsSetup,
+  IndexPatternsStart,
+  IndexPatternsService
+} from '../../../../plugins/data/public';
 import { initLegacyModule } from './shim/legacy_module';
 import { IUiActionsSetup } from '../../../../plugins/ui_actions/public';
 import {
