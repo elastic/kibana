@@ -16,7 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { FieldFormatRegisty, Plugin, FieldFormatsStart, FieldFormatsSetup } from '.';
+import {
+  FieldFormatRegisty,
+  Plugin,
+  FieldFormatsStart,
+  FieldFormatsSetup,
+  IndexPatternsContract,
+} from '.';
 import { searchSetupMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
 import { indexPatternsServiceMock } from './index_patterns/index_patterns_service.mock';
@@ -71,7 +77,7 @@ const createStartContract = (): Start => {
     ui: {
       IndexPatternSelect: jest.fn(),
     },
-    indexPatterns: indexPatternsServiceMock.createStartContract(),
+    indexPatterns: {} as IndexPatternsContract,
   };
   return startContract;
 };

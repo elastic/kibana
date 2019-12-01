@@ -67,7 +67,7 @@ export class GraphPlugin implements Plugin {
 
   start(
     core: CoreStart,
-    { data, npData, navigation, __LEGACY: { angularDependencies } }: GraphPluginStartDependencies
+    { npData, navigation, __LEGACY: { angularDependencies } }: GraphPluginStartDependencies
   ) {
     this.navigationStart = navigation;
     this.npDataStart = npData;

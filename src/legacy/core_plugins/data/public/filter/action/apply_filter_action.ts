@@ -32,7 +32,7 @@ import {
   applyFiltersPopover,
   changeTimeFilter,
   extractTimeFilter,
-  IndexPatternsStart,
+  IndexPatternsContract,
 } from '../../../../../../plugins/data/public';
 
 export const GLOBAL_APPLY_FILTER_ACTION = 'GLOBAL_APPLY_FILTER_ACTION';
@@ -50,7 +50,7 @@ export function createFilterAction(
   overlays: CoreStart['overlays'],
   filterManager: FilterManager,
   timeFilter: TimefilterContract,
-  indexPatternsService: IndexPatternsStart
+  indexPatternsService: IndexPatternsContract
 ): IAction<ActionContext> {
   return createAction<ActionContext>({
     type: GLOBAL_APPLY_FILTER_ACTION,
@@ -75,7 +75,7 @@ export function createFilterAction(
       if (selectedFilters.length > 1) {
         const indexPatterns = await Promise.all(
           filters.map(filter => {
-            return indexPatternsService.indexPatterns.get(filter.meta.index!);
+            return indexPatternsService.get(filter.meta.index!);
           })
         );
 

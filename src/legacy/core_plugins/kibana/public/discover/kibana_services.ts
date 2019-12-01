@@ -87,6 +87,7 @@ export { Vis } from 'ui/vis';
 export {
   IndexPatternsContract,
   IIndexPattern,
+  IndexPattern,
   IFieldType,
 } from '../../../../../plugins/data/public';
 export { ElasticSearchHit } from 'ui/registry/doc_views_types';
