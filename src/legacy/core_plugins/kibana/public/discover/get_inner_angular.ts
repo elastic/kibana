@@ -64,7 +64,7 @@ import { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
 // @ts-ignore
 import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
 import { configureAppAngularModule } from 'ui/legacy_compat';
-import { IndexPatterns } from '../../../data/public/index_patterns/index_patterns';
+import { IndexPatterns } from 'src/plugins/data/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationStart } from '../../../navigation/public';
 import { createDocTableDirective } from './angular/doc_table/doc_table';
