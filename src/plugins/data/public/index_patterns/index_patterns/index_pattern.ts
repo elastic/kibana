@@ -19,30 +19,20 @@
 
 import _, { each, reject } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
-import chrome from 'ui/chrome';
 import { SavedObjectsClientContract } from 'src/core/public';
-
 import {
   DuplicateField,
   SavedObjectNotFound,
   expandShorthand,
   FieldMappingSpec,
   MappingObject,
-} from '../../../../../../plugins/kibana_utils/public';
-import { toMountPoint } from '../../../../../../plugins/kibana_react/public';
+} from '../../../../kibana_utils/public';
 
-import {
-  ES_FIELD_TYPES,
-  KBN_FIELD_TYPES,
-  IIndexPattern,
-  indexPatterns,
-} from '../../../../../../plugins/data/public';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
 
-import { findIndexPatternByTitle, getRoutes } from '../utils';
-import { Field, FieldList, FieldListInterface, FieldType } from '../fields';
+import { findByTitle, getRoutes } from '../utils';
+import { indexPatterns } from '../';
+import { Field, FieldList, FieldListInterface } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
@@ -51,11 +41,6 @@ import { getNotifications, getFieldFormats } from '../services';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
-
-/** @deprecated
- *  Please use IIndexPattern instead
- * */
-export type StaticIndexPattern = IIndexPattern;
 
 export class IndexPattern implements IIndexPattern {
   [key: string]: any;
@@ -67,7 +52,6 @@ export class IndexPattern implements IIndexPattern {
   public typeMeta: any;
   public fields: FieldListInterface;
   public timeFieldName: string | undefined;
-  public intervalName: string | undefined | null;
   public formatHit: any;
   public formatField: any;
   public flattenHit: any;
@@ -177,7 +161,7 @@ export class IndexPattern implements IIndexPattern {
     this.initFields();
   }
 
-  private async updateFromElasticSearch(response: any, forceFieldRefresh: boolean = false) {
+  private updateFromElasticSearch(response: any, forceFieldRefresh: boolean = false) {
     if (!response.found) {
       throw new SavedObjectNotFound(type, this.id, '#/management/kibana/index_pattern');
     }
@@ -195,48 +179,6 @@ export class IndexPattern implements IIndexPattern {
 
     if (!this.title && this.id) {
       this.title = this.id;
-    }
-
-    if (this.isUnsupportedTimePattern()) {
-      const warningTitle = i18n.translate('data.indexPatterns.warningTitle', {
-        defaultMessage: 'Support for time interval index patterns removed',
-      });
-
-      const warningText = i18n.translate('data.indexPatterns.warningText', {
-        defaultMessage:
-          'Currently querying all indices matching {index}. {title} should be migrated to a wildcard-based index pattern.',
-        values: {
-          title: this.title,
-          index: this.getIndex(),
-        },
-      });
-
-      // kbnUrl was added to this service in #35262 before it was de-angularized, and merged in a PR
-      // directly against the 7.x branch. Index patterns were de-angularized in #39247, and in order
-      // to preserve the functionality from #35262 we need to get the injector here just for kbnUrl.
-      // This has all been removed as of 8.0.
-      const $injector = await chrome.dangerouslyGetActiveInjector();
-      const kbnUrl = $injector.get('kbnUrl') as any; // `any` because KbnUrl interface doesn't have `getRouteHref`
-      const { toasts } = getNotifications();
-
-      toasts.addWarning({
-        title: warningTitle,
-        text: toMountPoint(
-          <div>
-            <p>{warningText}</p>
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiButton size="s" href={kbnUrl.getRouteHref(this, 'edit')}>
-                  <FormattedMessage
-                    id="data.indexPatterns.editIndexPattern"
-                    defaultMessage="Edit index pattern"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </div>
-        ),
-      });
     }
 
     return this.indexFields(forceFieldRefresh);
@@ -310,19 +252,6 @@ export class IndexPattern implements IIndexPattern {
     return this;
   }
 
-  migrate(newTitle: string) {
-    return this.savedObjectsClient
-      .update(type, this.id!, {
-        title: newTitle,
-        intervalName: null,
-      })
-      .then(({ attributes: { title, intervalName } }) => {
-        this.title = title;
-        this.intervalName = intervalName;
-      })
-      .then(() => this);
-  }
-
   // Get the source filtering configuration for that index.
   getSourceFiltering() {
     return {
@@ -358,7 +287,7 @@ export class IndexPattern implements IIndexPattern {
     await this.save();
   }
 
-  removeScriptedField(field: FieldType) {
+  removeScriptedField(field: IFieldType) {
     this.fields.remove(field);
     return this.save();
   }
@@ -382,29 +311,6 @@ export class IndexPattern implements IIndexPattern {
 
   getScriptedFields() {
     return _.where(this.fields, { scripted: true });
-  }
-
-  getIndex() {
-    if (!this.isUnsupportedTimePattern()) {
-      return this.title;
-    }
-
-    // Take a time-based interval index pattern title (like [foo-]YYYY.MM.DD[-bar]) and turn it
-    // into the actual index (like foo-*-bar) by replacing anything not inside square brackets
-    // with a *.
-    const regex = /\[[^\]]*]/g; // Matches text inside brackets
-    const splits = this.title.split(regex); // e.g. ['', 'YYYY.MM.DD', ''] from the above example
-    const matches = this.title.match(regex) || []; // e.g. ['[foo-]', '[-bar]'] from the above example
-    return splits
-      .map((split, i) => {
-        const match = i >= matches.length ? '' : matches[i].replace(/[\[\]]/g, '');
-        return `${split.length ? '*' : ''}${match}`;
-      })
-      .join('');
-  }
-
-  isUnsupportedTimePattern(): boolean {
-    return !!this.intervalName;
   }
 
   isTimeBased(): boolean {
@@ -469,10 +375,7 @@ export class IndexPattern implements IIndexPattern {
       return response.id;
     };
 
-    const potentialDuplicateByTitle = await findIndexPatternByTitle(
-      this.savedObjectsClient,
-      this.title
-    );
+    const potentialDuplicateByTitle = await findByTitle(this.savedObjectsClient, this.title);
     // If there is potentially duplicate title, just create it
     if (!potentialDuplicateByTitle) {
       return await _create();

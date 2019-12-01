@@ -17,35 +17,18 @@
  * under the License.
  */
 
-import { IndexPattern } from './index_pattern';
+import { shortenDottedString } from './shorten_dotted_string';
 
-export interface PatternCache {
-  get: (id: string) => IndexPattern;
-  set: (id: string, value: IndexPattern) => IndexPattern;
-  clear: (id: string) => void;
-  clearAll: () => void;
-}
+describe('shortenDottedString', () => {
+  test('should convert a dot.notated.string into a short string', () => {
+    expect(shortenDottedString('dot.notated.string')).toBe('d.n.string');
+  });
 
-export function createIndexPatternCache(): PatternCache {
-  const vals: Record<string, any> = {};
-  const cache: PatternCache = {
-    get: (id: string) => {
-      return vals[id];
-    },
-    set: (id: string, prom: any) => {
-      vals[id] = prom;
-      return prom;
-    },
-    clear: (id: string) => {
-      delete vals[id];
-    },
-    clearAll: () => {
-      for (const id in vals) {
-        if (vals.hasOwnProperty(id)) {
-          delete vals[id];
-        }
-      }
-    },
-  };
-  return cache;
-}
+  test('should ignore non-string values', () => {
+    const obj = { key: 'val' };
+
+    expect(shortenDottedString(true)).toBe(true);
+    expect(shortenDottedString(123)).toBe(123);
+    expect(shortenDottedString(obj)).toBe(obj);
+  });
+});

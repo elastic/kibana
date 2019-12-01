@@ -17,4 +17,14 @@
  * under the License.
  */
 
-export * from './index_patterns_service';
+const DOT_PREFIX_RE = /(.).+?\./g;
+
+/**
+ * Convert a dot.notated.string into a short
+ * version (d.n.string)
+ *
+ * @return {any}
+ */
+export function shortenDottedString(input: any) {
+  return typeof input !== 'string' ? input : input.replace(DOT_PREFIX_RE, '$1.');
+}
