@@ -7,8 +7,9 @@
 /* eslint-disable no-console */
 
 import yaml from 'js-yaml';
-import axios, { AxiosRequestConfig } from 'axios';
+import axios, { AxiosRequestConfig, AxiosError } from 'axios';
 import fs from 'fs';
+import { union, difference } from 'lodash';
 import path from 'path';
 import { argv } from 'yargs';
 
@@ -21,20 +22,27 @@ const config = yaml.safeLoad(
 
 const GITHUB_USERNAME = argv.username as string;
 const KIBANA_INDEX = config['kibana.index'] as string;
-const ELASTICSEARCH_USERNAME = (argv.esUsername as string) || 'superuser';
+const ELASTICSEARCH_USERNAME = (argv.esUsername as string) || 'elastic';
 const ELASTICSEARCH_PASSWORD = (argv.esPassword ||
   config['elasticsearch.password']) as string;
-const BASE_URL = (argv.baseUrl as string) || 'http://localhost:5601';
+const KIBANA_BASE_URL = (argv.baseUrl as string) || 'http://localhost:5601';
 
-type User =
-  | 'apm_read_user' // read access to all apps + apm index access
-  | 'apm_write_user' // read/write access to all apps + apm index access
-  | 'kibana_write_user'; // read/write access to all apps (no apm index access)
-
-const READ_ROLE = `kibana_read_${GITHUB_USERNAME}`;
-const WRITE_ROLE = `kibana_write_${GITHUB_USERNAME}`;
+interface User {
+  username: string;
+  roles: string[];
+  full_name?: string;
+  email?: string;
+  enabled?: boolean;
+}
 
 init().catch(e => {
+  if (e.response) {
+    console.log(
+      JSON.stringify({ request: e.config, response: e.response.data }, null, 2)
+    );
+    return;
+  }
+
   console.log(e);
 });
 
@@ -61,40 +69,58 @@ async function init() {
     return;
   }
 
-  // create roles
-  await createRole({ role: READ_ROLE, privilege: 'read' });
-  await createRole({ role: WRITE_ROLE, privilege: 'all' });
+  const KIBANA_READ_ROLE = `kibana_read_${GITHUB_USERNAME}`;
+  const KIBANA_WRITE_ROLE = `kibana_write_${GITHUB_USERNAME}`;
 
-  // assign role to user
-  await assignRoleToUser({ role: WRITE_ROLE, username: 'apm_write_user' });
-  await assignRoleToUser({ role: READ_ROLE, username: 'apm_read_user' });
-  await assignRoleToUser({ role: WRITE_ROLE, username: 'kibana_write_user' });
+  // create roles
+  await createRole({ role: KIBANA_READ_ROLE, privilege: 'read' });
+  await createRole({ role: KIBANA_WRITE_ROLE, privilege: 'all' });
+
+  // read/write access to all apps + apm index access
+  await createOrUpdateUser({
+    username: 'apm_write_user',
+    roles: ['apm_user', KIBANA_WRITE_ROLE]
+  });
+
+  // read access to all apps + apm index access
+  await createOrUpdateUser({
+    username: 'apm_read_user',
+    roles: ['apm_user', KIBANA_READ_ROLE]
+  });
+
+  // read/write access to all apps (no apm index access)
+  await createOrUpdateUser({
+    username: 'kibana_write_user',
+    roles: [KIBANA_WRITE_ROLE]
+  });
 }
 
-async function callKibana(options: AxiosRequestConfig) {
-  try {
-    const { data } = await axios.request({
-      ...options,
-      baseURL: BASE_URL,
-      auth: {
-        username: ELASTICSEARCH_USERNAME,
-        password: ELASTICSEARCH_PASSWORD
-      },
-      headers: { 'kbn-xsrf': 'true', ...options.headers }
-    });
-    return data;
-  } catch (e) {
-    if (e.response) {
-      throw new Error(
-        JSON.stringify(
-          { request: e.config, response: e.response.data },
-          null,
-          2
-        )
-      );
+async function callKibana<T>(options: AxiosRequestConfig): Promise<T> {
+  const { data } = await axios.request({
+    ...options,
+    baseURL: KIBANA_BASE_URL,
+    auth: {
+      username: ELASTICSEARCH_USERNAME,
+      password: ELASTICSEARCH_PASSWORD
+    },
+    headers: { 'kbn-xsrf': 'true', ...options.headers }
+  });
+  return data;
+}
+
+async function createUser(newUser: User) {
+  const user = await callKibana<User>({
+    method: 'POST',
+    url: `/api/security/v1/users/${newUser.username}`,
+    data: {
+      ...newUser,
+      enabled: true,
+      password: ELASTICSEARCH_PASSWORD
     }
-    throw e;
-  }
+  });
+
+  console.log(`User "${newUser.username}" was created`);
+  return user;
 }
 
 async function createRole({
@@ -117,20 +143,18 @@ async function createRole({
   console.log(`Created role "${role}" with privilege "${privilege}"`);
 }
 
-async function assignRoleToUser({
-  role,
-  username
-}: {
-  role: string;
-  username: User;
-}) {
-  // get user
-  const user = await callKibana({ url: `/api/security/v1/users/${username}` });
+async function createOrUpdateUser(newUser: User) {
+  const { username } = newUser;
+  const existingUser = await getUser(username);
+  if (!existingUser) {
+    return createUser(newUser);
+  }
 
-  // ensure user does not already have role
-  if (user.roles.includes(role)) {
+  const allRoles = union(existingUser.roles, newUser.roles);
+  const hasAllRoles = difference(allRoles, existingUser.roles).length === 0;
+  if (hasAllRoles) {
     console.log(
-      `Skipping: Role "${role}" was already applied to user "${user.username}"`
+      `Skipping: User "${username}" already has all neccesarry roles`
     );
     return;
   }
@@ -139,8 +163,25 @@ async function assignRoleToUser({
   await callKibana({
     method: 'POST',
     url: `/api/security/v1/users/${username}`,
-    data: { ...user, roles: [...user.roles, role] }
+    data: { ...existingUser, roles: allRoles }
   });
 
-  console.log(`Role "${role}" was added to user "${username}"`);
+  console.log(`User "${username}" was updated`);
+}
+
+async function getUser(username: string) {
+  try {
+    return await callKibana<User>({
+      url: `/api/security/v1/users/${username}`
+    });
+  } catch (e) {
+    const err = e as AxiosError;
+
+    // return empty if user doesn't exist
+    if (err.response?.status === 404) {
+      return null;
+    }
+
+    throw e;
+  }
 }

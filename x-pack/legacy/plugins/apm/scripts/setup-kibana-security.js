@@ -18,6 +18,7 @@
 // compile typescript on the fly
 require('@babel/register')({
   extensions: ['.ts'],
+  plugins: ['@babel/plugin-proposal-optional-chaining'],
   presets: [
     '@babel/typescript',
     ['@babel/preset-env', { targets: { node: 'current' } }]
