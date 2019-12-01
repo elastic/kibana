@@ -57,7 +57,7 @@ uiRoutes
     controllerAs: 'listingController',
     resolve: {
       createNewVis: () => false,
-      hasDefaultIndex: ($rootScope, kbnUrl) => ensureDefaultIndexPattern(getServices().core, getServices().data, $rootScope, kbnUrl)
+      hasDefaultIndex: ($rootScope, kbnUrl) => ensureDefaultIndexPattern(getServices().core, getServices().npData, $rootScope, kbnUrl)
     },
   })
   .when(VisualizeConstants.WIZARD_STEP_1_PAGE_PATH, {
@@ -67,7 +67,7 @@ uiRoutes
     controllerAs: 'listingController',
     resolve: {
       createNewVis: () => true,
-      hasDefaultIndex: ($rootScope, kbnUrl) => ensureDefaultIndexPattern(getServices().core, getServices().data, $rootScope, kbnUrl)
+      hasDefaultIndex: ($rootScope, kbnUrl) => ensureDefaultIndexPattern(getServices().core, getServices().npData, $rootScope, kbnUrl)
     },
   });
 

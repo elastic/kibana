@@ -84,7 +84,11 @@ export { unhashUrl } from 'ui/state_management/state_hashing';
 
 // EXPORT types
 export { Vis } from 'ui/vis';
-export { IndexPatterns, IndexPattern, FieldType } from 'ui/index_patterns';
+export {
+  IndexPatternsContract,
+  IIndexPattern,
+  IFieldType,
+} from '../../../../../plugins/data/public';
 export { ElasticSearchHit } from 'ui/registry/doc_views_types';
 export { DocViewRenderProps, DocViewRenderFn } from 'ui/registry/doc_views';
 export { Adapters } from 'ui/inspector/types';

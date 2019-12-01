@@ -43,7 +43,6 @@ export {
   FieldType,
   FieldListInterface,
   IndexPattern,
-  IndexPatterns,
 } from '../../../core_plugins/data/public';
 
 export { FieldList } from '../../../../plugins/data/public';

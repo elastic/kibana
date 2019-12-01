@@ -58,6 +58,13 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
   public start(core: CoreStart): DataPublicPluginStart {
     const { uiSettings, http, notifications, savedObjects } = core;
     const fieldFormats = this.fieldFormatsService.start();
+    const indexPatternsService = this.indexPatterns.start({
+      uiSettings,
+      savedObjectsClient: savedObjects.client,
+      http,
+      notifications,
+      fieldFormats,
+    });
 
     return {
       autocomplete: this.autocomplete,
@@ -68,13 +75,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       ui: {
         IndexPatternSelect: createIndexPatternSelect(core.savedObjects.client),
       },
-      indexPatterns: this.indexPatterns.start({
-        uiSettings,
-        savedObjectsClient: savedObjects.client,
-        http,
-        notifications,
-        fieldFormats,
-      }),
+      indexPatterns: indexPatternsService.indexPatterns,
     };
   }
 

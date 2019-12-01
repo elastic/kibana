@@ -18,26 +18,11 @@
  */
 
 import { IndexPatternsService } from './index_patterns_service';
-import { flattenHitWrapper } from './index_patterns';
-import { IndexPatternsSetup } from './types';
 
 type IndexPatternsServiceClientContract = PublicMethodsOf<IndexPatternsService>;
 
 const createSetupContractMock = () => {
-  // Legacy mock - must be removed before migrating to new platform.
-  // Included here because we only want to call `jest.mock` when somebody creates
-  // the mock for this contract.
-  jest.mock('ui/chrome');
-
-  const setupContract: jest.Mocked<IndexPatternsSetup> = {
-    FieldList: {} as any,
-    flattenHitWrapper: jest.fn().mockImplementation(flattenHitWrapper),
-    formatHitProvider: jest.fn(),
-    indexPatterns: jest.fn() as any,
-    IndexPatternSelect: jest.fn(),
-  };
-
-  return setupContract;
+  return {};
 };
 
 const createMock = () => {
