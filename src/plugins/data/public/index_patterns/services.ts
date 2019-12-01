@@ -17,13 +17,14 @@
  * under the License.
  */
 
-import { once } from 'lodash';
+import { NotificationsStart } from 'src/core/public';
+import { createGetterSetter } from '../../../kibana_utils/public';
+import { FieldFormatsStart } from '../field_formats_provider';
 
-// @ts-ignore
-import { uiModules } from 'ui/modules';
-import { IndexPatterns } from '../';
+export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
+  'Notifications'
+);
 
-/** @internal */
-export const initLegacyModule = once((indexPatterns: IndexPatterns): void => {
-  uiModules.get('kibana/index_patterns').value('indexPatterns', indexPatterns);
-});
+export const [getFieldFormats, setFieldFormats] = createGetterSetter<FieldFormatsStart>(
+  'FieldFormats'
+);
