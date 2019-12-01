@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { IndexPatternsService, IndexPatternsSetup } from '.';
+import { IndexPatternsService } from './index_patterns_service';
 import { flattenHitWrapper } from './index_patterns';
+import { IndexPatternsSetup } from './types';
 
 type IndexPatternsServiceClientContract = PublicMethodsOf<IndexPatternsService>;
 
@@ -33,11 +34,7 @@ const createSetupContractMock = () => {
     flattenHitWrapper: jest.fn().mockImplementation(flattenHitWrapper),
     formatHitProvider: jest.fn(),
     indexPatterns: jest.fn() as any,
-    __LEGACY: {
-      // For BWC we must temporarily export the class implementation of Field,
-      // which is only used externally by the Index Pattern UI.
-      FieldImpl: jest.fn(),
-    },
+    IndexPatternSelect: jest.fn(),
   };
 
   return setupContract;

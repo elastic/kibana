@@ -18,7 +18,7 @@
  */
 
 import { HttpServiceBase } from 'src/core/public';
-import { indexPatterns } from '../../../../../../plugins/data/public';
+import { indexPatterns } from '../';
 
 const API_BASE_URL: string = `/api/index_patterns/`;
 
