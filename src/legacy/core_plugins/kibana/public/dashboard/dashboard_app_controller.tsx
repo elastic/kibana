@@ -39,7 +39,7 @@ import {
   unhashUrl,
 } from './legacy_imports';
 import { FilterStateManager, IndexPattern } from '../../../data/public';
-import { Query, SavedQuery } from '../../../../../plugins/data/public';
+import { Query, SavedQuery, IndexPatterns } from '../../../../../plugins/data/public';
 
 import './dashboard_empty_screen_directive';
 
@@ -78,9 +78,7 @@ export interface DashboardAppControllerDependencies extends RenderDeps {
   $routeParams: any;
   getAppState: any;
   globalState: State;
-  indexPatterns: {
-    getDefault: () => Promise<IndexPattern>;
-  };
+  indexPatterns: IndexPatterns;
   dashboardConfig: any;
   kbnUrl: KbnUrl;
   AppStateClass: TAppStateClass<DashboardAppState>;
@@ -171,7 +169,7 @@ export class DashboardAppController {
       } else {
         indexPatterns.getDefault().then(defaultIndexPattern => {
           $scope.$evalAsync(() => {
-            $scope.indexPatterns = [defaultIndexPattern];
+            $scope.indexPatterns = [defaultIndexPattern as IndexPattern];
           });
         });
       }

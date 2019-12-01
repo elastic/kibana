@@ -17,13 +17,35 @@
  * under the License.
  */
 
-import { once } from 'lodash';
+import { IndexPattern } from './index_pattern';
 
-// @ts-ignore
-import { uiModules } from 'ui/modules';
-import { IndexPatterns } from '../';
+interface PatternCache {
+  get: (id: string) => IndexPattern;
+  set: (id: string, value: IndexPattern) => IndexPattern;
+  clear: (id: string) => void;
+  clearAll: () => void;
+}
 
-/** @internal */
-export const initLegacyModule = once((indexPatterns: IndexPatterns): void => {
-  uiModules.get('kibana/index_patterns').value('indexPatterns', indexPatterns);
-});
+export function createIndexPatternCache(): PatternCache {
+  const vals: Record<string, any> = {};
+  const cache: PatternCache = {
+    get: (id: string) => {
+      return vals[id];
+    },
+    set: (id: string, prom: any) => {
+      vals[id] = prom;
+      return prom;
+    },
+    clear: (id: string) => {
+      delete vals[id];
+    },
+    clearAll: () => {
+      for (const id in vals) {
+        if (vals.hasOwnProperty(id)) {
+          delete vals[id];
+        }
+      }
+    },
+  };
+  return cache;
+}
