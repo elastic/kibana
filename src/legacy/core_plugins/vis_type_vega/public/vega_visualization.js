@@ -25,7 +25,7 @@ import { timefilter } from 'ui/timefilter';
 import { start as data } from '../../../core_plugins/data/public/legacy';
 import { npStart } from 'ui/new_platform';
 
-import { findIndexPatternByTitle } from '../../data/public/index_patterns';
+import { findIndexPatternByTitle } from '../../../../plugins/data/public';
 
 export const createVegaVisualization = ({ serviceSettings }) => class VegaVisualization {
   constructor(el, vis) {
