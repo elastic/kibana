@@ -24,7 +24,7 @@ import {
   DataPublicPluginStart,
   IndexPatternsSetup,
   IndexPatternsStart,
-  IndexPatternsService
+  IndexPatternsService,
 } from '../../../../plugins/data/public';
 import { initLegacyModule } from './shim/legacy_module';
 import { IUiActionsSetup } from '../../../../plugins/ui_actions/public';
