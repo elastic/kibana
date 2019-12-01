@@ -73,8 +73,8 @@ async function init() {
   const KIBANA_WRITE_ROLE = `kibana_write_${GITHUB_USERNAME}`;
 
   // create roles
-  await createRole({ role: KIBANA_READ_ROLE, privilege: 'read' });
-  await createRole({ role: KIBANA_WRITE_ROLE, privilege: 'all' });
+  await createRole({ roleName: KIBANA_READ_ROLE, privilege: 'read' });
+  await createRole({ roleName: KIBANA_WRITE_ROLE, privilege: 'all' });
 
   // read/write access to all apps + apm index access
   await createOrUpdateUser({
@@ -108,6 +108,41 @@ async function callKibana<T>(options: AxiosRequestConfig): Promise<T> {
   return data;
 }
 
+async function createRole({
+  roleName,
+  privilege
+}: {
+  roleName: string;
+  privilege: 'read' | 'all';
+}) {
+  const role = await getRole(roleName);
+  if (role) {
+    console.log(`Skipping: Role "${roleName}" already exists`);
+    return;
+  }
+
+  await callKibana({
+    method: 'PUT',
+    url: `/api/security/role/${roleName}`,
+    data: {
+      metadata: { version: 1 },
+      elasticsearch: { cluster: [], indices: [] },
+      kibana: [{ base: [privilege], feature: {}, spaces: ['*'] }]
+    }
+  });
+
+  console.log(`Created role "${roleName}" with privilege "${privilege}"`);
+}
+
+async function createOrUpdateUser(newUser: User) {
+  const existingUser = await getUser(newUser.username);
+  if (!existingUser) {
+    return createUser(newUser);
+  }
+
+  return updateUser(existingUser, newUser);
+}
+
 async function createUser(newUser: User) {
   const user = await callKibana<User>({
     method: 'POST',
@@ -123,38 +158,13 @@ async function createUser(newUser: User) {
   return user;
 }
 
-async function createRole({
-  role,
-  privilege
-}: {
-  role: string;
-  privilege: 'read' | 'all';
-}) {
-  await callKibana({
-    method: 'PUT',
-    url: `/api/security/role/${role}`,
-    data: {
-      metadata: { version: 1 },
-      elasticsearch: { cluster: [], indices: [] },
-      kibana: [{ base: [privilege], feature: {}, spaces: ['*'] }]
-    }
-  });
-
-  console.log(`Created role "${role}" with privilege "${privilege}"`);
-}
-
-async function createOrUpdateUser(newUser: User) {
+async function updateUser(existingUser: User, newUser: User) {
   const { username } = newUser;
-  const existingUser = await getUser(username);
-  if (!existingUser) {
-    return createUser(newUser);
-  }
-
   const allRoles = union(existingUser.roles, newUser.roles);
   const hasAllRoles = difference(allRoles, existingUser.roles).length === 0;
   if (hasAllRoles) {
     console.log(
-      `Skipping: User "${username}" already has all neccesarry roles`
+      `Skipping: User "${username}" already has neccesarry roles: "${newUser.roles}"`
     );
     return;
   }
@@ -178,6 +188,24 @@ async function getUser(username: string) {
     const err = e as AxiosError;
 
     // return empty if user doesn't exist
+    if (err.response?.status === 404) {
+      return null;
+    }
+
+    throw e;
+  }
+}
+
+async function getRole(roleName: string) {
+  try {
+    return await callKibana({
+      method: 'GET',
+      url: `/api/security/role/${roleName}`
+    });
+  } catch (e) {
+    const err = e as AxiosError;
+
+    // return empty if role doesn't exist
     if (err.response?.status === 404) {
       return null;
     }
