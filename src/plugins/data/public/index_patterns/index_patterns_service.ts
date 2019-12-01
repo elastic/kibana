@@ -23,16 +23,9 @@ import {
   HttpServiceBase,
   NotificationsStart,
 } from 'src/core/public';
-import { FieldFormatsStart } from '../../../../../plugins/data/public';
-import { Field, FieldList, FieldListInterface, FieldType } from './fields';
+import { FieldFormatsStart } from '../field_formats_provider';
 import { setNotifications, setFieldFormats } from './services';
-
-import {
-  createFlattenHitWrapper,
-  formatHitProvider,
-  IndexPattern,
-  IndexPatterns,
-} from './index_patterns';
+import { IndexPatterns } from './index_patterns';
 
 export interface IndexPatternDependencies {
   uiSettings: IUiSettingsClient;
@@ -51,16 +44,8 @@ export class IndexPatternsService {
   private setupApi: any;
 
   public setup() {
-    this.setupApi = {
-      FieldList,
-      flattenHitWrapper: createFlattenHitWrapper(),
-      formatHitProvider,
-      __LEGACY: {
-        // For BWC we must temporarily export the class implementation of Field,
-        // which is only used externally by the Index Pattern UI.
-        FieldImpl: Field,
-      },
-    };
+    this.setupApi = {};
+
     return this.setupApi;
   }
 
@@ -75,7 +60,6 @@ export class IndexPatternsService {
     setFieldFormats(fieldFormats);
 
     return {
-      ...this.setupApi,
       indexPatterns: new IndexPatterns(uiSettings, savedObjectsClient, http),
     };
   }
@@ -84,20 +68,3 @@ export class IndexPatternsService {
     // nothing to do here yet
   }
 }
-
-// static code
-
-/** @public */
-export { getFromSavedObject, getRoutes } from './utils';
-
-// types
-
-/** @internal */
-export type IndexPatternsSetup = ReturnType<IndexPatternsService['setup']>;
-export type IndexPatternsStart = ReturnType<IndexPatternsService['start']>;
-
-/** @public */
-export { IndexPattern, IndexPatterns, Field, FieldType, FieldListInterface };
-
-/** @public */
-export { findIndexPatternByTitle } from './utils';
