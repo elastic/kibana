@@ -19,7 +19,7 @@
 
 import { join } from 'path';
 
-import { pkg } from '../core/utils';
+import { pkg } from '../core/server/utils';
 import Command from '../cli/command';
 import { getDataPath } from '../core/server/path';
 import { Keystore } from '../legacy/server/keystore';

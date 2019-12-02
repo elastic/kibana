@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { pkg } from '../core/utils';
+import { pkg } from '../core/server/utils';
 import Command from '../cli/command';
 import listCommand from './list';
 import installCommand from './install';

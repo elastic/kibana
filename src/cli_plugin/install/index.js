@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { fromRoot, pkg } from '../../core/utils';
+import { fromRoot, pkg } from '../../core/server/utils';
 import install from './install';
 import Logger from '../lib/logger';
 import { getConfigPath } from '../../core/server/path';

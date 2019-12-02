@@ -22,7 +22,7 @@ import cluster from 'cluster';
 import { EventEmitter } from 'events';
 
 import { BinderFor } from '../../legacy/utils';
-import { fromRoot } from '../../core/utils';
+import { fromRoot } from '../../core/server/utils';
 
 const cliPath = fromRoot('src/cli');
 const baseArgs = _.difference(process.argv.slice(2), ['--no-watch']);

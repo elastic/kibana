@@ -27,8 +27,8 @@ import { makeRe } from 'minimatch';
 import jsonStableStringify from 'json-stable-stringify';
 
 import { IS_KIBANA_DISTRIBUTABLE } from '../../utils';
-import { fromRoot } from '../../../core/utils';
-
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { fromRoot } from '../../../core/server/utils';
 import { UiBundle } from './ui_bundle';
 import { appEntryTemplate } from './app_entry_template';
 

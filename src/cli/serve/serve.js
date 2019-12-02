@@ -23,7 +23,7 @@ import { resolve } from 'path';
 import url from 'url';
 
 import { IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
-import { fromRoot } from '../../core/utils';
+import { fromRoot } from '../../core/server/utils';
 import { getConfigPath } from '../../core/server/path';
 import { bootstrap } from '../../core/server';
 import { readKeystore } from './read_keystore';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { fromRoot } from '../../core/utils';
+import { fromRoot } from '../../core/server/utils';
 import remove from './remove';
 import Logger from '../lib/logger';
 import { parse } from './settings';

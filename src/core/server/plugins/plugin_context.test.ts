@@ -27,7 +27,7 @@ import { loggingServiceMock } from '../logging/logging_service.mock';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { PluginManifest } from './types';
 import { Server } from '../server';
-import { fromRoot } from '../../utils';
+import { fromRoot } from '../utils';
 
 const logger = loggingServiceMock.create();
 

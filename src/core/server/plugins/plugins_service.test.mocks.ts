@@ -21,7 +21,7 @@ export const mockPackage = new Proxy(
   { raw: { __dirname: '/tmp' } as any },
   { get: (obj, prop) => obj.raw[prop] }
 );
-jest.mock('../../../core/utils/package_json', () => ({ pkg: mockPackage }));
+jest.mock('../../../core/server/utils/package_json', () => ({ pkg: mockPackage }));
 
 export const mockDiscover = jest.fn();
 jest.mock('./discovery/plugins_discovery', () => ({ discover: mockDiscover }));

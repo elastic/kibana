@@ -20,7 +20,7 @@
 import { join, resolve } from 'path';
 import { accessSync, constants } from 'fs';
 import { TypeOf, schema } from '@kbn/config-schema';
-import { fromRoot } from '../../utils';
+import { fromRoot } from '../utils';
 
 const isString = (v: any): v is string => typeof v === 'string';
 
