@@ -18,8 +18,7 @@
  */
 
 import { find, get } from 'lodash';
-
-import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
+import { SavedObjectsClientContract, SimpleSavedObject } from 'src/core/public';
 
 /**
  * Returns an object matching a given title
@@ -28,7 +27,7 @@ import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../co
  * @param title {string}
  * @returns {Promise<SimpleSavedObject|undefined>}
  */
-export async function findIndexPatternByTitle(
+export async function findByTitle(
   client: SavedObjectsClientContract,
   title: string
 ): Promise<SimpleSavedObject<any> | void> {
