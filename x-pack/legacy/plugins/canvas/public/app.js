@@ -20,6 +20,7 @@ import 'uiExports/visResponseHandlers';
 import 'uiExports/visRequestHandlers';
 import 'uiExports/savedObjectTypes';
 import 'uiExports/spyModes';
+import 'uiExports/embeddableFactories';
 import 'uiExports/interpreter';
 
 // load application code

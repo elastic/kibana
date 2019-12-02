@@ -18,6 +18,7 @@
  */
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import 'ui/autoload/all';
+import 'uiExports/embeddableFactories';
 import 'uiExports/embeddableActions';
 
 import { npSetup, npStart } from 'ui/new_platform';

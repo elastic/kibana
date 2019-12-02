@@ -22,6 +22,7 @@ import 'uiExports/inspectorViews';
 import 'uiExports/interpreter';
 import 'uiExports/savedObjectTypes';
 import 'uiExports/embeddableActions';
+import 'uiExports/embeddableFactories';
 import 'uiExports/navbarExtensions';
 import 'uiExports/docViews';
 import 'uiExports/search';
