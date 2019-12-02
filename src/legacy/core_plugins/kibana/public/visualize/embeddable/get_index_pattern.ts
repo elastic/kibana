@@ -17,18 +17,15 @@
  * under the License.
  */
 
-import {
-  getServices,
-  getFromSavedObject,
-  StaticIndexPattern,
-  VisSavedObject,
-} from '../kibana_services';
+import { getServices, getFromSavedObject, VisSavedObject } from '../kibana_services';
+
+import { IIndexPattern } from '../../../../../../plugins/data/public';
 
 const { savedObjectsClient, uiSettings } = getServices();
 
 export async function getIndexPattern(
   savedVis: VisSavedObject
-): Promise<StaticIndexPattern | undefined> {
+): Promise<IIndexPattern | undefined> {
   if (savedVis.vis.type.name !== 'metrics') {
     return savedVis.vis.indexPattern;
   }

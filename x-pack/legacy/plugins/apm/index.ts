@@ -31,7 +31,7 @@ export const apm: LegacyPluginInitializer = kibana => {
         order: 8100
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      home: ['plugins/apm/register_feature'],
+      home: ['plugins/apm/legacy_register_feature'],
 
       // TODO: get proper types
       injectDefaultVars(server: Server) {
