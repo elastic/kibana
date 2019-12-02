@@ -17,16 +17,25 @@
  * under the License.
  */
 
-import { CoreStart, Plugin } from '../../../../../core/public';
-import { initTableVisLegacyModule } from './table_vis_legacy_module';
+import { IModule } from 'angular';
+
+// @ts-ignore
+import { TableVisController } from './table_vis_controller.js';
+// @ts-ignore
+import { KbnAggTable } from './agg_table/agg_table';
+// @ts-ignore
+import { KbnAggTableGroup } from './agg_table/agg_table_group';
+// @ts-ignore
+import { KbnRows } from './paginated_table/rows';
+// @ts-ignore
+import { PaginatedTable } from './paginated_table/paginated_table';
 
 /** @internal */
-export class LegacyDependenciesPlugin implements Plugin {
-  public setup() {
-    initTableVisLegacyModule();
-  }
-
-  public start(core: CoreStart) {
-    // nothing to do here yet
-  }
-}
+export const initTableVisLegacyModule = (angularIns: IModule): void => {
+  angularIns
+    .controller('KbnTableVisController', TableVisController)
+    .directive('kbnAggTable', KbnAggTable)
+    .directive('kbnAggTableGroup', KbnAggTableGroup)
+    .directive('kbnRows', KbnRows)
+    .directive('paginatedTable', PaginatedTable);
+};
