@@ -11,3 +11,10 @@ Context passed to the plugins `start` method.
 ```typescript
 export interface CoreStart 
 ```
+
+## Properties
+
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [savedObjects](./kibana-plugin-server.corestart.savedobjects.md) | <code>SavedObjectsServiceStart</code> | [SavedObjectsServiceStart](./kibana-plugin-server.savedobjectsservicestart.md) |
+
