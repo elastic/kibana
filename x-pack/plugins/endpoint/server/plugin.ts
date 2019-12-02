@@ -10,9 +10,7 @@ import { addRoutes } from './routes';
 
 export type EndpointPluginStart = void;
 export type EndpointPluginSetup = void;
-export interface EndpointPluginSetupDependencies {
-  features: FeaturesPluginSetupContract;
-}
+export interface EndpointPluginSetupDependencies {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
 export interface EndpointPluginStartDependencies {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
@@ -24,24 +22,7 @@ export class EndpointPlugin
       EndpointPluginStartDependencies,
       EndpointPluginSetupDependencies
     > {
-  public setup(core: CoreSetup, plugins: EndpointPluginSetupDependencies) {
-    plugins.features.registerFeature({
-      id: 'endpoint',
-      name: 'Endpoint',
-      icon: 'bug',
-      navLinkId: 'endpoint',
-      app: ['endpoint', 'kibana'],
-      privileges: {
-        read: {
-          api: ['resolver'],
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: ['show'],
-        },
-      },
-    });
+  public setup(core: CoreSetup) {
     const router = core.http.createRouter();
     addRoutes(router);
   }
