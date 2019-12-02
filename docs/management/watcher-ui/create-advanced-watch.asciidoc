@@ -16,7 +16,7 @@ This screen lets you define the core properties of an advanced watch.
 image:management/watcher-ui/images/advanced-watch/advanced-watch-create.png["Create Advanced Watch",link="management/watcher-ui/images/advanced-watch/advanced-watch-create.png"]
 
 The `ID` refers to the identifier used by Elasticsearch, whereas `Name` is the more user-friendly way to identify the watch. Refer to the 
-{stack-ov}/how-watcher-works.html#watch-definition[Watch definition documentation] 
+{ref}/how-watcher-works.html#watch-definition[Watch definition documentation] 
 for the Watch JSON.
 
 [float]

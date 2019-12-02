@@ -12,16 +12,17 @@
 - <<saml>>
 
 [[basic-authentication]]
-==== Basic Authentication
+==== Basic authentication
 
 Basic authentication requires a username and password to successfully log in to {kib}. It is enabled by default and based on the Native security realm provided by {es}. The basic authentication provider uses a Kibana provided login form, and supports authentication using the `Authorization` request header's `Basic` scheme.
 
 The session cookies that are issued by the basic authentication provider are stateless. Therefore, logging out of Kibana when using the basic authentication provider clears the session cookies from the browser but does not invalidate the session cookie for reuse.
 
-For more information about basic authentication and built-in users, see {xpack-ref}/setting-up-authentication.html[Setting Up User Authentication].
+For more information about basic authentication and built-in users, see
+{ref}/setting-up-authentication.html[User authentication].
 
 [[token-authentication]]
-==== Token Authentication
+==== Token authentication
 
 Token authentication allows users to login using the same Kibana provided login form as basic authentication. The token authentication provider is built on {es}'s token APIs. The bearer tokens returned by {es}'s {ref}/security-api-get-token.html[get token API] can be used directly with Kibana using the `Authorization` request header with the `Bearer` scheme.
 
@@ -44,9 +45,9 @@ xpack.security.authProviders: [token, basic]
 --------------------------------------------------------------------------------
 
 [[saml]]
-==== SAML Single Sign-On
+==== SAML single sign-on
 
-SAML authentication allows users to log in to {kib} with an external Identity Provider, such as Okta or Auth0. Make sure that SAML is enabled and configured in {es} before setting it up in {kib}. See {xpack-ref}/saml-guide.html[Configuring SAML Single-Sign-On on the Elastic Stack].
+SAML authentication allows users to log in to {kib} with an external Identity Provider, such as Okta or Auth0. Make sure that SAML is enabled and configured in {es} before setting it up in {kib}. See {ref}/saml-guide.html[Configuring SAML single sign-on on the Elastic Stack].
 
 Set the configuration values in `kibana.yml` as follows:
 

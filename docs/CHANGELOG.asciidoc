@@ -2990,7 +2990,7 @@ Visualizations::
 Watcher::
 * Removed error messages that were appearing when you created an email action
 for a watch without a body or subject. For more information, see
-{stack-ov}/actions-email.html[Email Action].
+{ref}/actions-email.html[Email action].
 
 [[release-notes-6.1.0]]
 == {kib} 6.1.0
@@ -3095,8 +3095,8 @@ Security::
 * Added `manage_index_templates` cluster privileges to the `kibana_system` role,
 which enables the {kib} system user to create and manage the index template for
 the `.kibana` index. For more information, see
-{stack-ov}/security-privileges.html[Security Privileges] and
-{stack-ov}/built-in-roles.html[Built-in Roles].
+{ref}/security-privileges.html[Security privileges] and
+{ref}/built-in-roles.html[Built-in roles].
 
 Sharing::
 * Add a feature for custom panel titles {pull}14831[#14831]
@@ -3272,7 +3272,7 @@ Security::
 * The built-in users (`elastic`, `kibana`, and `logstash_system`) no longer have
 default passwords. You must create passwords for these users and configure {kib}
 to use this information. For more information, see
-{stack-ov}/setting-up-authentication.html[Setting Up User Authentication].
+{ref}/setting-up-authentication.html[User authentication].
 
 Watcher::
 * The built-in HTTP client used in webhooks, the http input and the http email attachment has been replaced.

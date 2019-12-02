@@ -8,7 +8,7 @@ user actions in {kib}.
 To use {reporting} with {security} enabled, you need to
 <<using-kibana-with-security,set up {kib} to work with {security}>>.
 If you are automatically generating reports with
-{xpack-ref}/xpack-alerting.html[{watcher}], you also need to configure {watcher}
+{ref}/xpack-alerting.html[{watcher}], you also need to configure {watcher}
 to trust the {kib} server's certificate. For more information, see
 <<securing-reporting>>.
 
@@ -34,7 +34,7 @@ POST /_xpack/security/user/reporter
 * If you are using an LDAP or Active Directory realm, you can either assign
 roles on a per user basis, or assign roles to groups of users. By default, role
 mappings are configured in
-{xpack-ref}/mapping-roles.html[`config/shield/role_mapping.yml`].
+{ref}/mapping-roles.html[`config/shield/role_mapping.yml`].
 For example, the following snippet assigns the user named Bill Murray the
 `kibana_user` and `reporting_user` roles:
 +
@@ -54,7 +54,7 @@ In a production environment, you should restrict access to
 the {reporting} endpoints to authorized users. This requires that you:
 
 . Enable {security} on your {es} cluster. For more information,
-see {xpack-ref}/security-getting-started.html[Getting Started with Security].
+see {ref}/security-getting-started.html[Getting Started with Security].
 . Configure an SSL certificate for Kibana. For more information, see
 <<using-kibana-with-security>>.
 . Configure {watcher} to trust the Kibana server's certificate by adding it to
@@ -82,4 +82,4 @@ includes a watch that submits requests as the built-in `elastic` user:
 <<automating-report-generation>>.
 
 For more information about configuring watches, see
-{xpack-ref}/how-watcher-works.html[How Watcher Works].
+{ref}/how-watcher-works.html[How {watcher} works].
