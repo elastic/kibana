@@ -13,7 +13,6 @@ import yaml from 'js-yaml';
 
 const KIBANA_DEV_YML_PATH = '../../../../config/kibana.dev.yml';
 
-
 Cypress.Commands.add('logout', () => {
   cy.request({
     method: 'GET',
@@ -26,8 +25,8 @@ Cypress.Commands.add('logout', () => {
 Cypress.Commands.add('loginRequest', (username, password) => {
   cy.request({
     body: {
-      username: username,
-      password: password,
+      username,
+      password,
     },
     headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
     method: 'POST',
@@ -47,14 +46,17 @@ Cypress.Commands.add('loginViaConfig', () => {
 });
 
 Cypress.Commands.add('login', () => {
-  if (Cypress.env('ELASTICSEARCH_USERNAME') != null && Cypress.env('ELASTICSEARCH_PASSWORD') != null) {
+  if (
+    Cypress.env('ELASTICSEARCH_USERNAME') != null &&
+    Cypress.env('ELASTICSEARCH_PASSWORD') != null
+  ) {
     cy.loginViaEnvironmentCredentials();
   } else {
     cy.loginViaConfig();
   }
 });
 
-Cypress.Commands.add('visitSiem', (url) => {
+Cypress.Commands.add('visitSiem', url => {
   cy.login();
   cy.visit(`${Cypress.config().baseUrl}${url}`);
   cy.viewport('macbook-15');
