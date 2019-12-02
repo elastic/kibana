@@ -57,9 +57,9 @@ export function usePolicies() {
 
   async function fetchPolicies() {
     try {
-      const data = await policies.getAll();
+      const result = await policies.getAll(1, 10000);
       setState({
-        data,
+        data: result.list,
         isLoading: false,
       });
     } catch (err) {

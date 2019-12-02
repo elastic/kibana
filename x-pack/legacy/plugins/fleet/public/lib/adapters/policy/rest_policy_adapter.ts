@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ReturnTypeList, ReturnTypeCreate } from '../../../../common/return_types';
+import {
+  ReturnTypeList,
+  ReturnTypeCreate,
+  ReturnTypeGet,
+  ReturnTypeUpdate,
+  ReturnTypeAction,
+} from '../../../../common/return_types';
 import { Policy } from '../../../../scripts/mock_spec/types';
 import { RestAPIAdapter } from '../rest_api/adapter_types';
 import { PolicyAdapter } from './memory_policy_adapter';
@@ -16,7 +22,7 @@ export class RestPolicyAdapter extends PolicyAdapter {
 
   public async get(id: string): Promise<Policy | null> {
     try {
-      return await this.REST.get<Policy>(`/api/ingest/policy/${id}`);
+      return (await this.REST.get<ReturnTypeGet<Policy>>(`/api/ingest/policy/${id}`)).item;
     } catch (e) {
       return null;
     }
@@ -24,7 +30,11 @@ export class RestPolicyAdapter extends PolicyAdapter {
 
   public async getAll(page: number, perPage: number, kuery?: string) {
     try {
-      return await this.REST.get<ReturnTypeList<Policy>>(`/api/ingest/policies`);
+      return await this.REST.get<ReturnTypeList<Policy>>(`/api/ingest/policies`, {
+        page,
+        perPage,
+        kuery: kuery !== '' ? kuery : undefined,
+      });
     } catch (e) {
       return {
         list: [],
@@ -38,5 +48,13 @@ export class RestPolicyAdapter extends PolicyAdapter {
 
   public async create(policy: Partial<Policy>) {
     return await this.REST.post<ReturnTypeCreate<Policy>>(`/api/ingest/policies`, policy);
+  }
+
+  public async update(id: string, policy: Partial<Policy>) {
+    return await this.REST.put<ReturnTypeUpdate<Policy>>(`/api/ingest/policy/${id}`, policy);
+  }
+
+  public async getAgentStatus(policyId: string) {
+    return await this.REST.get<ReturnTypeAction>(`/api/fleet/policy/${policyId}/agent-status`);
   }
 }

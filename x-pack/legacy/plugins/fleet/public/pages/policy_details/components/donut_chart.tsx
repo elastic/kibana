@@ -58,13 +58,8 @@ export const DonutChart = ({ height, width, data }: DonutChartProps) => {
     }
   }, [data, height, width]);
   return (
-    <EuiFlexGroup alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <svg ref={chartElement} width={width} height={height} />
-      </EuiFlexItem>
-      {/* <EuiFlexItem>
-        <DonutChartLegend down={down} up={up} />
-      </EuiFlexItem> */}
-    </EuiFlexGroup>
+    <EuiFlexItem grow={false}>
+      <svg ref={chartElement} width={width} height={height} />
+    </EuiFlexItem>
   );
 };

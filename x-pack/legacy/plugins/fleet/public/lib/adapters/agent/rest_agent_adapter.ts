@@ -50,9 +50,9 @@ export class RestAgentAdapter extends AgentAdapter {
 
   public async getWithToken(enrollmentToken: string): Promise<Agent | null> {
     try {
-      return (await this.REST.get<ReturnTypeGet<Agent>>(
-        `/api/fleet/agent/unknown/${enrollmentToken}`
-      )).item;
+      return (
+        await this.REST.get<ReturnTypeGet<Agent>>(`/api/fleet/agent/unknown/${enrollmentToken}`)
+      ).item;
     } catch (e) {
       return null;
     }

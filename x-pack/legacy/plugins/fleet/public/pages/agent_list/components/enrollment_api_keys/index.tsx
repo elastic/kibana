@@ -38,7 +38,7 @@ export const EnrollmentApiKeysTable: React.FC = () => {
     {
       field: null,
       name: i18n.translate('xpack.fleet.agentList.apiKeyColumnTitle', {
-        defaultMessage: 'Api Key',
+        defaultMessage: 'API Key',
       }),
       render: (key: EnrollmentApiKey) => <ApiKeyField apiKeyId={key.id} />,
     },

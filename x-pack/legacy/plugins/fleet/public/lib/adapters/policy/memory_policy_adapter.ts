@@ -3,7 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ReturnTypeList, ReturnTypeCreate } from '../../../../common/return_types';
+import {
+  ReturnTypeList,
+  ReturnTypeCreate,
+  ReturnTypeUpdate,
+  ReturnTypeAction,
+} from '../../../../common/return_types';
 import { Policy } from '../../../../scripts/mock_spec/types';
 
 export class PolicyAdapter {
@@ -35,5 +40,28 @@ export class PolicyAdapter {
     // @ts-ignore
     this.memoryDB.push(item);
     return { item, success: true, action: 'created' };
+  }
+
+  public async update(id: string, policy: Partial<Policy>): Promise<ReturnTypeUpdate<Policy>> {
+    const index = this.memoryDB.findIndex(beat => beat.id === id);
+
+    if (index === -1) {
+      return { item: this.memoryDB[index], success: false, action: 'updated' };
+    }
+
+    this.memoryDB[index] = { ...this.memoryDB[index], ...policy };
+    return { item: this.memoryDB[index], success: true, action: 'updated' };
+  }
+
+  public async getAgentStatus(policyId: string): Promise<ReturnTypeAction> {
+    return {
+      result: {
+        total: 123,
+        online: 123,
+        error: 0,
+        offline: 0,
+      },
+      success: true,
+    };
   }
 }
