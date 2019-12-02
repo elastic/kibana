@@ -156,6 +156,7 @@ export class WatcherFlyout extends Component<
     apmIndexPatternTitle: string;
   }) => () => {
     const { serviceName } = this.props.urlParams;
+    const core = this.context;
 
     if (!serviceName) {
       return;
