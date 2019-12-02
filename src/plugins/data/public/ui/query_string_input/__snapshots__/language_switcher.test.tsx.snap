@@ -206,7 +206,6 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
         "overrideLocalDefault": [MockFunction],
         "remove": [MockFunction],
         "set": [MockFunction],
-        "stop": [MockFunction],
       },
     }
   }
@@ -497,7 +496,6 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
         "overrideLocalDefault": [MockFunction],
         "remove": [MockFunction],
         "set": [MockFunction],
-        "stop": [MockFunction],
       },
     }
   }
