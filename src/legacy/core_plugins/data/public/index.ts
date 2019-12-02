@@ -38,9 +38,14 @@ export {
   StaticIndexPattern,
 } from './index_patterns';
 export { QueryStringInput } from './query';
-export { SearchBar, SearchBarProps, SavedQueryAttributes, SavedQuery } from './search';
+export { SearchBar, SearchBarProps } from './search';
+export {
+  SavedQueryAttributes,
+  SavedQuery,
+  SavedQueryTimeFilter,
+} from '../../../../plugins/data/public';
 
 /** @public static code */
 export * from '../common';
 export { FilterStateManager } from './filter/filter_manager';
-export { getFromSavedObject, getRoutes } from './index_patterns';
+export { getFromSavedObject, getRoutes, flattenHitWrapper } from './index_patterns';

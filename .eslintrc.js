@@ -203,13 +203,6 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/siem/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-        'react-hooks/rules-of-hooks': 'off',
-      },
-    },
-    {
       files: ['x-pack/legacy/plugins/snapshot_restore/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
@@ -356,6 +349,21 @@ module.exports = {
                   '!src/plugins/**/server/index.{js,ts,tsx}',
                 ],
                 allowSameFolder: true,
+              },
+              {
+                target: ['src/core/**/*'],
+                from: ['x-pack/**/*'],
+                errorMessage: 'OSS cannot import x-pack files.',
+              },
+              {
+                target: ['src/core/**/*'],
+                from: [
+                  'plugins/**/*',
+                  'src/plugins/**/*',
+                  'src/legacy/core_plugins/**/*',
+                  'src/legacy/ui/**/*',
+                ],
+                errorMessage: 'The core cannot depend on any plugins.',
               },
               {
                 from: ['src/legacy/ui/**/*', 'ui/**/*'],
@@ -827,6 +835,8 @@ module.exports = {
         // might be introduced after the other warns are fixed
         // 'react/jsx-sort-props': 'error',
         'react/jsx-tag-spacing': 'error',
+        // might be introduced after the other warns are fixed
+        'react-hooks/exhaustive-deps': 'off',
         'require-atomic-updates': 'error',
         'rest-spread-spacing': ['error', 'never'],
         'symbol-description': 'error',

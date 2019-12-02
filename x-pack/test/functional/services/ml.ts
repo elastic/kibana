@@ -11,6 +11,7 @@ import {
   MachineLearningAPIProvider,
   MachineLearningDataFrameAnalyticsProvider,
   MachineLearningDataVisualizerProvider,
+  MachineLearningDataVisualizerIndexBasedProvider,
   MachineLearningJobManagementProvider,
   MachineLearningJobSourceSelectionProvider,
   MachineLearningJobTableProvider,
@@ -29,6 +30,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const api = MachineLearningAPIProvider(context);
   const dataFrameAnalytics = MachineLearningDataFrameAnalyticsProvider(context);
   const dataVisualizer = MachineLearningDataVisualizerProvider(context);
+  const dataVisualizerIndexBased = MachineLearningDataVisualizerIndexBasedProvider(context);
   const jobManagement = MachineLearningJobManagementProvider(context, api);
   const jobSourceSelection = MachineLearningJobSourceSelectionProvider(context);
   const jobTable = MachineLearningJobTableProvider(context);
@@ -46,6 +48,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     api,
     dataFrameAnalytics,
     dataVisualizer,
+    dataVisualizerIndexBased,
     jobManagement,
     jobSourceSelection,
     jobTable,
