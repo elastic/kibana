@@ -24,7 +24,7 @@ import angular from 'angular';
 import 'ui/angular-bootstrap';
 import 'angular-recursion';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
-import { CoreStart, LegacyCoreStart, UiSettingsClientContract } from 'kibana/public';
+import { CoreStart, LegacyCoreStart, IUiSettingsClient } from 'kibana/public';
 import {
   PrivateProvider,
   PaginateDirectiveProvider,
@@ -69,7 +69,7 @@ function createLocalPrivateModule() {
   angular.module('tableVisPrivate', []).provider('Private', PrivateProvider);
 }
 
-function createLocalConfigModule(uiSettings: UiSettingsClientContract) {
+function createLocalConfigModule(uiSettings: IUiSettingsClient) {
   angular
     .module('tableVisConfig', ['tableVisPrivate'])
     .provider('stateManagementConfig', StateManagementConfigProvider)
