@@ -92,7 +92,6 @@ export function pathParts(path: string): AssetParts {
     file = type;
     type = 'fields';
     service = '';
-
   }
 
   return {
