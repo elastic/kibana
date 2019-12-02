@@ -117,7 +117,7 @@ function DefaultEditorAggGroup({
         });
       });
     }
-  }, [aggsState, formIsTouched, isAllAggsTouched]);
+  }, [formIsTouched]);
 
   useEffect(() => {
     setValidity(`aggGroup__${groupName}`, isGroupValid);
