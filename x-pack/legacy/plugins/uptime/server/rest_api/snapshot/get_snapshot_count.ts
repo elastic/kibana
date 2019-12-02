@@ -4,33 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
-import { Snapshot } from '../../../common/runtime_types';
 import { UMRestApiRouteCreator } from '../types';
 
 export const createGetSnapshotCount: UMRestApiRouteCreator = (libs: UMServerLibs) => ({
   method: 'GET',
   path: '/api/uptime/snapshot/count',
   validate: {
-    query: Joi.object({
-      dateRangeStart: Joi.string().required(),
-      dateRangeEnd: Joi.string().required(),
-      filters: Joi.string(),
-      statusFilter: Joi.string(),
+    query: schema.object({
+      dateRangeStart: schema.string(),
+      dateRangeEnd: schema.string(),
+      filters: schema.maybe(schema.string()),
+      statusFilter: schema.maybe(schema.string()),
     }),
   },
-  tags: ['access:uptime'],
-  handler: async (_context: any, request: any, response: any): Promise<Snapshot> => {
+  options: {
+    tags: ['access:uptime'],
+  },
+  handler: async (_context, request, response): Promise<any> => {
     const { dateRangeStart, dateRangeEnd, filters, statusFilter } = request.query;
+    const result = await libs.monitorStates.getSnapshotCount(
+      request,
+      dateRangeStart,
+      dateRangeEnd,
+      filters,
+      statusFilter
+    );
     return response.ok({
-      body: await libs.monitorStates.getSnapshotCount(
-        request,
-        dateRangeStart,
-        dateRangeEnd,
-        filters,
-        statusFilter
-      ),
+      body: {
+        ...result,
+      },
     });
   },
 });
