@@ -21,3 +21,5 @@ export { SuggestionsComponent } from './typeahead/suggestions_component';
 export { IndexPatternSelect } from './index_pattern_select';
 export { FilterBar } from './filter_bar';
 export { applyFiltersPopover } from './apply_filters';
+// temp export
+export { QueryLanguageSwitcher } from './query_string_input/language_switcher';
