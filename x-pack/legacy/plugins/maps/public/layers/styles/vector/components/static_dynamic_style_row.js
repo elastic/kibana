@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { VectorStyle } from '../vector/vector_style';
+import { VectorStyle } from '../vector_style';
 import { i18n } from '@kbn/i18n';
 
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiFormRow, EuiButtonToggle } from '@elastic/eui';

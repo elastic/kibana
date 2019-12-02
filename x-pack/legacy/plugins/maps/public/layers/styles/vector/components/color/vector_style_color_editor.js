@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { StaticDynamicStyleRow } from '../../../components/static_dynamic_style_row';
+import { StaticDynamicStyleRow } from '../static_dynamic_style_row';
 import { DynamicColorSelection } from './dynamic_color_selection';
 import { StaticColorSelection } from './static_color_selection';
 import { getVectorStyleLabel } from '../get_vector_style_label';
