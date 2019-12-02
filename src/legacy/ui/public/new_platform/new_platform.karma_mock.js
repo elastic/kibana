@@ -114,8 +114,10 @@ export const npSetup = {
       registerAction: sinon.fake(),
       registerTrigger: sinon.fake(),
     },
-    feature_catalogue: {
-      register: sinon.fake(),
+    home: {
+      featureCatalogue: {
+        register: sinon.fake(),
+      },
     },
   },
 };
@@ -229,8 +231,10 @@ export const npStart = {
       getTriggerActions: sinon.fake(),
       getTriggerCompatibleActions: sinon.fake(),
     },
-    feature_catalogue: {
-      register: sinon.fake(),
+    home: {
+      featureCatalogue: {
+        register: sinon.fake(),
+      },
     },
   },
 };

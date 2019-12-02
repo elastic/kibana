@@ -8,7 +8,6 @@ import { EuiPanel } from '@elastic/eui';
 import { getOr, isEmpty, isEqual } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
-import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { BrowserFields } from '../../containers/source';
 import { TimelineQuery } from '../../containers/timeline';
@@ -29,7 +28,12 @@ import { TimelineRefetch } from '../timeline/refetch_timeline';
 import { isCompactFooter } from '../timeline/timeline';
 import { ManageTimelineContext } from '../timeline/timeline_context';
 import * as i18n from './translations';
-import { Query, esFilters, esQuery } from '../../../../../../../src/plugins/data/public';
+import {
+  IIndexPattern,
+  Query,
+  esFilters,
+  esQuery,
+} from '../../../../../../../src/plugins/data/public';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 500;
 
@@ -46,7 +50,7 @@ interface Props {
   filters: esFilters.Filter[];
   height?: number;
   id: string;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   isLive: boolean;
   itemsPerPage: number;
   itemsPerPageOptions: number[];

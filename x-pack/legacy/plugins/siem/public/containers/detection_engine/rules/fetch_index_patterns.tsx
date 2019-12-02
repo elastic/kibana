@@ -6,7 +6,7 @@
 
 import { isEmpty, get } from 'lodash/fp';
 import { useEffect, useState, Dispatch, SetStateAction } from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 
 import { getIndexFields, sourceQuery } from '../../../containers/source';
 import { useStateToaster } from '../../../components/toasters';
@@ -20,7 +20,7 @@ interface FetchIndexPattern {
   isLoading: boolean;
   indices: string[];
   indicesExists: boolean;
-  indexPatterns: StaticIndexPattern | null;
+  indexPatterns: IIndexPattern | null;
 }
 
 type Return = [FetchIndexPattern, Dispatch<SetStateAction<string[]>>];
@@ -29,7 +29,7 @@ export const useFetchIndexPatterns = (): Return => {
   const apolloClient = useApolloClient();
   const [indices, setIndices] = useState<string[]>([]);
   const [indicesExists, setIndicesExists] = useState(false);
-  const [indexPatterns, setIndexPatterns] = useState<StaticIndexPattern | null>(null);
+  const [indexPatterns, setIndexPatterns] = useState<IIndexPattern | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [, dispatchToaster] = useStateToaster();
 
