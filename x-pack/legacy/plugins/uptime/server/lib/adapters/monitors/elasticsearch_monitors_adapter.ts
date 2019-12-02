@@ -197,7 +197,8 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
   public async getFilterBar(
     request: any,
     dateRangeStart: string,
-    dateRangeEnd: string
+    dateRangeEnd: string,
+    filters: string
   ): Promise<OverviewFilters> {
     const fields = {
       ids: 'monitor.id',
@@ -207,11 +208,12 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       locations: 'observer.geo.name',
       tags: 'tags',
     };
-    const params = {
-      index: INDEX_NAMES.HEARTBEAT,
-      body: {
-        size: 0,
-        query: {
+    let filtersObj;
+    if (filters) {
+      console.log('fil', JSON.stringify(JSON.parse(filters), null, 2));
+      filtersObj = JSON.parse(filters);
+      const topFilterClause = [
+        {
           range: {
             '@timestamp': {
               gte: dateRangeStart,
@@ -219,12 +221,36 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
             },
           },
         },
+        ...(filtersObj.bool.filter ?? {}),
+      ];
+      filtersObj.bool.filter = {
+        ...topFilterClause,
+      };
+      console.log('the new obj', JSON.stringify(topFilterClause, null, 2));
+    } else {
+      filtersObj = {
+        range: {
+          '@timestamp': {
+            gte: dateRangeStart,
+            lte: dateRangeEnd,
+          },
+        },
+      };
+    }
+    const params = {
+      index: INDEX_NAMES.HEARTBEAT,
+      body: {
+        size: 0,
+        query: {
+          ...filtersObj,
+        },
         aggs: Object.values(fields).reduce((acc: { [key: string]: any }, field) => {
           acc[field] = { terms: { field, size: 20 } };
           return acc;
         }, {}),
       },
     };
+    console.log(JSON.stringify(params, null, 2));
     const { aggregations } = await this.database.search(request, params);
 
     // @ts-ignore the current code does not jive with TS's type inference

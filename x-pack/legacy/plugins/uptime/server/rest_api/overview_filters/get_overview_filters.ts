@@ -22,7 +22,9 @@ export const createGetOverviewFilters = (libs: UMServerLibs) => ({
   },
   handler: async (request: any): Promise<unknown> => {
     const { dateRangeStart, dateRangeEnd, filters } = request.query;
-    const c = await libs.monitors.getFilterBar(request, dateRangeStart, dateRangeEnd);
+    console.log('filters', filters);
+
+    const c = await libs.monitors.getFilterBar(request, dateRangeStart, dateRangeEnd, filters);
     return {
       ...c,
     };

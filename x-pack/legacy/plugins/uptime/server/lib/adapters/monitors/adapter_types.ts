@@ -14,7 +14,7 @@ export interface UMMonitorsAdapter {
     dateRangeEnd: string,
     location?: string | null
   ): Promise<MonitorChart>;
-  getFilterBar(request: any, dateRangeStart: string, dateRangeEnd: string): Promise<any>;
+  getFilterBar(request: any, dateRangeStart: string, dateRangeEnd: string, filters: string): Promise<any>;
   getMonitorPageTitle(request: any, monitorId: string): Promise<MonitorPageTitle | null>;
   getMonitorDetails(request: any, monitorId: string): Promise<any>;
 }
