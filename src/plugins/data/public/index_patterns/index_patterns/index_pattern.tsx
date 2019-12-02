@@ -22,40 +22,30 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import chrome from 'ui/chrome';
-import { SavedObjectsClientContract } from 'src/core/public';
 
+import { SavedObjectsClientContract } from 'src/core/public';
 import {
   DuplicateField,
   SavedObjectNotFound,
   expandShorthand,
   FieldMappingSpec,
   MappingObject,
-} from '../../../../../../plugins/kibana_utils/public';
-import { toMountPoint } from '../../../../../../plugins/kibana_react/public';
+} from '../../../../kibana_utils/public';
+import { toMountPoint } from '../../../../kibana_react/public';
 
-import {
-  ES_FIELD_TYPES,
-  KBN_FIELD_TYPES,
-  IIndexPattern,
-  indexPatterns,
-} from '../../../../../../plugins/data/public';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
 
-import { findIndexPatternByTitle, getRoutes } from '../utils';
-import { Field, FieldList, FieldListInterface, FieldType } from '../fields';
+import { findByTitle, getRoutes } from '../utils';
+import { indexPatterns } from '../';
+import { Field, FieldList, FieldListInterface } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { IIndexPatternsApiClient } from './index_patterns_api_client';
-import { getNotifications, getFieldFormats } from '../services';
+import { getNotifications, getFieldFormats, getHttp } from '../services';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
-
-/** @deprecated
- *  Please use IIndexPattern instead
- * */
-export type StaticIndexPattern = IIndexPattern;
 
 export class IndexPattern implements IIndexPattern {
   [key: string]: any;
@@ -215,8 +205,13 @@ export class IndexPattern implements IIndexPattern {
       // directly against the 7.x branch. Index patterns were de-angularized in #39247, and in order
       // to preserve the functionality from #35262 we need to get the injector here just for kbnUrl.
       // This has all been removed as of 8.0.
-      const $injector = await chrome.dangerouslyGetActiveInjector();
-      const kbnUrl = $injector.get('kbnUrl') as any; // `any` because KbnUrl interface doesn't have `getRouteHref`
+
+      // 2019-12-01 The usage of kbnUrl had to be removed due to the transition to NP.
+      // It's now temporarily replaced by a simple replace of the single argument used by all URLs.
+      // Once kbnUrl is migrated to NP, this can be updated.
+      const editUrlTemplate = getRoutes().edit;
+      const editUrl = '/app/kibana#' + editUrlTemplate.replace('{{id}}', this.id!);
+
       const { toasts } = getNotifications();
 
       toasts.addWarning({
@@ -226,7 +221,7 @@ export class IndexPattern implements IIndexPattern {
             <p>{warningText}</p>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiButton size="s" href={kbnUrl.getRouteHref(this, 'edit')}>
+                <EuiButton size="s" href={getHttp().basePath.prepend(editUrl)}>
                   <FormattedMessage
                     id="data.indexPatterns.editIndexPattern"
                     defaultMessage="Edit index pattern"
@@ -358,7 +353,7 @@ export class IndexPattern implements IIndexPattern {
     await this.save();
   }
 
-  removeScriptedField(field: FieldType) {
+  removeScriptedField(field: IFieldType) {
     this.fields.remove(field);
     return this.save();
   }
@@ -469,10 +464,7 @@ export class IndexPattern implements IIndexPattern {
       return response.id;
     };
 
-    const potentialDuplicateByTitle = await findIndexPatternByTitle(
-      this.savedObjectsClient,
-      this.title
-    );
+    const potentialDuplicateByTitle = await findByTitle(this.savedObjectsClient, this.title);
     // If there is potentially duplicate title, just create it
     if (!potentialDuplicateByTitle) {
       return await _create();

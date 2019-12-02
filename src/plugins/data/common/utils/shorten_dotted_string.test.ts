@@ -17,13 +17,18 @@
  * under the License.
  */
 
-import { once } from 'lodash';
+import { shortenDottedString } from './shorten_dotted_string';
 
-// @ts-ignore
-import { uiModules } from 'ui/modules';
-import { IndexPatterns } from '../';
+describe('shortenDottedString', () => {
+  test('should convert a dot.notated.string into a short string', () => {
+    expect(shortenDottedString('dot.notated.string')).toBe('d.n.string');
+  });
 
-/** @internal */
-export const initLegacyModule = once((indexPatterns: IndexPatterns): void => {
-  uiModules.get('kibana/index_patterns').value('indexPatterns', indexPatterns);
+  test('should ignore non-string values', () => {
+    const obj = { key: 'val' };
+
+    expect(shortenDottedString(true)).toBe(true);
+    expect(shortenDottedString(123)).toBe(123);
+    expect(shortenDottedString(obj)).toBe(obj);
+  });
 });

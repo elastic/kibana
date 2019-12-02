@@ -17,35 +17,16 @@
  * under the License.
  */
 
-import { IndexPattern } from './index_pattern';
+import { NotificationsStart, HttpStart } from 'src/core/public';
+import { createGetterSetter } from '../../../kibana_utils/public';
+import { FieldFormatsStart } from '../field_formats_provider';
 
-export interface PatternCache {
-  get: (id: string) => IndexPattern;
-  set: (id: string, value: IndexPattern) => IndexPattern;
-  clear: (id: string) => void;
-  clearAll: () => void;
-}
+export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
+  'Notifications'
+);
 
-export function createIndexPatternCache(): PatternCache {
-  const vals: Record<string, any> = {};
-  const cache: PatternCache = {
-    get: (id: string) => {
-      return vals[id];
-    },
-    set: (id: string, prom: any) => {
-      vals[id] = prom;
-      return prom;
-    },
-    clear: (id: string) => {
-      delete vals[id];
-    },
-    clearAll: () => {
-      for (const id in vals) {
-        if (vals.hasOwnProperty(id)) {
-          delete vals[id];
-        }
-      }
-    },
-  };
-  return cache;
-}
+export const [getFieldFormats, setFieldFormats] = createGetterSetter<FieldFormatsStart>(
+  'FieldFormats'
+);
+
+export const [getHttp, setHttp] = createGetterSetter<HttpStart>('Http');
