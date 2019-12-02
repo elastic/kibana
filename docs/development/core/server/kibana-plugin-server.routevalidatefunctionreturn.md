@@ -14,6 +14,6 @@ export declare type RouteValidateFunctionReturn<T> = {
     error?: undefined;
 } | {
     value?: undefined;
-    error: SchemaTypeError;
+    error: RouteValidationError;
 };
 ```

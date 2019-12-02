@@ -1054,7 +1054,7 @@ export type RedirectResponseOptions = HttpResponseOptions & {
 };
 
 // @public
-export type RequestHandler<P extends RouteURLValidationParams, Q extends RouteURLValidationParams, B extends RouteBodyValidationParams, Method extends RouteMethod = any> = (context: RequestHandlerContext, request: KibanaRequest<RouteValidatedType<P>, RouteValidatedType<Q>, RouteValidatedType<B>, Method>, response: KibanaResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
+export type RequestHandler<P extends RouteURLValidationParams = RouteValidateFunction<unknown>, Q extends RouteURLValidationParams = RouteValidateFunction<unknown>, B extends RouteBodyValidationParams = RouteValidateFunction<unknown>, Method extends RouteMethod = any> = (context: RequestHandlerContext, request: KibanaRequest<RouteValidatedType<P>, RouteValidatedType<Q>, RouteValidatedType<B>, Method>, response: KibanaResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 
 // @public
 export interface RequestHandlerContext {
@@ -1151,8 +1151,13 @@ export type RouteValidateFunctionReturn<T> = {
     error?: undefined;
 } | {
     value?: undefined;
-    error: SchemaTypeError;
+    error: RouteValidationError;
 };
+
+// @public
+export class RouteValidationError extends SchemaTypeError {
+    constructor(error: Error | string, path?: string[]);
+}
 
 // @public (undocumented)
 export interface SavedObject<T extends SavedObjectAttributes = any> {

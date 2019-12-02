@@ -18,7 +18,8 @@
  */
 import { KibanaRequest } from './request';
 import { httpServerMock } from '../http_server.mocks';
-import { schema, SchemaTypeError } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import { RouteValidationError } from './validator';
 
 describe('KibanaRequest', () => {
   describe('get all headers', () => {
@@ -105,7 +106,7 @@ describe('KibanaRequest', () => {
           if (Buffer.isBuffer(data)) {
             return { value: data };
           } else {
-            return { error: new SchemaTypeError('It should be a Buffer', []) };
+            return { error: new RouteValidationError('It should be a Buffer', []) };
           }
         },
       });

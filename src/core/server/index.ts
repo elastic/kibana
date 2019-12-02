@@ -123,6 +123,7 @@ export {
   validBodyOutput,
   RouteValidateFunctionReturn,
   RouteValidateFunction,
+  RouteValidationError,
   RouteURLValidationParams,
   RouteBodyValidationParams,
   SessionStorage,

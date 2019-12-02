@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { validate } from './validator';
-import { SchemaTypeError, schema } from '@kbn/config-schema';
+import { validate, RouteValidationError } from './validator';
+import { schema } from '@kbn/config-schema';
 
 describe('Router validator', () => {
   it('should validate and infer the type from a function', () => {
@@ -26,7 +26,7 @@ describe('Router validator', () => {
       if (typeof data.foo === 'string') {
         return { value: { foo: data.foo as string } };
       }
-      return { error: new SchemaTypeError('Not a string', ['foo']) };
+      return { error: new RouteValidationError('Not a string', ['foo']) };
     };
 
     expect(validate(validateFn, { foo: 'bar' })).toStrictEqual({ foo: 'bar' });

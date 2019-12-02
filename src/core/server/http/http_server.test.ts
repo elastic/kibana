@@ -25,9 +25,9 @@ jest.mock('fs', () => ({
 
 import supertest from 'supertest';
 
-import { ByteSizeValue, schema, SchemaTypeError } from '@kbn/config-schema';
+import { ByteSizeValue, schema } from '@kbn/config-schema';
 import { HttpConfig } from './http_config';
-import { Router } from './router';
+import { Router, RouteValidationError } from './router';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { HttpServer } from './http_server';
 import { Readable } from 'stream';
@@ -298,7 +298,7 @@ test('valid body with validate function', async () => {
           if (typeof bar === 'string' && typeof baz === 'number') {
             return { value: { bar, baz } };
           } else {
-            return { error: new SchemaTypeError('Wrong payload', ['body']) };
+            return { error: new RouteValidationError('Wrong payload', ['body']) };
           }
         },
       },

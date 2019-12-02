@@ -20,6 +20,20 @@
 import { SchemaTypeError, ValidationError, ObjectType, Type, TypeOf } from '@kbn/config-schema';
 
 /**
+ * Error to return when the validation is not successful.
+ * @public
+ */
+export class RouteValidationError extends SchemaTypeError {
+  constructor(error: Error | string, path: string[] = []) {
+    super(error, path);
+
+    // Set the prototype explicitly, see:
+    // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
+    Object.setPrototypeOf(this, RouteValidationError.prototype);
+  }
+}
+
+/**
  * Allowed returned format of the custom validate function
  * @public
  */
@@ -30,7 +44,7 @@ export type RouteValidateFunctionReturn<T> =
     }
   | {
       value?: undefined;
-      error: SchemaTypeError;
+      error: RouteValidationError;
     };
 
 /**
@@ -59,7 +73,7 @@ function validateFunction<T extends RouteValidateFunction<unknown>>(
   try {
     result = validationSpec(data);
   } catch (err) {
-    result = { error: new SchemaTypeError(err, []) };
+    result = { error: new RouteValidationError(err) };
   }
 
   if (result.error) {
@@ -78,6 +92,9 @@ export function validate<T>(
   } else if (validationSpec instanceof Type) {
     return validationSpec.validate(data, {}, namespace);
   } else {
-    throw new Error(`The validation rule provided in the handler is not valid`);
+    throw new ValidationError(
+      new RouteValidationError(`The validation rule provided in the handler is not valid`),
+      namespace
+    );
   }
 }

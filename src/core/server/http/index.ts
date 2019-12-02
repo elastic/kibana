@@ -53,6 +53,7 @@ export {
   validBodyOutput,
   RouteValidateFunctionReturn,
   RouteValidateFunction,
+  RouteValidationError,
   RouteURLValidationParams,
   RouteBodyValidationParams,
 } from './router';
