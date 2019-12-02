@@ -16,8 +16,12 @@ import {
 import * as Registry from '../registry';
 import { CallESAsCurrentUser, getInstallationObject } from './index';
 import { getObject } from './get_objects';
-import { Field, processFields } from '../lib/field';
-import { generateMappings, getTemplate, generateTemplateName } from '../lib/template/template';
+import { Field } from '../lib/fields/field';
+import {
+  generateMappings,
+  getTemplate,
+  generateTemplateName,
+} from '../lib/elasticsearch/template/template';
 
 export async function installPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
