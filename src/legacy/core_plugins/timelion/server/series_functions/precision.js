@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
 import reduce from '../lib/reduce.js';
 import alter from '../lib/alter.js';
 import Chainable from '../lib/classes/chainable';
@@ -31,14 +30,10 @@ export default new Chainable('precision', {
     {
       name: 'precision',
       types: ['number'],
-      help: i18n.translate('timelion.help.functions.precision.args.precisionHelpText', {
-        defaultMessage: 'Number of digits to round each value to',
-      }),
+      defaultMessage: 'The number of digits to truncate each value to',
     }
   ],
-  help: i18n.translate('timelion.help.functions.precisionHelpText', {
-    defaultMessage: 'number of digits to round the decimal portion of the value to',
-  }),
+  defaultMessage: 'The number of digits to truncate the decimal portion of the value to',
   fn: async function precisionFn(args) {
     await alter(args, function (eachSeries, precision) {
       eachSeries._meta = eachSeries._meta || {};
