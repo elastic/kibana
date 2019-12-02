@@ -48,10 +48,7 @@ export function explorerChartsContainerServiceFactory(callback) {
 
   callback(getDefaultChartsData());
 
-  let requestCount = 0;
   const anomalyDataChange = function (anomalyRecords, earliestMs, latestMs) {
-    const newRequestCount = ++requestCount;
-    requestCount = newRequestCount;
 
     const data = getDefaultChartsData();
 
@@ -124,7 +121,7 @@ export function explorerChartsContainerServiceFactory(callback) {
           range.min,
           range.max,
           config.interval
-        );
+        ).toPromise();
       } else {
         // Extract the partition, by, over fields on which to filter.
         const criteriaFields = [];
@@ -169,7 +166,7 @@ export function explorerChartsContainerServiceFactory(callback) {
             range.min,
             range.max,
             interval
-          )
+          ).toPromise()
             .then((resp) => {
               // Return data in format required by the explorer charts.
               const results = resp.results;
@@ -201,7 +198,7 @@ export function explorerChartsContainerServiceFactory(callback) {
         range.min,
         range.max,
         ANOMALIES_MAX_RESULTS
-      );
+      ).toPromise();
     }
 
     // Query 3 - load any scheduled events for the job.
@@ -213,7 +210,7 @@ export function explorerChartsContainerServiceFactory(callback) {
         config.interval,
         1,
         MAX_SCHEDULED_EVENTS
-      );
+      ).toPromise();
     }
 
     // Query 4 - load context data distribution
@@ -380,11 +377,6 @@ export function explorerChartsContainerServiceFactory(callback) {
 
     Promise.all(seriesPromises)
       .then(response => {
-        // TODO: Add test to prevent this regression.
-        // Ignore this response if it's returned by an out of date promise
-        if (newRequestCount < requestCount) {
-          return;
-        }
         // calculate an overall min/max for all series
         const processedData = response.map(processChartData);
         const allDataPoints = _.reduce(processedData, (datapoints, series) => {

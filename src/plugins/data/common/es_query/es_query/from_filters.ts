@@ -54,7 +54,7 @@ const translateToQuery = (filter: Filter) => {
 
 export const buildQueryFromFilters = (
   filters: Filter[] = [],
-  indexPattern: IIndexPattern | null,
+  indexPattern: IIndexPattern | undefined,
   ignoreFilterIfFieldNotInIndex: boolean = false
 ) => {
   filters = filters.filter(filter => filter && !isFilterDisabled(filter));
