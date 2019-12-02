@@ -10,59 +10,47 @@ import { RoleValidator } from '../../../lib/validate_role';
 import { IndexPrivilegeForm } from './index_privilege_form';
 import { IndexPrivileges } from './index_privileges';
 
-test.skip('it renders without crashing', () => {
-  const props = {
-    role: {
-      name: '',
-      elasticsearch: {
-        cluster: [],
-        indices: [],
-        run_as: [],
-      },
-      kibana: [],
+// the IndexPrivileges post-mount hook kicks off some promises;
+// we need to wait for those promises to resolve to ensure any errors are properly caught
+const flushPromises = () => new Promise(setImmediate);
+
+const createProps = () => ({
+  role: {
+    name: '',
+    kibana: [],
+    elasticsearch: {
+      cluster: [],
+      indices: [
+        {
+          names: ['foo*'],
+          privileges: ['all'],
+          query: '*',
+          field_security: {
+            grant: ['some_field'],
+          },
+        },
+      ],
+      run_as: [],
     },
-    httpClient: jest.fn(),
-    onChange: jest.fn(),
-    indexPatterns: [],
-    allowDocumentLevelSecurity: true,
-    allowFieldLevelSecurity: true,
-    editable: true,
-    validator: new RoleValidator(),
-    availableIndexPrivileges: ['all', 'read', 'write', 'index'],
-  };
-  const wrapper = shallowWithIntl(<IndexPrivileges {...props} />);
+  },
+  httpClient: jest.fn(),
+  onChange: jest.fn(),
+  indexPatterns: [],
+  editable: true,
+  allowDocumentLevelSecurity: true,
+  allowFieldLevelSecurity: true,
+  validator: new RoleValidator(),
+  availableIndexPrivileges: ['all', 'read', 'write', 'index'],
+});
+
+test('it renders without crashing', async () => {
+  const wrapper = shallowWithIntl(<IndexPrivileges {...createProps()} />);
+  await flushPromises();
   expect(wrapper).toMatchSnapshot();
 });
 
-test('it renders a IndexPrivilegeForm for each privilege on the role', () => {
-  const props = {
-    role: {
-      name: '',
-      kibana: [],
-      elasticsearch: {
-        cluster: [],
-        indices: [
-          {
-            names: ['foo*'],
-            privileges: ['all'],
-            query: '*',
-            field_security: {
-              grant: ['some_field'],
-            },
-          },
-        ],
-        run_as: [],
-      },
-    },
-    httpClient: jest.fn(),
-    onChange: jest.fn(),
-    indexPatterns: [],
-    editable: true,
-    allowDocumentLevelSecurity: true,
-    allowFieldLevelSecurity: true,
-    validator: new RoleValidator(),
-    availableIndexPrivileges: ['all', 'read', 'write', 'index'],
-  };
-  const wrapper = mountWithIntl(<IndexPrivileges {...props} />);
+test('it renders a IndexPrivilegeForm for each privilege on the role', async () => {
+  const wrapper = mountWithIntl(<IndexPrivileges {...createProps()} />);
+  await flushPromises();
   expect(wrapper.find(IndexPrivilegeForm)).toHaveLength(1);
 });
