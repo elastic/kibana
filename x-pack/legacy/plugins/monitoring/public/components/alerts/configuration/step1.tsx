@@ -14,6 +14,7 @@ import {
   EuiButton,
   EuiSuperSelect,
   EuiToolTip,
+  EuiCallOut,
 } from '@elastic/eui';
 import { kfetch } from 'ui/kfetch';
 import { omit, pick } from 'lodash';
@@ -37,6 +38,7 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
   const [isTesting, setIsTesting] = React.useState(false);
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [testingStatus, setTestingStatus] = React.useState<string | boolean | null>(null);
+  const [fullTestingError, setFullTestingError] = React.useState('');
 
   async function createEmailAction(data: EmailActionData) {
     if (props.editAction) {
@@ -108,12 +110,8 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
     if (result.status === 'ok') {
       setTestingStatus(true);
     } else {
-      setTestingStatus(
-        i18n.translate('xpack.monitoring.alerts.configuration.step1.testingError', {
-          defaultMessage:
-            'Unable to send test email. Please double check your email configuration.',
-        })
-      );
+      setTestingStatus(false);
+      setFullTestingError(result.message);
     }
     setIsTesting(false);
   }
@@ -265,13 +263,20 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
           </EuiText>
         </Fragment>
       );
-    } else if (testingStatus !== null) {
+    } else if (testingStatus === false) {
       testingStatusUi = (
         <Fragment>
           <EuiSpacer />
-          <EuiText color="danger">
-            <p>{testingStatus}</p>
-          </EuiText>
+          <EuiCallOut
+            title={i18n.translate('xpack.monitoring.alerts.configuration.step1.testingError', {
+              defaultMessage:
+                'Unable to send test email. Please double check your email configuration.',
+            })}
+            color="danger"
+            iconType="alert"
+          >
+            <p>{fullTestingError}</p>
+          </EuiCallOut>
         </Fragment>
       );
     }

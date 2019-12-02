@@ -201,13 +201,15 @@ exports[`Step1 testing should show a failed test error 1`] = `
     </EuiFlexItem>
   </EuiFlexGroup>
   <EuiSpacer />
-  <EuiText
+  <EuiCallOut
     color="danger"
+    iconType="alert"
+    title="Unable to send test email. Please double check your email configuration."
   >
     <p>
-      Unable to send test email. Please double check your email configuration.
+      Very detailed error message
     </p>
-  </EuiText>
+  </EuiCallOut>
 </Fragment>
 `;
 
