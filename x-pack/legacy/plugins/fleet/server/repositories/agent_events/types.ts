@@ -11,6 +11,7 @@ export const RuntimeAgentEventType = t.union([
   t.literal('STATE'),
   t.literal('ERROR'),
   t.literal('ACTION_RESULT'),
+  t.literal('ACTION'),
 ]);
 
 export const RuntimeAgentEventSubtype = t.union([
@@ -21,6 +22,7 @@ export const RuntimeAgentEventSubtype = t.union([
   t.literal('FAILED'),
   t.literal('STOPPED'),
   t.literal('DATA_DUMP'),
+  t.literal('ACKNOWLEDGE'),
 ]);
 
 export const RuntimeAgentEvent = t.intersection(
@@ -34,6 +36,7 @@ export const RuntimeAgentEvent = t.intersection(
     t.partial({
       payload: t.any,
       data: t.string,
+      action_id: t.string,
     }),
   ],
   'AgentEvent'
@@ -52,6 +55,7 @@ export const RuntimeAgentEventSOAttributes = t.intersection(
     t.partial({
       payload: t.string,
       data: t.string,
+      action_id: t.string,
     }),
   ],
   'AgentEventSOAttribute'

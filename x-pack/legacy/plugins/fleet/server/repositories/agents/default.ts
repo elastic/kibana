@@ -22,6 +22,8 @@ import {
   SortOptions,
 } from './types';
 
+const SO_TYPE = 'agents';
+
 export class AgentsRepository implements AgentsRepositoryType {
   constructor(private readonly soAdapter: SODatabaseAdapter) {}
 
@@ -36,7 +38,7 @@ export class AgentsRepository implements AgentsRepositoryType {
   ): Promise<Agent> {
     const so = await this.soAdapter.create(
       user,
-      'agents',
+      SO_TYPE,
       {
         ...agent,
         local_metadata: JSON.stringify(agent.local_metadata || {}),
@@ -60,7 +62,7 @@ export class AgentsRepository implements AgentsRepositoryType {
    * @param agent
    */
   public async delete(user: FrameworkUser, agent: Agent) {
-    await this.soAdapter.delete(user, 'agents', agent.id);
+    await this.soAdapter.delete(user, SO_TYPE, agent.id);
   }
 
   /**
@@ -68,7 +70,7 @@ export class AgentsRepository implements AgentsRepositoryType {
    * @param agent
    */
   public async getById(user: FrameworkUser, id: string): Promise<Agent | null> {
-    const response = await this.soAdapter.get<SavedObjectAgentAttributes>(user, 'agents', id);
+    const response = await this.soAdapter.get<SavedObjectAgentAttributes>(user, SO_TYPE, id);
     if (!response) {
       return null;
     }
@@ -78,7 +80,7 @@ export class AgentsRepository implements AgentsRepositoryType {
 
   public async getByAccessApiKeyId(user: FrameworkUser, apiKeyId: string): Promise<Agent | null> {
     const response = await this.soAdapter.find<SavedObjectAgentAttributes>(user, {
-      type: 'agents',
+      type: SO_TYPE,
       searchFields: ['access_api_key_id'],
       search: apiKeyId,
     });
@@ -98,7 +100,7 @@ export class AgentsRepository implements AgentsRepositoryType {
    */
   public async getBySharedId(user: FrameworkUser, sharedId: string): Promise<Agent | null> {
     const response = await this.soAdapter.find<SavedObjectAgentAttributes>(user, {
-      type: 'agents',
+      type: SO_TYPE,
       searchFields: ['shared_id'],
       search: sharedId,
     });
@@ -129,11 +131,42 @@ export class AgentsRepository implements AgentsRepositoryType {
       updateData.user_provided_metadata = JSON.stringify(newData.user_provided_metadata);
     }
 
-    const { error } = await this.soAdapter.update(user, 'agents', id, updateData);
+    const { error } = await this.soAdapter.update(user, SO_TYPE, id, updateData);
 
     if (error) {
       throw new Error(error.message);
     }
+  }
+
+  /**
+   * Update an agent
+   *
+   * @param id
+   * @param newData
+   */
+  public async bulkUpdate(
+    user: FrameworkUser,
+    updates: Array<{ id: string; newData: Partial<Agent> }>
+  ) {
+    const bulkUpdateData = updates.map(({ id, newData }) => {
+      const { local_metadata, user_provided_metadata, ...data } = newData;
+      const updateData: Partial<SavedObjectAgentAttributes> = { ...data };
+
+      if (newData.local_metadata) {
+        updateData.local_metadata = JSON.stringify(newData.local_metadata);
+      }
+      if (newData.user_provided_metadata) {
+        updateData.user_provided_metadata = JSON.stringify(newData.user_provided_metadata);
+      }
+
+      return {
+        id,
+        attributes: updateData,
+        type: SO_TYPE,
+      };
+    });
+
+    await this.soAdapter.bulkUpdate(user, bulkUpdateData);
   }
 
   /**
@@ -151,7 +184,7 @@ export class AgentsRepository implements AgentsRepositoryType {
 
     // neet to play with saved object to know what it's possible to do here
     const res = await this.soAdapter.find<SavedObjectAgentAttributes>(user, {
-      type: 'agents',
+      type: SO_TYPE,
       search,
     });
 
@@ -194,7 +227,7 @@ export class AgentsRepository implements AgentsRepositoryType {
     }
 
     const { saved_objects, total } = await this.soAdapter.find<SavedObjectAgentAttributes>(user, {
-      type: 'agents',
+      type: SO_TYPE,
       page,
       perPage,
       filter: _joinFilters(filters),

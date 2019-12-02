@@ -10,6 +10,7 @@ import { PolicyLib } from './policy';
 import { ArtifactLib } from './artifact';
 import { InstallLib } from './install';
 import { FrameworkLib } from './framework';
+import { AgentPolicyLib } from './agent_policy';
 
 export interface FleetServerLib {
   apiKeys: ApiKeyLib;
@@ -18,4 +19,5 @@ export interface FleetServerLib {
   artifacts: ArtifactLib;
   install: InstallLib;
   framework: FrameworkLib;
+  agentsPolicy: AgentPolicyLib;
 }

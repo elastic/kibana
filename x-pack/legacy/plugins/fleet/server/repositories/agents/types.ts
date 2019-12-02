@@ -19,10 +19,10 @@ export const RuntimeAgentType = t.union([
 ]);
 
 const RuntimeAgentActionType = t.union([
+  t.literal('POLICY_CHANGE'),
   t.literal('DATA_DUMP'),
   t.literal('RESUME'),
   t.literal('PAUSE'),
-  t.literal('UNENROLL'),
 ]);
 
 export type AgentActionType = t.TypeOf<typeof RuntimeAgentActionType>;
@@ -140,6 +140,11 @@ export interface AgentsRepository {
   getBySharedId(user: FrameworkUser, sharedId: string): Promise<Agent | null>;
 
   update(user: FrameworkUser, id: string, newData: Partial<Agent>): Promise<void>;
+
+  bulkUpdate(
+    user: FrameworkUser,
+    data: Array<{ id: string; newData: Partial<Agent> }>
+  ): Promise<void>;
 
   findByMetadata(
     user: FrameworkUser,

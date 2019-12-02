@@ -50,6 +50,8 @@ export const createCheckinAgentsRoute = (libs: FleetServerLib) => ({
       policy,
       actions: actions.map(a => ({
         type: a.type,
+        data: a.data ? JSON.parse(a.data) : a.data,
+        id: a.id,
       })),
     };
   },

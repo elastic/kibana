@@ -16,6 +16,9 @@ import {
   SavedObjectsCreateOptions,
   SavedObjectsBulkGetObject,
   SavedObjectsUpdateResponse,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkUpdateOptions,
+  SavedObjectsBulkUpdateResponse,
 } from 'src/core/server';
 import { FrameworkUser } from '../framework/adapter_types';
 
@@ -32,6 +35,12 @@ export interface SODatabaseAdapter {
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options?: SavedObjectsCreateOptions
   ): Promise<SavedObjectsBulkResponse<T>>;
+
+  bulkUpdate<T extends SavedObjectAttributes = any>(
+    user: FrameworkUser,
+    objects: Array<SavedObjectsBulkUpdateObject<T>>,
+    options?: SavedObjectsBulkUpdateOptions
+  ): Promise<SavedObjectsBulkUpdateResponse<T>>;
 
   delete(
     user: FrameworkUser,

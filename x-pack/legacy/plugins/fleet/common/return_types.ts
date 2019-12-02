@@ -42,6 +42,7 @@ export interface ReturnTypeDelete extends BaseReturnType {
 export interface ReturnTypeCheckin extends BaseReturnType {
   action: 'checkin';
   actions: Array<{
+    id: string;
     type: string;
     data?: object;
   }>;

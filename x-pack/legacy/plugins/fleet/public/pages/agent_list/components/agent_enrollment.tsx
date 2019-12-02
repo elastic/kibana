@@ -17,7 +17,6 @@ import {
   EuiHorizontalRule,
   EuiSelect,
   EuiSpacer,
-  EuiSuperSelect,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -40,7 +39,6 @@ interface RouterProps {
 
 export const AgentEnrollmentFlyout: React.FC<RouterProps> = ({ onClose, policies }) => {
   const libs = useLibs();
-  const [selectedPolicy, setSelectedPolicy] = useState('');
   const [quickInstallType, setQuickInstallType] = useState<'shell' | 'container' | 'tools'>(
     'shell'
   );
@@ -138,21 +136,6 @@ export const AgentEnrollmentFlyout: React.FC<RouterProps> = ({ onClose, policies
 
   const renderedInstructions = apiKey.data && (
     <Fragment>
-      <EuiText>
-        <h5>
-          <FormattedMessage
-            id="xpack.fleet.agentEnrollment.enrollIntoSelectionTitle"
-            defaultMessage="Enroll into policy:"
-          />
-        </h5>
-      </EuiText>
-      <EuiSuperSelect
-        options={policies.map(p => ({ value: p.id, inputDisplay: p.name }))}
-        valueOfSelected={selectedPolicy || ''}
-        onChange={value => setSelectedPolicy(value)}
-      />
-      <EuiSpacer size="s" />
-
       <EuiText>
         <h5>
           <FormattedMessage

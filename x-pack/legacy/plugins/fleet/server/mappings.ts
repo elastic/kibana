@@ -107,6 +107,7 @@ export const mappings = {
     properties: {
       type: { type: 'keyword' },
       agent_id: { type: 'keyword' },
+      action_id: { type: 'keyword' },
       subtype: { type: 'keyword' },
       timestamp: { type: 'date' },
       message: { type: 'text' },

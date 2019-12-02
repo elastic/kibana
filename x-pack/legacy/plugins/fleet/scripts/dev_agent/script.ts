@@ -83,7 +83,7 @@ async function checkin(kibanaURL: string, agent: Agent, log: ToolingLog) {
   }
 
   const json = await res.json();
-  log.info('checkin', json);
+  log.info('checkin', JSON.stringify(json, null, 2));
 }
 
 async function enroll(kibanaURL: string, apiKey: string, log: ToolingLog): Promise<Agent> {

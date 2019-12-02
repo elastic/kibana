@@ -226,25 +226,31 @@ export class AgentLib {
     const actions = this._filterActionsForCheckin(agent);
 
     const now = new Date().toISOString();
-    const updatedActions = actions.map(a => {
-      return { ...a, sent_at: now };
-    });
 
     const updateData: Partial<Agent> = {
       last_checkin: now,
-      actions: updatedActions,
     };
 
     if (localMetadata) {
       updateData.local_metadata = localMetadata;
     }
 
-    await this.agentsRepository.update(internalUser, agent.id, updateData);
     if (events.length > 0) {
+      // TODO move this to an AgentEvent lib https://github.com/elastic/kibana/issues/51976
+      const acknowledgedActions = events
+        .filter(e => e.type === 'ACTION' && e.subtype === 'ACKNOWLEDGE')
+        .map(e => e.action_id);
+
+      const updatedActions = actions.map(a => {
+        return { ...a, sent_at: acknowledgedActions.indexOf(a.id) >= 0 ? now : undefined };
+      });
+      updateData.actions = updatedActions;
+
       await this.agentEventsRepository.createEventsForAgent(internalUser, agent.id, events);
     }
+    await this.agentsRepository.update(internalUser, agent.id, updateData);
 
-    return { actions, policy: null };
+    return { actions: updateData.actions || actions, policy: null };
   }
 
   public async addAction(

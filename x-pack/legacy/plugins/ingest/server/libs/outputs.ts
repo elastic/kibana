@@ -14,7 +14,7 @@ export class OutputsLib {
     }
   ) {}
   public async getByIDs(_user: FrameworkUser, ids: string[]): Promise<Output[]> {
-    if (ids.length > 0 || ids[0] !== 'default') {
+    if (ids.length > 0 && ids[0] !== 'default') {
       throw new Error('Currently, only a default output is supported');
     }
 
