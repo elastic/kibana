@@ -144,7 +144,7 @@ export const TransactionDistribution: FunctionComponent<Props> = (
       sample =>
         sample.transactionId === transactionId && sample.traceId === traceId
     );
-    return sampleFound === -1 ? false : true;
+    return sampleFound !== -1;
   });
 
   onBucketSelected(bucketIndex);
