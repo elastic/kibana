@@ -10,7 +10,7 @@ import { pure } from 'recompose';
 
 import * as i18n from '../translations';
 import { OpenTimelineProps } from '../types';
-import { HeaderPanel } from '../../header_panel';
+import { HeaderSection } from '../../header_section';
 
 type Props = Pick<OpenTimelineProps, 'onAddTimelinesToFavorites' | 'onDeleteSelected' | 'title'> & {
   /** The number of timelines currently selected */
@@ -23,7 +23,7 @@ type Props = Pick<OpenTimelineProps, 'onAddTimelinesToFavorites' | 'onDeleteSele
  */
 export const TitleRow = pure<Props>(
   ({ onAddTimelinesToFavorites, onDeleteSelected, selectedTimelinesCount, title }) => (
-    <HeaderPanel title={title}>
+    <HeaderSection title={title}>
       {(onAddTimelinesToFavorites || onDeleteSelected) && (
         <EuiFlexGroup gutterSize="s" responsive={false}>
           {onAddTimelinesToFavorites && (
@@ -55,7 +55,7 @@ export const TitleRow = pure<Props>(
           )}
         </EuiFlexGroup>
       )}
-    </HeaderPanel>
+    </HeaderSection>
   )
 );
 

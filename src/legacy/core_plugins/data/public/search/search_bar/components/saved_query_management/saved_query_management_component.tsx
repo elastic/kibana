@@ -29,13 +29,13 @@ import {
   EuiPagination,
   EuiText,
   EuiSpacer,
+  EuiIcon,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useEffect, useState, Fragment } from 'react';
 import { sortBy } from 'lodash';
-import { SavedQuery } from '../../index';
-import { SavedQueryService } from '../../lib/saved_query_service';
+import { SavedQuery, SavedQueryService } from '../../../../../../../../plugins/data/public';
 import { SavedQueryListItem } from './saved_query_list_item';
 
 const perPage = 50;
@@ -116,8 +116,6 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
 
   const savedQueryPopoverButton = (
     <EuiButtonEmpty
-      iconType="arrowDown"
-      iconSide="right"
       onClick={() => {
         setIsOpen(!isOpen);
       }}
@@ -129,7 +127,8 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
       })}
       data-test-subj="saved-query-management-popover-button"
     >
-      #
+      <EuiIcon type="save" className="euiQuickSelectPopover__buttonText" />
+      <EuiIcon type="arrowDown" />
     </EuiButtonEmpty>
   );
 

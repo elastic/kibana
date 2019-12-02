@@ -21,13 +21,13 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { TableListView } from './../../table_list_view';
+import { TableListView } from '../../../../../../../src/plugins/kibana_react/public';
 
 import { EuiIcon, EuiBetaBadge, EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
 import { getServices } from '../kibana_services';
 
-const { capabilities } = getServices();
+const { capabilities, toastNotifications, uiSettings } = getServices();
 
 class VisualizeListingTable extends Component {
   constructor(props) {
@@ -57,6 +57,8 @@ class VisualizeListingTable extends Component {
         tableListTitle={i18n.translate('kbn.visualize.listing.table.listTitle', {
           defaultMessage: 'Visualizations',
         })}
+        toastNotifications={toastNotifications}
+        uiSettings={uiSettings}
       />
     );
   }

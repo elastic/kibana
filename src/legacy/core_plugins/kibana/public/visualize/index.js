@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 import './editor/editor';
 import { i18n } from '@kbn/i18n';
 import './saved_visualizations/_saved_vis';
@@ -32,7 +33,6 @@ const { FeatureCatalogueRegistryProvider, uiRoutes } = getServices();
 
 uiRoutes
   .defaults(/visualize/, {
-    requireDefaultIndex: true,
     requireUICapability: 'visualize.show',
     badge: uiCapabilities => {
       if (uiCapabilities.visualize.save) {
@@ -57,6 +57,7 @@ uiRoutes
     controllerAs: 'listingController',
     resolve: {
       createNewVis: () => false,
+      hasDefaultIndex: ($rootScope, kbnUrl) => ensureDefaultIndexPattern(getServices().core, getServices().data, $rootScope, kbnUrl)
     },
   })
   .when(VisualizeConstants.WIZARD_STEP_1_PAGE_PATH, {
@@ -66,6 +67,7 @@ uiRoutes
     controllerAs: 'listingController',
     resolve: {
       createNewVis: () => true,
+      hasDefaultIndex: ($rootScope, kbnUrl) => ensureDefaultIndexPattern(getServices().core, getServices().data, $rootScope, kbnUrl)
     },
   });
 

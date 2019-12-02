@@ -61,6 +61,13 @@ describe('SIEM Navigation', () => {
     expect(setBreadcrumbs).toHaveBeenNthCalledWith(1, {
       detailName: undefined,
       navTabs: {
+        'detection-engine': {
+          disabled: false,
+          href: '#/link-to/detection-engine',
+          id: 'detection-engine',
+          name: 'Detection engine',
+          urlKey: 'detection-engine',
+        },
         hosts: {
           disabled: false,
           href: '#/link-to/hosts',
@@ -132,9 +139,17 @@ describe('SIEM Navigation', () => {
       tabName: undefined,
     });
     wrapper.update();
-    expect(setBreadcrumbs).toHaveBeenNthCalledWith(2, {
+    expect(setBreadcrumbs).toHaveBeenNthCalledWith(1, {
       detailName: undefined,
+      filters: [],
       navTabs: {
+        'detection-engine': {
+          disabled: false,
+          href: '#/link-to/detection-engine',
+          id: 'detection-engine',
+          name: 'Detection engine',
+          urlKey: 'detection-engine',
+        },
         hosts: {
           disabled: false,
           href: '#/link-to/hosts',
@@ -164,17 +179,13 @@ describe('SIEM Navigation', () => {
           urlKey: 'timeline',
         },
       },
-      pageName: 'network',
-      pathName: '/network',
-      search: '',
-      tabName: undefined,
-      query: { query: '', language: 'kuery' },
-      filters: [],
+      pageName: 'hosts',
+      pathName: '/hosts',
+      query: { language: 'kuery', query: '' },
       savedQuery: undefined,
-      timeline: {
-        id: '',
-        isOpen: false,
-      },
+      search: '',
+      tabName: 'authentications',
+      timeline: { id: '', isOpen: false },
       timerange: {
         global: {
           linkTo: ['timeline'],

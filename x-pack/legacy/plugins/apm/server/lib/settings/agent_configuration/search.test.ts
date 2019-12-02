@@ -16,6 +16,7 @@ describe('search configurations', () => {
       setup: ({
         config: { get: () => '' },
         client: { search: async () => searchMocks },
+        internalClient: { search: async () => searchMocks },
         indices: {
           apm_oss: {
             sourcemapIndices: 'myIndex',
@@ -41,6 +42,7 @@ describe('search configurations', () => {
       setup: ({
         config: { get: () => '' },
         client: { search: async () => searchMocks },
+        internalClient: { search: async () => searchMocks },
         indices: {
           apm_oss: {
             sourcemapIndices: 'myIndex',

@@ -20,7 +20,7 @@
 import { AggParam } from '../';
 import { AggConfigs } from '../agg_configs';
 import { AggConfig } from '../../vis';
-import { SearchSource } from '../../courier';
+import { SearchSourceContract, FetchOptions } from '../../courier/types';
 
 export class BaseParamType implements AggParam {
   name: string;
@@ -55,8 +55,8 @@ export class BaseParamType implements AggParam {
    */
   modifyAggConfigOnSearchRequestStart: (
     aggConfig: AggConfig,
-    searchSource?: SearchSource,
-    options?: any
+    searchSource?: SearchSourceContract,
+    options?: FetchOptions
   ) => void;
 
   constructor(config: Record<string, any>) {

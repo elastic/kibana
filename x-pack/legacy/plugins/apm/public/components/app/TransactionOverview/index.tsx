@@ -94,9 +94,7 @@ export function TransactionOverview() {
     }
   }, [http, serviceName, transactionType]);
 
-  const localFiltersConfig: React.ComponentProps<
-    typeof LocalUIFilters
-  > = useMemo(
+  const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(
     () => ({
       filterNames: ['transactionResult', 'host', 'containerId', 'podName'],
       params: {

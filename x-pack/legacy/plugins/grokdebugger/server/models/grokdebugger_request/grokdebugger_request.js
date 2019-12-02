@@ -35,7 +35,6 @@ export class GrokdebuggerRequest {
       docs: [
         {
           _index: 'grokdebugger',
-          _type: 'grokdebugger',
           _id: 'grokdebugger',
           _source: {
             rawEvent: this.rawEvent.toString()

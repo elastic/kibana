@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ProgressInline it renders 1`] = `
+<Component>
+  <ProgressInline
+    current={50}
+    max={100}
+    unit="tests"
+  >
+    Test progress
+  </ProgressInline>
+</Component>
+`;

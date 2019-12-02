@@ -18,7 +18,6 @@
  */
 
 import Joi from 'joi';
-import Boom from 'boom';
 import { Report } from '@kbn/analytics';
 import { Server } from 'hapi';
 
@@ -27,15 +26,27 @@ export async function storeReport(server: any, report: Report) {
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const internalRepository = getSavedObjectsRepository(callWithInternalUser);
 
-  const metricKeys = Object.keys(report.uiStatsMetrics);
-  return Promise.all(
-    metricKeys.map(async key => {
-      const metric = report.uiStatsMetrics[key];
+  const uiStatsMetrics = report.uiStatsMetrics ? Object.entries(report.uiStatsMetrics) : [];
+  const userAgents = report.userAgent ? Object.entries(report.userAgent) : [];
+  return Promise.all([
+    ...userAgents.map(async ([key, metric]) => {
+      const { userAgent } = metric;
+      const savedObjectId = `${key}:${userAgent}`;
+      return await internalRepository.create(
+        'ui-metric',
+        { count: 1 },
+        {
+          id: savedObjectId,
+          overwrite: true,
+        }
+      );
+    }),
+    ...uiStatsMetrics.map(async ([key, metric]) => {
       const { appName, eventName } = metric;
       const savedObjectId = `${appName}:${eventName}`;
-      return internalRepository.incrementCounter('ui-metric', savedObjectId, 'count');
-    })
-  );
+      return await internalRepository.incrementCounter('ui-metric', savedObjectId, 'count');
+    }),
+  ]);
 }
 
 export function registerUiMetricRoute(server: Server) {
@@ -45,36 +56,46 @@ export function registerUiMetricRoute(server: Server) {
     options: {
       validate: {
         payload: Joi.object({
-          report: Joi.object({
-            uiStatsMetrics: Joi.object()
-              .pattern(
-                /.*/,
-                Joi.object({
-                  key: Joi.string().required(),
-                  type: Joi.string().required(),
-                  appName: Joi.string().required(),
-                  eventName: Joi.string().required(),
-                  stats: Joi.object({
-                    min: Joi.number(),
-                    sum: Joi.number(),
-                    max: Joi.number(),
-                    avg: Joi.number(),
-                  }).allow(null),
-                })
-              )
-              .allow(null),
-          }),
+          reportVersion: Joi.number().optional(),
+          userAgent: Joi.object()
+            .pattern(
+              /.*/,
+              Joi.object({
+                key: Joi.string().required(),
+                type: Joi.string().required(),
+                appName: Joi.string().required(),
+                userAgent: Joi.string().required(),
+              })
+            )
+            .allow(null)
+            .optional(),
+          uiStatsMetrics: Joi.object()
+            .pattern(
+              /.*/,
+              Joi.object({
+                key: Joi.string().required(),
+                type: Joi.string().required(),
+                appName: Joi.string().required(),
+                eventName: Joi.string().required(),
+                stats: Joi.object({
+                  min: Joi.number(),
+                  sum: Joi.number(),
+                  max: Joi.number(),
+                  avg: Joi.number(),
+                }).allow(null),
+              })
+            )
+            .allow(null),
         }),
       },
     },
     handler: async (req: any, h: any) => {
-      const { report } = req.payload;
-
       try {
+        const report = req.payload;
         await storeReport(server, report);
-        return {};
+        return { status: 'ok' };
       } catch (error) {
-        return new Boom('Something went wrong', { statusCode: error.status });
+        return { status: 'fail' };
       }
     },
   });

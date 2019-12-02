@@ -20,12 +20,8 @@
 import _ from 'lodash';
 import { FilterManager } from './filter_manager.js';
 import {
-  buildPhraseFilter,
-  buildPhrasesFilter,
-  getPhraseFilterField,
-  getPhraseFilterValue,
-  isPhraseFilter,
-} from '@kbn/es-query';
+  esFilters,
+} from '../../../../../../plugins/data/public';
 
 export class PhraseFilterManager extends FilterManager {
   constructor(controlId, fieldName, indexPattern, queryFilter) {
@@ -43,12 +39,12 @@ export class PhraseFilterManager extends FilterManager {
   createFilter(phrases) {
     let newFilter;
     if (phrases.length === 1) {
-      newFilter = buildPhraseFilter(
+      newFilter = esFilters.buildPhraseFilter(
         this.indexPattern.fields.getByName(this.fieldName),
         phrases[0],
         this.indexPattern);
     } else {
-      newFilter = buildPhrasesFilter(
+      newFilter = esFilters.buildPhrasesFilter(
         this.indexPattern.fields.getByName(this.fieldName),
         phrases,
         this.indexPattern);
@@ -107,12 +103,12 @@ export class PhraseFilterManager extends FilterManager {
     }
 
     // single phrase filter
-    if (isPhraseFilter(kbnFilter)) {
-      if (getPhraseFilterField(kbnFilter) !== this.fieldName) {
+    if (esFilters.isPhraseFilter(kbnFilter)) {
+      if (esFilters.getPhraseFilterField(kbnFilter) !== this.fieldName) {
         return;
       }
 
-      return getPhraseFilterValue(kbnFilter);
+      return esFilters.getPhraseFilterValue(kbnFilter);
     }
 
     // single phrase filter from bool filter
