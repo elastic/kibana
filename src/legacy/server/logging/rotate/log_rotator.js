@@ -227,7 +227,10 @@ export class LogRotator {
     this.isRotating = true;
 
     // get rotated files metadata
-    const rotatedFiles = await this._readRotatedFilesMetadata();
+    const foundRotatedFiles = await this._readRotatedFilesMetadata();
+
+    // Truncate number of rotated files to the settings limit
+    const rotatedFiles = await this._truncateFoundRotatedFilesToKeepLimit(foundRotatedFiles);
 
     // delete last file
     await this._deleteLastRotatedFile(rotatedFiles);
@@ -257,6 +260,21 @@ export class LogRotator {
       .filter(file => new RegExp(`${logFileBaseName}\\.\\d`).test(file))
       .sort((a, b) => Number(a.match(/(\d+)/g).slice(-1)) - Number(b.match(/(\d+)/g).slice(-1)))
       .map(filename => `${logFilesFolder}${sep}${filename}`);
+  }
+
+  async _truncateFoundRotatedFilesToKeepLimit(foundRotatedFiles) {
+    if (foundRotatedFiles.length <= this.keepFiles) {
+      return foundRotatedFiles;
+    }
+
+    const finalRotatedFiles = foundRotatedFiles.slice(0, this.keepFiles);
+    const rotatedFilesToDelete = foundRotatedFiles.slice(finalRotatedFiles.length, foundRotatedFiles.length);
+
+    await Promise.all(
+      rotatedFilesToDelete.map(rotatedFilePath => unlinkAsync(rotatedFilePath))
+    );
+
+    return finalRotatedFiles;
   }
 
   async _deleteLastRotatedFile(rotatedFiles) {

@@ -156,6 +156,50 @@ describe('LogRotator', () => {
     lodash.throttle.mockRestore();
   });
 
+  it('rotates log file service correctly keeps number of files even when number setting changes', async () => {
+    jest.spyOn(lodash, 'throttle').mockImplementation(fn => fn);
+
+    writeBytesToFile(testFilePath, 3);
+
+    const logRotator = new LogRotator(createLogRotatorConfig(testFilePath), mockServer);
+    jest.spyOn(logRotator, '_sendReloadLogConfigSignal').mockImplementation(() => {});
+    await logRotator.start();
+
+    expect(logRotator.running).toBe(true);
+
+    const testLogFileDir = dirname(testFilePath);
+    expect(existsSync(join(testLogFileDir, 'log_rotator_test_log_file.log.0'))).toBeTruthy();
+
+    writeBytesToFile(testFilePath, 2);
+
+    // ['change', [asyncFunction]]
+    const onChangeCb = mockOn.mock.calls[0][1];
+    await onChangeCb(testLogFileDir, { size: 2 });
+
+    writeBytesToFile(testFilePath, 5);
+    await onChangeCb(testLogFileDir, { size: 5 });
+
+    await logRotator.stop();
+    expect(existsSync(join(testLogFileDir, 'log_rotator_test_log_file.log.0'))).toBeTruthy();
+    expect(existsSync(join(testLogFileDir, 'log_rotator_test_log_file.log.1'))).toBeTruthy();
+    expect(existsSync(join(testLogFileDir, 'log_rotator_test_log_file.log.2'))).toBeFalsy();
+    expect(statSync(join(testLogFileDir, 'log_rotator_test_log_file.log.0')).size).toBe(5);
+
+
+    logRotator.keepFiles = 1;
+    await logRotator.start();
+
+    writeBytesToFile(testFilePath, 5);
+    await onChangeCb(testLogFileDir, { size: 5 });
+
+    await logRotator.stop();
+    expect(existsSync(join(testLogFileDir, 'log_rotator_test_log_file.log.0'))).toBeTruthy();
+    expect(existsSync(join(testLogFileDir, 'log_rotator_test_log_file.log.1'))).toBeFalsy();
+    expect(statSync(join(testLogFileDir, 'log_rotator_test_log_file.log.0')).size).toBe(5);
+
+    lodash.throttle.mockRestore();
+  });
+
   it('rotates log file service correctly detects usePolling when it should be false', async () => {
     writeBytesToFile(testFilePath, 1);
 
