@@ -29,8 +29,9 @@
 
 import { EventEmitter } from 'events';
 import _ from 'lodash';
-import { PersistedState } from '../../../../ui/public/persisted_state';
-import { getTypes } from '../np_ready/public/services';
+import { PersistedState } from '../../../legacy_imports';
+
+import { getTypes } from '../services';
 
 export class Vis extends EventEmitter {
   constructor(visState = { type: 'histogram' }) {

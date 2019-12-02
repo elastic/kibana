@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 // @ts-ignore
 import { Vis } from './vis';
-import { Visualization } from '../np_ready/public/components';
+import { Visualization } from '../components';
 
 export const visualization = () => ({
   name: 'visualization',
@@ -31,18 +30,14 @@ export const visualization = () => ({
   render: async (domNode: HTMLElement, config: any, handlers: any) => {
     const { visData, visConfig, params } = config;
     const visType = config.visType || visConfig.type;
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const $rootScope = $injector.get('$rootScope') as any;
 
     if (handlers.vis) {
       // special case in visualize, we need to render first (without executing the expression), for maps to work
       if (visConfig) {
-        $rootScope.$apply(() => {
-          handlers.vis.setCurrentState({
-            type: visType,
-            params: visConfig,
-            title: handlers.vis.title,
-          });
+        handlers.vis.setCurrentState({
+          type: visType,
+          params: visConfig,
+          title: handlers.vis.title,
         });
       }
     } else {
