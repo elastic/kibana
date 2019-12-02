@@ -25,6 +25,8 @@ import {
   IndexPatternMissingIndices,
   validateIndexPattern,
 } from './lib';
+import { getRoutes, getFromSavedObject } from './utils';
+import { flattenHitWrapper, formatHitProvider } from './index_patterns';
 
 export const indexPatterns = {
   ILLEGAL_CHARACTERS_KEY,
@@ -33,4 +35,13 @@ export const indexPatterns = {
   ILLEGAL_CHARACTERS,
   IndexPatternMissingIndices,
   validate: validateIndexPattern,
+  getRoutes,
+  getFromSavedObject,
+  flattenHitWrapper,
+  formatHitProvider,
 };
+
+export { IndexPatternsService } from './index_patterns_service';
+export { Field, FieldList, FieldListInterface } from './fields';
+export { IndexPattern, IndexPatterns } from './index_patterns';
+export { IndexPatternsStart, IndexPatternsSetup } from './types';

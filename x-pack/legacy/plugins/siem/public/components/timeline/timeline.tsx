@@ -8,7 +8,6 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { getOr, isEmpty } from 'lodash/fp';
 import * as React from 'react';
 import styled from 'styled-components';
-import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { BrowserFields } from '../../containers/source';
 import { TimelineQuery } from '../../containers/timeline';
@@ -36,7 +35,7 @@ import { TimelineHeader } from './header';
 import { calculateBodyHeight, combineQueries } from './helpers';
 import { TimelineRefetch } from './refetch_timeline';
 import { ManageTimelineContext } from './timeline_context';
-import { esQuery, esFilters } from '../../../../../../../src/plugins/data/public';
+import { esQuery, esFilters, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 
 const WrappedByAutoSizer = styled.div`
   width: 100%;
@@ -65,7 +64,7 @@ interface Props {
   flyoutHeaderHeight: number;
   flyoutHeight: number;
   id: string;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   isLive: boolean;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
