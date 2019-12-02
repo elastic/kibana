@@ -15,9 +15,9 @@ export function VectorStyleSizeEditor(props) {
   return (
     <StaticDynamicStyleRow
       ordinalFields={props.ordinalFields}
-      property={props.styleProperty}
-      label={getVectorStyleLabel(props.styleProperty)}
-      styleDescriptor={props.styleDescriptor}
+      styleName={props.styleName}
+      label={getVectorStyleLabel(props.styleName)}
+      styleProperty={props.styleProperty}
       handlePropertyChange={props.handlePropertyChange}
       DynamicSelector={DynamicSizeSelection}
       StaticSelector={StaticSizeSelection}
