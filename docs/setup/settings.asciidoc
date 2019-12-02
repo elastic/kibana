@@ -162,7 +162,7 @@ The following example shows a valid logging rotate configuration:
 enable log rotation. If you do not have a `logging.dest` set that is different from `stdout`
 that feature would not take any effect.
 
-`logging.rotate.everyBytes:`:: *Default: 10485760* The maximum size of a log file. If the 
+`logging.rotate.everyBytes:`:: *Default: 10485760* The maximum size of a log file (that is `not an exact` limit). After the 
 limit is reached, a new log file is generated. The default size limit is 10485760 (10 MB) and
 this option should be at least greater than 1024.
 
