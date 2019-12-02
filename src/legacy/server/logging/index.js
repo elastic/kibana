@@ -31,6 +31,7 @@ export async function setupLogging(server, config) {
 
 export async function loggingMixin(kbnServer, server, config) {
   logWithMetadata.decorateServer(server);
+
+  await setupLogging(server, config);
   await setupLoggingRotate(server, config);
-  return await setupLogging(server, config);
 }

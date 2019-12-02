@@ -28,19 +28,19 @@ export async function setupLoggingRotate(server, config) {
     return;
   }
 
-  // We don't want to run logging rotate server if
-  // we are not logging to a file
-  if (config.get('logging.dest') === 'stdout') {
-    server.log(
-      ['warning', 'logging:rotate'],
-      'Log rotation is enabled but logging.dest is configured for stdout. Set logging.dest to a file for this setting to take effect.'
-    );
-    return;
-  }
-
   // We just want to start the logging rotate service once
   // and we choose to use the master (prod) or the worker server (dev)
   if (!isMaster && isWorker && process.env.kbnWorkerType !== 'server') {
+    return;
+  }
+
+  // We don't want to run logging rotate server if
+  // we are not logging to a file
+  if (config.get('logging.dest') === 'stdout') {
+    server.logWithMetadata(
+      ['warning', 'logging:rotate'],
+      'Log rotation is enabled but logging.dest is configured for stdout. Set logging.dest to a file for this setting to take effect.'
+    );
     return;
   }
 
