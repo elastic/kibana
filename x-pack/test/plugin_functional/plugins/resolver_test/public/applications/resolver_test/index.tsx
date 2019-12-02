@@ -60,5 +60,5 @@ const AppRoot: React.FC<{
     }
   }, [embeddable, renderTarget]);
 
-  return <div ref={setRenderTarget} />;
+  return <div data-test-subj="resolverEmbeddableContainer" ref={setRenderTarget} />;
 });
