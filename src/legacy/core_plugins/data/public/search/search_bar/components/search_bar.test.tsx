@@ -38,6 +38,7 @@ const mockTimeHistory = {
 jest.mock('../../../../../../../plugins/data/public', () => {
   return {
     FilterBar: () => <div className="filterBar" />,
+    createSavedQueryService: () => {},
   };
 });
 

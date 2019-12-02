@@ -229,6 +229,8 @@ function stashCombinedJob(
     mlJobService.tempJobCloningObjects.start = jobCreator.start;
     mlJobService.tempJobCloningObjects.end = jobCreator.end;
   }
+
+  mlJobService.tempJobCloningObjects.calendars = jobCreator.calendars;
 }
 
 export function convertToMultiMetricJob(jobCreator: JobCreatorType) {
