@@ -25,7 +25,6 @@ const flattenHitWrapper = indexPatterns.flattenHitWrapper;
 
 export { getFromSavedObject, getRoutes, flattenHitWrapper };
 export { IFieldType as FieldType };
-export { IIndexPattern as StaticIndexPattern };
 export {
   Field,
   FieldListInterface,
