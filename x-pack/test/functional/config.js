@@ -56,7 +56,6 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/cross_cluster_replication'),
       resolve(__dirname, './apps/remote_clusters'),
       resolve(__dirname, './apps/transform'),
-      resolve(__dirname, './apps/endpoint'),
       // This license_management file must be last because it is destructive.
       resolve(__dirname, './apps/license_management'),
     ],
@@ -198,9 +197,6 @@ export default async function ({ readConfigFile }) {
       transform: {
         pathname: '/app/kibana/',
         hash: '/management/elasticsearch/transform',
-      },
-      endpoint: {
-        pathname: '/app/endpoint',
       },
     },
 
