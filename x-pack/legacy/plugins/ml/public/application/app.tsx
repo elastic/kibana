@@ -38,7 +38,7 @@ import 'ace';
 
 import { AppMountContext, AppMountParameters } from 'kibana/public';
 import { DataStart } from 'src/legacy/core_plugins/data/public';
-import { ANOMALY_DETECTION_BREADCRUMB } from './breadcrumbs';
+// import { ANOMALY_DETECTION_BREADCRUMB } from './breadcrumbs';
 
 import { Plugin as DataPlugin } from '../../../../../../src/plugins/data/public';
 import { KibanaContext, KibanaConfigTypeFix } from './contexts/kibana';
