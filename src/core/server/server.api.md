@@ -724,7 +724,7 @@ export interface IRouter {
     // 
     // @internal
     getRoutes: () => RouterRoute[];
-    handleLegacyErrors: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(handler: RequestHandler<P, Q, B>) => RequestHandler<P, Q, B>;
+    handleLegacyErrors: <P extends RouteURLValidationParams, Q extends RouteURLValidationParams, B extends RouteBodyValidationParams>(handler: RequestHandler<P, Q, B>) => RequestHandler<P, Q, B>;
     patch: RouteRegistrar<'patch'>;
     post: RouteRegistrar<'post'>;
     put: RouteRegistrar<'put'>;
@@ -760,10 +760,10 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     constructor(request: Request, params: Params, query: Query, body: Body, withoutSecretHeaders: boolean);
     // (undocumented)
     readonly body: Body;
-    // Warning: (ae-forgotten-export) The symbol "ValidatedType" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "RouteValidatedType" needs to be exported by the entry point index.d.ts
     // 
     // @internal
-    static from<P extends ObjectType | ValidateFunction<any>, Q extends ObjectType | ValidateFunction<any>, B extends ObjectType | Type<Buffer> | Type<Stream> | ValidateFunction<any>>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<ValidatedType<P>, ValidatedType<Q>, ValidatedType<B>, any>;
+    static from<P extends ObjectType | RouteValidateFunction<any>, Q extends ObjectType | RouteValidateFunction<any>, B extends ObjectType | Type<Buffer> | Type<Stream> | RouteValidateFunction<any>>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<RouteValidatedType<P>, RouteValidatedType<Q>, RouteValidatedType<B>, any>;
     readonly headers: Headers;
     // (undocumented)
     readonly params: Params;
@@ -1054,7 +1054,7 @@ export type RedirectResponseOptions = HttpResponseOptions & {
 };
 
 // @public
-export type RequestHandler<P extends ObjectType | ValidateFunction<unknown>, Q extends ObjectType | ValidateFunction<unknown>, B extends ObjectType | Type<Buffer> | Type<Stream> | ValidateFunction<unknown>, Method extends RouteMethod = any> = (context: RequestHandlerContext, request: KibanaRequest<ValidatedType<P>, ValidatedType<Q>, ValidatedType<B>, Method>, response: KibanaResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
+export type RequestHandler<P extends RouteURLValidationParams, Q extends RouteURLValidationParams, B extends RouteBodyValidationParams, Method extends RouteMethod = any> = (context: RequestHandlerContext, request: KibanaRequest<RouteValidatedType<P>, RouteValidatedType<Q>, RouteValidatedType<B>, Method>, response: KibanaResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 
 // @public
 export interface RequestHandlerContext {
@@ -1096,7 +1096,10 @@ export type ResponseHeaders = {
 };
 
 // @public
-export interface RouteConfig<P extends ObjectType | ValidateFunction<unknown>, Q extends ObjectType | ValidateFunction<unknown>, B extends ObjectType | Type<Buffer> | Type<Stream> | ValidateFunction<unknown>, Method extends RouteMethod> {
+export type RouteBodyValidationParams = RouteURLValidationParams | Type<Buffer> | Type<Stream>;
+
+// @public
+export interface RouteConfig<P extends RouteURLValidationParams, Q extends RouteURLValidationParams, B extends RouteBodyValidationParams, Method extends RouteMethod> {
     options?: RouteConfigOptions<Method>;
     path: string;
     validate: RouteSchemas<P, Q, B> | false;
@@ -1124,10 +1127,10 @@ export type RouteContentType = 'application/json' | 'application/*+json' | 'appl
 export type RouteMethod = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options';
 
 // @public
-export type RouteRegistrar<Method extends RouteMethod> = <P extends ObjectType | ValidateFunction<unknown>, Q extends ObjectType | ValidateFunction<unknown>, B extends ObjectType | Type<Buffer> | Type<Stream> | ValidateFunction<unknown>>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<P, Q, B, Method>) => void;
+export type RouteRegistrar<Method extends RouteMethod> = <P extends RouteURLValidationParams, Q extends RouteURLValidationParams, B extends RouteBodyValidationParams>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<P, Q, B, Method>) => void;
 
 // @public
-export interface RouteSchemas<P extends ObjectType | ValidateFunction<unknown>, Q extends ObjectType | ValidateFunction<unknown>, B extends ObjectType | Type<Buffer> | Type<Stream> | ValidateFunction<unknown>> {
+export interface RouteSchemas<P extends RouteURLValidationParams, Q extends RouteURLValidationParams, B extends RouteBodyValidationParams> {
     // (undocumented)
     body?: B;
     // (undocumented)
@@ -1135,6 +1138,21 @@ export interface RouteSchemas<P extends ObjectType | ValidateFunction<unknown>, 
     // (undocumented)
     query?: Q;
 }
+
+// @public
+export type RouteURLValidationParams = ObjectType | RouteValidateFunction<unknown>;
+
+// @public
+export type RouteValidateFunction<T> = (data: any) => RouteValidateFunctionReturn<T>;
+
+// @public
+export type RouteValidateFunctionReturn<T> = {
+    value: T;
+    error?: undefined;
+} | {
+    value?: undefined;
+    error: SchemaTypeError;
+};
 
 // @public (undocumented)
 export interface SavedObject<T extends SavedObjectAttributes = any> {
@@ -1721,18 +1739,6 @@ export interface UserProvidedValues<T = any> {
     // (undocumented)
     userValue?: T;
 }
-
-// @public
-export type ValidateFunction<T> = (data: any) => ValidateFunctionReturn<T>;
-
-// @public
-export type ValidateFunctionReturn<T> = {
-    value: T;
-    error?: undefined;
-} | {
-    value?: undefined;
-    error: SchemaTypeError;
-};
 
 // @public
 export const validBodyOutput: readonly ["data", "stream"];
