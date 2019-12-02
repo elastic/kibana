@@ -30,6 +30,7 @@ export const legacyChrome = chrome;
 
 // @ts-ignore
 export { AppState, AppStateProvider } from 'ui/state_management/app_state';
+export { State } from 'ui/state_management/state';
 // @ts-ignore
 export { GlobalStateProvider } from 'ui/state_management/global_state';
 // @ts-ignore
