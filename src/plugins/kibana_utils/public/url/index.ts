@@ -26,6 +26,13 @@ import { createBrowserHistory } from 'history';
 import { stringify as _stringifyQueryString, ParsedUrlQuery } from 'querystring';
 import { BaseState } from '../store/sync';
 
+// TODO: NP, Typescriptify, Simplify
+import {
+  createStateHash,
+  isStateHash,
+  HashedItemStoreSingleton,
+} from '../../../../legacy/ui/public/state_management/state_storage';
+
 const parseUrl = (url: string) => _parseUrl(url, true);
 const parseUrlHash = (url: string) => parseUrl(parseUrl(url).hash!.slice(1));
 const parseCurrentUrl = () => parseUrl(window.location.href);
@@ -43,7 +50,13 @@ export function getStatesFromUrl(url: string = window.location.href): Record<str
 
   const decoded: Record<string, BaseState> = {};
   try {
-    Object.keys(query).forEach(q => (decoded[q] = rison.decode(query[q])));
+    Object.entries(query).forEach(([q, value]) => {
+      if (isStateHash(value as string)) {
+        decoded[q] = JSON.parse(HashedItemStoreSingleton.getItem(value)!);
+      } else {
+        decoded[q] = rison.decode(query[q]);
+      }
+    });
   } catch (e) {
     throw new Error('oops');
   }
@@ -55,11 +68,26 @@ export function getStateFromUrl(key: string, url: string = window.location.href)
   return getStatesFromUrl(url)[key] || null;
 }
 
-export function setStateToUrl<T extends BaseState>(key: string, state: T): string {
+export function setStateToUrl<T extends BaseState>(
+  key: string,
+  state: T,
+  { useHash = false }: { useHash: boolean } = { useHash: false }
+): string {
   const url = parseCurrentUrl();
   const hash = parseCurrentUrlHash();
 
-  const encoded = rison.encode(state);
+  let encoded: string;
+  if (useHash) {
+    const stateJSON = JSON.stringify(state);
+    const stateHash = createStateHash(stateJSON, (hashKey: string) =>
+      HashedItemStoreSingleton.getItem(hashKey)
+    );
+    HashedItemStoreSingleton.setItem(stateHash, stateJSON);
+    encoded = stateHash;
+  } else {
+    encoded = rison.encode(state);
+  }
+
   const searchQueryString = stringifyQueryString({ ...hash.query, [key]: encoded });
 
   return formatUrl({

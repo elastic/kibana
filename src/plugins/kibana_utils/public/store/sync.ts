@@ -35,25 +35,28 @@ export enum InitialTruthSource {
   None,
 }
 
-export type SyncStrategyType = 'url' | 'hashed-url' | string;
+export enum SyncStrategy {
+  Url,
+  HashedUrl,
+}
 
-export interface StateSyncConfig<
+export interface IStateSyncConfig<
   State extends BaseState = BaseState,
   StorageState extends BaseState = BaseState
 > {
   syncKey: string;
   state: IState<State>;
-  syncStrategy: SyncStrategyType;
+  syncStrategy?: SyncStrategy;
   toStorageMapper?: (state: State) => StorageState;
   fromStorageMapper?: (storageState: StorageState) => Partial<State>;
   initialTruthSource?: InitialTruthSource;
 }
 
-interface SyncStrategy<State extends BaseState = BaseState> {
+interface ISyncStrategy<StorageState extends BaseState = BaseState> {
   // TODO: replace sounds like something url specific ...
-  toStorage: (state: State, opts: { replace: boolean }) => void;
-  fromStorage: () => State;
-  storageChange$: Observable<State>;
+  toStorage: (state: StorageState, opts: { replace: boolean }) => void;
+  fromStorage: () => StorageState;
+  storageChange$: Observable<StorageState>;
 }
 
 function distinctUntilChangedWithInitialValue<T>(
@@ -63,11 +66,13 @@ function distinctUntilChangedWithInitialValue<T>(
   return input$ => input$.pipe(startWith(initialValue), distinctUntilChanged(compare), skip(1));
 }
 
-const createUrlSyncStrategy = (key: string): SyncStrategy => {
+const createUrlSyncStrategyFactory = (
+  { useHash = false }: { useHash: boolean } = { useHash: false }
+) => (key: string): ISyncStrategy => {
   const { update: updateUrl, listen: listenUrl } = createUrlControls();
   return {
     toStorage: (state: BaseState, { replace = false } = { replace: false }) => {
-      updateUrl(setStateToUrl(key, state), replace);
+      updateUrl(setStateToUrl(key, state, { useHash }), replace);
     },
     fromStorage: () => getStateFromUrl(key),
     storageChange$: new Observable(observer => {
@@ -86,7 +91,13 @@ const createUrlSyncStrategy = (key: string): SyncStrategy => {
   };
 };
 
-export function syncState(config: StateSyncConfig[] | StateSyncConfig) {
+const Strategies: { [key in SyncStrategy]: (stateKey: string) => ISyncStrategy } = {
+  [SyncStrategy.Url]: createUrlSyncStrategyFactory({ useHash: false }),
+  [SyncStrategy.HashedUrl]: createUrlSyncStrategyFactory({ useHash: true }),
+  // Other SyncStrategies: LocalStorage, es, somewhere else...
+};
+
+export function syncState(config: IStateSyncConfig[] | IStateSyncConfig) {
   const stateSyncConfigs = Array.isArray(config) ? config : [config];
   const subscriptions: Subscription[] = [];
   let ignoreStateUpdate = false;
@@ -96,9 +107,9 @@ export function syncState(config: StateSyncConfig[] | StateSyncConfig) {
     const toStorageMapper = stateSyncConfig.toStorageMapper || (s => s);
     const fromStorageMapper = stateSyncConfig.fromStorageMapper || (s => s);
 
-    const { toStorage, fromStorage, storageChange$ } = createUrlSyncStrategy(
-      stateSyncConfig.syncKey
-    );
+    const { toStorage, fromStorage, storageChange$ } = Strategies[
+      stateSyncConfig.syncStrategy || SyncStrategy.Url
+    ](stateSyncConfig.syncKey);
 
     const updateState = (): boolean => {
       if (ignoreStateUpdate) return false;

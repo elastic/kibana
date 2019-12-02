@@ -42,7 +42,7 @@ import { getEditBreadcrumbs } from '../breadcrumbs';
 import {
   createStore,
   syncState,
-  InitialTruthSource,
+  InitialTruthSource, SyncStrategy,
 } from '../../../../../../../../plugins/kibana_utils/public';
 
 const REACT_SOURCE_FILTERS_DOM_ELEMENT_ID = 'reactSourceFiltersTable';
@@ -216,22 +216,12 @@ uiModules
     handleTabChange($scope, $stateContainer.get().tab);
 
     $scope.$$postDigest(() => {
-      // $scope.destroyStateSync = syncState([
-      //   {
-      //     syncKey: '_a',
-      //     state: $stateContainer,
-      //     initialTruthSource: InitialTruthSource.Storage,
-      //     syncStrategy: 'url',
-      //     toStorageMapper: state => ({ t: state.tab, f: state.fieldFilter }),
-      //     fromStorageMapper: storageState => ({ tab: storageState.t || 'indexedFields', fieldFilter: storageState.f || '' }),
-      //   }
-      // ]);
       $scope.destroyStateSync = syncState([
         {
           syncKey: '_a',
           state: $stateContainer,
           initialTruthSource: InitialTruthSource.Storage,
-          syncStrategy: 'url',
+          syncStrategy: SyncStrategy.Url,
           toStorageMapper: state => ({ t: state.tab }),
           fromStorageMapper: storageState => ({ tab: storageState.t || 'indexedFields' }),
         },
@@ -239,7 +229,7 @@ uiModules
           syncKey: '_b',
           state: $stateContainer,
           initialTruthSource: InitialTruthSource.Storage,
-          syncStrategy: 'url',
+          syncStrategy: config.get('state:storeInSessionStorage') ? SyncStrategy.HashedUrl : SyncStrategy.Url,
           toStorageMapper: state => ({ f: state.fieldFilter, i: state.indexedFieldTypeFilter, l: state.scriptedFieldLanguageFilter }),
           fromStorageMapper: storageState => (
             {
