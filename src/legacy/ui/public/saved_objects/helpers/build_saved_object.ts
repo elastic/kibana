@@ -22,13 +22,7 @@ import { hydrateIndexPattern } from 'ui/saved_objects/helpers/hydrate_index_patt
 import { intializeSavedObject } from 'ui/saved_objects/helpers/initialize_saved_object';
 import { serializeSavedObject } from 'ui/saved_objects/helpers/serialize_saved_object';
 import { SavedObjectsClient } from 'kibana/public';
-import {
-  ConfirmModalPromise,
-  EsResponse,
-  SavedObject,
-  SavedObjectConfig,
-  SaveOptions,
-} from 'ui/saved_objects/types';
+import { EsResponse, SavedObject, SavedObjectConfig, SaveOptions } from 'ui/saved_objects/types';
 import { applyEsResp } from 'ui/saved_objects/helpers/apply_es_resp';
 import { saveSavedObject } from 'ui/saved_objects/helpers/save_saved_object';
 import { IndexPatterns } from '../../../../core_plugins/data/public';
@@ -37,8 +31,7 @@ export function buildSavedObject(
   savedObject: SavedObject,
   config: SavedObjectConfig = {},
   indexPatterns: IndexPatterns,
-  savedObjectsClient: SavedObjectsClient,
-  confirmModalPromise: ConfirmModalPromise
+  savedObjectsClient: SavedObjectsClient
 ) {
   // type name for this object, used as the ES-type
   const esType = config.type || '';
@@ -106,13 +99,7 @@ export function buildSavedObject(
 
   savedObject.save = async (opts: SaveOptions) => {
     try {
-      const result = await saveSavedObject(
-        savedObject,
-        savedObjectsClient,
-        config,
-        opts,
-        confirmModalPromise
-      );
+      const result = await saveSavedObject(savedObject, savedObjectsClient, config, opts);
       return Promise.resolve(result);
     } catch (e) {
       return Promise.reject(e);

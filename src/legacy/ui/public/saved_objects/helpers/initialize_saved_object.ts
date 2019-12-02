@@ -33,13 +33,14 @@ export async function intializeSavedObject(
   // ensure that the esType is defined
   if (!esType) throw new Error('You must define a type name to use SavedObject objects.');
   const customInit = config.init || _.noop;
-  const afterESResp = config.afterESResp || _.noop;
 
   if (!savedObject.id) {
     // just assign the defaults and be done
     _.assign(savedObject, savedObject.defaults);
     await savedObject.hydrateIndexPattern!();
-    afterESResp.call(savedObject);
+    if (typeof config.afterESResp === 'function') {
+      await config.afterESResp.call(savedObject);
+    }
     return savedObject;
   }
 

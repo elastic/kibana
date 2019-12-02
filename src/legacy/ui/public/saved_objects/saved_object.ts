@@ -28,11 +28,10 @@
  * service and the saved object api.
  */
 import { SavedObjectsClient } from 'kibana/public';
-import { SavedObjectConfig, SaveOptions } from 'ui/saved_objects/types';
-import { buildSavedObject } from 'ui/saved_objects/helpers/build_saved_object';
 import { npStart } from 'ui/new_platform';
-import { ConfirmModalPromise } from './types';
 import { start as data } from '../../../core_plugins/data/public/legacy';
+import { SavedObjectConfig, SaveOptions } from './types';
+import { buildSavedObject } from './helpers/build_saved_object';
 
 export { SaveOptions } from './types';
 
@@ -42,7 +41,7 @@ export interface SavedObject {
   id?: string;
 }
 
-export function SavedObjectProvider(confirmModalPromise: ConfirmModalPromise) {
+export function SavedObjectProvider() {
   const savedObjectsClient = npStart.core.savedObjects.client;
   const indexPatterns = data.indexPatterns.indexPatterns;
 
@@ -61,8 +60,7 @@ export function SavedObjectProvider(confirmModalPromise: ConfirmModalPromise) {
       this,
       config,
       indexPatterns,
-      savedObjectsClient as SavedObjectsClient,
-      confirmModalPromise
+      savedObjectsClient as SavedObjectsClient
     );
   }
 

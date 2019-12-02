@@ -16,12 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  ConfirmModalPromise,
-  SavedObject,
-  SavedObjectConfig,
-  SaveOptions,
-} from 'ui/saved_objects/types';
+import { SavedObject, SavedObjectConfig, SaveOptions } from 'ui/saved_objects/types';
 import { SavedObjectsClient } from 'kibana/public';
 import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from 'ui/saved_objects/constants';
 
@@ -63,8 +58,7 @@ export async function saveSavedObject(
     confirmOverwrite = false,
     isTitleDuplicateConfirmed = false,
     onTitleDuplicate,
-  }: SaveOptions = {},
-  confirmModalPromise: ConfirmModalPromise
+  }: SaveOptions = {}
 ) {
   const esType = config.type || '';
   const extractReferences = config.extractReferences;
@@ -93,8 +87,7 @@ export async function saveSavedObject(
     savedObject,
     savedObjectsClient,
     isTitleDuplicateConfirmed,
-    onTitleDuplicate,
-    confirmModalPromise
+    onTitleDuplicate
   )
     .then(() => {
       if (confirmOverwrite) {
@@ -103,7 +96,6 @@ export async function saveSavedObject(
           savedObject,
           savedObjectsClient,
           esType,
-          confirmModalPromise,
           savedObject.creationOpts({ references })
         );
       } else {

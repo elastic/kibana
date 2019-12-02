@@ -18,12 +18,10 @@
  */
 import { i18n } from '@kbn/i18n';
 import { SAVE_DUPLICATE_REJECTED } from 'ui/saved_objects/constants';
-import { ConfirmModalPromise, SavedObject } from '../types';
+import { confirmModalPromise } from './confirm_modal_promise';
+import { SavedObject } from '../types';
 
-export function displayDuplicateTitleConfirmModal(
-  savedObject: SavedObject,
-  confirmModalPromise: ConfirmModalPromise
-) {
+export function displayDuplicateTitleConfirmModal(savedObject: SavedObject) {
   const confirmMessage = i18n.translate(
     'common.ui.savedObjects.confirmModal.saveDuplicateConfirmationMessage',
     {
@@ -32,13 +30,16 @@ export function displayDuplicateTitleConfirmModal(
     }
   );
 
-  return confirmModalPromise(confirmMessage, {
-    confirmButtonText: i18n.translate(
-      'common.ui.savedObjects.confirmModal.saveDuplicateButtonLabel',
-      {
-        defaultMessage: 'Save {name}',
-        values: { name: savedObject.getDisplayName() },
-      }
-    ),
-  }).catch(() => Promise.reject(new Error(SAVE_DUPLICATE_REJECTED)));
+  const confirmButtonText = i18n.translate(
+    'common.ui.savedObjects.confirmModal.saveDuplicateButtonLabel',
+    {
+      defaultMessage: 'Save {name}',
+      values: { name: savedObject.getDisplayName() },
+    }
+  );
+  try {
+    return confirmModalPromise(confirmMessage, '', confirmButtonText);
+  } catch (_) {
+    return Promise.reject(new Error(SAVE_DUPLICATE_REJECTED));
+  }
 }

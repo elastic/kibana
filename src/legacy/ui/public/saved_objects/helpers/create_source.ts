@@ -18,9 +18,10 @@
  */
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ConfirmModalPromise, SavedObject } from 'ui/saved_objects/types';
+import { SavedObject } from 'ui/saved_objects/types';
 import { SavedObjectAttributes, SavedObjectsClient } from 'kibana/public';
 import { OVERWRITE_REJECTED } from 'ui/saved_objects/constants';
+import { confirmModalPromise } from './confirm_modal_promise';
 
 /**
  * Attempts to create the current object using the serialized source. If an object already
@@ -39,7 +40,6 @@ export function createSource(
   savedObject: SavedObject,
   savedObjectsClient: SavedObjectsClient,
   esType: string,
-  confirmModalPromise: ConfirmModalPromise,
   options = {}
 ) {
   return savedObjectsClient.create(esType, source, options).catch(err => {
@@ -53,18 +53,18 @@ export function createSource(
         }
       );
 
-      return confirmModalPromise(confirmMessage, {
-        confirmButtonText: i18n.translate(
-          'common.ui.savedObjects.confirmModal.overwriteButtonLabel',
-          {
-            defaultMessage: 'Overwrite',
-          }
-        ),
-        title: i18n.translate('common.ui.savedObjects.confirmModal.overwriteTitle', {
-          defaultMessage: 'Overwrite {name}?',
-          values: { name: savedObject.getDisplayName() },
-        }),
-      })
+      const title = i18n.translate('common.ui.savedObjects.confirmModal.overwriteTitle', {
+        defaultMessage: 'Overwrite {name}?',
+        values: { name: savedObject.getDisplayName() },
+      });
+      const confirmButtonText = i18n.translate(
+        'common.ui.savedObjects.confirmModal.overwriteButtonLabel',
+        {
+          defaultMessage: 'Overwrite',
+        }
+      );
+
+      return confirmModalPromise(confirmMessage, title, confirmButtonText)
         .then(() =>
           savedObjectsClient.create(
             esType,

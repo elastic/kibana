@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ConfirmModalPromise, SavedObject } from 'ui/saved_objects/types';
+import { SavedObject } from 'ui/saved_objects/types';
 import { SavedObjectsClient, SimpleSavedObject } from 'kibana/public';
 import { findObjectByTitle } from 'ui/saved_objects';
 import { SAVE_DUPLICATE_REJECTED } from 'ui/saved_objects/constants';
@@ -26,8 +26,7 @@ export const checkForDuplicateTitle = (
   savedObject: SavedObject,
   savedObjectsClient: SavedObjectsClient,
   isTitleDuplicateConfirmed: boolean,
-  onTitleDuplicate: (() => void) | undefined,
-  confirmModalPromise: ConfirmModalPromise
+  onTitleDuplicate: (() => void) | undefined
 ) => {
   // Don't check for duplicates if user has already confirmed save with duplicate title
   if (isTitleDuplicateConfirmed) {
@@ -52,7 +51,7 @@ export const checkForDuplicateTitle = (
 
       // TODO: make onTitleDuplicate a required prop and remove UI components from this class
       // Need to leave here until all users pass onTitleDuplicate.
-      return displayDuplicateTitleConfirmModal(savedObject, confirmModalPromise);
+      return displayDuplicateTitleConfirmModal(savedObject);
     }
   );
 };
