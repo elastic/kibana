@@ -1,54 +1,13 @@
-Temporary README.md for users and developers working on the backend detection engine
-for how to get started.
+README.md for developers working on the backend detection engine for how to get started
+with scripts in the scripts folder to help with development.
 
-# Setup for Users
-
-If you're just a user and want to enable the REST interfaces and UI screens do the following.
-NOTE: this is very temporary and once alerting and actions is enabled by default you will no
-longer have to do these steps
-
-Set the environment variable ALERTING_FEATURE_ENABLED to be true in your .profile or your windows
-global environment variable.
-
-```sh
-export ALERTING_FEATURE_ENABLED=true
-```
-
-In your `kibana.yml` file enable alerting and actions like so:
-
-```sh
-# Feature flag to turn on alerting
-xpack.alerting.enabled: true
-
-# Feature flag to turn on actions which goes with alerting
-xpack.actions.enabled: true
-```
-
-Start Kibana and you will see these messages indicating detection engine is activated like so:
-
-```sh
-server    log   [11:39:05.561] [info][siem] Detected feature flags for actions and alerting and enabling detection engine API endpoints
-```
-
-If you see crashes like this:
-
-```ts
- FATAL  Error: Unmet requirement "alerting" for plugin "siem"
-```
-
-It is because Kibana is not picking up your changes from `kibana.yml` and not seeing that alerting and actions is enabled.
-
-# For Developers
-
-See these two other pages for references:
+See these two README.md's pages for references:
 https://github.com/elastic/kibana/blob/master/x-pack/legacy/plugins/alerting/README.md
 https://github.com/elastic/kibana/tree/master/x-pack/legacy/plugins/actions
 
-Since there is no UI yet and a lot of backend areas that are not created, you
-should install the kbn-action and kbn-alert project from here:
-https://github.com/pmuellr/kbn-action
-
 The scripts rely on CURL and jq, ensure both of these are installed:
+* [CURL](https://curl.haxx.se)
+* [jq](https://stedolan.github.io/jq/)
 
 ```sh
 brew update
@@ -66,28 +25,12 @@ export KIBANA_URL=http://localhost:5601
 export SIGNALS_INDEX=.siem-signals-${your user id}
 export TASK_MANAGER_INDEX=.kibana-task-manager-${your user id}
 export KIBANA_INDEX=.kibana-${your user id}
-
-# This is for the kbn-action and kbn-alert tool
-export KBN_URLBASE=http://${user}:${password}@localhost:5601
 ```
 
 source your .zhsrc/.bashrc or open a new terminal to ensure you get the new values set.
 
-Optional env var when set to true will utilize `reindex` api for reindexing
-instead of the scroll and bulk index combination.
-
 ```sh
-export USE_REINDEX_API=true
-```
-
-Add these lines to your `kibana.dev.yml` to turn on the feature toggles of alerting and actions:
-
-```sh
-# Feature flag to turn on alerting
-xpack.alerting.enabled: true
-
-# Feature flag to turn on actions which goes with alerting
-xpack.actions.enabled: true
+source ~/.zshrc
 ```
 
 Restart Kibana and ensure that you are using `--no-base-path` as changing the base path is a feature but will
@@ -96,12 +39,6 @@ get in the way of the CURL scripts written as is. You should see alerting and ac
 ```sh
 server    log   [22:05:22.277] [info][status][plugin:alerting@8.0.0] Status changed from uninitialized to green - Ready
 server    log   [22:05:22.270] [info][status][plugin:actions@8.0.0] Status changed from uninitialized to green - Ready
-```
-
-You should also see the SIEM detect the feature flags and start the API endpoints for detection engine
-
-```sh
-server    log   [11:39:05.561] [info][siem] Detected feature flags for actions and alerting and enabling detection engine API endpoints
 ```
 
 Go into your SIEM Advanced settings and underneath the setting of `siem:defaultSignalsIndex`, set that to the same
@@ -124,7 +61,7 @@ which will:
 - Delete any existing alerts you have
 - Delete any existing alert tasks you have
 - Delete any existing signal mapping you might have had.
-- Add the latest signal index and its mappings using your settings from `SIGNALS_INDEX` environment variable.
+- Add the latest signal index and its mappings using your settings from `${SIGNALS_INDEX}` environment variable.
 - Posts the sample rule from `rules/root_or_admin_1.json` by replacing its `output_index` with your `SIGNALS_INDEX` environment variable
 - The sample rule checks for root or admin every 5 minutes and reports that as a signal if it is a positive hit
 
