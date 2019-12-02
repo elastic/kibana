@@ -16,7 +16,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { SummaryHistogramPoint } from '../../../../common/graphql/types';
-import { getColorsMap } from './get_colors_map';
 import { getChartDateLabel, seriesHasDownValues } from '../../../lib/helper';
 
 export interface MonitorBarSeriesProps {
@@ -63,7 +62,7 @@ export const MonitorBarSeries = ({
         />
         <BarSeries
           id={id}
-          customSeriesColors={getColorsMap(dangerColor, id)}
+          customSeriesColors={[dangerColor]}
           data={(histogramSeries || []).map(({ timestamp, down }) => [timestamp, down])}
           name={i18n.translate('xpack.uptime.monitorList.downLineSeries.downLabel', {
             defaultMessage: 'Down checks',
