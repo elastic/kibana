@@ -17,16 +17,7 @@
  * under the License.
  */
 
-import { CoreStart, Plugin } from '../../../../../core/public';
-import { initTableVisLegacyModule } from './table_vis_legacy_module';
+import { IndexPatternsService } from './index_patterns_service';
 
-/** @internal */
-export class LegacyDependenciesPlugin implements Plugin {
-  public setup() {
-    initTableVisLegacyModule();
-  }
-
-  public start(core: CoreStart) {
-    // nothing to do here yet
-  }
-}
+export type IndexPatternsSetup = ReturnType<IndexPatternsService['setup']>;
+export type IndexPatternsStart = ReturnType<IndexPatternsService['start']>;

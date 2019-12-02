@@ -17,14 +17,4 @@
  * under the License.
  */
 
-import { NotificationsStart } from 'src/core/public';
-import { createGetterSetter } from '../../../../../plugins/kibana_utils/public';
-import { FieldFormatsStart } from '../../../../../plugins/data/public';
-
-export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
-  'Notifications'
-);
-
-export const [getFieldFormats, setFieldFormats] = createGetterSetter<FieldFormatsStart>(
-  'FieldFormats'
-);
+export { shortenDottedString } from './shorten_dotted_string';
