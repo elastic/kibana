@@ -8,6 +8,7 @@ import React, { useContext, createContext } from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Route, Switch } from 'react-router-dom';
 import styled from 'styled-components';
+import { HomePublicPluginSetup } from '../../../../../../src/plugins/home/public';
 import {
   CoreStart,
   LegacyCoreStart,
@@ -29,6 +30,7 @@ import { MatchedRouteProvider } from '../context/MatchedRouteContext';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
 import { setHelpExtension } from './setHelpExtension';
 import { setReadonlyBadge } from './updateBadge';
+import { featureCatalogueEntry } from './featureCatalogueEntry';
 
 export const REACT_APP_ROOT_ID = 'react-apm-root';
 
@@ -53,7 +55,10 @@ const App = () => {
 
 export type ApmPluginSetup = void;
 export type ApmPluginStart = void;
-export type ApmPluginSetupDeps = {}; // eslint-disable-line @typescript-eslint/consistent-type-definitions
+
+export interface ApmPluginSetupDeps {
+  home: HomePublicPluginSetup;
+}
 
 export interface ApmPluginStartDeps {
   data: DataPublicPluginStart;
@@ -74,11 +79,12 @@ export class ApmPlugin
       ApmPluginStartDeps
     > {
   // Take the DOM element as the constructor, so we can mount the app.
-  public setup(_core: CoreSetup, _plugins: ApmPluginSetupDeps) {}
+  public setup(_core: CoreSetup, plugins: ApmPluginSetupDeps) {
+    plugins.home.featureCatalogue.register(featureCatalogueEntry);
+  }
 
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     const i18nCore = core.i18n;
-
     // render APM feedback link in global help menu
     setHelpExtension(core);
     setReadonlyBadge(core);
