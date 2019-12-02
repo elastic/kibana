@@ -17,7 +17,7 @@ interface ScheduleRequest extends Hapi.Request {
     alertTypeId: string;
     interval: string;
     actions: AlertAction[];
-    alertTypeParams: Record<string, any>;
+    params: Record<string, any>;
     throttle: string | null;
   };
 }
@@ -41,7 +41,7 @@ export const createAlertRoute = {
           alertTypeId: Joi.string().required(),
           throttle: getDurationSchema().default(null),
           interval: getDurationSchema().required(),
-          alertTypeParams: Joi.object().required(),
+          params: Joi.object().required(),
           actions: Joi.array()
             .items(
               Joi.object().keys({
