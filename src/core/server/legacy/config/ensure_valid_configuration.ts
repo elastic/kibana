@@ -20,6 +20,7 @@
 import { getUnusedConfigKeys } from './get_unused_config_keys';
 import { ConfigService } from '../../config';
 import { LegacyServiceDiscoverPlugins } from '../legacy_service';
+import { CriticalError } from '../../errors';
 
 export async function ensureValidConfiguration(
   configService: ConfigService,
@@ -41,13 +42,9 @@ export async function ensureValidConfiguration(
   }
 }
 
-class InvalidConfigurationError extends Error {
-  public cause?: Error;
-  public code = 'InvalidConfig';
-  public processExitCode = 64;
-
+class InvalidConfigurationError extends CriticalError {
   constructor(message: string) {
-    super(message);
+    super(message, 'InvalidConfig', 64);
     Object.setPrototypeOf(this, InvalidConfigurationError.prototype);
   }
 }
