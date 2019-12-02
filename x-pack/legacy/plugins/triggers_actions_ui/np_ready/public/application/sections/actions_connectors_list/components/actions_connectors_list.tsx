@@ -144,6 +144,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
   const actionsTableColumns = [
     {
       field: 'actionType',
+      'data-test-subj': 'connectorsTableCell-actionType',
       name: i18n.translate(
         'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actionTypeTitle',
         {
@@ -155,6 +156,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     },
     {
       field: 'description',
+      'data-test-subj': 'connectorsTableCell-description',
       name: i18n.translate(
         'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.descriptionTitle',
         {
@@ -166,6 +168,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     },
     {
       field: 'referencedByCount',
+      'data-test-subj': 'connectorsTableCell-referencedByCount',
       name: i18n.translate(
         'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.referencedByCountTitle',
         { defaultMessage: 'Attached actions' }
@@ -242,7 +245,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
             itemId="id"
             columns={actionsTableColumns}
             rowProps={() => ({
-              'data-test-subj': 'row',
+              'data-test-subj': 'connectors-row',
             })}
             cellProps={() => ({
               'data-test-subj': 'cell',
@@ -261,6 +264,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
                 {
                   type: 'field_value_selection',
                   field: 'actionTypeId',
+                  'data-test-subj': 'typeFilterButton',
                   name: i18n.translate(
                     'xpack.triggersActionsUI.sections.actionsConnectorsList.filters.actionTypeIdName',
                     { defaultMessage: 'Type' }
