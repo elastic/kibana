@@ -15,7 +15,10 @@ export const createMockSavedObjectsRepository = (savedObject: any[] = []) => {
       }
       return result[0];
     }),
-    find: jest.fn(() => {
+    find: jest.fn(findArgs => {
+      if (findArgs.hasReference && findArgs.hasReference.id === 'bad-guy') {
+        throw SavedObjectsErrorHelpers.createBadRequestError('Error thrown for testing');
+      }
       return {
         total: savedObject.length,
         saved_objects: savedObject,
@@ -34,6 +37,13 @@ export const createMockSavedObjectsRepository = (savedObject: any[] = []) => {
       return {};
     }),
     delete: jest.fn((type: string, id: string) => {
+      const result = savedObject.filter(s => s.id === id);
+      if (!result.length) {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      }
+      if (type === 'case-workflow-comment' && id === 'bad-guy') {
+        throw SavedObjectsErrorHelpers.createBadRequestError('Error thrown for testing');
+      }
       return {};
     }),
     deleteByNamespace: jest.fn(),
