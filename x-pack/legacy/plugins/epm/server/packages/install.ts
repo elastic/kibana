@@ -116,61 +116,6 @@ function toAssetReference({ id, type }: SavedObject) {
   return reference;
 }
 
-const isDirectory = ({ path }: Registry.ArchiveEntry) => path.endsWith('/');
-const isPipeline = ({ path }: Registry.ArchiveEntry) =>
-  !isDirectory({ path }) && Registry.pathParts(path).type === ElasticsearchAssetType.ingestPipeline;
-
-// *Not really a datasource* but it'll do for now
-export async function installDatasource(options: {
-  savedObjectsClient: SavedObjectsClientContract;
-  pkgkey: string;
-  callCluster: CallESAsCurrentUser;
-}) {
-  const { savedObjectsClient, pkgkey, callCluster } = options;
-  const toSave = await installPipelines({ pkgkey, callCluster });
-  await installTemplates({ pkgkey, callCluster });
-
-  // currently saving to the EPM state Saved Object
-  // /api/ingest/datasource/add (or whatever) will use separate Saved Object
-  await saveInstallationReferences({
-    savedObjectsClient,
-    pkgkey,
-    toSave,
-  });
-
-  return toSave;
-}
-
-async function installPipelines({
-  callCluster,
-  pkgkey,
-}: {
-  callCluster: CallESAsCurrentUser;
-  pkgkey: string;
-}) {
-  const paths = await Registry.getArchiveInfo(pkgkey, isPipeline);
-  const installationPromises = paths.map(path => installPipeline({ callCluster, path }));
-
-  return Promise.all(installationPromises);
-}
-
-async function installPipeline({
-  callCluster,
-  path,
-}: {
-  callCluster: CallESAsCurrentUser;
-  path: string;
-}): Promise<AssetReference> {
-  const buffer = Registry.getAsset(path);
-  const parts = Registry.pathParts(path);
-  const id = path.replace(/\W/g, '_'); // TODO: replace with "real" pipeline id
-  const pipeline = buffer.toString('utf8');
-
-  await callCluster('ingest.putPipeline', { id, body: pipeline });
-
-  return { id, type: parts.type };
-}
-
 const isFields = ({ path }: Registry.ArchiveEntry) => {
   return path.includes('/fields/');
 };
