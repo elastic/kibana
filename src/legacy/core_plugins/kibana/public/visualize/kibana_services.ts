@@ -34,7 +34,6 @@ import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
-import { timefilter } from 'ui/timefilter';
 
 // Saved objects
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
@@ -44,8 +43,8 @@ import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_regis
 
 import { createUiStatsReporter, METRIC_TYPE } from '../../../ui_metric/public';
 import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
-import { start as data } from '../../../data/public/legacy';
 import { start as embeddables } from '../../../../core_plugins/embeddable_api/public/np_ready/public/legacy';
+import { start as data } from '../../../data/public/legacy';
 
 const services = {
   // new platform
@@ -61,6 +60,7 @@ const services = {
   core: npStart.core,
 
   share: npStart.plugins.share,
+  npData: npStart.plugins.data,
   data,
   embeddables,
   visualizations,
@@ -76,7 +76,7 @@ const services = {
   SavedObjectProvider,
   SavedObjectRegistryProvider,
   SavedObjectsClientProvider,
-  timefilter,
+  timefilter: npStart.plugins.data.query.timefilter.timefilter,
   uiModules,
   uiRoutes,
   wrapInI18nContext,
