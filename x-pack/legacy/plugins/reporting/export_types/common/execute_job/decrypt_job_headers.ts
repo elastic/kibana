@@ -12,6 +12,7 @@ interface HasHeaders {
   headers?: Record<string, string>;
 }
 
+// TODO merge functionality with CSV execute job
 export const decryptJobHeaders = async <JobParamsType, JobDocPayloadType extends HasHeaders>({
   job,
   server,
