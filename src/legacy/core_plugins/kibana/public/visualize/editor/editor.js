@@ -101,6 +101,11 @@ function VisualizeAppController(
   const queryFilter = filterManager;
   // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;
+  const _applyVis = () => {
+    $scope.$apply();
+  };
+  // This will trigger a digest cycle. This is needed when vis is updated from a global angular like in visualize_embeddable.js.
+  savedVis.vis.on('apply', _applyVis);
   // vis is instance of src/legacy/ui/public/vis/vis.js.
   // SearchSource is a promise-based stream of search results that can inherit from other search sources.
   const { vis, searchSource } = savedVis;
@@ -398,6 +403,7 @@ function VisualizeAppController(
       stateMonitor.destroy();
       filterStateManager.destroy();
       subscriptions.unsubscribe();
+      $scope.vis.off('apply', _applyVis);
     });
 
 
