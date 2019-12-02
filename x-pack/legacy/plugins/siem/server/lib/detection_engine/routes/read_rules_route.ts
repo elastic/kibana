@@ -7,7 +7,7 @@
 import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
-import { getIdError, transformOrError } from './utils';
+import { getIdError, transformOrError, transformError } from './utils';
 
 import { readRules } from '../alerts/read_rules';
 import { ServerFacade } from '../../../types';
@@ -18,7 +18,7 @@ export const createReadRulesRoute: Hapi.ServerRoute = {
   method: 'GET',
   path: DETECTION_ENGINE_RULES_URL,
   options: {
-    tags: ['access:signals-all'],
+    tags: ['access:siem'],
     validate: {
       options: {
         abortEarly: false,
@@ -34,15 +34,19 @@ export const createReadRulesRoute: Hapi.ServerRoute = {
     if (!alertsClient || !actionsClient) {
       return headers.response().code(404);
     }
-    const rule = await readRules({
-      alertsClient,
-      id,
-      ruleId,
-    });
-    if (rule != null) {
-      return transformOrError(rule);
-    } else {
-      return getIdError({ id, ruleId });
+    try {
+      const rule = await readRules({
+        alertsClient,
+        id,
+        ruleId,
+      });
+      if (rule != null) {
+        return transformOrError(rule);
+      } else {
+        return getIdError({ id, ruleId });
+      }
+    } catch (err) {
+      return transformError(err);
     }
   },
 };
