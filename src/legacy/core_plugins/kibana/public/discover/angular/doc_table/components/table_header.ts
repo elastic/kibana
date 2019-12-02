@@ -17,10 +17,10 @@
  * under the License.
  */
 import { wrapInI18nContext } from 'ui/i18n';
-import { UiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient } from 'kibana/public';
 import { TableHeader } from './table_header/table_header';
 
-export function createTableHeaderDirective(reactDirective: any, config: UiSettingsClient) {
+export function createTableHeaderDirective(reactDirective: any, config: IUiSettingsClient) {
   return reactDirective(
     wrapInI18nContext(TableHeader),
     [
