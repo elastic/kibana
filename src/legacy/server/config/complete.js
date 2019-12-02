@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default async function (kbnServer, server) {
+export default function (kbnServer, server) {
   server.decorate('server', 'config', function () {
     return kbnServer.config;
   });
