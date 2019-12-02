@@ -5,7 +5,7 @@
  */
 
 import { Location } from 'history';
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useState } from 'react';
 import { decode, encode, RisonValue } from 'rison-node';
 
 import { QueryString } from 'ui/utils/query_string';
@@ -16,26 +16,35 @@ export const useUrlState = <State>({
   decodeUrlState,
   encodeUrlState,
   urlStateKey,
+  writeDefaultState = false,
 }: {
   defaultState: State;
   decodeUrlState: (value: RisonValue | undefined) => State | undefined;
   encodeUrlState: (value: State) => RisonValue | undefined;
   urlStateKey: string;
+  writeDefaultState?: boolean;
 }) => {
   const history = useHistory();
 
+  // history.location is mutable so we can't reliably use useMemo
+  const queryString = history?.location ? getQueryStringFromLocation(history.location) : '';
+
   const urlStateString = useMemo(() => {
-    if (!history) {
+    if (!queryString) {
       return;
     }
 
-    return getParamFromQueryString(getQueryStringFromLocation(history.location), urlStateKey);
-  }, [history && history.location, urlStateKey]);
+    return getParamFromQueryString(queryString, urlStateKey);
+  }, [queryString, urlStateKey]);
 
   const decodedState = useMemo(() => decodeUrlState(decodeRisonUrlState(urlStateString)), [
     decodeUrlState,
     urlStateString,
   ]);
+
+  const [shouldInitialize, setShouldInitialize] = useState(
+    writeDefaultState && typeof decodedState === 'undefined'
+  );
 
   const state = useMemo(() => (typeof decodedState !== 'undefined' ? decodedState : defaultState), [
     defaultState,
@@ -44,26 +53,31 @@ export const useUrlState = <State>({
 
   const setState = useCallback(
     (newState: State | undefined) => {
-      if (!history) {
+      if (!history || !history.location) {
         return;
       }
 
-      const location = history.location;
+      const currentLocation = history.location;
 
       const newLocation = replaceQueryStringInLocation(
-        location,
+        currentLocation,
         replaceStateKeyInQueryString(
           urlStateKey,
           typeof newState !== 'undefined' ? encodeUrlState(newState) : undefined
-        )(getQueryStringFromLocation(location))
+        )(getQueryStringFromLocation(currentLocation))
       );
 
-      if (newLocation !== location) {
+      if (newLocation !== currentLocation) {
         history.replace(newLocation);
       }
     },
-    [encodeUrlState, history, history && history.location, urlStateKey]
+    [encodeUrlState, history, urlStateKey]
   );
+
+  if (shouldInitialize) {
+    setShouldInitialize(false);
+    setState(defaultState);
+  }
 
   return [state, setState] as [typeof state, typeof setState];
 };

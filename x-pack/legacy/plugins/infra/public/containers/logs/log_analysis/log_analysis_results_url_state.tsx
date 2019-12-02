@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect } from 'react';
-import * as rt from 'io-ts';
-import { identity, constant } from 'fp-ts/lib/function';
 import { fold } from 'fp-ts/lib/Either';
+import { constant, identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
+import * as rt from 'io-ts';
+
 import { useUrlState } from '../../../utils/use_url_state';
 
 const autoRefreshRT = rt.union([
@@ -40,11 +40,8 @@ export const useLogAnalysisResultsUrlState = () => {
       pipe(urlTimeRangeRT.decode(value), fold(constant(undefined), identity)),
     encodeUrlState: urlTimeRangeRT.encode,
     urlStateKey: TIME_RANGE_URL_STATE_KEY,
+    writeDefaultState: true,
   });
-
-  useEffect(() => {
-    setTimeRange(timeRange);
-  }, []);
 
   const [autoRefresh, setAutoRefresh] = useUrlState({
     defaultState: {
@@ -55,11 +52,8 @@ export const useLogAnalysisResultsUrlState = () => {
       pipe(autoRefreshRT.decode(value), fold(constant(undefined), identity)),
     encodeUrlState: autoRefreshRT.encode,
     urlStateKey: AUTOREFRESH_URL_STATE_KEY,
+    writeDefaultState: true,
   });
-
-  useEffect(() => {
-    setAutoRefresh(autoRefresh);
-  }, []);
 
   return {
     timeRange,
