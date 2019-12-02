@@ -9,14 +9,11 @@ import React from 'react';
 import { StaticDynamicStyleRow } from '../static_dynamic_style_row';
 import { DynamicOrientationSelection } from './dynamic_orientation_selection';
 import { StaticOrientationSelection } from './static_orientation_selection';
-import { getVectorStyleLabel } from '../get_vector_style_label';
 
 export function OrientationEditor(props) {
   return (
     <StaticDynamicStyleRow
       ordinalFields={props.ordinalFields}
-      styleName={props.styleName}
-      label={getVectorStyleLabel(props.styleName)}
       styleProperty={props.styleProperty}
       handlePropertyChange={props.handlePropertyChange}
       DynamicSelector={DynamicOrientationSelection}

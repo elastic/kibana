@@ -89,6 +89,7 @@ export class VectorStyle extends AbstractStyle {
           iconSize: this._iconSizeStyleProperty,
           iconOrientation: this._iconOrientationProperty,
         }}
+        symbolDescriptor={this._descriptor.properties[vectorStyles.SYMBOL]}
         layer={layer}
         loadIsPointsOnly={this._getIsPointsOnly}
         loadIsLinesOnly={this._getIsLinesOnly}

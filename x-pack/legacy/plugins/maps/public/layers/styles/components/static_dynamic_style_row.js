@@ -5,9 +5,8 @@
  */
 
 import React from 'react';
-import { VectorStyle } from '../vector_style';
+import { VectorStyle } from '../vector/vector_style';
 import { i18n } from '@kbn/i18n';
-import { getVectorStyleLabel } from './get_vector_style_label';
 
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiFormRow, EuiButtonToggle } from '@elastic/eui';
 
@@ -34,7 +33,7 @@ export class StaticDynamicStyleRow extends React.Component {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options,
     };
-    this.props.handlePropertyChange(this.props.styleProperty.getStyleName(), styleDescriptor);
+    this.props.handlePropertyChange(this.props.styleName, styleDescriptor);
   };
 
   _onDynamicStyleChange = options => {
@@ -42,7 +41,7 @@ export class StaticDynamicStyleRow extends React.Component {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options,
     };
-    this.props.handlePropertyChange(this.props.styleProperty.getStyleName(), styleDescriptor);
+    this.props.handlePropertyChange(this.props.styleName, styleDescriptor);
   };
 
   _onTypeToggle = () => {
@@ -97,10 +96,7 @@ export class StaticDynamicStyleRow extends React.Component {
         <EuiFlexItem
           className={isDynamic ? 'mapStaticDynamicSylingOption__dynamicSizeHack' : undefined}
         >
-          <EuiFormRow
-            label={getVectorStyleLabel(this.props.styleProperty.getStyleName())}
-            display="rowCompressed"
-          >
+          <EuiFormRow label={this.props.label && this.props.label} display="rowCompressed">
             {this._renderStyleSelector()}
           </EuiFormRow>
         </EuiFlexItem>
