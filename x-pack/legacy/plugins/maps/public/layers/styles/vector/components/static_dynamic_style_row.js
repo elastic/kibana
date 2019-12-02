@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Component, Fragment } from 'react';
 import { VectorStyle } from '../vector_style';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { FieldMetaOptionsPopover } from './field_meta_options_popover';
 
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiFormRow, EuiButtonToggle } from '@elastic/eui';
 
-export class StaticDynamicStyleRow extends React.Component {
+export class StaticDynamicStyleRow extends Component {
   // Store previous options locally so when type is toggled,
   // previous style options can be used.
   prevStaticStyleOptions = this.props.defaultStaticStyleOptions;
@@ -67,11 +68,14 @@ export class StaticDynamicStyleRow extends React.Component {
     if (this._isDynamic()) {
       const DynamicSelector = this.props.DynamicSelector;
       return (
-        <DynamicSelector
-          ordinalFields={this.props.ordinalFields}
-          onChange={this._onDynamicStyleChange}
-          styleOptions={this._getStyleOptions()}
-        />
+        <Fragment>
+          <DynamicSelector
+            ordinalFields={this.props.ordinalFields}
+            onChange={this._onDynamicStyleChange}
+            styleOptions={this._getStyleOptions()}
+          />
+          <FieldMetaOptionsPopover/>
+        </Fragment>
       );
     }
 

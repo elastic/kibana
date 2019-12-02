@@ -16,6 +16,7 @@ const DEFAULT_ICON = 'airfield';
 
 export const DEFAULT_MIN_SIZE = 1;
 export const DEFAULT_MAX_SIZE = 64;
+export const DEFAULT_SIGMA = 3;
 
 export const vectorStyles = {
   SYMBOL: 'symbol',
@@ -88,6 +89,10 @@ export function getDefaultDynamicProperties() {
       options: {
         color: COLOR_GRADIENTS[0].value,
         field: undefined,
+        fieldMetaOptions: {
+          isEnabled: true,
+          sigma: DEFAULT_SIGMA,
+        }
       }
     },
     [vectorStyles.LINE_COLOR]: {
@@ -95,6 +100,10 @@ export function getDefaultDynamicProperties() {
       options: {
         color: COLOR_GRADIENTS[0].value,
         field: undefined,
+        fieldMetaOptions: {
+          isEnabled: true,
+          sigma: DEFAULT_SIGMA,
+        }
       }
     },
     [vectorStyles.LINE_WIDTH]: {
@@ -103,6 +112,10 @@ export function getDefaultDynamicProperties() {
         minSize: DEFAULT_MIN_SIZE,
         maxSize: DEFAULT_MAX_SIZE,
         field: undefined,
+        fieldMetaOptions: {
+          isEnabled: true,
+          sigma: DEFAULT_SIGMA,
+        }
       }
     },
     [vectorStyles.ICON_SIZE]: {
@@ -111,12 +124,20 @@ export function getDefaultDynamicProperties() {
         minSize: DEFAULT_MIN_SIZE,
         maxSize: DEFAULT_MAX_SIZE,
         field: undefined,
+        fieldMetaOptions: {
+          isEnabled: true,
+          sigma: DEFAULT_SIGMA,
+        }
       }
     },
     [vectorStyles.ICON_ORIENTATION]: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
         field: undefined,
+        fieldMetaOptions: {
+          isEnabled: true,
+          sigma: DEFAULT_SIGMA,
+        }
       }
     },
   };

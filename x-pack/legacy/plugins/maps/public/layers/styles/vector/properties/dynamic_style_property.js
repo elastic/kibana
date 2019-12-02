@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
+import _ from 'lodash';
 import { AbstractStyleProperty } from './style_property';
+import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import { STYLE_TYPE } from '../../../../../common/constants';
 
 export class DynamicStyleProperty extends AbstractStyleProperty {
@@ -33,11 +34,17 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     }
 
     supportsFieldMeta() {
-      return this.isScaled() && this._field.supportsFieldMeta();
+      const fieldMetaOptions = this._getFieldMetaOptions();
+      return _.get(fieldMetaOptions, 'isEnabled', true)
+        && this.isScaled()
+        && this._field.supportsFieldMeta();
     }
 
     async getFieldMetaRequest() {
-      return this._field.getFieldMetaRequest({ sigma: 3 });
+      const fieldMetaOptions = this._getFieldMetaOptions();
+      return this._field.getFieldMetaRequest({
+        sigma: _.get(fieldMetaOptions, 'sigma', DEFAULT_SIGMA),
+      });
     }
 
     supportsFeatureState() {
@@ -46,5 +53,9 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
 
     isScaled() {
       return true;
+    }
+
+    _getFieldMetaOptions() {
+      return _.get(this.getOptions(), 'fieldMetaOptions', {});
     }
 }
