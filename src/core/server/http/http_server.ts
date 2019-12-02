@@ -18,6 +18,7 @@
  */
 
 import { Request, Server } from 'hapi';
+import url from 'url';
 
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
@@ -96,6 +97,7 @@ export class HttpServer {
 
     const basePathService = new BasePath(config.basePath);
     this.setupBasePathRewrite(config, basePathService);
+    this.setupConditionalCompression(config);
 
     return {
       registerRouter: this.registerRouter.bind(this),
@@ -173,6 +175,33 @@ export class HttpServer {
       }
       return response.notFound();
     });
+  }
+
+  private setupConditionalCompression(config: HttpConfig) {
+    if (this.server === undefined) {
+      throw new Error('Server is not created yet');
+    }
+
+    const { enabled, referrerWhitelist: list } = config.compression;
+    if (!enabled) {
+      this.log.debug('HTTP compression is disabled');
+      this.server.ext('onRequest', (request, h) => {
+        request.info.acceptEncoding = '';
+        return h.continue;
+      });
+    } else if (list) {
+      this.log.debug(`HTTP compression is only enabled for any referrer in the following: ${list}`);
+      this.server.ext('onRequest', (request, h) => {
+        const { referrer } = request.info;
+        if (referrer !== '') {
+          const { hostname } = url.parse(referrer);
+          if (!hostname || !list.includes(hostname)) {
+            request.info.acceptEncoding = '';
+          }
+        }
+        return h.continue;
+      });
+    }
   }
 
   private registerOnPostAuth(fn: OnPostAuthHandler) {
