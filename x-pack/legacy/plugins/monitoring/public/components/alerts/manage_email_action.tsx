@@ -153,7 +153,7 @@ export const ManageEmailAction: React.FC<ManageActionModalProps> = (
           defaultMessage: 'Service',
         })}
         helpText={
-          <EuiLink external href="https://nodemailer.com/smtp/well-known/">
+          <EuiLink external target="_blank" href="https://nodemailer.com/smtp/well-known/">
             {i18n.translate('xpack.monitoring.alerts.migrate.manageAction.serviceHelpText', {
               defaultMessage: 'Find out more',
             })}
