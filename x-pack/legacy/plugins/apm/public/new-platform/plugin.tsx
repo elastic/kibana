@@ -78,12 +78,15 @@ export interface ConfigSchema {
 // These are to be used until we switch over all our context handling to
 // kibana_react
 export const PluginsContext = createContext<
-  ApmPluginStartDeps & { apm: { config: ConfigSchema } }
+  ApmPluginStartDeps & { apm: { config: ConfigSchema; stackVersion: string } }
 >(
   {} as ApmPluginStartDeps & {
     apm: { config: ConfigSchema; stackVersion: string };
   }
 );
+export function usePlugins() {
+  return useContext(PluginsContext);
+}
 
 export class ApmPlugin
   implements

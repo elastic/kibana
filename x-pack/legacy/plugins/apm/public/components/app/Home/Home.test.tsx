@@ -10,9 +10,9 @@ import { Home } from '../Home';
 import * as plugin from '../../../new-platform/plugin';
 
 jest.spyOn(plugin, 'usePlugins').mockReturnValue(({
-  apm: { config: {} as plugin.ConfigSchema }
+  apm: { config: {} as plugin.ConfigSchema, stackVersion: '0' }
 } as unknown) as plugin.ApmPluginStartDeps & {
-  apm: { config: plugin.ConfigSchema };
+  apm: { config: plugin.ConfigSchema; stackVersion: string };
 });
 
 describe('Home component', () => {
