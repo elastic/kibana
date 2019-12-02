@@ -5,7 +5,7 @@
  */
 
 import { LayoutInstance, LayoutParams } from '../common/layouts/layout';
-import { ConditionalHeaders, JobDocPayload, ServerFacade, RequestFacade } from '../../types';
+import { JobDocPayload, ServerFacade, RequestFacade } from '../../types';
 
 // Job params: structure of incoming user request data, after being parsed from RISON
 export interface JobParamsPDF {

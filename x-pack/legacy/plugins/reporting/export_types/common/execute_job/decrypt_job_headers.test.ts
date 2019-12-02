@@ -23,14 +23,16 @@ describe('headers', () => {
   test(`fails if it can't decrypt headers`, async () => {
     await expect(
       decryptJobHeaders({
-        job: { headers: {} }, // FIXME isn't this the wrong type to pass to the decrypt function?
+        job: {
+          headers: 'Q53+9A+zf+Xe+ceR/uB/aR/Sw/8e+M+qR+WiG+8z+EY+mo+HiU/zQL+Xn',
+        },
         logger: ({
           error: jest.fn(),
         } as unknown) as Logger,
         server: mockServer,
       })
     ).rejects.toMatchInlineSnapshot(
-      `[Error: Failed to decrypt report job data. Please ensure that xpack.reporting.encryptionKey is set and re-generate this report. TypeError [ERR_INVALID_ARG_TYPE]: The first argument must be one of type string, Buffer, ArrayBuffer, Array, or Array-like Object. Received type object]`
+      `[Error: Failed to decrypt report job data. Please ensure that xpack.reporting.encryptionKey is set and re-generate this report. Error: Invalid IV length]`
     );
   });
 

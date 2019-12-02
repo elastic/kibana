@@ -8,12 +8,15 @@ import { i18n } from '@kbn/i18n';
 import { cryptoFactory } from '../../../server/lib/crypto';
 import { CryptoFactory, ServerFacade, Logger } from '../../../types';
 
-interface HasHeaders {
-  headers?: Record<string, string>;
+interface HasEncryptedHeaders {
+  headers?: string;
 }
 
 // TODO merge functionality with CSV execute job
-export const decryptJobHeaders = async <JobParamsType, JobDocPayloadType extends HasHeaders>({
+export const decryptJobHeaders = async <
+  JobParamsType,
+  JobDocPayloadType extends HasEncryptedHeaders
+>({
   job,
   server,
   logger,

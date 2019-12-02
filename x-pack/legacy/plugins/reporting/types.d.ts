@@ -184,7 +184,7 @@ export interface ConditionalHeadersConditions {
 }
 
 export interface CryptoFactory {
-  decrypt: (headers?: Record<string, string>) => any;
+  decrypt: (headers?: string) => any;
 }
 
 export interface TimeRangeParams {
@@ -199,7 +199,7 @@ export interface JobParamPostPayload {
 }
 
 export interface JobDocPayload<JobParamsType> {
-  headers?: Record<string, string>;
+  headers?: string; // serialized encrypted headers
   jobParams: JobParamsType;
   title: string;
   type: string | null;
