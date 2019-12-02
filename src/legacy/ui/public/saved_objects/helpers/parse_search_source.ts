@@ -89,11 +89,9 @@ export function parseSearchSource(
   );
 
   savedObject.searchSource.setFields(_.defaults(searchSourceValues, fnProps));
+  const query = savedObject.searchSource.getOwnField('query');
 
-  if (!_.isUndefined(savedObject.searchSource.getOwnField('query'))) {
-    savedObject.searchSource.setField(
-      'query',
-      migrateLegacyQuery(savedObject.searchSource.getOwnField('query'))
-    );
+  if (typeof query !== 'undefined') {
+    savedObject.searchSource.setField('query', migrateLegacyQuery(query));
   }
 }

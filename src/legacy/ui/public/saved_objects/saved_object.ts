@@ -28,12 +28,11 @@
  * service and the saved object api.
  */
 import { SavedObjectsClient } from 'kibana/public';
-import { IPrivate } from 'ui/private';
 import { SavedObjectConfig, SaveOptions } from 'ui/saved_objects/types';
 import { buildSavedObject } from 'ui/saved_objects/helpers/build_saved_object';
-import { SavedObjectsClientProvider } from './saved_objects_client_provider';
-import { IndexPatterns } from '../../../core_plugins/data/public/index_patterns/index_patterns';
+import { npStart } from 'ui/new_platform';
 import { ConfirmModalPromise } from './types';
+import { start as data } from '../../../core_plugins/data/public/legacy';
 
 export { SaveOptions } from './types';
 
@@ -43,12 +42,9 @@ export interface SavedObject {
   id?: string;
 }
 
-export function SavedObjectProvider(
-  Private: IPrivate,
-  confirmModalPromise: ConfirmModalPromise,
-  indexPatterns: IndexPatterns
-) {
-  const savedObjectsClient = Private(SavedObjectsClientProvider);
+export function SavedObjectProvider(confirmModalPromise: ConfirmModalPromise) {
+  const savedObjectsClient = npStart.core.savedObjects.client;
+  const indexPatterns = data.indexPatterns.indexPatterns;
 
   /**
    * The SavedObject class is a base class for saved objects loaded from the server and

@@ -18,7 +18,7 @@
  */
 import { SavedObject } from 'ui/saved_objects/types';
 import chrome from 'ui/chrome';
-import { SavedObjectsClient } from 'kibana/public';
+import { SavedObjectsClient, SavedObjectsFindOptions } from 'kibana/public';
 import { StringUtils } from '../utils/string_utils';
 
 /**
@@ -56,9 +56,11 @@ export class SavedObjectLoader {
    * @param id
    * @returns {Promise<SavedObject>}
    */
-  get(id: string) {
+  async get(id: string) {
     // @ts-ignore
-    return new this.Class(id).init();
+    const obj = new this.Class(id);
+    await obj.init();
+    return obj;
   }
 
   urlFor(id: string) {
@@ -121,7 +123,7 @@ export class SavedObjectLoader {
         searchFields: ['title^3', 'description'],
         defaultSearchOperator: 'AND',
         fields,
-      })
+      } as SavedObjectsFindOptions)
       .then(resp => {
         return {
           total: resp.total,
