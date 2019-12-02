@@ -5,6 +5,8 @@
  */
 
 import React, { FC } from 'react';
+import { i18n } from '@kbn/i18n';
+
 import { Redirect } from 'react-router-dom';
 import { MlRoute, PageLoader } from '../router';
 import { useResolver } from '../router';
@@ -15,10 +17,22 @@ import { checkFullLicense } from '../../license/check_license';
 import { checkGetJobsPrivilege } from '../../privilege/check_privilege';
 import { getMlNodeCount } from '../../ml_nodes_check';
 import { loadMlServerInfo } from '../../services/ml_server_info';
+import { ML_BREADCRUMB } from '../../breadcrumbs';
+
+const breadcrumbs = [
+  ML_BREADCRUMB,
+  {
+    text: i18n.translate('xpack.ml.overview.overviewLabel', {
+      defaultMessage: 'Overview',
+    }),
+    href: '#/overview',
+  },
+];
 
 export const overviewRoute: MlRoute = {
   path: '/overview',
   render: (props: any, config: any) => <PageWrapper config={config} />,
+  breadcrumbs,
 };
 
 const PageWrapper: FC<{ config: KibanaConfigTypeFix }> = ({ config }) => {
@@ -39,6 +53,7 @@ const PageWrapper: FC<{ config: KibanaConfigTypeFix }> = ({ config }) => {
 export const appRootRoute: MlRoute = {
   path: '/',
   render: () => <Page />,
+  breadcrumbs: [],
 };
 
 const Page: FC = () => {

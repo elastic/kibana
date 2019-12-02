@@ -10,6 +10,7 @@
  */
 
 import React, { FC } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { MlRoute, PageLoader } from '../../router';
 import { useResolver } from '../../router';
@@ -18,10 +19,23 @@ import { checkFullLicense } from '../../../license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check_privilege';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { CalendarsList } from '../../../settings/calendars';
+import { SETTINGS, ML_BREADCRUMB } from '../../breadcrumbs';
+
+const breadcrumbs = [
+  ML_BREADCRUMB,
+  SETTINGS,
+  {
+    text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagementLabel', {
+      defaultMessage: 'Calendar management',
+    }),
+    href: '#/settings/calendars_list',
+  },
+];
 
 export const calendarListRoute: MlRoute = {
   path: '/settings/calendars_list',
   render: (props: any, config: any) => <PageWrapper config={config} />,
+  breadcrumbs,
 };
 
 const PageWrapper: FC<{ config: any }> = ({ config }) => {

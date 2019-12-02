@@ -18,7 +18,7 @@ import 'uiExports/savedObjectTypes';
 import 'ui/autoload/all';
 import { I18nContext } from 'ui/i18n';
 
-import { UiSettingsClientContract } from 'src/core/public';
+// import { UiSettingsClientContract } from 'src/core/public';
 // needed to make syntax highlighting work in ace editors
 import 'ace';
 
@@ -38,6 +38,7 @@ import 'ace';
 
 import { AppMountContext, AppMountParameters } from 'kibana/public';
 import { DataStart } from 'src/legacy/core_plugins/data/public';
+import { ANOMALY_DETECTION_BREADCRUMB } from './breadcrumbs';
 
 import { Plugin as DataPlugin } from '../../../../../../src/plugins/data/public';
 import { KibanaContext, KibanaConfigTypeFix } from './contexts/kibana';
@@ -52,7 +53,14 @@ export interface MlDependencies extends AppMountParameters {
 
 const App: FC<{ basename: string; context: AppMountContext }> = ({ basename, context }) => {
   const config = (context.core.uiSettings as never) as KibanaConfigTypeFix; // TODO - make this UiSettingsClientContract, get rid of KibanaConfigTypeFix
-  return <MlRouter basename={basename} config={config} />;
+
+  return (
+    <MlRouter
+      basename={basename}
+      config={config}
+      setBreadCrumbs={context.core.chrome.setBreadcrumbs}
+    />
+  );
 };
 
 export const renderApp = (

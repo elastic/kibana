@@ -10,6 +10,7 @@
  */
 
 import React, { FC } from 'react';
+import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import queryString from 'query-string';
 
@@ -20,20 +21,45 @@ import { checkFullLicense } from '../../../license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check_privilege';
 import { checkMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import { EditFilterList } from '../../../settings/filter_lists';
+import { SETTINGS, ML_BREADCRUMB } from '../../breadcrumbs';
 
 enum MODE {
   NEW,
   EDIT,
 }
 
+const newBreadcrumbs = [
+  ML_BREADCRUMB,
+  SETTINGS,
+  {
+    text: i18n.translate('xpack.ml.settings.breadcrumbs.filterLists.createLabel', {
+      defaultMessage: 'Create',
+    }),
+    href: '#/settings/filter_lists/new',
+  },
+];
+
+const editBreadcrumbs = [
+  ML_BREADCRUMB,
+  SETTINGS,
+  {
+    text: i18n.translate('xpack.ml.settings.breadcrumbs.filterLists.editLabel', {
+      defaultMessage: 'Edit',
+    }),
+    href: '#/settings/filter_lists/edit',
+  },
+];
+
 export const newFilterListRoute: MlRoute = {
   path: '/settings/filter_lists/new_filter_list',
   render: (props: any, config: any) => <PageWrapper config={config} {...props} mode={MODE.NEW} />,
+  breadcrumbs: newBreadcrumbs,
 };
 
 export const editFilterListRoute: MlRoute = {
   path: '/settings/filter_lists/edit_filter_list/:filterId',
   render: (props: any, config: any) => <PageWrapper config={config} {...props} mode={MODE.EDIT} />,
+  breadcrumbs: editBreadcrumbs,
 };
 
 const PageWrapper: FC<{ location: any; config: any; mode: MODE }> = ({

@@ -18,10 +18,14 @@ import { checkFullLicense } from '../../../license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check_privilege';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { Settings } from '../../../settings';
+import { ML_BREADCRUMB, SETTINGS } from '../../breadcrumbs';
+
+const breadcrumbs = [ML_BREADCRUMB, SETTINGS];
 
 export const settingsRoute: MlRoute = {
   path: '/settings',
   render: (props: any, config: any) => <PageWrapper config={config} />,
+  breadcrumbs,
 };
 
 const PageWrapper: FC<{ config: any }> = ({ config }) => {

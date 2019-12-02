@@ -5,15 +5,29 @@
  */
 
 import React, { FC } from 'react';
+import { i18n } from '@kbn/i18n';
 import { MlRoute, PageLoader } from '../router';
 import { useResolver } from '../router';
 import { KibanaConfigTypeFix } from '../../contexts/kibana';
 import { basicResolvers } from '../resolvers';
 import { JobsPage } from '../../jobs/jobs_list';
+import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';
+
+const breadcrumbs = [
+  ML_BREADCRUMB,
+  ANOMALY_DETECTION_BREADCRUMB,
+  {
+    text: i18n.translate('xpack.ml.anomalyDetection.jobManagementLabel', {
+      defaultMessage: 'Job Management',
+    }),
+    href: '',
+  },
+];
 
 export const jobListRoute: MlRoute = {
   path: '/jobs',
   render: (props: any, config: any) => <PageWrapper config={config} />,
+  breadcrumbs,
 };
 
 const PageWrapper: FC<{ config: KibanaConfigTypeFix }> = ({ config }) => {

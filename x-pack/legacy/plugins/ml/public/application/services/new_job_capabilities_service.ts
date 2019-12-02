@@ -28,9 +28,6 @@ export function loadNewJobCapabilities(indexPatternId: string, savedSearchId: st
   const indexPatterns = data.indexPatterns.indexPatterns;
   const savedSearches = data.indexPatterns.indexPatterns;
   return new Promise(async (resolve, reject) => {
-    // get the index pattern id or saved search id from the url params
-    // const { index: indexPatternId, savedSearchId } = $route.current.params;
-
     if (indexPatternId !== undefined) {
       // index pattern is being used
       const indexPattern: IndexPattern = await indexPatterns.get(indexPatternId);

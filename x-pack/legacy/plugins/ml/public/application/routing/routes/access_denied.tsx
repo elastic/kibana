@@ -5,14 +5,25 @@
  */
 
 import React, { FC } from 'react';
+import { i18n } from '@kbn/i18n';
 import { MlRoute, PageLoader } from '../router';
 import { useResolver } from '../router';
 import { KibanaConfigTypeFix } from '../../contexts/kibana';
 import { Page } from '../../access_denied';
 
+const breadcrumbs = [
+  {
+    text: i18n.translate('xpack.ml.accessDeniedLabel', {
+      defaultMessage: 'Access denied',
+    }),
+    href: '',
+  },
+];
+
 export const accessDeniedRoute: MlRoute = {
   path: '/access-denied',
   render: (props: any, config: any) => <PageWrapper config={config} />,
+  breadcrumbs,
 };
 
 const PageWrapper: FC<{ config: KibanaConfigTypeFix }> = ({ config }) => {

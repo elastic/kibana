@@ -5,6 +5,7 @@
  */
 
 import React, { FC } from 'react';
+import { i18n } from '@kbn/i18n';
 import { decode } from 'rison-node';
 
 // @ts-ignore
@@ -15,10 +16,22 @@ import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../data_frame_analytics/pages/analytics_exploration';
 import { ANALYSIS_CONFIG_TYPE } from '../../../data_frame_analytics/common/analytics';
 import { DATA_FRAME_TASK_STATE } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
+import { ML_BREADCRUMB } from '../../breadcrumbs';
+
+const breadcrumbs = [
+  ML_BREADCRUMB,
+  {
+    text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.dataFrameExplorationLabel', {
+      defaultMessage: 'Data Frame Analytics',
+    }),
+    href: '',
+  },
+];
 
 export const analyticsJobExplorationRoute: MlRoute = {
   path: '/data_frame_analytics/exploration',
   render: (props: any, config: any) => <PageWrapper config={config} {...props} />,
+  breadcrumbs,
 };
 
 const PageWrapper: FC<{ location: any; config: any }> = ({ location, config }) => {

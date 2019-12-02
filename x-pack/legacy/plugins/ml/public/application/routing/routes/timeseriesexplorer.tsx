@@ -5,6 +5,7 @@
  */
 
 import React, { FC, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { decode } from 'rison-node';
 import moment from 'moment';
 import { Subscription } from 'rxjs';
@@ -21,10 +22,21 @@ import { APP_STATE_ACTION } from '../../timeseriesexplorer/timeseriesexplorer_co
 import { subscribeAppStateToObservable } from '../../util/app_state_utils';
 import { interval$ } from '../../components/controls/select_interval';
 import { severity$ } from '../../components/controls/select_severity';
+import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';
 
 export const timeSeriesExplorerRoute: MlRoute = {
   path: '/timeseriesexplorer',
   render: (props: any, config: any) => <PageWrapper config={config} {...props} />,
+  breadcrumbs: [
+    ML_BREADCRUMB,
+    ANOMALY_DETECTION_BREADCRUMB,
+    {
+      text: i18n.translate('xpack.ml.anomalyDetection.singleMetricViewerLabel', {
+        defaultMessage: 'Single Metric Viewer',
+      }),
+      href: '',
+    },
+  ],
 };
 
 const PageWrapper: FC<{ location: any; config: any }> = ({ location, config }) => {

@@ -5,6 +5,7 @@
  */
 
 import React, { FC } from 'react';
+import { i18n } from '@kbn/i18n';
 
 // @ts-ignore
 import queryString from 'query-string';
@@ -12,10 +13,23 @@ import { MlRoute, PageLoader } from '../../router';
 import { useResolver } from '../../router';
 import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../jobs/new_job/pages/job_type';
+import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../../breadcrumbs';
+
+const breadcrumbs = [
+  ML_BREADCRUMB,
+  ANOMALY_DETECTION_BREADCRUMB,
+  {
+    text: i18n.translate('xpack.ml.jobsBreadcrumbs.selectJobType', {
+      defaultMessage: 'Create job',
+    }),
+    href: '',
+  },
+];
 
 export const jobTypeRoute: MlRoute = {
   path: '/jobs/new_job/step/job_type',
   render: (props: any, config: any) => <PageWrapper config={config} {...props} />,
+  breadcrumbs,
 };
 
 const PageWrapper: FC<{ location: any; config: any }> = ({ location, config }) => {

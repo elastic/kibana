@@ -5,6 +5,7 @@
  */
 
 import React, { FC, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { decode } from 'rison-node';
 import { Subscription } from 'rxjs';
 
@@ -26,10 +27,23 @@ import { subscribeAppStateToObservable } from '../../util/app_state_utils';
 import { interval$ } from '../../components/controls/select_interval';
 import { severity$ } from '../../components/controls/select_severity';
 import { showCharts$ } from '../../components/controls/checkbox_showcharts';
+import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';
+
+const breadcrumbs = [
+  ML_BREADCRUMB,
+  ANOMALY_DETECTION_BREADCRUMB,
+  {
+    text: i18n.translate('xpack.ml.anomalyDetection.anomalyExplorerLabel', {
+      defaultMessage: 'Anomaly Explorer',
+    }),
+    href: '',
+  },
+];
 
 export const explorerRoute: MlRoute = {
   path: '/explorer',
   render: (props: any, config: any) => <PageWrapper config={config} {...props} />,
+  breadcrumbs,
 };
 
 const PageWrapper: FC<{ location: any; config: any }> = ({ location, config }) => {

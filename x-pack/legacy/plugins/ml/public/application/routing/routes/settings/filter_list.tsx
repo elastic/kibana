@@ -10,6 +10,7 @@
  */
 
 import React, { FC } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { MlRoute, PageLoader } from '../../router';
 import { useResolver } from '../../router';
@@ -19,9 +20,23 @@ import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { FilterLists } from '../../../settings/filter_lists';
 
+import { SETTINGS, ML_BREADCRUMB } from '../../breadcrumbs';
+
+const breadcrumbs = [
+  ML_BREADCRUMB,
+  SETTINGS,
+  {
+    text: i18n.translate('xpack.ml.settings.breadcrumbs.filterListsLabel', {
+      defaultMessage: 'Filter lists',
+    }),
+    href: '#/settings/filter_lists',
+  },
+];
+
 export const filterListRoute: MlRoute = {
   path: '/settings/filter_lists',
   render: (props: any, config: any) => <PageWrapper config={config} />,
+  breadcrumbs,
 };
 
 const PageWrapper: FC<{ config: any }> = ({ config }) => {

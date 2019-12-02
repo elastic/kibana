@@ -19,10 +19,14 @@ import { DatavisualizerSelector } from '../../../datavisualizer';
 
 import { checkBasicLicense } from '../../../license/check_license';
 import { checkFindFileStructurePrivilege } from '../../../privilege/check_privilege';
+import { DATA_VISUALIZER_BREADCRUMB, ML_BREADCRUMB } from '../../breadcrumbs';
+
+const breadcrumbs = [ML_BREADCRUMB, DATA_VISUALIZER_BREADCRUMB];
 
 export const selectorRoute: MlRoute = {
   path: '/datavisualizer',
   render: (props: any, config: any) => <PageWrapper config={config} {...props} />,
+  breadcrumbs,
 };
 
 const PageWrapper: FC<{ location: any; config: any }> = ({ location, config }) => {

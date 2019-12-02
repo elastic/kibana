@@ -5,15 +5,28 @@
  */
 
 import React, { FC } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { MlRoute, PageLoader } from '../../router';
 import { useResolver } from '../../router';
 import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../data_frame_analytics/pages/analytics_management';
+import { ML_BREADCRUMB } from '../../breadcrumbs';
+
+const breadcrumbs = [
+  ML_BREADCRUMB,
+  {
+    text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.dataFrameListLabel', {
+      defaultMessage: 'Data Frame Analytics',
+    }),
+    href: '',
+  },
+];
 
 export const analyticsJobsListRoute: MlRoute = {
   path: '/data_frame_analytics',
   render: (props: any, config: any) => <PageWrapper config={config} {...props} />,
+  breadcrumbs,
 };
 
 const PageWrapper: FC<{ location: any; config: any }> = ({ location, config }) => {

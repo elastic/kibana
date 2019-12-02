@@ -10,6 +10,7 @@
  */
 
 import React, { FC } from 'react';
+import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import queryString from 'query-string';
 
@@ -20,20 +21,45 @@ import { checkFullLicense } from '../../../license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check_privilege';
 import { checkMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import { NewCalendar } from '../../../settings/calendars';
+import { SETTINGS, ML_BREADCRUMB } from '../../breadcrumbs';
 
 enum MODE {
   NEW,
   EDIT,
 }
 
+const newBreadcrumbs = [
+  ML_BREADCRUMB,
+  SETTINGS,
+  {
+    text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.createLabel', {
+      defaultMessage: 'Create',
+    }),
+    href: '#/settings/calendars_list/new_calendar',
+  },
+];
+
+const editBreadcrumbs = [
+  ML_BREADCRUMB,
+  SETTINGS,
+  {
+    text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.editLabel', {
+      defaultMessage: 'Edit',
+    }),
+    href: '#/settings/calendars_list/edit_calendar',
+  },
+];
+
 export const newCalendarRoute: MlRoute = {
   path: '/settings/calendars_list/new_calendar',
   render: (props: any, config: any) => <PageWrapper config={config} {...props} mode={MODE.NEW} />,
+  breadcrumbs: newBreadcrumbs,
 };
 
 export const editCalendarRoute: MlRoute = {
   path: '/settings/calendars_list/edit_calendar/:calendarId',
   render: (props: any, config: any) => <PageWrapper config={config} {...props} mode={MODE.EDIT} />,
+  breadcrumbs: editBreadcrumbs,
 };
 
 const PageWrapper: FC<{ location: any; config: any; mode: MODE }> = ({

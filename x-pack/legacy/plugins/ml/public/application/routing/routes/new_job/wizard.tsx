@@ -5,6 +5,7 @@
  */
 
 import React, { FC } from 'react';
+import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import queryString from 'query-string';
 
@@ -16,12 +17,56 @@ import { JOB_TYPE } from '../../../jobs/new_job/common/job_creator/util/constant
 import { mlJobService } from '../../../services/job_service';
 import { loadNewJobCapabilities } from '../../../services/new_job_capabilities_service';
 import { checkCreateJobsPrivilege } from '../../../privilege/check_privilege';
+import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../../breadcrumbs';
+
+const baseBreadcrumbs = [ML_BREADCRUMB, ANOMALY_DETECTION_BREADCRUMB];
+
+const singleMetricBreadCrumbs = [
+  ...baseBreadcrumbs,
+  {
+    text: i18n.translate('xpack.ml.jobsBreadcrumbs.singleMetricLabel', {
+      defaultMessage: 'Single metric',
+    }),
+    href: '',
+  },
+];
+
+const multiMetricBreadCrumbs = [
+  ...baseBreadcrumbs,
+  {
+    text: i18n.translate('xpack.ml.jobsBreadcrumbs.multiMetricLabel', {
+      defaultMessage: 'Multi metric',
+    }),
+    href: '',
+  },
+];
+
+const populationBreadCrumbs = [
+  ...baseBreadcrumbs,
+  {
+    text: i18n.translate('xpack.ml.jobsBreadcrumbs.populationLabel', {
+      defaultMessage: 'Population',
+    }),
+    href: '',
+  },
+];
+
+const advancedBreadCrumbs = [
+  ...baseBreadcrumbs,
+  {
+    text: i18n.translate('xpack.ml.jobsBreadcrumbs.advancedConfigurationLabel', {
+      defaultMessage: 'Advanced configuration',
+    }),
+    href: '',
+  },
+];
 
 export const singleMetricRoute: MlRoute = {
   path: '/jobs/new_job/single_metric',
   render: (props: any, config: any) => (
     <PageWrapper config={config} {...props} jobType={JOB_TYPE.SINGLE_METRIC} />
   ),
+  breadcrumbs: singleMetricBreadCrumbs,
 };
 
 export const multiMetricRoute: MlRoute = {
@@ -29,6 +74,7 @@ export const multiMetricRoute: MlRoute = {
   render: (props: any, config: any) => (
     <PageWrapper config={config} {...props} jobType={JOB_TYPE.MULTI_METRIC} />
   ),
+  breadcrumbs: multiMetricBreadCrumbs,
 };
 
 export const populationRoute: MlRoute = {
@@ -36,6 +82,7 @@ export const populationRoute: MlRoute = {
   render: (props: any, config: any) => (
     <PageWrapper config={config} {...props} jobType={JOB_TYPE.POPULATION} />
   ),
+  breadcrumbs: populationBreadCrumbs,
 };
 
 export const advancedRoute: MlRoute = {
@@ -43,6 +90,7 @@ export const advancedRoute: MlRoute = {
   render: (props: any, config: any) => (
     <PageWrapper config={config} {...props} jobType={JOB_TYPE.ADVANCED} />
   ),
+  breadcrumbs: advancedBreadCrumbs,
 };
 
 const PageWrapper: FC<{ location: any; config: any; jobType: JOB_TYPE }> = ({

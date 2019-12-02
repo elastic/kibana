@@ -13,12 +13,14 @@ import { getIndexPatternById, getFullIndexPatterns } from '../util/index_utils';
 import { createSearchItems } from '../jobs/new_job/utils/new_job_utils';
 import { ResolverResults, Resolvers } from './resolvers';
 import { KibanaContext, KibanaConfigTypeFix } from '../contexts/kibana';
+import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
 
 import * as routes from './routes';
 
 export interface MlRoute {
   path: string;
   render(props: any, config: any): JSX.Element;
+  breadcrumbs: ChromeBreadcrumb[];
 }
 
 export const PageLoader: FC<{ context: any }> = ({ context, children }) => {
@@ -29,15 +31,24 @@ export const PageLoader: FC<{ context: any }> = ({ context, children }) => {
   );
 };
 
-export const MlRouter: FC<{ basename: string; config: KibanaConfigTypeFix }> = ({
-  basename,
-  config,
-}) => {
+export const MlRouter: FC<{
+  basename: string;
+  config: KibanaConfigTypeFix;
+  setBreadCrumbs: any;
+}> = ({ basename, config, setBreadCrumbs }) => {
   return (
     <Router basename={basename}>
       <div>
         {Object.entries(routes).map(([name, route]) => (
-          <Route key={name} path={route.path} exact render={props => route.render(props, config)} />
+          <Route
+            key={name}
+            path={route.path}
+            exact
+            render={props => {
+              setBreadCrumbs(route.breadcrumbs);
+              return route.render(props, config);
+            }}
+          />
         ))}
       </div>
     </Router>
