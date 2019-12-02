@@ -585,7 +585,7 @@ export const Page: FC = () => {
   return (
     <Fragment>
       <NavigationMenu tabId="datavisualizer" />
-      <EuiPage data-test-subj="mlPageDataVisualizer">
+      <EuiPage data-test-subj="mlPageIndexDataVisualizer">
         <EuiPageBody>
           <EuiPageContentHeader>
             <EuiPageContentHeaderSection>
