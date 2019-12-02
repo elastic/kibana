@@ -11,6 +11,7 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { RouteMethod, RouteConfig } from '../../../../../../../../src/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
 import { SpacesPluginSetup } from '../../../../../../../plugins/spaces/server';
+import { VisTypeTimeseriesSetup } from '../../../../../../../../src/plugins/vis_type_timeseries/server';
 
 interface ApmIndices {
   'apm_oss.transactionIndices': string | undefined;
@@ -20,9 +21,7 @@ interface ApmIndices {
 export interface InfraServerPluginDeps {
   spaces: SpacesPluginSetup;
   usageCollection: UsageCollectionSetup;
-  metrics: {
-    getVisData: any;
-  };
+  metrics: VisTypeTimeseriesSetup;
   indexPatterns: {
     indexPatternsServiceFactory: any;
   };

@@ -29,7 +29,11 @@ import { Observable, AsyncSubject } from 'rxjs';
 import { Server } from 'hapi';
 import { once } from 'lodash';
 import { VisTypeTimeseriesConfig } from '.';
-import { init, getVisData } from '../../../legacy/core_plugins/vis_type_timeseries/server';
+import {
+  init,
+  getVisData,
+  GetVisData,
+} from '../../../legacy/core_plugins/vis_type_timeseries/server';
 
 export interface LegacySetup {
   server: Server;
@@ -41,6 +45,7 @@ export interface VisTypeTimeseriesSetup {
     config$: Observable<VisTypeTimeseriesConfig>;
     registerLegacyAPI: (__LEGACY: LegacySetup) => void;
   };
+  getVisData: GetVisData;
 }
 
 export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {

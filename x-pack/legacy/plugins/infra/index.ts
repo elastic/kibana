@@ -17,6 +17,7 @@ import { InfraSetup } from '../../../plugins/infra/server';
 import { getApmIndices } from '../apm/server/lib/settings/apm_indices/get_apm_indices';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../plugins/features/server';
 import { SpacesPluginSetup } from '../../../plugins/spaces/server';
+import { VisTypeTimeseriesSetup } from '../../../../src/plugins/vis_type_timeseries/server';
 
 const APP_ID = 'infra';
 const logsSampleDataLinkLabel = i18n.translate('xpack.infra.sampleDataLinkLabel', {
@@ -92,7 +93,7 @@ export function infra(kibana: any) {
         indexPatterns: {
           indexPatternsServiceFactory: legacyServer.indexPatternsServiceFactory,
         },
-        metrics: plugins.metrics,
+        metrics: plugins.metrics as VisTypeTimeseriesSetup,
         spaces: plugins.spaces as SpacesPluginSetup,
         features: plugins.features as FeaturesPluginSetup,
         apm: {

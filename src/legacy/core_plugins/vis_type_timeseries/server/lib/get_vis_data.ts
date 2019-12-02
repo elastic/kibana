@@ -21,12 +21,37 @@ import { RequestHandlerContext, KibanaRequest } from 'src/core/server';
 import _ from 'lodash';
 import { getPanelData } from './vis_data/get_panel_data';
 
-export function getVisData(requestContext: RequestHandlerContext, request: KibanaRequest) {
+interface GetVisDataResponse {
+  [key: string]: GetVisDataPanel;
+}
+
+interface GetVisDataPanel {
+  id: string;
+  series: GetVisDataSeries[];
+}
+
+interface GetVisDataSeries {
+  id: string;
+  label: string;
+  data: GetVisDataDataPoint[];
+}
+
+type GetVisDataDataPoint = [number, number];
+
+export type GetVisData = (
+  requestContext: RequestHandlerContext,
+  request: KibanaRequest
+) => Promise<GetVisDataResponse>;
+
+export function getVisData(
+  requestContext: RequestHandlerContext,
+  request: KibanaRequest
+): Promise<GetVisDataResponse> {
   // NOTE / TODO: This facade has been put in place to make migrating to the New Platform easier. It
   // removes the need to refactor many layers of dependencies on "req", and instead just augments the top
   // level object passed from here. The layers should be refactored fully at some point, but for now
   // this works and we are still using the New Platform services for these vis data portions.
-  const options = {
+  const options: any = {
     payload: request.body,
     getUiSettingsService: () => requestContext.core.uiSettings.client,
     getSavedObjectsClient: () => requestContext.core.savedObjects.client,
@@ -50,7 +75,7 @@ export function getVisData(requestContext: RequestHandlerContext, request: Kiban
   const promises = options.payload.panels.map(getPanelData(options));
   return Promise.all(promises).then(res => {
     return res.reduce((acc, data) => {
-      return _.assign(acc, data);
+      return _.assign(acc as any, data);
     }, {});
-  });
+  }) as Promise<GetVisDataResponse>;
 }

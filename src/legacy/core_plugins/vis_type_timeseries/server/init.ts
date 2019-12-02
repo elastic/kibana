@@ -18,7 +18,6 @@
  */
 
 import { CoreSetup } from 'src/core/server';
-import { take } from 'rxjs/operators';
 
 // @ts-ignore
 import { fieldsRoutes } from './routes/fields';
@@ -37,8 +36,7 @@ export const init = async (
   __LEGACY: any
 ) => {
   const router = core.http.createRouter();
-
-  visDataRoutes(__LEGACY.server);
+  visDataRoutes(router);
 
   // [LEGACY_TODO]
   fieldsRoutes(__LEGACY.server);
