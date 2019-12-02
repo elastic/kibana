@@ -156,7 +156,7 @@ function routeSchemasFromRouteConfig<
 
   if (route.validate !== false) {
     Object.entries(route.validate).forEach(([key, schema]) => {
-      if (!(schema instanceof Type)) {
+      if (!(schema instanceof Type) && typeof schema !== 'function') {
         throw new Error(
           `Expected a valid schema declared with '@kbn/config-schema' package at key: [${key}].`
         );

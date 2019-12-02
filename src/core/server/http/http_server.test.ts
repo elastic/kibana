@@ -25,7 +25,7 @@ jest.mock('fs', () => ({
 
 import supertest from 'supertest';
 
-import { ByteSizeValue, schema } from '@kbn/config-schema';
+import { ByteSizeValue, schema, SchemaTypeError } from '@kbn/config-schema';
 import { HttpConfig } from './http_config';
 import { Router } from './router';
 import { loggingServiceMock } from '../logging/logging_service.mock';
@@ -263,6 +263,44 @@ test('valid body', async () => {
           bar: schema.string(),
           baz: schema.number(),
         }),
+      },
+    },
+    (context, req, res) => {
+      return res.ok({ body: req.body });
+    }
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup(config);
+  registerRouter(router);
+
+  await server.start();
+
+  await supertest(innerServer.listener)
+    .post('/foo/')
+    .send({
+      bar: 'test',
+      baz: 123,
+    })
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ bar: 'test', baz: 123 });
+    });
+});
+
+test('valid body with validate function', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext);
+
+  router.post(
+    {
+      path: '/',
+      validate: {
+        body: ({ bar, baz } = {}) => {
+          if (typeof bar === 'string' && typeof baz === 'number') {
+            return { value: { bar, baz } };
+          } else {
+            return { error: new SchemaTypeError('Wrong payload', ['body']) };
+          }
+        },
       },
     },
     (context, req, res) => {
