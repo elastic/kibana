@@ -24,7 +24,6 @@ export interface SavedObject {
   _serialize: () => { attributes: SavedObjectAttributes; references: SavedObjectReference[] };
   _source: Record<string, unknown>;
   applyESResp: (resp: EsResponse) => any;
-  applyEsResp: () => any;
   copyOnSave: boolean;
   creationOpts: (opts: CreationOpts) => Record<string, unknown>;
   columns?: string[];

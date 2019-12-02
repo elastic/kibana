@@ -44,19 +44,16 @@ export async function intializeSavedObject(
     return savedObject;
   }
 
-  try {
-    const resp = await savedObjectsClient.get(esType, savedObject.id);
-    const respMapped = {
-      _id: resp.id,
-      _type: resp.type,
-      _source: _.cloneDeep(resp.attributes),
-      references: resp.references,
-      found: !!resp._version,
-    };
-    await savedObject.applyESResp(respMapped);
-  } catch (e) {
-    await savedObject.applyEsResp();
-  }
+  const resp = await savedObjectsClient.get(esType, savedObject.id);
+  const respMapped = {
+    _id: resp.id,
+    _type: resp.type,
+    _source: _.cloneDeep(resp.attributes),
+    references: resp.references,
+    found: !!resp._version,
+  };
+  await savedObject.applyESResp(respMapped);
+
   await customInit.call(savedObject);
   return savedObject;
 }
