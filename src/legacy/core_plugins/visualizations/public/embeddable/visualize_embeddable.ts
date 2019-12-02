@@ -20,7 +20,6 @@
 import _, { forEach } from 'lodash';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
-import { StaticIndexPattern } from '../../../../ui/public/index_patterns';
 import { PersistedState } from '../../../../ui/public/persisted_state';
 import { SavedObject } from '../../../../ui/public/saved_objects/saved_object';
 import { queryGeohashBounds } from '../../../../ui/public/visualize/loader/utils';

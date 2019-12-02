@@ -19,7 +19,7 @@
 
 import { VisSavedObject } from './visualize_embeddable';
 import { getFromSavedObject } from '../../../data/public';
-import { IIndexPattern } from '../../../../../../plugins/data/public';
+import { IIndexPattern } from '../../../../../plugins/data/public';
 
 import { getUISettings, getSavedObjectsClient } from '../np_ready/public/services';
 

@@ -26,6 +26,7 @@ import {
 } from 'src/core/public';
 import { TypesStart } from './types';
 import { createGetterSetter } from '../../../../../../plugins/kibana_utils/public';
+import { IndexPatternsStart } from '../../../../../../plugins/data/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
@@ -40,3 +41,7 @@ export const [getSavedObjectsClient, setSavedObjectsClient] = createGetterSetter
 export const [getTypes, setTypes] = createGetterSetter<TypesStart>('Types');
 
 export const [getI18n, setI18n] = createGetterSetter<I18nStart>('I18n');
+
+export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatternsStart>(
+  'IndexPatterns'
+);

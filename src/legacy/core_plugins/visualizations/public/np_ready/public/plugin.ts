@@ -25,6 +25,7 @@ import {
   setHttp,
   setSavedObjectsClient,
   setI18n,
+  setIndexPatterns,
 } from './services';
 import { ExpressionsSetup } from '../../../../../../plugins/expressions/public';
 import { IEmbeddableSetup } from '../../../../../../plugins/embeddable/public';
@@ -37,13 +38,15 @@ import { showNewVisModal } from '../../wizard';
 
 import { SavedObjectRegistryProvider } from '../../legacy_imports';
 import '../../saved_visualizations';
+import { IndexPatternsStart } from '../../../../../../plugins/data/public';
 
 export interface VisualizationsSetupDeps {
   expressions: ExpressionsSetup;
+  embeddable: IEmbeddableSetup;
 }
 
 export interface VisualizationsStartDeps {
-  embeddable: IEmbeddableSetup;
+  data: IndexPatternsStart;
 }
 
 /**
@@ -70,35 +73,41 @@ export interface VisualizationsStart {
  * @internal
  */
 export class VisualizationsPlugin
-  implements Plugin<VisualizationsSetup, VisualizationsStart, VisualizationsSetupDeps> {
+  implements
+    Plugin<
+      VisualizationsSetup,
+      VisualizationsStart,
+      VisualizationsSetupDeps,
+      VisualizationsStartDeps
+    > {
   private readonly types: TypesService = new TypesService();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { expressions }: VisualizationsSetupDeps) {
+  public setup(core: CoreSetup, { expressions, embeddable }: VisualizationsSetupDeps) {
     setUISettings(core.uiSettings);
 
     expressions.registerFunction(visualizationFunction);
     expressions.registerRenderer(visualizationRenderer);
+
+    embeddable.registerEmbeddableFactory(
+      VISUALIZE_EMBEDDABLE_TYPE,
+      new VisualizeEmbeddableFactory()
+    );
 
     return {
       types: this.types.setup(),
     };
   }
 
-  public start(core: CoreStart, { embeddable }: VisualizationsStartDeps) {
+  public start(core: CoreStart, { data }: VisualizationsStartDeps) {
     const types = this.types.start();
     setI18n(core.i18n);
     setTypes(types);
     setCapabilities(core.application.capabilities);
     setHttp(core.http);
     setSavedObjectsClient(core.savedObjects.client);
-
-    // regostration of theese two items should happen in setup, but we depend on start contracts
-    embeddable.registerEmbeddableFactory(
-      VISUALIZE_EMBEDDABLE_TYPE,
-      new VisualizeEmbeddableFactory()
-    );
+    setIndexPatterns(data.indexPatterns);
 
     SavedObjectRegistryProvider.register((savedVisualizations: any) => {
       return savedVisualizations;

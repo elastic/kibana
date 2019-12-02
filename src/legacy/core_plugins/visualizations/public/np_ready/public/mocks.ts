@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { PluginInitializerContext } from 'src/core/public';
+
 jest.mock('ui/vis/vis_filters');
 jest.mock('ui/vis/default_feedback_message');
 jest.mock('ui/vis/index.js');
@@ -24,13 +26,12 @@ jest.mock('ui/vis/vis_factory');
 jest.mock('ui/registry/vis_types');
 jest.mock('./types/vis_type_alias_registry');
 
-import { PluginInitializerContext } from 'src/core/public';
 import { VisualizationsSetup, VisualizationsStart } from './';
 import { VisualizationsPlugin } from './plugin';
 import { coreMock } from '../../../../../../core/public/mocks';
 
 /* eslint-disable */
-// @ts-ignore
+import { dataPluginMock } from '../../../../../../plugins/data/public/mocks';
 import { embeddablePluginMock } from '../../../../../../plugins/embeddable/public/mocks';
 import { expressionsPluginMock } from '../../../../../../plugins/expressions/public/mocks';
 /* eslint-enable */
@@ -58,10 +59,11 @@ const createInstance = async () => {
 
   const setup = plugin.setup(coreMock.createSetup(), {
     expressions: expressionsPluginMock.createSetupContract(),
+    embeddable: embeddablePluginMock.createStartContract(),
   });
   const doStart = () =>
     plugin.start(coreMock.createStart(), {
-      embeddable: embeddablePluginMock.createStartContract(),
+      data: dataPluginMock.createStartContract(),
     });
 
   return {

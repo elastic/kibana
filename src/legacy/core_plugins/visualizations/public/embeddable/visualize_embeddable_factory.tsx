@@ -34,7 +34,6 @@ import {
   VisualizeOutput,
 } from './visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
-import { TypesStart } from '../np_ready/public/types';
 import {
   EmbeddableFactory,
   EmbeddableOutput,
@@ -47,7 +46,6 @@ interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
 }
 
-// @ts-ignore
 export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   VisualizeInput,
   VisualizeOutput | EmbeddableOutput,
@@ -55,7 +53,6 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   VisualizationAttributes
 > {
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
-  private readonly visTypes: TypesStart;
 
   constructor() {
     super({
@@ -64,25 +61,16 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
         includeFields: ['visState'],
         type: 'visualization',
         getIconForSavedObject: savedObject => {
-          if (!getTypes()) {
-            return 'visualizeApp';
-          }
           return (
             getTypes().get(JSON.parse(savedObject.attributes.visState).type).icon || 'visualizeApp'
           );
         },
         getTooltipForSavedObject: savedObject => {
-          if (!getTypes()) {
-            return '';
-          }
           return `${savedObject.attributes.title} (${
             getTypes().get(JSON.parse(savedObject.attributes.visState).type).title
           })`;
         },
         showSavedObject: savedObject => {
-          if (!getTypes()) {
-            return false;
-          }
           const typeName: string = JSON.parse(savedObject.attributes.visState).type;
           const visType = getTypes().get(typeName);
           if (!visType) {
@@ -95,8 +83,6 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
         },
       },
     });
-
-    this.visTypes = getTypes();
   }
 
   public isEditable() {
@@ -172,11 +158,10 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   public async create() {
     // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
-    if (this.visTypes) {
-      showNewVisModal({
-        editorParams: ['addToDashboard'],
-      });
-    }
+    showNewVisModal({
+      editorParams: ['addToDashboard'],
+    });
+
     return undefined;
   }
 }
