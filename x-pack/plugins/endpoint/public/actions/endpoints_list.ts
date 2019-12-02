@@ -26,20 +26,9 @@ export const actions = {
       }
     ]
   >('userPaginatedOrSortedEndpointListTable'),
-  // userSelectedTableItems: actionCreatorFactory<'userSelectedTableItems', [object[]]>(
-  //   'userSelectedTableItems'
-  // ),
-  // userClickedArchiveItems: actionCreatorFactory<'userClickedArchiveItems', [string[]]>(
-  //   'userClickedArchiveItems'
-  // ),
-  // serverReturnedArchiveItems: actionCreatorFactory<'serverReturnedArchiveItems', []>(
-  //   'serverReturnedArchiveItems'
-  // ),
 };
 
 export type EndpointListActions =
   | ReturnType<typeof actions.serverReturnedEndpointListData>
   | ReturnType<typeof actions.userFilteredEndpointListData>
   | ReturnType<typeof actions.userPaginatedOrSortedEndpointListTable>;
-// | ReturnType<typeof actions.userSelectedTableItems>
-// | ReturnType<typeof actions.userClickedArchiveItems>;
