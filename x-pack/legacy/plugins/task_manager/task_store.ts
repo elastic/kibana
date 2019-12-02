@@ -28,7 +28,7 @@ import {
   TaskInstance,
 } from './task';
 
-import { TaskEvent, asTaskClaimEvent } from './task_events';
+import { TaskClaim, asTaskClaimEvent } from './task_events';
 
 import {
   asUpdateByQuery,
@@ -37,6 +37,8 @@ import {
   ExistsBoolClause,
   TermBoolClause,
   RangeBoolClause,
+  BoolClause,
+  IDsClause,
 } from './queries/query_clauses';
 
 import {
@@ -121,7 +123,7 @@ export class TaskStore {
   private definitions: TaskDictionary<TaskDefinition>;
   private savedObjectsRepository: SavedObjectsClientContract;
   private serializer: SavedObjectsSerializer;
-  private events$: Subject<TaskEvent>;
+  private events$: Subject<TaskClaim>;
 
   /**
    * Constructs a new TaskStore.
@@ -141,14 +143,14 @@ export class TaskStore {
     this.definitions = opts.definitions;
     this.serializer = opts.serializer;
     this.savedObjectsRepository = opts.savedObjectsRepository;
-    this.events$ = new Subject<TaskEvent>();
+    this.events$ = new Subject<TaskClaim>();
   }
 
-  public get events(): Observable<TaskEvent> {
+  public get events(): Observable<TaskClaim> {
     return this.events$;
   }
 
-  private emitEvent = (event: TaskEvent) => {
+  private emitEvent = (event: TaskClaim) => {
     this.events$.next(event);
   };
 
@@ -254,7 +256,12 @@ export class TaskStore {
     const { query, sort } =
       claimTasksById && claimTasksById.length
         ? {
-            query: shouldBeOneOf(queryForScheduledTasks, idleTaskWithIDs(claimTasksById)),
+            query: shouldBeOneOf<
+              | ExistsBoolClause
+              | TermBoolClause
+              | RangeBoolClause
+              | BoolClause<TermBoolClause | IDsClause>
+            >(queryForScheduledTasks, idleTaskWithIDs(claimTasksById)),
             sort: sortByIdsThenByScheduling(claimTasksById),
           }
         : {

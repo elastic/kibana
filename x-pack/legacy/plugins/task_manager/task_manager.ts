@@ -9,10 +9,10 @@ import { performance } from 'perf_hooks';
 import { SavedObjectsClientContract, SavedObjectsSerializer } from 'src/core/server';
 
 import { Option, none, some, Some, isSome } from 'fp-ts/lib/Option';
-import { isOk, isErr } from './lib/result_type';
+import { either } from './lib/result_type';
 
 import { Logger } from './types';
-import { TaskEvent, TaskEventType } from './task_events';
+import { TaskMarkRunning, TaskRun, TaskClaim, isTaskRunEvent } from './task_events';
 import { fillPool, FillPoolResult } from './lib/fill_pool';
 import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './lib/middleware';
 import { sanitizeTaskDefinitions } from './lib/sanitize_task_definitions';
@@ -50,11 +50,13 @@ export interface TaskManagerOpts {
 type RunNowResult =
   | {
       id: string;
-      error: object | Error;
+      error: string;
     }
   | {
       id: string;
     };
+
+type TaskLifecycleEvent = TaskMarkRunning | TaskRun | TaskClaim;
 
 /*
  * The TaskManager is the public interface into the task manager system. This glues together
@@ -76,7 +78,7 @@ export class TaskManager {
   private store: TaskStore;
   private logger: Logger;
   private pool: TaskPool;
-  private events$: Subject<TaskEvent>;
+  private events$: Subject<TaskLifecycleEvent>;
 
   private poller: TaskPoller<FillPoolResult, Option<string>>;
 
@@ -122,9 +124,9 @@ export class TaskManager {
       maxWorkers: this.maxWorkers,
     });
 
-    this.events$ = new Subject<TaskEvent>();
+    this.events$ = new Subject();
     // if we end up with only one stream, remove merge
-    merge<TaskEvent>(this.store.events).subscribe(event => this.events$.next(event));
+    merge<TaskLifecycleEvent>(this.store.events).subscribe(event => this.events$.next(event));
 
     this.poller = new TaskPoller<FillPoolResult, Option<string>>({
       logger: this.logger,
@@ -133,7 +135,7 @@ export class TaskManager {
     });
   }
 
-  private emitEvent = (event: TaskEvent) => {
+  private emitEvent = (event: TaskLifecycleEvent) => {
     this.events$.next(event);
   };
 
@@ -265,18 +267,23 @@ export class TaskManager {
     await this.waitUntilStarted();
     return new Promise(resolve => {
       const subscription = this.events$
-        .pipe(filter(({ id }: TaskEvent) => id === task))
-        .subscribe(({ id, event, type }: TaskEvent) => {
-          if (
-            type === TaskEventType.TASK_RUN &&
-            isOk<void | ConcreteTaskInstance, object | Error>(event)
-          ) {
-            subscription.unsubscribe();
-            return resolve({ id });
-          } else if (isErr(event)) {
-            subscription.unsubscribe();
-            return resolve({ id, error: `${event.error}` });
-          }
+        .pipe(filter(({ id }: TaskLifecycleEvent) => id === task))
+        .subscribe((taskEvent: TaskLifecycleEvent) => {
+          const { id, event } = taskEvent;
+
+          either<ConcreteTaskInstance, Error>(
+            event,
+            (taskInstance: ConcreteTaskInstance) => {
+              if (isTaskRunEvent(taskEvent)) {
+                subscription.unsubscribe();
+                resolve({ id });
+              }
+            },
+            (error: Error) => {
+              subscription.unsubscribe();
+              resolve({ id, error: `${error}` });
+            }
+          );
         });
 
       this.attemptToRun(some(task));

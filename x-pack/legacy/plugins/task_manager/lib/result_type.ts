@@ -48,3 +48,34 @@ export async function promiseResult<T, E>(future: Promise<T>): Promise<Result<T,
     return asErr(e);
   }
 }
+
+export function either<T, E>(
+  result: Result<T, E>,
+  onOk: (value: T) => void,
+  onErr: (error: E) => void
+): void {
+  resolve<T, E, void>(result, onOk, onErr);
+}
+
+export async function eitherAsync<T, E>(
+  result: Result<T, E>,
+  onOk: (value: T) => Promise<void>,
+  onErr: (error: E) => Promise<void>
+): Promise<Result<T, E> | void> {
+  return await resolve<T, E, Promise<void>>(result, onOk, onErr);
+}
+
+export function resolve<T, E, Resolution>(
+  result: Result<T, E>,
+  onOk: (value: T) => Resolution,
+  onErr: (error: E) => Resolution
+): Resolution {
+  return isOk(result) ? onOk(result.value) : onErr(result.error);
+}
+
+export function correctError<T, E, E2>(
+  result: Result<T, E>,
+  correctErr: (error: E) => Result<T, E2>
+): Result<T, E2> {
+  return isOk(result) ? result : correctErr(result.error);
+}

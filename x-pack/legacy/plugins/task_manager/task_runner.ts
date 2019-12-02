@@ -14,8 +14,8 @@ import { performance } from 'perf_hooks';
 import Joi from 'joi';
 import { identity } from 'lodash';
 
-import { asOk, asErr } from './lib/result_type';
-import { TaskEvent, asTaskRunEvent, asTaskMarkRunningEvent } from './task_events';
+import { asOk, asErr, isErr, correctError, eitherAsync, resolve, Result } from './lib/result_type';
+import { TaskRun, TaskMarkRunning, asTaskRunEvent, asTaskMarkRunningEvent } from './task_events';
 import { intervalFromDate, intervalFromNow } from './lib/intervals';
 import { Logger } from './types';
 import { BeforeRunFunction, BeforeMarkRunningFunction } from './lib/middleware';
@@ -24,6 +24,8 @@ import {
   CancellableTask,
   ConcreteTaskInstance,
   RunResult,
+  SuccessfulRunResult,
+  FailedRunResult,
   TaskDefinition,
   TaskDictionary,
   validateRunResult,
@@ -31,12 +33,13 @@ import {
 } from './task';
 
 const defaultBackoffPerFailure = 5 * 60 * 1000;
+const EMPTY_RUN_RESULT: SuccessfulRunResult = {};
 
 export interface TaskRunner {
   isExpired: boolean;
   cancel: CancelFunction;
   markTaskAsRunning: () => Promise<boolean>;
-  run: () => Promise<RunResult>;
+  run: () => Promise<Result<SuccessfulRunResult, FailedRunResult>>;
   id: string;
   toString: () => string;
 }
@@ -54,7 +57,7 @@ interface Opts {
   store: Updatable;
   beforeRun: BeforeRunFunction;
   beforeMarkRunning: BeforeMarkRunningFunction;
-  onTaskEvent?: (event: TaskEvent) => void;
+  onTaskEvent?: (event: TaskRun | TaskMarkRunning) => void;
 }
 
 /**
@@ -73,7 +76,7 @@ export class TaskManagerRunner implements TaskRunner {
   private bufferedTaskStore: Updatable;
   private beforeRun: BeforeRunFunction;
   private beforeMarkRunning: BeforeMarkRunningFunction;
-  private onTaskEvent: (event: TaskEvent) => void;
+  private onTaskEvent: (event: TaskRun | TaskMarkRunning) => void;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -144,9 +147,9 @@ export class TaskManagerRunner implements TaskRunner {
    * into the total timeout time the task in configured with. We may decide to
    * start the timer after beforeRun resolves
    *
-   * @returns {Promise<RunResult>}
+   * @returns {Promise<Result<SuccessfulRunResult, FailedRunResult>>}
    */
-  public async run(): Promise<RunResult> {
+  public async run(): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
     this.logger.debug(`Running task ${this}`);
     const modifiedContext = await this.beforeRun({
       taskInstance: this.instance,
@@ -161,7 +164,7 @@ export class TaskManagerRunner implements TaskRunner {
       this.logger.error(`Task ${this} failed: ${err}`);
       // in error scenario, we can not get the RunResult
       // re-use modifiedContext's state, which is correct as of beforeRun
-      return this.processResult({ error: err, state: modifiedContext.taskInstance.state });
+      return this.processResult(asErr({ error: err, state: modifiedContext.taskInstance.state }));
     }
   }
 
@@ -224,7 +227,7 @@ export class TaskManagerRunner implements TaskRunner {
       }
 
       performanceStopMarkingTaskAsRunning();
-      this.onTaskEvent(asTaskMarkRunningEvent(this.id, asOk(undefined)));
+      this.onTaskEvent(asTaskMarkRunningEvent(this.id, asOk(this.instance)));
       return true;
     } catch (error) {
       performanceStopMarkingTaskAsRunning();
@@ -251,62 +254,78 @@ export class TaskManagerRunner implements TaskRunner {
     this.logger.warn(`The task ${this} is not cancellable.`);
   }
 
-  private validateResult(result?: RunResult | void): RunResult {
+  private validateResult(result?: RunResult | void): Result<SuccessfulRunResult, FailedRunResult> {
     const { error } = Joi.validate(result, validateRunResult);
 
     if (error) {
       this.logger.warn(`Invalid task result for ${this}: ${error.message}`);
+      return asErr({
+        error: new Error(`Invalid task result for ${this}: ${error.message}`),
+        state: {},
+      });
+    }
+    if (!result) {
+      return asOk(EMPTY_RUN_RESULT);
     }
 
-    return result || { state: {} };
+    return result.error ? asErr({ ...result, error: result.error as Error }) : asOk(result);
   }
 
-  private async processResultForRecurringTask(result: RunResult): Promise<RunResult> {
-    // recurring task: update the task instance
+  private retryAtAfterFailure = (
+    failureResult: FailedRunResult
+  ): Result<SuccessfulRunResult, Error> => {
+    const { runAt, state, error } = failureResult;
+
     const startedAt = this.instance.startedAt!;
-    const state = result.state || this.instance.state || {};
-    let status: TaskStatus = this.getInstanceStatus();
 
-    let runAt;
-    if (status === 'failed') {
-      // task run errored, keep the same runAt
-      runAt = this.instance.runAt;
-    } else if (result.runAt) {
-      runAt = result.runAt;
-    } else if (result.error) {
-      // when result.error is truthy, then we're retrying because it failed
-      const newRunAt = this.instance.interval
-        ? intervalFromDate(startedAt, this.instance.interval)!
-        : this.getRetryDelay({
-            attempts: this.instance.attempts,
-            error: result.error,
-          });
-
-      if (!newRunAt) {
-        status = 'failed';
-        runAt = this.instance.runAt;
-      } else {
-        runAt = newRunAt;
-      }
-    } else {
-      runAt = intervalFromDate(startedAt, this.instance.interval)!;
+    if (runAt) {
+      return asOk({ state, runAt });
     }
+
+    // when result.error is truthy, then we're retrying because it failed
+    const newRunAt = this.instance.interval
+      ? intervalFromDate(startedAt, this.instance.interval)!
+      : this.getRetryDelay({
+          attempts: this.instance.attempts,
+          error,
+        });
+
+    if (newRunAt) {
+      return asOk({ state, runAt: newRunAt });
+    }
+    return asErr(new Error(`Task ${this} retry failed: cannot schedule retry`));
+  };
+
+  private async processResultForRecurringTask(
+    result: Result<SuccessfulRunResult, FailedRunResult>
+  ): Promise<void> {
+    // recurring task: update the task instance
+    const { startedAt, interval } = this.instance;
+    const status: TaskStatus = this.getInstanceStatus();
+
+    const resolution =
+      status === 'failed'
+        ? { status: 'failed' as TaskStatus, runAt: this.instance.runAt }
+        : resolve<SuccessfulRunResult, Error, { runAt: Date; state?: Record<string, any> }>(
+            correctError(result, this.retryAtAfterFailure),
+            ({ runAt, state = this.instance.state }: SuccessfulRunResult) => ({
+              runAt: runAt || intervalFromDate(startedAt!, interval)!,
+              state,
+            }),
+            (failedResult: Error) => ({ status: 'failed', runAt: this.instance.runAt })
+          );
 
     await this.bufferedTaskStore.update({
       ...this.instance,
-      runAt,
-      state,
-      status,
+      ...resolution,
       startedAt: null,
       retryAt: null,
       ownerId: null,
-      attempts: result.error ? this.instance.attempts : 0,
+      attempts: isErr<SuccessfulRunResult, FailedRunResult>(result) ? this.instance.attempts : 0,
     });
-
-    return result;
   }
 
-  private async processResultWhenDone(result: RunResult): Promise<RunResult> {
+  private async processResultWhenDone(): Promise<void> {
     // not a recurring task: clean up by removing the task instance from store
     try {
       await this.bufferedTaskStore.remove(this.instance.id);
@@ -317,22 +336,26 @@ export class TaskManagerRunner implements TaskRunner {
         throw err;
       }
     }
-
-    return result;
   }
 
-  private async processResult(result: RunResult): Promise<RunResult> {
-    if (result.error) {
-      await this.processResultForRecurringTask(result);
-      this.onTaskEvent(asTaskRunEvent(this.id, asErr(result.error)));
-    } else {
-      if (result.runAt || this.instance.interval) {
+  private async processResult(
+    result: Result<SuccessfulRunResult, FailedRunResult>
+  ): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
+    await eitherAsync(
+      result,
+      async ({ runAt }: SuccessfulRunResult) => {
+        if (runAt || this.instance.interval) {
+          await this.processResultForRecurringTask(result);
+        } else {
+          await this.processResultWhenDone();
+        }
+        this.onTaskEvent(asTaskRunEvent(this.id, asOk(this.instance)));
+      },
+      async ({ error }: FailedRunResult) => {
         await this.processResultForRecurringTask(result);
-      } else {
-        await this.processResultWhenDone(result);
+        this.onTaskEvent(asTaskRunEvent(this.id, asErr(error)));
       }
-      this.onTaskEvent(asTaskRunEvent(this.id, asOk(undefined)));
-    }
+    );
     return result;
   }
 

@@ -627,10 +627,10 @@ describe('TaskStore', () => {
                       must: [
                         { term: { 'task.status': 'idle' } },
                         {
-                          term: {
-                            'task.id': [
-                              '33c6977a-ed6d-43bd-98d9-3f827f7b7cd8',
-                              'a208b22c-14ec-4fb4-995f-d2ff7a3b03b8',
+                          ids: {
+                            values: [
+                              'task:33c6977a-ed6d-43bd-98d9-3f827f7b7cd8',
+                              'task:a208b22c-14ec-4fb4-995f-d2ff7a3b03b8',
                             ],
                           },
                         },
@@ -649,10 +649,25 @@ describe('TaskStore', () => {
           type: 'number',
           order: 'asc',
           script: {
-            lang: 'expression',
-            source: `params.ids.contains(doc['task.id']) ? 0 : (doc['task.retryAt'].value || doc['task.runAt'].value)`,
+            lang: 'painless',
+            source: `
+if(params.ids.contains(doc['_id'].value)){
+  return 0;
+}
+
+if (doc['task.retryAt'].size()!=0) {
+  return doc['task.retryAt'].value.toInstant().toEpochMilli();
+}
+if (doc['task.runAt'].size()!=0) {
+  return doc['task.runAt'].value.toInstant().toEpochMilli();
+}
+    
+`,
             params: {
-              ids: ['33c6977a-ed6d-43bd-98d9-3f827f7b7cd8', 'a208b22c-14ec-4fb4-995f-d2ff7a3b03b8'],
+              ids: [
+                'task:33c6977a-ed6d-43bd-98d9-3f827f7b7cd8',
+                'task:a208b22c-14ec-4fb4-995f-d2ff7a3b03b8',
+              ],
             },
           },
         },
@@ -969,33 +984,35 @@ describe('TaskStore', () => {
         index: '',
       });
 
-      const sub = store.events.pipe(filter((event: TaskEvent) => event.id === 'aaa')).subscribe({
-        next: (event: TaskEvent) => {
-          expect(event).toMatchObject(
-            asTaskClaimEvent(
-              'aaa',
-              asOk({
-                id: 'aaa',
-                runAt,
-                taskType: 'foo',
-                interval: undefined,
-                attempts: 0,
-                status: 'idle' as TaskStatus,
-                params: { hello: 'world' },
-                state: { baby: 'Henhen' },
-                user: 'jimbo',
-                scope: ['reporting'],
-                ownerId: taskManagerId,
-                startedAt: null,
-                retryAt: null,
-                scheduledAt: new Date(),
-              })
-            )
-          );
-          sub.unsubscribe();
-          done();
-        },
-      });
+      const sub = store.events
+        .pipe(filter((event: TaskEvent<any, any>) => event.id === 'aaa'))
+        .subscribe({
+          next: (event: TaskEvent<any, any>) => {
+            expect(event).toMatchObject(
+              asTaskClaimEvent(
+                'aaa',
+                asOk({
+                  id: 'aaa',
+                  runAt,
+                  taskType: 'foo',
+                  interval: undefined,
+                  attempts: 0,
+                  status: 'idle' as TaskStatus,
+                  params: { hello: 'world' },
+                  state: { baby: 'Henhen' },
+                  user: 'jimbo',
+                  scope: ['reporting'],
+                  ownerId: taskManagerId,
+                  startedAt: null,
+                  retryAt: null,
+                  scheduledAt: new Date(),
+                })
+              )
+            );
+            sub.unsubscribe();
+            done();
+          },
+        });
 
       await store.claimAvailableTasks({
         claimTasksById: ['aaa'],
@@ -1024,33 +1041,35 @@ describe('TaskStore', () => {
         index: '',
       });
 
-      const sub = store.events.pipe(filter((event: TaskEvent) => event.id === 'bbb')).subscribe({
-        next: (event: TaskEvent) => {
-          expect(event).toMatchObject(
-            asTaskClaimEvent(
-              'bbb',
-              asOk({
-                id: 'bbb',
-                runAt,
-                taskType: 'bar',
-                interval: '5m',
-                attempts: 2,
-                status: 'running' as TaskStatus,
-                params: { shazm: 1 },
-                state: { henry: 'The 8th' },
-                user: 'dabo',
-                scope: ['reporting', 'ceo'],
-                ownerId: taskManagerId,
-                startedAt: null,
-                retryAt: null,
-                scheduledAt: new Date(),
-              })
-            )
-          );
-          sub.unsubscribe();
-          done();
-        },
-      });
+      const sub = store.events
+        .pipe(filter((event: TaskEvent<any, any>) => event.id === 'bbb'))
+        .subscribe({
+          next: (event: TaskEvent<any, any>) => {
+            expect(event).toMatchObject(
+              asTaskClaimEvent(
+                'bbb',
+                asOk({
+                  id: 'bbb',
+                  runAt,
+                  taskType: 'bar',
+                  interval: '5m',
+                  attempts: 2,
+                  status: 'running' as TaskStatus,
+                  params: { shazm: 1 },
+                  state: { henry: 'The 8th' },
+                  user: 'dabo',
+                  scope: ['reporting', 'ceo'],
+                  ownerId: taskManagerId,
+                  startedAt: null,
+                  retryAt: null,
+                  scheduledAt: new Date(),
+                })
+              )
+            );
+            sub.unsubscribe();
+            done();
+          },
+        });
 
       await store.claimAvailableTasks({
         claimTasksById: ['aaa'],
@@ -1079,15 +1098,17 @@ describe('TaskStore', () => {
         index: '',
       });
 
-      const sub = store.events.pipe(filter((event: TaskEvent) => event.id === 'ccc')).subscribe({
-        next: (event: TaskEvent) => {
-          expect(event).toMatchObject(
-            asTaskClaimEvent('ccc', asErr(new Error(`failed to claim task 'ccc'`)))
-          );
-          sub.unsubscribe();
-          done();
-        },
-      });
+      const sub = store.events
+        .pipe(filter((event: TaskEvent<any, any>) => event.id === 'ccc'))
+        .subscribe({
+          next: (event: TaskEvent<any, any>) => {
+            expect(event).toMatchObject(
+              asTaskClaimEvent('ccc', asErr(new Error(`failed to claim task 'ccc'`)))
+            );
+            sub.unsubscribe();
+            done();
+          },
+        });
 
       await store.claimAvailableTasks({
         claimTasksById: ['ccc'],

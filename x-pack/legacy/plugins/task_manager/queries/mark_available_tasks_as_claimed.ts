@@ -41,9 +41,18 @@ export const IdleTaskWithExpiredRunAt: BoolClause<TermBoolClause | RangeBoolClau
   },
 };
 
-export const idleTaskWithIDs = (claimTasksById: string[]): IDsClause => ({
-  ids: {
-    values: claimTasksById,
+export const idleTaskWithIDs = (
+  claimTasksById: string[]
+): BoolClause<TermBoolClause | IDsClause> => ({
+  bool: {
+    must: [
+      { term: { 'task.status': 'idle' } },
+      {
+        ids: {
+          values: claimTasksById,
+        },
+      },
+    ],
   },
 });
 
@@ -69,12 +78,12 @@ export const SortByRunAtAndRetryAt: SortClause = {
     script: {
       lang: 'painless',
       source: `
-      if (doc['task.retryAt'].size()!=0) {
-        return doc['task.retryAt'].value.toInstant().toEpochMilli();
-      }
-      if (doc['task.runAt'].size()!=0) {
-        return doc['task.runAt'].value.toInstant().toEpochMilli();
-      }
+if (doc['task.retryAt'].size()!=0) {
+  return doc['task.retryAt'].value.toInstant().toEpochMilli();
+}
+if (doc['task.runAt'].size()!=0) {
+  return doc['task.runAt'].value.toInstant().toEpochMilli();
+}
     `,
     },
   },
@@ -92,11 +101,11 @@ export const sortByIdsThenByScheduling = (claimTasksById: string[]): SortClause 
       _script: {
         script: {
           source: `
-          if(params.ids.contains(doc['_id'].value)){
-            return ${SORT_VALUE_TO_BE_FIRST};
-          }
-          ${source}
-        `,
+if(params.ids.contains(doc['_id'].value)){
+  return ${SORT_VALUE_TO_BE_FIRST};
+}
+${source}
+`,
           params: { ids: claimTasksById },
         },
       },

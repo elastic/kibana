@@ -64,6 +64,15 @@ export interface RunResult {
   state: Record<string, any>;
 }
 
+export interface SuccessfulRunResult {
+  runAt?: Date;
+  state?: Record<string, any>;
+}
+
+export interface FailedRunResult extends SuccessfulRunResult {
+  error: Error;
+}
+
 export const validateRunResult = Joi.object({
   runAt: Joi.date().optional(),
   error: Joi.object().optional(),

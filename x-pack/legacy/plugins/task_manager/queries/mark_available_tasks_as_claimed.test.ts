@@ -144,8 +144,15 @@ describe('mark_available_tasks_as_claimed', () => {
           type: 'number',
           order: 'asc',
           script: {
-            lang: 'expression',
-            source: `doc['task.retryAt'].value || doc['task.runAt'].value`,
+            lang: 'painless',
+            source: `
+if (doc['task.retryAt'].size()!=0) {
+  return doc['task.retryAt'].value.toInstant().toEpochMilli();
+}
+if (doc['task.runAt'].size()!=0) {
+  return doc['task.runAt'].value.toInstant().toEpochMilli();
+}
+    `,
           },
         },
       },

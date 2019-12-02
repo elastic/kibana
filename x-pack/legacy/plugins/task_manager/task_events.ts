@@ -8,34 +8,25 @@ import { ConcreteTaskInstance } from './task';
 
 import { Result } from './lib/result_type';
 
-export type TaskMarkRunning = Result<void, Error>;
-export type TaskRun = Result<void, object | Error>;
-export type TaskClaim = Result<ConcreteTaskInstance, Error>;
-
 export enum TaskEventType {
   TASK_CLAIM = 'TASK_CLAIM',
   TASK_MARK_RUNNING = 'TASK_MARK_RUNNING',
   TASK_RUN = 'TASK_RUN',
 }
 
-export type TaskEvent = {
+export interface TaskEvent<T, E> {
   id: string;
-} & (
-  | {
-      type: TaskEventType.TASK_CLAIM;
-      event: TaskClaim;
-    }
-  | {
-      type: TaskEventType.TASK_MARK_RUNNING;
-      event: TaskMarkRunning;
-    }
-  | {
-      type: TaskEventType.TASK_RUN;
-      event: TaskRun;
-    }
-);
+  type: TaskEventType;
+  event: Result<T, E>;
+}
+export type TaskMarkRunning = TaskEvent<ConcreteTaskInstance, Error>;
+export type TaskRun = TaskEvent<ConcreteTaskInstance, Error>;
+export type TaskClaim = TaskEvent<ConcreteTaskInstance, Error>;
 
-export function asTaskMarkRunningEvent(id: string, event: Result<void, Error>): TaskEvent {
+export function asTaskMarkRunningEvent(
+  id: string,
+  event: Result<ConcreteTaskInstance, Error>
+): TaskMarkRunning {
   return {
     id,
     type: TaskEventType.TASK_MARK_RUNNING,
@@ -43,7 +34,7 @@ export function asTaskMarkRunningEvent(id: string, event: Result<void, Error>): 
   };
 }
 
-export function asTaskRunEvent(id: string, event: Result<void, object | Error>): TaskEvent {
+export function asTaskRunEvent(id: string, event: Result<ConcreteTaskInstance, Error>): TaskRun {
   return {
     id,
     type: TaskEventType.TASK_RUN,
@@ -54,10 +45,22 @@ export function asTaskRunEvent(id: string, event: Result<void, object | Error>):
 export function asTaskClaimEvent(
   id: string,
   event: Result<ConcreteTaskInstance, Error>
-): TaskEvent {
+): TaskClaim {
   return {
     id,
     type: TaskEventType.TASK_CLAIM,
     event,
   };
+}
+
+export function isTaskMarkRunningEvent(
+  taskEvent: TaskEvent<any, any>
+): taskEvent is TaskMarkRunning {
+  return taskEvent.type === TaskEventType.TASK_MARK_RUNNING;
+}
+export function isTaskRunEvent(taskEvent: TaskEvent<any, any>): taskEvent is TaskRun {
+  return taskEvent.type === TaskEventType.TASK_RUN;
+}
+export function isTaskClaimEvent(taskEvent: TaskEvent<any, any>): taskEvent is TaskClaim {
+  return taskEvent.type === TaskEventType.TASK_CLAIM;
 }

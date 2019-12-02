@@ -683,7 +683,7 @@ describe('TaskManagerRunner', () => {
 
       await runner.markTaskAsRunning();
 
-      expect(onTaskEvent).toHaveBeenCalledWith(asTaskMarkRunningEvent(id, asOk(undefined)));
+      expect(onTaskEvent).toHaveBeenCalledWith(asTaskMarkRunningEvent(id, asOk(instance)));
     });
 
     test('emits TaskEvent when a task fails to be marked as running', async () => {
@@ -720,7 +720,7 @@ describe('TaskManagerRunner', () => {
     test('emits TaskEvent when a task is run successfully', async () => {
       const id = _.random(1, 20).toString();
       const onTaskEvent = jest.fn();
-      const { runner } = testOpts({
+      const { runner, instance } = testOpts({
         onTaskEvent,
         instance: {
           id,
@@ -738,14 +738,14 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      expect(onTaskEvent).toHaveBeenCalledWith(asTaskRunEvent(id, asOk(undefined)));
+      expect(onTaskEvent).toHaveBeenCalledWith(asTaskRunEvent(id, asOk(instance)));
     });
 
     test('emits TaskEvent when a recurring task is run successfully', async () => {
       const id = _.random(1, 20).toString();
       const runAt = minutesFromNow(_.random(5));
       const onTaskEvent = jest.fn();
-      const { runner } = testOpts({
+      const { runner, instance } = testOpts({
         onTaskEvent,
         instance: {
           id,
@@ -764,7 +764,7 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      expect(onTaskEvent).toHaveBeenCalledWith(asTaskRunEvent(id, asOk(undefined)));
+      expect(onTaskEvent).toHaveBeenCalledWith(asTaskRunEvent(id, asOk(instance)));
     });
 
     test('emits TaskEvent when a task run throws an error', async () => {
@@ -855,7 +855,7 @@ describe('TaskManagerRunner', () => {
   interface TestOpts {
     instance?: Partial<ConcreteTaskInstance>;
     definitions?: any;
-    onTaskEvent?: (event: TaskEvent) => void;
+    onTaskEvent?: (event: TaskEvent<any, any>) => void;
   }
 
   function testOpts(opts: TestOpts) {
