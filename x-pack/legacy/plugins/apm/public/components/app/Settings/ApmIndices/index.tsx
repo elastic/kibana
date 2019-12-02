@@ -22,7 +22,7 @@ import {
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useCallApmApi } from '../../../../hooks/useCallApmApi';
 import { APMClient } from '../../../../services/rest/createCallApmApi';
-import { clearCache } from '../../../../services/rest/callApi.ts';
+import { clearCache } from '../../../../services/rest/callApi';
 import { useKibanaCore } from '../../../../../../observability/public';
 
 const APM_INDEX_LABELS = [
