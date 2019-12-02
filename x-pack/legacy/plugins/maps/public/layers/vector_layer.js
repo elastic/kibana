@@ -456,7 +456,6 @@ export class VectorLayer extends AbstractLayer {
       startLoading(dataRequestId, requestToken, nextMeta);
       const layerName = await this.getDisplayName();
       const styleMeta = await source.loadStylePropsMeta(layerName, dynamicStyleProps, registerCancelCallback, nextMeta);
-      console.log(styleMeta);
       stopLoading(dataRequestId, requestToken, styleMeta, nextMeta);
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {
