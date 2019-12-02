@@ -4,6 +4,7 @@ search which is not available in the DEV console for the detection engine.
 Before beginning ensure in your .zshrc/.bashrc you have your user, password, and url set:
 
 Open up your .zshrc/.bashrc and add these lines with the variables filled in:
+
 ```
 export ELASTICSEARCH_USERNAME=${user}
 export ELASTICSEARCH_PASSWORD=${password}
@@ -21,6 +22,7 @@ And that you have the latest version of [NodeJS](https://nodejs.org/en/),
 [CURL](https://curl.haxx.se), and [jq](https://stedolan.github.io/jq/) installed.
 
 If you have homebrew you can install using brew like so
+
 ```
 brew install jq
 ```
@@ -29,10 +31,9 @@ After that you can execute scripts within this folder by first ensuring
 your current working directory is `./scripts` and then running any scripts within
 that folder.
 
-Example to add a signal to the system
+Example to add a rule to the system
 
 ```
 cd ./scripts
-./post_signal.sh ./signals/root_or_admin_1.json
+./post_rule.sh ./rules/root_or_admin_1.json
 ```
-

@@ -7,16 +7,16 @@
 import { EuiFormRow } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React, { useCallback, useEffect, useState } from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
 
-import { SavedQueryTimeFilter } from '../../../../../../../../../../src/legacy/core_plugins/data/public/search';
-import { SavedQuery } from '../../../../../../../../../../src/legacy/core_plugins/data/public';
 import {
   esFilters,
+  IIndexPattern,
   Query,
   FilterManager,
+  SavedQuery,
+  SavedQueryTimeFilter,
 } from '../../../../../../../../../../src/plugins/data/public';
 
 import { QueryBar } from '../../../../../components/query_bar';
@@ -28,14 +28,14 @@ import { FieldHook, getFieldValidityAndErrorMessage } from '../shared_imports';
 export interface FieldValueQueryBar {
   filters: esFilters.Filter[];
   query: Query;
-  saved_id: string;
+  saved_id: string | null;
 }
 interface QueryBarDefineRuleProps {
   dataTestSubj: string;
   field: FieldHook;
   idAria: string;
   isLoading: boolean;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
 }
 
 const StyledEuiFormRow = styled(EuiFormRow)`
