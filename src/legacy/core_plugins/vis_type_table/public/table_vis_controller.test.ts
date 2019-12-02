@@ -38,8 +38,8 @@ import { Vis } from '../../visualizations/public';
 import { setup as visualizationsSetup } from '../../visualizations/public/np_ready/public/legacy';
 // eslint-disable-next-line
 import { stubFields } from '../../../../plugins/data/public/stubs';
-// eslint-disable-next-line
-import { setFieldFormats } from '../../../../plugins/data/public/index_patterns/services';
+// @ts-ignore
+import { setFieldFormats } from '../../../../plugins/data/public/index_patterns/services'; // eslint-disable
 
 interface TableVisScope extends IScope {
   [key: string]: any;
