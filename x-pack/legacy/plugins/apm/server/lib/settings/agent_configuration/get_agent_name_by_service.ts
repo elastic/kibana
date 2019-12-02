@@ -48,8 +48,6 @@ export async function getAgentNameByService({
   };
 
   const { aggregations } = await client.search(params);
-  // TODO(TS-3.7-ESLINT)
-  // eslint-disable-next-line @typescript-eslint/camelcase
   const agentName = aggregations?.agent_names.buckets[0].key as
     | string
     | undefined;

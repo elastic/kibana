@@ -59,7 +59,7 @@ const calculateFlyoutHeight = ({
 export const HomePage = pure(() => (
   <AutoSizer detectAnyWindowResize={true} content>
     {({ measureRef, windowMeasurement: { height: windowHeight = 0 } }) => (
-      <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" innerRef={measureRef}>
+      <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" ref={measureRef}>
         <HeaderGlobal />
 
         <main data-test-subj="pageContainer">

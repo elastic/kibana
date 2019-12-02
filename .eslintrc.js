@@ -65,18 +65,6 @@ module.exports = {
       },
     },
     {
-      files: ['src/core/public/application/**/*.{js,ts,tsx}'],
-      rules: {
-        'react/no-danger': 'off',
-      },
-    },
-    {
-      files: ['src/legacy/core_plugins/console/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: ['src/legacy/core_plugins/data/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
@@ -361,6 +349,21 @@ module.exports = {
                   '!src/plugins/**/server/index.{js,ts,tsx}',
                 ],
                 allowSameFolder: true,
+              },
+              {
+                target: ['src/core/**/*'],
+                from: ['x-pack/**/*'],
+                errorMessage: 'OSS cannot import x-pack files.',
+              },
+              {
+                target: ['src/core/**/*'],
+                from: [
+                  'plugins/**/*',
+                  'src/plugins/**/*',
+                  'src/legacy/core_plugins/**/*',
+                  'src/legacy/ui/**/*',
+                ],
+                errorMessage: 'The core cannot depend on any plugins.',
               },
               {
                 from: ['src/legacy/ui/**/*', 'ui/**/*'],

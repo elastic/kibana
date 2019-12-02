@@ -227,7 +227,7 @@ export class TOCEntry extends React.Component {
       return null;
     }
 
-    const tocDetails = this.props.layer.getLegendDetails();
+    const tocDetails = this.props.layer.renderLegendDetails();
     if (!tocDetails) {
       return null;
     }

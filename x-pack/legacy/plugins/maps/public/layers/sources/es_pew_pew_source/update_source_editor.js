@@ -11,6 +11,7 @@ import { indexPatternService } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';
 
 export class UpdateSourceEditor extends Component {
   state = {
@@ -55,6 +56,10 @@ export class UpdateSourceEditor extends Component {
     this.props.onChange({ propName: 'metrics', value: metrics });
   };
 
+  _onApplyGlobalQueryChange = applyGlobalQuery => {
+    this.props.onChange({ propName: 'applyGlobalQuery', value: applyGlobalQuery });
+  };
+
   render() {
     return (
       <>
@@ -69,6 +74,10 @@ export class UpdateSourceEditor extends Component {
           fields={this.state.fields}
           metrics={this.props.metrics}
           onChange={this._onMetricsChange}
+        />
+        <GlobalFilterCheckbox
+          applyGlobalQuery={this.props.applyGlobalQuery}
+          setApplyGlobalQuery={this._onApplyGlobalQueryChange}
         />
       </>
     );

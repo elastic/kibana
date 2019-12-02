@@ -27,7 +27,7 @@ export default function({ getPageObjects }: FtrProviderContext) {
   describe('visual builder', function describeIndexTests() {
     describe('table', () => {
       beforeEach(async () => {
-        await visualBuilder.resetPage('2015-09-22 06:00:00.000', '2015-09-22 11:00:00.000');
+        await visualBuilder.resetPage('Sep 22, 2015 @ 06:00:00.000', 'Sep 22, 2015 @ 11:00:00.000');
         await visualBuilder.clickTable();
 
         await visualBuilder.checkTableTabIsPresent();

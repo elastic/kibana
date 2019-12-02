@@ -40,7 +40,7 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string 
         background-color: ${rgba(props.theme.eui.euiColorSuccess, 0.3)};
     }
   > div.timeline-drop-area-empty {
-     color: ${props.theme.eui.euiColorSuccess}
+     color: ${props.theme.eui.euiColorSuccess};
      background-color: ${rgba(props.theme.eui.euiColorSuccess, 0.2)};
 
      & .euiTextColor--subdued {
@@ -105,7 +105,7 @@ export const DroppableWrapper = pure<Props>(
       {(provided, snapshot) => (
         <ReactDndDropTarget
           height={height}
-          innerRef={provided.innerRef}
+          ref={provided.innerRef}
           {...provided.droppableProps}
           isDraggingOver={snapshot.isDraggingOver}
         >

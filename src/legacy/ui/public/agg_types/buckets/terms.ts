@@ -19,16 +19,12 @@
 
 import chrome from 'ui/chrome';
 import { noop } from 'lodash';
-import { SearchSource } from 'ui/courier';
 import { i18n } from '@kbn/i18n';
+import { SearchSource, getRequestInspectorStats, getResponseInspectorStats } from '../../courier';
 import { BucketAggType, BucketAggParam } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { AggConfigOptions } from '../agg_config';
 import { IBucketAggConfig } from './_bucket_agg_type';
-import {
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-} from '../../courier/utils/courier_inspector_utils';
 import { createFilterTerms } from './create_filter/terms';
 import { wrapWithInlineComp } from './inline_comp_wrapper';
 import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
@@ -41,7 +37,7 @@ import { OtherBucketParamEditor } from '../../vis/editors/default/controls/other
 import { AggConfigs } from '../agg_configs';
 
 import { Adapters } from '../../../../../plugins/inspector/public';
-import { ContentType, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
+import { ContentType, FieldFormat, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
 // @ts-ignore
 import { Schemas } from '../../vis/editors/default/schemas';
@@ -75,7 +71,7 @@ export const termsBucketAgg = new BucketAggType({
     const params = agg.params;
     return agg.getFieldDisplayName() + ': ' + params.order.text;
   },
-  getFormat(bucket) {
+  getFormat(bucket): FieldFormat {
     return {
       getConverterFor: (type: ContentType) => {
         return (val: any) => {
@@ -91,10 +87,11 @@ export const termsBucketAgg = new BucketAggType({
             basePath: chrome.getBasePath(),
           };
           const converter = bucket.params.field.format.getConverterFor(type);
+
           return converter(val, undefined, undefined, parsedUrl);
         };
       },
-    };
+    } as FieldFormat;
   },
   createFilter: createFilterTerms,
   postFlightRequest: async (

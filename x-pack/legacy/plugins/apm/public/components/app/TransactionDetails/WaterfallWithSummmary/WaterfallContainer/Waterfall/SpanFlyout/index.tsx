@@ -101,8 +101,6 @@ export function SpanFlyout({
   const dbContext = span.span.db;
   const httpContext = span.span.http;
   const spanTypes = getSpanTypes(span);
-  // TODO(TS-3.7-ESLINT)
-  // eslint-disable-next-line @typescript-eslint/camelcase
   const spanHttpStatusCode = httpContext?.response.status_code;
   const spanHttpUrl = httpContext?.url?.original;
   const spanHttpMethod = httpContext?.method;
