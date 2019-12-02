@@ -152,9 +152,6 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const InspectButton = connect(
-  makeMapStateToProps,
-  {
-    setIsInspected: inputsActions.setInspectionParameter,
-  }
-)(InspectButtonComponent);
+export const InspectButton = connect(makeMapStateToProps, {
+  setIsInspected: inputsActions.setInspectionParameter,
+})(InspectButtonComponent);

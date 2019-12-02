@@ -13,7 +13,7 @@ import {
   NewJobCaps,
   METRIC_AGG_TYPE,
 } from '../../../../common/types/fields';
-import { ES_FIELD_TYPES } from '../../../../../../../../src/plugins/data/common';
+import { ES_FIELD_TYPES } from '../../../../../../../../src/plugins/data/server';
 import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { rollupServiceProvider, RollupJob, RollupFields } from './rollup';
 import { aggregations, mlOnlyAggregations } from './aggregations';
@@ -31,6 +31,8 @@ const supportedTypes: string[] = [
   ES_FIELD_TYPES.SCALED_FLOAT,
   ES_FIELD_TYPES.SHORT,
   ES_FIELD_TYPES.IP,
+  ES_FIELD_TYPES.GEO_POINT,
+  ES_FIELD_TYPES.GEO_SHAPE,
 ];
 
 export function fieldServiceProvider(
@@ -135,6 +137,7 @@ async function combineFieldsAndAggs(
   const keywordFields = getKeywordFields(fields);
   const numericalFields = getNumericalFields(fields);
   const ipFields = getIpFields(fields);
+  const geoFields = getGeoFields(fields);
 
   const isRollup = Object.keys(rollupFields).length > 0;
   const mix = mixFactory(isRollup, rollupFields);
@@ -142,17 +145,16 @@ async function combineFieldsAndAggs(
   aggs.forEach(a => {
     if (a.type === METRIC_AGG_TYPE && a.fields !== undefined) {
       switch (a.id) {
+        case ML_JOB_AGGREGATION.LAT_LONG:
+          geoFields.forEach(f => mix(f, a));
+          break;
         case ML_JOB_AGGREGATION.DISTINCT_COUNT:
         case ML_JOB_AGGREGATION.HIGH_DISTINCT_COUNT:
         case ML_JOB_AGGREGATION.LOW_DISTINCT_COUNT:
           // distinct count (i.e. cardinality) takes keywords, ips
           // as well as numerical fields
-          keywordFields.forEach(f => {
-            mix(f, a);
-          });
-          ipFields.forEach(f => {
-            mix(f, a);
-          });
+          keywordFields.forEach(f => mix(f, a));
+          ipFields.forEach(f => mix(f, a));
         // note, no break to fall through to add numerical fields.
         default:
           // all other aggs take numerical fields
@@ -233,5 +235,11 @@ function getNumericalFields(fields: Field[]): Field[] {
       f.type === ES_FIELD_TYPES.FLOAT ||
       f.type === ES_FIELD_TYPES.HALF_FLOAT ||
       f.type === ES_FIELD_TYPES.SCALED_FLOAT
+  );
+}
+
+function getGeoFields(fields: Field[]): Field[] {
+  return fields.filter(
+    f => f.type === ES_FIELD_TYPES.GEO_POINT || f.type === ES_FIELD_TYPES.GEO_SHAPE
   );
 }

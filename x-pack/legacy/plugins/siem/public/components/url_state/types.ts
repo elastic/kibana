@@ -6,8 +6,7 @@
 
 import ApolloClient from 'apollo-client';
 import { ActionCreator } from 'typescript-fsa';
-import { StaticIndexPattern } from 'ui/index_patterns';
-import { Query, esFilters } from 'src/plugins/data/public';
+import { IIndexPattern, Query, esFilters } from 'src/plugins/data/public';
 
 import { UrlInputsModel } from '../../store/inputs/model';
 import { RouteSpyState } from '../../utils/route/types';
@@ -25,6 +24,7 @@ export const ALL_URL_STATE_KEYS: KeyUrlState[] = [
 ];
 
 export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
+  'detection-engine': [],
   host: [
     CONSTANTS.appQuery,
     CONSTANTS.filters,
@@ -39,15 +39,16 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
     CONSTANTS.timerange,
     CONSTANTS.timeline,
   ],
-  timeline: [CONSTANTS.timeline, CONSTANTS.timerange],
   overview: [CONSTANTS.timeline, CONSTANTS.timerange],
+  timeline: [CONSTANTS.timeline, CONSTANTS.timerange],
 };
 
 export type LocationTypes =
-  | CONSTANTS.networkDetails
-  | CONSTANTS.networkPage
+  | CONSTANTS.detectionEnginePage
   | CONSTANTS.hostsDetails
   | CONSTANTS.hostsPage
+  | CONSTANTS.networkDetails
+  | CONSTANTS.networkPage
   | CONSTANTS.overviewPage
   | CONSTANTS.timelinePage
   | CONSTANTS.unknown;
@@ -68,7 +69,7 @@ export type KeyUrlState = keyof UrlState;
 
 export interface UrlStateProps {
   navTabs: Record<string, NavTab>;
-  indexPattern?: StaticIndexPattern;
+  indexPattern?: IIndexPattern;
   mapToUrlState?: (value: string) => UrlState;
   onChange?: (urlState: UrlState, previousUrlState: UrlState) => void;
   onInitialize?: (urlState: UrlState) => void;
@@ -107,7 +108,7 @@ export interface UrlStateToRedux {
 export interface SetInitialStateFromUrl<TCache> {
   apolloClient: ApolloClient<TCache> | ApolloClient<{}> | undefined;
   detailName: string | undefined;
-  indexPattern: StaticIndexPattern | undefined;
+  indexPattern: IIndexPattern | undefined;
   pageName: string;
   updateTimeline: DispatchUpdateTimeline;
   updateTimelineIsLoading: ActionCreator<UpdateTimelineIsLoading>;

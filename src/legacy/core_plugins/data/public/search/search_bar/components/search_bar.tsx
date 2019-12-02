@@ -24,21 +24,27 @@ import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { get, isEqual } from 'lodash';
 
-import { TimeRange } from 'src/plugins/data/common/types';
-import { TimeHistoryContract } from 'src/plugins/data/public';
-import { IndexPattern, Query, FilterBar } from '../../../../../data/public';
+import { IndexPattern } from '../../../../../data/public';
 import { QueryBarTopRow } from '../../../query';
-import { SavedQuery, SavedQueryAttributes } from '../index';
 import { SavedQueryMeta, SaveQueryForm } from './saved_query_management/save_query_form';
 import { SavedQueryManagementComponent } from './saved_query_management/saved_query_management_component';
-import { SavedQueryService } from '../lib/saved_query_service';
-import { createSavedQueryService } from '../lib/saved_query_service';
+
 import {
   withKibana,
   KibanaReactContextValue,
 } from '../../../../../../../plugins/kibana_react/public';
-import { IDataPluginServices } from '../../../types';
-import { esFilters } from '../../../../../../../plugins/data/public';
+import {
+  IDataPluginServices,
+  TimeRange,
+  Query,
+  esFilters,
+  TimeHistoryContract,
+  FilterBar,
+  SavedQueryService,
+  createSavedQueryService,
+  SavedQuery,
+  SavedQueryAttributes,
+} from '../../../../../../../plugins/data/public';
 
 interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
@@ -61,7 +67,7 @@ export interface SearchBarOwnProps {
   isLoading?: boolean;
   customSubmitButton?: React.ReactNode;
   screenTitle?: string;
-
+  dataTestSubj?: string;
   // Togglers
   showQueryBar?: boolean;
   showQueryInput?: boolean;
@@ -73,6 +79,7 @@ export interface SearchBarOwnProps {
   // Show when user has privileges to save
   showSaveQuery?: boolean;
   savedQuery?: SavedQuery;
+  onQueryChange?: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onQuerySubmit?: (payload: { dateRange: TimeRange; query?: Query }) => void;
   // User has saved the current state as a saved query
   onSaved?: (savedQuery: SavedQuery) => void;
@@ -207,6 +214,18 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     );
   }
 
+  /*
+   * This Function is here to show the toggle in saved query form
+   * in case you the date range (from/to)
+   */
+  private shouldRenderTimeFilterInSavedQueryForm() {
+    const { dateRangeFrom, dateRangeTo, showDatePicker } = this.props;
+    return (
+      showDatePicker ||
+      (!showDatePicker && dateRangeFrom !== undefined && dateRangeTo !== undefined)
+    );
+  }
+
   public setFilterBarHeight = () => {
     requestAnimationFrame(() => {
       const height =
@@ -300,6 +319,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       dateRangeFrom: queryAndDateRange.dateRange.from,
       dateRangeTo: queryAndDateRange.dateRange.to,
     });
+    if (this.props.onQueryChange) {
+      this.props.onQueryChange(queryAndDateRange);
+    }
   };
 
   public onQueryBarSubmit = (queryAndDateRange: { dateRange?: TimeRange; query?: Query }) => {
@@ -396,6 +418,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           customSubmitButton={
             this.props.customSubmitButton ? this.props.customSubmitButton : undefined
           }
+          dataTestSubj={this.props.dataTestSubj}
         />
       );
     }
@@ -441,7 +464,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             onSave={this.onSave}
             onClose={() => this.setState({ showSaveQueryModal: false })}
             showFilterOption={this.props.showFilterBar}
-            showTimeFilterOption={this.props.showDatePicker}
+            showTimeFilterOption={this.shouldRenderTimeFilterInSavedQueryForm()}
           />
         ) : null}
         {this.state.showSaveNewQueryModal ? (
@@ -450,7 +473,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             onSave={savedQueryMeta => this.onSave(savedQueryMeta, true)}
             onClose={() => this.setState({ showSaveNewQueryModal: false })}
             showFilterOption={this.props.showFilterBar}
-            showTimeFilterOption={this.props.showDatePicker}
+            showTimeFilterOption={this.shouldRenderTimeFilterInSavedQueryForm()}
           />
         ) : null}
       </div>

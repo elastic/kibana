@@ -20,7 +20,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
-import { RefreshInterval, TimeRange, Query } from '../../../data/public';
+import { RefreshInterval, TimeRange, Query, esFilters } from '../../../data/public';
 import { CoreStart } from '../../../../core/public';
 import { IUiActionsStart } from '../ui_actions_plugin';
 import {
@@ -30,14 +30,13 @@ import {
   ViewMode,
   EmbeddableFactory,
   IEmbeddable,
-  Start as EmbeddableStartContract,
+  IEmbeddableStart,
 } from '../embeddable_plugin';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import { createPanelState } from './panel';
 import { DashboardPanelState } from './types';
 import { DashboardViewport } from './viewport/dashboard_viewport';
 import { Start as InspectorStartContract } from '../../../inspector/public';
-import { esFilters } from '../../../../plugins/data/public';
 import {
   KibanaContextProvider,
   KibanaReactContext,
@@ -78,7 +77,7 @@ export interface DashboardContainerOptions {
   application: CoreStart['application'];
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
-  embeddable: EmbeddableStartContract;
+  embeddable: IEmbeddableStart;
   inspector: InspectorStartContract;
   SavedObjectFinder: React.ComponentType<any>;
   ExitFullScreenButton: React.ComponentType<any>;

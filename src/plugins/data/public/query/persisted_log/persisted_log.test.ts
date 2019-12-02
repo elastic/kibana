@@ -36,12 +36,6 @@ const createMockStorage = () => ({
   clear: jest.fn(),
 });
 
-jest.mock('ui/chrome', () => {
-  return {
-    getBasePath: () => `/some/base/path`,
-  };
-});
-
 const historyName = 'testHistory';
 const historyLimit = 10;
 const payload = [

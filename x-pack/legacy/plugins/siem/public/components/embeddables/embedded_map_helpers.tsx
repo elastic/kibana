@@ -7,7 +7,6 @@
 import uuid from 'uuid';
 import React from 'react';
 import { OutPortal, PortalNode } from 'react-reverse-portal';
-import { Query } from 'src/plugins/data/common';
 import { PluginsStart } from 'ui/new_platform/new_platform';
 
 import { ActionToaster, AppToast } from '../toasters';
@@ -27,7 +26,7 @@ import { getLayerList } from './map_config';
 // @ts-ignore Missing type defs as maps moves to Typescript
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../maps/common/constants';
 import * as i18n from './translations';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
 
 /**
  * Displays an error toast for the provided title and message

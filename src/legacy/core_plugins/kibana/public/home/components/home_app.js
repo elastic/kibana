@@ -31,12 +31,13 @@ import { getServices } from '../kibana_services';
 
 export function HomeApp({ directories }) {
   const {
-    telemetryOptInProvider,
-    shouldShowTelemetryOptIn,
     getInjected,
     savedObjectsClient,
     getBasePath,
     addBasePath,
+    telemetryOptInProvider: {
+      setOptInNoticeSeen,
+    },
   } = getServices();
 
   const isCloudEnabled = getInjected('isCloudEnabled', false);
@@ -85,10 +86,7 @@ export function HomeApp({ directories }) {
               find={savedObjectsClient.find}
               localStorage={localStorage}
               urlBasePath={getBasePath()}
-              shouldShowTelemetryOptIn={shouldShowTelemetryOptIn}
-              setOptIn={telemetryOptInProvider.setOptIn}
-              fetchTelemetry={telemetryOptInProvider.fetchExample}
-              getTelemetryBannerId={telemetryOptInProvider.getBannerId}
+              onOptInSeen={setOptInNoticeSeen}
             />
           </Route>
           <Route path="/home">

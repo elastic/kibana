@@ -5,12 +5,9 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import { getEsQueryConfig } from '@kbn/es-query';
 import { getOr, isEmpty, isEqual } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
-import { StaticIndexPattern } from 'ui/index_patterns';
-import { Query } from 'src/plugins/data/common';
 
 import { BrowserFields } from '../../containers/source';
 import { TimelineQuery } from '../../containers/timeline';
@@ -18,7 +15,7 @@ import { Direction } from '../../graphql/types';
 import { useKibanaCore } from '../../lib/compose/kibana_core';
 import { KqlMode } from '../../store/timeline/model';
 import { AutoSizer } from '../auto_sizer';
-import { HeaderPanel } from '../header_panel';
+import { HeaderSection } from '../header_section';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
 import { Sort } from '../timeline/body/sort';
@@ -31,7 +28,12 @@ import { TimelineRefetch } from '../timeline/refetch_timeline';
 import { isCompactFooter } from '../timeline/timeline';
 import { ManageTimelineContext } from '../timeline/timeline_context';
 import * as i18n from './translations';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import {
+  IIndexPattern,
+  Query,
+  esFilters,
+  esQuery,
+} from '../../../../../../../src/plugins/data/public';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 500;
 
@@ -48,7 +50,7 @@ interface Props {
   filters: esFilters.Filter[];
   height?: number;
   id: string;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   isLive: boolean;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
@@ -85,7 +87,7 @@ export const EventsViewer = React.memo<Props>(
     const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
     const core = useKibanaCore();
     const combinedQueries = combineQueries({
-      config: getEsQueryConfig(core.uiSettings),
+      config: esQuery.getEsQueryConfig(core.uiSettings),
       dataProviders,
       indexPattern,
       browserFields,
@@ -102,7 +104,7 @@ export const EventsViewer = React.memo<Props>(
         <AutoSizer detectAnyWindowResize={true} content>
           {({ measureRef, content: { width = 0 } }) => (
             <>
-              <WrappedByAutoSizer innerRef={measureRef}>
+              <WrappedByAutoSizer ref={measureRef}>
                 <div
                   data-test-subj="events-viewer-measured"
                   style={{ height: '0px', width: '100%' }}
@@ -132,7 +134,7 @@ export const EventsViewer = React.memo<Props>(
                     totalCount = 0,
                   }) => (
                     <>
-                      <HeaderPanel
+                      <HeaderSection
                         id={id}
                         showInspect={showInspect}
                         subtitle={`${i18n.SHOWING}: ${totalCount.toLocaleString()} ${i18n.UNIT(

@@ -20,14 +20,12 @@
 import { i18n } from '@kbn/i18n';
 import { identity } from 'lodash';
 import { AggConfig, Vis } from 'ui/vis';
+import { npStart } from 'ui/new_platform';
 import { SerializedFieldFormat } from 'src/plugins/expressions/public';
 
-import { FieldFormat } from '../../../../../../plugins/data/common/field_formats';
+import { IFieldFormatId, FieldFormat } from '../../../../../../plugins/data/public';
 
 import { tabifyGetColumns } from '../../../agg_response/tabify/_get_columns';
-import chrome from '../../../chrome';
-// @ts-ignore
-import { fieldFormats } from '../../../registry/field_formats';
 import { dateRange } from '../../../utils/date_range';
 import { ipRange } from '../../../utils/ip_range';
 import { DateRangeKey } from '../../../agg_types/buckets/date_range';
@@ -45,18 +43,22 @@ function isTermsFieldFormat(
   return serializedFieldFormat.id === 'terms';
 }
 
-const config = chrome.getUiSettingsClient();
+const getConfig = (key: string, defaultOverride?: any): any =>
+  npStart.core.uiSettings.get(key, defaultOverride);
+const DefaultFieldFormat = FieldFormat.from(identity);
 
-const getConfig = (...args: any[]): any => config.get(...args);
-const getDefaultFieldFormat = () => ({ convert: identity });
+const getFieldFormat = (id?: IFieldFormatId, params: object = {}): FieldFormat => {
+  const fieldFormats = npStart.plugins.data.fieldFormats;
 
-const getFieldFormat = (id: string | undefined, params: object = {}) => {
-  const Format = fieldFormats.getType(id);
-  if (Format) {
-    return new Format(params, getConfig);
-  } else {
-    return getDefaultFieldFormat();
+  if (id) {
+    const Format = fieldFormats.getType(id);
+
+    if (Format) {
+      return new Format(params, getConfig);
+    }
   }
+
+  return new DefaultFieldFormat();
 };
 
 export const createFormat = (agg: AggConfig): SerializedFieldFormat => {
@@ -93,9 +95,9 @@ export const createFormat = (agg: AggConfig): SerializedFieldFormat => {
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => FieldFormat;
 
-export const getFormat: FormatFactory = (mapping = {}) => {
+export const getFormat: FormatFactory = mapping => {
   if (!mapping) {
-    return getDefaultFieldFormat();
+    return new DefaultFieldFormat();
   }
   const { id } = mapping;
   if (id === 'range') {
@@ -143,8 +145,9 @@ export const getFormat: FormatFactory = (mapping = {}) => {
           const parsedUrl = {
             origin: window.location.origin,
             pathname: window.location.pathname,
-            basePath: chrome.getBasePath(),
+            basePath: npStart.core.http.basePath,
           };
+          // @ts-ignore
           return format.convert(val, undefined, undefined, parsedUrl);
         };
       },
@@ -159,11 +162,12 @@ export const getFormat: FormatFactory = (mapping = {}) => {
         const parsedUrl = {
           origin: window.location.origin,
           pathname: window.location.pathname,
-          basePath: chrome.getBasePath(),
+          basePath: npStart.core.http.basePath,
         };
+        // @ts-ignore
         return format.convert(val, type, undefined, parsedUrl);
       },
-    };
+    } as FieldFormat;
   } else {
     return getFieldFormat(id, mapping.params);
   }

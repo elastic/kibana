@@ -37,7 +37,8 @@ import {
   EuiConfirmModal,
   EuiCallOut,
 } from '@elastic/eui';
-import { ToastsStart, UiSettingsClientContract } from 'kibana/public';
+import { ToastsStart, IUiSettingsClient } from 'kibana/public';
+import { toMountPoint } from '../util';
 
 export const EMPTY_FILTER = '';
 
@@ -65,7 +66,7 @@ export interface TableListViewProps {
   tableColumns: Column[];
   tableListTitle: string;
   toastNotifications: ToastsStart;
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
 }
 
 export interface TableListViewState {
@@ -111,7 +112,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
     };
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this._isMounted = true;
   }
 
@@ -166,7 +167,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       await this.props.deleteItems(this.state.selectedIds.map(id => itemsById[id]));
     } catch (error) {
       this.props.toastNotifications.addDanger({
-        title: (
+        title: toMountPoint(
           <FormattedMessage
             id="kibana-react.tableListView.listing.unableToDeleteDangerMessage"
             defaultMessage="Unable to delete {entityName}(s)"

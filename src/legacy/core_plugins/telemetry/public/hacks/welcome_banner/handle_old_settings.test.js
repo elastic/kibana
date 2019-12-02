@@ -49,7 +49,7 @@ const getTelemetryOptInProvider = (enabled, { simulateFailure = false } = {}) =>
     }
   };
 
-  return new TelemetryOptInProvider($injector, chrome);
+  return new TelemetryOptInProvider($injector, chrome, false);
 };
 
 describe('handle_old_settings', () => {

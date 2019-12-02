@@ -17,7 +17,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsClient](./kibana-plugin-public.savedobjectsclient.md) | Saved Objects is Kibana's data persisentence mechanism allowing plugins to use Elasticsearch for storing plugin state. The client-side SavedObjectsClient is a thin convenience library around the SavedObjects HTTP API for interacting with Saved Objects. |
 |  [SimpleSavedObject](./kibana-plugin-public.simplesavedobject.md) | This class is a very simple wrapper for SavedObjects loaded from the server with the [SavedObjectsClient](./kibana-plugin-public.savedobjectsclient.md)<!-- -->.<!-- -->It provides basic functionality for creating/saving/deleting saved objects, but doesn't include any type-specific implementations. |
 |  [ToastsApi](./kibana-plugin-public.toastsapi.md) | Methods for adding and removing global toast messages. |
-|  [UiSettingsClient](./kibana-plugin-public.uisettingsclient.md) |  |
 
 ## Interfaces
 
@@ -33,6 +32,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ChromeBadge](./kibana-plugin-public.chromebadge.md) |  |
 |  [ChromeBrand](./kibana-plugin-public.chromebrand.md) |  |
 |  [ChromeDocTitle](./kibana-plugin-public.chromedoctitle.md) | APIs for accessing and updating the document title. |
+|  [ChromeHelpExtension](./kibana-plugin-public.chromehelpextension.md) |  |
 |  [ChromeNavControl](./kibana-plugin-public.chromenavcontrol.md) |  |
 |  [ChromeNavControls](./kibana-plugin-public.chromenavcontrols.md) | [APIs](./kibana-plugin-public.chromenavcontrols.md) for registering new controls to be displayed in the navigation bar. |
 |  [ChromeNavLink](./kibana-plugin-public.chromenavlink.md) |  |
@@ -64,6 +64,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IHttpFetchError](./kibana-plugin-public.ihttpfetcherror.md) |  |
 |  [IHttpInterceptController](./kibana-plugin-public.ihttpinterceptcontroller.md) | Used to halt a request Promise chain in a [HttpInterceptor](./kibana-plugin-public.httpinterceptor.md)<!-- -->. |
 |  [InterceptedHttpResponse](./kibana-plugin-public.interceptedhttpresponse.md) |  |
+|  [IUiSettingsClient](./kibana-plugin-public.iuisettingsclient.md) | Client-side client that provides access to the advanced settings stored in elasticsearch. The settings provide control over the behavior of the Kibana application. For example, a user can specify how to display numeric or date fields. Users can adjust the settings via Management UI. [IUiSettingsClient](./kibana-plugin-public.iuisettingsclient.md) |
 |  [LegacyCoreSetup](./kibana-plugin-public.legacycoresetup.md) | Setup interface exposed to the legacy platform via the <code>ui/new_platform</code> module. |
 |  [LegacyCoreStart](./kibana-plugin-public.legacycorestart.md) | Start interface exposed to the legacy platform via the <code>ui/new_platform</code> module. |
 |  [LegacyNavLink](./kibana-plugin-public.legacynavlink.md) |  |
@@ -98,7 +99,11 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  --- | --- |
 |  [AppUnmount](./kibana-plugin-public.appunmount.md) | A function called when an application should be unmounted from the page. This function should be synchronous. |
 |  [ChromeBreadcrumb](./kibana-plugin-public.chromebreadcrumb.md) |  |
-|  [ChromeHelpExtension](./kibana-plugin-public.chromehelpextension.md) |  |
+|  [ChromeHelpExtensionMenuCustomLink](./kibana-plugin-public.chromehelpextensionmenucustomlink.md) |  |
+|  [ChromeHelpExtensionMenuDiscussLink](./kibana-plugin-public.chromehelpextensionmenudiscusslink.md) |  |
+|  [ChromeHelpExtensionMenuDocumentationLink](./kibana-plugin-public.chromehelpextensionmenudocumentationlink.md) |  |
+|  [ChromeHelpExtensionMenuGitHubLink](./kibana-plugin-public.chromehelpextensionmenugithublink.md) |  |
+|  [ChromeHelpExtensionMenuLink](./kibana-plugin-public.chromehelpextensionmenulink.md) |  |
 |  [ChromeNavLinkUpdateableFields](./kibana-plugin-public.chromenavlinkupdateablefields.md) |  |
 |  [HandlerContextType](./kibana-plugin-public.handlercontexttype.md) | Extracts the type of the first argument of a [HandlerFunction](./kibana-plugin-public.handlerfunction.md) to represent the type of the context. |
 |  [HandlerFunction](./kibana-plugin-public.handlerfunction.md) | A function that accepts a context object and an optional number of additional arguments. Used for the generic types in [IContextContainer](./kibana-plugin-public.icontextcontainer.md) |
@@ -109,17 +114,17 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HttpStart](./kibana-plugin-public.httpstart.md) | See [HttpServiceBase](./kibana-plugin-public.httpservicebase.md) |
 |  [IContextProvider](./kibana-plugin-public.icontextprovider.md) | A function that returns a context value for a specific key of given context type. |
 |  [IToasts](./kibana-plugin-public.itoasts.md) | Methods for adding and removing global toast messages. See [ToastsApi](./kibana-plugin-public.toastsapi.md)<!-- -->. |
-|  [OverlayBannerMount](./kibana-plugin-public.overlaybannermount.md) | A function that will mount the banner inside the provided element. |
-|  [OverlayBannerUnmount](./kibana-plugin-public.overlaybannerunmount.md) | A function that will unmount the banner from the element. |
+|  [MountPoint](./kibana-plugin-public.mountpoint.md) | A function that should mount DOM content inside the provided container element and return a handler to unmount it. |
 |  [PluginInitializer](./kibana-plugin-public.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>public</code> directory should conform to this interface. |
 |  [PluginOpaqueId](./kibana-plugin-public.pluginopaqueid.md) |  |
 |  [RecursiveReadonly](./kibana-plugin-public.recursivereadonly.md) |  |
 |  [SavedObjectAttribute](./kibana-plugin-public.savedobjectattribute.md) | Type definition for a Saved Object attribute value |
 |  [SavedObjectAttributeSingle](./kibana-plugin-public.savedobjectattributesingle.md) | Don't use this type, it's simply a helper type for [SavedObjectAttribute](./kibana-plugin-public.savedobjectattribute.md) |
 |  [SavedObjectsClientContract](./kibana-plugin-public.savedobjectsclientcontract.md) | SavedObjectsClientContract as implemented by the [SavedObjectsClient](./kibana-plugin-public.savedobjectsclient.md) |
+|  [Toast](./kibana-plugin-public.toast.md) |  |
 |  [ToastInput](./kibana-plugin-public.toastinput.md) | Inputs for [IToasts](./kibana-plugin-public.itoasts.md) APIs. |
 |  [ToastInputFields](./kibana-plugin-public.toastinputfields.md) | Allowed fields for [ToastInput](./kibana-plugin-public.toastinput.md)<!-- -->. |
 |  [ToastsSetup](./kibana-plugin-public.toastssetup.md) | [IToasts](./kibana-plugin-public.itoasts.md) |
 |  [ToastsStart](./kibana-plugin-public.toastsstart.md) | [IToasts](./kibana-plugin-public.itoasts.md) |
-|  [UiSettingsClientContract](./kibana-plugin-public.uisettingsclientcontract.md) | Client-side client that provides access to the advanced settings stored in elasticsearch. The settings provide control over the behavior of the Kibana application. For example, a user can specify how to display numeric or date fields. Users can adjust the settings via Management UI. [UiSettingsClient](./kibana-plugin-public.uisettingsclient.md) |
+|  [UnmountCallback](./kibana-plugin-public.unmountcallback.md) | A function that will unmount the element previously mounted by the associated [MountPoint](./kibana-plugin-public.mountpoint.md) |
 
