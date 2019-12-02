@@ -104,7 +104,7 @@ export class DashboardPlugin implements Plugin {
           chrome: contextCore.chrome,
           addBasePath: contextCore.http.basePath.prepend,
           uiSettings: contextCore.uiSettings,
-          savedQueryService: dataStart.search.services.savedQueryService,
+          savedQueryService: npDataStart.query.savedQueries,
           embeddables,
           dashboardCapabilities: contextCore.application.capabilities.dashboard,
           localStorage: new Storage(localStorage),
