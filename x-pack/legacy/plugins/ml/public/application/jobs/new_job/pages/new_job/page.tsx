@@ -86,6 +86,11 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       // auto set the time range based on the index
       autoSetTimeRange = isAdvancedJobCreator(jobCreator);
     }
+
+    if (mlJobService.tempJobCloningObjects.calendars) {
+      jobCreator.calendars = mlJobService.tempJobCloningObjects.calendars;
+      mlJobService.tempJobCloningObjects.calendars = undefined;
+    }
   } else {
     // creating a new job
     jobCreator.bucketSpan = DEFAULT_BUCKET_SPAN;

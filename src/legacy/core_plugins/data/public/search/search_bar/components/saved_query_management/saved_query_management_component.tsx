@@ -35,8 +35,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useEffect, useState, Fragment } from 'react';
 import { sortBy } from 'lodash';
-import { SavedQuery } from '../../index';
-import { SavedQueryService } from '../../lib/saved_query_service';
+import { SavedQuery, SavedQueryService } from '../../../../../../../../plugins/data/public';
 import { SavedQueryListItem } from './saved_query_list_item';
 
 const perPage = 50;
