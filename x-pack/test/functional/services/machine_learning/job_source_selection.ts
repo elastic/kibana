@@ -24,7 +24,7 @@ export function MachineLearningJobSourceSelectionProvider({ getService }: FtrPro
 
     async selectSource(sourceName: string, nextPageSubj: string) {
       await this.filterSourceSelection(sourceName);
-      retry.tryForTime(30 * 1000, async () => {
+      await retry.tryForTime(30 * 1000, async () => {
         await testSubjects.clickWhenNotDisabled(`savedObjectTitle${sourceName}`);
         await testSubjects.existOrFail(nextPageSubj, { timeout: 10 * 1000 });
       });
