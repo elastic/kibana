@@ -19,7 +19,6 @@ import styled, { createGlobalStyle } from 'styled-components';
   SIDE EFFECT: the following `createGlobalStyle` overrides default styling in angular code that was not theme-friendly
   and `EuiPopover`, `EuiToolTip` global styles
 */
-
 export const AppGlobalStyle = createGlobalStyle`
   div.app-wrapper {
     background-color: rgba(0,0,0,0);
