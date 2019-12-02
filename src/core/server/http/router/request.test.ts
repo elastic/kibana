@@ -68,12 +68,14 @@ describe('KibanaRequest', () => {
 
   describe('RouteSchema type inferring', () => {
     it('should work with config-schema', () => {
-      const body = new Buffer('body!');
-      const request = httpServerMock.createRawRequest({
-        params: { id: 'params' },
-        query: { search: 'query' },
-        payload: body,
-      });
+      const body = Buffer.from('body!');
+      const request = {
+        ...httpServerMock.createRawRequest({
+          params: { id: 'params' },
+          query: { search: 'query' },
+        }),
+        payload: body, // Set outside because the mock is using `merge` by lodash and breaks the Buffer into arrays
+      } as any;
       const kibanaRequest = KibanaRequest.from(request, {
         params: schema.object({ id: schema.string() }),
         query: schema.object({ search: schema.string() }),
@@ -88,12 +90,14 @@ describe('KibanaRequest', () => {
     });
 
     it('should work with ValidationFunction', () => {
-      const body = new Buffer('body!');
-      const request = httpServerMock.createRawRequest({
-        params: { id: 'params' },
-        query: { search: 'query' },
-        payload: body,
-      });
+      const body = Buffer.from('body!');
+      const request = {
+        ...httpServerMock.createRawRequest({
+          params: { id: 'params' },
+          query: { search: 'query' },
+        }),
+        payload: body, // Set outside because the mock is using `merge` by lodash and breaks the Buffer into arrays
+      } as any;
       const kibanaRequest = KibanaRequest.from(request, {
         params: schema.object({ id: schema.string() }),
         query: schema.object({ search: schema.string() }),
