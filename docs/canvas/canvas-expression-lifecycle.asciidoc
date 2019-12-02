@@ -2,9 +2,36 @@
 [[canvas-expression-lifecycle]]
 == Canvas expression lifecycle
 
+[[canvas-change-your-expression-change-your-output]]
+=== Change Your Expression, Change Your Output
+In the previous section, you saw how you can add arguments to a function to change its output, but you can also substitute one function for another in many situations. For example, you could change the visualization by swapping out the <<pie_fn, pie>> function for another *renderer*, a function that returns a `render` data type. 
+
+Let’s change that last pie visualization into a bubble chart by replacing the <<pie_fn, pie>> function with the <<plot_fn, plot>> function. This is possible because both functions can accept the output accept a `pointseries` data type as their _context_. Just switching the functions will work, but it won’t produce a useful visualization on its own, since you don’t have any axis dimensions, i.e. `x` or `y`, defined. You’ll also need to modify the <<pointseries_fn, pointseries>> function to change its output as well. In this case, you can change the `size` argument to `y`, so the maximum price values are plotted on the y-axis, and add an `x` argument using the "@timestamp" field in the data to plot those values over time. This leaves you with the following expression and produces a bubble chart showing the max price of each state over time:
+
+image::images/canvas-change-your-expression-chart.png[Bubble Chart]
+[source,text]
+----
+filters
+| demodata
+| pointseries color="state" y="max(price)" x="@timestamp"
+| plot
+| render
+----
+
+The <<plot_fn, plot>> function, like <<pie_fn, pie>>, also takes several arguments, which will again control what the final visualization looks like. As one example, passing a `legend` argument with a value of `false` to the function will hide the legend on the chart.
+
+[source,text,subs=+quotes]
+----
+filters
+| demodata
+| pointseries color="state" y="max(price)" x="@timestamp"
+| plot *legend=false*
+| render
+----
+
+
 [[canvas-expressions-only-fetch-and-manipulate-data]]
 === Expressions Only Fetch and Manipulate Data
-
 
 [[canvas-handling-context-and-argument-types]]
 === Handling context and argument types
