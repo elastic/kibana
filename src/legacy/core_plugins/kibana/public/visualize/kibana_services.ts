@@ -22,11 +22,10 @@ import {
   LegacyCoreStart,
   SavedObjectsClientContract,
   ToastsStart,
-  UiSettingsClientContract,
+  IUiSettingsClient,
 } from 'kibana/public';
-import { StaticIndexPattern } from 'plugins/data';
 
-import { DataStart } from '../../../data/public';
+import { DataStart, IndexPatterns } from '../../../data/public';
 
 import { NavigationStart } from '../../../navigation/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
@@ -44,7 +43,7 @@ export interface VisualizeKibanaServices {
   editorTypes: any;
   embeddables: IEmbeddableStart;
   getBasePath: () => string;
-  indexPatterns: StaticIndexPattern[];
+  indexPatterns: IndexPatterns;
   legacyChrome: any;
   localStorage: Storage;
   navigation: NavigationStart;
@@ -55,7 +54,7 @@ export interface VisualizeKibanaServices {
   savedQueryService: NpDataStart['query']['savedQueries'];
   savedVisualizations: SavedVisualizations;
   share: SharePluginStart;
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
   visualizeCapabilities: any;
   visualizations: VisualizationsStart;
 }

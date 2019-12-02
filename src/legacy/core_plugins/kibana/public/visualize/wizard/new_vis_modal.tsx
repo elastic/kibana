@@ -22,7 +22,7 @@ import React from 'react';
 import { EuiModal, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { UiSettingsClientContract } from 'kibana/public';
+import { IUiSettingsClient } from 'kibana/public';
 import { VisType } from '../legacy_imports';
 import { VisualizeConstants } from '../visualize_constants';
 import { createUiStatsReporter, METRIC_TYPE } from '../../../../ui_metric/public';
@@ -36,7 +36,7 @@ interface TypeSelectionProps {
   visTypesRegistry: TypesStart;
   editorParams?: string[];
   addBasePath: (path: string) => string;
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
 }
 
 interface TypeSelectionState {

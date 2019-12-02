@@ -21,7 +21,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { I18nProvider } from '@kbn/i18n/react';
-import { UiSettingsClientContract } from 'kibana/public';
+import { IUiSettingsClient } from 'kibana/public';
 import { NewVisModal } from './new_vis_modal';
 import { TypesStart } from '../../../../visualizations/public/np_ready/public/types';
 
@@ -33,7 +33,7 @@ export function showNewVisModal(
   visTypeRegistry: TypesStart,
   { editorParams = [] }: ShowNewVisModalParams = {},
   addBasePath: (path: string) => string,
-  uiSettings: UiSettingsClientContract
+  uiSettings: IUiSettingsClient
 ) {
   const container = document.createElement('div');
   const onClose = () => {
