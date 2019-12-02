@@ -143,6 +143,15 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   set('plugins.paths', _.compact([].concat(
     get('plugins.paths'),
     opts.pluginPath,
+    opts.runExamples ? [
+      // Ideally this would automatically include all plugins in a top level examples dir.
+      // I do not include all plugins inside plugin functional since they are not all well
+      // built for examples, but just for testing purposes. I think there should be a
+      // distinction.  The examples should be useable even without the bootstrapping of
+      // the test enviornment, loading up es_archived data, for example.
+      fromRoot('test/plugin_functional/plugins/demo_search'),
+      fromRoot('test/plugin_functional/plugins/search_explorer'),
+    ] : [],
 
     XPACK_INSTALLED && !opts.oss
       ? [XPACK_DIR]
@@ -200,7 +209,8 @@ export default function (program) {
 
   if (!IS_KIBANA_DISTRIBUTABLE) {
     command
-      .option('--oss', 'Start Kibana without X-Pack');
+      .option('--oss', 'Start Kibana without X-Pack')
+      .option('--run-examples', 'Adds plugin paths for all the Kibana example plugins and runs with no base path');
   }
 
   if (CAN_CLUSTER) {
@@ -237,7 +247,7 @@ export default function (program) {
           silent: !!opts.silent,
           watch: !!opts.watch,
           repl: !!opts.repl,
-          basePath: !!opts.basePath,
+          basePath: opts.runExamples ? false : !!opts.basePath,
           optimize: !!opts.optimize,
           oss: !!opts.oss
         },
