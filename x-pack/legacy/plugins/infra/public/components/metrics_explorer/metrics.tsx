@@ -7,7 +7,7 @@
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState } from 'react';
 import { FieldType } from 'ui/index_patterns';
 import { colorTransformer, MetricsExplorerColor } from '../../../common/color_palette';
 import {
@@ -31,24 +31,19 @@ interface SelectedOption {
 
 export const MetricsExplorerMetrics = ({ options, onChange, fields, autoFocus = false }: Props) => {
   const colors = Object.keys(MetricsExplorerColor) as MetricsExplorerColor[];
-  const [inputRef, setInputRef] = useState<HTMLInputElement | null>(null);
-  const [focusOnce, setFocusState] = useState<boolean>(false);
+  const [shouldFocus, setShouldFocus] = useState(autoFocus);
 
-  useEffect(() => {
-    if (inputRef && autoFocus && !focusOnce) {
-      inputRef.focus();
-      setFocusState(true);
-    }
-  }, [inputRef]);
+  // the EuiCombobox forwards the ref to an input element
+  const handleInputRef = useCallback(
+    (ref: HTMLInputElement | null) => {
+      if (ref && shouldFocus) {
+        ref.focus();
+        setShouldFocus(false);
+      }
+    },
+    [shouldFocus]
+  );
 
-  // I tried to use useRef originally but the EUIComboBox component's type definition
-  // would only accept an actual input element or a callback function (with the same type).
-  // This effectivly does the same thing but is compatible with EuiComboBox.
-  const handleInputRef = (ref: HTMLInputElement) => {
-    if (ref) {
-      setInputRef(ref);
-    }
-  };
   const handleChange = useCallback(
     selectedOptions => {
       onChange(
@@ -59,7 +54,7 @@ export const MetricsExplorerMetrics = ({ options, onChange, fields, autoFocus = 
         }))
       );
     },
-    [options, onChange]
+    [onChange, options.aggregation, colors]
   );
 
   const comboOptions = fields
