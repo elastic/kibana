@@ -54,7 +54,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`can navigate to search profiler`, async () => {
         await PageObjects.common.navigateToApp('searchProfiler');
-        await testSubjects.existOrFail('searchProfiler');
+        await testSubjects.existOrFail('searchprofiler');
       });
 
       it(`can navigate to grok debugger`, async () => {

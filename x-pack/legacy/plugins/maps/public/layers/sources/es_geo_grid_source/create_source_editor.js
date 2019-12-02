@@ -8,7 +8,6 @@ import _ from 'lodash';
 import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 
-import { IndexPatternSelect } from 'ui/index_patterns';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { RENDER_AS } from './render_as';
 import { indexPatternService } from '../../../kibana_services';
@@ -22,17 +21,14 @@ import {
 } from '@elastic/eui';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 
+import { npStart } from 'ui/new_platform';
+const { IndexPatternSelect } = npStart.plugins.data.ui;
+
 function filterGeoField({ type }) {
   return [ES_GEO_FIELD_TYPE.GEO_POINT].includes(type);
 }
 
 const requestTypeOptions = [
-  {
-    label: i18n.translate('xpack.maps.source.esGeoGrid.pointsDropdownOption', {
-      defaultMessage: 'points'
-    }),
-    value: RENDER_AS.POINT
-  },
   {
     label: i18n.translate('xpack.maps.source.esGeoGrid.gridRectangleDropdownOption', {
       defaultMessage: 'grid rectangles'
@@ -44,6 +40,12 @@ const requestTypeOptions = [
       defaultMessage: 'heat map'
     }),
     value: RENDER_AS.HEATMAP
+  },
+  {
+    label: i18n.translate('xpack.maps.source.esGeoGrid.pointsDropdownOption', {
+      defaultMessage: 'points'
+    }),
+    value: RENDER_AS.POINT
   }
 ];
 

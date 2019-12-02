@@ -20,9 +20,7 @@
 import { TSearchStrategyProvider } from 'src/plugins/data/server';
 import { DEMO_SEARCH_STRATEGY } from '../common';
 
-export const demoSearchStrategyProvider: TSearchStrategyProvider<
-  typeof DEMO_SEARCH_STRATEGY
-> = () => {
+export const demoSearchStrategyProvider: TSearchStrategyProvider<typeof DEMO_SEARCH_STRATEGY> = () => {
   return {
     search: request => {
       return Promise.resolve({

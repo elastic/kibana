@@ -21,13 +21,12 @@ import $ from 'jquery';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
-import { VisProvider } from 'ui/vis';
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { Vis } from '../../../visualizations/public';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { AppStateProvider } from 'ui/state_management/app_state';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 
-import { createTableVisTypeDefinition } from '../table_vis_type';
+import { tableVisTypeDefinition } from '../table_vis_type';
 import { setup as visualizationsSetup } from '../../../visualizations/public/np_ready/public/legacy';
 
 describe('Table Vis - Controller', async function () {
@@ -36,23 +35,14 @@ describe('Table Vis - Controller', async function () {
   let Private;
   let $scope;
   let $el;
-  let Vis;
   let fixtures;
   let AppState;
   let tableAggResponse;
   let tabifiedResponse;
-  let legacyDependencies;
 
-  ngMock.inject(function ($injector) {
-    Private = $injector.get('Private');
-    legacyDependencies = {
-      // eslint-disable-next-line new-cap
-      createAngularVisualization: VisFactoryProvider(Private).createAngularVisualization,
-    };
+  ngMock.inject(function () {
 
-    visualizationsSetup.types.registerVisualization(() =>
-      createTableVisTypeDefinition(legacyDependencies)
-    );
+    visualizationsSetup.types.createBaseVisualization(tableVisTypeDefinition);
   });
 
   beforeEach(ngMock.module('kibana', 'kibana/table_vis'));
@@ -63,7 +53,6 @@ describe('Table Vis - Controller', async function () {
       $compile = $injector.get('$compile');
       fixtures = require('fixtures/fake_hierarchical_data');
       AppState = Private(AppStateProvider);
-      Vis = Private(VisProvider);
       tableAggResponse = legacyResponseHandlerProvider().handler;
     })
   );

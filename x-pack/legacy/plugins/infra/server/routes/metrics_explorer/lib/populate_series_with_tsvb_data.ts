@@ -18,6 +18,7 @@ import {
 } from '../types';
 import { createMetricModel } from './create_metrics_model';
 import { JsonObject } from '../../../../common/typed_json';
+import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
 
 export const populateSeriesWithTSVBData = (
   req: InfraFrameworkRequest<MetricsExplorerWrappedRequest>,
@@ -54,6 +55,27 @@ export const populateSeriesWithTSVBData = (
 
   // Create the TSVB model based on the request options
   const model = createMetricModel(options);
+  const calculatedInterval = await calculateMetricInterval(
+    framework,
+    req,
+    {
+      indexPattern: options.indexPattern,
+      timestampField: options.timerange.field,
+      timerange: options.timerange,
+    },
+    options.metrics
+      .filter(metric => metric.field)
+      .map(metric => {
+        return metric
+          .field!.split(/\./)
+          .slice(0, 2)
+          .join('.');
+      })
+  );
+
+  if (calculatedInterval) {
+    model.interval = `>=${calculatedInterval}s`;
+  }
 
   // Get TSVB results using the model, timerange and filters
   const tsvbResults = await framework.makeTSVBRequest(req, model, timerange, filters);
@@ -83,7 +105,10 @@ export const populateSeriesWithTSVBData = (
   // MetricsExplorerRow.
   const timestamps = tsvbResults.custom.series.reduce(
     (currentTimestamps, tsvbSeries) =>
-      union(currentTimestamps, tsvbSeries.data.map(row => row[0])).sort(),
+      union(
+        currentTimestamps,
+        tsvbSeries.data.map(row => row[0])
+      ).sort(),
     [] as number[]
   );
   // Combine the TSVB series for multiple metrics.

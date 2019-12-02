@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import $ from 'jquery';
 
 import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useAppContext } from '../../../../context';
+import { useServicesContext, useEditorReadContext } from '../../../../contexts';
 import { useUIAceKeyboardMode } from '../use_ui_ace_keyboard_mode';
 import { ConsoleMenu } from '../../../../components';
 
@@ -32,12 +32,13 @@ import { autoIndent, getDocumentation } from '../console_menu_actions';
 import { registerCommands } from './keyboard_shortcuts';
 import { applyCurrentSettings } from './apply_editor_settings';
 
+import { useSendCurrentRequestToES, useSetInputEditor } from '../../../../hooks';
+
 // @ts-ignore
 import { initializeEditor } from '../../../../../../../public/quarantined/src/input';
 // @ts-ignore
 import mappings from '../../../../../../../public/quarantined/src/mappings';
 
-import { useEditorActionContext, useEditorReadContext } from '../../context';
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { loadRemoteState } from './load_remote_editor_state';
 
@@ -60,15 +61,15 @@ const DEFAULT_INPUT_VALUE = `GET _search
   }
 }`;
 
-function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
+function EditorUI({ previousStateLocation = 'stored' }: EditorProps) {
   const {
     services: { history, notifications },
-    ResizeChecker,
     docLinkVersion,
-  } = useAppContext();
+  } = useServicesContext();
 
   const { settings } = useEditorReadContext();
-  const dispatch = useEditorActionContext();
+  const setInputEditor = useSetInputEditor();
+  const sendCurrentRequestToES = useSendCurrentRequestToES();
 
   const editorRef = useRef<HTMLDivElement | null>(null);
   const actionsRef = useRef<HTMLDivElement | null>(null);
@@ -77,13 +78,13 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
   const [textArea, setTextArea] = useState<HTMLTextAreaElement | null>(null);
   useUIAceKeyboardMode(textArea);
 
-  const openDocumentation = async () => {
+  const openDocumentation = useCallback(async () => {
     const documentation = await getDocumentation(editorInstanceRef.current!, docLinkVersion);
     if (!documentation) {
       return;
     }
     window.open(documentation, '_blank');
-  };
+  }, [docLinkVersion]);
 
   useEffect(() => {
     const $editor = $(editorRef.current!);
@@ -103,7 +104,7 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
       let timer: number;
       const saveDelay = 500;
 
-      return editorInstanceRef.current.getSession().on('change', function onChange() {
+      editorInstanceRef.current.getSession().on('change', function onChange() {
         if (timer) {
           clearTimeout(timer);
         }
@@ -120,40 +121,22 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
       }
     }
 
-    dispatch({
-      type: 'setInputEditor',
-      value: editorInstanceRef.current,
-    });
-
+    setInputEditor(editorInstanceRef.current);
     setTextArea(editorRef.current!.querySelector('textarea'));
 
     mappings.retrieveAutoCompleteInfo();
 
     const unsubscribeResizer = subscribeResizeChecker(
-      ResizeChecker,
       editorRef.current!,
       editorInstanceRef.current
     );
-    const unsubscribeAutoSave = setupAutosave();
+    setupAutosave();
 
     return () => {
       unsubscribeResizer();
-      unsubscribeAutoSave();
       mappings.clearSubscriptions();
     };
-  }, []);
-
-  const sendCurrentRequestToES = useCallback(() => {
-    dispatch({
-      type: 'sendRequestToEs',
-      value: {
-        isUsingTripleQuotes: settings.tripleQuotes,
-        isPolling: settings.polling,
-        callback: (esPath: any, esMethod: any, esData: any) =>
-          history.addToHistory(esPath, esMethod, esData),
-      },
-    });
-  }, [settings]);
+  }, [history, previousStateLocation, setInputEditor]);
 
   useEffect(() => {
     applyCurrentSettings(editorInstanceRef.current!, settings);
@@ -167,7 +150,7 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
       sendCurrentRequestToES,
       openDocumentation,
     });
-  }, [sendCurrentRequestToES]);
+  }, [sendCurrentRequestToES, openDocumentation]);
 
   return (
     <div style={abs} className="conApp">
@@ -221,4 +204,4 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
   );
 }
 
-export const Editor = React.memo(_Editor);
+export const Editor = React.memo(EditorUI);

@@ -18,9 +18,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { SearchService, SearchStart, createSearchBar, StatetfulSearchBarProps } from './search';
-import { QueryService, QuerySetup } from './query';
-import { TimefilterService, TimefilterSetup } from './timefilter';
+import { createSearchBar, StatetfulSearchBarProps } from './search';
 import { IndexPatternsService, IndexPatternsSetup, IndexPatternsStart } from './index_patterns';
 import { Storage, IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
 import { DataPublicPluginStart } from '../../../../plugins/data/public';
@@ -43,8 +41,6 @@ export interface DataPluginStartDependencies {
  * @public
  */
 export interface DataSetup {
-  query: QuerySetup;
-  timefilter: TimefilterSetup;
   indexPatterns: IndexPatternsSetup;
 }
 
@@ -54,10 +50,7 @@ export interface DataSetup {
  * @public
  */
 export interface DataStart {
-  query: QuerySetup;
-  timefilter: TimefilterSetup;
   indexPatterns: IndexPatternsStart;
-  search: SearchStart;
   ui: {
     SearchBar: React.ComponentType<StatetfulSearchBarProps>;
   };
@@ -77,26 +70,15 @@ export interface DataStart {
 
 export class DataPlugin implements Plugin<DataSetup, DataStart, {}, DataPluginStartDependencies> {
   private readonly indexPatterns: IndexPatternsService = new IndexPatternsService();
-  private readonly query: QueryService = new QueryService();
-  private readonly search: SearchService = new SearchService();
-  private readonly timefilter: TimefilterService = new TimefilterService();
 
   private setupApi!: DataSetup;
   private storage!: IStorageWrapper;
 
   public setup(core: CoreSetup): DataSetup {
-    const { uiSettings } = core;
-
     this.storage = new Storage(window.localStorage);
 
-    const timefilterService = this.timefilter.setup({
-      uiSettings,
-      storage: this.storage,
-    });
     this.setupApi = {
       indexPatterns: this.indexPatterns.setup(),
-      query: this.query.setup(),
-      timefilter: timefilterService,
     };
 
     return this.setupApi;
@@ -110,6 +92,7 @@ export class DataPlugin implements Plugin<DataSetup, DataStart, {}, DataPluginSt
       savedObjectsClient: savedObjects.client,
       http,
       notifications,
+      fieldFormats: data.fieldFormats,
     });
 
     initLegacyModule(indexPatternsService.indexPatterns);
@@ -118,14 +101,13 @@ export class DataPlugin implements Plugin<DataSetup, DataStart, {}, DataPluginSt
       core,
       data,
       storage: this.storage,
-      timefilter: this.setupApi.timefilter,
     });
 
     uiActions.registerAction(
       createFilterAction(
         core.overlays,
         data.query.filterManager,
-        this.setupApi.timefilter.timefilter,
+        data.query.timefilter.timefilter,
         indexPatternsService
       )
     );
@@ -135,7 +117,6 @@ export class DataPlugin implements Plugin<DataSetup, DataStart, {}, DataPluginSt
     return {
       ...this.setupApi!,
       indexPatterns: indexPatternsService,
-      search: this.search.start(savedObjects.client),
       ui: {
         SearchBar,
       },
@@ -144,8 +125,5 @@ export class DataPlugin implements Plugin<DataSetup, DataStart, {}, DataPluginSt
 
   public stop() {
     this.indexPatterns.stop();
-    this.query.stop();
-    this.search.stop();
-    this.timefilter.stop();
   }
 }

@@ -26,7 +26,6 @@ export const searchprofiler = (kibana: any) => {
       devTools: [`${publicSrc}/legacy`],
       styleSheetPaths: `${publicSrc}/np_ready/application/index.scss`,
       // Legacy
-      hacks: ['plugins/searchprofiler/register'],
       home: ['plugins/searchprofiler/register_feature'],
     },
     init(server: Server) {

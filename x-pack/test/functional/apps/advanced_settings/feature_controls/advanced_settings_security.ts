@@ -47,7 +47,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         await PageObjects.security.logout();
-
         await PageObjects.security.login(
           'global_advanced_settings_all_user',
           'global_advanced_settings_all_user-password',
@@ -55,7 +54,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             expectSpaceSelector: false,
           }
         );
-
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
       });

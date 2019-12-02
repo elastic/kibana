@@ -22,7 +22,6 @@ export const searchMocks = {
     hits: [
       {
         _index: '.apm-agent-configuration',
-        _type: '_doc',
         _id: '-aQHsm0BxZLczArvNQYW',
         _score: 0.9808292,
         _source: {
@@ -39,7 +38,6 @@ export const searchMocks = {
       },
       {
         _index: '.apm-agent-configuration',
-        _type: '_doc',
         _id: '-KQHsm0BxZLczArvNAb0',
         _score: 0.18232156,
         _source: {
@@ -56,7 +54,6 @@ export const searchMocks = {
       },
       {
         _index: '.apm-agent-configuration',
-        _type: '_doc',
         _id: '96QHsm0BxZLczArvNAbD',
         _score: 0.0,
         _source: {

@@ -65,18 +65,6 @@ module.exports = {
       },
     },
     {
-      files: ['src/core/public/application/**/*.{js,ts,tsx}'],
-      rules: {
-        'react/no-danger': 'off',
-      },
-    },
-    {
-      files: ['src/legacy/core_plugins/console/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: ['src/legacy/core_plugins/data/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
@@ -212,13 +200,6 @@ module.exports = {
       files: ['x-pack/legacy/plugins/monitoring/**/*.{js,ts,tsx}'],
       rules: {
         'jsx-a11y/click-events-have-key-events': 'off',
-      },
-    },
-    {
-      files: ['x-pack/legacy/plugins/siem/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-        'react-hooks/rules-of-hooks': 'off',
       },
     },
     {
@@ -370,6 +351,21 @@ module.exports = {
                 allowSameFolder: true,
               },
               {
+                target: ['src/core/**/*'],
+                from: ['x-pack/**/*'],
+                errorMessage: 'OSS cannot import x-pack files.',
+              },
+              {
+                target: ['src/core/**/*'],
+                from: [
+                  'plugins/**/*',
+                  'src/plugins/**/*',
+                  'src/legacy/core_plugins/**/*',
+                  'src/legacy/ui/**/*',
+                ],
+                errorMessage: 'The core cannot depend on any plugins.',
+              },
+              {
                 from: ['src/legacy/ui/**/*', 'ui/**/*'],
                 target: [
                   'test/plugin_functional/plugins/**/public/np_ready/**/*',
@@ -400,6 +396,7 @@ module.exports = {
         'x-pack/test/functional/apps/**/*.js',
         'x-pack/legacy/plugins/apm/**/*.js',
         'test/*/config.ts',
+        'test/*/{tests,test_suites,apis,apps}/**/*',
         'test/visual_regression/tests/**/*',
         'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
         'x-pack/test/*/*config.*ts',
@@ -838,6 +835,8 @@ module.exports = {
         // might be introduced after the other warns are fixed
         // 'react/jsx-sort-props': 'error',
         'react/jsx-tag-spacing': 'error',
+        // might be introduced after the other warns are fixed
+        'react-hooks/exhaustive-deps': 'off',
         'require-atomic-updates': 'error',
         'rest-spread-spacing': ['error', 'never'],
         'symbol-description': 'error',

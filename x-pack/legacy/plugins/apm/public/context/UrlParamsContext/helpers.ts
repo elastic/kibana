@@ -7,9 +7,10 @@
 import { compact, pick } from 'lodash';
 import datemath from '@elastic/datemath';
 import { IUrlParams } from './types';
+import { ProcessorEvent } from '../../../common/processor_event';
 
 interface PathParams {
-  processorEvent?: 'error' | 'metric' | 'transaction';
+  processorEvent?: ProcessorEvent;
   serviceName?: string;
   errorGroupId?: string;
   serviceNodeName?: string;
@@ -82,24 +83,24 @@ export function getPathParams(pathname: string = ''): PathParams {
       switch (servicePageName) {
         case 'transactions':
           return {
-            processorEvent: 'transaction',
+            processorEvent: ProcessorEvent.transaction,
             serviceName
           };
         case 'errors':
           return {
-            processorEvent: 'error',
+            processorEvent: ProcessorEvent.error,
             serviceName,
             errorGroupId: paths[3]
           };
         case 'metrics':
           return {
-            processorEvent: 'metric',
+            processorEvent: ProcessorEvent.metric,
             serviceName,
             serviceNodeName
           };
         case 'nodes':
           return {
-            processorEvent: 'metric',
+            processorEvent: ProcessorEvent.metric,
             serviceName
           };
         case 'service-map':
@@ -112,7 +113,7 @@ export function getPathParams(pathname: string = ''): PathParams {
 
     case 'traces':
       return {
-        processorEvent: 'transaction'
+        processorEvent: ProcessorEvent.transaction
       };
     default:
       return {};

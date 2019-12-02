@@ -37,10 +37,7 @@ export const useLogAnalysisResultsUrlState = () => {
       endTime: 'now',
     },
     decodeUrlState: (value: unknown) =>
-      pipe(
-        urlTimeRangeRT.decode(value),
-        fold(constant(undefined), identity)
-      ),
+      pipe(urlTimeRangeRT.decode(value), fold(constant(undefined), identity)),
     encodeUrlState: urlTimeRangeRT.encode,
     urlStateKey: TIME_RANGE_URL_STATE_KEY,
   });
@@ -55,10 +52,7 @@ export const useLogAnalysisResultsUrlState = () => {
       interval: 30000,
     },
     decodeUrlState: (value: unknown) =>
-      pipe(
-        autoRefreshRT.decode(value),
-        fold(constant(undefined), identity)
-      ),
+      pipe(autoRefreshRT.decode(value), fold(constant(undefined), identity)),
     encodeUrlState: autoRefreshRT.encode,
     urlStateKey: AUTOREFRESH_URL_STATE_KEY,
   });

@@ -308,7 +308,10 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
           return (
             <EuiButton
               onClick={() =>
-                deletePolicyPrompt(selectedItems.map(({ name }) => name), onPolicyDeleted)
+                deletePolicyPrompt(
+                  selectedItems.map(({ name }) => name),
+                  onPolicyDeleted
+                )
               }
               color="danger"
               data-test-subj="srPolicyListBulkDeleteActionButton"

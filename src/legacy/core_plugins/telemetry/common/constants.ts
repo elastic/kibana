@@ -51,13 +51,19 @@ export const LOCALSTORAGE_KEY = 'telemetry.data';
 /**
  * Link to the Elastic Telemetry privacy statement.
  */
-export const PRIVACY_STATEMENT_URL = `https://www.elastic.co/legal/telemetry-privacy-statement`;
+export const PRIVACY_STATEMENT_URL = `https://www.elastic.co/legal/privacy-statement`;
 
 /**
  * The type name used within the Monitoring index to publish localization stats.
  * @type {string}
  */
 export const KIBANA_LOCALIZATION_STATS_TYPE = 'localization';
+
+/**
+ * The type name used to publish telemetry plugin stats.
+ * @type {string}
+ */
+export const TELEMETRY_STATS_TYPE = 'telemetry';
 
 /**
  * UI metric usage type

@@ -139,13 +139,10 @@ const makeMapStateToProps = () => {
   return (state: State, { type }: OwnProps) => getUncommonProcessesSelector(state, type);
 };
 
-export const UncommonProcessTable = connect(
-  makeMapStateToProps,
-  {
-    updateTableActivePage: hostsActions.updateTableActivePage,
-    updateTableLimit: hostsActions.updateTableLimit,
-  }
-)(UncommonProcessTableComponent);
+export const UncommonProcessTable = connect(makeMapStateToProps, {
+  updateTableActivePage: hostsActions.updateTableActivePage,
+  updateTableLimit: hostsActions.updateTableLimit,
+})(UncommonProcessTableComponent);
 
 const getUncommonColumns = (): UncommonProcessTableColumns => [
   {
@@ -229,7 +226,10 @@ export const getUncommonColumnsCurated = (pageType: HostsType): UncommonProcessT
   const columns: UncommonProcessTableColumns = getUncommonColumns();
   if (pageType === HostsType.details) {
     return [i18n.HOSTS, i18n.NUMBER_OF_HOSTS].reduce((acc, name) => {
-      acc.splice(acc.findIndex(column => column.name === name), 1);
+      acc.splice(
+        acc.findIndex(column => column.name === name),
+        1
+      );
       return acc;
     }, columns);
   } else {

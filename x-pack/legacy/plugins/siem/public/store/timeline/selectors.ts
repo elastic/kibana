@@ -22,10 +22,7 @@ const selectCallOutUnauthorizedMsg = (state: State): boolean =>
 export const selectTimeline = (state: State, timelineId: string): TimelineModel =>
   state.timeline.timelineById[timelineId];
 
-export const autoSaveMsgSelector = createSelector(
-  selectAutoSaveMsg,
-  autoSaveMsg => autoSaveMsg
-);
+export const autoSaveMsgSelector = createSelector(selectAutoSaveMsg, autoSaveMsg => autoSaveMsg);
 
 export const timelineByIdSelector = createSelector(
   selectTimelineById,
@@ -41,45 +38,34 @@ export const getShowCallOutUnauthorizedMsg = () =>
 export const getTimelines = () => timelineByIdSelector;
 
 export const getTimelineByIdSelector = () =>
-  createSelector(
-    selectTimeline,
-    timeline => timeline || timelineDefaults
-  );
+  createSelector(selectTimeline, timeline => timeline || timelineDefaults);
 
 export const getEventsByIdSelector = () =>
-  createSelector(
-    selectTimeline,
-    timeline => timeline || eventsDefaults
-  );
+  createSelector(selectTimeline, timeline => timeline || eventsDefaults);
 
 export const getKqlFilterQuerySelector = () =>
-  createSelector(
-    selectTimeline,
-    timeline =>
-      timeline &&
-      timeline.kqlQuery &&
-      timeline.kqlQuery.filterQuery &&
-      timeline.kqlQuery.filterQuery.kuery
-        ? timeline.kqlQuery.filterQuery.kuery.expression
-        : null
+  createSelector(selectTimeline, timeline =>
+    timeline &&
+    timeline.kqlQuery &&
+    timeline.kqlQuery.filterQuery &&
+    timeline.kqlQuery.filterQuery.kuery
+      ? timeline.kqlQuery.filterQuery.kuery.expression
+      : null
   );
 
 export const getKqlFilterQueryDraftSelector = () =>
-  createSelector(
-    selectTimeline,
-    timeline => (timeline && timeline.kqlQuery ? timeline.kqlQuery.filterQueryDraft : null)
+  createSelector(selectTimeline, timeline =>
+    timeline && timeline.kqlQuery ? timeline.kqlQuery.filterQueryDraft : null
   );
 
 export const getKqlFilterKuerySelector = () =>
-  createSelector(
-    selectTimeline,
-    timeline =>
-      timeline &&
-      timeline.kqlQuery &&
-      timeline.kqlQuery.filterQuery &&
-      timeline.kqlQuery.filterQuery.kuery
-        ? timeline.kqlQuery.filterQuery.kuery
-        : null
+  createSelector(selectTimeline, timeline =>
+    timeline &&
+    timeline.kqlQuery &&
+    timeline.kqlQuery.filterQuery &&
+    timeline.kqlQuery.filterQuery.kuery
+      ? timeline.kqlQuery.filterQuery.kuery
+      : null
   );
 
 export const isFilterQueryDraftValidSelector = () =>
