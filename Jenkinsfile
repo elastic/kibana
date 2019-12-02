@@ -26,7 +26,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
               'oss-ciGroup12': kibanaPipeline.getOssCiGroupWorker(12),
               'oss-firefoxSmoke': kibanaPipeline.getPostBuildWorker('firefoxSmoke', { runbld('./test/scripts/jenkins_firefox_smoke.sh', 'Execute kibana-firefoxSmoke') }),
               'oss-accessibility': kibanaPipeline.getPostBuildWorker('accessibility', { runbld('./test/scripts/jenkins_accessibility.sh', 'Execute accessibility tests') }),
-              'oss-visualRegression': kibanaPipeline.getPostBuildWorker('visualRegression', { runbld('./test/scripts/jenkins_visual_regression.sh', 'Execute kibana-visualRegression') }),
+              // 'oss-visualRegression': kibanaPipeline.getPostBuildWorker('visualRegression', { runbld('./test/scripts/jenkins_visual_regression.sh', 'Execute kibana-visualRegression') }),
             ]),
             'kibana-xpack-agent': kibanaPipeline.withWorkers('kibana-xpack-tests', { kibanaPipeline.buildXpack() }, [
               'xpack-ciGroup1': kibanaPipeline.getXpackCiGroupWorker(1),
@@ -41,7 +41,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
               'xpack-ciGroup10': kibanaPipeline.getXpackCiGroupWorker(10),
               'xpack-firefoxSmoke': kibanaPipeline.getPostBuildWorker('xpack-firefoxSmoke', { runbld('./test/scripts/jenkins_xpack_firefox_smoke.sh', 'Execute xpack-firefoxSmoke') }),
               'xpack-accessibility': kibanaPipeline.getPostBuildWorker('xpack-accessibility', { runbld('./test/scripts/jenkins_xpack_accessibility.sh', 'Execute xpack-accessibility tests') }),
-              'xpack-visualRegression': kibanaPipeline.getPostBuildWorker('xpack-visualRegression', { runbld('./test/scripts/jenkins_xpack_visual_regression.sh', 'Execute xpack-visualRegression') }),
+              // 'xpack-visualRegression': kibanaPipeline.getPostBuildWorker('xpack-visualRegression', { runbld('./test/scripts/jenkins_xpack_visual_regression.sh', 'Execute xpack-visualRegression') }),
             ]),
           ])
         }
