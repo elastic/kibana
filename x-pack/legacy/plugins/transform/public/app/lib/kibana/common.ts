@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract, UiSettingsClientContract } from 'src/core/public';
+import { SavedObjectsClientContract, IUiSettingsClient } from 'src/core/public';
 import {
   IndexPattern as IndexPatternType,
   IndexPatterns as IndexPatternsType,
@@ -73,7 +73,7 @@ export function loadCurrentSavedSearch(savedSearches: any, savedSearchId: SavedS
 export function createSearchItems(
   indexPattern: IndexPatternType | undefined,
   savedSearch: any,
-  config: UiSettingsClientContract
+  config: IUiSettingsClient
 ) {
   // query is only used by the data visualizer as it needs
   // a lucene query_string.
