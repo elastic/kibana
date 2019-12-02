@@ -18,12 +18,14 @@
  */
 
 import chrome from 'ui/chrome';
-import { StaticIndexPattern, getFromSavedObject } from 'ui/index_patterns';
+import { getFromSavedObject } from 'ui/index_patterns';
+
 import { VisSavedObject } from './visualize_embeddable';
+import { IIndexPattern } from '../../../../../../plugins/data/public';
 
 export async function getIndexPattern(
   savedVis: VisSavedObject
-): Promise<StaticIndexPattern | undefined> {
+): Promise<IIndexPattern | undefined> {
   if (savedVis.vis.type.name !== 'metrics') {
     return savedVis.vis.indexPattern;
   }
