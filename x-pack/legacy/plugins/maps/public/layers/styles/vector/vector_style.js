@@ -9,7 +9,13 @@ import React from 'react';
 import { VectorStyleEditor } from './components/vector_style_editor';
 import { getDefaultProperties, vectorStyles } from './vector_style_defaults';
 import { AbstractStyle } from '../abstract_style';
-import { GEO_JSON_TYPE, FIELD_ORIGIN, STYLE_TYPE, SOURCE_META_ID_ORIGIN } from '../../../../common/constants';
+import {
+  GEO_JSON_TYPE,
+  FIELD_ORIGIN,
+  STYLE_TYPE,
+  SOURCE_META_ID_ORIGIN,
+  VECTOR_STYLE_TYPE,
+} from '../../../../common/constants';
 import { VectorIcon } from './components/legend/vector_icon';
 import { VectorStyleLegend } from './components/legend/vector_style_legend';
 import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
@@ -31,7 +37,7 @@ const POLYGONS = [GEO_JSON_TYPE.POLYGON, GEO_JSON_TYPE.MULTI_POLYGON];
 
 export class VectorStyle extends AbstractStyle {
 
-  static type = 'VECTOR';
+  static type = VECTOR_STYLE_TYPE;
   static STYLE_TYPE = STYLE_TYPE;
   static createDescriptor(properties = {}) {
     return {

@@ -17,6 +17,7 @@ import {
   EMPTY_FEATURE_COLLECTION,
   LAYER_TYPE,
   FIELD_ORIGIN,
+  VECTOR_STYLE_TYPE,
 } from '../../common/constants';
 import _ from 'lodash';
 import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
@@ -391,35 +392,33 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async _syncSourceStyleMeta(syncContext) {
-    const dynamicStyleProps = this._style.getDynamicPropertiesArray()
-      .filter(dynamicStyleProp => {
-        return dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE && dynamicStyleProp.supportsFieldMeta();
-      });
+    if (this._style.constructor.type !== VECTOR_STYLE_TYPE) {
+      return;
+    }
 
     return this._syncStyleMeta({
       source: this._source,
       sourceQuery: this.getQuery(),
       dataRequestId: SOURCE_META_ID_ORIGIN,
-      dynamicStyleProps,
+      dynamicStyleProps: this._style.getDynamicPropertiesArray().filter(dynamicStyleProp => {
+        return dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE && dynamicStyleProp.supportsFieldMeta();
+      }),
       ...syncContext
     });
   }
 
   async _syncJoinStyleMeta(syncContext, join) {
     const joinSource = join.getRightJoinSource();
-    const dynamicStyleProps = this._style.getDynamicPropertiesArray()
-      .filter(dynamicStyleProp => {
-        const matchingField = joinSource.getMetricFieldForName(dynamicStyleProp.getField().getName());
-        return dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.JOIN
-          && !!matchingField
-          && dynamicStyleProp.supportsFieldMeta();
-      });
-
     return this._syncStyleMeta({
       source: joinSource,
       sourceQuery: joinSource.getWhereQuery(),
       dataRequestId: join.getSourceMetaDataRequestId(),
-      dynamicStyleProps,
+      dynamicStyleProps: this._style.getDynamicPropertiesArray().filter(dynamicStyleProp => {
+        const matchingField = joinSource.getMetricFieldForName(dynamicStyleProp.getField().getName());
+        return dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.JOIN
+          && !!matchingField
+          && dynamicStyleProp.supportsFieldMeta();
+      }),
       ...syncContext
     });
   }

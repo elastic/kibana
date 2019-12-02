@@ -126,6 +126,9 @@ export const COUNT_PROP_LABEL =  i18n.translate('xpack.maps.aggs.defaultCountLab
 export const COUNT_PROP_NAME = 'doc_count';
 
 export const STYLE_TYPE = {
-  'STATIC': 'STATIC',
-  'DYNAMIC': 'DYNAMIC'
+  STATIC: 'STATIC',
+  DYNAMIC: 'DYNAMIC'
 };
+
+export const VECTOR_STYLE_TYPE = 'VECTOR';
+export const HEATMAP_STYLE_TYPE = 'HEATMAP';
