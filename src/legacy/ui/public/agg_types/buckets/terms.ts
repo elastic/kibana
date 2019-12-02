@@ -19,16 +19,12 @@
 
 import chrome from 'ui/chrome';
 import { noop } from 'lodash';
-import { SearchSource } from 'ui/courier';
 import { i18n } from '@kbn/i18n';
+import { SearchSource, getRequestInspectorStats, getResponseInspectorStats } from '../../courier';
 import { BucketAggType, BucketAggParam } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { AggConfigOptions } from '../agg_config';
 import { IBucketAggConfig } from './_bucket_agg_type';
-import {
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-} from '../../courier/utils/courier_inspector_utils';
 import { createFilterTerms } from './create_filter/terms';
 import { wrapWithInlineComp } from './inline_comp_wrapper';
 import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';

@@ -30,11 +30,12 @@ import { HttpConfig } from './http_config';
 import { Router } from './router';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { HttpServer } from './http_server';
+import { Readable } from 'stream';
 
 const cookieOptions = {
   name: 'sid',
   encryptionKey: 'something_at_least_32_characters',
-  validate: () => true,
+  validate: () => ({ isValid: true }),
   isSecure: false,
 };
 
@@ -660,6 +661,157 @@ describe('conditional compression', () => {
       expect(response.header).not.toHaveProperty('content-encoding');
     });
   });
+});
+
+test('exposes route details of incoming request to a route handler (POST + payload options)', async () => {
+  const { registerRouter, server: innerServer } = await server.setup(config);
+
+  const router = new Router('', logger, enhanceWithContext);
+  router.post(
+    {
+      path: '/',
+      validate: { body: schema.object({ test: schema.number() }) },
+      options: { body: { accepts: 'application/json' } },
+    },
+    (context, req, res) => res.ok({ body: req.route })
+  );
+  registerRouter(router);
+
+  await server.start();
+  await supertest(innerServer.listener)
+    .post('/')
+    .send({ test: 1 })
+    .expect(200, {
+      method: 'post',
+      path: '/',
+      options: {
+        authRequired: true,
+        tags: [],
+        body: {
+          parse: true, // hapi populates the default
+          maxBytes: 1024, // hapi populates the default
+          accepts: ['application/json'],
+          output: 'data',
+        },
+      },
+    });
+});
+
+describe('body options', () => {
+  test('should reject the request because the Content-Type in the request is not valid', async () => {
+    const { registerRouter, server: innerServer } = await server.setup(config);
+
+    const router = new Router('', logger, enhanceWithContext);
+    router.post(
+      {
+        path: '/',
+        validate: { body: schema.object({ test: schema.number() }) },
+        options: { body: { accepts: 'multipart/form-data' } }, // supertest sends 'application/json'
+      },
+      (context, req, res) => res.ok({ body: req.route })
+    );
+    registerRouter(router);
+
+    await server.start();
+    await supertest(innerServer.listener)
+      .post('/')
+      .send({ test: 1 })
+      .expect(415, {
+        statusCode: 415,
+        error: 'Unsupported Media Type',
+        message: 'Unsupported Media Type',
+      });
+  });
+
+  test('should reject the request because the payload is too large', async () => {
+    const { registerRouter, server: innerServer } = await server.setup(config);
+
+    const router = new Router('', logger, enhanceWithContext);
+    router.post(
+      {
+        path: '/',
+        validate: { body: schema.object({ test: schema.number() }) },
+        options: { body: { maxBytes: 1 } },
+      },
+      (context, req, res) => res.ok({ body: req.route })
+    );
+    registerRouter(router);
+
+    await server.start();
+    await supertest(innerServer.listener)
+      .post('/')
+      .send({ test: 1 })
+      .expect(413, {
+        statusCode: 413,
+        error: 'Request Entity Too Large',
+        message: 'Payload content length greater than maximum allowed: 1',
+      });
+  });
+
+  test('should not parse the content in the request', async () => {
+    const { registerRouter, server: innerServer } = await server.setup(config);
+
+    const router = new Router('', logger, enhanceWithContext);
+    router.post(
+      {
+        path: '/',
+        validate: { body: schema.buffer() },
+        options: { body: { parse: false } },
+      },
+      (context, req, res) => {
+        try {
+          expect(req.body).toBeInstanceOf(Buffer);
+          expect(req.body.toString()).toBe(JSON.stringify({ test: 1 }));
+          return res.ok({ body: req.route.options.body });
+        } catch (err) {
+          return res.internalError({ body: err.message });
+        }
+      }
+    );
+    registerRouter(router);
+
+    await server.start();
+    await supertest(innerServer.listener)
+      .post('/')
+      .send({ test: 1 })
+      .expect(200, {
+        parse: false,
+        maxBytes: 1024, // hapi populates the default
+        output: 'data',
+      });
+  });
+});
+
+test('should return a stream in the body', async () => {
+  const { registerRouter, server: innerServer } = await server.setup(config);
+
+  const router = new Router('', logger, enhanceWithContext);
+  router.put(
+    {
+      path: '/',
+      validate: { body: schema.stream() },
+      options: { body: { output: 'stream' } },
+    },
+    (context, req, res) => {
+      try {
+        expect(req.body).toBeInstanceOf(Readable);
+        return res.ok({ body: req.route.options.body });
+      } catch (err) {
+        return res.internalError({ body: err.message });
+      }
+    }
+  );
+  registerRouter(router);
+
+  await server.start();
+  await supertest(innerServer.listener)
+    .put('/')
+    .send({ test: 1 })
+    .expect(200, {
+      parse: true,
+      maxBytes: 1024, // hapi populates the default
+      output: 'stream',
+    });
 });
 
 describe('setup contract', () => {

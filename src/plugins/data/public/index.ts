@@ -30,9 +30,12 @@ export * from '../common';
 
 export * from './autocomplete_provider';
 export * from './field_formats_provider';
+export * from './index_patterns';
 
 export * from './types';
 
 export { IRequestTypesMap, IResponseTypesMap } from './search';
 export * from './search';
 export * from './query';
+
+export * from './ui';
