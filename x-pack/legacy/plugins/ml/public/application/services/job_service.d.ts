@@ -6,6 +6,7 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { CombinedJob } from '../jobs/new_job/common/job_creator/configs';
+import { Calendar } from '../../../common/types/calendars';
 
 export interface ExistingJobsAndGroups {
   jobIds: string[];
@@ -20,6 +21,7 @@ declare interface JobService {
     skipTimeRangeStep: boolean;
     start?: number;
     end?: number;
+    calendars: Calendar[] | undefined;
   };
   skipTimeRangeStep: boolean;
   saveNewJob(job: any): Promise<any>;
