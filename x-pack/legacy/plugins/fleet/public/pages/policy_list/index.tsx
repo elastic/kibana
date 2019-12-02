@@ -61,7 +61,7 @@ export const PolicyListPage: React.FC<{}> = () => {
   useEffect(() => {
     fetchPolicies();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [search]);
 
   // Some policies retrieved, set up table props
   const columns = [
