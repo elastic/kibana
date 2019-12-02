@@ -21,7 +21,6 @@ import {
   logsSummaryHighlightsRequestRT,
   logsSummaryHighlightsResponseRT,
 } from '../../../common/http_api/logs';
-import { parseFilterQuery } from '../../utils/serialized_query';
 import {
   compileFormattingRules,
   CompiledLogMessageFormattingRule,
@@ -29,6 +28,8 @@ import {
 import { getBuiltinRules } from '../../lib/domains/log_entries_domain/builtin_rules';
 import { SavedSourceConfigurationFieldColumnRuntimeType } from '../../lib/sources';
 import { InfraSourceConfiguration } from '../../../public/graphql/types';
+
+import { buildLogSummaryQueryBody } from './helpers';
 
 // FIXME: move to a shared place, or to the elasticsearch-js repo
 interface DateRangeAggregation {
@@ -59,46 +60,25 @@ export const initLogsSummaryRoute = ({ framework, sources }: InfraBackendLibs) =
           fold(throwErrors(Boom.badRequest), identity)
         );
 
-        const timestampField = source.configuration.fields.timestamp;
+        const {
+          timestamp: timestampField,
+          tiebreaker: tiebreakerField,
+        } = source.configuration.fields;
         const { startDate, endDate, bucketSize, query } = payload;
-
-        const ranges = [];
-        for (let start = startDate as number; start <= endDate; start += bucketSize) {
-          ranges.push({ from: start, to: start + bucketSize });
-        }
 
         const esResults = await framework.callWithRequest<
           {},
           { log_summary: DateRangeAggregation }
         >(req, 'search', {
           index: source.configuration.logAlias,
-          body: {
-            size: 0,
-            query: {
-              bool: {
-                filter: [
-                  ...(query ? [parseFilterQuery(query)] : []),
-                  {
-                    range: {
-                      [timestampField]: {
-                        lte: endDate,
-                        gte: startDate,
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-            aggs: {
-              log_summary: {
-                date_range: {
-                  field: timestampField,
-                  ranges,
-                },
-              },
-            },
-            sort: [{ [timestampField]: 'asc' }],
-          },
+          body: buildLogSummaryQueryBody({
+            startDate,
+            endDate,
+            bucketSize,
+            timestampField,
+            tiebreakerField,
+            query,
+          }),
         });
 
         return res.response(
@@ -136,11 +116,6 @@ export const initLogsSummaryRoute = ({ framework, sources }: InfraBackendLibs) =
         const tiebreakerField = source.configuration.fields.tiebreaker;
         const { startDate, endDate, bucketSize, query, highlightTerms } = payload;
 
-        const ranges: Array<{ from: number; to: number }> = [];
-        for (let start = startDate as number; start <= endDate; start += bucketSize) {
-          ranges.push({ from: start, to: start + bucketSize });
-        }
-
         const messageFormattingRules = compileFormattingRules(
           getBuiltinRules(source.configuration.fields.message)
         );
@@ -155,44 +130,15 @@ export const initLogsSummaryRoute = ({ framework, sources }: InfraBackendLibs) =
               { log_summary: DateRangeAggregation }
             >(req, 'search', {
               index: source.configuration.logAlias,
-              body: {
-                size: 0,
-                query: {
-                  bool: {
-                    filter: [
-                      ...(query
-                        ? [{ bool: { must: [parseFilterQuery(query), highlightQuery] } }]
-                        : [highlightQuery]),
-                      {
-                        range: {
-                          [timestampField]: {
-                            lte: endDate,
-                            gte: startDate,
-                          },
-                        },
-                      },
-                    ],
-                  },
-                },
-                aggs: {
-                  log_summary: {
-                    date_range: {
-                      field: timestampField,
-                      ranges,
-                    },
-                    aggregations: {
-                      top_hits_by_key: {
-                        top_hits: {
-                          size: 1,
-                          sort: [{ [timestampField]: 'asc' }, { [tiebreakerField]: 'asc' }],
-                          _source: false,
-                        },
-                      },
-                    },
-                  },
-                },
-                sort: [{ [timestampField]: 'asc' }],
-              },
+              body: buildLogSummaryQueryBody({
+                startDate,
+                endDate,
+                bucketSize,
+                timestampField,
+                tiebreakerField,
+                query,
+                highlightQuery,
+              }),
             });
 
             return {
