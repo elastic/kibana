@@ -236,14 +236,9 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
             },
             "http": Object {
               "addLoadingCount": [MockFunction],
-              "anonymousPaths": AnonymousPaths {
-                "basePath": BasePath {
-                  "basePath": "",
-                  "get": [Function],
-                  "prepend": [Function],
-                  "remove": [Function],
-                },
-                "paths": Set {},
+              "anonymousPaths": Object {
+                "isAnonymous": [MockFunction],
+                "register": [MockFunction],
               },
               "basePath": BasePath {
                 "basePath": "",
@@ -798,14 +793,9 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                     },
                     "http": Object {
                       "addLoadingCount": [MockFunction],
-                      "anonymousPaths": AnonymousPaths {
-                        "basePath": BasePath {
-                          "basePath": "",
-                          "get": [Function],
-                          "prepend": [Function],
-                          "remove": [Function],
-                        },
-                        "paths": Set {},
+                      "anonymousPaths": Object {
+                        "isAnonymous": [MockFunction],
+                        "register": [MockFunction],
                       },
                       "basePath": BasePath {
                         "basePath": "",
@@ -1348,14 +1338,9 @@ exports[`QueryStringInput Should pass the query language to the language switche
             },
             "http": Object {
               "addLoadingCount": [MockFunction],
-              "anonymousPaths": AnonymousPaths {
-                "basePath": BasePath {
-                  "basePath": "",
-                  "get": [Function],
-                  "prepend": [Function],
-                  "remove": [Function],
-                },
-                "paths": Set {},
+              "anonymousPaths": Object {
+                "isAnonymous": [MockFunction],
+                "register": [MockFunction],
               },
               "basePath": BasePath {
                 "basePath": "",
@@ -1907,14 +1892,9 @@ exports[`QueryStringInput Should pass the query language to the language switche
                     },
                     "http": Object {
                       "addLoadingCount": [MockFunction],
-                      "anonymousPaths": AnonymousPaths {
-                        "basePath": BasePath {
-                          "basePath": "",
-                          "get": [Function],
-                          "prepend": [Function],
-                          "remove": [Function],
-                        },
-                        "paths": Set {},
+                      "anonymousPaths": Object {
+                        "isAnonymous": [MockFunction],
+                        "register": [MockFunction],
                       },
                       "basePath": BasePath {
                         "basePath": "",
@@ -2457,14 +2437,9 @@ exports[`QueryStringInput Should render the given query 1`] = `
             },
             "http": Object {
               "addLoadingCount": [MockFunction],
-              "anonymousPaths": AnonymousPaths {
-                "basePath": BasePath {
-                  "basePath": "",
-                  "get": [Function],
-                  "prepend": [Function],
-                  "remove": [Function],
-                },
-                "paths": Set {},
+              "anonymousPaths": Object {
+                "isAnonymous": [MockFunction],
+                "register": [MockFunction],
               },
               "basePath": BasePath {
                 "basePath": "",
@@ -3016,14 +2991,9 @@ exports[`QueryStringInput Should render the given query 1`] = `
                     },
                     "http": Object {
                       "addLoadingCount": [MockFunction],
-                      "anonymousPaths": AnonymousPaths {
-                        "basePath": BasePath {
-                          "basePath": "",
-                          "get": [Function],
-                          "prepend": [Function],
-                          "remove": [Function],
-                        },
-                        "paths": Set {},
+                      "anonymousPaths": Object {
+                        "isAnonymous": [MockFunction],
+                        "register": [MockFunction],
                       },
                       "basePath": BasePath {
                         "basePath": "",
