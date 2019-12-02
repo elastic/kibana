@@ -43,7 +43,7 @@ function isMatchPhraseFilter(filter: any): filter is DeprecatedMatchPhraseFilter
   return Boolean(fieldName && get(filter, ['match', fieldName, 'type']) === 'phrase');
 }
 
-export function migrateFilter(filter: Filter, indexPattern: IIndexPattern | null) {
+export function migrateFilter(filter: Filter, indexPattern?: IIndexPattern) {
   if (isMatchPhraseFilter(filter)) {
     const fieldName = Object.keys(filter.match)[0];
     const params: Record<string, any> = get(filter, ['match', fieldName]);

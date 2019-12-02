@@ -25,8 +25,11 @@ import { getSuggestionsProvider } from './suggestions_provider';
 import { SearchService } from './search/search_service';
 import { FieldFormatsService } from './field_formats_provider';
 import { QueryService } from './query';
+import { createIndexPatternSelect } from './ui/index_pattern_select';
+import { IndexPatternsService } from './index_patterns';
 
 export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPublicPluginStart> {
+  private readonly indexPatterns: IndexPatternsService = new IndexPatternsService();
   private readonly autocomplete = new AutocompleteProviderRegister();
   private readonly searchService: SearchService;
   private readonly fieldFormatsService: FieldFormatsService;
@@ -53,16 +56,30 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
   }
 
   public start(core: CoreStart): DataPublicPluginStart {
+    const { uiSettings, http, notifications, savedObjects } = core;
+    const fieldFormats = this.fieldFormatsService.start();
+
     return {
       autocomplete: this.autocomplete,
       getSuggestions: getSuggestionsProvider(core.uiSettings, core.http),
       search: this.searchService.start(core),
-      fieldFormats: this.fieldFormatsService.start(),
-      query: this.queryService.start(),
+      fieldFormats,
+      query: this.queryService.start(core.savedObjects),
+      ui: {
+        IndexPatternSelect: createIndexPatternSelect(core.savedObjects.client),
+      },
+      indexPatterns: this.indexPatterns.start({
+        uiSettings,
+        savedObjectsClient: savedObjects.client,
+        http,
+        notifications,
+        fieldFormats,
+      }),
     };
   }
 
   public stop() {
+    this.indexPatterns.stop();
     this.autocomplete.clearProviders();
   }
 }
