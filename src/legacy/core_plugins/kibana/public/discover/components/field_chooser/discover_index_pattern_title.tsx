@@ -68,15 +68,10 @@ export function DiscoverIndexPatternTitle({
               data-test-subj="indexPattern-switch-link"
               size="xs"
               onClick={() => onChange()}
-            >
-              (
-              <FormattedMessage
-                id="kbn.discover.fieldChooser.indexPattern.changeLinkLabel"
-                defaultMessage="change"
-                description="should be a short word since lack of space"
-              />
-              )
-            </EuiButtonEmpty>
+              iconSide="right"
+              iconType="arrowDown"
+              color="text"
+            />
           </EuiToolTip>
         </EuiFlexItem>
       )}
