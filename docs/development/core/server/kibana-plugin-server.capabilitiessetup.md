@@ -6,6 +6,12 @@
 
 APIs to manage the [Capabilities](./kibana-plugin-server.capabilities.md) that will be used by the application.
 
+Plugins relying on capabilities to toggle some of their features should register them during the setup phase using the `registerProvider` method.
+
+Plugins having the responsibility to restrict capabilities depending on a given context should register their capabilities switcher using the `registerSwitcher` method.
+
+Refers to the methods documentation for complete description and examples.
+
 <b>Signature:</b>
 
 ```typescript
@@ -16,6 +22,6 @@ export interface CapabilitiesSetup
 
 |  Method | Description |
 |  --- | --- |
-|  [registerProvider(provider)](./kibana-plugin-server.capabilitiessetup.registerprovider.md) | Register a [CapabilitiesProvider](./kibana-plugin-server.capabilitiesprovider.md) to be used when resolving capabilities. |
-|  [registerSwitcher(switcher)](./kibana-plugin-server.capabilitiessetup.registerswitcher.md) | Register a [CapabilitiesSwitcher](./kibana-plugin-server.capabilitiesswitcher.md) to be used when resolving capabilities. |
+|  [registerProvider(provider)](./kibana-plugin-server.capabilitiessetup.registerprovider.md) | Register a [CapabilitiesProvider](./kibana-plugin-server.capabilitiesprovider.md) to be used to provide [Capabilities](./kibana-plugin-server.capabilities.md) when resolving them. |
+|  [registerSwitcher(switcher)](./kibana-plugin-server.capabilitiessetup.registerswitcher.md) | Register a [CapabilitiesSwitcher](./kibana-plugin-server.capabilitiesswitcher.md) to be used to change the default state of the [Capabilities](./kibana-plugin-server.capabilities.md) entries when resolving them.<!-- -->A capabilities switcher can only change the state of existing capabilities. Capabilities added or removed when invoking the switcher will be ignored. |
 

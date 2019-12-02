@@ -4,7 +4,7 @@
 
 ## CapabilitiesSetup.registerProvider() method
 
-Register a [CapabilitiesProvider](./kibana-plugin-server.capabilitiesprovider.md) to be used when resolving capabilities.
+Register a [CapabilitiesProvider](./kibana-plugin-server.capabilitiesprovider.md) to be used to provide [Capabilities](./kibana-plugin-server.capabilities.md) when resolving them.
 
 <b>Signature:</b>
 
@@ -24,6 +24,7 @@ registerProvider(provider: CapabilitiesProvider): void;
 
 ## Example
 
+How to register a plugin's capabilities during setup
 
 ```ts
 // my-plugin/server/plugin.ts
@@ -34,10 +35,11 @@ public setup(core: CoreSetup, deps: {}) {
          myPlugin: true,
        },
        myPlugin: {
-         feature: true,
+         someFeature: true,
+         featureDisabledByDefault: false,
        },
      }
-   })
+   });
 }
 
 ```

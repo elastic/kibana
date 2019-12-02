@@ -4,7 +4,9 @@
 
 ## CapabilitiesSetup.registerSwitcher() method
 
-Register a [CapabilitiesSwitcher](./kibana-plugin-server.capabilitiesswitcher.md) to be used when resolving capabilities.
+Register a [CapabilitiesSwitcher](./kibana-plugin-server.capabilitiesswitcher.md) to be used to change the default state of the [Capabilities](./kibana-plugin-server.capabilities.md) entries when resolving them.
+
+A capabilities switcher can only change the state of existing capabilities. Capabilities added or removed when invoking the switcher will be ignored.
 
 <b>Signature:</b>
 
@@ -22,22 +24,23 @@ registerSwitcher(switcher: CapabilitiesSwitcher): void;
 
 `void`
 
-## Remarks
-
-A capabilities switcher can only change the state of existing capabilities. capabilities added or removed when invoking the switcher will be ignored.
-
 ## Example
 
+How to restrict some capabilities
 
 ```ts
 // my-plugin/server/plugin.ts
 public setup(core: CoreSetup, deps: {}) {
    core.capabilities.registerSwitcher((request, capabilities) => {
-     if(myPluginApi.shouldRestrictBecauseOf(request)) {
-       return myPluginApi.disableSomeCapabilities(capabilities);
+     if(myPluginApi.shouldRestrictSomePluginBecauseOf(request)) {
+       return {
+         somePlugin: {
+           featureEnabledByDefault: false // `featureEnabledByDefault` will be disabled. All other capabilities will remain unchanged.
+         }
+       }
      }
-     return capabilities;
-   })
+     return {}; // All capabilities will remain unchanged.
+   });
 }
 
 ```

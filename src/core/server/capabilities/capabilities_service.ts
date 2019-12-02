@@ -28,6 +28,14 @@ import { registerRoutes } from './routes';
 /**
  * APIs to manage the {@link Capabilities} that will be used by the application.
  *
+ * Plugins relying on capabilities to toggle some of their features should register them during the setup phase
+ * using the `registerProvider` method.
+ *
+ * Plugins having the responsibility to restrict capabilities depending on a given context should register
+ * their capabilities switcher using the `registerSwitcher` method.
+ *
+ * Refers to the methods documentation for complete description and examples.
+ *
  * @public
  */
 export interface CapabilitiesSetup {
@@ -36,6 +44,7 @@ export interface CapabilitiesSetup {
    * when resolving them.
    *
    * @example
+   * How to register a plugin's capabilities during setup
    * ```ts
    * // my-plugin/server/plugin.ts
    * public setup(core: CoreSetup, deps: {}) {
@@ -45,10 +54,11 @@ export interface CapabilitiesSetup {
    *          myPlugin: true,
    *        },
    *        myPlugin: {
-   *          feature: true,
+   *          someFeature: true,
+   *          featureDisabledByDefault: false,
    *        },
    *      }
-   *    })
+   *    });
    * }
    * ```
    */
@@ -58,22 +68,26 @@ export interface CapabilitiesSetup {
    * Register a {@link CapabilitiesSwitcher} to be used to change the default state
    * of the {@link Capabilities} entries when resolving them.
    *
+   * A capabilities switcher can only change the state of existing capabilities.
+   * Capabilities added or removed when invoking the switcher will be ignored.
+   *
    * @example
+   * How to restrict some capabilities
    * ```ts
    * // my-plugin/server/plugin.ts
    * public setup(core: CoreSetup, deps: {}) {
    *    core.capabilities.registerSwitcher((request, capabilities) => {
-   *      if(myPluginApi.shouldRestrictBecauseOf(request)) {
-   *        return myPluginApi.disableSomeCapabilities(capabilities);
+   *      if(myPluginApi.shouldRestrictSomePluginBecauseOf(request)) {
+   *        return {
+   *          somePlugin: {
+   *            featureEnabledByDefault: false // `featureEnabledByDefault` will be disabled. All other capabilities will remain unchanged.
+   *          }
+   *        }
    *      }
-   *      return capabilities;
-   *    })
+   *      return {}; // All capabilities will remain unchanged.
+   *    });
    * }
    * ```
-   *
-   * @remarks
-   * A capabilities switcher can only change the state of existing capabilities.
-   * capabilities added or removed when invoking the switcher will be ignored.
    */
   registerSwitcher(switcher: CapabilitiesSwitcher): void;
 }
