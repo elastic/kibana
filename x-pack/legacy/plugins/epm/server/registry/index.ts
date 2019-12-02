@@ -87,7 +87,7 @@ export function pathParts(path: string): AssetParts {
   }
 
   // This is to cover for the fields.yml files inside the "fields" directory
-  if (file === undefined) {
+  if (file === undefined && type.endsWith('.yml')) {
     file = type;
     type = 'fields';
     service = '';
