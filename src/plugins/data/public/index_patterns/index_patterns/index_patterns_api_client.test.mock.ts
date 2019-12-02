@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { setup } from '../../../../../../test_utils/public/http_test_setup';
+import { setup } from 'test_utils/http_test_setup';
 
 export const { http } = setup(injectedMetadata => {
   injectedMetadata.getBasePath.mockReturnValue('/hola/daro/');
