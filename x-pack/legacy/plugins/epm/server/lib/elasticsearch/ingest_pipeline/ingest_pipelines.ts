@@ -5,8 +5,8 @@
  */
 
 import { CallESAsCurrentUser } from './cluster_access';
-import * as Registry from '../registry';
-import { AssetReference, ElasticsearchAssetType } from '../../common/types';
+import * as Registry from '../../../registry';
+import { AssetReference, ElasticsearchAssetType } from '../../../../common/types';
 
 export function rewriteIngestPipeline(
   pipeline: string,

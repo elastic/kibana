@@ -6,7 +6,7 @@
 
 import { SavedObjectsClientContract } from 'src/core/server/';
 import { CallESAsCurrentUser } from '../lib/cluster_access';
-import { installPipelines } from '../lib/ingest_pipelines';
+import { installPipelines } from '../lib/elasticsearch/ingest_pipeline/ingest_pipelines';
 import { AssetReference } from '../../common/types';
 import { SAVED_OBJECT_TYPE_DATASOURCES } from '../../common/constants';
 import { Datasource, DatasourceAttributes } from '../../common/types';
