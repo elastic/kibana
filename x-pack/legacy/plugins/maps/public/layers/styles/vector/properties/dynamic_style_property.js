@@ -34,14 +34,14 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     }
 
     supportsFieldMeta() {
-      const fieldMetaOptions = this._getFieldMetaOptions();
+      const fieldMetaOptions = this.getFieldMetaOptions();
       return _.get(fieldMetaOptions, 'isEnabled', true)
         && this.isScaled()
         && this._field.supportsFieldMeta();
     }
 
     async getFieldMetaRequest() {
-      const fieldMetaOptions = this._getFieldMetaOptions();
+      const fieldMetaOptions = this.getFieldMetaOptions();
       return this._field.getFieldMetaRequest({
         sigma: _.get(fieldMetaOptions, 'sigma', DEFAULT_SIGMA),
       });
@@ -55,7 +55,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
       return true;
     }
 
-    _getFieldMetaOptions() {
+    getFieldMetaOptions() {
       return _.get(this.getOptions(), 'fieldMetaOptions', {});
     }
 }

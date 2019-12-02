@@ -78,10 +78,10 @@ export class VectorStyle extends AbstractStyle {
   }
 
   renderEditor({ layer, onStyleDescriptorChange }) {
-    const styleProperties = { ...this.getRawProperties() };
+    const rawProperties = this.getRawProperties();
     const handlePropertyChange = (propertyName, settings) => {
-      styleProperties[propertyName] = settings;//override single property, but preserve the rest
-      const vectorStyleDescriptor = VectorStyle.createDescriptor(styleProperties);
+      rawProperties[propertyName] = settings;//override single property, but preserve the rest
+      const vectorStyleDescriptor = VectorStyle.createDescriptor(rawProperties);
       onStyleDescriptorChange(vectorStyleDescriptor);
     };
 

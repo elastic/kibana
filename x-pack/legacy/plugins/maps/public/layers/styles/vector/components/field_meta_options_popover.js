@@ -4,9 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButtonEmpty, EuiPopover, } from '@elastic/eui';
+import React, { Component, Fragment } from 'react';
+import {
+  EuiButtonIcon,
+  EuiFormRow,
+  EuiPopover,
+  EuiSwitch,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export class FieldMetaOptionsPopover extends Component {
 
@@ -26,18 +31,39 @@ export class FieldMetaOptionsPopover extends Component {
     });
   }
 
+  _onIsEnabledChange = event => {
+    this.props.onChange({
+      ...this.props.fieldMetaOptions,
+      isEnabled: !event.target.checked,
+    });
+  };
+
   _renderButton() {
     return (
-      <EuiButtonEmpty
+      <EuiButtonIcon
         onClick={this._togglePopover}
         size="xs"
         iconType="gear"
-      >
-        <FormattedMessage
-          id="xpack.maps.styles.fieldMetaOptions.togglePopoverLabel"
-          defaultMessage="Advanced config"
-        />
-      </EuiButtonEmpty>
+      />
+    );
+  }
+
+  _renderContent() {
+    return (
+      <Fragment>
+        <EuiFormRow
+          display="columnCompressedSwitch"
+        >
+          <EuiSwitch
+            label={i18n.translate('xpack.maps.styles.fieldMetaOptions.isEnabledLabel', {
+              defaultMessage: 'Clamp range to on-screen features',
+            })}
+            checked={!this.props.fieldMetaOptions.isEnabled}
+            onChange={this._onIsEnabledChange}
+            compressed
+          />
+        </EuiFormRow>
+      </Fragment>
     );
   }
 
@@ -51,9 +77,7 @@ export class FieldMetaOptionsPopover extends Component {
         closePopover={this._closePopover}
         ownFocus
       >
-        <div>
-          stuff goes here
-        </div>
+        {this._renderContent()}
       </EuiPopover>
     );
   }

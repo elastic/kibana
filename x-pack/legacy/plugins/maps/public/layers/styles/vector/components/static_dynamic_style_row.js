@@ -30,6 +30,17 @@ export class StaticDynamicStyleRow extends Component {
     return this.props.styleProperty.getOptions();
   }
 
+  _onFieldMetaOptionsChange = fieldMetaOptions => {
+    const styleDescriptor = {
+      type: VectorStyle.STYLE_TYPE.DYNAMIC,
+      options: {
+        ...this._getStyleOptions(),
+        fieldMetaOptions
+      }
+    };
+    this.props.handlePropertyChange(this.props.styleProperty.getStyleName(), styleDescriptor);
+  }
+
   _onStaticStyleChange = options => {
     const styleDescriptor = {
       type: VectorStyle.STYLE_TYPE.STATIC,
@@ -71,7 +82,10 @@ export class StaticDynamicStyleRow extends Component {
             onChange={this._onDynamicStyleChange}
             styleOptions={this._getStyleOptions()}
           />
-          <FieldMetaOptionsPopover/>
+          <FieldMetaOptionsPopover
+            fieldMetaOptions={this.props.styleProperty.getFieldMetaOptions()}
+            onChange={this._onFieldMetaOptionsChange}
+          />
         </Fragment>
       );
     }
