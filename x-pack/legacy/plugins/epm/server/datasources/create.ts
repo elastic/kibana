@@ -7,6 +7,7 @@
 import { SavedObjectsClientContract } from 'src/core/server/';
 import { CallESAsCurrentUser } from '../lib/cluster_access';
 import { installPipelines } from '../lib/elasticsearch/ingest_pipeline/ingest_pipelines';
+import { installTemplates } from '../packages/install';
 import { AssetReference } from '../../common/types';
 import { SAVED_OBJECT_TYPE_DATASOURCES } from '../../common/constants';
 import { Datasource, DatasourceAttributes } from '../../common/types';
@@ -18,6 +19,8 @@ export async function createDatasource(options: {
 }) {
   const { savedObjectsClient, pkgkey, callCluster } = options;
   const toSave = await installPipelines({ pkgkey, callCluster });
+  // TODO: Clean up
+  await installTemplates({ pkgkey, callCluster });
 
   await saveDatasourceReferences({
     savedObjectsClient,

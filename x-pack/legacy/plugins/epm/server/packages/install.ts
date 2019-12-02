@@ -17,6 +17,7 @@ import {
   getTemplate,
   generateTemplateName,
 } from '../lib/elasticsearch/template/template';
+import { CallESAsCurrentUser } from '../lib/cluster_access';
 
 export async function installPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -129,7 +130,7 @@ const isFields = ({ path }: Registry.ArchiveEntry) => {
  * @param callCluster
  * @param pkgkey
  */
-async function installTemplates({
+export async function installTemplates({
   callCluster,
   pkgkey,
 }: {
