@@ -115,7 +115,11 @@ export class ExpressionInput extends React.Component<Props> {
     this.props.onChange(value);
   };
 
-  provideSuggestions = (model: monacoEditor.editor.ITextModel, position: monacoEditor.Position) => {
+  provideSuggestions = (
+    model: monacoEditor.editor.ITextModel,
+    position: monacoEditor.Position,
+    context: monacoEditor.languages.CompletionContext
+  ) => {
     const text = model.getValue();
     const textRange = model.getFullModelRange();
 
@@ -126,32 +130,62 @@ export class ExpressionInput extends React.Component<Props> {
       endColumn: textRange.endColumn,
     });
 
-    const wordUntil = model.getWordUntilPosition(position);
-    const wordRange = new monacoEditor.Range(
-      position.lineNumber,
-      wordUntil.startColumn,
-      position.lineNumber,
-      wordUntil.endColumn
-    );
+    let wordRange: monacoEditor.Range;
+    let aSuggestions;
+    if (context.triggerCharacter === ' ') {
+      const wordUntil = model.getWordUntilPosition(position);
+      wordRange = new monacoEditor.Range(
+        position.lineNumber,
+        wordUntil.startColumn,
+        position.lineNumber,
+        wordUntil.endColumn
+      );
+      aSuggestions = getAutocompleteSuggestions(
+        this.props.functionDefinitions,
+        text,
+        text.length - lengthAfterPosition
+      );
+    } else if (context.triggerCharacter === '{') {
+      const wordUntil = model.getWordAtPosition(position.delta(0, -3));
+      if (wordUntil) {
+        wordRange = new monacoEditor.Range(
+          position.lineNumber,
+          position.column,
+          position.lineNumber,
+          position.column
+        );
+        // aSuggestions = getAutocompleteSuggestions(
+        //   this.props.functionDefinitions,
+        //   text,
+        //   text.length - lengthAfterPosition
+        // );
+        aSuggestions = getAutocompleteSuggestions(
+          this.props.functionDefinitions,
+          text.substring(0, text.length - lengthAfterPosition) + '}',
+          text.length - lengthAfterPosition
+        );
+      }
+    }
 
-    const aSuggestions = getAutocompleteSuggestions(
-      this.props.functionDefinitions,
-      text,
-      text.length - lengthAfterPosition
-    );
+    if (!aSuggestions) {
+      return { suggestions: [] };
+    }
 
-    const suggestions = aSuggestions.map((s: AutocompleteSuggestion) => {
+    const suggestions = aSuggestions.map((s: AutocompleteSuggestion, index) => {
+      const sortText = String.fromCharCode(index);
       if (s.type === 'argument') {
         return {
           label: s.argDef.name,
-          kind: monacoEditor.languages.CompletionItemKind.Field,
+          kind: monacoEditor.languages.CompletionItemKind.Variable,
           documentation: { value: getArgReferenceStr(s.argDef), isTrusted: true },
+          detail: getArgReferenceStr(s.argDef),
           insertText: s.text,
           command: {
             title: 'Trigger Suggestion Dialog',
             id: 'editor.action.triggerSuggest',
           },
           range: wordRange,
+          sortText,
         };
       } else if (s.type === 'value') {
         return {
@@ -163,6 +197,7 @@ export class ExpressionInput extends React.Component<Props> {
             id: 'editor.action.triggerSuggest',
           },
           range: wordRange,
+          sortText,
         };
       } else {
         return {
@@ -172,12 +207,14 @@ export class ExpressionInput extends React.Component<Props> {
             value: getFunctionReferenceStr(s.fnDef),
             isTrusted: true,
           },
+          detail: getFunctionReferenceStr(s.fnDef),
           insertText: s.text,
           command: {
             title: 'Trigger Suggestion Dialog',
             id: 'editor.action.triggerSuggest',
           },
           range: wordRange,
+          sortText,
         };
       }
     });
@@ -270,10 +307,18 @@ export class ExpressionInput extends React.Component<Props> {
           <div className="canvasExpressionInput__editor">
             <Editor
               languageId={LANGUAGE_ID}
+              languageConfiguration={{
+                autoClosingPairs: [
+                  {
+                    open: '{',
+                    close: '}',
+                  },
+                ],
+              }}
               value={value}
               onChange={this.onChange}
               suggestionProvider={{
-                triggerCharacters: [' '],
+                triggerCharacters: [' ', '{'],
                 provideCompletionItems: this.provideSuggestions,
               }}
               hoverProvider={{
