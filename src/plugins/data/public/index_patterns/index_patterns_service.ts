@@ -27,7 +27,7 @@ import { FieldFormatsStart } from '../field_formats_provider';
 import { setNotifications, setFieldFormats, setHttp } from './services';
 import { IndexPatterns } from './index_patterns';
 
-interface IndexPatternDependencies {
+export interface IndexPatternDependencies {
   uiSettings: IUiSettingsClient;
   savedObjectsClient: SavedObjectsClientContract;
   http: HttpServiceBase;
