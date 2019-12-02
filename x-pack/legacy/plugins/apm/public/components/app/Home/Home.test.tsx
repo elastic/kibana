@@ -7,20 +7,26 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import { Home } from '../Home';
-import * as plugin from '../../../new-platform/plugin';
-
-jest.spyOn(plugin, 'usePlugins').mockReturnValue(({
-  apm: { config: {} as plugin.ConfigSchema, stackVersion: '0' }
-} as unknown) as plugin.ApmPluginStartDeps & {
-  apm: { config: plugin.ConfigSchema; stackVersion: string };
-});
+import { MockPluginContextWrapper } from '../../../utils/testHelpers';
 
 describe('Home component', () => {
   it('should render services', () => {
-    expect(shallow(<Home tab="services" />)).toMatchSnapshot();
+    expect(
+      shallow(
+        <MockPluginContextWrapper>
+          <Home tab="services" />
+        </MockPluginContextWrapper>
+      )
+    ).toMatchSnapshot();
   });
 
   it('should render traces', () => {
-    expect(shallow(<Home tab="traces" />)).toMatchSnapshot();
+    expect(
+      shallow(
+        <MockPluginContextWrapper>
+          <Home tab="traces" />
+        </MockPluginContextWrapper>
+      )
+    ).toMatchSnapshot();
   });
 });
