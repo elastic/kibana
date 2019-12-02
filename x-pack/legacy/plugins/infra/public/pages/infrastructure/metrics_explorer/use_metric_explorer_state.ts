@@ -5,7 +5,7 @@
  */
 
 import { useState, useCallback, useContext } from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 import {
   MetricsExplorerMetric,
   MetricsExplorerAggregation,
@@ -27,7 +27,7 @@ export interface MetricExplorerViewState {
 
 export const useMetricsExplorerState = (
   source: SourceQuery.Query['source']['configuration'],
-  derivedIndexPattern: StaticIndexPattern
+  derivedIndexPattern: IIndexPattern
 ) => {
   const [refreshSignal, setRefreshSignal] = useState(0);
   const [afterKey, setAfterKey] = useState<string | null>(null);

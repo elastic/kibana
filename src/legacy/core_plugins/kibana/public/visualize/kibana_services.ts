@@ -117,7 +117,6 @@ export {
 
 // export types
 export { METRIC_TYPE };
-export { StaticIndexPattern } from 'ui/index_patterns';
 export { AppState } from 'ui/state_management/app_state';
 export { VisType } from 'ui/vis';
 
