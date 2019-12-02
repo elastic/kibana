@@ -77,6 +77,39 @@ filters
 
 [[canvas-expressions-only-fetch-and-manipulate-data]]
 === Expressions Only Fetch and Manipulate Data
+So far you’ve only seen expressions as a way to produce visualizations, but that’s not really what’s happening. Expressions only produce data which is then used to create something, which in the case of Canvas, means rendering an element. An element can be a visualization, driven by data, but it can also be something much simpler, like a static image. Either way, an expression is used to produce an output that is used to render the desired result. For example, here’s an expression that shows a placekitten image:
+
+[source,text]
+----
+image dataurl=https://placekitten.com/160/160 mode="cover"
+----
+
+But as mentioned, this doesn’t actually _render that image_, but instead it _produces some output that can be used to render that image_. That’s an important distinction, and you can see the actual output by adding in the render function and telling it to produce debug output, like so:
+
+[source,text]
+----
+image dataurl=https://placekitten.com/160/160 mode="cover"
+| render as=debug
+----
+
+If you run that in Canvas, instead of seeing an image, you should see the following JSON output.
+
+[source,JSON]
+----
+{
+  "type": "image",
+  "mode": "cover",
+  "dataurl": "https://placekitten.com/160/160"
+}
+----
+
+NOTE: You may need to expand the element’s size to see the whole output.
+
+Canvas uses this output’s "data type" to map to a specific renderer and passes the entire output into it. It’s up to the image render function in this case to produce an image on the workpad’s page. In this case, the expression produces some JSON output, but expressions can also produce other, simpler data, like a string or a number. But usually more useful results tend to be JSON.
+
+If this had been the output of the table, pie chart, or plot chart from the previous sections, it would have been much more complex, but the idea is the same; call some function, pass in the expression’s output, and render something on the page. As far as the expression, and the associated interpreter, is concerned, the expression produced an output and its job is done.
+
+Canvas uses that output to render an element, but other applications can use expressions to do pretty much anything. As stated previously, expressions simply execute functions, and the functions are all written in Javascript. That means if you can do something in Javascript, you can do it with an expression. This can include, just to name a few things, sending emails or notifications, reading from or writing to a file, controlling devices with WebUSB or Web Bluetooth, consuming an external API, really just about anything. If your Javascript works in the environment where the code will run, such as in Node.js or in a browser, you can do it with an expression.
 
 [[canvas-handling-context-and-argument-types]]
 === Handling context and argument types
