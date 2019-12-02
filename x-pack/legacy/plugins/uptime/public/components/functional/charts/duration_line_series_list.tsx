@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { LineSeries, CurveType, getSpecId } from '@elastic/charts';
+import { LineSeries, CurveType } from '@elastic/charts';
 import { LocationDurationLine } from '../../../../common/graphql/types';
 import { getColorsMap } from './get_colors_map';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
@@ -21,9 +21,9 @@ export const DurationLineSeriesList = ({ lines, meanColor }: Props) => (
       <LineSeries
         curve={CurveType.CURVE_MONOTONE_X}
         // this id is used for the line chart representing the average duration length
-        customSeriesColors={getColorsMap(meanColor, getSpecId(`average-${name}`))}
+        customSeriesColors={getColorsMap(meanColor, `average-${name}`)}
         data={line.map(({ x, y }) => [x, microsToMillis(y || null)])}
-        id={getSpecId(`loc-avg-${name}`)}
+        id={`loc-avg-${name}`}
         key={`locline-${name}`}
         name={name}
         xAccessor={0}

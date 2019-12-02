@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { getSpecId, getGroupId, ScaleType, BarSeries } from '@elastic/charts';
+import { ScaleType, BarSeries } from '@elastic/charts';
 import { getSeriesColors, getBarStyles } from '../utils/series_styles';
 import { ChartsEntities } from '../model/charts';
 import { X_ACCESSOR_INDEX, Y_ACCESSOR_INDEXES } from '../../../constants';
@@ -40,8 +40,8 @@ export function BarSeriesDecorator({
   useDefaultGroupDomain,
   sortIndex,
 }) {
-  const id = getSpecId(seriesId);
-  const groupId = getGroupId(seriesGroupId);
+  const id = seriesId;
+  const groupId = seriesGroupId;
   const customSeriesColors = getSeriesColors(color, id);
   const barSeriesStyle = getBarStyles(bars, color);
 

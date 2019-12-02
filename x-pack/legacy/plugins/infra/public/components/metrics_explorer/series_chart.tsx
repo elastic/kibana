@@ -7,7 +7,6 @@
 import React from 'react';
 import {
   ScaleType,
-  getSpecId,
   DataSeriesColorsValues,
   CustomSeriesColorsMap,
   AreaSeries,
@@ -45,7 +44,7 @@ export const MetricsExplorerAreaChart = ({ metric, id, series, type, stack }: Pr
     colorTransformer(MetricsExplorerColor.color0);
 
   const yAccessor = `metric_${id}`;
-  const specId = getSpecId(yAccessor);
+  const specId = yAccessor;
   const colors: DataSeriesColorsValues = {
     colorValues: [],
     specId,
@@ -87,7 +86,7 @@ export const MetricsExplorerBarChart = ({ metric, id, series, stack }: Props) =>
     colorTransformer(MetricsExplorerColor.color0);
 
   const yAccessor = `metric_${id}`;
-  const specId = getSpecId(yAccessor);
+  const specId = yAccessor;
   const colors: DataSeriesColorsValues = {
     colorValues: [],
     specId,

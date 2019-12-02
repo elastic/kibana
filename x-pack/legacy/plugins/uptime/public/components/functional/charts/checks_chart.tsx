@@ -8,8 +8,6 @@ import {
   AreaSeries,
   Axis,
   Chart,
-  getAxisId,
-  getSpecId,
   Position,
   Settings,
   ScaleType,
@@ -45,8 +43,8 @@ interface ChecksChartProps {
  * @param props The props values required by this component.
  */
 export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartProps) => {
-  const upSeriesSpecId = getSpecId('Up');
-  const downSeriesSpecId = getSpecId('Down');
+  const upSeriesSpecId = 'Up';
+  const downSeriesSpecId = 'Down';
   const [getUrlParams] = useUrlParams();
   const { absoluteDateRangeStart: min, absoluteDateRangeEnd: max } = getUrlParams();
 
@@ -74,7 +72,7 @@ export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartPr
         <Chart>
           <Settings xDomain={{ min, max }} showLegend={false} />
           <Axis
-            id={getAxisId('checksBottom')}
+            id="checksBottom"
             position={Position.Bottom}
             showOverlappingTicks={true}
             tickFormat={timeFormatter(getChartDateLabel(min, max))}
@@ -84,7 +82,7 @@ export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartPr
             })}
           />
           <Axis
-            id={getAxisId('left')}
+            id="left"
             position={Position.Left}
             tickFormat={d => Number(d).toFixed(0)}
             title={i18n.translate('xpack.uptime.monitorChart.checksChart.leftAxis.title', {

@@ -9,7 +9,6 @@ import {
   AreaSeries,
   BarSeries,
   ScaleType,
-  getSpecId,
   DataSeriesColorsValues,
   CustomSeriesColorsMap,
   RecursivePartial,
@@ -48,13 +47,13 @@ export const AreaChart = ({ id, color, series, name, type, stack }: Props) => {
   };
   const colors: DataSeriesColorsValues = {
     colorValues: [],
-    specId: getSpecId(id),
+    specId: id,
   };
   const customColors: CustomSeriesColorsMap = new Map();
   customColors.set(colors, color || '#999');
   return (
     <AreaSeries
-      id={getSpecId(id)}
+      id={id}
       name={name}
       xScaleType={ScaleType.Time}
       yScaleType={ScaleType.Linear}
@@ -81,13 +80,13 @@ export const BarChart = ({ id, color, series, name, type, stack }: Props) => {
   };
   const colors: DataSeriesColorsValues = {
     colorValues: [],
-    specId: getSpecId(id),
+    specId: id,
   };
   const customColors: CustomSeriesColorsMap = new Map();
   customColors.set(colors, color || '#999');
   return (
     <BarSeries
-      id={getSpecId(id)}
+      id={id}
       name={name}
       xScaleType={ScaleType.Time}
       yScaleType={ScaleType.Linear}

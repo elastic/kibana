@@ -5,7 +5,7 @@
  */
 
 import React, { FC } from 'react';
-import { BarSeries, Chart, getSpecId, ScaleType, Settings, TooltipType } from '@elastic/charts';
+import { BarSeries, Chart, ScaleType, Settings, TooltipType } from '@elastic/charts';
 import { Axes } from '../common/axes';
 import { getCustomColor } from '../common/utils';
 import { LineChartPoint } from '../../../../common/chart_loader';
@@ -40,7 +40,7 @@ export const EventRateChart: FC<Props> = ({
 
           <Settings tooltip={TooltipType.None} />
           <BarSeries
-            id={getSpecId('event_rate')}
+            id="event_rate"
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor={'time'}

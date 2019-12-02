@@ -8,7 +8,6 @@ import {
   CustomSeriesColorsMap,
   DARK_THEME,
   DataSeriesColorsValues,
-  getSpecId,
   LIGHT_THEME,
   mergeWithDefaultTheme,
   PartialTheme,
@@ -86,7 +85,7 @@ export const getSeriesStyle = (
   const customSeriesColors: CustomSeriesColorsMap = new Map();
   const dataSeriesColorValues: DataSeriesColorsValues = {
     colorValues: seriesType === SeriesType.BAR ? [seriesKey] : [],
-    specId: getSpecId(seriesKey),
+    specId: seriesKey,
   };
 
   customSeriesColors.set(dataSeriesColorValues, color);

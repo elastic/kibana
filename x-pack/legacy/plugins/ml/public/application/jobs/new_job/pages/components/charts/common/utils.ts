@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getSpecId, CustomSeriesColorsMap, DataSeriesColorsValues } from '@elastic/charts';
+import { CustomSeriesColorsMap, DataSeriesColorsValues } from '@elastic/charts';
 
 export function getCustomColor(specId: string, color: string): CustomSeriesColorsMap {
   const lineDataSeriesColorValues: DataSeriesColorsValues = {
     colorValues: [],
-    specId: getSpecId(specId),
+    specId,
   };
   return new Map([[lineDataSeriesColorValues, color]]);
 }

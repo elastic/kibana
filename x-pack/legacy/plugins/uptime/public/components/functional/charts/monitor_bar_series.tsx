@@ -8,10 +8,8 @@ import {
   Axis,
   BarSeries,
   Chart,
-  getSpecId,
   ScaleType,
   Settings,
-  getAxisId,
   Position,
   timeFormatter,
 } from '@elastic/charts';
@@ -53,7 +51,7 @@ export const MonitorBarSeries = ({
   dangerColor,
   histogramSeries,
 }: MonitorBarSeriesProps) => {
-  const id = getSpecId('downSeries');
+  const id = 'downSeries';
 
   return seriesHasDownValues(histogramSeries) ? (
     <div style={{ height: 50, width: '100%', maxWidth: '1200px' }}>
@@ -61,14 +59,14 @@ export const MonitorBarSeries = ({
         <Settings xDomain={{ min: absoluteStartDate, max: absoluteEndDate }} />
         <Axis
           hide
-          id={getAxisId('bottom')}
+          id="bottom"
           position={Position.Bottom}
           tickFormat={timeFormatter(getChartDateLabel(absoluteStartDate, absoluteEndDate))}
         />
         <BarSeries
+          id={id}
           customSeriesColors={getColorsMap(dangerColor, id)}
           data={(histogramSeries || []).map(({ timestamp, down }) => [timestamp, down])}
-          id={id}
           name={i18n.translate('xpack.uptime.monitorList.downLineSeries.downLabel', {
             defaultMessage: 'Down checks',
           })}
