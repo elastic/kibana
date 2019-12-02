@@ -7,16 +7,12 @@
 import React, { useEffect, useState } from 'react';
 import uuid from 'uuid';
 import { Query, esFilters } from 'src/plugins/data/common';
-import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
+import styled from 'styled-components';
 
-import {
-  EmbeddablePanel,
-  ViewMode,
-} from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { start } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import { start } from '../../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import * as i18n from './translations';
 // @ts-ignore
-import { MAP_SAVED_OBJECT_TYPE } from '../../../../../maps/common/constants';
+import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../maps/common/constants';
 
 import { MapEmbeddable } from './types';
 import { getLayerList } from './map_config';
@@ -25,6 +21,21 @@ export interface EmbeddedMapProps {
   query: Query;
   filters: esFilters.Filter[];
 }
+
+const EmbeddedPanel = styled.div`
+  z-index: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  .embPanel__content {
+    display: flex;
+    flex: 1 1 100%;
+    z-index: 1;
+    min-height: 0; // Absolute must for Firefox to scroll contents
+  }
+`;
 
 export const EmbeddedMap = React.memo<EmbeddedMapProps>(({ filters, query }) => {
   const [embeddable, setEmbeddable] = useState<MapEmbeddable | null>(null);
@@ -41,7 +52,7 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(({ filters, query }) => 
     hidePanelTitles: true,
     query,
     refreshConfig: { value: 0, pause: true },
-    viewMode: ViewMode.VIEW,
+    viewMode: 'view',
     isLayerTOCOpen: false,
     hideFilterActions: true,
     mapCenter: { lon: 11, lat: 47, zoom: 0 },
@@ -49,6 +60,8 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(({ filters, query }) => 
     disableTooltipControl: true,
     hideToolbarOverlay: true,
   };
+
+  const embeddableRoot: React.RefObject<HTMLDivElement> = React.createRef();
 
   useEffect(() => {
     async function setupEmbeddable() {
@@ -59,26 +72,17 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(({ filters, query }) => 
     }
     setupEmbeddable();
   }, []);
-  const getActions = () => {
-    return [];
-  };
-  return embeddable != null ? (
-    <EmbeddablePanel
-      data-test-subj="embeddable-panel"
-      hideHeader={true}
-      embeddable={embeddable}
-      // @ts-ignore
-      getActions={getActions}
-      getEmbeddableFactory={start.getEmbeddableFactory}
-      getAllEmbeddableFactories={start.getEmbeddableFactories}
-      SavedObjectFinder={SavedObjectFinder}
-      inspector={{
-        isAvailable: () => false,
-        // @ts-ignore
-        open: false,
-      }}
-    />
-  ) : null;
+  useEffect(() => {
+    if (embeddableRoot.current && embeddable) {
+      embeddable.render(embeddableRoot.current);
+    }
+  }, [embeddable]);
+
+  return (
+    <EmbeddedPanel>
+      <div className="embPanel__content" ref={embeddableRoot} />
+    </EmbeddedPanel>
+  );
 });
 
 EmbeddedMap.displayName = 'EmbeddedMap';

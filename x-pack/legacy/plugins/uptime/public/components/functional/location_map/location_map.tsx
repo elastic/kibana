@@ -7,7 +7,7 @@
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
-import { EmbeddedMap } from '../embeddables/embedded_map';
+import { EmbeddedMap } from './embeddables/embedded_map';
 import { fetchMonitorLocations } from '../../../state/actions/monitor';
 import { AppState } from '../../../state';
 import { getMonitorLocations } from '../../../state/selectors';
@@ -23,7 +23,6 @@ interface LocationMapProps {
 }
 
 export const LocationMapComponent = ({ monitorId, loadMonitorLocations }: LocationMapProps) => {
-  // return <div style={style} ref={el => (mapContainer = el)} />;
   useEffect(() => {
     loadMonitorLocations(monitorId);
   }, []);

@@ -28,6 +28,7 @@ import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../infra/public';
 import { getTitle } from '../lib/helper/get_title';
 import { LocationMap } from '../components/functional/location_map';
+import { MonitorStatusDetails } from '../components/functional/monitor_status_details';
 
 interface MonitorPageProps {
   logMonitorPageLoad: () => void;
@@ -96,16 +97,8 @@ export const MonitorPage = ({
     <Fragment>
       <MonitorPageTitle monitorId={monitorId} variables={{ monitorId }} />
       <EuiSpacer size="s" />
-      <MonitorStatusBar monitorId={monitorId} variables={sharedVariables} />
+      <MonitorStatusDetails monitorId={monitorId} variables={sharedVariables} />
       <EuiSpacer size="s" />
-      <EuiPanel>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={1} />
-          <EuiFlexItem grow={false}>
-            <LocationMap monitorId={monitorId} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
       <MonitorCharts
         {...colors}
         monitorId={monitorId}
