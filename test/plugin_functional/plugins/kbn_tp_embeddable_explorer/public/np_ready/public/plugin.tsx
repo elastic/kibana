@@ -27,7 +27,7 @@ import {
   Setup as InspectorSetupContract,
 } from '../../../../../../../src/plugins/inspector/public';
 
-import { Plugin as EmbeddablePlugin, CONTEXT_MENU_TRIGGER } from './embeddable_api';
+import { CONTEXT_MENU_TRIGGER } from './embeddable_api';
 
 const REACT_ROOT_ID = 'embeddableExplorerRoot';
 
@@ -38,9 +38,13 @@ import {
   ContactCardEmbeddableFactory,
 } from './embeddable_api';
 import { App } from './app';
+import {
+  IEmbeddableStart,
+  IEmbeddableSetup,
+} from '.../../../../../../../src/plugins/embeddable/public';
 
 export interface SetupDependencies {
-  embeddable: ReturnType<EmbeddablePlugin['setup']>;
+  embeddable: IEmbeddableSetup;
   inspector: InspectorSetupContract;
   __LEGACY: {
     SavedObjectFinder: React.ComponentType<any>;
@@ -49,7 +53,7 @@ export interface SetupDependencies {
 }
 
 interface StartDependencies {
-  embeddable: ReturnType<EmbeddablePlugin['start']>;
+  embeddable: IEmbeddableStart;
   uiActions: IUiActionsStart;
   inspector: InspectorStartContract;
   __LEGACY: {

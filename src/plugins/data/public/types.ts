@@ -24,12 +24,15 @@ import { FieldFormatsSetup, FieldFormatsStart } from './field_formats_provider';
 import { ISearchSetup, ISearchStart } from './search';
 import { IGetSuggestions } from './suggestions_provider/types';
 import { QuerySetup, QueryStart } from './query';
+import { IndexPatternSelectProps } from './ui/index_pattern_select';
+import { IndexPatternsStart, IndexPatternsSetup } from './index_patterns';
 
 export interface DataPublicPluginSetup {
   autocomplete: AutocompletePublicPluginSetup;
   search: ISearchSetup;
   fieldFormats: FieldFormatsSetup;
   query: QuerySetup;
+  indexPatterns?: IndexPatternsSetup;
 }
 
 export interface DataPublicPluginStart {
@@ -38,6 +41,10 @@ export interface DataPublicPluginStart {
   search: ISearchStart;
   fieldFormats: FieldFormatsStart;
   query: QueryStart;
+  ui: {
+    IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
+  };
+  indexPatterns: IndexPatternsStart;
 }
 
 export * from './autocomplete_provider/types';
