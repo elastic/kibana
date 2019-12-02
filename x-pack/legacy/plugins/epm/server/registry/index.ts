@@ -76,6 +76,7 @@ export async function getArchiveInfo(
 
 export function pathParts(path: string): AssetParts {
   let dataset;
+
   let [pkgkey, service, type, file] = path.split('/');
 
   // if it's a dataset
@@ -87,7 +88,7 @@ export function pathParts(path: string): AssetParts {
   }
 
   // This is to cover for the fields.yml files inside the "fields" directory
-  if (file === undefined && type.endsWith('.yml')) {
+  if (file === undefined) {
     file = type;
     type = 'fields';
     service = '';

@@ -29,6 +29,8 @@ export async function removeInstallation(options: {
       savedObjectsClient.delete(assetType, id);
     } else if (assetType === ElasticsearchAssetType.ingestPipeline) {
       deletePipeline(callCluster, id);
+    } else if (assetType === ElasticsearchAssetType.indexTemplate) {
+      deleteTemplate(callCluster, id);
     }
   });
   await Promise.all(deletePromises);
@@ -41,5 +43,12 @@ async function deletePipeline(callCluster: CallESAsCurrentUser, id: string): Pro
   // '*' shouldn't ever appear here, but it still would delete all ingest pipelines
   if (id && id !== '*') {
     await callCluster('ingest.deletePipeline', { id });
+  }
+}
+
+async function deleteTemplate(callCluster: CallESAsCurrentUser, name: string): Promise<void> {
+  // '*' shouldn't ever appear here, but it still would delete all templates
+  if (name && name !== '*') {
+    await callCluster('indices.deleteTemplate', { name });
   }
 }

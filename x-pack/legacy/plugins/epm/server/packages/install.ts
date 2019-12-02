@@ -5,6 +5,7 @@
  */
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server/';
+import { safeLoad } from 'js-yaml';
 import { SAVED_OBJECT_TYPE } from '../../common/constants';
 import {
   AssetReference,
@@ -15,6 +16,12 @@ import {
 import * as Registry from '../registry';
 import { CallESAsCurrentUser, getInstallationObject } from './index';
 import { getObject } from './get_objects';
+import { Field } from '../lib/fields/field';
+import {
+  generateMappings,
+  getTemplate,
+  generateTemplateName,
+} from '../lib/elasticsearch/template/template';
 
 export async function installPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -126,6 +133,7 @@ export async function installDatasource(options: {
 }) {
   const { savedObjectsClient, pkgkey, callCluster } = options;
   const toSave = await installPipelines({ pkgkey, callCluster });
+  await installTemplates({ pkgkey, callCluster });
 
   // currently saving to the EPM state Saved Object
   // /api/ingest/datasource/add (or whatever) will use separate Saved Object
@@ -166,4 +174,74 @@ async function installPipeline({
   await callCluster('ingest.putPipeline', { id, body: pipeline });
 
   return { id, type: parts.type };
+}
+
+const isFields = ({ path }: Registry.ArchiveEntry) => {
+  return path.includes('/fields/');
+};
+
+/**
+ * installTemplates installs one template for each dataset
+ *
+ * For each dataset, the fields.yml files are extracted. If there are multiple
+ * in one datasets, they are merged together into 1 and then converted to a template
+ * The template is currently loaded with the pkgey-package-dataset
+ * @param callCluster
+ * @param pkgkey
+ */
+async function installTemplates({
+  callCluster,
+  pkgkey,
+}: {
+  callCluster: CallESAsCurrentUser;
+  pkgkey: string;
+}) {
+  const paths = await Registry.getArchiveInfo(pkgkey, isFields);
+
+  // Collect the fields.yml files per dataset
+  const datasets = new Map();
+
+  // TODO: extracting a dataset list should be generic somewhere
+  for (const path of paths) {
+    const parts = path.split('/');
+
+    if (datasets.get(parts[2]) === undefined) {
+      datasets.set(parts[2], []);
+    }
+    datasets.get(parts[2]).push(path);
+  }
+
+  const promises: Array<Promise<AssetReference>> = [];
+
+  datasets.forEach((dataset, key) => {
+    let datasetFields: Field[] = [];
+    dataset.forEach((path: string) => {
+      const buffer = Registry.getAsset(path);
+      datasetFields = safeLoad(buffer.toString());
+    });
+
+    const promise = installTemplate(callCluster, pkgkey, datasetFields, key);
+    promises.push(promise);
+  });
+
+  return Promise.all(promises);
+}
+
+async function installTemplate(
+  callCluster: CallESAsCurrentUser,
+  pkgkey: string,
+  fields: Field[],
+  datasetName: string
+): Promise<AssetReference> {
+  const mappings = generateMappings(fields);
+  const templateName = generateTemplateName(pkgkey, datasetName);
+  const template = getTemplate(templateName + '-*', mappings);
+  // TODO: Check return values for errors
+  await callCluster('indices.putTemplate', {
+    name: templateName,
+    body: template,
+  });
+
+  // The id of a template is it's name
+  return { id: templateName, type: 'index-template' };
 }
