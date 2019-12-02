@@ -8,7 +8,9 @@
 
 ```typescript
 config: {
-        globalConfig__deprecated$: Observable<SharedGlobalConfig>;
+        legacy: {
+            globalConfig$: Observable<SharedGlobalConfig>;
+        };
         create: <T = ConfigSchema>() => Observable<T>;
         createIfExists: <T = ConfigSchema>() => Observable<T | undefined>;
     };

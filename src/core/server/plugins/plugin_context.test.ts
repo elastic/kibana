@@ -69,9 +69,9 @@ describe('Plugin Context', () => {
       manifest
     );
 
-    expect(pluginInitializerContext.config.globalConfig__deprecated$).toBeDefined();
+    expect(pluginInitializerContext.config.legacy.globalConfig$).toBeDefined();
 
-    const configObject = await pluginInitializerContext.config.globalConfig__deprecated$
+    const configObject = await pluginInitializerContext.config.legacy.globalConfig$
       .pipe(first())
       .toPromise();
     expect(configObject).toStrictEqual({

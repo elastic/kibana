@@ -53,7 +53,7 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
   };
 
   const mock: jest.Mocked<PluginInitializerContext<T>['config']> = {
-    globalConfig__deprecated$: of(globalConfig),
+    legacy: { globalConfig$: of(globalConfig) },
     create: jest.fn().mockReturnValue(of(config)),
     createIfExists: jest.fn().mockReturnValue(of(config)),
   };

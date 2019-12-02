@@ -79,24 +79,26 @@ export function createPluginInitializerContext(
      * Core configuration functionality, enables fetching a subset of the config.
      */
     config: {
-      /**
-       * Global configuration
-       * Note: naming not final here, it will be renamed in a near future (https://github.com/elastic/kibana/issues/46240)
-       * @deprecated
-       */
-      globalConfig__deprecated$: combineLatest(
-        coreContext.configService.atPath<KibanaConfigType>(kibanaConfig.path),
-        coreContext.configService.atPath<ElasticsearchConfigType>(elasticsearchConfig.path),
-        coreContext.configService.atPath<PathConfigType>(pathConfig.path)
-      ).pipe(
-        map(([kibana, elasticsearch, path]) =>
-          deepFreeze({
-            kibana: pick(kibana, SharedGlobalConfigKeys.kibana),
-            elasticsearch: pick(elasticsearch, SharedGlobalConfigKeys.elasticsearch),
-            path: pick(path, SharedGlobalConfigKeys.path),
-          })
-        )
-      ),
+      legacy: {
+        /**
+         * Global configuration
+         * Note: naming not final here, it will be renamed in a near future (https://github.com/elastic/kibana/issues/46240)
+         * @deprecated
+         */
+        globalConfig$: combineLatest(
+          coreContext.configService.atPath<KibanaConfigType>(kibanaConfig.path),
+          coreContext.configService.atPath<ElasticsearchConfigType>(elasticsearchConfig.path),
+          coreContext.configService.atPath<PathConfigType>(pathConfig.path)
+        ).pipe(
+          map(([kibana, elasticsearch, path]) =>
+            deepFreeze({
+              kibana: pick(kibana, SharedGlobalConfigKeys.kibana),
+              elasticsearch: pick(elasticsearch, SharedGlobalConfigKeys.elasticsearch),
+              path: pick(path, SharedGlobalConfigKeys.path),
+            })
+          )
+        ),
+      },
 
       /**
        * Reads the subset of the config at the `configPath` defined in the plugin
