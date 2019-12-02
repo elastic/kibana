@@ -8,12 +8,11 @@ import React from 'react';
 import {
   queryByLabelText,
   render,
-  queryBySelectText,
   getByText,
   getByDisplayValue,
   queryByDisplayValue,
   fireEvent
-} from 'react-testing-library';
+} from '@testing-library/react';
 import { omit } from 'lodash';
 import { history } from '../../../../utils/history';
 import { TransactionOverview } from '..';
@@ -31,16 +30,6 @@ jest.spyOn(history, 'replace');
 const coreMock = ({
   notifications: { toasts: { addWarning: () => {} } }
 } as unknown) as LegacyCoreStart;
-
-// Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
-/* eslint-disable no-console */
-const originalError = console.error;
-beforeAll(() => {
-  console.error = jest.fn();
-});
-afterAll(() => {
-  console.error = originalError;
-});
 
 function setup({
   urlParams,
@@ -107,8 +96,8 @@ describe('TransactionOverview', () => {
       });
 
       // secondType is selected in the dropdown
-      expect(queryBySelectText(container, 'secondType')).not.toBeNull();
-      expect(queryBySelectText(container, 'firstType')).toBeNull();
+      expect(queryByDisplayValue(container, 'secondType')).not.toBeNull();
+      expect(queryByDisplayValue(container, 'firstType')).toBeNull();
 
       expect(getByText(container, 'firstType')).not.toBeNull();
     });

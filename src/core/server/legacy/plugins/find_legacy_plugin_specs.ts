@@ -25,6 +25,7 @@ import {
   // @ts-ignore
 } from '../../../../legacy/plugin_discovery/find_plugin_specs.js';
 import { LoggerFactory } from '../../logging';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { collectUiExports as collectLegacyUiExports } from '../../../../legacy/ui/ui_exports/collect_ui_exports';
 import { Config } from '../../config';
 

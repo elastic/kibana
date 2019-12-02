@@ -29,7 +29,7 @@ import {
   Context,
   ExpressionRenderHandler,
   ExpressionDataHandler,
-  RenderResult,
+  RenderId,
 } from '../../types';
 import { getExpressions } from '../../services';
 
@@ -40,7 +40,7 @@ declare global {
       context?: Context,
       initialContext?: Context
     ) => ReturnType<ExpressionDataHandler['getData']>;
-    renderPipelineResponse: (context?: Context) => Promise<RenderResult>;
+    renderPipelineResponse: (context?: Context) => Promise<RenderId>;
   }
 }
 
@@ -85,16 +85,16 @@ class Main extends React.Component<{}, State> {
         lastRenderHandler.destroy();
       }
 
-      lastRenderHandler = getExpressions().render(this.chartRef.current!, context);
-      const renderResult = await lastRenderHandler.render$.pipe(first()).toPromise();
+      lastRenderHandler = getExpressions().render(this.chartRef.current!, context, {
+        onRenderError: (el, error, handler) => {
+          this.setState({
+            expression: 'Render error!\n\n' + JSON.stringify(error),
+          });
+          handler.done();
+        },
+      });
 
-      if (typeof renderResult === 'object' && renderResult.type === 'error') {
-        this.setState({
-          expression: 'Render error!\n\n' + JSON.stringify(renderResult.error),
-        });
-      }
-
-      return renderResult;
+      return lastRenderHandler.render$.pipe(first()).toPromise();
     };
   }
 
