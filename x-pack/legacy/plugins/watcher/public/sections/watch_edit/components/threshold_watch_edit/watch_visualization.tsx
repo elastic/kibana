@@ -8,9 +8,6 @@ import React, { Fragment, useContext, useEffect } from 'react';
 import {
   AnnotationDomainTypes,
   Axis,
-  getAnnotationId,
-  getAxisId,
-  getSpecId,
   Chart,
   LineAnnotation,
   LineSeries,
@@ -219,22 +216,17 @@ export const WatchVisualization = () => {
               legendPosition={Position.Bottom}
             />
             <Axis
-              id={getAxisId('bottom')}
+              id="bottom"
               position={Position.Bottom}
               showOverlappingTicks={true}
               tickFormat={dateFormatter}
             />
-            <Axis
-              domain={{ max: maxY }}
-              id={getAxisId('left')}
-              title={aggLabel}
-              position={Position.Left}
-            />
+            <Axis domain={{ max: maxY }} id="left" title={aggLabel} position={Position.Left} />
             {watchVisualizationDataKeys.map((key: string) => {
               return (
                 <LineSeries
                   key={key}
-                  id={getSpecId(key)}
+                  id={key}
                   xScaleType={ScaleType.Time}
                   yScaleType={ScaleType.Linear}
                   data={watchVisualizationData[key]}
@@ -249,7 +241,7 @@ export const WatchVisualization = () => {
               return (
                 <LineAnnotation
                   key={specId}
-                  annotationId={getAnnotationId(specId)}
+                  id={specId}
                   domainType={AnnotationDomainTypes.YDomain}
                   dataValues={[{ dataValue: watch.threshold[i], details: specId }]}
                 />

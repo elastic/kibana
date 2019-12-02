@@ -6,16 +6,7 @@
 
 import React from 'react';
 
-import {
-  Chart,
-  BarSeries,
-  Axis,
-  Position,
-  getAxisId,
-  getSpecId,
-  ScaleType,
-  Settings,
-} from '@elastic/charts';
+import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
 import { getOr, get, isNumber } from 'lodash/fp';
 import { AutoSizer } from '../auto_sizer';
 import { ChartPlaceHolder } from './chart_place_holder';
@@ -57,8 +48,8 @@ export const BarChartBaseComponent = ({
   const xTickFormatter = get('configs.axis.xTickFormatter', chartConfigs);
   const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
   const tickSize = getOr(0, 'configs.axis.tickSize', chartConfigs);
-  const xAxisId = getAxisId(`stat-items-barchart-${data[0].key}-x`);
-  const yAxisId = getAxisId(`stat-items-barchart-${data[0].key}-y`);
+  const xAxisId = `stat-items-barchart-${data[0].key}-x`;
+  const yAxisId = `stat-items-barchart-${data[0].key}-y`;
   const settings = {
     ...chartDefaultSettings,
     ...get('configs.settings', chartConfigs),
@@ -68,11 +59,10 @@ export const BarChartBaseComponent = ({
       <Settings {...settings} />
       {data.map(series => {
         const barSeriesKey = series.key;
-        const barSeriesSpecId = getSpecId(barSeriesKey);
         const seriesType = SeriesType.BAR;
         return checkIfAllTheDataInTheSeriesAreValid ? (
           <BarSeries
-            id={barSeriesSpecId}
+            id={barSeriesKey}
             key={barSeriesKey}
             name={series.key}
             xScaleType={getOr(ScaleType.Linear, 'configs.series.xScaleType', chartConfigs)}

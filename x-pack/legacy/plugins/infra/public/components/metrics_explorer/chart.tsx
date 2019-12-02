@@ -7,15 +7,7 @@
 import React, { useCallback, useMemo } from 'react';
 
 import { EuiTitle, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import {
-  Axis,
-  Chart,
-  getAxisId,
-  niceTimeFormatter,
-  Position,
-  Settings,
-  TooltipValue,
-} from '@elastic/charts';
+import { Axis, Chart, niceTimeFormatter, Position, Settings, TooltipValue } from '@elastic/charts';
 import { first, last } from 'lodash';
 import moment from 'moment';
 import { UICapabilities } from 'ui/capabilities';
@@ -141,13 +133,13 @@ export const MetricsExplorerChart = injectUICapabilities(
                 />
               ))}
               <Axis
-                id={getAxisId('timestamp')}
+                id="timestamp"
                 position={Position.Bottom}
                 showOverlappingTicks={true}
                 tickFormat={dateFormatter}
               />
               <Axis
-                id={getAxisId('values')}
+                id="values"
                 position={Position.Left}
                 tickFormat={yAxisFormater}
                 domain={domain}

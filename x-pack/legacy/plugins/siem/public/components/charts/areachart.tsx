@@ -9,8 +9,6 @@ import {
   Axis,
   AreaSeries,
   Chart,
-  getAxisId,
-  getSpecId,
   Position,
   ScaleType,
   Settings,
@@ -74,8 +72,8 @@ export const AreaChartBaseComponent = ({
 }) => {
   const xTickFormatter = get('configs.axis.xTickFormatter', chartConfigs);
   const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
-  const xAxisId = getAxisId(`group-${data[0].key}-x`);
-  const yAxisId = getAxisId(`group-${data[0].key}-y`);
+  const xAxisId = `group-${data[0].key}-x`;
+  const yAxisId = `group-${data[0].key}-y`;
   const settings = {
     ...chartDefaultSettings,
     ...get('configs.settings', chartConfigs),
@@ -86,13 +84,12 @@ export const AreaChartBaseComponent = ({
         <Settings {...settings} />
         {data.map(series => {
           const seriesKey = series.key;
-          const seriesSpecId = getSpecId(seriesKey);
           return checkIfAllTheDataInTheSeriesAreValid(series) ? (
             <AreaSeries
-              id={seriesSpecId}
+              id={seriesKey}
               key={seriesKey}
               name={series.key.replace('Histogram', '')}
-              data={series.value || undefined}
+              data={series.value || []}
               xScaleType={getOr(ScaleType.Linear, 'configs.series.xScaleType', chartConfigs)}
               yScaleType={getOr(ScaleType.Linear, 'configs.series.yScaleType', chartConfigs)}
               timeZone={browserTimezone}

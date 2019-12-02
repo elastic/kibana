@@ -20,7 +20,6 @@ import { mergeWithDefaultTheme, LIGHT_THEME } from '@elastic/charts';
 
 jest.mock('@elastic/charts', () => {
   return {
-    getSpecId: jest.fn(() => {}),
     mergeWithDefaultTheme: jest.fn(),
   };
 });
