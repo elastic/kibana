@@ -51,6 +51,7 @@ configService.atPath.mockReturnValue(
     ssl: {
       enabled: false,
     },
+    compression: { enabled: true },
   } as any)
 );
 
@@ -160,6 +161,53 @@ describe('Handler', () => {
       error: 'Bad Request',
       message: '[request query.page]: expected value of type [number] but got [string]',
       statusCode: 400,
+    });
+  });
+});
+
+describe('handleLegacyErrors', () => {
+  it('properly convert Boom errors', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    router.get(
+      { path: '/', validate: false },
+      router.handleLegacyErrors((context, req, res) => {
+        throw Boom.notFound();
+      })
+    );
+    await server.start();
+
+    const result = await supertest(innerServer.listener)
+      .get('/')
+      .expect(404);
+
+    expect(result.body.message).toBe('Not Found');
+  });
+
+  it('returns default error when non-Boom errors are thrown', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    router.get(
+      {
+        path: '/',
+        validate: false,
+      },
+      router.handleLegacyErrors((context, req, res) => {
+        throw new Error('Unexpected');
+      })
+    );
+    await server.start();
+
+    const result = await supertest(innerServer.listener)
+      .get('/')
+      .expect(500);
+
+    expect(result.body).toEqual({
+      error: 'Internal Server Error',
+      message: 'An internal server error occurred.',
+      statusCode: 500,
     });
   });
 });
