@@ -114,7 +114,7 @@ export const useLogAnalysisJobs = ({
 
   const viewResults = useCallback(() => {
     dispatch({ type: 'viewedResults' });
-  }, []);
+  }, [dispatch]);
 
   const cleanupAndSetup = useCallback(
     (indices: string[], start: number | undefined, end: number | undefined) => {
@@ -127,16 +127,16 @@ export const useLogAnalysisJobs = ({
           dispatch({ type: 'failedSetup' });
         });
     },
-    [cleanupMLResources, setupMlModule]
+    [cleanupMLResources, dispatch, setupMlModule]
   );
 
   const viewSetupForReconfiguration = useCallback(() => {
     dispatch({ type: 'requestedJobConfigurationUpdate' });
-  }, []);
+  }, [dispatch]);
 
   const viewSetupForUpdate = useCallback(() => {
     dispatch({ type: 'requestedJobDefinitionUpdate' });
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     fetchModuleDefinition();

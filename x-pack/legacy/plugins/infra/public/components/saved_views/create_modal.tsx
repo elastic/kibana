@@ -36,7 +36,7 @@ export const SavedViewCreateModal = ({ close, save }: Props) => {
   const saveView = useCallback(() => {
     save(viewName, includeTime);
     close();
-  }, [viewName, includeTime]);
+  }, [close, includeTime, save, viewName]);
 
   return (
     <EuiOverlayMask>

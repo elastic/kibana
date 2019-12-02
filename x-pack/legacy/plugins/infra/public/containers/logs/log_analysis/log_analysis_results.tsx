@@ -50,7 +50,7 @@ export const useLogAnalysisResults = ({
 
   useEffect(() => {
     getLogEntryRate();
-  }, [sourceId, startTime, endTime, bucketDuration, lastRequestTime]);
+  }, [bucketDuration, endTime, getLogEntryRate, lastRequestTime, sourceId, startTime]);
 
   const logRateResults: LogRateResults | null = useMemo(() => {
     if (logEntryRate) {
