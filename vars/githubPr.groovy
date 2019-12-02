@@ -157,7 +157,7 @@ def postComment(message) {
 
 def getComments() {
   withGithubCredentials {
-    return githubApi.get("repos/elastic/kibana/issues/${env.ghprbPullId}/comments")
+    return githubIssues.getComments(env.ghprbPullId)
   }
 }
 
