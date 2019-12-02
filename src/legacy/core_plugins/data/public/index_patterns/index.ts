@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IFieldType, IIndexPattern, indexPatterns } from '../../../../../plugins/data/public';
+import { IFieldType, indexPatterns } from '../../../../../plugins/data/public';
 
 const getFromSavedObject = indexPatterns.getFromSavedObject;
 const getRoutes = indexPatterns.getRoutes;
