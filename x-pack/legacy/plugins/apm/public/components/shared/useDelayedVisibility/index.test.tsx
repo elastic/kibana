@@ -4,20 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cleanup, renderHook } from 'react-hooks-testing-library';
+import { renderHook } from '@testing-library/react-hooks';
 import { useDelayedVisibility } from '.';
-
-afterEach(cleanup);
-
-// Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
-/* eslint-disable no-console */
-const originalError = console.error;
-beforeAll(() => {
-  console.error = jest.fn();
-});
-afterAll(() => {
-  console.error = originalError;
-});
 
 describe('useFetcher', () => {
   let hook;
