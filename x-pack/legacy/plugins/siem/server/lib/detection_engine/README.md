@@ -1,21 +1,20 @@
-README.md for developers working on the backend detection engine for how to get started
-with scripts in the scripts folder to help with development.
+README.md for developers working on the backend detection engine on how to get started
+using the CURL scripts in the scripts folder.
 
-See these two README.md's pages for references:
-https://github.com/elastic/kibana/blob/master/x-pack/legacy/plugins/alerting/README.md
-https://github.com/elastic/kibana/tree/master/x-pack/legacy/plugins/actions
-
-The scripts rely on CURL and jq, ensure both of these are installed:
+The scripts rely on CURL and jq:
 * [CURL](https://curl.haxx.se)
 * [jq](https://stedolan.github.io/jq/)
 
+
+Install curl and jq
 ```sh
 brew update
 brew install curl
 brew install jq
 ```
 
-Open up your .zshrc/.bashrc and add these lines with the variables filled in:
+Open `$HOME/.zshrc` or `${HOME}.bashrc` depending on your SHELL output from `echo $SHELL`
+and add these environment variables:
 
 ```sh
 export ELASTICSEARCH_USERNAME=${user}
@@ -27,7 +26,7 @@ export TASK_MANAGER_INDEX=.kibana-task-manager-${your user id}
 export KIBANA_INDEX=.kibana-${your user id}
 ```
 
-source your .zhsrc/.bashrc or open a new terminal to ensure you get the new values set.
+source `$HOME/.zshrc` or `${HOME}.bashrc` to ensure variables are set:
 
 ```sh
 source ~/.zshrc
@@ -37,18 +36,18 @@ Restart Kibana and ensure that you are using `--no-base-path` as changing the ba
 get in the way of the CURL scripts written as is. You should see alerting and actions starting up like so afterwards
 
 ```sh
-server    log   [22:05:22.277] [info][status][plugin:alerting@8.0.0] Status changed from uninitialized to green - Ready
-server    log   [22:05:22.270] [info][status][plugin:actions@8.0.0] Status changed from uninitialized to green - Ready
+server log [22:05:22.277] [info][status][plugin:alerting@8.0.0] Status changed from uninitialized to green - Ready
+server log [22:05:22.270] [info][status][plugin:actions@8.0.0] Status changed from uninitialized to green - Ready
 ```
 
 Go into your SIEM Advanced settings and underneath the setting of `siem:defaultSignalsIndex`, set that to the same
-value as you did with the environment variable of SIGNALS_INDEX, which should be `.siem-signals-${your user id}`
+value as you did with the environment variable of `${SIGNALS_INDEX}`, which should be `.siem-signals-${your user id}`
 
 ```
 .siem-signals-${your user id}
 ```
 
-Open a terminal and go into the scripts folder `cd kibana/x-pack/legacy/plugins/siem/server/lib/detection_engine/scripts` and run:
+Go to the scripts folder `cd kibana/x-pack/legacy/plugins/siem/server/lib/detection_engine/scripts` and run:
 
 ```sh
 ./hard_reset.sh
@@ -118,21 +117,20 @@ You should see the new rules created like so:
 Every 5 minutes if you get positive hits you will see messages on info like so:
 
 ```sh
-server    log   [09:54:59.013] [info][plugins][siem] Total signals found from signal rule "id: a556065c-0656-4ba1-ad64-a77ca9d2013b", "ruleId: rule-1": 10000
+server log [09:54:59.013] [info][plugins][siem] Total signals found from signal rule "id: a556065c-0656-4ba1-ad64-a77ca9d2013b", "ruleId: rule-1": 10000
 ```
 
-Rules are space aware and default to the "default" space for these scripts if you do not export
-the variable of SPACE_URL. For example, if you want to post rules to the space `test-space` you would
-set your SPACE_URL to be:
+Rules are [space aware](https://www.elastic.co/guide/en/kibana/master/xpack-spaces.html) and default
+to the "default" (empty) URL space if you do not export the variable of `SPACE_URL`. Example, if you want to
+post rules to `test-space` you set `SPACE_URL` to be:
 
 ```sh
 export SPACE_URL=/s/test-space
 ```
 
-So that the scripts prepend a `/s/test-space` in front of all the APIs to correctly create, modify, delete, and update
-them from within that space.
-
-See the scripts folder and the tools for more command line fun.
+The  `${SPACE_URL}` is in front of all the APIs to correctly create, modify, delete, and update
+them from within the defined space. If this variable is not defined the default which is the url of an
+empty string will be used. 
 
 Add the `.siem-signals-${your user id}` to your advanced SIEM settings to see any signals
 created which should update once every 5 minutes at this point.
@@ -153,3 +151,7 @@ logging.events:
     ops: __no-ops__,
   }
 ```
+
+See these two README.md's pages for more references on the alerting and actions API:
+https://github.com/elastic/kibana/blob/master/x-pack/legacy/plugins/alerting/README.md
+https://github.com/elastic/kibana/tree/master/x-pack/legacy/plugins/actions
