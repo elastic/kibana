@@ -176,7 +176,8 @@ export type InfraTSVBDataPoint = [number, number];
 export type InfraRouteConfig<
   params extends ObjectType,
   query extends ObjectType,
-  body extends ObjectType
+  body extends ObjectType,
+  method extends RouteMethod
 > = {
   method: RouteMethod;
-} & RouteConfig<params, query, body>;
+} & RouteConfig<params, query, body, method>;
