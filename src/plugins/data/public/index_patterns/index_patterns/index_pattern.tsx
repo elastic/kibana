@@ -221,7 +221,7 @@ export class IndexPattern implements IIndexPattern {
             <p>{warningText}</p>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiButton size="s" href={editUrl}>
+                <EuiButton size="s" href={'/app/kibana#' + editUrl}>
                   <FormattedMessage
                     id="data.indexPatterns.editIndexPattern"
                     defaultMessage="Edit index pattern"
