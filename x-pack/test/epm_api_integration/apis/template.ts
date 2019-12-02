@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
-import { getTemplate } from '../../../legacy/plugins/epm/server/lib/template/template';
+import { getTemplate } from '../../../legacy/plugins/epm/server/lib/elasticsearch/template/template';
 
 export default function({ getService }: FtrProviderContext) {
   const indexPattern = 'foo';
