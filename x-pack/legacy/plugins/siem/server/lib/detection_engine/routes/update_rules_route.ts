@@ -11,13 +11,13 @@ import { updateRules } from '../alerts/update_rules';
 import { UpdateRulesRequest } from '../alerts/types';
 import { updateRulesSchema } from './schemas';
 import { ServerFacade } from '../../../types';
-import { getIdError, transformOrError } from './utils';
+import { getIdError, transformOrError, transformError } from './utils';
 
 export const createUpdateRulesRoute: Hapi.ServerRoute = {
   method: 'PUT',
   path: DETECTION_ENGINE_RULES_URL,
   options: {
-    tags: ['access:signals-all'],
+    tags: ['access:siem'],
     validate: {
       options: {
         abortEarly: false,
@@ -50,6 +50,7 @@ export const createUpdateRulesRoute: Hapi.ServerRoute = {
       tags,
       to,
       type,
+      threats,
       references,
     } = request.payload;
 
@@ -60,38 +61,43 @@ export const createUpdateRulesRoute: Hapi.ServerRoute = {
       return headers.response().code(404);
     }
 
-    const rule = await updateRules({
-      alertsClient,
-      actionsClient,
-      description,
-      enabled,
-      falsePositives,
-      filter,
-      from,
-      immutable,
-      query,
-      language,
-      outputIndex,
-      savedId,
-      meta,
-      filters,
-      id,
-      ruleId,
-      index,
-      interval,
-      maxSignals,
-      riskScore,
-      name,
-      severity,
-      tags,
-      to,
-      type,
-      references,
-    });
-    if (rule != null) {
-      return transformOrError(rule);
-    } else {
-      return getIdError({ id, ruleId });
+    try {
+      const rule = await updateRules({
+        alertsClient,
+        actionsClient,
+        description,
+        enabled,
+        falsePositives,
+        filter,
+        from,
+        immutable,
+        query,
+        language,
+        outputIndex,
+        savedId,
+        meta,
+        filters,
+        id,
+        ruleId,
+        index,
+        interval,
+        maxSignals,
+        riskScore,
+        name,
+        severity,
+        tags,
+        to,
+        type,
+        threats,
+        references,
+      });
+      if (rule != null) {
+        return transformOrError(rule);
+      } else {
+        return getIdError({ id, ruleId });
+      }
+    } catch (err) {
+      return transformError(err);
     }
   },
 };

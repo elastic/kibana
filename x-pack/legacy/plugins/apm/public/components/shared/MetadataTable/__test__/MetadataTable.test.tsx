@@ -5,14 +5,12 @@
  */
 
 import React from 'react';
-import 'jest-dom/extend-expect';
-import { render, cleanup } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import { MetadataTable } from '..';
 import { expectTextsInDocument } from '../../../../utils/testHelpers';
 import { SectionsWithRows } from '../helper';
 
 describe('MetadataTable', () => {
-  afterEach(cleanup);
   it('shows sections', () => {
     const sectionsWithRows = ([
       { key: 'foo', label: 'Foo', required: true },

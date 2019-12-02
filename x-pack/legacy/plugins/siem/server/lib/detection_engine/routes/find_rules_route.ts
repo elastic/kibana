@@ -11,13 +11,13 @@ import { findRules } from '../alerts/find_rules';
 import { FindRulesRequest } from '../alerts/types';
 import { findRulesSchema } from './schemas';
 import { ServerFacade } from '../../../types';
-import { transformFindAlertsOrError } from './utils';
+import { transformFindAlertsOrError, transformError } from './utils';
 
 export const createFindRulesRoute: Hapi.ServerRoute = {
   method: 'GET',
   path: `${DETECTION_ENGINE_RULES_URL}/_find`,
   options: {
-    tags: ['access:signals-all'],
+    tags: ['access:siem'],
     validate: {
       options: {
         abortEarly: false,
@@ -34,15 +34,19 @@ export const createFindRulesRoute: Hapi.ServerRoute = {
       return headers.response().code(404);
     }
 
-    const rules = await findRules({
-      alertsClient,
-      perPage: query.per_page,
-      page: query.page,
-      sortField: query.sort_field,
-      sortOrder: query.sort_order,
-      filter: query.filter,
-    });
-    return transformFindAlertsOrError(rules);
+    try {
+      const rules = await findRules({
+        alertsClient,
+        perPage: query.per_page,
+        page: query.page,
+        sortField: query.sort_field,
+        sortOrder: query.sort_order,
+        filter: query.filter,
+      });
+      return transformFindAlertsOrError(rules);
+    } catch (err) {
+      return transformError(err);
+    }
   },
 };
 

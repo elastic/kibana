@@ -12,13 +12,13 @@ import { deleteRules } from '../alerts/delete_rules';
 import { ServerFacade } from '../../../types';
 import { queryRulesSchema } from './schemas';
 import { QueryRequest } from '../alerts/types';
-import { getIdError, transformOrError } from './utils';
+import { getIdError, transformOrError, transformError } from './utils';
 
 export const createDeleteRulesRoute: Hapi.ServerRoute = {
   method: 'DELETE',
   path: DETECTION_ENGINE_RULES_URL,
   options: {
-    tags: ['access:signals-all'],
+    tags: ['access:siem'],
     validate: {
       options: {
         abortEarly: false,
@@ -35,17 +35,21 @@ export const createDeleteRulesRoute: Hapi.ServerRoute = {
       return headers.response().code(404);
     }
 
-    const rule = await deleteRules({
-      actionsClient,
-      alertsClient,
-      id,
-      ruleId,
-    });
+    try {
+      const rule = await deleteRules({
+        actionsClient,
+        alertsClient,
+        id,
+        ruleId,
+      });
 
-    if (rule != null) {
-      return transformOrError(rule);
-    } else {
-      return getIdError({ id, ruleId });
+      if (rule != null) {
+        return transformOrError(rule);
+      } else {
+        return getIdError({ id, ruleId });
+      }
+    } catch (err) {
+      return transformError(err);
     }
   },
 };
