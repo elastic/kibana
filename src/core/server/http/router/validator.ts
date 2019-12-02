@@ -75,7 +75,9 @@ export function validate<T>(
 ): T {
   if (typeof validationSpec === 'function') {
     return validateFunction(validationSpec, data, namespace);
-  } else {
+  } else if (validationSpec instanceof Type) {
     return validationSpec.validate(data, {}, namespace);
+  } else {
+    throw new Error(`The validation rule provided in the handler is not valid`);
   }
 }

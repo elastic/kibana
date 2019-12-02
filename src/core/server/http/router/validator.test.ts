@@ -79,4 +79,25 @@ describe('Router validator', () => {
       '[myField]: expected value of type [Buffer] but got [Object]'
     );
   });
+
+  it('should catch the errors thrown by the validate function', () => {
+    const validateFn = (data: any) => {
+      throw new Error('Something went terribly wrong');
+    };
+
+    expect(() => validate(validateFn, { foo: 1 })).toThrowError('Something went terribly wrong');
+    expect(() => validate(validateFn, {}, 'myField')).toThrowError(
+      '[myField]: Something went terribly wrong'
+    );
+  });
+
+  it('should not accept invalid validation options', () => {
+    const wrongValidateSpec = {
+      validate: <T>(data: T): T => data,
+    };
+
+    expect(() => validate(wrongValidateSpec as any, { foo: 1 })).toThrowError(
+      'The validation rule provided in the handler is not valid'
+    );
+  });
 });
