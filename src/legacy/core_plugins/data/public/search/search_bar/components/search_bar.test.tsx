@@ -38,7 +38,6 @@ const mockTimeHistory = {
 jest.mock('../../../../../../../plugins/data/public', () => {
   return {
     FilterBar: () => <div className="filterBar" />,
-    createSavedQueryService: () => {},
   };
 });
 
@@ -106,6 +105,11 @@ function wrapSearchBarInContext(testProps: any) {
     notifications: startMock.notifications,
     http: startMock.http,
     storage: createMockStorage(),
+    data: {
+      query: {
+        savedQueries: {},
+      },
+    },
   };
 
   return (

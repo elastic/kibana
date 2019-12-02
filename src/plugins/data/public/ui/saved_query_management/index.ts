@@ -17,7 +17,4 @@
  * under the License.
  */
 
-export { getIndexPatternTitle } from './get_index_pattern_title';
-export * from './types';
-export { validateIndexPattern } from './validate_index_pattern';
-export { IndexPatternMissingIndices } from './errors';
+export { SavedQueryManagementComponent } from './saved_query_management_component';
