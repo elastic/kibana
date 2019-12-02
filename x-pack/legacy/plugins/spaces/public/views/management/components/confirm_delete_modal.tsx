@@ -39,14 +39,14 @@ interface Props {
 }
 
 interface State {
-  confirmSpaceName: string;
+  confirmDelete: string;
   error: boolean | null;
   deleteInProgress: boolean;
 }
 
 class ConfirmDeleteModalUI extends Component<Props, State> {
   public state = {
-    confirmSpaceName: '',
+    confirmDelete: '',
     error: null,
     deleteInProgress: false,
   };
@@ -132,7 +132,7 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
               >
                 <EuiFieldText
                   name="confirmDeleteSpaceInput"
-                  value={this.state.confirmSpaceName}
+                  value={this.state.confirmDelete}
                   onChange={this.onSpaceNameChange}
                   disabled={this.state.deleteInProgress}
                 />
@@ -174,18 +174,18 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
   private onSpaceNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (typeof this.state.error === 'boolean') {
       this.setState({
-        confirmSpaceName: e.target.value,
+        confirmDelete: e.target.value,
         error: e.target.value !== this.props.space.name,
       });
     } else {
       this.setState({
-        confirmSpaceName: e.target.value,
+        confirmDelete: e.target.value,
       });
     }
   };
 
   private onConfirm = async () => {
-    if (this.state.confirmSpaceName === 'DELETE') {
+    if (this.state.confirmDelete === 'DELETE') {
       const needsRedirect = isDeletingCurrentSpace(this.props.space, this.props.spacesNavState);
       const spacesManager = this.props.spacesManager;
 
