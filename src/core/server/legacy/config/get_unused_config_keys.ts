@@ -29,19 +29,25 @@ import { LegacyConfig } from './types';
 
 const getFlattenedKeys = (object: object) => Object.keys(getFlattenedObject(object));
 
-export async function getUnusedConfigKeys(
-  coreHandledConfigPaths: string[],
-  pluginsSpecs: LegacyPluginSpec[],
-  disabledPluginSpecs: LegacyPluginSpec[],
-  rawSettings: Record<string, any>,
-  configValues: LegacyConfig
-) {
+export async function getUnusedConfigKeys({
+  coreHandledConfigPaths,
+  pluginSpecs,
+  disabledPluginSpecs,
+  inputSettings,
+  legacyConfig,
+}: {
+  coreHandledConfigPaths: string[];
+  pluginSpecs: LegacyPluginSpec[];
+  disabledPluginSpecs: LegacyPluginSpec[];
+  inputSettings: Record<string, any>;
+  legacyConfig: LegacyConfig;
+}) {
   // transform deprecated core settings
-  const settings = transformDeprecations(rawSettings);
+  const settings = transformDeprecations(inputSettings);
 
   // transform deprecated plugin settings
-  for (let i = 0; i < pluginsSpecs.length; i++) {
-    const spec = pluginsSpecs[i];
+  for (let i = 0; i < pluginSpecs.length; i++) {
+    const spec = pluginSpecs[i];
     const transform = await getTransform(spec);
     const prefix = spec.getConfigPrefix();
 
@@ -60,7 +66,7 @@ export async function getUnusedConfigKeys(
   }
 
   const inputKeys = getFlattenedKeys(settings);
-  const appliedKeys = getFlattenedKeys(configValues.get());
+  const appliedKeys = getFlattenedKeys(legacyConfig.get());
 
   if (inputKeys.includes('env')) {
     // env is a special case key, see https://github.com/elastic/kibana/blob/848bf17b/src/legacy/server/config/config.js#L74

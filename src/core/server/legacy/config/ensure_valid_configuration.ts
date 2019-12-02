@@ -25,13 +25,13 @@ export async function ensureValidConfiguration(
   configService: ConfigService,
   { pluginSpecs, disabledPluginSpecs, pluginExtendedConfig, settings }: LegacyServiceDiscoverPlugins
 ) {
-  const unusedConfigKeys = await getUnusedConfigKeys(
-    await configService.getUsedPaths(),
+  const unusedConfigKeys = await getUnusedConfigKeys({
+    coreHandledConfigPaths: await configService.getUsedPaths(),
     pluginSpecs,
     disabledPluginSpecs,
-    settings,
-    pluginExtendedConfig
-  );
+    inputSettings: settings,
+    legacyConfig: pluginExtendedConfig,
+  });
 
   if (unusedConfigKeys.length > 0) {
     const message = `Unknown configuration key(s): ${unusedConfigKeys

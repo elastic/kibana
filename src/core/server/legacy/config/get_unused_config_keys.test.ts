@@ -17,13 +17,11 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { LegacyPluginSpec } from '../plugins/find_legacy_plugin_specs';
+import { LegacyConfig } from './types';
+import { getUnusedConfigKeys } from './get_unused_config_keys';
 // @ts-ignore
 import { transformDeprecations } from '../../../../legacy/server/config/transform_deprecations';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LegacyConfig } from './index';
-import { getUnusedConfigKeys } from './get_unused_config_keys';
 
 jest.mock('../../../../legacy/server/config/transform_deprecations', () => ({
   transformDeprecations: jest.fn().mockImplementation(s => s),
@@ -42,130 +40,138 @@ describe('getUnusedConfigKeys', () => {
 
   describe('not using core or plugin specs', () => {
     it('should return an empty list for empty parameters', async () => {
-      expect(await getUnusedConfigKeys([], [], [], {}, getConfig())).toEqual([]);
+      expect(
+        await getUnusedConfigKeys({
+          coreHandledConfigPaths: [],
+          pluginSpecs: [],
+          disabledPluginSpecs: [],
+          inputSettings: {},
+          legacyConfig: getConfig(),
+        })
+      ).toEqual([]);
     });
 
     it('returns empty list when config and settings have the same properties', async () => {
       expect(
-        await getUnusedConfigKeys(
-          [],
-          [],
-          [],
-          {
+        await getUnusedConfigKeys({
+          coreHandledConfigPaths: [],
+          pluginSpecs: [],
+          disabledPluginSpecs: [],
+          inputSettings: {
             presentInBoth: true,
             alsoInBoth: 'someValue',
           },
-          getConfig({
+          legacyConfig: getConfig({
             presentInBoth: true,
             alsoInBoth: 'someValue',
-          })
-        )
+          }),
+        })
       ).toEqual([]);
     });
 
     it('returns empty list when config has entries not present in settings', async () => {
       expect(
-        await getUnusedConfigKeys(
-          [],
-          [],
-          [],
-          {
+        await getUnusedConfigKeys({
+          coreHandledConfigPaths: [],
+          pluginSpecs: [],
+          disabledPluginSpecs: [],
+          inputSettings: {
             presentInBoth: true,
           },
-          getConfig({
+          legacyConfig: getConfig({
             presentInBoth: true,
             onlyInConfig: 'someValue',
-          })
-        )
+          }),
+        })
       ).toEqual([]);
     });
 
     it('returns the list of properties from settings not present in config', async () => {
       expect(
-        await getUnusedConfigKeys(
-          [],
-          [],
-          [],
-          {
+        await getUnusedConfigKeys({
+          coreHandledConfigPaths: [],
+          pluginSpecs: [],
+          disabledPluginSpecs: [],
+          inputSettings: {
             presentInBoth: true,
             onlyInSetting: 'value',
           },
-          getConfig({
+          legacyConfig: getConfig({
             presentInBoth: true,
-          })
-        )
+          }),
+        })
       ).toEqual(['onlyInSetting']);
     });
 
     it('correctly handle nested properties', async () => {
       expect(
-        await getUnusedConfigKeys(
-          [],
-          [],
-          [],
-          {
+        await getUnusedConfigKeys({
+          coreHandledConfigPaths: [],
+          pluginSpecs: [],
+          disabledPluginSpecs: [],
+          inputSettings: {
             elasticsearch: {
               username: 'foo',
               password: 'bar',
             },
           },
-          getConfig({
+          legacyConfig: getConfig({
             elasticsearch: {
               username: 'foo',
               onlyInConfig: 'default',
             },
-          })
-        )
+          }),
+        })
       ).toEqual(['elasticsearch.password']);
     });
 
     it('correctly handle "env" specific case', async () => {
       expect(
-        await getUnusedConfigKeys(
-          [],
-          [],
-          [],
-          {
+        await getUnusedConfigKeys({
+          coreHandledConfigPaths: [],
+          pluginSpecs: [],
+          disabledPluginSpecs: [],
+          inputSettings: {
             env: 'development',
           },
-          getConfig({
+          legacyConfig: getConfig({
             env: {
               name: 'development',
             },
-          })
-        )
+          }),
+        })
       ).toEqual([]);
     });
 
     it('correctly handle array properties', async () => {
       expect(
-        await getUnusedConfigKeys(
-          [],
-          [],
-          [],
-          {
+        await getUnusedConfigKeys({
+          coreHandledConfigPaths: [],
+          pluginSpecs: [],
+          disabledPluginSpecs: [],
+          inputSettings: {
             prop: ['a', 'b', 'c'],
           },
-          getConfig({
+          legacyConfig: getConfig({
             prop: ['a'],
-          })
-        )
+          }),
+        })
       ).toEqual([]);
     });
   });
 
   it('ignores config for plugins that are disabled', async () => {
     expect(
-      await getUnusedConfigKeys(
-        [],
-        [],
-        [
+      await getUnusedConfigKeys({
+        coreHandledConfigPaths: [],
+        pluginSpecs: [],
+        disabledPluginSpecs: [
           ({
             id: 'foo',
             getConfigPrefix: () => 'foo.bar',
           } as unknown) as LegacyPluginSpec,
         ],
-        {
+        inputSettings: {
           foo: {
             bar: {
               unused: true,
@@ -175,20 +181,20 @@ describe('getUnusedConfigKeys', () => {
             missingProp: false,
           },
         },
-        getConfig({
+        legacyConfig: getConfig({
           prop: 'a',
-        })
-      )
+        }),
+      })
     ).toEqual(['plugin.missingProp']);
   });
 
   it('ignores properties managed by the new platform', async () => {
     expect(
-      await getUnusedConfigKeys(
-        ['core', 'foo.bar'],
-        [],
-        [],
-        {
+      await getUnusedConfigKeys({
+        coreHandledConfigPaths: ['core', 'foo.bar'],
+        pluginSpecs: [],
+        disabledPluginSpecs: [],
+        inputSettings: {
           core: {
             prop: 'value',
           },
@@ -197,24 +203,24 @@ describe('getUnusedConfigKeys', () => {
             dolly: true,
           },
         },
-        getConfig({})
-      )
+        legacyConfig: getConfig({}),
+      })
     ).toEqual(['foo.dolly']);
   });
 
   describe('using deprecation', () => {
     it('calls transformDeprecations with the settings', async () => {
-      await getUnusedConfigKeys(
-        [],
-        [],
-        [],
-        {
+      await getUnusedConfigKeys({
+        coreHandledConfigPaths: [],
+        pluginSpecs: [],
+        disabledPluginSpecs: [],
+        inputSettings: {
           prop: 'settings',
         },
-        getConfig({
+        legacyConfig: getConfig({
           prop: 'config',
-        })
-      );
+        }),
+      });
       expect(transformDeprecations).toHaveBeenCalledTimes(1);
       expect(transformDeprecations).toHaveBeenCalledWith({
         prop: 'settings',
@@ -228,26 +234,26 @@ describe('getUnusedConfigKeys', () => {
         return settings;
       });
       expect(
-        await getUnusedConfigKeys(
-          [],
-          [],
-          [],
-          {
+        await getUnusedConfigKeys({
+          coreHandledConfigPaths: [],
+          pluginSpecs: [],
+          disabledPluginSpecs: [],
+          inputSettings: {
             onlyInSettings: 'bar',
             deprecated: 'value',
           },
-          getConfig({
+          legacyConfig: getConfig({
             updated: 'config',
-          })
-        )
+          }),
+        })
       ).toEqual(['onlyInSettings']);
     });
 
     it('should use the plugin deprecations provider', async () => {
       expect(
-        await getUnusedConfigKeys(
-          [],
-          [
+        await getUnusedConfigKeys({
+          coreHandledConfigPaths: [],
+          pluginSpecs: [
             ({
               getDeprecationsProvider() {
                 return async ({ rename }: any) => [rename('foo1', 'foo2')];
@@ -255,19 +261,19 @@ describe('getUnusedConfigKeys', () => {
               getConfigPrefix: () => 'foo',
             } as unknown) as LegacyPluginSpec,
           ],
-          [],
-          {
+          disabledPluginSpecs: [],
+          inputSettings: {
             foo: {
               foo: 'dolly',
               foo1: 'bar',
             },
           },
-          getConfig({
+          legacyConfig: getConfig({
             foo: {
               foo2: 'bar',
             },
-          })
-        )
+          }),
+        })
       ).toEqual(['foo.foo']);
     });
   });

@@ -46,13 +46,13 @@ describe('ensureValidConfiguration', () => {
       } as any
     );
     expect(getUnusedConfigKeys).toHaveBeenCalledTimes(1);
-    expect(getUnusedConfigKeys).toHaveBeenCalledWith(
-      ['core', 'elastic'],
-      'pluginSpecs',
-      'disabledPluginSpecs',
-      'settings',
-      'pluginExtendedConfig'
-    );
+    expect(getUnusedConfigKeys).toHaveBeenCalledWith({
+      coreHandledConfigPaths: ['core', 'elastic'],
+      pluginSpecs: 'pluginSpecs',
+      disabledPluginSpecs: 'disabledPluginSpecs',
+      inputSettings: 'settings',
+      legacyConfig: 'pluginExtendedConfig',
+    });
   });
 
   it('returns normally when there is no unused keys', async () => {
