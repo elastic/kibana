@@ -62,11 +62,11 @@ export default function (kibana) {
 
     uiExports: {
       hacks: [
+        'plugins/kibana/discover',
         'plugins/kibana/dev_tools',
       ],
       savedObjectTypes: [
         'plugins/kibana/visualize/saved_visualizations/saved_visualization_register',
-        'plugins/kibana/discover/saved_searches/saved_search_register',
         'plugins/kibana/dashboard/saved_dashboard/saved_dashboard_register',
       ],
       app: {
@@ -324,6 +324,7 @@ export default function (kibana) {
     },
 
     init: async function (server) {
+      const { usageCollection } = server.newPlatform.setup.plugins;
       // uuid
       await manageUuid(server);
       // routes
@@ -338,8 +339,8 @@ export default function (kibana) {
       registerKqlTelemetryApi(server);
       registerFieldFormats(server);
       registerTutorials(server);
-      makeKQLUsageCollector(server);
-      registerCspCollector(server);
+      makeKQLUsageCollector(usageCollection, server);
+      registerCspCollector(usageCollection, server);
       server.expose('systemApi', systemApi);
       server.injectUiAppVars('kibana', () => injectVars(server));
     },
