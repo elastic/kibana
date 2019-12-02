@@ -15,8 +15,8 @@ const commonHeaders = {
 // eslint-disable-next-line import/no-default-export
 export default function resolverAPIIntegrationTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  describe('Resolver', function() {
-    it('should response to hello-world', async function() {
+  describe('Resolver api', function() {
+    it('should respond to hello-world', async function() {
       const { body } = await supertest
         .get('/api/endpoint/hello-world')
         .set(commonHeaders)
