@@ -18,7 +18,10 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       await testSubjects.click('typeFilterButton');
     },
     async typeFilterButton() {
-      return await testSubjects.find('typeFilterButton');
+      const typeFilter = await find.allByCssSelector(
+        '.euiFilterButton__textShift[data-text="Type"]'
+      );
+      return typeFilter[0];
     },
     async createActionConnector() {
       await testSubjects.click('createActionButton');

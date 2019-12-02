@@ -27,9 +27,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const actionsConnectorsList = await testSubjects.exists('actionsList');
       expect(actionsConnectorsList).to.be(true);
 
-      // TODO: find the way to add data-test-subj to typeFilterButton
-      // const typeFilterButton = await pageObjects.triggersActionsUI.typeFilterButton();
-      // expect(await typeFilterButton.isDisplayed()).to.be(true);
+      const typeFilterButton = await pageObjects.triggersActionsUI.typeFilterButton();
+      expect(await typeFilterButton.isDisplayed()).to.be(true);
     });
 
     describe('Alerts tab', () => {
