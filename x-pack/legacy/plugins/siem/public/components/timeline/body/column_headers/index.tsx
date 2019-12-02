@@ -5,7 +5,7 @@
  */
 
 import { noop } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { Droppable } from 'react-beautiful-dnd';
 
 import { BrowserFields } from '../../../../containers/source';

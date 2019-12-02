@@ -77,11 +77,14 @@ export const ColumnHeader = React.memo<ColumneHeaderProps>(
       <Resizable
         enable={{ right: true }}
         size={{
-          width: isDragging ? 0 : header.width,
+          width: header.width,
           height: 'auto',
         }}
+        style={{
+          position: isDragging ? 'absolute' : 'relative',
+        }}
         handleComponent={{
-          right: <EventsHeadingHandle />,
+          right: !isDragging ? <EventsHeadingHandle /> : undefined,
         }}
         onResizeStop={(e, direction, ref, delta) => {
           onColumnResized({ columnId: header.id, delta: delta.width });
@@ -129,7 +132,7 @@ export const ColumnHeader = React.memo<ColumneHeaderProps>(
               ) : (
                 <DraggedContainer onDragging={setIsDragging}>
                   <DragEffects>
-                    <DraggableFieldBadge fieldId={header.id} fieldWidth={'180px'} />
+                    <DraggableFieldBadge fieldId={header.id} fieldWidth={`${header.width}px`} />
                   </DragEffects>
                 </DraggedContainer>
               )}

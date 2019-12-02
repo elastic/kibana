@@ -9,9 +9,11 @@ import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
-import { Resizable } from 're-resizable';
 
+import { OnResize, Resizeable } from '../../resize_handle';
+import { TimelineResizeHandle } from '../../resize_handle/styled_handles';
 import { FlyoutHeader } from '../header';
+
 import * as i18n from './translations';
 import { timelineActions } from '../../../store/actions';
 
@@ -39,10 +41,10 @@ interface DispatchProps {
 
 type Props = OwnProps & DispatchProps;
 
-const EuiFlyoutContainer = styled.div<{ headerHeight: number }>`
+const EuiFlyoutContainer = styled.div<{ headerHeight: number; width: number }>`
   .timeline-flyout {
-    min-width: 0;
-    width: auto;
+    min-width: 150px;
+    width: ${({ width }) => `${width}px`};
   }
   .timeline-flyout-header {
     align-items: center;
@@ -82,14 +84,6 @@ const WrappedCloseButton = styled.div`
 
 WrappedCloseButton.displayName = 'WrappedCloseButton';
 
-export const TimelineResizeHandle = styled.div<{ height: number }>`
-  border: 2px solid ${({ theme }) => theme.eui.euiColorLightShade};
-  z-index: 2;
-  height: ${({ height }) => `${height}px`};
-  position: absolute;
-`;
-TimelineResizeHandle.displayName = 'TimelineResizeHandle';
-
 const FlyoutHeaderWithCloseButton = React.memo<{
   onClose: () => void;
   timelineId: string;
@@ -128,14 +122,16 @@ const FlyoutPaneComponent = React.memo<Props>(
     usersViewing,
     width,
   }) => {
-    const onResize = useCallback(
-      (event, direction, ref, delta) => {
+    const renderFlyout = useCallback(() => <></>, []);
+
+    const onResize: OnResize = useCallback(
+      ({ delta, id }) => {
         const bodyClientWidthPixels = document.body.clientWidth;
 
         applyDeltaToWidth({
           bodyClientWidthPixels,
-          delta: -delta.width,
-          id: timelineId,
+          delta,
+          id,
           maxWidthPercent,
           minWidthPixels,
         });
@@ -143,7 +139,7 @@ const FlyoutPaneComponent = React.memo<Props>(
       [applyDeltaToWidth, maxWidthPercent, minWidthPixels]
     );
     return (
-      <EuiFlyoutContainer headerHeight={headerHeight} data-test-subj="flyout-pane">
+      <EuiFlyoutContainer headerHeight={headerHeight} data-test-subj="flyout-pane" width={width}>
         <EuiFlyout
           aria-label={i18n.TIMELINE_DESCRIPTION}
           className="timeline-flyout"
@@ -153,31 +149,28 @@ const FlyoutPaneComponent = React.memo<Props>(
           onClose={onClose}
           size="l"
         >
-          <Resizable
-            enable={{ left: true }}
-            minWidth={150}
-            handleComponent={{
-              left: (
-                <TimelineResizeHandle data-test-subj="flyout-resize-handle" height={flyoutHeight} />
-              ),
-            }}
-            onResizeStop={onResize}
+          <Resizeable
+            handle={
+              <TimelineResizeHandle data-test-subj="flyout-resize-handle" height={flyoutHeight} />
+            }
+            id={timelineId}
+            onResize={onResize}
+            render={renderFlyout}
+          />
+          <EuiFlyoutHeader
+            className="timeline-flyout-header"
+            data-test-subj="eui-flyout-header"
+            hasBorder={false}
           >
-            <EuiFlyoutHeader
-              className="timeline-flyout-header"
-              data-test-subj="eui-flyout-header"
-              hasBorder={false}
-            >
-              <FlyoutHeaderWithCloseButton
-                onClose={onClose}
-                timelineId={timelineId}
-                usersViewing={usersViewing}
-              />
-            </EuiFlyoutHeader>
-            <EuiFlyoutBody data-test-subj="eui-flyout-body" className="timeline-flyout-body">
-              {children}
-            </EuiFlyoutBody>
-          </Resizable>
+            <FlyoutHeaderWithCloseButton
+              onClose={onClose}
+              timelineId={timelineId}
+              usersViewing={usersViewing}
+            />
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody data-test-subj="eui-flyout-body" className="timeline-flyout-body">
+            {children}
+          </EuiFlyoutBody>
         </EuiFlyout>
       </EuiFlyoutContainer>
     );
