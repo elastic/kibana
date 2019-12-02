@@ -11,12 +11,13 @@ https://www.elastic.co/products/elasticsearch/service[Elasticsearch Service],
 and reach out on the https://discuss.elastic.co/c/kibana[Kibana Discuss forum]
 if you have any questions or feedback.
 
-//For a complete list of highlights, see the Kibana 7.5 release blog.
-
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
 
 // tag::notable-highlights[]
+
+For a complete list of highlights, 
+see the https://www.elastic.co/blog/kibana-7-5-0-released[Kibana 7.5 release blog].
 
 [float]
 [[lens-7.5]]
@@ -115,9 +116,6 @@ for the full documentation.
 
 [role="screenshot"]
 image::release-notes/images/7.5-snapshot-retention.png[Snapshot Retention UI]
-
-
-
 
 
 // end::notable-highlights[]
