@@ -12,6 +12,10 @@
 
 import { performance } from 'perf_hooks';
 import Joi from 'joi';
+import { identity } from 'lodash';
+
+import { asOk, asErr } from './lib/result_type';
+import { TaskEvent, asTaskRunEvent, asTaskMarkRunningEvent } from './task_events';
 import { intervalFromDate, intervalFromNow } from './lib/intervals';
 import { Logger } from './types';
 import { BeforeRunFunction, BeforeMarkRunningFunction } from './lib/middleware';
@@ -33,6 +37,7 @@ export interface TaskRunner {
   cancel: CancelFunction;
   markTaskAsRunning: () => Promise<boolean>;
   run: () => Promise<RunResult>;
+  id: string;
   toString: () => string;
 }
 
@@ -49,6 +54,7 @@ interface Opts {
   store: Updatable;
   beforeRun: BeforeRunFunction;
   beforeMarkRunning: BeforeMarkRunningFunction;
+  onTaskEvent?: (event: TaskEvent) => void;
 }
 
 /**
@@ -67,6 +73,7 @@ export class TaskManagerRunner implements TaskRunner {
   private bufferedTaskStore: Updatable;
   private beforeRun: BeforeRunFunction;
   private beforeMarkRunning: BeforeMarkRunningFunction;
+  private onTaskEvent: (event: TaskEvent) => void;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -78,13 +85,22 @@ export class TaskManagerRunner implements TaskRunner {
    * @prop {BeforeRunFunction} beforeRun - A function that adjusts the run context prior to running the task
    * @memberof TaskManagerRunner
    */
-  constructor(opts: Opts) {
-    this.instance = sanitizeInstance(opts.instance);
-    this.definitions = opts.definitions;
-    this.logger = opts.logger;
-    this.bufferedTaskStore = opts.store;
-    this.beforeRun = opts.beforeRun;
-    this.beforeMarkRunning = opts.beforeMarkRunning;
+  constructor({
+    instance,
+    definitions,
+    logger,
+    store,
+    beforeRun,
+    beforeMarkRunning,
+    onTaskEvent = identity,
+  }: Opts) {
+    this.instance = sanitizeInstance(instance);
+    this.definitions = definitions;
+    this.logger = logger;
+    this.bufferedTaskStore = store;
+    this.beforeRun = beforeRun;
+    this.beforeMarkRunning = beforeMarkRunning;
+    this.onTaskEvent = onTaskEvent;
   }
 
   /**
@@ -143,7 +159,6 @@ export class TaskManagerRunner implements TaskRunner {
       return this.processResult(validatedResult);
     } catch (err) {
       this.logger.error(`Task ${this} failed: ${err}`);
-
       // in error scenario, we can not get the RunResult
       // re-use modifiedContext's state, which is correct as of beforeRun
       return this.processResult({ error: err, state: modifiedContext.taskInstance.state });
@@ -209,9 +224,11 @@ export class TaskManagerRunner implements TaskRunner {
       }
 
       performanceStopMarkingTaskAsRunning();
+      this.onTaskEvent(asTaskMarkRunningEvent(this.id, asOk(undefined)));
       return true;
     } catch (error) {
       performanceStopMarkingTaskAsRunning();
+      this.onTaskEvent(asTaskMarkRunningEvent(this.id, asErr(error)));
       if (error.statusCode !== VERSION_CONFLICT_STATUS) {
         throw error;
       }
@@ -264,6 +281,7 @@ export class TaskManagerRunner implements TaskRunner {
             attempts: this.instance.attempts,
             error: result.error,
           });
+
       if (!newRunAt) {
         status = 'failed';
         runAt = this.instance.runAt;
@@ -304,10 +322,16 @@ export class TaskManagerRunner implements TaskRunner {
   }
 
   private async processResult(result: RunResult): Promise<RunResult> {
-    if (result.runAt || this.instance.interval || result.error) {
+    if (result.error) {
       await this.processResultForRecurringTask(result);
+      this.onTaskEvent(asTaskRunEvent(this.id, asErr(result.error)));
     } else {
-      await this.processResultWhenDone(result);
+      if (result.runAt || this.instance.interval) {
+        await this.processResultForRecurringTask(result);
+      } else {
+        await this.processResultWhenDone(result);
+      }
+      this.onTaskEvent(asTaskRunEvent(this.id, asOk(undefined)));
     }
     return result;
   }
@@ -347,7 +371,6 @@ export class TaskManagerRunner implements TaskRunner {
     if (addDuration && result) {
       result = intervalFromDate(result, addDuration)!;
     }
-
     return result;
   }
 }

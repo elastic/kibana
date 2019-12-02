@@ -46,9 +46,14 @@ export default function TaskTestingAPI(kibana) {
               const { params, state } = taskInstance;
               const prevState = state || { count: 0 };
 
+              const count = (prevState.count || 0) + 1;
+
               if (params.failWith) {
-                throw new Error(params.failWith);
+                if (!params.failOn || (params.failOn && count === params.failOn)) {
+                  throw new Error(params.failWith);
+                }
               }
+
 
               const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
               await callCluster('index', {
@@ -68,7 +73,7 @@ export default function TaskTestingAPI(kibana) {
               }
 
               return {
-                state: { count: (prevState.count || 0) + 1 },
+                state: { count },
                 runAt: millisecondsFromNow(params.nextRunMilliseconds),
               };
             },

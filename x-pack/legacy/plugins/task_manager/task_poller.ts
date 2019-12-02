@@ -62,7 +62,6 @@ export class TaskPoller<T, H> {
     }
 
     this.pollingSubscription = this.poller$.subscribe(requests => {
-      // console.log({ requests });
       this.attemptWork(...requests);
     });
   }

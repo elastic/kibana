@@ -8,48 +8,45 @@ import { ConcreteTaskInstance } from './task';
 
 import { Result } from './lib/result_type';
 
-export type TaskRun = Result<ConcreteTaskInstance, [ConcreteTaskInstance, Error]>;
-export type TaskRunNow = Result<void, Error>;
+export type TaskMarkRunning = Result<void, Error>;
+export type TaskRun = Result<void, object | Error>;
 export type TaskClaim = Result<ConcreteTaskInstance, Error>;
 
 export enum TaskEventType {
-  TASK_RUN_NOW,
-  TASK_RUN,
-  TASK_CLAIM,
+  TASK_CLAIM = 'TASK_CLAIM',
+  TASK_MARK_RUNNING = 'TASK_MARK_RUNNING',
+  TASK_RUN = 'TASK_RUN',
 }
 
 export type TaskEvent = {
   id: string;
 } & (
   | {
-      type: TaskEventType.TASK_RUN;
-      event: TaskRun;
-    }
-  | {
       type: TaskEventType.TASK_CLAIM;
       event: TaskClaim;
     }
   | {
-      type: TaskEventType.TASK_RUN_NOW;
-      event: TaskRunNow;
+      type: TaskEventType.TASK_MARK_RUNNING;
+      event: TaskMarkRunning;
+    }
+  | {
+      type: TaskEventType.TASK_RUN;
+      event: TaskRun;
     }
 );
 
-export function asTaskRunEvent(
-  id: string,
-  event: Result<ConcreteTaskInstance, [ConcreteTaskInstance, Error]>
-): TaskEvent {
+export function asTaskMarkRunningEvent(id: string, event: Result<void, Error>): TaskEvent {
   return {
     id,
-    type: TaskEventType.TASK_RUN,
+    type: TaskEventType.TASK_MARK_RUNNING,
     event,
   };
 }
 
-export function asTaskRunNowEvent(id: string, event: Result<void, Error>): TaskEvent {
+export function asTaskRunEvent(id: string, event: Result<void, object | Error>): TaskEvent {
   return {
     id,
-    type: TaskEventType.TASK_RUN_NOW,
+    type: TaskEventType.TASK_RUN,
     event,
   };
 }

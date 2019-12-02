@@ -5,7 +5,6 @@
  */
 
 import _ from 'lodash';
-import { Subject } from 'rxjs';
 import { TaskPoller } from './task_poller';
 import { mockLogger, resolvable, sleep } from './test_utils';
 

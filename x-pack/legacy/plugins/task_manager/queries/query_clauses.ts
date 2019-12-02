@@ -14,11 +14,16 @@ export interface ExistsBoolClause {
   exists: { field: string };
 }
 
+export interface IDsClause {
+  ids: {
+    values: string[];
+  };
+}
 export interface ShouldClause<T> {
-  should: Array<BoolClause<T> | T>;
+  should: Array<BoolClause<T> | IDsClause | T>;
 }
 export interface MustClause<T> {
-  must: Array<BoolClause<T> | T>;
+  must: Array<BoolClause<T> | IDsClause | T>;
 }
 export interface BoolClause<T> {
   bool: MustClause<T> | ShouldClause<T>;
@@ -49,7 +54,7 @@ export interface UpdateByQuery<T> {
 }
 
 export function shouldBeOneOf<T>(
-  ...should: Array<BoolClause<T> | T>
+  ...should: Array<BoolClause<T> | IDsClause | T>
 ): {
   bool: ShouldClause<T>;
 } {
@@ -61,7 +66,7 @@ export function shouldBeOneOf<T>(
 }
 
 export function mustBeAllOf<T>(
-  ...must: Array<BoolClause<T> | T>
+  ...must: Array<BoolClause<T> | IDsClause | T>
 ): {
   bool: MustClause<T>;
 } {

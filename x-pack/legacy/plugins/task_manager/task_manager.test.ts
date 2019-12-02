@@ -280,18 +280,18 @@ describe('TaskManager', () => {
 
       const availableWorkers = 1;
 
-      claimAvailableTasks(claim, availableWorkers, logger);
+      claimAvailableTasks([], claim, availableWorkers, logger);
 
       expect(claim).toHaveBeenCalledTimes(1);
     });
 
-    test('shouldnt claim Available Tasks when there are no available workers', () => {
+    test('should not claim Available Tasks when there are no available workers', () => {
       const logger = mockLogger();
       const claim = jest.fn(() => Promise.resolve({ docs: [], claimedTasks: 0 }));
 
       const availableWorkers = 0;
 
-      claimAvailableTasks(claim, availableWorkers, logger);
+      claimAvailableTasks([], claim, availableWorkers, logger);
 
       expect(claim).not.toHaveBeenCalled();
     });
@@ -320,7 +320,7 @@ describe('TaskManager', () => {
         });
       });
 
-      claimAvailableTasks(claim, 10, logger);
+      claimAvailableTasks([], claim, 10, logger);
 
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn.mock.calls[0][0]).toMatchInlineSnapshot(

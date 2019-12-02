@@ -3,12 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Subject } from 'rxjs';
-import { Option, none } from 'fp-ts/lib/Option';
+import { Subject, merge } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { performance } from 'perf_hooks';
 import { SavedObjectsClientContract, SavedObjectsSerializer } from 'src/core/server';
+
+import { Option, none, some, Some, isSome } from 'fp-ts/lib/Option';
+import { isOk, isErr } from './lib/result_type';
+
 import { Logger } from './types';
-import { TaskEvent } from './task_events';
+import { TaskEvent, TaskEventType } from './task_events';
 import { fillPool, FillPoolResult } from './lib/fill_pool';
 import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './lib/middleware';
 import { sanitizeTaskDefinitions } from './lib/sanitize_task_definitions';
@@ -43,6 +47,15 @@ export interface TaskManagerOpts {
   serializer: SavedObjectsSerializer;
 }
 
+type RunNowResult =
+  | {
+      id: string;
+      error: object | Error;
+    }
+  | {
+      id: string;
+    };
+
 /*
  * The TaskManager is the public interface into the task manager system. This glues together
  * all of the disparate modules in one integration point. The task manager operates in two different ways:
@@ -61,11 +74,9 @@ export class TaskManager {
   private maxWorkers: number;
   private definitions: TaskDictionary<TaskDefinition>;
   private store: TaskStore;
-  // private poller: TaskPoller<FillPoolResult>;
   private logger: Logger;
   private pool: TaskPool;
-
-  private taskEvent$: Subject<TaskEvent>;
+  private events$: Subject<TaskEvent>;
 
   private poller: TaskPoller<FillPoolResult, Option<string>>;
 
@@ -85,7 +96,6 @@ export class TaskManager {
     this.maxWorkers = opts.config.get('xpack.task_manager.max_workers');
     this.definitions = {};
     this.logger = opts.logger;
-    this.taskEvent$ = new Subject<TaskEvent>();
 
     const taskManagerId = opts.config.get('server.uuid');
     if (!taskManagerId) {
@@ -112,6 +122,10 @@ export class TaskManager {
       maxWorkers: this.maxWorkers,
     });
 
+    this.events$ = new Subject<TaskEvent>();
+    // if we end up with only one stream, remove merge
+    merge<TaskEvent>(this.store.events).subscribe(event => this.events$.next(event));
+
     this.poller = new TaskPoller<FillPoolResult, Option<string>>({
       logger: this.logger,
       pollInterval: opts.config.get('xpack.task_manager.poll_interval'),
@@ -119,11 +133,21 @@ export class TaskManager {
     });
   }
 
-  private pollForWork = async (): Promise<FillPoolResult> => {
+  private emitEvent = (event: TaskEvent) => {
+    this.events$.next(event);
+  };
+
+  private pollForWork = async (
+    ...optionalTasksToClaim: Array<Option<string>>
+  ): Promise<FillPoolResult> => {
+    const tasksToClaim = optionalTasksToClaim
+      .filter(isSome)
+      .map((task: Some<string>) => task.value);
     return fillPool(
       // claim available tasks
       () =>
         claimAvailableTasks(
+          tasksToClaim.splice(0, this.pool.availableWorkers),
           this.store.claimAvailableTasks,
           this.pool.availableWorkers,
           this.logger
@@ -135,8 +159,8 @@ export class TaskManager {
     );
   };
 
-  private attemptWork() {
-    this.poller.queueWork(none);
+  private attemptToRun(task: Option<string> = none) {
+    this.poller.queueWork(task);
   }
 
   private createTaskRunnerForTask = (instance: ConcreteTaskInstance) => {
@@ -147,6 +171,7 @@ export class TaskManager {
       definitions: this.definitions,
       beforeRun: this.middleware.beforeRun,
       beforeMarkRunning: this.middleware.beforeMarkRunning,
+      onTaskEvent: this.emitEvent,
     });
   };
 
@@ -226,8 +251,36 @@ export class TaskManager {
       taskInstance,
     });
     const result = await this.store.schedule(modifiedTask);
-    this.attemptWork();
+    this.attemptToRun();
     return result;
+  }
+
+  /**
+   * Run  task.
+   *
+   * @param task - The task being scheduled.
+   * @returns {Promise<ConcreteTaskInstance>}
+   */
+  public async runNow(task: string): Promise<RunNowResult> {
+    await this.waitUntilStarted();
+    return new Promise(resolve => {
+      const subscription = this.events$
+        .pipe(filter(({ id }: TaskEvent) => id === task))
+        .subscribe(({ id, event, type }: TaskEvent) => {
+          if (
+            type === TaskEventType.TASK_RUN &&
+            isOk<void | ConcreteTaskInstance, object | Error>(event)
+          ) {
+            subscription.unsubscribe();
+            return resolve({ id });
+          } else if (isErr(event)) {
+            subscription.unsubscribe();
+            return resolve({ id, error: `${event.error}` });
+          }
+        });
+
+      this.attemptToRun(some(task));
+    });
   }
 
   /**
@@ -286,6 +339,7 @@ export class TaskManager {
 }
 
 export async function claimAvailableTasks(
+  claimTasksById: string[],
   claim: (opts: OwnershipClaimingOpts) => Promise<ClaimOwnershipResult>,
   availableWorkers: number,
   logger: Logger
@@ -297,6 +351,7 @@ export async function claimAvailableTasks(
       const { docs, claimedTasks } = await claim({
         size: availableWorkers,
         claimOwnershipUntil: intervalFromNow('30s')!,
+        claimTasksById,
       });
 
       if (claimedTasks === 0) {

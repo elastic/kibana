@@ -198,13 +198,22 @@ export class TaskStore {
    * @param {OwnershipClaimingOpts} options
    * @returns {Promise<ClaimOwnershipResult>}
    */
-  public claimAvailableTasks = async (
-    opts: OwnershipClaimingOpts
-  ): Promise<ClaimOwnershipResult> => {
-    const { claimTasksById } = opts;
+  public claimAvailableTasks = async ({
+    claimOwnershipUntil,
+    claimTasksById = [],
+    size,
+  }: OwnershipClaimingOpts): Promise<ClaimOwnershipResult> => {
+    const claimTasksByIdWithRawIds = claimTasksById.map(id =>
+      this.serializer.generateRawId(undefined, 'task', id)
+    );
 
-    const claimedTasks = await this.markAvailableTasksAsClaimed(opts);
-    const docs = claimedTasks > 0 ? await this.sweepForClaimedTasks(opts) : [];
+    const claimedTasks = await this.markAvailableTasksAsClaimed(
+      claimOwnershipUntil,
+      claimTasksByIdWithRawIds,
+      size
+    );
+    const docs =
+      claimedTasks > 0 ? await this.sweepForClaimedTasks(claimTasksByIdWithRawIds, size) : [];
 
     // emit success/fail events for claimed tasks by id
     if (claimTasksById && claimTasksById.length) {
@@ -224,11 +233,11 @@ export class TaskStore {
     };
   };
 
-  private async markAvailableTasksAsClaimed({
-    size,
-    claimOwnershipUntil,
-    claimTasksById,
-  }: OwnershipClaimingOpts): Promise<number> {
+  private async markAvailableTasksAsClaimed(
+    claimOwnershipUntil: OwnershipClaimingOpts['claimOwnershipUntil'],
+    claimTasksById: OwnershipClaimingOpts['claimTasksById'],
+    size: OwnershipClaimingOpts['size']
+  ): Promise<number> {
     const queryForScheduledTasks = mustBeAllOf(
       // Either a task with idle status and runAt <= now or
       // status running or claiming with a retryAt <= now.
@@ -273,10 +282,10 @@ export class TaskStore {
   /**
    * Fetches tasks from the index, which are owned by the current Kibana instance
    */
-  private async sweepForClaimedTasks({
-    size,
-    claimTasksById,
-  }: OwnershipClaimingOpts): Promise<ConcreteTaskInstance[]> {
+  private async sweepForClaimedTasks(
+    claimTasksById: OwnershipClaimingOpts['claimTasksById'],
+    size: OwnershipClaimingOpts['size']
+  ): Promise<ConcreteTaskInstance[]> {
     const { docs } = await this.search({
       query: {
         bool: {

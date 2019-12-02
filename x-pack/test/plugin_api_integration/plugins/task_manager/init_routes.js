@@ -60,6 +60,31 @@ export function initRoutes(server, taskTestingEvents) {
   });
 
   server.route({
+    path: '/api/sample_tasks/run_now',
+    method: 'POST',
+    config: {
+      validate: {
+        payload: Joi.object({
+          task: Joi.object({
+            id: Joi.string().optional()
+          })
+        }),
+      },
+    },
+    async handler(request) {
+      try {
+        const { task } = request.payload;
+
+        const taskResult = await (taskManager.runNow(task.id));
+
+        return taskResult;
+      } catch (err) {
+        return err;
+      }
+    },
+  });
+
+  server.route({
     path: '/api/sample_tasks/ensure_scheduled',
     method: 'POST',
     config: {
