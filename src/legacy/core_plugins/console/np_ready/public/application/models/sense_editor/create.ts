@@ -17,14 +17,22 @@
  * under the License.
  */
 
-import ace from 'brace';
-import { LegacyCoreEditor } from './legacy_core_editor';
+import { SenseEditor } from './editor';
+import * as core from '../legacy_core_editor';
 
-export const create = (el: HTMLElement) => {
-  const actions = document.querySelector('#ConAppEditorActions');
-  if (!actions) {
-    throw new Error('Could not find ConAppEditorActions element!');
-  }
-  const aceEditor = ace.edit(el);
-  return new LegacyCoreEditor(aceEditor, actions);
-};
+let senseEditor: SenseEditor;
+export function create(element: HTMLElement) {
+  const coreEditor = core.create(element);
+  senseEditor = new SenseEditor(coreEditor);
+
+  /**
+   * Init the editor
+   */
+  senseEditor.highlightCurrentRequestsAndUpdateActionBar();
+  return senseEditor;
+}
+
+// eslint-disable-next-line
+export default function getInput() {
+  return senseEditor;
+}

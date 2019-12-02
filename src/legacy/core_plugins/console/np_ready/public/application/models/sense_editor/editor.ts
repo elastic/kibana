@@ -18,104 +18,40 @@
  */
 
 import _ from 'lodash';
-import $ from 'jquery';
-import * as curl from './curl';
 import RowParser from './row_parser';
-import InputMode from './mode/input';
 import * as utils from './utils';
 // @ts-ignore
 import * as es from '../../../../../public/quarantined/src/es';
 // const chrome = require('ui/chrome');
 
 import smartResize from './smart_resize';
-import { CoreEditor, Position } from '../../../types';
+import { CoreEditor, Position, Range } from '../../../types';
+import { createTokenIterator } from '../../factories';
 
-// function createInstance($el) {
-//   const aceEditor = ace.edit($el[0]);
-//
-//   // we must create a custom class for each instance, so that the prototype
-//   // can be the unique aceEditor it extends
-//   const CustomSenseEditor = function() {};
-//   CustomSenseEditor.prototype = {};
-//
-//   function bindProp(key) {
-//     Object.defineProperty(CustomSenseEditor.prototype, key, {
-//       get: function() {
-//         return aceEditor[key];
-//       },
-//       set: function(val) {
-//         aceEditor[key] = val;
-//       },
-//     });
-//   }
-//
-//   // iterate all of the accessible properties/method, on the prototype and beyond
-//   // eslint-disable-next-line guard-for-in
-//   for (const key in aceEditor) {
-//     switch (typeof aceEditor[key]) {
-//       case 'function':
-//         CustomSenseEditor.prototype[key] = _.bindKey(aceEditor, key);
-//         break;
-//       default:
-//         bindProp(key);
-//         break;
-//     }
-//   }
-//
-//   const editor = new CustomSenseEditor();
-//   editor.__ace = aceEditor;
-//   return editor;
-// }
+import Autocomplete from '../../../../../public/quarantined/src/autocomplete';
 
 export class SenseEditor {
-  currentReqRange: any;
+  currentReqRange: (Range & { markerRef: any }) | null;
   parser: any;
   resize: any;
 
-  constructor(private readonly coreEditor: CoreEditor, private readonly $actions: HTMLElement) {
+  private readonly autocomplete: any;
+
+  constructor(private readonly coreEditor: CoreEditor) {
     this.currentReqRange = null;
     this.parser = new RowParser(this.coreEditor);
     this.resize = smartResize(this.coreEditor);
+    this.autocomplete = new (Autocomplete as any)({
+      coreEditor,
+      parser: this.parser,
+    });
+    this.coreEditor.on(
+      'tokenizerUpdate',
+      this.highlightCurrentRequestsAndUpdateActionBar.bind(this)
+    );
+    this.coreEditor.on('changeCursor', this.highlightCurrentRequestsAndUpdateActionBar.bind(this));
+    this.coreEditor.on('changeScrollTop', this.updateActionsBar.bind(this));
   }
-
-  // dirty check for tokenizer state, uses a lot less cycles
-  // than listening for tokenizerUpdate
-  // const onceDoneTokenizing = function(callback, cancelAlreadyScheduledCalls) {
-  //   const session = editor.getSession();
-  //   let timer = false;
-  //   const checkInterval = 25;
-  //
-  //   return function() {
-  //     const self = this;
-  //     const args = [].slice.call(arguments, 0);
-  //
-  //     if (cancelAlreadyScheduledCalls) {
-  //       timer = clearTimeout(timer);
-  //     }
-  //
-  //     setTimeout(function check() {
-  //       // If the bgTokenizer doesn't exist, we can assume that the underlying editor has been
-  //       // torn down, e.g. by closing the History tab, and we don't need to do anything further.
-  //       if (session.bgTokenizer) {
-  //         // Wait until the bgTokenizer is done running before executing the callback.
-  //         if (session.bgTokenizer.running) {
-  //           timer = setTimeout(check, checkInterval);
-  //         } else {
-  //           callback.apply(self, args);
-  //         }
-  //       }
-  //     });
-  //   };
-  // };
-
-  // editor.setShowPrintMargin(false);
-
-  // (function(session) {
-  //   session.setMode(new InputMode.Mode());
-  //   session.setFoldStyle('markbeginend');
-  //   session.setTabSize(2);
-  //   session.setUseWrapMode(true);
-  // })(editor.getSession());
 
   prevRequestStart = (rowOrPos?: number | Position): Position => {
     let curRow: number;
@@ -125,7 +61,7 @@ export class SenseEditor {
     } else if (_.isObject(rowOrPos)) {
       curRow = (rowOrPos as Position).lineNumber;
     } else {
-      curRow = (rowOrPos as number);
+      curRow = rowOrPos as number;
     }
 
     while (curRow > 0 && !this.parser.isStartRequestRow(curRow, this.coreEditor)) curRow--;
@@ -143,7 +79,7 @@ export class SenseEditor {
     } else if (_.isObject(rowOrPos)) {
       curRow = (rowOrPos as Position).lineNumber;
     } else {
-      curRow = (rowOrPos as number);
+      curRow = rowOrPos as number;
     }
     const maxLines = this.coreEditor.getValue().split('\n').length;
     for (; curRow < maxLines - 1; curRow++) {
@@ -157,530 +93,408 @@ export class SenseEditor {
     };
   };
 
-  // autoIndent = onceDoneTokenizing(function() {
-  autoIndent = () => {
-    this.getRequestRange((reqRange: string[] | null) => {
-      if (!reqRange) {
-        return;
+  autoIndent = _.debounce(async () => {
+    await this.coreEditor.waitForLatestTokens();
+    const reqRange = await this.getRequestRange();
+    if (!reqRange) {
+      return;
+    }
+    const parsedReq = await this.getRequest();
+
+    if (!parsedReq) {
+      return;
+    }
+
+    if (parsedReq.data && parsedReq.data.length > 0) {
+      let indent = parsedReq.data.length === 1; // unindent multi docs by default
+      let formattedData = utils.reformatData(parsedReq.data, indent);
+      if (!formattedData.changed) {
+        // toggle.
+        indent = !indent;
+        formattedData = utils.reformatData(parsedReq.data, indent);
       }
-      this.getRequest((parsedReq: any) => {
-        if (parsedReq.data && parsedReq.data.length > 0) {
-          let indent = parsedReq.data.length === 1; // unindent multi docs by default
-          let formattedData = utils.reformatData(parsedReq.data, indent);
-          if (!formattedData.changed) {
-            // toggle.
-            indent = !indent;
-            formattedData = utils.reformatData(parsedReq.data, indent);
-          }
-          parsedReq.data = formattedData.data;
+      parsedReq.data = formattedData.data;
 
-          this.replaceRequestRange(parsedReq, reqRange);
-        }
-      });
-    });
-  };
-  // }, true);
+      this.replaceRequestRange(parsedReq, reqRange);
+    }
+  }, 25);
 
-  update = (data: string) => {
-    this.coreEditor.setValue(data);
+  update = async (data: string, reTokenizeAll = false) => {
+    return this.coreEditor.setValue(data, reTokenizeAll);
   };
 
-  replaceRequestRange = (newRequest: any, requestRange: any) => {
+  replaceRequestRange = (newRequest: any, requestRange: Range) => {
     const text = utils.textFromRequest(newRequest);
     if (requestRange) {
-      const pos = this.editor.getCursorPosition();
-      editor.getSession().replace(requestRange, text);
-      const maxRow = Math.max(requestRange.start.row + text.split('\n').length - 1, 0);
-      pos.row = Math.min(pos.row, maxRow);
-      editor.moveCursorToPosition(pos);
-      // ACE UPGRADE - check if needed - at the moment the above may trigger a selection.
-      editor.clearSelection();
+      this.coreEditor.replaceRange(requestRange, text);
     } else {
       // just insert where we are
-      editor.insert(text);
+      this.coreEditor.insert(this.coreEditor.getCurrentPosition(), text);
     }
   };
 
-  editor.iterForCurrentLoc = function() {
-    const pos = editor.getCursorPosition();
-    return editor.iterForPosition(pos.row, pos.column, editor);
+  getRequestRange = async (row?: number): Promise<Range | null> => {
+    await this.coreEditor.waitForLatestTokens();
+
+    if (this.parser.isInBetweenRequestsRow(row)) {
+      return null;
+    }
+
+    const reqStart = this.prevRequestStart(row);
+    const reqEnd = this.nextRequestEnd(reqStart);
+
+    return {
+      start: {
+        ...reqStart,
+      },
+      end: {
+        ...reqEnd,
+      },
+    };
   };
 
-  editor.iterForPosition = function(row, column) {
-    return new (ace.acequire('ace/token_iterator').TokenIterator)(editor.getSession(), row, column);
-  };
+  getEngulfingRequestsRange = async (
+    range = this.coreEditor.getSelectionRange()
+  ): Promise<Range | null> => {
+    // if (_.isUndefined(cb)) {
+    //   cb = range;
+    //   range = null;
+    // }
 
-  editor.getRequestRange = onceDoneTokenizing(function(row, cb) {
-    if (_.isUndefined(cb)) {
-      cb = row;
-      row = null;
-    }
-    if (typeof cb !== 'function') {
-      return;
-    }
+    await this.coreEditor.waitForLatestTokens();
 
-    if (editor.parser.isInBetweenRequestsRow(row)) {
-      cb(null);
-      return;
-    }
-
-    const reqStart = editor.prevRequestStart(row, editor);
-    const reqEnd = editor.nextRequestEnd(reqStart, editor);
-    cb(
-      new (ace.acequire('ace/range').Range)(
-        reqStart.row,
-        reqStart.column,
-        reqEnd.row,
-        reqEnd.column
-      )
-    );
-  });
-
-  editor.getEngulfingRequestsRange = onceDoneTokenizing(function(range, cb) {
-    if (_.isUndefined(cb)) {
-      cb = range;
-      range = null;
-    }
-
-    range = range || editor.getSelectionRange();
-
-    const session = editor.getSession();
-    let startRow = range.start.row;
-    let endRow = range.end.row;
-    const maxLine = Math.max(0, session.getLength() - 1);
+    let startLineNumber = range.start.lineNumber;
+    let endLineNumber = range.end.lineNumber;
+    const maxLine = Math.max(1, this.coreEditor.getLineCount());
 
     // move start row to the previous request start if in body, o.w. forward
-    if (editor.parser.isInBetweenRequestsRow(startRow)) {
-      //for (; startRow <= endRow; startRow++) {
+    if (this.parser.isInBetweenRequestsRow(startLineNumber)) {
+      // for (; startRow <= endRow; startRow++) {
       //  if (editor.parser.isStartRequestRow(startRow)) {
       //    break;
       //  }
-      //}
+      // }
     } else {
-      for (; startRow >= 0; startRow--) {
-        if (editor.parser.isStartRequestRow(startRow)) {
+      for (; startLineNumber >= 1; startLineNumber--) {
+        if (this.parser.isStartRequestRow(startLineNumber)) {
           break;
         }
       }
     }
 
-    if (startRow < 0 || startRow > endRow) {
-      cb(null);
-      return;
+    if (startLineNumber < 1 || startLineNumber > endLineNumber) {
+      return null;
     }
-    // move end row to the previous request end if between requests, o.w. walk forward
-    if (editor.parser.isInBetweenRequestsRow(endRow)) {
-      for (; endRow >= startRow; endRow--) {
-        if (editor.parser.isEndRequestRow(endRow)) {
+    // move end row to the previous request end if between requests, otherwise walk forward
+    if (this.parser.isInBetweenRequestsRow(endLineNumber)) {
+      for (; endLineNumber >= startLineNumber; endLineNumber--) {
+        if (this.parser.isEndRequestRow(endLineNumber)) {
           break;
         }
       }
     } else {
-      for (; endRow <= maxLine; endRow++) {
-        if (editor.parser.isEndRequestRow(endRow)) {
+      for (; endLineNumber <= maxLine; endLineNumber++) {
+        if (this.parser.isEndRequestRow(endLineNumber)) {
           break;
         }
       }
     }
 
-    if (endRow < startRow || endRow > maxLine) {
-      cb(null);
-      return;
+    if (endLineNumber < startLineNumber || endLineNumber > maxLine) {
+      return null;
     }
 
-    const endColumn = (session.getLine(endRow) || '').replace(/\s+$/, '').length;
-    cb(new (ace.acequire('ace/range').Range)(startRow, 0, endRow, endColumn));
-  });
+    const endColumn = (this.coreEditor.getLineValue(endLineNumber) || '').replace(/\s+$/, '')
+      .length;
+    return {
+      start: {
+        lineNumber: startLineNumber,
+        column: 1,
+      },
+      end: {
+        lineNumber: endLineNumber,
+        column: endColumn,
+      },
+    };
+  };
 
-  editor.getRequestInRange = onceDoneTokenizing(function(range, cb) {
+  getRequestInRange = async (range?: Range) => {
+    await this.coreEditor.waitForLatestTokens();
     if (!range) {
-      return;
+      return null;
     }
-    const request = {
+    const request: {
+      method: string;
+      data: string[];
+      url: string | null;
+      range: Range;
+    } = {
       method: '',
       data: [],
       url: null,
-      range: range,
+      range,
     };
 
     const pos = range.start;
-    const tokenIter = editor.iterForPosition(pos.row, pos.column, editor);
+    const tokenIter = createTokenIterator({ editor: this.coreEditor, position: pos });
     let t = tokenIter.getCurrentToken();
-    if (editor.parser.isEmptyToken(t)) {
+    if (this.parser.isEmptyToken(t)) {
       // if the row starts with some spaces, skip them.
-      t = editor.parser.nextNonEmptyToken(tokenIter);
+      t = this.parser.nextNonEmptyToken(tokenIter);
     }
+    if (t == null) {
+      return null;
+    }
+
     request.method = t.value;
-    t = editor.parser.nextNonEmptyToken(tokenIter);
+    t = this.parser.nextNonEmptyToken(tokenIter);
+
     if (!t || t.type === 'method') {
       return null;
     }
+
     request.url = '';
+
     while (t && t.type && t.type.indexOf('url') === 0) {
       request.url += t.value;
       t = tokenIter.stepForward();
     }
-    if (editor.parser.isEmptyToken(t)) {
+    if (this.parser.isEmptyToken(t)) {
       // if the url row ends with some spaces, skip them.
-      t = editor.parser.nextNonEmptyToken(tokenIter);
+      t = this.parser.nextNonEmptyToken(tokenIter);
     }
 
-    let bodyStartRow = (t ? 0 : 1) + tokenIter.getCurrentTokenRow(); // artificially increase end of docs.
-    let dataEndPos;
+    let bodyStartLineNumber = (t ? 1 : 2) + tokenIter.getCurrentTokenLineNumber()!; // artificially increase end of docs.
+    let dataEndPos: Position;
     while (
-      bodyStartRow < range.end.row ||
-      (bodyStartRow === range.end.row && 0 < range.end.column)
+      bodyStartLineNumber < range.end.lineNumber ||
+      (bodyStartLineNumber === range.end.lineNumber && 0 < range.end.column)
     ) {
-      dataEndPos = editor.nextDataDocEnd({
-        row: bodyStartRow,
-        column: 0,
+      dataEndPos = this.nextDataDocEnd({
+        lineNumber: bodyStartLineNumber,
+        column: 1,
       });
-      const bodyRange = new (ace.acequire('ace/range').Range)(
-        bodyStartRow,
-        0,
-        dataEndPos.row,
-        dataEndPos.column
-      );
-      const data = editor.getSession().getTextRange(bodyRange);
+      const bodyRange: Range = {
+        start: {
+          lineNumber: bodyStartLineNumber,
+          column: 1,
+        },
+        end: dataEndPos,
+      };
+      const data = this.coreEditor.getValueInRange(bodyRange)!;
       request.data.push(data.trim());
-      bodyStartRow = dataEndPos.row + 1;
+      bodyStartLineNumber = dataEndPos.lineNumber + 1;
     }
 
-    cb(request);
-  });
+    return request;
+  };
 
-  editor.getRequestsInRange = function(range, includeNonRequestBlocks, cb) {
-    if (_.isUndefined(includeNonRequestBlocks)) {
-      includeNonRequestBlocks = false;
-      cb = range;
-      range = null;
-    } else if (_.isUndefined(cb)) {
-      cb = includeNonRequestBlocks;
-      includeNonRequestBlocks = false;
+  getRequestsInRange = async (range?: Range, includeNonRequestBlocks = false): Promise<any[]> => {
+    await this.coreEditor.waitForLatestTokens();
+    if (!range) {
+      return [];
     }
 
-    function explicitRangeToRequests(requestsRange, tempCb) {
-      if (!requestsRange) {
-        tempCb([]);
-        return;
-      }
+    const engulfingRange = await this.getEngulfingRequestsRange(range);
 
-      const startRow = requestsRange.start.row;
-      const endRow = requestsRange.end.row;
+    if (!engulfingRange) {
+      return [];
+    }
 
-      // move to the next request start (during the second iterations this may not be exactly on a request
-      let currentRow = startRow;
-      for (; currentRow <= endRow; currentRow++) {
-        if (editor.parser.isStartRequestRow(currentRow)) {
-          break;
+    const requests: any = [];
+
+    let rangeStartCursor = engulfingRange.start.lineNumber;
+    const endLineNumber = engulfingRange.end.lineNumber;
+
+    // move to the next request start (during the second iterations this may not be exactly on a request
+    let currentLineNumber = engulfingRange.start.lineNumber;
+    for (; currentLineNumber <= endLineNumber; currentLineNumber++) {
+      if (this.parser.isStartRequestRow(currentLineNumber)) {
+        if (includeNonRequestBlocks && currentLineNumber !== rangeStartCursor) {
+          const nonRequestPrefixBlock = this.coreEditor
+            .getLines(rangeStartCursor, currentLineNumber - 1)
+            .join('\n');
+          requests.push(nonRequestPrefixBlock);
         }
-      }
 
-      let nonRequestPrefixBlock = null;
-      if (includeNonRequestBlocks && currentRow !== startRow) {
-        nonRequestPrefixBlock = editor
-          .getSession()
-          .getLines(startRow, currentRow - 1)
-          .join('\n');
-      }
+        rangeStartCursor = currentLineNumber;
 
-      if (currentRow > endRow) {
-        tempCb(nonRequestPrefixBlock ? [nonRequestPrefixBlock] : []);
-        return;
-      }
-
-      editor.getRequest(currentRow, function(request) {
+        const request = await this.getRequest(currentLineNumber);
         if (!request) {
-          return;
+          return requests;
+        } else {
+          requests.push(request);
         }
-        explicitRangeToRequests(
-          {
-            start: {
-              row: request.range.end.row + 1,
-            },
-            end: {
-              row: requestsRange.end.row,
-            },
-          },
-          function(restOfRequests) {
-            restOfRequests.unshift(request);
-            if (nonRequestPrefixBlock !== null) {
-              restOfRequests.unshift(nonRequestPrefixBlock);
-            }
-            tempCb(restOfRequests);
-          }
-        );
-      });
+      }
     }
 
-    editor.getEngulfingRequestsRange(range, function(requestRange) {
-      explicitRangeToRequests(requestRange, cb);
+    return requests;
+  };
+
+  getRequest = async (row?: number) => {
+    await this.coreEditor.waitForLatestTokens();
+    if (this.parser.isInBetweenRequestsRow(row)) {
+      return null;
+    }
+
+    const range = await this.getRequestRange(row);
+    return this.getRequestInRange(range!);
+  };
+
+  moveToPreviousRequestEdge = async () => {
+    await this.coreEditor.waitForLatestTokens();
+    const pos = this.coreEditor.getCurrentPosition();
+    for (
+      pos.lineNumber--;
+      pos.lineNumber > 1 && !this.parser.isRequestEdge(pos.lineNumber);
+      pos.lineNumber--
+    ) {
+      // loop for side effects
+    }
+    this.coreEditor.moveCursorTo({
+      lineNumber: pos.lineNumber,
+      column: 1,
     });
   };
 
-  editor.getRequest = onceDoneTokenizing(function(row, cb) {
-    if (_.isUndefined(cb)) {
-      cb = row;
-      row = null;
-    }
-    if (typeof cb !== 'function') {
-      return;
-    }
-    if (editor.parser.isInBetweenRequestsRow(row)) {
-      cb(null);
-      return;
-    }
-    editor.getRequestRange(row, function(range) {
-      editor.getRequestInRange(range, cb);
-    });
-  });
-
-  editor.moveToPreviousRequestEdge = onceDoneTokenizing(function() {
-    const pos = editor.getCursorPosition();
-    for (pos.row--; pos.row > 0 && !editor.parser.isRequestEdge(pos.row); pos.row--) {
-      // loop for side effects
-    }
-    editor.moveCursorTo(pos.row, 0);
-  });
-
-  editor.moveToNextRequestEdge = onceDoneTokenizing(function(moveOnlyIfNotOnEdge) {
-    const pos = editor.getCursorPosition();
-    const maxRow = editor.getSession().getLength();
+  moveToNextRequestEdge = async (moveOnlyIfNotOnEdge: boolean) => {
+    await this.coreEditor.waitForLatestTokens();
+    const pos = this.coreEditor.getCurrentPosition();
+    const maxRow = this.coreEditor.getLineCount();
     if (!moveOnlyIfNotOnEdge) {
-      pos.row++;
+      pos.lineNumber++;
     }
-    for (; pos.row < maxRow && !editor.parser.isRequestEdge(pos.row); pos.row++) {
+    for (
+      ;
+      pos.lineNumber < maxRow && !this.parser.isRequestEdge(pos.lineNumber);
+      pos.lineNumber++
+    ) {
       // loop for side effects
     }
-    editor.moveCursorTo(pos.row, 0);
-  });
+    this.coreEditor.moveCursorTo({
+      lineNumber: pos.lineNumber,
+      column: 1,
+    });
+  };
 
-  editor.nextRequestEnd = function(pos) {
-    pos = pos || editor.getCursorPosition();
-    const session = editor.getSession();
-    let curRow = pos.row;
-    const maxLines = session.getLength();
-    for (; curRow < maxLines - 1; curRow++) {
-      const curRowMode = editor.parser.getRowParseMode(curRow, editor);
-      if ((curRowMode & editor.parser.MODE.REQUEST_END) > 0) {
+  nextRequestEnd = (pos: Position): Position => {
+    pos = pos || this.coreEditor.getCurrentPosition();
+    const maxLines = this.coreEditor.getLineCount();
+    let curLineNumber = pos.lineNumber;
+    for (; curLineNumber < maxLines - 1; curLineNumber++) {
+      const curRowMode = this.parser.getRowParseMode(curLineNumber);
+      // eslint-disable-next-line no-bitwise
+      if ((curRowMode & this.parser.MODE.REQUEST_END) > 0) {
         break;
       }
-      if (curRow !== pos.row && (curRowMode & editor.parser.MODE.REQUEST_START) > 0) {
+      // eslint-disable-next-line no-bitwise
+      if (curLineNumber !== pos.lineNumber && (curRowMode & this.parser.MODE.REQUEST_START) > 0) {
         break;
       }
     }
 
-    const column = (session.getLine(curRow) || '').replace(/\s+$/, '').length;
+    const column = (this.coreEditor.getLineValue(curLineNumber) || '').replace(/\s+$/, '').length;
 
     return {
-      row: curRow,
-      column: column,
+      lineNumber: curLineNumber,
+      column,
     };
   };
 
-  editor.nextDataDocEnd = function(pos) {
-    pos = pos || editor.getCursorPosition();
-    const session = editor.getSession();
-    let curRow = pos.row;
-    const maxLines = session.getLength();
-    for (; curRow < maxLines - 1; curRow++) {
-      const curRowMode = editor.parser.getRowParseMode(curRow, editor);
-      if ((curRowMode & RowParser.REQUEST_END) > 0) {
+  nextDataDocEnd = (pos: Position): Position => {
+    pos = pos || this.coreEditor.getCurrentPosition();
+    let curLineNumber = pos.lineNumber;
+    const maxLines = this.coreEditor.getLineCount();
+    for (; curLineNumber < maxLines - 1; curLineNumber++) {
+      const curRowMode = this.parser.getRowParseMode(curLineNumber);
+      // eslint-disable-next-line no-bitwise
+      if ((curRowMode & this.parser.MODE.REQUEST_END) > 0) {
         break;
       }
-      if ((curRowMode & editor.parser.MODE.MULTI_DOC_CUR_DOC_END) > 0) {
+      // eslint-disable-next-line no-bitwise
+      if ((curRowMode & this.parser.MODE.MULTI_DOC_CUR_DOC_END) > 0) {
         break;
       }
-      if (curRow !== pos.row && (curRowMode & editor.parser.MODE.REQUEST_START) > 0) {
+      // eslint-disable-next-line no-bitwise
+      if (curLineNumber !== pos.lineNumber && (curRowMode & this.parser.MODE.REQUEST_START) > 0) {
         break;
       }
     }
 
-    const column = (session.getLine(curRow) || '').length;
+    const column = (this.coreEditor.getLineValue(curLineNumber) || '').length;
 
     return {
-      row: curRow,
-      column: column,
+      lineNumber: curLineNumber,
+      column,
     };
   };
 
-  // overwrite the actual aceEditor's onPaste method
-  const origOnPaste = editor.__ace.onPaste;
-  editor.__ace.onPaste = function(text) {
-    if (text && curl.detectCURL(text)) {
-      editor.handleCURLPaste(text);
+  highlightCurrentRequestsAndUpdateActionBar = _.debounce(async () => {
+    await this.coreEditor.waitForLatestTokens();
+    const newCurrentReqRange = await this.getEngulfingRequestsRange();
+    if (newCurrentReqRange === null && this.currentReqRange === null) {
       return;
     }
-    origOnPaste.call(this, text);
-  };
-
-  editor.handleCURLPaste = function(text) {
-    const curlInput = curl.parseCURL(text);
-
-    editor.insert(curlInput);
-  };
-
-  editor.highlightCurrentRequestsAndUpdateActionBar = onceDoneTokenizing(function() {
-    const session = editor.getSession();
-    editor.getEngulfingRequestsRange(function(newCurrentReqRange) {
-      if (newCurrentReqRange === null && CURRENT_REQ_RANGE === null) {
-        return;
+    if (
+      newCurrentReqRange !== null &&
+      this.currentReqRange !== null &&
+      newCurrentReqRange.start.lineNumber === this.currentReqRange.start.lineNumber &&
+      newCurrentReqRange.end.lineNumber === this.currentReqRange.end.lineNumber
+    ) {
+      // same request, now see if we are on the first line and update the action bar
+      const cursorLineNumber = this.coreEditor.getCurrentPosition().lineNumber;
+      if (cursorLineNumber === this.currentReqRange.start.lineNumber) {
+        this.updateActionsBar();
       }
-      if (
-        newCurrentReqRange !== null &&
-        CURRENT_REQ_RANGE !== null &&
-        newCurrentReqRange.start.row === CURRENT_REQ_RANGE.start.row &&
-        newCurrentReqRange.end.row === CURRENT_REQ_RANGE.end.row
-      ) {
-        // same request, now see if we are on the first line and update the action bar
-        const cursorRow = editor.getCursorPosition().row;
-        if (cursorRow === CURRENT_REQ_RANGE.start.row) {
-          editor.updateActionsBar();
-        }
-        return; // nothing to do..
-      }
-
-      if (CURRENT_REQ_RANGE) {
-        session.removeMarker(CURRENT_REQ_RANGE.marker_id);
-      }
-
-      CURRENT_REQ_RANGE = newCurrentReqRange;
-      if (CURRENT_REQ_RANGE) {
-        CURRENT_REQ_RANGE.marker_id = session.addMarker(
-          CURRENT_REQ_RANGE,
-          'ace_snippet-marker',
-          'fullLine'
-        );
-      }
-      editor.updateActionsBar();
-    });
-  }, true);
-
-  editor.getRequestsAsCURL = function(range, cb) {
-    if (_.isUndefined(cb)) {
-      cb = range;
-      range = null;
+      return; // nothing to do..
     }
 
-    if (_.isUndefined(cb)) {
-      cb = $.noop;
+    if (this.currentReqRange) {
+      this.coreEditor.removeMarker(this.currentReqRange.markerRef);
     }
 
-    editor.getRequestsInRange(range, true, function(requests) {
-      const result = _.map(requests, function requestToCurl(req) {
-        if (typeof req === 'string') {
-          // no request block
-          return req;
-        }
+    this.currentReqRange = newCurrentReqRange as any;
+    if (this.currentReqRange) {
+      this.currentReqRange.markerRef = this.coreEditor.addMarker(this.currentReqRange);
+    }
+    this.updateActionsBar();
+  }, 25);
 
-        const esPath = req.url;
-        const esMethod = req.method;
-        const esData = req.data;
+  getRequestsAsCURL = async (range: Range, elasticsearchBaseUrl: string): Promise<string> => {
+    const requests = await this.getRequestsInRange(range, true);
+    const result = _.map(requests, req => {
+      if (typeof req === 'string') {
+        // no request block
+        return req;
+      }
 
-        // this is the first url defined in elasticsearch.hosts
-        const elasticsearchBaseUrl = chrome.getInjected('elasticsearchUrl');
-        const url = es.constructESUrl(elasticsearchBaseUrl, esPath);
+      const esPath = req.url;
+      const esMethod = req.method;
+      const esData = req.data;
 
-        let ret = 'curl -X' + esMethod + ' "' + url + '"';
-        if (esData && esData.length) {
-          ret += " -H 'Content-Type: application/json' -d'\n";
-          const dataAsString = utils.collapseLiteralStrings(esData.join('\n'));
-          // since Sense doesn't allow single quote json string any single qoute is within a string.
-          ret += dataAsString.replace(/'/g, '\\"');
-          if (esData.length > 1) {
-            ret += '\n';
-          } // end with a new line
-          ret += "'";
-        }
-        return ret;
-      });
+      // this is the first url defined in elasticsearch.hosts
+      const url = es.constructESUrl(elasticsearchBaseUrl, esPath);
 
-      cb(result.join('\n'));
+      let ret = 'curl -X' + esMethod + ' "' + url + '"';
+      if (esData && esData.length) {
+        ret += " -H 'Content-Type: application/json' -d'\n";
+        const dataAsString = utils.collapseLiteralStrings(esData.join('\n'));
+        // since Sense doesn't allow single quote json string any single qoute is within a string.
+        ret += dataAsString.replace(/'/g, '\\"');
+        if (esData.length > 1) {
+          ret += '\n';
+        } // end with a new line
+        ret += "'";
+      }
+      return ret;
     });
+
+    return result.join('\n');
   };
 
-  editor.getSession().on('tokenizerUpdate', function() {
-    editor.highlightCurrentRequestsAndUpdateActionBar();
-  });
+  updateActionsBar = () => this.coreEditor.legacyUpdateUI(this.currentReqRange);
 
-  editor.getSession().selection.on('changeCursor', function() {
-    editor.highlightCurrentRequestsAndUpdateActionBar();
-  });
-
-  editor.updateActionsBar = (function() {
-    const set = function(top) {
-      if (top === null) {
-        editor.$actions.css('visibility', 'hidden');
-      } else {
-        editor.$actions.css({
-          top: top,
-          visibility: 'visible',
-        });
-      }
-    };
-
-    const hide = function() {
-      set();
-    };
-
-    return function() {
-      if (!editor.$actions) {
-        return;
-      }
-      if (CURRENT_REQ_RANGE) {
-        // elements are positioned relative to the editor's container
-        // pageY is relative to page, so subtract the offset
-        // from pageY to get the new top value
-        const offsetFromPage = editor.$el.offset().top;
-        const startRow = CURRENT_REQ_RANGE.start.row;
-        const startColumn = CURRENT_REQ_RANGE.start.column;
-        const session = editor.session;
-        const firstLine = session.getLine(startRow);
-        const maxLineLength = session.getWrapLimit() - 5;
-        const isWrapping = firstLine.length > maxLineLength;
-        const getScreenCoords = row =>
-          editor.renderer.textToScreenCoordinates(row, startColumn).pageY - offsetFromPage;
-        const topOfReq = getScreenCoords(startRow);
-
-        if (topOfReq >= 0) {
-          let offset = 0;
-          if (isWrapping) {
-            // Try get the line height of the text area in pixels.
-            const textArea = editor.$el.find('textArea');
-            const hasRoomOnNextLine = session.getLine(startRow + 1).length < maxLineLength;
-            if (textArea && hasRoomOnNextLine) {
-              // Line height + the number of wraps we have on a line.
-              offset += session.getRowLength(startRow) * textArea.height();
-            } else {
-              if (startRow > 0) {
-                set(getScreenCoords(startRow - 1, startColumn));
-                return;
-              }
-              set(getScreenCoords(startRow + 1, startColumn));
-              return;
-            }
-          }
-          set(topOfReq + offset);
-          return;
-        }
-
-        const bottomOfReq =
-          editor.renderer.textToScreenCoordinates(
-            CURRENT_REQ_RANGE.end.row,
-            CURRENT_REQ_RANGE.end.column
-          ).pageY - offsetFromPage;
-
-        if (bottomOfReq >= 0) {
-          set(0);
-          return;
-        }
-      }
-
-      hide();
-    };
-  })();
-
-  editor.getSession().on('changeScrollTop', editor.updateActionsBar);
-
-  return editor;
+  getCoreEditor() {
+    return this.coreEditor;
+  }
 }

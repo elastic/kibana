@@ -20,6 +20,14 @@
 import { TokensProvider } from './tokens_provider';
 import { Token } from './token';
 
+type MarkerRef = any;
+
+export type EditorEvent =
+  | 'tokenizerUpdate'
+  | 'changeCursor'
+  | 'changeScrollTop'
+  | 'changeSelection';
+
 export interface Position {
   /**
    * The line number, not zero-indexed.
@@ -79,8 +87,6 @@ export enum LINE_MODE {
   UNKNOWN = 64,
 }
 
-export type CreateCoreEditor = (el: HTMLDivElement) => CoreEditor;
-
 /**
  * The CoreEditor is a component separate from the Editor implementation that provides Console
  * app specific business logic. The CoreEditor is an interface to the lower-level editor implementation
@@ -99,8 +105,10 @@ export interface CoreEditor {
 
   /**
    * Sets the contents of the editor.
+   *
+   * Returns a promise so that callers can wait for re-tokenizing to complete.
    */
-  setValue(value: string): void;
+  setValue(value: string, forceRetokenize: boolean): Promise<void>;
 
   /**
    * Get the contents of the editor at a specific line.
@@ -126,6 +134,11 @@ export interface CoreEditor {
    * Clear the selected range.
    */
   clearSelection(): void;
+
+  /**
+   * TODO: Document
+   */
+  getSelectionRange(): Range;
 
   /**
    * Move the cursor to the indicated position.
@@ -159,4 +172,73 @@ export interface CoreEditor {
    * Get line content between and including the start and end lines provided.
    */
   getLines(startLine: number, endLine: number): string[];
+
+  /**
+   * Replace a range in the current buffer with the provided value.
+   */
+  replaceRange(range: Range, value: string): void;
+
+  /**
+   * Return the current line count in the buffer.
+   */
+  getLineCount(): number;
+
+  /**
+   * Move the cursor in the current buffer to the provided position
+   */
+  moveCursorTo(pos: Position): void;
+
+  /**
+   * A legacy mechanism which gives consumers of this interface a chance to wait for
+   * latest tokenization to complete.
+   */
+  waitForLatestTokens(): Promise<void>;
+
+  /**
+   * Mark a range in the current buffer
+   */
+  addMarker(range: Range): MarkerRef;
+
+  /**
+   * Mark a range in the current buffer
+   */
+  removeMarker(ref: MarkerRef): void;
+
+  /**
+   * Get a number that represents the current wrap limit on a line
+   */
+  getWrapLimit(): number;
+
+  /**
+   * Register a listener for predefined editor events
+   */
+  on(event: EditorEvent, listener: () => void): void;
+
+  /**
+   * Unregister a listener for predefined editor events
+   */
+  off(event: EditorEvent, listener: () => void): void;
+
+  /**
+   * Execute a predefined editor command.
+   */
+  execCommand(cmd: string): void;
+
+  /**
+   * Returns a boolean value indicating whether or not the completer UI is currently showing in
+   * the editor
+   */
+  isCompleterActive(): boolean;
+
+  /**
+   * Get the HTML container element for this editor instance
+   */
+  getContainer(): HTMLDivElement;
+
+  /**
+   * Because the core editor should not know about requests, but can know about ranges we still
+   * have this backdoor to update UI in response to request range changes, for example, as the user
+   * moves the cursor around
+   */
+  legacyUpdateUI(opts: any): void;
 }

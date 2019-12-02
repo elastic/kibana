@@ -21,8 +21,6 @@ import React, { CSSProperties, useCallback, useEffect, useRef, useState } from '
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import $ from 'jquery';
-
 import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useServicesContext, useEditorReadContext } from '../../../../contexts';
 import { useUIAceKeyboardMode } from '../use_ui_ace_keyboard_mode';
@@ -34,8 +32,7 @@ import { applyCurrentSettings } from './apply_editor_settings';
 
 import { useSendCurrentRequestToES, useSetInputEditor } from '../../../../hooks';
 
-// @ts-ignore
-import { initializeEditor } from '../../../../../../../public/quarantined/src/input';
+import * as senseEditor from '../../../../models/sense_editor';
 // @ts-ignore
 import mappings from '../../../../../../../public/quarantined/src/mappings';
 
@@ -72,7 +69,6 @@ function EditorUI({ previousStateLocation = 'stored' }: EditorProps) {
   const sendCurrentRequestToES = useSendCurrentRequestToES();
 
   const editorRef = useRef<HTMLDivElement | null>(null);
-  const actionsRef = useRef<HTMLDivElement | null>(null);
   const editorInstanceRef = useRef<any | null>(null);
 
   const [textArea, setTextArea] = useState<HTMLTextAreaElement | null>(null);
@@ -87,9 +83,7 @@ function EditorUI({ previousStateLocation = 'stored' }: EditorProps) {
   }, [docLinkVersion]);
 
   useEffect(() => {
-    const $editor = $(editorRef.current!);
-    const $actions = $(actionsRef.current!);
-    editorInstanceRef.current = initializeEditor($editor, $actions);
+    editorInstanceRef.current = senseEditor.create(editorRef.current!);
 
     if (previousStateLocation === 'stored') {
       const { content } = history.getSavedEditorState() || {
@@ -157,7 +151,6 @@ function EditorUI({ previousStateLocation = 'stored' }: EditorProps) {
       <div className="conApp__editor">
         <ul className="conApp__autoComplete" id="autocomplete" />
         <EuiFlexGroup
-          ref={actionsRef}
           className="conApp__editorActions"
           id="ConAppEditorActions"
           gutterSize="none"

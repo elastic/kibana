@@ -36,8 +36,8 @@ import { populateContext } from './autocomplete/engine';
 import { URL_PATH_END_MARKER } from './autocomplete/components';
 import { createTokenIterator } from '../../../np_ready/public/application/factories';
 
-import { Position, Token, Range } from '../../../np_ready/public/types';
-import { CoreEditor } from '../../../np_ready/public/types/core_editor';
+import { Position, Token, Range, CoreEditor } from '../../../np_ready/public/types';
+import { SenseEditor } from '../../../np_ready/public/application/models/sense_editor';
 
 let LAST_EVALUATED_TOKEN: any = null;
 
@@ -54,7 +54,7 @@ function isUrlParamsToken(token: any) {
   }
 }
 function getCurrentMethodAndTokenPaths(
-  editor: LegacyEditor,
+  editor: CoreEditor,
   pos: Position,
   parser: any,
   forceEndOfUrl?: boolean
@@ -297,8 +297,8 @@ function getCurrentMethodAndTokenPaths(
   }
   return ret;
 }
-export function getEndpointFromPosition(aceEditor: AceEditor, pos: AcePosition, parser: any) {
-  const editor = new CoreEditor(aceEditor);
+export function getEndpointFromPosition(senseEditor: SenseEditor, pos: AcePosition, parser: any) {
+  const editor = senseEditor.getCoreEditor();
   const context = {
     ...getCurrentMethodAndTokenPaths(
       editor,
@@ -313,23 +313,7 @@ export function getEndpointFromPosition(aceEditor: AceEditor, pos: AcePosition, 
 }
 
 // eslint-disable-next-line
-export default function({
-  coreEditor: editor,
-  parser,
-  execCommand,
-  getCursorPosition,
-  isCompleterActive,
-  addChangeListener,
-  removeChangeListener,
-}: {
-  coreEditor: CoreEditor;
-  parser: any;
-  execCommand: (cmd: string) => void;
-  getCursorPosition: () => Position | null;
-  isCompleterActive: () => boolean;
-  addChangeListener: (fn: any) => void;
-  removeChangeListener: (fn: any) => void;
-}) {
+export default function({ coreEditor: editor, parser }: { coreEditor: CoreEditor; parser: any }) {
   function isUrlPathToken(token: Token | null) {
     switch ((token || ({} as any)).type) {
       case 'url.slash':
@@ -404,7 +388,7 @@ export default function({
     valueToInsert = context.prefixToAdd + valueToInsert + context.suffixToAdd;
 
     // disable listening to the changes we are making.
-    removeChangeListener(editorChangeListener);
+    editor.off('changeSelection', editorChangeListener);
 
     if (context.rangeToReplace.start.column !== context.rangeToReplace.end.column) {
       editor.replace(context.rangeToReplace, valueToInsert);
@@ -456,7 +440,7 @@ export default function({
     }
 
     // re-enable listening to typing
-    addChangeListener(editorChangeListener);
+    editor.on('changeSelection', editorChangeListener);
   }
 
   function getAutoCompleteContext(ctxEditor: CoreEditor, pos: Position) {
@@ -964,13 +948,13 @@ export default function({
     }
 
     LAST_EVALUATED_TOKEN = currentToken;
-    execCommand('startAutocomplete');
+    editor.execCommand('startAutocomplete');
   },
   100);
 
   function editorChangeListener() {
-    const position = getCursorPosition();
-    if (position && !isCompleterActive()) {
+    const position = editor.getCurrentPosition();
+    if (position && !editor.isCompleterActive()) {
       evaluateCurrentTokenAfterAChange(position);
     }
   }
@@ -1054,7 +1038,7 @@ export default function({
     }
   }
 
-  addChangeListener(editorChangeListener);
+  editor.on('changeSelection', editorChangeListener);
 
   // Hook into Ace
 
@@ -1090,8 +1074,8 @@ export default function({
     _test: {
       getCompletions,
       addReplacementInfoToContext,
-      addChangeListener: () => addChangeListener(editorChangeListener),
-      removeChangeListener: () => removeChangeListener(editorChangeListener),
+      addChangeListener: () => editor.on('changeSelection', editorChangeListener),
+      removeChangeListener: () => editor.off('changeSelection', editorChangeListener),
     },
   };
 }

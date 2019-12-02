@@ -17,15 +17,11 @@
  * under the License.
  */
 
-// @ts-ignore
-import '../../../../public/quarantined/tests/src/setup_mocks';
+import './token_provider.test.mocks';
 
-import { Editor } from 'brace';
 import $ from 'jquery';
-// @ts-ignore
-import { initializeEditor } from '../../../../public/quarantined/src/input.ts';
+import { create, SenseEditor } from '../../application/models/sense_editor';
 
-import { AceTokensProvider } from '.';
 import { Position, Token, TokensProvider } from '../../types';
 
 interface RunTestArgs {
@@ -34,7 +30,7 @@ interface RunTestArgs {
 }
 
 describe('Ace (legacy) token provider', () => {
-  let aceEditor: Editor & { $el: any; autocomplete: any; update: any };
+  let senseEditor: SenseEditor;
   let tokenProvider: TokensProvider;
   beforeEach(() => {
     // Set up our document body
@@ -44,16 +40,18 @@ describe('Ace (legacy) token provider', () => {
         <div id="ConCopyAsCurl" />
       </div>`;
 
-    aceEditor = initializeEditor($('#ConAppEditor'), $('#ConAppEditorActions'));
+    senseEditor = create(document.querySelector<HTMLElement>('#ConAppEditor')!);
 
-    aceEditor.$el.show();
-    aceEditor.autocomplete._test.removeChangeListener();
-    tokenProvider = new AceTokensProvider(aceEditor.session);
+    $(senseEditor.getCoreEditor().getContainer())!.show();
+
+    (senseEditor as any).autocomplete._test.removeChangeListener();
+    tokenProvider = senseEditor.getCoreEditor().getTokenProvider();
   });
-  afterEach(done => {
-    aceEditor.$el.hide();
-    aceEditor.autocomplete._test.addChangeListener();
-    aceEditor.update('', done);
+
+  afterEach(async () => {
+    $(senseEditor.getCoreEditor().getContainer())!.hide();
+    (senseEditor as any).autocomplete._test.addChangeListener();
+    await senseEditor.update('', true);
   });
 
   describe('#getTokens', () => {
@@ -63,7 +61,7 @@ describe('Ace (legacy) token provider', () => {
       done,
       lineNumber = 1,
     }: RunTestArgs & { expectedTokens: Token[] | null; lineNumber?: number }) => {
-      aceEditor.update(input, function() {
+      senseEditor.update(input, true).then(() => {
         const tokens = tokenProvider.getTokens(lineNumber);
         expect(tokens).toEqual(expectedTokens);
         if (done) done();
@@ -160,7 +158,7 @@ describe('Ace (legacy) token provider', () => {
       test('case 2 - empty lines', done => {
         runTest({
           input: `GET http://test:user@somehost/
-          
+
 
 
 
@@ -182,7 +180,7 @@ describe('Ace (legacy) token provider', () => {
       done,
       position,
     }: RunTestArgs & { expectedToken: Token | null; position: Position }) => {
-      aceEditor.update(input, function() {
+      senseEditor.update(input, true).then(() => {
         const tokens = tokenProvider.getTokenAt(position);
         expect(tokens).toEqual(expectedToken);
         if (done) done();

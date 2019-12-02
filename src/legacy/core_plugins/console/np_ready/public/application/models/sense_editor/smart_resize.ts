@@ -19,7 +19,8 @@
 
 import { get, throttle } from 'lodash';
 
-export default function (editor) {
+// eslint-disable-next-line import/no-default-export
+export default function(editor: any) {
   const resize = editor.resize;
 
   const throttledResize = throttle(() => {

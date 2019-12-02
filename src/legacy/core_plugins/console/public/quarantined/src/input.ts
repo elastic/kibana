@@ -45,18 +45,12 @@ export function initializeEditor($el: JQuery<HTMLElement>, $actionsEl: JQuery<HT
       }
       return null;
     },
-    isCompleterActive: () => {
-      return Boolean(input.__ace.completer && input.__ace.completer.activated);
-    },
     addChangeListener: (fn: any) => input.on('changeSelection', fn),
     removeChangeListener: (fn: any) => input.off('changeSelection', fn),
   };
 
   input.autocomplete = new (Autocomplete as any)(editorShim);
-  input.setOptions({
-    enableBasicAutocompletion: true,
-  });
-  input.$blockScrolling = Infinity;
+
   input.$actions = $actionsEl;
 
   /**

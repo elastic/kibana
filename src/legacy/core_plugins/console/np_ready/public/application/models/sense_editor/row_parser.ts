@@ -84,39 +84,39 @@ export default class RowParser {
     return MODE.REQUEST_START;
   }
 
-  rowPredicate(lineNumber: number, editor: CoreEditor, value: any) {
+  rowPredicate(lineNumber: number | undefined, editor: CoreEditor, value: any) {
     const mode = this.getRowParseMode(lineNumber);
     // eslint-disable-next-line no-bitwise
     return (mode & value) > 0;
   }
 
-  isEndRequestRow(row: number, _e: CoreEditor) {
+  isEndRequestRow(row?: number, _e?: CoreEditor) {
     const editor = _e || this.editor;
     return this.rowPredicate(row, editor, MODE.REQUEST_END);
   }
 
-  isRequestEdge(row: number, _e: CoreEditor) {
+  isRequestEdge(row?: number, _e?: CoreEditor) {
     const editor = _e || this.editor;
     // eslint-disable-next-line no-bitwise
     return this.rowPredicate(row, editor, MODE.REQUEST_END | MODE.REQUEST_START);
   }
 
-  isStartRequestRow(row: number, _e: CoreEditor) {
+  isStartRequestRow(row?: number, _e?: CoreEditor) {
     const editor = _e || this.editor;
     return this.rowPredicate(row, editor, MODE.REQUEST_START);
   }
 
-  isInBetweenRequestsRow(row: number, _e: CoreEditor) {
+  isInBetweenRequestsRow(row?: number, _e?: CoreEditor) {
     const editor = _e || this.editor;
     return this.rowPredicate(row, editor, MODE.BETWEEN_REQUESTS);
   }
 
-  isInRequestsRow(row: number, _e: CoreEditor) {
+  isInRequestsRow(row?: number, _e?: CoreEditor) {
     const editor = _e || this.editor;
     return this.rowPredicate(row, editor, MODE.IN_REQUEST);
   }
 
-  isMultiDocDocEndRow(row: number, _e: CoreEditor) {
+  isMultiDocDocEndRow(row?: number, _e?: CoreEditor) {
     const editor = _e || this.editor;
     return this.rowPredicate(row, editor, MODE.MULTI_DOC_CUR_DOC_END);
   }
