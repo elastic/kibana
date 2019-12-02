@@ -27,7 +27,7 @@ export default function (kibana) {
         privileges: {
           all: {
             savedObject: {
-              all: ['globaltype'],
+              all: ['alerting'],
               read: [],
             },
             ui: [],
@@ -35,7 +35,31 @@ export default function (kibana) {
           read: {
             savedObject: {
               all: [],
-              read: ['globaltype'],
+              read: ['alerting'],
+            },
+            ui: [],
+          }
+        }
+      });
+
+      server.plugins.xpack_main.registerFeature({
+        id: 'siem_alerting',
+        name: 'siem_alerting',
+        icon: 'upArrow',
+        navLinkId: 'siem_alerting',
+        app: [],
+        privileges: {
+          all: {
+            savedObject: {
+              all: [{ type: 'alerting', when: { key: 'consumer', value: 'siem' } }],
+              read: [],
+            },
+            ui: [],
+          },
+          read: {
+            savedObject: {
+              all: [],
+              read: [{ type: 'alerting', when: { key: 'consumer', value: 'siem' } }],
             },
             ui: [],
           }

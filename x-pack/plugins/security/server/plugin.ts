@@ -194,6 +194,7 @@ export class Plugin {
             adminClusterClient: adminClient,
             authz,
             legacyAPI,
+            features,
           });
 
           legacyAPI.capabilities.registerCapabilitiesModifier((request, capabilities) =>

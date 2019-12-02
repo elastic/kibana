@@ -5,6 +5,10 @@
  */
 
 import { isString } from 'lodash';
+import {
+  SavedObjectPrivilege,
+  isSavedObjectPrivilege,
+} from '../../../../features/server/feature_kibana_privileges';
 
 export class SavedObjectActions {
   private readonly prefix: string;
@@ -17,15 +21,23 @@ export class SavedObjectActions {
     return `${this.prefix}*`;
   }
 
-  public get(type: string, operation: string): string {
-    if (!type || !isString(type)) {
-      throw new Error('type is required and must be a string');
+  public get(typeOrSavedObjectPrivilege: string | SavedObjectPrivilege, operation: string): string {
+    if (!typeOrSavedObjectPrivilege) {
+      throw new Error('typeOrSavedObjectPrivilege is required');
     }
 
     if (!operation || !isString(operation)) {
-      throw new Error('type is required and must be a string');
+      throw new Error('operation is required and must be a string');
     }
 
-    return `${this.prefix}${type}/${operation}`;
+    if (isString(typeOrSavedObjectPrivilege)) {
+      return `${this.prefix}${typeOrSavedObjectPrivilege}/${operation}`;
+    }
+
+    if (isSavedObjectPrivilege(typeOrSavedObjectPrivilege)) {
+      return `${this.prefix}${typeOrSavedObjectPrivilege.type}/${operation}(${typeOrSavedObjectPrivilege.when.key}=${typeOrSavedObjectPrivilege.when.value})`;
+    }
+
+    throw new Error(`typeOrSavedObjectPrivilege must be a string or SavedObjectPrivilege`);
   }
 }

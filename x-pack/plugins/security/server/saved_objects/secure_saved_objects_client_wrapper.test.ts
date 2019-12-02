@@ -9,12 +9,15 @@ import { Actions } from '../authorization';
 import { securityAuditLoggerMock } from '../audit/index.mock';
 import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectPrivilege } from '../../../features/server/feature_kibana_privileges';
 
 const createSecureSavedObjectsClientWrapperOptions = () => {
   const actions = new Actions('some-version');
   jest
     .spyOn(actions.savedObject, 'get')
-    .mockImplementation((type: string, action: string) => `mock-saved_object:${type}/${action}`);
+    .mockImplementation(
+      (type: string | SavedObjectPrivilege, action: string) => `mock-saved_object:${type}/${action}`
+    );
 
   const forbiddenError = new Error('Mock ForbiddenError');
   const generalError = new Error('Mock GeneralError');

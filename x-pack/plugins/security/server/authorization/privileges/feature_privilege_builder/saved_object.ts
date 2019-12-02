@@ -16,13 +16,17 @@ export class FeaturePrivilegeSavedObjectBuilder extends BaseFeaturePrivilegeBuil
   public getActions(privilegeDefinition: FeatureKibanaPrivileges, feature: Feature): string[] {
     return uniq([
       ...flatten(
-        privilegeDefinition.savedObject.all.map(type => [
-          ...allOperations.map(operation => this.actions.savedObject.get(type, operation)),
+        privilegeDefinition.savedObject.all.map(typeOrSavedObjectPrivilege => [
+          ...allOperations.map(operation =>
+            this.actions.savedObject.get(typeOrSavedObjectPrivilege, operation)
+          ),
         ])
       ),
       ...flatten(
-        privilegeDefinition.savedObject.read.map(type => [
-          ...readOperations.map(operation => this.actions.savedObject.get(type, operation)),
+        privilegeDefinition.savedObject.read.map(typeOrSavedObjectPrivilege => [
+          ...readOperations.map(operation =>
+            this.actions.savedObject.get(typeOrSavedObjectPrivilege, operation)
+          ),
         ])
       ),
     ]);

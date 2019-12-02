@@ -43,6 +43,7 @@ import {
   SavedObjectsBulkUpdateOptions,
   SavedObjectsDeleteOptions,
   SavedObjectsDeleteByNamespaceOptions,
+  SavedObjectsPredicate,
 } from '../saved_objects_client';
 import {
   SavedObject,
@@ -92,6 +93,19 @@ export interface IncrementCounterOptions extends SavedObjectsBaseOptions {
 }
 
 const DEFAULT_REFRESH_SETTING = 'wait_for';
+
+const doesAPredicateMatch = (
+  predicates: SavedObjectsPredicate[],
+  savedObject: SavedObject<any>
+): boolean => {
+  for (const predicate of predicates) {
+    if (savedObject.attributes[predicate.when.key] === predicate.when.value) {
+      return true;
+    }
+  }
+
+  return false;
+};
 
 export class SavedObjectsRepository {
   private _migrator: KibanaMigrator;
@@ -170,7 +184,7 @@ export class SavedObjectsRepository {
       namespace,
       references = [],
       refresh = DEFAULT_REFRESH_SETTING,
-      predicate,
+      predicates,
     } = options;
 
     if (!this._allowedTypes.includes(type)) {
@@ -180,22 +194,36 @@ export class SavedObjectsRepository {
     const method = id && !overwrite ? 'create' : 'index';
     const time = this._getCurrentTime();
 
-    if (predicate) {
+    if (predicates && predicates.length > 0) {
+      if (
+        !doesAPredicateMatch(predicates, {
+          id: id || '',
+          type,
+          attributes,
+          references,
+          migrationVersion,
+        })
+      ) {
+        throw SavedObjectsErrorHelpers.decorateBadRequestError(
+          new Error('GET OUTTA HERE YA TURKEY')
+        );
+      }
+
       const response = await this._callCluster('get', {
         id: this._serializer.generateRawId(options.namespace, type, id),
         index: this.getIndexForType(type),
         ignore: [404],
       });
-      const documentFound = response.found === true;
       const indexFound = response.status !== 404;
-      const { isValid, error } = predicate({
-        indexFound,
-        documentFound,
-        _source: response._source,
-      });
-
-      if (!isValid) {
-        throw error;
+      const documentFound = indexFound && response.found === true;
+      if (
+        indexFound &&
+        documentFound &&
+        !doesAPredicateMatch(predicates, this._rawToSavedObject(response))
+      ) {
+        throw SavedObjectsErrorHelpers.decorateBadRequestError(
+          new Error('GET OUTTA HERE YA TURKEY')
+        );
       }
     }
 

@@ -6,14 +6,16 @@
 
 import { IClusterClient, KibanaRequest, LegacyRequest } from '../../../../../src/core/server';
 import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
-import { LegacyAPI } from '../plugin';
+import { LegacyAPI, FeaturesService } from '../plugin';
 import { Authorization } from '../authorization';
 import { SecurityAuditLogger } from '../audit';
+import { SavedObjectsPrivileges } from './saved_objects_privileges';
 
 interface SetupSavedObjectsParams {
   adminClusterClient: IClusterClient;
   auditLogger: SecurityAuditLogger;
   authz: Pick<Authorization, 'mode' | 'actions' | 'checkSavedObjectsPrivilegesWithRequest'>;
+  features: FeaturesService;
   legacyAPI: Pick<LegacyAPI, 'savedObjects'>;
 }
 
@@ -21,10 +23,12 @@ export function setupSavedObjects({
   adminClusterClient,
   auditLogger,
   authz,
+  features,
   legacyAPI: { savedObjects },
 }: SetupSavedObjectsParams) {
   const getKibanaRequest = (request: KibanaRequest | LegacyRequest) =>
     request instanceof KibanaRequest ? request : KibanaRequest.from(request);
+
   savedObjects.setScopedSavedObjectsClientFactory(({ request }) => {
     const kibanaRequest = getKibanaRequest(request);
     if (authz.mode.useRbacForRequest(kibanaRequest)) {
@@ -54,6 +58,7 @@ export function setupSavedObjects({
             kibanaRequest
           ),
           errors: savedObjects.SavedObjectsClient.errors,
+          savedObjectsPrivileges: new SavedObjectsPrivileges(features),
         });
       }
 

@@ -29,15 +29,12 @@ import {
 } from '../types';
 import { SavedObjectsErrorHelpers } from './lib/errors';
 
-export interface CreatePredicateArgs {
-  indexFound: boolean;
-  documentFound: boolean;
-  _source: Record<string, any>;
-}
-
-export interface PredicateResult {
-  isValid: boolean;
-  error?: Error;
+export interface SavedObjectsPredicate {
+  type: string;
+  when: {
+    key: string;
+    value: string;
+  };
 }
 
 /**
@@ -54,7 +51,7 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   references?: SavedObjectReference[];
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
-  predicate?(args: CreatePredicateArgs): PredicateResult;
+  predicates?: SavedObjectsPredicate[];
 }
 
 /**

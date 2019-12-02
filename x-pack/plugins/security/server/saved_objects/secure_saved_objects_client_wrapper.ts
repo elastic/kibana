@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedObjectsPredicate } from 'src/core/server/saved_objects';
+import { isString } from 'util';
 import {
   SavedObjectAttributes,
   SavedObjectsBaseOptions,
@@ -17,6 +19,8 @@ import {
 } from '../../../../../src/core/server';
 import { SecurityAuditLogger } from '../audit';
 import { Actions, CheckSavedObjectsPrivileges } from '../authorization';
+import { SavedObjectsPrivileges } from './saved_objects_privileges';
+import { SavedObjectCondition } from '../../../features/server/feature_kibana_privileges';
 
 interface SecureSavedObjectsClientWrapperOptions {
   actions: Actions;
@@ -24,6 +28,11 @@ interface SecureSavedObjectsClientWrapperOptions {
   baseClient: SavedObjectsClientContract;
   errors: SavedObjectsClientContract['errors'];
   checkSavedObjectsPrivilegesAsCurrentUser: CheckSavedObjectsPrivileges;
+  savedObjectsPrivileges: SavedObjectsPrivileges;
+}
+
+interface EnsureAuthorizedResult {
+  predicates?: SavedObjectsPredicate[];
 }
 
 export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContract {
@@ -32,18 +41,21 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   private readonly baseClient: SavedObjectsClientContract;
   private readonly checkSavedObjectsPrivilegesAsCurrentUser: CheckSavedObjectsPrivileges;
   public readonly errors: SavedObjectsClientContract['errors'];
+  private readonly savedObjectsPrivileges: SavedObjectsPrivileges;
   constructor({
     actions,
     auditLogger,
     baseClient,
     checkSavedObjectsPrivilegesAsCurrentUser,
     errors,
+    savedObjectsPrivileges,
   }: SecureSavedObjectsClientWrapperOptions) {
     this.errors = errors;
     this.actions = actions;
     this.auditLogger = auditLogger;
     this.baseClient = baseClient;
     this.checkSavedObjectsPrivilegesAsCurrentUser = checkSavedObjectsPrivilegesAsCurrentUser;
+    this.savedObjectsPrivileges = savedObjectsPrivileges;
   }
 
   public async create<T extends SavedObjectAttributes>(
@@ -51,28 +63,12 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     attributes: T = {} as T,
     options: SavedObjectsCreateOptions = {}
   ) {
-    await this.ensureAuthorized(type, 'create', options.namespace, { type, attributes, options });
-
-    if (type === 'alerting') {
-      options.predicate = ({ documentFound, indexFound, _source }) => {
-        if (!documentFound || !indexFound) {
-          return {
-            isValid: true,
-          };
-        }
-
-        if (_source.alerting.consumer === 'siem') {
-          return {
-            isValid: true,
-          };
-        }
-
-        return {
-          isValid: false,
-          error: this.errors.decorateForbiddenError(new Error(`GET OUTTA HERE YA TURKEY`)),
-        };
-      };
-    }
+    const { predicates } = await this.ensureAuthorized(type, 'create', options.namespace, {
+      type,
+      attributes,
+      options,
+    });
+    options.predicates = predicates;
     return await this.baseClient.create(type, attributes, options);
   }
 
@@ -163,18 +159,43 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     action: string,
     namespace?: string,
     args?: Record<string, unknown>
-  ) {
+  ): Promise<EnsureAuthorizedResult> {
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
-    const actionsToTypesMap = new Map(
-      types.map(type => [this.actions.savedObject.get(type, action), type])
-    );
-    const actions = Array.from(actionsToTypesMap.keys());
-    const { hasAllRequested, username, privileges } = await this.checkPrivileges(
-      actions,
-      namespace
-    );
+    const actionsMap = new Map<string, string | SavedObjectsPredicate>();
+    for (const type of types) {
+      if (this.savedObjectsPrivileges.hasConditionalPrivileges(type)) {
+        const conditions = this.savedObjectsPrivileges.getConditions(type);
+        for (const condition of conditions) {
+          actionsMap.set(this.actions.savedObject.get({ type, when: condition }, action), {
+            type,
+            when: condition,
+          });
+        }
+      } else {
+        actionsMap.set(this.actions.savedObject.get(type, action), type);
+      }
+    }
+    const actions = Array.from(actionsMap.keys());
+    const { username, privileges } = await this.checkPrivileges(actions, namespace);
 
-    if (hasAllRequested) {
+    const predicates: SavedObjectsPredicate[] = [];
+    let forbidden = false;
+    const missingPrivileges: string[] = [];
+    for (const [privilege, result] of Object.entries(privileges)) {
+      const typeOrCondition = actionsMap.get(privilege)!;
+      if (isString(typeOrCondition)) {
+        if (result === false) {
+          forbidden = true;
+          missingPrivileges.push(privilege);
+        }
+      } else {
+        if (result === true) {
+          predicates.push(typeOrCondition);
+        }
+      }
+    }
+
+    if (!forbidden) {
       this.auditLogger.savedObjectsAuthorizationSuccess(username, action, types, args);
     } else {
       const missingPrivileges = this.getMissingPrivileges(privileges);
@@ -186,11 +207,15 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
         args
       );
       const msg = `Unable to ${action} ${missingPrivileges
-        .map(privilege => actionsToTypesMap.get(privilege))
+        .map(privilege => actionsMap.get(privilege))
         .sort()
         .join(',')}`;
       throw this.errors.decorateForbiddenError(new Error(msg));
     }
+
+    return {
+      predicates,
+    };
   }
 
   private getMissingPrivileges(privileges: Record<string, boolean>) {

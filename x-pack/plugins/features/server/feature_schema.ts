@@ -24,6 +24,14 @@ const managementSchema = Joi.object().pattern(
 );
 const catalogueSchema = Joi.array().items(Joi.string().regex(uiCapabilitiesRegex));
 
+export const savedObjectPrivilegeSchema = Joi.object({
+  type: Joi.string().required(),
+  when: Joi.object({
+    key: Joi.string().required(),
+    value: Joi.string().required(),
+  }).required(),
+});
+
 const privilegeSchema = Joi.object({
   excludeFromBasePrivileges: Joi.boolean(),
   management: managementSchema,
@@ -32,10 +40,10 @@ const privilegeSchema = Joi.object({
   app: Joi.array().items(Joi.string()),
   savedObject: Joi.object({
     all: Joi.array()
-      .items(Joi.string())
+      .items(Joi.string(), savedObjectPrivilegeSchema)
       .required(),
     read: Joi.array()
-      .items(Joi.string())
+      .items(Joi.string(), savedObjectPrivilegeSchema)
       .required(),
   }).required(),
   ui: Joi.array()
