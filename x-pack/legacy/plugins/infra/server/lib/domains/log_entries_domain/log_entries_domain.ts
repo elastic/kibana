@@ -10,13 +10,7 @@ import { sortBy } from 'lodash';
 import { RequestHandlerContext } from 'src/core/server';
 import { TimeKey } from '../../../../common/time';
 import { JsonObject } from '../../../../common/typed_json';
-import {
-  InfraLogEntry,
-  InfraLogItem,
-  InfraLogMessageSegment,
-  InfraLogSummaryBucket,
-  InfraLogSummaryHighlightBucket,
-} from '../../../graphql/types';
+import { InfraLogEntry, InfraLogItem, InfraLogMessageSegment } from '../../../graphql/types';
 import {
   InfraSourceConfiguration,
   InfraSources,
@@ -211,75 +205,6 @@ export class InfraLogEntriesDomain {
     return documentSets;
   }
 
-  public async getLogSummaryBucketsBetween(
-    requestContext: RequestHandlerContext,
-    sourceId: string,
-    start: number,
-    end: number,
-    bucketSize: number,
-    filterQuery?: LogEntryQuery
-  ): Promise<InfraLogSummaryBucket[]> {
-    const { configuration } = await this.libs.sources.getSourceConfiguration(
-      requestContext,
-      sourceId
-    );
-    const dateRangeBuckets = await this.adapter.getContainedLogSummaryBuckets(
-      requestContext,
-      configuration,
-      start,
-      end,
-      bucketSize,
-      filterQuery
-    );
-    return dateRangeBuckets;
-  }
-
-  public async getLogSummaryHighlightBucketsBetween(
-    requestContext: RequestHandlerContext,
-    sourceId: string,
-    start: number,
-    end: number,
-    bucketSize: number,
-    highlightQueries: string[],
-    filterQuery?: LogEntryQuery
-  ): Promise<InfraLogSummaryHighlightBucket[][]> {
-    const { configuration } = await this.libs.sources.getSourceConfiguration(
-      requestContext,
-      sourceId
-    );
-    const messageFormattingRules = compileFormattingRules(
-      getBuiltinRules(configuration.fields.message)
-    );
-    const requiredFields = getRequiredFields(configuration, messageFormattingRules);
-
-    const summaries = await Promise.all(
-      highlightQueries.map(async highlightQueryPhrase => {
-        const highlightQuery = createHighlightQueryDsl(highlightQueryPhrase, requiredFields);
-        const query = filterQuery
-          ? {
-              bool: {
-                must: [filterQuery, highlightQuery],
-              },
-            }
-          : highlightQuery;
-        const summaryBuckets = await this.adapter.getContainedLogSummaryBuckets(
-          requestContext,
-          configuration,
-          start,
-          end,
-          bucketSize,
-          query
-        );
-        const summaryHighlightBuckets = summaryBuckets
-          .filter(logSummaryBucketHasEntries)
-          .map(convertLogSummaryBucketToSummaryHighlightBucket);
-        return summaryHighlightBuckets;
-      })
-    );
-
-    return summaries;
-  }
-
   public async getLogItem(
     requestContext: RequestHandlerContext,
     id: string,
@@ -335,15 +260,6 @@ export interface LogEntriesAdapter {
     highlightQuery?: LogEntryQuery
   ): Promise<LogEntryDocument[]>;
 
-  getContainedLogSummaryBuckets(
-    requestContext: RequestHandlerContext,
-    sourceConfiguration: InfraSourceConfiguration,
-    start: number,
-    end: number,
-    bucketSize: number,
-    filterQuery?: LogEntryQuery
-  ): Promise<LogSummaryBucket[]>;
-
   getLogItem(
     requestContext: RequestHandlerContext,
     id: string,
@@ -395,18 +311,6 @@ const convertLogDocumentToEntry = (
       };
     }
   }),
-});
-
-const logSummaryBucketHasEntries = (bucket: LogSummaryBucket) =>
-  bucket.entriesCount > 0 && bucket.topEntryKeys.length > 0;
-
-const convertLogSummaryBucketToSummaryHighlightBucket = (
-  bucket: LogSummaryBucket
-): InfraLogSummaryHighlightBucket => ({
-  entriesCount: bucket.entriesCount,
-  start: bucket.start,
-  end: bucket.end,
-  representativeKey: bucket.topEntryKeys[0],
 });
 
 const getRequiredFields = (
