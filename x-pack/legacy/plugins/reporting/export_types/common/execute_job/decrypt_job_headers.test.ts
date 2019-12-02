@@ -9,45 +9,29 @@ import { createMockServer } from '../../../test_helpers/create_mock_server';
 import { Logger } from '../../../types';
 import { decryptJobHeaders } from './decrypt_job_headers';
 
-const createMockLogger = () =>
-  (({
-    warning: jest.fn(),
-    debug: jest.fn(),
-    info: jest.fn(),
-    error: jest.fn(),
-  } as unknown) as Logger);
+let mockServer: any;
+beforeEach(() => {
+  mockServer = createMockServer('');
+});
 
-interface PayloadType {
-  headers?: Record<string, string>;
-}
+const encryptHeaders = async (headers: Record<string, string>) => {
+  const crypto = cryptoFactory(mockServer);
+  return await crypto.encrypt(headers);
+};
 
 describe('headers', () => {
-  let mockServer: any;
-  const encryptHeaders = async (headers: Record<string, string>) => {
-    const crypto = cryptoFactory(mockServer);
-    return await crypto.encrypt(headers);
-  };
-
-  beforeEach(() => {
-    mockServer = createMockServer('');
-  });
-
   test(`fails if it can't decrypt headers`, async () => {
     await expect(
       decryptJobHeaders({
-        job: {
-          title: 'cool-job-bro',
-          type: 'csv',
-          jobParams: {
-            savedObjectId: 'abc-123',
-            isImmediate: false,
-            savedObjectType: 'search',
-          },
-        } as PayloadType,
+        job: { headers: {} }, // FIXME isn't this the wrong type to pass to the decrypt function?
+        logger: ({
+          error: jest.fn(),
+        } as unknown) as Logger,
         server: mockServer,
-        logger: createMockLogger(),
       })
-    ).rejects.toBeDefined();
+    ).rejects.toMatchInlineSnapshot(
+      `[Error: Failed to decrypt report job data. Please ensure that xpack.reporting.encryptionKey is set and re-generate this report. TypeError [ERR_INVALID_ARG_TYPE]: The first argument must be one of type string, Buffer, ArrayBuffer, Array, or Array-like Object. Received type object]`
+    );
   });
 
   test(`passes back decrypted headers that were passed in`, async () => {
@@ -61,15 +45,10 @@ describe('headers', () => {
       job: {
         title: 'cool-job-bro',
         type: 'csv',
-        jobParams: {
-          savedObjectId: 'abc-123',
-          isImmediate: false,
-          savedObjectType: 'search',
-        },
         headers: encryptedHeaders,
       },
+      logger: {} as Logger,
       server: mockServer,
-      logger: createMockLogger(),
     });
     expect(decryptedHeaders).toEqual(headers);
   });
