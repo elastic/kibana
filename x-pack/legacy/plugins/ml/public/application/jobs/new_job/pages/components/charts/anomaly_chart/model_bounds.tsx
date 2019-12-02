@@ -7,7 +7,6 @@
 import React, { FC } from 'react';
 import { ScaleType, AreaSeries, CurveType } from '@elastic/charts';
 import { ModelItem } from '../../../../common/results_loader';
-import { getCustomColor } from '../common/utils';
 import { seriesStyle, MODEL_COLOR } from '../common/settings';
 
 interface Props {
@@ -44,7 +43,7 @@ export const ModelBounds: FC<Props> = ({ modelData }) => {
       yScaleToDataExtent={false}
       curve={CurveType.CURVE_MONOTONE_X}
       areaSeriesStyle={areaSeriesStyle}
-      customSeriesColors={getCustomColor(SPEC_ID, MODEL_COLOR)}
+      customSeriesColors={[MODEL_COLOR]}
     />
   );
 };

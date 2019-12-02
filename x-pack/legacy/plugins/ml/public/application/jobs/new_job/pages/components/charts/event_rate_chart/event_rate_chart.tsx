@@ -7,7 +7,6 @@
 import React, { FC } from 'react';
 import { BarSeries, Chart, ScaleType, Settings, TooltipType } from '@elastic/charts';
 import { Axes } from '../common/axes';
-import { getCustomColor } from '../common/utils';
 import { LineChartPoint } from '../../../../common/chart_loader';
 import { EVENT_RATE_COLOR } from '../common/settings';
 import { LoadingWrapper } from '../loading_wrapper';
@@ -46,7 +45,7 @@ export const EventRateChart: FC<Props> = ({
             xAccessor={'time'}
             yAccessors={['value']}
             data={eventRateChartData}
-            customSeriesColors={getCustomColor(SPEC_ID, EVENT_RATE_COLOR)}
+            customSeriesColors={[EVENT_RATE_COLOR]}
           />
         </Chart>
       </LoadingWrapper>

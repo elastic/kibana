@@ -26,7 +26,6 @@ import {
   Axis,
   BarSeries,
   Chart,
-  DataSeriesColorsValues,
   niceTimeFormatter,
   Position,
   ScaleType,
@@ -392,13 +391,8 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     const specId = i18n.translate('xpack.lens.indexPattern.fieldStatsCountLabel', {
       defaultMessage: 'Count',
     });
-    const colors: DataSeriesColorsValues = {
-      colorValues: [],
-      specId,
-    };
     const expectedColor = getColorForDataType(field.type);
-
-    const seriesColors = new Map([[colors, expectedColor]]);
+    const seriesColors = expectedColor ? [expectedColor] : undefined;
 
     if (field.type === 'date') {
       return wrapInPopover(

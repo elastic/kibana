@@ -6,7 +6,6 @@
 
 import React, { FC } from 'react';
 import { LineSeries, ScaleType, CurveType } from '@elastic/charts';
-import { getCustomColor } from '../common/utils';
 import { seriesStyle, LINE_COLOR } from '../common/settings';
 
 interface Props {
@@ -31,7 +30,7 @@ export const Line: FC<Props> = ({ chartData }) => {
       yScaleToDataExtent={false}
       curve={CurveType.CURVE_MONOTONE_X}
       lineSeriesStyle={lineSeriesStyle}
-      customSeriesColors={getCustomColor(SPEC_ID, LINE_COLOR)}
+      customSeriesColors={[LINE_COLOR]}
     />
   );
 };

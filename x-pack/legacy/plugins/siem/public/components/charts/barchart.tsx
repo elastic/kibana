@@ -63,7 +63,6 @@ export const BarChartBaseComponent = ({
       <Settings {...settings} />
       {data.map(series => {
         const barSeriesKey = series.key;
-        const seriesType = SeriesType.BAR;
         return checkIfAllTheDataInTheSeriesAreValid ? (
           <BarSeries
             id={barSeriesKey}
@@ -77,7 +76,7 @@ export const BarChartBaseComponent = ({
             splitSeriesAccessors={['g']}
             data={series.value!}
             stackAccessors={get('configs.series.stackAccessors', chartConfigs)}
-            customSeriesColors={getSeriesStyle(barSeriesKey, series.color, seriesType)}
+            customSeriesColors={series.color ? [series.color] : undefined}
           />
         ) : null;
       })}

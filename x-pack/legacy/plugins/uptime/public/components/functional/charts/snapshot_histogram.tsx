@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
-import { getColorsMap } from './get_colors_map';
 import { getChartDateLabel } from '../../../lib/helper';
 import { withUptimeGraphQL, UptimeGraphQLQueryProps } from '../../higher_order';
 import { snapshotHistogramQuery } from '../../../queries/snapshot_histogram_query';
@@ -159,7 +158,7 @@ export const SnapshotHistogramComponent: React.FC<Props> = ({
             })}
           />
           <BarSeries
-            customSeriesColors={getColorsMap(danger, downSpecId)}
+            customSeriesColors={[danger]}
             data={histogram.map(({ x, downCount }) => [x, downCount || 0])}
             id={downSpecId}
             name={i18n.translate('xpack.uptime.snapshotHistogram.series.downLabel', {
@@ -173,7 +172,7 @@ export const SnapshotHistogramComponent: React.FC<Props> = ({
             yScaleType="linear"
           />
           <BarSeries
-            customSeriesColors={getColorsMap(gray, upSpecId)}
+            customSeriesColors={[gray]}
             data={histogram.map(({ x, upCount }) => [x, upCount || 0])}
             id={upSpecId}
             name={upMonitorsId}

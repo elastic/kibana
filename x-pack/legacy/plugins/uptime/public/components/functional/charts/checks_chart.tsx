@@ -19,7 +19,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { StatusData } from '../../../../common/graphql/types';
 import { getChartDateLabel } from '../../../lib/helper';
-import { getColorsMap } from './get_colors_map';
 import { useUrlParams } from '../../../hooks';
 
 interface ChecksChartProps {
@@ -91,7 +90,7 @@ export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartPr
             })}
           />
           <AreaSeries
-            customSeriesColors={getColorsMap(successColor, upSeriesSpecId)}
+            customSeriesColors={[successColor]}
             data={status.map(({ x, up }) => ({
               x,
               [upString]: up || 0,
@@ -105,7 +104,7 @@ export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartPr
             yScaleType={ScaleType.Linear}
           />
           <AreaSeries
-            customSeriesColors={getColorsMap(dangerColor, downSeriesSpecId)}
+            customSeriesColors={[downSeriesSpecId]}
             data={status.map(({ x, down }) => ({
               x,
               [downString]: down || 0,
