@@ -108,7 +108,8 @@ export const apm: LegacyPluginInitializer = kibana => {
           }
         }
       });
-      makeApmUsageCollector(server);
+      const { usageCollection } = server.newPlatform.setup.plugins;
+      makeApmUsageCollector(usageCollection, server);
       const apmPlugin = server.newPlatform.setup.plugins
         .apm as APMPluginContract;
 
