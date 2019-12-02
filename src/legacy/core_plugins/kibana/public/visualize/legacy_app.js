@@ -27,6 +27,7 @@ import { initVisualizeAppDirective } from './visualize_app';
 import { VisualizeConstants } from './visualize_constants';
 import { VisualizeListingController } from './listing/visualize_listing';
 import { ensureDefaultIndexPattern, registerTimefilterWithGlobalStateFactory } from './legacy_imports';
+import { syncOnMount } from './global_state_sync';
 
 import {
   getLandingBreadcrumbs,
@@ -37,6 +38,10 @@ import {
 
 export function initVisualizeApp(app, deps) {
   initVisualizeAppDirective(app, deps);
+
+  app.run(globalState => {
+    syncOnMount(globalState, deps.npDataStart);
+  });
 
   app.run((globalState, $rootScope) => {
     registerTimefilterWithGlobalStateFactory(
