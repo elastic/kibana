@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { npStart } from 'ui/new_platform';
+import { CoreStart } from 'kibana/public';
 
-const { core } = npStart;
-const apmUiEnabled = core.injectedMetadata.getInjectedVar('apmUiEnabled');
-
-if (apmUiEnabled === false) {
-  core.chrome.navLinks.update('apm', { hidden: true });
+export function toggleAppLinkInNav(core: CoreStart, { apmUiEnabled = false }) {
+  if (apmUiEnabled === false) {
+    core.chrome.navLinks.update('apm', { hidden: true });
+  }
 }
