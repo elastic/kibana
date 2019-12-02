@@ -17,4 +17,7 @@
  * under the License.
  */
 
-export { getIndexPatternTitle } from './get_index_pattern_title';
+export { getTitle } from './get_title';
+export * from './types';
+export { validateIndexPattern } from './validate_index_pattern';
+export { IndexPatternMissingIndices } from './errors';
