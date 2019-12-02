@@ -21,7 +21,6 @@ export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPlugi
     anonymousPaths.register('/login');
     anonymousPaths.register('/logout');
     anonymousPaths.register('/logged_out');
-    anonymousPaths.register('/status');
 
     const tenant = `${injectedMetadata.getInjectedVar('session.tenant', '')}`;
     const sessionExpired = new SessionExpired(basePath, tenant);
