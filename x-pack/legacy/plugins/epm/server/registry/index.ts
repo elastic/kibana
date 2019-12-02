@@ -86,6 +86,13 @@ export function pathParts(path: string): AssetParts {
     [pkgkey, service, type, file] = path.replace(`dataset/${dataset}/`, '').split('/');
   }
 
+  // This is to cover for the fields.yml files inside the "fields" directory
+  if (file === undefined) {
+    file = type;
+    type = 'fields';
+    service = '';
+  }
+
   return {
     pkgkey,
     service,
