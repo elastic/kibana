@@ -53,19 +53,20 @@ const {
   capabilities,
   chrome,
   chromeLegacy,
+  npData,
   data,
   docTitle,
   FilterBarQueryFilterProvider,
   getBasePath,
   toastNotifications,
-  timefilter,
   uiModules,
   uiRoutes,
   visualizations,
   share,
 } = getServices();
 
-const { savedQueryService } = data.search.services;
+const savedQueryService = npData.query.savedQueries;
+const { timefilter } = npData.query.timefilter;
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
