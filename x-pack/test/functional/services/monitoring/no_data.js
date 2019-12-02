@@ -11,7 +11,7 @@ export function MonitoringNoDataProvider({ getService, getPageObjects }) {
 
   return new class NoData {
     async enableMonitoring() {
-      // Cloud currently does not support Metricbase-based collection and monitoring
+      // Cloud currently does not support Metricbeat-based collection
       // so the UI does not give the user a choice between the two collection
       // methods. So if we're on cloud, do not try and switch to internal collection
       // as it's already the default
