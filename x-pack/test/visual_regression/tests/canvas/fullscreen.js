@@ -14,9 +14,9 @@ export default function ({ getPageObjects, getService }) {
         hash: '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31/page/1'
       });
 
-      PageObjects.canvas.enterFullscreen();
+      await PageObjects.canvas.enterFullscreen();
 
-      PageObjects.canvas.waitForWorkpadElements();
+      await PageObjects.canvas.waitForWorkpadElements();
 
       await visualTesting.snapshot();
     });
