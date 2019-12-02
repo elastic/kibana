@@ -34,7 +34,7 @@ import { createEsService } from 'ui/es';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 // @ts-ignore
 import { PrivateProvider } from 'ui/private/private';
-import { CoreStart, LegacyCoreStart, UiSettingsClientContract } from 'kibana/public';
+import { CoreStart, LegacyCoreStart, IUiSettingsClient } from 'kibana/public';
 // @ts-ignore
 import { watchMultiDecorator } from 'ui/directives/watch_multi/watch_multi';
 // @ts-ignore
@@ -64,7 +64,7 @@ import { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
 // @ts-ignore
 import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
 import { configureAppAngularModule } from 'ui/legacy_compat';
-import { IndexPatterns } from '../../../data/public/index_patterns/index_patterns';
+import { IndexPatterns } from '../../../../../plugins/data/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationStart } from '../../../navigation/public';
 import { createDocTableDirective } from './angular/doc_table/doc_table';
@@ -225,7 +225,7 @@ function createLocalKbnUrlModule() {
     .service('redirectWhenMissing', (Private: IPrivate) => Private(RedirectWhenMissingProvider));
 }
 
-function createLocalConfigModule(uiSettings: UiSettingsClientContract) {
+function createLocalConfigModule(uiSettings: IUiSettingsClient) {
   angular
     .module('discoverConfig', ['discoverPrivate'])
     .provider('stateManagementConfig', StateManagementConfigProvider)

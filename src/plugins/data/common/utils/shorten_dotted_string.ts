@@ -17,17 +17,14 @@
  * under the License.
  */
 
-import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
+const DOT_PREFIX_RE = /(.).+?\./g;
 
-export async function getIndexPatternTitle(
-  client: SavedObjectsClientContract,
-  indexPatternId: string
-): Promise<SimpleSavedObject<any>> {
-  const savedObject = (await client.get('index-pattern', indexPatternId)) as SimpleSavedObject<any>;
-
-  if (savedObject.error) {
-    throw new Error(`Unable to get index-pattern title: ${savedObject.error.message}`);
-  }
-
-  return savedObject.attributes.title;
+/**
+ * Convert a dot.notated.string into a short
+ * version (d.n.string)
+ *
+ * @return {any}
+ */
+export function shortenDottedString(input: any) {
+  return typeof input !== 'string' ? input : input.replace(DOT_PREFIX_RE, '$1.');
 }
