@@ -6,28 +6,30 @@
 
 import { useContext, useMemo } from 'react';
 import { StreamItem, LogEntryStreamItem } from '../../components/logging/log_text_stream/item';
-import { useStore, LogEntriesState, LogEntriesCallbacks } from '../../store/v2';
 import { LogEntry, LogEntryHighlight } from '../../utils/log_entry';
 import { RendererFunction } from '../../utils/typed_react';
 // deep inporting to avoid a circular import problem
 import { LogHighlightsState } from './log_highlights/log_highlights';
+import { LogPositionState } from './log_position';
+import { LogEntriesState, LogEntriesStateParams, LogEntriesCallbacks } from './log_entries';
 import { UniqueTimeKey } from '../../../common/time';
 
 export const WithStreamItems: React.FunctionComponent<{
   children: RendererFunction<
-    LogEntriesState &
+    LogEntriesStateParams &
       LogEntriesCallbacks & {
         currentHighlightKey: UniqueTimeKey | null;
         items: StreamItem[];
       }
   >;
 }> = ({ children }) => {
-  const [{ logEntries, logPosition }, { logEntriesCallbacks }] = useStore();
+  const [logEntries, logEntriesCallbacks] = useContext(LogEntriesState.Context);
+  const { isAutoReloading } = useContext(LogPositionState.Context);
   const { currentHighlightKey, logEntryHighlightsById } = useContext(LogHighlightsState.Context);
 
   const items = useMemo(
     () =>
-      logEntries.isReloading && !logPosition.isAutoReloading
+      logEntries.isReloading && !isAutoReloading
         ? []
         : logEntries.entries.map(logEntry =>
             createLogEntryStreamItem(logEntry, logEntryHighlightsById[logEntry.gid] || [])

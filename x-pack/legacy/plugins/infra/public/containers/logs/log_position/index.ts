@@ -5,19 +5,20 @@
  */
 
 import { useContext } from 'react';
+import createContainer from 'constate';
 import { ReduxStateContext } from '../../../utils/redux_context';
 import { logPositionSelectors as logPositionReduxSelectors } from '../../../store/local/selectors';
 import { TimeKey } from '../../../../common/time';
 
-export const useLogPositionStore = () => {
+export const useLogPositionState = () => {
   const { local: state } = useContext(ReduxStateContext);
   const timeKey = logPositionReduxSelectors.selectVisibleMidpointOrTarget(state);
   const pages = logPositionReduxSelectors.selectPagesBeforeAndAfter(state);
   const isAutoReloading = logPositionReduxSelectors.selectIsAutoReloading(state);
-  return { timeKey, isAutoReloading, ...pages } as LogPositionState;
+  return { timeKey, isAutoReloading, ...pages };
 };
 
-export interface LogPositionState {
+export interface LogPositionStateParams {
   timeKey: TimeKey | null;
   pagesAfterEnd: number | null;
   pagesBeforeStart: number | null;
@@ -30,3 +31,5 @@ export const logPositionInitialState = {
   pagesBeforeStart: null,
   isAutoReloading: false,
 };
+
+export const LogPositionState = createContainer(useLogPositionState);

@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { useEffect, useState, useReducer, useCallback } from 'react';
-import { createStructuredSelector } from 'reselect';
+import createContainer from 'constate';
 import { pick } from 'lodash';
 import { useGraphQLQueries } from './gql_queries';
 import { TimeKey, timeKeyIsBetween } from '../../../../common/time';
-import { SerializedFilterQuery } from '../../local/log_filter';
+import { SerializedFilterQuery } from '../../../store/local/log_filter';
 import { InfraLogEntry } from './types';
-import { State } from '..';
 
 const DESIRED_BUFFER_PAGES = 2;
 
@@ -31,7 +30,7 @@ type ReceiveActions =
 
 interface ReceiveEntriesAction {
   type: ReceiveActions;
-  payload: LogEntriesState;
+  payload: LogEntriesStateParams;
 }
 interface FetchOrErrorAction {
   type: Exclude<Action, ReceiveActions>;
@@ -47,13 +46,6 @@ interface LogEntriesDependencies {
   pagesAfterEnd: number | null;
 }
 
-const logEntriesInitialDependencies: LogEntriesDependencies = {
-  filterQuery: null,
-  timeKey: null,
-  pagesBeforeStart: null,
-  pagesAfterEnd: null,
-};
-
 type FetchEntriesParams = LogEntriesDependencies & {
   sourceId: string;
 };
@@ -63,7 +55,7 @@ interface FetchMoreEntriesParams {
   pagesAfterEnd: number | null;
 }
 
-export interface LogEntriesState {
+export interface LogEntriesStateParams {
   entries: InfraLogEntry[];
   entriesStart: TimeKey | null;
   entriesEnd: TimeKey | null;
@@ -81,7 +73,7 @@ export const logEntriesInitialCallbacks = {
   fetchNewerEntries: async () => {},
 };
 
-export const logEntriesInitialState: LogEntriesState = {
+export const logEntriesInitialState: LogEntriesStateParams = {
   entries: [],
   entriesStart: null,
   entriesEnd: null,
@@ -98,7 +90,7 @@ const shouldFetchNewEntries = ({
   filterQuery,
   entriesStart,
   entriesEnd,
-}: FetchEntriesParams & LogEntriesState & { prevParams: FetchEntriesParams }) => {
+}: FetchEntriesParams & LogEntriesStateParams & { prevParams: FetchEntriesParams }) => {
   if (!timeKey) return false;
   const shouldLoadWithNewFilter = filterQuery !== prevParams.filterQuery;
   const shouldLoadAroundNewPosition =
@@ -120,7 +112,7 @@ const shouldFetchMoreEntries = ({ pagesAfterEnd, pagesBeforeStart }: FetchMoreEn
 
 const useFetchEntriesEffect = (
   dispatch: Dispatch,
-  state: LogEntriesState,
+  state: LogEntriesStateParams,
   params: FetchEntriesParams
 ) => {
   const { getLogEntriesAround, getLogEntriesBefore, getLogEntriesAfter } = useGraphQLQueries();
@@ -186,14 +178,10 @@ const useFetchEntriesEffect = (
   };
 };
 
-export const useLogEntriesStore: () => [
-  LogEntriesState,
-  (deps: LogEntriesDependencies) => void,
-  LogEntriesCallbacks
-] = () => {
+export const useLogEntriesState: (
+  dependencies: LogEntriesDependencies
+) => [LogEntriesStateParams, LogEntriesCallbacks] = dependencies => {
   const [state, dispatch] = useReducer(logEntriesStateReducer, logEntriesInitialState);
-
-  const [dependencies, subscriber] = useState(logEntriesInitialDependencies);
 
   const { fetchNewerEntries } = useFetchEntriesEffect(dispatch, state, {
     ...dependencies,
@@ -201,10 +189,10 @@ export const useLogEntriesStore: () => [
   });
   const callbacks = { fetchNewerEntries };
 
-  return [state, subscriber, callbacks];
+  return [state, callbacks];
 };
 
-const logEntriesStateReducer = (prevState: LogEntriesState, action: ActionObj) => {
+const logEntriesStateReducer = (prevState: LogEntriesStateParams, action: ActionObj) => {
   switch (action.type) {
     case Action.ReceiveNewEntries:
       return { ...prevState, ...action.payload, isReloading: false };
@@ -229,12 +217,4 @@ const logEntriesStateReducer = (prevState: LogEntriesState, action: ActionObj) =
   }
 };
 
-export const logEntriesDependenciesSelector = createStructuredSelector<
-  State,
-  LogEntriesDependencies
->({
-  filterQuery: state => state.logFilter.filterQuery,
-  timeKey: state => state.logPosition.timeKey,
-  pagesBeforeStart: state => state.logPosition.pagesBeforeStart,
-  pagesAfterEnd: state => state.logPosition.pagesAfterEnd,
-});
+export const LogEntriesState = createContainer(useLogEntriesState);

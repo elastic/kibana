@@ -20,7 +20,6 @@ import { EuiThemeProvider } from '../../../../common/eui_styled_components';
 import { InfraFrontendLibs } from '../lib/lib';
 import { PageRouter } from '../routes';
 import { createStore } from '../store';
-import { StoreProvider } from '../store/v2';
 import { ApolloClientContext } from '../utils/apollo_context';
 import { ReduxStateContextProvider } from '../utils/redux_context';
 import { HistoryContext } from '../utils/history_context';
@@ -51,13 +50,11 @@ export async function startApp(libs: InfraFrontendLibs) {
               <ReduxStateContextProvider>
                 <ApolloProvider client={libs.apolloClient}>
                   <ApolloClientContext.Provider value={libs.apolloClient}>
-                    <StoreProvider>
-                      <EuiThemeProvider darkMode={darkMode}>
-                        <HistoryContext.Provider value={history}>
-                          <PageRouter history={history} />
-                        </HistoryContext.Provider>
-                      </EuiThemeProvider>
-                    </StoreProvider>
+                    <EuiThemeProvider darkMode={darkMode}>
+                      <HistoryContext.Provider value={history}>
+                        <PageRouter history={history} />
+                      </HistoryContext.Provider>
+                    </EuiThemeProvider>
                   </ApolloClientContext.Provider>
                 </ApolloProvider>
               </ReduxStateContextProvider>

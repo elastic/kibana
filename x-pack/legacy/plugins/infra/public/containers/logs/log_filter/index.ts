@@ -5,20 +5,23 @@
  */
 
 import { useContext } from 'react';
+import createContainer from 'constate';
 import { ReduxStateContext } from '../../../utils/redux_context';
-import { SerializedFilterQuery } from '../../local/log_filter';
+import { SerializedFilterQuery } from '../../../store/local/log_filter';
 import { logFilterSelectors as logFilterReduxSelectors } from '../../../store/local/selectors';
 
-export const useLogFilterStore = () => {
+export const useLogFilterState = () => {
   const { local: state } = useContext(ReduxStateContext);
   const filterQuery = logFilterReduxSelectors.selectLogFilterQueryAsJson(state);
-  return { filterQuery } as LogFilterState;
+  return { filterQuery };
 };
 
-export interface LogFilterState {
+export interface LogFilterStateParams {
   filterQuery: SerializedFilterQuery | null;
 }
 
 export const logFilterInitialState = {
   filterQuery: null,
 };
+
+export const LogFilterState = createContainer(useLogFilterState);

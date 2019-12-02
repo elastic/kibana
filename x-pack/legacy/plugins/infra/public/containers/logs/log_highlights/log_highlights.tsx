@@ -13,21 +13,20 @@ import { useNextAndPrevious } from './next_and_previous';
 import { useReduxBridgeSetters } from './redux_bridge_setters';
 import { useLogSummaryBufferInterval } from '../log_summary';
 import { LogViewConfiguration } from '../log_view_configuration';
-import { useStore } from '../../../store/v2';
+import { TimeKey } from '../../../../common/time';
 
 export const useLogHighlightsState = ({
   sourceId,
   sourceVersion,
+  entriesStart,
+  entriesEnd,
 }: {
   sourceId: string;
   sourceVersion: string | undefined;
+  entriesStart: TimeKey | null;
+  entriesEnd: TimeKey | null;
 }) => {
   const [highlightTerms, setHighlightTerms] = useState<string[]>([]);
-  const [
-    {
-      logEntries: { entriesStart: startKey, entriesEnd: endKey },
-    },
-  ] = useStore();
   const {
     filterQuery,
     visibleMidpoint,
@@ -51,7 +50,14 @@ export const useLogHighlightsState = ({
     logEntryHighlights,
     logEntryHighlightsById,
     loadLogEntryHighlightsRequest,
-  } = useLogEntryHighlights(sourceId, sourceVersion, startKey, endKey, filterQuery, highlightTerms);
+  } = useLogEntryHighlights(
+    sourceId,
+    sourceVersion,
+    entriesStart,
+    entriesEnd,
+    filterQuery,
+    highlightTerms
+  );
 
   const { logSummaryHighlights, loadLogSummaryHighlightsRequest } = useLogSummaryHighlights(
     sourceId,
