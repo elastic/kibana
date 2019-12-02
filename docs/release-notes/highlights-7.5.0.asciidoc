@@ -18,6 +18,9 @@ if you have any questions or feedback.
 
 // tag::notable-highlights[]
 
+For a complete list of highlights, 
+see the https://www.elastic.co/blog/kibana-7-5-0-released[Kibana 7.5 release blog].
+
 [float]
 [[lens-7.5]]
 === Lens&mdash;a new way to create visualizations (beta)
