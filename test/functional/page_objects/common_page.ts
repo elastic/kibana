@@ -411,7 +411,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       return response.status !== 200;
     }
 
-    async isCloud() {
+    async isCloud(): Promise<boolean> {
       const baseUrl = this.getHostPort();
       const username = config.get('servers.kibana.username');
       const password = config.get('servers.kibana.password');
