@@ -7,12 +7,12 @@
 import { EuiFormRow } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React, { useCallback, useEffect, useState } from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
 
 import {
   esFilters,
+  IIndexPattern,
   Query,
   FilterManager,
   SavedQuery,
@@ -35,7 +35,7 @@ interface QueryBarDefineRuleProps {
   field: FieldHook;
   idAria: string;
   isLoading: boolean;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
 }
 
 const StyledEuiFormRow = styled(EuiFormRow)`
