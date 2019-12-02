@@ -12,7 +12,6 @@ import { CaseService } from '../../../services';
 import { securityMock } from '../../../../../security/server/mocks';
 
 describe('GET all cases', () => {
-  const caseSavedObjects = mockCases;
   const setup = async () => {
     const httpService = httpServiceMock.createSetupContract();
     const router = httpService.createRouter('') as jest.Mocked<IRouter>;
@@ -41,7 +40,7 @@ describe('GET all cases', () => {
       method: 'get',
     });
 
-    const theContext = createRouteContext(createMockSavedObjectsRepository(caseSavedObjects));
+    const theContext = createRouteContext(createMockSavedObjectsRepository(mockCases));
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);

@@ -17,7 +17,6 @@ import { CaseService } from '../../../services';
 import { securityMock } from '../../../../../security/server/mocks';
 
 describe('DELETE comment', () => {
-  const caseSavedObjects = mockCases;
   const setup = async () => {
     const httpService = httpServiceMock.createSetupContract();
     const router = httpService.createRouter('') as jest.Mocked<IRouter>;
@@ -45,11 +44,11 @@ describe('DELETE comment', () => {
       method: 'delete',
       params: {
         case_id: 'valid-id',
-        comment_id: '3379c780-0fce-11ea-a2db-6b4d84335bfc',
+        comment_id: 'mock-id-1',
       },
     });
 
-    const theContext = createRouteContext(createMockSavedObjectsRepository(caseSavedObjects));
+    const theContext = createRouteContext(createMockSavedObjectsRepository(mockCases));
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(204);

@@ -7,7 +7,7 @@
 export const mockCases = [
   {
     type: 'case-workflow',
-    id: '3379c780-0fce-11ea-a2db-6b4d84335bfc',
+    id: 'mock-id-1',
     attributes: {
       creation_date: 1574718888885,
       last_edit_date: 1574718888885,
@@ -28,7 +28,7 @@ export const mockCases = [
   },
   {
     type: 'case-workflow',
-    id: '65d20440-0fd3-11ea-84ca-bdbdbec58a3f',
+    id: 'mock-id-2',
     attributes: {
       creation_date: 1574721120834,
       last_edit_date: 1574721120834,
@@ -49,7 +49,7 @@ export const mockCases = [
   },
   {
     type: 'case-workflow',
-    id: '6ffb2eb0-0fd3-11ea-84ca-bdbdbec58a3f',
+    id: 'mock-id-3',
     attributes: {
       creation_date: 1574721137881,
       last_edit_date: 1574721137881,
@@ -82,7 +82,7 @@ export const mockCasesErrorTriggerData = [
 export const mockCaseComments = [
   {
     type: 'case-workflow-comment',
-    id: '3a2a9410-0fce-11ea-a2db-6b4d84335bfc',
+    id: 'mock-comment-1',
     attributes: {
       comment: 'Wow, good luck catching that bad meanie!',
       creation_date: 1574718900112,
@@ -96,7 +96,7 @@ export const mockCaseComments = [
       {
         type: 'case-workflow',
         name: 'associated-case-workflow',
-        id: '3379c780-0fce-11ea-a2db-6b4d84335bfc',
+        id: 'mock-id-1',
       },
     ],
     updated_at: '2019-11-25T21:55:00.177Z',
@@ -104,7 +104,7 @@ export const mockCaseComments = [
   },
   {
     type: 'case-workflow-comment',
-    id: '3bb94a60-0fce-11ea-a2db-6b4d84335bfc',
+    id: 'mock-comment-2',
     attributes: {
       comment: 'Well I decided to update my comment. So what? Deal with it.',
       creation_date: 1574718902724,
@@ -118,7 +118,7 @@ export const mockCaseComments = [
       {
         type: 'case-workflow',
         name: 'associated-case-workflow',
-        id: '3379c780-0fce-11ea-a2db-6b4d84335bfc',
+        id: 'mock-id-1',
       },
     ],
     updated_at: '2019-11-25T21:55:14.633Z',
@@ -126,7 +126,7 @@ export const mockCaseComments = [
   },
   {
     type: 'case-workflow-comment',
-    id: '77871900-0fd3-11ea-84ca-bdbdbec58a3f',
+    id: 'mock-comment-3',
     attributes: {
       comment: 'Wow, good luck catching that bad meanie!',
       creation_date: 1574721150542,
@@ -140,7 +140,7 @@ export const mockCaseComments = [
       {
         type: 'case-workflow',
         name: 'associated-case-workflow',
-        id: '6ffb2eb0-0fd3-11ea-84ca-bdbdbec58a3f',
+        id: 'mock-id-3',
       },
     ],
     updated_at: '2019-11-25T22:32:30.608Z',
