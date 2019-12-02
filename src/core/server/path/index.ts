@@ -66,7 +66,7 @@ export const config = {
   path: 'path',
   schema: schema.object({
     // getConfigPath returns the path until the kibana.yml config. We need to move 1 level up for the dir
-    config: schema.string({ defaultValue: () => resolve(getConfigPath(), '..') }),
+    configDir: schema.string({ defaultValue: () => resolve(getConfigPath(), '..') }),
     data: schema.string({ defaultValue: () => getDataPath() }),
   }),
 };
