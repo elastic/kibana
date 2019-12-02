@@ -38,6 +38,8 @@ import { Vis } from '../../visualizations/public';
 import { setup as visualizationsSetup } from '../../visualizations/public/np_ready/public/legacy';
 // eslint-disable-next-line
 import { stubFields } from '../../../../plugins/data/public/stubs';
+// eslint-disable-next-line
+import { setFieldFormats } from '../../../../plugins/data/public/index_patterns/services';
 
 interface TableVisScope extends IScope {
   [key: string]: any;
@@ -78,13 +80,7 @@ describe('Table Vis - Controller', () => {
   let $el: JQuery<HTMLElement>;
   let tableAggResponse: any;
   let tabifiedResponse: any;
-  const stubIndexPattern = new StubIndexPattern(
-    'logstash-*',
-    (cfg: any) => cfg,
-    'time',
-    stubFields,
-    npStart.core.uiSettings
-  );
+  let stubIndexPattern: any;
 
   const initLocalAngular = () => {
     const tableVisModule = getAngularModule('kibana/table_vis', npStart.core);
@@ -104,6 +100,19 @@ describe('Table Vis - Controller', () => {
       tableAggResponse = legacyResponseHandlerProvider().handler;
     })
   );
+
+  beforeEach(() => {
+    setFieldFormats(({
+      getDefaultInstance: jest.fn(),
+    } as unknown) as any);
+    stubIndexPattern = new StubIndexPattern(
+      'logstash-*',
+      (cfg: any) => cfg,
+      'time',
+      stubFields,
+      npStart.core.uiSettings
+    );
+  });
 
   function getRangeVis(params?: object) {
     // @ts-ignore
