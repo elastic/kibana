@@ -176,7 +176,7 @@ export const ManageEmailAction: React.FC<ManageActionModalProps> = (
               }
             }}
             hasDividers
-            isInvalid={showErrors}
+            isInvalid={showErrors && !!errors.service}
           />
           {addNewServiceUi}
         </Fragment>
@@ -195,7 +195,7 @@ export const ManageEmailAction: React.FC<ManageActionModalProps> = (
         <EuiFieldText
           value={data.host}
           onChange={e => setData({ ...data, host: e.target.value })}
-          isInvalid={showErrors}
+          isInvalid={showErrors && !!errors.host}
         />
       </EuiFormRow>
 
@@ -212,7 +212,7 @@ export const ManageEmailAction: React.FC<ManageActionModalProps> = (
         <EuiFieldNumber
           value={data.port}
           onChange={e => setData({ ...data, port: parseInt(e.target.value, 10) || '' })}
-          isInvalid={showErrors}
+          isInvalid={showErrors && !!errors.port}
         />
       </EuiFormRow>
 
@@ -244,7 +244,7 @@ export const ManageEmailAction: React.FC<ManageActionModalProps> = (
         <EuiFieldText
           value={data.from}
           onChange={e => setData({ ...data, from: e.target.value })}
-          isInvalid={showErrors}
+          isInvalid={showErrors && !!errors.from}
         />
       </EuiFormRow>
 
@@ -261,7 +261,7 @@ export const ManageEmailAction: React.FC<ManageActionModalProps> = (
         <EuiFieldText
           value={data.user}
           onChange={e => setData({ ...data, user: e.target.value })}
-          isInvalid={showErrors}
+          isInvalid={showErrors && !!errors.user}
         />
       </EuiFormRow>
 
@@ -278,7 +278,7 @@ export const ManageEmailAction: React.FC<ManageActionModalProps> = (
         <EuiFieldPassword
           value={data.password}
           onChange={e => setData({ ...data, password: e.target.value })}
-          isInvalid={showErrors}
+          isInvalid={showErrors && !!errors.password}
         />
       </EuiFormRow>
 
