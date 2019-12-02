@@ -8,12 +8,23 @@ import { Plugin, CoreSetup } from 'kibana/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 import { addRoutes } from './routes';
 
-export interface PluginsSetup {
+export type EndpointPluginStart = void;
+export type EndpointPluginSetup = void;
+export interface EndpointPluginSetupDependencies {
   features: FeaturesPluginSetupContract;
 }
 
-export class EndpointPlugin implements Plugin<void, void, PluginsSetup, {}> {
-  public setup(core: CoreSetup, plugins: PluginsSetup) {
+export interface EndpointPluginStartDependencies {} // eslint-disable-line @typescript-eslint/no-empty-interface
+
+export class EndpointPlugin
+  implements
+    Plugin<
+      EndpointPluginStart,
+      EndpointPluginSetup,
+      EndpointPluginStartDependencies,
+      EndpointPluginSetupDependencies
+    > {
+  public setup(core: CoreSetup, plugins: EndpointPluginSetupDependencies) {
     plugins.features.registerFeature({
       id: 'endpoint',
       name: 'Endpoint',
@@ -36,5 +47,4 @@ export class EndpointPlugin implements Plugin<void, void, PluginsSetup, {}> {
   }
 
   public start() {}
-  public stop() {}
 }

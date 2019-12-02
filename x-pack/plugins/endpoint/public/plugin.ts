@@ -4,38 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreSetup } from 'kibana/public';
-import { i18n } from '@kbn/i18n';
+import { Plugin } from 'kibana/public';
+import { IEmbeddableStart } from 'src/plugins/embeddable/public';
 import { ResolverEmbeddableFactory } from './embeddables/resolver';
-import { Plugin as EmbeddablePlugin } from '../../../../src/plugins/embeddable/public';
 
-interface StartDependencies {
-  embeddable: ReturnType<EmbeddablePlugin['start']>;
+export type EndpointPluginStart = void;
+export type EndpointPluginSetup = void;
+export interface EndpointPluginSetupDependencies {} // eslint-disable-line @typescript-eslint/no-empty-interface
+
+export interface EndpointPluginStartDependencies {
+  embeddable: IEmbeddableStart;
 }
 
-export class EndpointPlugin implements Plugin<{}, {}> {
-  public setup(core: CoreSetup) {
-    core.application.register({
-      id: 'endpoint',
-      title: i18n.translate('xpack.endpoint.pluginTitle', {
-        defaultMessage: 'Endpoint',
-      }),
-      async mount(context, params) {
-        const { renderApp } = await import('./applications/endpoint');
-        return renderApp(context, params);
-      },
-    });
-    return {};
-  }
+export class EndpointPlugin
+  implements
+    Plugin<
+      EndpointPluginSetup,
+      EndpointPluginStart,
+      EndpointPluginSetupDependencies,
+      EndpointPluginStartDependencies
+    > {
+  public setup() {}
 
-  public start(...args: [unknown, StartDependencies]) {
+  public start(...args: [unknown, EndpointPluginStartDependencies]) {
     const [, plugins] = args;
     const resolverEmbeddableFactory = new ResolverEmbeddableFactory();
     plugins.embeddable.registerEmbeddableFactory(
       resolverEmbeddableFactory.type,
       resolverEmbeddableFactory
     );
-    return {};
   }
 
   public stop() {}

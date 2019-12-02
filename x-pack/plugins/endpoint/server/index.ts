@@ -5,12 +5,22 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { EndpointPlugin } from './plugin';
+import { PluginInitializer } from 'src/core/server';
+import {
+  EndpointPlugin,
+  EndpointPluginStart,
+  EndpointPluginSetup,
+  EndpointPluginStartDependencies,
+  EndpointPluginSetupDependencies,
+} from './plugin';
 
 export const config = {
   schema: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
 };
 
-export function plugin() {
-  return new EndpointPlugin();
-}
+export const plugin: PluginInitializer<
+  EndpointPluginStart,
+  EndpointPluginSetup,
+  EndpointPluginStartDependencies,
+  EndpointPluginSetupDependencies
+> = () => new EndpointPlugin();
