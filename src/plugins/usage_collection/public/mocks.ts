@@ -17,11 +17,28 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/server';
-import { UsageCollectionPlugin } from './plugin';
-import { ConfigSchema } from './config';
+import { MetricsSetupContract, MetricsStartContract, METRIC_TYPE } from '.';
 
-export { UsageCollectionSetup } from './plugin';
-export const config = { schema: ConfigSchema };
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new UsageCollectionPlugin(initializerContext);
+export type Setup = jest.Mocked<MetricsSetupContract>;
+export type Start = jest.Mocked<MetricsStartContract>;
+
+const createSetupContract = (): Setup => {
+  const setupContract: Setup = {
+    registerApp: jest.fn(),
+  };
+  return setupContract;
+};
+
+const createStartContract = (): Start => {
+  const startContract: Start = {
+    reportUiStats: jest.fn(),
+    METRIC_TYPE,
+  };
+
+  return startContract;
+};
+
+export const metricsPluginMock = {
+  createSetupContract,
+  createStartContract,
+};

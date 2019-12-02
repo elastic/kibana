@@ -17,11 +17,13 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/server';
-import { UsageCollectionPlugin } from './plugin';
-import { ConfigSchema } from './config';
+import { PluginInitializerContext } from '../../../core/public';
+import { MetricsPublicPlugin } from './plugin';
 
-export { UsageCollectionSetup } from './plugin';
-export const config = { schema: ConfigSchema };
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new UsageCollectionPlugin(initializerContext);
+export { METRIC_TYPE } from '@kbn/analytics';
+export { MetricsSetupContract, MetricsStartContract } from './plugin';
+export { MetricsPublicPlugin as Plugin };
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new MetricsPublicPlugin(initializerContext);
+}

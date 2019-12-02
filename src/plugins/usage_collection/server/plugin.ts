@@ -22,11 +22,18 @@ import { TypeOf } from '@kbn/config-schema';
 import { ConfigSchema } from './config';
 import { PluginInitializerContext, Logger } from '../../../../src/core/server';
 import { CollectorSet } from './collector';
+import { setupRoutes } from './routes';
 
-export type UsageCollectionSetup = CollectorSet;
+export interface UsageCollectionSetup extends CollectorSet {
+  registerLegacyAPI: (legacyAPI: LegacyApi) => void;
+}
+
+export type LegacyApi = any;
 
 export class Plugin {
   logger: Logger;
+  private legacyAPI: LegacyApi;
+  private getLegacyAPI = (): LegacyApi => this.legacyAPI;
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
   }
@@ -42,7 +49,16 @@ export class Plugin {
       maximumWaitTimeForAllCollectorsInS: config.maximumWaitTimeForAllCollectorsInS,
     });
 
-    return collectorSet;
+    const router = core.http.createRouter();
+    setupRoutes(router, this.getLegacyAPI);
+
+    return {
+      ...collectorSet,
+      registerLegacyAPI: legacyAPI => (this.legacyAPI = legacyAPI),
+      // uiMetrics: {
+      //   enabled: config.ui_metrics.enabled,
+      // }
+    };
   }
 
   public start() {

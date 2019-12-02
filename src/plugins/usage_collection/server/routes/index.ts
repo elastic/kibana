@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/server';
-import { UsageCollectionPlugin } from './plugin';
-import { ConfigSchema } from './config';
+import { IRouter } from '../../../../../src/core/server';
+import { LegacyApi } from '../plugin';
+import { registerUiMetricRoute } from './report_metrics';
 
-export { UsageCollectionSetup } from './plugin';
-export const config = { schema: ConfigSchema };
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new UsageCollectionPlugin(initializerContext);
+export function setupRoutes(router: IRouter, getLegacyApi: () => LegacyApi) {
+  registerUiMetricRoute(router, getLegacyApi);
+}

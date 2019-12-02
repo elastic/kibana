@@ -20,5 +20,8 @@
 import { schema } from '@kbn/config-schema';
 
 export const ConfigSchema = schema.object({
+  ui_metric: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
   maximumWaitTimeForAllCollectorsInS: schema.number({ defaultValue: 60 }),
 });

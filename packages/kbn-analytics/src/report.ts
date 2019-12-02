@@ -23,23 +23,25 @@ const REPORT_VERSION = 1;
 
 export interface Report {
   reportVersion: typeof REPORT_VERSION;
-  uiStatsMetrics: {
-    [key: string]: {
+  uiStatsMetrics: Record<
+    string,
+    {
       key: string;
       appName: string;
       eventName: string;
       type: UiStatsMetricType;
       stats: Stats;
-    };
-  };
-  userAgent?: {
-    [key: string]: {
+    }
+  >;
+  userAgent?: Record<
+    string,
+    {
       userAgent: string;
       key: string;
       type: METRIC_TYPE.USER_AGENT;
       appName: string;
-    };
-  };
+    }
+  >;
 }
 
 export class ReportManager {
