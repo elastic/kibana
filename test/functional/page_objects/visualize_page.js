@@ -1190,8 +1190,13 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async getLegendEntries() {
-      const legendEntries = await find.allByCssSelector('.visLegend__valueTitle', defaultFindTimeout * 2);
-      return await Promise.all(legendEntries.map(async chart => await chart.getAttribute('data-label')));
+      const legendEntries = await find.allByCssSelector(
+        '.visLegend__button',
+        defaultFindTimeout * 2
+      );
+      return await Promise.all(
+        legendEntries.map(async chart => await chart.getAttribute('data-label'))
+      );
     }
 
     async openLegendOptionColors(name) {
@@ -1221,7 +1226,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async toggleLegend(show = true) {
       await retry.try(async () => {
-        const isVisible = find.byCssSelector('vislib-legend');
+        const isVisible = find.byCssSelector('.visLegend');
         if ((show && !isVisible) || (!show && isVisible)) {
           await testSubjects.click('vislibToggleLegend');
         }
@@ -1231,7 +1236,9 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     async filterLegend(name) {
       await this.toggleLegend();
       await testSubjects.click(`legend-${name}`);
-      await testSubjects.click(`legend-${name}-filterIn`);
+      const filters = await testSubjects.find(`legend-${name}-filters`);
+      const [filterIn] = await filters.findAllByCssSelector(`input`);
+      await filterIn.click();
       await this.waitForVisualizationRenderingStabilized();
     }
 

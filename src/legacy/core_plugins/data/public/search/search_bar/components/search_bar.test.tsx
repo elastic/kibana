@@ -43,7 +43,7 @@ jest.mock('../../../../../../../plugins/data/public', () => {
 
 jest.mock('../../../../../data/public', () => {
   return {
-    QueryBarInput: () => <div className="queryBar" />,
+    QueryStringInput: () => <div className="queryBar" />,
   };
 });
 
@@ -105,6 +105,11 @@ function wrapSearchBarInContext(testProps: any) {
     notifications: startMock.notifications,
     http: startMock.http,
     storage: createMockStorage(),
+    data: {
+      query: {
+        savedQueries: {},
+      },
+    },
   };
 
   return (
