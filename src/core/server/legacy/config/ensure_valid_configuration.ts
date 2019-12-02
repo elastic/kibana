@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getUnusedConfigKeys } from '../../../../legacy/server/config/get_unused_config_keys';
+import { getUnusedConfigKeys } from './get_unused_config_keys';
 import { ConfigService } from '../../config';
 import { LegacyServiceDiscoverPlugins } from '../legacy_service';
 

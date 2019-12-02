@@ -18,14 +18,14 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LegacyPluginSpec } from '../../../core/server/legacy/plugins/find_legacy_plugin_specs';
+import { LegacyPluginSpec } from '../plugins/find_legacy_plugin_specs';
 // @ts-ignore
-import { transformDeprecations } from './transform_deprecations';
+import { transformDeprecations } from '../../../../legacy/server/config/transform_deprecations';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LegacyConfig } from '../../../core/server/legacy/config';
+import { LegacyConfig } from './index';
 import { getUnusedConfigKeys } from './get_unused_config_keys';
 
-jest.mock('./transform_deprecations', () => ({
+jest.mock('../../../../legacy/server/config/transform_deprecations', () => ({
   transformDeprecations: jest.fn().mockImplementation(s => s),
 }));
 

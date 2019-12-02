@@ -19,16 +19,13 @@
 
 import { difference, get, set } from 'lodash';
 // @ts-ignore
-import { transformDeprecations } from './transform_deprecations';
-import { unset, getFlattenedObject } from '../../utils';
+import { transformDeprecations } from '../../../../legacy/server/config/transform_deprecations';
 // @ts-ignore
-import { getTransform } from '../../deprecation';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { hasConfigPathIntersection } from '../../../core/server/config/';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LegacyPluginSpec } from '../../../core/server/legacy/plugins/find_legacy_plugin_specs';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LegacyConfig } from '../../../core/server/legacy/config';
+import { getTransform } from '../../../../legacy/deprecation/index';
+import { unset, getFlattenedObject } from '../../../../legacy/utils';
+import { hasConfigPathIntersection } from '../../config';
+import { LegacyPluginSpec } from '../plugins/find_legacy_plugin_specs';
+import { LegacyConfig } from './types';
 
 const getFlattenedKeys = (object: object) => Object.keys(getFlattenedObject(object));
 

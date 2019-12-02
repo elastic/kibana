@@ -18,10 +18,10 @@
  */
 
 import { ensureValidConfiguration } from './ensure_valid_configuration';
-import { getUnusedConfigKeys } from '../../../../legacy/server/config/get_unused_config_keys';
+import { getUnusedConfigKeys } from './get_unused_config_keys';
 import { configServiceMock } from '../../config/config_service.mock';
 
-jest.mock('../../../../legacy/server/config/get_unused_config_keys');
+jest.mock('./get_unused_config_keys');
 
 describe('ensureValidConfiguration', () => {
   let configService: ReturnType<typeof configServiceMock.create>;
