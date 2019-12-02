@@ -5,6 +5,7 @@
  */
 
 import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from 'src/core/server';
+import { CASE_COMMENT_SAVED_OBJECT } from '../../../constants';
 
 export const createMockSavedObjectsRepository = (savedObject: any[] = []) => {
   const mockSavedObjectsClientContract = ({
@@ -24,17 +25,40 @@ export const createMockSavedObjectsRepository = (savedObject: any[] = []) => {
         saved_objects: savedObject,
       };
     }),
-    create: jest.fn((type, attributes, { id }) => {
-      if (savedObject.find(s => s.id === id)) {
-        throw SavedObjectsErrorHelpers.decorateConflictError(new Error(), 'case conflict');
+    create: jest.fn((type, attributes, references) => {
+      if (attributes.description === 'Throw an error' || attributes.comment === 'Throw an error') {
+        throw SavedObjectsErrorHelpers.createBadRequestError('Error thrown for testing');
       }
-      return {};
+      if (type === CASE_COMMENT_SAVED_OBJECT) {
+        return {
+          type,
+          id: 'mock-comment',
+          attributes,
+          ...references,
+          updated_at: '2019-12-02T22:48:08.327Z',
+          version: 'WzksMV0=',
+        };
+      }
+      return {
+        type,
+        id: 'mock-it',
+        attributes,
+        references: [],
+        updated_at: '2019-12-02T22:48:08.327Z',
+        version: 'WzksMV0=',
+      };
     }),
-    update: jest.fn((type, id) => {
+    update: jest.fn((type, id, attributes) => {
       if (!savedObject.find(s => s.id === id)) {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       }
-      return {};
+      return {
+        id,
+        type,
+        updated_at: '2019-11-22T22:50:55.191Z',
+        version: 'WzE3LDFd',
+        attributes,
+      };
     }),
     delete: jest.fn((type: string, id: string) => {
       const result = savedObject.filter(s => s.id === id);

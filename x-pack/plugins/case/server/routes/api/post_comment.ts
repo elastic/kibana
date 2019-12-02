@@ -26,8 +26,8 @@ export function initPostCommentApi({ caseService, router }: RouteDeps) {
       let newComment;
       try {
         user = await caseService.getUser({ request, response });
-      } catch (e) {
-        return e;
+      } catch (error) {
+        return response.customError(wrapError(error));
       }
       try {
         newComment = await caseService.postNewComment({

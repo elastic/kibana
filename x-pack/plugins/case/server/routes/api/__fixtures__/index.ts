@@ -7,3 +7,4 @@
 export { mockCases, mockCasesErrorTriggerData, mockCaseComments } from './mock_saved_objects';
 export { createMockSavedObjectsRepository } from './create_mock_so_repository';
 export { createRouteContext } from './route_contexts';
+export { authenticationMock } from './authc_mock';

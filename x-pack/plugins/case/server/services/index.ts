@@ -144,14 +144,7 @@ export class CaseService {
       }
       if (!user) {
         this.log.debug(`Error on GET user: Bad User`);
-        throw response.badRequest({
-          body: {
-            message: 'Bad User - the user is not authenticated',
-            attributes: {
-              requestBody: request.body,
-            },
-          },
-        });
+        throw new Error('Bad User - the user is not authenticated');
       }
       return user;
     },
