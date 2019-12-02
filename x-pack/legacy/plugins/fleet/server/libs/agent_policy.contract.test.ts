@@ -16,8 +16,6 @@ import { MemorizeSODatabaseAdapter } from '../adapters/saved_objects_database/me
 import { SODatabaseAdapter } from '../adapters/saved_objects_database/default';
 import { FleetServerLib } from './types';
 import { compose } from './compose/memorized';
-import { MemorizedElasticsearchAdapter } from '../adapters/elasticsearch/memorize_adapter';
-import { ElasticsearchAdapter } from '../adapters/elasticsearch/default';
 import { Agent } from '../repositories/agents/types';
 
 jest.mock('./framework');
@@ -61,10 +59,9 @@ function getUser(): FrameworkUser {
   } as unknown) as FrameworkUser;
 }
 
-describe('ApiKeys Lib', () => {
+describe('AgentPolicy Lib', () => {
   let servers: any;
   let soAdapter: MemorizeSODatabaseAdapter;
-  let esAdapter: MemorizedElasticsearchAdapter;
   let libs: FleetServerLib;
 
   async function getAgentById(agentId: string) {
@@ -106,9 +103,6 @@ describe('ApiKeys Lib', () => {
       servers = await createKibanaServer({
         security: { enabled: false },
       });
-      esAdapter = new MemorizedElasticsearchAdapter(
-        new ElasticsearchAdapter(servers.kbnServer.plugins.elasticsearch)
-      );
       soAdapter = new MemorizeSODatabaseAdapter(
         new SODatabaseAdapter(
           servers.kbnServer.savedObjects,
@@ -119,9 +113,6 @@ describe('ApiKeys Lib', () => {
 
     if (!soAdapter) {
       soAdapter = new MemorizeSODatabaseAdapter();
-    }
-    if (!esAdapter) {
-      esAdapter = new MemorizedElasticsearchAdapter();
     }
   });
 

@@ -1,0 +1,1215 @@
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - find:"enrollment_api_keys" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - create:agents (2)'] = {
+  "results": {
+    "type": "agents",
+    "id": "e669efa0-150a-11ea-8ad9-d10bed68f7b3",
+    "attributes": {
+      "policy_id": "default",
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}"
+    },
+    "references": [],
+    "updated_at": "2019-12-02T13:51:54.778Z",
+    "version": "WzIsMV0="
+  }
+}
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - find:"enrollment_api_keys" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - create:agents (2)'] = {
+  "results": {
+    "type": "agents",
+    "id": "7cff2bf0-150c-11ea-836d-474a0a44645c",
+    "attributes": {
+      "policy_id": "default",
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}"
+    },
+    "references": [],
+    "updated_at": "2019-12-02T14:03:16.911Z",
+    "version": "WzIsMV0="
+  }
+}
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - get:agents (3)'] = {
+  "results": {
+    "id": "7cff2bf0-150c-11ea-836d-474a0a44645c",
+    "type": "agents",
+    "updated_at": "2019-12-02T14:03:16.911Z",
+    "version": "WzIsMV0=",
+    "attributes": {
+      "policy_id": "default",
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}"
+    },
+    "references": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - find:"enrollment_api_keys" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - create:agents (2)'] = {
+  "results": {
+    "type": "agents",
+    "id": "5e02c760-150d-11ea-976f-3b5d44ae2d6d",
+    "attributes": {
+      "policy_id": "default",
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": [],
+    "updated_at": "2019-12-02T14:09:34.421Z",
+    "version": "WzIsMV0="
+  }
+}
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - get:agents (3)'] = {
+  "results": {
+    "id": "5e02c760-150d-11ea-976f-3b5d44ae2d6d",
+    "type": "agents",
+    "updated_at": "2019-12-02T14:09:34.421Z",
+    "version": "WzIsMV0=",
+    "attributes": {
+      "policy_id": "default",
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - update:agents (4)'] = {
+  "results": {
+    "id": "5e02c760-150d-11ea-976f-3b5d44ae2d6d",
+    "type": "agents",
+    "updated_at": "2019-12-02T14:09:35.350Z",
+    "version": "WzMsMV0=",
+    "attributes": {
+      "actions": [
+        {
+          "id": "1f742219-4d96-45cf-b275-9201ff3c83a4",
+          "type": "POLICY_CHANGE",
+          "created_at": "2019-12-02T14:09:35.348Z",
+          "data": "{\"policy\":{\"id\":\"default\",\"outputs\":{},\"streams\":[],\"name\":\"Policy 1\",\"updated_by\":\"johndoe\",\"updated_on\":\"2019-09-23T20:46:42+0000\",\"version\":0,\"created_by\":\"johndoe\",\"created_on\":\"2019-09-23T20:46:42+0000\"}}"
+        }
+      ]
+    }
+  }
+}
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - get:agents (5)'] = {
+  "results": {
+    "id": "5e02c760-150d-11ea-976f-3b5d44ae2d6d",
+    "type": "agents",
+    "updated_at": "2019-12-02T14:09:35.350Z",
+    "version": "WzMsMV0=",
+    "attributes": {
+      "policy_id": "default",
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": [
+        {
+          "data": "{\"policy\":{\"id\":\"default\",\"outputs\":{},\"streams\":[],\"name\":\"Policy 1\",\"updated_by\":\"johndoe\",\"updated_on\":\"2019-09-23T20:46:42+0000\",\"version\":0,\"created_by\":\"johndoe\",\"created_on\":\"2019-09-23T20:46:42+0000\"}}",
+          "created_at": "2019-12-02T14:09:35.348Z",
+          "id": "1f742219-4d96-45cf-b275-9201ff3c83a4",
+          "type": "POLICY_CHANGE"
+        }
+      ]
+    },
+    "references": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - find:"enrollment_api_keys" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - create:agents (2)'] = {
+  "results": {
+    "type": "agents",
+    "id": "c51fb130-1510-11ea-bcd5-b59bad6abd3f",
+    "attributes": {
+      "policy_id": "default",
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": [],
+    "updated_at": "2019-12-02T14:33:55.907Z",
+    "version": "WzIsMV0="
+  }
+}
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - get:agents (3)'] = {
+  "results": {
+    "id": "c51fb130-1510-11ea-bcd5-b59bad6abd3f",
+    "type": "agents",
+    "updated_at": "2019-12-02T14:33:55.907Z",
+    "version": "WzIsMV0=",
+    "attributes": {
+      "policy_id": "default",
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - update:agents (4)'] = {
+  "results": {
+    "id": "c51fb130-1510-11ea-bcd5-b59bad6abd3f",
+    "type": "agents",
+    "updated_at": "2019-12-02T14:33:56.725Z",
+    "version": "WzMsMV0=",
+    "attributes": {
+      "actions": [
+        {
+          "id": "ce67857d-53ab-4db0-b5c7-e1e1834d3b56",
+          "type": "POLICY_CHANGE",
+          "created_at": "2019-12-02T14:33:56.724Z",
+          "data": "{\"policy\":{\"outputs\":{\"default\":{\"api_token\":\"slfhsdlfhjjkshfkjh:sdfsdfsdfsdf\",\"id\":\"default\",\"name\":\"Default\",\"type\":\"elasticsearch\",\"url\":\"https://localhost:9200\",\"tlsCert\":\"ldsjfldsjfljsdalkfjl;ksadh;kjsdha;kjhslgkjhsdalkghasdkgh\"}},\"streams\":[{\"metricsets\":[\"container\",\"cpu\"],\"id\":\"string\",\"type\":\"etc\",\"output\":{\"use_output\":\"default\"}}]}}"
+        }
+      ]
+    }
+  }
+}
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - get:agents (5)'] = {
+  "results": {
+    "id": "c51fb130-1510-11ea-bcd5-b59bad6abd3f",
+    "type": "agents",
+    "updated_at": "2019-12-02T14:33:56.725Z",
+    "version": "WzMsMV0=",
+    "attributes": {
+      "policy_id": "default",
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": [
+        {
+          "data": "{\"policy\":{\"outputs\":{\"default\":{\"api_token\":\"slfhsdlfhjjkshfkjh:sdfsdfsdfsdf\",\"id\":\"default\",\"name\":\"Default\",\"type\":\"elasticsearch\",\"url\":\"https://localhost:9200\",\"tlsCert\":\"ldsjfldsjfljsdalkfjl;ksadh;kjsdha;kjhslgkjhsdalkghasdkgh\"}},\"streams\":[{\"metricsets\":[\"container\",\"cpu\"],\"id\":\"string\",\"type\":\"etc\",\"output\":{\"use_output\":\"default\"}}]}}",
+          "created_at": "2019-12-02T14:33:56.724Z",
+          "id": "ce67857d-53ab-4db0-b5c7-e1e1834d3b56",
+          "type": "POLICY_CHANGE"
+        }
+      ]
+    },
+    "references": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - find:"enrollment_api_keys" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - create:agents (2)'] = {
+  "results": {
+    "type": "agents",
+    "id": "286b00f0-1511-11ea-a27e-2717661c3dab",
+    "attributes": {
+      "policy_id": "default",
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": [],
+    "updated_at": "2019-12-02T14:36:42.495Z",
+    "version": "WzIsMV0="
+  }
+}
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - get:agents (3)'] = {
+  "results": {
+    "id": "286b00f0-1511-11ea-a27e-2717661c3dab",
+    "type": "agents",
+    "updated_at": "2019-12-02T14:36:42.495Z",
+    "version": "WzIsMV0=",
+    "attributes": {
+      "policy_id": "default",
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - update:agents (4)'] = {
+  "results": {
+    "id": "286b00f0-1511-11ea-a27e-2717661c3dab",
+    "type": "agents",
+    "updated_at": "2019-12-02T14:36:42.745Z",
+    "version": "WzMsMV0=",
+    "attributes": {
+      "actions": [
+        {
+          "id": "7e5c256a-1f12-47e3-a0ac-dcda013a6462",
+          "type": "POLICY_CHANGE",
+          "created_at": "2019-12-02T14:36:42.743Z",
+          "data": "{\"policy\":{\"outputs\":{\"default\":{\"api_token\":\"slfhsdlfhjjkshfkjh:sdfsdfsdfsdf\",\"id\":\"default\",\"name\":\"Default\",\"type\":\"elasticsearch\",\"url\":\"https://localhost:9200\",\"tlsCert\":\"ldsjfldsjfljsdalkfjl;ksadh;kjsdha;kjhslgkjhsdalkghasdkgh\"}},\"streams\":[{\"metricsets\":[\"container\",\"cpu\"],\"id\":\"string\",\"type\":\"etc\",\"output\":{\"use_output\":\"default\"}}]}}"
+        }
+      ]
+    }
+  }
+}
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - get:agents (5)'] = {
+  "results": {
+    "id": "286b00f0-1511-11ea-a27e-2717661c3dab",
+    "type": "agents",
+    "updated_at": "2019-12-02T14:36:42.745Z",
+    "version": "WzMsMV0=",
+    "attributes": {
+      "policy_id": "default",
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": [
+        {
+          "data": "{\"policy\":{\"outputs\":{\"default\":{\"api_token\":\"slfhsdlfhjjkshfkjh:sdfsdfsdfsdf\",\"id\":\"default\",\"name\":\"Default\",\"type\":\"elasticsearch\",\"url\":\"https://localhost:9200\",\"tlsCert\":\"ldsjfldsjfljsdalkfjl;ksadh;kjsdha;kjhslgkjhsdalkghasdkgh\"}},\"streams\":[{\"metricsets\":[\"container\",\"cpu\"],\"id\":\"string\",\"type\":\"etc\",\"output\":{\"use_output\":\"default\"}}]}}",
+          "created_at": "2019-12-02T14:36:42.743Z",
+          "id": "7e5c256a-1f12-47e3-a0ac-dcda013a6462",
+          "type": "POLICY_CHANGE"
+        }
+      ]
+    },
+    "references": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentsForPolicyId Should updates all agents with the new policy - find:"enrollment_api_keys" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentsForPolicyId Should updates all agents with the new policy - create:agents (2)'] = {
+  "results": {
+    "type": "agents",
+    "id": "292ddbc0-1511-11ea-a27e-2717661c3dab",
+    "attributes": {
+      "policy_id": "default",
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": [],
+    "updated_at": "2019-12-02T14:36:43.772Z",
+    "version": "WzQsMV0="
+  }
+}
+
+exports['ApiKeys Lib updateAgentsForPolicyId Should updates all agents with the new policy - create:agents (3)'] = {
+  "results": {
+    "type": "agents",
+    "id": "29c69950-1511-11ea-a27e-2717661c3dab",
+    "attributes": {
+      "policy_id": "default",
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": [],
+    "updated_at": "2019-12-02T14:36:44.773Z",
+    "version": "WzUsMV0="
+  }
+}
+
+exports['ApiKeys Lib updateAgentsForPolicyId Should updates all agents with the new policy - create:agents (4)'] = {
+  "results": {
+    "type": "agents",
+    "id": "2a65e690-1511-11ea-a27e-2717661c3dab",
+    "attributes": {
+      "policy_id": "policy2",
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": [],
+    "updated_at": "2019-12-02T14:36:45.817Z",
+    "version": "WzYsMV0="
+  }
+}
+
+exports['ApiKeys Lib updateAgentsForPolicyId Should updates all agents with the new policy - find:"agents" (5)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 100,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentsForPolicyId Should updates all agents with the new policy - bulkUpdate (6)'] = {
+  "results": {
+    "saved_objects": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentsForPolicyId Should updates all agents with the new policy - get:agents (7)'] = {
+  "results": {
+    "id": "292ddbc0-1511-11ea-a27e-2717661c3dab",
+    "type": "agents",
+    "updated_at": "2019-12-02T14:36:43.772Z",
+    "version": "WzQsMV0=",
+    "attributes": {
+      "policy_id": "default",
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentsForPolicyId Should updates all agents with the new policy - get:agents (8)'] = {
+  "results": {
+    "id": "29c69950-1511-11ea-a27e-2717661c3dab",
+    "type": "agents",
+    "updated_at": "2019-12-02T14:36:44.773Z",
+    "version": "WzUsMV0=",
+    "attributes": {
+      "policy_id": "default",
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentsForPolicyId Should updates all agents with the new policy - get:agents (9)'] = {
+  "results": {
+    "id": "2a65e690-1511-11ea-a27e-2717661c3dab",
+    "type": "agents",
+    "updated_at": "2019-12-02T14:36:45.817Z",
+    "version": "WzYsMV0=",
+    "attributes": {
+      "policy_id": "policy2",
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - find:"enrollment_api_keys" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - create:agents (2)'] = {
+  "results": {
+    "type": "agents",
+    "id": "6852b6e0-1511-11ea-a155-519330227ea0",
+    "attributes": {
+      "policy_id": "default",
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": [],
+    "updated_at": "2019-12-02T14:38:29.709Z",
+    "version": "WzIsMV0="
+  }
+}
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - get:agents (3)'] = {
+  "results": {
+    "id": "6852b6e0-1511-11ea-a155-519330227ea0",
+    "type": "agents",
+    "updated_at": "2019-12-02T14:38:29.709Z",
+    "version": "WzIsMV0=",
+    "attributes": {
+      "policy_id": "default",
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - update:agents (4)'] = {
+  "results": {
+    "id": "6852b6e0-1511-11ea-a155-519330227ea0",
+    "type": "agents",
+    "updated_at": "2019-12-02T14:38:30.027Z",
+    "version": "WzMsMV0=",
+    "attributes": {
+      "actions": [
+        {
+          "id": "44adbc65-4b99-4aef-a620-fa99016b5a0f",
+          "type": "POLICY_CHANGE",
+          "created_at": "2019-12-02T14:38:30.024Z",
+          "data": "{\"policy\":{\"outputs\":{\"default\":{\"api_token\":\"slfhsdlfhjjkshfkjh:sdfsdfsdfsdf\",\"id\":\"default\",\"name\":\"Default\",\"type\":\"elasticsearch\",\"url\":\"https://localhost:9200\",\"tlsCert\":\"ldsjfldsjfljsdalkfjl;ksadh;kjsdha;kjhslgkjhsdalkghasdkgh\"}},\"streams\":[{\"metricsets\":[\"container\",\"cpu\"],\"id\":\"string\",\"type\":\"etc\",\"output\":{\"use_output\":\"default\"}}]}}"
+        }
+      ]
+    }
+  }
+}
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - get:agents (5)'] = {
+  "results": {
+    "id": "6852b6e0-1511-11ea-a155-519330227ea0",
+    "type": "agents",
+    "updated_at": "2019-12-02T14:38:30.027Z",
+    "version": "WzMsMV0=",
+    "attributes": {
+      "policy_id": "default",
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": [
+        {
+          "data": "{\"policy\":{\"outputs\":{\"default\":{\"api_token\":\"slfhsdlfhjjkshfkjh:sdfsdfsdfsdf\",\"id\":\"default\",\"name\":\"Default\",\"type\":\"elasticsearch\",\"url\":\"https://localhost:9200\",\"tlsCert\":\"ldsjfldsjfljsdalkfjl;ksadh;kjsdha;kjhslgkjhsdalkghasdkgh\"}},\"streams\":[{\"metricsets\":[\"container\",\"cpu\"],\"id\":\"string\",\"type\":\"etc\",\"output\":{\"use_output\":\"default\"}}]}}",
+          "created_at": "2019-12-02T14:38:30.024Z",
+          "id": "44adbc65-4b99-4aef-a620-fa99016b5a0f",
+          "type": "POLICY_CHANGE"
+        }
+      ]
+    },
+    "references": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentsForPolicyId Should updates all agents with the new policy - find:"enrollment_api_keys" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentsForPolicyId Should updates all agents with the new policy - create:agents (2)'] = {
+  "results": {
+    "type": "agents",
+    "id": "691f55b0-1511-11ea-a155-519330227ea0",
+    "attributes": {
+      "policy_id": "default",
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": [],
+    "updated_at": "2019-12-02T14:38:31.051Z",
+    "version": "WzQsMV0="
+  }
+}
+
+exports['ApiKeys Lib updateAgentsForPolicyId Should updates all agents with the new policy - create:agents (3)'] = {
+  "results": {
+    "type": "agents",
+    "id": "69b83a50-1511-11ea-a155-519330227ea0",
+    "attributes": {
+      "policy_id": "default",
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": [],
+    "updated_at": "2019-12-02T14:38:32.053Z",
+    "version": "WzUsMV0="
+  }
+}
+
+exports['ApiKeys Lib updateAgentsForPolicyId Should updates all agents with the new policy - create:agents (4)'] = {
+  "results": {
+    "type": "agents",
+    "id": "6a5341d0-1511-11ea-a155-519330227ea0",
+    "attributes": {
+      "policy_id": "policy2",
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": [],
+    "updated_at": "2019-12-02T14:38:33.068Z",
+    "version": "WzYsMV0="
+  }
+}
+
+exports['ApiKeys Lib updateAgentsForPolicyId Should updates all agents with the new policy - find:"agents" (5)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 100,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentsForPolicyId Should updates all agents with the new policy - bulkUpdate (6)'] = {
+  "results": {
+    "saved_objects": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentsForPolicyId Should updates all agents with the new policy - get:agents (7)'] = {
+  "results": {
+    "id": "691f55b0-1511-11ea-a155-519330227ea0",
+    "type": "agents",
+    "updated_at": "2019-12-02T14:38:31.051Z",
+    "version": "WzQsMV0=",
+    "attributes": {
+      "policy_id": "default",
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentsForPolicyId Should updates all agents with the new policy - get:agents (8)'] = {
+  "results": {
+    "id": "69b83a50-1511-11ea-a155-519330227ea0",
+    "type": "agents",
+    "updated_at": "2019-12-02T14:38:32.053Z",
+    "version": "WzUsMV0=",
+    "attributes": {
+      "policy_id": "default",
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentsForPolicyId Should updates all agents with the new policy - get:agents (9)'] = {
+  "results": {
+    "id": "6a5341d0-1511-11ea-a155-519330227ea0",
+    "type": "agents",
+    "updated_at": "2019-12-02T14:38:33.068Z",
+    "version": "WzYsMV0=",
+    "attributes": {
+      "policy_id": "policy2",
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - find:"enrollment_api_keys" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - create:agents (2)'] = {
+  "results": {
+    "type": "agents",
+    "id": "dca8aa90-1511-11ea-9f34-65c55b2d70d9",
+    "attributes": {
+      "policy_id": "default",
+      "active": true,
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": [],
+    "updated_at": "2019-12-02T14:41:44.888Z",
+    "version": "WzIsMV0="
+  }
+}
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - get:agents (3)'] = {
+  "results": {
+    "id": "dca8aa90-1511-11ea-9f34-65c55b2d70d9",
+    "type": "agents",
+    "updated_at": "2019-12-02T14:41:44.888Z",
+    "version": "WzIsMV0=",
+    "attributes": {
+      "policy_id": "default",
+      "active": true,
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - update:agents (4)'] = {
+  "results": {
+    "id": "dca8aa90-1511-11ea-9f34-65c55b2d70d9",
+    "type": "agents",
+    "updated_at": "2019-12-02T14:41:45.862Z",
+    "version": "WzMsMV0=",
+    "attributes": {
+      "actions": [
+        {
+          "id": "3b265219-71cc-4f26-ba87-90417066dc02",
+          "type": "POLICY_CHANGE",
+          "created_at": "2019-12-02T14:41:45.859Z",
+          "data": "{\"policy\":{\"outputs\":{\"default\":{\"api_token\":\"slfhsdlfhjjkshfkjh:sdfsdfsdfsdf\",\"id\":\"default\",\"name\":\"Default\",\"type\":\"elasticsearch\",\"url\":\"https://localhost:9200\",\"tlsCert\":\"ldsjfldsjfljsdalkfjl;ksadh;kjsdha;kjhslgkjhsdalkghasdkgh\"}},\"streams\":[{\"metricsets\":[\"container\",\"cpu\"],\"id\":\"string\",\"type\":\"etc\",\"output\":{\"use_output\":\"default\"}}]}}"
+        }
+      ]
+    }
+  }
+}
+
+exports['ApiKeys Lib updateAgentForPolicyId Should update the agent with the new policy - get:agents (5)'] = {
+  "results": {
+    "id": "dca8aa90-1511-11ea-9f34-65c55b2d70d9",
+    "type": "agents",
+    "updated_at": "2019-12-02T14:41:45.862Z",
+    "version": "WzMsMV0=",
+    "attributes": {
+      "policy_id": "default",
+      "active": true,
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": [
+        {
+          "data": "{\"policy\":{\"outputs\":{\"default\":{\"api_token\":\"slfhsdlfhjjkshfkjh:sdfsdfsdfsdf\",\"id\":\"default\",\"name\":\"Default\",\"type\":\"elasticsearch\",\"url\":\"https://localhost:9200\",\"tlsCert\":\"ldsjfldsjfljsdalkfjl;ksadh;kjsdha;kjhslgkjhsdalkghasdkgh\"}},\"streams\":[{\"metricsets\":[\"container\",\"cpu\"],\"id\":\"string\",\"type\":\"etc\",\"output\":{\"use_output\":\"default\"}}]}}",
+          "created_at": "2019-12-02T14:41:45.859Z",
+          "id": "3b265219-71cc-4f26-ba87-90417066dc02",
+          "type": "POLICY_CHANGE"
+        }
+      ]
+    },
+    "references": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentsForPolicyId Should updates all agents with the new policy - find:"enrollment_api_keys" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentsForPolicyId Should updates all agents with the new policy - create:agents (2)'] = {
+  "results": {
+    "type": "agents",
+    "id": "dddc2180-1511-11ea-9f34-65c55b2d70d9",
+    "attributes": {
+      "policy_id": "default",
+      "active": true,
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": [],
+    "updated_at": "2019-12-02T14:41:46.904Z",
+    "version": "WzQsMV0="
+  }
+}
+
+exports['ApiKeys Lib updateAgentsForPolicyId Should updates all agents with the new policy - create:agents (3)'] = {
+  "results": {
+    "type": "agents",
+    "id": "de755440-1511-11ea-9f34-65c55b2d70d9",
+    "attributes": {
+      "policy_id": "default",
+      "active": true,
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": [],
+    "updated_at": "2019-12-02T14:41:47.907Z",
+    "version": "WzUsMV0="
+  }
+}
+
+exports['ApiKeys Lib updateAgentsForPolicyId Should updates all agents with the new policy - create:agents (4)'] = {
+  "results": {
+    "type": "agents",
+    "id": "df12a5b0-1511-11ea-9f34-65c55b2d70d9",
+    "attributes": {
+      "policy_id": "policy2",
+      "active": true,
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": [],
+    "updated_at": "2019-12-02T14:41:48.939Z",
+    "version": "WzYsMV0="
+  }
+}
+
+exports['ApiKeys Lib updateAgentsForPolicyId Should updates all agents with the new policy - find:"agents" (5)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 100,
+    "total": 3,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "dca8aa90-1511-11ea-9f34-65c55b2d70d9",
+        "attributes": {
+          "policy_id": "default",
+          "active": true,
+          "local_metadata": "{}",
+          "user_provided_metadata": "{}",
+          "actions": [
+            {
+              "data": "{\"policy\":{\"outputs\":{\"default\":{\"api_token\":\"slfhsdlfhjjkshfkjh:sdfsdfsdfsdf\",\"id\":\"default\",\"name\":\"Default\",\"type\":\"elasticsearch\",\"url\":\"https://localhost:9200\",\"tlsCert\":\"ldsjfldsjfljsdalkfjl;ksadh;kjsdha;kjhslgkjhsdalkghasdkgh\"}},\"streams\":[{\"metricsets\":[\"container\",\"cpu\"],\"id\":\"string\",\"type\":\"etc\",\"output\":{\"use_output\":\"default\"}}]}}",
+              "created_at": "2019-12-02T14:41:45.859Z",
+              "id": "3b265219-71cc-4f26-ba87-90417066dc02",
+              "type": "POLICY_CHANGE"
+            }
+          ]
+        },
+        "references": [],
+        "updated_at": "2019-12-02T14:41:45.862Z",
+        "version": "WzMsMV0="
+      },
+      {
+        "type": "agents",
+        "id": "dddc2180-1511-11ea-9f34-65c55b2d70d9",
+        "attributes": {
+          "policy_id": "default",
+          "active": true,
+          "local_metadata": "{}",
+          "user_provided_metadata": "{}",
+          "actions": []
+        },
+        "references": [],
+        "updated_at": "2019-12-02T14:41:46.904Z",
+        "version": "WzQsMV0="
+      },
+      {
+        "type": "agents",
+        "id": "de755440-1511-11ea-9f34-65c55b2d70d9",
+        "attributes": {
+          "policy_id": "default",
+          "active": true,
+          "local_metadata": "{}",
+          "user_provided_metadata": "{}",
+          "actions": []
+        },
+        "references": [],
+        "updated_at": "2019-12-02T14:41:47.907Z",
+        "version": "WzUsMV0="
+      }
+    ]
+  }
+}
+
+exports['ApiKeys Lib updateAgentsForPolicyId Should updates all agents with the new policy - find:"agents" (7)'] = {
+  "results": {
+    "page": 2,
+    "per_page": 100,
+    "total": 3,
+    "saved_objects": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentsForPolicyId Should updates all agents with the new policy - bulkUpdate (8)'] = {
+  "results": {
+    "saved_objects": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentsForPolicyId Should updates all agents with the new policy - get:agents (9)'] = {
+  "results": {
+    "id": "dddc2180-1511-11ea-9f34-65c55b2d70d9",
+    "type": "agents",
+    "updated_at": "2019-12-02T14:41:50.094Z",
+    "version": "WzgsMV0=",
+    "attributes": {
+      "policy_id": "default",
+      "active": true,
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": [
+        {
+          "data": "{\"policy\":{\"outputs\":{\"default\":{\"api_token\":\"slfhsdlfhjjkshfkjh:sdfsdfsdfsdf\",\"id\":\"default\",\"name\":\"Default\",\"type\":\"elasticsearch\",\"url\":\"https://localhost:9200\",\"tlsCert\":\"ldsjfldsjfljsdalkfjl;ksadh;kjsdha;kjhslgkjhsdalkghasdkgh\"}},\"streams\":[{\"metricsets\":[\"container\",\"cpu\"],\"id\":\"string\",\"type\":\"etc\",\"output\":{\"use_output\":\"default\"}}]}}",
+          "created_at": "2019-12-02T14:41:50.043Z",
+          "id": "0754c11b-74c9-47dc-ad30-c7bbef7508d1",
+          "type": "POLICY_CHANGE"
+        }
+      ]
+    },
+    "references": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentsForPolicyId Should updates all agents with the new policy - get:agents (10)'] = {
+  "results": {
+    "id": "de755440-1511-11ea-9f34-65c55b2d70d9",
+    "type": "agents",
+    "updated_at": "2019-12-02T14:41:50.094Z",
+    "version": "WzksMV0=",
+    "attributes": {
+      "policy_id": "default",
+      "active": true,
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": [
+        {
+          "data": "{\"policy\":{\"outputs\":{\"default\":{\"api_token\":\"slfhsdlfhjjkshfkjh:sdfsdfsdfsdf\",\"id\":\"default\",\"name\":\"Default\",\"type\":\"elasticsearch\",\"url\":\"https://localhost:9200\",\"tlsCert\":\"ldsjfldsjfljsdalkfjl;ksadh;kjsdha;kjhslgkjhsdalkghasdkgh\"}},\"streams\":[{\"metricsets\":[\"container\",\"cpu\"],\"id\":\"string\",\"type\":\"etc\",\"output\":{\"use_output\":\"default\"}}]}}",
+          "created_at": "2019-12-02T14:41:50.044Z",
+          "id": "cf6733f7-5482-4928-970b-992124a6ee07",
+          "type": "POLICY_CHANGE"
+        }
+      ]
+    },
+    "references": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentsForPolicyId Should updates all agents with the new policy - get:agents (11)'] = {
+  "results": {
+    "id": "df12a5b0-1511-11ea-9f34-65c55b2d70d9",
+    "type": "agents",
+    "updated_at": "2019-12-02T14:41:48.939Z",
+    "version": "WzYsMV0=",
+    "attributes": {
+      "policy_id": "policy2",
+      "active": true,
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": []
+  }
+}
+
+exports['ApiKeys Lib updateAgentsForPolicyId Should updates all agents with the new policy - bulkUpdate (6)'] = {
+  "thrownError": "{\"msg\":\"unknown error\",\"path\":\"/_bulk\",\"query\":{\"refresh\":\"wait_for\"},\"body\":\"{\\\"update\\\":{\\\"_id\\\":\\\"agents:dca8aa90-1511-11ea-9f34-65c55b2d70d9\\\",\\\"_index\\\":\\\".kibana\\\"}}\\n{\\\"doc\\\":{\\\"agents\\\":{\\\"actions\\\":[{\\\"data\\\":\\\"{\\\\\\\"policy\\\\\\\":{\\\\\\\"outputs\\\\\\\":{\\\\\\\"default\\\\\\\":{\\\\\\\"api_token\\\\\\\":\\\\\\\"slfhsdlfhjjkshfkjh:sdfsdfsdfsdf\\\\\\\",\\\\\\\"id\\\\\\\":\\\\\\\"default\\\\\\\",\\\\\\\"name\\\\\\\":\\\\\\\"Default\\\\\\\",\\\\\\\"type\\\\\\\":\\\\\\\"elasticsearch\\\\\\\",\\\\\\\"url\\\\\\\":\\\\\\\"https://localhost:9200\\\\\\\",\\\\\\\"tlsCert\\\\\\\":\\\\\\\"ldsjfldsjfljsdalkfjl;ksadh;kjsdha;kjhslgkjhsdalkghasdkgh\\\\\\\"}},\\\\\\\"streams\\\\\\\":[{\\\\\\\"metricsets\\\\\\\":[\\\\\\\"container\\\\\\\",\\\\\\\"cpu\\\\\\\"],\\\\\\\"id\\\\\\\":\\\\\\\"string\\\\\\\",\\\\\\\"type\\\\\\\":\\\\\\\"etc\\\\\\\",\\\\\\\"output\\\\\\\":{\\\\\\\"use_output\\\\\\\":\\\\\\\"default\\\\\\\"}}]}}\\\",\\\"created_at\\\":\\\"2019-12-02T14:41:45.859Z\\\",\\\"id\\\":\\\"3b265219-71cc-4f26-ba87-90417066dc02\\\",\\\"type\\\":\\\"POLICY_CHANGE\\\"},{\\\"id\\\":\\\"21e05485-c488-4504-8a81-72a56839755a\\\",\\\"type\\\":\\\"POLICY_CHANGE\\\",\\\"created_at\\\":\\\"2019-12-02T14:41:50.043Z\\\",\\\"data\\\":\\\"{\\\\\\\"policy\\\\\\\":{\\\\\\\"outputs\\\\\\\":{\\\\\\\"default\\\\\\\":{\\\\\\\"api_token\\\\\\\":\\\\\\\"slfhsdlfhjjkshfkjh:sdfsdfsdfsdf\\\\\\\",\\\\\\\"id\\\\\\\":\\\\\\\"default\\\\\\\",\\\\\\\"name\\\\\\\":\\\\\\\"Default\\\\\\\",\\\\\\\"type\\\\\\\":\\\\\\\"elasticsearch\\\\\\\",\\\\\\\"url\\\\\\\":\\\\\\\"https://localhost:9200\\\\\\\",\\\\\\\"tlsCert\\\\\\\":\\\\\\\"ldsjfldsjfljsdalkfjl;ksadh;kjsdha;kjhslgkjhsdalkghasdkgh\\\\\\\"}},\\\\\\\"streams\\\\\\\":[{\\\\\\\"metricsets\\\\\\\":[\\\\\\\"container\\\\\\\",\\\\\\\"cpu\\\\\\\"],\\\\\\\"id\\\\\\\":\\\\\\\"string\\\\\\\",\\\\\\\"type\\\\\\\":\\\\\\\"etc\\\\\\\",\\\\\\\"output\\\\\\\":{\\\\\\\"use_output\\\\\\\":\\\\\\\"default\\\\\\\"}}]}}\\\"}]},\\\"updated_at\\\":\\\"2019-12-02T14:41:50.094Z\\\"}}\\n{\\\"update\\\":{\\\"_id\\\":\\\"agents:dddc2180-1511-11ea-9f34-65c55b2d70d9\\\",\\\"_index\\\":\\\".kibana\\\"}}\\n{\\\"doc\\\":{\\\"agents\\\":{\\\"actions\\\":[{\\\"id\\\":\\\"0754c11b-74c9-47dc-ad30-c7bbef7508d1\\\",\\\"type\\\":\\\"POLICY_CHANGE\\\",\\\"created_at\\\":\\\"2019-12-02T14:41:50.043Z\\\",\\\"data\\\":\\\"{\\\\\\\"policy\\\\\\\":{\\\\\\\"outputs\\\\\\\":{\\\\\\\"default\\\\\\\":{\\\\\\\"api_token\\\\\\\":\\\\\\\"slfhsdlfhjjkshfkjh:sdfsdfsdfsdf\\\\\\\",\\\\\\\"id\\\\\\\":\\\\\\\"default\\\\\\\",\\\\\\\"name\\\\\\\":\\\\\\\"Default\\\\\\\",\\\\\\\"type\\\\\\\":\\\\\\\"elasticsearch\\\\\\\",\\\\\\\"url\\\\\\\":\\\\\\\"https://localhost:9200\\\\\\\",\\\\\\\"tlsCert\\\\\\\":\\\\\\\"ldsjfldsjfljsdalkfjl;ksadh;kjsdha;kjhslgkjhsdalkghasdkgh\\\\\\\"}},\\\\\\\"streams\\\\\\\":[{\\\\\\\"metricsets\\\\\\\":[\\\\\\\"container\\\\\\\",\\\\\\\"cpu\\\\\\\"],\\\\\\\"id\\\\\\\":\\\\\\\"string\\\\\\\",\\\\\\\"type\\\\\\\":\\\\\\\"etc\\\\\\\",\\\\\\\"output\\\\\\\":{\\\\\\\"use_output\\\\\\\":\\\\\\\"default\\\\\\\"}}]}}\\\"}]},\\\"updated_at\\\":\\\"2019-12-02T14:41:50.094Z\\\"}}\\n{\\\"update\\\":{\\\"_id\\\":\\\"agents:de755440-1511-11ea-9f34-65c55b2d70d9\\\",\\\"_index\\\":\\\".kibana\\\"}}\\n{\\\"doc\\\":{\\\"agents\\\":{\\\"actions\\\":[{\\\"id\\\":\\\"cf6733f7-5482-4928-970b-992124a6ee07\\\",\\\"type\\\":\\\"POLICY_CHANGE\\\",\\\"created_at\\\":\\\"2019-12-02T14:41:50.044Z\\\",\\\"data\\\":\\\"{\\\\\\\"policy\\\\\\\":{\\\\\\\"outputs\\\\\\\":{\\\\\\\"default\\\\\\\":{\\\\\\\"api_token\\\\\\\":\\\\\\\"slfhsdlfhjjkshfkjh:sdfsdfsdfsdf\\\\\\\",\\\\\\\"id\\\\\\\":\\\\\\\"default\\\\\\\",\\\\\\\"name\\\\\\\":\\\\\\\"Default\\\\\\\",\\\\\\\"type\\\\\\\":\\\\\\\"elasticsearch\\\\\\\",\\\\\\\"url\\\\\\\":\\\\\\\"https://localhost:9200\\\\\\\",\\\\\\\"tlsCert\\\\\\\":\\\\\\\"ldsjfldsjfljsdalkfjl;ksadh;kjsdha;kjhslgkjhsdalkghasdkgh\\\\\\\"}},\\\\\\\"streams\\\\\\\":[{\\\\\\\"metricsets\\\\\\\":[\\\\\\\"container\\\\\\\",\\\\\\\"cpu\\\\\\\"],\\\\\\\"id\\\\\\\":\\\\\\\"string\\\\\\\",\\\\\\\"type\\\\\\\":\\\\\\\"etc\\\\\\\",\\\\\\\"output\\\\\\\":{\\\\\\\"use_output\\\\\\\":\\\\\\\"default\\\\\\\"}}]}}\\\"}]},\\\"updated_at\\\":\\\"2019-12-02T14:41:50.094Z\\\"}}\\n\",\"statusCode\":0}",
+  "results": null
+}
+
+exports['AgentPolicy Lib updateAgentForPolicyId Should update the agent with the new policy - find:"enrollment_api_keys" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['AgentPolicy Lib updateAgentForPolicyId Should update the agent with the new policy - create:agents (2)'] = {
+  "results": {
+    "type": "agents",
+    "id": "161e1b60-1545-11ea-8a4c-d782b3e0e16c",
+    "attributes": {
+      "policy_id": "default",
+      "active": true,
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": [],
+    "updated_at": "2019-12-02T20:48:25.622Z",
+    "version": "WzIsMV0="
+  }
+}
+
+exports['AgentPolicy Lib updateAgentForPolicyId Should update the agent with the new policy - get:agents (3)'] = {
+  "results": {
+    "id": "161e1b60-1545-11ea-8a4c-d782b3e0e16c",
+    "type": "agents",
+    "updated_at": "2019-12-02T20:48:25.622Z",
+    "version": "WzIsMV0=",
+    "attributes": {
+      "policy_id": "default",
+      "active": true,
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": []
+  }
+}
+
+exports['AgentPolicy Lib updateAgentForPolicyId Should update the agent with the new policy - update:agents (4)'] = {
+  "results": {
+    "id": "161e1b60-1545-11ea-8a4c-d782b3e0e16c",
+    "type": "agents",
+    "updated_at": "2019-12-02T20:48:25.986Z",
+    "version": "WzMsMV0=",
+    "attributes": {
+      "actions": [
+        {
+          "id": "46f35c21-d60c-458a-be45-4682d9126906",
+          "type": "POLICY_CHANGE",
+          "created_at": "2019-12-02T20:48:25.984Z",
+          "data": "{\"policy\":{\"outputs\":{\"default\":{\"api_token\":\"slfhsdlfhjjkshfkjh:sdfsdfsdfsdf\",\"id\":\"default\",\"name\":\"Default\",\"type\":\"elasticsearch\",\"url\":\"https://localhost:9200\",\"tlsCert\":\"ldsjfldsjfljsdalkfjl;ksadh;kjsdha;kjhslgkjhsdalkghasdkgh\"}},\"streams\":[{\"metricsets\":[\"container\",\"cpu\"],\"id\":\"string\",\"type\":\"etc\",\"output\":{\"use_output\":\"default\"}}]}}"
+        }
+      ]
+    }
+  }
+}
+
+exports['AgentPolicy Lib updateAgentForPolicyId Should update the agent with the new policy - get:agents (5)'] = {
+  "results": {
+    "id": "161e1b60-1545-11ea-8a4c-d782b3e0e16c",
+    "type": "agents",
+    "updated_at": "2019-12-02T20:48:25.986Z",
+    "version": "WzMsMV0=",
+    "attributes": {
+      "policy_id": "default",
+      "active": true,
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": [
+        {
+          "data": "{\"policy\":{\"outputs\":{\"default\":{\"api_token\":\"slfhsdlfhjjkshfkjh:sdfsdfsdfsdf\",\"id\":\"default\",\"name\":\"Default\",\"type\":\"elasticsearch\",\"url\":\"https://localhost:9200\",\"tlsCert\":\"ldsjfldsjfljsdalkfjl;ksadh;kjsdha;kjhslgkjhsdalkghasdkgh\"}},\"streams\":[{\"metricsets\":[\"container\",\"cpu\"],\"id\":\"string\",\"type\":\"etc\",\"output\":{\"use_output\":\"default\"}}]}}",
+          "created_at": "2019-12-02T20:48:25.984Z",
+          "id": "46f35c21-d60c-458a-be45-4682d9126906",
+          "type": "POLICY_CHANGE"
+        }
+      ]
+    },
+    "references": []
+  }
+}
+
+exports['AgentPolicy Lib updateAgentsForPolicyId Should updates all agents with the new policy - find:"enrollment_api_keys" (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['AgentPolicy Lib updateAgentsForPolicyId Should updates all agents with the new policy - create:agents (2)'] = {
+  "results": {
+    "type": "agents",
+    "id": "16f20d30-1545-11ea-8a4c-d782b3e0e16c",
+    "attributes": {
+      "policy_id": "default",
+      "active": true,
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": [],
+    "updated_at": "2019-12-02T20:48:27.011Z",
+    "version": "WzQsMV0="
+  }
+}
+
+exports['AgentPolicy Lib updateAgentsForPolicyId Should updates all agents with the new policy - create:agents (3)'] = {
+  "results": {
+    "type": "agents",
+    "id": "178a2e80-1545-11ea-8a4c-d782b3e0e16c",
+    "attributes": {
+      "policy_id": "default",
+      "active": true,
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": [],
+    "updated_at": "2019-12-02T20:48:28.008Z",
+    "version": "WzUsMV0="
+  }
+}
+
+exports['AgentPolicy Lib updateAgentsForPolicyId Should updates all agents with the new policy - create:agents (4)'] = {
+  "results": {
+    "type": "agents",
+    "id": "182499c0-1545-11ea-8a4c-d782b3e0e16c",
+    "attributes": {
+      "policy_id": "policy2",
+      "active": true,
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": [],
+    "updated_at": "2019-12-02T20:48:29.020Z",
+    "version": "WzYsMV0="
+  }
+}
+
+exports['AgentPolicy Lib updateAgentsForPolicyId Should updates all agents with the new policy - find:"agents" (5)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 100,
+    "total": 3,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "161e1b60-1545-11ea-8a4c-d782b3e0e16c",
+        "attributes": {
+          "policy_id": "default",
+          "active": true,
+          "local_metadata": "{}",
+          "user_provided_metadata": "{}",
+          "actions": [
+            {
+              "data": "{\"policy\":{\"outputs\":{\"default\":{\"api_token\":\"slfhsdlfhjjkshfkjh:sdfsdfsdfsdf\",\"id\":\"default\",\"name\":\"Default\",\"type\":\"elasticsearch\",\"url\":\"https://localhost:9200\",\"tlsCert\":\"ldsjfldsjfljsdalkfjl;ksadh;kjsdha;kjhslgkjhsdalkghasdkgh\"}},\"streams\":[{\"metricsets\":[\"container\",\"cpu\"],\"id\":\"string\",\"type\":\"etc\",\"output\":{\"use_output\":\"default\"}}]}}",
+              "created_at": "2019-12-02T20:48:25.984Z",
+              "id": "46f35c21-d60c-458a-be45-4682d9126906",
+              "type": "POLICY_CHANGE"
+            }
+          ]
+        },
+        "references": [],
+        "updated_at": "2019-12-02T20:48:25.986Z",
+        "version": "WzMsMV0="
+      },
+      {
+        "type": "agents",
+        "id": "16f20d30-1545-11ea-8a4c-d782b3e0e16c",
+        "attributes": {
+          "policy_id": "default",
+          "active": true,
+          "local_metadata": "{}",
+          "user_provided_metadata": "{}",
+          "actions": []
+        },
+        "references": [],
+        "updated_at": "2019-12-02T20:48:27.011Z",
+        "version": "WzQsMV0="
+      },
+      {
+        "type": "agents",
+        "id": "178a2e80-1545-11ea-8a4c-d782b3e0e16c",
+        "attributes": {
+          "policy_id": "default",
+          "active": true,
+          "local_metadata": "{}",
+          "user_provided_metadata": "{}",
+          "actions": []
+        },
+        "references": [],
+        "updated_at": "2019-12-02T20:48:28.008Z",
+        "version": "WzUsMV0="
+      }
+    ]
+  }
+}
+
+exports['AgentPolicy Lib updateAgentsForPolicyId Should updates all agents with the new policy - find:"agents" (7)'] = {
+  "results": {
+    "page": 2,
+    "per_page": 100,
+    "total": 3,
+    "saved_objects": []
+  }
+}
+
+exports['AgentPolicy Lib updateAgentsForPolicyId Should updates all agents with the new policy - bulkUpdate (8)'] = {
+  "results": {
+    "saved_objects": []
+  }
+}
+
+exports['AgentPolicy Lib updateAgentsForPolicyId Should updates all agents with the new policy - get:agents (9)'] = {
+  "results": {
+    "id": "16f20d30-1545-11ea-8a4c-d782b3e0e16c",
+    "type": "agents",
+    "updated_at": "2019-12-02T20:48:30.149Z",
+    "version": "WzgsMV0=",
+    "attributes": {
+      "policy_id": "default",
+      "active": true,
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": [
+        {
+          "data": "{\"policy\":{\"outputs\":{\"default\":{\"api_token\":\"slfhsdlfhjjkshfkjh:sdfsdfsdfsdf\",\"id\":\"default\",\"name\":\"Default\",\"type\":\"elasticsearch\",\"url\":\"https://localhost:9200\",\"tlsCert\":\"ldsjfldsjfljsdalkfjl;ksadh;kjsdha;kjhslgkjhsdalkghasdkgh\"}},\"streams\":[{\"metricsets\":[\"container\",\"cpu\"],\"id\":\"string\",\"type\":\"etc\",\"output\":{\"use_output\":\"default\"}}]}}",
+          "created_at": "2019-12-02T20:48:30.109Z",
+          "id": "519cf0f3-398c-4534-b732-63f28b6ea465",
+          "type": "POLICY_CHANGE"
+        }
+      ]
+    },
+    "references": []
+  }
+}
+
+exports['AgentPolicy Lib updateAgentsForPolicyId Should updates all agents with the new policy - get:agents (10)'] = {
+  "results": {
+    "id": "178a2e80-1545-11ea-8a4c-d782b3e0e16c",
+    "type": "agents",
+    "updated_at": "2019-12-02T20:48:30.149Z",
+    "version": "WzksMV0=",
+    "attributes": {
+      "policy_id": "default",
+      "active": true,
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": [
+        {
+          "data": "{\"policy\":{\"outputs\":{\"default\":{\"api_token\":\"slfhsdlfhjjkshfkjh:sdfsdfsdfsdf\",\"id\":\"default\",\"name\":\"Default\",\"type\":\"elasticsearch\",\"url\":\"https://localhost:9200\",\"tlsCert\":\"ldsjfldsjfljsdalkfjl;ksadh;kjsdha;kjhslgkjhsdalkghasdkgh\"}},\"streams\":[{\"metricsets\":[\"container\",\"cpu\"],\"id\":\"string\",\"type\":\"etc\",\"output\":{\"use_output\":\"default\"}}]}}",
+          "created_at": "2019-12-02T20:48:30.109Z",
+          "id": "509d6a9d-60a2-4b77-8e66-22db9efdec91",
+          "type": "POLICY_CHANGE"
+        }
+      ]
+    },
+    "references": []
+  }
+}
+
+exports['AgentPolicy Lib updateAgentsForPolicyId Should updates all agents with the new policy - get:agents (11)'] = {
+  "results": {
+    "id": "182499c0-1545-11ea-8a4c-d782b3e0e16c",
+    "type": "agents",
+    "updated_at": "2019-12-02T20:48:29.020Z",
+    "version": "WzYsMV0=",
+    "attributes": {
+      "policy_id": "policy2",
+      "active": true,
+      "local_metadata": "{}",
+      "user_provided_metadata": "{}",
+      "actions": []
+    },
+    "references": []
+  }
+}
+
+exports['AgentPolicy Lib updateAgentsForPolicyId Should updates all agents with the new policy - bulkUpdate (6)'] = {
+  "thrownError": "{\"msg\":\"unknown error\",\"path\":\"/_bulk\",\"query\":{\"refresh\":\"wait_for\"},\"body\":\"{\\\"update\\\":{\\\"_id\\\":\\\"agents:161e1b60-1545-11ea-8a4c-d782b3e0e16c\\\",\\\"_index\\\":\\\".kibana\\\"}}\\n{\\\"doc\\\":{\\\"agents\\\":{\\\"actions\\\":[{\\\"data\\\":\\\"{\\\\\\\"policy\\\\\\\":{\\\\\\\"outputs\\\\\\\":{\\\\\\\"default\\\\\\\":{\\\\\\\"api_token\\\\\\\":\\\\\\\"slfhsdlfhjjkshfkjh:sdfsdfsdfsdf\\\\\\\",\\\\\\\"id\\\\\\\":\\\\\\\"default\\\\\\\",\\\\\\\"name\\\\\\\":\\\\\\\"Default\\\\\\\",\\\\\\\"type\\\\\\\":\\\\\\\"elasticsearch\\\\\\\",\\\\\\\"url\\\\\\\":\\\\\\\"https://localhost:9200\\\\\\\",\\\\\\\"tlsCert\\\\\\\":\\\\\\\"ldsjfldsjfljsdalkfjl;ksadh;kjsdha;kjhslgkjhsdalkghasdkgh\\\\\\\"}},\\\\\\\"streams\\\\\\\":[{\\\\\\\"metricsets\\\\\\\":[\\\\\\\"container\\\\\\\",\\\\\\\"cpu\\\\\\\"],\\\\\\\"id\\\\\\\":\\\\\\\"string\\\\\\\",\\\\\\\"type\\\\\\\":\\\\\\\"etc\\\\\\\",\\\\\\\"output\\\\\\\":{\\\\\\\"use_output\\\\\\\":\\\\\\\"default\\\\\\\"}}]}}\\\",\\\"created_at\\\":\\\"2019-12-02T20:48:25.984Z\\\",\\\"id\\\":\\\"46f35c21-d60c-458a-be45-4682d9126906\\\",\\\"type\\\":\\\"POLICY_CHANGE\\\"},{\\\"id\\\":\\\"db1f1263-2e31-4ffe-b509-833e4e6f5b47\\\",\\\"type\\\":\\\"POLICY_CHANGE\\\",\\\"created_at\\\":\\\"2019-12-02T20:48:30.109Z\\\",\\\"data\\\":\\\"{\\\\\\\"policy\\\\\\\":{\\\\\\\"outputs\\\\\\\":{\\\\\\\"default\\\\\\\":{\\\\\\\"api_token\\\\\\\":\\\\\\\"slfhsdlfhjjkshfkjh:sdfsdfsdfsdf\\\\\\\",\\\\\\\"id\\\\\\\":\\\\\\\"default\\\\\\\",\\\\\\\"name\\\\\\\":\\\\\\\"Default\\\\\\\",\\\\\\\"type\\\\\\\":\\\\\\\"elasticsearch\\\\\\\",\\\\\\\"url\\\\\\\":\\\\\\\"https://localhost:9200\\\\\\\",\\\\\\\"tlsCert\\\\\\\":\\\\\\\"ldsjfldsjfljsdalkfjl;ksadh;kjsdha;kjhslgkjhsdalkghasdkgh\\\\\\\"}},\\\\\\\"streams\\\\\\\":[{\\\\\\\"metricsets\\\\\\\":[\\\\\\\"container\\\\\\\",\\\\\\\"cpu\\\\\\\"],\\\\\\\"id\\\\\\\":\\\\\\\"string\\\\\\\",\\\\\\\"type\\\\\\\":\\\\\\\"etc\\\\\\\",\\\\\\\"output\\\\\\\":{\\\\\\\"use_output\\\\\\\":\\\\\\\"default\\\\\\\"}}]}}\\\"}]},\\\"updated_at\\\":\\\"2019-12-02T20:48:30.149Z\\\"}}\\n{\\\"update\\\":{\\\"_id\\\":\\\"agents:16f20d30-1545-11ea-8a4c-d782b3e0e16c\\\",\\\"_index\\\":\\\".kibana\\\"}}\\n{\\\"doc\\\":{\\\"agents\\\":{\\\"actions\\\":[{\\\"id\\\":\\\"519cf0f3-398c-4534-b732-63f28b6ea465\\\",\\\"type\\\":\\\"POLICY_CHANGE\\\",\\\"created_at\\\":\\\"2019-12-02T20:48:30.109Z\\\",\\\"data\\\":\\\"{\\\\\\\"policy\\\\\\\":{\\\\\\\"outputs\\\\\\\":{\\\\\\\"default\\\\\\\":{\\\\\\\"api_token\\\\\\\":\\\\\\\"slfhsdlfhjjkshfkjh:sdfsdfsdfsdf\\\\\\\",\\\\\\\"id\\\\\\\":\\\\\\\"default\\\\\\\",\\\\\\\"name\\\\\\\":\\\\\\\"Default\\\\\\\",\\\\\\\"type\\\\\\\":\\\\\\\"elasticsearch\\\\\\\",\\\\\\\"url\\\\\\\":\\\\\\\"https://localhost:9200\\\\\\\",\\\\\\\"tlsCert\\\\\\\":\\\\\\\"ldsjfldsjfljsdalkfjl;ksadh;kjsdha;kjhslgkjhsdalkghasdkgh\\\\\\\"}},\\\\\\\"streams\\\\\\\":[{\\\\\\\"metricsets\\\\\\\":[\\\\\\\"container\\\\\\\",\\\\\\\"cpu\\\\\\\"],\\\\\\\"id\\\\\\\":\\\\\\\"string\\\\\\\",\\\\\\\"type\\\\\\\":\\\\\\\"etc\\\\\\\",\\\\\\\"output\\\\\\\":{\\\\\\\"use_output\\\\\\\":\\\\\\\"default\\\\\\\"}}]}}\\\"}]},\\\"updated_at\\\":\\\"2019-12-02T20:48:30.149Z\\\"}}\\n{\\\"update\\\":{\\\"_id\\\":\\\"agents:178a2e80-1545-11ea-8a4c-d782b3e0e16c\\\",\\\"_index\\\":\\\".kibana\\\"}}\\n{\\\"doc\\\":{\\\"agents\\\":{\\\"actions\\\":[{\\\"id\\\":\\\"509d6a9d-60a2-4b77-8e66-22db9efdec91\\\",\\\"type\\\":\\\"POLICY_CHANGE\\\",\\\"created_at\\\":\\\"2019-12-02T20:48:30.109Z\\\",\\\"data\\\":\\\"{\\\\\\\"policy\\\\\\\":{\\\\\\\"outputs\\\\\\\":{\\\\\\\"default\\\\\\\":{\\\\\\\"api_token\\\\\\\":\\\\\\\"slfhsdlfhjjkshfkjh:sdfsdfsdfsdf\\\\\\\",\\\\\\\"id\\\\\\\":\\\\\\\"default\\\\\\\",\\\\\\\"name\\\\\\\":\\\\\\\"Default\\\\\\\",\\\\\\\"type\\\\\\\":\\\\\\\"elasticsearch\\\\\\\",\\\\\\\"url\\\\\\\":\\\\\\\"https://localhost:9200\\\\\\\",\\\\\\\"tlsCert\\\\\\\":\\\\\\\"ldsjfldsjfljsdalkfjl;ksadh;kjsdha;kjhslgkjhsdalkghasdkgh\\\\\\\"}},\\\\\\\"streams\\\\\\\":[{\\\\\\\"metricsets\\\\\\\":[\\\\\\\"container\\\\\\\",\\\\\\\"cpu\\\\\\\"],\\\\\\\"id\\\\\\\":\\\\\\\"string\\\\\\\",\\\\\\\"type\\\\\\\":\\\\\\\"etc\\\\\\\",\\\\\\\"output\\\\\\\":{\\\\\\\"use_output\\\\\\\":\\\\\\\"default\\\\\\\"}}]}}\\\"}]},\\\"updated_at\\\":\\\"2019-12-02T20:48:30.149Z\\\"}}\\n\",\"statusCode\":0}",
+  "results": null
+}
