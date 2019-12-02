@@ -399,7 +399,6 @@ export class IndexPattern implements IIndexPattern {
   }
 
   isUnsupportedTimePattern(): boolean {
-    return true;
     return !!this.intervalName;
   }
 
