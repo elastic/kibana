@@ -12,3 +12,4 @@ export * from './settings';
 export * from './data_frame_analytics';
 export * from './timeseriesexplorer';
 export * from './explorer';
+export * from './access_denied';
