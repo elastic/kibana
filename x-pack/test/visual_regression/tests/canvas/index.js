@@ -25,6 +25,5 @@ export default function ({ loadTestFile, getService }) {
 
     this.tags('ciGroup10');
     loadTestFile(require.resolve('./fullscreen'));
-    loadTestFile(require.resolve('./sample_data'));
   });
 }
