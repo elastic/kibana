@@ -116,6 +116,7 @@ module.exports = {
           }],
           '@typescript-eslint/consistent-type-assertions': 'error',
           '@typescript-eslint/no-empty-interface': 'error',
+          '@typescript-eslint/no-extra-non-null-assertion': 'error',
           '@typescript-eslint/no-misused-new': 'error',
           '@typescript-eslint/no-namespace': 'error',
           '@typescript-eslint/triple-slash-reference': ['error', {
@@ -167,6 +168,7 @@ module.exports = {
           'object-shorthand': 'error',
           'one-var': [ 'error', 'never' ],
           'prefer-const': 'error',
+          'prefer-rest-params': 'error',
           'quotes': ['error', 'double', { 'avoidEscape': true }],
           'quote-props': ['error', 'consistent-as-needed'],
           'radix': 'error',
