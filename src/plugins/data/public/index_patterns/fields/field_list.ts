@@ -19,7 +19,8 @@
 
 import { findIndex } from 'lodash';
 import { IndexPattern } from '../index_patterns';
-import { Field, FieldType, FieldSpec } from './field';
+import { IFieldType } from '../../../common';
+import { Field, FieldSpec } from './field';
 
 type FieldMap = Map<Field['name'], Field>;
 
@@ -27,7 +28,7 @@ export interface FieldListInterface extends Array<Field> {
   getByName(name: Field['name']): Field | undefined;
   getByType(type: Field['type']): Field[];
   add(field: FieldSpec): void;
-  remove(field: FieldType): void;
+  remove(field: IFieldType): void;
 }
 
 export class FieldList extends Array<Field> implements FieldListInterface {
@@ -42,7 +43,7 @@ export class FieldList extends Array<Field> implements FieldListInterface {
     }
     this.groups.get(field.type)!.set(field.name, field);
   };
-  private removeByGroup = (field: FieldType) => this.groups.get(field.type)!.delete(field.name);
+  private removeByGroup = (field: IFieldType) => this.groups.get(field.type)!.delete(field.name);
 
   constructor(indexPattern: IndexPattern, specs: FieldSpec[] = [], shortDotsEnable = false) {
     super();
@@ -61,7 +62,7 @@ export class FieldList extends Array<Field> implements FieldListInterface {
     this.setByGroup(newField);
   };
 
-  remove = (field: FieldType) => {
+  remove = (field: IFieldType) => {
     this.removeByGroup(field);
     this.byName.delete(field.name);
 

@@ -17,13 +17,4 @@
  * under the License.
  */
 
-import { once } from 'lodash';
-
-// @ts-ignore
-import { uiModules } from 'ui/modules';
-import { IndexPatterns } from '../';
-
-/** @internal */
-export const initLegacyModule = once((indexPatterns: IndexPatterns): void => {
-  uiModules.get('kibana/index_patterns').value('indexPatterns', indexPatterns);
-});
+export { shortenDottedString } from './shorten_dotted_string';
