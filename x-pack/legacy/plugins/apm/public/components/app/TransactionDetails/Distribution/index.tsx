@@ -43,7 +43,7 @@ export function getFormattedBuckets(buckets: IBucket[], bucketSize: number) {
         x: key + bucketSize,
         y: count,
         style: {
-          cursor: count > 0 && !isEmpty(samples) ? 'pointer' : 'default'
+          cursor: isEmpty(samples) ? 'default' : 'pointer'
         }
       };
     }
@@ -94,7 +94,7 @@ interface Props {
   distribution?: TransactionDistributionAPIResponse;
   urlParams: IUrlParams;
   isLoading: boolean;
-  onBucketSelected(index: number): void;
+  bucketIndex: number;
 }
 
 export const TransactionDistribution: FunctionComponent<Props> = (
@@ -102,9 +102,9 @@ export const TransactionDistribution: FunctionComponent<Props> = (
 ) => {
   const {
     distribution,
-    urlParams: { transactionId, traceId, transactionType },
+    urlParams: { transactionType },
     isLoading,
-    onBucketSelected
+    bucketIndex
   } = props;
 
   const formatYShort = useCallback(getFormatYShort(transactionType), [
@@ -138,16 +138,6 @@ export const TransactionDistribution: FunctionComponent<Props> = (
 
   const xMax = d3.max(buckets, d => d.x) || 0;
   const timeFormatter = getDurationFormatter(xMax);
-
-  const bucketIndex = buckets.findIndex(bucket => {
-    const sampleFound = bucket.samples.findIndex(
-      sample =>
-        sample.transactionId === transactionId && sample.traceId === traceId
-    );
-    return sampleFound !== -1;
-  });
-
-  onBucketSelected(bucketIndex);
 
   return (
     <div>
@@ -183,7 +173,7 @@ export const TransactionDistribution: FunctionComponent<Props> = (
         bucketSize={distribution.bucketSize}
         bucketIndex={bucketIndex}
         onClick={(bucket: IChartPoint) => {
-          if (!isEmpty(bucket.samples) && bucket.y > 0) {
+          if (!isEmpty(bucket.samples)) {
             const sample = bucket.samples[0];
             history.push({
               ...history.location,
@@ -198,12 +188,8 @@ export const TransactionDistribution: FunctionComponent<Props> = (
         formatX={(time: number) => timeFormatter(time).formatted}
         formatYShort={formatYShort}
         formatYLong={formatYLong}
-        verticalLineHover={(bucket: IChartPoint) =>
-          bucket.y > 0 && isEmpty(bucket.samples)
-        }
-        backgroundHover={(bucket: IChartPoint) =>
-          bucket.y > 0 && !isEmpty(bucket.samples)
-        }
+        verticalLineHover={(bucket: IChartPoint) => isEmpty(bucket.samples)}
+        backgroundHover={(bucket: IChartPoint) => !isEmpty(bucket.samples)}
         tooltipHeader={(bucket: IChartPoint) => {
           const xFormatted = timeFormatter(bucket.x);
           const x0Formatted = timeFormatter(bucket.x0);

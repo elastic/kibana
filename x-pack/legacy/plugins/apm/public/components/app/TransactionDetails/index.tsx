@@ -13,7 +13,7 @@ import {
   EuiFlexItem
 } from '@elastic/eui';
 import _ from 'lodash';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { useTransactionDistribution } from '../../../hooks/useTransactionDistribution';
 import { useWaterfall } from '../../../hooks/useWaterfall';
@@ -61,8 +61,15 @@ export function TransactionDetails() {
     return config;
   }, [transactionName, transactionType, serviceName]);
 
-  const [selectedBucket, setSelectedBucket] = useState(-1);
-  const traceSamples = distributionData.buckets[selectedBucket]?.samples;
+  const bucketIndex = distributionData.buckets.findIndex(bucket =>
+    bucket.samples.some(
+      sample =>
+        sample.transactionId === urlParams.transactionId &&
+        sample.traceId === urlParams.traceId
+    )
+  );
+
+  const traceSamples = distributionData.buckets[bucketIndex]?.samples;
 
   return (
     <div>
@@ -97,7 +104,7 @@ export function TransactionDetails() {
               distribution={distributionData}
               isLoading={distributionStatus === FETCH_STATUS.LOADING}
               urlParams={urlParams}
-              onBucketSelected={setSelectedBucket}
+              bucketIndex={bucketIndex}
             />
           </EuiPanel>
 

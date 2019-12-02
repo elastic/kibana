@@ -5,6 +5,7 @@
  */
 
 import { getFormattedBuckets } from '../index';
+import { IBucket } from '../../../../../../server/lib/transactions/distribution/get_buckets/transform';
 
 describe('Distribution', () => {
   it('getFormattedBuckets', () => {
@@ -30,7 +31,7 @@ describe('Distribution', () => {
           }
         ]
       }
-    ];
+    ] as IBucket[];
     expect(getFormattedBuckets(buckets, 20)).toEqual([
       { x: 20, x0: 0, y: 0, style: { cursor: 'default' }, samples: [] },
       { x: 40, x0: 20, y: 0, style: { cursor: 'default' }, samples: [] },

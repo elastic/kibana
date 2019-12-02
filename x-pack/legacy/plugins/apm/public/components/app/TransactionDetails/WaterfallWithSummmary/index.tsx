@@ -28,9 +28,10 @@ import { IBucket } from '../../../../../server/lib/transactions/distribution/get
 import { history } from '../../../../utils/history';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { MaybeViewTraceLink } from './MaybeViewTraceLink';
+import { units, px } from '../../../../style/variables';
 
 const PaginationContainer = styled.div`
-  margin-left: 4px;
+  margin-left: ${px(units.quarter)};
   display: flex;
   align-items: center;
 
@@ -39,7 +40,7 @@ const PaginationContainer = styled.div`
   }
 
   > span:last-of-type {
-    margin-right: 8px;
+    margin-right: ${px(units.half)};
   }
 `;
 
