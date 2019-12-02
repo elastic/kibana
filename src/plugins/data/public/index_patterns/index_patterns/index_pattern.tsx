@@ -42,7 +42,7 @@ import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { IIndexPatternsApiClient } from './index_patterns_api_client';
-import { getNotifications, getFieldFormats } from '../services';
+import { getNotifications, getFieldFormats, getHttp } from '../services';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
@@ -210,7 +210,7 @@ export class IndexPattern implements IIndexPattern {
       // It's now temporarily replaced by a simple replace of the single argument used by all URLs.
       // Once kbnUrl is migrated to NP, this can be updated.
       const editUrlTemplate = getRoutes().edit;
-      const editUrl = editUrlTemplate.replace('{{id}}', this.id!);
+      const editUrl = '/app/kibana#' + editUrlTemplate.replace('{{id}}', this.id!);
 
       const { toasts } = getNotifications();
 
@@ -221,7 +221,7 @@ export class IndexPattern implements IIndexPattern {
             <p>{warningText}</p>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiButton size="s" href={'/app/kibana#' + editUrl}>
+                <EuiButton size="s" href={getHttp().basePath.prepend(editUrl)}>
                   <FormattedMessage
                     id="data.indexPatterns.editIndexPattern"
                     defaultMessage="Edit index pattern"
@@ -399,6 +399,7 @@ export class IndexPattern implements IIndexPattern {
   }
 
   isUnsupportedTimePattern(): boolean {
+    return true;
     return !!this.intervalName;
   }
 

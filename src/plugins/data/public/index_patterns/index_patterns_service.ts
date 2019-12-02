@@ -24,7 +24,7 @@ import {
   NotificationsStart,
 } from 'src/core/public';
 import { FieldFormatsStart } from '../field_formats_provider';
-import { setNotifications, setFieldFormats } from './services';
+import { setNotifications, setFieldFormats, setHttp } from './services';
 import { IndexPatterns } from './index_patterns';
 
 interface IndexPatternDependencies {
@@ -58,6 +58,7 @@ export class IndexPatternsService {
   }: IndexPatternDependencies) {
     setNotifications(notifications);
     setFieldFormats(fieldFormats);
+    setHttp(http);
 
     return {
       indexPatterns: new IndexPatterns(uiSettings, savedObjectsClient, http),
