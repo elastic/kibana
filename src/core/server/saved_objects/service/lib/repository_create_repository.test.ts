@@ -21,10 +21,11 @@ import { mockKibanaMigrator } from '../../migrations/kibana/kibana_migrator.mock
 import { SavedObjectsSchema } from '../../schema';
 import { KibanaMigrator } from '../../migrations';
 import { Config } from 'src/core/server/config';
-import { createRepository } from './create_repository';
 jest.mock('./repository');
 
-describe('#createRepository', () => {
+const { SavedObjectsRepository: originalRepository } = jest.requireActual('./repository');
+
+describe('SavedObjectsRepository#createRepository', () => {
   const callAdminCluster = jest.fn();
   const schema = new SavedObjectsSchema({
     nsAgnosticType: { isNamespaceAgnostic: true },
@@ -64,7 +65,7 @@ describe('#createRepository', () => {
 
   it('should not allow a repository with an undefined type', () => {
     try {
-      createRepository(
+      originalRepository.createRepository(
         (migrator as unknown) as KibanaMigrator,
         schema,
         {} as Config,
@@ -80,12 +81,14 @@ describe('#createRepository', () => {
   });
 
   it('should create a repository without hidden types', () => {
-    const repository = createRepository(
+    const repository = originalRepository.createRepository(
       (migrator as unknown) as KibanaMigrator,
       schema,
       {} as Config,
       '.kibana-test',
-      callAdminCluster
+      callAdminCluster,
+      [],
+      SavedObjectsRepository
     );
     expect(repository).toBeDefined();
     expect(RepositoryConstructor.mock.calls[0][0].allowedTypes).toMatchInlineSnapshot(`
@@ -98,13 +101,14 @@ describe('#createRepository', () => {
   });
 
   it('should create a repository with a unique list of hidden types', () => {
-    const repository = createRepository(
+    const repository = originalRepository.createRepository(
       (migrator as unknown) as KibanaMigrator,
       schema,
       {} as Config,
       '.kibana-test',
       callAdminCluster,
-      ['hiddenType', 'hiddenType', 'hiddenType']
+      ['hiddenType', 'hiddenType', 'hiddenType'],
+      SavedObjectsRepository
     );
     expect(repository).toBeDefined();
     expect(RepositoryConstructor.mock.calls[0][0].allowedTypes).toMatchInlineSnapshot(`
