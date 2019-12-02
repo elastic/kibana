@@ -36,7 +36,7 @@ import {
 import { HapiResponseAdapter } from './response_adapter';
 import { RequestHandlerContext } from '../../../server';
 import { wrapErrors } from './error_wrapper';
-import { RouteValidatedType } from './validator';
+import { RouteValidatedType, RouteValidateFunction } from './validator';
 
 interface RouterRoute {
   method: RouteMethod;
@@ -357,9 +357,9 @@ type RequestHandlerEnhanced<
  * @public
  */
 export type RequestHandler<
-  P extends RouteURLValidationParams,
-  Q extends RouteURLValidationParams,
-  B extends RouteBodyValidationParams,
+  P extends RouteURLValidationParams = RouteValidateFunction<unknown>,
+  Q extends RouteURLValidationParams = RouteValidateFunction<unknown>,
+  B extends RouteBodyValidationParams = RouteValidateFunction<unknown>,
   Method extends RouteMethod = any
 > = (
   context: RequestHandlerContext,
