@@ -19,7 +19,7 @@
 
 import { ObjectType, Type } from '@kbn/config-schema';
 import { Stream } from 'stream';
-import { ValidateFunction } from './validator';
+import { RouteValidateFunction } from './validator';
 
 /**
  * The set of common HTTP methods supported by Kibana routing.
@@ -122,13 +122,31 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
 }
 
 /**
+ * URL params and query properties are allowed to be validated via `schema.object(...)` (from @kbn/config-schema) or
+ * a `RouteValidateFunction` that returns the custom-validated value.
+ *
+ * @public
+ */
+export type RouteURLValidationParams = ObjectType | RouteValidateFunction<unknown>;
+
+/**
+ * Similar to the URL and query params, the body payload for a route are allowed to be validated via `schema.object(...)` (from @kbn/config-schema) or
+ * a `RouteValidateFunction` that returns the custom-validated value (similarly to the URL and query params).
+ * But, on top of that, when the `body` options `parse: false` or `output: 'stream'` are used, the `@kbn/config-schema` options to validate it are `schema.buffer(...)`
+ * or `schema.stream(...)`, respectively.
+ *
+ * @public
+ */
+export type RouteBodyValidationParams = RouteURLValidationParams | Type<Buffer> | Type<Stream>;
+
+/**
  * Route specific configuration.
  * @public
  */
 export interface RouteConfig<
-  P extends ObjectType | ValidateFunction<unknown>,
-  Q extends ObjectType | ValidateFunction<unknown>,
-  B extends ObjectType | Type<Buffer> | Type<Stream> | ValidateFunction<unknown>,
+  P extends RouteURLValidationParams,
+  Q extends RouteURLValidationParams,
+  B extends RouteBodyValidationParams,
   Method extends RouteMethod
 > {
   /**
@@ -216,9 +234,9 @@ export interface RouteConfig<
  * @public
  */
 export interface RouteSchemas<
-  P extends ObjectType | ValidateFunction<unknown>,
-  Q extends ObjectType | ValidateFunction<unknown>,
-  B extends ObjectType | Type<Buffer> | Type<Stream> | ValidateFunction<unknown>
+  P extends RouteURLValidationParams,
+  Q extends RouteURLValidationParams,
+  B extends RouteBodyValidationParams
 > {
   params?: P;
   query?: Q;

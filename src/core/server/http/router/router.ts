@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import { ObjectType, Type } from '@kbn/config-schema';
+import { Type } from '@kbn/config-schema';
 import { Request, ResponseObject, ResponseToolkit } from 'hapi';
 import Boom from 'boom';
 
-import { Stream } from 'stream';
 import { Logger } from '../../logging';
 import { KibanaRequest } from './request';
 import { KibanaResponseFactory, kibanaResponseFactory, IKibanaResponse } from './response';
@@ -31,11 +30,13 @@ import {
   RouteMethod,
   RouteSchemas,
   validBodyOutput,
+  RouteURLValidationParams,
+  RouteBodyValidationParams,
 } from './route';
 import { HapiResponseAdapter } from './response_adapter';
 import { RequestHandlerContext } from '../../../server';
 import { wrapErrors } from './error_wrapper';
-import { ValidateFunction, ValidatedType } from './validator';
+import { RouteValidatedType } from './validator';
 
 interface RouterRoute {
   method: RouteMethod;
@@ -50,9 +51,9 @@ interface RouterRoute {
  * @public
  */
 export type RouteRegistrar<Method extends RouteMethod> = <
-  P extends ObjectType | ValidateFunction<unknown>,
-  Q extends ObjectType | ValidateFunction<unknown>,
-  B extends ObjectType | Type<Buffer> | Type<Stream> | ValidateFunction<unknown>
+  P extends RouteURLValidationParams,
+  Q extends RouteURLValidationParams,
+  B extends RouteBodyValidationParams
 >(
   route: RouteConfig<P, Q, B, Method>,
   handler: RequestHandler<P, Q, B, Method>
@@ -109,7 +110,11 @@ export interface IRouter {
    * Wrap a router handler to catch and converts legacy boom errors to proper custom errors.
    * @param handler {@link RequestHandler} - a route handler to wrap
    */
-  handleLegacyErrors: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+  handleLegacyErrors: <
+    P extends RouteURLValidationParams,
+    Q extends RouteURLValidationParams,
+    B extends RouteBodyValidationParams
+  >(
     handler: RequestHandler<P, Q, B>
   ) => RequestHandler<P, Q, B>;
 
@@ -122,9 +127,9 @@ export interface IRouter {
 }
 
 export type ContextEnhancer<
-  P extends ObjectType,
-  Q extends ObjectType,
-  B extends ObjectType,
+  P extends RouteURLValidationParams,
+  Q extends RouteURLValidationParams,
+  B extends RouteBodyValidationParams,
   Method extends RouteMethod
 > = (handler: RequestHandler<P, Q, B, Method>) => RequestHandlerEnhanced<P, Q, B, Method>;
 
@@ -142,9 +147,9 @@ function getRouteFullPath(routerPath: string, routePath: string) {
  * undefined.
  */
 function routeSchemasFromRouteConfig<
-  P extends ObjectType | ValidateFunction<unknown>,
-  Q extends ObjectType | ValidateFunction<unknown>,
-  B extends ObjectType | Type<Buffer> | Type<Stream> | ValidateFunction<unknown>
+  P extends RouteURLValidationParams,
+  Q extends RouteURLValidationParams,
+  B extends RouteBodyValidationParams
 >(route: RouteConfig<P, Q, B, typeof routeMethod>, routeMethod: RouteMethod) {
   // The type doesn't allow `validate` to be undefined, but it can still
   // happen when it's used from JavaScript.
@@ -176,9 +181,9 @@ function routeSchemasFromRouteConfig<
 function validOptions(
   method: RouteMethod,
   routeConfig: RouteConfig<
-    ObjectType | ValidateFunction<unknown>,
-    ObjectType | ValidateFunction<unknown>,
-    ObjectType | Type<Buffer> | Type<Stream> | ValidateFunction<unknown>,
+    RouteURLValidationParams,
+    RouteURLValidationParams,
+    RouteBodyValidationParams,
     typeof method
   >
 ) {
@@ -227,9 +232,9 @@ export class Router implements IRouter {
     private readonly enhanceWithContext: ContextEnhancer<any, any, any, any>
   ) {
     const buildMethod = <Method extends RouteMethod>(method: Method) => <
-      P extends ObjectType | ValidateFunction<unknown>,
-      Q extends ObjectType | ValidateFunction<unknown>,
-      B extends ObjectType | Type<Buffer> | Type<Stream> | ValidateFunction<unknown>
+      P extends RouteURLValidationParams,
+      Q extends RouteURLValidationParams,
+      B extends RouteBodyValidationParams
     >(
       route: RouteConfig<P, Q, B, Method>,
       handler: RequestHandler<P, Q, B, Method>
@@ -261,16 +266,18 @@ export class Router implements IRouter {
     return [...this.routes];
   }
 
-  public handleLegacyErrors<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-    handler: RequestHandler<P, Q, B>
-  ): RequestHandler<P, Q, B> {
+  public handleLegacyErrors<
+    P extends RouteURLValidationParams,
+    Q extends RouteURLValidationParams,
+    B extends RouteBodyValidationParams
+  >(handler: RequestHandler<P, Q, B>): RequestHandler<P, Q, B> {
     return wrapErrors(handler);
   }
 
   private async handle<
-    P extends ObjectType | ValidateFunction<unknown>,
-    Q extends ObjectType | ValidateFunction<unknown>,
-    B extends ObjectType | Type<Buffer> | Type<Stream> | ValidateFunction<unknown>
+    P extends RouteURLValidationParams,
+    Q extends RouteURLValidationParams,
+    B extends RouteBodyValidationParams
   >({
     routeSchemas,
     request,
@@ -283,9 +290,9 @@ export class Router implements IRouter {
     routeSchemas?: RouteSchemas<P, Q, B>;
   }) {
     let kibanaRequest: KibanaRequest<
-      ValidatedType<P>,
-      ValidatedType<Q>,
-      ValidatedType<B>,
+      RouteValidatedType<P>,
+      RouteValidatedType<Q>,
+      RouteValidatedType<B>,
       typeof request.method
     >;
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
@@ -310,9 +317,9 @@ type WithoutHeadArgument<T> = T extends (first: any, ...rest: infer Params) => i
   : never;
 
 type RequestHandlerEnhanced<
-  P extends ObjectType | ValidateFunction<unknown>,
-  Q extends ObjectType | ValidateFunction<unknown>,
-  B extends ObjectType | Type<Buffer> | Type<Stream> | ValidateFunction<unknown>,
+  P extends RouteURLValidationParams,
+  Q extends RouteURLValidationParams,
+  B extends RouteBodyValidationParams,
   Method extends RouteMethod
 > = WithoutHeadArgument<RequestHandler<P, Q, B, Method>>;
 
@@ -350,12 +357,17 @@ type RequestHandlerEnhanced<
  * @public
  */
 export type RequestHandler<
-  P extends ObjectType | ValidateFunction<unknown>,
-  Q extends ObjectType | ValidateFunction<unknown>,
-  B extends ObjectType | Type<Buffer> | Type<Stream> | ValidateFunction<unknown>,
+  P extends RouteURLValidationParams,
+  Q extends RouteURLValidationParams,
+  B extends RouteBodyValidationParams,
   Method extends RouteMethod = any
 > = (
   context: RequestHandlerContext,
-  request: KibanaRequest<ValidatedType<P>, ValidatedType<Q>, ValidatedType<B>, Method>,
+  request: KibanaRequest<
+    RouteValidatedType<P>,
+    RouteValidatedType<Q>,
+    RouteValidatedType<B>,
+    Method
+  >,
   response: KibanaResponseFactory
 ) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;

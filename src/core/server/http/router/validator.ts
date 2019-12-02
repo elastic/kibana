@@ -23,7 +23,7 @@ import { SchemaTypeError, ValidationError, ObjectType, Type, TypeOf } from '@kbn
  * Allowed returned format of the custom validate function
  * @public
  */
-export type ValidateFunctionReturn<T> =
+export type RouteValidateFunctionReturn<T> =
   | {
       value: T;
       error?: undefined;
@@ -37,25 +37,25 @@ export type ValidateFunctionReturn<T> =
  * Custom validate function (only if @kbn/config-schema is not a valid option in your plugin)
  * @public
  */
-export type ValidateFunction<T> = (data: any) => ValidateFunctionReturn<T>;
+export type RouteValidateFunction<T> = (data: any) => RouteValidateFunctionReturn<T>;
 
-export type TypeOfFunctionReturn<T extends ValidateFunction<unknown>> = NonNullable<
+export type TypeOfFunctionReturn<T extends RouteValidateFunction<unknown>> = NonNullable<
   ReturnType<T>['value']
 >;
 
-export type ValidateSpecs<T> = ObjectType | Type<T> | ValidateFunction<T>;
-export type ValidatedType<T extends ValidateSpecs<unknown>> = T extends Type<unknown>
+export type RouteValidateSpecs<T> = ObjectType | Type<T> | RouteValidateFunction<T>;
+export type RouteValidatedType<T extends RouteValidateSpecs<unknown>> = T extends Type<unknown>
   ? TypeOf<T>
-  : T extends ValidateFunction<unknown>
+  : T extends RouteValidateFunction<unknown>
   ? TypeOfFunctionReturn<T>
   : never;
 
-function validateFunction<T extends ValidateFunction<unknown>>(
+function validateFunction<T extends RouteValidateFunction<unknown>>(
   validationSpec: T,
   data: any,
   namespace?: string
 ): TypeOfFunctionReturn<typeof validationSpec> {
-  let result: ValidateFunctionReturn<ReturnType<typeof validationSpec>['value']>;
+  let result: RouteValidateFunctionReturn<ReturnType<typeof validationSpec>['value']>;
   try {
     result = validationSpec(data);
   } catch (err) {
@@ -68,7 +68,11 @@ function validateFunction<T extends ValidateFunction<unknown>>(
   return result.value as TypeOfFunctionReturn<typeof validationSpec>;
 }
 
-export function validate<T>(validationSpec: ValidateSpecs<T>, data: any, namespace?: string): T {
+export function validate<T>(
+  validationSpec: RouteValidateSpecs<T>,
+  data: any,
+  namespace?: string
+): T {
   if (typeof validationSpec === 'function') {
     return validateFunction(validationSpec, data, namespace);
   } else {

@@ -18,25 +18,28 @@
  */
 
 import Boom from 'boom';
-import { ObjectType, Type } from '@kbn/config-schema';
-import { Stream } from 'stream';
 import { KibanaRequest } from './request';
 import { KibanaResponseFactory } from './response';
 import { RequestHandler } from './router';
 import { RequestHandlerContext } from '../../../server';
-import { RouteMethod } from './route';
-import { ValidateFunction, ValidatedType } from './validator';
+import { RouteMethod, RouteURLValidationParams, RouteBodyValidationParams } from './route';
+import { RouteValidatedType } from './validator';
 
 export const wrapErrors = <
-  P extends ObjectType | ValidateFunction<unknown>,
-  Q extends ObjectType | ValidateFunction<unknown>,
-  B extends ObjectType | Type<Buffer> | Type<Stream> | ValidateFunction<unknown>
+  P extends RouteURLValidationParams,
+  Q extends RouteURLValidationParams,
+  B extends RouteBodyValidationParams
 >(
   handler: RequestHandler<P, Q, B, RouteMethod>
 ): RequestHandler<P, Q, B, RouteMethod> => {
   return async (
     context: RequestHandlerContext,
-    request: KibanaRequest<ValidatedType<P>, ValidatedType<Q>, ValidatedType<B>, RouteMethod>,
+    request: KibanaRequest<
+      RouteValidatedType<P>,
+      RouteValidatedType<Q>,
+      RouteValidatedType<B>,
+      RouteMethod
+    >,
     response: KibanaResponseFactory
   ) => {
     try {
