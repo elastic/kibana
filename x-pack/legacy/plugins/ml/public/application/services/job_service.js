@@ -34,6 +34,7 @@ class JobService {
       skipTimeRangeStep: false,
       start: undefined,
       end: undefined,
+      calendars: undefined,
     };
 
     this.jobs = [];

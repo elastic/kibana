@@ -25,12 +25,12 @@ import * as Rx from 'rxjs';
 import { buildPipeline } from 'ui/visualize/loader/pipeline_helpers';
 import { SavedObject } from 'ui/saved_objects/saved_object';
 import { Vis } from 'ui/vis';
-import { SearchSource } from 'ui/courier';
 import { queryGeohashBounds } from 'ui/visualize/loader/utils';
 import { getTableAggs } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { AppState } from 'ui/state_management/app_state';
 import { npStart } from 'ui/new_platform';
 import { IExpressionLoaderParams } from 'src/plugins/expressions/public';
+import { SearchSourceContract } from '../../../../../ui/public/courier';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   TimeRange,
@@ -53,7 +53,7 @@ const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<
 export interface VisSavedObject extends SavedObject {
   vis: Vis;
   description?: string;
-  searchSource: SearchSource;
+  searchSource: SearchSourceContract;
   title: string;
   uiStateJSON?: string;
   destroy: () => void;

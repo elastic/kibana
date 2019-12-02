@@ -79,7 +79,6 @@ export const ml = (kibana: any) => {
         injectUiAppVars: server.injectUiAppVars,
         http: mlHttpService,
         savedObjects: server.savedObjects,
-        usage: server.usage,
       };
 
       const plugins = {
@@ -87,6 +86,7 @@ export const ml = (kibana: any) => {
         security: server.plugins.security,
         xpackMain: server.plugins.xpack_main,
         spaces: server.plugins.spaces,
+        usageCollection: kbnServer.newPlatform.setup.plugins.usageCollection,
         ml: this,
       };
 

@@ -5,11 +5,11 @@
  */
 
 import { flatten, mapValues, uniq } from 'lodash';
-import { fromKueryExpression } from '@kbn/es-query';
 import { getSuggestionsProvider as field } from './field';
 import { getSuggestionsProvider as value } from './value';
 import { getSuggestionsProvider as operator } from './operator';
 import { getSuggestionsProvider as conjunction } from './conjunction';
+import { esKuery } from '../../../../../../src/plugins/data/public';
 
 const cursorSymbol = '@kuery-cursor@';
 
@@ -27,7 +27,7 @@ export const kueryProvider = ({ config, indexPatterns, boolFilter }) => {
 
     let cursorNode;
     try {
-      cursorNode = fromKueryExpression(cursoredQuery, { cursorSymbol, parseCursor: true });
+      cursorNode = esKuery.fromKueryExpression(cursoredQuery, { cursorSymbol, parseCursor: true });
     } catch (e) {
       cursorNode = {};
     }
