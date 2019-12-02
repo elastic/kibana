@@ -30,7 +30,7 @@ interface Props {
 export const PolicyForm: React.FC<Props> = ({ policy, updatePolicy }) => {
   // TODO: Replace with real policy meta
   const [meta, setMeta] = useState<{ [key: string]: string }>(
-    policy.id
+    policy.id || policy.name
       ? {
           env: 'test',
           region: 'us-east',
