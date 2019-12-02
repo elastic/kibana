@@ -61,32 +61,38 @@ export const useResolver = (
 
   useEffect(() => {
     (async () => {
-      const res = await Promise.all(funcs.map(r => r()));
-      res.forEach((r, i) => (tempResults[funcNames[i]] = r));
-      setResults(tempResults);
+      try {
+        const res = await Promise.all(funcs.map(r => r()));
+        res.forEach((r, i) => (tempResults[funcNames[i]] = r));
+        setResults(tempResults);
 
-      const stubbedSavedSearch = ({
-        searchSource: {
-          getField() {},
-        },
-      } as never) as SavedSearch;
+        const stubbedSavedSearch = ({
+          searchSource: {
+            getField() {},
+          },
+        } as never) as SavedSearch;
 
-      if (index !== undefined) {
-        const { indexPattern, savedSearch, combinedQuery } = createSearchItems(
-          config,
-          await getIndexPatternById(index),
-          stubbedSavedSearch
-        );
+        if (index !== undefined) {
+          const { indexPattern, savedSearch, combinedQuery } = createSearchItems(
+            config,
+            await getIndexPatternById(index),
+            stubbedSavedSearch
+          );
 
-        setContext({
-          combinedQuery,
-          currentIndexPattern: indexPattern,
-          currentSavedSearch: savedSearch,
-          indexPatterns: getFullIndexPatterns()!,
-          kibanaConfig: config,
-        });
-      } else {
-        setContext({});
+          setContext({
+            combinedQuery,
+            currentIndexPattern: indexPattern,
+            currentSavedSearch: savedSearch,
+            indexPatterns: getFullIndexPatterns()!,
+            kibanaConfig: config,
+          });
+        } else {
+          setContext({});
+        }
+      } catch (error) {
+        // quietly fail. Let the resolvers handle the redirection if any fail to resolve
+        // eslint-disable-next-line no-console
+        console.error(error);
       }
     })();
   }, []);
