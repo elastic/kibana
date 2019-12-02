@@ -6,14 +6,17 @@
 
 import { Plugin, CoreSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { FlattenedPromise, flattenedPromise } from '../common/flattened_promise';
-import {
-  Start as EmbeddablePluginStart,
-  IEmbeddable,
-} from '../../../../../../src/plugins/embeddable/public';
+import { IEmbeddable, IEmbeddableStart } from '../../../../../../src/plugins/embeddable/public';
 
 export class ResolverTestPlugin implements Plugin {
-  private embeddable: FlattenedPromise<IEmbeddable | undefined> = flattenedPromise();
+  private resolveEmbeddable!: (
+    value: IEmbeddable | undefined | PromiseLike<IEmbeddable | undefined> | undefined
+  ) => void;
+  private embeddablePromise: Promise<IEmbeddable | undefined> = new Promise<
+    IEmbeddable | undefined
+  >(resolve => {
+    this.resolveEmbeddable = resolve;
+  });
   public setup(core: CoreSetup) {
     core.application.register({
       id: 'resolver_test',
@@ -22,15 +25,15 @@ export class ResolverTestPlugin implements Plugin {
       }),
       mount: async (context, params) => {
         const { renderApp } = await import('./applications/resolver_test');
-        return renderApp(context, params, this.embeddable.promise);
+        return renderApp(context, params, this.embeddablePromise);
       },
     });
   }
 
-  public start(...args: [unknown, { embeddable: EmbeddablePluginStart }]) {
+  public start(...args: [unknown, { embeddable: IEmbeddableStart }]) {
     const [, plugins] = args;
     const factory = plugins.embeddable.getEmbeddableFactory('resolver');
-    this.embeddable.resolve(factory.create({ id: 'what is id for?' }));
+    this.resolveEmbeddable(factory.create({ id: 'test basic render' }));
   }
   public stop() {}
 }

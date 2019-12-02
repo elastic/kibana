@@ -7,8 +7,9 @@
 import * as React from 'react';
 import ReactDOM from 'react-dom';
 import { AppMountContext, AppMountParameters } from 'kibana/public';
-import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n/react';
 import { IEmbeddable } from 'src/plugins/embeddable/public';
+import { useEffect } from 'react';
 
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
@@ -33,31 +34,31 @@ export function renderApp(
 const AppRoot: React.FC<{
   embeddable: Promise<IEmbeddable | undefined>;
 }> = React.memo(({ embeddable: embeddablePromise }) => {
-  const [embeddable, setEmbeddable] = React.useState<IEmbeddable | null | undefined>(null);
+  const [embeddable, setEmbeddable] = React.useState<IEmbeddable | undefined>(undefined);
+  const [renderTarget, setRenderTarget] = React.useState<HTMLDivElement | null>(null);
 
-  embeddablePromise.then(setEmbeddable);
+  useEffect(() => {
+    let reject;
+    Promise.race([
+      new Promise<never>((...args) => {
+        reject = args[1];
+      }),
+      embeddablePromise,
+    ]).then(value => {
+      setEmbeddable(value);
+    });
 
-  return (
-    <>
-      {embeddable !== null && embeddable !== undefined && (
-        <EmbeddableHouse embeddable={embeddable} />
-      )}
-    </>
-  );
+    return reject;
+  }, [embeddablePromise]);
+
+  useEffect(() => {
+    if (embeddable && renderTarget) {
+      embeddable.render(renderTarget);
+      return () => {
+        embeddable.destroy();
+      };
+    }
+  }, [embeddable, renderTarget]);
+
+  return <div ref={setRenderTarget} />;
 });
-
-const EmbeddableHouse: React.FunctionComponent<{ embeddable: IEmbeddable }> = ({ embeddable }) => {
-  const embeddableRef = React.createRef<IEmbeddable>();
-  if (embeddableRef.current !== embeddable && embeddableRef.current) {
-    // Should this component have this concern?
-    embeddable.destroy();
-  }
-
-  const callbackRef = React.useCallback(
-    function(element) {
-      embeddable.render(element);
-    },
-    [embeddable]
-  );
-  return <div ref={callbackRef} />;
-};
