@@ -35,6 +35,8 @@ interface LogSummaryQueryBodyParams {
   highlightQuery?: object;
 }
 
+const TIMESTAMP_FORMAT = 'epoch_millis';
+
 export const buildLogSummaryQueryBody = ({
   startDate,
   endDate,
@@ -52,7 +54,9 @@ export const buildLogSummaryQueryBody = ({
       bool: {
         filter: [
           ...(filters.length === 2 ? [{ bool: { must: filters } }] : filters),
-          { range: { [timestampField]: { gte: startDate, lte: endDate } } },
+          {
+            range: { [timestampField]: { gte: startDate, lte: endDate, format: TIMESTAMP_FORMAT } },
+          },
         ],
       },
     },
@@ -60,6 +64,7 @@ export const buildLogSummaryQueryBody = ({
       log_summary: {
         date_range: {
           field: timestampField,
+          format: TIMESTAMP_FORMAT,
           ranges: generateRangeBuckets(startDate, endDate, bucketSize),
         },
         ...(highlightQuery
