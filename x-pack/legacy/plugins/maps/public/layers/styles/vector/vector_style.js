@@ -282,34 +282,36 @@ export class VectorStyle extends AbstractStyle {
       return fieldName === dynamicProp.getField().getName();
     });
 
-    let dataRequestId;
-    if (dynamicProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE) {
-      dataRequestId = SOURCE_META_ID_ORIGIN;
-    } else {
-      const join = this._layer.getValidJoins().find(join => {
-        const matchingField = join.getRightJoinSource().getMetricFieldForName(fieldName);
-        return !!matchingField;
-      });
-      if (join) {
-        dataRequestId = join.getSourceMetaDataRequestId();
+    if (dynamicProp && dynamicProp.supportsFieldMeta()) {
+      let dataRequestId;
+      if (dynamicProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE) {
+        dataRequestId = SOURCE_META_ID_ORIGIN;
+      } else {
+        const join = this._layer.getValidJoins().find(join => {
+          const matchingField = join.getRightJoinSource().getMetricFieldForName(fieldName);
+          return !!matchingField;
+        });
+        if (join) {
+          dataRequestId = join.getSourceMetaDataRequestId();
+        }
       }
-    }
 
-    if (dataRequestId) {
-      const styleMetaDataRequest = this._layer._findDataRequestForSource(dataRequestId);
-      if (styleMetaDataRequest && styleMetaDataRequest.hasData()) {
-        const data = styleMetaDataRequest.getData();
-        const field = dynamicProp.getField();
-        const realFieldName = field.getESDocFieldName ? field.getESDocFieldName() : field.getName();
-        const stats = data[realFieldName];
-        if (stats) {
-          const min = Math.max(stats.min, stats.std_deviation_bounds.lower);
-          const max = Math.min(stats.max, stats.std_deviation_bounds.upper);
-          return {
-            min,
-            max,
-            delta: max - min,
-          };
+      if (dataRequestId) {
+        const styleMetaDataRequest = this._layer._findDataRequestForSource(dataRequestId);
+        if (styleMetaDataRequest && styleMetaDataRequest.hasData()) {
+          const data = styleMetaDataRequest.getData();
+          const field = dynamicProp.getField();
+          const realFieldName = field.getESDocFieldName ? field.getESDocFieldName() : field.getName();
+          const stats = data[realFieldName];
+          if (stats) {
+            const min = Math.max(stats.min, stats.std_deviation_bounds.lower);
+            const max = Math.min(stats.max, stats.std_deviation_bounds.upper);
+            return {
+              min,
+              max,
+              delta: max - min,
+            };
+          }
         }
       }
     }
