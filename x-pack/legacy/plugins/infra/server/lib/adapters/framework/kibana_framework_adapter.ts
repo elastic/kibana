@@ -29,6 +29,7 @@ import {
   KibanaRequest,
   RequestHandlerContext,
   KibanaResponseFactory,
+  RouteMethod,
 } from '../../../../../../../../src/core/server';
 import { RequestHandler } from '../../../../../../../../src/core/server';
 import { InfraConfig } from '../../../../../../../plugins/infra/server';
@@ -47,19 +48,21 @@ export class KibanaFramework {
   public registerRoute<
     params extends ObjectType = any,
     query extends ObjectType = any,
-    body extends ObjectType = any
-  >(config: InfraRouteConfig<params, query, body>, handler: RequestHandler<params, query, body>) {
+    body extends ObjectType = any,
+    method extends RouteMethod = any
+  >(
+    config: InfraRouteConfig<params, query, body, method>,
+    handler: RequestHandler<params, query, body>
+  ) {
     const defaultOptions = {
       tags: ['access:infra'],
-    };
-    const routeOptions = {
-      ...defaultOptions,
-      ...(config.options ? config.options : {}),
     };
     const routeConfig = {
       path: config.path,
       validate: config.validate,
-      options: routeOptions,
+      // Currently we have no use of custom options beyond tags, this can be extended
+      // beyond defaultOptions if it's needed.
+      options: defaultOptions,
     };
     switch (config.method) {
       case 'get':
