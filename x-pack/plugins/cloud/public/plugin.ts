@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
+import { ELASTIC_SUPPORT_LINK } from '../common/constants';
 
 interface CloudConfigType {
   id?: string;
@@ -29,5 +30,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     };
   }
 
-  public start() {}
+  public start(coreStart: CoreStart) {
+    coreStart.chrome.setHelpSupportUrl(ELASTIC_SUPPORT_LINK);
+  }
 }
