@@ -244,7 +244,7 @@ export class ESSearchSource extends AbstractESSource {
       totalEntities: {
         cardinality: {
           field: topHitsSplitField,
-          precision_threshold: 10,
+          precision_threshold: 1,
         }
       },
       entitySplit: {
