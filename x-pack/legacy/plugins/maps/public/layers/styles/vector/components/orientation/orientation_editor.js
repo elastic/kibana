@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { StaticDynamicStyleRow } from '../../../components/static_dynamic_style_row';
+import { StaticDynamicStyleRow } from '../static_dynamic_style_row';
 import { DynamicOrientationSelection } from './dynamic_orientation_selection';
 import { StaticOrientationSelection } from './static_orientation_selection';
 import { i18n } from '@kbn/i18n';
