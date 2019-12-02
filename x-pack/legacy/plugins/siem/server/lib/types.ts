@@ -23,7 +23,7 @@ import { Note } from './note/saved_object';
 import { PinnedEvent } from './pinned_event/saved_object';
 import { Timeline } from './timeline/saved_object';
 import { TLS } from './tls';
-import { RuleAlertParamsRest } from './detection_engine/alerts/types';
+import { SearchTypes, OutputRuleAlertRest } from './detection_engine/alerts/types';
 
 export * from './hosts';
 
@@ -66,7 +66,7 @@ export interface SiemContext {
 }
 
 export interface Signal {
-  rule: Partial<RuleAlertParamsRest>;
+  rule: Partial<OutputRuleAlertRest>;
   parent: {
     id: string;
     type: string;
@@ -74,10 +74,13 @@ export interface Signal {
     depth: number;
   };
   original_time: string;
+  original_event?: SearchTypes;
+  status: 'open' | 'closed';
 }
 
 export interface SignalHit {
   '@timestamp': string;
+  event: object;
   signal: Partial<Signal>;
 }
 
