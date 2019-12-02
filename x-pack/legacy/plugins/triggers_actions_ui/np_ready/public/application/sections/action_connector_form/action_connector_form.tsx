@@ -44,7 +44,7 @@ export const ActionConnectorForm = ({
     actionTypeRegistry,
   } = useAppDependencies();
 
-  const { loadActions } = useContext(ActionsConnectorsContext);
+  const { reloadConnectors } = useContext(ActionsConnectorsContext);
 
   // hooks
   const [{ connector }, dispatch] = useReducer(connectorReducer, { connector: initialAction });
@@ -70,6 +70,9 @@ export const ActionConnectorForm = ({
     body: { message: string; error: string };
   } | null>(null);
 
+  const actionTypeRegisterd = actionTypeRegistry.get(initialAction.actionTypeId);
+  if (actionTypeRegisterd === null) return null;
+
   function validateBaseProperties(actionObject: ActionConnector) {
     const validationResult = { errors: {} };
     const errors = {
@@ -89,8 +92,6 @@ export const ActionConnectorForm = ({
     return validationResult;
   }
 
-  const actionTypeRegisterd = actionTypeRegistry.get(initialAction.actionTypeId);
-  if (actionTypeRegisterd === null) return null;
   const FieldsComponent = actionTypeRegisterd.actionConnectorFields;
   const errors = {
     ...actionTypeRegisterd.validateConnector(connector).errors,
@@ -98,38 +99,30 @@ export const ActionConnectorForm = ({
   } as IErrorObject;
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
 
-  async function onActionSave(): Promise<any> {
+  async function onActionConnectorSave(): Promise<any> {
     try {
-      let newAction;
+      let savingMessage;
+      let savedConnector;
       if (connector.id === undefined) {
-        newAction = await createActionConnector({ http, connector });
-        toastNotifications.addSuccess(
-          i18n.translate(
-            'xpack.triggersActionsUI.sections.actionConnectorForm.saveSuccessNotificationText',
-            {
-              defaultMessage: "Created '{actionName}'",
-              values: {
-                actionName: newAction.description,
-              },
-            }
-          )
-        );
+        savedConnector = await createActionConnector({ http, connector });
+        savingMessage = 'Updated';
       } else {
-        newAction = await updateActionConnector({ http, connector, id: connector.id });
-        toastNotifications.addSuccess(
-          i18n.translate(
-            'xpack.triggersActionsUI.sections.actionConnectorForm.saveSuccessNotificationText',
-            {
-              defaultMessage: "Updated '{actionName}'",
-              values: {
-                actionName: newAction.description,
-              },
-            }
-          )
-        );
+        savedConnector = await updateActionConnector({ http, connector, id: connector.id });
+        savingMessage = 'Created';
       }
-
-      return newAction;
+      toastNotifications.addSuccess(
+        i18n.translate(
+          'xpack.triggersActionsUI.sections.actionConnectorForm.saveSuccessNotificationText',
+          {
+            defaultMessage: "{savingMessage} '{connectorName}'",
+            values: {
+              connectorName: savedConnector.description,
+              savingMessage,
+            },
+          }
+        )
+      );
+      return savedConnector;
     } catch (error) {
       return {
         error,
@@ -254,13 +247,13 @@ export const ActionConnectorForm = ({
               isLoading={isSaving}
               onClick={async () => {
                 setIsSaving(true);
-                const savedAction = await onActionSave();
+                const savedAction = await onActionConnectorSave();
                 setIsSaving(false);
                 if (savedAction && savedAction.error) {
                   return setServerError(savedAction.error);
                 }
                 setFlyoutVisibility(false);
-                loadActions();
+                reloadConnectors();
               }}
             >
               <FormattedMessage

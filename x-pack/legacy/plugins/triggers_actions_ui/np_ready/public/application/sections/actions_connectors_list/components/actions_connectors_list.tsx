@@ -232,7 +232,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
             editFlyoutVisible,
             setEditFlyoutVisibility,
             actionTypesIndex,
-            loadActions,
+            reloadConnectors: loadActions,
           }}
         >
           <EuiInMemoryTable

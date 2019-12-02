@@ -14,5 +14,5 @@ export interface IActionsConnectorsContext {
   setEditFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
   setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
   actionTypesIndex: Record<string, ActionType> | undefined;
-  loadActions: () => Promise<void>;
+  reloadConnectors: () => Promise<void>;
 }
