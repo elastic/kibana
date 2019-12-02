@@ -141,7 +141,7 @@ export default function(kibana: any) {
 
       server.route(
         createProxyRoute({
-          baseUrl: head(legacyEsConfig.hosts),
+          hosts: legacyEsConfig.hosts,
           pathFilters: proxyPathFilters,
           getConfigForReq(req: any, uri: any) {
             const filteredHeaders = filterHeaders(

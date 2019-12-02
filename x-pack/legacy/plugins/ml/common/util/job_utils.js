@@ -12,7 +12,7 @@ import numeral from '@elastic/numeral';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
 import { parseInterval } from './parse_interval';
 import { maxLengthValidator } from './validators';
-import { CREATED_BY_LABEL } from '../../public/jobs/new_job/common/job_creator/util/constants';
+import { CREATED_BY_LABEL } from '../../public/application/jobs/new_job/common/job_creator/util/constants';
 
 // work out the default frequency based on the bucket_span in seconds
 export function calculateDatafeedFrequencyDefaultSeconds(bucketSpanSeconds) {

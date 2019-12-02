@@ -74,14 +74,17 @@ export interface LegacyServiceStartDeps {
 }
 
 /** @internal */
-export interface LegacyServiceSetup {
+export interface LegacyServiceDiscoverPlugins {
   pluginSpecs: LegacyPluginSpec[];
   uiExports: SavedObjectsLegacyUiExports;
   pluginExtendedConfig: Config;
 }
 
 /** @internal */
-export class LegacyService implements CoreService<LegacyServiceSetup> {
+export type ILegacyService = Pick<LegacyService, keyof LegacyService>;
+
+/** @internal */
+export class LegacyService implements CoreService {
   /** Symbol to represent the legacy platform as a fake "plugin". Used by the ContextService */
   public readonly legacyId = Symbol();
   private readonly log: Logger;
@@ -111,9 +114,7 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
       .pipe(map(rawConfig => new HttpConfig(rawConfig, coreContext.env)));
   }
 
-  public async setup(setupDeps: LegacyServiceSetupDeps) {
-    this.setupDeps = setupDeps;
-
+  public async discoverPlugins(): Promise<LegacyServiceDiscoverPlugins> {
     this.update$ = this.coreContext.configService.getConfig$().pipe(
       tap(config => {
         if (this.kbnServer !== undefined) {
@@ -162,6 +163,16 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
       uiExports,
       pluginExtendedConfig,
     };
+  }
+
+  public async setup(setupDeps: LegacyServiceSetupDeps) {
+    this.log.debug('setting up legacy service');
+    if (!this.legacyRawConfig || !this.legacyPlugins || !this.settings) {
+      throw new Error(
+        'Legacy service has not discovered legacy plugins yet. Ensure LegacyService.discoverPlugins() is called before LegacyService.setup()'
+      );
+    }
+    this.setupDeps = setupDeps;
   }
 
   public async start(startDeps: LegacyServiceStartDeps) {
@@ -249,11 +260,19 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
         basePath: setupDeps.core.http.basePath,
         isTlsEnabled: setupDeps.core.http.isTlsEnabled,
       },
+      savedObjects: {
+        setClientFactory: setupDeps.core.savedObjects.setClientFactory,
+        addClientWrapper: setupDeps.core.savedObjects.addClientWrapper,
+        createInternalRepository: setupDeps.core.savedObjects.createInternalRepository,
+        createScopedRepository: setupDeps.core.savedObjects.createScopedRepository,
+      },
       uiSettings: {
         register: setupDeps.core.uiSettings.register,
       },
     };
-    const coreStart: CoreStart = {};
+    const coreStart: CoreStart = {
+      savedObjects: { getScopedClient: startDeps.core.savedObjects.getScopedClient },
+    };
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const KbnServer = require('../../../legacy/server/kbn_server');
@@ -278,7 +297,6 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
           hapiServer: setupDeps.core.http.server,
           kibanaMigrator: startDeps.core.savedObjects.migrator,
           uiPlugins: setupDeps.core.plugins.uiPlugins,
-          uiPluginConfigs: setupDeps.core.plugins.uiPluginConfigs,
           elasticsearch: setupDeps.core.elasticsearch,
           uiSettings: setupDeps.core.uiSettings,
           savedObjectsClientProvider: startDeps.core.savedObjects.clientProvider,
