@@ -6,10 +6,10 @@
 
 import { isEqual, isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useState, useEffect } from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
 import { Subscription } from 'rxjs';
 
 import {
+  IIndexPattern,
   Query,
   esFilters,
   FilterManager,
@@ -38,7 +38,7 @@ export interface QueryBarTimelineComponentProps {
   from: number;
   fromStr: string;
   kqlMode: KqlMode;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   isRefreshPaused: boolean;
   refreshInterval: number;
   savedQueryId: string | null;
