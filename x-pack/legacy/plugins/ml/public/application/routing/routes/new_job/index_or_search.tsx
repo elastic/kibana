@@ -8,7 +8,7 @@ import React, { FC } from 'react';
 import { MlRoute, PageLoader } from '../../router';
 import { useResolver } from '../../router';
 import { basicResolvers } from '../../resolvers';
-import { Page } from '../../../jobs/new_job/pages/index_or_search';
+import { Page, preConfiguredJobRedirect } from '../../../jobs/new_job/pages/index_or_search';
 
 export const indexOrSearchRoute: MlRoute = {
   path: '/jobs/new_job/step/index_or_search',
@@ -25,7 +25,10 @@ export const dataVizIndexOrSearchRoute: MlRoute = {
 };
 
 const PageWrapper: FC<{ config: any; nextStepPath: string }> = ({ config, nextStepPath }) => {
-  const { context } = useResolver(undefined, config, basicResolvers);
+  const { context } = useResolver(undefined, config, {
+    ...basicResolvers,
+    preConfiguredJobRedirect,
+  });
   return (
     <PageLoader context={context}>
       <Page {...{ nextStepPath }} />
