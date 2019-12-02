@@ -53,6 +53,7 @@ beforeEach(() => {
     maxPayload: new ByteSizeValue(1024),
     port: 10002,
     ssl: { enabled: false },
+    compression: { enabled: true },
   } as HttpConfig;
 
   configWithSSL = {
@@ -614,6 +615,90 @@ test('exposes route details of incoming request to a route handler', async () =>
         tags: [],
       },
     });
+});
+
+describe('conditional compression', () => {
+  async function setupServer(innerConfig: HttpConfig) {
+    const { registerRouter, server: innerServer } = await server.setup(innerConfig);
+    const router = new Router('', logger, enhanceWithContext);
+    // we need the large body here so that compression would normally be used
+    const largeRequest = {
+      body: 'hello'.repeat(500),
+      headers: { 'Content-Type': 'text/html; charset=UTF-8' },
+    };
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok(largeRequest));
+    registerRouter(router);
+    await server.start();
+    return innerServer.listener;
+  }
+
+  test('with `compression.enabled: true`', async () => {
+    const listener = await setupServer(config);
+
+    const response = await supertest(listener)
+      .get('/')
+      .set('accept-encoding', 'gzip');
+
+    expect(response.header).toHaveProperty('content-encoding', 'gzip');
+  });
+
+  test('with `compression.enabled: false`', async () => {
+    const listener = await setupServer({
+      ...config,
+      compression: { enabled: false },
+    });
+
+    const response = await supertest(listener)
+      .get('/')
+      .set('accept-encoding', 'gzip');
+
+    expect(response.header).not.toHaveProperty('content-encoding');
+  });
+
+  describe('with defined `compression.referrerWhitelist`', () => {
+    let listener: Server;
+    beforeEach(async () => {
+      listener = await setupServer({
+        ...config,
+        compression: { enabled: true, referrerWhitelist: ['foo'] },
+      });
+    });
+
+    test('enables compression for no referer', async () => {
+      const response = await supertest(listener)
+        .get('/')
+        .set('accept-encoding', 'gzip');
+
+      expect(response.header).toHaveProperty('content-encoding', 'gzip');
+    });
+
+    test('enables compression for whitelisted referer', async () => {
+      const response = await supertest(listener)
+        .get('/')
+        .set('accept-encoding', 'gzip')
+        .set('referer', 'http://foo:1234');
+
+      expect(response.header).toHaveProperty('content-encoding', 'gzip');
+    });
+
+    test('disables compression for non-whitelisted referer', async () => {
+      const response = await supertest(listener)
+        .get('/')
+        .set('accept-encoding', 'gzip')
+        .set('referer', 'http://bar:1234');
+
+      expect(response.header).not.toHaveProperty('content-encoding');
+    });
+
+    test('disables compression for invalid referer', async () => {
+      const response = await supertest(listener)
+        .get('/')
+        .set('accept-encoding', 'gzip')
+        .set('referer', 'http://asdf$%^');
+
+      expect(response.header).not.toHaveProperty('content-encoding');
+    });
+  });
 });
 
 test('exposes route details of incoming request to a route handler (POST + payload options)', async () => {

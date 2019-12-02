@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from './legacy_dependencies_plugin';
+export { SavedQueryManagementComponent } from './saved_query_management_component';
