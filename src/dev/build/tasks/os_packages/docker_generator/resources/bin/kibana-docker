@@ -42,7 +42,6 @@ kibana_vars=(
     kibana.index
     logging.dest
     logging.quiet
-    logging.rotate
     logging.rotate.enabled
     logging.rotate.everyBytes
     logging.rotate.keepFiles
