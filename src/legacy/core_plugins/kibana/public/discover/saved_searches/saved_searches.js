@@ -22,7 +22,6 @@ import { uiModules } from 'ui/modules';
 import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
 
-
 // Register this service with the saved object registry so it can be
 // edited by the object editor.
 savedObjectManagementRegistry.register({
@@ -40,9 +39,7 @@ export function createSavedSearchesService(Private, SavedSearch) {
     nouns: 'saved searches',
   };
 
-  savedSearchLoader.urlFor = function (id) {
-    return `/discover/${encodeURIComponent(id)}`;
-  };
+  savedSearchLoader.urlFor = id => `#/discover/${encodeURIComponent(id)}`;
 
   return savedSearchLoader;
 }
