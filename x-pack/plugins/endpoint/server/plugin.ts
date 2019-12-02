@@ -5,7 +5,6 @@
  */
 
 import { Plugin, CoreSetup } from 'kibana/server';
-import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 import { addRoutes } from './routes';
 
 export type EndpointPluginStart = void;
