@@ -138,10 +138,20 @@ export class HashedItemStore implements IStorage<string, boolean> {
 
   // Store indexed items in descending order by touched (oldest first, newest last). We'll use
   // this to remove older items when we run out of storage space.
+  private ensuredSorting = false;
   private getIndexedItems(): IndexedItem[] {
     // Restore a previously persisted index
     const persistedItemIndex = this.storage.getItem(HashedItemStore.PERSISTED_INDEX_KEY);
-    return persistedItemIndex ? sortBy(JSON.parse(persistedItemIndex) || [], 'touched') : [];
+    let items = persistedItemIndex ? JSON.parse(persistedItemIndex) || [] : [];
+
+    // ensure sorting once, as sorting all indexed items on each get is a performance hit
+    if (!this.ensuredSorting) {
+      items = sortBy(items, 'touched');
+      this.setIndexedItems(items);
+      this.ensuredSorting = true;
+    }
+
+    return items;
   }
 
   private setIndexedItems(items: IndexedItem[]) {
