@@ -117,7 +117,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     };
 
     _unsubscribeAll = new Subject();
-
     // make sure dragSelect is only available if the mouse pointer is actually over a swimlane
     disableDragSelectOnMouseLeave = true;
 

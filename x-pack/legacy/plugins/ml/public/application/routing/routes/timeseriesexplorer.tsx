@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useEffect } from 'react';
 import { decode } from 'rison-node';
 import moment from 'moment';
+import { Subscription } from 'rxjs';
 
 // @ts-ignore
 import queryString from 'query-string';
@@ -17,6 +18,9 @@ import { basicResolvers } from '../resolvers';
 import { TimeSeriesExplorer } from '../../timeseriesexplorer';
 import { mlJobService } from '../../services/job_service';
 import { APP_STATE_ACTION } from '../../timeseriesexplorer/timeseriesexplorer_constants';
+import { subscribeAppStateToObservable } from '../../util/app_state_utils';
+import { interval$ } from '../../components/controls/select_interval';
+import { severity$ } from '../../components/controls/select_severity';
 
 export const timeSeriesExplorerRoute: MlRoute = {
   path: '/timeseriesexplorer',
@@ -38,6 +42,7 @@ const PageWrapper: FC<{ location: any; config: any }> = ({ location, config }) =
     appState.mlTimeSeriesExplorer = {};
     globalState.fetch = () => {};
     globalState.on = () => {};
+    globalState.off = () => {};
     globalState.save = () => {};
   } catch (error) {
     // eslint-disable-next-line no-console
@@ -45,10 +50,37 @@ const PageWrapper: FC<{ location: any; config: any }> = ({ location, config }) =
     window.location.href = '#data_frame_analytics';
   }
 
+  return (
+    <PageLoader context={context}>
+      <TimeSeriesExplorerWrapper {...{ appState, globalState, config }} />
+    </PageLoader>
+  );
+};
+
+class AppState {
+  fetch() {}
+  on() {}
+  off() {}
+  save() {}
+}
+
+const TimeSeriesExplorerWrapper: FC<{ globalState: any; appState: any; config: any }> = ({
+  globalState,
+  appState,
+  config,
+}) => {
   timefilter.setTime({
     from: globalState.time.from,
     to: globalState.time.to,
   });
+
+  const subscriptions = new Subscription();
+  subscriptions.add(
+    subscribeAppStateToObservable(AppState, 'mlSelectInterval', interval$, () => {})
+  );
+  subscriptions.add(
+    subscribeAppStateToObservable(AppState, 'mlSelectSeverity', severity$, () => {})
+  );
 
   const appStateHandler = (action: string, payload: any) => {
     switch (action) {
@@ -87,19 +119,23 @@ const PageWrapper: FC<{ location: any; config: any }> = ({ location, config }) =
     }
   };
 
+  useEffect(() => {
+    return () => {
+      subscriptions.unsubscribe();
+    };
+  });
+
   const tzConfig = config.get('dateFormat:tz');
   const dateFormatTz = tzConfig !== 'Browser' ? tzConfig : moment.tz.guess();
 
   return (
-    <PageLoader context={context}>
-      <TimeSeriesExplorer
-        {...{
-          appStateHandler,
-          dateFormatTz,
-          globalState,
-          timefilter,
-        }}
-      />
-    </PageLoader>
+    <TimeSeriesExplorer
+      {...{
+        appStateHandler,
+        dateFormatTz,
+        globalState,
+        timefilter,
+      }}
+    />
   );
 };

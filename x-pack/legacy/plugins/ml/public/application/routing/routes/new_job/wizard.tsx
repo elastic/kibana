@@ -14,6 +14,7 @@ import { MlRoute, PageLoader } from '../../router';
 import { Page } from '../../../jobs/new_job/pages/new_job';
 import { JOB_TYPE } from '../../../jobs/new_job/common/job_creator/util/constants';
 import { mlJobService } from '../../../services/job_service';
+import { loadNewJobCapabilities } from '../../../services/new_job_capabilities_service';
 
 export const singleMetricRoute: MlRoute = {
   path: '/jobs/new_job/single_metric',
@@ -51,6 +52,7 @@ const PageWrapper: FC<{ location: any; config: any; jobType: JOB_TYPE }> = ({
   const { index } = queryString.parse(location.search);
   const { context, results } = useResolver(index, config, {
     ...basicResolvers,
+    jobCaps: () => loadNewJobCapabilities(index, ''),
     existingJobsAndGroups: mlJobService.getJobAndGroupIds,
   });
 

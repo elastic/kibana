@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedSearchLoader } from 'src/legacy/core_plugins/kibana/public/discover/types';
+import { IndexPattern } from 'ui/index_patterns';
+import { start as data } from '../../../../../../../src/legacy/core_plugins/data/public/legacy';
 
 import {
   Field,
@@ -23,14 +24,12 @@ import { ml } from './ml_api_service';
 
 // called in the angular routing resolve block to initialize the
 // newJobCapsService with the currently selected index pattern
-export function loadNewJobCapabilities(
-  indexPatterns: IndexPatternsContract,
-  savedSearches: SavedSearchLoader,
-  $route: Record<string, any>
-) {
+export function loadNewJobCapabilities(indexPatternId: string, savedSearchId: string) {
+  const indexPatterns = data.indexPatterns.indexPatterns;
+  const savedSearches = data.indexPatterns.indexPatterns;
   return new Promise(async (resolve, reject) => {
     // get the index pattern id or saved search id from the url params
-    const { index: indexPatternId, savedSearchId } = $route.current.params;
+    // const { index: indexPatternId, savedSearchId } = $route.current.params;
 
     if (indexPatternId !== undefined) {
       // index pattern is being used
