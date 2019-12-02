@@ -5,7 +5,6 @@
  */
 
 import { createDatasource } from './index';
-
 import { PluginContext } from '../plugin';
 import { Request, ResponseToolkit } from '../types';
 import { getClient } from '../saved_objects';
