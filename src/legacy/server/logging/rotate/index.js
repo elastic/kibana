@@ -30,7 +30,7 @@ export async function setupLoggingRotate(server, config) {
 
   // We don't want to run logging rotate server if
   // we are not logging to a file
-  if (config.get('logging.rotate.enabled') && config.get('logging.dest') === 'stdout') {
+  if (config.get('logging.dest') === 'stdout') {
     server.log(
       ['warning', 'logging:rotate'],
       'Log rotation is enabled but logging.dest is configured for stdout. Set logging.dest to a file for this setting to take effect.'
