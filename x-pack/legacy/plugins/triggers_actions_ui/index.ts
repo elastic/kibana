@@ -10,7 +10,7 @@ import { resolve } from 'path';
 
 export function triggersActionsUI(kibana: any) {
   return new kibana.Plugin({
-    id: 'triggersActionsUI',
+    id: 'triggers_actions_ui',
     configPrefix: 'xpack.triggers_actions_ui',
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana'],
