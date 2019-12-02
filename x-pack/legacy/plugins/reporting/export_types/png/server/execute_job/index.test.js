@@ -27,7 +27,7 @@ beforeEach(() => {
     'server.port': 5601
   };
   mockServer = {
-    expose: () => { },
+    expose: () => { }, // NOTE: this is for oncePerServer
     config: memoize(() => ({ get: jest.fn() })),
     info: {
       protocol: 'http',
