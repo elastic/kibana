@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreSetup, CoreStart } from 'kibana/server';
+import { Plugin, CoreSetup } from 'kibana/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 import { addRoutes } from './routes';
 
