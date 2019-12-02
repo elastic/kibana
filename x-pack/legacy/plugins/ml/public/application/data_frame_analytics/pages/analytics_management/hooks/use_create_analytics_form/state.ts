@@ -46,6 +46,7 @@ export interface State {
     dependentVariable: DependentVariable;
     dependentVariableFetchFail: boolean;
     dependentVariableOptions: Array<{ label: DependentVariable }> | [];
+    description: string;
     destinationIndex: EsIndexName;
     destinationIndexNameExists: boolean;
     destinationIndexNameEmpty: boolean;
@@ -89,6 +90,7 @@ export const getInitialState = (): State => ({
     dependentVariable: '',
     dependentVariableFetchFail: false,
     dependentVariableOptions: [],
+    description: '',
     destinationIndex: '',
     destinationIndexNameExists: false,
     destinationIndexNameEmpty: true,
