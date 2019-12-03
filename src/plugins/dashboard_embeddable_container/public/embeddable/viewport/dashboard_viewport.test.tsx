@@ -173,6 +173,41 @@ test('renders exit full screen button when in full screen mode', async () => {
   component.unmount();
 });
 
+test('renders exit full screen button when in full screen mode and empty screen', async () => {
+  const { props, options } = getProps();
+  const emptyScreenProps: DashboardEmptyScreenProps = {
+    onLinkClick: jest.fn(),
+    showLinkToVisualize: true,
+  };
+  props.container.updateInput({ isEmptyState: true, isFullScreenMode: true, emptyScreenProps });
+  const component = mount(
+    <I18nProvider>
+      <KibanaContextProvider services={options}>
+        <DashboardViewport {...props} />
+      </KibanaContextProvider>
+    </I18nProvider>
+  );
+  expect(
+    (component
+      .find('.dshDashboardEmptyScreen')
+      .childAt(0)
+      .type() as any).name
+  ).toBe('ExitFullScreenButton');
+
+  props.container.updateInput({ isFullScreenMode: false });
+  component.update();
+  await nextTick();
+
+  expect(
+    (component
+      .find('.dshDashboardEmptyScreen')
+      .childAt(0)
+      .type() as any).name
+  ).not.toBe('ExitFullScreenButton');
+
+  component.unmount();
+});
+
 test('DashboardViewport unmount unsubscribes', async done => {
   const { props, options } = getProps();
   const component = mount(

@@ -100,10 +100,17 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
 
   private renderEmptyScreen() {
     const emptyScreenProps = this.props.container.getInput().emptyScreenProps;
-    if (!emptyScreenProps) {
-      return null;
-    }
-    return <DashboardEmptyScreen {...emptyScreenProps} />;
+    const { isFullScreenMode } = this.state;
+    return (
+      <div className="dshDashboardEmptyScreen">
+        {isFullScreenMode && (
+          <this.context.services.ExitFullScreenButton
+            onExitFullScreenMode={this.onExitFullScreenMode}
+          />
+        )}
+        {emptyScreenProps && <DashboardEmptyScreen {...emptyScreenProps} />}
+      </div>
+    );
   }
 
   private renderContainerScreen() {
@@ -129,6 +136,11 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
 
   public render() {
     const { isEmptyState } = this.state;
-    return <div>{isEmptyState ? this.renderEmptyScreen() : this.renderContainerScreen()}</div>;
+    return (
+      <React.Fragment>
+        {isEmptyState ? this.renderEmptyScreen() : null}
+        {this.renderContainerScreen()}
+      </React.Fragment>
+    );
   }
 }
