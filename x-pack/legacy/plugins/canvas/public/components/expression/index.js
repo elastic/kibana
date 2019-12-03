@@ -55,8 +55,11 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 };
 
 const expressionLifecycle = lifecycle({
-  componentWillReceiveProps({ formState, setFormState, expression }) {
-    if (this.props.expression !== expression && expression !== formState.expression) {
+  componentDidUpdate(prevProps) {
+    const prevExpression = prevProps.expression;
+
+    const { expression, formState, setFormState } = this.props;
+    if (expression !== prevExpression && expression !== formState.expression) {
       setFormState({
         expression,
         dirty: false,
