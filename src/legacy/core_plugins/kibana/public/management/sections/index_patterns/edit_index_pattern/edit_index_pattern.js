@@ -191,7 +191,7 @@ uiModules
   .get('apps/management')
   .controller('managementIndexPatternsEdit', function (
     $scope, $location, $route, Promise, config, indexPatterns, Private, confirmModal) {
-    const $stateContainer = createStore(
+    const store = createStore(
       {
         tab: 'indexedFields',
         fieldFilter: '',
@@ -200,10 +200,10 @@ uiModules
     );
     Object.defineProperty($scope, 'state', {
       get() {
-        return $stateContainer.get();
+        return store.get();
       },
     });
-    const stateContainerSub = $stateContainer.state$.subscribe(s => {
+    const stateContainerSub = store.state$.subscribe(s => {
       handleTabChange($scope, s.tab);
       $scope.fieldFilter = s.fieldFilter;
       handleFieldFilterChange(s.fieldFilter);
@@ -213,13 +213,16 @@ uiModules
         $scope.$apply();
       }
     });
-    handleTabChange($scope, $stateContainer.get().tab);
+    handleTabChange($scope, store.get().tab);
 
     $scope.$$postDigest(() => {
+      // just an artificial example of advanced syncState util setup
+      // 1. different strategies are used for different slices
+      // 2. to/from storage mappers are used to shorten state keys
       $scope.destroyStateSync = syncState([
         {
           syncKey: '_a',
-          state: $stateContainer,
+          store,
           initialTruthSource: InitialTruthSource.Storage,
           syncStrategy: SyncStrategy.Url,
           toStorageMapper: state => ({ t: state.tab }),
@@ -227,7 +230,7 @@ uiModules
         },
         {
           syncKey: '_b',
-          state: $stateContainer,
+          store,
           initialTruthSource: InitialTruthSource.Storage,
           syncStrategy: config.get('state:storeInSessionStorage') ? SyncStrategy.HashedUrl : SyncStrategy.Url,
           toStorageMapper: state => ({ f: state.fieldFilter, i: state.indexedFieldTypeFilter, l: state.scriptedFieldLanguageFilter }),
@@ -288,11 +291,11 @@ uiModules
     };
 
     $scope.changeFilter = function (filter, val) {
-      $stateContainer.set({ ...$stateContainer.get(), [filter]: val || '' }); // null causes filter to check for null explicitly
+      store.set({ ...store.get(), [filter]: val || '' }); // null causes filter to check for null explicitly
     };
 
     $scope.changeTab = function (obj) {
-      $stateContainer.set({ ...$stateContainer.get(), tab: obj.index });
+      store.set({ ...store.get(), tab: obj.index });
     };
 
     $scope.$watchCollection('indexPattern.fields', function () {
@@ -365,8 +368,8 @@ uiModules
     };
 
     $scope.onFieldFilterInputChange = function (fieldFilter) {
-      $stateContainer.set({
-        ...$stateContainer.get(),
+      store.set({
+        ...store.get(),
         fieldFilter,
       });
     };
