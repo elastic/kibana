@@ -24,6 +24,8 @@ import {
   EuiFormRow,
   EuiComboBox,
   EuiCard,
+  EuiKeyPadMenu,
+  EuiKeyPadMenuItem,
   EuiTabs,
   EuiTab,
   EuiLink,
@@ -293,30 +295,28 @@ export const AlertAdd = ({ refreshList }: Props) => {
 
   const alertTypeNodes = alertTypeRegistry.list().map(function(item, index) {
     return (
-      <EuiFlexItem key={index}>
-        <EuiCard
-          icon={<EuiIcon size="xl" type={item.iconClass} />}
-          title={item.name}
-          description={''}
-          onClick={() => {
-            setAlertProperty('alertTypeId', item.id);
-            setAlertType(item.alertType);
-          }}
-        />
-      </EuiFlexItem>
+      <EuiKeyPadMenuItem
+        key={index}
+        label={item.name}
+        onClick={() => {
+          setAlertProperty('alertTypeId', item.id);
+          setAlertType(item.alertType);
+        }}
+      >
+        <EuiIcon size="xl" type={item.iconClass} />
+      </EuiKeyPadMenuItem>
     );
   });
 
   const actionTypeNodes = actionTypeRegistry.list().map(function(item, index) {
     return (
-      <EuiFlexItem key={index}>
-        <EuiCard
-          icon={<EuiIcon size="xl" type={item.iconClass} />}
-          title={actionTypesIndex ? actionTypesIndex[item.id].name : item.name}
-          description={''}
-          onClick={() => addActionType(item.actionType)}
-        />
-      </EuiFlexItem>
+      <EuiKeyPadMenuItem
+        key={index}
+        label={actionTypesIndex ? actionTypesIndex[item.id].name : item.name}
+        onClick={() => addActionType(item.actionType)}
+      >
+        <EuiIcon size="xl" type={item.iconClass} />
+      </EuiKeyPadMenuItem>
     );
   });
 
@@ -532,10 +532,10 @@ export const AlertAdd = ({ refreshList }: Props) => {
             />
           </h5>
         </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiFlexGrid gutterSize="m" columns={3}>
+        <EuiSpacer />
+        <EuiFlexGroup gutterSize="s" wrap>
           {alertTypeNodes}
-        </EuiFlexGrid>
+        </EuiFlexGroup>
       </Fragment>
     );
   }
@@ -574,7 +574,13 @@ export const AlertAdd = ({ refreshList }: Props) => {
 
   return (
     <EuiPortal>
-      <EuiFlyout ownFocus onClose={closeFlyout} aria-labelledby="flyoutAlertAddTitle" size="m">
+      <EuiFlyout
+        ownFocus
+        onClose={closeFlyout}
+        aria-labelledby="flyoutAlertAddTitle"
+        size="m"
+        maxWidth={620}
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
             <h3 id="flyoutTitle">
@@ -757,10 +763,10 @@ export const AlertAdd = ({ refreshList }: Props) => {
                     />
                   </h5>
                 </EuiTitle>
-                <EuiSpacer size="s" />
-                <EuiFlexGrid gutterSize="m" columns={3}>
+                <EuiSpacer />
+                <EuiFlexGroup gutterSize="s" wrap>
                   {actionTypeNodes}
-                </EuiFlexGrid>
+                </EuiFlexGroup>
               </Fragment>
             ) : null}
           </EuiForm>
