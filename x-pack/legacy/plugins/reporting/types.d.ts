@@ -289,14 +289,16 @@ export interface ESQueueWorkerOptions {
   intervalErrorMultiplier: number;
 }
 
-// workerFn is a generic for ImmediateExecuteFn<JobParamsType> | ESQueueWorkerExecuteFn<JobDocPayloadType>,
+// GenericWorkerFn is a generic for ImmediateExecuteFn<JobParamsType> | ESQueueWorkerExecuteFn<JobDocPayloadType>,
+type GenericWorkerFn<JobParamsType> = (
+  jobSource: JobSource<JobParamsType>,
+  ...workerRestArgs: any[]
+) => void | Promise<JobDocOutputExecuted>;
+
 export interface ESQueueInstance<JobParamsType, JobDocPayloadType> {
   registerWorker: (
     pluginId: string,
-    workerFn: (
-      jobSource: JobSource<JobParamsType>,
-      ...workerRestArgs: any[]
-    ) => void | Promise<JobDocOutputExecuted>,
+    workerFn: GenericWorkerFn<JobParamsType>,
     workerOptions: ESQueueWorkerOptions
   ) => ESQueueWorker;
 }
