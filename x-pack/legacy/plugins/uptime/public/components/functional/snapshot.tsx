@@ -12,51 +12,26 @@ import { DonutChart } from './charts';
 import { ChartWrapper } from './charts/chart_wrapper';
 import { SnapshotHeading } from './snapshot_heading';
 import { useUrlParams } from '../../hooks';
-import { SnapshotState } from '../../state/reducers/snapshot';
 import { UptimeSettingsContext, UptimeRefreshContext } from '../../contexts';
-import { fetchSnapshotCount } from '../../state/api';
+import { fetchSnapshotCount, SnapshotApiRequest } from '../../state/api';
 
 const SNAPSHOT_CHART_WIDTH = 144;
 const SNAPSHOT_CHART_HEIGHT = 144;
 
-/**
- * Props expected from parent components.
- */
-interface OwnProps {
-  dateRangeStart?: string;
-  dateRangeEnd?: string;
-  filters?: string;
-  /**
-   * Height is needed, since by default charts takes height of 100%
-   */
-  height?: string;
-  statusFilter?: string;
-}
-
-/**
- * Props given by the Redux store based on action input.
- */
-interface StoreProps {
+export interface SnapshotState {
   count: SnapshotType;
-  lastRefresh: number;
+  errors: any[];
   loading: boolean;
 }
 
-/**
- * Contains functions that will dispatch actions used
- * for this component's lifecyclel
- */
-interface DispatchProps {
-  loadSnapshotCount: typeof fetchSnapshotCount;
+interface Props {
+  height: string;
 }
 
-/**
- * Props used to render the Snapshot component.
- */
-type Props = OwnProps & StoreProps & DispatchProps;
-
-type PresentationalComponentProps = Pick<StoreProps, 'count' | 'loading'> &
-  Pick<OwnProps, 'height'>;
+type PresentationalComponentProps = Props & {
+  count: SnapshotType;
+  loading: boolean;
+};
 
 export const PresentationalComponent: React.FC<PresentationalComponentProps> = ({
   count,
@@ -75,14 +50,6 @@ export const PresentationalComponent: React.FC<PresentationalComponentProps> = (
   </ChartWrapper>
 );
 
-interface ApiRequest {
-  basePath: string;
-  dateRangeStart: string;
-  dateRangeEnd: string;
-  filters?: string;
-  statusFilter?: string;
-}
-
 const initialState: SnapshotState = {
   count: {
     down: 0,
@@ -99,14 +66,14 @@ const initialState: SnapshotState = {
  * glean the status of their uptime environment.
  * @param props the props required by the component
  */
-export const Snapshot: React.FC<Props> = ({ height, loading }: Props) => {
+export const Snapshot: React.FC<Props> = ({ height }: Props) => {
   const [state, setState] = useState<SnapshotState>(initialState);
   const { basePath } = useContext(UptimeSettingsContext);
   const { lastRefresh } = useContext(UptimeRefreshContext);
   const [getUrlParams] = useUrlParams();
   const { dateRangeStart, dateRangeEnd, filters, statusFilter } = getUrlParams();
   useEffect(() => {
-    async function f(props: ApiRequest) {
+    async function f(props: SnapshotApiRequest) {
       setState({
         ...state,
         count: {
@@ -128,5 +95,5 @@ export const Snapshot: React.FC<Props> = ({ height, loading }: Props) => {
     }
     setState({ ...state, loading: true });
   }, [dateRangeStart, dateRangeEnd, filters, lastRefresh, statusFilter]);
-  return <PresentationalComponent count={state.count} height={height} loading={loading} />;
+  return <PresentationalComponent count={state.count} height={height} loading={state.loading} />;
 };

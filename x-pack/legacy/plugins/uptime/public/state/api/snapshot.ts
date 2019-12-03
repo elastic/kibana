@@ -9,7 +9,7 @@ import { isRight } from 'fp-ts/lib/Either';
 import { getApiPath } from '../../lib/helper';
 import { SnapshotType, Snapshot } from '../../../common/runtime_types';
 
-interface ApiRequest {
+export interface SnapshotApiRequest {
   basePath: string;
   dateRangeStart: string;
   dateRangeEnd: string;
@@ -23,7 +23,7 @@ export const fetchSnapshotCount = async ({
   dateRangeEnd,
   filters,
   statusFilter,
-}: ApiRequest): Promise<Snapshot> => {
+}: SnapshotApiRequest): Promise<Snapshot> => {
   const url = getApiPath(`/api/uptime/snapshot/count`, basePath);
   const params = {
     dateRangeStart,
