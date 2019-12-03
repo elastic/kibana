@@ -12,22 +12,29 @@ import { Redirect } from 'react-router-dom';
 import { useFetcher, FETCH_STATUS } from '../../../hooks/useFetcher';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
+import { QueryParams } from '../../shared/Links/apm/ExternalLinks';
 
 const CentralizedContainer = styled.div`
   height: 100%;
   display: flex;
 `;
 
-const redirectToTransactionDetailPage = (transaction: Transaction) =>
-  url.format({
+const redirectToTransactionDetailPage = (
+  transaction: Transaction,
+  { rangeFrom, rangeTo }: Partial<QueryParams>
+) => {
+  const dateRange = rangeFrom && rangeTo ? { rangeFrom, rangeTo } : {};
+  return url.format({
     pathname: `/services/${transaction.service.name}/transactions/view`,
     query: {
       traceId: transaction.trace.id,
       transactionId: transaction.transaction.id,
       transactionName: transaction.transaction.name,
-      transactionType: transaction.transaction.type
+      transactionType: transaction.transaction.type,
+      ...dateRange
     }
   });
+};
 
 const redirectToTracePage = (traceId: string) =>
   url.format({
@@ -39,7 +46,7 @@ const redirectToTracePage = (traceId: string) =>
 
 export const TraceLink = () => {
   const { urlParams } = useUrlParams();
-  const { traceIdLink: traceId } = urlParams;
+  const { traceIdLink: traceId, rangeFrom, rangeTo } = urlParams;
 
   const { data = { transaction: null }, status } = useFetcher(
     callApmApi => {
@@ -58,7 +65,10 @@ export const TraceLink = () => {
   );
   if (traceId && status === FETCH_STATUS.SUCCESS) {
     const to = data.transaction
-      ? redirectToTransactionDetailPage(data.transaction)
+      ? redirectToTransactionDetailPage(data.transaction, {
+          rangeFrom,
+          rangeTo
+        })
       : redirectToTracePage(traceId);
     return <Redirect to={to} />;
   }

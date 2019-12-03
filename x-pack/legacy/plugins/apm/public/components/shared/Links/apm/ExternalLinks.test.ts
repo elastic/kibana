@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { getTraceUrl } from './ExternalLinks';
-import { IBasePath } from 'kibana/server';
 
 jest.mock('../../../app/Main/route_config/index.tsx', () => ({
   routes: [
@@ -20,14 +19,12 @@ describe('ExternalLinks', () => {
     jest.clearAllMocks();
   });
   it('trace link', () => {
-    const kibanaBasePath = {
-      prepend: apmPath => apmPath
-    } as IBasePath;
-    expect(getTraceUrl(kibanaBasePath, 123)).toEqual(
-      '/apm/apm#/link-to/trace/123'
-    );
-    expect(getTraceUrl(kibanaBasePath, '456')).toEqual(
-      '/apm/apm#/link-to/trace/456'
+    expect(getTraceUrl(123)).toEqual('/link-to/trace/123');
+    expect(getTraceUrl('456')).toEqual('/link-to/trace/456');
+  });
+  it('trace link with dates', () => {
+    expect(getTraceUrl(123, { rangeFrom: '123', rangeTo: '456' })).toEqual(
+      '/link-to/trace/123?rangeFrom=123&rangeTo=456'
     );
   });
 });
