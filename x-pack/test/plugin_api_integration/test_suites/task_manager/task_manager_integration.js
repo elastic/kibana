@@ -255,8 +255,6 @@ export default function ({ getService }) {
     });
 
     it('should return a task run error result when running a task now fails', async () => {
-
-
       const originalTask = await scheduleTask({
         taskType: 'sampleTask',
         interval: `30m`,
@@ -299,6 +297,69 @@ export default function ({ getService }) {
         const [task] = (await currentTasks()).docs.filter(taskDoc => taskDoc.id === originalTask.id);
         expect(task.attempts).to.eql(1);
 
+      });
+    });
+
+    it('should return a task run error result when trying to run a non-existent task', async () => {
+      // runNow should fail
+      const failedRunNowResult  = await runTaskNow({
+        id: 'i-dont-exist'
+      });
+      expect(failedRunNowResult).to.eql({ error: `Error: failed to run task "i-dont-exist" as it does not exist`, id: 'i-dont-exist' });
+    });
+
+    it('should return a task run error result when trying to run a task now which is already running', async () => {
+      const longRunningTask = await scheduleTask({
+        taskType: 'sampleTask',
+        interval: `30m`,
+        params: {
+          waitForEvent: 'rescheduleHasHappened'
+        },
+      });
+
+      function getTaskById(tasks, id) {
+        return tasks.filter(task => task.id === id)[0];
+      }
+
+      // wait for task to run and stall
+      await retry.try(async () => {
+        const docs = await historyDocs();
+        expect(docs.filter(taskDoc => taskDoc._source.taskId === longRunningTask.id).length).to.eql(1);
+      });
+
+      // first runNow should fail
+      const failedRunNowResult  = await runTaskNow({
+        id: longRunningTask.id
+      });
+
+      expect(
+        failedRunNowResult
+      ).to.eql(
+        { error: `Error: failed to run task "${longRunningTask.id}" as it is currently running`, id: longRunningTask.id }
+      );
+
+      // finish first run
+      await releaseTasksWaitingForEventToComplete('rescheduleHasHappened');
+      await retry.try(async () => {
+        const tasks = (await currentTasks()).docs;
+        expect(getTaskById(tasks, longRunningTask.id).state.count).to.eql(1);
+      });
+
+      // second runNow should be successful
+      const successfulRunNowResult  = runTaskNow({
+        id: longRunningTask.id
+      });
+
+      // wait for task to run and stall
+      await retry.try(async () => {
+        const docs = await historyDocs();
+        expect(docs.filter(taskDoc => taskDoc._source.taskId === longRunningTask.id).length).to.eql(2);
+      });
+      // release it
+      await releaseTasksWaitingForEventToComplete('rescheduleHasHappened');
+
+      return successfulRunNowResult.then (successfulRunNowResult => {
+        expect(successfulRunNowResult).to.eql({ id: longRunningTask.id });
       });
     });
 

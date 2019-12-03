@@ -202,7 +202,7 @@ export class TaskManagerRunner implements TaskRunner {
 
       this.instance = await this.bufferedTaskStore.update({
         ...taskInstance,
-        status: TaskStatus.RUNNING,
+        status: TaskStatus.Running,
         startedAt: now,
         attempts,
         retryAt: this.instance.interval
@@ -303,7 +303,7 @@ export class TaskManagerRunner implements TaskRunner {
       }
     }
     // scheduling a retry isn't possible,mark task as failed
-    return asErr({ status: TaskStatus.FAILED });
+    return asErr({ status: TaskStatus.Failed });
   };
 
   private async processResultForRecurringTask(
@@ -320,7 +320,7 @@ export class TaskManagerRunner implements TaskRunner {
           runAt: runAt || intervalFromDate(startedAt!, interval)!,
           state,
           attempts,
-          status: TaskStatus.IDLE,
+          status: TaskStatus.Idle,
         });
       }),
       unwrap

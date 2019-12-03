@@ -74,7 +74,7 @@ export interface FailedRunResult extends SuccessfulRunResult {
 }
 
 export interface FailedTaskResult {
-  status: TaskStatus.FAILED;
+  status: TaskStatus.Failed;
 }
 
 export const validateRunResult = Joi.object({
@@ -164,10 +164,13 @@ export interface TaskDictionary<T extends TaskDefinition> {
 }
 
 export enum TaskStatus {
-  IDLE = 'idle',
-  CLAIMING = 'claiming',
-  RUNNING = 'running',
-  FAILED = 'failed',
+  Idle = 'idle',
+  Claiming = 'claiming',
+  Running = 'running',
+  Failed = 'failed',
+}
+export enum TaskLifecycle {
+  NotFound = 'notFound',
 }
 
 /*

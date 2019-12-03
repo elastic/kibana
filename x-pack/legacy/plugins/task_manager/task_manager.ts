@@ -12,7 +12,13 @@ import { Option, none, some, Some, isSome } from 'fp-ts/lib/Option';
 import { either } from './lib/result_type';
 
 import { Logger } from './types';
-import { TaskMarkRunning, TaskRun, TaskClaim, isTaskRunEvent } from './task_events';
+import {
+  TaskMarkRunning,
+  TaskRun,
+  TaskClaim,
+  isTaskRunEvent,
+  isTaskClaimEvent,
+} from './task_events';
 import { fillPool, FillPoolResult } from './lib/fill_pool';
 import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './lib/middleware';
 import { sanitizeTaskDefinitions } from './lib/sanitize_task_definitions';
@@ -24,6 +30,8 @@ import {
   RunContext,
   TaskInstanceWithId,
   TaskInstance,
+  TaskLifecycle,
+  TaskStatus,
 } from './task';
 import { TaskPoller } from './task_poller';
 import { TaskPool } from './task_pool';
@@ -278,8 +286,27 @@ export class TaskManager {
                 resolve({ id });
               }
             },
-            (error: Error) => {
+            async (error: Error) => {
               subscription.unsubscribe();
+
+              try {
+                if (isTaskClaimEvent(taskEvent)) {
+                  const taskLifecycleStatus = await this.store.getLifecycle(id);
+                  if (taskLifecycleStatus === TaskLifecycle.NotFound) {
+                    resolve({
+                      id,
+                      error: `Error: failed to run task "${id}" as it does not exist`,
+                    });
+                  } else if (taskLifecycleStatus !== TaskStatus.Idle) {
+                    resolve({
+                      id,
+                      error: `Error: failed to run task "${id}" as it is currently running`,
+                    });
+                  }
+                }
+              } catch (err) {
+                this.logger.error(`Failed to get Task "${id}" as part of runNow: ${err}`);
+              }
               resolve({ id, error: `${error}` });
             },
             event

@@ -90,7 +90,7 @@ describe('TaskManagerRunner', () => {
     const { runner, store } = testOpts({
       instance: {
         interval: '10m',
-        status: TaskStatus.RUNNING,
+        status: TaskStatus.Running,
         startedAt: new Date(),
       },
       definitions: {

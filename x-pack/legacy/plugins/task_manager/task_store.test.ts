@@ -9,12 +9,13 @@ import sinon from 'sinon';
 import uuid from 'uuid';
 import { filter } from 'rxjs/operators';
 
-import { TaskDictionary, TaskDefinition, TaskInstance, TaskStatus } from './task';
+import { TaskDictionary, TaskDefinition, TaskInstance, TaskStatus, TaskLifecycle } from './task';
 import { FetchOpts, StoreOpts, OwnershipClaimingOpts, TaskStore } from './task_store';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { SavedObjectsSerializer, SavedObjectsSchema, SavedObjectAttributes } from 'src/core/server';
 import { asTaskClaimEvent, TaskEvent } from './task_events';
 import { asOk, asErr } from './lib/result_type';
+import { SavedObjectsErrorHelpers } from '../../../../src/core/server/saved_objects/service/lib/errors';
 
 const taskDefinitions: TaskDictionary<TaskDefinition> = {
   report: {
@@ -903,6 +904,143 @@ if (doc['task.runAt'].size()!=0) {
       const result = await store.remove(id);
       expect(result).toBeUndefined();
       expect(savedObjectsClient.delete).toHaveBeenCalledWith('task', id);
+    });
+  });
+
+  describe('get', () => {
+    test('gets the task with the specified id', async () => {
+      const id = `id-${_.random(1, 20)}`;
+      const task = {
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        id,
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        attempts: 3,
+        status: 'idle' as TaskStatus,
+        version: '123',
+        ownerId: null,
+      };
+
+      const callCluster = jest.fn();
+      savedObjectsClient.get.mockImplementation(async (type: string) => ({
+        id,
+        type,
+        attributes: {
+          ..._.omit(task, 'id'),
+          ..._.mapValues(_.pick(task, 'params', 'state'), value => JSON.stringify(value)),
+        },
+        references: [],
+        version: '123',
+      }));
+
+      const store = new TaskStore({
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        callCluster,
+        maxAttempts: 2,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+      });
+
+      const result = await store.get(id);
+
+      expect(result).toEqual(task);
+
+      expect(savedObjectsClient.get).toHaveBeenCalledWith('task', id);
+    });
+  });
+
+  describe('getLifecycle', () => {
+    test('returns the task status if the task exists ', async () => {
+      expect.assertions(4);
+      return Promise.all(
+        Object.values(TaskStatus).map(async status => {
+          const id = `id-${_.random(1, 20)}`;
+          const task = {
+            runAt: mockedDate,
+            scheduledAt: mockedDate,
+            startedAt: null,
+            retryAt: null,
+            id,
+            params: { hello: 'world' },
+            state: { foo: 'bar' },
+            taskType: 'report',
+            attempts: 3,
+            status: status as TaskStatus,
+            version: '123',
+            ownerId: null,
+          };
+
+          const callCluster = jest.fn();
+          savedObjectsClient.get.mockImplementation(async (type: string) => ({
+            id,
+            type,
+            attributes: {
+              ..._.omit(task, 'id'),
+              ..._.mapValues(_.pick(task, 'params', 'state'), value => JSON.stringify(value)),
+            },
+            references: [],
+            version: '123',
+          }));
+
+          const store = new TaskStore({
+            index: 'tasky',
+            taskManagerId: '',
+            serializer,
+            callCluster,
+            maxAttempts: 2,
+            definitions: taskDefinitions,
+            savedObjectsRepository: savedObjectsClient,
+          });
+
+          expect(await store.getLifecycle(id)).toEqual(status);
+        })
+      );
+    });
+
+    test('returns NotFound status if the task doesnt exists ', async () => {
+      const id = `id-${_.random(1, 20)}`;
+
+      savedObjectsClient.get.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('type', 'id')
+      );
+
+      const store = new TaskStore({
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        callCluster: jest.fn(),
+        maxAttempts: 2,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+      });
+
+      expect(await store.getLifecycle(id)).toEqual(TaskLifecycle.NotFound);
+    });
+
+    test('throws if an unknown error takes place ', async () => {
+      const id = `id-${_.random(1, 20)}`;
+
+      savedObjectsClient.get.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createBadRequestError()
+      );
+
+      const store = new TaskStore({
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        callCluster: jest.fn(),
+        maxAttempts: 2,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+      });
+
+      return expect(store.getLifecycle(id)).rejects.toThrow('Bad Request');
     });
   });
 

@@ -26,6 +26,8 @@ import {
   TaskDefinition,
   TaskDictionary,
   TaskInstance,
+  TaskLifecycle,
+  TaskStatus,
 } from './task';
 
 import { TaskClaim, asTaskClaimEvent } from './task_events';
@@ -346,6 +348,34 @@ export class TaskStore {
    */
   public async remove(id: string): Promise<void> {
     await this.savedObjectsRepository.delete('task', id);
+  }
+
+  /**
+   * Gets a task by id
+   *
+   * @param {string} id
+   * @returns {Promise<void>}
+   */
+  public async get(id: string): Promise<ConcreteTaskInstance> {
+    return savedObjectToConcreteTaskInstance(await this.savedObjectsRepository.get('task', id));
+  }
+
+  /**
+   * Gets task lifecycle step by id
+   *
+   * @param {string} id
+   * @returns {Promise<void>}
+   */
+  public async getLifecycle(id: string): Promise<TaskLifecycle | TaskStatus> {
+    try {
+      const task = await this.get(id);
+      return task.status;
+    } catch (err) {
+      if (err.output && err.output.statusCode === 404) {
+        return TaskLifecycle.NotFound;
+      }
+      throw err;
+    }
   }
 
   private async search(opts: SearchOpts = {}): Promise<FetchResult> {
