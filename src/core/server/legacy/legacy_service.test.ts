@@ -47,6 +47,7 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 import { capabilitiesServiceMock } from '../capabilities/capabilities_service.mock';
+import { uuidServiceMock } from '../uuid/uuid_service.mock';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
 
@@ -89,6 +90,7 @@ beforeEach(() => {
           browserConfigs: new Map(),
         },
       },
+      uuid: uuidServiceMock.createSetupContract(),
     },
     plugins: { 'plugin-id': 'plugin-value' },
   };

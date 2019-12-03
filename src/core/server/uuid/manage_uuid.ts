@@ -30,7 +30,7 @@ const FILE_NAME = 'uuid';
 const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
 
-export async function manageInstanceUUID(configService: IConfigService): Promise<string> {
+export async function manageInstanceUuid(configService: IConfigService): Promise<string> {
   const config = await configService
     .getConfig$()
     .pipe(take(1))

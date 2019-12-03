@@ -171,6 +171,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     uiSettings: {
       register: deps.uiSettings.register,
     },
+    uuid: {
+      getInstanceUuid: deps.uuid.getInstanceUuid,
+    },
   };
 }
 

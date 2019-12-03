@@ -47,6 +47,7 @@ import { IUiSettingsClient, UiSettingsServiceSetup } from './ui_settings';
 import { SavedObjectsClientContract } from './saved_objects/types';
 import { SavedObjectsServiceSetup, SavedObjectsServiceStart } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
+import { UuidServiceSetup } from './uuid';
 
 export { bootstrap } from './bootstrap';
 export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
@@ -254,6 +255,8 @@ export interface CoreSetup {
   savedObjects: SavedObjectsServiceSetup;
   /** {@link UiSettingsServiceSetup} */
   uiSettings: UiSettingsServiceSetup;
+  /** {@link UuidServiceSetup} */
+  uuid: UuidServiceSetup;
 }
 
 /**
@@ -275,4 +278,5 @@ export {
   PluginsServiceSetup,
   PluginsServiceStart,
   PluginOpaqueId,
+  UuidServiceSetup,
 };

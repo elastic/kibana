@@ -282,6 +282,9 @@ export class LegacyService implements CoreService {
       uiSettings: {
         register: setupDeps.core.uiSettings.register,
       },
+      uuid: {
+        getInstanceUuid: setupDeps.core.uuid.getInstanceUuid,
+      },
     };
     const coreStart: CoreStart = {
       capabilities: startDeps.core.capabilities,
