@@ -42,19 +42,15 @@ export const useMetricsTime = () => {
     interval: '>=1m',
   });
 
-  const parsedFrom = dateMath.parse(timeRange.from);
-  const parsedTo = dateMath.parse(timeRange.to, { roundUp: true });
   const parsedTimeRange = useMemo(
     () => ({
       ...timeRange,
-      from:
-        (parsedFrom && parsedFrom.valueOf()) ||
-        moment()
-          .subtract(1, 'hour')
-          .valueOf(),
-      to: (parsedTo && parsedTo.valueOf()) || moment().valueOf(),
+      from: (dateMath.parse(timeRange.from) ?? moment().subtract(1, 'hour'))?.valueOf(),
+      to: (dateMath.parse(timeRange.to, { roundUp: true }) ?? moment())?.valueOf(),
     }),
-    [parsedFrom, parsedTo, lastRefresh]
+    // lastRefresh is used to force a refresh for identical dates
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [lastRefresh, timeRange]
   );
 
   return {
