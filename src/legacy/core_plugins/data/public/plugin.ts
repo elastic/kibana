@@ -29,7 +29,6 @@ import { setFieldFormats } from '../../../../plugins/data/public/services';
 
 export interface DataPluginStartDependencies {
   data: DataPublicPluginStart;
-  uiActions: IUiActionsSetup;
 }
 
 /**
@@ -62,7 +61,7 @@ export class DataPlugin implements Plugin<void, DataStart, {}, DataPluginStartDe
     this.storage = new Storage(window.localStorage);
   }
 
-  public start(core: CoreStart, { data, uiActions }: DataPluginStartDependencies): DataStart {
+  public start(core: CoreStart, { data }: DataPluginStartDependencies): DataStart {
     // This is required for when Angular code uses Field and FieldList.
     setFieldFormats(data.fieldFormats);
     initLegacyModule(data.indexPatterns);
