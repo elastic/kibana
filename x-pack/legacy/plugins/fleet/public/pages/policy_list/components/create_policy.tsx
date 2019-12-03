@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { PolicyForm } from '../../../components/policy_form';
 import { useLibs } from '../../../hooks/use_libs';
-import { Policy } from '../../../../scripts/mock_spec/types';
+import { Policy } from '../../../../common/types/domain_data';
 
 interface RouterProps {
   onClose: () => void;
@@ -37,7 +37,7 @@ export const CreatePolicyFlyout: React.FC<RouterProps> = ({ onClose }) => {
     });
   };
 
-  const renderHeader = () => (
+  const header = (
     <EuiFlyoutHeader hasBorder aria-labelledby="FleetCreatePolicyFlyoutTitle">
       <EuiTitle size="m">
         <h2 id="FleetCreatePolicyFlyoutTitle">
@@ -50,13 +50,13 @@ export const CreatePolicyFlyout: React.FC<RouterProps> = ({ onClose }) => {
     </EuiFlyoutHeader>
   );
 
-  const renderBody = () => (
+  const body = (
     <EuiFlyoutBody>
       <PolicyForm policy={policy} updatePolicy={updatePolicy} />
     </EuiFlyoutBody>
   );
 
-  const renderFooter = () => (
+  const footer = (
     <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
@@ -114,9 +114,9 @@ export const CreatePolicyFlyout: React.FC<RouterProps> = ({ onClose }) => {
 
   return (
     <EuiFlyout onClose={onClose} size="m" maxWidth={400}>
-      {renderHeader()}
-      {renderBody()}
-      {renderFooter()}
+      {header}
+      {body}
+      {footer}
     </EuiFlyout>
   );
 };

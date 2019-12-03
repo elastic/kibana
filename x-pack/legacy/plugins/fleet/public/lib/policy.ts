@@ -9,7 +9,7 @@ import {
   ReturnTypeUpdate,
   ReturnTypeAction,
 } from '../../common/return_types';
-import { Policy } from '../../scripts/mock_spec/types';
+import { Policy } from '../../common/types/domain_data';
 import { PolicyAdapter } from './adapters/policy/memory_policy_adapter';
 
 export class PoliciesLib {

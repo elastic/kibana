@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment, useState } from 'react';
-import { Policy } from '../../../../scripts/mock_spec/types';
+import { Policy } from '../../../../common/types/domain_data';
 import { useLibs } from '../../../hooks/use_libs';
 import { EnrollmentApiKeysTable } from './enrollment_api_keys';
 import { useEnrollmentApiKey, useEnrollmentApiKeys } from './enrollment_api_keys/hooks';

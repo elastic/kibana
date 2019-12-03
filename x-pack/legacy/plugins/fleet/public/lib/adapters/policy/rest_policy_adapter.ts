@@ -11,7 +11,7 @@ import {
   ReturnTypeUpdate,
   ReturnTypeAction,
 } from '../../../../common/return_types';
-import { Policy } from '../../../../scripts/mock_spec/types';
+import { Policy } from '../../../../common/types/domain_data';
 import { RestAPIAdapter } from '../rest_api/adapter_types';
 import { PolicyAdapter } from './memory_policy_adapter';
 

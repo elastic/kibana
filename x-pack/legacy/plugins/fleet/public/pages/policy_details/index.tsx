@@ -26,7 +26,7 @@ import {
   DEFAULT_AGENTS_PAGE_SIZE,
   AGENTS_PAGE_SIZE_OPTIONS,
 } from '../../../common/constants/agent';
-import { Datasource } from '../../../scripts/mock_spec/types';
+import { Datasource } from '../../../common/types/domain_data';
 import { Loading } from '../../components/loading';
 import { ConnectedLink } from '../../components/navigation/connected_link';
 import { useLibs } from '../../hooks/use_libs';

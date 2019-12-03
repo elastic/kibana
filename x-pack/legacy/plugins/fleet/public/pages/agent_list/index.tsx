@@ -26,8 +26,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import useInterval from '@use-it/interval';
 import React, { useEffect, useState } from 'react';
 import { AGENT_POLLING_INTERVAL } from '../../../common/constants/agent';
-import { Agent } from '../../../common/types/domain_data';
-import { Policy } from '../../../scripts/mock_spec/types';
+import { Agent, Policy } from '../../../common/types/domain_data';
 import { AgentHealth } from '../../components/agent_health';
 import { AgentUnenrollProvider } from '../../components/agent_unenroll_provider';
 import { ConnectedLink } from '../../components/navigation/connected_link';
@@ -187,7 +186,7 @@ export const AgentListPage: React.FC<{}> = () => {
       truncateText: true,
       render: (policyId: string) => (
         <ConnectedLink color="primary" path={`/policies/${policyId}`}>
-          {(policies.find(p => p.id === policyId) || ({} as Policy)).name || `Policy: ${policyId}`}
+          {policies.find(p => p.id === policyId)?.name || policyId}
         </ConnectedLink>
       ),
     },
