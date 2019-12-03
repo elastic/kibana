@@ -64,6 +64,7 @@ export const buildRule = ({
     filters: ruleParams.filters,
     created_by: createdBy,
     updated_by: updatedBy,
+    threats: ruleParams.threats,
   });
 };
 
