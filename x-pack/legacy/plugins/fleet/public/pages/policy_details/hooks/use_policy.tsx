@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState, useEffect } from 'react';
+import { Policy } from '../../../../common/types/domain_data';
 import { useLibs } from '../../../hooks/use_libs';
-import { Policy } from '../../../../../ingest/server/libs/types';
 
 export function useGetPolicy(id: string) {
   const { policies } = useLibs();

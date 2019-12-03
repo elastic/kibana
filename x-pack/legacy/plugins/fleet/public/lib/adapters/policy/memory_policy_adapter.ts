@@ -9,7 +9,7 @@ import {
   ReturnTypeUpdate,
   ReturnTypeAction,
 } from '../../../../common/return_types';
-import { Policy } from '../../../../../ingest/server/libs/types';
+import { Policy } from '../../../../common/types/domain_data';
 
 export class PolicyAdapter {
   private memoryDB: Policy[];

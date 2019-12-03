@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { PolicyForm } from '../../../components/policy_form';
 import { useLibs } from '../../../hooks/use_libs';
-import { Policy } from '../../../../../ingest/server/libs/types';
+import { Policy } from '../../../../common/types/domain_data';
 
 interface RouterProps {
   onClose: () => void;
