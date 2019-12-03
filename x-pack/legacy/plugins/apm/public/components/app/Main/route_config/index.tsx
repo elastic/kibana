@@ -191,6 +191,13 @@ export function getRoutes({
         return query.transactionName as string;
       },
       name: RouteName.TRANSACTION_NAME
+    },
+    {
+      exact: true,
+      path: '/link-to/trace/:traceId',
+      component: TraceLink,
+      breadcrumb: null,
+      name: RouteName.LINK_TO_TRACE
     }
   ];
 
