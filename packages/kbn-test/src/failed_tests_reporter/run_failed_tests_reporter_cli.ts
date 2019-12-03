@@ -112,18 +112,21 @@ export function runFailedTestsReporterCli() {
         }
 
         // mutates report to include messages and writes updated report to disk
-        await addMessagesToReport(report, messages, log, reportPath);
+        if (!flags['skip-junit-update']) {
+          await addMessagesToReport(report, messages, log, reportPath);
+        }
       }
     },
     {
       description: `a cli that opens issues or updates existing issues based on junit reports`,
       flags: {
-        boolean: ['dry-run'],
+        boolean: ['dry-run', 'skip-junit-update'],
         string: ['build-url'],
         default: {
           'build-url': process.env.BUILD_URL,
         },
         help: `
+          --skip-junit-update  Don't modify the jUnit reports to include the messages logged about related failures
           --dry-run          Execute the CLI without contacting Github
           --build-url        URL of the failed build, defaults to process.env.BUILD_URL
         `,
