@@ -35,7 +35,7 @@ export function runFailedTestsReporterCli() {
         throw createFlagError('Missing --build-url or process.env.BUILD_URL');
       }
 
-      const dryRun = !!flags['dry-run'];
+      const dryRun = true;
       if (!dryRun) {
         // JOB_NAME is formatted as `elastic+kibana+7.x` in some places and `elastic+kibana+7.x/JOB=kibana-intake,node=immutable` in others
         const jobNameSplit = (process.env.JOB_NAME || '').split(/\+|\//);

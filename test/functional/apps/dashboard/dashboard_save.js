@@ -51,6 +51,7 @@ export default function ({ getPageObjects }) {
     });
 
     it('Saves on confirm duplicate title warning', async function () {
+      throw new Error('failure');
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName, { waitDialogIsClosed: false });
