@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { InfraNodeType } from '../graphql/types';
 import { KbnServer } from '../kibana.index';
 import { InventoryItemType } from '../../common/inventory_models/types';
@@ -18,10 +19,13 @@ interface InfraopsSum {
 }
 
 export class UsageCollector {
-  public static getUsageCollector(server: KbnServer) {
-    const { collectorSet } = server.usage;
+  public static registerUsageCollector(usageCollection: UsageCollectionSetup): void {
+    const collector = UsageCollector.getUsageCollector(usageCollection);
+    usageCollection.registerCollector(collector);
+  }
 
-    return collectorSet.makeUsageCollector({
+  public static getUsageCollector(usageCollection: UsageCollectionSetup) {
+    return usageCollection.makeUsageCollector({
       type: KIBANA_REPORTING_TYPE,
       isReady: () => true,
       fetch: async () => {
