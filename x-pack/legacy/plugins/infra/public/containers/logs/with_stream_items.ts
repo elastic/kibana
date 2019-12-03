@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useContext, useMemo } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { connect } from 'react-redux';
 
 import { StreamItem, LogEntryStreamItem } from '../../components/logging/log_text_stream/item';
@@ -52,6 +52,9 @@ export const WithStreamItems = withStreamItems(
     >;
     initializeOnMount: boolean;
   }) => {
+    const [shouldInitialize, setShouldInitialize] = useState(
+      initializeOnMount && !props.isReloading && !props.isLoadingMore
+    );
     const { currentHighlightKey, logEntryHighlightsById } = useContext(LogHighlightsState.Context);
     const items = useMemo(
       () =>
@@ -70,11 +73,10 @@ export const WithStreamItems = withStreamItems(
       ]
     );
 
-    useEffect(() => {
-      if (initializeOnMount && !props.isReloading && !props.isLoadingMore) {
-        props.reloadEntries();
-      }
-    }, []);
+    if (shouldInitialize) {
+      setShouldInitialize(false);
+      props.reloadEntries();
+    }
 
     return children({
       ...props,

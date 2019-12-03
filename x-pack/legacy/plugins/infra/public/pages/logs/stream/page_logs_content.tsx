@@ -134,13 +134,8 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                 <WithSummary>
                   {({ buckets }) => (
                     <WithLogPosition>
-                      {({
-                        isAutoReloading,
-                        jumpToTargetPosition,
-                        visibleMidpointTime,
-                        visibleTimeInterval,
-                      }) => (
-                        <WithStreamItems initializeOnMount={!isAutoReloading}>
+                      {({ jumpToTargetPosition, visibleMidpointTime, visibleTimeInterval }) => (
+                        <WithStreamItems initializeOnMount={false}>
                           {({ isReloading }) => (
                             <LogMinimap
                               height={height}
