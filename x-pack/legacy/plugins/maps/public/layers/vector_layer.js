@@ -401,7 +401,7 @@ export class VectorLayer extends AbstractLayer {
       sourceQuery: this.getQuery(),
       dataRequestId: SOURCE_META_ID_ORIGIN,
       dynamicStyleProps: this._style.getDynamicPropertiesArray().filter(dynamicStyleProp => {
-        return dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE && dynamicStyleProp.supportsFieldMeta();
+        return dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE && dynamicStyleProp.isFieldMetaEnabled();
       }),
       ...syncContext
     });
@@ -417,7 +417,7 @@ export class VectorLayer extends AbstractLayer {
         const matchingField = joinSource.getMetricFieldForName(dynamicStyleProp.getField().getName());
         return dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.JOIN
           && !!matchingField
-          && dynamicStyleProp.supportsFieldMeta();
+          && dynamicStyleProp.isFieldMetaEnabled();
       }),
       ...syncContext
     });

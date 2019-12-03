@@ -83,7 +83,7 @@ export class StaticDynamicStyleRow extends Component {
             styleOptions={this._getStyleOptions()}
           />
           <FieldMetaOptionsPopover
-            fieldMetaOptions={this.props.styleProperty.getFieldMetaOptions()}
+            styleProperty={this.props.styleProperty}
             onChange={this._onFieldMetaOptionsChange}
           />
         </Fragment>

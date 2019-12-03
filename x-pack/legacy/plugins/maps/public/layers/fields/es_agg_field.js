@@ -40,6 +40,10 @@ export class ESAggMetricField extends AbstractField {
     return (this.getAggType() === COUNT_AGG_TYPE) ? true : !!this._esDocField;
   }
 
+  async getDataType() {
+    return this._esDocField.getDataType();
+  }
+
   getESDocFieldName() {
     return this._esDocField ? this._esDocField.getName() : '';
   }

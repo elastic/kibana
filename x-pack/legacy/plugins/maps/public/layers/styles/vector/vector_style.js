@@ -286,7 +286,7 @@ export class VectorStyle extends AbstractStyle {
     const dynamicProps = this.getDynamicPropertiesArray();
     const dynamicProp = dynamicProps.find(dynamicProp => { return fieldName === dynamicProp.getField().getName(); });
 
-    if (dynamicProp && dynamicProp.supportsFieldMeta()) {
+    if (dynamicProp && dynamicProp.isFieldMetaEnabled()) {
       let dataRequestId;
       if (dynamicProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE) {
         dataRequestId = SOURCE_META_ID_ORIGIN;

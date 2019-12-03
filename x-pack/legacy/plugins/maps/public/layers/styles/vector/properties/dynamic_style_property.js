@@ -33,9 +33,18 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
       return this._field.getOrigin();
     }
 
-    supportsFieldMeta() {
+    async showFieldMetaPopover() {
+      const fieldType = await this._field.getDataType();
+      return this._supportsFieldMeta() && fieldType === 'number';
+    }
+
+    isFieldMetaEnabled() {
       const fieldMetaOptions = this.getFieldMetaOptions();
-      return _.get(fieldMetaOptions, 'isEnabled', true) && this.isScaled() && this._field.supportsFieldMeta();
+      return this._supportsFieldMeta() && _.get(fieldMetaOptions, 'isEnabled', true);
+    }
+
+    _supportsFieldMeta() {
+      return this.isScaled() && this._field.supportsFieldMeta();
     }
 
     async getFieldMetaRequest() {
