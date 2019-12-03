@@ -15,7 +15,6 @@ import { OrientationEditor } from './orientation/orientation_editor';
 import {
   getDefaultDynamicProperties,
   getDefaultStaticProperties,
-  vectorStyles,
 } from '../vector_style_defaults';
 import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../color_utils';
 import { VECTOR_SHAPE_TYPES } from '../../../sources/vector_feature_types';
@@ -121,10 +120,9 @@ export class VectorStyleEditor extends Component {
   _renderFillColor() {
     return (
       <VectorStyleColorEditor
-        styleProperty={vectorStyles.FILL_COLOR}
         swatches={DEFAULT_FILL_COLORS}
         handlePropertyChange={this.props.handlePropertyChange}
-        styleDescriptor={this.props.styleProperties.fillColor}
+        styleProperty={this.props.styleProperties.fillColor}
         ordinalFields={this._getOrdinalFields()}
         defaultStaticStyleOptions={this.state.defaultStaticProperties.fillColor.options}
         defaultDynamicStyleOptions={this.state.defaultDynamicProperties.fillColor.options}
@@ -135,10 +133,9 @@ export class VectorStyleEditor extends Component {
   _renderLineColor() {
     return (
       <VectorStyleColorEditor
-        styleProperty={vectorStyles.LINE_COLOR}
         swatches={DEFAULT_LINE_COLORS}
         handlePropertyChange={this.props.handlePropertyChange}
-        styleDescriptor={this.props.styleProperties.lineColor}
+        styleProperty={this.props.styleProperties.lineColor}
         ordinalFields={this._getOrdinalFields()}
         defaultStaticStyleOptions={this.state.defaultStaticProperties.lineColor.options}
         defaultDynamicStyleOptions={this.state.defaultDynamicProperties.lineColor.options}
@@ -149,9 +146,8 @@ export class VectorStyleEditor extends Component {
   _renderLineWidth() {
     return (
       <VectorStyleSizeEditor
-        styleProperty={vectorStyles.LINE_WIDTH}
         handlePropertyChange={this.props.handlePropertyChange}
-        styleDescriptor={this.props.styleProperties.lineWidth}
+        styleProperty={this.props.styleProperties.lineWidth}
         ordinalFields={this._getOrdinalFields()}
         defaultStaticStyleOptions={this.state.defaultStaticProperties.lineWidth.options}
         defaultDynamicStyleOptions={this.state.defaultDynamicProperties.lineWidth.options}
@@ -162,9 +158,8 @@ export class VectorStyleEditor extends Component {
   _renderSymbolSize() {
     return (
       <VectorStyleSizeEditor
-        styleProperty={vectorStyles.ICON_SIZE}
         handlePropertyChange={this.props.handlePropertyChange}
-        styleDescriptor={this.props.styleProperties.iconSize}
+        styleProperty={this.props.styleProperties.iconSize}
         ordinalFields={this._getOrdinalFields()}
         defaultStaticStyleOptions={this.state.defaultStaticProperties.iconSize.options}
         defaultDynamicStyleOptions={this.state.defaultDynamicProperties.iconSize.options}
@@ -174,13 +169,12 @@ export class VectorStyleEditor extends Component {
 
   _renderPointProperties() {
     let iconOrientation;
-    if (this.props.styleProperties.symbol.options.symbolizeAs === SYMBOLIZE_AS_ICON) {
+    if (this.props.symbolDescriptor.options.symbolizeAs === SYMBOLIZE_AS_ICON) {
       iconOrientation = (
         <Fragment>
           <OrientationEditor
-            styleProperty={vectorStyles.ICON_ORIENTATION}
             handlePropertyChange={this.props.handlePropertyChange}
-            styleDescriptor={this.props.styleProperties.iconOrientation}
+            styleProperty={this.props.styleProperties.iconOrientation}
             ordinalFields={this.state.numberFields}
             defaultStaticStyleOptions={this.state.defaultStaticProperties.iconOrientation.options}
             defaultDynamicStyleOptions={this.state.defaultDynamicProperties.iconOrientation.options}
@@ -193,7 +187,7 @@ export class VectorStyleEditor extends Component {
     return (
       <Fragment>
         <VectorStyleSymbolEditor
-          styleOptions={this.props.styleProperties.symbol.options}
+          styleOptions={this.props.symbolDescriptor.options}
           handlePropertyChange={this.props.handlePropertyChange}
           symbolOptions={SYMBOL_OPTIONS}
           isDarkMode={chrome.getUiSettingsClient().get('theme:darkMode', false)}

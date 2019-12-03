@@ -36,7 +36,6 @@ export {
   IndexPattern,
   IndexPatterns,
 } from './index_patterns';
-export { QueryStringInput } from './query';
 export { SearchBar, SearchBarProps } from './search';
 export {
   SavedQueryAttributes,
