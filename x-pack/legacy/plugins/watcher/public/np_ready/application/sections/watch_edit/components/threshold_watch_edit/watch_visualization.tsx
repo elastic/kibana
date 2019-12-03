@@ -20,7 +20,7 @@ import {
 } from '@elastic/charts';
 import dateMath from '@elastic/datemath';
 import moment from 'moment-timezone';
-import { UiSettingsClientContract } from 'src/core/public';
+import { IUiSettingsClient } from 'src/core/public';
 import { EuiCallOut, EuiLoadingChart, EuiSpacer, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { VisualizeOptions } from 'plugins/watcher/np_ready/application/models/visualize_options';
@@ -46,7 +46,7 @@ const customTheme = () => {
   };
 };
 
-const getTimezone = (config: UiSettingsClientContract) => {
+const getTimezone = (config: IUiSettingsClient) => {
   const DATE_FORMAT_CONFIG_KEY = 'dateFormat:tz';
   const isCustomTimezone = !config.isDefault(DATE_FORMAT_CONFIG_KEY);
   if (isCustomTimezone) {

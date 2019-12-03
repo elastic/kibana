@@ -10,8 +10,9 @@ import {
   DocLinksStart,
   HttpSetup,
   ToastsSetup,
-  UiSettingsClientContract,
+  IUiSettingsClient,
 } from 'src/core/public';
+
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import {
   HashRouter,
@@ -41,7 +42,7 @@ export interface AppDeps {
   docLinks: DocLinksStart;
   toasts: ToastsSetup;
   http: HttpSetup;
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
   legacy: LegacyDependencies;
   euiUtils: any;
 }
