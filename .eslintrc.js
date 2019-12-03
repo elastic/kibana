@@ -164,12 +164,6 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/graph/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: ['x-pack/legacy/plugins/index_management/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
@@ -337,6 +331,7 @@ module.exports = {
                   '!src/core/server/index.ts',
                   '!src/core/server/mocks.ts',
                   '!src/core/server/types.ts',
+                  '!src/core/server/test_utils.ts',
                   // for absolute imports until fixed in
                   // https://github.com/elastic/kibana/issues/36096
                   '!src/core/server/types',

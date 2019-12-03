@@ -467,6 +467,33 @@ export interface CallAPIOptions {
 }
 
 // @public
+export interface Capabilities {
+    [key: string]: Record<string, boolean | Record<string, boolean>>;
+    catalogue: Record<string, boolean>;
+    management: {
+        [sectionId: string]: Record<string, boolean>;
+    };
+    navLinks: Record<string, boolean>;
+}
+
+// @public
+export type CapabilitiesProvider = () => Partial<Capabilities>;
+
+// @public
+export interface CapabilitiesSetup {
+    registerProvider(provider: CapabilitiesProvider): void;
+    registerSwitcher(switcher: CapabilitiesSwitcher): void;
+}
+
+// @public
+export interface CapabilitiesStart {
+    resolveCapabilities(request: KibanaRequest): Promise<Capabilities>;
+}
+
+// @public
+export type CapabilitiesSwitcher = (request: KibanaRequest, uiCapabilities: Capabilities) => Partial<Capabilities> | Promise<Partial<Capabilities>>;
+
+// @public
 export class ClusterClient implements IClusterClient {
     constructor(config: ElasticsearchClientConfig, log: Logger, getAuthHeaders?: GetAuthHeaders);
     asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest): IScopedClusterClient;
@@ -505,6 +532,8 @@ export type CoreId = symbol;
 // @public
 export interface CoreSetup {
     // (undocumented)
+    capabilities: CapabilitiesSetup;
+    // (undocumented)
     context: ContextSetup;
     // (undocumented)
     elasticsearch: ElasticsearchServiceSetup;
@@ -518,6 +547,8 @@ export interface CoreSetup {
 
 // @public
 export interface CoreStart {
+    // (undocumented)
+    capabilities: CapabilitiesStart;
     // (undocumented)
     savedObjects: SavedObjectsServiceStart;
 }
@@ -1610,8 +1641,10 @@ export class SavedObjectsSchema {
     constructor(schemaDefinition?: SavedObjectsSchemaDefinition);
     // (undocumented)
     getConvertToAliasScript(type: string): string | undefined;
+    // Warning: (ae-forgotten-export) The symbol "LegacyConfig" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
-    getIndexForType(config: Config, type: string): string | undefined;
+    getIndexForType(config: LegacyConfig, type: string): string | undefined;
     // (undocumented)
     isHiddenType(type: string): boolean;
     // (undocumented)
