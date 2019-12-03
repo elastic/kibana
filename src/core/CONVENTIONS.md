@@ -23,6 +23,8 @@ my_plugin/
 └── server
     ├── routes
     │   └── index.ts
+    ├── collectors
+    │   └── register.ts
     ├── services
     │   ├── my_service
     │   │   └── index.ts
@@ -44,8 +46,9 @@ my_plugin/
   - If there is only a single application, this directory can be called `application` that exports the `renderApp` function.
 - Services provided to other plugins as APIs should live inside the `services` subdirectory.
   - Services should model the plugin lifecycle (more details below).
-- HTTP routes should be contained inside the `routes` directory.
+- HTTP routes should be contained inside the `server/routes` directory.
   - More should be fleshed out here...
+- Usage collectors for Telemetry should be defined in a separate `server/collectors/` directory.
 
 ### The PluginInitializer
 
@@ -213,7 +216,7 @@ export class Plugin {
 
 ### Usage Collection
 
-For creating and registering a Usage Collector. Collectors would be defined in a separate directory `server/collectors/register.ts`. You can read more about usage collectors on `src/plugins/usage_collection/README.md`.
+For creating and registering a Usage Collector. Collectors should be defined in a separate directory `server/collectors/`. You can read more about usage collectors on `src/plugins/usage_collection/README.md`.
 
 ```ts
 // server/collectors/register.ts

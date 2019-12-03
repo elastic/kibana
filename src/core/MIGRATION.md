@@ -1352,7 +1352,7 @@ export class Plugin implements Plugin<PluginSetup, PluginStart> {
   }
 ```
 
-If you want to disable your plugin by default, you could declare the `enabled` flag in plugin config. This is a special Kibana platform key. The platform reads its value and won't create a plugin instance if `enabled: false`. All plugins are considered enabled by default.
+All plugins are considered enabled by default. If you want to disable your plugin by default, you could declare the `enabled` flag in plugin config. This is a special Kibana platform key. The platform reads its value and won't create a plugin instance if `enabled: false`.
 ```js
 export const config = {
   schema: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
