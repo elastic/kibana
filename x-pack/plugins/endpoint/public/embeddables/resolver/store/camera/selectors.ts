@@ -21,33 +21,21 @@ export const worldToRaster: (state: CameraState) => (worldPosition: Vector2) => 
   const halfViewHeight = viewHeight / 2;
   const negativeHalfViewHeight = viewHeight / -2;
 
-  const right = halfViewWidth / state.zoomLevel + state.panningOffset[0];
-  const left = negativeHalfViewWidth / state.zoomLevel + state.panningOffset[0];
-  const top = halfViewHeight / state.zoomLevel + state.panningOffset[1];
-  const bottom = negativeHalfViewHeight / state.zoomLevel + state.panningOffset[1];
+  const right = halfViewWidth / state.zoomLevel; // + state.panningOffset[0];
+  const left = negativeHalfViewWidth / state.zoomLevel; // + state.panningOffset[0];
+  const top = halfViewHeight / state.zoomLevel; // + state.panningOffset[1];
+  const bottom = negativeHalfViewHeight / state.zoomLevel; // + state.panningOffset[1];
 
   console.log('top', top, 'right', right, 'bottom', bottom, 'left', left);
-  console.log(
-    'x translation',
-    -(left + right) / viewWidth,
-    'y translation',
-    -(top + bottom) / viewHeight
-  );
-
-  /*
-    raster size [ 300, 200 ]
-    panning offset [ 0, 0 ]
-    zoom level 1
-    top 100 right 150 bottom -100 left -150
-    x translation 0 y translation 0
-    */
 
   const leftAlign = -left;
   const topAlign = (top - bottom) / 2;
 
+  console.log('leftAlign', leftAlign, 'top align', topAlign);
+
   return ([worldX, worldY]) => [
-    worldX * (viewWidth / (right - left)) + leftAlign,
-    -worldY * (viewHeight / (top - bottom)) + topAlign,
+    (worldX + state.panningOffset[0]) * (viewWidth / (right - left)) + leftAlign,
+    -(worldY + state.panningOffset[1]) * (viewHeight / (top - bottom)) + topAlign,
 
     /*
      // should be centered
