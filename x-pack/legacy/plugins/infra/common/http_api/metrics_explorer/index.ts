@@ -20,7 +20,7 @@ export const metricsExplorerMetricRequiredFieldsRT = rt.type({
 });
 
 export const metricsExplorerMetricOptionalFieldsRT = rt.partial({
-  field: rt.union([rt.string, rt.null, rt.undefined]),
+  field: rt.union([rt.string, rt.undefined]),
 });
 
 export const metricsExplorerMetricRT = rt.intersection([
