@@ -1,0 +1,79 @@
+[[space-rbac-tutorial]]
+=== Granting user access tutorial
+
+In the following tutorial, use the security options to grant a user
+access to {kib}.
+
+[float]
+[[rbac-before-you-begin]]
+==== Before you begin
+
+To complete the tutorial, you'll need to log in with the `kibana_user` built-in
+role. For informationabout roles, see {ref}/built-in-roles.html[Built-in roles].
+
+[float]
+[[create-rbac-space]]
+==== Create the space
+
+Control the features that are visible to the user.
+
+. Go to *Management > Kibana > Spaces*, then click *Create a Space*.
+
+. Enter a *Name* for the space. For example `Developer space`.
+
+. Click *Create space*.
+
+[float]
+[[create-rbac-role]]
+==== Create the role
+
+Assign {kib} privileges to the user.
+
+. Go to *Management > Security > Roles*, then click *Create Role*.
+
+. Enter the *Role Name*. For example, `Developer role`.
+
+. From the *Cluster privileges* dropdown, select *monitor*.
++
+Stack monitoring enables the user to monitor system performance, and evaluate
+and tune ingest pipelines. For more information, see
+{ref}/monitoring-overview.html[Monitoring overview].
+
+. From the *Indices* dropdown, select the index pattern you'd like to grant
+access for the user.
+
+. From the *Privileges* dropdown, select *read* and *view_index_metadata*.
++
+For information about privileges, see {ref}/security-privileges.html[Security privileges].
+
+. Click *Add space privilege*.
+
+.. From the *Spaces* dropdown, select `Developer space`.
+
+.. Next to Discover, click *All*.
+When you grant *All* privileges, you allow the user to create saved searches
+while designing visualizations.
+
+[float]
+[[create-rbac-user]]
+==== Create the user
+
+Assign the log in credentials for the user.
+
+. Go to *Management > Security > Users*, then click *Create user*.
+
+. On the *New user* pane, enter the user information.
+
+. From the *Roles* dropdown, select `Developer`, then click *Create user*.
+
+[float]
+[[rbac-next-steps]]
+==== Next steps
+
+Now that your user can log in using the `Developer` role, they can:
+
+* Access {kib} data
+
+* Build visualizations and dashboards
+
+* Monitor system performance
