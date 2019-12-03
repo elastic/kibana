@@ -131,21 +131,6 @@ export const AgentEnrollmentFlyout: React.FC<RouterProps> = ({ onClose, policies
           <EnrollmentApiKeysTable />
         </>
       )}
-      <EuiSpacer size="m" />
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.fleet.agentEnrollment.enrollIntoSelectionTitle"
-            defaultMessage="Enroll into policy"
-          />
-        }
-      >
-        <EuiSuperSelect
-          options={policies.map(p => ({ value: p.id, inputDisplay: p.name }))}
-          valueOfSelected={selectedPolicy || ''}
-          onChange={value => setSelectedPolicy(value)}
-        />
-      </EuiFormRow>
     </>
   );
 
