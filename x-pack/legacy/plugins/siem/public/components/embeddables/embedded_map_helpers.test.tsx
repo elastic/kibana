@@ -7,7 +7,6 @@
 import { createEmbeddable, displayErrorToast } from './embedded_map_helpers';
 import { createUiNewPlatformMock } from 'ui/new_platform/__mocks__/helpers';
 import { createPortalNode } from 'react-reverse-portal';
-import { PluginsStart } from 'ui/new_platform/new_platform';
 
 jest.mock('ui/new_platform');
 jest.mock('../../lib/settings/use_kibana_ui_setting');
