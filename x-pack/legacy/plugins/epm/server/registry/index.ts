@@ -124,7 +124,12 @@ async function fetchArchiveBuffer(key: string): Promise<Buffer> {
   const { registryUrl } = epmConfigStore.getConfig();
   // TODO: Should this use the "download" key from the package info? Or is this the foundation
   // to get started so should never change?
-  return getResponseStream(`${registryUrl}/epr/package/${key}`).then(streamToBuffer);
+
+  // Extract the package name from the key, removes version and .tar.gz part
+  const dashIndex = key.lastIndexOf('-');
+  const packageName = key.substring(0, dashIndex);
+
+  return getResponseStream(`${registryUrl}/epr/${packageName}/${key}`).then(streamToBuffer);
 }
 
 export function getAsset(key: string) {
