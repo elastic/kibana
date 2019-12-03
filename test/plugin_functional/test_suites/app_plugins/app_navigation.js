@@ -22,12 +22,12 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'header', 'settings']);
+  const PageObjects = getPageObjects(['common', 'header', 'home']);
 
   describe('app navigation', function describeIndexTests() {
 
     before(async () => {
-      await PageObjects.common.navigateToApp('settings');
+      await PageObjects.common.navigateToApp('home');
     });
 
     it('should show nav link that navigates to the app', async () => {
