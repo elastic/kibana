@@ -9,6 +9,8 @@ import { PolicyLib } from './policy';
 import { ESDatabaseAdapter } from './adapters/es_database/default';
 import { OutputsLib } from './outputs';
 import { DatasourcesLib } from './datasources';
+import { SavedObjectAttributes } from '../../../../../../src/core/server';
+
 export interface ServerLibs {
   outputs: OutputsLib;
   datasources: DatasourcesLib;
@@ -42,7 +44,7 @@ export interface Policy {
  * and metrics. A data source can be in multiple policies at the same time. A datasource can
  * have multiple streams.
  */
-export interface Datasource {
+export interface Datasource extends SavedObjectAttributes {
   id: string;
   name: string;
   package: Package;
@@ -54,7 +56,7 @@ export interface Datasource {
  * A group of items related to a data ingestion source (e.g. MySQL, nginx, AWS). Can include
  * Kibana assets, ES assets, data source configuration templates, manual install steps, etc.
  */
-export interface Package {
+export interface Package extends SavedObjectAttributes {
   assets: Asset[];
   description?: string;
   name: string;
@@ -66,7 +68,7 @@ export interface Package {
  * Item installed for Kibana (e.g. dashboard, visualization), Elasticsearch (e.g. ingest
  * pipeline, ILM policy), or a Kibana plugin (e.g. ML job)
  */
-export interface Asset {
+export interface Asset extends SavedObjectAttributes {
   id: string;
   type: AssetType;
 }
@@ -86,7 +88,7 @@ export enum AssetType {
 /**
  * A combination of an input type, the required config, an output, and any processors
  */
-export interface Stream {
+export interface Stream extends SavedObjectAttributes {
   config?: { [key: string]: any };
   id: string;
   input: Input;
@@ -97,7 +99,7 @@ export interface Stream {
 /**
  * Where the data comes from
  */
-export interface Input {
+export interface Input extends SavedObjectAttributes {
   /**
    * Mix of configurable and required properties still TBD. Object for now might become string
    */

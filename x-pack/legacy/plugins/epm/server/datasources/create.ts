@@ -10,7 +10,7 @@ import { installPipelines } from '../lib/elasticsearch/ingest_pipeline/ingest_pi
 import { installTemplates } from '../packages/install';
 import { AssetReference } from '../../common/types';
 import { SAVED_OBJECT_TYPE_DATASOURCES } from '../../common/constants';
-import { DatasourceSavedObject, DatasourceAttributes } from '../../common/types';
+import { Datasource, Asset, InputType } from '../../../ingest/server/libs/types';
 
 export async function createDatasource(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -38,20 +38,19 @@ export async function saveDatasourceReferences(options: {
 }) {
   const { savedObjectsClient, pkgkey, toSave } = options;
   const savedObject = await getDatasourceObject({ savedObjectsClient, pkgkey });
-  const savedRefs = savedObject && savedObject.attributes.installed;
-  const mergeRefsReducer = (current: AssetReference[], pending: AssetReference) => {
+  const savedRefs = savedObject?.attributes.package.assets;
+  const mergeRefsReducer = (current: Asset[] = [], pending: Asset) => {
     const hasRef = current.find(c => c.id === pending.id && c.type === pending.type);
     if (!hasRef) current.push(pending);
     return current;
   };
 
-  const toInstall = toSave.reduce(mergeRefsReducer, savedRefs || []);
-
-  await savedObjectsClient.create<DatasourceAttributes>(
-    SAVED_OBJECT_TYPE_DATASOURCES,
-    { installed: toInstall },
-    { id: pkgkey, overwrite: true }
-  );
+  const toInstall = (toSave as Asset[]).reduce(mergeRefsReducer, savedRefs);
+  const datasource: Datasource = createFakeDatasource(pkgkey, toInstall);
+  await savedObjectsClient.create<Datasource>(SAVED_OBJECT_TYPE_DATASOURCES, datasource, {
+    id: pkgkey,
+    overwrite: true,
+  });
 
   return toInstall;
 }
@@ -59,9 +58,41 @@ export async function saveDatasourceReferences(options: {
 export async function getDatasourceObject(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
-}): Promise<DatasourceSavedObject | undefined> {
+}) {
   const { savedObjectsClient, pkgkey } = options;
   return savedObjectsClient
-    .get<DatasourceAttributes>(SAVED_OBJECT_TYPE_DATASOURCES, pkgkey)
+    .get<Datasource>(SAVED_OBJECT_TYPE_DATASOURCES, pkgkey)
     .catch(e => undefined);
+}
+
+function createFakeDatasource(pkgkey: string, assets: Asset[] = []): Datasource {
+  return {
+    id: pkgkey,
+    name: 'name',
+    read_alias: 'read_alias',
+    package: {
+      name: 'name',
+      version: '1.0.1, 1.3.1',
+      description: 'description',
+      title: 'title',
+      assets: assets as Asset[],
+    },
+    streams: [
+      {
+        id: 'string',
+        input: {
+          type: InputType.Log,
+          config: { config: 'values', go: 'here' },
+          ingest_pipelines: ['string'],
+          id: 'string',
+          index_template: 'string',
+          ilm_policy: 'string',
+          fields: [{}],
+        },
+        config: { config: 'values', go: 'here' },
+        output_id: 'output_id',
+        processors: ['string'],
+      },
+    ],
+  };
 }

@@ -6,6 +6,7 @@
 
 import { SAVED_OBJECT_TYPE_DATASOURCES, SAVED_OBJECT_TYPE_PACKAGES } from '../common/constants';
 import { Request } from './types';
+import { mappings as ingestMappings } from '../../ingest/server/mappings';
 
 export const getClient = (req: Request) => req.getSavedObjectsClient();
 
@@ -21,17 +22,7 @@ export const mappings = {
       },
     },
   },
-  [SAVED_OBJECT_TYPE_DATASOURCES]: {
-    properties: {
-      installed: {
-        type: 'nested',
-        properties: {
-          id: { type: 'keyword' },
-          type: { type: 'keyword' },
-        },
-      },
-    },
-  },
+  [SAVED_OBJECT_TYPE_DATASOURCES]: ingestMappings.datasources,
 };
 
 export const savedObjectSchemas = {
