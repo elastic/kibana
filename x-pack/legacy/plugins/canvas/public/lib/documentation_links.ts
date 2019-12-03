@@ -4,4 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { Editor } from './editor';
+import { getCoreStart } from '../legacy';
+
+export const getDocumentationLinks = () => ({
+  canvas: `${getCoreStart().docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${
+    getCoreStart().docLinks.DOC_LINK_VERSION
+  }/canvas.html`,
+});

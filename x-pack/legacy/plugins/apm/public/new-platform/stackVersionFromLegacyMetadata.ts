@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
+import { metadata } from 'ui/metadata';
 
-export const documentationLinks = {
-  canvas: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/canvas.html`,
-};
+export const stackVersionFromLegacyMetadata = metadata.branch;
