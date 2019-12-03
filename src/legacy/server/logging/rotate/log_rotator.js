@@ -196,8 +196,7 @@ export class LogRotator {
   _shouldRotate() {
     // should rotate evaluation
     // 1. should rotate if current log size exceeds
-    //    the defined one on everyBytes or has already
-    //    pass the defined time on interval.
+    //    the defined one on everyBytes
     // 2. should not rotate if is already rotating or if any
     //    of the conditions on 1. do not apply
     if (this.isRotating) {
