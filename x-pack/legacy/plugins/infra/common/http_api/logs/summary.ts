@@ -30,19 +30,7 @@ export type LogsSummaryRequest = rt.TypeOf<typeof logsSummaryRequestRT>;
 export type LogsSummaryHighlightsRequest = rt.TypeOf<typeof logsSummaryHighlightsRequestRT>;
 
 export const logsSummaryResponseRT = rt.type({
-  start: rt.number,
-  end: rt.number,
-  buckets: rt.array(
-    rt.type({
-      start: rt.number,
-      end: rt.number,
-      entriesCount: rt.number,
-    })
-  ),
-});
-
-export const logsSummaryHighlightsResponseRT = rt.array(
-  rt.type({
+  data: rt.type({
     start: rt.number,
     end: rt.number,
     buckets: rt.array(
@@ -50,14 +38,30 @@ export const logsSummaryHighlightsResponseRT = rt.array(
         start: rt.number,
         end: rt.number,
         entriesCount: rt.number,
-        representativeKey: rt.type({
-          time: rt.number,
-          tiebreaker: rt.number,
-        }),
       })
     ),
-  })
-);
+  }),
+});
+
+export const logsSummaryHighlightsResponseRT = rt.type({
+  data: rt.array(
+    rt.type({
+      start: rt.number,
+      end: rt.number,
+      buckets: rt.array(
+        rt.type({
+          start: rt.number,
+          end: rt.number,
+          entriesCount: rt.number,
+          representativeKey: rt.type({
+            time: rt.number,
+            tiebreaker: rt.number,
+          }),
+        })
+      ),
+    })
+  ),
+});
 
 export type LogsSummaryResponse = rt.TypeOf<typeof logsSummaryResponseRT>;
 export type LogsSummaryHighlightsResponse = rt.TypeOf<typeof logsSummaryHighlightsResponseRT>;

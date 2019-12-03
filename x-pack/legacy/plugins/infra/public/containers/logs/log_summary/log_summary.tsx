@@ -11,7 +11,7 @@ import { useLogSummaryBufferInterval } from './use_log_summary_buffer_interval';
 import { fetchLogSummary } from './api/log_summary';
 import { LogsSummaryResponse } from '../../../../common/http_api';
 
-export type LogSummaryBuckets = LogsSummaryResponse['buckets'];
+export type LogSummaryBuckets = LogsSummaryResponse['data']['buckets'];
 
 export const useLogSummary = (
   sourceId: string,
@@ -39,7 +39,7 @@ export const useLogSummary = (
         query: filterQuery,
       }).then(response => {
         if (!getIsCancelled()) {
-          setLogSummaryBuckets(response.buckets);
+          setLogSummaryBuckets(response.data.buckets);
         }
       });
     },

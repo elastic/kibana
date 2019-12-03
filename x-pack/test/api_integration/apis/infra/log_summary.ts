@@ -64,14 +64,13 @@ export default function({ getService }: FtrProviderContext) {
         fold(throwErrors(createPlainError), identity)
       );
 
-      expect(logSummaryResponse).to.have.property('buckets');
-      expect(logSummaryResponse.buckets).to.have.length(10);
+      expect(logSummaryResponse.data.buckets).to.have.length(10);
       expect(
-        logSummaryResponse.buckets.filter((bucket: any) => bucket.entriesCount > 0)
+        logSummaryResponse.data.buckets.filter((bucket: any) => bucket.entriesCount > 0)
       ).to.have.length(5);
       expect(
         pairs(
-          logSummaryResponse.buckets,
+          logSummaryResponse.data.buckets,
           (first: any, second: any) => first.end === second.start
         ).every(pair => pair)
       ).to.equal(true);

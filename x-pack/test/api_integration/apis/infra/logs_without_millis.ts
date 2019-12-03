@@ -115,9 +115,8 @@ export default function({ getService }: FtrProviderContext) {
         fold(throwErrors(createPlainError), identity)
       );
 
-      expect(logSummaryResponse).to.have.property('buckets');
       expect(
-        logSummaryResponse.buckets.filter((bucket: any) => bucket.entriesCount > 0)
+        logSummaryResponse.data.buckets.filter((bucket: any) => bucket.entriesCount > 0)
       ).to.have.length(2);
     });
   });

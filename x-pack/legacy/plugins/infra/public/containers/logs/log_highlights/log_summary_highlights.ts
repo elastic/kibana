@@ -20,9 +20,9 @@ export const useLogSummaryHighlights = (
   filterQuery: string | null,
   highlightTerms: string[]
 ) => {
-  const [logSummaryHighlights, setLogSummaryHighlights] = useState<LogsSummaryHighlightsResponse>(
-    []
-  );
+  const [logSummaryHighlights, setLogSummaryHighlights] = useState<
+    LogsSummaryHighlightsResponse['data']
+  >([]);
 
   const [loadLogSummaryHighlightsRequest, loadLogSummaryHighlights] = useTrackedPromise(
     {
@@ -42,7 +42,7 @@ export const useLogSummaryHighlights = (
         });
       },
       onResolve: response => {
-        setLogSummaryHighlights(response);
+        setLogSummaryHighlights(response.data);
       },
     },
     [sourceId, start, end, bucketSize, filterQuery, highlightTerms]

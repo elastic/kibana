@@ -84,14 +84,16 @@ export const initLogsSummaryRoute = ({ framework, sources }: InfraBackendLibs) =
 
         return res.response(
           logsSummaryResponseRT.encode({
-            start: startDate,
-            end: endDate,
-            buckets:
-              esResults.aggregations?.log_summary.buckets.map(bucket => ({
-                start: bucket.from,
-                end: bucket.to,
-                entriesCount: bucket.doc_count,
-              })) ?? [],
+            data: {
+              start: startDate,
+              end: endDate,
+              buckets:
+                esResults.aggregations?.log_summary.buckets.map(bucket => ({
+                  start: bucket.from,
+                  end: bucket.to,
+                  entriesCount: bucket.doc_count,
+                })) ?? [],
+            },
           })
         );
       } catch (error) {
@@ -163,7 +165,7 @@ export const initLogsSummaryRoute = ({ framework, sources }: InfraBackendLibs) =
           })
         );
 
-        return res.response(logsSummaryHighlightsResponseRT.encode(summaries));
+        return res.response(logsSummaryHighlightsResponseRT.encode({ data: summaries }));
       } catch (error) {
         return Boom.badImplementation(error.message);
       }

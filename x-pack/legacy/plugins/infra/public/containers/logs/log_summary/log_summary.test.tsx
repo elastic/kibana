@@ -54,7 +54,7 @@ describe('useLogSummary hook', () => {
     //     }),
     //   })
     // );
-    expect(getLastHookValue().buckets).toEqual(firstMockResponse.buckets);
+    expect(getLastHookValue().buckets).toEqual(firstMockResponse.data.buckets);
 
     // DOESN'T WORK YET until https://github.com/facebook/react/pull/14853 has been merged
     await act(async (_, setArgs) => {
@@ -72,7 +72,7 @@ describe('useLogSummary hook', () => {
         }),
       })
     );
-    expect(getLastHookValue().buckets).toEqual(secondMockResponse.buckets);
+    expect(getLastHookValue().buckets).toEqual(secondMockResponse.data.buckets);
   });
 
   /**
@@ -100,7 +100,7 @@ describe('useLogSummary hook', () => {
     );
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
-    expect(getLastHookValue().buckets).toEqual(firstMockResponse.buckets);
+    expect(getLastHookValue().buckets).toEqual(firstMockResponse.data.buckets);
 
     act((_, setArgs) => {
       setArgs({ sourceId: 'CHANGED_SOURCE_ID' });
@@ -112,7 +112,7 @@ describe('useLogSummary hook', () => {
         sourceId: 'CHANGED_SOURCE_ID',
       })
     );
-    expect(getLastHookValue().buckets).toEqual(secondMockResponse.buckets);
+    expect(getLastHookValue().buckets).toEqual(secondMockResponse.data.buckets);
   });
 
   it('queries for new summary buckets when the filter query changes', () => {
@@ -135,7 +135,7 @@ describe('useLogSummary hook', () => {
         query: 'INITIAL_FILTER_QUERY',
       })
     );
-    expect(getLastHookValue().buckets).toEqual(firstMockResponse.buckets);
+    expect(getLastHookValue().buckets).toEqual(firstMockResponse.data.buckets);
 
     act((_, setArgs) => {
       setArgs({ filterQuery: 'CHANGED_FILTER_QUERY' });
@@ -147,7 +147,7 @@ describe('useLogSummary hook', () => {
         query: 'CHANGED_FILTER_QUERY',
       })
     );
-    expect(getLastHookValue().buckets).toEqual(secondMockResponse.buckets);
+    expect(getLastHookValue().buckets).toEqual(secondMockResponse.data.buckets);
   });
 
   it('queries for new summary buckets when the midpoint time changes', () => {
@@ -221,7 +221,7 @@ const Identity: React.FunctionComponent = ({ children }) => <>{children}</>;
 
 const createMockResponse = (
   buckets: Array<{ start: number; end: number; entriesCount: number }>
-) => ({ buckets });
+) => ({ data: { buckets } });
 
 const createSyncMockPromise = <Value extends any>(value: Value) => ({
   then: (callback: (value: Value) => any) => callback(value),
