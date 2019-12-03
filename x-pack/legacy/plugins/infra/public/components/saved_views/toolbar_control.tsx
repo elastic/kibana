@@ -34,12 +34,12 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
   const [modalOpen, setModalOpen] = useState(false);
   const [isInvalid, setIsInvalid] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
-  const openSaveModal = useCallback(() => setCreateModalOpen(true), []);
-  const closeModal = useCallback(() => setModalOpen(false), []);
-  const closeCreateModal = useCallback(() => {
+  const openSaveModal = useCallback(() => {
     setIsInvalid(false);
-    setCreateModalOpen(false);
+    setCreateModalOpen(true);
   }, []);
+  const closeModal = useCallback(() => setModalOpen(false), []);
+  const closeCreateModal = useCallback(() => setCreateModalOpen(false), []);
   const loadViews = useCallback(() => {
     find();
     setModalOpen(true);
