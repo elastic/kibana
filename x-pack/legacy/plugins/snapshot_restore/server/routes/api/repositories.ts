@@ -45,7 +45,7 @@ interface ManagedRepository {
 }
 
 export const getAllHandler: RouterRouteHandler = async (
-  req,
+  _req,
   callWithRequest
 ): Promise<{
   repositories: Repository[];

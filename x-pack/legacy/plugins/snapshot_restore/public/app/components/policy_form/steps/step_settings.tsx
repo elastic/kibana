@@ -130,182 +130,184 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
         fullWidth
       >
         <EuiFormRow hasEmptyLabelSpace fullWidth describedByIds={['indicesDescription']}>
-          {isManagedPolicy ? (
-            <EuiToolTip
-              position="left"
-              content={
-                <p>
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.policyForm.stepSettings.indicesTooltip"
-                    defaultMessage="Cloud-managed policies require all indices."
-                  />
-                </p>
-              }
-            >
-              {indicesSwitch}
-            </EuiToolTip>
-          ) : (
-            indicesSwitch
-          )}
-          {isAllIndices ? null : (
-            <Fragment>
-              <EuiSpacer size="m" />
-              <EuiFormRow
-                className="snapshotRestore__policyForm__stepSettings__indicesFieldWrapper"
-                label={
-                  selectIndicesMode === 'list' ? (
-                    <EuiFlexGroup justifyContent="spaceBetween">
-                      <EuiFlexItem grow={false}>
-                        <FormattedMessage
-                          id="xpack.snapshotRestore.policyForm.stepSettings.selectIndicesLabel"
-                          defaultMessage="Select indices"
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiLink
-                          onClick={() => {
-                            setSelectIndicesMode('custom');
-                            updatePolicyConfig({ indices: indexPatterns.join(',') });
-                          }}
-                        >
+          <Fragment>
+            {isManagedPolicy ? (
+              <EuiToolTip
+                position="left"
+                content={
+                  <p>
+                    <FormattedMessage
+                      id="xpack.snapshotRestore.policyForm.stepSettings.indicesTooltip"
+                      defaultMessage="Cloud-managed policies require all indices."
+                    />
+                  </p>
+                }
+              >
+                {indicesSwitch}
+              </EuiToolTip>
+            ) : (
+              indicesSwitch
+            )}
+            {isAllIndices ? null : (
+              <Fragment>
+                <EuiSpacer size="m" />
+                <EuiFormRow
+                  className="snapshotRestore__policyForm__stepSettings__indicesFieldWrapper"
+                  label={
+                    selectIndicesMode === 'list' ? (
+                      <EuiFlexGroup justifyContent="spaceBetween">
+                        <EuiFlexItem grow={false}>
                           <FormattedMessage
-                            id="xpack.snapshotRestore.policyForm.stepSettings.indicesToggleCustomLink"
-                            defaultMessage="Use index patterns"
-                          />
-                        </EuiLink>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  ) : (
-                    <EuiFlexGroup justifyContent="spaceBetween">
-                      <EuiFlexItem grow={false}>
-                        <FormattedMessage
-                          id="xpack.snapshotRestore.policyForm.stepSettings.indicesPatternLabel"
-                          defaultMessage="Index patterns"
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiLink
-                          data-test-subj="selectIndicesLink"
-                          onClick={() => {
-                            setSelectIndicesMode('list');
-                            updatePolicyConfig({ indices: indicesSelection });
-                          }}
-                        >
-                          <FormattedMessage
-                            id="xpack.snapshotRestore.policyForm.stepSettings.indicesToggleListLink"
+                            id="xpack.snapshotRestore.policyForm.stepSettings.selectIndicesLabel"
                             defaultMessage="Select indices"
                           />
-                        </EuiLink>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  )
-                }
-                helpText={
-                  selectIndicesMode === 'list' ? (
-                    <FormattedMessage
-                      id="xpack.snapshotRestore.policyForm.stepSettings.selectIndicesHelpText"
-                      defaultMessage="{count} {count, plural, one {index} other {indices}} will be backed up. {selectOrDeselectAllLink}"
-                      values={{
-                        count: config.indices && config.indices.length,
-                        selectOrDeselectAllLink:
-                          config.indices && config.indices.length > 0 ? (
-                            <EuiLink
-                              data-test-subj="deselectIndicesLink"
-                              onClick={() => {
-                                // TODO: Change this to setIndicesOptions() when https://github.com/elastic/eui/issues/2071 is fixed
-                                indicesOptions.forEach((option: Option) => {
-                                  option.checked = undefined;
-                                });
-                                updatePolicyConfig({ indices: [] });
-                                setIndicesSelection([]);
-                              }}
-                            >
-                              <FormattedMessage
-                                id="xpack.snapshotRestore.policyForm.stepSettings.deselectAllIndicesLink"
-                                defaultMessage="Deselect all"
-                              />
-                            </EuiLink>
-                          ) : (
-                            <EuiLink
-                              onClick={() => {
-                                // TODO: Change this to setIndicesOptions() when https://github.com/elastic/eui/issues/2071 is fixed
-                                indicesOptions.forEach((option: Option) => {
-                                  option.checked = 'on';
-                                });
-                                updatePolicyConfig({ indices: [...indices] });
-                                setIndicesSelection([...indices]);
-                              }}
-                            >
-                              <FormattedMessage
-                                id="xpack.snapshotRestore.policyForm.stepSettings.selectAllIndicesLink"
-                                defaultMessage="Select all"
-                              />
-                            </EuiLink>
-                          ),
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiLink
+                            onClick={() => {
+                              setSelectIndicesMode('custom');
+                              updatePolicyConfig({ indices: indexPatterns.join(',') });
+                            }}
+                          >
+                            <FormattedMessage
+                              id="xpack.snapshotRestore.policyForm.stepSettings.indicesToggleCustomLink"
+                              defaultMessage="Use index patterns"
+                            />
+                          </EuiLink>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    ) : (
+                      <EuiFlexGroup justifyContent="spaceBetween">
+                        <EuiFlexItem grow={false}>
+                          <FormattedMessage
+                            id="xpack.snapshotRestore.policyForm.stepSettings.indicesPatternLabel"
+                            defaultMessage="Index patterns"
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiLink
+                            data-test-subj="selectIndicesLink"
+                            onClick={() => {
+                              setSelectIndicesMode('list');
+                              updatePolicyConfig({ indices: indicesSelection });
+                            }}
+                          >
+                            <FormattedMessage
+                              id="xpack.snapshotRestore.policyForm.stepSettings.indicesToggleListLink"
+                              defaultMessage="Select indices"
+                            />
+                          </EuiLink>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    )
+                  }
+                  helpText={
+                    selectIndicesMode === 'list' ? (
+                      <FormattedMessage
+                        id="xpack.snapshotRestore.policyForm.stepSettings.selectIndicesHelpText"
+                        defaultMessage="{count} {count, plural, one {index} other {indices}} will be backed up. {selectOrDeselectAllLink}"
+                        values={{
+                          count: config.indices && config.indices.length,
+                          selectOrDeselectAllLink:
+                            config.indices && config.indices.length > 0 ? (
+                              <EuiLink
+                                data-test-subj="deselectIndicesLink"
+                                onClick={() => {
+                                  // TODO: Change this to setIndicesOptions() when https://github.com/elastic/eui/issues/2071 is fixed
+                                  indicesOptions.forEach((option: Option) => {
+                                    option.checked = undefined;
+                                  });
+                                  updatePolicyConfig({ indices: [] });
+                                  setIndicesSelection([]);
+                                }}
+                              >
+                                <FormattedMessage
+                                  id="xpack.snapshotRestore.policyForm.stepSettings.deselectAllIndicesLink"
+                                  defaultMessage="Deselect all"
+                                />
+                              </EuiLink>
+                            ) : (
+                              <EuiLink
+                                onClick={() => {
+                                  // TODO: Change this to setIndicesOptions() when https://github.com/elastic/eui/issues/2071 is fixed
+                                  indicesOptions.forEach((option: Option) => {
+                                    option.checked = 'on';
+                                  });
+                                  updatePolicyConfig({ indices: [...indices] });
+                                  setIndicesSelection([...indices]);
+                                }}
+                              >
+                                <FormattedMessage
+                                  id="xpack.snapshotRestore.policyForm.stepSettings.selectAllIndicesLink"
+                                  defaultMessage="Select all"
+                                />
+                              </EuiLink>
+                            ),
+                        }}
+                      />
+                    ) : null
+                  }
+                  isInvalid={Boolean(errors.indices)}
+                  error={errors.indices}
+                >
+                  {selectIndicesMode === 'list' ? (
+                    <EuiSelectable
+                      allowExclusions={false}
+                      options={indicesOptions}
+                      onChange={options => {
+                        const newSelectedIndices: string[] = [];
+                        options.forEach(({ label, checked }) => {
+                          if (checked === 'on') {
+                            newSelectedIndices.push(label);
+                          }
+                        });
+                        setIndicesOptions(options);
+                        updatePolicyConfig({ indices: newSelectedIndices });
+                        setIndicesSelection(newSelectedIndices);
+                      }}
+                      searchable
+                      height={300}
+                    >
+                      {(list, search) => (
+                        <EuiPanel paddingSize="s" hasShadow={false}>
+                          {search}
+                          {list}
+                        </EuiPanel>
+                      )}
+                    </EuiSelectable>
+                  ) : (
+                    <EuiComboBox
+                      options={indices.map(index => ({ label: index }))}
+                      placeholder={i18n.translate(
+                        'xpack.snapshotRestore.policyForm.stepSettings.indicesPatternPlaceholder',
+                        {
+                          defaultMessage: 'Enter index patterns, i.e. logstash-*',
+                        }
+                      )}
+                      selectedOptions={indexPatterns.map(pattern => ({ label: pattern }))}
+                      onCreateOption={(pattern: string) => {
+                        if (!pattern.trim().length) {
+                          return;
+                        }
+                        const newPatterns = [...indexPatterns, pattern];
+                        setIndexPatterns(newPatterns);
+                        updatePolicyConfig({
+                          indices: newPatterns.join(','),
+                        });
+                      }}
+                      onChange={(patterns: Array<{ label: string }>) => {
+                        const newPatterns = patterns.map(({ label }) => label);
+                        setIndexPatterns(newPatterns);
+                        updatePolicyConfig({
+                          indices: newPatterns.join(','),
+                        });
                       }}
                     />
-                  ) : null
-                }
-                isInvalid={Boolean(errors.indices)}
-                error={errors.indices}
-              >
-                {selectIndicesMode === 'list' ? (
-                  <EuiSelectable
-                    allowExclusions={false}
-                    options={indicesOptions}
-                    onChange={options => {
-                      const newSelectedIndices: string[] = [];
-                      options.forEach(({ label, checked }) => {
-                        if (checked === 'on') {
-                          newSelectedIndices.push(label);
-                        }
-                      });
-                      setIndicesOptions(options);
-                      updatePolicyConfig({ indices: newSelectedIndices });
-                      setIndicesSelection(newSelectedIndices);
-                    }}
-                    searchable
-                    height={300}
-                  >
-                    {(list, search) => (
-                      <EuiPanel paddingSize="s" hasShadow={false}>
-                        {search}
-                        {list}
-                      </EuiPanel>
-                    )}
-                  </EuiSelectable>
-                ) : (
-                  <EuiComboBox
-                    options={indices.map(index => ({ label: index }))}
-                    placeholder={i18n.translate(
-                      'xpack.snapshotRestore.policyForm.stepSettings.indicesPatternPlaceholder',
-                      {
-                        defaultMessage: 'Enter index patterns, i.e. logstash-*',
-                      }
-                    )}
-                    selectedOptions={indexPatterns.map(pattern => ({ label: pattern }))}
-                    onCreateOption={(pattern: string) => {
-                      if (!pattern.trim().length) {
-                        return;
-                      }
-                      const newPatterns = [...indexPatterns, pattern];
-                      setIndexPatterns(newPatterns);
-                      updatePolicyConfig({
-                        indices: newPatterns.join(','),
-                      });
-                    }}
-                    onChange={(patterns: Array<{ label: string }>) => {
-                      const newPatterns = patterns.map(({ label }) => label);
-                      setIndexPatterns(newPatterns);
-                      updatePolicyConfig({
-                        indices: newPatterns.join(','),
-                      });
-                    }}
-                  />
-                )}
-              </EuiFormRow>
-            </Fragment>
-          )}
+                  )}
+                </EuiFormRow>
+              </Fragment>
+            )}
+          </Fragment>
         </EuiFormRow>
       </EuiDescribedFormGroup>
     );
