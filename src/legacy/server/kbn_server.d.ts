@@ -36,6 +36,8 @@ import { LegacyServiceSetupDeps, LegacyServiceStartDeps } from '../../core/serve
 // Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsManagement } from '../../core/server/saved_objects/management';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { LegacyConfig } from '../../core/server/legacy';
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 import { UsageCollectionSetup } from '../../plugins/usage_collection/server';
@@ -43,10 +45,7 @@ import { IndexPatternsServiceFactory } from './index_patterns';
 import { Capabilities } from '../../core/server';
 import { UiSettingsServiceFactoryOptions } from '../../legacy/ui/ui_settings/ui_settings_service_factory';
 
-export interface KibanaConfig {
-  get<T>(key: string): T;
-  has(key: string): boolean;
-}
+export type KibanaConfig = LegacyConfig;
 
 export interface UiApp {
   getId(): string;
@@ -128,9 +127,6 @@ export default class KbnServer {
       plugins: Record<string, object>;
     };
     stop: null;
-    params: {
-      handledConfigPaths: UnwrapPromise<ReturnType<ConfigService['getUsedPaths']>>;
-    };
   };
   public server: Server;
   public inject: Server['inject'];
