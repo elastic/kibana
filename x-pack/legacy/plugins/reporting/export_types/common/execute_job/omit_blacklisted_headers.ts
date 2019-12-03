@@ -7,7 +7,7 @@ import { omit } from 'lodash';
 import { KBN_SCREENSHOT_HEADER_BLACKLIST } from '../../../common/constants';
 import { ServerFacade } from '../../../types';
 
-export const omitBlacklistedHeaders = <JobParamsType, JobDocPayloadType>({
+export const omitBlacklistedHeaders = <JobDocPayloadType>({
   job,
   decryptedHeaders,
   server,

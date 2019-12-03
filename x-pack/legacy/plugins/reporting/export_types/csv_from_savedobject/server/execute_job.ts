@@ -27,10 +27,9 @@ import {
 } from '../types';
 import { createGenerateCsv } from './lib';
 
-export const executeJobFactory: ExecuteJobFactory<
-  JobParamsPanelCsv,
-  ImmediateExecuteFn<JobParamsPanelCsv>
-> = function executeJobFactoryFn(server: ServerFacade) {
+export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
+  JobParamsPanelCsv
+>> = function executeJobFactoryFn(server: ServerFacade) {
   const crypto = cryptoFactory(server);
   const logger = LevelLogger.createForServer(server, [
     PLUGIN_ID,

@@ -15,10 +15,9 @@ import { validateUrls } from '../../../../common/validate_urls';
 import { cryptoFactory } from '../../../../server/lib/crypto';
 import { JobParamsPNG } from '../../types';
 
-export const createJobFactory: CreateJobFactory<
-  JobParamsPNG,
-  ESQueueCreateJobFn<JobParamsPNG>
-> = function createJobFactoryFn(server: ServerFacade) {
+export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
+  JobParamsPNG
+>> = function createJobFactoryFn(server: ServerFacade) {
   const crypto = cryptoFactory(server);
 
   return async function createJob(

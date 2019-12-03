@@ -27,10 +27,9 @@ interface CreateJobFnOpts {
   layout: any;
 }
 
-export const createJobFactory: CreateJobFactory<
-  JobParamsPDF,
-  ESQueueCreateJobFn<JobParamsPDF>
-> = function createJobFactoryFn(server: ServerFacade) {
+export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
+  JobParamsPDF
+>> = function createJobFactoryFn(server: ServerFacade) {
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PDF_JOB_TYPE, 'create']);
   const compatibilityShim = compatibilityShimFactory(server, logger);
   const crypto = cryptoFactory(server);

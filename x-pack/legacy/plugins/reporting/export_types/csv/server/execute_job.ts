@@ -14,10 +14,9 @@ import { createGenerateCsv } from './lib/generate_csv';
 // @ts-ignore untyped module TODO
 import { fieldFormatMapFactory } from './lib/field_format_map';
 
-export const executeJobFactory: ExecuteJobFactory<
-  JobDocPayloadDiscoverCsv,
-  ESQueueWorkerExecuteFn<JobDocPayloadDiscoverCsv>
-> = function executeJobFactoryFn(server: ServerFacade) {
+export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
+  JobDocPayloadDiscoverCsv
+>> = function executeJobFactoryFn(server: ServerFacade) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   const crypto = cryptoFactory(server);
   const config = server.config();

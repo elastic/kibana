@@ -5,7 +5,7 @@
  */
 import { ConditionalHeaders, ServerFacade } from '../../../types';
 
-export const getConditionalHeaders = <JobParamsType, JobDocPayloadType>({
+export const getConditionalHeaders = <JobDocPayloadType>({
   job,
   filteredHeaders,
   server,

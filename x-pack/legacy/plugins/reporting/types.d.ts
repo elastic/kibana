@@ -301,12 +301,8 @@ export interface ESQueueInstance<JobParamsType, JobDocPayloadType> {
   ) => ESQueueWorker;
 }
 
-export type CreateJobFactory<JobParamsType, CreateJobFnType> = (
-  server: ServerFacade
-) => CreateJobFnType;
-export type ExecuteJobFactory<JobPayloadType, ExecuteJobFnType> = (
-  server: ServerFacade
-) => ExecuteJobFnType;
+export type CreateJobFactory<CreateJobFnType> = (server: ServerFacade) => CreateJobFnType;
+export type ExecuteJobFactory<ExecuteJobFnType> = (server: ServerFacade) => ExecuteJobFnType;
 
 export interface ExportTypeDefinition<
   JobParamsType,
@@ -319,8 +315,8 @@ export interface ExportTypeDefinition<
   jobType: string;
   jobContentEncoding?: string;
   jobContentExtension: string;
-  createJobFactory: CreateJobFactory<JobParamsType, CreateJobFnType>;
-  executeJobFactory: ExecuteJobFactory<JobPayloadType, ExecuteJobFnType>;
+  createJobFactory: CreateJobFactory<CreateJobFnType>;
+  executeJobFactory: ExecuteJobFactory<ExecuteJobFnType>;
   validLicenses: string[];
 }
 

@@ -18,10 +18,9 @@ import {
 import { JobDocPayloadPNG } from '../../types';
 import { generatePngObservableFactory } from '../lib/generate_png';
 
-export const executeJobFactory: ExecuteJobFactory<
-  JobDocPayloadPNG,
-  ESQueueWorkerExecuteFn<JobDocPayloadPNG>
-> = function executeJobFactoryFn(server: ServerFacade) {
+export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
+  JobDocPayloadPNG
+>> = function executeJobFactoryFn(server: ServerFacade) {
   const generatePngObservable = generatePngObservableFactory(server);
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PNG_JOB_TYPE, 'execute']);
 

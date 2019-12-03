@@ -14,10 +14,9 @@ import {
 } from '../../../types';
 import { JobParamsDiscoverCsv } from '../types';
 
-export const createJobFactory: CreateJobFactory<
-  JobParamsDiscoverCsv,
-  ESQueueCreateJobFn<JobParamsDiscoverCsv>
-> = function createJobFactoryFn(server: ServerFacade) {
+export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
+  JobParamsDiscoverCsv
+>> = function createJobFactoryFn(server: ServerFacade) {
   const crypto = cryptoFactory(server);
 
   return async function createJob(

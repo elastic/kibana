@@ -19,10 +19,9 @@ import {
   getCustomLogo,
 } from '../../../common/execute_job/';
 
-export const executeJobFactory: ExecuteJobFactory<
-  JobDocPayloadPDF,
-  ESQueueWorkerExecuteFn<JobDocPayloadPDF>
-> = function executeJobFactoryFn(server: ServerFacade) {
+export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
+  JobDocPayloadPDF
+>> = function executeJobFactoryFn(server: ServerFacade) {
   const generatePdfObservable = generatePdfObservableFactory(server);
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PDF_JOB_TYPE, 'execute']);
 
