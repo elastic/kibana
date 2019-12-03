@@ -16,18 +16,20 @@ interface Props {
   onChange: (rule: BaseRuleGroup) => void;
 }
 
-const availableRules = ['all', 'any', 'field']
-  .map(type => [createRuleForType(type, null, false), createRuleForType(type, null, true)])
-  .flat();
+const rules = ['all', 'any', 'field'].map(type =>
+  createRuleForType(type, undefined, null)
+) as BaseRule[];
+
+const exceptRules = ['all', 'any', 'field'].map(type =>
+  createRuleForType(type, undefined, 'except')
+) as BaseRule[];
 
 export const RuleGroupTitle = (props: Props) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const canUseExcept = props.parentRule && props.parentRule.getType() === 'all';
 
-  const availableRuleTypes = availableRules.filter(
-    rt => rt instanceof BaseRuleGroup && (!rt.isNegated || canUseExcept)
-  );
+  const availableRuleTypes = [...rules, ...(canUseExcept ? exceptRules : [])];
 
   const onChange = (newRule: BaseRuleGroup) => {
     props.onChange(newRule.clone() as BaseRuleGroup);
@@ -48,8 +50,7 @@ export const RuleGroupTitle = (props: Props) => {
     <EuiPopover button={ruleButton} isOpen={isMenuOpen} closePopover={() => setIsMenuOpen(false)}>
       <EuiContextMenuPanel
         items={availableRuleTypes.map((rt, index) => {
-          const isSelected =
-            rt.getType() === props.rule.getType() && rt.isNegated === props.rule.isNegated;
+          const isSelected = rt.getDisplayTitle() === props.rule.getDisplayTitle();
           const icon = isSelected ? 'check' : undefined;
           return (
             <EuiContextMenuItem

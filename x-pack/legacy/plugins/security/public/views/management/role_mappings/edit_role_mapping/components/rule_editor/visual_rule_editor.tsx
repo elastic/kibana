@@ -22,7 +22,7 @@ interface Props {
 export class VisualRuleEditor extends Component<Props, {}> {
   public render() {
     if (this.props.rules) {
-      return this.renderRule(this.props.rules, 0, this.onRuleChange, this.onRuleDelete);
+      return this.renderRule(this.props.rules, this.onRuleChange);
     }
 
     return (
@@ -48,31 +48,19 @@ export class VisualRuleEditor extends Component<Props, {}> {
     this.props.onChange(null);
   };
 
-  private renderRule = (
-    rule: BaseRule,
-    ruleDepth: number,
-    onChange: (updatedRule: BaseRule) => void,
-    onDelete: () => void,
-    extraProps: Record<string, any> = {}
-  ) => {
-    return this.getEditorForRuleType(rule, onChange, onDelete, extraProps, ruleDepth);
+  private renderRule = (rule: BaseRule, onChange: (updatedRule: BaseRule) => void) => {
+    return this.getEditorForRuleType(rule, onChange);
   };
 
-  private getEditorForRuleType(
-    rule: BaseRule,
-    onChange: (updatedRule: BaseRule) => void,
-    onDelete: () => void,
-    extraProps: Record<string, any>,
-    ruleDepth: number
-  ) {
+  private getEditorForRuleType(rule: BaseRule, onChange: (updatedRule: BaseRule) => void) {
     switch (rule.getType()) {
       case 'field':
         return (
           <FieldRuleEditor
             rule={rule as FieldRule}
             onChange={value => onChange(value)}
+            allowDelete={true}
             onDelete={this.onRuleDelete}
-            {...extraProps}
           />
         );
       case 'except':
@@ -81,7 +69,7 @@ export class VisualRuleEditor extends Component<Props, {}> {
         return (
           <RuleGroupEditor
             rule={rule as BaseRuleGroup}
-            ruleDepth={ruleDepth}
+            ruleDepth={0}
             onChange={value => onChange(value)}
             onDelete={this.onRuleDelete}
           />

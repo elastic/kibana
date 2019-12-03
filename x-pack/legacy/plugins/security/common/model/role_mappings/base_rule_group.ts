@@ -14,4 +14,12 @@ export abstract class BaseRuleGroup extends BaseRule {
   abstract removeRule(ruleIndex: number): void;
 
   abstract addRule(rule: BaseRule): void;
+
+  public canAddRule(): boolean {
+    return true;
+  }
+
+  public canRemoveRule(): boolean {
+    return true;
+  }
 }

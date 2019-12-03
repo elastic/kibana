@@ -22,6 +22,7 @@ import { RoleMappingFieldRuleValue } from '../../../../../../../common/model';
 
 interface Props {
   rule: FieldRule;
+  allowDelete: boolean;
   onChange: (rule: FieldRule) => void;
   onDelete: () => void;
 }
@@ -100,8 +101,10 @@ export class FieldRuleEditor extends Component<Props, State> {
 
   private renderPrimaryFieldRow = (field: string, ruleValue: RoleMappingFieldRuleValue) => {
     let renderAddValueButton = true;
+    let renderDeleteButton = this.props.allowDelete;
     let rowRuleValue: RoleMappingFieldRuleValue = ruleValue;
     if (Array.isArray(ruleValue)) {
+      renderDeleteButton = ruleValue.length > 1 || this.props.allowDelete;
       renderAddValueButton = ruleValue.length === 1;
       rowRuleValue = ruleValue[0];
     }
@@ -130,15 +133,17 @@ export class FieldRuleEditor extends Component<Props, State> {
         <EuiFlexItem grow={1}>
           {this.renderFieldValueInput(type, rowRuleValue, valueComparison.id, 0)}
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFormRow hasEmptyLabelSpace={true}>
-            <EuiButtonIcon
-              iconType="trash"
-              color="danger"
-              onClick={() => this.onRemoveAlternateValue(0)}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
+        {renderDeleteButton && (
+          <EuiFlexItem grow={false}>
+            <EuiFormRow hasEmptyLabelSpace={true}>
+              <EuiButtonIcon
+                iconType="trash"
+                color="danger"
+                onClick={() => this.onRemoveAlternateValue(0)}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={1}>
           <EuiFormRow hasEmptyLabelSpace={true}>
             {renderAddValueButton ? (
@@ -267,7 +272,7 @@ export class FieldRuleEditor extends Component<Props, State> {
     const { field, value } = this.props.rule;
     const nextValue = Array.isArray(value) ? [...value] : [value];
     nextValue.push('*');
-    this.props.onChange(new FieldRule(this.props.rule.isNegated, field, nextValue));
+    this.props.onChange(new FieldRule(field, nextValue));
   };
 
   private onRemoveAlternateValue = (index: number) => {
@@ -280,7 +285,7 @@ export class FieldRuleEditor extends Component<Props, State> {
     }
     const nextValue = [...value];
     nextValue.splice(index, 1);
-    this.props.onChange(new FieldRule(this.props.rule.isNegated, field, nextValue));
+    this.props.onChange(new FieldRule(field, nextValue));
   };
 
   private onFieldChange = ([newField]: Array<{ label: string }>) => {
@@ -289,12 +294,12 @@ export class FieldRuleEditor extends Component<Props, State> {
     }
 
     const { value } = this.props.rule;
-    this.props.onChange(new FieldRule(this.props.rule.isNegated, newField.label, value));
+    this.props.onChange(new FieldRule(newField.label, value));
   };
 
   private onAddField = (newField: string) => {
     const { value } = this.props.rule;
-    this.props.onChange(new FieldRule(this.props.rule.isNegated, newField, value));
+    this.props.onChange(new FieldRule(newField, value));
   };
 
   private onValueChange = (index: number) => (e: ChangeEvent<HTMLInputElement>) => {
@@ -306,7 +311,7 @@ export class FieldRuleEditor extends Component<Props, State> {
     } else {
       nextValue = e.target.value;
     }
-    this.props.onChange(new FieldRule(this.props.rule.isNegated, field, nextValue));
+    this.props.onChange(new FieldRule(field, nextValue));
   };
 
   private onNumericValueChange = (index: number) => (e: ChangeEvent<HTMLInputElement>) => {
@@ -318,7 +323,7 @@ export class FieldRuleEditor extends Component<Props, State> {
     } else {
       nextValue = parseFloat(e.target.value);
     }
-    this.props.onChange(new FieldRule(this.props.rule.isNegated, field, nextValue));
+    this.props.onChange(new FieldRule(field, nextValue));
   };
 
   private onComparisonTypeChange = (index: number, newType: ComparisonOption) => {
@@ -334,7 +339,7 @@ export class FieldRuleEditor extends Component<Props, State> {
     } else {
       nextValue = comparison.defaultValue;
     }
-    this.props.onChange(new FieldRule(this.props.rule.isNegated, field, nextValue));
+    this.props.onChange(new FieldRule(field, nextValue));
   };
 
   private getComparisonType(ruleValue: RoleMappingFieldRuleValue) {

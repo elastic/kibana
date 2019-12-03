@@ -8,6 +8,9 @@ import { FieldRule } from './field_rule';
 import { AllRule } from './all_rule';
 import { AnyRule } from './any_rule';
 import { BaseRule } from './base_rule';
+import { ExceptFieldRule } from './except_field_rule';
+import { ExceptAllRule } from './except_all_rule';
+import { ExceptAnyRule } from './except_any_rule';
 import { RoleMappingFieldRuleValue } from '..';
 
 export class RuleBuilderError extends Error {
@@ -23,9 +26,11 @@ export class RuleBuilderError extends Error {
 export function createRuleForType(
   ruleType: string,
   ruleDefinition: any | undefined,
-  isNegated: boolean = false,
+  parentRuleType: string | null,
   ruleTrace: string[] = []
 ) {
+  const isRuleNegated = parentRuleType === 'except';
+
   switch (ruleType) {
     case 'field': {
       const fieldData = ruleDefinition || { username: '*' };
@@ -34,14 +39,15 @@ export function createRuleForType(
       if (entries.length !== 1) {
         throw new RuleBuilderError(`Expected a single field, but found ${entries.length}`, [
           ...ruleTrace,
-          `field`,
+          ruleType,
         ]);
       }
 
       const [field, value] = entries[0] as [string, RoleMappingFieldRuleValue];
       const valueType = typeof value;
       if (value === null || ['string', 'number'].includes(valueType)) {
-        return new FieldRule(isNegated, field, value);
+        const fieldRule = new FieldRule(field, value);
+        return isRuleNegated ? new ExceptFieldRule(fieldRule) : fieldRule;
       }
       throw new RuleBuilderError(
         `Invalid value type for field. Expected one of null, string, or number, but found ${valueType} (${value})`,
@@ -52,13 +58,13 @@ export function createRuleForType(
       if (ruleDefinition != null && !Array.isArray(ruleDefinition)) {
         throw new RuleBuilderError(
           `Expected an array of rules, but found ${typeof ruleDefinition}`,
-          [...ruleTrace, 'all']
+          [...ruleTrace, ruleType]
         );
       }
       const subRules = ((ruleDefinition as any[]) || []).map((definition: any, index) =>
-        parseRawRules(definition, false, [...ruleTrace, 'all', `[${index}]`])
+        parseRawRules(definition, ruleType, [...ruleTrace, ruleType, `[${index}]`])
       ) as BaseRule[];
-      return new AllRule(isNegated, subRules);
+      return isRuleNegated ? new ExceptAllRule(subRules) : new AllRule(subRules);
     }
     case 'any': {
       if (ruleDefinition != null && !Array.isArray(ruleDefinition)) {
@@ -68,9 +74,9 @@ export function createRuleForType(
         );
       }
       const subRules = ((ruleDefinition as any[]) || []).map((definition: any, index) =>
-        parseRawRules(definition, false, [...ruleTrace, 'any', `[${index}]`])
+        parseRawRules(definition, ruleType, [...ruleTrace, ruleType, `[${index}]`])
       ) as BaseRule[];
-      return new AnyRule(isNegated, subRules);
+      return isRuleNegated ? new ExceptAnyRule(subRules) : new AnyRule(subRules);
     }
     case 'except': {
       if (ruleDefinition && typeof ruleDefinition !== 'object') {
@@ -79,24 +85,27 @@ export function createRuleForType(
           'except',
         ]);
       }
-      return parseRawRules(ruleDefinition || {}, true, [...ruleTrace, 'except']);
+      if (parentRuleType !== 'all') {
+        throw new RuleBuilderError(
+          `'except' can only exist within an 'all' rule, but found within ${parentRuleType}`,
+          [...ruleTrace, ruleType]
+        );
+      }
+      return parseRawRules(ruleDefinition || {}, ruleType, [...ruleTrace, ruleType]);
     }
     default:
       throw new RuleBuilderError(`Unknown rule type: ${ruleType}`, [...ruleTrace, ruleType]);
   }
 }
 
-export function generateRulesFromRaw(
-  rawRules: Record<string, any> = {},
-  isNegated: boolean = false
-): BaseRule | null {
-  return parseRawRules(rawRules, isNegated, []);
+export function generateRulesFromRaw(rawRules: Record<string, any> = {}): BaseRule | null {
+  return parseRawRules(rawRules, null, []);
 }
 
 function parseRawRules(
-  rawRules: Record<string, any> = {},
-  isNegated: boolean = false,
-  ruleTrace: string[] = []
+  rawRules: Record<string, any>,
+  parentRuleType: string | null,
+  ruleTrace: string[]
 ): BaseRule | null {
   const entries = Object.entries(rawRules) as Array<[string, any]>;
   if (!entries.length) {
@@ -111,5 +120,5 @@ function parseRawRules(
 
   const rule = entries[0];
   const [ruleType, ruleDefinition] = rule;
-  return createRuleForType(ruleType, ruleDefinition, isNegated, ruleTrace);
+  return createRuleForType(ruleType, ruleDefinition, parentRuleType, ruleTrace);
 }

@@ -19,7 +19,6 @@ interface Props {
   ruleDepth: number;
   onChange: (rule: BaseRuleGroup) => void;
   onDelete: () => void;
-  hideAddRuleButton?: boolean;
 }
 export class RuleGroupEditor extends Component<Props, {}> {
   public render() {
@@ -46,7 +45,7 @@ export class RuleGroupEditor extends Component<Props, {}> {
             </EuiFlexGroup>
           </EuiFlexItem>
           {this.renderSubRules()}
-          {!this.props.hideAddRuleButton && (
+          {this.props.rule.canAddRule() && (
             <EuiFlexItem>
               <AddRuleButton onClick={this.onAddRuleClick} />
             </EuiFlexItem>
@@ -69,6 +68,7 @@ export class RuleGroupEditor extends Component<Props, {}> {
                   updatedRule.replaceRule(subRuleIndex, updatedSubRule);
                   this.props.onChange(updatedRule);
                 }}
+                allowDelete={this.props.rule.canRemoveRule()}
                 onDelete={() => {
                   const updatedRule = this.props.rule.clone() as BaseRuleGroup;
                   updatedRule.removeRule(subRuleIndex);
@@ -77,6 +77,7 @@ export class RuleGroupEditor extends Component<Props, {}> {
               />
             </EuiFlexItem>
           );
+        case 'except':
         case 'any':
         case 'all':
           return (
@@ -98,6 +99,8 @@ export class RuleGroupEditor extends Component<Props, {}> {
               />
             </EuiFlexItem>
           );
+        default:
+          return <div>Unsupported rule type: {subRule.getType()}</div>;
       }
     });
   };

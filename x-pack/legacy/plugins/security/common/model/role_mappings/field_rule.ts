@@ -9,12 +9,8 @@ import { BaseRule } from './base_rule';
 import { RoleMappingFieldRuleValue } from '..';
 
 export class FieldRule extends BaseRule {
-  constructor(
-    public readonly isNegated: boolean,
-    public readonly field: string,
-    public readonly value: RoleMappingFieldRuleValue
-  ) {
-    super(isNegated);
+  constructor(public readonly field: string, public readonly value: RoleMappingFieldRuleValue) {
+    super();
   }
 
   public getType() {
@@ -22,28 +18,18 @@ export class FieldRule extends BaseRule {
   }
 
   public getDisplayTitle() {
-    if (this.isNegated) {
-      return `The following is false`;
-    }
     return `The following is true`;
   }
 
   public clone() {
-    return new FieldRule(this.isNegated, this.field, _.cloneDeep(this.value));
+    return new FieldRule(this.field, _.cloneDeep(this.value));
   }
 
   public toRaw() {
-    const rawRule = {
+    return {
       field: {
         [this.field]: this.value,
       },
     };
-
-    if (this.isNegated) {
-      return {
-        except: rawRule,
-      };
-    }
-    return rawRule;
   }
 }

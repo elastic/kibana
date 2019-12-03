@@ -7,7 +7,7 @@
 import { BaseRuleGroup } from './base_rule_group';
 import { BaseRule } from './base_rule';
 
-export class AllRule extends BaseRuleGroup {
+export class ExceptAllRule extends BaseRuleGroup {
   constructor(private rules: BaseRule[] = []) {
     super();
   }
@@ -21,7 +21,7 @@ export class AllRule extends BaseRuleGroup {
   }
 
   public getDisplayTitle() {
-    return `All of the following are true`;
+    return `Any of the following are false`;
   }
 
   public replaceRule(ruleIndex: number, rule: BaseRule) {
@@ -37,12 +37,16 @@ export class AllRule extends BaseRuleGroup {
   }
 
   public clone() {
-    return new AllRule(this.rules.map(r => r.clone()));
+    return new ExceptAllRule(this.rules.map(r => r.clone()));
   }
 
   public toRaw() {
-    return {
+    const rawRule = {
       all: [...this.rules.map(rule => rule.toRaw())],
+    };
+
+    return {
+      except: rawRule,
     };
   }
 }

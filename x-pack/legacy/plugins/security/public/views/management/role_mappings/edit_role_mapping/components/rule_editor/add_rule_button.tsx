@@ -35,7 +35,7 @@ export const AddRuleButton = (props: Props) => {
       icon="user"
       onClick={() => {
         setIsMenuOpen(false);
-        props.onClick(new FieldRule(false, 'username', '*'));
+        props.onClick(new FieldRule('username', '*'));
       }}
     >
       Add Rule
@@ -46,7 +46,7 @@ export const AddRuleButton = (props: Props) => {
       icon="partial"
       onClick={() => {
         setIsMenuOpen(false);
-        props.onClick(new AllRule(false, []));
+        props.onClick(new AllRule([]));
       }}
     >
       Add rule group

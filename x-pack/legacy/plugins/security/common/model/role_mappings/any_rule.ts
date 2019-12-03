@@ -8,8 +8,8 @@ import { BaseRuleGroup } from './base_rule_group';
 import { BaseRule } from './base_rule';
 
 export class AnyRule extends BaseRuleGroup {
-  constructor(public readonly isNegated: boolean, private rules: BaseRule[]) {
-    super(isNegated);
+  constructor(private rules: BaseRule[] = []) {
+    super();
   }
 
   public getRules() {
@@ -21,9 +21,6 @@ export class AnyRule extends BaseRuleGroup {
   }
 
   public getDisplayTitle() {
-    if (this.isNegated) {
-      return `None of the following are true`;
-    }
     return `Any of the following are true`;
   }
 
@@ -40,22 +37,12 @@ export class AnyRule extends BaseRuleGroup {
   }
 
   public clone() {
-    return new AnyRule(
-      this.isNegated,
-      this.rules.map(r => r.clone())
-    );
+    return new AnyRule(this.rules.map(r => r.clone()));
   }
 
   public toRaw() {
-    const rawRule = {
+    return {
       any: [...this.rules.map(rule => rule.toRaw())],
     };
-
-    if (this.isNegated) {
-      return {
-        except: rawRule,
-      };
-    }
-    return rawRule;
   }
 }

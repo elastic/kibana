@@ -5,8 +5,6 @@
  */
 
 export abstract class BaseRule {
-  constructor(public readonly isNegated: boolean) {}
-
   abstract toRaw(): Record<string, any>;
 
   abstract getType(): string;
