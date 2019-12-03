@@ -102,10 +102,14 @@ enum ShouldFetchMoreEntries {
   After,
 }
 
-const shouldFetchMoreEntries = ({ pagesAfterEnd, pagesBeforeStart }: FetchMoreEntriesParams) => {
+const shouldFetchMoreEntries = (
+  { pagesAfterEnd, pagesBeforeStart }: FetchMoreEntriesParams,
+  { hasMoreBeforeStart, hasMoreAfterEnd }: LogEntriesStateParams
+) => {
   if (pagesBeforeStart === null || pagesAfterEnd === null) return false;
-  if (pagesBeforeStart < DESIRED_BUFFER_PAGES) return ShouldFetchMoreEntries.Before;
-  if (pagesAfterEnd < DESIRED_BUFFER_PAGES) return ShouldFetchMoreEntries.After;
+  if (pagesBeforeStart < DESIRED_BUFFER_PAGES && hasMoreBeforeStart)
+    return ShouldFetchMoreEntries.Before;
+  if (pagesAfterEnd < DESIRED_BUFFER_PAGES && hasMoreAfterEnd) return ShouldFetchMoreEntries.After;
   return false;
 };
 
@@ -118,7 +122,7 @@ const useFetchEntriesEffect = (
 
   const [prevParams, cachePrevParams] = useState(params);
 
-  const runFetchNewEntriesRequest = useCallback(async () => {
+  const runFetchNewEntriesRequest = async () => {
     dispatch({ type: Action.FetchingNewEntries });
     try {
       const payload = await getLogEntriesAround(params);
@@ -126,25 +130,25 @@ const useFetchEntriesEffect = (
     } catch (e) {
       dispatch({ type: Action.ErrorOnNewEntries });
     }
-  }, [params]);
+  };
 
-  const runFetchMoreEntriesRequest = useCallback(
-    async (direction: ShouldFetchMoreEntries) => {
-      dispatch({ type: Action.FetchingMoreEntries });
-      const getEntriesBefore = direction === ShouldFetchMoreEntries.Before;
-      const getMoreLogEntries = getEntriesBefore ? getLogEntriesBefore : getLogEntriesAfter;
-      try {
-        const payload = await getMoreLogEntries(params);
-        dispatch({
-          type: getEntriesBefore ? Action.ReceiveEntriesBefore : Action.ReceiveEntriesAfter,
-          payload,
-        });
-      } catch (e) {
-        dispatch({ type: Action.ErrorOnMoreEntries });
-      }
-    },
-    [params]
-  );
+  const runFetchMoreEntriesRequest = async (direction: ShouldFetchMoreEntries) => {
+    dispatch({ type: Action.FetchingMoreEntries });
+    const getEntriesBefore = direction === ShouldFetchMoreEntries.Before;
+    const timeKey = getEntriesBefore
+      ? state.entries[0].key
+      : state.entries[state.entries.length - 1].key;
+    const getMoreLogEntries = getEntriesBefore ? getLogEntriesBefore : getLogEntriesAfter;
+    try {
+      const payload = await getMoreLogEntries({ ...params, timeKey });
+      dispatch({
+        type: getEntriesBefore ? Action.ReceiveEntriesBefore : Action.ReceiveEntriesAfter,
+        payload,
+      });
+    } catch (e) {
+      dispatch({ type: Action.ErrorOnMoreEntries });
+    }
+  };
 
   const fetchNewEntriesEffectDependencies = Object.values(
     pick(params, ['sourceId', 'filterQuery', 'timeKey'])
@@ -156,11 +160,13 @@ const useFetchEntriesEffect = (
     cachePrevParams(params);
   };
 
-  const fetchMoreEntriesEffectDependencies = Object.values(
-    pick(params, ['pagesAfterEnd', 'pagesBeforeStart'])
-  );
-  const fetchMoreEntriesEffect = useCallback(() => {
-    const direction = shouldFetchMoreEntries(params);
+  const fetchMoreEntriesEffectDependencies = [
+    ...Object.values(pick(params, ['pagesAfterEnd', 'pagesBeforeStart'])),
+    Object.values(pick(state, ['hasMoreBeforeStart', 'hasMoreAfterEnd'])),
+  ];
+  const fetchMoreEntriesEffect = () => {
+    if (state.isLoadingMore) return;
+    const direction = shouldFetchMoreEntries(params, state);
     switch (direction) {
       case ShouldFetchMoreEntries.Before:
       case ShouldFetchMoreEntries.After:
@@ -169,7 +175,7 @@ const useFetchEntriesEffect = (
       default:
         break;
     }
-  }, [params]);
+  };
   useEffect(fetchNewEntriesEffect, fetchNewEntriesEffectDependencies);
   useEffect(fetchMoreEntriesEffect, fetchMoreEntriesEffectDependencies);
 
@@ -200,11 +206,25 @@ const logEntriesStateReducer = (prevState: LogEntriesStateParams, action: Action
       return { ...prevState, ...action.payload, isReloading: false };
     case Action.ReceiveEntriesBefore: {
       const newEntries = [...action.payload.entries, ...prevState.entries];
-      return { ...prevState, ...action.payload, entries: newEntries, isLoadingMore: false };
+      const { hasMoreBeforeStart, entriesStart } = action.payload;
+      const update = {
+        entries: newEntries,
+        isLoadingMore: false,
+        hasMoreBeforeStart,
+        entriesStart,
+      };
+      return { ...prevState, ...update };
     }
     case Action.ReceiveEntriesAfter: {
       const newEntries = [...prevState.entries, ...action.payload.entries];
-      return { ...prevState, ...action.payload, entries: newEntries, isLoadingMore: false };
+      const { hasMoreAfterEnd, entriesEnd } = action.payload;
+      const update = {
+        entries: newEntries,
+        isLoadingMore: false,
+        hasMoreAfterEnd,
+        entriesEnd,
+      };
+      return { ...prevState, ...update };
     }
     case Action.FetchingNewEntries:
       return { ...prevState, isReloading: true };
