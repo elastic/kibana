@@ -11,13 +11,19 @@ import enzymeToJson from 'enzyme-to-json';
 import { Location } from 'history';
 import moment from 'moment';
 import { Moment } from 'moment-timezone';
-import React from 'react';
-import { render, waitForElement } from 'react-testing-library';
+import React, { FunctionComponent, ReactNode } from 'react';
+import { render, waitForElement } from '@testing-library/react';
+import '@testing-library/jest-dom/extend-expect';
 import { MemoryRouter } from 'react-router-dom';
 import { APMConfig } from '../../../../../plugins/apm/server';
 import { LocationProvider } from '../context/LocationContext';
 import { PromiseReturnType } from '../../typings/common';
 import { ESFilter } from '../../typings/elasticsearch';
+import {
+  PluginsContext,
+  ConfigSchema,
+  ApmPluginStartDeps
+} from '../new-platform/plugin';
 
 export function toJson(wrapper: ReactWrapper) {
   return enzymeToJson(wrapper, {
@@ -178,3 +184,23 @@ export async function inspectSearchParams(
 }
 
 export type SearchParamsMock = PromiseReturnType<typeof inspectSearchParams>;
+
+export const MockPluginContextWrapper: FunctionComponent<{}> = ({
+  children
+}: {
+  children?: ReactNode;
+}) => {
+  return (
+    <PluginsContext.Provider
+      value={
+        {
+          apm: { config: {} as ConfigSchema, stackVersion: '0' }
+        } as ApmPluginStartDeps & {
+          apm: { config: ConfigSchema; stackVersion: string };
+        }
+      }
+    >
+      {children}
+    </PluginsContext.Provider>
+  );
+};
