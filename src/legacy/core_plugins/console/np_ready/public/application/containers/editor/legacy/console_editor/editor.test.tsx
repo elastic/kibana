@@ -17,68 +17,33 @@
  * under the License.
  */
 
+import './editor.test.mock';
+
 import React from 'react';
-import { ReactWrapper, mount } from 'enzyme';
+import { mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n/react';
 import { act } from 'react-dom/test-utils';
 import * as sinon from 'sinon';
 
+import { notificationServiceMock } from '../../../../../../../../../../../src/core/public/mocks';
+
+import { nextTick } from 'test_utils/enzyme_helpers';
 import {
   ServicesContextProvider,
   EditorContextProvider,
   RequestContextProvider,
 } from '../../../../contexts';
 
-import { Editor } from './editor';
-
-jest.mock('../../../../contexts/editor_context/editor_registry.ts', () => ({
-  instance: {
-    setInputEditor: () => {},
-    getInputEditor: () => ({
-      getRequestsInRange: (cb: any) => cb([{ test: 'test' }]),
-    }),
-  },
-}));
-jest.mock('../../../../components/editor_example.tsx', () => {});
-jest.mock('../../../../../../../public/quarantined/src/mappings.js', () => ({
-  retrieveAutoCompleteInfo: () => {},
-  clearSubscriptions: () => {},
-}));
-jest.mock('../../../../../../../public/quarantined/src/input.ts', () => {
-  return {
-    initializeEditor: () => ({
-      $el: {
-        css: () => {},
-      },
-      focus: () => {},
-      update: () => {},
-      getSession: () => ({ on: () => {}, setUseWrapMode: () => {} }),
-      commands: {
-        addCommand: () => {},
-      },
-    }),
-  };
-});
-
-import * as sendRequestModule from '../../../../hooks/use_send_current_request_to_es/send_request_to_es';
+import { sendRequestToES } from '../../../../hooks/use_send_current_request_to_es/send_request_to_es';
 import * as consoleMenuActions from '../console_menu_actions';
+import { Editor } from './editor';
 
 describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
   let mockedAppContextValue: any;
-  let editor: ReactWrapper;
+  const sandbox = sinon.createSandbox();
 
-  beforeEach(() => {
-    document.queryCommandSupported = sinon.fake(() => true);
-    mockedAppContextValue = {
-      services: {
-        history: {
-          getSavedEditorState: () => null,
-          updateCurrentState: () => {},
-        },
-      },
-      docLinkVersion: 'NA',
-    };
-    editor = mount(
+  const doMount = () =>
+    mount(
       <I18nProvider>
         <ServicesContextProvider value={mockedAppContextValue}>
           <RequestContextProvider>
@@ -89,51 +54,56 @@ describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
         </ServicesContextProvider>
       </I18nProvider>
     );
+
+  beforeEach(() => {
+    document.queryCommandSupported = sinon.fake(() => true);
+    mockedAppContextValue = {
+      services: {
+        history: {
+          getSavedEditorState: () => null,
+          updateCurrentState: jest.fn(),
+        },
+        notifications: notificationServiceMock.createSetupContract(),
+      },
+      docLinkVersion: 'NA',
+    };
   });
 
-  // TODO: Re-enable when React ^16.9 is available
-  it.skip('calls send current request to ES', () => {
-    const stub = sinon.stub(sendRequestModule, 'sendRequestToES');
-    try {
-      act(() => {
-        editor.find('[data-test-subj~="sendRequestButton"]').simulate('click');
-      });
-      expect(stub.called).toBe(true);
-      expect(stub.callCount).toBe(1);
-    } finally {
-      stub.restore();
-    }
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('calls send current request to ES', async () => {
+    (sendRequestToES as jest.Mock).mockRejectedValue({});
+    const editor = doMount();
+    act(() => {
+      editor.find('[data-test-subj~="sendRequestButton"]').simulate('click');
+    });
+    await nextTick();
+    expect(sendRequestToES).toBeCalledTimes(1);
   });
 
   it('opens docs', () => {
-    const stub = sinon.stub(consoleMenuActions, 'getDocumentation');
-    try {
-      const consoleMenuToggle = editor.find('[data-test-subj~="toggleConsoleMenu"]').last();
-      consoleMenuToggle.simulate('click');
+    const stub = sandbox.stub(consoleMenuActions, 'getDocumentation');
+    const editor = doMount();
+    const consoleMenuToggle = editor.find('[data-test-subj~="toggleConsoleMenu"]').last();
+    consoleMenuToggle.simulate('click');
 
-      const docsButton = editor.find('[data-test-subj~="consoleMenuOpenDocs"]').last();
-      docsButton.simulate('click');
+    const docsButton = editor.find('[data-test-subj~="consoleMenuOpenDocs"]').last();
+    docsButton.simulate('click');
 
-      expect(stub.called).toBe(true);
-      expect(stub.callCount).toBe(1);
-    } finally {
-      stub.restore();
-    }
+    expect(stub.callCount).toBe(1);
   });
 
   it('prompts auto-indent', () => {
-    const stub = sinon.stub(consoleMenuActions, 'autoIndent');
-    try {
-      const consoleMenuToggle = editor.find('[data-test-subj~="toggleConsoleMenu"]').last();
-      consoleMenuToggle.simulate('click');
+    const stub = sandbox.stub(consoleMenuActions, 'autoIndent');
+    const editor = doMount();
+    const consoleMenuToggle = editor.find('[data-test-subj~="toggleConsoleMenu"]').last();
+    consoleMenuToggle.simulate('click');
 
-      const autoIndentButton = editor.find('[data-test-subj~="consoleMenuAutoIndent"]').last();
-      autoIndentButton.simulate('click');
+    const autoIndentButton = editor.find('[data-test-subj~="consoleMenuAutoIndent"]').last();
+    autoIndentButton.simulate('click');
 
-      expect(stub.called).toBe(true);
-      expect(stub.callCount).toBe(1);
-    } finally {
-      stub.restore();
-    }
+    expect(stub.callCount).toBe(1);
   });
 });
