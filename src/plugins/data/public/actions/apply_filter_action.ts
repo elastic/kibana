@@ -21,11 +21,11 @@ import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '../../../kibana_react/public';
 import { IAction, createAction, IncompatibleActionError } from '../../../ui_actions/public';
 import { getOverlays, getIndexPatterns } from '../services';
+import { applyFiltersPopover } from '../ui/apply_filters';
 import {
   esFilters,
   FilterManager,
   TimefilterContract,
-  applyFiltersPopover,
   changeTimeFilter,
   extractTimeFilter,
 } from '..';
