@@ -3,6 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export type ResolverState = boolean;
+export interface ResolverState {
+  camera: CameraState;
+}
 
 export { ResolverAction } from './actions';
+
+export interface CameraState {
+  readonly zoomLevel: number;
+  readonly panningOffset: readonly [number, number];
+  readonly rasterSize: readonly [number, number];
+}
+
+export type Vector2 = readonly [number, number];

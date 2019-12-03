@@ -3,11 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Reducer, combineReducers } from 'redux';
+import { cameraReducer } from './camera/reducer';
 import { ResolverState, ResolverAction } from '../types';
-export function reducer(state: ResolverState = true, action: ResolverAction) {
-  if (action.type === 'shut') {
-    return state;
-  } else {
-    return !state;
-  }
-}
+
+export const resolverReducer: Reducer<ResolverState, ResolverAction> = combineReducers({
+  camera: cameraReducer,
+});

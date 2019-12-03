@@ -4,12 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createStore } from 'redux';
-import { resolverReducer } from './reducer';
-
-export const storeFactory = () => {
-  const store = createStore(resolverReducer, undefined);
-  return {
-    store,
-  };
-};
+export { cameraReducer } from './reducer';
+export { CameraAction } from './action';
