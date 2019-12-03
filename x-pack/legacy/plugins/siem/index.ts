@@ -23,6 +23,8 @@ import {
   DEFAULT_INTERVAL_VALUE,
   DEFAULT_FROM,
   DEFAULT_TO,
+  DEFAULT_SIGNALS_INDEX,
+  DEFAULT_SIGNALS_INDEX_KEY,
 } from './common/constants';
 import { defaultIndexPattern } from './default_index_pattern';
 
@@ -32,12 +34,7 @@ export const siem = (kibana: any) => {
     id: APP_ID,
     configPrefix: 'xpack.siem',
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch'],
-    // Uncomment these lines to turn on alerting and action for detection engine and comment the other
-    // require statement out. These are hidden behind feature flags at the moment so if you turn
-    // these on without the feature flags turned on then Kibana will crash since we are a legacy plugin
-    // and legacy plugins cannot have optional requirements.
-    // require: ['kibana', 'elasticsearch', 'alerting', 'actions'],
+    require: ['kibana', 'elasticsearch', 'alerting', 'actions'],
     uiExports: {
       app: {
         description: i18n.translate('xpack.siem.securityDescription', {
@@ -102,6 +99,18 @@ export const siem = (kibana: any) => {
           description: i18n.translate('xpack.siem.uiSettings.defaultIndexDescription', {
             defaultMessage:
               '<p>Comma-delimited list of Elasticsearch indices from which the SIEM app collects events.</p>',
+          }),
+          category: ['siem'],
+          requiresPageReload: true,
+        },
+        [DEFAULT_SIGNALS_INDEX_KEY]: {
+          name: i18n.translate('xpack.siem.uiSettings.defaultSignalsIndexLabel', {
+            defaultMessage: 'Elasticsearch signals index',
+          }),
+          value: DEFAULT_SIGNALS_INDEX,
+          description: i18n.translate('xpack.siem.uiSettings.defaultSignalsIndexDescription', {
+            defaultMessage:
+              '<p>Elasticsearch signals index from which outputted signals will appear by default</p>',
           }),
           category: ['siem'],
           requiresPageReload: true,

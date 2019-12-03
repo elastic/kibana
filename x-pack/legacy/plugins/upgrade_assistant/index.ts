@@ -43,11 +43,12 @@ export function upgradeAssistant(kibana: any) {
     init(server: Legacy.Server) {
       // Add server routes and initialize the plugin here
       const instance = plugin({} as any);
+      const { usageCollection } = server.newPlatform.setup.plugins;
       instance.setup(server.newPlatform.setup.core, {
+        usageCollection,
         __LEGACY: {
           // Legacy objects
           events: server.events,
-          usage: server.usage,
           savedObjects: server.savedObjects,
 
           // Legacy functions

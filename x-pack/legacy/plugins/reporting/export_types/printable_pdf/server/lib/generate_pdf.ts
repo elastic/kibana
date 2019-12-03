@@ -11,24 +11,12 @@ import { LevelLogger } from '../../../../server/lib';
 import { ServerFacade, ConditionalHeaders } from '../../../../types';
 // @ts-ignore untyped module
 import { pdf } from './pdf';
-import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
 import { createLayout } from '../../../common/layouts';
-import { TimeRange } from '../../../common/lib/screenshots/types';
+import { ScreenshotResults } from '../../../common/lib/screenshots/types';
 import { LayoutInstance, LayoutParams } from '../../../common/layouts/layout';
 
-interface ScreenshotData {
-  base64EncodedData: string;
-  title: string;
-  description: string;
-}
-
-interface UrlScreenshot {
-  screenshots: ScreenshotData[];
-  timeRange: TimeRange;
-}
-
-const getTimeRange = (urlScreenshots: UrlScreenshot[]) => {
+const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
   const grouped = groupBy(urlScreenshots.map(u => u.timeRange));
   const values = Object.values(grouped);
   if (values.length === 1) {
@@ -38,7 +26,7 @@ const getTimeRange = (urlScreenshots: UrlScreenshot[]) => {
   return null;
 };
 
-function generatePdfObservableFn(server: ServerFacade) {
+export function generatePdfObservableFactory(server: ServerFacade) {
   const screenshotsObservable = screenshotsObservableFactory(server);
   const captureConcurrency = 1;
 
@@ -49,20 +37,16 @@ function generatePdfObservableFn(server: ServerFacade) {
     browserTimezone: string,
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams,
-    logo: string
+    logo?: string
   ) {
     const layout = createLayout(server, layoutParams) as LayoutInstance;
-
     const screenshots$ = Rx.from(urls).pipe(
       mergeMap(
         url => screenshotsObservable({ logger, url, conditionalHeaders, layout, browserTimezone }),
         captureConcurrency
-      )
-    );
-
-    return screenshots$.pipe(
+      ),
       toArray(),
-      mergeMap(async (urlScreenshots: UrlScreenshot[]) => {
+      mergeMap(async (urlScreenshots: ScreenshotResults[]) => {
         const pdfOutput = pdf.create(layout, logo);
 
         if (title) {
@@ -85,7 +69,7 @@ function generatePdfObservableFn(server: ServerFacade) {
         return buffer;
       })
     );
+
+    return screenshots$;
   };
 }
-
-export const generatePdfObservableFactory = oncePerServer(generatePdfObservableFn);

@@ -109,7 +109,7 @@ interface ColorProps {
   color: string;
 }
 
-const SquareOuter = euiStyled<ColorProps, 'div'>('div')`
+const SquareOuter = euiStyled.div<ColorProps>`
   position: absolute;
   top: 4px;
   left: 4px;
@@ -120,7 +120,7 @@ const SquareOuter = euiStyled<ColorProps, 'div'>('div')`
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
 `;
 
-const SquareInner = euiStyled<ColorProps, 'div'>('div')`
+const SquareInner = euiStyled.div<ColorProps>`
   cursor: pointer;
   position: absolute;
   top: 0;
@@ -154,7 +154,7 @@ const ValueInner = euiStyled.button`
   }
 `;
 
-const SquareTextContent = euiStyled<ColorProps, 'div'>('div')`
+const SquareTextContent = euiStyled.div<ColorProps>`
   text-align: center;
   width: 100%;
   overflow: hidden;

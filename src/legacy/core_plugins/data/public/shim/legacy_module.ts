@@ -21,7 +21,7 @@ import { once } from 'lodash';
 
 // @ts-ignore
 import { uiModules } from 'ui/modules';
-import { IndexPatterns } from '../index_patterns/index_patterns';
+import { IndexPatterns } from '../';
 
 /** @internal */
 export const initLegacyModule = once((indexPatterns: IndexPatterns): void => {

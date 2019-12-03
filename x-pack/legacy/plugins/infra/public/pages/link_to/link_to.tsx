@@ -19,7 +19,7 @@ interface LinkToPageProps {
 
 const ITEM_TYPES = inventoryModels.map(m => m.id).join('|');
 
-export const LinkToPage: React.SFC<LinkToPageProps> = props => (
+export const LinkToPage: React.FC<LinkToPageProps> = props => (
   <Switch>
     <Route
       path={`${props.match.url}/:sourceId?/:nodeType(${ITEM_TYPES})-logs/:nodeId`}

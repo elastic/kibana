@@ -249,7 +249,7 @@ Array [
               >
                 <button
                   aria-checked="false"
-                  aria-describedby="mockId"
+                  aria-labelledby="mockId"
                   class="euiSwitch__button"
                   data-test-subj="remoteClusterFormSkipUnavailableFormToggle"
                   id="mockId"
@@ -508,7 +508,7 @@ Array [
       >
         <button
           aria-checked="false"
-          aria-describedby="mockId"
+          aria-labelledby="mockId"
           class="euiSwitch__button"
           data-test-subj="remoteClusterFormSkipUnavailableFormToggle"
           id="mockId"
