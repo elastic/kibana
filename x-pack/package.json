@@ -1,6 +1,6 @@
 {
   "name": "x-pack",
-  "version": "7.5.0",
+  "version": "7.5.1",
   "author": "Elastic",
   "private": true,
   "license": "Elastic-License",
@@ -288,7 +288,7 @@
     "lz-string": "^1.4.4",
     "mapbox-gl": "1.3.1",
     "mapbox-gl-draw-rectangle-mode": "^1.0.4",
-    "markdown-it": "^8.4.1",
+    "markdown-it": "^10.0.0",
     "memoize-one": "^5.0.0",
     "mime": "^2.4.4",
     "moment": "^2.20.1",
