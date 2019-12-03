@@ -29,7 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { RenderDeps } from './application';
 import { DataStart } from '../../../data/public';
 import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
-import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public';
+import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationStart } from '../../../navigation/public';
 import { DashboardConstants } from './dashboard_constants';
@@ -49,7 +49,7 @@ export interface LegacyAngularInjectedDependencies {
 export interface DashboardPluginStartDependencies {
   data: DataStart;
   npData: NpDataStart;
-  embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
+  embeddables: IEmbeddableStart;
   navigation: NavigationStart;
   share: SharePluginStart;
 }
@@ -67,7 +67,7 @@ export class DashboardPlugin implements Plugin {
     dataStart: DataStart;
     npDataStart: NpDataStart;
     savedObjectsClient: SavedObjectsClientContract;
-    embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
+    embeddables: IEmbeddableStart;
     navigation: NavigationStart;
     share: SharePluginStart;
   } | null = null;
@@ -104,7 +104,7 @@ export class DashboardPlugin implements Plugin {
           chrome: contextCore.chrome,
           addBasePath: contextCore.http.basePath.prepend,
           uiSettings: contextCore.uiSettings,
-          savedQueryService: dataStart.search.services.savedQueryService,
+          savedQueryService: npDataStart.query.savedQueries,
           embeddables,
           dashboardCapabilities: contextCore.application.capabilities.dashboard,
           localStorage: new Storage(localStorage),
