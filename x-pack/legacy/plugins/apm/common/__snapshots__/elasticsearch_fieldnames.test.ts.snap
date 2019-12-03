@@ -82,26 +82,7 @@ exports[`Error SPAN_SUBTYPE 1`] = `undefined`;
 
 exports[`Error SPAN_TYPE 1`] = `undefined`;
 
-exports[`Error TIMESTAMP 1`] = `
-Object {
-  "us": 1337,
-}
-`;
-
-exports[`Error TRACE 1`] = `
-Object {
-  "id": "trace id",
-}
-`;
-
 exports[`Error TRACE_ID 1`] = `"trace id"`;
-
-exports[`Error TRANSACTION 1`] = `
-Object {
-  "id": "transaction id",
-  "type": "request",
-}
-`;
 
 exports[`Error TRANSACTION_BREAKDOWN_COUNT 1`] = `undefined`;
 
@@ -207,25 +188,7 @@ exports[`Span SPAN_SUBTYPE 1`] = `"my subtype"`;
 
 exports[`Span SPAN_TYPE 1`] = `"span type"`;
 
-exports[`Span TIMESTAMP 1`] = `
-Object {
-  "us": 1337,
-}
-`;
-
-exports[`Span TRACE 1`] = `
-Object {
-  "id": "trace id",
-}
-`;
-
 exports[`Span TRACE_ID 1`] = `"trace id"`;
-
-exports[`Span TRANSACTION 1`] = `
-Object {
-  "id": "transaction id",
-}
-`;
 
 exports[`Span TRANSACTION_BREAKDOWN_COUNT 1`] = `undefined`;
 
@@ -331,32 +294,7 @@ exports[`Transaction SPAN_SUBTYPE 1`] = `undefined`;
 
 exports[`Transaction SPAN_TYPE 1`] = `undefined`;
 
-exports[`Transaction TIMESTAMP 1`] = `
-Object {
-  "us": 1337,
-}
-`;
-
-exports[`Transaction TRACE 1`] = `
-Object {
-  "id": "trace id",
-}
-`;
-
 exports[`Transaction TRACE_ID 1`] = `"trace id"`;
-
-exports[`Transaction TRANSACTION 1`] = `
-Object {
-  "duration": Object {
-    "us": 1337,
-  },
-  "id": "transaction id",
-  "name": "transaction name",
-  "result": "transaction result",
-  "sampled": true,
-  "type": "transaction type",
-}
-`;
 
 exports[`Transaction TRANSACTION_BREAKDOWN_COUNT 1`] = `undefined`;
 

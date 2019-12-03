@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const TIMESTAMP = 'timestamp';
-
 export const SERVICE_NAME = 'service.name';
 export const SERVICE_ENVIRONMENT = 'service.environment';
 export const SERVICE_AGENT_NAME = 'agent.name';
@@ -19,7 +17,6 @@ export const OBSERVER_VERSION_MAJOR = 'observer.version_major';
 export const OBSERVER_LISTENING = 'observer.listening';
 export const PROCESSOR_EVENT = 'processor.event';
 
-export const TRANSACTION = 'transaction';
 export const TRANSACTION_DURATION = 'transaction.duration.us';
 export const TRANSACTION_TYPE = 'transaction.type';
 export const TRANSACTION_RESULT = 'transaction.result';
@@ -29,7 +26,6 @@ export const TRANSACTION_SAMPLED = 'transaction.sampled';
 export const TRANSACTION_BREAKDOWN_COUNT = 'transaction.breakdown.count';
 export const TRANSACTION_PAGE_URL = 'transaction.page.url';
 
-export const TRACE = 'trace';
 export const TRACE_ID = 'trace.id';
 
 export const SPAN_DURATION = 'span.duration.us';

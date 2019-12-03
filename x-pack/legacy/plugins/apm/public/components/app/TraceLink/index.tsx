@@ -19,10 +19,11 @@ const CentralizedContainer = styled.div`
   display: flex;
 `;
 
-const redirectToTransactionDetailPage = (
-  transaction: Transaction,
-  { rangeFrom, rangeTo }: Partial<QueryParams>
-) => {
+const redirectToTransactionDetailPage = ({
+  transaction,
+  rangeFrom,
+  rangeTo
+}: { transaction: Transaction } & Partial<QueryParams>) => {
   const dateRange = rangeFrom && rangeTo ? { rangeFrom, rangeTo } : {};
   return url.format({
     pathname: `/services/${transaction.service.name}/transactions/view`,
@@ -65,7 +66,8 @@ export const TraceLink = () => {
   );
   if (traceId && status === FETCH_STATUS.SUCCESS) {
     const to = data.transaction
-      ? redirectToTransactionDetailPage(data.transaction, {
+      ? redirectToTransactionDetailPage({
+          transaction: data.transaction,
           rangeFrom,
           rangeTo
         })

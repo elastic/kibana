@@ -7,11 +7,7 @@
 import {
   PROCESSOR_EVENT,
   TRACE_ID,
-  PARENT_ID,
-  SERVICE_NAME,
-  TRACE,
-  TRANSACTION,
-  TIMESTAMP
+  PARENT_ID
 } from '../../../../common/elasticsearch_fieldnames';
 import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import { Setup } from '../../helpers/setup_request';
@@ -22,7 +18,6 @@ export async function getTransactionByTraceId(traceId: string, setup: Setup) {
   const params = {
     index: indices['apm_oss.transactionIndices'],
     body: {
-      _source: [TIMESTAMP, TRANSACTION, SERVICE_NAME, TRACE],
       size: 1,
       query: {
         bool: {
