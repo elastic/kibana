@@ -31,7 +31,7 @@ export const ml = (kibana: any) => {
     publicDir: resolve(__dirname, 'public'),
 
     uiExports: {
-      // managementSections: ['plugins/ml/management'],
+      managementSections: ['plugins/ml/application/management'],
       app: {
         title: i18n.translate('xpack.ml.mlNavTitle', {
           defaultMessage: 'Machine Learning',
