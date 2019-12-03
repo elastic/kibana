@@ -56,26 +56,35 @@ exports[`<Settings /> can navigate Autoplay Settings 1`] = `
                       class="euiContextMenu__itemLayout"
                     >
                       <svg
-                        class="euiIcon euiIcon--medium euiIcon-isLoading euiContextMenu__icon"
+                        class="euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__icon"
                         focusable="false"
                         height="16"
                         viewBox="0 0 16 16"
                         width="16"
                         xmlns="http://www.w3.org/2000/svg"
-                      />
+                      >
+                        <path
+                          d="M4.608 3.063C4.345 2.895 4 3.089 4 3.418v9.167c0 .329.345.523.608.356l7.2-4.584a.426.426 0 0 0 0-.711l-7.2-4.583zm.538-.844l7.2 4.583a1.426 1.426 0 0 1 0 2.399l-7.2 4.583C4.21 14.38 3 13.696 3 12.585V3.418C3 2.307 4.21 1.624 5.146 2.22z"
+                        />
+                      </svg>
                       <span
                         class="euiContextMenuItem__text"
                       >
                         Auto Play
                       </span>
                       <svg
-                        class="euiIcon euiIcon--medium euiIcon-isLoading euiContextMenu__arrow"
+                        class="euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__arrow"
                         focusable="false"
                         height="16"
                         viewBox="0 0 16 16"
                         width="16"
                         xmlns="http://www.w3.org/2000/svg"
-                      />
+                      >
+                        <path
+                          d="M5.157 13.069l4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771z"
+                          fill-rule="nonzero"
+                        />
+                      </svg>
                     </span>
                   </button>
                   <button
@@ -86,26 +95,35 @@ exports[`<Settings /> can navigate Autoplay Settings 1`] = `
                       class="euiContextMenu__itemLayout"
                     >
                       <svg
-                        class="euiIcon euiIcon--medium euiIcon-isLoading euiContextMenu__icon"
+                        class="euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__icon"
                         focusable="false"
                         height="16"
                         viewBox="0 0 16 16"
                         width="16"
                         xmlns="http://www.w3.org/2000/svg"
-                      />
+                      >
+                        <path
+                          d="M0 6h4v4H0V6zm1 1v2h2V7H1zm5-1h4v4H6V6zm1 1v2h2V7H7zm5-1h4v4h-4V6zm1 3h2V7h-2v2z"
+                        />
+                      </svg>
                       <span
                         class="euiContextMenuItem__text"
                       >
                         Toolbar
                       </span>
                       <svg
-                        class="euiIcon euiIcon--medium euiIcon-isLoading euiContextMenu__arrow"
+                        class="euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__arrow"
                         focusable="false"
                         height="16"
                         viewBox="0 0 16 16"
                         width="16"
                         xmlns="http://www.w3.org/2000/svg"
-                      />
+                      >
+                        <path
+                          d="M5.157 13.069l4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771z"
+                          fill-rule="nonzero"
+                        />
+                      </svg>
                     </span>
                   </button>
                 </div>
@@ -266,13 +284,18 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
                   class="euiContextMenu__itemLayout"
                 >
                   <svg
-                    class="euiIcon euiIcon--medium euiIcon-isLoading euiContextMenu__icon"
+                    class="euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__icon"
                     focusable="false"
                     height="16"
                     viewBox="0 0 16 16"
                     width="16"
                     xmlns="http://www.w3.org/2000/svg"
-                  />
+                  >
+                    <path
+                      d="M10.843 13.069L6.232 8.384a.546.546 0 0 1 0-.768l4.61-4.685a.552.552 0 0 0 0-.771.53.53 0 0 0-.759 0l-4.61 4.684a1.65 1.65 0 0 0 0 2.312l4.61 4.684a.53.53 0 0 0 .76 0 .552.552 0 0 0 0-.771z"
+                      fill-rule="nonzero"
+                    />
+                  </svg>
                   <span
                     class="euiContextMenu__text"
                   >
@@ -307,21 +330,30 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
                             class="euiSwitch__track"
                           >
                             <svg
-                              class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
+                              class="euiIcon euiIcon--medium euiIcon-isLoaded euiSwitch__icon"
                               focusable="false"
                               height="16"
                               viewBox="0 0 16 16"
                               width="16"
                               xmlns="http://www.w3.org/2000/svg"
-                            />
+                            >
+                              <path
+                                d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
+                              />
+                            </svg>
                             <svg
-                              class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
+                              class="euiIcon euiIcon--medium euiIcon-isLoaded euiSwitch__icon euiSwitch__icon--checked"
                               focusable="false"
                               height="16"
                               viewBox="0 0 16 16"
                               width="16"
                               xmlns="http://www.w3.org/2000/svg"
-                            />
+                            >
+                              <path
+                                d="M6.5 12a.502.502 0 0 1-.354-.146l-4-4a.502.502 0 0 1 .708-.708L6.5 10.793l6.646-6.647a.502.502 0 0 1 .708.708l-7 7A.502.502 0 0 1 6.5 12"
+                                fill-rule="evenodd"
+                              />
+                            </svg>
                           </span>
                         </span>
                       </button>
@@ -485,26 +517,35 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 1`] =
                       class="euiContextMenu__itemLayout"
                     >
                       <svg
-                        class="euiIcon euiIcon--medium euiIcon-isLoading euiContextMenu__icon"
+                        class="euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__icon"
                         focusable="false"
                         height="16"
                         viewBox="0 0 16 16"
                         width="16"
                         xmlns="http://www.w3.org/2000/svg"
-                      />
+                      >
+                        <path
+                          d="M4.608 3.063C4.345 2.895 4 3.089 4 3.418v9.167c0 .329.345.523.608.356l7.2-4.584a.426.426 0 0 0 0-.711l-7.2-4.583zm.538-.844l7.2 4.583a1.426 1.426 0 0 1 0 2.399l-7.2 4.583C4.21 14.38 3 13.696 3 12.585V3.418C3 2.307 4.21 1.624 5.146 2.22z"
+                        />
+                      </svg>
                       <span
                         class="euiContextMenuItem__text"
                       >
                         Auto Play
                       </span>
                       <svg
-                        class="euiIcon euiIcon--medium euiIcon-isLoading euiContextMenu__arrow"
+                        class="euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__arrow"
                         focusable="false"
                         height="16"
                         viewBox="0 0 16 16"
                         width="16"
                         xmlns="http://www.w3.org/2000/svg"
-                      />
+                      >
+                        <path
+                          d="M5.157 13.069l4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771z"
+                          fill-rule="nonzero"
+                        />
+                      </svg>
                     </span>
                   </button>
                   <button
@@ -515,26 +556,35 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 1`] =
                       class="euiContextMenu__itemLayout"
                     >
                       <svg
-                        class="euiIcon euiIcon--medium euiIcon-isLoading euiContextMenu__icon"
+                        class="euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__icon"
                         focusable="false"
                         height="16"
                         viewBox="0 0 16 16"
                         width="16"
                         xmlns="http://www.w3.org/2000/svg"
-                      />
+                      >
+                        <path
+                          d="M0 6h4v4H0V6zm1 1v2h2V7H1zm5-1h4v4H6V6zm1 1v2h2V7H7zm5-1h4v4h-4V6zm1 3h2V7h-2v2z"
+                        />
+                      </svg>
                       <span
                         class="euiContextMenuItem__text"
                       >
                         Toolbar
                       </span>
                       <svg
-                        class="euiIcon euiIcon--medium euiIcon-isLoading euiContextMenu__arrow"
+                        class="euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__arrow"
                         focusable="false"
                         height="16"
                         viewBox="0 0 16 16"
                         width="16"
                         xmlns="http://www.w3.org/2000/svg"
-                      />
+                      >
+                        <path
+                          d="M5.157 13.069l4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771z"
+                          fill-rule="nonzero"
+                        />
+                      </svg>
                     </span>
                   </button>
                 </div>

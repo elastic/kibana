@@ -504,23 +504,28 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                       className="euiStepNumber__icon"
                       type="check"
                     >
-                      <EuiIconEmpty
+                      <EuiIconCheck
                         aria-label="complete"
-                        className="euiIcon euiIcon--medium euiIcon-isLoading euiStepNumber__icon"
+                        className="euiIcon euiIcon--medium euiIcon-isLoaded euiStepNumber__icon"
                         focusable="false"
                         style={null}
                       >
                         <svg
                           aria-label="complete"
-                          className="euiIcon euiIcon--medium euiIcon-isLoading euiStepNumber__icon"
+                          className="euiIcon euiIcon--medium euiIcon-isLoaded euiStepNumber__icon"
                           focusable="false"
                           height={16}
                           style={null}
                           viewBox="0 0 16 16"
                           width={16}
                           xmlns="http://www.w3.org/2000/svg"
-                        />
-                      </EuiIconEmpty>
+                        >
+                          <path
+                            d="M6.5 12a.502.502 0 0 1-.354-.146l-4-4a.502.502 0 0 1 .708-.708L6.5 10.793l6.646-6.647a.502.502 0 0 1 .708.708l-7 7A.502.502 0 0 1 6.5 12"
+                            fillRule="evenodd"
+                          />
+                        </svg>
+                      </EuiIconCheck>
                     </EuiIcon>
                   </EuiI18n>
                 </div>
