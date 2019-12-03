@@ -57,7 +57,7 @@ describe('worldToRaster', () => {
         expect(worldToRaster(store.getState())([0, 0])).toEqual([150, 100]);
       });
     });
-    describe('when the user has panned up and to the right by 50', () => {
+    describe('when the user has panned to the right and up by 50', () => {
       beforeEach(() => {
         const action: UserPanned = { type: 'userPanned', payload: [-50, -50] };
         store.dispatch(action);
@@ -72,6 +72,32 @@ describe('worldToRaster', () => {
         expect(worldToRaster(store.getState())([60, -60]).toString()).toEqual(
           [160, 210].toString()
         );
+      });
+    });
+    describe('when the user has panned to the right by 350 and up by 250', () => {
+      beforeEach(() => {
+        const action: UserPanned = { type: 'userPanned', payload: [-350, -250] };
+        store.dispatch(action);
+      });
+      describe('when the user has scaled to 2', () => {
+        // the viewport will only cover half, or 150x100 instead of 300x200
+        beforeEach(() => {
+          const action: UserScaled = { type: 'userScaled', payload: [2, 2] };
+          store.dispatch(action);
+        });
+        // we expect the viewport to be
+        // minX = 350 - (150/2) = 275
+        // maxX = 350 + (150/2) = 425
+        // minY = 250 - (100/2) = 200
+        // maxY = 250 + (100/2) = 300
+        it('should convert 350,250 in world space to 150,100 (center) in raster space', () => {
+          expect(worldToRaster(store.getState())([350, 250]).toString()).toEqual(
+            [150, 100].toString()
+          );
+        });
+        it('should convert 275,300 in world space to 0,0 (top left) in raster space', () => {
+          expect(worldToRaster(store.getState())([275, 300]).toString()).toEqual([0, 0].toString());
+        });
       });
     });
   });
