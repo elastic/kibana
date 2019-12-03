@@ -215,7 +215,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
               <SnapshotDeleteProvider>
                 {deleteSnapshotPrompt => {
                   const isDeleteDisabled = Boolean(lastSuccessfulManagedSnapshot)
-                    ? snapshot === lastSuccessfulManagedSnapshot.snapshot
+                    ? snapshot === lastSuccessfulManagedSnapshot!.snapshot
                     : false;
                   const label = isDeleteDisabled
                     ? i18n.translate(
@@ -287,7 +287,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
     onSelectionChange: (newSelectedItems: SnapshotDetails[]) => setSelectedItems(newSelectedItems),
     selectable: ({ snapshot }: SnapshotDetails) =>
       Boolean(lastSuccessfulManagedSnapshot)
-        ? snapshot !== lastSuccessfulManagedSnapshot.snapshot
+        ? snapshot !== lastSuccessfulManagedSnapshot!.snapshot
         : true,
     selectableMessage: (selectable: boolean) => {
       if (!selectable) {
