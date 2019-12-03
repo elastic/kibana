@@ -10,12 +10,14 @@ import { MockedProvider } from 'react-apollo/test-utils';
 
 import { useKibanaCore } from '../../lib/compose/kibana_core';
 import { wait } from '../../lib/helpers';
-import { TestProviders } from '../../mock';
+import { mockIndexPattern, TestProviders } from '../../mock';
 import { mockUiSettings } from '../../mock/ui_settings';
 
 import { mockEventViewerResponse } from './mock';
 import { StatefulEventsViewer } from '.';
 import { useFetchIndexPatterns } from '../../containers/detection_engine/rules/fetch_index_patterns';
+import { mockBrowserFields } from '../../containers/source/mock';
+import { eventsDefaultModel } from './default_model';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');
 
@@ -29,8 +31,8 @@ const mockUseFetchIndexPatterns: jest.Mock = useFetchIndexPatterns as jest.Mock;
 jest.mock('../../containers/detection_engine/rules/fetch_index_patterns');
 mockUseFetchIndexPatterns.mockImplementation(() => [
   {
-    browserFields: {},
-    indexPatterns: {},
+    browserFields: mockBrowserFields,
+    indexPatterns: mockIndexPattern,
   },
 ]);
 
@@ -42,7 +44,12 @@ describe('StatefulEventsViewer', () => {
     const wrapper = mount(
       <TestProviders>
         <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer end={to} id={'test-stateful-events-viewer'} start={from} />
+          <StatefulEventsViewer
+            defaultModel={eventsDefaultModel}
+            end={to}
+            id={'test-stateful-events-viewer'}
+            start={from}
+          />
         </MockedProvider>
       </TestProviders>
     );
@@ -62,7 +69,12 @@ describe('StatefulEventsViewer', () => {
     const wrapper = mount(
       <TestProviders>
         <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer end={to} id={'test-stateful-events-viewer'} start={from} />
+          <StatefulEventsViewer
+            defaultModel={eventsDefaultModel}
+            end={to}
+            id={'test-stateful-events-viewer'}
+            start={from}
+          />
         </MockedProvider>
       </TestProviders>
     );
@@ -82,7 +94,12 @@ describe('StatefulEventsViewer', () => {
     const wrapper = mount(
       <TestProviders>
         <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer end={to} id={'test-stateful-events-viewer'} start={from} />
+          <StatefulEventsViewer
+            defaultModel={eventsDefaultModel}
+            end={to}
+            id={'test-stateful-events-viewer'}
+            start={from}
+          />
         </MockedProvider>
       </TestProviders>
     );

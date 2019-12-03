@@ -5,27 +5,29 @@
  */
 
 import { isEqual } from 'lodash/fp';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
+import chrome from 'ui/chrome';
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
-import { timelineActions, inputsActions } from '../../store/actions';
-import { KqlMode, TimelineModel, timelineTypeDefaultsMapping } from '../../store/timeline/model';
+import { inputsActions, timelineActions } from '../../store/actions';
+import { KqlMode, SubsetTimelineModel, TimelineModel } from '../../store/timeline/model';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { DataProvider } from '../timeline/data_providers/data_provider';
 import { Sort } from '../timeline/body/sort';
 import { OnChangeItemsPerPage } from '../timeline/events';
-import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
+import { esFilters, Query } from '../../../../../../../src/plugins/data/public';
 
 import { EventsViewer } from './events_viewer';
 import { InputsModelId } from '../../store/inputs/constants';
-import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
 import { useFetchIndexPatterns } from '../../containers/detection_engine/rules/fetch_index_patterns';
-import { EVENTS_VIEWER } from '../../store/timeline/types';
 import { TimelineTypeContextProps } from '../timeline/timeline_context';
+import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 
 export interface OwnProps {
   defaultIndices?: string[];
+  defaultFilters?: esFilters.Filter[];
+  defaultModel: SubsetTimelineModel;
   end: number;
   id: string;
   start: number;
@@ -81,7 +83,9 @@ const StatefulEventsViewerComponent = React.memo<Props>(
     createTimeline,
     columns,
     dataProviders,
-    defaultIndices = [],
+    defaultFilters = {},
+    defaultModel,
+    defaultIndices,
     deleteEventQuery,
     end,
     filters,
@@ -98,14 +102,15 @@ const StatefulEventsViewerComponent = React.memo<Props>(
     timelineTypeContext = {
       showCheckboxes: false,
       showRowRenderers: true,
-      timelineType: EVENTS_VIEWER,
     },
     updateItemsPerPage,
     upsertColumn,
     utilityBar,
   }) => {
     const [showInspect, setShowInspect] = useState(false);
-    const [{ browserFields, indexPatterns }] = useFetchIndexPatterns(defaultIndices);
+    const [{ browserFields, indexPatterns }] = useFetchIndexPatterns(
+      defaultIndices ?? chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY)
+    );
 
     useEffect(() => {
       if (createTimeline != null) {
@@ -151,14 +156,11 @@ const StatefulEventsViewerComponent = React.memo<Props>(
         {browserFields && indexPatterns && (
           <EventsViewer
             browserFields={browserFields}
-            columns={
-              timelineTypeDefaultsMapping[timelineTypeContext.timelineType]?.columns ??
-              defaultHeaders
-            }
+            columns={defaultModel.columns}
             id={id}
             dataProviders={dataProviders!}
             end={end}
-            filters={filters}
+            filters={{ ...filters, ...defaultFilters }}
             headerFilterGroup={headerFilterGroup}
             indexPattern={indexPatterns ?? {}}
             isLive={isLive}
@@ -202,9 +204,9 @@ const makeMapStateToProps = () => {
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const getEvents = timelineSelectors.getEventsByIdSelector();
-  const mapStateToProps = (state: State, { id, timelineTypeContext }: OwnProps) => {
+  const mapStateToProps = (state: State, { id, defaultModel }: OwnProps) => {
     const input: inputsModel.InputsRange = getInputsTimeline(state);
-    const events: TimelineModel = getEvents(state, id, timelineTypeContext?.timelineType);
+    const events: TimelineModel = getEvents(state, id) ?? defaultModel;
     const { columns, dataProviders, itemsPerPage, itemsPerPageOptions, kqlMode, sort } = events;
 
     return {

@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { createContext, useContext, useEffect, memo, useState } from 'react';
-import { DEFAULT, TimelineType } from '../../store/timeline/types';
+import React, { createContext, memo, useContext, useEffect, useState } from 'react';
 
 const initTimelineContext = false;
 export const TimelineContext = createContext<boolean>(initTimelineContext);
@@ -20,7 +19,6 @@ export interface TimelineTypeContextProps {
   footerText?: string;
   showCheckboxes: boolean;
   showRowRenderers: boolean;
-  timelineType: TimelineType;
   title?: string;
 }
 const initTimelineType: TimelineTypeContextProps = {
@@ -28,7 +26,6 @@ const initTimelineType: TimelineTypeContextProps = {
   footerText: undefined,
   showCheckboxes: false,
   showRowRenderers: true,
-  timelineType: DEFAULT,
   title: undefined,
 };
 export const TimelineTypeContext = createContext<TimelineTypeContextProps>(initTimelineType);

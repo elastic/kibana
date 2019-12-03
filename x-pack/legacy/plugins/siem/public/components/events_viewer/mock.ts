@@ -5,7 +5,6 @@
  */
 
 import { noop } from 'lodash/fp';
-import { defaultIndexPattern } from '../../../default_index_pattern';
 import { timelineQuery } from '../../containers/timeline/index.gql_query';
 
 export const mockEventViewerResponse = [
@@ -26,12 +25,11 @@ export const mockEventViewerResponse = [
           'source.ip',
           'destination.ip',
         ],
-        filterQuery:
-          '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1566943856794}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1566857456791}}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}',
+        filterQuery: '',
         sourceId: 'default',
         pagination: { limit: 25, cursor: null, tiebreaker: null },
         sortField: { sortFieldId: '@timestamp', direction: 'desc' },
-        defaultIndex: defaultIndexPattern,
+        defaultIndex: 'filebeat-*,auditbeat-*,packetbeat-*',
         inspect: false,
       },
     },

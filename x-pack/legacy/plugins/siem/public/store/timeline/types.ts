@@ -25,12 +25,6 @@ export interface TimelineState {
   showCallOutUnauthorizedMsg: boolean;
 }
 
-// Types of Timelines for determining default columnHeaders
-export const DEFAULT = 'timeline';
-export const EVENTS_VIEWER = 'events-viewer';
-export const SIGNALS_VIEWER = 'signals-viewer';
-export type TimelineType = typeof DEFAULT | typeof EVENTS_VIEWER | typeof SIGNALS_VIEWER;
-
 export interface ActionTimeline extends Action<string> {
   payload: {
     id: string;

@@ -30,7 +30,7 @@ import { Body } from './index';
 import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
 import { timelineActions, appActions } from '../../../store/actions';
-import { TimelineModel } from '../../../store/timeline/model';
+import { timelineDefaults, TimelineModel } from '../../../store/timeline/model';
 import { plainRowRenderer } from './renderers/plain_row_renderer';
 import { useTimelineTypeContext } from '../timeline_context';
 
@@ -206,7 +206,7 @@ const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const getNotesByIds = appSelectors.notesByIdsSelector();
   const mapStateToProps = (state: State, { browserFields, id }: OwnProps) => {
-    const timeline: TimelineModel = getTimeline(state, id);
+    const timeline: TimelineModel = getTimeline(state, id) ?? timelineDefaults;
     const { columns, eventIdToNoteIds, pinnedEventIds } = timeline;
 
     return {

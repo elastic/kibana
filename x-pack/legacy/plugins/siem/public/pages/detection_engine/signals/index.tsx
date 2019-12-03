@@ -11,8 +11,8 @@ import { ClosedSignals } from './components/closed_signals';
 import { GlobalTime } from '../../../containers/global_time';
 import { StatefulEventsViewer } from '../../../components/events_viewer';
 import * as i18n from './translations';
-import { SIGNALS_VIEWER } from '../../../store/timeline/types';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
+import { signalsDefaultModel } from './default_model';
 
 const SIGNALS_PAGE_TIMELINE_ID = 'signals-page';
 const FILTER_OPEN = 'open';
@@ -62,6 +62,7 @@ export const SignalsTable = React.memo(() => {
         {({ to, from, setQuery, deleteQuery, isInitializing }) => (
           <StatefulEventsViewer
             defaultIndices={[DEFAULT_SIGNALS_INDEX]}
+            defaultModel={signalsDefaultModel}
             end={to}
             headerFilterGroup={
               <SignalsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />
@@ -73,7 +74,6 @@ export const SignalsTable = React.memo(() => {
               footerText: i18n.TOTAL_COUNT_OF_SIGNALS,
               showCheckboxes: true,
               showRowRenderers: false,
-              timelineType: SIGNALS_VIEWER,
               title: i18n.SIGNALS_TABLE_TITLE,
             }}
             utilityBar={(totalCount: number) =>
