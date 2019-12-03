@@ -43,21 +43,21 @@ export const SIGNALS_HEADERS_RULE = i18n.translate(
 );
 
 export const SIGNALS_HEADERS_METHOD = i18n.translate(
-  'xpack.siem.eventsViewer.signals.defaultHeaders.ruleTitle',
+  'xpack.siem.eventsViewer.signals.defaultHeaders.methodTitle',
   {
     defaultMessage: 'Method',
   }
 );
 
 export const SIGNALS_HEADERS_SEVERITY = i18n.translate(
-  'xpack.siem.eventsViewer.signals.defaultHeaders.ruleTitle',
+  'xpack.siem.eventsViewer.signals.defaultHeaders.severityTitle',
   {
     defaultMessage: 'Severity',
   }
 );
 
 export const SIGNALS_HEADERS_RISK_SCORE = i18n.translate(
-  'xpack.siem.eventsViewer.signals.defaultHeaders.ruleTitle',
+  'xpack.siem.eventsViewer.signals.defaultHeaders.riskScoreTitle',
   {
     defaultMessage: 'Risk Score',
   }
