@@ -18,18 +18,18 @@
  */
 
 import { APICaller } from 'src/core/server/elasticsearch';
-import { Config } from 'src/core/server/config';
 import { retryCallCluster } from '../../../elasticsearch/retry_call_cluster';
 import { KibanaMigrator } from '../../migrations';
 import { SavedObjectsSchema } from '../../schema';
 import { getRootPropertiesObjects } from '../../mappings';
 import { SavedObjectsSerializer } from '../../serialization';
 import { SavedObjectsRepository } from '.';
+import { LegacyConfig } from '../../../legacy/config';
 
 export const createRepository = (
   migrator: KibanaMigrator,
   schema: SavedObjectsSchema,
-  config: Config,
+  config: LegacyConfig,
   indexName: string,
   callCluster: APICaller,
   extraTypes: string[] = []
