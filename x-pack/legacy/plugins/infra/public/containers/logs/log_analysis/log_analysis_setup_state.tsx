@@ -122,7 +122,7 @@ export const useAnalysisSetupState = ({
     return validatedIndices.reduce<ValidationIndicesUIError[]>((errors, index) => {
       return selectedIndexNames.includes(index.index) ? errors.concat(index.errors) : errors;
     }, []);
-  }, [selectedIndexNames, validatedIndices, validateIndicesRequest.state]);
+  }, [isValidating, validateIndicesRequest.state, selectedIndexNames, validatedIndices]);
 
   return {
     cleanupAndSetup,

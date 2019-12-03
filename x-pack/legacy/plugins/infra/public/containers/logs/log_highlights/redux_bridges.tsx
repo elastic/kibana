@@ -20,7 +20,7 @@ export const LogHighlightsStreamItemsBridge = withStreamItems(
     useEffect(() => {
       setStartKey(entriesStart);
       setEndKey(entriesEnd);
-    }, [entriesStart, entriesEnd]);
+    }, [entriesStart, entriesEnd, setStartKey, setEndKey]);
 
     return null;
   }
@@ -37,11 +37,11 @@ export const LogHighlightsPositionBridge = withLogPosition(
     const { setJumpToTarget, setVisibleMidpoint } = useContext(LogHighlightsState.Context);
     useEffect(() => {
       setVisibleMidpoint(visibleMidpoint);
-    }, [visibleMidpoint]);
+    }, [setVisibleMidpoint, visibleMidpoint]);
 
     useEffect(() => {
       setJumpToTarget(() => jumpToTargetPosition);
-    }, [jumpToTargetPosition]);
+    }, [jumpToTargetPosition, setJumpToTarget]);
 
     return null;
   }
@@ -53,7 +53,7 @@ export const LogHighlightsFilterQueryBridge = withLogFilter(
 
     useEffect(() => {
       setFilterQuery(serializedFilterQuery);
-    }, [serializedFilterQuery]);
+    }, [serializedFilterQuery, setFilterQuery]);
 
     return null;
   }
