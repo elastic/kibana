@@ -16,12 +16,19 @@ describe('worldToRaster', () => {
     store = createStore(cameraReducer, undefined);
   });
   describe('when the raster size is 300 x 200 pixels', () => {
+    let compare: (
+      worldPosition: [number, number],
+      expectedRasterPosition: [number, number]
+    ) => void;
     beforeEach(() => {
       const action: UserSetRasterSize = { type: 'userSetRasterSize', payload: [300, 200] };
       store.dispatch(action);
+      compare = (worldPosition: [number, number], expectedRasterPosition: [number, number]) => {
+        expect(worldToRaster(store.getState())(worldPosition)).toEqual(expectedRasterPosition);
+      };
     });
     it('should convert 0,0 (center) in world space to 150,100 in raster space', () => {
-      expect(worldToRaster(store.getState())([0, 0])).toEqual([150, 100]);
+      compare([0, 0], [150, 100]);
     });
     it('should convert 0,100 (top) in world space to 150,0 in raster space', () => {
       expect(worldToRaster(store.getState())([0, 100])).toEqual([150, 0]);
@@ -62,15 +69,13 @@ describe('worldToRaster', () => {
         store.dispatch(action);
       });
       it('should convert 0,0 (center) in world space to 100,150 in raster space', () => {
-        expect(worldToRaster(store.getState())([0, 0]).toString()).toEqual([100, 150].toString());
+        expect(worldToRaster(store.getState())([0, 0])).toEqual([100, 150]);
       });
       it('should convert 50,50 (right and up a bit) in world space to 150,100 (center) in raster space', () => {
-        expect(worldToRaster(store.getState())([50, 50]).toString()).toEqual([150, 100].toString());
+        expect(worldToRaster(store.getState())([50, 50])).toEqual([150, 100]);
       });
       it('should convert 60,-60 (right and down a bit) in world space to 160,210 (center) in raster space', () => {
-        expect(worldToRaster(store.getState())([60, -60]).toString()).toEqual(
-          [160, 210].toString()
-        );
+        expect(worldToRaster(store.getState())([60, -60])).toEqual([160, 210]);
       });
     });
     describe('when the user has panned to the right by 350 and up by 250', () => {
@@ -90,12 +95,10 @@ describe('worldToRaster', () => {
         // minY = 250 - (100/2) = 200
         // maxY = 250 + (100/2) = 300
         it('should convert 350,250 in world space to 150,100 (center) in raster space', () => {
-          expect(worldToRaster(store.getState())([350, 250]).toString()).toEqual(
-            [150, 100].toString()
-          );
+          expect(worldToRaster(store.getState())([350, 250])).toEqual([150, 100]);
         });
         it('should convert 275,300 in world space to 0,0 (top left) in raster space', () => {
-          expect(worldToRaster(store.getState())([275, 300]).toString()).toEqual([0, 0].toString());
+          expect(worldToRaster(store.getState())([275, 300])).toEqual([0, 0]);
         });
       });
     });
