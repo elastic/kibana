@@ -6,7 +6,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useReducer } from 'react';
 import styled from 'styled-components';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import {
@@ -25,6 +25,8 @@ import { useTrackPageview } from '../../../infra/public';
 import { getIndexPattern } from '../lib/adapters/index_pattern';
 import { combineFiltersAndUserSearch, stringifyKueries, toStaticIndexPattern } from '../lib/helper';
 import { AutocompleteProviderRegister, esKuery } from '../../../../../../src/plugins/data/public';
+import { SnapshotContext, snapshotInitialState } from '../contexts/snapshot_context';
+import { snapshotReducer } from '../state/reducers/snapshot';
 
 interface OverviewPageProps {
   basePath: string;
@@ -87,6 +89,8 @@ export const OverviewPage = ({
     }
   }, []);
 
+  const [snapshotState, snapshotDispatch] = useReducer(snapshotReducer, snapshotInitialState);
+
   useTrackPageview({ app: 'uptime', path: 'overview' });
   useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
 
@@ -127,7 +131,7 @@ export const OverviewPage = ({
   const linkParameters = stringifyUrlParams(params);
 
   return (
-    <Fragment>
+    <SnapshotContext.Provider value={{ ...snapshotState, dispatch: snapshotDispatch }}>
       <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={{}}>
         <EuiFlexGroup gutterSize="xs" wrap responsive>
           <EuiFlexItem grow={1} style={{ flexBasis: 500 }}>
@@ -171,6 +175,6 @@ export const OverviewPage = ({
           }}
         />
       </EmptyState>
-    </Fragment>
+    </SnapshotContext.Provider>
   );
 };

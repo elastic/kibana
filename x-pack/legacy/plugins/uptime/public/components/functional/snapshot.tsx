@@ -5,7 +5,7 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import React, { useEffect, useReducer, useContext } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { get } from 'lodash';
 import { Snapshot as SnapshotType } from '../../../common/runtime_types';
 import { DonutChart } from './charts';
@@ -17,9 +17,9 @@ import {
   fetchSnapshotCountSuccess,
   fetchSnapshotCountFail,
 } from '../../state/actions';
-import { SnapshotState, snapshotReducer } from '../../state/reducers/snapshot';
 import { UptimeSettingsContext, UptimeRefreshContext } from '../../contexts';
 import { fetchSnapshotCount } from '../../state/api';
+import { SnapshotContext } from '../../contexts/snapshot_context';
 
 const SNAPSHOT_CHART_WIDTH = 144;
 const SNAPSHOT_CHART_HEIGHT = 144;
@@ -88,31 +88,21 @@ interface ApiRequest {
   statusFilter?: string;
 }
 
-const initialState: SnapshotState = {
-  count: {
-    down: 0,
-    mixed: 0,
-    total: 0,
-    up: 0,
-  },
-  errors: [],
-  loading: false,
-};
-
 /**
  * This component visualizes a KPI and histogram chart to help users quickly
  * glean the status of their uptime environment.
  * @param props the props required by the component
  */
 export const Snapshot: React.FC<Props> = ({ height, loading }: Props) => {
-  const [state, reactDispatch] = useReducer(snapshotReducer, initialState);
   const { basePath } = useContext(UptimeSettingsContext);
   const { lastRefresh } = useContext(UptimeRefreshContext);
   const [getUrlParams] = useUrlParams();
   const { dateRangeStart, dateRangeEnd, filters, statusFilter } = getUrlParams();
+  const { dispatch, ...state } = useContext(SnapshotContext);
   useEffect(() => {
+    dispatch(fetchSnapshotCountAction(dateRangeStart, dateRangeEnd, filters, statusFilter));
     async function f(props: ApiRequest) {
-      reactDispatch(fetchSnapshotCountSuccess(await fetchSnapshotCount({ ...props })));
+      dispatch(fetchSnapshotCountSuccess(await fetchSnapshotCount({ ...props })));
     }
     try {
       f({
@@ -123,9 +113,8 @@ export const Snapshot: React.FC<Props> = ({ height, loading }: Props) => {
         statusFilter,
       });
     } catch (e) {
-      reactDispatch(fetchSnapshotCountFail(e));
+      dispatch(fetchSnapshotCountFail(e));
     }
-    reactDispatch(fetchSnapshotCountAction(dateRangeStart, dateRangeEnd, filters, statusFilter));
   }, [dateRangeStart, dateRangeEnd, filters, lastRefresh, statusFilter]);
   return <PresentationalComponent count={state.count} height={height} loading={loading} />;
 };
