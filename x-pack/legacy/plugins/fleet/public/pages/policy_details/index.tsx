@@ -125,7 +125,7 @@ export const PolicyDetailsPage: React.FC<Props> = ({
                       id="xpack.fleet.policyDetails.policyDetailsTitle"
                       defaultMessage="Policy '{id}'"
                       values={{
-                        name: policyId,
+                        id: policyId,
                       }}
                     />
                   )}
