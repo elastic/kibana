@@ -45,6 +45,16 @@ const stringifyQueryString = (query: ParsedUrlQuery) =>
     encodeURIComponent: encodeUriQuery,
   });
 
+/**
+ * Parses a kibana url and retrieves all the states encoded into url,
+ * Handles both expanded rison state and hashed state (where the actual state stored in sessionStorage)
+ * e.g.:
+ *
+ * given an url:
+ * http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')
+ * will return object:
+ * {_a: {tab: 'indexedFields'}, _b: {f: 'test', i: '', l: ''}};
+ */
 export function getStatesFromUrl(url: string = window.location.href): Record<string, BaseState> {
   const { query } = parseUrlHash(url);
 
@@ -64,17 +74,41 @@ export function getStatesFromUrl(url: string = window.location.href): Record<str
   return decoded;
 }
 
+/**
+ * Retrieves specific state from url by key
+ * e.g.:
+ *
+ * given an url:
+ * http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')
+ * and key '_a'
+ * will return object:
+ * {tab: 'indexedFields'}
+ */
+// TODO: Optimize to not parse all the states if we need just one specific state by key
 export function getStateFromUrl(key: string, url: string = window.location.href): BaseState {
   return getStatesFromUrl(url)[key] || null;
 }
 
+/**
+ * Sets state to the url by key  and returns a new url string.
+ * Doesn't actually updates history
+ *
+ * e.g.:
+ * given a url: http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')
+ * key: '_a'
+ * and state: {tab: 'other'}
+ *
+ * will return url:
+ * http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_a=(tab:other)&_b=(f:test,i:'',l:'')
+ */
 export function setStateToUrl<T extends BaseState>(
   key: string,
   state: T,
-  { useHash = false }: { useHash: boolean } = { useHash: false }
+  { useHash = false }: { useHash: boolean } = { useHash: false },
+  rawUrl = window.location.href
 ): string {
-  const url = parseCurrentUrl();
-  const hash = parseCurrentUrlHash();
+  const url = parseUrl(rawUrl);
+  const hash = parseUrlHash(rawUrl);
 
   let encoded: string;
   if (useHash) {
@@ -99,6 +133,13 @@ export function setStateToUrl<T extends BaseState>(
   });
 }
 
+/**
+ * A tiny wrapper around history library to listen for url changes and update url
+ * History library handles a bunch of cross browser edge cases
+ *
+ * listen(cb) - accepts a callback which will be called whenever url has changed
+ * update(url: string, replace: boolean) - get an absolute / relative url to update the location to
+ */
 export const createUrlControls = () => {
   const history = createBrowserHistory();
   return {

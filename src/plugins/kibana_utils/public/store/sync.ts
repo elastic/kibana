@@ -21,8 +21,23 @@ import { MonoTypeOperatorFunction, Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, map, share, skip, startWith } from 'rxjs/operators';
 import { createUrlControls, getStateFromUrl, setStateToUrl } from '../url';
 
+export interface IStateSyncConfig<
+  State extends BaseState = BaseState,
+  StorageState extends BaseState = BaseState
+> {
+  syncKey: string;
+  state: IState<State>;
+  syncStrategy?: SyncStrategy;
+  toStorageMapper?: (state: State) => StorageState;
+  fromStorageMapper?: (storageState: StorageState) => Partial<State>;
+  initialTruthSource?: InitialTruthSource;
+}
+
 export type BaseState = Record<string, unknown>;
 
+/**
+ * To use StateSync util application have to pass state in the form of following interface
+ */
 export interface IState<State extends BaseState = BaseState> {
   get: () => State;
   set: (state: State) => void;
@@ -38,18 +53,6 @@ export enum InitialTruthSource {
 export enum SyncStrategy {
   Url,
   HashedUrl,
-}
-
-export interface IStateSyncConfig<
-  State extends BaseState = BaseState,
-  StorageState extends BaseState = BaseState
-> {
-  syncKey: string;
-  state: IState<State>;
-  syncStrategy?: SyncStrategy;
-  toStorageMapper?: (state: State) => StorageState;
-  fromStorageMapper?: (storageState: StorageState) => Partial<State>;
-  initialTruthSource?: InitialTruthSource;
 }
 
 interface ISyncStrategy<StorageState extends BaseState = BaseState> {
