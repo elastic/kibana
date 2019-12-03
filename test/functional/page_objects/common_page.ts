@@ -287,6 +287,11 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       };
     }
 
+    async getSharedItemContainer() {
+      const cssSelector = '[data-shared-item-container]';
+      return find.byCssSelector(cssSelector);
+    }
+
     async ensureModalOverlayHidden() {
       return retry.try(async () => {
         const shown = await testSubjects.exists('confirmModalTitleText');
