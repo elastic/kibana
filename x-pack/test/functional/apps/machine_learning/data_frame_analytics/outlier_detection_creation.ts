@@ -24,7 +24,7 @@ export default function({ getService }: FtrProviderContext) {
 
     const testDataList = [
       {
-        suiteTitle: 'batch transform with terms+date_histogram groups and avg agg',
+        suiteTitle: 'iowa house prices',
         jobType: 'outlier_detection',
         jobId: `ihp_1_${Date.now()}`,
         source: 'ihp_outlier',
