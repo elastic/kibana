@@ -10,9 +10,11 @@ import { DataProvider } from '../../components/timeline/data_providers/data_prov
 import { DEFAULT_TIMELINE_WIDTH } from '../../components/timeline/body/helpers';
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
 import { defaultHeaders as eventsDefaultHeaders } from '../../components/events_viewer/default_headers';
+import { signalsHeaders } from '../../pages/detection_engine/signals/default_headers';
 import { Sort } from '../../components/timeline/body/sort';
 import { Direction, PinnedEvent } from '../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
+import { DEFAULT, EVENTS_VIEWER, SIGNALS_VIEWER, TimelineType } from './types';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';
@@ -74,34 +76,37 @@ export interface TimelineModel {
   version: string | null;
 }
 
-export const timelineDefaults: Readonly<Pick<
-  TimelineModel,
-  | 'columns'
-  | 'dataProviders'
-  | 'description'
-  | 'eventIdToNoteIds'
-  | 'filters'
-  | 'highlightedDropAndProviderId'
-  | 'historyIds'
-  | 'isFavorite'
-  | 'isLive'
-  | 'itemsPerPage'
-  | 'itemsPerPageOptions'
-  | 'kqlMode'
-  | 'kqlQuery'
-  | 'title'
-  | 'noteIds'
-  | 'pinnedEventIds'
-  | 'pinnedEventsSaveObject'
-  | 'dateRange'
-  | 'show'
-  | 'sort'
-  | 'width'
-  | 'isSaving'
-  | 'isLoading'
-  | 'savedObjectId'
-  | 'version'
->> = {
+export type SubsetTimelineModel = Readonly<
+  Pick<
+    TimelineModel,
+    | 'columns'
+    | 'dataProviders'
+    | 'description'
+    | 'eventIdToNoteIds'
+    | 'highlightedDropAndProviderId'
+    | 'historyIds'
+    | 'isFavorite'
+    | 'isLive'
+    | 'itemsPerPage'
+    | 'itemsPerPageOptions'
+    | 'kqlMode'
+    | 'kqlQuery'
+    | 'title'
+    | 'noteIds'
+    | 'pinnedEventIds'
+    | 'pinnedEventsSaveObject'
+    | 'dateRange'
+    | 'show'
+    | 'sort'
+    | 'width'
+    | 'isSaving'
+    | 'isLoading'
+    | 'savedObjectId'
+    | 'version'
+  >
+>;
+
+export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filters'> = {
   columns: defaultHeaders,
   dataProviders: [],
   description: '',
@@ -138,30 +143,18 @@ export const timelineDefaults: Readonly<Pick<
   version: null,
 };
 
-export const eventsDefaults: Readonly<Pick<
-  TimelineModel,
-  | 'columns'
-  | 'dataProviders'
-  | 'description'
-  | 'eventIdToNoteIds'
-  | 'highlightedDropAndProviderId'
-  | 'historyIds'
-  | 'isFavorite'
-  | 'isLive'
-  | 'itemsPerPage'
-  | 'itemsPerPageOptions'
-  | 'kqlMode'
-  | 'kqlQuery'
-  | 'title'
-  | 'noteIds'
-  | 'pinnedEventIds'
-  | 'pinnedEventsSaveObject'
-  | 'dateRange'
-  | 'show'
-  | 'sort'
-  | 'width'
-  | 'isSaving'
-  | 'isLoading'
-  | 'savedObjectId'
-  | 'version'
->> = { ...timelineDefaults, columns: eventsDefaultHeaders };
+export const eventsDefaults: SubsetTimelineModel = {
+  ...timelineDefaults,
+  columns: eventsDefaultHeaders,
+};
+
+export const signalsDefaults: SubsetTimelineModel = {
+  ...timelineDefaults,
+  columns: signalsHeaders,
+};
+
+export const timelineTypeDefaultsMapping: Record<TimelineType, SubsetTimelineModel> = {
+  [DEFAULT]: timelineDefaults,
+  [EVENTS_VIEWER]: eventsDefaults,
+  [SIGNALS_VIEWER]: signalsDefaults,
+};

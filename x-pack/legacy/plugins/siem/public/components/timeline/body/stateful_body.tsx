@@ -31,6 +31,8 @@ import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
 import { timelineActions, appActions } from '../../../store/actions';
 import { TimelineModel } from '../../../store/timeline/model';
+import { plainRowRenderer } from './renderers/plain_row_renderer';
+import { useTimelineTypeContext } from '../timeline_context';
 
 interface OwnProps {
   browserFields: BrowserFields;
@@ -107,6 +109,8 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     updateNote,
     updateSort,
   }) => {
+    const timelineTypeContext = useTimelineTypeContext();
+
     const getNotesByIds = useCallback(
       (noteIds: string[]): Note[] => appSelectors.getNotes(notesById, noteIds),
       [notesById]
@@ -167,7 +171,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         onUpdateColumns={onUpdateColumns}
         pinnedEventIds={pinnedEventIds}
         range={range!}
-        rowRenderers={rowRenderers}
+        rowRenderers={timelineTypeContext.showRowRenderers ? rowRenderers : [plainRowRenderer]}
         sort={sort}
         toggleColumn={toggleColumn}
         updateNote={onUpdateNote}

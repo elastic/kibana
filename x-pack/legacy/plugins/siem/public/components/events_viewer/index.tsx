@@ -8,10 +8,9 @@ import { isEqual } from 'lodash/fp';
 import React, { useEffect, useState, useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
-import { WithSource } from '../../containers/source';
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
 import { timelineActions, inputsActions } from '../../store/actions';
-import { KqlMode, TimelineModel } from '../../store/timeline/model';
+import { KqlMode, TimelineModel, timelineTypeDefaultsMapping } from '../../store/timeline/model';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { DataProvider } from '../timeline/data_providers/data_provider';
 import { Sort } from '../timeline/body/sort';
@@ -20,11 +19,19 @@ import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
 
 import { EventsViewer } from './events_viewer';
 import { InputsModelId } from '../../store/inputs/constants';
+import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
+import { useFetchIndexPatterns } from '../../containers/detection_engine/rules/fetch_index_patterns';
+import { EVENTS_VIEWER } from '../../store/timeline/types';
+import { TimelineTypeContextProps } from '../timeline/timeline_context';
 
 export interface OwnProps {
+  defaultIndices?: string[];
   end: number;
   id: string;
   start: number;
+  headerFilterGroup?: React.ReactNode;
+  timelineTypeContext?: TimelineTypeContextProps;
+  utilityBar?: (totalCount: number) => React.ReactNode;
 }
 
 interface StateReduxProps {
@@ -74,9 +81,11 @@ const StatefulEventsViewerComponent = React.memo<Props>(
     createTimeline,
     columns,
     dataProviders,
+    defaultIndices = [],
     deleteEventQuery,
     end,
     filters,
+    headerFilterGroup,
     id,
     isLive,
     itemsPerPage,
@@ -86,10 +95,17 @@ const StatefulEventsViewerComponent = React.memo<Props>(
     removeColumn,
     start,
     sort,
+    timelineTypeContext = {
+      showCheckboxes: false,
+      showRowRenderers: true,
+      timelineType: EVENTS_VIEWER,
+    },
     updateItemsPerPage,
     upsertColumn,
+    utilityBar,
   }) => {
     const [showInspect, setShowInspect] = useState(false);
+    const [{ browserFields, indexPatterns }] = useFetchIndexPatterns(defaultIndices);
 
     useEffect(() => {
       if (createTimeline != null) {
@@ -131,31 +147,35 @@ const StatefulEventsViewerComponent = React.memo<Props>(
     const handleOnMouseLeave = useCallback(() => setShowInspect(false), []);
 
     return (
-      <WithSource sourceId="default">
-        {({ indexPattern, browserFields }) => (
-          <div onMouseEnter={handleOnMouseEnter} onMouseLeave={handleOnMouseLeave}>
-            <EventsViewer
-              browserFields={browserFields}
-              columns={columns}
-              id={id}
-              dataProviders={dataProviders!}
-              end={end}
-              filters={filters}
-              indexPattern={indexPattern}
-              isLive={isLive}
-              itemsPerPage={itemsPerPage!}
-              itemsPerPageOptions={itemsPerPageOptions!}
-              kqlMode={kqlMode}
-              onChangeItemsPerPage={onChangeItemsPerPage}
-              query={query}
-              showInspect={showInspect}
-              start={start}
-              sort={sort!}
-              toggleColumn={toggleColumn}
-            />
-          </div>
+      <div onMouseEnter={handleOnMouseEnter} onMouseLeave={handleOnMouseLeave}>
+        {browserFields && indexPatterns && (
+          <EventsViewer
+            browserFields={browserFields}
+            columns={
+              timelineTypeDefaultsMapping[timelineTypeContext.timelineType]?.columns ??
+              defaultHeaders
+            }
+            id={id}
+            dataProviders={dataProviders!}
+            end={end}
+            filters={filters}
+            headerFilterGroup={headerFilterGroup}
+            indexPattern={indexPatterns ?? {}}
+            isLive={isLive}
+            itemsPerPage={itemsPerPage!}
+            itemsPerPageOptions={itemsPerPageOptions!}
+            kqlMode={kqlMode}
+            onChangeItemsPerPage={onChangeItemsPerPage}
+            query={query}
+            showInspect={showInspect}
+            start={start}
+            sort={sort!}
+            timelineTypeContext={timelineTypeContext}
+            toggleColumn={toggleColumn}
+            utilityBar={utilityBar}
+          />
         )}
-      </WithSource>
+      </div>
     );
   },
   (prevProps, nextProps) =>
@@ -182,9 +202,9 @@ const makeMapStateToProps = () => {
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const getEvents = timelineSelectors.getEventsByIdSelector();
-  const mapStateToProps = (state: State, { id }: OwnProps) => {
+  const mapStateToProps = (state: State, { id, timelineTypeContext }: OwnProps) => {
     const input: inputsModel.InputsRange = getInputsTimeline(state);
-    const events: TimelineModel = getEvents(state, id);
+    const events: TimelineModel = getEvents(state, id, timelineTypeContext?.timelineType);
     const { columns, dataProviders, itemsPerPage, itemsPerPageOptions, kqlMode, sort } = events;
 
     return {
