@@ -31,8 +31,8 @@ export type JobValidationResult = BasicValidations & AsyncValidatorsResult;
 
 export interface JobConfigs {
   jobCreator: JobCreator;
-  jobConfig: string;
-  datafeedConfig: string;
+  jobConfigString: string;
+  datafeedConfigString: string;
 }
 
 export interface ValidationSummary {
@@ -153,8 +153,8 @@ export class JobValidator {
 
         this._jobConfigs$.next({
           jobCreator: this._jobCreator,
-          jobConfig: formattedJobConfig,
-          datafeedConfig: formattedDatafeedConfig,
+          jobConfigString: formattedJobConfig,
+          datafeedConfigString: formattedDatafeedConfig,
         });
 
         this._validating = false;
