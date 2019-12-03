@@ -6,7 +6,6 @@
 
 import moment from 'moment';
 import { KibanaRequest } from 'src/core/server';
-import { StaticIndexPattern } from 'ui/index_patterns';
 import { IIndexPattern } from 'src/plugins/data/common';
 import { APMConfig } from '../../../../../../plugins/apm/server';
 import {
@@ -22,7 +21,7 @@ import { ProcessorEvent } from '../../../common/processor_event';
 import { getDynamicIndexPattern } from '../index_pattern/get_dynamic_index_pattern';
 
 function decodeUiFilters(
-  indexPattern: StaticIndexPattern | undefined,
+  indexPattern: IIndexPattern | undefined,
   uiFiltersEncoded?: string
 ) {
   if (!uiFiltersEncoded || !indexPattern) {
