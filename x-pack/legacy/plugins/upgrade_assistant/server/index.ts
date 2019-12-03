@@ -5,9 +5,8 @@
  */
 
 import { Legacy } from 'kibana';
-import { UpgradeAssistantTelemetryServer } from '../common/types';
 import { credentialStoreFactory } from './lib/reindexing/credential_store';
-import { makeUpgradeAssistantUsageCollector } from './lib/telemetry';
+import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { registerClusterCheckupRoutes } from './routes/cluster_checkup';
 import { registerDeprecationLoggingRoutes } from './routes/deprecation_logging';
 import { registerQueryDefaultFieldRoutes } from './routes/query_default_field';
@@ -15,6 +14,7 @@ import { registerReindexIndicesRoutes, registerReindexWorker } from './routes/re
 import { registerTelemetryRoutes } from './routes/telemetry';
 
 export function initServer(server: Legacy.Server) {
+  const { usageCollection } = server.newPlatform.setup.plugins;
   registerClusterCheckupRoutes(server);
   registerDeprecationLoggingRoutes(server);
   registerQueryDefaultFieldRoutes(server);
@@ -31,6 +31,6 @@ export function initServer(server: Legacy.Server) {
   registerReindexIndicesRoutes(server, worker, credentialStore);
 
   // Bootstrap the needed routes and the collector for the telemetry
-  registerTelemetryRoutes(server as UpgradeAssistantTelemetryServer);
-  makeUpgradeAssistantUsageCollector(server as UpgradeAssistantTelemetryServer);
+  registerTelemetryRoutes(server);
+  registerUpgradeAssistantUsageCollector(usageCollection, server);
 }

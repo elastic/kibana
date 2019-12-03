@@ -20,7 +20,6 @@ import { deepFreeze } from '../../../../src/core/utils';
 import { SpacesPluginSetup } from '../../spaces/server';
 import { PluginSetupContract as FeaturesSetupContract } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { CapabilitiesModifier } from '../../../../src/legacy/server/capabilities';
 
 import { Authentication, setupAuthentication } from './authentication';
 import { Authorization, setupAuthorization } from './authorization';
@@ -44,7 +43,6 @@ export type FeaturesService = Pick<FeaturesSetupContract, 'getFeatures'>;
 export interface LegacyAPI {
   serverConfig: { protocol: string; hostname: string; port: number };
   isSystemAPIRequest: (request: KibanaRequest) => boolean;
-  capabilities: { registerCapabilitiesModifier: (provider: CapabilitiesModifier) => void };
   kibanaIndexName: string;
   cspRules: string;
   savedObjects: SavedObjectsLegacyService<KibanaRequest | LegacyRequest>;
@@ -75,7 +73,10 @@ export interface PluginSetupContract {
     registerPrivilegesWithCluster: () => void;
     license: SecurityLicense;
     config: RecursiveReadonly<{
-      sessionTimeout: number | null;
+      session: {
+        idleTimeout: number | null;
+        lifespan: number | null;
+      };
       secureCookies: boolean;
       authc: { providers: string[] };
     }>;
@@ -154,6 +155,8 @@ export class Plugin {
       featuresService: features,
     });
 
+    core.capabilities.registerSwitcher(authz.disableUnauthorizedCapabilities);
+
     defineRoutes({
       router: core.http.createRouter(),
       basePath: core.http.basePath,
@@ -193,10 +196,6 @@ export class Plugin {
             authz,
             legacyAPI,
           });
-
-          legacyAPI.capabilities.registerCapabilitiesModifier((request, capabilities) =>
-            authz.disableUnauthorizedCapabilities(KibanaRequest.from(request), capabilities)
-          );
         },
 
         registerPrivilegesWithCluster: async () => await authz.registerPrivilegesWithCluster(),
@@ -206,7 +205,11 @@ export class Plugin {
         // We should stop exposing this config as soon as only new platform plugin consumes it. The only
         // exception may be `sessionTimeout` as other parts of the app may want to know it.
         config: {
-          sessionTimeout: config.sessionTimeout,
+          loginAssistanceMessage: config.loginAssistanceMessage,
+          session: {
+            idleTimeout: config.session.idleTimeout,
+            lifespan: config.session.lifespan,
+          },
           secureCookies: config.secureCookies,
           cookieName: config.cookieName,
           authc: { providers: config.authc.providers },
