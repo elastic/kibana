@@ -26,6 +26,10 @@ export function getVectorStyleLabel(styleName) {
       return i18n.translate('xpack.maps.styles.vector.symbolSizeLabel', {
         defaultMessage: 'Symbol size'
       });
+    case vectorStyles.ICON_ORIENTATION:
+      return i18n.translate('xpack.maps.styles.vector.orientationLabel', {
+        defaultMessage: 'Symbol orientation'
+      });
     default:
       return styleName;
   }
