@@ -19,7 +19,6 @@
 
 import { map } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
-import { resolve } from 'path';
 import { CoreContext } from '../core_context';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
@@ -29,7 +28,7 @@ import {
   PluginOpaqueId,
   SharedGlobalConfigKeys,
 } from './types';
-import { PathConfigType, config as pathConfig, getConfigPath } from '../path';
+import { PathConfigType, config as pathConfig } from '../path';
 import { KibanaConfigType, config as kibanaConfig } from '../kibana_config';
 import {
   ElasticsearchConfigType,
@@ -95,11 +94,7 @@ export function createPluginInitializerContext(
             deepFreeze({
               kibana: pick(kibana, SharedGlobalConfigKeys.kibana),
               elasticsearch: pick(elasticsearch, SharedGlobalConfigKeys.elasticsearch),
-              path: {
-                // getConfigPath returns the path until the kibana.yml config. We need to move 1 level up for the dir
-                configDir: resolve(getConfigPath(), '..'),
-                dataDir: path.data,
-              },
+              path: pick(path, SharedGlobalConfigKeys.path),
             })
           )
         ),

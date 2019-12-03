@@ -47,10 +47,7 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
       pingTimeout: duration('30s'),
       startupTimeout: duration('30s'),
     },
-    path: {
-      configDir: '/tmp',
-      dataDir: '/tmp',
-    },
+    path: { data: '/tmp' },
   };
 
   const mock: jest.Mocked<PluginInitializerContext<T>['config']> = {
