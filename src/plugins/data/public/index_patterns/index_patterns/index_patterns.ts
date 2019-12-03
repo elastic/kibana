@@ -28,7 +28,6 @@ import {
 import { createIndexPatternCache } from './_pattern_cache';
 import { IndexPattern } from './index_pattern';
 import { IndexPatternsApiClient, GetFieldsOptions } from './index_patterns_api_client';
-import { FieldList } from '..';
 
 const indexPatternCache = createIndexPatternCache();
 
@@ -148,6 +147,4 @@ export class IndexPatterns {
   };
 }
 
-export type IndexPatternsContract = PublicMethodsOf<IndexPatterns> & {
-  FieldList: typeof FieldList;
-};
+export type IndexPatternsContract = PublicMethodsOf<IndexPatterns>;
