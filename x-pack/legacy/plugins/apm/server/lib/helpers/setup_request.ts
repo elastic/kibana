@@ -73,7 +73,7 @@ export async function setupRequest<TParams extends SetupRequestParams>(
   const { config } = context;
   const { query } = context.params;
 
-  const indices = await getApmIndices(context);
+  const indices = await getApmIndices(context.core, context.config);
 
   const dynamicIndexPattern = await getDynamicIndexPattern({
     context,

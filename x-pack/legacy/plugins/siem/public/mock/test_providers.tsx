@@ -58,6 +58,11 @@ const services = {
   storage: {
     get: () => {},
   },
+  data: {
+    query: {
+      savedQueries: {},
+    },
+  },
 };
 
 const localStorageMock = () => {

@@ -262,7 +262,7 @@ export class KibanaFramework {
     // For the following request we need a copy of the instnace of the internal request
     // but modified for our TSVB request. This will ensure all the instance methods
     // are available along with our overriden values
-    const requestCopy = Object.assign(request, {
+    const requestCopy = Object.assign({}, request, {
       url,
       body: {
         timerange,
