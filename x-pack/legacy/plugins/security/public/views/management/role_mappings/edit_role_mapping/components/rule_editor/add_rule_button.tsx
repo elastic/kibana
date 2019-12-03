@@ -6,16 +6,13 @@
 
 import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiPopover, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
-import { RoleMappingRule } from '../../../../../../../common/model';
+import { AllRule } from '../../../../../../../common/model/role_mappings/all_rule';
+import { FieldRule } from '../../../../../../../common/model/role_mappings/field_rule';
+import { BaseRule } from '../../../../../../../common/model/role_mappings/base_rule';
 
 interface Props {
-  onClick: (newRule: RoleMappingRule) => void;
+  onClick: (newRule: BaseRule) => void;
 }
-
-const defaultValues = {
-  field: () => ({ field: { username: '*' } }),
-  all: () => ({ all: [] }),
-};
 
 export const AddRuleButton = (props: Props) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -38,18 +35,18 @@ export const AddRuleButton = (props: Props) => {
       icon="user"
       onClick={() => {
         setIsMenuOpen(false);
-        props.onClick(defaultValues.field());
+        props.onClick(new FieldRule(false, 'username', '*'));
       }}
     >
       Add Rule
     </EuiContextMenuItem>,
     <EuiContextMenuItem
-      key="rule"
+      key="ruleGroup"
       name="Add rule group"
       icon="partial"
       onClick={() => {
         setIsMenuOpen(false);
-        props.onClick(defaultValues.all());
+        props.onClick(new AllRule(false, []));
       }}
     >
       Add rule group

@@ -30,6 +30,14 @@ export type RoleMappingRule =
   | RoleMappingFieldRule
   | RoleMappingExceptRule;
 
+export type RoleMappingRuleType =
+  | 'field'
+  | 'all'
+  | 'any'
+  | 'exceptAll'
+  | 'exceptAny'
+  | 'exceptField';
+
 export type RoleTemplateFormat = 'string' | 'json';
 
 export interface InlineRoleTemplate {

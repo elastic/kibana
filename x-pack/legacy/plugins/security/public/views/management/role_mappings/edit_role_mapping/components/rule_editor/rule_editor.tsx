@@ -6,32 +6,46 @@
 
 import React, { Component } from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
-import {
-  RoleMapping,
-  RoleMappingRule,
-  RoleMappingFieldRule,
-  RoleMappingExceptRule,
-  RoleMappingAnyRule,
-  RoleMappingAllRule,
-} from '../../../../../../../common/model';
+import { RoleMapping } from '../../../../../../../common/model';
 import { FieldRuleEditor } from './field_rule_editor';
-import { AnyRuleEditor } from './any_rule_editor';
-import { AllRuleEditor } from './all_rule_editor';
-import { ExceptRuleEditor } from './except_rule_editor';
 import { AddRuleButton } from './add_rule_button';
 
 import 'brace/mode/json';
 import 'brace/theme/github';
+import { BaseRule } from '../../../../../../../common/model/role_mappings/base_rule';
+import { generateRulesFromRaw } from '../../../../../../../common/model/role_mappings/rule_builder';
+import { RuleGroupEditor } from './rule_group_editor';
+import { BaseRuleGroup } from '../../../../../../../common/model/role_mappings/base_rule_group';
+import { FieldRule } from '../../../../../../../common/model/role_mappings/field_rule';
 
 interface Props {
   roleMapping: RoleMapping;
   onChange: (roleMapping: RoleMapping) => void;
 }
 
-export class RuleEditor extends Component<Props, void> {
+interface State {
+  rules: BaseRule | null;
+}
+
+export class RuleEditor extends Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      rules: generateRulesFromRaw(props.roleMapping.rules),
+    };
+  }
+
+  componentWillReceiveProps(nextProps: Props) {
+    if (!this.state.rules) {
+      this.setState({
+        rules: generateRulesFromRaw(nextProps.roleMapping.rules),
+      });
+    }
+  }
+
   public render() {
-    if (this.hasRule(this.props.roleMapping.rules)) {
-      return this.renderRule(this.props.roleMapping.rules, 0, this.onRuleChange, this.onRuleDelete);
+    if (this.state.rules) {
+      return this.renderRule(this.state.rules, 0, this.onRuleChange, this.onRuleDelete);
     }
 
     return (
@@ -43,6 +57,9 @@ export class RuleEditor extends Component<Props, void> {
             onClick={newRule => {
               this.props.onChange({
                 ...this.props.roleMapping,
+                rules: newRule.toRaw(),
+              });
+              this.setState({
                 rules: newRule,
               });
             }}
@@ -52,13 +69,12 @@ export class RuleEditor extends Component<Props, void> {
     );
   }
 
-  private hasRule(entry: RoleMapping['rules']): entry is RoleMappingRule {
-    return Object.keys(entry).length > 0;
-  }
-
-  private onRuleChange = (updatedRule: RoleMappingRule) => {
+  private onRuleChange = (updatedRule: BaseRule) => {
     this.props.onChange({
       ...this.props.roleMapping,
+      rules: updatedRule.toRaw(),
+    });
+    this.setState({
       rules: updatedRule,
     });
   };
@@ -68,89 +84,51 @@ export class RuleEditor extends Component<Props, void> {
       ...this.props.roleMapping,
       rules: {},
     });
+    this.setState({
+      rules: null,
+    });
   };
 
   private renderRule = (
-    rule: RoleMappingRule,
+    rule: BaseRule,
     ruleDepth: number,
-    onChange: (updatedRule: RoleMappingRule) => void,
+    onChange: (updatedRule: BaseRule) => void,
     onDelete: () => void,
     extraProps: Record<string, any> = {}
   ) => {
-    const entries = Object.keys(rule);
-    if (entries.length > 1) {
-      throw new Error(`Expected at most one rule, but found ${entries.length}`);
-    }
-    const ruleType = entries[0];
-    const editor = this.getEditorForRuleType(
-      ruleType,
-      rule,
-      onChange,
-      onDelete,
-      extraProps,
-      ruleDepth
-    );
-
-    return (
-      <EuiFlexGroup className="secRoleMapping__rule">
-        <EuiFlexItem grow={1}>{editor}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon iconType="trash" color="danger" onClick={onDelete} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+    return this.getEditorForRuleType(rule, onChange, onDelete, extraProps, ruleDepth);
   };
 
   private getEditorForRuleType(
-    ruleType: string,
-    ruleDefinition: RoleMappingRule,
-    onChange: (updatedRule: RoleMappingRule) => void,
+    rule: BaseRule,
+    onChange: (updatedRule: BaseRule) => void,
     onDelete: () => void,
     extraProps: Record<string, any>,
     ruleDepth: number
   ) {
-    switch (ruleType) {
+    switch (rule.getType()) {
       case 'field':
         return (
           <FieldRuleEditor
-            rule={ruleDefinition as RoleMappingFieldRule}
+            rule={rule as FieldRule}
             onChange={value => onChange(value)}
+            onDelete={this.onRuleDelete}
             {...extraProps}
           />
         );
       case 'except':
-        return (
-          <ExceptRuleEditor
-            rule={ruleDefinition as RoleMappingExceptRule}
-            ruleDepth={ruleDepth}
-            onChange={value => onChange(value)}
-            onDelete={onDelete}
-            renderRule={this.renderRule}
-            {...extraProps}
-          />
-        );
       case 'any':
-        return (
-          <AnyRuleEditor
-            rule={ruleDefinition as RoleMappingAnyRule}
-            ruleDepth={ruleDepth}
-            onChange={value => onChange(value)}
-            renderRule={this.renderRule}
-            {...extraProps}
-          />
-        );
       case 'all':
         return (
-          <AllRuleEditor
-            rule={ruleDefinition as RoleMappingAllRule}
+          <RuleGroupEditor
+            rule={rule as BaseRuleGroup}
             ruleDepth={ruleDepth}
             onChange={value => onChange(value)}
-            renderRule={this.renderRule}
-            {...extraProps}
+            onDelete={this.onRuleDelete}
           />
         );
       default:
-        return <div>Unsupported rule type: {ruleType}</div>;
+        return <div>Unsupported rule type: {rule.getType()}</div>;
     }
   }
 }

@@ -13,18 +13,17 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiComboBox,
-  EuiPopover,
-  EuiPopoverTitle,
   EuiButton,
   EuiSelect,
-  EuiButtonEmpty,
   EuiSpacer,
 } from '@elastic/eui';
-import { RoleMappingFieldRule, RoleMappingFieldRuleValue } from '../../../../../../../common/model';
+import { FieldRule } from '../../../../../../../common/model/role_mappings/field_rule';
+import { RoleMappingFieldRuleValue } from '../../../../../../../common/model';
 
 interface Props {
-  rule: RoleMappingFieldRule;
-  onChange: (rule: RoleMappingFieldRule) => void;
+  rule: FieldRule;
+  onChange: (rule: FieldRule) => void;
+  onDelete: () => void;
 }
 
 interface State {
@@ -80,15 +79,15 @@ export class FieldRuleEditor extends Component<Props, State> {
   }
 
   public render() {
-    const [field, ruleValue] = this.extractRule(this.props.rule.field);
+    const { field, value } = this.props.rule;
 
-    const content = Array.isArray(ruleValue)
-      ? ruleValue.map((v, index) =>
+    const content = Array.isArray(value)
+      ? value.map((v, index) =>
           index === 0
-            ? this.renderPrimaryFieldRow(field, ruleValue)
-            : this.renderFieldRow(field, ruleValue, index)
+            ? this.renderPrimaryFieldRow(field, value)
+            : this.renderFieldRow(field, value, index)
         )
-      : [this.renderPrimaryFieldRow(field, ruleValue)];
+      : [this.renderPrimaryFieldRow(field, value)];
 
     return (
       <EuiFlexGroup direction="column">
@@ -100,11 +99,9 @@ export class FieldRuleEditor extends Component<Props, State> {
   }
 
   private renderPrimaryFieldRow = (field: string, ruleValue: RoleMappingFieldRuleValue) => {
-    let renderDeleteButton = false;
     let renderAddValueButton = true;
     let rowRuleValue: RoleMappingFieldRuleValue = ruleValue;
     if (Array.isArray(ruleValue)) {
-      renderDeleteButton = ruleValue.length > 1;
       renderAddValueButton = ruleValue.length === 1;
       rowRuleValue = ruleValue[0];
     }
@@ -122,28 +119,35 @@ export class FieldRuleEditor extends Component<Props, State> {
               selectedOptions={[{ label: field }]}
               singleSelection={{ asPlainText: true }}
               onChange={this.onFieldChange}
+              onCreateOption={this.onAddField}
               options={fieldOptions}
             />
           </EuiFormRow>
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {this.renderFieldTypeInput(type, rowRuleValue, valueComparison.id, 0)}
+        </EuiFlexItem>
         <EuiFlexItem grow={1}>
           {this.renderFieldValueInput(type, rowRuleValue, valueComparison.id, 0)}
         </EuiFlexItem>
-        {renderDeleteButton && (
-          <EuiFlexItem grow={false}>
-            <EuiFormRow hasEmptyLabelSpace={true}>
-              <EuiButtonIcon
-                iconType="trash"
-                color="danger"
-                onClick={() => this.onRemoveAlternateValue(0)}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <EuiFormRow hasEmptyLabelSpace={true}>
+            <EuiButtonIcon
+              iconType="trash"
+              color="danger"
+              onClick={() => this.onRemoveAlternateValue(0)}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <EuiFormRow hasEmptyLabelSpace={true}>
             {renderAddValueButton ? (
-              <EuiButton onClick={this.onAddAlternateValue} iconType="plusInCircle" color="primary">
+              <EuiButton
+                onClick={this.onAddAlternateValue}
+                iconType="plusInCircle"
+                color="primary"
+                size="s"
+              >
                 add alternate value
               </EuiButton>
             ) : (
@@ -178,6 +182,9 @@ export class FieldRuleEditor extends Component<Props, State> {
             <EuiExpression description={`or`} value={field} />
           </EuiFormRow>
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {this.renderFieldTypeInput(type, rowRuleValue, valueComparison.id, valueIndex)}
+        </EuiFlexItem>
         <EuiFlexItem grow={1}>
           {this.renderFieldValueInput(type, rowRuleValue, valueComparison.id, valueIndex)}
         </EuiFlexItem>
@@ -193,7 +200,12 @@ export class FieldRuleEditor extends Component<Props, State> {
         <EuiFlexItem grow={1}>
           <EuiFormRow hasEmptyLabelSpace={true}>
             {renderAddValueButton ? (
-              <EuiButton onClick={this.onAddAlternateValue} iconType="plusInCircle" color="primary">
+              <EuiButton
+                onClick={this.onAddAlternateValue}
+                iconType="plusInCircle"
+                color="primary"
+                size="s"
+              >
                 add alternate value
               </EuiButton>
             ) : (
@@ -205,95 +217,88 @@ export class FieldRuleEditor extends Component<Props, State> {
     );
   };
 
-  private renderFieldValueInput = (
+  private renderFieldTypeInput = (
     fieldType: 'number' | 'text',
     rowRuleValue: RoleMappingFieldRuleValue,
     inputType: string,
     valueIndex: number
   ) => {
-    const popoverId = `popover_${valueIndex}`;
     return (
-      <EuiFormRow label="Value" key={valueIndex}>
-        <EuiFieldText
-          value={(rowRuleValue as string) || '-- null --'}
-          onChange={
-            fieldType === 'number'
-              ? this.onNumericValueChange(valueIndex)
-              : this.onValueChange(valueIndex)
-          }
-          disabled={rowRuleValue === null}
-          type={fieldType}
-          prepend={
-            <EuiPopover
-              button={
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType="arrowDown"
-                  iconSide="right"
-                  onClick={this.openMatchesPopover(popoverId)}
-                >
-                  {inputType}
-                </EuiButtonEmpty>
-              }
-              isOpen={this.state.openPopoverIds.includes(popoverId)}
-              closePopover={this.closeMatchesPopover(popoverId)}
-              ownFocus
-            >
-              <EuiPopoverTitle>Comparison type</EuiPopoverTitle>
-              <EuiSelect
-                options={[
-                  { value: 'text', text: 'text' },
-                  { value: 'number', text: 'number' },
-                  { value: 'null', text: 'is null' },
-                ]}
-                value={inputType}
-                onChange={e =>
-                  this.onComparisonTypeChange(valueIndex, e.target.value as ComparisonOption)
-                }
-              />
-            </EuiPopover>
+      <EuiFormRow label="Type" key={valueIndex}>
+        <EuiSelect
+          options={[
+            { value: 'text', text: 'text' },
+            { value: 'number', text: 'number' },
+            { value: 'null', text: 'is null' },
+          ]}
+          value={inputType}
+          onChange={e =>
+            this.onComparisonTypeChange(valueIndex, e.target.value as ComparisonOption)
           }
         />
       </EuiFormRow>
     );
   };
 
+  private renderFieldValueInput = (
+    fieldType: 'number' | 'text',
+    rowRuleValue: RoleMappingFieldRuleValue,
+    inputType: string,
+    valueIndex: number
+  ) => {
+    const isNullValue = rowRuleValue === null;
+    return (
+      <EuiFormRow label="Value" key={valueIndex}>
+        <EuiFieldText
+          value={isNullValue ? '-- null --' : (rowRuleValue as string)}
+          onChange={
+            fieldType === 'number'
+              ? this.onNumericValueChange(valueIndex)
+              : this.onValueChange(valueIndex)
+          }
+          disabled={isNullValue}
+          type={fieldType}
+        />
+      </EuiFormRow>
+    );
+  };
+
   private onAddAlternateValue = () => {
-    const [field, value] = this.extractRule(this.props.rule.field);
+    const { field, value } = this.props.rule;
     const nextValue = Array.isArray(value) ? [...value] : [value];
     nextValue.push('*');
-    this.props.onChange({
-      field: {
-        [field]: nextValue,
-      },
-    });
+    this.props.onChange(new FieldRule(this.props.rule.isNegated, field, nextValue));
   };
 
   private onRemoveAlternateValue = (index: number) => {
-    const [field, value] = this.extractRule(this.props.rule.field);
-    if (!Array.isArray(value)) {
-      throw new TypeError('expected value to be an array');
+    const { field, value } = this.props.rule;
+
+    if (!Array.isArray(value) || value.length === 1) {
+      // Only one value left. Delete entire rule instead.
+      this.props.onDelete();
+      return;
     }
     const nextValue = [...value];
     nextValue.splice(index, 1);
-    this.props.onChange({
-      field: {
-        [field]: nextValue,
-      },
-    });
+    this.props.onChange(new FieldRule(this.props.rule.isNegated, field, nextValue));
   };
 
   private onFieldChange = ([newField]: Array<{ label: string }>) => {
-    const [, value] = this.extractRule(this.props.rule.field);
-    this.props.onChange({
-      field: {
-        [newField.label]: value,
-      },
-    });
+    if (!newField) {
+      return;
+    }
+
+    const { value } = this.props.rule;
+    this.props.onChange(new FieldRule(this.props.rule.isNegated, newField.label, value));
+  };
+
+  private onAddField = (newField: string) => {
+    const { value } = this.props.rule;
+    this.props.onChange(new FieldRule(this.props.rule.isNegated, newField, value));
   };
 
   private onValueChange = (index: number) => (e: ChangeEvent<HTMLInputElement>) => {
-    const [field, value] = this.extractRule(this.props.rule.field);
+    const { field, value } = this.props.rule;
     let nextValue;
     if (Array.isArray(value)) {
       nextValue = [...value];
@@ -301,15 +306,11 @@ export class FieldRuleEditor extends Component<Props, State> {
     } else {
       nextValue = e.target.value;
     }
-    this.props.onChange({
-      field: {
-        [field]: nextValue,
-      },
-    });
+    this.props.onChange(new FieldRule(this.props.rule.isNegated, field, nextValue));
   };
 
   private onNumericValueChange = (index: number) => (e: ChangeEvent<HTMLInputElement>) => {
-    const [field, value] = this.extractRule(this.props.rule.field);
+    const { field, value } = this.props.rule;
     let nextValue;
     if (Array.isArray(value)) {
       nextValue = [...value];
@@ -317,11 +318,7 @@ export class FieldRuleEditor extends Component<Props, State> {
     } else {
       nextValue = parseFloat(e.target.value);
     }
-    this.props.onChange({
-      field: {
-        [field]: nextValue,
-      },
-    });
+    this.props.onChange(new FieldRule(this.props.rule.isNegated, field, nextValue));
   };
 
   private onComparisonTypeChange = (index: number, newType: ComparisonOption) => {
@@ -329,7 +326,7 @@ export class FieldRuleEditor extends Component<Props, State> {
     if (!comparison) {
       throw new Error(`Unexpected comparison type: ${newType}`);
     }
-    const [field, value] = this.extractRule(this.props.rule.field);
+    const { field, value } = this.props.rule;
     let nextValue = value;
     if (Array.isArray(value)) {
       nextValue = [...value];
@@ -337,20 +334,8 @@ export class FieldRuleEditor extends Component<Props, State> {
     } else {
       nextValue = comparison.defaultValue;
     }
-    this.props.onChange({
-      field: {
-        [field]: nextValue,
-      },
-    });
+    this.props.onChange(new FieldRule(this.props.rule.isNegated, field, nextValue));
   };
-
-  private extractRule(fieldRuleDef: RoleMappingFieldRule['field']) {
-    const entries = Object.entries(fieldRuleDef);
-    if (entries.length !== 1) {
-      throw new Error(`Expected a single field rule, but found ${entries.length}`);
-    }
-    return entries[0];
-  }
 
   private getComparisonType(ruleValue: RoleMappingFieldRuleValue) {
     const valueType = typeof ruleValue;
@@ -365,9 +350,4 @@ export class FieldRuleEditor extends Component<Props, State> {
     }
     throw new Error(`Unable to detect comparison type for rule value [${ruleValue}]`);
   }
-
-  private openMatchesPopover = (popoverId: string) => () =>
-    this.setState({ openPopoverIds: [...this.state.openPopoverIds, popoverId] });
-  private closeMatchesPopover = (popoverId: string) => () =>
-    this.setState({ openPopoverIds: this.state.openPopoverIds.filter(id => id !== popoverId) });
 }
