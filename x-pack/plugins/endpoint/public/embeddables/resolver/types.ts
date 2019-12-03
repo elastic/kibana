@@ -16,5 +16,3 @@ export interface CameraState {
 }
 
 export type Vector2 = readonly [number, number];
-
-export type ResolverSelector = (state: ResolverState) => unknown;

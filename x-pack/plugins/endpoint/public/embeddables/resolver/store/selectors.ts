@@ -5,12 +5,9 @@
  */
 
 import * as cameraSelectors from './camera/selectors';
-import { ResolverState, ResolverSelector } from '../types';
+import { ResolverState } from '../types';
 
-export const worldToRaster: ResolverSelector = composeSelectors(
-  cameraStateSelector,
-  cameraSelectors.worldToRaster
-);
+export const worldToRaster = composeSelectors(cameraStateSelector, cameraSelectors.worldToRaster);
 
 function cameraStateSelector(state: ResolverState) {
   return state.camera;
