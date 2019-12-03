@@ -96,7 +96,10 @@ export const WatchEdit = ({
   };
 }) => {
   // hooks
-  const { MANAGEMENT_BREADCRUMB, chrome } = useAppContext();
+  const {
+    legacy: { MANAGEMENT_BREADCRUMB },
+    chrome,
+  } = useAppContext();
   const [{ watch, loadError }, dispatch] = useReducer(watchReducer, { watch: null });
 
   const setWatchProperty = (property: string, value: any) => {

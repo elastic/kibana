@@ -67,7 +67,11 @@ export const WatchStatus = ({
     };
   };
 }) => {
-  const { chrome, MANAGEMENT_BREADCRUMB, toasts } = useAppContext();
+  const {
+    chrome,
+    legacy: { MANAGEMENT_BREADCRUMB },
+    toasts,
+  } = useAppContext();
   const {
     error: watchDetailError,
     data: watchDetail,

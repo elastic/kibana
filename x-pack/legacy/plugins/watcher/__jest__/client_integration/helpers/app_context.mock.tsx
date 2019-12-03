@@ -19,27 +19,29 @@ export const withAppContext = (Component: ComponentType<any>) => (props: any) =>
             ELASTIC_WEBSITE_URL: 'test',
             links: {} as any,
           },
-          savedObjects: {
-            create: jest.fn(),
-          } as any,
           chrome: {
             setBreadcrumbs: () => {},
           } as any,
-          TimeBuckets: class MockTimeBuckets {
-            setBounds(_domain: any) {
-              return {};
-            }
-            getInterval() {
-              return {
-                expression: {},
-              };
-            }
+          legacy: {
+            TimeBuckets: class MockTimeBuckets {
+              setBounds(_domain: any) {
+                return {};
+              }
+              getInterval() {
+                return {
+                  expression: {},
+                };
+              }
+            },
+            MANAGEMENT_BREADCRUMB: { text: 'test' },
+            savedObjects: {
+              create: jest.fn(),
+            } as any,
           },
           uiSettings: {
             get: () => {},
             isDefault: () => true,
           } as any,
-          MANAGEMENT_BREADCRUMB: { text: 'test' },
         } as any
       }
     >

@@ -45,7 +45,10 @@ import { useAppContext } from '../../../app_context';
 
 export const WatchList = () => {
   // hooks
-  const { chrome, MANAGEMENT_BREADCRUMB } = useAppContext();
+  const {
+    chrome,
+    legacy: { MANAGEMENT_BREADCRUMB },
+  } = useAppContext();
   const {
     links: { watcherGettingStartedUrl },
   } = useAppContext();

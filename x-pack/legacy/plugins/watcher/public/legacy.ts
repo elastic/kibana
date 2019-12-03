@@ -33,7 +33,7 @@ let unmountApp: AppUnmount | Promise<AppUnmount>;
 routes.when('/management/elasticsearch/watcher/:param1?/:param2?/:param3?/:param4?', {
   template,
   controller: class WatcherController {
-    constructor($injector: any, $scope: any, $http: any, Private: any) {
+    constructor($injector: any, $scope: any) {
       const $route = $injector.get('$route');
       const licenseStatus = xpackInfo.get(`features.${PLUGIN.ID}`);
       const shimCore: CoreSetup = {
@@ -42,7 +42,7 @@ routes.when('/management/elasticsearch/watcher/:param1?/:param2?/:param3?/:param
           ...npSetup.core.application,
           register(app: App): void {
             mountApp = () =>
-              app.mount({} as any, {
+              app.mount(npStart as any, {
                 element: elem,
                 appBasePath: '/management/elasticsearch/watcher/',
               });
@@ -63,7 +63,6 @@ routes.when('/management/elasticsearch/watcher/:param1?/:param2?/:param3?/:param
           ...(npSetup.plugins as typeof npSetup.plugins & { eui_utils: any }),
           __LEGACY: {
             MANAGEMENT_BREADCRUMB,
-            savedObjects: npStart.core.savedObjects.client,
             I18nContext,
             TimeBuckets,
             licenseStatus,

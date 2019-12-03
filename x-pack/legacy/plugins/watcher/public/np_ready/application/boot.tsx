@@ -6,23 +6,28 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { App, AppDeps } from './app';
+import { SavedObjectsClientContract } from 'src/core/public';
 
+import { App, AppDeps } from './app';
 import { setHttpClient, setSavedObjectsClient } from './lib/api';
+import { BootLegacyDependencies } from '../types';
 
 interface BootDeps extends AppDeps {
   element: HTMLElement;
-  I18nContext: any;
+  savedObjects: SavedObjectsClientContract;
+  legacy: BootLegacyDependencies;
 }
 
 export const boot = (bootDeps: BootDeps) => {
-  const { element, I18nContext, ...appDeps } = bootDeps;
+  const { element, legacy, savedObjects, ...appDeps } = bootDeps;
+  const { I18nContext, ...appLegacyDeps } = legacy;
+
   setHttpClient(appDeps.http);
-  setSavedObjectsClient(appDeps.savedObjects);
+  setSavedObjectsClient(savedObjects);
 
   render(
     <I18nContext>
-      <App {...appDeps} />
+      <App {...{ ...appDeps, legacy: appLegacyDeps }} />
     </I18nContext>,
     element
   );

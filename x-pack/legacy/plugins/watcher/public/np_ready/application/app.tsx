@@ -9,7 +9,6 @@ import {
   ChromeStart,
   DocLinksStart,
   HttpSetup,
-  SavedObjectsClientContract,
   ToastsSetup,
   UiSettingsClientContract,
 } from 'src/core/public';
@@ -30,6 +29,7 @@ import { registerRouter } from './lib/navigation';
 import { BASE_PATH } from './constants';
 import { LICENSE_STATUS_VALID } from '../../../../../common/constants';
 import { AppContextProvider } from './app_context';
+import { LegacyDependencies } from '../types';
 
 const ShareRouter = withRouter(({ children, history }: RouteComponentProps & { children: any }) => {
   registerRouter({ history });
@@ -37,20 +37,17 @@ const ShareRouter = withRouter(({ children, history }: RouteComponentProps & { c
 });
 
 export interface AppDeps {
-  MANAGEMENT_BREADCRUMB: { text: string; href?: string };
   chrome: ChromeStart;
   docLinks: DocLinksStart;
   toasts: ToastsSetup;
   http: HttpSetup;
   uiSettings: UiSettingsClientContract;
-  savedObjects: SavedObjectsClientContract;
+  legacy: LegacyDependencies;
   euiUtils: any;
-  TimeBuckets: any;
-  licenseStatus: { status: string; message: string };
 }
 
 export const App = (deps: AppDeps) => {
-  const { status, message } = deps.licenseStatus;
+  const { status, message } = deps.legacy.licenseStatus;
 
   if (status !== LICENSE_STATUS_VALID) {
     return (
