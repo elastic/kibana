@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.common.navigateToApp('visualize');
     });
 
-    it('should have the correct data-shared-item title and description', async function () {
+    it('should have the correct data-shared-item title and description, and sharedItemContainer should exist', async function () {
       const expected = {
         title: 'Shared-Item Visualization AreaChart',
         description: 'AreaChart'
