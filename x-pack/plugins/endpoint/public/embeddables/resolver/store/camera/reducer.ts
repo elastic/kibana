@@ -26,7 +26,10 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
   } else if (action.type === 'userPanned') {
     return {
       ...state,
-      panningOffset: action.payload,
+      panningOffset: [
+        state.panningOffset[0] + action.payload[0],
+        state.panningOffset[1] + action.payload[1],
+      ],
     };
   } else if (action.type === 'userSetRasterSize') {
     return {
