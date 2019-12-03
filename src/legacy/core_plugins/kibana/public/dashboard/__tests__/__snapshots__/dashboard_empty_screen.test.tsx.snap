@@ -278,7 +278,7 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
                         <div
                           className="euiText euiText--medium"
                         >
-                          <span>
+                          <p>
                             Click the 
                             <EuiLink
                               aria-label="Add visualization"
@@ -296,7 +296,7 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
                               </button>
                             </EuiLink>
                              button in the menu bar above to add a visualization to the dashboard.
-                          </span>
+                          </p>
                         </div>
                       </EuiText>
                       <EuiSpacer
@@ -313,29 +313,31 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
                           className="euiText euiText--medium"
                           data-test-subj="linkToVisualizeParagraph"
                         >
-                          <FormattedMessage
-                            defaultMessage="If you haven't set up any visualizations yet, {visualizeAppLink} to create your first visualization"
-                            id="kbn.dashboard.addVisualizationDescription3"
-                            values={
-                              Object {
-                                "visualizeAppLink": <a
-                                  className="euiLink"
-                                  href="#/visualize"
-                                >
-                                  visit the Visualize app
-                                </a>,
+                          <p>
+                            <FormattedMessage
+                              defaultMessage="If you haven't set up any visualizations yet, {visualizeAppLink} to create your first visualization"
+                              id="kbn.dashboard.addVisualizationDescription3"
+                              values={
+                                Object {
+                                  "visualizeAppLink": <a
+                                    className="euiLink"
+                                    href="#/visualize"
+                                  >
+                                    visit the Visualize app
+                                  </a>,
+                                }
                               }
-                            }
-                          >
-                            If you haven't set up any visualizations yet, 
-                            <a
-                              className="euiLink"
-                              href="#/visualize"
                             >
-                              visit the Visualize app
-                            </a>
-                             to create your first visualization
-                          </FormattedMessage>
+                              If you haven't set up any visualizations yet, 
+                              <a
+                                className="euiLink"
+                                href="#/visualize"
+                              >
+                                visit the Visualize app
+                              </a>
+                               to create your first visualization
+                            </FormattedMessage>
+                          </p>
                         </div>
                       </EuiText>
                     </div>
@@ -629,7 +631,7 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
                         <div
                           className="euiText euiText--medium"
                         >
-                          <span>
+                          <p>
                             Click the 
                             <EuiLink
                               aria-label="Edit dashboard"
@@ -647,7 +649,7 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
                               </button>
                             </EuiLink>
                              button in the menu bar above to start working on your new dashboard.
-                          </span>
+                          </p>
                         </div>
                       </EuiText>
                     </div>
