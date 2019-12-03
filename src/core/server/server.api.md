@@ -544,6 +544,8 @@ export interface CoreSetup {
     savedObjects: SavedObjectsServiceSetup;
     // (undocumented)
     uiSettings: UiSettingsServiceSetup;
+    // (undocumented)
+    uuid: UuidServiceSetup;
 }
 
 // @public
@@ -1753,6 +1755,13 @@ export interface UserProvidedValues<T = any> {
     isOverridden?: boolean;
     // (undocumented)
     userValue?: T;
+}
+
+// Warning: (ae-missing-release-tag) "UuidServiceSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public
+export interface UuidServiceSetup {
+    getInstanceUuid(): string;
 }
 
 // @public
