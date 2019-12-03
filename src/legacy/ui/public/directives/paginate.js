@@ -55,33 +55,34 @@ export function PaginateDirectiveProvider($parse, $compile) {
         paginate.otherWidthGetter = $parse(attrs.otherWidth);
 
         paginate.init();
-      }
+      },
     },
     controllerAs: 'paginate',
     controller: function ($scope, $document) {
       const self = this;
       const ALL = 0;
-      const allSizeTitle = i18n.translate('common.ui.directives.paginate.size.allDropDownOptionLabel', {
-        defaultMessage: 'All',
-      });
+      const allSizeTitle = i18n.translate(
+        'common.ui.directives.paginate.size.allDropDownOptionLabel',
+        {
+          defaultMessage: 'All',
+        }
+      );
 
       self.sizeOptions = [
         { title: '10', value: 10 },
         { title: '25', value: 25 },
         { title: '100', value: 100 },
-        { title: allSizeTitle, value: ALL }
+        { title: allSizeTitle, value: ALL },
       ];
 
       // setup the watchers, called in the post-link function
       self.init = function () {
-
         self.perPage = _.parseInt(self.perPage) || $scope[self.perPageProp];
 
-        $scope.$watchMulti([
-          'paginate.perPage',
-          self.perPageProp,
-          self.otherWidthGetter
-        ], function (vals, oldVals) {
+        $scope.$watchMulti(['paginate.perPage', self.perPageProp, self.otherWidthGetter], function (
+          vals,
+          oldVals
+        ) {
           const intChanges = vals[0] !== oldVals[0];
 
           if (intChanges) {
@@ -217,7 +218,7 @@ export function PaginateDirectiveProvider($parse, $compile) {
           return true;
         }
       }
-    }
+    },
   };
 }
 
@@ -225,7 +226,7 @@ export function PaginateControlsDirectiveProvider() {
   // this directive is automatically added by paginate if not found within it's $el
   return {
     restrict: 'E',
-    template: paginateControlsTemplate
+    template: paginateControlsTemplate,
   };
 }
 

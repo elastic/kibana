@@ -52,9 +52,13 @@ export function watchMultiDecorator($provide) {
      * @return {Function} - an unwatch function, just like the return value of $watch
      */
     $delegate.constructor.prototype.$watchMulti = function (expressions, fn) {
-      if (!Array.isArray(expressions)) throw new TypeError('expected an array of expressions to watch');
-      if (!_.isFunction(fn)) throw new TypeError('expected a function that is triggered on each watch');
+      if (!Array.isArray(expressions)) {
+        throw new TypeError('expected an array of expressions to watch');
+      }
 
+      if (!_.isFunction(fn)) {
+        throw new TypeError('expected a function that is triggered on each watch');
+      }
       const $scope = this;
       const vals = new Array(expressions.length);
       const prev = new Array(expressions.length);
@@ -67,36 +71,46 @@ export function watchMultiDecorator($provide) {
         expr = normalizeExpression($scope, expr);
         if (!expr) return;
 
-        return expr.fn.call($scope, expr.get, function (newVal, oldVal) {
-          if (newVal === oldVal) {
-            init += 1;
-          }
+        return expr.fn.call(
+          $scope,
+          expr.get,
+          function (newVal, oldVal) {
+            if (newVal === oldVal) {
+              init += 1;
+            }
 
-          vals[i] = newVal;
-          prev[i] = oldVal;
-          fire = true;
-        }, expr.deep);
+            vals[i] = newVal;
+            prev[i] = oldVal;
+            fire = true;
+          },
+          expr.deep
+        );
       });
 
       // then, the watcher that checks to see if any of
       // the other watchers triggered this cycle
       let flip = false;
-      unwatchers.push($scope.$watch(function () {
-        if (init < neededInits) return init;
+      unwatchers.push(
+        $scope.$watch(
+          function () {
+            if (init < neededInits) return init;
 
-        if (fire) {
-          fire = false;
-          flip = !flip;
-        }
-        return flip;
-      }, function () {
-        if (init < neededInits) return false;
+            if (fire) {
+              fire = false;
+              flip = !flip;
+            }
+            return flip;
+          },
+          function () {
+            if (init < neededInits) return false;
 
-        fn(vals.slice(0), prev.slice(0));
-        vals.forEach(function (v, i) {
-          prev[i] = v;
-        });
-      }));
+            fn(vals.slice(0), prev.slice(0));
+            vals.forEach(function (v, i) {
+              prev[i] = v;
+            });
+          }
+        )
+      );
 
       return _.partial(callEach, unwatchers);
     };
@@ -105,7 +119,7 @@ export function watchMultiDecorator($provide) {
       if (!expr) return;
       const norm = {
         fn: $scope.$watch,
-        deep: false
+        deep: false,
       };
 
       if (_.isFunction(expr)) return _.assign(norm, { get: expr });
@@ -115,14 +129,14 @@ export function watchMultiDecorator($provide) {
       if (expr.substr(0, 2) === '[]') {
         return _.assign(norm, {
           fn: $scope.$watchCollection,
-          get: expr.substr(2)
+          get: expr.substr(2),
         });
       }
 
       if (expr.charAt(0) === '=') {
         return _.assign(norm, {
           deep: true,
-          get: expr.substr(1)
+          get: expr.substr(1),
         });
       }
 
