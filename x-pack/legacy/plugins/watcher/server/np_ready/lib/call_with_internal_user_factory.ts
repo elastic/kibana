@@ -5,13 +5,14 @@
  */
 
 import { once } from 'lodash';
+import { ServerShim } from '../types';
 
 const _callWithInternalUser = once((server: any) => {
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   return callWithInternalUser;
 });
 
-export const callWithInternalUserFactory = (server: any) => {
+export const callWithInternalUserFactory = (server: ServerShim) => {
   return (...args: any[]) => {
     return _callWithInternalUser(server)(...args);
   };

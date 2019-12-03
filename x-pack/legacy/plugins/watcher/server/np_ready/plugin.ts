@@ -7,7 +7,7 @@
 import { Plugin, CoreSetup } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN } from '../../common/constants';
-import { ServerShim, ServerShimWithRouter } from './types';
+import { ServerShim, NPServer } from './types';
 
 import { registerLicenseChecker } from '../../../../server/lib/register_license_checker';
 import { registerSettingsRoutes } from './routes/api/settings';
@@ -21,25 +21,24 @@ import { registerLoadHistoryRoute } from './routes/api/register_load_history_rou
 export class WatcherServerPlugin implements Plugin<void, void, any, any> {
   async setup({ http }: CoreSetup, { __LEGACY: serverShim }: { __LEGACY: ServerShim }) {
     const router = http.createRouter();
-    const serverShimWithRouter: ServerShimWithRouter = {
-      ...serverShim,
+    const npServer: NPServer = {
       router,
     };
     // Register license checker
     registerLicenseChecker(
-      serverShimWithRouter as any,
+      serverShim as any,
       PLUGIN.ID,
       PLUGIN.getI18nName(i18n),
       PLUGIN.MINIMUM_LICENSE_REQUIRED
     );
 
-    registerListFieldsRoute(serverShimWithRouter);
-    registerLoadHistoryRoute(serverShimWithRouter);
-    registerIndicesRoutes(serverShimWithRouter);
-    registerLicenseRoutes(serverShimWithRouter);
-    registerSettingsRoutes(serverShimWithRouter);
-    registerWatchesRoutes(serverShimWithRouter);
-    registerWatchRoutes(serverShimWithRouter);
+    registerListFieldsRoute(npServer, serverShim);
+    registerLoadHistoryRoute(npServer, serverShim);
+    registerIndicesRoutes(npServer, serverShim);
+    registerLicenseRoutes(npServer, serverShim);
+    registerSettingsRoutes(npServer, serverShim);
+    registerWatchesRoutes(npServer, serverShim);
+    registerWatchRoutes(npServer, serverShim);
   }
   start() {}
   stop() {}

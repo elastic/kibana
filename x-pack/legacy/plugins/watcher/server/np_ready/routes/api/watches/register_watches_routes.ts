@@ -6,9 +6,9 @@
 
 import { registerListRoute } from './register_list_route';
 import { registerDeleteRoute } from './register_delete_route';
-import { ServerShimWithRouter } from '../../../types';
+import { NPServer, ServerShim } from '../../../types';
 
-export function registerWatchesRoutes(server: ServerShimWithRouter) {
-  registerListRoute(server);
-  registerDeleteRoute(server);
+export function registerWatchesRoutes(server: NPServer, legacy: ServerShim) {
+  registerListRoute(server, legacy);
+  registerDeleteRoute(server, legacy);
 }

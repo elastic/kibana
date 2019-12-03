@@ -5,8 +5,8 @@
  */
 
 import { registerLoadRoute } from './register_load_route';
-import { ServerShimWithRouter } from '../../../types';
+import { NPServer, ServerShim } from '../../../types';
 
-export function registerSettingsRoutes(server: ServerShimWithRouter) {
-  registerLoadRoute(server);
+export function registerSettingsRoutes(server: NPServer, legacy: ServerShim) {
+  registerLoadRoute(server, legacy);
 }

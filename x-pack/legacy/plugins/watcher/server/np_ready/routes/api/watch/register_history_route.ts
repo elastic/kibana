@@ -12,7 +12,7 @@ import { fetchAllFromScroll } from '../../../lib/fetch_all_from_scroll';
 import { INDEX_NAMES, ES_SCROLL_SETTINGS } from '../../../../../common/constants';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
-import { ServerShimWithRouter } from '../../../types';
+import { NPServer, ServerShim } from '../../../types';
 // @ts-ignore
 import { WatchHistoryItem } from '../../../models/watch_history_item';
 
@@ -42,10 +42,10 @@ function fetchHistoryItems(callWithRequest: any, watchId: any, startTime: any) {
   );
 }
 
-export function registerHistoryRoute(server: ServerShimWithRouter) {
-  const isEsError = isEsErrorFactory(server);
+export function registerHistoryRoute(server: NPServer, legacy: ServerShim) {
+  const isEsError = isEsErrorFactory(legacy);
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
-    const callWithRequest = callWithRequestFactory(server, request);
+    const callWithRequest = callWithRequestFactory(legacy, request);
     const { watchId } = request.params;
     const { startTime } = request.query;
 
@@ -93,6 +93,6 @@ export function registerHistoryRoute(server: ServerShimWithRouter) {
         }),
       },
     },
-    licensePreRoutingFactory(server, handler)
+    licensePreRoutingFactory(legacy, handler)
   );
 }

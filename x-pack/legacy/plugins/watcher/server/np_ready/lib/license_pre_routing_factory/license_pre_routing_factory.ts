@@ -12,10 +12,10 @@ import {
 } from 'src/core/server';
 import { PLUGIN } from '../../../../common/constants';
 import { LICENSE_STATUS_VALID } from '../../../../../../common/constants/license_status';
-import { ServerShimWithRouter } from '../../types';
+import { ServerShim } from '../../types';
 
 export const licensePreRoutingFactory = (
-  server: ServerShimWithRouter,
+  server: ServerShim,
   handler: RequestHandler<any, any, any>
 ): RequestHandler<any, any, any> => {
   const xpackMainPlugin = server.plugins.xpack_main;

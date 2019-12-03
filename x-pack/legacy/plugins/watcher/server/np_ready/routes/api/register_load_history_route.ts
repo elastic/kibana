@@ -11,7 +11,7 @@ import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../lib/is_es_error_factory';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
-import { ServerShimWithRouter } from '../../types';
+import { NPServer, ServerShim } from '../../types';
 // @ts-ignore
 import { WatchHistoryItem } from '../../models/watch_history_item';
 
@@ -28,10 +28,10 @@ function fetchHistoryItem(callWithRequest: any, watchHistoryItemId: string) {
   });
 }
 
-export function registerLoadHistoryRoute(server: ServerShimWithRouter) {
-  const isEsError = isEsErrorFactory(server);
+export function registerLoadHistoryRoute(server: NPServer, legacy: ServerShim) {
+  const isEsError = isEsErrorFactory(legacy);
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
-    const callWithRequest = callWithRequestFactory(server, request);
+    const callWithRequest = callWithRequestFactory(legacy, request);
     const id = request.params.id;
 
     try {
@@ -73,6 +73,6 @@ export function registerLoadHistoryRoute(server: ServerShimWithRouter) {
         }),
       },
     },
-    licensePreRoutingFactory(server, handler)
+    licensePreRoutingFactory(legacy, handler)
   );
 }

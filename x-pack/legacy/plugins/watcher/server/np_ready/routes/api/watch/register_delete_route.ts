@@ -9,7 +9,7 @@ import { RequestHandler } from 'kibana/server';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
-import { ServerShimWithRouter } from '../../../types';
+import { NPServer, ServerShim } from '../../../types';
 
 function deleteWatch(callWithRequest: any, watchId: string) {
   return callWithRequest('watcher.deleteWatch', {
@@ -17,10 +17,10 @@ function deleteWatch(callWithRequest: any, watchId: string) {
   });
 }
 
-export function registerDeleteRoute(server: ServerShimWithRouter) {
-  const isEsError = isEsErrorFactory(server);
+export function registerDeleteRoute(server: NPServer, legacy: ServerShim) {
+  const isEsError = isEsErrorFactory(legacy);
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
-    const callWithRequest = callWithRequestFactory(server, request);
+    const callWithRequest = callWithRequestFactory(legacy, request);
 
     const { watchId } = request.params;
 
@@ -48,6 +48,6 @@ export function registerDeleteRoute(server: ServerShimWithRouter) {
         }),
       },
     },
-    licensePreRoutingFactory(server, handler)
+    licensePreRoutingFactory(legacy, handler)
   );
 }

@@ -9,7 +9,7 @@ import { RequestHandler } from 'src/core/server';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
-import { ServerShimWithRouter } from '../../../types';
+import { NPServer, ServerShim } from '../../../types';
 
 // @ts-ignore
 import { Watch } from '../../../models/watch';
@@ -28,10 +28,10 @@ function fetchVisualizeData(callWithRequest: any, index: any, body: any) {
   return callWithRequest('search', params);
 }
 
-export function registerVisualizeRoute(server: ServerShimWithRouter) {
-  const isEsError = isEsErrorFactory(server);
+export function registerVisualizeRoute(server: NPServer, legacy: ServerShim) {
+  const isEsError = isEsErrorFactory(legacy);
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
-    const callWithRequest = callWithRequestFactory(server, request);
+    const callWithRequest = callWithRequestFactory(legacy, request);
     const watch = Watch.fromDownstreamJson(request.body.watch);
     const options = VisualizeOptions.fromDownstreamJson(request.body.options);
     const body = watch.getVisualizeQuery(options);
@@ -66,6 +66,6 @@ export function registerVisualizeRoute(server: ServerShimWithRouter) {
         }),
       },
     },
-    licensePreRoutingFactory(server, handler)
+    licensePreRoutingFactory(legacy, handler)
   );
 }

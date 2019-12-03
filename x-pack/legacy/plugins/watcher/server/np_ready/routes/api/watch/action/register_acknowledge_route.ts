@@ -12,7 +12,7 @@ import { isEsErrorFactory } from '../../../../lib/is_es_error_factory';
 import { licensePreRoutingFactory } from '../../../../lib/license_pre_routing_factory';
 // @ts-ignore
 import { WatchStatus } from '../../../../models/watch_status';
-import { ServerShimWithRouter } from '../../../../types';
+import { NPServer, ServerShim } from '../../../../types';
 
 function acknowledgeAction(callWithRequest: any, watchId: string, actionId: string) {
   return callWithRequest('watcher.ackWatch', {
@@ -21,10 +21,10 @@ function acknowledgeAction(callWithRequest: any, watchId: string, actionId: stri
   });
 }
 
-export function registerAcknowledgeRoute(server: ServerShimWithRouter) {
-  const isEsError = isEsErrorFactory(server);
+export function registerAcknowledgeRoute(server: NPServer, legacy: ServerShim) {
+  const isEsError = isEsErrorFactory(legacy);
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
-    const callWithRequest = callWithRequestFactory(server, request);
+    const callWithRequest = callWithRequestFactory(legacy, request);
     const { watchId, actionId } = request.params;
 
     try {
@@ -61,6 +61,6 @@ export function registerAcknowledgeRoute(server: ServerShimWithRouter) {
         }),
       },
     },
-    licensePreRoutingFactory(server, handler)
+    licensePreRoutingFactory(legacy, handler)
   );
 }

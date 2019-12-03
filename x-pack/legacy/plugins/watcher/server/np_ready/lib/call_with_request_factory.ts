@@ -6,6 +6,7 @@
 
 import { once } from 'lodash';
 import { elasticsearchJsPlugin } from './elasticsearch_js_plugin';
+import { ServerShim } from '../types';
 
 const callWithRequest = once((server: any) => {
   const config = { plugins: [elasticsearchJsPlugin] };
@@ -14,7 +15,7 @@ const callWithRequest = once((server: any) => {
   return cluster.callWithRequest;
 });
 
-export const callWithRequestFactory = (server: any, request: any) => {
+export const callWithRequestFactory = (server: ServerShim, request: any) => {
   return (...args: any[]) => {
     return callWithRequest(server)(request, ...args);
   };

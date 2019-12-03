@@ -11,7 +11,7 @@ import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
-import { ServerShimWithRouter } from '../../../types';
+import { NPServer, ServerShim } from '../../../types';
 // @ts-ignore
 import { ExecuteDetails } from '../../../models/execute_details';
 // @ts-ignore
@@ -28,10 +28,10 @@ function executeWatch(callWithRequest: any, executeDetails: any, watchJson: any)
   });
 }
 
-export function registerExecuteRoute(server: ServerShimWithRouter) {
-  const isEsError = isEsErrorFactory(server);
+export function registerExecuteRoute(server: NPServer, legacy: ServerShim) {
+  const isEsError = isEsErrorFactory(legacy);
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
-    const callWithRequest = callWithRequestFactory(server, request);
+    const callWithRequest = callWithRequestFactory(legacy, request);
     const executeDetails = ExecuteDetails.fromDownstreamJson(request.body.executeDetails);
     const watch = Watch.fromDownstreamJson(request.body.watch);
 
@@ -74,6 +74,6 @@ export function registerExecuteRoute(server: ServerShimWithRouter) {
         }),
       },
     },
-    licensePreRoutingFactory(server, handler)
+    licensePreRoutingFactory(legacy, handler)
   );
 }

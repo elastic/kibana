@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { RequestHandler } from 'src/core/server';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
-import { ServerShimWithRouter } from '../../../types';
+import { NPServer, ServerShim } from '../../../types';
 
 function deleteWatches(callWithRequest: any, watchIds: string[]) {
   const deletePromises = watchIds.map(watchId => {
@@ -37,9 +37,9 @@ function deleteWatches(callWithRequest: any, watchIds: string[]) {
   });
 }
 
-export function registerDeleteRoute(server: ServerShimWithRouter) {
+export function registerDeleteRoute(server: NPServer, legacy: ServerShim) {
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
-    const callWithRequest = callWithRequestFactory(server, request);
+    const callWithRequest = callWithRequestFactory(legacy, request);
 
     try {
       const results = await deleteWatches(callWithRequest, request.body.watchIds);
@@ -58,6 +58,6 @@ export function registerDeleteRoute(server: ServerShimWithRouter) {
         }),
       },
     },
-    licensePreRoutingFactory(server, handler)
+    licensePreRoutingFactory(legacy, handler)
   );
 }

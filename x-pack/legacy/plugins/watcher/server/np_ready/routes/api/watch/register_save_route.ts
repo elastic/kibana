@@ -15,7 +15,7 @@ import {
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
-import { ServerShimWithRouter } from '../../../types';
+import { NPServer, ServerShim } from '../../../types';
 
 function fetchWatch(callWithRequest: any, watchId: string) {
   return callWithRequest('watcher.getWatch', {
@@ -30,10 +30,10 @@ function saveWatch(callWithRequest: any, id: string, body: any) {
   });
 }
 
-export function registerSaveRoute(server: ServerShimWithRouter) {
-  const isEsError = isEsErrorFactory(server);
+export function registerSaveRoute(server: NPServer, legacy: ServerShim) {
+  const isEsError = isEsErrorFactory(legacy);
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
-    const callWithRequest = callWithRequestFactory(server, request);
+    const callWithRequest = callWithRequestFactory(legacy, request);
     const { id } = request.params;
     const { type, isNew, ...watchConfig } = request.body;
 
@@ -100,6 +100,6 @@ export function registerSaveRoute(server: ServerShimWithRouter) {
         body: schema.object({}, { allowUnknowns: true }),
       },
     },
-    licensePreRoutingFactory(server, handler)
+    licensePreRoutingFactory(legacy, handler)
   );
 }

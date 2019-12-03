@@ -5,8 +5,8 @@
  */
 
 import { registerGetRoute } from './register_get_route';
-import { ServerShimWithRouter } from '../../../types';
+import { NPServer, ServerShim } from '../../../types';
 
-export function registerIndicesRoutes(server: ServerShimWithRouter) {
-  registerGetRoute(server);
+export function registerIndicesRoutes(server: NPServer, legacy: ServerShim) {
+  registerGetRoute(server, legacy);
 }

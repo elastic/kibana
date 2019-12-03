@@ -17,6 +17,6 @@ export interface ServerShim {
   };
 }
 
-export interface ServerShimWithRouter extends ServerShim {
+export interface NPServer {
   router: IRouter;
 }

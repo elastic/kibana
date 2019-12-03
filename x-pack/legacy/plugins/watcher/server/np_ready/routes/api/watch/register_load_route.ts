@@ -12,7 +12,7 @@ import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 // @ts-ignore
 import { Watch } from '../../../models/watch';
-import { ServerShimWithRouter } from '../../../types';
+import { NPServer, ServerShim } from '../../../types';
 
 function fetchWatch(callWithRequest: any, watchId: string) {
   return callWithRequest('watcher.getWatch', {
@@ -20,10 +20,10 @@ function fetchWatch(callWithRequest: any, watchId: string) {
   });
 }
 
-export function registerLoadRoute(server: ServerShimWithRouter) {
-  const isEsError = isEsErrorFactory(server);
+export function registerLoadRoute(server: NPServer, legacy: ServerShim) {
+  const isEsError = isEsErrorFactory(legacy);
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
-    const callWithRequest = callWithRequestFactory(server, request);
+    const callWithRequest = callWithRequestFactory(legacy, request);
 
     const id = request.params.id;
 
@@ -65,6 +65,6 @@ export function registerLoadRoute(server: ServerShimWithRouter) {
         }),
       },
     },
-    licensePreRoutingFactory(server, handler)
+    licensePreRoutingFactory(legacy, handler)
   );
 }
