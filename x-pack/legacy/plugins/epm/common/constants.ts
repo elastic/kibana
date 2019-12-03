@@ -17,4 +17,5 @@ export const PLUGIN = {
   CONFIG_PREFIX: 'xpack.epm',
 };
 
-export const SAVED_OBJECT_TYPE = 'epm';
+export const SAVED_OBJECT_TYPE_PACKAGES = 'epm-package';
+export const SAVED_OBJECT_TYPE_DATASOURCES = 'epm-datasource';

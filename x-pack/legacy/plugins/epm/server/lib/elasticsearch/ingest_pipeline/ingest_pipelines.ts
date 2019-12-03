@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { CallESAsCurrentUser } from '../../cluster_access';
+import * as Registry from '../../../registry';
+import { AssetReference, ElasticsearchAssetType } from '../../../../common/types';
+
 export function rewriteIngestPipeline(
   pipeline: string,
   substitutions: Array<{
@@ -28,3 +32,37 @@ export function rewriteIngestPipeline(
   });
   return pipeline;
 }
+
+export async function installPipelines({
+  callCluster,
+  pkgkey,
+}: {
+  callCluster: CallESAsCurrentUser;
+  pkgkey: string;
+}) {
+  const paths = await Registry.getArchiveInfo(pkgkey, isPipeline);
+  const installationPromises = paths.map(path => installPipeline({ callCluster, path }));
+
+  return Promise.all(installationPromises);
+}
+
+async function installPipeline({
+  callCluster,
+  path,
+}: {
+  callCluster: CallESAsCurrentUser;
+  path: string;
+}): Promise<AssetReference> {
+  const buffer = Registry.getAsset(path);
+  const parts = Registry.pathParts(path);
+  const id = path.replace(/\W/g, '_'); // TODO: replace with "real" pipeline id
+  const pipeline = buffer.toString('utf8');
+
+  await callCluster('ingest.putPipeline', { id, body: pipeline });
+
+  return { id, type: parts.type };
+}
+
+const isDirectory = ({ path }: Registry.ArchiveEntry) => path.endsWith('/');
+const isPipeline = ({ path }: Registry.ArchiveEntry) =>
+  !isDirectory({ path }) && Registry.pathParts(path).type === ElasticsearchAssetType.ingestPipeline;

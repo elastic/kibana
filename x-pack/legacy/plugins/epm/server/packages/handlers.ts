@@ -9,14 +9,13 @@ import { AssetType } from '../../common/types';
 import {
   SearchParams,
   getCategories,
-  getClusterAccessor,
   getFile,
   getPackageInfo,
   getPackages,
   installPackage,
-  installDatasource,
   removeInstallation,
 } from './index';
+import { getClusterAccessor } from '../lib/cluster_access';
 import { PluginContext } from '../plugin';
 import { getClient } from '../saved_objects';
 import { Request, ResponseToolkit } from '../types';
@@ -91,16 +90,3 @@ export async function handleRequestDelete(req: InstallDeletePackageRequest, extr
 }
 
 //   const pipelineResults = await installPipelines({ pkgkey, callCluster });
-export async function handleRequestInstallDatasource(
-  req: InstallDeletePackageRequest,
-  extra: Extra
-) {
-  const { pkgkey } = req.params;
-  const savedObjectsClient = getClient(req);
-  const callCluster = getClusterAccessor(extra.context.esClient, req);
-  return installDatasource({
-    savedObjectsClient,
-    pkgkey,
-    callCluster,
-  });
-}
