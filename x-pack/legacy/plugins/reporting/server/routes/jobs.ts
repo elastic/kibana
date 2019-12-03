@@ -25,7 +25,10 @@ import {
 
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
-export function registerJobs(server: ServerFacade, exportTypesRegistry: ExportTypesRegistry) {
+export function registerJobInfoRoutes(
+  server: ServerFacade,
+  exportTypesRegistry: ExportTypesRegistry
+) {
   const jobsQuery = jobsQueryFactory(server);
   const getRouteConfig = getRouteConfigFactoryManagementPre(server);
   const getRouteConfigDownload = getRouteConfigFactoryDownloadPre(server);

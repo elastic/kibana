@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
 // @ts-ignore untyped module defintition
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
-import { registerRoutes } from './server/routes';
+import { registerJobGenerationRoutes, registerJobInfoRoutes } from './server/routes';
 import {
   createQueueFactory,
   enqueueJobFactory,
@@ -109,7 +109,8 @@ export const reporting = (kibana: any) => {
       const enqueueJob = enqueueJobFactory(server, { exportTypesRegistry, esqueue });
 
       // Reporting routes
-      registerRoutes(server, exportTypesRegistry, enqueueJob, logger);
+      registerJobGenerationRoutes(server, enqueueJob, logger);
+      registerJobInfoRoutes(server, exportTypesRegistry);
     },
 
     deprecations({ unused }: any) {
