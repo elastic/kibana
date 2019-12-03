@@ -20,7 +20,7 @@
 import { ResponseObject, Server } from 'hapi';
 import { UnwrapPromise } from '@kbn/utility-types';
 
-import { SavedObjectsClientProviderOptions, CoreSetup } from 'src/core/server';
+import { SavedObjectsClientProviderOptions, CoreSetup, CoreStart } from 'src/core/server';
 import {
   ConfigService,
   ElasticsearchServiceSetup,
@@ -41,9 +41,8 @@ import { LegacyConfig } from '../../core/server/legacy';
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 import { UsageCollectionSetup } from '../../plugins/usage_collection/server';
-import { CapabilitiesModifier } from './capabilities';
 import { IndexPatternsServiceFactory } from './index_patterns';
-import { Capabilities } from '../../core/public';
+import { Capabilities } from '../../core/server';
 import { UiSettingsServiceFactoryOptions } from '../../legacy/ui/ui_settings/ui_settings_service_factory';
 
 export type KibanaConfig = LegacyConfig;
@@ -68,7 +67,6 @@ declare module 'hapi' {
     savedObjects: SavedObjectsLegacyService;
     injectUiAppVars: (pluginName: string, getAppVars: () => { [key: string]: any }) => void;
     getHiddenUiAppById(appId: string): UiApp;
-    registerCapabilitiesModifier: (provider: CapabilitiesModifier) => void;
     addScopedTutorialContextFactory: (
       scopedTutorialContextFactory: (...args: any[]) => any
     ) => void;
@@ -89,7 +87,6 @@ declare module 'hapi' {
     getBasePath(): string;
     getDefaultRoute(): Promise<string>;
     getUiSettingsService(): IUiSettingsClient;
-    getCapabilities(): Promise<Capabilities>;
   }
 
   interface ResponseToolkit {
@@ -126,7 +123,7 @@ export default class KbnServer {
       plugins: PluginsSetup;
     };
     start: {
-      core: CoreSetup;
+      core: CoreStart;
       plugins: Record<string, object>;
     };
     stop: null;

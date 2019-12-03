@@ -17,23 +17,4 @@
  * under the License.
  */
 
-import { Capabilities } from './capabilities_service';
-
-export const mergeCapabilities = (...sources: Array<Partial<Capabilities>>) =>
-  sources.reduce(
-    (capabilities, source) => {
-      Object.entries(source).forEach(([key, value]) => {
-        capabilities[key] = {
-          ...value,
-          ...capabilities[key],
-        };
-      });
-
-      return capabilities;
-    },
-    {
-      navLinks: {},
-      management: {},
-      catalogue: {},
-    }
-  );
+export { createHttpServer } from './http/test_utils';

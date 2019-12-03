@@ -246,6 +246,7 @@ export class LegacyService implements CoreService {
     }
   ) {
     const coreSetup: CoreSetup = {
+      capabilities: setupDeps.core.capabilities,
       context: setupDeps.core.context,
       elasticsearch: {
         adminClient$: setupDeps.core.elasticsearch.adminClient$,
@@ -276,6 +277,7 @@ export class LegacyService implements CoreService {
       },
     };
     const coreStart: CoreStart = {
+      capabilities: startDeps.core.capabilities,
       savedObjects: { getScopedClient: startDeps.core.savedObjects.getScopedClient },
     };
 

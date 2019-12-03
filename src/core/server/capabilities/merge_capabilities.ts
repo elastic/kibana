@@ -17,28 +17,19 @@
  * under the License.
  */
 
-import typeDetect from 'type-detect';
 import { merge } from 'lodash';
-import { Capabilities } from '../../../core/public';
+import { Capabilities } from './types';
 
 export const mergeCapabilities = (...sources: Array<Partial<Capabilities>>): Capabilities =>
-  merge(
-    {
-      navLinks: {},
-      management: {},
-      catalogue: {},
-    },
-    ...sources,
-    (a: any, b: any) => {
-      if (
-        (typeDetect(a) === 'boolean' && typeDetect(b) === 'Object') ||
-        (typeDetect(b) === 'boolean' && typeDetect(a) === 'Object')
-      ) {
-        throw new Error(`a boolean and an object can't be merged`);
-      }
-
-      if (typeDetect(a) === 'boolean' && typeDetect(b) === 'boolean' && a !== b) {
-        throw new Error(`"true" and "false" can't be merged`);
-      }
+  merge({}, ...sources, (a: any, b: any) => {
+    if (
+      (typeof a === 'boolean' && typeof b === 'object') ||
+      (typeof a === 'object' && typeof b === 'boolean')
+    ) {
+      throw new Error(`conflict trying to merge boolean with object`);
     }
-  );
+
+    if (typeof a === 'boolean' && typeof b === 'boolean' && a !== b) {
+      throw new Error(`conflict trying to merge booleans with different values`);
+    }
+  });
