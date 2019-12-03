@@ -7,7 +7,6 @@
 import React from 'react';
 import { mountHook } from 'test_utils/enzyme_helpers';
 
-// import { ApolloClientContext } from '../../../utils/apollo_context';
 import { useLogSummary } from './log_summary';
 
 import { fetchLogSummary } from './api/log_summary';
@@ -101,30 +100,19 @@ describe('useLogSummary hook', () => {
     );
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
-    // expect(mockApolloClient.query).toHaveBeenLastCalledWith(
-    //   expect.objectContaining({
-    //     variables: expect.objectContaining({
-    //       sourceId: 'INITIAL_SOURCE_ID',
-    //     }),
-    //   })
-    // );
     expect(getLastHookValue().buckets).toEqual(firstMockResponse.buckets);
 
     act((_, setArgs) => {
       setArgs({ sourceId: 'CHANGED_SOURCE_ID' });
     });
 
-    // expect(mockApolloClient.query).toHaveBeenCalledTimes(2);
-    // expect(mockApolloClient.query).toHaveBeenLastCalledWith(
-    //   expect.objectContaining({
-    //     variables: expect.objectContaining({
-    //       sourceId: 'CHANGED_SOURCE_ID',
-    //     }),
-    //   })
-    // );
-    // expect(getLastHookValue().buckets).toEqual(
-    //   secondMockResponse.data.source.logSummaryBetween.buckets
-    // );
+    expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
+    expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        sourceId: 'CHANGED_SOURCE_ID',
+      })
+    );
+    expect(getLastHookValue().buckets).toEqual(secondMockResponse.buckets);
   });
 
   it('queries for new summary buckets when the filter query changes', () => {
