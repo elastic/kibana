@@ -6,7 +6,12 @@
 
 import * as Rx from 'rxjs';
 import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
-import { ExecuteJobFactory, ESQueueWorkerExecuteFn, ServerFacade } from '../../../../types';
+import {
+  ServerFacade,
+  ExecuteJobFactory,
+  ESQueueWorkerExecuteFn,
+  HeadlessChromiumDriverFactory,
+} from '../../../../types';
 import { JobDocPayloadPDF } from '../../types';
 import { PLUGIN_ID, PDF_JOB_TYPE } from '../../../../common/constants';
 import { LevelLogger } from '../../../../server/lib';
@@ -21,8 +26,15 @@ import {
 
 export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
   JobDocPayloadPDF
->> = function executeJobFactoryFn(server: ServerFacade) {
-  const generatePdfObservable = generatePdfObservableFactory(server);
+>> = function executeJobFactoryFn(
+  server: ServerFacade,
+  { browserDriverFactory }: { browserDriverFactory?: HeadlessChromiumDriverFactory } = {}
+) {
+  if (!browserDriverFactory) {
+    throw new Error('Reporting browser driver factory must be passed for PDF job execution');
+  }
+
+  const generatePdfObservable = generatePdfObservableFactory(server, browserDriverFactory);
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PDF_JOB_TYPE, 'execute']);
 
   return function executeJob(

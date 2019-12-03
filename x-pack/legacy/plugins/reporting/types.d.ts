@@ -16,27 +16,14 @@ import { CancellationToken } from './common/cancellation_token';
 import { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
 import { BrowserType } from './server/browsers/types';
 
+export type ReportingPlugin = object; // For Plugin contract
+
 export type Job = EventEmitter & {
   id: string;
   toJSON: () => {
     id: string;
   };
 };
-
-export interface ReportingPlugin {
-  queue: {
-    addJob: <PayloadType>(type: string, payload: PayloadType, options: object) => Job;
-  };
-  // TODO: convert exportTypesRegistry to TS
-  exportTypesRegistry: {
-    getById: <T, U, V, W>(id: string) => ExportTypeDefinition<T, U, V, W>;
-    getAll: <T, U, V, W>() => Array<ExportTypeDefinition<T, U, V, W>>;
-    get: <T, U, V, W>(
-      callback: (item: ExportTypeDefinition<T, U, V, W>) => boolean
-    ) => ExportTypeDefinition<T, U, V, W>;
-  };
-  browserDriverFactory: HeadlessChromiumDriverFactory;
-}
 
 export interface ReportingConfigOptions {
   browser: BrowserConfig;
@@ -88,7 +75,6 @@ export type ReportingPluginSpecOptions = Legacy.PluginSpecOptions;
 
 export type ServerFacade = Legacy.Server & {
   plugins: {
-    reporting?: ReportingPlugin;
     xpack_main?: XPackMainPlugin & {
       status?: any;
     };
@@ -246,6 +232,10 @@ export interface JobDocOutputExecuted {
   size: number;
 }
 
+export interface ESQueue {
+  addJob: (type: string, payload: object, options: object) => Job;
+}
+
 export interface ESQueueWorker {
   on: (event: string, handler: any) => void;
 }
@@ -304,7 +294,12 @@ export interface ESQueueInstance<JobParamsType, JobDocPayloadType> {
 }
 
 export type CreateJobFactory<CreateJobFnType> = (server: ServerFacade) => CreateJobFnType;
-export type ExecuteJobFactory<ExecuteJobFnType> = (server: ServerFacade) => ExecuteJobFnType;
+export type ExecuteJobFactory<ExecuteJobFnType> = (
+  server: ServerFacade,
+  opts?: {
+    browserDriverFactory?: HeadlessChromiumDriverFactory;
+  }
+) => ExecuteJobFnType;
 
 export interface ExportTypeDefinition<
   JobParamsType,
@@ -322,17 +317,9 @@ export interface ExportTypeDefinition<
   validLicenses: string[];
 }
 
-export interface ExportTypesRegistry {
-  register: <JobParamsType, CreateJobFnType, JobPayloadType, ExecuteJobFnType>(
-    exportTypeDefinition: ExportTypeDefinition<
-      JobParamsType,
-      CreateJobFnType,
-      JobPayloadType,
-      ExecuteJobFnType
-    >
-  ) => void;
-}
-
+export { ExportTypesRegistry } from './server/lib/export_types_registry';
+export { HeadlessChromiumDriver } from './server/browsers/chromium/driver';
+export { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
 export { CancellationToken } from './common/cancellation_token';
 
 // Prefer to import this type using: `import { LevelLogger } from 'relative/path/server/lib';`

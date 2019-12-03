@@ -5,7 +5,7 @@
  */
 
 import * as sinon from 'sinon';
-import { ServerFacade } from '../../types';
+import { ServerFacade, ExportTypesRegistry, HeadlessChromiumDriverFactory } from '../../types';
 import { createWorkerFactory } from './create_worker';
 // @ts-ignore
 import { Esqueue } from './esqueue';
@@ -44,7 +44,10 @@ describe('Create Worker', () => {
   });
 
   test('Creates a single Esqueue worker for Reporting', async () => {
-    const createWorker = createWorkerFactory(getMockServer());
+    const createWorker = createWorkerFactory(getMockServer(), {
+      exportTypesRegistry: {} as ExportTypesRegistry,
+      browserDriverFactory: {} as HeadlessChromiumDriverFactory,
+    });
     const registerWorkerSpy = sinon.spy(queue, 'registerWorker');
 
     createWorker(queue);
@@ -75,7 +78,11 @@ Object {
         { executeJobFactory: executeJobFactoryStub },
         { executeJobFactory: executeJobFactoryStub },
         { executeJobFactory: executeJobFactoryStub },
-      ])
+      ]),
+      {
+        exportTypesRegistry: {} as ExportTypesRegistry,
+        browserDriverFactory: {} as HeadlessChromiumDriverFactory,
+      }
     );
     const registerWorkerSpy = sinon.spy(queue, 'registerWorker');
 

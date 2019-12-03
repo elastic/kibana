@@ -40,7 +40,6 @@ function getServerMock(customization) {
         },
       },
     },
-    expose: () => {},
     log: () => {},
     config: () => ({
       get: key => {
@@ -56,6 +55,11 @@ function getServerMock(customization) {
 }
 
 const getResponseMock = (customization = {}) => customization;
+const getExportTypesRegistryMock = () => ({
+  getAll() {
+    return [];
+  },
+});
 
 describe('license checks', () => {
   describe('with a basic license', () => {
@@ -67,8 +71,13 @@ describe('license checks', () => {
         .returns('basic');
       const callClusterMock = jest.fn(() => Promise.resolve(getResponseMock()));
       const usageCollection = getMockUsageCollection();
-      const { fetch: getReportingUsage } = getReportingUsageCollector(usageCollection, serverWithBasicLicenseMock);
-      usageStats = await getReportingUsage(callClusterMock);
+      const { fetch: getReportingUsage } = getReportingUsageCollector(
+        usageCollection,
+        serverWithBasicLicenseMock,
+        () => {},
+        getExportTypesRegistryMock()
+      );
+      usageStats = await getReportingUsage(callClusterMock, getExportTypesRegistryMock());
     });
 
     test('sets enables to true', async () => {
@@ -93,8 +102,13 @@ describe('license checks', () => {
         .returns('none');
       const callClusterMock = jest.fn(() => Promise.resolve(getResponseMock()));
       const usageCollection = getMockUsageCollection();
-      const { fetch: getReportingUsage } = getReportingUsageCollector(usageCollection, serverWithNoLicenseMock);
-      usageStats = await getReportingUsage(callClusterMock);
+      const { fetch: getReportingUsage } = getReportingUsageCollector(
+        usageCollection,
+        serverWithNoLicenseMock,
+        () => {},
+        getExportTypesRegistryMock()
+      );
+      usageStats = await getReportingUsage(callClusterMock, getExportTypesRegistryMock());
     });
 
     test('sets enables to true', async () => {
@@ -121,9 +135,11 @@ describe('license checks', () => {
       const usageCollection = getMockUsageCollection();
       const { fetch: getReportingUsage } = getReportingUsageCollector(
         usageCollection,
-        serverWithPlatinumLicenseMock
+        serverWithPlatinumLicenseMock,
+        () => {},
+        getExportTypesRegistryMock()
       );
-      usageStats = await getReportingUsage(callClusterMock);
+      usageStats = await getReportingUsage(callClusterMock, getExportTypesRegistryMock());
     });
 
     test('sets enables to true', async () => {
@@ -148,8 +164,13 @@ describe('license checks', () => {
         .returns('basic');
       const callClusterMock = jest.fn(() => Promise.resolve({}));
       const usageCollection = getMockUsageCollection();
-      const { fetch: getReportingUsage } = getReportingUsageCollector(usageCollection, serverWithBasicLicenseMock);
-      usageStats = await getReportingUsage(callClusterMock);
+      const { fetch: getReportingUsage } = getReportingUsageCollector(
+        usageCollection,
+        serverWithBasicLicenseMock,
+        () => {},
+        getExportTypesRegistryMock()
+      );
+      usageStats = await getReportingUsage(callClusterMock, getExportTypesRegistryMock());
     });
 
     test('sets enables to true', async () => {
@@ -170,7 +191,12 @@ describe('data modeling', () => {
     serverWithPlatinumLicenseMock.plugins.xpack_main.info.license.getType = sinon
       .stub()
       .returns('platinum');
-    ({ fetch: getReportingUsage } = getReportingUsageCollector(usageCollection, serverWithPlatinumLicenseMock));
+    ({ fetch: getReportingUsage } = getReportingUsageCollector(
+      usageCollection,
+      serverWithPlatinumLicenseMock,
+      () => {},
+      getExportTypesRegistryMock()
+    ));
   });
 
   test('with normal looking usage data', async () => {
@@ -295,6 +321,7 @@ describe('data modeling', () => {
         })
       )
     );
+
     const usageStats = await getReportingUsage(callClusterMock);
     expect(usageStats).toMatchInlineSnapshot(`
 Object {

@@ -8,6 +8,7 @@ import boom from 'boom';
 import { API_BASE_URL } from '../../common/constants';
 import {
   ServerFacade,
+  ExportTypesRegistry,
   RequestFacade,
   ReportingResponseToolkit,
   JobDocOutput,
@@ -24,7 +25,7 @@ import {
 
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
-export function registerJobs(server: ServerFacade) {
+export function registerJobs(server: ServerFacade, exportTypesRegistry: ExportTypesRegistry) {
   const jobsQuery = jobsQueryFactory(server);
   const getRouteConfig = getRouteConfigFactoryManagementPre(server);
   const getRouteConfigDownload = getRouteConfigFactoryDownloadPre(server);
@@ -119,7 +120,7 @@ export function registerJobs(server: ServerFacade) {
   });
 
   // trigger a download of the output from a job
-  const jobResponseHandler = jobResponseHandlerFactory(server);
+  const jobResponseHandler = jobResponseHandlerFactory(server, exportTypesRegistry);
   server.route({
     path: `${MAIN_ENTRY}/download/{docId}`,
     method: 'GET',

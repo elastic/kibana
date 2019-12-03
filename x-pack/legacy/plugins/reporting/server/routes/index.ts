@@ -6,20 +6,29 @@
 
 import boom from 'boom';
 import { API_BASE_URL } from '../../common/constants';
-import { ServerFacade, RequestFacade, ReportingResponseToolkit, Logger } from '../../types';
-import { enqueueJobFactory } from '../lib/enqueue_job';
+import {
+  ServerFacade,
+  RequestFacade,
+  ExportTypesRegistry,
+  ReportingResponseToolkit,
+  Logger,
+} from '../../types';
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
 import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
 import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
 import { registerJobs } from './jobs';
 import { registerLegacy } from './legacy';
 
-export function registerRoutes(server: ServerFacade, logger: Logger) {
+export function registerRoutes(
+  server: ServerFacade,
+  exportTypesRegistry: ExportTypesRegistry,
+  enqueueJob: any,
+  logger: Logger
+) {
   const config = server.config();
   const DOWNLOAD_BASE_URL = config.get('server.basePath') + `${API_BASE_URL}/jobs/download`;
   // @ts-ignore TODO
   const { errors: esErrors } = server.plugins.elasticsearch.getCluster('admin');
-  const enqueueJob = enqueueJobFactory(server);
 
   /*
    * Generates enqueued job details to use in responses
@@ -68,5 +77,5 @@ export function registerRoutes(server: ServerFacade, logger: Logger) {
     registerGenerateCsvFromSavedObjectImmediate(server, logger);
   }
 
-  registerJobs(server);
+  registerJobs(server, exportTypesRegistry);
 }
