@@ -160,7 +160,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
 
       if (indexPattern !== undefined) {
         await newJobCapsService.initializeFromIndexPattern(indexPattern);
-        // Get fields and filter for numeric
+        // Get fields and filter for supported types for job type
         const { fields } = newJobCapsService;
         const options: Array<{ label: string }> = [];
 

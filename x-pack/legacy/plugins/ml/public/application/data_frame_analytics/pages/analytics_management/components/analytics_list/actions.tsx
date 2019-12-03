@@ -13,7 +13,11 @@ import {
   createPermissionFailureMessage,
 } from '../../../../../privilege/check_privilege';
 
-import { getAnalysisType, isClassificationAnalysis } from '../../../../common/analytics';
+import {
+  getAnalysisType,
+  isRegressionAnalysis,
+  isOutlierAnalysis,
+} from '../../../../common/analytics';
 
 import { getResultsUrl, isDataFrameAnalyticsRunning, DataFrameAnalyticsListRow } from './common';
 import { stopAnalytics } from '../../services/analytics_service';
@@ -26,7 +30,8 @@ export const AnalyticsViewAction = {
   render: (item: DataFrameAnalyticsListRow) => {
     const analysisType = getAnalysisType(item.config.analysis);
     const jobStatus = item.stats.state;
-    const isDisabled = isClassificationAnalysis(item.config.analysis);
+    const isDisabled =
+      !isRegressionAnalysis(item.config.analysis) && !isOutlierAnalysis(item.config.analysis);
 
     const url = getResultsUrl(item.id, analysisType, jobStatus);
     return (
