@@ -17,14 +17,15 @@
  * under the License.
  */
 
-jest.mock('ui/new_platform');
+import { createInputControlVisFn } from './input_control_fn';
 
 // eslint-disable-next-line
 import { functionWrapper } from '../../../../plugins/expressions/public/functions/tests/utils';
-import { inputControlVis } from './input_control_fn';
+
+jest.mock('ui/new_platform');
 
 describe('interpreter/functions#input_control_vis', () => {
-  const fn = functionWrapper(inputControlVis);
+  const fn = functionWrapper(createInputControlVisFn);
   const visConfig = {
     controls: [
       {
@@ -36,10 +37,10 @@ describe('interpreter/functions#input_control_vis', () => {
           type: 'terms',
           multiselect: true,
           size: 100,
-          order: 'desc'
+          order: 'desc',
         },
         parent: '',
-        indexPatternRefName: 'control_0_index_pattern'
+        indexPatternRefName: 'control_0_index_pattern',
       },
     ],
     updateFiltersOnChange: false,
@@ -48,7 +49,7 @@ describe('interpreter/functions#input_control_vis', () => {
   };
 
   it('returns an object with the correct structure', () => {
-    const actual = fn(undefined, { visConfig: JSON.stringify(visConfig) });
+    const actual = fn(null, { visConfig: JSON.stringify(visConfig) });
     expect(actual).toMatchSnapshot();
   });
 });

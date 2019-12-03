@@ -17,22 +17,24 @@
  * under the License.
  */
 
-import { VisController } from './vis_controller';
-import { ControlsTab } from './components/editor/controls_tab';
-import { OptionsTab } from './components/editor/options_tab';
 import { i18n } from '@kbn/i18n';
-import { setup as visualizations } from '../../visualizations/public/np_ready/public/legacy';
+
+// @ts-ignore
+import { VisController } from './vis_controller';
+// @ts-ignore
+import { ControlsTab } from './components/editor/controls_tab';
+// @ts-ignore
+import { OptionsTab } from './components/editor/options_tab';
 import { Status, defaultFeedbackMessage } from '../../visualizations/public';
 
-
-export const inputControlVisDefinition = {
+export const inputControlVisTypeDefinition = {
   name: 'input_control_vis',
   title: i18n.translate('inputControl.register.controlsTitle', {
-    defaultMessage: 'Controls'
+    defaultMessage: 'Controls',
   }),
   icon: 'visControls',
   description: i18n.translate('inputControl.register.controlsDescription', {
-    defaultMessage: 'Create interactive controls for easy dashboard manipulation.'
+    defaultMessage: 'Create interactive controls for easy dashboard manipulation.',
   }),
   stage: 'experimental',
   requiresUpdateStatus: [Status.PARAMS, Status.TIME],
@@ -52,23 +54,19 @@ export const inputControlVisDefinition = {
       {
         name: 'controls',
         title: i18n.translate('inputControl.register.tabs.controlsTitle', {
-          defaultMessage: 'Controls'
+          defaultMessage: 'Controls',
         }),
-        editor: ControlsTab
+        editor: ControlsTab,
       },
       {
         name: 'options',
         title: i18n.translate('inputControl.register.tabs.optionsTitle', {
-          defaultMessage: 'Options'
+          defaultMessage: 'Options',
         }),
-        editor: OptionsTab
-      }
-    ]
+        editor: OptionsTab,
+      },
+    ],
   },
   requestHandler: 'none',
   responseHandler: 'none',
 };
-
-// register the provider with the visTypes registry
-visualizations.types.createBaseVisualization(inputControlVisDefinition);
-

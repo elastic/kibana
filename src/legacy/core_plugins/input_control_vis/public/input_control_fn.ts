@@ -17,35 +17,61 @@
  * under the License.
  */
 
-import { functionsRegistry } from 'plugins/interpreter/registries';
 import { i18n } from '@kbn/i18n';
 
-export const inputControlVis = () => ({
+import {
+  ExpressionFunction,
+  KibanaDatatable,
+  Render,
+} from '../../../../plugins/expressions/public';
+
+const name = 'input_control_vis';
+
+type Context = KibanaDatatable;
+
+interface Arguments {
+  visConfig: string;
+}
+
+type VisParams = Required<Arguments>;
+
+interface RenderValue {
+  visType: 'input_control_vis';
+  visConfig: VisParams;
+}
+
+type Return = Promise<Render<RenderValue>>;
+
+export const createInputControlVisFn = (): ExpressionFunction<
+  typeof name,
+  Context,
+  Arguments,
+  Return
+> => ({
   name: 'input_control_vis',
   type: 'render',
   context: {
     types: [],
   },
   help: i18n.translate('inputControl.function.help', {
-    defaultMessage: 'Input control visualization'
+    defaultMessage: 'Input control visualization',
   }),
   args: {
     visConfig: {
       types: ['string'],
       default: '"{}"',
-    }
+      help: '',
+    },
   },
-  fn(context, args) {
+  async fn(context, args) {
     const params = JSON.parse(args.visConfig);
     return {
       type: 'render',
       as: 'visualization',
       value: {
         visType: 'input_control_vis',
-        visConfig: params
-      }
+        visConfig: params,
+      },
     };
-  }
+  },
 });
-
-functionsRegistry.register(inputControlVis);
