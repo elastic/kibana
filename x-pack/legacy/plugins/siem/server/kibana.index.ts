@@ -18,6 +18,7 @@ import {
 import { rulesAlertType } from './lib/detection_engine/alerts/rules_alert_type';
 import { isAlertExecutor } from './lib/detection_engine/alerts/types';
 import { createRulesRoute } from './lib/detection_engine/routes/create_rules_route';
+import { createIndexRoute } from './lib/detection_engine/routes/create_index_route';
 import { readRulesRoute } from './lib/detection_engine/routes/read_rules_route';
 import { findRulesRoute } from './lib/detection_engine/routes/find_rules_route';
 import { deleteRulesRoute } from './lib/detection_engine/routes/delete_rules_route';
@@ -56,6 +57,7 @@ export const initServerWithKibana = (
     updateRulesRoute(kbnServer);
     deleteRulesRoute(kbnServer);
     findRulesRoute(kbnServer);
+    createIndexRoute(kbnServer);
   }
 
   const xpackMainPlugin = kbnServer.plugins.xpack_main;

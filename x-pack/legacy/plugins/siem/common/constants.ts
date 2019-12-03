@@ -37,7 +37,8 @@ export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges';
 export const SIGNALS_ID = `${APP_ID}.signals`;
 
 /**
- * Detection engine route
+ * Detection engine routes
  */
 export const DETECTION_ENGINE_URL = '/api/detection_engine';
 export const DETECTION_ENGINE_RULES_URL = `${DETECTION_ENGINE_URL}/rules`;
+export const DETECTION_ENGINE_INDEX_URL = `${DETECTION_ENGINE_URL}/index`;
