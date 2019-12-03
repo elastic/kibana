@@ -64,3 +64,8 @@ export const mockContextService = contextServiceMock.create();
 jest.doMock('./context/context_service', () => ({
   ContextService: jest.fn(() => mockContextService),
 }));
+
+export const mockEnsureValidConfiguration = jest.fn();
+jest.doMock('./legacy/config/ensure_valid_configuration', () => ({
+  ensureValidConfiguration: mockEnsureValidConfiguration,
+}));
