@@ -9,15 +9,12 @@ import React from 'react';
 import { StaticDynamicStyleRow } from '../static_dynamic_style_row';
 import { DynamicColorSelection } from './dynamic_color_selection';
 import { StaticColorSelection } from './static_color_selection';
-import { getVectorStyleLabel } from '../get_vector_style_label';
 
 export function VectorStyleColorEditor(props) {
   return (
     <StaticDynamicStyleRow
       ordinalFields={props.ordinalFields}
-      property={props.styleProperty}
-      label={getVectorStyleLabel(props.styleProperty)}
-      styleDescriptor={props.styleDescriptor}
+      styleProperty={props.styleProperty}
       handlePropertyChange={props.handlePropertyChange}
       swatches={props.swatches}
       DynamicSelector={DynamicColorSelection}

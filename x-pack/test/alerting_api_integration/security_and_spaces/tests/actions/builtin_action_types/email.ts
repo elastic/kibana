@@ -23,7 +23,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'An email action',
+          name: 'An email action',
           actionTypeId: '.email',
           config: {
             service: '__json',
@@ -39,7 +39,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
       createdActionId = createdAction.id;
       expect(createdAction).to.eql({
         id: createdActionId,
-        description: 'An email action',
+        name: 'An email action',
         actionTypeId: '.email',
         config: {
           service: '__json',
@@ -58,7 +58,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
-        description: 'An email action',
+        name: 'An email action',
         actionTypeId: '.email',
         config: {
           from: 'bob@example.com',
@@ -139,7 +139,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'An email action',
+          name: 'An email action',
           actionTypeId: '.email',
           config: {},
         })

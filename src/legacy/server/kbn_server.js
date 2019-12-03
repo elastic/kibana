@@ -56,7 +56,7 @@ export default class KbnServer {
     this.settings = settings || {};
     this.config = config;
 
-    const { setupDeps, startDeps, handledConfigPaths, logger, __internals, env } = core;
+    const { setupDeps, startDeps, logger, __internals, env } = core;
 
     this.server = __internals.hapiServer;
     this.newPlatform = {
@@ -71,9 +71,6 @@ export default class KbnServer {
       setup: setupDeps,
       start: startDeps,
       stop: null,
-      params: {
-        handledConfigPaths,
-      },
     };
 
     this.uiExports = legacyPlugins.uiExports;
