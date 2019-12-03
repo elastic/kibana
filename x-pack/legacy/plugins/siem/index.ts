@@ -133,12 +133,11 @@ export const siem = (kibana: any) => {
       mappings: savedObjectMappings,
     },
     init(server: Server) {
-      const { config, newPlatform, plugins, route } = server;
+      const { newPlatform, plugins, route } = server;
       const { coreContext, env, setup } = newPlatform;
       const initializerContext = { ...coreContext, env } as PluginInitializerContext;
 
       const serverFacade = {
-        config,
         plugins: { alerting: plugins.alerting, xpack_main: plugins.xpack_main },
         route: route.bind(server),
       };

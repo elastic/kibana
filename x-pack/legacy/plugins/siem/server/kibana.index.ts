@@ -26,7 +26,7 @@ const APP_ID = 'siem';
 
 export const initServerWithKibana = (
   context: PluginInitializerContext,
-  { config, plugins: { alerting, xpack_main }, route }: ServerFacade
+  { plugins: { alerting, xpack_main }, route }: ServerFacade
 ) => {
   const logger = context.logger.get('plugins', APP_ID);
   const version = context.env.packageInfo.version;
