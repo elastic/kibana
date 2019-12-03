@@ -51,7 +51,12 @@ describe('#start', () => {
   it('filters available apps based on returned navLinks', async () => {
     const service = new CapabilitiesService();
     const startContract = await service.start({ apps, http });
-    expect(startContract.availableApps).toEqual(new Map([['app1', { id: 'app1' }]]));
+    expect(startContract.availableApps).toEqual(
+      new Map([
+        ['app1', { id: 'app1' }],
+        ['appMissingInCapabilities', { id: 'appMissingInCapabilities' }],
+      ])
+    );
   });
 
   it('does not allow Capabilities to be modified', async () => {
