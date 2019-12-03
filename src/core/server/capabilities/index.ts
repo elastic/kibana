@@ -17,7 +17,5 @@
  * under the License.
  */
 
-export const mockRegisterCapabilitiesRoute = jest.fn();
-jest.mock('./capabilities_route', () => ({
-  registerCapabilitiesRoute: mockRegisterCapabilitiesRoute,
-}));
+export { CapabilitiesService, CapabilitiesSetup, CapabilitiesStart } from './capabilities_service';
+export { Capabilities, CapabilitiesSwitcher, CapabilitiesProvider } from './types';

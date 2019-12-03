@@ -17,18 +17,22 @@
  * under the License.
  */
 
-import { Request } from 'hapi';
+import { Capabilities } from '../../types/capabilities';
+import { KibanaRequest } from '../http';
 
-import { Capabilities } from '../../../core/public';
-import { mergeCapabilities } from './merge_capabilities';
-import { CapabilitiesModifier } from './capabilities_mixin';
+export { Capabilities };
 
-export const resolveCapabilities = (
-  request: Request,
-  modifiers: CapabilitiesModifier[],
-  ...capabilities: Array<Partial<Capabilities>>
-) =>
-  modifiers.reduce(
-    async (resolvedCaps, modifier) => modifier(request, await resolvedCaps),
-    Promise.resolve(mergeCapabilities(...capabilities))
-  );
+/**
+ * See {@link CapabilitiesSetup}
+ * @public
+ */
+export type CapabilitiesProvider = () => Partial<Capabilities>;
+
+/**
+ * See {@link CapabilitiesSetup}
+ * @public
+ */
+export type CapabilitiesSwitcher = (
+  request: KibanaRequest,
+  uiCapabilities: Capabilities
+) => Partial<Capabilities> | Promise<Partial<Capabilities>>;
