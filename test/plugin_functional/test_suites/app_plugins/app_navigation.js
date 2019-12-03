@@ -22,7 +22,7 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'header']);
+  const PageObjects = getPageObjects(['common', 'header', 'settings']);
 
   describe('app navigation', function describeIndexTests() {
 
