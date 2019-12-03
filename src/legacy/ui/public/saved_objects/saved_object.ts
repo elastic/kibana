@@ -27,11 +27,12 @@
  * This class seems to interface with ES primarily through the es Angular
  * service and the saved object api.
  */
-import { SavedObjectsClient } from 'kibana/public';
+import { SavedObjectsClient, SavedObjectsClientContract } from 'kibana/public';
 import { npStart } from 'ui/new_platform';
 import { start as data } from '../../../core_plugins/data/public/legacy';
 import { SavedObjectConfig, SaveOptions } from './types';
 import { buildSavedObject } from './helpers/build_saved_object';
+import { IndexPatterns } from '../../../core_plugins/data/public/index_patterns/index_patterns';
 
 export { SaveOptions } from './types';
 
@@ -41,10 +42,10 @@ export interface SavedObject {
   id?: string;
 }
 
-export function SavedObjectProvider() {
-  const savedObjectsClient = npStart.core.savedObjects.client;
-  const indexPatterns = data.indexPatterns.indexPatterns;
-
+export function createSavedObjectClass(
+  savedObjectsClient: SavedObjectsClientContract,
+  indexPatterns: IndexPatterns
+) {
   /**
    * The SavedObject class is a base class for saved objects loaded from the server and
    * provides additional functionality besides loading/saving/deleting/etc.
@@ -54,15 +55,21 @@ export function SavedObjectProvider() {
    * which returns instances of SimpleSavedObject which don't introduce additional type-specific complexity.
    * @param {*} config
    */
-  function SavedObject(config: SavedObjectConfig = {}) {
-    return buildSavedObject(
-      // @ts-ignore
-      this,
-      config,
-      indexPatterns,
-      savedObjectsClient as SavedObjectsClient
-    );
+  class SavedObject {
+    constructor(config: SavedObjectConfig = {}) {
+      buildSavedObject(
+        // @ts-ignore
+        this,
+        config,
+        indexPatterns,
+        savedObjectsClient as SavedObjectsClient
+      );
+    }
   }
 
   return SavedObject;
+}
+// the old angular way, should be removed once no longer used
+export function SavedObjectProvider() {
+  return createSavedObjectClass(npStart.core.savedObjects.client, data.indexPatterns.indexPatterns);
 }

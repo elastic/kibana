@@ -18,13 +18,14 @@
  */
 import _ from 'lodash';
 import { SearchSource } from 'ui/courier';
-import { hydrateIndexPattern } from 'ui/saved_objects/helpers/hydrate_index_pattern';
-import { intializeSavedObject } from 'ui/saved_objects/helpers/initialize_saved_object';
-import { serializeSavedObject } from 'ui/saved_objects/helpers/serialize_saved_object';
 import { SavedObjectsClient } from 'kibana/public';
-import { EsResponse, SavedObject, SavedObjectConfig, SaveOptions } from 'ui/saved_objects/types';
-import { applyEsResp } from 'ui/saved_objects/helpers/apply_es_resp';
-import { saveSavedObject } from 'ui/saved_objects/helpers/save_saved_object';
+import { hydrateIndexPattern } from './hydrate_index_pattern';
+import { intializeSavedObject } from './initialize_saved_object';
+import { serializeSavedObject } from './serialize_saved_object';
+
+import { EsResponse, SavedObject, SavedObjectConfig, SaveOptions } from '../types';
+import { applyEsResp } from './apply_es_resp';
+import { saveSavedObject } from './save_saved_object';
 import { IndexPatterns } from '../../../../core_plugins/data/public';
 
 export function buildSavedObject(

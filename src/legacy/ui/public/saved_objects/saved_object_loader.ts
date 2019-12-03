@@ -18,7 +18,7 @@
  */
 import { SavedObject } from 'ui/saved_objects/types';
 import chrome from 'ui/chrome';
-import { SavedObjectsClient, SavedObjectsFindOptions } from 'kibana/public';
+import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'kibana/public';
 import { StringUtils } from '../utils/string_utils';
 
 /**
@@ -34,9 +34,9 @@ export class SavedObjectLoader {
   Class: (id: string) => SavedObject;
   lowercaseType: string;
   loaderProperties: Record<string, string>;
-  savedObjectsClient: SavedObjectsClient;
+  savedObjectsClient: SavedObjectsClientContract;
 
-  constructor(SavedObjectClass: any, savedObjectClient: SavedObjectsClient) {
+  constructor(SavedObjectClass: any, savedObjectClient: SavedObjectsClientContract) {
     this.type = SavedObjectClass.type;
     this.Class = SavedObjectClass;
     this.lowercaseType = this.type.toLowerCase();
