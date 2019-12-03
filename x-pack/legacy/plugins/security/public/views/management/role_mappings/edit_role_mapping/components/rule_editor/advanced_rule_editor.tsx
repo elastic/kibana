@@ -8,8 +8,11 @@ import React, { useState } from 'react';
 
 import 'brace/mode/json';
 import 'brace/theme/github';
-import { EuiCodeEditor } from '@elastic/eui';
-import { generateRulesFromRaw } from '../../../../../../../common/model/role_mappings/rule_builder';
+import { EuiCodeEditor, EuiFormRow } from '@elastic/eui';
+import {
+  generateRulesFromRaw,
+  RuleBuilderError,
+} from '../../../../../../../common/model/role_mappings/rule_builder';
 import { BaseRule } from '../../../../../../../common/model/role_mappings/base_rule';
 
 interface Props {
@@ -23,6 +26,8 @@ export const AdvancedRuleEditor = (props: Props) => {
     JSON.stringify(props.rules ? props.rules.toRaw() : {}, null, 2)
   );
 
+  const [ruleBuilderError, setRuleBuilderError] = useState<RuleBuilderError | null>(null);
+
   function onRulesChange(updatedRules: string) {
     setRawRules(updatedRules);
     // Fire onChange only if rules are valid
@@ -30,31 +35,47 @@ export const AdvancedRuleEditor = (props: Props) => {
       const ruleJSON = JSON.parse(updatedRules);
       props.onChange(generateRulesFromRaw(ruleJSON));
       props.onValidityChange(true);
-    } catch (ignore) {
+      setRuleBuilderError(null);
+    } catch (e) {
+      if (e instanceof RuleBuilderError) {
+        setRuleBuilderError(e);
+      } else {
+        setRuleBuilderError(null);
+      }
       props.onValidityChange(false);
     }
   }
 
   return (
-    <EuiCodeEditor
-      aria-label={''}
-      mode={'json'}
-      theme="github"
-      value={rawRules}
-      onChange={onRulesChange}
-      width="100%"
-      height="auto"
-      minLines={6}
-      maxLines={30}
-      isReadOnly={false}
-      setOptions={{
-        showLineNumbers: true,
-        tabSize: 2,
-      }}
-      editorProps={{
-        $blockScrolling: Infinity,
-      }}
-      showGutter={true}
-    />
+    <EuiFormRow
+      isInvalid={Boolean(ruleBuilderError)}
+      error={
+        ruleBuilderError &&
+        `Invalid rule definition at ${ruleBuilderError.ruleTrace.join('.')} : ${
+          ruleBuilderError.message
+        }`
+      }
+    >
+      <EuiCodeEditor
+        aria-label={''}
+        mode={'json'}
+        theme="github"
+        value={rawRules}
+        onChange={onRulesChange}
+        width="100%"
+        height="auto"
+        minLines={6}
+        maxLines={30}
+        isReadOnly={false}
+        setOptions={{
+          showLineNumbers: true,
+          tabSize: 2,
+        }}
+        editorProps={{
+          $blockScrolling: Infinity,
+        }}
+        showGutter={true}
+      />
+    </EuiFormRow>
   );
 };

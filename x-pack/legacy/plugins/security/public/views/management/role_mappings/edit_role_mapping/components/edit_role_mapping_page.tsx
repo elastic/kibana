@@ -45,6 +45,7 @@ interface State {
   mode: 'roles' | 'templates';
   error: any;
   saveInProgress: boolean;
+  rulesValid: boolean;
 }
 
 interface Props {
@@ -64,6 +65,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
       mode: 'roles',
       error: undefined,
       saveInProgress: false,
+      rulesValid: true,
     };
   }
 
@@ -292,8 +294,16 @@ export class EditRoleMappingPage extends Component<Props, State> {
         <EuiFlexItem>
           <EuiFormRow fullWidth>
             <RuleEditor
-              roleMapping={this.state.roleMapping!}
-              onChange={roleMapping => this.setState({ roleMapping })}
+              onValidityChange={this.onRuleValidityChange}
+              rawRules={this.state.roleMapping!.rules}
+              onChange={rules =>
+                this.setState({
+                  roleMapping: {
+                    ...this.state.roleMapping!,
+                    rules,
+                  },
+                })
+              }
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -322,6 +332,8 @@ export class EditRoleMappingPage extends Component<Props, State> {
         <EuiFormRow hasEmptyLabelSpace>
           <EuiSwitch
             name={'enabled'}
+            label={'enabled'}
+            showLabel={false}
             checked={this.state.roleMapping!.enabled}
             onChange={e => {
               this.setState({
@@ -352,7 +364,12 @@ export class EditRoleMappingPage extends Component<Props, State> {
     return (
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <EuiButton fill onClick={this.saveRoleMapping} isLoading={this.state.saveInProgress}>
+          <EuiButton
+            fill
+            onClick={this.saveRoleMapping}
+            isLoading={this.state.saveInProgress}
+            disabled={!this.state.rulesValid}
+          >
             Save role mapping
           </EuiButton>
         </EuiFlexItem>
@@ -385,6 +402,12 @@ export class EditRoleMappingPage extends Component<Props, State> {
         )}
       </EuiFlexGroup>
     );
+  };
+
+  private onRuleValidityChange = (rulesValid: boolean) => {
+    this.setState({
+      rulesValid,
+    });
   };
 
   private saveRoleMapping = () => {

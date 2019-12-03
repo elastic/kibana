@@ -13,8 +13,9 @@ import { VisualRuleEditor } from './visual_rule_editor';
 import { AdvancedRuleEditor } from './advanced_rule_editor';
 
 interface Props {
-  roleMapping: RoleMapping;
-  onChange: (roleMapping: RoleMapping) => void;
+  rawRules: RoleMapping['rules'];
+  onChange: (rawRules: RoleMapping['rules']) => void;
+  onValidityChange: (isValid: boolean) => void;
 }
 
 interface State {
@@ -28,7 +29,7 @@ export class RuleEditor extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      rules: generateRulesFromRaw(props.roleMapping.rules),
+      rules: generateRulesFromRaw(props.rawRules),
       isRuleValid: true,
       showConfirmModeChange: false,
       mode: 'advanced',
@@ -38,7 +39,7 @@ export class RuleEditor extends Component<Props, State> {
   componentWillReceiveProps(nextProps: Props) {
     if (!this.state.rules) {
       this.setState({
-        rules: generateRulesFromRaw(nextProps.roleMapping.rules),
+        rules: generateRulesFromRaw(nextProps.rawRules),
       });
     }
   }
@@ -115,7 +116,10 @@ export class RuleEditor extends Component<Props, State> {
         <EuiConfirmModal
           title={'Switch with invalid rules?'}
           onCancel={() => this.setState({ showConfirmModeChange: false })}
-          onConfirm={() => this.setState({ mode: 'visual', showConfirmModeChange: false })}
+          onConfirm={() => {
+            this.setState({ mode: 'visual', showConfirmModeChange: false });
+            this.onValidityChange(true);
+          }}
           cancelButtonText={'Cancel'}
           confirmButtonText={'Switch anyway'}
         >
@@ -129,10 +133,7 @@ export class RuleEditor extends Component<Props, State> {
   };
 
   private onRuleChange = (updatedRule: BaseRule | null) => {
-    this.props.onChange({
-      ...this.props.roleMapping,
-      rules: updatedRule ? updatedRule.toRaw() : {},
-    });
+    this.props.onChange(updatedRule ? updatedRule.toRaw() : {});
     this.setState({
       rules: updatedRule,
     });
@@ -140,20 +141,23 @@ export class RuleEditor extends Component<Props, State> {
 
   private onValidityChange = (isRuleValid: boolean) => {
     this.setState({ isRuleValid });
+    this.props.onValidityChange(isRuleValid);
   };
 
   private trySwitchEditorMode = (newMode: State['mode']) => {
     switch (newMode) {
       case 'visual': {
         if (this.state.isRuleValid) {
-          this.setState({ mode: newMode, isRuleValid: true });
+          this.setState({ mode: newMode });
+          this.onValidityChange(true);
         } else {
           this.setState({ showConfirmModeChange: true });
         }
         break;
       }
       case 'advanced':
-        this.setState({ mode: newMode, isRuleValid: true });
+        this.setState({ mode: newMode });
+        this.onValidityChange(true);
         break;
       default:
         throw new Error(`Unexpected rule editor mode: ${this.state.mode}`);
