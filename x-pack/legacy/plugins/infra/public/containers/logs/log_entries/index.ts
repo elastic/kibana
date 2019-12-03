@@ -83,6 +83,11 @@ export const logEntriesInitialState: LogEntriesStateParams = {
   lastLoadedTime: null,
 };
 
+const cleanDuplicateItems = (entriesA: InfraLogEntry[], entriesB: InfraLogEntry[]) => {
+  const gids = new Set(entriesB.map(item => item.gid));
+  return entriesA.filter(item => !gids.has(item.gid));
+};
+
 const shouldFetchNewEntries = ({
   prevParams,
   timeKey,
@@ -205,7 +210,8 @@ const logEntriesStateReducer = (prevState: LogEntriesStateParams, action: Action
     case Action.ReceiveNewEntries:
       return { ...prevState, ...action.payload, isReloading: false };
     case Action.ReceiveEntriesBefore: {
-      const newEntries = [...action.payload.entries, ...prevState.entries];
+      const prevEntries = cleanDuplicateItems(prevState.entries, action.payload.entries);
+      const newEntries = [...action.payload.entries, ...prevEntries];
       const { hasMoreBeforeStart, entriesStart } = action.payload;
       const update = {
         entries: newEntries,
@@ -216,7 +222,8 @@ const logEntriesStateReducer = (prevState: LogEntriesStateParams, action: Action
       return { ...prevState, ...update };
     }
     case Action.ReceiveEntriesAfter: {
-      const newEntries = [...prevState.entries, ...action.payload.entries];
+      const prevEntries = cleanDuplicateItems(prevState.entries, action.payload.entries);
+      const newEntries = [...prevEntries, ...action.payload.entries];
       const { hasMoreAfterEnd, entriesEnd } = action.payload;
       const update = {
         entries: newEntries,
