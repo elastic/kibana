@@ -16,12 +16,9 @@ exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/
     }
   }
   customSeriesColors={
-    Map {
-      Object {
-        "colorValues": Array [],
-        "specId": "61ca57f1-469d-11e7-af02-69e470af7417:Rome",
-      } => "rgb(0, 156, 224)",
-    }
+    Array [
+      "rgb(0, 156, 224)",
+    ]
   }
   data={
     Array [
