@@ -13,7 +13,6 @@ export {
   EsDoc,
   EsDocSource,
   EsFieldName,
-  MAX_COLUMNS,
 } from './fields';
 export { DropDownLabel, DropDownOption, Label } from './dropdown';
 export {

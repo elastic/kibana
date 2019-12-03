@@ -200,11 +200,6 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
   const [searchQuery, setSearchQuery] = useState(defaults.searchQuery);
   const [useKQL] = useState(true);
 
-  const addToSearch = (newSearch: string) => {
-    const currentDisplaySearch = searchString === defaultSearch ? emptySearch : searchString;
-    setSearchString(`${currentDisplaySearch} ${newSearch}`.trim());
-  };
-
   const searchHandler = (d: Record<string, any>) => {
     const { filterQuery, queryString } = d;
     const newSearch = queryString === emptySearch ? defaultSearch : queryString;
@@ -834,8 +829,8 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange 
         </div>
       </EuiFlexItem>
 
-      <EuiFlexItem>
-        <SourceIndexPreview cellClick={addToSearch} query={pivotQuery} />
+      <EuiFlexItem grow={false}>
+        <SourceIndexPreview query={pivotQuery} />
         <EuiSpacer size="m" />
         <PivotPreview aggs={aggList} groupBy={groupByList} query={pivotQuery} />
       </EuiFlexItem>

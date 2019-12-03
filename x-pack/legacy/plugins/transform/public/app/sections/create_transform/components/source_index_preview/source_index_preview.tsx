@@ -4,59 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
-import moment from 'moment-timezone';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import {
-  EuiBadge,
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
-  EuiCheckbox,
   EuiCodeBlock,
   EuiCopy,
+  EuiDataGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiPopover,
-  EuiPopoverTitle,
   EuiProgress,
-  EuiText,
   EuiTitle,
-  EuiToolTip,
-  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
-import {
-  ColumnType,
-  mlInMemoryTableBasicFactory,
-  SortingPropType,
-  SORT_DIRECTION,
-} from '../../../../../shared_imports';
-
-import { KBN_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
-import { Dictionary } from '../../../../../../common/types/common';
-import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/utils/date_utils';
+import { getNestedProperty } from '../../../../../../common/utils/object_utils';
 
 import { useCurrentIndexPattern } from '../../../../lib/kibana';
 
-import {
-  toggleSelectedField,
-  EsDoc,
-  EsFieldName,
-  MAX_COLUMNS,
-  PivotQuery,
-} from '../../../../common';
+import { EsFieldName, PivotQuery } from '../../../../common';
 
 import { getSourceIndexDevConsoleStatement } from './common';
-import { ExpandedRow } from './expanded_row';
 import { SOURCE_INDEX_STATUS, useSourceIndexData } from './use_source_index_data';
 
-type ItemIdToExpandedRowMap = Dictionary<JSX.Element>;
-
-const CELL_CLICK_ENABLED = false;
+// EuiDataGrid needs a fixed width on the parent element to provide a horizontal scrollbar.
+// Because the overall transform wizard doesn't have a fixed width, we need to calculate it
+// based of the overall width of the root element and substract all paddings and margins
+// from elements between the root and the EuiDataGrid component.
+const defaultPanelWidth = 500;
+const panelPadding = 410 + 48 + 16 + 32 + 24 + 12 + 32;
 
 interface SourceIndexPreviewTitle {
   indexPatternTitle: string;
@@ -74,63 +53,97 @@ const SourceIndexPreviewTitle: React.FC<SourceIndexPreviewTitle> = ({ indexPatte
 
 interface Props {
   query: PivotQuery;
-  cellClick?(search: string): void;
 }
 
-export const SourceIndexPreview: React.FC<Props> = React.memo(({ cellClick, query }) => {
-  const [clearTable, setClearTable] = useState(false);
+export const SourceIndexPreview: React.FC<Props> = React.memo(({ query }) => {
+  const [panelWidth, setPanelWidth] = useState(defaultPanelWidth);
+
+  const resizeHandler = () => {
+    const docWidth = document.documentElement.clientWidth;
+    const sideBarWidth = (document.getElementById('management-sidenav')?.clientWidth || 192) + 24;
+    // TODO This doesn't consider when the document width doesn't change but the nav does yet ...
+    const navWidth = document.getElementById('navDrawerMenu')?.clientWidth || 48;
+    const nextPanelWidth = docWidth - panelPadding - sideBarWidth - navWidth;
+    setPanelWidth(nextPanelWidth);
+  };
+
+  useEffect(() => {
+    window.addEventListener('resize', resizeHandler);
+    resizeHandler();
+    return () => {
+      window.removeEventListener('resize', resizeHandler);
+    };
+  }, []);
 
   const indexPattern = useCurrentIndexPattern();
-
-  const [selectedFields, setSelectedFields] = useState([] as EsFieldName[]);
-  const [isColumnsPopoverVisible, setColumnsPopoverVisible] = useState(false);
-
-  // EuiInMemoryTable has an issue with dynamic sortable columns
-  // and will trigger a full page Kibana error in such a case.
-  // The following is a workaround until this is solved upstream:
-  // - If the sortable/columns config changes,
-  //   the table will be unmounted/not rendered.
-  //   This is what setClearTable(true) in toggleColumn() does.
-  // - After that on next render it gets re-enabled. To make sure React
-  //   doesn't consolidate the state updates, setTimeout is used.
-  if (clearTable) {
-    setTimeout(() => setClearTable(false), 0);
-  }
-
-  function toggleColumnsPopover() {
-    setColumnsPopoverVisible(!isColumnsPopoverVisible);
-  }
-
-  function closeColumnsPopover() {
-    setColumnsPopoverVisible(false);
-  }
-
-  function toggleColumn(column: EsFieldName) {
-    // spread to a new array otherwise the component wouldn't re-render
-    setClearTable(true);
-    setSelectedFields([...toggleSelectedField(selectedFields, column)]);
-  }
-
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState(
-    {} as ItemIdToExpandedRowMap
-  );
-
-  function toggleDetails(item: EsDoc) {
-    if (itemIdToExpandedRowMap[item._id]) {
-      delete itemIdToExpandedRowMap[item._id];
-    } else {
-      itemIdToExpandedRowMap[item._id] = <ExpandedRow item={item} />;
+  const allFields = indexPattern.fields.map(f => f.name);
+  const indexPatternFields: string[] = allFields.filter(f => {
+    if (indexPattern.metaFields.includes(f)) {
+      return false;
     }
-    // spread to a new object otherwise the component wouldn't re-render
-    setItemIdToExpandedRowMap({ ...itemIdToExpandedRowMap });
-  }
 
-  const { errorMessage, status, tableItems } = useSourceIndexData(
+    const fieldParts = f.split('.');
+    const lastPart = fieldParts.pop();
+    if (lastPart === 'keyword' && allFields.includes(fieldParts.join('.'))) {
+      return false;
+    }
+
+    return true;
+  });
+
+  // Column visibility
+  const [visibleColumns, setVisibleColumns] = useState<EsFieldName[]>(indexPatternFields);
+
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+
+  const { errorMessage, status, rowCount, tableItems: data } = useSourceIndexData(
     indexPattern,
     query,
-    selectedFields,
-    setSelectedFields
+    pagination
   );
+
+  // EuiDataGrid State
+  const dataGridColumns = indexPatternFields.map(id => ({ id }));
+
+  const onChangeItemsPerPage = useCallback(pageSize => setPagination(p => ({ ...p, pageSize })), [
+    setPagination,
+  ]);
+
+  const onChangePage = useCallback(pageIndex => setPagination(p => ({ ...p, pageIndex })), [
+    setPagination,
+  ]);
+
+  // ** Sorting config
+  const [sortingColumns, setSortingColumns] = useState([]);
+  const onSort = useCallback(sc => setSortingColumns(sc), [setSortingColumns]);
+
+  const renderCellValue = useMemo(() => {
+    return ({
+      rowIndex,
+      columnId,
+      setCellProps,
+    }: {
+      rowIndex: number;
+      columnId: string;
+      setCellProps: any;
+    }) => {
+      const adjustedRowIndex = rowIndex - pagination.pageIndex * pagination.pageSize;
+
+      const cellValue = data.hasOwnProperty(adjustedRowIndex)
+        ? getNestedProperty(data[adjustedRowIndex], columnId, null)
+        : null;
+
+      if (typeof cellValue === 'object' && cellValue !== null) {
+        return JSON.stringify(cellValue);
+      }
+
+      if (cellValue === undefined) {
+        return null;
+      }
+
+      return cellValue;
+    };
+  }, [data, pagination.pageIndex, pagination.pageSize]);
 
   if (status === SOURCE_INDEX_STATUS.ERROR) {
     return (
@@ -151,7 +164,7 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ cellClick, quer
     );
   }
 
-  if (status === SOURCE_INDEX_STATUS.LOADED && tableItems.length === 0) {
+  if (status === SOURCE_INDEX_STATUS.LOADED && data.length === 0) {
     return (
       <EuiPanel grow={false} data-test-subj="transformSourceIndexPreview empty">
         <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
@@ -175,211 +188,21 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ cellClick, quer
     );
   }
 
-  let docFields: EsFieldName[] = [];
-  let docFieldsCount = 0;
-  if (tableItems.length > 0) {
-    docFields = Object.keys(tableItems[0]._source);
-    docFields.sort();
-    docFieldsCount = docFields.length;
-  }
-
-  const columns: Array<ColumnType<EsDoc>> = selectedFields.map(k => {
-    const column: ColumnType<EsDoc> = {
-      field: `_source["${k}"]`,
-      name: k,
-      sortable: true,
-      truncateText: true,
-    };
-
-    const field = indexPattern.fields.find(f => f.name === k);
-
-    const formatField = (d: string) => {
-      return field !== undefined && field.type === KBN_FIELD_TYPES.DATE
-        ? formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000)
-        : d;
-    };
-
-    const render = (d: any) => {
-      if (Array.isArray(d) && d.every(item => typeof item === 'string')) {
-        // If the cells data is an array of strings, return as a comma separated list.
-        // The list will get limited to 5 items with `…` at the end if there's more in the original array.
-        return `${d
-          .map(item => formatField(item))
-          .slice(0, 5)
-          .join(', ')}${d.length > 5 ? ', …' : ''}`;
-      } else if (Array.isArray(d)) {
-        // If the cells data is an array of e.g. objects, display a 'array' badge with a
-        // tooltip that explains that this type of field is not supported in this table.
-        return (
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.transform.sourceIndexPreview.SourceIndexArrayToolTipContent',
-              {
-                defaultMessage:
-                  'The full content of this array based column is available in the expanded row.',
-              }
-            )}
-          >
-            <EuiBadge>
-              {i18n.translate('xpack.transform.sourceIndexPreview.SourceIndexArrayBadgeContent', {
-                defaultMessage: 'array',
-              })}
-            </EuiBadge>
-          </EuiToolTip>
-        );
-      } else if (typeof d === 'object' && d !== null) {
-        // If the cells data is an object, display a 'object' badge with a
-        // tooltip that explains that this type of field is not supported in this table.
-        return (
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.transform.sourceIndexPreview.SourceIndexObjectToolTipContent',
-              {
-                defaultMessage:
-                  'The full content of this object based column is available in the expanded row.',
-              }
-            )}
-          >
-            <EuiBadge>
-              {i18n.translate('xpack.transform.sourceIndexPreview.SourceIndexObjectBadgeContent', {
-                defaultMessage: 'object',
-              })}
-            </EuiBadge>
-          </EuiToolTip>
-        );
-      }
-
-      return formatField(d);
-    };
-
-    if (typeof field !== 'undefined') {
-      switch (field.type) {
-        case KBN_FIELD_TYPES.BOOLEAN:
-          column.dataType = 'boolean';
-          break;
-        case KBN_FIELD_TYPES.DATE:
-          column.align = 'right';
-          column.render = (d: any) => formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000);
-          break;
-        case KBN_FIELD_TYPES.NUMBER:
-          column.dataType = 'number';
-          break;
-        default:
-          column.render = render;
-          break;
-      }
-    } else {
-      column.render = render;
-    }
-
-    if (CELL_CLICK_ENABLED && cellClick) {
-      column.render = (d: string) => (
-        <EuiButtonEmpty size="xs" onClick={() => cellClick(`${k}:(${d})`)}>
-          {render(d)}
-        </EuiButtonEmpty>
-      );
-    }
-
-    return column;
-  });
-
-  let sorting: SortingPropType = false;
-
-  if (columns.length > 0) {
-    sorting = {
-      sort: {
-        field: `_source["${selectedFields[0]}"]`,
-        direction: SORT_DIRECTION.ASC,
-      },
-    };
-  }
-
-  columns.unshift({
-    align: RIGHT_ALIGNMENT,
-    width: '40px',
-    isExpander: true,
-    render: (item: EsDoc) => (
-      <EuiButtonIcon
-        onClick={() => toggleDetails(item)}
-        aria-label={
-          itemIdToExpandedRowMap[item._id]
-            ? i18n.translate('xpack.transform.sourceIndexPreview.rowCollapse', {
-                defaultMessage: 'Collapse',
-              })
-            : i18n.translate('xpack.transform.sourceIndexPreview.rowExpand', {
-                defaultMessage: 'Expand',
-              })
-        }
-        iconType={itemIdToExpandedRowMap[item._id] ? 'arrowUp' : 'arrowDown'}
-      />
-    ),
-  });
-
   const euiCopyText = i18n.translate('xpack.transform.sourceIndexPreview.copyClipboardTooltip', {
     defaultMessage: 'Copy Dev Console statement of the source index preview to the clipboard.',
   });
 
-  const MlInMemoryTableBasic = mlInMemoryTableBasicFactory<EsDoc>();
-
   return (
-    <EuiPanel grow={false} data-test-subj="transformSourceIndexPreview loaded">
+    <EuiPanel
+      data-test-subj="transformSourceIndexPreview loaded"
+      style={{ width: `${panelWidth}px` }}
+    >
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center" gutterSize="xs">
-            <EuiFlexItem style={{ textAlign: 'right' }}>
-              {docFieldsCount > MAX_COLUMNS && (
-                <EuiText size="s">
-                  {i18n.translate('xpack.transform.sourceIndexPreview.fieldSelection', {
-                    defaultMessage:
-                      '{selectedFieldsLength, number} of {docFieldsCount, number} {docFieldsCount, plural, one {field} other {fields}} selected',
-                    values: { selectedFieldsLength: selectedFields.length, docFieldsCount },
-                  })}
-                </EuiText>
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <EuiPopover
-                  id="popover"
-                  button={
-                    <EuiButtonIcon
-                      iconType="gear"
-                      onClick={toggleColumnsPopover}
-                      aria-label={i18n.translate(
-                        'xpack.transform.sourceIndexPreview.selectColumnsAriaLabel',
-                        {
-                          defaultMessage: 'Select columns',
-                        }
-                      )}
-                    />
-                  }
-                  isOpen={isColumnsPopoverVisible}
-                  closePopover={closeColumnsPopover}
-                  ownFocus
-                >
-                  <EuiPopoverTitle>
-                    {i18n.translate('xpack.transform.sourceIndexPreview.selectFieldsPopoverTitle', {
-                      defaultMessage: 'Select fields',
-                    })}
-                  </EuiPopoverTitle>
-                  <div style={{ maxHeight: '400px', overflowY: 'scroll' }}>
-                    {docFields.map(d => (
-                      <EuiCheckbox
-                        key={d}
-                        id={d}
-                        label={d}
-                        checked={selectedFields.includes(d)}
-                        onChange={() => toggleColumn(d)}
-                        disabled={selectedFields.includes(d) && selectedFields.length === 1}
-                      />
-                    ))}
-                  </div>
-                </EuiPopover>
-              </EuiText>
-            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiCopy
                 beforeMessage={euiCopyText}
@@ -397,25 +220,34 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ cellClick, quer
       {status !== SOURCE_INDEX_STATUS.LOADING && (
         <EuiProgress size="xs" color="accent" max={1} value={0} />
       )}
-      {clearTable === false && columns.length > 0 && sorting !== false && (
-        <MlInMemoryTableBasic
-          allowNeutralSort={false}
-          compressed
-          items={tableItems}
-          columns={columns}
-          pagination={{
-            initialPageSize: 5,
-            pageSizeOptions: [5, 10, 25],
+      {dataGridColumns.length > 0 && data.length > 0 && (
+        <EuiDataGrid
+          aria-label="Source index preview"
+          columns={dataGridColumns}
+          columnVisibility={{ visibleColumns, setVisibleColumns }}
+          gridStyle={{
+            border: 'all',
+            fontSize: 's',
+            cellPadding: 's',
+            stripes: true,
+            rowHover: 'highlight',
+            header: 'shade',
           }}
-          hasActions={false}
-          isSelectable={false}
-          itemId="_id"
-          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-          isExpandable={true}
-          rowProps={item => ({
-            'data-test-subj': `transformSourceIndexPreviewRow row-${item._id}`,
-          })}
-          sorting={sorting}
+          rowCount={rowCount}
+          renderCellValue={renderCellValue}
+          sorting={{ columns: sortingColumns, onSort }}
+          toolbarVisibility={{
+            showColumnSelector: true,
+            showStyleSelector: false,
+            showSortSelector: true,
+            showFullScreenSelector: true,
+          }}
+          pagination={{
+            ...pagination,
+            pageSizeOptions: [10, 50, 100],
+            onChangeItemsPerPage,
+            onChangePage,
+          }}
         />
       )}
     </EuiPanel>
