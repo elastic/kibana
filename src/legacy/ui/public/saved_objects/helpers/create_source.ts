@@ -28,6 +28,9 @@ import { confirmModalPromise } from './confirm_modal_promise';
  * exists, a warning message requests an overwrite confirmation.
  * @param source - serialized version of this object (return value from this._serialize())
  * What will be indexed into elasticsearch.
+ * @param savedObject - savedObject
+ * @param savedObjectsClient - client to create a new saved object
+ * @param esType - type of the saved object
  * @param options - options to pass to the saved object create method
  * @returns {Promise} - A promise that is resolved with the objects id if the object is
  * successfully indexed. If the overwrite confirmation was rejected, an error is thrown with
