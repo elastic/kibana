@@ -13,7 +13,6 @@ import {
   EuiSwitch,
   EuiCallOut,
   EuiButtonIcon,
-  EuiLink,
   EuiText,
 } from '@elastic/eui';
 import { RoleTemplate } from '../../../../../../../common/model';
@@ -22,7 +21,6 @@ import {
   isStoredRoleTemplate,
   isInvalidRoleTemplate,
 } from '../../services/role_template_type';
-import { documentationLinks } from '../../../services/documentation_links';
 import { RoleTemplateTypeSelect } from './role_template_type_select';
 
 interface Props {

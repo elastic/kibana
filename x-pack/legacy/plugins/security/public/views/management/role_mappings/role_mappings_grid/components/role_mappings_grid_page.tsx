@@ -44,6 +44,15 @@ interface State {
   error: any;
 }
 
+const path = '#/management/security/';
+
+const getCreateRoleMappingHref = () => `${path}role_mappings/edit`;
+
+const getEditRoleMappingHref = (roleMappingName: string) =>
+  `${path}role_mappings/edit/${encodeURIComponent(roleMappingName)}`;
+
+const getEditRoleHref = (roleName: string) => `${path}roles/edit/${encodeURIComponent(roleName)}`;
+
 export class RoleMappingsGridPage extends Component<any, State> {
   constructor(props: any) {
     super(props);
@@ -133,6 +142,14 @@ export class RoleMappingsGridPage extends Component<any, State> {
                 />
               </p>
             </EuiText>
+          </EuiPageContentHeaderSection>
+          <EuiPageContentHeaderSection>
+            <EuiButton data-test-subj="createRoleMappingButton" href={getCreateRoleMappingHref()}>
+              <FormattedMessage
+                id="xpack.security.management.roleMappings.table.createRoleMappingButtonLabel"
+                defaultMessage="Create role mapping"
+              />
+            </EuiButton>
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
         <EuiPageContentBody>
@@ -247,8 +264,6 @@ export class RoleMappingsGridPage extends Component<any, State> {
   };
 
   private getColumnConfig = () => {
-    const path = '#/management/security/';
-
     const config = [
       {
         field: 'name',
@@ -259,7 +274,7 @@ export class RoleMappingsGridPage extends Component<any, State> {
         render: (roleMappingName: string) => {
           return (
             <EuiLink
-              href={`${path}role_mappings/edit/${encodeURIComponent(roleMappingName)}`}
+              href={getEditRoleMappingHref(roleMappingName)}
               data-test-subj="roleMappingName"
             >
               {roleMappingName}
@@ -290,7 +305,7 @@ export class RoleMappingsGridPage extends Component<any, State> {
           const roleLinks = roles.map((rolename, index) => {
             return (
               <Fragment key={rolename}>
-                <EuiLink href={`${path}roles/edit/${rolename}`}>{rolename}</EuiLink>
+                <EuiLink href={getEditRoleHref(rolename)}>{rolename}</EuiLink>
                 {index === roles.length - 1 ? null : ', '}
               </Fragment>
             );
@@ -327,6 +342,32 @@ export class RoleMappingsGridPage extends Component<any, State> {
           {
             render: (record: RoleMapping) => {
               return (
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.security.management.roleMappings.table.actionEditTooltip',
+                    { defaultMessage: 'Edit' }
+                  )}
+                >
+                  <EuiButtonIcon
+                    aria-label={i18n.translate(
+                      'xpack.security.management.roleMappings.table.actionDeleteAriaLabel',
+                      {
+                        defaultMessage: `Edit '{name}'`,
+                        values: { name: record.name },
+                      }
+                    )}
+                    iconType="pencil"
+                    color="primary"
+                    data-test-subj="editRoleMappingButton"
+                    href={getEditRoleMappingHref(record.name)}
+                  />
+                </EuiToolTip>
+              );
+            },
+          },
+          {
+            render: (record: RoleMapping) => {
+              return (
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem>
                     <DeleteProvider>
@@ -346,7 +387,7 @@ export class RoleMappingsGridPage extends Component<any, State> {
                                   values: { name },
                                 }
                               )}
-                              iconType="minusInCircle"
+                              iconType="trash"
                               color="danger"
                               data-test-subj="deleteRoleMappingButton"
                               onClick={() =>
