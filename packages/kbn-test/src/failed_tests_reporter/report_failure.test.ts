@@ -18,7 +18,6 @@
  */
 
 import dedent from 'dedent';
-import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/dev-utils';
 
 import { createFailureIssue, updateFailureIssue } from './report_failure';
 
@@ -27,10 +26,6 @@ const { GithubApi } = jest.requireMock('./github_api');
 
 describe('createFailureIssue()', () => {
   it('creates new github issue with failure text, link to issue, and valid metadata', async () => {
-    const log = new ToolingLog();
-    const writer = new ToolingLogCollectingWriter();
-    log.setWriters([writer]);
-
     const api = new GithubApi();
 
     await createFailureIssue(
@@ -40,6 +35,7 @@ describe('createFailureIssue()', () => {
         failure: 'this is the failure text',
         name: 'test name',
         time: '2018-01-01T01:00:00Z',
+        likelyIrrelevant: false,
       },
       api
     );
@@ -71,20 +67,11 @@ describe('createFailureIssue()', () => {
         ],
       }
     `);
-    expect(writer.messages).toMatchInlineSnapshot(`
-      Array [
-        " [34minfo[39m Created issue undefined",
-      ]
-    `);
   });
 });
 
 describe('updateFailureIssue()', () => {
   it('increments failure count and adds new comment to issue', async () => {
-    const log = new ToolingLog();
-    const writer = new ToolingLogCollectingWriter();
-    log.setWriters([writer]);
-
     const api = new GithubApi();
 
     await updateFailureIssue(
@@ -136,11 +123,6 @@ describe('updateFailureIssue()', () => {
           },
         ],
       }
-    `);
-    expect(writer.messages).toMatchInlineSnapshot(`
-      Array [
-        " [34minfo[39m Updated issue https://github.com/issues/1234, failCount: 11",
-      ]
     `);
   });
 });
