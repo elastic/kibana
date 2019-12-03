@@ -18,7 +18,7 @@
  */
 import { isEmpty } from 'lodash';
 import { IUiSettingsClient, SavedObjectsClientContract } from 'src/core/public';
-import { getFromSavedObject } from '../../../';
+import { indexPatterns } from '../..';
 
 export async function fetchIndexPatterns(
   savedObjectsClient: SavedObjectsClientContract,
@@ -48,5 +48,5 @@ export async function fetchIndexPatterns(
       ? exactMatches
       : [...exactMatches, await savedObjectsClient.get('index-pattern', defaultIndex)];
 
-  return allMatches.map(getFromSavedObject);
+  return allMatches.map(indexPatterns.getFromSavedObject);
 }

@@ -46,14 +46,10 @@ import {
   matchPairs,
   getQueryLog,
   Query,
-  QueryLanguageSwitcher,
-} from '../../../../../../../plugins/data/public';
-import {
-  withKibana,
-  KibanaReactContextValue,
-  toMountPoint,
-} from '../../../../../../../plugins/kibana_react/public';
+} from '../..';
+import { withKibana, KibanaReactContextValue, toMountPoint } from '../../../../kibana_react/public';
 import { fetchIndexPatterns } from './fetch_index_patterns';
+import { QueryLanguageSwitcher } from './language_switcher';
 
 interface Props {
   kibana: KibanaReactContextValue<IDataPluginServices>;

@@ -25,14 +25,11 @@ import {
 
 import { EuiFieldText } from '@elastic/eui';
 import React from 'react';
-import { QueryLanguageSwitcher } from '../../../../../../../plugins/data/public';
+import { QueryLanguageSwitcher } from './language_switcher';
 import { QueryStringInput, QueryStringInputUI } from './query_string_input';
-import { coreMock } from '../../../../../../../core/public/mocks';
+import { coreMock } from '../../../../../core/public/mocks';
 const startMock = coreMock.createStart();
-/* eslint-disable @kbn/eslint/no-restricted-paths */
-
-import { stubIndexPatternWithFields } from '../../../../../../../plugins/data/public/stubs';
-/* eslint-enable @kbn/eslint/no-restricted-paths */
+import { stubIndexPatternWithFields } from '../../stubs';
 
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { I18nProvider } from '@kbn/i18n/react';
