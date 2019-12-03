@@ -106,27 +106,29 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
     return <DashboardEmptyScreen {...emptyScreenProps} />;
   }
 
-  public render() {
+  private renderContainerScreen() {
     const { container } = this.props;
-    const { isFullScreenMode, isEmptyState, panels, title, description, useMargins } = this.state;
+    const { isFullScreenMode, panels, title, description, useMargins } = this.state;
     return (
-      <div>
-        {isEmptyState ? this.renderEmptyScreen() : null}
-        <div
-          data-shared-items-count={Object.values(panels).length}
-          data-shared-items-container
-          data-title={title}
-          data-description={description}
-          className={useMargins ? 'dshDashboardViewport-withMargins' : 'dshDashboardViewport'}
-        >
-          {isFullScreenMode && (
-            <this.context.services.ExitFullScreenButton
-              onExitFullScreenMode={this.onExitFullScreenMode}
-            />
-          )}
-          <DashboardGrid container={container} />
-        </div>
+      <div
+        data-shared-items-count={Object.values(panels).length}
+        data-shared-items-container
+        data-title={title}
+        data-description={description}
+        className={useMargins ? 'dshDashboardViewport-withMargins' : 'dshDashboardViewport'}
+      >
+        {isFullScreenMode && (
+          <this.context.services.ExitFullScreenButton
+            onExitFullScreenMode={this.onExitFullScreenMode}
+          />
+        )}
+        <DashboardGrid container={container} />
       </div>
     );
+  }
+
+  public render() {
+    const { isEmptyState } = this.state;
+    return <div>{isEmptyState ? this.renderEmptyScreen() : this.renderContainerScreen()}</div>;
   }
 }
