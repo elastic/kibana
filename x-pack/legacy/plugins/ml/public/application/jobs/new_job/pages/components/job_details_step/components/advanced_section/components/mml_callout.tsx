@@ -7,56 +7,15 @@
 import React, { FC, useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiText } from '@elastic/eui';
-import { Observable, ReplaySubject, Subject } from 'rxjs';
-import { distinctUntilChanged, filter, map, switchMap, takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { pluck, takeUntil } from 'rxjs/operators';
 import { JobCreatorContext } from '../../../../job_creator_context';
-import {
-  CardinalityModelPlotHigh,
-  CardinalityValidationResult,
-  ml,
-} from '../../../../../../../../services/ml_api_service';
-import { Datafeed, Job } from '../../../../../../common/job_creator/configs';
-
-export function isCardinalityModelPlotHigh(
-  cardinalityValidationResult: CardinalityValidationResult
-): cardinalityValidationResult is CardinalityModelPlotHigh {
-  return (
-    (cardinalityValidationResult as CardinalityModelPlotHigh).modelPlotCardinality !== undefined
-  );
-}
-
-const modelPlotConfig$ = new ReplaySubject<{
-  isModelPlotEnabled: boolean;
-  jobConfig: Job;
-  datafeedConfig: Datafeed;
-}>(1);
-
-const modelPlotCardinality$: Observable<number | undefined> = modelPlotConfig$.pipe(
-  filter(value => value.isModelPlotEnabled),
-  // No need to perform an API call if the analysis configuration hasn't been changed
-  distinctUntilChanged((prev, curr) => {
-    return (
-      prev.jobConfig.analysis_config === curr.jobConfig.analysis_config ||
-      prev.isModelPlotEnabled === curr.isModelPlotEnabled
-    );
-  }),
-  switchMap(({ jobConfig, datafeedConfig }) => {
-    return ml.validateCardinality$({
-      ...jobConfig,
-      datafeed_config: datafeedConfig,
-    });
-  }),
-  map(validationResults => {
-    for (const validationResult of validationResults) {
-      if (isCardinalityModelPlotHigh(validationResult)) {
-        return validationResult.modelPlotCardinality;
-      }
-    }
-  })
-);
+import { CardinalityModelPlotHigh } from '../../../../../../../../services/ml_api_service';
+import { JobValidationResult } from '../../../../../../common/job_validator/job_validator';
+import { CardinalityValidatorError } from '../../../../../../common/job_validator/validators';
 
 export const MMLCallout: FC = () => {
-  const { jobCreator } = useContext(JobCreatorContext);
+  const { jobCreator, jobValidator } = useContext(JobCreatorContext);
   const [highCardinality, setHighCardinality] = useState<
     CardinalityModelPlotHigh['modelPlotCardinality'] | null
   >(null);
@@ -64,21 +23,18 @@ export const MMLCallout: FC = () => {
   const unsubscribeAll$ = new Subject();
 
   useEffect(() => {
-    modelPlotCardinality$.pipe(takeUntil(unsubscribeAll$)).subscribe(modelPlotCardinality => {
-      setHighCardinality(modelPlotCardinality ?? null);
-    });
+    jobValidator.validationResult$
+      .pipe(
+        takeUntil(unsubscribeAll$),
+        pluck<JobValidationResult, CardinalityValidatorError['highCardinality']>('highCardinality')
+      )
+      .subscribe(result => {
+        setHighCardinality(result?.value ?? null);
+      });
     return () => {
       unsubscribeAll$.next();
     };
   }, []);
-
-  useEffect(() => {
-    modelPlotConfig$.next({
-      isModelPlotEnabled: jobCreator.modelPlot,
-      jobConfig: jobCreator.jobConfig,
-      datafeedConfig: jobCreator.datafeedConfig,
-    });
-  }, [jobCreator.modelPlot, jobCreator.jobConfig.analysis_config]);
 
   return jobCreator.modelPlot === true && highCardinality !== null ? (
     <EuiCallOut

@@ -5,19 +5,33 @@
  */
 
 import { ReactElement } from 'react';
+import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import {
   basicJobValidation,
   basicDatafeedValidation,
 } from '../../../../../../common/util/job_utils';
 import { getNewJobLimits } from '../../../../services/ml_server_info';
-import { JobCreatorType } from '../job_creator';
+import { JobCreator, JobCreatorType } from '../job_creator';
 import { populateValidationMessages, checkForExistingJobAndGroupIds } from './util';
 import { ExistingJobsAndGroups } from '../../../../services/job_service';
+import { cardinalityValidator, CardinalityValidatorResult } from './validators';
 
 // delay start of validation to allow the user to make changes
 // e.g. if they are typing in a new value, try not to validate
 // after every keystroke
 const VALIDATION_DELAY_MS = 500;
+
+/**
+ * Union of possible validation results.
+ */
+export type JobValidationResult = Partial<CardinalityValidatorResult>;
+
+export interface JobConfigs {
+  jobCreator: JobCreator;
+  jobConfig: string;
+  datafeedConfig: string;
+}
 
 export interface ValidationSummary {
   basic: boolean;
@@ -47,6 +61,7 @@ export class JobValidator {
   private _lastJobConfig: string;
   private _lastDatafeedConfig: string;
   private _validateTimeout: ReturnType<typeof setTimeout> | null = null;
+  private _asyncValidators: Array<Observable<JobValidationResult>> = [];
   private _existingJobsAndGroups: ExistingJobsAndGroups;
   private _basicValidations: BasicValidations = {
     jobId: { valid: true },
@@ -60,6 +75,11 @@ export class JobValidator {
     scrollSize: { valid: true },
   };
   private _validating: boolean = false;
+  private _validationResult$ = new BehaviorSubject<JobValidationResult>({});
+  /**
+   * Combine latest job and datafeed configs as JSON strings.
+   */
+  private _jobConfigs$ = new Subject<JobConfigs>();
 
   constructor(jobCreator: JobCreatorType, existingJobsAndGroups: ExistingJobsAndGroups) {
     this._jobCreator = jobCreator;
@@ -70,12 +90,22 @@ export class JobValidator {
       advanced: false,
     };
     this._existingJobsAndGroups = existingJobsAndGroups;
+    this._registerAsyncValidators();
   }
+
+  validationResult$ = this._validationResult$.asObservable();
 
   public validate(callback: () => void, forceValidate: boolean = false) {
     this._validating = true;
     const formattedJobConfig = this._jobCreator.formattedJobJson;
     const formattedDatafeedConfig = this._jobCreator.formattedDatafeedJson;
+
+    this._jobConfigs$.next({
+      jobCreator: this._jobCreator,
+      jobConfig: formattedJobConfig,
+      datafeedConfig: formattedDatafeedConfig,
+    });
+
     // only validate if the config has changed
     if (
       forceValidate ||
@@ -137,6 +167,25 @@ export class JobValidator {
     populateValidationMessages(idResults, this._basicValidations, jobConfig, datafeedConfig);
 
     this._validationSummary.basic = this._isOverallBasicValid();
+  }
+
+  private _registerAsyncValidators() {
+    this._asyncValidators = [cardinalityValidator(this._jobConfigs$)];
+
+    combineLatest(this._asyncValidators)
+      .pipe(
+        map(res => {
+          return res.reduce((acc, curr) => {
+            return {
+              ...acc,
+              ...(curr ? curr : {}),
+            };
+          }, {});
+        })
+      )
+      .subscribe(validationResult => {
+        this._validationResult$.next(validationResult);
+      });
   }
 
   private _isOverallBasicValid() {
