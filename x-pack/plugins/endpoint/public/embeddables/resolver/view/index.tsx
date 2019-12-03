@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { MouseEventHandler, useCallback, useState, useEffect, useRef } from 'react';
+import React, { MouseEventHandler, useCallback, useState, useEffect, useRef, useMemo } from 'react';
 import { Store } from 'redux';
 import { Provider, useSelector, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import styled from 'styled-components';
-import { ResolverState, ResolverAction } from '../types';
+import { ResolverState, ResolverAction, Vector2 } from '../types';
 import * as selectors from '../store/selectors';
 
 export const AppRoot: React.FC<{
@@ -26,9 +26,6 @@ const useResolverDispatch = () => useDispatch<Dispatch<ResolverAction>>();
 
 const Diagnostic = styled(
   React.memo(({ className }: { className?: string }) => {
-    const worldToRaster = useSelector(selectors.worldToRaster);
-
-    console.log('we rerendered!', 'worldToRaster([0, 0])', worldToRaster([0, 0]));
     const scale = useSelector(selectors.scale);
 
     const [elementBoundingClientRect, clientRectCallbackFunction] = useAutoUpdatingClientRect();
@@ -49,7 +46,7 @@ const Diagnostic = styled(
         if (event.buttons === 1) {
           dispatch({
             type: 'userPanned',
-            payload: [event.movementX * scale[0], event.movementY * scale[1]],
+            payload: [event.movementX * scale[0], -event.movementY * scale[1]],
           });
         }
       },
@@ -57,12 +54,15 @@ const Diagnostic = styled(
     );
 
     return (
-      <div className={className} ref={clientRectCallbackFunction} onMouseMove={handleMouseMove} />
+      <div className={className} ref={clientRectCallbackFunction} onMouseMove={handleMouseMove}>
+        <DiagnosticDot worldPosition={useMemo(() => [0, 0], [])} />
+      </div>
     );
   })
 )`
   display: flex;
   flex-grow: 1;
+  position: relative;
 `;
 
 function useAutoUpdatingClientRect() {
@@ -89,3 +89,26 @@ function useAutoUpdatingClientRect() {
   }, []);
   return [rect, ref] as const;
 }
+
+const DiagnosticDot = styled(
+  React.memo(({ className, worldPosition }: { className?: string; worldPosition: Vector2 }) => {
+    const worldToRaster = useSelector(selectors.worldToRaster);
+    const [left, top] = worldToRaster(worldPosition);
+    const style = {
+      left: (left - 30).toString() + 'px',
+      top: (top - 30).toString() + 'px',
+    };
+    return (
+      <span role="img" aria-label="drooling face" className={className} style={style}>
+        🤤
+      </span>
+    );
+  })
+)`
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  text-align: center;
+  font-size: 60px;
+  user-select: none;
+`;
