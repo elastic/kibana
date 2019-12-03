@@ -69,6 +69,11 @@ async function init() {
     return;
   }
 
+  if (!isSecurityEnabled()) {
+    console.log('Security must be enabled!');
+    return;
+  }
+
   const KIBANA_READ_ROLE = `kibana_read_${GITHUB_USERNAME}`;
   const KIBANA_WRITE_ROLE = `kibana_write_${GITHUB_USERNAME}`;
 
@@ -93,6 +98,16 @@ async function init() {
     username: 'kibana_write_user',
     roles: [KIBANA_WRITE_ROLE]
   });
+}
+
+async function isSecurityEnabled() {
+  interface XPackInfo {
+    features: { security?: { allow_rbac: boolean } };
+  }
+  const { features } = await callKibana<XPackInfo>({
+    url: `/api/xpack/v1/info`
+  });
+  return features.security?.allow_rbac;
 }
 
 async function callKibana<T>(options: AxiosRequestConfig): Promise<T> {
