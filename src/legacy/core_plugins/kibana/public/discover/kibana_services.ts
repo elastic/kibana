@@ -67,7 +67,6 @@ export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 // @ts-ignore
 export { RequestAdapter } from 'ui/inspector/adapters';
 export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
-export { FieldList } from 'ui/index_patterns';
 export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';

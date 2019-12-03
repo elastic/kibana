@@ -26,7 +26,8 @@ import { SearchService } from './search/search_service';
 import { FieldFormatsService } from './field_formats_provider';
 import { QueryService } from './query';
 import { createIndexPatternSelect } from './ui/index_pattern_select';
-import { IndexPatternsService } from './index_patterns';
+import { IndexPatternsService, FieldList } from './index_patterns';
+import { setNotifications, setFieldFormats } from './services';
 
 export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPublicPluginStart> {
   private readonly indexPatterns: IndexPatternsService = new IndexPatternsService();
@@ -58,12 +59,12 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
   public start(core: CoreStart): DataPublicPluginStart {
     const { uiSettings, http, notifications, savedObjects } = core;
     const fieldFormats = this.fieldFormatsService.start();
+    setNotifications(notifications);
+    setFieldFormats(fieldFormats);
     const indexPatternsService = this.indexPatterns.start({
       uiSettings,
       savedObjectsClient: savedObjects.client,
       http,
-      notifications,
-      fieldFormats,
     });
 
     return {
@@ -75,7 +76,10 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       ui: {
         IndexPatternSelect: createIndexPatternSelect(core.savedObjects.client),
       },
-      indexPatterns: indexPatternsService.indexPatterns,
+      indexPatterns: {
+        ...indexPatternsService.indexPatterns,
+        FieldList,
+      },
     };
   }
 

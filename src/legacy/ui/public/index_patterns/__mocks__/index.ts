@@ -20,8 +20,6 @@
 import { indexPatterns as npIndexPatterns } from '../../../../../plugins/data/public';
 
 export const flattenHitWrapper = npIndexPatterns.flattenHitWrapper;
-export const formatHitProvider = npIndexPatterns.formatHitProvider;
 
 // static code
 export { getFromSavedObject, getRoutes } from '../../../../core_plugins/data/public';
-export { FieldList } from '../../../../../plugins/data/public';

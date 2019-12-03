@@ -29,12 +29,7 @@ export function plugin() {
 /** @public types */
 export { DataStart };
 
-export {
-  Field,
-  FieldType,
-  FieldListInterface,
-  IndexPattern,
-} from './index_patterns';
+export { Field, FieldType, IFieldList, IndexPattern } from './index_patterns';
 export { SearchBar, SearchBarProps } from './search';
 export {
   SavedQueryAttributes,

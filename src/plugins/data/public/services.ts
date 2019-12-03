@@ -18,8 +18,8 @@
  */
 
 import { NotificationsStart } from 'src/core/public';
-import { createGetterSetter } from '../../../kibana_utils/public';
-import { FieldFormatsStart } from '../field_formats_provider';
+import { FieldFormatsStart } from '.';
+import { createGetterSetter } from '../../kibana_utils/public';
 
 export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
   'Notifications'

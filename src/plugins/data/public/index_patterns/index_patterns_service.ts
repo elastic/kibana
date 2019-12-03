@@ -17,22 +17,13 @@
  * under the License.
  */
 
-import {
-  IUiSettingsClient,
-  SavedObjectsClientContract,
-  HttpServiceBase,
-  NotificationsStart,
-} from 'src/core/public';
-import { FieldFormatsStart } from '../field_formats_provider';
-import { setNotifications, setFieldFormats } from './services';
+import { IUiSettingsClient, SavedObjectsClientContract, HttpServiceBase } from 'src/core/public';
 import { IndexPatterns } from './index_patterns';
 
 export interface IndexPatternDependencies {
   uiSettings: IUiSettingsClient;
   savedObjectsClient: SavedObjectsClientContract;
   http: HttpServiceBase;
-  notifications: NotificationsStart;
-  fieldFormats: FieldFormatsStart;
 }
 
 /**
@@ -41,24 +32,7 @@ export interface IndexPatternDependencies {
  * @internal
  */
 export class IndexPatternsService {
-  private setupApi: any;
-
-  public setup() {
-    this.setupApi = {};
-
-    return this.setupApi;
-  }
-
-  public start({
-    uiSettings,
-    savedObjectsClient,
-    http,
-    notifications,
-    fieldFormats,
-  }: IndexPatternDependencies) {
-    setNotifications(notifications);
-    setFieldFormats(fieldFormats);
-
+  public start({ uiSettings, savedObjectsClient, http }: IndexPatternDependencies) {
     return {
       indexPatterns: new IndexPatterns(uiSettings, savedObjectsClient, http),
     };
