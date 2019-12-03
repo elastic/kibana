@@ -17,7 +17,12 @@
  * under the License.
  */
 
-/** @internal */
-export { LegacyObjectToConfigAdapter, ensureValidConfiguration, LegacyConfig } from './config';
-/** @internal */
-export { LegacyService, LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy_service';
+/**
+ * New platform representation of the legacy configuration (KibanaConfig)
+ *
+ * @internal
+ */
+export interface LegacyConfig {
+  get<T>(key?: string): T;
+  has(key: string): boolean;
+}

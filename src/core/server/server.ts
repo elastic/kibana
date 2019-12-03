@@ -23,7 +23,7 @@ import { Type } from '@kbn/config-schema';
 import { ConfigService, Env, Config, ConfigPath } from './config';
 import { ElasticsearchService } from './elasticsearch';
 import { HttpService, InternalHttpServiceSetup } from './http';
-import { LegacyService } from './legacy';
+import { LegacyService, ensureValidConfiguration } from './legacy';
 import { Logger, LoggerFactory } from './logging';
 import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
@@ -82,6 +82,10 @@ export class Server {
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
     const pluginDependencies = await this.plugins.discover();
     const legacyPlugins = await this.legacy.discoverPlugins();
+
+    // Immediately terminate in case of invalid configuration
+    await ensureValidConfiguration(this.configService, legacyPlugins);
+
     const contextServiceSetup = this.context.setup({
       // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
       // 1) Can access context from any NP plugin

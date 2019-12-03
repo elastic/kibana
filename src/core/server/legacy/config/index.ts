@@ -17,7 +17,6 @@
  * under the License.
  */
 
-/** @internal */
-export { LegacyObjectToConfigAdapter, ensureValidConfiguration, LegacyConfig } from './config';
-/** @internal */
-export { LegacyService, LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy_service';
+export { ensureValidConfiguration } from './ensure_valid_configuration';
+export { LegacyObjectToConfigAdapter } from './legacy_object_to_config_adapter';
+export { LegacyConfig } from './types';
