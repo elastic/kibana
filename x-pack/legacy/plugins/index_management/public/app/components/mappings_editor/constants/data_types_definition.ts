@@ -4,184 +4,243 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import { MainType, DataType, DataTypeDefinition } from '../types';
 
 export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
   text: {
     value: 'text',
-    label: 'Text',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.textDescription', {
+      defaultMessage: 'Text',
+    }),
     documentation: {
       main: '/text.html',
     },
   },
   keyword: {
     value: 'keyword',
-    label: 'Keyword',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.keywordDescription', {
+      defaultMessage: 'Keyword',
+    }),
     documentation: {
       main: '/keyword.html',
     },
   },
   numeric: {
     value: 'numeric',
-    label: 'Numeric',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.numericDescription', {
+      defaultMessage: 'Numeric',
+    }),
     documentation: {
       main: '/number.html',
     },
     subTypes: {
-      label: 'Numeric type',
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.numericSubtypeDescription', {
+        defaultMessage: 'Numeric type',
+      }),
       types: ['long', 'integer', 'short', 'byte', 'double', 'float', 'half_float', 'scaled_float'],
     },
   },
   byte: {
-    label: 'Byte',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.byteDescription', {
+      defaultMessage: 'Byte',
+    }),
     value: 'byte',
   },
   double: {
-    label: 'Double',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.doubleDescription', {
+      defaultMessage: 'Double',
+    }),
     value: 'double',
   },
   integer: {
-    label: 'Integer',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.integerDescription', {
+      defaultMessage: 'Integer',
+    }),
     value: 'integer',
   },
   long: {
-    label: 'Long',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.longDescription', {
+      defaultMessage: 'Long',
+    }),
     value: 'long',
   },
   float: {
-    label: 'Float',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.floatDescription', {
+      defaultMessage: 'Float',
+    }),
     value: 'float',
   },
   half_float: {
-    label: 'Half float',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.halfFloatDescription', {
+      defaultMessage: 'Half float',
+    }),
     value: 'half_float',
   },
   scaled_float: {
-    label: 'Scaled float',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.scaledFloatDescription', {
+      defaultMessage: 'Scaled float',
+    }),
     value: 'scaled_float',
   },
   short: {
-    label: 'Short',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.shortDescription', {
+      defaultMessage: 'Short',
+    }),
     value: 'short',
   },
   date_type: {
-    label: 'Date type',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.dateTypeDescription', {
+      defaultMessage: 'Date type',
+    }),
     value: 'date',
     subTypes: {
-      label: 'Date type',
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.dateSubtypeDescription', {
+        defaultMessage: 'Date type',
+      }),
       types: ['date', 'date_nanos'],
     },
   },
   date: {
-    label: 'Date',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.dateDescription', {
+      defaultMessage: 'Date',
+    }),
     value: 'date',
     documentation: {
       main: '/date.html',
     },
   },
   date_nanos: {
-    label: 'Date nanos',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.dateNanosDescription', {
+      defaultMessage: 'Date nanos',
+    }),
     value: 'date_nanos',
     documentation: {
       main: '/date_nanos.html',
     },
   },
   binary: {
-    label: 'Binary',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.binaryDescription', {
+      defaultMessage: 'Binary',
+    }),
     value: 'binary',
     documentation: {
       main: '/binary.html',
     },
   },
   ip: {
-    label: 'IP',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.ipDescription', {
+      defaultMessage: 'IP',
+    }),
     value: 'ip',
     documentation: {
       main: '/ip.html',
     },
   },
   boolean: {
-    label: 'Boolean',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.booleanDescription', {
+      defaultMessage: 'Boolean',
+    }),
     value: 'boolean',
     documentation: {
       main: '/boolean.html',
     },
   },
   range: {
-    label: 'Range',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.rangeDescription', {
+      defaultMessage: 'Range',
+    }),
     value: 'range',
     documentation: {
       main: '/range.html',
     },
     subTypes: {
-      label: 'Range type',
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.rangeSubtypeDescription', {
+        defaultMessage: 'Range type',
+      }),
       types: ['integer_range', 'float_range', 'long_range', 'double_range', 'date_range'],
     },
   },
   object: {
-    label: 'Object',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.objectDescription', {
+      defaultMessage: 'Object',
+    }),
     value: 'object',
     documentation: {
       main: '/object.html',
     },
   },
   nested: {
-    label: 'Nested',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.nestedDescription', {
+      defaultMessage: 'Nested',
+    }),
     value: 'nested',
     documentation: {
       main: '/nested.html',
     },
   },
   rank_feature: {
-    label: 'Rank feature',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.rankFeatureDescription', {
+      defaultMessage: 'Rank feature',
+    }),
     value: 'rank_feature',
     documentation: {
       main: '/rank-feature.html',
     },
   },
   rank_features: {
-    label: 'Rank features',
-    value: 'date',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.rankFeaturesDescription', {
+      defaultMessage: 'Rank features',
+    }),
+    value: 'rank_features',
     documentation: {
       main: '/rank-features.html',
     },
   },
   dense_vector: {
-    label: 'Dense vector',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.denseVectorDescription', {
+      defaultMessage: 'Dense vector',
+    }),
     value: 'dense_vector',
     documentation: {
       main: '/dense-vector.html',
     },
   },
-  sparse_vector: {
-    label: 'Sparse vector',
-    value: 'sparse_vector',
-    documentation: {
-      main: '/sparse-vector.html',
-    },
-  },
   date_range: {
-    label: 'Date range',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.dateRangeDescription', {
+      defaultMessage: 'Date range',
+    }),
     value: 'date_range',
   },
   double_range: {
-    label: 'Double range',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.doubleRangeDescription', {
+      defaultMessage: 'Double range',
+    }),
     value: 'double_range',
   },
   float_range: {
-    label: 'Float range',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.floatRangeDescription', {
+      defaultMessage: 'Float range',
+    }),
     value: 'float_range',
   },
   integer_range: {
-    label: 'Integer range',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.integerRangeDescription', {
+      defaultMessage: 'Integer range',
+    }),
     value: 'integer_range',
   },
   long_range: {
-    label: 'Long range',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.longRangeDescription', {
+      defaultMessage: 'Long range',
+    }),
     value: 'long_range',
   },
   geo: {
-    label: 'Geo',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.geoDescription', {
+      defaultMessage: 'Geo',
+    }),
     value: 'geo',
     subTypes: {
       label: 'Geo type',
@@ -189,14 +248,18 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     },
   },
   geo_point: {
-    label: 'Geo point',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.geoPointDescription', {
+      defaultMessage: 'Geo-point',
+    }),
     value: 'geo_point',
     documentation: {
       main: '/geo-point.html',
     },
   },
   geo_shape: {
-    label: 'Geo shape',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.geoShapeDescription', {
+      defaultMessage: 'Geo-shape',
+    }),
     value: 'geo_shape',
     documentation: {
       main: '/geo-shape.html',
@@ -204,10 +267,14 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     },
   },
   specialised: {
-    label: 'Specialised',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.specialisedDescription', {
+      defaultMessage: 'Specialised',
+    }),
     value: 'specialised',
     subTypes: {
-      label: 'Specialised type',
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.specialisedTypeDescription', {
+        defaultMessage: 'Specialised type',
+      }),
       types: [
         'alias',
         'completion',
@@ -220,62 +287,77 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
         'rank_features',
         'shape',
         'search_as_you_type',
-        'sparse_vector',
         'token_count',
       ],
     },
   },
   completion: {
-    label: 'Completion suggester',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.completionSuggestorDescription', {
+      defaultMessage: 'Completion suggestor',
+    }),
     value: 'completion',
     documentation: {
       main: '/search-suggesters.html#completion-suggester',
     },
   },
   token_count: {
-    label: 'Token count',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.tokenCountDescription', {
+      defaultMessage: 'Token count',
+    }),
     value: 'token_count',
     documentation: {
       main: '/token-count.html',
     },
   },
   percolator: {
-    label: 'Percolator',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.percolatorDescription', {
+      defaultMessage: 'Percolator',
+    }),
     value: 'percolator',
     documentation: {
       main: '/percolator.html',
     },
   },
   join: {
-    label: 'Join',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.joinDescription', {
+      defaultMessage: 'Join',
+    }),
     value: 'join',
     documentation: {
       main: '/join.html',
     },
   },
   alias: {
-    label: 'Alias',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.aliasDescription', {
+      defaultMessage: 'Alias',
+    }),
     value: 'alias',
     documentation: {
       main: '/alias.html',
     },
   },
   search_as_you_type: {
-    label: 'Search as you type',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.searchAsYouTypeDescription', {
+      defaultMessage: 'Search-as-you-type',
+    }),
     value: 'search_as_you_type',
     documentation: {
       main: '/search-as-you-type.html',
     },
   },
   flattened: {
-    label: 'Flattened',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.flattenedDescription', {
+      defaultMessage: 'Flattened',
+    }),
     value: 'flattened',
     documentation: {
       main: '/flattened.html',
     },
   },
   shape: {
-    label: 'Shape',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.shapeDescription', {
+      defaultMessage: 'Shape',
+    }),
     value: 'shape',
     documentation: {
       main: '/shape.html',

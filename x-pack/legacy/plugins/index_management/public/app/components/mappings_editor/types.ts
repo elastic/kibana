@@ -68,7 +68,6 @@ export type SpecialisedType =
   | 'rank_features'
   | 'search_as_you_type'
   | 'shape'
-  | 'sparse_vector'
   | 'token_count';
 
 export type ParameterName =
