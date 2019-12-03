@@ -94,7 +94,10 @@ export function createPluginInitializerContext(
             deepFreeze({
               kibana: pick(kibana, SharedGlobalConfigKeys.kibana),
               elasticsearch: pick(elasticsearch, SharedGlobalConfigKeys.elasticsearch),
-              path: pick(path, SharedGlobalConfigKeys.path),
+              path: {
+                configDir: path.configDir,
+                dataDir: path.data,
+              },
             })
           )
         ),

@@ -49,7 +49,7 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
     },
     path: {
       configDir: '/tmp',
-      data: '/tmp',
+      dataDir: '/tmp',
     },
   };
 
