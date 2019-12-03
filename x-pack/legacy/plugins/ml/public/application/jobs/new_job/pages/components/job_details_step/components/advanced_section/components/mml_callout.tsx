@@ -7,36 +7,20 @@
 import React, { FC, useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiText } from '@elastic/eui';
-import { Subject } from 'rxjs';
-import { pluck, takeUntil } from 'rxjs/operators';
 import { JobCreatorContext } from '../../../../job_creator_context';
-import { CardinalityModelPlotHigh } from '../../../../../../../../services/ml_api_service';
-import { JobValidationResult } from '../../../../../../common/job_validator/job_validator';
-import { CardinalityValidatorError } from '../../../../../../common/job_validator/validators';
 
 export const MMLCallout: FC = () => {
-  const { jobCreator, jobValidator } = useContext(JobCreatorContext);
-  const [highCardinality, setHighCardinality] = useState<
-    CardinalityModelPlotHigh['modelPlotCardinality'] | null
-  >(null);
-
-  const unsubscribeAll$ = new Subject();
+  const { jobCreator, jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
+  const [highCardinality, setHighCardinality] = useState<number | null>(null);
 
   useEffect(() => {
-    jobValidator.validationResult$
-      .pipe(
-        takeUntil(unsubscribeAll$),
-        pluck<JobValidationResult, CardinalityValidatorError['highCardinality']>('highCardinality')
-      )
-      .subscribe(result => {
-        setHighCardinality(result?.value ?? null);
-      });
-    return () => {
-      unsubscribeAll$.next();
-    };
-  }, []);
+    const value = jobValidator.latestValidationResult?.highCardinality?.value ?? null;
+    if (value) {
+      setHighCardinality(value);
+    }
+  }, [jobValidatorUpdated]);
 
-  return jobCreator.modelPlot === true && highCardinality !== null ? (
+  return jobCreator.modelPlot && highCardinality !== null ? (
     <EuiCallOut
       title={
         <FormattedMessage

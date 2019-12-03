@@ -47,10 +47,10 @@ export function cardinalityValidator(
     distinctUntilChanged((prev, curr) => {
       return prev.jobConfig === curr.jobConfig;
     }),
-    switchMap(v => {
+    switchMap(({ jobCreator }) => {
       return ml.validateCardinality$({
-        ...v.jobCreator.jobConfig,
-        datafeed_config: v.jobCreator.datafeedConfig,
+        ...jobCreator.jobConfig,
+        datafeed_config: jobCreator.datafeedConfig,
       });
     }),
     map(validationResults => {

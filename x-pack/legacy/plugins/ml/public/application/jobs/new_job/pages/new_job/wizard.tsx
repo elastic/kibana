@@ -77,7 +77,18 @@ export const Wizard: FC<Props> = ({
   );
 
   useEffect(() => {
+    const subscription = jobValidator.validationResult$.subscribe(() => {
+      setJobValidatorUpdate(jobValidatorUpdated);
+    });
+
+    return () => {
+      return subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
     jobValidator.validate(() => {
+      // FIXME without this callback "Next" button on "Pick fields" remain disabled
       setJobValidatorUpdate(jobValidatorUpdated);
     });
 
