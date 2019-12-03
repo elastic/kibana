@@ -12,22 +12,44 @@ export enum RuleStep {
   aboutRule = 'about-rule',
   scheduleRule = 'schedule-rule',
 }
+export type RuleStatusType = 'passive' | 'active' | 'valid';
 
 export interface RuleStepData {
-  isValid: boolean;
   data: unknown;
+  isValid: boolean;
 }
 
 export interface RuleStepProps {
   setStepData: (step: RuleStep, data: unknown, isValid: boolean) => void;
+  isEditView: boolean;
   isLoading: boolean;
 }
 
-export interface DefineStepRule {
+interface StepRuleData {
+  isNew: boolean;
+}
+export interface AboutStepRule extends StepRuleData {
+  name: string;
+  description: string;
+  severity: string;
+  riskScore: number;
+  references: string[];
+  falsePositives: string[];
+  tags: string[];
+}
+
+export interface DefineStepRule extends StepRuleData {
   outputIndex: string;
   useIndicesConfig: string;
   index: string[];
   queryBar: FieldValueQueryBar;
+}
+
+export interface ScheduleStepRule extends StepRuleData {
+  enabled: boolean;
+  interval: string;
+  from: string;
+  to?: string;
 }
 
 export interface DefineStepRuleJson {
@@ -37,16 +59,6 @@ export interface DefineStepRuleJson {
   saved_id?: string;
   query: string;
   language: string;
-}
-
-export interface AboutStepRule {
-  name: string;
-  description: string;
-  severity: string;
-  riskScore: number;
-  references: string[];
-  falsePositives: string[];
-  tags: string[];
 }
 
 export interface AboutStepRuleJson {
@@ -59,12 +71,6 @@ export interface AboutStepRuleJson {
   tags: string[];
 }
 
-export interface ScheduleStepRule {
-  enabled: boolean;
-  interval: string;
-  from: string;
-  to?: string;
-}
 export type ScheduleStepRuleJson = ScheduleStepRule;
 
 export type FormatRuleType = 'query' | 'saved_query';

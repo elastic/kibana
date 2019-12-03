@@ -337,6 +337,7 @@ module.exports = {
                   '!src/core/server/index.ts',
                   '!src/core/server/mocks.ts',
                   '!src/core/server/types.ts',
+                  '!src/core/server/test_utils.ts',
                   // for absolute imports until fixed in
                   // https://github.com/elastic/kibana/issues/36096
                   '!src/core/server/types',
@@ -349,6 +350,21 @@ module.exports = {
                   '!src/plugins/**/server/index.{js,ts,tsx}',
                 ],
                 allowSameFolder: true,
+              },
+              {
+                target: ['src/core/**/*'],
+                from: ['x-pack/**/*'],
+                errorMessage: 'OSS cannot import x-pack files.',
+              },
+              {
+                target: ['src/core/**/*'],
+                from: [
+                  'plugins/**/*',
+                  'src/plugins/**/*',
+                  'src/legacy/core_plugins/**/*',
+                  'src/legacy/ui/**/*',
+                ],
+                errorMessage: 'The core cannot depend on any plugins.',
               },
               {
                 from: ['src/legacy/ui/**/*', 'ui/**/*'],
