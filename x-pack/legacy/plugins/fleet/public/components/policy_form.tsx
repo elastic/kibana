@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Policy } from '../../common/types/domain_data';
+import { Policy } from '../../../../ingest/server/libs/types';
 
 interface Props {
   policy: Partial<Policy>;

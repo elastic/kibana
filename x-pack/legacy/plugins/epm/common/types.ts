@@ -9,6 +9,7 @@ import {
   SavedObjectAttributes,
   SavedObjectReference,
 } from '../../../../../src/core/server';
+import { Datasource } from '../../ingest/server/libs/types';
 
 export enum InstallationStatus {
   installed = 'installed',
@@ -126,8 +127,8 @@ export interface InstallationAttributes extends SavedObjectAttributes {
   installed: AssetReference[];
 }
 
-export type Datasource = SavedObject<DatasourceAttributes>;
-export interface DatasourceAttributes extends SavedObjectAttributes {
+export type DatasourceSavedObject = SavedObject<DatasourceAttributes>;
+export interface DatasourceAttributes extends SavedObjectAttributes, Datasource {
   installed: AssetReference[];
 }
 

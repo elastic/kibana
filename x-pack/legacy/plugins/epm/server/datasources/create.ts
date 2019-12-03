@@ -10,7 +10,7 @@ import { installPipelines } from '../lib/elasticsearch/ingest_pipeline/ingest_pi
 import { installTemplates } from '../packages/install';
 import { AssetReference } from '../../common/types';
 import { SAVED_OBJECT_TYPE_DATASOURCES } from '../../common/constants';
-import { Datasource, DatasourceAttributes } from '../../common/types';
+import { DatasourceSavedObject, DatasourceAttributes } from '../../common/types';
 
 export async function createDatasource(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -59,7 +59,7 @@ export async function saveDatasourceReferences(options: {
 export async function getDatasourceObject(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
-}): Promise<Datasource | undefined> {
+}): Promise<DatasourceSavedObject | undefined> {
   const { savedObjectsClient, pkgkey } = options;
   return savedObjectsClient
     .get<DatasourceAttributes>(SAVED_OBJECT_TYPE_DATASOURCES, pkgkey)

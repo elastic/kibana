@@ -11,9 +11,9 @@ import {
   ReturnTypeUpdate,
   ReturnTypeAction,
 } from '../../../../common/return_types';
-import { Policy } from '../../../../common/types/domain_data';
 import { RestAPIAdapter } from '../rest_api/adapter_types';
 import { PolicyAdapter } from './memory_policy_adapter';
+import { Policy } from '../../../../../ingest/server/libs/types';
 
 export class RestPolicyAdapter extends PolicyAdapter {
   constructor(private readonly REST: RestAPIAdapter) {

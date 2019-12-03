@@ -26,7 +26,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import useInterval from '@use-it/interval';
 import React, { useEffect, useState } from 'react';
 import { AGENT_POLLING_INTERVAL } from '../../../common/constants/agent';
-import { Agent, Policy } from '../../../common/types/domain_data';
+import { Agent } from '../../../common/types/domain_data';
 import { AgentHealth } from '../../components/agent_health';
 import { AgentUnenrollProvider } from '../../components/agent_unenroll_provider';
 import { ConnectedLink } from '../../components/navigation/connected_link';
@@ -34,6 +34,7 @@ import { SearchBar } from '../../components/search_bar';
 import { useLibs } from '../../hooks/use_libs';
 import { usePagination } from '../../hooks/use_pagination';
 import { AgentEnrollmentFlyout } from './components/agent_enrollment';
+import { Policy } from '../../../../ingest/server/libs/types';
 
 export const AgentListPage: React.FC<{}> = () => {
   const libs = useLibs();

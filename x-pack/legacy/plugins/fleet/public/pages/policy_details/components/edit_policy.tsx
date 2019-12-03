@@ -17,9 +17,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Policy } from '../../../../common/types/domain_data';
 import { PolicyForm } from '../../../components/policy_form';
 import { useLibs } from '../../../hooks/use_libs';
+import { Policy } from '../../../../../ingest/server/libs/types';
 
 interface RouterProps {
   policy: Policy;

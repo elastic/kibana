@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { FrameworkUser } from './adapters/framework/adapter_types';
-import { Datasource } from './adapters/policy/adapter_types';
+import { Datasource } from './types';
 
 export class DatasourcesLib {
   private datasources: Datasource[] = [];

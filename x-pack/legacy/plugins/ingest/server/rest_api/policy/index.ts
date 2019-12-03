@@ -16,8 +16,7 @@ import {
   FrameworkRequest,
   FrameworkRouteHandler,
 } from '../../libs/adapters/framework/adapter_types';
-import { Policy } from '../../libs/adapters/policy/adapter_types';
-import { ServerLibs } from '../../libs/types';
+import { ServerLibs, Policy } from '../../libs/types';
 
 export const createGETPoliciyRoute = (libs: ServerLibs) => ({
   method: 'GET',

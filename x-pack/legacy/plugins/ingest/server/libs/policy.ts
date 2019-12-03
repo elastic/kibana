@@ -9,11 +9,12 @@ import { flatten, unique } from 'lodash';
 import { DEFAULT_POLICY_ID } from '../../common/constants';
 import { ReturnTypeBulkDelete } from '../../common/types/std_return_format';
 import { FrameworkAuthenticatedUser, FrameworkUser } from './adapters/framework/adapter_types';
-import { Datasource, Policy, Status, StoredPolicy } from './adapters/policy/adapter_types';
+import { StoredPolicy } from './adapters/policy/adapter_types';
 import { PolicyAdapter } from './adapters/policy/default';
 import { DatasourcesLib } from './datasources';
 import { BackendFrameworkLib } from './framework';
 import { OutputsLib } from './outputs';
+import { Status, Datasource, Policy } from './types';
 
 export class PolicyLib {
   public events: EventEmitter = new EventEmitter();
