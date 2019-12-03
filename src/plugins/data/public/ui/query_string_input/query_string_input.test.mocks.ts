@@ -16,11 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-/* eslint-disable @kbn/eslint/no-restricted-paths */
-
-import { stubIndexPatternWithFields } from '../../../../../../../plugins/data/public/stubs';
-/* eslint-enable @kbn/eslint/no-restricted-paths */
+import { stubIndexPatternWithFields } from '../../stubs';
 
 export const mockPersistedLog = {
   add: jest.fn(),
@@ -35,7 +31,7 @@ export const mockFetchIndexPatterns = jest
   .fn()
   .mockReturnValue(Promise.resolve([stubIndexPatternWithFields]));
 
-jest.mock('../../../../../../../plugins/data/public/query/persisted_log', () => ({
+jest.mock('../../query/persisted_log', () => ({
   PersistedLog: mockPersistedLogFactory,
 }));
 

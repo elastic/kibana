@@ -17,5 +17,12 @@
  * under the License.
  */
 
-export { QueryBarTopRow } from './components/query_bar_top_row';
-export { QueryStringInput } from './components/query_string_input';
+/**
+ * New platform representation of the legacy configuration (KibanaConfig)
+ *
+ * @internal
+ */
+export interface LegacyConfig {
+  get<T>(key?: string): T;
+  has(key: string): boolean;
+}

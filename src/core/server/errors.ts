@@ -17,26 +17,14 @@
  * under the License.
  */
 
-import _ from 'lodash';
-
-export default function registerCount(server) {
-  server.route({
-    path: '/api/kibana/{id}/_count',
-    method: ['POST', 'GET'],
-    handler: async function (req) {
-      const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-      const boundCallWithRequest = _.partial(callWithRequest, req);
-
-      try {
-        const res = await boundCallWithRequest('count', {
-          allowNoIndices: false,
-          index: req.params.id
-        });
-
-        return { count: res.count };
-      } catch (err) {
-        throw server.plugins.elasticsearch.handleESError(err);
-      }
-    }
-  });
+export class CriticalError extends Error {
+  constructor(
+    message: string,
+    public code: string,
+    public processExitCode: number,
+    public cause?: Error
+  ) {
+    super(message);
+    Object.setPrototypeOf(this, CriticalError.prototype);
+  }
 }

@@ -17,8 +17,6 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('search', () => {
-    loadTestFile(require.resolve('./count'));
-  });
-}
+export { ensureValidConfiguration } from './ensure_valid_configuration';
+export { LegacyObjectToConfigAdapter } from './legacy_object_to_config_adapter';
+export { LegacyConfig } from './types';

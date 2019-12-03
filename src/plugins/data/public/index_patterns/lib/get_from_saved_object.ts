@@ -17,8 +17,16 @@
  * under the License.
  */
 
-import registerCount from './count/register_count';
+import { get } from 'lodash';
 
-export function searchApi(server) {
-  registerCount(server);
+export function getFromSavedObject(savedObject: any) {
+  if (get(savedObject, 'attributes.fields') === undefined) {
+    return;
+  }
+
+  return {
+    id: savedObject.id,
+    fields: JSON.parse(savedObject.attributes.fields),
+    title: savedObject.attributes.title,
+  };
 }

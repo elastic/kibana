@@ -20,7 +20,7 @@ import { SavedObjectsRepository } from './repository';
 import { mockKibanaMigrator } from '../../migrations/kibana/kibana_migrator.mock';
 import { SavedObjectsSchema } from '../../schema';
 import { KibanaMigrator } from '../../migrations';
-import { Config } from 'src/core/server/config';
+import { LegacyConfig } from '../../../legacy/config';
 jest.mock('./repository');
 
 const { SavedObjectsRepository: originalRepository } = jest.requireActual('./repository');
@@ -68,7 +68,7 @@ describe('SavedObjectsRepository#createRepository', () => {
       originalRepository.createRepository(
         (migrator as unknown) as KibanaMigrator,
         schema,
-        {} as Config,
+        {} as LegacyConfig,
         '.kibana-test',
         callAdminCluster,
         ['unMappedType1', 'unmappedType2']
@@ -84,7 +84,7 @@ describe('SavedObjectsRepository#createRepository', () => {
     const repository = originalRepository.createRepository(
       (migrator as unknown) as KibanaMigrator,
       schema,
-      {} as Config,
+      {} as LegacyConfig,
       '.kibana-test',
       callAdminCluster,
       [],
@@ -104,7 +104,7 @@ describe('SavedObjectsRepository#createRepository', () => {
     const repository = originalRepository.createRepository(
       (migrator as unknown) as KibanaMigrator,
       schema,
-      {} as Config,
+      {} as LegacyConfig,
       '.kibana-test',
       callAdminCluster,
       ['hiddenType', 'hiddenType', 'hiddenType'],

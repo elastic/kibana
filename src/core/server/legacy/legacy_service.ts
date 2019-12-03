@@ -31,6 +31,7 @@ import { Logger } from '../logging';
 import { PluginsServiceSetup, PluginsServiceStart } from '../plugins';
 import { findLegacyPluginSpecs } from './plugins';
 import { LegacyPluginSpec } from './plugins/find_legacy_plugin_specs';
+import { LegacyConfig } from './config';
 
 interface LegacyKbnServer {
   applyLoggingConfiguration: (settings: Readonly<Record<string, any>>) => void;
@@ -76,8 +77,10 @@ export interface LegacyServiceStartDeps {
 /** @internal */
 export interface LegacyServiceDiscoverPlugins {
   pluginSpecs: LegacyPluginSpec[];
+  disabledPluginSpecs: LegacyPluginSpec[];
   uiExports: SavedObjectsLegacyUiExports;
-  pluginExtendedConfig: Config;
+  pluginExtendedConfig: LegacyConfig;
+  settings: Record<string, any>;
 }
 
 /** @internal */
@@ -94,7 +97,7 @@ export class LegacyService implements CoreService {
   private configSubscription?: Subscription;
   private setupDeps?: LegacyServiceSetupDeps;
   private update$: ConnectableObservable<Config> | undefined;
-  private legacyRawConfig: Config | undefined;
+  private legacyRawConfig: LegacyConfig | undefined;
   private legacyPlugins:
     | {
         pluginSpecs: LegacyPluginSpec[];
@@ -160,8 +163,10 @@ export class LegacyService implements CoreService {
 
     return {
       pluginSpecs,
+      disabledPluginSpecs,
       uiExports,
       pluginExtendedConfig,
+      settings: this.settings,
     };
   }
 
@@ -211,7 +216,7 @@ export class LegacyService implements CoreService {
     }
   }
 
-  private async createClusterManager(config: Config) {
+  private async createClusterManager(config: LegacyConfig) {
     const basePathProxy$ = this.coreContext.env.cliArgs.basePath
       ? combineLatest(this.devConfig$, this.httpConfig$).pipe(
           first(),
@@ -231,7 +236,7 @@ export class LegacyService implements CoreService {
 
   private async createKbnServer(
     settings: Record<string, any>,
-    config: Config,
+    config: LegacyConfig,
     setupDeps: LegacyServiceSetupDeps,
     startDeps: LegacyServiceStartDeps,
     legacyPlugins: {
@@ -286,7 +291,6 @@ export class LegacyService implements CoreService {
           mode: this.coreContext.env.mode,
           packageInfo: this.coreContext.env.packageInfo,
         },
-        handledConfigPaths: await this.coreContext.configService.getUsedPaths(),
         setupDeps: {
           core: coreSetup,
           plugins: setupDeps.plugins,

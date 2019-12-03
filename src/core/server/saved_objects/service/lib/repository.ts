@@ -29,7 +29,6 @@ import { SavedObjectsErrorHelpers } from './errors';
 import { decodeRequestVersion, encodeVersion, encodeHitVersion } from '../../version';
 import { SavedObjectsSchema } from '../../schema';
 import { KibanaMigrator } from '../../migrations';
-import { Config } from '../../../config';
 import { SavedObjectsSerializer, SanitizedSavedObjectDoc, RawDoc } from '../../serialization';
 import {
   SavedObjectsBulkCreateObject,
@@ -53,6 +52,7 @@ import {
   MutatingOperationRefreshSetting,
 } from '../../types';
 import { validateConvertFilterToKueryNode } from './filter_utils';
+import { LegacyConfig } from '../../../legacy/config';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -76,7 +76,7 @@ const isLeft = <L, R>(either: Either<L, R>): either is Left<L> => {
 export interface SavedObjectsRepositoryOptions {
   index: string;
   /** @deprecated Will be removed once SavedObjectsSchema is exposed from Core */
-  config: Config;
+  config: LegacyConfig;
   mappings: IndexMapping;
   callCluster: APICaller;
   schema: SavedObjectsSchema;
@@ -118,7 +118,7 @@ export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedOb
 export class SavedObjectsRepository {
   private _migrator: KibanaMigrator;
   private _index: string;
-  private _config: Config;
+  private _config: LegacyConfig;
   private _mappings: IndexMapping;
   private _schema: SavedObjectsSchema;
   private _allowedTypes: string[];
@@ -136,7 +136,7 @@ export class SavedObjectsRepository {
   public static createRepository(
     migrator: KibanaMigrator,
     schema: SavedObjectsSchema,
-    config: Config,
+    config: LegacyConfig,
     indexName: string,
     callCluster: APICaller,
     extraTypes: string[] = [],
