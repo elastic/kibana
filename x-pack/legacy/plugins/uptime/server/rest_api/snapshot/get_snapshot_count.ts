@@ -22,15 +22,24 @@ export const createGetSnapshotCount: UMRestApiRouteCreator = (libs: UMServerLibs
   options: {
     tags: ['access:uptime'],
   },
-  handler: async (_context, request, response): Promise<any> => {
+  handler: async (
+    {
+      core: {
+        elasticsearch: {
+          dataClient: { callAsCurrentUser },
+        },
+      },
+    },
+    request,
+    response
+  ): Promise<any> => {
     const { dateRangeStart, dateRangeEnd, filters, statusFilter } = request.query;
-    const result = await libs.monitorStates.getSnapshotCount(
-      request,
+    const result = await libs.monitorStates.getSnapshotCount(callAsCurrentUser, {
       dateRangeStart,
       dateRangeEnd,
       filters,
-      statusFilter
-    );
+      statusFilter,
+    });
     return response.ok({
       body: {
         ...result,
