@@ -5,19 +5,14 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import React, { useEffect, useReducer, useContext } from 'react';
+import React, { useEffect, useContext, useState } from 'react';
 import { get } from 'lodash';
 import { Snapshot as SnapshotType } from '../../../common/runtime_types';
 import { DonutChart } from './charts';
 import { ChartWrapper } from './charts/chart_wrapper';
 import { SnapshotHeading } from './snapshot_heading';
 import { useUrlParams } from '../../hooks';
-import {
-  fetchSnapshotCount as fetchSnapshotCountAction,
-  fetchSnapshotCountSuccess,
-  fetchSnapshotCountFail,
-} from '../../state/actions';
-import { SnapshotState, snapshotReducer } from '../../state/reducers/snapshot';
+import { SnapshotState } from '../../state/reducers/snapshot';
 import { UptimeSettingsContext, UptimeRefreshContext } from '../../contexts';
 import { fetchSnapshotCount } from '../../state/api';
 
@@ -105,14 +100,20 @@ const initialState: SnapshotState = {
  * @param props the props required by the component
  */
 export const Snapshot: React.FC<Props> = ({ height, loading }: Props) => {
-  const [state, reactDispatch] = useReducer(snapshotReducer, initialState);
+  const [state, setState] = useState<SnapshotState>(initialState);
   const { basePath } = useContext(UptimeSettingsContext);
   const { lastRefresh } = useContext(UptimeRefreshContext);
   const [getUrlParams] = useUrlParams();
   const { dateRangeStart, dateRangeEnd, filters, statusFilter } = getUrlParams();
   useEffect(() => {
     async function f(props: ApiRequest) {
-      reactDispatch(fetchSnapshotCountSuccess(await fetchSnapshotCount({ ...props })));
+      setState({
+        ...state,
+        count: {
+          ...(await fetchSnapshotCount({ ...props })),
+        },
+        loading: false,
+      });
     }
     try {
       f({
@@ -123,9 +124,9 @@ export const Snapshot: React.FC<Props> = ({ height, loading }: Props) => {
         statusFilter,
       });
     } catch (e) {
-      reactDispatch(fetchSnapshotCountFail(e));
+      setState({ ...state, errors: [...state.errors, e] });
     }
-    reactDispatch(fetchSnapshotCountAction(dateRangeStart, dateRangeEnd, filters, statusFilter));
+    setState({ ...state, loading: true });
   }, [dateRangeStart, dateRangeEnd, filters, lastRefresh, statusFilter]);
   return <PresentationalComponent count={state.count} height={height} loading={loading} />;
 };
