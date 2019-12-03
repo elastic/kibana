@@ -27,14 +27,19 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
     deletedId,
     deleteView,
     find,
-    errorOnFind,
-    errorOnCreate,
+    findError,
+    createError,
+    createdId,
   } = useSavedView(props.defaultViewState, props.viewType);
   const [modalOpen, setModalOpen] = useState(false);
+  const [isInvalid, setIsInvalid] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const openSaveModal = useCallback(() => setCreateModalOpen(true), []);
-  const closeCreateModal = useCallback(() => setCreateModalOpen(false), []);
   const closeModal = useCallback(() => setModalOpen(false), []);
+  const closeCreateModal = useCallback(() => {
+    setIsInvalid(false);
+    setCreateModalOpen(false);
+  }, []);
   const loadViews = useCallback(() => {
     find();
     setModalOpen(true);
@@ -51,6 +56,19 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
   );
 
   useEffect(() => {
+    if (createError) {
+      setIsInvalid(true);
+    }
+  }, [createError]);
+
+  useEffect(() => {
+    if (createdId !== undefined) {
+      // INFO: Close the modal after the view is created.
+      closeCreateModal();
+    }
+  }, [createdId, closeCreateModal]);
+
+  useEffect(() => {
     if (deletedId !== undefined) {
       // INFO: Refresh view list after an item is deleted
       find();
@@ -58,12 +76,12 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
   }, [deletedId, find]);
 
   useEffect(() => {
-    if (errorOnCreate) {
-      toastNotifications.addWarning(getErrorToast('create')!);
-    } else if (errorOnFind) {
-      toastNotifications.addWarning(getErrorToast('find')!);
+    if (createError) {
+      toastNotifications.addWarning(getErrorToast('create', createError)!);
+    } else if (findError) {
+      toastNotifications.addWarning(getErrorToast('find', findError)!);
     }
-  }, [errorOnCreate, errorOnFind]);
+  }, [createError, findError]);
 
   return (
     <>
@@ -82,7 +100,9 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
         </EuiButtonEmpty>
       </EuiFlexGroup>
 
-      {createModalOpen && <SavedViewCreateModal close={closeCreateModal} save={save} />}
+      {createModalOpen && (
+        <SavedViewCreateModal isInvalid={isInvalid} close={closeCreateModal} save={save} />
+      )}
       {modalOpen && (
         <SavedViewListFlyout<ViewState>
           loading={loading}
@@ -96,18 +116,22 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
   );
 }
 
-const getErrorToast = (type: 'create' | 'find') => {
+const getErrorToast = (type: 'create' | 'find', msg?: string) => {
   if (type === 'create') {
     return {
-      title: i18n.translate('xpack.infra.savedView.errorOnCreate.title', {
-        defaultMessage: `An error occured saving view.`,
-      }),
+      title:
+        msg ||
+        i18n.translate('xpack.infra.savedView.errorOnCreate.title', {
+          defaultMessage: `An error occured saving view.`,
+        }),
     };
   } else if (type === 'find') {
     return {
-      title: i18n.translate('xpack.infra.savedView.findError.title', {
-        defaultMessage: `An error occurred while loading views.`,
-      }),
+      title:
+        msg ||
+        i18n.translate('xpack.infra.savedView.findError.title', {
+          defaultMessage: `An error occurred while loading views.`,
+        }),
     };
   }
 };
