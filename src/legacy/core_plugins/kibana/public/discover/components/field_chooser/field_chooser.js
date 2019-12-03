@@ -23,7 +23,7 @@ import { fieldCalculator } from './lib/field_calculator';
 import './discover_field';
 import './discover_field_search_directive';
 import './discover_index_pattern_directive';
-import { getServices } from '../../kibana_services';
+import { FieldList } from '../../../../../../../plugins/data/public';
 import fieldChooserTemplate from './field_chooser.html';
 
 export function createFieldChooserDirective($location, config, $route) {
@@ -281,7 +281,6 @@ export function createFieldChooserDirective($location, config, $route) {
           });
         });
 
-        const { FieldList } = getServices().indexPatterns;
         const fields = new FieldList(indexPattern, fieldSpecs);
 
         if (prevFields) {

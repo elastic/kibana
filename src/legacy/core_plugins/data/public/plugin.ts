@@ -29,6 +29,9 @@ import {
 } from './filter/action/apply_filter_action';
 import { APPLY_FILTER_TRIGGER } from '../../../../plugins/embeddable/public';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { setFieldFormats } from '../../../../plugins/data/public/services';
+
 export interface DataPluginStartDependencies {
   data: DataPublicPluginStart;
   uiActions: IUiActionsSetup;
@@ -65,6 +68,8 @@ export class DataPlugin implements Plugin<void, DataStart, {}, DataPluginStartDe
   }
 
   public start(core: CoreStart, { data, uiActions }: DataPluginStartDependencies): DataStart {
+    // This is required for when Angular code uses Field and FieldList.
+    setFieldFormats(data.fieldFormats);
     initLegacyModule(data.indexPatterns);
 
     const SearchBar = createSearchBar({
