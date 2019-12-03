@@ -45,8 +45,11 @@ import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plug
 import { ContextSetup } from './context';
 import { IUiSettingsClient, UiSettingsServiceSetup } from './ui_settings';
 import { SavedObjectsClientContract } from './saved_objects/types';
+import { SavedObjectsServiceSetup, SavedObjectsServiceStart } from './saved_objects';
+import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 
 export { bootstrap } from './bootstrap';
+export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
 export { ConfigPath, ConfigService, EnvironmentMode, PackageInfo } from './config';
 export {
   IContextContainer,
@@ -149,6 +152,7 @@ export {
   SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
+  SavedObjectsClientFactory,
   SavedObjectsCreateOptions,
   SavedObjectsErrorHelpers,
   SavedObjectsExportOptions,
@@ -170,7 +174,13 @@ export {
   SavedObjectsLegacyService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
+  SavedObjectsServiceStart,
+  SavedObjectsServiceSetup,
   SavedObjectsDeleteOptions,
+  ISavedObjectsRepository,
+  SavedObjectsRepository,
+  SavedObjectsDeleteByNamespaceOptions,
+  SavedObjectsIncrementCounterOptions,
 } from './saved_objects';
 
 export {
@@ -232,12 +242,16 @@ export interface RequestHandlerContext {
  * @public
  */
 export interface CoreSetup {
+  /** {@link CapabilitiesSetup} */
+  capabilities: CapabilitiesSetup;
   /** {@link ContextSetup} */
   context: ContextSetup;
   /** {@link ElasticsearchServiceSetup} */
   elasticsearch: ElasticsearchServiceSetup;
   /** {@link HttpServiceSetup} */
   http: HttpServiceSetup;
+  /** {@link SavedObjectsServiceSetup} */
+  savedObjects: SavedObjectsServiceSetup;
   /** {@link UiSettingsServiceSetup} */
   uiSettings: UiSettingsServiceSetup;
 }
@@ -247,6 +261,18 @@ export interface CoreSetup {
  *
  * @public
  */
-export interface CoreStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
+export interface CoreStart {
+  /** {@link CapabilitiesStart} */
+  capabilities: CapabilitiesStart;
+  /** {@link SavedObjectsServiceStart} */
+  savedObjects: SavedObjectsServiceStart;
+}
 
-export { ContextSetup, PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId };
+export {
+  CapabilitiesSetup,
+  CapabilitiesStart,
+  ContextSetup,
+  PluginsServiceSetup,
+  PluginsServiceStart,
+  PluginOpaqueId,
+};
