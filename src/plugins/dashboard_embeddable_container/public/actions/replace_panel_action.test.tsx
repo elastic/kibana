@@ -82,7 +82,6 @@ beforeEach(async () => {
 });
 
 test('Executes the replace panel action', async () => {
-  // let core: any = testPlugin(coreMock.createSetup(), coreMock.createStart()).coreStart;
   let SavedObjectFinder: any;
   let notifications: any;
   const action = new ReplacePanelAction(
