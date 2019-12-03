@@ -4,12 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createStore } from 'redux';
-import { HttpServiceBase } from 'kibana/public';
+import { createStore, StoreEnhancer } from 'redux';
 import { resolverReducer } from './reducer';
+import { HttpServiceBase } from '../../../../../../../src/core/public';
 
 export const storeFactory = ({ httpServiceBase }: { httpServiceBase: HttpServiceBase }) => {
-  const store = createStore(resolverReducer, undefined, applyMiddleware());
+  interface SomethingThatMightHaveReduxDevTools {
+    __REDUX_DEVTOOLS_EXTENSION__?: (options?: { name?: string }) => StoreEnhancer;
+  }
+  const windowWhichMightHaveReduxDevTools = window as SomethingThatMightHaveReduxDevTools;
+  const store = createStore(
+    resolverReducer,
+    windowWhichMightHaveReduxDevTools.__REDUX_DEVTOOLS_EXTENSION__ &&
+      windowWhichMightHaveReduxDevTools.__REDUX_DEVTOOLS_EXTENSION__({
+        name: 'Resolver',
+      })
+  );
   return {
     store,
   };

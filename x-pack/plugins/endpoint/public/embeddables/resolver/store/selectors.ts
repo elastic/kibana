@@ -9,6 +9,10 @@ import { ResolverState } from '../types';
 
 export const worldToRaster = composeSelectors(cameraStateSelector, cameraSelectors.worldToRaster);
 
+export const rasterToWorld = composeSelectors(cameraStateSelector, cameraSelectors.rasterToWorld);
+
+export const scale = composeSelectors(cameraStateSelector, cameraSelectors.scale);
+
 function cameraStateSelector(state: ResolverState) {
   return state.camera;
 }

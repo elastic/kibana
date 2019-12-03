@@ -106,3 +106,5 @@ export const rasterToWorld: (state: CameraState) => (worldPosition: Vector2) => 
     ];
   };
 };
+
+export const scale = (state: CameraState): Vector2 => state.scaling;

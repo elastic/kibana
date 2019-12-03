@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpServiceBase } from 'kibana/public';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { AppRoot } from './view';
@@ -14,6 +13,7 @@ import {
   IContainer,
   Embeddable,
 } from '../../../../../../src/plugins/embeddable/public';
+import { HttpServiceBase } from '../../../../../../src/core/public';
 
 export class ResolverEmbeddable extends Embeddable {
   public readonly type = 'resolver';
@@ -42,7 +42,7 @@ export class ResolverEmbeddable extends Embeddable {
     }
     this.lastRenderTarget = node;
     // TODO, figure out how to destroy middleware
-    const { store } = storeFactory({ httpServiceBase });
+    const { store } = storeFactory({ httpServiceBase: this.httpServiceBase });
     ReactDOM.render(<AppRoot store={store} />, node);
   }
 
