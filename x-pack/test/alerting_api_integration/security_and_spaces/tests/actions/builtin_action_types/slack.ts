@@ -37,7 +37,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'A slack action',
+          name: 'A slack action',
           actionTypeId: '.slack',
           secrets: {
             webhookUrl: 'http://example.com',
@@ -47,7 +47,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
       expect(createdAction).to.eql({
         id: createdAction.id,
-        description: 'A slack action',
+        name: 'A slack action',
         actionTypeId: '.slack',
         config: {},
       });
@@ -60,7 +60,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
-        description: 'A slack action',
+        name: 'A slack action',
         actionTypeId: '.slack',
         config: {},
       });
@@ -71,7 +71,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'A slack action',
+          name: 'A slack action',
           actionTypeId: '.slack',
           secrets: {},
         })
@@ -91,7 +91,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'A slack simulator',
+          name: 'A slack simulator',
           actionTypeId: '.slack',
           secrets: {
             webhookUrl: slackSimulatorURL,
