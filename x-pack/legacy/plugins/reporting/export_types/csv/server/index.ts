@@ -4,19 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ExportTypesRegistry } from '../../../types';
 import { createJobFactory } from './create_job';
 import { executeJobFactory } from './execute_job';
 import { metadata } from '../metadata';
-import { PNG_JOB_TYPE as jobType } from '../../../common/constants';
+import { CSV_JOB_TYPE as jobType } from '../../../common/constants';
 
-export function register(registry) {
+export function register(registry: ExportTypesRegistry) {
   registry.register({
     ...metadata,
     jobType,
-    jobContentEncoding: 'base64',
-    jobContentExtension: 'PNG',
+    jobContentExtension: 'csv',
     createJobFactory,
     executeJobFactory,
-    validLicenses: ['trial', 'standard', 'gold', 'platinum'],
+    validLicenses: ['trial', 'basic', 'standard', 'gold', 'platinum'],
   });
 }
