@@ -19,7 +19,12 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { Storage } from '../../kibana_utils/public';
-import { DataPublicPluginSetup, DataPublicPluginStart, DataSetupDependencies } from './types';
+import {
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+  DataSetupDependencies,
+  DataStartDependencies,
+} from './types';
 import { AutocompleteProviderRegister } from './autocomplete_provider';
 import { getSuggestionsProvider } from './suggestions_provider';
 import { SearchService } from './search/search_service';
@@ -49,11 +54,10 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       uiSettings: core.uiSettings,
       storage,
     });
+
     uiActions.registerAction(
       createFilterAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
-
-    uiActions.attachAction(APPLY_FILTER_TRIGGER, GLOBAL_APPLY_FILTER_ACTION);
 
     return {
       autocomplete: this.autocomplete,
@@ -63,7 +67,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     };
   }
 
-  public start(core: CoreStart): DataPublicPluginStart {
+  public start(core: CoreStart, { uiActions }: DataStartDependencies): DataPublicPluginStart {
     const { uiSettings, http, notifications, savedObjects, overlays } = core;
     const fieldFormats = this.fieldFormatsService.start();
     setNotifications(notifications);
@@ -72,6 +76,8 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
 
     const indexPatternsService = new IndexPatterns(uiSettings, savedObjects.client, http);
     setIndexPatterns(indexPatternsService);
+
+    uiActions.attachAction(APPLY_FILTER_TRIGGER, GLOBAL_APPLY_FILTER_ACTION);
 
     return {
       autocomplete: this.autocomplete,

@@ -19,7 +19,7 @@
 
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { IUiActionsSetup } from 'src/plugins/ui_actions/public';
+import { IUiActionsSetup, IUiActionsStart } from 'src/plugins/ui_actions/public';
 import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
 import { FieldFormatsSetup, FieldFormatsStart } from './field_formats_provider';
 import { ISearchSetup, ISearchStart } from './search';
@@ -30,6 +30,10 @@ import { IndexPatternsContract } from './index_patterns';
 
 export interface DataSetupDependencies {
   uiActions: IUiActionsSetup;
+}
+
+export interface DataStartDependencies {
+  uiActions: IUiActionsStart;
 }
 
 export interface DataPublicPluginSetup {
