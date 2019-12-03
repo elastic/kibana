@@ -22,7 +22,6 @@ export const TextType = () => {
         <EditFieldFormRow
           title={<h3>Form index</h3>}
           description="This is description text."
-          direction="column"
           formFieldPath="index"
         >
           This one has the content shown below the toggle.

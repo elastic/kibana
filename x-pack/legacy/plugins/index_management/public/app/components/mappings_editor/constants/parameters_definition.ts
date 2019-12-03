@@ -172,6 +172,9 @@ export const PARAMETERS_DEFINITION = {
     fieldConfig: {
       defaultValue: '',
       type: FIELD_TYPES.TEXT,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.copyToLabel', {
+        defaultMessage: 'Destination field name',
+      }),
       validations: [
         {
           validator: emptyField(
@@ -233,6 +236,9 @@ export const PARAMETERS_DEFINITION = {
     fieldConfig: {
       defaultValue: 1.0,
       type: FIELD_TYPES.NUMBER,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.boostLabel', {
+        defaultMessage: 'Boost level',
+      }),
       formatters: [toInt],
       validations: [
         {
@@ -417,6 +423,9 @@ export const PARAMETERS_DEFINITION = {
   term_vector: {
     fieldConfig: {
       type: FIELD_TYPES.SUPER_SELECT,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.termVectorLabel', {
+        defaultMessage: 'Set term vector',
+      }),
       defaultValue: 'no',
     },
   },
@@ -448,6 +457,9 @@ export const PARAMETERS_DEFINITION = {
   position_increment_gap: {
     fieldConfig: {
       type: FIELD_TYPES.NUMBER,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.positionIncrementGapLabel', {
+        defaultMessage: 'Position increment gap',
+      }),
       defaultValue: 100,
       formatters: [toInt],
       validations: [
@@ -494,6 +506,9 @@ export const PARAMETERS_DEFINITION = {
     fieldConfig: {
       defaultValue: 'BM25',
       type: FIELD_TYPES.SUPER_SELECT,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.similarityLabel', {
+        defaultMessage: 'Similarity algorithm',
+      }),
       helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.similarityHelpText', {
         defaultMessage: 'Defaults to BM25.',
       }),

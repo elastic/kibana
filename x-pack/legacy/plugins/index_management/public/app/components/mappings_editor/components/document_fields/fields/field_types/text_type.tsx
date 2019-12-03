@@ -6,7 +6,6 @@
 import React from 'react';
 import {
   EuiSpacer,
-  EuiRange,
   EuiDualRange,
   EuiFormRow,
   EuiCallOut,
@@ -23,6 +22,7 @@ import {
   FieldHook,
   FormDataProvider,
   CheckBoxField,
+  RangeField,
 } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
 import { PARAMETERS_OPTIONS } from '../../../../constants';
@@ -190,7 +190,7 @@ export const TextType = React.memo(({ field }: Props) => {
             formFieldPath="fielddata"
           >
             {/* fielddata_frequency_filter */}
-            <EuiFormRow label={i18nTexts.rangeFieldLabel}>
+            <EuiFormRow label={i18nTexts.rangeFieldLabel} fullWidth>
               <UseMultiFields
                 fields={{
                   min: {
@@ -211,6 +211,7 @@ export const TextType = React.memo(({ field }: Props) => {
                       value={[min.value as number, max.value as number]}
                       onChange={onFrequencyFilterChange(min, max)}
                       showInput
+                      fullWidth
                     />
                   );
                 }}
@@ -265,7 +266,7 @@ export const TextType = React.memo(({ field }: Props) => {
             )}
             toggleDefaultValue={getDefaultValueToggle('indexPrefixes', field.source)}
           >
-            <EuiFormRow label={i18nTexts.rangeFieldLabel}>
+            <EuiFormRow label={i18nTexts.rangeFieldLabel} fullWidth>
               <UseMultiFields
                 fields={{
                   min: {
@@ -285,6 +286,7 @@ export const TextType = React.memo(({ field }: Props) => {
                     value={[min.value as number, max.value as number]}
                     onChange={onIndexPrefixesChanage(min, max)}
                     showInput
+                    fullWidth
                   />
                 )}
               </UseMultiFields>
@@ -319,17 +321,16 @@ export const TextType = React.memo(({ field }: Props) => {
                     <UseField
                       path="position_increment_gap"
                       config={getFieldConfig('position_increment_gap')}
-                    >
-                      {positionIncrementGapField => (
-                        <EuiRange
-                          min={0}
-                          max={200}
-                          value={positionIncrementGapField.value as string}
-                          onChange={positionIncrementGapField.onChange as any}
-                          showInput
-                        />
-                      )}
-                    </UseField>
+                      component={RangeField}
+                      componentProps={{
+                        euiFieldProps: {
+                          min: 0,
+                          max: 200,
+                          showInput: true,
+                          fullWidth: true,
+                        },
+                      }}
+                    />
                     {formData.index_options !== 'positions' &&
                       formData.index_options !== 'offsets' && (
                         <>
@@ -381,27 +382,23 @@ export const TextType = React.memo(({ field }: Props) => {
             description={i18n.translate('xpack.idxMgmt.mappingsEditor.termVectorFieldDescription', {
               defaultMessage: 'Whether term vectors should be stored for an analyzed field.',
             })}
-            direction="column"
             toggleDefaultValue={getDefaultValueToggle('term_vector', field.source)}
           >
             <FormDataProvider pathsToWatch="term_vector">
               {formData => (
                 <>
-                  <EuiFlexGroup alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <UseField
-                        path="term_vector"
-                        config={getFieldConfig('term_vector')}
-                        component={Field}
-                        componentProps={{
-                          euiFieldProps: {
-                            options: PARAMETERS_OPTIONS.term_vector,
-                            style: { minWidth: 300 },
-                          },
-                        }}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                  <UseField
+                    path="term_vector"
+                    config={getFieldConfig('term_vector')}
+                    component={Field}
+                    componentProps={{
+                      euiFieldProps: {
+                        options: PARAMETERS_OPTIONS.term_vector,
+                        style: { minWidth: 300 },
+                        fullWidth: true,
+                      },
+                    }}
+                  />
 
                   {formData.term_vector === 'with_positions_offsets' && (
                     <>

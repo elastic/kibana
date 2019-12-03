@@ -139,7 +139,6 @@ export const SearchAsYouType = React.memo(({ field }: Props) => {
                 defaultMessage: 'Whether term vectors should be stored for an analyzed field.',
               }
             )}
-            direction="column"
             toggleDefaultValue={getDefaultValueToggle('term_vector', field.source)}
           >
             <FormDataProvider pathsToWatch="term_vector">

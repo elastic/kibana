@@ -36,7 +36,6 @@ export const IndexParameter = ({
       defaultMessage: 'Allow the field to be searchable.',
     })}
     formFieldPath="index"
-    direction="column"
   >
     {/* index_options */}
     {hasIndexOptions && (
