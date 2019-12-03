@@ -63,7 +63,7 @@ module.service('savedSearches', function(SavedSearch: SavedSearchType) {
     nouns: 'saved searches',
   };
 
-  savedSearchLoader.urlFor = function(id) {
+  savedSearchLoader.urlFor = function(id: string) {
     return id;
     // return kbnUrl.eval('#/discover/{{id}}', { id: id });
   };

@@ -71,6 +71,7 @@ export interface SavedObjectConfig {
     references: SavedObjectReference[];
   };
   id?: string;
+  init?: () => void;
   indexPattern?: IndexPattern;
   injectReferences?: any;
   mapping?: any;

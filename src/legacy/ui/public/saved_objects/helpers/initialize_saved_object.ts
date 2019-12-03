@@ -32,7 +32,6 @@ export async function intializeSavedObject(
   const esType = config.type;
   // ensure that the esType is defined
   if (!esType) throw new Error('You must define a type name to use SavedObject objects.');
-  const customInit = config.init || _.noop;
 
   if (!savedObject.id) {
     // just assign the defaults and be done
@@ -53,7 +52,9 @@ export async function intializeSavedObject(
     found: !!resp._version,
   };
   await savedObject.applyESResp(respMapped);
+  if (typeof config.init === 'function') {
+    await config.init.call(savedObject);
+  }
 
-  await customInit.call(savedObject);
   return savedObject;
 }
