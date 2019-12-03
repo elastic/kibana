@@ -70,6 +70,16 @@ export type RuleAlertParamsRest = Omit<
   output_index: RuleAlertParams['outputIndex'];
 };
 
+export interface SignalsParams {
+  signalId: string | undefined | null;
+  query: string | undefined | null;
+  status: 'open' | 'closed' | undefined | null;
+}
+
+export type SignalsRestParams = Omit<SignalsParams, 'signalId'> & {
+  signal_id: SignalsParams['signalId'];
+};
+
 export type OutputRuleAlertRest = RuleAlertParamsRest & {
   id: string;
   created_by: string | undefined | null;
@@ -148,6 +158,10 @@ export type RuleAlertType = Alert & {
 
 export interface RulesRequest extends RequestFacade {
   payload: RuleAlertParamsRest;
+}
+
+export interface SignalsRequest extends RequestFacade {
+  payload: SignalsRestParams;
 }
 
 export interface UpdateRulesRequest extends RequestFacade {
