@@ -155,10 +155,10 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       truncateText: true,
     },
     {
-      field: 'description',
-      'data-test-subj': 'connectorsTableCell-description',
+      field: 'name',
+      'data-test-subj': 'connectorsTableCell-name',
       name: i18n.translate(
-        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.descriptionTitle',
+        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.nameTitle',
         {
           defaultMessage: 'Name',
         }

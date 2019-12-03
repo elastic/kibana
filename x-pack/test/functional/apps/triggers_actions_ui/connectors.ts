@@ -25,10 +25,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const serverLogCard = await testSubjects.find('.server-log-card');
       await serverLogCard.click();
 
-      const descriptionInput = await testSubjects.find('descriptionInput');
-      await descriptionInput.click();
-      await descriptionInput.clearValue();
-      await descriptionInput.type('My server log connector');
+      const nameInput = await testSubjects.find('nameInput');
+      await nameInput.click();
+      await nameInput.clearValue();
+      await nameInput.type('My server log connector');
 
       const saveButton = await find.byCssSelector(
         '[data-test-subj="saveActionButton"]:not(disabled)'
@@ -50,10 +50,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const serverLogCard = await testSubjects.find('.server-log-card');
       await serverLogCard.click();
 
-      const descriptionInput = await testSubjects.find('descriptionInput');
-      await descriptionInput.click();
-      await descriptionInput.clearValue();
-      await descriptionInput.type('My server log connector to update');
+      const nameInput = await testSubjects.find('nameInput');
+      await nameInput.click();
+      await nameInput.clearValue();
+      await nameInput.type('My server log connector to update');
 
       const saveButton = await find.byCssSelector(
         '[data-test-subj="saveActionButton"]:not(disabled)'
@@ -75,9 +75,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const deleteConnectorBtn = await testSubjects.find('editConnector');
       await deleteConnectorBtn.click();
 
-      const descriptionInputToUpdate = await testSubjects.find('descriptionInput');
-      await descriptionInputToUpdate.click();
-      await descriptionInputToUpdate.type(' is now updated');
+      const nameInputToUpdate = await testSubjects.find('nameInput');
+      await nameInputToUpdate.click();
+      await nameInputToUpdate.type(' is now updated');
 
       const saveEditButton = await find.byCssSelector(
         '[data-test-subj="saveActionButton"]:not(disabled)'
@@ -101,10 +101,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const serverLogCard = await testSubjects.find('.server-log-card');
       await serverLogCard.click();
 
-      const descriptionInput = await testSubjects.find('descriptionInput');
-      await descriptionInput.click();
-      await descriptionInput.clearValue();
-      await descriptionInput.type('My server log connector to delete');
+      const nameInput = await testSubjects.find('nameInput');
+      await nameInput.click();
+      await nameInput.clearValue();
+      await nameInput.type('My server log connector to delete');
 
       const saveButton = await find.byCssSelector(
         '[data-test-subj="saveActionButton"]:not(disabled)'

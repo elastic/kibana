@@ -51,7 +51,7 @@ export interface ActionConnector {
   secrets: Record<string, any>;
   id: string;
   actionTypeId: string;
-  description: string;
+  name: string;
   referencedByCount?: number;
   config: Record<string, any>;
 }

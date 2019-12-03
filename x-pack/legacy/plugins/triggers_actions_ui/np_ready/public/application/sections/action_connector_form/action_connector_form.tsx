@@ -79,7 +79,7 @@ export const ActionConnectorForm = ({
       description: new Array<string>(),
     };
     validationResult.errors = errors;
-    if (!actionObject.description) {
+    if (!actionObject.name) {
       errors.description.push(
         i18n.translate(
           'xpack.triggersActionsUI.sections.actionConnectorForm.error.requiredNameText',
@@ -110,7 +110,7 @@ export const ActionConnectorForm = ({
           {
             defaultMessage: "Created '{connectorName}'",
             values: {
-              connectorName: savedConnector.description,
+              connectorName: savedConnector.name,
             },
           }
         );
@@ -121,7 +121,7 @@ export const ActionConnectorForm = ({
           {
             defaultMessage: "Updated '{connectorName}'",
             values: {
-              connectorName: savedConnector.description,
+              connectorName: savedConnector.name,
             },
           }
         );
@@ -154,29 +154,29 @@ export const ActionConnectorForm = ({
             </Fragment>
           )}
           <ErrableFormRow
-            id="actionDescription"
+            id="actionName"
             fullWidth
             label={
               <FormattedMessage
-                id="xpack.triggersActionsUI.sections.actionConnectorForm.actionDescritionLabel"
-                defaultMessage="Description"
+                id="xpack.triggersActionsUI.sections.actionConnectorForm.actionNameLabel"
+                defaultMessage="Name"
               />
             }
-            errorKey="description"
-            isShowingErrors={hasErrors && connector.description !== undefined}
+            errorKey="name"
+            isShowingErrors={hasErrors && connector.name !== undefined}
             errors={errors}
           >
             <EuiFieldText
               fullWidth
-              name="description"
-              data-test-subj="descriptionInput"
-              value={connector.description || ''}
+              name="name"
+              data-test-subj="nameInput"
+              value={connector.name || ''}
               onChange={e => {
-                setActionProperty('description', e.target.value);
+                setActionProperty('name', e.target.value);
               }}
               onBlur={() => {
-                if (!connector.description) {
-                  setActionProperty('description', '');
+                if (!connector.name) {
+                  setActionProperty('name', '');
                 }
               }}
             />

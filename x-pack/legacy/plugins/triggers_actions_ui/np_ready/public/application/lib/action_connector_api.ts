@@ -52,7 +52,7 @@ export async function updateActionConnector({
   id,
 }: {
   http: HttpServiceBase;
-  connector: Pick<ActionConnectorWithoutId, 'description' | 'config' | 'secrets'>;
+  connector: Pick<ActionConnectorWithoutId, 'name' | 'config' | 'secrets'>;
   id: string;
 }): Promise<ActionConnector> {
   return await http.put(`${BASE_ACTION_API_PATH}/${id}`, {
