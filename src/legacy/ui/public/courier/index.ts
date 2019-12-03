@@ -18,7 +18,11 @@
  */
 
 export { SearchSource } from './search_source';
-export { searchSourceMock } from './search_source/mocks';
+
+// TODO: Exporting this mock outside of jest tests causes errors because
+// jest is undefined. Need to refactor the mock to be consistent with
+// other NP-style mocks.
+// export { searchSourceMock } from './search_source/mocks';
 
 export {
   addSearchStrategy, // used externally by Rollups
