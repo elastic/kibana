@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../legacy/plugins/ml/common/constants/states';
 
 export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
-  const es = getService('es');
+  const es = getService('legacyEs');
   const log = getService('log');
   const retry = getService('retry');
   const esSupertest = getService('esSupertest');

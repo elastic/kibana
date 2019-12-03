@@ -23,7 +23,6 @@ import { Subscription } from 'rxjs';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
-import '../saved_searches/saved_searches';
 import '../components/field_chooser/field_chooser';
 
 // doc table
@@ -33,7 +32,7 @@ import { getSortForSearchSource } from './doc_table/lib/get_sort_for_search_sour
 import * as columnActions from './doc_table/actions/columns';
 
 import indexTemplate from './discover.html';
-import { showOpenSearchPanel } from '../top_nav/show_open_search_panel';
+import { showOpenSearchPanel } from '../components/top_nav/show_open_search_panel';
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 import '../components/fetch_error';
 import { getPainlessError } from './get_painless_error';
@@ -57,26 +56,31 @@ import {
   vislibSeriesResponseHandlerProvider,
   Vis,
   SavedObjectSaveModal,
+  getAngularModule,
+  ensureDefaultIndexPattern,
 } from '../kibana_services';
 
 const {
+  core,
   chrome,
+  data,
   docTitle,
-  FilterBarQueryFilterProvider,
+  filterManager,
+  State,
   share,
-  StateProvider,
   timefilter,
   toastNotifications,
-  uiModules,
-  uiRoutes,
-}  = getServices();
+  uiSettings
+} = getServices();
 
-import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
-import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
-import { start as data } from '../../../../data/public/legacy';
+import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
+import { start as dataLP } from '../../../../data/public/legacy';
 import { generateFilters } from '../../../../../../plugins/data/public';
+import { getIndexPatternId } from '../helpers/get_index_pattern_id';
+import { registerTimefilterWithGlobalStateFactory } from '../../../../../ui/public/timefilter/setup_router';
+import { FilterStateManager } from '../../../../data/public/filter/filter_manager';
 
-const { savedQueryService } = data.search.services;
+const { savedQueryService } = data.query.savedQueries;
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -84,21 +88,20 @@ const fetchStatuses = {
   COMPLETE: 'complete',
 };
 
-const app = uiModules.get('apps/discover', [
-  'kibana/url',
-  'kibana/index_patterns'
-]);
+const app = getAngularModule();
+app.run((globalState, $rootScope) => {registerTimefilterWithGlobalStateFactory(
+  timefilter,
+  globalState,
+  $rootScope
+);
+});
 
-uiRoutes
-  .defaults(/^\/discover(\/|$)/, {
+app.config($routeProvider => {
+  const defaults = {
     requireDefaultIndex: true,
     requireUICapability: 'discover.show',
     k7Breadcrumbs: ($route, $injector) =>
-      $injector.invoke(
-        $route.current.params.id
-          ? getSavedSearchBreadcrumbs
-          : getRootBreadcrumbs
-      ),
+      $injector.invoke($route.current.params.id ? getSavedSearchBreadcrumbs : getRootBreadcrumbs),
     badge: uiCapabilities => {
       if (uiCapabilities.discover.save) {
         return undefined;
@@ -111,60 +114,61 @@ uiRoutes
         tooltip: i18n.translate('kbn.discover.badge.readOnly.tooltip', {
           defaultMessage: 'Unable to save searches',
         }),
-        iconType: 'glasses'
+        iconType: 'glasses',
       };
-    }
-  })
-  .when('/discover/:id?', {
+    },
+  };
+  $routeProvider.when('/discover/:id?', {
+    ...defaults,
     template: indexTemplate,
     reloadOnSearch: false,
     resolve: {
-      ip: function (Promise, indexPatterns, config, Private) {
-        const State = Private(StateProvider);
-        return indexPatterns.getCache().then((savedObjects)=> {
-          /**
-           *  In making the indexPattern modifiable it was placed in appState. Unfortunately,
-           *  the load order of AppState conflicts with the load order of many other things
-           *  so in order to get the name of the index we should use, and to switch to the
-           *  default if necessary, we parse the appState with a temporary State object and
-           *  then destroy it immediatly after we're done
-           *
-           *  @type {State}
-           */
-          const state = new State('_a', {});
-
-          const specified = !!state.index;
-          const exists = _.findIndex(savedObjects, o => o.id === state.index) > -1;
-          const id = exists ? state.index : config.get('defaultIndex');
-          state.destroy();
-
+      savedObjects: function (redirectWhenMissing, $route, kbnUrl, Promise, $rootScope) {
+        const indexPatterns = dataLP.indexPatterns.indexPatterns;
+        const savedSearchId = $route.current.params.id;
+        return ensureDefaultIndexPattern(core, dataLP, $rootScope, kbnUrl).then(() => {
           return Promise.props({
-            list: savedObjects,
-            loaded: indexPatterns.get(id),
-            stateVal: state.index,
-            stateValFound: specified && exists
+            ip: indexPatterns.getCache().then((indexPatternList) => {
+              /**
+               *  In making the indexPattern modifiable it was placed in appState. Unfortunately,
+               *  the load order of AppState conflicts with the load order of many other things
+               *  so in order to get the name of the index we should use, and to switch to the
+               *  default if necessary, we parse the appState with a temporary State object and
+               *  then destroy it immediatly after we're done
+               *
+               *  @type {State}
+               */
+              const state = new State('_a', {});
+
+              const id = getIndexPatternId(state.index, indexPatternList, uiSettings.get('defaultIndex'));
+              state.destroy();
+              return Promise.props({
+                list: indexPatternList,
+                loaded: indexPatterns.get(id),
+                stateVal: state.index,
+                stateValFound: !!state.index && id === state.index,
+              });
+            }),
+            savedSearch: getServices().getSavedSearchById(savedSearchId, kbnUrl)
+              .then((savedSearch) => {
+                if (savedSearchId) {
+                  chrome.recentlyAccessed.add(
+                    savedSearch.getFullPath(),
+                    savedSearch.title,
+                    savedSearchId);
+                }
+                return savedSearch;
+              })
+              .catch(redirectWhenMissing({
+                'search': '/discover',
+                'index-pattern': '/management/kibana/objects/savedSearches/' + $route.current.params.id
+              }))
           });
         });
       },
-      savedSearch: function (redirectWhenMissing, savedSearches, $route) {
-        const savedSearchId = $route.current.params.id;
-        return savedSearches.get(savedSearchId)
-          .then((savedSearch) => {
-            if (savedSearchId) {
-              chrome.recentlyAccessed.add(
-                savedSearch.getFullPath(),
-                savedSearch.title,
-                savedSearchId);
-            }
-            return savedSearch;
-          })
-          .catch(redirectWhenMissing({
-            'search': '/discover',
-            'index-pattern': '/management/kibana/objects/savedSearches/' + $route.current.params.id
-          }));
-      }
     }
   });
+});
 
 app.directive('discoverApp', function () {
   return {
@@ -186,12 +190,14 @@ function discoverController(
   config,
   kbnUrl,
   localStorage,
-  uiCapabilities
+  uiCapabilities,
+  getAppState,
+  globalState,
 ) {
   const responseHandler = vislibSeriesResponseHandlerProvider().handler;
   const getUnhashableStates = Private(getUnhashableStatesProvider);
+  const filterStateManager = new FilterStateManager(globalState, getAppState, filterManager);
 
-  const queryFilter = Private(FilterBarQueryFilterProvider);
 
   const inspectorAdapters = {
     requests: new RequestAdapter()
@@ -224,13 +230,14 @@ function discoverController(
   };
 
   // the saved savedSearch
-  const savedSearch = $route.current.locals.savedSearch;
+  const savedSearch = $route.current.locals.savedObjects.savedSearch;
 
   let abortController;
   $scope.$on('$destroy', () => {
     if (abortController) abortController.abort();
     savedSearch.destroy();
     subscriptions.unsubscribe();
+    filterStateManager.destroy();
   });
 
   const $appStatus = $scope.appStatus = this.appStatus = {
@@ -389,7 +396,7 @@ function discoverController(
   $scope.searchSource.setParent(timeRangeSearchSource);
 
   const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
-  docTitle.change(`Discover${pageTitleSuffix}`);
+  chrome.docTitle.change(`Discover${pageTitleSuffix}`);
   const discoverBreadcrumbsTitle = i18n.translate('kbn.discover.discoverBreadcrumbTitle', {
     defaultMessage: 'Discover',
   });
@@ -409,30 +416,16 @@ function discoverController(
 
   const $state = $scope.state = new AppState(getStateDefaults());
 
-  $scope.filters = queryFilter.getFilters();
+  $scope.filters = filterManager.getFilters();
   $scope.screenTitle = savedSearch.title;
 
   $scope.onFiltersUpdated = filters => {
-    // The filters will automatically be set when the queryFilter emits an update event (see below)
-    queryFilter.setFilters(filters);
+    // The filters will automatically be set when the filterManager emits an update event (see below)
+    filterManager.setFilters(filters);
   };
-
-  $scope.applyFilters = filters => {
-    const { timeRangeFilter, restOfFilters } = extractTimeFilter($scope.indexPattern.timeFieldName, filters);
-    queryFilter.addFilters(restOfFilters);
-    if (timeRangeFilter) changeTimeFilter(timefilter, timeRangeFilter);
-
-    $scope.state.$newFilters = [];
-  };
-
-  $scope.$watch('state.$newFilters', (filters = []) => {
-    if (filters.length === 1) {
-      $scope.applyFilters(filters);
-    }
-  });
 
   const getFieldCounts = async () => {
-    // the field counts aren't set until we have the data back,
+    // the field counts aren't set until we have the dataLP back,
     // so we wait for the fetch to be done before proceeding
     if ($scope.fetchStatus === fetchStatuses.COMPLETE) {
       return $scope.fieldCounts;
@@ -539,7 +532,7 @@ function discoverController(
     sampleSize: config.get('discover:sampleSize'),
     timefield: isDefaultTypeIndexPattern($scope.indexPattern) && $scope.indexPattern.timeFieldName,
     savedSearch: savedSearch,
-    indexPatternList: $route.current.locals.ip.list,
+    indexPatternList: $route.current.locals.savedObjects.ip.list,
   };
 
   const shouldSearchOnPageLoad = () => {
@@ -588,22 +581,22 @@ function discoverController(
           if (!angular.equals(sort, currentSort)) $scope.fetch();
         });
 
-        // update data source when filters update
-        subscriptions.add(subscribeWithScope($scope, queryFilter.getUpdates$(), {
+        // update dataLP source when filters update
+        subscriptions.add(subscribeWithScope($scope, filterManager.getUpdates$(), {
           next: () => {
-            $scope.filters = queryFilter.getFilters();
+            $scope.filters = filterManager.getFilters();
             $scope.updateDataSource().then(function () {
               $state.save();
             });
           }
         }));
 
-        // fetch data when filters fire fetch event
-        subscriptions.add(subscribeWithScope($scope, queryFilter.getUpdates$(), {
+        // fetch dataLP when filters fire fetch event
+        subscriptions.add(subscribeWithScope($scope, filterManager.getUpdates$(), {
           next: $scope.fetch
         }));
 
-        // update data source when hitting forward/back and the query changes
+        // update dataLP source when hitting forward/back and the query changes
         $scope.$listen($state, 'fetch_with_changes', function (diff) {
           if (diff.indexOf('query') >= 0) $scope.fetch();
         });
@@ -643,7 +636,7 @@ function discoverController(
           let prev = {};
           const status = {
             UNINITIALIZED: 'uninitialized',
-            LOADING: 'loading', // initial data load
+            LOADING: 'loading', // initial dataLP load
             READY: 'ready', // results came back
             NO_RESULTS: 'none' // no results came back
           };
@@ -714,7 +707,7 @@ function discoverController(
                 savedSearchTitle: savedSearch.title,
               }
             }),
-            'data-test-subj': 'saveSearchSuccess',
+            'dataLP-test-subj': 'saveSearchSuccess',
           });
 
           if (savedSearch.id !== $route.current.params.id) {
@@ -775,7 +768,7 @@ function discoverController(
         } else {
           toastNotifications.addError(error, {
             title: i18n.translate('kbn.discover.errorLoadingData', {
-              defaultMessage: 'Error loading data',
+              defaultMessage: 'Error loading dataLP',
             }),
           });
         }
@@ -823,10 +816,10 @@ function discoverController(
   function logInspectorRequest() {
     inspectorAdapters.requests.reset();
     const title = i18n.translate('kbn.discover.inspectorRequestDataTitle', {
-      defaultMessage: 'Data',
+      defaultMessage: 'dataLP',
     });
     const description = i18n.translate('kbn.discover.inspectorRequestDescription', {
-      defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
+      defaultMessage: 'This request queries Elasticsearch to fetch the dataLP for the search.',
     });
     inspectorRequest = inspectorAdapters.requests.start(title, { description });
     inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));
@@ -885,7 +878,7 @@ function discoverController(
       .setField('size', $scope.opts.sampleSize)
       .setField('sort', getSortForSearchSource($state.sort, indexPattern))
       .setField('query', !$state.query ? null : $state.query)
-      .setField('filter', queryFilter.getFilters());
+      .setField('filter', filterManager.getFilters());
   });
 
   $scope.setSortOrder = function setSortOrder(sortPair) {
@@ -895,8 +888,8 @@ function discoverController(
   // TODO: On array fields, negating does not negate the combination, rather all terms
   $scope.filterQuery = function (field, values, operation) {
     $scope.indexPattern.popularizeField(field, 1);
-    const newFilters = generateFilters(queryFilter, field, values, operation, $scope.indexPattern.id);
-    return queryFilter.addFilters(newFilters);
+    const newFilters = generateFilters(filterManager, field, values, operation, $scope.indexPattern.id);
+    return filterManager.addFilters(newFilters);
   };
 
   $scope.addColumn = function addColumn(columnName) {
@@ -943,7 +936,7 @@ function discoverController(
       query: '',
       language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
     };
-    queryFilter.removeAll();
+    filterManager.removeAll();
     $state.save();
     $scope.fetch();
   };
@@ -951,8 +944,7 @@ function discoverController(
   const updateStateFromSavedQuery = (savedQuery) => {
     $state.query = savedQuery.attributes.query;
     $state.save();
-
-    queryFilter.setFilters(savedQuery.attributes.filters || []);
+    filterManager.setFilters(savedQuery.attributes.filters || []);
 
     if (savedQuery.attributes.timefilter) {
       timefilter.setTime({
@@ -982,7 +974,6 @@ function discoverController(
       $scope.savedQuery = undefined;
       return;
     }
-
     if (!$scope.savedQuery || newSavedQueryId !== $scope.savedQuery.id) {
       savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
         $scope.$evalAsync(() => {
@@ -992,6 +983,7 @@ function discoverController(
       });
     }
   });
+
 
   async function setupVisualization() {
     // If no timefield has been specified we don't create a histogram of messages
@@ -1055,7 +1047,7 @@ function discoverController(
       loaded: loadedIndexPattern,
       stateVal,
       stateValFound,
-    } = $route.current.locals.ip;
+    } = $route.current.locals.savedObjects.ip;
 
     const ownIndexPattern = $scope.searchSource.getOwnField('index');
 
@@ -1103,12 +1095,12 @@ function discoverController(
   // Block the UI from loading if the user has loaded a rollup index pattern but it isn't
   // supported.
   $scope.isUnsupportedIndexPattern = (
-    !isDefaultTypeIndexPattern($route.current.locals.ip.loaded)
-    && !hasSearchStategyForIndexPattern($route.current.locals.ip.loaded)
+    !isDefaultTypeIndexPattern($route.current.locals.savedObjects.ip.loaded)
+    && !hasSearchStategyForIndexPattern($route.current.locals.savedObjects.ip.loaded)
   );
 
   if ($scope.isUnsupportedIndexPattern) {
-    $scope.unsupportedIndexPatternType = $route.current.locals.ip.loaded.type;
+    $scope.unsupportedIndexPatternType = $route.current.locals.savedObjects.ip.loaded.type;
     return;
   }
 

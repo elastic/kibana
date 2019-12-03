@@ -15,7 +15,7 @@ export async function listConfigurations({ setup }: { setup: Setup }) {
   const { internalClient, indices } = setup;
 
   const params = {
-    index: indices['apm_oss.apmAgentConfigurationIndex']
+    index: indices.apmAgentConfigurationIndex
   };
 
   const resp = await internalClient.search<AgentConfiguration>(params);

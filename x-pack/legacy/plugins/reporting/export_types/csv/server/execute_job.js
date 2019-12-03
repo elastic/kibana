@@ -5,12 +5,12 @@
  */
 
 import { CSV_JOB_TYPE, PLUGIN_ID } from '../../../common/constants';
-import { cryptoFactory, oncePerServer, LevelLogger } from '../../../server/lib';
+import { cryptoFactory, LevelLogger } from '../../../server/lib';
 import { createGenerateCsv } from './lib/generate_csv';
 import { fieldFormatMapFactory } from './lib/field_format_map';
 import { i18n } from '@kbn/i18n';
 
-function executeJobFn(server) {
+export function executeJobFactory(server) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   const crypto = cryptoFactory(server);
   const config = server.config();
@@ -126,5 +126,3 @@ function executeJobFn(server) {
     };
   };
 }
-
-export const executeJobFactory = oncePerServer(executeJobFn);

@@ -23,6 +23,7 @@
 import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import { uiModules } from 'ui/modules';
+import { npSetup } from 'ui/new_platform';
 
 // import the uiExports that we want to "use"
 import 'uiExports/home';
@@ -31,7 +32,6 @@ import 'uiExports/visTypes';
 import 'uiExports/visEditorTypes';
 import 'uiExports/visualize';
 import 'uiExports/savedObjectTypes';
-import 'uiExports/fieldFormats';
 import 'uiExports/fieldFormatEditors';
 import 'uiExports/navbarExtensions';
 import 'uiExports/contextMenuActions';
@@ -60,10 +60,12 @@ import { showAppRedirectNotification } from 'ui/notify';
 import 'leaflet';
 import { localApplicationService } from './local_application_service';
 
+
+npSetup.plugins.kibana_legacy.forwardApp('doc', 'discover', { keepPrefix: true });
+npSetup.plugins.kibana_legacy.forwardApp('context', 'discover', { keepPrefix: true });
 localApplicationService.attachToAngular(routes);
 
 routes.enable();
-
 
 routes
   .otherwise({

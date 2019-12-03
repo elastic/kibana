@@ -11,7 +11,11 @@
 
 import { sum, round } from 'lodash';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { Setup } from '../../../../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../../../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
 import { ChartBase } from '../../../types';
 import { getMetricsProjection } from '../../../../../../common/projections/metrics';
@@ -23,16 +27,7 @@ import {
   METRIC_JAVA_GC_TIME
 } from '../../../../../../common/elasticsearch_fieldnames';
 import { getBucketSize } from '../../../../helpers/get_bucket_size';
-
-const colors = [
-  theme.euiColorVis0,
-  theme.euiColorVis1,
-  theme.euiColorVis2,
-  theme.euiColorVis3,
-  theme.euiColorVis4,
-  theme.euiColorVis5,
-  theme.euiColorVis6
-];
+import { getVizColorForIndex } from '../../../../../../common/viz_colors';
 
 export async function fetchAndTransformGcMetrics({
   setup,
@@ -41,7 +36,7 @@ export async function fetchAndTransformGcMetrics({
   chartBase,
   fieldName
 }: {
-  setup: Setup;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
   serviceName: string;
   serviceNodeName?: string;
   chartBase: ChartBase;
@@ -148,7 +143,7 @@ export async function fetchAndTransformGcMetrics({
       title: label,
       key: label,
       type: chartBase.type,
-      color: colors[i],
+      color: getVizColorForIndex(i, theme),
       overallValue,
       data
     };

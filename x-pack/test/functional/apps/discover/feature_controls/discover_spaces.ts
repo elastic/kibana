@@ -21,9 +21,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
 
   async function setDiscoverTimeRange() {
-    const fromTime = '2015-09-19 06:31:44.000';
-    const toTime = '2015-09-23 18:31:44.000';
-    await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+    await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
   describe('spaces', () => {
