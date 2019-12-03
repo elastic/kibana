@@ -19,7 +19,6 @@
 
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
-import { act } from '@testing-library/react-hooks';
 
 import { I18nProvider } from '@kbn/i18n/react';
 import { EuiButtonGroup } from '@elastic/eui';
@@ -173,10 +172,8 @@ describe('VisLegend Component', () => {
     it('should call unHighlight handler when legend item is unhovered', () => {
       const first = getLegendItems(wrapper).first();
 
-      act(() => {
-        first.simulate('mouseEnter');
-        first.simulate('mouseLeave');
-      });
+      first.simulate('mouseEnter');
+      first.simulate('mouseLeave');
 
       expect(vislibVis.handler.unHighlight).toHaveBeenCalledTimes(1);
     });
