@@ -65,6 +65,7 @@ export class SavedObjectLoader {
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error(e);
+      throw e;
     }
   }
 

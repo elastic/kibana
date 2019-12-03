@@ -49,11 +49,6 @@ export async function hydrateIndexPattern(
     return null;
   }
 
-  try {
-    const indexObj = await indexPatterns.get(index);
-    savedObject.searchSource!.setField('index', indexObj);
-  } catch (e) {
-    throw e;
-  }
-  // If index is not an IndexPattern object at savedObject point, then it's a string id of an index.
+  const indexObj = await indexPatterns.get(index);
+  savedObject.searchSource!.setField('index', indexObj);
 }

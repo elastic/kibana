@@ -71,6 +71,8 @@ export async function applyEsResp(
     await afterESResp.call(savedObject);
     return savedObject;
   } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error(e);
     throw e;
   }
 }
