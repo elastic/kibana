@@ -48,7 +48,15 @@ export default function({ getService }: FtrProviderContext) {
       const { body } = await supertest
         .post(LOGS_SUMMARY_PATH)
         .set(COMMON_HEADERS)
-        .send(logsSummaryRequestRT.encode({ startDate, endDate, bucketSize, query: null }))
+        .send(
+          logsSummaryRequestRT.encode({
+            sourceId: 'default',
+            startDate,
+            endDate,
+            bucketSize,
+            query: null,
+          })
+        )
         .expect(200);
 
       const logSummaryResponse = pipe(

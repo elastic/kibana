@@ -52,25 +52,26 @@ export const initLogsSummaryRoute = ({ framework, sources }: InfraBackendLibs) =
     path: LOGS_SUMMARY_PATH,
     handler: async (req, res) => {
       try {
-        // const space = framework.getSpaceId(req);
-        // FIXME -> Shouldn't this be the active space?
-        const source = await sources.getSourceConfiguration(req, 'default');
         const payload = pipe(
           logsSummaryRequestRT.decode(req.payload),
           fold(throwErrors(Boom.badRequest), identity)
         );
 
+        const { sourceId, startDate, endDate, bucketSize, query } = payload;
+
+        const sourceConfiguration = (await sources.getSourceConfiguration(req, sourceId))
+          .configuration;
+
         const {
           timestamp: timestampField,
           tiebreaker: tiebreakerField,
-        } = source.configuration.fields;
-        const { startDate, endDate, bucketSize, query } = payload;
+        } = sourceConfiguration.fields;
 
         const esResults = await framework.callWithRequest<
           {},
           { log_summary: DateRangeAggregation }
         >(req, 'search', {
-          index: source.configuration.logAlias,
+          index: sourceConfiguration.logAlias,
           body: buildLogSummaryQueryBody({
             startDate,
             endDate,
@@ -105,21 +106,22 @@ export const initLogsSummaryRoute = ({ framework, sources }: InfraBackendLibs) =
     path: LOGS_SUMMARY_HIGHLIGHTS_PATH,
     handler: async (req, res) => {
       try {
-        const source = await sources.getSourceConfiguration(req, 'default');
-
         const payload = pipe(
           logsSummaryHighlightsRequestRT.decode(req.payload),
           fold(throwErrors(Boom.badRequest), identity)
         );
+        const { sourceId, startDate, endDate, bucketSize, query, highlightTerms } = payload;
 
-        const timestampField = source.configuration.fields.timestamp;
-        const tiebreakerField = source.configuration.fields.tiebreaker;
-        const { startDate, endDate, bucketSize, query, highlightTerms } = payload;
+        const sourceConfiguration = (await sources.getSourceConfiguration(req, sourceId))
+          .configuration;
+
+        const timestampField = sourceConfiguration.fields.timestamp;
+        const tiebreakerField = sourceConfiguration.fields.tiebreaker;
 
         const messageFormattingRules = compileFormattingRules(
-          getBuiltinRules(source.configuration.fields.message)
+          getBuiltinRules(sourceConfiguration.fields.message)
         );
-        const requiredFields = getRequiredFields(source.configuration, messageFormattingRules);
+        const requiredFields = getRequiredFields(sourceConfiguration, messageFormattingRules);
 
         const summaries = await Promise.all(
           highlightTerms.map(async highlight => {
@@ -129,7 +131,7 @@ export const initLogsSummaryRoute = ({ framework, sources }: InfraBackendLibs) =
               {},
               { log_summary: DateRangeAggregation }
             >(req, 'search', {
-              index: source.configuration.logAlias,
+              index: sourceConfiguration.logAlias,
               body: buildLogSummaryQueryBody({
                 startDate,
                 endDate,

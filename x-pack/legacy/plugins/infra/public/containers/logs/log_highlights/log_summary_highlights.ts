@@ -33,6 +33,7 @@ export const useLogSummaryHighlights = (
         }
 
         return await fetchLogSummaryHighlights({
+          sourceId,
           startDate: start,
           endDate: end,
           bucketSize,

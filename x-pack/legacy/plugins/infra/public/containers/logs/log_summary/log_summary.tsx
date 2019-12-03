@@ -32,6 +32,7 @@ export const useLogSummary = (
       }
 
       fetchLogSummary({
+        sourceId,
         startDate: bufferStart,
         endDate: bufferEnd,
         bucketSize,

@@ -12,6 +12,7 @@ export const LOGS_SUMMARY_HIGHLIGHTS_PATH = '/api/logs/summary/highlights';
 // const esDate = rt.union([rt.string, rt.number]);
 
 export const logsSummaryRequestRT = rt.type({
+  sourceId: rt.string,
   startDate: rt.number,
   endDate: rt.number,
   bucketSize: rt.number,
