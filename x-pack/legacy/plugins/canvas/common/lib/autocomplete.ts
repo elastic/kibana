@@ -24,7 +24,7 @@ interface BaseSuggestion {
   end: number;
 }
 
-interface FunctionSuggestion extends BaseSuggestion {
+export interface FunctionSuggestion extends BaseSuggestion {
   type: 'function';
   fnDef: CanvasFunction;
 }
@@ -58,7 +58,7 @@ interface FnArgAtPosition {
   parentFn?: string;
   // If this function is a sub-expression function, the context could either be local or it
   // could be the parent's previous function.
-  contextFn?: string;
+  contextFn?: string | null;
 }
 
 // If you parse an expression with the "addMeta" option it completely
@@ -242,6 +242,12 @@ function getFnArgAtPosition(ast: ExpressionASTWithMeta, position: number): FnArg
         ) {
           const result = getFnArgAtPosition(value, position);
           if (!result.argName) {
+            const contextFn =
+              result.fnIndex === 0
+                ? fnIndex > 0
+                  ? ast.node.chain[fnIndex - 1].node.function
+                  : null
+                : result.ast.node.chain[result.fnIndex - 1].node.function;
             return {
               ...result,
               argName,
@@ -249,10 +255,7 @@ function getFnArgAtPosition(ast: ExpressionASTWithMeta, position: number): FnArg
               argStart,
               argEnd,
               parentFn: fn.node.function,
-              contextFn:
-                result.fnIndex === 0
-                  ? ast.node.chain[fnIndex - 1].node.function
-                  : result.ast.node.chain[result.fnIndex - 1].node.function,
+              contextFn,
             };
           }
           return result;
@@ -304,7 +307,7 @@ function getSubFnNameSuggestions(
   fnIndex: number,
   parentFn: string,
   parentFnArgName: string,
-  contextFn?: string
+  contextFn?: string | null
 ): FunctionSuggestion[] {
   // Filter the list of functions by the text at the marker
   const { start, end, node: fn } = ast.node.chain[fnIndex];
@@ -312,18 +315,16 @@ function getSubFnNameSuggestions(
   const matchingFnDefs = specs.filter(({ name }) => textMatches(name, query));
 
   const parentFnDef = getByAlias(specs, parentFn);
-  const matchingArgDef = Object.entries<CanvasArgValue>(parentFnDef.args).find(
-    ([name]) => name === parentFnArgName
-  );
+  const matchingArgDef = getByAlias(parentFnDef.args, parentFnArgName);
 
-  if (!matchingArgDef || !matchingArgDef.length) {
+  if (!matchingArgDef) {
     return [];
   }
 
   const contextFnDef = contextFn ? getByAlias(specs, contextFn) : null;
   const contextFnType = contextFnDef && contextFnDef.type;
 
-  const expectedReturnTypes = (matchingArgDef[1] || {}).types;
+  const expectedReturnTypes = matchingArgDef.types;
 
   const fnDefs = matchingFnDefs.sort((a: CanvasFunction, b: CanvasFunction) => {
     const aScore = getScore(a, contextFnType, expectedReturnTypes);
@@ -342,17 +343,24 @@ function getSubFnNameSuggestions(
 
 function getScore(a: CanvasFunction, context: any, returnTypes?: any[] | null) {
   let score = 0;
+  if (!context) {
+    context = 'null';
+  }
   if (a.context && a.context.types) {
     score++;
     if (a.context.types.includes(context)) {
       score++;
     }
+  } else if (!context && a.context && (a.context.types as string[]).includes('null')) {
+    score += 2;
   }
   if (returnTypes && a.type) {
     score++;
     if (returnTypes.length && returnTypes.includes(a.type)) {
       score += 3;
     }
+  } else if (!returnTypes && (!a.type || a.type === 'null')) {
+    score += 4;
   }
 
   return score;
@@ -373,13 +381,7 @@ function getArgNameSuggestions(
   }
 
   // We use the exact text instead of the value because it is always a string and might be quoted
-  const { text, start, end } = fn.arguments[argName][argIndex];
-
-  // Filter the list of args by the text at the marker
-  const query = text.replace(MARKER, '');
-  const matchingArgDefs = Object.entries<CanvasArgValue>(fnDef.args).filter(([name]) =>
-    textMatches(name, query)
-  );
+  const { start, end } = fn.arguments[argName][argIndex];
 
   // Filter the list of args by those which aren't already present (unless they allow multi)
   const argEntries = Object.entries(fn.arguments).map<[string, ExpressionArgASTWithMeta[]]>(
@@ -388,32 +390,21 @@ function getArgNameSuggestions(
     }
   );
 
-  const unusedArgDefs = matchingArgDefs.filter(([matchingArgName, matchingArgDef]) => {
-    if (matchingArgDef.multi) {
-      return true;
+  const unusedArgDefs = Object.entries<CanvasArgValue>(fnDef.args).filter(
+    ([matchingArgName, matchingArgDef]) => {
+      if (matchingArgDef.multi) {
+        return true;
+      }
+      return !argEntries.some(([name, values]) => {
+        return (
+          values.length > 0 &&
+          (name === matchingArgName || (matchingArgDef.aliases || []).includes(name))
+        );
+      });
     }
-    return !argEntries.some(([name, values]) => {
-      return (
-        values.length > 0 &&
-        (name === matchingArgName || (matchingArgDef.aliases || []).includes(name))
-      );
-    });
-  });
-
-  // Sort by whether or not the arg is also the unnamed, then by whether or not the arg name starts
-  // with the text at the marker, then alphabetically
-  const comparator = combinedComparator(
-    unnamedArgComparator,
-    invokeWithProp<string, 'name', CanvasArgValue & { name: string }, number>(
-      startsWithComparator(query),
-      'name'
-    ),
-    invokeWithProp<string, 'name', CanvasArgValue & { name: string }, number>(
-      alphanumericalComparator,
-      'name'
-    )
   );
-  const argDefs = unusedArgDefs.map(([name, arg]) => ({ name, ...arg })).sort(comparator);
+
+  const argDefs = unusedArgDefs.map(([name, arg]) => ({ name, ...arg })).sort(unnamedArgComparator);
 
   return argDefs.map(argDef => {
     return { type: 'argument', text: argDef.name + '=', start, end: end - MARKER.length, argDef };
@@ -443,25 +434,15 @@ function getArgValueSuggestions(
   if (typeof node !== 'string') {
     return [];
   }
-  const query = node.replace(MARKER, '');
   const argOptions = argDef.options ? argDef.options : [];
 
-  let suggestions = [...argOptions];
+  const suggestions = [...argOptions];
 
   if (argDef.default !== undefined) {
     suggestions.push(argDef.default);
   }
 
-  suggestions = uniq(suggestions);
-
-  // Filter the list of suggestions by the text at the marker
-  const filtered = suggestions.filter(option => textMatches(String(option), query));
-
-  // Sort by whether or not the value starts with the text at the marker, then alphabetically
-  const comparator = combinedComparator<any>(startsWithComparator(query), alphanumericalComparator);
-  const sorted = filtered.sort(comparator);
-
-  return sorted.map(value => {
+  return uniq(suggestions).map(value => {
     const text = maybeQuote(value) + ' ';
     return { start, end: end - MARKER.length, type: 'value', text };
   });
@@ -485,42 +466,4 @@ function unnamedArgComparator(a: CanvasArgValue, b: CanvasArgValue): number {
   return (
     (b.aliases && b.aliases.includes('_') ? 1 : 0) - (a.aliases && a.aliases.includes('_') ? 1 : 0)
   );
-}
-
-function alphanumericalComparator(a: any, b: any): number {
-  if (a < b) {
-    return -1;
-  }
-  if (a > b) {
-    return 1;
-  }
-  return 0;
-}
-
-function startsWithComparator(query: string) {
-  return (a: any, b: any) =>
-    (String(b).startsWith(query) ? 1 : 0) - (String(a).startsWith(query) ? 1 : 0);
-}
-
-type Comparator<T> = (a: T, b: T) => number;
-
-function combinedComparator<T>(...comparators: Array<Comparator<T>>): Comparator<T> {
-  return (a: T, b: T) =>
-    comparators.reduce((acc: number, comparator) => {
-      if (acc !== 0) {
-        return acc;
-      }
-      return comparator(a, b);
-    }, 0);
-}
-
-function invokeWithProp<
-  PropType,
-  PropName extends string,
-  ArgType extends { [key in PropName]: PropType },
-  FnReturnType
->(fn: (...args: PropType[]) => FnReturnType, prop: PropName): (...args: ArgType[]) => FnReturnType {
-  return (...args: Array<{ [key in PropName]: PropType }>) => {
-    return fn(...args.map(arg => arg[prop]));
-  };
 }

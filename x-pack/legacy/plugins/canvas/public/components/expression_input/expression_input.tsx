@@ -132,7 +132,23 @@ export class ExpressionInput extends React.Component<Props> {
 
     let wordRange: monacoEditor.Range;
     let aSuggestions;
-    if (context.triggerCharacter === ' ') {
+
+    if (context.triggerCharacter === '{') {
+      const wordUntil = model.getWordAtPosition(position.delta(0, -3));
+      if (wordUntil) {
+        wordRange = new monacoEditor.Range(
+          position.lineNumber,
+          position.column,
+          position.lineNumber,
+          position.column
+        );
+        aSuggestions = getAutocompleteSuggestions(
+          this.props.functionDefinitions,
+          text.substring(0, text.length - lengthAfterPosition) + '}',
+          text.length - lengthAfterPosition
+        );
+      }
+    } else {
       const wordUntil = model.getWordUntilPosition(position);
       wordRange = new monacoEditor.Range(
         position.lineNumber,
@@ -145,26 +161,6 @@ export class ExpressionInput extends React.Component<Props> {
         text,
         text.length - lengthAfterPosition
       );
-    } else if (context.triggerCharacter === '{') {
-      const wordUntil = model.getWordAtPosition(position.delta(0, -3));
-      if (wordUntil) {
-        wordRange = new monacoEditor.Range(
-          position.lineNumber,
-          position.column,
-          position.lineNumber,
-          position.column
-        );
-        // aSuggestions = getAutocompleteSuggestions(
-        //   this.props.functionDefinitions,
-        //   text,
-        //   text.length - lengthAfterPosition
-        // );
-        aSuggestions = getAutocompleteSuggestions(
-          this.props.functionDefinitions,
-          text.substring(0, text.length - lengthAfterPosition) + '}',
-          text.length - lengthAfterPosition
-        );
-      }
     }
 
     if (!aSuggestions) {
@@ -178,7 +174,7 @@ export class ExpressionInput extends React.Component<Props> {
           label: s.argDef.name,
           kind: monacoEditor.languages.CompletionItemKind.Variable,
           documentation: { value: getArgReferenceStr(s.argDef), isTrusted: true },
-          detail: getArgReferenceStr(s.argDef),
+          detail: s.argDef.help,
           insertText: s.text,
           command: {
             title: 'Trigger Suggestion Dialog',
@@ -207,7 +203,7 @@ export class ExpressionInput extends React.Component<Props> {
             value: getFunctionReferenceStr(s.fnDef),
             isTrusted: true,
           },
-          detail: getFunctionReferenceStr(s.fnDef),
+          detail: s.fnDef.help,
           insertText: s.text,
           command: {
             title: 'Trigger Suggestion Dialog',
