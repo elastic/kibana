@@ -19,7 +19,7 @@ def withDefaultPrComments(closure) {
       closure()
     }
 
-    if (!isPr()) {
+    if (!params.ENABLE_GITHUB_PR_COMMENTS || !isPr()) {
       return
     }
 
