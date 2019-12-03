@@ -45,7 +45,7 @@ export class TimelionVisController {
   getInjector() {
     if (!this.injector) {
       const mountpoint = document.createElement('div');
-      mountpoint.setAttribute('style', 'height: 100%; width: 100%;');
+      mountpoint.setAttribute('class', 'visChart');
       this.injector = angular.bootstrap(mountpoint, [innerAngularName]);
       this.el.append(mountpoint);
     }
@@ -89,7 +89,7 @@ export class TimelionVisController {
         this.$scope = this.$rootScope.$new();
         this.$scope.uiState = this.vis.getUiState();
         updateScope();
-        this.el.html(this.$compile(this.vis.type.visConfig.template)(this.$scope));
+        this.el.find('div').append(this.$compile(this.vis.type.visConfig.template)(this.$scope));
         this.$scope.$apply();
       } else {
         updateScope();
