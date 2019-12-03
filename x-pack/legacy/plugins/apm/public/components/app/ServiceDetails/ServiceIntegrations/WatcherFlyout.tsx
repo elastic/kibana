@@ -36,6 +36,7 @@ import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { KibanaLink } from '../../../shared/Links/KibanaLink';
 import { createErrorGroupWatch, Schedule } from './createErrorGroupWatch';
 import { ElasticDocsLink } from '../../../shared/Links/ElasticDocsLink';
+import { PluginsContext } from '../../../../new-platform/plugin';
 
 type ScheduleKey = keyof Schedule;
 
@@ -149,9 +150,13 @@ export class WatcherFlyout extends Component<
     this.setState({ slackUrl: event.target.value });
   };
 
-  public createWatch = () => {
-    const core = this.context;
+  public createWatch = ({
+    apmIndexPatternTitle
+  }: {
+    apmIndexPatternTitle: string;
+  }) => () => {
     const { serviceName } = this.props.urlParams;
+    const core = this.context;
 
     if (!serviceName) {
       return;
@@ -185,10 +190,6 @@ export class WatcherFlyout extends Component<
             value: 24,
             unit: 'h'
           };
-
-    const apmIndexPatternTitle = core.injectedMetadata.getInjectedVar(
-      'apmIndexPatternTitle'
-    ) as string;
 
     return createErrorGroupWatch({
       http: core.http,
@@ -613,20 +614,26 @@ export class WatcherFlyout extends Component<
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButton
-                onClick={this.createWatch}
-                fill
-                disabled={
-                  !this.state.actions.email && !this.state.actions.slack
-                }
-              >
-                {i18n.translate(
-                  'xpack.apm.serviceDetails.enableErrorReportsPanel.createWatchButtonLabel',
-                  {
-                    defaultMessage: 'Create watch'
-                  }
-                )}
-              </EuiButton>
+              <PluginsContext.Consumer>
+                {({ apm }) => {
+                  return (
+                    <EuiButton
+                      onClick={this.createWatch(apm.config)}
+                      fill
+                      disabled={
+                        !this.state.actions.email && !this.state.actions.slack
+                      }
+                    >
+                      {i18n.translate(
+                        'xpack.apm.serviceDetails.enableErrorReportsPanel.createWatchButtonLabel',
+                        {
+                          defaultMessage: 'Create watch'
+                        }
+                      )}
+                    </EuiButton>
+                  );
+                }}
+              </PluginsContext.Consumer>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>
