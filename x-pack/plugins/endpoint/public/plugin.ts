@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin } from 'kibana/public';
+import { Plugin, CoreStart } from 'kibana/public';
 import { IEmbeddableStart } from 'src/plugins/embeddable/public';
 import { ResolverEmbeddableFactory } from './embeddables/resolver';
 
@@ -26,8 +26,7 @@ export class EndpointPlugin
     > {
   public setup() {}
 
-  public start(...args: [unknown, EndpointPluginStartDependencies]) {
-    const [, plugins] = args;
+  public start(_core: CoreStart, plugins: EndpointPluginStartDependencies) {
     const resolverEmbeddableFactory = new ResolverEmbeddableFactory();
     plugins.embeddable.registerEmbeddableFactory(
       resolverEmbeddableFactory.type,

@@ -15,8 +15,7 @@ export function addRoutes(router: IRouter) {
         tags: ['access:resolver'],
       },
     },
-    async function greetingIndex(...passedArgs) {
-      const [, , response] = passedArgs;
+    async function greetingIndex(_context, _request, response) {
       return response.ok({
         body: { hello: 'world' },
         headers: {
