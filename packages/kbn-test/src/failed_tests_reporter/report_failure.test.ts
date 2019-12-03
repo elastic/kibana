@@ -41,7 +41,6 @@ describe('createFailureIssue()', () => {
         name: 'test name',
         time: '2018-01-01T01:00:00Z',
       },
-      log,
       api
     );
 
@@ -101,7 +100,6 @@ describe('updateFailureIssue()', () => {
           <!-- kibanaCiData = {"failed-test":{"test.failCount":10}} -->"
         `,
       },
-      log,
       api
     );
 
