@@ -18,12 +18,12 @@
  */
 
 import { getVisData } from '../lib/get_vis_data';
-import { visSchema } from './post_vis_schema';
+import { visPayload } from './post_vis_schema';
 import Boom from 'boom';
 import Joi from 'joi';
 
 const requestPayloadSchema = {
-  payload: Joi.object({ ...visSchema })
+  payload: Joi.object({ ...visPayload })
 };
 export const visDataRoutes = server => {
   server.route({

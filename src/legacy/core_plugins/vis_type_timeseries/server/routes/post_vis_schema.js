@@ -18,7 +18,6 @@
  */
 
 import Joi from 'joi';
-const stringOptional = Joi.string().allow('').optional();
 const stringOptionalNullable = Joi.string().allow('', null).optional();
 const stringRequired = Joi.string().allow('').required();
 const arrayNullable = Joi.array().allow(null);
@@ -31,137 +30,164 @@ const queryObject = Joi.object({
   query: Joi.string().allow(''),
 });
 
-export const visSchema = {
+const annotationsItems = Joi.object({
+  color: stringOptionalNullable,
+  fields: stringOptionalNullable,
+  hidden: Joi.boolean().optional(),
+  icon: stringOptionalNullable,
+  id: stringOptionalNullable,
+  ignore_global_filters: numberIntegerOptional,
+  ignore_panel_filters: numberIntegerOptional,
+  index_pattern: stringOptionalNullable,
+  query_string: queryObject.optional(),
+  template: stringOptionalNullable,
+  time_field: stringOptionalNullable,
+});
+
+const backgroundColorRulesItems = Joi.object({
+  value: Joi.number().allow(null).optional(),
+  id: stringOptionalNullable,
+  background_color: stringOptionalNullable,
+  color: stringOptionalNullable
+});
+
+const gaugeColorRulesItems = Joi.object({
+  gauge: stringOptionalNullable,
+  id: stringOptionalNullable,
+  operator: stringOptionalNullable,
+  value: Joi.number(),
+});
+const metricsItems = Joi.object({
+  field: stringOptionalNullable,
+  id: stringRequired,
+  metric_agg: stringOptionalNullable,
+  numerator: stringOptionalNullable,
+  denominator: stringOptionalNullable,
+  sigma: stringOptionalNullable,
+  type: stringRequired,
+  value: stringOptionalNullable,
+  values: Joi.array()
+    .items(Joi.string().allow('', null))
+    .allow(null)
+    .optional()
+});
+
+const splitFiltersItems = Joi.object({
+  id: stringOptionalNullable,
+  color: stringOptionalNullable,
+  filter: Joi.object({
+    language: Joi.string().allow(''),
+    query: Joi.string().allow('')
+  }).optional(),
+  label: stringOptionalNullable
+});
+
+const seriesItems = Joi.object({
+  aggregate_by: stringOptionalNullable,
+  aggregate_function: stringOptionalNullable,
+  axis_position: stringRequired,
+  axis_max: stringOptionalNullable,
+  axis_min: stringOptionalNullable,
+  chart_type: stringRequired,
+  color: stringRequired,
+  color_rules: Joi.array()
+    .items(Joi.object({
+      value: numberOptional,
+      id: stringRequired,
+      text: stringOptionalNullable,
+      operator: stringOptionalNullable
+    })).optional(),
+  fill: numberOptional,
+  filter: Joi.object({
+    query: stringRequired,
+    language: stringOptionalNullable,
+  }).optional(),
+  formatter: stringRequired,
+  hide_in_legend: numberIntegerOptional,
+  hidden: Joi.boolean().optional(),
+  id: stringRequired,
+  label: stringOptionalNullable,
+  line_width: numberOptional,
+  metrics: Joi.array()
+    .items(metricsItems),
+  offset_time: stringOptionalNullable,
+  override_index_pattern: numberOptional,
+  point_size: numberRequired,
+  separate_axis: numberIntegerOptional,
+  seperate_axis: numberIntegerOptional,
+  series_index_pattern: stringOptionalNullable,
+  series_time_field: stringOptionalNullable,
+  series_interval: stringOptionalNullable,
+  series_drop_last_bucket: numberIntegerOptional,
+  split_color_mode: stringOptionalNullable,
+  split_filters: Joi.array()
+    .items(splitFiltersItems).optional(),
+  split_mode: stringRequired,
+  stacked: stringRequired,
+  steps: numberIntegerOptional,
+  terms_field: stringOptionalNullable,
+  terms_order_by: stringOptionalNullable,
+  terms_size: stringOptionalNullable,
+  terms_direction: stringOptionalNullable,
+  terms_include: stringOptionalNullable,
+  terms_exclude: stringOptionalNullable,
+  time_range_mode: stringOptionalNullable,
+  trend_arrows: numberOptional,
+  type: stringOptionalNullable,
+  value_template: stringOptionalNullable,
+  var_name: stringOptionalNullable
+});
+
+export const visPayload = {
   filters: arrayNullable,
   panels: Joi.array()
     .items(Joi.object({
       annotations: Joi.array()
-        .items(Joi.object({
-          color: stringOptional,
-          fields: stringOptional,
-          icon: stringOptional,
-          id: stringOptional,
-          ignore_global_filters: numberIntegerOptional, // allow only 0 and 1
-          ignore_panel_filters: numberIntegerOptional, // allow only 0 and 1
-          index_pattern: stringOptional,
-          query_string: queryObject.optional(),
-          template: stringOptionalNullable,
-          time_field: stringOptional,
-        })).optional(),
+        .items(annotationsItems).optional(),
       axis_formatter: stringRequired,
       axis_position: stringRequired,
       axis_scale: stringRequired,
-      axis_min: numberOptional,
-      axis_max: numberOptional,
+      axis_min: stringOptionalNullable,
+      axis_max: stringOptionalNullable,
       bar_color_rules: arrayNullable.optional(),
-      background_color: stringOptional,
-      background_color_rules: Joi.array().items(Joi.object({
-        id: stringOptional,
-      })).optional(),
-      default_index_pattern: stringRequired,
-      default_timefield: stringRequired,
-      drilldown_url: stringOptional,
+      background_color: stringOptionalNullable,
+      background_color_rules: Joi.array()
+        .items(backgroundColorRulesItems).optional(),
+      default_index_pattern: stringOptionalNullable,
+      default_timefield: stringOptionalNullable,
+      drilldown_url: stringOptionalNullable,
       drop_last_bucket: numberIntegerOptional,
-      filter: stringOptional,
-      // Gauge
+      filter: Joi.alternatives(
+        stringOptionalNullable,
+        Joi.object({
+          language: stringOptionalNullable,
+          query: stringOptionalNullable
+        })),
       gauge_color_rules: Joi.array()
-        .items(Joi.object({
-          gauge: stringOptional,
-          id: stringOptional,
-          operator: stringOptional,
-          value: Joi.number(),
-        })
-        ).optional(),
-      gauge_width: numberOptional,
-      gauge_inner_width: numberOptional,
-      gauge_style: stringOptional,
-      gauge_max: stringOptional,
-      // general
+        .items(gaugeColorRulesItems).optional(),
+      gauge_width: stringOptionalNullable,
+      gauge_inner_color: stringOptionalNullable,
+      gauge_inner_width: Joi.alternatives(stringOptionalNullable, numberIntegerOptional),
+      gauge_style: stringOptionalNullable,
+      gauge_max: stringOptionalNullable,
       id: stringRequired,
       ignore_global_filters: numberOptional,
       index_pattern: stringRequired,
       interval: stringRequired,
       isModelInvalid: Joi.boolean().optional(),
-      // unknown
-      legend_position: stringOptional,
-      markdown: stringOptional,
+      legend_position: stringOptionalNullable,
+      markdown: stringOptionalNullable,
       markdown_scrollbars: numberIntegerOptional,
       markdown_openLinksInNewTab: numberIntegerOptional,
-      markdown_vertical_align: stringOptional,
-      markdown_less: stringOptional,
-      // table ??
-      pivot_id: stringOptional,
-      pivot_label: stringOptional,
-      // general
+      markdown_vertical_align: stringOptionalNullable,
+      markdown_less: stringOptionalNullable,
+      markdown_css: stringOptionalNullable,
+      pivot_id: stringOptionalNullable,
+      pivot_label: stringOptionalNullable,
+      pivot_type: stringOptionalNullable,
+      pivot_rows: stringOptionalNullable,
       series: Joi.array()
-        .items(
-          Joi.object({
-            axis_position: stringRequired,
-            chart_type: stringRequired,
-            color: stringRequired,
-            color_rules: Joi.array()
-              .items(Joi.object({
-                value: numberOptional,
-                id: stringRequired,
-                text: stringOptional,
-                operator: stringOptional
-              })).optional(),
-            fill: numberOptional,
-            filter: Joi.object({
-              query: stringRequired,
-              language: stringOptional,
-            }).optional(),
-            formatter: stringRequired,
-            hidden: Joi.boolean().optional(),
-            id: stringRequired,
-            label: stringOptional,
-            line_width: numberOptional,
-            metrics: Joi.array()
-              .items(
-                Joi.object({
-                  field: stringOptionalNullable,
-                  id: stringRequired,
-                  metric_agg: stringOptional,
-                  numerator: stringOptional,
-                  denominator: stringOptional,
-                  sigma: stringOptional,
-                  type: stringRequired,
-                  values: Joi.array()
-                    .items(Joi.string().allow('', null))
-                    .allow(null)
-                    .optional()
-                })
-              ),
-            offset_time: stringOptional,
-            override_index_pattern: numberOptional,
-            point_size: numberRequired,
-            separate_axis: numberIntegerOptional, // Timeseries, Gauge
-            seperate_axis: numberIntegerOptional, // Table
-            series_index_pattern: stringOptional,
-            series_time_field: stringOptional,
-            series_interval: stringOptionalNullable,
-            series_drop_last_bucket: numberIntegerOptional,
-            split_color_mode: stringOptionalNullable,
-            split_filters: Joi.array()
-              .items(Joi.object({
-                id: stringOptionalNullable,
-                color: stringOptionalNullable,
-                filter: Joi.object({ queryObject }).optional()
-              })).optional(),
-            split_mode: stringRequired,
-            stacked: stringRequired,
-            terms_field: stringOptionalNullable,
-            terms_order_by: stringOptionalNullable,
-            terms_size: stringOptionalNullable,
-            terms_direction: stringOptionalNullable,
-            terms_include: stringOptionalNullable,
-            terms_exclude: stringOptionalNullable,
-            time_range_mode: stringOptionalNullable,
-            trend_arrows: numberOptional,
-            value_template: stringOptionalNullable,
-            var_name: stringOptionalNullable
-          }),
-        ).required(),
+        .items(seriesItems).required(),
       show_grid: numberIntegerRequired,
       show_legend: numberIntegerRequired,
       time_field: stringOptionalNullable,
