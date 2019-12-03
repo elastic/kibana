@@ -9,11 +9,12 @@ import { initRoutes } from './routes';
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
 import { getFlightsSavedObjects } from './sample_data/flights_saved_objects.js';
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects.js';
-import { LICENSE_CHECK_STATE } from '../../../../plugins/licensing/server';
+import { checkLicense } from '../check_license';
+import { watchStatusAndLicenseToInitialize } from	'../../../server/lib/watch_status_and_license_to_initialize';
 
 export class MapPlugin {
   setup(core, plugins, __LEGACY) {
-    const { featuresPlugin, licensing } = plugins;
+    const { featuresPlugin } = plugins;
     let routesInitialized = false;
 
     featuresPlugin.registerFeature({
@@ -43,13 +44,17 @@ export class MapPlugin {
       }
     });
 
-    licensing.license$.subscribe(license => {
-      const { state } = license.check('maps', 'basic');
-      if (state === LICENSE_CHECK_STATE.Valid && !routesInitialized) {
-        routesInitialized = true;
-        initRoutes(__LEGACY, license.uid);
-      }
-    });
+    watchStatusAndLicenseToInitialize(__LEGACY.plugins.xpackMainPlugin, __LEGACY.pluginRef,
+      async license => {
+        if (license && license.maps && !routesInitialized) {
+          routesInitialized = true;
+          initRoutes(__LEGACY, license.uid);
+        }
+      });
+
+    __LEGACY.plugins.xpackMainPlugin.info
+      .feature(APP_ID)
+      .registerLicenseCheckResultsGenerator(checkLicense);
 
     const sampleDataLinkLabel = i18n.translate('xpack.maps.sampleDataLinkLabel', {
       defaultMessage: 'Map'
