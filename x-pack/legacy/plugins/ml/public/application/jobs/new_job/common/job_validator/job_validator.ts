@@ -117,14 +117,14 @@ export class JobValidator {
       this._basicValidationResult$,
       this._asyncValidatorsResult$,
     ]).pipe(
-      map(([basic, asyncS]) => {
+      map(([basicValidationResult, asyncValidatorsResult]) => {
         return {
-          ...basic,
-          ...asyncS,
+          ...basicValidationResult,
+          ...asyncValidatorsResult,
         };
       }),
-      tap(v => {
-        this.latestValidationResult = v;
+      tap(latestValidationResult => {
+        this.latestValidationResult = latestValidationResult;
       })
     );
   }
