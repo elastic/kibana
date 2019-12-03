@@ -34,7 +34,7 @@ export const createShortenUrlRoute = ({
     {
       path: '/api/shorten_url',
       validate: {
-        body: schema.object({ url: schema.string() }, { allowUnknowns: false }),
+        body: schema.object({ url: schema.string() }),
       },
     },
     router.handleLegacyErrors(async function(context, request, response) {
