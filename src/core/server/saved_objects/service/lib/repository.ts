@@ -18,7 +18,7 @@
  */
 
 import { omit } from 'lodash';
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { APICaller } from '../../../elasticsearch/';
 
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import { getSearchDsl } from './search_dsl';
@@ -28,7 +28,6 @@ import { SavedObjectsErrorHelpers } from './errors';
 import { decodeRequestVersion, encodeVersion, encodeHitVersion } from '../../version';
 import { SavedObjectsSchema } from '../../schema';
 import { KibanaMigrator } from '../../migrations';
-import { Config } from '../../../config';
 import { SavedObjectsSerializer, SanitizedSavedObjectDoc, RawDoc } from '../../serialization';
 import {
   SavedObjectsBulkCreateObject,
@@ -42,7 +41,6 @@ import {
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateOptions,
   SavedObjectsDeleteOptions,
-  SavedObjectsDeleteByNamespaceOptions,
 } from '../saved_objects_client';
 import {
   SavedObject,
@@ -53,6 +51,7 @@ import {
   MutatingOperationRefreshSetting,
 } from '../../types';
 import { validateConvertFilterToKueryNode } from './filter_utils';
+import { LegacyConfig } from '../../../legacy/config';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -75,35 +74,57 @@ const isLeft = <L, R>(either: Either<L, R>): either is Left<L> => {
 
 export interface SavedObjectsRepositoryOptions {
   index: string;
-  config: Config;
+  /** @deprecated Will be removed once SavedObjectsSchema is exposed from Core */
+  config: LegacyConfig;
   mappings: IndexMapping;
-  callCluster: CallCluster;
+  callCluster: APICaller;
   schema: SavedObjectsSchema;
   serializer: SavedObjectsSerializer;
   migrator: KibanaMigrator;
   allowedTypes: string[];
-  onBeforeWrite?: (...args: Parameters<CallCluster>) => Promise<void>;
 }
 
-export interface IncrementCounterOptions extends SavedObjectsBaseOptions {
+/**
+ * @public
+ */
+export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOptions {
   migrationVersion?: SavedObjectsMigrationVersion;
+  /** The Elasticsearch Refresh setting for this operation */
+  refresh?: MutatingOperationRefreshSetting;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOptions {
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
 }
 
 const DEFAULT_REFRESH_SETTING = 'wait_for';
 
+/**
+ * See {@link SavedObjectsRepository}
+ *
+ * @public
+ */
+export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedObjectsRepository>;
+
+/**
+ * @public
+ */
 export class SavedObjectsRepository {
   private _migrator: KibanaMigrator;
   private _index: string;
-  private _config: Config;
+  private _config: LegacyConfig;
   private _mappings: IndexMapping;
   private _schema: SavedObjectsSchema;
   private _allowedTypes: string[];
-  private _onBeforeWrite: (...args: Parameters<CallCluster>) => Promise<void>;
-  private _unwrappedCallCluster: CallCluster;
+  private _unwrappedCallCluster: APICaller;
   private _serializer: SavedObjectsSerializer;
 
+  /** @internal */
   constructor(options: SavedObjectsRepositoryOptions) {
     const {
       index,
@@ -114,7 +135,6 @@ export class SavedObjectsRepository {
       serializer,
       migrator,
       allowedTypes = [],
-      onBeforeWrite = () => Promise.resolve(),
     } = options;
 
     // It's important that we migrate documents / mark them as up-to-date
@@ -134,9 +154,7 @@ export class SavedObjectsRepository {
     }
     this._allowedTypes = allowedTypes;
 
-    this._onBeforeWrite = onBeforeWrite;
-
-    this._unwrappedCallCluster = async (...args: Parameters<CallCluster>) => {
+    this._unwrappedCallCluster = async (...args: Parameters<APICaller>) => {
       await migrator.runMigrations();
       return callCluster(...args);
     };
@@ -448,11 +466,11 @@ export class SavedObjectsRepository {
     }
 
     let kueryNode;
+
     try {
-      kueryNode =
-        filter && filter !== ''
-          ? validateConvertFilterToKueryNode(allowedTypes, filter, this._mappings)
-          : null;
+      if (filter) {
+        kueryNode = validateConvertFilterToKueryNode(allowedTypes, filter, this._mappings);
+      }
     } catch (e) {
       if (e.name === 'KQLSyntaxError') {
         throw SavedObjectsErrorHelpers.createBadRequestError('KQLSyntaxError: ' + e.message);
@@ -805,7 +823,7 @@ export class SavedObjectsRepository {
     type: string,
     id: string,
     counterFieldName: string,
-    options: IncrementCounterOptions = {}
+    options: SavedObjectsIncrementCounterOptions = {}
   ) {
     if (typeof type !== 'string') {
       throw new Error('"type" argument must be a string');
@@ -869,16 +887,15 @@ export class SavedObjectsRepository {
     };
   }
 
-  private async _writeToCluster(...args: Parameters<CallCluster>) {
+  private async _writeToCluster(...args: Parameters<APICaller>) {
     try {
-      await this._onBeforeWrite(...args);
       return await this._callCluster(...args);
     } catch (err) {
       throw decorateEsError(err);
     }
   }
 
-  private async _callCluster(...args: Parameters<CallCluster>) {
+  private async _callCluster(...args: Parameters<APICaller>) {
     try {
       return await this._unwrappedCallCluster(...args);
     } catch (err) {
