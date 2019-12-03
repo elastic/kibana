@@ -10,72 +10,72 @@
  border-bottom is always visible, even when mouseovering and changing the background color.
  */
 
-.mappingsEditor {
-  &__fieldsListItem {
-    &--dottedLine {
-      > .mappingsEditor__fieldsListItem__field {
-        border-bottom-style: dashed;
-      }
-    }
+.mappingsEditor__fieldsListItem--dottedLine {
+  > .mappingsEditor__fieldsListItem__field {
+    border-bottom-style: dashed;
+  }
+}
 
-    &__field {
-      border-bottom: $euiBorderThin;
-      margin-top: $euiSizeXS; // [3]
+.mappingsEditor__fieldsListItem__field {
+  border-bottom: $euiBorderThin;
+  margin-top: $euiSizeXS; // [3]
+}
 
-      &:hover {
-        background-color: $euiColorLightestShade;
-        .mappingsEditor__fieldsListItem__actions,
-        .mappingsEditor__fieldsListItem__multiFieldButton {
-          opacity: 1;
-        }
-      }
-
-      &--selected {
-        background-color: $euiColorLightestShade;
-        &:hover {
-          background-color: $euiColorLightestShade;
-        }
-      }
-
-      &--dim {
-        opacity: 0.3;
-
-        &:hover {
-          background-color: initial;
-        }
-      }
-    }
-
-    &__wrapper {
-      padding-left: $euiSizeXS;
-
-      &--indent {
-        padding-left: $euiSize;
-      }
-    }
-
-    &__content {
-      height: $euiSizeXL * 2;
-      position: relative;
-
-      &--indent {
-        padding-left: $euiSizeXL;
-      }
-    }
-
-    &__toggle {
-      padding-left: $euiSizeXS;
-      width: $euiSizeL;
-    }
-
-    &__actions,
-    &__multiFieldButton {
-      opacity: 0;
-      padding-right: $euiSizeS;
-      transition: opacity $euiAnimSpeedNormal $euiAnimSlightResistance;
+.mappingsEditor__fieldsListItem__field--enabled {
+  &:hover {
+    background-color: $euiColorLightestShade;
+    .mappingsEditor__fieldsListItem__actions,
+    .mappingsEditor__fieldsListItem__multiFieldButton {
+      opacity: 1;
     }
   }
+}
 
+.mappingsEditor__fieldsListItem__field--selected {
+  background-color: $euiColorLightestShade;
+  &:hover {
+    background-color: $euiColorLightestShade;
+  }
+}
+
+.mappingsEditor__fieldsListItem__field--dim {
+  opacity: 0.3;
+
+  &:hover {
+    background-color: initial;
+  }
+}
+
+.mappingsEditor__fieldsListItem__wrapper {
+  padding-left: $euiSizeXS;
+}
+
+.mappingsEditor__fieldsListItem__wrapper--indent {
+  padding-left: $euiSize;
+}
+
+.mappingsEditor__fieldsListItem__content {
+  height: $euiSizeXL * 2;
+  position: relative;
+}
+
+.mappingsEditor__fieldsListItem__content --indent {
+  padding-left: $euiSizeXL;
+}
+
+.mappingsEditor__fieldsListItem__toggle {
+  padding-left: $euiSizeXS;
+  width: $euiSizeL;
+}
+
+.mappingsEditor__fieldsListItem__actions,
+.mappingsEditor__fieldsListItem__multiFieldButton {
+  opacity: 0;
+  padding-right: $euiSizeS;
+  transition: opacity $euiAnimSpeedNormal $euiAnimSlightResistance;
+}
+
+.mappingsEditor {
   &__createFieldWrapper {
     background-color: $euiColorLightestShade;
     border-right: $euiBorderThin;
