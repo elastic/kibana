@@ -37,5 +37,4 @@ export { configureAppAngularModule } from 'ui/legacy_compat';
 export { DefaultEditorSize } from 'ui/vis/editor_size';
 // @ts-ignore
 export { timezoneProvider } from 'ui/vis/lib/timezone';
-export { KIBANA_CONTEXT_NAME } from 'src/plugins/expressions/public';
 export { VisParams } from 'ui/vis';

@@ -17,10 +17,11 @@
  * under the License.
  */
 
+import { KIBANA_CONTEXT_NAME } from 'src/plugins/expressions/public';
 import { i18n } from '@kbn/i18n';
 import { TimelionVisualizationDependencies } from '../plugin';
 import { TimeRange, esFilters, esQuery, Query } from '../../../../../plugins/data/public';
-import { timezoneProvider, KIBANA_CONTEXT_NAME, VisParams } from './legacy_imports';
+import { timezoneProvider, VisParams } from './legacy_imports';
 
 interface Stats {
   cacheCount: number;
