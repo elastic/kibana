@@ -26,8 +26,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import useInterval from '@use-it/interval';
 import React, { useEffect, useState } from 'react';
 import { AGENT_POLLING_INTERVAL } from '../../../common/constants/agent';
-import { Agent } from '../../../common/types/domain_data';
-import { Policy } from '../../../scripts/mock_spec/types';
+import { Agent, Policy } from '../../../common/types/domain_data';
 import { AgentHealth } from '../../components/agent_health';
 import { AgentUnenrollProvider } from '../../components/agent_unenroll_provider';
 import { ConnectedLink } from '../../components/navigation/connected_link';
@@ -106,7 +105,7 @@ export const AgentListPage: React.FC<{}> = () => {
   // Fetch policies method
   const fetchPolicies = async () => {
     setIsPoliciesLoading(true);
-    setPolicies(await libs.policies.getAll());
+    setPolicies((await libs.policies.getAll(1, 10000)).list);
     setIsPoliciesLoading(false);
   };
 
@@ -185,8 +184,11 @@ export const AgentListPage: React.FC<{}> = () => {
         defaultMessage: 'Policy',
       }),
       truncateText: true,
-      render: (policyId: string) =>
-        (policies.find(p => p.id === policyId) || ({} as Policy)).name || `Policy: ${policyId}`,
+      render: (policyId: string) => (
+        <ConnectedLink color="primary" path={`/policies/${policyId}`}>
+          {policies.find(p => p.id === policyId)?.name || policyId}
+        </ConnectedLink>
+      ),
     },
     {
       field: 'active',
@@ -252,7 +254,7 @@ export const AgentListPage: React.FC<{}> = () => {
         ) : null}
         <EuiTitle size="l">
           <h1>
-            <FormattedMessage id="xpack.fleet.agentList.pageTitle" defaultMessage="Elastic Fleet" />
+            <FormattedMessage id="xpack.fleet.agentList.pageTitle" defaultMessage="Agents" />
           </h1>
         </EuiTitle>
         <EuiSpacer size="s" />

@@ -9,7 +9,7 @@ import { useLibs } from '../../../../hooks/use_libs';
 import { Pagination } from '../../../../hooks/use_pagination';
 import { ReturnTypeList, ReturnTypeGet } from '../../../../../common/return_types';
 import { EnrollmentApiKey } from '../../../../../common/types/domain_data';
-import { Policy } from '../../../../../scripts/mock_spec/types';
+import { Policy } from '../../../../../common/types/domain_data';
 
 export function useEnrollmentApiKeys(pagination: Pagination) {
   const { enrollmentApiKeys } = useLibs();
@@ -57,9 +57,9 @@ export function usePolicies() {
 
   async function fetchPolicies() {
     try {
-      const data = await policies.getAll();
+      const result = await policies.getAll(1, 10000);
       setState({
-        data,
+        data: result.list,
         isLoading: false,
       });
     } catch (err) {

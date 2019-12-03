@@ -7,7 +7,12 @@
 import { Server } from 'hapi';
 import { HapiFrameworkAdapter } from '../libs/adapters/framework/hapi_framework_adapter';
 import { ServerLibs } from '../libs/types';
-import { createGETPoliciesRoute, createGETPoliciyRoute, createPOSTPoliciesRoute } from './policy';
+import {
+  createGETPoliciesRoute,
+  createGETPoliciyRoute,
+  createPOSTPoliciesRoute,
+  createPUTPoliciesRoute,
+} from './policy';
 
 export function initRestApi(server: Server, libs: ServerLibs) {
   const frameworkAdapter = new HapiFrameworkAdapter(server);
@@ -16,4 +21,5 @@ export function initRestApi(server: Server, libs: ServerLibs) {
   frameworkAdapter.registerRoute(createGETPoliciyRoute(libs));
   frameworkAdapter.registerRoute(createGETPoliciesRoute(libs));
   frameworkAdapter.registerRoute(createPOSTPoliciesRoute(libs));
+  frameworkAdapter.registerRoute(createPUTPoliciesRoute(libs));
 }

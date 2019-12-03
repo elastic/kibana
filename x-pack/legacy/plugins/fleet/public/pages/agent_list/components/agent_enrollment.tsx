@@ -14,6 +14,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiFormRow,
   EuiHorizontalRule,
   EuiSelect,
   EuiSpacer,
@@ -23,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment, useState } from 'react';
-import { Policy } from '../../../../scripts/mock_spec/types';
+import { Policy } from '../../../../common/types/domain_data';
 import { useLibs } from '../../../hooks/use_libs';
 import { EnrollmentApiKeysTable } from './enrollment_api_keys';
 import { useEnrollmentApiKey, useEnrollmentApiKeys } from './enrollment_api_keys/hooks';
@@ -90,23 +91,22 @@ export const AgentEnrollmentFlyout: React.FC<RouterProps> = ({ onClose, policies
   const [apiKeyListVisible, setApiKeyListVisble] = useState(false);
   const renderedPolicySelect = (
     <>
-      <EuiText>
-        <h5>
+      <EuiFormRow
+        label={
           <FormattedMessage
-            id="xpack.fleet.agentEnrollment.selectPolicyTitle"
-            defaultMessage="Select Policy"
+            id="xpack.fleet.agentEnrollment.selectKeyTitle"
+            defaultMessage="Select API key"
           />
-        </h5>
-      </EuiText>
-      <EuiSpacer size="s" />
-      <EuiSelect
-        options={policyOptions}
-        value={selectedApiKeyId || undefined}
-        onChange={e => setSelectedApiKeyId(e.target.value)}
-      />
+        }
+      >
+        <EuiSelect
+          options={policyOptions}
+          value={selectedApiKeyId || undefined}
+          onChange={e => setSelectedApiKeyId(e.target.value)}
+        />
+      </EuiFormRow>
       <EuiSpacer size="m" />
       <EuiButtonEmpty
-        color="text"
         onClick={() => {
           setApiKeyListVisble(!apiKeyListVisible);
         }}
@@ -118,12 +118,12 @@ export const AgentEnrollmentFlyout: React.FC<RouterProps> = ({ onClose, policies
         {apiKeyListVisible ? (
           <FormattedMessage
             id="xpack.fleet.agentEnrollment.hideKeysButton"
-            defaultMessage="Hide ApiKeys"
+            defaultMessage="Hide API keys"
           />
         ) : (
           <FormattedMessage
-            id="xpack.fleet.agentEnrollment.viewKeysButton"
-            defaultMessage="View ApiKeys"
+            id="xpack.fleet.agentEnrollment.manageKeysButton"
+            defaultMessage="Manage API keys"
           />
         )}
       </EuiButtonEmpty>
@@ -133,26 +133,26 @@ export const AgentEnrollmentFlyout: React.FC<RouterProps> = ({ onClose, policies
           <EnrollmentApiKeysTable />
         </>
       )}
+      <EuiSpacer size="m" />
+      <EuiFormRow
+        label={
+          <FormattedMessage
+            id="xpack.fleet.agentEnrollment.enrollIntoSelectionTitle"
+            defaultMessage="Enroll into policy"
+          />
+        }
+      >
+        <EuiSuperSelect
+          options={policies.map(p => ({ value: p.id, inputDisplay: p.name }))}
+          valueOfSelected={selectedPolicy || ''}
+          onChange={value => setSelectedPolicy(value)}
+        />
+      </EuiFormRow>
     </>
   );
 
   const renderedInstructions = apiKey.data && (
     <Fragment>
-      <EuiText>
-        <h5>
-          <FormattedMessage
-            id="xpack.fleet.agentEnrollment.enrollIntoSelectionTitle"
-            defaultMessage="Enroll into policy:"
-          />
-        </h5>
-      </EuiText>
-      <EuiSuperSelect
-        options={policies.map(p => ({ value: p.id, inputDisplay: p.name }))}
-        valueOfSelected={selectedPolicy || ''}
-        onChange={value => setSelectedPolicy(value)}
-      />
-      <EuiSpacer size="s" />
-
       <EuiText>
         <h5>
           <FormattedMessage
@@ -206,8 +206,7 @@ export const AgentEnrollmentFlyout: React.FC<RouterProps> = ({ onClose, policies
   const body = (
     <EuiFlyoutBody>
       {renderedPolicySelect}
-      <EuiHorizontalRule />
-      <EuiSpacer size="l" />
+      <EuiHorizontalRule margin="xl" />
       {renderedInstructions}
     </EuiFlyoutBody>
   );

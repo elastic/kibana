@@ -70,6 +70,7 @@ export class TestingFrameworkAdapter implements FrameworkAdapter {
 
   public registerManagementUI(settings: {
     sectionId?: string;
+    id: string;
     name: string;
     basePath: string;
     visable?: boolean;

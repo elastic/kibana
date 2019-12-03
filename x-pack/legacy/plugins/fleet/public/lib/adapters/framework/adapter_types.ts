@@ -31,6 +31,7 @@ export interface FrameworkAdapter {
   }): void;
   registerManagementUI(settings: {
     sectionId?: string;
+    id: string;
     name: string;
     basePath: string;
     visable?: boolean;

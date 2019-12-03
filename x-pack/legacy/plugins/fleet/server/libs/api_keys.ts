@@ -168,7 +168,7 @@ export class ApiKeyLib {
   public async deleteEnrollmentApiKey(user: FrameworkUser, id: string) {
     const enrollmentApiKey = await this.enrollmentApiKeysRepository.getById(user, id);
     if (!enrollmentApiKey) {
-      throw Boom.notFound('Enrollment Api Key not found');
+      throw Boom.notFound('Enrollment API key not found');
     }
 
     await this.esAdapter.deleteApiKey(this.frameworkLib.getInternalUser(), {

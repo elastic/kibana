@@ -8,6 +8,7 @@ import Boom from 'boom';
 import * as Joi from 'joi';
 import {
   ReturnTypeCreate,
+  ReturnTypeUpdate,
   ReturnTypeGet,
   ReturnTypeList,
 } from '../../../common/types/std_return_format';
@@ -20,7 +21,7 @@ import { ServerLibs } from '../../libs/types';
 
 export const createGETPoliciyRoute = (libs: ServerLibs) => ({
   method: 'GET',
-  path: '/api/ingest/policies/{policyId}',
+  path: '/api/ingest/policy/{policyId}',
   config: {},
   handler: (async (
     request: FrameworkRequest<{ params: { policyId: string } }>
@@ -87,5 +88,34 @@ export const createPOSTPoliciesRoute = (libs: ServerLibs) => ({
     );
 
     return { item: policy, success: true, action: 'created' };
+  }) as FrameworkRouteHandler,
+});
+
+export const createPUTPoliciesRoute = (libs: ServerLibs) => ({
+  method: 'PUT',
+  path: '/api/ingest/policy/{policyId}',
+  config: {
+    validate: {
+      payload: {
+        name: Joi.string().required(),
+        description: Joi.string().optional(),
+      },
+    },
+  },
+  handler: (async (
+    request: FrameworkRequest<{
+      params: { policyId: string };
+      payload: { name: string; description?: string };
+    }>
+  ): Promise<ReturnTypeUpdate<any>> => {
+    if (!request.user || request.user.kind !== 'authenticated') {
+      throw Boom.unauthorized('Only authenticated users can create a policy');
+    }
+    const policy = await libs.policy.update(request.user, request.params.policyId, {
+      name: request.payload.name,
+      description: request.payload.description,
+    });
+
+    return { item: policy, success: true, action: 'updated' };
   }) as FrameworkRouteHandler,
 });
