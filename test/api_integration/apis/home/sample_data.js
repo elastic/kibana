@@ -43,7 +43,6 @@ export default function ({ getService }) {
 
     describe('install', () => {
       it('should return 404 if id does not match any sample data sets', async () => {
-        throw new Error('forced error');
         await supertest
           .post(`/api/sample_data/xxxx`)
           .set('kbn-xsrf', 'kibana')
