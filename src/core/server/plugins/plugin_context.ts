@@ -102,6 +102,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
   plugin: PluginWrapper<TPlugin, TPluginDependencies>
 ): CoreSetup {
   return {
+    capabilities: {
+      registerProvider: deps.capabilities.registerProvider,
+      registerSwitcher: deps.capabilities.registerSwitcher,
+    },
     context: {
       createContextContainer: deps.context.createContextContainer,
     },
@@ -153,6 +157,9 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
   plugin: PluginWrapper<TPlugin, TPluginDependencies>
 ): CoreStart {
   return {
+    capabilities: {
+      resolveCapabilities: deps.capabilities.resolveCapabilities,
+    },
     savedObjects: { getScopedClient: deps.savedObjects.getScopedClient },
   };
 }

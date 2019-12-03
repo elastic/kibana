@@ -44,6 +44,9 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AuthResultParams](./kibana-plugin-server.authresultparams.md) | Result of an incoming request authentication. |
 |  [AuthToolkit](./kibana-plugin-server.authtoolkit.md) | A tool set defining an outcome of Auth interceptor for incoming request. |
 |  [CallAPIOptions](./kibana-plugin-server.callapioptions.md) | The set of options that defines how API call should be made and result be processed. |
+|  [Capabilities](./kibana-plugin-server.capabilities.md) | The read-only set of capabilities available for the current UI session. Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID, and the boolean is a flag indicating if the capability is enabled or disabled. |
+|  [CapabilitiesSetup](./kibana-plugin-server.capabilitiessetup.md) | APIs to manage the [Capabilities](./kibana-plugin-server.capabilities.md) that will be used by the application.<!-- -->Plugins relying on capabilities to toggle some of their features should register them during the setup phase using the <code>registerProvider</code> method.<!-- -->Plugins having the responsibility to restrict capabilities depending on a given context should register their capabilities switcher using the <code>registerSwitcher</code> method.<!-- -->Refers to the methods documentation for complete description and examples. |
+|  [CapabilitiesStart](./kibana-plugin-server.capabilitiesstart.md) | APIs to access the application [Capabilities](./kibana-plugin-server.capabilities.md)<!-- -->. |
 |  [ContextSetup](./kibana-plugin-server.contextsetup.md) | An object that handles registration of context providers and configuring handlers with context. |
 |  [CoreSetup](./kibana-plugin-server.coresetup.md) | Context passed to the plugins <code>setup</code> method. |
 |  [CoreStart](./kibana-plugin-server.corestart.md) | Context passed to the plugins <code>start</code> method. |
@@ -145,6 +148,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AuthenticationHandler](./kibana-plugin-server.authenticationhandler.md) | See [AuthToolkit](./kibana-plugin-server.authtoolkit.md)<!-- -->. |
 |  [AuthHeaders](./kibana-plugin-server.authheaders.md) | Auth Headers map |
 |  [AuthResult](./kibana-plugin-server.authresult.md) |  |
+|  [CapabilitiesProvider](./kibana-plugin-server.capabilitiesprovider.md) | See [CapabilitiesSetup](./kibana-plugin-server.capabilitiessetup.md) |
+|  [CapabilitiesSwitcher](./kibana-plugin-server.capabilitiesswitcher.md) | See [CapabilitiesSetup](./kibana-plugin-server.capabilitiessetup.md) |
 |  [ConfigPath](./kibana-plugin-server.configpath.md) |  |
 |  [ElasticsearchClientConfig](./kibana-plugin-server.elasticsearchclientconfig.md) |  |
 |  [GetAuthHeaders](./kibana-plugin-server.getauthheaders.md) | Get headers to authenticate a user against Elasticsearch. |
