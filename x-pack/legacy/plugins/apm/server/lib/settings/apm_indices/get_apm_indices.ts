@@ -59,12 +59,12 @@ export function getApmIndicesConfig(config: APMConfig): ApmIndicesConfig {
 // }
 
 export async function getApmIndices(
-  core: APMRequestHandlerContext['core'],
+  savedObjectsClient: SavedObjectsClientContract,
   config: APMRequestHandlerContext['config']
 ) {
   try {
     const apmIndicesSavedObject = await getApmIndicesSavedObject(
-      core.savedObjects.client
+      savedObjectsClient
     );
     const apmIndicesConfig = getApmIndicesConfig(config);
     return merge({}, apmIndicesConfig, apmIndicesSavedObject);

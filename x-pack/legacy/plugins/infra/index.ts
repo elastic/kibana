@@ -7,14 +7,14 @@
 import { i18n } from '@kbn/i18n';
 import JoiNamespace from 'joi';
 import { resolve } from 'path';
-import { PluginInitializerContext } from 'src/core/server';
+import { PluginInitializerContext, SavedObjectsClientContract } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import KbnServer from 'src/legacy/server/kbn_server';
 import { getConfigSchema } from './server/kibana.index';
 import { savedObjectMappings } from './server/saved_objects';
 import { plugin, InfraServerPluginDeps } from './server/new_platform_index';
 import { InfraSetup } from '../../../plugins/infra/server';
-import { getApmIndices } from '../apm/server/lib/settings/apm_indices/get_apm_indices';
+import { APMPluginContract } from '../../../plugins/apm/server/plugin';
 
 const APP_ID = 'infra';
 const logsSampleDataLinkLabel = i18n.translate('xpack.infra.sampleDataLinkLabel', {
@@ -103,12 +103,7 @@ export function infra(kibana: any) {
             __internals: legacyServer.newPlatform.__internals,
           },
         },
-        apm: {
-          // NP_NOTE: This needs migrating once APM's getApmIndices() has been ported to NP.
-          // On our side we're using the NP savedObjectsClient, but legacyServer.config() needs to go.
-          getIndices: savedObjectsClient =>
-            getApmIndices({ savedObjectsClient, config: legacyServer.config() }),
-        },
+        apm: plugins.apm as APMPluginContract,
       };
 
       const infraPluginInstance = plugin(initContext);
