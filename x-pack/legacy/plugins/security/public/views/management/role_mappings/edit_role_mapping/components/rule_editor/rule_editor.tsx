@@ -5,18 +5,12 @@
  */
 
 import React, { Component } from 'react';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonEmpty, EuiSpacer, EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 import { RoleMapping } from '../../../../../../../common/model';
-import { FieldRuleEditor } from './field_rule_editor';
-import { AddRuleButton } from './add_rule_button';
-
-import 'brace/mode/json';
-import 'brace/theme/github';
 import { BaseRule } from '../../../../../../../common/model/role_mappings/base_rule';
 import { generateRulesFromRaw } from '../../../../../../../common/model/role_mappings/rule_builder';
-import { RuleGroupEditor } from './rule_group_editor';
-import { BaseRuleGroup } from '../../../../../../../common/model/role_mappings/base_rule_group';
-import { FieldRule } from '../../../../../../../common/model/role_mappings/field_rule';
+import { VisualRuleEditor } from './visual_rule_editor';
+import { AdvancedRuleEditor } from './advanced_rule_editor';
 
 interface Props {
   roleMapping: RoleMapping;
@@ -25,6 +19,9 @@ interface Props {
 
 interface State {
   rules: BaseRule | null;
+  isRuleValid: boolean;
+  showConfirmModeChange: boolean;
+  mode: 'visual' | 'advanced';
 }
 
 export class RuleEditor extends Component<Props, State> {
@@ -32,6 +29,9 @@ export class RuleEditor extends Component<Props, State> {
     super(props);
     this.state = {
       rules: generateRulesFromRaw(props.roleMapping.rules),
+      isRuleValid: true,
+      showConfirmModeChange: false,
+      mode: 'advanced',
     };
   }
 
@@ -44,91 +44,119 @@ export class RuleEditor extends Component<Props, State> {
   }
 
   public render() {
-    if (this.state.rules) {
-      return this.renderRule(this.state.rules, 0, this.onRuleChange, this.onRuleDelete);
-    }
-
     return (
-      <EuiEmptyPrompt
-        title={<h3>No rules defined</h3>}
-        body={<div>Add a rule to control which users should be assigned roles.</div>}
-        actions={
-          <AddRuleButton
-            onClick={newRule => {
-              this.props.onChange({
-                ...this.props.roleMapping,
-                rules: newRule.toRaw(),
-              });
-              this.setState({
-                rules: newRule,
-              });
-            }}
-          />
-        }
-      />
+      <div>
+        {this.getModeToggle()}
+        <EuiSpacer />
+        {this.getEditor()}
+        {this.getConfirmModeChangePrompt()}
+      </div>
     );
   }
 
-  private onRuleChange = (updatedRule: BaseRule) => {
+  private getModeToggle() {
+    switch (this.state.mode) {
+      case 'visual':
+        return (
+          <EuiButtonEmpty
+            size="xs"
+            onClick={() => {
+              this.trySwitchEditorMode('advanced');
+            }}
+            iconType="inputOutput"
+            iconSide="right"
+            style={{ marginLeft: '0px' }}
+          >
+            Switch to advanced editor
+          </EuiButtonEmpty>
+        );
+      case 'advanced':
+        return (
+          <EuiButtonEmpty
+            size="xs"
+            onClick={() => {
+              this.trySwitchEditorMode('visual');
+            }}
+            iconType="inputOutput"
+            iconSide="right"
+            style={{ marginLeft: '0px' }}
+          >
+            Switch to visual editor
+          </EuiButtonEmpty>
+        );
+      default:
+        throw new Error(`Unexpected rule editor mode: ${this.state.mode}`);
+    }
+  }
+
+  private getEditor() {
+    switch (this.state.mode) {
+      case 'visual':
+        return <VisualRuleEditor rules={this.state.rules} onChange={this.onRuleChange} />;
+      case 'advanced':
+        return (
+          <AdvancedRuleEditor
+            rules={this.state.rules}
+            onChange={this.onRuleChange}
+            onValidityChange={this.onValidityChange}
+          />
+        );
+      default:
+        throw new Error(`Unexpected rule editor mode: ${this.state.mode}`);
+    }
+  }
+
+  private getConfirmModeChangePrompt = () => {
+    if (!this.state.showConfirmModeChange) {
+      return null;
+    }
+    return (
+      <EuiOverlayMask>
+        <EuiConfirmModal
+          title={'Switch with invalid rules?'}
+          onCancel={() => this.setState({ showConfirmModeChange: false })}
+          onConfirm={() => this.setState({ mode: 'visual', showConfirmModeChange: false })}
+          cancelButtonText={'Cancel'}
+          confirmButtonText={'Switch anyway'}
+        >
+          <p>
+            The rules defined are not valid, and cannot be translated to the visual editor. You may
+            lost some or all of your changes during the conversion. Do you wish to continue?
+          </p>
+        </EuiConfirmModal>
+      </EuiOverlayMask>
+    );
+  };
+
+  private onRuleChange = (updatedRule: BaseRule | null) => {
     this.props.onChange({
       ...this.props.roleMapping,
-      rules: updatedRule.toRaw(),
+      rules: updatedRule ? updatedRule.toRaw() : {},
     });
     this.setState({
       rules: updatedRule,
     });
   };
 
-  private onRuleDelete = () => {
-    this.props.onChange({
-      ...this.props.roleMapping,
-      rules: {},
-    });
-    this.setState({
-      rules: null,
-    });
+  private onValidityChange = (isRuleValid: boolean) => {
+    this.setState({ isRuleValid });
   };
 
-  private renderRule = (
-    rule: BaseRule,
-    ruleDepth: number,
-    onChange: (updatedRule: BaseRule) => void,
-    onDelete: () => void,
-    extraProps: Record<string, any> = {}
-  ) => {
-    return this.getEditorForRuleType(rule, onChange, onDelete, extraProps, ruleDepth);
-  };
-
-  private getEditorForRuleType(
-    rule: BaseRule,
-    onChange: (updatedRule: BaseRule) => void,
-    onDelete: () => void,
-    extraProps: Record<string, any>,
-    ruleDepth: number
-  ) {
-    switch (rule.getType()) {
-      case 'field':
-        return (
-          <FieldRuleEditor
-            rule={rule as FieldRule}
-            onChange={value => onChange(value)}
-            onDelete={this.onRuleDelete}
-            {...extraProps}
-          />
-        );
-      case 'except':
-      case 'any':
-      case 'all':
-        return (
-          <RuleGroupEditor
-            rule={rule as BaseRuleGroup}
-            ruleDepth={ruleDepth}
-            onChange={value => onChange(value)}
-            onDelete={this.onRuleDelete}
-          />
-        );
+  private trySwitchEditorMode = (newMode: State['mode']) => {
+    switch (newMode) {
+      case 'visual': {
+        if (this.state.isRuleValid) {
+          this.setState({ mode: newMode, isRuleValid: true });
+        } else {
+          this.setState({ showConfirmModeChange: true });
+        }
+        break;
+      }
+      case 'advanced':
+        this.setState({ mode: newMode, isRuleValid: true });
+        break;
       default:
-        return <div>Unsupported rule type: {rule.getType()}</div>;
+        throw new Error(`Unexpected rule editor mode: ${this.state.mode}`);
     }
-  }
+  };
 }

@@ -257,7 +257,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
                 iconSide="right"
                 style={{ marginLeft: '0px' }}
               >
-                Switch to role remplates
+                Switch to role templates
               </EuiButtonEmpty>
             )}
           </EuiText>

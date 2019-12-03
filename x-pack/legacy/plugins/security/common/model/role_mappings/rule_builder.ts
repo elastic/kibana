@@ -17,9 +17,15 @@ export function createRuleForType(
 ) {
   switch (ruleType) {
     case 'field': {
-      const fieldData = ruleDefinition || { field: { username: '*' } };
+      const fieldData = ruleDefinition || { username: '*' };
       const [field, value] = Object.entries(fieldData)[0] as [string, RoleMappingFieldRuleValue];
-      return new FieldRule(isNegated, field, value);
+      const valueType = typeof value;
+      if (value === null || ['string', 'number'].includes(valueType)) {
+        return new FieldRule(isNegated, field, value);
+      }
+      throw new Error(
+        `Invalid value type for field. Expected one of null, string, or number, but found ${valueType} (${value})`
+      );
     }
     case 'all': {
       if (ruleDefinition && !Array.isArray(ruleDefinition)) {
