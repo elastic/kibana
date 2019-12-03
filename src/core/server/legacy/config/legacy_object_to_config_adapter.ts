@@ -70,6 +70,7 @@ export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
       ssl: configValue.ssl,
       keepaliveTimeout: configValue.keepaliveTimeout,
       socketTimeout: configValue.socketTimeout,
+      compression: configValue.compression,
     };
   }
 
