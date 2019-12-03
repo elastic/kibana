@@ -438,10 +438,12 @@ export class VectorLayer extends AbstractLayer {
       return;
     }
 
+    const dynamicStyleFields = dynamicStyleProps.map(dynamicStyleProp => {
+      return dynamicStyleProp.getField().getName();
+    });
+
     const nextMeta = {
-      dynamicStyleFields: dynamicStyleProps.map(dynamicStyleProp => {
-        return dynamicStyleProp.getField().getName();
-      }),
+      dynamicStyleFields: _.uniq(dynamicStyleFields).sort(),
       sourceQuery,
       // TODO include time range?, make this user configurable?
     };
