@@ -56,10 +56,14 @@ function getProps(
     } as any,
     notifications: {} as any,
     overlays: {} as any,
-    inspector: {} as any,
+    inspector: {
+      isAvailable: jest.fn(),
+    } as any,
     SavedObjectFinder: () => null,
     ExitFullScreenButton,
-    uiActions: {} as any,
+    uiActions: {
+      getTriggerCompatibleActions: (() => []) as any,
+    } as any,
   };
 
   const input = getSampleDashboardInput({
@@ -88,7 +92,7 @@ function getProps(
   };
 }
 
-test.skip('renders DashboardViewport', () => {
+test('renders DashboardViewport', () => {
   const { props, options } = getProps();
   const component = mount(
     <I18nProvider>
@@ -117,7 +121,7 @@ test('renders DashboardViewport with no visualizations', () => {
   component.unmount();
 });
 
-test.skip('renders exit full screen button when in full screen mode', async () => {
+test('renders exit full screen button when in full screen mode', async () => {
   const { props, options } = getProps();
   props.container.updateInput({ isFullScreenMode: true });
   const component = mount(

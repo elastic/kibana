@@ -138,7 +138,7 @@ test('DashboardGrid removes panel when removed from container', () => {
   expect(panelElements.length).toBe(1);
 });
 
-test('DashboardGrid renders expanded panel',() => {
+test('DashboardGrid renders expanded panel', () => {
   const { props, options } = prepare();
   const component = mountWithIntl(
     <KibanaContextProvider services={options}>
