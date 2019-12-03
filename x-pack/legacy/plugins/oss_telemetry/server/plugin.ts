@@ -9,26 +9,15 @@ import { PluginSetupContract as TaskManagerPluginSetupContract } from '../../tas
 import { registerCollectors } from './lib/collectors';
 import { registerTasks, scheduleTasks } from './lib/tasks';
 import KbnServer from '../../../../../src/legacy/server/kbn_server';
-
-type UsageCollector = any;
-interface UsageCollectorDefinition {
-  type: string;
-  isReady(): boolean;
-  fetch(): Promise<any>;
-}
+import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
 
 export interface LegacyConfig {
   get: (key: string) => string | number | boolean;
 }
 
 export interface OssTelemetrySetupDependencies {
+  usageCollection: UsageCollectionSetup;
   __LEGACY: {
-    telemetry: {
-      collectorSet: {
-        makeUsageCollector(definition: UsageCollectorDefinition): UsageCollector;
-        register(collector: UsageCollector): void;
-      };
-    };
     config: LegacyConfig;
     xpackMainStatus: { kbnServer: KbnServer };
   };

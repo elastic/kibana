@@ -55,11 +55,6 @@ export const getMockTaskManager = (fetch: any = getMockTaskFetch()) =>
     fetch,
   } as unknown) as TaskManagerPluginSetupContract);
 
-export const getCluster = (cluster: string) => ({
+export const getCluster = () => ({
   callWithInternalUser: getMockCallWithInternal(),
-});
-
-export const getMockCollectorSet = () => ({
-  makeUsageCollector: () => '',
-  register: () => undefined,
 });

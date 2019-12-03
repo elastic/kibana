@@ -54,19 +54,20 @@ const {
   capabilities,
   chrome,
   chromeLegacy,
+  npData,
   data,
   docTitle,
   FilterBarQueryFilterProvider,
   getBasePath,
   toastNotifications,
-  timefilter,
   uiModules,
   uiRoutes,
   visualizations,
   share,
 } = getServices();
 
-const { savedQueryService } = data.search.services;
+const savedQueryService = npData.query.savedQueries;
+const { timefilter } = npData.query.timefilter;
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
@@ -423,6 +424,12 @@ function VisEditor(
     }));
     subscriptions.add(subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
       next: updateTimeRange
+    }));
+
+    subscriptions.add(chrome.getIsVisible$().subscribe(isVisible => {
+      $scope.$evalAsync(() => {
+        $scope.isVisible = isVisible;
+      });
     }));
 
     // update the searchSource when query updates

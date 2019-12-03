@@ -102,6 +102,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
   plugin: PluginWrapper<TPlugin, TPluginDependencies>
 ): CoreSetup {
   return {
+    capabilities: {
+      registerProvider: deps.capabilities.registerProvider,
+      registerSwitcher: deps.capabilities.registerSwitcher,
+    },
     context: {
       createContextContainer: deps.context.createContextContainer,
     },
@@ -122,6 +126,12 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerOnPostAuth: deps.http.registerOnPostAuth,
       basePath: deps.http.basePath,
       isTlsEnabled: deps.http.isTlsEnabled,
+    },
+    savedObjects: {
+      setClientFactory: deps.savedObjects.setClientFactory,
+      addClientWrapper: deps.savedObjects.addClientWrapper,
+      createInternalRepository: deps.savedObjects.createInternalRepository,
+      createScopedRepository: deps.savedObjects.createScopedRepository,
     },
     uiSettings: {
       register: deps.uiSettings.register,
@@ -146,5 +156,10 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
   deps: PluginsServiceStartDeps,
   plugin: PluginWrapper<TPlugin, TPluginDependencies>
 ): CoreStart {
-  return {};
+  return {
+    capabilities: {
+      resolveCapabilities: deps.capabilities.resolveCapabilities,
+    },
+    savedObjects: { getScopedClient: deps.savedObjects.getScopedClient },
+  };
 }

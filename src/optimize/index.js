@@ -66,7 +66,7 @@ export default async (kbnServer, server, config) => {
   const optimizer = new FsOptimizer({
     logWithMetadata: (tags, message, metadata) => server.logWithMetadata(tags, message, metadata),
     uiBundles,
-    discoveredPlugins: newPlatform.__internals.uiPlugins.internal,
+    newPlatformPluginInfo: newPlatform.__internals.uiPlugins.internal,
     profile: config.get('optimize.profile'),
     sourceMaps: config.get('optimize.sourceMaps'),
     workers: config.get('optimize.workers'),

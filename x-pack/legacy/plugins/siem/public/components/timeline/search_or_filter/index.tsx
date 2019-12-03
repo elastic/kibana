@@ -8,9 +8,8 @@ import { getOr, isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
-import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { esFilters } from '../../../../../../../../src/plugins/data/public';
+import { esFilters, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { BrowserFields } from '../../../containers/source';
 import { convertKueryToElasticSearchQuery } from '../../../lib/keury';
 import {
@@ -29,7 +28,7 @@ import { SearchOrFilter } from './search_or_filter';
 
 interface OwnProps {
   browserFields: BrowserFields;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   timelineId: string;
 }
 

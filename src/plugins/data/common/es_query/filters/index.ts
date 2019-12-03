@@ -20,6 +20,9 @@
 import { omit, get } from 'lodash';
 import { Filter } from './meta_filter';
 
+export * from './build_filters';
+export * from './get_filter_params';
+
 export * from './custom_filter';
 export * from './exists_filter';
 export * from './geo_bounding_box_filter';

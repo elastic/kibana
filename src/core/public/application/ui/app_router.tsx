@@ -39,7 +39,7 @@ interface Props {
   redirectTo?: (path: string) => void;
 }
 
-export const AppRouter: React.StatelessComponent<Props> = ({
+export const AppRouter: React.FunctionComponent<Props> = ({
   history,
   redirectTo = (path: string) => (window.location.href = path),
   ...otherProps

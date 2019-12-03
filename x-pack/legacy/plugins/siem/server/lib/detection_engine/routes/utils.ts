@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import { pickBy } from 'lodash/fp';
-import { SignalAlertType, isAlertType, OutputSignalAlertRest, isAlertTypes } from '../alerts/types';
+import { RuleAlertType, isAlertType, OutputRuleAlertRest, isAlertTypes } from '../alerts/types';
 
 export const getIdError = ({
   id,
@@ -26,48 +26,65 @@ export const getIdError = ({
 
 // Transforms the data but will remove any null or undefined it encounters and not include
 // those on the export
-export const transformAlertToSignal = (signal: SignalAlertType): Partial<OutputSignalAlertRest> => {
-  return pickBy<OutputSignalAlertRest>((value: unknown) => value != null, {
-    created_by: signal.createdBy,
-    description: signal.alertTypeParams.description,
-    enabled: signal.enabled,
-    false_positives: signal.alertTypeParams.falsePositives,
-    filter: signal.alertTypeParams.filter,
-    filters: signal.alertTypeParams.filters,
-    from: signal.alertTypeParams.from,
-    id: signal.id,
-    immutable: signal.alertTypeParams.immutable,
-    index: signal.alertTypeParams.index,
-    interval: signal.interval,
-    rule_id: signal.alertTypeParams.ruleId,
-    language: signal.alertTypeParams.language,
-    max_signals: signal.alertTypeParams.maxSignals,
-    name: signal.name,
-    query: signal.alertTypeParams.query,
-    references: signal.alertTypeParams.references,
-    saved_id: signal.alertTypeParams.savedId,
-    severity: signal.alertTypeParams.severity,
-    size: signal.alertTypeParams.size,
-    updated_by: signal.updatedBy,
-    tags: signal.alertTypeParams.tags,
-    to: signal.alertTypeParams.to,
-    type: signal.alertTypeParams.type,
+export const transformAlertToRule = (alert: RuleAlertType): Partial<OutputRuleAlertRest> => {
+  return pickBy<OutputRuleAlertRest>((value: unknown) => value != null, {
+    created_by: alert.createdBy,
+    description: alert.params.description,
+    enabled: alert.enabled,
+    false_positives: alert.params.falsePositives,
+    filter: alert.params.filter,
+    filters: alert.params.filters,
+    from: alert.params.from,
+    id: alert.id,
+    immutable: alert.params.immutable,
+    index: alert.params.index,
+    interval: alert.interval,
+    rule_id: alert.params.ruleId,
+    language: alert.params.language,
+    output_index: alert.params.outputIndex,
+    max_signals: alert.params.maxSignals,
+    risk_score: alert.params.riskScore,
+    name: alert.name,
+    query: alert.params.query,
+    references: alert.params.references,
+    saved_id: alert.params.savedId,
+    meta: alert.params.meta,
+    severity: alert.params.severity,
+    updated_by: alert.updatedBy,
+    tags: alert.params.tags,
+    to: alert.params.to,
+    type: alert.params.type,
+    threats: alert.params.threats,
   });
 };
 
 export const transformFindAlertsOrError = (findResults: { data: unknown[] }): unknown | Boom => {
   if (isAlertTypes(findResults.data)) {
-    findResults.data = findResults.data.map(signal => transformAlertToSignal(signal));
+    findResults.data = findResults.data.map(alert => transformAlertToRule(alert));
     return findResults;
   } else {
     return new Boom('Internal error transforming', { statusCode: 500 });
   }
 };
 
-export const transformOrError = (signal: unknown): Partial<OutputSignalAlertRest> | Boom => {
-  if (isAlertType(signal)) {
-    return transformAlertToSignal(signal);
+export const transformOrError = (alert: unknown): Partial<OutputRuleAlertRest> | Boom => {
+  if (isAlertType(alert)) {
+    return transformAlertToRule(alert);
   } else {
     return new Boom('Internal error transforming', { statusCode: 500 });
+  }
+};
+
+export const transformError = (err: Error & { statusCode?: number }) => {
+  if (Boom.isBoom(err)) {
+    return err;
+  } else {
+    if (err.statusCode != null) {
+      return new Boom(err.message, { statusCode: err.statusCode });
+    } else {
+      // natively return the err and allow the regular framework
+      // to deal with the error when it is a non Boom
+      return err;
+    }
   }
 };

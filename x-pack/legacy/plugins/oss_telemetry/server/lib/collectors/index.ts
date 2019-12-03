@@ -8,5 +8,5 @@ import { registerVisualizationsCollector } from './visualizations/register_usage
 import { OssTelemetrySetupDependencies } from '../../plugin';
 
 export function registerCollectors(deps: OssTelemetrySetupDependencies) {
-  registerVisualizationsCollector(deps.__LEGACY.telemetry.collectorSet, deps.taskManager);
+  registerVisualizationsCollector(deps.usageCollection, deps.taskManager);
 }
