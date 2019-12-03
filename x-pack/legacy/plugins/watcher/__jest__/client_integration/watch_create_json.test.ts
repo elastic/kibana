@@ -24,7 +24,6 @@ describe.skip('<JsonWatchEdit /> create route', () => {
     beforeEach(async () => {
       testBed = await setup();
 
-      // @ts-ignore (remove when react 16.9.0 is released)
       await act(async () => {
         const { component } = testBed;
         await nextTick();
@@ -88,7 +87,6 @@ describe.skip('<JsonWatchEdit /> create route', () => {
           form.setInputValue('nameInput', watch.name);
           form.setInputValue('idInput', watch.id);
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.clickSubmitButton();
             await nextTick();
@@ -137,7 +135,6 @@ describe.skip('<JsonWatchEdit /> create route', () => {
 
           httpRequestsMockHelpers.setSaveWatchResponse(watch.id, undefined, { body: error });
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.clickSubmitButton();
             await nextTick();
@@ -166,7 +163,6 @@ describe.skip('<JsonWatchEdit /> create route', () => {
             watch: { id, type },
           } = WATCH;
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.clickSimulateButton();
             await nextTick();
@@ -227,7 +223,6 @@ describe.skip('<JsonWatchEdit /> create route', () => {
             },
           });
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.clickSimulateButton();
             await nextTick();
