@@ -22,8 +22,10 @@ import globby from 'globby';
 
 import { getFailures } from './get_failures';
 import { GithubApi } from './github_api';
-import { updatedFailureIssue, createFailureIssue } from './report_failure';
+import { updateFailureIssue, createFailureIssue } from './report_failure';
 import { getIssueMetadata } from './issue_metadata';
+import { readTestReport } from './test_report';
+import { mentionGithubIssuesInReport, Update } from './mention_github_issues_in_report';
 
 export function runFailedTestsReporterCli() {
   run(
@@ -67,7 +69,19 @@ export function runFailedTestsReporterCli() {
       });
 
       for (const reportPath of reportPaths) {
-        for (const failure of await getFailures(log, reportPath)) {
+        const report = await readTestReport(reportPath);
+        const updates: Update[] = [];
+
+        for (const { failure, type } of await getFailures(report)) {
+          if (type === 'ignore') {
+            updates.push({
+              classname: failure.classname,
+              name: failure.name,
+              message: 'Failure is likely irrelevant, so an issue was not created or updated',
+            });
+            continue;
+          }
+
           const existingIssue = await githubApi.findFailedTestIssue(
             i =>
               getIssueMetadata(i.body, 'test.class') === failure.classname &&
@@ -75,11 +89,25 @@ export function runFailedTestsReporterCli() {
           );
 
           if (existingIssue) {
-            await updatedFailureIssue(buildUrl, existingIssue, log, githubApi);
-          } else {
-            await createFailureIssue(buildUrl, failure, log, githubApi);
+            const newFailureCount = await updateFailureIssue(buildUrl, existingIssue, githubApi);
+            updates.push({
+              classname: failure.classname,
+              name: failure.name,
+              message: `Updated existing issue: ${existingIssue.html_url}, (fail count: ${newFailureCount})`,
+            });
+            continue;
           }
+
+          const newIssueUrl = await createFailureIssue(buildUrl, failure, githubApi);
+          updates.push({
+            classname: failure.classname,
+            name: failure.name,
+            message: `Created new issue: ${newIssueUrl}`,
+          });
         }
+
+        // mutates report to have mentions of updates made and writes updated report to disk
+        await mentionGithubIssuesInReport(report, updates, log, reportPath);
       }
     },
     {

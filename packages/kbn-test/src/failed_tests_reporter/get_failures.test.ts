@@ -17,14 +17,12 @@
  * under the License.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
-
 import { getFailures } from './get_failures';
-
-const log = new ToolingLog();
+import { parseTestReport } from './test_report';
+import { FTR_REPORT, JEST_REPORT, KARMA_REPORT, MOCHA_REPORT } from './__fixtures__';
 
 it('discovers failures in ftr report', async () => {
-  const failures = await getFailures(log, require.resolve('./__fixtures__/ftr_report.xml'));
+  const failures = getFailures(await parseTestReport(FTR_REPORT));
   expect(failures).toMatchInlineSnapshot(`
     Array [
       Object {
@@ -45,7 +43,7 @@ it('discovers failures in ftr report', async () => {
 });
 
 it('discovers failures in jest report', async () => {
-  const failures = await getFailures(log, require.resolve('./__fixtures__/jest_report.xml'));
+  const failures = getFailures(await parseTestReport(JEST_REPORT));
   expect(failures).toMatchInlineSnapshot(`
     Array [
       Object {
@@ -62,7 +60,7 @@ it('discovers failures in jest report', async () => {
 });
 
 it('discovers failures in karma report', async () => {
-  const failures = await getFailures(log, require.resolve('./__fixtures__/karma_report.xml'));
+  const failures = getFailures(await parseTestReport(KARMA_REPORT));
   expect(failures).toMatchInlineSnapshot(`
     Array [
       Object {
@@ -86,6 +84,6 @@ it('discovers failures in karma report', async () => {
 });
 
 it('discovers failures in mocha report', async () => {
-  const failures = await getFailures(log, require.resolve('./__fixtures__/mocha_report.xml'));
+  const failures = getFailures(await parseTestReport(MOCHA_REPORT));
   expect(failures).toMatchInlineSnapshot(`Array []`);
 });

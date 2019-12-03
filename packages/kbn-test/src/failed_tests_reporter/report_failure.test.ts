@@ -20,7 +20,7 @@
 import dedent from 'dedent';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/dev-utils';
 
-import { createFailureIssue, updatedFailureIssue } from './report_failure';
+import { createFailureIssue, updateFailureIssue } from './report_failure';
 
 jest.mock('./github_api');
 const { GithubApi } = jest.requireMock('./github_api');
@@ -80,7 +80,7 @@ describe('createFailureIssue()', () => {
   });
 });
 
-describe('updatedFailureIssue()', () => {
+describe('updateFailureIssue()', () => {
   it('increments failure count and adds new comment to issue', async () => {
     const log = new ToolingLog();
     const writer = new ToolingLogCollectingWriter();
@@ -88,7 +88,7 @@ describe('updatedFailureIssue()', () => {
 
     const api = new GithubApi();
 
-    await updatedFailureIssue(
+    await updateFailureIssue(
       'https://build-url',
       {
         html_url: 'https://github.com/issues/1234',

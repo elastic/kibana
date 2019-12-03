@@ -17,69 +17,15 @@
  * under the License.
  */
 
-import { promisify } from 'util';
-import Fs from 'fs';
-
-import xml2js from 'xml2js';
 import stripAnsi from 'strip-ansi';
-import { ToolingLog } from '@kbn/dev-utils';
 
-type TestReport =
-  | {
-      testsuites: {
-        testsuite: TestSuite[];
-      };
-    }
-  | {
-      testsuite: TestSuite;
-    };
+import { FailedTestCase, TestReport, makeFailedTestCaseIter } from './test_report';
 
-interface TestSuite {
-  $: {
-    /* ISO8601 timetamp when test suite ran */
-    timestamp: string;
-    /* number of second this tests suite took */
-    time: string;
-    /* number of tests as a string */
-    tests: string;
-    /* number of failed tests as a string */
-    failures: string;
-    /* number of skipped tests as a string */
-    skipped: string;
-  };
-  testcase: TestCase[];
-}
-
-interface TestCase {
-  $: {
-    /* unique test name */
-    name: string;
-    /* somewhat human readable combination of test name and file */
-    classname: string;
-    /* number of seconds this test took */
-    time: string;
-  };
-  /* contents of system-out elements */
-  'system-out'?: string[];
-  /* contents of failure elements */
-  failure?: Array<string | { _: string }>;
-  /* contents of skipped elements */
-  skipped?: string[];
-}
-
-export type TestFailure = TestCase['$'] & {
+export type TestFailure = FailedTestCase['$'] & {
   failure: string;
 };
 
-const readAsync = promisify(Fs.readFile);
-
-const indent = (text: string) =>
-  `  ${text
-    .split('\n')
-    .map(l => `  ${l}`)
-    .join('\n')}`;
-
-const getFailureText = (failure: NonNullable<TestCase['failure']>) => {
+const getFailureText = (failure: FailedTestCase['failure']) => {
   const [failureNode] = failure;
 
   if (failureNode && typeof failureNode === 'object' && typeof failureNode._ === 'string') {
@@ -119,45 +65,22 @@ const isLikelyIrrelevant = ({ name, failure }: TestFailure) => {
   }
 };
 
-export async function getFailures(log: ToolingLog, testReportPath: string) {
-  const xml = await readAsync(testReportPath, 'utf8');
+export function getFailures(report: TestReport) {
+  const failures: Array<{ type: 'ignore' | 'report'; failure: TestFailure }> = [];
 
-  // Parses junit XML files
-  const report: TestReport = await xml2js.parseStringPromise(xml);
+  for (const testCase of makeFailedTestCaseIter(report)) {
+    // unwrap xml weirdness
+    const failure: TestFailure = {
+      ...testCase.$,
+      // Strip ANSI color characters
+      failure: getFailureText(testCase.failure),
+    };
 
-  // Grab the failures. Reporters may report multiple testsuites in a single file.
-  const testSuites = 'testsuites' in report ? report.testsuites.testsuite : [report.testsuite];
-
-  const failures: TestFailure[] = [];
-  for (const testSuite of testSuites) {
-    for (const testCase of testSuite.testcase) {
-      const { failure } = testCase;
-
-      if (!failure) {
-        continue;
-      }
-
-      // unwrap xml weirdness
-      const failureCase: TestFailure = {
-        ...testCase.$,
-        // Strip ANSI color characters
-        failure: getFailureText(failure),
-      };
-
-      if (isLikelyIrrelevant(failureCase)) {
-        log.warning(
-          `Ignoring likely irrelevant failure: ${failureCase.classname} - ${
-            failureCase.name
-          }\n${indent(failureCase.failure)}`
-        );
-        continue;
-      }
-
-      failures.push(failureCase);
-    }
+    failures.push({
+      type: isLikelyIrrelevant(failure) ? 'ignore' : 'report',
+      failure,
+    });
   }
-
-  log.info(`Found ${failures.length} test failures`);
 
   return failures;
 }
