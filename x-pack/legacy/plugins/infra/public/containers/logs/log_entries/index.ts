@@ -29,7 +29,7 @@ type ReceiveActions =
 
 interface ReceiveEntriesAction {
   type: ReceiveActions;
-  payload: LogEntriesStateParams;
+  payload: LogEntriesResponse;
 }
 interface FetchOrErrorAction {
   type: Exclude<Action, ReceiveActions>;
@@ -54,16 +54,19 @@ interface FetchMoreEntriesParams {
   pagesAfterEnd: number | null;
 }
 
-export interface LogEntriesStateParams {
+export interface LogEntriesResponse {
   entries: InfraLogEntry[];
   entriesStart: TimeKey | null;
   entriesEnd: TimeKey | null;
   hasMoreAfterEnd: boolean;
   hasMoreBeforeStart: boolean;
-  isReloading: boolean;
-  isLoadingMore: boolean;
   lastLoadedTime: Date | null;
 }
+
+export type LogEntriesStateParams = {
+  isReloading: boolean;
+  isLoadingMore: boolean;
+} & LogEntriesResponse;
 
 export interface LogEntriesCallbacks {
   fetchNewerEntries: () => Promise<void>;
@@ -110,15 +113,15 @@ const shouldFetchMoreEntries = ({ pagesAfterEnd, pagesBeforeStart }: FetchMoreEn
 };
 
 const useFetchEntriesEffect = (
-  dispatch: Dispatch,
   state: LogEntriesStateParams,
+  dispatch: Dispatch,
   params: FetchEntriesParams
 ) => {
   const { getLogEntriesAround, getLogEntriesBefore, getLogEntriesAfter } = useGraphQLQueries();
 
   const [prevParams, cachePrevParams] = useState(params);
 
-  const runFetchNewEntriesRequest = async () => {
+  const runFetchNewEntriesRequest = useCallback(async () => {
     dispatch({ type: Action.FetchingNewEntries });
     try {
       const payload = await getLogEntriesAround(params);
@@ -126,22 +129,25 @@ const useFetchEntriesEffect = (
     } catch (e) {
       dispatch({ type: Action.ErrorOnNewEntries });
     }
-  };
+  }, [params]);
 
-  const runFetchMoreEntriesRequest = async (direction: ShouldFetchMoreEntries) => {
-    dispatch({ type: Action.FetchingMoreEntries });
-    const getEntriesBefore = direction === ShouldFetchMoreEntries.Before;
-    const getMoreLogEntries = getEntriesBefore ? getLogEntriesBefore : getLogEntriesAfter;
-    try {
-      const payload = await getMoreLogEntries(params);
-      dispatch({
-        type: getEntriesBefore ? Action.ReceiveEntriesBefore : Action.ReceiveEntriesAfter,
-        payload,
-      });
-    } catch (e) {
-      dispatch({ type: Action.ErrorOnMoreEntries });
-    }
-  };
+  const runFetchMoreEntriesRequest = useCallback(
+    async (direction: ShouldFetchMoreEntries) => {
+      dispatch({ type: Action.FetchingMoreEntries });
+      const getEntriesBefore = direction === ShouldFetchMoreEntries.Before;
+      const getMoreLogEntries = getEntriesBefore ? getLogEntriesBefore : getLogEntriesAfter;
+      try {
+        const payload = await getMoreLogEntries(params);
+        dispatch({
+          type: getEntriesBefore ? Action.ReceiveEntriesBefore : Action.ReceiveEntriesAfter,
+          payload,
+        });
+      } catch (e) {
+        dispatch({ type: Action.ErrorOnMoreEntries });
+      }
+    },
+    [params]
+  );
 
   const fetchNewEntriesEffectDependencies = Object.values(
     pick(params, ['sourceId', 'filterQuery', 'timeKey'])
@@ -156,7 +162,7 @@ const useFetchEntriesEffect = (
   const fetchMoreEntriesEffectDependencies = Object.values(
     pick(params, ['pagesAfterEnd', 'pagesBeforeStart'])
   );
-  const fetchMoreEntriesEffect = () => {
+  const fetchMoreEntriesEffect = useCallback(() => {
     const direction = shouldFetchMoreEntries(params);
     switch (direction) {
       case ShouldFetchMoreEntries.Before:
@@ -166,7 +172,7 @@ const useFetchEntriesEffect = (
       default:
         break;
     }
-  };
+  }, [params]);
   useEffect(fetchNewEntriesEffect, fetchNewEntriesEffectDependencies);
   useEffect(fetchMoreEntriesEffect, fetchMoreEntriesEffectDependencies);
 
@@ -182,7 +188,7 @@ export const useLogEntriesState: (
 ) => [LogEntriesStateParams, LogEntriesCallbacks] = dependencies => {
   const [state, dispatch] = useReducer(logEntriesStateReducer, logEntriesInitialState);
 
-  const { fetchNewerEntries } = useFetchEntriesEffect(dispatch, state, {
+  const { fetchNewerEntries } = useFetchEntriesEffect(state, dispatch, {
     ...dependencies,
     sourceId: 'default',
   });

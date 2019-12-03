@@ -5,22 +5,21 @@
  */
 import { ApolloClient } from 'apollo-client';
 import { TimeKey } from '../../../../common/time';
-import { SerializedFilterQuery } from '../../local/log_filter';
 import { logEntriesQuery } from '../../../graphql/log_entries.gql_query';
 import { useApolloClient } from '../../../utils/apollo_context';
-import { LogEntriesState } from '.';
+import { LogEntriesResponse } from '.';
 
 const LOAD_CHUNK_SIZE = 200;
 
 type LogEntriesGetter = (
-  client: ApolloClient<{}> | undefined,
+  client: ApolloClient<{}>,
   countBefore: number,
   countAfter: number
 ) => (params: {
   sourceId: string;
   timeKey: TimeKey | null;
-  filterQuery: SerializedFilterQuery | null;
-}) => Promise<LogEntriesState>;
+  filterQuery: string | null;
+}) => Promise<LogEntriesResponse>;
 
 const getLogEntries: LogEntriesGetter = (client, countBefore, countAfter) => async ({
   sourceId,
@@ -28,7 +27,6 @@ const getLogEntries: LogEntriesGetter = (client, countBefore, countAfter) => asy
   filterQuery,
 }) => {
   if (!timeKey) throw new Error('TimeKey is null');
-  if (!client) throw new Error('Missing Apollo client');
   const result = await client.query({
     query: logEntriesQuery,
     variables: {
@@ -52,7 +50,7 @@ const getLogEntries: LogEntriesGetter = (client, countBefore, countAfter) => asy
     hasMoreAfterEnd: logEntriesAround.hasMoreAfter,
     hasMoreBeforeStart: logEntriesAround.hasMoreBefore,
     lastLoadedTime: new Date(),
-  } as LogEntriesState;
+  };
 };
 
 export const useGraphQLQueries = () => {
