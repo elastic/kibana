@@ -46,6 +46,7 @@ export const ActionTypeMenu = ({ setActionType }: Props) => {
     return (
       <EuiFlexItem key={index}>
         <EuiCard
+          data-test-subj={`${item.actionType.id}-card`}
           icon={<EuiIcon size="xl" type={item.iconClass} />}
           title={item.name}
           description={item.selectMessage}

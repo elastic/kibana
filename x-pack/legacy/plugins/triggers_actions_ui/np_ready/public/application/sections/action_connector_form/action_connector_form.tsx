@@ -44,7 +44,7 @@ export const ActionConnectorForm = ({
     actionTypeRegistry,
   } = useAppDependencies();
 
-  const { loadActions } = useContext(ActionsConnectorsContext);
+  const { reloadConnectors } = useContext(ActionsConnectorsContext);
 
   // hooks
   const [{ connector }, dispatch] = useReducer(connectorReducer, { connector: initialAction });
@@ -70,13 +70,16 @@ export const ActionConnectorForm = ({
     body: { message: string; error: string };
   } | null>(null);
 
+  const actionTypeRegisterd = actionTypeRegistry.get(initialAction.actionTypeId);
+  if (actionTypeRegisterd === null) return null;
+
   function validateBaseProperties(actionObject: ActionConnector) {
     const validationResult = { errors: {} };
     const errors = {
       description: new Array<string>(),
     };
     validationResult.errors = errors;
-    if (!actionObject.description) {
+    if (!actionObject.name) {
       errors.description.push(
         i18n.translate(
           'xpack.triggersActionsUI.sections.actionConnectorForm.error.requiredNameText',
@@ -89,8 +92,6 @@ export const ActionConnectorForm = ({
     return validationResult;
   }
 
-  const actionTypeRegisterd = actionTypeRegistry.get(initialAction.actionTypeId);
-  if (actionTypeRegisterd === null) return null;
   const FieldsComponent = actionTypeRegisterd.actionConnectorFields;
   const errors = {
     ...actionTypeRegisterd.validateConnector(connector).errors,
@@ -98,38 +99,35 @@ export const ActionConnectorForm = ({
   } as IErrorObject;
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
 
-  async function onActionSave(): Promise<any> {
+  async function onActionConnectorSave(): Promise<any> {
     try {
-      let newAction;
+      let message;
+      let savedConnector;
       if (connector.id === undefined) {
-        newAction = await createActionConnector({ http, connector });
-        toastNotifications.addSuccess(
-          i18n.translate(
-            'xpack.triggersActionsUI.sections.actionConnectorForm.saveSuccessNotificationText',
-            {
-              defaultMessage: "Created '{actionName}'",
-              values: {
-                actionName: newAction.description,
-              },
-            }
-          )
+        savedConnector = await createActionConnector({ http, connector });
+        message = i18n.translate(
+          'xpack.triggersActionsUI.sections.actionConnectorForm.saveSuccessNotificationText',
+          {
+            defaultMessage: "Created '{connectorName}'",
+            values: {
+              connectorName: savedConnector.name,
+            },
+          }
         );
       } else {
-        newAction = await updateActionConnector({ http, connector, id: connector.id });
-        toastNotifications.addSuccess(
-          i18n.translate(
-            'xpack.triggersActionsUI.sections.actionConnectorForm.saveSuccessNotificationText',
-            {
-              defaultMessage: "Updated '{actionName}'",
-              values: {
-                actionName: newAction.description,
-              },
-            }
-          )
+        savedConnector = await updateActionConnector({ http, connector, id: connector.id });
+        message = i18n.translate(
+          'xpack.triggersActionsUI.sections.actionConnectorForm.saveSuccessNotificationText',
+          {
+            defaultMessage: "Updated '{connectorName}'",
+            values: {
+              connectorName: savedConnector.name,
+            },
+          }
         );
       }
-
-      return newAction;
+      toastNotifications.addSuccess(message);
+      return savedConnector;
     } catch (error) {
       return {
         error,
@@ -156,29 +154,29 @@ export const ActionConnectorForm = ({
             </Fragment>
           )}
           <ErrableFormRow
-            id="actionDescription"
+            id="actionName"
             fullWidth
             label={
               <FormattedMessage
-                id="xpack.triggersActionsUI.sections.actionConnectorForm.actionDescritionLabel"
-                defaultMessage="Description"
+                id="xpack.triggersActionsUI.sections.actionConnectorForm.actionNameLabel"
+                defaultMessage="Name"
               />
             }
-            errorKey="description"
-            isShowingErrors={hasErrors && connector.description !== undefined}
+            errorKey="name"
+            isShowingErrors={hasErrors && connector.name !== undefined}
             errors={errors}
           >
             <EuiFieldText
               fullWidth
-              name="description"
-              data-test-subj="descriptionInput"
-              value={connector.description || ''}
+              name="name"
+              data-test-subj="nameInput"
+              value={connector.name || ''}
               onChange={e => {
-                setActionProperty('description', e.target.value);
+                setActionProperty('name', e.target.value);
               }}
               onBlur={() => {
-                if (!connector.description) {
-                  setActionProperty('description', '');
+                if (!connector.name) {
+                  setActionProperty('name', '');
                 }
               }}
             />
@@ -254,13 +252,13 @@ export const ActionConnectorForm = ({
               isLoading={isSaving}
               onClick={async () => {
                 setIsSaving(true);
-                const savedAction = await onActionSave();
+                const savedAction = await onActionConnectorSave();
                 setIsSaving(false);
                 if (savedAction && savedAction.error) {
                   return setServerError(savedAction.error);
                 }
                 setFlyoutVisibility(false);
-                loadActions();
+                reloadConnectors();
               }}
             >
               <FormattedMessage

@@ -6,7 +6,6 @@
 
 import Boom from 'boom';
 import { BulkIndexDocumentsParams } from 'elasticsearch';
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { CatAliasesParams } from 'elasticsearch';
 import { CatAllocationParams } from 'elasticsearch';
 import { CatCommonParams } from 'elasticsearch';
@@ -468,6 +467,33 @@ export interface CallAPIOptions {
 }
 
 // @public
+export interface Capabilities {
+    [key: string]: Record<string, boolean | Record<string, boolean>>;
+    catalogue: Record<string, boolean>;
+    management: {
+        [sectionId: string]: Record<string, boolean>;
+    };
+    navLinks: Record<string, boolean>;
+}
+
+// @public
+export type CapabilitiesProvider = () => Partial<Capabilities>;
+
+// @public
+export interface CapabilitiesSetup {
+    registerProvider(provider: CapabilitiesProvider): void;
+    registerSwitcher(switcher: CapabilitiesSwitcher): void;
+}
+
+// @public
+export interface CapabilitiesStart {
+    resolveCapabilities(request: KibanaRequest): Promise<Capabilities>;
+}
+
+// @public
+export type CapabilitiesSwitcher = (request: KibanaRequest, uiCapabilities: Capabilities) => Partial<Capabilities> | Promise<Partial<Capabilities>>;
+
+// @public
 export class ClusterClient implements IClusterClient {
     constructor(config: ElasticsearchClientConfig, log: Logger, getAuthHeaders?: GetAuthHeaders);
     asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest): IScopedClusterClient;
@@ -506,6 +532,8 @@ export type CoreId = symbol;
 // @public
 export interface CoreSetup {
     // (undocumented)
+    capabilities: CapabilitiesSetup;
+    // (undocumented)
     context: ContextSetup;
     // (undocumented)
     elasticsearch: ElasticsearchServiceSetup;
@@ -519,6 +547,8 @@ export interface CoreSetup {
 
 // @public
 export interface CoreStart {
+    // (undocumented)
+    capabilities: CapabilitiesStart;
     // (undocumented)
     savedObjects: SavedObjectsServiceStart;
 }
@@ -742,15 +772,15 @@ export type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser'
 
 // @public
 export interface IUiSettingsClient {
-    get: <T extends SavedObjectAttribute = any>(key: string) => Promise<T>;
-    getAll: <T extends SavedObjectAttribute = any>() => Promise<Record<string, T>>;
+    get: <T = any>(key: string) => Promise<T>;
+    getAll: <T = any>() => Promise<Record<string, T>>;
     getRegistered: () => Readonly<Record<string, UiSettingsParams>>;
-    getUserProvided: <T extends SavedObjectAttribute = any>() => Promise<Record<string, UserProvidedValues<T>>>;
+    getUserProvided: <T = any>() => Promise<Record<string, UserProvidedValues<T>>>;
     isOverridden: (key: string) => boolean;
     remove: (key: string) => Promise<void>;
     removeMany: (keys: string[]) => Promise<void>;
-    set: <T extends SavedObjectAttribute = any>(key: string, value: T) => Promise<void>;
-    setMany: <T extends SavedObjectAttribute = any>(changes: Record<string, T>) => Promise<void>;
+    set: (key: string, value: any) => Promise<void>;
+    setMany: (changes: Record<string, any>) => Promise<void>;
 }
 
 // @public
@@ -1611,8 +1641,10 @@ export class SavedObjectsSchema {
     constructor(schemaDefinition?: SavedObjectsSchemaDefinition);
     // (undocumented)
     getConvertToAliasScript(type: string): string | undefined;
+    // Warning: (ae-forgotten-export) The symbol "LegacyConfig" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
-    getIndexForType(config: Config, type: string): string | undefined;
+    getIndexForType(config: LegacyConfig, type: string): string | undefined;
     // (undocumented)
     isHiddenType(type: string): boolean;
     // (undocumented)
@@ -1713,7 +1745,7 @@ export interface UiSettingsServiceSetup {
 export type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string';
 
 // @public
-export interface UserProvidedValues<T extends SavedObjectAttribute = any> {
+export interface UserProvidedValues<T = any> {
     // (undocumented)
     isOverridden?: boolean;
     // (undocumented)

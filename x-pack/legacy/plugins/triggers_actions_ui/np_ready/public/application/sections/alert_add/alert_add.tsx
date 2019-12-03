@@ -387,8 +387,8 @@ export const AlertAdd = ({ refreshList }: Props) => {
     }
     return [
       {
-        label: val.description,
-        value: val.description,
+        label: val.name,
+        value: val.name,
         id: actionItemId,
       },
     ];
@@ -403,8 +403,8 @@ export const AlertAdd = ({ refreshList }: Props) => {
         }
         const optionsList = connectors
           .filter(field => field.actionTypeId === actionConnector.actionTypeId)
-          .map(({ description, id }) => ({
-            label: description,
+          .map(({ name, id }) => ({
+            label: name,
             key: id,
             id,
           }));
@@ -433,7 +433,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
                   <EuiTitle size="s">
                     <h5>
                       <FormattedMessage
-                        defaultMessage={`Action: ${actionConnector.description}`}
+                        defaultMessage={`Action: ${actionConnector.name}`}
                         id="xpack.triggersActionsUI.sections.alertAdd.selectAlertActionTypeEditTitle"
                       />
                     </h5>

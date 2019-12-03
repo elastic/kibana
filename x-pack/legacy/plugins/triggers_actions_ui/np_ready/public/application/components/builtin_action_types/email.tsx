@@ -167,7 +167,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
         errors={errors}
         isShowingErrors={hasErrors && from !== undefined}
         label={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionAdd.emailAction.fromTextFieldLabel',
+          'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.fromTextFieldLabel',
           {
             defaultMessage: 'From',
           }
@@ -197,7 +197,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
             errors={errors}
             isShowingErrors={hasErrors && host !== undefined}
             label={i18n.translate(
-              'xpack.triggersActionsUI.sections.actionAdd.emailAction.hostTextFieldLabel',
+              'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.hostTextFieldLabel',
               {
                 defaultMessage: 'Host',
               }
@@ -227,7 +227,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
             errors={errors}
             isShowingErrors={hasErrors && port !== undefined}
             label={i18n.translate(
-              'xpack.triggersActionsUI.sections.actionAdd.emailAction.portTextFieldLabel',
+              'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.portTextFieldLabel',
               {
                 defaultMessage: 'Port',
               }
@@ -260,7 +260,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
             errors={errors}
             isShowingErrors={hasErrors && user !== undefined}
             label={i18n.translate(
-              'xpack.triggersActionsUI.sections.actionAdd.emailAction.userTextFieldLabel',
+              'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.userTextFieldLabel',
               {
                 defaultMessage: 'User',
               }
@@ -290,7 +290,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
             errors={errors}
             isShowingErrors={hasErrors && password !== undefined}
             label={i18n.translate(
-              'xpack.triggersActionsUI.sections.actionAdd.emailAction.passwordFieldLabel',
+              'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.passwordFieldLabel',
               {
                 defaultMessage: 'Password',
               }
@@ -337,7 +337,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
         errors={errors}
         isShowingErrors={hasErrors && to !== undefined}
         label={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionAdd.emailAction.recipientTextFieldLabel',
+          'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientTextFieldLabel',
           {
             defaultMessage: 'To',
           }
@@ -376,7 +376,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
         errors={errors}
         isShowingErrors={hasErrors && cc !== undefined}
         label={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionAdd.emailAction.recipientCopyTextFieldLabel',
+          'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientCopyTextFieldLabel',
           {
             defaultMessage: 'Cc',
           }
@@ -415,7 +415,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
         errors={errors}
         isShowingErrors={hasErrors && bcc !== undefined}
         label={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionAdd.emailAction.recipientBccTextFieldLabel',
+          'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientBccTextFieldLabel',
           {
             defaultMessage: 'Bcc',
           }
@@ -454,7 +454,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
         errors={errors}
         isShowingErrors={hasErrors && message !== undefined}
         label={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionAdd.emailAction.subjectTextFieldLabel',
+          'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.subjectTextFieldLabel',
           {
             defaultMessage: 'Subject',
           }
@@ -476,7 +476,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
         errors={errors}
         isShowingErrors={hasErrors && message !== undefined}
         label={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionAdd.emailAction.messageTextAreaFieldLabel',
+          'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.messageTextAreaFieldLabel',
           {
             defaultMessage: 'Message',
           }

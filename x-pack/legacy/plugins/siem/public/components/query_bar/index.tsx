@@ -6,11 +6,12 @@
 
 import { isEqual } from 'lodash/fp';
 import React, { memo, useState, useEffect, useMemo, useCallback } from 'react';
-import { StaticIndexPattern, IndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from 'ui/index_patterns';
 
 import { SavedQuery, SearchBar } from '../../../../../../../src/legacy/core_plugins/data/public';
 import {
   esFilters,
+  IIndexPattern,
   FilterManager,
   Query,
   TimeHistory,
@@ -24,7 +25,7 @@ export interface QueryBarComponentProps {
   dateRangeFrom?: string;
   dateRangeTo?: string;
   hideSavedQuery?: boolean;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   isLoading?: boolean;
   isRefreshPaused?: boolean;
   filterQuery: Query;

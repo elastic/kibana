@@ -144,6 +144,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
   const actionsTableColumns = [
     {
       field: 'actionType',
+      'data-test-subj': 'connectorsTableCell-actionType',
       name: i18n.translate(
         'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actionTypeTitle',
         {
@@ -154,9 +155,10 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       truncateText: true,
     },
     {
-      field: 'description',
+      field: 'name',
+      'data-test-subj': 'connectorsTableCell-name',
       name: i18n.translate(
-        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.descriptionTitle',
+        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.nameTitle',
         {
           defaultMessage: 'Name',
         }
@@ -166,6 +168,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     },
     {
       field: 'referencedByCount',
+      'data-test-subj': 'connectorsTableCell-referencedByCount',
       name: i18n.translate(
         'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.referencedByCountTitle',
         { defaultMessage: 'Attached actions' }
@@ -181,6 +184,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       actions: [
         {
           enabled: () => canSave,
+          'data-test-subj': 'editConnector',
           name: i18n.translate(
             'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.editActionName',
             { defaultMessage: 'Edit' }
@@ -200,6 +204,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
         },
         {
           enabled: () => canDelete,
+          'data-test-subj': 'deleteConnector',
           name: i18n.translate(
             'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionName',
             { defaultMessage: 'Delete' }
@@ -232,7 +237,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
             editFlyoutVisible,
             setEditFlyoutVisibility,
             actionTypesIndex,
-            loadActions,
+            reloadConnectors: loadActions,
           }}
         >
           <EuiInMemoryTable
@@ -242,7 +247,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
             itemId="id"
             columns={actionsTableColumns}
             rowProps={() => ({
-              'data-test-subj': 'row',
+              'data-test-subj': 'connectors-row',
             })}
             cellProps={() => ({
               'data-test-subj': 'cell',
@@ -261,6 +266,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
                 {
                   type: 'field_value_selection',
                   field: 'actionTypeId',
+                  'data-test-subj': 'typeFilterButton',
                   name: i18n.translate(
                     'xpack.triggersActionsUI.sections.actionsConnectorsList.filters.actionTypeIdName',
                     { defaultMessage: 'Type' }

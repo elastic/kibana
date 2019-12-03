@@ -35,9 +35,7 @@ export {
   FieldListInterface,
   IndexPattern,
   IndexPatterns,
-  StaticIndexPattern,
 } from './index_patterns';
-export { QueryStringInput } from './query';
 export { SearchBar, SearchBarProps } from './search';
 export {
   SavedQueryAttributes,
@@ -48,4 +46,4 @@ export {
 /** @public static code */
 export * from '../common';
 export { FilterStateManager } from './filter/filter_manager';
-export { getFromSavedObject, getRoutes } from './index_patterns';
+export { getFromSavedObject, getRoutes, flattenHitWrapper } from './index_patterns';
