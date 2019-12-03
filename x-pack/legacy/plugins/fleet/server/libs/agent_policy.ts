@@ -42,6 +42,7 @@ export class AgentPolicyLib {
       });
       if (agents.length === 0) {
         hasMore = false;
+        break;
       }
 
       const agentUpdate = agents.map(agent => {

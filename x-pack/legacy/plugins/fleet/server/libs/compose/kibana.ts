@@ -23,6 +23,7 @@ import { AgentEventsRepository } from '../../repositories/agent_events/default';
 import { InstallLib } from '../install';
 import { ElasticsearchAdapter } from '../../adapters/elasticsearch/default';
 import { AgentPolicyLib } from '../agent_policy';
+import { AgentEventLib } from '../agent_event';
 
 export function compose(server: any): FleetServerLib {
   const frameworkAdapter = new FrameworkAdapter(server);
@@ -49,9 +50,9 @@ export function compose(server: any): FleetServerLib {
 
   const policies = new PolicyLib(policyAdapter);
   const apiKeys = new ApiKeyLib(enrollmentApiKeysRepository, esAdapter, framework);
-  const agents = new AgentLib(agentsRepository, agentEventsRepository, apiKeys, policies);
-
   const agentsPolicy = new AgentPolicyLib(agentsRepository, policies);
+  const agentEvents = new AgentEventLib(agentEventsRepository);
+  const agents = new AgentLib(agentsRepository, apiKeys, agentEvents);
 
   const artifactRepository = new FileSystemArtifactRepository(os.tmpdir());
   const artifacts = new ArtifactLib(artifactRepository, new HttpAdapter());
@@ -61,6 +62,7 @@ export function compose(server: any): FleetServerLib {
   return {
     agents,
     agentsPolicy,
+    agentEvents,
     apiKeys,
     policies,
     artifacts,

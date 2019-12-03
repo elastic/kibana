@@ -15,14 +15,18 @@ export const RuntimeAgentEventType = t.union([
 ]);
 
 export const RuntimeAgentEventSubtype = t.union([
+  // State
   t.literal('RUNNING'),
   t.literal('STARTING'),
   t.literal('IN_PROGRESS'),
   t.literal('CONFIG'),
   t.literal('FAILED'),
   t.literal('STOPPED'),
+  // Action results
   t.literal('DATA_DUMP'),
-  t.literal('ACKNOWLEDGE'),
+  // Actions
+  t.literal('ACKNOWLEDGED'),
+  t.literal('UNKNOWN'),
 ]);
 
 export const RuntimeAgentEvent = t.intersection(

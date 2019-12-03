@@ -40,7 +40,7 @@ export const createGETAgentEventsRoute = (libs: FleetServerLib) => ({
     const page = parseInt(request.query.page, 10);
     const perPage = parseInt(request.query.per_page, 10);
 
-    const { items, total } = await libs.agents.getEventsById(
+    const { items, total } = await libs.agentEvents.getEventsById(
       request.user,
       request.params.agentId,
       request.query.kuery,
