@@ -34,6 +34,13 @@ import { RuleEditor } from './rule_editor';
 import { RoleSelector } from './role_selector';
 import { NoCompatibleRealms, PermissionDenied, DeleteProvider } from '../../components';
 import { ROLE_MAPPINGS_PATH } from '../../../management_urls';
+import {
+  validateRoleMappingName,
+  validateRoleMappingRoles,
+  validateRoleMappingRoleTemplates,
+  validateRoleMappingForSave,
+  validateRoleMappingRules,
+} from '../services/role_mapping_validation';
 
 interface State {
   isLoadingApp: boolean;
@@ -43,7 +50,12 @@ interface State {
   canUseStoredScripts: boolean;
   canUseInlineScripts: boolean;
   mode: 'roles' | 'templates';
-  error: any;
+  loadError: any;
+  formError: {
+    isInvalid: boolean;
+    error?: string;
+  };
+  validateForm: boolean;
   saveInProgress: boolean;
   rulesValid: boolean;
 }
@@ -63,9 +75,13 @@ export class EditRoleMappingPage extends Component<Props, State> {
       canUseStoredScripts: true,
       canUseInlineScripts: true,
       mode: 'roles',
-      error: undefined,
+      loadError: undefined,
       saveInProgress: false,
       rulesValid: true,
+      validateForm: false,
+      formError: {
+        isInvalid: false,
+      },
     };
   }
 
@@ -74,7 +90,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
   }
 
   public render() {
-    const { permissionDenied, isLoadingApp, error } = this.state;
+    const { permissionDenied, isLoadingApp, loadError: error } = this.state;
 
     if (permissionDenied) {
       return <PermissionDenied />;
@@ -124,7 +140,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
 
     return (
       <div>
-        <EuiForm>
+        <EuiForm isInvalid={this.state.formError.isInvalid} error={this.state.formError.error}>
           <EuiTitle>
             <h1>
               {this.editingExistingRoleMapping() ? (
@@ -204,7 +220,10 @@ export class EditRoleMappingPage extends Component<Props, State> {
           />
         }
       >
-        <EuiFormRow hasEmptyLabelSpace>
+        <EuiFormRow
+          hasEmptyLabelSpace
+          {...(this.state.validateForm && validateRoleMappingName(this.state.roleMapping!))}
+        >
           <EuiFieldText
             name={'name'}
             value={this.state.roleMapping!.name || ''}
@@ -218,6 +237,15 @@ export class EditRoleMappingPage extends Component<Props, State> {
   };
 
   private getRolesSelector = () => {
+    const validationFunction = () => {
+      if (!this.state.validateForm) {
+        return {};
+      }
+      if (this.state.mode === 'roles') {
+        return validateRoleMappingRoles(this.state.roleMapping!);
+      }
+      return validateRoleMappingRoleTemplates(this.state.roleMapping!);
+    };
     return (
       <EuiDescribedFormGroup
         title={
@@ -265,7 +293,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
           </EuiText>
         }
       >
-        <EuiFormRow fullWidth={true}>
+        <EuiFormRow fullWidth={true} {...validationFunction()}>
           <RoleSelector
             roleMapping={this.state.roleMapping!}
             mode={this.state.mode}
@@ -292,7 +320,10 @@ export class EditRoleMappingPage extends Component<Props, State> {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow fullWidth>
+          <EuiFormRow
+            fullWidth
+            {...(this.state.validateForm && validateRoleMappingRules(this.state.roleMapping!))}
+          >
             <RuleEditor
               onValidityChange={this.onRuleValidityChange}
               rawRules={this.state.roleMapping!.rules}
@@ -412,6 +443,12 @@ export class EditRoleMappingPage extends Component<Props, State> {
 
   private saveRoleMapping = () => {
     if (!this.state.roleMapping) {
+      return;
+    }
+
+    const { isInvalid } = validateRoleMappingForSave(this.state.roleMapping);
+    if (isInvalid) {
+      this.setState({ validateForm: true });
       return;
     }
 
