@@ -57,6 +57,7 @@ export const JobType: FC<Props> = ({ type, setFormState }) => {
             const value = e.target.value as AnalyticsJobType;
             setFormState({ jobType: value });
           }}
+          data-test-subj="mlAnalyticsCreateJobFlyoutJobTypeSelect"
         />
       </EuiFormRow>
     </Fragment>
