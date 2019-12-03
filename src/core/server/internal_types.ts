@@ -25,9 +25,11 @@ import {
   InternalSavedObjectsServiceStart,
   InternalSavedObjectsServiceSetup,
 } from './saved_objects';
+import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 
 /** @internal */
 export interface InternalCoreSetup {
+  capabilities: CapabilitiesSetup;
   context: ContextSetup;
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
@@ -39,5 +41,6 @@ export interface InternalCoreSetup {
  * @internal
  */
 export interface InternalCoreStart {
+  capabilities: CapabilitiesStart;
   savedObjects: InternalSavedObjectsServiceStart;
 }
