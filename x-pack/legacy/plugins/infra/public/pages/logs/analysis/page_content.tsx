@@ -33,7 +33,7 @@ export const AnalysisPageContent = () => {
 
   useEffect(() => {
     fetchJobStatus();
-  }, []);
+  }, [fetchJobStatus]);
 
   if (!hasLogAnalysisCapabilites) {
     return <AnalysisUnavailableContent />;

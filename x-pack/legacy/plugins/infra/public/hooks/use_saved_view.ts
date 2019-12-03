@@ -26,10 +26,10 @@ export const useSavedView = <ViewState>(defaultViewState: ViewState, viewType: s
   >(viewType);
   const { create, error: errorOnCreate } = useCreateSavedObject(viewType);
   const { deleteObject, deletedId } = useDeleteSavedObject(viewType);
-  const deleteView = useCallback((id: string) => deleteObject(id), []);
-  const saveView = useCallback((d: { [p: string]: any }) => create(d), []);
+  const deleteView = useCallback((id: string) => deleteObject(id), [deleteObject]);
+  const saveView = useCallback((d: { [p: string]: any }) => create(d), [create]);
 
-  const savedObjects = data ? data.savedObjects : [];
+  const savedObjects = useMemo(() => (data ? data.savedObjects : []), [data]);
   const views = useMemo(() => {
     const items: Array<SavedView<ViewState>> = [
       {
@@ -42,19 +42,17 @@ export const useSavedView = <ViewState>(defaultViewState: ViewState, viewType: s
       },
     ];
 
-    if (data) {
-      data.savedObjects.forEach(
-        o =>
-          o.type === viewType &&
-          items.push({
-            ...o.attributes,
-            id: o.id,
-          })
-      );
-    }
+    savedObjects.forEach(
+      o =>
+        o.type === viewType &&
+        items.push({
+          ...o.attributes,
+          id: o.id,
+        })
+    );
 
     return items;
-  }, [savedObjects, defaultViewState]);
+  }, [defaultViewState, savedObjects, viewType]);
 
   return {
     views,
