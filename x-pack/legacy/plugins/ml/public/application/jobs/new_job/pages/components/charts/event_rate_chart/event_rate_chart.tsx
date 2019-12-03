@@ -19,8 +19,6 @@ interface Props {
   loading?: boolean;
 }
 
-const SPEC_ID = 'event_rate';
-
 export const EventRateChart: FC<Props> = ({
   eventRateChartData,
   height,

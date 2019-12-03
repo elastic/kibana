@@ -24,7 +24,6 @@ import {
   ChartSeriesData,
   getChartHeight,
   getChartWidth,
-  getSeriesStyle,
   WrappedByAutoSizer,
   useTheme,
   useBrowserTimeZone,

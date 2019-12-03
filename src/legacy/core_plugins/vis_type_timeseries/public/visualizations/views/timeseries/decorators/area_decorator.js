@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { ScaleType, AreaSeries } from '@elastic/charts';
-import { getSeriesColors, getAreaStyles } from '../utils/series_styles';
+import { getAreaStyles } from '../utils/series_styles';
 import { ChartsEntities } from '../model/charts';
 import { X_ACCESSOR_INDEX, Y_ACCESSOR_INDEXES } from '../../../constants';
 
@@ -43,7 +43,7 @@ export function AreaSeriesDecorator({
 }) {
   const id = seriesId;
   const groupId = seriesGroupId;
-  const customSeriesColors = getSeriesColors(color, id);
+  const customSeriesColors = [color];
   const areaSeriesStyle = getAreaStyles({ points, lines, color });
 
   const seriesSettings = {

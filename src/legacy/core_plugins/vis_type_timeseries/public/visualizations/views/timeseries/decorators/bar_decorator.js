@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { ScaleType, BarSeries } from '@elastic/charts';
-import { getSeriesColors, getBarStyles } from '../utils/series_styles';
+import { getBarStyles } from '../utils/series_styles';
 import { ChartsEntities } from '../model/charts';
 import { X_ACCESSOR_INDEX, Y_ACCESSOR_INDEXES } from '../../../constants';
 
@@ -42,7 +42,7 @@ export function BarSeriesDecorator({
 }) {
   const id = seriesId;
   const groupId = seriesGroupId;
-  const customSeriesColors = getSeriesColors(color, id);
+  const customSeriesColors = [color];
   const barSeriesStyle = getBarStyles(bars, color);
 
   const seriesSettings = {
