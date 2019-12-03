@@ -98,7 +98,7 @@ export function runFailedTestsReporterCli() {
               name: failure.name,
               message: dryRun
                 ? `Test has failed ${newFailureCount - 1} times before: ${existingIssue.html_url}`
-                : `Updated existing issue: ${existingIssue.html_url}, (fail count: ${newFailureCount})`,
+                : `Updated existing issue: ${existingIssue.html_url} (fail count: ${newFailureCount})`,
             });
             continue;
           }
