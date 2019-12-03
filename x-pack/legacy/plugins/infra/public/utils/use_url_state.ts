@@ -5,10 +5,10 @@
  */
 
 import { Location } from 'history';
-import { useMemo, useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { decode, encode, RisonValue } from 'rison-node';
-
 import { QueryString } from 'ui/utils/query_string';
+
 import { useHistory } from './history_context';
 
 export const useUrlState = <State>({
@@ -42,10 +42,6 @@ export const useUrlState = <State>({
     urlStateString,
   ]);
 
-  const [shouldInitialize, setShouldInitialize] = useState(
-    writeDefaultState && typeof decodedState === 'undefined'
-  );
-
   const state = useMemo(() => (typeof decodedState !== 'undefined' ? decodedState : defaultState), [
     defaultState,
     decodedState,
@@ -74,10 +70,16 @@ export const useUrlState = <State>({
     [encodeUrlState, history, urlStateKey]
   );
 
-  if (shouldInitialize) {
-    setShouldInitialize(false);
-    setState(defaultState);
-  }
+  const [shouldInitialize, setShouldInitialize] = useState(
+    writeDefaultState && typeof decodedState === 'undefined'
+  );
+
+  useEffect(() => {
+    if (shouldInitialize) {
+      setShouldInitialize(false);
+      setState(defaultState);
+    }
+  }, [shouldInitialize, setState, defaultState]);
 
   return [state, setState] as [typeof state, typeof setState];
 };

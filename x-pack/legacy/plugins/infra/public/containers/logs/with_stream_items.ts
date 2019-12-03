@@ -52,9 +52,6 @@ export const WithStreamItems = withStreamItems(
     >;
     initializeOnMount: boolean;
   }) => {
-    const [shouldInitialize, setShouldInitialize] = useState(
-      initializeOnMount && !props.isReloading && !props.isLoadingMore
-    );
     const { currentHighlightKey, logEntryHighlightsById } = useContext(LogHighlightsState.Context);
     const items = useMemo(
       () =>
@@ -73,10 +70,16 @@ export const WithStreamItems = withStreamItems(
       ]
     );
 
-    if (shouldInitialize) {
-      setShouldInitialize(false);
-      props.reloadEntries();
-    }
+    const [shouldInitialize, setShouldInitialize] = useState(
+      initializeOnMount && !props.isReloading && !props.isLoadingMore
+    );
+
+    useEffect(() => {
+      if (shouldInitialize) {
+        setShouldInitialize(false);
+        props.reloadEntries();
+      }
+    }, [shouldInitialize, props]);
 
     return children({
       ...props,
