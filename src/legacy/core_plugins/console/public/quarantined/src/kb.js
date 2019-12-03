@@ -24,7 +24,7 @@ import {
   ListComponent,
   TemplateAutocompleteComponent,
   UsernameAutocompleteComponent,
-} from './autocomplete/components';
+} from '../../../np_ready/public/lib/autocomplete/components';
 
 import $ from 'jquery';
 import _ from 'lodash';

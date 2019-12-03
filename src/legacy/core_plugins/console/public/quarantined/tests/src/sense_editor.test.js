@@ -16,13 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import './setup_mocks';
+import '../../../../np_ready/public/application/models/sense_editor/sense_editor.test.mocks';
+
+jest.mock('../../../../np_ready/public/application', () => ({ legacyBackDoorToSettings: () => {}, }));
+
 import $ from 'jquery';
 import _ from 'lodash';
 import ace from 'brace';
 import 'brace/mode/json';
 
-import { initializeEditor } from '../../src/input';
+import { create } from '../../../../np_ready/public/application/models/sense_editor';
 const editorInput1 = require('./editor_input1.txt');
 const utils = require('../../src/utils');
 
@@ -40,23 +43,23 @@ describe('Editor', () => {
         <div id="ConCopyAsCurl" />
       </div>`;
 
-    input = initializeEditor(
-      $('#ConAppEditor'),
-      $('#ConAppEditorActions'),
+    input = create(
+      document.querySelector('#ConAppEditor')
     );
-    input.$el.show();
+    $(input.getCoreEditor().getContainer()).show();
     input.autocomplete._test.removeChangeListener();
   });
   afterEach(function () {
-    input.$el.hide();
+    $(input.getCoreEditor().getContainer()).hide();
     input.autocomplete._test.addChangeListener();
   });
 
   let testCount = 0;
 
-  const callWithEditorMethod = (editorMethod, fn) => (done) => {
+  const callWithEditorMethod = (editorMethod, fn) => async (done) => {
     try {
-      input[editorMethod](results => fn(results, done));
+      const results = await input[editorMethod]();
+      fn(results, done);
     } catch {
       done();
     }
@@ -79,10 +82,9 @@ describe('Editor', () => {
       data = prefix;
     }
 
-    test('Utils test ' + id + ' : ' + name, function (done) {
-      input.update(data, function () {
-        testToRun(done);
-      });
+    test('Utils test ' + id + ' : ' + name, async function (done) {
+      await input.update(data, true);
+      testToRun(done);
     });
   }
 
@@ -347,17 +349,16 @@ describe('Editor', () => {
   );
 
   function multiReqTest(name, editorInput, range, expected) {
-    utilsTest('multi request select - ' + name, editorInput, function (done) {
-      input.getRequestsInRange(range, function (requests) {
-        // convert to format returned by request.
-        _.each(expected, function (req) {
-          req.data =
-            req.data == null ? [] : [JSON.stringify(req.data, null, 2)];
-        });
-
-        compareRequest(requests, expected);
-        done();
+    utilsTest('multi request select - ' + name, editorInput, async function (done) {
+      const requests = await input.getRequestsInRange(range, true);
+      // convert to format returned by request.
+      _.each(expected, function (req) {
+        req.data =
+          req.data == null ? [] : [JSON.stringify(req.data, null, 2)];
       });
+
+      compareRequest(requests, expected);
+      done();
     });
   }
 
@@ -460,11 +461,10 @@ describe('Editor', () => {
   );
 
   function multiReqCopyAsCurlTest(name, editorInput, range, expected) {
-    utilsTest('multi request copy as curl - ' + name, editorInput, function (done) {
-      input.getRequestsAsCURL(range, function (curl) {
-        expect(curl).toEqual(expected);
-        done();
-      });
+    utilsTest('multi request copy as curl - ' + name, editorInput, async function (done) {
+      const curl = await input.getRequestsAsCURL(range, 'http://localhost:9200');
+      expect(curl).toEqual(expected);
+      done();
     });
   }
 

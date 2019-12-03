@@ -18,4 +18,5 @@
  */
 
 export * from './create';
-export { SenseEditor } from './editor';
+export { MODE } from './row_parser';
+export { SenseEditor } from './sense_editor';

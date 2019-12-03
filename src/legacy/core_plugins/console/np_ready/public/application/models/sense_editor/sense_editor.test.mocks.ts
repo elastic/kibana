@@ -16,14 +16,37 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import mappings from '../../mappings';
-import { ListComponent } from './list_component';
+/* eslint no-undef: 0 */
 
-export class TemplateAutocompleteComponent extends ListComponent {
-  constructor(name, parent) {
-    super(name, mappings.getTemplates, parent, true, true);
-  }
-  getContextKey() {
-    return 'template';
-  }
-}
+jest.mock('./mode/worker', () => {
+  return { workerModule: { id: 'sense_editor/mode/worker', src: '' } };
+});
+
+// @ts-ignore
+window.Worker = function() {
+  this.postMessage = () => {};
+  (this as any).terminate = () => {};
+};
+
+// @ts-ignore
+window.URL = {
+  createObjectURL: () => {
+    return '';
+  },
+};
+
+import 'brace';
+import 'brace/ext/language_tools';
+import 'brace/ext/searchbox';
+import 'brace/mode/json';
+import 'brace/mode/text';
+
+document.queryCommandSupported = () => true;
+
+import jQuery from 'jquery';
+jest.spyOn(jQuery, 'ajax').mockImplementation(
+  () =>
+    new Promise(() => {
+      // never resolve
+    }) as any
+);

@@ -16,23 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { SenseEditor } from './sense_editor';
-import * as core from '../legacy_core_editor';
-
-let senseEditor: SenseEditor;
-export function create(element: HTMLElement) {
-  const coreEditor = core.create(element);
-  senseEditor = new SenseEditor(coreEditor);
-
-  /**
-   * Init the editor
-   */
-  senseEditor.highlightCurrentRequestsAndUpdateActionBar();
-  return senseEditor;
+import _ from 'lodash';
+import { ListComponent } from './list_component';
+import mappings from '../../../../../public/quarantined/src/mappings';
+function TypeGenerator(context) {
+  return mappings.getTypes(context.indices);
 }
+function nonValidIndexType(token) {
+  return !(token === '_all' || token[0] !== '_');
+}
+export class  TypeAutocompleteComponent extends ListComponent {
+  constructor(name, parent, multiValued) {
+    super(name, TypeGenerator, parent, multiValued);
+  }
+  validateTokens(tokens) {
+    if (!this.multiValued && tokens.length > 1) {
+      return false;
+    }
 
-// eslint-disable-next-line
-export default function getInput() {
-  return senseEditor;
+    return !_.find(tokens, nonValidIndexType);
+  }
+
+  getDefaultTermMeta() {
+    return 'type';
+  }
+
+  getContextKey() {
+    return 'types';
+  }
 }

@@ -18,7 +18,7 @@
  */
 
 // @ts-ignore
-import Autocomplete from './autocomplete';
+import Autocomplete from '../../../np_ready/public/lib/autocomplete/autocomplete';
 
 import { LegacyCoreEditor } from '../../../np_ready/public/application/models';
 

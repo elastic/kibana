@@ -18,9 +18,9 @@
  */
 
 const _ = require('lodash');
-import { UrlPatternMatcher } from '../autocomplete/components';
-import { UrlParams } from '../autocomplete/url_params';
-import  { globalsOnlyAutocompleteComponents, compileBodyDescription } from '../autocomplete/body_completer';
+import { UrlPatternMatcher } from '../../../../np_ready/public/lib/autocomplete/components';
+import { UrlParams } from '../../../../np_ready/public/lib/autocomplete/url_params';
+import  { globalsOnlyAutocompleteComponents, compileBodyDescription } from '../../../../np_ready/public/lib/autocomplete/body_completer';
 
 
 /**

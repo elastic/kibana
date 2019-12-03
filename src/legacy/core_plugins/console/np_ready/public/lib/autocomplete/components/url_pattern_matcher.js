@@ -23,7 +23,7 @@ import {
   AcceptEndpointComponent,
   ListComponent,
   SimpleParamComponent,
-} from '.';
+} from './index';
 
 /**
  * @param parametrizedComponentFactories a dict of the following structure

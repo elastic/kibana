@@ -18,7 +18,7 @@
  */
 
 // @ts-ignore
-import { getEndpointFromPosition } from '../../../../../../public/quarantined/src/autocomplete';
+import { getEndpointFromPosition } from '../../../../lib/autocomplete/autocomplete';
 
 export function autoIndent(editor: any, event: any) {
   editor.autoIndent();

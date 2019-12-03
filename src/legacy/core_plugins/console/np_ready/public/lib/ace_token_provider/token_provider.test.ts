@@ -17,9 +17,15 @@
  * under the License.
  */
 
-import './token_provider.test.mocks';
+import '../../application/models/sense_editor/sense_editor.test.mocks';
 
 import $ from 'jquery';
+
+// TODO:
+// We import from application models as a convenient way to bootstrap loading up of an editor using
+// this lib. We also need to import application specific mocks which is not ideal.
+// In this situation, the token provider lib knows about app models in tests, which it really shouldn't. Should create
+// a better sandbox in future.
 import { create, SenseEditor } from '../../application/models/sense_editor';
 
 import { Position, Token, TokensProvider } from '../../types';

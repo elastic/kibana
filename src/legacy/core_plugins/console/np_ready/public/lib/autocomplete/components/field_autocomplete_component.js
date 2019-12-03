@@ -17,7 +17,7 @@
  * under the License.
  */
 import _ from 'lodash';
-import mappings from '../../mappings';
+import mappings from '../../../../../public/quarantined/src/mappings';
 import { ListComponent } from './list_component';
 
 function FieldGenerator(context) {

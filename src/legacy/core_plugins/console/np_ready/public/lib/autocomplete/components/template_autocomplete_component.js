@@ -16,28 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import _ from 'lodash';
-import mappings from '../../mappings';
+import mappings from '../../../../../public/quarantined/src/mappings';
 import { ListComponent } from './list_component';
-function nonValidIndexType(token) {
-  return !(token === '_all' || token[0] !== '_');
-}
-export class IndexAutocompleteComponent extends ListComponent {
-  constructor(name, parent, multiValued) {
-    super(name, mappings.getIndices, parent, multiValued);
-  }
-  validateTokens(tokens) {
-    if (!this.multiValued && tokens.length > 1) {
-      return false;
-    }
-    return !_.find(tokens, nonValidIndexType);
-  }
 
-  getDefaultTermMeta() {
-    return 'index';
+export class TemplateAutocompleteComponent extends ListComponent {
+  constructor(name, parent) {
+    super(name, mappings.getTemplates, parent, true, true);
   }
-
   getContextKey() {
-    return 'indices';
+    return 'template';
   }
 }

@@ -20,7 +20,7 @@
 import { CoreEditor, Token } from '../../../types';
 import { TokenIterator } from '../../../lib/token_iterator';
 
-const MODE = {
+export const MODE = {
   REQUEST_START: 2,
   IN_REQUEST: 4,
   MULTI_DOC_CUR_DOC_END: 8,
@@ -32,7 +32,7 @@ const MODE = {
 export default class RowParser {
   constructor(private readonly editor: CoreEditor) {}
 
-  static MODE = MODE;
+  MODE = MODE;
 
   getRowParseMode(lineNumber = this.editor.getCurrentPosition().lineNumber) {
     const linesCount = this.editor.getValue().split('\n').length;

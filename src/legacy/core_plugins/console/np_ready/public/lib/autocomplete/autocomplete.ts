@@ -27,17 +27,17 @@ import {
   getGlobalAutocompleteComponents,
   getUnmatchedEndpointComponents,
   // @ts-ignore
-} from './kb';
+} from '../../../../public/quarantined/src/kb';
 // @ts-ignore
-import utils from './utils';
+import utils from '../../../../public/quarantined/src/utils';
 // @ts-ignore
-import { populateContext } from './autocomplete/engine';
+import { populateContext } from './engine';
 // @ts-ignore
-import { URL_PATH_END_MARKER } from './autocomplete/components';
-import { createTokenIterator } from '../../../np_ready/public/application/factories';
+import { URL_PATH_END_MARKER } from './components/index';
+import { createTokenIterator } from '../../application/factories';
 
-import { Position, Token, Range, CoreEditor } from '../../../np_ready/public/types';
-import { SenseEditor } from '../../../np_ready/public/application/models/sense_editor';
+import { Position, Token, Range, CoreEditor } from '../../types';
+import { SenseEditor } from '../../application/models/sense_editor';
 
 let LAST_EVALUATED_TOKEN: any = null;
 

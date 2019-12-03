@@ -25,9 +25,9 @@ import {
   URL_PATH_END_MARKER,
   UrlPatternMatcher,
   ListComponent
-} from '../../src/autocomplete/components';
+} from '../../../../np_ready/public/lib/autocomplete/components';
 
-import { populateContext } from '../../src/autocomplete/engine';
+import { populateContext } from '../../../../np_ready/public/lib/autocomplete/engine';
 
 describe('Url autocomplete', () => {
   function patternsTest(

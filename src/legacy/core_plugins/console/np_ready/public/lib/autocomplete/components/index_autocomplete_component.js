@@ -17,12 +17,12 @@
  * under the License.
  */
 import _ from 'lodash';
-import mappings from '../../mappings';
+import mappings from '../../../../../public/quarantined/src/mappings';
 import { ListComponent } from './list_component';
-function nonValidUsernameType(token) {
-  return token[0] === '_';
+function nonValidIndexType(token) {
+  return !(token === '_all' || token[0] !== '_');
 }
-export class UsernameAutocompleteComponent extends ListComponent {
+export class IndexAutocompleteComponent extends ListComponent {
   constructor(name, parent, multiValued) {
     super(name, mappings.getIndices, parent, multiValued);
   }
@@ -30,14 +30,14 @@ export class UsernameAutocompleteComponent extends ListComponent {
     if (!this.multiValued && tokens.length > 1) {
       return false;
     }
-    return !_.find(tokens, nonValidUsernameType);
+    return !_.find(tokens, nonValidIndexType);
   }
 
   getDefaultTermMeta() {
-    return 'username';
+    return 'index';
   }
 
   getContextKey() {
-    return 'username';
+    return 'indices';
   }
 }

@@ -21,8 +21,8 @@ import 'brace';
 import 'brace/mode/javascript';
 import 'brace/mode/json';
 const _ = require('lodash');
-import { UrlParams } from '../../src/autocomplete/url_params';
-import { populateContext } from '../../src/autocomplete/engine';
+import { UrlParams } from '../../../../np_ready/public/lib/autocomplete/url_params';
+import { populateContext } from '../../../../np_ready/public/lib/autocomplete/engine';
 
 describe('Url params', () => {
   function paramTest(

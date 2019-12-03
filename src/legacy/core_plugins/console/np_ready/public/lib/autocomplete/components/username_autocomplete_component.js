@@ -17,31 +17,27 @@
  * under the License.
  */
 import _ from 'lodash';
+import mappings from '../../../../../public/quarantined/src/mappings';
 import { ListComponent } from './list_component';
-import mappings from '../../mappings';
-function TypeGenerator(context) {
-  return mappings.getTypes(context.indices);
+function nonValidUsernameType(token) {
+  return token[0] === '_';
 }
-function nonValidIndexType(token) {
-  return !(token === '_all' || token[0] !== '_');
-}
-export class  TypeAutocompleteComponent extends ListComponent {
+export class UsernameAutocompleteComponent extends ListComponent {
   constructor(name, parent, multiValued) {
-    super(name, TypeGenerator, parent, multiValued);
+    super(name, mappings.getIndices, parent, multiValued);
   }
   validateTokens(tokens) {
     if (!this.multiValued && tokens.length > 1) {
       return false;
     }
-
-    return !_.find(tokens, nonValidIndexType);
+    return !_.find(tokens, nonValidUsernameType);
   }
 
   getDefaultTermMeta() {
-    return 'type';
+    return 'username';
   }
 
   getContextKey() {
-    return 'types';
+    return 'username';
   }
 }

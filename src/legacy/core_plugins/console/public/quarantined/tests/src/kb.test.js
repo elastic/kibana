@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { populateContext } from '../../src/autocomplete/engine';
+import { populateContext } from '../../../../np_ready/public/lib/autocomplete/engine';
 
 import './setup_mocks';
 import 'brace';

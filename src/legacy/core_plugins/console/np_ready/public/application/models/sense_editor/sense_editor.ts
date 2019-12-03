@@ -28,13 +28,14 @@ import smartResize from './smart_resize';
 import { CoreEditor, Position, Range } from '../../../types';
 import { createTokenIterator } from '../../factories';
 
-import Autocomplete from '../../../../../public/quarantined/src/autocomplete';
+import Autocomplete from '../../../lib/autocomplete/autocomplete';
 
 export class SenseEditor {
   currentReqRange: (Range & { markerRef: any }) | null;
   parser: any;
   resize: any;
 
+  // @ts-ignore
   private readonly autocomplete: any;
 
   constructor(private readonly coreEditor: CoreEditor) {
