@@ -94,7 +94,7 @@ export const initLogsSummaryRoute = ({ framework, sources }: InfraBackendLibs) =
           })
         );
       } catch (error) {
-        // FIXME handle this
+        return Boom.badImplementation(error.message);
       }
     },
   });
@@ -163,8 +163,7 @@ export const initLogsSummaryRoute = ({ framework, sources }: InfraBackendLibs) =
 
         return res.response(logsSummaryHighlightsResponseRT.encode(summaries));
       } catch (error) {
-        // FIXME handle this
-        throw error;
+        return Boom.badImplementation(error.message);
       }
     },
   });
