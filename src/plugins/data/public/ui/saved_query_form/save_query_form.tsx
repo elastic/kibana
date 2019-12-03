@@ -35,11 +35,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { sortBy, isEqual } from 'lodash';
-import {
-  SavedQuery,
-  SavedQueryAttributes,
-  SavedQueryService,
-} from '../../../../../../../../plugins/data/public';
+import { SavedQuery, SavedQueryAttributes, SavedQueryService } from '../..';
 
 interface Props {
   savedQuery?: SavedQueryAttributes;

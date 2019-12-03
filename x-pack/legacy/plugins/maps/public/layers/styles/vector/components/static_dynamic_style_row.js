@@ -5,9 +5,9 @@
  */
 
 import React from 'react';
-import { VectorStyle } from '../vector/vector_style';
-import _ from 'lodash';
+import { VectorStyle } from '../vector_style';
 import { i18n } from '@kbn/i18n';
+import { getVectorStyleLabel } from './get_vector_style_label';
 
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiFormRow, EuiButtonToggle } from '@elastic/eui';
 
@@ -22,14 +22,11 @@ export class StaticDynamicStyleRow extends React.Component {
   }
 
   _isDynamic() {
-    if (!this.props.styleDescriptor) {
-      return false;
-    }
-    return this.props.styleDescriptor.type === VectorStyle.STYLE_TYPE.DYNAMIC;
+    return this.props.styleProperty.isDynamic();
   }
 
   _getStyleOptions() {
-    return _.get(this.props, 'styleDescriptor.options');
+    return this.props.styleProperty.getOptions();
   }
 
   _onStaticStyleChange = options => {
@@ -37,7 +34,7 @@ export class StaticDynamicStyleRow extends React.Component {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options,
     };
-    this.props.handlePropertyChange(this.props.property, styleDescriptor);
+    this.props.handlePropertyChange(this.props.styleProperty.getStyleName(), styleDescriptor);
   };
 
   _onDynamicStyleChange = options => {
@@ -45,7 +42,7 @@ export class StaticDynamicStyleRow extends React.Component {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options,
     };
-    this.props.handlePropertyChange(this.props.property, styleDescriptor);
+    this.props.handlePropertyChange(this.props.styleProperty.getStyleName(), styleDescriptor);
   };
 
   _onTypeToggle = () => {
@@ -100,7 +97,10 @@ export class StaticDynamicStyleRow extends React.Component {
         <EuiFlexItem
           className={isDynamic ? 'mapStaticDynamicSylingOption__dynamicSizeHack' : undefined}
         >
-          <EuiFormRow label={this.props.label && this.props.label} display="rowCompressed">
+          <EuiFormRow
+            label={getVectorStyleLabel(this.props.styleProperty.getStyleName())}
+            display="rowCompressed"
+          >
             {this._renderStyleSelector()}
           </EuiFormRow>
         </EuiFlexItem>

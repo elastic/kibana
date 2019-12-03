@@ -38,21 +38,14 @@ export const initServerWithKibana = (
     }
   }
 
-  if (
-    config().has('xpack.actions.enabled') &&
-    config().get('xpack.actions.enabled') === true &&
-    config().has('xpack.alerting.enabled') &&
-    config().get('xpack.alerting.enabled') === true
-  ) {
-    logger.info(
-      'Detected feature flags for actions and alerting and enabling detection engine API endpoints'
-    );
-    createRulesRoute(route);
-    readRulesRoute(route);
-    updateRulesRoute(route);
-    deleteRulesRoute(route);
-    findRulesRoute(route);
-  }
+  // Signals/Alerting Rules routes for
+  // routes such as ${DETECTION_ENGINE_RULES_URL}
+  // that have the REST endpoints of /api/detection_engine/rules
+  createRulesRoute(route);
+  readRulesRoute(route);
+  updateRulesRoute(route);
+  deleteRulesRoute(route);
+  findRulesRoute(route);
 
   xpack_main.registerFeature({
     id: APP_ID,
