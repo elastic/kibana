@@ -16,6 +16,7 @@ export interface CoreSetup
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [capabilities](./kibana-plugin-server.coresetup.capabilities.md) | <code>CapabilitiesSetup</code> | [CapabilitiesSetup](./kibana-plugin-server.capabilitiessetup.md) |
 |  [context](./kibana-plugin-server.coresetup.context.md) | <code>ContextSetup</code> | [ContextSetup](./kibana-plugin-server.contextsetup.md) |
 |  [elasticsearch](./kibana-plugin-server.coresetup.elasticsearch.md) | <code>ElasticsearchServiceSetup</code> | [ElasticsearchServiceSetup](./kibana-plugin-server.elasticsearchservicesetup.md) |
 |  [http](./kibana-plugin-server.coresetup.http.md) | <code>HttpServiceSetup</code> | [HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md) |
