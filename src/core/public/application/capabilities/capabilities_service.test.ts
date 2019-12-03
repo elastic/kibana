@@ -17,37 +17,40 @@
  * under the License.
  */
 
-import { InjectedMetadataService } from '../../injected_metadata';
+import { httpServiceMock, HttpSetupMock } from '../../http/http_service.mock';
 import { CapabilitiesService } from './capabilities_service';
 import { App } from '../types';
 
+const mockedCapabilities = {
+  catalogue: {},
+  management: {},
+  navLinks: {
+    app1: true,
+    app2: false,
+    legacyApp1: true,
+    legacyApp2: false,
+  },
+  foo: { feature: true },
+  bar: { feature: true },
+};
+
 describe('#start', () => {
-  const injectedMetadata = new InjectedMetadataService({
-    injectedMetadata: {
-      version: 'kibanaVersion',
-      capabilities: {
-        catalogue: {},
-        management: {},
-        navLinks: {
-          app1: true,
-          app2: false,
-          legacyApp1: true,
-          legacyApp2: false,
-        },
-        foo: { feature: true },
-        bar: { feature: true },
-      },
-    } as any,
-  }).start();
+  let http: HttpSetupMock;
+
+  beforeEach(() => {
+    http = httpServiceMock.createStartContract();
+    http.post.mockReturnValue(Promise.resolve(mockedCapabilities));
+  });
 
   const apps = new Map([
     ['app1', { id: 'app1' }],
     ['app2', { id: 'app2', capabilities: { app2: { feature: true } } }],
+    ['appMissingInCapabilities', { id: 'appMissingInCapabilities' }],
   ] as Array<[string, App]>);
 
   it('filters available apps based on returned navLinks', async () => {
     const service = new CapabilitiesService();
-    const startContract = await service.start({ apps, injectedMetadata });
+    const startContract = await service.start({ apps, http });
     expect(startContract.availableApps).toEqual(new Map([['app1', { id: 'app1' }]]));
   });
 
@@ -55,7 +58,7 @@ describe('#start', () => {
     const service = new CapabilitiesService();
     const { capabilities } = await service.start({
       apps,
-      injectedMetadata,
+      http,
     });
 
     // @ts-ignore TypeScript knows this shouldn't be possible

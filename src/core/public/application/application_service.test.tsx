@@ -399,7 +399,7 @@ describe('ApplicationService', () => {
 
       expect(MockCapabilitiesService.start).toHaveBeenCalledWith({
         apps: new Map([['app1', { id: 'app1', legacy: false, status: AppStatus.accessible }]]),
-        injectedMetadata,
+        http,
       });
     });
 
@@ -413,7 +413,7 @@ describe('ApplicationService', () => {
         apps: new Map([
           ['legacyApp1', { id: 'legacyApp1', legacy: true, status: AppStatus.accessible }],
         ]),
-        injectedMetadata,
+        http,
       });
     });
 

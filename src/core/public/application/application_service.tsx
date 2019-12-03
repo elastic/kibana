@@ -158,13 +158,13 @@ export class ApplicationService {
     const legacyMode = injectedMetadata.getLegacyMode();
     const currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
     const { availableApps: enabledApps, capabilities } = await this.capabilities.start({
+      http,
       apps: new Map(
         [...this.apps].map(([id, appBox]) => [
           id,
           (isLegacyApp(appBox) ? appBox : appBox.app) as App | LegacyApp,
         ])
       ),
-      injectedMetadata,
     });
 
     // Only setup history if we're not in legacy mode

@@ -17,37 +17,17 @@
  * under the License.
  */
 
+import { Capabilities } from '../../../types/capabilities';
 import { deepFreeze, RecursiveReadonly } from '../../../utils';
-import { App, LegacyApp } from '../types';
-import { InjectedMetadataStart } from '../../injected_metadata';
+import { LegacyApp, App } from '../types';
+import { HttpStart } from '../../http';
 
 interface StartDeps {
   apps: ReadonlyMap<string, App | LegacyApp>;
-  injectedMetadata: InjectedMetadataStart;
+  http: HttpStart;
 }
 
-/**
- * The read-only set of capabilities available for the current UI session.
- * Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID,
- * and the boolean is a flag indicating if the capability is enabled or disabled.
- *
- * @public
- */
-export interface Capabilities {
-  /** Navigation link capabilities. */
-  navLinks: Record<string, boolean>;
-
-  /** Management section capabilities. */
-  management: {
-    [sectionId: string]: Record<string, boolean>;
-  };
-
-  /** Catalogue capabilities. Catalogue entries drive the visibility of the Kibana homepage options. */
-  catalogue: Record<string, boolean>;
-
-  /** Custom capabilities, registered by plugins. */
-  [key: string]: Record<string, boolean | Record<string, boolean>>;
-}
+export { Capabilities };
 
 /** @internal */
 export interface CapabilitiesStart {
@@ -60,8 +40,9 @@ export interface CapabilitiesStart {
  * @internal
  */
 export class CapabilitiesService {
-  public async start({ apps, injectedMetadata }: StartDeps): Promise<CapabilitiesStart> {
-    const capabilities = deepFreeze(injectedMetadata.getCapabilities());
+  public async start({ apps, http }: StartDeps): Promise<CapabilitiesStart> {
+    const capabilities = await this.fetchCapabilities(http, [...apps.keys()]);
+
     const availableApps = new Map(
       [...apps].filter(
         ([appId]) =>
@@ -73,5 +54,19 @@ export class CapabilitiesService {
       availableApps,
       capabilities,
     };
+  }
+
+  private async fetchCapabilities(http: HttpStart, appIds: string[]): Promise<Capabilities> {
+    const payload = JSON.stringify({
+      applications: appIds,
+    });
+
+    const url = http.anonymousPaths.isAnonymous(window.location.pathname)
+      ? '/api/core/capabilities/defaults'
+      : '/api/core/capabilities';
+    const capabilities = await http.post(url, {
+      body: payload,
+    });
+    return deepFreeze(capabilities);
   }
 }
