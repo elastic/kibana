@@ -15,7 +15,6 @@ export function MachineLearningJobManagementProvider(
   mlApi: ProvidedType<typeof MachineLearningAPIProvider>
 ) {
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
 
   return {
     async navigateToNewJobSourceSelection() {
@@ -36,10 +35,7 @@ export function MachineLearningJobManagementProvider(
     },
 
     async assertStartDatafeedModalExists() {
-      // this retry can be removed as soon as #48734 is merged
-      await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail('mlStartDatafeedModal');
-      });
+      await testSubjects.existOrFail('mlStartDatafeedModal', { timeout: 5000 });
     },
 
     async confirmStartDatafeedModal() {

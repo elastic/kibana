@@ -141,15 +141,14 @@ export function MachineLearningJobWizardAdvancedProvider({
     },
 
     async openCreateDetectorModal() {
-      await testSubjects.click('mlAddDetectorButton');
-      await this.assertCreateDetectorModalExists();
+      await retry.tryForTime(20 * 1000, async () => {
+        await testSubjects.click('mlAddDetectorButton');
+        await this.assertCreateDetectorModalExists();
+      });
     },
 
     async assertCreateDetectorModalExists() {
-      // this retry can be removed as soon as #48734 is merged
-      await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail('mlCreateDetectorModal');
-      });
+      await testSubjects.existOrFail('mlCreateDetectorModal', { timeout: 5000 });
     },
 
     async assertDetectorFunctionInputExists() {
@@ -298,18 +297,17 @@ export function MachineLearningJobWizardAdvancedProvider({
     },
 
     async clickEditDetector(detectorIndex: number) {
-      await testSubjects.click(
-        `mlAdvancedDetector ${detectorIndex} > mlAdvancedDetectorEditButton`
-      );
-      await this.assertCreateDetectorModalExists();
+      await retry.tryForTime(20 * 1000, async () => {
+        await testSubjects.click(
+          `mlAdvancedDetector ${detectorIndex} > mlAdvancedDetectorEditButton`
+        );
+        await this.assertCreateDetectorModalExists();
+      });
     },
 
     async createJob() {
       await testSubjects.clickWhenNotDisabled('mlJobWizardButtonCreateJob');
-      // this retry can be removed as soon as #48734 is merged
-      await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail('mlStartDatafeedModal');
-      });
+      await testSubjects.existOrFail('mlStartDatafeedModal', { timeout: 10 * 1000 });
     },
   };
 }
