@@ -35,7 +35,12 @@ export class SavedObjectActions {
     }
 
     if (isSavedObjectPrivilege(typeOrSavedObjectPrivilege)) {
-      return `${this.prefix}${typeOrSavedObjectPrivilege.type}/${operation}(${typeOrSavedObjectPrivilege.when.key}=${typeOrSavedObjectPrivilege.when.value})`;
+      const conditions = Array.isArray(typeOrSavedObjectPrivilege.when)
+        ? typeOrSavedObjectPrivilege.when
+        : [typeOrSavedObjectPrivilege.when];
+      return `${this.prefix}${typeOrSavedObjectPrivilege.type}/${operation}(${conditions
+        .map(({ key, value }) => `${key}=${value}`)
+        .join('&')})`;
     }
 
     throw new Error(`typeOrSavedObjectPrivilege must be a string or SavedObjectPrivilege`);

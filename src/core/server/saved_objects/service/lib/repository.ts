@@ -99,7 +99,8 @@ const doesAPredicateMatch = (
   savedObject: SavedObject<any>
 ): boolean => {
   for (const predicate of predicates) {
-    if (savedObject.attributes[predicate.when.key] === predicate.when.value) {
+    const conditions = Array.isArray(predicate.when) ? predicate.when : [predicate.when];
+    if (conditions.every(condition => savedObject.attributes[condition.key] === condition.value)) {
       return true;
     }
   }

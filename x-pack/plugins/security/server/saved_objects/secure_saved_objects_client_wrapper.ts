@@ -20,7 +20,6 @@ import {
 import { SecurityAuditLogger } from '../audit';
 import { Actions, CheckSavedObjectsPrivileges } from '../authorization';
 import { SavedObjectsPrivileges } from './saved_objects_privileges';
-import { SavedObjectCondition } from '../../../features/server/feature_kibana_privileges';
 
 interface SecureSavedObjectsClientWrapperOptions {
   actions: Actions;
@@ -198,7 +197,6 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     if (!forbidden) {
       this.auditLogger.savedObjectsAuthorizationSuccess(username, action, types, args);
     } else {
-      const missingPrivileges = this.getMissingPrivileges(privileges);
       this.auditLogger.savedObjectsAuthorizationFailure(
         username,
         action,

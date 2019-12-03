@@ -13,6 +13,10 @@
       "consumer": {
         "type": "keyword",
         "ignore_above": 2048
+      },
+      "alert_type": {
+        "type": "keyword",
+        "ignore_above": 2048
       }
     }
   }

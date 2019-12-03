@@ -29,12 +29,14 @@ import {
 } from '../types';
 import { SavedObjectsErrorHelpers } from './lib/errors';
 
+interface SavedObjectsPredicateCondition {
+  key: string;
+  value: string;
+}
+
 export interface SavedObjectsPredicate {
   type: string;
-  when: {
-    key: string;
-    value: string;
-  };
+  when: SavedObjectsPredicateCondition | SavedObjectsPredicateCondition[];
 }
 
 /**

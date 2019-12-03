@@ -7,12 +7,15 @@
 import { FeaturesService } from '../plugin';
 import {
   isSavedObjectPrivilege,
-  SavedObjectCondition,
+  SavedObjectPrivilegeCondition,
 } from '../../../features/server/feature_kibana_privileges';
 
 export class SavedObjectsPrivileges {
   private readonly conditionalTypes: string[];
-  private readonly typesConditions: Map<string, SavedObjectCondition[]>;
+  private readonly typesConditions: Map<
+    string,
+    Array<SavedObjectPrivilegeCondition | SavedObjectPrivilegeCondition[]>
+  >;
 
   constructor(features: FeaturesService) {
     const savedObjectPrivileges = features
@@ -40,7 +43,9 @@ export class SavedObjectsPrivileges {
     return this.conditionalTypes.includes(type);
   }
 
-  public getConditions(type: string): SavedObjectCondition[] {
+  public getConditions(
+    type: string
+  ): Array<SavedObjectPrivilegeCondition | SavedObjectPrivilegeCondition[]> {
     if (!this.typesConditions.has(type)) {
       throw new Error(`${type} doesn't have any conditions`);
     }

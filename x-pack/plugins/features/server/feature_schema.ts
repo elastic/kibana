@@ -24,12 +24,17 @@ const managementSchema = Joi.object().pattern(
 );
 const catalogueSchema = Joi.array().items(Joi.string().regex(uiCapabilitiesRegex));
 
+const savedObjectPrivilegeCondition = Joi.object({
+  key: Joi.string().required(),
+  value: Joi.string().required(),
+});
+
 export const savedObjectPrivilegeSchema = Joi.object({
   type: Joi.string().required(),
-  when: Joi.object({
-    key: Joi.string().required(),
-    value: Joi.string().required(),
-  }).required(),
+  when: Joi.array()
+    .items(savedObjectPrivilegeCondition)
+    .single()
+    .required(),
 });
 
 const privilegeSchema = Joi.object({

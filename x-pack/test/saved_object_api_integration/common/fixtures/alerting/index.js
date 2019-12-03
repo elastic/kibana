@@ -38,8 +38,8 @@ export default function (kibana) {
               read: ['alerting'],
             },
             ui: [],
-          }
-        }
+          },
+        },
       });
 
       server.plugins.xpack_main.registerFeature({
@@ -62,8 +62,88 @@ export default function (kibana) {
               read: [{ type: 'alerting', when: { key: 'consumer', value: 'siem' } }],
             },
             ui: [],
-          }
-        }
+          },
+        },
+      });
+
+      server.plugins.xpack_main.registerFeature({
+        id: 'siem_threshhold_alerting',
+        name: 'siem_threshhold_alerting',
+        icon: 'upArrow',
+        navLinkId: 'siem_threshhold_alerting',
+        app: [],
+        privileges: {
+          all: {
+            savedObject: {
+              all: [
+                {
+                  type: 'alerting',
+                  when: [
+                    { key: 'consumer', value: 'siem' },
+                    { key: 'alert-type', value: 'threshold' },
+                  ],
+                },
+              ],
+              read: [],
+            },
+            ui: [],
+          },
+          read: {
+            savedObject: {
+              all: [],
+              read: [
+                {
+                  type: 'alerting',
+                  when: [
+                    { key: 'consumer', value: 'siem' },
+                    { key: 'alert-type', value: 'threshold' },
+                  ],
+                },
+              ],
+            },
+            ui: [],
+          },
+        },
+      });
+
+      server.plugins.xpack_main.registerFeature({
+        id: 'stack_monitoring_threshhold_alerting',
+        name: 'stack_monitoring_threshhold_alerting',
+        icon: 'upArrow',
+        navLinkId: 'stack_monitoring_threshhold_alerting',
+        app: [],
+        privileges: {
+          all: {
+            savedObject: {
+              all: [
+                {
+                  type: 'alerting',
+                  when: [
+                    { key: 'consumer', value: 'stack-monitoring' },
+                    { key: 'alert-type', value: 'threshold' },
+                  ],
+                },
+              ],
+              read: [],
+            },
+            ui: [],
+          },
+          read: {
+            savedObject: {
+              all: [],
+              read: [
+                {
+                  type: 'alerting',
+                  when: [
+                    { key: 'consumer', value: 'stack-monitoring' },
+                    { key: 'alert-type', value: 'threshold' },
+                  ],
+                },
+              ],
+            },
+            ui: [],
+          },
+        },
       });
     },
   });

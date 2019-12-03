@@ -6,14 +6,14 @@
 
 import { savedObjectPrivilegeSchema } from './feature_schema';
 
-export interface SavedObjectCondition {
+export interface SavedObjectPrivilegeCondition {
   key: string;
   value: string;
 }
 
 export interface SavedObjectPrivilege {
   type: string;
-  when: SavedObjectCondition;
+  when: SavedObjectPrivilegeCondition | SavedObjectPrivilegeCondition[];
 }
 
 export function isSavedObjectPrivilege(
