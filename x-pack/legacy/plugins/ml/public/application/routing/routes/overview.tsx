@@ -17,7 +17,7 @@ import { checkFullLicense } from '../../license/check_license';
 import { checkGetJobsPrivilege } from '../../privilege/check_privilege';
 import { getMlNodeCount } from '../../ml_nodes_check';
 import { loadMlServerInfo } from '../../services/ml_server_info';
-import { ML_BREADCRUMB } from '../../breadcrumbs';
+import { ML_BREADCRUMB } from '../breadcrumbs';
 
 const breadcrumbs = [
   ML_BREADCRUMB,
