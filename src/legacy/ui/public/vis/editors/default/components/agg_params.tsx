@@ -144,7 +144,11 @@ function DefaultEditorAggParams({
         } else {
           newValue = typedParamConfig[property];
         }
-        setAggParamValue(agg.id, param, newValue);
+
+        // this check is obligatory to avoid infinite render, because setAggParamValue creates a brand new agg object
+        if (agg.params[param] !== newValue) {
+          setAggParamValue(agg.id, param, newValue);
+        }
       }
     });
   }, [editorConfig]);
