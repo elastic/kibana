@@ -18,10 +18,12 @@
  */
 
 import { UuidService } from './uuid_service';
-import { loggingServiceMock } from '../logging/logging_service.mock';
-import { mockCoreContext } from '../core_context.mock';
 import { manageInstanceUuid } from './manage_uuid';
 import { CoreContext } from '../core_context';
+
+import { loggingServiceMock } from '../logging/logging_service.mock';
+import { mockCoreContext } from '../core_context.mock';
+import { legacyServiceMock } from '../legacy/legacy_service.mock';
 
 jest.mock('./manage_uuid', () => ({
   manageInstanceUuid: jest.fn().mockResolvedValue('SOME_UUID'),
@@ -29,6 +31,7 @@ jest.mock('./manage_uuid', () => ({
 
 describe('UuidService', () => {
   let logger: ReturnType<typeof loggingServiceMock.create>;
+  let legacyDiscover: ReturnType<typeof legacyServiceMock.createDiscover>;
   let coreContext: CoreContext;
   let service: UuidService;
 
@@ -36,18 +39,19 @@ describe('UuidService', () => {
     jest.clearAllMocks();
     logger = loggingServiceMock.create();
     coreContext = mockCoreContext.create({ logger });
+    legacyDiscover = legacyServiceMock.createDiscover();
     service = new UuidService(coreContext);
   });
 
   describe('#setup()', () => {
-    it('should call manageInstanceUuid with core configuration service', async () => {
-      await service.setup();
+    it('calls manageInstanceUuid with core configuration service', async () => {
+      await service.setup({ legacyPlugins: legacyDiscover });
       expect(manageInstanceUuid).toHaveBeenCalledTimes(1);
       expect(manageInstanceUuid).toHaveBeenCalledWith(coreContext.configService);
     });
 
-    it('should log a message containing the UUID', async () => {
-      await service.setup();
+    it('logs a message containing the UUID', async () => {
+      await service.setup({ legacyPlugins: legacyDiscover });
       expect(loggingServiceMock.collect(logger).info).toMatchInlineSnapshot(`
         Array [
           Array [
@@ -57,9 +61,17 @@ describe('UuidService', () => {
       `);
     });
 
-    it('should returns the uuid resolved from manageInstanceUuid', async () => {
-      const setup = await service.setup();
+    it('returns the uuid resolved from manageInstanceUuid', async () => {
+      const setup = await service.setup({ legacyPlugins: legacyDiscover });
       expect(setup.getInstanceUuid()).toEqual('SOME_UUID');
+    });
+
+    it('sets the uuid value in the legacy config', async () => {
+      await service.setup({ legacyPlugins: legacyDiscover });
+      expect(legacyDiscover.pluginExtendedConfig.set).toHaveBeenCalledWith(
+        'server.uuid',
+        'SOME_UUID'
+      );
     });
   });
 });

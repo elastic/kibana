@@ -21,6 +21,7 @@ import { manageInstanceUuid } from './manage_uuid';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { IConfigService } from '../config';
+import { LegacyServiceDiscoverPlugins } from '../legacy/legacy_service';
 
 /**
  * APIs to access the application's instance uuid.
@@ -30,6 +31,10 @@ export interface UuidServiceSetup {
    * Retrieve the Kibana instance uuid.
    */
   getInstanceUuid(): string;
+}
+
+interface SetupDeps {
+  legacyPlugins: LegacyServiceDiscoverPlugins;
 }
 
 /** @internal */
@@ -43,9 +48,13 @@ export class UuidService {
     this.configService = core.configService;
   }
 
-  public async setup() {
+  public async setup({ legacyPlugins }: SetupDeps) {
     this.uuid = await manageInstanceUuid(this.configService);
     this.log.info(`Kibana instance UUID: ${this.uuid}`);
+
+    // propagate the instance uuid to the legacy config, as it was the legacy way to access it.
+    legacyPlugins.pluginExtendedConfig.set('server.uuid', this.uuid);
+
     return {
       getInstanceUuid: () => this.uuid,
     };
