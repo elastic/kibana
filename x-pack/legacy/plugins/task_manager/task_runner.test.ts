@@ -9,7 +9,7 @@ import sinon from 'sinon';
 import { minutesFromNow } from './lib/intervals';
 import { asOk, asErr } from './lib/result_type';
 import { TaskEvent, asTaskRunEvent, asTaskMarkRunningEvent } from './task_events';
-import { ConcreteTaskInstance } from './task';
+import { ConcreteTaskInstance, TaskStatus } from './task';
 import { TaskManagerRunner } from './task_runner';
 import { mockLogger } from './test_utils';
 import { SavedObjectsErrorHelpers } from '../../../../src/core/server/saved_objects/service/lib/errors';
@@ -90,7 +90,7 @@ describe('TaskManagerRunner', () => {
     const { runner, store } = testOpts({
       instance: {
         interval: '10m',
-        status: 'running',
+        status: TaskStatus.RUNNING,
         startedAt: new Date(),
       },
       definitions: {

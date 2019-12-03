@@ -272,7 +272,6 @@ export class TaskManager {
           const { id, event } = taskEvent;
 
           either<ConcreteTaskInstance, Error>(
-            event,
             (taskInstance: ConcreteTaskInstance) => {
               if (isTaskRunEvent(taskEvent)) {
                 subscription.unsubscribe();
@@ -282,7 +281,8 @@ export class TaskManager {
             (error: Error) => {
               subscription.unsubscribe();
               resolve({ id, error: `${error}` });
-            }
+            },
+            event
           );
         });
 

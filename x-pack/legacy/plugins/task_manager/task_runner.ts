@@ -12,9 +12,9 @@
 
 import { performance } from 'perf_hooks';
 import Joi from 'joi';
-import { identity } from 'lodash';
+import { identity, defaults, flow } from 'lodash';
 
-import { asOk, asErr, isErr, correctError, eitherAsync, resolve, Result } from './lib/result_type';
+import { asOk, asErr, mapErr, eitherAsync, unwrap, mapOk, Result } from './lib/result_type';
 import { TaskRun, TaskMarkRunning, asTaskRunEvent, asTaskMarkRunningEvent } from './task_events';
 import { intervalFromDate, intervalFromNow } from './lib/intervals';
 import { Logger } from './types';
@@ -26,6 +26,7 @@ import {
   RunResult,
   SuccessfulRunResult,
   FailedRunResult,
+  FailedTaskResult,
   TaskDefinition,
   TaskDictionary,
   validateRunResult,
@@ -201,7 +202,7 @@ export class TaskManagerRunner implements TaskRunner {
 
       this.instance = await this.bufferedTaskStore.update({
         ...taskInstance,
-        status: 'running',
+        status: TaskStatus.RUNNING,
         startedAt: now,
         attempts,
         retryAt: this.instance.interval
@@ -271,58 +272,72 @@ export class TaskManagerRunner implements TaskRunner {
     return result.error ? asErr({ ...result, error: result.error as Error }) : asOk(result);
   }
 
-  private retryAtAfterFailure = (
-    failureResult: FailedRunResult
-  ): Result<SuccessfulRunResult, Error> => {
-    const { runAt, state, error } = failureResult;
-
-    const startedAt = this.instance.startedAt!;
-
-    if (runAt) {
-      return asOk({ state, runAt });
+  private shouldTryToScheduleRetry(): boolean {
+    if (this.instance.interval) {
+      return true;
     }
 
-    // when result.error is truthy, then we're retrying because it failed
-    const newRunAt = this.instance.interval
-      ? intervalFromDate(startedAt, this.instance.interval)!
-      : this.getRetryDelay({
-          attempts: this.instance.attempts,
+    const maxAttempts = this.definition.maxAttempts || this.bufferedTaskStore.maxAttempts;
+    return this.instance.attempts < maxAttempts;
+  }
+
+  private rescheduleFailedRun = (
+    failureResult: FailedRunResult
+  ): Result<SuccessfulRunResult, FailedTaskResult> => {
+    if (this.shouldTryToScheduleRetry()) {
+      const { runAt, state, error } = failureResult;
+      // if we're retrying, keep the number of attempts
+      const { interval, attempts } = this.instance;
+      if (runAt || interval) {
+        return asOk({ state, attempts, runAt });
+      } else {
+        // when result.error is truthy, then we're retrying because it failed
+        const newRunAt = this.getRetryDelay({
+          attempts,
           error,
         });
 
-    if (newRunAt) {
-      return asOk({ state, runAt: newRunAt });
+        if (newRunAt) {
+          return asOk({ state, attempts, runAt: newRunAt });
+        }
+      }
     }
-    return asErr(new Error(`Task ${this} retry failed: cannot schedule retry`));
+    // scheduling a retry isn't possible,mark task as failed
+    return asErr({ status: TaskStatus.FAILED });
   };
 
   private async processResultForRecurringTask(
     result: Result<SuccessfulRunResult, FailedRunResult>
   ): Promise<void> {
-    // recurring task: update the task instance
-    const { startedAt, interval } = this.instance;
-    const status: TaskStatus = this.getInstanceStatus();
+    const fieldUpdates = flow(
+      // if running the task has failed ,try to correct by scheduling a retry in the near future
+      mapErr(this.rescheduleFailedRun),
+      // if retrying is possible (new runAt) or this is simply an interval
+      // based task - reschedule
+      mapOk(({ runAt, state, attempts = 0 }: Partial<ConcreteTaskInstance>) => {
+        const { startedAt, interval } = this.instance;
+        return asOk({
+          runAt: runAt || intervalFromDate(startedAt!, interval)!,
+          state,
+          attempts,
+          status: TaskStatus.IDLE,
+        });
+      }),
+      unwrap
+    )(result);
 
-    const resolution =
-      status === 'failed'
-        ? { status: 'failed' as TaskStatus, runAt: this.instance.runAt }
-        : resolve<SuccessfulRunResult, Error, { runAt: Date; state?: Record<string, any> }>(
-            correctError(result, this.retryAtAfterFailure),
-            ({ runAt, state = this.instance.state }: SuccessfulRunResult) => ({
-              runAt: runAt || intervalFromDate(startedAt!, interval)!,
-              state,
-            }),
-            (failedResult: Error) => ({ status: 'failed', runAt: this.instance.runAt })
-          );
-
-    await this.bufferedTaskStore.update({
-      ...this.instance,
-      ...resolution,
-      startedAt: null,
-      retryAt: null,
-      ownerId: null,
-      attempts: isErr<SuccessfulRunResult, FailedRunResult>(result) ? this.instance.attempts : 0,
-    });
+    await this.bufferedTaskStore.update(
+      defaults(
+        {
+          ...fieldUpdates,
+          // reset fields that track the lifecycle of the concluded `task run`
+          startedAt: null,
+          retryAt: null,
+          ownerId: null,
+        },
+        this.instance
+      )
+    );
   }
 
   private async processResultWhenDone(): Promise<void> {
@@ -342,7 +357,6 @@ export class TaskManagerRunner implements TaskRunner {
     result: Result<SuccessfulRunResult, FailedRunResult>
   ): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
     await eitherAsync(
-      result,
       async ({ runAt }: SuccessfulRunResult) => {
         if (runAt || this.instance.interval) {
           await this.processResultForRecurringTask(result);
@@ -354,18 +368,10 @@ export class TaskManagerRunner implements TaskRunner {
       async ({ error }: FailedRunResult) => {
         await this.processResultForRecurringTask(result);
         this.onTaskEvent(asTaskRunEvent(this.id, asErr(error)));
-      }
+      },
+      result
     );
     return result;
-  }
-
-  private getInstanceStatus() {
-    if (this.instance.interval) {
-      return 'idle';
-    }
-
-    const maxAttempts = this.definition.maxAttempts || this.bufferedTaskStore.maxAttempts;
-    return this.instance.attempts < maxAttempts ? 'idle' : 'failed';
   }
 
   private getRetryDelay({

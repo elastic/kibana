@@ -73,6 +73,10 @@ export interface FailedRunResult extends SuccessfulRunResult {
   error: Error;
 }
 
+export interface FailedTaskResult {
+  status: TaskStatus.FAILED;
+}
+
 export const validateRunResult = Joi.object({
   runAt: Joi.date().optional(),
   error: Joi.object().optional(),
@@ -159,7 +163,12 @@ export interface TaskDictionary<T extends TaskDefinition> {
   [taskType: string]: T;
 }
 
-export type TaskStatus = 'idle' | 'claiming' | 'running' | 'failed';
+export enum TaskStatus {
+  IDLE = 'idle',
+  CLAIMING = 'claiming',
+  RUNNING = 'running',
+  FAILED = 'failed',
+}
 
 /*
  * A task instance represents all of the data required to store, fetch,

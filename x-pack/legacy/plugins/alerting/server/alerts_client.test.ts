@@ -9,6 +9,7 @@ import { AlertsClient } from './alerts_client';
 import { savedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
+import { TaskStatus } from '../../task_manager';
 
 const taskManager = taskManagerMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -106,7 +107,7 @@ describe('create()', () => {
       taskType: 'alerting:123',
       scheduledAt: new Date(),
       attempts: 1,
-      status: 'idle',
+      status: 'idle' as TaskStatus,
       runAt: new Date(),
       startedAt: null,
       retryAt: null,
@@ -474,7 +475,7 @@ describe('create()', () => {
       taskType: 'alerting:123',
       scheduledAt: new Date(),
       attempts: 1,
-      status: 'idle',
+      status: 'idle' as TaskStatus,
       runAt: new Date(),
       startedAt: null,
       retryAt: null,
@@ -554,7 +555,7 @@ describe('enable()', () => {
       id: 'task-123',
       scheduledAt: new Date(),
       attempts: 0,
-      status: 'idle',
+      status: 'idle' as TaskStatus,
       runAt: new Date(),
       state: {},
       params: {},
@@ -631,7 +632,7 @@ describe('enable()', () => {
       id: 'task-123',
       scheduledAt: new Date(),
       attempts: 0,
-      status: 'idle',
+      status: 'idle' as TaskStatus,
       runAt: new Date(),
       state: {},
       params: {},
