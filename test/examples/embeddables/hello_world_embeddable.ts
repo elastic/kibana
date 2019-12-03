@@ -19,19 +19,28 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService }) {
+import { PluginFunctionalProviderContext } from 'test/plugin_functional/services';
+
+// eslint-disable-next-line import/no-default-export
+export default function({ getService }: PluginFunctionalProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
   describe('hello world embeddable', () => {
-
     before(async () => {
-      await testSubjects.click('embedExplorerTab-helloWorldEmbeddable');
+      await testSubjects.click('helloWorldEmbeddableSection');
     });
 
-    it('hello world embeddable renders', async () => {
+    it('hello world embeddable render', async () => {
       await retry.try(async () => {
         const text = await testSubjects.getVisibleText('helloWorldEmbeddable');
+        expect(text).to.be('HELLO WORLD!');
+      });
+    });
+
+    it('hello world embeddable from factory renders', async () => {
+      await retry.try(async () => {
+        const text = await testSubjects.getVisibleText('helloWorldEmbeddableFromFactory');
         expect(text).to.be('HELLO WORLD!');
       });
     });

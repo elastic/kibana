@@ -1,7 +1,7 @@
 {
-  "name": "search_explorer",
+  "name": "embeddable_explorer",
   "version": "1.0.0",
-  "main": "target/examples/search_explorer",
+  "main": "target/examples/embeddable_explorer",
   "kibana": {
     "version": "kibana",
     "templateVersion": "1.0.0"

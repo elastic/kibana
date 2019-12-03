@@ -148,6 +148,8 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       // Ideally this would automatically include all plugins in the examples dir
       fromRoot('examples/demo_search'),
       fromRoot('examples/search_explorer'),
+      fromRoot('examples/embeddable_examples'),
+      fromRoot('examples/embeddable_explorer'),
     ] : [],
 
     XPACK_INSTALLED && !opts.oss

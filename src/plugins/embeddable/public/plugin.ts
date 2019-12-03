@@ -31,6 +31,21 @@ export interface IEmbeddableSetup {
   registerEmbeddableFactory: EmbeddableApi['registerEmbeddableFactory'];
 }
 
+export interface EmbeddableAppMountContext {
+  getEmbeddableFactories: EmbeddableApi['getEmbeddableFactories'];
+  getEmbeddableFactory: EmbeddableApi['getEmbeddableFactory'];
+}
+
+/**
+ * Extends the AppMountContext so other plugins have access
+ * to embeddable functionality in their applications.
+ */
+declare module 'kibana/public' {
+  interface AppMountContext {
+    embeddable?: EmbeddableAppMountContext;
+  }
+}
+
 export type IEmbeddableStart = EmbeddableApi;
 
 export class EmbeddablePublicPlugin implements Plugin<IEmbeddableSetup, IEmbeddableStart> {
@@ -53,6 +68,13 @@ export class EmbeddablePublicPlugin implements Plugin<IEmbeddableSetup, IEmbedda
   }
 
   public start(core: CoreStart) {
+    core.application.registerMountContext<'embeddable'>('embeddable', () => {
+      return {
+        getEmbeddableFactories: this.api.getEmbeddableFactories,
+        getEmbeddableFactory: this.api.getEmbeddableFactory,
+      };
+    });
+
     return this.api;
   }
 

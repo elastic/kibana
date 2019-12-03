@@ -26,6 +26,7 @@ export default async function ({ readConfigFile }) {
   return {
     testFiles: [
       require.resolve('./search'),
+      require.resolve('./embeddables'),
     ],
     services: {
       ...functionalConfig.get('services'),

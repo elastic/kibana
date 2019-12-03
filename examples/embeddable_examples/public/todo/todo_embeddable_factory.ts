@@ -16,14 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { EmbeddableOutput, EmbeddableInput, IEmbeddable } from './i_embeddable';
-export { Embeddable } from './embeddable';
-export {
-  EmbeddableInstanceConfiguration,
-  EmbeddableFactory,
-  OutputSpec,
-} from './embeddable_factory';
-export { ErrorEmbeddable, isErrorEmbeddable } from './error_embeddable';
-export { withEmbeddableSubscription } from './with_subscription';
-export { EmbeddableFactoryRenderer } from './embeddable_factory_renderer';
-export { EmbeddableRoot } from './embeddable_root';
+
+import { i18n } from '@kbn/i18n';
+import { IContainer, EmbeddableFactory } from '../../../../src/plugins/embeddable/public';
+import { TodoEmbeddable, TODO_EMBEDDABLE, TodoInput } from './todo_embeddable';
+
+export class TodoEmbeddableFactory extends EmbeddableFactory {
+  public readonly type = TODO_EMBEDDABLE;
+
+  public isEditable() {
+    return true;
+  }
+
+  public async create(initialInput: TodoInput, parent?: IContainer) {
+    return new TodoEmbeddable(initialInput, parent);
+  }
+
+  public getDisplayName() {
+    return i18n.translate('embeddableApi.samples.helloworld.displayName', {
+      defaultMessage: 'Todo item',
+    });
+  }
+}

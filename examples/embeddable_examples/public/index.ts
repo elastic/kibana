@@ -17,23 +17,18 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import { PluginInitializer } from 'kibana/public';
+export {
+  HELLO_WORLD_EMBEDDABLE,
+  HelloWorldEmbeddable,
+  HelloWorldEmbeddableFactory,
+} from './hello_world';
+export { ListContainer, LIST_CONTAINER } from './list_container';
+export { TODO_EMBEDDABLE } from './todo';
 
-export default function ({ getService }) {
-  const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
+import { EmbeddableExamplesPlugin } from './plugin';
 
-  describe('hello world container', () => {
+export { SearchableListContainer, SEARCHABLE_LIST_CONTAINER } from './searchable_list_container';
+export { MULTI_TASK_TODO_EMBEDDABLE } from './multi_task_todo';
 
-    before(async () => {
-      await testSubjects.click('embedExplorerTab-helloWorldContainer');
-    });
-
-    it('hello world embeddable renders', async () => {
-      await retry.try(async () => {
-        const text = await testSubjects.getVisibleText('helloWorldEmbeddable');
-        expect(text).to.be('HELLO WORLD!');
-      });
-    });
-  });
-}
+export const plugin: PluginInitializer<void, void> = () => new EmbeddableExamplesPlugin();

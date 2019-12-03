@@ -16,14 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { EmbeddableOutput, EmbeddableInput, IEmbeddable } from './i_embeddable';
-export { Embeddable } from './embeddable';
-export {
-  EmbeddableInstanceConfiguration,
+
+import { i18n } from '@kbn/i18n';
+import {
   EmbeddableFactory,
-  OutputSpec,
-} from './embeddable_factory';
-export { ErrorEmbeddable, isErrorEmbeddable } from './error_embeddable';
-export { withEmbeddableSubscription } from './with_subscription';
-export { EmbeddableFactoryRenderer } from './embeddable_factory_renderer';
-export { EmbeddableRoot } from './embeddable_root';
+  GetEmbeddableFactory,
+  ContainerInput,
+} from '../../../../src/plugins/embeddable/public';
+import { LIST_CONTAINER, ListContainer } from './list_container';
+
+export class ListContainerFactory extends EmbeddableFactory {
+  public readonly type = LIST_CONTAINER;
+  public readonly isContainerType = true;
+
+  constructor(private getEmbeddableFactory: GetEmbeddableFactory) {
+    super();
+  }
+
+  public isEditable() {
+    return true;
+  }
+
+  public async create(initialInput: ContainerInput) {
+    return new ListContainer(initialInput, this.getEmbeddableFactory);
+  }
+
+  public getDisplayName() {
+    return i18n.translate('embeddableExamples.searchableListContainer.displayName', {
+      defaultMessage: 'List container',
+    });
+  }
+}

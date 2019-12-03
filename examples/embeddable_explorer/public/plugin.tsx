@@ -16,14 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { EmbeddableOutput, EmbeddableInput, IEmbeddable } from './i_embeddable';
-export { Embeddable } from './embeddable';
-export {
-  EmbeddableInstanceConfiguration,
-  EmbeddableFactory,
-  OutputSpec,
-} from './embeddable_factory';
-export { ErrorEmbeddable, isErrorEmbeddable } from './error_embeddable';
-export { withEmbeddableSubscription } from './with_subscription';
-export { EmbeddableFactoryRenderer } from './embeddable_factory_renderer';
-export { EmbeddableRoot } from './embeddable_root';
+
+import { Plugin, CoreSetup } from 'kibana/public';
+import { EmbeddableAppMountContext } from '../../../src/plugins/embeddable/public';
+
+declare module 'kibana/public' {
+  interface AppMountContext {
+    embeddable?: EmbeddableAppMountContext;
+  }
+}
+export class EmbeddableExplorerPlugin implements Plugin {
+  public setup(core: CoreSetup) {
+    core.application.register({
+      id: 'embeddableExplorer',
+      title: 'Embeddable explorer',
+      async mount(context, params) {
+        const { renderApp } = await import('./application');
+        return renderApp(context, params);
+      },
+    });
+  }
+
+  public start() {}
+  public stop() {}
+}

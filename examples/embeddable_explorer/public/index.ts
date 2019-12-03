@@ -16,14 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { EmbeddableOutput, EmbeddableInput, IEmbeddable } from './i_embeddable';
-export { Embeddable } from './embeddable';
-export {
-  EmbeddableInstanceConfiguration,
-  EmbeddableFactory,
-  OutputSpec,
-} from './embeddable_factory';
-export { ErrorEmbeddable, isErrorEmbeddable } from './error_embeddable';
-export { withEmbeddableSubscription } from './with_subscription';
-export { EmbeddableFactoryRenderer } from './embeddable_factory_renderer';
-export { EmbeddableRoot } from './embeddable_root';
+
+import { EmbeddableExplorerPlugin } from './plugin';
+
+export const plugin = () => new EmbeddableExplorerPlugin();

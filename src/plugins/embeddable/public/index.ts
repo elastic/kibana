@@ -55,10 +55,13 @@ export {
   ViewMode,
   isErrorEmbeddable,
   openAddPanelFlyout,
+  withEmbeddableSubscription,
+  EmbeddableFactoryRenderer,
+  EmbeddableRoot,
 } from './lib';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);
 }
 
-export { IEmbeddableSetup, IEmbeddableStart } from './plugin';
+export { IEmbeddableSetup, IEmbeddableStart, EmbeddableAppMountContext } from './plugin';

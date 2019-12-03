@@ -16,14 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { EmbeddableOutput, EmbeddableInput, IEmbeddable } from './i_embeddable';
-export { Embeddable } from './embeddable';
-export {
-  EmbeddableInstanceConfiguration,
-  EmbeddableFactory,
-  OutputSpec,
-} from './embeddable_factory';
-export { ErrorEmbeddable, isErrorEmbeddable } from './error_embeddable';
-export { withEmbeddableSubscription } from './with_subscription';
-export { EmbeddableFactoryRenderer } from './embeddable_factory_renderer';
-export { EmbeddableRoot } from './embeddable_root';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import {
+  Container,
+  ContainerInput,
+  GetEmbeddableFactory,
+} from '../../../../src/plugins/embeddable/public';
+import { ListContainerComponent } from './list_container_component';
+
+export const LIST_CONTAINER = 'LIST_CONTAINER';
+
+export class ListContainer extends Container<{}, ContainerInput> {
+  public readonly type = LIST_CONTAINER;
+
+  constructor(input: ContainerInput, getEmbeddableFactory: GetEmbeddableFactory) {
+    super(input, { embeddableLoaded: {} }, getEmbeddableFactory);
+  }
+
+  // This container has no input itself.
+  getInheritedInput(id: string) {
+    return {};
+  }
+
+  public render(node: HTMLElement) {
+    ReactDOM.render(<ListContainerComponent embeddable={this} />, node);
+  }
+}
