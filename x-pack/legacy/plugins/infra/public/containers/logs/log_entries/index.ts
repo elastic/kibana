@@ -38,21 +38,18 @@ type ActionObj = ReceiveEntriesAction | FetchOrErrorAction;
 
 type Dispatch = (action: ActionObj) => void;
 
-interface LogEntriesDependencies {
+interface LogEntriesFetchParams {
   filterQuery: string | null;
   timeKey: TimeKey | null;
   pagesBeforeStart: number | null;
   pagesAfterEnd: number | null;
 }
 
-type FetchEntriesParams = LogEntriesDependencies & {
+type FetchEntriesParams = LogEntriesFetchParams & {
   sourceId: string;
 };
 
-interface FetchMoreEntriesParams {
-  pagesBeforeStart: number | null;
-  pagesAfterEnd: number | null;
-}
+type FetchMoreEntriesParams = Pick<LogEntriesFetchParams, 'pagesBeforeStart' | 'pagesAfterEnd'>;
 
 export interface LogEntriesResponse {
   entries: InfraLogEntry[];
@@ -184,12 +181,12 @@ const useFetchEntriesEffect = (
 };
 
 export const useLogEntriesState: (
-  dependencies: LogEntriesDependencies
-) => [LogEntriesStateParams, LogEntriesCallbacks] = dependencies => {
+  params: LogEntriesFetchParams
+) => [LogEntriesStateParams, LogEntriesCallbacks] = params => {
   const [state, dispatch] = useReducer(logEntriesStateReducer, logEntriesInitialState);
 
   const { fetchNewerEntries } = useFetchEntriesEffect(state, dispatch, {
-    ...dependencies,
+    ...params,
     sourceId: 'default',
   });
   const callbacks = { fetchNewerEntries };
