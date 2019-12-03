@@ -409,6 +409,14 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       });
       return response.status !== 200;
     }
+    async waitForSaveModalToClose() {
+      log.debug('Waiting for save modal to close');
+      await retry.try(async () => {
+        if (await testSubjects.exists('savedObjectSaveModal')) {
+          throw new Error('save modal still open');
+        }
+      });
+    }
   }
 
   return new CommonPage();

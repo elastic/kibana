@@ -96,7 +96,7 @@ Payload:
 
 |Property|Description|Type|
 |---|---|---|
-|description|A description to reference and search in the future. This value will be used to populate dropdowns.|string|
+|name|A name to reference and search in the future. This value will be used to populate dropdowns.|string|
 |actionTypeId|The id value of the action type you want to call when the action executes.|string|
 |config|The configuration the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if config validation is defined.|object|
 |secrets|The secrets the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if secrets validation is defined.|object|
@@ -139,7 +139,7 @@ Payload:
 
 |Property|Description|Type|
 |---|---|---|
-|description|A description to reference and search in the future. This value will be used to populate dropdowns.|string|
+|name|A name to reference and search in the future. This value will be used to populate dropdowns.|string|
 |config|The configuration the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if config validation is defined.|object|
 |secrets|The secrets the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if secrets validation is defined.|object|
 
@@ -301,7 +301,7 @@ $ kbn-action create .slack "post to slack" '{"webhookUrl": "https://hooks.slack.
     "id": "d6f1e228-1806-4a72-83ac-e06f3d5c2fbe",
     "attributes": {
         "actionTypeId": ".slack",
-        "description": "post to slack",
+        "name": "post to slack",
         "config": {}
     },
     "references": [],
