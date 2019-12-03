@@ -7,8 +7,13 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import { Home } from '../Home';
+import * as plugin from '../../../new-platform/plugin';
 
-jest.mock('ui/new_platform');
+jest.spyOn(plugin, 'usePlugins').mockReturnValue(({
+  apm: { config: {} as plugin.ConfigSchema }
+} as unknown) as plugin.ApmPluginStartDeps & {
+  apm: { config: plugin.ConfigSchema };
+});
 
 describe('Home component', () => {
   it('should render services', () => {

@@ -43,22 +43,18 @@ export const initServerWithKibana = (
 
   const libs = compose(kbnServer, mode);
   initServer(libs);
-  if (
-    kbnServer.config().has('xpack.actions.enabled') &&
-    kbnServer.config().get('xpack.actions.enabled') === true &&
-    kbnServer.config().has('xpack.alerting.enabled') &&
-    kbnServer.config().has('xpack.alerting.enabled') === true
-  ) {
-    logger.info(
-      'Detected feature flags for actions and alerting and enabling detection engine API endpoints'
-    );
-    createRulesRoute(kbnServer);
-    readRulesRoute(kbnServer);
-    updateRulesRoute(kbnServer);
-    deleteRulesRoute(kbnServer);
-    findRulesRoute(kbnServer);
-    createIndexRoute(kbnServer);
-  }
+
+  // Signals/Alerting Rules routes for
+  // routes such as ${DETECTION_ENGINE_RULES_URL}
+  // that have the REST endpoints of /api/detection_engine/rules
+  createRulesRoute(kbnServer);
+  readRulesRoute(kbnServer);
+  updateRulesRoute(kbnServer);
+  deleteRulesRoute(kbnServer);
+  findRulesRoute(kbnServer);
+
+  // Index rule routes
+  createIndexRoute(kbnServer);
 
   const xpackMainPlugin = kbnServer.plugins.xpack_main;
   xpackMainPlugin.registerFeature({
