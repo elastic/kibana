@@ -23,7 +23,6 @@ describe('worldToRaster', () => {
     it('should convert 0,0 (center) in world space to 150,100 in raster space', () => {
       expect(worldToRaster(store.getState())([0, 0])).toEqual([150, 100]);
     });
-    // top
     it('should convert 0,100 (top) in world space to 150,0 in raster space', () => {
       expect(worldToRaster(store.getState())([0, 100])).toEqual([150, 0]);
     });
@@ -45,7 +44,7 @@ describe('worldToRaster', () => {
     it('should convert -150,0 (left) in world space to 0,100 in raster space', () => {
       expect(worldToRaster(store.getState())([-150, 0])).toEqual([0, 100]);
     });
-    it('should convert -150,100 (top left) in world space to 0,100 in raster space', () => {
+    it('should convert -150,100 (top left) in world space to 0,0 in raster space', () => {
       expect(worldToRaster(store.getState())([-150, 100])).toEqual([0, 0]);
     });
     describe('when the user has zoomed to 0.5', () => {
