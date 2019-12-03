@@ -6,6 +6,41 @@
 
 import * as t from 'io-ts';
 
+export const NewRuleSchema = t.intersection([
+  t.type({
+    description: t.string,
+    enabled: t.boolean,
+    index: t.array(t.string),
+    interval: t.string,
+    language: t.string,
+    name: t.string,
+    query: t.string,
+    severity: t.string,
+    type: t.union([t.literal('query'), t.literal('saved_query')]),
+  }),
+  t.partial({
+    created_by: t.string,
+    false_positives: t.array(t.string),
+    from: t.string,
+    id: t.string,
+    max_signals: t.number,
+    references: t.array(t.string),
+    rule_id: t.string,
+    tags: t.array(t.string),
+    to: t.string,
+    updated_by: t.string,
+  }),
+]);
+
+export const NewRulesSchema = t.array(NewRuleSchema);
+export type NewRule = t.TypeOf<typeof NewRuleSchema>;
+
+export interface AddRulesProps {
+  rule: NewRule;
+  kbnVersion: string;
+  signal: AbortSignal;
+}
+
 export const RuleSchema = t.intersection([
   t.type({
     created_by: t.string,

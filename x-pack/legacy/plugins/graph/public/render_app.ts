@@ -28,7 +28,7 @@ import {
   LegacyCoreStart,
   SavedObjectsClientContract,
   ToastsStart,
-  UiSettingsClientContract,
+  IUiSettingsClient,
 } from 'kibana/public';
 // @ts-ignore
 import { initGraphApp } from './app';
@@ -48,7 +48,7 @@ export interface GraphDependencies extends LegacyAngularInjectedDependencies {
   coreStart: AppMountContext['core'];
   navigation: NavigationStart;
   chrome: ChromeStart;
-  config: UiSettingsClientContract;
+  config: IUiSettingsClient;
   toastNotifications: ToastsStart;
   indexPatterns: DataStart['indexPatterns']['indexPatterns'];
   npData: ReturnType<DataPlugin['start']>;

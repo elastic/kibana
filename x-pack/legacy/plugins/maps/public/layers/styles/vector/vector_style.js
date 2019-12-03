@@ -59,7 +59,6 @@ export class VectorStyle extends AbstractStyle {
     this._iconSizeStyleProperty = this._makeSizeProperty(this._descriptor.properties[vectorStyles.ICON_SIZE], vectorStyles.ICON_SIZE);
     // eslint-disable-next-line max-len
     this._iconOrientationProperty = this._makeOrientationProperty(this._descriptor.properties[vectorStyles.ICON_ORIENTATION], vectorStyles.ICON_ORIENTATION);
-
   }
 
   _getAllStyleProperties() {
@@ -83,7 +82,14 @@ export class VectorStyle extends AbstractStyle {
     return (
       <VectorStyleEditor
         handlePropertyChange={handlePropertyChange}
-        styleProperties={styleProperties}
+        styleProperties={{
+          lineColor: this._lineColorStyleProperty,
+          fillColor: this._fillColorStyleProperty,
+          lineWidth: this._lineWidthStyleProperty,
+          iconSize: this._iconSizeStyleProperty,
+          iconOrientation: this._iconOrientationProperty,
+        }}
+        symbolDescriptor={this._descriptor.properties[vectorStyles.SYMBOL]}
         layer={layer}
         loadIsPointsOnly={this._getIsPointsOnly}
         loadIsLinesOnly={this._getIsLinesOnly}

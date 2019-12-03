@@ -7,6 +7,7 @@
 import { getQueryFilter, getFilter } from './get_filter';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { AlertServices } from '../../../../../alerting/server/types';
+import { PartialFilter } from './types';
 
 describe('get_filter', () => {
   let savedObjectsClient = savedObjectsClientMock.create();
@@ -136,6 +137,103 @@ describe('get_filter', () => {
             {
               match_phrase: {
                 'host.name': 'siem-windows',
+              },
+            },
+          ],
+          should: [],
+          must_not: [],
+        },
+      });
+    });
+
+    test('it should work with a simple filter as a kuery without meta information', () => {
+      const esQuery = getQueryFilter(
+        'host.name: windows',
+        'kuery',
+        [
+          {
+            query: {
+              match_phrase: {
+                'host.name': 'siem-windows',
+              },
+            },
+          },
+        ],
+        ['auditbeat-*']
+      );
+      expect(esQuery).toEqual({
+        bool: {
+          must: [],
+          filter: [
+            {
+              bool: {
+                should: [
+                  {
+                    match: {
+                      'host.name': 'windows',
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+            {
+              match_phrase: {
+                'host.name': 'siem-windows',
+              },
+            },
+          ],
+          should: [],
+          must_not: [],
+        },
+      });
+    });
+
+    test('it should work with a simple filter as a kuery without meta information with an exists', () => {
+      const query: PartialFilter = {
+        query: {
+          match_phrase: {
+            'host.name': 'siem-windows',
+          },
+        },
+      } as PartialFilter;
+
+      const exists: PartialFilter = {
+        exists: {
+          field: 'host.hostname',
+        },
+      } as PartialFilter;
+
+      const esQuery = getQueryFilter(
+        'host.name: windows',
+        'kuery',
+        [query, exists],
+        ['auditbeat-*']
+      );
+      expect(esQuery).toEqual({
+        bool: {
+          must: [],
+          filter: [
+            {
+              bool: {
+                should: [
+                  {
+                    match: {
+                      'host.name': 'windows',
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+            {
+              match_phrase: {
+                'host.name': 'siem-windows',
+              },
+            },
+            {
+              exists: {
+                field: 'host.hostname',
               },
             },
           ],

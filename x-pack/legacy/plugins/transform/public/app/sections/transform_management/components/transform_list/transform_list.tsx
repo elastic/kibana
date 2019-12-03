@@ -42,7 +42,7 @@ import { StopAction } from './action_stop';
 import { ItemIdToExpandedRowMap, Query, Clause } from './common';
 import { getColumns } from './columns';
 import { ExpandedRow } from './expanded_row';
-import { ProgressBar, TransformTable } from './transform_table';
+import { ProgressBar, transformTableFactory } from './transform_table';
 
 function getItemIdToExpandedRowMap(
   itemIds: TransformId[],
@@ -373,6 +373,8 @@ export const TransformList: FC<Props> = ({
   const selection = {
     onSelectionChange: (selected: TransformListRow[]) => setTransformSelection(selected),
   };
+
+  const TransformTable = transformTableFactory<TransformListRow>();
 
   return (
     <div data-test-subj="transformListTableContainer">

@@ -32,7 +32,9 @@ export const validatePolicy = (
       schedule: [],
       repository: [],
       indices: [],
+      expireAfterValue: [],
       minCount: [],
+      maxCount: [],
     },
   };
 
@@ -104,6 +106,33 @@ export const validatePolicy = (
         values: {
           policyName: managedRepository.policy,
         },
+      })
+    );
+  }
+
+  if (retention && retention.expireAfterValue && retention.expireAfterValue < 0) {
+    validation.errors.expireAfterValue.push(
+      i18n.translate(
+        'xpack.snapshotRestore.policyValidation.invalidNegativeDeleteAfterErrorMessage',
+        {
+          defaultMessage: 'Delete after cannot be negative.',
+        }
+      )
+    );
+  }
+
+  if (retention && retention.minCount && retention.minCount < 0) {
+    validation.errors.minCount.push(
+      i18n.translate('xpack.snapshotRestore.policyValidation.invalidNegativeMinCountErrorMessage', {
+        defaultMessage: 'Minimum count cannot be negative.',
+      })
+    );
+  }
+
+  if (retention && retention.maxCount && retention.maxCount < 0) {
+    validation.errors.maxCount.push(
+      i18n.translate('xpack.snapshotRestore.policyValidation.invalidNegativeMaxCountErrorMessage', {
+        defaultMessage: 'Maximum count cannot be negative.',
       })
     );
   }

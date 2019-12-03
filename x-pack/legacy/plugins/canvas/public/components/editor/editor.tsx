@@ -19,9 +19,9 @@ import 'monaco-editor/esm/vs/editor/contrib/suggest/suggestController.js'; // Ne
 import 'monaco-editor/esm/vs/editor/contrib/hover/hover.js'; // Needed for hover
 import 'monaco-editor/esm/vs/editor/contrib/parameterHints/parameterHints.js'; // Needed for signature
 
-import { theme } from './editor_theme';
+import { LIGHT_THEME, DARK_THEME } from './editor_theme';
 
-interface Props {
+export interface Props {
   /** Width of editor. Defaults to 100%. */
   width?: string | number;
 
@@ -79,6 +79,11 @@ interface Props {
    * Function called after the editor is mounted in the view
    */
   editorDidMount?: EditorDidMount;
+
+  /**
+   * Should the editor use the dark theme
+   */
+  useDarkTheme?: boolean;
 }
 
 export class Editor extends React.Component<Props, {}> {
@@ -115,7 +120,7 @@ export class Editor extends React.Component<Props, {}> {
     });
 
     // Register the theme
-    monaco.editor.defineTheme('euiColors', theme);
+    monaco.editor.defineTheme('euiColors', this.props.useDarkTheme ? DARK_THEME : LIGHT_THEME);
   };
 
   _editorDidMount = (
