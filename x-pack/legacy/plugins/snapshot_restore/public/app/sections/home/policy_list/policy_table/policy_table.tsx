@@ -6,7 +6,6 @@
 
 import React, { useState } from 'react';
 import {
-  EuiBadge,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,6 +16,7 @@ import {
   EuiLoadingSpinner,
   EuiText,
   EuiIcon,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import { SlmPolicy } from '../../../../../../common/types';
@@ -76,12 +76,15 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
             </EuiFlexItem>
             {isManagedPolicy ? (
               <EuiFlexItem grow={false}>
-                <EuiBadge color="primary">
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.policyList.table.managedPolicyBadgeLabel"
-                    defaultMessage="Managed"
-                  />
-                </EuiBadge>
+                <EuiIconTip
+                  content={
+                    <FormattedMessage
+                      id="xpack.snapshotRestore.policyList.table.managedPolicyBadgeLabel"
+                      defaultMessage="This is a managed policy"
+                    />
+                  }
+                  position="right"
+                />
               </EuiFlexItem>
             ) : null}
             {inProgress ? (

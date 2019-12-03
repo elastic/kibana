@@ -190,8 +190,8 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
               {currentStep === lastStep ? (
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    fill
-                    color="secondary"
+                    fill={isEditing && policy.isManagedPolicy ? false : true}
+                    color={isEditing && policy.isManagedPolicy ? 'warning' : 'secondary'}
                     iconType="check"
                     onClick={() => savePolicy()}
                     isLoading={isSaving}

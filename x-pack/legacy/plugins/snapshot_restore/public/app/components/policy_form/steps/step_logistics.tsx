@@ -120,6 +120,8 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
               },
               {
                 managedRepository,
+                isEditing,
+                policyName: policy.name,
               }
             );
           }}
@@ -254,6 +256,8 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           },
           {
             managedRepository,
+            isEditing,
+            policyName: policy.name,
           }
         );
       }
@@ -272,7 +276,11 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             {
               repository: e.target.value,
             },
-            { managedRepository }
+            {
+              managedRepository,
+              isEditing,
+              policyName: policy.name,
+            }
           );
         }}
         fullWidth
@@ -341,7 +349,11 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
               {
                 snapshotName: e.target.value.toLowerCase(),
               },
-              { managedRepository }
+              {
+                managedRepository,
+                isEditing,
+                policyName: policy.name,
+              }
             );
           }}
           onBlur={() => setTouched({ ...touched, snapshotName: true })}
@@ -418,7 +430,11 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
                   {
                     schedule: e.target.value,
                   },
-                  { managedRepository }
+                  {
+                    managedRepository,
+                    isEditing,
+                    policyName: policy.name,
+                  }
                 );
               }}
               onBlur={() => setTouched({ ...touched, schedule: true })}
@@ -437,7 +453,11 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
                   {
                     schedule: simpleCron.expression,
                   },
-                  { managedRepository }
+                  {
+                    managedRepository,
+                    isEditing,
+                    policyName: policy.name,
+                  }
                 );
               }}
               data-test-subj="showBasicCronLink"
@@ -475,6 +495,8 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
                 },
                 {
                   managedRepository,
+                  isEditing,
+                  policyName: policy.name,
                 }
               );
             }}

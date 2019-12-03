@@ -17,12 +17,19 @@ const isStringEmpty = (str: string | null): boolean => {
 
 export const validatePolicy = (
   policy: SlmPolicyPayload,
-  validationHelperData: any
+  validationHelperData: {
+    managedRepository?: {
+      name: string;
+      policy: string;
+    };
+    isEditing?: boolean;
+    policyName?: string;
+  }
 ): PolicyValidation => {
   const i18n = textService.i18n;
 
   const { name, snapshotName, schedule, repository, config, retention } = policy;
-  const { managedRepository } = validationHelperData;
+  const { managedRepository, isEditing, policyName } = validationHelperData;
 
   const validation: PolicyValidation = {
     isValid: true,
@@ -99,7 +106,12 @@ export const validatePolicy = (
     );
   }
 
-  if (managedRepository && managedRepository.name === repository && managedRepository.policy) {
+  if (
+    managedRepository &&
+    managedRepository.name === repository &&
+    managedRepository.policy &&
+    !(isEditing && managedRepository.policy === policyName)
+  ) {
     validation.errors.repository.push(
       i18n.translate('xpack.snapshotRestore.policyValidation.invalidRepoErrorMessage', {
         defaultMessage: 'Policy "{policyName}" is already associated with this repository.',
