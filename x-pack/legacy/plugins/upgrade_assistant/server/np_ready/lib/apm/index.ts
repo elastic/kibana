@@ -29,7 +29,7 @@ export async function getDeprecatedApmIndices(
     if (isLegacyApmIndex(index, indexPatterns, indices[index].mappings)) {
       deprecations.push({
         level: 'warning',
-        message: 'APM index needs converted to 7.x format',
+        message: 'APM index requires conversion to 7.x format',
         url: 'https://www.elastic.co/guide/en/apm/get-started/master/apm-release-notes.html',
         details: 'This index was created prior to 7.0',
         reindex: true,

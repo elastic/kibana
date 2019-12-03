@@ -55,6 +55,7 @@ export function upgradeAssistant(kibana: any) {
 
           // Legacy plugins
           plugins: {
+            apm_oss: server.plugins.apm_oss,
             elasticsearch: server.plugins.elasticsearch,
             xpack_main: server.plugins.xpack_main,
             cloud: {
