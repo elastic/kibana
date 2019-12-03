@@ -19,7 +19,7 @@
 
 import { MonoTypeOperatorFunction, Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, map, share, skip, startWith } from 'rxjs/operators';
-import { createUrlControls, getStateFromUrl, setStateToUrl } from '../url';
+import { createUrlControls, getStateFromUrl, IUrlControls, setStateToUrl } from '../url';
 
 /**
  * Configuration of StateSync utility
@@ -33,7 +33,7 @@ export interface IStateSyncConfig<
 > {
   /**
    * Storage key to use for syncing,
-   * e.g. having syncKey '_a' will sync state to ?_a query param
+   * e.g. syncKey '_a' should be synced state to ?_a query param
    */
   syncKey: string;
   /**
@@ -54,7 +54,7 @@ export interface IStateSyncConfig<
    *
    * SyncStrategy.Url is default
    */
-  syncStrategy?: SyncStrategy | SyncStrategyFactory;
+  syncStrategy?: SyncStrategy | ISyncStrategy;
 
   /**
    * These mappers are needed to transform application state to a different shape we want to store
@@ -173,22 +173,15 @@ interface ISyncStrategy<StorageState extends BaseState = BaseState> {
    * Take in a state object, should serialise and persist
    */
   // TODO: replace sounds like something url specific ...
-  toStorage: (state: StorageState, opts: { replace: boolean }) => void;
+  toStorage: (syncKey: string, state: StorageState, opts: { replace: boolean }) => Promise<void>;
   /**
    * Should retrieve state from the storage and deserialize it
    */
-  fromStorage: () => StorageState;
+  fromStorage: (syncKey: string) => Promise<StorageState>;
   /**
    * Should notify when the storage has changed
    */
-  storageChange$: Observable<StorageState>;
-}
-
-export type SyncStrategyFactory = (syncKey: string) => ISyncStrategy;
-export function isSyncStrategyFactory(
-  syncStrategy: SyncStrategy | SyncStrategyFactory | void
-): syncStrategy is SyncStrategyFactory {
-  return typeof syncStrategy === 'function';
+  storageChange$?: (syncKey: string) => Observable<StorageState>;
 }
 
 /**
@@ -197,47 +190,58 @@ export function isSyncStrategyFactory(
  * Both expanded and hashed use cases
  */
 const createUrlSyncStrategyFactory = (
-  { useHash = false }: { useHash: boolean } = { useHash: false }
-): SyncStrategyFactory => (syncKey: string): ISyncStrategy => {
-  const { update: updateUrl, listen: listenUrl } = createUrlControls();
+  { useHash = false }: { useHash: boolean } = { useHash: false },
+  { updateAsync: updateUrlAsync, listen: listenUrl }: IUrlControls = createUrlControls()
+): ISyncStrategy => {
   return {
-    toStorage: (state: BaseState, { replace = false } = { replace: false }) => {
-      const newUrl = setStateToUrl(syncKey, state, { useHash });
-      updateUrl(newUrl, replace);
+    toStorage: async (
+      syncKey: string,
+      state: BaseState,
+      { replace = false } = { replace: false }
+    ) => {
+      await updateUrlAsync(
+        currentUrl => setStateToUrl(syncKey, state, { useHash }, currentUrl),
+        replace
+      );
     },
-    fromStorage: () => getStateFromUrl(syncKey),
-    storageChange$: new Observable(observer => {
-      const unlisten = listenUrl(() => {
-        observer.next();
-      });
+    fromStorage: async syncKey => getStateFromUrl(syncKey),
+    storageChange$: (syncKey: string) =>
+      new Observable(observer => {
+        const unlisten = listenUrl(() => {
+          observer.next();
+        });
 
-      return () => {
-        unlisten();
-      };
-    }).pipe(
-      map(() => getStateFromUrl(syncKey)),
-      distinctUntilChangedWithInitialValue(getStateFromUrl(syncKey), shallowEqual),
-      share()
-    ),
+        return () => {
+          unlisten();
+        };
+      }).pipe(
+        map(() => getStateFromUrl(syncKey)),
+        distinctUntilChangedWithInitialValue(getStateFromUrl(syncKey), shallowEqual),
+        share()
+      ),
+  };
+};
+
+export function isSyncStrategy(
+  syncStrategy: SyncStrategy | ISyncStrategy | void
+): syncStrategy is ISyncStrategy {
+  return typeof syncStrategy === 'object';
+}
+
+// strategies provided out of the box
+const createStrategies: () => {
+  [key in SyncStrategy]: ISyncStrategy;
+} = () => {
+  const urlControls = createUrlControls();
+  return {
+    [SyncStrategy.Url]: createUrlSyncStrategyFactory({ useHash: false }, urlControls),
+    [SyncStrategy.HashedUrl]: createUrlSyncStrategyFactory({ useHash: true }, urlControls),
+    // Other SyncStrategies: LocalStorage, es, somewhere else...
   };
 };
 
 /**
- * SyncStrategy.Url: the same as old persisting of expanded state in rison format to url
- * SyncStrategy.HashedUrl: the same as old persisting of hashed state using sessionStorage for storing expanded state
- *
- * Possible to provide own custom SyncStrategy by implementing ISyncStrategy
- *
- * SyncStrategy.Url is default
- */
-const Strategies: { [key in SyncStrategy]: (syncKey: string) => ISyncStrategy } = {
-  [SyncStrategy.Url]: createUrlSyncStrategyFactory({ useHash: false }),
-  [SyncStrategy.HashedUrl]: createUrlSyncStrategyFactory({ useHash: true }),
-  // Other SyncStrategies: LocalStorage, es, somewhere else...
-};
-
-/**
- * Utility for syncing application state wrapped in IState container shape
+ * Utility for syncing application state wrapped in IStore container
  * with some kind of storage (e.g. URL)
  *
  * Minimal usage example:
@@ -331,78 +335,42 @@ export function syncState(config: IStateSyncConfig[] | IStateSyncConfig): Destro
   const stateSyncConfigs = Array.isArray(config) ? config : [config];
   const subscriptions: Subscription[] = [];
 
-  // flags are needed to be able to skip our own state / storage updates
-  // e.g. when we trigger state because storage changed,
-  // we want to make sure we won't run into infinite cycle
-  let ignoreStateUpdate = false;
-  let ignoreStorageUpdate = false;
+  const syncStrategies = createStrategies();
 
   stateSyncConfigs.forEach(stateSyncConfig => {
     const toStorageMapper = stateSyncConfig.toStorageMapper || (s => s);
     const fromStorageMapper = stateSyncConfig.fromStorageMapper || (s => s);
 
-    const { toStorage, fromStorage, storageChange$ } = (isSyncStrategyFactory(
-      stateSyncConfig.syncStrategy
-    )
+    const { toStorage, fromStorage, storageChange$ } = isSyncStrategy(stateSyncConfig.syncStrategy)
       ? stateSyncConfig.syncStrategy
-      : Strategies[stateSyncConfig.syncStrategy || SyncStrategy.Url])(stateSyncConfig.syncKey);
+      : syncStrategies[stateSyncConfig.syncStrategy || SyncStrategy.Url];
 
     // returned boolean indicates if update happen
-    const updateState = (): boolean => {
-      if (ignoreStateUpdate) return false;
-      const update = (): boolean => {
-        const storageState = fromStorage();
-        if (!storageState) {
-          ignoreStorageUpdate = false;
-          return false;
-        }
-
-        if (storageState) {
-          stateSyncConfig.store.set({
-            ...stateSyncConfig.store.get(),
-            ...fromStorageMapper(storageState),
-          });
-          return true;
-        }
-
+    const updateState = async (): Promise<boolean> => {
+      const storageState = await fromStorage(stateSyncConfig.syncKey);
+      if (!storageState) {
         return false;
-      };
+      }
 
-      ignoreStorageUpdate = true;
-      const updated = update();
-      ignoreStorageUpdate = false;
-      return updated;
+      if (storageState) {
+        stateSyncConfig.store.set({
+          ...stateSyncConfig.store.get(),
+          ...fromStorageMapper(storageState),
+        });
+        return true;
+      }
+
+      return false;
     };
 
     // returned boolean indicates if update happen
-    const updateStorage = ({ replace = false } = {}): boolean => {
-      if (ignoreStorageUpdate) return false;
-
-      const update = () => {
-        const newStorageState = toStorageMapper(stateSyncConfig.store.get());
-        toStorage(newStorageState, { replace });
-        return true;
-      };
-
-      ignoreStateUpdate = true;
-      const hasUpdated = update();
-      ignoreStateUpdate = false;
-      return hasUpdated;
+    const updateStorage = async ({ replace = false } = {}): Promise<boolean> => {
+      const newStorageState = toStorageMapper(stateSyncConfig.store.get());
+      await toStorage(stateSyncConfig.syncKey, newStorageState, { replace });
+      return true;
     };
 
-    // initial syncing of store state and storage state
-    const initialTruthSource = stateSyncConfig.initialTruthSource ?? InitialTruthSource.Storage;
-    if (initialTruthSource === InitialTruthSource.Storage) {
-      const hasUpdated = updateState();
-      // if there is nothing by state key in storage
-      // then we should fallback and consider state source of truth
-      if (!hasUpdated) {
-        updateStorage({ replace: true });
-      }
-    } else if (initialTruthSource === InitialTruthSource.Store) {
-      updateStorage({ replace: true });
-    }
-
+    // subscribe to state and storage updates
     subscriptions.push(
       stateSyncConfig.store.state$
         .pipe(
@@ -413,14 +381,30 @@ export function syncState(config: IStateSyncConfig[] | IStateSyncConfig): Destro
           )
         )
         .subscribe(() => {
-          // TODO: batch storage updates
           updateStorage();
-        }),
-      storageChange$.subscribe(() => {
-        // TODO: batch state updates? or should it be handled by state containers instead?
-        updateState();
-      })
+        })
     );
+    if (storageChange$) {
+      subscriptions.push(
+        storageChange$(stateSyncConfig.syncKey).subscribe(() => {
+          updateState();
+        })
+      );
+    }
+
+    // initial syncing of store state and storage state
+    const initialTruthSource = stateSyncConfig.initialTruthSource ?? InitialTruthSource.Storage;
+    if (initialTruthSource === InitialTruthSource.Storage) {
+      updateState().then(hasUpdated => {
+        // if there is nothing by state key in storage
+        // then we should fallback and consider state source of truth
+        if (!hasUpdated) {
+          updateStorage({ replace: true });
+        }
+      });
+    } else if (initialTruthSource === InitialTruthSource.Store) {
+      updateStorage({ replace: true });
+    }
   });
 
   return () => {

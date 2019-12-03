@@ -33,10 +33,11 @@ import {
   HashedItemStoreSingleton,
 } from '../../../../legacy/ui/public/state_management/state_storage';
 
-const parseUrl = (url: string) => _parseUrl(url, true);
-const parseUrlHash = (url: string) => parseUrl(parseUrl(url).hash!.slice(1));
-const parseCurrentUrl = () => parseUrl(window.location.href);
-const parseCurrentUrlHash = () => parseUrlHash(window.location.href);
+export const parseUrl = (url: string) => _parseUrl(url, true);
+export const parseUrlHash = (url: string) => parseUrl(parseUrl(url).hash!.slice(1));
+export const getCurrentUrl = () => window.location.href;
+export const parseCurrentUrl = () => parseUrl(getCurrentUrl());
+export const parseCurrentUrlHash = () => parseUrlHash(getCurrentUrl());
 
 // encodeUriQuery implements the less-aggressive encoding done naturally by
 // the browser. We use it to generate the same urls the browser would
@@ -136,34 +137,86 @@ export function setStateToUrl<T extends BaseState>(
 /**
  * A tiny wrapper around history library to listen for url changes and update url
  * History library handles a bunch of cross browser edge cases
- *
- * listen(cb) - accepts a callback which will be called whenever url has changed
- * update(url: string, replace: boolean) - get an absolute / relative url to update the location to
  */
-export const createUrlControls = () => {
+export interface IUrlControls {
+  /**
+   * Allows to listen for url changes
+   * @param cb - get's called when url has been changed
+   */
+  listen: (cb: () => void) => () => void;
+
+  /**
+   * Updates url synchronously
+   * @param url - url to update to
+   * @param replace - use replace instead of push
+   */
+  update: (url: string, replace: boolean) => string;
+
+  /**
+   * Schedules url update to next microtask,
+   * Useful to ignore sync changes to url
+   * @param updater - fn which receives current url and should return next url to update to
+   * @param replace - use replace instead of push
+   */
+  updateAsync: (updater: UrlUpdaterFnType, replace: boolean) => Promise<string>;
+}
+export type UrlUpdaterFnType = (currentUrl: string) => string;
+
+export const createUrlControls = (): IUrlControls => {
   const history = createBrowserHistory();
+  const updateQueue: Array<(currentUrl: string) => string> = [];
+
+  // if we should replace or push with next async update,
+  // if any call in a queue asked to push, then we should push
+  let shouldReplace = true;
+
   return {
     listen: (cb: () => void) =>
       history.listen(() => {
         cb();
       }),
-    update: (url: string, replace = false) => {
-      const { pathname, search } = parseUrl(url);
-      const parsedHash = parseUrlHash(url);
-      const searchQueryString = stringifyQueryString(parsedHash.query);
-      const location = {
-        pathname,
-        hash: formatUrl({
-          pathname: parsedHash.pathname,
-          search: searchQueryString,
-        }),
-        search,
-      };
-      if (replace) {
-        history.replace(location);
-      } else {
-        history.push(location);
+    update: (newUrl: string, replace = false) => updateUrl(newUrl, replace),
+    updateAsync: (updater: (currentUrl: string) => string, replace = false) => {
+      updateQueue.push(updater);
+      if (shouldReplace) {
+        shouldReplace = replace;
       }
+
+      // Schedule url update to the next microtask
+      return Promise.resolve().then(() => {
+        if (updater.length === 0) return getCurrentUrl();
+        const resultUrl = updateQueue.reduce((url, nextUpdate) => nextUpdate(url), getCurrentUrl());
+        const newUrl = updateUrl(resultUrl, shouldReplace);
+        // queue clean up
+        updateQueue.splice(0, updateQueue.length);
+        shouldReplace = true;
+
+        return newUrl;
+      });
     },
   };
+
+  function updateUrl(newUrl: string, replace = false): string {
+    if (newUrl === getCurrentUrl()) return getCurrentUrl();
+
+    const { pathname, search } = parseUrl(newUrl);
+    const parsedHash = parseUrlHash(newUrl);
+    const searchQueryString = stringifyQueryString(parsedHash.query);
+    const location = {
+      pathname,
+      hash: formatUrl({
+        pathname: parsedHash.pathname,
+        search: searchQueryString,
+      }),
+      search,
+    };
+    if (replace) {
+      history.replace(location);
+    } else {
+      history.push(location);
+    }
+    return getCurrentUrl();
+
+    return newUrl;
+  }
 };

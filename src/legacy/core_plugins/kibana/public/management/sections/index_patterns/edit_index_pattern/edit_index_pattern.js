@@ -42,7 +42,6 @@ import { getEditBreadcrumbs } from '../breadcrumbs';
 import {
   createStore,
   syncState,
-  InitialTruthSource, SyncStrategy,
 } from '../../../../../../../../plugins/kibana_utils/public';
 
 const REACT_SOURCE_FILTERS_DOM_ELEMENT_ID = 'reactSourceFiltersTable';
@@ -215,34 +214,76 @@ uiModules
     });
     handleTabChange($scope, store.get().tab);
 
+    $scope.crazyBatchUpdate = () => {
+      store.set({ ...store.get(), tab: 'indexedFiles' });
+      store.set({ ...store.get() });
+      store.set({ ...store.get(), fieldFilter: 'BATCH!' });
+    };
+
     $scope.$$postDigest(() => {
-      // just an artificial example of advanced syncState util setup
-      // 1. different strategies are used for different slices
-      // 2. to/from storage mappers are used to shorten state keys
-      $scope.destroyStateSync = syncState([
-        {
-          syncKey: '_a',
-          store,
-          initialTruthSource: InitialTruthSource.Storage,
-          syncStrategy: SyncStrategy.Url,
-          toStorageMapper: state => ({ t: state.tab }),
-          fromStorageMapper: storageState => ({ tab: storageState.t || 'indexedFields' }),
-        },
-        {
-          syncKey: '_b',
-          store,
-          initialTruthSource: InitialTruthSource.Storage,
-          syncStrategy: config.get('state:storeInSessionStorage') ? SyncStrategy.HashedUrl : SyncStrategy.Url,
-          toStorageMapper: state => ({ f: state.fieldFilter, i: state.indexedFieldTypeFilter, l: state.scriptedFieldLanguageFilter }),
-          fromStorageMapper: storageState => (
-            {
-              fieldFilter: storageState.f || '',
-              indexedFieldTypeFilter: storageState.i || '',
-              scriptedFieldLanguageFilter: storageState.l || ''
-            }
-          ),
-        },
-      ]);
+      // 1. the simplest use case
+      $scope.destroyStateSync = syncState({
+        syncKey: '_s',
+        store,
+      });
+
+      // 2. conditionally picking sync strategy
+      // $scope.destroyStateSync = syncState({
+      //   syncKey: '_s',
+      //   store,
+      //   syncStrategy: config.get('state:storeInSessionStorage') ? SyncStrategy.HashedUrl : SyncStrategy.Url
+      // });
+
+      // 3. implementing custom sync strategy
+      // const localStorageSyncStrategy = {
+      //   toStorage: (syncKey, state) => localStorage.setItem(syncKey, JSON.stringify(state)),
+      //   fromStorage: (syncKey) => localStorage.getItem(syncKey) ? JSON.parse(localStorage.getItem(syncKey)) : null
+      // };
+      // $scope.destroyStateSync = syncState({
+      //   syncKey: '_s',
+      //   store,
+      //   syncStrategy: localStorageSyncStrategy
+      // });
+
+      // 4. syncing only part of state
+      // $scope.destroyStateSync = syncState({
+      //   syncKey: '_s',
+      //   store,
+      //   toStorageMapper: s => ({ tab: s.tab })
+      // });
+
+      // 5. transform state before serialising
+      // this could be super useful for backward compatibility
+      // $scope.destroyStateSync = syncState({
+      //   syncKey: '_s',
+      //   store,
+      //   toStorageMapper: s => ({ t: s.tab }),
+      //   fromStorageMapper: s => ({ tab: s.t })
+      // });
+
+      // 6. multiple different sync configs
+      // $scope.destroyStateSync = syncState([
+      //   {
+      //     syncKey: '_a',
+      //     store,
+      //     syncStrategy: SyncStrategy.Url,
+      //     toStorageMapper: s => ({ t: s.tab }),
+      //     fromStorageMapper: s => ({ tab: s.t })
+      //   },
+      //   {
+      //     syncKey: '_b',
+      //     store,
+      //     syncStrategy: SyncStrategy.HashedUrl,
+      //     toStorageMapper: state => ({ f: state.fieldFilter, i: state.indexedFieldTypeFilter, l: state.scriptedFieldLanguageFilter }),
+      //     fromStorageMapper: storageState => (
+      //       {
+      //         fieldFilter: storageState.f || '',
+      //         indexedFieldTypeFilter: storageState.i || '',
+      //         scriptedFieldLanguageFilter: storageState.l || ''
+      //       }
+      //     ),
+      //   },
+      // ]);
     });
 
     const indexPatternListProvider = Private(IndexPatternListFactory)();

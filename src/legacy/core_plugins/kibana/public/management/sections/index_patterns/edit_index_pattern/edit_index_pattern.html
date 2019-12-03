@@ -14,6 +14,8 @@
         delete="removePattern()"
       ></kbn-management-index-patterns-header>
 
+      <button ng-click="crazyBatchUpdate()">Crazy batch update</button>
+
       <div class="euiSpacer euiSpacer--s"></div>
       <p ng-if="::(indexPattern.timeFieldName || (indexPattern.tags && indexPattern.tags.length))">
         <span ng-if="::indexPattern.timeFieldName">
