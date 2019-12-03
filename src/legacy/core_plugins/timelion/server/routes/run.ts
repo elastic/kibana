@@ -47,16 +47,9 @@ export interface TimelionRequestQuery {
     timezone: string;
     to?: string;
   };
-  query?: {
-    expression: string[];
-    from: string;
-    interval: string;
-    to: string;
-    timezone: string;
-  };
 }
 
-function formatErrorResponse(e: any, h: any) {
+function formatErrorResponse(e: Error, h: Legacy.ResponseToolkit) {
   return h
     .response({
       title: e.toString(),
