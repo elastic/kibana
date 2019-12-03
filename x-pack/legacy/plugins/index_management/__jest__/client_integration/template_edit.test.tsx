@@ -94,7 +94,7 @@ describe('<TemplateEdit />', () => {
         await actions.completeStepTwo(JSON.stringify(SETTINGS));
 
         // Step 3 (mappings)
-        await actions.completeStepThree(JSON.stringify(MAPPINGS));
+        await actions.completeStepThree();
 
         // Step 4 (aliases)
         await actions.completeStepFour(JSON.stringify(ALIASES));

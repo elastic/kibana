@@ -26,16 +26,9 @@ export const ALIASES = {
 };
 
 export const MAPPINGS = {
-  _source: {
-    enabled: false,
-  },
-  properties: {
-    host_name: {
-      type: 'keyword',
-    },
-    created_at: {
-      type: 'date',
-      format: 'EEE MMM dd HH:mm:ss Z yyyy',
-    },
-  },
+  dynamic: true,
+  date_detection: true,
+  numeric_detection: true,
+  dynamic_date_formats: [],
+  properties: {},
 };

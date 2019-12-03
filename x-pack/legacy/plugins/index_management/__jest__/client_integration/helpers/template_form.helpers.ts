@@ -15,7 +15,7 @@ export interface TemplateFormTestBed extends TestBed<TemplateFormTestSubjects> {
     clickSubmitButton: () => void;
     completeStepOne: ({ name, indexPatterns, order, version }: Partial<Template>) => void;
     completeStepTwo: (settings: string) => void;
-    completeStepThree: (mappings: string) => void;
+    completeStepThree: () => void;
     completeStepFour: (aliases: string) => void;
     selectSummaryTab: (tab: 'summary' | 'request') => void;
   };
@@ -85,17 +85,10 @@ export const formSetup = async (
     component.update();
   };
 
-  const completeStepThree = async (mappings: string) => {
-    const { find, component } = testBed;
+  const completeStepThree = async () => {
+    const { component } = testBed;
 
-    if (mappings) {
-      find('mockCodeEditor').simulate('change', {
-        jsonString: mappings,
-      }); // Using mocked EuiCodeEditor
-      await nextTick(50);
-      component.update();
-    }
-
+    await nextTick();
     clickNextButton();
     await nextTick(50); // hooks updates cycles are tricky, adding some latency is needed
     component.update();
