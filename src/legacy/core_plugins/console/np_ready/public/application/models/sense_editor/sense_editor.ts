@@ -265,11 +265,11 @@ export class SenseEditor {
       t = this.parser.nextNonEmptyToken(tokenIter);
     }
 
-    let bodyStartLineNumber = (t ? 1 : 2) + tokenIter.getCurrentTokenLineNumber()!; // artificially increase end of docs.
+    let bodyStartLineNumber = (t ? 0 : 1) + tokenIter.getCurrentTokenLineNumber()!; // artificially increase end of docs.
     let dataEndPos: Position;
     while (
       bodyStartLineNumber < range.end.lineNumber ||
-      (bodyStartLineNumber === range.end.lineNumber && 0 < range.end.column)
+      (bodyStartLineNumber === range.end.lineNumber && 1 < range.end.column)
     ) {
       dataEndPos = this.nextDataDocEnd({
         lineNumber: bodyStartLineNumber,
@@ -309,25 +309,35 @@ export class SenseEditor {
 
     // move to the next request start (during the second iterations this may not be exactly on a request
     let currentLineNumber = engulfingRange.start.lineNumber;
-    for (; currentLineNumber <= endLineNumber; currentLineNumber++) {
-      if (this.parser.isStartRequestRow(currentLineNumber)) {
-        if (includeNonRequestBlocks && currentLineNumber !== rangeStartCursor) {
-          const nonRequestPrefixBlock = this.coreEditor
-            .getLines(rangeStartCursor, currentLineNumber - 1)
-            .join('\n');
+
+    const flushNonRequestBlock = () => {
+      if (includeNonRequestBlocks) {
+        const nonRequestPrefixBlock = this.coreEditor
+          .getLines(rangeStartCursor, currentLineNumber - 1)
+          .join('\n');
+        if (nonRequestPrefixBlock) {
           requests.push(nonRequestPrefixBlock);
         }
+      }
+    };
 
-        rangeStartCursor = currentLineNumber;
-
+    while (currentLineNumber <= endLineNumber) {
+      if (this.parser.isStartRequestRow(currentLineNumber)) {
+        flushNonRequestBlock();
         const request = await this.getRequest(currentLineNumber);
         if (!request) {
+          // Something has probably gone wrong.
           return requests;
         } else {
           requests.push(request);
+          rangeStartCursor = currentLineNumber = request.range.end.lineNumber + 1;
         }
+      } else {
+        ++currentLineNumber;
       }
     }
+
+    flushNonRequestBlock();
 
     return requests;
   };
@@ -406,7 +416,7 @@ export class SenseEditor {
     pos = pos || this.coreEditor.getCurrentPosition();
     let curLineNumber = pos.lineNumber;
     const maxLines = this.coreEditor.getLineCount();
-    for (; curLineNumber < maxLines - 1; curLineNumber++) {
+    for (; curLineNumber < maxLines; curLineNumber++) {
       const curRowMode = this.parser.getRowParseMode(curLineNumber);
       // eslint-disable-next-line no-bitwise
       if ((curRowMode & this.parser.MODE.REQUEST_END) > 0) {
@@ -422,7 +432,9 @@ export class SenseEditor {
       }
     }
 
-    const column = (this.coreEditor.getLineValue(curLineNumber) || '').length;
+    const column =
+        (this.coreEditor.getLineValue(curLineNumber) || '').length +
+        1 /* Range goes to 1 after last char */;
 
     return {
       lineNumber: curLineNumber,

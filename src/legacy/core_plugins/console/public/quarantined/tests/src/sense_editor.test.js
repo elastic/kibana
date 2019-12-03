@@ -350,7 +350,7 @@ describe('Editor', () => {
 
   function multiReqTest(name, editorInput, range, expected) {
     utilsTest('multi request select - ' + name, editorInput, async function (done) {
-      const requests = await input.getRequestsInRange(range, true);
+      const requests = await input.getRequestsInRange(range, false);
       // convert to format returned by request.
       _.each(expected, function (req) {
         req.data =
@@ -365,7 +365,7 @@ describe('Editor', () => {
   multiReqTest(
     'mid body to mid body',
     editorInput1,
-    { start: { row: 12 }, end: { row: 17 } },
+    { start: { lineNumber: 13 }, end: { lineNumber: 18 } },
     [
       {
         method: 'PUT',
@@ -387,7 +387,7 @@ describe('Editor', () => {
   multiReqTest(
     'single request start to end',
     editorInput1,
-    { start: { row: 10 }, end: { row: 13 } },
+    { start: { lineNumber: 11 }, end: { lineNumber: 14 } },
     [
       {
         method: 'PUT',
@@ -402,7 +402,7 @@ describe('Editor', () => {
   multiReqTest(
     'start to end, with comment',
     editorInput1,
-    { start: { row: 6 }, end: { row: 13 } },
+    { start: { lineNumber: 7 }, end: { lineNumber: 14 } },
     [
       {
         method: 'GET',
@@ -422,7 +422,7 @@ describe('Editor', () => {
   multiReqTest(
     'before start to after end, with comments',
     editorInput1,
-    { start: { row: 4 }, end: { row: 14 } },
+    { start: { lineNumber: 5 }, end: { lineNumber: 15 } },
     [
       {
         method: 'GET',
@@ -442,21 +442,21 @@ describe('Editor', () => {
   multiReqTest(
     'between requests',
     editorInput1,
-    { start: { row: 21 }, end: { row: 22 } },
+    { start: { lineNumber: 22 }, end: { lineNumber: 23 } },
     []
   );
 
   multiReqTest(
     'between requests - with comment',
     editorInput1,
-    { start: { row: 20 }, end: { row: 22 } },
+    { start: { lineNumber: 21 }, end: { lineNumber: 23 } },
     []
   );
 
   multiReqTest(
     'between requests - before comment',
     editorInput1,
-    { start: { row: 19 }, end: { row: 22 } },
+    { start: { lineNumber: 20 }, end: { lineNumber: 23 } },
     []
   );
 
@@ -471,7 +471,7 @@ describe('Editor', () => {
   multiReqCopyAsCurlTest(
     'start to end, with comment',
     editorInput1,
-    { start: { row: 6 }, end: { row: 13 } },
+    { start: { lineNumber: 7 }, end: { lineNumber: 14 } },
     `
 curl -XGET "http://localhost:9200/_stats?level=shards"
 

@@ -86,14 +86,13 @@ export class LegacyCoreEditor implements CoreEditor {
   }
 
   getValueInRange({ start, end }: Range): string {
-    const session = this.editor.getSession();
     const aceRange = new _AceRange(
       start.lineNumber - 1,
       start.column - 1,
       end.lineNumber - 1,
       end.column - 1
     );
-    return session.doc.getTextRange(aceRange);
+    return this.editor.getSession().getTextRange(aceRange);
   }
 
   getTokenProvider(): TokensProvider {
