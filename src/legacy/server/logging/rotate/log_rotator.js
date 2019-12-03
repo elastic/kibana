@@ -239,7 +239,7 @@ export class LogRotator {
     // and normalize
     await this._renameRotatedFilesByOne(rotatedFiles);
 
-    // rename + compress current log into 0
+    // rename current log into 0
     await this._rotateCurrentLogFile();
 
     // send SIGHUP to reload log configuration
