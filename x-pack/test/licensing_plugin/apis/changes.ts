@@ -15,6 +15,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esSupertestWithoutAuth = getService('esSupertestWithoutAuth');
   const security: SecurityService = getService('security');
   const PageObjects = getPageObjects(['common', 'security']);
+  const testSubjects = getService('testSubjects');
 
   const scenario = {
     async setup() {
@@ -129,6 +130,8 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         isAvailable: false,
         isEnabled: true,
       });
+      // banner shown only when license expired not just deleted
+      await testSubjects.missingOrFail('licenseExpiredBanner');
     });
   });
 }

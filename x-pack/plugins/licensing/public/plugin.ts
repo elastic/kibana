@@ -3,14 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { Subject, Subscription } from 'rxjs';
 
-import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 
 import { ILicense, LicensingPluginSetup } from '../common/types';
 import { createLicenseUpdate } from '../common/license_update';
 import { License } from '../common/license';
+import { mountExpiredBanner } from './expired_banner';
 
 export const licensingSessionStorageKey = 'xpack.licensing';
 
@@ -29,9 +29,11 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
    * A function to execute once the plugin's HTTP interceptor needs to stop listening.
    */
   private removeInterceptor?: () => void;
-  private storageSubscription?: Subscription;
+  private internalSubscription?: Subscription;
+  private isLicenseExpirationBannerShown? = false;
 
   private readonly infoEndpoint = '/api/licensing/info';
+  private coreStart?: CoreStart;
   private prevSignature?: string;
 
   constructor(
@@ -72,7 +74,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
       this.getSaved()
     );
 
-    this.storageSubscription = license$.subscribe(license => {
+    this.internalSubscription = license$.subscribe(license => {
       if (license.isAvailable) {
         this.prevSignature = license.signature;
         this.save(license);
@@ -80,6 +82,11 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
         this.prevSignature = undefined;
         // Prevent reusing stale license if the fetch operation fails
         this.removeSaved();
+      }
+
+      if (license.status === 'expired' && !this.isLicenseExpirationBannerShown && this.coreStart) {
+        this.isLicenseExpirationBannerShown = true;
+        this.showExpiredBanner(license);
       }
     });
 
@@ -105,7 +112,9 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
     };
   }
 
-  public async start() {}
+  public async start(core: CoreStart) {
+    this.coreStart = core;
+  }
 
   public stop() {
     this.stop$.next();
@@ -114,9 +123,9 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
     if (this.removeInterceptor !== undefined) {
       this.removeInterceptor();
     }
-    if (this.storageSubscription !== undefined) {
-      this.storageSubscription.unsubscribe();
-      this.storageSubscription = undefined;
+    if (this.internalSubscription !== undefined) {
+      this.internalSubscription.unsubscribe();
+      this.internalSubscription = undefined;
     }
   }
 
@@ -127,7 +136,6 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
           'kbn-system-api': 'true',
         },
       });
-
       return new License({
         license: response.license,
         features: response.features,
@@ -137,4 +145,16 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
       return new License({ error: error.message, signature: '' });
     }
   };
+
+  private showExpiredBanner(license: ILicense) {
+    const uploadUrl = this.coreStart!.http.basePath.prepend(
+      '/app/kibana#/management/elasticsearch/license_management/upload_license'
+    );
+    this.coreStart!.overlays.banners.add(
+      mountExpiredBanner({
+        type: license.type!,
+        uploadUrl,
+      })
+    );
+  }
 }

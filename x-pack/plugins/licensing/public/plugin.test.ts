@@ -5,6 +5,7 @@
  */
 
 import { take } from 'rxjs/operators';
+import { mountExpiredBannerMock } from './plugin.test.mocks';
 
 import { LicenseType } from '../common/types';
 import { LicensingPlugin, licensingSessionStorageKey } from './plugin';
@@ -20,6 +21,7 @@ describe('licensing plugin', () => {
   let plugin: LicensingPlugin;
 
   afterEach(async () => {
+    jest.clearAllMocks();
     await plugin.stop();
   });
 
@@ -186,6 +188,7 @@ describe('licensing plugin', () => {
       });
     });
   });
+
   describe('interceptor', () => {
     it('register http interceptor checking signature header', async () => {
       const sessionStorage = coreMock.createStorage();
@@ -320,6 +323,59 @@ describe('licensing plugin', () => {
       expect(updated).toBe(false);
     });
   });
+
+  describe('expired banner', () => {
+    it('does not show "license expired" banner if license is not expired.', async () => {
+      const sessionStorage = coreMock.createStorage();
+      plugin = new LicensingPlugin(coreMock.createPluginInitializerContext(), sessionStorage);
+
+      const coreSetup = coreMock.createSetup();
+      coreSetup.http.get.mockResolvedValueOnce(
+        licenseMock.create({ license: { status: 'active', type: 'gold' } })
+      );
+
+      const { refresh } = await plugin.setup(coreSetup);
+
+      const coreStart = coreMock.createStart();
+      await plugin.start(coreStart);
+
+      await refresh();
+      expect(coreStart.overlays.banners.add).toHaveBeenCalledTimes(0);
+    });
+
+    it('shows "license expired" banner if license is expired only once.', async () => {
+      const sessionStorage = coreMock.createStorage();
+      plugin = new LicensingPlugin(coreMock.createPluginInitializerContext(), sessionStorage);
+
+      const coreSetup = coreMock.createSetup();
+      const activeLicense = licenseMock.create({ license: { status: 'active', type: 'gold' } });
+      const expiredLicense = licenseMock.create({ license: { status: 'expired', type: 'gold' } });
+      coreSetup.http.get
+        .mockResolvedValueOnce(activeLicense)
+        .mockResolvedValueOnce(expiredLicense)
+        .mockResolvedValueOnce(activeLicense)
+        .mockResolvedValueOnce(expiredLicense);
+
+      const { refresh } = await plugin.setup(coreSetup);
+
+      const coreStart = coreMock.createStart();
+      await plugin.start(coreStart);
+
+      await refresh();
+      expect(coreStart.overlays.banners.add).toHaveBeenCalledTimes(0);
+      await refresh();
+      expect(coreStart.overlays.banners.add).toHaveBeenCalledTimes(1);
+      await refresh();
+      expect(coreStart.overlays.banners.add).toHaveBeenCalledTimes(1);
+      await refresh();
+      expect(coreStart.overlays.banners.add).toHaveBeenCalledTimes(1);
+      expect(mountExpiredBannerMock).toHaveBeenCalledWith({
+        type: 'gold',
+        uploadUrl: '/app/kibana#/management/elasticsearch/license_management/upload_license',
+      });
+    });
+  });
+
   describe('#stop', () => {
     it('stops polling', async () => {
       const sessionStorage = coreMock.createStorage();
