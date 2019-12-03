@@ -19,7 +19,7 @@ export default function({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await esArchiver.unload('ml/ihp_outlier');
+      await esArchiver.unload('ml/egs_regression');
     });
 
     const testDataList = [
