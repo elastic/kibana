@@ -75,8 +75,14 @@ const getDefaultValueToggle = (param: string, field: FieldType) => {
 
 const i18nTexts = {
   rangeFieldLabel: i18n.translate('xpack.idxMgmt.mappingsEditor.rangeFieldLabel', {
-    defaultMessage: 'Range (min/max percentage)',
+    defaultMessage: 'Min/max frequency percentage',
   }),
+  indexPrefixesRangeFieldLabel: i18n.translate(
+    'xpack.idxMgmt.mappingsEditor.indexPrefixesRangeFieldLabel',
+    {
+      defaultMessage: 'Min/max prefix length',
+    }
+  ),
 };
 
 export const TextType = React.memo(({ field }: Props) => {
@@ -266,7 +272,7 @@ export const TextType = React.memo(({ field }: Props) => {
             )}
             toggleDefaultValue={getDefaultValueToggle('indexPrefixes', field.source)}
           >
-            <EuiFormRow label={i18nTexts.rangeFieldLabel} fullWidth>
+            <EuiFormRow label={i18nTexts.indexPrefixesRangeFieldLabel} fullWidth>
               <UseMultiFields
                 fields={{
                   min: {
