@@ -63,7 +63,7 @@ describe('getDeprecatedApmIndices', () => {
     const [deprecation, _] = await getDeprecatedApmIndices(callWithRequest, {} as any, ['foo-*']);
 
     expect(deprecation.level).toEqual('warning');
-    expect(deprecation.message).toEqual('APM index needs converted to 7.x format');
+    expect(deprecation.message).toEqual('APM index requires conversion to 7.x format');
     expect(deprecation.url).toEqual(
       'https://www.elastic.co/guide/en/apm/get-started/master/apm-release-notes.html'
     );
