@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }) {
   describe('app navigation', function describeIndexTests() {
 
     before(async () => {
-      await PageObjects.common.navigateToApp('home');
+      await PageObjects.common.navigateToApp('settings');
     });
 
     it('should show nav link that navigates to the app', async () => {
