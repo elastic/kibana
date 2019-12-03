@@ -9,11 +9,10 @@ import { initRoutes } from './routes';
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
 import { getFlightsSavedObjects } from './sample_data/flights_saved_objects.js';
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects.js';
-import { checkLicense } from '../check_license';
+import { LICENSE_CHECK_STATE } from '../../../../plugins/licensing/server';
 
 export class MapPlugin {
   setup(core, plugins, __LEGACY) {
-    const { xpackMainPlugin } = __LEGACY.plugins;
     const { featuresPlugin, licensing } = plugins;
     let routesInitialized = false;
 
@@ -45,16 +44,12 @@ export class MapPlugin {
     });
 
     licensing.license$.subscribe(license => {
-      const mapsFeature = license.getFeature('spatial');
-      if (!routesInitialized && mapsFeature.isEnabled) {
+      const { state } = license.check('maps', 'basic');
+      if (state === LICENSE_CHECK_STATE.Valid && !routesInitialized) {
         routesInitialized = true;
         initRoutes(__LEGACY, license.uid);
       }
     });
-
-    xpackMainPlugin.info
-      .feature(APP_ID)
-      .registerLicenseCheckResultsGenerator(checkLicense);
 
     const sampleDataLinkLabel = i18n.translate('xpack.maps.sampleDataLinkLabel', {
       defaultMessage: 'Map'
