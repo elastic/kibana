@@ -24,7 +24,7 @@ import { Vis, VisParams } from '../../../visualizations/public';
 import { npStart } from './legacy_imports';
 import { getServices } from '../kibana_services';
 import { getAngularModule } from './get_inner_angular';
-import { initTimelionLegacyModule } from './timelion_vis_legacy_module';
+import { initTimelionVisLegacyModule } from './timelion_vis_legacy_module';
 
 const innerAngularName = 'kibana/timelion_vis';
 
@@ -56,7 +56,7 @@ export class TimelionVisController {
   initLocalAngular() {
     if (!this.timelionVisModule) {
       this.timelionVisModule = getAngularModule(innerAngularName, npStart.core);
-      initTimelionLegacyModule(this.timelionVisModule, getServices().timelionPanels);
+      initTimelionVisLegacyModule(this.timelionVisModule, getServices().timelionPanels);
     }
   }
 

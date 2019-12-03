@@ -30,7 +30,7 @@ import { TimelionExpInput } from '../directives/timelion_expression_input';
 import { TimelionExpressionSuggestions } from '../directives/timelion_expression_suggestions/timelion_expression_suggestions';
 
 /** @internal */
-export const initTimelionLegacyModule = (
+export const initTimelionVisLegacyModule = (
   angularIns: IModule,
   timelionPanels: Map<string, Panel>
 ): void => {
