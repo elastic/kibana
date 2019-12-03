@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { indexPatternRoute, kueryBarIndexPatternRoute } from './index_pattern';
+import {
+  staticIndexPatternRoute,
+  dynamicIndexPatternRoute
+} from './index_pattern';
 import {
   errorDistributionRoute,
   errorGroupsRoute,
@@ -39,7 +42,8 @@ import {
   transactionGroupsChartsRoute,
   transactionGroupsDistributionRoute,
   transactionGroupsRoute,
-  transactionGroupsAvgDurationByCountry
+  transactionGroupsAvgDurationByCountry,
+  transactionGroupsAvgDurationByBrowser
 } from './transaction_groups';
 import {
   errorGroupsLocalFiltersRoute,
@@ -57,8 +61,8 @@ import { serviceMapRoute } from './services';
 const createApmApi = () => {
   const api = createApi()
     // index pattern
-    .add(indexPatternRoute)
-    .add(kueryBarIndexPatternRoute)
+    .add(staticIndexPatternRoute)
+    .add(dynamicIndexPatternRoute)
 
     // Errors
     .add(errorDistributionRoute)
@@ -99,6 +103,7 @@ const createApmApi = () => {
     .add(transactionGroupsChartsRoute)
     .add(transactionGroupsDistributionRoute)
     .add(transactionGroupsRoute)
+    .add(transactionGroupsAvgDurationByBrowser)
     .add(transactionGroupsAvgDurationByCountry)
 
     // UI filters

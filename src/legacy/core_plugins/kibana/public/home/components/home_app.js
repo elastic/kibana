@@ -35,6 +35,9 @@ export function HomeApp({ directories }) {
     savedObjectsClient,
     getBasePath,
     addBasePath,
+    telemetryOptInProvider: {
+      setOptInNoticeSeen,
+    },
   } = getServices();
 
   const isCloudEnabled = getInjected('isCloudEnabled', false);
@@ -83,6 +86,7 @@ export function HomeApp({ directories }) {
               find={savedObjectsClient.find}
               localStorage={localStorage}
               urlBasePath={getBasePath()}
+              onOptInSeen={setOptInNoticeSeen}
             />
           </Route>
           <Route path="/home">

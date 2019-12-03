@@ -88,21 +88,17 @@ export function AddEditFlyout({
 
   // config settings
   const [sampleRate, setSampleRate] = useState<string>(
-    // TODO(TS-3.7-ESLINT)
     (
-      selectedConfig?.settings.transaction_sample_rate || // eslint-disable-line @typescript-eslint/camelcase
+      selectedConfig?.settings.transaction_sample_rate ||
       defaultSettings.TRANSACTION_SAMPLE_RATE
     ).toString()
   );
   const [captureBody, setCaptureBody] = useState<string>(
-    // TODO(TS-3.7-ESLINT)
-    // eslint-disable-next-line @typescript-eslint/camelcase
     selectedConfig?.settings.capture_body || defaultSettings.CAPTURE_BODY
   );
   const [transactionMaxSpans, setTransactionMaxSpans] = useState<string>(
-    // TODO(TS-3.7-ESLINT)
     (
-      selectedConfig?.settings.transaction_max_spans || // eslint-disable-line @typescript-eslint/camelcase
+      selectedConfig?.settings.transaction_max_spans ||
       defaultSettings.TRANSACTION_MAX_SPANS
     ).toString()
   );

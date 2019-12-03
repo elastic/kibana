@@ -139,6 +139,7 @@ export const AnomaliesTable: React.FunctionComponent<{
       name: maxAnomalyScoreColumnName,
       sortable: true,
       truncateText: true,
+      dataType: 'number',
     },
     {
       align: RIGHT_ALIGNMENT,

@@ -285,3 +285,77 @@ test('Updates when hidePanelTitles is toggled', async () => {
   title = findTestSubject(component, `embeddablePanelHeading-HelloRobStark`);
   expect(title.length).toBe(1);
 });
+
+test('Check when hide header option is false', async () => {
+  const inspector = inspectorPluginMock.createStartContract();
+
+  const container = new HelloWorldContainer(
+    { id: '123', panels: {}, viewMode: ViewMode.VIEW, hidePanelTitles: false },
+    { getEmbeddableFactory } as any
+  );
+
+  const embeddable = await container.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE, {
+    firstName: 'Arya',
+    lastName: 'Stark',
+  });
+
+  const component = mount(
+    <I18nProvider>
+      <EmbeddablePanel
+        embeddable={embeddable}
+        getActions={() => Promise.resolve([])}
+        getAllEmbeddableFactories={(() => []) as any}
+        getEmbeddableFactory={(() => undefined) as any}
+        notifications={{} as any}
+        overlays={{} as any}
+        inspector={inspector}
+        SavedObjectFinder={() => null}
+        hideHeader={false}
+      />
+    </I18nProvider>
+  );
+
+  const title = findTestSubject(component, `embeddablePanelHeading-HelloAryaStark`);
+  expect(title.length).toBe(1);
+});
+
+test('Check when hide header option is true', async () => {
+  const inspector = inspectorPluginMock.createStartContract();
+
+  const container = new HelloWorldContainer(
+    { id: '123', panels: {}, viewMode: ViewMode.VIEW, hidePanelTitles: false },
+    { getEmbeddableFactory } as any
+  );
+
+  const embeddable = await container.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE, {
+    firstName: 'Arya',
+    lastName: 'Stark',
+  });
+
+  const component = mount(
+    <I18nProvider>
+      <EmbeddablePanel
+        embeddable={embeddable}
+        getActions={() => Promise.resolve([])}
+        getAllEmbeddableFactories={(() => []) as any}
+        getEmbeddableFactory={(() => undefined) as any}
+        notifications={{} as any}
+        overlays={{} as any}
+        inspector={inspector}
+        SavedObjectFinder={() => null}
+        hideHeader={true}
+      />
+    </I18nProvider>
+  );
+
+  const title = findTestSubject(component, `embeddablePanelHeading-HelloAryaStark`);
+  expect(title.length).toBe(0);
+});
