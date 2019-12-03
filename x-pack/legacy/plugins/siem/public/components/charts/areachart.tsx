@@ -25,7 +25,6 @@ import {
   ChartSeriesData,
   getChartHeight,
   getChartWidth,
-  getSeriesStyle,
   WrappedByAutoSizer,
 } from './common';
 
