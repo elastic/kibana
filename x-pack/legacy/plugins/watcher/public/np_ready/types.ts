@@ -1,0 +1,15 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+export interface LegacyDependencies {
+  MANAGEMENT_BREADCRUMB: { text: string; href?: string };
+  TimeBuckets: any;
+  licenseStatus: any;
+}
+
+export interface BootLegacyDependencies extends LegacyDependencies {
+  I18nContext: any;
+}
