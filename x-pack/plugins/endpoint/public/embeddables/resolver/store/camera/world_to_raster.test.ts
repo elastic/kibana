@@ -5,7 +5,7 @@
  */
 
 import { Store, createStore } from 'redux';
-import { CameraAction, UserSetRasterSize, UserPanned } from './action';
+import { CameraAction, UserSetRasterSize, UserPanned, UserScaled } from './action';
 import { CameraState } from '../../types';
 import { cameraReducer } from './reducer';
 import { worldToRaster } from './selectors';
@@ -48,6 +48,15 @@ describe('worldToRaster', () => {
     it('should convert -150,100 (top left) in world space to 0,100 in raster space', () => {
       expect(worldToRaster(store.getState())([-150, 100])).toEqual([0, 0]);
     });
+    describe('when the user has zoomed to 0.5', () => {
+      beforeEach(() => {
+        const action: UserScaled = { type: 'userScaled', payload: [0.5, 0.5] };
+        store.dispatch(action);
+      });
+      it('should convert 0, 0 (center) in world space to 150, 100 (center)', () => {
+        expect(worldToRaster(store.getState())([0, 0])).toEqual([150, 100]);
+      });
+    });
     describe('when the user has panned up and to the right by 50', () => {
       beforeEach(() => {
         const action: UserPanned = { type: 'userPanned', payload: [-50, -50] };
@@ -55,6 +64,14 @@ describe('worldToRaster', () => {
       });
       it('should convert 0,0 (center) in world space to 100,150 in raster space', () => {
         expect(worldToRaster(store.getState())([0, 0]).toString()).toEqual([100, 150].toString());
+      });
+      it('should convert 50,50 (right and up a bit) in world space to 150,100 (center) in raster space', () => {
+        expect(worldToRaster(store.getState())([50, 50]).toString()).toEqual([150, 100].toString());
+      });
+      it('should convert 60,-60 (right and down a bit) in world space to 160,210 (center) in raster space', () => {
+        expect(worldToRaster(store.getState())([60, -60]).toString()).toEqual(
+          [160, 210].toString()
+        );
       });
     });
   });

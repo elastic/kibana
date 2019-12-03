@@ -13,7 +13,7 @@ import { Vector2, CameraState } from '../../types';
 export const worldToRaster: (state: CameraState) => (worldPosition: Vector2) => Vector2 = state => {
   console.log('raster size', state.rasterSize);
   console.log('panning offset', state.panningOffset);
-  console.log('zoom level', state.zoomLevel);
+  console.log('zoom level', state.scaling);
   const viewWidth = state.rasterSize[0];
   const viewHeight = state.rasterSize[1];
   const halfViewWidth = viewWidth / 2;
@@ -21,10 +21,10 @@ export const worldToRaster: (state: CameraState) => (worldPosition: Vector2) => 
   const halfViewHeight = viewHeight / 2;
   const negativeHalfViewHeight = viewHeight / -2;
 
-  const right = halfViewWidth / state.zoomLevel; // + state.panningOffset[0];
-  const left = negativeHalfViewWidth / state.zoomLevel; // + state.panningOffset[0];
-  const top = halfViewHeight / state.zoomLevel; // + state.panningOffset[1];
-  const bottom = negativeHalfViewHeight / state.zoomLevel; // + state.panningOffset[1];
+  const right = halfViewWidth / state.scaling[0]; // + state.panningOffset[0];
+  const left = negativeHalfViewWidth / state.scaling[0]; // + state.panningOffset[0];
+  const top = halfViewHeight / state.scaling[1]; // + state.panningOffset[1];
+  const bottom = negativeHalfViewHeight / state.scaling[1]; // + state.panningOffset[1];
 
   console.log('top', top, 'right', right, 'bottom', bottom, 'left', left);
 

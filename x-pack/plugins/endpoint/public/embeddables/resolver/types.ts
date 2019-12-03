@@ -10,7 +10,7 @@ export interface ResolverState {
 export { ResolverAction } from './actions';
 
 export interface CameraState {
-  readonly zoomLevel: number;
+  readonly scaling: Vector2;
   readonly panningOffset: Vector2;
   readonly rasterSize: Vector2;
 }

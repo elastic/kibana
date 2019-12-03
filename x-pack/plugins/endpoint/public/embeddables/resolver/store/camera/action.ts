@@ -6,9 +6,9 @@
 
 import { Vector2 } from '../../types';
 
-export interface UserZoomed {
-  readonly type: 'userZoomed';
-  readonly payload: number;
+export interface UserScaled {
+  readonly type: 'userScaled';
+  readonly payload: Vector2;
 }
 
 export interface UserPanned {
@@ -21,4 +21,4 @@ export interface UserSetRasterSize {
   readonly payload: Vector2;
 }
 
-export type CameraAction = UserZoomed | UserPanned | UserSetRasterSize;
+export type CameraAction = UserScaled | UserPanned | UserSetRasterSize;

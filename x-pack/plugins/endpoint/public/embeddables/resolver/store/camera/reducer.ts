@@ -6,9 +6,9 @@
 import { Reducer } from 'redux';
 import { CameraState, ResolverAction } from '../../types';
 
-function initialState() {
+function initialState(): CameraState {
   return {
-    zoomLevel: 1,
+    scaling: [1, 1] as const,
     panningOffset: [0, 0] as const,
     rasterSize: [0, 0] as const,
   };
@@ -18,7 +18,7 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
   state = initialState(),
   action
 ) => {
-  if (action.type === 'userZoomed') {
+  if (action.type === 'userScaled') {
     return {
       ...state,
       scaling: action.payload,
