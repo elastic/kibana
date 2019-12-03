@@ -9,8 +9,8 @@ import {
   ReturnTypeUpdate,
   ReturnTypeAction,
 } from '../../common/return_types';
+import { Policy } from '../../common/types/domain_data';
 import { PolicyAdapter } from './adapters/policy/memory_policy_adapter';
-import { Policy } from '../../../ingest/server/libs/types';
 
 export class PoliciesLib {
   constructor(private readonly adapter: PolicyAdapter) {}
