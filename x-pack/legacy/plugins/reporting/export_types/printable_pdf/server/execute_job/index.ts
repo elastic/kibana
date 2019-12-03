@@ -40,7 +40,7 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
       mergeMap(getFullUrls),
       mergeMap(
         ({ job, conditionalHeaders, logo, urls }): Rx.Observable<Buffer> => {
-          const { browserTimezone, layout } = job as JobDocPayloadPDF;
+          const { browserTimezone, layout } = jobToExecute;
           return generatePdfObservable(
             jobLogger,
             job.title,

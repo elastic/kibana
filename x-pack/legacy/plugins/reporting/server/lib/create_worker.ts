@@ -33,7 +33,10 @@ export function createWorkerFactory<JobParamsType>(server: ServerFacade) {
   // Once more document types are added, this will need to be passed in
   return function createWorker(queue: ESQueueInstance<JobParamsType, JobDocPayloadType>) {
     // export type / execute job map
-    const jobExecutors: Map<string, any> = new Map();
+    const jobExecutors: Map<
+      string,
+      ImmediateExecuteFn<JobParamsType> | ESQueueWorkerExecuteFn<JobDocPayloadType>
+    > = new Map();
 
     for (const exportType of exportTypesRegistry.getAll() as Array<
       ExportTypeDefinition<JobParamsType, any, any, any>
