@@ -112,7 +112,7 @@ interface SpanActionToolTipProps {
   item?: IWaterfallItem;
 }
 
-const SpanActionToolTip: React.SFC<SpanActionToolTipProps> = ({
+const SpanActionToolTip: React.FC<SpanActionToolTipProps> = ({
   item,
   children
 }) => {

@@ -111,7 +111,14 @@ export class Join extends Component {
   async _loadLeftFields() {
     let leftFields;
     try {
-      leftFields = await this.props.layer.getLeftJoinFields();
+      const leftFieldsInstances = await this.props.layer.getLeftJoinFields();
+      const leftFieldPromises = leftFieldsInstances.map(async (field) => {
+        return {
+          name: field.getName(),
+          label: await field.getLabel()
+        };
+      });
+      leftFields = await Promise.all(leftFieldPromises);
     } catch (error) {
       leftFields = [];
     }

@@ -210,3 +210,40 @@ export class Plugin {
   }
 }
 ```
+
+### Usage Collection
+
+For creating and registering a Usage Collector. Collectors would be defined in a separate directory `server/collectors/register.ts`. You can read more about usage collectors on `src/plugins/usage_collection/README.md`.
+
+```ts
+// server/collectors/register.ts
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+
+export function registerMyPluginUsageCollector(usageCollection?: UsageCollectionSetup): void {
+  // usageCollection is an optional dependency, so make sure to return if it is not registered.
+  if (!usageCollection) {
+    return;
+  }
+
+  // create usage collector
+  const myCollector = usageCollection.makeUsageCollector({
+    type: MY_USAGE_TYPE,
+    fetch: async (callCluster: CallCluster) => {
+
+    // query ES and get some data
+    // summarize the data into a model
+    // return the modeled object that includes whatever you want to track
+
+      return {
+        my_objects: {
+          total: SOME_NUMBER
+        }
+      };
+    },
+  });
+
+  // register usage collector
+  usageCollection.registerCollector(myCollector);
+}
+```

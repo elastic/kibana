@@ -169,15 +169,14 @@ export interface DiscoveredPlugin {
 }
 
 /**
- * An extended `DiscoveredPlugin` that exposes more sensitive information. Should never
- * be exposed to client-side code.
  * @internal
  */
-export interface DiscoveredPluginInternal extends DiscoveredPlugin {
+export interface InternalPluginInfo {
   /**
-   * Path on the filesystem where plugin was loaded from.
+   * Path to the client-side entrypoint file to be used to build the client-side
+   * bundle for a plugin.
    */
-  readonly path: string;
+  readonly entryPointPath: string;
 }
 
 /**
