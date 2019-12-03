@@ -6,7 +6,6 @@
 
 import createContainer from 'constate';
 import { useState, useContext } from 'react';
-
 import { useLogEntryHighlights } from './log_entry_highlights';
 import { useLogSummaryHighlights } from './log_summary_highlights';
 import { useNextAndPrevious } from './next_and_previous';
@@ -20,15 +19,16 @@ export const useLogHighlightsState = ({
   sourceVersion,
   entriesStart,
   entriesEnd,
+  filterQuery,
 }: {
   sourceId: string;
   sourceVersion: string | undefined;
   entriesStart: TimeKey | null;
   entriesEnd: TimeKey | null;
+  filterQuery: string | null;
 }) => {
   const [highlightTerms, setHighlightTerms] = useState<string[]>([]);
   const {
-    filterQuery,
     visibleMidpoint,
     setFilterQuery,
     setVisibleMidpoint,
