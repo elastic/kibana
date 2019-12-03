@@ -150,6 +150,9 @@ describe('ApplicationService', () => {
                 tooltip: 'App inaccessible due to reason',
               };
             }
+            return {
+              tooltip: 'App accessible',
+            };
           })
         );
 
@@ -167,6 +170,7 @@ describe('ApplicationService', () => {
               "id": "app2",
               "legacy": false,
               "status": 0,
+              "tooltip": "App accessible",
             },
           }
         `);
@@ -479,7 +483,6 @@ describe('ApplicationService', () => {
         );
       });
 
-      //
       it('throws if application is inaccessible', async () => {
         setup.registerAppUpdater(
           of(app => {

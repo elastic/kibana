@@ -18,7 +18,7 @@
  */
 
 import { createBrowserHistory } from 'history';
-import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import React from 'react';
 
@@ -77,6 +77,7 @@ export class ApplicationService {
   private started = false;
   private readonly apps = new Map<string, AppBox | LegacyApp>();
   private readonly statusUpdaters$ = new BehaviorSubject<Map<symbol, AppUpdaterWrapper>>(new Map());
+  private readonly subscriptions: Subscription[] = [];
 
   private readonly capabilities = new CapabilitiesService();
   private mountContext?: IContextContainer<App['mount']>;
@@ -86,7 +87,7 @@ export class ApplicationService {
 
     const registerStatusUpdater = (application: string, updater$: Observable<AppUpdater>) => {
       const updaterId = Symbol();
-      updater$.subscribe(updater => {
+      const subscription = updater$.subscribe(updater => {
         const nextValue = new Map(this.statusUpdaters$.getValue());
         nextValue.set(updaterId, {
           application,
@@ -94,6 +95,7 @@ export class ApplicationService {
         });
         this.statusUpdaters$.next(nextValue);
       });
+      this.subscriptions.push(subscription);
     };
 
     return {
@@ -244,7 +246,10 @@ export class ApplicationService {
     };
   }
 
-  public stop() {}
+  public stop() {
+    this.statusUpdaters$.complete();
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+  }
 }
 
 const updateStatus = <T extends AppBase>(app: T, statusUpdaters: AppUpdaterWrapper[]): T => {

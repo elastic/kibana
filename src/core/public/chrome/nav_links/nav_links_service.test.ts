@@ -38,7 +38,7 @@ const availableApps = new Map([
     'legacyApp1',
     {
       id: 'legacyApp1',
-      order: 0,
+      order: 5,
       title: 'Legacy App 1',
       icon: 'legacyApp1',
       appUrl: '/app1',
@@ -229,7 +229,7 @@ describe('NavLinksService', () => {
           "icon": "legacyApp1",
           "id": "legacyApp1",
           "legacy": true,
-          "order": 0,
+          "order": 5,
           "title": "Legacy App 1",
         }
       `);
