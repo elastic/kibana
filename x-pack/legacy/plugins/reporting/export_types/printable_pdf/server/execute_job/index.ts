@@ -6,7 +6,8 @@
 
 import * as Rx from 'rxjs';
 import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
-import { i18n } from '@kbn/i18n';
+import { ExecuteJobFactory, ESQueueWorkerExecuteFn, ServerFacade } from '../../../../types';
+import { JobDocPayloadPDF } from '../../types';
 import { PLUGIN_ID, PDF_JOB_TYPE } from '../../../../common/constants';
 import { LevelLogger } from '../../../../server/lib';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
@@ -18,44 +19,40 @@ import {
   getCustomLogo,
 } from '../../../common/execute_job/';
 
-export function executeJobFactory(server) {
+export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
+  JobDocPayloadPDF
+>> = function executeJobFactoryFn(server: ServerFacade) {
   const generatePdfObservable = generatePdfObservableFactory(server);
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PDF_JOB_TYPE, 'execute']);
 
-  return function executeJob(jobId, jobToExecute, cancellationToken) {
+  return function executeJob(
+    jobId: string,
+    jobToExecute: JobDocPayloadPDF,
+    cancellationToken: any
+  ) {
     const jobLogger = logger.clone([jobId]);
 
-    const process$ = Rx.of({ job: jobToExecute, server }).pipe(
+    const process$ = Rx.of({ job: jobToExecute, server, logger }).pipe(
       mergeMap(decryptJobHeaders),
-      catchError(err => {
-        jobLogger.error(err);
-        return Rx.throwError(
-          i18n.translate(
-            'xpack.reporting.exportTypes.printablePdf.compShim.failedToDecryptReportJobDataErrorMessage',
-            {
-              defaultMessage:
-                'Failed to decrypt report job data. Please ensure that {encryptionKey} is set and re-generate this report. {err}',
-              values: { encryptionKey: 'xpack.reporting.encryptionKey', err: err.toString() },
-            }
-          )
-        );
-      }),
       map(omitBlacklistedHeaders),
       map(getConditionalHeaders),
       mergeMap(getCustomLogo),
       mergeMap(getFullUrls),
-      mergeMap(({ job, conditionalHeaders, logo, urls }) => {
-        return generatePdfObservable(
-          jobLogger,
-          job.title,
-          urls,
-          job.browserTimezone,
-          conditionalHeaders,
-          job.layout,
-          logo
-        );
-      }),
-      map(buffer => ({
+      mergeMap(
+        ({ job, conditionalHeaders, logo, urls }): Rx.Observable<Buffer> => {
+          const { browserTimezone, layout } = jobToExecute;
+          return generatePdfObservable(
+            jobLogger,
+            job.title,
+            urls,
+            browserTimezone,
+            conditionalHeaders,
+            layout,
+            logo
+          );
+        }
+      ),
+      map((buffer: Buffer) => ({
         content_type: 'application/pdf',
         content: buffer.toString('base64'),
         size: buffer.byteLength,
@@ -70,4 +67,4 @@ export function executeJobFactory(server) {
 
     return process$.pipe(takeUntil(stop$)).toPromise();
   };
-}
+};
