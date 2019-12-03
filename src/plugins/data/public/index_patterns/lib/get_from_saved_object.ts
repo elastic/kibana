@@ -17,5 +17,16 @@
  * under the License.
  */
 
-export { QueryBarTopRow } from './components/query_bar_top_row';
-export { QueryStringInput } from './components/query_string_input';
+import { get } from 'lodash';
+
+export function getFromSavedObject(savedObject: any) {
+  if (get(savedObject, 'attributes.fields') === undefined) {
+    return;
+  }
+
+  return {
+    id: savedObject.id,
+    fields: JSON.parse(savedObject.attributes.fields),
+    title: savedObject.attributes.title,
+  };
+}

@@ -23,14 +23,10 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { QueryBarTopRow } from './query_bar_top_row';
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
-
-import { stubIndexPatternWithFields } from '../../../../../../../plugins/data/public/stubs';
-/* eslint-enable @kbn/eslint/no-restricted-paths */
-
-import { coreMock } from '../../../../../../../core/public/mocks';
+import { coreMock } from '../../../../../core/public/mocks';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { I18nProvider } from '@kbn/i18n/react';
+import { stubIndexPatternWithFields } from '../../stubs';
 const startMock = coreMock.createStart();
 
 const mockTimeHistory = {
