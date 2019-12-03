@@ -46,7 +46,7 @@ export class LogRotator {
     this.throttledRotate = throttle(async () => { await this._rotate(); }, 5000);
     this.stalker = null;
     this.usePolling = config.get('logging.rotate.usePolling');
-    this.pollingInterval = config.get('logging.rotate.pollingInterval') * 1000;
+    this.pollingInterval = config.get('logging.rotate.pollingInterval');
     this.stalkerUsePollingPolicyTestTimeout = null;
   }
 

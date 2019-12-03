@@ -140,7 +140,7 @@ export default () => Joi.object({
       enabled: Joi.boolean().default(false),
       everyBytes: Joi.number().greater(1024).default(10485760),
       keepFiles: Joi.number().greater(2).less(1024).default(7),
-      pollingInterval: Joi.number().greater(5).less(3600).default(10),
+      pollingInterval: Joi.number().greater(5000).less(3600000).default(10000),
       usePolling: Joi.boolean().default(false)
     }).default()
   }).default(),

@@ -42,7 +42,7 @@ const createLogRotatorConfig = (logFilePath) => {
     ['logging.rotate.everyBytes', 2],
     ['logging.rotate.keepFiles', 2],
     ['logging.rotate.usePolling', false],
-    ['logging.rotate.pollingInterval', 10]
+    ['logging.rotate.pollingInterval', 10000]
   ]);
 };
 
