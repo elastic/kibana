@@ -18,6 +18,40 @@
     }
   ],
   "paths": {
+    "/policy/{id}": {
+      "get": {
+        "summary": "Get policy",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./models/policy.v1.json"
+                }
+              }
+            },
+            "headers": {
+              "$ref": "#/components/headers"
+            }
+          }
+        },
+        "description": "Return a policy",
+        "operationId": "getPolicy"
+      },
+      "options": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "$ref": "#/components/headers"
+            }
+          }
+        }
+      },
+      "parameters": []
+    },
     "/policies": {
       "get": {
         "summary": "Get policies",
@@ -28,17 +62,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "oneOf": [
-                    {
-                      "type": "array",
-                      "items": {
-                        "$ref": "./models/policy.v1.json"
-                      }
-                    },
-                    {
-                      "$ref": "./models/policy.v1.json"
-                    }
-                  ]
+                  "type": "array",
+                  "items": {
+                    "$ref": "./models/policy.v1.json"
+                  }
                 }
               }
             },

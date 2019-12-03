@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server/';
-import { SAVED_OBJECT_TYPE } from '../../common/constants';
+import { SAVED_OBJECT_TYPE_PACKAGES } from '../../common/constants';
 import { InstallationAttributes, Installed, Installation, NotInstalled } from '../../common/types';
 import * as Registry from '../registry';
 import { createInstallableFrom } from './index';
@@ -32,7 +32,7 @@ export async function getPackages(
     );
   });
   const searchObjects = registryItems.map(({ name, version }) => ({
-    type: SAVED_OBJECT_TYPE,
+    type: SAVED_OBJECT_TYPE_PACKAGES,
     id: `${name}-${version}`,
   }));
   const results = await savedObjectsClient.bulkGet<InstallationAttributes>(searchObjects);
@@ -77,7 +77,7 @@ export async function getInstallationObject(options: {
 }): Promise<Installation | undefined> {
   const { savedObjectsClient, pkgkey } = options;
   return savedObjectsClient
-    .get<InstallationAttributes>(SAVED_OBJECT_TYPE, pkgkey)
+    .get<InstallationAttributes>(SAVED_OBJECT_TYPE_PACKAGES, pkgkey)
     .catch(e => undefined);
 }
 

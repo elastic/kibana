@@ -80,7 +80,7 @@ function useSuggestions(fieldPrefix: string, search: string) {
     try {
       const esSuggestions = (
         await elasticsearch.getSuggestions(debouncedSearch, debouncedSearch.length, fieldPrefix)
-      ).map(suggestion => ({
+      ).map((suggestion: any) => ({
         label: suggestion.text,
         description: suggestion.description || '',
         type: transformSuggestionType(suggestion.type),

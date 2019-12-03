@@ -4,22 +4,57 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Policy } from '../../../../scripts/mock_spec/types';
+import {
+  ReturnTypeList,
+  ReturnTypeCreate,
+  ReturnTypeGet,
+  ReturnTypeUpdate,
+  ReturnTypeAction,
+} from '../../../../common/return_types';
+import { Policy } from '../../../../common/types/domain_data';
 import { RestAPIAdapter } from '../rest_api/adapter_types';
 import { PolicyAdapter } from './memory_policy_adapter';
-
-const POLICIES_SERVER_HOST = `${window.location.protocol}//${window.location.hostname}:4010`;
 
 export class RestPolicyAdapter extends PolicyAdapter {
   constructor(private readonly REST: RestAPIAdapter) {
     super([]);
   }
 
-  public async getAll() {
+  public async get(id: string): Promise<Policy | null> {
     try {
-      return await this.REST.get<Policy[]>(`${POLICIES_SERVER_HOST}/policies`);
+      return (await this.REST.get<ReturnTypeGet<Policy>>(`/api/ingest/policy/${id}`)).item;
     } catch (e) {
-      return [];
+      return null;
     }
+  }
+
+  public async getAll(page: number, perPage: number, kuery?: string) {
+    try {
+      return await this.REST.get<ReturnTypeList<Policy>>(`/api/ingest/policies`, {
+        page,
+        perPage,
+        kuery: kuery !== '' ? kuery : undefined,
+      });
+    } catch (e) {
+      return {
+        list: [],
+        success: false,
+        page,
+        total: 0,
+        perPage,
+      };
+    }
+  }
+
+  public async create(policy: Partial<Policy>) {
+    return await this.REST.post<ReturnTypeCreate<Policy>>(`/api/ingest/policies`, policy);
+  }
+
+  public async update(id: string, policy: Partial<Policy>) {
+    return await this.REST.put<ReturnTypeUpdate<Policy>>(`/api/ingest/policy/${id}`, policy);
+  }
+
+  public async getAgentStatus(policyId: string) {
+    return await this.REST.get<ReturnTypeAction>(`/api/fleet/policy/${policyId}/agent-status`);
   }
 }

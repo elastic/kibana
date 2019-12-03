@@ -7,6 +7,7 @@ import { PLUGIN } from '../common/constants';
 import * as CommonRoutes from '../common/routes';
 import { ServerRoute } from './types';
 import * as Packages from './packages/handlers';
+import * as Datasources from './datasources/handlers';
 
 // Manager public API paths
 export const routes: ServerRoute[] = [
@@ -50,6 +51,6 @@ export const routes: ServerRoute[] = [
     method: 'GET',
     path: CommonRoutes.API_INSTALL_DATASOURCE_PATTERN,
     options: { tags: [`access:${PLUGIN.ID}`], json: { space: 2 } },
-    handler: Packages.handleRequestInstallDatasource,
+    handler: Datasources.handleRequestInstallDatasource,
   },
 ];

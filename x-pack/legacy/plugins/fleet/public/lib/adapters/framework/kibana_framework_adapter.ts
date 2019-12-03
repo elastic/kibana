@@ -176,6 +176,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
 
   public registerManagementUI(settings: {
     sectionId?: string;
+    id: string;
     name: string;
     basePath: string;
     visable?: boolean;
@@ -191,7 +192,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
 
     const section = this.management.getSection(sectionId);
 
-    section.register(sectionId, {
+    section.register(settings.id, {
       visible: settings.visable || true,
       display: settings.name,
       order: settings.order || 30,

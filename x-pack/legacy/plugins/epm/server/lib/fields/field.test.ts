@@ -10,7 +10,7 @@ import { safeLoad } from 'js-yaml';
 import { Field, processFields } from './field';
 
 test('tests loading fields.yml', () => {
-  const fieldsYML = readFileSync(path.join(__dirname, '/tests/fields/base.yml'), 'utf-8');
+  const fieldsYML = readFileSync(path.join(__dirname, '/tests/base.yml'), 'utf-8');
 
   const fields: Field[] = safeLoad(fieldsYML);
 
@@ -18,7 +18,7 @@ test('tests loading fields.yml', () => {
 
   // Convert it json for easier comparison of the output
   const json = JSON.stringify(fields, null, 2);
-  const generatedFile = path.join(__dirname, './tests/fields/base.fields.generate.json');
+  const generatedFile = path.join(__dirname, './tests/base.fields.generate.json');
 
   // Regenerate the file if `-generate` flag is used
   if (process.argv.includes('-generate')) {

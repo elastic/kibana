@@ -18,7 +18,7 @@ async function startApp(libs: FrontendLibs) {
   libs.framework.renderUIAtPath(
     BASE_PATH,
     <I18nContext>
-      <HashRouter basename="/fleet">
+      <HashRouter basename={BASE_PATH}>
         <LibsContext.Provider value={libs}>
           <AppRoutes />
         </LibsContext.Provider>
@@ -32,10 +32,19 @@ async function startApp(libs: FrontendLibs) {
   if (libs.framework.licenseIsAtLeast('standard')) {
     libs.framework.registerManagementUI({
       sectionId: 'ingest',
+      id: 'ingest_fleet',
       name: i18n.translate('xpack.fleet.fleetManagementLinkLabel', {
         defaultMessage: 'Fleet',
       }),
-      basePath: BASE_PATH,
+      basePath: `/ingest/agents`,
+    });
+    libs.framework.registerManagementUI({
+      sectionId: 'ingest',
+      id: 'ingest_policies',
+      name: i18n.translate('xpack.fleet.policyManagementLinkLabel', {
+        defaultMessage: 'Policies',
+      }),
+      basePath: `/ingest/policies`,
     });
   }
 }

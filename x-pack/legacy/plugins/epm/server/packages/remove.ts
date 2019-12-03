@@ -5,8 +5,9 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server/';
-import { SAVED_OBJECT_TYPE } from '../../common/constants';
-import { getInstallationObject, savedObjectTypes, CallESAsCurrentUser } from './index';
+import { SAVED_OBJECT_TYPE_PACKAGES } from '../../common/constants';
+import { getInstallationObject, savedObjectTypes } from './index';
+import { CallESAsCurrentUser } from '../lib/cluster_access';
 import { AssetReference, AssetType, ElasticsearchAssetType } from '../../common/types';
 
 export async function removeInstallation(options: {
@@ -20,7 +21,7 @@ export async function removeInstallation(options: {
 
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state
-  await savedObjectsClient.delete(SAVED_OBJECT_TYPE, pkgkey);
+  await savedObjectsClient.delete(SAVED_OBJECT_TYPE_PACKAGES, pkgkey);
 
   // Delete the installed assets
   const deletePromises = installedObjects.map(async ({ id, type }) => {
@@ -29,6 +30,8 @@ export async function removeInstallation(options: {
       savedObjectsClient.delete(assetType, id);
     } else if (assetType === ElasticsearchAssetType.ingestPipeline) {
       deletePipeline(callCluster, id);
+    } else if (assetType === ElasticsearchAssetType.indexTemplate) {
+      deleteTemplate(callCluster, id);
     }
   });
   await Promise.all(deletePromises);
@@ -41,5 +44,12 @@ async function deletePipeline(callCluster: CallESAsCurrentUser, id: string): Pro
   // '*' shouldn't ever appear here, but it still would delete all ingest pipelines
   if (id && id !== '*') {
     await callCluster('ingest.deletePipeline', { id });
+  }
+}
+
+async function deleteTemplate(callCluster: CallESAsCurrentUser, name: string): Promise<void> {
+  // '*' shouldn't ever appear here, but it still would delete all templates
+  if (name && name !== '*') {
+    await callCluster('indices.deleteTemplate', { name });
   }
 }

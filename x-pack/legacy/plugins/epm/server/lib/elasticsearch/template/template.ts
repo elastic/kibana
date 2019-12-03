@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Field } from '../field';
+import { Field } from '../../fields/field';
 
 export interface Template {
   order: number;
@@ -53,6 +53,14 @@ export function generateMappings(fields: Field[]): Mappings {
     props[field.name] = { type };
   });
   return { properties: props };
+}
+
+/**
+ * Generates the template name out of the given information
+ */
+export function generateTemplateName(pkgkey: string, datasetName: string): string {
+  // TODO: This is only a temporary name. More info like dataset type is needed to create full name
+  return pkgkey + '-' + datasetName;
 }
 
 function getBaseTemplate(mappings: Mappings): Template {
