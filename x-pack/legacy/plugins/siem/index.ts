@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { Server } from 'hapi';
+import { Root } from 'joi';
 
 import { PluginInitializerContext } from 'src/core/server';
 import { plugin } from './server';
@@ -25,6 +26,7 @@ import {
   DEFAULT_TO,
   DEFAULT_SIGNALS_INDEX,
   DEFAULT_SIGNALS_INDEX_KEY,
+  SIGNALS_INDEX_KEY,
 } from './common/constants';
 import { defaultIndexPattern } from './default_index_pattern';
 
@@ -169,6 +171,14 @@ export const siem = (kibana: any) => {
         setup.plugins,
         serverFacade
       );
+    },
+    config(Joi: Root) {
+      return Joi.object()
+        .keys({
+          enabled: Joi.boolean().default(true),
+          [SIGNALS_INDEX_KEY]: Joi.string().default('.siem-signals'),
+        })
+        .default();
     },
   });
 };
