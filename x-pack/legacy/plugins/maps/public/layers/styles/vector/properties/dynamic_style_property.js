@@ -34,6 +34,10 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     }
 
     async showFieldMetaPopover() {
+      if (!this.isComplete()) {
+        return false;
+      }
+
       const fieldType = await this._field.getDataType();
       return this._supportsFieldMeta() && fieldType === 'number';
     }

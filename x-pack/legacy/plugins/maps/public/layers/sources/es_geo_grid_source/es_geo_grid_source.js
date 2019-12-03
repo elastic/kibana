@@ -15,7 +15,7 @@ import { AggConfigs } from 'ui/agg_types';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { convertToGeoJson } from './convert_to_geojson';
 import { VectorStyle } from '../../styles/vector/vector_style';
-import { VECTOR_STYLES } from '../../styles/vector/vector_style_defaults';
+import { getDefaultDynamicProperties, VECTOR_STYLES } from '../../styles/vector/vector_style_defaults';
 import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -228,10 +228,14 @@ export class ESGeoGridSource extends AbstractESAggSource {
       sourceDescriptor: this._descriptor,
       ...options
     });
+
+    const defaultDynamicProperties = getDefaultDynamicProperties();
+
     descriptor.style = VectorStyle.createDescriptor({
       [VECTOR_STYLES.FILL_COLOR]: {
         type: DynamicStyleProperty.type,
         options: {
+          ...defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options,
           field: {
             label: COUNT_PROP_LABEL,
             name: COUNT_PROP_NAME,
@@ -243,6 +247,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
       [VECTOR_STYLES.ICON_SIZE]: {
         type: DynamicStyleProperty.type,
         options: {
+          ...defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options,
           field: {
             label: COUNT_PROP_LABEL,
             name: COUNT_PROP_NAME,

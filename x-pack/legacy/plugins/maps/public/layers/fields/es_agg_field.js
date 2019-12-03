@@ -41,7 +41,8 @@ export class ESAggMetricField extends AbstractField {
   }
 
   async getDataType() {
-    return this._esDocField.getDataType();
+    // aggregations only provide numerical data
+    return 'number';
   }
 
   getESDocFieldName() {
