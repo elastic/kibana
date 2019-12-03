@@ -7,14 +7,14 @@
 import _ from 'lodash';
 import React from 'react';
 import { VectorStyleEditor } from './components/vector_style_editor';
-import { getDefaultProperties, vectorStyles } from './vector_style_defaults';
+import { getDefaultProperties, VECTOR_STYLES } from './vector_style_defaults';
 import { AbstractStyle } from '../abstract_style';
 import {
   GEO_JSON_TYPE,
   FIELD_ORIGIN,
   STYLE_TYPE,
   SOURCE_META_ID_ORIGIN,
-  VECTOR_STYLE_TYPE,
+  LAYER_STYLE_TYPE,
 } from '../../../../common/constants';
 import { VectorIcon } from './components/legend/vector_icon';
 import { VectorStyleLegend } from './components/legend/vector_style_legend';
@@ -37,7 +37,7 @@ const POLYGONS = [GEO_JSON_TYPE.POLYGON, GEO_JSON_TYPE.MULTI_POLYGON];
 
 export class VectorStyle extends AbstractStyle {
 
-  static type = VECTOR_STYLE_TYPE;
+  static type = LAYER_STYLE_TYPE.VECTOR;
   static STYLE_TYPE = STYLE_TYPE;
   static createDescriptor(properties = {}) {
     return {
@@ -59,12 +59,12 @@ export class VectorStyle extends AbstractStyle {
       ...VectorStyle.createDescriptor(descriptor.properties),
     };
 
-    this._lineColorStyleProperty = this._makeColorProperty(this._descriptor.properties[vectorStyles.LINE_COLOR], vectorStyles.LINE_COLOR);
-    this._fillColorStyleProperty = this._makeColorProperty(this._descriptor.properties[vectorStyles.FILL_COLOR], vectorStyles.FILL_COLOR);
-    this._lineWidthStyleProperty = this._makeSizeProperty(this._descriptor.properties[vectorStyles.LINE_WIDTH], vectorStyles.LINE_WIDTH);
-    this._iconSizeStyleProperty = this._makeSizeProperty(this._descriptor.properties[vectorStyles.ICON_SIZE], vectorStyles.ICON_SIZE);
+    this._lineColorStyleProperty = this._makeColorProperty(this._descriptor.properties[VECTOR_STYLES.LINE_COLOR], VECTOR_STYLES.LINE_COLOR);
+    this._fillColorStyleProperty = this._makeColorProperty(this._descriptor.properties[VECTOR_STYLES.FILL_COLOR], VECTOR_STYLES.FILL_COLOR);
+    this._lineWidthStyleProperty = this._makeSizeProperty(this._descriptor.properties[VECTOR_STYLES.LINE_WIDTH], VECTOR_STYLES.LINE_WIDTH);
+    this._iconSizeStyleProperty = this._makeSizeProperty(this._descriptor.properties[VECTOR_STYLES.ICON_SIZE], VECTOR_STYLES.ICON_SIZE);
     // eslint-disable-next-line max-len
-    this._iconOrientationProperty = this._makeOrientationProperty(this._descriptor.properties[vectorStyles.ICON_ORIENTATION], vectorStyles.ICON_ORIENTATION);
+    this._iconOrientationProperty = this._makeOrientationProperty(this._descriptor.properties[VECTOR_STYLES.ICON_ORIENTATION], VECTOR_STYLES.ICON_ORIENTATION);
   }
 
   _getAllStyleProperties() {
@@ -95,7 +95,7 @@ export class VectorStyle extends AbstractStyle {
           iconSize: this._iconSizeStyleProperty,
           iconOrientation: this._iconOrientationProperty,
         }}
-        symbolDescriptor={this._descriptor.properties[vectorStyles.SYMBOL]}
+        symbolDescriptor={this._descriptor.properties[VECTOR_STYLES.SYMBOL]}
         layer={layer}
         loadIsPointsOnly={this._getIsPointsOnly}
         loadIsLinesOnly={this._getIsLinesOnly}
@@ -284,9 +284,7 @@ export class VectorStyle extends AbstractStyle {
 
   _getFieldRange = (fieldName) => {
     const dynamicProps = this.getDynamicPropertiesArray();
-    const dynamicProp = dynamicProps.find(dynamicProp => {
-      return fieldName === dynamicProp.getField().getName();
-    });
+    const dynamicProp = dynamicProps.find(dynamicProp => { return fieldName === dynamicProp.getField().getName(); });
 
     if (dynamicProp && dynamicProp.supportsFieldMeta()) {
       let dataRequestId;
@@ -335,8 +333,8 @@ export class VectorStyle extends AbstractStyle {
       <VectorIcon
         loadIsPointsOnly={this._getIsPointsOnly}
         loadIsLinesOnly={this._getIsLinesOnly}
-        fillColor={styles[vectorStyles.FILL_COLOR]}
-        lineColor={styles[vectorStyles.LINE_COLOR]}
+        fillColor={styles[VECTOR_STYLES.FILL_COLOR]}
+        lineColor={styles[VECTOR_STYLES.LINE_COLOR]}
         symbolId={symbolId}
       />
     );
@@ -367,7 +365,7 @@ export class VectorStyle extends AbstractStyle {
         // To work around this limitation, some styling values must fall back to geojson property values.
         let supportsFeatureState;
         let isScaled;
-        if (styleProperty.getStyleName() === vectorStyles.ICON_SIZE
+        if (styleProperty.getStyleName() === VECTOR_STYLES.ICON_SIZE
           && this._descriptor.properties.symbol.options.symbolizeAs === SYMBOLIZE_AS_ICON) {
           supportsFeatureState = false;
           isScaled = true;

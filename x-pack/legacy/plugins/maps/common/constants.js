@@ -130,5 +130,7 @@ export const STYLE_TYPE = {
   DYNAMIC: 'DYNAMIC'
 };
 
-export const VECTOR_STYLE_TYPE = 'VECTOR';
-export const HEATMAP_STYLE_TYPE = 'HEATMAP';
+export const LAYER_STYLE_TYPE = {
+  VECTOR: 'VECTOR',
+  HEATMAP: 'HEATMAP'
+};

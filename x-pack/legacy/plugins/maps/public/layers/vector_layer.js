@@ -17,7 +17,7 @@ import {
   EMPTY_FEATURE_COLLECTION,
   LAYER_TYPE,
   FIELD_ORIGIN,
-  VECTOR_STYLE_TYPE,
+  LAYER_STYLE_TYPE,
 } from '../../common/constants';
 import _ from 'lodash';
 import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
@@ -392,7 +392,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async _syncSourceStyleMeta(syncContext) {
-    if (this._style.constructor.type !== VECTOR_STYLE_TYPE) {
+    if (this._style.constructor.type !== LAYER_STYLE_TYPE.VECTOR) {
       return;
     }
 

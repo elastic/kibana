@@ -15,7 +15,7 @@ import { AggConfigs } from 'ui/agg_types';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { convertToGeoJson } from './convert_to_geojson';
 import { VectorStyle } from '../../styles/vector/vector_style';
-import { vectorStyles } from '../../styles/vector/vector_style_defaults';
+import { VECTOR_STYLES } from '../../styles/vector/vector_style_defaults';
 import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -170,13 +170,15 @@ export class ESGeoGridSource extends AbstractESAggSource {
     const searchSource  = await this._makeSearchSource(searchFilters, 0);
     const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(searchFilters.geogridPrecision), aggSchemas.all);
     searchSource.setField('aggs', aggConfigs.toDsl());
-    const esResponse = await this._runEsQuery(
-      layerName,
+    const esResponse = await this._runEsQuery({
+      requestId: this.getId(),
+      requestName: layerName,
       searchSource,
       registerCancelCallback,
-      i18n.translate('xpack.maps.source.esGrid.inspectorDescription', {
+      requestDescription: i18n.translate('xpack.maps.source.esGrid.inspectorDescription', {
         defaultMessage: 'Elasticsearch geo grid aggregation request'
-      }));
+      }),
+    });
 
     const tabifiedResp = tabifyAggResponse(aggConfigs, esResponse);
     const { featureCollection } = convertToGeoJson({
@@ -227,7 +229,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
       ...options
     });
     descriptor.style = VectorStyle.createDescriptor({
-      [vectorStyles.FILL_COLOR]: {
+      [VECTOR_STYLES.FILL_COLOR]: {
         type: DynamicStyleProperty.type,
         options: {
           field: {
@@ -238,7 +240,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
           color: 'Blues'
         }
       },
-      [vectorStyles.ICON_SIZE]: {
+      [VECTOR_STYLES.ICON_SIZE]: {
         type: DynamicStyleProperty.type,
         options: {
           field: {

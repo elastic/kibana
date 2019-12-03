@@ -18,7 +18,7 @@ export const DEFAULT_MIN_SIZE = 1;
 export const DEFAULT_MAX_SIZE = 64;
 export const DEFAULT_SIGMA = 3;
 
-export const vectorStyles = {
+export const VECTOR_STYLES = {
   SYMBOL: 'symbol',
   FILL_COLOR: 'fillColor',
   LINE_COLOR: 'lineColor',
@@ -30,7 +30,7 @@ export const vectorStyles = {
 export function getDefaultProperties(mapColors = []) {
   return {
     ...getDefaultStaticProperties(mapColors),
-    [vectorStyles.SYMBOL]: {
+    [VECTOR_STYLES.SYMBOL]: {
       options: {
         symbolizeAs: SYMBOLIZE_AS_CIRCLE,
         symbolId: DEFAULT_ICON,
@@ -49,31 +49,31 @@ export function getDefaultStaticProperties(mapColors = []) {
 
 
   return {
-    [vectorStyles.FILL_COLOR]: {
+    [VECTOR_STYLES.FILL_COLOR]: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
         color: nextFillColor,
       }
     },
-    [vectorStyles.LINE_COLOR]: {
+    [VECTOR_STYLES.LINE_COLOR]: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
         color: nextLineColor
       }
     },
-    [vectorStyles.LINE_WIDTH]: {
+    [VECTOR_STYLES.LINE_WIDTH]: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
         size: 1
       }
     },
-    [vectorStyles.ICON_SIZE]: {
+    [VECTOR_STYLES.ICON_SIZE]: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
         size: DEFAULT_ICON_SIZE
       }
     },
-    [vectorStyles.ICON_ORIENTATION]: {
+    [VECTOR_STYLES.ICON_ORIENTATION]: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
         orientation: 0
@@ -84,7 +84,7 @@ export function getDefaultStaticProperties(mapColors = []) {
 
 export function getDefaultDynamicProperties() {
   return {
-    [vectorStyles.FILL_COLOR]: {
+    [VECTOR_STYLES.FILL_COLOR]: {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         color: COLOR_GRADIENTS[0].value,
@@ -95,7 +95,7 @@ export function getDefaultDynamicProperties() {
         }
       }
     },
-    [vectorStyles.LINE_COLOR]: {
+    [VECTOR_STYLES.LINE_COLOR]: {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         color: COLOR_GRADIENTS[0].value,
@@ -106,7 +106,7 @@ export function getDefaultDynamicProperties() {
         }
       }
     },
-    [vectorStyles.LINE_WIDTH]: {
+    [VECTOR_STYLES.LINE_WIDTH]: {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         minSize: DEFAULT_MIN_SIZE,
@@ -118,7 +118,7 @@ export function getDefaultDynamicProperties() {
         }
       }
     },
-    [vectorStyles.ICON_SIZE]: {
+    [VECTOR_STYLES.ICON_SIZE]: {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         minSize: DEFAULT_MIN_SIZE,
@@ -130,7 +130,7 @@ export function getDefaultDynamicProperties() {
         }
       }
     },
-    [vectorStyles.ICON_ORIENTATION]: {
+    [VECTOR_STYLES.ICON_ORIENTATION]: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
         field: undefined,

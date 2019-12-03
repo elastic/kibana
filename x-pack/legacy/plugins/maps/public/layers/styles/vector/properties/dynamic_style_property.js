@@ -35,9 +35,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
 
     supportsFieldMeta() {
       const fieldMetaOptions = this.getFieldMetaOptions();
-      return _.get(fieldMetaOptions, 'isEnabled', true)
-        && this.isScaled()
-        && this._field.supportsFieldMeta();
+      return _.get(fieldMetaOptions, 'isEnabled', true) && this.isScaled() && this._field.supportsFieldMeta();
     }
 
     async getFieldMetaRequest() {
