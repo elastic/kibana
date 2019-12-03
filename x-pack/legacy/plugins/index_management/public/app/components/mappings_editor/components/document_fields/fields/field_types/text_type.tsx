@@ -75,7 +75,7 @@ const getDefaultValueToggle = (param: string, field: FieldType) => {
 
 const i18nTexts = {
   rangeFieldLabel: i18n.translate('xpack.idxMgmt.mappingsEditor.rangeFieldLabel', {
-    defaultMessage: 'Range (Min / Max %)',
+    defaultMessage: 'Range (min/max percentage)',
   }),
 };
 
@@ -117,7 +117,7 @@ export const TextType = React.memo(({ field }: Props) => {
             {({ useSameAnalyzerForSearch }) => {
               const label = useSameAnalyzerForSearch
                 ? i18n.translate('xpack.idxMgmt.mappingsEditor.indexSearchAnalyzerFieldLabel', {
-                    defaultMessage: 'Index + search analyzer',
+                    defaultMessage: 'Index and search analyzer',
                   })
                 : i18n.translate('xpack.idxMgmt.mappingsEditor.indexAnalyzerFieldLabel', {
                     defaultMessage: 'Index analyzer',
