@@ -47,7 +47,7 @@ export interface EditorFrameInstance {
 
 export interface EditorFrameSetup {
   // generic type on the API functions to pull the "unknown vs. specific type" error into the implementation
-  registerDatasource: <T, P>(name: string, datasource: Datasource<T, P>) => void;
+  registerDatasource: <T, P>(datasource: Datasource<T, P>) => void;
   registerVisualization: <T, P>(visualization: Visualization<T, P>) => void;
 }
 
@@ -123,6 +123,8 @@ export type StateSetter<T> = (newState: T | ((prevState: T) => T)) => void;
  * Interface for the datasource registry
  */
 export interface Datasource<T = unknown, P = unknown> {
+  id: string;
+
   // For initializing, either from an empty state or from persisted state
   // Because this will be called at runtime, state might have a type of `any` and
   // datasources should validate their arguments
