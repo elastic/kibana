@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Vector2 } from '../../types';
+
 export interface UserZoomed {
   readonly type: 'userZoomed';
   readonly payload: number;
@@ -11,12 +13,12 @@ export interface UserZoomed {
 
 export interface UserPanned {
   readonly type: 'userPanned';
-  readonly payload: readonly [number, number];
+  readonly payload: Vector2;
 }
 
 export interface UserSetRasterSize {
   readonly type: 'userSetRasterSize';
-  readonly payload: readonly [number, number];
+  readonly payload: Vector2;
 }
 
 export type CameraAction = UserZoomed | UserPanned | UserSetRasterSize;

@@ -7,6 +7,8 @@
 import { HttpServiceBase } from 'kibana/public';
 import ReactDOM from 'react-dom';
 import React from 'react';
+import { AppRoot } from './view';
+import { storeFactory } from './store';
 import {
   EmbeddableInput,
   IContainer,
@@ -40,8 +42,8 @@ export class ResolverEmbeddable extends Embeddable {
     }
     this.lastRenderTarget = node;
     // TODO, figure out how to destroy middleware
-    const { store } = storeFactory();
-    ReactDOM.render(<AppRoot store={store} httpServiceBase={this.httpServiceBase} />, node);
+    const { store } = storeFactory({ httpServiceBase });
+    ReactDOM.render(<AppRoot store={store} />, node);
   }
 
   public reload(): void {

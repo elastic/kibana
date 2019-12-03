@@ -5,10 +5,11 @@
  */
 
 import { createStore } from 'redux';
+import { HttpServiceBase } from 'kibana/public';
 import { resolverReducer } from './reducer';
 
-export const storeFactory = () => {
-  const store = createStore(resolverReducer, undefined);
+export const storeFactory = ({ httpServiceBase }: { httpServiceBase: HttpServiceBase }) => {
+  const store = createStore(resolverReducer, undefined, applyMiddleware());
   return {
     store,
   };
