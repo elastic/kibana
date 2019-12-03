@@ -19,8 +19,10 @@
 
 import Boom from 'boom';
 import Joi from 'joi';
-import { serializeProvider, API_ROUTE } from '../../common';
+import { serializeProvider } from '../../../../../plugins/expressions/common';
 import { createHandlers } from '../lib/create_handlers';
+
+const API_ROUTE = '/api/interpreter';
 
 /**
  * Register the Canvas function endopints.

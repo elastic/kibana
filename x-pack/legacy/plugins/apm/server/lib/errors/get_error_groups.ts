@@ -13,7 +13,11 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../typings/common';
 import { APMError } from '../../../typings/es_schemas/ui/APMError';
-import { Setup } from '../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../helpers/setup_request';
 import { getErrorGroupsProjection } from '../../../common/projections/errors';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
 import { SortOptions } from '../../../typings/elasticsearch/aggregations';
@@ -31,7 +35,7 @@ export async function getErrorGroups({
   serviceName: string;
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
-  setup: Setup;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
   const { client } = setup;
 
@@ -105,8 +109,6 @@ export async function getErrorGroups({
 
   // aggregations can be undefined when no matching indices are found.
   // this is an exception rather than the rule so the ES type does not account for this.
-  // TODO(TS-3.7-ESLINT)
-  // eslint-disable-next-line @typescript-eslint/camelcase
   const hits = (resp.aggregations?.error_groups.buckets || []).map(bucket => {
     const source = bucket.sample.hits.hits[0]._source;
     const message =

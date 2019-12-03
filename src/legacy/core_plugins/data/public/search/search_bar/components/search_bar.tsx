@@ -24,23 +24,25 @@ import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { get, isEqual } from 'lodash';
 
-import { IndexPattern, FilterBar } from '../../../../../data/public';
+import { IndexPattern } from '../../../../../data/public';
 import { QueryBarTopRow } from '../../../query';
-import { SavedQuery, SavedQueryAttributes } from '../index';
-import { SavedQueryMeta, SaveQueryForm } from './saved_query_management/save_query_form';
-import { SavedQueryManagementComponent } from './saved_query_management/saved_query_management_component';
-import { SavedQueryService } from '../lib/saved_query_service';
-import { createSavedQueryService } from '../lib/saved_query_service';
+
 import {
   withKibana,
   KibanaReactContextValue,
 } from '../../../../../../../plugins/kibana_react/public';
-import { IDataPluginServices } from '../../../types';
 import {
+  IDataPluginServices,
   TimeRange,
   Query,
   esFilters,
   TimeHistoryContract,
+  FilterBar,
+  SavedQuery,
+  SavedQueryAttributes,
+  SavedQueryMeta,
+  SaveQueryForm,
+  SavedQueryManagementComponent,
 } from '../../../../../../../plugins/data/public';
 
 interface SearchBarInjectedDeps {
@@ -64,7 +66,7 @@ export interface SearchBarOwnProps {
   isLoading?: boolean;
   customSubmitButton?: React.ReactNode;
   screenTitle?: string;
-
+  dataTestSubj?: string;
   // Togglers
   showQueryBar?: boolean;
   showQueryInput?: boolean;
@@ -109,8 +111,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     showAutoRefreshOnly: false,
   };
 
-  private savedQueryService!: SavedQueryService;
   private services = this.props.kibana.services;
+  private savedQueryService = this.services.data.query.savedQueries;
   public filterBarRef: Element | null = null;
   public filterBarWrapperRef: Element | null = null;
 
@@ -365,9 +367,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       this.setFilterBarHeight();
       this.ro.observe(this.filterBarRef);
     }
-    if (this.services.savedObjects) {
-      this.savedQueryService = createSavedQueryService(this.services.savedObjects.client);
-    }
   }
 
   public componentDidUpdate() {
@@ -415,6 +414,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           customSubmitButton={
             this.props.customSubmitButton ? this.props.customSubmitButton : undefined
           }
+          dataTestSubj={this.props.dataTestSubj}
         />
       );
     }

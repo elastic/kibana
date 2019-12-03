@@ -14,7 +14,7 @@ interface LayoutProps {
   modalClosePath?: string;
 }
 
-export const NoDataLayout: React.SFC<LayoutProps> = withRouter<any>(
+export const NoDataLayout: React.FC<LayoutProps> = withRouter<any>(
   ({ actionSection, title, modalClosePath, children, history }) => {
     return (
       <EuiFlexGroup justifyContent="spaceAround">

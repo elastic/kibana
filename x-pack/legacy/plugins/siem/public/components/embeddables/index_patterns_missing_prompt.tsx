@@ -12,7 +12,7 @@ import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 
 import * as i18n from './translations';
 
-export const IndexPatternsMissingPrompt = React.memo(() => (
+export const IndexPatternsMissingPromptComponent = () => (
   <EuiEmptyPrompt
     iconType="gisApp"
     title={<h2>{i18n.ERROR_TITLE}</h2>}
@@ -58,4 +58,10 @@ export const IndexPatternsMissingPrompt = React.memo(() => (
       </EuiButton>
     }
   />
-));
+);
+
+IndexPatternsMissingPromptComponent.displayName = 'IndexPatternsMissingPromptComponent';
+
+export const IndexPatternsMissingPrompt = React.memo(IndexPatternsMissingPromptComponent);
+
+IndexPatternsMissingPrompt.displayName = 'IndexPatternsMissingPrompt';

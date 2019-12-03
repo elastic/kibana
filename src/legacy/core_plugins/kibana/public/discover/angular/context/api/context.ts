@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IndexPatterns, IndexPattern, getServices } from '../../../kibana_services';
+import { IndexPatterns, IndexPattern, SearchSource } from '../../../kibana_services';
 import { reverseSortDir, SortDirection } from './utils/sorting';
 import { extractNanos, convertIsoToMillis } from './utils/date_conversion';
 import { fetchHitsInInterval } from './utils/fetch_hits_in_interval';
@@ -33,8 +33,6 @@ export interface EsHitRecord {
   _source: Record<string, any>;
 }
 export type EsHitRecordList = EsHitRecord[];
-
-const { SearchSource } = getServices();
 
 const DAY_MILLIS = 24 * 60 * 60 * 1000;
 
@@ -114,7 +112,7 @@ function fetchContextProvider(indexPatterns: IndexPatterns) {
 
   async function createSearchSource(indexPattern: IndexPattern, filters: esFilters.Filter[]) {
     return new SearchSource()
-      .setParent(false)
+      .setParent(undefined)
       .setField('index', indexPattern)
       .setField('filter', filters);
   }

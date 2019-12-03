@@ -25,7 +25,6 @@ import { HomePlugin, LegacyAngularInjectedDependencies } from './plugin';
 import { createUiStatsReporter, METRIC_TYPE } from '../../../ui_metric/public';
 import { start as data } from '../../../data/public/legacy';
 import { TelemetryOptInProvider } from '../../../telemetry/public/services';
-import { localApplicationService } from '../local_application_service';
 
 export const trackUiMetric = createUiStatsReporter('Kibana_home');
 
@@ -54,6 +53,7 @@ let copiedLegacyCatalogue = false;
 (async () => {
   const instance = new HomePlugin();
   instance.setup(npSetup.core, {
+    ...npSetup.plugins,
     __LEGACY: {
       trackUiMetric,
       metadata: npStart.core.injectedMetadata.getLegacyMetadata(),
@@ -64,14 +64,13 @@ let copiedLegacyCatalogue = false;
           const Private = injector.get<IPrivate>('Private');
           // Merge legacy registry with new registry
           (Private(FeatureCatalogueRegistryProvider as any) as any).inTitleOrder.map(
-            npSetup.plugins.feature_catalogue.register
+            npSetup.plugins.home.featureCatalogue.register
           );
           copiedLegacyCatalogue = true;
         }
-        return npStart.plugins.feature_catalogue.get();
+        return npStart.plugins.home.featureCatalogue.get();
       },
       getAngularDependencies,
-      localApplicationService,
     },
   });
   instance.start(npStart.core, {

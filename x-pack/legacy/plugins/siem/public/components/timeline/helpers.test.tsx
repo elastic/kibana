@@ -5,8 +5,6 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
-
-import { FilterStateStore } from '../../../../../../../src/plugins/data/common/es_query/filters';
 import { mockIndexPattern } from '../../mock';
 
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
@@ -171,7 +169,7 @@ describe('Combined Queries', () => {
         browserFields: mockBrowserFields,
         filters: [
           {
-            $state: { store: FilterStateStore.APP_STATE },
+            $state: { store: esFilters.FilterStateStore.APP_STATE },
             meta: {
               alias: null,
               disabled: false,
@@ -183,7 +181,7 @@ describe('Combined Queries', () => {
             query: { match_phrase: { 'event.category': 'file' } },
           },
           {
-            $state: { store: FilterStateStore.APP_STATE },
+            $state: { store: esFilters.FilterStateStore.APP_STATE },
             meta: {
               alias: null,
               disabled: false,

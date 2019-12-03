@@ -12,11 +12,17 @@ import {
   TRANSACTION_DURATION
 } from '../../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../../typings/common';
-import { Setup } from '../../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../helpers/setup_request';
 import { getServicesProjection } from '../../../../common/projections/services';
 
 export type ServiceListAPIResponse = PromiseReturnType<typeof getServicesItems>;
-export async function getServicesItems(setup: Setup) {
+export async function getServicesItems(
+  setup: Setup & SetupTimeRange & SetupUIFilters
+) {
   const { start, end, client } = setup;
 
   const projection = getServicesProjection({ setup });
@@ -58,13 +64,9 @@ export async function getServicesItems(setup: Setup) {
     const eventTypes = bucket.events.buckets;
 
     const transactions = eventTypes.find(e => e.key === 'transaction');
-    // TODO(TS-3.7-ESLINT)
-    // eslint-disable-next-line @typescript-eslint/camelcase
     const totalTransactions = transactions?.doc_count || 0;
 
     const errors = eventTypes.find(e => e.key === 'error');
-    // TODO(TS-3.7-ESLINT)
-    // eslint-disable-next-line @typescript-eslint/camelcase
     const totalErrors = errors?.doc_count || 0;
 
     const deltaAsMinutes = (end - start) / 1000 / 60;
