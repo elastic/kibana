@@ -18,6 +18,9 @@
  */
 /* eslint no-undef: 0 */
 
+// TODO: Remove this mock
+jest.mock('../../../application', () => ({ legacyBackDoorToSettings: () => {} }));
+
 jest.mock('./mode/worker', () => {
   return { workerModule: { id: 'sense_editor/mode/worker', src: '' } };
 });

@@ -19,13 +19,11 @@
 
 import React, { useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import $ from 'jquery';
 
 import { DevToolsSettings } from '../../../services';
 import { subscribeResizeChecker } from '../editor/legacy/subscribe_console_resize_checker';
 
-// @ts-ignore
-import SenseEditor from '../../../../../public/quarantined/src/sense_editor/editor';
+import * as senseEditor from '../../models/sense_editor';
 import { applyCurrentSettings } from '../editor/legacy/console_editor/apply_editor_settings';
 
 interface Props {
@@ -38,10 +36,8 @@ export function HistoryViewer({ settings, req }: Props) {
   const viewerRef = useRef<any | null>(null);
 
   useEffect(() => {
-    const viewer = new SenseEditor($(divRef.current!));
+    const viewer = senseEditor.create(divRef.current!);
     viewerRef.current = viewer;
-    viewer.renderer.setShowPrintMargin(false);
-    viewer.$blockScrolling = Infinity;
     const unsubscribe = subscribeResizeChecker(divRef.current!, viewer);
     return () => unsubscribe();
   }, []);

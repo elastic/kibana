@@ -16,18 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import '../../../../np_ready/public/application/models/sense_editor/sense_editor.test.mocks';
-
-jest.mock('../../../../np_ready/public/application', () => ({ legacyBackDoorToSettings: () => {}, }));
+import '../sense_editor.test.mocks';
 
 import $ from 'jquery';
 import _ from 'lodash';
 import ace from 'brace';
 import 'brace/mode/json';
 
-import { create } from '../../../../np_ready/public/application/models/sense_editor';
+import { create } from '../create';
 const editorInput1 = require('./editor_input1.txt');
-const utils = require('../../src/utils');
+const utils = require('../../../../../../public/quarantined/src/utils');
 
 const aceRange = ace.acequire('ace/range');
 
