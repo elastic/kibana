@@ -52,7 +52,7 @@ export class AgentPolicyLib {
         };
       });
 
-      this.agentsRepository.bulkUpdate(user, agentUpdate);
+      await this.agentsRepository.bulkUpdate(user, agentUpdate);
     }
   }
 
