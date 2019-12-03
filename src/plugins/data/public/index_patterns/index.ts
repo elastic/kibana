@@ -42,7 +42,6 @@ export const indexPatterns = {
   formatHitProvider,
 };
 
-export { IndexPatternsService } from './index_patterns_service';
 export { Field, FieldList, IFieldList } from './fields';
 
 // TODO: figure out how to replace IndexPatterns in get_inner_angular.
