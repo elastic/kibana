@@ -116,7 +116,6 @@ export function maps(kibana) {
         route: server.route.bind(server),
         plugins: {
           elasticsearch: server.plugins.elasticsearch,
-          xpackMainPlugin: server.plugins.xpack_main
         },
         savedObjects: {
           getSavedObjectsRepository: server.savedObjects.getSavedObjectsRepository
