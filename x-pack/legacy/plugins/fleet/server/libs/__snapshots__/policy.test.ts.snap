@@ -2,6 +2,7 @@
 
 exports[`Policies Lib getWithAgentFormating Should return a policy with all datasource, formatted for agent 1`] = `
 Object {
+  "id": "policy_example",
   "outputs": Object {
     "default": Object {
       "api_token": "slfhsdlfhjjkshfkjh:sdfsdfsdfsdf",

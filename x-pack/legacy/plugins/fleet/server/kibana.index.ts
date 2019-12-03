@@ -24,6 +24,11 @@ export const initServerWithKibana = (hapiServer: any) => {
         policyId: event.policyId,
       });
     }
+
+    if (event.type === 'updated') {
+      await libs.agentsPolicy.updateAgentsForPolicyId(user, event.policyId);
+    }
+
     if (event.type === 'deleted') {
       await libs.agents.unenrollForPolicy(user, event.policyId);
       await libs.apiKeys.deleteEnrollmentApiKeyForPolicyId(user, event.policyId);
