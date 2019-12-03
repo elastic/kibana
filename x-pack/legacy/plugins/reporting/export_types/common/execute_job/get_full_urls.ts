@@ -16,6 +16,13 @@ import { ServerFacade, ConditionalHeaders } from '../../../types';
 import { JobDocPayloadPNG } from '../../png/types';
 import { JobDocPayloadPDF } from '../../printable_pdf/types';
 
+function isPngJob(job: JobDocPayloadPNG | JobDocPayloadPDF): job is JobDocPayloadPNG {
+  return (job as JobDocPayloadPNG).relativeUrl !== undefined;
+}
+function isPdfJob(job: JobDocPayloadPNG | JobDocPayloadPDF): job is JobDocPayloadPDF {
+  return (job as JobDocPayloadPDF).objects !== undefined;
+}
+
 export async function getFullUrls<JobDocPayloadType>({
   job,
   server,
@@ -38,12 +45,10 @@ export async function getFullUrls<JobDocPayloadType>({
   // PDF and PNG job params put in the url differently
   let relativeUrls: string[] = [];
 
-  const pngJob = job as JobDocPayloadPNG; // single page (png)
-  const pdfJob = job as JobDocPayloadPDF; // multi page (pdf)
-  if (pngJob.relativeUrl) {
-    relativeUrls = [pngJob.relativeUrl];
-  } else if (pdfJob.objects) {
-    relativeUrls = pdfJob.objects.map(obj => obj.relativeUrl);
+  if (isPngJob(job)) {
+    relativeUrls = [job.relativeUrl];
+  } else if (isPdfJob(job)) {
+    relativeUrls = job.objects.map(obj => obj.relativeUrl);
   } else {
     throw new Error(
       `No valid URL fields found in Job Params! Expected \`job.relativeUrl\` or \`job.objects[{ relativeUrl }]\``
