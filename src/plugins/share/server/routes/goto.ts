@@ -20,7 +20,6 @@
 import { CoreSetup, IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 
-import { handleShortUrlError } from './lib/short_url_error';
 import { shortUrlAssertValid } from './lib/short_url_assert_valid';
 import { ShortUrlLookupService } from './lib/short_url_lookup';
 
@@ -40,31 +39,27 @@ export const createGotoRoute = ({
         params: schema.object({ urlId: schema.string() }),
       },
     },
-    async function(context, request, response) {
-      try {
-        const url = await shortUrlLookup.getUrl(request.params.urlId, {
-          savedObjects: context.core.savedObjects.client,
-        });
-        shortUrlAssertValid(url);
+    router.handleLegacyErrors(async function(context, request, response) {
+      const url = await shortUrlLookup.getUrl(request.params.urlId, {
+        savedObjects: context.core.savedObjects.client,
+      });
+      shortUrlAssertValid(url);
 
-        const uiSettings = context.core.uiSettings.client;
-        const stateStoreInSessionStorage = await uiSettings.get('state:storeInSessionStorage');
-        if (!stateStoreInSessionStorage) {
-          return response.redirected({
-            headers: {
-              location: http.basePath.prepend(url),
-            },
-          });
-        } else {
-          return response.redirected({
-            headers: {
-              location: http.basePath.prepend('/goto_LP/' + request.params.urlId),
-            },
-          });
-        }
-      } catch (err) {
-        return handleShortUrlError(response, err);
+      const uiSettings = context.core.uiSettings.client;
+      const stateStoreInSessionStorage = await uiSettings.get('state:storeInSessionStorage');
+      if (!stateStoreInSessionStorage) {
+        return response.redirected({
+          headers: {
+            location: http.basePath.prepend(url),
+          },
+        });
+      } else {
+        return response.redirected({
+          headers: {
+            location: http.basePath.prepend('/goto_LP/' + request.params.urlId),
+          },
+        });
       }
-    }
+    })
   );
 };

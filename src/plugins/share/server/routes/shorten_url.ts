@@ -20,7 +20,6 @@
 import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 
-import { handleShortUrlError } from './lib/short_url_error';
 import { shortUrlAssertValid } from './lib/short_url_assert_valid';
 import { ShortUrlLookupService } from './lib/short_url_lookup';
 
@@ -38,16 +37,13 @@ export const createShortenUrlRoute = ({
         body: schema.object({ url: schema.string() }, { allowUnknowns: false }),
       },
     },
-    async function(context, request, response) {
-      try {
-        shortUrlAssertValid(request.body.url);
-        const urlId = await shortUrlLookup.generateUrlId(request.body.url, {
-          savedObjects: context.core.savedObjects.client,
-        });
-        return response.ok({ body: { urlId } });
-      } catch (err) {
-        return handleShortUrlError(response, err);
-      }
-    }
+    router.handleLegacyErrors(async function(context, request, response) {
+      shortUrlAssertValid(request.body.url);
+      const urlId = await shortUrlLookup.generateUrlId(request.body.url, {
+        savedObjects: context.core.savedObjects.client,
+      });
+      throw new Error();
+      return response.ok({ body: { urlId } });
+    })
   );
 };
