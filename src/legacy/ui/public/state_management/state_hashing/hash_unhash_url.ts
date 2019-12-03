@@ -25,12 +25,12 @@ import { format as formatUrl, parse as parseUrl } from 'url';
 import { HashedItemStoreSingleton } from '../state_storage';
 import { createStateHash, isStateHash } from './state_hash';
 
-export type IQuery = Record<string, any>;
+export type IParsedUrlQuery = Record<string, any>;
 
-interface QueryMapperOptions {
+interface IUrlQueryMapperOptions {
   hashableParams: string[];
 }
-export type QueryReplacerOptions = QueryMapperOptions;
+export type IUrlQueryReplacerOptions = IUrlQueryMapperOptions;
 
 export const unhashQuery = createQueryMapper(stateHashToRisonState);
 export const hashQuery = createQueryMapper(risonStateToStateHash);
@@ -44,8 +44,8 @@ export const hashUrl = createQueryReplacer(hashQuery);
 const __HACK_HARDCODED_LEGACY_HASHABLE_PARAMS = ['_g', '_a', '_s'];
 function createQueryMapper(queryParamMapper: (q: string) => string | null) {
   return (
-    query: IQuery,
-    options: QueryMapperOptions = {
+    query: IParsedUrlQuery,
+    options: IUrlQueryMapperOptions = {
       hashableParams: __HACK_HARDCODED_LEGACY_HASHABLE_PARAMS,
     }
   ) =>
@@ -58,8 +58,8 @@ function createQueryMapper(queryParamMapper: (q: string) => string | null) {
 }
 
 function createQueryReplacer(
-  queryMapper: (q: IQuery, options?: QueryMapperOptions) => IQuery,
-  options?: QueryReplacerOptions
+  queryMapper: (q: IParsedUrlQuery, options?: IUrlQueryMapperOptions) => IParsedUrlQuery,
+  options?: IUrlQueryReplacerOptions
 ) {
   return (url: string) => {
     if (!url) return url;
