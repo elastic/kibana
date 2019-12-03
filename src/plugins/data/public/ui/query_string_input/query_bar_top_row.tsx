@@ -41,8 +41,8 @@ import {
   PersistedLog,
   getQueryLog,
   esKuery,
-} from '../../../../../../../plugins/data/public';
-import { useKibana, toMountPoint } from '../../../../../../../plugins/kibana_react/public';
+} from '../..';
+import { useKibana, toMountPoint } from '../../../../kibana_react/public';
 import { QueryStringInput } from './query_string_input';
 
 interface Props {
