@@ -35,7 +35,7 @@ jest.mock('fs', () => {
 
 import { FTR_REPORT, JEST_REPORT, MOCHA_REPORT, KARMA_REPORT } from './__fixtures__';
 import { parseTestReport } from './test_report';
-import { mentionGithubIssuesInReport } from './mention_github_issues_in_report';
+import { addMessagesToReport } from './mention_github_issues_in_report';
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -44,7 +44,7 @@ beforeEach(() => {
 const log = new ToolingLog();
 
 it('rewrites ftr reports with minimal changes', async () => {
-  const xml = await mentionGithubIssuesInReport(
+  const xml = await addMessagesToReport(
     await parseTestReport(FTR_REPORT),
     [
       {
@@ -86,7 +86,7 @@ it('rewrites ftr reports with minimal changes', async () => {
     -    at onFailure (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/test/common/services/retry/retry_for_success.ts:68:13)]]>
     -      </failure>
     +    at onFailure (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/test/common/services/retry/retry_for_success.ts:68:13)
-    +      
+    +
     +
     +Failed Tests Reporter:
     +  - foo bar
@@ -130,7 +130,7 @@ it('rewrites ftr reports with minimal changes', async () => {
 });
 
 it('rewrites jest reports with minimal changes', async () => {
-  const xml = await mentionGithubIssuesInReport(
+  const xml = await addMessagesToReport(
     await parseTestReport(JEST_REPORT),
     [
       {
@@ -160,7 +160,7 @@ it('rewrites jest reports with minimal changes', async () => {
     +      <failure><![CDATA[
     +        TypeError: Cannot read property '0' of undefined
     +    at Object.<anonymous>.test (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts:166:10)
-    +      
+    +
     +
     +Failed Tests Reporter:
     +  - foo bar
@@ -177,7 +177,7 @@ it('rewrites jest reports with minimal changes', async () => {
 });
 
 it('rewrites mocha reports with minimal changes', async () => {
-  const xml = await mentionGithubIssuesInReport(
+  const xml = await addMessagesToReport(
     await parseTestReport(MOCHA_REPORT),
     [
       {
@@ -201,7 +201,7 @@ it('rewrites mocha reports with minimal changes', async () => {
          <testcase name=\\"code in multiple nodes &quot;before all&quot; hook\\" classname=\\"X-Pack Mocha Tests.x-pack/legacy/plugins/code/server/__tests__/multi_node·ts\\" time=\\"0.121\\">
            <system-out>
     -        <![CDATA[]]>
-    +        
+    +
            </system-out>
     -      <failure>
     -        <![CDATA[Error: Unable to read artifact info from https://artifacts-api.elastic.co/v1/versions/8.0.0-SNAPSHOT/builds/latest/projects/elasticsearch: Service Temporarily Unavailable
@@ -219,7 +219,7 @@ it('rewrites mocha reports with minimal changes', async () => {
     -    at process._tickCallback (internal/process/next_tick.js:68:7)]]>
     -      </failure>
     +    at process._tickCallback (internal/process/next_tick.js:68:7)
-    +      
+    +
     +
     +Failed Tests Reporter:
     +  - foo bar
@@ -228,7 +228,7 @@ it('rewrites mocha reports with minimal changes', async () => {
          <testcase name=\\"code in multiple nodes &quot;after all&quot; hook\\" classname=\\"X-Pack Mocha Tests.x-pack/legacy/plugins/code/server/__tests__/multi_node·ts\\" time=\\"0.003\\">
            <system-out>
     -        <![CDATA[]]>
-    +        
+    +
            </system-out>
            <failure>
     -        <![CDATA[TypeError: Cannot read property 'shutdown' of undefined
@@ -241,7 +241,7 @@ it('rewrites mocha reports with minimal changes', async () => {
          <testcase name=\\"repository service test can not clone a repo by ssh without a key\\" classname=\\"X-Pack Mocha Tests.x-pack/legacy/plugins/code/server/__tests__/repository_service·ts\\" time=\\"0.005\\">
            <system-out>
     -        <![CDATA[]]>
-    +        
+    +
            </system-out>
          </testcase>
        </testsuite>
@@ -253,7 +253,7 @@ it('rewrites mocha reports with minimal changes', async () => {
 });
 
 it('rewrites karma reports with minimal changes', async () => {
-  const xml = await mentionGithubIssuesInReport(
+  const xml = await addMessagesToReport(
     await parseTestReport(KARMA_REPORT),
     [
       {

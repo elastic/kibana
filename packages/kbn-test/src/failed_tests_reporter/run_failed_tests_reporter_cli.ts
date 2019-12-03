@@ -25,7 +25,7 @@ import { GithubApi } from './github_api';
 import { updateFailureIssue, createFailureIssue } from './report_failure';
 import { getIssueMetadata } from './issue_metadata';
 import { readTestReport } from './test_report';
-import { mentionGithubIssuesInReport, Update } from './mention_github_issues_in_report';
+import { addMessagesToReport, Message } from './mention_github_issues_in_report';
 
 export function runFailedTestsReporterCli() {
   run(
@@ -35,8 +35,14 @@ export function runFailedTestsReporterCli() {
         throw createFlagError('Missing --build-url or process.env.BUILD_URL');
       }
 
-      const dryRun = true;
+      let dryRun = !!flags['dry-run'];
       if (!dryRun) {
+        if (!process.env.GITHUB_TOKEN) {
+          throw createFailError(
+            'GITHUB_TOKEN environment variable must be set, otherwise use --dry-run flag'
+          );
+        }
+
         // JOB_NAME is formatted as `elastic+kibana+7.x` in some places and `elastic+kibana+7.x/JOB=kibana-intake,node=immutable` in others
         const jobNameSplit = (process.env.JOB_NAME || '').split(/\+|\//);
         const branch = jobNameSplit.length >= 3 ? jobNameSplit[2] : process.env.GIT_BRANCH;
@@ -50,15 +56,10 @@ export function runFailedTestsReporterCli() {
         const isMasterOrVersion =
           branch.match(/^(origin\/){0,1}master$/) || branch.match(/^(origin\/){0,1}\d+\.(x|\d+)$/);
         if (!isMasterOrVersion || isPr) {
-          throw createFailError('Failure issues only created on master/version branch jobs', {
-            exitCode: 0,
-          });
-        }
-
-        if (!process.env.GITHUB_TOKEN) {
-          throw createFailError(
-            'GITHUB_TOKEN environment variable must be set, otherwise use --dry-run flag'
+          log.info(
+            'Failure issues only created on master/version branch jobs, switching to --dry-run mode'
           );
+          dryRun = true;
         }
       }
 
@@ -70,14 +71,16 @@ export function runFailedTestsReporterCli() {
 
       for (const reportPath of reportPaths) {
         const report = await readTestReport(reportPath);
-        const updates: Update[] = [];
+        const messages: Message[] = [];
 
         for (const { failure, type } of await getFailures(report)) {
           if (type === 'ignore') {
-            updates.push({
+            messages.push({
               classname: failure.classname,
               name: failure.name,
-              message: 'Failure is likely irrelevant, so an issue was not created or updated',
+              message:
+                'Failure is likely irrelevant' +
+                (dryRun ? '' : ', so an issue was not created or updated'),
             });
             continue;
           }
@@ -90,24 +93,26 @@ export function runFailedTestsReporterCli() {
 
           if (existingIssue) {
             const newFailureCount = await updateFailureIssue(buildUrl, existingIssue, githubApi);
-            updates.push({
+            messages.push({
               classname: failure.classname,
               name: failure.name,
-              message: `Updated existing issue: ${existingIssue.html_url}, (fail count: ${newFailureCount})`,
+              message: dryRun
+                ? `Test has failed ${newFailureCount - 1} times before: ${existingIssue.html_url}`
+                : `Updated existing issue: ${existingIssue.html_url}, (fail count: ${newFailureCount})`,
             });
             continue;
           }
 
           const newIssueUrl = await createFailureIssue(buildUrl, failure, githubApi);
-          updates.push({
+          messages.push({
             classname: failure.classname,
             name: failure.name,
-            message: `Created new issue: ${newIssueUrl}`,
+            message: dryRun ? `First time failure` : `Created new issue: ${newIssueUrl}`,
           });
         }
 
-        // mutates report to have mentions of updates made and writes updated report to disk
-        await mentionGithubIssuesInReport(report, updates, log, reportPath);
+        // mutates report to include messages and writes updated report to disk
+        await addMessagesToReport(report, messages, log, reportPath);
       }
     },
     {

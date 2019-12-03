@@ -27,7 +27,7 @@ import { TestReport, makeFailedTestCaseIter } from './test_report';
 
 const writeAsync = promisify(Fs.writeFile);
 
-export interface Update {
+export interface Message {
   classname: string;
   name: string;
   message: string;
@@ -37,16 +37,16 @@ export interface Update {
  * Mutate the report to include mentions of Github issues related to test failures,
  * then write the updated report to disk
  */
-export async function mentionGithubIssuesInReport(
+export async function addMessagesToReport(
   report: TestReport,
-  updates: Update[],
+  messages: Message[],
   log: ToolingLog,
   reportPath: string
 ) {
   for (const testCase of makeFailedTestCaseIter(report)) {
     const { classname, name } = testCase.$;
-    const messageList = updates
-      .filter((u: Update) => u.classname === classname && u.name === name)
+    const messageList = messages
+      .filter(u => u.classname === classname && u.name === name)
       .reduce((acc, u) => `${acc}\n  - ${u.message}`, '');
 
     if (!messageList) {
@@ -71,7 +71,13 @@ export async function mentionGithubIssuesInReport(
     cdata: true,
     xmldec: { version: '1.0', encoding: 'utf-8' },
   });
-  const xml = builder.buildObject(report);
+
+  const xml = builder
+    .buildObject(report)
+    .split('\n')
+    .map(line => (line.trim() === '' ? '' : line))
+    .join('\n');
+
   await writeAsync(reportPath, xml, 'utf8');
   return xml;
 }
