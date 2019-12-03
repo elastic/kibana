@@ -49,6 +49,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const closeButton = await testSubjects.find('toastCloseButton');
       await closeButton.click();
+
+      const searchBox = await find.byCssSelector('[data-test-subj="actionsList"] .euiFieldSearch');
+      await searchBox.click();
+      await searchBox.clearValue();
+      await searchBox.type(connectorName);
+      await searchBox.pressKeys(ENTER_KEY);
+
+      const textShownInConnectorsList = await testSubjects.getVisibleText(
+        'connectorsTableCell-name'
+      );
+      expect(textShownInConnectorsList).to.eql(connectorName);
     });
 
     it('should edit a connector', async () => {
@@ -102,6 +113,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const closeToastUpdatedButton = await testSubjects.find('toastCloseButton');
       await closeToastUpdatedButton.click();
+
+      await searchBox.click();
+      await searchBox.clearValue();
+      await searchBox.type(updatedConnectorName);
+      await searchBox.pressKeys(ENTER_KEY);
+
+      const textShownInConnectorsList = await testSubjects.getVisibleText(
+        'connectorsTableCell-name'
+      );
+      expect(textShownInConnectorsList).to.eql(updatedConnectorName);
     });
 
     it('should delete a connector', async () => {
