@@ -7,7 +7,6 @@
 import { useContext } from 'react';
 import createContainer from 'constate';
 import { ReduxStateContext } from '../../../utils/redux_context';
-import { SerializedFilterQuery } from '../../../store/local/log_filter';
 import { logFilterSelectors as logFilterReduxSelectors } from '../../../store/local/selectors';
 
 export const useLogFilterState = () => {
@@ -17,7 +16,7 @@ export const useLogFilterState = () => {
 };
 
 export interface LogFilterStateParams {
-  filterQuery: SerializedFilterQuery | null;
+  filterQuery: string | null;
 }
 
 export const logFilterInitialState = {

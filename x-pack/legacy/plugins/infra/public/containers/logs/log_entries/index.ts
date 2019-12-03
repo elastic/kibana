@@ -8,7 +8,6 @@ import createContainer from 'constate';
 import { pick } from 'lodash';
 import { useGraphQLQueries } from './gql_queries';
 import { TimeKey, timeKeyIsBetween } from '../../../../common/time';
-import { SerializedFilterQuery } from '../../../store/local/log_filter';
 import { InfraLogEntry } from './types';
 
 const DESIRED_BUFFER_PAGES = 2;
@@ -40,7 +39,7 @@ type ActionObj = ReceiveEntriesAction | FetchOrErrorAction;
 type Dispatch = (action: ActionObj) => void;
 
 interface LogEntriesDependencies {
-  filterQuery: SerializedFilterQuery | null;
+  filterQuery: string | null;
   timeKey: TimeKey | null;
   pagesBeforeStart: number | null;
   pagesAfterEnd: number | null;
