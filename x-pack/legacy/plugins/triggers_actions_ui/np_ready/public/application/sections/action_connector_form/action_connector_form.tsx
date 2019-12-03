@@ -101,27 +101,32 @@ export const ActionConnectorForm = ({
 
   async function onActionConnectorSave(): Promise<any> {
     try {
-      let savingMessage;
+      let message;
       let savedConnector;
       if (connector.id === undefined) {
         savedConnector = await createActionConnector({ http, connector });
-        savingMessage = 'Updated';
-      } else {
-        savedConnector = await updateActionConnector({ http, connector, id: connector.id });
-        savingMessage = 'Created';
-      }
-      toastNotifications.addSuccess(
-        i18n.translate(
+        message = i18n.translate(
           'xpack.triggersActionsUI.sections.actionConnectorForm.saveSuccessNotificationText',
           {
-            defaultMessage: "{savingMessage} '{connectorName}'",
+            defaultMessage: "Created '{connectorName}'",
             values: {
               connectorName: savedConnector.description,
-              savingMessage,
             },
           }
-        )
-      );
+        );
+      } else {
+        savedConnector = await updateActionConnector({ http, connector, id: connector.id });
+        message = i18n.translate(
+          'xpack.triggersActionsUI.sections.actionConnectorForm.saveSuccessNotificationText',
+          {
+            defaultMessage: "Updated '{connectorName}'",
+            values: {
+              connectorName: savedConnector.description,
+            },
+          }
+        );
+      }
+      toastNotifications.addSuccess(message);
       return savedConnector;
     } catch (error) {
       return {

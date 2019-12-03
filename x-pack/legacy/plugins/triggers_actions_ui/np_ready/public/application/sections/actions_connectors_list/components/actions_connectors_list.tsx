@@ -184,6 +184,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       actions: [
         {
           enabled: () => canSave,
+          'data-test-subj': 'editConnector',
           name: i18n.translate(
             'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.editActionName',
             { defaultMessage: 'Edit' }
@@ -203,6 +204,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
         },
         {
           enabled: () => canDelete,
+          'data-test-subj': 'deleteConnector',
           name: i18n.translate(
             'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionName',
             { defaultMessage: 'Delete' }

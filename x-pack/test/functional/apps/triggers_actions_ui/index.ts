@@ -10,5 +10,6 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
   describe('Actions and Triggers app', function() {
     this.tags('ciGroup3'); // not sure about which CI group this tests should belong to
     loadTestFile(require.resolve('./home_page'));
+    loadTestFile(require.resolve('./connectors'));
   });
 };
