@@ -21,19 +21,11 @@
 // these are necessary to bootstrap the local angular.
 // They can stay even after NP cutover
 import angular from 'angular';
-import 'ui/angular-bootstrap';
-import 'angular-sortable-view';
-import 'brace/mode/hjson';
-import 'brace/ext/searchbox';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import { CoreStart, LegacyCoreStart } from 'kibana/public';
 import {
-  PrivateProvider,
-  PaginateDirectiveProvider,
-  PaginateControlsDirectiveProvider,
   watchMultiDecorator,
   KbnAccessibleClickProvider,
-  StateManagementConfigProvider,
   configureAppAngularModule,
 } from './legacy_imports';
 
@@ -49,41 +41,13 @@ let initialized = false;
 
 export function getInnerAngular(name = 'kibana/timelion_vis', core: CoreStart) {
   if (!initialized) {
-    createLocalPrivateModule();
     createLocalI18nModule();
-    createLocalConfigModule(core.uiSettings);
-    createLocalPaginateModule();
     initialized = true;
   }
   return angular
-    .module(name, [
-      ...thirdPartyAngularDependencies,
-      'timelionVisPaginate',
-      'timelionVisConfig',
-      'timelionVisPrivate',
-      'timelionVisI18n',
-    ])
+    .module(name, [...thirdPartyAngularDependencies, 'timelionVisI18n'])
     .config(watchMultiDecorator)
     .directive('kbnAccessibleClick', KbnAccessibleClickProvider);
-}
-
-function createLocalPrivateModule() {
-  angular.module('timelionVisPrivate', []).provider('Private', PrivateProvider);
-}
-
-function createLocalConfigModule(uiSettings: any) {
-  angular
-    .module('timelionVisConfig', ['timelionVisPrivate'])
-    .provider('stateManagementConfig', StateManagementConfigProvider)
-    .provider('config', function() {
-      return {
-        $get: () => ({
-          get: (value: string) => {
-            return uiSettings ? uiSettings.get(value) : undefined;
-          },
-        }),
-      };
-    });
 }
 
 function createLocalI18nModule() {
@@ -92,11 +56,4 @@ function createLocalI18nModule() {
     .provider('i18n', I18nProvider)
     .filter('i18n', i18nFilter)
     .directive('i18nId', i18nDirective);
-}
-
-function createLocalPaginateModule() {
-  angular
-    .module('timelionVisPaginate', [])
-    .directive('paginate', PaginateDirectiveProvider)
-    .directive('paginateControls', PaginateControlsDirectiveProvider);
 }

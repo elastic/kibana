@@ -17,21 +17,13 @@
  * under the License.
  */
 
-export { npSetup, npStart } from 'ui/new_platform';
-// @ts-ignore
-export { PrivateProvider } from 'ui/private/private';
+export { npStart } from 'ui/new_platform';
 
-// @ts-ignore
-export { PaginateDirectiveProvider } from 'ui/directives/paginate';
-// @ts-ignore
-export { PaginateControlsDirectiveProvider } from 'ui/directives/paginate';
 // @ts-ignore
 export { watchMultiDecorator } from 'ui/directives/watch_multi/watch_multi';
 
 // @ts-ignore
 export { KbnAccessibleClickProvider } from 'ui/accessibility/kbn_accessible_click';
-// @ts-ignore
-export { StateManagementConfigProvider } from 'ui/state_management/config_provider';
 export { configureAppAngularModule } from 'ui/legacy_compat';
 // @ts-ignore
 export { DefaultEditorSize } from 'ui/vis/editor_size';
