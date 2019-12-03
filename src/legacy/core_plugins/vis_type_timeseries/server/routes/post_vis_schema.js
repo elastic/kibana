@@ -84,6 +84,11 @@ export const visSchema = {
       isModelInvalid: Joi.boolean().optional(),
       // unknown
       legend_position: stringOptional,
+      markdown: stringOptional,
+      markdown_scrollbars: numberIntegerOptional,
+      markdown_openLinksInNewTab: numberIntegerOptional,
+      markdown_vertical_align: stringOptional,
+      markdown_less: stringOptional,
       // table ??
       pivot_id: stringOptional,
       pivot_label: stringOptional,
@@ -118,8 +123,13 @@ export const visSchema = {
                   id: stringRequired,
                   metric_agg: stringOptional,
                   numerator: stringOptional,
+                  denominator: stringOptional,
                   sigma: stringOptional,
                   type: stringRequired,
+                  values: Joi.array()
+                    .items(Joi.string().allow('', null))
+                    .allow(null)
+                    .optional()
                 })
               ),
             offset_time: stringOptional,
@@ -140,13 +150,16 @@ export const visSchema = {
               })).optional(),
             split_mode: stringRequired,
             stacked: stringRequired,
-            terms_field: stringOptional,
-            terms_order_by: stringOptional,
-            terms_size: stringOptional,
-            terms_direction: stringOptional,
-            time_range_mode: stringOptional,
+            terms_field: stringOptionalNullable,
+            terms_order_by: stringOptionalNullable,
+            terms_size: stringOptionalNullable,
+            terms_direction: stringOptionalNullable,
+            terms_include: stringOptionalNullable,
+            terms_exclude: stringOptionalNullable,
+            time_range_mode: stringOptionalNullable,
             trend_arrows: numberOptional,
-            value_template: stringOptional,
+            value_template: stringOptionalNullable,
+            var_name: stringOptionalNullable
           }),
         ).required(),
       show_grid: numberIntegerRequired,
