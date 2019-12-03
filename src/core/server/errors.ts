@@ -17,7 +17,14 @@
  * under the License.
  */
 
-/** @internal */
-export { LegacyObjectToConfigAdapter, ensureValidConfiguration, LegacyConfig } from './config';
-/** @internal */
-export { LegacyService, LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy_service';
+export class CriticalError extends Error {
+  constructor(
+    message: string,
+    public code: string,
+    public processExitCode: number,
+    public cause?: Error
+  ) {
+    super(message);
+    Object.setPrototypeOf(this, CriticalError.prototype);
+  }
+}
