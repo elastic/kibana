@@ -72,7 +72,6 @@ export interface SavedObjectConfig {
   };
   id?: string;
   indexPattern?: IndexPattern;
-  init?: () => any;
   injectReferences?: any;
   mapping?: any;
   migrationVersion?: Record<string, any>;
