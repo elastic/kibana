@@ -123,7 +123,7 @@ export class AbstractSource {
     return AbstractSource.isIndexingSource;
   }
 
-  isElasticsearchSource() {
+  isESSource() {
     return false;
   }
 

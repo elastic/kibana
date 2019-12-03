@@ -54,7 +54,7 @@ export class AbstractESSource extends AbstractVectorSource {
     return [];
   }
 
-  isElasticsearchSource() {
+  isESSource() {
     return true;
   }
 

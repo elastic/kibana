@@ -56,7 +56,7 @@ export class FieldMetaOptionsPopover extends Component {
         >
           <EuiSwitch
             label={i18n.translate('xpack.maps.styles.fieldMetaOptions.isEnabledLabel', {
-              defaultMessage: 'Clamp range to on-screen features',
+              defaultMessage: 'Clamp range to on-screen values',
             })}
             checked={!this.props.fieldMetaOptions.isEnabled}
             onChange={this._onIsEnabledChange}

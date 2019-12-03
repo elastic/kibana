@@ -434,7 +434,7 @@ export class VectorLayer extends AbstractLayer {
     registerCancelCallback
   }) {
 
-    if (!source.isElasticsearchSource() || dynamicStyleProps.length === 0) {
+    if (!source.isESSource() || dynamicStyleProps.length === 0) {
       return;
     }
 

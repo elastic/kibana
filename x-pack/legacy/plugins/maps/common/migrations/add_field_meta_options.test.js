@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint max-len: 0 */
-
 import { addFieldMetaOptions } from './add_field_meta_options';
 import {  LAYER_TYPE, STYLE_TYPE } from '../constants';
 
@@ -28,23 +26,6 @@ describe('addFieldMetaOptions', () => {
           type: 'HEATMAP',
           colorRampName: 'Greens'
         }
-      }
-    ]);
-    const attributes = {
-      title: 'my map',
-      layerListJSON
-    };
-    expect(addFieldMetaOptions({ attributes })).toEqual({
-      title: 'my map',
-      layerListJSON
-    });
-  });
-
-  test('Should handle vector layer without style descriptor', () => {
-    const layerListJSON = JSON.stringify([
-      {
-        type: LAYER_TYPE.VECTOR,
-        style: null
       }
     ]);
     const attributes = {
@@ -111,7 +92,30 @@ describe('addFieldMetaOptions', () => {
     };
     expect(addFieldMetaOptions({ attributes })).toEqual({
       title: 'my map',
-      layerListJSON: '[{\"type\":\"VECTOR\",\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"name\":\"my_field\",\"origin\":\"source\"},\"color\":\"Greys\",\"fieldMetaOptions\":{\"isEnabled\":false,\"sigma\":3}}}}}}]'
+      layerListJSON: JSON.stringify([
+        {
+          type: LAYER_TYPE.VECTOR,
+          style: {
+            type: 'VECTOR',
+            properties: {
+              fillColor: {
+                type: STYLE_TYPE.DYNAMIC,
+                options: {
+                  field: {
+                    name: 'my_field',
+                    origin: 'source'
+                  },
+                  color: 'Greys',
+                  fieldMetaOptions: {
+                    isEnabled: false,
+                    sigma: 3,
+                  }
+                }
+              }
+            }
+          }
+        }
+      ])
     });
   });
 });

@@ -322,6 +322,7 @@ export class VectorStyle extends AbstractStyle {
       }
     }
 
+    // Default to clamped range from on-screen values
     return _.get(this._descriptor, ['__styleMeta', fieldName]);
   }
 
