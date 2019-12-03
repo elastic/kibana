@@ -63,7 +63,7 @@ export const createGotoRoute = ({
           });
         }
       } catch (err) {
-        throw handleShortUrlError(err);
+        return handleShortUrlError(response, err);
       }
     }
   );

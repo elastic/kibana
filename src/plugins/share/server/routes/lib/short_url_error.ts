@@ -18,9 +18,11 @@
  */
 
 import Boom from 'boom';
+import { KibanaResponseFactory } from 'kibana/server';
 
-export function handleShortUrlError(error: Error) {
-  return Boom.boomify(error, {
+export function handleShortUrlError(response: KibanaResponseFactory, error: Error) {
+  return response.customError({
     statusCode: Boom.isBoom(error) ? error.output.statusCode : 500,
+    body: error.message,
   });
 }

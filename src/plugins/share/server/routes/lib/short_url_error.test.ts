@@ -20,9 +20,16 @@
 import _ from 'lodash';
 import { handleShortUrlError } from './short_url_error';
 import Boom from 'boom';
+import { KibanaResponseFactory } from 'kibana/server';
 
 function createErrorWithStatusCode(statusCode: number) {
   return new Boom('', { statusCode });
+}
+
+function createResponseStub() {
+  return ({
+    customError: jest.fn(),
+  } as unknown) as jest.Mocked<KibanaResponseFactory>;
 }
 
 describe('handleShortUrlError()', () => {
@@ -36,14 +43,20 @@ describe('handleShortUrlError()', () => {
 
   caughtErrorsWithStatusCode.forEach(err => {
     const statusCode = (err as Boom).output.statusCode;
+    const response = createResponseStub();
     it(`should handle errors with statusCode of ${statusCode}`, function() {
-      expect(_.get(handleShortUrlError(err), 'output.statusCode')).toBe(statusCode);
+      handleShortUrlError(response, err);
+      expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode }));
     });
   });
 
   uncaughtErrors.forEach(err => {
     it(`should not handle unknown errors`, function() {
-      expect(_.get(handleShortUrlError(err), 'output.statusCode')).toBe(500);
+      const response = createResponseStub();
+      handleShortUrlError(response, err);
+      expect(response.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 500 })
+      );
     });
   });
 });

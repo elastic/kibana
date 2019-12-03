@@ -46,7 +46,7 @@ export const createShortenUrlRoute = ({
         });
         return response.ok({ body: { urlId } });
       } catch (err) {
-        throw handleShortUrlError(err);
+        return handleShortUrlError(response, err);
       }
     }
   );
