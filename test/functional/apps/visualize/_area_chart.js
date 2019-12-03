@@ -57,7 +57,6 @@ export default function ({ getService, getPageObjects }) {
     it('should save and load with special characters', async function () {
       const vizNamewithSpecialChars = vizName1 + '/?&=%';
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizNamewithSpecialChars);
-      await PageObjects.visualize.waitForVisualizationSavedToastGone();
     });
 
     it('should save and load with non-ascii characters', async function () {
@@ -67,7 +66,6 @@ export default function ({ getService, getPageObjects }) {
 
     it('should save and load', async function () {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
-      await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
     });
