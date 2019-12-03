@@ -16,11 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import './_saved_search';
+import { npStart } from 'ui/new_platform';
+// @ts-ignore
 import { uiModules } from 'ui/modules';
-import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
+import { SavedObjectsClientContract } from 'kibana/public';
+import { SavedObjectLoader } from 'ui/saved_objects';
+// @ts-ignore
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
+import { createSavedSearchClass } from './_saved_search';
+import { start as data } from '../../../../data/public/legacy';
+import { IndexPatterns } from '../../../../data/public';
 
 // Register this service with the saved object registry so it can be
 // edited by the object editor.
@@ -29,9 +34,12 @@ savedObjectManagementRegistry.register({
   title: 'searches',
 });
 
-export function createSavedSearchesService(Private, SavedSearch) {
-  const savedObjectClient = Private(SavedObjectsClientProvider);
-  const savedSearchLoader = new SavedObjectLoader(SavedSearch, savedObjectClient);
+export function createSavedSearchesService(
+  savedObjectsClient: SavedObjectsClientContract,
+  indexPatterns: IndexPatterns
+) {
+  const SavedSearchClass = createSavedSearchClass(savedObjectsClient, indexPatterns);
+  const savedSearchLoader = new SavedObjectLoader(SavedSearchClass, savedObjectsClient);
   // Customize loader properties since adding an 's' on type doesn't work for type 'search' .
   savedSearchLoader.loaderProperties = {
     name: 'searches',
@@ -39,9 +47,12 @@ export function createSavedSearchesService(Private, SavedSearch) {
     nouns: 'saved searches',
   };
 
-  savedSearchLoader.urlFor = id => `#/discover/${encodeURIComponent(id)}`;
+  savedSearchLoader.urlFor = (id: string) => `#/discover/${encodeURIComponent(id)}`;
 
   return savedSearchLoader;
 }
+// this is needed for saved object management
 const module = uiModules.get('discover/saved_searches');
-module.service('savedSearches', createSavedSearchesService);
+module.service('savedSearches', () =>
+  createSavedSearchesService(npStart.core.savedObjects.client, data.indexPatterns.indexPatterns)
+);

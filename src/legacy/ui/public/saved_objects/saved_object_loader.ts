@@ -57,10 +57,15 @@ export class SavedObjectLoader {
    * @returns {Promise<SavedObject>}
    */
   async get(id: string) {
-    // @ts-ignore
-    const obj = new this.Class(id);
-    await obj.init();
-    return obj;
+    try {
+      // @ts-ignore
+      const obj = new this.Class(id);
+      await obj.init();
+      return obj;
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+    }
   }
 
   urlFor(id: string) {

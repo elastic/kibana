@@ -33,7 +33,6 @@ import { StateProvider } from 'ui/state_management/state';
 // @ts-ignore
 import { createSavedSearchesService } from '../saved_searches/saved_searches';
 // @ts-ignore
-import { createSavedSearchFactory } from '../saved_searches/_saved_search';
 import { DiscoverStartPlugins } from '../plugin';
 import { start as legacyData } from '../../../../data/public/legacy';
 import { DataStart, IndexPatterns } from '../../../../data/public';
@@ -67,13 +66,9 @@ export interface DiscoverServices {
 export async function buildGlobalAngularServices() {
   const injector = await chromeLegacy.dangerouslyGetActiveInjector();
   const Private = injector.get<IPrivate>('Private');
-  const kbnUrl = injector.get<IPrivate>('kbnUrl');
   const State = Private(StateProvider);
-  const SavedSearchFactory = createSavedSearchFactory(Private);
-  const service = createSavedSearchesService(Private, SavedSearchFactory, kbnUrl, chromeLegacy);
+
   return {
-    getSavedSearchById: async (id: string) => service.get(id),
-    getSavedSearchUrlById: async (id: string) => service.urlFor(id),
     State,
   };
 }
@@ -86,7 +81,10 @@ export async function buildServices(core: CoreStart, plugins: DiscoverStartPlugi
         getSavedSearchUrlById: async (id: string) => void id,
         State: null,
       };
-
+  const savedObjectService = createSavedSearchesService(
+    core.savedObjects.client,
+    legacyData.indexPatterns.indexPatterns
+  );
   return {
     ...globalAngularServices,
     addBasePath: core.http.basePath.prepend,
@@ -98,6 +96,8 @@ export async function buildServices(core: CoreStart, plugins: DiscoverStartPlugi
     docViewsRegistry,
     eui_utils: plugins.eui_utils,
     filterManager: plugins.data.query.filterManager,
+    getSavedSearchById: async (id: string) => savedObjectService.get(id),
+    getSavedSearchUrlById: async (id: string) => savedObjectService.urlFor(id),
     indexPatterns: legacyData.indexPatterns.indexPatterns,
     inspector: plugins.inspector,
     // @ts-ignore
