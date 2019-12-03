@@ -283,7 +283,7 @@ export function getEvalQueryBody({
 
   if (searchQuery !== undefined && ignoreDefaultQuery === true) {
     query = searchQuery;
-  } else if (isRegressionResultsSearchBoolQuery(searchQuery)) {
+  } else if (searchQuery !== undefined && isRegressionResultsSearchBoolQuery(searchQuery)) {
     const searchQueryClone = cloneDeep(searchQuery);
     searchQueryClone.bool.must.push(query);
     query = searchQueryClone;
