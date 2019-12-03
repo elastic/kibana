@@ -18,7 +18,7 @@ import {
   fetchSnapshotCountFail,
 } from '../../state/actions';
 import { UptimeSettingsContext, UptimeRefreshContext } from '../../contexts';
-import { fetchSnapshotCount } from '../../state/api';
+import { fetchSnapshotCount, SnapshotApiRequest } from '../../state/api';
 import { SnapshotContext } from '../../contexts/snapshot_context';
 
 const SNAPSHOT_CHART_WIDTH = 144;
@@ -27,43 +27,19 @@ const SNAPSHOT_CHART_HEIGHT = 144;
 /**
  * Props expected from parent components.
  */
-interface OwnProps {
-  dateRangeStart?: string;
-  dateRangeEnd?: string;
-  filters?: string;
+interface Props {
   /**
    * Height is needed, since by default charts takes height of 100%
    */
   height?: string;
-  statusFilter?: string;
 }
 
-/**
- * Props given by the Redux store based on action input.
- */
-interface StoreProps {
+type PresentationalProps = Props & {
   count: SnapshotType;
-  lastRefresh: number;
   loading: boolean;
-}
+};
 
-/**
- * Contains functions that will dispatch actions used
- * for this component's lifecyclel
- */
-interface DispatchProps {
-  loadSnapshotCount: typeof fetchSnapshotCount;
-}
-
-/**
- * Props used to render the Snapshot component.
- */
-type Props = OwnProps & StoreProps & DispatchProps;
-
-type PresentationalComponentProps = Pick<StoreProps, 'count' | 'loading'> &
-  Pick<OwnProps, 'height'>;
-
-export const PresentationalComponent: React.FC<PresentationalComponentProps> = ({
+export const PresentationalComponent: React.FC<PresentationalProps> = ({
   count,
   height,
   loading,
@@ -80,20 +56,12 @@ export const PresentationalComponent: React.FC<PresentationalComponentProps> = (
   </ChartWrapper>
 );
 
-interface ApiRequest {
-  basePath: string;
-  dateRangeStart: string;
-  dateRangeEnd: string;
-  filters?: string;
-  statusFilter?: string;
-}
-
 /**
  * This component visualizes a KPI and histogram chart to help users quickly
  * glean the status of their uptime environment.
  * @param props the props required by the component
  */
-export const Snapshot: React.FC<Props> = ({ height, loading }: Props) => {
+export const Snapshot: React.FC<Props> = ({ height }: Props) => {
   const { basePath } = useContext(UptimeSettingsContext);
   const { lastRefresh } = useContext(UptimeRefreshContext);
   const [getUrlParams] = useUrlParams();
@@ -101,7 +69,7 @@ export const Snapshot: React.FC<Props> = ({ height, loading }: Props) => {
   const { dispatch, ...state } = useContext(SnapshotContext);
   useEffect(() => {
     dispatch(fetchSnapshotCountAction(dateRangeStart, dateRangeEnd, filters, statusFilter));
-    async function f(props: ApiRequest) {
+    async function f(props: SnapshotApiRequest) {
       dispatch(fetchSnapshotCountSuccess(await fetchSnapshotCount({ ...props })));
     }
     try {
@@ -116,5 +84,5 @@ export const Snapshot: React.FC<Props> = ({ height, loading }: Props) => {
       dispatch(fetchSnapshotCountFail(e));
     }
   }, [dateRangeStart, dateRangeEnd, filters, lastRefresh, statusFilter]);
-  return <PresentationalComponent count={state.count} height={height} loading={loading} />;
+  return <PresentationalComponent count={state.count} height={height} loading={state.loading} />;
 };
