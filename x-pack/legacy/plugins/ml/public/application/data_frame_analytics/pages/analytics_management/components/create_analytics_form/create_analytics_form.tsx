@@ -15,6 +15,7 @@ import {
   EuiRange,
   EuiSwitch,
 } from '@elastic/eui';
+import { debounce } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -111,14 +112,14 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     }
   };
 
-  const loadModelMemoryLimitEstimate = async () => {
+  const debouncedMmlEstimateLoad = debounce(async () => {
     try {
       const jobConfig = getJobConfigFromFormState(form);
       delete jobConfig.dest;
       delete jobConfig.model_memory_limit;
       const resp = await ml.dataFrameAnalytics.estimateDataFrameAnalyticsMemoryUsage(jobConfig);
       setFormState({
-        modelMemoryLimit: resp.expected_memory_without_disk,
+        modelMemoryLimit: resp.memory_estimation?.expected_memory_without_disk,
       });
     } catch (e) {
       setFormState({
@@ -128,7 +129,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
             : DEFAULT_MODEL_MEMORY_LIMIT.outlier_detection,
       });
     }
-  };
+  }, 500);
 
   const loadDependentFieldOptions = async () => {
     setFormState({
@@ -213,8 +214,12 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       jobType === JOB_TYPES.OUTLIER_DETECTION;
 
     if (hasBasicRequiredFields && hasRequiredAnalysisFields) {
-      loadModelMemoryLimitEstimate();
+      debouncedMmlEstimateLoad();
     }
+
+    return () => {
+      debouncedMmlEstimateLoad.cancel();
+    };
   }, [jobType, sourceIndex, dependentVariable, trainingPercent]);
 
   return (
