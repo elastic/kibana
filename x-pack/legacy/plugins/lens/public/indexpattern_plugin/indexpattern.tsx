@@ -89,12 +89,6 @@ export function uniqueLabels(layers: Record<string, IndexPatternLayer>) {
   return columnLabelMap;
 }
 
-function removeProperty<T>(prop: string, object: Record<string, T>): Record<string, T> {
-  const result = { ...object };
-  delete result[prop];
-  return result;
-}
-
 export function getIndexPatternDatasource({
   chrome,
   core,
