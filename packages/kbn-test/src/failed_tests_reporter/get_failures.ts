@@ -23,6 +23,7 @@ import { FailedTestCase, TestReport, makeFailedTestCaseIter } from './test_repor
 
 export type TestFailure = FailedTestCase['$'] & {
   failure: string;
+  likelyIrrelevant: boolean;
 };
 
 const getFailureText = (failure: FailedTestCase['failure']) => {
@@ -35,7 +36,7 @@ const getFailureText = (failure: FailedTestCase['failure']) => {
   return stripAnsi(String(failureNode));
 };
 
-const isLikelyIrrelevant = ({ name, failure }: TestFailure) => {
+const isLikelyIrrelevant = (name: string, failure: string) => {
   if (
     failure.includes('NoSuchSessionError: This driver instance does not have a valid session ID')
   ) {
@@ -63,22 +64,23 @@ const isLikelyIrrelevant = ({ name, failure }: TestFailure) => {
   if (failure.includes('Unable to fetch Kibana status API response from Kibana')) {
     return true;
   }
+
+  return false;
 };
 
 export function getFailures(report: TestReport) {
-  const failures: Array<{ type: 'ignore' | 'report'; failure: TestFailure }> = [];
+  const failures: TestFailure[] = [];
 
   for (const testCase of makeFailedTestCaseIter(report)) {
-    // unwrap xml weirdness
-    const failure: TestFailure = {
-      ...testCase.$,
-      // Strip ANSI color characters
-      failure: getFailureText(testCase.failure),
-    };
+    const failure = getFailureText(testCase.failure);
+    const likelyIrrelevant = isLikelyIrrelevant(testCase.$.name, failure);
 
     failures.push({
-      type: isLikelyIrrelevant(failure) ? 'ignore' : 'report',
+      // unwrap xml weirdness
+      ...testCase.$,
+      // Strip ANSI color characters
       failure,
+      likelyIrrelevant,
     });
   }
 

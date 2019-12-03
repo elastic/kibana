@@ -73,8 +73,8 @@ export function runFailedTestsReporterCli() {
         const report = await readTestReport(reportPath);
         const messages: Message[] = [];
 
-        for (const { failure, type } of await getFailures(report)) {
-          if (type === 'ignore') {
+        for (const failure of await getFailures(report)) {
+          if (failure.likelyIrrelevant) {
             messages.push({
               classname: failure.classname,
               name: failure.name,
