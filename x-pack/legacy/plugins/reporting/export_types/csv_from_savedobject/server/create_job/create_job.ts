@@ -95,8 +95,7 @@ export const createJobFactory: CreateJobFactory<ImmediateCreateJobFn<
     return {
       headers: serializedEncryptedHeaders,
       jobParams: { ...jobParams, panel, visType },
-      type: null, // resolved in executeJob
-      objects: null, // resolved in executeJob
+      type: null,
       title,
     };
   };
