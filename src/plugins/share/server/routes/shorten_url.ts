@@ -42,7 +42,6 @@ export const createShortenUrlRoute = ({
       const urlId = await shortUrlLookup.generateUrlId(request.body.url, {
         savedObjects: context.core.savedObjects.client,
       });
-      throw new Error();
       return response.ok({ body: { urlId } });
     })
   );

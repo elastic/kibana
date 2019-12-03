@@ -5,6 +5,8 @@
 # App
 /x-pack/legacy/plugins/lens/ @elastic/kibana-app
 /x-pack/legacy/plugins/graph/ @elastic/kibana-app
+/src/plugins/share/ @elastic/kibana-app
+/src/legacy/server/url_shortening/ @elastic/kibana-app
 
 # App Architecture
 /src/plugins/data/ @elastic/kibana-app-arch
@@ -13,7 +15,6 @@
 /src/plugins/kibana_react/ @elastic/kibana-app-arch
 /src/plugins/kibana_utils/ @elastic/kibana-app-arch
 /src/plugins/navigation/ @elastic/kibana-app-arch
-/src/plugins/share/ @elastic/kibana-app-arch
 /src/plugins/ui_actions/ @elastic/kibana-app-arch
 /src/plugins/visualizations/ @elastic/kibana-app-arch
 /x-pack/plugins/advanced_ui_actions/ @elastic/kibana-app-arch
@@ -27,7 +28,6 @@
 /src/legacy/core_plugins/kibana/server/routes/api/suggestions/ @elastic/kibana-app-arch
 /src/legacy/core_plugins/visualizations/ @elastic/kibana-app-arch
 /src/legacy/server/index_patterns/ @elastic/kibana-app-arch
-/src/legacy/server/url_shortening/ @elastic/kibana-app-arch
 
 # APM
 /x-pack/legacy/plugins/apm/  @elastic/apm-ui
