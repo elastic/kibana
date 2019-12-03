@@ -17,7 +17,12 @@ const isStringEmpty = (str: string | null): boolean => {
 
 export const validatePolicy = (
   policy: SlmPolicyPayload,
-  validationHelperData: any
+  validationHelperData: {
+    managedRepository?: {
+      name: string;
+      policy: string;
+    };
+  }
 ): PolicyValidation => {
   const i18n = textService.i18n;
 
