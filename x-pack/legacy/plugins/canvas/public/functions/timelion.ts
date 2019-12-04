@@ -6,6 +6,7 @@
 
 import { flatten } from 'lodash';
 import chrome from 'ui/chrome';
+import { npStart } from 'ui/new_platform';
 import { ExpressionFunction, DatatableRow } from 'src/plugins/expressions/public';
 import { fetch } from '../../common/lib/fetch';
 // @ts-ignore untyped local
@@ -64,8 +65,11 @@ export function timelion(): ExpressionFunction<'timelion', Filter, Arguments, Pr
       // workpad, if it exists. Otherwise fall back on the function args.
       const timeFilter = context.and.find(and => and.type === 'time');
       const range = timeFilter
-        ? { from: timeFilter.from, to: timeFilter.to }
-        : { from: args.from, to: args.to };
+        ? { min: timeFilter.from, max: timeFilter.to }
+        : npStart.plugins.data.query.timefilter.timefilter.calculateBounds({
+            from: args.from,
+            to: args.to,
+          });
 
       const body = {
         extended: {
@@ -79,8 +83,8 @@ export function timelion(): ExpressionFunction<'timelion', Filter, Arguments, Pr
         },
         sheet: [args.query],
         time: {
-          from: range.from,
-          to: range.to,
+          from: range.min,
+          to: range.max,
           interval: args.interval,
           timezone: args.timezone,
         },
