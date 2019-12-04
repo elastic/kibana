@@ -93,21 +93,28 @@ export function runFailedTestsReporterCli() {
 
           if (existingIssue) {
             const newFailureCount = await updateFailureIssue(buildUrl, existingIssue, githubApi);
+            const url = existingIssue.html_url;
+            const message =
+              `Test has failed ${newFailureCount - 1} times on tracked branches: ${url}` +
+              (dryRun ? '' : `. Updated existing issue: ${url} (fail count: ${newFailureCount})`);
+
             messages.push({
               classname: failure.classname,
               name: failure.name,
-              message: dryRun
-                ? `Test has failed ${newFailureCount - 1} times before: ${existingIssue.html_url}`
-                : `Updated existing issue: ${existingIssue.html_url} (fail count: ${newFailureCount})`,
+              message,
             });
             continue;
           }
 
           const newIssueUrl = await createFailureIssue(buildUrl, failure, githubApi);
+          const message =
+            `Test has not failed recently on tracked branches` +
+            (dryRun ? '' : `Created new issue: ${newIssueUrl}`);
+
           messages.push({
             classname: failure.classname,
             name: failure.name,
-            message: dryRun ? `First time failure` : `Created new issue: ${newIssueUrl}`,
+            message,
           });
         }
 
