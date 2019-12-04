@@ -31,10 +31,6 @@ export function createWorkerFactory<JobParamsType>(
   server: ServerFacade,
   { exportTypesRegistry, browserDriverFactory }: CreateWorkerFactoryOpts
 ) {
-  if (!browserDriverFactory) {
-    throw new Error('need that browser drver factory');
-  }
-
   type JobDocPayloadType = JobDocPayload<JobParamsType>;
   const config = server.config();
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'queue-worker']);
