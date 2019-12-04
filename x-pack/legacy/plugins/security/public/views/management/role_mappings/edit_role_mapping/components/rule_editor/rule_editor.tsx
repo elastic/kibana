@@ -6,12 +6,13 @@
 
 import React, { Component } from 'react';
 import {
-  EuiButtonEmpty,
   EuiSpacer,
   EuiConfirmModal,
   EuiOverlayMask,
   EuiText,
   EuiCallOut,
+  EuiIcon,
+  EuiLink,
 } from '@elastic/eui';
 import { RoleMapping } from '../../../../../../../common/model';
 import { BaseRule } from '../../../../../../../common/model/role_mappings/base_rule';
@@ -95,31 +96,23 @@ export class RuleEditor extends Component<Props, State> {
     switch (this.state.mode) {
       case 'visual':
         return (
-          <EuiButtonEmpty
-            size="xs"
+          <EuiLink
             onClick={() => {
               this.trySwitchEditorMode('advanced');
             }}
-            iconType="inputOutput"
-            iconSide="right"
-            style={{ marginLeft: '0px' }}
           >
-            Switch to advanced editor
-          </EuiButtonEmpty>
+            Switch to advanced editor <EuiIcon type="inputOutput" size="s" />
+          </EuiLink>
         );
       case 'advanced':
         return (
-          <EuiButtonEmpty
-            size="xs"
+          <EuiLink
             onClick={() => {
               this.trySwitchEditorMode('visual');
             }}
-            iconType="inputOutput"
-            iconSide="right"
-            style={{ marginLeft: '0px' }}
           >
-            Switch to visual editor
-          </EuiButtonEmpty>
+            Switch to visual editor <EuiIcon type="inputOutput" size="s" />
+          </EuiLink>
         );
       default:
         throw new Error(`Unexpected rule editor mode: ${this.state.mode}`);

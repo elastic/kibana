@@ -23,6 +23,8 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
+  EuiLink,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -266,29 +268,21 @@ export class EditRoleMappingPage extends Component<Props, State> {
             </span>
             <EuiSpacer size="xs" />
             {this.state.mode === 'templates' ? (
-              <EuiButtonEmpty
-                size="xs"
+              <EuiLink
                 onClick={() => {
                   this.setState({ mode: 'roles' });
                 }}
-                iconType="inputOutput"
-                iconSide="right"
-                style={{ marginLeft: '0px' }}
               >
-                Switch to roles
-              </EuiButtonEmpty>
+                Switch to roles <EuiIcon size="s" type="inputOutput" />
+              </EuiLink>
             ) : (
-              <EuiButtonEmpty
-                size="xs"
+              <EuiLink
                 onClick={() => {
                   this.setState({ mode: 'templates' });
                 }}
-                iconType="inputOutput"
-                iconSide="right"
-                style={{ marginLeft: '0px' }}
               >
-                Switch to role templates
-              </EuiButtonEmpty>
+                Switch to role templates <EuiIcon size="s" type="inputOutput" />
+              </EuiLink>
             )}
           </EuiText>
         }
