@@ -46,7 +46,7 @@ export class EndpointPlugin implements Plugin {
   }
 
   public start() {
-    this.logger.info('Starting plugin');
+    this.logger.debug('Starting plugin');
   }
 
   public stop() {

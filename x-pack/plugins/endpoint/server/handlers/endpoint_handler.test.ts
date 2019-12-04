@@ -9,7 +9,11 @@ import { IClusterClient, IScopedClusterClient } from 'kibana/server';
 import { EndpointHandler } from './endpoint_handler';
 import { SearchResponse } from 'elasticsearch';
 import { EndpointData } from '../types';
-import { elasticsearchServiceMock, httpServerMock } from '../../../../../src/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  loggingServiceMock,
+} from '../../../../../src/core/server/mocks';
 import { ResponseToEndpointMapper } from './response_to_endpoint_mapper';
 import { EndpointConfigSchema } from '../config';
 
@@ -33,6 +37,7 @@ describe('test endpoint handler', () => {
       );
       const testHandler = new EndpointHandler({
         clusterClient: mockClusterClient,
+        logFactory: loggingServiceMock.create(),
         config: () => Promise.resolve(EndpointConfigSchema.validate({})),
       });
       const response = await testHandler.findEndpoint(
@@ -71,6 +76,7 @@ describe('test endpoint handler', () => {
 
       const testHandler = new EndpointHandler({
         clusterClient: mockClusterClient,
+        logFactory: loggingServiceMock.create(),
         config: () => Promise.resolve(EndpointConfigSchema.validate({})),
       });
       const response = await testHandler.findLatestOfAllEndpoints(
@@ -118,6 +124,7 @@ describe('test endpoint handler', () => {
       );
       const testHandler = new EndpointHandler({
         clusterClient: mockClusterClient,
+        logFactory: loggingServiceMock.create(),
         config: () => Promise.resolve(EndpointConfigSchema.validate({})),
       });
       const response = await testHandler.findLatestOfAllEndpoints(

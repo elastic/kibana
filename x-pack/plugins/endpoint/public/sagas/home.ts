@@ -33,7 +33,7 @@ async function resourceSaga(
     actionsAndState,
     isOnPage,
   })) {
-    if (action.type === homeActions.userClickedBootstrap.type) {
+    if (userIsOnPageAndLoggedIn && shouldInitialize) {
       try {
         const data = await context.core.http.post('/endpoint/bootstrap', {});
         dispatch(homeActions.serverReturnedBootstrapData(data));

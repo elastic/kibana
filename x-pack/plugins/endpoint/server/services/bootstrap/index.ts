@@ -4,16 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient, LoggerFactory, Logger } from 'kibana/server';
+import { IScopedClusterClient, Logger } from 'kibana/server';
 import { alreadyExists } from './errors';
 // figure out how to read in a json file
 import endpointTemplate from './template.json';
 import { EndpointAppContext } from '../../types';
 import { EndpointConfigType } from '../../config';
 
+export const appName = 'endpoint';
+export const ilmName = 'endpoint_policy';
+
 const templateVersion = 1;
-const appName = 'endpoint';
-const ilmName = 'endpoint_policy';
 const fanPipeline = 'route-events';
 const alertsIndex = 'alerts';
 
@@ -73,6 +74,10 @@ function makeTemplateBody(
   return body;
 }
 
+export function catVersion(name: string) {
+  return makeNameVersion(name, appVersion);
+}
+
 // TODO implement retries
 export class BootstrapService {
   private readonly logger: Logger;
@@ -111,12 +116,12 @@ export class BootstrapService {
         index: makeIndexName(aliasWithVersion),
         body: makeAliasBody(aliasWithVersion),
       });
-      this.logger.info('success: ' + JSON.stringify(res));
+      this.logger.debug('success: ' + JSON.stringify(res));
     } catch (e) {
       if (alreadyExists(e)) {
-        this.logger.debug('index already exists');
+        this.logger.info('index already exists');
       } else if (await this.aliasExists(alias)) {
-        this.logger.debug(`alias: ${alias} already exists`);
+        this.logger.info(`alias: ${alias} already exists`);
       } else {
         throw e;
       }
@@ -129,7 +134,7 @@ export class BootstrapService {
   }
 
   private async createILMPolicy() {
-    const policy = makeNameVersion(ilmName, appVersion);
+    const policy = catVersion(ilmName);
     try {
       const getRes = await this.client.callAsCurrentUser('transport.request', {
         path: `/_ilm/policy/${policy}`,

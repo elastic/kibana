@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
 import {
   EuiButton,
   EuiPage,
@@ -20,30 +19,14 @@ import {
   EuiTitle,
   EuiSideNav,
 } from '@elastic/eui';
-import { actions as homeActions } from '../actions/home';
 
 export const Home = () => {
-  const dispatch = useDispatch();
-  const BootstrapButton = () => {
-    onBootstrap();
-
-    async function onBootstrap() {
-      dispatch(homeActions.userClickedBootstrap());
-    }
-
-    return (
-      <EuiButton color="danger" iconType="trash" onClick={onBootstrap}>
-        Bootstrap
-      </EuiButton>
-    );
-  };
-
   return (
     <EuiPageBody>
       <EuiPageHeader>
         <EuiPageHeaderSection>
           <EuiTitle size="l">
-            <h1>Welcome to Endpoint!</h1>
+            <h1 data-test-subj="welcomeEndpointMessage">Welcome to Endpoint!</h1>
           </EuiTitle>
         </EuiPageHeaderSection>
       </EuiPageHeader>
@@ -55,10 +38,7 @@ export const Home = () => {
             </EuiTitle>
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
-        <EuiPageContentBody>
-          Body Content
-          <BootstrapButton />
-        </EuiPageContentBody>
+        <EuiPageContentBody>Body Content</EuiPageContentBody>
       </EuiPageContent>
     </EuiPageBody>
   );

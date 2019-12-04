@@ -11,11 +11,6 @@ export const actions = {
   serverReturnedBootstrapData: actionCreatorFactory<'serverReturnedBootstrapData', [any]>(
     'serverReturnedBootstrapData'
   ),
-  userClickedBootstrap: actionCreatorFactory<'userClickedBootstrap', [void]>(
-    'userClickedBootstrap'
-  ),
 };
 
-export type HomeAction =
-  | ReturnType<typeof actions.serverReturnedBootstrapData>
-  | ReturnType<typeof actions.userClickedBootstrap>;
+export type HomeAction = ReturnType<typeof actions.serverReturnedBootstrapData>;
