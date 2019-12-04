@@ -1,5 +1,5 @@
 [[space-rbac-tutorial]]
-=== Tutorial:  Use Role Based Access Control (RBAC) to customize Kibana Spaces
+=== Tutorial:  Use role-based access control to customize Kibana spaces
 
 With role-based access control (RBAC), you can provide users access to data, tools,
 and Kibana spaces.  In this tutorial, you will learn how to configure roles
