@@ -11,7 +11,30 @@ import {
   EuiPopover,
   EuiSwitch,
 } from '@elastic/eui';
+import { VECTOR_STYLES } from '../vector_style_defaults';
 import { i18n } from '@kbn/i18n';
+
+function getIsEnableToggleLabel(styleName) {
+  switch (styleName) {
+    case VECTOR_STYLES.FILL_COLOR:
+    case VECTOR_STYLES.LINE_COLOR:
+      return i18n.translate('xpack.maps.styles.fieldMetaOptions.isEnabled.colorLabel', {
+        defaultMessage: 'Calculate color ramp range from indices'
+      });
+    case VECTOR_STYLES.LINE_WIDTH:
+      return i18n.translate('xpack.maps.styles.fieldMetaOptions.isEnabled.widthLabel', {
+        defaultMessage: 'Calculate border width range from indices'
+      });
+    case VECTOR_STYLES.ICON_SIZE:
+      return i18n.translate('xpack.maps.styles.fieldMetaOptions.isEnabled.sizeLabel', {
+        defaultMessage: 'Calculate symbol size range from indices'
+      });
+    default:
+      return i18n.translate('xpack.maps.styles.fieldMetaOptions.isEnabled.defaultLabel', {
+        defaultMessage: 'Calculate symbolization range from indices'
+      });
+  }
+}
 
 export class FieldMetaOptionsPopover extends Component {
 
@@ -59,9 +82,11 @@ export class FieldMetaOptionsPopover extends Component {
   _onIsEnabledChange = event => {
     this.props.onChange({
       ...this._getFieldMetaOptions(),
-      isEnabled: !event.target.checked,
+      isEnabled: event.target.checked,
     });
   };
+
+
 
   _renderButton() {
     return (
@@ -83,10 +108,8 @@ export class FieldMetaOptionsPopover extends Component {
           display="columnCompressedSwitch"
         >
           <EuiSwitch
-            label={i18n.translate('xpack.maps.styles.fieldMetaOptions.isEnabledLabel', {
-              defaultMessage: 'Clamp range to on-screen values',
-            })}
-            checked={!this._getFieldMetaOptions().isEnabled}
+            label={getIsEnableToggleLabel(this.props.styleProperty.getStyleName())}
+            checked={this._getFieldMetaOptions().isEnabled}
             onChange={this._onIsEnabledChange}
             compressed
           />
