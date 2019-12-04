@@ -24,18 +24,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(welcomeMessage).to.be('Welcome to Endpoint!');
     });
 
-    it('Navigate to Endpoints page', async() => {
+    it('Navigate to Endpoints page', async () => {
       await pageObjects.endpoint.navigateEndpointsPage();
       // find the search bar
       const endpointSearchBar = await testSubjects.find('endpointsSearchBar');
       // add the search criteria
       await endpointSearchBar.type('_source.host.os.full="Windows Server 2016"');
-      //press the enter key
+      // press the enter key
       await endpointSearchBar.pressKeys(browser.keys.ENTER);
-
+      // debug lines to visually inspect the page before the test exits
       log.debug('sleep for 10 seconds');
       await pageObjects.common.sleep(10000);
     });
-
   });
 };
