@@ -8,6 +8,7 @@ import { FtrProviderContext } from '../services';
 
 export default function({ loadTestFile }: FtrProviderContext) {
   describe('Licensing plugin', function() {
+    this.tags('ciGroup2');
     loadTestFile(require.resolve('./info'));
     loadTestFile(require.resolve('./header'));
 
