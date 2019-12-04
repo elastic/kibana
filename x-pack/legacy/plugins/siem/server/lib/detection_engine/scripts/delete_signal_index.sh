@@ -9,7 +9,7 @@
 set -e
 ./check_env_variables.sh
 
-# Example: ./delete_index.sh
+# Example: ./delete_signal_index.sh
 curl -s -k \
   -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
