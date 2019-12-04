@@ -93,7 +93,7 @@ const getEmbeddable = () => {
 
 describe('execute()', () => {
   describe('when no filters are given', () => {
-    test.skip('throws an error', async () => {
+    test('throws an error', async () => {
       const action = createFilterAction();
       const error = await expectErrorAsync(() =>
         action.execute({
