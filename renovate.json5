@@ -298,6 +298,14 @@
         ],
       },
       {
+        groupSlug: 'prettier',
+        groupName: 'prettier related packages',
+        packageNames: [
+          'prettier',
+          '@types/prettier',
+        ],
+      },
+      {
         groupSlug: 'bluebird',
         groupName: 'bluebird related packages',
         packageNames: [
@@ -519,14 +527,6 @@
         packageNames: [
           'podium',
           '@types/podium',
-        ],
-      },
-      {
-        groupSlug: 'prettier',
-        groupName: 'prettier related packages',
-        packageNames: [
-          'prettier',
-          '@types/prettier',
         ],
       },
       {
