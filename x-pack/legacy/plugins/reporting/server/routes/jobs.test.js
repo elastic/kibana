@@ -7,7 +7,7 @@
 import Hapi from 'hapi';
 import { difference, memoize } from 'lodash';
 import { registerJobInfoRoutes } from './jobs';
-import { getExportTypesRegistry } from '../lib/export_types_registry';
+import { ExportTypesRegistry } from '../lib/export_types_registry';
 jest.mock('./lib/authorized_user_pre_routing', () => {
   return {
     authorizedUserPreRoutingFactory: () => () => ({})
@@ -19,15 +19,28 @@ jest.mock('./lib/reporting_feature_pre_routing', () => {
   };
 });
 
-
 let mockServer;
 let exportTypesRegistry;
-const mockLogger = jest.fn();
+const mockLogger = {
+  error: jest.fn(),
+  debug: jest.fn(),
+};
 
 beforeEach(() => {
   mockServer = new Hapi.Server({ debug: false, port: 8080, routes: { log: { collect: true } } });
   mockServer.config = memoize(() => ({ get: jest.fn() }));
-  exportTypesRegistry = getExportTypesRegistry();
+  exportTypesRegistry = new ExportTypesRegistry();
+  exportTypesRegistry.register({
+    id: 'unencoded',
+    jobType: 'unencodedJobType',
+    jobContentExtension: 'csv'
+  });
+  exportTypesRegistry.register({
+    id: 'base64Encoded',
+    jobType: 'base64EncodedJobType',
+    jobContentEncoding: 'base64',
+    jobContentExtension: 'pdf'
+  });
   mockServer.plugins = {
     elasticsearch: {
       getCluster: memoize(() => ({ callWithInternalUser: jest.fn() })),
@@ -79,7 +92,6 @@ test(`returns 401 if not valid job type`, async () => {
 });
 
 describe(`when job is incomplete`, () => {
-
   const getIncompleteResponse = async () => {
     mockServer.plugins.elasticsearch.getCluster('admin')
       .callWithInternalUser.mockReturnValue(Promise.resolve(getHits({ jobtype: 'unencodedJobType', status: 'pending' })));
