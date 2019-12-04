@@ -51,6 +51,7 @@ export function createMockDatasource(): DatasourceMock {
   };
 
   return {
+    id: 'mockindexpattern',
     getDatasourceSuggestionsForField: jest.fn((_state, item) => []),
     getDatasourceSuggestionsFromCurrentState: jest.fn(_state => []),
     getPersistableState: jest.fn(),

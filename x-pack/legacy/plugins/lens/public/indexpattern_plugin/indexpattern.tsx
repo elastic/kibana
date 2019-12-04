@@ -113,6 +113,8 @@ export function getIndexPatternDatasource({
 
   // Not stateful. State is persisted to the frame
   const indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState> = {
+    id: 'indexpattern',
+
     initialize(state?: IndexPatternPersistedState) {
       return loadInitialState({ state, savedObjectsClient });
     },
