@@ -8,6 +8,11 @@ import * as Registry from '../registry';
 import { cacheHas } from '../registry/cache';
 import { RegistryPackage } from '../../common/types';
 
+// paths from RegistryPackage are routes to the assets on EPR
+// paths for ArchiveEntry are routes to the assets in the archive
+// RegistryPackage paths have a `/package/` prefix compared to ArchiveEntry paths
+const EPR_PATH_PREFIX = '/package/';
+
 export function getAssets(
   packageInfo: RegistryPackage,
   filter = (path: string): boolean => true,
@@ -25,7 +30,7 @@ export function getAssets(
     if (dataSet !== '') {
       // TODO: Filter for dataset path
       const comparePath =
-        '/package/' + packageInfo.name + '-' + packageInfo.version + '/dataset/' + dataSet;
+        EPR_PATH_PREFIX + packageInfo.name + '-' + packageInfo.version + '/dataset/' + dataSet;
       if (!path.includes(comparePath)) {
         continue;
       }
@@ -52,19 +57,12 @@ export async function getAssetsData(
 
   // Gather all asset data
   const assets = getAssets(packageInfo, filter, dataSet);
+  const entries: Registry.ArchiveEntry[] = assets.map(path => {
+    const archivePath = path.replace(EPR_PATH_PREFIX, '');
+    const buffer = Registry.getAsset(archivePath);
 
-  const entries: Registry.ArchiveEntry[] = [];
-
-  for (const asset of assets) {
-    const subPath = asset.substring(9);
-    const buf = Registry.getAsset(subPath);
-
-    const entry: Registry.ArchiveEntry = {
-      path: asset,
-      buffer: buf,
-    };
-    entries.push(entry);
-  }
+    return { path, buffer };
+  });
 
   return entries;
 }
