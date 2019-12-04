@@ -7,7 +7,6 @@
 import { EuiBadge, EuiBadgeProps, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import * as React from 'react';
-
 import styled from 'styled-components';
 
 import { Ecs } from '../../../../../graphql/types';

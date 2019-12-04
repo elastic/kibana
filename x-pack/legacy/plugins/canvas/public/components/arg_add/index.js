@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import { pure } from 'recompose';
+
 import { ArgAdd as Component } from './arg_add';
 
-export const ArgAdd = React.memo(Component);
+export const ArgAdd = pure(Component);

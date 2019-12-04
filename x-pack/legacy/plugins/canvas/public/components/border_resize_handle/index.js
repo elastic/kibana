@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import { pure } from 'recompose';
 import { BorderResizeHandle as Component } from './border_resize_handle';
 
-export const BorderResizeHandle = React.memo(Component);
+export const BorderResizeHandle = pure(Component);

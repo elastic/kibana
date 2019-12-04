@@ -7,7 +7,6 @@
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import moment from 'moment';
 import * as React from 'react';
-
 import styled from 'styled-components';
 
 import { Note } from '../../lib/note';

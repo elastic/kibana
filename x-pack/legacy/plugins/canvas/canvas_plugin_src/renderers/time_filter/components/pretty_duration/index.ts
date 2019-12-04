@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import { pure } from 'recompose';
 import { PrettyDuration as Component } from './pretty_duration';
 
-export const PrettyDuration = React.memo(Component);
+export const PrettyDuration = pure(Component);

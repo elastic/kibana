@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import { pure } from 'recompose';
 import { ItemGrid as Component, Props as ComponentProps } from './item_grid';
 
-export const ItemGrid = React.memo<ComponentProps<any>>(Component);
+export const ItemGrid = pure<ComponentProps<any>>(Component);

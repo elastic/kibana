@@ -6,7 +6,6 @@
 
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, IconType } from '@elastic/eui';
 import React from 'react';
-
 import styled from 'styled-components';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`

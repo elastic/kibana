@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import { pure } from 'recompose';
 import { TextStylePicker as Component } from './text_style_picker';
 
-export const TextStylePicker = React.memo(Component);
+export const TextStylePicker = pure(Component);

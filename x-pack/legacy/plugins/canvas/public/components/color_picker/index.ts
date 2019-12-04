@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './color_picker';
+import { pure } from 'recompose';
+
+import { ColorPicker as Component } from './color_picker';
+
+export { Props } from './color_picker';
+export const ColorPicker = pure(Component);

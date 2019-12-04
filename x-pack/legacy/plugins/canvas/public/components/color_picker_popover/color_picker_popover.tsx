@@ -6,16 +6,17 @@
 
 import { EuiLink, PopoverAnchorPosition } from '@elastic/eui';
 import PropTypes from 'prop-types';
-import React, { MouseEvent } from 'react';
+import React, { FunctionComponent, MouseEvent } from 'react';
 import { ColorDot } from '../color_dot';
-import { ColorPicker, ColorPickerComponent, ColorPickerComponentProps } from '../color_picker';
+import { ColorPicker, Props as ColorPickerProps } from '../color_picker';
 import { Popover } from '../popover';
 
-export interface Props extends ColorPickerComponentProps {
+export interface Props extends ColorPickerProps {
   anchorPosition: PopoverAnchorPosition;
 }
 
-export const ColorPickerPopoverComponent = ({ value, anchorPosition, ...rest }: Props) => {
+export const ColorPickerPopover: FunctionComponent<Props> = (props: Props) => {
+  const { value, anchorPosition, ...rest } = props;
   const button = (handleClick: (ev: MouseEvent) => void) => (
     <EuiLink style={{ fontSize: 0 }} onClick={handleClick}>
       <ColorDot value={value} />
@@ -34,11 +35,7 @@ export const ColorPickerPopoverComponent = ({ value, anchorPosition, ...rest }: 
   );
 };
 
-ColorPickerPopoverComponent.propTypes = {
-  ...ColorPickerComponent.propTypes,
+ColorPickerPopover.propTypes = {
+  ...ColorPicker.propTypes,
   anchorPosition: PropTypes.string,
 };
-
-export const ColorPickerPopover = React.memo(ColorPickerPopoverComponent);
-
-ColorPickerPopover.displayName = 'ColorPickerPopover';

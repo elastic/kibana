@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import { pure } from 'recompose';
 import { Datatable as Component } from './datatable';
 
-export const Datatable = React.memo(Component);
+export const Datatable = pure(Component);

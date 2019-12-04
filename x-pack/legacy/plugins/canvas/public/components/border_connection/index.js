@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import { pure } from 'recompose';
 import { BorderConnection as Component } from './border_connection';
 
-export const BorderConnection = React.memo(Component);
+export const BorderConnection = pure(Component);

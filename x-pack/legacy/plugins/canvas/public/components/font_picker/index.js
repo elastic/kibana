@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import { pure } from 'recompose';
+
 import { FontPicker as Component } from './font_picker';
 
-export const FontPicker = React.memo(Component);
+export const FontPicker = pure(Component);

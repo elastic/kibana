@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import { pure } from 'recompose';
 import { HoverAnnotation as Component } from './hover_annotation';
 
-export const HoverAnnotation = React.memo(Component);
+export const HoverAnnotation = pure(Component);

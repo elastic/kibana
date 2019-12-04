@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import { pure } from 'recompose';
+
 import { PaletteSwatch as Component } from './palette_swatch';
 
-export const PaletteSwatch = React.memo(Component);
+export const PaletteSwatch = pure(Component);

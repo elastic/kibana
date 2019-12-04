@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import { pure } from 'recompose';
 import { Navbar as Component } from './navbar';
 
-export const Navbar = React.memo(Component);
+export const Navbar = pure(Component);

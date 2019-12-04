@@ -10,7 +10,7 @@ import tinycolor from 'tinycolor2';
 import { ColorManager, Props as ColorManagerProps } from '../color_manager';
 import { ColorPalette } from '../color_palette';
 
-export interface ColorPickerComponentProps extends ColorManagerProps {
+export interface Props extends ColorManagerProps {
   /**
    * An array of hexadecimal color values. Non-hex will be ignored.
    * @default []
@@ -18,7 +18,7 @@ export interface ColorPickerComponentProps extends ColorManagerProps {
   colors?: string[];
 }
 
-export const ColorPickerComponent: FunctionComponent<ColorPickerComponentProps> = ({
+export const ColorPicker: FunctionComponent<Props> = ({
   colors = [],
   hasButtons = false,
   onAddColor,
@@ -56,7 +56,7 @@ export const ColorPickerComponent: FunctionComponent<ColorPickerComponentProps> 
   );
 };
 
-ColorPickerComponent.propTypes = {
+ColorPicker.propTypes = {
   colors: PropTypes.array,
   hasButtons: PropTypes.bool,
   onAddColor: PropTypes.func,
@@ -64,5 +64,3 @@ ColorPickerComponent.propTypes = {
   onRemoveColor: PropTypes.func,
   value: PropTypes.string,
 };
-
-export const ColorPicker = React.memo(ColorPickerComponent);

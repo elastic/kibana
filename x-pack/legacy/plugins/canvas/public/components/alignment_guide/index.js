@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import { pure } from 'recompose';
 import { AlignmentGuide as Component } from './alignment_guide';
 
-export const AlignmentGuide = React.memo(Component);
+export const AlignmentGuide = pure(Component);

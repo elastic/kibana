@@ -7,7 +7,6 @@
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import { Sticky } from 'react-sticky';
-
 import styled, { css } from 'styled-components';
 
 import { gutterTimeline } from '../../lib/helpers';

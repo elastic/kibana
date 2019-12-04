@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import { pure } from 'recompose';
 import { Positionable as Component } from './positionable';
 
-export const Positionable = React.memo(Component);
+export const Positionable = pure(Component);

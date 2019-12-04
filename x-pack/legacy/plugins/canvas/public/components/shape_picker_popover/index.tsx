@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './shape_picker_popover';
+import { pure } from 'recompose';
+
+import { ShapePickerPopover as Component } from './shape_picker_popover';
+
+export const ShapePickerPopover = pure(Component);

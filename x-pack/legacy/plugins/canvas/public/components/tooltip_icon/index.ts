@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import { pure } from 'recompose';
 import { TooltipIcon as Component } from './tooltip_icon';
 export { IconType } from './tooltip_icon';
 
-export const TooltipIcon = React.memo(Component);
+export const TooltipIcon = pure(Component);

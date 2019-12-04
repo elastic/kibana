@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import { pure } from 'recompose';
 import { Tray as Component } from './tray';
 
-export const Tray = React.memo(Component);
+export const Tray = pure(Component);
