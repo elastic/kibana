@@ -11,7 +11,6 @@ import { Dispatch } from 'redux';
 import styled from 'styled-components';
 import { ResolverState, ResolverAction, Vector2 } from '../types';
 import * as selectors from '../store/selectors';
-import { clamp } from '../lib/math';
 
 export const AppRoot: React.FC<{
   store: Store<ResolverState, ResolverAction>;
@@ -27,12 +26,26 @@ const useResolverDispatch = () => useDispatch<Dispatch<ResolverAction>>();
 
 const Diagnostic = styled(
   React.memo(({ className }: { className?: string }) => {
-    const scale = useSelector(selectors.scale);
     const userIsPanning = useSelector(selectors.userIsPanning);
 
     const [elementBoundingClientRect, clientRectCallbackFunction] = useAutoUpdatingClientRect();
 
     const dispatch = useResolverDispatch();
+
+    const rasterToWorld = useSelector(selectors.rasterToWorld);
+
+    const worldPositionFromClientPosition = useCallback(
+      (clientPosition: Vector2): Vector2 | null => {
+        if (elementBoundingClientRect === undefined) {
+          return null;
+        }
+        return rasterToWorld([
+          clientPosition[0] - elementBoundingClientRect.x,
+          clientPosition[1] - elementBoundingClientRect.y,
+        ]);
+      },
+      [rasterToWorld, elementBoundingClientRect]
+    );
 
     useEffect(() => {
       if (elementBoundingClientRect !== undefined) {
@@ -61,8 +74,19 @@ const Diagnostic = styled(
             payload: [event.clientX, -event.clientY],
           });
         }
+        // TODO, don't fire two actions here. make userContinuedPanning also pass world position
+        const maybeClientWorldPosition = worldPositionFromClientPosition([
+          event.clientX,
+          event.clientY,
+        ]);
+        if (maybeClientWorldPosition !== null) {
+          dispatch({
+            type: 'userFocusedOnWorldCoordinates',
+            payload: maybeClientWorldPosition,
+          });
+        }
       },
-      [dispatch, userIsPanning]
+      [dispatch, userIsPanning, worldPositionFromClientPosition]
     );
 
     const handleMouseUp = useCallback(() => {
@@ -75,19 +99,37 @@ const Diagnostic = styled(
 
     const handleWheel = useCallback(
       (event: React.WheelEvent<HTMLDivElement>) => {
-        if (event.ctrlKey) {
-          /*
-           * Clamp amount at ±10 percent per action.
-           * Determining the scale of the deltaY is difficult due to differences in UA.
-           */
-          const scaleDelta = clamp(event.deltaY, -0.1, 0.1);
+        // we use elementBoundingClientRect to interpret pixel deltas as a fraction of the element's height
+        if (
+          elementBoundingClientRect !== undefined &&
+          event.ctrlKey &&
+          event.deltaY !== 0 &&
+          event.deltaMode === 0
+        ) {
           dispatch({
-            type: 'userScaled',
-            payload: [scale[0] + scaleDelta, scale[1] + scaleDelta],
+            type: 'userZoomed',
+            payload: event.deltaY / elementBoundingClientRect.height,
           });
         }
       },
-      [scale, dispatch]
+      [elementBoundingClientRect, dispatch]
+    );
+
+    // TODO, handle mouse up when no longer on element or event window. ty
+
+    const dotPositions = useMemo(
+      (): ReadonlyArray<readonly [number, number]> => [
+        [0, 0],
+        [0, 100],
+        [100, 100],
+        [100, 0],
+        [100, -100],
+        [0, -100],
+        [-100, -100],
+        [-100, 0],
+        [-100, 100],
+      ],
+      []
     );
 
     return (
@@ -99,7 +141,9 @@ const Diagnostic = styled(
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
       >
-        <DiagnosticDot worldPosition={useMemo(() => [0, 0], [])} />
+        {dotPositions.map(worldPosition => (
+          <DiagnosticDot worldPosition={worldPosition} />
+        ))}
       </div>
     );
   })
@@ -139,20 +183,21 @@ const DiagnosticDot = styled(
     const worldToRaster = useSelector(selectors.worldToRaster);
     const [left, top] = worldToRaster(worldPosition);
     const style = {
-      left: (left - 30).toString() + 'px',
-      top: (top - 30).toString() + 'px',
+      left: (left - 20).toString() + 'px',
+      top: (top - 20).toString() + 'px',
     };
     return (
-      <span role="img" aria-label="drooling face" className={className} style={style}>
-        🤤
+      <span className={className} style={style}>
+        ({worldPosition[0]}, {worldPosition[1]})
       </span>
     );
   })
 )`
   position: absolute;
-  width: 60px;
-  height: 60px;
+  width: 40px;
+  height: 40px;
   text-align: center;
-  font-size: 60px;
+  font-size: 20px;
   user-select: none;
+  border: 1px solid black;
 `;

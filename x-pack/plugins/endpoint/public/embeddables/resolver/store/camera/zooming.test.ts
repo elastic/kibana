@@ -8,7 +8,7 @@ import { CameraAction } from './action';
 import { cameraReducer } from './reducer';
 import { createStore, Store } from 'redux';
 import { CameraState, AABB } from '../../types';
-import { viewableBoundingBox, rasterToWorld, worldToRaster } from './selectors';
+import { viewableBoundingBox, rasterToWorld } from './selectors';
 import { userScaled, expectVectorsToBeClose } from './test_helpers';
 
 describe('zooming', () => {

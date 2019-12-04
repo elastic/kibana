@@ -34,16 +34,6 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
   } else if (action.type === 'userZoomed') {
     const newScaleX = clamp(state.scaling[0] + action.payload, 0.1, 3);
     const newScaleY = clamp(state.scaling[1] + action.payload, 0.1, 3);
-    console.log(
-      'scaleX',
-      state.scaling[0],
-      'scaleY',
-      state.scaling[1],
-      'newScaleX',
-      newScaleX,
-      'newScaleY',
-      newScaleY
-    );
     const stateWithNewScaling: CameraState = {
       ...state,
       scaling: [newScaleX, newScaleY],
@@ -68,10 +58,6 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
           stateWithNewScaling.translationNotCountingCurrentPanning[1] + delta[1],
         ],
       };
-
-      // if no lastMousePosition, we're good
-      // get world coordinates of lastMousePosition using old state
-      // get raster coordinates of lastMousue
     } else {
       return stateWithNewScaling;
     }
@@ -87,6 +73,7 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
       currentPanningOffset: action.payload,
     };
   } else if (action.type === 'userContinuedPanning') {
+    // TODO make these offsets be in world coordinates as well
     if (userIsPanning(state)) {
       return {
         ...state,
