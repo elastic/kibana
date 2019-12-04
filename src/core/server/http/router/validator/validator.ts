@@ -19,7 +19,8 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { ValidationError, Type } from '@kbn/config-schema';
+import { ValidationError, Type, schema } from '@kbn/config-schema';
+import { Stream } from 'stream';
 import { RouteValidationError } from './validator_error';
 
 /**
@@ -46,9 +47,10 @@ export class RouteValidator<T> {
   constructor(private readonly validationRule: (data: any) => RouteValidateFunctionReturn<T>) {}
 
   public validate(data: any, namespace?: string): T {
+    const precheckedData = this.preValidateSchema(data).validate(data, {}, namespace);
     let result: RouteValidateFunctionReturn<T>;
     try {
-      result = this.validationRule(data);
+      result = this.validationRule(precheckedData);
     } catch (err) {
       result = { error: new RouteValidationError(err) };
     }
@@ -57,6 +59,18 @@ export class RouteValidator<T> {
       throw new ValidationError(result.error, namespace);
     }
     return result.value;
+  }
+
+  private preValidateSchema(data: any) {
+    if (Buffer.isBuffer(data)) {
+      // if options.body.parse !== true
+      return schema.buffer();
+    } else if (data instanceof Stream) {
+      // if options.body.output === 'stream'
+      return schema.stream();
+    } else {
+      return schema.object({}, { allowUnknowns: true });
+    }
   }
 }
 

@@ -32,9 +32,9 @@ describe('Router validator', () => {
     expect(validate(validator, { foo: 'bar' }).foo.toUpperCase()).toBe('BAR'); // It knows it's a string! :)
     expect(() => validate(validator, { foo: 1 })).toThrowError('[foo]: Not a string');
     expect(() => validate(validator, {})).toThrowError('[foo]: Not a string');
-    expect(() => validate(validator, undefined)).toThrowError(
-      `Cannot read property 'foo' of undefined`
-    );
+
+    // Despite the undefined, the pre-validation enforces an empty object
+    expect(() => validate(validator, undefined)).toThrowError('[foo]: Not a string');
     expect(() => validate(validator, {}, 'myField')).toThrowError('[myField.foo]: Not a string');
   });
 
