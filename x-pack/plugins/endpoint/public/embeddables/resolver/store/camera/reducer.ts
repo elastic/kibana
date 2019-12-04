@@ -3,7 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { Reducer } from 'redux';
+import { clamp } from '../../lib/math';
+
 import { CameraState, ResolverAction } from '../../types';
 
 function initialState(): CameraState {
@@ -19,9 +22,10 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
   action
 ) => {
   if (action.type === 'userScaled') {
+    const [deltaX, deltaY] = action.payload;
     return {
       ...state,
-      scaling: action.payload,
+      scaling: [clamp(deltaX, 0.48, 1.2), clamp(deltaY, 0.48, 1.2)],
     };
   } else if (action.type === 'userPanned') {
     return {

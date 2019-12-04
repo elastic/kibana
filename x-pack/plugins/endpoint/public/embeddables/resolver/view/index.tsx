@@ -11,6 +11,7 @@ import { Dispatch } from 'redux';
 import styled from 'styled-components';
 import { ResolverState, ResolverAction, Vector2 } from '../types';
 import * as selectors from '../store/selectors';
+import { clamp } from '../lib/math.ts';
 
 export const AppRoot: React.FC<{
   store: Store<ResolverState, ResolverAction>;
@@ -26,6 +27,8 @@ const useResolverDispatch = () => useDispatch<Dispatch<ResolverAction>>();
 
 const Diagnostic = styled(
   React.memo(({ className }: { className?: string }) => {
+    type ComponentElement = HTMLDivElement;
+
     const scale = useSelector(selectors.scale);
 
     const [elementBoundingClientRect, clientRectCallbackFunction] = useAutoUpdatingClientRect();
@@ -41,7 +44,7 @@ const Diagnostic = styled(
       }
     }, [elementBoundingClientRect, dispatch]);
 
-    const handleMouseMove: MouseEventHandler<HTMLDivElement> = useCallback(
+    const handleMouseMove: MouseEventHandler<ComponentElement> = useCallback(
       event => {
         if (event.buttons === 1) {
           dispatch({
@@ -53,8 +56,30 @@ const Diagnostic = styled(
       [scale, dispatch]
     );
 
+    const handleWheel = useCallback(
+      (event: React.WheelEvent<HTMLDivElement>) => {
+        if (event.ctrlKey) {
+          /*
+           * Clamp amount at ±10 percent per action.
+           * Determining the scale of the deltaY is difficult due to differences in UA.
+           */
+          const scaleDelta = clamp(event.deltaY, -0.1, 0.1);
+          dispatch({
+            type: 'userScaled',
+            payload: [scale[0] + scaleDelta, scale[1] + scaleDelta],
+          });
+        }
+      },
+      [scale, dispatch]
+    );
+
     return (
-      <div className={className} ref={clientRectCallbackFunction} onMouseMove={handleMouseMove}>
+      <div
+        className={className}
+        ref={clientRectCallbackFunction}
+        onMouseMove={handleMouseMove}
+        onWheel={handleWheel}
+      >
         <DiagnosticDot worldPosition={useMemo(() => [0, 0], [])} />
       </div>
     );
