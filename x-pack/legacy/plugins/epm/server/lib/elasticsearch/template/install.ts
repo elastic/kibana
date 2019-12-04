@@ -22,12 +22,12 @@ const isFields = (path: string) => {
  * in one datasets, they are merged together into 1 and then converted to a template
  * The template is currently loaded with the pkgey-package-dataset
  */
-export async function installTemplates(p: RegistryPackage, callCluster: CallESAsCurrentUser) {
+export async function installTemplates(pkg: RegistryPackage, callCluster: CallESAsCurrentUser) {
   const promises: Array<Promise<AssetReference>> = [];
 
-  for (const dataset of p.datasets) {
+  for (const dataset of pkg.datasets) {
     // Fetch all assset entries for this dataset
-    const assetEntries = await getAssetsData(p, isFields, dataset.name);
+    const assetEntries = await getAssetsData(pkg, isFields, dataset.name);
 
     // Merge all the fields of a dataset together and create an Elasticsearch index template
     let datasetFields: Field[] = [];
@@ -38,7 +38,7 @@ export async function installTemplates(p: RegistryPackage, callCluster: CallESAs
       }
     }
 
-    const promise = installTemplate({ callCluster, fields: datasetFields, p, dataset });
+    const promise = installTemplate({ callCluster, fields: datasetFields, pkg, dataset });
     promises.push(promise);
   }
 
@@ -48,16 +48,16 @@ export async function installTemplates(p: RegistryPackage, callCluster: CallESAs
 async function installTemplate({
   callCluster,
   fields,
-  p,
+  pkg,
   dataset,
 }: {
   callCluster: CallESAsCurrentUser;
   fields: Field[];
-  p: RegistryPackage;
+  pkg: RegistryPackage;
   dataset: Dataset;
 }): Promise<AssetReference> {
   const mappings = generateMappings(fields);
-  const templateName = generateTemplateName(p.name, dataset.name, dataset.type);
+  const templateName = generateTemplateName(pkg.name, dataset.name, dataset.type);
   const template = getTemplate(templateName + '-*', mappings);
   // TODO: Check return values for errors
   await callCluster('indices.putTemplate', {
