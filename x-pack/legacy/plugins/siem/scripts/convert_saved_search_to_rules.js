@@ -45,7 +45,7 @@ const allRulesNdJson = 'all_rules.ndjson';
 // of siem:defaultIndex and your kibana.dev.yml setting of xpack.siem.signalsIndex. If
 // the setting of xpack.siem.signalsIndex is not set it defaults to .siem-signals
 // const INDEX = ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'];
-// const OUTPUT_INDEX = process.env.SIGNALS_INDEX || '.siem-signals';
+// const OUTPUT_INDEX = '.siem-signals-some-other-index';
 
 const walk = dir => {
   const list = fs.readdirSync(dir);
