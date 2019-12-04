@@ -5,8 +5,9 @@
  */
 
 import * as sinon from 'sinon';
-import { ServerFacade, ExportTypesRegistry, HeadlessChromiumDriverFactory } from '../../types';
+import { ServerFacade, HeadlessChromiumDriverFactory } from '../../types';
 import { createWorkerFactory } from './create_worker';
+import { ExportTypesRegistry } from './export_types_registry';
 // @ts-ignore
 import { Esqueue } from './esqueue';
 // @ts-ignore
@@ -22,16 +23,17 @@ configGetStub.withArgs('server.uuid').returns('g9ymiujthvy6v8yrh7567g6fwzgzftzfr
 
 const executeJobFactoryStub = sinon.stub();
 
-const getMockServer = (
-  exportTypes: any[] = [{ executeJobFactory: executeJobFactoryStub }]
-): ServerFacade => {
+const getMockServer = (): ServerFacade => {
   return ({
     log: sinon.stub(),
-    expose: sinon.stub(),
     config: () => ({ get: configGetStub }),
-    plugins: { reporting: { exportTypesRegistry: { getAll: () => exportTypes } } },
   } as unknown) as ServerFacade;
 };
+const getMockExportTypesRegistry = (
+  exportTypes: any[] = [{ executeJobFactory: executeJobFactoryStub }]
+) => ({
+  getAll: () => exportTypes,
+});
 
 describe('Create Worker', () => {
   let queue: Esqueue;
@@ -44,8 +46,9 @@ describe('Create Worker', () => {
   });
 
   test('Creates a single Esqueue worker for Reporting', async () => {
+    const exportTypesRegistry = getMockExportTypesRegistry();
     const createWorker = createWorkerFactory(getMockServer(), {
-      exportTypesRegistry: {} as ExportTypesRegistry,
+      exportTypesRegistry: exportTypesRegistry as ExportTypesRegistry,
       browserDriverFactory: {} as HeadlessChromiumDriverFactory,
     });
     const registerWorkerSpy = sinon.spy(queue, 'registerWorker');
@@ -71,19 +74,17 @@ Object {
   });
 
   test('Creates a single Esqueue worker for Reporting, even if there are multiple export types', async () => {
-    const createWorker = createWorkerFactory(
-      getMockServer([
-        { executeJobFactory: executeJobFactoryStub },
-        { executeJobFactory: executeJobFactoryStub },
-        { executeJobFactory: executeJobFactoryStub },
-        { executeJobFactory: executeJobFactoryStub },
-        { executeJobFactory: executeJobFactoryStub },
-      ]),
-      {
-        exportTypesRegistry: {} as ExportTypesRegistry,
-        browserDriverFactory: {} as HeadlessChromiumDriverFactory,
-      }
-    );
+    const exportTypesRegistry = getMockExportTypesRegistry([
+      { executeJobFactory: executeJobFactoryStub },
+      { executeJobFactory: executeJobFactoryStub },
+      { executeJobFactory: executeJobFactoryStub },
+      { executeJobFactory: executeJobFactoryStub },
+      { executeJobFactory: executeJobFactoryStub },
+    ]);
+    const createWorker = createWorkerFactory(getMockServer(), {
+      exportTypesRegistry: exportTypesRegistry as ExportTypesRegistry,
+      browserDriverFactory: {} as HeadlessChromiumDriverFactory,
+    });
     const registerWorkerSpy = sinon.spy(queue, 'registerWorker');
 
     createWorker(queue);
