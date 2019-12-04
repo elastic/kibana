@@ -9,7 +9,11 @@ import { act } from 'react-dom/test-utils';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { TemplateFormTestBed } from './helpers/template_form.helpers';
 import * as fixtures from '../../test/fixtures';
-import { TEMPLATE_NAME, INDEX_PATTERNS as DEFAULT_INDEX_PATTERNS } from './helpers/constants';
+import {
+  TEMPLATE_NAME,
+  INDEX_PATTERNS as DEFAULT_INDEX_PATTERNS,
+  MAPPINGS,
+} from './helpers/constants';
 
 const { setup } = pageHelpers.templateClone;
 
@@ -50,6 +54,7 @@ describe('<TemplateClone />', () => {
   const templateToClone = fixtures.getTemplate({
     name: TEMPLATE_NAME,
     indexPatterns: ['indexPattern1'],
+    mappings: MAPPINGS,
   });
 
   beforeEach(async () => {
@@ -87,6 +92,7 @@ describe('<TemplateClone />', () => {
         component.update();
 
         // Bypass step 3 (mappings)
+        await nextTick();
         actions.clickNextButton();
         await nextTick();
         component.update();
