@@ -6,8 +6,8 @@
 
 import * as sinon from 'sinon';
 import { ServerFacade, HeadlessChromiumDriverFactory } from '../../types';
-import { createWorkerFactory } from './create_worker';
 import { ExportTypesRegistry } from './export_types_registry';
+import { createWorkerFactory } from './create_worker';
 // @ts-ignore
 import { Esqueue } from './esqueue';
 // @ts-ignore

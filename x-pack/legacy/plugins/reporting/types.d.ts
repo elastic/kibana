@@ -90,7 +90,7 @@ interface ReportingRequest {
     management: {
       jobTypes: any;
     };
-    user: string;
+    user: any;
   };
 }
 

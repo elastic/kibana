@@ -146,7 +146,7 @@ export function registerJobInfoRoutes(
           logger.error(`Report ${docId} has failed: ${JSON.stringify(response.source)}`);
         } else {
           logger.debug(
-            `Report ${docId} is not ready: [${statusCode}] Reason: [${JSON.stringify(
+            `Report ${docId} has non-OK status: [${statusCode}] Reason: [${JSON.stringify(
               response.source
             )}]`
           );
