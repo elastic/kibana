@@ -14,6 +14,7 @@ pipeline {
     HOME = "${env.WORKSPACE}"
     APM_ITS = 'apm-integration-testing'
     CYPRESS_DIR = 'x-pack/legacy/plugins/apm/cypress'
+    PIPELINE_LOG_LEVEL = 'DEBUG'
   }
   options {
     timeout(time: 1, unit: 'HOURS')
@@ -34,7 +35,8 @@ pipeline {
       options { skipDefaultCheckout() }
       steps {
         deleteDir()
-        gitCheckout(basedir: "${BASE_DIR}", githubNotifyFirstTimeContributor: false)
+        gitCheckout(basedir: "${BASE_DIR}", githubNotifyFirstTimeContributor: false,
+                    shallow: false, reference: "/var/lib/jenkins/.git-references/kibana.git")
         script {
           dir("${BASE_DIR}"){
             def regexps =[ "^x-pack/legacy/plugins/apm/" ]
