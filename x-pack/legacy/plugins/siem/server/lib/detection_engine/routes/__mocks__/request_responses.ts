@@ -30,7 +30,7 @@ export const typicalPayload = (): Partial<Omit<RuleAlertParamsRest, 'filter'>> =
     {
       framework: 'fake',
       tactic: { id: 'fakeId', name: 'fakeName', reference: 'fakeRef' },
-      technique: { id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' },
+      techniques: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
     },
   ],
 });
@@ -154,11 +154,13 @@ export const getResult = (): RuleAlertType => ({
           name: 'impact',
           reference: 'https://attack.mitre.org/tactics/TA0040/',
         },
-        technique: {
-          id: 'T1499',
-          name: 'endpoint denial of service',
-          reference: 'https://attack.mitre.org/techniques/T1499/',
-        },
+        techniques: [
+          {
+            id: 'T1499',
+            name: 'endpoint denial of service',
+            reference: 'https://attack.mitre.org/techniques/T1499/',
+          },
+        ],
       },
     ],
     references: ['http://www.example.com', 'https://ww.example.com'],
