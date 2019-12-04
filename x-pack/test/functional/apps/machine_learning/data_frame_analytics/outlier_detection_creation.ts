@@ -127,8 +127,7 @@ export default function({ getService }: FtrProviderContext) {
 
         it('displays the created job in the analytics table', async () => {
           await ml.dataFrameAnalyticsTable.refreshAnalyticsTable();
-          // TODO: re-enable filtering as soon as the filter bug ##51891 is fixed
-          // await ml.dataFrameAnalyticsTable.filterWithSearchString(testData.jobId);
+          await ml.dataFrameAnalyticsTable.filterWithSearchString(testData.jobId);
           const rows = await ml.dataFrameAnalyticsTable.parseAnalyticsTable();
           const filteredRows = rows.filter(row => row.id === testData.jobId);
           expect(filteredRows).to.have.length(
