@@ -153,30 +153,28 @@ const StatefulEventsViewerComponent = React.memo<Props>(
 
     return (
       <div onMouseEnter={handleOnMouseEnter} onMouseLeave={handleOnMouseLeave}>
-        {browserFields && indexPatterns && (
-          <EventsViewer
-            browserFields={browserFields}
-            columns={defaultModel.columns}
-            id={id}
-            dataProviders={dataProviders!}
-            end={end}
-            filters={{ ...filters, ...defaultFilters }}
-            headerFilterGroup={headerFilterGroup}
-            indexPattern={indexPatterns ?? {}}
-            isLive={isLive}
-            itemsPerPage={itemsPerPage!}
-            itemsPerPageOptions={itemsPerPageOptions!}
-            kqlMode={kqlMode}
-            onChangeItemsPerPage={onChangeItemsPerPage}
-            query={query}
-            showInspect={showInspect}
-            start={start}
-            sort={sort!}
-            timelineTypeContext={timelineTypeContext}
-            toggleColumn={toggleColumn}
-            utilityBar={utilityBar}
-          />
-        )}
+        <EventsViewer
+          browserFields={browserFields ?? {}}
+          columns={defaultModel.columns}
+          id={id}
+          dataProviders={dataProviders!}
+          end={end}
+          filters={{ ...filters, ...defaultFilters }}
+          headerFilterGroup={headerFilterGroup}
+          indexPattern={indexPatterns ?? { fields: [], title: '' }}
+          isLive={isLive}
+          itemsPerPage={itemsPerPage!}
+          itemsPerPageOptions={itemsPerPageOptions!}
+          kqlMode={kqlMode}
+          onChangeItemsPerPage={onChangeItemsPerPage}
+          query={query}
+          showInspect={showInspect}
+          start={start}
+          sort={sort!}
+          timelineTypeContext={timelineTypeContext}
+          toggleColumn={toggleColumn}
+          utilityBar={utilityBar}
+        />
       </div>
     );
   },
