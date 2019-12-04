@@ -145,10 +145,6 @@ export interface DatasourcePublicAPI {
   // Render can be called many times
   renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => void;
   renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps) => void;
-
-  removeColumnInTableSpec: (columnId: string) => void;
-  moveColumnTo: (columnId: string, targetIndex: number) => void;
-  duplicateColumn: (columnId: string) => TableSpec;
 }
 
 export interface TableSpecColumn {
