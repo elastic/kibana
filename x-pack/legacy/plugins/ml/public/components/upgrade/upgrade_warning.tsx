@@ -4,26 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { FC } from 'react';
 
-import React from 'react';
-
-import {
-  EuiCallOut,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { isUpgradeInProgress } from '../../services/upgrade_service';
 
-export function UpgradeWarning() {
+export const UpgradeWarning: FC = () => {
   if (isUpgradeInProgress() === true) {
     return (
       <React.Fragment>
         <EuiCallOut
-          title={(<FormattedMessage
-            id="xpack.ml.upgrade.upgradeWarning.upgradeInProgressWarningTitle"
-            defaultMessage="Index migration in progress"
-          />)}
+          title={
+            <FormattedMessage
+              id="xpack.ml.upgrade.upgradeWarning.upgradeInProgressWarningTitle"
+              defaultMessage="Index migration in progress"
+            />
+          }
           color="warning"
           iconType="alert"
         >
@@ -45,4 +43,4 @@ export function UpgradeWarning() {
   }
 
   return null;
-}
+};

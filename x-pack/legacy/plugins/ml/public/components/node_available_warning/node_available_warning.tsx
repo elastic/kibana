@@ -8,8 +8,8 @@ import React, { Fragment, FC } from 'react';
 
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { mlNodesAvailable, permissionToViewMlNodeCount } from '../../../../ml_nodes_check';
-import { getCloudDeploymentId, isCloud } from '../../../../services/ml_server_info';
+import { mlNodesAvailable, permissionToViewMlNodeCount } from '../../ml_nodes_check';
+import { getCloudDeploymentId, isCloud } from '../../services/ml_server_info';
 
 export const NodeAvailableWarning: FC = () => {
   if (mlNodesAvailable() === true || permissionToViewMlNodeCount() === false) {
