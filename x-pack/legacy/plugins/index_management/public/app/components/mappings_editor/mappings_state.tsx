@@ -82,7 +82,6 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    // console.log('State update', state);
     // If we are creating a new field, but haven't entered any name
     // it is valid and we can byPass its form validation (that requires a "name" to be defined)
     const isFieldFormVisible = state.fieldForm !== undefined;

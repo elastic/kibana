@@ -130,17 +130,6 @@ describe('<TemplateCreate />', () => {
           expect(exists('stepMappings')).toBe(true);
           expect(find('stepTitle').text()).toEqual('Mappings (optional)');
         });
-
-        it('should not allow invalid json', async () => {
-          const { actions, form } = testBed;
-
-          await act(async () => {
-            // Complete step 3 (mappings) with invalid json
-            await actions.completeStepThree('{ invalidJsonString ');
-          });
-
-          expect(form.getErrorsMessages()).toContain('Invalid JSON format.');
-        });
       });
 
       describe('aliases (step 4)', () => {
@@ -155,7 +144,7 @@ describe('<TemplateCreate />', () => {
             await actions.completeStepTwo('{}');
 
             // Complete step 3 (mappings)
-            await actions.completeStepThree('{}');
+            await actions.completeStepThree();
           });
         });
 
@@ -196,7 +185,7 @@ describe('<TemplateCreate />', () => {
           await actions.completeStepTwo(JSON.stringify(SETTINGS));
 
           // Complete step 3 (mappings)
-          await actions.completeStepThree(JSON.stringify(MAPPINGS));
+          await actions.completeStepThree();
 
           // Complete step 4 (aliases)
           await actions.completeStepFour(JSON.stringify(ALIASES));
@@ -250,7 +239,7 @@ describe('<TemplateCreate />', () => {
           await actions.completeStepTwo(JSON.stringify({}));
 
           // Complete step 3 (mappings)
-          await actions.completeStepThree(JSON.stringify({}));
+          await actions.completeStepThree();
 
           // Complete step 4 (aliases)
           await actions.completeStepFour(JSON.stringify({}));
@@ -280,7 +269,7 @@ describe('<TemplateCreate />', () => {
           await actions.completeStepTwo(JSON.stringify(SETTINGS));
 
           // Complete step 3 (mappings)
-          await actions.completeStepThree(JSON.stringify(MAPPINGS));
+          await actions.completeStepThree();
 
           // Complete step 4 (aliases)
           await actions.completeStepFour(JSON.stringify(ALIASES));
