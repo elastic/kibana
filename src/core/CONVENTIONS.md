@@ -1,6 +1,12 @@
 # Kibana Conventions
 
-- [Plugin Structure](#plugin-structure)
+- [Kibana Conventions](#kibana-conventions)
+  - [Plugin Structure](#plugin-structure)
+    - [The PluginInitializer](#the-plugininitializer)
+    - [The Plugin class](#the-plugin-class)
+    - [Applications](#applications)
+    - [Services](#services)
+    - [Usage Collection](#usage-collection)
 
 ## Plugin Structure
 
