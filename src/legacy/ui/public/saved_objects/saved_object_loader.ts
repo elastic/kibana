@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { npStart } from 'ui/new_platform';
 import { SavedObject } from 'ui/saved_objects/types';
-import chrome from 'ui/chrome';
 import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'kibana/public';
 import { StringUtils } from '../utils/string_utils';
 
@@ -30,11 +30,11 @@ import { StringUtils } from '../utils/string_utils';
  * to avoid pulling in extra functionality which isn't used.
  */
 export class SavedObjectLoader {
-  type: string;
-  Class: (id: string) => SavedObject;
-  lowercaseType: string;
-  loaderProperties: Record<string, string>;
-  savedObjectsClient: SavedObjectsClientContract;
+  private readonly savedObjectsClient: SavedObjectsClientContract;
+  private readonly Class: (id: string) => SavedObject;
+  public type: string;
+  public lowercaseType: string;
+  public loaderProperties: Record<string, string>;
 
   constructor(SavedObjectClass: any, savedObjectClient: SavedObjectsClientContract) {
     this.type = SavedObjectClass.type;
@@ -60,8 +60,7 @@ export class SavedObjectLoader {
     try {
       // @ts-ignore
       const obj = new this.Class(id);
-      await obj.init();
-      return obj;
+      return obj.init();
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error(e);
@@ -73,7 +72,7 @@ export class SavedObjectLoader {
     return `#/${this.lowercaseType}/${encodeURIComponent(id)}`;
   }
 
-  delete(ids: string | string[]) {
+  async delete(ids: string | string[]) {
     const idsUsed = !Array.isArray(ids) ? [ids] : ids;
 
     const deletions = idsUsed.map(id => {
@@ -81,10 +80,20 @@ export class SavedObjectLoader {
       const savedObject = new this.Class(id);
       return savedObject.delete();
     });
+    await Promise.all(deletions);
 
-    return Promise.all(deletions).then(() => {
-      chrome.untrackNavLinksForDeletedSavedObjects(idsUsed);
-    });
+    const coreNavLinks = npStart.core.chrome.navLinks;
+    /**
+     * Modify last url for deleted saved objects to avoid loading pages with "Could not locate..."
+     */
+    coreNavLinks
+      .getAll()
+      .filter(
+        link =>
+          link.linkToLastSubUrl &&
+          idsUsed.find(deletedId => link.url && link.url.includes(deletedId)) !== undefined
+      )
+      .forEach(link => coreNavLinks.update(link.id, { url: link.baseUrl }));
   }
 
   /**
@@ -94,7 +103,7 @@ export class SavedObjectLoader {
    * @param id
    * @returns {source} The modified source object, with an id and url field.
    */
-  mapHitSource(source: any, id: string) {
+  mapHitSource(source: Record<string, unknown>, id: string) {
     source.id = id;
     source.url = this.urlFor(id);
     return source;
@@ -106,7 +115,7 @@ export class SavedObjectLoader {
    * @param hit
    * @returns {hit.attributes} The modified hit.attributes object, with an id and url field.
    */
-  mapSavedObjectApiHits(hit: any) {
+  mapSavedObjectApiHits(hit: { attributes: Record<string, unknown>; id: string }) {
     return this.mapHitSource(hit.attributes, hit.id);
   }
 
@@ -119,7 +128,7 @@ export class SavedObjectLoader {
    * @param fields
    * @returns {Promise}
    */
-  findAll(search: string = '', size = 100, fields?: string[]) {
+  findAll(search: string = '', size: number = 100, fields?: string[]) {
     return this.savedObjectsClient
       .find({
         type: this.lowercaseType,
@@ -138,7 +147,7 @@ export class SavedObjectLoader {
       });
   }
 
-  find(search = '', size = 100) {
+  find(search: string = '', size: number = 100) {
     return this.findAll(search, size).then(resp => {
       return {
         total: resp.total,
