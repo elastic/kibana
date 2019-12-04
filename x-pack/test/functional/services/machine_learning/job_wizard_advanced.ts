@@ -138,8 +138,10 @@ export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProv
     },
 
     async openCreateDetectorModal() {
-      await testSubjects.click('mlAddDetectorButton');
-      await this.assertCreateDetectorModalExists();
+      await retry.tryForTime(20 * 1000, async () => {
+        await testSubjects.click('mlAddDetectorButton');
+        await this.assertCreateDetectorModalExists();
+      });
     },
 
     async assertCreateDetectorModalExists() {
