@@ -187,16 +187,19 @@ export class LegacyCoreEditor implements CoreEditor {
 
   replaceRange(range: Range, value: string) {
     const pos = this.editor.getCursorPosition();
-    this.editor.getSession().replace(
-      new _AceRange({
-        startRow: range.start.lineNumber - 1,
-        startColumn: range.start.column - 1,
-        endRow: range.end.lineNumber - 1,
-        endColumn: range.end.column - 1,
-      }),
-      value
-    );
-    const maxRow = Math.max(range.start.lineNumber - 1 + value.split('\n').length - 1, 0);
+    this.editor
+      .getSession()
+      .replace(
+        new _AceRange(
+          range.start.lineNumber - 1,
+          range.start.column - 1,
+          range.end.lineNumber - 1,
+          range.end.column - 1
+        ),
+        value
+      );
+
+    const maxRow = Math.max(range.start.lineNumber - 1 + value.split('\n').length - 1, 1);
     pos.row = Math.min(pos.row, maxRow);
     this.editor.moveCursorToPosition(pos);
     // ACE UPGRADE - check if needed - at the moment the above may trigger a selection.

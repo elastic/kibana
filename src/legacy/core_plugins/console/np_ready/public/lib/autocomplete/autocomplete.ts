@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import ace, { Editor as AceEditor, IEditSession, Position as AcePosition } from 'brace';
+import ace, { Editor as AceEditor, IEditSession } from 'brace';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -297,12 +297,12 @@ function getCurrentMethodAndTokenPaths(
   }
   return ret;
 }
-export function getEndpointFromPosition(senseEditor: SenseEditor, pos: AcePosition, parser: any) {
+export function getEndpointFromPosition(senseEditor: SenseEditor, pos: Position, parser: any) {
   const editor = senseEditor.getCoreEditor();
   const context = {
     ...getCurrentMethodAndTokenPaths(
       editor,
-      { column: pos.column + 1, lineNumber: pos.row + 1 },
+      { column: pos.column, lineNumber: pos.lineNumber },
       parser,
       true
     ),

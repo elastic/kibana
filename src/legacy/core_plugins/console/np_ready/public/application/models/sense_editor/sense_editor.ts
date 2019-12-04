@@ -65,7 +65,7 @@ export class SenseEditor {
 
     return {
       lineNumber: curRow,
-      column: 0,
+      column: 1,
     };
   };
 
@@ -201,8 +201,8 @@ export class SenseEditor {
       return null;
     }
 
-    const endColumn = (this.coreEditor.getLineValue(endLineNumber) || '').replace(/\s+$/, '')
-      .length;
+    const endColumn =
+      (this.coreEditor.getLineValue(endLineNumber) || '').replace(/\s+$/, '').length + 1;
     return {
       start: {
         lineNumber: startLineNumber,
@@ -403,7 +403,8 @@ export class SenseEditor {
       }
     }
 
-    const column = (this.coreEditor.getLineValue(curLineNumber) || '').replace(/\s+$/, '').length;
+    const column =
+      (this.coreEditor.getLineValue(curLineNumber) || '').replace(/\s+$/, '').length + 1;
 
     return {
       lineNumber: curLineNumber,
