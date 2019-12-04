@@ -43,7 +43,6 @@ export const apm: LegacyPluginInitializer = kibana => {
           apmServiceMapEnabled: config.get('xpack.apm.serviceMapEnabled')
         };
       },
-      hacks: ['plugins/apm/hacks/toggle_app_link_in_nav'],
       savedObjectSchemas: {
         'apm-services-telemetry': {
           isNamespaceAgnostic: true
