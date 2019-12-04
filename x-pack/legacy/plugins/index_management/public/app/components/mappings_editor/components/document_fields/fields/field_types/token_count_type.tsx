@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
-import { UseField, NumericField, fieldFormatters } from '../../../../shared_imports';
+import { UseField, NumericField } from '../../../../shared_imports';
 
 import {
   StoreParameter,
@@ -60,6 +60,10 @@ export const TokenCountType = ({ field }: Props) => {
           {/* null_value */}
           <NullValueParameter
             defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
+          />
+
+          <NullValueParameter
+            defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
             description={i18n.translate(
               'xpack.idxMgmt.mappingsEditor.tokenCount.nullValueFieldDescription',
               {
@@ -71,7 +75,7 @@ export const TokenCountType = ({ field }: Props) => {
             <UseField
               path="null_value"
               component={NumericField}
-              config={{ formatters: [fieldFormatters.toInt] }}
+              config={getFieldConfig('null_value_numeric')}
             />
           </NullValueParameter>
 

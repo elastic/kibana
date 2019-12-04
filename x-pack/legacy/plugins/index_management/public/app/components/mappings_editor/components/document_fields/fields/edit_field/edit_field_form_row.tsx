@@ -31,8 +31,6 @@ interface Props {
   children?: React.ReactNode | ChildrenFunc;
 }
 
-const PADDING_LEFT_NO_TOGGLE = '66px';
-
 export const EditFieldFormRow = React.memo(
   ({
     title,
@@ -49,7 +47,9 @@ export const EditFieldFormRow = React.memo(
     const switchLabel = title.props.children;
 
     const initialVisibleState =
-      toggleDefaultValue !== undefined
+      withToggle === false
+        ? true
+        : toggleDefaultValue !== undefined
         ? toggleDefaultValue
         : formFieldPath !== undefined
         ? (getFieldConfig(formFieldPath).defaultValue! as boolean)
@@ -133,7 +133,7 @@ export const EditFieldFormRow = React.memo(
       const controlsHeader = (controlsTitle || controlsDescription) && (
         <div
           style={{
-            paddingLeft: withToggle === false ? PADDING_LEFT_NO_TOGGLE : undefined,
+            paddingLeft: withToggle === false ? '0' : undefined,
           }}
         >
           {controlsTitle}
@@ -144,7 +144,7 @@ export const EditFieldFormRow = React.memo(
       const controls = ((isContentVisible && children !== undefined) || isChildrenFunction) && (
         <div
           style={{
-            paddingLeft: withToggle === false ? PADDING_LEFT_NO_TOGGLE : undefined,
+            paddingLeft: withToggle === false ? '0' : undefined,
           }}
         >
           <EuiSpacer size="m" />

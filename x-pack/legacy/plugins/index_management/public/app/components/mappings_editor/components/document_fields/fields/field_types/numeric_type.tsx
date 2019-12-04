@@ -114,7 +114,7 @@ export const NumericType = ({ field }: Props) => {
             <UseField
               path="null_value"
               component={NumericField}
-              config={{ formatters: [fieldFormatters.toInt] }}
+              config={getFieldConfig('null_value_numeric')}
             />
           </NullValueParameter>
 
