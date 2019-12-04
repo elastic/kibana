@@ -5,6 +5,7 @@
  */
 
 import * as Registry from '../registry';
+import { cacheHas } from '../registry/cache';
 import { RegistryPackage } from '../../common/types';
 
 export function getAssets(
@@ -40,11 +41,15 @@ export function getAssets(
   return assets;
 }
 
-export function getAssetsData(
+export async function getAssetsData(
   packageInfo: RegistryPackage,
   filter = (path: string): boolean => true,
   dataSet: string = ''
-): Registry.ArchiveEntry[] {
+): Promise<Registry.ArchiveEntry[]> {
+  // TODO: Needs to be called to fill the cache but should not be required
+  const pkgkey = packageInfo.name + '-' + packageInfo.version;
+  if (!cacheHas(pkgkey)) await Registry.getArchiveInfo(pkgkey);
+
   // Gather all asset data
   const assets = getAssets(packageInfo, filter, dataSet);
 
