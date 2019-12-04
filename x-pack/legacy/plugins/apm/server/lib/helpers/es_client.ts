@@ -78,7 +78,7 @@ async function getParamsForSearchRequest(
 ) {
   const { uiSettings } = context.core;
   const [indices, includeFrozen] = await Promise.all([
-    getApmIndices(context.core, context.config),
+    getApmIndices(context.core.savedObjects.client, context.config),
     uiSettings.client.get('search:includeFrozen')
   ]);
 
