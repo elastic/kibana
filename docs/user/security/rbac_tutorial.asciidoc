@@ -108,9 +108,9 @@ image::security/images/role-space-visualization.png["Associate space"]
 [float]
 ==== Create the developer's user account with the proper roles
 
-Go to **Management > Users** 
-Click on **Create user** and create a user with the `dev-mortgage` role 
-and the `monitoring-user` role which is required for users of Stack Monitoring.
+Go to **Management > Users** and click on **Create user** to create a 
+user.  Give the user the `dev-mortgage` role 
+and the `monitoring-user` role, which is required for users of **Stack Monitoring**.
 
 [role="screenshot"]
 image::security/images/role-new-user.png["Develoer user"]
