@@ -29,10 +29,6 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
   server: ServerFacade,
   { browserDriverFactory }: { browserDriverFactory?: HeadlessChromiumDriverFactory } = {}
 ) {
-  if (!browserDriverFactory) {
-    throw new Error('Reporting browser driver factory must be passed for PNG job execution');
-  }
-
   const generatePngObservable = generatePngObservableFactory(server, browserDriverFactory);
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PNG_JOB_TYPE, 'execute']);
 

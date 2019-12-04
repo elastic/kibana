@@ -30,10 +30,6 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
   server: ServerFacade,
   { browserDriverFactory }: { browserDriverFactory?: HeadlessChromiumDriverFactory } = {}
 ) {
-  if (!browserDriverFactory) {
-    throw new Error('Reporting browser driver factory must be passed for PDF job execution');
-  }
-
   const generatePdfObservable = generatePdfObservableFactory(server, browserDriverFactory);
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PDF_JOB_TYPE, 'execute']);
 
