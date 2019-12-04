@@ -25,6 +25,7 @@ import { contextServiceMock } from './context/context_service.mock';
 import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { InternalCoreSetup, InternalCoreStart } from './internal_types';
+import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
 
 export { httpServerMock } from './http/http_server.mocks';
 export { sessionStorageMock } from './http/cookie_session_storage.mocks';
@@ -87,6 +88,7 @@ function createCoreSetupMock() {
     register: uiSettingsServiceMock.createSetupContract().register,
   };
   const mock: MockedKeys<CoreSetup> = {
+    capabilities: capabilitiesServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
     elasticsearch: elasticsearchServiceMock.createSetupContract(),
     http: httpMock,
@@ -99,6 +101,7 @@ function createCoreSetupMock() {
 
 function createCoreStartMock() {
   const mock: MockedKeys<CoreStart> = {
+    capabilities: capabilitiesServiceMock.createStartContract(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
   };
 
@@ -107,6 +110,7 @@ function createCoreStartMock() {
 
 function createInternalCoreSetupMock() {
   const setupDeps: InternalCoreSetup = {
+    capabilities: capabilitiesServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
     elasticsearch: elasticsearchServiceMock.createSetupContract(),
     http: httpServiceMock.createSetupContract(),
@@ -118,6 +122,7 @@ function createInternalCoreSetupMock() {
 
 function createInternalCoreStartMock() {
   const startDeps: InternalCoreStart = {
+    capabilities: capabilitiesServiceMock.createStartContract(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
   };
   return startDeps;

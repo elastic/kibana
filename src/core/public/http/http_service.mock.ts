@@ -22,12 +22,12 @@ import { HttpSetup } from './types';
 import { BehaviorSubject } from 'rxjs';
 import { BasePath } from './base_path_service';
 
-type ServiceSetupMockType = jest.Mocked<HttpSetup> & {
+export type HttpSetupMock = jest.Mocked<HttpSetup> & {
   basePath: BasePath;
   anonymousPaths: jest.Mocked<HttpSetup['anonymousPaths']>;
 };
 
-const createServiceMock = ({ basePath = '' } = {}): ServiceSetupMockType => ({
+const createServiceMock = ({ basePath = '' } = {}): HttpSetupMock => ({
   fetch: jest.fn(),
   get: jest.fn(),
   head: jest.fn(),
