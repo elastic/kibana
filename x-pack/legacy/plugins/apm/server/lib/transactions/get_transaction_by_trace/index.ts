@@ -13,7 +13,10 @@ import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import { Setup } from '../../helpers/setup_request';
 import { ProcessorEvent } from '../../../../common/processor_event';
 
-export async function getTransactionByTraceId(traceId: string, setup: Setup) {
+export async function getRootTransactionByTraceId(
+  traceId: string,
+  setup: Setup
+) {
   const { client, indices } = setup;
   const params = {
     index: indices['apm_oss.transactionIndices'],

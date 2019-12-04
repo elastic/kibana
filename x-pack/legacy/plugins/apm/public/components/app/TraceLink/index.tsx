@@ -13,35 +13,44 @@ import { useFetcher, FETCH_STATUS } from '../../../hooks/useFetcher';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import { QueryParams } from '../../shared/Links/apm/ExternalLinks';
+import { TRACE_ID } from '../../../../common/elasticsearch_fieldnames';
 
 const CentralizedContainer = styled.div`
   height: 100%;
   display: flex;
 `;
 
+type DateRange = Partial<QueryParams>;
+
+const getDateRange = ({ rangeFrom, rangeTo }: DateRange) =>
+  rangeFrom && rangeTo ? { rangeFrom, rangeTo } : {};
+
 const redirectToTransactionDetailPage = ({
   transaction,
   rangeFrom,
   rangeTo
-}: { transaction: Transaction } & Partial<QueryParams>) => {
-  const dateRange = rangeFrom && rangeTo ? { rangeFrom, rangeTo } : {};
-  return url.format({
+}: { transaction: Transaction } & DateRange) =>
+  url.format({
     pathname: `/services/${transaction.service.name}/transactions/view`,
     query: {
       traceId: transaction.trace.id,
       transactionId: transaction.transaction.id,
       transactionName: transaction.transaction.name,
       transactionType: transaction.transaction.type,
-      ...dateRange
+      ...getDateRange({ rangeFrom, rangeTo })
     }
   });
-};
 
-const redirectToTracePage = (traceId: string) =>
+const redirectToTracePage = ({
+  traceId,
+  rangeFrom,
+  rangeTo
+}: { traceId: string } & DateRange) =>
   url.format({
     pathname: `/traces`,
     query: {
-      kuery: encodeURIComponent(`trace.id : "${traceId}"`)
+      kuery: encodeURIComponent(`${TRACE_ID} : "${traceId}"`),
+      ...getDateRange({ rangeFrom, rangeTo })
     }
   });
 
@@ -71,7 +80,7 @@ export const TraceLink = () => {
           rangeFrom,
           rangeTo
         })
-      : redirectToTracePage(traceId);
+      : redirectToTracePage({ traceId, rangeFrom, rangeTo });
     return <Redirect to={to} />;
   }
 

@@ -10,7 +10,6 @@ import * as urlParamsHooks from '../../../../hooks/useUrlParams';
 import * as hooks from '../../../../hooks/useFetcher';
 import { TraceLink } from '../';
 import { mockNow } from '../../../../utils/testHelpers';
-import moment from 'moment-timezone';
 
 jest.mock('../../Main/route_config/index.tsx', () => ({
   routes: [
@@ -68,8 +67,7 @@ describe('TraceLink', () => {
           name: 'bar',
           type: 'GET'
         },
-        trace: { id: 123 },
-        timestamp: { us: moment('2019-11-23').valueOf() * 1000 }
+        trace: { id: 123 }
       };
       spyOn(hooks, 'useFetcher').and.returnValue({
         data: { transaction },
@@ -89,8 +87,7 @@ describe('TraceLink', () => {
           name: 'bar',
           type: 'GET'
         },
-        trace: { id: 123 },
-        timestamp: { us: moment('2019-11-25').valueOf() * 1000 }
+        trace: { id: 123 }
       };
       spyOn(hooks, 'useFetcher').and.returnValue({
         data: { transaction },
