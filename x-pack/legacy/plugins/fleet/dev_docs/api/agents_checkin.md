@@ -42,8 +42,6 @@ Authorization: ApiKey VALID_ACCESS_API_KEY
 {
   "action": "checkin",
   "success": true,
-  "policy": {
-  },
   "actions": []
 }
 ```

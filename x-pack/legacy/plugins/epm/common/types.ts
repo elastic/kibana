@@ -99,6 +99,15 @@ export type ElasticsearchAssetTypeToParts = Record<
   ElasticsearchAssetParts[]
 >;
 
+export interface Dataset {
+  title: string;
+  name: string;
+  release: string;
+  ingeset_pipeline: string;
+  vars: object[];
+  type: string;
+}
+
 export interface RegistryPackage {
   name: string;
   version: string;
@@ -109,6 +118,7 @@ export interface RegistryPackage {
   title?: string;
   screenshots?: ScreenshotItem[];
   assets: string[];
+  datasets: Dataset[];
 }
 
 // Managers public HTTP response types

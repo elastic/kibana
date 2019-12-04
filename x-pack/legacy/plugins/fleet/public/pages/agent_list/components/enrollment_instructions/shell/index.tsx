@@ -67,7 +67,7 @@ export const ShellEnrollmentInstructions: React.FC<Props> = ({ kibanaUrl, apiKey
   const [isManualInstallationOpen, setIsManualInstallationOpen] = useState<boolean>(false);
 
   // Build quick installation command
-  const quickInstallInstructions = `API_KEY=${apiKey.api_key} curl ${kibanaUrl}/api/fleet/install/${currentPlatform} | bash`;
+  const quickInstallInstructions = `API_KEY=${apiKey.api_key} sh -c "$(curl ${kibanaUrl}/api/fleet/install/${currentPlatform})"`;
 
   return (
     <Fragment>

@@ -17,6 +17,8 @@ import {
   SavedObjectsCreateOptions,
   SavedObjectsBulkGetObject,
   SavedObjectsUpdateResponse,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkUpdateOptions,
 } from 'src/core/server';
 import { SODatabaseAdapter as SODatabaseAdapterType } from './adapter_types';
 import { SODatabaseAdapter } from './default';
@@ -43,7 +45,24 @@ export class MemorizeSODatabaseAdapter implements SODatabaseAdapterType {
     );
   }
 
-  async bulkCreate<T extends SavedObjectAttributes = any>(
+  public async bulkUpdate<T extends SavedObjectAttributes = any>(
+    user: FrameworkUser,
+    objects: Array<SavedObjectsBulkUpdateObject<T>>,
+    options?: SavedObjectsBulkUpdateOptions
+  ) {
+    return Slapshot.memorize(
+      `bulkUpdate`,
+      () => {
+        if (!this.soAdadpter) {
+          throw new Error('An adapter must be provided when running tests online');
+        }
+        return this.soAdadpter.bulkUpdate(user, objects, options);
+      },
+      { pure: false }
+    );
+  }
+
+  public async bulkCreate<T extends SavedObjectAttributes = any>(
     user: FrameworkUser,
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options?: SavedObjectsCreateOptions

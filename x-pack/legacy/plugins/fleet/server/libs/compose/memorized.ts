@@ -25,10 +25,15 @@ import { ElasticsearchAdapter } from '../../adapters/elasticsearch/default';
 import { MemorizeSODatabaseAdapter } from '../../adapters/saved_objects_database/memorize_adapter';
 import { MemorizedElasticsearchAdapter } from '../../adapters/elasticsearch/memorize_adapter';
 import { MemorizeEncryptedSavedObjects } from '../../adapters/encrypted_saved_objects/memorize_adapter';
+import { AgentPolicyLib } from '../agent_policy';
+import { AgentEventLib } from '../agent_event';
 
 export function compose(server?: any): FleetServerLib {
   const frameworkAdapter = new FrameworkAdapter(server);
-  const policyAdapter = new PoliciesRepository(server ? server.plugins.ingest.policy : undefined);
+  const policyRepository = new PoliciesRepository(
+    server && server.plugins.ingest.policy,
+    server && server.plugins.ingest.outputs
+  );
 
   const framework = new FrameworkLib(frameworkAdapter);
   const soDatabaseAdapter = new MemorizeSODatabaseAdapter(
@@ -49,21 +54,24 @@ export function compose(server?: any): FleetServerLib {
     encryptedObjectAdapter
   );
 
-  const policies = new PolicyLib(policyAdapter);
+  const policies = new PolicyLib(policyRepository);
   const apiKeys = new ApiKeyLib(enrollmentApiKeysRepository, esAdapter, framework);
-  const agents = new AgentLib(agentsRepository, agentEventsRepository, apiKeys, policies);
+  const agentEvents = new AgentEventLib(agentEventsRepository);
+  const agents = new AgentLib(agentsRepository, apiKeys, agentEvents);
 
   const artifactRepository = new FileSystemArtifactRepository(os.tmpdir());
   const artifacts = new ArtifactLib(artifactRepository, new HttpAdapter());
-
+  const agentsPolicy = new AgentPolicyLib(agentsRepository, policies);
   const install = new InstallLib(framework);
 
   return {
     agents,
+    agentEvents,
     apiKeys,
     policies,
     artifacts,
     install,
     framework,
+    agentsPolicy,
   };
 }

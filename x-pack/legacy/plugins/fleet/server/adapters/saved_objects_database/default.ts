@@ -18,6 +18,8 @@ import {
   SavedObjectsUpdateResponse,
   SavedObjectsClient as SavedObjectsClientType,
   SavedObjectsLegacyService,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkUpdateOptions,
 } from 'src/core/server';
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { SODatabaseAdapter as SODatabaseAdapterType } from './adapter_types';
@@ -76,6 +78,20 @@ export class SODatabaseAdapter implements SODatabaseAdapterType {
     options?: SavedObjectsCreateOptions
   ) {
     return await this.getClient(user).bulkCreate(objects, options);
+  }
+
+  /**
+   * Persists multiple documents batched together as a single request
+   *
+   * @param objects
+   * @param options
+   */
+  async bulkUpdate<T extends SavedObjectAttributes = any>(
+    user: FrameworkUser,
+    objects: Array<SavedObjectsBulkUpdateObject<T>>,
+    options?: SavedObjectsBulkUpdateOptions
+  ) {
+    return await this.getClient(user).bulkUpdate(objects, options);
   }
 
   /**

@@ -16,20 +16,17 @@ import {
   NewAgent,
   SortOptions,
 } from '../repositories/agents/types';
-import { AgentEvent, AgentEventsRepository } from '../repositories/agent_events/types';
+import { AgentEvent } from '../repositories/agent_events/types';
 import { AgentPolicy } from '../repositories/policies/types';
 import { ApiKeyLib } from './api_keys';
-import { PolicyLib } from './policy';
 import { AgentStatusHelper } from './agent_status_helper';
+import { AgentEventLib } from './agent_event';
 
 export class AgentLib {
   constructor(
     private readonly agentsRepository: AgentsRepository,
-    private readonly agentEventsRepository: AgentEventsRepository,
     private readonly apiKeys: ApiKeyLib,
-    // TODO remove will be used later
-    // @ts-ignore
-    private readonly policies: PolicyLib
+    private readonly agentEvents: AgentEventLib
   ) {}
 
   /**
@@ -166,7 +163,7 @@ export class AgentLib {
    */
   public async delete(user: FrameworkUser, agent: Agent) {
     if (agent.type === 'EPHEMERAL') {
-      await this.agentEventsRepository.deleteEventsForAgent(user, agent.id);
+      await this.agentEvents.deleteEventsForAgent(user, agent.id);
       return await this.agentsRepository.delete(user, agent);
     }
 
@@ -178,23 +175,6 @@ export class AgentLib {
    */
   public async getById(user: FrameworkUser, id: string): Promise<Agent | null> {
     return await this.agentsRepository.getById(user, id);
-  }
-
-  /**
-   * Get events for a given agent
-   */
-  public async getEventsById(
-    user: FrameworkUser,
-    agentId: string,
-    search?: string,
-    page: number = 1,
-    perPage: number = 25
-  ): Promise<{ items: AgentEvent[]; total: number }> {
-    return await this.agentEventsRepository.getEventsForAgent(user, agentId, {
-      search,
-      page,
-      perPage,
-    });
   }
 
   /**
@@ -226,25 +206,30 @@ export class AgentLib {
     const actions = this._filterActionsForCheckin(agent);
 
     const now = new Date().toISOString();
-    const updatedActions = actions.map(a => {
-      return { ...a, sent_at: now };
-    });
 
     const updateData: Partial<Agent> = {
       last_checkin: now,
-      actions: updatedActions,
     };
 
     if (localMetadata) {
       updateData.local_metadata = localMetadata;
     }
 
-    await this.agentsRepository.update(internalUser, agent.id, updateData);
-    if (events.length > 0) {
-      await this.agentEventsRepository.createEventsForAgent(internalUser, agent.id, events);
+    const { acknowledgedActionIds } = await this.agentEvents.processEventsForCheckin(
+      internalUser,
+      agent.id,
+      events
+    );
+    if (acknowledgedActionIds.length > 0) {
+      const updatedActions = actions.map(a => {
+        return { ...a, sent_at: acknowledgedActionIds.indexOf(a.id) >= 0 ? now : undefined };
+      });
+      updateData.actions = updatedActions;
     }
 
-    return { actions, policy: null };
+    await this.agentsRepository.update(internalUser, agent.id, updateData);
+
+    return { actions: updateData.actions || actions, policy: null };
   }
 
   public async addAction(

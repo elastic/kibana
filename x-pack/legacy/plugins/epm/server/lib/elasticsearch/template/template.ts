@@ -58,9 +58,13 @@ export function generateMappings(fields: Field[]): Mappings {
 /**
  * Generates the template name out of the given information
  */
-export function generateTemplateName(pkgkey: string, datasetName: string): string {
+export function generateTemplateName(
+  packageName: string,
+  datasetName: string,
+  type: string
+): string {
   // TODO: This is only a temporary name. More info like dataset type is needed to create full name
-  return pkgkey + '-' + datasetName;
+  return type + '-' + packageName + '-' + datasetName;
 }
 
 function getBaseTemplate(mappings: Mappings): Template {

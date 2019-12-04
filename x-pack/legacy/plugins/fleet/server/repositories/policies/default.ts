@@ -4,11 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IngestPlugin, PoliciesRepository as PoliciesRepositoryType } from './types';
+import {
+  IngestPolicyLib,
+  IngestOutputLib,
+  PoliciesRepository as PoliciesRepositoryType,
+} from './types';
 import { FrameworkUser } from '../../adapters/framework/adapter_types';
 
 export class PoliciesRepository implements PoliciesRepositoryType {
-  constructor(private readonly plugin?: IngestPlugin) {}
+  constructor(
+    private readonly ingestPolicyLib?: IngestPolicyLib,
+    private readonly ingestOutputLib?: IngestOutputLib
+  ) {}
 
   /**
    * Return a full policy
@@ -16,16 +23,26 @@ export class PoliciesRepository implements PoliciesRepositoryType {
    * @param id
    */
   async getPolicyOutputByIDs(user: FrameworkUser, ids: string[]) {
-    if (this.plugin) {
-      return await this.plugin.getPolicyOutputByIDs(user, ids);
+    if (this.ingestOutputLib) {
+      return await this.ingestOutputLib.getByIDs(
+        {
+          kind: 'internal',
+        },
+        ids
+      );
     }
 
     return [];
   }
 
   async get(user: FrameworkUser, id: string) {
-    if (this.plugin) {
-      return await this.plugin.getPolicyById(user, id);
+    if (this.ingestPolicyLib) {
+      return await this.ingestPolicyLib.get(
+        {
+          kind: 'internal',
+        },
+        id
+      );
     }
 
     return null;
