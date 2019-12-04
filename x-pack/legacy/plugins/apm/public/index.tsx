@@ -9,8 +9,8 @@ import 'react-vis/dist/style.css';
 import { PluginInitializerContext } from 'kibana/public';
 import 'ui/autoload/all';
 import chrome from 'ui/chrome';
-import { plugin } from './new-platform';
-import { REACT_APP_ROOT_ID } from './new-platform/plugin';
+import { plugin } from '../../../../plugins/apm/public';
+import { REACT_APP_ROOT_ID } from '../../../../plugins/apm/public/plugin';
 import './style/global_overrides.css';
 import template from './templates/index.html';
 

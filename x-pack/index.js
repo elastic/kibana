@@ -44,7 +44,7 @@ import { actions } from './legacy/plugins/actions';
 import { alerting } from './legacy/plugins/alerting';
 import { lens } from './legacy/plugins/lens';
 
-module.exports = function (kibana) {
+module.exports = function(kibana) {
   return [
     xpackMain(kibana),
     graph(kibana),
@@ -60,7 +60,7 @@ module.exports = function (kibana) {
     dashboardMode(kibana),
     logstash(kibana),
     beats(kibana),
-    apm(kibana),
+    //apm(kibana),
     maps(kibana),
     canvas(kibana),
     licenseManagement(kibana),

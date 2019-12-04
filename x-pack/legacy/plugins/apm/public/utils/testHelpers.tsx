@@ -23,7 +23,7 @@ import {
   PluginsContext,
   ConfigSchema,
   ApmPluginStartDeps
-} from '../new-platform/plugin';
+} from '../../../../../plugins/apm/public/plugin';
 
 export function toJson(wrapper: ReactWrapper) {
   return enzymeToJson(wrapper, {

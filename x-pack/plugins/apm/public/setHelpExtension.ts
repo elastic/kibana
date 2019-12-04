@@ -6,28 +6,28 @@
 
 import url from 'url';
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '../../../../src/core/public';
 
 export function setHelpExtension({ chrome, http }: CoreStart) {
   chrome.setHelpExtension({
     appName: i18n.translate('xpack.apm.feedbackMenu.appName', {
-      defaultMessage: 'APM'
+      defaultMessage: 'APM',
     }),
     links: [
       {
         linkType: 'discuss',
-        href: 'https://discuss.elastic.co/c/apm'
+        href: 'https://discuss.elastic.co/c/apm',
       },
       {
         linkType: 'custom',
         href: url.format({
           pathname: http.basePath.prepend('/app/kibana'),
-          hash: '/management/elasticsearch/upgrade_assistant'
+          hash: '/management/elasticsearch/upgrade_assistant',
         }),
         content: i18n.translate('xpack.apm.helpMenu.upgradeAssistantLink', {
-          defaultMessage: 'Upgrade assistant'
-        })
-      }
-    ]
+          defaultMessage: 'Upgrade assistant',
+        }),
+      },
+    ],
   });
 }

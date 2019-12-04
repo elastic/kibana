@@ -5,22 +5,25 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '../../../../src/core/public';
 
 export function setReadonlyBadge({ application, chrome }: CoreStart) {
-  const canSave = application.capabilities.apm.save;
+  console.log({ application });
+  //  const canSave = application.capabilities.apm.save;
+
+  const canSave = true;
   const { setBadge } = chrome;
 
   setBadge(
     !canSave
       ? {
           text: i18n.translate('xpack.apm.header.badge.readOnly.text', {
-            defaultMessage: 'Read only'
+            defaultMessage: 'Read only',
           }),
           tooltip: i18n.translate('xpack.apm.header.badge.readOnly.tooltip', {
-            defaultMessage: 'Unable to save'
+            defaultMessage: 'Unable to save',
           }),
-          iconType: 'glasses'
+          iconType: 'glasses',
         }
       : undefined
   );

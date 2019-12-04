@@ -36,7 +36,7 @@ import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { KibanaLink } from '../../../shared/Links/KibanaLink';
 import { createErrorGroupWatch, Schedule } from './createErrorGroupWatch';
 import { ElasticDocsLink } from '../../../shared/Links/ElasticDocsLink';
-import { PluginsContext } from '../../../../new-platform/plugin';
+import { PluginsContext } from '../../../../../../../../plugins/apm/public/plugin';
 
 type ScheduleKey = keyof Schedule;
 

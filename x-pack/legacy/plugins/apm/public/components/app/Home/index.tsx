@@ -25,7 +25,7 @@ import { EuiTabLink } from '../../shared/EuiTabLink';
 import { SettingsLink } from '../../shared/Links/apm/SettingsLink';
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
 import { ServiceMap } from '../ServiceMap';
-import { usePlugins } from '../../../new-platform/plugin';
+import { usePlugins } from '../../../../../../../plugins/apm/public/plugin';
 
 function getHomeTabs({
   apmServiceMapEnabled = false

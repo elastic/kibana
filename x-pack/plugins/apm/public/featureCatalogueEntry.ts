@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FeatureCatalogueCategory } from '../../../../../../src/plugins/home/public';
+import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 
 export const featureCatalogueEntry = {
   id: 'apm',
@@ -13,10 +13,10 @@ export const featureCatalogueEntry = {
   description: i18n.translate('xpack.apm.apmDescription', {
     defaultMessage:
       'Automatically collect in-depth performance metrics and ' +
-      'errors from inside your applications.'
+      'errors from inside your applications.',
   }),
   icon: 'apmApp',
   path: '/app/apm',
   showOnHomePage: true,
-  category: FeatureCatalogueCategory.DATA
+  category: FeatureCatalogueCategory.DATA,
 };

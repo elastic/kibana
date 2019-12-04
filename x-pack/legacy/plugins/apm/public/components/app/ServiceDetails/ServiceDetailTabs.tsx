@@ -21,7 +21,7 @@ import { ServiceNodeOverview } from '../ServiceNodeOverview';
 import { useAgentName } from '../../../hooks/useAgentName';
 import { ServiceMap } from '../ServiceMap';
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
-import { usePlugins } from '../../../new-platform/plugin';
+import { usePlugins } from '../../../../../../../plugins/apm/public/plugin';
 
 interface Props {
   tab: 'transactions' | 'errors' | 'metrics' | 'nodes' | 'service-map';

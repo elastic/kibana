@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
-import { usePlugins } from '../../../new-platform/plugin';
+import { usePlugins } from '../../../../../../../plugins/apm/public/plugin';
 
 // union type constisting of valid guide sections that we link to
 type DocsSection = '/apm/get-started' | '/x-pack' | '/apm/server';

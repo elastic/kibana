@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '../../../../src/core/public';
 
 export function toggleAppLinkInNav(core: CoreStart, { apmUiEnabled = false }) {
   if (apmUiEnabled === false) {

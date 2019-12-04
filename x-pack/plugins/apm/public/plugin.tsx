@@ -1,0 +1,157 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React, { createContext, useContext } from 'react';
+import ReactDOM from 'react-dom';
+import { Route, Router, Switch } from 'react-router-dom';
+import styled from 'styled-components';
+import {
+  CoreSetup,
+  CoreStart,
+  LegacyCoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from '../../../../src/core/public';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import { BreadcrumbRoute } from '../../../legacy/plugins/apm/public/components/app/Main/ProvideBreadcrumbs';
+import { getRoutes } from '../../../legacy/plugins/apm/public/components/app/Main/route_config';
+import { ScrollToTopOnPathChange } from '../../../legacy/plugins/apm/public/components/app/Main/ScrollToTopOnPathChange';
+import { UpdateBreadcrumbs } from '../../../legacy/plugins/apm/public/components/app/Main/UpdateBreadcrumbs';
+import { LicenseProvider } from '../../../legacy/plugins/apm/public/context/LicenseContext';
+import { LoadingIndicatorProvider } from '../../../legacy/plugins/apm/public/context/LoadingIndicatorContext';
+import { LocationProvider } from '../../../legacy/plugins/apm/public/context/LocationContext';
+import { MatchedRouteProvider } from '../../../legacy/plugins/apm/public/context/MatchedRouteContext';
+import { UrlParamsProvider } from '../../../legacy/plugins/apm/public/context/UrlParamsContext';
+import { createStaticIndexPattern } from '../../../legacy/plugins/apm/public/services/rest/index_pattern';
+import { px, unit, units } from '../../../legacy/plugins/apm/public/style/variables';
+import { history } from '../../../legacy/plugins/apm/public/utils/history';
+import { KibanaCoreContextProvider } from '../../../legacy/plugins/observability/public';
+import { featureCatalogueEntry } from './featureCatalogueEntry';
+import { setHelpExtension } from './setHelpExtension';
+import { toggleAppLinkInNav } from './toggleAppLinkInNav';
+import { setReadonlyBadge } from './updateBadge';
+
+export const REACT_APP_ROOT_ID = 'react-apm-root';
+
+const MainContainer = styled.main`
+  min-width: ${px(unit * 50)};
+  padding: ${px(units.plus)};
+  height: 100%;
+`;
+
+const App = ({ routes }: { routes: BreadcrumbRoute[] }) => {
+  return (
+    <MainContainer data-test-subj="apmMainContainer">
+      <UpdateBreadcrumbs routes={routes} />
+      <Route component={ScrollToTopOnPathChange} />
+      <Switch>
+        {routes.map((route, i) => (
+          <Route key={i} {...route} />
+        ))}
+      </Switch>
+    </MainContainer>
+  );
+};
+
+export type ApmPluginSetup = void;
+export type ApmPluginStart = void;
+
+export interface ApmPluginSetupDeps {
+  home: HomePublicPluginSetup;
+}
+
+export interface ApmPluginStartDeps {
+  data: DataPublicPluginStart;
+}
+
+export interface ConfigSchema {
+  apmIndexPatternTitle: string;
+  apmServiceMapEnabled: boolean;
+  apmUiEnabled: boolean;
+}
+
+// These are to be used until we switch over all our context handling to
+// kibana_react
+export const PluginsContext = createContext<
+  ApmPluginStartDeps & { apm: { config: ConfigSchema; stackVersion: string } }
+>(
+  {} as ApmPluginStartDeps & {
+    apm: { config: ConfigSchema; stackVersion: string };
+  }
+);
+export function usePlugins() {
+  return useContext(PluginsContext);
+}
+
+export class ApmPlugin
+  implements Plugin<ApmPluginSetup, ApmPluginStart, ApmPluginSetupDeps, ApmPluginStartDeps> {
+  constructor(
+    // @ts-ignore Not using initializerContext now, but will be once NP
+    // migration is complete.
+    private readonly initializerContext: PluginInitializerContext<ConfigSchema>
+  ) {}
+
+  // Take the DOM element as the constructor, so we can mount the app.
+  public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
+    plugins.home.featureCatalogue.register(featureCatalogueEntry);
+
+    core.application.register({
+      ...featureCatalogueEntry,
+      async mount(context, params) {
+        // Load application bundle
+        const { renderApp } = await import('./application');
+        return renderApp(context, params.element);
+      },
+    });
+  }
+
+  public start(core: CoreStart, plugins: ApmPluginStartDeps) {
+    const i18nCore = core.i18n;
+    const config = this.initializerContext.config.get<ConfigSchema>();
+    const stackVersion = this.initializerContext.env.packageInfo.branch;
+
+    const pluginsForContext = { ...plugins, apm: { config, stackVersion } };
+
+    const routes = getRoutes(config);
+
+    // render APM feedback link in global help menu
+    setHelpExtension(core);
+    setReadonlyBadge(core);
+    toggleAppLinkInNav(core, config);
+
+    // ReactDOM.render(
+    //   <KibanaCoreContextProvider core={core as LegacyCoreStart}>
+    //     <PluginsContext.Provider value={pluginsForContext}>
+    //       <i18nCore.Context>
+    //         <Router history={history}>
+    //           <LocationProvider>
+    //             <MatchedRouteProvider routes={routes}>
+    //               <UrlParamsProvider>
+    //                 <LoadingIndicatorProvider>
+    //                   <LicenseProvider>
+    //                     <App routes={routes} />
+    //                   </LicenseProvider>
+    //                 </LoadingIndicatorProvider>
+    //               </UrlParamsProvider>
+    //             </MatchedRouteProvider>
+    //           </LocationProvider>
+    //         </Router>
+    //       </i18nCore.Context>
+    //     </PluginsContext.Provider>
+    //   </KibanaCoreContextProvider>,
+    //   document.getElementById(REACT_APP_ROOT_ID)
+    // );
+
+    // create static index pattern and store as saved object. Not needed by APM UI but for legacy reasons in Discover, Dashboard etc.
+    createStaticIndexPattern(core.http).catch(e => {
+      // eslint-disable-next-line no-console
+      console.log('Error fetching static index pattern', e);
+    });
+  }
+
+  public stop() {}
+}
