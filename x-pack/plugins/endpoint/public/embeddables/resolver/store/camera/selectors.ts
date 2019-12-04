@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Vector2, CameraState, CameraStateWhenPanning } from '../../types';
+import { Vector2, CameraState, CameraStateWhenPanning, AABB } from '../../types';
 
-interface Viewport {
+interface RasterCameraProperties {
   renderWidth: number;
   renderHeight: number;
   clippingPlaneRight: number;
@@ -15,7 +15,15 @@ interface Viewport {
   clippingPlaneBottom: number;
 }
 
-function viewport(state: CameraState): Viewport {
+export function viewableBoundingBox(state: CameraState): AABB {
+  const { renderWidth, renderHeight } = rasterCameraProperties(state);
+  return {
+    minimum: rasterToWorld(state)([0, renderHeight]),
+    maximum: rasterToWorld(state)([renderWidth, 0]),
+  };
+}
+
+function rasterCameraProperties(state: CameraState): RasterCameraProperties {
   const renderWidth = state.rasterSize[0];
   const renderHeight = state.rasterSize[1];
   const clippingPlaneRight = renderWidth / 2 / state.scaling[0];
@@ -43,7 +51,7 @@ export const worldToRaster: (state: CameraState) => (worldPosition: Vector2) => 
     clippingPlaneTop,
     clippingPlaneLeft,
     clippingPlaneBottom,
-  } = viewport(state);
+  } = rasterCameraProperties(state);
 
   return ([worldX, worldY]) => {
     const [translationX, translationY] = translation(state);
@@ -83,7 +91,7 @@ export const rasterToWorld: (state: CameraState) => (worldPosition: Vector2) => 
     clippingPlaneTop,
     clippingPlaneLeft,
     clippingPlaneBottom,
-  } = viewport(state);
+  } = rasterCameraProperties(state);
 
   return ([rasterX, rasterY]) => {
     const [translationX, translationY] = translation(state);

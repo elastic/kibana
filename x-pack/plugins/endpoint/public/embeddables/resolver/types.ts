@@ -23,3 +23,8 @@ export interface CameraStateWhenPanning extends CameraState {
 }
 
 export type Vector2 = readonly [number, number];
+
+export interface AABB {
+  readonly minimum: Vector2;
+  readonly maximum: Vector2;
+}
