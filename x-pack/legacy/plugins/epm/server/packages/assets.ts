@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Registry from '../registry';
 import { RegistryPackage } from '../../common/types';
+import * as Registry from '../registry';
 
 export function getAssets(
   packageInfo: RegistryPackage,

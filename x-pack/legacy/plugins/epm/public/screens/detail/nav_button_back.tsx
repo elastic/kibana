@@ -3,10 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiButtonEmptyProps, EuiButtonEmpty } from '@elastic/eui';
-import styled from 'styled-components';
+import { EuiButtonEmpty, EuiButtonEmptyProps } from '@elastic/eui';
 import React from 'react';
-import { useLinks, useCore } from '../../hooks';
+import styled from 'styled-components';
+import { useCore, useLinks } from '../../hooks';
 
 export function NavButtonBack() {
   const { toListView } = useLinks();

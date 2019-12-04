@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
 import {
   EuiAccordion,
   EuiFlexGroup,
@@ -12,13 +11,14 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiNotificationBadge,
+  EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiSpacer,
 } from '@elastic/eui';
+import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { entries } from '../../common/type_utils';
 import { AssetsGroupedByServiceByType } from '../../common/types';
+import { entries } from '../../common/type_utils';
 import { AssetIcons, AssetTitleMap, ServiceIcons, ServiceTitleMap } from '../constants';
 import { useCore } from '../hooks/use_core';
 

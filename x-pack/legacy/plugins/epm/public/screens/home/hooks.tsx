@@ -7,7 +7,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { CategorySummaryList, PackageList } from '../../../common/types';
 import { getCategories, getPackages } from '../../data';
-import { LocalSearch, fieldsToSearch, searchIdField } from './search_packages';
+import { fieldsToSearch, LocalSearch, searchIdField } from './search_packages';
 
 export function useCategories() {
   const [categories, setCategories] = useState<CategorySummaryList>([]);

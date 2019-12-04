@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useState, Fragment } from 'react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import createContainer from 'constate';
-import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import React, { Fragment, useCallback, useState } from 'react';
 import { NotificationsStart } from 'src/core/public';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { PackageInfo } from '../../common/types';
-import { installPackage as fetchInstallPackage, installDatasource, removePackage } from '../data';
+import { installDatasource, installPackage as fetchInstallPackage, removePackage } from '../data';
 import { InstallStatus } from '../types';
 
 interface PackagesInstall {

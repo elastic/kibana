@@ -5,8 +5,8 @@
  */
 
 import { readFileSync, writeFileSync } from 'fs';
-import path from 'path';
 import { safeLoad } from 'js-yaml';
+import path from 'path';
 import { Field, processFields } from './field';
 
 test('tests loading fields.yml', () => {

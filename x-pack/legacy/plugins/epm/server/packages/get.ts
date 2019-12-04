@@ -6,11 +6,11 @@
 
 import { SavedObjectsClientContract } from 'src/core/server/';
 import { SAVED_OBJECT_TYPE_PACKAGES } from '../../common/constants';
-import { InstallationAttributes, Installed, Installation, NotInstalled } from '../../common/types';
+import { Installation, InstallationAttributes, Installed, NotInstalled } from '../../common/types';
 import * as Registry from '../registry';
 import { createInstallableFrom } from './index';
 
-export { SearchParams, fetchFile as getFile } from '../registry';
+export { fetchFile as getFile, SearchParams } from '../registry';
 
 function nameAsTitle(name: string) {
   return name.charAt(0).toUpperCase() + name.substr(1).toLowerCase();

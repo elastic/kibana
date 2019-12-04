@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
 import {
   EuiFacetButton,
   EuiFacetGroup,
@@ -15,20 +14,21 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
+import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { entries } from '../../common/type_utils';
-import {
-  DisplayedAssets,
-  AssetIcons,
-  AssetTitleMap,
-  ServiceIcons,
-  ServiceTitleMap,
-} from '../constants';
 import {
   AssetsGroupedByServiceByType,
   AssetTypeToParts,
   KibanaAssetType,
 } from '../../common/types';
+import { entries } from '../../common/type_utils';
+import {
+  AssetIcons,
+  AssetTitleMap,
+  DisplayedAssets,
+  ServiceIcons,
+  ServiceTitleMap,
+} from '../constants';
 import { useCore } from '../hooks/use_core';
 
 export function AssetsFacetGroup({ assets }: { assets: AssetsGroupedByServiceByType }) {

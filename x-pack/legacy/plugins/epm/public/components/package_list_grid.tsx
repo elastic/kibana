@@ -3,10 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, ReactNode } from 'react';
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import React, { Fragment, ReactNode } from 'react';
 import { PackageList } from '../../common/types';
-import { PackageCard, BadgeProps } from './package_card';
+import { BadgeProps, PackageCard } from './package_card';
 
 type ListProps = {
   controls?: ReactNode;

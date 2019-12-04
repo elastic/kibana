@@ -6,9 +6,9 @@
 
 import React from 'react';
 import { Route } from 'react-router-dom';
+import { PLUGIN } from '../common/constants';
 import { Detail, DetailProps } from './screens/detail';
 import { Home } from './screens/home';
-import { PLUGIN } from '../common/constants';
 
 // patterns are used by React Router and are relative to `APP_ROOT`
 export const patterns = {
