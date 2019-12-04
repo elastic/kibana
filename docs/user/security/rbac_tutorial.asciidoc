@@ -45,7 +45,7 @@ for an overview of your roles.  This view provides actions
 for you to create, edit, and delete roles.
 
 [role="screenshot"]
-image::spaces/images/role-management.png["Role management"]
+image::security/images/role-management.png["Role management"]
 
 
 You can create as many roles as you like. Click *Create role* and 
@@ -68,7 +68,7 @@ Stack monitoring is a cluster level privilege, so in *Cluster
 privileges* select  **monitor**
 
 [role="screenshot"]
-image::spaces/images/role-monitor-privilege.png["Monitor privilege"]
+image::security/images/role-monitor-privilege.png["Monitor privilege"]
 
 [float]
 ==== Give the role permission to access the data
@@ -82,7 +82,7 @@ In the screenshots Filebeat and Metricbeat data is used, but you
 should use the index patterns for your indices.
 
 [role="screenshot"]
-image::spaces/images/role-index-privilege.png["Index privilege"]
+image::security/images/role-index-privilege.png["Index privilege"]
 
 [float]
 ==== Give the role permission to create visualizations and dashboards
@@ -91,10 +91,10 @@ By default, roles do not give Kibana privileges.  Click **add space
 privilege** and associate this role with the `Dev Mortgage` space
 
 [role="screenshot"]
-image::spaces/images/role-space-init.png["Allow Kibana"]
+image::security/images/role-space-init.png["Allow Kibana"]
 
 [role="screenshot"]
-image::spaces/images/role-space-associate.png["Associate space"]
+image::security/images/role-space-associate.png["Associate space"]
 
 In order to create new visualizations and dashboards users with 
 the `dev-mortgage` role need read and write (All) access to the 
@@ -103,7 +103,7 @@ been given read and write access because it is common for developers
 to create saved searches while designing visualizations.
 
 [role="screenshot"]
-image::spaces/images/role-space-visualization.png["Associate space"]
+image::security/images/role-space-visualization.png["Associate space"]
 
 [float]
 ==== Create the developer's user account with the proper roles
@@ -115,5 +115,5 @@ Finally, have the developer log in and access the Dev Mortgage space
 and create a new visualization.
 
 [role="screenshot"]
-image::spaces/images/role-new-user.png["Develoer user"]
+image::security/images/role-new-user.png["Develoer user"]
 
