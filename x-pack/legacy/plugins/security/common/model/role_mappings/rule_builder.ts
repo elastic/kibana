@@ -57,15 +57,19 @@ export function createRuleForType(
       }
 
       const [field, value] = entries[0] as [string, RoleMappingFieldRuleValue];
-      const valueType = typeof value;
-      if (value === null || ['string', 'number'].includes(valueType)) {
-        const fieldRule = new FieldRule(field, value);
-        return createResult(isRuleNegated ? new ExceptFieldRule(fieldRule) : fieldRule, depth);
-      }
-      throw new RuleBuilderError(
-        `Invalid value type for field. Expected one of null, string, or number, but found ${valueType} (${value})`,
-        [...ruleTrace, `field[${field}]`]
-      );
+      const values = Array.isArray(value) ? value : [value];
+      values.forEach(fieldValue => {
+        const valueType = typeof fieldValue;
+        if (value !== null && !['string', 'number'].includes(valueType)) {
+          throw new RuleBuilderError(
+            `Invalid value type for field. Expected one of null, string, or number, but found ${valueType} (${value})`,
+            [...ruleTrace, `field[${field}]`]
+          );
+        }
+      });
+
+      const fieldRule = new FieldRule(field, value);
+      return createResult(isRuleNegated ? new ExceptFieldRule(fieldRule) : fieldRule, depth);
     }
     case 'all': {
       if (ruleDefinition != null && !Array.isArray(ruleDefinition)) {
