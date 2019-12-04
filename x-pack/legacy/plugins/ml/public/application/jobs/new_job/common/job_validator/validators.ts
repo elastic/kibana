@@ -43,9 +43,15 @@ export function cardinalityValidator(
     filter(({ jobCreator }) => {
       return jobCreator?.modelPlot;
     }),
+    map(({ jobCreator }) => {
+      return {
+        jobCreator,
+        analysisConfigString: JSON.stringify(jobCreator.jobConfig.analysis_config),
+      };
+    }),
     // No need to perform an API call if the analysis configuration hasn't been changed
     distinctUntilChanged((prev, curr) => {
-      return prev.jobConfigString === curr.jobConfigString;
+      return prev.analysisConfigString === curr.analysisConfigString;
     }),
     switchMap(({ jobCreator }) => {
       return ml.validateCardinality$({
