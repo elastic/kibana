@@ -1,0 +1,41 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default ({ getPageObjects, getService }: FtrProviderContext) => {
+  const pageObjects = getPageObjects(['common', 'endpoint']);
+  const log = getService('log');
+  const browser = getService('browser');
+  const testSubjects = getService('testSubjects');
+
+  describe('Endpoint Home Page', function() {
+    this.tags(['skipCloud']);
+    before(async () => {
+      await pageObjects.common.navigateToApp('endpoint');
+    });
+
+    it('Loads the app', async () => {
+      const welcomeMessage = await pageObjects.endpoint.welcomeEndpointMessage();
+      expect(welcomeMessage).to.be('Welcome to Endpoint!');
+    });
+
+    it('Navigate to Endpoints page', async() => {
+      await pageObjects.endpoint.navigateEndpointsPage();
+      // find the search bar
+      const endpointSearchBar = await testSubjects.find('endpointsSearchBar');
+      // add the search criteria
+      await endpointSearchBar.type('_source.host.os.full="Windows Server 2016"');
+      //press the enter key
+      await endpointSearchBar.pressKeys(browser.keys.ENTER);
+
+      log.debug('sleep for 10 seconds');
+      await pageObjects.common.sleep(10000);
+    });
+
+  });
+};
