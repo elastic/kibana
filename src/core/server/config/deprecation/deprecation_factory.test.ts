@@ -18,9 +18,11 @@
  */
 
 import { ConfigDeprecationLogger } from './types';
-import { rename, unused } from './deprecations';
+import { configDeprecationFactory } from './deprecation_factory';
 
-describe('Deprecations', () => {
+describe('DeprecationFactory', () => {
+  const { rename, unused } = configDeprecationFactory;
+
   let deprecationMessages: string[];
   const logger: ConfigDeprecationLogger = msg => deprecationMessages.push(msg);
 

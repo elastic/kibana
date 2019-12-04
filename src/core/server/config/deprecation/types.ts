@@ -24,3 +24,18 @@ export type ConfigDeprecation = (
   fromPath: string,
   logger: ConfigDeprecationLogger
 ) => Record<string, any>;
+
+/** @internal */
+export interface ConfigDeprecationWithContext {
+  deprecation: ConfigDeprecation;
+  path: string;
+}
+
+export interface IConfigDeprecationFactory {
+  rename(oldKey: string, newKey: string): ConfigDeprecation;
+  renameFromRoot(oldKey: string, newKey: string): ConfigDeprecation;
+  unused(unusedKey: string): ConfigDeprecation;
+  unusedFromRoot(unusedKey: string): ConfigDeprecation;
+}
+
+export type ConfigDeprecationProvider = (factory: IConfigDeprecationFactory) => ConfigDeprecation[];

@@ -18,7 +18,7 @@
  */
 
 import { get, set } from 'lodash';
-import { ConfigDeprecation, ConfigDeprecationLogger } from './types';
+import { ConfigDeprecation, ConfigDeprecationLogger, IConfigDeprecationFactory } from './types';
 import { unset } from './utils';
 
 const _rename = (
@@ -64,22 +64,27 @@ const _unused = (
   return config;
 };
 
-export const rename = (oldKey: string, newKey: string): ConfigDeprecation => (
-  config,
-  rootPath,
-  log
-) => _rename(config, rootPath, log, oldKey, newKey);
+const rename = (oldKey: string, newKey: string): ConfigDeprecation => (config, rootPath, log) =>
+  _rename(config, rootPath, log, oldKey, newKey);
 
-export const unused = (unusedKey: string): ConfigDeprecation => (config, rootPath, log) =>
-  _unused(config, rootPath, log, unusedKey);
-
-export const renameFromRoot = (oldKey: string, newKey: string): ConfigDeprecation => (
+const renameFromRoot = (oldKey: string, newKey: string): ConfigDeprecation => (
   config,
   rootPath,
   log
 ) => _rename(config, '', log, oldKey, newKey);
 
-export const unusedFromRoot = (unusedKey: string): ConfigDeprecation => (config, rootPath, log) =>
+const unused = (unusedKey: string): ConfigDeprecation => (config, rootPath, log) =>
+  _unused(config, rootPath, log, unusedKey);
+
+const unusedFromRoot = (unusedKey: string): ConfigDeprecation => (config, rootPath, log) =>
   _unused(config, '', log, unusedKey);
 
 const getPath = (rootPath: string, subPath: string) => `${rootPath}.${subPath}`;
+
+/** @internal */
+export const configDeprecationFactory: IConfigDeprecationFactory = {
+  rename,
+  renameFromRoot,
+  unused,
+  unusedFromRoot,
+};

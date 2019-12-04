@@ -25,6 +25,11 @@ import { distinctUntilChanged, first, map } from 'rxjs/operators';
 import { Config, ConfigPath, Env } from '.';
 import { Logger, LoggerFactory } from '../logging';
 import { hasConfigPathIntersection } from './config';
+import {
+  ConfigDeprecationWithContext,
+  ConfigDeprecationProvider,
+  configDeprecationFactory,
+} from './deprecation';
 
 /** @internal */
 export type IConfigService = PublicMethodsOf<ConfigService>;
@@ -39,6 +44,7 @@ export class ConfigService {
    */
   private readonly handledPaths: ConfigPath[] = [];
   private readonly schemas = new Map<string, Type<unknown>>();
+  private readonly deprecations: ConfigDeprecationWithContext[] = [];
 
   constructor(
     private readonly config$: Observable<Config>,
@@ -62,6 +68,20 @@ export class ConfigService {
     await this.validateConfig(path)
       .pipe(first())
       .toPromise();
+  }
+
+  /**
+   * Register a {@link ConfigDeprecationProvider} to be used when validating and migrating the configuration
+   */
+  public addDeprecationProvider(path: ConfigPath, provider: ConfigDeprecationProvider) {
+    const flatPath = pathToString(path);
+    const deprecations = provider(configDeprecationFactory);
+    this.deprecations.push(
+      ...deprecations.map(deprecation => ({
+        deprecation,
+        path: flatPath,
+      }))
+    );
   }
 
   /**

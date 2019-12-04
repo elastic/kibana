@@ -17,11 +17,23 @@
  * under the License.
  */
 
-export {
-  ConfigDeprecation,
-  ConfigDeprecationWithContext,
-  ConfigDeprecationLogger,
-  IConfigDeprecationFactory,
-  ConfigDeprecationProvider,
-} from './types';
-export { configDeprecationFactory } from './deprecation_factory';
+import { cloneDeep } from 'lodash';
+import { ConfigDeprecationWithContext } from './types';
+
+export const applyDeprecations = (
+  config: Record<string, any>,
+  deprecations: ConfigDeprecationWithContext[]
+) => {
+  const deprecationMessages: string[] = [];
+  const logger = (msg: string) => deprecationMessages.push(msg);
+
+  let processed = cloneDeep(config);
+  deprecations.forEach(({ deprecation, path }) => {
+    processed = deprecation(processed, path, logger);
+  });
+
+  return {
+    config: processed,
+    messages: deprecationMessages,
+  };
+};
