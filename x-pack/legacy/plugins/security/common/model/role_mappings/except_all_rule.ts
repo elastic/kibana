@@ -36,6 +36,10 @@ export class ExceptAllRule extends BaseRuleGroup {
     this.rules.push(rule);
   }
 
+  public canContainRule(rule: BaseRule) {
+    return true;
+  }
+
   public clone() {
     return new ExceptAllRule(this.rules.map(r => r.clone()));
   }

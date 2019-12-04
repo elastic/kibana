@@ -7,6 +7,9 @@
 import _ from 'lodash';
 import { BaseRuleGroup } from './base_rule_group';
 import { FieldRule } from './field_rule';
+import { BaseRule } from './base_rule';
+import { ExceptAllRule } from './except_all_rule';
+import { ExceptAnyRule } from './except_any_rule';
 
 export class ExceptFieldRule extends BaseRuleGroup {
   constructor(private fieldRule: FieldRule) {
@@ -39,6 +42,11 @@ export class ExceptFieldRule extends BaseRuleGroup {
 
   public canRemoveRule(): boolean {
     return false;
+  }
+
+  public canContainRule(rule: BaseRule) {
+    const forbiddenRules = [ExceptAllRule, ExceptAnyRule, ExceptFieldRule];
+    return forbiddenRules.every(forbiddenRule => !(rule instanceof forbiddenRule));
   }
 
   public getDisplayTitle() {

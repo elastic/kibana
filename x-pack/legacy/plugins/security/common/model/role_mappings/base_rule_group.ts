@@ -15,6 +15,8 @@ export abstract class BaseRuleGroup extends BaseRule {
 
   abstract addRule(rule: BaseRule): void;
 
+  abstract canContainRule(rule: BaseRule): boolean;
+
   public canAddRule(): boolean {
     return true;
   }

@@ -6,6 +6,8 @@
 
 import { BaseRuleGroup } from './base_rule_group';
 import { BaseRule } from './base_rule';
+import { ExceptAllRule } from './except_all_rule';
+import { ExceptFieldRule } from './except_field_rule';
 
 export class ExceptAnyRule extends BaseRuleGroup {
   constructor(private rules: BaseRule[] = []) {
@@ -34,6 +36,11 @@ export class ExceptAnyRule extends BaseRuleGroup {
 
   public addRule(rule: BaseRule) {
     this.rules.push(rule);
+  }
+
+  public canContainRule(rule: BaseRule) {
+    const forbiddenRules = [ExceptAllRule, ExceptAnyRule, ExceptFieldRule];
+    return forbiddenRules.every(forbiddenRule => !(rule instanceof forbiddenRule));
   }
 
   public clone() {

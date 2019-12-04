@@ -36,6 +36,10 @@ export class AllRule extends BaseRuleGroup {
     this.rules.push(rule);
   }
 
+  public canContainRule() {
+    return true;
+  }
+
   public clone() {
     return new AllRule(this.rules.map(r => r.clone()));
   }

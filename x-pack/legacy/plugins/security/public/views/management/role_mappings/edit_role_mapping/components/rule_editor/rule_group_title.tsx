@@ -5,7 +5,15 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButtonEmpty, EuiPopover, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
+import {
+  EuiPopover,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiLink,
+  EuiIcon,
+  EuiOverlayMask,
+  EuiConfirmModal,
+} from '@elastic/eui';
 import { BaseRule } from '../../../../../../../common/model/role_mappings/base_rule';
 import { createRuleForType } from '../../../../../../../common/model/role_mappings/rule_builder';
 import { BaseRuleGroup } from '../../../../../../../common/model/role_mappings/base_rule_group';
@@ -18,7 +26,7 @@ interface Props {
 }
 
 // TODO: Cleanup
-const rules = ['all', 'any', 'field'].map(
+const rules = ['all', 'any'].map(
   type => createRuleForType(type, undefined, null, [], 0).rules
 ) as BaseRule[];
 
@@ -29,23 +37,37 @@ const exceptRules = ['all', 'any', 'field'].map(
 export const RuleGroupTitle = (props: Props) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const [showConfirmChangeModal, setShowConfirmChangeModal] = useState(false);
+  const [pendingNewRule, setPendingNewRule] = useState<BaseRuleGroup | null>(null);
+
   const canUseExcept = props.parentRule && props.parentRule.getType() === 'all';
 
   const availableRuleTypes = [...rules, ...(canUseExcept ? exceptRules : [])];
 
   const onChange = (newRule: BaseRuleGroup) => {
+    const currentSubRules = props.rule.getRules();
+    const areSubRulesValid = currentSubRules.every(subRule => newRule.canContainRule(subRule));
+    if (areSubRulesValid) {
+      const clone = newRule.clone() as BaseRuleGroup;
+      currentSubRules.forEach(subRule => clone.addRule(subRule));
+
+      props.onChange(clone);
+      setIsMenuOpen(false);
+    } else {
+      setPendingNewRule(newRule);
+      setShowConfirmChangeModal(true);
+    }
+  };
+
+  const changeRuleDiscardingSubRules = (newRule: BaseRuleGroup) => {
     props.onChange(newRule.clone() as BaseRuleGroup);
     setIsMenuOpen(false);
   };
 
   const ruleButton = (
-    <EuiButtonEmpty
-      iconType="arrowDown"
-      iconSide="right"
-      onClick={() => setIsMenuOpen(!isMenuOpen)}
-    >
-      {props.rule.getDisplayTitle()}
-    </EuiButtonEmpty>
+    <EuiLink onClick={() => setIsMenuOpen(!isMenuOpen)}>
+      {props.rule.getDisplayTitle()} <EuiIcon type="arrowDown" />
+    </EuiLink>
   );
 
   const ruleTypeSelector = (
@@ -68,5 +90,34 @@ export const RuleGroupTitle = (props: Props) => {
     </EuiPopover>
   );
 
-  return <h3>{ruleTypeSelector}</h3>;
+  const confirmChangeModal = showConfirmChangeModal ? (
+    <EuiOverlayMask>
+      <EuiConfirmModal
+        title={'Switch with invalid rules?'}
+        onCancel={() => {
+          setShowConfirmChangeModal(false);
+          setPendingNewRule(null);
+        }}
+        onConfirm={() => {
+          setShowConfirmChangeModal(false);
+          changeRuleDiscardingSubRules(pendingNewRule!);
+          setPendingNewRule(null);
+        }}
+        cancelButtonText={'Cancel'}
+        confirmButtonText={'Switch anyway'}
+      >
+        <p>
+          This group contains rules which are not compatible. If you switch, you will lose all rules
+          within this group.
+        </p>
+      </EuiConfirmModal>
+    </EuiOverlayMask>
+  ) : null;
+
+  return (
+    <h3>
+      {ruleTypeSelector}
+      {confirmChangeModal}
+    </h3>
+  );
 };
