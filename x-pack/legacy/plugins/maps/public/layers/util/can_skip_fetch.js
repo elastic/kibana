@@ -142,5 +142,10 @@ export function canSkipStyleMetaUpdate({ prevDataRequest, nextMeta }) {
 
   const updateDueToSourceQuery = !_.isEqual(prevMeta.sourceQuery, nextMeta.sourceQuery);
 
-  return !updateDueToFields && !updateDueToSourceQuery;
+  const updateDueToIsTimeAware = nextMeta.isTimeAware !== prevMeta.isTimeAware;
+  const updateDueToTime = nextMeta.isTimeAware
+    ? !_.isEqual(prevMeta.timeFilters, nextMeta.timeFilters)
+    : false;
+
+  return !updateDueToFields && !updateDueToSourceQuery && !updateDueToIsTimeAware && !updateDueToTime;
 }

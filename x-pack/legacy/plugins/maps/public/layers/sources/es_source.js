@@ -271,7 +271,7 @@ export class AbstractESSource extends AbstractVectorSource {
     return fieldFromIndexPattern.format.getConverterFor('text');
   }
 
-  async loadStylePropsMeta(layerName, dynamicStyleProps, registerCancelCallback, searchFilters) {
+  async loadStylePropsMeta(layerName, style, dynamicStyleProps, registerCancelCallback, searchFilters) {
     const promises = dynamicStyleProps.map(dynamicStyleProp => {
       return dynamicStyleProp.getFieldMetaRequest();
     });
@@ -288,6 +288,9 @@ export class AbstractESSource extends AbstractVectorSource {
     searchSource.setField('aggs', aggs);
     if (searchFilters.sourceQuery) {
       searchSource.setField('query', searchFilters.sourceQuery);
+    }
+    if (style.isTimeAware() && await this.isTimeAware()) {
+      searchSource.setField('filter', [timefilter.createFilter(indexPattern, searchFilters.timeFilters)]);
     }
 
     const resp = await this._runEsQuery({

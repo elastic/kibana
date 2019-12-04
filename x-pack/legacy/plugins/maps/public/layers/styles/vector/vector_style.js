@@ -39,10 +39,11 @@ export class VectorStyle extends AbstractStyle {
 
   static type = LAYER_STYLE_TYPE.VECTOR;
   static STYLE_TYPE = STYLE_TYPE;
-  static createDescriptor(properties = {}) {
+  static createDescriptor(properties = {}, isTimeAware = true) {
     return {
       type: VectorStyle.type,
-      properties: { ...getDefaultProperties(), ...properties }
+      properties: { ...getDefaultProperties(), ...properties },
+      isTimeAware,
     };
   }
 
@@ -56,7 +57,7 @@ export class VectorStyle extends AbstractStyle {
     this._layer  = layer;
     this._descriptor = {
       ...descriptor,
-      ...VectorStyle.createDescriptor(descriptor.properties),
+      ...VectorStyle.createDescriptor(descriptor.properties, descriptor.isTimeAware),
     };
 
     this._lineColorStyleProperty = this._makeColorProperty(this._descriptor.properties[VECTOR_STYLES.LINE_COLOR], VECTOR_STYLES.LINE_COLOR);
@@ -81,7 +82,12 @@ export class VectorStyle extends AbstractStyle {
     const rawProperties = this.getRawProperties();
     const handlePropertyChange = (propertyName, settings) => {
       rawProperties[propertyName] = settings;//override single property, but preserve the rest
-      const vectorStyleDescriptor = VectorStyle.createDescriptor(rawProperties);
+      const vectorStyleDescriptor = VectorStyle.createDescriptor(rawProperties, this.isTimeAware());
+      onStyleDescriptorChange(vectorStyleDescriptor);
+    };
+
+    const onIsTimeAwareChange = isTimeAware => {
+      const vectorStyleDescriptor = VectorStyle.createDescriptor(rawProperties, isTimeAware);
       onStyleDescriptorChange(vectorStyleDescriptor);
     };
 
@@ -99,6 +105,8 @@ export class VectorStyle extends AbstractStyle {
         layer={layer}
         loadIsPointsOnly={this._getIsPointsOnly}
         loadIsLinesOnly={this._getIsLinesOnly}
+        onIsTimeAwareChange={onIsTimeAwareChange}
+        isTimeAware={this.isTimeAware()}
       />
     );
   }
@@ -162,7 +170,7 @@ export class VectorStyle extends AbstractStyle {
       nextStyleDescriptor: VectorStyle.createDescriptor({
         ...originalProperties,
         ...updatedProperties,
-      })
+      }, this.isTimeAware())
     };
   }
 
@@ -243,6 +251,10 @@ export class VectorStyle extends AbstractStyle {
       }
     });
     return fieldNames;
+  }
+
+  isTimeAware() {
+    return this._descriptor.isTimeAware;
   }
 
   getRawProperties() {

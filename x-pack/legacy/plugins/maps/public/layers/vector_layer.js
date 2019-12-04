@@ -428,6 +428,7 @@ export class VectorLayer extends AbstractLayer {
     sourceQuery,
     dataRequestId,
     dynamicStyleProps,
+    dataFilters,
     startLoading,
     stopLoading,
     onLoadError,
@@ -445,7 +446,8 @@ export class VectorLayer extends AbstractLayer {
     const nextMeta = {
       dynamicStyleFields: _.uniq(dynamicStyleFields).sort(),
       sourceQuery,
-      // TODO include time range?, make this user configurable?
+      isTimeAware: this._style.isTimeAware() && await source.isTimeAware(),
+      timeFilters: dataFilters.timeFilters,
     };
     const prevDataRequest = this._findDataRequestForSource(dataRequestId);
     const canSkipFetch = canSkipStyleMetaUpdate({ prevDataRequest, nextMeta });
@@ -457,7 +459,7 @@ export class VectorLayer extends AbstractLayer {
     try {
       startLoading(dataRequestId, requestToken, nextMeta);
       const layerName = await this.getDisplayName();
-      const styleMeta = await source.loadStylePropsMeta(layerName, dynamicStyleProps, registerCancelCallback, nextMeta);
+      const styleMeta = await source.loadStylePropsMeta(layerName, this._style, dynamicStyleProps, registerCancelCallback, nextMeta);
       stopLoading(dataRequestId, requestToken, styleMeta, nextMeta);
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {
