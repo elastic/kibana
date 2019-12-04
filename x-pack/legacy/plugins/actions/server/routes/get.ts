@@ -13,24 +13,22 @@ interface GetRequest extends Hapi.Request {
   };
 }
 
-export function getRoute(server: Hapi.Server) {
-  server.route({
-    method: 'GET',
-    path: `/api/action/{id}`,
-    options: {
-      tags: ['access:actions-read'],
-      validate: {
-        params: Joi.object()
-          .keys({
-            id: Joi.string().required(),
-          })
-          .required(),
-      },
+export const getActionRoute = {
+  method: 'GET',
+  path: `/api/action/{id}`,
+  config: {
+    tags: ['access:actions-read'],
+    validate: {
+      params: Joi.object()
+        .keys({
+          id: Joi.string().required(),
+        })
+        .required(),
     },
-    async handler(request: GetRequest) {
-      const { id } = request.params;
-      const actionsClient = request.getActionsClient!();
-      return await actionsClient.get({ id });
-    },
-  });
-}
+  },
+  async handler(request: GetRequest) {
+    const { id } = request.params;
+    const actionsClient = request.getActionsClient!();
+    return await actionsClient.get({ id });
+  },
+};

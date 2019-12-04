@@ -4,6 +4,8 @@
 
 ## HttpRequestInit.body property
 
+A BodyInit object or null to set request's body.
+
 <b>Signature:</b>
 
 ```typescript

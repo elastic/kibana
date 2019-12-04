@@ -9,6 +9,7 @@ import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { IndexFields } from '../../lib/index_fields';
 import { SourceStatus } from '../../lib/source_status';
 import { QuerySourceResolver } from '../sources/resolvers';
+import { FrameworkFieldsRequest } from '../../lib/index_fields/types';
 
 export type SourceStatusIndicesExistResolver = ChildResolverOf<
   AppResolverOf<SourceStatusResolvers.IndicesExistResolver>,
@@ -31,10 +32,22 @@ export const createSourceStatusResolvers = (libs: {
 } => ({
   SourceStatus: {
     async indicesExist(source, args, { req }) {
-      return await libs.sourceStatus.hasIndices(req, args.defaultIndex);
+      if (
+        args.defaultIndex.length === 1 &&
+        (args.defaultIndex[0] === '' || args.defaultIndex[0] === '_all')
+      ) {
+        return false;
+      }
+      return libs.sourceStatus.hasIndices(req, args.defaultIndex);
     },
     async indexFields(source, args, { req }) {
-      return libs.fields.getFields(req, args.defaultIndex);
+      if (
+        args.defaultIndex.length === 1 &&
+        (args.defaultIndex[0] === '' || args.defaultIndex[0] === '_all')
+      ) {
+        return [];
+      }
+      return libs.fields.getFields(req as FrameworkFieldsRequest, args.defaultIndex);
     },
   },
 });

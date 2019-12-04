@@ -1,13 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
-
-if [[ -z "$IS_PIPELINE_JOB" ]] ; then
-  trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
-else
-  source src/dev/ci_setup/setup_env.sh
-fi
-
+source test/scripts/jenkins_test_setup.sh
 source "$KIBANA_DIR/src/dev/ci_setup/setup_percy.sh"
 
 if [[ -z "$IS_PIPELINE_JOB" ]] ; then
@@ -25,12 +18,10 @@ else
   export KIBANA_INSTALL_DIR="$destDir"
 fi
 
-export TEST_BROWSER_HEADLESS=1
-
 cd "$XPACK_DIR"
 
 checks-reporter-with-killswitch "X-Pack visual regression tests" \
-  yarn run percy exec \
+  yarn run percy exec -t 500 \
   node scripts/functional_tests \
     --debug --bail \
     --kibana-install-dir "$KIBANA_INSTALL_DIR" \

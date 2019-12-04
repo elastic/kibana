@@ -7,6 +7,7 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
     display="row"
     error={null}
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
@@ -39,6 +40,7 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
@@ -71,7 +73,8 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
       }
     />
   </EuiFormRow>
-  <InjectIntl(FormatEditorSamplesComponent)
+  <FormatEditorSamples
+    sampleType="text"
     samples={
       Array [
         Object {
@@ -123,6 +126,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     display="row"
     error={null}
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
@@ -155,6 +159,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
@@ -192,6 +197,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     display="row"
     error={null}
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
@@ -213,7 +219,8 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
       onChange={[Function]}
     />
   </EuiFormRow>
-  <InjectIntl(FormatEditorSamplesComponent)
+  <FormatEditorSamples
+    sampleType="text"
     samples={
       Array [
         Object {

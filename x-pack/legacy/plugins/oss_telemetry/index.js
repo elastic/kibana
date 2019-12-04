@@ -11,11 +11,12 @@ import { PLUGIN_ID } from './constants';
 export const ossTelemetry = (kibana) => {
   return new kibana.Plugin({
     id: PLUGIN_ID,
-    require: ['elasticsearch', 'xpack_main', 'task_manager'],
+    require: ['elasticsearch', 'xpack_main'],
     configPrefix: 'xpack.oss_telemetry',
 
     init(server) {
-      registerCollectors(server);
+      const { usageCollection } = server.newPlatform.setup.plugins;
+      registerCollectors(usageCollection, server);
       registerTasks(server);
       scheduleTasks(server);
     }

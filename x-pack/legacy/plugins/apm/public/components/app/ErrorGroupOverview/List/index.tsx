@@ -7,7 +7,6 @@
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
@@ -22,6 +21,7 @@ import {
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { ManagedTable } from '../../../shared/ManagedTable';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
+import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 
 const GroupIdLink = styled(ErrorDetailLink)`
   font-family: ${fontFamilyCode};
@@ -142,7 +142,11 @@ const ErrorGroupList: React.FC<Props> = props => {
         ),
         align: 'right',
         render: (value?: number) =>
-          value ? moment(value).fromNow() : NOT_AVAILABLE_LABEL
+          value ? (
+            <TimestampTooltip time={value} timeUnit="minutes" />
+          ) : (
+            NOT_AVAILABLE_LABEL
+          )
       }
     ],
     [serviceName]
@@ -159,7 +163,6 @@ const ErrorGroupList: React.FC<Props> = props => {
       initialSortField="latestOccurrenceAt"
       initialSortDirection="desc"
       sortItems={false}
-      hidePerPageOptions={false}
     />
   );
 };

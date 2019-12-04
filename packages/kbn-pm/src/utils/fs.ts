@@ -19,21 +19,19 @@
 
 import cmdShimCb from 'cmd-shim';
 import fs from 'fs';
-import mkdirpCb from 'mkdirp';
 import { ncp } from 'ncp';
 import { dirname, relative } from 'path';
 import { promisify } from 'util';
 
 const lstat = promisify(fs.lstat);
-const readFile = promisify(fs.readFile);
+export const readFile = promisify(fs.readFile);
 const symlink = promisify(fs.symlink);
-const chmod = promisify(fs.chmod);
+export const chmod = promisify(fs.chmod);
 const cmdShim = promisify<string, string>(cmdShimCb);
-const mkdirp = promisify(mkdirpCb);
+const mkdir = promisify(fs.mkdir);
+export const mkdirp = async (path: string) => await mkdir(path, { recursive: true });
 export const unlink = promisify(fs.unlink);
 export const copyDirectory = promisify(ncp);
-
-export { chmod, readFile, mkdirp };
 
 async function statTest(path: string, block: (stats: fs.Stats) => boolean) {
   try {

@@ -7,6 +7,9 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import PropTypes from 'prop-types';
 import React, { FunctionComponent } from 'react';
+import { ComponentStrings } from '../../../../i18n';
+
+const { AdvancedFilter: strings } = ComponentStrings;
 
 export interface Props {
   /** Optional value for the component */
@@ -30,14 +33,14 @@ export const AdvancedFilter: FunctionComponent<Props> = ({ value = '', onChange,
         <input
           type="text"
           className="canvasAdvancedFilter__input"
-          placeholder="Enter filter expression"
+          placeholder={strings.getInputPlaceholder()}
           value={value}
           onChange={e => onChange(e.target.value)}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <button className="canvasAdvancedFilter__button" type="submit">
-          Apply
+          {strings.getApplyButtonLabel()}
         </button>
       </EuiFlexItem>
     </EuiFlexGroup>

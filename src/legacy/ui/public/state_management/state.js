@@ -37,13 +37,20 @@ import { createLegacyClass } from '../utils/legacy_class';
 import { callEach } from '../utils/function';
 
 import {
-  createStateHash,
   HashedItemStoreSingleton,
-  isStateHash,
 } from './state_storage';
+import {
+  createStateHash,
+  isStateHash
+} from './state_hashing';
 
-export function StateProvider(Private, $rootScope, $location, stateManagementConfig, config, kbnUrl) {
+export function StateProvider(Private, $rootScope, $location, stateManagementConfig, config, kbnUrl, $injector) {
   const Events = Private(EventsProvider);
+
+  const isDummyRoute = () =>
+    $injector.has('$route') &&
+    $injector.get('$route').current &&
+    $injector.get('$route').current.outerAngularWrapperRoute;
 
   createLegacyClass(State).inherits(Events);
   function State(
@@ -137,7 +144,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
 
     let stash = this._readFromURL();
 
-    // nothing to read from the url? save if ordered to persist
+    // nothing to read from the url? save if ordered to persist, but only if it's not on a wrapper route
     if (stash === null) {
       if (this._persistAcrossApps) {
         return this.save();
@@ -150,7 +157,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
     // apply diff to state from stash, will change state in place via side effect
     const diffResults = applyDiff(this, stash);
 
-    if (diffResults.keys.length) {
+    if (!isDummyRoute() && diffResults.keys.length) {
       this.emit('fetch_with_changes', diffResults.keys);
     }
   };
@@ -161,6 +168,10 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
    */
   State.prototype.save = function (replace) {
     if (!stateManagementConfig.enabled) {
+      return;
+    }
+
+    if (isDummyRoute()) {
       return;
     }
 
@@ -284,9 +295,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
 
     // We need to strip out Angular-specific properties.
     const json = angular.toJson(state);
-    const hash = createStateHash(json, hash => {
-      return this._hashedItemStore.getItem(hash);
-    });
+    const hash = createStateHash(json);
     const isItemSet = this._hashedItemStore.setItem(hash, json);
 
     if (isItemSet) {

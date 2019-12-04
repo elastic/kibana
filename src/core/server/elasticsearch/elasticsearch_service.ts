@@ -19,14 +19,16 @@
 
 import { ConnectableObservable, Observable, Subscription } from 'rxjs';
 import { filter, first, map, publishReplay, switchMap } from 'rxjs/operators';
-import { merge } from 'lodash';
+
 import { CoreService } from '../../types';
+import { merge } from '../../utils';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { ClusterClient } from './cluster_client';
 import { ElasticsearchClientConfig } from './elasticsearch_client_config';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
-import { HttpServiceSetup, GetAuthHeaders } from '../http/';
+import { InternalHttpServiceSetup, GetAuthHeaders } from '../http/';
+import { InternalElasticsearchServiceSetup } from './types';
 
 /** @internal */
 interface CoreClusterClients {
@@ -36,42 +38,11 @@ interface CoreClusterClients {
 }
 
 interface SetupDeps {
-  http: HttpServiceSetup;
-}
-
-/** @public */
-export interface ElasticsearchServiceSetup {
-  // Required for the BWC with the legacy Kibana only.
-  readonly legacy: {
-    readonly config$: Observable<ElasticsearchConfig>;
-  };
-  /**
-   * Create application specific Elasticsearch cluster API client with customized config.
-   *
-   * @param type Unique identifier of the client
-   * @param clientConfig A config consists of Elasticsearch JS client options and
-   * valid sub-set of Elasticsearch service config.
-   * We fill all the missing properties in the `clientConfig` using the default
-   * Elasticsearch config so that we don't depend on default values set and
-   * controlled by underlying Elasticsearch JS client.
-   * We don't run validation against passed config expect it to be valid.
-   *
-   * @example
-   * ```js
-   * const client = elasticsearch.createCluster('my-app-name', config);
-   * const data = await client.callAsInternalUser();
-   * ```
-   */
-  readonly createClient: (
-    type: string,
-    clientConfig?: Partial<ElasticsearchClientConfig>
-  ) => ClusterClient;
-  readonly adminClient$: Observable<ClusterClient>;
-  readonly dataClient$: Observable<ClusterClient>;
+  http: InternalHttpServiceSetup;
 }
 
 /** @internal */
-export class ElasticsearchService implements CoreService<ElasticsearchServiceSetup> {
+export class ElasticsearchService implements CoreService<InternalElasticsearchServiceSetup> {
   private readonly log: Logger;
   private readonly config$: Observable<ElasticsearchConfig>;
   private subscription?: Subscription;
@@ -80,10 +51,10 @@ export class ElasticsearchService implements CoreService<ElasticsearchServiceSet
     this.log = coreContext.logger.get('elasticsearch-service');
     this.config$ = coreContext.configService
       .atPath<ElasticsearchConfigType>('elasticsearch')
-      .pipe(map(rawConfig => new ElasticsearchConfig(rawConfig)));
+      .pipe(map(rawConfig => new ElasticsearchConfig(rawConfig, coreContext.logger.get('config'))));
   }
 
-  public async setup(deps: SetupDeps): Promise<ElasticsearchServiceSetup> {
+  public async setup(deps: SetupDeps): Promise<InternalElasticsearchServiceSetup> {
     this.log.debug('Setting up elasticsearch service');
 
     const clients$ = this.config$.pipe(

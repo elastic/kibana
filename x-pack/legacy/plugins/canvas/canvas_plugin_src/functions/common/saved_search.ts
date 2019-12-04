@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { ExpressionFunction } from 'src/plugins/expressions/common/types';
 import { SearchInput } from 'src/legacy/core_plugins/kibana/public/discover/embeddable';
 import {
   EmbeddableTypes,
@@ -14,7 +14,7 @@ import {
 
 import { buildEmbeddableFilters } from '../../../server/lib/build_embeddable_filters';
 import { Filter } from '../../../types';
-import { getFunctionHelp } from '../../strings';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   id: string;

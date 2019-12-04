@@ -24,12 +24,10 @@ import { isWorker } from 'cluster';
 import { fromRoot, pkg } from '../utils';
 import { Config } from './config';
 import loggingConfiguration from './logging/configuration';
-import configSetupMixin from './config/setup';
 import httpMixin from './http';
 import { coreMixin } from './core';
 import { loggingMixin } from './logging';
 import warningsMixin from './warnings';
-import { usageMixin } from './usage';
 import { statusMixin } from './status';
 import pidMixin from './pid';
 import { configDeprecationWarningsMixin } from './config/deprecation_warnings';
@@ -50,33 +48,39 @@ import { i18nMixin } from './i18n';
 const rootDir = fromRoot('.');
 
 export default class KbnServer {
-  constructor(settings, core) {
+  constructor(settings, config, core, legacyPlugins) {
     this.name = pkg.name;
     this.version = pkg.version;
     this.build = pkg.build || false;
     this.rootDir = rootDir;
     this.settings = settings || {};
+    this.config = config;
 
-    const { setupDeps, startDeps, handledConfigPaths, logger } = core;
+    const { setupDeps, startDeps, logger, __internals, env } = core;
+
+    this.server = __internals.hapiServer;
     this.newPlatform = {
+      env: {
+        mode: env.mode,
+        packageInfo: env.packageInfo,
+      },
+      __internals,
       coreContext: {
         logger,
       },
       setup: setupDeps,
       start: startDeps,
       stop: null,
-      params: {
-        handledConfigPaths,
-      },
     };
+
+    this.uiExports = legacyPlugins.uiExports;
+    this.pluginSpecs = legacyPlugins.pluginSpecs;
+    this.disabledPluginSpecs = legacyPlugins.disabledPluginSpecs;
 
     this.ready = constant(this.mixin(
       Plugins.waitForInitSetupMixin,
 
-      // sets this.config, reads this.settings
-      configSetupMixin,
-
-      // sets this.server
+      // Sets global HTTP behaviors
       httpMixin,
 
       coreMixin,
@@ -86,7 +90,6 @@ export default class KbnServer {
       loggingMixin,
       configDeprecationWarningsMixin,
       warningsMixin,
-      usageMixin,
       statusMixin,
 
       // writes pid file
@@ -101,7 +104,7 @@ export default class KbnServer {
       // tell the config we are done loading plugins
       configCompleteMixin,
 
-      // setup this.uiExports and this.uiBundles
+      // setup this.uiBundles
       uiMixin,
       indexPatternsMixin,
 
@@ -160,8 +163,6 @@ export default class KbnServer {
     await this.ready();
 
     const { server, config } = this;
-
-    await server.kibanaMigrator.awaitMigration();
 
     if (isWorker) {
       // help parent process know when we are ready

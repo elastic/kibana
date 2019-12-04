@@ -59,8 +59,7 @@ export default function ({ getService, getPageObjects }) {
     after(async function afterAll() {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.clickIndexPatternLogstash();
-      await PageObjects.settings.removeIndexPattern();
+      await PageObjects.settings.removeLogstashIndexPatternIfExist();
     });
 
     it('should not allow saving of invalid scripts', async function () {
@@ -125,8 +124,8 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should see scripted field value in Discover', async function () {
-        const fromTime = '2015-09-17 06:31:44.000';
-        const toTime = '2015-09-18 18:31:44.000';
+        const fromTime = 'Sep 17, 2015 @ 06:31:44.000';
+        const toTime = 'Sep 18, 2015 @ 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
@@ -187,8 +186,8 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should see scripted field value in Discover', async function () {
-        const fromTime = '2015-09-17 06:31:44.000';
-        const toTime = '2015-09-18 18:31:44.000';
+        const fromTime = 'Sep 17, 2015 @ 06:31:44.000';
+        const toTime = 'Sep 18, 2015 @ 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
@@ -247,8 +246,8 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should see scripted field value in Discover', async function () {
-        const fromTime = '2015-09-17 06:31:44.000';
-        const toTime = '2015-09-18 18:31:44.000';
+        const fromTime = 'Sep 17, 2015 @ 06:31:44.000';
+        const toTime = 'Sep 18, 2015 @ 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
@@ -308,8 +307,8 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should see scripted field value in Discover', async function () {
-        const fromTime = '2015-09-17 19:22:00.000';
-        const toTime = '2015-09-18 07:00:00.000';
+        const fromTime = 'Sep 17, 2015 @ 19:22:00.000';
+        const toTime = 'Sep 18, 2015 @ 07:00:00.000';
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
@@ -327,7 +326,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should filter by scripted field value in Discover', async function () {
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
-        await log.debug('filter by "2015-09-17 23:00" in the expanded scripted field list');
+        await log.debug('filter by "Sep 17, 2015 @ 23:00" in the expanded scripted field list');
         await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, '2015-09-17 23:00');
         await PageObjects.header.waitUntilLoadingHasFinished();
 

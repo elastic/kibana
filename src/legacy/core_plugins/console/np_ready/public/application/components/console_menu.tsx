@@ -19,14 +19,16 @@
 
 import React, { Component } from 'react';
 
-import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
+import { EuiIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   getCurl: (cb: (text: string) => void) => void;
   getDocumentation: () => Promise<string | null>;
   autoIndent: (ev?: React.MouseEvent) => void;
+  addNotification?: (opts: { title: string }) => void;
 }
 
 interface State {
@@ -53,6 +55,14 @@ export class ConsoleMenu extends Component<Props, State> {
 
   copyAsCurl() {
     this.copyText(this.state.curlCode);
+    const { addNotification } = this.props;
+    if (addNotification) {
+      addNotification({
+        title: i18n.translate('console.consoleMenu.copyAsCurlMessage', {
+          defaultMessage: 'Request copied as cURL',
+        }),
+      });
+    }
   }
 
   copyText(text: string) {
@@ -93,17 +103,16 @@ export class ConsoleMenu extends Component<Props, State> {
 
   render() {
     const button = (
-      <EuiButtonIcon
-        iconType="wrench"
+      <button
+        className="euiButtonIcon--primary"
         onClick={this.onButtonClick}
-        // @ts-ignore
-        aria-label={
-          <FormattedMessage
-            id="console.requestOptionsButtonAriaLabel"
-            defaultMessage="Request options"
-          />
-        }
-      />
+        data-test-subj="toggleConsoleMenu"
+        aria-label={i18n.translate('console.requestOptionsButtonAriaLabel', {
+          defaultMessage: 'Request options',
+        })}
+      >
+        <EuiIcon type="wrench" />
+      </button>
     );
 
     const items = [
@@ -123,6 +132,7 @@ export class ConsoleMenu extends Component<Props, State> {
       </EuiContextMenuItem>,
       <EuiContextMenuItem
         key="Open documentation"
+        data-test-subj="consoleMenuOpenDocs"
         onClick={() => {
           this.openDocs();
         }}
@@ -132,7 +142,11 @@ export class ConsoleMenu extends Component<Props, State> {
           defaultMessage="Open documentation"
         />
       </EuiContextMenuItem>,
-      <EuiContextMenuItem key="Auto indent" onClick={this.autoIndent}>
+      <EuiContextMenuItem
+        data-test-subj="consoleMenuAutoIndent"
+        key="Auto indent"
+        onClick={this.autoIndent}
+      >
         <FormattedMessage
           id="console.requestOptions.autoIndentButtonLabel"
           defaultMessage="Auto indent"

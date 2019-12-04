@@ -15,5 +15,5 @@ export interface NotificationsStart
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [toasts](./kibana-plugin-public.notificationsstart.toasts.md) | <code>ToastsStart</code> |  |
+|  [toasts](./kibana-plugin-public.notificationsstart.toasts.md) | <code>ToastsStart</code> | [ToastsStart](./kibana-plugin-public.toastsstart.md) |
 

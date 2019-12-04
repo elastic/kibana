@@ -5,7 +5,7 @@
  */
 
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
-import { SavedObjectsService } from 'src/legacy/server/kbn_server';
+import { SavedObjectsLegacyService } from 'src/legacy/server/kbn_server';
 import { callWithInternalUserFactory } from '../../client/call_with_internal_user_factory';
 
 export interface MlTelemetry {
@@ -30,7 +30,7 @@ export function createMlTelemetry(count: number = 0): MlTelemetry {
 // savedObjects
 export function storeMlTelemetry(
   elasticsearchPlugin: ElasticsearchPlugin,
-  savedObjects: SavedObjectsService,
+  savedObjects: SavedObjectsLegacyService,
   mlTelemetry: MlTelemetry
 ): void {
   const savedObjectsClient = getSavedObjectsClient(elasticsearchPlugin, savedObjects);
@@ -42,7 +42,7 @@ export function storeMlTelemetry(
 // needs savedObjects and elasticsearchPlugin
 export function getSavedObjectsClient(
   elasticsearchPlugin: ElasticsearchPlugin,
-  savedObjects: SavedObjectsService
+  savedObjects: SavedObjectsLegacyService
 ): any {
   const { SavedObjectsClient, getSavedObjectsRepository } = savedObjects;
   const callWithInternalUser = callWithInternalUserFactory(elasticsearchPlugin);
@@ -52,7 +52,7 @@ export function getSavedObjectsClient(
 
 export async function incrementFileDataVisualizerIndexCreationCount(
   elasticsearchPlugin: ElasticsearchPlugin,
-  savedObjects: SavedObjectsService
+  savedObjects: SavedObjectsLegacyService
 ): Promise<void> {
   const savedObjectsClient = getSavedObjectsClient(elasticsearchPlugin, savedObjects);
 

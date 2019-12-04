@@ -50,7 +50,7 @@ This module provides a Utilities for interacting with the configuration.
 
 ### Methods
 
-**server.plugins.actions.registerType(options)**
+**server.plugins.actions.setup.registerType(options)**
 
 The following table describes the properties of the `options` object.
 
@@ -73,6 +73,7 @@ This is the primary function for an action type. Whenever the action needs to ex
 
 |Property|Description|
 |---|---|
+|actionId|The action saved object id that the action type is executing for.|
 |config|The decrypted configuration given to an action. This comes from the action saved object that is partially or fully encrypted within the data store. If you would like to validate the config before being passed to the executor, define `validate.config` within the action type.|
 |params|Parameters for the execution. These will be given at execution time by either an alert or manually provided when calling the plugin provided execute function.|
 |services.callCluster(path, opts)|Use this to do Elasticsearch queries on the cluster Kibana connects to. This function is the same as any other `callCluster` in Kibana.<br><br>**NOTE**: This currently authenticates as the Kibana internal user, but will change in a future PR.|
@@ -95,7 +96,7 @@ Payload:
 
 |Property|Description|Type|
 |---|---|---|
-|description|A description to reference and search in the future. This value will be used to populate dropdowns.|string|
+|name|A name to reference and search in the future. This value will be used to populate dropdowns.|string|
 |actionTypeId|The id value of the action type you want to call when the action executes.|string|
 |config|The configuration the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if config validation is defined.|object|
 |secrets|The secrets the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if secrets validation is defined.|object|
@@ -138,7 +139,7 @@ Payload:
 
 |Property|Description|Type|
 |---|---|---|
-|description|A description to reference and search in the future. This value will be used to populate dropdowns.|string|
+|name|A name to reference and search in the future. This value will be used to populate dropdowns.|string|
 |config|The configuration the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if config validation is defined.|object|
 |secrets|The secrets the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if secrets validation is defined.|object|
 
@@ -300,7 +301,7 @@ $ kbn-action create .slack "post to slack" '{"webhookUrl": "https://hooks.slack.
     "id": "d6f1e228-1806-4a72-83ac-e06f3d5c2fbe",
     "attributes": {
         "actionTypeId": ".slack",
-        "description": "post to slack",
+        "name": "post to slack",
         "config": {}
     },
     "references": [],

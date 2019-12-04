@@ -17,8 +17,11 @@ import {
   EuiPortal,
 } from '@elastic/eui';
 import { Shortcuts } from 'react-shortcuts';
+import { ComponentStrings } from '../../../i18n';
 import { ExpressionInput } from '../expression_input';
 import { ToolTipShortcut } from '../tool_tip_shortcut';
+
+const { Expression: strings } = ComponentStrings;
 
 const { useRef } = React;
 
@@ -90,12 +93,13 @@ export const Expression = ({
                 <EuiToolTip
                   content={
                     <span>
-                      Run the expression <ToolTipShortcut namespace="EXPRESSION" action="RUN" />
+                      {strings.getRunTooltip()}{' '}
+                      <ToolTipShortcut namespace="EXPRESSION" action="RUN" />
                     </span>
                   }
                 >
                   <EuiButton fill disabled={!!error} onClick={handleRun} size="s">
-                    Run
+                    {strings.getRunButtonLabel()}
                   </EuiButton>
                 </EuiToolTip>
               </EuiFlexItem>
@@ -105,7 +109,7 @@ export const Expression = ({
                   color={formState.dirty ? 'danger' : 'primary'}
                   onClick={done}
                 >
-                  {formState.dirty ? 'Cancel' : 'Close'}
+                  {formState.dirty ? strings.getCancelButtonLabel() : strings.getCloseButtonLabel()}
                 </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -117,12 +121,12 @@ export const Expression = ({
                   href="https://www.elastic.co/guide/en/kibana/current/canvas-function-reference.html"
                   target="_blank"
                 >
-                  Learn expression syntax
+                  {strings.getLearnLinkText()}
                 </EuiLink>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty iconType="fullScreen" onClick={toggleCompactView} size="xs">
-                  {isCompact ? 'Maximize' : 'Minimize'} editor
+                  {isCompact ? strings.getMaximizeButtonLabel() : strings.getMinimizeButtonLabel()}
                 </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>

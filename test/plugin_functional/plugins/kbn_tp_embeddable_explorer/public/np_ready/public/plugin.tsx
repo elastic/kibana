@@ -19,28 +19,32 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { IUiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
+import { createHelloWorldAction } from '../../../../../../../src/plugins/ui_actions/public/tests/test_samples';
 
 import {
   Start as InspectorStartContract,
   Setup as InspectorSetupContract,
 } from '../../../../../../../src/plugins/inspector/public';
 
-import { Plugin as EmbeddablePlugin, CONTEXT_MENU_TRIGGER } from './embeddable_api';
+import { CONTEXT_MENU_TRIGGER } from './embeddable_api';
 
 const REACT_ROOT_ID = 'embeddableExplorerRoot';
 
 import {
-  HelloWorldAction,
   SayHelloAction,
-  SendMessageAction,
+  createSendMessageAction,
   HelloWorldEmbeddableFactory,
   ContactCardEmbeddableFactory,
-  HELLO_WORLD_ACTION_ID,
-} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples';
+} from './embeddable_api';
 import { App } from './app';
+import {
+  IEmbeddableStart,
+  IEmbeddableSetup,
+} from '.../../../../../../../src/plugins/embeddable/public';
 
 export interface SetupDependencies {
-  embeddable: ReturnType<EmbeddablePlugin['setup']>;
+  embeddable: IEmbeddableSetup;
   inspector: InspectorSetupContract;
   __LEGACY: {
     SavedObjectFinder: React.ComponentType<any>;
@@ -49,7 +53,8 @@ export interface SetupDependencies {
 }
 
 interface StartDependencies {
-  embeddable: ReturnType<EmbeddablePlugin['start']>;
+  embeddable: IEmbeddableStart;
+  uiActions: IUiActionsStart;
   inspector: InspectorStartContract;
   __LEGACY: {
     SavedObjectFinder: React.ComponentType<any>;
@@ -67,21 +72,21 @@ export class EmbeddableExplorerPublicPlugin
   public setup(core: CoreSetup, setupDeps: SetupDependencies): EmbeddableExplorerSetup {}
 
   public start(core: CoreStart, plugins: StartDependencies): EmbeddableExplorerStart {
-    const helloWorldAction = new HelloWorldAction(core.overlays);
+    const helloWorldAction = createHelloWorldAction(core.overlays);
     const sayHelloAction = new SayHelloAction(alert);
-    const sendMessageAction = new SendMessageAction(core.overlays);
+    const sendMessageAction = createSendMessageAction(core.overlays);
     const helloWorldEmbeddableFactory = new HelloWorldEmbeddableFactory();
     const contactCardEmbeddableFactory = new ContactCardEmbeddableFactory(
       {},
-      plugins.embeddable.executeTriggerActions,
+      plugins.uiActions.executeTriggerActions,
       core.overlays
     );
 
-    plugins.embeddable.registerAction(helloWorldAction);
-    plugins.embeddable.registerAction(sayHelloAction);
-    plugins.embeddable.registerAction(sendMessageAction);
+    plugins.uiActions.registerAction(helloWorldAction);
+    plugins.uiActions.registerAction(sayHelloAction);
+    plugins.uiActions.registerAction(sendMessageAction);
 
-    plugins.embeddable.attachAction(CONTEXT_MENU_TRIGGER, HELLO_WORLD_ACTION_ID);
+    plugins.uiActions.attachAction(CONTEXT_MENU_TRIGGER, helloWorldAction.id);
 
     plugins.embeddable.registerEmbeddableFactory(
       helloWorldEmbeddableFactory.type,
@@ -96,7 +101,7 @@ export class EmbeddableExplorerPublicPlugin
       const root = document.getElementById(REACT_ROOT_ID);
       ReactDOM.render(
         <App
-          getActions={plugins.embeddable.getTriggerCompatibleActions}
+          getActions={plugins.uiActions.getTriggerCompatibleActions}
           getAllEmbeddableFactories={plugins.embeddable.getEmbeddableFactories}
           getEmbeddableFactory={plugins.embeddable.getEmbeddableFactory}
           notifications={core.notifications}

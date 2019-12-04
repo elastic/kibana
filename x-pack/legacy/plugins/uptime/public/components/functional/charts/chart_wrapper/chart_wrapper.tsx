@@ -4,15 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment } from 'react';
+import React, { FC, Fragment, HTMLAttributes } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
 
 interface Props {
+  /**
+   * Height for the chart
+   */
   height?: string;
+  /**
+   * if chart data source is still loading
+   */
   loading?: boolean;
+  /**
+   * aria-label for accessibility
+   */
+  'aria-label'?: string;
 }
 
-export const ChartWrapper: FC<Props> = ({ loading = false, height = '100%', children }) => {
+export const ChartWrapper: FC<Props> = ({
+  loading = false,
+  height = '100%',
+  children,
+  ...rest
+}) => {
   const opacity = loading === true ? 0.3 : 1;
 
   return (
@@ -23,6 +38,7 @@ export const ChartWrapper: FC<Props> = ({ loading = false, height = '100%', chil
           opacity,
           transition: 'opacity 0.2s',
         }}
+        {...(rest as HTMLAttributes<HTMLDivElement>)}
       >
         {children}
       </div>
@@ -30,7 +46,7 @@ export const ChartWrapper: FC<Props> = ({ loading = false, height = '100%', chil
         <EuiFlexGroup
           justifyContent="spaceAround"
           alignItems="center"
-          style={{ height, marginTop: `-${height}` }}
+          style={{ height, marginTop: `-${height}`, marginBottom: 0 }}
         >
           <EuiFlexItem grow={false}>
             <EuiLoadingChart size="xl" />

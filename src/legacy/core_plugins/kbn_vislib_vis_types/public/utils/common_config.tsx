@@ -40,15 +40,15 @@ function getAreaOptionTabs() {
       title: i18n.translate('kbnVislibVisTypes.area.tabs.panelSettingsTitle', {
         defaultMessage: 'Panel settings',
       }),
-      editor: PointSeriesOptions,
+      editor: (props: VisOptionsProps<BasicVislibParams>) => (
+        <ValidationWrapper {...props} component={PointSeriesOptions} />
+      ),
     },
   ];
 }
 
-function getCountLabel() {
-  return i18n.translate('kbnVislibVisTypes.area.countText', {
-    defaultMessage: 'Count',
-  });
-}
+const countLabel = i18n.translate('kbnVislibVisTypes.area.countText', {
+  defaultMessage: 'Count',
+});
 
-export { getAreaOptionTabs, getCountLabel };
+export { getAreaOptionTabs, countLabel };

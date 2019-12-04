@@ -5,7 +5,6 @@
  */
 
 import {
-  AppState,
   SerializedNode,
   WorkspaceNode,
   WorkspaceEdge,
@@ -15,7 +14,10 @@ import {
   WorkspaceField,
   GraphWorkspaceSavedObject,
   SerializedWorkspaceState,
+  Workspace,
+  AdvancedSettings,
 } from '../../types';
+import { IndexpatternDatasource } from '../../state_management';
 
 function serializeNode(
   { data, scaledSize, parent, x, y, label, color }: WorkspaceNode,
@@ -34,13 +36,12 @@ function serializeNode(
 }
 
 function serializeEdge(
-  { source, target, weight, width, inferred, label }: WorkspaceEdge,
+  { source, target, weight, width, label }: WorkspaceEdge,
   allNodes: WorkspaceNode[] = []
 ): SerializedEdge {
   return {
     weight,
     width,
-    inferred,
     label,
     source: allNodes.indexOf(source),
     target: allNodes.indexOf(target),
@@ -80,7 +81,19 @@ function serializeField({
 
 export function appStateToSavedWorkspace(
   currentSavedWorkspace: GraphWorkspaceSavedObject,
-  { workspace, urlTemplates, advancedSettings, selectedIndex, selectedFields }: AppState,
+  {
+    workspace,
+    urlTemplates,
+    advancedSettings,
+    selectedIndex,
+    selectedFields,
+  }: {
+    workspace: Workspace;
+    urlTemplates: UrlTemplate[];
+    advancedSettings: AdvancedSettings;
+    selectedIndex: IndexpatternDatasource;
+    selectedFields: WorkspaceField[];
+  },
   canSaveData: boolean
 ) {
   const blacklist: SerializedNode[] = canSaveData
@@ -96,7 +109,7 @@ export function appStateToSavedWorkspace(
   const mappedUrlTemplates = urlTemplates.map(serializeUrlTemplate);
 
   const persistedWorkspaceState: SerializedWorkspaceState = {
-    indexPattern: selectedIndex.attributes.title,
+    indexPattern: selectedIndex.title,
     selectedFields: selectedFields.map(serializeField),
     blacklist,
     vertices,

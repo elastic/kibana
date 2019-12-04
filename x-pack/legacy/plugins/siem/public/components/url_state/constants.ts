@@ -5,16 +5,19 @@
  */
 
 export enum CONSTANTS {
+  appQuery = 'query',
+  detectionEnginePage = 'detectionEngine.page',
+  filters = 'filters',
   hostsDetails = 'hosts.details',
   hostsPage = 'hosts.page',
-  kqlQuery = 'kqlQuery',
   networkDetails = 'network.details',
   networkPage = 'network.page',
   overviewPage = 'overview.page',
+  savedQuery = 'savedQuery',
   timelinePage = 'timeline.page',
   timerange = 'timerange',
-  timelineId = 'timelineId',
+  timeline = 'timeline',
   unknown = 'unknown',
 }
 
-export type UrlStateType = 'host' | 'network' | 'overview' | 'timeline';
+export type UrlStateType = 'detection-engine' | 'host' | 'network' | 'overview' | 'timeline';

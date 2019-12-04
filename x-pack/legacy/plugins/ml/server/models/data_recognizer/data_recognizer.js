@@ -9,8 +9,7 @@
 import fs from 'fs';
 import Boom from 'boom';
 import numeral from '@elastic/numeral';
-import { idx } from '@kbn/elastic-idx';
-import { merge } from 'lodash';
+import { merge, get } from 'lodash';
 import { getLatestDataOrBucketTimestamp, prefixDatafeedId } from '../../../common/util/job_utils';
 import { mlLog } from '../../client/log';
 import { jobServiceProvider } from '../job_service';
@@ -781,7 +780,7 @@ export class DataRecognizer {
 
       if (Array.isArray(moduleConfig.jobs)) {
         moduleConfig.jobs.forEach((job) => {
-          const mml = idx(job, _ => _.config.analysis_limits.model_memory_limit);
+          const mml = get(job, 'config.analysis_limits.model_memory_limit');
           if (mml !== undefined) {
             const mmlBytes = numeral(mml.toUpperCase()).value();
             if (mmlBytes > maxBytes) {
@@ -812,45 +811,78 @@ export class DataRecognizer {
   }
 
   applyJobConfigOverrides(moduleConfig, jobOverrides, jobPrefix = '') {
-    if(jobOverrides !== undefined && jobOverrides !== null) {
-      if (typeof jobOverrides !== 'object') {
-        throw Boom.badRequest(
-          `Incompatible jobOverrides type (${typeof jobOverrides}). It needs to be an object or array of objects.`
-        );
+    if (jobOverrides === undefined || jobOverrides === null) {
+      return;
+    }
+
+    if (typeof jobOverrides !== 'object') {
+      throw Boom.badRequest(
+        `Incompatible jobOverrides type (${typeof jobOverrides}). It needs to be an object or array of objects.`
+      );
+    }
+
+    // jobOverrides could be a single object or an array of objects.
+    // if single, convert to an array
+    const overrides = Array.isArray(jobOverrides) ? jobOverrides : [jobOverrides];
+    const { jobs } = moduleConfig;
+
+    // separate all the overrides.
+    // the overrides which don't contain a job id will be applied to all jobs in the module
+    const generalOverrides = [];
+    const jobSpecificOverrides = [];
+
+    overrides.forEach(override => {
+      if (override.job_id === undefined) {
+        generalOverrides.push(override);
+      } else {
+        jobSpecificOverrides.push(override);
+      }
+    });
+
+    function processArrayValues(source, update) {
+      if (typeof source !== 'object' || typeof update !== 'object') {
+        return;
       }
 
-      // jobOverrides could be a single object or an array of objects.
-      // if single, convert to an array
-      const overrides = Array.isArray(jobOverrides) ? jobOverrides : [jobOverrides];
-      const { jobs } = moduleConfig;
+      Object.keys(source).forEach(key => {
+        const sourceValue = source[key];
+        const updateValue = update[key];
 
-      // separate all the overrides.
-      // the overrides which don't contain a job id will be applied to all jobs in the module
-      const generalOverrides = [];
-      const jobSpecificOverrides = [];
-      overrides.forEach(o => {
-        if (o.job_id === undefined) {
-          generalOverrides.push(o);
-        } else {
-          jobSpecificOverrides.push(o);
+        if (
+          typeof sourceValue !== 'object' ||
+          sourceValue === null ||
+          typeof updateValue !== 'object' ||
+          updateValue === null
+        ) {
+          return;
         }
-      });
 
-      generalOverrides.forEach(o => {
-        jobs.forEach(({ config }) => merge(config, o));
-      });
-
-      jobSpecificOverrides.forEach(o => {
-        // for each override, find the relevant job.
-        // note, the job id already has the prefix prepended to it
-        const job = jobs.find(j => j.id === `${jobPrefix}${o.job_id}`);
-        if (job !== undefined) {
-          // delete the job_id in the override as this shouldn't be overridden
-          delete o.job_id;
-          merge(job.config, o);
+        if (Array.isArray(sourceValue) && Array.isArray(updateValue)) {
+          source[key] = updateValue;
+        } else {
+          processArrayValues(sourceValue, updateValue);
         }
       });
     }
+
+    generalOverrides.forEach(generalOverride => {
+      jobs.forEach(job => {
+        merge(job.config, generalOverride);
+        processArrayValues(job.config, generalOverride);
+      });
+    });
+
+    jobSpecificOverrides.forEach(jobSpecificOverride => {
+      // for each override, find the relevant job.
+      // note, the job id already has the prefix prepended to it
+      const job = jobs.find(j => j.id === `${jobPrefix}${jobSpecificOverride.job_id}`);
+      if (job !== undefined) {
+        // delete the job_id in the override as this shouldn't be overridden
+        delete jobSpecificOverride.job_id;
+        merge(job.config, jobSpecificOverride);
+        processArrayValues(job.config, jobSpecificOverride);
+      }
+    });
   }
 
   applyDatafeedConfigOverrides(moduleConfig, datafeedOverrides, jobPrefix = '') {

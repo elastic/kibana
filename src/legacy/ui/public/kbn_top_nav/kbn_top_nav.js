@@ -20,15 +20,11 @@
 import 'ngreact';
 import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
-import { TopNavMenu } from '../../../core_plugins/kibana_react/public';
-import { Storage } from 'ui/storage';
-import chrome from 'ui/chrome';
-import { npSetup } from 'ui/new_platform';
-
+import { start as navigation } from '../../../core_plugins/navigation/public/legacy';
 
 const module = uiModules.get('kibana');
 
-module.directive('kbnTopNav', () => {
+export function createTopNavDirective() {
   return {
     restrict: 'E',
     template: '',
@@ -44,21 +40,10 @@ module.directive('kbnTopNav', () => {
       // of the config array's disableButton function return value changes.
       child.setAttribute('disabled-buttons', 'disabledButtons');
 
-      // Pass in storage
-      const localStorage = new Storage(window.localStorage);
-      child.setAttribute('http', 'http');
-      child.setAttribute('store', 'store');
-      child.setAttribute('ui-settings', 'uiSettings');
-      child.setAttribute('saved-objects-client', 'savedObjectsClient');
-
       // Append helper directive
       elem.append(child);
 
       const linkFn = ($scope, _, $attr) => {
-        $scope.store = localStorage;
-        $scope.http = npSetup.core.http;
-        $scope.uiSettings = npSetup.core.uiSettings;
-        $scope.savedObjectsClient = chrome.getSavedObjectsClient();
 
         // Watch config changes
         $scope.$watch(() => {
@@ -86,24 +71,20 @@ module.directive('kbnTopNav', () => {
       return linkFn;
     }
   };
-});
+}
 
-module.directive('kbnTopNavHelper', (reactDirective) => {
+module.directive('kbnTopNav', createTopNavDirective);
+
+export const createTopNavHelper = ({ TopNavMenu }) => (reactDirective) => {
   return reactDirective(
     wrapInI18nContext(TopNavMenu),
     [
-      ['name', { watchDepth: 'reference' }],
       ['config', { watchDepth: 'value' }],
       ['disabledButtons', { watchDepth: 'reference' }],
 
       ['query', { watchDepth: 'reference' }],
       ['savedQuery', { watchDepth: 'reference' }],
-      ['store', { watchDepth: 'reference' }],
-      ['uiSettings', { watchDepth: 'reference' }],
-      ['savedObjectsClient', { watchDepth: 'reference' }],
       ['intl', { watchDepth: 'reference' }],
-      ['store', { watchDepth: 'reference' }],
-      ['http', { watchDepth: 'reference' }],
 
       ['onQuerySubmit', { watchDepth: 'reference' }],
       ['onFiltersUpdated', { watchDepth: 'reference' }],
@@ -134,4 +115,6 @@ module.directive('kbnTopNavHelper', (reactDirective) => {
       'showAutoRefreshOnly',
     ],
   );
-});
+};
+
+module.directive('kbnTopNavHelper', createTopNavHelper(navigation.ui));

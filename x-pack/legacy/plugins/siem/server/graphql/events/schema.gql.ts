@@ -9,13 +9,6 @@ import gql from 'graphql-tag';
 export const eventsSchema = gql`
   scalar EsValue
 
-  type EventsData {
-    edges: [EcsEdges!]!
-    totalCount: Float!
-    pageInfo: PageInfoPaginated!
-    inspect: Inspect
-  }
-
   type EventsTimelineData {
     edges: [EcsEdges!]!
     totalCount: Float!
@@ -75,15 +68,19 @@ export const eventsSchema = gql`
     network
   }
 
+  type MatrixOverTimeHistogramData {
+    x: Float!
+    y: Float!
+    g: String!
+  }
+
+  type EventsOverTimeData {
+    inspect: Inspect
+    eventsOverTime: [MatrixOverTimeHistogramData!]!
+    totalCount: Float!
+  }
+
   extend type Source {
-    "Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified"
-    Events(
-      pagination: PaginationInputPaginated!
-      sortField: SortField!
-      timerange: TimerangeInput
-      filterQuery: String
-      defaultIndex: [String!]!
-    ): EventsData!
     Timeline(
       pagination: PaginationInput!
       sortField: SortField!
@@ -103,5 +100,10 @@ export const eventsSchema = gql`
       details: LastTimeDetails!
       defaultIndex: [String!]!
     ): LastEventTimeData!
+    EventsOverTime(
+      timerange: TimerangeInput!
+      filterQuery: String
+      defaultIndex: [String!]!
+    ): EventsOverTimeData!
   }
 `;

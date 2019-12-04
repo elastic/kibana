@@ -5,16 +5,16 @@
  */
 
 import { createMockServer } from './_mock_server';
-import { getRoute } from './get';
+import { getAlertRoute } from './get';
 
 const { server, alertsClient } = createMockServer();
-getRoute(server);
+server.route(getAlertRoute);
 
 const mockedAlert = {
   id: '1',
   alertTypeId: '1',
   interval: '10s',
-  alertTypeParams: {
+  params: {
     bar: true,
   },
   actions: [

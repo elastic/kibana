@@ -6,7 +6,6 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 <%_ } _%>
 
-import 'ui/autoload/styles';
 import { Main } from './components/main';
 
 const app = uiModules.get('apps/<%= camelCase(name) %>');

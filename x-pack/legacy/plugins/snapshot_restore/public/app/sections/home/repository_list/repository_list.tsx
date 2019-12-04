@@ -9,7 +9,7 @@ import { RouteComponentProps } from 'react-router-dom';
 
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { Repository } from '../../../../../common/types';
-import { SectionError, SectionLoading } from '../../../components';
+import { SectionError, SectionLoading, Error } from '../../../components';
 import { BASE_PATH, UIM_REPOSITORY_LIST_LOAD } from '../../../constants';
 import { useAppDependencies } from '../../../index';
 import { useLoadRepositories } from '../../../services/http';
@@ -88,7 +88,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
             defaultMessage="Error loading repositories"
           />
         }
-        error={error}
+        error={error as Error}
       />
     );
   } else if (repositories && repositories.length === 0) {
@@ -99,7 +99,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
           <h1>
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryList.emptyPromptTitle"
-              defaultMessage="You don't have any repositories yet"
+              defaultMessage="Register your first repository"
             />
           </h1>
         }
@@ -108,7 +108,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
             <p>
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryList.emptyPromptDescription"
-                defaultMessage="You need a repository to store your snapshots."
+                defaultMessage="Create a place where your snapshots will live."
               />
             </p>
           </Fragment>

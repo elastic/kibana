@@ -9,13 +9,17 @@ import { FtrProviderContext } from '../ftr_provider_context';
 import {
   MachineLearningAnomalyExplorerProvider,
   MachineLearningAPIProvider,
-  MachineLearningDataFramesProvider,
+  MachineLearningDataFrameAnalyticsProvider,
   MachineLearningDataVisualizerProvider,
+  MachineLearningDataVisualizerIndexBasedProvider,
   MachineLearningJobManagementProvider,
   MachineLearningJobSourceSelectionProvider,
   MachineLearningJobTableProvider,
   MachineLearningJobTypeSelectionProvider,
+  MachineLearningJobWizardAdvancedProvider,
   MachineLearningJobWizardCommonProvider,
+  MachineLearningJobWizardMultiMetricProvider,
+  MachineLearningJobWizardPopulationProvider,
   MachineLearningNavigationProvider,
   MachineLearningSettingsProvider,
   MachineLearningSingleMetricViewerProvider,
@@ -24,13 +28,17 @@ import {
 export function MachineLearningProvider(context: FtrProviderContext) {
   const anomalyExplorer = MachineLearningAnomalyExplorerProvider(context);
   const api = MachineLearningAPIProvider(context);
-  const dataFrames = MachineLearningDataFramesProvider(context);
+  const dataFrameAnalytics = MachineLearningDataFrameAnalyticsProvider(context);
   const dataVisualizer = MachineLearningDataVisualizerProvider(context);
-  const jobManagement = MachineLearningJobManagementProvider(context);
+  const dataVisualizerIndexBased = MachineLearningDataVisualizerIndexBasedProvider(context);
+  const jobManagement = MachineLearningJobManagementProvider(context, api);
   const jobSourceSelection = MachineLearningJobSourceSelectionProvider(context);
   const jobTable = MachineLearningJobTableProvider(context);
   const jobTypeSelection = MachineLearningJobTypeSelectionProvider(context);
+  const jobWizardAdvanced = MachineLearningJobWizardAdvancedProvider(context);
   const jobWizardCommon = MachineLearningJobWizardCommonProvider(context);
+  const jobWizardMultiMetric = MachineLearningJobWizardMultiMetricProvider(context);
+  const jobWizardPopulation = MachineLearningJobWizardPopulationProvider(context);
   const navigation = MachineLearningNavigationProvider(context);
   const settings = MachineLearningSettingsProvider(context);
   const singleMetricViewer = MachineLearningSingleMetricViewerProvider(context);
@@ -38,13 +46,17 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   return {
     anomalyExplorer,
     api,
-    dataFrames,
+    dataFrameAnalytics,
     dataVisualizer,
+    dataVisualizerIndexBased,
     jobManagement,
     jobSourceSelection,
     jobTable,
     jobTypeSelection,
+    jobWizardAdvanced,
     jobWizardCommon,
+    jobWizardMultiMetric,
+    jobWizardPopulation,
     navigation,
     settings,
     singleMetricViewer,

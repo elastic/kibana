@@ -17,22 +17,15 @@
  * under the License.
  */
 
-import { StaticIndexPattern } from 'ui/index_patterns';
-import { TimeRange } from 'src/plugins/data/public';
-import { Query } from 'src/legacy/core_plugins/data/public';
-import { Filter } from '@kbn/es-query';
+import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from 'src/plugins/embeddable/public';
 import { SavedSearch } from '../types';
-import {
-  EmbeddableInput,
-  EmbeddableOutput,
-  IEmbeddable,
-} from '../../../../embeddable_api/public/np_ready/public';
-import { SortOrder } from '../doc_table/components/table_header/helpers';
+import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
+import { esFilters, IIndexPattern, TimeRange, Query } from '../../../../../../plugins/data/public';
 
 export interface SearchInput extends EmbeddableInput {
   timeRange: TimeRange;
   query?: Query;
-  filters?: Filter[];
+  filters?: esFilters.Filter[];
   hidePanelTitles?: boolean;
   columns?: string[];
   sort?: SortOrder[];
@@ -40,7 +33,7 @@ export interface SearchInput extends EmbeddableInput {
 
 export interface SearchOutput extends EmbeddableOutput {
   editUrl: string;
-  indexPatterns?: StaticIndexPattern[];
+  indexPatterns?: IIndexPattern[];
   editable: boolean;
 }
 

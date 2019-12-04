@@ -114,7 +114,7 @@ function DateRangesParamEditor({
     <EuiFormRow compressed fullWidth>
       <>
         <EuiText size="xs">
-          <EuiLink href={getDocLink('date.dateMath')} target="_blank" rel="noopener">
+          <EuiLink href={getDocLink('date.dateMath')} target="_blank">
             <FormattedMessage
               id="common.ui.aggTypes.dateRanges.acceptedDateFormatsLinkText"
               defaultMessage="Acceptable date formats"

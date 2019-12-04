@@ -2,15 +2,11 @@
 
 set -e
 
-if [[ -z "$IS_PIPELINE_JOB" ]] ; then
-  trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
-fi
-
 export TEST_BROWSER_HEADLESS=1
 
 echo " -> Running mocha tests"
 cd "$XPACK_DIR"
-checks-reporter-with-killswitch "X-Pack Mocha" yarn test
+checks-reporter-with-killswitch "X-Pack Karma Tests" yarn test:browser
 echo ""
 echo ""
 

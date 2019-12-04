@@ -10,30 +10,24 @@ jest.mock('./lib/post_pagerduty', () => ({
 
 import { ActionType, Services, ActionTypeExecutorOptions } from '../types';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
-import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { postPagerduty } from './lib/post_pagerduty';
 import { createActionTypeRegistry } from './index.test';
 
 const postPagerdutyMock = postPagerduty as jest.Mock;
 
 const ACTION_TYPE_ID = '.pagerduty';
-const NO_OP_FN = () => {};
 
 const services: Services = {
-  log: NO_OP_FN,
   callCluster: async (path: string, opts: any) => {},
-  savedObjectsClient: SavedObjectsClientMock.create(),
+  savedObjectsClient: savedObjectsClientMock.create(),
 };
 
 let actionType: ActionType;
 
 beforeAll(() => {
-  const actionTypeRegistry = createActionTypeRegistry();
+  const { actionTypeRegistry } = createActionTypeRegistry();
   actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
-});
-
-beforeEach(() => {
-  services.log = NO_OP_FN;
 });
 
 describe('get()', () => {
@@ -125,8 +119,14 @@ describe('execute()', () => {
       return { status: 202, data: 'data-here' };
     });
 
-    const id = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = { id, config, params, secrets, services };
+    const actionId = 'some-action-id';
+    const executorOptions: ActionTypeExecutorOptions = {
+      actionId,
+      config,
+      params,
+      secrets,
+      services,
+    };
     const actionResponse = await actionType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
     expect({ apiUrl, data, headers }).toMatchInlineSnapshot(`
@@ -179,8 +179,14 @@ describe('execute()', () => {
       return { status: 202, data: 'data-here' };
     });
 
-    const id = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = { id, config, params, secrets, services };
+    const actionId = 'some-action-id';
+    const executorOptions: ActionTypeExecutorOptions = {
+      actionId,
+      config,
+      params,
+      secrets,
+      services,
+    };
     const actionResponse = await actionType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
     expect({ apiUrl, data, headers }).toMatchInlineSnapshot(`
@@ -237,8 +243,14 @@ describe('execute()', () => {
       return { status: 202, data: 'data-here' };
     });
 
-    const id = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = { id, config, params, secrets, services };
+    const actionId = 'some-action-id';
+    const executorOptions: ActionTypeExecutorOptions = {
+      actionId,
+      config,
+      params,
+      secrets,
+      services,
+    };
     const actionResponse = await actionType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
     expect({ apiUrl, data, headers }).toMatchInlineSnapshot(`
@@ -286,8 +298,14 @@ describe('execute()', () => {
       return { status: 202, data: 'data-here' };
     });
 
-    const id = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = { id, config, params, secrets, services };
+    const actionId = 'some-action-id';
+    const executorOptions: ActionTypeExecutorOptions = {
+      actionId,
+      config,
+      params,
+      secrets,
+      services,
+    };
     const actionResponse = await actionType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
     expect({ apiUrl, data, headers }).toMatchInlineSnapshot(`
@@ -320,8 +338,14 @@ describe('execute()', () => {
       throw new Error('doing some testing');
     });
 
-    const id = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = { id, config, params, secrets, services };
+    const actionId = 'some-action-id';
+    const executorOptions: ActionTypeExecutorOptions = {
+      actionId,
+      config,
+      params,
+      secrets,
+      services,
+    };
     const actionResponse = await actionType.executor(executorOptions);
     expect(actionResponse).toMatchInlineSnapshot(`
                         Object {
@@ -340,8 +364,14 @@ describe('execute()', () => {
       return { status: 429, data: 'data-here' };
     });
 
-    const id = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = { id, config, params, secrets, services };
+    const actionId = 'some-action-id';
+    const executorOptions: ActionTypeExecutorOptions = {
+      actionId,
+      config,
+      params,
+      secrets,
+      services,
+    };
     const actionResponse = await actionType.executor(executorOptions);
     expect(actionResponse).toMatchInlineSnapshot(`
                   Object {
@@ -361,8 +391,14 @@ describe('execute()', () => {
       return { status: 501, data: 'data-here' };
     });
 
-    const id = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = { id, config, params, secrets, services };
+    const actionId = 'some-action-id';
+    const executorOptions: ActionTypeExecutorOptions = {
+      actionId,
+      config,
+      params,
+      secrets,
+      services,
+    };
     const actionResponse = await actionType.executor(executorOptions);
     expect(actionResponse).toMatchInlineSnapshot(`
                   Object {
@@ -382,8 +418,14 @@ describe('execute()', () => {
       return { status: 418, data: 'data-here' };
     });
 
-    const id = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = { id, config, params, secrets, services };
+    const actionId = 'some-action-id';
+    const executorOptions: ActionTypeExecutorOptions = {
+      actionId,
+      config,
+      params,
+      secrets,
+      services,
+    };
     const actionResponse = await actionType.executor(executorOptions);
     expect(actionResponse).toMatchInlineSnapshot(`
                   Object {

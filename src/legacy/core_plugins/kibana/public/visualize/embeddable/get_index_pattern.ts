@@ -17,20 +17,20 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-import { StaticIndexPattern, getFromSavedObject } from 'ui/index_patterns';
-import { VisSavedObject } from 'ui/visualize/loader/types';
+import { getServices, getFromSavedObject, VisSavedObject } from '../kibana_services';
+
+import { IIndexPattern } from '../../../../../../plugins/data/public';
+
+const { savedObjectsClient, uiSettings } = getServices();
 
 export async function getIndexPattern(
   savedVis: VisSavedObject
-): Promise<StaticIndexPattern | undefined> {
+): Promise<IIndexPattern | undefined> {
   if (savedVis.vis.type.name !== 'metrics') {
     return savedVis.vis.indexPattern;
   }
 
-  const config = chrome.getUiSettingsClient();
-  const savedObjectsClient = chrome.getSavedObjectsClient();
-  const defaultIndex = config.get('defaultIndex');
+  const defaultIndex = uiSettings.get('defaultIndex');
 
   if (savedVis.vis.params.index_pattern) {
     const indexPatternObjects = await savedObjectsClient.find({

@@ -12,7 +12,7 @@ import { networkModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
-import { Columns } from '../../../load_more_table';
+import { Columns } from '../../../paginated_table';
 import { IS_OPERATOR } from '../../../timeline/data_providers/data_provider';
 import { PreferenceFormattedBytes } from '../../../formatted_bytes';
 import { Provider } from '../../../timeline/data_providers/provider';
@@ -69,6 +69,7 @@ export const getNetworkDnsColumns = (type: networkModel.NetworkType): NetworkDns
     },
   },
   {
+    align: 'right',
     field: `node.${NetworkDnsFields.queryCount}`,
     name: i18n.TOTAL_QUERIES,
     sortable: true,
@@ -83,6 +84,7 @@ export const getNetworkDnsColumns = (type: networkModel.NetworkType): NetworkDns
     },
   },
   {
+    align: 'right',
     field: `node.${NetworkDnsFields.uniqueDomains}`,
     name: i18n.UNIQUE_DOMAINS,
     sortable: true,
@@ -97,6 +99,7 @@ export const getNetworkDnsColumns = (type: networkModel.NetworkType): NetworkDns
     },
   },
   {
+    align: 'right',
     field: `node.${NetworkDnsFields.dnsBytesIn}`,
     name: i18n.DNS_BYTES_IN,
     sortable: true,
@@ -111,6 +114,7 @@ export const getNetworkDnsColumns = (type: networkModel.NetworkType): NetworkDns
     },
   },
   {
+    align: 'right',
     field: `node.${NetworkDnsFields.dnsBytesOut}`,
     name: i18n.DNS_BYTES_OUT,
     sortable: true,

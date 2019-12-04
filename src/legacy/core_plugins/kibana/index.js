@@ -17,14 +17,12 @@
  * under the License.
  */
 
-import Promise from 'bluebird';
-import { mkdirp as mkdirpNode } from 'mkdirp';
+import Fs from 'fs';
 import { resolve } from 'path';
+import { promisify } from 'util';
 
 import { migrations } from './migrations';
 import manageUuid from './server/lib/manage_uuid';
-import { searchApi } from './server/routes/api/search';
-import { scrollSearchApi } from './server/routes/api/scroll_search';
 import { importApi } from './server/routes/api/import';
 import { exportApi } from './server/routes/api/export';
 import { homeApi } from './server/routes/api/home';
@@ -38,10 +36,11 @@ import * as systemApi from './server/lib/system_api';
 import mappings from './mappings.json';
 import { getUiSettingDefaults } from './ui_setting_defaults';
 import { makeKQLUsageCollector } from './server/lib/kql_usage_collector';
+import { registerCspCollector } from './server/lib/csp_usage_collector';
 import { injectVars } from './inject_vars';
 import { i18n } from '@kbn/i18n';
 
-const mkdirp = Promise.promisify(mkdirpNode);
+const mkdirAsync = promisify(Fs.mkdir);
 
 export default function (kibana) {
   const kbnBaseUrl = '/app/kibana';
@@ -61,12 +60,11 @@ export default function (kibana) {
 
     uiExports: {
       hacks: [
-        'plugins/kibana/dev_tools/hacks/hide_empty_tools',
+        'plugins/kibana/discover',
+        'plugins/kibana/dev_tools',
       ],
-      fieldFormats: ['plugins/kibana/field_formats/register'],
       savedObjectTypes: [
         'plugins/kibana/visualize/saved_visualizations/saved_visualization_register',
-        'plugins/kibana/discover/saved_searches/saved_search_register',
         'plugins/kibana/dashboard/saved_dashboard/saved_dashboard_register',
       ],
       app: {
@@ -84,7 +82,6 @@ export default function (kibana) {
           }),
           order: -1003,
           url: `${kbnBaseUrl}#/discover`,
-          icon: 'plugins/kibana/assets/discover.svg',
           euiIconType: 'discoverApp',
         },
         {
@@ -94,7 +91,6 @@ export default function (kibana) {
           }),
           order: -1002,
           url: `${kbnBaseUrl}#/visualize`,
-          icon: 'plugins/kibana/assets/visualize.svg',
           euiIconType: 'visualizeApp',
         },
         {
@@ -110,7 +106,6 @@ export default function (kibana) {
           // the url above in order to preserve the original url for BWC. The subUrlBase helps the Chrome api nav
           // to determine what url to use for the app link.
           subUrlBase: `${kbnBaseUrl}#/dashboard`,
-          icon: 'plugins/kibana/assets/dashboard.svg',
           euiIconType: 'dashboardApp',
         },
         {
@@ -120,7 +115,6 @@ export default function (kibana) {
           }),
           order: 9001,
           url: '/app/kibana#/dev_tools',
-          icon: 'plugins/kibana/assets/wrench.svg',
           euiIconType: 'devToolsApp',
         },
         {
@@ -130,7 +124,6 @@ export default function (kibana) {
           }),
           order: 9003,
           url: `${kbnBaseUrl}#/management`,
-          icon: 'plugins/kibana/assets/settings.svg',
           euiIconType: 'managementApp',
           linkToLastSubUrl: false,
         },
@@ -320,7 +313,7 @@ export default function (kibana) {
       try {
         // Create the data directory (recursively, if the a parent dir doesn't exist).
         // If it already exists, does nothing.
-        await mkdirp(server.config().get('path.data'));
+        await mkdirAsync(server.config().get('path.data'), { recursive: true });
       } catch (err) {
         server.log(['error', 'init'], err);
         // Stop the server startup with a fatal error
@@ -328,13 +321,12 @@ export default function (kibana) {
       }
     },
 
-    init: function (server) {
+    init: async function (server) {
+      const { usageCollection } = server.newPlatform.setup.plugins;
       // uuid
-      manageUuid(server);
+      await manageUuid(server);
       // routes
-      searchApi(server);
       scriptsApi(server);
-      scrollSearchApi(server);
       importApi(server);
       exportApi(server);
       homeApi(server);
@@ -343,7 +335,8 @@ export default function (kibana) {
       registerKqlTelemetryApi(server);
       registerFieldFormats(server);
       registerTutorials(server);
-      makeKQLUsageCollector(server);
+      makeKQLUsageCollector(usageCollection, server);
+      registerCspCollector(usageCollection, server);
       server.expose('systemApi', systemApi);
       server.injectUiAppVars('kibana', () => injectVars(server));
     },

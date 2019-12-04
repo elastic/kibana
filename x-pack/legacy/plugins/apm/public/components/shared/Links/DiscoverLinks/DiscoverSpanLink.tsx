@@ -15,14 +15,14 @@ function getDiscoverQuery(span: Span) {
     _a: {
       interval: 'auto',
       query: {
-        language: 'lucene',
+        language: 'kuery',
         query
       }
     }
   };
 }
 
-export const DiscoverSpanLink: React.SFC<{
+export const DiscoverSpanLink: React.FC<{
   readonly span: Span;
 }> = ({ span, children }) => {
   return <DiscoverLink query={getDiscoverQuery(span)} children={children} />;

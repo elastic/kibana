@@ -5,9 +5,11 @@
  */
 
 import { Dispatch } from 'redux';
+import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 import { Omit } from '../../../common/utility_types';
 import { InputsModelId } from './constants';
 import { CONSTANTS } from '../../components/url_state/constants';
+import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
 
 export interface AbsoluteTimeRange {
   kind: 'absolute';
@@ -78,8 +80,11 @@ export type GlobalQuery = GlobalGraphqlQuery | GlobalKqlQuery;
 export interface InputsRange {
   timerange: TimeRange;
   policy: Policy;
-  query: GlobalQuery[];
+  queries: GlobalQuery[];
   linkTo: InputsModelId[];
+  query: Query;
+  filters: esFilters.Filter[];
+  savedQuery?: SavedQuery;
 }
 
 export interface LinkTo {

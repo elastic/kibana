@@ -19,17 +19,13 @@
 
 import React, { Fragment, PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-import {
-  EuiSearchBar,
-  EuiFormErrorText,
-} from '@elastic/eui';
+import { EuiSearchBar, EuiFormErrorText } from '@elastic/eui';
 
 import { getCategoryName } from '../../lib';
 
-class SearchUI extends PureComponent {
-
+export class Search extends PureComponent {
   static propTypes = {
     categories: PropTypes.array.isRequired,
     query: PropTypes.object.isRequired,
@@ -50,7 +46,7 @@ class SearchUI extends PureComponent {
   state = {
     isSearchTextValid: true,
     parseErrorMessage: null,
-  }
+  };
 
   onChange = ({ query, error }) => {
     if (error) {
@@ -66,59 +62,47 @@ class SearchUI extends PureComponent {
       parseErrorMessage: null,
     });
     this.props.onQueryChange({ query });
-  }
+  };
 
   render() {
-    const { query, intl } = this.props;
+    const { query } = this.props;
 
     const box = {
       incremental: true,
       'data-test-subj': 'settingsSearchBar',
-      'aria-label': intl.formatMessage({
-        id: 'kbn.management.settings.searchBarAriaLabel',
+      'aria-label': i18n.translate('kbn.management.settings.searchBarAriaLabel', {
         defaultMessage: 'Search advanced settings',
       }), // hack until EuiSearchBar is fixed
-
     };
 
     const filters = [
       {
         type: 'field_value_selection',
         field: 'category',
-        name: intl.formatMessage({
-          id: 'kbn.management.settings.categorySearchLabel',
+        name: i18n.translate('kbn.management.settings.categorySearchLabel', {
           defaultMessage: 'Category',
         }),
         multiSelect: 'or',
         options: this.categories,
-      }
+      },
     ];
 
     let queryParseError;
     if (!this.state.isSearchTextValid) {
-      const parseErrorMsg = intl.formatMessage({
-        id: 'kbn.management.settings.searchBar.unableToParseQueryErrorMessage',
-        defaultMessage: 'Unable to parse query',
-      });
+      const parseErrorMsg = i18n.translate(
+        'kbn.management.settings.searchBar.unableToParseQueryErrorMessage',
+        { defaultMessage: 'Unable to parse query' }
+      );
       queryParseError = (
-        <EuiFormErrorText>
-          {`${parseErrorMsg}. ${this.state.parseErrorMessage}`}
-        </EuiFormErrorText>
+        <EuiFormErrorText>{`${parseErrorMsg}. ${this.state.parseErrorMessage}`}</EuiFormErrorText>
       );
     }
 
     return (
       <Fragment>
-        <EuiSearchBar
-          box={box}
-          filters={filters}
-          onChange={this.onChange}
-          query={query}
-        />
+        <EuiSearchBar box={box} filters={filters} onChange={this.onChange} query={query} />
         {queryParseError}
       </Fragment>
     );
   }
 }
-
-export const Search = injectI18n(SearchUI);

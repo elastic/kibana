@@ -6,12 +6,12 @@
 
 import expect from '@kbn/expect';
 import path from 'path';
-import mkdirp from 'mkdirp';
 import fs from 'fs';
-import { promisify } from 'bluebird';
+import { promisify } from 'util';
 import { checkIfPdfsMatch, checkIfPngsMatch } from './lib';
+
 const writeFileAsync = promisify(fs.writeFile);
-const mkdirAsync = promisify(mkdirp);
+const mkdirAsync = promisify(fs.mkdir);
 
 const REPORTS_FOLDER = path.resolve(__dirname, 'reports');
 
@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }) {
 
     const writeSessionReport = async (name, rawPdf, reportExt = 'pdf') => {
       const sessionDirectory = path.resolve(REPORTS_FOLDER, 'session');
-      await mkdirAsync(sessionDirectory);
+      await mkdirAsync(sessionDirectory, { recursive: true });
       const sessionReportPath = path.resolve(sessionDirectory, `${name}.${reportExt}`);
       await writeFileAsync(sessionReportPath, rawPdf);
       return sessionReportPath;
@@ -254,7 +254,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('Discover', () => {
-      describe('Generate CSV button', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/31379
+      describe.skip('Generate CSV button', () => {
         beforeEach(() => PageObjects.common.navigateToApp('discover'));
 
         it('is not available if new', async () => {

@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { expectFixtureEql } from './expect_fixture_eql';
 import { monitorStatusBarQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
+import { expectFixtureEql } from './helpers/expect_fixture_eql';
 
 export default function ({ getService }) {
   describe('monitorStatusBar query', () => {
+    before('load heartbeat data', () => getService('esArchiver').load('uptime/full_heartbeat'));
+    after('unload heartbeat index', () => getService('esArchiver').unload('uptime/full_heartbeat'));
+
     const supertest = getService('supertest');
 
     it('returns the status for all monitors with no ID filtering', async () => {
@@ -17,7 +20,7 @@ export default function ({ getService }) {
         query: monitorStatusBarQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
+          dateRangeEnd: '2025-01-28T19:00:16.078Z',
         },
       };
       const {
@@ -28,7 +31,8 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorStatusBarQuery });
-      expectFixtureEql({ monitorStatus: responseData }, 'monitor_status');
+
+      expectFixtureEql(responseData, 'monitor_status_all', res => res.forEach(i => delete i.millisFromNow));
     });
 
     it('returns the status for only the given monitor', async () => {
@@ -37,19 +41,17 @@ export default function ({ getService }) {
         query: monitorStatusBarQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
-          monitorId: 'auto-tcp-0X81440A68E839814C',
+          dateRangeEnd: '2025-01-28T19:00:16.078Z',
+          monitorId: '0002-up',
         },
       };
-      const {
-        body: {
-          data: { monitorStatus },
-        },
-      } = await supertest
+      const res = await supertest
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorStatusBarQuery });
-      expectFixtureEql({ monitorStatus }, 'monitor_status_by_id');
+
+
+      expectFixtureEql(res.body.data.monitorStatus, 'monitor_status_by_id');
     });
   });
 }

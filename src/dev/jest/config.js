@@ -39,6 +39,8 @@ export default {
     '<rootDir>/test/functional/services/remote',
   ],
   collectCoverageFrom: [
+    'src/plugins/**/*.{ts,tsx}',
+    '!src/plugins/**/*.d.ts',
     'packages/kbn-ui-framework/src/components/**/*.js',
     '!packages/kbn-ui-framework/src/components/index.js',
     '!packages/kbn-ui-framework/src/components/**/*/index.js',
@@ -51,6 +53,7 @@ export default {
     '!src/legacy/ui/public/{agg_types,vis}/**/*.d.ts',
   ],
   moduleNameMapper: {
+    '^src/plugins/(.*)': '<rootDir>/src/plugins/$1',
     '^plugins/([^\/.]*)(.*)': '<rootDir>/src/legacy/core_plugins/$1/public$2',
     '^ui/(.*)': '<rootDir>/src/legacy/ui/public/$1',
     '^uiExports/(.*)': '<rootDir>/src/dev/jest/mocks/file_mock.js',
@@ -100,6 +103,7 @@ export default {
     'packages/kbn-pm/dist/index.js'
   ],
   snapshotSerializers: [
+    '<rootDir>/src/plugins/kibana_react/public/util/test_helpers/react_mount_serializer.ts',
     '<rootDir>/node_modules/enzyme-to-json/serializer',
   ],
   reporters: [

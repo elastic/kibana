@@ -4,9 +4,9 @@
 <titleabbrev>Resolve import errors</titleabbrev>
 ++++
 
-Resolve errors from the import API. 
+experimental[] Resolve errors from the import API.
 
-To resolve errors, you can: 
+To resolve errors, you can:
 
 * Retry certain saved objects
 
@@ -14,12 +14,18 @@ To resolve errors, you can:
 
 * Change references to different saved objects
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
-
 [[saved-objects-api-resolve-import-errors-request]]
 ==== Request
 
 `POST /api/saved_objects/_resolve_import_errors`
+
+`POST /s/<space_id>/api/saved_objects/_resolve_import_errors`
+
+[[saved-objects-api-resolve-import-errors-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 [[saved-objects-api-resolve-import-errors-request-body]]
 ==== Request body
@@ -35,19 +41,19 @@ The request body must include the multipart/form-data type.
 [[saved-objects-api-resolve-import-errors-response-body]]
 ==== Response body
 
-`success`:: 
+`success`::
   Top-level property that indicates if the errors successfully resolved.
-  
-`successCount`:: 
+
+`successCount`::
   Indicates the number of successfully resolved records.
 
 `errors`::
   (array) Specifies the objects that failed to resolve.
-  
+
 [[saved-objects-api-resolve-import-errors-codes]]
 ==== Response code
 
-`200`:: 
+`200`::
     Indicates a successful call.
 
 [[saved-objects-api-resolve-import-errors-example]]

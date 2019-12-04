@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import sinon from 'sinon';
 import proxyquire from 'proxyquire';
 import { QueueMock } from './fixtures/queue';
-import { ClientMock } from './fixtures/elasticsearch';
+import { ClientMock } from './fixtures/legacy_elasticsearch';
 import { constants } from '../constants';
 
 const createIndexMock = sinon.stub();

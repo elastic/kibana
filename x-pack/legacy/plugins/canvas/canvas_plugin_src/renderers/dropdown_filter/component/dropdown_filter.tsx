@@ -7,6 +7,9 @@
 import { EuiIcon } from '@elastic/eui';
 import PropTypes from 'prop-types';
 import React, { ChangeEvent, FocusEvent, FunctionComponent } from 'react';
+import { ComponentStrings } from '../../../../i18n';
+
+const { DropdownFilter: strings } = ComponentStrings;
 
 export interface Props {
   /**
@@ -31,7 +34,9 @@ export const DropdownFilter: FunctionComponent<Props> = ({
   commit,
   choices = [],
 }) => {
-  let options = [{ value: '%%CANVAS_MATCH_ALL%%', text: '-- ANY --' }];
+  let options = [
+    { value: '%%CANVAS_MATCH_ALL%%', text: `-- ${strings.getMatchAllOptionLabel()} --` },
+  ];
   options = options.concat(choices.map(choice => ({ value: choice, text: choice })));
 
   const changeHandler = (e: FocusEvent<HTMLSelectElement> | ChangeEvent<HTMLSelectElement>) => {

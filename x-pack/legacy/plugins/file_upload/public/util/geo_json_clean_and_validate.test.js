@@ -5,7 +5,7 @@
  */
 
 import {
-  cleanFeatures,
+  cleanGeometry,
   geoJsonCleanAndValidate,
 } from './geo_json_clean_and_validate';
 const jsts = require('jsts');
@@ -36,8 +36,8 @@ describe('geo_json_clean_and_validate', () => {
     expect(isSimpleOrValid).toEqual(true);
 
     // Confirm no change to features
-    const cleanedFeatures = cleanFeatures([geoJson]);
-    expect(cleanedFeatures[0]).toEqual(goodFeatureGeoJson);
+    const cleanedFeature = cleanGeometry(geoJson);
+    expect(cleanedFeature).toEqual(goodFeatureGeoJson.geometry);
   });
 
   it('should modify incorrect features', () => {
@@ -85,8 +85,13 @@ describe('geo_json_clean_and_validate', () => {
     });
 
     // Confirm changes to object
-    const cleanedFeatures = cleanFeatures(geoJson.features);
-    expect(cleanedFeatures).not.toEqual(badFeaturesGeoJson.features);
+    const cleanedFeatures = geoJson.features.map(feature => ({
+      ...feature,
+      geometry: cleanGeometry(feature)
+    }));
+    cleanedFeatures.forEach((feature, idx) =>
+      expect(feature).not.toEqual(badFeaturesGeoJson.features[idx])
+    );
 
     // Confirm now valid features geometry
     geoJson = reader.read({ ...badFeaturesGeoJson, features: cleanedFeatures });

@@ -54,7 +54,7 @@ export const AuthorizationProvider = ({ privilegesEndpoint, children }: Props) =
     isLoading,
     privileges: isLoading ? { hasAllPrivileges: true, missingPrivileges: {} } : privilegesData,
     apiError: error ? error : null,
-  };
+  } as Authorization;
 
   return <AuthorizationContext.Provider value={value}>{children}</AuthorizationContext.Provider>;
 };

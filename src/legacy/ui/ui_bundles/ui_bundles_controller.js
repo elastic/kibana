@@ -20,11 +20,10 @@
 import { resolve, relative, isAbsolute } from 'path';
 import { createHash } from 'crypto';
 import { promisify } from 'util';
-import { existsSync } from 'fs';
+import { existsSync, mkdir } from 'fs';
 
 import del from 'del';
 import { makeRe } from 'minimatch';
-import mkdirp from 'mkdirp';
 import jsonStableStringify from 'json-stable-stringify';
 
 import { IS_KIBANA_DISTRIBUTABLE, fromRoot } from '../../utils';
@@ -32,7 +31,7 @@ import { IS_KIBANA_DISTRIBUTABLE, fromRoot } from '../../utils';
 import { UiBundle } from './ui_bundle';
 import { appEntryTemplate } from './app_entry_template';
 
-const mkdirpAsync = promisify(mkdirp);
+const mkdirAsync = promisify(mkdir);
 const REPO_ROOT = fromRoot();
 
 function getWebpackAliases(pluginSpecs) {
@@ -179,7 +178,7 @@ export class UiBundlesController {
   async resetBundleDir() {
     if (!existsSync(this._workingDir)) {
       // create a fresh working directory
-      await mkdirpAsync(this._workingDir);
+      await mkdirAsync(this._workingDir, { recursive: true });
     } else {
       // delete all children of the working directory
       await del(this.resolvePath('*'), {

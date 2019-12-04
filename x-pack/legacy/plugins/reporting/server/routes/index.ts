@@ -5,19 +5,19 @@
  */
 
 import boom from 'boom';
-import { Request, ResponseToolkit } from 'hapi';
 import { API_BASE_URL } from '../../common/constants';
-import { KbnServer, Logger } from '../../types';
+import { ServerFacade, RequestFacade, ReportingResponseToolkit, Logger } from '../../types';
 import { enqueueJobFactory } from '../lib/enqueue_job';
-import { registerGenerate } from './generate';
+import { registerGenerateFromJobParams } from './generate_from_jobparams';
 import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
 import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
 import { registerJobs } from './jobs';
 import { registerLegacy } from './legacy';
 
-export function registerRoutes(server: KbnServer, logger: Logger) {
+export function registerRoutes(server: ServerFacade, logger: Logger) {
   const config = server.config();
   const DOWNLOAD_BASE_URL = config.get('server.basePath') + `${API_BASE_URL}/jobs/download`;
+  // @ts-ignore TODO
   const { errors: esErrors } = server.plugins.elasticsearch.getCluster('admin');
   const enqueueJob = enqueueJobFactory(server);
 
@@ -26,11 +26,10 @@ export function registerRoutes(server: KbnServer, logger: Logger) {
    */
   async function handler(
     exportTypeId: string,
-    jobParams: any,
-    request: Request,
-    h: ResponseToolkit
+    jobParams: object,
+    request: RequestFacade,
+    h: ReportingResponseToolkit
   ) {
-    // @ts-ignore
     const user = request.pre.user;
     const headers = request.headers;
 
@@ -60,7 +59,7 @@ export function registerRoutes(server: KbnServer, logger: Logger) {
     return err;
   }
 
-  registerGenerate(server, handler, handleError);
+  registerGenerateFromJobParams(server, handler, handleError);
   registerLegacy(server, handler, handleError);
 
   // Register beta panel-action download-related API's

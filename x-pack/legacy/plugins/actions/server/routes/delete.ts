@@ -13,25 +13,23 @@ interface DeleteRequest extends Hapi.Request {
   };
 }
 
-export function deleteRoute(server: Hapi.Server) {
-  server.route({
-    method: 'DELETE',
-    path: `/api/action/{id}`,
-    options: {
-      tags: ['access:actions-all'],
-      validate: {
-        params: Joi.object()
-          .keys({
-            id: Joi.string().required(),
-          })
-          .required(),
-      },
+export const deleteActionRoute = {
+  method: 'DELETE',
+  path: `/api/action/{id}`,
+  config: {
+    tags: ['access:actions-all'],
+    validate: {
+      params: Joi.object()
+        .keys({
+          id: Joi.string().required(),
+        })
+        .required(),
     },
-    async handler(request: DeleteRequest, h: Hapi.ResponseToolkit) {
-      const { id } = request.params;
-      const actionsClient = request.getActionsClient!();
-      await actionsClient.delete({ id });
-      return h.response().code(204);
-    },
-  });
-}
+  },
+  async handler(request: DeleteRequest, h: Hapi.ResponseToolkit) {
+    const { id } = request.params;
+    const actionsClient = request.getActionsClient!();
+    await actionsClient.delete({ id });
+    return h.response().code(204);
+  },
+};

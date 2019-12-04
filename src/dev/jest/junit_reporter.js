@@ -18,9 +18,8 @@
  */
 
 import { resolve, dirname, relative } from 'path';
-import { writeFileSync } from 'fs';
+import { writeFileSync, mkdirSync } from 'fs';
 
-import mkdirp from 'mkdirp';
 import xmlBuilder from 'xmlbuilder';
 
 import { escapeCdata } from '@kbn/test';
@@ -46,7 +45,7 @@ export default class JestJUnitReporter {
    * @return {undefined}
    */
   onRunComplete(contexts, results) {
-    if (!process.env.CI || !results.testResults.length) {
+    if (!process.env.CI || process.env.DISABLE_JUNIT_REPORTER || !results.testResults.length) {
       return;
     }
 
@@ -107,17 +106,11 @@ export default class JestJUnitReporter {
       rootDirectory,
       'target/junit',
       process.env.JOB || '.',
-      `TEST-${reportName}.xml`
+      `TEST-${process.env.JOB ? process.env.JOB + '-' : ''}${reportName}.xml`
     );
 
-    const reportXML = root.end({
-      pretty: true,
-      indent: '  ',
-      newline: '\n',
-      spacebeforeslash: '',
-    });
-
-    mkdirp.sync(dirname(reportPath));
+    const reportXML = root.end();
+    mkdirSync(dirname(reportPath), { recursive: true });
     writeFileSync(reportPath, reportXML, 'utf8');
   }
 }

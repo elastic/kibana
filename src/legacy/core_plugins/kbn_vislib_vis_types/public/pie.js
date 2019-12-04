@@ -17,99 +17,70 @@
  * under the License.
  */
 
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
+import { AggGroupNames } from 'ui/vis/editors/default';
 import { PieOptions } from './components/options';
+import { getPositions, Positions } from './utils/collections';
+import { vislibVisController } from './controller';
 
-export default function HistogramVisType(Private) {
-  const VisFactory = Private(VisFactoryProvider);
-
-  return VisFactory.createVislibVisualization({
-    name: 'pie',
-    title: i18n.translate('kbnVislibVisTypes.pie.pieTitle', { defaultMessage: 'Pie' }),
-    icon: 'visPie',
-    description: i18n.translate('kbnVislibVisTypes.pie.pieDescription', { defaultMessage: 'Compare parts of a whole' }),
-    visConfig: {
-      defaults: {
-        type: 'pie',
-        addTooltip: true,
-        addLegend: true,
-        legendPosition: 'right',
-        isDonut: true,
-        labels: {
-          show: false,
-          values: true,
-          last_level: true,
-          truncate: 100
-        }
+export const pieDefinition = {
+  name: 'pie',
+  title: i18n.translate('kbnVislibVisTypes.pie.pieTitle', { defaultMessage: 'Pie' }),
+  icon: 'visPie',
+  description: i18n.translate('kbnVislibVisTypes.pie.pieDescription', { defaultMessage: 'Compare parts of a whole' }),
+  visualization: vislibVisController,
+  visConfig: {
+    defaults: {
+      type: 'pie',
+      addTooltip: true,
+      addLegend: true,
+      legendPosition: Positions.RIGHT,
+      isDonut: true,
+      labels: {
+        show: false,
+        values: true,
+        last_level: true,
+        truncate: 100
+      }
+    },
+  },
+  editorConfig: {
+    collections: {
+      legendPositions: getPositions()
+    },
+    optionsTemplate: PieOptions,
+    schemas: new Schemas([
+      {
+        group: AggGroupNames.Metrics,
+        name: 'metric',
+        title: i18n.translate('kbnVislibVisTypes.pie.metricTitle', { defaultMessage: 'Slice size' }),
+        min: 1,
+        max: 1,
+        aggFilter: ['sum', 'count', 'cardinality', 'top_hits'],
+        defaults: [
+          { schema: 'metric', type: 'count' }
+        ]
       },
-    },
-    events: {
-      brush: { disabled: true },
-    },
-    editorConfig: {
-      collections: {
-        legendPositions: [
-          {
-            text: i18n.translate('kbnVislibVisTypes.pie.editorConfig.legendPositions.leftText', {
-              defaultMessage: 'Left'
-            }),
-            value: 'left'
-          },
-          {
-            text: i18n.translate('kbnVislibVisTypes.pie.editorConfig.legendPositions.rightText', {
-              defaultMessage: 'Right'
-            }),
-            value: 'right'
-          },
-          {
-            text: i18n.translate('kbnVislibVisTypes.pie.editorConfig.legendPositions.topText', {
-              defaultMessage: 'Top'
-            }),
-            value: 'top'
-          },
-          {
-            text: i18n.translate('kbnVislibVisTypes.pie.editorConfig.legendPositions.bottomText', {
-              defaultMessage: 'Bottom'
-            }),
-            value: 'bottom'
-          },
-        ],
+      {
+        group: AggGroupNames.Buckets,
+        name: 'segment',
+        title: i18n.translate('kbnVislibVisTypes.pie.segmentTitle', { defaultMessage: 'Split slices' }),
+        min: 0,
+        max: Infinity,
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
       },
-      optionsTemplate: PieOptions,
-      schemas: new Schemas([
-        {
-          group: 'metrics',
-          name: 'metric',
-          title: i18n.translate('kbnVislibVisTypes.pie.metricTitle', { defaultMessage: 'Slice size' }),
-          min: 1,
-          max: 1,
-          aggFilter: ['sum', 'count', 'cardinality', 'top_hits'],
-          defaults: [
-            { schema: 'metric', type: 'count' }
-          ]
-        },
-        {
-          group: 'buckets',
-          name: 'segment',
-          title: i18n.translate('kbnVislibVisTypes.pie.segmentTitle', { defaultMessage: 'Split slices' }),
-          min: 0,
-          max: Infinity,
-          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
-        },
-        {
-          group: 'buckets',
-          name: 'split',
-          title: i18n.translate('kbnVislibVisTypes.pie.splitTitle', { defaultMessage: 'Split chart' }),
-          mustBeFirst: true,
-          min: 0,
-          max: 1,
-          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
-        }
-      ])
-    },
-    hierarchicalData: true,
-    responseHandler: 'vislib_slices',
-  });
-}
+      {
+        group: AggGroupNames.Buckets,
+        name: 'split',
+        title: i18n.translate('kbnVislibVisTypes.pie.splitTitle', { defaultMessage: 'Split chart' }),
+        mustBeFirst: true,
+        min: 0,
+        max: 1,
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
+      }
+    ])
+  },
+  hierarchicalData: true,
+  responseHandler: 'vislib_slices',
+};

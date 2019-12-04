@@ -18,7 +18,7 @@
  */
 
 import { PersistedState } from 'ui/persisted_state';
-import { AggConfigs } from 'ui/vis/agg_configs';
+import { AggConfigs } from 'ui/agg_types/agg_configs';
 import { Vis } from './../..';
 
 export interface VisOptionsProps<VisParamType = unknown> {

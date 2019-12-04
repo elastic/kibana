@@ -21,22 +21,17 @@ import $ from 'jquery';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import fixtures from 'fixtures/fake_hierarchical_data';
-import { legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
+import { legacyResponseHandlerProvider, tabifyAggResponse, npStart } from '../../legacy_imports';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { VisProvider } from 'ui/vis';
-import { tabifyAggResponse } from 'ui/agg_response/tabify';
-
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { createTableVisTypeDefinition } from '../../table_vis_type';
-import { setup as visualizationsSetup } from '../../../../visualizations/public/legacy';
+import { Vis } from '../../../../visualizations/public';
+import { getAngularModule } from '../../get_inner_angular';
+import { initTableVisLegacyModule } from '../../table_vis_legacy_module';
 
 describe('Table Vis - AggTableGroup Directive', function () {
   let $rootScope;
   let $compile;
-  let Vis;
   let indexPattern;
   let tableAggResponse;
-  let legacyDependencies;
   const tabifiedData = {};
 
   const init = () => {
@@ -58,19 +53,29 @@ describe('Table Vis - AggTableGroup Directive', function () {
     tabifiedData.threeTermBuckets = tabifyAggResponse(vis2.aggs, fixtures.threeTermBuckets);
   };
 
-  beforeEach(ngMock.module('kibana'));
+  const initLocalAngular = () => {
+    const tableVisModule = getAngularModule('kibana/table_vis', npStart.core);
+    initTableVisLegacyModule(tableVisModule);
+  };
+
+  beforeEach(initLocalAngular);
+
+  beforeEach(ngMock.module('kibana/table_vis'));
   beforeEach(
     ngMock.inject(function ($injector, Private) {
+      // this is provided in table_vis_controller.js
+      // tech debt that will be resolved through further deangularization and moving tests to jest
+      /*
       legacyDependencies = {
         // eslint-disable-next-line new-cap
         createAngularVisualization: VisFactoryProvider(Private).createAngularVisualization,
       };
 
       visualizationsSetup.types.registerVisualization(() => createTableVisTypeDefinition(legacyDependencies));
+      */
 
       tableAggResponse = legacyResponseHandlerProvider().handler;
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-      Vis = Private(VisProvider);
 
       $rootScope = $injector.get('$rootScope');
       $compile = $injector.get('$compile');

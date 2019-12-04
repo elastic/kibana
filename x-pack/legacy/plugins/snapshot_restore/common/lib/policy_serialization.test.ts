@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { deserializePolicy } from './policy_serialization';
+import { deserializePolicy, serializePolicy } from './policy_serialization';
 
 describe('repository_serialization', () => {
   describe('deserializePolicy()', () => {
@@ -25,6 +25,11 @@ describe('repository_serialization', () => {
                 foo: 'bar',
               },
             },
+            retention: {
+              expire_after: '14d',
+              max_count: 30,
+              min_count: 4,
+            },
           },
           next_execution: '2019-07-11T01:30:00.000Z',
           next_execution_millis: 1562722200000,
@@ -44,6 +49,12 @@ describe('repository_serialization', () => {
           metadata: {
             foo: 'bar',
           },
+        },
+        retention: {
+          expireAfterValue: 14,
+          expireAfterUnit: 'd',
+          maxCount: 30,
+          minCount: 4,
         },
         nextExecution: '2019-07-11T01:30:00.000Z',
         nextExecutionMillis: 1562722200000,
@@ -108,6 +119,50 @@ describe('repository_serialization', () => {
           snapshotName: 'daily-snap-2019.07.10-ya_cajvksbcidtlbnnxt9q',
           time: 1562722202548,
           timeString: '2019-07-10T01:30:02.548Z',
+        },
+      });
+    });
+  });
+
+  describe('serializePolicy()', () => {
+    it('should serialize a slm policy', () => {
+      expect(
+        serializePolicy({
+          name: 'my-snapshot-policy',
+          snapshotName: 'my-backups-snapshots',
+          schedule: '0 30 1 * * ?',
+          repository: 'my-backups',
+          config: {
+            indices: ['kibana-*'],
+            includeGlobalState: false,
+            ignoreUnavailable: false,
+            metadata: {
+              foo: 'bar',
+            },
+          },
+          retention: {
+            expireAfterValue: 14,
+            expireAfterUnit: 'd',
+            maxCount: 30,
+            minCount: 4,
+          },
+        })
+      ).toEqual({
+        name: 'my-backups-snapshots',
+        schedule: '0 30 1 * * ?',
+        repository: 'my-backups',
+        config: {
+          indices: ['kibana-*'],
+          include_global_state: false,
+          ignore_unavailable: false,
+          metadata: {
+            foo: 'bar',
+          },
+        },
+        retention: {
+          expire_after: '14d',
+          max_count: 30,
+          min_count: 4,
         },
       });
     });

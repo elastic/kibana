@@ -50,7 +50,7 @@ export class Timeline {
     request: FrameworkRequest,
     timelineId: string
   ): Promise<TimelineSavedObject> {
-    return await this.getSavedTimeline(request, timelineId);
+    return this.getSavedTimeline(request, timelineId);
   }
 
   public async getAllTimeline(
@@ -72,7 +72,7 @@ export class Timeline {
       sortOrder: sort != null ? sort.sortOrder : undefined,
     };
 
-    return await this.getAllSavedTimeline(request, options);
+    return this.getAllSavedTimeline(request, options);
   }
 
   public async persistFavorite(
@@ -94,7 +94,7 @@ export class Timeline {
           version,
           ...savedTimeline
         } = await this.getBasicSavedTimeline(request, timelineId);
-        timelineId = savedObjectId;
+        timelineId = savedObjectId; // eslint-disable-line no-param-reassign
         timeline = savedTimeline;
       }
 

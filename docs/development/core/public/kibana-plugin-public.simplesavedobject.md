@@ -18,7 +18,7 @@ export declare class SimpleSavedObject<T extends SavedObjectAttributes>
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(client, { id, type, version, attributes, error, references, migrationVersion })](./kibana-plugin-public.simplesavedobject.(constructor).md) |  | Constructs a new instance of the <code>SimpleSavedObject</code> class |
+|  [(constructor)(client, { id, type, version, attributes, error, references, migrationVersion })](./kibana-plugin-public.simplesavedobject._constructor_.md) |  | Constructs a new instance of the <code>SimpleSavedObject</code> class |
 
 ## Properties
 

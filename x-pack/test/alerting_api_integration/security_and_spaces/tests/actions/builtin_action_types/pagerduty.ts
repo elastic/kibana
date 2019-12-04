@@ -17,6 +17,7 @@ import {
 export default function pagerdutyTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('pagerduty action', () => {
     let simulatedActionId = '';
@@ -24,11 +25,9 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
 
     // need to wait for kibanaServer to settle ...
     before(() => {
-      const kibanaServer = getService('kibanaServer');
-      const kibanaUrl = kibanaServer.status && kibanaServer.status.kibanaServerUrl;
-      pagerdutySimulatorURL = `${kibanaUrl}${getExternalServiceSimulatorPath(
-        ExternalServiceSimulator.PAGERDUTY
-      )}`;
+      pagerdutySimulatorURL = kibanaServer.resolveUrl(
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY)
+      );
     });
 
     after(() => esArchiver.unload('empty_kibana'));
@@ -38,7 +37,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'A pagerduty action',
+          name: 'A pagerduty action',
           actionTypeId: '.pagerduty',
           secrets: {
             routingKey: 'pager-duty-routing-key',
@@ -48,7 +47,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
 
       expect(createdAction).to.eql({
         id: createdAction.id,
-        description: 'A pagerduty action',
+        name: 'A pagerduty action',
         actionTypeId: '.pagerduty',
         config: {
           apiUrl: null,
@@ -63,7 +62,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
-        description: 'A pagerduty action',
+        name: 'A pagerduty action',
         actionTypeId: '.pagerduty',
         config: {
           apiUrl: null,
@@ -76,7 +75,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'A pagerduty action',
+          name: 'A pagerduty action',
           actionTypeId: '.pagerduty',
           secrets: {},
         })
@@ -96,7 +95,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'A pagerduty simulator',
+          name: 'A pagerduty simulator',
           actionTypeId: '.pagerduty',
           config: {
             apiUrl: pagerdutySimulatorURL,

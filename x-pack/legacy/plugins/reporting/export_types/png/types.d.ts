@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
-import { LayoutInstance } from '../common/layouts/layout';
-import { ConditionalHeaders, KbnServer, JobDocPayload } from '../../types';
+import { LayoutInstance, LayoutParams } from '../common/layouts/layout';
+import { ConditionalHeaders, JobDocPayload, RequestFacade } from '../../types';
 
 // Job params: structure of incoming user request data
 export interface JobParamsPNG {
@@ -18,17 +17,10 @@ export interface JobParamsPNG {
 }
 
 // Job payload: structure of stored job data provided by create_job
-export interface JobDocPayloadPNG extends JobDocPayload {
+export interface JobDocPayloadPNG extends JobDocPayload<JobParamsPNG> {
   basePath?: string;
   browserTimezone: string;
   forceNow?: string;
-  layout: any;
+  layout: LayoutParams;
   relativeUrl: string;
-  objects: undefined;
 }
-
-export type ESQueueCreateJobFnPNG = (
-  jobParams: JobParamsPNG,
-  headers: ConditionalHeaders,
-  request: Request
-) => Promise<JobParamsPNG>;

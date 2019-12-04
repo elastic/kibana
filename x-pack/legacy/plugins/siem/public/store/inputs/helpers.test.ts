@@ -118,7 +118,7 @@ describe('Inputs', () => {
       };
       const newState: InputsModel = upsertQuery(newQuery);
 
-      expect(newState.global.query[0]).toEqual({
+      expect(newState.global.queries[0]).toEqual({
         id: 'myQuery',
         inspect: null,
         isInspected: false,
@@ -144,7 +144,7 @@ describe('Inputs', () => {
       newQuery.state = newState;
       newState = upsertQuery(newQuery);
 
-      expect(newState.global.query[0]).toEqual({
+      expect(newState.global.queries[0]).toEqual({
         id: 'myQuery',
         inspect: null,
         isInspected: false,
@@ -179,7 +179,7 @@ describe('Inputs', () => {
       };
       const newState: InputsModel = setIsInspected(newQuery);
 
-      expect(newState.global.query[0]).toEqual({
+      expect(newState.global.queries[0]).toEqual({
         id: 'myQuery',
         inspect: null,
         isInspected: true,
@@ -199,7 +199,7 @@ describe('Inputs', () => {
       };
       const newState: InputsModel = setIsInspected(newQuery);
 
-      expect(newState.global.query[0]).toEqual({
+      expect(newState.global.queries[0]).toEqual({
         id: 'myQuery',
         inspect: null,
         isInspected: false,
@@ -263,7 +263,7 @@ describe('Inputs', () => {
             duration: 300000,
             kind: 'manual',
           },
-          query: [
+          queries: [
             {
               id: 'myQuery',
               inspect: null,
@@ -280,6 +280,8 @@ describe('Inputs', () => {
             to: 1,
             toStr: 'now',
           },
+          query: { query: '', language: 'kuery' },
+          filters: [],
         },
         timeline: {
           linkTo: ['global'],
@@ -287,7 +289,7 @@ describe('Inputs', () => {
             duration: 300000,
             kind: 'manual',
           },
-          query: [],
+          queries: [],
           timerange: {
             from: 0,
             fromStr: 'now-24h',
@@ -295,6 +297,8 @@ describe('Inputs', () => {
             to: 1,
             toStr: 'now',
           },
+          query: { query: '', language: 'kuery' },
+          filters: [],
         },
       });
     });

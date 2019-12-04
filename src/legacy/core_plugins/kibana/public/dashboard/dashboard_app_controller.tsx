@@ -23,41 +23,25 @@ import React from 'react';
 import angular from 'angular';
 import { uniq } from 'lodash';
 
-import chrome from 'ui/chrome';
-import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
-import { toastNotifications } from 'ui/notify';
-
-// @ts-ignore
-import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
-import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
-
-import { docTitle } from 'ui/doc_title/doc_title';
-
-import { showSaveModal, SaveResult } from 'ui/saved_objects/show_saved_object_save_modal';
-
-import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
-import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
-
-import { timefilter } from 'ui/timefilter';
-
-import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing/get_unhashable_states_provider';
+import { Subscription } from 'rxjs';
 
 import {
+  subscribeWithScope,
+  ConfirmationButtonTypes,
+  showSaveModal,
+  SaveResult,
+  migrateLegacyQuery,
+  State,
   AppStateClass as TAppStateClass,
-  AppState as TAppState,
-} from 'ui/state_management/app_state';
+  KbnUrl,
+  SaveOptions,
+  SavedObjectFinder,
+  unhashUrl,
+} from './legacy_imports';
+import { FilterStateManager, IndexPattern } from '../../../data/public';
+import { Query, SavedQuery, IndexPatterns } from '../../../../../plugins/data/public';
 
-import { KbnUrl } from 'ui/url/kbn_url';
-import { Filter } from '@kbn/es-query';
-import { IndexPattern } from 'ui/index_patterns';
-import { IPrivate } from 'ui/private';
-import { Query, SavedQuery } from 'src/legacy/core_plugins/data/public';
-import { SaveOptions } from 'ui/saved_objects/saved_object';
-import { capabilities } from 'ui/capabilities';
-import { Subscription } from 'rxjs';
-import { npStart } from 'ui/new_platform';
-import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
-import { data } from '../../../data/public/setup';
+import './dashboard_empty_screen_directive';
 
 import {
   DashboardContainer,
@@ -72,7 +56,6 @@ import {
   ViewMode,
   openAddPanelFlyout,
 } from '../../../embeddable_api/public/np_ready/public';
-import { start } from '../../../embeddable_api/public/np_ready/public/legacy';
 import { DashboardAppState, NavAction, ConfirmModalFn, SavedDashboardPanel } from './types';
 
 import { showOptionsPopover } from './top_nav/show_options_popover';
@@ -87,8 +70,21 @@ import { getDashboardTitle } from './dashboard_strings';
 import { DashboardAppScope } from './dashboard_app';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../visualize/embeddable';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
+import { RenderDeps } from './application';
 
-const { savedQueryService } = data.search.services;
+export interface DashboardAppControllerDependencies extends RenderDeps {
+  $scope: DashboardAppScope;
+  $route: any;
+  $routeParams: any;
+  getAppState: any;
+  globalState: State;
+  indexPatterns: IndexPatterns;
+  dashboardConfig: any;
+  kbnUrl: KbnUrl;
+  AppStateClass: TAppStateClass<DashboardAppState>;
+  config: any;
+  confirmModal: ConfirmModalFn;
+}
 
 export class DashboardAppController {
   // Part of the exposed plugin API - do not remove without careful consideration.
@@ -101,61 +97,51 @@ export class DashboardAppController {
     $route,
     $routeParams,
     getAppState,
+    globalState,
     dashboardConfig,
     localStorage,
-    Private,
     kbnUrl,
     AppStateClass,
     indexPatterns,
     config,
     confirmModal,
-    courier,
-  }: {
-    courier: { fetch: () => void };
-    $scope: DashboardAppScope;
-    $route: any;
-    $routeParams: any;
-    getAppState: {
-      previouslyStored: () => TAppState | undefined;
-    };
-    indexPatterns: {
-      getDefault: () => Promise<IndexPattern>;
-    };
-    dashboardConfig: any;
-    localStorage: {
-      get: (prop: string) => unknown;
-    };
-    Private: IPrivate;
-    kbnUrl: KbnUrl;
-    AppStateClass: TAppStateClass<DashboardAppState>;
-    config: any;
-    confirmModal: ConfirmModalFn;
-  }) {
-    const queryFilter = Private(FilterBarQueryFilterProvider);
-    const getUnhashableStates = Private(getUnhashableStatesProvider);
-    const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
+    savedQueryService,
+    embeddables,
+    share,
+    dashboardCapabilities,
+    npDataStart: {
+      query: {
+        filterManager,
+        timefilter: { timefilter },
+      },
+    },
+    core: { notifications, overlays, chrome, injectedMetadata },
+  }: DashboardAppControllerDependencies) {
+    new FilterStateManager(globalState, getAppState, filterManager);
+    const queryFilter = filterManager;
 
     let lastReloadRequestTime = 0;
 
     const dash = ($scope.dash = $route.current.locals.dash);
     if (dash.id) {
-      docTitle.change(dash.title);
+      chrome.docTitle.change(dash.title);
     }
 
     const dashboardStateManager = new DashboardStateManager({
       savedDashboard: dash,
       AppStateClass,
       hideWriteControls: dashboardConfig.getHideWriteControls(),
+      kibanaVersion: injectedMetadata.getKibanaVersion(),
     });
 
     $scope.appState = dashboardStateManager.getAppState();
 
-    // The 'previouslyStored' check is so we only update the time filter on dashboard open, not during
+    // The hash check is so we only update the time filter on dashboard open, not during
     // normal cross app navigation.
-    if (dashboardStateManager.getIsTimeSavedWithDashboard() && !getAppState.previouslyStored()) {
+    if (dashboardStateManager.getIsTimeSavedWithDashboard() && !globalState.$inheritedGlobalState) {
       dashboardStateManager.syncTimefilterWithDashboard(timefilter);
     }
-    $scope.showSaveQuery = capabilities.get().dashboard.saveQuery as boolean;
+    $scope.showSaveQuery = dashboardCapabilities.saveQuery as boolean;
 
     const updateIndexPatterns = (container?: DashboardContainer) => {
       if (!container || isErrorEmbeddable(container)) {
@@ -179,7 +165,7 @@ export class DashboardAppController {
       } else {
         indexPatterns.getDefault().then(defaultIndexPattern => {
           $scope.$evalAsync(() => {
-            $scope.indexPatterns = [defaultIndexPattern];
+            $scope.indexPatterns = [defaultIndexPattern as IndexPattern];
           });
         });
       }
@@ -190,10 +176,7 @@ export class DashboardAppController {
         [key: string]: DashboardPanelState;
       } = {};
       dashboardStateManager.getPanels().forEach((panel: SavedDashboardPanel) => {
-        embeddablesMap[panel.panelIndex] = convertSavedDashboardPanelToPanelState(
-          panel,
-          dashboardStateManager.getUseMargins()
-        );
+        embeddablesMap[panel.panelIndex] = convertSavedDashboardPanelToPanelState(panel);
       });
       let expandedPanelId;
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
@@ -242,7 +225,7 @@ export class DashboardAppController {
     let outputSubscription: Subscription | undefined;
 
     const dashboardDom = document.getElementById('dashboardViewport');
-    const dashboardFactory = start.getEmbeddableFactory(
+    const dashboardFactory = embeddables.getEmbeddableFactory(
       DASHBOARD_CONTAINER_TYPE
     ) as DashboardContainerFactory;
     dashboardFactory
@@ -257,7 +240,7 @@ export class DashboardAppController {
             updateIndexPatterns(dashboardContainer);
           });
 
-          inputSubscription = dashboardContainer.getInput$().subscribe(async () => {
+          inputSubscription = dashboardContainer.getInput$().subscribe(() => {
             let dirty = false;
 
             // This has to be first because handleDashboardContainerChanges causes
@@ -265,7 +248,7 @@ export class DashboardAppController {
 
             // Add filters modifies the object passed to it, hence the clone deep.
             if (!_.isEqual(container.getInput().filters, queryFilter.getFilters())) {
-              await queryFilter.addFilters(_.cloneDeep(container.getInput().filters));
+              queryFilter.addFilters(_.cloneDeep(container.getInput().filters));
 
               dashboardStateManager.applyFilters($scope.model.query, container.getInput().filters);
               dirty = true;
@@ -331,12 +314,13 @@ export class DashboardAppController {
       getDashboardTitle(
         dashboardStateManager.getTitle(),
         dashboardStateManager.getViewMode(),
-        dashboardStateManager.getIsDirty(timefilter)
+        dashboardStateManager.getIsDirty(timefilter),
+        dashboardStateManager.isNew()
       );
 
     // Push breadcrumbs to new header navigation
     const updateBreadcrumbs = () => {
-      chrome.breadcrumbs.set([
+      chrome.setBreadcrumbs([
         {
           text: i18n.translate('kbn.dashboard.dashboardAppBreadcrumbsTitle', {
             defaultMessage: 'Dashboard',
@@ -417,15 +401,6 @@ export class DashboardAppController {
       queryFilter.setFilters(filters);
     };
 
-    $scope.onCancelApplyFilters = () => {
-      $scope.appState.$newFilters = [];
-    };
-
-    $scope.onApplyFilters = filters => {
-      queryFilter.addFiltersAndChangeTimeFilter(filters);
-      $scope.appState.$newFilters = [];
-    };
-
     $scope.onQuerySaved = savedQuery => {
       $scope.savedQuery = savedQuery;
     };
@@ -437,7 +412,6 @@ export class DashboardAppController {
     $scope.onClearSavedQuery = () => {
       delete $scope.savedQuery;
       dashboardStateManager.setSavedQueryId(undefined);
-      queryFilter.removeAll();
       dashboardStateManager.applyFilters(
         {
           query: '',
@@ -446,10 +420,12 @@ export class DashboardAppController {
         },
         []
       );
+      // Making this method sync broke the updates.
+      // Temporary fix, until we fix the complex state in this file.
+      setTimeout(queryFilter.removeAll, 0);
     };
 
     const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
-      queryFilter.setFilters(savedQuery.attributes.filters || []);
       dashboardStateManager.applyFilters(
         savedQuery.attributes.query,
         savedQuery.attributes.filters || []
@@ -463,6 +439,11 @@ export class DashboardAppController {
           timefilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
         }
       }
+      // Making this method sync broke the updates.
+      // Temporary fix, until we fix the complex state in this file.
+      setTimeout(() => {
+        queryFilter.setFilters(savedQuery.attributes.filters || []);
+      }, 0);
     };
 
     $scope.$watch('savedQuery', (newSavedQuery: SavedQuery) => {
@@ -481,7 +462,7 @@ export class DashboardAppController {
           $scope.savedQuery = undefined;
           return;
         }
-        if ($scope.savedQuery && newSavedQueryId !== $scope.savedQuery.id) {
+        if (!$scope.savedQuery || newSavedQueryId !== $scope.savedQuery.id) {
           savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery: SavedQuery) => {
             $scope.$evalAsync(() => {
               $scope.savedQuery = savedQuery;
@@ -492,12 +473,6 @@ export class DashboardAppController {
       }
     );
 
-    $scope.$watch('appState.$newFilters', (filters: Filter[] = []) => {
-      if (filters.length === 1) {
-        $scope.onApplyFilters(filters);
-      }
-    });
-
     $scope.indexPatterns = [];
 
     $scope.$watch('model.query', (newQuery: Query) => {
@@ -506,7 +481,7 @@ export class DashboardAppController {
     });
 
     $scope.$watch(
-      () => capabilities.get().dashboard.saveQuery,
+      () => dashboardCapabilities.saveQuery,
       newCapability => {
         $scope.showSaveQuery = newCapability as boolean;
       }
@@ -606,7 +581,7 @@ export class DashboardAppController {
       return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
         .then(function(id) {
           if (id) {
-            toastNotifications.addSuccess({
+            notifications.toasts.addSuccess({
               title: i18n.translate('kbn.dashboard.dashboardWasSavedSuccessMessage', {
                 defaultMessage: `Dashboard '{dashTitle}' was saved`,
                 values: { dashTitle: dash.title },
@@ -617,14 +592,14 @@ export class DashboardAppController {
             if (dash.id !== $routeParams.id) {
               kbnUrl.change(createDashboardEditUrl(dash.id));
             } else {
-              docTitle.change(dash.lastSavedTitle);
+              chrome.docTitle.change(dash.lastSavedTitle);
               updateViewMode(ViewMode.VIEW);
             }
           }
           return { id };
         })
         .catch(error => {
-          toastNotifications.addDanger({
+          notifications.toasts.addDanger({
             title: i18n.translate('kbn.dashboard.dashboardWasNotSavedDangerMessage', {
               defaultMessage: `Dashboard '{dashTitle}' was not saved. Error: {errorMessage}`,
               values: {
@@ -745,10 +720,10 @@ export class DashboardAppController {
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
         openAddPanelFlyout({
           embeddable: dashboardContainer,
-          getAllFactories: start.getEmbeddableFactories,
-          getFactory: start.getEmbeddableFactory,
-          notifications: npStart.core.notifications,
-          overlays: npStart.core.overlays,
+          getAllFactories: embeddables.getEmbeddableFactories,
+          getFactory: embeddables.getEmbeddableFactory,
+          notifications,
+          overlays,
           SavedObjectFinder,
         });
       }
@@ -768,14 +743,13 @@ export class DashboardAppController {
       });
     };
     navActions[TopNavIds.SHARE] = anchorElement => {
-      showShareContextMenu({
+      share.toggleShareContextMenu({
         anchorElement,
         allowEmbed: true,
         allowShortUrl: !dashboardConfig.getHideWriteControls(),
-        getUnhashableStates,
+        shareableUrl: unhashUrl(window.location.href),
         objectId: dash.id,
         objectType: 'dashboard',
-        shareContextMenuExtensions: shareContextMenuExtensions.raw,
         sharingData: {
           title: dash.title,
         },
@@ -796,8 +770,15 @@ export class DashboardAppController {
       },
     });
 
+    const visibleSubscription = chrome.getIsVisible$().subscribe(isVisible => {
+      $scope.$evalAsync(() => {
+        $scope.isVisible = isVisible;
+      });
+    });
+
     $scope.$on('$destroy', () => {
       updateSubscription.unsubscribe();
+      visibleSubscription.unsubscribe();
       $scope.timefilterSubscriptions$.unsubscribe();
 
       dashboardStateManager.destroy();

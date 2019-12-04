@@ -28,7 +28,7 @@ import { I18nStart } from '../i18n';
 import { NotificationsStart } from '../notifications';
 import { OverlayStart } from '../overlays';
 import { PluginOpaqueId } from '../plugins';
-import { UiSettingsClientContract } from '../ui_settings';
+import { IUiSettingsClient } from '../ui_settings';
 import { RecursiveReadonly } from '../../utils';
 
 /** @public */
@@ -80,6 +80,12 @@ export interface App extends AppBase {
    * @returns An unmounting function that will be called to unmount the application.
    */
   mount: (context: AppMountContext, params: AppMountParameters) => AppUnmount | Promise<AppUnmount>;
+
+  /**
+   * Hide the UI chrome when the application is mounted. Defaults to `false`.
+   * Takes precedence over chrome service visibility settings.
+   */
+  chromeless?: boolean;
 }
 
 /** @internal */
@@ -112,8 +118,17 @@ export interface AppMountContext {
     notifications: NotificationsStart;
     /** {@link OverlayStart} */
     overlays: OverlayStart;
-    /** {@link UiSettingsClient} */
-    uiSettings: UiSettingsClientContract;
+    /** {@link IUiSettingsClient} */
+    uiSettings: IUiSettingsClient;
+    /**
+     * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
+     * use *only* to retrieve config values. There is no way to set injected values
+     * in the new platform. Use the legacy platform API instead.
+     * @deprecated
+     * */
+    injectedMetadata: {
+      getInjectedVar: (name: string, defaultValue?: any) => unknown;
+    };
   };
 }
 
@@ -136,12 +151,13 @@ export interface AppMountParameters {
    * export class MyPlugin implements Plugin {
    *   setup({ application }) {
    *     application.register({
-   *     id: 'my-app',
-   *     async mount(context, params) {
-   *       const { renderApp } = await import('./application');
-   *       return renderApp(context, params);
-   *     },
-   *   });
+   *      id: 'my-app',
+   *      async mount(context, params) {
+   *        const { renderApp } = await import('./application');
+   *        return renderApp(context, params);
+   *      },
+   *    });
+   *  }
    * }
    * ```
    *
@@ -193,7 +209,7 @@ export interface ApplicationSetup {
    */
   registerMountContext<T extends keyof AppMountContext>(
     contextName: T,
-    provider: IContextProvider<AppMountContext, T>
+    provider: IContextProvider<App['mount'], T>
   ): void;
 }
 
@@ -224,7 +240,7 @@ export interface InternalApplicationSetup {
   registerMountContext<T extends keyof AppMountContext>(
     pluginOpaqueId: PluginOpaqueId,
     contextName: T,
-    provider: IContextProvider<AppMountContext, T>
+    provider: IContextProvider<App['mount'], T>
   ): void;
 }
 
@@ -261,7 +277,7 @@ export interface ApplicationStart {
    */
   registerMountContext<T extends keyof AppMountContext>(
     contextName: T,
-    provider: IContextProvider<AppMountContext, T>
+    provider: IContextProvider<App['mount'], T>
   ): void;
 }
 
@@ -291,7 +307,7 @@ export interface InternalApplicationStart
   registerMountContext<T extends keyof AppMountContext>(
     pluginOpaqueId: PluginOpaqueId,
     contextName: T,
-    provider: IContextProvider<AppMountContext, T>
+    provider: IContextProvider<App['mount'], T>
   ): void;
 
   // Internal APIs

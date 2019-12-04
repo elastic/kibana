@@ -19,8 +19,8 @@ export interface ChromeNavLinks
 |  [enableForcedAppSwitcherNavigation()](./kibana-plugin-public.chromenavlinks.enableforcedappswitchernavigation.md) | Enable forced navigation mode, which will trigger a page refresh when a nav link is clicked and only the hash is updated. |
 |  [get(id)](./kibana-plugin-public.chromenavlinks.get.md) | Get the state of a navlink at this point in time. |
 |  [getAll()](./kibana-plugin-public.chromenavlinks.getall.md) | Get the current state of all navlinks. |
-|  [getForceAppSwitcherNavigation$()](./kibana-plugin-public.chromenavlinks.getforceappswitchernavigation$.md) | An observable of the forced app switcher state. |
-|  [getNavLinks$()](./kibana-plugin-public.chromenavlinks.getnavlinks$.md) | Get an observable for a sorted list of navlinks. |
+|  [getForceAppSwitcherNavigation$()](./kibana-plugin-public.chromenavlinks.getforceappswitchernavigation_.md) | An observable of the forced app switcher state. |
+|  [getNavLinks$()](./kibana-plugin-public.chromenavlinks.getnavlinks_.md) | Get an observable for a sorted list of navlinks. |
 |  [has(id)](./kibana-plugin-public.chromenavlinks.has.md) | Check whether or not a navlink exists. |
 |  [showOnly(id)](./kibana-plugin-public.chromenavlinks.showonly.md) | Remove all navlinks except the one matching the given id. |
 |  [update(id, values)](./kibana-plugin-public.chromenavlinks.update.md) | Update the navlink for the given id with the updated attributes. Returns the updated navlink or <code>undefined</code> if it does not exist. |

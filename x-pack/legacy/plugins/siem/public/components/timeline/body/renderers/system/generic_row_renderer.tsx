@@ -7,11 +7,14 @@
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import * as i18n from './translations';
+import { DnsRequestEventDetails } from '../dns/dns_request_event_details';
+import { EndgameSecurityEventDetails } from '../endgame/endgame_security_event_details';
+import { isFileEvent, isNillEmptyOrNotFinite } from '../helpers';
 import { RowRenderer, RowRendererContainer } from '../row_renderer';
-import { Row } from '../helpers';
+
 import { SystemGenericDetails } from './generic_details';
 import { SystemGenericFileDetails } from './generic_file_details';
+import * as i18n from './translations';
 
 export const createGenericSystemRowRenderer = ({
   actionName,
@@ -31,7 +34,7 @@ export const createGenericSystemRowRenderer = ({
     );
   },
   renderRow: ({ browserFields, data, children, timelineId }) => (
-    <Row className="euiTableRow">
+    <>
       {children}
       <RowRendererContainer>
         <SystemGenericDetails
@@ -42,7 +45,75 @@ export const createGenericSystemRowRenderer = ({
           timelineId={timelineId}
         />
       </RowRendererContainer>
-    </Row>
+    </>
+  ),
+});
+
+export const createEndgameProcessRowRenderer = ({
+  actionName,
+  text,
+}: {
+  actionName: string;
+  text: string;
+}): RowRenderer => ({
+  isInstance: ecs => {
+    const action: string | null | undefined = get('event.action[0]', ecs);
+    const category: string | null | undefined = get('event.category[0]', ecs);
+    return (
+      category != null &&
+      category.toLowerCase() === 'process' &&
+      action != null &&
+      action.toLowerCase() === actionName
+    );
+  },
+  renderRow: ({ browserFields, data, children, timelineId }) => (
+    <>
+      {children}
+      <RowRendererContainer>
+        <SystemGenericFileDetails
+          browserFields={browserFields}
+          data={data}
+          contextId={`endgame-process-${actionName}-${timelineId}`}
+          showMessage={false}
+          text={text}
+          timelineId={timelineId}
+        />
+      </RowRendererContainer>
+    </>
+  ),
+});
+
+export const createFimRowRenderer = ({
+  actionName,
+  text,
+}: {
+  actionName: string;
+  text: string;
+}): RowRenderer => ({
+  isInstance: ecs => {
+    const action: string | null | undefined = get('event.action[0]', ecs);
+    const category: string | null | undefined = get('event.category[0]', ecs);
+    const dataset: string | null | undefined = get('event.dataset[0]', ecs);
+    return (
+      isFileEvent({ eventCategory: category, eventDataset: dataset }) &&
+      action != null &&
+      action.toLowerCase() === actionName
+    );
+  },
+  renderRow: ({ browserFields, data, children, timelineId }) => (
+    <>
+      {children}
+      <RowRendererContainer>
+        <SystemGenericFileDetails
+          browserFields={browserFields}
+          data={data}
+          contextId={`fim-${actionName}-${timelineId}`}
+          showMessage={false}
+          text={text}
+          timelineId={timelineId}
+        />
+      </RowRendererContainer>
+    </>
   ),
 });
 
@@ -64,7 +135,7 @@ export const createGenericFileRowRenderer = ({
     );
   },
   renderRow: ({ browserFields, data, children, timelineId }) => (
-    <Row className="euiTableRow">
+    <>
       {children}
       <RowRendererContainer>
         <SystemGenericFileDetails
@@ -75,7 +146,85 @@ export const createGenericFileRowRenderer = ({
           timelineId={timelineId}
         />
       </RowRendererContainer>
-    </Row>
+    </>
+  ),
+});
+
+export const createSocketRowRenderer = ({
+  actionName,
+  text,
+}: {
+  actionName: string;
+  text: string;
+}): RowRenderer => ({
+  isInstance: ecs => {
+    const action: string | null | undefined = get('event.action[0]', ecs);
+    return action != null && action.toLowerCase() === actionName;
+  },
+  renderRow: ({ browserFields, data, children, timelineId }) => (
+    <>
+      {children}
+      <RowRendererContainer>
+        <SystemGenericFileDetails
+          browserFields={browserFields}
+          data={data}
+          contextId={`socket-${actionName}-${timelineId}`}
+          text={text}
+          timelineId={timelineId}
+        />
+      </RowRendererContainer>
+    </>
+  ),
+});
+
+export const createSecurityEventRowRenderer = ({
+  actionName,
+}: {
+  actionName: string;
+}): RowRenderer => ({
+  isInstance: ecs => {
+    const category: string | null | undefined = get('event.category[0]', ecs);
+    const action: string | null | undefined = get('event.action[0]', ecs);
+    return (
+      category != null &&
+      category.toLowerCase() === 'authentication' &&
+      action != null &&
+      action.toLowerCase() === actionName
+    );
+  },
+  renderRow: ({ browserFields, data, children, timelineId }) => (
+    <>
+      {children}
+      <RowRendererContainer>
+        <EndgameSecurityEventDetails
+          browserFields={browserFields}
+          data={data}
+          contextId={`authentication-${actionName}-${timelineId}`}
+          timelineId={timelineId}
+        />
+      </RowRendererContainer>
+    </>
+  ),
+});
+
+export const createDnsRowRenderer = (): RowRenderer => ({
+  isInstance: ecs => {
+    const dnsQuestionType: string | null | undefined = get('dns.question.type[0]', ecs);
+    const dnsQuestionName: string | null | undefined = get('dns.question.name[0]', ecs);
+    return !isNillEmptyOrNotFinite(dnsQuestionType) && !isNillEmptyOrNotFinite(dnsQuestionName);
+  },
+  renderRow: ({ browserFields, data, children, timelineId }) => (
+    <>
+      {children}
+      <RowRendererContainer>
+        <DnsRequestEventDetails
+          browserFields={browserFields}
+          data={data}
+          contextId={`dns-request-${timelineId}`}
+          timelineId={timelineId}
+        />
+      </RowRendererContainer>
+    </>
   ),
 });
 
@@ -89,9 +238,39 @@ const systemProcessStartedRowRenderer = createGenericFileRowRenderer({
   text: i18n.PROCESS_STARTED,
 });
 
+const endgameProcessStartedRowRenderer = createEndgameProcessRowRenderer({
+  actionName: 'creation_event',
+  text: i18n.PROCESS_STARTED,
+});
+
 const systemProcessStoppedRowRenderer = createGenericFileRowRenderer({
   actionName: 'process_stopped',
   text: i18n.PROCESS_STOPPED,
+});
+
+const endgameProcessTerminationRowRenderer = createEndgameProcessRowRenderer({
+  actionName: 'termination_event',
+  text: i18n.TERMINATED_PROCESS,
+});
+
+const endgameFileCreateEventRowRenderer = createFimRowRenderer({
+  actionName: 'file_create_event',
+  text: i18n.CREATED_FILE,
+});
+
+const fimFileCreateEventRowRenderer = createFimRowRenderer({
+  actionName: 'created',
+  text: i18n.CREATED_FILE,
+});
+
+const endgameFileDeleteEventRowRenderer = createFimRowRenderer({
+  actionName: 'file_delete_event',
+  text: i18n.DELETED_FILE,
+});
+
+const fimFileDeletedEventRowRenderer = createFimRowRenderer({
+  actionName: 'deleted',
+  text: i18n.DELETED_FILE,
 });
 
 const systemExistingRowRenderer = createGenericFileRowRenderer({
@@ -99,15 +278,53 @@ const systemExistingRowRenderer = createGenericFileRowRenderer({
   text: i18n.EXISTING_PROCESS,
 });
 
-const systemSocketOpenedRowRenderer = createGenericFileRowRenderer({
+const systemSocketOpenedRowRenderer = createSocketRowRenderer({
   actionName: 'socket_opened',
   text: i18n.SOCKET_OPENED,
 });
 
-const systemSocketClosedRowRenderer = createGenericFileRowRenderer({
+const systemSocketClosedRowRenderer = createSocketRowRenderer({
   actionName: 'socket_closed',
   text: i18n.SOCKET_CLOSED,
 });
+
+const endgameIpv4ConnectionAcceptEventRowRenderer = createSocketRowRenderer({
+  actionName: 'ipv4_connection_accept_event',
+  text: i18n.ACCEPTED_A_CONNECTION_VIA,
+});
+
+const endgameIpv6ConnectionAcceptEventRowRenderer = createSocketRowRenderer({
+  actionName: 'ipv6_connection_accept_event',
+  text: i18n.ACCEPTED_A_CONNECTION_VIA,
+});
+
+const endgameIpv4DisconnectReceivedEventRowRenderer = createSocketRowRenderer({
+  actionName: 'ipv4_disconnect_received_event',
+  text: i18n.DISCONNECTED_VIA,
+});
+
+const endgameIpv6DisconnectReceivedEventRowRenderer = createSocketRowRenderer({
+  actionName: 'ipv6_disconnect_received_event',
+  text: i18n.DISCONNECTED_VIA,
+});
+
+const endgameAdminLogonRowRenderer = createSecurityEventRowRenderer({
+  actionName: 'admin_logon',
+});
+
+const endgameExplicitUserLogonRowRenderer = createSecurityEventRowRenderer({
+  actionName: 'explicit_user_logon',
+});
+
+const endgameUserLogoffRowRenderer = createSecurityEventRowRenderer({
+  actionName: 'user_logoff',
+});
+
+const endgameUserLogonRowRenderer = createSecurityEventRowRenderer({
+  actionName: 'user_logon',
+});
+
+const dnsRowRenderer = createDnsRowRenderer();
 
 const systemExistingUserRowRenderer = createGenericSystemRowRenderer({
   actionName: 'existing_user',
@@ -196,6 +413,21 @@ const systemUserRemovedRowRenderer = createGenericSystemRowRenderer({
 });
 
 export const systemRowRenderers: RowRenderer[] = [
+  dnsRowRenderer,
+  endgameAdminLogonRowRenderer,
+  endgameExplicitUserLogonRowRenderer,
+  endgameFileCreateEventRowRenderer,
+  endgameFileDeleteEventRowRenderer,
+  endgameIpv4ConnectionAcceptEventRowRenderer,
+  endgameIpv6ConnectionAcceptEventRowRenderer,
+  endgameIpv4DisconnectReceivedEventRowRenderer,
+  endgameIpv6DisconnectReceivedEventRowRenderer,
+  endgameProcessStartedRowRenderer,
+  endgameProcessTerminationRowRenderer,
+  endgameUserLogoffRowRenderer,
+  endgameUserLogonRowRenderer,
+  fimFileCreateEventRowRenderer,
+  fimFileDeletedEventRowRenderer,
   systemAcceptedRowRenderer,
   systemBootRowRenderer,
   systemErrorRowRenderer,

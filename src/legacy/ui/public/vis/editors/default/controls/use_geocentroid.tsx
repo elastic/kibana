@@ -23,14 +23,19 @@ import { EuiSwitch, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from '..';
 
-function UseGeocentroidParamEditor({ value, setValue }: AggParamEditorProps<boolean>) {
+function UseGeocentroidParamEditor({ value = false, setValue }: AggParamEditorProps<boolean>) {
   const label = i18n.translate('common.ui.aggTypes.placeMarkersOffGridLabel', {
     defaultMessage: 'Place markers off grid (use geocentroid)',
   });
 
   return (
     <EuiFormRow compressed>
-      <EuiSwitch label={label} checked={value} onChange={ev => setValue(ev.target.checked)} />
+      <EuiSwitch
+        compressed={true}
+        label={label}
+        checked={value}
+        onChange={ev => setValue(ev.target.checked)}
+      />
     </EuiFormRow>
   );
 }

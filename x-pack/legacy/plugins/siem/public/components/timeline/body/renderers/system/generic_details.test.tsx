@@ -44,7 +44,7 @@ describe('SystemGenericDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Braden@zeek-london[generic-text-123]6278with resultfailureSource128.199.212.120'
+        'Braden@zeek-london[generic-text-123](6278)with resultfailureSource128.199.212.120'
       );
     });
   });
@@ -69,6 +69,7 @@ describe('SystemGenericDetails', () => {
               sshMethod="[sshMethod-123]"
               sshSignature="[sshSignature-123]"
               text="[generic-text-123]"
+              userDomain="[userDomain-123]"
               userName="[username-123]"
               workingDirectory="[working-directory-123]"
             />
@@ -76,7 +77,7 @@ describe('SystemGenericDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        '[username-123]@[hostname-123]in[working-directory-123][generic-text-123][processName-123]with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
+        '[username-123]\\[userDomain-123]@[hostname-123]in[working-directory-123][generic-text-123][processName-123](123)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
       );
     });
 
@@ -99,6 +100,7 @@ describe('SystemGenericDetails', () => {
               sshMethod={null}
               sshSignature={null}
               text={null}
+              userDomain={null}
               userName={null}
               workingDirectory={null}
             />
@@ -127,6 +129,7 @@ describe('SystemGenericDetails', () => {
               sshMethod={null}
               sshSignature={null}
               text={null}
+              userDomain={null}
               userName={null}
               workingDirectory={null}
             />
@@ -155,6 +158,7 @@ describe('SystemGenericDetails', () => {
               sshMethod={null}
               sshSignature={null}
               text={null}
+              userDomain={null}
               userName={null}
               workingDirectory={null}
             />
@@ -183,6 +187,7 @@ describe('SystemGenericDetails', () => {
               sshMethod={null}
               sshSignature={null}
               text={null}
+              userDomain={null}
               userName={null}
               workingDirectory={null}
             />
@@ -211,6 +216,7 @@ describe('SystemGenericDetails', () => {
               sshMethod={null}
               sshSignature={null}
               text={null}
+              userDomain={null}
               userName={null}
               workingDirectory={null}
             />
@@ -241,6 +247,7 @@ describe('SystemGenericDetails', () => {
               sshMethod={null}
               sshSignature={null}
               text={null}
+              userDomain={null}
               userName={null}
               workingDirectory={null}
             />
@@ -271,6 +278,7 @@ describe('SystemGenericDetails', () => {
               sshMethod={null}
               sshSignature={null}
               text={null}
+              userDomain={null}
               userName={null}
               workingDirectory={null}
             />
@@ -295,12 +303,13 @@ describe('SystemGenericDetails', () => {
               packageName="[packageName-123]"
               packageSummary="[packageSummary-123]"
               packageVersion="[packageVersion-123]"
-              processExecutable="[packageVersion-123]"
+              processExecutable="[processExecutable-123]"
               processPid={null}
               processName={null}
               sshMethod={null}
               sshSignature={null}
               text={null}
+              userDomain={null}
               userName={null}
               workingDirectory={null}
             />
@@ -308,7 +317,7 @@ describe('SystemGenericDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        '[hostname-123][packageVersion-123]with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
+        '[hostname-123][processExecutable-123]with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
       );
     });
 
@@ -325,12 +334,13 @@ describe('SystemGenericDetails', () => {
               packageName="[packageName-123]"
               packageSummary="[packageSummary-123]"
               packageVersion="[packageVersion-123]"
-              processExecutable="[packageVersion-123]"
+              processExecutable="[processExecutable-123]"
               processPid={123}
               processName={null}
               sshMethod={null}
               sshSignature={null}
               text={null}
+              userDomain={null}
               userName={null}
               workingDirectory={null}
             />
@@ -338,7 +348,7 @@ describe('SystemGenericDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        '[hostname-123][packageVersion-123]with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
+        '[hostname-123][processExecutable-123](123)with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
       );
     });
 
@@ -355,12 +365,13 @@ describe('SystemGenericDetails', () => {
               packageName="[packageName-123]"
               packageSummary="[packageSummary-123]"
               packageVersion="[packageVersion-123]"
-              processExecutable="[packageVersion-123]"
+              processExecutable="[processExecutable-123]"
               processPid={123}
               processName="[processName-123]"
               sshMethod={null}
               sshSignature={null}
               text={null}
+              userDomain={null}
               userName={null}
               workingDirectory={null}
             />
@@ -368,7 +379,7 @@ describe('SystemGenericDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        '[hostname-123][processName-123]with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
+        '[hostname-123][processName-123](123)with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
       );
     });
 
@@ -385,12 +396,13 @@ describe('SystemGenericDetails', () => {
               packageName="[packageName-123]"
               packageSummary="[packageSummary-123]"
               packageVersion="[packageVersion-123]"
-              processExecutable="[packageVersion-123]"
+              processExecutable="[processExecutable-123]"
               processPid={123}
               processName="[processName-123]"
               sshMethod="[sshMethod-123]"
               sshSignature={null}
               text={null}
+              userDomain={null}
               userName={null}
               workingDirectory={null}
             />
@@ -398,7 +410,7 @@ describe('SystemGenericDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        '[hostname-123][processName-123]with result[outcome-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
+        '[hostname-123][processName-123](123)with result[outcome-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
       );
     });
 
@@ -415,12 +427,13 @@ describe('SystemGenericDetails', () => {
               packageName="[packageName-123]"
               packageSummary="[packageSummary-123]"
               packageVersion="[packageVersion-123]"
-              processExecutable="[packageVersion-123]"
+              processExecutable="[processExecutable-123]"
               processPid={123}
               processName="[processName-123]"
               sshMethod="[sshMethod-123]"
               sshSignature="[sshSignature-123]"
               text={null}
+              userDomain={null}
               userName={null}
               workingDirectory={null}
             />
@@ -428,7 +441,7 @@ describe('SystemGenericDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        '[hostname-123][processName-123]with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
+        '[hostname-123][processName-123](123)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
       );
     });
 
@@ -445,12 +458,13 @@ describe('SystemGenericDetails', () => {
               packageName="[packageName-123]"
               packageSummary="[packageSummary-123]"
               packageVersion="[packageVersion-123]"
-              processExecutable="[packageVersion-123]"
+              processExecutable="[processExecutable-123]"
               processPid={123}
               processName="[processName-123]"
               sshMethod="[sshMethod-123]"
               sshSignature="[sshSignature-123]"
               text="[text-123]"
+              userDomain={null}
               userName={null}
               workingDirectory={null}
             />
@@ -458,11 +472,11 @@ describe('SystemGenericDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        '[hostname-123][text-123][processName-123]with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
+        '[hostname-123][text-123][processName-123](123)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
       );
     });
 
-    test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processPid, processName, sshMethod, sshSignature, text, username', () => {
+    test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processPid, processName, sshMethod, sshSignature, text, userDomain, username', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <div>
@@ -475,12 +489,13 @@ describe('SystemGenericDetails', () => {
               packageName="[packageName-123]"
               packageSummary="[packageSummary-123]"
               packageVersion="[packageVersion-123]"
-              processExecutable="[packageVersion-123]"
+              processExecutable="[processExecutable-123]"
               processPid={123}
               processName="[processName-123]"
               sshMethod="[sshMethod-123]"
               sshSignature="[sshSignature-123]"
               text="[text-123]"
+              userDomain="[userDomain-123]"
               userName="[username-123]"
               workingDirectory={null}
             />
@@ -488,11 +503,11 @@ describe('SystemGenericDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        '[username-123]@[hostname-123][text-123][processName-123]with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
+        '[username-123]\\[userDomain-123]@[hostname-123][text-123][processName-123](123)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
       );
     });
 
-    test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processPid, processName, sshMethod, sshSignature, text, username, working-directory', () => {
+    test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processPid, processName, sshMethod, sshSignature, text, userDomain, username, working-directory', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <div>
@@ -505,12 +520,13 @@ describe('SystemGenericDetails', () => {
               packageName="[packageName-123]"
               packageSummary="[packageSummary-123]"
               packageVersion="[packageVersion-123]"
-              processExecutable="[packageVersion-123]"
+              processExecutable="[processExecutable-123]"
               processPid={123}
               processName="[processName-123]"
               sshMethod="[sshMethod-123]"
               sshSignature="[sshSignature-123]"
               text="[text-123]"
+              userDomain="[userDomain-123]"
               userName="[username-123]"
               workingDirectory="[working-directory-123]"
             />
@@ -518,7 +534,7 @@ describe('SystemGenericDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        '[username-123]@[hostname-123]in[working-directory-123][text-123][processName-123]with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
+        '[username-123]\\[userDomain-123]@[hostname-123]in[working-directory-123][text-123][processName-123](123)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
       );
     });
   });

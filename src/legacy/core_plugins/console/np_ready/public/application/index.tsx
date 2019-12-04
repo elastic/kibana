@@ -18,8 +18,8 @@
  */
 
 import React from 'react';
-import { AppContextProvider } from './context';
-import { EditorContextProvider } from './containers/editor/context';
+import { NotificationsSetup } from 'src/core/public';
+import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';
 import { Main } from './containers';
 import { createStorage, createHistory, createSettings, Settings } from '../services';
 
@@ -28,8 +28,12 @@ export function legacyBackDoorToSettings() {
   return settingsRef;
 }
 
-export function boot(deps: { docLinkVersion: string; I18nContext: any; ResizeChecker: any }) {
-  const { I18nContext, ResizeChecker } = deps;
+export function boot(deps: {
+  docLinkVersion: string;
+  I18nContext: any;
+  notifications: NotificationsSetup;
+}) {
+  const { I18nContext, notifications, docLinkVersion } = deps;
 
   const storage = createStorage({
     engine: window.localStorage,
@@ -41,13 +45,18 @@ export function boot(deps: { docLinkVersion: string; I18nContext: any; ResizeChe
 
   return (
     <I18nContext>
-      <AppContextProvider
-        value={{ ...deps, services: { storage, history, settings }, ResizeChecker }}
+      <ServicesContextProvider
+        value={{
+          docLinkVersion,
+          services: { storage, history, settings, notifications },
+        }}
       >
-        <EditorContextProvider settings={settings.toJSON()}>
-          <Main />
-        </EditorContextProvider>
-      </AppContextProvider>
+        <RequestContextProvider>
+          <EditorContextProvider settings={settings.toJSON()}>
+            <Main />
+          </EditorContextProvider>
+        </RequestContextProvider>
+      </ServicesContextProvider>
     </I18nContext>
   );
 }

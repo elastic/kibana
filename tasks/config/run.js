@@ -60,6 +60,7 @@ module.exports = function (grunt) {
     '--plugins.initialize=false',
     '--optimize.bundleFilter=tests',
     '--server.port=5610',
+    '--migrations.skip=true'
   ];
 
   const NODE = 'node';
@@ -253,7 +254,7 @@ module.exports = function (grunt) {
       cmd: NODE,
       args: [
         'scripts/functional_tests',
-        '--config', 'test/interpreter_functional/config.js',
+        '--config', 'test/interpreter_functional/config.ts',
         '--bail',
         '--debug',
         '--kibana-install-dir', KIBANA_INSTALL_DIR,

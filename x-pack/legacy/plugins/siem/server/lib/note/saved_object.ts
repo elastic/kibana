@@ -65,7 +65,7 @@ export class Note {
   }
 
   public async getNote(request: FrameworkRequest, noteId: string): Promise<NoteSavedObject> {
-    return await this.getSavedNote(request, noteId);
+    return this.getSavedNote(request, noteId);
   }
 
   public async getNotesByEventId(
@@ -109,7 +109,7 @@ export class Note {
       sortField: sort != null ? sort.sortField : undefined,
       sortOrder: sort != null ? sort.sortOrder : undefined,
     };
-    return await this.getAllSavedNote(request, options);
+    return this.getAllSavedNote(request, options);
   }
 
   public async persistNote(

@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { i18n } from '@kbn/i18n';
 
 export const EMS_CATALOGUE_PATH = 'ems/catalogue';
 
@@ -39,21 +40,35 @@ export const LAYER_TYPE = {
   HEATMAP: 'HEATMAP'
 };
 
+export const SORT_ORDER = {
+  ASC: 'asc',
+  DESC: 'desc',
+};
+
 export const EMS_TMS = 'EMS_TMS';
 export const EMS_FILE = 'EMS_FILE';
 export const ES_GEO_GRID = 'ES_GEO_GRID';
 export const ES_SEARCH = 'ES_SEARCH';
 export const ES_PEW_PEW = 'ES_PEW_PEW';
+
+export const FIELD_ORIGIN = {
+  SOURCE: 'source',
+  JOIN: 'join'
+};
+
 export const SOURCE_DATA_ID_ORIGIN = 'source';
 
 export const GEOJSON_FILE = 'GEOJSON_FILE';
+
+export const MIN_ZOOM = 0;
+export const MAX_ZOOM = 24;
 
 export const DECIMAL_DEGREES_PRECISION = 5; // meters precision
 export const ZOOM_PRECISION = 2;
 export const ES_SIZE_LIMIT = 10000;
 
 export const FEATURE_ID_PROPERTY_NAME = '__kbn__feature_id__';
-export const FEATURE_VISIBLE_PROPERTY_NAME = '__kbn__isvisible__';
+export const FEATURE_VISIBLE_PROPERTY_NAME = '__kbn_isvisibleduetojoin__';
 
 export const MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER = '_';
 
@@ -90,4 +105,25 @@ export const EMPTY_FEATURE_COLLECTION = {
 export const DRAW_TYPE = {
   BOUNDS: 'BOUNDS',
   POLYGON: 'POLYGON'
+};
+
+export const METRIC_TYPE = {
+  AVG: 'avg',
+  COUNT: 'count',
+  MAX: 'max',
+  MIN: 'min',
+  SUM: 'sum',
+  UNIQUE_COUNT: 'cardinality',
+};
+
+export const COUNT_AGG_TYPE = METRIC_TYPE.COUNT;
+export const COUNT_PROP_LABEL =  i18n.translate('xpack.maps.aggs.defaultCountLabel', {
+  defaultMessage: 'count'
+});
+
+export const COUNT_PROP_NAME = 'doc_count';
+
+export const STYLE_TYPE = {
+  'STATIC': 'STATIC',
+  'DYNAMIC': 'DYNAMIC'
 };

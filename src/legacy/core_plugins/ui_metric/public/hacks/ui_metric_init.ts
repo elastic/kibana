@@ -20,15 +20,26 @@
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
-import { createAnalyticsReporter, setTelemetryReporter } from '../services/telemetry_analytics';
+import { kfetch } from 'ui/kfetch';
+import {
+  createAnalyticsReporter,
+  setTelemetryReporter,
+  trackUserAgent,
+} from '../services/telemetry_analytics';
+import { isUnauthenticated } from '../../../telemetry/public/services';
 
 function telemetryInit($injector: any) {
-  const localStorage = $injector.get('localStorage');
+  const uiMetricEnabled = chrome.getInjected('uiMetricEnabled');
   const debug = chrome.getInjected('debugUiMetric');
-  const $http = $injector.get('$http');
-  const basePath = chrome.getBasePath();
-  const uiReporter = createAnalyticsReporter({ localStorage, $http, basePath, debug });
+  if (!uiMetricEnabled || isUnauthenticated()) {
+    return;
+  }
+  const localStorage = $injector.get('localStorage');
+
+  const uiReporter = createAnalyticsReporter({ localStorage, debug, kfetch });
   setTelemetryReporter(uiReporter);
+  uiReporter.start();
+  trackUserAgent('kibana');
 }
 
 uiModules.get('kibana').run(telemetryInit);

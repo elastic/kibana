@@ -32,8 +32,6 @@ export interface Query {
 
   getFilterBar?: FilterBar | null;
 
-  getErrorsList?: ErrorListItem[] | null;
-
   getMonitorPageTitle?: MonitorPageTitle | null;
   /** Fetches the current state of Uptime monitors for the given parameters. */
   getMonitorStates?: MonitorSummaryResult | null;
@@ -478,8 +476,6 @@ export interface FilterBar {
   ids?: string[] | null;
   /** The location values users have configured for the agents. */
   locations?: string[] | null;
-  /** The names users have configured for the monitors. */
-  names?: string[] | null;
   /** The ports of the monitored endpoints. */
   ports?: number[] | null;
   /** The schemes used by the monitors. */
@@ -488,25 +484,6 @@ export interface FilterBar {
   statuses?: string[] | null;
   /** The list of URLs */
   urls?: string[] | null;
-}
-/** A representation of an error state for a monitor. */
-export interface ErrorListItem {
-  /** The number of times this error has occurred. */
-  count: number;
-  /** The most recent message associated with this error type. */
-  latestMessage?: string | null;
-  /** The location assigned to the agent reporting this error. */
-  location?: string | null;
-  /** The ID of the monitor reporting the error. */
-  monitorId?: string | null;
-  /** The name configured for the monitor by the user. */
-  name?: string | null;
-  /** The status code, if available, of the error request. */
-  statusCode?: string | null;
-  /** When the most recent error state occurred. */
-  timestamp?: string | null;
-  /** What kind of error the monitor reported. */
-  type: string;
 }
 
 export interface MonitorPageTitle {
@@ -518,6 +495,10 @@ export interface MonitorPageTitle {
 }
 /** The primary object returned for monitor states. */
 export interface MonitorSummaryResult {
+  /** Used to go to the next page of results */
+  prevPagePagination?: string | null;
+  /** Used to go to the previous page of results */
+  nextPagePagination?: string | null;
   /** The objects representing the state of a series of heartbeat monitors. */
   summaries?: MonitorSummary[] | null;
   /** The number of summaries. */
@@ -725,6 +706,8 @@ export interface GetMonitorsQueryArgs {
   dateRangeEnd: string;
 
   filters?: string | null;
+
+  statusFilter?: string | null;
 }
 export interface GetSnapshotQueryArgs {
   dateRangeStart: string;
@@ -732,6 +715,8 @@ export interface GetSnapshotQueryArgs {
   dateRangeEnd: string;
 
   filters?: string | null;
+
+  statusFilter?: string | null;
 }
 export interface GetSnapshotHistogramQueryArgs {
   dateRangeStart: string;
@@ -739,6 +724,8 @@ export interface GetSnapshotHistogramQueryArgs {
   dateRangeEnd: string;
 
   filters?: string | null;
+
+  statusFilter?: string | null;
 
   monitorId?: string | null;
 }
@@ -766,13 +753,6 @@ export interface GetFilterBarQueryArgs {
 
   dateRangeEnd: string;
 }
-export interface GetErrorsListQueryArgs {
-  dateRangeStart: string;
-
-  dateRangeEnd: string;
-
-  filters?: string | null;
-}
 export interface GetMonitorPageTitleQueryArgs {
   monitorId: string;
 }
@@ -781,7 +761,25 @@ export interface GetMonitorStatesQueryArgs {
 
   dateRangeEnd: string;
 
+  pagination?: string | null;
+
   filters?: string | null;
+
+  statusFilter?: string | null;
+}
+
+// ====================================================
+// Enums
+// ====================================================
+
+export enum CursorDirection {
+  AFTER = 'AFTER',
+  BEFORE = 'BEFORE',
+}
+
+export enum SortOrder {
+  ASC = 'ASC',
+  DESC = 'DESC',
 }
 
 // ====================================================

@@ -18,12 +18,12 @@ import {
   EuiDescriptionListDescription,
   EuiHorizontalRule,
   EuiFlexGroup,
-  EuiToolTip,
-  EuiIcon
 } from '@elastic/eui';
 import { ClusterItemContainer, DisabledIfNoDataAndInSetupModeLink } from './helpers';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { SetupModeTooltip } from '../../setup_mode/tooltip';
+import { BEATS_SYSTEM_ID } from '../../../../common/constants';
 
 export function BeatsPanel(props) {
   const { setupMode } = props;
@@ -36,48 +36,16 @@ export function BeatsPanel(props) {
   const goToBeats = () => props.changeUrl('beats');
   const goToInstances = () => props.changeUrl('beats/beats');
 
-  const setupModeBeatsData = get(setupMode.data, 'beats');
-  let setupModeInstancesData = null;
-  if (setupMode.enabled && setupMode.data) {
-    const {
-      totalUniqueInstanceCount,
-      totalUniqueFullyMigratedCount,
-      totalUniquePartiallyMigratedCount
-    } = setupModeBeatsData;
-    const hasInstances = totalUniqueInstanceCount > 0 || get(setupModeBeatsData, 'detected.mightExist', false);
-    const allMonitoredByMetricbeat = totalUniqueInstanceCount > 0 &&
-      (totalUniqueFullyMigratedCount === totalUniqueInstanceCount || totalUniquePartiallyMigratedCount === totalUniqueInstanceCount);
-    const internalCollectionOn = totalUniquePartiallyMigratedCount > 0;
-    if (hasInstances && (!allMonitoredByMetricbeat || internalCollectionOn)) {
-      let tooltipText = null;
-
-      if (!allMonitoredByMetricbeat) {
-        tooltipText = i18n.translate('xpack.monitoring.cluster.overview.beatsPanel.setupModeNodesTooltip.oneInternal', {
-          defaultMessage: `There's at least one instance that isn't being monitored using Metricbeat. Click the flag
-          icon to visit the instances listing page and find out more information about the status of each instance.`
-        });
-      }
-      else if (internalCollectionOn) {
-        tooltipText = i18n.translate('xpack.monitoring.cluster.overview.beatsPanel.setupModeNodesTooltip.disableInternal', {
-          defaultMessage: `All instances are being monitored using Metricbeat but internal collection still needs to be turned
-          off. Click the flag icon to visit the instances listing page and disable internal collection.`
-        });
-      }
-
-      setupModeInstancesData = (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            position="top"
-            content={tooltipText}
-          >
-            <EuiLink onClick={goToInstances}>
-              <EuiIcon type="flag" color="warning"/>
-            </EuiLink>
-          </EuiToolTip>
-        </EuiFlexItem>
-      );
-    }
-  }
+  const setupModeData = get(setupMode.data, 'beats');
+  const setupModeTooltip = setupMode && setupMode.enabled
+    ? (
+      <SetupModeTooltip
+        setupModeData={setupModeData}
+        productName={BEATS_SYSTEM_ID}
+        badgeClickAction={goToInstances}
+      />
+    )
+    : null;
 
   const beatTypes = props.beats.types.map((beat, index) => {
     return [
@@ -111,7 +79,7 @@ export function BeatsPanel(props) {
               <h3>
                 <DisabledIfNoDataAndInSetupModeLink
                   setupModeEnabled={setupMode.enabled}
-                  setupModeData={setupModeBeatsData}
+                  setupModeData={setupModeData}
                   onClick={goToBeats}
                   aria-label={i18n.translate('xpack.monitoring.cluster.overview.beatsPanel.overviewLinkAriaLabel', {
                     defaultMessage: 'Beats Overview'
@@ -174,7 +142,7 @@ export function BeatsPanel(props) {
                   </h3>
                 </EuiTitle>
               </EuiFlexItem>
-              {setupModeInstancesData}
+              {setupModeTooltip}
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">

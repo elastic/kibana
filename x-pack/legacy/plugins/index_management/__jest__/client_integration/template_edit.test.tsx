@@ -5,8 +5,6 @@
  */
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import axiosXhrAdapter from 'axios/lib/adapters/xhr';
-import axios from 'axios';
 
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { TemplateFormTestBed } from './helpers/template_form.helpers';
@@ -17,27 +15,7 @@ const UPDATED_INDEX_PATTERN = ['updatedIndexPattern'];
 
 const { setup } = pageHelpers.templateEdit;
 
-const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
-
-jest.mock('ui/index_patterns', () => ({
-  ILLEGAL_CHARACTERS: 'ILLEGAL_CHARACTERS',
-  CONTAINS_SPACES: 'CONTAINS_SPACES',
-  validateIndexPattern: () => {
-    return {
-      errors: {},
-    };
-  },
-}));
-
-jest.mock('ui/chrome', () => ({
-  breadcrumbs: { set: () => {} },
-  addBasePath: (path: string) => path || '/api/index_management',
-}));
-
-jest.mock('../../public/services/api', () => ({
-  ...jest.requireActual('../../public/services/api'),
-  getHttpClient: () => mockHttpClient,
-}));
+jest.mock('ui/new_platform');
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -55,16 +33,14 @@ jest.mock('@elastic/eui', () => ({
   EuiCodeEditor: (props: any) => (
     <input
       data-test-subj="mockCodeEditor"
-      onChange={async (syntheticEvent: any) => {
+      onChange={(syntheticEvent: any) => {
         props.onChange(syntheticEvent.jsonString);
       }}
     />
   ),
 }));
 
-// We need to skip the tests until react 16.9.0 is released
-// which supports asynchronous code inside act()
-describe.skip('<TemplateEdit />', () => {
+describe('<TemplateEdit />', () => {
   let testBed: TemplateFormTestBed;
 
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -79,11 +55,10 @@ describe.skip('<TemplateEdit />', () => {
   });
 
   beforeEach(async () => {
-    testBed = await setup();
-
     httpRequestsMockHelpers.setLoadTemplateResponse(templateToEdit);
 
-    // @ts-ignore (remove when react 16.9.0 is released)
+    testBed = await setup();
+
     await act(async () => {
       await nextTick();
       testBed.component.update();
@@ -98,38 +73,37 @@ describe.skip('<TemplateEdit />', () => {
     expect(find('pageTitle').text()).toEqual(`Edit template '${name}'`);
   });
 
+  it('should set the nameField to readOnly', () => {
+    const { find } = testBed;
+
+    const nameInput = find('nameField.input');
+    expect(nameInput.props().disabled).toEqual(true);
+  });
+
   describe('form payload', () => {
     beforeEach(async () => {
-      const { actions, find } = testBed;
+      const { actions } = testBed;
 
-      // Step 1 (logistics)
-      const nameInput = find('nameInput');
-      expect(nameInput.props().readOnly).toEqual(true);
+      await act(async () => {
+        // Complete step 1 (logistics)
+        await actions.completeStepOne({
+          indexPatterns: UPDATED_INDEX_PATTERN,
+        });
 
-      actions.completeStepOne({
-        indexPatterns: UPDATED_INDEX_PATTERN,
-      });
+        // Step 2 (index settings)
+        await actions.completeStepTwo(JSON.stringify(SETTINGS));
 
-      // Step 2 (index settings)
-      actions.completeStepTwo({
-        settings: JSON.stringify(SETTINGS),
-      });
+        // Step 3 (mappings)
+        await actions.completeStepThree(JSON.stringify(MAPPINGS));
 
-      // Step 3 (mappings)
-      actions.completeStepThree({
-        mappings: JSON.stringify(MAPPINGS),
-      });
-
-      // Step 4 (aliases)
-      actions.completeStepFour({
-        aliases: JSON.stringify(ALIASES),
+        // Step 4 (aliases)
+        await actions.completeStepFour(JSON.stringify(ALIASES));
       });
     });
 
     it('should send the correct payload with changed values', async () => {
       const { actions } = testBed;
 
-      // @ts-ignore (remove when react 16.9.0 is released)
       await act(async () => {
         actions.clickSubmitButton();
         await nextTick();
@@ -139,17 +113,18 @@ describe.skip('<TemplateEdit />', () => {
 
       const { version, order } = templateToEdit;
 
-      expect(latestRequest.requestBody).toEqual(
-        JSON.stringify({
-          name: TEMPLATE_NAME,
-          version,
-          order,
-          indexPatterns: UPDATED_INDEX_PATTERN,
-          settings: JSON.stringify(SETTINGS),
-          mappings: JSON.stringify(MAPPINGS),
-          aliases: JSON.stringify(ALIASES),
-        })
-      );
+      const expected = JSON.stringify({
+        name: TEMPLATE_NAME,
+        version,
+        order,
+        indexPatterns: UPDATED_INDEX_PATTERN,
+        isManaged: false,
+        settings: SETTINGS,
+        mappings: MAPPINGS,
+        aliases: ALIASES,
+      });
+
+      expect(JSON.parse(latestRequest.requestBody).body).toEqual(expected);
     });
   });
 });

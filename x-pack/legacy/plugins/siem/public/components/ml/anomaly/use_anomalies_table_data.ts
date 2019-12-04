@@ -71,50 +71,62 @@ export const useAnomaliesTableData = ({
   const [anomalyScore] = useKibanaUiSetting(DEFAULT_ANOMALY_SCORE);
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
 
-  const fetchFunc = async (
-    influencersInput: InfluencerInput[],
-    criteriaFieldsInput: CriteriaFields[],
-    earliestMs: number,
-    latestMs: number
-  ) => {
-    if (userPermissions && !skip && siemJobs.length > 0) {
-      try {
-        const data = await anomaliesTableData(
-          {
-            jobIds: siemJobs,
-            criteriaFields: criteriaFieldsInput,
-            aggregationInterval: 'auto',
-            threshold: getThreshold(anomalyScore, threshold),
-            earliestMs,
-            latestMs,
-            influencers: influencersInput,
-            dateFormatTz: timezone,
-            maxRecords: 500,
-            maxExamples: 10,
-          },
-          {
-            'kbn-version': kbnVersion,
-          }
-        );
-        setTableData(data);
-        setLoading(false);
-      } catch (error) {
-        errorToToaster({ title: i18n.SIEM_TABLE_FETCH_FAILURE, error, dispatchToaster });
-        setLoading(false);
-      }
-    } else if (!userPermissions) {
-      setLoading(false);
-    } else if (siemJobs.length === 0) {
-      setLoading(false);
-    } else {
-      setTableData(null);
-      setLoading(true);
-    }
-  };
+  const siemJobIds = siemJobs.filter(job => job.isInstalled).map(job => job.id);
 
   useEffect(() => {
+    let isSubscribed = true;
+    const abortCtrl = new AbortController();
     setLoading(true);
-    fetchFunc(influencers, criteriaFields, startDate, endDate);
+
+    async function fetchAnomaliesTableData(
+      influencersInput: InfluencerInput[],
+      criteriaFieldsInput: CriteriaFields[],
+      earliestMs: number,
+      latestMs: number
+    ) {
+      if (userPermissions && !skip && siemJobIds.length > 0) {
+        try {
+          const data = await anomaliesTableData(
+            {
+              jobIds: siemJobIds,
+              criteriaFields: criteriaFieldsInput,
+              aggregationInterval: 'auto',
+              threshold: getThreshold(anomalyScore, threshold),
+              earliestMs,
+              latestMs,
+              influencers: influencersInput,
+              dateFormatTz: timezone,
+              maxRecords: 500,
+              maxExamples: 10,
+            },
+            kbnVersion,
+            abortCtrl.signal
+          );
+          if (isSubscribed) {
+            setTableData(data);
+            setLoading(false);
+          }
+        } catch (error) {
+          if (isSubscribed) {
+            errorToToaster({ title: i18n.SIEM_TABLE_FETCH_FAILURE, error, dispatchToaster });
+            setLoading(false);
+          }
+        }
+      } else if (!userPermissions && isSubscribed) {
+        setLoading(false);
+      } else if (siemJobIds.length === 0 && isSubscribed) {
+        setLoading(false);
+      } else if (isSubscribed) {
+        setTableData(null);
+        setLoading(true);
+      }
+    }
+
+    fetchAnomaliesTableData(influencers, criteriaFields, startDate, endDate);
+    return () => {
+      isSubscribed = false;
+      abortCtrl.abort();
+    };
   }, [
     influencersOrCriteriaToString(influencers),
     influencersOrCriteriaToString(criteriaFields),
@@ -122,7 +134,7 @@ export const useAnomaliesTableData = ({
     endDate,
     skip,
     userPermissions,
-    siemJobs.join(),
+    siemJobIds.sort().join(),
   ]);
 
   return [loading, tableData];

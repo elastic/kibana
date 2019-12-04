@@ -37,7 +37,7 @@ export const FIELD = i18n.translate('xpack.siem.fieldBrowser.fieldLabel', {
 });
 
 export const FIELDS = i18n.translate('xpack.siem.fieldBrowser.fieldsTitle', {
-  defaultMessage: 'Fields',
+  defaultMessage: 'Columns',
 });
 
 export const FIELDS_COUNT = (totalCount: number) =>

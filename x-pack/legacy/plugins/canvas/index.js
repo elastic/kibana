@@ -5,7 +5,7 @@
  */
 
 import { resolve } from 'path';
-import init from './init';
+import { init } from './init';
 import { mappings } from './server/mappings';
 import { CANVAS_APP, CANVAS_TYPE, CUSTOM_ELEMENT_TYPE } from './common/lib';
 import { migrations } from './migrations';
@@ -22,7 +22,7 @@ export function canvas(kibana) {
         description: 'Data driven workpads',
         icon: 'plugins/canvas/icon.svg',
         euiIconType: 'canvasApp',
-        main: 'plugins/canvas/app',
+        main: 'plugins/canvas/legacy_start',
       },
       interpreter: [
         'plugins/canvas/browser_functions',

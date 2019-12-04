@@ -49,7 +49,7 @@ function isNullOrUndefined(value?: number | null): value is null | undefined {
   return value === null || value === undefined;
 }
 
-interface YExtentsProps {
+export interface YExtentsProps {
   scale: Scale;
   setScale: SetScale;
   setMultipleValidity: (paramName: string, isValid: boolean) => void;
@@ -80,7 +80,7 @@ function YExtents({ scale, setScale, setMultipleValidity }: YExtentsProps) {
     setMultipleValidity('yExtents', isValid);
 
     return () => setMultipleValidity('yExtents', true);
-  }, [isValid]);
+  }, [isValid, setMultipleValidity]);
 
   return (
     <EuiFormRow error={errors} isInvalid={!!errors.length} fullWidth compressed>

@@ -12,8 +12,7 @@ import template from './index.html';
 import { I18nContext } from 'ui/i18n';
 import { Listing } from '../../../components/logstash/listing';
 import { SetupModeRenderer } from '../../../components/renderers';
-import { LOGSTASH_SYSTEM_ID } from '../../../../../telemetry/common/constants';
-import { CODE_PATH_LOGSTASH } from '../../../../common/constants';
+import { CODE_PATH_LOGSTASH, LOGSTASH_SYSTEM_ID } from '../../../../common/constants';
 
 uiRoutes.when('/logstash/nodes', {
   template,
@@ -46,7 +45,7 @@ uiRoutes.when('/logstash/nodes', {
               scope={$scope}
               injector={$injector}
               productName={LOGSTASH_SYSTEM_ID}
-              render={({ setupMode, flyoutComponent }) => (
+              render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
                 <Fragment>
                   {flyoutComponent}
                   <Listing
@@ -58,6 +57,7 @@ uiRoutes.when('/logstash/nodes', {
                     onTableChange={this.onTableChange}
                     angular={{ kbnUrl, scope: $scope }}
                   />
+                  {bottomBarComponent}
                 </Fragment>
               )}
             />

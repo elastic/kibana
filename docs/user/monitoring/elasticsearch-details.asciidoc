@@ -27,7 +27,7 @@ highlighted in yellow or red.
 TIP: Conditions that require your attention are listed at the top of the
 Clusters page. You can also set up watches to alert you when the status
 of your cluster changes. To learn how, see
-{stack-ov}/watch-cluster-status.html[Watch Your Cluster Health].
+{ref}/watch-cluster-status.html[Watching the status of an {es} cluster].
 
 The panel at the top shows the current cluster statistics, the charts show the
 search and indexing performance over time, and the table at the bottom shows
@@ -145,7 +145,7 @@ You can also see advanced information, which contains the results from the
 [role="screenshot"] 
 image::user/monitoring/images/monitoring-ccr-shard.png["Cross-cluster replication shard details",link="images/monitoring-ccr-shard.png"]
 
-For more information, see {stack-ov}/xpack-ccr.html[Cross-cluster replication].
+For more information, see {ref}/xpack-ccr.html[{ccr-cap}].
 
 [float]
 [[logs-monitor-page]]

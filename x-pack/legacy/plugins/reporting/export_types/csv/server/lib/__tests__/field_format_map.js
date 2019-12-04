@@ -6,10 +6,8 @@
 
 import expect from '@kbn/expect';
 
-import { FieldFormat } from '../../../../../../../../../src/plugins/data/common/field_formats';
 import { FieldFormatsService } from '../../../../../../../../../src/legacy/ui/field_formats/mixin/field_formats_service';
-import { createBytesFormat } from '../../../../../../../../../src/legacy/core_plugins/kibana/common/field_formats/types/bytes';
-import { createNumberFormat } from '../../../../../../../../../src/legacy/core_plugins/kibana/common/field_formats/types/number';
+import { BytesFormat, NumberFormat } from '../../../../../../../../../src/plugins/data/server';
 
 import { fieldFormatMapFactory } from '../field_format_map';
 
@@ -34,7 +32,7 @@ describe('field format map', function () {
   const getConfig = (key) => configMock[key];
   const testValue = '4000';
 
-  const fieldFormats = new FieldFormatsService([createBytesFormat(FieldFormat), createNumberFormat(FieldFormat)], getConfig);
+  const fieldFormats = new FieldFormatsService([BytesFormat, NumberFormat], getConfig);
 
   const formatMap = fieldFormatMapFactory(indexPatternSavedObject, fieldFormats);
 

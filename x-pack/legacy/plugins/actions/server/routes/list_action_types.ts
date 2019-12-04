@@ -6,15 +6,13 @@
 
 import Hapi from 'hapi';
 
-export function listActionTypesRoute(server: Hapi.Server) {
-  server.route({
-    method: 'GET',
-    path: `/api/action/types`,
-    options: {
-      tags: ['access:actions-read'],
-    },
-    async handler(request: Hapi.Request) {
-      return request.server.plugins.actions!.listTypes();
-    },
-  });
-}
+export const listActionTypesRoute = {
+  method: 'GET',
+  path: `/api/action/types`,
+  config: {
+    tags: ['access:actions-read'],
+  },
+  async handler(request: Hapi.Request) {
+    return request.server.plugins.actions!.start.listTypes();
+  },
+};

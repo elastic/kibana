@@ -28,35 +28,41 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
 
   class GraphPage {
     async selectIndexPattern(pattern: string) {
-      await find.clickDisplayedByCssSelector('.gphIndexSelect');
-      await find.clickByCssSelector('.gphIndexSelect > option[label="' + pattern + '"]');
+      await testSubjects.click('graphDatasourceButton');
+      await testSubjects.click(`savedObjectTitle${pattern.split(' ').join('-')}`);
+      // wait till add fields button becomes available, then the index pattern is loaded completely
+      await testSubjects.waitForAttributeToChange(
+        'graph-add-field-button',
+        'aria-disabled',
+        'false'
+      );
     }
 
     async clickAddField() {
       await retry.try(async () => {
-        await find.clickByCssSelector('#addVertexFieldButton');
-        // make sure the fieldSelectionList is not hidden
-        await testSubjects.exists('fieldSelectionList');
+        await testSubjects.click('graph-add-field-button');
+        await testSubjects.existOrFail('graph-field-search', { timeout: 3000 });
       });
     }
 
     async selectField(field: string) {
-      await find.clickDisplayedByCssSelector(
-        'select[id="fieldList"] > option[label="' + field + '"]'
-      );
-      await find.clickDisplayedByCssSelector('button[ng-click="addFieldToSelection()"]');
+      await testSubjects.setValue('graph-field-search', field);
+      await find.clickDisplayedByCssSelector(`[title="${field}"]`);
     }
 
-    async addField(field: string) {
+    async addFields(fields: string[]) {
       log.debug('click Add Field icon');
       await this.clickAddField();
-      log.debug('select field ' + field);
-      await this.selectField(field);
+      for (const field of fields) {
+        log.debug('select field ' + field);
+        await this.selectField(field);
+      }
     }
 
     async query(str: string) {
-      await find.setValue('input.kuiLocalSearchInput', str);
-      await find.clickDisplayedByCssSelector('button.kuiLocalSearchButton');
+      await testSubjects.click('queryInput');
+      await testSubjects.setValue('queryInput', str);
+      await testSubjects.click('graph-explore-button');
     }
 
     private getPositionAsString(x: string, y: string) {
@@ -125,7 +131,7 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
     async getGraphObjects() {
       await this.stopLayout();
       const graphElements = await find.allByCssSelector(
-        '#svgRootGroup line, #svgRootGroup circle, text.gphNode__label'
+        '#graphSvg line, #graphSvg circle, #graphSvg text.gphNode__label'
       );
       const nodes: Node[] = [];
       const nodePositionMap: Record<string, number> = {};
@@ -154,7 +160,7 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
           const [sourcePosition, targetPosition] = await this.getLinePositions(element);
           const lineStyle = await element.getAttribute('style');
           // grep out the width of the connection from the style attribute
-          const strokeWidth = Number(/stroke-width: (\d+(\.\d+)?)px/.exec(lineStyle)![1]);
+          const strokeWidth = Number(/stroke-width: ?(\d+(\.\d+)?)/.exec(lineStyle)![1]);
           edges.push({
             element,
             width: strokeWidth,
@@ -175,18 +181,24 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
     }
 
     async createWorkspace() {
-      await testSubjects.click('graphCreateWorkspacePromptButton');
+      await testSubjects.click('graphCreateGraphPromptButton');
     }
 
     async newGraph() {
       log.debug('Click New Workspace');
-      await testSubjects.click('graphNewButton');
-      await PageObjects.common.sleep(1000);
+      await retry.try(async () => {
+        await testSubjects.click('graphNewButton');
+        await testSubjects.existOrFail('confirmModal', { timeout: 3000 });
+      });
       await PageObjects.common.clickConfirmOnModal();
+      await testSubjects.existOrFail('graphGuidancePanel');
     }
 
     async saveGraph(name: string) {
-      await testSubjects.click('graphSaveButton');
+      await retry.try(async () => {
+        await testSubjects.click('graphSaveButton');
+        await testSubjects.existOrFail('savedObjectTitle', { timeout: 3000 });
+      });
       await testSubjects.setValue('savedObjectTitle', name);
       await testSubjects.click('confirmSaveSavedObjectButton');
 
@@ -213,7 +225,10 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
     }
 
     async goToListingPage() {
-      await testSubjects.click('graphHomeBreadcrumb');
+      await retry.try(async () => {
+        await testSubjects.click('breadcrumb graphHomeBreadcrumb first');
+        await testSubjects.existOrFail('graphLandingPage', { timeout: 3000 });
+      });
     }
 
     async openGraph(name: string) {
@@ -224,11 +239,10 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
     }
 
     async deleteGraph(name: string) {
-      await this.goToListingPage();
-      await this.searchForWorkspaceWithName(name);
       await testSubjects.click('checkboxSelectAll');
       await this.clickDeleteSelectedWorkspaces();
       await PageObjects.common.clickConfirmOnModal();
+      await testSubjects.find('graphCreateGraphPromptButton');
     }
 
     async getWorkspaceCount() {

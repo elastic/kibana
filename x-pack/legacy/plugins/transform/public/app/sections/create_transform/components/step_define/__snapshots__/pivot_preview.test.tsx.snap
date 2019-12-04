@@ -1,0 +1,44 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Transform: <PivotPreview /> Minimal initialization 1`] = `
+<div>
+  <ContextProvider
+    value={
+      Object {
+        "initialized": false,
+      }
+    }
+  >
+    <Component
+      aggs={
+        Object {
+          "the-agg-name": Object {
+            "agg": "avg",
+            "aggName": "the-group-by-agg-name",
+            "dropDownName": "the-group-by-drop-down-name",
+            "field": "the-agg-field",
+          },
+        }
+      }
+      groupBy={
+        Object {
+          "the-group-by-name": Object {
+            "agg": "terms",
+            "aggName": "the-group-by-agg-name",
+            "dropDownName": "the-group-by-drop-down-name",
+            "field": "the-group-by-field",
+          },
+        }
+      }
+      query={
+        Object {
+          "query_string": Object {
+            "default_operator": "AND",
+            "query": "the-query",
+          },
+        }
+      }
+    />
+  </ContextProvider>
+</div>
+`;

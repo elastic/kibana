@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import React, { Component, Fragment } from 'react';
 
 import {
@@ -15,24 +14,24 @@ import {
   EuiSpacer,
   EuiText,
   EuiTextColor,
+  EuiTextAlign,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { indexPatternService } from '../../../kibana_services';
-import { Storage } from 'ui/storage';
 
-import { SearchBar } from 'plugins/data';
+import { start as data } from '../../../../../../../../src/legacy/core_plugins/data/public/legacy';
+const { SearchBar } = data.ui;
 
-const settings = chrome.getUiSettingsClient();
-const localStorage = new Storage(window.localStorage);
+import { npStart } from 'ui/new_platform';
 
 export class FilterEditor extends Component {
-
   state = {
     isPopoverOpen: false,
     indexPatterns: [],
-  }
+  };
 
   componentDidMount() {
     this._isMounted = true;
@@ -44,13 +43,14 @@ export class FilterEditor extends Component {
   }
 
   _loadIndexPatterns = async () => {
-    const indexPatternIds = this.props.layer.getIndexPatternIds();
+    // Filter only effects source so only load source indices.
+    const indexPatternIds = this.props.layer.getSource().getIndexPatternIds();
     const indexPatterns = [];
-    const getIndexPatternPromises = indexPatternIds.map(async (indexPatternId) => {
+    const getIndexPatternPromises = indexPatternIds.map(async indexPatternId => {
       try {
         const indexPattern = await indexPatternService.get(indexPatternId);
         indexPatterns.push(indexPattern);
-      } catch(err) {
+      } catch (err) {
         // unable to fetch index pattern
       }
     });
@@ -62,25 +62,26 @@ export class FilterEditor extends Component {
     }
 
     this.setState({ indexPatterns });
-  }
+  };
 
   _toggle = () => {
     this.setState(prevState => ({
       isPopoverOpen: !prevState.isPopoverOpen,
     }));
-  }
+  };
 
   _close = () => {
     this.setState({ isPopoverOpen: false });
-  }
+  };
 
   _onQueryChange = ({ query }) => {
     this.props.setLayerQuery(this.props.layer.getId(), query);
     this._close();
-  }
+  };
 
   _renderQueryPopover() {
     const layerQuery = this.props.layer.getQuery();
+    const { uiSettings } = npStart.core;
 
     return (
       <EuiPopover
@@ -89,23 +90,22 @@ export class FilterEditor extends Component {
         isOpen={this.state.isPopoverOpen}
         closePopover={this._close}
         anchorPosition="leftCenter"
+        ownFocus
       >
         <div className="mapFilterEditor" data-test-subj="mapFilterEditor">
           <SearchBar
-            uiSettings={settings}
             showFilterBar={false}
             showDatePicker={false}
             showQueryInput={true}
-            query={layerQuery ? layerQuery : { language: settings.get('search:queryLanguage'), query: '' }}
+            query={
+              layerQuery
+                ? layerQuery
+                : { language: uiSettings.get('search:queryLanguage'), query: '' }
+            }
             onQuerySubmit={this._onQueryChange}
-            appName="maps"
             indexPatterns={this.state.indexPatterns}
-            store={localStorage}
             customSubmitButton={
-              <EuiButton
-                fill
-                data-test-subj="mapFilterEditorSubmitButton"
-              >
+              <EuiButton fill data-test-subj="mapFilterEditorSubmitButton">
                 <FormattedMessage
                   id="xpack.maps.layerPanel.filterEditor.queryBarSubmitButtonLabel"
                   defaultMessage="Set filter"
@@ -122,7 +122,7 @@ export class FilterEditor extends Component {
     const query = this.props.layer.getQuery();
     if (!query || !query.query) {
       return (
-        <EuiText>
+        <EuiText size="s" textAlign="center">
           <p>
             <EuiTextColor color="subdued">
               <FormattedMessage
@@ -132,15 +132,13 @@ export class FilterEditor extends Component {
             </EuiTextColor>
           </p>
         </EuiText>
-
       );
     }
 
     return (
       <Fragment>
-        <EuiCodeBlock paddingSize="s">
-          {query.query}
-        </EuiCodeBlock>
+        <EuiCodeBlock paddingSize="s">{query.query}</EuiCodeBlock>
+
         <EuiSpacer size="m" />
       </Fragment>
     );
@@ -148,23 +146,25 @@ export class FilterEditor extends Component {
 
   _renderOpenButton() {
     const query = this.props.layer.getQuery();
-    const openButtonLabel = query && query.query
-      ? i18n.translate('xpack.maps.layerPanel.filterEditor.editFilterButtonLabel', {
-        defaultMessage: 'Edit filter'
-      })
-      : i18n.translate('xpack.maps.layerPanel.filterEditor.addFilterButtonLabel', {
-        defaultMessage: 'Add filter'
-      });
+    const openButtonLabel =
+      query && query.query
+        ? i18n.translate('xpack.maps.layerPanel.filterEditor.editFilterButtonLabel', {
+          defaultMessage: 'Edit filter',
+        })
+        : i18n.translate('xpack.maps.layerPanel.filterEditor.addFilterButtonLabel', {
+          defaultMessage: 'Add filter',
+        });
+    const openButtonIcon = query && query.query ? 'pencil' : 'plusInCircleFilled';
 
     return (
-      <EuiButton
+      <EuiButtonEmpty
+        size="xs"
         onClick={this._toggle}
         data-test-subj="mapLayerPanelOpenFilterEditorButton"
-        iconType="arrowDown"
-        iconSide="right"
+        iconType={openButtonIcon}
       >
         {openButtonLabel}
-      </EuiButton>
+      </EuiButtonEmpty>
     );
   }
 
@@ -180,12 +180,11 @@ export class FilterEditor extends Component {
           </h5>
         </EuiTitle>
 
-        <EuiSpacer size="m"/>
+        <EuiSpacer size="m" />
 
         {this._renderQuery()}
 
-        {this._renderQueryPopover()}
-
+        <EuiTextAlign textAlign="center">{this._renderQueryPopover()}</EuiTextAlign>
       </Fragment>
     );
   }

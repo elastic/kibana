@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as rt from 'io-ts';
-import { kfetch } from 'ui/kfetch';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
+import * as rt from 'io-ts';
+import { kfetch } from 'ui/kfetch';
+
+import { jobCustomSettingsRT } from './ml_api_types';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
-import { getJobId } from '../../../../../common/log_analysis';
+import { getAllModuleJobIds } from '../../../../../common/log_analysis';
 
 export const callJobsSummaryAPI = async (spaceId: string, sourceId: string) => {
   const response = await kfetch({
@@ -18,7 +20,7 @@ export const callJobsSummaryAPI = async (spaceId: string, sourceId: string) => {
     pathname: '/api/ml/jobs/jobs_summary',
     body: JSON.stringify(
       fetchJobStatusRequestPayloadRT.encode({
-        jobIds: [getJobId(spaceId, sourceId, 'log-entry-rate')],
+        jobIds: getAllModuleJobIds(spaceId, sourceId),
       })
     ),
   });
@@ -37,6 +39,7 @@ export type FetchJobStatusRequestPayload = rt.TypeOf<typeof fetchJobStatusReques
 const datafeedStateRT = rt.keyof({
   started: null,
   stopped: null,
+  '': null,
 });
 
 const jobStateRT = rt.keyof({
@@ -56,10 +59,13 @@ export const jobSummaryRT = rt.intersection([
     datafeedIndices: rt.array(rt.string),
     datafeedState: datafeedStateRT,
     fullJob: rt.partial({
+      custom_settings: jobCustomSettingsRT,
       finished_time: rt.number,
     }),
   }),
 ]);
+
+export type JobSummary = rt.TypeOf<typeof jobSummaryRT>;
 
 export const fetchJobStatusResponsePayloadRT = rt.array(jobSummaryRT);
 

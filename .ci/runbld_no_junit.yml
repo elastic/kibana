@@ -1,0 +1,6 @@
+# This file is not picked up by anything automatically
+# It is used by being passed as an argument to runbld, when automatic processing of junit reports is not desired
+profiles:
+- ".*": # Match any job
+    tests:
+      junit-filename-pattern: "8d8bd494-d909-4e67-a052-7e8b5aaeb5e4" # A bogus path that should never exist

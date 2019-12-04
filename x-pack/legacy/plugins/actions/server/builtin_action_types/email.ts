@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import nodemailerServices from 'nodemailer/lib/well-known/services.json';
@@ -11,6 +12,7 @@ import nodemailerServices from 'nodemailer/lib/well-known/services.json';
 import { sendEmail, JSON_TRANSPORT_SERVICE } from './lib/send_email';
 import { nullableType } from './lib/nullable';
 import { portSchema } from './lib/schemas';
+import { Logger } from '../../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 
 // config definition
@@ -97,7 +99,7 @@ function validateParams(paramsObject: any): string | void {
 }
 
 // action type definition
-export function getActionType(): ActionType {
+export function getActionType({ logger }: { logger: Logger }): ActionType {
   return {
     id: '.email',
     name: 'email',
@@ -106,18 +108,20 @@ export function getActionType(): ActionType {
       secrets: SecretsSchema,
       params: ParamsSchema,
     },
-    executor,
+    executor: curry(executor)({ logger }),
   };
 }
 
 // action executor
 
-async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionTypeExecutorResult> {
-  const id = execOptions.id;
+async function executor(
+  { logger }: { logger: Logger },
+  execOptions: ActionTypeExecutorOptions
+): Promise<ActionTypeExecutorResult> {
+  const actionId = execOptions.actionId;
   const config = execOptions.config as ActionTypeConfigType;
   const secrets = execOptions.secrets as ActionTypeSecretsType;
   const params = execOptions.params as ActionParamsType;
-  const services = execOptions.services;
 
   const transport: any = {
     user: secrets.user,
@@ -149,12 +153,12 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
   let result;
 
   try {
-    result = await sendEmail(services, sendEmailOptions);
+    result = await sendEmail(logger, sendEmailOptions);
   } catch (err) {
     const message = i18n.translate('xpack.actions.builtin.email.errorSendingErrorMessage', {
-      defaultMessage: 'error in action "{id}" sending email: {errorMessage}',
+      defaultMessage: 'error in action "{actionId}" sending email: {errorMessage}',
       values: {
-        id,
+        actionId,
         errorMessage: err.message,
       },
     });

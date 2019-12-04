@@ -23,7 +23,7 @@ import { act } from 'react-dom/test-utils';
 import { VisState, AggConfig } from '../../../';
 import { Schema } from '../schemas';
 import { AggGroupNames } from '../agg_groups';
-import { AggConfigs } from '../../../agg_configs';
+import { AggConfigs } from '../../../../agg_types/agg_configs';
 import { DefaultEditorAggGroup, DefaultEditorAggGroupProps } from './agg_group';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';

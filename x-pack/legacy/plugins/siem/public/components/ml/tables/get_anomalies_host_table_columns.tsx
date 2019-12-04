@@ -6,8 +6,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import moment from 'moment';
-import { Columns } from '../../load_more_table';
+import { Columns } from '../../paginated_table';
 import { AnomaliesByHost, Anomaly, NarrowDateRange } from '../types';
 import { getRowItemDraggable } from '../../tables/helpers';
 import { EntityDraggable } from '../entity_draggable';
@@ -18,10 +17,9 @@ import * as i18n from './translations';
 import { getEntries } from '../get_entries';
 import { DraggableScore } from '../score/draggable_score';
 import { createExplorerLink } from '../links/create_explorer_link';
-import { LocalizedDateTooltip } from '../../localized_date_tooltip';
-import { PreferenceFormattedDate } from '../../formatted_date';
 import { HostsType } from '../../../store/hosts/model';
 import { escapeDataProviderId } from '../../drag_and_drop/helpers';
+import { FormattedRelativePreferenceDate } from '../../formatted_date';
 
 export const getAnomaliesHostTableColumns = (
   startDate: number,
@@ -126,11 +124,7 @@ export const getAnomaliesHostTableColumns = (
     name: i18n.TIME_STAMP,
     field: 'anomaly.time',
     sortable: true,
-    render: time => (
-      <LocalizedDateTooltip date={moment(new Date(time)).toDate()}>
-        <PreferenceFormattedDate value={new Date(time)} />
-      </LocalizedDateTooltip>
-    ),
+    render: time => <FormattedRelativePreferenceDate value={time} />,
   },
 ];
 

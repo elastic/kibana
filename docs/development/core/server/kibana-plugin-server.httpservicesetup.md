@@ -2,14 +2,91 @@
 
 [Home](./index.md) &gt; [kibana-plugin-server](./kibana-plugin-server.md) &gt; [HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md)
 
-## HttpServiceSetup type
+## HttpServiceSetup interface
 
+Kibana HTTP Service provides own abstraction for work with HTTP stack. Plugins don't have direct access to `hapi` server and its primitives anymore. Moreover, plugins shouldn't rely on the fact that HTTP Service uses one or another library under the hood. This gives the platform flexibility to upgrade or changing our internal HTTP stack without breaking plugins. If the HTTP Service lacks functionality you need, we are happy to discuss and support your needs.
 
 <b>Signature:</b>
 
 ```typescript
-export declare type HttpServiceSetup = Omit<HttpServerSetup, 'registerRouter'> & {
-    createRouter: (path: string, plugin?: PluginOpaqueId) => IRouter;
-    registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(pluginOpaqueId: PluginOpaqueId, contextName: T, provider: RequestHandlerContextProvider<RequestHandlerContext>) => RequestHandlerContextContainer<RequestHandlerContext>;
-};
+export interface HttpServiceSetup 
 ```
+
+## Properties
+
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [basePath](./kibana-plugin-server.httpservicesetup.basepath.md) | <code>IBasePath</code> | Access or manipulate the Kibana base path See [IBasePath](./kibana-plugin-server.ibasepath.md)<!-- -->. |
+|  [createCookieSessionStorageFactory](./kibana-plugin-server.httpservicesetup.createcookiesessionstoragefactory.md) | <code>&lt;T&gt;(cookieOptions: SessionStorageCookieOptions&lt;T&gt;) =&gt; Promise&lt;SessionStorageFactory&lt;T&gt;&gt;</code> | Creates cookie based session storage factory [SessionStorageFactory](./kibana-plugin-server.sessionstoragefactory.md) |
+|  [createRouter](./kibana-plugin-server.httpservicesetup.createrouter.md) | <code>() =&gt; IRouter</code> | Provides ability to declare a handler function for a particular path and HTTP request method. |
+|  [isTlsEnabled](./kibana-plugin-server.httpservicesetup.istlsenabled.md) | <code>boolean</code> | Flag showing whether a server was configured to use TLS connection. |
+|  [registerAuth](./kibana-plugin-server.httpservicesetup.registerauth.md) | <code>(handler: AuthenticationHandler) =&gt; void</code> | To define custom authentication and/or authorization mechanism for incoming requests. |
+|  [registerOnPostAuth](./kibana-plugin-server.httpservicesetup.registeronpostauth.md) | <code>(handler: OnPostAuthHandler) =&gt; void</code> | To define custom logic to perform for incoming requests. |
+|  [registerOnPreAuth](./kibana-plugin-server.httpservicesetup.registeronpreauth.md) | <code>(handler: OnPreAuthHandler) =&gt; void</code> | To define custom logic to perform for incoming requests. |
+|  [registerRouteHandlerContext](./kibana-plugin-server.httpservicesetup.registerroutehandlercontext.md) | <code>&lt;T extends keyof RequestHandlerContext&gt;(contextName: T, provider: RequestHandlerContextProvider&lt;T&gt;) =&gt; RequestHandlerContextContainer</code> | Register a context provider for a route handler. |
+
+## Example
+
+To handle an incoming request in your plugin you should: - Create a `Router` instance.
+
+```ts
+const router = httpSetup.createRouter();
+
+```
+- Use `@kbn/config-schema` package to create a schema to validate the request `params`<!-- -->, `query`<!-- -->, and `body`<!-- -->. Every incoming request will be validated against the created schema. If validation failed, the request is rejected with `400` status and `Bad request` error without calling the route's handler. To opt out of validating the request, specify `false`<!-- -->.
+
+```ts
+import { schema, TypeOf } from '@kbn/config-schema';
+const validate = {
+  params: schema.object({
+    id: schema.string(),
+  }),
+};
+
+```
+- Declare a function to respond to incoming request. The function will receive `request` object containing request details: url, headers, matched route, as well as validated `params`<!-- -->, `query`<!-- -->, `body`<!-- -->. And `response` object instructing HTTP server to create HTTP response with information sent back to the client as the response body, headers, and HTTP status. Unlike, `hapi` route handler in the Legacy platform, any exception raised during the handler call will generate `500 Server error` response and log error details for further investigation. See below for returning custom error responses.
+
+```ts
+const handler = async (context: RequestHandlerContext, request: KibanaRequest, response: ResponseFactory) => {
+  const data = await findObject(request.params.id);
+  // creates a command to respond with 'not found' error
+  if (!data) return response.notFound();
+  // creates a command to send found data to the client and set response headers
+  return response.ok({
+    body: data,
+    headers: {
+      'content-type': 'application/json'
+    }
+  });
+}
+
+```
+- Register route handler for GET request to 'path/<!-- -->{<!-- -->id<!-- -->}<!-- -->' path
+
+```ts
+import { schema, TypeOf } from '@kbn/config-schema';
+const router = httpSetup.createRouter();
+
+const validate = {
+  params: schema.object({
+    id: schema.string(),
+  }),
+};
+
+router.get({
+  path: 'path/{id}',
+  validate
+},
+async (context, request, response) => {
+  const data = await findObject(request.params.id);
+  if (!data) return response.notFound();
+  return response.ok({
+    body: data,
+    headers: {
+      'content-type': 'application/json'
+    }
+  });
+});
+
+```
+

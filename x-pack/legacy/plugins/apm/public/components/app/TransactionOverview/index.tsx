@@ -15,6 +15,7 @@ import {
 import { Location } from 'history';
 import { first } from 'lodash';
 import React, { useMemo } from 'react';
+import { useKibanaCore } from '../../../../../observability/public';
 import { useTransactionList } from '../../../hooks/useTransactionList';
 import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
@@ -85,15 +86,15 @@ export function TransactionOverview() {
     status: transactionListStatus
   } = useTransactionList(urlParams);
 
+  const { http } = useKibanaCore();
+
   const { data: hasMLJob = false } = useFetcher(() => {
     if (serviceName && transactionType) {
-      return getHasMLJob({ serviceName, transactionType });
+      return getHasMLJob({ serviceName, transactionType, http });
     }
-  }, [serviceName, transactionType]);
+  }, [http, serviceName, transactionType]);
 
-  const localFiltersConfig: React.ComponentProps<
-    typeof LocalUIFilters
-  > = useMemo(
+  const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(
     () => ({
       filterNames: ['transactionResult', 'host', 'containerId', 'podName'],
       params: {

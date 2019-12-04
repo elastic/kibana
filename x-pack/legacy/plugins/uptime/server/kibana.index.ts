@@ -10,6 +10,7 @@ import { PLUGIN } from '../common/constants';
 import { KibanaTelemetryAdapter } from './lib/adapters/telemetry';
 import { compose } from './lib/compose/kibana';
 import { initUptimeServer } from './uptime_server';
+import { UptimeCorePlugins, UptimeCoreSetup } from './lib/adapters/framework';
 
 export interface KibanaRouteOptions {
   path: string;
@@ -21,20 +22,16 @@ export interface KibanaRouteOptions {
 
 export interface KibanaServer extends Server {
   route: (options: KibanaRouteOptions) => void;
-  usage: {
-    collectorSet: {
-      register: (usageCollector: any) => any;
-    };
-  };
 }
 
-export const initServerWithKibana = (server: KibanaServer) => {
-  const libs = compose(server);
-  server.usage.collectorSet.register(KibanaTelemetryAdapter.initUsageCollector(server));
+export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCorePlugins) => {
+  const { usageCollection, xpack } = plugins;
+  const libs = compose(server, plugins);
+  KibanaTelemetryAdapter.registerUsageCollector(usageCollection);
+
   initUptimeServer(libs);
 
-  const xpackMainPlugin = server.plugins.xpack_main;
-  xpackMainPlugin.registerFeature({
+  xpack.registerFeature({
     id: PLUGIN.ID,
     name: i18n.translate('xpack.uptime.featureRegistry.uptimeFeatureName', {
       defaultMessage: 'Uptime',

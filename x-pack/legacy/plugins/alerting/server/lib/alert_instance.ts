@@ -5,16 +5,30 @@
  */
 
 import { State, Context } from '../types';
+import { parseDuration } from './parse_duration';
+
+interface Meta {
+  lastScheduledActions?: {
+    group: string;
+    date: Date;
+  };
+}
+
+interface ScheduledExecutionOptions {
+  actionGroup: string;
+  context: Context;
+  state: State;
+}
 
 interface ConstructorOptions {
-  state?: Record<string, any>;
-  meta?: Record<string, any>;
+  state?: State;
+  meta?: Meta;
 }
 
 export class AlertInstance {
-  private scheduledExecutionOptions?: Record<string, any>;
-  private meta: Record<string, any>;
-  private state: Record<string, any>;
+  private scheduledExecutionOptions?: ScheduledExecutionOptions;
+  private meta: Meta;
+  private state: State;
 
   constructor({ state = {}, meta = {} }: ConstructorOptions = {}) {
     this.state = state;
@@ -25,7 +39,23 @@ export class AlertInstance {
     return this.scheduledExecutionOptions !== undefined;
   }
 
-  getSechduledActionOptions() {
+  isThrottled(throttle: string | null) {
+    if (this.scheduledExecutionOptions === undefined) {
+      return false;
+    }
+    const throttleMills = throttle ? parseDuration(throttle) : 0;
+    const actionGroup = this.scheduledExecutionOptions.actionGroup;
+    if (
+      this.meta.lastScheduledActions &&
+      this.meta.lastScheduledActions.group === actionGroup &&
+      new Date(this.meta.lastScheduledActions.date).getTime() + throttleMills > Date.now()
+    ) {
+      return true;
+    }
+    return false;
+  }
+
+  getScheduledActionOptions() {
     return this.scheduledExecutionOptions;
   }
 
@@ -36,10 +66,6 @@ export class AlertInstance {
 
   getState() {
     return this.state;
-  }
-
-  getMeta() {
-    return this.meta;
   }
 
   scheduleActions(actionGroup: string, context: Context = {}) {
@@ -55,9 +81,8 @@ export class AlertInstance {
     return this;
   }
 
-  replaceMeta(meta: Record<string, any>) {
-    this.meta = meta;
-    return this;
+  updateLastScheduledActions(group: string) {
+    this.meta.lastScheduledActions = { group, date: new Date() };
   }
 
   /**

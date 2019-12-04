@@ -13,7 +13,7 @@ import {
 } from '../../../shared_imports';
 import { httpService } from './index';
 
-export const sendRequest = (config: SendRequestConfig): Promise<Partial<SendRequestResponse>> => {
+export const sendRequest = (config: SendRequestConfig): Promise<SendRequestResponse> => {
   return _sendRequest(httpService.httpClient, config);
 };
 

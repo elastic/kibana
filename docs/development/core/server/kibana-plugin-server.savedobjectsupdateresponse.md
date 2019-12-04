@@ -8,7 +8,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = any> extends Omit<SavedObject<T>, 'attributes'> 
+export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = any> extends Omit<SavedObject<T>, 'attributes' | 'references'> 
 ```
 
 ## Properties
@@ -16,4 +16,5 @@ export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = an
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [attributes](./kibana-plugin-server.savedobjectsupdateresponse.attributes.md) | <code>Partial&lt;T&gt;</code> |  |
+|  [references](./kibana-plugin-server.savedobjectsupdateresponse.references.md) | <code>SavedObjectReference[] &#124; undefined</code> |  |
 

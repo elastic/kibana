@@ -20,19 +20,11 @@
 import Hapi from 'hapi';
 import { createMockServer } from './_mock_server';
 import { createResolveImportErrorsRoute } from './resolve_import_errors';
+import { savedObjectsClientMock } from '../../../../core/server/mocks';
 
 describe('POST /api/saved_objects/_resolve_import_errors', () => {
   let server: Hapi.Server;
-  const savedObjectsClient = {
-    errors: {} as any,
-    bulkCreate: jest.fn(),
-    bulkGet: jest.fn(),
-    create: jest.fn(),
-    delete: jest.fn(),
-    find: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-  };
+  const savedObjectsClient = savedObjectsClientMock.create();
 
   beforeEach(() => {
     server = createMockServer();
@@ -111,6 +103,7 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
           attributes: {
             title: 'Look at my dashboard',
           },
+          references: [],
         },
       ],
     });
@@ -153,6 +146,7 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
           attributes: {
             title: 'Look at my dashboard',
           },
+          references: [],
         },
       ],
     });
@@ -219,6 +213,7 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
           attributes: {
             title: 'Look at my dashboard',
           },
+          references: [],
         },
       ],
     });

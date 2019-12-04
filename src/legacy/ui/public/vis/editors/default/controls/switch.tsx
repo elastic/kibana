@@ -19,7 +19,7 @@
 
 import React from 'react';
 
-import { EuiSwitch, EuiToolTip, EuiSpacer } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { AggParamEditorProps } from '..';
 
 interface SwitchParamEditorProps extends AggParamEditorProps<boolean> {
@@ -30,7 +30,7 @@ interface SwitchParamEditorProps extends AggParamEditorProps<boolean> {
 }
 
 function SwitchParamEditor({
-  value,
+  value = false,
   setValue,
   dataTestSubj,
   displayToolTip,
@@ -38,14 +38,10 @@ function SwitchParamEditor({
   disabled,
 }: SwitchParamEditorProps) {
   return (
-    <div className="visEditorSidebar__aggParamFormRow">
-      <EuiToolTip
-        content={displayToolTip}
-        delay="long"
-        position="right"
-        anchorClassName="eui-displayBlock"
-      >
+    <EuiFormRow fullWidth={true}>
+      <EuiToolTip content={displayToolTip} delay="long" position="right">
         <EuiSwitch
+          compressed={true}
           label={displayLabel}
           checked={value}
           disabled={disabled}
@@ -53,8 +49,7 @@ function SwitchParamEditor({
           onChange={ev => setValue(ev.target.checked)}
         />
       </EuiToolTip>
-      <EuiSpacer size="s" />
-    </div>
+    </EuiFormRow>
   );
 }
 

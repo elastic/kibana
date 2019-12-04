@@ -10,6 +10,8 @@ import { URL } from 'url';
 import { curry } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 
+import { ActionsConfigType } from './types';
+
 export enum WhitelistedHosts {
   Any = '*',
 }
@@ -17,11 +19,6 @@ export enum WhitelistedHosts {
 enum WhitelistingField {
   url = 'url',
   hostname = 'hostname',
-}
-
-export interface ActionsKibanaConfig {
-  enabled: boolean;
-  whitelistedHosts: string[];
 }
 
 export interface ActionsConfigurationUtilities {
@@ -45,7 +42,7 @@ function doesValueWhitelistAnyHostname(whitelistedHostname: string): boolean {
   return whitelistedHostname === WhitelistedHosts.Any;
 }
 
-function isWhitelisted({ whitelistedHosts }: ActionsKibanaConfig, hostname: string): boolean {
+function isWhitelisted({ whitelistedHosts }: ActionsConfigType, hostname: string): boolean {
   return (
     Array.isArray(whitelistedHosts) &&
     isSome(
@@ -59,17 +56,17 @@ function isWhitelisted({ whitelistedHosts }: ActionsKibanaConfig, hostname: stri
   );
 }
 
-function isWhitelistedHostnameInUri(config: ActionsKibanaConfig, uri: string): boolean {
+function isWhitelistedHostnameInUri(config: ActionsConfigType, uri: string): boolean {
   return pipe(
     tryCatch(() => new URL(uri)),
     map(url => url.hostname),
     mapNullable(hostname => isWhitelisted(config, hostname)),
-    getOrElse(() => false)
+    getOrElse<boolean>(() => false)
   );
 }
 
 export function getActionsConfigurationUtilities(
-  config: ActionsKibanaConfig
+  config: ActionsConfigType
 ): ActionsConfigurationUtilities {
   const isWhitelistedHostname = curry(isWhitelisted)(config);
   const isWhitelistedUri = curry(isWhitelistedHostnameInUri)(config);

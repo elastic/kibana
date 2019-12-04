@@ -15,8 +15,7 @@ import React, { Fragment } from 'react';
 import { I18nContext } from 'ui/i18n';
 import { Listing } from '../../../components/beats/listing/listing';
 import { SetupModeRenderer } from '../../../components/renderers';
-import { BEATS_SYSTEM_ID } from '../../../../../telemetry/common/constants';
-import { CODE_PATH_BEATS } from '../../../../common/constants';
+import { CODE_PATH_BEATS, BEATS_SYSTEM_ID } from '../../../../common/constants';
 
 uiRoutes.when('/beats/beats', {
   template,
@@ -63,7 +62,7 @@ uiRoutes.when('/beats/beats', {
             scope={this.scope}
             injector={this.injector}
             productName={BEATS_SYSTEM_ID}
-            render={({ setupMode, flyoutComponent }) => (
+            render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
               <Fragment>
                 {flyoutComponent}
                 <Listing
@@ -78,6 +77,7 @@ uiRoutes.when('/beats/beats', {
                     scope: this.scope,
                   }}
                 />
+                {bottomBarComponent}
               </Fragment>
             )}
           />

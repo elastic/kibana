@@ -20,13 +20,33 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
-import { settingsGet } from './new_vis_modal.test.mocks';
-
 import { NewVisModal } from './new_vis_modal';
+import { VisType } from '../kibana_services';
+import { TypesStart } from '../../../../visualizations/public/np_ready/public/types';
 
-import { VisType } from 'ui/vis';
+jest.mock('../kibana_services', () => {
+  const mock = {
+    addBasePath: jest.fn(path => `root${path}`),
+    uiSettings: { get: jest.fn() },
+    createUiStatsReporter: () => jest.fn(),
+  };
+
+  return {
+    getServices: () => mock,
+    VisType: {},
+    METRIC_TYPE: 'metricType',
+  };
+});
+
+import { getServices } from '../kibana_services';
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('NewVisModal', () => {
+  const settingsGet = getServices().uiSettings.get as jest.Mock;
+
   const defaultVisTypeParams = {
     hidden: false,
     visualization: class Controller {
@@ -37,7 +57,7 @@ describe('NewVisModal', () => {
     requestHandler: 'none',
     responseHandler: 'none',
   };
-  const visTypes: VisType[] = [
+  const _visTypes = [
     { name: 'vis', title: 'Vis Type 1', stage: 'production', ...defaultVisTypeParams },
     { name: 'visExp', title: 'Experimental Vis', stage: 'experimental', ...defaultVisTypeParams },
     {
@@ -47,6 +67,15 @@ describe('NewVisModal', () => {
       ...defaultVisTypeParams,
     },
   ];
+  const visTypes: TypesStart = {
+    get: (id: string) => {
+      return _visTypes.find(vis => vis.name === id) as VisType;
+    },
+    all: () => {
+      return _visTypes as VisType[];
+    },
+    getAliases: () => [],
+  };
 
   it('should render as expected', () => {
     const wrapper = mountWithIntl(

@@ -83,9 +83,11 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
   // stores previous aggs' custom labels
   const [lastCustomLabels, setLastCustomLabels] = useState({} as { [key: string]: string });
   // stores previous aggs' field and type
-  const [lastSeriesAgg, setLastSeriesAgg] = useState({} as {
-    [key: string]: { type: string; field: string };
-  });
+  const [lastSeriesAgg, setLastSeriesAgg] = useState(
+    {} as {
+      [key: string]: { type: string; field: string };
+    }
+  );
 
   const updateAxisTitle = () => {
     const axes = cloneDeep(stateParams.valueAxes);
@@ -125,13 +127,17 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
         lastLabels[axis.id] = newCustomLabel;
 
         if (
-          aggTypeIsChanged ||
-          aggFieldIsChanged ||
-          axis.title.text === '' ||
-          lastCustomLabels[axis.id] === axis.title.text
+          Object.keys(lastCustomLabels).length !== 0 &&
+          (aggTypeIsChanged ||
+            aggFieldIsChanged ||
+            axis.title.text === '' ||
+            lastCustomLabels[axis.id] === axis.title.text)
         ) {
           // Override axis title with new custom label
-          axes[axisNumber] = { ...axes[axisNumber], title: { ...axis, text: newCustomLabel } };
+          axes[axisNumber] = {
+            ...axis,
+            title: { ...axis.title, text: newCustomLabel },
+          };
           isAxesChanged = true;
         }
       }

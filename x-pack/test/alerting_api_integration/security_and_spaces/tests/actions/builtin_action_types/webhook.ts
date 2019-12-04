@@ -28,6 +28,7 @@ function parsePort(url: Record<string, string>): Record<string, string | null | 
 export default function webhookTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   async function createWebhookAction(
     urlWithCreds: string,
@@ -47,7 +48,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       .post('/api/action')
       .set('kbn-xsrf', 'test')
       .send({
-        description: 'A generic Webhook action',
+        name: 'A generic Webhook action',
         actionTypeId: '.webhook',
         secrets: {
           user,
@@ -65,10 +66,9 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
     // need to wait for kibanaServer to settle ...
     before(() => {
-      const kibanaServer = getService('kibanaServer');
-      const kibanaUrl = kibanaServer.status && kibanaServer.status.kibanaServerUrl;
-      const webhookServiceUrl = getExternalServiceSimulatorPath(ExternalServiceSimulator.WEBHOOK);
-      webhookSimulatorURL = `${kibanaUrl}${webhookServiceUrl}`;
+      webhookSimulatorURL = kibanaServer.resolveUrl(
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.WEBHOOK)
+      );
     });
 
     after(() => esArchiver.unload('empty_kibana'));
@@ -78,7 +78,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         .post('/api/action')
         .set('kbn-xsrf', 'test')
         .send({
-          description: 'A generic Webhook action',
+          name: 'A generic Webhook action',
           actionTypeId: '.webhook',
           secrets: {
             user: 'username',
@@ -92,7 +92,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
       expect(createdAction).to.eql({
         id: createdAction.id,
-        description: 'A generic Webhook action',
+        name: 'A generic Webhook action',
         actionTypeId: '.webhook',
         config: {
           ...defaultValues,
@@ -108,7 +108,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
-        description: 'A generic Webhook action',
+        name: 'A generic Webhook action',
         actionTypeId: '.webhook',
         config: {
           ...defaultValues,
@@ -167,7 +167,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         .post('/api/action')
         .set('kbn-xsrf', 'test')
         .send({
-          description: 'A generic Webhook action',
+          name: 'A generic Webhook action',
           actionTypeId: '.webhook',
           secrets: {
             user: 'username',

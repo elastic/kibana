@@ -17,8 +17,8 @@
  * under the License.
  */
 
-// @ts-ignore
-import { functionWrapper } from '../../interpreter/test_helpers';
+// eslint-disable-next-line
+import { functionWrapper } from '../../../../plugins/expressions/public/functions/tests/utils';
 import { createMarkdownVisFn } from './markdown_fn';
 
 describe('interpreter/functions#markdown', () => {
@@ -30,7 +30,7 @@ describe('interpreter/functions#markdown', () => {
   };
 
   it('returns an object with the correct structure', async () => {
-    const actual = await fn(undefined, args);
+    const actual = await fn(null, args, undefined);
     expect(actual).toMatchSnapshot();
   });
 });

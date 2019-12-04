@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
 
   describe('update', () => {
@@ -52,9 +52,53 @@ export default function ({ getService }) {
               attributes: {
                 title: 'My second favorite vis'
               },
-              references: [],
             });
           });
+      });
+
+      it('does not pass references if omitted', async () => {
+        const resp = await supertest
+          .put(`/api/saved_objects/visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab`)
+          .send({
+            attributes: {
+              title: 'foo'
+            }
+          })
+          .expect(200);
+
+        expect(resp.body).not.to.have.property('references');
+      });
+
+      it('passes references if they are provided', async () => {
+        const references = [{ id: 'foo', name: 'Foo', type: 'visualization' }];
+
+        const resp = await supertest
+          .put(`/api/saved_objects/visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab`)
+          .send({
+            attributes: {
+              title: 'foo'
+            },
+            references
+          })
+          .expect(200);
+
+        expect(resp.body).to.have.property('references');
+        expect(resp.body.references).to.eql(references);
+      });
+
+      it('passes empty references array if empty references array is provided', async () => {
+        const resp = await supertest
+          .put(`/api/saved_objects/visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab`)
+          .send({
+            attributes: {
+              title: 'foo'
+            },
+            references: []
+          })
+          .expect(200);
+
+        expect(resp.body).to.have.property('references');
+        expect(resp.body.references).to.eql([]);
       });
 
       describe('unknown id', () => {

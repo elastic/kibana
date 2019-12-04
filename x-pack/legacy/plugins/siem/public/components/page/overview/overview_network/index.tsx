@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
 import { pure } from 'recompose';
 
-import { HeaderPanel } from '../../../header_panel';
+import { HeaderSection } from '../../../header_section';
 import { manageQuery } from '../../../page/manage_query';
 import {
   ID as OverviewNetworkQueryId,
@@ -17,6 +17,7 @@ import {
 } from '../../../../containers/overview/overview_network';
 import { inputsModel } from '../../../../store/inputs';
 import { OverviewNetworkStats } from '../overview_network_stats';
+import { getNetworkUrl } from '../../../link_to';
 
 export interface OwnProps {
   startDate: number;
@@ -41,7 +42,7 @@ export const OverviewNetwork = pure<OwnProps>(({ endDate, startDate, setQuery })
   return (
     <EuiFlexItem>
       <EuiPanel onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)}>
-        <HeaderPanel
+        <HeaderSection
           border
           id={OverviewNetworkQueryId}
           showInspect={isHover}
@@ -58,13 +59,13 @@ export const OverviewNetwork = pure<OwnProps>(({ endDate, startDate, setQuery })
             />
           }
         >
-          <EuiButton href="#/link-to/network/">
+          <EuiButton href={getNetworkUrl()}>
             <FormattedMessage
               id="xpack.siem.overview.networkAction"
               defaultMessage="View network"
             />
           </EuiButton>
-        </HeaderPanel>
+        </HeaderSection>
 
         <OverviewNetworkQuery endDate={endDate} sourceId="default" startDate={startDate}>
           {({ overviewNetwork, loading, id, inspect, refetch }) => (

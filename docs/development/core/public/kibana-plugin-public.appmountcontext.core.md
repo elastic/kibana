@@ -17,6 +17,9 @@ core: {
         i18n: I18nStart;
         notifications: NotificationsStart;
         overlays: OverlayStart;
-        uiSettings: UiSettingsClientContract;
+        uiSettings: IUiSettingsClient;
+        injectedMetadata: {
+            getInjectedVar: (name: string, defaultValue?: any) => unknown;
+        };
     };
 ```

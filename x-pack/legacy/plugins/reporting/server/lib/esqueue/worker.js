@@ -22,8 +22,8 @@ export function formatJobObject(job) {
 }
 
 export function getUpdatedDocPath(response) {
-  const { _index: ind, _type: type = '_doc', _id: id } = response;
-  return `/${ind}/${type}/${id}`;
+  const { _index: ind, _id: id } = response;
+  return `/${ind}/${id}`;
 }
 
 const MAX_PARTIAL_ERROR_LENGTH = 1000; // 1000 of beginning, 1000 of end
@@ -60,6 +60,8 @@ function getLogger(opts, id, logLevel) {
           `The entire error message length is: ${errLength} characters.`,
           tags
         );
+      } else {
+        logger(errString, tags);
       }
       return;
     }
@@ -85,7 +87,6 @@ export class Worker extends events.EventEmitter {
     this._client = this.queue.client;
     this.jobtype = type;
     this.workerFn = workerFn;
-    this.checkSize = opts.size || 10;
 
     this.debug = getLogger(opts, this.id, 'debug');
     this.warn = getLogger(opts, this.id, 'warning');
@@ -324,7 +325,7 @@ export class Worker extends events.EventEmitter {
         }
       }
 
-      this.warn(`Failure occurred on job ${job._id}`, jobErr);
+      this.error(`Failure occurred on job ${job._id}`, jobErr);
       this.emit(constants.EVENT_WORKER_JOB_EXECUTION_ERROR, this._formatErrorParams(jobErr, job));
       return this._failJob(job, (jobErr.toString) ? jobErr.toString() : false);
     });
@@ -419,7 +420,7 @@ export class Worker extends events.EventEmitter {
         { priority: { order: 'asc' } },
         { created_at: { order: 'asc' } }
       ],
-      size: this.checkSize
+      size: constants.DEFAULT_WORKER_CHECK_SIZE,
     };
 
     return this._client.callWithInternalUser('search', {

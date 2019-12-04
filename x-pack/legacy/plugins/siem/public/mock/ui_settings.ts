@@ -9,6 +9,7 @@ import {
   DEFAULT_SIEM_TIME_RANGE,
   DEFAULT_SIEM_REFRESH_INTERVAL,
   DEFAULT_INDEX_KEY,
+  DEFAULT_DATE_FORMAT,
   DEFAULT_DATE_FORMAT_TZ,
   DEFAULT_DARK_MODE,
   DEFAULT_TIME_RANGE,
@@ -18,6 +19,7 @@ import {
   DEFAULT_INTERVAL_PAUSE,
   DEFAULT_INTERVAL_VALUE,
 } from '../../common/constants';
+import { defaultIndexPattern } from '../../default_index_pattern';
 
 chrome.getUiSettingsClient().get.mockImplementation((key: string) => {
   switch (key) {
@@ -36,12 +38,38 @@ chrome.getUiSettingsClient().get.mockImplementation((key: string) => {
         value: DEFAULT_INTERVAL_VALUE,
       };
     case DEFAULT_INDEX_KEY:
-      return ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'];
+      return defaultIndexPattern;
     case DEFAULT_DATE_FORMAT_TZ:
       return 'Asia/Taipei';
+    case DEFAULT_DATE_FORMAT:
+      return 'MMM D, YYYY @ HH:mm:ss.SSS';
     case DEFAULT_DARK_MODE:
       return false;
     default:
       throw new Error(`Unexpected config key: ${key}`);
   }
 });
+
+export interface MockNpSetUp {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  core: { uiSettings: any };
+}
+
+type Config =
+  | 'query:allowLeadingWildcards'
+  | 'query:queryString:options'
+  | 'courier:ignoreFilterIfFieldNotInIndex'
+  | 'dateFormat:tz';
+
+export const mockUiSettings = {
+  get: (item: Config) => {
+    return mockUiSettings[item];
+  },
+  get$: () => ({
+    subscribe: jest.fn(),
+  }),
+  'query:allowLeadingWildcards': true,
+  'query:queryString:options': {},
+  'courier:ignoreFilterIfFieldNotInIndex': true,
+  'dateFormat:tz': 'Browser',
+};

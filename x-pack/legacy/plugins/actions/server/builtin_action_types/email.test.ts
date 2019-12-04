@@ -10,7 +10,7 @@ jest.mock('./lib/send_email', () => ({
 
 import { ActionType, ActionTypeExecutorOptions } from '../types';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
-import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { createActionTypeRegistry } from './index.test';
 import { sendEmail } from './lib/send_email';
 import { ActionParamsType, ActionTypeConfigType, ActionTypeSecretsType } from './email';
@@ -23,13 +23,13 @@ const NO_OP_FN = () => {};
 const services = {
   log: NO_OP_FN,
   callCluster: async (path: string, opts: any) => {},
-  savedObjectsClient: SavedObjectsClientMock.create(),
+  savedObjectsClient: savedObjectsClientMock.create(),
 };
 
 let actionType: ActionType;
 
 beforeAll(() => {
-  const actionTypeRegistry = createActionTypeRegistry();
+  const { actionTypeRegistry } = createActionTypeRegistry();
   actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
 });
 
@@ -183,8 +183,14 @@ describe('execute()', () => {
       message: 'a message to you',
     };
 
-    const id = 'some-id';
-    const executorOptions: ActionTypeExecutorOptions = { id, config, params, secrets, services };
+    const actionId = 'some-id';
+    const executorOptions: ActionTypeExecutorOptions = {
+      actionId,
+      config,
+      params,
+      secrets,
+      services,
+    };
     sendEmailMock.mockReset();
     await actionType.executor(executorOptions);
     expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`

@@ -6,14 +6,14 @@
 
 import { noop } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import * as React from 'react';
+import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
 import { BrowserFields } from '../../../containers/source';
 import { TimelineItem } from '../../../graphql/types';
 import { Note } from '../../../lib/note';
-import { appSelectors, State, timelineSelectors } from '../../../store';
+import { appModel, appSelectors, State, timelineSelectors } from '../../../store';
 import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
 import {
   OnColumnRemoved,
@@ -45,7 +45,7 @@ interface OwnProps {
 interface ReduxProps {
   columnHeaders: ColumnHeader[];
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
-  getNotesByIds: (noteIds: string[]) => Note[];
+  notesById: appModel.NotesById;
   pinnedEventIds: Readonly<Record<string, boolean>>;
   range?: string;
 }
@@ -84,54 +84,71 @@ type StatefulBodyComponentProps = OwnProps & ReduxProps & DispatchProps;
 
 export const emptyColumnHeaders: ColumnHeader[] = [];
 
-class StatefulBodyComponent extends React.Component<StatefulBodyComponentProps> {
-  public shouldComponentUpdate({
+const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
+  ({
+    addNoteToEvent,
+    applyDeltaToColumnWidth,
     browserFields,
     columnHeaders,
     data,
     eventIdToNoteIds,
-    getNotesByIds,
     height,
     id,
-    isEventViewer,
+    isEventViewer = false,
+    notesById,
+    pinEvent,
     pinnedEventIds,
     range,
+    removeColumn,
     sort,
-  }: StatefulBodyComponentProps) {
-    return (
-      browserFields !== this.props.browserFields ||
-      columnHeaders !== this.props.columnHeaders ||
-      data !== this.props.data ||
-      eventIdToNoteIds !== this.props.eventIdToNoteIds ||
-      getNotesByIds !== this.props.getNotesByIds ||
-      height !== this.props.height ||
-      id !== this.props.id ||
-      isEventViewer !== this.props.isEventViewer ||
-      pinnedEventIds !== this.props.pinnedEventIds ||
-      range !== this.props.range ||
-      sort !== this.props.sort
+    toggleColumn,
+    unPinEvent,
+    updateColumns,
+    updateNote,
+    updateSort,
+  }) => {
+    const getNotesByIds = useCallback(
+      (noteIds: string[]): Note[] => appSelectors.getNotes(notesById, noteIds),
+      [notesById]
     );
-  }
 
-  public render() {
-    const {
-      browserFields,
-      columnHeaders,
-      data,
-      eventIdToNoteIds,
-      getNotesByIds,
-      height,
-      id,
-      isEventViewer = false,
-      pinnedEventIds,
-      range,
-      sort,
-      toggleColumn,
-    } = this.props;
+    const onAddNoteToEvent: AddNoteToEvent = useCallback(
+      ({ eventId, noteId }: { eventId: string; noteId: string }) =>
+        addNoteToEvent!({ id, eventId, noteId }),
+      [id]
+    );
+
+    const onColumnSorted: OnColumnSorted = useCallback(
+      sorted => {
+        updateSort!({ id, sort: sorted });
+      },
+      [id]
+    );
+
+    const onColumnRemoved: OnColumnRemoved = useCallback(
+      columnId => removeColumn!({ id, columnId }),
+      [id]
+    );
+
+    const onColumnResized: OnColumnResized = useCallback(
+      ({ columnId, delta }) => applyDeltaToColumnWidth!({ id, columnId, delta }),
+      [id]
+    );
+
+    const onPinEvent: OnPinEvent = useCallback(eventId => pinEvent!({ id, eventId }), [id]);
+
+    const onUnPinEvent: OnUnPinEvent = useCallback(eventId => unPinEvent!({ id, eventId }), [id]);
+
+    const onUpdateNote: UpdateNote = useCallback((note: Note) => updateNote!({ note }), []);
+
+    const onUpdateColumns: OnUpdateColumns = useCallback(
+      columns => updateColumns!({ id, columns }),
+      [id]
+    );
 
     return (
       <Body
-        addNoteToEvent={this.onAddNoteToEvent}
+        addNoteToEvent={onAddNoteToEvent}
         browserFields={browserFields}
         columnHeaders={columnHeaders || emptyColumnHeaders}
         columnRenderers={columnRenderers}
@@ -141,51 +158,40 @@ class StatefulBodyComponent extends React.Component<StatefulBodyComponentProps> 
         height={height}
         id={id}
         isEventViewer={isEventViewer}
-        onColumnResized={this.onColumnResized}
-        onColumnRemoved={this.onColumnRemoved}
-        onColumnSorted={this.onColumnSorted}
+        onColumnRemoved={onColumnRemoved}
+        onColumnResized={onColumnResized}
+        onColumnSorted={onColumnSorted}
         onFilterChange={noop} // TODO: this is the callback for column filters, which is out scope for this phase of delivery
-        onPinEvent={this.onPinEvent}
-        onUpdateColumns={this.onUpdateColumns}
-        onUnPinEvent={this.onUnPinEvent}
+        onPinEvent={onPinEvent}
+        onUnPinEvent={onUnPinEvent}
+        onUpdateColumns={onUpdateColumns}
         pinnedEventIds={pinnedEventIds}
         range={range!}
         rowRenderers={rowRenderers}
         sort={sort}
         toggleColumn={toggleColumn}
-        updateNote={this.onUpdateNote}
+        updateNote={onUpdateNote}
       />
     );
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.browserFields === nextProps.browserFields &&
+      prevProps.columnHeaders === nextProps.columnHeaders &&
+      prevProps.data === nextProps.data &&
+      prevProps.eventIdToNoteIds === nextProps.eventIdToNoteIds &&
+      prevProps.notesById === nextProps.notesById &&
+      prevProps.height === nextProps.height &&
+      prevProps.id === nextProps.id &&
+      prevProps.isEventViewer === nextProps.isEventViewer &&
+      prevProps.pinnedEventIds === nextProps.pinnedEventIds &&
+      prevProps.range === nextProps.range &&
+      prevProps.sort === nextProps.sort
+    );
   }
+);
 
-  private onAddNoteToEvent: AddNoteToEvent = ({
-    eventId,
-    noteId,
-  }: {
-    eventId: string;
-    noteId: string;
-  }) => this.props.addNoteToEvent!({ id: this.props.id, eventId, noteId });
-
-  private onColumnSorted: OnColumnSorted = sorted => {
-    this.props.updateSort!({ id: this.props.id, sort: sorted });
-  };
-
-  private onColumnRemoved: OnColumnRemoved = columnId =>
-    this.props.removeColumn!({ id: this.props.id, columnId });
-
-  private onColumnResized: OnColumnResized = ({ columnId, delta }) =>
-    this.props.applyDeltaToColumnWidth!({ id: this.props.id, columnId, delta });
-
-  private onPinEvent: OnPinEvent = eventId => this.props.pinEvent!({ id: this.props.id, eventId });
-
-  private onUnPinEvent: OnUnPinEvent = eventId =>
-    this.props.unPinEvent!({ id: this.props.id, eventId });
-
-  private onUpdateNote: UpdateNote = (note: Note) => this.props.updateNote!({ note });
-
-  private onUpdateColumns: OnUpdateColumns = columns =>
-    this.props.updateColumns!({ id: this.props.id, columns });
-}
+StatefulBodyComponent.displayName = 'StatefulBodyComponent';
 
 const makeMapStateToProps = () => {
   const memoizedColumnHeaders: (
@@ -201,26 +207,23 @@ const makeMapStateToProps = () => {
 
     return {
       columnHeaders: memoizedColumnHeaders(columns, browserFields),
-      id,
       eventIdToNoteIds,
-      getNotesByIds: getNotesByIds(state),
+      notesById: getNotesByIds(state),
+      id,
       pinnedEventIds,
     };
   };
   return mapStateToProps;
 };
 
-export const StatefulBody = connect(
-  makeMapStateToProps,
-  {
-    addNoteToEvent: timelineActions.addNoteToEvent,
-    applyDeltaToColumnWidth: timelineActions.applyDeltaToColumnWidth,
-    unPinEvent: timelineActions.unPinEvent,
-    updateColumns: timelineActions.updateColumns,
-    updateSort: timelineActions.updateSort,
-    pinEvent: timelineActions.pinEvent,
-    removeColumn: timelineActions.removeColumn,
-    removeProvider: timelineActions.removeProvider,
-    updateNote: appActions.updateNote,
-  }
-)(StatefulBodyComponent);
+export const StatefulBody = connect(makeMapStateToProps, {
+  addNoteToEvent: timelineActions.addNoteToEvent,
+  applyDeltaToColumnWidth: timelineActions.applyDeltaToColumnWidth,
+  pinEvent: timelineActions.pinEvent,
+  removeColumn: timelineActions.removeColumn,
+  removeProvider: timelineActions.removeProvider,
+  unPinEvent: timelineActions.unPinEvent,
+  updateColumns: timelineActions.updateColumns,
+  updateNote: appActions.updateNote,
+  updateSort: timelineActions.updateSort,
+})(StatefulBodyComponent);

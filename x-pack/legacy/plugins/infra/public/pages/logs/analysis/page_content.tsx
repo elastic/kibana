@@ -5,20 +5,35 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 
+import { isSetupStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import { LogAnalysisCapabilities, LogAnalysisJobs } from '../../../containers/logs/log_analysis';
 import { Source } from '../../../containers/source';
 import { AnalysisResultsContent } from './page_results_content';
 import { AnalysisSetupContent } from './page_setup_content';
 import { AnalysisUnavailableContent } from './page_unavailable_content';
+import { AnalysisSetupStatusUnknownContent } from './page_setup_status_unknown';
 
 export const AnalysisPageContent = () => {
-  const { sourceId, source } = useContext(Source.Context);
+  const { sourceId } = useContext(Source.Context);
   const { hasLogAnalysisCapabilites } = useContext(LogAnalysisCapabilities.Context);
 
-  const { setup, retry, setupStatus, viewResults } = useContext(LogAnalysisJobs.Context);
+  const {
+    availableIndices,
+    cleanupAndSetup,
+    fetchJobStatus,
+    lastSetupErrorMessages,
+    setup,
+    setupStatus,
+    timestampField,
+    viewResults,
+  } = useContext(LogAnalysisJobs.Context);
+
+  useEffect(() => {
+    fetchJobStatus();
+  }, []);
 
   if (!hasLogAnalysisCapabilites) {
     return <AnalysisUnavailableContent />;
@@ -30,7 +45,9 @@ export const AnalysisPageContent = () => {
         })}
       />
     );
-  } else if (setupStatus === 'skipped' || setupStatus === 'hiddenAfterSuccess') {
+  } else if (setupStatus === 'unknown') {
+    return <AnalysisSetupStatusUnknownContent retry={fetchJobStatus} />;
+  } else if (isSetupStatusWithResults(setupStatus)) {
     return (
       <AnalysisResultsContent
         sourceId={sourceId}
@@ -40,10 +57,12 @@ export const AnalysisPageContent = () => {
   } else {
     return (
       <AnalysisSetupContent
+        availableIndices={availableIndices}
+        cleanupAndSetup={cleanupAndSetup}
+        errorMessages={lastSetupErrorMessages}
         setup={setup}
-        retry={retry}
         setupStatus={setupStatus}
-        indexPattern={source ? source.configuration.logAlias : ''}
+        timestampField={timestampField}
         viewResults={viewResults}
       />
     );

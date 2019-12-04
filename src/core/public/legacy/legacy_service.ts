@@ -19,7 +19,7 @@
 
 import angular from 'angular';
 import { InternalCoreSetup, InternalCoreStart } from '../core_system';
-import { LegacyCoreSetup, LegacyCoreStart } from '../';
+import { LegacyCoreSetup, LegacyCoreStart, MountPoint } from '../';
 
 /** @internal */
 export interface LegacyPlatformParams {
@@ -40,7 +40,7 @@ interface StartDeps {
 }
 
 interface BootstrapModule {
-  bootstrap: (targetDomElement: HTMLElement) => void;
+  bootstrap: MountPoint;
 }
 
 /**
@@ -51,6 +51,8 @@ interface BootstrapModule {
  * setup either the app or browser tests.
  */
 export class LegacyPlatformService {
+  /** Symbol to represent the legacy platform as a fake "plugin". Used by the ContextService */
+  public readonly legacyId = Symbol();
   private bootstrapModule?: BootstrapModule;
   private targetDomElement?: HTMLElement;
 

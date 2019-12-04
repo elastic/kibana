@@ -503,6 +503,25 @@
     });
 
     /**
+   * Gets API keys in Elasticsearch
+   * @param {boolean} owner A boolean flag that can be used to query API keys owned by the currently authenticated user.
+   * Defaults to false. The realm_name or username parameters cannot be specified when this parameter is set to true as
+   * they are assumed to be the currently authenticated ones.
+   */
+    shield.getAPIKeys = ca({
+      method: 'GET',
+      urls: [{
+        fmt: `/_security/api_key?owner=<%=owner%>`,
+        req: {
+          owner: {
+            type: 'boolean',
+            required: true
+          }
+        }
+      }]
+    });
+
+    /**
      * Creates an API key in Elasticsearch for the current user.
      *
      * @param {string} name A name for this API key

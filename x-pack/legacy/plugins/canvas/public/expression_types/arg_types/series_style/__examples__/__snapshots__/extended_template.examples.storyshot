@@ -12,8 +12,7 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
 >
   <div>
     <div
-      className="euiFormRow euiFormRow--compressed"
-      id="generated-id-row"
+      className="euiFormRow euiFormRow--compressed euiFormRow--horizontal"
     >
       <div
         className="euiFormRow__labelWrapper"
@@ -22,20 +21,20 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
           className="euiFormLabel euiFormRow__label"
           htmlFor="generated-id"
         >
-          Series Identifier
+          Series id
         </label>
       </div>
       <div
         className="euiFormRow__fieldWrapper"
       >
         <div
-          className="euiFormControlLayout"
+          className="euiFormControlLayout euiFormControlLayout--compressed"
         >
           <div
             className="euiFormControlLayout__childrenWrapper"
           >
             <select
-              className="euiSelect"
+              className="euiSelect euiSelect--compressed"
               id="generated-id"
               onBlur={[Function]}
               onChange={[Function]}
@@ -46,7 +45,7 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
               <option
                 value=""
               >
-                Select Series
+                Select series
               </option>
               <option
                 value="label1"
@@ -85,6 +84,9 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
       className="euiSpacer euiSpacer--s"
     />
     <div
+      className="euiSpacer euiSpacer--s"
+    />
+    <div
       className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
       <div
@@ -92,7 +94,6 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
       >
         <div
           className="euiFormRow euiFormRow--compressed"
-          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -108,13 +109,13 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
             className="euiFormRow__fieldWrapper"
           >
             <div
-              className="euiFormControlLayout"
+              className="euiFormControlLayout euiFormControlLayout--compressed"
             >
               <div
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <select
-                  className="euiSelect"
+                  className="euiSelect euiSelect--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -181,7 +182,6 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
       >
         <div
           className="euiFormRow euiFormRow--compressed"
-          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -197,13 +197,13 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
             className="euiFormRow__fieldWrapper"
           >
             <div
-              className="euiFormControlLayout"
+              className="euiFormControlLayout euiFormControlLayout--compressed"
             >
               <div
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <select
-                  className="euiSelect"
+                  className="euiSelect euiSelect--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -270,7 +270,6 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
       >
         <div
           className="euiFormRow euiFormRow--compressed"
-          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -286,13 +285,13 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
             className="euiFormRow__fieldWrapper"
           >
             <div
-              className="euiFormControlLayout"
+              className="euiFormControlLayout euiFormControlLayout--compressed"
             >
               <div
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <select
-                  className="euiSelect"
+                  className="euiSelect euiSelect--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}

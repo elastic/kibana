@@ -24,6 +24,7 @@ import { LoggerAdapter } from './logger_adapter';
 import { LoggerFactory } from './logger_factory';
 import { LoggingConfigType, LoggerConfigType, LoggingConfig } from './logging_config';
 
+export type ILoggingService = PublicMethodsOf<LoggingService>;
 /**
  * Service that is responsible for maintaining loggers and logger appenders.
  * @internal

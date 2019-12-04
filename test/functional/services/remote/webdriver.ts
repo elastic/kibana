@@ -17,23 +17,26 @@
  * under the License.
  */
 
+import { delimiter } from 'path';
+
+import * as Rx from 'rxjs';
+import { mergeMap, map, takeUntil } from 'rxjs/operators';
+import { Lifecycle } from '@kbn/test/src/functional_test_runner/lib/lifecycle';
 import { ToolingLog } from '@kbn/dev-utils';
 import { delay } from 'bluebird';
 import chromeDriver from 'chromedriver';
 // @ts-ignore types not available
 import geckoDriver from 'geckodriver';
-import { Builder, Capabilities, By, Key, logging, until } from 'selenium-webdriver';
-// @ts-ignore types not available
+import { Builder, Capabilities, By, logging, until } from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome';
-// @ts-ignore types not available
 import firefox from 'selenium-webdriver/firefox';
-// @ts-ignore internal modules are not typed
-import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
 // @ts-ignore internal modules are not typed
 import { Executor } from 'selenium-webdriver/lib/http';
 // @ts-ignore internal modules are not typed
 import { getLogger } from 'selenium-webdriver/lib/logging';
 
+import { pollForLogEntry$ } from './poll_for_log_entry';
+import { createStdoutSocket } from './create_stdout_stream';
 import { preventParallelCalls } from './prevent_parallel_calls';
 
 import { Browsers } from './browsers';
@@ -58,22 +61,37 @@ Executor.prototype.execute = preventParallelCalls(
 );
 
 let attemptCounter = 0;
-async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
+async function attemptToCreateCommand(
+  log: ToolingLog,
+  browserType: Browsers,
+  lifecycle: Lifecycle,
+  logPollingMs: number
+) {
   const attemptId = ++attemptCounter;
   log.debug('[webdriver] Creating session');
 
   const buildDriverInstance = async () => {
     switch (browserType) {
-      case 'chrome':
+      case 'chrome': {
         const chromeCapabilities = Capabilities.chrome();
         const chromeOptions = [
-          'disable-translate',
-          'new-window',
+          // Disables the sandbox for all process types that are normally sandboxed.
           'no-sandbox',
+          // Launches URL in new browser window.
+          'new-window',
+          // By default, file:// URIs cannot read other file:// URIs. This is an override for developers who need the old behavior for testing.
           'allow-file-access-from-files',
+          // Use fake device for Media Stream to replace actual camera and microphone.
           'use-fake-device-for-media-stream',
+          // Bypass the media stream infobar by selecting the default device for media streams (e.g. WebRTC). Works with --use-fake-device-for-media-stream.
           'use-fake-ui-for-media-stream',
         ];
+        if (process.platform === 'linux') {
+          // The /dev/shm partition is too small in certain VM environments, causing
+          // Chrome to fail or crash. Use this flag to work-around this issue
+          // (a temporary directory will always be used to create anonymous shared memory files).
+          chromeOptions.push('disable-dev-shm-usage');
+        }
         if (headlessBrowser === '1') {
           // Use --disable-gpu to avoid an error from a missing Mesa library, as per
           // See: https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md
@@ -84,28 +102,108 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
           args: chromeOptions,
         });
         chromeCapabilities.set('goog:loggingPrefs', { browser: 'ALL' });
-        return new Builder()
+
+        const session = await new Builder()
           .forBrowser(browserType)
           .withCapabilities(chromeCapabilities)
           .setChromeService(new chrome.ServiceBuilder(chromeDriver.path).enableVerboseLogging())
           .build();
-      case 'firefox':
+
+        return {
+          session,
+          consoleLog$: pollForLogEntry$(
+            session,
+            logging.Type.BROWSER,
+            logPollingMs,
+            lifecycle.cleanup$
+          ).pipe(
+            takeUntil(lifecycle.cleanup$),
+            map(({ message, level: { name: level } }) => ({
+              message: message.replace(/\\n/g, '\n'),
+              level,
+            }))
+          ),
+        };
+      }
+
+      case 'firefox': {
         const firefoxOptions = new firefox.Options();
+        // Firefox 65+ supports logging console output to stdout
+        firefoxOptions.set('moz:firefoxOptions', {
+          prefs: { 'devtools.console.stdout.content': true },
+        });
         if (headlessBrowser === '1') {
           // See: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
-          firefoxOptions.addArguments('-headless');
+          firefoxOptions.headless();
         }
-        return new Builder()
+        const { input, chunk$, cleanup } = await createStdoutSocket();
+        lifecycle.on('cleanup', cleanup);
+
+        const session = await new Builder()
           .forBrowser(browserType)
           .setFirefoxOptions(firefoxOptions)
-          .setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path).enableVerboseLogging())
+          .setFirefoxService(
+            new firefox.ServiceBuilder(geckoDriver.path).setStdio(['ignore', input, 'ignore'])
+          )
           .build();
+
+        const CONSOLE_LINE_RE = /^console\.([a-z]+): ([\s\S]+)/;
+
+        return {
+          session,
+          consoleLog$: chunk$.pipe(
+            map(chunk => chunk.toString('utf8')),
+            mergeMap(msg => {
+              const match = msg.match(CONSOLE_LINE_RE);
+              if (!match) {
+                log.debug('Firefox stdout: ' + msg);
+                return [];
+              }
+
+              const [, level, message] = match;
+              return [
+                {
+                  level,
+                  message: message.trim(),
+                },
+              ];
+            })
+          ),
+        };
+      }
+
+      case 'ie': {
+        // https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/ie_exports_Options.html
+        const driverPath = require.resolve('iedriver/lib/iedriver');
+        process.env.PATH = driverPath + delimiter + process.env.PATH;
+
+        const ieCapabilities = Capabilities.ie();
+        ieCapabilities.set('se:ieOptions', {
+          'ie.ensureCleanSession': true,
+          ignoreProtectedModeSettings: true,
+          ignoreZoomSetting: false, // requires us to have 100% zoom level
+          nativeEvents: true, // need this for values to stick but it requires 100% scaling and window focus
+          requireWindowFocus: true,
+          logLevel: 'TRACE',
+        });
+
+        const session = await new Builder()
+          .forBrowser(browserType)
+          .withCapabilities(ieCapabilities)
+          .build();
+
+        return {
+          session,
+          consoleLog$: Rx.EMPTY,
+        };
+      }
+
       default:
         throw new Error(`${browserType} is not supported yet`);
     }
   };
 
-  const session = await buildDriverInstance();
+  const { session, consoleLog$ } = await buildDriverInstance();
 
   if (throttleOption === '1' && browserType === 'chrome') {
     // Only chrome supports this option.
@@ -123,10 +221,15 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
     return;
   } // abort
 
-  return { driver: session, By, Key, until, LegacyActionSequence };
+  return { driver: session, By, until, consoleLog$ };
 }
 
-export async function initWebDriver(log: ToolingLog, browserType: Browsers) {
+export async function initWebDriver(
+  log: ToolingLog,
+  browserType: Browsers,
+  lifecycle: Lifecycle,
+  logPollingMs: number
+) {
   const logger = getLogger('webdriver.http.Executor');
   logger.setLevel(logging.Level.FINEST);
   logger.addHandler((entry: { message: string }) => {
@@ -148,7 +251,7 @@ export async function initWebDriver(log: ToolingLog, browserType: Browsers) {
       while (true) {
         const command = await Promise.race([
           delay(30 * SECOND),
-          attemptToCreateCommand(log, browserType),
+          attemptToCreateCommand(log, browserType, lifecycle, logPollingMs),
         ]);
 
         if (!command) {

@@ -154,7 +154,7 @@ describe('Inspect Button', () => {
 
       wrapper.update();
 
-      expect(store.getState().inputs.global.query[0].isInspected).toBe(true);
+      expect(store.getState().inputs.global.queries[0].isInspected).toBe(true);
       expect(
         wrapper
           .find('button[data-test-subj="modal-inspect-close"]')
@@ -185,7 +185,7 @@ describe('Inspect Button', () => {
 
       wrapper.update();
 
-      expect(store.getState().inputs.global.query[0].isInspected).toBe(false);
+      expect(store.getState().inputs.global.queries[0].isInspected).toBe(false);
       expect(
         wrapper
           .find('button[data-test-subj="modal-inspect-close"]')
@@ -200,7 +200,7 @@ describe('Inspect Button', () => {
           <InspectButton queryId={newQuery.id} show={true} title="My title" />
         </TestProviderWithoutDragAndDrop>
       );
-      store.getState().inputs.global.query[0].loading = true;
+      store.getState().inputs.global.queries[0].loading = true;
       wrapper
         .find('button[data-test-subj="inspect-icon-button"]')
         .first()
@@ -208,7 +208,7 @@ describe('Inspect Button', () => {
 
       wrapper.update();
 
-      expect(store.getState().inputs.global.query[0].isInspected).toBe(true);
+      expect(store.getState().inputs.global.queries[0].isInspected).toBe(true);
       expect(
         wrapper
           .find('button[data-test-subj="modal-inspect-close"]')

@@ -4,8 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBasicTable, EuiPanel, EuiTitle, EuiButtonIcon, EuiIcon, EuiLink } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiFlexGroup,
+  EuiPanel,
+  EuiTitle,
+  EuiButtonIcon,
+  EuiIcon,
+  EuiLink,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
@@ -21,10 +30,10 @@ import { MonitorListStatusColumn } from './monitor_list_status_column';
 import { formatUptimeGraphQLErrorList } from '../../../lib/helper/format_error_list';
 import { ExpandedRowMap } from './types';
 import { MonitorListDrawer } from './monitor_list_drawer';
-import { CLIENT_DEFAULTS } from '../../../../common/constants';
 import { MonitorBarSeries } from '../charts';
-import { MonitorPageLink } from '../monitor_page_link';
+import { MonitorPageLink } from './monitor_page_link';
 import { MonitorListActionsPopover } from './monitor_list_actions_popover';
+import { OverviewPageLink } from '../overview_page_link';
 
 interface MonitorListQueryResult {
   monitorStates?: MonitorSummaryResult;
@@ -34,16 +43,9 @@ interface MonitorListProps {
   absoluteStartDate: number;
   absoluteEndDate: number;
   dangerColor: string;
+  hasActiveFilters: boolean;
   successColor: string;
   linkParameters?: string;
-  // TODO: reintegrate pagination in a future release
-  // pageIndex: number;
-  // pageSize: number;
-  // TODO: reintroduce for pagination and sorting
-  // onChange: (criteria: Criteria) => void;
-  // TODO: reintegrate sorting in a future release
-  // sortField: string;
-  // sortDirection: string;
 }
 
 type Props = UptimeGraphQLQueryProps<MonitorListQueryResult> & MonitorListProps;
@@ -53,42 +55,30 @@ export const MonitorListComponent = (props: Props) => {
     absoluteStartDate,
     absoluteEndDate,
     dangerColor,
-    successColor,
     data,
     errors,
+    hasActiveFilters,
     linkParameters,
     loading,
-    // TODO: reintroduce for pagination and sorting
-    // onChange,
-    // TODO: reintegrate pagination in future release
-    // pageIndex,
-    // pageSize,
-    // TODO: reintegrate sorting in future release
-    // sortDirection,
-    // sortField,
   } = props;
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
-
   const items = get<MonitorSummary[]>(data, 'monitorStates.summaries', []);
-  // TODO: use with pagination
-  // const count = get<number>(data, 'monitorStates.totalSummaryCount.count', 0);
 
-  // TODO: reintegrate pagination in future release
-  // const pagination: Pagination = {
-  //   pageIndex,
-  //   pageSize,
-  //   pageSizeOptions: [5, 10, 20, 50],
-  //   totalItemCount: count,
-  //   hidePerPageOptions: false,
-  // };
+  const nextPagePagination = get<string>(data, 'monitorStates.nextPagePagination');
+  const prevPagePagination = get<string>(data, 'monitorStates.prevPagePagination');
 
-  // TODO: reintegrate sorting in future release
-  // const sorting = {
-  //   sort: {
-  //     field: sortField,
-  //     direction: sortDirection,
-  //   },
-  // };
+  const getExpandedRowMap = () => {
+    return drawerIds.reduce((map: ExpandedRowMap, id: string) => {
+      return {
+        ...map,
+        [id]: (
+          <MonitorListDrawer
+            summary={items.find(({ monitor_id: monitorId }) => monitorId === id)}
+          />
+        ),
+      };
+    }, {});
+  };
 
   return (
     <Fragment>
@@ -103,34 +93,36 @@ export const MonitorListComponent = (props: Props) => {
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiBasicTable
+          aria-label={i18n.translate('xpack.uptime.monitorList.table.description', {
+            defaultMessage:
+              'Monitor Status table with columns for Status, Name, URL, IP, Downtime History and Integrations. The table is currently displaying {length} items.',
+            values: { length: items.length },
+          })}
           error={errors ? formatUptimeGraphQLErrorList(errors) : errors}
-          loading={loading}
+          // Only set loading to true when there are no items present to prevent the bug outlined in
+          // in https://github.com/elastic/eui/issues/2393 . Once that is fixed we can simply set the value here to
+          // loading={loading}
+          loading={loading && (!items || items.length < 1)}
           isExpandable={true}
           hasActions={true}
           itemId="monitor_id"
-          itemIdToExpandedRowMap={drawerIds.reduce((map: ExpandedRowMap, id: string) => {
-            return {
-              ...map,
-              [id]: (
-                <MonitorListDrawer
-                  condensedCheckLimit={CLIENT_DEFAULTS.CONDENSED_CHECK_LIMIT}
-                  summary={
-                    items ? items.find(({ monitor_id: monitorId }) => monitorId === id) : undefined
-                  }
-                  successColor={successColor}
-                  dangerColor={dangerColor}
-                />
-              ),
-            };
-          }, {})}
+          itemIdToExpandedRowMap={getExpandedRowMap()}
           items={items}
           // TODO: not needed without sorting and pagination
           // onChange={onChange}
-          noItemsMessage={i18n.translate('xpack.uptime.monitorList.noItemMessage', {
-            defaultMessage: 'No uptime monitors found',
-            description:
-              'This message is shown if the monitors table is rendered but has no items.',
-          })}
+          noItemsMessage={
+            hasActiveFilters
+              ? i18n.translate('xpack.uptime.monitorList.noItemForSelectedFiltersMessage', {
+                  defaultMessage: 'No monitors found for selected filter criteria',
+                  description:
+                    'This message is show if there are no monitors in the table and some filter or search criteria exists',
+                })
+              : i18n.translate('xpack.uptime.monitorList.noItemMessage', {
+                  defaultMessage: 'No uptime monitors found',
+                  description:
+                    'This message is shown if the monitors table is rendered but has no items.',
+                })
+          }
           // TODO: reintegrate pagination in future release
           // pagination={pagination}
           // TODO: reintegrate sorting in future release
@@ -153,11 +145,7 @@ export const MonitorListComponent = (props: Props) => {
                 defaultMessage: 'Name',
               }),
               render: (name: string, summary: MonitorSummary) => (
-                <MonitorPageLink
-                  id={summary.monitor_id}
-                  linkParameters={linkParameters}
-                  location={undefined}
-                >
+                <MonitorPageLink monitorId={summary.monitor_id} linkParameters={linkParameters}>
                   {name ? name : `Unnamed - ${summary.monitor_id}`}
                 </MonitorPageLink>
               ),
@@ -208,7 +196,7 @@ export const MonitorListComponent = (props: Props) => {
                 {
                   defaultMessage: 'Integrations',
                   description:
-                    'The heading column of some action buttons that will take users to other Obsevability apps',
+                    'The heading column of some action buttons that will take users to other Observability apps',
                 }
               ),
               render: (state: any, summary: MonitorSummary) => (
@@ -236,9 +224,9 @@ export const MonitorListComponent = (props: Props) => {
                         },
                       }
                     )}
-                    iconType={drawerIds.find(item => item === id) ? 'arrowUp' : 'arrowDown'}
+                    iconType={drawerIds.includes(id) ? 'arrowUp' : 'arrowDown'}
                     onClick={() => {
-                      if (drawerIds.find(i => id === i)) {
+                      if (drawerIds.includes(id)) {
                         updateDrawerIds(drawerIds.filter(p => p !== id));
                       } else {
                         updateDrawerIds([...drawerIds, id]);
@@ -250,6 +238,23 @@ export const MonitorListComponent = (props: Props) => {
             },
           ]}
         />
+        <EuiSpacer size="s" />
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <OverviewPageLink
+              dataTestSubj="xpack.uptime.monitorList.prevButton"
+              direction="prev"
+              pagination={prevPagePagination}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <OverviewPageLink
+              dataTestSubj="xpack.uptime.monitorList.nextButton"
+              direction="next"
+              pagination={nextPagePagination}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPanel>
     </Fragment>
   );

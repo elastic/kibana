@@ -5,15 +5,14 @@
  */
 
 import expect from '@kbn/expect';
-import { getTestAlertData } from './utils';
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
+import { getTestAlertData, getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('create', () => {
@@ -55,15 +54,20 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               objectRemover.add(space.id, response.body.id, 'alert');
               expect(response.body).to.eql({
                 id: response.body.id,
+                name: 'abc',
+                tags: ['foo'],
                 actions: [],
                 enabled: true,
                 alertTypeId: 'test.noop',
-                alertTypeParams: {},
+                params: {},
                 createdBy: user.username,
-                interval: '10s',
+                interval: '1m',
                 scheduledTaskId: response.body.scheduledTaskId,
+                throttle: '1m',
                 updatedBy: user.username,
                 apiKeyOwner: user.username,
+                muteAll: false,
+                mutedInstanceIds: [],
               });
               expect(typeof response.body.scheduledTaskId).to.be('string');
               const { _source: taskRecord } = await getScheduledTask(response.body.scheduledTaskId);
@@ -169,10 +173,10 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message:
-                  'child "alertTypeId" fails because ["alertTypeId" is required]. child "interval" fails because ["interval" is required]. child "alertTypeParams" fails because ["alertTypeParams" is required]. child "actions" fails because ["actions" is required]',
+                  'child "name" fails because ["name" is required]. child "alertTypeId" fails because ["alertTypeId" is required]. child "interval" fails because ["interval" is required]. child "params" fails because ["params" is required]. child "actions" fails because ["actions" is required]',
                 validation: {
                   source: 'payload',
-                  keys: ['alertTypeId', 'interval', 'alertTypeParams', 'actions'],
+                  keys: ['name', 'alertTypeId', 'interval', 'params', 'actions'],
                 },
               });
               break;
@@ -181,7 +185,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it(`should handle create alert request appropriately when alertTypeParams isn't valid`, async () => {
+        it(`should handle create alert request appropriately when params isn't valid`, async () => {
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
@@ -210,7 +214,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message:
-                  'alertTypeParams invalid: [param1]: expected value of type [string] but got [undefined]',
+                  'params invalid: [param1]: expected value of type [string] but got [undefined]',
               });
               break;
             default:
@@ -243,7 +247,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message:
-                  'child "interval" fails because ["interval" with value "10x" fails to match the seconds (5s) pattern, "interval" with value "10x" fails to match the minutes (5m) pattern, "interval" with value "10x" fails to match the hours (5h) pattern, "interval" with value "10x" fails to match the days (5d) pattern]',
+                  'child "interval" fails because ["interval" with value "10x" fails to match the seconds pattern, "interval" with value "10x" fails to match the minutes pattern, "interval" with value "10x" fails to match the hours pattern, "interval" with value "10x" fails to match the days pattern]',
                 validation: {
                   source: 'payload',
                   keys: ['interval', 'interval', 'interval', 'interval'],
@@ -280,7 +284,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message:
-                  'child "interval" fails because ["interval" with value "0s" fails to match the seconds (5s) pattern, "interval" with value "0s" fails to match the minutes (5m) pattern, "interval" with value "0s" fails to match the hours (5h) pattern, "interval" with value "0s" fails to match the days (5d) pattern]',
+                  'child "interval" fails because ["interval" with value "0s" fails to match the seconds pattern, "interval" with value "0s" fails to match the minutes pattern, "interval" with value "0s" fails to match the hours pattern, "interval" with value "0s" fails to match the days pattern]',
                 validation: {
                   source: 'payload',
                   keys: ['interval', 'interval', 'interval', 'interval'],

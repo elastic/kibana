@@ -1,0 +1,9 @@
+.lnsIndexPatternDimensionPanel {
+  @include euiFontSizeS;
+  background-color: $euiColorEmptyShade;
+  border-radius: $euiBorderRadius;
+  display: flex;
+  align-items: center;
+  margin-top: $euiSizeXS;
+  overflow: hidden;
+}

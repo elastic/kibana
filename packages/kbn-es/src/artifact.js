@@ -22,7 +22,6 @@ const AbortController = require('abort-controller');
 const fs = require('fs');
 const { promisify } = require('util');
 const { pipeline, Transform } = require('stream');
-const mkdirp = require('mkdirp');
 const chalk = require('chalk');
 const { createHash } = require('crypto');
 const path = require('path');
@@ -285,7 +284,8 @@ exports.Artifact = class Artifact {
     let first500Bytes = Buffer.alloc(0);
     let contentLength = 0;
 
-    mkdirp.sync(path.dirname(tmpPath));
+    fs.mkdirSync(path.dirname(tmpPath), { recursive: true });
+
     await asyncPipeline(
       resp.body,
       new Transform({

@@ -1,0 +1,48 @@
+.transform__TransformTable {
+  // Using an override as a last resort because we cannot set custom classes on
+  // nested upstream components. The opening animation limits the height
+  // of the expanded row to 1000px which turned out to be not predictable.
+  // The animation could also result in flickering with expanded rows
+  // where the inner content would result in the DOM changing the height.
+  .euiTableRow-isExpandedRow .euiTableCellContent {
+    animation: none !important;
+    .euiTableCellContent__text {
+      width: 100%;
+    }
+  }
+  // Another override: Because an update to the table replaces the DOM, the same
+  // icon would still again fade in with an animation. If the table refreshes with
+  // e.g. 1s this would result in a blinking icon effect.
+  .euiIcon-isLoaded {
+    animation: none !important;
+  }
+}
+.transform__BulkActionItem {
+  display: block;
+  padding: $euiSizeS;
+  width: 100%;
+  text-align: left;
+}
+
+.transform__BulkActionsBorder {
+    height: 20px;
+    border-right: $euiBorderThin;
+    width: 1px;
+    display: inline-block;
+    vertical-align: middle;
+    height: 35px;
+    margin: 0px 5px;
+    margin-top: -5px;
+}
+
+.transform__ProgressBar {
+  margin-bottom: $euiSizeM;
+}
+
+.transform__TaskStateBadge, .transform__TaskModeBadge {
+  max-width: 100px;
+}
+
+.transform__TransformTable__messagesPaneTable .euiTableCellContent__text {
+  text-align: left;
+}

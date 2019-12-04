@@ -4,53 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiPopover, EuiPopoverTitle, EuiSpacer } from '@elastic/eui';
-import React, { useContext, useEffect, useReducer, useState } from 'react';
-import styled from 'styled-components';
+import { EuiButtonEmpty, EuiCallOut, EuiPopover, EuiPopoverTitle, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
+import React, { useContext, useReducer, useState } from 'react';
+import styled from 'styled-components';
+import { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } from 'ui/documentation_links';
 
-import { useJobSummaryData } from './hooks/use_job_summary_data';
-import * as i18n from './translations';
-import { Job } from './types';
+import { DEFAULT_KBN_VERSION } from '../../../common/constants';
+import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
+import { METRIC_TYPE, TELEMETRY_EVENT, trackUiAction as track } from '../../lib/track_usage';
+import { errorToToaster } from '../ml/api/error_to_toaster';
 import { hasMlAdminPermissions } from '../ml/permissions/has_ml_admin_permissions';
 import { MlCapabilitiesContext } from '../ml/permissions/ml_capabilities_provider';
-import { JobsTable } from './jobs_table/jobs_table';
+import { useStateToaster } from '../toasters';
 import { setupMlJob, startDatafeeds, stopDatafeeds } from './api';
-import { useIndexPatterns } from './hooks/use_index_patterns';
-import { UpgradeContents } from './upgrade_contents';
-import { FilterGroup } from './jobs_table/filter_group';
+import { filterJobs } from './helpers';
+import { useSiemJobs } from './hooks/use_siem_jobs';
+import { JobsTableFilters } from './jobs_table/filters/jobs_table_filters';
+import { JobsTable } from './jobs_table/jobs_table';
 import { ShowingCount } from './jobs_table/showing_count';
 import { PopoverDescription } from './popover_description';
-import {
-  getConfigTemplatesToInstall,
-  getIndexPatternTitles,
-  getJobsToDisplay,
-  getJobsToInstall,
-  getStablePatternTitles,
-} from './helpers';
-import { configTemplates } from './config_templates';
-import { useStateToaster } from '../toasters';
-import { errorToToaster } from '../ml/api/error_to_toaster';
-import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
-import { DEFAULT_KBN_VERSION } from '../../../common/constants';
-import { METRIC_TYPE, TELEMETRY_EVENT, trackUiAction as track } from '../../lib/track_usage';
+import * as i18n from './translations';
+import { JobsFilters, JobSummary, SiemJob } from './types';
+import { UpgradeContents } from './upgrade_contents';
 
 const PopoverContentsDiv = styled.div`
-  max-width: 550px;
+  max-width: 684px;
 `;
 
 PopoverContentsDiv.displayName = 'PopoverContentsDiv';
 
 interface State {
   isLoading: boolean;
-  jobs: Job[];
+  jobs: JobSummary[];
   refreshToggle: boolean;
 }
 
 type Action =
   | { type: 'refresh' }
   | { type: 'loading' }
-  | { type: 'success'; results: Job[] }
+  | { type: 'success'; results: JobSummary[] }
   | { type: 'failure' };
 
 function mlPopoverReducer(state: State, action: Action): State {
@@ -92,26 +86,42 @@ const initialState: State = {
   refreshToggle: true,
 };
 
+const defaultFilterProps: JobsFilters = {
+  filterQuery: '',
+  showCustomJobs: false,
+  showElasticJobs: false,
+  selectedGroups: [],
+};
+
 export const MlPopover = React.memo(() => {
   const [{ refreshToggle }, dispatch] = useReducer(mlPopoverReducer, initialState);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [showCustomJobs, setShowCustomJobs] = useState(false);
-  const [showElasticJobs, setShowElasticJobs] = useState(false);
-  const [isLoadingJobSummaryData, jobSummaryData] = useJobSummaryData([], refreshToggle);
-  const [isCreatingJobs, setIsCreatingJobs] = useState(false);
-  const [filterQuery, setFilterQuery] = useState('');
-  const [, dispatchToaster] = useStateToaster();
-  const [, configuredIndexPatterns] = useIndexPatterns(refreshToggle);
-  const capabilities = useContext(MlCapabilitiesContext);
+  const [filterProperties, setFilterProperties] = useState(defaultFilterProps);
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
-  const headers = { 'kbn-version': kbnVersion };
-
-  const configuredIndexPatternTitles = getIndexPatternTitles(configuredIndexPatterns);
+  const [isLoadingSiemJobs, siemJobs] = useSiemJobs(refreshToggle);
+  const [, dispatchToaster] = useStateToaster();
+  const capabilities = useContext(MlCapabilitiesContext);
 
   // Enable/Disable Job & Datafeed -- passed to JobsTable for use as callback on JobSwitch
-  const enableDatafeed = async (jobName: string, latestTimestampMs: number, enable: boolean) => {
-    submitTelemetry(jobName, enable, embeddedJobIds);
+  const enableDatafeed = async (job: SiemJob, latestTimestampMs: number, enable: boolean) => {
+    submitTelemetry(job, enable);
+
+    if (!job.isInstalled) {
+      try {
+        await setupMlJob({
+          configTemplate: job.moduleId,
+          indexPatternName: job.defaultIndexPattern,
+          jobIdErrorFilter: [job.id],
+          groups: job.groups,
+          kbnVersion,
+        });
+      } catch (error) {
+        errorToToaster({ title: i18n.CREATE_JOB_FAILURE, error, dispatchToaster });
+        dispatch({ type: 'refresh' });
+        return;
+      }
+    }
 
     // Max start time for job is no more than two weeks ago to ensure job performance
     const maxStartTime = moment
@@ -122,14 +132,14 @@ export const MlPopover = React.memo(() => {
     if (enable) {
       const startTime = Math.max(latestTimestampMs, maxStartTime);
       try {
-        await startDatafeeds([`datafeed-${jobName}`], headers, startTime);
+        await startDatafeeds({ datafeedIds: [`datafeed-${job.id}`], kbnVersion, start: startTime });
       } catch (error) {
         track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_ENABLE_FAILURE);
         errorToToaster({ title: i18n.START_JOB_FAILURE, error, dispatchToaster });
       }
     } else {
       try {
-        await stopDatafeeds([`datafeed-${jobName}`], headers);
+        await stopDatafeeds({ datafeedIds: [`datafeed-${job.id}`], kbnVersion });
       } catch (error) {
         track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_DISABLE_FAILURE);
         errorToToaster({ title: i18n.STOP_JOB_FAILURE, error, dispatchToaster });
@@ -138,60 +148,12 @@ export const MlPopover = React.memo(() => {
     dispatch({ type: 'refresh' });
   };
 
-  // All jobs from embedded configTemplates that should be installed
-  const embeddedJobIds = getJobsToInstall(configTemplates);
+  const filteredJobs = filterJobs({
+    jobs: siemJobs,
+    ...filterProperties,
+  });
 
-  // Jobs currently installed retrieved via ml jobs_summary api for 'siem' group
-  const siemGroupJobIds = jobSummaryData != null ? jobSummaryData.map(job => job.id) : [];
-  const installedJobIds = embeddedJobIds.filter(job => siemGroupJobIds.includes(job));
-
-  // Config templates that still need to be installed and have a defaultIndexPattern that is configured
-  const configTemplatesToInstall = getConfigTemplatesToInstall(
-    configTemplates,
-    installedJobIds,
-    configuredIndexPatternTitles || []
-  );
-
-  // Filter installed job to show all 'siem' group jobs or just embedded
-  const jobsToDisplay = getJobsToDisplay(
-    jobSummaryData,
-    embeddedJobIds,
-    showCustomJobs,
-    showElasticJobs,
-    filterQuery
-  );
-
-  // Install Config Templates as effect of opening popover
-  useEffect(() => {
-    if (
-      isPopoverOpen &&
-      jobSummaryData != null &&
-      configuredIndexPatternTitles.length > 0 &&
-      configTemplatesToInstall.length > 0
-    ) {
-      const setupJobs = async () => {
-        setIsCreatingJobs(true);
-        try {
-          await Promise.all(
-            configTemplatesToInstall.map(configTemplate => {
-              return setupMlJob({
-                configTemplate: configTemplate.name,
-                indexPatternName: configTemplate.defaultIndexPattern,
-                groups: ['siem'],
-                headers,
-              });
-            })
-          );
-          setIsCreatingJobs(false);
-          dispatch({ type: 'refresh' });
-        } catch (error) {
-          errorToToaster({ title: i18n.CREATE_JOB_FAILURE, error, dispatchToaster });
-          setIsCreatingJobs(false);
-        }
-      };
-      setupJobs();
-    }
-  }, [jobSummaryData, getStablePatternTitles(configuredIndexPatternTitles)]);
+  const incompatibleJobCount = siemJobs.filter(j => !j.isCompatible).length;
 
   if (!capabilities.isPlatinumOrTrialLicense) {
     // If the user does not have platinum show upgrade UI
@@ -200,14 +162,14 @@ export const MlPopover = React.memo(() => {
         anchorPosition="downRight"
         id="integrations-popover"
         button={
-          <EuiButton
+          <EuiButtonEmpty
             data-test-subj="integrations-button"
             iconType="arrowDown"
             iconSide="right"
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
           >
             {i18n.ANOMALY_DETECTION}
-          </EuiButton>
+          </EuiButtonEmpty>
         }
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(!isPopoverOpen)}
@@ -222,7 +184,7 @@ export const MlPopover = React.memo(() => {
         anchorPosition="downRight"
         id="integrations-popover"
         button={
-          <EuiButton
+          <EuiButtonEmpty
             data-test-subj="integrations-button"
             iconType="arrowDown"
             iconSide="right"
@@ -232,7 +194,7 @@ export const MlPopover = React.memo(() => {
             }}
           >
             {i18n.ANOMALY_DETECTION}
-          </EuiButton>
+          </EuiButtonEmpty>
         }
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(!isPopoverOpen)}
@@ -243,21 +205,46 @@ export const MlPopover = React.memo(() => {
 
           <EuiSpacer />
 
-          <FilterGroup
-            showCustomJobs={showCustomJobs}
-            setShowCustomJobs={setShowCustomJobs}
-            showElasticJobs={showElasticJobs}
-            setShowElasticJobs={setShowElasticJobs}
-            setFilterQuery={setFilterQuery}
-          />
+          <JobsTableFilters siemJobs={siemJobs} onFilterChanged={setFilterProperties} />
 
-          <ShowingCount filterResultsLength={jobsToDisplay.length} />
+          <ShowingCount filterResultsLength={filteredJobs.length} />
 
-          <EuiSpacer />
+          <EuiSpacer size="m" />
+
+          {incompatibleJobCount > 0 && (
+            <>
+              <EuiCallOut
+                title={i18n.MODULE_NOT_COMPATIBLE_TITLE(incompatibleJobCount)}
+                color="warning"
+                iconType="alert"
+                size="s"
+              >
+                <p>
+                  <FormattedMessage
+                    defaultMessage="We could not find any data, see {mlDocs} for more information on Machine Learning job requirements."
+                    id="xpack.siem.components.mlPopup.moduleNotCompatibleDescription"
+                    values={{
+                      mlDocs: (
+                        <a
+                          href={`${ELASTIC_WEBSITE_URL}guide/en/siem/guide/${DOC_LINK_VERSION}/machine-learning.html`}
+                          rel="noopener noreferrer"
+                          target="_blank"
+                        >
+                          {'Anomaly Detection with Machine Learning'}
+                        </a>
+                      ),
+                    }}
+                  />
+                </p>
+              </EuiCallOut>
+
+              <EuiSpacer size="m" />
+            </>
+          )}
 
           <JobsTable
-            isLoading={isCreatingJobs || isLoadingJobSummaryData}
-            jobs={jobsToDisplay}
+            isLoading={isLoadingSiemJobs}
+            jobs={filteredJobs}
             onJobStateChange={enableDatafeed}
           />
         </PopoverContentsDiv>
@@ -269,11 +256,11 @@ export const MlPopover = React.memo(() => {
   }
 });
 
-const submitTelemetry = (jobName: string, enabled: boolean, embeddedJobIds: string[]) => {
+const submitTelemetry = (job: SiemJob, enabled: boolean) => {
   // Report type of job enabled/disabled
   track(
     METRIC_TYPE.COUNT,
-    embeddedJobIds.includes(jobName)
+    job.isElasticJob
       ? enabled
         ? TELEMETRY_EVENT.SIEM_JOB_ENABLED
         : TELEMETRY_EVENT.SIEM_JOB_DISABLED

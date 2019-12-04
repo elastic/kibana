@@ -58,7 +58,7 @@ uiRoutes.when('/overview', {
             <SetupModeRenderer
               scope={$scope}
               injector={$injector}
-              render={({ setupMode, flyoutComponent }) => (
+              render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
                 <Fragment>
                   {flyoutComponent}
                   <Overview
@@ -67,6 +67,7 @@ uiRoutes.when('/overview', {
                     changeUrl={changeUrl}
                     showLicenseExpiration={showLicenseExpiration}
                   />
+                  {bottomBarComponent}
                 </Fragment>
               )}
             />

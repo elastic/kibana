@@ -30,6 +30,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
   const globalNav = getService('globalNav');
   const config = getService('config');
   const defaultFindTimeout = config.get('timeouts.find');
+  const comboBox = getService('comboBox');
 
   class DiscoverPage {
     async getQueryField() {
@@ -271,8 +272,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async selectIndexPattern(indexPattern) {
-      await find.clickByCssSelector('.index-pattern-selection');
-      await find.setValue('.ui-select-search', indexPattern + '\n');
+      await testSubjects.click('indexPattern-switch-link');
+      await comboBox.set('index-pattern-selection', indexPattern);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -282,19 +283,13 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async openSidebarFieldFilter() {
-      const fieldFilterFormExists = await testSubjects.exists('discoverFieldFilter');
-      if (!fieldFilterFormExists) {
-        await testSubjects.click('toggleFieldFilterButton');
-        await testSubjects.existOrFail('discoverFieldFilter');
-      }
+      await testSubjects.click('toggleFieldFilterButton');
+      await testSubjects.existOrFail('filterSelectionPanel');
     }
 
     async closeSidebarFieldFilter() {
-      const fieldFilterFormExists = await testSubjects.exists('discoverFieldFilter');
-      if (fieldFilterFormExists) {
-        await testSubjects.click('toggleFieldFilterButton');
-        await testSubjects.missingOrFail('discoverFieldFilter', { allowHidden: true });
-      }
+      await testSubjects.click('toggleFieldFilterButton');
+      await testSubjects.missingOrFail('filterSelectionPanel', { allowHidden: true });
     }
 
   }

@@ -21,7 +21,7 @@ import React, { useState, useEffect } from 'react';
 import { omit, isEqual } from 'lodash';
 import { htmlIdGenerator, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Query } from 'plugins/data';
+import { Query } from 'src/plugins/data/public';
 import chrome from '../../../../chrome';
 import { FilterRow } from './filter';
 import { AggParamEditorProps } from '..';
@@ -29,7 +29,7 @@ import { AggParamEditorProps } from '..';
 const generateId = htmlIdGenerator();
 const config = chrome.getUiSettingsClient();
 
-interface FilterValue {
+export interface FilterValue {
   input: Query;
   label: string;
   id: string;

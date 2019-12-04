@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiText } from '@elastic/eui';
 import * as React from 'react';
-import styled from 'styled-components';
 
 import { BrowserFields } from '../../../containers/source';
 import { TimelineItem } from '../../../graphql/types';
@@ -21,15 +19,14 @@ import {
   OnUnPinEvent,
   OnUpdateColumns,
 } from '../events';
-import { footerHeight } from '../footer';
-
+import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
 import { ColumnHeaders } from './column_headers';
 import { ColumnHeader } from './column_headers/column_header';
 import { Events } from './events';
 import { getActionsColumnWidth } from './helpers';
-import { Sort } from './sort';
 import { ColumnRenderer } from './renderers/column_renderer';
 import { RowRenderer } from './renderers/row_renderer';
+import { Sort } from './sort';
 
 export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
@@ -56,31 +53,6 @@ export interface BodyProps {
   toggleColumn: (column: ColumnHeader) => void;
   updateNote: UpdateNote;
 }
-
-const HorizontalScroll = styled.div<{
-  height: number;
-}>`
-  display: block;
-  height: ${({ height }) => `${height}px`};
-  overflow: hidden;
-  overflow-x: auto;
-  min-height: 0px;
-`;
-
-HorizontalScroll.displayName = 'HorizontalScroll';
-
-const VerticalScrollContainer = styled.div<{
-  height: number;
-  minWidth: number;
-}>`
-  display: block;
-  height: ${({ height }) => `${height - footerHeight - 12}px`};
-  overflow: hidden;
-  overflow-y: auto;
-  min-width: ${({ minWidth }) => `${minWidth}px`};
-`;
-
-VerticalScrollContainer.displayName = 'VerticalScrollContainer';
 
 /** Renders the timeline body */
 export const Body = React.memo<BodyProps>(
@@ -114,30 +86,29 @@ export const Body = React.memo<BodyProps>(
     );
 
     return (
-      <HorizontalScroll data-test-subj="horizontal-scroll" height={height}>
-        <EuiText size="s">
-          <ColumnHeaders
-            actionsColumnWidth={getActionsColumnWidth(isEventViewer)}
-            browserFields={browserFields}
-            columnHeaders={columnHeaders}
-            isEventViewer={isEventViewer}
-            onColumnRemoved={onColumnRemoved}
-            onColumnResized={onColumnResized}
-            onColumnSorted={onColumnSorted}
-            onFilterChange={onFilterChange}
-            onUpdateColumns={onUpdateColumns}
-            showEventsSelect={false}
-            sort={sort}
-            timelineId={id}
-            toggleColumn={toggleColumn}
-            minWidth={columnWidths}
-          />
-
-          <VerticalScrollContainer
-            data-test-subj="vertical-scroll-container"
-            height={height}
-            minWidth={columnWidths}
+      <>
+        <TimelineBody data-test-subj="timeline-body" bodyHeight={height}>
+          <EventsTable
+            data-test-subj="events-table"
+            // Passing the styles directly to the component because the width is being calculated and is recommended by Styled Components for performance: https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
+            style={{ minWidth: columnWidths + 'px' }}
           >
+            <ColumnHeaders
+              actionsColumnWidth={getActionsColumnWidth(isEventViewer)}
+              browserFields={browserFields}
+              columnHeaders={columnHeaders}
+              isEventViewer={isEventViewer}
+              onColumnRemoved={onColumnRemoved}
+              onColumnResized={onColumnResized}
+              onColumnSorted={onColumnSorted}
+              onFilterChange={onFilterChange}
+              onUpdateColumns={onUpdateColumns}
+              showEventsSelect={false}
+              sort={sort}
+              timelineId={id}
+              toggleColumn={toggleColumn}
+            />
+
             <Events
               actionsColumnWidth={getActionsColumnWidth(isEventViewer)}
               addNoteToEvent={addNoteToEvent}
@@ -157,13 +128,12 @@ export const Body = React.memo<BodyProps>(
               rowRenderers={rowRenderers}
               toggleColumn={toggleColumn}
               updateNote={updateNote}
-              minWidth={columnWidths}
             />
-          </VerticalScrollContainer>
-        </EuiText>
-      </HorizontalScroll>
+          </EventsTable>
+        </TimelineBody>
+        <TimelineBodyGlobalStyle />
+      </>
     );
   }
 );
-
 Body.displayName = 'Body';

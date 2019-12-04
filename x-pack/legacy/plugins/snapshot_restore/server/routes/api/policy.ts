@@ -10,8 +10,12 @@ import {
 } from '../../../../../server/lib/create_router/error_wrappers';
 import { SlmPolicyEs, SlmPolicy, SlmPolicyPayload } from '../../../common/types';
 import { deserializePolicy, serializePolicy } from '../../../common/lib';
+import { Plugins } from '../../../shim';
 
-export function registerPolicyRoutes(router: Router) {
+let callWithInternalUser: any;
+
+export function registerPolicyRoutes(router: Router, plugins: Plugins) {
+  callWithInternalUser = plugins.elasticsearch.getCluster('data').callWithInternalUser;
   router.get('policies', getAllHandler);
   router.get('policy/{name}', getOneHandler);
   router.post('policy/{name}/run', executeHandler);
@@ -19,10 +23,13 @@ export function registerPolicyRoutes(router: Router) {
   router.put('policies', createHandler);
   router.put('policies/{name}', updateHandler);
   router.get('policies/indices', getIndicesHandler);
+  router.get('policies/retention_settings', getRetentionSettingsHandler);
+  router.put('policies/retention_settings', updateRetentionSettingsHandler);
+  router.post('policies/retention', executeRetentionHandler);
 }
 
 export const getAllHandler: RouterRouteHandler = async (
-  req,
+  _req,
   callWithRequest
 ): Promise<{
   policies: SlmPolicy[];
@@ -144,7 +151,7 @@ export const updateHandler: RouterRouteHandler = async (req, callWithRequest) =>
 };
 
 export const getIndicesHandler: RouterRouteHandler = async (
-  req,
+  _req,
   callWithRequest
 ): Promise<{
   indices: string[];
@@ -160,4 +167,43 @@ export const getIndicesHandler: RouterRouteHandler = async (
   return {
     indices: indices.map(({ index }) => index).sort(),
   };
+};
+
+export const getRetentionSettingsHandler: RouterRouteHandler = async (): Promise<
+  | {
+      [key: string]: string;
+    }
+  | undefined
+> => {
+  const { persistent, transient, defaults } = await callWithInternalUser('cluster.getSettings', {
+    filterPath: '**.slm.retention*',
+    includeDefaults: true,
+  });
+  const { slm: retentionSettings = undefined } = {
+    ...defaults,
+    ...persistent,
+    ...transient,
+  };
+
+  const { retention_schedule: retentionSchedule } = retentionSettings;
+
+  return { retentionSchedule };
+};
+
+export const updateRetentionSettingsHandler: RouterRouteHandler = async (req, callWithRequest) => {
+  const { retentionSchedule } = req.payload as { retentionSchedule: string };
+
+  return await callWithRequest('cluster.putSettings', {
+    body: {
+      persistent: {
+        slm: {
+          retention_schedule: retentionSchedule,
+        },
+      },
+    },
+  });
+};
+
+export const executeRetentionHandler: RouterRouteHandler = async (_req, callWithRequest) => {
+  return await callWithRequest('slm.executeRetention');
 };

@@ -1,6 +1,6 @@
 [role="xpack"]
 [[reporting-troubleshooting]]
-== Reporting Troubleshooting
+== Reporting troubleshooting
 ++++
 <titleabbrev>Troubleshooting</titleabbrev>
 ++++
@@ -8,28 +8,15 @@
 Having trouble? Here are solutions to common problems you might encounter while using Reporting.
 
 [float]
-=== Verbose Logging
-Kibana's server logs have a lot of useful information for troubleshooting and understanding how things work. If you're having any issues at
-all, the full logs from Reporting will be the first place to look. In `kibana.yml`:
-
-[source,yaml]
---------------------------------------------------------------------------------
-logging.verbose: true
---------------------------------------------------------------------------------
-
-For more information about logging, see <<logging-verbose,Kibana configuration settings>>.
-
-[float]
 [[reporting-troubleshooting-system-dependencies]]
-=== System Dependencies
+=== System dependencies
 Reporting launches a "headless" web browser called Chromium on the Kibana server. It is a custom build made by Elastic of an open source
 project, and it is intended to have minimal dependencies on OS libraries. However, the Kibana server OS might still require additional
 dependencies for Chromium.
 
 Make sure Kibana server OS has the appropriate packages installed for the distribution.
 
-[float]
-==== On CentOS/RHEL systems, the following packages should be installed:
+If you are using CentOS/RHEL systems, install the following packages:
 * `ipa-gothic-fonts`
 * `xorg-x11-fonts-100dpi`
 * `xorg-x11-fonts-75dpi`
@@ -40,25 +27,24 @@ Make sure Kibana server OS has the appropriate packages installed for the distri
 * `fontconfig`
 * `freetype`
 
-[float]
-==== On Ubuntu/Debian systems, the following packages should be installed:
+If you are using Ubuntu/Debian systems, install the following packages:
 * `fonts-liberation`
 * `libfontconfig1`
 
 [float]
-=== Text is Not rendered correctly in generated reports
+=== Text is rendered incorrectly in generated reports
 
 If a report label is rendered as an empty rectangle, no system fonts are available. Install at least one font package on the system.
 
 If the report is missing certain Chinese, Japanese or Korean characters, ensure that a system font with those characters is installed.
 
 [float]
-=== Data Table Visualization does not show all data in PDF reports
+=== Missing data in PDF report of data table visualization
 There is currently a known limitation with the Data Table visualization that only the first page of data rows, which are the only data
 visible on the screen, are shown in PDF reports.
 
 [float]
-=== File Permissions
+=== File permissions
 Ensure that the `headless_shell` binary located in your Kibana data directory is owned by the user who is running Kibana, that the
 user has the execute permission, and if applicable, that the filesystem is mounted with the `exec` option.
 
@@ -70,7 +56,7 @@ the first time Kibana starts when verbose logging is enabled.
 
 [float]
 [[reporting-troubleshooting-error-messages]]
-=== Error Messages
+=== Error messages
 Whenever possible, a Reporting error message tries to be as self-explanatory as possible. Here are some error messages you might encounter,
 along with the solution.
 
@@ -100,3 +86,28 @@ the CAP_SYS_ADMIN capability.
 
 Elastic recommends that you research the feasibility of enabling unprivileged user namespaces before disabling the sandbox. An exception
 is if you are running Kibana in Docker because the container runs in a user namespace with the built-in seccomp/bpf filters.
+
+[float]
+=== Verbose logs
+{kib} server logs have a lot of useful information for troubleshooting and understanding how things work. If you're having any issues at
+all, the full logs from Reporting will be the first place to look. In `kibana.yml`:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+logging.verbose: true
+--------------------------------------------------------------------------------
+
+For more information about logging, see <<logging-verbose,Kibana configuration settings>>.
+
+=== Puppeteer debug logs
+The Chromium browser that {kib} launches on the server is driven by a NodeJS library for Chromium called Puppeteer. The Puppeteer library
+has its own command-line method to generate its own debug logs, which can sometimes be helpful, particularly to figure out if a problem is
+caused by Kibana or Chromium. See more at https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/README.md#debugging-tips
+
+Using Puppeteer's debug method when launching Kibana would look like:
+> Enable verbose logging - internal DevTools protocol traffic will be logged via the debug module under the puppeteer namespace.
+>     ```
+>     env DEBUG="puppeteer:*" ./bin/kibana
+>     ```
+
+The Puppeteer logs are very verbose and could possibly contain sensitive information. Handle the generated output with care.

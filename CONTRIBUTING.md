@@ -173,6 +173,10 @@ yarn kbn bootstrap
 
 (You can also run `yarn kbn` to see the other available commands. For more info about this tool, see https://github.com/elastic/kibana/tree/master/packages/kbn-pm.)
 
+#### Increase node.js heap size
+
+Kibana is a big project and for some commands it can happen that the process hits the default heap limit and crashes with an out-of-memory error. If you run into this problem, you can increase maximum heap size by setting the `--max_old_space_size` option on the command line. To set the limit for all commands, simply add the following line to your shell config: `export NODE_OPTIONS="--max_old_space_size=2048"`.
+
 ### Running Elasticsearch Locally
 
 There are a few options when it comes to running Elasticsearch locally:
@@ -302,16 +306,26 @@ IntelliJ   | Settings » Languages & Frameworks » JavaScript » Code Quality To
 
 Another tool we use for enforcing consistent coding style is EditorConfig, which can be set up by installing a plugin in your editor that dynamically updates its configuration. Take a look at the [EditorConfig](http://editorconfig.org/#download) site to find a plugin for your editor, and browse our [`.editorconfig`](https://github.com/elastic/kibana/blob/master/.editorconfig) file to see what config rules we set up.
 
+#### Setup Guide for VS Code Users
+
 Note that for VSCode, to enable "live" linting of TypeScript (and other) file types, you will need to modify your local settings, as shown below.  The default for the ESLint extension is to only lint JavaScript file types.
 
 ```json
-   "eslint.validate": [
-        "javascript",
-        "javascriptreact",
-        "typescript",
-        "typescriptreact",
-    ]
+"eslint.validate": [
+  "javascript",
+  "javascriptreact",
+  { "language": "typescript", "autoFix": true },
+  { "language": "typescriptreact", "autoFix": true }
+]
 ```
+
+`eslint` can automatically fix trivial lint errors when you save a file by adding this line in your setting.
+
+```json
+  "eslint.autoFixOnSave": true,
+```
+
+:warning: It is **not** recommended to use the [`Prettier` extension/IDE plugin](https://prettier.io/) while maintaining the Kibana project. Formatting and styling roles are set in the multiple `.eslintrc.js` files across the project and some of them use the [NPM version of Prettier](https://www.npmjs.com/package/prettier). Using the IDE extension might cause conflicts, applying the formatting to too many files that shouldn't be prettier-ized and/or highlighting errors that are actually OK.
 
 ### Internationalization
 
@@ -385,13 +399,19 @@ Test runner arguments:
  - `[test path]` is the relative path to the test file.
 
  Examples:
-  - Run the entire elasticsearch_service test suite with yarn:
-    `node scripts/jest src/core/server/elasticsearch/elasticsearch_service.test.ts`
-  - Run the jest test case whose description matches 'stops both admin and data clients':
-    `node scripts/jest -t 'stops both admin and data clients' src/core/server/elasticsearch/elasticsearch_service.test.ts`
+  - Run the entire elasticsearch_service test suite:
+    ```
+    node scripts/jest src/core/server/elasticsearch/elasticsearch_service.test.ts
+    ```
+  - Run the jest test case whose description matches `stops both admin and data clients`:
+    ```
+    node scripts/jest -t 'stops both admin and data clients' src/core/server/elasticsearch/elasticsearch_service.test.ts
+    ```
   - Run the api integration test case whose description matches the given string:
-    `node scripts/functional_tests_server --config test/api_integration/config.js`
-    `node scripts/functional_test_runner --config test/api_integration/config.js --grep='should return 404 if id does not match any sample data sets'`
+    ```
+    node scripts/functional_tests_server --config test/api_integration/config.js
+    node scripts/functional_test_runner --config test/api_integration/config.js --grep='should return 404 if id does not match any sample data sets'
+    ```
 
 ### Debugging Unit Tests
 

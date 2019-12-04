@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTab, EuiTabs, EuiLink } from '@elastic/eui';
+import { EuiBetaBadge, EuiLink, EuiTab, EuiTabs } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Route } from 'react-router-dom';
+
 import euiStyled from '../../../../../common/eui_styled_components';
 
 interface TabConfiguration {
@@ -36,7 +38,8 @@ export class RoutedTabs extends React.Component<RoutedTabsProps> {
               {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
               <EuiLink
                 href={`#${tab.path}`}
-                onClick={e => {
+                data-test-subj={`infrastructureNavLink_${tab.path}`}
+                onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                   e.preventDefault();
                   history.push(tab.path);
                 }}
@@ -52,6 +55,24 @@ export class RoutedTabs extends React.Component<RoutedTabsProps> {
     });
   }
 }
+
+const tabBetaBadgeLabel = i18n.translate('xpack.infra.common.tabBetaBadgeLabel', {
+  defaultMessage: 'Beta',
+});
+
+const tabBetaBadgeTooltipContent = i18n.translate('xpack.infra.common.tabBetaBadgeTooltipContent', {
+  defaultMessage:
+    'This feature is under active development. Extra functionality is coming, and some functionality may change.',
+});
+
+export const TabBetaBadge = euiStyled(EuiBetaBadge).attrs({
+  'aria-label': tabBetaBadgeLabel,
+  label: tabBetaBadgeLabel,
+  tooltipContent: tabBetaBadgeTooltipContent,
+})`
+  margin-left: 4px;
+  vertical-align: baseline;
+`;
 
 const TabContainer = euiStyled.div`
   .euiLink {

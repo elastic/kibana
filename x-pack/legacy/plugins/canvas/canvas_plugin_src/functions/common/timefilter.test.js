@@ -6,7 +6,7 @@
 
 import sinon from 'sinon';
 import { functionWrapper } from '../../../__tests__/helpers/function_wrapper';
-import { getFunctionErrors } from '../../strings';
+import { getFunctionErrors } from '../../../i18n';
 import { emptyFilter } from './__tests__/fixtures/test_filters';
 import { timefilter } from './timefilter';
 

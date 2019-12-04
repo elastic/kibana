@@ -22,5 +22,6 @@ export * from './context';
 export * from './deep_freeze';
 export * from './get';
 export * from './map_to_object';
+export * from './merge';
 export * from './pick';
 export * from './url';

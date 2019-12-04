@@ -8,11 +8,11 @@ import { createUsersAndRoles } from '../../common/lib/create_users_and_roles';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function({ getService, loadTestFile }: FtrProviderContext) {
-  const es = getService('es');
+  const es = getService('legacyEs');
   const supertest = getService('supertest');
 
   describe('saved objects security only enabled', function() {
-    this.tags('ciGroup4');
+    this.tags('ciGroup9');
 
     before(async () => {
       await createUsersAndRoles(es, supertest);
@@ -28,5 +28,6 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./import'));
     loadTestFile(require.resolve('./resolve_import_errors'));
     loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./bulk_update'));
   });
 }

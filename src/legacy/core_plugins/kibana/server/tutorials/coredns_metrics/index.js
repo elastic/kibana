@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function corednsMetricsSpecProvider(server, context) {
+export function corednsMetricsSpecProvider(context) {
   const moduleName = 'coredns';
   return {
     id: 'corednsMetrics',
@@ -39,7 +39,7 @@ export function corednsMetricsSpecProvider(server, context) {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-coredns.html',
       },
     }),
-    // euiIconType: 'logoCoreDNS',
+    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/coredns.svg',
     artifacts: {
       application: {
         label: i18n.translate('kbn.server.tutorials.corednsMetrics.artifacts.application.label', {
@@ -53,7 +53,7 @@ export function corednsMetricsSpecProvider(server, context) {
       }
     },
     completionTimeMinutes: 10,
-    // previewImagePath: '/plugins/kibana/home/tutorial_resources/coredns_metrics/screenshot.png',
+    previewImagePath: '/plugins/kibana/home/tutorial_resources/coredns_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)

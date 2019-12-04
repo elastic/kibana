@@ -5,6 +5,7 @@ exports[`UserHostWorkingDir rendering it renders against shallow snapshot 1`] = 
   contextId="context-123"
   eventId="event-123"
   hostName="[hostName-123]"
+  userDomain="[userDomain-123]"
   userName="[userName-123]"
   workingDirectory="[working-directory-123]"
 />

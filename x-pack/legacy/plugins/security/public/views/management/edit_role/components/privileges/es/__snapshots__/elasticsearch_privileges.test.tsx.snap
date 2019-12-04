@@ -13,19 +13,17 @@ exports[`it renders without crashing 1`] = `
           id="xpack.security.management.editRole.elasticSearchPrivileges.manageRoleActionsDescription"
           values={Object {}}
         />
-        <EuiLink
+        <ForwardRef
           className="editRole__learnMore"
-          color="primary"
           href="undefinedguide/en/elastic-stack-overview/undefined/security-privileges.html#privileges-list-cluster"
           target="_blank"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Learn more"
             id="xpack.security.management.editRole.elasticSearchPrivileges.learnMoreLinkText"
             values={Object {}}
           />
-        </EuiLink>
+        </ForwardRef>
       </p>
     }
     fullWidth={false}
@@ -45,6 +43,7 @@ exports[`it renders without crashing 1`] = `
       describedByIds={Array []}
       display="row"
       fullWidth={true}
+      hasChildLabel={true}
       hasEmptyLabelSpace={true}
       labelType="label"
     >
@@ -80,19 +79,17 @@ exports[`it renders without crashing 1`] = `
           id="xpack.security.management.editRole.elasticSearchPrivileges.howToBeSubmittedOnBehalfOfOtherUsersDescription"
           values={Object {}}
         />
-        <EuiLink
+        <ForwardRef
           className="editRole__learnMore"
-          color="primary"
           href="undefinedguide/en/elastic-stack-overview/undefined/security-privileges.html#_run_as_privilege"
           target="_blank"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Learn more"
             id="xpack.security.management.editRole.elasticSearchPrivileges.learnMoreLinkText"
             values={Object {}}
           />
-        </EuiLink>
+        </ForwardRef>
       </p>
     }
     fullWidth={false}
@@ -112,6 +109,7 @@ exports[`it renders without crashing 1`] = `
       describedByIds={Array []}
       display="row"
       fullWidth={false}
+      hasChildLabel={true}
       hasEmptyLabelSpace={true}
       labelType="label"
     >
@@ -156,10 +154,8 @@ exports[`it renders without crashing 1`] = `
       />
       <EuiLink
         className="editRole__learnMore"
-        color="primary"
         href="undefinedguide/en/elastic-stack-overview/undefined/security-privileges.html#privileges-list-indices"
         target="_blank"
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Learn more"

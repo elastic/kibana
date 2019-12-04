@@ -23,24 +23,22 @@ import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import sinon from 'sinon';
-import { legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
+import { legacyResponseHandlerProvider, tabifyAggResponse, npStart } from '../../legacy_imports';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { VisProvider } from 'ui/vis';
-import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { round } from 'lodash';
 
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { createTableVisTypeDefinition } from '../../table_vis_type';
-import { setup as visualizationsSetup } from '../../../../visualizations/public/legacy';
+import { Vis } from '../../../../visualizations/public';
+import { tableVisTypeDefinition } from '../../table_vis_type';
+import { setup as visualizationsSetup } from '../../../../visualizations/public/np_ready/public/legacy';
+import { getAngularModule } from '../../get_inner_angular';
+import { initTableVisLegacyModule } from '../../table_vis_legacy_module';
 
 describe('Table Vis - AggTable Directive', function () {
   let $rootScope;
   let $compile;
-  let Vis;
   let indexPattern;
   let settings;
   let tableAggResponse;
-  let legacyDependencies;
   const tabifiedData = {};
 
   const init = () => {
@@ -99,19 +97,22 @@ describe('Table Vis - AggTable Directive', function () {
     );
   };
 
-  beforeEach(ngMock.module('kibana'));
+  const initLocalAngular = () => {
+    const tableVisModule = getAngularModule('kibana/table_vis', npStart.core);
+    initTableVisLegacyModule(tableVisModule);
+  };
+
+  beforeEach(initLocalAngular);
+
+  ngMock.inject(function () {
+    visualizationsSetup.types.createBaseVisualization(tableVisTypeDefinition);
+  });
+
+  beforeEach(ngMock.module('kibana/table_vis'));
   beforeEach(
     ngMock.inject(function ($injector, Private, config) {
-      legacyDependencies = {
-        // eslint-disable-next-line new-cap
-        createAngularVisualization: VisFactoryProvider(Private).createAngularVisualization,
-      };
-
-      visualizationsSetup.types.registerVisualization(() => createTableVisTypeDefinition(legacyDependencies));
-
       tableAggResponse = legacyResponseHandlerProvider().handler;
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-      Vis = Private(VisProvider);
       settings = config;
 
       $rootScope = $injector.get('$rootScope');

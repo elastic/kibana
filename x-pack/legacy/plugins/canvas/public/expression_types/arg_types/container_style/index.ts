@@ -11,8 +11,10 @@ import { get } from 'lodash';
 import { templateFromReactComponent } from '../../../lib/template_from_react_component';
 import { Arguments as SimpleArguments, SimpleTemplate } from './simple_template';
 import { Arguments as ExtendedArguments, ExtendedTemplate } from './extended_template';
+import { ArgTypesStrings } from '../../../../i18n';
 
 const { set } = immutable;
+const { ContainerStyle: strings } = ArgTypesStrings;
 
 interface Arguments extends SimpleArguments, ExtendedArguments {}
 type ArgumentTypes = Partial<Arguments>;
@@ -43,8 +45,8 @@ const wrap = (Component: ComponentType<any>) =>
 
 export const containerStyle = () => ({
   name: 'containerStyle',
-  displayName: 'Container style',
-  help: 'Tweak the appearance of the element container',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   default: '{containerStyle}',
   simpleTemplate: templateFromReactComponent(wrap(SimpleTemplate)),
   template: templateFromReactComponent(wrap(ExtendedTemplate)),
