@@ -10,35 +10,16 @@ import {
   createRouteContext,
 } from '../__fixtures__';
 import { initGetCommentApi } from '../get_comment';
-import { IRouter, kibanaResponseFactory } from 'src/core/server';
-import { loggingServiceMock, httpServiceMock, httpServerMock } from 'src/core/server/mocks';
-import { CaseService } from '../../../services';
-import { securityMock } from '../../../../../security/server/mocks';
+import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
+import { httpServerMock } from 'src/core/server/mocks';
+import { setupRoute } from './test_utils';
 
 describe('GET comment', () => {
-  const setup = async () => {
-    const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
-
-    const log = loggingServiceMock.create().get('case');
-
-    const service = new CaseService(log);
-    const caseService = await service.setup({
-      authentication: securityMock.createSetup().authc,
-    });
-
-    initGetCommentApi({
-      router,
-      caseService,
-    });
-
-    return {
-      routeHandler: router.get.mock.calls[0][1],
-    };
-  };
+  let routeHandler: RequestHandler<any, any, any>;
+  beforeAll(async () => {
+    routeHandler = await setupRoute(initGetCommentApi, 'get');
+  });
   it(`returns the comment`, async () => {
-    const { routeHandler } = await setup();
-
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases/comments/{id}',
       method: 'get',
@@ -54,8 +35,6 @@ describe('GET comment', () => {
     expect(response.payload).toEqual(mockCaseComments.find(s => s.id === 'mock-comment-1'));
   });
   it(`returns an error when getComment throws`, async () => {
-    const { routeHandler } = await setup();
-
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases/comments/{id}',
       method: 'get',

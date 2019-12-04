@@ -11,36 +11,16 @@ import {
   createRouteContext,
 } from '../__fixtures__';
 import { initGetCaseApi } from '../get_case';
-import { IRouter, kibanaResponseFactory } from 'src/core/server';
-import { loggingServiceMock, httpServiceMock, httpServerMock } from 'src/core/server/mocks';
-import { CaseService } from '../../../services';
-import { securityMock } from '../../../../../security/server/mocks';
+import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
+import { httpServerMock } from 'src/core/server/mocks';
+import { setupRoute } from './test_utils';
 
 describe('GET case', () => {
-  const caseSavedObjects = mockCases;
-  const setup = async () => {
-    const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
-
-    const log = loggingServiceMock.create().get('case');
-
-    const service = new CaseService(log);
-    const caseService = await service.setup({
-      authentication: securityMock.createSetup().authc,
-    });
-
-    initGetCaseApi({
-      router,
-      caseService,
-    });
-
-    return {
-      routeHandler: router.get.mock.calls[0][1],
-    };
-  };
+  let routeHandler: RequestHandler<any, any, any>;
+  beforeAll(async () => {
+    routeHandler = await setupRoute(initGetCaseApi, 'get');
+  });
   it(`returns the case without case comments when includeComments is false`, async () => {
-    const { routeHandler } = await setup();
-
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases/{id}',
       params: {
@@ -52,17 +32,15 @@ describe('GET case', () => {
       },
     });
 
-    const theContext = createRouteContext(createMockSavedObjectsRepository(caseSavedObjects));
+    const theContext = createRouteContext(createMockSavedObjectsRepository(mockCases));
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
 
     expect(response.status).toEqual(200);
-    expect(response.payload).toEqual(caseSavedObjects.find(s => s.id === 'mock-id-1'));
+    expect(response.payload).toEqual(mockCases.find(s => s.id === 'mock-id-1'));
     expect(response.payload.comments).toBeUndefined();
   });
   it(`returns an error when thrown from getCase`, async () => {
-    const { routeHandler } = await setup();
-
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases/{id}',
       params: {
@@ -74,7 +52,7 @@ describe('GET case', () => {
       },
     });
 
-    const theContext = createRouteContext(createMockSavedObjectsRepository(caseSavedObjects));
+    const theContext = createRouteContext(createMockSavedObjectsRepository(mockCases));
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
 
@@ -82,8 +60,6 @@ describe('GET case', () => {
     expect(response.payload.isBoom).toEqual(true);
   });
   it(`returns the case with case comments when includeComments is true`, async () => {
-    const { routeHandler } = await setup();
-
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases/{id}',
       params: {
@@ -95,7 +71,7 @@ describe('GET case', () => {
       },
     });
 
-    const theContext = createRouteContext(createMockSavedObjectsRepository(caseSavedObjects));
+    const theContext = createRouteContext(createMockSavedObjectsRepository(mockCases));
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
 
@@ -103,8 +79,6 @@ describe('GET case', () => {
     expect(response.payload.comments.saved_objects).toHaveLength(3);
   });
   it(`returns an error when thrown from getAllCaseComments`, async () => {
-    const { routeHandler } = await setup();
-
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases/{id}',
       params: {

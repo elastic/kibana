@@ -11,34 +11,16 @@ import {
   createRouteContext,
 } from '../__fixtures__';
 import { initDeleteCaseApi } from '../delete_case';
-import { IRouter, kibanaResponseFactory } from 'src/core/server';
-import { loggingServiceMock, httpServiceMock, httpServerMock } from 'src/core/server/mocks';
-import { CaseService } from '../../../services';
-import { securityMock } from '../../../../../security/server/mocks';
+import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
+import { httpServerMock } from 'src/core/server/mocks';
+import { setupRoute } from './test_utils';
 
 describe('DELETE case', () => {
-  const setup = async () => {
-    const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
-
-    const log = loggingServiceMock.create().get('case');
-
-    const service = new CaseService(log);
-    const caseService = await service.setup({
-      authentication: securityMock.createSetup().authc,
-    });
-
-    initDeleteCaseApi({
-      router,
-      caseService,
-    });
-
-    return {
-      routeHandler: router.delete.mock.calls[0][1],
-    };
-  };
+  let routeHandler: RequestHandler<any, any, any>;
+  beforeAll(async () => {
+    routeHandler = await setupRoute(initDeleteCaseApi, 'delete');
+  });
   it(`deletes the case. responds with 204`, async () => {
-    const { routeHandler } = await setup();
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases/{id}',
       method: 'delete',
@@ -53,7 +35,6 @@ describe('DELETE case', () => {
     expect(response.status).toEqual(204);
   });
   it(`returns an error when thrown from deleteCase service`, async () => {
-    const { routeHandler } = await setup();
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases/{id}',
       method: 'delete',
@@ -68,8 +49,6 @@ describe('DELETE case', () => {
     expect(response.status).toEqual(404);
   });
   it(`returns an error when thrown from getAllCaseComments service`, async () => {
-    const { routeHandler } = await setup();
-
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases/{id}',
       method: 'delete',
@@ -86,8 +65,6 @@ describe('DELETE case', () => {
     expect(response.status).toEqual(400);
   });
   it(`returns an error when thrown from deleteComment service`, async () => {
-    const { routeHandler } = await setup();
-
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases/{id}',
       method: 'delete',

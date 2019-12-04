@@ -4,41 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  authenticationMock,
-  createMockSavedObjectsRepository,
-  createRouteContext,
-  mockCases,
-} from '../__fixtures__';
+import { createMockSavedObjectsRepository, createRouteContext, mockCases } from '../__fixtures__';
 import { initUpdateCaseApi } from '../update_case';
-import { IRouter, kibanaResponseFactory } from 'src/core/server';
-import { loggingServiceMock, httpServiceMock, httpServerMock } from 'src/core/server/mocks';
-import { CaseService } from '../../../services';
+import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
+import { httpServerMock } from 'src/core/server/mocks';
+import { setupRoute } from './test_utils';
 
 describe('UPDATE case', () => {
-  const setup = async (badAuth = false) => {
-    const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
-
-    const log = loggingServiceMock.create().get('case');
-
-    const service = new CaseService(log);
-    const caseService = await service.setup({
-      authentication: badAuth ? authenticationMock.createInvalid() : authenticationMock.create(),
-    });
-
-    initUpdateCaseApi({
-      router,
-      caseService,
-    });
-
-    return {
-      routeHandler: router.post.mock.calls[0][1],
-    };
-  };
+  let routeHandler: RequestHandler<any, any, any>;
+  beforeAll(async () => {
+    routeHandler = await setupRoute(initUpdateCaseApi, 'post');
+  });
   it(`Updates a case`, async () => {
-    const { routeHandler } = await setup();
-
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases/{id}',
       method: 'post',
@@ -58,8 +35,6 @@ describe('UPDATE case', () => {
     expect(response.payload.attributes.state).toEqual('closed');
   });
   it(`Returns an error if updateCase throws`, async () => {
-    const { routeHandler } = await setup();
-
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases/{id}',
       method: 'post',

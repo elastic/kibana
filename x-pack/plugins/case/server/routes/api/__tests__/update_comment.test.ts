@@ -5,40 +5,21 @@
  */
 
 import {
-  authenticationMock,
   createMockSavedObjectsRepository,
   createRouteContext,
   mockCaseComments,
 } from '../__fixtures__';
 import { initUpdateCommentApi } from '../update_comment';
-import { IRouter, kibanaResponseFactory } from 'src/core/server';
-import { loggingServiceMock, httpServiceMock, httpServerMock } from 'src/core/server/mocks';
-import { CaseService } from '../../../services';
+import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
+import { httpServerMock } from 'src/core/server/mocks';
+import { setupRoute } from './test_utils';
 
 describe('UPDATE comment', () => {
-  const setup = async (badAuth = false) => {
-    const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
-
-    const log = loggingServiceMock.create().get('case');
-
-    const service = new CaseService(log);
-    const caseService = await service.setup({
-      authentication: badAuth ? authenticationMock.createInvalid() : authenticationMock.create(),
-    });
-
-    initUpdateCommentApi({
-      router,
-      caseService,
-    });
-
-    return {
-      routeHandler: router.post.mock.calls[0][1],
-    };
-  };
+  let routeHandler: RequestHandler<any, any, any>;
+  beforeAll(async () => {
+    routeHandler = await setupRoute(initUpdateCommentApi, 'post');
+  });
   it(`Updates a comment`, async () => {
-    const { routeHandler } = await setup();
-
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases/comment/{id}',
       method: 'post',
@@ -58,8 +39,6 @@ describe('UPDATE comment', () => {
     expect(response.payload.attributes.comment).toEqual('Update my comment');
   });
   it(`Returns an error if updateComment throws`, async () => {
-    const { routeHandler } = await setup();
-
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases/comment/{id}',
       method: 'post',
