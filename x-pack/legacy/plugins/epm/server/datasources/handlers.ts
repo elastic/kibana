@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createDatasource } from './index';
+import Boom from 'boom';
+import { createDatasource, PackageNotInstalledError } from './index';
 import { PluginContext } from '../plugin';
 import { Request, ResponseToolkit } from '../types';
 import { getClient } from '../saved_objects';
@@ -25,9 +26,20 @@ export async function handleRequestInstallDatasource(req: CreateDatasourceReques
   const { pkgkey } = req.params;
   const savedObjectsClient = getClient(req);
   const callCluster = getClusterAccessor(extra.context.esClient, req);
-  return createDatasource({
-    savedObjectsClient,
-    pkgkey,
-    callCluster,
-  });
+
+  try {
+    const result = await createDatasource({
+      savedObjectsClient,
+      pkgkey,
+      callCluster,
+    });
+
+    return result;
+  } catch (error) {
+    if (error instanceof PackageNotInstalledError) {
+      throw new Boom(error, { statusCode: 403 });
+    } else {
+      return error;
+    }
+  }
 }

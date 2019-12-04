@@ -8,12 +8,18 @@ import { SavedObjectsClientContract } from 'src/core/server/';
 import { CallESAsCurrentUser } from '../lib/cluster_access';
 import { installPipelines } from '../lib/elasticsearch/ingest_pipeline/ingest_pipelines';
 import { installTemplates } from '../lib/elasticsearch/template/install';
-import { AssetReference, RegistryPackage } from '../../common/types';
+import { AssetReference, InstallationStatus, RegistryPackage } from '../../common/types';
 import { SAVED_OBJECT_TYPE_DATASOURCES } from '../../common/constants';
 import { Datasource, Asset, InputType } from '../../../ingest/server/libs/types';
+import { getPackageInfo } from '../packages';
 import * as Registry from '../registry';
 
 const pkgToPkgKey = ({ name, version }: RegistryPackage) => `${name}-${version}`;
+export class PackageNotInstalledError extends Error {
+  constructor(pkgkey: string) {
+    super(`${pkgkey} is not installed`);
+  }
+}
 
 export async function createDatasource(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -21,9 +27,16 @@ export async function createDatasource(options: {
   callCluster: CallESAsCurrentUser;
 }) {
   const { savedObjectsClient, pkgkey, callCluster } = options;
+  const info = await getPackageInfo({ savedObjectsClient, pkgkey });
+
+  if (info.status !== InstallationStatus.installed) {
+    throw new PackageNotInstalledError(pkgkey);
+  }
+
   const toSave = await installPipelines({ pkgkey, callCluster });
   // TODO: Clean up
   const pkg = await Registry.fetchInfo(pkgkey);
+
   await Promise.all([
     installTemplates(pkg, callCluster),
     saveDatasourceReferences({
