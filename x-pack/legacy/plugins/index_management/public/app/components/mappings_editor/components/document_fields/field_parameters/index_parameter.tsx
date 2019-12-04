@@ -38,7 +38,7 @@ export const IndexParameter = ({
     formFieldPath="index"
   >
     {/* index_options */}
-    {hasIndexOptions && (
+    {hasIndexOptions ? (
       <UseField
         path="index_options"
         config={config}
@@ -49,6 +49,8 @@ export const IndexParameter = ({
           },
         }}
       />
+    ) : (
+      undefined
     )}
   </EditFieldFormRow>
 );
