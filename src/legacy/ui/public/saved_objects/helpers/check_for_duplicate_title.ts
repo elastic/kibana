@@ -17,14 +17,14 @@
  * under the License.
  */
 import { SavedObject } from 'ui/saved_objects/types';
-import { SavedObjectsClient, SimpleSavedObject } from 'kibana/public';
+import { SavedObjectsClientContract, SimpleSavedObject } from 'kibana/public';
 import { findObjectByTitle } from 'ui/saved_objects';
 import { SAVE_DUPLICATE_REJECTED } from 'ui/saved_objects/constants';
 import { displayDuplicateTitleConfirmModal } from 'ui/saved_objects/helpers/display_duplicate_title_confirm_modal';
 
 export const checkForDuplicateTitle = (
   savedObject: SavedObject,
-  savedObjectsClient: SavedObjectsClient,
+  savedObjectsClient: SavedObjectsClientContract,
   isTitleDuplicateConfirmed: boolean,
   onTitleDuplicate: (() => void) | undefined
 ) => {

@@ -18,12 +18,12 @@
  */
 import _ from 'lodash';
 import { SearchSource } from 'ui/courier';
-import { SavedObjectsClient } from 'kibana/public';
+import { SavedObjectsClientContract } from 'kibana/public';
 import { hydrateIndexPattern } from './hydrate_index_pattern';
 import { intializeSavedObject } from './initialize_saved_object';
 import { serializeSavedObject } from './serialize_saved_object';
 
-import { EsResponse, SavedObject, SavedObjectConfig, SaveOptions } from '../types';
+import { EsResponse, SavedObject, SavedObjectConfig, SavedObjectSaveOpts } from '../types';
 import { applyEsResp } from './apply_es_resp';
 import { saveSavedObject } from './save_saved_object';
 import { IndexPatterns } from '../../../../core_plugins/data/public';
@@ -32,7 +32,7 @@ export function buildSavedObject(
   savedObject: SavedObject,
   config: SavedObjectConfig = {},
   indexPatterns: IndexPatterns,
-  savedObjectsClient: SavedObjectsClient
+  savedObjectsClient: SavedObjectsClientContract
 ) {
   // type name for this object, used as the ES-type
   const esType = config.type || '';
@@ -98,7 +98,7 @@ export function buildSavedObject(
     ...opts,
   });
 
-  savedObject.save = async (opts: SaveOptions) => {
+  savedObject.save = async (opts: SavedObjectSaveOpts) => {
     try {
       const result = await saveSavedObject(savedObject, savedObjectsClient, config, opts);
       return Promise.resolve(result);

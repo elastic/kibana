@@ -19,14 +19,14 @@
 
 import _ from 'lodash';
 import { SavedObject, SavedObjectConfig } from 'ui/saved_objects/types';
-import { SavedObjectsClient } from 'kibana/public';
+import { SavedObjectsClientContract } from 'kibana/public';
 
 /**
  * Initialize saved object
  */
 export async function intializeSavedObject(
   savedObject: SavedObject,
-  savedObjectsClient: SavedObjectsClient,
+  savedObjectsClient: SavedObjectsClientContract,
   config: SavedObjectConfig
 ) {
   const esType = config.type;

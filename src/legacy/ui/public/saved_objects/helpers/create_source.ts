@@ -19,7 +19,7 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { SavedObject } from 'ui/saved_objects/types';
-import { SavedObjectAttributes, SavedObjectsClient } from 'kibana/public';
+import { SavedObjectAttributes, SavedObjectsClientContract } from 'kibana/public';
 import { OVERWRITE_REJECTED } from 'ui/saved_objects/constants';
 import { confirmModalPromise } from './confirm_modal_promise';
 
@@ -41,7 +41,7 @@ import { confirmModalPromise } from './confirm_modal_promise';
 export function createSource(
   source: SavedObjectAttributes,
   savedObject: SavedObject,
-  savedObjectsClient: SavedObjectsClient,
+  savedObjectsClient: SavedObjectsClientContract,
   esType: string,
   options = {}
 ) {

@@ -23,10 +23,9 @@ import { IndexPattern } from '../../../core_plugins/data/public';
 export interface SavedObject {
   _serialize: () => { attributes: SavedObjectAttributes; references: SavedObjectReference[] };
   _source: Record<string, unknown>;
-  applyESResp: (resp: EsResponse) => any;
+  applyESResp: (resp: EsResponse) => Promise<SavedObject>;
   copyOnSave: boolean;
-  creationOpts: (opts: CreationOpts) => Record<string, unknown>;
-  columns?: string[];
+  creationOpts: (opts: SavedObjectCreationOpts) => Record<string, unknown>;
   defaults: any;
   delete?: () => Promise<{}>;
   destroy?: () => void;
@@ -35,26 +34,24 @@ export interface SavedObject {
   getFullPath: () => string;
   hydrateIndexPattern?: (id?: string) => Promise<null | void>;
   id?: string | null;
-  index: string;
-  init?: () => void;
+  init?: () => Promise<SavedObject>;
   isSaving: boolean;
-  isTitleChanged: any;
+  isTitleChanged: () => boolean;
   lastSavedTitle: string;
   migrationVersion?: Record<string, any>;
-  save: (saveOptions: SaveOptions) => Promise<string>;
+  save: (saveOptions: SavedObjectSaveOpts) => Promise<string>;
   searchSource?: SearchSource;
   showInRecentlyAccessed: boolean;
   title: string;
-  sort?: any;
 }
 
-export interface SaveOptions {
+export interface SavedObjectSaveOpts {
   confirmOverwrite?: boolean;
   isTitleDuplicateConfirmed?: boolean;
   onTitleDuplicate?: () => void;
 }
 
-export interface CreationOpts {
+export interface SavedObjectCreationOpts {
   references?: SavedObjectReference[];
   overwrite?: boolean;
 }
@@ -82,8 +79,3 @@ export interface SavedObjectConfig {
 }
 
 export type EsResponse = Record<string, any>;
-
-export type ConfirmModalPromise = (
-  message: string,
-  customOptions: Record<string, unknown>
-) => angular.IPromise<unknown>;

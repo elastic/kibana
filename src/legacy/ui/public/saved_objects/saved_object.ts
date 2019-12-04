@@ -30,14 +30,14 @@
 import { SavedObjectsClient, SavedObjectsClientContract } from 'kibana/public';
 import { npStart } from 'ui/new_platform';
 import { start as data } from '../../../core_plugins/data/public/legacy';
-import { SavedObjectConfig, SaveOptions } from './types';
+import { SavedObjectConfig, SavedObjectSaveOpts } from './types';
 import { buildSavedObject } from './helpers/build_saved_object';
 import { IndexPatterns } from '../../../core_plugins/data/public/index_patterns/index_patterns';
 
-export { SaveOptions } from './types';
+export { SavedObjectSaveOpts as SaveOptions } from './types';
 
 export interface SavedObject {
-  save: (saveOptions: SaveOptions) => Promise<string>;
+  save: (saveOptions: SavedObjectSaveOpts) => Promise<string>;
   copyOnSave: boolean;
   id?: string;
 }

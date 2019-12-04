@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObject, SavedObjectConfig, SaveOptions } from 'ui/saved_objects/types';
-import { SavedObjectsClient } from 'kibana/public';
+import { SavedObject, SavedObjectConfig, SavedObjectSaveOpts } from 'ui/saved_objects/types';
+import { SavedObjectsClientContract } from 'kibana/public';
 import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from 'ui/saved_objects/constants';
 
 import { createSource } from 'ui/saved_objects/helpers/create_source';
@@ -46,19 +46,18 @@ function isErrorNonFatal(error: { message: string }) {
  * @property {boolean} [options.isTitleDuplicateConfirmed=false] - If true, save allowed with duplicate title
  * @property {func} [options.onTitleDuplicate] - function called if duplicate title exists.
  * When not provided, confirm modal will be displayed asking user to confirm or cancel save.
- * @param {ConfirmModalPromise} [confirmModalPromise]
  * @return {Promise}
  * @resolved {String} - The id of the doc
  */
 export async function saveSavedObject(
   savedObject: SavedObject,
-  savedObjectsClient: SavedObjectsClient,
+  savedObjectsClient: SavedObjectsClientContract,
   config: SavedObjectConfig,
   {
     confirmOverwrite = false,
     isTitleDuplicateConfirmed = false,
     onTitleDuplicate,
-  }: SaveOptions = {}
+  }: SavedObjectSaveOpts = {}
 ) {
   const esType = config.type || '';
   const extractReferences = config.extractReferences;
