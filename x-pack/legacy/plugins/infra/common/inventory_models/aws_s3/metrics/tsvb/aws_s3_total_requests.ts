@@ -22,7 +22,7 @@ export const awsS3TotalRequests: TSVBMetricModelCreator = (
       split_mode: 'everything',
       metrics: [
         {
-          field: 'aws.s3_daily_storage.requests.total',
+          field: 'aws.s3_request.requests.total',
           id: 'max-size',
           type: 'max',
         },

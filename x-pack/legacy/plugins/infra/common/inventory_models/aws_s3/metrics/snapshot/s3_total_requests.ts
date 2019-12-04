@@ -9,7 +9,7 @@ import { SnapshotModel } from '../../../types';
 export const s3TotalRequests: SnapshotModel = {
   s3TotalRequests: {
     max: {
-      field: 'aws.s3_daily_storage.requests.total',
+      field: 'aws.s3_request.requests.total',
     },
   },
 };

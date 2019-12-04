@@ -18,12 +18,23 @@ export const awsRDSActiveTransactions: TSVBMetricModelCreator = (
   type: 'timeseries',
   series: [
     {
-      id: 'transactions',
+      id: 'active',
       split_mode: 'everything',
       metrics: [
         {
           field: 'aws.rds.transactions.active',
-          id: 'avg-trans',
+          id: 'avg',
+          type: 'avg',
+        },
+      ],
+    },
+    {
+      id: 'blocked',
+      split_mode: 'everything',
+      metrics: [
+        {
+          field: 'aws.rds.transactions.blocked',
+          id: 'avg',
           type: 'avg',
         },
       ],

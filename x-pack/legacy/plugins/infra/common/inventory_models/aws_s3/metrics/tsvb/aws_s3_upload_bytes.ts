@@ -22,7 +22,7 @@ export const awsS3UploadBytes: TSVBMetricModelCreator = (
       split_mode: 'everything',
       metrics: [
         {
-          field: 'aws.s3_daily_storage.uploaded.bytes',
+          field: 'aws.s3_request.uploaded.bytes',
           id: 'max-bytes',
           type: 'max',
         },

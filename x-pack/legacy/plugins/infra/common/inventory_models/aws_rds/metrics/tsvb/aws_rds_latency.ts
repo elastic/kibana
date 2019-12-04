@@ -18,12 +18,56 @@ export const awsRDSLatency: TSVBMetricModelCreator = (
   type: 'timeseries',
   series: [
     {
-      id: 'latency',
+      id: 'read',
       split_mode: 'everything',
       metrics: [
         {
-          field: 'aws.rds.latency.dml',
-          id: 'avg-latency',
+          field: 'aws.rds.latency.read',
+          id: 'avg',
+          type: 'avg',
+        },
+      ],
+    },
+    {
+      id: 'write',
+      split_mode: 'everything',
+      metrics: [
+        {
+          field: 'aws.rds.latency.write',
+          id: 'avg',
+          type: 'avg',
+        },
+      ],
+    },
+    {
+      id: 'insert',
+      split_mode: 'everything',
+      metrics: [
+        {
+          field: 'aws.rds.latency.insert',
+          id: 'avg',
+          type: 'avg',
+        },
+      ],
+    },
+    {
+      id: 'update',
+      split_mode: 'everything',
+      metrics: [
+        {
+          field: 'aws.rds.latency.update',
+          id: 'avg',
+          type: 'avg',
+        },
+      ],
+    },
+    {
+      id: 'commit',
+      split_mode: 'everything',
+      metrics: [
+        {
+          field: 'aws.rds.latency.commit',
+          id: 'avg',
           type: 'avg',
         },
       ],

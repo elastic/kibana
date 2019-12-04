@@ -7,9 +7,21 @@
 import { SnapshotModel } from '../../../types';
 
 export const cpu: SnapshotModel = {
-  cpu: {
+  cpu_avg: {
     avg: {
       field: 'aws.rds.cpu.total.pct',
+    },
+  },
+  cpu: {
+    bucket_script: {
+      buckets_path: {
+        cpu: 'cpu_avg',
+      },
+      script: {
+        source: 'params.cpu / 100',
+        lang: 'painless',
+      },
+      gap_policy: 'skip',
     },
   },
 };

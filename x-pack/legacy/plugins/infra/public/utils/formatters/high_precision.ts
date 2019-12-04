@@ -4,12 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SnapshotModel } from '../../../types';
-
-export const s3UploadBytes: SnapshotModel = {
-  s3UploadBytes: {
-    max: {
-      field: 'aws.s3_request.uploaded.bytes',
-    },
-  },
+export const formatHighPercision = (val: number) => {
+  return Number(val).toLocaleString('en', {
+    maximumFractionDigits: 5,
+  });
 };

@@ -9,7 +9,7 @@ import { SnapshotModel } from '../../../types';
 export const s3DownloadBytes: SnapshotModel = {
   s3DownloadBytes: {
     max: {
-      field: 'aws.s3_daily_storage.downloaded.bytes',
+      field: 'aws.s3_request.downloaded.bytes',
     },
   },
 };

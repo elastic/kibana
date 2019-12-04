@@ -35,8 +35,7 @@ export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
         <ChartSectionVis
           stacked={true}
           type="area"
-          formatter="number"
-          formatterTemplate="{{value}}%"
+          formatter="percent"
           seriesOverrides={{
             total: { color: theme.eui.euiColorVis1 },
           }}

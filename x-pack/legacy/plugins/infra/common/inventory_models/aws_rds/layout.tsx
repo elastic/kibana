@@ -14,125 +14,162 @@ import { withTheme } from '../../../../../common/eui_styled_components';
 export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
   <React.Fragment>
     <Section
-      navLabel="AWS S3"
+      navLabel="AWS RDS"
       sectionLabel={i18n.translate(
-        'xpack.infra.metricDetailPage.s3MetricsLayout.overviewSection.sectionLabel',
+        'xpack.infra.metricDetailPage.rdsMetricsLayout.overviewSection.sectionLabel',
         {
-          defaultMessage: 'Aws S3 Overview',
+          defaultMessage: 'Aws RDS Overview',
         }
       )}
       metrics={metrics}
     >
       <SubSection
-        id="awsS3BucketSize"
+        id="awsRDSCpuTotal"
         label={i18n.translate(
-          'xpack.infra.metricDetailPage.s3MetricsLayout.bucketSize.sectionLabel',
+          'xpack.infra.metricDetailPage.rdsMetricsLayout.cpuTotal.sectionLabel',
           {
-            defaultMessage: 'Bucket Size',
+            defaultMessage: 'Total CPU Usage',
           }
         )}
       >
         <ChartSectionVis
-          type="bar"
-          formatter="bytes"
+          type="area"
+          formatter="percent"
           seriesOverrides={{
-            bytes: {
+            cpu: {
               color: theme.eui.euiColorVis1,
               name: i18n.translate(
-                'xpack.infra.metricDetailPage.s3MetricsLayout.bucketSize.chartLabel',
-                { defaultMessage: 'Total Bytes' }
+                'xpack.infra.metricDetailPage.rdsMetricsLayout.cpuTotal.chartLabel',
+                { defaultMessage: 'Total' }
               ),
             },
           }}
         />
       </SubSection>
       <SubSection
-        id="awsS3NumberOfObjects"
+        id="awsRDSConnections"
         label={i18n.translate(
-          'xpack.infra.metricDetailPage.s3MetricsLayout.numberOfObjects.sectionLabel',
+          'xpack.infra.metricDetailPage.rdsMetricsLayout.connections.sectionLabel',
           {
-            defaultMessage: 'Number of Objects',
+            defaultMessage: 'Connections',
           }
         )}
       >
         <ChartSectionVis
           type="bar"
-          formatter="abbreviatedNumber"
+          formatter="number"
           seriesOverrides={{
-            objects: {
+            connections: {
               color: theme.eui.euiColorVis1,
               name: i18n.translate(
-                'xpack.infra.metricDetailPage.s3MetricsLayout.numberOfObjects.chartLabel',
-                { defaultMessage: 'Objects' }
+                'xpack.infra.metricDetailPage.rdsMetricsLayout.connections.chartLabel',
+                { defaultMessage: 'Connections' }
               ),
             },
           }}
         />
       </SubSection>
       <SubSection
-        id="awsS3TotalRequests"
+        id="awsRDSQueriesExecuted"
         label={i18n.translate(
-          'xpack.infra.metricDetailPage.s3MetricsLayout.totalRequests.sectionLabel',
+          'xpack.infra.metricDetailPage.rdsMetricsLayout.queriesExecuted.sectionLabel',
           {
-            defaultMessage: 'Total Requests',
+            defaultMessage: 'Queries Executed',
           }
         )}
       >
         <ChartSectionVis
           type="bar"
-          formatter="abbreviatedNumber"
+          formatter="number"
           seriesOverrides={{
-            total: {
+            queries: {
               color: theme.eui.euiColorVis1,
               name: i18n.translate(
-                'xpack.infra.metricDetailPage.s3MetricsLayout.totalRequests.chartLabel',
-                { defaultMessage: 'Requests' }
+                'xpack.infra.metricDetailPage.rdsMetricsLayout.queriesExecuted.chartLabel',
+                { defaultMessage: 'Queries' }
               ),
             },
           }}
         />
       </SubSection>
       <SubSection
-        id="awsS3DownloadBytes"
+        id="awsRDSActiveTransactions"
         label={i18n.translate(
-          'xpack.infra.metricDetailPage.s3MetricsLayout.downloadBytes.sectionLabel',
+          'xpack.infra.metricDetailPage.rdsMetricsLayout.activeTransactions.sectionLabel',
           {
-            defaultMessage: 'Downloaded Bytes',
+            defaultMessage: 'Transactions',
           }
         )}
       >
         <ChartSectionVis
           type="bar"
-          formatter="bytes"
+          formatter="number"
           seriesOverrides={{
-            bytes: {
+            active: {
               color: theme.eui.euiColorVis1,
               name: i18n.translate(
-                'xpack.infra.metricDetailPage.s3MetricsLayout.downloadBytes.chartLabel',
-                { defaultMessage: 'Bytes' }
+                'xpack.infra.metricDetailPage.rdsMetricsLayout.active.chartLabel',
+                { defaultMessage: 'Active' }
+              ),
+            },
+            blocked: {
+              color: theme.eui.euiColorVis2,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.rdsMetricsLayout.blocked.chartLabel',
+                { defaultMessage: 'Blocked' }
               ),
             },
           }}
         />
       </SubSection>
       <SubSection
-        id="awsS3UploadBytes"
+        id="awsRDSLatency"
         label={i18n.translate(
-          'xpack.infra.metricDetailPage.s3MetricsLayout.uploadBytes.sectionLabel',
+          'xpack.infra.metricDetailPage.rdsMetricsLayout.latency.sectionLabel',
           {
-            defaultMessage: 'Uploaded Bytes',
+            defaultMessage: 'Latency',
           }
         )}
       >
         <ChartSectionVis
           type="bar"
-          formatter="bytes"
+          stacked={true}
+          formatter="highPercision"
+          formatterTemplate={'{{value}} ms'}
           seriesOverrides={{
-            bytes: {
+            read: {
               color: theme.eui.euiColorVis1,
               name: i18n.translate(
-                'xpack.infra.metricDetailPage.s3MetricsLayout.uploadBytes.chartLabel',
-                { defaultMessage: 'Bytes' }
+                'xpack.infra.metricDetailPage.rdsMetricsLayout.latency.read.chartLabel',
+                { defaultMessage: 'Read' }
+              ),
+            },
+            write: {
+              color: theme.eui.euiColorVis2,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.rdsMetricsLayout.latency.write.chartLabel',
+                { defaultMessage: 'Write' }
+              ),
+            },
+            insert: {
+              color: theme.eui.euiColorVis0,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.rdsMetricsLayout.latency.insert.chartLabel',
+                { defaultMessage: 'Insert' }
+              ),
+            },
+            update: {
+              color: theme.eui.euiColorVis7,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.rdsMetricsLayout.latency.update.chartLabel',
+                { defaultMessage: 'Update' }
+              ),
+            },
+            commit: {
+              color: theme.eui.euiColorVis3,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.rdsMetricsLayout.latency.commit.chartLabel',
+                { defaultMessage: 'Commit' }
               ),
             },
           }}

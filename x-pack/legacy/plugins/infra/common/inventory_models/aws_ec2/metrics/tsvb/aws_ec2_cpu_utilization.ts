@@ -26,6 +26,18 @@ export const awsEC2CpuUtilization: TSVBMetricModelCreator = (
           id: 'avg-cpu',
           type: 'avg',
         },
+        {
+          id: 'convert-to-percent',
+          script: 'params.avg / 100',
+          type: 'calculation',
+          variables: [
+            {
+              field: 'avg-cpu',
+              id: 'var-avg',
+              name: 'avg',
+            },
+          ],
+        },
       ],
     },
   ],
