@@ -21,6 +21,6 @@ set -e
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
   -X POST ${KIBANA_URL}${SPACE_URL}/api/detection_engine/signals/status \
   -d '{
-  "status": "closed",
+  "status": "'$1'",
   "query": "{\"range\":{\"@timestamp\":{\"gte\":\"now-2M\",\"lte\":\"now/M\"}}}"}' \
   | jq .

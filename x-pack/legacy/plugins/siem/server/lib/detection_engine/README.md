@@ -159,6 +159,8 @@ https://github.com/elastic/kibana/tree/master/x-pack/legacy/plugins/actions
 To update the status of a signal or group of signals, the following scripts provide an example of how to
 go about doing so.
 
-`scripts/signals/put_signal_doc.sh` will post a sample signal doc into the signals index to play with
-`scripts/signals/set_status_with_id.sh` will update the status of the sample signal to whatever is set in the script itself
-`scripts/signals/set_status_with_query.sh` will update the status of the signals in the result of the query.
+`./scripts/signals/put_signal_doc.sh` will post a sample signal doc into the signals index to play with
+`./scripts/signals/set_status_with_id.sh closed` will update the status of the sample signal to closed
+`./scripts/signals/set_status_with_id.sh open` will update the status of the sample signal to open
+`scripts/signals/set_status_with_query.sh closed` will update the status of the signals in the result of the query to closed.
+`scripts/signals/set_status_with_query.sh open` will update the status of the signals in the result of the query to open.

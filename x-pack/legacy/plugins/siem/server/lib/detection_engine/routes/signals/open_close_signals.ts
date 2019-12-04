@@ -6,10 +6,9 @@
 
 import Hapi from 'hapi';
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
-import { SignalsRequest, SignalSearchResponse, SignalSourceHit } from '../../alerts/types';
+import { SignalsRequest } from '../../alerts/types';
 import { setSignalsStatusSchema } from '../schemas';
 import { ServerFacade } from '../../../../types';
-import { Signal, SignalHit } from '../../../types';
 import { transformError } from '../utils';
 
 export const setSignalsStatusRouteDef: Hapi.ServerRoute = {
@@ -31,49 +30,30 @@ export const setSignalsStatusRouteDef: Hapi.ServerRoute = {
       return headers.response().code(404);
     }
     if (status) {
+      let queryObject;
       if (signalIds) {
-        try {
-          const signals = await callWithRequest(request, 'mget', {
-            index: '.siem-signals-devin-hurley', // fix how this is setup.
-            body: { ids: signalIds },
-          });
-          if (signals && signals.docs && signals.docs[0]._source) {
-            signals.docs.forEach(async doc => {
-              (doc._source as SignalHit).signal.status = status;
-              await callWithRequest(request, 'update', {
-                id: doc._id,
-                index: '.siem-signals-devin-hurley', // fix how this is setup.
-                body: { doc: doc._source },
-              });
-            });
-          }
-        } catch (exc) {
-          // error while getting or updating signal with id: id in signal index .siem-signals
-          return transformError(exc);
-        }
+        queryObject = { ids: { valuess: signalIds } };
       }
       if (query) {
-        try {
-          const signals: SignalSearchResponse = await callWithRequest(request, 'search', {
-            index: '.siem-signals-devin-hurley', // fix how this is setup.
-            body: {
-              query: JSON.parse(query),
-            },
-          });
-          signals.hits.hits.forEach(async (hit: SignalSourceHit) => {
-            (hit._source.signal as Signal).status = status;
-            await callWithRequest(request, 'update', {
-              id: hit._id,
-              index: '.siem-signals-devin-hurley', // fix how this is setup.
-              body: { doc: { ...hit._source } },
-            });
-          });
-        } catch (exc) {
-          return transformError(exc);
-        }
+        queryObject = JSON.parse(query);
       }
-      return true;
+      try {
+        return callWithRequest(request, 'updateByQuery', {
+          index: '.siem-signals-devin-hurley',
+          body: {
+            script: {
+              source: `ctx._source.signal.status = '${status}'`,
+              lang: 'painless',
+            },
+            query: queryObject,
+          },
+        });
+      } catch (exc) {
+        // error while getting or updating signal with id: id in signal index .siem-signals
+        return transformError(exc);
+      }
     }
+    return true;
   },
 };
 

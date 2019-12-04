@@ -20,5 +20,5 @@ set -e
   -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
   -X POST ${KIBANA_URL}${SPACE_URL}/api/detection_engine/signals/status \
-  -d '{"signal_ids": ["45562a28e0dFakeSignalId"], "status": "closed"}' \
+  -d '{"signal_ids": ["45562a28e0dFakeSignalId"], "status": "'$1'"}' \
   | jq .
