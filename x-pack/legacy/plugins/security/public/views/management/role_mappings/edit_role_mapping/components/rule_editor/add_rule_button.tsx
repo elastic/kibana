@@ -9,6 +9,7 @@ import { EuiButtonEmpty, EuiPopover, EuiContextMenuPanel, EuiContextMenuItem } f
 import { BaseRule, FieldRule, AllRule } from '../../../model';
 
 interface Props {
+  autoAdd?: boolean;
   onClick: (newRule: BaseRule) => void;
 }
 
@@ -19,7 +20,11 @@ export const AddRuleButton = (props: Props) => {
     <EuiButtonEmpty
       iconType="plusInCircle"
       onClick={() => {
-        setIsMenuOpen(!isMenuOpen);
+        if (props.autoAdd) {
+          props.onClick(new AllRule([new FieldRule('username', '*')]));
+        } else {
+          setIsMenuOpen(!isMenuOpen);
+        }
       }}
     >
       Add
@@ -44,7 +49,7 @@ export const AddRuleButton = (props: Props) => {
       icon="partial"
       onClick={() => {
         setIsMenuOpen(false);
-        props.onClick(new AllRule([]));
+        props.onClick(new AllRule([new FieldRule('username', '*')]));
       }}
     >
       Add rule group

@@ -4,8 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
+import React, { Component, Fragment } from 'react';
+import {
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiHorizontalRule,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { AddRuleButton } from './add_rule_button';
 import { RuleGroupTitle } from './rule_group_title';
 import { FieldRuleEditor } from './field_rule_editor';
@@ -31,7 +38,7 @@ export class RuleGroupEditor extends Component<Props, {}> {
         >
           <EuiFlexItem>
             <EuiFlexGroup alignItems="center">
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={true}>
                 <RuleGroupTitle
                   rule={this.props.rule}
                   onChange={this.props.onChange}
@@ -39,7 +46,9 @@ export class RuleGroupEditor extends Component<Props, {}> {
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon iconType="trash" color="danger" onClick={this.props.onDelete} />
+                <EuiButtonEmpty color="danger" onClick={this.props.onDelete} size="s">
+                  Delete rule group
+                </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -55,50 +64,63 @@ export class RuleGroupEditor extends Component<Props, {}> {
   }
 
   private renderSubRules = () => {
-    return this.props.rule.getRules().map((subRule, subRuleIndex) => {
+    return this.props.rule.getRules().map((subRule, subRuleIndex, rules) => {
+      const isLastRule = subRuleIndex === rules.length - 1;
+      const divider = isLastRule ? null : (
+        <EuiFlexItem grow={false}>
+          <EuiHorizontalRule margin="m" />
+        </EuiFlexItem>
+      );
+
       switch (subRule.getType()) {
         case 'field':
           return (
-            <EuiFlexItem key={subRuleIndex}>
-              <FieldRuleEditor
-                rule={subRule as FieldRule}
-                onChange={updatedSubRule => {
-                  const updatedRule = this.props.rule.clone() as BaseRuleGroup;
-                  updatedRule.replaceRule(subRuleIndex, updatedSubRule);
-                  this.props.onChange(updatedRule);
-                }}
-                allowAdd={this.props.allowAdd}
-                allowDelete={this.props.rule.canRemoveRule()}
-                onDelete={() => {
-                  const updatedRule = this.props.rule.clone() as BaseRuleGroup;
-                  updatedRule.removeRule(subRuleIndex);
-                  this.props.onChange(updatedRule);
-                }}
-              />
-            </EuiFlexItem>
+            <Fragment>
+              <EuiFlexItem key={subRuleIndex}>
+                <FieldRuleEditor
+                  rule={subRule as FieldRule}
+                  onChange={updatedSubRule => {
+                    const updatedRule = this.props.rule.clone() as BaseRuleGroup;
+                    updatedRule.replaceRule(subRuleIndex, updatedSubRule);
+                    this.props.onChange(updatedRule);
+                  }}
+                  allowAdd={this.props.allowAdd}
+                  allowDelete={this.props.rule.canRemoveRule()}
+                  onDelete={() => {
+                    const updatedRule = this.props.rule.clone() as BaseRuleGroup;
+                    updatedRule.removeRule(subRuleIndex);
+                    this.props.onChange(updatedRule);
+                  }}
+                />
+              </EuiFlexItem>
+              {divider}
+            </Fragment>
           );
         case 'except':
         case 'any':
         case 'all':
           return (
-            <EuiFlexItem key={subRuleIndex}>
-              <RuleGroupEditor
-                rule={subRule as BaseRuleGroup}
-                parentRule={this.props.rule}
-                allowAdd={this.props.allowAdd}
-                ruleDepth={this.props.ruleDepth + 1}
-                onChange={updatedSubRule => {
-                  const updatedRule = this.props.rule.clone() as BaseRuleGroup;
-                  updatedRule.replaceRule(subRuleIndex, updatedSubRule);
-                  this.props.onChange(updatedRule);
-                }}
-                onDelete={() => {
-                  const updatedRule = this.props.rule.clone() as BaseRuleGroup;
-                  updatedRule.removeRule(subRuleIndex);
-                  this.props.onChange(updatedRule);
-                }}
-              />
-            </EuiFlexItem>
+            <Fragment>
+              <EuiFlexItem key={subRuleIndex}>
+                <RuleGroupEditor
+                  rule={subRule as BaseRuleGroup}
+                  parentRule={this.props.rule}
+                  allowAdd={this.props.allowAdd}
+                  ruleDepth={this.props.ruleDepth + 1}
+                  onChange={updatedSubRule => {
+                    const updatedRule = this.props.rule.clone() as BaseRuleGroup;
+                    updatedRule.replaceRule(subRuleIndex, updatedSubRule);
+                    this.props.onChange(updatedRule);
+                  }}
+                  onDelete={() => {
+                    const updatedRule = this.props.rule.clone() as BaseRuleGroup;
+                    updatedRule.removeRule(subRuleIndex);
+                    this.props.onChange(updatedRule);
+                  }}
+                />
+              </EuiFlexItem>
+              {divider}
+            </Fragment>
           );
         default:
           return <div>Unsupported rule type: {subRule.getType()}</div>;

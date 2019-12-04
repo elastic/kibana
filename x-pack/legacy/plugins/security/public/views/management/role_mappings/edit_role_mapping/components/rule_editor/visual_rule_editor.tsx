@@ -37,6 +37,7 @@ export class VisualRuleEditor extends Component<Props, {}> {
         body={<div>Add a rule to control which users should be assigned roles.</div>}
         actions={
           <AddRuleButton
+            autoAdd={true}
             onClick={newRule => {
               this.props.onChange(newRule);
             }}

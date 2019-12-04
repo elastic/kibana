@@ -12,8 +12,8 @@ import {
   EuiFieldText,
   EuiSwitch,
   EuiCallOut,
-  EuiButtonIcon,
   EuiText,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { RoleTemplate } from '../../../../../../../common/model';
 import {
@@ -39,11 +39,14 @@ export const RoleTemplateEditor = ({
   canUseStoredScripts,
 }: Props) => {
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup direction="column" gutterSize="s">
+      {getTemplateConfigurationFields()}
       {getEditorForTemplate()}
       <EuiFlexItem grow={false}>
-        <EuiFormRow hasEmptyLabelSpace={true}>
-          <EuiButtonIcon iconType="trash" color="danger" onClick={() => onDelete(roleTemplate)} />
+        <EuiFormRow>
+          <EuiButtonEmpty color="danger" onClick={() => onDelete(roleTemplate)} size="s">
+            Delete role template
+          </EuiButtonEmpty>
         </EuiFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -67,9 +70,9 @@ export const RoleTemplateEditor = ({
     );
   }
 
-  function getEditorForTemplate() {
+  function getTemplateConfigurationFields() {
     const templateTypeComboBox = (
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem>
         <EuiFormRow label="Template type">
           <RoleTemplateTypeSelect
             roleTemplate={roleTemplate}
@@ -80,21 +83,38 @@ export const RoleTemplateEditor = ({
         </EuiFormRow>
       </EuiFlexItem>
     );
+
+    const templateFormatSwitch = <EuiFlexItem>{getTemplateFormatSwitch()}</EuiFlexItem>;
+
+    return (
+      <EuiFlexItem>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          {templateTypeComboBox}
+          {templateFormatSwitch}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    );
+  }
+
+  function getEditorForTemplate() {
     if (isInlineRoleTemplate(roleTemplate)) {
       const extraProps: Record<string, any> = {};
       if (!canUseInlineScripts) {
         extraProps.isInvalid = true;
         extraProps.error = (
           <EuiText size="xs" color="danger">
-            This template cannot be used because inline scripts are disabled in Elasticsearch
+            This template cannot be used because inline scripts are disabled in Elasticsearch.
           </EuiText>
         );
       }
       return (
         <Fragment>
-          {templateTypeComboBox}
           <EuiFlexItem grow={1} style={{ maxWidth: '400px' }}>
-            <EuiFormRow label="Template" {...extraProps}>
+            <EuiFormRow
+              label="Template"
+              helpText="You can use mustache templates here."
+              {...extraProps}
+            >
               <EuiFieldText
                 value={roleTemplate.template.source}
                 onChange={e => {
@@ -108,7 +128,6 @@ export const RoleTemplateEditor = ({
               />
             </EuiFormRow>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>{getTemplateFormatSwitch()}</EuiFlexItem>
         </Fragment>
       );
     }
@@ -119,17 +138,16 @@ export const RoleTemplateEditor = ({
         extraProps.isInvalid = true;
         extraProps.error = (
           <EuiText size="xs" color="danger">
-            This template cannot be used because stored scripts are disabled in Elasticsearch
+            This template cannot be used because stored scripts are disabled in Elasticsearch.
           </EuiText>
         );
       }
       return (
         <Fragment>
-          {templateTypeComboBox}
           <EuiFlexItem grow={1} style={{ maxWidth: '400px' }}>
             <EuiFormRow
               label="Stored script id"
-              helpText="Enter the id of a previously stored painless or mustache script"
+              helpText="Enter the id of a previously stored painless or mustache script."
               {...extraProps}
             >
               <EuiFieldText
@@ -145,7 +163,6 @@ export const RoleTemplateEditor = ({
               />
             </EuiFormRow>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>{getTemplateFormatSwitch()}</EuiFlexItem>
         </Fragment>
       );
     }

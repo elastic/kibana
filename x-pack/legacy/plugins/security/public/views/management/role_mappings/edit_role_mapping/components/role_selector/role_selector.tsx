@@ -4,8 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { EuiComboBox, EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { Fragment } from 'react';
+import {
+  EuiComboBox,
+  EuiFormRow,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 import { RoleMapping, Role } from '../../../../../../../common/model';
 import { RolesApi } from '../../../../../../lib/roles_api';
 import { AddRoleTemplateButton } from './add_role_template_button';
@@ -49,6 +56,7 @@ export class RoleSelector extends React.Component<Props, State> {
     return (
       <EuiComboBox
         data-test-subj="roleMappingFormRoleComboBox"
+        placeholder={'Select one or more roles'}
         isLoading={this.state.roles.length === 0}
         options={this.state.roles.map(r => ({ label: r.name }))}
         selectedOptions={roles!.map(r => ({ label: r }))}
@@ -66,9 +74,9 @@ export class RoleSelector extends React.Component<Props, State> {
   private getRoleTemplates = () => {
     const { role_templates: roleTemplates = [] } = this.props.roleMapping;
     return (
-      <EuiFlexGroup direction="column" alignItems="flexStart">
+      <div>
         {roleTemplates.map((rt, index) => (
-          <EuiFlexItem key={index}>
+          <Fragment key={index}>
             <RoleTemplateEditor
               canUseStoredScripts={this.props.canUseStoredScripts}
               canUseInlineScripts={this.props.canUseInlineScripts}
@@ -90,39 +98,38 @@ export class RoleSelector extends React.Component<Props, State> {
                 });
               }}
             />
-          </EuiFlexItem>
+            <EuiHorizontalRule />
+          </Fragment>
         ))}
-        <EuiFlexItem>
-          <AddRoleTemplateButton
-            canUseStoredScripts={this.props.canUseStoredScripts}
-            canUseInlineScripts={this.props.canUseInlineScripts}
-            onClick={type => {
-              switch (type) {
-                case 'inline': {
-                  const templates = this.props.roleMapping.role_templates || [];
-                  this.props.onChange({
-                    ...this.props.roleMapping,
-                    roles: [],
-                    role_templates: [...templates, { template: { source: '' } }],
-                  });
-                  break;
-                }
-                case 'stored': {
-                  const templates = this.props.roleMapping.role_templates || [];
-                  this.props.onChange({
-                    ...this.props.roleMapping,
-                    roles: [],
-                    role_templates: [...templates, { template: { id: '' } }],
-                  });
-                  break;
-                }
-                default:
-                  throw new Error(`Unsupported template type: ${type}`);
+        <AddRoleTemplateButton
+          canUseStoredScripts={this.props.canUseStoredScripts}
+          canUseInlineScripts={this.props.canUseInlineScripts}
+          onClick={type => {
+            switch (type) {
+              case 'inline': {
+                const templates = this.props.roleMapping.role_templates || [];
+                this.props.onChange({
+                  ...this.props.roleMapping,
+                  roles: [],
+                  role_templates: [...templates, { template: { source: '' } }],
+                });
+                break;
               }
-            }}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+              case 'stored': {
+                const templates = this.props.roleMapping.role_templates || [];
+                this.props.onChange({
+                  ...this.props.roleMapping,
+                  roles: [],
+                  role_templates: [...templates, { template: { id: '' } }],
+                });
+                break;
+              }
+              default:
+                throw new Error(`Unsupported template type: ${type}`);
+            }
+          }}
+        />
+      </div>
     );
   };
 }
