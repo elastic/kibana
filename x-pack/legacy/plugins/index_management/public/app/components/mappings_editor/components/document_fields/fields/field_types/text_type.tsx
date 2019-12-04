@@ -400,7 +400,6 @@ export const TextType = React.memo(({ field }: Props) => {
                     componentProps={{
                       euiFieldProps: {
                         options: PARAMETERS_OPTIONS.term_vector,
-                        style: { minWidth: 300 },
                         fullWidth: true,
                       },
                     }}
