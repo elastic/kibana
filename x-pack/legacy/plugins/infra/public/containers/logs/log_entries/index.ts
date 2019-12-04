@@ -43,12 +43,10 @@ interface LogEntriesFetchParams {
   timeKey: TimeKey | null;
   pagesBeforeStart: number | null;
   pagesAfterEnd: number | null;
+  sourceId: string;
 }
 
-type FetchEntriesParams = LogEntriesFetchParams & {
-  sourceId: string;
-};
-
+type FetchEntriesParams = LogEntriesFetchParams;
 type FetchMoreEntriesParams = Pick<LogEntriesFetchParams, 'pagesBeforeStart' | 'pagesAfterEnd'>;
 
 export interface LogEntriesResponse {
@@ -196,10 +194,7 @@ export const useLogEntriesState: (
 ) => [LogEntriesStateParams, LogEntriesCallbacks] = params => {
   const [state, dispatch] = useReducer(logEntriesStateReducer, logEntriesInitialState);
 
-  const { fetchNewerEntries } = useFetchEntriesEffect(state, dispatch, {
-    ...params,
-    sourceId: 'default',
-  });
+  const { fetchNewerEntries } = useFetchEntriesEffect(state, dispatch, params);
   const callbacks = { fetchNewerEntries };
 
   return [state, callbacks];

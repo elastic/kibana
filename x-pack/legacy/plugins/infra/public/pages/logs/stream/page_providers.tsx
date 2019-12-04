@@ -16,9 +16,10 @@ import { LogEntriesState } from '../../../containers/logs/log_entries';
 import { Source } from '../../../containers/source';
 
 const LogEntriesStateProvider: React.FC = ({ children }) => {
+  const { sourceId } = useContext(Source.Context);
   const { timeKey, pagesBeforeStart, pagesAfterEnd } = useContext(LogPositionState.Context);
   const { filterQuery } = useContext(LogFilterState.Context);
-  const entriesProps = { timeKey, pagesBeforeStart, pagesAfterEnd, filterQuery };
+  const entriesProps = { timeKey, pagesBeforeStart, pagesAfterEnd, filterQuery, sourceId };
   return <LogEntriesState.Provider {...entriesProps}>{children}</LogEntriesState.Provider>;
 };
 
