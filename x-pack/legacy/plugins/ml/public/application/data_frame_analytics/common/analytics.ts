@@ -35,6 +35,7 @@ interface ClassificationAnalysis {
     dependent_variable: string;
     training_percent?: number;
     num_top_classes?: string;
+    prediction_field_name?: string;
   };
 }
 
@@ -109,6 +110,7 @@ export const getAnalysisType = (analysis: AnalysisConfig) => {
 
 export const getDependentVar = (analysis: AnalysisConfig) => {
   let depVar = '';
+
   if (isRegressionAnalysis(analysis)) {
     depVar = analysis.regression.dependent_variable;
   }
@@ -128,13 +130,17 @@ export const getPredictionFieldName = (analysis: AnalysisConfig) => {
   return predictionFieldName;
 };
 
-export const getPredictedFieldName = (resultsField: string, analysis: AnalysisConfig) => {
+export const getPredictedFieldName = (
+  resultsField: string,
+  analysis: AnalysisConfig,
+  forSort?: boolean
+) => {
   // default is 'ml'
   const predictionFieldName = getPredictionFieldName(analysis);
   const defaultPredictionField = `${getDependentVar(analysis)}_prediction`;
   const predictedField = `${resultsField}.${
     predictionFieldName ? predictionFieldName : defaultPredictionField
-  }`;
+  }${isClassificationAnalysis(analysis) && !forSort ? '.keyword' : ''}`;
   return predictedField;
 };
 

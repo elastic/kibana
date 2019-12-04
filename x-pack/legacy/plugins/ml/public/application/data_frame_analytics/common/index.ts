@@ -31,6 +31,7 @@ export {
 export {
   getDefaultSelectableFields,
   getDefaultRegressionFields,
+  getDefaultClassificationFields,
   getFlattenedFields,
   sortColumns,
   sortRegressionResultsColumns,

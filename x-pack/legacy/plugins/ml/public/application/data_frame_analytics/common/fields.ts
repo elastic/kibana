@@ -77,7 +77,7 @@ export const sortRegressionResultsFields = (
 ) => {
   const dependentVariable = getDependentVar(jobConfig.analysis);
   const resultsField = jobConfig.dest.results_field;
-  const predictedField = getPredictedFieldName(resultsField, jobConfig.analysis);
+  const predictedField = getPredictedFieldName(resultsField, jobConfig.analysis, true);
   if (a === `${resultsField}.is_training`) {
     return -1;
   }
@@ -96,6 +96,14 @@ export const sortRegressionResultsFields = (
   if (b === dependentVariable) {
     return 1;
   }
+
+  if (a === `${resultsField}.prediction_probability`) {
+    return -1;
+  }
+  if (b === `${resultsField}.prediction_probability`) {
+    return 1;
+  }
+
   return a.localeCompare(b);
 };
 
@@ -107,7 +115,7 @@ export const sortRegressionResultsColumns = (
 ) => (a: string, b: string) => {
   const dependentVariable = getDependentVar(jobConfig.analysis);
   const resultsField = jobConfig.dest.results_field;
-  const predictedField = getPredictedFieldName(resultsField, jobConfig.analysis);
+  const predictedField = getPredictedFieldName(resultsField, jobConfig.analysis, true);
 
   const typeofA = typeof obj[a];
   const typeofB = typeof obj[b];
@@ -133,6 +141,14 @@ export const sortRegressionResultsColumns = (
   }
 
   if (b === dependentVariable) {
+    return 1;
+  }
+
+  if (a === `${resultsField}.prediction_probability`) {
+    return -1;
+  }
+
+  if (b === `${resultsField}.prediction_probability`) {
     return 1;
   }
 
@@ -183,6 +199,44 @@ export function getFlattenedFields(obj: EsDocSource, resultsField: string): EsFi
   });
   return flatDocFields.filter(f => f !== ML__ID_COPY);
 }
+
+export const getDefaultClassificationFields = (
+  docs: EsDoc[],
+  jobConfig: DataFrameAnalyticsConfig
+): EsFieldName[] => {
+  const resultsField = jobConfig.dest.results_field;
+  if (docs.length === 0) {
+    return [];
+  }
+
+  const newDocFields = getFlattenedFields(docs[0]._source, resultsField);
+  return newDocFields
+    .filter(k => {
+      if (k === `${resultsField}.is_training`) {
+        return true;
+      }
+      // predicted value of dependent variable
+      if (k === getPredictedFieldName(resultsField, jobConfig.analysis, true)) {
+        return true;
+      }
+      // actual value of dependent variable
+      if (k === getDependentVar(jobConfig.analysis)) {
+        return true;
+      }
+
+      if (k === `${resultsField}.prediction_probability`) {
+        return true;
+      }
+
+      if (k.split('.')[0] === resultsField) {
+        return false;
+      }
+
+      return docs.some(row => row._source[k] !== null);
+    })
+    .sort((a, b) => sortRegressionResultsFields(a, b, jobConfig))
+    .slice(0, DEFAULT_REGRESSION_COLUMNS);
+};
 
 export const getDefaultRegressionFields = (
   docs: EsDoc[],
