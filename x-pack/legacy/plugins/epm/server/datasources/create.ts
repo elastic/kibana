@@ -77,7 +77,7 @@ function createFakeDatasource(pkgkey: string, assets: Asset[] = []): Datasource 
       version: '1.0.1, 1.3.1',
       description: 'description',
       title: 'title',
-      assets: assets as Asset[],
+      assets,
     },
     streams: [
       {
