@@ -9,10 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
 // @ts-ignore untyped module defintition
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
-import { registerJobGenerationRoutes, registerJobInfoRoutes } from './server/routes';
+import { registerRoutes } from './server/routes';
 import {
-  createQueueFactory,
-  enqueueJobFactory,
   LevelLogger,
   checkLicenseFactory,
   getExportTypesRegistry,
@@ -105,12 +103,8 @@ export const reporting = (kibana: any) => {
       // Post initialization of the above code, the collector is now ready to fetch its data
       isCollectorReady = true;
 
-      const esqueue = createQueueFactory(server, { exportTypesRegistry, browserDriverFactory });
-      const enqueueJob = enqueueJobFactory(server, { exportTypesRegistry, esqueue });
-
       // Reporting routes
-      registerJobGenerationRoutes(server, enqueueJob, logger);
-      registerJobInfoRoutes(server, exportTypesRegistry);
+      registerRoutes(server, exportTypesRegistry, browserDriverFactory, logger);
     },
 
     deprecations({ unused }: any) {

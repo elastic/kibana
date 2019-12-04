@@ -6,17 +6,33 @@
 
 import boom from 'boom';
 import { API_BASE_URL } from '../../common/constants';
-import { ServerFacade, RequestFacade, ReportingResponseToolkit, Logger } from '../../types';
+import {
+  ServerFacade,
+  ExportTypesRegistry,
+  HeadlessChromiumDriverFactory,
+  RequestFacade,
+  ReportingResponseToolkit,
+  Logger,
+} from '../../types';
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
 import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
 import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
 import { registerLegacy } from './legacy';
+import { createQueueFactory, enqueueJobFactory } from '../lib';
 
-export function registerJobGenerationRoutes(server: ServerFacade, enqueueJob: any, logger: Logger) {
+export function registerJobGenerationRoutes(
+  server: ServerFacade,
+  exportTypesRegistry: ExportTypesRegistry,
+  browserDriverFactory: HeadlessChromiumDriverFactory,
+  logger: Logger
+) {
   const config = server.config();
   const DOWNLOAD_BASE_URL = config.get('server.basePath') + `${API_BASE_URL}/jobs/download`;
   // @ts-ignore TODO
   const { errors: esErrors } = server.plugins.elasticsearch.getCluster('admin');
+
+  const esqueue = createQueueFactory(server, { exportTypesRegistry, browserDriverFactory });
+  const enqueueJob = enqueueJobFactory(server, { exportTypesRegistry, esqueue });
 
   /*
    * Generates enqueued job details to use in responses

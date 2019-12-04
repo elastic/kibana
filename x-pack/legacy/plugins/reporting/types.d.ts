@@ -13,6 +13,7 @@ import {
   CallCluster,
 } from '../../../../src/legacy/core_plugins/elasticsearch';
 import { CancellationToken } from './common/cancellation_token';
+import { LevelLogger } from './server/lib/level_logger';
 import { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
 import { BrowserType } from './server/browsers/types';
 
@@ -323,7 +324,7 @@ export { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver
 export { CancellationToken } from './common/cancellation_token';
 
 // Prefer to import this type using: `import { LevelLogger } from 'relative/path/server/lib';`
-export { LevelLogger as Logger } from './server/lib/level_logger';
+export { LevelLogger as Logger };
 
 export interface AbsoluteURLFactoryOptions {
   defaultBasePath: string;

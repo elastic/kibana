@@ -9,6 +9,7 @@ import { API_BASE_URL } from '../../common/constants';
 import {
   ServerFacade,
   ExportTypesRegistry,
+  Logger,
   RequestFacade,
   ReportingResponseToolkit,
   JobDocOutput,
@@ -27,7 +28,8 @@ const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
 export function registerJobInfoRoutes(
   server: ServerFacade,
-  exportTypesRegistry: ExportTypesRegistry
+  exportTypesRegistry: ExportTypesRegistry,
+  logger: Logger
 ) {
   const jobsQuery = jobsQueryFactory(server);
   const getRouteConfig = getRouteConfigFactoryManagementPre(server);
@@ -140,13 +142,15 @@ export function registerJobInfoRoutes(
       const { statusCode } = response;
 
       if (statusCode !== 200) {
-        const logLevel = statusCode === 500 ? 'error' : 'debug';
-        server.log(
-          [logLevel, 'reporting', 'download'],
-          `Report ${docId} has non-OK status: [${statusCode}] Reason: [${JSON.stringify(
-            response.source
-          )}]`
-        );
+        if (statusCode === 500) {
+          logger.error(`Report ${docId} has failed: ${JSON.stringify(response.source)}`);
+        } else {
+          logger.debug(
+            `Report ${docId} is not ready: [${statusCode}] Reason: [${JSON.stringify(
+              response.source
+            )}]`
+          );
+        }
       }
 
       if (!response.isBoom) {

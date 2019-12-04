@@ -4,5 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { registerJobGenerationRoutes } from './generation';
-export { registerJobInfoRoutes } from './jobs';
+import {
+  ServerFacade,
+  ExportTypesRegistry,
+  HeadlessChromiumDriverFactory,
+  Logger,
+} from '../../types';
+import { registerJobGenerationRoutes } from './generation';
+import { registerJobInfoRoutes } from './jobs';
+
+export function registerRoutes(
+  server: ServerFacade,
+  exportTypesRegistry: ExportTypesRegistry,
+  browserDriverFactory: HeadlessChromiumDriverFactory,
+  logger: Logger
+) {
+  registerJobGenerationRoutes(server, exportTypesRegistry, browserDriverFactory, logger);
+  registerJobInfoRoutes(server, exportTypesRegistry, logger);
+}
