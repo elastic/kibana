@@ -19,17 +19,30 @@ type QueryAlertsResolver = ChildResolverOf<
   QuerySourceResolver
 >;
 
+type QueryAlertsHistogramResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.AlertsResolver>,
+  QuerySourceResolver
+>;
+
 export const createAlertsResolvers = (
   libs: AlertsResolversDeps
 ): {
   Source: {
     Alerts: QueryAlertsResolver;
+    AlertsHistogram: QueryAlertsHistogramResolver;
   };
 } => ({
   Source: {
     async Alerts(source, args, { req }, info) {
       const options = createOptions(source, args, info, 'edges.node.ecs.');
       return libs.alerts.getAlertsData(req, { ...options, fieldRequested: args.fieldRequested });
+    },
+    async AlertsHistogram(source, args, { req }, info) {
+      const options = {
+        ...createOptions(source, args, info),
+        defaultIndex: args.defaultIndex,
+      };
+      return libs.alerts.getAlertsHistogramData(req, options);
     },
   },
 });

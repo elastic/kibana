@@ -259,12 +259,6 @@ export interface SortTimelineInput {
   sortDirection?: Maybe<string>;
 }
 
-export interface AlertsSortField {
-  field: AlertsFields;
-
-  direction: Direction;
-}
-
 export interface FavoriteTimelineInput {
   fullName?: Maybe<string>;
 
@@ -470,6 +464,8 @@ export interface Source {
   status: SourceStatus;
 
   Alerts: AlertsData;
+
+  AlertsHistogram: AlertsOverTimeData;
   /** Gets Authentication success and failures based on a timerange */
   Authentications: AuthenticationsData;
 
@@ -571,7 +567,7 @@ export interface IndexField {
 }
 
 export interface AlertsData {
-  edges: AlertsEdges[];
+  edges: TimelineEdges[];
 
   totalCount: number;
 
@@ -580,7 +576,7 @@ export interface AlertsData {
   inspect?: Maybe<Inspect>;
 }
 
-export interface AlertsEdges {
+export interface TimelineEdges {
   node: TimelineItem;
 
   cursor: CursorType;
@@ -1220,6 +1216,22 @@ export interface Inspect {
   response: string[];
 }
 
+export interface AlertsOverTimeData {
+  inspect?: Maybe<Inspect>;
+
+  alertsOverTimeByModule: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
+}
+
+export interface MatrixOverTimeHistogramData {
+  x: number;
+
+  y: number;
+
+  g: string;
+}
+
 export interface AuthenticationsData {
   edges: AuthenticationsEdges[];
 
@@ -1274,14 +1286,6 @@ export interface AuthenticationsOverTimeData {
   totalCount: number;
 }
 
-export interface MatrixOverTimeHistogramData {
-  x: number;
-
-  y: number;
-
-  g: string;
-}
-
 export interface TimelineData {
   edges: TimelineEdges[];
 
@@ -1290,12 +1294,6 @@ export interface TimelineData {
   pageInfo: PageInfo;
 
   inspect?: Maybe<Inspect>;
-}
-
-export interface TimelineEdges {
-  node: TimelineItem;
-
-  cursor: CursorType;
 }
 
 export interface TimelineDetailsData {
@@ -2072,22 +2070,6 @@ export interface ResponseFavoriteTimeline {
   favorite?: Maybe<FavoriteTimelineResult[]>;
 }
 
-export interface ObserverFields {
-  name?: Maybe<string[] | string>;
-}
-
-export interface AlertsItem {
-  _id?: Maybe<string>;
-
-  event?: Maybe<EventEcsFields>;
-
-  host?: Maybe<HostEcsFields>;
-
-  observer?: Maybe<ObserverFields>;
-
-  inspect?: Maybe<Inspect>;
-}
-
 export interface EcsEdges {
   node: Ecs;
 
@@ -2185,6 +2167,13 @@ export interface AlertsSourceArgs {
   filterQuery?: Maybe<string>;
 
   defaultIndex: string[];
+}
+export interface AlertsHistogramSourceArgs {
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+
+  timerange: TimerangeInput;
 }
 export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
@@ -2822,6 +2811,8 @@ export namespace SourceResolvers {
     status?: StatusResolver<SourceStatus, TypeParent, TContext>;
 
     Alerts?: AlertsResolver<AlertsData, TypeParent, TContext>;
+
+    AlertsHistogram?: AlertsHistogramResolver<AlertsOverTimeData, TypeParent, TContext>;
     /** Gets Authentication success and failures based on a timerange */
     Authentications?: AuthenticationsResolver<AuthenticationsData, TypeParent, TContext>;
 
@@ -2911,6 +2902,19 @@ export namespace SourceResolvers {
     filterQuery?: Maybe<string>;
 
     defaultIndex: string[];
+  }
+
+  export type AlertsHistogramResolver<
+    R = AlertsOverTimeData,
+    Parent = Source,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext, AlertsHistogramArgs>;
+  export interface AlertsHistogramArgs {
+    filterQuery?: Maybe<string>;
+
+    defaultIndex: string[];
+
+    timerange: TimerangeInput;
   }
 
   export type AuthenticationsResolver<
@@ -3456,7 +3460,7 @@ export namespace IndexFieldResolvers {
 
 export namespace AlertsDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = AlertsData> {
-    edges?: EdgesResolver<AlertsEdges[], TypeParent, TContext>;
+    edges?: EdgesResolver<TimelineEdges[], TypeParent, TContext>;
 
     totalCount?: TotalCountResolver<number, TypeParent, TContext>;
 
@@ -3466,7 +3470,7 @@ export namespace AlertsDataResolvers {
   }
 
   export type EdgesResolver<
-    R = AlertsEdges[],
+    R = TimelineEdges[],
     Parent = AlertsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -3487,8 +3491,8 @@ export namespace AlertsDataResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
-export namespace AlertsEdgesResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = AlertsEdges> {
+export namespace TimelineEdgesResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = TimelineEdges> {
     node?: NodeResolver<TimelineItem, TypeParent, TContext>;
 
     cursor?: CursorResolver<CursorType, TypeParent, TContext>;
@@ -3496,12 +3500,12 @@ export namespace AlertsEdgesResolvers {
 
   export type NodeResolver<
     R = TimelineItem,
-    Parent = AlertsEdges,
+    Parent = TimelineEdges,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type CursorResolver<
     R = CursorType,
-    Parent = AlertsEdges,
+    Parent = TimelineEdges,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
@@ -5627,6 +5631,62 @@ export namespace InspectResolvers {
   >;
 }
 
+export namespace AlertsOverTimeDataResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = AlertsOverTimeData> {
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+
+    alertsOverTimeByModule?: AlertsOverTimeByModuleResolver<
+      MatrixOverTimeHistogramData[],
+      TypeParent,
+      TContext
+    >;
+
+    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
+  }
+
+  export type InspectResolver<
+    R = Maybe<Inspect>,
+    Parent = AlertsOverTimeData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type AlertsOverTimeByModuleResolver<
+    R = MatrixOverTimeHistogramData[],
+    Parent = AlertsOverTimeData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TotalCountResolver<
+    R = number,
+    Parent = AlertsOverTimeData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace MatrixOverTimeHistogramDataResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = MatrixOverTimeHistogramData> {
+    x?: XResolver<number, TypeParent, TContext>;
+
+    y?: YResolver<number, TypeParent, TContext>;
+
+    g?: GResolver<string, TypeParent, TContext>;
+  }
+
+  export type XResolver<
+    R = number,
+    Parent = MatrixOverTimeHistogramData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type YResolver<
+    R = number,
+    Parent = MatrixOverTimeHistogramData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type GResolver<
+    R = string,
+    Parent = MatrixOverTimeHistogramData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
 export namespace AuthenticationsDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = AuthenticationsData> {
     edges?: EdgesResolver<AuthenticationsEdges[], TypeParent, TContext>;
@@ -5808,32 +5868,6 @@ export namespace AuthenticationsOverTimeDataResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
-export namespace MatrixOverTimeHistogramDataResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = MatrixOverTimeHistogramData> {
-    x?: XResolver<number, TypeParent, TContext>;
-
-    y?: YResolver<number, TypeParent, TContext>;
-
-    g?: GResolver<string, TypeParent, TContext>;
-  }
-
-  export type XResolver<
-    R = number,
-    Parent = MatrixOverTimeHistogramData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type YResolver<
-    R = number,
-    Parent = MatrixOverTimeHistogramData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type GResolver<
-    R = string,
-    Parent = MatrixOverTimeHistogramData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
 export namespace TimelineDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = TimelineData> {
     edges?: EdgesResolver<TimelineEdges[], TypeParent, TContext>;
@@ -5863,25 +5897,6 @@ export namespace TimelineDataResolvers {
   export type InspectResolver<
     R = Maybe<Inspect>,
     Parent = TimelineData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace TimelineEdgesResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = TimelineEdges> {
-    node?: NodeResolver<TimelineItem, TypeParent, TContext>;
-
-    cursor?: CursorResolver<CursorType, TypeParent, TContext>;
-  }
-
-  export type NodeResolver<
-    R = TimelineItem,
-    Parent = TimelineEdges,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type CursorResolver<
-    R = CursorType,
-    Parent = TimelineEdges,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
@@ -8561,58 +8576,6 @@ export namespace ResponseFavoriteTimelineResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
-export namespace ObserverFieldsResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = ObserverFields> {
-    name?: NameResolver<Maybe<string[] | string>, TypeParent, TContext>;
-  }
-
-  export type NameResolver<
-    R = Maybe<string[] | string>,
-    Parent = ObserverFields,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace AlertsItemResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = AlertsItem> {
-    _id?: _IdResolver<Maybe<string>, TypeParent, TContext>;
-
-    event?: EventResolver<Maybe<EventEcsFields>, TypeParent, TContext>;
-
-    host?: HostResolver<Maybe<HostEcsFields>, TypeParent, TContext>;
-
-    observer?: ObserverResolver<Maybe<ObserverFields>, TypeParent, TContext>;
-
-    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
-  }
-
-  export type _IdResolver<
-    R = Maybe<string>,
-    Parent = AlertsItem,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type EventResolver<
-    R = Maybe<EventEcsFields>,
-    Parent = AlertsItem,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type HostResolver<
-    R = Maybe<HostEcsFields>,
-    Parent = AlertsItem,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type ObserverResolver<
-    R = Maybe<ObserverFields>,
-    Parent = AlertsItem,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type InspectResolver<
-    R = Maybe<Inspect>,
-    Parent = AlertsItem,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
 export namespace EcsEdgesResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = EcsEdges> {
     node?: NodeResolver<Ecs, TypeParent, TContext>;
@@ -8829,7 +8792,7 @@ export type IResolvers<TContext = SiemContext> = {
   SourceStatus?: SourceStatusResolvers.Resolvers<TContext>;
   IndexField?: IndexFieldResolvers.Resolvers<TContext>;
   AlertsData?: AlertsDataResolvers.Resolvers<TContext>;
-  AlertsEdges?: AlertsEdgesResolvers.Resolvers<TContext>;
+  TimelineEdges?: TimelineEdgesResolvers.Resolvers<TContext>;
   TimelineItem?: TimelineItemResolvers.Resolvers<TContext>;
   TimelineNonEcsData?: TimelineNonEcsDataResolvers.Resolvers<TContext>;
   Ecs?: EcsResolvers.Resolvers<TContext>;
@@ -8883,15 +8846,15 @@ export type IResolvers<TContext = SiemContext> = {
   CursorType?: CursorTypeResolvers.Resolvers<TContext>;
   PageInfo?: PageInfoResolvers.Resolvers<TContext>;
   Inspect?: InspectResolvers.Resolvers<TContext>;
+  AlertsOverTimeData?: AlertsOverTimeDataResolvers.Resolvers<TContext>;
+  MatrixOverTimeHistogramData?: MatrixOverTimeHistogramDataResolvers.Resolvers<TContext>;
   AuthenticationsData?: AuthenticationsDataResolvers.Resolvers<TContext>;
   AuthenticationsEdges?: AuthenticationsEdgesResolvers.Resolvers<TContext>;
   AuthenticationItem?: AuthenticationItemResolvers.Resolvers<TContext>;
   LastSourceHost?: LastSourceHostResolvers.Resolvers<TContext>;
   PageInfoPaginated?: PageInfoPaginatedResolvers.Resolvers<TContext>;
   AuthenticationsOverTimeData?: AuthenticationsOverTimeDataResolvers.Resolvers<TContext>;
-  MatrixOverTimeHistogramData?: MatrixOverTimeHistogramDataResolvers.Resolvers<TContext>;
   TimelineData?: TimelineDataResolvers.Resolvers<TContext>;
-  TimelineEdges?: TimelineEdgesResolvers.Resolvers<TContext>;
   TimelineDetailsData?: TimelineDetailsDataResolvers.Resolvers<TContext>;
   DetailItem?: DetailItemResolvers.Resolvers<TContext>;
   LastEventTimeData?: LastEventTimeDataResolvers.Resolvers<TContext>;
@@ -8962,8 +8925,6 @@ export type IResolvers<TContext = SiemContext> = {
   ResponseNote?: ResponseNoteResolvers.Resolvers<TContext>;
   ResponseTimeline?: ResponseTimelineResolvers.Resolvers<TContext>;
   ResponseFavoriteTimeline?: ResponseFavoriteTimelineResolvers.Resolvers<TContext>;
-  ObserverFields?: ObserverFieldsResolvers.Resolvers<TContext>;
-  AlertsItem?: AlertsItemResolvers.Resolvers<TContext>;
   EcsEdges?: EcsEdgesResolvers.Resolvers<TContext>;
   EventsTimelineData?: EventsTimelineDataResolvers.Resolvers<TContext>;
   OsFields?: OsFieldsResolvers.Resolvers<TContext>;

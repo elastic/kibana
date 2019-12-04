@@ -89,6 +89,10 @@ describe('Hosts redux store', () => {
           activePage: 0,
           limit: 10,
         },
+        alerts: {
+          activePage: 0,
+          limit: 10,
+        },
       });
     });
 
@@ -110,6 +114,10 @@ describe('Hosts redux store', () => {
           limit: 10,
         },
         uncommonProcesses: {
+          activePage: 0,
+          limit: 10,
+        },
+        alerts: {
           activePage: 0,
           limit: 10,
         },

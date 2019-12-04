@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createQueryFilterClauses } from '../../utils/build_query';
+import { createQueryFilterClauses, calculateTimeseriesInterval } from '../../utils/build_query';
 import { buildTimelineQuery } from '../events/query.dsl';
-import { RequestOptions } from '../framework';
+import { RequestOptions, RequestBasicOptions } from '../framework';
 
 export const buildAlertsQuery = (options: RequestOptions) => {
   const eventsQuery = buildTimelineQuery(options);
@@ -26,4 +26,76 @@ export const buildAlertsQuery = (options: RequestOptions) => {
       },
     },
   };
+};
+
+export const buildAlertsHistogramQuery = ({
+  filterQuery,
+  timerange: { from, to },
+  defaultIndex,
+  sourceConfiguration: {
+    fields: { timestamp },
+  },
+}: RequestBasicOptions) => {
+  const filter = [
+    ...createQueryFilterClauses(filterQuery),
+    {
+      range: {
+        [timestamp]: {
+          gte: from,
+          lte: to,
+        },
+      },
+    },
+  ];
+
+  const getHistogramAggregation = () => {
+    const minIntervalSeconds = 10;
+    const interval = calculateTimeseriesInterval(from, to, minIntervalSeconds);
+    const histogramTimestampField = '@timestamp';
+    const dateHistogram = {
+      date_histogram: {
+        field: histogramTimestampField,
+        fixed_interval: `${interval}s`,
+      },
+    };
+    const autoDateHistogram = {
+      auto_date_histogram: {
+        field: histogramTimestampField,
+        buckets: 36,
+      },
+    };
+    return {
+      alertsByModuleGroup: {
+        terms: {
+          field: 'event.module',
+          missing: 'All others',
+          order: {
+            _count: 'desc',
+          },
+          size: 10,
+        },
+        aggs: {
+          alerts: interval ? dateHistogram : autoDateHistogram,
+        },
+      },
+    };
+  };
+
+  const dslQuery = {
+    index: defaultIndex,
+    allowNoIndices: true,
+    ignoreUnavailable: true,
+    body: {
+      aggregations: getHistogramAggregation(),
+      query: {
+        bool: {
+          filter,
+        },
+      },
+      size: 0,
+      track_total_hits: true,
+    },
+  };
+
+  return dslQuery;
 };

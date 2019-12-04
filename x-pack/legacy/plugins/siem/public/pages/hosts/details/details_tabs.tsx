@@ -20,6 +20,7 @@ import {
   UncommonProcessQueryTabBody,
   AnomaliesQueryTabBody,
   EventsQueryTabBody,
+  AlertsQueryTabBody,
 } from '../navigation';
 
 const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
@@ -89,6 +90,10 @@ const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
         <Route
           path={`${hostDetailsPagePath}/:tabName(${HostsTableType.events})`}
           render={() => <EventsQueryTabBody {...tabProps} />}
+        />
+        <Route
+          path={`${hostDetailsPagePath}/:tabName(${HostsTableType.alerts})`}
+          render={() => <AlertsQueryTabBody {...tabProps} />}
         />
       </Switch>
     );

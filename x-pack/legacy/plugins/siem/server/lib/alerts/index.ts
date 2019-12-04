@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FrameworkRequest } from '../framework';
+import { FrameworkRequest, RequestBasicOptions } from '../framework';
 export * from './elasticsearch_adapter';
 import { AlertsAdapter } from './types';
 import { AlertsData } from '../../graphql/types';
@@ -18,5 +18,12 @@ export class Alerts {
     options: TimelineRequestOptions
   ): Promise<AlertsData> {
     return this.adapter.getAlertsData(req, options);
+  }
+
+  public async getAlertsHistogramData(
+    req: FrameworkRequest,
+    options: RequestBasicOptions
+  ): Promise<AlertsOverTimeData> {
+    return this.adapter.getAlertsHistogramData(req, options);
   }
 }

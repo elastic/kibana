@@ -18,6 +18,12 @@ export const alertsSchema = gql`
     hostName
   }
 
+  type AlertsOverTimeData {
+    inspect: Inspect
+    alertsOverTimeByModule: [MatrixOverTimeHistogramData!]!
+    totalCount: Float!
+  }
+
   extend type Source {
     Alerts(
       pagination: PaginationInput!
@@ -27,5 +33,10 @@ export const alertsSchema = gql`
       filterQuery: String
       defaultIndex: [String!]!
     ): AlertsData!
+    AlertsHistogram(
+      filterQuery: String
+      defaultIndex: [String!]!
+      timerange: TimerangeInput!
+    ): AlertsOverTimeData!
   }
 `;

@@ -49,4 +49,14 @@ export const defaultHeaders: ColumnHeader[] = [
     id: 'message',
     width: DEFAULT_COLUMN_MIN_WIDTH,
   },
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: 'agent.id',
+    width: DEFAULT_COLUMN_MIN_WIDTH,
+  },
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: 'agent.type',
+    width: DEFAULT_COLUMN_MIN_WIDTH,
+  },
 ];

@@ -29,7 +29,8 @@ const getHostDetailsTabPath = (pagePath: string) =>
   `${HostsTableType.authentications}|` +
   `${HostsTableType.uncommonProcesses}|` +
   `${HostsTableType.anomalies}|` +
-  `${HostsTableType.events})`;
+  `${HostsTableType.events}|` +
+  `${HostsTableType.alerts})`;
 
 type Props = Partial<RouteComponentProps<{}>> & { url: string };
 

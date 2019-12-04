@@ -6,21 +6,26 @@
 
 import { getOr, get, cloneDeep, uniq, last } from 'lodash/fp';
 
-import { AlertsData, TimelineEdges } from '../../graphql/types';
+import {
+  AlertsData,
+  AlertsOverTimeData,
+  TimelineEdges,
+  MatrixOverOrdinalHistogramData,
+} from '../../graphql/types';
 
 import { inspectStringifyObject } from '../../utils/build_query';
 
-import { FrameworkAdapter, FrameworkRequest } from '../framework';
-import { buildAlertsQuery } from './query.dsl';
+import { FrameworkAdapter, FrameworkRequest, RequestBasicOptions } from '../framework';
+import { buildAlertsQuery, buildAlertsHistogramQuery } from './query.dsl';
 
-import { AlertsAdapter } from './types';
-import { SearchHit } from '../types';
-import { TimelineRequestOptions } from '../events/types';
+import { AlertsAdapter, AlertsGroupData } from './types';
+import { SearchHit, TermAggregation } from '../types';
+import { TimelineRequestOptions, EventHit } from '../events/types';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { eventFieldsMap } from '../ecs_fields';
 import { formatTimelineData } from '../events';
 export class ElasticsearchAlertsAdapter implements AlertsAdapter {
-  constructor(private readonly framework: FrameworkAdapter) {}
+  constructor(private readonly framework: FrameworkAdapter) { }
 
   public async getAlertsData(
     request: FrameworkRequest,
@@ -52,4 +57,43 @@ export class ElasticsearchAlertsAdapter implements AlertsAdapter {
 
     return { edges, inspect, pageInfo: { hasNextPage, endCursor: lastCursor }, totalCount };
   }
+
+  public async getAlertsHistogramData(
+    request: FrameworkRequest,
+    options: RequestBasicOptions
+  ): Promise<AlertsOverTimeData> {
+    const dsl = buildAlertsHistogramQuery(options);
+    const response = await this.framework.callWithRequest<EventHit, TermAggregation>(
+      request,
+      'search',
+      dsl
+    );
+    const totalCount = getOr(0, 'hits.total.value', response);
+    const alertsOverTimeByModule = getOr([], 'aggregations.alertsByModuleGroup.buckets', response);
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
+    return {
+      inspect,
+      alertsOverTimeByModule: getAlertsOverTimeByModule(alertsOverTimeByModule),
+      totalCount,
+    };
+  }
 }
+
+const getAlertsOverTimeByModule = (data: AlertsGroupData[]): MatrixOverOrdinalHistogramData[] => {
+  let result: MatrixOverOrdinalHistogramData[] = [];
+  data.forEach(({ key: group, alerts }) => {
+    const alertsData = getOr([], 'buckets', alerts).map(
+      ({ key, doc_count }: { key: number; doc_count: number }) => ({
+        x: key,
+        y: doc_count,
+        g: group,
+      })
+    );
+    result = [...result, ...alertsData];
+  });
+
+  return result;
+};

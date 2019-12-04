@@ -257,12 +257,6 @@ export interface SortTimelineInput {
   sortDirection?: Maybe<string>;
 }
 
-export interface AlertsSortField {
-  field: AlertsFields;
-
-  direction: Direction;
-}
-
 export interface FavoriteTimelineInput {
   fullName?: Maybe<string>;
 
@@ -468,6 +462,8 @@ export interface Source {
   status: SourceStatus;
 
   Alerts: AlertsData;
+
+  AlertsHistogram: AlertsOverTimeData;
   /** Gets Authentication success and failures based on a timerange */
   Authentications: AuthenticationsData;
 
@@ -569,7 +565,7 @@ export interface IndexField {
 }
 
 export interface AlertsData {
-  edges: AlertsEdges[];
+  edges: TimelineEdges[];
 
   totalCount: number;
 
@@ -578,7 +574,7 @@ export interface AlertsData {
   inspect?: Maybe<Inspect>;
 }
 
-export interface AlertsEdges {
+export interface TimelineEdges {
   node: TimelineItem;
 
   cursor: CursorType;
@@ -1218,6 +1214,22 @@ export interface Inspect {
   response: string[];
 }
 
+export interface AlertsOverTimeData {
+  inspect?: Maybe<Inspect>;
+
+  alertsOverTimeByModule: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
+}
+
+export interface MatrixOverTimeHistogramData {
+  x: number;
+
+  y: number;
+
+  g: string;
+}
+
 export interface AuthenticationsData {
   edges: AuthenticationsEdges[];
 
@@ -1272,14 +1284,6 @@ export interface AuthenticationsOverTimeData {
   totalCount: number;
 }
 
-export interface MatrixOverTimeHistogramData {
-  x: number;
-
-  y: number;
-
-  g: string;
-}
-
 export interface TimelineData {
   edges: TimelineEdges[];
 
@@ -1288,12 +1292,6 @@ export interface TimelineData {
   pageInfo: PageInfo;
 
   inspect?: Maybe<Inspect>;
-}
-
-export interface TimelineEdges {
-  node: TimelineItem;
-
-  cursor: CursorType;
 }
 
 export interface TimelineDetailsData {
@@ -2070,22 +2068,6 @@ export interface ResponseFavoriteTimeline {
   favorite?: Maybe<FavoriteTimelineResult[]>;
 }
 
-export interface ObserverFields {
-  name?: Maybe<string[]>;
-}
-
-export interface AlertsItem {
-  _id?: Maybe<string>;
-
-  event?: Maybe<EventEcsFields>;
-
-  host?: Maybe<HostEcsFields>;
-
-  observer?: Maybe<ObserverFields>;
-
-  inspect?: Maybe<Inspect>;
-}
-
 export interface EcsEdges {
   node: Ecs;
 
@@ -2183,6 +2165,13 @@ export interface AlertsSourceArgs {
   filterQuery?: Maybe<string>;
 
   defaultIndex: string[];
+}
+export interface AlertsHistogramSourceArgs {
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+
+  timerange: TimerangeInput;
 }
 export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
@@ -2478,6 +2467,58 @@ export interface DeleteTimelineMutationArgs {
 // Documents
 // ====================================================
 
+export namespace GetAlertsOverTimeQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    defaultIndex: string[];
+    filterQuery?: Maybe<string>;
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    AlertsHistogram: AlertsHistogram;
+  };
+
+  export type AlertsHistogram = {
+    __typename?: 'AlertsOverTimeData';
+
+    alertsOverTimeByModule: AlertsOverTimeByModule[];
+
+    totalCount: number;
+
+    inspect: Maybe<Inspect>;
+  };
+
+  export type AlertsOverTimeByModule = {
+    __typename?: 'MatrixOverTimeHistogramData';
+
+    x: number;
+
+    y: number;
+
+    g: string;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+}
+
 export namespace GetAlertsQuery {
   export type Variables = {
     sourceId: string;
@@ -2540,7 +2581,7 @@ export namespace GetAlertsQuery {
   };
 
   export type Edges = {
-    __typename?: 'AlertsEdges';
+    __typename?: 'TimelineEdges';
 
     node: Node;
   };
