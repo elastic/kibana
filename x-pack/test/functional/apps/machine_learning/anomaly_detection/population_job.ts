@@ -106,7 +106,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('job creation loads the job type selection page', async () => {
-      await ml.jobSourceSelection.selectSource('ecommerce');
+      await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob('ecommerce');
     });
 
     it('job creation loads the population job wizard page', async () => {

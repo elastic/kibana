@@ -24,8 +24,9 @@ import {
   ILLEGAL_CHARACTERS,
   IndexPatternMissingIndices,
   validateIndexPattern,
+  getFromSavedObject,
 } from './lib';
-import { getRoutes, getFromSavedObject } from './utils';
+import { getRoutes } from './utils';
 import { flattenHitWrapper, formatHitProvider } from './index_patterns';
 
 export const indexPatterns = {
