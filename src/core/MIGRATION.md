@@ -738,7 +738,7 @@ This definition isn't going to do much for us just yet, but as we get further in
 
 ```ts
 // public/plugin.ts
-import { CoreSetup, CoreStart, Plugin } from '../kibana/server';
+import { CoreSetup, CoreStart, Plugin } from 'kibana/server';
 import { FooSetup, FooStart } from '../../../../legacy/core_plugins/foo/public';
 
 /**
@@ -806,7 +806,7 @@ While you're at it, you can also add your plugin initializer to this file:
 
 ```ts
 // public/index.ts
-import { PluginInitializer, PluginInitializerContext } from '../kibana/server';
+import { PluginInitializer, PluginInitializerContext } from 'kibana/server';
 import { DemoSetup, DemoStart, DemoSetupDeps, DemoStartDeps, DemoPlugin } from './plugin';
 
 // Core will be looking for this when loading our plugin in the new platform
@@ -840,7 +840,7 @@ So we will take a similar approach to what was described above in the server sec
 
 ```ts
 // public/legacy.ts
-import { PluginInitializerContext } from '../kibana/server';
+import { PluginInitializerContext } from 'kibana/server';
 import { npSetup, npStart } from 'ui/new_platform';
 import { plugin } from '.';
 
