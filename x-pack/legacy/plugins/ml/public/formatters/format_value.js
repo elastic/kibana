@@ -37,8 +37,10 @@ export function formatValue(value, mlFunction, fieldFormat, record) {
     if (value.length === 1) {
       return formatSingleValue(value[0], mlFunction, fieldFormat, record);
     } else {
-      // Return with array style formatting.
-      const values = value.map(val => formatSingleValue(val, mlFunction, fieldFormat, record));
+      // Currently only multi-value response is for lat_long detectors.
+      // Return with array style formatting, with items formatted as numbers, rather than
+      // the default String format which is set for geo_point and geo_shape fields.
+      const values = value.map(val => formatSingleValue(val, mlFunction, undefined, record));
       return `[${values}]`;
     }
   } else {
