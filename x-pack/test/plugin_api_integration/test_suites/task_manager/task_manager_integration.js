@@ -313,7 +313,7 @@ export default function ({ getService }) {
         taskType: 'sampleTask',
         interval: `30m`,
         params: {
-          waitForEvent: 'rescheduleHasHappened'
+          waitOnceForEvent: 'runNowHasBeenCalled'
         },
       });
 
@@ -328,7 +328,7 @@ export default function ({ getService }) {
       });
 
       // first runNow should fail
-      const failedRunNowResult  = await runTaskNow({
+      const failedRunNowResult = await runTaskNow({
         id: longRunningTask.id
       });
 
@@ -339,28 +339,18 @@ export default function ({ getService }) {
       );
 
       // finish first run
-      await releaseTasksWaitingForEventToComplete('rescheduleHasHappened');
+      await releaseTasksWaitingForEventToComplete('runNowHasBeenCalled');
       await retry.try(async () => {
         const tasks = (await currentTasks()).docs;
         expect(getTaskById(tasks, longRunningTask.id).state.count).to.eql(1);
       });
 
       // second runNow should be successful
-      const successfulRunNowResult  = runTaskNow({
+      const successfulRunNowResult = await runTaskNow({
         id: longRunningTask.id
       });
 
-      // wait for task to run and stall
-      await retry.try(async () => {
-        const docs = await historyDocs();
-        expect(docs.filter(taskDoc => taskDoc._source.taskId === longRunningTask.id).length).to.eql(2);
-      });
-      // release it
-      await releaseTasksWaitingForEventToComplete('rescheduleHasHappened');
-
-      return successfulRunNowResult.then (successfulRunNowResult => {
-        expect(successfulRunNowResult).to.eql({ id: longRunningTask.id });
-      });
+      expect(successfulRunNowResult).to.eql({ id: longRunningTask.id });
     });
 
     async function expectReschedule(originalRunAt, currentTask, expectedDiff) {

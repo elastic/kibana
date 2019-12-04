@@ -46,10 +46,10 @@ export default function TaskTestingAPI(kibana) {
               const { params, state } = taskInstance;
               const prevState = state || { count: 0 };
 
-              const count = (prevState.count || 0) + 1;
+              const stateUpdate = { count: (prevState.count || 0) + 1 };
 
               if (params.failWith) {
-                if (!params.failOn || (params.failOn && count === params.failOn)) {
+                if (!params.failOn || (params.failOn && stateUpdate.count === params.failOn)) {
                   throw new Error(params.failWith);
                 }
               }
@@ -70,10 +70,13 @@ export default function TaskTestingAPI(kibana) {
 
               if (params.waitForEvent) {
                 await once(taskTestingEvents, params.waitForEvent);
+              } else if (params.waitOnceForEvent && !state.hasWaitedOnce) {
+                await once(taskTestingEvents, params.waitOnceForEvent);
+                stateUpdate.hasWaitedOnce = true;
               }
 
               return {
-                state: { count },
+                state: stateUpdate,
                 runAt: millisecondsFromNow(params.nextRunMilliseconds),
               };
             },
