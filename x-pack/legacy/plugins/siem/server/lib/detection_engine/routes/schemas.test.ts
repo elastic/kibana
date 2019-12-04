@@ -290,11 +290,13 @@ describe('schemas', () => {
                 name: 'fakeName',
                 reference: 'fakeRef',
               },
-              technique: {
-                id: 'techniqueId',
-                name: 'techniqueName',
-                reference: 'techniqueRef',
-              },
+              techniques: [
+                {
+                  id: 'techniqueId',
+                  name: 'techniqueName',
+                  reference: 'techniqueRef',
+                },
+              ],
             },
           ],
         }).error
@@ -825,11 +827,13 @@ describe('schemas', () => {
                 name: 'fakeName',
                 reference: 'fakeRef',
               },
-              technique: {
-                id: 'techniqueId',
-                name: 'techniqueName',
-                reference: 'techniqueRef',
-              },
+              techniques: [
+                {
+                  id: 'techniqueId',
+                  name: 'techniqueName',
+                  reference: 'techniqueRef',
+                },
+              ],
             },
           ],
         }).error
@@ -860,11 +864,13 @@ describe('schemas', () => {
           threats: [
             {
               framework: 'fake',
-              technique: {
-                id: 'techniqueId',
-                name: 'techniqueName',
-                reference: 'techniqueRef',
-              },
+              techniques: [
+                {
+                  id: 'techniqueId',
+                  name: 'techniqueName',
+                  reference: 'techniqueRef',
+                },
+              ],
             },
           ],
         }).error
@@ -2030,11 +2036,13 @@ describe('schemas', () => {
           name: 'fakeName',
           reference: 'fakeRef',
         },
-        technique: {
-          id: 'techniqueId',
-          name: 'techniqueName',
-          reference: 'techniqueRef',
-        },
+        techniques: [
+          {
+            id: 'techniqueId',
+            name: 'techniqueName',
+            reference: 'techniqueRef',
+          },
+        ],
       },
     ];
     expect(
@@ -2060,11 +2068,13 @@ describe('schemas', () => {
               name: 'fakeName',
               reference: 'fakeRef',
             },
-            technique: {
-              id: 'techniqueId',
-              name: 'techniqueName',
-              reference: 'techniqueRef',
-            },
+            techniques: [
+              {
+                id: 'techniqueId',
+                name: 'techniqueName',
+                reference: 'techniqueRef',
+              },
+            ],
           },
         ],
       }).value.threats
@@ -2097,11 +2107,13 @@ describe('schemas', () => {
               name: 'fakeName',
               reference: 'fakeRef',
             },
-            technique: {
-              id: 'techniqueId',
-              name: 'techniqueName',
-              reference: 'techniqueRef',
-            },
+            techniques: [
+              {
+                id: 'techniqueId',
+                name: 'techniqueName',
+                reference: 'techniqueRef',
+              },
+            ],
           },
         ],
       }).error
@@ -2130,21 +2142,23 @@ describe('schemas', () => {
         threats: [
           {
             framework: 'fake',
-            technique: {
-              id: 'techniqueId',
-              name: 'techniqueName',
-              reference: 'techniqueRef',
-            },
+            techniques: [
+              {
+                id: 'techniqueId',
+                name: 'techniqueName',
+                reference: 'techniqueRef',
+              },
+            ],
           },
         ],
       }).error
     ).toBeTruthy();
   });
-  test('threats is invalid when updated with missing technique sub-object', () => {
+  test('threats is invalid when updated with missing techniques', () => {
     expect(
       updateRulesSchema.validate<
         Partial<Omit<UpdateRuleAlertParamsRest, 'threats'>> & {
-          threats: Array<Partial<Omit<ThreatParams, 'technique'>>>;
+          threats: Array<Partial<Omit<ThreatParams, 'techniques'>>>;
         }
       >({
         id: 'rule-1',

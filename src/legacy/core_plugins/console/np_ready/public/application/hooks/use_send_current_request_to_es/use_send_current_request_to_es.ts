@@ -44,6 +44,7 @@ export const useSendCurrentRequestToES = () => {
         });
         return;
       }
+
       const results = await sendRequestToES({
         requests,
       });
