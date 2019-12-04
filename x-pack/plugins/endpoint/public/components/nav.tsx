@@ -46,6 +46,7 @@ export const Nav = withRouter(({ history, navigateToApp }: NavProps) => (
             id: 'endpoints',
             name: 'Endpoints',
             onClick: () => history.push('/endpoints'),
+            "data-test-subj": "menuEndpoints",
           },
           {
             id: 'alerts',

@@ -23,7 +23,7 @@ export const Home = () => (
     <EuiPageHeader>
       <EuiPageHeaderSection>
         <EuiTitle size="l">
-          <h1>Welcome to Endpoint!</h1>
+          <h1 data-test-subj="welcomeEndpointMessage">Welcome to Endpoint!</h1>
         </EuiTitle>
       </EuiPageHeaderSection>
     </EuiPageHeader>
