@@ -4,7 +4,7 @@
 Role Based Access Control (RBAC) is used to provide access to data, tools,
 and Kibana Spaces.  In this tutorial you will learn how to configure roles
 that provide the right users with the right access to the data, tools, and
-Kibana Spaces.
+Kibana spaces.
 
 [float]
 ==== Scenario
@@ -116,4 +116,3 @@ and create a new visualization.
 
 [role="screenshot"]
 image::security/images/role-new-user.png["Develoer user"]
-
