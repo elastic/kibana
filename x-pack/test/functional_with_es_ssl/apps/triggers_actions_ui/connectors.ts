@@ -95,7 +95,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const rowsBeforeDelete = await testSubjects.findAll('connectors-row');
       expect(rowsBeforeDelete.length).to.eql(1);
 
-      const deleteConnectorBtn = await testSubjects.find('editConnector');
+      const deleteConnectorBtn = await testSubjects.find('edit');
       await deleteConnectorBtn.click();
 
       const nameInputToUpdate = await testSubjects.find('nameInput');

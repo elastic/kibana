@@ -184,7 +184,6 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       actions: [
         {
           enabled: () => canSave,
-          'data-test-subj': 'editConnector',
           name: i18n.translate(
             'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.editActionName',
             { defaultMessage: 'Edit' }
