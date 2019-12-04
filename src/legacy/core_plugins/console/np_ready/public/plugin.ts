@@ -30,7 +30,7 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
 
   async setup({ notifications }: CoreSetup, pluginSet: XPluginSet) {
     const {
-      __LEGACY: { I18nContext },
+      __LEGACY: { I18nContext, elasticsearchUrl },
       dev_tools,
       home,
     } = pluginSet;
@@ -63,6 +63,7 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
             docLinkVersion: ctx.core.docLinks.DOC_LINK_VERSION,
             I18nContext,
             notifications,
+            elasticsearchUrl,
           }),
           element
         );

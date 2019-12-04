@@ -286,7 +286,10 @@ export class SenseEditor {
     return request;
   };
 
-  getRequestsInRange = async (range?: Range, includeNonRequestBlocks = false): Promise<any[]> => {
+  getRequestsInRange = async (
+    range = this.coreEditor.getSelectionRange(),
+    includeNonRequestBlocks = false
+  ): Promise<any[]> => {
     await this.coreEditor.waitForLatestTokens();
     if (!range) {
       return [];
@@ -469,7 +472,7 @@ export class SenseEditor {
     this.updateActionsBar();
   }, 25);
 
-  getRequestsAsCURL = async (range: Range, elasticsearchBaseUrl: string): Promise<string> => {
+  getRequestsAsCURL = async (elasticsearchBaseUrl: string, range?: Range): Promise<string> => {
     const requests = await this.getRequestsInRange(range, true);
     const result = _.map(requests, req => {
       if (typeof req === 'string') {

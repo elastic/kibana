@@ -20,6 +20,7 @@
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { npSetup, npStart } from 'ui/new_platform';
 import { I18nContext } from 'ui/i18n';
+import chrome from 'ui/chrome';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
 export interface XPluginSet {
@@ -27,6 +28,7 @@ export interface XPluginSet {
   home: HomePublicPluginSetup;
   __LEGACY: {
     I18nContext: any;
+    elasticsearchUrl: string;
   };
 }
 
@@ -39,6 +41,7 @@ const pluginInstance = plugin({} as any);
 pluginInstance.setup(npSetup.core, {
   ...npSetup.plugins,
   __LEGACY: {
+    elasticsearchUrl: chrome.getInjected('elasticsearchUrl'),
     I18nContext,
   },
 });

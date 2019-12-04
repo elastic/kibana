@@ -551,10 +551,8 @@ export default function({ coreEditor: editor, parser }: { coreEditor: CoreEditor
 
     // in between request on an empty
     if (editor.getLineValue(pos.lineNumber).trim() === '') {
-      // check if the previous line is a single line begging of a new request
-      rowMode = parser.getRowParseMode(
-        pos.lineNumber - 1 - 1 /* see RowParser for why the added -1, for now */
-      );
+      // check if the previous line is a single line beginning of a new request
+      rowMode = parser.getRowParseMode(pos.lineNumber - 1);
       // eslint-disable-next-line no-bitwise
       if (
         // eslint-disable-next-line no-bitwise
@@ -961,10 +959,10 @@ export default function({ coreEditor: editor, parser }: { coreEditor: CoreEditor
 
   function getCompletions(
     DO_NOT_USE: AceEditor,
-    session: IEditSession,
-    pos: any,
-    prefix: any,
-    callback: any
+    DO_NOT_USE_SESSION: IEditSession,
+    pos: { row: number; column: number },
+    prefix: string,
+    callback: (...args: any[]) => void
   ) {
     const position: Position = {
       lineNumber: pos.row + 1,

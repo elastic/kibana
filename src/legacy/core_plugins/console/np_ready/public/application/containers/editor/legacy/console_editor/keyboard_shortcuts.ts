@@ -17,49 +17,60 @@
  * under the License.
  */
 import { throttle } from 'lodash';
+import { SenseEditor } from '../../../../models/sense_editor';
 
 interface Actions {
-  input: any; // TODO: Wrap this in an editor interface
+  senseEditor: SenseEditor;
   sendCurrentRequestToES: () => void;
   openDocumentation: () => void;
 }
 
-export function registerCommands({ input, sendCurrentRequestToES, openDocumentation }: Actions) {
-  const throttledAutoIndent = throttle(() => input.autoIndent(), 500, {
+export function registerCommands({
+  senseEditor,
+  sendCurrentRequestToES,
+  openDocumentation,
+}: Actions) {
+  const throttledAutoIndent = throttle(() => senseEditor.autoIndent(), 500, {
     leading: true,
     trailing: true,
   });
-  input.commands.addCommand({
+  const coreEditor = senseEditor.getCoreEditor();
+
+  coreEditor.registerKeyboardShortcut({
+    keys: { win: 'Ctrl-Enter', mac: 'Command-Enter' },
     name: 'send to elasticsearch',
-    bindKey: { win: 'Ctrl-Enter', mac: 'Command-Enter' },
-    exec: () => sendCurrentRequestToES(),
+    fn: () => sendCurrentRequestToES(),
   });
-  input.commands.addCommand({
+
+  coreEditor.registerKeyboardShortcut({
     name: 'open documentation',
-    bindKey: { win: 'Ctrl-/', mac: 'Command-/' },
-    exec: () => {
+    keys: { win: 'Ctrl-/', mac: 'Command-/' },
+    fn: () => {
       openDocumentation();
     },
   });
-  input.commands.addCommand({
+
+  coreEditor.registerKeyboardShortcut({
     name: 'auto indent request',
-    bindKey: { win: 'Ctrl-I', mac: 'Command-I' },
-    exec: () => {
+    keys: { win: 'Ctrl-I', mac: 'Command-I' },
+    fn: () => {
       throttledAutoIndent();
     },
   });
-  input.commands.addCommand({
+
+  coreEditor.registerKeyboardShortcut({
     name: 'move to previous request start or end',
-    bindKey: { win: 'Ctrl-Up', mac: 'Command-Up' },
-    exec: () => {
-      input.moveToPreviousRequestEdge();
+    keys: { win: 'Ctrl-Up', mac: 'Command-Up' },
+    fn: () => {
+      senseEditor.moveToPreviousRequestEdge();
     },
   });
-  input.commands.addCommand({
+
+  coreEditor.registerKeyboardShortcut({
     name: 'move to next request start or end',
-    bindKey: { win: 'Ctrl-Down', mac: 'Command-Down' },
-    exec: () => {
-      input.moveToNextRequestEdge();
+    keys: { win: 'Ctrl-Down', mac: 'Command-Down' },
+    fn: () => {
+      senseEditor.moveToNextRequestEdge(false);
     },
   });
 }

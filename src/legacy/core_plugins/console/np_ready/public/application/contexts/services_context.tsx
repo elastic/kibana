@@ -28,6 +28,7 @@ interface ContextValue {
     settings: Settings;
     notifications: NotificationsSetup;
   };
+  elasticsearchUrl: string;
   docLinkVersion: string;
 }
 

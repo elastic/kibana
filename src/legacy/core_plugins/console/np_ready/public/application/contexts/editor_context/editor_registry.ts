@@ -17,15 +17,17 @@
  * under the License.
  */
 
-export class EditorRegistry {
-  inputEditor: any;
+import { SenseEditor } from '../../models/sense_editor';
 
-  setInputEditor(inputEditor: any) {
+export class EditorRegistry {
+  inputEditor: SenseEditor | undefined;
+
+  setInputEditor(inputEditor: SenseEditor) {
     this.inputEditor = inputEditor;
   }
 
   getInputEditor() {
-    return this.inputEditor;
+    return this.inputEditor!;
   }
 }
 

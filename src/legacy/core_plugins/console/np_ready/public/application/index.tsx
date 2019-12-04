@@ -32,8 +32,9 @@ export function boot(deps: {
   docLinkVersion: string;
   I18nContext: any;
   notifications: NotificationsSetup;
+  elasticsearchUrl: string;
 }) {
-  const { I18nContext, notifications, docLinkVersion } = deps;
+  const { I18nContext, notifications, docLinkVersion, elasticsearchUrl } = deps;
 
   const storage = createStorage({
     engine: window.localStorage,
@@ -47,6 +48,7 @@ export function boot(deps: {
     <I18nContext>
       <ServicesContextProvider
         value={{
+          elasticsearchUrl,
           docLinkVersion,
           services: { storage, history, settings, notifications },
         }}

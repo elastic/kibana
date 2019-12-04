@@ -23,7 +23,7 @@ import ace from 'brace';
 import * as OutputMode from './mode/output';
 import smartResize from './smart_resize';
 
-export function createReadOnly(element: HTMLElement) {
+export function createReadOnlyAceEditor(element: HTMLElement): ace.Editor {
   const output = ace.acequire('ace/ace').edit(element);
 
   const outputMode = new OutputMode.Mode();

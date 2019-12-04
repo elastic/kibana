@@ -35,9 +35,8 @@ export default class RowParser {
   MODE = MODE;
 
   getRowParseMode(lineNumber = this.editor.getCurrentPosition().lineNumber) {
-    const linesCount = this.editor.getValue().split('\n').length;
-
-    if (lineNumber >= linesCount || lineNumber < 1) {
+    const linesCount = this.editor.getLineCount();
+    if (lineNumber > linesCount || lineNumber < 1) {
       return MODE.BETWEEN_REQUESTS;
     }
     const mode = this.editor.getLineState(lineNumber);

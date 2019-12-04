@@ -18,8 +18,8 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-
-import { createReadOnly } from '../../../../models/sense_editor';
+import ace from 'brace';
+import { createReadOnlyAceEditor } from '../../../../models/legacy_core_editor';
 import {
   useServicesContext,
   useEditorReadContext,
@@ -43,7 +43,7 @@ function modeForContentType(contentType: string) {
 
 function EditorOutputUI() {
   const editorRef = useRef<null | HTMLDivElement>(null);
-  const editorInstanceRef = useRef<null | any>(null);
+  const editorInstanceRef = useRef<null | ace.Editor>(null);
   const { services } = useServicesContext();
 
   const { settings: readOnlySettings } = useEditorReadContext();
@@ -52,7 +52,7 @@ function EditorOutputUI() {
   } = useRequestReadContext();
 
   useEffect(() => {
-    editorInstanceRef.current = createReadOnly(editorRef.current!);
+    editorInstanceRef.current = createReadOnlyAceEditor(editorRef.current!);
     const unsubscribe = subscribeResizeChecker(editorRef.current!, editorInstanceRef.current);
 
     return () => {
@@ -63,18 +63,18 @@ function EditorOutputUI() {
   useEffect(() => {
     if (data) {
       const mode = modeForContentType(data[0].response.contentType);
-      editorInstanceRef.current.session.setMode(mode);
-      editorInstanceRef.current.update(
+      editorInstanceRef.current!.session.setMode(mode);
+      (editorInstanceRef.current! as any).update(
         data
           .map(d => d.response.value)
           .map(readOnlySettings.tripleQuotes ? utils.expandLiteralStrings : a => a)
           .join('\n')
       );
     } else if (error) {
-      editorInstanceRef.current.session.setMode(modeForContentType(error.contentType));
-      editorInstanceRef.current.update(error.value);
+      editorInstanceRef.current!.session.setMode(modeForContentType(error.contentType));
+      (editorInstanceRef.current! as any).update(error.value);
     } else {
-      editorInstanceRef.current.update('');
+      (editorInstanceRef.current! as any).update('');
     }
   }, [readOnlySettings, data, error]);
 

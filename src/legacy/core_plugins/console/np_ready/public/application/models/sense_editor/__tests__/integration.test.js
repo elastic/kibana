@@ -25,35 +25,35 @@ const kb = require('../../../../../../public/quarantined/src/kb');
 const mappings = require('../../../../../../public/quarantined/src/mappings');
 
 describe('Integration', () => {
-  let input;
+  let senseEditor;
   beforeEach(() => {
     // Set up our document body
     document.body.innerHTML =
       '<div><div id="ConAppEditor" /><div id="ConAppEditorActions" /><div id="ConCopyAsCurl" /></div>';
 
-    input = create(document.querySelector('#ConAppEditor'));
-    $(input.getCoreEditor().getContainer()).show();
-    input.autocomplete._test.removeChangeListener();
+    senseEditor = create(document.querySelector('#ConAppEditor'));
+    $(senseEditor.getCoreEditor().getContainer()).show();
+    senseEditor.autocomplete._test.removeChangeListener();
   });
   afterEach(() => {
-    $(input.getCoreEditor().getContainer()).hide();
-    input.autocomplete._test.addChangeListener();
+    $(senseEditor.getCoreEditor().getContainer()).hide();
+    senseEditor.autocomplete._test.addChangeListener();
   });
 
   function processContextTest(data, mapping, kbSchemes, requestLine, testToRun) {
     test(testToRun.name, async function (done) {
-      let rowOffset = 0; // add one for the extra method line
+      let lineOffset = 0; // add one for the extra method line
       let editorValue = data;
       if (requestLine != null) {
         if (data != null) {
           editorValue = requestLine + '\n' + data;
-          rowOffset = 1;
+          lineOffset = 1;
         } else {
           editorValue = requestLine;
         }
       }
 
-      testToRun.cursor.row += rowOffset;
+      testToRun.cursor.lineNumber += lineOffset;
 
       mappings.clear();
       mappings.loadMappings(mapping);
@@ -74,20 +74,20 @@ describe('Integration', () => {
       }
       kb.setActiveApi(testApi);
       const { cursor } = testToRun;
-      await input.update(editorValue, true);
-      input.moveCursorToPosition(cursor);
+      await senseEditor.update(editorValue, true);
+      senseEditor.getCoreEditor().moveCursorToPosition(cursor);
 
       // allow ace rendering to move cursor so it will be seen during test - handy for debugging.
       //setTimeout(function () {
-      input.completer = {
+      senseEditor.completer = {
         base: {},
         changeListener: function () {},
       }; // mimic auto complete
 
-      input.autocomplete._test.getCompletions(
-        input,
-        input.getSession(),
-        cursor,
+      senseEditor.autocomplete._test.getCompletions(
+        senseEditor,
+        null,
+        { row: cursor.lineNumber - 1, column: cursor.column - 1 },
         '',
         function (err, terms) {
           if (testToRun.assertThrows) {
@@ -96,7 +96,6 @@ describe('Integration', () => {
           }
 
           if (err) {
-            done();
             throw err;
           }
 
@@ -135,14 +134,13 @@ describe('Integration', () => {
               });
               expect(filteredActualTerms).toEqual(expectedTerms);
             }
-            done();
           }
 
           const context = terms[0].context;
-          const { cursor: { row, column } } = testToRun;
-          input.autocomplete._test.addReplacementInfoToContext(
+          const { cursor: { lineNumber, column } } = testToRun;
+          senseEditor.autocomplete._test.addReplacementInfoToContext(
             context,
-            { lineNumber: row + 1, column: column + 1 },
+            { lineNumber, column },
             terms[0].value
           );
 
@@ -157,7 +155,7 @@ describe('Integration', () => {
           }
 
           function posCompare(actual, expected) {
-            expect(actual.lineNumber).toEqual(expected.lineNumber + rowOffset);
+            expect(actual.lineNumber).toEqual(expected.lineNumber + lineOffset);
             expect(actual.column).toEqual(expected.column);
           }
 
@@ -226,7 +224,7 @@ describe('Integration', () => {
   contextTests({}, MAPPING, SEARCH_KB, 'POST _search', [
     {
       name: 'Empty doc',
-      cursor: { row: 0, column: 1 },
+      cursor: { lineNumber: 1, column: 2 },
       initialValue: '',
       addTemplate: true,
       prefixToAdd: '',
@@ -242,7 +240,7 @@ describe('Integration', () => {
   contextTests({}, MAPPING, SEARCH_KB, 'POST _no_context', [
     {
       name: 'Missing KB',
-      cursor: { row: 0, column: 1 },
+      cursor: { lineNumber: 1, column: 2 },
       no_context: true,
     },
   ]);
@@ -266,7 +264,7 @@ describe('Integration', () => {
     [
       {
         name: 'Missing KB - global auto complete',
-        cursor: { row: 2, column: 5 },
+        cursor: { lineNumber: 3, column: 6 },
         autoCompleteSet: ['t1'],
       },
     ]
@@ -286,7 +284,7 @@ describe('Integration', () => {
     [
       {
         name: 'existing dictionary key, no template',
-        cursor: { row: 1, column: 6 },
+        cursor: { lineNumber: 2, column: 6 },
         initialValue: 'query',
         addTemplate: false,
         prefixToAdd: '',
@@ -299,7 +297,7 @@ describe('Integration', () => {
       },
       {
         name: 'existing inner dictionary key',
-        cursor: { row: 2, column: 7 },
+        cursor: { lineNumber: 3, column: 8 },
         initialValue: 'field',
         addTemplate: false,
         prefixToAdd: '',
@@ -312,7 +310,7 @@ describe('Integration', () => {
       },
       {
         name: 'existing dictionary key, yes template',
-        cursor: { row: 4, column: 7 },
+        cursor: { lineNumber: 5, column: 8 },
         initialValue: 'facets',
         addTemplate: true,
         prefixToAdd: '',
@@ -325,12 +323,11 @@ describe('Integration', () => {
       },
       {
         name: 'ignoring meta keys',
-        cursor: { row: 4, column: 14 },
+        cursor: { lineNumber: 5, column: 15 },
         no_context: true,
       },
     ]
   );
-
 
   contextTests(
     '{\n' +
@@ -346,7 +343,7 @@ describe('Integration', () => {
     [
       {
         name: 'trailing comma, end of line',
-        cursor: { row: 4, column: 16 },
+        cursor: { lineNumber: 5, column: 17 },
         initialValue: '',
         addTemplate: true,
         prefixToAdd: '',
@@ -359,7 +356,7 @@ describe('Integration', () => {
       },
       {
         name: 'trailing comma, beginning of line',
-        cursor: { row: 5, column: 1 },
+        cursor: { lineNumber: 6, column: 2 },
         initialValue: '',
         addTemplate: true,
         prefixToAdd: '',
@@ -372,7 +369,7 @@ describe('Integration', () => {
       },
       {
         name: 'prefix comma, beginning of line',
-        cursor: { row: 6, column: 0 },
+        cursor: { lineNumber: 7, column: 1 },
         initialValue: '',
         addTemplate: true,
         prefixToAdd: ', ',
@@ -385,7 +382,7 @@ describe('Integration', () => {
       },
       {
         name: 'prefix comma, end of line',
-        cursor: { row: 5, column: 14 },
+        cursor: { lineNumber: 6, column: 15 },
         initialValue: '',
         addTemplate: true,
         prefixToAdd: ', ',
@@ -427,31 +424,31 @@ describe('Integration', () => {
     [
       {
         name: 'not matching object when { is not opened',
-        cursor: { row: 1, column: 12 },
+        cursor: { lineNumber: 2, column: 13 },
         initialValue: '',
         autoCompleteSet: ['{'],
       },
       {
         name: 'not matching array when [ is not opened',
-        cursor: { row: 2, column: 12 },
+        cursor: { lineNumber: 3, column: 13 },
         initialValue: '',
         autoCompleteSet: ['['],
       },
       {
         name: 'matching value with one_of',
-        cursor: { row: 3, column: 19 },
+        cursor: { lineNumber: 4, column: 20 },
         initialValue: '',
         autoCompleteSet: [1, 2],
       },
       {
         name: 'matching value',
-        cursor: { row: 4, column: 12 },
+        cursor: { lineNumber: 5, column: 13 },
         initialValue: '',
         autoCompleteSet: [3],
       },
       {
         name: 'matching any value with one_of',
-        cursor: { row: 5, column: 21 },
+        cursor: { lineNumber: 6, column: 22 },
         initialValue: '',
         autoCompleteSet: [4, 5],
       },
@@ -474,7 +471,7 @@ describe('Integration', () => {
     [
       {
         name: '* matching everything',
-        cursor: { row: 5, column: 15 },
+        cursor: { lineNumber: 6, column: 16 },
         initialValue: '',
         addTemplate: true,
         prefixToAdd: '',
@@ -507,7 +504,7 @@ describe('Integration', () => {
     [
       {
         name: '{index} matching',
-        cursor: { row: 1, column: 15 },
+        cursor: { lineNumber: 2, column: 16 },
         autoCompleteSet: [
           { name: 'index1', meta: 'index' },
           { name: 'index2', meta: 'index' },
@@ -548,7 +545,7 @@ describe('Integration', () => {
     [
       {
         name: 'Templates 1',
-        cursor: { row: 1, column: 0 },
+        cursor: { lineNumber: 2, column: 1 },
         autoCompleteSet: [
           tt('array', []),
           tt('fixed', { a: 1 }),
@@ -559,7 +556,7 @@ describe('Integration', () => {
       },
       {
         name: 'Templates - one off',
-        cursor: { row: 4, column: 12 },
+        cursor: { lineNumber: 5, column: 13 },
         autoCompleteSet: [tt('o1'), tt('o2')],
       },
     ]
@@ -602,7 +599,7 @@ describe('Integration', () => {
     [
       {
         name: 'Conditionals',
-        cursor: { row: 2, column: 15 },
+        cursor: { lineNumber: 3, column: 16 },
         autoCompleteSet: [tt('always', {}), tt('match', {})],
       },
     ]
@@ -645,7 +642,7 @@ describe('Integration', () => {
     [
       {
         name: 'Any of - templates',
-        cursor: { row: 1, column: 0 },
+        cursor: { lineNumber: 2, column: 1 },
         autoCompleteSet: [
           tt('any_of_mixed', []),
           tt('any_of_numbers', [1, 2]),
@@ -654,22 +651,22 @@ describe('Integration', () => {
       },
       {
         name: 'Any of - numbers',
-        cursor: { row: 2, column: 2 },
+        cursor: { lineNumber: 3, column: 3 },
         autoCompleteSet: [1, 2, 3],
       },
       {
         name: 'Any of - object',
-        cursor: { row: 6, column: 2 },
+        cursor: { lineNumber: 7, column: 3 },
         autoCompleteSet: [tt('a', 1), tt('b', 2), tt('c', 1)],
       },
       {
         name: 'Any of - mixed - obj',
-        cursor: { row: 11, column: 2 },
+        cursor: { lineNumber: 12, column: 3 },
         autoCompleteSet: [tt('a', 1)],
       },
       {
         name: 'Any of - mixed - both',
-        cursor: { row: 13, column: 2 },
+        cursor: { lineNumber: 14, column: 3 },
         autoCompleteSet: [tt('{'), tt(3)],
       },
     ]
@@ -692,7 +689,7 @@ describe('Integration', () => {
     [
       {
         name: 'Empty string as default',
-        cursor: { row: 0, column: 1 },
+        cursor: { lineNumber: 1, column: 2 },
         autoCompleteSet: [tt('query', '')],
       },
     ]
@@ -775,7 +772,7 @@ describe('Integration', () => {
     [
       {
         name: 'Relative scope link test',
-        cursor: { row: 2, column: 12 },
+        cursor: { lineNumber: 3, column: 13 },
         autoCompleteSet: [
           tt('b', {}),
           tt('c', {}),
@@ -788,37 +785,37 @@ describe('Integration', () => {
       },
       {
         name: 'External scope link test',
-        cursor: { row: 3, column: 12 },
+        cursor: { lineNumber: 4, column: 13 },
         autoCompleteSet: [tt('t2', 1)],
       },
       {
         name: 'Global scope link test',
-        cursor: { row: 4, column: 12 },
+        cursor: { lineNumber: 5, column: 13 },
         autoCompleteSet: [tt('t1', 2), tt('t1a', {})],
       },
       {
         name: 'Global scope link with an internal scope link',
-        cursor: { row: 5, column: 17 },
+        cursor: { lineNumber: 6, column: 18 },
         autoCompleteSet: [tt('t1', 2), tt('t1a', {})],
       },
       {
         name: 'Entire endpoint scope link test',
-        cursor: { row: 7, column: 12 },
+        cursor: { lineNumber: 8, column: 13 },
         autoCompleteSet: [tt('target', {})],
       },
       {
         name: 'A scope link within an array',
-        cursor: { row: 9, column: 10 },
+        cursor: { lineNumber: 10, column: 11 },
         autoCompleteSet: [tt('t2', 1)],
       },
       {
         name: 'A function based scope link',
-        cursor: { row: 11, column: 12 },
+        cursor: { lineNumber: 12, column: 13 },
         autoCompleteSet: [tt('a', 1), tt('b', 2)],
       },
       {
         name: 'A global scope link with wrong link',
-        cursor: { row: 12, column: 12 },
+        cursor: { lineNumber: 13, column: 13 },
         assertThrows: /broken/,
       },
     ]
@@ -847,7 +844,7 @@ describe('Integration', () => {
     [
       {
         name: 'Top level scope link',
-        cursor: { row: 0, column: 1 },
+        cursor: { lineNumber: 1, column: 2 },
         autoCompleteSet: [tt('t1', 2)],
       },
     ]
@@ -873,7 +870,7 @@ describe('Integration', () => {
     [
       {
         name: 'Path after empty object',
-        cursor: { row: 1, column: 10 },
+        cursor: { lineNumber: 2, column: 11 },
         autoCompleteSet: ['a', 'b'],
       },
     ]
@@ -889,7 +886,7 @@ describe('Integration', () => {
     [
       {
         name: 'Replace an empty string',
-        cursor: { row: 1, column: 4 },
+        cursor: { lineNumber: 2, column: 5 },
         rangeToReplace: {
           start: { lineNumber: 2, column: 4 },
           end: { lineNumber: 2, column: 10 },
@@ -921,12 +918,12 @@ describe('Integration', () => {
     [
       {
         name: 'List of objects - internal autocomplete',
-        cursor: { row: 3, column: 10 },
+        cursor: { lineNumber: 4, column: 11 },
         autoCompleteSet: ['b'],
       },
       {
         name: 'List of objects - external template',
-        cursor: { row: 0, column: 1 },
+        cursor: { lineNumber: 1, column: 2 },
         autoCompleteSet: [tt('a', [{}])],
       },
     ]
@@ -954,7 +951,7 @@ describe('Integration', () => {
     [
       {
         name: 'Field completion as scope',
-        cursor: { row: 3, column: 10 },
+        cursor: { lineNumber: 4, column: 11 },
         autoCompleteSet: [
           tt('field1.1.1', { f: 1 }, 'string'),
           tt('field1.1.2', { f: 1 }, 'string'),
@@ -962,7 +959,7 @@ describe('Integration', () => {
       },
       {
         name: 'Field completion as value',
-        cursor: { row: 9, column: 23 },
+        cursor: { lineNumber: 10, column: 24 },
         autoCompleteSet: [
           { name: 'field1.1.1', meta: 'string' },
           { name: 'field1.1.2', meta: 'string' },
@@ -975,7 +972,7 @@ describe('Integration', () => {
   contextTests('POST _search\n', MAPPING, SEARCH_KB, null, [
     {
       name: 'initial doc start',
-      cursor: { row: 1, column: 0 },
+      cursor: { lineNumber: 2, column: 1 },
       autoCompleteSet: ['{'],
       prefixToAdd: '',
       suffixToAdd: '',
@@ -990,14 +987,14 @@ describe('Integration', () => {
     [
       {
         name: 'Cursor rows after request end',
-        cursor: { row: 4, column: 0 },
+        cursor: { lineNumber: 5, column: 1 },
         autoCompleteSet: ['GET', 'PUT', 'POST', 'DELETE', 'HEAD'],
         prefixToAdd: '',
         suffixToAdd: ' ',
       },
       {
         name: 'Cursor just after request end',
-        cursor: { row: 2, column: 1 },
+        cursor: { lineNumber: 3, column: 2 },
         no_context: true,
       },
     ]
@@ -1031,7 +1028,7 @@ describe('Integration', () => {
   contextTests(null, MAPPING, CLUSTER_KB, 'GET _cluster', [
     {
       name: 'Endpoints with slashes - no slash',
-      cursor: { row: 0, column: 8 },
+      cursor: { lineNumber: 1, column: 9 },
       autoCompleteSet: [
         '_cluster/nodes/stats',
         '_cluster/stats',
@@ -1047,7 +1044,7 @@ describe('Integration', () => {
   contextTests(null, MAPPING, CLUSTER_KB, 'GET _cluster/', [
     {
       name: 'Endpoints with slashes - before slash',
-      cursor: { row: 0, column: 7 },
+      cursor: { lineNumber: 1, column: 8 },
       autoCompleteSet: [
         '_cluster/nodes/stats',
         '_cluster/stats',
@@ -1060,7 +1057,7 @@ describe('Integration', () => {
     },
     {
       name: 'Endpoints with slashes - on slash',
-      cursor: { row: 0, column: 12 },
+      cursor: { lineNumber: 1, column: 13 },
       autoCompleteSet: [
         '_cluster/nodes/stats',
         '_cluster/stats',
@@ -1073,7 +1070,7 @@ describe('Integration', () => {
     },
     {
       name: 'Endpoints with slashes - after slash',
-      cursor: { row: 0, column: 13 },
+      cursor: { lineNumber: 1, column: 14 },
       autoCompleteSet: ['nodes/stats', 'stats'],
       prefixToAdd: '',
       suffixToAdd: '',
@@ -1083,7 +1080,7 @@ describe('Integration', () => {
   contextTests(null, MAPPING, CLUSTER_KB, 'GET _cluster/no', [
     {
       name: 'Endpoints with slashes - after slash',
-      cursor: { row: 0, column: 14 },
+      cursor: { lineNumber: 1, column: 15 },
       autoCompleteSet: [
         { name: 'nodes/stats', meta: 'endpoint' },
         { name: 'stats', meta: 'endpoint' },
@@ -1097,7 +1094,7 @@ describe('Integration', () => {
   contextTests(null, MAPPING, CLUSTER_KB, 'GET _cluster/nodes/st', [
     {
       name: 'Endpoints with two slashes',
-      cursor: { row: 0, column: 20 },
+      cursor: { lineNumber: 1, column: 21 },
       autoCompleteSet: ['stats'],
       prefixToAdd: '',
       suffixToAdd: '',
@@ -1108,7 +1105,7 @@ describe('Integration', () => {
   contextTests(null, MAPPING, CLUSTER_KB, 'GET ', [
     {
       name: 'Immediately after space + method',
-      cursor: { row: 0, column: 4 },
+      cursor: { lineNumber: 1, column: 5 },
       autoCompleteSet: [
         { name: '_cluster/nodes/stats', meta: 'endpoint' },
         { name: '_cluster/stats', meta: 'endpoint' },
@@ -1125,7 +1122,7 @@ describe('Integration', () => {
   contextTests(null, MAPPING, CLUSTER_KB, 'GET cl', [
     {
       name: 'Endpoints by subpart GET',
-      cursor: { row: 0, column: 6 },
+      cursor: { lineNumber: 1, column: 7 },
       autoCompleteSet: [
         { name: '_cluster/nodes/stats', meta: 'endpoint' },
         { name: '_cluster/stats', meta: 'endpoint' },
@@ -1143,7 +1140,7 @@ describe('Integration', () => {
   contextTests(null, MAPPING, CLUSTER_KB, 'POST cl', [
     {
       name: 'Endpoints by subpart POST',
-      cursor: { row: 0, column: 7 },
+      cursor: { lineNumber: 1, column: 8 },
       no_context: true,
       prefixToAdd: '',
       suffixToAdd: '',
@@ -1154,7 +1151,7 @@ describe('Integration', () => {
   contextTests(null, MAPPING, CLUSTER_KB, 'GET _search?', [
     {
       name: 'Params just after ?',
-      cursor: { row: 0, column: 12 },
+      cursor: { lineNumber: 1, column: 13 },
       autoCompleteSet: [
         { name: 'filter_path', meta: 'param', insertValue: 'filter_path=' },
         { name: 'format', meta: 'param', insertValue: 'format=' },
@@ -1170,7 +1167,7 @@ describe('Integration', () => {
   contextTests(null, MAPPING, CLUSTER_KB, 'GET _search?format=', [
     {
       name: 'Params values',
-      cursor: { row: 0, column: 19 },
+      cursor: { lineNumber: 1, column: 20 },
       autoCompleteSet: [
         { name: 'json', meta: 'format' },
         { name: 'yaml', meta: 'format' },
@@ -1183,7 +1180,7 @@ describe('Integration', () => {
   contextTests(null, MAPPING, CLUSTER_KB, 'GET _search?format=yaml&', [
     {
       name: 'Params after amp',
-      cursor: { row: 0, column: 24 },
+      cursor: { lineNumber: 1, column: 25 },
       autoCompleteSet: [
         { name: 'filter_path', meta: 'param', insertValue: 'filter_path=' },
         { name: 'format', meta: 'param', insertValue: 'format=' },
@@ -1199,7 +1196,7 @@ describe('Integration', () => {
   contextTests(null, MAPPING, CLUSTER_KB, 'GET _search?format=yaml&search', [
     {
       name: 'Params on existing param',
-      cursor: { row: 0, column: 26 },
+      cursor: { lineNumber: 1, column: 27 },
       rangeToReplace: {
         start: { lineNumber: 1, column: 25 },
         end: { lineNumber: 1, column: 31 },
@@ -1224,7 +1221,7 @@ describe('Integration', () => {
     [
       {
         name: 'Params on existing value',
-        cursor: { row: 0, column: 37 },
+        cursor: { lineNumber: 1, column: 38 },
         rangeToReplace: {
           start: { lineNumber: 1, column: 37 },
           end: { lineNumber: 1, column: 40 },
@@ -1247,7 +1244,7 @@ describe('Integration', () => {
     [
       {
         name: 'Params on just after = with existing value',
-        cursor: { row: 0, column: 36 },
+        cursor: { lineNumber: 1, column: 37 },
         rangeToReplace: {
           start: { lineNumber: 1, column: 37 },
           end: { lineNumber: 1, column: 37 },
@@ -1276,7 +1273,7 @@ describe('Integration', () => {
     [
       {
         name: 'fullurl - existing dictionary key, no template',
-        cursor: { row: 1, column: 6 },
+        cursor: { lineNumber: 2, column: 7 },
         initialValue: 'query',
         addTemplate: false,
         prefixToAdd: '',
@@ -1289,7 +1286,7 @@ describe('Integration', () => {
       },
       {
         name: 'fullurl - existing inner dictionary key',
-        cursor: { row: 2, column: 7 },
+        cursor: { lineNumber: 3, column: 8 },
         initialValue: 'field',
         addTemplate: false,
         prefixToAdd: '',
@@ -1302,7 +1299,7 @@ describe('Integration', () => {
       },
       {
         name: 'fullurl - existing dictionary key, yes template',
-        cursor: { row: 4, column: 7 },
+        cursor: { lineNumber: 5, column: 8 },
         initialValue: 'facets',
         addTemplate: true,
         prefixToAdd: '',

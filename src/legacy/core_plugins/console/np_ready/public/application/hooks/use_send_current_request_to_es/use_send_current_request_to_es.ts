@@ -36,7 +36,7 @@ export const useSendCurrentRequestToES = () => {
     dispatch({ type: 'sendRequest', payload: undefined });
     try {
       const editor = registry.getInputEditor();
-      const requests = await new Promise<any[]>(resolve => editor.getRequestsInRange(resolve));
+      const requests = await editor.getRequestsInRange();
       if (!requests.length) {
         dispatch({
           type: 'requestFail',

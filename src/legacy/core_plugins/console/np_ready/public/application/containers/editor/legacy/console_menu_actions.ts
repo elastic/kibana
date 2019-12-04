@@ -19,31 +19,34 @@
 
 // @ts-ignore
 import { getEndpointFromPosition } from '../../../../lib/autocomplete/autocomplete';
+import { SenseEditor } from '../../../models/sense_editor';
 
-export function autoIndent(editor: any, event: any) {
-  editor.autoIndent();
+export async function autoIndent(editor: SenseEditor, event: any) {
   event.preventDefault();
-  editor.focus();
+  await editor.autoIndent();
+  editor
+    .getCoreEditor()
+    .getContainer()
+    .focus();
 }
 
-export function getDocumentation(editor: any, docLinkVersion: string): Promise<string | null> {
-  return new Promise(resolve => {
-    editor.getRequestsInRange((requests: any) => {
-      if (!requests || requests.length === 0) {
-        resolve(null);
-        return;
-      }
-      const position = requests[0].range.end;
-      position.column = position.column - 1;
-      const endpoint = getEndpointFromPosition(editor, position, editor.parser);
-      if (endpoint && endpoint.documentation && endpoint.documentation.indexOf('http') !== -1) {
-        const nextDocumentation = endpoint.documentation
-          .replace('/master/', `/${docLinkVersion}/`)
-          .replace('/current/', `/${docLinkVersion}/`);
-        resolve(nextDocumentation);
-      } else {
-        resolve(null);
-      }
-    });
+export function getDocumentation(
+  editor: SenseEditor,
+  docLinkVersion: string
+): Promise<string | null> {
+  return editor.getRequestsInRange().then(requests => {
+    if (!requests || requests.length === 0) {
+      return null;
+    }
+    const position = requests[0].range.end;
+    position.column = position.column - 1;
+    const endpoint = getEndpointFromPosition(editor, position, editor.parser);
+    if (endpoint && endpoint.documentation && endpoint.documentation.indexOf('http') !== -1) {
+      return endpoint.documentation
+        .replace('/master/', `/${docLinkVersion}/`)
+        .replace('/current/', `/${docLinkVersion}/`);
+    } else {
+      return null;
+    }
   });
 }

@@ -38,6 +38,7 @@ import mappings from '../../../../../../../public/quarantined/src/mappings';
 
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { loadRemoteState } from './load_remote_editor_state';
+import { SenseEditor } from '../../../../models/sense_editor';
 
 export interface EditorProps {
   previousStateLocation?: 'stored' | string;
@@ -62,6 +63,7 @@ function EditorUI({ previousStateLocation = 'stored' }: EditorProps) {
   const {
     services: { history, notifications },
     docLinkVersion,
+    elasticsearchUrl,
   } = useServicesContext();
 
   const { settings } = useEditorReadContext();
@@ -69,7 +71,7 @@ function EditorUI({ previousStateLocation = 'stored' }: EditorProps) {
   const sendCurrentRequestToES = useSendCurrentRequestToES();
 
   const editorRef = useRef<HTMLDivElement | null>(null);
-  const editorInstanceRef = useRef<any | null>(null);
+  const editorInstanceRef = useRef<SenseEditor | null>(null);
 
   const [textArea, setTextArea] = useState<HTMLTextAreaElement | null>(null);
   useUIAceKeyboardMode(textArea);
@@ -98,7 +100,7 @@ function EditorUI({ previousStateLocation = 'stored' }: EditorProps) {
       let timer: number;
       const saveDelay = 500;
 
-      editorInstanceRef.current.getSession().on('change', function onChange() {
+      editorInstanceRef.current!.getCoreEditor().on('change', () => {
         if (timer) {
           clearTimeout(timer);
         }
@@ -108,7 +110,7 @@ function EditorUI({ previousStateLocation = 'stored' }: EditorProps) {
 
     function saveCurrentState() {
       try {
-        const content = editorInstanceRef.current.getValue();
+        const content = editorInstanceRef.current!.getCoreEditor().getValue();
         history.updateCurrentState(content);
       } catch (e) {
         // Ignoring saving error
@@ -122,7 +124,7 @@ function EditorUI({ previousStateLocation = 'stored' }: EditorProps) {
 
     const unsubscribeResizer = subscribeResizeChecker(
       editorRef.current!,
-      editorInstanceRef.current
+      editorInstanceRef.current.getCoreEditor()
     );
     setupAutosave();
 
@@ -133,14 +135,17 @@ function EditorUI({ previousStateLocation = 'stored' }: EditorProps) {
   }, [history, previousStateLocation, setInputEditor]);
 
   useEffect(() => {
-    applyCurrentSettings(editorInstanceRef.current!, settings);
+    applyCurrentSettings(editorInstanceRef.current!.getCoreEditor(), settings);
     // Preserve legacy focus behavior after settings have updated.
-    editorInstanceRef.current!.focus();
+    editorInstanceRef
+      .current!.getCoreEditor()
+      .getContainer()
+      .focus();
   }, [settings]);
 
   useEffect(() => {
     registerCommands({
-      input: editorInstanceRef.current,
+      senseEditor: editorInstanceRef.current!,
       sendCurrentRequestToES,
       openDocumentation,
     });
@@ -173,8 +178,8 @@ function EditorUI({ previousStateLocation = 'stored' }: EditorProps) {
           </EuiFlexItem>
           <EuiFlexItem>
             <ConsoleMenu
-              getCurl={(cb: any) => {
-                editorInstanceRef.current!.getRequestsAsCURL(cb);
+              getCurl={() => {
+                return editorInstanceRef.current!.getRequestsAsCURL(elasticsearchUrl);
               }}
               getDocumentation={() => {
                 return getDocumentation(editorInstanceRef.current!, docLinkVersion);

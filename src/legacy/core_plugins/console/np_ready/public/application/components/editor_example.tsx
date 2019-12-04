@@ -21,8 +21,8 @@ import React, { useEffect } from 'react';
 // @ts-ignore
 import exampleText from 'raw-loader!../constants/help_example.txt';
 import $ from 'jquery';
-// @ts-ignore
-import SenseEditor from '../../../../public/quarantined/src/sense_editor/editor';
+
+import { createReadOnlyAceEditor } from '../models/legacy_core_editor/create_readonly';
 
 interface EditorExampleProps {
   panel: string;
@@ -32,11 +32,9 @@ export function EditorExample(props: EditorExampleProps) {
   const elemId = `help-example-${props.panel}`;
 
   useEffect(() => {
-    const el = $(`#${elemId}`);
-    el.text(exampleText.trim());
-    const editor = new SenseEditor(el);
-    editor.setReadOnly(true);
-    editor.$blockScrolling = Infinity;
+    const el = document.querySelector<HTMLElement>(`#${elemId}`)!;
+    $(el).text(exampleText.trim());
+    const editor = createReadOnlyAceEditor(el);
 
     return () => {
       editor.destroy();

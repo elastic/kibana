@@ -19,11 +19,12 @@
 
 import React, { useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
+import ace from 'brace';
 
 import { DevToolsSettings } from '../../../services';
 import { subscribeResizeChecker } from '../editor/legacy/subscribe_console_resize_checker';
 
-import * as senseEditor from '../../models/sense_editor';
+import * as editor from '../../models/legacy_core_editor';
 import { applyCurrentSettings } from '../editor/legacy/console_editor/apply_editor_settings';
 
 interface Props {
@@ -33,10 +34,10 @@ interface Props {
 
 export function HistoryViewer({ settings, req }: Props) {
   const divRef = useRef<HTMLDivElement | null>(null);
-  const viewerRef = useRef<any | null>(null);
+  const viewerRef = useRef<ace.Editor | null>(null);
 
   useEffect(() => {
-    const viewer = senseEditor.create(divRef.current!);
+    const viewer = editor.createReadOnlyAceEditor(divRef.current!);
     viewerRef.current = viewer;
     const unsubscribe = subscribeResizeChecker(divRef.current!, viewer);
     return () => unsubscribe();

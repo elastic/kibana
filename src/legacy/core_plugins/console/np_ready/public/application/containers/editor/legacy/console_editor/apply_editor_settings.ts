@@ -18,8 +18,16 @@
  */
 
 import { DevToolsSettings } from '../../../../../services';
+import { CoreEditor } from '../../../../../types';
 
-export function applyCurrentSettings(editor: any, settings: DevToolsSettings) {
-  editor.getSession().setUseWrapMode(settings.wrapMode);
-  editor.$el.css('font-size', settings.fontSize + 'px');
+export function applyCurrentSettings(editor: CoreEditor | any, settings: DevToolsSettings) {
+  if (editor.setStyles) {
+    editor.setStyles({
+      wrapLines: settings.wrapMode,
+      fontSize: settings.fontSize + 'px',
+    });
+  } else {
+    editor.getSession().setUseWrapMode(settings.wrapMode);
+    editor.container.style.fontSize = settings.fontSize + 'px';
+  }
 }

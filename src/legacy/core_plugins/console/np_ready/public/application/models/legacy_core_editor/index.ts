@@ -24,4 +24,5 @@ import 'brace/mode/json';
 import 'brace/mode/text';
 
 export * from './legacy_core_editor';
+export * from './create_readonly';
 export * from './create';

@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 interface Props {
-  getCurl: (cb: (text: string) => void) => void;
+  getCurl: () => Promise<string>;
   getDocumentation: () => Promise<string | null>;
   autoIndent: (ev?: React.MouseEvent) => void;
   addNotification?: (opts: { title: string }) => void;
@@ -48,7 +48,7 @@ export class ConsoleMenu extends Component<Props, State> {
 
   mouseEnter = () => {
     if (this.state.isPopoverOpen) return;
-    this.props.getCurl(text => {
+    this.props.getCurl().then(text => {
       this.setState({ curlCode: text });
     });
   };

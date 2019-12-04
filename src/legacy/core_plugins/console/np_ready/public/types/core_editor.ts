@@ -26,6 +26,7 @@ export type EditorEvent =
   | 'tokenizerUpdate'
   | 'changeCursor'
   | 'changeScrollTop'
+  | 'change'
   | 'changeSelection';
 
 export interface Position {
@@ -241,4 +242,14 @@ export interface CoreEditor {
    * A method to for the editor to resize, useful when, for instance, window size changes.
    */
   resize(): void;
+
+  /**
+   * Expose a way to set styles on the editor
+   */
+  setStyles(styles: { wrapLines: boolean; fontSize: string }): void;
+
+  /**
+   * Register a keyboard shortcut and provide a function to be called.
+   */
+  registerKeyboardShortcut(opts: { keys: any; fn: () => void; name: string }): void;
 }
