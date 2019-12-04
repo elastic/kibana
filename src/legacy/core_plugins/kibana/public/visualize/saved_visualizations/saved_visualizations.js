@@ -24,6 +24,7 @@ import { savedObjectManagementRegistry } from '../../management/saved_object_reg
 import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
 import { createVisualizeEditUrl } from '../visualize_constants';
 import { findListItems } from './find_list_items';
+import { npStart } from '../../../../../ui/public/new_platform';
 
 const app = uiModules.get('app/visualize');
 
@@ -39,7 +40,8 @@ app.service('savedVisualizations', function (SavedVis, Private, kbnUrl) {
   const savedObjectClient = Private(SavedObjectsClientProvider);
   const saveVisualizationLoader = new SavedObjectLoader(
     SavedVis,
-    savedObjectClient
+    savedObjectClient,
+    npStart.core.chrome
   );
 
   saveVisualizationLoader.mapHitSource = function (source, id) {

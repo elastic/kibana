@@ -16,9 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { npStart } from 'ui/new_platform';
 import { SavedObject } from 'ui/saved_objects/types';
-import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'kibana/public';
+import { ChromeStart, SavedObjectsClientContract, SavedObjectsFindOptions } from 'kibana/public';
 import { StringUtils } from '../utils/string_utils';
 
 /**
@@ -30,13 +29,16 @@ import { StringUtils } from '../utils/string_utils';
  * to avoid pulling in extra functionality which isn't used.
  */
 export class SavedObjectLoader {
-  private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly Class: (id: string) => SavedObject;
   public type: string;
   public lowercaseType: string;
   public loaderProperties: Record<string, string>;
 
-  constructor(SavedObjectClass: any, savedObjectClient: SavedObjectsClientContract) {
+  constructor(
+    SavedObjectClass: any,
+    private readonly savedObjectsClient: SavedObjectsClientContract,
+    private readonly chrome: ChromeStart
+  ) {
     this.type = SavedObjectClass.type;
     this.Class = SavedObjectClass;
     this.lowercaseType = this.type.toLowerCase();
@@ -46,8 +48,6 @@ export class SavedObjectLoader {
       noun: StringUtils.upperFirst(this.type),
       nouns: `${this.lowercaseType}s`,
     };
-
-    this.savedObjectsClient = savedObjectClient;
   }
 
   /**
@@ -82,7 +82,7 @@ export class SavedObjectLoader {
     });
     await Promise.all(deletions);
 
-    const coreNavLinks = npStart.core.chrome.navLinks;
+    const coreNavLinks = this.chrome.navLinks;
     /**
      * Modify last url for deleted saved objects to avoid loading pages with "Could not locate..."
      */
