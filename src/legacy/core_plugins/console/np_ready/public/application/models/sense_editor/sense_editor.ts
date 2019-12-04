@@ -18,13 +18,11 @@
  */
 
 import _ from 'lodash';
-import RowParser from './row_parser';
+import RowParser from '../../../lib/row_parser';
 import * as utils from './utils';
 // @ts-ignore
 import * as es from '../../../../../public/quarantined/src/es';
-// const chrome = require('ui/chrome');
 
-import smartResize from './smart_resize';
 import { CoreEditor, Position, Range } from '../../../types';
 import { createTokenIterator } from '../../factories';
 
@@ -33,7 +31,6 @@ import Autocomplete from '../../../lib/autocomplete/autocomplete';
 export class SenseEditor {
   currentReqRange: (Range & { markerRef: any }) | null;
   parser: any;
-  resize: any;
 
   // @ts-ignore
   private readonly autocomplete: any;
@@ -41,7 +38,6 @@ export class SenseEditor {
   constructor(private readonly coreEditor: CoreEditor) {
     this.currentReqRange = null;
     this.parser = new RowParser(this.coreEditor);
-    this.resize = smartResize(this.coreEditor);
     this.autocomplete = new (Autocomplete as any)({
       coreEditor,
       parser: this.parser,
@@ -362,7 +358,7 @@ export class SenseEditor {
     ) {
       // loop for side effects
     }
-    this.coreEditor.moveCursorTo({
+    this.coreEditor.moveCursorToPosition({
       lineNumber: pos.lineNumber,
       column: 1,
     });
@@ -382,7 +378,7 @@ export class SenseEditor {
     ) {
       // loop for side effects
     }
-    this.coreEditor.moveCursorTo({
+    this.coreEditor.moveCursorToPosition({
       lineNumber: pos.lineNumber,
       column: 1,
     });

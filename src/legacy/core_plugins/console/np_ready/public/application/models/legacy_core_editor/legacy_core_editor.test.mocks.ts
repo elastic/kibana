@@ -17,16 +17,27 @@
  * under the License.
  */
 
-import { SenseEditor } from './sense_editor';
-import * as core from '../legacy_core_editor';
+jest.mock('./mode/worker', () => {
+  return { workerModule: { id: 'sense_editor/mode/worker', src: '' } };
+});
 
-export function create(element: HTMLElement) {
-  const coreEditor = core.create(element);
-  const senseEditor = new SenseEditor(coreEditor);
+// @ts-ignore
+window.Worker = function() {
+  this.postMessage = () => {};
+  (this as any).terminate = () => {};
+};
 
-  /**
-   * Init the editor
-   */
-  senseEditor.highlightCurrentRequestsAndUpdateActionBar();
-  return senseEditor;
-}
+// @ts-ignore
+window.URL = {
+  createObjectURL: () => {
+    return '';
+  },
+};
+
+import 'brace';
+import 'brace/ext/language_tools';
+import 'brace/ext/searchbox';
+import 'brace/mode/json';
+import 'brace/mode/text';
+
+document.queryCommandSupported = () => true;

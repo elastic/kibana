@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { CoreEditor, Token } from '../../../types';
-import { TokenIterator } from '../../../lib/token_iterator';
+import { CoreEditor, Token } from '../types';
+import { TokenIterator } from './token_iterator';
 
 export const MODE = {
   REQUEST_START: 2,

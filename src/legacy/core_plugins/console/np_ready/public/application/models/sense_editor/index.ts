@@ -18,5 +18,6 @@
  */
 
 export * from './create';
-export { MODE } from './row_parser';
+export * from '../legacy_core_editor/create_readonly';
+export { MODE } from '../../../lib/row_parser';
 export { SenseEditor } from './sense_editor';

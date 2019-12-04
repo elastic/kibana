@@ -18,33 +18,10 @@
  */
 /* eslint no-undef: 0 */
 
+import '../legacy_core_editor/legacy_core_editor.test.mocks';
+
 // TODO: Remove this mock
 jest.mock('../../../application', () => ({ legacyBackDoorToSettings: () => {} }));
-
-jest.mock('./mode/worker', () => {
-  return { workerModule: { id: 'sense_editor/mode/worker', src: '' } };
-});
-
-// @ts-ignore
-window.Worker = function() {
-  this.postMessage = () => {};
-  (this as any).terminate = () => {};
-};
-
-// @ts-ignore
-window.URL = {
-  createObjectURL: () => {
-    return '';
-  },
-};
-
-import 'brace';
-import 'brace/ext/language_tools';
-import 'brace/ext/searchbox';
-import 'brace/mode/json';
-import 'brace/mode/text';
-
-document.queryCommandSupported = () => true;
 
 import jQuery from 'jquery';
 jest.spyOn(jQuery, 'ajax').mockImplementation(

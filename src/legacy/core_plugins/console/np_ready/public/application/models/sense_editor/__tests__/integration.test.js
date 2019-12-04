@@ -16,17 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import './setup_mocks';
-import 'brace';
-import 'brace/mode/json';
-import { initializeEditor } from '../../src/input';
+import '../sense_editor.test.mocks';
+import { create } from '../create';
 import _ from 'lodash';
 const $ = require('jquery');
 
-const kb = require('../../src/kb');
-const mappings = require('../../src/mappings');
-
-
+const kb = require('../../../../../../public/quarantined/src/kb');
+const mappings = require('../../../../../../public/quarantined/src/mappings');
 
 describe('Integration', () => {
   let input;
@@ -35,15 +31,12 @@ describe('Integration', () => {
     document.body.innerHTML =
       '<div><div id="ConAppEditor" /><div id="ConAppEditorActions" /><div id="ConCopyAsCurl" /></div>';
 
-    input = initializeEditor(
-      $('#ConAppEditor'),
-      $('#ConAppEditorActions')
-    );
-    input.$el.show();
+    input = create(document.querySelector('#ConAppEditor'));
+    $(input.getCoreEditor().getContainer()).show();
     input.autocomplete._test.removeChangeListener();
   });
   afterEach(() => {
-    input.$el.hide();
+    $(input.getCoreEditor().getContainer()).hide();
     input.autocomplete._test.addChangeListener();
   });
 
@@ -81,109 +74,106 @@ describe('Integration', () => {
       }
       kb.setActiveApi(testApi);
       const { cursor } = testToRun;
-      const { row, column } =   cursor;
-      input.update(editorValue, function () {
-        input.moveCursorTo(row, column);
+      await input.update(editorValue, true);
+      input.moveCursorToPosition(cursor);
 
-        // allow ace rendering to move cursor so it will be seen during test - handy for debugging.
-        //setTimeout(function () {
-        input.completer = {
-          base: {},
-          changeListener: function () {},
-        }; // mimic auto complete
+      // allow ace rendering to move cursor so it will be seen during test - handy for debugging.
+      //setTimeout(function () {
+      input.completer = {
+        base: {},
+        changeListener: function () {},
+      }; // mimic auto complete
 
-        input.autocomplete._test.getCompletions(
-          input,
-          input.getSession(),
-          cursor,
-          '',
-          function (err, terms) {
-            if (testToRun.assertThrows) {
-              done();
-              return;
-            }
+      input.autocomplete._test.getCompletions(
+        input,
+        input.getSession(),
+        cursor,
+        '',
+        function (err, terms) {
+          if (testToRun.assertThrows) {
+            done();
+            return;
+          }
 
-            if (err) {
-              done();
-              throw err;
-            }
+          if (err) {
+            done();
+            throw err;
+          }
 
-            if (testToRun.no_context) {
-              expect(!terms || terms.length === 0).toBeTruthy();
+          if (testToRun.no_context) {
+            expect(!terms || terms.length === 0).toBeTruthy();
+          } else {
+            expect(terms).not.toBeNull();
+            expect(terms.length).toBeGreaterThan(0);
+          }
+
+          if (!terms || terms.length === 0) {
+            done();
+            return;
+          }
+
+          if (testToRun.autoCompleteSet) {
+            const expectedTerms = _.map(testToRun.autoCompleteSet, function (t) {
+              if (typeof t !== 'object') {
+                t = { name: t };
+              }
+              return t;
+            });
+            if (terms.length !== expectedTerms.length) {
+              expect(_.pluck(terms, 'name')).toEqual(_.pluck(expectedTerms, 'name'));
             } else {
-              expect(terms).not.toBeNull();
-              expect(terms.length).toBeGreaterThan(0);
-            }
-
-            if (!terms || terms.length === 0) {
-              done();
-              return;
-            }
-
-            if (testToRun.autoCompleteSet) {
-              const expectedTerms = _.map(testToRun.autoCompleteSet, function (t) {
-                if (typeof t !== 'object') {
-                  t = { name: t };
-                }
-                return t;
-              });
-              if (terms.length !== expectedTerms.length) {
-                expect(_.pluck(terms, 'name')).toEqual(_.pluck(expectedTerms, 'name'));
-              } else {
-                const filteredActualTerms = _.map(terms, function (
-                  actualTerm,
-                  i
-                ) {
-                  const expectedTerm = expectedTerms[i];
-                  const filteredTerm = {};
-                  _.each(expectedTerm, function (v, p) {
-                    filteredTerm[p] = actualTerm[p];
-                  });
-                  return filteredTerm;
+              const filteredActualTerms = _.map(terms, function (
+                actualTerm,
+                i
+              ) {
+                const expectedTerm = expectedTerms[i];
+                const filteredTerm = {};
+                _.each(expectedTerm, function (v, p) {
+                  filteredTerm[p] = actualTerm[p];
                 });
-                expect(filteredActualTerms).toEqual(expectedTerms);
-              }
-              done();
+                return filteredTerm;
+              });
+              expect(filteredActualTerms).toEqual(expectedTerms);
             }
-
-            const context = terms[0].context;
-            const { cursor: { row, column } } = testToRun;
-            input.autocomplete._test.addReplacementInfoToContext(
-              context,
-              { lineNumber: row + 1, column: column + 1 },
-              terms[0].value
-            );
-
-            function ac(prop, propTest) {
-              if (typeof testToRun[prop] !== 'undefined') {
-                if (propTest) {
-                  propTest(context[prop], testToRun[prop], prop);
-                } else {
-                  expect(context[prop]).toEqual(testToRun[prop]);
-                }
-              }
-            }
-
-            function posCompare(actual, expected) {
-              expect(actual.lineNumber).toEqual(expected.lineNumber + rowOffset);
-              expect(actual.column).toEqual(expected.column);
-            }
-
-            function rangeCompare(actual, expected, name) {
-              posCompare(actual.start, expected.start, name + '.start');
-              posCompare(actual.end, expected.end, name + '.end');
-            }
-
-            ac('prefixToAdd');
-            ac('suffixToAdd');
-            ac('addTemplate');
-            ac('textBoxPosition', posCompare);
-            ac('rangeToReplace', rangeCompare);
             done();
           }
-        );
-        //});
-      });
+
+          const context = terms[0].context;
+          const { cursor: { row, column } } = testToRun;
+          input.autocomplete._test.addReplacementInfoToContext(
+            context,
+            { lineNumber: row + 1, column: column + 1 },
+            terms[0].value
+          );
+
+          function ac(prop, propTest) {
+            if (typeof testToRun[prop] !== 'undefined') {
+              if (propTest) {
+                propTest(context[prop], testToRun[prop], prop);
+              } else {
+                expect(context[prop]).toEqual(testToRun[prop]);
+              }
+            }
+          }
+
+          function posCompare(actual, expected) {
+            expect(actual.lineNumber).toEqual(expected.lineNumber + rowOffset);
+            expect(actual.column).toEqual(expected.column);
+          }
+
+          function rangeCompare(actual, expected, name) {
+            posCompare(actual.start, expected.start, name + '.start');
+            posCompare(actual.end, expected.end, name + '.end');
+          }
+
+          ac('prefixToAdd');
+          ac('suffixToAdd');
+          ac('addTemplate');
+          ac('textBoxPosition', posCompare);
+          ac('rangeToReplace', rangeCompare);
+          done();
+        }
+      );
     });
   }
 

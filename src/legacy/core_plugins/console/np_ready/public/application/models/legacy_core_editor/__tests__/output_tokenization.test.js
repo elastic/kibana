@@ -16,26 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import './setup_mocks';
-import ace from 'brace';
-import 'brace/mode/javascript';
-import 'brace/mode/json';
-
 const $ = require('jquery');
-const RowParser = require('../../src/sense_editor/row_parser');
-
-import { initializeOutput } from '../../src/output';
+import RowParser from '../../../../lib/row_parser';
+import ace from 'brace';
+import { createReadOnly } from '../../legacy_core_editor/create_readonly';
 let output;
-
 const tokenIterator = ace.acequire('ace/token_iterator');
 
 describe('Output Tokenization', () => {
   beforeEach(() => {
-    output = initializeOutput($('#ConAppOutput'));
-    output.$el.show();
+    output = createReadOnly(document.querySelector('#ConAppOutput'));
+    $(output.container).show();
   });
+
   afterEach(() => {
-    output.$el.hide();
+    $(output.container).hide();
   });
 
   function tokensAsList() {

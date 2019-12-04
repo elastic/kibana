@@ -16,17 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import './setup_mocks';
-import ace from 'brace';
-import 'brace/mode/json';
+import '../legacy_core_editor.test.mocks';
+import RowParser from '../../../../lib/row_parser';
+import { createTokenIterator } from '../../../factories';
 import $ from 'jquery';
-import { initializeEditor } from '../../src/input';
-
-const tokenIterator = ace.acequire('ace/token_iterator');
+import { create } from '../create';
 
 describe('Input Tokenization', () => {
-  let input;
+  let coreEditor;
   beforeEach(() => {
     // Set up our document body
     document.body.innerHTML =
@@ -36,33 +33,25 @@ describe('Input Tokenization', () => {
         <div id="ConCopyAsCurl" />
       </div>`;
 
-    input = initializeEditor(
-      $('#ConAppEditor'),
-      $('#ConAppEditorActions'),
-    );
+    coreEditor = create(document.querySelector('#ConAppEditor'));
 
-    input = initializeEditor(
-      $('#ConAppEditor'),
-      $('#ConAppEditorActions'),
-    );
-    input.$el.show();
-    input.autocomplete._test.removeChangeListener();
+    $(coreEditor.getContainer()).show();
   });
   afterEach(() => {
-    input.$el.hide();
-    input.autocomplete._test.addChangeListener();
+    $(coreEditor.getContainer()).hide();
   });
 
   function tokensAsList() {
-    const iter = new tokenIterator.TokenIterator(input.getSession(), 0, 0);
+    const iter = createTokenIterator({ editor: coreEditor, position: { lineNumber: 1, column: 1 } });
     const ret = [];
     let t = iter.getCurrentToken();
-    if (input.parser.isEmptyToken(t)) {
-      t = input.parser.nextNonEmptyToken(iter);
+    const parser = new RowParser(coreEditor);
+    if (parser.isEmptyToken(t)) {
+      t = parser.nextNonEmptyToken(iter);
     }
     while (t) {
       ret.push({ value: t.value, type: t.type });
-      t = input.parser.nextNonEmptyToken(iter);
+      t = parser.nextNonEmptyToken(iter);
     }
 
     return ret;
@@ -84,17 +73,15 @@ describe('Input Tokenization', () => {
     }
 
     test('Token test ' + testCount++ + ' prefix: ' + prefix, async function (done) {
-      input.update(data, function () {
-        const tokens = tokensAsList();
-        const normTokenList = [];
-        for (let i = 0; i < tokenList.length; i++) {
-          normTokenList.push({ type: tokenList[i++], value: tokenList[i] });
-        }
+      await coreEditor.setValue(data, true);
+      const tokens = tokensAsList();
+      const normTokenList = [];
+      for (let i = 0; i < tokenList.length; i++) {
+        normTokenList.push({ type: tokenList[i++], value: tokenList[i] });
+      }
 
-        expect(tokens).toEqual(normTokenList);
-        done();
-      });
-
+      expect(tokens).toEqual(normTokenList);
+      done();
     });
   }
 
@@ -271,10 +258,8 @@ describe('Input Tokenization', () => {
 
   function statesAsList() {
     const ret = [];
-    const session = input.getSession();
-    const maxLine = session.getLength();
-    for (let row = 0; row < maxLine; row++) ret.push(session.getState(row));
-
+    const maxLine = coreEditor.getLineCount();
+    for (let line = 1; line <= maxLine; line++) ret.push(coreEditor.getLineState(line));
     return ret;
   }
 
@@ -293,11 +278,10 @@ describe('Input Tokenization', () => {
     }
 
     test('States test ' + testCount++ + ' prefix: ' + prefix, async function (done) {
-      input.update(data, function () {
-        const modes = statesAsList();
-        expect(modes).toEqual(statesList);
-        done();
-      });
+      await coreEditor.setValue(data, true);
+      const modes = statesAsList();
+      expect(modes).toEqual(statesList);
+      done();
     });
   }
 

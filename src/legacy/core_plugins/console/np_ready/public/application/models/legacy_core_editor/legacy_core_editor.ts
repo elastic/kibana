@@ -23,15 +23,17 @@ import $ from 'jquery';
 import { CoreEditor, Position, Range, Token, TokensProvider, EditorEvent } from '../../../types';
 import { AceTokensProvider } from '../../../lib/ace_token_provider';
 import * as curl from '../sense_editor/curl';
+import smartResize from './smart_resize';
 
 // @ts-ignore
-import * as InputMode from '../sense_editor/mode/input';
+import * as InputMode from './mode/input';
 
 const _AceRange = ace.acequire('ace/range').Range;
 
 export class LegacyCoreEditor implements CoreEditor {
   private _aceOnPaste: any;
   $actions: any;
+  resize: () => void;
 
   constructor(private readonly editor: IAceEditor, actions: HTMLElement) {
     this.$actions = $(actions);
@@ -42,6 +44,8 @@ export class LegacyCoreEditor implements CoreEditor {
     (session as any).setFoldStyle('markbeginend');
     session.setTabSize(2);
     session.setUseWrapMode(true);
+
+    this.resize = smartResize(this.editor);
 
     // Intercept ace on paste handler.
     this._aceOnPaste = this.editor.onPaste;
@@ -216,10 +220,6 @@ export class LegacyCoreEditor implements CoreEditor {
   getLineCount() {
     const text = this.getValue();
     return text.split('\n').length;
-  }
-
-  moveCursorTo(pos: Position) {
-    this.editor.moveCursorTo(pos.lineNumber - 1, pos.column - 1);
   }
 
   addMarker(range: Range) {

@@ -184,11 +184,6 @@ export interface CoreEditor {
   getLineCount(): number;
 
   /**
-   * Move the cursor in the current buffer to the provided position
-   */
-  moveCursorTo(pos: Position): void;
-
-  /**
    * A legacy mechanism which gives consumers of this interface a chance to wait for
    * latest tokenization to complete.
    */
@@ -241,4 +236,9 @@ export interface CoreEditor {
    * moves the cursor around
    */
   legacyUpdateUI(opts: any): void;
+
+  /**
+   * A method to for the editor to resize, useful when, for instance, window size changes.
+   */
+  resize(): void;
 }

@@ -18,10 +18,8 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import $ from 'jquery';
 
-// @ts-ignore
-import { initializeOutput } from '../../../../../../../public/quarantined/src/output';
+import { createReadOnly } from '../../../../models/sense_editor';
 import {
   useServicesContext,
   useEditorReadContext,
@@ -54,8 +52,7 @@ function EditorOutputUI() {
   } = useRequestReadContext();
 
   useEffect(() => {
-    const editor$ = $(editorRef.current!);
-    editorInstanceRef.current = initializeOutput(editor$, services.settings);
+    editorInstanceRef.current = createReadOnly(editorRef.current!);
     const unsubscribe = subscribeResizeChecker(editorRef.current!, editorInstanceRef.current);
 
     return () => {
