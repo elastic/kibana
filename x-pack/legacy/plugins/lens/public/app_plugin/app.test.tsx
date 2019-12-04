@@ -106,14 +106,10 @@ describe('Lens App', () => {
             },
           },
         },
-      },
-      dataShim: {
         indexPatterns: {
-          indexPatterns: {
-            get: jest.fn(id => {
-              return new Promise(resolve => resolve({ id }));
-            }),
-          },
+          get: jest.fn(id => {
+            return new Promise(resolve => resolve({ id }));
+          }),
         },
       },
       storage: {
