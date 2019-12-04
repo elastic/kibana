@@ -7,6 +7,7 @@
 import { getImportRouteHandler } from './routes/file_upload';
 import { MAX_BYTES } from '../common/constants/file_import';
 import { registerFileUploadUsageCollector } from './telemetry';
+import Joi from 'joi';
 
 export class FileUploadPlugin {
   setup(core, plugins, __LEGACY) {
@@ -20,6 +21,33 @@ export class FileUploadPlugin {
       handler: getImportRouteHandler(elasticsearchPlugin, getSavedObjectsRepository),
       config: {
         payload: { maxBytes: MAX_BYTES },
+        // "index": "utah",
+        // "data": [],
+        // "settings": {
+        //   "number_of_shards": 1
+        // },
+        // "mappings": {
+        //   "coordinates": {
+        //     "type": "geo_point"
+        //   }
+        // },
+        // "ingestPipeline": {},
+        // "fileType": "json",
+        // "app": "Maps"
+        validate: {
+          query: Joi.object().keys({
+            id: Joi.string(),
+          }),
+          payload: Joi.object({
+            app: Joi.string(),
+            index: Joi.string().required(),
+            data: Joi.array().required(),
+            fileType: Joi.string().required(),
+            ingestPipeline: Joi.object(),
+            settings: Joi.object(),
+            mappings: Joi.object().required(),
+          }).required(),
+        }
       }
     });
 

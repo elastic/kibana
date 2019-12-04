@@ -23,7 +23,7 @@ export function getImportRouteHandler(elasticsearchPlugin, getSavedObjectsReposi
     const requestObj = {
       query: request.query,
       payload: request.payload,
-      params: request.payload,
+      params: request.params,
       auth: request.auth,
       headers: request.headers
     };
