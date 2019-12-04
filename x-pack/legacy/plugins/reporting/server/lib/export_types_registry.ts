@@ -33,6 +33,8 @@ export class ExportTypesRegistry {
       throw new Error(`'item' with id ${item.id} has already been registered`);
     }
 
+    // TODO: Unwrap the execute function from the item's executeJobFactory
+    // Move that work out of server/lib/create_worker to reduce dependence on ESQueue
     this._map.set(item.id, item);
   }
 

@@ -60,6 +60,7 @@ export function enqueueJobFactory(
       throw new Error(`Export type ${exportTypeId} does not exist in the registry!`);
     }
 
+    // TODO: the createJobFn should be unwrapped in the register method of the export types registry
     const createJob = exportType.createJobFactory(server) as CreateJobFn;
     const payload = await createJob(jobParams, headers, request);
 

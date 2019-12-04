@@ -49,6 +49,7 @@ export function createWorkerFactory<JobParamsType>(
     for (const exportType of exportTypesRegistry.getAll() as Array<
       ExportTypeDefinition<JobParamsType, any, any, any>
     >) {
+      // TODO: the executeJobFn should be unwrapped in the register method of the export types registry
       const jobExecutor = exportType.executeJobFactory(server, { browserDriverFactory });
       jobExecutors.set(exportType.jobType, jobExecutor);
     }

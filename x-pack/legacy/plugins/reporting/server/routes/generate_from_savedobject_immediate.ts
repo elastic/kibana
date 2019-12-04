@@ -45,6 +45,11 @@ export function registerGenerateCsvFromSavedObjectImmediate(
     handler: async (request: RequestFacade, h: ReportingResponseToolkit) => {
       const logger = parentLogger.clone(['savedobject-csv']);
       const jobParams = getJobParamsFromRequest(request, { isImmediate: true });
+
+      /* TODO these functions should be made available in the export types registery after doing
+       * exportTypesRegistry.getById(CSV_FROM_SAVEDOBJECT_JOB_TYPE)
+       * The execute job factory methods should always be called with HeadlessChromiumDriverFactory
+       */
       const createJobFn = createJobFactory(server);
       const executeJobFn = executeJobFactory(server);
       const jobDocPayload: JobDocPayloadPanelCsv = await createJobFn(
