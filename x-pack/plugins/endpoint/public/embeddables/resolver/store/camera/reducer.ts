@@ -28,15 +28,12 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
     const [deltaX, deltaY] = action.payload;
     return {
       ...state,
-      scaling: [clamp(deltaX, 0.48, 1.2), clamp(deltaY, 0.48, 1.2)],
+      scaling: [clamp(deltaX, 0.1, 3), clamp(deltaY, 0.1, 3)],
     };
   } else if (action.type === 'userSetPanningOffset') {
     return {
       ...state,
-      translation: [
-        state.translation[0] + action.payload[0],
-        state.translation[1] + action.payload[1],
-      ],
+      translation: action.payload,
     };
   } else if (action.type === 'userStartedPanning') {
     return {
