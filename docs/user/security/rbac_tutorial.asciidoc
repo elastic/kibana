@@ -1,6 +1,5 @@
 [[space-rbac-tutorial]]
-=== Tutorial:  Use Role Based Access Control (RBAC) to customize Kibana 
-Spaces
+=== Tutorial:  Use Role Based Access Control (RBAC) to customize Kibana Spaces
 
 Role Based Access Control (RBAC) is used to provide access to data, tools,
 and Kibana Spaces.  In this tutorial you will learn how to configure roles
@@ -56,13 +55,9 @@ developer working on the bank's mortgage application.
 [float]
 ==== Give the role the ability to monitor the Elastic Stack
 
-Stack monitoring is an important feature for system admins and 
-developers.  
-Both of these groups of people will use stack monitoring to look 
-at performance.
-Developers will also use stack monitoring to evaluate and tune 
-ingest pipelines.
-Note for Gail: I need to learn how to link to https://www.elastic.co/guide/en/elasticsearch/reference/7.4/monitoring-overview.html (in an elasticsearch book).
+Stack monitoring is an important feature for system admins and developers.  
+Both of these groups of people will use stack monitoring to look at 
+performance.  Developers will also use stack monitoring to evaluate and tune ingest pipelines.  For more information on stack monitoring see the https://www.elastic.co/guide/en/elasticsearch/reference/current/monitoring-overview.html[monitoring overview].
 
 Stack monitoring is a cluster level privilege, so in *Cluster 
 privileges* select  **monitor**
@@ -76,8 +71,8 @@ image::security/images/role-monitor-privilege.png["Monitor privilege"]
 Access to data in indices is an index level privilege, so in 
 *Index privileges* add a line or lines for the indices containing the 
 data for this role.  There are two privileges needed, `read` and 
-`view_index_metadata`.  All of the privileges are detailed at 
-Note for Gail, I need to link here also: https://www.elastic.co/guide/en/elasticsearch/reference/7.4/security-privileges.html
+`view_index_metadata`.  All of the privileges are detailed in the 
+https://www.elastic.co/guide/en/elasticsearch/reference/current/security-privileges.html[security privileges] documentaion.
 In the screenshots Filebeat and Metricbeat data is used, but you 
 should use the index patterns for your indices.
 
