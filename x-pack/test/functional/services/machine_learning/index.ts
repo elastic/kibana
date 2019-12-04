@@ -6,6 +6,7 @@
 
 export { MachineLearningAnomalyExplorerProvider } from './anomaly_explorer';
 export { MachineLearningAPIProvider } from './api';
+export { MachineLearningCustomUrlsProvider } from './custom_urls';
 export { MachineLearningDataFrameAnalyticsProvider } from './data_frame_analytics';
 export { MachineLearningDataVisualizerProvider } from './data_visualizer';
 export { MachineLearningDataVisualizerIndexBasedProvider } from './data_visualizer_index_based';

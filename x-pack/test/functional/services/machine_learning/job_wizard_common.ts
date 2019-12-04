@@ -4,10 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
+import { ProvidedType } from '@kbn/test/types/ftr';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { MachineLearningCustomUrlsProvider } from './custom_urls';
 
-export function MachineLearningJobWizardCommonProvider({ getService }: FtrProviderContext) {
+export function MachineLearningJobWizardCommonProvider(
+  { getService }: FtrProviderContext,
+  customUrls: ProvidedType<typeof MachineLearningCustomUrlsProvider>
+) {
   const comboBox = getService('comboBox');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -18,6 +23,16 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
 
   function advancedSectionSelector(subSelector?: string) {
     const subj = 'mlJobWizardAdvancedSection';
+    return !subSelector ? subj : `${subj} > ${subSelector}`;
+  }
+
+  function additionalSettingsSectionSelector(subSelector?: string) {
+    const subj = 'mlJobWizardAdditionalSettingsSection';
+    return !subSelector ? subj : `${subj} > ${subSelector}`;
+  }
+
+  function newCustomUrlFormModal(subSelector?: string) {
+    const subj = 'mlJobNewCustomUrlFormModal';
     return !subSelector ? subj : `${subj} > ${subSelector}`;
   }
 
@@ -356,6 +371,34 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     async clickUseFullDataButton(expectedStartDate: string, expectedEndDate: string) {
       await testSubjects.clickWhenNotDisabled('mlButtonUseFullData');
       await this.assertDateRangeSelection(expectedStartDate, expectedEndDate);
+    },
+
+    async ensureAdditionalSettingsSectionOpen() {
+      await retry.tryForTime(5000, async () => {
+        if ((await testSubjects.exists(additionalSettingsSectionSelector())) === false) {
+          await testSubjects.click('mlJobWizardToggleAdditionalSettingsSection');
+          await testSubjects.existOrFail(additionalSettingsSectionSelector(), { timeout: 1000 });
+        }
+      });
+    },
+
+    async ensureNewCustomUrlFormModalOpen() {
+      await retry.tryForTime(5000, async () => {
+        if ((await testSubjects.exists(newCustomUrlFormModal())) === false) {
+          await testSubjects.click('mlJobOpenCustomUrlFormButton');
+          await testSubjects.existOrFail(newCustomUrlFormModal(), { timeout: 1000 });
+        }
+      });
+    },
+
+    async addCustomUrl() {
+      await this.ensureNewCustomUrlFormModalOpen();
+      // Fill-in the form
+      await customUrls.setCustomUrlLabel('check-kibana-dashboard');
+      // Add custom URL
+      await customUrls.addCustomUrl();
+
+      await customUrls.assertCustomUrlItem(0);
     },
 
     async ensureAdvancedSectionOpen() {

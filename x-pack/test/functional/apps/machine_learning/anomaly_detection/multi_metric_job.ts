@@ -170,6 +170,14 @@ export default function({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.assertJobGroupSelection(jobGroups);
     });
 
+    it('job creation opens the additional settings section', async () => {
+      await ml.jobWizardCommon.ensureAdditionalSettingsSectionOpen();
+    });
+
+    it('job creation adds a new custom url', async () => {
+      await ml.jobWizardCommon.addCustomUrl();
+    });
+
     it('job creation opens the advanced section', async () => {
       await ml.jobWizardCommon.ensureAdvancedSectionOpen();
     });
