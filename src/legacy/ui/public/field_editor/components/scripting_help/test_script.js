@@ -29,16 +29,19 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiCallOut,
-  EuiFieldText,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
+import { start as data } from '../../../../../core_plugins/data/public/legacy';
+const { SearchBar } = data.ui;
+import { npStart } from 'ui/new_platform';
+const { uiSettings } = npStart.core;
+
+import { esQuery } from '../../../../../../plugins/data/public';
 
 export class TestScript extends Component {
   state = {
     isLoading: false,
     additionalFields: [],
-    searchQuery: '',
   }
 
   componentDidMount() {
@@ -47,7 +50,7 @@ export class TestScript extends Component {
     }
   }
 
-  previewScript = async () => {
+  previewScript = async (searchContext) => {
     const {
       indexPattern,
       lang,
@@ -64,12 +67,18 @@ export class TestScript extends Component {
       isLoading: true,
     });
 
+    let query;
+    if (searchContext) {
+      const esQueryConfigs = esQuery.getEsQueryConfig(uiSettings);
+      query = esQuery.buildEsQuery(this.props.indexPattern, searchContext.query, null, esQueryConfigs);
+    }
+
     const scriptResponse = await executeScript({
       name,
       lang,
       script,
       indexPatternTitle: indexPattern.title,
-      additionalQuery: this.state.searchQuery,
+      query,
       additionalFields: this.state.additionalFields.map(option => {
         return option.value;
       })
@@ -186,30 +195,26 @@ export class TestScript extends Component {
           />
         </EuiFormRow>
 
-        <EuiFormRow label="Search query">
-
-          <EuiFieldText
-            placeholder={i18n.translate('common.ui.savedObjects.finder.searchPlaceholder', {
-              defaultMessage: 'Search…',
-            })}
-            value={this.state.searchQuery}
-            onChange={e => {
-              this.setState({
-                searchQuery: e.target.value,
-              });
-            }}
+        <div className="testScriptSearchBar">
+          <SearchBar
+            showFilterBar={false}
+            showDatePicker={false}
+            showQueryInput={true}
+            query={{ language: uiSettings.get('search:queryLanguage'), query: '' }}
+            onQuerySubmit={this.previewScript}
+            indexPatterns={[this.props.indexPattern]}
+            customSubmitButton={
+              <EuiButton
+                disabled={this.props.script ? false : true}
+                isLoading={this.state.isLoading}
+                data-test-subj="runScriptButton"
+              >
+                Run script
+              </EuiButton>
+            }
           />
+        </div>
 
-        </EuiFormRow>
-
-        <EuiButton
-          onClick={this.previewScript}
-          disabled={this.props.script ? false : true}
-          isLoading={this.state.isLoading}
-          data-test-subj="runScriptButton"
-        >
-          Run script
-        </EuiButton>
       </Fragment>
     );
   }
