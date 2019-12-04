@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { mountHook } from 'test_utils/enzyme_helpers';
+import { renderHook } from '@testing-library/react-hooks';
 
 import { useLogSummary } from './log_summary';
 
@@ -22,18 +21,11 @@ describe('useLogSummary hook', () => {
   });
 
   it('provides an empty list of buckets by default', () => {
-    const { getLastHookValue } = mountHook(() => useLogSummary('SOURCE_ID', null, 1000, null));
-    expect(getLastHookValue().buckets).toEqual([]);
+    const { result } = renderHook(() => useLogSummary('SOURCE_ID', null, 1000, null));
+    expect(result.current.buckets).toEqual([]);
   });
 
-  /**
-   * This is skipped until `act` can deal with async operations, see comment
-   * below.
-   *
-   * The test cases below this are a temporary alternative until the
-   * shortcomings of the `act` function have been overcome.
-   */
-  it.skip('queries for new summary buckets when the source id changes', async () => {
+  it('queries for new summary buckets when the source id changes', async () => {
     const firstMockResponse = createMockResponse([{ start: 99000, end: 101000, entriesCount: 1 }]);
     const secondMockResponse = createMockResponse([{ start: 99000, end: 101000, entriesCount: 2 }]);
 
@@ -41,70 +33,25 @@ describe('useLogSummary hook', () => {
       .mockResolvedValueOnce(firstMockResponse)
       .mockResolvedValueOnce(secondMockResponse);
 
-    const { act, getLastHookValue } = mountHook(
+    const { result, waitForNextUpdate, rerender } = renderHook(
       ({ sourceId }) => useLogSummary(sourceId, 100000, 1000, null),
-      Identity,
-      { sourceId: 'INITIAL_SOURCE_ID' }
+      {
+        initialProps: { sourceId: 'INITIAL_SOURCE_ID' },
+      }
     );
+
+    await waitForNextUpdate();
+
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
-    // expect(mockApolloClient.query).toHaveBeenLastCalledWith(
-    //   expect.objectContaining({
-    //     variables: expect.objectContaining({
-    //       sourceId: 'INITIAL_SOURCE_ID',
-    //     }),
-    //   })
-    // );
-    expect(getLastHookValue().buckets).toEqual(firstMockResponse.data.buckets);
-
-    // DOESN'T WORK YET until https://github.com/facebook/react/pull/14853 has been merged
-    await act(async (_, setArgs) => {
-      setArgs({ sourceId: 'CHANGED_SOURCE_ID' });
-
-      // wait for the promise queue to be processed
-      await fetchLogSummaryMock();
-    });
-
-    expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        variables: expect.objectContaining({
-          sourceId: 'CHANGED_SOURCE_ID',
-        }),
+        sourceId: 'INITIAL_SOURCE_ID',
       })
     );
-    expect(getLastHookValue().buckets).toEqual(secondMockResponse.data.buckets);
-  });
+    expect(result.current.buckets).toEqual(firstMockResponse.data.buckets);
 
-  /**
-   * The following test cases use a bad workaround to avoid the problems
-   * exhibited by the skipped test case above. Instead of a real Promise we
-   * fake a synchronously resolving promise-like return value to avoid any
-   * async behavior.
-   *
-   * They should be rewritten to the cleaner async/await style shown in the
-   * test case above once `act` is capable of dealing with it.
-   */
-
-  it('queries for new summary buckets when the source id changes - workaround', () => {
-    const firstMockResponse = createMockResponse([{ start: 99000, end: 101000, entriesCount: 1 }]);
-    const secondMockResponse = createMockResponse([{ start: 99000, end: 101000, entriesCount: 2 }]);
-
-    fetchLogSummaryMock
-      .mockReturnValueOnce(createSyncMockPromise(firstMockResponse))
-      .mockReturnValueOnce(createSyncMockPromise(secondMockResponse));
-
-    const { act, getLastHookValue } = mountHook(
-      ({ sourceId }) => useLogSummary(sourceId, 100000, 1000, null),
-      Identity,
-      { sourceId: 'INITIAL_SOURCE_ID' }
-    );
-
-    expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
-    expect(getLastHookValue().buckets).toEqual(firstMockResponse.data.buckets);
-
-    act((_, setArgs) => {
-      setArgs({ sourceId: 'CHANGED_SOURCE_ID' });
-    });
+    rerender({ sourceId: 'CHANGED_SOURCE_ID' });
+    await waitForNextUpdate();
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
@@ -112,22 +59,25 @@ describe('useLogSummary hook', () => {
         sourceId: 'CHANGED_SOURCE_ID',
       })
     );
-    expect(getLastHookValue().buckets).toEqual(secondMockResponse.data.buckets);
+    expect(result.current.buckets).toEqual(secondMockResponse.data.buckets);
   });
 
-  it('queries for new summary buckets when the filter query changes', () => {
+  it('queries for new summary buckets when the filter query changes', async () => {
     const firstMockResponse = createMockResponse([{ start: 99000, end: 101000, entriesCount: 1 }]);
     const secondMockResponse = createMockResponse([{ start: 99000, end: 101000, entriesCount: 2 }]);
 
     fetchLogSummaryMock
-      .mockReturnValueOnce(createSyncMockPromise(firstMockResponse))
-      .mockReturnValueOnce(createSyncMockPromise(secondMockResponse));
+      .mockResolvedValueOnce(firstMockResponse)
+      .mockResolvedValueOnce(secondMockResponse);
 
-    const { act, getLastHookValue } = mountHook(
+    const { result, waitForNextUpdate, rerender } = renderHook(
       ({ filterQuery }) => useLogSummary('SOURCE_ID', 100000, 1000, filterQuery),
-      Identity,
-      { filterQuery: 'INITIAL_FILTER_QUERY' }
+      {
+        initialProps: { filterQuery: 'INITIAL_FILTER_QUERY' },
+      }
     );
+
+    await waitForNextUpdate();
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
@@ -135,11 +85,10 @@ describe('useLogSummary hook', () => {
         query: 'INITIAL_FILTER_QUERY',
       })
     );
-    expect(getLastHookValue().buckets).toEqual(firstMockResponse.data.buckets);
+    expect(result.current.buckets).toEqual(firstMockResponse.data.buckets);
 
-    act((_, setArgs) => {
-      setArgs({ filterQuery: 'CHANGED_FILTER_QUERY' });
-    });
+    rerender({ filterQuery: 'CHANGED_FILTER_QUERY' });
+    await waitForNextUpdate();
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
@@ -147,20 +96,22 @@ describe('useLogSummary hook', () => {
         query: 'CHANGED_FILTER_QUERY',
       })
     );
-    expect(getLastHookValue().buckets).toEqual(secondMockResponse.data.buckets);
+    expect(result.current.buckets).toEqual(secondMockResponse.data.buckets);
   });
 
-  it('queries for new summary buckets when the midpoint time changes', () => {
+  it('queries for new summary buckets when the midpoint time changes', async () => {
     fetchLogSummaryMock
-      .mockReturnValueOnce(createSyncMockPromise(createMockResponse([])))
-      .mockReturnValueOnce(createSyncMockPromise(createMockResponse([])));
+      .mockResolvedValueOnce(createMockResponse([]))
+      .mockResolvedValueOnce(createMockResponse([]));
 
-    const { act } = mountHook(
+    const { waitForNextUpdate, rerender } = renderHook(
       ({ midpointTime }) => useLogSummary('SOURCE_ID', midpointTime, 1000, null),
-      Identity,
-      { midpointTime: 100000 }
+      {
+        initialProps: { midpointTime: 100000 },
+      }
     );
 
+    await waitForNextUpdate();
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
@@ -169,9 +120,8 @@ describe('useLogSummary hook', () => {
       })
     );
 
-    act((_, setArgs) => {
-      setArgs({ midpointTime: 200000 });
-    });
+    rerender({ midpointTime: 200000 });
+    await waitForNextUpdate();
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
@@ -182,17 +132,25 @@ describe('useLogSummary hook', () => {
     );
   });
 
-  it('queries for new summary buckets when the interval size changes', () => {
+  it('queries for new summary buckets when the interval size changes', async () => {
     fetchLogSummaryMock
-      .mockReturnValueOnce(createSyncMockPromise(createMockResponse([])))
-      .mockReturnValueOnce(createSyncMockPromise(createMockResponse([])));
+      .mockResolvedValueOnce(createMockResponse([]))
+      .mockResolvedValueOnce(createMockResponse([]));
 
-    const { act } = mountHook(
+    // const { act } = mountHook(
+    //   ({ intervalSize }) => useLogSummary('SOURCE_ID', 100000, intervalSize, null),
+    //   Identity,
+    //
+    // );
+
+    const { waitForNextUpdate, rerender } = renderHook(
       ({ intervalSize }) => useLogSummary('SOURCE_ID', 100000, intervalSize, null),
-      Identity,
-      { intervalSize: 1000 }
+      {
+        initialProps: { intervalSize: 1000 },
+      }
     );
 
+    await waitForNextUpdate();
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
@@ -202,9 +160,8 @@ describe('useLogSummary hook', () => {
       })
     );
 
-    act((_, setArgs) => {
-      setArgs({ intervalSize: 2000 });
-    });
+    rerender({ intervalSize: 2000 });
+    await waitForNextUpdate();
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
@@ -217,12 +174,6 @@ describe('useLogSummary hook', () => {
   });
 });
 
-const Identity: React.FunctionComponent = ({ children }) => <>{children}</>;
-
 const createMockResponse = (
   buckets: Array<{ start: number; end: number; entriesCount: number }>
 ) => ({ data: { buckets } });
-
-const createSyncMockPromise = <Value extends any>(value: Value) => ({
-  then: (callback: (value: Value) => any) => callback(value),
-});
