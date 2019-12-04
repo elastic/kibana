@@ -69,6 +69,12 @@ export function initializeUpdateWorkpadRoute(deps: RouteInitializerDeps) {
         }),
         body: WorkpadSchema,
       },
+      options: {
+        body: {
+          maxBytes: 26214400,
+          accepts: ['application/json'],
+        },
+      },
     },
     catchErrorHandler(async (context, request, response) => {
       return workpadUpdateHandler(
@@ -88,6 +94,12 @@ export function initializeUpdateWorkpadRoute(deps: RouteInitializerDeps) {
           id: schema.string(),
         }),
         body: WorkpadSchema,
+      },
+      options: {
+        body: {
+          maxBytes: 26214400,
+          accepts: ['application/json'],
+        },
       },
     },
     catchErrorHandler(async (context, request, response) => {
@@ -115,6 +127,12 @@ export function initializeUpdateWorkpadAssetsRoute(deps: RouteInitializerDeps) {
         // Because we don't know what keys the assets will have, we have to allow
         // unknowns and then validate in the handler
         body: schema.object({}, { allowUnknowns: true }),
+      },
+      options: {
+        body: {
+          maxBytes: 26214400,
+          accepts: ['application/json'],
+        },
       },
     },
     async (context, request, response) => {
