@@ -13,15 +13,15 @@ import {
 } from '../../../../services/ml_api_service';
 import { JobCreator } from '../job_creator';
 
-export enum ValidatorSeverity {
-  ERROR = 'ERROR',
-  WARNING = 'WARNING',
+export enum VALIDATOR_SEVERITY {
+  ERROR,
+  WARNING,
 }
 
 export interface CardinalityValidatorError {
   highCardinality: {
     value: number;
-    severity: ValidatorSeverity;
+    severity: VALIDATOR_SEVERITY;
   };
 }
 
@@ -36,9 +36,9 @@ export function isCardinalityModelPlotHigh(
 }
 
 export function cardinalityValidator(
-  jobConfigs$: Subject<JobCreator>
+  jobCreator$: Subject<JobCreator>
 ): Observable<CardinalityValidatorResult> {
-  return jobConfigs$.pipe(
+  return jobCreator$.pipe(
     // Perform a cardinality check only with enabled model plot.
     filter(jobCreator => {
       return jobCreator?.modelPlot;
@@ -65,7 +65,7 @@ export function cardinalityValidator(
           return {
             highCardinality: {
               value: validationResult.modelPlotCardinality,
-              severity: ValidatorSeverity.WARNING,
+              severity: VALIDATOR_SEVERITY.WARNING,
             },
           };
         }

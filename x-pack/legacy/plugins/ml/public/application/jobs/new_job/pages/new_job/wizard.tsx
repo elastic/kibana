@@ -88,7 +88,6 @@ export const Wizard: FC<Props> = ({
 
   useEffect(() => {
     jobValidator.validate(() => {
-      // FIXME without this callback "Next" button on "Pick fields" remain disabled
       setJobValidatorUpdate(jobValidatorUpdated);
     });
 

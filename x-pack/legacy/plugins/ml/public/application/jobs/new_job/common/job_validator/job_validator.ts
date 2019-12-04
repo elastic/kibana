@@ -74,7 +74,7 @@ export class JobValidator {
   private _validating: boolean = false;
   private _basicValidationResult$ = new ReplaySubject<JobValidationResult>(2);
 
-  private _jobConfigs$ = new Subject<JobCreator>();
+  private _jobCreatorSubject$ = new Subject<JobCreator>();
 
   /**
    * Observable that combines basic and async validation results.
@@ -91,7 +91,7 @@ export class JobValidator {
     };
     this._existingJobsAndGroups = existingJobsAndGroups;
 
-    this._asyncValidators$ = [cardinalityValidator(this._jobConfigs$)];
+    this._asyncValidators$ = [cardinalityValidator(this._jobCreatorSubject$)];
 
     this._asyncValidatorsResult$ = combineLatest(this._asyncValidators$).pipe(
       map(res => {
@@ -142,7 +142,7 @@ export class JobValidator {
       this._validateTimeout = setTimeout(() => {
         this._runBasicValidation();
 
-        this._jobConfigs$.next(this._jobCreator);
+        this._jobCreatorSubject$.next(this._jobCreator);
 
         this._validating = false;
         this._validateTimeout = null;
