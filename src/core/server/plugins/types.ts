@@ -21,7 +21,7 @@ import { Observable } from 'rxjs';
 import { Type } from '@kbn/config-schema';
 
 import { RecursiveReadonly } from 'kibana/public';
-import { ConfigPath, EnvironmentMode, PackageInfo } from '../config';
+import { ConfigPath, EnvironmentMode, PackageInfo, ConfigDeprecation } from '../config';
 import { LoggerFactory } from '../logging';
 import { KibanaConfigType } from '../kibana_config';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
@@ -62,6 +62,10 @@ export type PluginConfigSchema<T> = Type<T>;
  * @public
  */
 export interface PluginConfigDescriptor<T = any> {
+  /**
+   * List of {@link ConfigDeprecation} to apply to the plugin configuration.
+   */
+  deprecations?: ConfigDeprecation[];
   /**
    * List of configuration properties that will be available on the client-side plugin.
    */

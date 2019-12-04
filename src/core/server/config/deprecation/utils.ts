@@ -17,11 +17,24 @@
  * under the License.
  */
 
-export { ConfigService, IConfigService } from './config_service';
-export { RawConfigService } from './raw_config_service';
-export { Config, ConfigPath, isConfigPath, hasConfigPathIntersection } from './config';
-export { ObjectToConfigAdapter } from './object_to_config_adapter';
-export { CliArgs, Env } from './env';
-export { ConfigDeprecation, ConfigDeprecationLogger } from './deprecation';
+import { get } from 'lodash';
 
-export { EnvironmentMode, PackageInfo } from './types';
+export function unset(obj: Record<string, any>, atPath: string) {
+  const paths = atPath
+    .split('.')
+    .map(s => s.trim())
+    .filter(v => v !== '');
+  if (paths.length === 0) {
+    return;
+  }
+  if (paths.length === 1) {
+    delete obj[paths[0]];
+    return;
+  }
+  const property = paths.pop() as string;
+  const parentPath = paths.join('.');
+  const parent = get(obj, parentPath) as any;
+  if (parent !== undefined) {
+    delete parent[property];
+  }
+}
