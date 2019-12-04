@@ -308,6 +308,7 @@ export class WebElementWrapper {
    */
   public async type(value: string | string[], options: TypeOptions = { charByChar: false }) {
     if (options.charByChar) {
+      await delay(100);
       for (const char of value) {
         await this.retryCall(async function type(wrapper) {
           await wrapper._webElement.sendKeys(char);
