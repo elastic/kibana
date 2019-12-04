@@ -33,7 +33,7 @@ export const AdvancedRuleEditor = (props: Props) => {
     // Fire onChange only if rules are valid
     try {
       const ruleJSON = JSON.parse(updatedRules);
-      props.onChange(generateRulesFromRaw(ruleJSON));
+      props.onChange(generateRulesFromRaw(ruleJSON).rules);
       props.onValidityChange(true);
       setRuleBuilderError(null);
     } catch (e) {
@@ -55,6 +55,7 @@ export const AdvancedRuleEditor = (props: Props) => {
           ruleBuilderError.message
         }`
       }
+      fullWidth
     >
       <EuiCodeEditor
         aria-label={''}

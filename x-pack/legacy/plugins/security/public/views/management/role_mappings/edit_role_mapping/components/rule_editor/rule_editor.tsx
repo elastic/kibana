@@ -5,7 +5,7 @@
  */
 
 import React, { Component } from 'react';
-import { EuiButtonEmpty, EuiSpacer, EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiButtonEmpty, EuiSpacer, EuiConfirmModal, EuiOverlayMask, EuiText } from '@elastic/eui';
 import { RoleMapping } from '../../../../../../../common/model';
 import { BaseRule } from '../../../../../../../common/model/role_mappings/base_rule';
 import { generateRulesFromRaw } from '../../../../../../../common/model/role_mappings/rule_builder';
@@ -20,40 +20,53 @@ interface Props {
 
 interface State {
   rules: BaseRule | null;
+  maxDepth: number;
   isRuleValid: boolean;
   showConfirmModeChange: boolean;
   mode: 'visual' | 'advanced';
 }
 
+const VISUAL_MAX_RULE_DEPTH = 5;
+
 export class RuleEditor extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      rules: generateRulesFromRaw(props.rawRules),
+      ...this.initializeFromRawRules(props.rawRules),
       isRuleValid: true,
       showConfirmModeChange: false,
-      mode: 'advanced',
     };
   }
 
-  componentWillReceiveProps(nextProps: Props) {
+  public componentWillReceiveProps(nextProps: Props) {
     if (!this.state.rules) {
-      this.setState({
-        rules: generateRulesFromRaw(nextProps.rawRules),
-      });
+      this.setState({ ...this.initializeFromRawRules(nextProps.rawRules) });
     }
   }
 
   public render() {
     return (
       <div>
-        {this.getModeToggle()}
-        <EuiSpacer />
         {this.getEditor()}
+        <EuiSpacer />
+        <EuiText>
+          <p>Current max depth: {this.state.maxDepth}</p>
+        </EuiText>
+        {this.getModeToggle()}
         {this.getConfirmModeChangePrompt()}
       </div>
     );
   }
+
+  private initializeFromRawRules = (rawRules: Props['rawRules']) => {
+    const { rules, maxDepth } = generateRulesFromRaw(rawRules);
+    const mode: State['mode'] = maxDepth > VISUAL_MAX_RULE_DEPTH ? 'advanced' : 'visual';
+    return {
+      rules,
+      mode,
+      maxDepth,
+    };
+  };
 
   private getModeToggle() {
     switch (this.state.mode) {
@@ -133,9 +146,10 @@ export class RuleEditor extends Component<Props, State> {
   };
 
   private onRuleChange = (updatedRule: BaseRule | null) => {
-    this.props.onChange(updatedRule ? updatedRule.toRaw() : {});
+    const raw = updatedRule ? updatedRule.toRaw() : {};
+    this.props.onChange(raw);
     this.setState({
-      rules: updatedRule,
+      ...generateRulesFromRaw(raw),
     });
   };
 

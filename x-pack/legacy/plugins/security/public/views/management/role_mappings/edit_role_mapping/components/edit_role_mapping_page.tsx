@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, ChangeEvent } from 'react';
+import React, { Component, ChangeEvent, Fragment } from 'react';
 import {
   EuiCallOut,
   EuiDescribedFormGroup,
@@ -307,6 +307,18 @@ export class EditRoleMappingPage extends Component<Props, State> {
   };
 
   private getRuleEditor = () => {
+    const validationResult =
+      this.state.validateForm && validateRoleMappingRules(this.state.roleMapping!);
+
+    let validationWarning = null;
+    if (validationResult) {
+      validationWarning = (
+        <Fragment>
+          <EuiCallOut color="danger" title={validationResult.error || 'FIXME YO'} size="s" />
+        </Fragment>
+      );
+    }
+
     return (
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
@@ -324,18 +336,21 @@ export class EditRoleMappingPage extends Component<Props, State> {
             fullWidth
             {...(this.state.validateForm && validateRoleMappingRules(this.state.roleMapping!))}
           >
-            <RuleEditor
-              onValidityChange={this.onRuleValidityChange}
-              rawRules={this.state.roleMapping!.rules}
-              onChange={rules =>
-                this.setState({
-                  roleMapping: {
-                    ...this.state.roleMapping!,
-                    rules,
-                  },
-                })
-              }
-            />
+            <Fragment>
+              {validationWarning}
+              <RuleEditor
+                onValidityChange={this.onRuleValidityChange}
+                rawRules={this.state.roleMapping!.rules}
+                onChange={rules =>
+                  this.setState({
+                    roleMapping: {
+                      ...this.state.roleMapping!,
+                      rules,
+                    },
+                  })
+                }
+              />
+            </Fragment>
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>

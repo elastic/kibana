@@ -16,12 +16,13 @@ interface Props {
   onChange: (rule: BaseRuleGroup) => void;
 }
 
-const rules = ['all', 'any', 'field'].map(type =>
-  createRuleForType(type, undefined, null)
+// TODO: Cleanup
+const rules = ['all', 'any', 'field'].map(
+  type => createRuleForType(type, undefined, null, [], 0).rules
 ) as BaseRule[];
 
-const exceptRules = ['all', 'any', 'field'].map(type =>
-  createRuleForType(type, undefined, 'except')
+const exceptRules = ['all', 'any', 'field'].map(
+  type => createRuleForType(type, undefined, 'except', [], 0).rules
 ) as BaseRule[];
 
 export const RuleGroupTitle = (props: Props) => {

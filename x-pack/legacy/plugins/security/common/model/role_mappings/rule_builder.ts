@@ -23,12 +23,25 @@ export class RuleBuilderError extends Error {
   }
 }
 
+interface RuleBuilderResult {
+  maxDepth: number;
+  rules: BaseRule | null;
+}
+
+function createResult(rules: BaseRule | null, ...depths: number[]) {
+  return {
+    rules,
+    maxDepth: Math.max(...depths),
+  };
+}
+
 export function createRuleForType(
   ruleType: string,
   ruleDefinition: any | undefined,
   parentRuleType: string | null,
-  ruleTrace: string[] = []
-) {
+  ruleTrace: string[] = [],
+  depth: number
+): RuleBuilderResult {
   const isRuleNegated = parentRuleType === 'except';
 
   switch (ruleType) {
@@ -47,7 +60,7 @@ export function createRuleForType(
       const valueType = typeof value;
       if (value === null || ['string', 'number'].includes(valueType)) {
         const fieldRule = new FieldRule(field, value);
-        return isRuleNegated ? new ExceptFieldRule(fieldRule) : fieldRule;
+        return createResult(isRuleNegated ? new ExceptFieldRule(fieldRule) : fieldRule, depth);
       }
       throw new RuleBuilderError(
         `Invalid value type for field. Expected one of null, string, or number, but found ${valueType} (${value})`,
@@ -61,10 +74,25 @@ export function createRuleForType(
           [...ruleTrace, ruleType]
         );
       }
-      const subRules = ((ruleDefinition as any[]) || []).map((definition: any, index) =>
-        parseRawRules(definition, ruleType, [...ruleTrace, ruleType, `[${index}]`])
-      ) as BaseRule[];
-      return isRuleNegated ? new ExceptAllRule(subRules) : new AllRule(subRules);
+
+      const subRulesResults = ((ruleDefinition as any[]) || []).map((definition: any, index) =>
+        parseRawRules(definition, ruleType, [...ruleTrace, ruleType, `[${index}]`], depth)
+      ) as RuleBuilderResult[];
+
+      const { subRules, maxDepth } = subRulesResults.reduce(
+        (acc, result) => {
+          return {
+            subRules: [...acc.subRules, result.rules!],
+            maxDepth: Math.max(acc.maxDepth, result.maxDepth),
+          };
+        },
+        { subRules: [] as BaseRule[], maxDepth: 0 }
+      );
+
+      return createResult(
+        isRuleNegated ? new ExceptAllRule(subRules) : new AllRule(subRules),
+        maxDepth
+      );
     }
     case 'any': {
       if (ruleDefinition != null && !Array.isArray(ruleDefinition)) {
@@ -73,10 +101,24 @@ export function createRuleForType(
           [...ruleTrace, 'any']
         );
       }
-      const subRules = ((ruleDefinition as any[]) || []).map((definition: any, index) =>
-        parseRawRules(definition, ruleType, [...ruleTrace, ruleType, `[${index}]`])
-      ) as BaseRule[];
-      return isRuleNegated ? new ExceptAnyRule(subRules) : new AnyRule(subRules);
+      const subRulesResults = ((ruleDefinition as any[]) || []).map((definition: any, index) =>
+        parseRawRules(definition, ruleType, [...ruleTrace, ruleType, `[${index}]`], depth)
+      ) as RuleBuilderResult[];
+
+      const { subRules, maxDepth } = subRulesResults.reduce(
+        (acc, result) => {
+          return {
+            subRules: [...acc.subRules, result.rules!],
+            maxDepth: Math.max(acc.maxDepth, result.maxDepth),
+          };
+        },
+        { subRules: [] as BaseRule[], maxDepth: 0 }
+      );
+
+      return createResult(
+        isRuleNegated ? new ExceptAnyRule(subRules) : new AnyRule(subRules),
+        maxDepth
+      );
     }
     case 'except': {
       if (ruleDefinition && typeof ruleDefinition !== 'object') {
@@ -91,25 +133,26 @@ export function createRuleForType(
           [...ruleTrace, ruleType]
         );
       }
-      return parseRawRules(ruleDefinition || {}, ruleType, [...ruleTrace, ruleType]);
+      return parseRawRules(ruleDefinition || {}, ruleType, [...ruleTrace, ruleType], depth);
     }
     default:
       throw new RuleBuilderError(`Unknown rule type: ${ruleType}`, [...ruleTrace, ruleType]);
   }
 }
 
-export function generateRulesFromRaw(rawRules: Record<string, any> = {}): BaseRule | null {
-  return parseRawRules(rawRules, null, []);
+export function generateRulesFromRaw(rawRules: Record<string, any> = {}): RuleBuilderResult {
+  return parseRawRules(rawRules, null, [], 0);
 }
 
 function parseRawRules(
   rawRules: Record<string, any>,
   parentRuleType: string | null,
-  ruleTrace: string[]
-): BaseRule | null {
+  ruleTrace: string[],
+  depth: number
+): RuleBuilderResult {
   const entries = Object.entries(rawRules) as Array<[string, any]>;
   if (!entries.length) {
-    return null;
+    return createResult(null, depth);
   }
   if (entries.length > 1) {
     throw new RuleBuilderError(
@@ -120,5 +163,5 @@ function parseRawRules(
 
   const rule = entries[0];
   const [ruleType, ruleDefinition] = rule;
-  return createRuleForType(ruleType, ruleDefinition, parentRuleType, ruleTrace);
+  return createRuleForType(ruleType, ruleDefinition, parentRuleType, ruleTrace, depth + 1);
 }
