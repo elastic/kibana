@@ -8,20 +8,28 @@ import Hapi from 'hapi';
 import Boom from 'boom';
 
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../common/constants';
-import signalsPolicy from '../signals_policy.json';
 import { ServerFacade, RequestFacade } from '../../../types';
 import { transformError, getIndex, callWithRequestFactory } from './utils';
 import { getIndexExists } from '../alerts/get_index_exists';
 import { getPolicyExists } from '../alerts/get_policy_exists';
-import { setPolicy } from '../alerts/set_policy';
-import { setTemplate } from '../alerts/set_template';
-import { getSignalsTemplate } from '../signals_template';
+import { deletePolicy } from '../alerts/delete_policy';
 import { getTemplateExists } from '../alerts/get_template_exists';
-import { createBootstrapIndex } from '../alerts/create_bootstrap_index';
+import { deleteAllIndex } from '../alerts/delete_all_index';
+import { deleteTemplate } from '../alerts/delete_template';
 
-export const createCreateIndexRoute = (server: ServerFacade): Hapi.ServerRoute => {
+/**
+ * Deletes all of the indexes, template, ilm policies, and aliases. You can check
+ * this by looking at each of these settings from ES after a deletion:
+ * GET /_template/.siem-signals-default
+ * GET /.siem-signals-default-000001/
+ * GET /_ilm/policy/.signals-default
+ * GET /_alias/.siem-signals-default
+ *
+ * And ensuring they're all gone
+ */
+export const createDeleteIndexRoute = (server: ServerFacade): Hapi.ServerRoute => {
   return {
-    method: 'POST',
+    method: 'DELETE',
     path: DETECTION_ENGINE_INDEX_URL,
     options: {
       tags: ['access:siem'],
@@ -36,19 +44,18 @@ export const createCreateIndexRoute = (server: ServerFacade): Hapi.ServerRoute =
         const index = getIndex(request, server);
         const callWithRequest = callWithRequestFactory(request);
         const indexExists = await getIndexExists(callWithRequest, index);
-        if (indexExists) {
-          return new Boom(`index ${index} already exists`, { statusCode: 409 });
+        if (!indexExists) {
+          return new Boom(`index ${index} does not exist`, { statusCode: 404 });
         } else {
+          await deleteAllIndex(callWithRequest, `${index}-*`);
           const policyExists = await getPolicyExists(callWithRequest, index);
-          if (!policyExists) {
-            await setPolicy(callWithRequest, index, signalsPolicy);
+          if (policyExists) {
+            await deletePolicy(callWithRequest, index);
           }
           const templateExists = await getTemplateExists(callWithRequest, index);
-          if (!templateExists) {
-            const template = getSignalsTemplate(index);
-            await setTemplate(callWithRequest, index, template);
+          if (templateExists) {
+            await deleteTemplate(callWithRequest, index);
           }
-          createBootstrapIndex(callWithRequest, index);
           return { acknowledged: true };
         }
       } catch (err) {
@@ -58,6 +65,6 @@ export const createCreateIndexRoute = (server: ServerFacade): Hapi.ServerRoute =
   };
 };
 
-export const createIndexRoute = (server: ServerFacade) => {
-  server.route(createCreateIndexRoute(server));
+export const deleteIndexRoute = (server: ServerFacade) => {
+  server.route(createDeleteIndexRoute(server));
 };

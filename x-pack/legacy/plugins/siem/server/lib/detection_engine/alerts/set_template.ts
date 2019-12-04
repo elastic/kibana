@@ -4,15 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndicesGetSettingsParams } from 'elasticsearch';
+import { IndicesPutTemplateParams } from 'elasticsearch';
 import { CallClusterOptions } from 'src/legacy/core_plugins/elasticsearch';
 import { CallWithRequest } from './types';
 
-export const readIndex = async (
-  callWithRequest: CallWithRequest<IndicesGetSettingsParams, CallClusterOptions, unknown>,
-  index: string
-) => {
-  return callWithRequest('indices.get', {
-    index,
+export const setTemplate = async (
+  callWithRequest: CallWithRequest<IndicesPutTemplateParams, CallClusterOptions, unknown>,
+  name: string,
+  body: unknown
+): Promise<unknown> => {
+  const putTemplate = await callWithRequest('indices.putTemplate', {
+    name,
+    body,
   });
+  return putTemplate;
 };

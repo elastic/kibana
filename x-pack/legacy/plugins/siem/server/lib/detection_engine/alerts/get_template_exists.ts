@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndicesGetSettingsParams } from 'elasticsearch';
+import { IndicesExistsTemplateParams } from 'elasticsearch';
 import { CallClusterOptions } from 'src/legacy/core_plugins/elasticsearch';
 import { CallWithRequest } from './types';
 
-export const readIndex = async (
-  callWithRequest: CallWithRequest<IndicesGetSettingsParams, CallClusterOptions, unknown>,
-  index: string
-) => {
-  return callWithRequest('indices.get', {
-    index,
+export const getTemplateExists = async (
+  callWithRequest: CallWithRequest<IndicesExistsTemplateParams, CallClusterOptions, boolean>,
+  template: string
+): Promise<boolean> => {
+  return callWithRequest('indices.existsTemplate', {
+    name: template,
   });
 };

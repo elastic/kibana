@@ -5,18 +5,12 @@
  */
 
 import Hapi from 'hapi';
-import {
-  DETECTION_ENGINE_INDEX_URL,
-  SIGNALS_INDEX_KEY,
-  APP_ID,
-} from '../../../../common/constants';
-import { createIndex } from '../alerts/create_index';
 
-// TODO: The schema
-// import { createRulesSchema } from './schemas';
-
+import { DETECTION_ENGINE_INDEX_URL } from '../../../../common/constants';
 import { ServerFacade, RequestFacade } from '../../../types';
-import { transformError } from './utils';
+import { transformError, getIndex, callWithRequestFactory } from './utils';
+import { readIndex } from '../alerts/read_index';
+import { getIndexExists } from '../alerts/get_index_exists';
 
 export const createReadIndexRoute = (server: ServerFacade): Hapi.ServerRoute => {
   return {
@@ -28,20 +22,26 @@ export const createReadIndexRoute = (server: ServerFacade): Hapi.ServerRoute => 
         options: {
           abortEarly: false,
         },
-        // payload: createRulesSchema, TODO: The Schema
       },
     },
-    async handler(context, request: RequestFacade, headers) {
-      const spaceId = server.plugins.spaces.getSpaceId(request);
-      const signalsIndex = server.config().get(`xpack.${APP_ID}.${SIGNALS_INDEX_KEY}`);
-      const index = `${signalsIndex}-${spaceId}`;
-      const elasticsearch = request.server.plugins.elasticsearch;
-      const { callWithRequest } = elasticsearch.getCluster('data');
+    async handler(request: RequestFacade, headers) {
       try {
-        const result = await callWithRequest(request, 'indices.getSettings', {
-          index,
-        });
-        return result;
+        const index = getIndex(request, server);
+        const callWithRequest = callWithRequestFactory(request);
+        // head request is used for if you want to get if the index exists
+        // or not and it will return a content-length: 0 along with either a 200 or 404
+        // depending on if the index exists or not.
+        if (request.method.toLowerCase() === 'head') {
+          const indexExists = await getIndexExists(callWithRequest, index);
+          if (indexExists) {
+            return headers.response().code(200);
+          } else {
+            return headers.response().code(404);
+          }
+        } else {
+          const indexSettings = await readIndex(callWithRequest, index);
+          return indexSettings;
+        }
       } catch (err) {
         return transformError(err);
       }

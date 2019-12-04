@@ -9,7 +9,7 @@
 set -e
 ./check_env_variables.sh
 
-# Example: ./get_index.sh
+# Example: ./get_signal_index.sh
 curl -s -k \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
  -X GET ${KIBANA_URL}${SPACE_URL}/api/detection_engine/index | jq .

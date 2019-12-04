@@ -25,6 +25,7 @@ import { findRulesRoute } from './lib/detection_engine/routes/find_rules_route';
 import { deleteRulesRoute } from './lib/detection_engine/routes/delete_rules_route';
 import { updateRulesRoute } from './lib/detection_engine/routes/update_rules_route';
 import { ServerFacade } from './types';
+import { deleteIndexRoute } from './lib/detection_engine/routes/delete_index_route';
 
 const APP_ID = 'siem';
 
@@ -57,6 +58,7 @@ export const initServerWithKibana = (
   // All REST index creation, policy management for spaces
   createIndexRoute(kbnServer);
   readIndexRoute(kbnServer);
+  deleteIndexRoute(kbnServer);
 
   const xpackMainPlugin = kbnServer.plugins.xpack_main;
   xpackMainPlugin.registerFeature({

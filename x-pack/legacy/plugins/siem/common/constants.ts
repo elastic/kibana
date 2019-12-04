@@ -15,7 +15,11 @@ export const DEFAULT_TIME_RANGE = 'timepicker:timeDefaults';
 export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults';
 export const DEFAULT_SIEM_TIME_RANGE = 'siem:timeDefaults';
 export const DEFAULT_SIEM_REFRESH_INTERVAL = 'siem:refreshIntervalDefaults';
+
+// DEPRECATED: THIS WILL BE REMOVED VERY SOON AND IS NO LONGER USED ON THE BACKEND
+// TODO: Remove this as soon as no code is left that is pulling data from it.
 export const DEFAULT_SIGNALS_INDEX_KEY = 'siem:defaultSignalsIndex';
+
 export const DEFAULT_SIGNALS_INDEX = '.siem-signals';
 export const DEFAULT_MAX_SIGNALS = 100;
 export const DEFAULT_SEARCH_AFTER_PAGE_SIZE = 100;

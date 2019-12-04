@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndicesGetSettingsParams } from 'elasticsearch';
+import { IndicesDeleteParams } from 'elasticsearch';
 import { CallClusterOptions } from 'src/legacy/core_plugins/elasticsearch';
 import { CallWithRequest } from './types';
 
-export const readIndex = async (
-  callWithRequest: CallWithRequest<IndicesGetSettingsParams, CallClusterOptions, unknown>,
+export const deleteAllIndex = async (
+  callWithRequest: CallWithRequest<IndicesDeleteParams, CallClusterOptions, boolean>,
   index: string
-) => {
-  return callWithRequest('indices.get', {
+): Promise<boolean> => {
+  return callWithRequest('indices.delete', {
     index,
   });
 };

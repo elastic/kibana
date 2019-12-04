@@ -9,10 +9,8 @@
 set -e
 ./check_env_variables.sh
 
-# Example: ./put_signal_index.sh
-curl -s -k \
-  -H "Content-Type: application/json" \
-  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -d @../signals_mapping.json \
-  -X PUT ${ELASTICSEARCH_URL}/${SIGNALS_INDEX} \
-  | jq .
+# Example: ./get_signal_index_exists.sh
+curl -s -k --head \
+ -H 'Content-Type: application/json' \
+ -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
+ ${KIBANA_URL}${SPACE_URL}/api/detection_engine/index
