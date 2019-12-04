@@ -8,10 +8,12 @@ import { SavedObjectsClientContract } from 'src/core/server/';
 import { CallESAsCurrentUser } from '../lib/cluster_access';
 import { installPipelines } from '../lib/elasticsearch/ingest_pipeline/ingest_pipelines';
 import { installTemplates } from '../lib/elasticsearch/template/install';
-import { AssetReference } from '../../common/types';
+import { AssetReference, RegistryPackage } from '../../common/types';
 import { SAVED_OBJECT_TYPE_DATASOURCES } from '../../common/constants';
 import { Datasource, Asset, InputType } from '../../../ingest/server/libs/types';
 import * as Registry from '../registry';
+
+const pkgToPkgKey = ({ name, version }: RegistryPackage) => `${name}-${version}`;
 
 export async function createDatasource(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -21,25 +23,26 @@ export async function createDatasource(options: {
   const { savedObjectsClient, pkgkey, callCluster } = options;
   const toSave = await installPipelines({ pkgkey, callCluster });
   // TODO: Clean up
-  const info = await Registry.fetchInfo(pkgkey);
-  await installTemplates(info, callCluster);
-
-  await saveDatasourceReferences({
-    savedObjectsClient,
-    pkgkey,
-    toSave,
-  });
+  const pkg = await Registry.fetchInfo(pkgkey);
+  await Promise.all([
+    installTemplates(pkg, callCluster),
+    saveDatasourceReferences({
+      savedObjectsClient,
+      pkg,
+      toSave,
+    }),
+  ]);
 
   return toSave;
 }
 
 async function saveDatasourceReferences(options: {
   savedObjectsClient: SavedObjectsClientContract;
-  pkgkey: string;
+  pkg: RegistryPackage;
   toSave: AssetReference[];
 }) {
-  const { savedObjectsClient, pkgkey, toSave } = options;
-  const savedDatasource = await getDatasource({ savedObjectsClient, pkgkey });
+  const { savedObjectsClient, pkg, toSave } = options;
+  const savedDatasource = await getDatasource({ savedObjectsClient, pkg });
   const savedAssets = savedDatasource?.package.assets;
   const assetsReducer = (current: Asset[] = [], pending: Asset) => {
     const hasAsset = current.find(c => c.id === pending.id && c.type === pending.type);
@@ -48,9 +51,9 @@ async function saveDatasourceReferences(options: {
   };
 
   const toInstall = (toSave as Asset[]).reduce(assetsReducer, savedAssets);
-  const datasource: Datasource = createFakeDatasource(pkgkey, toInstall);
+  const datasource: Datasource = createFakeDatasource(pkg, toInstall);
   await savedObjectsClient.create<Datasource>(SAVED_OBJECT_TYPE_DATASOURCES, datasource, {
-    id: pkgkey,
+    id: pkgToPkgKey(pkg),
     overwrite: true,
   });
 
@@ -59,26 +62,26 @@ async function saveDatasourceReferences(options: {
 
 async function getDatasource(options: {
   savedObjectsClient: SavedObjectsClientContract;
-  pkgkey: string;
+  pkg: RegistryPackage;
 }) {
-  const { savedObjectsClient, pkgkey } = options;
+  const { savedObjectsClient, pkg } = options;
   const datasource = await savedObjectsClient
-    .get<Datasource>(SAVED_OBJECT_TYPE_DATASOURCES, pkgkey)
+    .get<Datasource>(SAVED_OBJECT_TYPE_DATASOURCES, pkgToPkgKey(pkg))
     .catch(e => undefined);
 
   return datasource?.attributes;
 }
 
-function createFakeDatasource(pkgkey: string, assets: Asset[] = []): Datasource {
+function createFakeDatasource(pkg: RegistryPackage, assets: Asset[] = []): Datasource {
   return {
-    id: pkgkey,
+    id: pkgToPkgKey(pkg),
     name: 'name',
     read_alias: 'read_alias',
     package: {
-      name: 'name',
-      version: '1.0.1, 1.3.1',
-      description: 'description',
-      title: 'title',
+      name: pkg.name,
+      version: pkg.version,
+      description: pkg.description,
+      title: pkg.title,
       assets,
     },
     streams: [
