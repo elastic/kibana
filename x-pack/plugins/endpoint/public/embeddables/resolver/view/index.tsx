@@ -141,8 +141,8 @@ const Diagnostic = styled(
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
       >
-        {dotPositions.map(worldPosition => (
-          <DiagnosticDot worldPosition={worldPosition} />
+        {dotPositions.map((worldPosition, index) => (
+          <DiagnosticDot key={index} worldPosition={worldPosition} />
         ))}
       </div>
     );
@@ -188,7 +188,9 @@ const DiagnosticDot = styled(
     };
     return (
       <span className={className} style={style}>
-        ({worldPosition[0]}, {worldPosition[1]})
+        x: {worldPosition[0]}
+        <br />
+        y: {worldPosition[1]}
       </span>
     );
   })
@@ -196,8 +198,12 @@ const DiagnosticDot = styled(
   position: absolute;
   width: 40px;
   height: 40px;
-  text-align: center;
-  font-size: 20px;
+  text-align: left;
+  font-size: 10px;
   user-select: none;
   border: 1px solid black;
+  box-sizing: border-box;
+  border-radius: 10%;
+  padding: 4px;
+  white-space: nowrap;
 `;
