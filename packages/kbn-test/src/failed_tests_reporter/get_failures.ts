@@ -38,7 +38,8 @@ const getFailureText = (failure: FailedTestCase['failure']) => {
 
 const isLikelyIrrelevant = (name: string, failure: string) => {
   if (
-    failure.includes('NoSuchSessionError: This driver instance does not have a valid session ID')
+    failure.includes('NoSuchSessionError: This driver instance does not have a valid session ID') ||
+    failure.includes('NoSuchSessionError: Tried to run command without establishing a connection')
   ) {
     return true;
   }
