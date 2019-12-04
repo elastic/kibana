@@ -8,6 +8,11 @@ import { TestBed, SetupFunc } from '../../../../../../test_utils';
 import { Template } from '../../../common/types';
 import { nextTick } from './index';
 
+interface MappingField {
+  name: string;
+  type: string;
+}
+
 export interface TemplateFormTestBed extends TestBed<TemplateFormTestSubjects> {
   actions: {
     clickNextButton: () => void;
@@ -15,9 +20,10 @@ export interface TemplateFormTestBed extends TestBed<TemplateFormTestSubjects> {
     clickSubmitButton: () => void;
     completeStepOne: ({ name, indexPatterns, order, version }: Partial<Template>) => void;
     completeStepTwo: (settings: string) => void;
-    completeStepThree: () => void;
+    completeStepThree: (mappingFields?: MappingField[]) => void;
     completeStepFour: (aliases: string) => void;
     selectSummaryTab: (tab: 'summary' | 'request') => void;
+    addMappingField: (name: string, type: string) => void;
   };
 }
 
@@ -85,10 +91,18 @@ export const formSetup = async (
     component.update();
   };
 
-  const completeStepThree = async () => {
+  const completeStepThree = async (mappingFields?: MappingField[]) => {
     const { component } = testBed;
 
-    await nextTick();
+    if (mappingFields) {
+      for (const field of mappingFields) {
+        const { name, type } = field;
+        await addMappingField(name, type);
+      }
+    } else {
+      await nextTick();
+    }
+
     clickNextButton();
     await nextTick(50); // hooks updates cycles are tricky, adding some latency is needed
     component.update();
@@ -120,6 +134,21 @@ export const formSetup = async (
       .simulate('click');
   };
 
+  const addMappingField = async (name: string, type: string) => {
+    const { find, form, component } = testBed;
+
+    form.setInputValue('createFieldWrapper.input', name);
+    form.setInputValue('createFieldWrapper.select', type);
+
+    await nextTick();
+    component.update();
+
+    find('createFieldWrapper.addButton').simulate('click');
+
+    await nextTick();
+    component.update();
+  };
+
   return {
     ...testBed,
     actions: {
@@ -131,6 +160,7 @@ export const formSetup = async (
       completeStepThree,
       completeStepFour,
       selectSummaryTab,
+      addMappingField,
     },
   };
 };
@@ -140,6 +170,13 @@ export type TemplateFormTestSubjects = TestSubjects;
 export type TestSubjects =
   | 'backButton'
   | 'codeEditorContainer'
+  | 'createFieldWrapper.addChildButton'
+  | 'createFieldWrapper.addButton'
+  | 'createFieldWrapper.addFieldButton'
+  | 'createFieldWrapper.addMultiFieldButton'
+  | 'createFieldWrapper.input'
+  | 'createFieldWrapper.select'
+  | 'fieldsListItem'
   | 'indexPatternsField'
   | 'indexPatternsWarning'
   | 'indexPatternsWarningDescription'
