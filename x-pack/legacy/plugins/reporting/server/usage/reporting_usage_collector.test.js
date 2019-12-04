@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import sinon from 'sinon';
+import { getExportTypesRegistry } from '../lib/export_types_registry';
 import { getReportingUsageCollector } from './reporting_usage_collector';
+
+const exportTypesRegistry = getExportTypesRegistry();
 
 function getMockUsageCollection() {
   class MockUsageCollector {
@@ -55,11 +58,6 @@ function getServerMock(customization) {
 }
 
 const getResponseMock = (customization = {}) => customization;
-const getExportTypesRegistryMock = () => ({
-  getAll() {
-    return [];
-  },
-});
 
 describe('license checks', () => {
   describe('with a basic license', () => {
@@ -75,9 +73,9 @@ describe('license checks', () => {
         usageCollection,
         serverWithBasicLicenseMock,
         () => {},
-        getExportTypesRegistryMock()
+        exportTypesRegistry
       );
-      usageStats = await getReportingUsage(callClusterMock, getExportTypesRegistryMock());
+      usageStats = await getReportingUsage(callClusterMock, exportTypesRegistry);
     });
 
     test('sets enables to true', async () => {
@@ -106,9 +104,9 @@ describe('license checks', () => {
         usageCollection,
         serverWithNoLicenseMock,
         () => {},
-        getExportTypesRegistryMock()
+        exportTypesRegistry
       );
-      usageStats = await getReportingUsage(callClusterMock, getExportTypesRegistryMock());
+      usageStats = await getReportingUsage(callClusterMock, exportTypesRegistry);
     });
 
     test('sets enables to true', async () => {
@@ -137,9 +135,9 @@ describe('license checks', () => {
         usageCollection,
         serverWithPlatinumLicenseMock,
         () => {},
-        getExportTypesRegistryMock()
+        exportTypesRegistry
       );
-      usageStats = await getReportingUsage(callClusterMock, getExportTypesRegistryMock());
+      usageStats = await getReportingUsage(callClusterMock, exportTypesRegistry);
     });
 
     test('sets enables to true', async () => {
@@ -168,9 +166,9 @@ describe('license checks', () => {
         usageCollection,
         serverWithBasicLicenseMock,
         () => {},
-        getExportTypesRegistryMock()
+        exportTypesRegistry
       );
-      usageStats = await getReportingUsage(callClusterMock, getExportTypesRegistryMock());
+      usageStats = await getReportingUsage(callClusterMock, exportTypesRegistry);
     });
 
     test('sets enables to true', async () => {
@@ -195,7 +193,7 @@ describe('data modeling', () => {
       usageCollection,
       serverWithPlatinumLicenseMock,
       () => {},
-      getExportTypesRegistryMock()
+      exportTypesRegistry
     ));
   });
 
