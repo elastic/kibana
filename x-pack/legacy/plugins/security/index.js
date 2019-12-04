@@ -130,7 +130,6 @@ export const security = (kibana) => new kibana.Plugin({
       isSystemAPIRequest: server.plugins.kibana.systemApi.isSystemApiRequest.bind(
         server.plugins.kibana.systemApi
       ),
-      capabilities: { registerCapabilitiesModifier: server.registerCapabilitiesModifier },
       cspRules: createCSPRuleString(config.get('csp.rules')),
       kibanaIndexName: config.get('kibana.index'),
     });
