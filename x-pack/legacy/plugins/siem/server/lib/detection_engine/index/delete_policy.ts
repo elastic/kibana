@@ -6,15 +6,12 @@
 
 import { CallWithRequest } from './types';
 
-export const setPolicy = async (
-  callWithRequest: CallWithRequest<{ path: string; method: 'PUT'; body: unknown }, {}, unknown>,
-  policy: string,
-  body: unknown
+export const deletePolicy = async (
+  callWithRequest: CallWithRequest<{ path: string; method: 'DELETE' }, {}, unknown>,
+  policy: string
 ): Promise<unknown> => {
-  const createRequest = await callWithRequest('transport.request', {
+  return callWithRequest('transport.request', {
     path: `_ilm/policy/${policy}`,
-    method: 'PUT',
-    body,
+    method: 'DELETE',
   });
-  return createRequest;
 };

@@ -7,17 +7,17 @@
 import Hapi from 'hapi';
 import Boom from 'boom';
 
-import { DETECTION_ENGINE_INDEX_URL } from '../../../../common/constants';
-import signalsPolicy from '../signals_policy.json';
-import { ServerFacade, RequestFacade } from '../../../types';
-import { transformError, getIndex, callWithRequestFactory } from './utils';
-import { getIndexExists } from '../alerts/get_index_exists';
-import { getPolicyExists } from '../alerts/get_policy_exists';
-import { setPolicy } from '../alerts/set_policy';
-import { setTemplate } from '../alerts/set_template';
-import { getSignalsTemplate } from '../signals_template';
-import { getTemplateExists } from '../alerts/get_template_exists';
-import { createBootstrapIndex } from '../alerts/create_bootstrap_index';
+import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
+import signalsPolicy from '../../signals_policy.json';
+import { ServerFacade, RequestFacade } from '../../../../types';
+import { transformError, getIndex, callWithRequestFactory } from '../utils';
+import { getIndexExists } from '../../index/get_index_exists';
+import { getPolicyExists } from '../../index/get_policy_exists';
+import { setPolicy } from '../../index/set_policy';
+import { setTemplate } from '../../index/set_template';
+import { getSignalsTemplate } from '../../signals_template';
+import { getTemplateExists } from '../../index/get_template_exists';
+import { createBootstrapIndex } from '../../index/create_bootstrap_index';
 
 export const createCreateIndexRoute = (server: ServerFacade): Hapi.ServerRoute => {
   return {

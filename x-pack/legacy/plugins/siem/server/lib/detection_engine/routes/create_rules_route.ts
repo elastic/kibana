@@ -15,7 +15,7 @@ import { createRulesSchema } from './schemas';
 import { ServerFacade } from '../../../types';
 import { readRules } from '../alerts/read_rules';
 import { transformOrError, transformError, getIndex, callWithRequestFactory } from './utils';
-import { getIndexExists } from '../alerts/get_index_exists';
+import { getIndexExists } from '../index/get_index_exists';
 
 export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
   return {

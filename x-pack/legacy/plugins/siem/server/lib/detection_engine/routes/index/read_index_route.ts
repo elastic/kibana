@@ -6,11 +6,11 @@
 
 import Hapi from 'hapi';
 
-import { DETECTION_ENGINE_INDEX_URL } from '../../../../common/constants';
-import { ServerFacade, RequestFacade } from '../../../types';
-import { transformError, getIndex, callWithRequestFactory } from './utils';
-import { readIndex } from '../alerts/read_index';
-import { getIndexExists } from '../alerts/get_index_exists';
+import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
+import { ServerFacade, RequestFacade } from '../../../../types';
+import { transformError, getIndex, callWithRequestFactory } from '../utils';
+import { readIndex } from '../../index/read_index';
+import { getIndexExists } from '../../index/get_index_exists';
 
 export const createReadIndexRoute = (server: ServerFacade): Hapi.ServerRoute => {
   return {

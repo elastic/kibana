@@ -13,9 +13,8 @@ export const setTemplate = async (
   name: string,
   body: unknown
 ): Promise<unknown> => {
-  const putTemplate = await callWithRequest('indices.putTemplate', {
+  return callWithRequest('indices.putTemplate', {
     name,
     body,
   });
-  return putTemplate;
 };

@@ -11,7 +11,7 @@ import { CallWithRequest } from './types';
 export const readIndex = async (
   callWithRequest: CallWithRequest<IndicesGetSettingsParams, CallClusterOptions, unknown>,
   index: string
-) => {
+): Promise<unknown> => {
   return callWithRequest('indices.get', {
     index,
   });

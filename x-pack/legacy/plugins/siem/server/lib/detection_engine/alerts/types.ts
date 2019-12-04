@@ -241,8 +241,6 @@ export type RuleAlertTypeDefinition = Omit<AlertType, 'executor'> & {
   executor: ({ services, params, state }: RuleExecutorOptions) => Promise<State | void>;
 };
 
-export type CallWithRequest<T, U, V> = (endpoint: string, params: T, options?: V) => Promise<V>;
-
 export const isAlertTypes = (obj: unknown[]): obj is RuleAlertType[] => {
   return obj.every(rule => isAlertType(rule));
 };
