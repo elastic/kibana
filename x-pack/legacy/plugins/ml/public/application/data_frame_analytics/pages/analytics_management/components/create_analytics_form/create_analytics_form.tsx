@@ -248,6 +248,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               )}
               checked={isAdvancedEditorEnabled}
               onChange={actions.switchToAdvancedEditor}
+              data-test-subj="mlAnalyticsCreateJobFlyoutAdvancedEditorSwitch"
             />
           </EuiFormRow>
           <EuiFormRow
@@ -301,6 +302,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                 }
               )}
               isInvalid={(!jobIdEmpty && !jobIdValid) || jobIdExists}
+              data-test-subj="mlAnalyticsCreateJobFlyoutJobIdInput"
             />
           </EuiFormRow>
           <EuiFormRow
@@ -338,6 +340,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                     setFormState({ sourceIndex: selectedOptions[0].label || '' })
                   }
                   isClearable={false}
+                  data-test-subj="mlAnalyticsCreateJobFlyoutSourceIndexSelect"
                 />
               )}
               {isJobCreated && (
@@ -404,6 +407,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                 }
               )}
               isInvalid={!destinationIndexNameEmpty && !destinationIndexNameValid}
+              data-test-subj="mlAnalyticsCreateJobFlyoutDestinationIndexInput"
             />
           </EuiFormRow>
           {jobType === JOB_TYPES.REGRESSION && (
@@ -463,6 +467,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                   }
                   isClearable={false}
                   isInvalid={dependentVariable === ''}
+                  data-test-subj="mlAnalyticsCreateJobFlyoutDependentVariableSelect"
                 />
               </EuiFormRow>
               <EuiFormRow
@@ -480,6 +485,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                   value={trainingPercent}
                   // @ts-ignore Property 'value' does not exist on type 'EventTarget' | (EventTarget & HTMLInputElement)
                   onChange={e => setFormState({ trainingPercent: e.target.value })}
+                  data-test-subj="mlAnalyticsCreateJobFlyoutTrainingPercentSlider"
                 />
               </EuiFormRow>
             </Fragment>
@@ -500,6 +506,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               value={modelMemoryLimit || ''}
               onChange={e => setFormState({ modelMemoryLimit: e.target.value })}
               isInvalid={modelMemoryLimit === ''}
+              data-test-subj="mlAnalyticsCreateJobFlyoutModelMemoryInput"
             />
           </EuiFormRow>
           <EuiFormRow
@@ -521,6 +528,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               })}
               checked={createIndexPattern === true}
               onChange={() => setFormState({ createIndexPattern: !createIndexPattern })}
+              data-test-subj="mlAnalyticsCreateJobFlyoutCreateIndexPatternSwitch"
             />
           </EuiFormRow>
         </Fragment>
