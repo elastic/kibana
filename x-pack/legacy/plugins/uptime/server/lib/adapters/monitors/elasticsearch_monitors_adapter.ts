@@ -393,12 +393,14 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
 
     const monLocs: MonitorLocation[] = [];
     locations.forEach((loc: any) => {
-      const mostRecentLocation = loc.most_recent.hits.hits[0]._source;
-      const location: MonitorLocation = {
-        summary: mostRecentLocation?.summary,
-        geo: getGeo(mostRecentLocation?.observer?.geo),
-      };
-      monLocs.push(location);
+      if (loc?.key !== '__location_missing__') {
+        const mostRecentLocation = loc.most_recent.hits.hits[0]._source;
+        const location: MonitorLocation = {
+          summary: mostRecentLocation?.summary,
+          geo: getGeo(mostRecentLocation?.observer?.geo),
+        };
+        monLocs.push(location);
+      }
     });
 
     return {

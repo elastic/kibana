@@ -5,14 +5,15 @@
  */
 
 import lowPolyLayerFeatures from './low_poly_layer.json';
+import { LocationPoint } from './embedded_map';
 
 /**
  * Returns `Source/Destination Point-to-point` Map LayerList configuration, with a source,
  * destination, and line layer for each of the provided indexPatterns
  *
  */
-export const getLayerList = () => {
-  return [getLowPolyLayer()];
+export const getLayerList = (upPoints: LocationPoint[], downPoints: LocationPoint[]) => {
+  return [getLowPolyLayer(), getDownPointsLayer(downPoints), getUpPointsLayer(upPoints)];
 };
 
 export const getLowPolyLayer = () => {
@@ -47,6 +48,110 @@ export const getLowPolyLayer = () => {
           type: 'STATIC',
           options: {
             size: 0,
+          },
+        },
+        iconSize: {
+          type: 'STATIC',
+          options: {
+            size: 6,
+          },
+        },
+      },
+    },
+    type: 'VECTOR',
+  };
+};
+
+export const getDownPointsLayer = (downPoints: LocationPoint[]) => {
+  const features = downPoints?.map(point => ({
+    type: 'feature',
+    geometry: {
+      type: 'Point',
+      coordinates: [+point.lon, +point.lat],
+    },
+  }));
+  return {
+    id: 'down_points',
+    label: 'Down Locations',
+    sourceDescriptor: {
+      type: 'GEOJSON_FILE',
+      __featureCollection: {
+        features,
+        type: 'FeatureCollection',
+      },
+    },
+    visible: true,
+    style: {
+      type: 'VECTOR',
+      properties: {
+        fillColor: {
+          type: 'STATIC',
+          options: {
+            color: '#BC261E',
+          },
+        },
+        lineColor: {
+          type: 'STATIC',
+          options: {
+            color: '#fff',
+          },
+        },
+        lineWidth: {
+          type: 'STATIC',
+          options: {
+            size: 2,
+          },
+        },
+        iconSize: {
+          type: 'STATIC',
+          options: {
+            size: 6,
+          },
+        },
+      },
+    },
+    type: 'VECTOR',
+  };
+};
+
+export const getUpPointsLayer = (upPoints: LocationPoint[]) => {
+  const features = upPoints?.map(point => ({
+    type: 'feature',
+    geometry: {
+      type: 'Point',
+      coordinates: [+point.lon, +point.lat],
+    },
+  }));
+  return {
+    id: 'up_points',
+    label: 'Up Locations',
+    sourceDescriptor: {
+      type: 'GEOJSON_FILE',
+      __featureCollection: {
+        features,
+        type: 'FeatureCollection',
+      },
+    },
+    visible: true,
+    style: {
+      type: 'VECTOR',
+      properties: {
+        fillColor: {
+          type: 'STATIC',
+          options: {
+            color: '#98A2B2',
+          },
+        },
+        lineColor: {
+          type: 'STATIC',
+          options: {
+            color: '#fff',
+          },
+        },
+        lineWidth: {
+          type: 'STATIC',
+          options: {
+            size: 2,
           },
         },
         iconSize: {

@@ -7,8 +7,8 @@
 import * as t from 'io-ts';
 
 export const LocationType = t.partial({
-  lat: t.number,
-  lon: t.number,
+  lat: t.string,
+  lon: t.string,
 });
 
 export const CheckGeoType = t.partial({

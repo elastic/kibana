@@ -6,7 +6,6 @@
 
 import React, { useEffect, useState } from 'react';
 import uuid from 'uuid';
-import { Query, esFilters } from 'src/plugins/data/common';
 import styled from 'styled-components';
 
 import { start } from '../../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
@@ -18,8 +17,13 @@ import { MapEmbeddable } from './types';
 import { getLayerList } from './map_config';
 
 export interface EmbeddedMapProps {
-  query: Query;
-  filters: esFilters.Filter[];
+  upPoints: LocationPoint[];
+  downPoints: LocationPoint[];
+}
+
+export interface LocationPoint {
+  lat: string;
+  lon: string;
 }
 
 const EmbeddedPanel = styled.div`
@@ -35,23 +39,45 @@ const EmbeddedPanel = styled.div`
     z-index: 1;
     min-height: 0; // Absolute must for Firefox to scroll contents
   }
+  &&& .mapboxgl-canvas {
+    animation: none !important;
+  }
 `;
 
-export const EmbeddedMap = React.memo<EmbeddedMapProps>(({ filters, query }) => {
-  const [embeddable, setEmbeddable] = useState<MapEmbeddable | null>(null);
+export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
+  const [embeddable, setEmbeddable] = useState<MapEmbeddable>();
+
+  async function setupEmbeddable() {
+    const mapState = {
+      layerList: getLayerList(upPoints, downPoints),
+      title: i18n.MAP_TITLE,
+    };
+    // @ts-ignore
+    const embeddableObject = await factory.createFromState(mapState, input, undefined);
+
+    setEmbeddable(embeddableObject);
+  }
+  useEffect(() => {
+    if (embeddable?.destroy) {
+      embeddable.destroy();
+    }
+    setupEmbeddable();
+  }, [upPoints, downPoints]);
+
+  useEffect(() => {
+    if (embeddableRoot.current && embeddable) {
+      embeddable.render(embeddableRoot.current);
+    }
+  }, [embeddable]);
 
   const factory = start.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
 
-  const state = {
-    layerList: getLayerList(),
-    title: i18n.MAP_TITLE,
-  };
   const input = {
     id: uuid.v4(),
-    filters,
+    filters: [],
     hidePanelTitles: true,
-    query,
-    refreshConfig: { value: 0, pause: true },
+    query: { query: '', language: 'kuery' },
+    refreshConfig: { value: 0, pause: false },
     viewMode: 'view',
     isLayerTOCOpen: false,
     hideFilterActions: true,
@@ -63,26 +89,11 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(({ filters, query }) => 
 
   const embeddableRoot: React.RefObject<HTMLDivElement> = React.createRef();
 
-  useEffect(() => {
-    async function setupEmbeddable() {
-      // @ts-ignore
-      const embeddableObject = await factory.createFromState(state, input, undefined);
-
-      setEmbeddable(embeddableObject);
-    }
-    setupEmbeddable();
-  }, []);
-  useEffect(() => {
-    if (embeddableRoot.current && embeddable) {
-      embeddable.render(embeddableRoot.current);
-    }
-  }, [embeddable]);
-
   return (
     <EmbeddedPanel>
       <div className="embPanel__content" ref={embeddableRoot} />
     </EmbeddedPanel>
   );
-});
+};
 
 EmbeddedMap.displayName = 'EmbeddedMap';
