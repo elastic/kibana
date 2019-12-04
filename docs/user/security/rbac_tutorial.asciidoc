@@ -29,7 +29,7 @@ To complete this tutorial, you'll need the following:
 name. See <<spaces-managing, view, create, and delete spaces>> for 
 details on creating a space.
 *  **Data**:  You can use <<tutorial-sample-data, sample data>> or 
-live data.  In the steps below Filebeat and Metricbeat data are used.
+live data.  In the steps below, Filebeat and Metricbeat data are used.
 
 [float]
 ==== Steps
@@ -112,4 +112,3 @@ image::security/images/role-new-user.png["Develoer user"]
 
 Finally, have the developer log in and access the Dev Mortgage space 
 and create a new visualization.
-
