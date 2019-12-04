@@ -12,8 +12,7 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { MlRoute, PageLoader } from '../../router';
-import { useResolver } from '../../router';
+import { MlRoute, PageLoader, useResolver, PageProps } from '../../router';
 
 import { checkFullLicense } from '../../../license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check_privilege';
@@ -34,11 +33,11 @@ const breadcrumbs = [
 
 export const calendarListRoute: MlRoute = {
   path: '/settings/calendars_list',
-  render: (props: any, config: any) => <PageWrapper config={config} />,
+  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
   breadcrumbs,
 };
 
-const PageWrapper: FC<{ config: any }> = ({ config }) => {
+const PageWrapper: FC<PageProps> = ({ config }) => {
   const { context } = useResolver(undefined, config, {
     checkFullLicense,
     checkGetJobsPrivilege,

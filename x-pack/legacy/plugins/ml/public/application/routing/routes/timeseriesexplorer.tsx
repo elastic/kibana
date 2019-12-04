@@ -13,8 +13,7 @@ import { Subscription } from 'rxjs';
 // @ts-ignore
 import queryString from 'query-string';
 import { timefilter } from 'ui/timefilter';
-import { MlRoute, PageLoader } from '../router';
-import { useResolver } from '../router';
+import { MlRoute, PageLoader, useResolver, PageProps } from '../router';
 import { basicResolvers } from '../resolvers';
 import { TimeSeriesExplorer } from '../../timeseriesexplorer';
 import { mlJobService } from '../../services/job_service';
@@ -26,7 +25,7 @@ import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';
 
 export const timeSeriesExplorerRoute: MlRoute = {
   path: '/timeseriesexplorer',
-  render: (props: any, config: any) => <PageWrapper config={config} {...props} />,
+  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
   breadcrumbs: [
     ML_BREADCRUMB,
     ANOMALY_DETECTION_BREADCRUMB,
@@ -39,9 +38,9 @@ export const timeSeriesExplorerRoute: MlRoute = {
   ],
 };
 
-const PageWrapper: FC<{ location: any; config: any }> = ({ location, config }) => {
+const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
   const { context } = useResolver('', config, {
-    ...basicResolvers,
+    ...basicResolvers(deps),
     jobs: mlJobService.loadJobsWrapper,
   });
   const { _a, _g } = queryString.parse(location.search);
@@ -50,17 +49,18 @@ const PageWrapper: FC<{ location: any; config: any }> = ({ location, config }) =
   try {
     appState = decode(_a);
     globalState = decode(_g);
-
-    appState.mlTimeSeriesExplorer = {};
-    globalState.fetch = () => {};
-    globalState.on = () => {};
-    globalState.off = () => {};
-    globalState.save = () => {};
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.error('Could not parse global state');
-    window.location.href = '#data_frame_analytics';
+    // console.error('Could not parse global state');
+    // window.location.href = '#data_frame_analytics';
+    // globalState = {};
+    // appState = {};
   }
+  appState.mlTimeSeriesExplorer = {};
+  globalState.fetch = () => {};
+  globalState.on = () => {};
+  globalState.off = () => {};
+  globalState.save = () => {};
 
   return (
     <PageLoader context={context}>
@@ -81,10 +81,12 @@ const TimeSeriesExplorerWrapper: FC<{ globalState: any; appState: any; config: a
   appState,
   config,
 }) => {
-  timefilter.setTime({
-    from: globalState.time.from,
-    to: globalState.time.to,
-  });
+  if (globalState.time) {
+    timefilter.setTime({
+      from: globalState.time.from,
+      to: globalState.time.to,
+    });
+  }
 
   const subscriptions = new Subscription();
   subscriptions.add(

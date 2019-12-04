@@ -17,8 +17,9 @@ type IndexPatternSavedObject = SimpleSavedObject<SavedObjectAttributes>;
 let indexPatternCache: IndexPatternSavedObject[] = [];
 let fullIndexPatterns: IndexPatternsContract | null = null;
 
-export function loadIndexPatterns() {
-  fullIndexPatterns = npStart.plugins.data.indexPatterns;
+export function loadIndexPatterns(indexPatterns: IndexPatterns) {
+  fullIndexPatterns =
+    indexPatterns !== undefined ? indexPatterns : data.indexPatterns.indexPatterns; // NP   TODO  - remove this check, indexPatterns should always be passed in
   const savedObjectsClient = chrome.getSavedObjectsClient();
   return savedObjectsClient
     .find({

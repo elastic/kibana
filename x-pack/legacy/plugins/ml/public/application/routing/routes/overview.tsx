@@ -8,8 +8,7 @@ import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { Redirect } from 'react-router-dom';
-import { MlRoute, PageLoader } from '../router';
-import { useResolver } from '../router';
+import { MlRoute, PageLoader, useResolver } from '../router';
 import { KibanaConfigTypeFix } from '../../contexts/kibana';
 import { OverviewPage } from '../../overview';
 
@@ -31,7 +30,7 @@ const breadcrumbs = [
 
 export const overviewRoute: MlRoute = {
   path: '/overview',
-  render: (props: any, config: any) => <PageWrapper config={config} />,
+  render: (props, config) => <PageWrapper config={config} />,
   breadcrumbs,
 };
 

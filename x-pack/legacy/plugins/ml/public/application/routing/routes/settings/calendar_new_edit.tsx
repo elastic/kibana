@@ -14,8 +14,7 @@ import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import queryString from 'query-string';
 
-import { MlRoute, PageLoader } from '../../router';
-import { useResolver } from '../../router';
+import { MlRoute, PageLoader, useResolver, PageProps } from '../../router';
 
 import { checkFullLicense } from '../../../license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check_privilege';
@@ -26,6 +25,10 @@ import { SETTINGS, ML_BREADCRUMB } from '../../breadcrumbs';
 enum MODE {
   NEW,
   EDIT,
+}
+
+interface NewCalendarPageProps extends PageProps {
+  mode: MODE;
 }
 
 const newBreadcrumbs = [
@@ -52,21 +55,21 @@ const editBreadcrumbs = [
 
 export const newCalendarRoute: MlRoute = {
   path: '/settings/calendars_list/new_calendar',
-  render: (props: any, config: any) => <PageWrapper config={config} {...props} mode={MODE.NEW} />,
+  render: (props, config, deps) => (
+    <PageWrapper config={config} {...props} deps={deps} mode={MODE.NEW} />
+  ),
   breadcrumbs: newBreadcrumbs,
 };
 
 export const editCalendarRoute: MlRoute = {
   path: '/settings/calendars_list/edit_calendar/:calendarId',
-  render: (props: any, config: any) => <PageWrapper config={config} {...props} mode={MODE.EDIT} />,
+  render: (props, config, deps) => (
+    <PageWrapper config={config} {...props} deps={deps} mode={MODE.EDIT} />
+  ),
   breadcrumbs: editBreadcrumbs,
 };
 
-const PageWrapper: FC<{ location: any; config: any; mode: MODE }> = ({
-  location,
-  config,
-  mode,
-}) => {
+const PageWrapper: FC<NewCalendarPageProps> = ({ location, config, mode }) => {
   let calendarId: string | undefined;
   if (mode === MODE.EDIT) {
     const pathMatch: string[] | null = location.pathname.match(/.+\/(.+)$/);

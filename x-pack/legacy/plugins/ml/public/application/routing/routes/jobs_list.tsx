@@ -6,8 +6,8 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { MlRoute, PageLoader } from '../router';
-import { useResolver } from '../router';
+import { RouteProps } from 'react-router-dom';
+import { MlRoute, PageLoader, useResolver, PageProps } from '../router';
 import { KibanaConfigTypeFix } from '../../contexts/kibana';
 import { basicResolvers } from '../resolvers';
 import { JobsPage } from '../../jobs/jobs_list';
@@ -26,12 +26,12 @@ const breadcrumbs = [
 
 export const jobListRoute: MlRoute = {
   path: '/jobs',
-  render: (props: any, config: any) => <PageWrapper config={config} />,
+  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
   breadcrumbs,
 };
 
-const PageWrapper: FC<{ config: KibanaConfigTypeFix }> = ({ config }) => {
-  const { context } = useResolver(undefined, config, basicResolvers);
+const PageWrapper: FC<PageProps> = ({ config, deps }) => {
+  const { context } = useResolver(undefined, config, basicResolvers(deps));
 
   return (
     <PageLoader context={context}>

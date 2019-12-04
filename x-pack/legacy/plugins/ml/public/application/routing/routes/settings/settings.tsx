@@ -11,8 +11,7 @@
 
 import React, { FC } from 'react';
 
-import { MlRoute, PageLoader } from '../../router';
-import { useResolver } from '../../router';
+import { MlRoute, PageLoader, useResolver, PageProps } from '../../router';
 
 import { checkFullLicense } from '../../../license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check_privilege';
@@ -24,11 +23,11 @@ const breadcrumbs = [ML_BREADCRUMB, SETTINGS];
 
 export const settingsRoute: MlRoute = {
   path: '/settings',
-  render: (props: any, config: any) => <PageWrapper config={config} />,
+  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
   breadcrumbs,
 };
 
-const PageWrapper: FC<{ config: any }> = ({ config }) => {
+const PageWrapper: FC<PageProps> = ({ config }) => {
   const { context } = useResolver(undefined, config, {
     checkFullLicense,
     checkGetJobsPrivilege,

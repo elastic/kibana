@@ -14,8 +14,7 @@ import { i18n } from '@kbn/i18n';
 
 // @ts-ignore
 import queryString from 'query-string';
-import { MlRoute, PageLoader } from '../../router';
-import { useResolver } from '../../router';
+import { MlRoute, PageLoader, useResolver, PageProps } from '../../router';
 import { FileDataVisualizerPage } from '../../../datavisualizer/file_based';
 
 import { checkBasicLicense } from '../../../license/check_license';
@@ -38,15 +37,15 @@ const breadcrumbs = [
 
 export const fileBasedRoute: MlRoute = {
   path: '/filedatavisualizer',
-  render: (props: any, config: any) => <PageWrapper config={config} {...props} />,
+  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
   breadcrumbs,
 };
 
-const PageWrapper: FC<{ location: any; config: any }> = ({ location, config }) => {
+const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
   const { index } = queryString.parse(location.search);
   const { context } = useResolver(index, config, {
     checkBasicLicense,
-    loadIndexPatterns,
+    loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),
     checkFindFileStructurePrivilege,
     getMlNodeCount,
   });

@@ -5,25 +5,42 @@
  */
 
 import React, { FC, useEffect, useState } from 'react';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Route, RouteProps } from 'react-router-dom';
+import { Location } from 'history';
 import { I18nContext } from 'ui/i18n';
 import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 
+import { IndexPatterns } from 'ui/index_patterns';
 import { getIndexPatternById, getFullIndexPatterns } from '../util/index_utils';
 import { createSearchItems } from '../jobs/new_job/utils/new_job_utils';
 import { ResolverResults, Resolvers } from './resolvers';
-import { KibanaContext, KibanaConfigTypeFix } from '../contexts/kibana';
+import { KibanaContext, KibanaConfigTypeFix, KibanaContextValue } from '../contexts/kibana';
 import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
 
 import * as routes from './routes';
 
+// custom RouteProps making location non-optional
+interface MlRouteProps extends RouteProps {
+  location: Location;
+}
+
 export interface MlRoute {
   path: string;
-  render(props: any, config: any): JSX.Element;
+  render(props: MlRouteProps, config: KibanaConfigTypeFix, deps: PageDependencies): JSX.Element;
   breadcrumbs: ChromeBreadcrumb[];
 }
 
-export const PageLoader: FC<{ context: any }> = ({ context, children }) => {
+export interface PageProps {
+  location: Location;
+  config: KibanaConfigTypeFix;
+  deps: PageDependencies;
+}
+
+export interface PageDependencies {
+  indexPatterns: IndexPatterns;
+}
+
+export const PageLoader: FC<{ context: KibanaContextValue }> = ({ context, children }) => {
   return context === null ? null : (
     <I18nContext>
       <KibanaContext.Provider value={context}>{children}</KibanaContext.Provider>
@@ -35,7 +52,8 @@ export const MlRouter: FC<{
   basename: string;
   config: KibanaConfigTypeFix;
   setBreadCrumbs: any;
-}> = ({ basename, config, setBreadCrumbs }) => {
+  indexPatterns: IndexPatterns;
+}> = ({ basename, config, setBreadCrumbs, indexPatterns }) => {
   return (
     <Router basename={basename}>
       <div>
@@ -46,7 +64,7 @@ export const MlRouter: FC<{
             exact
             render={props => {
               setBreadCrumbs(route.breadcrumbs);
-              return route.render(props, config);
+              return route.render(props, config, { indexPatterns });
             }}
           />
         ))}
@@ -59,7 +77,7 @@ export const useResolver = (
   index: string | undefined,
   config: KibanaConfigTypeFix,
   resolvers: Resolvers
-) => {
+): { context: KibanaContextValue; results: ResolverResults } => {
   const funcNames = Object.keys(resolvers); // Object.entries gets this wrong?!
   const funcs = Object.values(resolvers); // Object.entries gets this wrong?!
   const tempResults = funcNames.reduce((p, c) => {

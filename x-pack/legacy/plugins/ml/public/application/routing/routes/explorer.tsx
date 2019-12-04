@@ -13,8 +13,7 @@ import { Subscription } from 'rxjs';
 import queryString from 'query-string';
 import { timefilter } from 'ui/timefilter';
 // import { AppState as IAppState, AppStateClass } from 'ui/state_management/app_state';
-import { MlRoute, PageLoader } from '../router';
-import { useResolver } from '../router';
+import { MlRoute, PageLoader, useResolver, PageProps } from '../router';
 import { basicResolvers } from '../resolvers';
 import { Explorer } from '../../explorer';
 import { mlJobService } from '../../services/job_service';
@@ -42,14 +41,14 @@ const breadcrumbs = [
 
 export const explorerRoute: MlRoute = {
   path: '/explorer',
-  render: (props: any, config: any) => <PageWrapper config={config} {...props} />,
+  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
   breadcrumbs,
 };
 
-const PageWrapper: FC<{ location: any; config: any }> = ({ location, config }) => {
+const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
   const { index } = queryString.parse(location.search);
   const { context } = useResolver(index, config, {
-    ...basicResolvers,
+    ...basicResolvers(deps),
     jobs: mlJobService.loadJobsWrapper,
   });
   const { _a, _g } = queryString.parse(location.search);
@@ -58,21 +57,22 @@ const PageWrapper: FC<{ location: any; config: any }> = ({ location, config }) =
   try {
     appState = decode(_a);
     globalState = decode(_g);
-
-    appState.mlTimeSeriesExplorer = {};
-    appState.fetch = () => {};
-    appState.on = () => {};
-    appState.off = () => {};
-    appState.save = () => {};
-    globalState.fetch = () => {};
-    globalState.on = () => {};
-    globalState.off = () => {};
-    globalState.save = () => {};
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.error('Could not parse global state');
-    window.location.href = '#data_frame_analytics';
+    // console.error('Could not parse global state');
+    // window.location.href = '#data_frame_analytics';
+    // globalState = {};
+    // appState = {};
   }
+  appState.mlTimeSeriesExplorer = {};
+  appState.fetch = () => {};
+  appState.on = () => {};
+  appState.off = () => {};
+  appState.save = () => {};
+  globalState.fetch = () => {};
+  globalState.on = () => {};
+  globalState.off = () => {};
+  globalState.save = () => {};
 
   return (
     <PageLoader context={context}>
@@ -125,10 +125,12 @@ const ExplorerWrapper: FC<{ globalState: any; appState: any }> = ({ globalState,
     subscribeAppStateToObservable(AppState, 'mlSelectSeverity', severity$, () => {})
   );
 
-  timefilter.setTime({
-    from: globalState.time.from,
-    to: globalState.time.to,
-  });
+  if (globalState.time) {
+    timefilter.setTime({
+      from: globalState.time.from,
+      to: globalState.time.to,
+    });
+  }
 
   useEffect(() => {
     return () => {

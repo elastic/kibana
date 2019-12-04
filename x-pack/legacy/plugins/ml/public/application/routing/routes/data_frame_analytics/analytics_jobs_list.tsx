@@ -7,8 +7,7 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { MlRoute, PageLoader } from '../../router';
-import { useResolver } from '../../router';
+import { MlRoute, PageLoader, useResolver, PageProps } from '../../router';
 import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../data_frame_analytics/pages/analytics_management';
 import { ML_BREADCRUMB } from '../../breadcrumbs';
@@ -25,12 +24,12 @@ const breadcrumbs = [
 
 export const analyticsJobsListRoute: MlRoute = {
   path: '/data_frame_analytics',
-  render: (props: any, config: any) => <PageWrapper config={config} {...props} />,
+  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
   breadcrumbs,
 };
 
-const PageWrapper: FC<{ location: any; config: any }> = ({ location, config }) => {
-  const { context } = useResolver('', config, basicResolvers);
+const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
+  const { context } = useResolver('', config, basicResolvers(deps));
   return (
     <PageLoader context={context}>
       <Page />

@@ -44,7 +44,7 @@ export const ml = (kibana: any) => {
         main: 'plugins/ml/legacy',
       },
       styleSheetPaths: resolve(__dirname, 'public/application/index.scss'),
-      // hacks: ['plugins/ml/hacks/toggle_app_link_in_nav'],
+      hacks: ['plugins/ml/application/hacks/toggle_app_link_in_nav'],
       savedObjectSchemas: {
         'ml-telemetry': {
           isNamespaceAgnostic: true,

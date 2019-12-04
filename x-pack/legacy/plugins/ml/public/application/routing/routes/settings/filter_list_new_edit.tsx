@@ -14,8 +14,7 @@ import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import queryString from 'query-string';
 
-import { MlRoute, PageLoader } from '../../router';
-import { useResolver } from '../../router';
+import { MlRoute, PageLoader, useResolver, PageProps } from '../../router';
 
 import { checkFullLicense } from '../../../license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check_privilege';
@@ -26,6 +25,10 @@ import { SETTINGS, ML_BREADCRUMB } from '../../breadcrumbs';
 enum MODE {
   NEW,
   EDIT,
+}
+
+interface NewFilterPageProps extends PageProps {
+  mode: MODE;
 }
 
 const newBreadcrumbs = [
@@ -52,21 +55,21 @@ const editBreadcrumbs = [
 
 export const newFilterListRoute: MlRoute = {
   path: '/settings/filter_lists/new_filter_list',
-  render: (props: any, config: any) => <PageWrapper config={config} {...props} mode={MODE.NEW} />,
+  render: (props, config, deps) => (
+    <PageWrapper config={config} {...props} mode={MODE.NEW} deps={deps} />
+  ),
   breadcrumbs: newBreadcrumbs,
 };
 
 export const editFilterListRoute: MlRoute = {
   path: '/settings/filter_lists/edit_filter_list/:filterId',
-  render: (props: any, config: any) => <PageWrapper config={config} {...props} mode={MODE.EDIT} />,
+  render: (props, config, deps) => (
+    <PageWrapper config={config} {...props} mode={MODE.EDIT} deps={deps} />
+  ),
   breadcrumbs: editBreadcrumbs,
 };
 
-const PageWrapper: FC<{ location: any; config: any; mode: MODE }> = ({
-  location,
-  config,
-  mode,
-}) => {
+const PageWrapper: FC<NewFilterPageProps> = ({ location, config, mode }) => {
   let filterId: string | undefined;
   if (mode === MODE.EDIT) {
     const pathMatch: string[] | null = location.pathname.match(/.+\/(.+)$/);

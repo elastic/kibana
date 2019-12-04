@@ -10,6 +10,7 @@ import { checkGetJobsPrivilege } from '../privilege/check_privilege';
 import { getMlNodeCount } from '../ml_nodes_check/check_ml_nodes';
 // import { getJobManagementBreadcrumbs } from './jobs/breadcrumbs';
 import { loadMlServerInfo } from '../services/ml_server_info';
+import { PageDependencies } from './router';
 
 export interface Resolvers {
   [name: string]: () => Promise<any>;
@@ -17,11 +18,11 @@ export interface Resolvers {
 export interface ResolverResults {
   [name: string]: any;
 }
-export const basicResolvers: Resolvers = {
+export const basicResolvers = (deps: PageDependencies): Resolvers => ({
   checkFullLicense,
   getMlNodeCount,
   loadMlServerInfo,
-  loadIndexPatterns,
+  loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),
   checkGetJobsPrivilege,
   // getJobManagementBreadcrumbs(),
-};
+});

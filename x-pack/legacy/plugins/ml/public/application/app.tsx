@@ -17,6 +17,7 @@ import 'uiExports/savedObjectTypes';
 
 import 'ui/autoload/all';
 import { I18nContext } from 'ui/i18n';
+import { IndexPatterns } from 'ui/index_patterns';
 
 // import { UiSettingsClientContract } from 'src/core/public';
 // needed to make syntax highlighting work in ace editors
@@ -51,7 +52,11 @@ export interface MlDependencies extends AppMountParameters {
   indexPatterns: DataStart['indexPatterns']['indexPatterns'];
 }
 
-const App: FC<{ basename: string; context: AppMountContext }> = ({ basename, context }) => {
+const App: FC<{ basename: string; context: AppMountContext; indexPatterns: IndexPatterns }> = ({
+  basename,
+  context,
+  indexPatterns,
+}) => {
   const config = (context.core.uiSettings as never) as KibanaConfigTypeFix; // TODO - make this UiSettingsClientContract, get rid of KibanaConfigTypeFix
 
   return (
@@ -59,6 +64,7 @@ const App: FC<{ basename: string; context: AppMountContext }> = ({ basename, con
       basename={basename}
       config={config}
       setBreadCrumbs={context.core.chrome.setBreadcrumbs}
+      indexPatterns={indexPatterns}
     />
   );
 };
@@ -68,7 +74,10 @@ export const renderApp = (
   { appBasePath, element, indexPatterns }: MlDependencies
 ) => {
   const basename = `${appBasePath}#`;
-  ReactDOM.render(<App basename={basename} context={context} />, element);
+  ReactDOM.render(
+    <App basename={basename} context={context} indexPatterns={indexPatterns} />,
+    element
+  );
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };

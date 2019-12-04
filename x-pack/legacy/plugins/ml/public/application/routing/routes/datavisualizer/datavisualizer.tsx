@@ -13,8 +13,7 @@ import React, { FC } from 'react';
 
 // @ts-ignore
 import queryString from 'query-string';
-import { MlRoute, PageLoader } from '../../router';
-import { useResolver } from '../../router';
+import { MlRoute, PageLoader, useResolver, PageProps } from '../../router';
 import { DatavisualizerSelector } from '../../../datavisualizer';
 
 import { checkBasicLicense } from '../../../license/check_license';
@@ -25,11 +24,11 @@ const breadcrumbs = [ML_BREADCRUMB, DATA_VISUALIZER_BREADCRUMB];
 
 export const selectorRoute: MlRoute = {
   path: '/datavisualizer',
-  render: (props: any, config: any) => <PageWrapper config={config} {...props} />,
+  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
   breadcrumbs,
 };
 
-const PageWrapper: FC<{ location: any; config: any }> = ({ location, config }) => {
+const PageWrapper: FC<PageProps> = ({ location, config }) => {
   const { index } = queryString.parse(location.search);
   const { context } = useResolver(index, config, {
     checkBasicLicense,

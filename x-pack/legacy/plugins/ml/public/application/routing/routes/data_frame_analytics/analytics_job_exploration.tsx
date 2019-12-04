@@ -10,8 +10,7 @@ import { decode } from 'rison-node';
 
 // @ts-ignore
 import queryString from 'query-string';
-import { MlRoute, PageLoader } from '../../router';
-import { useResolver } from '../../router';
+import { MlRoute, PageLoader, useResolver, PageProps } from '../../router';
 import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../data_frame_analytics/pages/analytics_exploration';
 import { ANALYSIS_CONFIG_TYPE } from '../../../data_frame_analytics/common/analytics';
@@ -30,12 +29,12 @@ const breadcrumbs = [
 
 export const analyticsJobExplorationRoute: MlRoute = {
   path: '/data_frame_analytics/exploration',
-  render: (props: any, config: any) => <PageWrapper config={config} {...props} />,
+  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
   breadcrumbs,
 };
 
-const PageWrapper: FC<{ location: any; config: any }> = ({ location, config }) => {
-  const { context } = useResolver('', config, basicResolvers);
+const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
+  const { context } = useResolver('', config, basicResolvers(deps));
   const { _g } = queryString.parse(location.search);
   let globalState: any = null;
   try {

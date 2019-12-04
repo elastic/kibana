@@ -24,7 +24,7 @@ const breadcrumbs = [
 
 export const newJobRoute: MlRoute = {
   path: '/jobs/new_job',
-  render: (props: any, config: any) => <Page />,
+  render: () => <Page />,
   breadcrumbs,
 };
 

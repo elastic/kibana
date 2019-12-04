@@ -9,9 +9,8 @@ import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import queryString from 'query-string';
 
-import { useResolver } from '../../router';
+import { MlRoute, PageLoader, useResolver, PageProps } from '../../router';
 import { basicResolvers } from '../../resolvers';
-import { MlRoute, PageLoader } from '../../router';
 import { Page } from '../../../jobs/new_job/recognize';
 import { checkViewOrCreateJobs } from '../../../jobs/new_job/recognize/resolvers';
 import { mlJobService } from '../../../services/job_service';
@@ -30,20 +29,22 @@ const breadcrumbs = [
 
 export const recognizeRoute: MlRoute = {
   path: '/jobs/new_job/recognize',
-  render: (props: any, config: any) => <PageWrapper config={config} {...props} />,
+  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
   breadcrumbs,
 };
 
 export const checkViewOrCreateRoute: MlRoute = {
   path: '/modules/check_view_or_create',
-  render: (props: any, config: any) => <CheckViewOrCreateWrapper config={config} {...props} />,
+  render: (props, config, deps) => (
+    <CheckViewOrCreateWrapper config={config} {...props} deps={deps} />
+  ),
   breadcrumbs: [],
 };
 
-const PageWrapper: FC<{ location: any; config: any }> = ({ location, config }) => {
+const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
   const { id, index } = queryString.parse(location.search);
   const { context, results } = useResolver(index, config, {
-    ...basicResolvers,
+    ...basicResolvers(deps),
     existingJobsAndGroups: mlJobService.getJobAndGroupIds,
   });
 
@@ -54,7 +55,7 @@ const PageWrapper: FC<{ location: any; config: any }> = ({ location, config }) =
   );
 };
 
-const CheckViewOrCreateWrapper: FC<{ location: any; config: any }> = ({ location, config }) => {
+const CheckViewOrCreateWrapper: FC<PageProps> = ({ location, config, deps }) => {
   const { id: moduleId, index: indexPatternId } = queryString.parse(location.search);
   // the single resolver checkViewOrCreateJobs redirects only. so will always reject
   useResolver(undefined, config, {
