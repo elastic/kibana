@@ -18,4 +18,4 @@
  */
 
 export { init } from './init';
-export { getVisData, GetVisData } from './lib/get_vis_data';
+export { getVisData, GetVisData, GetVisDataOptions } from './lib/get_vis_data';

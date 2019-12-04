@@ -23,7 +23,6 @@ import {
   CoreStart,
   Plugin,
   RequestHandlerContext,
-  KibanaRequest,
 } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { Server } from 'hapi';
@@ -33,6 +32,7 @@ import {
   init,
   getVisData,
   GetVisData,
+  GetVisDataOptions,
 } from '../../../legacy/core_plugins/vis_type_timeseries/server';
 
 export interface LegacySetup {
@@ -64,8 +64,8 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
           init(core, plugins, config$, logger, __LEGACY);
         }),
       },
-      getVisData: async (requestContext: RequestHandlerContext, request: KibanaRequest) => {
-        return await getVisData(requestContext, request);
+      getVisData: async (requestContext: RequestHandlerContext, options: GetVisDataOptions) => {
+        return await getVisData(requestContext, options);
       },
     };
   }

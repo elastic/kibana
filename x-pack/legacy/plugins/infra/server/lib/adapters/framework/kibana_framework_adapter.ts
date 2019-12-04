@@ -36,12 +36,10 @@ import { InfraConfig } from '../../../../../../../plugins/infra/server';
 
 export class KibanaFramework {
   public router: IRouter;
-  private core: CoreSetup;
   public plugins: InfraServerPluginDeps;
 
   constructor(core: CoreSetup, config: InfraConfig, plugins: InfraServerPluginDeps) {
     this.router = core.http.createRouter();
-    this.core = core;
     this.plugins = plugins;
   }
 
@@ -246,30 +244,21 @@ export class KibanaFramework {
     }
   }
 
-  // NP_TODO: [TSVB_GROUP] This method needs fixing when the metrics plugin has migrated to the New Platform
   public async makeTSVBRequest(
-    request: KibanaRequest,
+    requestContext: RequestHandlerContext,
     model: TSVBMetricModel,
     timerange: { min: number; max: number },
-    filters: any[],
-    requestContext: RequestHandlerContext
+    filters: any[]
   ): Promise<InfraTSVBResponse> {
     const { getVisData } = this.plugins.metrics;
     if (typeof getVisData !== 'function') {
       throw new Error('TSVB is not available');
     }
-    const url = this.core.http.basePath.prepend('/api/metrics/vis/data');
-    // For the following request we need a copy of the instnace of the internal request
-    // but modified for our TSVB request. This will ensure all the instance methods
-    // are available along with our overriden values
-    const requestCopy = Object.assign({}, request, {
-      url,
-      body: {
-        timerange,
-        panels: [model],
-        filters,
-      },
-    });
-    return getVisData(requestContext, requestCopy);
+    const options = {
+      timerange,
+      panels: [model],
+      filters,
+    };
+    return getVisData(requestContext, options);
   }
 }
