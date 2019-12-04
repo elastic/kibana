@@ -4,4 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SecurityServiceProvider } from './security';
+import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { services } from './services';
+
+export default async function({}: FtrConfigProviderContext) {
+  return {
+    services,
+  };
+}
