@@ -7,10 +7,7 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function MachineLearningJobWizardAdvancedProvider({
-  getService,
-  getPageObjects,
-}: FtrProviderContext) {
+export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProviderContext) {
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -141,8 +138,10 @@ export function MachineLearningJobWizardAdvancedProvider({
     },
 
     async openCreateDetectorModal() {
-      await testSubjects.click('mlAddDetectorButton');
-      await this.assertCreateDetectorModalExists();
+      await retry.tryForTime(20 * 1000, async () => {
+        await testSubjects.click('mlAddDetectorButton');
+        await this.assertCreateDetectorModalExists();
+      });
     },
 
     async assertCreateDetectorModalExists() {
