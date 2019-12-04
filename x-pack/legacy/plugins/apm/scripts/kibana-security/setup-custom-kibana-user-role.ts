@@ -69,7 +69,8 @@ async function init() {
     return;
   }
 
-  if (!isSecurityEnabled()) {
+  const isEnabled = await isSecurityEnabled();
+  if (!isEnabled) {
     console.log('Security must be enabled!');
     return;
   }

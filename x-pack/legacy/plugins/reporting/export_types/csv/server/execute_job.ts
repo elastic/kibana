@@ -4,20 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+import { ExecuteJobFactory, ESQueueWorkerExecuteFn, ServerFacade } from '../../../types';
 import { CSV_JOB_TYPE, PLUGIN_ID } from '../../../common/constants';
 import { cryptoFactory, LevelLogger } from '../../../server/lib';
+import { JobDocPayloadDiscoverCsv } from '../types';
+// @ts-ignore untyped module TODO
 import { createGenerateCsv } from './lib/generate_csv';
+// @ts-ignore untyped module TODO
 import { fieldFormatMapFactory } from './lib/field_format_map';
-import { i18n } from '@kbn/i18n';
 
-export function executeJobFactory(server) {
+export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
+  JobDocPayloadDiscoverCsv
+>> = function executeJobFactoryFn(server: ServerFacade) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   const crypto = cryptoFactory(server);
   const config = server.config();
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, CSV_JOB_TYPE, 'execute-job']);
   const serverBasePath = config.get('server.basePath');
 
-  return async function executeJob(jobId, job, cancellationToken) {
+  return async function executeJob(
+    jobId: string,
+    job: JobDocPayloadDiscoverCsv,
+    cancellationToken: any
+  ) {
     const jobLogger = logger.clone([jobId]);
 
     const {
@@ -65,7 +75,7 @@ export function executeJobFactory(server) {
       },
     };
 
-    const callEndpoint = (endpoint, clientParams = {}, options = {}) => {
+    const callEndpoint = (endpoint: string, clientParams = {}, options = {}) => {
       return callWithRequest(fakeRequest, endpoint, clientParams, options);
     };
     const savedObjects = server.savedObjects;
@@ -76,6 +86,7 @@ export function executeJobFactory(server) {
 
     const [formatsMap, uiSettings] = await Promise.all([
       (async () => {
+        // @ts-ignore fieldFormatServiceFactory' does not exist on type 'ServerFacade TODO
         const fieldFormats = await server.fieldFormatServiceFactory(uiConfig);
         return fieldFormatMapFactory(indexPatternSavedObject, fieldFormats);
       })(),
@@ -125,4 +136,4 @@ export function executeJobFactory(server) {
       csv_contains_formulas: csvContainsFormulas,
     };
   };
-}
+};
