@@ -33,21 +33,21 @@ export async function createDatasource(options: {
   return toSave;
 }
 
-export async function saveDatasourceReferences(options: {
+async function saveDatasourceReferences(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
   toSave: AssetReference[];
 }) {
   const { savedObjectsClient, pkgkey, toSave } = options;
-  const savedObject = await getDatasourceObject({ savedObjectsClient, pkgkey });
-  const savedRefs = savedObject?.attributes.package.assets;
-  const mergeRefsReducer = (current: Asset[] = [], pending: Asset) => {
-    const hasRef = current.find(c => c.id === pending.id && c.type === pending.type);
-    if (!hasRef) current.push(pending);
+  const savedDatasource = await getDatasource({ savedObjectsClient, pkgkey });
+  const savedAssets = savedDatasource?.package.assets;
+  const assetsReducer = (current: Asset[] = [], pending: Asset) => {
+    const hasAsset = current.find(c => c.id === pending.id && c.type === pending.type);
+    if (!hasAsset) current.push(pending);
     return current;
   };
 
-  const toInstall = (toSave as Asset[]).reduce(mergeRefsReducer, savedRefs);
+  const toInstall = (toSave as Asset[]).reduce(assetsReducer, savedAssets);
   const datasource: Datasource = createFakeDatasource(pkgkey, toInstall);
   await savedObjectsClient.create<Datasource>(SAVED_OBJECT_TYPE_DATASOURCES, datasource, {
     id: pkgkey,
@@ -57,14 +57,16 @@ export async function saveDatasourceReferences(options: {
   return toInstall;
 }
 
-export async function getDatasourceObject(options: {
+async function getDatasource(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
 }) {
   const { savedObjectsClient, pkgkey } = options;
-  return savedObjectsClient
+  const datasource = await savedObjectsClient
     .get<Datasource>(SAVED_OBJECT_TYPE_DATASOURCES, pkgkey)
     .catch(e => undefined);
+
+  return datasource?.attributes;
 }
 
 function createFakeDatasource(pkgkey: string, assets: Asset[] = []): Datasource {
