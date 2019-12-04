@@ -28,6 +28,11 @@ export interface EmbeddableInput {
   id: string;
   lastReloadRequestTime?: number;
   hidePanelTitles?: boolean;
+
+  /**
+   * List of action IDs that this embeddable should not render.
+   */
+  disabledActions?: string[];
 }
 
 export interface EmbeddableOutput {
