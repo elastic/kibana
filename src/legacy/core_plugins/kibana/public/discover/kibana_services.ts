@@ -74,8 +74,6 @@ export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore
 export { timezoneProvider } from 'ui/vis/lib/timezone';
 // @ts-ignore
-export { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
-// @ts-ignore
 export { tabifyAggResponse } from 'ui/agg_response/tabify';
 // @ts-ignore
 export { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
@@ -84,7 +82,7 @@ export { unhashUrl } from 'ui/state_management/state_hashing';
 
 // EXPORT types
 export { Vis } from 'ui/vis';
-export { StaticIndexPattern, IndexPatterns, IndexPattern, FieldType } from 'ui/index_patterns';
+export { IndexPatterns, IndexPattern, FieldType } from 'ui/index_patterns';
 export { ElasticSearchHit } from 'ui/registry/doc_views_types';
 export { DocViewRenderProps, DocViewRenderFn } from 'ui/registry/doc_views';
 export { Adapters } from 'ui/inspector/types';
