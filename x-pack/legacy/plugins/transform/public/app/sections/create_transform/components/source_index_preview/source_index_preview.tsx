@@ -134,7 +134,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
 
   if (status === SOURCE_INDEX_STATUS.ERROR) {
     return (
-      <EuiPanel grow={false}>
+      <EuiPanel grow={false} data-test-subj="transformSourceIndexPreview error">
         <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
         <EuiCallOut
           title={i18n.translate('xpack.transform.sourceIndexPreview.sourceIndexPatternError', {
@@ -153,7 +153,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
 
   if (status === SOURCE_INDEX_STATUS.LOADED && tableItems.length === 0) {
     return (
-      <EuiPanel grow={false}>
+      <EuiPanel grow={false} data-test-subj="transformSourceIndexPreview empty">
         <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
         <EuiCallOut
           title={i18n.translate(
@@ -320,7 +320,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
   });
 
   return (
-    <EuiPanel grow={false}>
+    <EuiPanel grow={false} data-test-subj="transformSourceIndexPreview loaded">
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
