@@ -5,6 +5,7 @@
  */
 import { Subject, merge } from 'rxjs';
 import { filter } from 'rxjs/operators';
+import { uniq } from 'lodash';
 import { performance } from 'perf_hooks';
 import { SavedObjectsClientContract, SavedObjectsSerializer } from 'src/core/server';
 
@@ -146,14 +147,11 @@ export class TaskManager {
   private pollForWork = async (
     ...optionalTasksToClaim: Array<Option<string>>
   ): Promise<FillPoolResult> => {
-    const tasksToClaim = optionalTasksToClaim
-      .filter(isSome)
-      .map((task: Some<string>) => task.value);
     return fillPool(
       // claim available tasks
       () =>
         claimAvailableTasks(
-          tasksToClaim.splice(0, this.pool.availableWorkers),
+          rejectDuplicateAndEmptyValues(optionalTasksToClaim),
           this.store.claimAvailableTasks,
           this.pool.availableWorkers,
           this.logger
@@ -368,6 +366,10 @@ export class TaskManager {
   }
 }
 
+function rejectDuplicateAndEmptyValues(values: Array<Option<string>>) {
+  return uniq(values.filter(isSome).map((optional: Some<string>) => optional.value));
+}
+
 export async function claimAvailableTasks(
   claimTasksById: string[],
   claim: (opts: OwnershipClaimingOpts) => Promise<ClaimOwnershipResult>,
@@ -381,7 +383,7 @@ export async function claimAvailableTasks(
       const { docs, claimedTasks } = await claim({
         size: availableWorkers,
         claimOwnershipUntil: intervalFromNow('30s')!,
-        claimTasksById,
+        claimTasksById: claimTasksById.splice(0, availableWorkers),
       });
 
       if (claimedTasks === 0) {

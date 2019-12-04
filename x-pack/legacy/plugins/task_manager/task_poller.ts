@@ -48,9 +48,25 @@ export class TaskPoller<T, H> {
     this.pollingSubscription = Subscription.EMPTY;
     this.pollPhaseResults$ = new Subject();
     this.claimRequestQueue$ = new Subject<H>();
-    this.poller$ = this.claimRequestQueue$.pipe(
-      buffer(interval(opts.pollInterval).pipe(throttle(ev => this.pollPhaseResults$)))
-    );
+    this.poller$ =
+      // queue of requests for work to be done, each request can provide a single
+      // argument of type `H`
+      this.claimRequestQueue$.pipe(
+        // buffer these requests (so that multiple requests get flattened into
+        // a single request which receives an array of arguments of type `H`)
+        buffer(
+          // flush this buffer at the fixed interval specified under `pollInterval`
+          interval(opts.pollInterval).pipe(
+            throttle(
+              // only emit one interval event and then ignore every subsequent interval
+              // event until a corresponding completion of `attemptWork`. This prevents
+              // us from flushing the request buffer until the work has been completed
+              // the previous calls to `attemptWork`
+              () => this.pollPhaseResults$
+            )
+          )
+        )
+      );
   }
 
   /**
@@ -82,7 +98,8 @@ export class TaskPoller<T, H> {
    */
   private attemptWork = async (...requests: H[]) => {
     try {
-      this.pollPhaseResults$.next(asOk(await this.work(...requests)));
+      const workResult = await this.work(...requests);
+      this.pollPhaseResults$.next(asOk(workResult));
     } catch (err) {
       this.logger.error(`Failed to poll for work: ${err}`);
       this.pollPhaseResults$.next(asErr(err));

@@ -626,7 +626,14 @@ describe('TaskStore', () => {
                   {
                     bool: {
                       must: [
-                        { term: { 'task.status': 'idle' } },
+                        {
+                          bool: {
+                            should: [
+                              { term: { 'task.status': 'idle' } },
+                              { term: { 'task.status': 'failed' } },
+                            ],
+                          },
+                        },
                         {
                           ids: {
                             values: [
