@@ -754,8 +754,7 @@ export interface IRouter {
     // 
     // @internal
     getRoutes: () => RouterRoute[];
-    // Warning: (ae-forgotten-export) The symbol "RouteValidateSpecs" needs to be exported by the entry point index.d.ts
-    handleLegacyErrors: <P extends RouteValidateSpecs, Q extends RouteValidateSpecs, B extends RouteValidateSpecs>(handler: RequestHandler<P, Q, B>) => RequestHandler<P, Q, B>;
+    handleLegacyErrors: <P, Q, B>(handler: RequestHandler<P, Q, B>) => RequestHandler<P, Q, B>;
     patch: RouteRegistrar<'patch'>;
     post: RouteRegistrar<'post'>;
     put: RouteRegistrar<'put'>;
@@ -791,6 +790,8 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     constructor(request: Request, params: Params, query: Query, body: Body, withoutSecretHeaders: boolean);
     // (undocumented)
     readonly body: Body;
+    // Warning: (ae-forgotten-export) The symbol "RouteValidateSpecs" needs to be exported by the entry point index.d.ts
+    // 
     // @internal
     static from<P extends RouteValidateSpecs, Q extends RouteValidateSpecs, B extends RouteValidateSpecs>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<ReturnType<P["validate"]>, ReturnType<Q["validate"]>, ReturnType<B["validate"]>, any>;
     readonly headers: Headers;
@@ -1082,10 +1083,8 @@ export type RedirectResponseOptions = HttpResponseOptions & {
     };
 };
 
-// Warning: (ae-forgotten-export) The symbol "RouteValidatedType" needs to be exported by the entry point index.d.ts
-// 
 // @public
-export type RequestHandler<P extends RouteValidateSpecs = RouteValidator<unknown>, Q extends RouteValidateSpecs = RouteValidator<unknown>, B extends RouteValidateSpecs = RouteValidator<unknown>, Method extends RouteMethod = any> = (context: RequestHandlerContext, request: KibanaRequest<RouteValidatedType<P>, RouteValidatedType<Q>, RouteValidatedType<B>, Method>, response: KibanaResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
+export type RequestHandler<P = unknown, Q = unknown, B = unknown, Method extends RouteMethod = any> = (context: RequestHandlerContext, request: KibanaRequest<P, Q, B, Method>, response: KibanaResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 
 // @public
 export interface RequestHandlerContext {
@@ -1154,8 +1153,10 @@ export type RouteContentType = 'application/json' | 'application/*+json' | 'appl
 // @public
 export type RouteMethod = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options';
 
+// Warning: (ae-forgotten-export) The symbol "RouteValidatedType" needs to be exported by the entry point index.d.ts
+// 
 // @public
-export type RouteRegistrar<Method extends RouteMethod> = <P extends RouteValidateSpecs, Q extends RouteValidateSpecs, B extends RouteValidateSpecs>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<P, Q, B, Method>) => void;
+export type RouteRegistrar<Method extends RouteMethod> = <P extends RouteValidateSpecs, Q extends RouteValidateSpecs, B extends RouteValidateSpecs>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<RouteValidatedType<P>, RouteValidatedType<Q>, RouteValidatedType<B>, Method>) => void;
 
 // @public
 export interface RouteSchemas<P extends RouteValidateSpecs, Q extends RouteValidateSpecs, B extends RouteValidateSpecs> {

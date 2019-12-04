@@ -54,7 +54,12 @@ export type RouteRegistrar<Method extends RouteMethod> = <
   B extends RouteValidateSpecs
 >(
   route: RouteConfig<P, Q, B, Method>,
-  handler: RequestHandler<P, Q, B, Method>
+  handler: RequestHandler<
+    RouteValidatedType<P>,
+    RouteValidatedType<Q>,
+    RouteValidatedType<B>,
+    Method
+  >
 ) => void;
 
 /**
@@ -108,13 +113,7 @@ export interface IRouter {
    * Wrap a router handler to catch and converts legacy boom errors to proper custom errors.
    * @param handler {@link RequestHandler} - a route handler to wrap
    */
-  handleLegacyErrors: <
-    P extends RouteValidateSpecs,
-    Q extends RouteValidateSpecs,
-    B extends RouteValidateSpecs
-  >(
-    handler: RequestHandler<P, Q, B>
-  ) => RequestHandler<P, Q, B>;
+  handleLegacyErrors: <P, Q, B>(handler: RequestHandler<P, Q, B>) => RequestHandler<P, Q, B>;
 
   /**
    * Returns all routes registered with this router.
@@ -124,12 +123,9 @@ export interface IRouter {
   getRoutes: () => RouterRoute[];
 }
 
-export type ContextEnhancer<
-  P extends RouteValidateSpecs,
-  Q extends RouteValidateSpecs,
-  B extends RouteValidateSpecs,
-  Method extends RouteMethod
-> = (handler: RequestHandler<P, Q, B, Method>) => RequestHandlerEnhanced<P, Q, B, Method>;
+export type ContextEnhancer<P, Q, B, Method extends RouteMethod> = (
+  handler: RequestHandler<P, Q, B, Method>
+) => RequestHandlerEnhanced<P, Q, B, Method>;
 
 function getRouteFullPath(routerPath: string, routePath: string) {
   // If router's path ends with slash and route's path starts with slash,
@@ -235,7 +231,12 @@ export class Router implements IRouter {
       B extends RouteValidateSpecs
     >(
       route: RouteConfig<P, Q, B, Method>,
-      handler: RequestHandler<P, Q, B, Method>
+      handler: RequestHandler<
+        RouteValidatedType<P>,
+        RouteValidatedType<Q>,
+        RouteValidatedType<B>,
+        Method
+      >
     ) => {
       const routeSchemas = routeSchemasFromRouteConfig(route, method);
 
@@ -264,19 +265,11 @@ export class Router implements IRouter {
     return [...this.routes];
   }
 
-  public handleLegacyErrors<
-    P extends RouteValidateSpecs,
-    Q extends RouteValidateSpecs,
-    B extends RouteValidateSpecs
-  >(handler: RequestHandler<P, Q, B>): RequestHandler<P, Q, B> {
+  public handleLegacyErrors<P, Q, B>(handler: RequestHandler<P, Q, B>): RequestHandler<P, Q, B> {
     return wrapErrors(handler);
   }
 
-  private async handle<
-    P extends RouteValidateSpecs,
-    Q extends RouteValidateSpecs,
-    B extends RouteValidateSpecs
-  >({
+  private async handle<P, Q, B>({
     routeSchemas,
     request,
     responseToolkit,
@@ -285,14 +278,13 @@ export class Router implements IRouter {
     request: Request;
     responseToolkit: ResponseToolkit;
     handler: RequestHandlerEnhanced<P, Q, B, typeof request.method>;
-    routeSchemas?: RouteSchemas<P, Q, B>;
-  }) {
-    let kibanaRequest: KibanaRequest<
-      RouteValidatedType<P>,
-      RouteValidatedType<Q>,
-      RouteValidatedType<B>,
-      typeof request.method
+    routeSchemas?: RouteSchemas<
+      RouteValidateSpecs<P>,
+      RouteValidateSpecs<Q>,
+      RouteValidateSpecs<B>
     >;
+  }) {
+    let kibanaRequest: KibanaRequest<P, Q, B, typeof request.method>;
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
       kibanaRequest = KibanaRequest.from(request, routeSchemas);
@@ -314,12 +306,9 @@ type WithoutHeadArgument<T> = T extends (first: any, ...rest: infer Params) => i
   ? (...rest: Params) => Return
   : never;
 
-type RequestHandlerEnhanced<
-  P extends RouteValidateSpecs,
-  Q extends RouteValidateSpecs,
-  B extends RouteValidateSpecs,
-  Method extends RouteMethod
-> = WithoutHeadArgument<RequestHandler<P, Q, B, Method>>;
+type RequestHandlerEnhanced<P, Q, B, Method extends RouteMethod> = WithoutHeadArgument<
+  RequestHandler<P, Q, B, Method>
+>;
 
 /**
  * A function executed when route path matched requested resource path.
@@ -355,17 +344,12 @@ type RequestHandlerEnhanced<
  * @public
  */
 export type RequestHandler<
-  P extends RouteValidateSpecs = RouteValidator<unknown>,
-  Q extends RouteValidateSpecs = RouteValidator<unknown>,
-  B extends RouteValidateSpecs = RouteValidator<unknown>,
+  P = unknown,
+  Q = unknown,
+  B = unknown,
   Method extends RouteMethod = any
 > = (
   context: RequestHandlerContext,
-  request: KibanaRequest<
-    RouteValidatedType<P>,
-    RouteValidatedType<Q>,
-    RouteValidatedType<B>,
-    Method
-  >,
+  request: KibanaRequest<P, Q, B, Method>,
   response: KibanaResponseFactory
 ) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;

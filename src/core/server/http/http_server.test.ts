@@ -33,6 +33,7 @@ import {
   RouteValidator,
   KibanaRequest,
   KibanaResponseFactory,
+  RequestHandler,
 } from './router';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { HttpServer } from './http_server';
@@ -334,13 +335,62 @@ test('valid body with validate function', async () => {
 });
 
 // https://github.com/elastic/kibana/issues/47047
-test('not inline handler', async () => {
+test('not inline handler - KibanaRequest', async () => {
   const router = new Router('/foo', logger, enhanceWithContext);
 
   const handler = (
     context: RequestHandlerContext,
     req: KibanaRequest<unknown, unknown, { bar: string; baz: number }>,
     res: KibanaResponseFactory
+  ) => {
+    const body = {
+      bar: req.body.bar.toUpperCase(),
+      baz: req.body.baz.toString(),
+    };
+
+    return res.ok({ body });
+  };
+
+  router.post(
+    {
+      path: '/',
+      validate: {
+        body: new RouteValidator(({ bar, baz } = {}) => {
+          if (typeof bar === 'string' && typeof baz === 'number') {
+            return { value: { bar, baz } };
+          } else {
+            return { error: new RouteValidationError('Wrong payload', ['body']) };
+          }
+        }),
+      },
+    },
+    handler
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup(config);
+  registerRouter(router);
+
+  await server.start();
+
+  await supertest(innerServer.listener)
+    .post('/foo/')
+    .send({
+      bar: 'test',
+      baz: 123,
+    })
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ bar: 'TEST', baz: '123' });
+    });
+});
+
+test('not inline handler - RequestHandler', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext);
+
+  const handler: RequestHandler<unknown, unknown, { bar: string; baz: number }> = (
+    context,
+    req,
+    res
   ) => {
     const body = {
       bar: req.body.bar.toUpperCase(),

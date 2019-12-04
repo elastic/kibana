@@ -23,23 +23,13 @@ import { KibanaResponseFactory } from './response';
 import { RequestHandler } from './router';
 import { RequestHandlerContext } from '../../../server';
 import { RouteMethod } from './route';
-import { RouteValidatedType, RouteValidateSpecs } from './validator';
 
-export const wrapErrors = <
-  P extends RouteValidateSpecs,
-  Q extends RouteValidateSpecs,
-  B extends RouteValidateSpecs
->(
+export const wrapErrors = <P, Q, B>(
   handler: RequestHandler<P, Q, B, RouteMethod>
 ): RequestHandler<P, Q, B, RouteMethod> => {
   return async (
     context: RequestHandlerContext,
-    request: KibanaRequest<
-      RouteValidatedType<P>,
-      RouteValidatedType<Q>,
-      RouteValidatedType<B>,
-      RouteMethod
-    >,
+    request: KibanaRequest<P, Q, B, RouteMethod>,
     response: KibanaResponseFactory
   ) => {
     try {

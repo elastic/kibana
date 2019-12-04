@@ -9,7 +9,7 @@ A function executed when route path matched requested resource path. Request han
 <b>Signature:</b>
 
 ```typescript
-export declare type RequestHandler<P extends RouteValidateSpecs = RouteValidator<unknown>, Q extends RouteValidateSpecs = RouteValidator<unknown>, B extends RouteValidateSpecs = RouteValidator<unknown>, Method extends RouteMethod = any> = (context: RequestHandlerContext, request: KibanaRequest<RouteValidatedType<P>, RouteValidatedType<Q>, RouteValidatedType<B>, Method>, response: KibanaResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
+export declare type RequestHandler<P = unknown, Q = unknown, B = unknown, Method extends RouteMethod = any> = (context: RequestHandlerContext, request: KibanaRequest<P, Q, B, Method>, response: KibanaResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 ```
 
 ## Example
