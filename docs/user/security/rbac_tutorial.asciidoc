@@ -44,7 +44,7 @@ through in this tutorial:
 * Create the web developer's user account with the proper roles
 
 [float]
-==== Create a role named `mortgage-developer`
+==== Create a role
 
 Go to **Management > Roles** 
 for an overview of your roles.  This view provides actions
