@@ -55,9 +55,8 @@ image::security/images/role-management.png["Role management"]
 
 
 You can create as many roles as you like. Click *Create role* and 
-provide a name; 
-in this tutorial use `dev-mortgage` because this role is for a 
-developer working on the bank's mortgage application.
+provide a name. Use `dev-mortgage` because this role is for a developer 
+working on the bank's mortgage application.
 
 [float]
 ==== Give the role the ability to monitor the Elastic Stack
