@@ -32,14 +32,6 @@ export const createTimeRangeWithInterval = async (
     modules,
     options.nodeType
   );
-  if (!interval) {
-    throw new Error(
-      i18n.translate('xpack.infra.snapshot.createTimeRangeWithInterval.error', {
-        defaultMessage: 'Unable to calulate interval for {modules}',
-        values: { modules: modules.join(', ') },
-      })
-    );
-  }
   return {
     interval: `${interval}s`,
     from: options.timerange.to - interval * 5000, // We need at least 5 buckets worth of data

@@ -76,12 +76,12 @@ export const calculateMetricInterval = async (
 
   // if ES doesn't return an aggregations key, something went seriously wrong.
   if (!resp.aggregations) {
-    return;
+    return 60000;
   }
 
   const intervals = resp.aggregations.modules.buckets.map(a => a.period.value).filter(v => !!v);
   if (!intervals.length) {
-    return;
+    return 60000;
   }
 
   return Math.max(...intervals) / 1000;
