@@ -21,7 +21,7 @@ import { SAVE_DUPLICATE_REJECTED } from 'ui/saved_objects/constants';
 import { confirmModalPromise } from './confirm_modal_promise';
 import { SavedObject } from '../types';
 
-export function displayDuplicateTitleConfirmModal(savedObject: SavedObject) {
+export function displayDuplicateTitleConfirmModal(savedObject: SavedObject): Promise<true> {
   const confirmMessage = i18n.translate(
     'common.ui.savedObjects.confirmModal.saveDuplicateConfirmationMessage',
     {

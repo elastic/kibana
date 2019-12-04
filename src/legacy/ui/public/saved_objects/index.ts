@@ -20,4 +20,4 @@
 export { SavedObjectRegistryProvider } from './saved_object_registry';
 export { SavedObjectsClientProvider } from './saved_objects_client_provider';
 export { SavedObjectLoader } from './saved_object_loader';
-export { findObjectByTitle } from './find_object_by_title';
+export { findObjectByTitle } from './helpers/find_object_by_title';

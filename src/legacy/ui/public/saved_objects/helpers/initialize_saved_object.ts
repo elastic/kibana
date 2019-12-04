@@ -16,10 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import _ from 'lodash';
-import { SavedObject, SavedObjectConfig } from 'ui/saved_objects/types';
 import { SavedObjectsClientContract } from 'kibana/public';
+import { SavedObject, SavedObjectConfig } from '../types';
 
 /**
  * Initialize saved object

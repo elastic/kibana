@@ -22,7 +22,11 @@ import { parseSearchSource } from 'ui/saved_objects/helpers/parse_search_source'
 import { expandShorthand, SavedObjectNotFound } from '../../../../../plugins/kibana_utils/public';
 import { IndexPattern } from '../../../../core_plugins/data/public';
 
-export async function applyEsResp(
+/**
+ * A given response of and ElasticSearch containing a plain saved object is applied to the given
+ * savedObject
+ */
+export async function applyESResp(
   resp: EsResponse,
   savedObject: SavedObject,
   config: SavedObjectConfig
@@ -30,7 +34,6 @@ export async function applyEsResp(
   const mapping = expandShorthand(config.mapping);
   const esType = config.type || '';
   savedObject._source = _.cloneDeep(resp._source);
-  const afterESResp = config.afterESResp || _.noop;
   const injectReferences = config.injectReferences;
   const hydrateIndexPattern = savedObject.hydrateIndexPattern!;
 
@@ -68,7 +71,9 @@ export async function applyEsResp(
     if (injectReferences && resp.references && resp.references.length > 0) {
       injectReferences(savedObject, resp.references);
     }
-    await afterESResp.call(savedObject);
+    if (typeof config.afterESResp === 'function') {
+      await config.afterESResp.call(savedObject);
+    }
     return savedObject;
   } catch (e) {
     // eslint-disable-next-line no-console

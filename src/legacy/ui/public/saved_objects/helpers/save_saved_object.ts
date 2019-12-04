@@ -16,13 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObject, SavedObjectConfig, SavedObjectSaveOpts } from 'ui/saved_objects/types';
-import { SavedObjectsClientContract } from 'kibana/public';
-import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from 'ui/saved_objects/constants';
-
-import { createSource } from 'ui/saved_objects/helpers/create_source';
-import { checkForDuplicateTitle } from 'ui/saved_objects/helpers/check_for_duplicate_title';
 import { npStart } from 'ui/new_platform';
+import { SavedObjectsClientContract } from 'kibana/public';
+import { SavedObject, SavedObjectConfig, SavedObjectSaveOpts } from '../types';
+import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from '../constants';
+import { createSource } from './create_source';
+import { checkForDuplicateTitle } from './check_for_duplicate_title';
 
 /**
  * @param error {Error} the error
@@ -58,7 +57,7 @@ export async function saveSavedObject(
     isTitleDuplicateConfirmed = false,
     onTitleDuplicate,
   }: SavedObjectSaveOpts = {}
-) {
+): Promise<string> {
   const esType = config.type || '';
   const extractReferences = config.extractReferences;
   // Save the original id in case the save fails.
@@ -80,52 +79,45 @@ export async function saveSavedObject(
   }
   if (!references) throw new Error('References not returned from extractReferences');
 
-  savedObject.isSaving = true;
-
-  return checkForDuplicateTitle(
-    savedObject,
-    savedObjectsClient,
-    isTitleDuplicateConfirmed,
-    onTitleDuplicate
-  )
-    .then(() => {
-      if (confirmOverwrite) {
-        return createSource(
+  try {
+    await checkForDuplicateTitle(
+      savedObject,
+      savedObjectsClient,
+      isTitleDuplicateConfirmed,
+      onTitleDuplicate
+    );
+    savedObject.isSaving = true;
+    const resp = confirmOverwrite
+      ? await createSource(
           attributes,
           savedObject,
           savedObjectsClient,
           esType,
           savedObject.creationOpts({ references })
-        );
-      } else {
-        return savedObjectsClient.create(
+        )
+      : await savedObjectsClient.create(
           esType,
           attributes,
           savedObject.creationOpts({ references, overwrite: true })
         );
-      }
-    })
-    .then((resp: any) => {
-      savedObject.id = resp.id;
-    })
-    .then(() => {
-      if (savedObject.showInRecentlyAccessed && savedObject.getFullPath) {
-        npStart.core.chrome.recentlyAccessed.add(
-          savedObject.getFullPath(),
-          savedObject.title,
-          savedObject.id as string
-        );
-      }
-      savedObject.isSaving = false;
-      savedObject.lastSavedTitle = savedObject.title;
-      return savedObject.id as any;
-    })
-    .catch((err: Error) => {
-      savedObject.isSaving = false;
-      savedObject.id = originalId;
-      if (isErrorNonFatal(err)) {
-        return;
-      }
-      return Promise.reject(err);
-    });
+
+    savedObject.id = resp.id;
+    if (savedObject.showInRecentlyAccessed && savedObject.getFullPath) {
+      npStart.core.chrome.recentlyAccessed.add(
+        savedObject.getFullPath(),
+        savedObject.title,
+        String(savedObject.id)
+      );
+    }
+    savedObject.isSaving = false;
+    savedObject.lastSavedTitle = savedObject.title;
+    return savedObject.id;
+  } catch (err) {
+    savedObject.isSaving = false;
+    savedObject.id = originalId;
+    if (isErrorNonFatal(err)) {
+      return '';
+    }
+    return Promise.reject(err);
+  }
 }

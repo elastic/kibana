@@ -16,42 +16,53 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObject } from 'ui/saved_objects/types';
-import { SavedObjectsClientContract, SimpleSavedObject } from 'kibana/public';
-import { findObjectByTitle } from 'ui/saved_objects';
-import { SAVE_DUPLICATE_REJECTED } from 'ui/saved_objects/constants';
-import { displayDuplicateTitleConfirmModal } from 'ui/saved_objects/helpers/display_duplicate_title_confirm_modal';
+import { SavedObjectsClientContract } from 'kibana/public';
+import { SavedObject } from '../types';
+import { findObjectByTitle } from './find_object_by_title';
+import { SAVE_DUPLICATE_REJECTED } from '../constants';
+import { displayDuplicateTitleConfirmModal } from './display_duplicate_title_confirm_modal';
 
-export const checkForDuplicateTitle = (
+/**
+ * check for an existing SavedObject with the same title in ES
+ * returns Promise<true> when it's no duplicate, or the modal displaying the warning
+ * that's there's a duplicate is confirmed, else it returns a rejected Promise<ErrorMsg>
+ * @param savedObject
+ * @param savedObjectsClient
+ * @param isTitleDuplicateConfirmed
+ * @param onTitleDuplicate
+ */
+export async function checkForDuplicateTitle(
   savedObject: SavedObject,
   savedObjectsClient: SavedObjectsClientContract,
   isTitleDuplicateConfirmed: boolean,
   onTitleDuplicate: (() => void) | undefined
-) => {
+): Promise<true> {
   // Don't check for duplicates if user has already confirmed save with duplicate title
   if (isTitleDuplicateConfirmed) {
-    return Promise.resolve(true);
+    return true;
   }
 
   // Don't check if the user isn't updating the title, otherwise that would become very annoying to have
   // to confirm the save every time, except when copyOnSave is true, then we do want to check.
   if (savedObject.title === savedObject.lastSavedTitle && !savedObject.copyOnSave) {
-    return Promise.resolve(true);
+    return true;
   }
 
-  return findObjectByTitle(savedObjectsClient, savedObject.getEsType(), savedObject.title).then(
-    (duplicate: SimpleSavedObject<any> | void) => {
-      if (!duplicate) return true;
-      if (duplicate.id === savedObject.id) return true;
-
-      if (onTitleDuplicate) {
-        onTitleDuplicate();
-        return Promise.reject(new Error(SAVE_DUPLICATE_REJECTED));
-      }
-
-      // TODO: make onTitleDuplicate a required prop and remove UI components from this class
-      // Need to leave here until all users pass onTitleDuplicate.
-      return displayDuplicateTitleConfirmModal(savedObject);
-    }
+  const duplicate = await findObjectByTitle(
+    savedObjectsClient,
+    savedObject.getEsType(),
+    savedObject.title
   );
-};
+
+  if (!duplicate) return true;
+  if (duplicate.id === savedObject.id) return true;
+
+  if (onTitleDuplicate) {
+    onTitleDuplicate();
+    return Promise.reject(new Error(SAVE_DUPLICATE_REJECTED));
+  }
+
+  // TODO: make onTitleDuplicate a required prop and remove UI components from this class
+  // Need to leave here until all users pass onTitleDuplicate.
+  return displayDuplicateTitleConfirmModal(savedObject);
+}

@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObject, SavedObjectConfig } from 'ui/saved_objects/types';
-import { IndexPatterns } from '../../../../core_plugins/data/public/index_patterns/index_patterns';
+import { SavedObject, SavedObjectConfig } from '../types';
+import { IndexPatterns } from '../../../../core_plugins/data/public';
 
 /**
  * After creation or fetching from ES, ensure that the searchSources index indexPattern

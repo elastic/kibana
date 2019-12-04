@@ -18,7 +18,7 @@
  */
 import _ from 'lodash';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
-import { SavedObject } from 'ui/saved_objects/types';
+import { SavedObject } from '../types';
 import { InvalidJSONProperty } from '../../../../../plugins/kibana_utils/public';
 
 export function parseSearchSource(

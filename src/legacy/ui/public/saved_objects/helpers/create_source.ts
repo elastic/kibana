@@ -38,14 +38,16 @@ import { confirmModalPromise } from './confirm_modal_promise';
  * a create or index error.
  * @resolved {SavedObject}
  */
-export function createSource(
+export async function createSource(
   source: SavedObjectAttributes,
   savedObject: SavedObject,
   savedObjectsClient: SavedObjectsClientContract,
   esType: string,
   options = {}
 ) {
-  return savedObjectsClient.create(esType, source, options).catch(err => {
+  try {
+    return await savedObjectsClient.create(esType, source, options);
+  } catch (err) {
     // record exists, confirm overwriting
     if (_.get(err, 'res.status') === 409) {
       const confirmMessage = i18n.translate(
@@ -77,6 +79,6 @@ export function createSource(
         )
         .catch(() => Promise.reject(new Error(OVERWRITE_REJECTED)));
     }
-    return Promise.reject(err);
-  });
+    return await Promise.reject(err);
+  }
 }

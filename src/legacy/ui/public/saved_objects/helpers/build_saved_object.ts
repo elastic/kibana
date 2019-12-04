@@ -24,7 +24,7 @@ import { intializeSavedObject } from './initialize_saved_object';
 import { serializeSavedObject } from './serialize_saved_object';
 
 import { EsResponse, SavedObject, SavedObjectConfig, SavedObjectSaveOpts } from '../types';
-import { applyEsResp } from './apply_es_resp';
+import { applyESResp } from './apply_es_resp';
 import { saveSavedObject } from './save_saved_object';
 import { IndexPatterns } from '../../../../core_plugins/data/public';
 
@@ -77,7 +77,7 @@ export function buildSavedObject(
    */
   savedObject.init = _.once(() => intializeSavedObject(savedObject, savedObjectsClient, config));
 
-  savedObject.applyESResp = (resp: EsResponse) => applyEsResp(resp, savedObject, config);
+  savedObject.applyESResp = (resp: EsResponse) => applyESResp(resp, savedObject, config);
 
   /**
    * Serialize this object
@@ -108,8 +108,6 @@ export function buildSavedObject(
   };
 
   savedObject.destroy = () => {};
-
-  // savedObject.getFullPath = () => config.path + '/' + config.id;
 
   /**
    * Delete this object from Elasticsearch

@@ -22,7 +22,7 @@ import { EuiConfirmModal } from '@elastic/eui';
 import { npStart } from 'ui/new_platform';
 import { toMountPoint } from '../../../../../plugins/kibana_react/public';
 
-export function confirmModalPromise(message = '', title = '', confirmBtnText = '') {
+export function confirmModalPromise(message = '', title = '', confirmBtnText = ''): Promise<true> {
   return new Promise((resolve, reject) => {
     const cancelButtonText = i18n.translate(
       'common.ui.savedObjects.confirmModal.cancelButtonLabel',
@@ -40,7 +40,7 @@ export function confirmModalPromise(message = '', title = '', confirmBtnText = '
           }}
           onConfirm={() => {
             modal.close();
-            resolve();
+            resolve(true);
           }}
           confirmButtonText={confirmBtnText}
           cancelButtonText={cancelButtonText}
