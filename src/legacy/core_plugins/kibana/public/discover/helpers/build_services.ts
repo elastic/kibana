@@ -83,7 +83,8 @@ export async function buildServices(core: CoreStart, plugins: DiscoverStartPlugi
       };
   const savedObjectService = createSavedSearchesService(
     core.savedObjects.client,
-    legacyData.indexPatterns.indexPatterns
+    legacyData.indexPatterns.indexPatterns,
+    core.chrome
   );
   return {
     ...globalAngularServices,
