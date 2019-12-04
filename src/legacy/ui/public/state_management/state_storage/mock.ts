@@ -17,9 +17,21 @@
  * under the License.
  */
 
-export { HashedItemStoreSingleton } from './hashed_item_store_singleton';
+import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
+import { HashedItemStore } from './hashed_item_store';
 
-export {
-  createStateHash,
-  isStateHash,
-} from './state_hash';
+/**
+ * Useful for mocking state_storage from jest,
+ *
+ * import { mockSessionStorage } from '../state_storage/mock;
+ *
+ * And all tests in the test file will use HashedItemStoreSingleton
+ * with underlying mockSessionStorage we have access to
+ */
+export const mockSessionStorage = new StubBrowserStorage();
+const mockHashedItemStore = new HashedItemStore(mockSessionStorage);
+jest.mock('../state_storage', () => {
+  return {
+    HashedItemStoreSingleton: mockHashedItemStore,
+  };
+});

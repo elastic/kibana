@@ -17,58 +17,55 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
 import { encode as encodeRison } from 'rison-node';
-
-import {
-  createStateHash,
-  isStateHash,
-} from '../state_hash';
+import { mockSessionStorage } from '../state_storage/mock';
+import { createStateHash, isStateHash } from '../state_hashing';
 
 describe('stateHash', () => {
-  const existingJsonProvider = () => null;
+  beforeEach(() => {
+    mockSessionStorage.clear();
+  });
 
   describe('#createStateHash', () => {
-
-    describe('returns a hash', () => {
+    it('returns a hash', () => {
       const json = JSON.stringify({ a: 'a' });
-      const hash = createStateHash(json, existingJsonProvider);
-      expect(isStateHash(hash)).to.be(true);
+      const hash = createStateHash(json);
+      expect(isStateHash(hash)).toBe(true);
     });
 
-    describe('returns the same hash for the same input', () => {
+    it('returns the same hash for the same input', () => {
       const json = JSON.stringify({ a: 'a' });
-      const hash1 = createStateHash(json, existingJsonProvider);
-      const hash2 = createStateHash(json, existingJsonProvider);
-      expect(hash1).to.equal(hash2);
+      const hash1 = createStateHash(json);
+      const hash2 = createStateHash(json);
+      expect(hash1).toEqual(hash2);
     });
 
-    describe('returns a different hash for different input', () => {
+    it('returns a different hash for different input', () => {
       const json1 = JSON.stringify({ a: 'a' });
-      const hash1 = createStateHash(json1, existingJsonProvider);
+      const hash1 = createStateHash(json1);
 
       const json2 = JSON.stringify({ a: 'b' });
-      const hash2 = createStateHash(json2, existingJsonProvider);
-      expect(hash1).to.not.equal(hash2);
+      const hash2 = createStateHash(json2);
+      expect(hash1).not.toEqual(hash2);
     });
   });
 
   describe('#isStateHash', () => {
     it('returns true for values created using #createStateHash', () => {
       const json = JSON.stringify({ a: 'a' });
-      const hash = createStateHash(json, existingJsonProvider);
-      expect(isStateHash(hash)).to.be(true);
+      const hash = createStateHash(json);
+      expect(isStateHash(hash)).toBe(true);
     });
 
     it('returns false for values not created using #createStateHash', () => {
       const json = JSON.stringify({ a: 'a' });
-      expect(isStateHash(json)).to.be(false);
+      expect(isStateHash(json)).toBe(false);
     });
 
     it('returns false for RISON', () => {
       // We're storing RISON in the URL, so let's test against this specifically.
       const rison = encodeRison({ a: 'a' });
-      expect(isStateHash(rison)).to.be(false);
+      expect(isStateHash(rison)).toBe(false);
     });
   });
 });

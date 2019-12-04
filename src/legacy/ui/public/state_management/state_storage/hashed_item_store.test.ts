@@ -17,22 +17,19 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import sinon from 'sinon';
-
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
-import { HashedItemStore } from '../hashed_item_store';
+import { HashedItemStore } from './hashed_item_store';
 
 describe('hashedItemStore', () => {
   describe('interface', () => {
     describe('#constructor', () => {
       it('retrieves persisted index from sessionStorage', () => {
         const sessionStorage = new StubBrowserStorage();
-        sinon.spy(sessionStorage, 'getItem');
+        const spy = jest.spyOn(sessionStorage, 'getItem');
 
         new HashedItemStore(sessionStorage);
-        sinon.assert.calledWith(sessionStorage.getItem, HashedItemStore.PERSISTED_INDEX_KEY);
-        sessionStorage.getItem.restore();
+        expect(spy).toBeCalledWith(HashedItemStore.PERSISTED_INDEX_KEY);
+        spy.mockReset();
       });
 
       it('sorts indexed items by touched property', () => {
@@ -57,14 +54,14 @@ describe('hashedItemStore', () => {
         sessionStorage.setItem(HashedItemStore.PERSISTED_INDEX_KEY, JSON.stringify({ a, b, c }));
 
         const hashedItemStore = new HashedItemStore(sessionStorage);
-        expect(hashedItemStore._indexedItems).to.eql([a, c, b]);
+        expect((hashedItemStore as any).indexedItems).toEqual([a, c, b]);
       });
     });
 
     describe('#setItem', () => {
       describe('if the item exists in sessionStorage', () => {
-        let sessionStorage;
-        let hashedItemStore;
+        let sessionStorage: Storage;
+        let hashedItemStore: HashedItemStore;
         const hash = 'a';
         const item = JSON.stringify({});
 
@@ -75,19 +72,19 @@ describe('hashedItemStore', () => {
 
         it('persists the item in sessionStorage', () => {
           hashedItemStore.setItem(hash, item);
-          expect(sessionStorage.getItem(hash)).to.equal(item);
+          expect(sessionStorage.getItem(hash)).toEqual(item);
         });
 
         it('returns true', () => {
           const result = hashedItemStore.setItem(hash, item);
-          expect(result).to.equal(true);
+          expect(result).toEqual(true);
         });
       });
 
       describe(`if the item doesn't exist in sessionStorage`, () => {
         describe(`if there's storage space`, () => {
-          let sessionStorage;
-          let hashedItemStore;
+          let sessionStorage: Storage;
+          let hashedItemStore: HashedItemStore;
           const hash = 'a';
           const item = JSON.stringify({});
 
@@ -98,32 +95,31 @@ describe('hashedItemStore', () => {
 
           it('persists the item in sessionStorage', () => {
             hashedItemStore.setItem(hash, item);
-            expect(sessionStorage.getItem(hash)).to.equal(item);
+            expect(sessionStorage.getItem(hash)).toEqual(item);
           });
 
           it('returns true', () => {
             const result = hashedItemStore.setItem(hash, item);
-            expect(result).to.equal(true);
+            expect(result).toEqual(true);
           });
         });
 
         describe(`if there isn't storage space`, () => {
-          let fakeTimer;
-          let sessionStorage;
-          let hashedItemStore;
-          let storageSizeLimit;
+          let sessionStorage: Storage;
+          let hashedItemStore: HashedItemStore;
+          let storageSizeLimit: number;
           const hash = 'a';
           const item = JSON.stringify({});
 
-          function setItemLater(hash, item) {
+          function setItemLater(_hash: string, _item: string) {
             // Move time forward, so this item will be "touched" most recently.
-            fakeTimer.tick(1);
-            return hashedItemStore.setItem(hash, item);
+            jest.advanceTimersByTime(1);
+            return hashedItemStore.setItem(_hash, _item);
           }
 
           beforeEach(() => {
             // Control time.
-            fakeTimer = sinon.useFakeTimers(Date.now());
+            jest.useFakeTimers();
 
             sessionStorage = new StubBrowserStorage();
             hashedItemStore = new HashedItemStore(sessionStorage);
@@ -141,29 +137,29 @@ describe('hashedItemStore', () => {
 
           afterEach(() => {
             // Stop controlling time.
-            fakeTimer.restore();
+            jest.useRealTimers();
           });
 
           describe('and the item will fit', () => {
             it('removes older items until the new item fits', () => {
               setItemLater(hash, item);
-              expect(sessionStorage.getItem('b')).to.equal(null);
-              expect(sessionStorage.getItem('c')).to.equal(item);
+              expect(sessionStorage.getItem('b')).toEqual(null);
+              expect(sessionStorage.getItem('c')).toEqual(item);
             });
 
             it('persists the item in sessionStorage', () => {
               setItemLater(hash, item);
-              expect(sessionStorage.getItem(hash)).to.equal(item);
+              expect(sessionStorage.getItem(hash)).toEqual(item);
             });
 
             it('returns true', () => {
               const result = setItemLater(hash, item);
-              expect(result).to.equal(true);
+              expect(result).toEqual(true);
             });
           });
 
           describe(`and the item won't fit`, () => {
-            let itemTooBigToFit;
+            let itemTooBigToFit: string;
 
             beforeEach(() => {
               // Make sure the item is longer than the storage size limit.
@@ -176,18 +172,18 @@ describe('hashedItemStore', () => {
 
             it('removes all items', () => {
               setItemLater(hash, itemTooBigToFit);
-              expect(sessionStorage.getItem('b')).to.equal(null);
-              expect(sessionStorage.getItem('c')).to.equal(null);
+              expect(sessionStorage.getItem('b')).toEqual(null);
+              expect(sessionStorage.getItem('c')).toEqual(null);
             });
 
             it(`doesn't persist the item in sessionStorage`, () => {
               setItemLater(hash, itemTooBigToFit);
-              expect(sessionStorage.getItem(hash)).to.equal(null);
+              expect(sessionStorage.getItem(hash)).toEqual(null);
             });
 
             it('returns false', () => {
               const result = setItemLater(hash, itemTooBigToFit);
-              expect(result).to.equal(false);
+              expect(result).toEqual(false);
             });
           });
         });
@@ -196,25 +192,24 @@ describe('hashedItemStore', () => {
 
     describe('#getItem', () => {
       describe('if the item exists in sessionStorage', () => {
-        let fakeTimer;
-        let sessionStorage;
-        let hashedItemStore;
+        let sessionStorage: Storage;
+        let hashedItemStore: HashedItemStore;
 
-        function setItemLater(hash, item) {
+        function setItemLater(hash: string, item: string) {
           // Move time forward, so this item will be "touched" most recently.
-          fakeTimer.tick(1);
+          jest.advanceTimersByTime(1);
           return hashedItemStore.setItem(hash, item);
         }
 
-        function getItemLater(hash) {
+        function getItemLater(hash: string) {
           // Move time forward, so this item will be "touched" most recently.
-          fakeTimer.tick(1);
+          jest.advanceTimersByTime(1);
           return hashedItemStore.getItem(hash);
         }
 
         beforeEach(() => {
           // Control time.
-          fakeTimer = sinon.useFakeTimers(Date.now());
+          jest.useFakeTimers();
 
           sessionStorage = new StubBrowserStorage();
           hashedItemStore = new HashedItemStore(sessionStorage);
@@ -223,12 +218,12 @@ describe('hashedItemStore', () => {
 
         afterEach(() => {
           // Stop controlling time.
-          fakeTimer.restore();
+          jest.useRealTimers();
         });
 
         it('returns the item', () => {
           const retrievedItem = hashedItemStore.getItem('1');
-          expect(retrievedItem).to.be('a');
+          expect(retrievedItem).toBe('a');
         });
 
         it('prevents the item from being first to be removed when freeing up storage space', () => {
@@ -244,14 +239,14 @@ describe('hashedItemStore', () => {
 
           // Add a new item, causing the second item to be removed, but not the first.
           setItemLater('3', 'c');
-          expect(hashedItemStore.getItem('2')).to.equal(null);
-          expect(hashedItemStore.getItem('1')).to.equal('a');
+          expect(hashedItemStore.getItem('2')).toEqual(null);
+          expect(hashedItemStore.getItem('1')).toEqual('a');
         });
       });
 
       describe(`if the item doesn't exist in sessionStorage`, () => {
-        let sessionStorage;
-        let hashedItemStore;
+        let sessionStorage: Storage;
+        let hashedItemStore: HashedItemStore;
         const hash = 'a';
 
         beforeEach(() => {
@@ -261,40 +256,38 @@ describe('hashedItemStore', () => {
 
         it('returns null', () => {
           const retrievedItem = hashedItemStore.getItem(hash);
-          expect(retrievedItem).to.be(null);
+          expect(retrievedItem).toBe(null);
         });
       });
     });
   });
 
   describe('behavior', () => {
-    let fakeTimer;
-    let sessionStorage;
-    let hashedItemStore;
+    let sessionStorage: Storage;
+    let hashedItemStore: HashedItemStore;
 
-    function setItemLater(hash, item) {
+    function setItemLater(hash: string, item: string) {
       // Move time forward, so this item will be "touched" most recently.
-      fakeTimer.tick(1);
+      jest.advanceTimersByTime(1);
       return hashedItemStore.setItem(hash, item);
     }
 
-    function getItemLater(hash) {
+    function getItemLater(hash: string) {
       // Move time forward, so this item will be "touched" most recently.
-      fakeTimer.tick(1);
+      jest.advanceTimersByTime(1);
       return hashedItemStore.getItem(hash);
     }
 
     beforeEach(() => {
       // Control time.
-      fakeTimer = sinon.useFakeTimers(Date.now());
-
+      jest.useFakeTimers();
       sessionStorage = new StubBrowserStorage();
       hashedItemStore = new HashedItemStore(sessionStorage);
     });
 
     afterEach(() => {
       // Stop controlling time.
-      fakeTimer.restore();
+      jest.useRealTimers();
     });
 
     it('orders items to be removed based on when they were last retrieved', () => {
@@ -314,39 +307,39 @@ describe('hashedItemStore', () => {
       getItemLater('4');
 
       setItemLater('5', 'e');
-      expect(hashedItemStore.getItem('1')).to.equal(null);
-      expect(hashedItemStore.getItem('3')).to.equal('c');
-      expect(hashedItemStore.getItem('2')).to.equal('b');
-      expect(hashedItemStore.getItem('4')).to.equal('d');
-      expect(hashedItemStore.getItem('5')).to.equal('e');
+      expect(hashedItemStore.getItem('1')).toEqual(null);
+      expect(hashedItemStore.getItem('3')).toEqual('c');
+      expect(hashedItemStore.getItem('2')).toEqual('b');
+      expect(hashedItemStore.getItem('4')).toEqual('d');
+      expect(hashedItemStore.getItem('5')).toEqual('e');
 
       setItemLater('6', 'f');
-      expect(hashedItemStore.getItem('3')).to.equal(null);
-      expect(hashedItemStore.getItem('2')).to.equal('b');
-      expect(hashedItemStore.getItem('4')).to.equal('d');
-      expect(hashedItemStore.getItem('5')).to.equal('e');
-      expect(hashedItemStore.getItem('6')).to.equal('f');
+      expect(hashedItemStore.getItem('3')).toEqual(null);
+      expect(hashedItemStore.getItem('2')).toEqual('b');
+      expect(hashedItemStore.getItem('4')).toEqual('d');
+      expect(hashedItemStore.getItem('5')).toEqual('e');
+      expect(hashedItemStore.getItem('6')).toEqual('f');
 
       setItemLater('7', 'g');
-      expect(hashedItemStore.getItem('2')).to.equal(null);
-      expect(hashedItemStore.getItem('4')).to.equal('d');
-      expect(hashedItemStore.getItem('5')).to.equal('e');
-      expect(hashedItemStore.getItem('6')).to.equal('f');
-      expect(hashedItemStore.getItem('7')).to.equal('g');
+      expect(hashedItemStore.getItem('2')).toEqual(null);
+      expect(hashedItemStore.getItem('4')).toEqual('d');
+      expect(hashedItemStore.getItem('5')).toEqual('e');
+      expect(hashedItemStore.getItem('6')).toEqual('f');
+      expect(hashedItemStore.getItem('7')).toEqual('g');
 
       setItemLater('8', 'h');
-      expect(hashedItemStore.getItem('4')).to.equal(null);
-      expect(hashedItemStore.getItem('5')).to.equal('e');
-      expect(hashedItemStore.getItem('6')).to.equal('f');
-      expect(hashedItemStore.getItem('7')).to.equal('g');
-      expect(hashedItemStore.getItem('8')).to.equal('h');
+      expect(hashedItemStore.getItem('4')).toEqual(null);
+      expect(hashedItemStore.getItem('5')).toEqual('e');
+      expect(hashedItemStore.getItem('6')).toEqual('f');
+      expect(hashedItemStore.getItem('7')).toEqual('g');
+      expect(hashedItemStore.getItem('8')).toEqual('h');
 
       setItemLater('9', 'i');
-      expect(hashedItemStore.getItem('5')).to.equal(null);
-      expect(hashedItemStore.getItem('6')).to.equal('f');
-      expect(hashedItemStore.getItem('7')).to.equal('g');
-      expect(hashedItemStore.getItem('8')).to.equal('h');
-      expect(hashedItemStore.getItem('9')).to.equal('i');
+      expect(hashedItemStore.getItem('5')).toEqual(null);
+      expect(hashedItemStore.getItem('6')).toEqual('f');
+      expect(hashedItemStore.getItem('7')).toEqual('g');
+      expect(hashedItemStore.getItem('8')).toEqual('h');
+      expect(hashedItemStore.getItem('9')).toEqual('i');
     });
   });
 });
