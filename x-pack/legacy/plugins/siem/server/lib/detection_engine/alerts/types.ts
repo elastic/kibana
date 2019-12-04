@@ -71,13 +71,13 @@ export type RuleAlertParamsRest = Omit<
 };
 
 export interface SignalsParams {
-  signalId: string | undefined | null;
+  signalIds: string[] | undefined | null;
   query: string | undefined | null;
   status: 'open' | 'closed' | undefined | null;
 }
 
-export type SignalsRestParams = Omit<SignalsParams, 'signalId'> & {
-  signal_id: SignalsParams['signalId'];
+export type SignalsRestParams = Omit<SignalsParams, 'signalIds'> & {
+  signal_ids: SignalsParams['signalIds'];
 };
 
 export type OutputRuleAlertRest = RuleAlertParamsRest & {

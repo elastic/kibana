@@ -9,7 +9,7 @@ import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/const
 import { SignalsRequest, SignalSearchResponse, SignalSourceHit } from '../../alerts/types';
 import { setSignalsStatusSchema } from '../schemas';
 import { ServerFacade } from '../../../../types';
-import { Signal } from '../../../types';
+import { Signal, SignalHit } from '../../../types';
 import { transformError } from '../utils';
 
 export const setSignalsStatusRouteDef: Hapi.ServerRoute = {
@@ -25,24 +25,28 @@ export const setSignalsStatusRouteDef: Hapi.ServerRoute = {
     },
   },
   async handler(request: SignalsRequest, headers) {
-    const { signal_id: signalId, query, status } = request.payload;
+    const { signal_ids: signalIds, query, status } = request.payload;
     const { callWithRequest } = request.server.plugins.elasticsearch.getCluster('data');
     if (!callWithRequest) {
       return headers.response().code(404);
     }
     if (status) {
-      if (signalId) {
+      if (signalIds) {
         try {
-          const signal = await callWithRequest(request, 'get', {
-            id: signalId,
+          const signals = await callWithRequest(request, 'mget', {
             index: '.siem-signals-devin-hurley', // fix how this is setup.
+            body: { ids: signalIds },
           });
-          signal._source.signal.status = status;
-          return callWithRequest(request, 'update', {
-            id: signalId,
-            index: '.siem-signals-devin-hurley', // fix how this is setup.
-            body: { doc: { ...signal._source } },
-          });
+          if (signals && signals.docs && signals.docs[0]._source) {
+            signals.docs.forEach(async doc => {
+              (doc._source as SignalHit).signal.status = status;
+              await callWithRequest(request, 'update', {
+                id: doc._id,
+                index: '.siem-signals-devin-hurley', // fix how this is setup.
+                body: { doc: doc._source },
+              });
+            });
+          }
         } catch (exc) {
           // error while getting or updating signal with id: id in signal index .siem-signals
           return transformError(exc);

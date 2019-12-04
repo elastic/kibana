@@ -45,7 +45,7 @@ const per_page = Joi.number()
 const page = Joi.number()
   .min(1)
   .default(1);
-const signal_id = Joi.string();
+const signal_ids = Joi.array().items(Joi.string());
 const sort_field = Joi.string();
 const sort_order = Joi.string().valid('asc', 'desc');
 const tags = Joi.array().items(Joi.string());
@@ -217,7 +217,7 @@ export const findRulesSchema = Joi.object({
 });
 
 export const setSignalsStatusSchema = Joi.object({
-  signal_id,
+  signal_ids,
   query,
   status,
-}).xor('signal_id', 'query');
+}).xor('signal_ids', 'query');
