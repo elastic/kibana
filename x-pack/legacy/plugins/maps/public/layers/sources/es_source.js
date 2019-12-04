@@ -120,7 +120,6 @@ export class AbstractESSource extends AbstractVectorSource {
       searchSource.setField('query', searchFilters.query);
     }
 
-    console.log(searchFilters.sourceQuery);
     if (searchFilters.sourceQuery) {
       const layerSearchSource = new SearchSource();
       layerSearchSource.setField('index', indexPattern);
