@@ -7,7 +7,7 @@
 import Hapi from 'hapi';
 import { difference, memoize } from 'lodash';
 import { registerJobs } from './jobs';
-import { ExportTypesRegistry } from '../../common/export_types_registry';
+import { getExportTypesRegistry } from '../lib/export_types_registry';
 jest.mock('./lib/authorized_user_pre_routing', () => {
   return {
     authorizedUserPreRoutingFactory: () => () => ({})
@@ -25,7 +25,7 @@ let mockServer;
 beforeEach(() => {
   mockServer = new Hapi.Server({ debug: false, port: 8080, routes: { log: { collect: true } } });
   mockServer.config = memoize(() => ({ get: jest.fn() }));
-  const exportTypesRegistry = new ExportTypesRegistry();
+  const exportTypesRegistry = getExportTypesRegistry();
   exportTypesRegistry.register({
     id: 'unencoded',
     jobType: 'unencodedJobType',
