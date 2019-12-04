@@ -143,7 +143,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
     return (
       <div>
         <EuiForm isInvalid={this.state.formError.isInvalid} error={this.state.formError.error}>
-          <EuiTitle>
+          <EuiTitle size="l">
             <h1>
               {this.editingExistingRoleMapping() ? (
                 <FormattedMessage

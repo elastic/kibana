@@ -63,9 +63,6 @@ export class RuleEditor extends Component<Props, State> {
       <div>
         {this.getEditor()}
         <EuiSpacer />
-        <EuiText>
-          <p>Current max depth: {this.state.maxDepth}</p>
-        </EuiText>
         {this.getModeToggle()}
         {this.getConfirmModeChangePrompt()}
       </div>
