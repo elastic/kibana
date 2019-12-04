@@ -46,6 +46,7 @@ export interface LegacyPlugins {
   __LEGACY: {
     XSRF: string;
     isCloudEnabled: boolean;
+    basePath: string;
   };
 }
 
@@ -59,6 +60,7 @@ function startApp() {
     __LEGACY: {
       XSRF: chrome.getXsrfToken(),
       isCloudEnabled: chrome.getInjected('isCloudEnabled', false),
+      basePath: chrome.getBasePath(),
     },
     management: {
       sections: {

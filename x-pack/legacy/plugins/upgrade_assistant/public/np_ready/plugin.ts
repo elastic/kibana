@@ -11,12 +11,12 @@ import { LegacyPlugins } from '../legacy';
 export class UpgradeAssistantUIPlugin implements Plugin {
   async setup(
     { http }: CoreSetup,
-    { management, __LEGACY: { XSRF, isCloudEnabled } }: LegacyPlugins
+    { management, __LEGACY: { XSRF, isCloudEnabled, basePath } }: LegacyPlugins
   ) {
     const appRegistrar = management.sections.get('kibana');
     return appRegistrar.registerApp({
       mount(__, { __LEGACY: { renderToElement } }) {
-        return renderToElement(() => RootComponent({ http, XSRF, isCloudEnabled }));
+        return renderToElement(() => RootComponent({ http, XSRF, basePath, isCloudEnabled }));
       },
     });
   }

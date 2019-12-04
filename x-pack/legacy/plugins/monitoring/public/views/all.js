@@ -37,3 +37,4 @@ import './beats/beat';
 import './apm/overview';
 import './apm/instances';
 import './apm/instance';
+import './setup_mode';

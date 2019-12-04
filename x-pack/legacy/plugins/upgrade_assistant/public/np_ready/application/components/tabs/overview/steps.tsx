@@ -104,7 +104,7 @@ export const StepsUI: FunctionComponent<UpgradeAssistantTabProps & ReactIntl.Inj
   }, {} as { [checkupType: string]: number });
 
   // Uncomment when START_UPGRADE_STEP is in use!
-  const { http, XSRF /* , isCloudEnabled */ } = useAppContext();
+  const { http, XSRF /* , isCloudEnabled */, basePath } = useAppContext();
 
   return (
     <EuiSteps
@@ -215,6 +215,66 @@ export const StepsUI: FunctionComponent<UpgradeAssistantTabProps & ReactIntl.Inj
                   <FormattedMessage
                     id="xpack.upgradeAssistant.overviewTab.steps.indicesStep.noRemainingIssuesLabel"
                     defaultMessage="No remaining deprecated settings."
+                  />
+                </p>
+              )}
+            </EuiText>
+          ),
+        },
+        {
+          title: countByType.monitoring
+            ? intl.formatMessage({
+                id:
+                  'xpack.upgradeAssistant.overviewTab.steps.monitoringStep.issuesRemainingStepTitle',
+                defaultMessage: 'Monitor your stack products with Metricbeat',
+              })
+            : intl.formatMessage({
+                id:
+                  'xpack.upgradeAssistant.overviewTab.steps.monitoringStep.noIssuesRemainingStepTitle',
+                defaultMessage: 'You are monitoring all your stack products with Metricbeat',
+              }),
+          status: countByType.monitoring ? 'danger' : 'complete',
+          children: (
+            <EuiText>
+              {countByType.monitoring ? (
+                <Fragment>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.upgradeAssistant.overviewTab.steps.monitoringStep.todo.todoDetail"
+                      defaultMessage="Go to the {stackMonitoringLink} to monitor with Metricbeat."
+                      values={{
+                        stackMonitoringLink: (
+                          <EuiLink
+                            target="_blank"
+                            external
+                            href={`${basePath}/app/monitoring#/setup-mode`}
+                          >
+                            <FormattedMessage
+                              id="xpack.upgradeAssistant.overviewTab.steps.monitoringStep.todo.monitoringTabButtonLabel"
+                              defaultMessage="Stack Monitoring"
+                            />
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  </p>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.upgradeAssistant.overviewTab.steps.monitoringStep.remainingIssuesDetail"
+                      defaultMessage="{numIssues} stack products must be monitored with Metricbeat"
+                      values={{
+                        numIssues: (
+                          <EuiNotificationBadge>{countByType.monitoring}</EuiNotificationBadge>
+                        ),
+                      }}
+                    />
+                  </p>
+                </Fragment>
+              ) : (
+                <p>
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.overviewTab.steps.monitoringStep.noRemainingIssuesLabel"
+                    defaultMessage="No remaining self-monitoring stack products detected."
                   />
                 </p>
               )}

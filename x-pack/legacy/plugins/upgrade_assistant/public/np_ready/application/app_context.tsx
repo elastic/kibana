@@ -10,6 +10,7 @@ export interface ContextValue {
   http: HttpSetup;
   isCloudEnabled: boolean;
   XSRF: string;
+  basePath: string;
 }
 
 export const AppContext = createContext<ContextValue>({} as any);

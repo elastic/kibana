@@ -158,7 +158,7 @@ export const toggleSetupMode = inSetupMode => {
 export const setSetupModeMenuItem = () => {
   checkAngularState();
 
-  if (isOnPage('no-data')) {
+  if (isOnPage('no-data') || isOnPage('setup-mode')) {
     return;
   }
 

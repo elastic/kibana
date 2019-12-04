@@ -13,6 +13,7 @@ import { createRequestShim } from './create_request_shim';
 
 export function registerClusterCheckupRoutes(server: ServerShimWithRouter) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
+
   const isCloudEnabled = _.get(server.plugins, 'cloud.config.isCloudEnabled', false);
 
   server.router.get(
@@ -22,9 +23,18 @@ export function registerClusterCheckupRoutes(server: ServerShimWithRouter) {
     },
     versionCheckHandlerWrapper(async (ctx, request, response) => {
       const reqShim = createRequestShim(request);
+      const monitoringCluster = server.plugins.elasticsearch.getCluster('monitoring');
+      const monitoringClusterCallWithRequest = monitoringCluster
+        ? monitoringCluster.callWithRequest
+        : null;
       try {
         return response.ok({
-          body: await getUpgradeAssistantStatus(callWithRequest, reqShim, isCloudEnabled),
+          body: await getUpgradeAssistantStatus(
+            callWithRequest,
+            reqShim,
+            isCloudEnabled,
+            monitoringClusterCallWithRequest
+          ),
         });
       } catch (e) {
         if (e.status === 403) {

@@ -22,12 +22,14 @@ export interface UpgradeAssistantStatus {
   readyForUpgrade: boolean;
   cluster: EnrichedDeprecationInfo[];
   indices: EnrichedDeprecationInfo[];
+  monitoring: EnrichedDeprecationInfo[];
 }
 
 export async function getUpgradeAssistantStatus(
   callWithRequest: CallClusterWithRequest,
   req: RequestShim,
-  isCloudEnabled: boolean
+  isCloudEnabled: boolean,
+  monitoringCallWithRequest: CallClusterWithRequest | null
 ): Promise<UpgradeAssistantStatus> {
   const deprecations = await callWithRequest(req, 'transport.request', {
     path: '/_migration/deprecations',
@@ -36,6 +38,7 @@ export async function getUpgradeAssistantStatus(
 
   const cluster = getClusterDeprecations(deprecations, isCloudEnabled);
   const indices = getCombinedIndexInfos(deprecations);
+  const monitoring = await getMonitoringDeprecations(req, monitoringCallWithRequest);
 
   const criticalWarnings = cluster.concat(indices).filter(d => d.level === 'critical');
 
@@ -43,6 +46,7 @@ export async function getUpgradeAssistantStatus(
     readyForUpgrade: criticalWarnings.length === 0,
     cluster,
     indices,
+    monitoring,
   };
 }
 
@@ -72,4 +76,87 @@ const getClusterDeprecations = (deprecations: DeprecationAPIResponse, isCloudEna
   } else {
     return combined;
   }
+};
+
+// TODO: move to lib?
+interface PartionedMonitoringIndex {
+  version: string;
+  isMetricbeat: boolean;
+  date: string;
+}
+
+const MONITORING_INDEX_REGEX = /\.monitoring-([^-]+)-([^-]+)-([mb]*)-?([^-]+)/;
+function partitionMonitoringIndices(indices: string[]) {
+  return indices.reduce(
+    (accum: { [product: string]: PartionedMonitoringIndex[] }, index: string) => {
+      const result = MONITORING_INDEX_REGEX.exec(index);
+      if (result && result.length === 5) {
+        const product = result[1];
+        const version = result[2];
+        const isMetricbeat = result[3] === 'mb';
+        const date = result[4];
+
+        accum[product] = accum[product] || [];
+        accum[product].push({ version, isMetricbeat, date });
+      }
+      return accum;
+    },
+    {}
+  );
+}
+
+const getMonitoringDeprecations = async (
+  req: RequestShim,
+  monitoringCallWithRequest: CallClusterWithRequest | null
+): Promise<EnrichedDeprecationInfo[]> => {
+  const deprecations: EnrichedDeprecationInfo[] = [];
+
+  if (!monitoringCallWithRequest) {
+    return deprecations;
+  }
+
+  const index = '*:.monitoring-*,.monitoring-*';
+  const response = await monitoringCallWithRequest(req, 'search', {
+    index,
+    ignoreUnavailable: true,
+    filterPath: 'aggregations.indices.buckets',
+    size: 0,
+    body: {
+      query: {
+        range: {
+          timestamp: {
+            gte: 'now-5m',
+          },
+        },
+      },
+      aggs: {
+        indices: {
+          terms: {
+            field: '_index',
+            size: 1000,
+          },
+        },
+      },
+    },
+  });
+
+  const indices = response.aggregations.indices.buckets.map(
+    (bucket: { key: string }) => bucket.key
+  );
+  const partitioned = partitionMonitoringIndices(indices);
+  const products = Object.keys(partitioned);
+  for (const productName of products) {
+    if (
+      partitioned[productName].some(({ isMetricbeat }: PartionedMonitoringIndex) => !isMetricbeat)
+    ) {
+      deprecations.push({
+        level: 'critical',
+        message: `${productName} needs migrating bro`,
+        url:
+          'https://www.elastic.co/blog/external-collection-for-elastic-stack-monitoring-is-now-available-via-metricbeat',
+      });
+    }
+  }
+
+  return deprecations;
 };
