@@ -24,8 +24,7 @@ You'll provide the web developer with the access and privileges to get the job d
 
 To complete this tutorial, you'll need the following:
 
-*  **Administrative privileges**: To create a space, role, and a user.  
-Log in as a superuser (the `elastic` user is a superuser by default).
+*  You must have a role that grants privileges to create a space, role, and user. See the {ref}/built-in-roles.html[built-in] roles.
 *  A **space**: In this tutorial we use `Dev Mortgage` as the space 
 name. See <<spaces-managing, view, create, and delete spaces>> for 
 details on creating a space.
