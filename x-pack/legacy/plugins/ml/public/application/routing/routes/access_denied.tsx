@@ -6,8 +6,7 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { MlRoute, PageLoader, useResolver } from '../router';
-import { KibanaConfigTypeFix } from '../../contexts/kibana';
+import { MlRoute, PageLoader, useResolver, PageProps } from '../router';
 import { Page } from '../../access_denied';
 
 const breadcrumbs = [
@@ -21,11 +20,11 @@ const breadcrumbs = [
 
 export const accessDeniedRoute: MlRoute = {
   path: '/access-denied',
-  render: (props, config) => <PageWrapper config={config} />,
+  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
   breadcrumbs,
 };
 
-const PageWrapper: FC<{ config: KibanaConfigTypeFix }> = ({ config }) => {
+const PageWrapper: FC<PageProps> = ({ config }) => {
   const { context } = useResolver(undefined, config, {});
 
   return (
