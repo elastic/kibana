@@ -34,8 +34,6 @@ export {
   RouteSchemas,
   RouteContentType,
   RouteConfigOptionsBody,
-  RouteURLValidationParams,
-  RouteBodyValidationParams,
   validBodyOutput,
 } from './route';
 export { HapiResponseAdapter } from './response_adapter';
@@ -58,8 +56,4 @@ export {
 
 export { IKibanaSocket } from './socket';
 
-export {
-  RouteValidateFunctionReturn,
-  RouteValidateFunction,
-  RouteValidationError,
-} from './validator';
+export { RouteValidateFunctionReturn, RouteValidator, RouteValidationError } from './validator';

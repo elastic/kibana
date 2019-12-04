@@ -17,76 +17,75 @@
  * under the License.
  */
 
-import { validate, RouteValidationError } from './validator';
+import { validate, RouteValidator, RouteValidationError } from './';
 import { schema } from '@kbn/config-schema';
 
 describe('Router validator', () => {
   it('should validate and infer the type from a function', () => {
-    const validateFn = (data: any) => {
+    const validator = new RouteValidator(data => {
       if (typeof data.foo === 'string') {
         return { value: { foo: data.foo as string } };
       }
       return { error: new RouteValidationError('Not a string', ['foo']) };
-    };
-
-    expect(validate(validateFn, { foo: 'bar' })).toStrictEqual({ foo: 'bar' });
-    expect(validate(validateFn, { foo: 'bar' }).foo.toUpperCase()).toBe('BAR'); // It knows it's a string! :)
-    expect(() => validate(validateFn, { foo: 1 })).toThrowError('[foo]: Not a string');
-    expect(() => validate(validateFn, {})).toThrowError('[foo]: Not a string');
-    expect(() => validate(validateFn, undefined)).toThrowError(
+    });
+    expect(validate(validator, { foo: 'bar' })).toStrictEqual({ foo: 'bar' });
+    expect(validate(validator, { foo: 'bar' }).foo.toUpperCase()).toBe('BAR'); // It knows it's a string! :)
+    expect(() => validate(validator, { foo: 1 })).toThrowError('[foo]: Not a string');
+    expect(() => validate(validator, {})).toThrowError('[foo]: Not a string');
+    expect(() => validate(validator, undefined)).toThrowError(
       `Cannot read property 'foo' of undefined`
     );
-    expect(() => validate(validateFn, {}, 'myField')).toThrowError('[myField.foo]: Not a string');
+    expect(() => validate(validator, {}, 'myField')).toThrowError('[myField.foo]: Not a string');
   });
 
   it('should validate and infer the type from a config-schema ObjectType', () => {
-    const validateFn = schema.object({
+    const schemaValidation = schema.object({
       foo: schema.string(),
     });
 
-    expect(validate(validateFn, { foo: 'bar' })).toStrictEqual({ foo: 'bar' });
-    expect(validate(validateFn, { foo: 'bar' }).foo.toUpperCase()).toBe('BAR'); // It knows it's a string! :)
-    expect(() => validate(validateFn, { foo: 1 })).toThrowError(
+    expect(validate(schemaValidation, { foo: 'bar' })).toStrictEqual({ foo: 'bar' });
+    expect(validate(schemaValidation, { foo: 'bar' }).foo.toUpperCase()).toBe('BAR'); // It knows it's a string! :)
+    expect(() => validate(schemaValidation, { foo: 1 })).toThrowError(
       '[foo]: expected value of type [string] but got [number]'
     );
-    expect(() => validate(validateFn, {})).toThrowError(
+    expect(() => validate(schemaValidation, {})).toThrowError(
       '[foo]: expected value of type [string] but got [undefined]'
     );
-    expect(() => validate(validateFn, undefined)).toThrowError(
+    expect(() => validate(schemaValidation, undefined)).toThrowError(
       '[foo]: expected value of type [string] but got [undefined]'
     );
-    expect(() => validate(validateFn, {}, 'myField')).toThrowError(
+    expect(() => validate(schemaValidation, {}, 'myField')).toThrowError(
       '[myField.foo]: expected value of type [string] but got [undefined]'
     );
   });
 
   it('should validate and infer the type from a config-schema non-ObjectType', () => {
-    const validateFn = schema.buffer();
+    const schemaValidation = schema.buffer();
 
     const foo = new Buffer('hi!');
-    expect(validate(validateFn, foo)).toStrictEqual(foo);
-    expect(validate(validateFn, foo).byteLength).toBeGreaterThan(0); // It knows it's a buffer! :)
-    expect(() => validate(validateFn, { foo: 1 })).toThrowError(
+    expect(validate(schemaValidation, foo)).toStrictEqual(foo);
+    expect(validate(schemaValidation, foo).byteLength).toBeGreaterThan(0); // It knows it's a buffer! :)
+    expect(() => validate(schemaValidation, { foo: 1 })).toThrowError(
       'expected value of type [Buffer] but got [Object]'
     );
-    expect(() => validate(validateFn, {})).toThrowError(
+    expect(() => validate(schemaValidation, {})).toThrowError(
       'expected value of type [Buffer] but got [Object]'
     );
-    expect(() => validate(validateFn, undefined)).toThrowError(
+    expect(() => validate(schemaValidation, undefined)).toThrowError(
       `expected value of type [Buffer] but got [undefined]`
     );
-    expect(() => validate(validateFn, {}, 'myField')).toThrowError(
+    expect(() => validate(schemaValidation, {}, 'myField')).toThrowError(
       '[myField]: expected value of type [Buffer] but got [Object]'
     );
   });
 
   it('should catch the errors thrown by the validate function', () => {
-    const validateFn = (data: any) => {
+    const validator = new RouteValidator(data => {
       throw new Error('Something went terribly wrong');
-    };
+    });
 
-    expect(() => validate(validateFn, { foo: 1 })).toThrowError('Something went terribly wrong');
-    expect(() => validate(validateFn, {}, 'myField')).toThrowError(
+    expect(() => validate(validator, { foo: 1 })).toThrowError('Something went terribly wrong');
+    expect(() => validate(validator, {}, 'myField')).toThrowError(
       '[myField]: Something went terribly wrong'
     );
   });

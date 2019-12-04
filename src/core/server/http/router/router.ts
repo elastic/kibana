@@ -30,13 +30,11 @@ import {
   RouteMethod,
   RouteSchemas,
   validBodyOutput,
-  RouteURLValidationParams,
-  RouteBodyValidationParams,
 } from './route';
 import { HapiResponseAdapter } from './response_adapter';
 import { RequestHandlerContext } from '../../../server';
 import { wrapErrors } from './error_wrapper';
-import { RouteValidatedType, RouteValidateFunction } from './validator';
+import { RouteValidatedType, RouteValidator, RouteValidateSpecs } from './validator';
 
 interface RouterRoute {
   method: RouteMethod;
@@ -51,9 +49,9 @@ interface RouterRoute {
  * @public
  */
 export type RouteRegistrar<Method extends RouteMethod> = <
-  P extends RouteURLValidationParams,
-  Q extends RouteURLValidationParams,
-  B extends RouteBodyValidationParams
+  P extends RouteValidateSpecs,
+  Q extends RouteValidateSpecs,
+  B extends RouteValidateSpecs
 >(
   route: RouteConfig<P, Q, B, Method>,
   handler: RequestHandler<P, Q, B, Method>
@@ -111,9 +109,9 @@ export interface IRouter {
    * @param handler {@link RequestHandler} - a route handler to wrap
    */
   handleLegacyErrors: <
-    P extends RouteURLValidationParams,
-    Q extends RouteURLValidationParams,
-    B extends RouteBodyValidationParams
+    P extends RouteValidateSpecs,
+    Q extends RouteValidateSpecs,
+    B extends RouteValidateSpecs
   >(
     handler: RequestHandler<P, Q, B>
   ) => RequestHandler<P, Q, B>;
@@ -127,9 +125,9 @@ export interface IRouter {
 }
 
 export type ContextEnhancer<
-  P extends RouteURLValidationParams,
-  Q extends RouteURLValidationParams,
-  B extends RouteBodyValidationParams,
+  P extends RouteValidateSpecs,
+  Q extends RouteValidateSpecs,
+  B extends RouteValidateSpecs,
   Method extends RouteMethod
 > = (handler: RequestHandler<P, Q, B, Method>) => RequestHandlerEnhanced<P, Q, B, Method>;
 
@@ -147,9 +145,9 @@ function getRouteFullPath(routerPath: string, routePath: string) {
  * undefined.
  */
 function routeSchemasFromRouteConfig<
-  P extends RouteURLValidationParams,
-  Q extends RouteURLValidationParams,
-  B extends RouteBodyValidationParams
+  P extends RouteValidateSpecs,
+  Q extends RouteValidateSpecs,
+  B extends RouteValidateSpecs
 >(route: RouteConfig<P, Q, B, typeof routeMethod>, routeMethod: RouteMethod) {
   // The type doesn't allow `validate` to be undefined, but it can still
   // happen when it's used from JavaScript.
@@ -161,7 +159,7 @@ function routeSchemasFromRouteConfig<
 
   if (route.validate !== false) {
     Object.entries(route.validate).forEach(([key, schema]) => {
-      if (!(schema instanceof Type) && typeof schema !== 'function') {
+      if (!(schema instanceof Type || schema instanceof RouteValidator)) {
         throw new Error(
           `Expected a valid schema declared with '@kbn/config-schema' package at key: [${key}].`
         );
@@ -181,9 +179,9 @@ function routeSchemasFromRouteConfig<
 function validOptions(
   method: RouteMethod,
   routeConfig: RouteConfig<
-    RouteURLValidationParams,
-    RouteURLValidationParams,
-    RouteBodyValidationParams,
+    RouteValidateSpecs,
+    RouteValidateSpecs,
+    RouteValidateSpecs,
     typeof method
   >
 ) {
@@ -232,9 +230,9 @@ export class Router implements IRouter {
     private readonly enhanceWithContext: ContextEnhancer<any, any, any, any>
   ) {
     const buildMethod = <Method extends RouteMethod>(method: Method) => <
-      P extends RouteURLValidationParams,
-      Q extends RouteURLValidationParams,
-      B extends RouteBodyValidationParams
+      P extends RouteValidateSpecs,
+      Q extends RouteValidateSpecs,
+      B extends RouteValidateSpecs
     >(
       route: RouteConfig<P, Q, B, Method>,
       handler: RequestHandler<P, Q, B, Method>
@@ -267,17 +265,17 @@ export class Router implements IRouter {
   }
 
   public handleLegacyErrors<
-    P extends RouteURLValidationParams,
-    Q extends RouteURLValidationParams,
-    B extends RouteBodyValidationParams
+    P extends RouteValidateSpecs,
+    Q extends RouteValidateSpecs,
+    B extends RouteValidateSpecs
   >(handler: RequestHandler<P, Q, B>): RequestHandler<P, Q, B> {
     return wrapErrors(handler);
   }
 
   private async handle<
-    P extends RouteURLValidationParams,
-    Q extends RouteURLValidationParams,
-    B extends RouteBodyValidationParams
+    P extends RouteValidateSpecs,
+    Q extends RouteValidateSpecs,
+    B extends RouteValidateSpecs
   >({
     routeSchemas,
     request,
@@ -317,9 +315,9 @@ type WithoutHeadArgument<T> = T extends (first: any, ...rest: infer Params) => i
   : never;
 
 type RequestHandlerEnhanced<
-  P extends RouteURLValidationParams,
-  Q extends RouteURLValidationParams,
-  B extends RouteBodyValidationParams,
+  P extends RouteValidateSpecs,
+  Q extends RouteValidateSpecs,
+  B extends RouteValidateSpecs,
   Method extends RouteMethod
 > = WithoutHeadArgument<RequestHandler<P, Q, B, Method>>;
 
@@ -357,9 +355,9 @@ type RequestHandlerEnhanced<
  * @public
  */
 export type RequestHandler<
-  P extends RouteURLValidationParams = RouteValidateFunction<unknown>,
-  Q extends RouteURLValidationParams = RouteValidateFunction<unknown>,
-  B extends RouteBodyValidationParams = RouteValidateFunction<unknown>,
+  P extends RouteValidateSpecs = RouteValidator<unknown>,
+  Q extends RouteValidateSpecs = RouteValidator<unknown>,
+  B extends RouteValidateSpecs = RouteValidator<unknown>,
   Method extends RouteMethod = any
 > = (
   context: RequestHandlerContext,

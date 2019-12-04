@@ -20,14 +20,11 @@
 import { Url } from 'url';
 import { Request } from 'hapi';
 
-import { ObjectType, Type } from '@kbn/config-schema';
-
-import { Stream } from 'stream';
 import { deepFreeze, RecursiveReadonly } from '../../../utils';
 import { Headers } from './headers';
 import { RouteMethod, RouteSchemas, RouteConfigOptions, validBodyOutput } from './route';
 import { KibanaSocket, IKibanaSocket } from './socket';
-import { validate, RouteValidateFunction, RouteValidatedType } from './validator';
+import { validate, RouteValidatedType, RouteValidateSpecs } from './validator';
 
 const requestSymbol = Symbol('request');
 
@@ -72,9 +69,9 @@ export class KibanaRequest<
    * @internal
    */
   public static from<
-    P extends ObjectType | RouteValidateFunction<any>,
-    Q extends ObjectType | RouteValidateFunction<any>,
-    B extends ObjectType | Type<Buffer> | Type<Stream> | RouteValidateFunction<any>
+    P extends RouteValidateSpecs,
+    Q extends RouteValidateSpecs,
+    B extends RouteValidateSpecs
   >(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders: boolean = true) {
     const requestParts = KibanaRequest.validate(req, routeSchemas);
     return new KibanaRequest(
@@ -93,9 +90,9 @@ export class KibanaRequest<
    * @internal
    */
   private static validate<
-    P extends ObjectType | RouteValidateFunction<any>,
-    Q extends ObjectType | RouteValidateFunction<any>,
-    B extends ObjectType | Type<Buffer> | Type<Stream> | RouteValidateFunction<any>
+    P extends RouteValidateSpecs,
+    Q extends RouteValidateSpecs,
+    B extends RouteValidateSpecs
   >(
     req: Request,
     routeSchemas: RouteSchemas<P, Q, B> | undefined
@@ -115,12 +112,12 @@ export class KibanaRequest<
     const params =
       routeSchemas.params === undefined
         ? ({} as RouteValidatedType<P>)
-        : validate<RouteValidatedType<P>>(routeSchemas.params, req.params, 'request params');
+        : validate<RouteValidatedType<P>>(routeSchemas.params as any, req.params, 'request params');
 
     const query =
       routeSchemas.query === undefined
         ? ({} as RouteValidatedType<Q>)
-        : validate<RouteValidatedType<Q>>(routeSchemas.query, req.query, 'request query');
+        : validate<RouteValidatedType<Q>>(routeSchemas.query as any, req.query, 'request query');
 
     const body =
       routeSchemas.body === undefined

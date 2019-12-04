@@ -19,7 +19,7 @@
 import { KibanaRequest } from './request';
 import { httpServerMock } from '../http_server.mocks';
 import { schema } from '@kbn/config-schema';
-import { RouteValidationError } from './validator';
+import { RouteValidator, RouteValidationError } from './validator';
 
 describe('KibanaRequest', () => {
   describe('get all headers', () => {
@@ -102,13 +102,13 @@ describe('KibanaRequest', () => {
       const kibanaRequest = KibanaRequest.from(request, {
         params: schema.object({ id: schema.string() }),
         query: schema.object({ search: schema.string() }),
-        body: data => {
+        body: new RouteValidator(data => {
           if (Buffer.isBuffer(data)) {
             return { value: data };
           } else {
             return { error: new RouteValidationError('It should be a Buffer', []) };
           }
-        },
+        }),
       });
       expect(kibanaRequest.params).toStrictEqual({ id: 'params' });
       expect(kibanaRequest.params.id.toUpperCase()).toEqual('PARAMS'); // infers it's a string

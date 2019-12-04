@@ -27,7 +27,7 @@ import supertest from 'supertest';
 
 import { ByteSizeValue, schema } from '@kbn/config-schema';
 import { HttpConfig } from './http_config';
-import { Router, RouteValidationError } from './router';
+import { Router, RouteValidationError, RouteValidator } from './router';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { HttpServer } from './http_server';
 import { Readable } from 'stream';
@@ -295,13 +295,13 @@ test('valid body with validate function', async () => {
     {
       path: '/',
       validate: {
-        body: ({ bar, baz } = {}) => {
+        body: new RouteValidator(({ bar, baz } = {}) => {
           if (typeof bar === 'string' && typeof baz === 'number') {
             return { value: { bar, baz } };
           } else {
             return { error: new RouteValidationError('Wrong payload', ['body']) };
           }
-        },
+        }),
       },
     },
     (context, req, res) => {

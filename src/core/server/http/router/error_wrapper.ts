@@ -22,13 +22,13 @@ import { KibanaRequest } from './request';
 import { KibanaResponseFactory } from './response';
 import { RequestHandler } from './router';
 import { RequestHandlerContext } from '../../../server';
-import { RouteMethod, RouteURLValidationParams, RouteBodyValidationParams } from './route';
-import { RouteValidatedType } from './validator';
+import { RouteMethod } from './route';
+import { RouteValidatedType, RouteValidateSpecs } from './validator';
 
 export const wrapErrors = <
-  P extends RouteURLValidationParams,
-  Q extends RouteURLValidationParams,
-  B extends RouteBodyValidationParams
+  P extends RouteValidateSpecs,
+  Q extends RouteValidateSpecs,
+  B extends RouteValidateSpecs
 >(
   handler: RequestHandler<P, Q, B, RouteMethod>
 ): RequestHandler<P, Q, B, RouteMethod> => {
