@@ -1,4 +1,4 @@
-# Editor Component
+# Code Editor Component
 
 This re-usable code editor component was built as a layer of abstraction on top of the [Monaco Code Editor](https://microsoft.github.io/monaco-editor/) (and the [React Monaco Editor component](https://github.com/react-monaco-editor/react-monaco-editor)). The goal of this component is to expose a set of the most-used, most-helpful features from Monaco in a way that's easy to use out of the box. If a use case requires additional features, this component still allows access to all other Monaco features.
 
