@@ -266,7 +266,6 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
                 {
                   type: 'field_value_selection',
                   field: 'actionTypeId',
-                  'data-test-subj': 'typeFilterButton',
                   name: i18n.translate(
                     'xpack.triggersActionsUI.sections.actionsConnectorsList.filters.actionTypeIdName',
                     { defaultMessage: 'Type' }
@@ -283,6 +282,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
                         key="delete"
                         iconType="trash"
                         color="danger"
+                        data-test-subj="bulkDelete"
                         onClick={deleteSelectedItems}
                         title={
                           canDelete

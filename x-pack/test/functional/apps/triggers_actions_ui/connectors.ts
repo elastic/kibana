@@ -162,7 +162,53 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await find.byCssSelector('[data-test-subj="actionsTable"]:not(.euiBasicTable-loading)');
 
-      const rowsAfterDelete = await testSubjects.findAll('connectors-row');
+      const rowsAfterDelete = await testSubjects.findAll('connectors-row', 0);
+      expect(rowsAfterDelete.length).to.eql(0);
+    });
+
+    it('should bulk delete connectors', async () => {
+      const connectorName = generateUniqueKey();
+
+      await pageObjects.triggersActionsUI.createActionConnector();
+
+      const serverLogCard = await testSubjects.find('.server-log-card');
+      await serverLogCard.click();
+
+      const nameInput = await testSubjects.find('nameInput');
+      await nameInput.click();
+      await nameInput.clearValue();
+      await nameInput.type(connectorName);
+
+      const saveButton = await find.byCssSelector(
+        '[data-test-subj="saveActionButton"]:not(disabled)'
+      );
+      await saveButton.click();
+
+      await testSubjects.exists('euiToastHeader');
+
+      const closeButton = await testSubjects.find('toastCloseButton');
+      await closeButton.click();
+
+      const searchBox = await find.byCssSelector('[data-test-subj="actionsList"] .euiFieldSearch');
+      await searchBox.click();
+      await searchBox.clearValue();
+      await searchBox.type(connectorName);
+      await searchBox.pressKeys(ENTER_KEY);
+
+      const rowsBeforeDelete = await testSubjects.findAll('connectors-row');
+      expect(rowsBeforeDelete.length).to.eql(1);
+
+      const deleteCheckbox = await find.byCssSelector(
+        '.euiTableRowCellCheckbox .euiCheckbox__input'
+      );
+      await deleteCheckbox.click();
+
+      const bulkDeleteBtn = await testSubjects.find('bulkDelete');
+      await bulkDeleteBtn.click();
+
+      await find.byCssSelector('[data-test-subj="actionsTable"]:not(.euiBasicTable-loading)');
+
+      const rowsAfterDelete = await testSubjects.findAll('connectors-row', 0);
       expect(rowsAfterDelete.length).to.eql(0);
     });
   });
