@@ -4,32 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import url from 'url';
-import styled from 'styled-components';
+import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { useFetcher, FETCH_STATUS } from '../../../hooks/useFetcher';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
-import { QueryParams } from '../../shared/Links/apm/ExternalLinks';
+import styled from 'styled-components';
+import url from 'url';
 import { TRACE_ID } from '../../../../common/elasticsearch_fieldnames';
+import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
+import { useUrlParams } from '../../../hooks/useUrlParams';
 
 const CentralizedContainer = styled.div`
   height: 100%;
   display: flex;
 `;
 
-type DateRange = Partial<QueryParams>;
-
-const getDateRange = ({ rangeFrom, rangeTo }: DateRange) =>
-  rangeFrom && rangeTo ? { rangeFrom, rangeTo } : {};
-
 const redirectToTransactionDetailPage = ({
   transaction,
   rangeFrom,
   rangeTo
-}: { transaction: Transaction } & DateRange) =>
+}: {
+  transaction: Transaction;
+  rangeFrom?: string;
+  rangeTo?: string;
+}) =>
   url.format({
     pathname: `/services/${transaction.service.name}/transactions/view`,
     query: {
@@ -37,7 +35,8 @@ const redirectToTransactionDetailPage = ({
       transactionId: transaction.transaction.id,
       transactionName: transaction.transaction.name,
       transactionType: transaction.transaction.type,
-      ...getDateRange({ rangeFrom, rangeTo })
+      rangeFrom,
+      rangeTo
     }
   });
 
@@ -45,12 +44,17 @@ const redirectToTracePage = ({
   traceId,
   rangeFrom,
   rangeTo
-}: { traceId: string } & DateRange) =>
+}: {
+  traceId: string;
+  rangeFrom?: string;
+  rangeTo?: string;
+}) =>
   url.format({
     pathname: `/traces`,
     query: {
       kuery: encodeURIComponent(`${TRACE_ID} : "${traceId}"`),
-      ...getDateRange({ rangeFrom, rangeTo })
+      rangeFrom,
+      rangeTo
     }
   });
 

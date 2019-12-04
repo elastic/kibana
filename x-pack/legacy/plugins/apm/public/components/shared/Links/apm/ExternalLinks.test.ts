@@ -19,12 +19,8 @@ describe('ExternalLinks', () => {
     jest.clearAllMocks();
   });
   it('trace link', () => {
-    expect(getTraceUrl(123)).toEqual('/link-to/trace/123');
-    expect(getTraceUrl('456')).toEqual('/link-to/trace/456');
-  });
-  it('trace link with dates', () => {
-    expect(getTraceUrl(123, { rangeFrom: '123', rangeTo: '456' })).toEqual(
-      '/link-to/trace/123?rangeFrom=123&rangeTo=456'
-    );
+    expect(
+      getTraceUrl({ traceId: 'foo', rangeFrom: '123', rangeTo: '456' })
+    ).toEqual('/link-to/trace/foo?rangeFrom=123&rangeTo=456');
   });
 });

@@ -9,7 +9,6 @@ import { shallow } from 'enzyme';
 import * as urlParamsHooks from '../../../../hooks/useUrlParams';
 import * as hooks from '../../../../hooks/useFetcher';
 import { TraceLink } from '../';
-import { mockNow } from '../../../../utils/testHelpers';
 
 jest.mock('../../Main/route_config/index.tsx', () => ({
   routes: [
@@ -36,7 +35,9 @@ describe('TraceLink', () => {
   it('renders trace page when transaction is not found', () => {
     spyOn(urlParamsHooks, 'useUrlParams').and.returnValue({
       urlParams: {
-        traceIdLink: '123'
+        traceIdLink: '123',
+        rangeFrom: 'now-24h',
+        rangeTo: 'now'
       }
     });
     spyOn(hooks, 'useFetcher').and.returnValue({
@@ -46,7 +47,7 @@ describe('TraceLink', () => {
 
     const component = shallow(<TraceLink />);
     expect(component.prop('to')).toEqual(
-      '/traces?kuery=trace.id%2520%253A%2520%2522123%2522'
+      '/traces?kuery=trace.id%2520%253A%2520%2522123%2522&rangeFrom=now-24h&rangeTo=now'
     );
   });
 
@@ -54,10 +55,11 @@ describe('TraceLink', () => {
     beforeAll(() => {
       spyOn(urlParamsHooks, 'useUrlParams').and.returnValue({
         urlParams: {
-          traceIdLink: '123'
+          traceIdLink: '123',
+          rangeFrom: 'now-24h',
+          rangeTo: 'now'
         }
       });
-      mockNow('2019-11-25'.valueOf());
     });
     it('renders with date range params', () => {
       const transaction = {
@@ -75,27 +77,7 @@ describe('TraceLink', () => {
       });
       const component = shallow(<TraceLink />);
       expect(component.prop('to')).toEqual(
-        '/services/foo/transactions/view?traceId=123&transactionId=456&transactionName=bar&transactionType=GET'
-      );
-    });
-
-    it('renders without date range', () => {
-      const transaction = {
-        service: { name: 'foo' },
-        transaction: {
-          id: '456',
-          name: 'bar',
-          type: 'GET'
-        },
-        trace: { id: 123 }
-      };
-      spyOn(hooks, 'useFetcher').and.returnValue({
-        data: { transaction },
-        status: 'success'
-      });
-      const component = shallow(<TraceLink />);
-      expect(component.prop('to')).toEqual(
-        '/services/foo/transactions/view?traceId=123&transactionId=456&transactionName=bar&transactionType=GET'
+        '/services/foo/transactions/view?traceId=123&transactionId=456&transactionName=bar&transactionType=GET&rangeFrom=now-24h&rangeTo=now'
       );
     });
   });
