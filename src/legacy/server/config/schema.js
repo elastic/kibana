@@ -106,6 +106,7 @@ export default () => Joi.object({
     maxPayloadBytes: HANDLED_IN_NEW_PLATFORM,
     socketTimeout: HANDLED_IN_NEW_PLATFORM,
     ssl: HANDLED_IN_NEW_PLATFORM,
+    compression: HANDLED_IN_NEW_PLATFORM,
   }).default(),
 
   uiSettings: HANDLED_IN_NEW_PLATFORM,

@@ -149,8 +149,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
     this.vis._setUiState(this.uiState);
 
-    this.appState = appState;
-
     this.subscriptions.push(
       Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
         this.handleChanges();
@@ -315,6 +313,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
     div.setAttribute('data-test-subj', 'visualizationLoader');
     div.setAttribute('data-shared-item', '');
+    div.setAttribute('data-shared-item-container', '');
     div.setAttribute('data-rendering-count', '0');
     div.setAttribute('data-render-complete', 'false');
 

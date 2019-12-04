@@ -22,6 +22,7 @@ import { isMaster } from 'cluster';
 import { CliArgs, Env, RawConfigService } from './config';
 import { LegacyObjectToConfigAdapter } from './legacy';
 import { Root } from './root';
+import { CriticalError } from './errors';
 
 interface KibanaFeatures {
   // Indicates whether we can run Kibana in a so called cluster mode in which
@@ -125,7 +126,9 @@ function onRootShutdown(reason?: any) {
     // mirror such fatal errors in standard output with `console.error`.
     // eslint-disable-next-line
     console.error(`\n${chalk.white.bgRed(' FATAL ')} ${reason}\n`);
+
+    process.exit(reason instanceof CriticalError ? reason.processExitCode : 1);
   }
 
-  process.exit(reason === undefined ? 0 : (reason as any).processExitCode || 1);
+  process.exit(0);
 }

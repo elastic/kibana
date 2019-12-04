@@ -193,12 +193,20 @@ function EditorUI({ previousStateLocation = 'stored' }: EditorProps) {
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-        <div
-          ref={editorRef}
-          id="ConAppEditor"
-          className="conApp__editorContent"
-          data-test-subj="request-editor"
-        />
+
+        {/* Axe complains about Ace's textarea element missing a label, which interferes with our
+        automated a11y tests per #52136. This wrapper does nothing to address a11y but it does
+        satisfy Axe. */}
+
+        {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+        <label className="conApp__textAreaLabelHack">
+          <div
+            ref={editorRef}
+            id="ConAppEditor"
+            className="conApp__editorContent"
+            data-test-subj="request-editor"
+          />
+        </label>
       </div>
     </div>
   );
