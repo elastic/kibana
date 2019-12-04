@@ -15,9 +15,7 @@ export const MMLCallout: FC = () => {
 
   useEffect(() => {
     const value = jobValidator.latestValidationResult?.highCardinality?.value ?? null;
-    if (value) {
-      setHighCardinality(value);
-    }
+    setHighCardinality(value);
   }, [jobValidatorUpdated]);
 
   return jobCreator.modelPlot && highCardinality !== null ? (
