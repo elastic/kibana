@@ -37,6 +37,13 @@ export const SPAN_ACTION = 'span.action';
 export const SPAN_NAME = 'span.name';
 export const SPAN_ID = 'span.id';
 
+export const DESTINATION_ADDRESS = 'destination.address';
+export const CONNECTION_TYPE = 'connection.type';
+export const CONNECTION_SUBTYPE = 'connection.subtype';
+export const CALLEE_NAME = 'callee.name';
+export const CALLEE_ENVIRONMENT = 'callee.environment';
+export const CONNECTION_UPSTREAM_LIST = 'connection.upstream.list';
+
 // Parent ID for a transaction or span
 export const PARENT_ID = 'parent.id';
 

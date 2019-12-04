@@ -97,6 +97,20 @@ export interface AggregationOptionsByType {
     buckets_path: BucketsPath;
     script?: Script;
   };
+
+  composite: {
+    sources: Array<{
+      [name: string]:
+        | {
+            terms: {
+              field: string;
+              missing_bucket?: boolean;
+            };
+          }
+        | undefined;
+    }>;
+    size?: number;
+  };
 }
 
 type AggregationType = keyof AggregationOptionsByType;
@@ -229,6 +243,19 @@ interface AggregationResponsePart<
         value: number | null;
       }
     | undefined;
+  composite: {
+    buckets: Array<
+      {
+        doc_count: number;
+        key: {
+          [name: string]: string;
+        };
+      } & BucketSubAggregationResponse<
+        TAggregationOptionsMap['aggs'],
+        TDocument
+      >
+    >;
+  };
 }
 
 // Type for debugging purposes. If you see an error in AggregationResponseMap

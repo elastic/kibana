@@ -53,30 +53,15 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
 
   const { data } = useFetcher(
     callApmApi => {
-      if (serviceName && start && end) {
-        return callApmApi({
-          pathname: '/api/apm/service-map/{serviceName}',
-          params: {
-            path: {
-              serviceName
-            },
-            query: {
-              start,
-              end,
-              environment,
-              uiFilters: JSON.stringify(uiFiltersOmitEnv)
-            }
-          }
-        });
-      }
       if (start && end) {
         return callApmApi({
-          pathname: '/api/apm/service-map/all',
+          pathname: '/api/apm/service-map',
           params: {
             query: {
               start,
               end,
               environment,
+              serviceName,
               uiFilters: JSON.stringify(uiFiltersOmitEnv)
             }
           }

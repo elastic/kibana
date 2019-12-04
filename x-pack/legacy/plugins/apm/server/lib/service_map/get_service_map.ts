@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { idx } from '@kbn/elastic-idx';
 import { PromiseReturnType } from '../../../typings/common';
 import { rangeFilter } from '../helpers/range_filter';
 import {
@@ -12,11 +11,33 @@ import {
   SetupUIFilters
 } from '../helpers/setup_request';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
+import {
+  SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
+  DESTINATION_ADDRESS,
+  CONNECTION_TYPE,
+  CONNECTION_SUBTYPE,
+  CALLEE_NAME,
+  CALLEE_ENVIRONMENT,
+  CONNECTION_UPSTREAM_LIST
+} from '../../../common/elasticsearch_fieldnames';
 
 export interface IEnvOptions {
   setup: Setup & SetupTimeRange & SetupUIFilters;
   serviceName?: string;
   environment?: string;
+}
+
+interface ServiceMapElement {
+  data:
+    | {
+        id: string;
+      }
+    | {
+        id: string;
+        source: string;
+        target: string;
+      };
 }
 
 export type ServiceMapAPIResponse = PromiseReturnType<typeof getServiceMap>;
@@ -35,7 +56,7 @@ export async function getServiceMap({
         bool: {
           filter: [
             { range: rangeFilter(start, end) },
-            { exists: { field: 'connection.type' } },
+            { exists: { field: CONNECTION_TYPE } },
             ...uiFiltersES
           ]
         }
@@ -44,23 +65,23 @@ export async function getServiceMap({
         conns: {
           composite: {
             sources: [
-              { 'service.name': { terms: { field: 'service.name' } } },
+              { [SERVICE_NAME]: { terms: { field: SERVICE_NAME } } },
               {
-                'service.environment': {
-                  terms: { field: 'service.environment', missing_bucket: true }
+                [SERVICE_ENVIRONMENT]: {
+                  terms: { field: SERVICE_ENVIRONMENT, missing_bucket: true }
                 }
               },
               {
-                'destination.address': {
+                [DESTINATION_ADDRESS]: {
                   terms: {
-                    field: 'destination.address'
+                    field: DESTINATION_ADDRESS
                   }
                 }
               },
-              { 'connection.type': { terms: { field: 'connection.type' } } }, // will filter out regular spans etc.
+              { [CONNECTION_TYPE]: { terms: { field: CONNECTION_TYPE } } }, // will filter out regular spans etc.
               {
-                'connection.subtype': {
-                  terms: { field: 'connection.subtype', missing_bucket: true }
+                [CONNECTION_SUBTYPE]: {
+                  terms: { field: CONNECTION_SUBTYPE, missing_bucket: true }
                 }
               }
             ],
@@ -69,12 +90,12 @@ export async function getServiceMap({
           aggs: {
             dests: {
               terms: {
-                field: 'callee.name'
+                field: CALLEE_NAME
               },
               aggs: {
                 envs: {
                   terms: {
-                    field: 'callee.environment',
+                    field: CALLEE_ENVIRONMENT,
                     missing: ''
                   }
                 }
@@ -88,49 +109,42 @@ export async function getServiceMap({
 
   if (serviceName || environment) {
     const upstreamServiceName = serviceName || '*';
-
-    let upstreamEnvironment = '*';
-    if (environment) {
-      upstreamEnvironment =
-        environment === ENVIRONMENT_NOT_DEFINED ? 'null' : environment;
-    }
+    const upstreamEnvironment = environment
+      ? environment === ENVIRONMENT_NOT_DEFINED
+        ? 'null'
+        : environment
+      : '*';
 
     params.body.query.bool.filter.push({
       wildcard: {
-        ['connection.upstream.list']: `${upstreamServiceName}/${upstreamEnvironment}`
+        [CONNECTION_UPSTREAM_LIST]: `${upstreamServiceName}/${upstreamEnvironment}`
       }
     });
   }
 
-  // @ts-ignore
   const { aggregations } = await client.search(params);
-  const buckets: Array<{
-    key: {
-      'service.name': string;
-      'service.environment': string | null;
-      'destination.address': string;
-      'connection.type': string;
-      'connection.subtype': string | null;
-    };
-    dests: {
-      buckets: Array<{
-        key: string;
-        envs: {
-          buckets: Array<{ key: string }>;
-        };
-      }>;
-    };
-  }> = idx(aggregations, _ => _.conns.buckets) || [];
+  const buckets = aggregations?.conns.buckets ?? [];
+
+  if (buckets.length === 0) {
+    return [];
+  }
+
+  const initialServiceMapNode: ServiceMapElement = {
+    data: {
+      id: buckets[0].key[SERVICE_NAME]
+    }
+  };
 
   return buckets.reduce(
-    (acc, { key: connection, dests }) => {
-      const connectionServiceName = connection['service.name'];
-      let destinationNames = dests.buckets.map(
-        ({ key: destinationName }) => destinationName
-      );
-      if (destinationNames.length === 0) {
-        destinationNames = [connection['destination.address']];
-      }
+    (acc: ServiceMapElement[], { key: connection, dests }) => {
+      const connectionServiceName = connection[SERVICE_NAME];
+
+      const destinationNames =
+        dests.buckets.length === 0
+          ? [connection[DESTINATION_ADDRESS]]
+          : dests.buckets.map(
+              ({ key: destinationName }) => destinationName as string
+            );
 
       const serviceMapConnections = destinationNames.flatMap(
         destinationName => [
@@ -149,16 +163,11 @@ export async function getServiceMap({
         ]
       );
 
+      if (acc.length === 0) {
+        return [initialServiceMapNode, ...serviceMapConnections];
+      }
       return [...acc, ...serviceMapConnections];
     },
-    buckets.length
-      ? [
-          {
-            data: {
-              id: buckets[0].key['service.name']
-            }
-          }
-        ]
-      : []
+    []
   );
 }

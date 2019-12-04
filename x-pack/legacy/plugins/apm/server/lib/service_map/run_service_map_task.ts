@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Server } from 'hapi';
+
 function interestingTransactions(since?: string, afterKey?: any) {
   if (!since) {
     since = 'now-1h';
@@ -134,7 +136,7 @@ interface Connection {
 }
 
 export async function runServiceMapTask(
-  kbnServer: any,
+  server: Server,
   config: any,
   lastRun?: string
 ) {
@@ -146,7 +148,7 @@ export async function runServiceMapTask(
     'xpack.apm.serviceMapDestinationPipeline'
   );
 
-  const callCluster = kbnServer.server.plugins.elasticsearch.getCluster('data')
+  const callCluster = server.plugins.elasticsearch.getCluster('data')
     .callWithInternalUser;
 
   let mostRecent = '';

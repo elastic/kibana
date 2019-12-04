@@ -87,35 +87,11 @@ export const serviceNodeMetadataRoute = createRoute(() => ({
   }
 }));
 
-export const serviceMapAllRoute = createRoute(() => ({
-  path: '/api/apm/service-map/all',
-  params: {
-    query: t.intersection([
-      t.partial({ environment: t.string }),
-      uiFiltersRt,
-      rangeRt
-    ])
-  },
-  handler: async ({ context, request }) => {
-    if (!context.config['xpack.apm.serviceMapEnabled']) {
-      return new Boom('Not found', { statusCode: 404 });
-    }
-    const setup = await setupRequest(context, request);
-    const {
-      query: { environment }
-    } = context.params;
-    return getServiceMap({ setup, environment });
-  }
-}));
-
 export const serviceMapRoute = createRoute(() => ({
-  path: '/api/apm/service-map/{serviceName}',
+  path: '/api/apm/service-map',
   params: {
-    path: t.type({
-      serviceName: t.string
-    }),
     query: t.intersection([
-      t.partial({ environment: t.string }),
+      t.partial({ environment: t.string, serviceName: t.string }),
       uiFiltersRt,
       rangeRt
     ])
@@ -126,8 +102,7 @@ export const serviceMapRoute = createRoute(() => ({
     }
     const setup = await setupRequest(context, request);
     const {
-      path: { serviceName },
-      query: { environment }
+      query: { serviceName, environment }
     } = context.params;
     return getServiceMap({ setup, serviceName, environment });
   }

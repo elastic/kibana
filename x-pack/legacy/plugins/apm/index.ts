@@ -128,9 +128,7 @@ export const apm: LegacyPluginInitializer = kibana => {
       apmPlugin.registerLegacyAPI({ server });
 
       if (config.get('xpack.apm.serviceMapEnabled')) {
-        initializeServiceMaps(server).catch(error => {
-          throw error;
-        });
+        initializeServiceMaps(server);
       }
     }
   });

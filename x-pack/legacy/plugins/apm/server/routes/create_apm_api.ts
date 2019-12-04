@@ -58,7 +58,7 @@ import {
   uiFiltersEnvironmentsRoute
 } from './ui_filters';
 import { createApi } from './create_api';
-import { serviceMapAllRoute, serviceMapRoute } from './services';
+import { serviceMapRoute } from './services';
 
 const createApmApi = () => {
   const api = createApi()
