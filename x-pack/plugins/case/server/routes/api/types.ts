@@ -22,13 +22,8 @@ export type UpdatedCommentType = TypeOf<typeof UpdatedCommentSchema>;
 export type UserType = TypeOf<typeof UserSchema>;
 
 export interface NewCaseFormatted extends NewCaseType {
-  creation_date: number;
-  last_edit_date: number;
-  reporter: UserType;
-}
-
-export interface UpdatedCaseFormatted extends UpdatedCaseType {
-  last_edit_date: number;
+  created_at: number;
+  created_by: UserType;
 }
 
 export interface UpdatedCaseType {

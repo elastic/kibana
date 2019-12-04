@@ -11,10 +11,9 @@ import { wrapError } from './utils';
 export function initDeleteCommentApi({ caseService, router }: RouteDeps) {
   router.delete(
     {
-      path: '/api/cases/{case_id}/comments/{comment_id}',
+      path: '/api/cases/comments/{comment_id}',
       validate: {
         params: schema.object({
-          case_id: schema.string(),
           comment_id: schema.string(),
         }),
       },

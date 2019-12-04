@@ -34,8 +34,8 @@ export function initPostCommentApi({ caseService, router }: RouteDeps) {
           client: context.core.savedObjects.client,
           attributes: formatNewComment({
             newComment: request.body,
-            full_name: user.full_name,
-            username: user.username,
+            full_name: created_by.full_name,
+            username: created_by.username,
           }),
           references: [
             {

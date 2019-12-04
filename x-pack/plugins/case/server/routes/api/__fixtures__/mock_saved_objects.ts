@@ -9,9 +9,8 @@ export const mockCases = [
     type: 'case-workflow',
     id: 'mock-id-1',
     attributes: {
-      creation_date: 1574718888885,
-      last_edit_date: 1574718888885,
-      reporter: {
+      created_at: 1574718888885,
+      created_by: {
         full_name: null,
         username: 'elastic',
       },
@@ -30,9 +29,8 @@ export const mockCases = [
     type: 'case-workflow',
     id: 'mock-id-2',
     attributes: {
-      creation_date: 1574721120834,
-      last_edit_date: 1574721120834,
-      reporter: {
+      created_at: 1574721120834,
+      created_by: {
         full_name: null,
         username: 'elastic',
       },
@@ -51,9 +49,8 @@ export const mockCases = [
     type: 'case-workflow',
     id: 'mock-id-3',
     attributes: {
-      creation_date: 1574721137881,
-      last_edit_date: 1574721137881,
-      reporter: {
+      created_at: 1574721137881,
+      created_by: {
         full_name: null,
         username: 'elastic',
       },
@@ -85,9 +82,8 @@ export const mockCaseComments = [
     id: 'mock-comment-1',
     attributes: {
       comment: 'Wow, good luck catching that bad meanie!',
-      creation_date: 1574718900112,
-      last_edit_date: 1574718900112,
-      user: {
+      created_at: 1574718900112,
+      created_by: {
         full_name: null,
         username: 'elastic',
       },
@@ -107,9 +103,8 @@ export const mockCaseComments = [
     id: 'mock-comment-2',
     attributes: {
       comment: 'Well I decided to update my comment. So what? Deal with it.',
-      creation_date: 1574718902724,
-      last_edit_date: 1574718914556,
-      user: {
+      created_at: 1574718902724,
+      created_by: {
         full_name: null,
         username: 'elastic',
       },
@@ -129,9 +124,8 @@ export const mockCaseComments = [
     id: 'mock-comment-3',
     attributes: {
       comment: 'Wow, good luck catching that bad meanie!',
-      creation_date: 1574721150542,
-      last_edit_date: 1574721150542,
-      user: {
+      created_at: 1574721150542,
+      created_by: {
         full_name: null,
         username: 'elastic',
       },

@@ -28,8 +28,8 @@ export function initPostCaseApi({ caseService, router }: RouteDeps) {
         const newCase = await caseService.postNewCase({
           client: context.core.savedObjects.client,
           attributes: formatNewCase(request.body, {
-            full_name: user.full_name,
-            username: user.username,
+            full_name: created_by.full_name,
+            username: created_by.username,
           }),
         });
         return response.ok({ body: newCase });

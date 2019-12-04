@@ -17,14 +17,12 @@ export const NewCommentSchema = schema.object({
 
 export const CommentSchema = schema.object({
   comment: schema.string(),
-  creation_date: schema.number(),
-  last_edit_date: schema.number(),
-  user: UserSchema,
+  created_at: schema.number(),
+  created_by: UserSchema,
 });
 
 export const UpdatedCommentSchema = schema.object({
   comment: schema.string(),
-  last_edit_date: schema.number(),
 });
 
 export const NewCaseSchema = schema.object({

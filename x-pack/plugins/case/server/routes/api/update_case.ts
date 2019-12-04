@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { formatUpdatedCase, wrapError } from './utils';
+import { wrapError } from './utils';
 import { RouteDeps } from '.';
 import { UpdatedCaseSchema } from './schema';
 
@@ -25,7 +25,7 @@ export function initUpdateCaseApi({ caseService, router }: RouteDeps) {
         const updatedCase = await caseService.updateCase({
           client: context.core.savedObjects.client,
           caseId: request.params.id,
-          updatedAttributes: formatUpdatedCase(request.body),
+          updatedAttributes: request.body,
         });
         return response.ok({ body: updatedCase });
       } catch (error) {

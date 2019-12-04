@@ -11,19 +11,15 @@ import {
   NewCaseFormatted,
   NewCommentType,
   NewCommentFormatted,
-  UpdatedCaseType,
-  UpdatedCaseFormatted,
   UserType,
-  UpdatedCommentType,
 } from './types';
 
 export const formatNewCase = (
   newCase: NewCaseType,
   { full_name, username }: { full_name?: string; username: string }
 ): NewCaseFormatted => ({
-  creation_date: new Date().valueOf(),
-  last_edit_date: new Date().valueOf(),
-  reporter: { full_name, username },
+  created_at: new Date().valueOf(),
+  created_by: { full_name, username },
   ...newCase,
 });
 
@@ -38,19 +34,8 @@ export const formatNewComment = ({
   username,
 }: NewCommentArgs): NewCommentFormatted => ({
   ...newComment,
-  creation_date: new Date().valueOf(),
-  last_edit_date: new Date().valueOf(),
-  user: { full_name, username },
-});
-
-export const formatUpdatedCase = (updateCase: UpdatedCaseType): UpdatedCaseFormatted => ({
-  ...updateCase,
-  last_edit_date: new Date().valueOf(),
-});
-
-export const formatUpdatedComment = (updatedComment: NewCommentType): UpdatedCommentType => ({
-  ...updatedComment,
-  last_edit_date: new Date().valueOf(),
+  created_at: new Date().valueOf(),
+  created_by: { full_name, username },
 });
 
 export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> {

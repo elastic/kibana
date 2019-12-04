@@ -56,7 +56,7 @@ describe('POST cases', () => {
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload.id).toEqual('mock-it');
-    expect(response.payload.attributes.reporter.username).toEqual('awesome');
+    expect(response.payload.attributes.created_by.username).toEqual('awesome');
   });
   it(`Returns an error if user authentication throws`, async () => {
     const { routeHandler } = await setup(true);

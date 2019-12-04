@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { formatUpdatedComment, wrapError } from './utils';
+import { wrapError } from './utils';
 import { NewCommentSchema } from './schema';
 import { RouteDeps } from '.';
 
@@ -25,7 +25,7 @@ export function initUpdateCommentApi({ caseService, router }: RouteDeps) {
         const updatedComment = await caseService.updateComment({
           client: context.core.savedObjects.client,
           commentId: request.params.id,
-          updatedAttributes: formatUpdatedComment(request.body),
+          updatedAttributes: request.body,
         });
         return response.ok({ body: updatedComment });
       } catch (error) {

@@ -33,19 +33,16 @@ export const caseSavedObjectMappings: {
           },
         },
       },
-      creation_date: {
+      created_at: {
         type: 'date',
       },
       description: {
         type: 'text',
       },
-      last_edit_date: {
-        type: 'date',
-      },
       title: {
         type: 'keyword',
       },
-      reporter: {
+      created_by: {
         properties: {
           username: {
             type: 'keyword',
@@ -76,13 +73,10 @@ export const caseCommentSavedObjectMappings: {
       comment: {
         type: 'text',
       },
-      creation_date: {
-        type: 'long',
+      created_at: {
+        type: 'date',
       },
-      last_edit_date: {
-        type: 'long',
-      },
-      user: {
+      created_by: {
         properties: {
           full_name: {
             type: 'keyword',

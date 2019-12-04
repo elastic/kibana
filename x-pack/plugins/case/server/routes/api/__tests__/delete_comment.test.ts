@@ -40,10 +40,9 @@ describe('DELETE comment', () => {
   it(`deletes the comment. responds with 204`, async () => {
     const { routeHandler } = await setup();
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{case_id}/comments/{comment_id}',
+      path: '/api/cases/comments/{comment_id}',
       method: 'delete',
       params: {
-        case_id: 'valid-id',
         comment_id: 'mock-id-1',
       },
     });
@@ -57,10 +56,9 @@ describe('DELETE comment', () => {
     const { routeHandler } = await setup();
 
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{case_id}/comments/{comment_id}',
+      path: '/api/cases/comments/{comment_id}',
       method: 'delete',
       params: {
-        case_id: 'valid-id',
         comment_id: 'bad-guy',
       },
     });

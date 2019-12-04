@@ -130,12 +130,15 @@ export const siem = (kibana: any) => {
         },
       },
       mappings: savedObjectMappings,
+      // TODO: Remove once while Saved Object Mappings API is programmed for the NP See: https://github.com/elastic/kibana/issues/50309
       savedObjectSchemas: {
         'case-workflow': {
           indexPattern: '.case-testing-ground', // TODO: Change this name and use kibana.yml settings to override it.
+          isNamespaceAgnostic: true,
         },
         'case-workflow-comment': {
           indexPattern: '.case-testing-ground', // TODO: Change this name and use kibana.yml settings to override it.
+          isNamespaceAgnostic: true,
         },
       },
     },

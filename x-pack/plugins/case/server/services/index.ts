@@ -18,7 +18,7 @@ import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../constants';
 import {
   NewCaseFormatted,
   NewCommentFormatted,
-  UpdatedCaseFormatted,
+  UpdatedCaseType,
   UpdatedCommentType,
 } from '../routes/api/types';
 import { PluginSetupContract as SecurityPluginSetup } from '../../../security/server/plugin';
@@ -44,7 +44,7 @@ interface PostCommentArgs extends ClientArgs {
 }
 interface UpdateCaseArgs extends ClientArgs {
   caseId: string;
-  updatedAttributes: UpdatedCaseFormatted;
+  updatedAttributes: UpdatedCaseType;
 }
 interface UpdateCommentArgs extends ClientArgs {
   commentId: string;
