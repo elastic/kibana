@@ -11,7 +11,6 @@ import { installTemplates } from '../lib/elasticsearch/template/install';
 import { AssetReference } from '../../common/types';
 import { SAVED_OBJECT_TYPE_DATASOURCES } from '../../common/constants';
 import { Datasource, Asset, InputType } from '../../../ingest/server/libs/types';
-import { DatasourceAttributes } from '../../common/types';
 import * as Registry from '../registry';
 
 export async function createDatasource(options: {
