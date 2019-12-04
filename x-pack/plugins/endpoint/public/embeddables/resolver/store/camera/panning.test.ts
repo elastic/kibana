@@ -38,6 +38,33 @@ describe('panning interaction', () => {
       it('should have a translation of 0,0', () => {
         translationShouldBeCloseTo([0, 0]);
       });
+      describe('when the user continues to pan 50px up and to the right', () => {
+        beforeEach(() => {
+          const action: CameraAction = { type: 'userContinuedPanning', payload: [150, 150] };
+          store.dispatch(action);
+        });
+        it('should have a translation of 50,50', () => {
+          translationShouldBeCloseTo([50, 50]);
+        });
+        describe('when the user then stops panning', () => {
+          beforeEach(() => {
+            const action: CameraAction = { type: 'userStoppedPanning' };
+            store.dispatch(action);
+          });
+          it('should have a translation of 50,50', () => {
+            translationShouldBeCloseTo([50, 50]);
+          });
+        });
+        describe('when the user then cancels panning', () => {
+          beforeEach(() => {
+            const action: CameraAction = { type: 'userCanceledPanning' };
+            store.dispatch(action);
+          });
+          it('should have a translation of 0,0', () => {
+            translationShouldBeCloseTo([0, 0]);
+          });
+        });
+      });
     });
   });
 });
