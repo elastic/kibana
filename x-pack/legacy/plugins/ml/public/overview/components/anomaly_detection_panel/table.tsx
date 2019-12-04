@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  MlInMemoryTable,
+  mlInMemoryTableFactory,
   SortDirection,
   SORT_DIRECTION,
   OnTableChangeArg,
@@ -45,6 +45,8 @@ export enum AnomalyDetectionListColumns {
   jobsInGroup = 'jobs_in_group',
 }
 
+const MlInMemoryTable = mlInMemoryTableFactory<Group>();
+
 interface Props {
   items: GroupsDictionary;
   statsBarData: JobStatsBarStats;
@@ -60,7 +62,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
   const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
 
   // columns: group, max anomaly, jobs in group, latest timestamp, docs processed, action to explorer
-  const columns: ColumnType[] = [
+  const columns: Array<ColumnType<Group>> = [
     {
       field: AnomalyDetectionListColumns.id,
       name: i18n.translate('xpack.ml.overview.anomalyDetection.tableId', {
