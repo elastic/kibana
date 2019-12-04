@@ -31,8 +31,6 @@ export interface EditorFrameProps {
   doc?: Document;
   datasourceMap: Record<string, Datasource>;
   visualizationMap: Record<string, Visualization>;
-  initialDatasourceId: string | null;
-  initialVisualizationId: string | null;
   ExpressionRenderer: ExpressionRenderer;
   onError: (e: { message: string }) => void;
   core: CoreSetup | CoreStart;

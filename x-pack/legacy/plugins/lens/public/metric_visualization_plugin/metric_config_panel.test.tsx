@@ -11,7 +11,7 @@ import { MetricConfigPanel } from './metric_config_panel';
 import { DatasourceDimensionPanelProps, Operation, DatasourcePublicAPI } from '../types';
 import { State } from './types';
 import { NativeRendererProps } from '../native_renderer';
-import { createMockFramePublicAPI, createMockDatasource } from '../editor_frame_plugin/mocks';
+import { createMockFramePublicAPI, createMockDatasource } from '../editor_frame/mocks';
 
 describe('MetricConfigPanel', () => {
   const dragDropContext = { dragging: undefined, setDragging: jest.fn() };

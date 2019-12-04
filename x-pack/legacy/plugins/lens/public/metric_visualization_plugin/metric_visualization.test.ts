@@ -6,7 +6,7 @@
 
 import { metricVisualization } from './metric_visualization';
 import { State } from './types';
-import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_plugin/mocks';
+import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame/mocks';
 import { generateId } from '../id_generator';
 import { DatasourcePublicAPI, FramePublicAPI } from '../types';
 

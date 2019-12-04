@@ -40,20 +40,6 @@ export interface EditorFrameProps {
     doc: Document;
   }) => void;
 }
-export interface EditorFrameInstance {
-  mount: (element: Element, props: EditorFrameProps) => void;
-  unmount: () => void;
-}
-
-export interface EditorFrameSetup {
-  // generic type on the API functions to pull the "unknown vs. specific type" error into the implementation
-  registerDatasource: <T, P>(datasource: Datasource<T, P>) => void;
-  registerVisualization: <T, P>(visualization: Visualization<T, P>) => void;
-}
-
-export interface EditorFrameStart {
-  createInstance: (options: EditorFrameOptions) => EditorFrameInstance;
-}
 
 // Hints the default nesting to the data source. 0 is the highest priority
 export type DimensionPriority = 0 | 1 | 2;

@@ -6,11 +6,12 @@
 
 import _ from 'lodash';
 import React, { useState, useEffect, useCallback } from 'react';
+import { CoreStart } from 'src/core/public';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { Query, DataPublicPluginStart } from 'src/plugins/data/public';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
-import { AppMountContext, NotificationsStart } from 'src/core/public';
+import { NotificationsStart } from 'src/core/public';
 import {
   DataStart,
   IndexPattern as IndexPatternInstance,
@@ -18,13 +19,14 @@ import {
   SavedQuery,
 } from 'src/legacy/core_plugins/data/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { ExpressionRenderer } from 'src/plugins/expressions/public';
 import { start as navigation } from '../../../../../../src/legacy/core_plugins/navigation/public/legacy';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { Document, SavedObjectStore } from '../persistence';
-import { EditorFrameInstance } from '../types';
-import { NativeRenderer } from '../native_renderer';
+import { Visualization, Datasource } from '../types';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { esFilters } from '../../../../../../src/plugins/data/public';
+import { EditorFrame } from '../editor_frame';
 
 interface State {
   isLoading: boolean;
@@ -43,8 +45,22 @@ interface State {
   savedQuery?: SavedQuery;
 }
 
+export interface Props {
+  datasourceMap: Record<string, Datasource>;
+  visualizationMap: Record<string, Visualization>;
+  data: DataPublicPluginStart;
+  core: CoreStart;
+  dataShim: DataStart;
+  storage: IStorageWrapper;
+  docId?: string;
+  docStorage: SavedObjectStore;
+  redirectTo: (id?: string) => void;
+  ExpressionRenderer: ExpressionRenderer;
+}
+
 export function App({
-  editorFrame,
+  datasourceMap,
+  visualizationMap,
   data,
   dataShim,
   core,
@@ -52,16 +68,8 @@ export function App({
   docId,
   docStorage,
   redirectTo,
-}: {
-  editorFrame: EditorFrameInstance;
-  data: DataPublicPluginStart;
-  core: AppMountContext['core'];
-  dataShim: DataStart;
-  storage: IStorageWrapper;
-  docId?: string;
-  docStorage: SavedObjectStore;
-  redirectTo: (id?: string) => void;
-}) {
+  ExpressionRenderer: expressionRenderer,
+}: Props) {
   const language =
     storage.get('kibana.userQueryLanguage') || core.uiSettings.get('search:queryLanguage');
 
@@ -95,6 +103,7 @@ export function App({
   }, []);
 
   // Sync Kibana breadcrumbs any time the saved document's title changes
+  const title = state.persistedDoc && state.persistedDoc.title;
   useEffect(() => {
     core.chrome.setBreadcrumbs([
       {
@@ -104,12 +113,10 @@ export function App({
         }),
       },
       {
-        text: state.persistedDoc
-          ? state.persistedDoc.title
-          : i18n.translate('xpack.lens.breadcrumbsCreate', { defaultMessage: 'Create' }),
+        text: title || i18n.translate('xpack.lens.breadcrumbsCreate', { defaultMessage: 'Create' }),
       },
     ]);
-  }, [state.persistedDoc && state.persistedDoc.title]);
+  }, [core, title]);
 
   useEffect(() => {
     if (docId && (!state.persistedDoc || state.persistedDoc.id !== docId)) {
@@ -261,17 +268,20 @@ export function App({
           </div>
 
           {(!state.isLoading || state.persistedDoc) && (
-            <NativeRenderer
-              className="lnsApp__frame"
-              render={editorFrame.mount}
-              nativeProps={{
-                dateRange: state.dateRange,
-                query: state.query,
-                filters: state.filters,
-                savedQuery: state.savedQuery,
-                doc: state.persistedDoc,
-                onError,
-                onChange: ({ filterableIndexPatterns, doc }) => {
+            <div className="lnsApp__frame">
+              <EditorFrame
+                data-test-subj="lnsEditorFrame"
+                dateRange={state.dateRange}
+                query={state.query}
+                filters={state.filters}
+                savedQuery={state.savedQuery}
+                doc={state.persistedDoc}
+                datasourceMap={datasourceMap}
+                visualizationMap={visualizationMap}
+                core={core}
+                ExpressionRenderer={expressionRenderer}
+                onError={onError}
+                onChange={({ filterableIndexPatterns, doc }) => {
                   if (!_.isEqual(state.persistedDoc, doc)) {
                     setState(s => ({ ...s, lastKnownDoc: doc }));
                   }
@@ -294,9 +304,9 @@ export function App({
                       }
                     });
                   }
-                },
-              }}
-            />
+                }}
+              />
+            </div>
           )}
         </div>
         {lastKnownDoc && state.isSaveModalVisible && (

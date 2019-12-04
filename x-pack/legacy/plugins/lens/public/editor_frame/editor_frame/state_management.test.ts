@@ -19,8 +19,6 @@ describe('editor_frame state management', () => {
         onError: jest.fn(),
         datasourceMap: { testDatasource: ({} as unknown) as Datasource },
         visualizationMap: { testVis: ({ initialize: jest.fn() } as unknown) as Visualization },
-        initialDatasourceId: 'testDatasource',
-        initialVisualizationId: 'testVis',
         ExpressionRenderer: createExpressionRendererMock(),
         onChange: jest.fn(),
         core: coreMock.createSetup(),
@@ -90,11 +88,11 @@ describe('editor_frame state management', () => {
       `);
     });
 
-    it('should not set active id if no initial visualization is passed in', () => {
-      const initialState = getInitialState({ ...props, initialVisualizationId: null });
+    it('should choose the first visualization if no visualization is passed in', () => {
+      const initialState = getInitialState(props);
 
       expect(initialState.visualization.state).toEqual(null);
-      expect(initialState.visualization.activeId).toEqual(null);
+      expect(initialState.visualization.activeId).toEqual('testVis');
       expect(props.visualizationMap.testVis.initialize).not.toHaveBeenCalled();
     });
   });

@@ -7,8 +7,7 @@
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { App } from './app';
-import { EditorFrameInstance } from '../types';
+import { App, Props } from './app';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { mount } from 'enzyme';
@@ -29,6 +28,7 @@ jest.mock('../../../../../../src/legacy/core_plugins/navigation/public/legacy', 
 }));
 
 import { start as navigation } from '../../../../../../src/legacy/core_plugins/navigation/public/legacy';
+import { createMockDatasource, createMockVisualization } from '../editor_frame/mocks';
 
 const { TopNavMenu } = navigation.ui;
 
@@ -37,13 +37,6 @@ jest.mock('../persistence');
 jest.mock('src/core/public');
 
 const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
-
-function createMockFrame(): jest.Mocked<EditorFrameInstance> {
-  return {
-    mount: jest.fn((el, props) => {}),
-    unmount: jest.fn(() => {}),
-  };
-}
 
 function createMockFilterManager() {
   const unsubscribe = jest.fn();
@@ -55,7 +48,7 @@ function createMockFilterManager() {
     getUpdates$: () => ({
       subscribe: ({ next }: { next: () => void }) => {
         subscriber = next;
-        return unsubscribe;
+        return { unsubscribe };
       },
     }),
     setFilters: (newFilters: unknown[]) => {
@@ -71,21 +64,16 @@ function createMockFilterManager() {
 }
 
 describe('Lens App', () => {
-  let frame: jest.Mocked<EditorFrameInstance>;
   let core: ReturnType<typeof coreMock['createStart']>;
 
-  function makeDefaultArgs(): jest.Mocked<{
-    editorFrame: EditorFrameInstance;
-    data: typeof dataStartMock;
-    core: typeof core;
-    dataShim: DataStart;
-    storage: Storage;
-    docId?: string;
-    docStorage: SavedObjectStore;
-    redirectTo: (id?: string) => void;
-  }> {
+  function makeDefaultArgs(): jest.Mocked<Props> {
     return ({
-      editorFrame: createMockFrame(),
+      datasourceMap: {
+        ds1: createMockDatasource(),
+      },
+      visualizationMap: {
+        v1: createMockVisualization(),
+      },
       core: {
         ...core,
         application: {
@@ -120,24 +108,24 @@ describe('Lens App', () => {
         get: jest.fn(),
       },
       docStorage: {
-        load: jest.fn(),
+        load: jest.fn(() =>
+          Promise.resolve({
+            id: '1234',
+            title: 'Daaaaaaadaumching!',
+            state: {
+              query: 'fake query',
+              datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
+              datasourceStates: { ds1: {} },
+            },
+          })
+        ),
         save: jest.fn(),
       },
       redirectTo: jest.fn(id => {}),
-    } as unknown) as jest.Mocked<{
-      editorFrame: EditorFrameInstance;
-      data: typeof dataStartMock;
-      core: typeof core;
-      dataShim: DataStart;
-      storage: Storage;
-      docId?: string;
-      docStorage: SavedObjectStore;
-      redirectTo: (id?: string) => void;
-    }>;
+    } as unknown) as jest.Mocked<Props>;
   }
 
   beforeEach(() => {
-    frame = createMockFrame();
     core = coreMock.createStart({ basePath: '/testbasepath' });
 
     core.uiSettings.get.mockImplementation(
@@ -155,61 +143,41 @@ describe('Lens App', () => {
 
   it('renders the editor frame', () => {
     const args = makeDefaultArgs();
-    args.editorFrame = frame;
+    const instance = mount(<App {...args} />);
+    const frame = instance.find('[data-test-subj="lnsEditorFrame"]').first();
 
-    mount(<App {...args} />);
-
-    expect(frame.mount.mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          <div
-            class="lnsApp__frame"
-          />,
-          Object {
-            "dateRange": Object {
-              "fromDate": "now-7d",
-              "toDate": "now",
-            },
-            "doc": undefined,
-            "filters": Array [],
-            "onChange": [Function],
-            "onError": [Function],
-            "query": Object {
-              "language": "kuery",
-              "query": "",
-            },
-            "savedQuery": undefined,
-          },
-        ],
-      ]
-    `);
+    expect(frame.exists()).toBeTruthy();
   });
 
   it('sets breadcrumbs when the document title changes', async () => {
     const defaultArgs = makeDefaultArgs();
-    const instance = mount(<App {...defaultArgs} />);
+
+    mount(<App {...defaultArgs} docId="1234" />);
 
     expect(core.chrome.setBreadcrumbs).toHaveBeenCalledWith([
       { text: 'Visualize', href: '/testbasepath/app/kibana#/visualize' },
       { text: 'Create' },
     ]);
 
-    (defaultArgs.docStorage.load as jest.Mock).mockResolvedValue({
-      id: '1234',
-      title: 'Daaaaaaadaumching!',
-      state: {
-        query: 'fake query',
-        datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
-      },
-    });
-
-    instance.setProps({ docId: '1234' });
     await waitForPromises();
 
     expect(defaultArgs.core.chrome.setBreadcrumbs).toHaveBeenCalledWith([
       { text: 'Visualize', href: '/testbasepath/app/kibana#/visualize' },
       { text: 'Daaaaaaadaumching!' },
     ]);
+  });
+
+  it('displays errors from the frame in a toast', () => {
+    const args = makeDefaultArgs();
+    const instance = mount(<App {...args} />);
+    const frame = instance.find('[data-test-subj="lnsEditorFrame"]').first();
+    const onError = (frame.prop('onError') as unknown) as (e: { message: string }) => void;
+
+    onError({ message: 'error' });
+
+    instance.update();
+
+    expect(args.core.notifications.toasts.addDanger).toHaveBeenCalled();
   });
 
   describe('persistence', () => {
@@ -223,19 +191,10 @@ describe('Lens App', () => {
 
     it('loads a document and uses query if there is a document id', async () => {
       const args = makeDefaultArgs();
-      args.editorFrame = frame;
-      (args.docStorage.load as jest.Mock).mockResolvedValue({
-        id: '1234',
-        state: {
-          query: 'fake query',
-          datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
-        },
-      });
+      const instance = mount(<App {...args} docId="1234" />);
 
-      const instance = mount(<App {...args} />);
-
-      instance.setProps({ docId: '1234' });
       await waitForPromises();
+      instance.update();
 
       expect(args.docStorage.load).toHaveBeenCalledWith('1234');
       expect(args.dataShim.indexPatterns.indexPatterns.get).toHaveBeenCalledWith('1');
@@ -246,25 +205,22 @@ describe('Lens App', () => {
         }),
         {}
       );
-      expect(frame.mount).toHaveBeenCalledWith(
-        expect.any(Element),
-        expect.objectContaining({
-          doc: {
-            id: '1234',
-            state: {
-              query: 'fake query',
-              datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
-            },
-          },
-        })
-      );
+
+      const frame = instance.find('[data-test-subj="lnsEditorFrame"]').first();
+
+      expect(frame.exists()).toBeTruthy();
+
+      expect(frame.prop('doc')).toMatchObject({
+        id: '1234',
+        state: {
+          query: 'fake query',
+          datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
+        },
+      });
     });
 
     it('does not load documents on sequential renders unless the id changes', async () => {
       const args = makeDefaultArgs();
-      args.editorFrame = frame;
-      (args.docStorage.load as jest.Mock).mockResolvedValue({ id: '1234' });
-
       const instance = mount(<App {...args} />);
 
       instance.setProps({ docId: '1234' });
@@ -282,12 +238,11 @@ describe('Lens App', () => {
 
     it('handles document load errors', async () => {
       const args = makeDefaultArgs();
-      args.editorFrame = frame;
+
       (args.docStorage.load as jest.Mock).mockRejectedValue('failed to load');
 
-      const instance = mount(<App {...args} />);
+      mount(<App {...args} docId="1234" />);
 
-      instance.setProps({ docId: '1234' });
       await waitForPromises();
 
       expect(args.docStorage.load).toHaveBeenCalledWith('1234');
@@ -332,12 +287,13 @@ describe('Lens App', () => {
           ...makeDefaultArgs(),
           docId: initialDocId,
         };
-        args.editorFrame = frame;
+
         (args.docStorage.load as jest.Mock).mockResolvedValue({
           id: '1234',
           state: {
             query: 'fake query',
             datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
+            datasourceStates: { ds1: {} },
           },
         });
         (args.docStorage.save as jest.Mock).mockImplementation(async ({ id }) => ({
@@ -346,18 +302,34 @@ describe('Lens App', () => {
 
         const instance = mount(<App {...args} />);
 
-        await waitForPromises();
-
         if (initialDocId) {
           expect(args.docStorage.load).toHaveBeenCalledTimes(1);
         } else {
           expect(args.docStorage.load).not.toHaveBeenCalled();
         }
 
-        const onChange = frame.mount.mock.calls[0][1].onChange;
+        await waitForPromises();
+        instance.update();
+
+        const frame = instance.find('[data-test-subj="lnsEditorFrame"]').first();
+        const onChange = frame.prop('onChange') as (x: unknown) => void;
         onChange({
           filterableIndexPatterns: [],
-          doc: ({ id: initialDocId } as unknown) as Document,
+          doc: {
+            id: initialDocId,
+            visualizationType: 'vs1',
+            expression: '',
+            title: saveProps.newTitle,
+            state: {
+              datasourceMetaData: {
+                filterableIndexPatterns: [],
+              },
+              datasourceStates: { ds1: {} },
+              filters: [],
+              query: { query: '', language: 'kql' },
+              visualization: {},
+            },
+          } as Document,
         });
 
         instance.update();
@@ -373,6 +345,7 @@ describe('Lens App', () => {
 
       it('shows a disabled save button when the user does not have permissions', async () => {
         const args = makeDefaultArgs();
+
         args.core.application = {
           ...args.core.application,
           capabilities: {
@@ -380,13 +353,14 @@ describe('Lens App', () => {
             visualize: { save: false, saveQuery: false, show: true },
           },
         };
-        args.editorFrame = frame;
 
         const instance = mount(<App {...args} />);
 
         expect(getButton(instance).disableButton).toEqual(true);
 
-        const onChange = frame.mount.mock.calls[0][1].onChange;
+        const frame = instance.find('[data-test-subj="lnsEditorFrame"]').first();
+        const onChange = frame.prop('onChange') as (x: unknown) => void;
+
         onChange({ filterableIndexPatterns: [], doc: ('will save this' as unknown) as Document });
 
         instance.update();
@@ -396,13 +370,13 @@ describe('Lens App', () => {
 
       it('shows a save button that is enabled when the frame has provided its state', async () => {
         const args = makeDefaultArgs();
-        args.editorFrame = frame;
-
         const instance = mount(<App {...args} />);
 
         expect(getButton(instance).disableButton).toEqual(true);
 
-        const onChange = frame.mount.mock.calls[0][1].onChange;
+        const frame = instance.find('[data-test-subj="lnsEditorFrame"]').first();
+        const onChange = frame.prop('onChange') as (x: unknown) => void;
+
         onChange({ filterableIndexPatterns: [], doc: ('will save this' as unknown) as Document });
 
         instance.update();
@@ -417,10 +391,12 @@ describe('Lens App', () => {
           newTitle: 'hello there',
         });
 
-        expect(args.docStorage.save).toHaveBeenCalledWith({
-          id: undefined,
-          title: 'hello there',
-        });
+        expect(args.docStorage.save).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: undefined,
+            title: 'hello there',
+          })
+        );
 
         expect(args.redirectTo).toHaveBeenCalledWith('aaa');
 
@@ -436,10 +412,12 @@ describe('Lens App', () => {
           newTitle: 'hello there',
         });
 
-        expect(args.docStorage.save).toHaveBeenCalledWith({
-          id: undefined,
-          title: 'hello there',
-        });
+        expect(args.docStorage.save).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: undefined,
+            title: 'hello there',
+          })
+        );
 
         expect(args.redirectTo).toHaveBeenCalledWith('aaa');
 
@@ -455,10 +433,12 @@ describe('Lens App', () => {
           newTitle: 'hello there',
         });
 
-        expect(args.docStorage.save).toHaveBeenCalledWith({
-          id: '1234',
-          title: 'hello there',
-        });
+        expect(args.docStorage.save).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: '1234',
+            title: 'hello there',
+          })
+        );
 
         expect(args.redirectTo).not.toHaveBeenCalled();
 
@@ -469,12 +449,13 @@ describe('Lens App', () => {
 
       it('handles save failure by showing a warning, but still allows another save', async () => {
         const args = makeDefaultArgs();
-        args.editorFrame = frame;
+
         (args.docStorage.save as jest.Mock).mockRejectedValue({ message: 'failed' });
 
         const instance = mount(<App {...args} />);
+        const frame = instance.find('[data-test-subj="lnsEditorFrame"]').first();
+        const onChange = frame.prop('onChange') as (x: unknown) => void;
 
-        const onChange = frame.mount.mock.calls[0][1].onChange;
         onChange({ filterableIndexPatterns: [], doc: ({ id: undefined } as unknown) as Document });
 
         instance.update();
@@ -495,9 +476,8 @@ describe('Lens App', () => {
   describe('query bar state management', () => {
     it('uses the default time and query language settings', () => {
       const args = makeDefaultArgs();
-      args.editorFrame = frame;
-
-      mount(<App {...args} />);
+      const instance = mount(<App {...args} />);
+      const frame = instance.find('[data-test-subj="lnsEditorFrame"]').first();
 
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -507,20 +487,14 @@ describe('Lens App', () => {
         }),
         {}
       );
-      expect(frame.mount).toHaveBeenCalledWith(
-        expect.any(Element),
-        expect.objectContaining({
-          dateRange: { fromDate: 'now-7d', toDate: 'now' },
-          query: { query: '', language: 'kuery' },
-        })
-      );
+      expect(frame.prop('dateRange')).toEqual({ fromDate: 'now-7d', toDate: 'now' });
+      expect(frame.prop('query')).toEqual({ query: '', language: 'kuery' });
     });
 
     it('updates the index patterns when the editor frame is changed', async () => {
       const args = makeDefaultArgs();
-      args.editorFrame = frame;
-
       const instance = mount(<App {...args} />);
+      const frame = instance.find('[data-test-subj="lnsEditorFrame"]').first();
 
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -529,7 +503,7 @@ describe('Lens App', () => {
         {}
       );
 
-      const onChange = frame.mount.mock.calls[0][1].onChange;
+      const onChange = frame.prop('onChange') as (x: unknown) => void;
       onChange({
         filterableIndexPatterns: [{ id: '1', title: 'newIndex' }],
         doc: ({ id: undefined } as unknown) as Document,
@@ -564,8 +538,6 @@ describe('Lens App', () => {
 
     it('updates the editor frame when the user changes query or time in the search bar', () => {
       const args = makeDefaultArgs();
-      args.editorFrame = frame;
-
       const instance = mount(<App {...args} />);
 
       instance.find(TopNavMenu).prop('onQuerySubmit')!({
@@ -575,6 +547,8 @@ describe('Lens App', () => {
 
       instance.update();
 
+      const frame = instance.find('[data-test-subj="lnsEditorFrame"]').first();
+
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           query: { query: 'new', language: 'lucene' },
@@ -583,19 +557,12 @@ describe('Lens App', () => {
         }),
         {}
       );
-      expect(frame.mount).toHaveBeenCalledWith(
-        expect.any(Element),
-        expect.objectContaining({
-          dateRange: { fromDate: 'now-14d', toDate: 'now-7d' },
-          query: { query: 'new', language: 'lucene' },
-        })
-      );
+      expect(frame.prop('dateRange')).toEqual({ fromDate: 'now-14d', toDate: 'now-7d' });
+      expect(frame.prop('query')).toEqual({ query: 'new', language: 'lucene' });
     });
 
     it('updates the filters when the user changes them', () => {
       const args = makeDefaultArgs();
-      args.editorFrame = frame;
-
       const instance = mount(<App {...args} />);
       const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
       const field = ({ name: 'myfield' } as unknown) as IFieldType;
@@ -604,12 +571,9 @@ describe('Lens App', () => {
 
       instance.update();
 
-      expect(frame.mount).toHaveBeenCalledWith(
-        expect.any(Element),
-        expect.objectContaining({
-          filters: [esFilters.buildExistsFilter(field, indexPattern)],
-        })
-      );
+      const frame = instance.find('[data-test-subj="lnsEditorFrame"]').first();
+
+      expect(frame.prop('filters')).toEqual([esFilters.buildExistsFilter(field, indexPattern)]);
     });
   });
 
@@ -634,8 +598,6 @@ describe('Lens App', () => {
 
     it('persists the saved query ID when the query is saved', () => {
       const args = makeDefaultArgs();
-      args.editorFrame = frame;
-
       const instance = mount(<App {...args} />);
 
       expect(TopNavMenu).toHaveBeenCalledWith(
@@ -677,8 +639,6 @@ describe('Lens App', () => {
 
     it('changes the saved query ID when the query is updated', () => {
       const args = makeDefaultArgs();
-      args.editorFrame = frame;
-
       const instance = mount(<App {...args} />);
 
       act(() => {
@@ -720,8 +680,6 @@ describe('Lens App', () => {
 
     it('clears all existing filters when the active saved query is cleared', () => {
       const args = makeDefaultArgs();
-      args.editorFrame = frame;
-
       const instance = mount(<App {...args} />);
 
       instance.find(TopNavMenu).prop('onQuerySubmit')!({
@@ -738,26 +696,9 @@ describe('Lens App', () => {
       instance.find(TopNavMenu).prop('onClearSavedQuery')!();
       instance.update();
 
-      expect(frame.mount).toHaveBeenLastCalledWith(
-        expect.any(Element),
-        expect.objectContaining({
-          filters: [],
-        })
-      );
+      const frame = instance.find('[data-test-subj="lnsEditorFrame"]').first();
+
+      expect(frame.prop('filters')).toEqual([]);
     });
-  });
-
-  it('displays errors from the frame in a toast', () => {
-    const args = makeDefaultArgs();
-    args.editorFrame = frame;
-
-    const instance = mount(<App {...args} />);
-
-    const onError = frame.mount.mock.calls[0][1].onError;
-    onError({ message: 'error' });
-
-    instance.update();
-
-    expect(args.core.notifications.toasts.addDanger).toHaveBeenCalled();
   });
 });

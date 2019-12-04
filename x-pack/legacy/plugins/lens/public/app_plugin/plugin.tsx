@@ -17,11 +17,12 @@ import React from 'react';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { HashRouter, Switch, Route, RouteComponentProps } from 'react-router-dom';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { CoreSetup, CoreStart, SavedObjectsClientContract } from 'src/core/public';
+import { CoreSetup, CoreStart } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { npStart } from 'ui/new_platform';
+import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { DataStart } from '../../../../../../src/legacy/core_plugins/data/public';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
-import { editorFrameSetup, editorFrameStart, editorFrameStop } from '../editor_frame_plugin';
 import { indexPatternDatasourceSetup, indexPatternDatasourceStop } from '../indexpattern_plugin';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { SavedObjectIndexStore } from '../persistence';
@@ -40,10 +41,12 @@ import {
 } from '../lens_ui_telemetry';
 import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../../common';
 import { KibanaLegacySetup } from '../../../../../../src/plugins/kibana_legacy/public';
-import { EditorFrameStart } from '../types';
+import { Visualization, Datasource } from '../types';
+import { mergeTables } from './merge_tables';
 
 export interface LensPluginSetupDependencies {
   kibana_legacy: KibanaLegacySetup;
+  expressions: ExpressionsSetup;
 }
 
 export interface LensPluginStartDependencies {
@@ -52,40 +55,40 @@ export interface LensPluginStartDependencies {
 }
 
 export class AppPlugin {
-  private startDependencies: {
-    data: DataPublicPluginStart;
-    dataShim: DataStart;
-    savedObjectsClient: SavedObjectsClientContract;
-    editorFrame: EditorFrameStart;
-  } | null = null;
+  private startParams?: {
+    core: CoreStart;
+    startDeps: LensPluginStartDependencies;
+  };
 
   constructor() {}
 
-  setup(core: CoreSetup, { kibana_legacy }: LensPluginSetupDependencies) {
+  setup(core: CoreSetup, plugins: LensPluginSetupDependencies) {
+    plugins.expressions.registerFunction(() => mergeTables);
+
     // TODO: These plugins should not be called from the top level, but since this is the
     // entry point to the app we have no choice until the new platform is ready
     const indexPattern = indexPatternDatasourceSetup();
     const datatableVisualization = datatableVisualizationSetup();
     const xyVisualization = xyVisualizationSetup();
     const metricVisualization = metricVisualizationSetup();
-    const editorFrameSetupInterface = editorFrameSetup();
+    const visualizationMap = lensPluginMap([
+      xyVisualization,
+      datatableVisualization,
+      metricVisualization,
+    ]) as Record<string, Visualization>;
+    const datasourceMap = lensPluginMap([indexPattern]) as Record<string, Datasource>;
 
-    editorFrameSetupInterface.registerVisualization(xyVisualization);
-    editorFrameSetupInterface.registerVisualization(datatableVisualization);
-    editorFrameSetupInterface.registerVisualization(metricVisualization);
-    editorFrameSetupInterface.registerDatasource(indexPattern);
-
-    kibana_legacy.registerLegacyApp({
+    plugins.kibana_legacy.registerLegacyApp({
       id: 'lens',
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
       mount: async (context, params) => {
-        if (this.startDependencies === null) {
+        const { startParams } = this;
+
+        if (!startParams) {
           throw new Error('mounted before start phase');
         }
-        const { data, dataShim, savedObjectsClient, editorFrame } = this.startDependencies;
-        addHelpMenuToAppChrome(context.core.chrome);
 
-        const instance = editorFrame.createInstance({});
+        addHelpMenuToAppChrome(context.core.chrome);
 
         setReportManager(
           new LensReportManager({
@@ -98,13 +101,15 @@ export class AppPlugin {
           trackUiEvent('loaded');
           return (
             <App
-              core={context.core}
-              data={data}
-              dataShim={dataShim}
-              editorFrame={instance}
+              core={startParams.core}
+              data={startParams.startDeps.data}
+              visualizationMap={visualizationMap}
+              datasourceMap={datasourceMap}
+              dataShim={startParams.startDeps.dataShim}
               storage={new Storage(localStorage)}
               docId={routeProps.match.params.id}
-              docStorage={new SavedObjectIndexStore(savedObjectsClient)}
+              ExpressionRenderer={npStart.plugins.expressions.ExpressionRenderer}
+              docStorage={new SavedObjectIndexStore(startParams.core.savedObjects.client)}
               redirectTo={id => {
                 if (!id) {
                   routeProps.history.push('/lens');
@@ -133,20 +138,14 @@ export class AppPlugin {
           params.element
         );
         return () => {
-          instance.unmount();
           unmountComponentAtNode(params.element);
         };
       },
     });
   }
 
-  start({ savedObjects }: CoreStart, { data, dataShim }: LensPluginStartDependencies) {
-    this.startDependencies = {
-      data,
-      dataShim,
-      savedObjectsClient: savedObjects.client,
-      editorFrame: editorFrameStart(),
-    };
+  start(core: CoreStart, startDeps: LensPluginStartDependencies) {
+    this.startParams = { core, startDeps };
   }
 
   stop() {
@@ -157,6 +156,12 @@ export class AppPlugin {
     xyVisualizationStop();
     metricVisualizationStop();
     datatableVisualizationStop();
-    editorFrameStop();
   }
+}
+
+function lensPluginMap<T extends { id: string }>(plugins: T[]) {
+  return plugins.reduce((acc, v) => {
+    acc[v.id] = v;
+    return acc;
+  }, {} as Record<string, T>);
 }

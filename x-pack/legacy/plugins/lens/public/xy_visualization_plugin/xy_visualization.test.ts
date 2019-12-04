@@ -8,7 +8,7 @@ import { xyVisualization } from './xy_visualization';
 import { Position } from '@elastic/charts';
 import { Operation } from '../types';
 import { State, SeriesType } from './types';
-import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_plugin/mocks';
+import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame/mocks';
 import { generateId } from '../id_generator';
 import { Ast } from '@kbn/interpreter/target/common';
 
