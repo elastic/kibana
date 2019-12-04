@@ -79,7 +79,17 @@ import {
 export { CoreContext, CoreSystem } from './core_system';
 export { RecursiveReadonly } from '../utils';
 
-export { App, AppBase, AppUnmount, AppMountContext, AppMountParameters } from './application';
+export {
+  ApplicationSetup,
+  ApplicationStart,
+  App,
+  AppBase,
+  AppMount,
+  AppMountDeprecated,
+  AppUnmount,
+  AppMountContext,
+  AppMountParameters,
+} from './application';
 
 export {
   SavedObjectsBatchResponse,
@@ -148,7 +158,10 @@ export { MountPoint, UnmountCallback } from './types';
 export interface CoreSetup<TPluginsStart extends object = object> {
   /** {@link ApplicationSetup} */
   application: ApplicationSetup;
-  /** {@link ContextSetup} */
+  /**
+   * {@link ContextSetup}
+   * @deprecated
+   */
   context: ContextSetup;
   /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
@@ -246,8 +259,6 @@ export interface LegacyCoreStart extends CoreStart {
 }
 
 export {
-  ApplicationSetup,
-  ApplicationStart,
   Capabilities,
   ChromeBadge,
   ChromeBrand,
