@@ -214,7 +214,7 @@ it('rewrites mocha reports with minimal changes', async () => {
     @@ -15,24 +15,28 @@
      </body>
      </html>
-     
+
          at Function.getSnapshot (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/packages/kbn-es/src/artifact.js:95:13)
     -    at process._tickCallback (internal/process/next_tick.js:68:7)]]>
     -      </failure>
@@ -316,7 +316,7 @@ it('rewrites karma reports with minimal changes', async () => {
     +    Chrome 75.0.3770 (Mac OS X 10.14.5) LOG: 'ready to load tests for shard 1 of 4'
      ,Chrome 75.0.3770 (Mac OS X 10.14.5) WARN: 'Unmatched GET to http://localhost:9876/api/interpreter/fns'
      ...
-     
+
     -]]>
     +
        </system-out>

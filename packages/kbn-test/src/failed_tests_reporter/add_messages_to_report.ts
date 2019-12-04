@@ -37,12 +37,15 @@ export interface Message {
  * Mutate the report to include mentions of Github issues related to test failures,
  * then write the updated report to disk
  */
-export async function addMessagesToReport(
-  report: TestReport,
-  messages: Message[],
-  log: ToolingLog,
-  reportPath: string
-) {
+export async function addMessagesToReport(options: {
+  log: ToolingLog;
+  report: TestReport;
+  messages: Message[];
+  reportPath: string;
+  dryRun?: boolean;
+}) {
+  const { log, report, messages, reportPath, dryRun } = options;
+
   for (const testCase of makeFailedTestCaseIter(report)) {
     const { classname, name } = testCase.$;
     const messageList = messages
@@ -78,6 +81,10 @@ export async function addMessagesToReport(
     .map(line => (line.trim() === '' ? '' : line))
     .join('\n');
 
-  await writeAsync(reportPath, xml, 'utf8');
+  if (dryRun) {
+    log.info(`updated ${reportPath}\n${xml}`);
+  } else {
+    await writeAsync(reportPath, xml, 'utf8');
+  }
   return xml;
 }

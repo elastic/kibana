@@ -25,7 +25,7 @@ import { GithubApi } from './github_api';
 import { updateFailureIssue, createFailureIssue } from './report_failure';
 import { getIssueMetadata } from './issue_metadata';
 import { readTestReport } from './test_report';
-import { addMessagesToReport, Message } from './mention_github_issues_in_report';
+import { addMessagesToReport, Message } from './add_messages_to_report';
 
 export function runFailedTestsReporterCli() {
   run(
@@ -119,9 +119,7 @@ export function runFailedTestsReporterCli() {
         }
 
         // mutates report to include messages and writes updated report to disk
-        if (!flags['skip-junit-update']) {
-          await addMessagesToReport(report, messages, log, reportPath);
-        }
+        await addMessagesToReport({ report, messages, log, reportPath, dryRun });
       }
     },
     {
@@ -133,7 +131,6 @@ export function runFailedTestsReporterCli() {
           'build-url': process.env.BUILD_URL,
         },
         help: `
-          --skip-junit-update  Don't modify the jUnit reports to include the messages logged about related failures
           --dry-run          Execute the CLI without contacting Github
           --build-url        URL of the failed build, defaults to process.env.BUILD_URL
         `,
