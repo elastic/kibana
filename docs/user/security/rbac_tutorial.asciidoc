@@ -108,7 +108,8 @@ user.  Give the user the `dev-mortgage` role
 and the `monitoring-user` role, which is required for users of **Stack Monitoring**.
 
 [role="screenshot"]
-image::security/images/role-new-user.png["Develoer user"]
+image::security/images/role-new-user.png["Developer user"]
 
 Finally, have the developer log in and access the Dev Mortgage space 
 and create a new visualization.
+
