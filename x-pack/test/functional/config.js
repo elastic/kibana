@@ -58,7 +58,6 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/transform'),
       // This license_management file must be last because it is destructive.
       resolve(__dirname, './apps/license_management'),
-      resolve(__dirname, './apps/triggers_actions_ui'),
     ],
 
     services,
@@ -197,10 +196,6 @@ export default async function ({ readConfigFile }) {
       transform: {
         pathname: '/app/kibana/',
         hash: '/management/elasticsearch/transform'
-      },
-      triggersActions: {
-        pathname: '/app/kibana',
-        hash: '/management/kibana/triggersActions',
       },
     },
 

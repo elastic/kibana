@@ -49,6 +49,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const closeButton = await testSubjects.find('toastCloseButton');
       await closeButton.click();
+      await testSubjects.waitForHidden('toastCloseButton');
 
       const searchBox = await find.byCssSelector('[data-test-subj="actionsList"] .euiFieldSearch');
       await searchBox.click();
@@ -83,6 +84,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const closeToastButton = await testSubjects.find('toastCloseButton');
       await closeToastButton.click();
+      await testSubjects.waitForHidden('toastCloseButton');
 
       const searchBox = await find.byCssSelector('[data-test-subj="actionsList"] .euiFieldSearch');
       await searchBox.click();
@@ -113,6 +115,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const closeToastUpdatedButton = await testSubjects.find('toastCloseButton');
       await closeToastUpdatedButton.click();
+      await testSubjects.waitForHidden('toastCloseButton');
 
       await searchBox.click();
       await searchBox.clearValue();
@@ -147,6 +150,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const closeButton = await testSubjects.find('toastCloseButton');
       await closeButton.click();
+      await testSubjects.waitForHidden('toastCloseButton');
 
       const searchBox = await find.byCssSelector('[data-test-subj="actionsList"] .euiFieldSearch');
       await searchBox.click();
@@ -188,6 +192,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const closeButton = await testSubjects.find('toastCloseButton');
       await closeButton.click();
+      await testSubjects.waitForHidden('toastCloseButton');
 
       const searchBox = await find.byCssSelector('[data-test-subj="actionsList"] .euiFieldSearch');
       await searchBox.click();

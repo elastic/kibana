@@ -46,7 +46,6 @@ import { RemoteClustersPageProvider } from './remote_clusters_page';
 import { CopySavedObjectsToSpacePageProvider } from './copy_saved_objects_to_space_page';
 import { LensPageProvider } from './lens_page';
 import { InfraMetricExplorerProvider } from './infra_metric_explorer';
-import { TriggersActionsPageProvider } from './triggers_actions_ui_page';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -79,5 +78,4 @@ export const pageObjects = {
   remoteClusters: RemoteClustersPageProvider,
   copySavedObjectsToSpace: CopySavedObjectsToSpacePageProvider,
   lens: LensPageProvider,
-  triggersActionsUI: TriggersActionsPageProvider,
 };

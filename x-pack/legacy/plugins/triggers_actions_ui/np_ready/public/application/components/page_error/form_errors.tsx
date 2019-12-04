@@ -21,7 +21,7 @@ export const ErrableFormRow = ({
 }) => {
   return (
     <EuiFormRow
-      isInvalid={isShowingErrors && errors[errorKey].length > 0}
+      isInvalid={isShowingErrors && errors[errorKey] && errors[errorKey].length > 0}
       error={errors[errorKey]}
       {...rest}
     >
