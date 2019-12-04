@@ -22,6 +22,30 @@ import {
   OverviewFilters,
 } from '../../../../common/runtime_types';
 
+export const daw = (dateRangeStart: string, dateRangeEnd: string, filters: string | undefined) => {
+  const range = {
+    range: {
+      '@timestamp': {
+        gte: dateRangeStart,
+        lte: dateRangeEnd,
+      },
+    },
+  };
+  if (filters) {
+    const filtersObj = JSON.parse(filters);
+    const h = Array.isArray(filtersObj?.bool?.filter ?? {})
+      ? // i.e. {"bool":{"filter":{ ...some nested filter objects }}}
+        filtersObj.bool.filter
+      : // i.e. {"bool":{"filter":[ ...some listed filter objects ]}}
+        Object.keys(filtersObj?.bool?.filter ?? {}).map(key => ({
+          ...filtersObj?.bool?.filter?.[key],
+        }));
+    filtersObj.bool.filter = [...h, range];
+    return filtersObj;
+  }
+  return range;
+};
+
 const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
   let up = null;
   let down = null;
@@ -208,35 +232,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       locations: 'observer.geo.name',
       tags: 'tags',
     };
-    let filtersObj;
-    if (filters) {
-      console.log('fil', JSON.stringify(JSON.parse(filters), null, 2));
-      filtersObj = JSON.parse(filters);
-      const topFilterClause = [
-        {
-          range: {
-            '@timestamp': {
-              gte: dateRangeStart,
-              lte: dateRangeEnd,
-            },
-          },
-        },
-        ...(filtersObj.bool.filter ?? {}),
-      ];
-      filtersObj.bool.filter = {
-        ...topFilterClause,
-      };
-      console.log('the new obj', JSON.stringify(topFilterClause, null, 2));
-    } else {
-      filtersObj = {
-        range: {
-          '@timestamp': {
-            gte: dateRangeStart,
-            lte: dateRangeEnd,
-          },
-        },
-      };
-    }
+    const filtersObj = daw(dateRangeStart, dateRangeEnd, filters);
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {

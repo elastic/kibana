@@ -439,3 +439,443 @@ Object {
   "statusMaxCount": 0,
 }
 `;
+
+exports[`getMonitorChartsData will provide expected filters when a location is specified 1`] = `
+Array [
+  Object {},
+  Object {
+    "body": Object {
+      "aggs": Object {
+        "timeseries": Object {
+          "aggs": Object {
+            "location": Object {
+              "aggs": Object {
+                "duration": Object {
+                  "stats": Object {
+                    "field": "monitor.duration.us",
+                  },
+                },
+                "status": Object {
+                  "terms": Object {
+                    "field": "monitor.status",
+                    "shard_size": 2,
+                    "size": 2,
+                  },
+                },
+              },
+              "terms": Object {
+                "field": "observer.geo.name",
+                "missing": "N/A",
+              },
+            },
+          },
+          "date_histogram": Object {
+            "field": "@timestamp",
+            "fixed_interval": "36000ms",
+            "min_doc_count": 0,
+          },
+        },
+      },
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "range": Object {
+                "@timestamp": Object {
+                  "gte": "now-15m",
+                  "lte": "now",
+                },
+              },
+            },
+            Object {
+              "term": Object {
+                "monitor.id": "fooID",
+              },
+            },
+            Object {
+              "term": Object {
+                "monitor.status": "up",
+              },
+            },
+            Object {
+              "term": Object {
+                "observer.geo.name": "Philadelphia",
+              },
+            },
+          ],
+        },
+      },
+      "size": 0,
+    },
+    "index": "heartbeat-8*",
+  },
+]
+`;
+
+exports[`getMonitorChartsData will run expected parameters when no location is specified 1`] = `
+Array [
+  Object {},
+  Object {
+    "body": Object {
+      "aggs": Object {
+        "timeseries": Object {
+          "aggs": Object {
+            "location": Object {
+              "aggs": Object {
+                "duration": Object {
+                  "stats": Object {
+                    "field": "monitor.duration.us",
+                  },
+                },
+                "status": Object {
+                  "terms": Object {
+                    "field": "monitor.status",
+                    "shard_size": 2,
+                    "size": 2,
+                  },
+                },
+              },
+              "terms": Object {
+                "field": "observer.geo.name",
+                "missing": "N/A",
+              },
+            },
+          },
+          "date_histogram": Object {
+            "field": "@timestamp",
+            "fixed_interval": "36000ms",
+            "min_doc_count": 0,
+          },
+        },
+      },
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "range": Object {
+                "@timestamp": Object {
+                  "gte": "now-15m",
+                  "lte": "now",
+                },
+              },
+            },
+            Object {
+              "term": Object {
+                "monitor.id": "fooID",
+              },
+            },
+            Object {
+              "term": Object {
+                "monitor.status": "up",
+              },
+            },
+          ],
+        },
+      },
+      "size": 0,
+    },
+    "index": "heartbeat-8*",
+  },
+]
+`;
+
+exports[`inserts empty buckets for missing data 1`] = `
+Object {
+  "durationMaxValue": 0,
+  "locationDurationLines": Array [
+    Object {
+      "line": Array [
+        Object {
+          "x": 1568411568000,
+          "y": 4658759,
+        },
+        Object {
+          "x": 1568411604000,
+          "y": null,
+        },
+        Object {
+          "x": 1568411640000,
+          "y": 481780,
+        },
+        Object {
+          "x": 1568411784000,
+          "y": 469206.5,
+        },
+        Object {
+          "x": 1568411820000,
+          "y": null,
+        },
+        Object {
+          "x": 1568411856000,
+          "y": null,
+        },
+        Object {
+          "x": 1568411892000,
+          "y": null,
+        },
+        Object {
+          "x": 1568411928000,
+          "y": 645563,
+        },
+        Object {
+          "x": 1568411964000,
+          "y": 1513896.6666667,
+        },
+        Object {
+          "x": 1568412036000,
+          "y": 1511409,
+        },
+        Object {
+          "x": 1568412072000,
+          "y": null,
+        },
+        Object {
+          "x": 1568412108000,
+          "y": null,
+        },
+        Object {
+          "x": 1568412144000,
+          "y": null,
+        },
+        Object {
+          "x": 1568412180000,
+          "y": null,
+        },
+        Object {
+          "x": 1568412216000,
+          "y": null,
+        },
+        Object {
+          "x": 1568412252000,
+          "y": null,
+        },
+        Object {
+          "x": 1568412288000,
+          "y": null,
+        },
+        Object {
+          "x": 1568412324000,
+          "y": 1804116,
+        },
+        Object {
+          "x": 1568412432000,
+          "y": 1972483.25,
+        },
+        Object {
+          "x": 1568412468000,
+          "y": 1020490,
+        },
+      ],
+      "name": "us-east-2",
+    },
+    Object {
+      "line": Array [
+        Object {
+          "x": 1568411568000,
+          "y": 8678399.5,
+        },
+        Object {
+          "x": 1568411604000,
+          "y": null,
+        },
+        Object {
+          "x": 1568411640000,
+          "y": 685056.5,
+        },
+        Object {
+          "x": 1568411784000,
+          "y": 261406.5,
+        },
+        Object {
+          "x": 1568411820000,
+          "y": null,
+        },
+        Object {
+          "x": 1568411856000,
+          "y": null,
+        },
+        Object {
+          "x": 1568411892000,
+          "y": null,
+        },
+        Object {
+          "x": 1568411928000,
+          "y": 1999309.6666667,
+        },
+        Object {
+          "x": 1568411964000,
+          "y": 2499799.25,
+        },
+        Object {
+          "x": 1568412036000,
+          "y": 1876155.3333333,
+        },
+        Object {
+          "x": 1568412072000,
+          "y": 1490845.75,
+        },
+        Object {
+          "x": 1568412108000,
+          "y": 2365962.6666667,
+        },
+        Object {
+          "x": 1568412144000,
+          "y": 1788901.25,
+        },
+        Object {
+          "x": 1568412180000,
+          "y": 1773177.5,
+        },
+        Object {
+          "x": 1568412216000,
+          "y": 3086220.3333333,
+        },
+        Object {
+          "x": 1568412252000,
+          "y": 1020528,
+        },
+        Object {
+          "x": 1568412288000,
+          "y": 1643963.3333333,
+        },
+        Object {
+          "x": 1568412324000,
+          "y": 1799630,
+        },
+        Object {
+          "x": 1568412432000,
+          "y": 1543307.5,
+        },
+        Object {
+          "x": 1568412468000,
+          "y": null,
+        },
+      ],
+      "name": "us-west-4",
+    },
+  ],
+  "status": Array [
+    Object {
+      "down": null,
+      "total": 4,
+      "up": null,
+      "x": 1568411568000,
+    },
+    Object {
+      "down": null,
+      "total": 0,
+      "up": null,
+      "x": 1568411604000,
+    },
+    Object {
+      "down": null,
+      "total": 8,
+      "up": null,
+      "x": 1568411640000,
+    },
+    Object {
+      "down": null,
+      "total": 8,
+      "up": null,
+      "x": 1568411784000,
+    },
+    Object {
+      "down": null,
+      "total": 0,
+      "up": null,
+      "x": 1568411820000,
+    },
+    Object {
+      "down": null,
+      "total": 0,
+      "up": null,
+      "x": 1568411856000,
+    },
+    Object {
+      "down": null,
+      "total": 0,
+      "up": null,
+      "x": 1568411892000,
+    },
+    Object {
+      "down": null,
+      "total": 4,
+      "up": null,
+      "x": 1568411928000,
+    },
+    Object {
+      "down": null,
+      "total": 7,
+      "up": null,
+      "x": 1568411964000,
+    },
+    Object {
+      "down": null,
+      "total": 5,
+      "up": null,
+      "x": 1568412036000,
+    },
+    Object {
+      "down": null,
+      "total": 4,
+      "up": null,
+      "x": 1568412072000,
+    },
+    Object {
+      "down": null,
+      "total": 3,
+      "up": null,
+      "x": 1568412108000,
+    },
+    Object {
+      "down": null,
+      "total": 4,
+      "up": null,
+      "x": 1568412144000,
+    },
+    Object {
+      "down": null,
+      "total": 4,
+      "up": null,
+      "x": 1568412180000,
+    },
+    Object {
+      "down": null,
+      "total": 3,
+      "up": null,
+      "x": 1568412216000,
+    },
+    Object {
+      "down": null,
+      "total": 1,
+      "up": null,
+      "x": 1568412252000,
+    },
+    Object {
+      "down": null,
+      "total": 3,
+      "up": null,
+      "x": 1568412288000,
+    },
+    Object {
+      "down": null,
+      "total": 8,
+      "up": null,
+      "x": 1568412324000,
+    },
+    Object {
+      "down": null,
+      "total": 8,
+      "up": null,
+      "x": 1568412432000,
+    },
+    Object {
+      "down": null,
+      "total": 1,
+      "up": null,
+      "x": 1568412468000,
+    },
+  ],
+  "statusMaxCount": 0,
+}
+`;

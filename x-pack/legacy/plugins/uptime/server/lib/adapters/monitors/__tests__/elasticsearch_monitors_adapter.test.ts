@@ -5,7 +5,7 @@
  */
 
 import { get, set } from 'lodash';
-import { ElasticsearchMonitorsAdapter } from '../elasticsearch_monitors_adapter';
+import { ElasticsearchMonitorsAdapter, daw } from '../elasticsearch_monitors_adapter';
 import { CountParams, CountResponse } from 'elasticsearch';
 import mockChartsData from './monitor_charts_mock.json';
 import { assertCloseTo } from '../../../helper';
@@ -24,6 +24,33 @@ describe('ElasticsearchMonitorsAdapter', () => {
         skipped: 0,
       },
     };
+  });
+
+  it('does stuff', () => {
+    const c = daw(
+      'now-15m',
+      'now',
+      '{"bool":{"should":[{"match":{"url.port":80}}],"minimum_should_match":1}}'
+    );
+    console.log(JSON.stringify(c, null, 2));
+  });
+
+  it('does stuff with an existing filters clause', () => {
+    const c = daw(
+      'now-15m',
+      'now',
+      '{"bool":{"filter":{"term":{"field":"monitor.id"}},"should":[{"match":{"url.port":80}}],"minimum_should_match":1}}'
+    );
+    console.log(JSON.stringify(c, null, 2));
+  });
+
+  it('does stuff when filters is an obj', () => {
+    const c = daw(
+      'now-15m',
+      'now',
+      '{"bool":{"filter":[{"field":"monitor.id"}],"should":[{"match":{"url.port":80}}],"minimum_should_match":1}}'
+    );
+    console.log(JSON.stringify(c, null, 2));
   });
 
   it('getMonitorChartsData will run expected parameters when no location is specified', async () => {
