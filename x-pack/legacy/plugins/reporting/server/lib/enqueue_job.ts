@@ -8,6 +8,7 @@ import { get } from 'lodash';
 // @ts-ignore
 import { events as esqueueEvents } from './esqueue';
 import {
+  EnqueueJobFn,
   ESQueueCreateJobFn,
   ImmediateCreateJobFn,
   Job,
@@ -35,7 +36,7 @@ interface EnqueueJobFactoryOpts {
 export function enqueueJobFactory(
   server: ServerFacade,
   { exportTypesRegistry, esqueue }: EnqueueJobFactoryOpts
-) {
+): EnqueueJobFn {
   const config = server.config();
   const captureConfig: CaptureConfig = config.get('xpack.reporting.capture');
   const browserType = captureConfig.browser.type;

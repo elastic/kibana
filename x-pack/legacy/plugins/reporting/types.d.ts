@@ -90,9 +90,18 @@ interface ReportingRequest {
     management: {
       jobTypes: any;
     };
-    user: any;
+    user: string;
   };
 }
+
+export type EnqueueJobFn = <JobParamsType>(
+  parentLogger: LevelLogger,
+  exportTypeId: string,
+  jobParams: JobParamsType,
+  user: string,
+  headers: Record<string, string>,
+  request: RequestFacade
+) => Promise<Job>;
 
 export type RequestFacade = ReportingRequest & Legacy.Request;
 
