@@ -120,10 +120,6 @@ export class DashboardAppController {
     new FilterStateManager(globalState, getAppState, filterManager);
     const queryFilter = filterManager;
 
-    function getUnhashableStates(): State[] {
-      return [getAppState(), globalState].filter(Boolean);
-    }
-
     let lastReloadRequestTime = 0;
 
     const dash = ($scope.dash = $route.current.locals.dash);
@@ -751,7 +747,7 @@ export class DashboardAppController {
         anchorElement,
         allowEmbed: true,
         allowShortUrl: !dashboardConfig.getHideWriteControls(),
-        shareableUrl: unhashUrl(window.location.href, getUnhashableStates()),
+        shareableUrl: unhashUrl(window.location.href),
         objectId: dash.id,
         objectType: 'dashboard',
         sharingData: {
