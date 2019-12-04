@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { FrameworkUser } from './adapters/framework/adapter_types';
-import { Output, OutputType } from './adapters/policy/adapter_types';
 import { BackendFrameworkLib } from './framework';
+import { Output, OutputType } from './types';
 
 export class OutputsLib {
   constructor(

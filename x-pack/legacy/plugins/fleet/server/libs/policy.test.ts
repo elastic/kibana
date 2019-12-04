@@ -3,10 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Policy, Status } from '../../../ingest/server/libs/adapters/policy/adapter_types';
 import { FrameworkUser, internalAuthData } from '../adapters/framework/adapter_types';
 import { AgentPolicy } from '../repositories/policies/types';
 import { PolicyLib } from './policy';
+import { Status, Policy } from '../../../ingest/server/libs/types';
 
 function getUser(apiKey?: string, apiKeyId?: string) {
   if (!apiKey) {

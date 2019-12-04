@@ -5,13 +5,18 @@
  */
 
 import * as t from 'io-ts';
+import { Output, Policy } from '../../../../ingest/server/libs/types';
 import { FrameworkUser } from '../../adapters/framework/adapter_types';
-import { Output, Policy } from '../../../../ingest/server/libs/adapters/policy/adapter_types';
 import { PolicyLib } from '../../../../ingest/server/libs/policy';
 import { OutputsLib } from '../../../../ingest/server/libs/outputs';
 
 export type IngestOutputLib = OutputsLib;
 export type IngestPolicyLib = PolicyLib;
+
+export interface IngestPlugin {
+  getPolicyOutputByIDs(user: FrameworkUser, ids: string[]): Promise<Output[]>;
+  getPolicyById(user: FrameworkUser, id: string): Promise<Policy>;
+}
 
 export interface PoliciesRepository {
   getPolicyOutputByIDs(user: FrameworkUser, ids: string[]): Promise<Output[]>;

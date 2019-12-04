@@ -8,9 +8,8 @@ import { callWhenOnline } from '@mattapperson/slapshot/lib/call_when_online';
 import * as elasticsearch from 'elasticsearch';
 import { INDEX_NAMES } from '../../common/constants/index_names';
 import { FrameworkUser } from './adapters/framework/adapter_types';
-import { Policy } from './adapters/policy/adapter_types';
 import { compose } from './compose/memorized';
-import { ServerLibs } from './types';
+import { ServerLibs, Policy } from './types';
 
 jest.mock('uuid/v4', () => {
   let uuid = 1;

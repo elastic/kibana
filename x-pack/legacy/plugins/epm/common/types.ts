@@ -136,11 +136,6 @@ export interface InstallationAttributes extends SavedObjectAttributes {
   installed: AssetReference[];
 }
 
-export type Datasource = SavedObject<DatasourceAttributes>;
-export interface DatasourceAttributes extends SavedObjectAttributes {
-  installed: AssetReference[];
-}
-
 export type Installable<T> = Installed<T> | NotInstalled<T>;
 
 export type Installed<T = {}> = T & {
