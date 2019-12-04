@@ -25,7 +25,7 @@ import {
   RequestHandlerContext,
   KibanaRequest,
 } from 'src/core/server';
-import { Observable, AsyncSubject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { Server } from 'hapi';
 import { once } from 'lodash';
 import { VisTypeTimeseriesConfig } from '.';
@@ -49,26 +49,19 @@ export interface VisTypeTimeseriesSetup {
 }
 
 export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
-  legacySetup$: AsyncSubject<LegacySetup>;
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
-    this.legacySetup$ = new AsyncSubject();
   }
 
   public setup(core: CoreSetup, plugins: any) {
     const logger = this.initializerContext.logger.get('visTypeTimeseries');
     const config$ = this.initializerContext.config.create<VisTypeTimeseriesConfig>();
 
-    this.legacySetup$.subscribe((__LEGACY: LegacySetup) => {
-      init(core, plugins, config$, logger, __LEGACY);
-    });
-
     return {
       __legacy: {
         config$,
         registerLegacyAPI: once((__LEGACY: LegacySetup) => {
-          this.legacySetup$.next(__LEGACY);
-          this.legacySetup$.complete();
+          init(core, plugins, config$, logger, __LEGACY);
         }),
       },
       getVisData: async (requestContext: RequestHandlerContext, request: KibanaRequest) => {
