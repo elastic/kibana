@@ -9,7 +9,7 @@
 set -e
 ./check_env_variables.sh
 
-# Example: ./create_index.sh
+# Example: ./post_signal_index.sh
 curl -s -k \
  -H 'Content-Type: application/json' \
  -H 'kbn-xsrf: 123' \

@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// TODO: Can we change the options?: V to be options?: U
-export type CallWithRequest<T, U, V> = (endpoint: string, params: T, options?: V) => Promise<V>;
+export type CallWithRequest<T, U, V> = (endpoint: string, params: T, options?: U) => Promise<V>;
