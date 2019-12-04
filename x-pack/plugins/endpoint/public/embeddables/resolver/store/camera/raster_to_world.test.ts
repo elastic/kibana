@@ -5,7 +5,7 @@
  */
 
 import { Store, createStore } from 'redux';
-import { CameraAction, UserSetRasterSize, UserSetPanningOffset, UserScaled } from './action';
+import { CameraAction } from './action';
 import { CameraState } from '../../types';
 import { cameraReducer } from './reducer';
 import { rasterToWorld } from './selectors';
@@ -23,7 +23,7 @@ describe('rasterToWorld', () => {
   });
   describe('when the raster size is 300 x 200 pixels', () => {
     beforeEach(() => {
-      const action: UserSetRasterSize = { type: 'userSetRasterSize', payload: [300, 200] };
+      const action: CameraAction = { type: 'userSetRasterSize', payload: [300, 200] };
       store.dispatch(action);
     });
     it('should convert 150,100 in raster space to 0,0 (center) in world space', () => {
@@ -55,7 +55,7 @@ describe('rasterToWorld', () => {
     });
     describe('when the user has zoomed to 0.5', () => {
       beforeEach(() => {
-        const action: UserScaled = { type: 'userScaled', payload: [0.5, 0.5] };
+        const action: CameraAction = { type: 'userScaled', payload: [0.5, 0.5] };
         store.dispatch(action);
       });
       it('should convert 150, 100 (center) to 0, 0 (center) in world space', () => {
@@ -64,7 +64,7 @@ describe('rasterToWorld', () => {
     });
     describe('when the user has panned to the right and up by 50', () => {
       beforeEach(() => {
-        const action: UserSetPanningOffset = { type: 'userPanned', payload: [-50, -50] };
+        const action: CameraAction = { type: 'userSetPanningOffset', payload: [-50, -50] };
         store.dispatch(action);
       });
       it('should convert 100,150 in raster space to 0,0 (center) in world space', () => {
@@ -79,13 +79,13 @@ describe('rasterToWorld', () => {
     });
     describe('when the user has panned to the right by 350 and up by 250', () => {
       beforeEach(() => {
-        const action: UserSetPanningOffset = { type: 'userPanned', payload: [-350, -250] };
+        const action: CameraAction = { type: 'userSetPanningOffset', payload: [-350, -250] };
         store.dispatch(action);
       });
       describe('when the user has scaled to 2', () => {
         // the viewport will only cover half, or 150x100 instead of 300x200
         beforeEach(() => {
-          const action: UserScaled = { type: 'userScaled', payload: [2, 2] };
+          const action: CameraAction = { type: 'userScaled', payload: [2, 2] };
           store.dispatch(action);
         });
         // we expect the viewport to be

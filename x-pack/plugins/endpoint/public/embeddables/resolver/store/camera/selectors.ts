@@ -6,20 +6,48 @@
 
 import { Vector2, CameraState, CameraStateWhenPanning } from '../../types';
 
+interface Viewport {
+  renderWidth: number;
+  renderHeight: number;
+  clippingPlaneRight: number;
+  clippingPlaneTop: number;
+  clippingPlaneLeft: number;
+  clippingPlaneBottom: number;
+}
+
+function viewport(state: CameraState): Viewport {
+  const renderWidth = state.rasterSize[0];
+  const renderHeight = state.rasterSize[1];
+  const clippingPlaneRight = renderWidth / 2 / state.scaling[0];
+  const clippingPlaneTop = renderHeight / 2 / state.scaling[1];
+
+  return {
+    renderWidth,
+    renderHeight,
+    clippingPlaneRight,
+    clippingPlaneTop,
+    clippingPlaneLeft: -clippingPlaneRight,
+    clippingPlaneBottom: -clippingPlaneTop,
+  };
+}
+
 /**
  * https://en.wikipedia.org/wiki/Orthographic_projection
  *
  */
 export const worldToRaster: (state: CameraState) => (worldPosition: Vector2) => Vector2 = state => {
-  const renderWidth = state.rasterSize[0];
-  const renderHeight = state.rasterSize[1];
-  const clippingPlaneRight = renderWidth / 2 / state.scaling[0];
-  const clippingPlaneTop = renderHeight / 2 / state.scaling[1];
-  const clippingPlaneLeft = -clippingPlaneRight;
-  const clippingPlaneBottom = -clippingPlaneTop;
+  const {
+    renderWidth,
+    renderHeight,
+    clippingPlaneRight,
+    clippingPlaneTop,
+    clippingPlaneLeft,
+    clippingPlaneBottom,
+  } = viewport(state);
 
   return ([worldX, worldY]) => {
     const [translationX, translationY] = translationIncludingActivePanning(state);
+
     const [xNdc, yNdc] = orthographicProjection(
       worldX + translationX,
       worldY + translationY,
@@ -39,13 +67,47 @@ function translationIncludingActivePanning(state: CameraState): Vector2 {
     const panningDeltaX = state.currentPanningOffset[0] - state.panningOrigin[0];
     const panningDeltaY = state.currentPanningOffset[1] - state.panningOrigin[1];
     return [
-      state.translation[0] + panningDeltaX * state.scaling[0],
-      state.translation[1] + panningDeltaY * state.scaling[1],
+      state.translation[0] + panningDeltaX / state.scaling[0],
+      state.translation[1] + panningDeltaY / state.scaling[1],
     ];
   } else {
     return state.translation;
   }
 }
+
+export const rasterToWorld: (state: CameraState) => (worldPosition: Vector2) => Vector2 = state => {
+  const {
+    renderWidth,
+    renderHeight,
+    clippingPlaneRight,
+    clippingPlaneTop,
+    clippingPlaneLeft,
+    clippingPlaneBottom,
+  } = viewport(state);
+
+  return ([rasterX, rasterY]) => {
+    const [translationX, translationY] = translationIncludingActivePanning(state);
+
+    // raster to ndc
+    const ndcX = (rasterX / renderWidth) * 2 - 1;
+    const ndcY = -1 * ((rasterY / renderHeight) * 2 - 1);
+
+    const [panningTranslatedX, panningTranslatedY] = inverseOrthographicProjection(
+      ndcX,
+      ndcY,
+      clippingPlaneTop,
+      clippingPlaneRight,
+      clippingPlaneBottom,
+      clippingPlaneLeft
+    );
+    return [panningTranslatedX - translationX, panningTranslatedY - translationY];
+  };
+};
+
+export const scale = (state: CameraState): Vector2 => state.scaling;
+
+export const userIsPanning = (state: CameraState): state is CameraStateWhenPanning =>
+  state.panningOrigin !== null;
 
 /**
  * Adjust x, y to be bounded, in scale, of a clipping plane defined by top, right, bottom, left
@@ -92,33 +154,3 @@ function inverseOrthographicProjection(
 
   return [xPrime, yPrime];
 }
-
-export const rasterToWorld: (state: CameraState) => (worldPosition: Vector2) => Vector2 = state => {
-  const renderWidth = state.rasterSize[0];
-  const renderHeight = state.rasterSize[1];
-  const clippingPlaneRight = renderWidth / 2 / state.scaling[0];
-  const clippingPlaneTop = renderHeight / 2 / state.scaling[1];
-  const clippingPlaneLeft = -clippingPlaneRight;
-  const clippingPlaneBottom = -clippingPlaneTop;
-
-  return ([rasterX, rasterY]) => {
-    // raster to ndc
-    const ndcX = (rasterX / renderWidth) * 2 - 1;
-    const ndcY = -1 * ((rasterY / renderHeight) * 2 - 1);
-
-    const [panningTranslatedX, panningTranslatedY] = inverseOrthographicProjection(
-      ndcX,
-      ndcY,
-      clippingPlaneTop,
-      clippingPlaneRight,
-      clippingPlaneBottom,
-      clippingPlaneLeft
-    );
-    return [panningTranslatedX - state.translation[0], panningTranslatedY - state.translation[1]];
-  };
-};
-
-export const scale = (state: CameraState): Vector2 => state.scaling;
-
-export const userIsPanning = (state: CameraState): state is CameraStateWhenPanning =>
-  state.panningOrigin !== null;
