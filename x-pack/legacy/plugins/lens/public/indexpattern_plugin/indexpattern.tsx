@@ -89,12 +89,6 @@ export function uniqueLabels(layers: Record<string, IndexPatternLayer>) {
   return columnLabelMap;
 }
 
-function removeProperty<T>(prop: string, object: Record<string, T>): Record<string, T> {
-  const result = { ...object };
-  delete result[prop];
-  return result;
-}
-
 export function getIndexPatternDatasource({
   chrome,
   core,
@@ -270,22 +264,6 @@ export function getIndexPatternDatasource({
             domElement
           );
         },
-
-        removeColumnInTableSpec: (columnId: string) => {
-          setState({
-            ...state,
-            layers: {
-              ...state.layers,
-              [layerId]: {
-                ...state.layers[layerId],
-                columnOrder: state.layers[layerId].columnOrder.filter(id => id !== columnId),
-                columns: removeProperty(columnId, state.layers[layerId].columns),
-              },
-            },
-          });
-        },
-        moveColumnTo: () => {},
-        duplicateColumn: () => [],
       };
     },
     getDatasourceSuggestionsForField(state, draggedField) {
