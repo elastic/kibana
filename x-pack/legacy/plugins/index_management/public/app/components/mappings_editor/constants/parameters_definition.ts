@@ -487,7 +487,7 @@ export const PARAMETERS_DEFINITION = {
         defaultMessage: 'Field path',
       }),
       helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.pathHelpText', {
-        defaultMessage: 'The path to the target field.',
+        defaultMessage: 'The absolute path from the root to the target field.',
       }),
       validations: [
         {
