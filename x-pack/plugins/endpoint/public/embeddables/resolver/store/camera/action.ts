@@ -6,9 +6,16 @@
 
 import { Vector2 } from '../../types';
 
+// Sets scaling directly. This is not what mouse interactions should use, more like programatic zooming
 interface UserScaled {
   readonly type: 'userScaled';
   readonly payload: Vector2;
+}
+
+interface UserZoomed {
+  readonly type: 'userZoomed';
+  // generally pass mouse wheels deltaY (when deltaMode is pixel) divided by -renderHeight
+  payload: number;
 }
 
 interface UserSetRasterSize {
@@ -39,6 +46,11 @@ interface UserCanceledPanning {
   readonly type: 'userCanceledPanning';
 }
 
+interface UserMovedMouseOnPanningCandidate {
+  readonly type: 'userMovedMouseOnPanningCandidate';
+  readonly payload: Vector2;
+}
+
 export type CameraAction =
   | UserScaled
   | UserSetRasterSize
@@ -46,4 +58,6 @@ export type CameraAction =
   | UserStartedPanning
   | UserContinuedPanning
   | UserStoppedPanning
-  | UserCanceledPanning;
+  | UserCanceledPanning
+  | UserMovedMouseOnPanningCandidate
+  | UserZoomed;

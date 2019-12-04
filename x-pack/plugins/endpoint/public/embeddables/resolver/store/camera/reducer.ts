@@ -30,6 +30,14 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
       ...state,
       scaling: [clamp(deltaX, 0.1, 3), clamp(deltaY, 0.1, 3)],
     };
+  } else if (action.type === 'userZoomed') {
+    return {
+      ...state,
+      scaling: [
+        clamp(state.scaling[0] + action.payload, 0.1, 3),
+        clamp(state.scaling[1] + action.payload, 0.1, 3),
+      ],
+    };
   } else if (action.type === 'userSetPanningOffset') {
     return {
       ...state,

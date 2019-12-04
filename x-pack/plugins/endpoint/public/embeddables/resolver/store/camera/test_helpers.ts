@@ -6,12 +6,16 @@
 
 import { Store } from 'redux';
 import { CameraAction } from './action';
-import { CameraState } from '../../types';
+import { CameraState, Vector2 } from '../../types';
 
-export function userScaled(
-  store: Store<CameraState, CameraAction>,
-  scalingValue: [number, number]
-): void {
+type CameraStore = Store<CameraState, CameraAction>;
+
+export function userScaled(store: CameraStore, scalingValue: [number, number]): void {
   const action: CameraAction = { type: 'userScaled', payload: scalingValue };
   store.dispatch(action);
+}
+
+export function expectVectorsToBeClose(first: Vector2, second: Vector2): void {
+  expect(first[0]).toBeCloseTo(second[0]);
+  expect(first[1]).toBeCloseTo(second[1]);
 }

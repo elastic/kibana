@@ -9,7 +9,7 @@ import { cameraReducer } from './reducer';
 import { createStore, Store } from 'redux';
 import { CameraState, AABB } from '../../types';
 import { viewableBoundingBox, rasterToWorld } from './selectors';
-import { userScaled } from './test_helpers';
+import { userScaled, expectVectorsToBeClose } from './test_helpers';
 
 describe('zooming', () => {
   let store: Store<CameraState, CameraAction>;
@@ -40,7 +40,7 @@ describe('zooming', () => {
         maximum: [150, 100],
       })
     );
-    describe('when the user has zoomed in to 2x', () => {
+    describe('when the user has scaled in to 2x', () => {
       beforeEach(() => {
         userScaled(store, [2, 2]);
       });
@@ -50,6 +50,45 @@ describe('zooming', () => {
           maximum: [75, 50],
         })
       );
+    });
+    describe('when the user zooms in by 1 zoom unit', () => {
+      beforeEach(() => {
+        const action: CameraAction = {
+          type: 'userZoomed',
+          payload: 1,
+        };
+        store.dispatch(action);
+      });
+      it(
+        ...cameraShouldBeBoundBy({
+          minimum: [-75, -50],
+          maximum: [75, 50],
+        })
+      );
+    });
+    it('the raster position 200, 50 should map to the world position 50, 50', () => {
+      expectVectorsToBeClose(rasterToWorld(store.getState())([200, 50]), [50, 50]);
+    });
+    describe('when the user has moved their mouse to the raster position 200, 50', () => {
+      beforeEach(() => {
+        const action: CameraAction = {
+          type: 'userMovedMouseOnPanningCandidate',
+          payload: [200, 50],
+        };
+        store.dispatch(action);
+      });
+      describe('when the user zooms in by 0.5 zoom units', () => {
+        beforeEach(() => {
+          const action: CameraAction = {
+            type: 'userZoomed',
+            payload: 0.5,
+          };
+          store.dispatch(action);
+        });
+        it('the raster position 200, 50 should map to the world position 50, 50', () => {
+          expectVectorsToBeClose(rasterToWorld(store.getState())([200, 50]), [50, 50]);
+        });
+      });
     });
     describe('when the user pans right by 100 pixels', () => {
       beforeEach(() => {
@@ -67,7 +106,7 @@ describe('zooming', () => {
         expect(worldCenterPoint[0]).toBeCloseTo(100);
         expect(worldCenterPoint[1]).toBeCloseTo(0);
       });
-      describe('when the user zooms to 2x', () => {
+      describe('when the user scales to 2x', () => {
         beforeEach(() => {
           userScaled(store, [2, 2]);
         });
