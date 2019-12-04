@@ -96,8 +96,6 @@ export { getFromSavedObject } from 'ui/index_patterns';
 export { PersistedState } from 'ui/persisted_state';
 // @ts-ignore
 export { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
-// @ts-ignore
-export { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';

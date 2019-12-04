@@ -23,7 +23,7 @@ import { Type } from '@kbn/config-schema';
 import { ConfigService, Env, Config, ConfigPath } from './config';
 import { ElasticsearchService } from './elasticsearch';
 import { HttpService, InternalHttpServiceSetup } from './http';
-import { LegacyService } from './legacy';
+import { LegacyService, ensureValidConfiguration } from './legacy';
 import { Logger, LoggerFactory } from './logging';
 import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
@@ -40,11 +40,13 @@ import { mapToObject } from '../utils/';
 import { ContextService } from './context';
 import { RequestHandlerContext } from '.';
 import { InternalCoreSetup } from './internal_types';
+import { CapabilitiesService } from './capabilities';
 
 const coreId = Symbol('core');
 
 export class Server {
   public readonly configService: ConfigService;
+  private readonly capabilities: CapabilitiesService;
   private readonly context: ContextService;
   private readonly elasticsearch: ElasticsearchService;
   private readonly http: HttpService;
@@ -70,6 +72,7 @@ export class Server {
     this.elasticsearch = new ElasticsearchService(core);
     this.savedObjects = new SavedObjectsService(core);
     this.uiSettings = new UiSettingsService(core);
+    this.capabilities = new CapabilitiesService(core);
   }
 
   public async setup() {
@@ -78,6 +81,10 @@ export class Server {
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
     const pluginDependencies = await this.plugins.discover();
     const legacyPlugins = await this.legacy.discoverPlugins();
+
+    // Immediately terminate in case of invalid configuration
+    await ensureValidConfiguration(this.configService, legacyPlugins);
+
     const contextServiceSetup = this.context.setup({
       // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
       // 1) Can access context from any NP plugin
@@ -95,6 +102,8 @@ export class Server {
 
     this.registerDefaultRoute(httpSetup);
 
+    const capabilitiesSetup = this.capabilities.setup({ http: httpSetup });
+
     const elasticsearchServiceSetup = await this.elasticsearch.setup({
       http: httpSetup,
     });
@@ -109,6 +118,7 @@ export class Server {
     });
 
     const coreSetup: InternalCoreSetup = {
+      capabilities: capabilitiesSetup,
       context: contextServiceSetup,
       elasticsearch: elasticsearchServiceSetup,
       http: httpSetup,
@@ -131,10 +141,14 @@ export class Server {
   public async start() {
     this.log.debug('starting server');
     const savedObjectsStart = await this.savedObjects.start({});
-
-    const pluginsStart = await this.plugins.start({ savedObjects: savedObjectsStart });
+    const capabilitiesStart = this.capabilities.start();
+    const pluginsStart = await this.plugins.start({
+      capabilities: capabilitiesStart,
+      savedObjects: savedObjectsStart,
+    });
 
     const coreStart = {
+      capabilities: capabilitiesStart,
       savedObjects: savedObjectsStart,
       plugins: pluginsStart,
     };

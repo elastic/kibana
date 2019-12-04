@@ -42,7 +42,6 @@ import {
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
-  getUnhashableStatesProvider,
   hasSearchStategyForIndexPattern,
   intervalOptions,
   isDefaultTypeIndexPattern,
@@ -195,9 +194,7 @@ function discoverController(
   globalState,
 ) {
   const responseHandler = vislibSeriesResponseHandlerProvider().handler;
-  const getUnhashableStates = Private(getUnhashableStatesProvider);
   const filterStateManager = new FilterStateManager(globalState, getAppState, filterManager);
-
 
   const inspectorAdapters = {
     requests: new RequestAdapter()
@@ -333,7 +330,7 @@ function discoverController(
           anchorElement,
           allowEmbed: false,
           allowShortUrl: uiCapabilities.discover.createShortUrl,
-          shareableUrl: unhashUrl(window.location.href, getUnhashableStates()),
+          shareableUrl: unhashUrl(window.location.href),
           objectId: savedSearch.id,
           objectType: 'search',
           sharingData: {
