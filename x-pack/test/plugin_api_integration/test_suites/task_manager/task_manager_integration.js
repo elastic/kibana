@@ -88,6 +88,23 @@ export default function ({ getService }) {
         .expect(200);
     }
 
+    function getTaskById(tasks, id) {
+      return tasks.filter(task => task.id === id)[0];
+    }
+
+    async function provideParamsToTasksWaitingForParams(taskId, data = {}) {
+      // wait for task to start running and stall on waitForParams
+      await retry.try(async () => {
+        const tasks = (await currentTasks()).docs;
+        expect(getTaskById(tasks, taskId).status).to.eql('running');
+      });
+
+      return supertest.post('/api/sample_tasks/event')
+        .set('kbn-xsrf', 'xxx')
+        .send({ event: taskId, data })
+        .expect(200);
+    }
+
     it('should support middleware', async () => {
       const historyItem = _.random(1, 100);
 
@@ -311,17 +328,17 @@ export default function ({ getService }) {
     it('should return a task run error result when trying to run a task now which is already running', async () => {
       const longRunningTask = await scheduleTask({
         taskType: 'sampleTask',
-        interval: `30m`,
+        interval: '30m',
         params: {
-          waitOnceForEvent: 'runNowHasBeenCalled'
+          waitForParams: true
         },
       });
 
-      function getTaskById(tasks, id) {
-        return tasks.filter(task => task.id === id)[0];
-      }
+      // tell the task to wait for the 'runNowHasBeenAttempted' event
+      await provideParamsToTasksWaitingForParams(longRunningTask.id, {
+        waitForEvent: 'runNowHasBeenAttempted'
+      });
 
-      // wait for task to run and stall
       await retry.try(async () => {
         const docs = await historyDocs();
         expect(docs.filter(taskDoc => taskDoc._source.taskId === longRunningTask.id).length).to.eql(1);
@@ -338,19 +355,57 @@ export default function ({ getService }) {
         { error: `Error: failed to run task "${longRunningTask.id}" as it is currently running`, id: longRunningTask.id }
       );
 
-      // finish first run
-      await releaseTasksWaitingForEventToComplete('runNowHasBeenCalled');
+      // finish first run by emitting 'runNowHasBeenAttempted' event
+      await releaseTasksWaitingForEventToComplete('runNowHasBeenAttempted');
       await retry.try(async () => {
         const tasks = (await currentTasks()).docs;
         expect(getTaskById(tasks, longRunningTask.id).state.count).to.eql(1);
       });
 
       // second runNow should be successful
-      const successfulRunNowResult = await runTaskNow({
+      const successfulRunNowResult = runTaskNow({
         id: longRunningTask.id
       });
 
-      expect(successfulRunNowResult).to.eql({ id: longRunningTask.id });
+      await provideParamsToTasksWaitingForParams(longRunningTask.id);
+
+      expect(await successfulRunNowResult).to.eql({ id: longRunningTask.id });
+    });
+
+    it('should allow a failed task to be rerun using runNow', async () => {
+
+      const taskThatFailsBeforeRunNow = await scheduleTask({
+        taskType: 'singleAttemptSampleTask',
+        params: {
+          waitForParams: true
+        },
+      });
+
+      // tell the task to fail on its next run
+      await provideParamsToTasksWaitingForParams(
+        taskThatFailsBeforeRunNow.id,
+        { failWith: 'error on first run' }
+      );
+
+      // wait for task to fail
+      await retry.try(async () => {
+        const tasks = (await currentTasks()).docs;
+        expect(getTaskById(tasks, taskThatFailsBeforeRunNow.id).status).to.eql('failed');
+      });
+
+      // runNow should be successfully run the failing task
+      const runNowResultWithExpectedFailure = runTaskNow({
+        id: taskThatFailsBeforeRunNow.id
+      });
+
+      // release the task without failing this time
+      await provideParamsToTasksWaitingForParams(taskThatFailsBeforeRunNow.id);
+
+      expect(
+        await runNowResultWithExpectedFailure
+      ).to.eql(
+        { id: taskThatFailsBeforeRunNow.id }
+      );
     });
 
     async function expectReschedule(originalRunAt, currentTask, expectedDiff) {
@@ -379,10 +434,6 @@ export default function ({ getService }) {
           waitForEvent: 'rescheduleHasHappened'
         },
       });
-
-      function getTaskById(tasks, id) {
-        return tasks.filter(task => task.id === id)[0];
-      }
 
       await retry.try(async () => {
         const tasks = (await currentTasks()).docs;

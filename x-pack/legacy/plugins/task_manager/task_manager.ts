@@ -55,14 +55,10 @@ export interface TaskManagerOpts {
   serializer: SavedObjectsSerializer;
 }
 
-type RunNowResult =
-  | {
-      id: string;
-      error: string;
-    }
-  | {
-      id: string;
-    };
+interface RunNowResult {
+  id: string;
+  error?: string;
+}
 
 type TaskLifecycleEvent = TaskMarkRunning | TaskRun | TaskClaim;
 

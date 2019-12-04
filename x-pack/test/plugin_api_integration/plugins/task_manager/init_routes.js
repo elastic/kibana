@@ -123,14 +123,15 @@ export function initRoutes(server, taskTestingEvents) {
     config: {
       validate: {
         payload: Joi.object({
-          event: Joi.string().required()
+          event: Joi.string().required(),
+          data: Joi.object().optional().default({})
         }),
       },
     },
     async handler(request) {
       try {
-        const { event } = request.payload;
-        taskTestingEvents.emit(event);
+        const { event, data } = request.payload;
+        taskTestingEvents.emit(event, data);
         return { event };
       } catch (err) {
         return err;

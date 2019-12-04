@@ -50,7 +50,7 @@ import {
   RecuringTaskWithInterval,
   taskWithLessThanMaxAttempts,
   SortByRunAtAndRetryAt,
-  idleTaskWithIDs,
+  taskWithIDsAndRunnableStatus,
   sortByIdsThenByScheduling,
 } from './queries/mark_available_tasks_as_claimed';
 
@@ -263,7 +263,7 @@ export class TaskStore {
               | TermBoolClause
               | RangeBoolClause
               | BoolClause<TermBoolClause | IDsClause>
-            >(queryForScheduledTasks, idleTaskWithIDs(claimTasksById)),
+            >(queryForScheduledTasks, taskWithIDsAndRunnableStatus(claimTasksById)),
             sort: sortByIdsThenByScheduling(claimTasksById),
           }
         : {

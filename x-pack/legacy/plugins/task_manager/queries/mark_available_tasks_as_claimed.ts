@@ -41,12 +41,16 @@ export const IdleTaskWithExpiredRunAt: BoolClause<TermBoolClause | RangeBoolClau
   },
 };
 
-export const idleTaskWithIDs = (
+export const taskWithIDsAndRunnableStatus = (
   claimTasksById: string[]
 ): BoolClause<TermBoolClause | IDsClause> => ({
   bool: {
     must: [
-      { term: { 'task.status': 'idle' } },
+      {
+        bool: {
+          should: [{ term: { 'task.status': 'idle' } }, { term: { 'task.status': 'failed' } }],
+        },
+      },
       {
         ids: {
           values: claimTasksById,
