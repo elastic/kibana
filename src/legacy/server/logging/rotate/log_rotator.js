@@ -67,7 +67,7 @@ export class LogRotator {
     await this._startLogFileSizeMonitor();
   }
 
-  stop() {
+  stop = () => {
     if (!this.running) {
       return;
     }
@@ -79,7 +79,7 @@ export class LogRotator {
     this._stopLogFileSizeMonitor();
 
     this.running = false;
-  }
+  };
 
   async _shouldUsePolling() {
     try {
@@ -150,7 +150,7 @@ export class LogRotator {
     this.stalker.on('change', this._logFileSizeMonitorHandler);
   }
 
-  _logFileSizeMonitorHandler = async  (filename, stats) => {
+  _logFileSizeMonitorHandler = async (filename, stats) => {
     if (!filename || !stats) {
       return;
     }
@@ -169,7 +169,7 @@ export class LogRotator {
   }
 
   _createExitListener() {
-    process.on('exit', this.stop.bind(this));
+    process.on('exit', this.stop);
   }
 
   _deleteExitListener() {
