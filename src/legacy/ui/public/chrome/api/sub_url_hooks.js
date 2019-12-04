@@ -18,18 +18,16 @@
  */
 
 import {
-  getUnhashableStatesProvider,
   unhashUrl,
 } from '../../state_management/state_hashing';
 
 export function registerSubUrlHooks(angularModule, internals) {
   angularModule.run(($rootScope, Private) => {
-    const getUnhashableStates = Private(getUnhashableStatesProvider);
     const subUrlRouteFilter = Private(SubUrlRouteFilterProvider);
 
     function updateSubUrls() {
       const urlWithHashes = window.location.href;
-      const urlWithStates = unhashUrl(urlWithHashes, getUnhashableStates());
+      const urlWithStates = unhashUrl(urlWithHashes);
       internals.trackPossibleSubUrl(urlWithStates);
     }
 
