@@ -183,9 +183,9 @@ export default function({ getService }: FtrProviderContext) {
               expect(firstNode).to.have.property('metric');
               expect(firstNode.metric).to.eql({
                 name: 'cpu',
-                value: 0.003666666666666667,
-                avg: 0.00809090909090909,
-                max: 0.057833333333333334,
+                value: 0.009285714285714286,
+                avg: 0.0015476190476190477,
+                max: 0.009285714285714286,
                 __typename: 'InfraSnapshotNodeMetric',
               });
             }
@@ -285,9 +285,9 @@ export default function({ getService }: FtrProviderContext) {
               expect(firstNode).to.have.property('metric');
               expect(firstNode.metric).to.eql({
                 name: 'cpu',
-                value: 0.003666666666666667,
-                avg: 0.00809090909090909,
-                max: 0.057833333333333334,
+                value: 0.009285714285714286,
+                avg: 0.0015476190476190477,
+                max: 0.009285714285714286,
                 __typename: 'InfraSnapshotNodeMetric',
               });
               const secondNode = nodes[1];
@@ -298,9 +298,9 @@ export default function({ getService }: FtrProviderContext) {
               expect(secondNode).to.have.property('metric');
               expect(secondNode.metric).to.eql({
                 name: 'cpu',
-                value: 0.003666666666666667,
-                avg: 0.00809090909090909,
-                max: 0.057833333333333334,
+                value: 0.009285714285714286,
+                avg: 0.0015476190476190477,
+                max: 0.009285714285714286,
                 __typename: 'InfraSnapshotNodeMetric',
               });
             }

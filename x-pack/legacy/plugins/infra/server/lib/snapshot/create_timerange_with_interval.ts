@@ -20,17 +20,18 @@ export const createTimeRangeWithInterval = async (
 ): Promise<InfraTimerangeInput> => {
   const aggregations = getMetricsAggregations(options);
   const modules = aggregationsToModules(aggregations);
-  const interval = await calculateMetricInterval(
-    framework,
-    request,
-    {
-      indexPattern: options.sourceConfiguration.metricAlias,
-      timestampField: options.sourceConfiguration.fields.timestamp,
-      timerange: { from: options.timerange.from, to: options.timerange.to },
-    },
-    modules,
-    options.nodeType
-  );
+  const interval =
+    (await calculateMetricInterval(
+      framework,
+      request,
+      {
+        indexPattern: options.sourceConfiguration.metricAlias,
+        timestampField: options.sourceConfiguration.fields.timestamp,
+        timerange: { from: options.timerange.from, to: options.timerange.to },
+      },
+      modules,
+      options.nodeType
+    )) || 60000;
   return {
     interval: `${interval}s`,
     from: options.timerange.to - interval * 5000, // We need at least 5 buckets worth of data
