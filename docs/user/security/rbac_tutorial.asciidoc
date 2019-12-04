@@ -64,7 +64,7 @@ developer working on the bank's mortgage application.
 ==== Give the role the ability to monitor the Elastic Stack
 
 Stack monitoring is an important feature for system admins and developers.  
-Both of these groups of people will use stack monitoring to look at 
+Both of these groups use stack monitoring to look at 
 performance.  Developers will also use stack monitoring to evaluate and tune ingest pipelines.  For more information on stack monitoring see the https://www.elastic.co/guide/en/elasticsearch/reference/current/monitoring-overview.html[monitoring overview].
 
 Stack monitoring is a cluster level privilege, so in *Cluster 
