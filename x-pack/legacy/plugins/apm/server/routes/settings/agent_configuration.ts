@@ -162,7 +162,6 @@ export const agentConfigurationSearchRoute = createRoute(core => ({
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    const { server } = context.__LEGACY;
     const { body } = context.params;
     const config = await searchConfigurations({
       serviceName: body.service.name,
@@ -171,7 +170,7 @@ export const agentConfigurationSearchRoute = createRoute(core => ({
     });
 
     if (!config) {
-      server.log(
+      context.logger.info(
         `Config was not found for ${body.service.name}/${body.service.environment}`
       );
       throw new Boom('Not found', { statusCode: 404 });

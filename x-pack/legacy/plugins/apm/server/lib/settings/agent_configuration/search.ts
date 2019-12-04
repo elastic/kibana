@@ -25,7 +25,8 @@ export async function searchConfigurations({
     ? [
         {
           constant_score: {
-            filter: { term: { [SERVICE_ENVIRONMENT]: { value: environment } } }
+            filter: { term: { [SERVICE_ENVIRONMENT]: { value: environment } } },
+            boost: 1
           }
         }
       ]
