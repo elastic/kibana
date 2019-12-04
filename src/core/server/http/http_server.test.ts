@@ -27,10 +27,17 @@ import supertest from 'supertest';
 
 import { ByteSizeValue, schema } from '@kbn/config-schema';
 import { HttpConfig } from './http_config';
-import { Router, RouteValidationError, RouteValidator } from './router';
+import {
+  Router,
+  RouteValidationError,
+  RouteValidator,
+  KibanaRequest,
+  KibanaResponseFactory,
+} from './router';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { HttpServer } from './http_server';
 import { Readable } from 'stream';
+import { RequestHandlerContext } from 'kibana/server';
 
 const cookieOptions = {
   name: 'sid',
@@ -323,6 +330,56 @@ test('valid body with validate function', async () => {
     .expect(200)
     .then(res => {
       expect(res.body).toEqual({ bar: 'test', baz: 123 });
+    });
+});
+
+// https://github.com/elastic/kibana/issues/47047
+test('not inline handler', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext);
+
+  const handler = (
+    context: RequestHandlerContext,
+    req: KibanaRequest<unknown, unknown, { bar: string; baz: number }>,
+    res: KibanaResponseFactory
+  ) => {
+    const body = {
+      bar: req.body.bar.toUpperCase(),
+      baz: req.body.baz.toString(),
+    };
+
+    return res.ok({ body });
+  };
+
+  router.post(
+    {
+      path: '/',
+      validate: {
+        body: new RouteValidator(({ bar, baz } = {}) => {
+          if (typeof bar === 'string' && typeof baz === 'number') {
+            return { value: { bar, baz } };
+          } else {
+            return { error: new RouteValidationError('Wrong payload', ['body']) };
+          }
+        }),
+      },
+    },
+    handler
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup(config);
+  registerRouter(router);
+
+  await server.start();
+
+  await supertest(innerServer.listener)
+    .post('/foo/')
+    .send({
+      bar: 'test',
+      baz: 123,
+    })
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ bar: 'TEST', baz: '123' });
     });
 });
 
