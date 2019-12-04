@@ -58,6 +58,8 @@ function stringMatch(str: string | undefined, substr: string) {
   );
 }
 
+const MlInMemoryTable = mlInMemoryTableFactory<DataFrameAnalyticsListRow>();
+
 interface Props {
   isManagementTable?: boolean;
   isMlEnabledInSpace?: boolean;
@@ -307,8 +309,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     setSortField(field);
     setSortDirection(direction);
   };
-
-  const MlInMemoryTable = mlInMemoryTableFactory<DataFrameAnalyticsListRow>();
 
   return (
     <Fragment>
