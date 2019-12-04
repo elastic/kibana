@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { MouseEventHandler, useCallback, useState, useEffect, useRef, useMemo } from 'react';
+import React, { useCallback, useState, useEffect, useRef, useMemo } from 'react';
 import { Store } from 'redux';
 import { Provider, useSelector, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import styled from 'styled-components';
 import { ResolverState, ResolverAction, Vector2 } from '../types';
 import * as selectors from '../store/selectors';
-import { clamp } from '../lib/math.ts';
+import { clamp } from '../lib/math';
 
 export const AppRoot: React.FC<{
   store: Store<ResolverState, ResolverAction>;
@@ -27,9 +27,8 @@ const useResolverDispatch = () => useDispatch<Dispatch<ResolverAction>>();
 
 const Diagnostic = styled(
   React.memo(({ className }: { className?: string }) => {
-    type ComponentElement = HTMLDivElement;
-
     const scale = useSelector(selectors.scale);
+    const userIsPanning = useSelector(selectors.userIsPanning);
 
     const [elementBoundingClientRect, clientRectCallbackFunction] = useAutoUpdatingClientRect();
 
@@ -44,17 +43,35 @@ const Diagnostic = styled(
       }
     }, [elementBoundingClientRect, dispatch]);
 
-    const handleMouseMove: MouseEventHandler<ComponentElement> = useCallback(
-      event => {
-        if (event.buttons === 1) {
+    const handleMouseDown = useCallback(
+      (event: React.MouseEvent<HTMLDivElement>) => {
+        dispatch({
+          type: 'userStartedPanning',
+          payload: [event.clientX, -event.clientY],
+        });
+      },
+      [dispatch]
+    );
+
+    const handleMouseMove = useCallback(
+      (event: React.MouseEvent<HTMLDivElement>) => {
+        if (event.buttons === 1 && userIsPanning) {
           dispatch({
-            type: 'userPanned',
-            payload: [event.movementX * scale[0], -event.movementY * scale[1]],
+            type: 'userContinuedPanning',
+            payload: [event.clientX, -event.clientY],
           });
         }
       },
-      [scale, dispatch]
+      [dispatch, userIsPanning]
     );
+
+    const handleMouseUp = useCallback(() => {
+      if (userIsPanning) {
+        dispatch({
+          type: 'userStoppedPanning',
+        });
+      }
+    }, [dispatch, userIsPanning]);
 
     const handleWheel = useCallback(
       (event: React.WheelEvent<HTMLDivElement>) => {
@@ -79,6 +96,8 @@ const Diagnostic = styled(
         ref={clientRectCallbackFunction}
         onMouseMove={handleMouseMove}
         onWheel={handleWheel}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
       >
         <DiagnosticDot worldPosition={useMemo(() => [0, 0], [])} />
       </div>

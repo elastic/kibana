@@ -13,6 +13,8 @@ export const rasterToWorld = composeSelectors(cameraStateSelector, cameraSelecto
 
 export const scale = composeSelectors(cameraStateSelector, cameraSelectors.scale);
 
+export const userIsPanning = composeSelectors(cameraStateSelector, cameraSelectors.userIsPanning);
+
 function cameraStateSelector(state: ResolverState) {
   return state.camera;
 }

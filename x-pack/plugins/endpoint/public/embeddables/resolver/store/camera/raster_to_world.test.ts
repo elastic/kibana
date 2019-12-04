@@ -5,7 +5,7 @@
  */
 
 import { Store, createStore } from 'redux';
-import { CameraAction, UserSetRasterSize, UserPanned, UserScaled } from './action';
+import { CameraAction, UserSetRasterSize, UserSetPanningOffset, UserScaled } from './action';
 import { CameraState } from '../../types';
 import { cameraReducer } from './reducer';
 import { rasterToWorld } from './selectors';
@@ -64,7 +64,7 @@ describe('rasterToWorld', () => {
     });
     describe('when the user has panned to the right and up by 50', () => {
       beforeEach(() => {
-        const action: UserPanned = { type: 'userPanned', payload: [-50, -50] };
+        const action: UserSetPanningOffset = { type: 'userPanned', payload: [-50, -50] };
         store.dispatch(action);
       });
       it('should convert 100,150 in raster space to 0,0 (center) in world space', () => {
@@ -79,7 +79,7 @@ describe('rasterToWorld', () => {
     });
     describe('when the user has panned to the right by 350 and up by 250', () => {
       beforeEach(() => {
-        const action: UserPanned = { type: 'userPanned', payload: [-350, -250] };
+        const action: UserSetPanningOffset = { type: 'userPanned', payload: [-350, -250] };
         store.dispatch(action);
       });
       describe('when the user has scaled to 2', () => {

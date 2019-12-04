@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Vector2, CameraState } from '../../types';
+import { Vector2, CameraState, CameraStateWhenPanning } from '../../types';
 
 /**
  * https://en.wikipedia.org/wiki/Orthographic_projection
@@ -19,9 +19,10 @@ export const worldToRaster: (state: CameraState) => (worldPosition: Vector2) => 
   const clippingPlaneBottom = -clippingPlaneTop;
 
   return ([worldX, worldY]) => {
+    const [translationX, translationY] = translationIncludingActivePanning(state);
     const [xNdc, yNdc] = orthographicProjection(
-      worldX + state.panningOffset[0],
-      worldY + state.panningOffset[1],
+      worldX + translationX,
+      worldY + translationY,
       clippingPlaneTop,
       clippingPlaneRight,
       clippingPlaneBottom,
@@ -32,6 +33,19 @@ export const worldToRaster: (state: CameraState) => (worldPosition: Vector2) => 
     return [(renderWidth * (xNdc + 1)) / 2, (renderHeight * (-yNdc + 1)) / 2];
   };
 };
+
+function translationIncludingActivePanning(state: CameraState): Vector2 {
+  if (userIsPanning(state)) {
+    const panningDeltaX = state.currentPanningOffset[0] - state.panningOrigin[0];
+    const panningDeltaY = state.currentPanningOffset[1] - state.panningOrigin[1];
+    return [
+      state.translation[0] + panningDeltaX * state.scaling[0],
+      state.translation[1] + panningDeltaY * state.scaling[1],
+    ];
+  } else {
+    return state.translation;
+  }
+}
 
 /**
  * Adjust x, y to be bounded, in scale, of a clipping plane defined by top, right, bottom, left
@@ -100,11 +114,11 @@ export const rasterToWorld: (state: CameraState) => (worldPosition: Vector2) => 
       clippingPlaneBottom,
       clippingPlaneLeft
     );
-    return [
-      panningTranslatedX - state.panningOffset[0],
-      panningTranslatedY - state.panningOffset[1],
-    ];
+    return [panningTranslatedX - state.translation[0], panningTranslatedY - state.translation[1]];
   };
 };
 
 export const scale = (state: CameraState): Vector2 => state.scaling;
+
+export const userIsPanning = (state: CameraState): state is CameraStateWhenPanning =>
+  state.panningOrigin !== null;

@@ -11,8 +11,15 @@ export { ResolverAction } from './actions';
 
 export interface CameraState {
   readonly scaling: Vector2;
-  readonly panningOffset: Vector2;
   readonly rasterSize: Vector2;
+  readonly translation: Vector2;
+  readonly panningOrigin: Vector2 | null;
+  readonly currentPanningOffset: Vector2 | null;
+}
+
+export interface CameraStateWhenPanning extends CameraState {
+  readonly panningOrigin: Vector2;
+  readonly currentPanningOffset: Vector2;
 }
 
 export type Vector2 = readonly [number, number];

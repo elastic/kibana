@@ -6,4 +6,3 @@
 import { CameraAction } from './store/camera';
 
 export type ResolverAction = CameraAction;
-
