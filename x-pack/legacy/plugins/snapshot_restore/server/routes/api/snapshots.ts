@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Router, RouterRouteHandler } from '../../../../../server/lib/create_router';
-import { wrapEsError } from '../../../../../server/lib/create_router/error_wrappers';
+import {
+  wrapEsError,
+  wrapCustomError,
+} from '../../../../../server/lib/create_router/error_wrappers';
 import { SnapshotDetails, SnapshotDetailsEs } from '../../../common/types';
 import { deserializeSnapshotDetails } from '../../../common/lib';
 import { Plugins } from '../../../shim';
@@ -95,13 +98,36 @@ export const getOneHandler: RouterRouteHandler = async (
 ): Promise<SnapshotDetails> => {
   const { repository, snapshot } = req.params;
   const managedRepository = await getManagedRepositoryName(callWithInternalUser);
-  const { snapshots }: { snapshots: SnapshotDetailsEs[] } = await callWithRequest('snapshot.get', {
-    repository,
-    snapshot,
-  });
 
-  // If the snapshot is missing the endpoint will return a 404, so we'll never get to this point.
-  return deserializeSnapshotDetails(repository, snapshots[0], managedRepository);
+  const { snapshots: fetchedSnapshots }: { snapshots: SnapshotDetailsEs[] } = await callWithRequest(
+    'snapshot.get',
+    {
+      repository,
+      snapshot: '_all',
+      ignore_unavailable: true, // Allow request to succeed even if some snapshots are unavailable.
+    }
+  );
+
+  const selectedSnapshot = fetchedSnapshots.find(
+    ({ snapshot: snapshotName }) => snapshot === snapshotName
+  ) as SnapshotDetailsEs;
+
+  if (!selectedSnapshot) {
+    throw wrapCustomError(new Error('Snapshot not found'), 404);
+  }
+
+  const successfulSnapshots = fetchedSnapshots
+    .filter(({ state }) => state === 'SUCCESS')
+    .sort((a, b) => {
+      return +new Date(b.end_time) - +new Date(a.end_time);
+    });
+
+  return deserializeSnapshotDetails(
+    repository,
+    selectedSnapshot,
+    managedRepository,
+    successfulSnapshots
+  );
 };
 
 export const deleteHandler: RouterRouteHandler = async (req, callWithRequest) => {
