@@ -33,7 +33,6 @@ experimental["The underlying Spaces concepts are stable, but the APIs for managi
 
 `color`::
   (Optional, string) Specifies the hexadecimal color code used in the space avatar. By default, the color is automatically generated from the space name.
-NOTE: The hexadecimal color code must include only lowercase letters.
 
 `imageUrl`::
   (Optional, string) Specifies the data-url encoded image to display in the space avatar. If specified, `initials` will not be displayed, and the `color` will be visible as the background color for transparent images.
