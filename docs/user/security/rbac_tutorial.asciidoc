@@ -63,10 +63,10 @@ working on the bank's mortgage application.
 
 Stack monitoring is an important feature for system admins and developers.  
 Both of these groups use stack monitoring to look at 
-performance.  Developers will also use stack monitoring to evaluate and tune ingest pipelines.  For more information on stack monitoring see the https://www.elastic.co/guide/en/elasticsearch/reference/current/monitoring-overview.html[monitoring overview].
+performance.  Developers also use stack monitoring to evaluate and tune ingest pipelines.  For more information on stack monitoring see the https://www.elastic.co/guide/en/elasticsearch/reference/current/monitoring-overview.html[monitoring overview].
 
 Stack monitoring is a cluster level privilege, so in *Cluster 
-privileges* select  **monitor**
+privileges*, select  **monitor**
 
 [role="screenshot"]
 image::security/images/role-monitor-privilege.png["Monitor privilege"]
@@ -75,11 +75,11 @@ image::security/images/role-monitor-privilege.png["Monitor privilege"]
 ==== Give the role permission to access the data
 
 Access to data in indices is an index level privilege, so in 
-*Index privileges* add a line or lines for the indices containing the 
-data for this role.  There are two privileges needed, `read` and 
-`view_index_metadata`.  All of the privileges are detailed in the 
+*Index privileges*, add lines for the indices that contain the 
+data for this role.  Two privileges needed: `read` and 
+`view_index_metadata`.  All privileges are detailed in the 
 https://www.elastic.co/guide/en/elasticsearch/reference/current/security-privileges.html[security privileges] documentaion.
-In the screenshots Filebeat and Metricbeat data is used, but you 
+In the screenshots, Filebeat and Metricbeat data is used, but you 
 should use the index patterns for your indices.
 
 [role="screenshot"]
