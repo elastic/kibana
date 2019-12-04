@@ -93,7 +93,7 @@ export type PluginOpaqueId = symbol;
  */
 export interface PluginManifest {
   /**
-   * Identifier of the plugin. Must be a string in snake_case.
+   * Identifier of the plugin.
    */
   readonly id: PluginName;
 
