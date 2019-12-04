@@ -178,7 +178,7 @@ export const siem = (kibana: any) => {
       return Joi.object()
         .keys({
           enabled: Joi.boolean().default(true),
-          [SIGNALS_INDEX_KEY]: Joi.string().default('.siem-signals'),
+          [SIGNALS_INDEX_KEY]: Joi.string().default(DEFAULT_SIGNALS_INDEX),
         })
         .default();
     },
