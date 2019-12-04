@@ -5,11 +5,13 @@
  */
 
 import Boom from 'boom';
+
 import {
   transformAlertToRule,
   getIdError,
   transformFindAlertsOrError,
   transformOrError,
+  transformError,
 } from './utils';
 import { getResult } from './__mocks__/request_responses';
 
@@ -39,6 +41,23 @@ describe('utils', () => {
         severity: 'high',
         updated_by: 'elastic',
         tags: [],
+        threats: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: 'TA0040',
+              name: 'impact',
+              reference: 'https://attack.mitre.org/tactics/TA0040/',
+            },
+            techniques: [
+              {
+                id: 'T1499',
+                name: 'endpoint denial of service',
+                reference: 'https://attack.mitre.org/techniques/T1499/',
+              },
+            ],
+          },
+        ],
         to: 'now',
         type: 'query',
       });
@@ -66,6 +85,23 @@ describe('utils', () => {
         severity: 'high',
         updated_by: 'elastic',
         tags: [],
+        threats: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: 'TA0040',
+              name: 'impact',
+              reference: 'https://attack.mitre.org/tactics/TA0040/',
+            },
+            techniques: [
+              {
+                id: 'T1499',
+                name: 'endpoint denial of service',
+                reference: 'https://attack.mitre.org/techniques/T1499/',
+              },
+            ],
+          },
+        ],
         to: 'now',
         type: 'query',
       });
@@ -95,6 +131,23 @@ describe('utils', () => {
         severity: 'high',
         updated_by: 'elastic',
         tags: [],
+        threats: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: 'TA0040',
+              name: 'impact',
+              reference: 'https://attack.mitre.org/tactics/TA0040/',
+            },
+            techniques: [
+              {
+                id: 'T1499',
+                name: 'endpoint denial of service',
+                reference: 'https://attack.mitre.org/techniques/T1499/',
+              },
+            ],
+          },
+        ],
         to: 'now',
         type: 'query',
       });
@@ -124,6 +177,23 @@ describe('utils', () => {
         severity: 'high',
         updated_by: 'elastic',
         tags: [],
+        threats: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: 'TA0040',
+              name: 'impact',
+              reference: 'https://attack.mitre.org/tactics/TA0040/',
+            },
+            techniques: [
+              {
+                id: 'T1499',
+                name: 'endpoint denial of service',
+                reference: 'https://attack.mitre.org/techniques/T1499/',
+              },
+            ],
+          },
+        ],
         to: 'now',
         type: 'query',
       });
@@ -151,6 +221,23 @@ describe('utils', () => {
         severity: 'high',
         updated_by: 'elastic',
         tags: [],
+        threats: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: 'TA0040',
+              name: 'impact',
+              reference: 'https://attack.mitre.org/tactics/TA0040/',
+            },
+            techniques: [
+              {
+                id: 'T1499',
+                name: 'endpoint denial of service',
+                reference: 'https://attack.mitre.org/techniques/T1499/',
+              },
+            ],
+          },
+        ],
         to: 'now',
         type: 'query',
       });
@@ -181,6 +268,23 @@ describe('utils', () => {
         severity: 'high',
         updated_by: 'elastic',
         tags: [],
+        threats: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: 'TA0040',
+              name: 'impact',
+              reference: 'https://attack.mitre.org/tactics/TA0040/',
+            },
+            techniques: [
+              {
+                id: 'T1499',
+                name: 'endpoint denial of service',
+                reference: 'https://attack.mitre.org/techniques/T1499/',
+              },
+            ],
+          },
+        ],
         to: 'now',
         type: 'query',
       });
@@ -211,6 +315,23 @@ describe('utils', () => {
         severity: 'high',
         updated_by: 'elastic',
         tags: [],
+        threats: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: 'TA0040',
+              name: 'impact',
+              reference: 'https://attack.mitre.org/tactics/TA0040/',
+            },
+            techniques: [
+              {
+                id: 'T1499',
+                name: 'endpoint denial of service',
+                reference: 'https://attack.mitre.org/techniques/T1499/',
+              },
+            ],
+          },
+        ],
         to: 'now',
         type: 'query',
       });
@@ -294,6 +415,23 @@ describe('utils', () => {
             tags: [],
             to: 'now',
             type: 'query',
+            threats: [
+              {
+                framework: 'MITRE ATT&CK',
+                tactic: {
+                  id: 'TA0040',
+                  name: 'impact',
+                  reference: 'https://attack.mitre.org/tactics/TA0040/',
+                },
+                techniques: [
+                  {
+                    id: 'T1499',
+                    name: 'endpoint denial of service',
+                    reference: 'https://attack.mitre.org/techniques/T1499/',
+                  },
+                ],
+              },
+            ],
           },
         ],
       });
@@ -331,12 +469,66 @@ describe('utils', () => {
         tags: [],
         to: 'now',
         type: 'query',
+        threats: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: 'TA0040',
+              name: 'impact',
+              reference: 'https://attack.mitre.org/tactics/TA0040/',
+            },
+            techniques: [
+              {
+                id: 'T1499',
+                name: 'endpoint denial of service',
+                reference: 'https://attack.mitre.org/techniques/T1499/',
+              },
+            ],
+          },
+        ],
       });
     });
 
     test('returns 500 if the data is not of type siem alert', () => {
       const output = transformOrError({ data: [{ random: 1 }] });
       expect((output as Boom).message).toEqual('Internal error transforming');
+    });
+  });
+
+  describe('transformError', () => {
+    test('returns boom if it is a boom object', () => {
+      const boom = new Boom('');
+      const transformed = transformError(boom);
+      expect(transformed).toBe(boom);
+    });
+
+    test('returns a boom if it is some non boom object that has a statusCode', () => {
+      const error: Error & { statusCode?: number } = {
+        statusCode: 403,
+        name: 'some name',
+        message: 'some message',
+      };
+      const transformed = transformError(error);
+      expect(Boom.isBoom(transformed)).toBe(true);
+    });
+
+    test('returns a boom with the message set', () => {
+      const error: Error & { statusCode?: number } = {
+        statusCode: 403,
+        name: 'some name',
+        message: 'some message',
+      };
+      const transformed = transformError(error);
+      expect(transformed.message).toBe('some message');
+    });
+
+    test('does not return a boom if it is some non boom object but it does not have a status Code.', () => {
+      const error: Error = {
+        name: 'some name',
+        message: 'some message',
+      };
+      const transformed = transformError(error);
+      expect(Boom.isBoom(transformed)).toBe(false);
     });
   });
 });
