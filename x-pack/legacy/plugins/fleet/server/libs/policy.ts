@@ -42,6 +42,7 @@ export class PolicyLib {
       return null;
     }
     const agentPolicy = {
+      id: policy.id,
       outputs: {
         ...(
           await this.policyAdapter.getPolicyOutputByIDs(
