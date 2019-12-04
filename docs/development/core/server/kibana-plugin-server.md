@@ -21,6 +21,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ElasticsearchErrorHelpers](./kibana-plugin-server.elasticsearcherrorhelpers.md) | Helpers for working with errors returned from the Elasticsearch service.Since the internal data of errors are subject to change, consumers of the Elasticsearch service should always use these helpers to classify errors instead of checking error internals such as <code>body.error.header[WWW-Authenticate]</code> |
 |  [KibanaRequest](./kibana-plugin-server.kibanarequest.md) | Kibana specific abstraction for an incoming request. |
 |  [RouteValidationError](./kibana-plugin-server.routevalidationerror.md) | Error to return when the validation is not successful. |
+|  [RouteValidator](./kibana-plugin-server.routevalidator.md) | Custom validator class. If @<!-- -->kbn/config-schema is not a valid option in your plugin, you can use this class to define your own validation logic. |
 |  [SavedObjectsClient](./kibana-plugin-server.savedobjectsclient.md) |  |
 |  [SavedObjectsErrorHelpers](./kibana-plugin-server.savedobjectserrorhelpers.md) |  |
 |  [SavedObjectsRepository](./kibana-plugin-server.savedobjectsrepository.md) |  |
@@ -186,12 +187,9 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ResponseError](./kibana-plugin-server.responseerror.md) | Error message and optional data send to the client in case of error. |
 |  [ResponseErrorAttributes](./kibana-plugin-server.responseerrorattributes.md) | Additional data to provide error details. |
 |  [ResponseHeaders](./kibana-plugin-server.responseheaders.md) | Http response headers to set. |
-|  [RouteBodyValidationParams](./kibana-plugin-server.routebodyvalidationparams.md) | Similar to the URL and query params, the body payload for a route are allowed to be validated via <code>schema.object(...)</code> (from @<!-- -->kbn/config-schema) or a <code>RouteValidateFunction</code> that returns the custom-validated value (similarly to the URL and query params). But, on top of that, when the <code>body</code> options <code>parse: false</code> or <code>output: 'stream'</code> are used, the <code>@kbn/config-schema</code> options to validate it are <code>schema.buffer(...)</code> or <code>schema.stream(...)</code>, respectively. |
 |  [RouteContentType](./kibana-plugin-server.routecontenttype.md) | The set of supported parseable Content-Types |
 |  [RouteMethod](./kibana-plugin-server.routemethod.md) | The set of common HTTP methods supported by Kibana routing. |
 |  [RouteRegistrar](./kibana-plugin-server.routeregistrar.md) | Route handler common definition |
-|  [RouteURLValidationParams](./kibana-plugin-server.routeurlvalidationparams.md) | URL params and query properties are allowed to be validated via <code>schema.object(...)</code> (from @<!-- -->kbn/config-schema) or a <code>RouteValidateFunction</code> that returns the custom-validated value. |
-|  [RouteValidateFunction](./kibana-plugin-server.routevalidatefunction.md) | Custom validate function (only if @<!-- -->kbn/config-schema is not a valid option in your plugin) |
 |  [RouteValidateFunctionReturn](./kibana-plugin-server.routevalidatefunctionreturn.md) | Allowed returned format of the custom validate function |
 |  [SavedObjectAttribute](./kibana-plugin-server.savedobjectattribute.md) | Type definition for a Saved Object attribute value |
 |  [SavedObjectAttributeSingle](./kibana-plugin-server.savedobjectattributesingle.md) | Don't use this type, it's simply a helper type for [SavedObjectAttribute](./kibana-plugin-server.savedobjectattribute.md) |

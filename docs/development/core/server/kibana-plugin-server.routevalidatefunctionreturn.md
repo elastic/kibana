@@ -11,9 +11,9 @@ Allowed returned format of the custom validate function
 ```typescript
 export declare type RouteValidateFunctionReturn<T> = {
     value: T;
-    error?: undefined;
+    error?: never;
 } | {
-    value?: undefined;
+    value?: never;
     error: RouteValidationError;
 };
 ```

@@ -9,7 +9,7 @@ Route specific configuration.
 <b>Signature:</b>
 
 ```typescript
-export interface RouteConfig<P extends RouteURLValidationParams, Q extends RouteURLValidationParams, B extends RouteBodyValidationParams, Method extends RouteMethod> 
+export interface RouteConfig<P extends RouteValidateSpecs, Q extends RouteValidateSpecs, B extends RouteValidateSpecs, Method extends RouteMethod> 
 ```
 
 ## Properties

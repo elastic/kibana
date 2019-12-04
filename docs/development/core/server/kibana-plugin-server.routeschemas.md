@@ -9,7 +9,7 @@ RouteSchemas contains the schemas for validating the different parts of a reques
 <b>Signature:</b>
 
 ```typescript
-export interface RouteSchemas<P extends RouteURLValidationParams, Q extends RouteURLValidationParams, B extends RouteBodyValidationParams> 
+export interface RouteSchemas<P extends RouteValidateSpecs, Q extends RouteValidateSpecs, B extends RouteValidateSpecs> 
 ```
 
 ## Properties

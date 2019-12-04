@@ -9,7 +9,7 @@
 import yaml from 'js-yaml';
 import axios, { AxiosRequestConfig, AxiosError } from 'axios';
 import fs from 'fs';
-import { union, difference } from 'lodash';
+import { union, difference, once } from 'lodash';
 import path from 'path';
 import { argv } from 'yargs';
 
@@ -22,6 +22,7 @@ const config = yaml.safeLoad(
 
 const GITHUB_USERNAME = argv.username as string;
 const KIBANA_INDEX = config['kibana.index'] as string;
+const TASK_MANAGER_INDEX = config['xpack.task_manager.index'] as string;
 const ELASTICSEARCH_USERNAME = (argv.esUsername as string) || 'elastic';
 const ELASTICSEARCH_PASSWORD = (argv.esPassword ||
   config['elasticsearch.password']) as string;
@@ -34,6 +35,18 @@ interface User {
   email?: string;
   enabled?: boolean;
 }
+
+const getKibanaBasePath = once(async () => {
+  try {
+    await axios.request({ url: KIBANA_BASE_URL, maxRedirects: 0 });
+  } catch (e) {
+    const err = e as AxiosError;
+    const { location } = err.response?.headers;
+    const isBasePath = RegExp(/^\/\w{3}$/).test(location);
+    return isBasePath ? location : '';
+  }
+  return '';
+});
 
 init().catch(e => {
   if (e.response) {
@@ -50,14 +63,21 @@ async function init() {
   // kibana.index must be different from `.kibana`
   if (KIBANA_INDEX === '.kibana') {
     console.log(
-      'Please use a custom `kibana.index` in kibana.dev.yml. Example: "kibana.index: .kibana-john"'
+      'kibana.dev.yml: Please use a custom "kibana.index". Example: "kibana.index: .kibana-john"'
     );
     return;
   }
 
   if (!KIBANA_INDEX.startsWith('.kibana')) {
     console.log(
-      'Your `kibana.index` must be prefixed with `.kibana`. Example: "kibana.index: .kibana-john"'
+      'kibana.dev.yml: "kibana.index" must be prefixed with `.kibana`. Example: "kibana.index: .kibana-john"'
+    );
+    return;
+  }
+
+  if (TASK_MANAGER_INDEX && !TASK_MANAGER_INDEX.startsWith('.kibana')) {
+    console.log(
+      'kibana.dev.yml: "xpack.task_manager.index" must be prefixed with `.kibana`. Example: "xpack.task_manager.index: .kibana-task-manager-john"'
     );
     return;
   }
@@ -66,6 +86,12 @@ async function init() {
     console.log(
       'Please specify your github username with `--username <username>` '
     );
+    return;
+  }
+
+  const isEnabled = await isSecurityEnabled();
+  if (!isEnabled) {
+    console.log('Security must be enabled!');
     return;
   }
 
@@ -95,10 +121,21 @@ async function init() {
   });
 }
 
+async function isSecurityEnabled() {
+  interface XPackInfo {
+    features: { security?: { allow_rbac: boolean } };
+  }
+  const { features } = await callKibana<XPackInfo>({
+    url: `/api/xpack/v1/info`
+  });
+  return features.security?.allow_rbac;
+}
+
 async function callKibana<T>(options: AxiosRequestConfig): Promise<T> {
+  const basePath = await getKibanaBasePath();
   const { data } = await axios.request({
     ...options,
-    baseURL: KIBANA_BASE_URL,
+    baseURL: KIBANA_BASE_URL + basePath,
     auth: {
       username: ELASTICSEARCH_USERNAME,
       password: ELASTICSEARCH_PASSWORD

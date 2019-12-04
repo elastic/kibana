@@ -101,7 +101,6 @@ import { MTermVectorsParams } from 'elasticsearch';
 import { NodesHotThreadsParams } from 'elasticsearch';
 import { NodesInfoParams } from 'elasticsearch';
 import { NodesStatsParams } from 'elasticsearch';
-import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { PeerCertificate } from 'tls';
 import { PingParams } from 'elasticsearch';
@@ -755,7 +754,8 @@ export interface IRouter {
     // 
     // @internal
     getRoutes: () => RouterRoute[];
-    handleLegacyErrors: <P extends RouteURLValidationParams, Q extends RouteURLValidationParams, B extends RouteBodyValidationParams>(handler: RequestHandler<P, Q, B>) => RequestHandler<P, Q, B>;
+    // Warning: (ae-forgotten-export) The symbol "RouteValidateSpecs" needs to be exported by the entry point index.d.ts
+    handleLegacyErrors: <P extends RouteValidateSpecs, Q extends RouteValidateSpecs, B extends RouteValidateSpecs>(handler: RequestHandler<P, Q, B>) => RequestHandler<P, Q, B>;
     patch: RouteRegistrar<'patch'>;
     post: RouteRegistrar<'post'>;
     put: RouteRegistrar<'put'>;
@@ -791,10 +791,8 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     constructor(request: Request, params: Params, query: Query, body: Body, withoutSecretHeaders: boolean);
     // (undocumented)
     readonly body: Body;
-    // Warning: (ae-forgotten-export) The symbol "RouteValidatedType" needs to be exported by the entry point index.d.ts
-    // 
     // @internal
-    static from<P extends ObjectType | RouteValidateFunction<any>, Q extends ObjectType | RouteValidateFunction<any>, B extends ObjectType | Type<Buffer> | Type<Stream> | RouteValidateFunction<any>>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<RouteValidatedType<P>, RouteValidatedType<Q>, RouteValidatedType<B>, any>;
+    static from<P extends RouteValidateSpecs, Q extends RouteValidateSpecs, B extends RouteValidateSpecs>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<ReturnType<P["validate"]>, ReturnType<Q["validate"]>, ReturnType<B["validate"]>, any>;
     readonly headers: Headers;
     // (undocumented)
     readonly params: Params;
@@ -1084,8 +1082,10 @@ export type RedirectResponseOptions = HttpResponseOptions & {
     };
 };
 
+// Warning: (ae-forgotten-export) The symbol "RouteValidatedType" needs to be exported by the entry point index.d.ts
+// 
 // @public
-export type RequestHandler<P extends RouteURLValidationParams = RouteValidateFunction<unknown>, Q extends RouteURLValidationParams = RouteValidateFunction<unknown>, B extends RouteBodyValidationParams = RouteValidateFunction<unknown>, Method extends RouteMethod = any> = (context: RequestHandlerContext, request: KibanaRequest<RouteValidatedType<P>, RouteValidatedType<Q>, RouteValidatedType<B>, Method>, response: KibanaResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
+export type RequestHandler<P extends RouteValidateSpecs = RouteValidator<unknown>, Q extends RouteValidateSpecs = RouteValidator<unknown>, B extends RouteValidateSpecs = RouteValidator<unknown>, Method extends RouteMethod = any> = (context: RequestHandlerContext, request: KibanaRequest<RouteValidatedType<P>, RouteValidatedType<Q>, RouteValidatedType<B>, Method>, response: KibanaResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 
 // @public
 export interface RequestHandlerContext {
@@ -1127,10 +1127,7 @@ export type ResponseHeaders = {
 };
 
 // @public
-export type RouteBodyValidationParams = RouteURLValidationParams | Type<Buffer> | Type<Stream>;
-
-// @public
-export interface RouteConfig<P extends RouteURLValidationParams, Q extends RouteURLValidationParams, B extends RouteBodyValidationParams, Method extends RouteMethod> {
+export interface RouteConfig<P extends RouteValidateSpecs, Q extends RouteValidateSpecs, B extends RouteValidateSpecs, Method extends RouteMethod> {
     options?: RouteConfigOptions<Method>;
     path: string;
     validate: RouteSchemas<P, Q, B> | false;
@@ -1158,10 +1155,10 @@ export type RouteContentType = 'application/json' | 'application/*+json' | 'appl
 export type RouteMethod = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options';
 
 // @public
-export type RouteRegistrar<Method extends RouteMethod> = <P extends RouteURLValidationParams, Q extends RouteURLValidationParams, B extends RouteBodyValidationParams>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<P, Q, B, Method>) => void;
+export type RouteRegistrar<Method extends RouteMethod> = <P extends RouteValidateSpecs, Q extends RouteValidateSpecs, B extends RouteValidateSpecs>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<P, Q, B, Method>) => void;
 
 // @public
-export interface RouteSchemas<P extends RouteURLValidationParams, Q extends RouteURLValidationParams, B extends RouteBodyValidationParams> {
+export interface RouteSchemas<P extends RouteValidateSpecs, Q extends RouteValidateSpecs, B extends RouteValidateSpecs> {
     // (undocumented)
     body?: B;
     // (undocumented)
@@ -1171,17 +1168,11 @@ export interface RouteSchemas<P extends RouteURLValidationParams, Q extends Rout
 }
 
 // @public
-export type RouteURLValidationParams = ObjectType | RouteValidateFunction<unknown>;
-
-// @public
-export type RouteValidateFunction<T> = (data: any) => RouteValidateFunctionReturn<T>;
-
-// @public
 export type RouteValidateFunctionReturn<T> = {
     value: T;
-    error?: undefined;
+    error?: never;
 } | {
-    value?: undefined;
+    value?: never;
     error: RouteValidationError;
 };
 
@@ -1189,6 +1180,13 @@ export type RouteValidateFunctionReturn<T> = {
 export class RouteValidationError extends SchemaTypeError {
     constructor(error: Error | string, path?: string[]);
 }
+
+// @public
+export class RouteValidator<T> {
+    constructor(validationRule: (data: any) => RouteValidateFunctionReturn<T>);
+    // (undocumented)
+    validate(data: any, namespace?: string): T;
+    }
 
 // @public (undocumented)
 export interface SavedObject<T extends SavedObjectAttributes = any> {
@@ -1621,14 +1619,15 @@ export interface SavedObjectsRawDoc {
 
 // @public (undocumented)
 export class SavedObjectsRepository {
-    // Warning: (ae-forgotten-export) The symbol "SavedObjectsRepositoryOptions" needs to be exported by the entry point index.d.ts
-    // 
-    // @internal
-    constructor(options: SavedObjectsRepositoryOptions);
     bulkCreate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkGet<T extends SavedObjectAttributes = any>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkUpdate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
     create<T extends SavedObjectAttributes>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
+    // Warning: (ae-forgotten-export) The symbol "KibanaMigrator" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "LegacyConfig" needs to be exported by the entry point index.d.ts
+    // 
+    // @internal
+    static createRepository(migrator: KibanaMigrator, schema: SavedObjectsSchema, config: LegacyConfig, indexName: string, callCluster: APICaller, extraTypes?: string[], injectedConstructor?: any): any;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
     // (undocumented)
@@ -1667,8 +1666,6 @@ export class SavedObjectsSchema {
     constructor(schemaDefinition?: SavedObjectsSchemaDefinition);
     // (undocumented)
     getConvertToAliasScript(type: string): string | undefined;
-    // Warning: (ae-forgotten-export) The symbol "LegacyConfig" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     getIndexForType(config: LegacyConfig, type: string): string | undefined;
     // (undocumented)
