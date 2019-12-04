@@ -18,7 +18,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { IAction } from 'src/plugins/ui_actions/public';
-import { NotificationsStart, OverlayStart } from 'src/core/public';
+import { CoreStart, NotificationsStart, OverlayStart } from 'src/core/public';
 import { ViewMode, GetEmbeddableFactory, GetEmbeddableFactories } from '../../../../types';
 import { openAddPanelFlyout } from './open_add_panel_flyout';
 import { IContainer } from '../../../../containers';
@@ -38,7 +38,8 @@ export class AddPanelAction implements IAction<ActionContext> {
     private readonly getAllFactories: GetEmbeddableFactories,
     private readonly overlays: OverlayStart,
     private readonly notifications: NotificationsStart,
-    private readonly SavedObjectFinder: React.ComponentType<any>
+    private readonly uiSettings: CoreStart['uiSettings'],
+    private readonly savedObjects: CoreStart['savedObjects']
   ) {}
 
   public getDisplayName() {
@@ -66,7 +67,8 @@ export class AddPanelAction implements IAction<ActionContext> {
       getAllFactories: this.getAllFactories,
       overlays: this.overlays,
       notifications: this.notifications,
-      SavedObjectFinder: this.SavedObjectFinder,
+      savedObjects: this.savedObjects,
+      uiSettings: this.uiSettings,
     });
   }
 }

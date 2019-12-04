@@ -35,7 +35,6 @@ import {
   AppStateClass as TAppStateClass,
   KbnUrl,
   SaveOptions,
-  SavedObjectFinder,
   unhashUrl,
 } from './legacy_imports';
 import { FilterStateManager, IndexPattern } from '../../../data/public';
@@ -115,7 +114,7 @@ export class DashboardAppController {
         timefilter: { timefilter },
       },
     },
-    core: { notifications, overlays, chrome, injectedMetadata },
+    core: { notifications, overlays, chrome, injectedMetadata, uiSettings, savedObjects },
   }: DashboardAppControllerDependencies) {
     new FilterStateManager(globalState, getAppState, filterManager);
     const queryFilter = filterManager;
@@ -728,7 +727,8 @@ export class DashboardAppController {
           getFactory: embeddables.getEmbeddableFactory,
           notifications,
           overlays,
-          SavedObjectFinder,
+          uiSettings,
+          savedObjects,
         });
       }
     };

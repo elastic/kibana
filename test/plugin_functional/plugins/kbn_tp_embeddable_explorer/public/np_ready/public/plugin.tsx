@@ -38,6 +38,7 @@ import {
   ContactCardEmbeddableFactory,
 } from './embeddable_api';
 import { App } from './app';
+import { SavedObjectFinder as SavedObjectFinderNP } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   IEmbeddableStart,
   IEmbeddableSetup,
@@ -47,7 +48,6 @@ export interface SetupDependencies {
   embeddable: IEmbeddableSetup;
   inspector: InspectorSetupContract;
   __LEGACY: {
-    SavedObjectFinder: React.ComponentType<any>;
     ExitFullScreenButton: React.ComponentType<any>;
   };
 }
@@ -57,7 +57,6 @@ interface StartDependencies {
   uiActions: IUiActionsStart;
   inspector: InspectorStartContract;
   __LEGACY: {
-    SavedObjectFinder: React.ComponentType<any>;
     ExitFullScreenButton: React.ComponentType<any>;
     onRenderComplete: (onRenderComplete: () => void) => void;
   };
@@ -97,6 +96,14 @@ export class EmbeddableExplorerPublicPlugin
       contactCardEmbeddableFactory
     );
 
+    const SavedObjectFinder = (props: any) => (
+      <SavedObjectFinderNP
+        savedObjects={core.savedObjects}
+        uiSettings={core.uiSettings}
+        {...props}
+      />
+    );
+
     plugins.__LEGACY.onRenderComplete(() => {
       const root = document.getElementById(REACT_ROOT_ID);
       ReactDOM.render(
@@ -107,8 +114,8 @@ export class EmbeddableExplorerPublicPlugin
           notifications={core.notifications}
           overlays={core.overlays}
           inspector={plugins.inspector}
-          SavedObjectFinder={plugins.__LEGACY.SavedObjectFinder}
           I18nContext={core.i18n.Context}
+          SavedObjectFinder={SavedObjectFinder}
         />,
         root
       );

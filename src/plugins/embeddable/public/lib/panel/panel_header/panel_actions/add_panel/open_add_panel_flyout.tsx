@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { NotificationsStart, OverlayStart } from 'src/core/public';
+import { CoreSetup, CoreStart, NotificationsStart, OverlayStart } from 'src/core/public';
 import { toMountPoint } from '../../../../../../../kibana_react/public';
 import { IContainer } from '../../../../containers';
 import { AddPanelFlyout } from './add_panel_flyout';
@@ -29,7 +29,8 @@ export async function openAddPanelFlyout(options: {
   getAllFactories: GetEmbeddableFactories;
   overlays: OverlayStart;
   notifications: NotificationsStart;
-  SavedObjectFinder: React.ComponentType<any>;
+  savedObjects: CoreStart['savedObjects'];
+  uiSettings: CoreSetup['uiSettings'];
 }) {
   const {
     embeddable,
@@ -37,7 +38,8 @@ export async function openAddPanelFlyout(options: {
     getAllFactories,
     overlays,
     notifications,
-    SavedObjectFinder,
+    savedObjects,
+    uiSettings,
   } = options;
   const flyoutSession = overlays.openFlyout(
     toMountPoint(
@@ -51,7 +53,8 @@ export async function openAddPanelFlyout(options: {
         getFactory={getFactory}
         getAllFactories={getAllFactories}
         notifications={notifications}
-        SavedObjectFinder={SavedObjectFinder}
+        savedObjects={savedObjects}
+        uiSettings={uiSettings}
       />
     ),
     {

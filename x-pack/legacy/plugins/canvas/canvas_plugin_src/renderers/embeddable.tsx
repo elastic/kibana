@@ -16,7 +16,6 @@ import {
 } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { start } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { EmbeddableExpression } from '../expression_types/embeddable';
-import { SavedObjectFinder } from '../../../../../../src/legacy/ui/public/saved_objects/components/saved_object_finder';
 import { RendererStrings } from '../../i18n';
 
 const { embeddable: strings } = RendererStrings;
@@ -48,7 +47,8 @@ const renderEmbeddable = (embeddableObject: IEmbeddable, domNode: HTMLElement) =
           notifications={npStart.core.notifications}
           overlays={npStart.core.overlays}
           inspector={npStart.plugins.inspector}
-          SavedObjectFinder={SavedObjectFinder}
+          uiSettings={npStart.core.uiSettings}
+          savedObjects={npStart.core.savedObjects}
         />
       </I18nContext>
     </div>

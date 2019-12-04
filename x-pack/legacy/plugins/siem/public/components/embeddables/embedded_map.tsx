@@ -9,7 +9,6 @@ import React, { useEffect, useState } from 'react';
 import { createPortalNode, InPortal } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
-import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 
 import { EmbeddablePanel } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
@@ -213,9 +212,10 @@ export const EmbeddedMapComponent = ({
             getEmbeddableFactory={start.getEmbeddableFactory}
             getAllEmbeddableFactories={start.getEmbeddableFactories}
             notifications={core.notifications}
+            uiSettings={core.uiSettings}
+            savedObjects={core.savedObjects}
             overlays={core.overlays}
             inspector={plugins.inspector}
-            SavedObjectFinder={SavedObjectFinder}
           />
         ) : !isLoading && isIndexError ? (
           <IndexPatternsMissingPrompt data-test-subj="missing-prompt" />

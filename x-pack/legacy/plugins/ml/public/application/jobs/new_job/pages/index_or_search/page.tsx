@@ -15,7 +15,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
+import { npStart } from 'ui/new_platform';
+import { SavedObjectFinder } from '../../../../../../../../../../src/plugins/kibana_react/public';
 
 export interface PageProps {
   nextStepPath: string;
@@ -76,6 +77,8 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
               },
             ]}
             fixedPageSize={RESULTS_PER_PAGE}
+            uiSettings={npStart.core.uiSettings}
+            savedObjects={npStart.core.savedObjects}
           />
         </EuiPageContent>
       </EuiPageBody>

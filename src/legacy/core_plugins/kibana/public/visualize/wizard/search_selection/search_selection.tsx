@@ -22,9 +22,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
-
-import { VisType } from '../../kibana_services';
+import { VisType, getServices } from '../../kibana_services';
+import { SavedObjectFinder } from '../../../../../../../plugins/kibana_react/public';
 
 interface SearchSelectionProps {
   onSearchSelected: (searchId: string, searchType: string) => void;
@@ -35,6 +34,9 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
   private fixedPageSize: number = 8;
 
   public render() {
+    const {
+      core: { uiSettings, savedObjects },
+    } = getServices();
     return (
       <React.Fragment>
         <EuiModalHeader>
@@ -85,6 +87,8 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
               },
             ]}
             fixedPageSize={this.fixedPageSize}
+            uiSettings={uiSettings}
+            savedObjects={savedObjects}
           />
         </EuiModalBody>
       </React.Fragment>

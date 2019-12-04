@@ -68,8 +68,9 @@ test('EmbeddableChildPanel renders an embeddable when it is done loading', async
       getEmbeddableFactory={(() => undefined) as any}
       notifications={{} as any}
       overlays={{} as any}
+      uiSettings={{} as any}
+      savedObjects={{} as any}
       inspector={inspector}
-      SavedObjectFinder={() => null}
     />
   );
 
@@ -106,8 +107,9 @@ test(`EmbeddableChildPanel renders an error message if the factory doesn't exist
       getEmbeddableFactory={(() => undefined) as any}
       notifications={{} as any}
       overlays={{} as any}
+      uiSettings={{} as any}
+      savedObjects={{} as any}
       inspector={inspector}
-      SavedObjectFinder={() => null}
     />
   );
 

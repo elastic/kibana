@@ -65,4 +65,3 @@ export { stateMonitorFactory, StateMonitor } from 'ui/state_management/state_mon
 export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 export { unhashUrl } from 'ui/state_management/state_hashing';
 export { IInjector } from 'ui/chrome';
-export { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
