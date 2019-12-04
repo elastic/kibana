@@ -46,8 +46,9 @@ interface UserCanceledPanning {
   readonly type: 'userCanceledPanning';
 }
 
-interface UserMovedMouseOnPanningCandidate {
-  readonly type: 'userMovedMouseOnPanningCandidate';
+interface UserFocusedOnWorldCoordinates {
+  readonly type: 'userFocusedOnWorldCoordinates';
+  // client X and Y of mouse event, adjusted for position of resolver on the page
   readonly payload: Vector2;
 }
 
@@ -59,5 +60,5 @@ export type CameraAction =
   | UserContinuedPanning
   | UserStoppedPanning
   | UserCanceledPanning
-  | UserMovedMouseOnPanningCandidate
+  | UserFocusedOnWorldCoordinates
   | UserZoomed;

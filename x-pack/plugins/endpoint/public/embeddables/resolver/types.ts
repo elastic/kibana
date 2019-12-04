@@ -15,6 +15,7 @@ export interface CameraState {
   readonly translationNotCountingCurrentPanning: Vector2;
   readonly panningOrigin: Vector2 | null;
   readonly currentPanningOffset: Vector2 | null;
+  readonly latestFocusedWorldCoordinates: Vector2 | null;
 }
 
 export interface CameraStateWhenPanning extends CameraState {

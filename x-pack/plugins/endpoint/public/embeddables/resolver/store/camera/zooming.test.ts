@@ -8,7 +8,7 @@ import { CameraAction } from './action';
 import { cameraReducer } from './reducer';
 import { createStore, Store } from 'redux';
 import { CameraState, AABB } from '../../types';
-import { viewableBoundingBox, rasterToWorld } from './selectors';
+import { viewableBoundingBox, rasterToWorld, worldToRaster } from './selectors';
 import { userScaled, expectVectorsToBeClose } from './test_helpers';
 
 describe('zooming', () => {
@@ -72,10 +72,13 @@ describe('zooming', () => {
     describe('when the user has moved their mouse to the raster position 200, 50', () => {
       beforeEach(() => {
         const action: CameraAction = {
-          type: 'userMovedMouseOnPanningCandidate',
-          payload: [200, 50],
+          type: 'userFocusedOnWorldCoordinates',
+          payload: rasterToWorld(store.getState())([200, 50]),
         };
         store.dispatch(action);
+      });
+      it('should have focused the world position 50, 50', () => {
+        expectVectorsToBeClose(store.getState().latestFocusedWorldCoordinates, [50, 50]);
       });
       describe('when the user zooms in by 0.5 zoom units', () => {
         beforeEach(() => {
