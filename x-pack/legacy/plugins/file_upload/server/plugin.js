@@ -21,19 +21,6 @@ export class FileUploadPlugin {
       handler: getImportRouteHandler(elasticsearchPlugin, getSavedObjectsRepository),
       config: {
         payload: { maxBytes: MAX_BYTES },
-        // "index": "utah",
-        // "data": [],
-        // "settings": {
-        //   "number_of_shards": 1
-        // },
-        // "mappings": {
-        //   "coordinates": {
-        //     "type": "geo_point"
-        //   }
-        // },
-        // "ingestPipeline": {},
-        // "fileType": "json",
-        // "app": "Maps"
         validate: {
           query: Joi.object().keys({
             id: Joi.string(),
@@ -41,10 +28,18 @@ export class FileUploadPlugin {
           payload: Joi.object({
             app: Joi.string(),
             index: Joi.string().required(),
-            data: Joi.array().required(),
+            data: Joi.array().when(
+              Joi.ref('$query.id'), {
+                is: Joi.exist(),
+                then: Joi.array().min(1).required()
+              }),
             fileType: Joi.string().required(),
             ingestPipeline: Joi.object(),
-            settings: Joi.object(),
+            settings: Joi.object().when(
+              Joi.ref('$query.id'), {
+                is: null,
+                then: Joi.required()
+              }),
             mappings: Joi.object().required(),
           }).required(),
         }
