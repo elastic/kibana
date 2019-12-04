@@ -29,12 +29,6 @@ type AsyncValidatorsResult = Partial<CardinalityValidatorResult>;
  */
 export type JobValidationResult = BasicValidations & AsyncValidatorsResult;
 
-export interface JobConfigs {
-  jobCreator: JobCreator;
-  jobConfigString: string;
-  datafeedConfigString: string;
-}
-
 export interface ValidationSummary {
   basic: boolean;
   advanced: boolean;
@@ -80,10 +74,7 @@ export class JobValidator {
   private _validating: boolean = false;
   private _basicValidationResult$ = new ReplaySubject<JobValidationResult>(2);
 
-  /**
-   * Combine latest job and datafeed configs as JSON strings.
-   */
-  private _jobConfigs$ = new Subject<JobConfigs>();
+  private _jobConfigs$ = new Subject<JobCreator>();
 
   /**
    * Observable that combines basic and async validation results.
@@ -151,11 +142,7 @@ export class JobValidator {
       this._validateTimeout = setTimeout(() => {
         this._runBasicValidation();
 
-        this._jobConfigs$.next({
-          jobCreator: this._jobCreator,
-          jobConfigString: formattedJobConfig,
-          datafeedConfigString: formattedDatafeedConfig,
-        });
+        this._jobConfigs$.next(this._jobCreator);
 
         this._validating = false;
         this._validateTimeout = null;

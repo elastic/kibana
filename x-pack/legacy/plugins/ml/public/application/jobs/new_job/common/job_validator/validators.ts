@@ -11,7 +11,7 @@ import {
   CardinalityValidationResult,
   ml,
 } from '../../../../services/ml_api_service';
-import { JobConfigs } from './job_validator';
+import { JobCreator } from '../job_creator';
 
 export enum ValidatorSeverity {
   ERROR = 'ERROR',
@@ -36,14 +36,14 @@ export function isCardinalityModelPlotHigh(
 }
 
 export function cardinalityValidator(
-  jobConfigs$: Subject<JobConfigs>
+  jobConfigs$: Subject<JobCreator>
 ): Observable<CardinalityValidatorResult> {
   return jobConfigs$.pipe(
     // Perform a cardinality check only with enabled model plot.
-    filter(({ jobCreator }) => {
+    filter(jobCreator => {
       return jobCreator?.modelPlot;
     }),
-    map(({ jobCreator }) => {
+    map(jobCreator => {
       return {
         jobCreator,
         analysisConfigString: JSON.stringify(jobCreator.jobConfig.analysis_config),
