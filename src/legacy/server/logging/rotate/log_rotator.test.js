@@ -19,7 +19,6 @@
 
 import del from 'del';
 import fs, {  existsSync, mkdirSync, statSync, writeFileSync } from 'fs';
-import lodash from 'lodash';
 import { LogRotator } from './log_rotator';
 import { tmpdir } from 'os';
 import { dirname, join } from 'path';
@@ -31,6 +30,11 @@ jest.mock('chokidar', () => ({
     on: mockOn,
     close: jest.fn()
   })),
+}));
+
+jest.mock('lodash', () => ({
+  ...require.requireActual('lodash'),
+  throttle: fn => fn
 }));
 
 const tempDir = join(tmpdir(), 'kbn_log_rotator_test');
@@ -47,7 +51,7 @@ const createLogRotatorConfig = (logFilePath) => {
 };
 
 const mockServer = {
-  log: jest.fn()
+  logWithMetadata: jest.fn()
 };
 
 const writeBytesToFile = (filePath, numberOfBytes) => {
@@ -125,8 +129,6 @@ describe('LogRotator', () => {
   });
 
   it('rotates log file service correctly keeps number of files', async () => {
-    jest.spyOn(lodash, 'throttle').mockImplementation(fn => fn);
-
     writeBytesToFile(testFilePath, 3);
 
     const logRotator = new LogRotator(createLogRotatorConfig(testFilePath), mockServer);
@@ -152,13 +154,9 @@ describe('LogRotator', () => {
     expect(existsSync(join(testLogFileDir, 'log_rotator_test_log_file.log.1'))).toBeTruthy();
     expect(existsSync(join(testLogFileDir, 'log_rotator_test_log_file.log.2'))).toBeFalsy();
     expect(statSync(join(testLogFileDir, 'log_rotator_test_log_file.log.0')).size).toBe(5);
-
-    lodash.throttle.mockRestore();
   });
 
   it('rotates log file service correctly keeps number of files even when number setting changes', async () => {
-    jest.spyOn(lodash, 'throttle').mockImplementation(fn => fn);
-
     writeBytesToFile(testFilePath, 3);
 
     const logRotator = new LogRotator(createLogRotatorConfig(testFilePath), mockServer);
@@ -196,8 +194,6 @@ describe('LogRotator', () => {
     expect(existsSync(join(testLogFileDir, 'log_rotator_test_log_file.log.0'))).toBeTruthy();
     expect(existsSync(join(testLogFileDir, 'log_rotator_test_log_file.log.1'))).toBeFalsy();
     expect(statSync(join(testLogFileDir, 'log_rotator_test_log_file.log.0')).size).toBe(5);
-
-    lodash.throttle.mockRestore();
   });
 
   it('rotates log file service correctly detects usePolling when it should be false', async () => {

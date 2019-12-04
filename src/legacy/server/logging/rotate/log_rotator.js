@@ -20,9 +20,11 @@
 import * as chokidar from 'chokidar';
 import { isMaster } from 'cluster';
 import fs from 'fs';
-import { once, throttle } from 'lodash';
+import { throttle } from 'lodash';
 import { tmpdir } from 'os';
 import { basename, dirname, join, sep } from 'path';
+import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { promisify } from 'util';
 
 const mkdirAsync = promisify(fs.mkdir);
@@ -35,7 +37,7 @@ const writeFileAsync = promisify(fs.writeFile);
 export class LogRotator {
   constructor(config, server) {
     this.config = config;
-    this.log = server.log;
+    this.log = server.logWithMetadata;
     this.logFilePath = config.get('logging.dest');
     this.interval = 1;
     this.everyBytes = config.get('logging.rotate.everyBytes');
@@ -91,33 +93,36 @@ export class LogRotator {
       await mkdirAsync(tempFileDir, { recursive: true });
       await writeFileAsync(tempFile, '');
 
+      // setup fs.watch for the temp test file
       const testWatcher = fs.watch(tempFile, { persistent: false });
 
-      return new Promise(async (resolve) => {
-        let fallbackTimeout = null;
-
-        const onResolve = once(async (resolve, completeStatus) => {
+      const usePollingTest$ = new Observable(async (observer) => {
+        // observable complete function
+        const completeFn = (fallbackTimeout, completeStatus) => {
           clearTimeout(fallbackTimeout);
-
           testWatcher.close();
-          await unlinkAsync(tempFile);
-          resolve(completeStatus);
-        });
 
-        fallbackTimeout = setTimeout(async () => {
-          await onResolve(resolve, true);
-        }, 15000);
+          observer.next(completeStatus);
+          observer.complete();
+        };
 
-        testWatcher.on('change', async () => {
-          await onResolve(resolve, false);
-        });
+        // setup conditions that would fire the observable
+        const fallbackTimeout = setTimeout(() => completeFn(fallbackTimeout, true), 15000);
+        testWatcher.on('change', () => completeFn(fallbackTimeout, false));
+        testWatcher.on('error', () => completeFn(fallbackTimeout, true));
 
-        testWatcher.on('error', async () => {
-          await onResolve(resolve, true);
-        });
-
+        // fire test watcher events
         await writeFileAsync(tempFile, 'test');
       });
+
+      // wait for the first observable result and consider it as the result
+      // for our use polling test
+      const usePollingTestResult = await usePollingTest$.pipe(first()).toPromise();
+
+      // delete the temp file used for the test
+      await unlinkAsync(tempFile);
+
+      return usePollingTestResult;
     } catch {
       return true;
     }
