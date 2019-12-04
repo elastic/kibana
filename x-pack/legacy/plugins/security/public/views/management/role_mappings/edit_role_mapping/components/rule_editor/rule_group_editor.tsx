@@ -15,6 +15,7 @@ import { FieldRuleEditor } from './field_rule_editor';
 
 interface Props {
   rule: BaseRuleGroup;
+  allowAdd: boolean;
   parentRule?: BaseRule;
   ruleDepth: number;
   onChange: (rule: BaseRuleGroup) => void;
@@ -45,7 +46,7 @@ export class RuleGroupEditor extends Component<Props, {}> {
             </EuiFlexGroup>
           </EuiFlexItem>
           {this.renderSubRules()}
-          {this.props.rule.canAddRule() && (
+          {this.props.allowAdd && this.props.rule.canAddRule() && (
             <EuiFlexItem>
               <AddRuleButton onClick={this.onAddRuleClick} />
             </EuiFlexItem>
@@ -68,6 +69,7 @@ export class RuleGroupEditor extends Component<Props, {}> {
                   updatedRule.replaceRule(subRuleIndex, updatedSubRule);
                   this.props.onChange(updatedRule);
                 }}
+                allowAdd={this.props.allowAdd}
                 allowDelete={this.props.rule.canRemoveRule()}
                 onDelete={() => {
                   const updatedRule = this.props.rule.clone() as BaseRuleGroup;
@@ -85,6 +87,7 @@ export class RuleGroupEditor extends Component<Props, {}> {
               <RuleGroupEditor
                 rule={subRule as BaseRuleGroup}
                 parentRule={this.props.rule}
+                allowAdd={this.props.allowAdd}
                 ruleDepth={this.props.ruleDepth + 1}
                 onChange={updatedSubRule => {
                   const updatedRule = this.props.rule.clone() as BaseRuleGroup;

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import React, { Component, Fragment } from 'react';
+import { EuiEmptyPrompt, EuiCallOut, EuiSpacer, EuiButton } from '@elastic/eui';
 import { FieldRuleEditor } from './field_rule_editor';
 import { AddRuleButton } from './add_rule_button';
 
@@ -13,16 +13,25 @@ import { BaseRule } from '../../../../../../../common/model/role_mappings/base_r
 import { RuleGroupEditor } from './rule_group_editor';
 import { BaseRuleGroup } from '../../../../../../../common/model/role_mappings/base_rule_group';
 import { FieldRule } from '../../../../../../../common/model/role_mappings/field_rule';
+import { VISUAL_MAX_RULE_DEPTH } from '../../services/role_mapping_constants';
 
 interface Props {
   rules: BaseRule | null;
+  maxDepth: number;
   onChange: (rules: BaseRule | null) => void;
+  onSwitchEditorMode: () => void;
 }
 
 export class VisualRuleEditor extends Component<Props, {}> {
   public render() {
     if (this.props.rules) {
-      return this.renderRule(this.props.rules, this.onRuleChange);
+      const rules = this.renderRule(this.props.rules, this.onRuleChange);
+      return (
+        <Fragment>
+          {this.getRuleDepthWarning()}
+          {rules}
+        </Fragment>
+      );
     }
 
     return (
@@ -39,6 +48,29 @@ export class VisualRuleEditor extends Component<Props, {}> {
       />
     );
   }
+
+  private canUseVisualEditor = () => this.props.maxDepth < VISUAL_MAX_RULE_DEPTH;
+
+  private getRuleDepthWarning = () => {
+    if (this.canUseVisualEditor()) {
+      return null;
+    }
+    return (
+      <Fragment>
+        <EuiCallOut iconType="alert" title="Switch to advanced editor">
+          <p>
+            Role mapping rules are too complex for the visual editor. Switch to the advanced editor
+            to continue editing this rule.
+          </p>
+
+          <EuiButton onClick={this.props.onSwitchEditorMode} size="s">
+            Use advanced editor
+          </EuiButton>
+        </EuiCallOut>
+        <EuiSpacer size="s" />
+      </Fragment>
+    );
+  };
 
   private onRuleChange = (updatedRule: BaseRule) => {
     this.props.onChange(updatedRule);
@@ -59,6 +91,7 @@ export class VisualRuleEditor extends Component<Props, {}> {
           <FieldRuleEditor
             rule={rule as FieldRule}
             onChange={value => onChange(value)}
+            allowAdd={this.canUseVisualEditor()}
             allowDelete={true}
             onDelete={this.onRuleDelete}
           />
@@ -70,6 +103,7 @@ export class VisualRuleEditor extends Component<Props, {}> {
           <RuleGroupEditor
             rule={rule as BaseRuleGroup}
             ruleDepth={0}
+            allowAdd={this.canUseVisualEditor()}
             onChange={value => onChange(value)}
             onDelete={this.onRuleDelete}
           />

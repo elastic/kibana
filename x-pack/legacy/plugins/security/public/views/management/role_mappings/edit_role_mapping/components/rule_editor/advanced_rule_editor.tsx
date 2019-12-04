@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, Fragment } from 'react';
 
 import 'brace/mode/json';
 import 'brace/theme/github';
-import { EuiCodeEditor, EuiFormRow } from '@elastic/eui';
+import { EuiCodeEditor, EuiFormRow, EuiButtonIcon, EuiButton, EuiSpacer } from '@elastic/eui';
 import {
   generateRulesFromRaw,
   RuleBuilderError,
@@ -46,6 +46,15 @@ export const AdvancedRuleEditor = (props: Props) => {
     }
   }
 
+  function reformatRules() {
+    try {
+      const ruleJSON = JSON.parse(rawRules);
+      setRawRules(JSON.stringify(ruleJSON, null, 2));
+    } catch (ignore) {
+      // ignore
+    }
+  }
+
   return (
     <EuiFormRow
       isInvalid={Boolean(ruleBuilderError)}
@@ -57,26 +66,32 @@ export const AdvancedRuleEditor = (props: Props) => {
       }
       fullWidth
     >
-      <EuiCodeEditor
-        aria-label={''}
-        mode={'json'}
-        theme="github"
-        value={rawRules}
-        onChange={onRulesChange}
-        width="100%"
-        height="auto"
-        minLines={6}
-        maxLines={30}
-        isReadOnly={false}
-        setOptions={{
-          showLineNumbers: true,
-          tabSize: 2,
-        }}
-        editorProps={{
-          $blockScrolling: Infinity,
-        }}
-        showGutter={true}
-      />
+      <Fragment>
+        <EuiCodeEditor
+          aria-label={''}
+          mode={'json'}
+          theme="github"
+          value={rawRules}
+          onChange={onRulesChange}
+          width="100%"
+          height="auto"
+          minLines={6}
+          maxLines={30}
+          isReadOnly={false}
+          setOptions={{
+            showLineNumbers: true,
+            tabSize: 2,
+          }}
+          editorProps={{
+            $blockScrolling: Infinity,
+          }}
+          showGutter={true}
+        />
+        <EuiSpacer size="s" />
+        <EuiButton iconType="broom" onClick={reformatRules} size="s">
+          Auto-format
+        </EuiButton>
+      </Fragment>
     </EuiFormRow>
   );
 };

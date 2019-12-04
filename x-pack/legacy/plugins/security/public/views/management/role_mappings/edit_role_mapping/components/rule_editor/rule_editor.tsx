@@ -5,12 +5,23 @@
  */
 
 import React, { Component } from 'react';
-import { EuiButtonEmpty, EuiSpacer, EuiConfirmModal, EuiOverlayMask, EuiText } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiSpacer,
+  EuiConfirmModal,
+  EuiOverlayMask,
+  EuiText,
+  EuiCallOut,
+} from '@elastic/eui';
 import { RoleMapping } from '../../../../../../../common/model';
 import { BaseRule } from '../../../../../../../common/model/role_mappings/base_rule';
 import { generateRulesFromRaw } from '../../../../../../../common/model/role_mappings/rule_builder';
 import { VisualRuleEditor } from './visual_rule_editor';
 import { AdvancedRuleEditor } from './advanced_rule_editor';
+import {
+  DEFAULT_VISUAL_EDITOR_RULE_DEPTH_CUTOFF,
+  VISUAL_MAX_RULE_DEPTH,
+} from '../../services/role_mapping_constants';
 
 interface Props {
   rawRules: RoleMapping['rules'];
@@ -23,10 +34,9 @@ interface State {
   maxDepth: number;
   isRuleValid: boolean;
   showConfirmModeChange: boolean;
+  showVisualEditorDisabledAlert: boolean;
   mode: 'visual' | 'advanced';
 }
-
-const VISUAL_MAX_RULE_DEPTH = 5;
 
 export class RuleEditor extends Component<Props, State> {
   constructor(props: Props) {
@@ -35,12 +45,16 @@ export class RuleEditor extends Component<Props, State> {
       ...this.initializeFromRawRules(props.rawRules),
       isRuleValid: true,
       showConfirmModeChange: false,
+      showVisualEditorDisabledAlert: false,
     };
   }
 
   public componentWillReceiveProps(nextProps: Props) {
     if (!this.state.rules) {
-      this.setState({ ...this.initializeFromRawRules(nextProps.rawRules) });
+      const nextState = this.initializeFromRawRules(nextProps.rawRules);
+      if (nextState.rules) {
+        this.setState({ ...nextState });
+      }
     }
   }
 
@@ -60,7 +74,8 @@ export class RuleEditor extends Component<Props, State> {
 
   private initializeFromRawRules = (rawRules: Props['rawRules']) => {
     const { rules, maxDepth } = generateRulesFromRaw(rawRules);
-    const mode: State['mode'] = maxDepth > VISUAL_MAX_RULE_DEPTH ? 'advanced' : 'visual';
+    const mode: State['mode'] =
+      maxDepth > DEFAULT_VISUAL_EDITOR_RULE_DEPTH_CUTOFF ? 'advanced' : 'visual';
     return {
       rules,
       mode,
@@ -69,6 +84,14 @@ export class RuleEditor extends Component<Props, State> {
   };
 
   private getModeToggle() {
+    if (this.state.mode === 'advanced' && this.state.maxDepth > VISUAL_MAX_RULE_DEPTH) {
+      return (
+        <EuiCallOut size="s" title="Visual editor unavailable">
+          Rule definition is too complex for the visual editor
+        </EuiCallOut>
+      );
+    }
+
     switch (this.state.mode) {
       case 'visual':
         return (
@@ -106,7 +129,14 @@ export class RuleEditor extends Component<Props, State> {
   private getEditor() {
     switch (this.state.mode) {
       case 'visual':
-        return <VisualRuleEditor rules={this.state.rules} onChange={this.onRuleChange} />;
+        return (
+          <VisualRuleEditor
+            rules={this.state.rules}
+            maxDepth={this.state.maxDepth}
+            onChange={this.onRuleChange}
+            onSwitchEditorMode={() => this.trySwitchEditorMode('advanced')}
+          />
+        );
       case 'advanced':
         return (
           <AdvancedRuleEditor

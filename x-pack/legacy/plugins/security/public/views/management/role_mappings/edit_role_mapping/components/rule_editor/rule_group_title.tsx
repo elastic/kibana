@@ -12,6 +12,7 @@ import { BaseRuleGroup } from '../../../../../../../common/model/role_mappings/b
 
 interface Props {
   rule: BaseRuleGroup;
+  readonly?: boolean;
   parentRule?: BaseRule;
   onChange: (rule: BaseRuleGroup) => void;
 }

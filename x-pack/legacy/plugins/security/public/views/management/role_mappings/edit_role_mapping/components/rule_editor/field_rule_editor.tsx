@@ -22,6 +22,7 @@ import { RoleMappingFieldRuleValue } from '../../../../../../../common/model';
 
 interface Props {
   rule: FieldRule;
+  allowAdd: boolean;
   allowDelete: boolean;
   onChange: (rule: FieldRule) => void;
   onDelete: () => void;
