@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup } from 'src/core/server';
+import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { Anomalies } from '../anomalies';
 import { ElasticsearchAnomaliesAdapter } from '../anomalies/elasticsearch_adapter';
 import { Authentications } from '../authentications';
@@ -32,8 +32,8 @@ import { Note } from '../note/saved_object';
 import { PinnedEvent } from '../pinned_event/saved_object';
 import { Timeline } from '../timeline/saved_object';
 
-export function compose(core: CoreSetup, version: string): AppBackendLibs {
-  const framework = new KibanaBackendFrameworkAdapter(core, version);
+export function compose(core: CoreSetup, env: PluginInitializerContext['env']): AppBackendLibs {
+  const framework = new KibanaBackendFrameworkAdapter(core, env);
   const sources = new Sources(new ConfigurationSourcesAdapter());
   const sourceStatus = new SourceStatus(new ElasticsearchSourceStatusAdapter(framework));
 

@@ -8,7 +8,13 @@ import * as GraphiQL from 'apollo-server-module-graphiql';
 import { GraphQLSchema } from 'graphql';
 import { runHttpQuery } from 'apollo-server-core';
 import { schema as configSchema } from '@kbn/config-schema';
-import { CoreSetup, IRouter, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
+import {
+  CoreSetup,
+  IRouter,
+  KibanaResponseFactory,
+  RequestHandlerContext,
+  PluginInitializerContext,
+} from 'src/core/server';
 import { IndexPatternsFetcher } from '../../../../../../../src/plugins/data/server';
 import { RequestFacade } from '../../types';
 
@@ -25,9 +31,9 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   private isProductionMode: boolean;
   private router: IRouter;
 
-  constructor(core: CoreSetup, version: string) {
-    this.version = version;
-    this.isProductionMode = process.env.NODE_ENV === 'production';
+  constructor(core: CoreSetup, env: PluginInitializerContext['env']) {
+    this.version = env.packageInfo.version;
+    this.isProductionMode = env.mode.prod;
     this.router = core.http.createRouter();
   }
 

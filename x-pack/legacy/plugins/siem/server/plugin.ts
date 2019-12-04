@@ -22,9 +22,8 @@ export class Plugin {
 
   public setup(core: CoreSetup, plugins: {}) {
     this.logger.debug('Shim plugin setup');
-    const version = this.context.env.packageInfo.version;
 
-    const libs = compose(core, version);
+    const libs = compose(core, this.context.env);
     initServer(libs);
   }
 }
