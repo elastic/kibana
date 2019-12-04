@@ -5,6 +5,6 @@
  */
 
 export const metadata = {
-  id: 'png',
-  name: 'PNG'
+  id: 'csv',
+  name: 'CSV',
 };
