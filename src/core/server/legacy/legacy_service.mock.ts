@@ -17,23 +17,35 @@
  * under the License.
  */
 
-import { LegacyServiceDiscoverPlugins } from './legacy_service';
+import {
+  LegacyService,
+  LegacyServiceDiscoverPlugins,
+  LegacyServiceSetupDeps,
+} from './legacy_service';
 
-const createDiscoverMock = () => {
-  const setupContract: DeeplyMockedKeys<LegacyServiceDiscoverPlugins> = {
-    pluginSpecs: [],
-    disabledPluginSpecs: [],
-    uiExports: {} as any,
-    settings: {},
-    pluginExtendedConfig: {
-      get: jest.fn(),
-      has: jest.fn(),
-      set: jest.fn(),
-    } as any,
-  };
-  return setupContract;
-};
+type LegacyServiceMock = jest.Mocked<PublicMethodsOf<LegacyService> & { legacyId: symbol }>;
+
+const createDiscoverPluginsMock = (): LegacyServiceDiscoverPlugins => ({
+  pluginSpecs: [],
+  uiExports: {} as any,
+  pluginExtendedConfig: {
+    get: jest.fn(),
+    has: jest.fn(),
+  },
+  disabledPluginSpecs: [],
+  settings: {},
+  navLinks: [],
+});
+const createLegacyServiceMock = (): LegacyServiceMock => ({
+  legacyId: Symbol(),
+  discoverPlugins: jest.fn().mockResolvedValue(createDiscoverPluginsMock()),
+  setup: jest.fn(),
+  start: jest.fn(),
+  stop: jest.fn(),
+});
 
 export const legacyServiceMock = {
-  createDiscover: createDiscoverMock,
+  create: createLegacyServiceMock,
+  createSetupContract: (deps: LegacyServiceSetupDeps) => createLegacyServiceMock().setup(deps),
+  createDiscoverPlugins: createDiscoverPluginsMock,
 };

@@ -23,12 +23,12 @@ import { getTelemetrySendUsageFrom } from './get_telemetry_send_usage_from';
 import { getTelemetryAllowChangingOptInStatus } from './get_telemetry_allow_changing_opt_in_status';
 import { getNotifyUserAboutOptInDefault } from './get_telemetry_notify_user_about_optin_default';
 
-export async function replaceTelemetryInjectedVars(request: any) {
-  const config = request.server.config();
+export async function replaceTelemetryInjectedVars(request: any, server: any) {
+  const config = server.config();
   const configTelemetrySendUsageFrom = config.get('telemetry.sendUsageFrom');
   const configTelemetryOptIn = config.get('telemetry.optIn');
   const configTelemetryAllowChangingOptInStatus = config.get('telemetry.allowChangingOptInStatus');
-  const isRequestingApplication = request.path.startsWith('/app');
+  const isRequestingApplication = request.route.path.startsWith('/app');
 
   // Prevent interstitial screens (such as the space selector) from prompting for telemetry
   if (!isRequestingApplication) {
@@ -38,7 +38,7 @@ export async function replaceTelemetryInjectedVars(request: any) {
   }
 
   const currentKibanaVersion = config.get('pkg.version');
-  const savedObjectsClient = request.getSavedObjectsClient();
+  const savedObjectsClient = server.savedObjects.getScopedSavedObjectsClient(request);
   const telemetrySavedObject = await getTelemetrySavedObject(savedObjectsClient);
   const allowChangingOptInStatus = getTelemetryAllowChangingOptInStatus({
     configTelemetryAllowChangingOptInStatus,

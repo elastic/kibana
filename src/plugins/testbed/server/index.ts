@@ -77,6 +77,26 @@ class Plugin {
       }
     );
 
+    router.get(
+      {
+        path: '/requestcontext/render/{id?}',
+        validate: {
+          params: schema.object({
+            id: schema.maybe(schema.string()),
+          }),
+        },
+      },
+      async (context, req, res) => {
+        const body = await context.core.rendering.render(req.params.id);
+        return res.ok({
+          body,
+          headers: {
+            'content-securty-policy': core.http.csp.header,
+          },
+        });
+      }
+    );
+
     return {
       data$: this.initializerContext.config.create<ConfigType>().pipe(
         map(configValue => {

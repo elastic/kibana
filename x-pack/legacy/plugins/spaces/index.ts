@@ -79,11 +79,7 @@ export const spaces = (kibana: Record<string, any>) =>
           activeSpace: null,
         };
       },
-      async replaceInjectedVars(
-        vars: Record<string, any>,
-        request: Legacy.Request,
-        server: Server
-      ) {
+      async replaceInjectedVars(vars: Record<string, any>, request: KibanaRequest, server: Server) {
         // NOTICE: use of `activeSpace` is deprecated and will not be made available in the New Platform.
         // Known usages:
         // - x-pack/legacy/plugins/infra/public/utils/use_kibana_space_id.ts
@@ -91,9 +87,8 @@ export const spaces = (kibana: Record<string, any>) =>
         if (!spacesPlugin) {
           throw new Error('New Platform XPack Spaces plugin is not available.');
         }
-        const kibanaRequest = KibanaRequest.from(request);
-        const spaceId = spacesPlugin.spacesService.getSpaceId(kibanaRequest);
-        const spacesClient = await spacesPlugin.spacesService.scopedClient(kibanaRequest);
+        const spaceId = spacesPlugin.spacesService.getSpaceId(request);
+        const spacesClient = await spacesPlugin.spacesService.scopedClient(request);
         try {
           vars.activeSpace = {
             valid: true,

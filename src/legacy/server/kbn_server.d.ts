@@ -20,19 +20,23 @@
 import { ResponseObject, Server } from 'hapi';
 import { UnwrapPromise } from '@kbn/utility-types';
 
-import { SavedObjectsClientProviderOptions, CoreSetup, CoreStart } from 'src/core/server';
 import {
   ConfigService,
+  CoreSetup,
+  CoreStart,
   ElasticsearchServiceSetup,
   EnvironmentMode,
   LoggerFactory,
   SavedObjectsClientContract,
   SavedObjectsLegacyService,
+  SavedObjectsClientProviderOptions,
   IUiSettingsClient,
   PackageInfo,
+  LegacyServiceSetupDeps,
+  LegacyServiceStartDeps,
+  LegacyServiceDiscoverPlugins,
 } from '../../core/server';
 
-import { LegacyServiceSetupDeps, LegacyServiceStartDeps } from '../../core/server/';
 // Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsManagement } from '../../core/server/saved_objects/management';
@@ -104,38 +108,63 @@ export interface PluginsSetup {
   [key: string]: object;
 }
 
+export interface Platform {
+  env: {
+    mode: Readonly<EnvironmentMode>;
+    packageInfo: Readonly<PackageInfo>;
+  };
+  handledConfigPaths: UnwrapPromise<ReturnType<ConfigService['getUsedPaths']>>;
+  setupDeps: {
+    core: CoreSetup;
+    plugins: PluginsSetup;
+  };
+  startDeps: {
+    core: CoreSetup;
+    plugins: Record<string, object>;
+  };
+  __internals: {
+    elasticsearch: LegacyServiceSetupDeps['core']['elasticsearch'];
+    hapiServer: LegacyServiceSetupDeps['core']['http']['server'];
+    kibanaMigrator: LegacyServiceStartDeps['core']['savedObjects']['migrator'];
+    savedObjectsClientProvider: LegacyServiceStartDeps['core']['savedObjects']['clientProvider'];
+    uiPlugins: LegacyServiceSetupDeps['core']['plugins']['uiPlugins'];
+    uiSettings: LegacyServiceSetupDeps['core']['uiSettings'];
+    rendering: LegacyServiceSetupDeps['core']['rendering'];
+  };
+  logger: LoggerFactory;
+}
+
+export interface LegacyPlugins {
+  pluginSpecs: LegacyServiceDiscoverPlugins['pluginSpecs'];
+  disabledPluginSpecs: LegacyServiceDiscoverPlugins['pluginSpecs'];
+  uiExports: LegacyServiceDiscoverPlugins['uiExports'];
+}
+
 // eslint-disable-next-line import/no-default-export
 export default class KbnServer {
   public readonly newPlatform: {
-    __internals: {
-      hapiServer: LegacyServiceSetupDeps['core']['http']['server'];
-      uiPlugins: LegacyServiceSetupDeps['core']['plugins']['uiPlugins'];
-      elasticsearch: LegacyServiceSetupDeps['core']['elasticsearch'];
-      uiSettings: LegacyServiceSetupDeps['core']['uiSettings'];
-      kibanaMigrator: LegacyServiceStartDeps['core']['savedObjects']['migrator'];
-    };
-    env: {
-      mode: Readonly<EnvironmentMode>;
-      packageInfo: Readonly<PackageInfo>;
-    };
+    __internals: Omit<Platform['__internals'], 'savedObjectsClientProvider'>;
+    env: Platform['env'];
     coreContext: {
-      logger: LoggerFactory;
+      logger: Platform['logger'];
     };
-    setup: {
-      core: CoreSetup;
-      plugins: PluginsSetup;
-    };
-    start: {
-      core: CoreStart;
-      plugins: Record<string, object>;
-    };
+    setup: Platform['setupDeps'];
+    start: Platform['startDeps'];
     stop: null;
+    params: {
+      handledConfigPaths: Platform['handledConfigPaths'];
+    };
   };
   public server: Server;
   public inject: Server['inject'];
   public pluginSpecs: any[];
 
-  constructor(settings: any, core: any);
+  constructor(
+    settings: Record<string, any>,
+    config: KibanaConfig,
+    core: Platform,
+    legacyPlugins: LegacyPlugins
+  );
 
   public ready(): Promise<void>;
   public mixin(...fns: KbnMixinFunc[]): Promise<void>;

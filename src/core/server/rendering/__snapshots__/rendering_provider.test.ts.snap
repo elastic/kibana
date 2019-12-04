@@ -1,0 +1,220 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RenderingProvider render() renders "core" page 1`] = `
+Object {
+  "basePath": "/mock-server-basepath",
+  "branch": Any<String>,
+  "buildNumber": Any<Number>,
+  "csp": Object {
+    "warnLegacyBrowsers": true,
+  },
+  "env": Object {
+    "binDir": Any<String>,
+    "cliArgs": Object {
+      "basePath": false,
+      "dev": true,
+      "open": false,
+      "optimize": false,
+      "oss": false,
+      "quiet": false,
+      "repl": false,
+      "silent": false,
+      "watch": false,
+    },
+    "configDir": Any<String>,
+    "configs": Array [],
+    "homeDir": Any<String>,
+    "isDevClusterMaster": false,
+    "logDir": Any<String>,
+    "mode": Object {
+      "dev": true,
+      "name": "development",
+      "prod": false,
+    },
+    "packageInfo": Object {
+      "branch": Any<String>,
+      "buildNum": Any<Number>,
+      "buildSha": Any<String>,
+      "dist": false,
+      "version": Any<String>,
+    },
+    "pluginSearchPaths": Any<Array>,
+    "staticFilesDir": Any<String>,
+  },
+  "i18n": Object {
+    "translationsUrl": "/mock-server-basepath/translations/en.json",
+  },
+  "legacyMetadata": Object {
+    "app": Object {},
+    "basePath": "/mock-server-basepath",
+    "branch": Any<String>,
+    "buildNum": Any<Number>,
+    "buildSha": Any<String>,
+    "bundleId": "app:core",
+    "devMode": true,
+    "nav": Array [],
+    "serverName": "http-server-test",
+    "uiSettings": Object {
+      "defaults": Object {
+        "all": "settings",
+      },
+      "user": Object {
+        "providedBy": Object {
+          "isOverridden": true,
+          "value": "user",
+        },
+      },
+    },
+    "version": Any<String>,
+  },
+  "legacyMode": false,
+  "uiPlugins": Array [],
+  "vars": Object {},
+  "version": Any<String>,
+}
+`;
+
+exports[`RenderingProvider render() renders with custom injectedVarsOverrides 1`] = `
+Object {
+  "basePath": "/mock-server-basepath",
+  "branch": Any<String>,
+  "buildNumber": Any<Number>,
+  "csp": Object {
+    "warnLegacyBrowsers": true,
+  },
+  "env": Object {
+    "binDir": Any<String>,
+    "cliArgs": Object {
+      "basePath": false,
+      "dev": true,
+      "open": false,
+      "optimize": false,
+      "oss": false,
+      "quiet": false,
+      "repl": false,
+      "silent": false,
+      "watch": false,
+    },
+    "configDir": Any<String>,
+    "configs": Array [],
+    "homeDir": Any<String>,
+    "isDevClusterMaster": false,
+    "logDir": Any<String>,
+    "mode": Object {
+      "dev": true,
+      "name": "development",
+      "prod": false,
+    },
+    "packageInfo": Object {
+      "branch": Any<String>,
+      "buildNum": Any<Number>,
+      "buildSha": Any<String>,
+      "dist": false,
+      "version": Any<String>,
+    },
+    "pluginSearchPaths": Any<Array>,
+    "staticFilesDir": Any<String>,
+  },
+  "i18n": Object {
+    "translationsUrl": "/mock-server-basepath/translations/en.json",
+  },
+  "legacyMetadata": Object {
+    "app": Object {},
+    "basePath": "/mock-server-basepath",
+    "branch": Any<String>,
+    "buildNum": Any<Number>,
+    "buildSha": Any<String>,
+    "bundleId": "app:core",
+    "devMode": true,
+    "nav": Array [],
+    "serverName": "http-server-test",
+    "uiSettings": Object {
+      "defaults": Object {
+        "all": "settings",
+      },
+      "user": Object {
+        "providedBy": Object {
+          "isOverridden": true,
+          "value": "user",
+        },
+      },
+    },
+    "version": Any<String>,
+  },
+  "legacyMode": false,
+  "uiPlugins": Array [],
+  "vars": Object {
+    "fake": "__TEST_TOKEN__",
+  },
+  "version": Any<String>,
+}
+`;
+
+exports[`RenderingProvider render() renders with excluded user settings 1`] = `
+Object {
+  "basePath": "/mock-server-basepath",
+  "branch": Any<String>,
+  "buildNumber": Any<Number>,
+  "csp": Object {
+    "warnLegacyBrowsers": true,
+  },
+  "env": Object {
+    "binDir": Any<String>,
+    "cliArgs": Object {
+      "basePath": false,
+      "dev": true,
+      "open": false,
+      "optimize": false,
+      "oss": false,
+      "quiet": false,
+      "repl": false,
+      "silent": false,
+      "watch": false,
+    },
+    "configDir": Any<String>,
+    "configs": Array [],
+    "homeDir": Any<String>,
+    "isDevClusterMaster": false,
+    "logDir": Any<String>,
+    "mode": Object {
+      "dev": true,
+      "name": "development",
+      "prod": false,
+    },
+    "packageInfo": Object {
+      "branch": Any<String>,
+      "buildNum": Any<Number>,
+      "buildSha": Any<String>,
+      "dist": false,
+      "version": Any<String>,
+    },
+    "pluginSearchPaths": Any<Array>,
+    "staticFilesDir": Any<String>,
+  },
+  "i18n": Object {
+    "translationsUrl": "/mock-server-basepath/translations/en.json",
+  },
+  "legacyMetadata": Object {
+    "app": Object {},
+    "basePath": "/mock-server-basepath",
+    "branch": Any<String>,
+    "buildNum": Any<Number>,
+    "buildSha": Any<String>,
+    "bundleId": "app:core",
+    "devMode": true,
+    "nav": Array [],
+    "serverName": "http-server-test",
+    "uiSettings": Object {
+      "defaults": Object {
+        "all": "settings",
+      },
+      "user": Object {},
+    },
+    "version": Any<String>,
+  },
+  "legacyMode": false,
+  "uiPlugins": Array [],
+  "vars": Object {},
+  "version": Any<String>,
+}
+`;

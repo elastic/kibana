@@ -9,5 +9,6 @@
 ```typescript
 core: InternalCoreSetup & {
         plugins: PluginsServiceSetup;
+        rendering: RenderingServiceSetup;
     };
 ```

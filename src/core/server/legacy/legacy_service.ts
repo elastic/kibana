@@ -29,6 +29,7 @@ import { CspConfigType, config as cspConfig } from '../csp';
 import { DevConfig, DevConfigType, config as devConfig } from '../dev';
 import { BasePathProxyServer, HttpConfig, HttpConfigType, config as httpConfig } from '../http';
 import { Logger } from '../logging';
+import { RenderingServiceSetup } from '../rendering';
 import { PluginsServiceSetup, PluginsServiceStart } from '../plugins';
 import { findLegacyPluginSpecs } from './plugins';
 import { LegacyPluginSpec } from './plugins/find_legacy_plugin_specs';
@@ -64,6 +65,7 @@ function getLegacyRawConfig(config: Config, pathConfig: PathConfigType) {
 export interface LegacyServiceSetupDeps {
   core: InternalCoreSetup & {
     plugins: PluginsServiceSetup;
+    rendering: RenderingServiceSetup;
   };
   plugins: Record<string, unknown>;
 }
@@ -86,6 +88,7 @@ export interface LegacyServiceDiscoverPlugins {
   uiExports: SavedObjectsLegacyUiExports;
   pluginExtendedConfig: LegacyConfig;
   settings: Record<string, any>;
+  navLinks: Array<Record<string, unknown>>;
 }
 
 /** @internal */
@@ -108,6 +111,7 @@ export class LegacyService implements CoreService {
         pluginSpecs: LegacyPluginSpec[];
         disabledPluginSpecs: LegacyPluginSpec[];
         uiExports: SavedObjectsLegacyUiExports;
+        navLinks: Array<Record<string, unknown>>;
       }
     | undefined;
   private settings: Record<string, any> | undefined;
@@ -153,12 +157,14 @@ export class LegacyService implements CoreService {
       pluginExtendedConfig,
       disabledPluginSpecs,
       uiExports,
+      navLinks,
     } = await findLegacyPluginSpecs(this.settings, this.coreContext.logger);
 
     this.legacyPlugins = {
       pluginSpecs,
       disabledPluginSpecs,
       uiExports,
+      navLinks,
     };
 
     const deprecationProviders = await pluginSpecs
@@ -190,6 +196,7 @@ export class LegacyService implements CoreService {
       uiExports,
       pluginExtendedConfig,
       settings: this.settings,
+      navLinks,
     };
   }
 
@@ -338,6 +345,7 @@ export class LegacyService implements CoreService {
           kibanaMigrator: startDeps.core.savedObjects.migrator,
           uiPlugins: setupDeps.core.plugins.uiPlugins,
           elasticsearch: setupDeps.core.elasticsearch,
+          rendering: setupDeps.core.rendering,
           uiSettings: setupDeps.core.uiSettings,
           savedObjectsClientProvider: startDeps.core.savedObjects.clientProvider,
         },

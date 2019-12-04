@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest } from '../../../../../../src/core/server';
-
 export async function replaceInjectedVars(originalInjectedVars, request, server) {
   const xpackInfo = server.plugins.xpack_main.info;
 
@@ -25,11 +23,7 @@ export async function replaceInjectedVars(originalInjectedVars, request, server)
   }
 
   // request is not authenticated
-  if (
-    !(await server.newPlatform.setup.plugins.security.authc.isAuthenticated(
-      KibanaRequest.from(request)
-    ))
-  ) {
+  if (!(await server.newPlatform.setup.plugins.security.authc.isAuthenticated(request))) {
     return originalInjectedVars;
   }
 

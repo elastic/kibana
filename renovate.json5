@@ -522,6 +522,14 @@
         ],
       },
       {
+        groupSlug: 'prettier',
+        groupName: 'prettier related packages',
+        packageNames: [
+          'prettier',
+          '@types/prettier',
+        ],
+      },
+      {
         groupSlug: '@reach/router',
         groupName: '@reach/router related packages',
         packageNames: [

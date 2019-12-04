@@ -28,6 +28,7 @@ import { LoggerFactory } from '../../logging';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { collectUiExports as collectLegacyUiExports } from '../../../../legacy/ui/ui_exports/collect_ui_exports';
 import { LegacyConfig, LegacyConfigDeprecationProvider } from '../config';
+import { getNavLinks } from './get_nav_links';
 
 export interface LegacyPluginPack {
   getPath(): string;
@@ -128,11 +129,14 @@ export async function findLegacyPluginSpecs(settings: unknown, loggerFactory: Lo
     spec$.pipe(toArray()),
     log$.pipe(toArray())
   ).toPromise();
+  const uiExports = collectLegacyUiExports(pluginSpecs);
+  const navLinks = getNavLinks(uiExports);
 
   return {
     disabledPluginSpecs,
     pluginSpecs,
     pluginExtendedConfig: configToMutate,
-    uiExports: collectLegacyUiExports(pluginSpecs),
+    uiExports,
+    navLinks,
   };
 }

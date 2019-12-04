@@ -81,5 +81,6 @@ export {
   SessionStorageCookieOptions,
   SessionCookieValidationResult,
 } from './cookie_session_storage';
+export * from './csp';
 export * from './types';
 export { BasePath, IBasePath } from './base_path_service';

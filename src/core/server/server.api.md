@@ -799,6 +799,11 @@ export interface IndexSettingsDeprecationInfo {
 }
 
 // @public
+export interface IRenderingProvider {
+    render(pluginId?: string, includeUserProvidedConfig?: boolean): Promise<string>;
+}
+
+// @public
 export interface IRouter {
     delete: RouteRegistrar<'delete'>;
     get: RouteRegistrar<'get'>;
@@ -901,6 +906,28 @@ export type KnownHeaders = KnownKeys<IncomingHttpHeaders>;
 export interface LegacyRequest extends Request {
 }
 
+// @internal (undocumented)
+export interface LegacyServiceDiscoverPlugins {
+    // (undocumented)
+    disabledPluginSpecs: LegacyPluginSpec[];
+    // (undocumented)
+    navLinks: Array<Record<string, unknown>>;
+    // Warning: (ae-forgotten-export) The symbol "LegacyConfig" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    pluginExtendedConfig: LegacyConfig;
+    // Warning: (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    pluginSpecs: LegacyPluginSpec[];
+    // (undocumented)
+    settings: Record<string, any>;
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsLegacyUiExports" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    uiExports: SavedObjectsLegacyUiExports;
+}
+
 // @public @deprecated (undocumented)
 export interface LegacyServiceSetupDeps {
     // Warning: (ae-forgotten-export) The symbol "InternalCoreSetup" needs to be exported by the entry point index.d.ts
@@ -908,6 +935,7 @@ export interface LegacyServiceSetupDeps {
     // (undocumented)
     core: InternalCoreSetup & {
         plugins: PluginsServiceSetup;
+        rendering: RenderingServiceSetup;
     };
     // (undocumented)
     plugins: Record<string, unknown>;
@@ -1161,6 +1189,16 @@ export type RedirectResponseOptions = HttpResponseOptions & {
     };
 };
 
+// @public (undocumented)
+export interface RenderingServiceSetup {
+    // Warning: (ae-forgotten-export) The symbol "GetRenderingProviderParams" needs to be exported by the entry point index.d.ts
+    getRenderingProvider: (params: GetRenderingProviderParams) => IRenderingProvider;
+    // Warning: (ae-forgotten-export) The symbol "PluginVariables" needs to be exported by the entry point index.d.ts
+    getVarsFor: (id: string) => Promise<PluginVariables>;
+    // Warning: (ae-forgotten-export) The symbol "VarProvider" needs to be exported by the entry point index.d.ts
+    registerVarProvider: (id: string, provider: VarProvider) => void;
+}
+
 // @public
 export type RequestHandler<P = unknown, Q = unknown, B = unknown, Method extends RouteMethod = any> = (context: RequestHandlerContext, request: KibanaRequest<P, Q, B, Method>, response: KibanaResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 
@@ -1168,6 +1206,7 @@ export type RequestHandler<P = unknown, Q = unknown, B = unknown, Method extends
 export interface RequestHandlerContext {
     // (undocumented)
     core: {
+        rendering: IRenderingProvider;
         savedObjects: {
             client: SavedObjectsClientContract;
         };
@@ -1718,7 +1757,6 @@ export class SavedObjectsRepository {
     bulkUpdate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
     create<T extends SavedObjectAttributes>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
     // Warning: (ae-forgotten-export) The symbol "KibanaMigrator" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "LegacyConfig" needs to be exported by the entry point index.d.ts
     // 
     // @internal
     static createRepository(migrator: KibanaMigrator, schema: SavedObjectsSchema, config: LegacyConfig, indexName: string, callCluster: APICaller, extraTypes?: string[], injectedConstructor?: any): any;

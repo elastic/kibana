@@ -18,3 +18,39 @@
  */
 
 export { createHttpServer } from './http/test_utils';
+
+/**
+ * Jest snapshot matcher for rendering injected metadata
+ */
+export const INJECTED_METADATA = {
+  version: expect.any(String),
+  branch: expect.any(String),
+  buildNumber: expect.any(Number),
+  env: {
+    binDir: expect.any(String),
+    configDir: expect.any(String),
+    homeDir: expect.any(String),
+    logDir: expect.any(String),
+    packageInfo: {
+      branch: expect.any(String),
+      buildNum: expect.any(Number),
+      buildSha: expect.any(String),
+      version: expect.any(String),
+    },
+    pluginSearchPaths: expect.any(Array),
+    staticFilesDir: expect.any(String),
+  },
+  legacyMetadata: {
+    branch: expect.any(String),
+    buildNum: expect.any(Number),
+    buildSha: expect.any(String),
+    version: expect.any(String),
+  },
+};
+
+/**
+ * Jest snapshot matcher for rendering metadata
+ */
+export const METADATA = {
+  injectedMetadata: INJECTED_METADATA,
+};
