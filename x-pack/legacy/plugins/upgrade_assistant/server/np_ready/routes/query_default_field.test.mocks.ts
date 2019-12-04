@@ -4,4 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { plugin } from './np_ready';
+export const mockAddDefaultField = jest.fn();
+jest.mock('../lib/query_default_field', () => ({
+  addDefaultField: mockAddDefaultField,
+}));
