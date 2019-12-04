@@ -200,6 +200,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
               ),
           type: 'icon',
           icon: 'pencil',
+          'data-test-subj': 'edit',
           onClick: (item: ActionConnectorTableItem) => editItem(item),
         },
         {

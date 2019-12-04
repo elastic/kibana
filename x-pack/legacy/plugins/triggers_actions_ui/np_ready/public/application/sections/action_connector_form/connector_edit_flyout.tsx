@@ -16,7 +16,6 @@ import {
 import { ActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { ActionConnectorForm } from './action_connector_form';
 import { useAppDependencies } from '../../app_dependencies';
-import { SectionLoading } from '../../components/section_loading';
 import { ActionConnectorTableItem } from '../../../types';
 
 export interface ConnectorEditProps {
@@ -55,25 +54,14 @@ export const ConnectorEditFlyout = ({ connector }: ConnectorEditProps) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
-      {connector ? (
-        <ActionConnectorForm
-          initialAction={{
-            ...connector,
-            referencedByCount: undefined,
-            actionType: undefined,
-            secrets: {},
-          }}
-          actionTypeName={connector.actionType}
-          setFlyoutVisibility={setEditFlyoutVisibility}
-        />
-      ) : (
-        <SectionLoading>
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.actionConnectorForm.loadingWatchDescription"
-            defaultMessage="Loading watch…"
-          />
-        </SectionLoading>
-      )}
+      <ActionConnectorForm
+        initialAction={{
+          ...connector,
+          secrets: {},
+        }}
+        actionTypeName={connector.actionType}
+        setFlyoutVisibility={setEditFlyoutVisibility}
+      />
     </EuiFlyout>
   );
 };

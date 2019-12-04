@@ -30,6 +30,7 @@ export function triggersActionsUI(kibana: any) {
     uiExports: {
       hacks: ['plugins/triggers_actions_ui/hacks/register'],
       managementSections: ['plugins/triggers_actions_ui'],
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     },
   });
 }

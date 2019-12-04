@@ -56,7 +56,7 @@ export const ConnectorAddFlyout = () => {
     <EuiFlyout onClose={closeFlyout} aria-labelledby="flyoutActionAddTitle" size="m">
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup gutterSize="s" alignItems="center">
-          {actionTypeModel ? (
+          {actionTypeModel && actionTypeModel.iconClass ? (
             <EuiFlexItem grow={false}>
               <EuiIcon type={actionTypeModel.iconClass} size="m" />
             </EuiFlexItem>
