@@ -41,8 +41,8 @@ export default function ({ getService, getPageObjects }) {
         const { title, description } = await PageObjects.common.getSharedItemTitleAndDescription();
         expect(title).to.eql(expected.title);
         expect(description).to.eql(expected.description);
-        const sharedItemContainer = await PageObjects.common.getSharedItemContainer();
-        expect(sharedItemContainer).to.defined;
+        const sharedItemContainers = await PageObjects.common.getSharedItemContainers();
+        expect(sharedItemContainers.length).to.be(1);
       });
     });
   });

@@ -287,9 +287,9 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       };
     }
 
-    async getSharedItemContainer() {
+    async getSharedItemContainers() {
       const cssSelector = '[data-shared-item-container]';
-      return find.byCssSelector(cssSelector);
+      return find.allByCssSelector(cssSelector);
     }
 
     async ensureModalOverlayHidden() {
