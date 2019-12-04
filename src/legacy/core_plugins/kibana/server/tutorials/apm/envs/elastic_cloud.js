@@ -78,7 +78,7 @@ function getApmServerInstructionSet(cloudSetup) {
 
 function getApmAgentInstructionSet(cloudSetup) {
   const apmServerUrl = getIfExists(cloudSetup, 'apm.url');
-  const secretToken = getIfExists(cloudSetup, 'apm.secret_token');
+  const secretToken = getIfExists(cloudSetup, 'apm.secretToken');
 
   return {
     title: i18n.translate('kbn.server.tutorials.apm.elasticCloudInstructions.title', {

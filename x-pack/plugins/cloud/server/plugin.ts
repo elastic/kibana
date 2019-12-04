@@ -21,7 +21,7 @@ export interface CloudSetup {
   isCloudEnabled: boolean;
   apm: {
     url?: string;
-    secret_token?: string;
+    secretToken?: string;
   };
 }
 
@@ -44,8 +44,8 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       cloudId: config.id,
       isCloudEnabled,
       apm: {
-        url: get<string | undefined>(config, 'apm.url'),
-        secretToken: get<string | undefined>(config, 'apm.secret_token'),
+        url: config.apm?.url,
+        secretToken: config.apm?.secret_token,
       },
     };
   }
