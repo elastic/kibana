@@ -150,14 +150,14 @@ export class LogRotator {
     this.stalker.on('change', this._logFileSizeMonitorHandler);
   }
 
-_logFileSizeMonitorHandler = async  (filename, stats) => {
+  _logFileSizeMonitorHandler = async  (filename, stats) => {
     if (!filename || !stats) {
       return;
     }
 
     this.logFileSize = stats.size || 0;
     await this.throttledRotate();
-  }
+  };
 
   _stopLogFileSizeMonitor() {
     if (!this.stalker) {
