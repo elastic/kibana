@@ -17,9 +17,5 @@
  * under the License.
  */
 
-export { HashedItemStoreSingleton } from './hashed_item_store_singleton';
-
-export {
-  createStateHash,
-  isStateHash,
-} from './state_hash';
+export { hashUrl, unhashUrl, hashQuery, unhashQuery } from './hash_unhash_url';
+export { createStateHash, isStateHash } from './state_hash';
