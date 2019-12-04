@@ -46,7 +46,7 @@ export const worldToRaster: (state: CameraState) => (worldPosition: Vector2) => 
   } = viewport(state);
 
   return ([worldX, worldY]) => {
-    const [translationX, translationY] = translationIncludingActivePanning(state);
+    const [translationX, translationY] = translation(state);
 
     const [xNdc, yNdc] = orthographicProjection(
       worldX + translationX,
@@ -62,16 +62,16 @@ export const worldToRaster: (state: CameraState) => (worldPosition: Vector2) => 
   };
 };
 
-function translationIncludingActivePanning(state: CameraState): Vector2 {
+export function translation(state: CameraState): Vector2 {
   if (userIsPanning(state)) {
     const panningDeltaX = state.currentPanningOffset[0] - state.panningOrigin[0];
     const panningDeltaY = state.currentPanningOffset[1] - state.panningOrigin[1];
     return [
-      state.translation[0] + panningDeltaX / state.scaling[0],
-      state.translation[1] + panningDeltaY / state.scaling[1],
+      state.translationNotCountingCurrentPanning[0] + panningDeltaX / state.scaling[0],
+      state.translationNotCountingCurrentPanning[1] + panningDeltaY / state.scaling[1],
     ];
   } else {
-    return state.translation;
+    return state.translationNotCountingCurrentPanning;
   }
 }
 
@@ -86,7 +86,7 @@ export const rasterToWorld: (state: CameraState) => (worldPosition: Vector2) => 
   } = viewport(state);
 
   return ([rasterX, rasterY]) => {
-    const [translationX, translationY] = translationIncludingActivePanning(state);
+    const [translationX, translationY] = translation(state);
 
     // raster to ndc
     const ndcX = (rasterX / renderWidth) * 2 - 1;

@@ -12,7 +12,7 @@ export { ResolverAction } from './actions';
 export interface CameraState {
   readonly scaling: Vector2;
   readonly rasterSize: Vector2;
-  readonly translation: Vector2;
+  readonly translationNotCountingCurrentPanning: Vector2;
   readonly panningOrigin: Vector2 | null;
   readonly currentPanningOffset: Vector2 | null;
 }

@@ -5,7 +5,7 @@
  */
 
 import { Reducer } from 'redux';
-import { userIsPanning } from './selectors';
+import { userIsPanning, translation } from './selectors';
 import { clamp } from '../../lib/math';
 
 import { CameraState, ResolverAction } from '../../types';
@@ -14,7 +14,7 @@ function initialState(): CameraState {
   return {
     scaling: [1, 1] as const,
     rasterSize: [0, 0] as const,
-    translation: [0, 0] as const,
+    translationNotCountingCurrentPanning: [0, 0] as const,
     panningOrigin: null,
     currentPanningOffset: null,
   };
@@ -33,7 +33,7 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
   } else if (action.type === 'userSetPanningOffset') {
     return {
       ...state,
-      translation: action.payload,
+      translationNotCountingCurrentPanning: action.payload,
     };
   } else if (action.type === 'userStartedPanning') {
     return {
@@ -52,13 +52,9 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
     }
   } else if (action.type === 'userStoppedPanning') {
     if (userIsPanning(state)) {
-      // TODO, write some vector2 libs plz
-      const panningDeltaX = state.currentPanningOffset[0] - state.panningOrigin[0];
-      const panningDeltaY = state.currentPanningOffset[1] - state.panningOrigin[1];
-
       return {
         ...state,
-        translation: [state.translation[0] + panningDeltaX, state.translation[1] + panningDeltaY],
+        translationNotCountingCurrentPanning: translation(state),
         panningOrigin: null,
         currentPanningOffset: null,
       };
