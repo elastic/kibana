@@ -8,6 +8,7 @@ import {
   Plugin,
   CoreSetup,
   RequestHandlerContext,
+  SavedObjectsClientContract,
 } from 'src/core/server';
 import { Observable, combineLatest, AsyncSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -26,14 +27,18 @@ export interface LegacySetup {
 export interface APMPluginContract {
   config$: Observable<APMConfig>;
   registerLegacyAPI: (__LEGACY: LegacySetup) => void;
+  getApmIndices: (
+    savedObjectsClient: SavedObjectsClientContract
+  ) => ReturnType<typeof getApmIndices>;
 }
 
 export class APMPlugin implements Plugin<APMPluginContract> {
   legacySetup$: AsyncSubject<LegacySetup>;
-  currentConfig?: APMConfig;
+  currentConfig: APMConfig;
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
     this.legacySetup$ = new AsyncSubject();
+    this.currentConfig = {} as APMConfig;
   }
 
   public async setup(
@@ -72,8 +77,8 @@ export class APMPlugin implements Plugin<APMPluginContract> {
         this.legacySetup$.next(__LEGACY);
         this.legacySetup$.complete();
       }),
-      getApmIndices: async (requestContext: RequestHandlerContext) => {
-        return getApmIndices(requestContext.core, this.currentConfig as APMConfig);
+      getApmIndices: async (savedObjectsClient: SavedObjectsClientContract) => {
+        return getApmIndices(savedObjectsClient, this.currentConfig);
       },
     };
   }

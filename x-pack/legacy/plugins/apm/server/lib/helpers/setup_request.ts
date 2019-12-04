@@ -70,10 +70,10 @@ export async function setupRequest<TParams extends SetupRequestParams>(
   context: APMRequestHandlerContext<TParams>,
   request: KibanaRequest
 ): Promise<InferSetup<TParams>> {
-  const { config } = context;
+  const { config, core } = context;
   const { query } = context.params;
 
-  const indices = await getApmIndices(context.core, context.config);
+  const indices = await getApmIndices(core.savedObjects.client, config);
 
   const dynamicIndexPattern = await getDynamicIndexPattern({
     context,

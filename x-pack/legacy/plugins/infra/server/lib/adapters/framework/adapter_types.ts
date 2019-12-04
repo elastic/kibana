@@ -9,6 +9,7 @@ import { Lifecycle } from 'hapi';
 import { ObjectType } from '@kbn/config-schema';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { RouteMethod, RouteConfig } from '../../../../../../../../src/core/server';
+import { APMPluginContract } from '../../../../../../../plugins/apm/server/plugin';
 
 interface ApmIndices {
   'apm_oss.transactionIndices': string | undefined;
@@ -25,9 +26,7 @@ export interface InfraServerPluginDeps {
     indexPatternsServiceFactory: any;
   };
   features: any;
-  apm: {
-    getIndices: (savedObjectsClient: any) => Promise<ApmIndices>;
-  };
+  apm: APMPluginContract;
   ___legacy: any;
 }
 
