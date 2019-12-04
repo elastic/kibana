@@ -7,36 +7,37 @@
 import {
   PROCESSOR_EVENT,
   TRACE_ID,
-  TRANSACTION_ID
+  PARENT_ID
 } from '../../../../common/elasticsearch_fieldnames';
 import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
-import { rangeFilter } from '../../helpers/range_filter';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters
-} from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 import { ProcessorEvent } from '../../../../common/processor_event';
 
-export async function getTransaction(
-  transactionId: string,
+export async function getRootTransactionByTraceId(
   traceId: string,
-  setup: Setup & SetupTimeRange & SetupUIFilters
+  setup: Setup
 ) {
-  const { start, end, uiFiltersES, client, indices } = setup;
-
+  const { client, indices } = setup;
   const params = {
     index: indices['apm_oss.transactionIndices'],
     body: {
       size: 1,
       query: {
         bool: {
+          should: [
+            {
+              constant_score: {
+                filter: {
+                  bool: {
+                    must_not: { exists: { field: PARENT_ID } }
+                  }
+                }
+              }
+            }
+          ],
           filter: [
-            { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
-            { term: { [TRANSACTION_ID]: transactionId } },
             { term: { [TRACE_ID]: traceId } },
-            { range: rangeFilter(start, end) },
-            ...uiFiltersES
+            { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } }
           ]
         }
       }
@@ -44,5 +45,7 @@ export async function getTransaction(
   };
 
   const resp = await client.search<Transaction>(params);
-  return resp.hits.hits[0]?._source;
+  return {
+    transaction: resp.hits.hits[0]?._source
+  };
 }
