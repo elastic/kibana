@@ -151,9 +151,8 @@ const getMonitoringDeprecations = async (
     ) {
       deprecations.push({
         level: 'critical',
-        message: `${productName} needs migrating bro`,
-        url:
-          'https://www.elastic.co/blog/external-collection-for-elastic-stack-monitoring-is-now-available-via-metricbeat',
+        message: '',
+        url: '',
       });
     }
   }
