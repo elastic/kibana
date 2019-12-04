@@ -81,8 +81,8 @@ export const useSavedView = <ViewState>(defaultViewState: ViewState, viewType: s
     loading,
     deletedId,
     createdId,
-    findError: errorOnFind,
-    createError,
+    errorOnFind,
+    errorOnCreate: createError,
     deleteView,
     find,
   };

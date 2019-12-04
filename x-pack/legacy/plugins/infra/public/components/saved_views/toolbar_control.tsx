@@ -27,8 +27,8 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
     deletedId,
     deleteView,
     find,
-    findError,
-    createError,
+    errorOnFind,
+    errorOnCreate,
     createdId,
   } = useSavedView(props.defaultViewState, props.viewType);
   const [modalOpen, setModalOpen] = useState(false);
@@ -56,10 +56,10 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
   );
 
   useEffect(() => {
-    if (createError) {
+    if (errorOnCreate) {
       setIsInvalid(true);
     }
-  }, [createError]);
+  }, [errorOnCreate]);
 
   useEffect(() => {
     if (createdId !== undefined) {
@@ -76,12 +76,12 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
   }, [deletedId, find]);
 
   useEffect(() => {
-    if (createError) {
-      toastNotifications.addWarning(getErrorToast('create', createError)!);
-    } else if (findError) {
-      toastNotifications.addWarning(getErrorToast('find', findError)!);
+    if (errorOnCreate) {
+      toastNotifications.addWarning(getErrorToast('create', errorOnCreate)!);
+    } else if (errorOnFind) {
+      toastNotifications.addWarning(getErrorToast('find', errorOnFind)!);
     }
-  }, [createError, findError]);
+  }, [errorOnCreate, errorOnFind]);
 
   return (
     <>
