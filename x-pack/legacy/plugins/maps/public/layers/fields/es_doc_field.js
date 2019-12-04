@@ -31,11 +31,11 @@ export class ESDocField extends AbstractField {
     return true;
   }
 
-  async getFieldMetaRequest({ sigma }) {
+  async getFieldMetaRequest(/* config */) {
     const field = await this._getField();
 
     if (field.type === 'number') {
-      const extendedStats = { sigma };
+      const extendedStats = {};
       if (field.scripted) {
         extendedStats.script = {
           source: field.script,

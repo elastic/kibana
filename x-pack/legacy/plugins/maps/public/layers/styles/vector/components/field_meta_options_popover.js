@@ -9,6 +9,7 @@ import {
   EuiButtonIcon,
   EuiFormRow,
   EuiPopover,
+  EuiRange,
   EuiSwitch,
 } from '@elastic/eui';
 import { VECTOR_STYLES } from '../vector_style_defaults';
@@ -86,7 +87,12 @@ export class FieldMetaOptionsPopover extends Component {
     });
   };
 
-
+  _onSigmaChange = event => {
+    this.props.onChange({
+      ...this._getFieldMetaOptions(),
+      sigma: event.target.value,
+    });
+  }
 
   _renderButton() {
     return (
@@ -111,6 +117,25 @@ export class FieldMetaOptionsPopover extends Component {
             label={getIsEnableToggleLabel(this.props.styleProperty.getStyleName())}
             checked={this._getFieldMetaOptions().isEnabled}
             onChange={this._onIsEnabledChange}
+            compressed
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          label={i18n.translate('xpack.maps.styles.fieldMetaOptions.sigmaLabel', {
+            defaultMessage: 'Sigma',
+          })}
+          display="columnCompressed"
+        >
+          <EuiRange
+            min={1}
+            max={5}
+            step={0.25}
+            value={this._getFieldMetaOptions().sigma}
+            onChange={this._onSigmaChange}
+            disabled={!this._getFieldMetaOptions().isEnabled}
+            showTicks
+            tickInterval={1}
             compressed
           />
         </EuiFormRow>

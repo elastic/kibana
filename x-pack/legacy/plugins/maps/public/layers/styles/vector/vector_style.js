@@ -21,7 +21,7 @@ import { VectorStyleLegend } from './components/legend/vector_style_legend';
 import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
 import { SYMBOLIZE_AS_CIRCLE, SYMBOLIZE_AS_ICON } from './vector_constants';
 import { getMakiSymbolAnchor } from './symbol_utils';
-import { getComputedFieldName } from './style_util';
+import { getComputedFieldName, scaleValue } from './style_util';
 import { StaticStyleProperty } from './properties/static_style_property';
 import { DynamicStyleProperty } from './properties/dynamic_style_property';
 import { DynamicSizeProperty } from './properties/dynamic_size_property';
@@ -308,8 +308,11 @@ export class VectorStyle extends AbstractStyle {
           const realFieldName = field.getESDocFieldName ? field.getESDocFieldName() : field.getName();
           const stats = data[realFieldName];
           if (stats) {
-            const min = Math.max(stats.min, stats.std_deviation_bounds.lower);
-            const max = Math.min(stats.max, stats.std_deviation_bounds.upper);
+            const sigma = _.get(dynamicProp.getFieldMetaOptions(), 'sigma', 3);
+            const stdUpperBounds = (stats.std_deviation * sigma) + stats.avg;
+            const stdLowerBounds = (stats.std_deviation * sigma * -1) + stats.avg;
+            const min = Math.max(stats.min, stdLowerBounds);
+            const max = Math.min(stats.max, stdUpperBounds);
             return {
               min,
               max,
@@ -424,13 +427,7 @@ export class VectorStyle extends AbstractStyle {
         const value = parseFloat(feature.properties[name]);
         let styleValue;
         if (isScaled) {
-          if (isNaN(value) || !range) {//cannot scale
-            styleValue = -1;//put outside range
-          } else if (range.delta === 0) {//values are identical
-            styleValue = 1;//snap to end of color range
-          } else {
-            styleValue = (value - range.min) / range.delta;
-          }
+          styleValue = scaleValue(value, range);
         } else {
           if (isNaN(value)) {
             styleValue = 0;
