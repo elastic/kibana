@@ -5,7 +5,7 @@
  */
 
 import { safeLoad } from 'js-yaml';
-import { RegistryPackage, DataSet, AssetReference } from '../../../../common/types';
+import { RegistryPackage, Dataset, AssetReference } from '../../../../common/types';
 import * as Registry from '../../../registry';
 import { CallESAsCurrentUser } from '../../../../server/lib/cluster_access';
 import { getAssetsData } from '../../../packages/assets';
@@ -45,21 +45,26 @@ export async function installTemplates(p: RegistryPackage, callCluster: CallESAs
       }
     }
 
-    const promise = installTemplate(callCluster, datasetFields, p, dataset);
+    const promise = installTemplate({ callCluster, fields: datasetFields, p, dataset });
     promises.push(promise);
   }
 
   return Promise.all(promises);
 }
 
-async function installTemplate(
-  callCluster: CallESAsCurrentUser,
-  fields: Field[],
-  p: RegistryPackage,
-  dataSet: DataSet
-): Promise<AssetReference> {
+async function installTemplate({
+  callCluster,
+  fields,
+  p,
+  dataset,
+}: {
+  callCluster: CallESAsCurrentUser;
+  fields: Field[];
+  p: RegistryPackage;
+  dataset: Dataset;
+}): Promise<AssetReference> {
   const mappings = generateMappings(fields);
-  const templateName = generateTemplateName(p.name, dataSet.name, dataSet.type);
+  const templateName = generateTemplateName(p.name, dataset.name, dataset.type);
   const template = getTemplate(templateName + '-*', mappings);
   // TODO: Check return values for errors
   await callCluster('indices.putTemplate', {
