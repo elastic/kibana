@@ -247,3 +247,8 @@ export function registerMyPluginUsageCollector(usageCollection?: UsageCollection
   usageCollection.registerCollector(myCollector);
 }
 ```
+
+### Naming conventions
+
+Export start and setup contracts as `MyPluginStart` and `MyPluginSetup`. 
+This avoids naming clashes, if everyone exported them simply as `Start` and `Setup`.
