@@ -16,14 +16,3 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { PluginInitializerContext } from '../../../core/public';
-import { MetricsPublicPlugin } from './plugin';
-
-export { METRIC_TYPE } from '@kbn/analytics';
-export { MetricsSetup, MetricsStart } from './plugin';
-export { MetricsPublicPlugin as Plugin };
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new MetricsPublicPlugin(initializerContext);
-}

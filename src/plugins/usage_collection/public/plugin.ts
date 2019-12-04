@@ -21,11 +21,11 @@ import { createReporter, UiStatsMetricType, METRIC_TYPE } from '@kbn/analytics';
 import { Storage } from 'ui/storage';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 
-export interface MetricsSetupContract {
+export interface UsageCollectionSetup {
   registerApp: (appName: string) => void;
 }
 
-export interface MetricsStartContract {
+export interface UsageCollectionStart {
   reportUiStats: (
     appName: string,
     type: UiStatsMetricType,
@@ -36,25 +36,25 @@ export interface MetricsStartContract {
 }
 
 export class MetricsPublicPlugin
-  implements Plugin<{}, {}, MetricsSetupContract, MetricsStartContract> {
+  implements Plugin<{}, {}, UsageCollectionSetup, UsageCollectionStart> {
   private debugMode: boolean = false;
   private apps: { [appName: string]: boolean } = {};
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup): MetricsSetupContract {
+  public setup(core: CoreSetup): UsageCollectionSetup {
     this.debugMode = true;
     return {
       registerApp: (appName: string) => {
         if (this.apps[appName]) {
-          throw Error(`${appName} already registered in metrics plugin.`);
+          throw Error(`${appName} already registered in Usage Collection plugin.`);
         }
         this.apps[appName] = true;
       },
     };
   }
 
-  public start(core: CoreStart): MetricsStartContract {
+  public start(core: CoreStart): UsageCollectionStart {
     const localStorage = new Storage(window.localStorage) as any;
     const http = core.http;
     const debug = this.debugMode;
@@ -64,7 +64,7 @@ export class MetricsPublicPlugin
       debug,
       storage: localStorage,
       async http(report: object) {
-        const url = `/api/metrics/report`;
+        const url = `/api/ui_metric/report`;
         await http.post(url, {
           body: JSON.stringify({ report }),
         });
@@ -82,7 +82,7 @@ export class MetricsPublicPlugin
           return reporter.reportUiStats(appName, type, eventNames, count);
         }
         if (this.debugMode) {
-          throw Error(`${appName} not registered in metrics plugin.`);
+          throw Error(`${appName} not registered in Usage Collection plugin.`);
         }
       },
       METRIC_TYPE,

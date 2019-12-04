@@ -3,9 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Plugin as TransformPlugin } from './plugin';
-import { createPublicShim } from './shim';
+import { TransformPlugin } from './plugin';
+import { createPublicStartShim, createPublicSetupShim } from './shim';
 
-const { core, plugins } = createPublicShim();
-const transformPlugin = new TransformPlugin();
-transformPlugin.start(core, plugins);
+function createPlugin() {
+  const transformPlugin = new TransformPlugin();
+  const setupShim = createPublicSetupShim();
+  const startShim = createPublicStartShim();
+  transformPlugin.setup(setupShim.core, setupShim.plugins);
+  transformPlugin.start(startShim.core, startShim.plugins);
+}
+
+createPlugin();
