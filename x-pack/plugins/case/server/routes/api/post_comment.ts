@@ -22,10 +22,10 @@ export function initPostCommentApi({ caseService, router }: RouteDeps) {
       },
     },
     async (context, request, response) => {
-      let user;
+      let createdBy;
       let newComment;
       try {
-        user = await caseService.getUser({ request, response });
+        createdBy = await caseService.getUser({ request, response });
       } catch (error) {
         return response.customError(wrapError(error));
       }
@@ -34,8 +34,7 @@ export function initPostCommentApi({ caseService, router }: RouteDeps) {
           client: context.core.savedObjects.client,
           attributes: formatNewComment({
             newComment: request.body,
-            full_name: created_by.full_name,
-            username: created_by.username,
+            ...createdBy,
           }),
           references: [
             {

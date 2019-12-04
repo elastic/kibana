@@ -17,9 +17,9 @@ export function initPostCaseApi({ caseService, router }: RouteDeps) {
       },
     },
     async (context, request, response) => {
-      let user;
+      let createdBy;
       try {
-        user = await caseService.getUser({ request, response });
+        createdBy = await caseService.getUser({ request, response });
       } catch (error) {
         return response.customError(wrapError(error));
       }
@@ -28,8 +28,7 @@ export function initPostCaseApi({ caseService, router }: RouteDeps) {
         const newCase = await caseService.postNewCase({
           client: context.core.savedObjects.client,
           attributes: formatNewCase(request.body, {
-            full_name: created_by.full_name,
-            username: created_by.username,
+            ...createdBy,
           }),
         });
         return response.ok({ body: newCase });
