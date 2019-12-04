@@ -48,7 +48,7 @@ export interface RuleAlertParams {
   language: string | undefined | null;
   maxSignals: number;
   riskScore: number;
-  outputIndex: string; // TODO: This should be optional undefined or null
+  outputIndex: string;
   name: string;
   query: string | undefined | null;
   references: string[];
