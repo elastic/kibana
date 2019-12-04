@@ -39,12 +39,10 @@ export interface CapabilitiesStart {
  */
 export class CapabilitiesService {
   public async start({ appIds, http }: StartDeps): Promise<CapabilitiesStart> {
-    const capabilities = await http.post<Capabilities>(
-      `/api/core/capabilities${
-        http.anonymousPaths.isAnonymous(window.location.pathname) ? '/defaults' : ''
-      }`,
-      { body: JSON.stringify({ applications: appIds }) }
-    );
+    const route = http.anonymousPaths.isAnonymous(window.location.pathname) ? '/defaults' : '';
+    const capabilities = await http.post<Capabilities>(`/api/core/capabilities${route}`, {
+      body: JSON.stringify({ applications: appIds }),
+    });
 
     return {
       capabilities: deepFreeze(capabilities),

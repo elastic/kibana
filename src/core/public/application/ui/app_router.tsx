@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import React, { Fragment, FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 import { History } from 'history';
-import { Router, Route, RouteComponentProps } from 'react-router-dom';
+import { Router, Route, RouteComponentProps, Switch } from 'react-router-dom';
 
 import { Mounter } from '../types';
 import { AppContainer } from './app_container';
@@ -35,7 +35,7 @@ interface Params {
 
 export const AppRouter: FunctionComponent<Props> = ({ history, mounters }) => (
   <Router history={history}>
-    <Fragment>
+    <Switch>
       {[...mounters].flatMap(([appId, mounter]) =>
         // Remove /app paths from the routes as they will be handled by the
         // "named" route parameter `:appId` below
@@ -64,6 +64,6 @@ export const AppRouter: FunctionComponent<Props> = ({ history, mounters }) => (
           return <AppContainer mounter={mounter} appId={id} />;
         }}
       />
-    </Fragment>
+    </Switch>
   </Router>
 );

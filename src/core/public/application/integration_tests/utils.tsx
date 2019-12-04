@@ -17,31 +17,33 @@
  * under the License.
  */
 
-import React, { Component, ReactNode } from 'react';
-import { mount, ReactWrapper } from 'enzyme';
+import React, { ReactElement } from 'react';
+import { mount } from 'enzyme';
 
 import { I18nProvider } from '@kbn/i18n/react';
 
 import { App, LegacyApp, AppMountParameters } from '../types';
 import { MockedMounter, MockedMounterTuple } from '../test_types';
 
-type Renderer = (
-  item: string
-) => Promise<ReactWrapper<any, Readonly<{}>, Component<{}, {}, any>> | null>;
+type Dom = ReturnType<typeof mount> | null;
+type Renderer = (item: string) => Dom | Promise<Dom>;
 
 export const createRenderer = (
-  node: ReactNode | null,
-  callback: (item: string) => void
+  element: ReactElement | null,
+  callback?: (item: string) => void | Promise<void>
 ): Renderer => {
-  const dom = node !== null ? mount(<I18nProvider>{node}</I18nProvider>) : node;
+  const dom: Dom = element && mount(<I18nProvider>{element}</I18nProvider>);
 
-  return (item: string) => {
-    callback(item);
-    if (dom) {
-      dom.update();
-    }
-    return new Promise(resolve => setImmediate(() => resolve(dom))); // flushes any pending promises
-  };
+  return item =>
+    new Promise(async resolve => {
+      if (callback) {
+        await callback(item);
+      }
+      if (dom) {
+        dom.update();
+      }
+      setImmediate(() => resolve(dom)); // flushes any pending promises
+    });
 };
 
 export const createAppMounter = (
