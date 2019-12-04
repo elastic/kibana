@@ -72,16 +72,17 @@ export class StylePropertyLegendRow extends Component {
     return !this.props.style.isDynamic() || !this.props.style.isComplete() || !this.props.style.getField().getName();
   }
 
-  _formatValue = value => {
+  _formatValue = (value, prefix) => {
     if (!this.state.hasLoadedFieldFormatter || !this._fieldValueFormatter || value === EMPTY_VALUE) {
       return value;
     }
 
-    return this._fieldValueFormatter(value);
+    return this.props.style.isFieldMetaEnabled()
+      ? `${prefix} ${this._fieldValueFormatter(value)}`
+      : this._fieldValueFormatter(value);
   }
 
   render() {
-
     const { range, style } = this.props;
     if (this._excludeFromHeader()) {
       return null;
@@ -91,8 +92,8 @@ export class StylePropertyLegendRow extends Component {
     return (
       <StyleLegendRow
         header={header}
-        minLabel={this._formatValue(_.get(range, 'min', EMPTY_VALUE))}
-        maxLabel={this._formatValue(_.get(range, 'max', EMPTY_VALUE))}
+        minLabel={this._formatValue(_.get(range, 'min', EMPTY_VALUE), '<')}
+        maxLabel={this._formatValue(_.get(range, 'max', EMPTY_VALUE), '>')}
         propertyLabel={getVectorStyleLabel(style.getStyleName())}
         fieldLabel={this.state.label}
       />
