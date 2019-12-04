@@ -18,26 +18,19 @@
  */
 
 import ace from 'brace';
+const _ = require('lodash');
 
 const { SqlHighlightRules } = ace.acequire('ace/mode/sql_highlight_rules');
-const _ = require('lodash');
-const ScriptHighlightRules = require('./script_highlight_rules').ScriptHighlightRules;
+const { ScriptHighlightRules } = require('./script_highlight_rules');
 
 const jsonRules = function (root) {
   root = root ? root : 'json';
   const rules = {};
-  rules[root] = [
+  const xJsonRules = [
     {
       token: ['variable', 'whitespace', 'ace.punctuation.colon', 'whitespace', 'punctuation.start_triple_quote'],
       regex: '("(?:[^"]*_)?script"|"inline"|"source")(\\s*?)(:)(\\s*?)(""")',
       next: 'script-start',
-      merge: false,
-      push: true
-    },
-    {
-      token: 'punctuation.start_triple_quote',
-      regex: '"""sql',
-      next: 'sql-start',
       merge: false,
       push: true
     },
@@ -116,6 +109,16 @@ const jsonRules = function (root) {
       regex: '.+?'
     }
   ];
+
+  rules[root] = xJsonRules;
+  rules[root + '-sql'] = [{
+    token: ['variable', 'whitespace', 'ace.punctuation.colon', 'whitespace', 'punctuation.start_triple_quote'],
+    regex: '("query")(\\s*?)(:)(\\s*?)(""")',
+    next: 'sql-start',
+    merge: false,
+    push: true
+  }].concat(xJsonRules);
+
   rules.string_literal = [
     {
       token: 'punctuation.end_triple_quote',

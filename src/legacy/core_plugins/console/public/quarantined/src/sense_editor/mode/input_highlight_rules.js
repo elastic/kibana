@@ -36,12 +36,17 @@ export function mergeTokens(/* ... */) {
 
 const oop = ace.acequire('ace/lib/oop');
 const { TextHighlightRules } = ace.acequire('ace/mode/text_highlight_rules');
-export function InputHighlightRules() {
 
+export function InputHighlightRules() {
   // regexp must not have capturing parentheses. Use (?:) instead.
   // regexps are ordered -> the first match is used
   /*jshint -W015 */
   this.$rules = {
+    'start-sql': [
+      { token: 'whitespace', regex: '\\s+' },
+      { token: 'paren.lparen', regex: '{', next: 'json-sql', push: true },
+      { regex: '', next: 'start' }
+    ],
     'start': mergeTokens([
       { 'token': 'warning', 'regex': '#!.*$' },
       { token: 'comment', regex: /^#.*$/ },
@@ -66,6 +71,7 @@ export function InputHighlightRules() {
       addEOL(['whitespace'], /(\s+)/, 'start', 'url')
     ),
     'url': mergeTokens(
+      addEOL(['url.part'], /(_sql)/, 'start-sql', 'url-sql'),
       addEOL(['url.part'], /([^?\/,\s]+)/, 'start'),
       addEOL(['url.comma'], /(,)/, 'start'),
       addEOL(['url.slash'], /(\/)/, 'start'),
@@ -75,7 +81,17 @@ export function InputHighlightRules() {
       addEOL(['url.param', 'url.equal', 'url.value'], /([^&=]+)(=)([^&]*)/, 'start'),
       addEOL(['url.param'], /([^&=]+)/, 'start'),
       addEOL(['url.amp'], /(&)/, 'start')
-    )
+    ),
+    'url-sql': mergeTokens(
+      addEOL(['url.comma'], /(,)/, 'start-sql'),
+      addEOL(['url.slash'], /(\/)/, 'start-sql'),
+      addEOL(['url.questionmark'], /(\?)/, 'start-sql', 'urlParams-sql')
+    ),
+    'urlParams-sql': mergeTokens(
+      addEOL(['url.param', 'url.equal', 'url.value'], /([^&=]+)(=)([^&]*)/, 'start-sql'),
+      addEOL(['url.param'], /([^&=]+)/, 'start-sql'),
+      addEOL(['url.amp'], /(&)/, 'start-sql')
+    ),
   };
 
   addToRules(this);
