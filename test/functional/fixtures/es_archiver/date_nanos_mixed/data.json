@@ -11,8 +11,7 @@
         "fieldFormatMap": "{\"timestamp\":{\"id\":\"date_nanos\"}}"
       },
       "type": "index-pattern"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -41,8 +40,7 @@
         "version": 1
       },
       "type": "search"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -53,8 +51,7 @@
     "index": "timestamp-millis",
     "source": {
       "timestamp": "2019-01-01T12:10:30.124Z"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -65,8 +62,7 @@
     "index": "timestamp-millis",
     "source": {
       "timestamp": "2019-01-01T12:10:30.123Z"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -77,8 +73,7 @@
     "index": "timestamp-nanos",
     "source": {
       "timestamp": "2019-01-01T12:10:30.123456789Z"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -89,7 +84,6 @@
     "index": "timestamp-nanos",
     "source": {
       "timestamp": "2019-01-01T12:10:30.123498765Z"
-    },
-    "type": "_doc"
+    }
   }
 }

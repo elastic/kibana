@@ -16,7 +16,6 @@
     "hits": [
       {
         "_index": ".ml-annotations-6",
-        "_type": "doc",
         "_id": "T-CNvmgBQUJYQVn7TCPA",
         "_score": 0,
         "_source": {
@@ -33,7 +32,6 @@
       },
       {
         "_index": ".ml-annotations-6",
-        "_type": "doc",
         "_id": "3lVpvmgB5xYzd3PM-MSe",
         "_score": 0,
         "_source": {

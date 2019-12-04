@@ -2,7 +2,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "index-pattern:logstash-*",
     "source": {
       "index-pattern": {
@@ -23,7 +22,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "config:6.0.0",
     "source": {
       "config": {
@@ -40,7 +38,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "custom_space:index-pattern:logstash-*",
     "source": {
       "namespace": "custom_space",
@@ -62,7 +59,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "custom_space:config:6.0.0",
     "source": {
       "namespace": "custom_space",
