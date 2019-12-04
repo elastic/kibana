@@ -17,12 +17,21 @@
  * under the License.
  */
 
-import { AppState } from '../app_state';
-import { GlobalState } from '../global_state';
-import { State } from '../state';
+import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
+import { HashedItemStore } from './hashed_item_store';
 
-export function getUnhashableStatesProvider(getAppState: () => AppState, globalState: GlobalState) {
-  return function getUnhashableStates(): State[] {
-    return [getAppState(), globalState].filter(Boolean);
+/**
+ * Useful for mocking state_storage from jest,
+ *
+ * import { mockSessionStorage } from '../state_storage/mock;
+ *
+ * And all tests in the test file will use HashedItemStoreSingleton
+ * with underlying mockSessionStorage we have access to
+ */
+export const mockSessionStorage = new StubBrowserStorage();
+const mockHashedItemStore = new HashedItemStore(mockSessionStorage);
+jest.mock('../state_storage', () => {
+  return {
+    HashedItemStoreSingleton: mockHashedItemStore,
   };
-}
+});
