@@ -38,7 +38,6 @@ import {
   ContactCardEmbeddableFactory,
 } from './embeddable_api';
 import { App } from './app';
-import { SavedObjectFinder as SavedObjectFinderNP } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   IEmbeddableStart,
   IEmbeddableSetup,
@@ -96,14 +95,6 @@ export class EmbeddableExplorerPublicPlugin
       contactCardEmbeddableFactory
     );
 
-    const SavedObjectFinder = (props: any) => (
-      <SavedObjectFinderNP
-        savedObjects={core.savedObjects}
-        uiSettings={core.uiSettings}
-        {...props}
-      />
-    );
-
     plugins.__LEGACY.onRenderComplete(() => {
       const root = document.getElementById(REACT_ROOT_ID);
       ReactDOM.render(
@@ -115,7 +106,8 @@ export class EmbeddableExplorerPublicPlugin
           overlays={core.overlays}
           inspector={plugins.inspector}
           I18nContext={core.i18n.Context}
-          SavedObjectFinder={SavedObjectFinder}
+          uiSettings={core.uiSettings}
+          savedObjects={core.savedObjects}
         />,
         root
       );

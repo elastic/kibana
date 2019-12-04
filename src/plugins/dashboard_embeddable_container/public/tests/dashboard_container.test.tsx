@@ -64,7 +64,8 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
     notifications: {} as any,
     overlays: {} as any,
     inspector: {} as any,
-    SavedObjectFinder: () => null,
+    uiSettings: {} as any,
+    savedObjects: {} as any,
     ExitFullScreenButton: () => null,
     uiActions: {} as any,
   };
@@ -89,7 +90,8 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
           notifications={{} as any}
           overlays={{} as any}
           inspector={inspector}
-          SavedObjectFinder={() => null}
+          uiSettings={{} as any}
+          savedObjects={{} as any}
         />
       </KibanaContextProvider>
     </I18nProvider>

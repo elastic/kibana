@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { npStart } from 'ui/new_platform';
-import { SavedObjectFinder } from '../../../../../../../../../../src/plugins/kibana_react/public';
+import { SavedObjectFinderUi } from '../../../../../../../../../../src/plugins/kibana_react/public';
 
 export interface PageProps {
   nextStepPath: string;
@@ -47,7 +47,7 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
           </EuiPageHeaderSection>
         </EuiPageHeader>
         <EuiPageContent>
-          <SavedObjectFinder
+          <SavedObjectFinderUi
             key="searchSavedObjectFinder"
             onChoose={onObjectSelection}
             showFilter

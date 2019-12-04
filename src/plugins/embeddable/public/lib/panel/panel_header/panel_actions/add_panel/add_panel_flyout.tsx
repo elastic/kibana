@@ -36,7 +36,7 @@ import {
 import { IContainer } from '../../../../containers';
 import { EmbeddableFactoryNotFoundError } from '../../../../errors';
 import { GetEmbeddableFactories, GetEmbeddableFactory } from '../../../../types';
-import { SavedObjectFinder } from '../../../../../../../kibana_react/public';
+import { SavedObjectFinderUi } from '../../../../../../../kibana_react/public';
 
 interface Props {
   onClose: () => void;
@@ -134,7 +134,7 @@ export class AddPanelFlyout extends React.Component<Props, State> {
 
   public render() {
     const savedObjectsFinder = (
-      <SavedObjectFinder
+      <SavedObjectFinderUi
         onChoose={this.onAddPanel}
         savedObjectMetaData={[...this.props.getAllFactories()]
           .filter(

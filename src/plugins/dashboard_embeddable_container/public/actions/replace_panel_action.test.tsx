@@ -43,7 +43,6 @@ let embeddable: ContactCardEmbeddable;
 beforeEach(async () => {
   const options: DashboardOptions = {
     ExitFullScreenButton: () => null,
-    SavedObjectFinder: () => null,
     application: {} as any,
     embeddable: {
       getEmbeddableFactory: (id: string) => embeddableFactories.get(id)!,
@@ -51,6 +50,8 @@ beforeEach(async () => {
     inspector: {} as any,
     notifications: {} as any,
     overlays: {} as any,
+    uiSettings: {} as any,
+    savedObjects: {} as any,
     savedObjectMetaData: {} as any,
     uiActions: {} as any,
   };
@@ -81,27 +82,13 @@ beforeEach(async () => {
 
 test('Executes the replace panel action', async () => {
   let core: any;
-  let SavedObjectFinder: any;
-  let notifications: any;
-  const action = new ReplacePanelAction(
-    core,
-    SavedObjectFinder,
-    notifications,
-    getEmbeddableFactories
-  );
+  const action = new ReplacePanelAction(core, getEmbeddableFactories);
   action.execute({ embeddable });
 });
 
 test('Is not compatible when embeddable is not in a dashboard container', async () => {
   let core: any;
-  let SavedObjectFinder: any;
-  let notifications: any;
-  const action = new ReplacePanelAction(
-    core,
-    SavedObjectFinder,
-    notifications,
-    getEmbeddableFactories
-  );
+  const action = new ReplacePanelAction(core, getEmbeddableFactories);
   expect(
     await action.isCompatible({
       embeddable: new ContactCardEmbeddable(
@@ -114,14 +101,7 @@ test('Is not compatible when embeddable is not in a dashboard container', async 
 
 test('Execute throws an error when called with an embeddable not in a parent', async () => {
   let core: any;
-  let SavedObjectFinder: any;
-  let notifications: any;
-  const action = new ReplacePanelAction(
-    core,
-    SavedObjectFinder,
-    notifications,
-    getEmbeddableFactories
-  );
+  const action = new ReplacePanelAction(core, getEmbeddableFactories);
   async function check() {
     await action.execute({ embeddable: container });
   }
@@ -130,26 +110,12 @@ test('Execute throws an error when called with an embeddable not in a parent', a
 
 test('Returns title', async () => {
   let core: any;
-  let SavedObjectFinder: any;
-  let notifications: any;
-  const action = new ReplacePanelAction(
-    core,
-    SavedObjectFinder,
-    notifications,
-    getEmbeddableFactories
-  );
+  const action = new ReplacePanelAction(core, getEmbeddableFactories);
   expect(action.getDisplayName({ embeddable })).toBeDefined();
 });
 
 test('Returns an icon', async () => {
   let core: any;
-  let SavedObjectFinder: any;
-  let notifications: any;
-  const action = new ReplacePanelAction(
-    core,
-    SavedObjectFinder,
-    notifications,
-    getEmbeddableFactories
-  );
+  const action = new ReplacePanelAction(core, getEmbeddableFactories);
   expect(action.getIconType({ embeddable })).toBeDefined();
 });

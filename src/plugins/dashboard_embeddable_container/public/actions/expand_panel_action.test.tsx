@@ -42,7 +42,6 @@ let embeddable: ContactCardEmbeddable;
 beforeEach(async () => {
   const options: DashboardOptions = {
     ExitFullScreenButton: () => null,
-    SavedObjectFinder: () => null,
     application: {} as any,
     embeddable: {
       getEmbeddableFactory: (id: string) => embeddableFactories.get(id)!,
@@ -52,6 +51,8 @@ beforeEach(async () => {
     overlays: {} as any,
     savedObjectMetaData: {} as any,
     uiActions: {} as any,
+    uiSettings: {} as any,
+    savedObjects: {} as any,
   };
   const input = getSampleDashboardInput({
     panels: {

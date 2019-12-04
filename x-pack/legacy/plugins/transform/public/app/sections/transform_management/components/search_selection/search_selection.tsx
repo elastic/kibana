@@ -8,7 +8,7 @@ import { EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui'
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC } from 'react';
-import { SavedObjectFinder } from '../../../../../../../../../../src/plugins/kibana_react/public';
+import { SavedObjectFinderUi } from '../../../../../../../../../../src/plugins/kibana_react/public';
 import { useAppDependencies } from '../../../../app_dependencies';
 
 interface SearchSelectionProps {
@@ -37,7 +37,7 @@ export const SearchSelection: FC<SearchSelectionProps> = ({ onSearchSelected }) 
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <SavedObjectFinder
+        <SavedObjectFinderUi
           key="searchSavedObjectFinder"
           onChoose={onSearchSelected}
           showFilter

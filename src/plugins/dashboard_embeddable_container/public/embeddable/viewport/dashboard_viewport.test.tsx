@@ -57,7 +57,8 @@ function getProps(
     notifications: {} as any,
     overlays: {} as any,
     inspector: {} as any,
-    SavedObjectFinder: () => null,
+    uiSettings: {} as any,
+    savedObjects: {} as any,
     ExitFullScreenButton,
     uiActions: {} as any,
   };

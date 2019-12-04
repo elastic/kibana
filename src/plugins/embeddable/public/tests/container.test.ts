@@ -73,7 +73,8 @@ async function creatHelloWorldContainerAndEmbeddable(
     overlays: coreStart.overlays,
     notifications: coreStart.notifications,
     inspector: {} as any,
-    SavedObjectFinder: () => null,
+    uiSettings: coreStart.uiSettings,
+    savedObjects: coreStart.savedObjects,
   });
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
@@ -146,7 +147,8 @@ test('Container.removeEmbeddable removes and cleans up', async done => {
       overlays: coreStart.overlays,
       notifications: coreStart.notifications,
       inspector: {} as any,
-      SavedObjectFinder: () => null,
+      uiSettings: coreStart.uiSettings,
+      savedObjects: coreStart.savedObjects,
     }
   );
   const embeddable = await container.addNewEmbeddable<
@@ -326,7 +328,8 @@ test(`Container updates its state when a child's input is updated`, async done =
           notifications: coreStart.notifications,
           overlays: coreStart.overlays,
           inspector: {} as any,
-          SavedObjectFinder: () => null,
+          uiSettings: coreStart.uiSettings,
+          savedObjects: coreStart.savedObjects,
         });
         const cloneSubscription = Rx.merge(
           containerClone.getOutput$(),
@@ -576,7 +579,8 @@ test('Container changes made directly after adding a new embeddable are propagat
       overlays: coreStart.overlays,
       notifications: coreStart.notifications,
       inspector: {} as any,
-      SavedObjectFinder: () => null,
+      uiSettings: coreStart.uiSettings,
+      savedObjects: coreStart.savedObjects,
     }
   );
 
@@ -708,7 +712,8 @@ test('untilEmbeddableLoaded() throws an error if there is no such child panel in
       overlays: coreStart.overlays,
       notifications: coreStart.notifications,
       inspector: {} as any,
-      SavedObjectFinder: () => null,
+      uiSettings: coreStart.uiSettings,
+      savedObjects: coreStart.savedObjects,
     }
   );
 
@@ -742,7 +747,8 @@ test('untilEmbeddableLoaded() resolves if child is loaded in the container', asy
       overlays: coreStart.overlays,
       notifications: coreStart.notifications,
       inspector: {} as any,
-      SavedObjectFinder: () => null,
+      uiSettings: coreStart.uiSettings,
+      savedObjects: coreStart.savedObjects,
     }
   );
 
@@ -780,7 +786,8 @@ test('untilEmbeddableLoaded resolves with undefined if child is subsequently rem
       overlays: coreStart.overlays,
       notifications: coreStart.notifications,
       inspector: {} as any,
-      SavedObjectFinder: () => null,
+      uiSettings: coreStart.uiSettings,
+      savedObjects: coreStart.savedObjects,
     }
   );
 
@@ -820,7 +827,8 @@ test('adding a panel then subsequently removing it before its loaded removes the
       overlays: coreStart.overlays,
       notifications: coreStart.notifications,
       inspector: {} as any,
-      SavedObjectFinder: () => null,
+      uiSettings: coreStart.uiSettings,
+      savedObjects: coreStart.savedObjects,
     }
   );
 

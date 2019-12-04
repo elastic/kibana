@@ -43,8 +43,9 @@ interface Props {
   getAllEmbeddableFactories: GetEmbeddableFactories;
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
+  uiSettings: CoreStart['uiSettings'];
+  savedObjects: CoreStart['savedObjects'];
   inspector: InspectorStartContract;
-  SavedObjectFinder: React.ComponentType<any>;
 }
 
 interface State {
@@ -114,7 +115,8 @@ export class DashboardContainerExample extends React.Component<Props, State> {
             overlays={this.props.overlays}
             notifications={this.props.notifications}
             inspector={this.props.inspector}
-            SavedObjectFinder={this.props.SavedObjectFinder}
+            uiSettings={this.props.uiSettings}
+            savedObjects={this.props.savedObjects}
           />
         )}
       </div>

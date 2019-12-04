@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import { VisType, getServices } from '../../kibana_services';
-import { SavedObjectFinder } from '../../../../../../../plugins/kibana_react/public';
+import { SavedObjectFinderUi } from '../../../../../../../plugins/kibana_react/public';
 
 interface SearchSelectionProps {
   onSearchSelected: (searchId: string, searchType: string) => void;
@@ -54,7 +54,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
-          <SavedObjectFinder
+          <SavedObjectFinderUi
             key="searchSavedObjectFinder"
             onChoose={this.props.onSearchSelected}
             showFilter
