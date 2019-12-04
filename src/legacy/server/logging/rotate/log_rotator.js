@@ -147,7 +147,7 @@ export class LogRotator {
     }
 
     this.stalker = chokidar.watch(this.logFilePath, this._buildWatchCfg(this.usePolling));
-    this.stalker.on('change', async (filename, stats) => await this._logFileSizeMonitorHandler.bind(this)(filename, stats));
+    this.stalker.on('change', this._logFileSizeMonitorHandler);
   }
 
 _logFileSizeMonitorHandler = async  (filename, stats) => {
