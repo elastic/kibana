@@ -7,7 +7,6 @@ import {
   PluginInitializerContext,
   Plugin,
   CoreSetup,
-  RequestHandlerContext,
   SavedObjectsClientContract,
 } from 'src/core/server';
 import { Observable, combineLatest, AsyncSubject } from 'rxjs';

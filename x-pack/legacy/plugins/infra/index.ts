@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import JoiNamespace from 'joi';
 import { resolve } from 'path';
-import { PluginInitializerContext, SavedObjectsClientContract } from 'src/core/server';
+import { PluginInitializerContext } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import KbnServer from 'src/legacy/server/kbn_server';
 import { getConfigSchema } from './server/kibana.index';

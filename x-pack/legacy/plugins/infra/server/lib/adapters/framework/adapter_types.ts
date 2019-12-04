@@ -11,10 +11,6 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { RouteMethod, RouteConfig } from '../../../../../../../../src/core/server';
 import { APMPluginContract } from '../../../../../../../plugins/apm/server/plugin';
 
-interface ApmIndices {
-  'apm_oss.transactionIndices': string | undefined;
-}
-
 // NP_TODO: Compose real types from plugins we depend on, no "any"
 export interface InfraServerPluginDeps {
   usageCollection: UsageCollectionSetup;
