@@ -5,8 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { generateRulesFromRaw } from '../../../../../../common/model/role_mappings/rule_builder';
 import { RoleMapping } from '../../../../../../common/model';
+import { generateRulesFromRaw } from '../../model';
 
 interface ValidationResult {
   isInvalid: boolean;

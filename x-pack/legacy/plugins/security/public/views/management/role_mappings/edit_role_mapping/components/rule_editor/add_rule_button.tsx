@@ -6,9 +6,7 @@
 
 import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiPopover, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
-import { AllRule } from '../../../../../../../common/model/role_mappings/all_rule';
-import { FieldRule } from '../../../../../../../common/model/role_mappings/field_rule';
-import { BaseRule } from '../../../../../../../common/model/role_mappings/base_rule';
+import { BaseRule, FieldRule, AllRule } from '../../../model';
 
 interface Props {
   onClick: (newRule: BaseRule) => void;

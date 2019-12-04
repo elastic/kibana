@@ -8,12 +8,9 @@ import React, { Component, Fragment } from 'react';
 import { EuiEmptyPrompt, EuiCallOut, EuiSpacer, EuiButton } from '@elastic/eui';
 import { FieldRuleEditor } from './field_rule_editor';
 import { AddRuleButton } from './add_rule_button';
-
-import { BaseRule } from '../../../../../../../common/model/role_mappings/base_rule';
 import { RuleGroupEditor } from './rule_group_editor';
-import { BaseRuleGroup } from '../../../../../../../common/model/role_mappings/base_rule_group';
-import { FieldRule } from '../../../../../../../common/model/role_mappings/field_rule';
 import { VISUAL_MAX_RULE_DEPTH } from '../../services/role_mapping_constants';
+import { BaseRule, FieldRule, BaseRuleGroup } from '../../../model';
 
 interface Props {
   rules: BaseRule | null;

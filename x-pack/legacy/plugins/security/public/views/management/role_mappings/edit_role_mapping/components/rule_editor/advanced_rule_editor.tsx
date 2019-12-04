@@ -8,12 +8,8 @@ import React, { useState, Fragment } from 'react';
 
 import 'brace/mode/json';
 import 'brace/theme/github';
-import { EuiCodeEditor, EuiFormRow, EuiButtonIcon, EuiButton, EuiSpacer } from '@elastic/eui';
-import {
-  generateRulesFromRaw,
-  RuleBuilderError,
-} from '../../../../../../../common/model/role_mappings/rule_builder';
-import { BaseRule } from '../../../../../../../common/model/role_mappings/base_rule';
+import { EuiCodeEditor, EuiFormRow, EuiButton, EuiSpacer } from '@elastic/eui';
+import { BaseRule, RuleBuilderError, generateRulesFromRaw } from '../../../model';
 
 interface Props {
   rules: BaseRule | null;

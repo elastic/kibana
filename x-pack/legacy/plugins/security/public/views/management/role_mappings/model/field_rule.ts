@@ -6,10 +6,11 @@
 
 import _ from 'lodash';
 import { BaseRule } from './base_rule';
-import { RoleMappingFieldRuleValue } from '..';
+
+export type FieldRuleValue = string | number | null | Array<string | number | null>;
 
 export class FieldRule extends BaseRule {
-  constructor(public readonly field: string, public readonly value: RoleMappingFieldRuleValue) {
+  constructor(public readonly field: string, public readonly value: FieldRuleValue) {
     super();
   }
 

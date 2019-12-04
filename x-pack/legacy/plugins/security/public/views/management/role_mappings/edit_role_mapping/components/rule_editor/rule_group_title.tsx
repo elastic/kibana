@@ -14,9 +14,7 @@ import {
   EuiOverlayMask,
   EuiConfirmModal,
 } from '@elastic/eui';
-import { BaseRule } from '../../../../../../../common/model/role_mappings/base_rule';
-import { createRuleForType } from '../../../../../../../common/model/role_mappings/rule_builder';
-import { BaseRuleGroup } from '../../../../../../../common/model/role_mappings/base_rule_group';
+import { BaseRuleGroup, BaseRule, createRuleForType } from '../../../model';
 
 interface Props {
   rule: BaseRuleGroup;

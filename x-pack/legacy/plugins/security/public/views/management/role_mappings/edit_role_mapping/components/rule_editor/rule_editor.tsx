@@ -15,14 +15,13 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { RoleMapping } from '../../../../../../../common/model';
-import { BaseRule } from '../../../../../../../common/model/role_mappings/base_rule';
-import { generateRulesFromRaw } from '../../../../../../../common/model/role_mappings/rule_builder';
 import { VisualRuleEditor } from './visual_rule_editor';
 import { AdvancedRuleEditor } from './advanced_rule_editor';
 import {
   DEFAULT_VISUAL_EDITOR_RULE_DEPTH_CUTOFF,
   VISUAL_MAX_RULE_DEPTH,
 } from '../../services/role_mapping_constants';
+import { BaseRule, generateRulesFromRaw } from '../../../model';
 
 interface Props {
   rawRules: RoleMapping['rules'];

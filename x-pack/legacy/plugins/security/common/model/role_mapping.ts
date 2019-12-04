@@ -4,23 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type RoleMappingUserFields = 'username' | 'dn' | 'groups' | 'metadata' | 'realm' | string;
-
-export type RoleMappingFieldRuleValue = string | number | null | Array<string | number | null>;
-
-export interface RoleMappingAnyRule {
+interface RoleMappingAnyRule {
   any: RoleMappingRule[];
 }
 
-export interface RoleMappingAllRule {
+interface RoleMappingAllRule {
   all: RoleMappingRule[];
 }
 
-export interface RoleMappingFieldRule {
-  field: Record<RoleMappingUserFields, RoleMappingFieldRuleValue>;
+interface RoleMappingFieldRule {
+  field: Record<string, any>;
 }
 
-export interface RoleMappingExceptRule {
+interface RoleMappingExceptRule {
   except: RoleMappingRule;
 }
 
@@ -29,14 +25,6 @@ export type RoleMappingRule =
   | RoleMappingAllRule
   | RoleMappingFieldRule
   | RoleMappingExceptRule;
-
-export type RoleMappingRuleType =
-  | 'field'
-  | 'all'
-  | 'any'
-  | 'exceptAll'
-  | 'exceptAny'
-  | 'exceptField';
 
 export type RoleTemplateFormat = 'string' | 'json';
 

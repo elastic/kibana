@@ -6,12 +6,10 @@
 
 import React, { Component } from 'react';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
-import { BaseRule } from '../../../../../../../common/model/role_mappings/base_rule';
-import { FieldRule } from '../../../../../../../common/model/role_mappings/field_rule';
-import { BaseRuleGroup } from '../../../../../../../common/model/role_mappings/base_rule_group';
 import { AddRuleButton } from './add_rule_button';
 import { RuleGroupTitle } from './rule_group_title';
 import { FieldRuleEditor } from './field_rule_editor';
+import { BaseRuleGroup, BaseRule, FieldRule } from '../../../model';
 
 interface Props {
   rule: BaseRuleGroup;

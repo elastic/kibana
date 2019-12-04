@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FieldRule } from './field_rule';
+import { FieldRule, FieldRuleValue } from './field_rule';
 import { AllRule } from './all_rule';
 import { AnyRule } from './any_rule';
 import { BaseRule } from './base_rule';
 import { ExceptFieldRule } from './except_field_rule';
 import { ExceptAllRule } from './except_all_rule';
 import { ExceptAnyRule } from './except_any_rule';
-import { RoleMappingFieldRuleValue } from '..';
 
 export class RuleBuilderError extends Error {
   constructor(message: string, public readonly ruleTrace: string[]) {
@@ -56,7 +55,7 @@ export function createRuleForType(
         ]);
       }
 
-      const [field, value] = entries[0] as [string, RoleMappingFieldRuleValue];
+      const [field, value] = entries[0] as [string, FieldRuleValue];
       const values = Array.isArray(value) ? value : [value];
       values.forEach(fieldValue => {
         const valueType = typeof fieldValue;

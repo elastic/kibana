@@ -17,8 +17,7 @@ import {
   EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
-import { FieldRule } from '../../../../../../../common/model/role_mappings/field_rule';
-import { RoleMappingFieldRuleValue } from '../../../../../../../common/model';
+import { FieldRule, FieldRuleValue } from '../../../model';
 
 interface Props {
   rule: FieldRule;
@@ -52,7 +51,7 @@ const fieldOptions = userFields.map(f => ({ label: f.name }));
 type ComparisonOption = 'text' | 'number' | 'null';
 const comparisonOptions: Record<
   ComparisonOption,
-  { id: string; label: string; defaultValue: RoleMappingFieldRuleValue }
+  { id: string; label: string; defaultValue: FieldRuleValue }
 > = {
   text: {
     id: 'text',
@@ -100,10 +99,10 @@ export class FieldRuleEditor extends Component<Props, State> {
     );
   }
 
-  private renderPrimaryFieldRow = (field: string, ruleValue: RoleMappingFieldRuleValue) => {
+  private renderPrimaryFieldRow = (field: string, ruleValue: FieldRuleValue) => {
     let renderAddValueButton = true;
     let renderDeleteButton = this.props.allowDelete;
-    let rowRuleValue: RoleMappingFieldRuleValue = ruleValue;
+    let rowRuleValue: FieldRuleValue = ruleValue;
     if (Array.isArray(ruleValue)) {
       renderDeleteButton = ruleValue.length > 1 || this.props.allowDelete;
       renderAddValueButton = ruleValue.length === 1;
@@ -165,13 +164,9 @@ export class FieldRuleEditor extends Component<Props, State> {
     );
   };
 
-  private renderFieldRow = (
-    field: string,
-    ruleValue: RoleMappingFieldRuleValue,
-    valueIndex: number
-  ) => {
+  private renderFieldRow = (field: string, ruleValue: FieldRuleValue, valueIndex: number) => {
     let renderAddValueButton = true;
-    let rowRuleValue: RoleMappingFieldRuleValue = ruleValue;
+    let rowRuleValue: FieldRuleValue = ruleValue;
     if (Array.isArray(ruleValue)) {
       renderAddValueButton = valueIndex === ruleValue.length - 1;
       rowRuleValue = ruleValue[valueIndex];
@@ -225,7 +220,7 @@ export class FieldRuleEditor extends Component<Props, State> {
 
   private renderFieldTypeInput = (
     fieldType: 'number' | 'text',
-    rowRuleValue: RoleMappingFieldRuleValue,
+    rowRuleValue: FieldRuleValue,
     inputType: string,
     valueIndex: number
   ) => {
@@ -248,7 +243,7 @@ export class FieldRuleEditor extends Component<Props, State> {
 
   private renderFieldValueInput = (
     fieldType: 'number' | 'text',
-    rowRuleValue: RoleMappingFieldRuleValue,
+    rowRuleValue: FieldRuleValue,
     inputType: string,
     valueIndex: number
   ) => {
@@ -343,7 +338,7 @@ export class FieldRuleEditor extends Component<Props, State> {
     this.props.onChange(new FieldRule(field, nextValue));
   };
 
-  private getComparisonType(ruleValue: RoleMappingFieldRuleValue) {
+  private getComparisonType(ruleValue: FieldRuleValue) {
     const valueType = typeof ruleValue;
     if (valueType === 'string' || valueType === 'undefined') {
       return comparisonOptions.text;
