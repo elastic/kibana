@@ -6,43 +6,34 @@
 
 import { IRouter, RequestHandler, RouteConfig, LoggerFactory } from 'kibana/server';
 
-import { schema } from '@kbn/config-schema';
-
 import { BootstrapService } from '../services/bootstrap';
 import { wrapError } from '../services/bootstrap/errors';
+import { EndpointAppContext } from '../types';
 
-export function addRoutes(router: IRouter, factory: LoggerFactory) {
+export function registerBootstrapRoutes(router: IRouter, context: EndpointAppContext) {
   router.post(
     {
       path: '/endpoint/bootstrap',
-      validate: bootstrapRequestSchema,
+      validate: false,
     },
-    getBootstrapHandler(factory)
+    getBootstrapHandler(context)
   );
 }
 
-export const bootstrapRequestSchema = {
-  query: schema.object({
-    'index-pattern': schema.string(),
-  }),
-};
-
-type BootstrapperRequestHandler = { validate: typeof bootstrapRequestSchema } extends Pick<
+type BootstrapperRequestHandler = { validate: false } extends Pick<
   RouteConfig<infer P, infer Q, infer B>,
   'validate'
 >
   ? RequestHandler<P, Q, B>
   : never;
 
-export const getBootstrapHandler = (factory: LoggerFactory): BootstrapperRequestHandler => {
+export const getBootstrapHandler = (appContext: EndpointAppContext): BootstrapperRequestHandler => {
   return async function(context, request, response) {
-    const indexPattern = request.query['index-pattern'];
-
-    const log = factory.get('bootstrap-route');
-    log.info(`trying to bootstrap ${indexPattern}`);
+    const log = appContext.logFactory.get('bootstrap-route');
+    log.debug(`trying to bootstrap`);
     const boot: BootstrapService = new BootstrapService(
       context.core.elasticsearch.dataClient,
-      factory
+      appContext
     );
     try {
       await boot.doBootstrapping();
@@ -54,12 +45,8 @@ export const getBootstrapHandler = (factory: LoggerFactory): BootstrapperRequest
       });
     }
 
-    const data = {
-      hello: 'blah',
-    };
-
     return response.ok({
-      body: JSON.stringify(data),
+      body: {},
       headers: {
         'Content-Type': 'application/json',
       },

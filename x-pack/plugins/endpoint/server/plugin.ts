@@ -4,14 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  CoreSetup,
-  IClusterClient,
-  Logger,
-  Plugin,
-  PluginInitializerContext,
-  LoggerFactory,
-} from 'kibana/server';
+import { CoreSetup, IClusterClient, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
 import { first } from 'rxjs/operators';
 import { managementRoutes } from './routes/management';
 import { alertsRoutes } from './routes/alerts';
@@ -19,7 +12,7 @@ import { registerEndpointRoutes } from './routes/endpoints';
 import { EndpointHandler, EndpointRequestContext } from './handlers/endpoint_handler';
 import { EndpointAppContext } from './types';
 import { createConfig$, EndpointConfigType } from './config';
-import { addRoutes } from './routes/bootstrap';
+import { registerBootstrapRoutes } from './routes/bootstrap';
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {
@@ -29,31 +22,31 @@ declare module 'kibana/server' {
 
 export class EndpointPlugin implements Plugin {
   private readonly logger: Logger;
-  private readonly logFactory: LoggerFactory;
   private clusterClient?: IClusterClient;
   constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.logger = this.initializerContext.logger.get();
-    this.logFactory = this.initializerContext.logger;
+    this.logger = this.initializerContext.logger.get('endpoint');
   }
 
   public async setup(core: CoreSetup, deps: {}) {
     this.clusterClient = core.elasticsearch.createClient('endpoint-plugin');
-    const endpointHandler: EndpointRequestContext = new EndpointHandler({
+    const endpointContext = {
       clusterClient: this.clusterClient,
+      logFactory: this.initializerContext.logger,
       config: (): Promise<EndpointConfigType> => {
         return this.getConfig();
       },
-    } as EndpointAppContext);
+    } as EndpointAppContext;
+    const endpointHandler: EndpointRequestContext = new EndpointHandler(endpointContext);
     core.http.registerRouteHandlerContext('endpointPlugin', () => endpointHandler);
     const router = core.http.createRouter();
     managementRoutes(router);
     alertsRoutes(router);
     registerEndpointRoutes(router, endpointHandler);
-    addRoutes(router, this.logFactory);
+    registerBootstrapRoutes(router, endpointContext);
   }
 
   public start() {
-    this.logger.debug('Starting plugin');
+    this.logger.info('Starting plugin');
   }
 
   public stop() {

@@ -35,12 +35,8 @@ async function resourceSaga(
   })) {
     if (action.type === homeActions.userClickedBootstrap.type) {
       try {
-        const data = await context.core.http.post('/endpoint/bootstrap', {
-          query: {
-            'index-pattern': 'blah', // TODO: seems strange that we can't use lists in query params
-          },
-        });
-        dispatch(homeActions.serverReturnedData(data));
+        const data = await context.core.http.post('/endpoint/bootstrap', {});
+        dispatch(homeActions.serverReturnedBootstrapData(data));
       } catch (error) {
         // TODO: dispatch an error action
         throw new Error(error);

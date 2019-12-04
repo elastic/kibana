@@ -8,6 +8,8 @@ import { IScopedClusterClient, LoggerFactory, Logger } from 'kibana/server';
 import { alreadyExists } from './errors';
 // figure out how to read in a json file
 import endpointTemplate from './template.json';
+import { EndpointAppContext } from '../../types';
+import { EndpointConfigType } from '../../config';
 
 const templateVersion = 1;
 const appName = 'endpoint';
@@ -24,13 +26,13 @@ const defaultILM = {
       hot: {
         actions: {
           rollover: {
-            max_size: '50GB',
-            max_age: '30d',
+            max_size: '',
+            max_age: '',
           },
         },
       },
       delete: {
-        min_age: '90d',
+        min_age: '',
         actions: {
           delete: {},
         },
@@ -74,8 +76,19 @@ function makeTemplateBody(
 // TODO implement retries
 export class BootstrapService {
   private readonly logger: Logger;
-  constructor(private readonly client: IScopedClusterClient, log: LoggerFactory) {
-    this.logger = log.get('bootstrap');
+  private readonly configFunc: () => Promise<EndpointConfigType>;
+  constructor(private readonly client: IScopedClusterClient, appContext: EndpointAppContext) {
+    this.logger = appContext.logFactory.get('bootstrap');
+    this.configFunc = appContext.config;
+  }
+
+  private async makeILM() {
+    const config = await this.configFunc();
+    const ilm = JSON.parse(JSON.stringify(defaultILM));
+    ilm.policy.phases.hot.actions.rollover.max_size = config.ilmRollOverMaxSize;
+    ilm.policy.phases.hot.actions.rollover.max_age = config.ilmRollOverMaxAge;
+    ilm.policy.phases.delete.min_age = config.ilmDeleteMinAge;
+    return ilm;
   }
 
   private async aliasExists(alias: string): Promise<boolean> {
@@ -135,9 +148,10 @@ export class BootstrapService {
 
     this.logger.info(`ILM policy: ${policy} does not exist`);
     this.logger.info(`Creating ILM policy: ${policy}`);
+    const ilm = await this.makeILM();
     await this.client.callAsCurrentUser('transport.request', {
       path: `/_ilm/policy/${policy}`,
-      body: defaultILM,
+      body: ilm,
       method: 'PUT',
     });
   }

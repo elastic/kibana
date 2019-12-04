@@ -14,6 +14,9 @@ export type EndpointConfigType = ReturnType<typeof createConfig$> extends Observ
 export const EndpointConfigSchema = schema.object({
   searchResultDefaultFirstPageIndex: schema.number({ defaultValue: 0 }),
   searchResultDefaultPageSize: schema.number({ defaultValue: 10 }),
+  ilmRollOverMaxSize: schema.string({ defaultValue: '50GB' }),
+  ilmRollOverMaxAge: schema.string({ defaultValue: '30d' }),
+  ilmDeleteMinAge: schema.string({ defaultValue: '90d' }),
 });
 
 export function createConfig$(context: PluginInitializerContext) {

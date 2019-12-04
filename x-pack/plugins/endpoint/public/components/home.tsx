@@ -24,10 +24,11 @@ import { actions as homeActions } from '../actions/home';
 
 export const Home = () => {
   const dispatch = useDispatch();
-  const renderBootstrapButton = () => {
+  const BootstrapButton = () => {
+    onBootstrap();
+
     async function onBootstrap() {
       dispatch(homeActions.userClickedBootstrap());
-      // TODO: how to unselect once pressed? See https://github.com/elastic/eui/issues/1077
     }
 
     return (
@@ -37,7 +38,6 @@ export const Home = () => {
     );
   };
 
-  const bootstrapButton = renderBootstrapButton();
   return (
     <EuiPageBody>
       <EuiPageHeader>
@@ -55,7 +55,10 @@ export const Home = () => {
             </EuiTitle>
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
-        <EuiPageContentBody>Body Content {bootstrapButton}</EuiPageContentBody>
+        <EuiPageContentBody>
+          Body Content
+          <BootstrapButton />
+        </EuiPageContentBody>
       </EuiPageContent>
     </EuiPageBody>
   );
