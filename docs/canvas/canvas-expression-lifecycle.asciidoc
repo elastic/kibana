@@ -2,11 +2,56 @@
 [[canvas-expression-lifecycle]]
 == Canvas expression lifecycle
 
+[[canvas-function-can-take-arguments]]
+=== Functions Can Take Arguments
+
+Let’s look at another expression, which uses the same <<demodata_fn>> function but this time produces a pie chart instead.
+
+image::images/canvas-functions-can-take-arguments-pie-chart.png[Pie Chart]
+[source,text]
+----
+filters
+| demodata
+| pointseries color="state" size="max(price)"
+| pie
+| render
+----
+
+This one starts out just like before, using the <<filters_fn>> and <<demodata_fn>> functions to produce a filtered set of random data. This time, however, the output becomes the context for <<pointseries_fn>>, which is a way to "aggregate" or "roll up" your data, similar to how Elasticsearch works, but more generalized. In this case, the data is split up using the `color` and `size` dimensions, using arguments on the <<pointseries_fn>> function. Each unique value in the "state" column will have an associated "size" value, which in this case, will be the maximum value of the "price" column.
+
+If the expression stopped there, it would produce a `pointseries` data type as the output of this expression. But instead of looking at the raw values, the result is piped to <<pie_fn>>, which will produce an output that will render a pie visualization. And just like before, this is piped to <<render_fn>>, which is useful for its arguments.
+
+The end result is a simple pie chart that uses the default color palette. But <<pie_fn>> can take some additional arguments that control how it gets rendered. For example, you can provide a `hole` argument to turn your pie chart into a donut chart, one that has a "hole" in the middle of it, but changing the expression to this:
+
+
+image::images/canvas-functions-can-take-arguments-donut-chart.png[Donut Chart]
+[source,text]
+----
+filters
+| demodata
+| pointseries color="state" size="max(price)"
+| pie hole=50
+| render
+----
+
+
+[[canvas-aliases-and-unnamed-arguments]]
+=== Aliases and Unnamed Arguments
+
+Argument definitions have one canonical name, which is always provided in the underlying code, but when used in an expression they often times include aliases that make them easier or faster to type, usually both. 
+
+Take, as one example, the <<mapColumn_fn>> function, which has 2 arguments: `expression`, the expression to use to produce a calculated value, and `name`, the name of column to place the resulting data in. The `expression` argument includes some aliases, namely `exp`, `fn`, and `function`. That means that you can use any of those four options to provide that argument’s value. So in your expression, if you use `mapColumn name=newColumn fn={string example}`, this produces the same output as if you wrote the more verbose `mapColumn name=newColumn expression={string example}`.
+
+There’s also a special type of alias which allows you to leave off the argument’s name entirely. The alias for this is simply `+_+`, which indicates that the argument is an _unnamed_ argument, and can be provided without explicitly naming it in the expression. The `name` argument here uses the _unnamed_ alias, which means that you can further simplify our example to `mapColumn newColumn fn={string example}`.
+
+NOTE: There can only be one _unnamed_ argument for each function.
+
+
 [[canvas-change-your-expression-change-your-output]]
 === Change Your Expression, Change Your Output
 In the previous section, you saw how you can add arguments to a function to change its output, but you can also substitute one function for another in many situations. For example, you could change the visualization by swapping out the <<pie_fn, pie>> function for another *renderer*, a function that returns a `render` data type. 
 
-Let’s change that last pie visualization into a bubble chart by replacing the <<pie_fn, pie>> function with the <<plot_fn, plot>> function. This is possible because both functions can accept a `pointseries` data type as their _context_. Just switching the functions will work, but it won’t produce a useful visualization on its own, since you don’t have any axis dimensions, i.e. `x` or `y`, defined. You’ll also need to modify the <<pointseries_fn, pointseries>> function to change its output as well. In this case, you can change the `size` argument to `y`, so the maximum price values are plotted on the y-axis, and add an `x` argument using the "@timestamp" field in the data to plot those values over time. This leaves you with the following expression and produces a bubble chart showing the max price of each state over time:
+Let’s change that last pie visualization into a bubble chart by replacing the <<pie_fn, pie>> function with the <<plot_fn, plot>> function. This is possible because both functions can accept a `pointseries` data type as their _context_. Just switching the functions will work, but it won’t produce a useful visualization on its own, since you don’t have any axis dimensions, i.e. `x` or `y`, defined. You’ll also need to modify the <<pointseries_fn, pointseries>> function to change its output as well. In this case, you can change the `size` argument to `y`, so the maximum price values are plotted on the y-axis, and add an `x` argument using the `@timestamp` field in the data to plot those values over time. This leaves you with the following expression and produces a bubble chart showing the max price of each state over time:
 
 image::images/canvas-change-your-expression-chart.png[Bubble Chart]
 [source,text]
@@ -46,7 +91,7 @@ image dataurl={asset 3cb3ec3a-84d7-48fa-8709-274ad5cc9e0b}
 
 If you <<image_fn,look at the docs>> for the `image` function, you’ll see that it accepts the `null` data type and returns an `image` data type. Accepting `null` effectively means that it does not use context at all, so if you pipe anything to `image`, the value that was produced previously will be ignored. When the function executes, it will produce an `image` output, which is simply an object of type `image` that contains the information required to render an image. 
 
-*NOTE: It does not render an image itself*
+NOTE: It does not render an image itself.
 
 As explained in "<<canvas-expressions-only-fetch-and-manipulate-data>>", the output of an expression is just data. So the `image` type here is just a specific shape of data, not an actual image.
 
