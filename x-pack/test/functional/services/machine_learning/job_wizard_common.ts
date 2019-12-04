@@ -125,7 +125,10 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async setJobId(jobId: string) {
-      await testSubjects.setValue('mlJobWizardInputJobId', jobId, { clearWithKeyboard: true });
+      await testSubjects.setValue('mlJobWizardInputJobId', jobId, {
+        clearWithKeyboard: true,
+        typeCharByChar: true,
+      });
       await this.assertJobIdValue(jobId);
     },
 
@@ -143,6 +146,7 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     async setJobDescription(jobDescription: string) {
       await testSubjects.setValue('mlJobWizardInputJobDescription', jobDescription, {
         clearWithKeyboard: true,
+        typeCharByChar: true,
       });
       await this.assertJobDescriptionValue(jobDescription);
     },
@@ -285,7 +289,10 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
         await this.ensureAdvancedSectionOpen();
         subj = advancedSectionSelector(subj);
       }
-      await testSubjects.setValue(subj, modelMemoryLimit, { clearWithKeyboard: true });
+      await testSubjects.setValue(subj, modelMemoryLimit, {
+        clearWithKeyboard: true,
+        typeCharByChar: true,
+      });
       await this.assertModelMemoryLimitValue(modelMemoryLimit, {
         withAdvancedSection: sectionOptions.withAdvancedSection,
       });
