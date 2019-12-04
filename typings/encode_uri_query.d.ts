@@ -17,12 +17,8 @@
  * under the License.
  */
 
-import { AppState } from '../app_state';
-import { GlobalState } from '../global_state';
-import { State } from '../state';
-
-export function getUnhashableStatesProvider(getAppState: () => AppState, globalState: GlobalState) {
-  return function getUnhashableStates(): State[] {
-    return [getAppState(), globalState].filter(Boolean);
-  };
+declare module 'encode-uri-query' {
+  function encodeUriQuery(query: string, usePercentageSpace?: boolean): string;
+  // eslint-disable-next-line import/no-default-export
+  export default encodeUriQuery;
 }

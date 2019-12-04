@@ -17,7 +17,5 @@
  * under the License.
  */
 
-export { getUnhashableStatesProvider } from './get_unhashable_states_provider';
-export { hashUrl } from './hash_url';
-export { unhashQueryString } from './unhash_query_string';
-export { unhashUrl } from './unhash_url';
+export { hashUrl, unhashUrl, hashQuery, unhashQuery } from './hash_unhash_url';
+export { createStateHash, isStateHash } from './state_hash';
