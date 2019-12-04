@@ -22,6 +22,7 @@ import { toQuery } from '../../../shared/Links/url_helpers';
 import { ServiceNodeMetrics } from '../../ServiceNodeMetrics';
 import { resolveUrlParams } from '../../../../context/UrlParamsContext/resolveUrlParams';
 import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../../common/i18n';
+import { TraceLink } from '../../TraceLink';
 
 const metricsBreadcrumb = i18n.translate('xpack.apm.breadcrumb.metricsTitle', {
   defaultMessage: 'Metrics'
@@ -186,6 +187,13 @@ export const routes: BreadcrumbRoute[] = [
       return query.transactionName as string;
     },
     name: RouteName.TRANSACTION_NAME
+  },
+  {
+    exact: true,
+    path: '/link-to/trace/:traceId',
+    component: TraceLink,
+    breadcrumb: null,
+    name: RouteName.LINK_TO_TRACE
   }
 ];
 
