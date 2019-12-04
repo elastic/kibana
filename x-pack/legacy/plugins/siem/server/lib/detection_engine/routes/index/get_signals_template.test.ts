@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getSignalsTemplate } from './signals_template';
+import { getSignalsTemplate } from './get_signals_template';
 
-describe('signals_template', () => {
+describe('get_signals_template', () => {
   test('it should set the lifecycle name and the rollover alias to be the name of the index passed in', () => {
     const template = getSignalsTemplate('test-index');
     expect(template.settings).toEqual({

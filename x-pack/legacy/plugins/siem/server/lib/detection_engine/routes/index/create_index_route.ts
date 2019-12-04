@@ -15,7 +15,7 @@ import { getIndexExists } from '../../index/get_index_exists';
 import { getPolicyExists } from '../../index/get_policy_exists';
 import { setPolicy } from '../../index/set_policy';
 import { setTemplate } from '../../index/set_template';
-import { getSignalsTemplate } from './signals_template';
+import { getSignalsTemplate } from './get_signals_template';
 import { getTemplateExists } from '../../index/get_template_exists';
 import { createBootstrapIndex } from '../../index/create_bootstrap_index';
 
