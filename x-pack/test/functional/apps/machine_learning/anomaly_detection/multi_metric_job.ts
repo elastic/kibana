@@ -319,6 +319,18 @@ export default function({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.assertJobGroupSelection(jobGroupsClone);
     });
 
+    it('job cloning opens the additional settings section', async () => {
+      await ml.jobWizardCommon.ensureAdditionalSettingsSectionOpen();
+    });
+
+    it('job cloning persists custom urls', async () => {
+      await ml.customUrls.assertCustomUrlItem(0);
+    });
+
+    it('job cloning persists assigned calendars', async () => {
+      await ml.jobWizardCommon.assertCalendarsSelection(['wizard-test-calendar']);
+    });
+
     it('job cloning opens the advanced section', async () => {
       await ml.jobWizardCommon.ensureAdvancedSectionOpen();
     });

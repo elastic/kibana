@@ -187,6 +187,10 @@ export function MachineLearningJobWizardCommonProvider(
       );
     },
 
+    async assertCalendarsSelection(calendars: string[]) {
+      expect(await this.getSelectedCalendars()).to.eql(calendars);
+    },
+
     async addCalendar(calendarId: string) {
       await comboBox.setCustom('mlJobWizardComboBoxCalendars > comboBoxInput', calendarId);
       expect(await this.getSelectedCalendars()).to.contain(calendarId);
