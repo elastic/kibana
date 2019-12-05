@@ -404,7 +404,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
         <EuiScreenReaderOnly>
           <h1>
             <FormattedMessage
-              id="xpack.monitoring.elasticsearch.nodes.header"
+              id="xpack.monitoring.elasticsearch.nodes.heading"
               defaultMessage="Elasticsearch nodes"
             />
           </h1>

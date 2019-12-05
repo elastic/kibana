@@ -25,7 +25,7 @@ export function Overview(props) {
         <EuiScreenReaderOnly>
           <h1>
             <FormattedMessage
-              id="xpack.monitoring.overview"
+              id="xpack.monitoring.overview.heading"
               defaultMessage="Stack Monitoring overview"
             />
           </h1>
