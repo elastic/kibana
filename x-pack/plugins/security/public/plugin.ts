@@ -14,7 +14,7 @@ import {
   UnauthorizedResponseHttpInterceptor,
 } from './session';
 import { AuthenticatedUser } from '../common/model';
-import { SecurityLicenseService } from '../server/licensing';
+import { SecurityLicenseService } from '../common/licensing';
 import { registerSecurityNavControl } from './nav_control/nav_control';
 
 export interface PluginSetupDependencies {
