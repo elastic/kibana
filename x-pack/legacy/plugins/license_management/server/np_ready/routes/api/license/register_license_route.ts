@@ -10,7 +10,15 @@ import { Legacy, Server } from '../../../types';
 
 export function registerLicenseRoute(server: Server, legacy: Legacy, xpackInfo: any) {
   server.router.put(
-    { path: '/api/license', validate: { query: schema.object({ acknowledge: schema.string() }) } },
+    {
+      path: '/api/license',
+      validate: {
+        query: schema.object({ acknowledge: schema.string() }),
+        body: schema.object({
+          license: schema.object({}, { allowUnknowns: true }),
+        }),
+      },
+    },
     async (ctx, request, response) => {
       try {
         return response.ok({

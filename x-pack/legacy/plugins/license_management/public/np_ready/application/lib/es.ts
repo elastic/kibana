@@ -6,12 +6,12 @@
 
 import { HttpSetup } from 'src/core/public';
 
-export function putLicense(http: HttpSetup, license: any, acknowledge: boolean) {
+export function putLicense(http: HttpSetup, license: string, acknowledge: boolean) {
   return http.put('/api/license', {
     query: {
       acknowledge: acknowledge ? 'true' : '',
     },
-    body: JSON.stringify(license),
+    body: license,
     headers: {
       contentType: 'application/json',
     },
