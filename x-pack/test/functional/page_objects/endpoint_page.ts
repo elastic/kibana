@@ -6,8 +6,7 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function EndpointPageProvider({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'header']);
+export function EndpointPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   return {

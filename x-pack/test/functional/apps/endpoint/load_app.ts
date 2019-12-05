@@ -9,7 +9,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'endpoint']);
-  const log = getService('log');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
 
@@ -32,9 +31,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await endpointSearchBar.type('_source.host.os.full="Windows Server 2016"');
       // press the enter key
       await endpointSearchBar.pressKeys(browser.keys.ENTER);
-      // debug lines to visually inspect the page before the test exits
-      log.debug('sleep for 10 seconds');
-      await pageObjects.common.sleep(10000);
+      // find all the endpoint operating systems
+      const endpointList = await testSubjects.findAll('indexTableCell-os');
+      for (let i = 0; i < endpointList.length; i++) {
+        expect(await endpointList[i].getVisibleText()).to.be('Windows Server 2016');
+      }
     });
   });
 };

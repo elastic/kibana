@@ -51,22 +51,27 @@ const columns = [
     render: (name: string, item: { _id: string }) => {
       return <EndpointName name={name} path={`/endpoints/view/${item._id}`} />;
     },
+    'data-test-subj': 'indexTableCell-name',
   },
   {
     field: '_source.host.ip',
     name: 'IP Address',
+    'data-test-subj': 'indexTableCell-ip',
   },
   {
     field: '_source.host.os.full',
     name: 'Operating System',
+    'data-test-subj': 'indexTableCell-os',
   },
   {
     field: '_source.endpoint.domain',
     name: 'Domain',
+    'data-test-subj': 'indexTableCell-domain',
   },
   {
     field: '_source.host.name',
     name: 'Host Name',
+    'data-test-subj': 'indexTableCell-host',
   },
 ];
 
@@ -149,6 +154,7 @@ export const EndpointsPage = () => {
             pagination={paginationSetup}
             sorting={sortingSetup}
             onChange={handleTableChange}
+            data-test-subj="endpointsTable"
           />
         </EuiPageContentBody>
       </EuiPageContent>
