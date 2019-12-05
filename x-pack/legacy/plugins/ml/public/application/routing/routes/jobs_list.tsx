@@ -6,9 +6,7 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { RouteProps } from 'react-router-dom';
 import { MlRoute, PageLoader, useResolver, PageProps } from '../router';
-import { KibanaConfigTypeFix } from '../../contexts/kibana';
 import { basicResolvers } from '../resolvers';
 import { JobsPage } from '../../jobs/jobs_list';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';

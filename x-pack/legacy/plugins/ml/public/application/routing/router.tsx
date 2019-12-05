@@ -8,10 +8,8 @@ import React, { FC, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, RouteProps } from 'react-router-dom';
 import { Location } from 'history';
 import { I18nContext } from 'ui/i18n';
-// import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 
 import { IndexPatterns } from 'ui/index_patterns';
-// import { SavedObjectAttributes, SimpleSavedObject } from 'kibana/public';
 import {
   getIndexPatternById,
   getIndexPatternsContract,
@@ -68,7 +66,9 @@ export const MlRouter: FC<{
             path={route.path}
             exact
             render={props => {
-              setBreadCrumbs(route.breadcrumbs);
+              window.setTimeout(() => {
+                setBreadCrumbs(route.breadcrumbs);
+              });
               return route.render(props, config, { indexPatterns });
             }}
           />

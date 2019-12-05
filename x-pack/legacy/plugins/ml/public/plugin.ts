@@ -4,18 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DataStart } from 'src/legacy/core_plugins/data/public';
+// import { DataStart } from 'src/legacy/core_plugins/data/public';
 import { Plugin as DataPlugin } from 'src/plugins/data/public';
 import { NavigationStart } from '../../../../../src/legacy/core_plugins/navigation/public';
-import {
-  Plugin,
-  CoreStart,
-  CoreSetup,
-  UiSettingsClientContract,
-} from '../../../../../src/core/public';
+import { Plugin, CoreStart, CoreSetup } from '../../../../../src/core/public';
 
 export interface MlSetupDependencies {
-  data: DataStart;
+  // data: DataStart;
   npData: ReturnType<DataPlugin['start']>;
   navigation: NavigationStart;
   __LEGACY?: {
@@ -42,7 +37,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   // private dataStart: DataStart | null = null;
   // private npDataStart: ReturnType<DataPlugin['start']> | null = null;
 
-  setup(core: CoreSetup, { data, npData, navigation }: MlSetupDependencies) {
+  setup(core: CoreSetup, { /* data,*/ npData, navigation }: MlSetupDependencies) {
     // this.dataStart = data;
     // this.npDataStart = npData;
 
@@ -53,9 +48,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         const { renderApp } = await import('./application/app');
         return renderApp(context, {
           ...params,
-          indexPatterns: data!.indexPatterns.indexPatterns,
-          npData: npData!,
-          data,
+          indexPatterns: npData.indexPatterns.indexPatterns,
+          npData,
+          // data,
         });
       },
     });
@@ -66,6 +61,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   start(core: CoreStart, deps: {}) {
     // this.dataStart = data;
     // this.npDataStart = npData;
+    return {};
   }
   public stop() {}
 }
