@@ -6,9 +6,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { startBasic } from '../../../lib/start_basic';
-import { Server } from '../../../types';
+import { Legacy, Server } from '../../../types';
 
-export function registerStartBasicRoute(server: Server, xpackInfo: any) {
+export function registerStartBasicRoute(server: Server, legacy: Legacy, xpackInfo: any) {
   server.router.post(
     {
       path: '/api/license/start_basic',
@@ -17,7 +17,7 @@ export function registerStartBasicRoute(server: Server, xpackInfo: any) {
     async (ctx, request, response) => {
       try {
         return response.ok({
-          body: await startBasic(request, server.plugins.elasticsearch, xpackInfo),
+          body: await startBasic(request, legacy.plugins.elasticsearch, xpackInfo),
         });
       } catch (e) {
         return response.internalError({ body: e });

@@ -5,9 +5,9 @@
  */
 
 import { getPermissions } from '../../../lib/permissions';
-import { Server } from '../../../types';
+import { Legacy, Server } from '../../../types';
 
-export function registerPermissionsRoute(server: Server, xpackInfo: any) {
+export function registerPermissionsRoute(server: Server, legacy: Legacy, xpackInfo: any) {
   server.router.post(
     { path: '/api/license/permissions', validate: false },
     async (ctx, request, response) => {
@@ -19,7 +19,7 @@ export function registerPermissionsRoute(server: Server, xpackInfo: any) {
 
       try {
         return response.ok({
-          body: await getPermissions(request, server.plugins.elasticsearch, xpackInfo),
+          body: await getPermissions(request, legacy.plugins.elasticsearch, xpackInfo),
         });
       } catch (e) {
         return response.internalError({ body: e });

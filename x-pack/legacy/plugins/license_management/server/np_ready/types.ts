@@ -17,5 +17,8 @@ export interface Dependencies {
 
 export interface Server {
   router: IRouter;
+}
+
+export interface Legacy {
   plugins: Dependencies['__LEGACY'];
 }

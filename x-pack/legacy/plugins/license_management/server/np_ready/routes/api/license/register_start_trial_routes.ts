@@ -5,14 +5,14 @@
  */
 
 import { canStartTrial, startTrial } from '../../../lib/start_trial';
-import { Server } from '../../../types';
+import { Legacy, Server } from '../../../types';
 
-export function registerStartTrialRoutes(server: Server, xpackInfo: any) {
+export function registerStartTrialRoutes(server: Server, legacy: Legacy, xpackInfo: any) {
   server.router.get(
     { path: '/api/license/start_trial', validate: false },
     async (ctx, request, response) => {
       try {
-        return response.ok({ body: await canStartTrial(request, server.plugins.elasticsearch) });
+        return response.ok({ body: await canStartTrial(request, legacy.plugins.elasticsearch) });
       } catch (e) {
         return response.internalError({ body: e });
       }
@@ -24,7 +24,7 @@ export function registerStartTrialRoutes(server: Server, xpackInfo: any) {
     async (ctx, request, response) => {
       try {
         return response.ok({
-          body: await startTrial(request, server.plugins.elasticsearch, xpackInfo),
+          body: await startTrial(request, legacy.plugins.elasticsearch, xpackInfo),
         });
       } catch (e) {
         return response.internalError({ body: e });

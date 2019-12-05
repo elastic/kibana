@@ -20,14 +20,15 @@ export class LicenseManagementServerPlugin implements Plugin<void, void, any, an
     const router = http.createRouter();
 
     const server: Server = {
-      plugins: __LEGACY,
       router,
     };
 
-    registerLicenseRoute(server, xpackInfo);
-    registerStartTrialRoutes(server, xpackInfo);
-    registerStartBasicRoute(server, xpackInfo);
-    registerPermissionsRoute(server, xpackInfo);
+    const legacy = { plugins: __LEGACY };
+
+    registerLicenseRoute(server, legacy, xpackInfo);
+    registerStartTrialRoutes(server, legacy, xpackInfo);
+    registerStartBasicRoute(server, legacy, xpackInfo);
+    registerPermissionsRoute(server, legacy, xpackInfo);
   }
   start() {}
   stop() {}

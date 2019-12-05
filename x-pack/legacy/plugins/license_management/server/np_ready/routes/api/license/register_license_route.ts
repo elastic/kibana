@@ -6,15 +6,15 @@
 
 import { schema } from '@kbn/config-schema';
 import { putLicense } from '../../../lib/license';
-import { Server } from '../../../types';
+import { Legacy, Server } from '../../../types';
 
-export function registerLicenseRoute(server: Server, xpackInfo: any) {
+export function registerLicenseRoute(server: Server, legacy: Legacy, xpackInfo: any) {
   server.router.put(
     { path: '/api/license', validate: { query: schema.object({ acknowledge: schema.string() }) } },
     async (ctx, request, response) => {
       try {
         return response.ok({
-          body: await putLicense(request, server.plugins.elasticsearch, xpackInfo),
+          body: await putLicense(request, legacy.plugins.elasticsearch, xpackInfo),
         });
       } catch (e) {
         return response.internalError({ body: e });
