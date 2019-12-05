@@ -6,18 +6,18 @@
 
 import {
   createMockSavedObjectsRepository,
+  createRoute,
   createRouteContext,
   mockCaseComments,
 } from '../__fixtures__';
 import { initUpdateCommentApi } from '../update_comment';
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
-import { setupRoute } from './test_utils';
 
 describe('UPDATE comment', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeAll(async () => {
-    routeHandler = await setupRoute(initUpdateCommentApi, 'post');
+    routeHandler = await createRoute(initUpdateCommentApi, 'post');
   });
   it(`Updates a comment`, async () => {
     const request = httpServerMock.createKibanaRequest({

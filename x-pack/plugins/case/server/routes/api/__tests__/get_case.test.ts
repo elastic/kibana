@@ -5,20 +5,20 @@
  */
 
 import {
+  createMockSavedObjectsRepository,
+  createRoute,
+  createRouteContext,
   mockCases,
   mockCasesErrorTriggerData,
-  createMockSavedObjectsRepository,
-  createRouteContext,
 } from '../__fixtures__';
 import { initGetCaseApi } from '../get_case';
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
-import { setupRoute } from './test_utils';
 
 describe('GET case', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeAll(async () => {
-    routeHandler = await setupRoute(initGetCaseApi, 'get');
+    routeHandler = await createRoute(initGetCaseApi, 'get');
   });
   it(`returns the case without case comments when includeComments is false`, async () => {
     const request = httpServerMock.createKibanaRequest({

@@ -10,7 +10,7 @@ import { CaseService } from '../../../services';
 import { authenticationMock } from '../__fixtures__';
 import { RouteDeps } from '../index';
 
-export const setupRoute = async (
+export const createRoute = async (
   api: (deps: RouteDeps) => void,
   method: 'get' | 'post' | 'delete',
   badAuth = false

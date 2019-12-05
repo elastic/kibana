@@ -25,6 +25,14 @@ export function initPostCommentApi({ caseService, router }: RouteDeps) {
       let createdBy;
       let newComment;
       try {
+        await caseService.getCase({
+          client: context.core.savedObjects.client,
+          caseId: request.params.id,
+        });
+      } catch (error) {
+        return response.customError(wrapError(error));
+      }
+      try {
         createdBy = await caseService.getUser({ request, response });
       } catch (error) {
         return response.customError(wrapError(error));

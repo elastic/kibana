@@ -134,11 +134,11 @@ export const siem = (kibana: any) => {
       savedObjectSchemas: {
         'case-workflow': {
           indexPattern: '.case-testing-ground', // TODO: Change this name and use kibana.yml settings to override it.
-          isNamespaceAgnostic: true,
+          isNamespaceAgnostic: false,
         },
         'case-workflow-comment': {
           indexPattern: '.case-testing-ground', // TODO: Change this name and use kibana.yml settings to override it.
-          isNamespaceAgnostic: true,
+          isNamespaceAgnostic: false,
         },
       },
     },

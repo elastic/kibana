@@ -6,6 +6,7 @@
 
 import {
   createMockSavedObjectsRepository,
+  createRoute,
   createRouteContext,
   mockCases,
   mockCasesErrorTriggerData,
@@ -13,12 +14,11 @@ import {
 import { initDeleteCommentApi } from '../delete_comment';
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
-import { setupRoute } from './test_utils';
 
 describe('DELETE comment', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeAll(async () => {
-    routeHandler = await setupRoute(initDeleteCommentApi, 'delete');
+    routeHandler = await createRoute(initDeleteCommentApi, 'delete');
   });
   it(`deletes the comment. responds with 204`, async () => {
     const request = httpServerMock.createKibanaRequest({

@@ -4,16 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createMockSavedObjectsRepository, createRouteContext, mockCases } from '../__fixtures__';
+import {
+  createMockSavedObjectsRepository,
+  createRoute,
+  createRouteContext,
+  mockCases,
+} from '../__fixtures__';
 import { initUpdateCaseApi } from '../update_case';
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
-import { setupRoute } from './test_utils';
 
 describe('UPDATE case', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeAll(async () => {
-    routeHandler = await setupRoute(initUpdateCaseApi, 'post');
+    routeHandler = await createRoute(initUpdateCaseApi, 'post');
   });
   it(`Updates a case`, async () => {
     const request = httpServerMock.createKibanaRequest({

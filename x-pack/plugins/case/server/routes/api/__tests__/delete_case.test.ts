@@ -5,20 +5,20 @@
  */
 
 import {
+  createMockSavedObjectsRepository,
+  createRoute,
+  createRouteContext,
   mockCases,
   mockCasesErrorTriggerData,
-  createMockSavedObjectsRepository,
-  createRouteContext,
 } from '../__fixtures__';
 import { initDeleteCaseApi } from '../delete_case';
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
-import { setupRoute } from './test_utils';
 
 describe('DELETE case', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeAll(async () => {
-    routeHandler = await setupRoute(initDeleteCaseApi, 'delete');
+    routeHandler = await createRoute(initDeleteCaseApi, 'delete');
   });
   it(`deletes the case. responds with 204`, async () => {
     const request = httpServerMock.createKibanaRequest({

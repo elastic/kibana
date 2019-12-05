@@ -4,16 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createMockSavedObjectsRepository, createRouteContext, mockCases } from '../__fixtures__';
+import {
+  createMockSavedObjectsRepository,
+  createRoute,
+  createRouteContext,
+  mockCases,
+} from '../__fixtures__';
 import { initPostCaseApi } from '../post_case';
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
-import { setupRoute } from './test_utils';
 
 describe('POST cases', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeAll(async () => {
-    routeHandler = await setupRoute(initPostCaseApi, 'post');
+    routeHandler = await createRoute(initPostCaseApi, 'post');
   });
   it(`Posts a new case`, async () => {
     const request = httpServerMock.createKibanaRequest({
@@ -55,7 +59,7 @@ describe('POST cases', () => {
     expect(response.payload.isBoom).toEqual(true);
   });
   it(`Returns an error if user authentication throws`, async () => {
-    routeHandler = await setupRoute(initPostCaseApi, 'post', true);
+    routeHandler = await createRoute(initPostCaseApi, 'post', true);
 
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases',
