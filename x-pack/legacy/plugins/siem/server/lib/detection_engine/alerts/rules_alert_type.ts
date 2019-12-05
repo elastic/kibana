@@ -48,6 +48,7 @@ export const rulesAlertType = ({
         riskScore: schema.number(),
         severity: schema.string(),
         tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
+        threats: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
         to: schema.string(),
         type: schema.string(),
         references: schema.arrayOf(schema.string(), { defaultValue: [] }),
