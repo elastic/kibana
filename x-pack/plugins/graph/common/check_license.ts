@@ -5,56 +5,67 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ILicense } from '../../licensing/common/types';
 
-export function checkLicense(xpackLicenseInfo) {
+export interface GraphLicenseInformation {
+  showAppLink: boolean;
+  enableAppLink: boolean;
+  message: string;
+}
 
-  if (!xpackLicenseInfo || !xpackLicenseInfo.isAvailable()) {
+export function checkLicense(license: ILicense | undefined): GraphLicenseInformation {
+  if (!license || !license.isAvailable) {
     return {
       showAppLink: true,
       enableAppLink: false,
-      message: i18n.translate('xpack.graph.serverSideErrors.unavailableLicenseInformationErrorMessage', {
-        defaultMessage: 'Graph is unavailable - license information is not available at this time.',
-      })
+      message: i18n.translate(
+        'xpack.graph.serverSideErrors.unavailableLicenseInformationErrorMessage',
+        {
+          defaultMessage:
+            'Graph is unavailable - license information is not available at this time.',
+        }
+      ),
     };
   }
 
-  const graphFeature = xpackLicenseInfo.feature('graph');
-  if (!graphFeature.isEnabled()) {
+  const graphFeature = license.getFeature('graph');
+  if (!graphFeature.isEnabled) {
     return {
       showAppLink: false,
       enableAppLink: false,
       message: i18n.translate('xpack.graph.serverSideErrors.unavailableGraphErrorMessage', {
         defaultMessage: 'Graph is unavailable',
-      })
+      }),
     };
   }
 
-  const isLicenseActive = xpackLicenseInfo.license.isActive();
-  let message;
+  const isLicenseActive = license.isActive;
+  let message = '';
   if (!isLicenseActive) {
     message = i18n.translate('xpack.graph.serverSideErrors.expiredLicenseErrorMessage', {
       defaultMessage: 'Graph is unavailable - license has expired.',
     });
   }
 
-  if (xpackLicenseInfo.license.isOneOf([ 'trial', 'platinum' ])) {
+  if (license.isOneOf(['trial', 'platinum'])) {
     return {
       showAppLink: true,
       enableAppLink: isLicenseActive,
-      message
+      message,
     };
   }
 
   message = i18n.translate('xpack.graph.serverSideErrors.wrongLicenseTypeErrorMessage', {
-    defaultMessage: 'Graph is unavailable for the current {licenseType} license. Please upgrade your license.',
+    defaultMessage:
+      'Graph is unavailable for the current {licenseType} license. Please upgrade your license.',
     values: {
-      licenseType: xpackLicenseInfo.license.getType(),
+      licenseType: license.type,
     },
   });
 
   return {
     showAppLink: false,
     enableAppLink: false,
-    message
+    message,
   };
 }

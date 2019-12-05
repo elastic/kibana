@@ -39,10 +39,10 @@ import {
   hasFieldsSelector
 } from './state_management';
 import { formatHttpError } from './helpers/format_http_error';
+import { checkLicense } from '../../../../plugins/graph/common/check_license';
 
 export function initGraphApp(angularModule, deps) {
   const {
-    xpackInfo,
     chrome,
     savedGraphWorkspaces,
     toastNotifications,
@@ -59,20 +59,22 @@ export function initGraphApp(angularModule, deps) {
     Storage,
     canEditDrillDownUrls,
     graphSavePolicy,
+    licensing,
   } = deps;
 
   const app = angularModule;
 
-  function checkLicense(kbnBaseUrl) {
-    const licenseAllowsToShowThisPage = xpackInfo.get('features.graph.showAppLink') &&
-      xpackInfo.get('features.graph.enableAppLink');
+
+  licensing.license$.subscribe(license => {
+    const info = checkLicense(license);
+    const licenseAllowsToShowThisPage = info.showAppLink && info.enableAppLink;
+
     if (!licenseAllowsToShowThisPage) {
-      const message = xpackInfo.get('features.graph.message');
-      const newUrl = addAppRedirectMessageToUrl(addBasePath(kbnBaseUrl), message);
+      const newUrl = addAppRedirectMessageToUrl(addBasePath(kbnBaseUrl), info.message);
       window.location.href = newUrl;
       throw new Error('Graph license error');
     }
-  }
+  });
 
   app.directive('vennDiagram', function (reactDirective) {
     return reactDirective(VennDiagram);
@@ -123,7 +125,6 @@ export function initGraphApp(angularModule, deps) {
       template: listingTemplate,
       badge: getReadonlyBadge,
       controller($location, $scope) {
-        checkLicense(kbnBaseUrl);
         const services = savedObjectRegistry.byLoaderPropertiesName;
         const graphService = services['Graph workspace'];
 
@@ -164,7 +165,6 @@ export function initGraphApp(angularModule, deps) {
               ) : savedGraphWorkspaces.get();
 
           },
-          //Copied from example found in wizard.js ( Kibana TODO - can't
           indexPatterns: function () {
             return savedObjectsClient.find({
               type: 'index-pattern',
@@ -185,10 +185,8 @@ export function initGraphApp(angularModule, deps) {
 
   //========  Controller for basic UI ==================
   app.controller('graphuiPlugin', function ($scope, $route, $location, confirmModal) {
-    checkLicense(kbnBaseUrl);
 
     function handleError(err) {
-      checkLicense(kbnBaseUrl);
       const toastTitle = i18n.translate('xpack.graph.errorToastTitle', {
         defaultMessage: 'Graph Error',
         description: '"Graph" is a product name and should not be translated.',
@@ -206,7 +204,6 @@ export function initGraphApp(angularModule, deps) {
     }
 
     async function handleHttpError(error) {
-      checkLicense(kbnBaseUrl);
       toastNotifications.addDanger(formatHttpError(error));
     }
 

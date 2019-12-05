@@ -34,6 +34,7 @@ import {
 import { initGraphApp } from './app';
 import { Plugin as DataPlugin } from '../../../../../src/plugins/data/public';
 import { NavigationStart } from '../../../../../src/legacy/core_plugins/navigation/public';
+import { LicensingPluginSetup } from '../../../../plugins/licensing/common/types';
 
 /**
  * These are dependencies of the Graph app besides the base dependencies
@@ -47,13 +48,13 @@ export interface GraphDependencies extends LegacyAngularInjectedDependencies {
   capabilities: Record<string, boolean | Record<string, boolean>>;
   coreStart: AppMountContext['core'];
   navigation: NavigationStart;
+  licensing: LicensingPluginSetup;
   chrome: ChromeStart;
   config: IUiSettingsClient;
   toastNotifications: ToastsStart;
   indexPatterns: DataStart['indexPatterns']['indexPatterns'];
   npData: ReturnType<DataPlugin['start']>;
   savedObjectsClient: SavedObjectsClientContract;
-  xpackInfo: { get(path: string): unknown };
   addBasePath: (url: string) => string;
   getBasePath: () => string;
   Storage: any;
