@@ -5,12 +5,12 @@
  */
 
 import {
-  EuiText,
   EuiCodeBlock,
+  EuiLink,
   EuiTableHeaderCell,
   EuiTableRow,
   EuiTableRowCell,
-  EuiLink,
+  EuiText,
 } from '@elastic/eui';
 import React from 'react';
 

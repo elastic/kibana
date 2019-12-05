@@ -5,11 +5,12 @@
  */
 
 import { safeLoad } from 'js-yaml';
-import { RegistryPackage, Dataset, AssetReference } from '../../../../common/types';
+import { AssetReference, Dataset, RegistryPackage } from '../../../../common/types';
 import { CallESAsCurrentUser } from '../../../../server/lib/cluster_access';
 import { getAssetsData } from '../../../packages/assets';
+import * as Registry from '../../../registry';
 import { Field } from '../../fields/field';
-import { generateMappings, getTemplate, generateTemplateName } from './template';
+import { generateMappings, generateTemplateName, getTemplate } from './template';
 
 const isFields = (path: string) => {
   return path.includes('/fields/');

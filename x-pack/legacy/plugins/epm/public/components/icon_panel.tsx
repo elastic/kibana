@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiIcon, EuiPanel, IconType } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { EuiIcon, EuiPanel, IconType } from '@elastic/eui';
 import { useCore } from '../hooks/use_core';
 
 export function IconPanel({ iconType }: { iconType: IconType }) {

@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getTemplate, generateMappings } from './template';
 import { readFileSync, writeFileSync } from 'fs';
-import path from 'path';
 import { safeLoad } from 'js-yaml';
+import path from 'path';
 import { Field, processFields } from '../../fields/field';
+import { generateMappings, getTemplate } from './template';
 
 test('get template', () => {
   const pattern = 'logs-nginx-access-abcd-*';

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { EuiText, EuiTitle } from '@elastic/eui';
+import React from 'react';
 import { PackageList } from '../../../common/types';
 import { PackageListGrid } from '../../components/package_list_grid';
 

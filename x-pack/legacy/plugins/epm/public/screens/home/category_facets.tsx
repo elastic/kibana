@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
 import { EuiFacetButton, EuiFacetGroup } from '@elastic/eui';
+import React from 'react';
 import { CategorySummaryItem, CategorySummaryList } from '../../../common/types';
 
 export function CategoryFacets({

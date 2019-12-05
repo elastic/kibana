@@ -3,16 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiTitle, IconType } from '@elastic/eui';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiTitle, IconType } from '@elastic/eui';
 import { PLUGIN } from '../../../common/constants';
 import { PackageInfo } from '../../../common/types';
-import { Version } from '../../components/version';
 import { IconPanel } from '../../components/icon_panel';
+import { Version } from '../../components/version';
 import { useBreadcrumbs, useLinks } from '../../hooks';
-import { CenterColumn, LeftColumn, RightColumn } from './layout';
 import { InstallationButton } from './installation_button';
+import { CenterColumn, LeftColumn, RightColumn } from './layout';
 import { NavButtonBack } from './nav_button_back';
 
 const FullWidthNavRow = styled(EuiPage)`
