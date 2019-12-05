@@ -23,11 +23,11 @@ import {
 import { JobDocPayloadPNG } from '../../types';
 import { generatePngObservableFactory } from '../lib/generate_png';
 
-export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
-  JobDocPayloadPNG
->> = function executeJobFactoryFn(
+type QueuedPngExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocPayloadPNG>>;
+
+export const executeJobFactory: QueuedPngExecutorFactory = function executeJobFactoryFn(
   server: ServerFacade,
-  { browserDriverFactory }: { browserDriverFactory?: HeadlessChromiumDriverFactory } = {}
+  { browserDriverFactory }: { browserDriverFactory: HeadlessChromiumDriverFactory }
 ) {
   const generatePngObservable = generatePngObservableFactory(server, browserDriverFactory);
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PNG_JOB_TYPE, 'execute']);

@@ -10,6 +10,7 @@ import {
   ServerFacade,
   RequestFacade,
   ResponseFacade,
+  HeadlessChromiumDriverFactory,
   ReportingResponseToolkit,
   Logger,
   JobDocOutputExecuted,
@@ -46,12 +47,16 @@ export function registerGenerateCsvFromSavedObjectImmediate(
       const logger = parentLogger.clone(['savedobject-csv']);
       const jobParams = getJobParamsFromRequest(request, { isImmediate: true });
 
-      /* TODO these functions should be made available in the export types registery after doing
-       * exportTypesRegistry.getById(CSV_FROM_SAVEDOBJECT_JOB_TYPE)
-       * The execute job factory methods should always be called with HeadlessChromiumDriverFactory
+      /* TODO these functions should be made available in the export types registry:
+       *
+       *     const { createJobFn, executeJobFn } = exportTypesRegistry.getById(CSV_FROM_SAVEDOBJECT_JOB_TYPE)
+       *
+       * Calling an execute job factory requires passing a browserDriverFactory option, so we should not call the factory from here
        */
       const createJobFn = createJobFactory(server);
-      const executeJobFn = executeJobFactory(server);
+      const executeJobFn = executeJobFactory(server, {
+        browserDriverFactory: {} as HeadlessChromiumDriverFactory,
+      });
       const jobDocPayload: JobDocPayloadPanelCsv = await createJobFn(
         jobParams,
         request.headers,

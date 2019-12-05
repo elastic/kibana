@@ -14,12 +14,8 @@ import { LayoutParams } from '../../../common/layouts/layout';
 
 export function generatePngObservableFactory(
   server: ServerFacade,
-  browserDriverFactory?: HeadlessChromiumDriverFactory
+  browserDriverFactory: HeadlessChromiumDriverFactory
 ) {
-  if (!browserDriverFactory) {
-    throw new Error('Reporting browser driver factory must be passed for PNG job execution');
-  }
-
   const screenshotsObservable = screenshotsObservableFactory(server, browserDriverFactory);
 
   return function generatePngObservable(

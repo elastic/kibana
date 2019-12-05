@@ -28,12 +28,8 @@ const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
 
 export function generatePdfObservableFactory(
   server: ServerFacade,
-  browserDriverFactory?: HeadlessChromiumDriverFactory
+  browserDriverFactory: HeadlessChromiumDriverFactory
 ) {
-  if (!browserDriverFactory) {
-    throw new Error('Reporting browser driver factory must be passed for PDF job execution');
-  }
-
   const screenshotsObservable = screenshotsObservableFactory(server, browserDriverFactory);
   const captureConcurrency = 1;
 

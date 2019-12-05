@@ -24,11 +24,11 @@ import {
   getCustomLogo,
 } from '../../../common/execute_job/';
 
-export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
-  JobDocPayloadPDF
->> = function executeJobFactoryFn(
+type QueuedPdfExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocPayloadPDF>>;
+
+export const executeJobFactory: QueuedPdfExecutorFactory = function executeJobFactoryFn(
   server: ServerFacade,
-  { browserDriverFactory }: { browserDriverFactory?: HeadlessChromiumDriverFactory } = {}
+  { browserDriverFactory }: { browserDriverFactory: HeadlessChromiumDriverFactory }
 ) {
   const generatePdfObservable = generatePdfObservableFactory(server, browserDriverFactory);
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PDF_JOB_TYPE, 'execute']);

@@ -306,8 +306,8 @@ export interface ESQueueInstance<JobParamsType, JobDocPayloadType> {
 export type CreateJobFactory<CreateJobFnType> = (server: ServerFacade) => CreateJobFnType;
 export type ExecuteJobFactory<ExecuteJobFnType> = (
   server: ServerFacade,
-  opts?: {
-    browserDriverFactory?: HeadlessChromiumDriverFactory;
+  opts: {
+    browserDriverFactory: HeadlessChromiumDriverFactory;
   }
 ) => ExecuteJobFnType;
 
