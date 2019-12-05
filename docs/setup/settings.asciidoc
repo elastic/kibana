@@ -147,7 +147,7 @@ will default to `true`.
 `logging.quiet:`:: *Default: false* Set the value of this setting to `true` to
 suppress all logging output other than error messages.
 
-`logging.rotate:`:: Specifies the options for the logging rotate feature.
+`logging.rotate:`:: [experimental] Specifies the options for the logging rotate feature.
 When not defined, all the sub options defaults would be applied.
 The following example shows a valid logging rotate configuration:
 +
@@ -158,22 +158,22 @@ The following example shows a valid logging rotate configuration:
       keepFiles: 10
 --
 
-`logging.rotate.enabled:`:: *Default: false* Set the value of this setting to `true` to
+`logging.rotate.enabled:`:: [experimental] *Default: false* Set the value of this setting to `true` to
 enable log rotation. If you do not have a `logging.dest` set that is different from `stdout`
 that feature would not take any effect.
 
-`logging.rotate.everyBytes:`:: *Default: 10485760* The maximum size of a log file (that is `not an exact` limit). After the 
+`logging.rotate.everyBytes:`:: [experimental] *Default: 10485760* The maximum size of a log file (that is `not an exact` limit). After the 
 limit is reached, a new log file is generated. The default size limit is 10485760 (10 MB) and
 this option should be at least greater than 1024.
 
-`logging.rotate.keepFiles:`:: *Default: 7* The number of most recent rotated log files to keep 
+`logging.rotate.keepFiles:`:: [experimental] *Default: 7* The number of most recent rotated log files to keep 
 on disk. Older files are deleted during log rotation. The default value is 7. The `logging.rotate.keepFiles` 
 option has to be in the range of 2 to 1024 files.
 
-`logging.rotate.pollingInterval:`:: *Default: 10000* The number of milliseconds for the polling strategy in case 
+`logging.rotate.pollingInterval:`:: [experimental] *Default: 10000* The number of milliseconds for the polling strategy in case 
 the `logging.rotate.usePolling` is enabled. That option has to be in the range of 5000 to 3600000 milliseconds.
 
-`logging.rotate.usePolling:`:: *Default: false* By default we try to understand the best way to monitoring 
+`logging.rotate.usePolling:`:: [experimental] *Default: false* By default we try to understand the best way to monitoring 
 the log file. However, there is some systems where it could not be always accurate. In those cases, if needed, 
 the `polling` method could be used enabling that option.
 
