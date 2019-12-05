@@ -29,7 +29,7 @@ export const mockEventViewerResponse = [
         sourceId: 'default',
         pagination: { limit: 25, cursor: null, tiebreaker: null },
         sortField: { sortFieldId: '@timestamp', direction: 'desc' },
-        defaultIndex: 'filebeat-*,auditbeat-*,packetbeat-*',
+        defaultIndex: ['filebeat-*', 'auditbeat-*', 'packetbeat-*'],
         inspect: false,
       },
     },

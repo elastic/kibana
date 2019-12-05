@@ -83,7 +83,8 @@ class TimelineQueryComponent extends QueryTemplate<
       sourceId,
       pagination: { limit, cursor: null, tiebreaker: null },
       sortField,
-      defaultIndex: indexPattern?.title ?? chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      defaultIndex:
+        indexPattern?.title.split(',') ?? chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
       inspect: isInspected,
     };
     return (
