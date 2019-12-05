@@ -21,7 +21,7 @@
 import sizeMe from 'react-sizeme';
 
 import React from 'react';
-import { nextTick, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { skip } from 'rxjs/operators';
 import { EmbeddableFactory, GetEmbeddableFactory } from '../../embeddable_plugin';
 import { DashboardGrid, DashboardGridProps } from './dashboard_grid';
@@ -65,9 +65,13 @@ function prepare(props?: Partial<DashboardGridProps>) {
     } as any,
     notifications: {} as any,
     overlays: {} as any,
-    inspector: {} as any,
+    inspector: {
+      isAvailable: jest.fn(),
+    } as any,
     ExitFullScreenButton: () => null,
-    uiActions: {} as any,
+    uiActions: {
+      getTriggerCompatibleActions: (() => []) as any,
+    } as any,
     uiSettings: {} as any,
     savedObjects: {} as any,
   };
@@ -101,12 +105,11 @@ test('renders DashboardGrid', () => {
       <DashboardGrid {...props} />
     </KibanaContextProvider>
   );
-
   const panelElements = component.find('EmbeddableChildPanel');
   expect(panelElements.length).toBe(2);
 });
 
-test('renders DashboardGrid with no visualizations', async () => {
+test('renders DashboardGrid with no visualizations', () => {
   const { props, options } = prepare();
   const component = mountWithIntl(
     <KibanaContextProvider services={options}>
@@ -115,12 +118,11 @@ test('renders DashboardGrid with no visualizations', async () => {
   );
 
   props.container.updateInput({ panels: {} });
-  await nextTick();
   component.update();
   expect(component.find('EmbeddableChildPanel').length).toBe(0);
 });
 
-test('DashboardGrid removes panel when removed from container', async () => {
+test('DashboardGrid removes panel when removed from container', () => {
   const { props, options } = prepare();
   const component = mountWithIntl(
     <KibanaContextProvider services={options}>
@@ -132,13 +134,12 @@ test('DashboardGrid removes panel when removed from container', async () => {
   const filteredPanels = { ...originalPanels };
   delete filteredPanels['1'];
   props.container.updateInput({ panels: filteredPanels });
-  await nextTick();
   component.update();
   const panelElements = component.find('EmbeddableChildPanel');
   expect(panelElements.length).toBe(1);
 });
 
-test('DashboardGrid renders expanded panel', async () => {
+test('DashboardGrid renders expanded panel', () => {
   const { props, options } = prepare();
   const component = mountWithIntl(
     <KibanaContextProvider services={options}>
@@ -147,7 +148,6 @@ test('DashboardGrid renders expanded panel', async () => {
   );
 
   props.container.updateInput({ expandedPanelId: '1' });
-  await nextTick();
   component.update();
   // Both panels should still exist in the dom, so nothing needs to be re-fetched once minimized.
   expect(component.find('EmbeddableChildPanel').length).toBe(2);
@@ -157,7 +157,6 @@ test('DashboardGrid renders expanded panel', async () => {
   ).toBe('1');
 
   props.container.updateInput({ expandedPanelId: undefined });
-  await nextTick();
   component.update();
   expect(component.find('EmbeddableChildPanel').length).toBe(2);
 

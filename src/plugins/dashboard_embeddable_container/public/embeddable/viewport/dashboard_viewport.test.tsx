@@ -56,11 +56,15 @@ function getProps(
     } as any,
     notifications: {} as any,
     overlays: {} as any,
-    inspector: {} as any,
+    inspector: {
+      isAvailable: jest.fn(),
+    } as any,
     uiSettings: {} as any,
     savedObjects: {} as any,
     ExitFullScreenButton,
-    uiActions: {} as any,
+    uiActions: {
+      getTriggerCompatibleActions: (() => []) as any,
+    } as any,
   };
 
   const input = getSampleDashboardInput({

@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { isErrorEmbeddable, EmbeddableFactory } from '../embeddable_plugin';
 import { ReplacePanelAction } from './replace_panel_action';
 import { DashboardContainer } from '../embeddable';
@@ -29,6 +28,8 @@ import {
   ContactCardEmbeddableOutput,
 } from '../embeddable_plugin_test_samples';
 import { DashboardOptions } from '../embeddable/dashboard_container_factory';
+import { coreMock } from '../../../../core/public/mocks';
+import { CoreStart } from 'kibana/public';
 
 const embeddableFactories = new Map<string, EmbeddableFactory>();
 embeddableFactories.set(
@@ -39,8 +40,9 @@ const getEmbeddableFactories = () => embeddableFactories.values();
 
 let container: DashboardContainer;
 let embeddable: ContactCardEmbeddable;
-
+let coreStart: CoreStart;
 beforeEach(async () => {
+  coreStart = coreMock.createStart();
   const options: DashboardOptions = {
     ExitFullScreenButton: () => null,
     application: {} as any,
@@ -49,9 +51,9 @@ beforeEach(async () => {
     } as any,
     inspector: {} as any,
     notifications: {} as any,
-    overlays: {} as any,
-    uiSettings: {} as any,
-    savedObjects: {} as any,
+    uiSettings: coreStart.uiSettings,
+    savedObjects: coreStart.savedObjects,
+    overlays: coreStart.overlays,
     savedObjectMetaData: {} as any,
     uiActions: {} as any,
   };
@@ -81,14 +83,12 @@ beforeEach(async () => {
 });
 
 test('Executes the replace panel action', async () => {
-  let core: any;
-  const action = new ReplacePanelAction(core, getEmbeddableFactories);
+  const action = new ReplacePanelAction(coreStart, getEmbeddableFactories);
   action.execute({ embeddable });
 });
 
 test('Is not compatible when embeddable is not in a dashboard container', async () => {
-  let core: any;
-  const action = new ReplacePanelAction(core, getEmbeddableFactories);
+  const action = new ReplacePanelAction(coreStart, getEmbeddableFactories);
   expect(
     await action.isCompatible({
       embeddable: new ContactCardEmbeddable(
@@ -100,8 +100,7 @@ test('Is not compatible when embeddable is not in a dashboard container', async 
 });
 
 test('Execute throws an error when called with an embeddable not in a parent', async () => {
-  let core: any;
-  const action = new ReplacePanelAction(core, getEmbeddableFactories);
+  const action = new ReplacePanelAction(coreStart, getEmbeddableFactories);
   async function check() {
     await action.execute({ embeddable: container });
   }
@@ -109,13 +108,11 @@ test('Execute throws an error when called with an embeddable not in a parent', a
 });
 
 test('Returns title', async () => {
-  let core: any;
-  const action = new ReplacePanelAction(core, getEmbeddableFactories);
+  const action = new ReplacePanelAction(coreStart, getEmbeddableFactories);
   expect(action.getDisplayName({ embeddable })).toBeDefined();
 });
 
 test('Returns an icon', async () => {
-  let core: any;
-  const action = new ReplacePanelAction(core, getEmbeddableFactories);
+  const action = new ReplacePanelAction(coreStart, getEmbeddableFactories);
   expect(action.getIconType({ embeddable })).toBeDefined();
 });
