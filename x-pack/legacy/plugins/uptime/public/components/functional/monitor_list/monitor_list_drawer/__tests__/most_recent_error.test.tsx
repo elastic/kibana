@@ -39,7 +39,7 @@ describe('MostRecentError component', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('renders properly with empty data', () => {
+  it.skip('renders properly with empty data', () => {
     const component = renderWithIntl(
       <Router>
         <MostRecentError
