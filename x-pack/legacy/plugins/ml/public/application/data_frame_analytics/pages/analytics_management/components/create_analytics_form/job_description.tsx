@@ -14,7 +14,7 @@ const helpText = i18n.translate('xpack.ml.dataframe.analytics.create.jobDescript
 
 interface Props {
   description: string;
-  setFormState: any; // TODO update type
+  setFormState: React.Dispatch<React.SetStateAction<object>>;
 }
 
 export const JobDescriptionInput: FC<Props> = ({ description, setFormState }) => (
@@ -26,6 +26,7 @@ export const JobDescriptionInput: FC<Props> = ({ description, setFormState }) =>
   >
     <EuiTextArea
       value={description}
+      rows={2}
       onChange={e => {
         const value = e.target.value;
         setFormState({ description: value });
