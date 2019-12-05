@@ -53,7 +53,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
             .send({
-              description: 'My action',
+              name: 'My action',
               actionTypeId: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
@@ -151,7 +151,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
             .send({
-              description: 'Test rate limit',
+              name: 'Test rate limit',
               actionTypeId: 'test.rate-limit',
               config: {},
             })
@@ -344,7 +344,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
             .send({
-              description: 'My action',
+              name: 'My action',
               actionTypeId: 'test.authorization',
             })
             .expect(200);

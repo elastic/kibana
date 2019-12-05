@@ -26,6 +26,13 @@ export const typicalPayload = (): Partial<Omit<RuleAlertParamsRest, 'filter'>> =
   severity: 'high',
   query: 'user.name: root or user.name: admin',
   language: 'kuery',
+  threats: [
+    {
+      framework: 'fake',
+      tactic: { id: 'fakeId', name: 'fakeName', reference: 'fakeRef' },
+      techniques: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
+    },
+  ],
 });
 
 export const typicalFilterPayload = (): Partial<RuleAlertParamsRest> => ({
@@ -109,7 +116,7 @@ export const getCreateRequest = (): ServerInjectOptions => ({
 export const createActionResult = (): ActionResult => ({
   id: 'result-1',
   actionTypeId: 'action-id-1',
-  description: '',
+  name: '',
   config: {},
 });
 
@@ -139,6 +146,23 @@ export const getResult = (): RuleAlertType => ({
     tags: [],
     to: 'now',
     type: 'query',
+    threats: [
+      {
+        framework: 'MITRE ATT&CK',
+        tactic: {
+          id: 'TA0040',
+          name: 'impact',
+          reference: 'https://attack.mitre.org/tactics/TA0040/',
+        },
+        techniques: [
+          {
+            id: 'T1499',
+            name: 'endpoint denial of service',
+            reference: 'https://attack.mitre.org/techniques/T1499/',
+          },
+        ],
+      },
+    ],
     references: ['http://www.example.com', 'https://ww.example.com'],
   },
   interval: '5m',
@@ -156,6 +180,6 @@ export const getResult = (): RuleAlertType => ({
 export const updateActionResult = (): ActionResult => ({
   id: 'result-1',
   actionTypeId: 'action-id-1',
-  description: '',
+  name: '',
   config: {},
 });

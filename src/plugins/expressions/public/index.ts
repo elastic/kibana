@@ -29,7 +29,7 @@ export { interpreterProvider, ExpressionInterpret } from './interpreter_provider
 export { ExpressionRenderer, ExpressionRendererProps } from './expression_renderer';
 export { ExpressionDataHandler } from './execute';
 
-export { RenderResult, ExpressionRenderHandler } from './render';
+export { ExpressionRenderHandler } from './render';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new ExpressionsPublicPlugin(initializerContext);
