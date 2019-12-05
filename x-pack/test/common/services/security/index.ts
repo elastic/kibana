@@ -27,7 +27,7 @@ export async function SecurityServiceProvider({ getService }: GenericFtrProvider
   try {
     // delete the test_user if present (will it error if the user doesn't exist?)
     await secService.user.delete('test_user');
-  } catch (exception){
+  } catch (exception) {
     log('no test user to delete');
   }
 
