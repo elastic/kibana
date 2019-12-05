@@ -164,7 +164,7 @@ export const isRegressionResultsSearchBoolQuery = (
 export interface DataFrameAnalyticsConfig {
   id: DataFrameAnalyticsId;
   // Description attribute is not supported yet
-  // description?: string;
+  description?: string;
   dest: {
     index: IndexName;
     results_field: string;
