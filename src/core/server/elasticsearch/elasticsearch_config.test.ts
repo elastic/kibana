@@ -41,7 +41,7 @@ ElasticsearchConfig {
   "sniffOnConnectionFault": false,
   "sniffOnStart": false,
   "ssl": Object {
-    "alwaysPresentCertificate": true,
+    "alwaysPresentCertificate": false,
     "certificateAuthorities": undefined,
     "verificationMode": "full",
   },
