@@ -6,6 +6,7 @@
 
 import { shallowWithIntl, renderWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
+import moment from 'moment';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { MostRecentError } from '../most_recent_error';
 import { MonitorDetails, MonitorError } from '../../../../../../common/runtime_types';
@@ -21,12 +22,15 @@ describe('MostRecentError component', () => {
     };
     monitorDetails = {
       monitorId: 'bad-ssl',
-      timestamp: '2019-11-30T01:57:37.792Z',
+      timestamp: moment()
+        .subtract(2, 'day')
+        .toString(),
       error: monitorError,
     };
   });
 
   it('validates props with shallow render', () => {
+    monitorDetails.timestamp = '2019-11-30T01:57:37.792Z';
     const component = shallowWithIntl(
       <Router>
         <MostRecentError
@@ -39,7 +43,7 @@ describe('MostRecentError component', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('renders properly with empty data', () => {
+  it('renders properly with mock data', () => {
     const component = renderWithIntl(
       <Router>
         <MostRecentError
