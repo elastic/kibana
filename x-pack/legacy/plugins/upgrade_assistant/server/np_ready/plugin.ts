@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Plugin, CoreSetup, CoreStart } from 'src/core/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { ServerShim, ServerShimWithRouter } from './types';
 import { credentialStoreFactory } from './lib/reindexing/credential_store';
 import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { registerClusterCheckupRoutes } from './routes/cluster_checkup';
 import { registerDeprecationLoggingRoutes } from './routes/deprecation_logging';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { registerReindexIndicesRoutes, registerReindexWorker } from './routes/reindex_indices';
 import { CloudSetup } from '../../../../../plugins/cloud/server';
 import { registerTelemetryRoutes } from './routes/telemetry';
