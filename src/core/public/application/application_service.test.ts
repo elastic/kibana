@@ -77,9 +77,7 @@ describe('#setup()', () => {
       ).toThrowErrorMatchingInlineSnapshot(
         `"An application is already registered with the appRoute \\"/app/app1\\""`
       );
-      expect(() => registerLegacyApp({ id: 'app1' } as any)).toThrowErrorMatchingInlineSnapshot(
-        `"An application is already registered with the appRoute \\"/app/app1\\""`
-      );
+      expect(() => registerLegacyApp({ id: 'app1' } as any)).not.toThrow();
 
       register(Symbol(), { id: 'app-next', mount, appRoute: '/app/app3' } as any);
 
@@ -88,9 +86,7 @@ describe('#setup()', () => {
       ).toThrowErrorMatchingInlineSnapshot(
         `"An application is already registered with the appRoute \\"/app/app3\\""`
       );
-      expect(() => registerLegacyApp({ id: 'app3' } as any)).toThrowErrorMatchingInlineSnapshot(
-        `"An application is already registered with the appRoute \\"/app/app3\\""`
-      );
+      expect(() => registerLegacyApp({ id: 'app3' } as any)).not.toThrow();
     });
 
     it('throws an error if an App starts with the HTTP base path', () => {
@@ -133,11 +129,7 @@ describe('#setup()', () => {
       ).toThrowErrorMatchingInlineSnapshot(
         `"An application is already registered with the appRoute \\"/app/app1\\""`
       );
-      expect(() =>
-        registerLegacyApp({ id: 'app1:other' } as any)
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"An application is already registered with the appRoute \\"/app/app1\\""`
-      );
+      expect(() => registerLegacyApp({ id: 'app1:other' } as any)).not.toThrow();
     });
   });
 
@@ -202,14 +194,17 @@ describe('#start()', () => {
     `);
   });
 
-  it('passes metadata to capabilities', async () => {
+  it('passes appIds to capabilities', async () => {
     const { register } = service.setup(setupDeps);
 
     register(Symbol(), { id: 'app1', mount } as any);
+    register(Symbol(), { id: 'app2', mount } as any);
+    register(Symbol(), { id: 'app3', mount } as any);
     await service.start(startDeps);
 
     expect(MockCapabilitiesService.start).toHaveBeenCalledWith({
-      injectedMetadata: startDeps.injectedMetadata,
+      appIds: ['app1', 'app2', 'app3'],
+      http: setupDeps.http,
     });
   });
 

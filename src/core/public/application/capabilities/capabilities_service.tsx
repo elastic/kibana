@@ -26,8 +26,6 @@ interface StartDeps {
   http: HttpStart;
 }
 
-export { Capabilities };
-
 /** @internal */
 export interface CapabilitiesStart {
   capabilities: RecursiveReadonly<Capabilities>;

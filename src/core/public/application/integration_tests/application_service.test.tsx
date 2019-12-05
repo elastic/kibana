@@ -33,14 +33,25 @@ describe('#start()', () => {
   let service: ApplicationService;
 
   beforeEach(() => {
-    const http = httpServiceMock.createSetupContract();
     setupDeps = {
-      http,
+      http: httpServiceMock.createSetupContract(),
       context: contextServiceMock.createSetupContract(),
       injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
     };
+    setupDeps.http.post.mockImplementation(async path => {
+      if (path.startsWith('/api/core/capabilities')) {
+        return {
+          navLinks: {
+            alpha: true,
+            beta: false,
+            gamma: true,
+            delta: false,
+          },
+        };
+      }
+    });
     setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(false);
-    startDeps = { http, injectedMetadata: setupDeps.injectedMetadata };
+    startDeps = { http: setupDeps.http, injectedMetadata: setupDeps.injectedMetadata };
     service = new ApplicationService();
   });
 
@@ -51,22 +62,24 @@ describe('#start()', () => {
       const application = await service.start(startDeps);
       const stop$ = new Subject();
       const promise = application.currentAppId$
-        .pipe(skip(1), bufferCount(3), takeUntil(stop$))
+        .pipe(skip(1), bufferCount(4), takeUntil(stop$))
         .toPromise();
       const render = createRenderer(application.getComponent(), application.navigateToApp);
 
-      await render('myTestApp');
-      await render('myOtherApp');
-      await render('myLastApp');
+      await render('alpha');
+      await render('beta');
+      await render('gamma');
+      await render('delta');
       stop$.next();
 
       const appIds = await promise;
 
       expect(appIds).toMatchInlineSnapshot(`
         Array [
-          "myTestApp",
-          "myOtherApp",
-          "myLastApp",
+          "alpha",
+          "beta",
+          "gamma",
+          "delta",
         ]
       `);
     });
@@ -80,8 +93,8 @@ describe('#start()', () => {
       const application = await service.start(startDeps);
       const render = createRenderer(application.getComponent(), application.navigateToApp);
 
-      await render('legacyApp1');
-      expect(setupDeps.redirectTo).toHaveBeenCalledWith('/test/app/legacyApp1');
+      await render('alpha');
+      expect(setupDeps.redirectTo).toHaveBeenCalledWith('/test/app/alpha');
     });
 
     it('handles legacy apps with subapps', async () => {
