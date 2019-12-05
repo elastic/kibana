@@ -22,7 +22,7 @@ import { Server } from 'hapi';
 import { LogRotator } from './log_rotator';
 import { KibanaConfig } from '../../kbn_server';
 
-let logRotator: LogRotator | null = null;
+let logRotator: LogRotator;
 
 export async function setupLoggingRotate(server: Server, config: KibanaConfig) {
   // If log rotate is not enabled we skip
