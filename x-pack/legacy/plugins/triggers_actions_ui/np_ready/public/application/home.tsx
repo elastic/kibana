@@ -86,11 +86,11 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
       <EuiPageContent>
         <EuiPageContentHeader>
           <EuiPageContentHeaderSection>
-            <EuiTitle size="l">
+            <EuiTitle size="m">
               <h1 data-test-subj="appTitle">
                 <FormattedMessage
                   id="xpack.triggersActionsUI.home.appTitle"
-                  defaultMessage="Triggers and Actions"
+                  defaultMessage="Alerts and actions"
                 />
               </h1>
             </EuiTitle>

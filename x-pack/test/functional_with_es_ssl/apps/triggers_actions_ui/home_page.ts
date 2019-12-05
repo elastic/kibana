@@ -22,7 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await log.debug('Checking for section heading to say Triggers and Actions.');
 
       const headingText = await pageObjects.triggersActionsUI.sectionHeadingText();
-      expect(headingText).to.be('Triggers and Actions');
+      expect(headingText).to.be('Alerts and actions');
 
       const actionsConnectorsList = await testSubjects.exists('actionsList');
       expect(actionsConnectorsList).to.be(true);

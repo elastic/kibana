@@ -69,7 +69,7 @@ export class Plugin implements CorePlugin<Setup, Start> {
       const kbnSection = getSection('kibana');
       kbnSection.register('triggersActions', {
         display: i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
-          defaultMessage: 'Triggers and Actions',
+          defaultMessage: 'Alerts and actions',
         }),
         order: 7,
         url: `#${BASE_PATH}`,
