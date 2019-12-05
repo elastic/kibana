@@ -307,23 +307,32 @@ export class VectorStyleEditor extends Component {
     );
   }
 
+  _renderIsTimeAwareSwitch() {
+    if (!this.props.showIsTimeAware) {
+      return null;
+    }
+
+    return (
+      <EuiFormRow
+        display="columnCompressedSwitch"
+      >
+        <EuiSwitch
+          label={i18n.translate('xpack.maps.vectorStyleEditor.isTimeAwareLabel', {
+            defaultMessage: 'Apply global time to style metadata requests',
+          })}
+          checked={this.props.isTimeAware}
+          onChange={this._onIsTimeAwareChange}
+          compressed
+        />
+      </EuiFormRow>
+    );
+  }
+
   render() {
     return (
       <Fragment>
         {this._renderProperties()}
-
-        <EuiFormRow
-          display="columnCompressedSwitch"
-        >
-          <EuiSwitch
-            label={i18n.translate('xpack.maps.vectorStyleEditor.isTimeAwareLabel', {
-              defaultMessage: 'Apply global time range to style',
-            })}
-            checked={this.props.isTimeAware}
-            onChange={this._onIsTimeAwareChange}
-            compressed
-          />
-        </EuiFormRow>
+        {this._renderIsTimeAwareSwitch()}
       </Fragment>
     );
   }

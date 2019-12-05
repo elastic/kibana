@@ -91,6 +91,10 @@ export class VectorStyle extends AbstractStyle {
       onStyleDescriptorChange(vectorStyleDescriptor);
     };
 
+    const propertiesWithFieldMeta = this.getDynamicPropertiesArray().filter(dynamicStyleProp => {
+      return dynamicStyleProp.isFieldMetaEnabled();
+    });
+
     return (
       <VectorStyleEditor
         handlePropertyChange={handlePropertyChange}
@@ -107,6 +111,7 @@ export class VectorStyle extends AbstractStyle {
         loadIsLinesOnly={this._getIsLinesOnly}
         onIsTimeAwareChange={onIsTimeAwareChange}
         isTimeAware={this.isTimeAware()}
+        showIsTimeAware={propertiesWithFieldMeta.length > 0}
       />
     );
   }
