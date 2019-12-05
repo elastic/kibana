@@ -275,11 +275,17 @@ describe('hashedItemStore', () => {
         });
 
         it('removes and returns an item', () => {
-          const removedItem = hashedItemStore.removeItem('1');
-          expect(removedItem).toBe('a');
+          const removedItem1 = hashedItemStore.removeItem('1');
+          expect(removedItem1).toBe('a');
           expect(hashedItemStore.getItem('1')).toBeNull();
           expect(hashedItemStore.getItem('2')).not.toBeNull();
           expect((hashedItemStore as any).getIndexedItems()).toHaveLength(1);
+
+          const removedItem2 = hashedItemStore.removeItem('2');
+          expect(removedItem2).toBe('b');
+          expect(hashedItemStore.getItem('1')).toBeNull();
+          expect(hashedItemStore.getItem('2')).toBeNull();
+          expect((hashedItemStore as any).getIndexedItems()).toHaveLength(0);
         });
       });
 

@@ -114,10 +114,10 @@ export class HashedItemStore implements IStorage<string, boolean> {
   removeItem(hash: string): string | null {
     const indexedItems = this.getIndexedItems();
     const itemToRemove = this.storage.getItem(hash);
-    const indexToRemove = this.getIndexedItem(hash, indexedItems);
+    const indexedItemToRemove = this.getIndexedItem(hash, indexedItems);
 
-    if (indexToRemove) {
-      pull(indexedItems, indexToRemove);
+    if (indexedItemToRemove) {
+      pull(indexedItems, indexedItemToRemove);
       this.setIndexedItems(indexedItems);
     }
 
