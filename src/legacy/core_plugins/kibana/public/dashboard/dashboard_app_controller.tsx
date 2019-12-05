@@ -36,7 +36,7 @@ import {
   KbnUrl,
   SaveOptions,
   SavedObjectFinder,
-  unhashUrl,
+  StateManagement,
 } from './legacy_imports';
 import { FilterStateManager, IndexPattern } from '../../../data/public';
 import { Query, SavedQuery, IndexPatterns } from '../../../../../plugins/data/public';
@@ -747,7 +747,7 @@ export class DashboardAppController {
         anchorElement,
         allowEmbed: true,
         allowShortUrl: !dashboardConfig.getHideWriteControls(),
-        shareableUrl: unhashUrl(window.location.href),
+        shareableUrl: StateManagement.Url.unhashUrl(window.location.href),
         objectId: dash.id,
         objectType: 'dashboard',
         sharingData: {

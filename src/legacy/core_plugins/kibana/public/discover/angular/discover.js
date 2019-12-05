@@ -48,7 +48,7 @@ import {
   migrateLegacyQuery,
   RequestAdapter,
   showSaveModal,
-  unhashUrl,
+  StateManagement,
   stateMonitorFactory,
   subscribeWithScope,
   tabifyAggResponse,
@@ -330,7 +330,7 @@ function discoverController(
           anchorElement,
           allowEmbed: false,
           allowShortUrl: uiCapabilities.discover.createShortUrl,
-          shareableUrl: unhashUrl(window.location.href),
+          shareableUrl: StateManagement.Url.unhashUrl(window.location.href),
           objectId: savedSearch.id,
           objectType: 'search',
           sharingData: {

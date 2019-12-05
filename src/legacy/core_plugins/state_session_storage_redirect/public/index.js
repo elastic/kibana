@@ -18,7 +18,7 @@
  */
 
 import chrome from 'ui/chrome';
-import { hashUrl } from 'ui/state_management/state_hashing';
+import { StateManagement } from '../../../../plugins/kibana_utils/public';
 import uiRoutes from 'ui/routes';
 import { fatalError } from 'ui/notify';
 
@@ -29,7 +29,7 @@ uiRoutes
       url: function (AppState, globalState, $window) {
         const redirectUrl = chrome.getInjected('redirectUrl');
         try {
-          const hashedUrl = hashUrl(redirectUrl);
+          const hashedUrl = StateManagement.Url.hashUrl(redirectUrl);
           const url = chrome.addBasePath(hashedUrl);
 
           $window.location = url;

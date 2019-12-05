@@ -35,11 +35,7 @@ import { fatalError, toastNotifications } from '../notify';
 import './config_provider';
 import { createLegacyClass } from '../utils/legacy_class';
 import { callEach } from '../utils/function';
-import { hashedItemStore } from '../../../../plugins/kibana_utils/public';
-import {
-  createStateHash,
-  isStateHash
-} from './state_hashing';
+import { hashedItemStore, StateManagement } from '../../../../plugins/kibana_utils/public';
 
 export function StateProvider(Private, $rootScope, $location, stateManagementConfig, config, kbnUrl, $injector) {
   const Events = Private(EventsProvider);
@@ -95,7 +91,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
       return null;
     }
 
-    if (isStateHash(urlVal)) {
+    if (StateManagement.StateHash.isStateHash(urlVal)) {
       return this._parseStateHash(urlVal);
     }
 
@@ -269,7 +265,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
    *  @return {string} rison
    */
   State.prototype.translateHashToRison = function (stateHashOrRison) {
-    if (isStateHash(stateHashOrRison)) {
+    if (StateManagement.StateHash.isStateHash(stateHashOrRison)) {
       return rison.encode(this._parseStateHash(stateHashOrRison));
     }
 
@@ -292,7 +288,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
 
     // We need to strip out Angular-specific properties.
     const json = angular.toJson(state);
-    const hash = createStateHash(json);
+    const hash = StateManagement.StateHash.createStateHash(json);
     const isItemSet = this._hashedItemStore.setItem(hash, json);
 
     if (isItemSet) {

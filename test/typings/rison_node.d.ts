@@ -17,16 +17,23 @@
  * under the License.
  */
 
-export * from './core';
-export * from './errors';
-export * from './store';
-export * from './parse';
-export * from './resize_checker';
-export * from './render_complete';
-export * from './store';
-export * from './errors';
-export * from './field_mapping';
-export * from './storage';
-export * from './storage/hashed_item_store';
-import * as StateManagement from './state_management';
-export { StateManagement };
+declare module 'rison-node' {
+  export type RisonValue = null | boolean | number | string | RisonObject | RisonArray;
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  export interface RisonArray extends Array<RisonValue> {}
+
+  export interface RisonObject {
+    [key: string]: RisonValue;
+  }
+
+  export const decode: (input: string) => RisonValue;
+
+  // eslint-disable-next-line @typescript-eslint/camelcase
+  export const decode_object: (input: string) => RisonObject;
+
+  export const encode: <Input extends RisonValue>(input: Input) => string;
+
+  // eslint-disable-next-line @typescript-eslint/camelcase
+  export const encode_object: <Input extends RisonObject>(input: Input) => string;
+}

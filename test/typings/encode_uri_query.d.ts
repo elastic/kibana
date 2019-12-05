@@ -17,16 +17,8 @@
  * under the License.
  */
 
-export * from './core';
-export * from './errors';
-export * from './store';
-export * from './parse';
-export * from './resize_checker';
-export * from './render_complete';
-export * from './store';
-export * from './errors';
-export * from './field_mapping';
-export * from './storage';
-export * from './storage/hashed_item_store';
-import * as StateManagement from './state_management';
-export { StateManagement };
+declare module 'encode-uri-query' {
+  function encodeUriQuery(query: string, usePercentageSpace?: boolean): string;
+  // eslint-disable-next-line import/no-default-export
+  export default encodeUriQuery;
+}
