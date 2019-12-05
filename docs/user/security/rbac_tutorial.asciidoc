@@ -74,11 +74,11 @@ image::security/images/role-monitor-privilege.png["Monitor privilege"]
 [float]
 ==== Give the role permission to access the data
 
-Access to data in indices is an index level privilege, so in 
+Access to data in indices is an index-level privilege, so in 
 *Index privileges*, add lines for the indices that contain the 
 data for this role.  Two privileges needed: `read` and 
 `view_index_metadata`.  All privileges are detailed in the 
-https://www.elastic.co/guide/en/elasticsearch/reference/current/security-privileges.html[security privileges] documentaion.
+https://www.elastic.co/guide/en/elasticsearch/reference/current/security-privileges.html[security privileges] documentation.
 In the screenshots, Filebeat and Metricbeat data is used, but you 
 should use the index patterns for your indices.
 
@@ -111,4 +111,3 @@ image::security/images/role-new-user.png["Developer user"]
 
 Finally, have the developer log in and access the Dev Mortgage space 
 and create a new visualization.
-
