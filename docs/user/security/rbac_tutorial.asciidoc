@@ -38,7 +38,6 @@ With the requirements in mind, here are the steps that you will work
 through in this tutorial:
 
 * Create a role named `mortgage-developer`
-* Give the role the ability to monitor the Elastic Stack
 * Give the role permission to access the data in the relevant indices
 * Give the role permission to create visualizations and dashboards 
 * Create the web developer's user account with the proper roles
@@ -58,18 +57,6 @@ You can create as many roles as you like. Click *Create role* and
 provide a name. Use `dev-mortgage` because this role is for a developer 
 working on the bank's mortgage application.
 
-[float]
-==== Give the role the ability to monitor the Elastic Stack
-
-Stack monitoring is an important feature for system admins and developers.  
-Both of these groups use stack monitoring to look at 
-performance.  Developers also use stack monitoring to evaluate and tune ingest pipelines.  For more information on stack monitoring, see the https://www.elastic.co/guide/en/elasticsearch/reference/current/monitoring-overview.html[monitoring overview].
-
-Stack monitoring is a cluster level privilege, so in *Cluster 
-privileges*, select  **monitor**.
-
-[role="screenshot"]
-image::security/images/role-monitor-privilege.png["Monitor privilege"]
 
 [float]
 ==== Give the role permission to access the data
@@ -112,5 +99,6 @@ image::security/images/role-new-user.png["Developer user"]
 
 Finally, have the developer log in and access the Dev Mortgage space 
 and create a new visualization.
+
 NOTE: If the user is assigned to only one space, they will automatically enter that space on login.
 
