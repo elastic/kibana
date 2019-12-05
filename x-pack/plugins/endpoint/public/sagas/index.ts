@@ -11,17 +11,18 @@ import { alertListSaga } from './alert_list';
 import { alertDetailsSaga } from './alert_details';
 import { endpointsListSaga } from './endpoints_list';
 import { homeSaga } from './home';
+import { SagaContext } from '../lib/saga';
 
 // TODO: Type this properly
 // eslint-disable-next-line import/no-default-export
-export default function(context: AppMountContext, history: History) {
-  return async function(...args: any[]) {
+export default function sagas(context: AppMountContext, history: History) {
+  return async function(sagaContext: SagaContext) {
     await Promise.all([
-      routingSaga(...args),
-      alertListSaga(...[...args, context, history]),
-      alertDetailsSaga(...[...args, context, history]),
-      endpointsListSaga(...[...args, context, history]),
-      homeSaga(...[...args, context, history]),
+      routingSaga(sagaContext),
+      alertListSaga(sagaContext, context),
+      alertDetailsSaga(sagaContext, context, history),
+      endpointsListSaga(sagaContext, context),
+      homeSaga(sagaContext, context, history),
     ]);
   };
 }
