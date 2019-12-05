@@ -294,10 +294,6 @@ export class VectorStyle extends AbstractStyle {
     return this._checkIfOnlyFeatureType(VECTOR_SHAPE_TYPES.LINE);
   }
 
-  _getFieldRangeFromLocalFeatures = (fieldName) => {
-    return _.get(this._descriptor, ['__styleMeta', fieldName]);
-  }
-
   _getFieldRange = (fieldName) => {
     const fieldRangeFromLocalFeatures = _.get(this._descriptor, ['__styleMeta', fieldName]);
     const dynamicProps = this.getDynamicPropertiesArray();
