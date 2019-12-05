@@ -20,6 +20,7 @@ import {
   EuiPageBody,
   EuiPanel,
   EuiPageContent,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -31,12 +32,12 @@ function renderLatestActive(latestActive, latestTypes, latestVersions) {
         <EuiFlexItem>
           <EuiPanel>
             <EuiTitle size="s">
-              <h3>
+              <h2>
                 <FormattedMessage
                   id="xpack.monitoring.beats.overview.activeBeatsInLastDayTitle"
                   defaultMessage="Active Beats in Last Day"
                 />
-              </h3>
+              </h2>
             </EuiTitle>
             <EuiSpacer size="s" />
             <LatestActive latestActive={latestActive} />
@@ -45,12 +46,12 @@ function renderLatestActive(latestActive, latestTypes, latestVersions) {
         <EuiFlexItem>
           <EuiPanel>
             <EuiTitle size="s">
-              <h3>
+              <h2>
                 <FormattedMessage
                   id="xpack.monitoring.beats.overview.top5BeatTypesInLastDayTitle"
                   defaultMessage="Top 5 Beat Types in Last Day"
                 />
-              </h3>
+              </h2>
             </EuiTitle>
             <EuiSpacer size="s" />
             <LatestTypes latestTypes={latestTypes} />
@@ -59,12 +60,12 @@ function renderLatestActive(latestActive, latestTypes, latestVersions) {
         <EuiFlexItem>
           <EuiPanel>
             <EuiTitle size="s">
-              <h3>
+              <h2>
                 <FormattedMessage
                   id="xpack.monitoring.beats.overview.top5VersionsInLastDayTitle"
                   defaultMessage="Top 5 Versions in Last Day"
                 />
-              </h3>
+              </h2>
             </EuiTitle>
             <EuiSpacer size="s" />
             <LatestVersions latestVersions={latestVersions} />
@@ -109,6 +110,14 @@ export function BeatsOverview({
   return (
     <EuiPage>
       <EuiPageBody>
+        <EuiScreenReaderOnly>
+          <h1>
+            <FormattedMessage
+              id="xpack.monitoring.beats.overview.heading"
+              defaultMessage="Beats overview"
+            />
+          </h1>
+        </EuiScreenReaderOnly>
         <EuiPageContent>
           <Stats stats={stats} />
           {renderLatestActive(latestActive, latestTypes, latestVersions)}
