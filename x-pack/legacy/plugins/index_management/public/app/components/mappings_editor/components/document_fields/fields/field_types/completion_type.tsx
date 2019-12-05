@@ -35,7 +35,7 @@ export const CompletionType = ({ field }: Props) => {
   return (
     <EditFieldSection>
       {/* analyzers */}
-      <AnalyzersParameter id="completionType" field={field} />
+      <AnalyzersParameter field={field} />
 
       {/* max_input_length */}
       <EditFieldFormRow

@@ -107,7 +107,7 @@ export const TextType = React.memo(({ field }: Props) => {
 
       <AdvancedSettingsWrapper>
         {/* Analyzers */}
-        <AnalyzersParameter id="textType" field={field} withSearchQuoteAnalyzer={true} />
+        <AnalyzersParameter field={field} withSearchQuoteAnalyzer={true} />
 
         <EditFieldSection>
           {/* fielddata */}

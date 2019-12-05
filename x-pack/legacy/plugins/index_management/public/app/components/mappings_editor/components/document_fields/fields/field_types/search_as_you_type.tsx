@@ -53,7 +53,7 @@ export const SearchAsYouType = React.memo(({ field }: Props) => {
 
       <AdvancedSettingsWrapper>
         {/* Analyzers */}
-        <AnalyzersParameter id="searchAsYouTypeType" field={field} withSearchQuoteAnalyzer={true} />
+        <AnalyzersParameter field={field} withSearchQuoteAnalyzer={true} />
 
         <EditFieldSection>
           {/* norms */}

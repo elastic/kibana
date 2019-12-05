@@ -16,23 +16,19 @@ import { EditFieldSection } from '../fields/edit_field';
 import { AnalyzerParameter } from './analyzer_parameter';
 
 interface Props {
-  id: string;
   field: NormalizedField;
   withSearchQuoteAnalyzer?: boolean;
 }
 
-export const AnalyzersParameter = ({ id, field, withSearchQuoteAnalyzer = false }: Props) => {
-  const useSameAnalyzerForSearchId = `useSameAnalyzerForSearch-${id}`;
-
+export const AnalyzersParameter = ({ field, withSearchQuoteAnalyzer = false }: Props) => {
   return (
     <EditFieldSection
       title={i18n.translate('xpack.idxMgmt.mappingsEditor.analyzersSectionTitle', {
         defaultMessage: 'Analyzers',
       })}
     >
-      <FormDataProvider pathsToWatch={useSameAnalyzerForSearchId}>
-        {data => {
-          const useSameAnalyzerForSearch = data[useSameAnalyzerForSearchId];
+      <FormDataProvider pathsToWatch="useSameAnalyzerForSearch">
+        {({ useSameAnalyzerForSearch }) => {
           const label = useSameAnalyzerForSearch
             ? i18n.translate('xpack.idxMgmt.mappingsEditor.indexSearchAnalyzerFieldLabel', {
                 defaultMessage: 'Index and search analyzer',
@@ -50,7 +46,7 @@ export const AnalyzersParameter = ({ id, field, withSearchQuoteAnalyzer = false 
       <EuiSpacer size="s" />
 
       <UseField
-        path={useSameAnalyzerForSearchId}
+        path="useSameAnalyzerForSearch"
         component={CheckBoxField}
         config={{
           label: i18n.translate(
@@ -63,10 +59,9 @@ export const AnalyzersParameter = ({ id, field, withSearchQuoteAnalyzer = false 
         }}
       />
 
-      <FormDataProvider pathsToWatch={useSameAnalyzerForSearchId}>
-        {data => {
-          const useSameAnalyzerForSearch = data[useSameAnalyzerForSearchId];
-          return useSameAnalyzerForSearch ? null : (
+      <FormDataProvider pathsToWatch="useSameAnalyzerForSearch">
+        {({ useSameAnalyzerForSearch }) =>
+          useSameAnalyzerForSearch ? null : (
             <>
               <EuiSpacer size="m" />
               <AnalyzerParameter
@@ -76,8 +71,8 @@ export const AnalyzersParameter = ({ id, field, withSearchQuoteAnalyzer = false 
               />
               <EuiSpacer size="s" />
             </>
-          );
-        }}
+          )
+        }
       </FormDataProvider>
 
       {withSearchQuoteAnalyzer && (
