@@ -20,7 +20,7 @@ export const createRouteWithAuth = (
     request,
     response
   ) => {
-    if (libs.license(context)) {
+    if (libs.license(context.licensing.license)) {
       return await handler(context, request, response);
     }
     return response.badRequest();
