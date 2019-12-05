@@ -111,6 +111,61 @@ If this had been the output of the table, pie chart, or plot chart from the prev
 
 Canvas uses that output to render an element, but other applications can use expressions to do pretty much anything. As stated previously, expressions simply execute functions, and the functions are all written in Javascript. That means if you can do something in Javascript, you can do it with an expression. This can include, just to name a few things, sending emails or notifications, reading from or writing to a file, controlling devices with WebUSB or Web Bluetooth, consuming an external API, really just about anything. If your Javascript works in the environment where the code will run, such as in Node.js or in a browser, you can do it with an expression.
 
+[[canvas-expressions-composing-functions-with-subexpressions]]
+=== Composing Functions with Sub-Expressions
+
+You may have noticed another syntax in examples from other sections, namely expressions inside of curly brackets. These are called sub-expressions, and they can be used to provide a calculated value to another expression, instead of just a static one.
+
+A simple example of this is when you upload your own images to a Canvas workpad. That upload becomes an asset, and that asset can be retrieved using the `asset` function. Usually you’ll just do this from the UI, adding an image element to the page and uploading your image from the control in the sidebar, or picking an existing asset from there as well. In both cases, the system will consume that asset via the `asset` function, and you’ll end up with an expression similar to this:
+
+*[NOTE] The examples in this section can’t be copied and pasted directly, since the values used throughout will not exist in your workpad*
+
+[source,text]
+----
+image dataurl={asset 3cb3ec3a-84d7-48fa-8709-274ad5cc9e0b}
+----
+
+Sub-expressions are executed before the function that uses them is executed. In this case, `asset` will be run first, it will produce a value, the base64-encoded value of the image, and that value will be used as the value for the `dataurl` argument in the <<image_fn, image>> function. So at first pass, you’ll have something like this, after the asset function executes:
+
+[source,text]
+----
+image dataurl="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0"
+----
+
+Since all of the sub-expressions are now resolved into actual values, the <<image_fn, image>> function can be executed to produce its JSON output, just as it’s explained previously. In the case of images, the ability to nest sub-expressions is particularly useful to show one of several images conditionally. For example, you could swap between two images based on some calculated value by mixing in the <<if_fn, if>> function, like in this example expression:
+
+[source,text]
+----
+demodata
+| image dataurl={
+  if condition={getCell price | gte 100} 
+    then={asset 3cb3ec3a-84d7-48fa-8709-274ad5cc9e0b} 
+    else={asset cbc11a1f-8f25-4163-94b4-2c3a060192e7}
+}
+----
+
+Here, the expression to use for the value of the `condition` argument, `getCell price | gte 100`, runs first since it is nested deeper. This expressions retrieves the value from the “price” column in the first row of the datatable produced by `demodata` and piping the value to the `gte` function, comparing the value to `100` and returning `true` if it’s 100 or more and `false` if it’s under 100. That boolean value becomes the value for the `condition` argument and the output from the `then` expression is used as the output when `condition` is `true`, while the output from the "else" expression is used when `condition` is false. In both cases, a base64-encoded image will be returned and one of the two images will be displayed.
+
+You might be wondering how the <<getCell_fn, getCell>> function in the sub-expression accessed the data from the <<demodata_fn, demoData>> function, even though <<demodata_fn, demoData>> was not being directly piped into <<getCell_fn, getCell>>. The answer is simple, but important to understand; when nested sub-expressions are executed, they automatically receive the same _context_, or output of the previous function, that its parent function receives. In this specific expression, demodata’s datatable is automatically provided to the nested expression’s `getCell` function, which allows that expression to pull out a value and compare it to another value. 
+
+The passing of the _context_ is automatic, and it happens no matter how deeply you nest your sub-expressions. To demonstrate this, let’s modify the expression slightly to compare the value of the "price" against multiple conditions using the <<all_fn, all>> function. 
+
+[source,text]
+----
+demodata
+| image dataurl={
+  if condition={getCell price | all {gte 100} {neq 105}} 
+    then={asset 3cb3ec3a-84d7-48fa-8709-274ad5cc9e0b} 
+    else={asset cbc11a1f-8f25-4163-94b4-2c3a060192e7}
+}
+----
+
+This time, `getCell price` is run, and the result is passed into the next function as the context.  Then, each sub expression of the <<all_fn, all>> function is run, with the context given to their parent, which in this case is the result of `getCell price`. If `all` of these subexpressions evaluate to true, then the `if` condition argument will be true. 
+
+Sub-expressions can seem a little foreign, especially if you aren’t a developer, but they’re worth getting familiar with, since they provide a ton of power and flexibility. Since you can nest any expression you want, you can also use this behavior to mix data from multiple indices, or even data from multiple different sources. As an example, you could query an API for a value to use as part of the query provided to <<essql_fn, essql>>. 
+
+This whole section is really just scratching the surface, but hopefully after reading it you at least understand how to read expressions and make sense of what they are doing. With a little practice, you’ll get the hang of mixing _context_ and sub-expressions together to turn any input into your desired output.
+
 [[canvas-handling-context-and-argument-types]]
 === Handling context and argument types
 If you look through the function docs, you may notice that all of them define what a function accepts and what it returns. Additionally, every argument includes a type property that specifies the kind of data that can be used. These two types of values are actually the same, and can be used as a guide for how to deal with piping to other functions and using subexpressions for argument values. 
