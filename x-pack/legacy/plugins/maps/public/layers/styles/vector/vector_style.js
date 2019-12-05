@@ -294,51 +294,61 @@ export class VectorStyle extends AbstractStyle {
     return this._checkIfOnlyFeatureType(VECTOR_SHAPE_TYPES.LINE);
   }
 
+  _getFieldRangeFromLocalFeatures = (fieldName) => {
+    return _.get(this._descriptor, ['__styleMeta', fieldName]);
+  }
+
   _getFieldRange = (fieldName) => {
+    const fieldRangeFromLocalFeatures = _.get(this._descriptor, ['__styleMeta', fieldName]);
     const dynamicProps = this.getDynamicPropertiesArray();
     const dynamicProp = dynamicProps.find(dynamicProp => { return fieldName === dynamicProp.getField().getName(); });
 
-    if (dynamicProp && dynamicProp.isFieldMetaEnabled()) {
-      let dataRequestId;
-      if (dynamicProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE) {
-        dataRequestId = SOURCE_META_ID_ORIGIN;
-      } else {
-        const join = this._layer.getValidJoins().find(join => {
-          const matchingField = join.getRightJoinSource().getMetricFieldForName(fieldName);
-          return !!matchingField;
-        });
-        if (join) {
-          dataRequestId = join.getSourceMetaDataRequestId();
-        }
-      }
+    if (!dynamicProp || !dynamicProp.isFieldMetaEnabled()) {
+      return fieldRangeFromLocalFeatures;
+    }
 
-      if (dataRequestId) {
-        const styleMetaDataRequest = this._layer._findDataRequestForSource(dataRequestId);
-        if (styleMetaDataRequest && styleMetaDataRequest.hasData()) {
-          const data = styleMetaDataRequest.getData();
-          const field = dynamicProp.getField();
-          const realFieldName = field.getESDocFieldName ? field.getESDocFieldName() : field.getName();
-          const stats = data[realFieldName];
-          if (stats) {
-            const sigma = _.get(dynamicProp.getFieldMetaOptions(), 'sigma', 3);
-            const stdLowerBounds = stats.avg - (stats.std_deviation * sigma);
-            const stdUpperBounds = stats.avg + (stats.std_deviation * sigma);
-            const min = Math.max(stats.min, stdLowerBounds);
-            const max = Math.min(stats.max, stdUpperBounds);
-            return {
-              min,
-              max,
-              delta: max - min,
-              isMinOutsideStdRange: stats.min < stdLowerBounds,
-              isMaxOutsideStdRange: stats.max > stdUpperBounds,
-            };
-          }
-        }
+    let dataRequestId;
+    if (dynamicProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE) {
+      dataRequestId = SOURCE_META_ID_ORIGIN;
+    } else {
+      const join = this._layer.getValidJoins().find(join => {
+        const matchingField = join.getRightJoinSource().getMetricFieldForName(fieldName);
+        return !!matchingField;
+      });
+      if (join) {
+        dataRequestId = join.getSourceMetaDataRequestId();
       }
     }
 
-    // Default to clamped range from on-screen values
-    return _.get(this._descriptor, ['__styleMeta', fieldName]);
+    if (!dataRequestId) {
+      return fieldRangeFromLocalFeatures;
+    }
+
+    const styleMetaDataRequest = this._layer._findDataRequestForSource(dataRequestId);
+    if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
+      return fieldRangeFromLocalFeatures;
+    }
+
+    const data = styleMetaDataRequest.getData();
+    const field = dynamicProp.getField();
+    const realFieldName = field.getESDocFieldName ? field.getESDocFieldName() : field.getName();
+    const stats = data[realFieldName];
+    if (!stats) {
+      return fieldRangeFromLocalFeatures;
+    }
+
+    const sigma = _.get(dynamicProp.getFieldMetaOptions(), 'sigma', 3);
+    const stdLowerBounds = stats.avg - (stats.std_deviation * sigma);
+    const stdUpperBounds = stats.avg + (stats.std_deviation * sigma);
+    const min = Math.max(stats.min, stdLowerBounds);
+    const max = Math.min(stats.max, stdUpperBounds);
+    return {
+      min,
+      max,
+      delta: max - min,
+      isMinOutsideStdRange: stats.min < stdLowerBounds,
+      isMaxOutsideStdRange: stats.max > stdUpperBounds,
+    };
   }
 
   getIcon = () => {
