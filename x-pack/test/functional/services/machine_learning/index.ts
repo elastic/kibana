@@ -7,7 +7,10 @@
 export { MachineLearningAnomalyExplorerProvider } from './anomaly_explorer';
 export { MachineLearningAPIProvider } from './api';
 export { MachineLearningDataFrameAnalyticsProvider } from './data_frame_analytics';
+export { MachineLearningDataFrameAnalyticsCreationProvider } from './data_frame_analytics_creation';
+export { MachineLearningDataFrameAnalyticsTableProvider } from './data_frame_analytics_table';
 export { MachineLearningDataVisualizerProvider } from './data_visualizer';
+export { MachineLearningDataVisualizerIndexBasedProvider } from './data_visualizer_index_based';
 export { MachineLearningJobManagementProvider } from './job_management';
 export { MachineLearningJobSourceSelectionProvider } from './job_source_selection';
 export { MachineLearningJobTableProvider } from './job_table';

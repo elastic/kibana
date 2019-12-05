@@ -39,7 +39,6 @@ import {
   getServices,
   angular,
   absoluteToParsedUrl,
-  getUnhashableStatesProvider,
   KibanaParsedUrl,
   migrateLegacyQuery,
   SavedObjectSaveModal,
@@ -54,19 +53,20 @@ const {
   capabilities,
   chrome,
   chromeLegacy,
+  npData,
   data,
   docTitle,
   FilterBarQueryFilterProvider,
   getBasePath,
   toastNotifications,
-  timefilter,
   uiModules,
   uiRoutes,
   visualizations,
   share,
 } = getServices();
 
-const { savedQueryService } = data.search.services;
+const savedQueryService = npData.query.savedQueries;
+const { timefilter } = npData.query.timefilter;
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
@@ -165,7 +165,6 @@ function VisEditor(
   localStorage,
 ) {
   const queryFilter = Private(FilterBarQueryFilterProvider);
-  const getUnhashableStates = Private(getUnhashableStatesProvider);
 
   // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;
@@ -249,7 +248,7 @@ function VisEditor(
         anchorElement,
         allowEmbed: true,
         allowShortUrl: capabilities.visualize.createShortUrl,
-        shareableUrl: unhashUrl(window.location.href, getUnhashableStates()),
+        shareableUrl: unhashUrl(window.location.href),
         objectId: savedVis.id,
         objectType: 'visualization',
         sharingData: {
