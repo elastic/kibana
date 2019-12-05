@@ -18,7 +18,7 @@ import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
 import {
   MonitorDetails,
-  Error,
+  MonitorError,
   MonitorLocations,
   MonitorLocation,
 } from '../../../../common/runtime_types';
@@ -288,6 +288,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
         size: 1,
+        _source: ['error', '@timestamp'],
         query: {
           bool: {
             must: [
@@ -318,11 +319,15 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
 
     const result = await this.database.search(request, params);
 
-    const monitorError: Error | undefined = get(result, 'hits.hits[0]._source.error', undefined);
+    const data = result.hits.hits[0]?._source;
+
+    const monitorError: MonitorError | undefined = data?.error;
+    const errorTimeStamp: string | undefined = data?.['@timestamp'];
 
     return {
       monitorId,
       error: monitorError,
+      timestamp: errorTimeStamp,
     };
   }
 
