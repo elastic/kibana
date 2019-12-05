@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
+import { Plugin, CoreSetup, CoreStart, IAnonymousPaths } from 'src/core/public';
 import { Subscription, Observable } from 'rxjs';
 import { LicensingPluginSetup, ILicense } from '../../licensing/public';
 import {
@@ -45,8 +45,6 @@ export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPlugi
 
     this.license$ = licensing.license$;
 
-    const user = core.http.get('/api/security/v1/me') as Promise<AuthenticatedUser>;
-
     return {
       anonymousPaths,
       sessionTimeout: this.sessionTimeout,
@@ -56,18 +54,16 @@ export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPlugi
   public start(core: CoreStart) {
     this.sessionTimeout.start();
 
-    const user = core.http.get('/api/security/v1/me') as Promise<AuthenticatedUser>;
-
     const securityLicenseService = new SecurityLicenseService().setup();
     this.licenseSubscription = this.license$.subscribe(rawLicense => {
       securityLicenseService.update(rawLicense);
-
-      const isAnonymousPath = core.http.anonymousPaths.isAnonymous(window.location.pathname);
       const showSecurityLinks = securityLicenseService.license.getFeatures().showLinks;
 
-      const shouldRegisterNavControl = !isAnonymousPath && showSecurityLinks;
+      const shouldRegisterNavControl =
+        !this.isAnonymousPath(core.http.anonymousPaths) && showSecurityLinks;
 
       if (shouldRegisterNavControl && !this.navControlRegistered) {
+        const user = core.http.get('/api/security/v1/me') as Promise<AuthenticatedUser>;
         registerSecurityNavControl(core, user);
         this.navControlRegistered = true;
       }
@@ -81,6 +77,10 @@ export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPlugi
       this.licenseSubscription = undefined;
     }
     this.navControlRegistered = false;
+  }
+
+  private isAnonymousPath(anonymousPaths: IAnonymousPaths) {
+    return anonymousPaths.isAnonymous(window.location.pathname);
   }
 }
 
