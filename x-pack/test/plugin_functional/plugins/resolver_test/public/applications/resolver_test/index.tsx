@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import ReactDOM from 'react-dom';
-import { AppMountContext, AppMountParameters } from 'kibana/public';
+import { AppMountParameters } from 'kibana/public';
 import { I18nProvider } from '@kbn/i18n/react';
 import { IEmbeddable } from 'src/plugins/embeddable/public';
 import { useEffect } from 'react';
@@ -15,10 +15,9 @@ import { useEffect } from 'react';
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
  */
 export function renderApp(
-  ...args: [AppMountContext, AppMountParameters, Promise<IEmbeddable | undefined>]
+  { element }: AppMountParameters,
+  embeddable: Promise<IEmbeddable | undefined>
 ) {
-  const [, { element }, embeddable] = args;
-
   ReactDOM.render(
     <I18nProvider>
       <AppRoot embeddable={embeddable} />

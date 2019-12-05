@@ -23,9 +23,9 @@ export class ResolverTestPlugin implements Plugin {
       title: i18n.translate('xpack.resolver_test.pluginTitle', {
         defaultMessage: 'Resolver Test',
       }),
-      mount: async (context, params) => {
+      mount: async (_context, params) => {
         const { renderApp } = await import('./applications/resolver_test');
-        return renderApp(context, params, this.embeddablePromise);
+        return renderApp(params, this.embeddablePromise);
       },
     });
   }
