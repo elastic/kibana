@@ -32,7 +32,7 @@ import euiThemeDark from '@elastic/eui/dist/eui_theme_dark.json';
 
 import {
   ColumnType,
-  MlInMemoryTableBasic,
+  mlInMemoryTableBasicFactory,
   OnTableChangeArg,
   SortingPropType,
   SORT_DIRECTION,
@@ -53,7 +53,7 @@ import {
 } from '../../../../common';
 
 import { getOutlierScoreFieldName } from './common';
-import { INDEX_STATUS, useExploreData } from './use_explore_data';
+import { INDEX_STATUS, useExploreData, TableItem } from './use_explore_data';
 
 const customColorScaleFactory = (n: number) => (t: number) => {
   if (t < 1 / n) {
@@ -74,7 +74,7 @@ interface GetDataFrameAnalyticsResponse {
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
 
-const ExplorationTitle: React.SFC<{ jobId: string }> = ({ jobId }) => (
+const ExplorationTitle: React.FC<{ jobId: string }> = ({ jobId }) => (
   <EuiTitle size="xs">
     <span>
       {i18n.translate('xpack.ml.dataframe.analytics.exploration.jobIdTitle', {
@@ -165,7 +165,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
     docFieldsCount = docFields.length;
   }
 
-  const columns: ColumnType[] = [];
+  const columns: Array<ColumnType<TableItem>> = [];
 
   if (jobConfig !== undefined && selectedFields.length > 0 && tableItems.length > 0) {
     // table cell color coding takes into account:
@@ -186,7 +186,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
 
     columns.push(
       ...selectedFields.sort(sortColumns(tableItems[0], jobConfig.dest.results_field)).map(k => {
-        const column: ColumnType = {
+        const column: ColumnType<TableItem> = {
           field: k,
           name: k,
           sortable: true,
@@ -395,6 +395,8 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
       </EuiPanel>
     );
   }
+
+  const MlInMemoryTableBasic = mlInMemoryTableBasicFactory<TableItem>();
 
   return (
     <EuiPanel grow={false}>

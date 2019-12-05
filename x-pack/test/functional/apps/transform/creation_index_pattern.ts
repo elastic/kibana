@@ -17,7 +17,7 @@ export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  describe('creation', function() {
+  describe('creation_index_pattern', function() {
     this.tags(['smoke']);
     before(async () => {
       await esArchiver.load('ml/ecommerce');
@@ -56,10 +56,18 @@ export default function({ getService }: FtrProviderContext) {
           return `dest_${this.transformId}`;
         },
         expected: {
+          pivotPreview: {
+            column: 0,
+            values: [`Men's Accessories`],
+          },
           row: {
             status: 'stopped',
             mode: 'batch',
             progress: '100',
+          },
+          sourcePreview: {
+            columns: 6,
+            rows: 5,
           },
         },
       },
@@ -94,6 +102,13 @@ export default function({ getService }: FtrProviderContext) {
 
         it('loads the source index preview', async () => {
           await transform.wizard.assertSourceIndexPreviewLoaded();
+        });
+
+        it('shows the source index preview', async () => {
+          await transform.wizard.assertSourceIndexPreview(
+            testData.expected.sourcePreview.columns,
+            testData.expected.sourcePreview.rows
+          );
         });
 
         it('displays an empty pivot preview', async () => {
@@ -138,6 +153,13 @@ export default function({ getService }: FtrProviderContext) {
 
         it('loads the pivot preview', async () => {
           await transform.wizard.assertPivotPreviewLoaded();
+        });
+
+        it('shows the pivot preview', async () => {
+          await transform.wizard.assertPivotPreviewColumnValues(
+            testData.expected.pivotPreview.column,
+            testData.expected.pivotPreview.values
+          );
         });
 
         it('loads the details step', async () => {

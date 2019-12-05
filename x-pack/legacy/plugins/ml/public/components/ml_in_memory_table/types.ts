@@ -8,24 +8,21 @@ import { Component, HTMLAttributes, ReactElement, ReactNode } from 'react';
 
 import { CommonProps, EuiInMemoryTable } from '@elastic/eui';
 
-// At some point this could maybe solved with a generic <T>.
-type Item = any;
-
 // Not using an enum here because the original HorizontalAlignment is also a union type of string.
 type HorizontalAlignment = 'left' | 'center' | 'right';
 
-type SortableFunc = (item: Item) => any;
-type Sortable = boolean | SortableFunc;
+type SortableFunc<T> = <T>(item: T) => any;
+type Sortable<T> = boolean | SortableFunc<T>;
 type DATA_TYPES = any;
-type FooterFunc = (payload: { items: Item[]; pagination: any }) => ReactNode;
+type FooterFunc = <T>(payload: { items: T[]; pagination: any }) => ReactNode;
 type RenderFunc = (value: any, record?: any) => ReactNode;
-export interface FieldDataColumnType {
+export interface FieldDataColumnType<T> {
   field: string;
   name: ReactNode;
   description?: string;
   dataType?: DATA_TYPES;
   width?: string;
-  sortable?: Sortable;
+  sortable?: Sortable<T>;
   align?: HorizontalAlignment;
   truncateText?: boolean;
   render?: RenderFunc;
@@ -34,38 +31,38 @@ export interface FieldDataColumnType {
   'data-test-subj'?: string;
 }
 
-export interface ComputedColumnType {
+export interface ComputedColumnType<T> {
   render: RenderFunc;
   name?: ReactNode;
   description?: string;
-  sortable?: (item: Item) => any;
+  sortable?: (item: T) => any;
   width?: string;
   truncateText?: boolean;
   'data-test-subj'?: string;
 }
 
 type ICON_TYPES = any;
-type IconTypesFunc = (item: Item) => ICON_TYPES; // (item) => oneOf(ICON_TYPES)
+type IconTypesFunc<T> = (item: T) => ICON_TYPES; // (item) => oneOf(ICON_TYPES)
 type BUTTON_ICON_COLORS = any;
-type ButtonIconColorsFunc = (item: Item) => BUTTON_ICON_COLORS; // (item) => oneOf(ICON_BUTTON_COLORS)
-interface DefaultItemActionType {
+type ButtonIconColorsFunc<T> = (item: T) => BUTTON_ICON_COLORS; // (item) => oneOf(ICON_BUTTON_COLORS)
+interface DefaultItemActionType<T> {
   type?: 'icon' | 'button';
   name: string;
   description: string;
-  onClick?(item: Item): void;
+  onClick?(item: T): void;
   href?: string;
   target?: string;
-  available?(item: Item): boolean;
-  enabled?(item: Item): boolean;
+  available?(item: T): boolean;
+  enabled?(item: T): boolean;
   isPrimary?: boolean;
-  icon?: ICON_TYPES | IconTypesFunc; // required when type is 'icon'
-  color?: BUTTON_ICON_COLORS | ButtonIconColorsFunc;
+  icon?: ICON_TYPES | IconTypesFunc<T>; // required when type is 'icon'
+  color?: BUTTON_ICON_COLORS | ButtonIconColorsFunc<T>;
 }
 
-interface CustomItemActionType {
-  render(item: Item, enabled: boolean): ReactNode;
-  available?(item: Item): boolean;
-  enabled?(item: Item): boolean;
+interface CustomItemActionType<T> {
+  render(item: T, enabled: boolean): ReactNode;
+  available?(item: T): boolean;
+  enabled?(item: T): boolean;
   isPrimary?: boolean;
 }
 
@@ -76,20 +73,20 @@ export interface ExpanderColumnType {
   render: RenderFunc;
 }
 
-type SupportedItemActionType = DefaultItemActionType | CustomItemActionType;
+type SupportedItemActionType<T> = DefaultItemActionType<T> | CustomItemActionType<T>;
 
-export interface ActionsColumnType {
-  actions: SupportedItemActionType[];
+export interface ActionsColumnType<T> {
+  actions: Array<SupportedItemActionType<T>>;
   name?: ReactNode;
   description?: string;
   width?: string;
 }
 
-export type ColumnType =
-  | ActionsColumnType
-  | ComputedColumnType
+export type ColumnType<T> =
+  | ActionsColumnType<T>
+  | ComputedColumnType<T>
   | ExpanderColumnType
-  | FieldDataColumnType;
+  | FieldDataColumnType<T>;
 
 type QueryType = any;
 
@@ -161,17 +158,17 @@ export interface OnTableChangeArg extends Sorting {
   page: { index: number; size: number };
 }
 
-type ItemIdTypeFunc = (item: Item) => string;
+type ItemIdTypeFunc = <T>(item: T) => string;
 type ItemIdType =
   | string // the name of the item id property
   | ItemIdTypeFunc;
 
-export type EuiInMemoryTableProps = CommonProps & {
-  columns: ColumnType[];
+export type EuiInMemoryTableProps<T> = CommonProps & {
+  columns: Array<ColumnType<T>>;
   hasActions?: boolean;
   isExpandable?: boolean;
   isSelectable?: boolean;
-  items?: Item[];
+  items?: T[];
   loading?: boolean;
   message?: HTMLAttributes<HTMLDivElement>;
   error?: string;
@@ -184,16 +181,18 @@ export type EuiInMemoryTableProps = CommonProps & {
   responsive?: boolean;
   selection?: SelectionType;
   itemId?: ItemIdType;
-  itemIdToExpandedRowMap?: Record<string, Item>;
-  rowProps?: (item: Item) => void | Record<string, any>;
+  itemIdToExpandedRowMap?: Record<string, JSX.Element>;
+  rowProps?: (item: T) => void | Record<string, any>;
   cellProps?: () => void | Record<string, any>;
   onTableChange?: (arg: OnTableChangeArg) => void;
 };
 
-interface ComponentWithConstructor<T> extends Component {
+type EuiInMemoryTableType = typeof EuiInMemoryTable;
+
+interface ComponentWithConstructor<T> extends EuiInMemoryTableType {
   new (): Component<T>;
 }
 
-export const MlInMemoryTableBasic = (EuiInMemoryTable as any) as ComponentWithConstructor<
-  EuiInMemoryTableProps
->;
+export function mlInMemoryTableBasicFactory<T>() {
+  return EuiInMemoryTable as ComponentWithConstructor<EuiInMemoryTableProps<T>>;
+}
