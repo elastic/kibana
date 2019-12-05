@@ -122,6 +122,7 @@ export interface Dataset {
   ingeset_pipeline: string;
   vars: object[];
   type: string;
+  // This is for convenient and not in the output from the registry. When creating a dataset, this info should be added.
   package: string;
 }
 

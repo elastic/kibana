@@ -5,6 +5,8 @@
  */
 
 import { Field } from '../../fields/field';
+import { Dataset } from '../../../../common/types';
+import { getDatasetAssetBaseName } from '../index';
 
 export interface Template {
   order: number;
@@ -58,13 +60,8 @@ export function generateMappings(fields: Field[]): Mappings {
 /**
  * Generates the template name out of the given information
  */
-export function generateTemplateName(
-  packageName: string,
-  datasetName: string,
-  type: string
-): string {
-  // TODO: This is only a temporary name. More info like dataset type is needed to create full name
-  return type + '-' + packageName + '-' + datasetName;
+export function generateTemplateName(dataset: Dataset): string {
+  return getDatasetAssetBaseName(dataset);
 }
 
 function getBaseTemplate(mappings: Mappings): Template {
@@ -113,16 +110,6 @@ function getBaseTemplate(mappings: Mappings): Template {
           strings_as_keyword: {
             mapping: {
               ignore_above: 1024,
-              type: 'keyword',
-            },
-            match_mapping_type: 'string',
-          },
-        },
-        // Example of a dynamic template
-        {
-          labels: {
-            path_match: 'labels.*',
-            mapping: {
               type: 'keyword',
             },
             match_mapping_type: 'string',
