@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { rewriteIngestPipeline } from './ingest_pipelines';
 import { readFileSync } from 'fs';
 import path from 'path';
+import { rewriteIngestPipeline } from './ingest_pipelines';
 
 test('a json-format pipeline with pipeline references is correctly rewritten', () => {
   const inputStandard = readFileSync(

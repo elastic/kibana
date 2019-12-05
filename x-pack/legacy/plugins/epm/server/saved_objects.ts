@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { mappings as ingestMappings } from '../../ingest/server/mappings';
 import { SAVED_OBJECT_TYPE_DATASOURCES, SAVED_OBJECT_TYPE_PACKAGES } from '../common/constants';
 import { Request } from './types';
-import { mappings as ingestMappings } from '../../ingest/server/mappings';
 
 export const getClient = (req: Request) => req.getSavedObjectsClient();
 

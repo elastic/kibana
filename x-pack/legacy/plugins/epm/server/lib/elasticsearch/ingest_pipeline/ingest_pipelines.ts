@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CallESAsCurrentUser } from '../../cluster_access';
-import * as Registry from '../../../registry';
 import { AssetReference, ElasticsearchAssetType } from '../../../../common/types';
+import * as Registry from '../../../registry';
+import { CallESAsCurrentUser } from '../../cluster_access';
 
 export function rewriteIngestPipeline(
   pipeline: string,

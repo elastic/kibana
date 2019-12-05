@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import React, { Fragment } from 'react';
-import { EuiSpacer, EuiText, EuiTitle, EuiImage, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { ScreenshotItem } from '../../../common/types';
-import { useLinks, useCore } from '../../hooks';
+import { useCore, useLinks } from '../../hooks';
 
 interface ScreenshotProps {
   images: ScreenshotItem[];

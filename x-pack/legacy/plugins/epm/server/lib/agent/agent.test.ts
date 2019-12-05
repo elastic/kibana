@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import path from 'path';
-import * as yaml from 'js-yaml';
 import fs from 'fs';
+import * as yaml from 'js-yaml';
+import path from 'path';
 import { createInput } from './agent';
 
 test('test converting input and manifest into template', () => {

@@ -3,13 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect, useState, Fragment } from 'react';
 import { EuiLoadingContent, EuiText } from '@elastic/eui';
+import React, { Fragment, useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { getFileByPath } from '../../data';
-import { markdownRenderers } from './markdown_renderers';
 import { useLinks } from '../../hooks';
 import { ContentCollapse } from './content_collapse';
+import { markdownRenderers } from './markdown_renderers';
 
 export function Readme({
   readmePath,

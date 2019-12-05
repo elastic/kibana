@@ -3,17 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useState, useEffect } from 'react';
 import { EuiPage, EuiPageBody, EuiPageWidthProps, ICON_TYPES } from '@elastic/eui';
+import React, { Fragment, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { PackageInfo } from '../../../common/types';
 import { DetailViewPanelName } from '../../';
+import { PackageInfo } from '../../../common/types';
 import { getPackageInfoByKey } from '../../data';
-import { useCore } from '../../hooks/use_core';
 import { useSetPackageInstallStatus } from '../../hooks';
+import { useCore } from '../../hooks/use_core';
 import { InstallStatus } from '../../types';
-import { Header } from './header';
 import { Content } from './content';
+import { Header } from './header';
 
 export const DEFAULT_PANEL: DetailViewPanelName = 'overview';
 

@@ -3,10 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useState } from 'react';
 import { EuiHorizontalRule, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
+import React, { Fragment, useState } from 'react';
 import styled from 'styled-components';
-
 import { PLUGIN } from '../../../common/constants';
 import { CategorySummaryItem, PackageList } from '../../../common/types';
 import { PackageListGrid } from '../../components/package_list_grid';
@@ -14,11 +13,11 @@ import { useBreadcrumbs, useLinks } from '../../hooks';
 import { CategoryFacets } from './category_facets';
 import { Header } from './header';
 import {
+  useAllPackages,
   useCategories,
   useCategoryPackages,
-  useAllPackages,
-  useLocalSearch,
   useInstalledPackages,
+  useLocalSearch,
 } from './hooks';
 import { SearchPackages } from './search_packages';
 
