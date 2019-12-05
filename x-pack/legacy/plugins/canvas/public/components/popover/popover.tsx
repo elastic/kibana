@@ -12,7 +12,7 @@ import { EuiPopover, EuiToolTip } from '@elastic/eui';
 interface Props {
   button: (handleClick: React.MouseEventHandler<HTMLButtonElement>) => React.ReactElement;
   tooltipPosition?: 'top' | 'bottom' | 'left' | 'right';
-  children: (arg: { closePopover: () => void }) => React.ReactElement;
+  children: (arg: { closePopover: () => void }) => React.ReactNode;
   isOpen?: boolean;
   ownFocus?: boolean;
   tooltip?: string;

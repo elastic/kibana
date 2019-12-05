@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { MouseEvent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiLink, EuiPanel } from '@elastic/eui';
 import { Popover } from '../popover';

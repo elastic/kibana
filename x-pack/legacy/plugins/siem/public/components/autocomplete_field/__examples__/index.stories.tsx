@@ -3,11 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import * as React from 'react';
 import { storiesOf } from '@storybook/react';
-import React from 'react';
-import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
 import { ThemeProvider } from 'styled-components';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { AutocompleteSuggestion } from '../../../../../../../../src/plugins/data/public';
 import { SuggestionItem } from '../suggestion_item';
 
 const suggestion: AutocompleteSuggestion = {
