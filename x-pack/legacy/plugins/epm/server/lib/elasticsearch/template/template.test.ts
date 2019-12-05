@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getTemplate, generateMappings } from './template';
 import { readFileSync } from 'fs';
 import path from 'path';
 import { safeLoad } from 'js-yaml';
