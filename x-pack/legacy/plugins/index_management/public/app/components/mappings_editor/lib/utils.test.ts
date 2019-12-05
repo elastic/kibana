@@ -10,13 +10,19 @@ import uuid from 'uuid';
 import { isStateValid, deNormalize } from './utils';
 import { NormalizedFields, NormalizedField } from '../types';
 
-const createField = ({
+const createFieldById = ({
   id,
   nestedDepth = 0,
   path,
   source,
   isMultiField = false,
   canHaveChildFields = false,
+  canHaveMultiFields = false,
+  isExpanded = false,
+  childFieldsName = 'fields',
+  hasChildFields = false,
+  hasMultiFields = false,
+  parentId,
 }: NormalizedField) => {
   return {
     id,
@@ -25,40 +31,61 @@ const createField = ({
     source,
     isMultiField,
     canHaveChildFields,
+    canHaveMultiFields,
+    isExpanded,
+    childFieldsName,
+    hasChildFields,
+    hasMultiFields,
+    parentId,
   };
 };
 
+const createFieldMetadata = (type: string) => ({
+  id: uuid.v4(),
+  name: `${type}_field`,
+  source: {
+    name: `${type}_field`,
+    type,
+  },
+});
+
 describe('utils', () => {
   describe('deNormalize()', () => {
-    const rootField1Id = uuid.v4();
-    const fieldName = 'my_field';
-    const source = {
-      doc_values: true,
-      index: true,
-      name: fieldName,
-      null_value: 'true',
-      store: false,
-      type: 'boolean',
-    };
+    const {
+      id: rootBooleanFieldId,
+      name: rootBooleanFieldName,
+      source: rootBooleanSource,
+    } = createFieldMetadata('boolean');
+
+    const {
+      id: rootKeywordFieldId,
+      name: rootKeywordFieldName,
+      source: rootKeywordSource,
+    } = createFieldMetadata('keyword');
+
     const fieldsState = {
-      rootLevelFields: [rootField1Id],
+      rootLevelFields: [rootBooleanFieldId, rootKeywordFieldId],
       byId: {
-        [rootField1Id]: {
-          id: rootField1Id,
-          nestedDepth: 0,
-          path: fieldName,
-          source,
-          isMultiField: false,
-          canHaveChildFields: false,
-        },
+        [rootBooleanFieldId]: createFieldById({
+          id: rootBooleanFieldId,
+          path: rootBooleanFieldName,
+          source: rootBooleanSource,
+        }),
+        [rootKeywordFieldId]: createFieldById({
+          id: rootKeywordFieldId,
+          path: rootKeywordFieldName,
+          source: rootKeywordSource,
+        }),
       },
       aliases: {},
     } as NormalizedFields;
 
     it('handles base case', () => {
-      const { name, ...result } = source;
+      const { name: booleanName, ...normalizedBooleanField } = rootBooleanSource;
+      const { name: keywordName, ...normalizedKeywordField } = rootKeywordSource;
       expect(deNormalize(fieldsState)).toEqual({
-        [fieldName]: result,
+        [rootBooleanFieldName]: normalizedBooleanField,
+        [rootKeywordFieldName]: normalizedKeywordField,
       });
     });
 
