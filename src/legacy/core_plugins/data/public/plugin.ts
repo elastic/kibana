@@ -18,7 +18,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { createSearchBar, StatetfulSearchBarProps } from './search';
+import { createSearchBar, StatetfulSearchBarProps, SearchService, SearchStart } from './search';
 import { Storage, IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
 import { DataPublicPluginStart } from '../../../../plugins/data/public';
 import { initLegacyModule } from './shim/legacy_module';
@@ -36,6 +36,7 @@ export interface DataPluginStartDependencies {
  * @public
  */
 export interface DataStart {
+  search: SearchStart;
   ui: {
     SearchBar: React.ComponentType<StatetfulSearchBarProps>;
   };
@@ -54,6 +55,7 @@ export interface DataStart {
  */
 
 export class DataPlugin implements Plugin<void, DataStart, {}, DataPluginStartDependencies> {
+  private readonly search: SearchService = new SearchService();
   private storage!: IStorageWrapper;
 
   public setup(core: CoreSetup) {
@@ -72,11 +74,14 @@ export class DataPlugin implements Plugin<void, DataStart, {}, DataPluginStartDe
     });
 
     return {
+      search: this.search.start(core),
       ui: {
         SearchBar,
       },
     };
   }
 
-  public stop() {}
+  public stop() {
+    this.search.stop();
+  }
 }
