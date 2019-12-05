@@ -1,0 +1,186 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Should only show line style properties when is lines only 1`] = `
+<Fragment>
+  <StylePropertyLegendRow
+    key="lineColor"
+    range={
+      Object {
+        "delta": 10,
+        "max": 10,
+        "min": 0,
+      }
+    }
+    style={
+      DynamicStyleProperty {
+        "_field": undefined,
+        "_options": Object {},
+        "_styleName": "lineColor",
+      }
+    }
+  />
+  <StylePropertyLegendRow
+    key="lineWidth"
+    range={
+      Object {
+        "delta": 10,
+        "max": 10,
+        "min": 0,
+      }
+    }
+    style={
+      DynamicStyleProperty {
+        "_field": undefined,
+        "_options": Object {},
+        "_styleName": "lineWidth",
+      }
+    }
+  />
+</Fragment>
+`;
+
+exports[`Should only show polygon style properties when is polygons only 1`] = `
+<Fragment>
+  <StylePropertyLegendRow
+    key="fillColor"
+    range={
+      Object {
+        "delta": 10,
+        "max": 10,
+        "min": 0,
+      }
+    }
+    style={
+      DynamicStyleProperty {
+        "_field": undefined,
+        "_options": Object {},
+        "_styleName": "fillColor",
+      }
+    }
+  />
+  <StylePropertyLegendRow
+    key="lineColor"
+    range={
+      Object {
+        "delta": 10,
+        "max": 10,
+        "min": 0,
+      }
+    }
+    style={
+      DynamicStyleProperty {
+        "_field": undefined,
+        "_options": Object {},
+        "_styleName": "lineColor",
+      }
+    }
+  />
+  <StylePropertyLegendRow
+    key="lineWidth"
+    range={
+      Object {
+        "delta": 10,
+        "max": 10,
+        "min": 0,
+      }
+    }
+    style={
+      DynamicStyleProperty {
+        "_field": undefined,
+        "_options": Object {},
+        "_styleName": "lineWidth",
+      }
+    }
+  />
+</Fragment>
+`;
+
+exports[`Should show all style properties when not single feature type 1`] = `
+<Fragment>
+  <StylePropertyLegendRow
+    key="fillColor"
+    range={
+      Object {
+        "delta": 10,
+        "max": 10,
+        "min": 0,
+      }
+    }
+    style={
+      DynamicStyleProperty {
+        "_field": undefined,
+        "_options": Object {},
+        "_styleName": "fillColor",
+      }
+    }
+  />
+  <StylePropertyLegendRow
+    key="lineColor"
+    range={
+      Object {
+        "delta": 10,
+        "max": 10,
+        "min": 0,
+      }
+    }
+    style={
+      DynamicStyleProperty {
+        "_field": undefined,
+        "_options": Object {},
+        "_styleName": "lineColor",
+      }
+    }
+  />
+  <StylePropertyLegendRow
+    key="lineWidth"
+    range={
+      Object {
+        "delta": 10,
+        "max": 10,
+        "min": 0,
+      }
+    }
+    style={
+      DynamicStyleProperty {
+        "_field": undefined,
+        "_options": Object {},
+        "_styleName": "lineWidth",
+      }
+    }
+  />
+  <StylePropertyLegendRow
+    key="iconSize"
+    range={
+      Object {
+        "delta": 10,
+        "max": 10,
+        "min": 0,
+      }
+    }
+    style={
+      DynamicStyleProperty {
+        "_field": undefined,
+        "_options": Object {},
+        "_styleName": "iconSize",
+      }
+    }
+  />
+  <StylePropertyLegendRow
+    key="iconOrientation"
+    range={
+      Object {
+        "delta": 10,
+        "max": 10,
+        "min": 0,
+      }
+    }
+    style={
+      DynamicStyleProperty {
+        "_field": undefined,
+        "_options": Object {},
+        "_styleName": "iconOrientation",
+      }
+    }
+  />
+</Fragment>
+`;

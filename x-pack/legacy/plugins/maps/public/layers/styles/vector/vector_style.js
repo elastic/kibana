@@ -15,7 +15,7 @@ import { VectorStyleLegend } from './components/legend/vector_style_legend';
 import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
 import { SYMBOLIZE_AS_CIRCLE, SYMBOLIZE_AS_ICON } from './vector_constants';
 import { getMakiSymbolAnchor } from './symbol_utils';
-import { getComputedFieldName } from './style_util';
+import { getComputedFieldName, isOnlySingleFeatureType } from './style_util';
 import { StaticStyleProperty } from './properties/static_style_property';
 import { DynamicStyleProperty } from './properties/dynamic_style_property';
 import { DynamicSizeProperty } from './properties/dynamic_size_property';
@@ -248,36 +248,31 @@ export class VectorStyle extends AbstractStyle {
     return styleProperties.filter(styleProperty => (styleProperty.isDynamic() && styleProperty.isComplete()));
   }
 
-  _checkIfOnlyFeatureType = async (featureType) => {
-    const supportedFeatures = await this._source.getSupportedShapeTypes();
-
-    if (supportedFeatures.length === 1) {
-      return supportedFeatures[0] === featureType;
-    }
-
-    if (!this._descriptor.__styleMeta || !this._descriptor.__styleMeta.hasFeatureType) {
-      return false;
-    }
-
-    const featureTypes = Object.keys(this._descriptor.__styleMeta.hasFeatureType);
-    return featureTypes.reduce((isOnlySingleFeatureType, featureTypeKey) => {
-      const hasFeature = this._descriptor.__styleMeta.hasFeatureType[featureTypeKey];
-      return featureTypeKey === featureType
-        ? isOnlySingleFeatureType && hasFeature
-        : isOnlySingleFeatureType && !hasFeature;
-    }, true);
+  _isOnlySingleFeatureType = async (featureType) => {
+    return isOnlySingleFeatureType(
+      featureType,
+      await this._source.getSupportedShapeTypes(),
+      this._getStyleMeta().hasFeatureType);
   }
 
   _getIsPointsOnly = async () => {
-    return this._checkIfOnlyFeatureType(VECTOR_SHAPE_TYPES.POINT);
+    return this._isOnlySingleFeatureType(VECTOR_SHAPE_TYPES.POINT);
   }
 
   _getIsLinesOnly = async () => {
-    return this._checkIfOnlyFeatureType(VECTOR_SHAPE_TYPES.LINE);
+    return this._isOnlySingleFeatureType(VECTOR_SHAPE_TYPES.LINE);
+  }
+
+  _getIsPolygonsOnly = async () => {
+    return this._isOnlySingleFeatureType(VECTOR_SHAPE_TYPES.POLYGON);
   }
 
   _getFieldRange = (fieldName) => {
     return _.get(this._descriptor, ['__styleMeta', fieldName]);
+  }
+
+  _getStyleMeta = () => {
+    return _.get(this._descriptor, '__styleMeta', {});
   }
 
   getIcon = () => {
@@ -308,6 +303,8 @@ export class VectorStyle extends AbstractStyle {
 
     return (
       <VectorStyleLegend
+        loadIsLinesOnly={this._getIsLinesOnly}
+        loadIsPolygonsOnly={this._getIsPolygonsOnly}
         styleProperties={styleProperties}
       />
     );
