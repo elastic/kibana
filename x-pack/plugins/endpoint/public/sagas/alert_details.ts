@@ -9,15 +9,18 @@ import { AppMountContext } from 'kibana/public';
 import { withPageNavigationStatus } from './common';
 import { hrefIsForAlertDetail, alertIdFromHref } from '../concerns/alerts/routing';
 import { actions as alertDetailsActions } from '../actions/alert_details';
+import { SagaContext } from '../lib/saga';
 
-// TODO: type this properly
-export async function alertDetailsSaga(...args: any[]) {
-  await Promise.all([resourceSaga(...args)]);
+export async function alertDetailsSaga(
+  sagaContext: SagaContext,
+  context: AppMountContext,
+  history: History
+) {
+  await Promise.all([resourceSaga(sagaContext, context, history)]);
 }
 
-// TODO type actionsAndState, dispatch
 async function resourceSaga(
-  { actionsAndState, dispatch }: { actionsAndState: any; dispatch: any },
+  { actionsAndState, dispatch }: SagaContext,
   context: AppMountContext,
   history: History
 ) {
@@ -25,7 +28,6 @@ async function resourceSaga(
     action,
     userIsOnPageAndLoggedIn,
     href,
-    state,
     shouldInitialize,
     hrefChanged,
   } of withPageNavigationStatus({
