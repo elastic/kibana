@@ -34,7 +34,7 @@ export class ESDocField extends AbstractField {
   async getFieldMetaRequest(/* config */) {
     const field = await this._getField();
 
-    if (field.type === 'number') {
+    if (field.type === 'number' || field.type === 'date') {
       const extendedStats = {};
       if (field.scripted) {
         extendedStats.script = {

@@ -41,28 +41,7 @@ export class FieldMetaOptionsPopover extends Component {
 
   state = {
     isPopoverOpen: false,
-    showFieldMetaPopover: false,
   };
-
-  componentDidMount() {
-    this._isMounted = true;
-    this._loadShowFieldMetaPopover();
-  }
-
-  componentDidUpdate() {
-    this._loadShowFieldMetaPopover();
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
-
-  async _loadShowFieldMetaPopover() {
-    const showFieldMetaPopover = await this.props.styleProperty.showFieldMetaPopover();
-    if (this._isMounted && showFieldMetaPopover !== this.state.showFieldMetaPopover) {
-      this.setState({ showFieldMetaPopover });
-    }
-  }
 
   _togglePopover = () => {
     this.setState({
@@ -144,7 +123,7 @@ export class FieldMetaOptionsPopover extends Component {
   }
 
   render() {
-    if (!this.state.showFieldMetaPopover) {
+    if (!this.props.styleProperty.supportsFieldMeta()) {
       return null;
     }
 

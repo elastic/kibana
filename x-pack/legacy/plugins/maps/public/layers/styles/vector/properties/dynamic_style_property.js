@@ -33,22 +33,13 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
       return this._field.getOrigin();
     }
 
-    async showFieldMetaPopover() {
-      if (!this.isComplete()) {
-        return false;
-      }
-
-      const fieldType = await this._field.getDataType();
-      return this._supportsFieldMeta() && fieldType === 'number';
-    }
-
     isFieldMetaEnabled() {
       const fieldMetaOptions = this.getFieldMetaOptions();
-      return this._supportsFieldMeta() && _.get(fieldMetaOptions, 'isEnabled', true);
+      return this.supportsFieldMeta() && _.get(fieldMetaOptions, 'isEnabled', true);
     }
 
-    _supportsFieldMeta() {
-      return this.isScaled() && this._field.supportsFieldMeta();
+    supportsFieldMeta() {
+      return this.isComplete() && this.isScaled() && this._field.supportsFieldMeta();
     }
 
     async getFieldMetaRequest() {
