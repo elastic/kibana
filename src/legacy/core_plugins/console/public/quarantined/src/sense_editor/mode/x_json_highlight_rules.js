@@ -26,11 +26,18 @@ const { ScriptHighlightRules } = require('./script_highlight_rules');
 const jsonRules = function (root) {
   root = root ? root : 'json';
   const rules = {};
-  const xJsonRules = [
+  rules[root] = [
     {
       token: ['variable', 'whitespace', 'ace.punctuation.colon', 'whitespace', 'punctuation.start_triple_quote'],
       regex: '("(?:[^"]*_)?script"|"inline"|"source")(\\s*?)(:)(\\s*?)(""")',
       next: 'script-start',
+      merge: false,
+      push: true
+    },
+    {
+      token: 'punctuation.start_triple_quote',
+      regex: '"""sql',
+      next: 'sql-start',
       merge: false,
       push: true
     },
@@ -109,15 +116,6 @@ const jsonRules = function (root) {
       regex: '.+?'
     }
   ];
-
-  rules[root] = xJsonRules;
-  rules[root + '-sql'] = [{
-    token: ['variable', 'whitespace', 'ace.punctuation.colon', 'whitespace', 'punctuation.start_triple_quote'],
-    regex: '("query")(\\s*?)(:)(\\s*?)(""")',
-    next: 'sql-start',
-    merge: false,
-    push: true
-  }].concat(xJsonRules);
 
   rules.string_literal = [
     {

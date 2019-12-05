@@ -58,13 +58,20 @@ utils.reformatData = function (data, indent) {
   };
 };
 
-utils.collapseLiteralStrings = function (data) {
-  const splitData = data.split(`"""`);
-  for (let idx = 1; idx < splitData.length - 1; idx += 2) {
-    splitData[idx] = JSON.stringify(splitData[idx]);
+// For now just a dumb removal of any """sql strings. Eventually we want some why to reverse
+// this operation can probably bundle A -> B with the B -> A functionality.
+const collapseXLangMarkers = text => text.replace(`"""sql`, `"""`);
+
+utils.collapseLiteralStrings = _.pipe(
+  collapseXLangMarkers,
+  function (data) {
+    const splitData = data.split(`"""`);
+    for (let idx = 1; idx < splitData.length - 1; idx += 2) {
+      splitData[idx] = JSON.stringify(splitData[idx]);
+    }
+    return splitData.join('');
   }
-  return splitData.join('');
-};
+);
 
 /*
   The following regex describes global match on:
