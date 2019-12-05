@@ -358,7 +358,7 @@ export class RoleMappingsGridPage extends Component<any, State> {
                     )}
                     iconType="pencil"
                     color="primary"
-                    data-test-subj="editRoleMappingButton"
+                    data-test-subj={`editRoleMappingButton-${record.name}`}
                     href={getEditRoleMappingHref(record.name)}
                   />
                 </EuiToolTip>
@@ -389,7 +389,7 @@ export class RoleMappingsGridPage extends Component<any, State> {
                               )}
                               iconType="trash"
                               color="danger"
-                              data-test-subj="deleteRoleMappingButton"
+                              data-test-subj={`deleteRoleMappingButton-${record.name}`}
                               onClick={() =>
                                 deleteRoleMappingPrompt([record], this.onRoleMappingsDeleted)
                               }

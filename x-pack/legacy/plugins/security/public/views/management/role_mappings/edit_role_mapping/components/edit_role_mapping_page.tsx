@@ -409,6 +409,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
             onClick={this.saveRoleMapping}
             isLoading={this.state.saveInProgress}
             disabled={!this.state.rulesValid}
+            data-test-subj="saveRoleMappingButton"
           >
             Save role mapping
           </EuiButton>

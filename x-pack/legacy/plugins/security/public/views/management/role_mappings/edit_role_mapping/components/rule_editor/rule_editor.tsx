@@ -49,14 +49,14 @@ export class RuleEditor extends Component<Props, State> {
     };
   }
 
-  public componentWillReceiveProps(nextProps: Props) {
-    if (!this.state.rules) {
-      const nextState = this.initializeFromRawRules(nextProps.rawRules);
-      if (nextState.rules) {
-        this.setState({ ...nextState });
-      }
-    }
-  }
+  // public componentWillReceiveProps(nextProps: Props) {
+  //   if (!this.state.rules) {
+  //     const nextState = this.initializeFromRawRules(nextProps.rawRules);
+  //     if (nextState.rules) {
+  //       this.setState({ ...nextState });
+  //     }
+  //   }
+  // }
 
   public render() {
     return (
@@ -93,6 +93,7 @@ export class RuleEditor extends Component<Props, State> {
       case 'visual':
         return (
           <EuiLink
+            data-test-subj="roleMappingsAdvancedRuleEditorButton"
             onClick={() => {
               this.trySwitchEditorMode('advanced');
             }}
@@ -103,6 +104,7 @@ export class RuleEditor extends Component<Props, State> {
       case 'advanced':
         return (
           <EuiLink
+            data-test-subj="roleMappingsVisualRuleEditorButton"
             onClick={() => {
               this.trySwitchEditorMode('visual');
             }}

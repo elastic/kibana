@@ -7,11 +7,16 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+// see https://w3c.github.io/webdriver/webdriver-spec.html#keyboard-actions
+const BKSP_KEY = '\uE003';
+
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'roleMappings']);
   const security = getService('security');
+  const find = getService('find');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const aceEditor = getService('aceEditor');
 
   describe('Role Mappings', function() {
     before(async () => {
@@ -29,10 +34,57 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.setValue('roleMappingFormRoleComboBox', 'superuser');
       await browser.pressKeys(browser.keys.ENTER);
 
-      // TODO: Add rule
+      await testSubjects.click('roleMappingsAdvancedRuleEditorButton');
 
-      await testSubjects.click('saveRoleMappingButton');
+      const container = await testSubjects.find('codeEditorContainer');
+      await container.click();
+
+      const input = await find.activeElement();
+      await input.type([BKSP_KEY, BKSP_KEY], { charByChar: true }); // delete current content
+
+      input.type(
+        JSON.stringify({
+          all: [
+            {
+              field: {
+                username: '*',
+              },
+            },
+            {
+              field: {
+                'metadata.foo.bar': 'baz',
+              },
+            },
+            {
+              except: {
+                any: [
+                  {
+                    field: {
+                      dn: 'foo',
+                    },
+                  },
+                  {
+                    field: {
+                      dn: 'bar',
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        }),
+        { charByChar: false }
+      );
+
+      await testSubjects.click('saveRoleMappingButon');
+
       await testSubjects.existOrFail('savedRoleMappingSuccessToast');
+    });
+
+    it('allows a role mapping to be deleted', async () => {
+      await testSubjects.click(`deleteRoleMappingButton-new_role_mapping`);
+      await testSubjects.click('confirmModalConfirmButton');
+      await testSubjects.existOrFail('deletedRoleMappingSuccessToast');
     });
 
     describe('with role mappings', () => {

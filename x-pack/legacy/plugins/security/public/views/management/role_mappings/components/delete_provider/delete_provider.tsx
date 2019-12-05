@@ -91,7 +91,10 @@ export const DeleteProvider: React.FunctionComponent<Props> = ({ children }) => 
               values: { name: successfulDeletes[0].name },
             }
           );
-      toastNotifications.addSuccess(successMessage);
+      toastNotifications.addSuccess({
+        title: successMessage,
+        'data-test-subj': 'deletedRoleMappingSuccessToast',
+      });
       if (onSuccessCallback.current) {
         onSuccessCallback.current(successfulDeletes.map(({ name }) => name));
       }
