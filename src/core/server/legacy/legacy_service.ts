@@ -31,6 +31,8 @@ import { Logger } from '../logging';
 import { PluginsServiceSetup, PluginsServiceStart } from '../plugins';
 import { findLegacyPluginSpecs } from './plugins';
 import { LegacyPluginSpec } from './plugins/find_legacy_plugin_specs';
+import { PathConfigType } from '../path';
+import { LegacyConfig } from './config';
 
 interface LegacyKbnServer {
   applyLoggingConfiguration: (settings: Readonly<Record<string, any>>) => void;
@@ -39,7 +41,7 @@ interface LegacyKbnServer {
   close: () => Promise<void>;
 }
 
-function getLegacyRawConfig(config: Config) {
+function getLegacyRawConfig(config: Config, pathConfig: PathConfigType) {
   const rawConfig = config.toRaw();
 
   // Elasticsearch config is solely handled by the core and legacy platform
@@ -48,7 +50,10 @@ function getLegacyRawConfig(config: Config) {
     delete rawConfig.elasticsearch;
   }
 
-  return rawConfig;
+  return {
+    ...rawConfig,
+    path: pathConfig, // We rely heavily in the default value of 'path.data' in the legacy world and, since it has been moved to NP, it won't show up in RawConfig
+  };
 }
 
 /**
@@ -76,8 +81,10 @@ export interface LegacyServiceStartDeps {
 /** @internal */
 export interface LegacyServiceDiscoverPlugins {
   pluginSpecs: LegacyPluginSpec[];
+  disabledPluginSpecs: LegacyPluginSpec[];
   uiExports: SavedObjectsLegacyUiExports;
-  pluginExtendedConfig: Config;
+  pluginExtendedConfig: LegacyConfig;
+  settings: Record<string, any>;
 }
 
 /** @internal */
@@ -93,8 +100,8 @@ export class LegacyService implements CoreService {
   private kbnServer?: LegacyKbnServer;
   private configSubscription?: Subscription;
   private setupDeps?: LegacyServiceSetupDeps;
-  private update$: ConnectableObservable<Config> | undefined;
-  private legacyRawConfig: Config | undefined;
+  private update$: ConnectableObservable<[Config, PathConfigType]> | undefined;
+  private legacyRawConfig: LegacyConfig | undefined;
   private legacyPlugins:
     | {
         pluginSpecs: LegacyPluginSpec[];
@@ -115,22 +122,25 @@ export class LegacyService implements CoreService {
   }
 
   public async discoverPlugins(): Promise<LegacyServiceDiscoverPlugins> {
-    this.update$ = this.coreContext.configService.getConfig$().pipe(
-      tap(config => {
+    this.update$ = combineLatest(
+      this.coreContext.configService.getConfig$(),
+      this.coreContext.configService.atPath<PathConfigType>('path')
+    ).pipe(
+      tap(([config, pathConfig]) => {
         if (this.kbnServer !== undefined) {
-          this.kbnServer.applyLoggingConfiguration(getLegacyRawConfig(config));
+          this.kbnServer.applyLoggingConfiguration(getLegacyRawConfig(config, pathConfig));
         }
       }),
       tap({ error: err => this.log.error(err) }),
       publishReplay(1)
-    ) as ConnectableObservable<Config>;
+    ) as ConnectableObservable<[Config, PathConfigType]>;
 
     this.configSubscription = this.update$.connect();
 
     this.settings = await this.update$
       .pipe(
         first(),
-        map(config => getLegacyRawConfig(config))
+        map(([config, pathConfig]) => getLegacyRawConfig(config, pathConfig))
       )
       .toPromise();
 
@@ -160,8 +170,10 @@ export class LegacyService implements CoreService {
 
     return {
       pluginSpecs,
+      disabledPluginSpecs,
       uiExports,
       pluginExtendedConfig,
+      settings: this.settings,
     };
   }
 
@@ -211,7 +223,7 @@ export class LegacyService implements CoreService {
     }
   }
 
-  private async createClusterManager(config: Config) {
+  private async createClusterManager(config: LegacyConfig) {
     const basePathProxy$ = this.coreContext.env.cliArgs.basePath
       ? combineLatest(this.devConfig$, this.httpConfig$).pipe(
           first(),
@@ -231,7 +243,7 @@ export class LegacyService implements CoreService {
 
   private async createKbnServer(
     settings: Record<string, any>,
-    config: Config,
+    config: LegacyConfig,
     setupDeps: LegacyServiceSetupDeps,
     startDeps: LegacyServiceStartDeps,
     legacyPlugins: {
@@ -241,6 +253,7 @@ export class LegacyService implements CoreService {
     }
   ) {
     const coreSetup: CoreSetup = {
+      capabilities: setupDeps.core.capabilities,
       context: setupDeps.core.context,
       elasticsearch: {
         adminClient$: setupDeps.core.elasticsearch.adminClient$,
@@ -271,6 +284,7 @@ export class LegacyService implements CoreService {
       },
     };
     const coreStart: CoreStart = {
+      capabilities: startDeps.core.capabilities,
       savedObjects: { getScopedClient: startDeps.core.savedObjects.getScopedClient },
     };
 
@@ -284,7 +298,6 @@ export class LegacyService implements CoreService {
           mode: this.coreContext.env.mode,
           packageInfo: this.coreContext.env.packageInfo,
         },
-        handledConfigPaths: await this.coreContext.configService.getUsedPaths(),
         setupDeps: {
           core: coreSetup,
           plugins: setupDeps.plugins,
