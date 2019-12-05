@@ -20,18 +20,21 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 
-import { EuiComboBox } from '@elastic/eui';
+import { Required } from '@kbn/utility-types';
+import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
+
 import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
 import { getIndexPatternTitle } from '../../index_patterns/lib';
 
-export interface IndexPatternSelectProps {
-  onChange: (opt: any) => void;
+export type IndexPatternSelectProps = Required<
+  EuiComboBoxProps<any>,
+  'onChange' | 'placeholder'
+> & {
   indexPatternId: string;
-  placeholder: string;
-  fieldTypes: string[];
-  onNoIndexPatterns: () => void;
+  fieldTypes?: string[];
+  onNoIndexPatterns?: () => void;
   savedObjectsClient: SavedObjectsClientContract;
-}
+};
 
 interface IndexPatternSelectState {
   isLoading: boolean;
@@ -124,19 +127,20 @@ export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
 
   debouncedFetch = _.debounce(async (searchValue: string) => {
     const { fieldTypes, onNoIndexPatterns, savedObjectsClient } = this.props;
+    const hasFieldTypes = Boolean(fieldTypes && fieldTypes.length > 0);
 
     const savedObjectFields = ['title'];
-    if (fieldTypes) {
+    if (hasFieldTypes) {
       savedObjectFields.push('fields');
     }
     let savedObjects = await getIndexPatterns(savedObjectsClient, searchValue, savedObjectFields);
 
-    if (fieldTypes) {
+    if (hasFieldTypes) {
       savedObjects = savedObjects.filter((savedObject: SimpleSavedObject<any>) => {
         try {
           const indexPatternFields = JSON.parse(savedObject.attributes.fields as any);
           return indexPatternFields.some((field: any) => {
-            return fieldTypes.includes(field.type);
+            return fieldTypes?.includes(field.type);
           });
         } catch (err) {
           // Unable to parse fields JSON, invalid index pattern

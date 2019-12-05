@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { rangeControlFactory } from './range_control_factory';
-import { RangeControl } from '../components/vis/range_control';
+import { rangeControlFactory, RangeControl } from './range_control_factory';
 import { ControlParams, CONTROL_TYPES } from '../editor_utils';
 
 let esSearchResponse: any;
@@ -85,7 +84,7 @@ describe('fetch', () => {
     },
     type: CONTROL_TYPES.RANGE,
     label: 'test',
-    indexPattern: {} as,
+    indexPattern: {} as any,
     parent: {} as any,
   };
   const useTimeFilter = false;

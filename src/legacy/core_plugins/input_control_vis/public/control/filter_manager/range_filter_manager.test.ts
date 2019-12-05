@@ -19,6 +19,9 @@
 
 import expect from '@kbn/expect';
 import { RangeFilterManager } from './range_filter_manager';
+import { IndexPattern } from 'ui/index_patterns';
+import { FilterManager as QueryFilterManager } from '../../../../../../plugins/data/public';
+import { RangeFilter, RangeFilterMeta } from 'src/plugins/data/common/es_query/filters';
 
 describe('RangeFilterManager', function() {
   const controlId = 'control1';
@@ -28,19 +31,19 @@ describe('RangeFilterManager', function() {
     const fieldMock = {
       name: 'field1',
     };
-    const indexPatternMock = {
+    const indexPatternMock: IndexPattern = {
       id: indexPatternId,
       fields: {
-        getByName: name => {
-          const fields = {
+        getByName: (name: any) => {
+          const fields: any = {
             field1: fieldMock,
           };
           return fields[name];
         },
       },
-    };
-    const queryFilterMock = {};
-    let filterManager;
+    } as IndexPattern;
+    const queryFilterMock: QueryFilterManager = {} as QueryFilterManager;
+    let filterManager: RangeFilterManager;
     beforeEach(() => {
       filterManager = new RangeFilterManager(
         controlId,
@@ -62,22 +65,32 @@ describe('RangeFilterManager', function() {
   });
 
   describe('getValueFromFilterBar', function() {
-    const indexPatternMock = {};
-    const queryFilterMock = {};
-    let filterManager;
-    beforeEach(() => {
-      class MockFindFiltersRangeFilterManager extends RangeFilterManager {
-        constructor(controlId, fieldName, indexPattern, queryFilter) {
-          super(controlId, fieldName, indexPattern, queryFilter);
-          this.mockFilters = [];
-        }
-        findFilters() {
-          return this.mockFilters;
-        }
-        setMockFilters(mockFilters) {
-          this.mockFilters = mockFilters;
-        }
+    class MockFindFiltersRangeFilterManager extends RangeFilterManager {
+      mockFilters: RangeFilter[];
+
+      constructor(
+        id: string,
+        fieldName: string,
+        indexPattern: IndexPattern,
+        queryFilter: QueryFilterManager
+      ) {
+        super(id, fieldName, indexPattern, queryFilter);
+        this.mockFilters = [];
       }
+
+      findFilters() {
+        return this.mockFilters;
+      }
+
+      setMockFilters(mockFilters: RangeFilter[]) {
+        this.mockFilters = mockFilters;
+      }
+    }
+
+    const indexPatternMock: IndexPattern = {} as IndexPattern;
+    const queryFilterMock: QueryFilterManager = {} as QueryFilterManager;
+    let filterManager: MockFindFiltersRangeFilterManager;
+    beforeEach(() => {
       filterManager = new MockFindFiltersRangeFilterManager(
         controlId,
         'field1',
@@ -95,14 +108,15 @@ describe('RangeFilterManager', function() {
               lt: 3,
             },
           },
+          meta: {} as RangeFilterMeta,
         },
-      ]);
+      ] as RangeFilter[]);
       const value = filterManager.getValueFromFilterBar();
       expect(value).to.be.a('object');
       expect(value).to.have.property('min');
-      expect(value.min).to.be(1);
+      expect(value?.min).to.be(1);
       expect(value).to.have.property('max');
-      expect(value.max).to.be(3);
+      expect(value?.max).to.be(3);
     });
 
     test('should return undefined when filter value can not be extracted from Kibana filter', function() {
@@ -114,8 +128,9 @@ describe('RangeFilterManager', function() {
               lte: 3,
             },
           },
+          meta: {} as RangeFilterMeta,
         },
-      ]);
+      ] as RangeFilter[]);
       expect(filterManager.getValueFromFilterBar()).to.eql(undefined);
     });
   });

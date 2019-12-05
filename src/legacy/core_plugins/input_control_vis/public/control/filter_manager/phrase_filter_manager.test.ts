@@ -19,6 +19,10 @@
 
 import expect from '@kbn/expect';
 import { PhraseFilterManager } from './phrase_filter_manager';
+import { IndexPattern } from 'ui/index_patterns';
+
+import { FilterManager as QueryFilterManager } from '../../../../../../plugins/data/public';
+import { Filter } from 'src/plugins/data/common/es_query/filters';
 
 describe('PhraseFilterManager', function() {
   const controlId = 'control1';
@@ -28,19 +32,19 @@ describe('PhraseFilterManager', function() {
     const fieldMock = {
       name: 'field1',
       format: {
-        convert: val => val,
+        convert: (value: any) => value,
       },
     };
-    const indexPatternMock = {
+    const indexPatternMock: IndexPattern = {
       id: indexPatternId,
       fields: {
-        getByName: name => {
-          const fields = { field1: fieldMock };
+        getByName: (name: any) => {
+          const fields: any = { field1: fieldMock };
           return fields[name];
         },
       },
-    };
-    const queryFilterMock = {};
+    } as IndexPattern;
+    const queryFilterMock: QueryFilterManager = {} as QueryFilterManager;
     let filterManager: PhraseFilterManager;
     beforeEach(() => {
       filterManager = new PhraseFilterManager(
@@ -81,22 +85,32 @@ describe('PhraseFilterManager', function() {
   });
 
   describe('getValueFromFilterBar', function() {
-    const indexPatternMock = {};
-    const queryFilterMock = {};
-    let filterManager;
-    beforeEach(() => {
-      class MockFindFiltersPhraseFilterManager extends PhraseFilterManager {
-        constructor(controlId, fieldName, indexPattern, queryFilter, delimiter) {
-          super(controlId, fieldName, indexPattern, queryFilter, delimiter);
-          this.mockFilters = [];
-        }
-        findFilters() {
-          return this.mockFilters;
-        }
-        setMockFilters(mockFilters) {
-          this.mockFilters = mockFilters;
-        }
+    class MockFindFiltersPhraseFilterManager extends PhraseFilterManager {
+      mockFilters: Filter[];
+
+      constructor(
+        id: string,
+        fieldName: string,
+        indexPattern: IndexPattern,
+        queryFilter: QueryFilterManager
+      ) {
+        super(id, fieldName, indexPattern, queryFilter);
+        this.mockFilters = [];
       }
+
+      findFilters() {
+        return this.mockFilters;
+      }
+
+      setMockFilters(mockFilters: Filter[]) {
+        this.mockFilters = mockFilters;
+      }
+    }
+
+    const indexPatternMock: IndexPattern = {} as IndexPattern;
+    const queryFilterMock: QueryFilterManager = {} as QueryFilterManager;
+    let filterManager: MockFindFiltersPhraseFilterManager;
+    beforeEach(() => {
       filterManager = new MockFindFiltersPhraseFilterManager(
         controlId,
         'field1',
@@ -117,7 +131,7 @@ describe('PhraseFilterManager', function() {
             },
           },
         },
-      ]);
+      ] as Filter[]);
       expect(filterManager.getValueFromFilterBar()).to.eql(['ios']);
     });
 
@@ -143,7 +157,7 @@ describe('PhraseFilterManager', function() {
             },
           },
         },
-      ]);
+      ] as Filter[]);
       expect(filterManager.getValueFromFilterBar()).to.eql(['ios', 'win xp']);
     });
 
@@ -167,7 +181,7 @@ describe('PhraseFilterManager', function() {
             },
           },
         },
-      ]);
+      ] as Filter[]);
       expect(filterManager.getValueFromFilterBar()).to.eql(['ios', 'win xp']);
     });
 
@@ -183,7 +197,7 @@ describe('PhraseFilterManager', function() {
             },
           },
         },
-      ]);
+      ] as Filter[]);
       expect(filterManager.getValueFromFilterBar()).to.eql(undefined);
     });
   });

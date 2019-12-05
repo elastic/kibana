@@ -18,8 +18,8 @@
  */
 
 import _ from 'lodash';
-import { PhraseFilter } from 'src/plugins/data/common/es_query/filters';
 import { IndexPattern } from 'ui/index_patterns';
+import { Filter } from 'src/plugins/data/common/es_query/filters';
 import { FilterManager as QueryFilterManager } from '../../../../../../plugins/data/public';
 
 export abstract class FilterManager {
@@ -48,19 +48,19 @@ export abstract class FilterManager {
    *   single phrase: match query
    *   multiple phrases: bool query with should containing list of match_phrase queries
    */
-  abstract createFilter(phrases: any): PhraseFilter;
+  abstract createFilter(phrases: any): Filter;
 
   abstract getValueFromFilterBar(): any;
 
-  getIndexPattern() {
+  getIndexPattern(): IndexPattern {
     return this.indexPattern;
   }
 
-  getField() {
+  getField(): any {
     return this.indexPattern.fields.getByName(this.fieldName);
   }
 
-  findFilters() {
+  findFilters(): Filter[] {
     const kbnFilters = _.flatten([
       this.queryFilter.getAppFilters(),
       this.queryFilter.getGlobalFilters(),

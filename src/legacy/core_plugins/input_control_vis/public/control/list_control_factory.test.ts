@@ -18,7 +18,8 @@
  */
 
 import chrome from 'ui/chrome';
-import { listControlFactory } from './list_control_factory';
+import { listControlFactory, ListControl } from './list_control_factory';
+import { ControlParams, CONTROL_TYPES } from '../editor_utils';
 
 jest.mock('ui/timefilter', () => ({
   createFilter: jest.fn(),
@@ -33,8 +34,8 @@ jest.mock('ui/new_platform', () => ({
             fieldName: 'myNumberField',
             getIndexPattern: () => ({
               fields: {
-                getByName: name => {
-                  const fields = { myField: { name: 'myField' } };
+                getByName: (name: any) => {
+                  const fields: any = { myField: { name: 'myField' } };
                   return fields[name];
                 },
               },
@@ -54,8 +55,8 @@ jest.mock('../../../../core_plugins/data/public/legacy', () => ({
       indexPatterns: {
         get: () => ({
           fields: {
-            getByName: name => {
-              const fields = { myField: { name: 'myField' } };
+            getByName: (name: any) => {
+              const fields: any = { myField: { name: 'myField' } };
               return fields[name];
             },
           },
@@ -65,7 +66,7 @@ jest.mock('../../../../core_plugins/data/public/legacy', () => ({
   },
 }));
 
-chrome.getInjected.mockImplementation(key => {
+(chrome.getInjected as jest.Mock).mockImplementation(key => {
   switch (key) {
     case 'autocompleteTimeout':
       return 1000;
@@ -100,14 +101,18 @@ function MockSearchSource() {
 }
 
 describe('hasValue', () => {
-  const controlParams = {
+  const controlParams: ControlParams = {
     id: '1',
     fieldName: 'myField',
-    options: {},
+    options: {} as any,
+    type: CONTROL_TYPES.LIST,
+    label: 'test',
+    indexPattern: {} as any,
+    parent: 'parent',
   };
   const useTimeFilter = false;
 
-  let listControl;
+  let listControl: ListControl;
   beforeEach(async () => {
     listControl = await listControlFactory(controlParams, useTimeFilter, MockSearchSource);
   });
@@ -128,15 +133,19 @@ describe('hasValue', () => {
 });
 
 describe('fetch', () => {
-  const controlParams = {
+  const controlParams: ControlParams = {
     id: '1',
     fieldName: 'myField',
-    options: {},
+    options: {} as any,
+    type: CONTROL_TYPES.LIST,
+    label: 'test',
+    indexPattern: {} as any,
+    parent: 'parent',
   };
   const useTimeFilter = false;
   const SearchSource = jest.fn(MockSearchSource);
 
-  let listControl;
+  let listControl: ListControl;
   beforeEach(async () => {
     listControl = await listControlFactory(controlParams, useTimeFilter, SearchSource);
   });
@@ -159,22 +168,30 @@ describe('fetch', () => {
 });
 
 describe('fetch with ancestors', () => {
-  const controlParams = {
+  const controlParams: ControlParams = {
     id: '1',
     fieldName: 'myField',
-    options: {},
+    options: {} as any,
+    type: CONTROL_TYPES.LIST,
+    label: 'test',
+    indexPattern: {} as any,
+    parent: 'parent',
   };
   const useTimeFilter = false;
 
-  let listControl;
+  let listControl: ListControl;
   let parentControl;
   beforeEach(async () => {
     listControl = await listControlFactory(controlParams, useTimeFilter, MockSearchSource);
 
-    const parentControlParams = {
+    const parentControlParams: ControlParams = {
       id: 'parent',
       fieldName: 'myField',
-      options: {},
+      options: {} as any,
+      type: CONTROL_TYPES.LIST,
+      label: 'test',
+      indexPattern: {} as any,
+      parent: 'parent',
     };
     parentControl = await listControlFactory(parentControlParams, useTimeFilter, MockSearchSource);
     parentControl.clear();

@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 import { FilterManager } from './filter_manager';
-import { PhraseFilter, Filter } from 'src/plugins/data/common/es_query/filters';
+import { Filter } from 'src/plugins/data/common/es_query/filters';
 import { IndexPattern } from 'ui/index_patterns';
 import { FilterManager as QueryFilterManager } from '../../../../../../plugins/data/public';
 import { coreMock } from '../../../../../../core/public/mocks';
@@ -28,7 +28,7 @@ const setupMock = coreMock.createSetup();
 
 class FilterManagerTest extends FilterManager {
   createFilter() {
-    return {} as PhraseFilter;
+    return {} as Filter;
   }
 
   getValueFromFilterBar() {
