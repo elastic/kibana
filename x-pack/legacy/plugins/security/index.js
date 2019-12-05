@@ -55,7 +55,7 @@ export const security = (kibana) => new kibana.Plugin({
   },
 
   uiExports: {
-    chromeNavControls: ['plugins/security/views/nav_control'],
+    chromeNavControls: [],
     managementSections: ['plugins/security/views/management'],
     styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     apps: [{

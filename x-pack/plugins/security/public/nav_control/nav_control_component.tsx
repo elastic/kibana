@@ -6,9 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, {
-  Component,
-} from 'react';
+import React, { Component } from 'react';
 
 import {
   EuiAvatar,
@@ -20,12 +18,20 @@ import {
   EuiSpacer,
   EuiPopover,
 } from '@elastic/eui';
+import { AuthenticatedUser } from '../../common/model';
 
-/**
- * Placeholder for now from eui demo. Will need to be populated by Security plugin
- */
-export class SecurityNavControl extends Component {
-  constructor(props) {
+interface Props {
+  user: AuthenticatedUser;
+  editProfileUrl: string;
+  logoutUrl: string;
+}
+
+interface State {
+  isOpen: boolean;
+}
+
+export class SecurityNavControl extends Component<Props, State> {
+  constructor(props: Props) {
     super(props);
 
     this.state = {
@@ -53,7 +59,9 @@ export class SecurityNavControl extends Component {
         aria-controls="headerUserMenu"
         aria-expanded={this.state.isOpen}
         aria-haspopup="true"
-        aria-label={i18n.translate('xpack.security.navControlComponent.accountMenuAriaLabel', { defaultMessage: 'Account menu' })}
+        aria-label={i18n.translate('xpack.security.navControlComponent.accountMenuAriaLabel', {
+          defaultMessage: 'Account menu',
+        })}
         onClick={this.onMenuButtonClick}
         data-test-subj="userMenuButton"
       >
