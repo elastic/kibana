@@ -29,8 +29,8 @@ import { I18nContext } from 'ui/i18n';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
 export interface XPluginSet {
-  devTools: DevToolsSetup;
-  feature_catalogue: FeatureCatalogueSetup;
+  dev_tools: DevToolsSetup;
+  home: HomePublicPluginSetup;
   __LEGACY: {
     I18nContext: any;
   };
@@ -38,7 +38,7 @@ export interface XPluginSet {
 
 import { plugin } from '.';
 import { DevToolsSetup } from '../../../../../plugins/dev_tools/public';
-import { FeatureCatalogueSetup } from '../../../../../plugins/feature_catalogue/public';
+import { HomePublicPluginSetup } from '../../../../../plugins/home/public';
 
 const pluginInstance = plugin({} as any);
 

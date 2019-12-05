@@ -139,6 +139,7 @@ export const AnomaliesTable: React.FunctionComponent<{
       name: maxAnomalyScoreColumnName,
       sortable: true,
       truncateText: true,
+      dataType: 'number' as const,
     },
     {
       align: RIGHT_ALIGNMENT,
@@ -168,7 +169,7 @@ export const AnomaliesTable: React.FunctionComponent<{
   );
 };
 
-const StyledEuiBasicTable: typeof EuiBasicTable = euiStyled(EuiBasicTable)`
+const StyledEuiBasicTable: typeof EuiBasicTable = euiStyled(EuiBasicTable as any)`
   & .euiTable {
     table-layout: auto;
   }

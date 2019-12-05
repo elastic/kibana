@@ -19,6 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'src/core/public';
+import { toMountPoint } from '../../../../../../plugins/kibana_react/public';
 import {
   IAction,
   createAction,
@@ -28,11 +29,12 @@ import {
   esFilters,
   FilterManager,
   TimefilterContract,
+  applyFiltersPopover,
   changeTimeFilter,
   extractTimeFilter,
+  IndexPatternsStart,
 } from '../../../../../../plugins/data/public';
-import { applyFiltersPopover } from '../apply_filters/apply_filters_popover';
-import { IndexPatternsStart } from '../../index_patterns';
+
 export const GLOBAL_APPLY_FILTER_ACTION = 'GLOBAL_APPLY_FILTER_ACTION';
 
 interface ActionContext {
@@ -73,23 +75,25 @@ export function createFilterAction(
       if (selectedFilters.length > 1) {
         const indexPatterns = await Promise.all(
           filters.map(filter => {
-            return indexPatternsService.indexPatterns.get(filter.meta.index);
+            return indexPatternsService.indexPatterns.get(filter.meta.index!);
           })
         );
 
         const filterSelectionPromise: Promise<esFilters.Filter[]> = new Promise(resolve => {
           const overlay = overlays.openModal(
-            applyFiltersPopover(
-              filters,
-              indexPatterns,
-              () => {
-                overlay.close();
-                resolve([]);
-              },
-              (filterSelection: esFilters.Filter[]) => {
-                overlay.close();
-                resolve(filterSelection);
-              }
+            toMountPoint(
+              applyFiltersPopover(
+                filters,
+                indexPatterns,
+                () => {
+                  overlay.close();
+                  resolve([]);
+                },
+                (filterSelection: esFilters.Filter[]) => {
+                  overlay.close();
+                  resolve(filterSelection);
+                }
+              )
             ),
             {
               'data-test-subj': 'test',

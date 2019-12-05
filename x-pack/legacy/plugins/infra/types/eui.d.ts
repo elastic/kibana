@@ -41,7 +41,7 @@ declare module '@elastic/eui' {
     toggleOpenOnMobile?: () => void;
     isOpenOnMobile?: boolean;
   };
-  export const EuiSideNav: React.SFC<EuiSideNavProps>;
+  export const EuiSideNav: React.FC<EuiSideNavProps>;
 
   type EuiSizesResponsive = 'xs' | 's' | 'm' | 'l' | 'xl';
   type EuiResponsiveProps = CommonProps & {

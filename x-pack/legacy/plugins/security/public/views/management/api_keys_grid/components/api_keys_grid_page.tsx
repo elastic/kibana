@@ -87,7 +87,7 @@ export class ApiKeysGridPage extends Component<any, State> {
     if (isLoadingApp) {
       return (
         <EuiPageContent>
-          <SectionLoading>
+          <SectionLoading data-test-subj="apiKeysSectionLoading">
             <FormattedMessage
               id="xpack.security.management.apiKeys.table.loadingApiKeysDescription"
               defaultMessage="Loading API keys…"
@@ -113,6 +113,7 @@ export class ApiKeysGridPage extends Component<any, State> {
             }
             color="danger"
             iconType="alert"
+            data-test-subj="apiKeysError"
           >
             {statusCode}: {errorTitle} - {message}
           </EuiCallOut>
@@ -137,7 +138,7 @@ export class ApiKeysGridPage extends Component<any, State> {
     }
 
     const description = (
-      <EuiText color="subdued" size="s">
+      <EuiText color="subdued" size="s" data-test-subj="apiKeysDescriptionText">
         <p>
           {isAdmin ? (
             <FormattedMessage
@@ -310,6 +311,7 @@ export class ApiKeysGridPage extends Component<any, State> {
               color="success"
               iconType="user"
               size="s"
+              data-test-subj="apiKeyAdminDescriptionCallOut"
             />
 
             <EuiSpacer size="m" />

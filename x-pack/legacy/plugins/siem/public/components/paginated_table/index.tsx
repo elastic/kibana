@@ -5,6 +5,7 @@
  */
 import {
   EuiBasicTable,
+  EuiBasicTableProps,
   EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -17,8 +18,8 @@ import {
   Direction,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import React, { memo, useState, useEffect } from 'react';
-import styled, { css } from 'styled-components';
+import React, { memo, useState, useEffect, ComponentType } from 'react';
+import styled from 'styled-components';
 
 import { AuthTableColumns } from '../page/hosts/authentications_table';
 import { HostsTableColumns } from '../page/hosts/hosts_table';
@@ -251,6 +252,9 @@ export const PaginatedTable = memo<SiemTables>(
           <EuiLoadingContent data-test-subj="initialLoadingPanelPaginatedTable" lines={10} />
         ) : (
           <>
+            {
+              // @ts-ignore avoid some type mismatches
+            }
             <BasicTable
               // @ts-ignore `Columns` interface differs from EUI's `column` type and is used all over this plugin, so ignore the differences instead of refactoring a lot of code
               columns={columns}
@@ -262,7 +266,7 @@ export const PaginatedTable = memo<SiemTables>(
                 sorting
                   ? {
                       sort: {
-                        field: sorting.field,
+                        field: sorting.field as any, // eslint-disable-line @typescript-eslint/no-explicit-any
                         direction: sorting.direction,
                       },
                     }
@@ -306,7 +310,10 @@ export const PaginatedTable = memo<SiemTables>(
 
 PaginatedTable.displayName = 'PaginatedTable';
 
-const BasicTable = styled(EuiBasicTable)`
+type BasicTableType = ComponentType<EuiBasicTableProps<any>>; // eslint-disable-line @typescript-eslint/no-explicit-any
+const BasicTable: typeof EuiBasicTable & { displayName: string } = styled(
+  EuiBasicTable as BasicTableType
+)`
   tbody {
     th,
     td {
@@ -317,41 +324,39 @@ const BasicTable = styled(EuiBasicTable)`
       display: block;
     }
   }
-`;
+` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 BasicTable.displayName = 'BasicTable';
 
-const FooterAction = styled(EuiFlexGroup).attrs({
+const FooterAction = styled(EuiFlexGroup).attrs(() => ({
   alignItems: 'center',
   responsive: false,
-})`
-  margin-top: ${props => props.theme.eui.euiSizeXS};
+}))`
+  margin-top: ${({ theme }) => theme.eui.euiSizeXS};
 `;
 
 FooterAction.displayName = 'FooterAction';
 
 const PaginationEuiFlexItem = styled(EuiFlexItem)`
-  ${props => css`
-    @media only screen and (min-width: ${props.theme.eui.euiBreakpoints.m}) {
-      .euiButtonIcon:last-child {
-        margin-left: 28px;
-      }
-
-      .euiPagination {
-        position: relative;
-      }
-
-      .euiPagination::before {
-        bottom: 0;
-        color: ${props.theme.eui.euiButtonColorDisabled};
-        content: '\\2026';
-        font-size: ${props.theme.eui.euiFontSizeS};
-        padding: 5px ${props.theme.eui.euiSizeS};
-        position: absolute;
-        right: ${props.theme.eui.euiSizeL};
-      }
+  @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.m}) {
+    .euiButtonIcon:last-child {
+      margin-left: 28px;
     }
-  `}
+
+    .euiPagination {
+      position: relative;
+    }
+
+    .euiPagination::before {
+      bottom: 0;
+      color: ${({ theme }) => theme.eui.euiButtonColorDisabled};
+      content: '\\2026';
+      font-size: ${({ theme }) => theme.eui.euiFontSizeS};
+      padding: 5px ${({ theme }) => theme.eui.euiSizeS};
+      position: absolute;
+      right: ${({ theme }) => theme.eui.euiSizeL};
+    }
+  }
 `;
 
 PaginationEuiFlexItem.displayName = 'PaginationEuiFlexItem';

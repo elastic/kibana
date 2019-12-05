@@ -293,8 +293,6 @@ function getESResponse(buckets: any): ESResponse {
             lower: { value: bucket?.lower?.value || null },
             upper: { value: bucket?.upper?.value || null },
             anomaly_score: {
-              // TODO(TS-3.7-ESLINT)
-              // eslint-disable-next-line @typescript-eslint/camelcase
               value: bucket?.anomaly_score?.value || null
             }
           };

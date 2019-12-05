@@ -8,7 +8,7 @@ import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'src/core/public';
 import { SavedQuery } from 'src/legacy/core_plugins/data/public';
-import { KibanaDatatable } from '../../../../../src/legacy/core_plugins/interpreter/common';
+import { KibanaDatatable } from '../../../../../src/plugins/expressions/public';
 import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
 import { DateRange } from '../common';

@@ -6,12 +6,16 @@
 
 import { isEqual, isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useState, useEffect } from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
 import { Subscription } from 'rxjs';
 
-import { SavedQueryTimeFilter } from '../../../../../../../../src/legacy/core_plugins/data/public/search';
-import { SavedQuery } from '../../../../../../../../src/legacy/core_plugins/data/public';
-import { Query, esFilters, FilterManager } from '../../../../../../../../src/plugins/data/public';
+import {
+  IIndexPattern,
+  Query,
+  esFilters,
+  FilterManager,
+  SavedQuery,
+  SavedQueryTimeFilter,
+} from '../../../../../../../../src/plugins/data/public';
 
 import { BrowserFields } from '../../../containers/source';
 import { convertKueryToElasticSearchQuery } from '../../../lib/keury';
@@ -34,7 +38,7 @@ export interface QueryBarTimelineComponentProps {
   from: number;
   fromStr: string;
   kqlMode: KqlMode;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   isRefreshPaused: boolean;
   refreshInterval: number;
   savedQueryId: string | null;
@@ -157,15 +161,24 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       let isSubscribed = true;
       async function setSavedQueryByServices() {
         if (savedQueryId != null && savedQueryServices != null) {
-          const mySavedQuery = await savedQueryServices.getSavedQuery(savedQueryId);
-          if (isSubscribed) {
-            setSavedQuery({
-              ...mySavedQuery,
-              attributes: {
-                ...mySavedQuery.attributes,
-                filters: filters.filter(f => f.meta.controlledBy !== timelineFilterDropArea),
-              },
-            });
+          try {
+            // The getSavedQuery function will throw a promise rejection in
+            // src/legacy/core_plugins/data/public/search/search_bar/lib/saved_query_service.ts
+            // if the savedObjectsClient is undefined. This is happening in a test
+            // so I wrapped this in a try catch to keep the unhandled promise rejection
+            // warning from appearing in tests.
+            const mySavedQuery = await savedQueryServices.getSavedQuery(savedQueryId);
+            if (isSubscribed && mySavedQuery != null) {
+              setSavedQuery({
+                ...mySavedQuery,
+                attributes: {
+                  ...mySavedQuery.attributes,
+                  filters: filters.filter(f => f.meta.controlledBy !== timelineFilterDropArea),
+                },
+              });
+            }
+          } catch (exc) {
+            setSavedQuery(null);
           }
         } else if (isSubscribed) {
           setSavedQuery(null);
@@ -279,6 +292,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
         refreshInterval={refreshInterval}
         savedQuery={savedQuery}
         onSavedQuery={onSavedQuery}
+        dataTestSubj={'timelineQueryInput'}
       />
     );
   }
