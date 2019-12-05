@@ -19,6 +19,7 @@ import { initMetricExplorerRoute } from './routes/metrics_explorer';
 import { initMetadataRoute } from './routes/metadata';
 import { initSnapshotRoute } from './routes/snapshot';
 import { initNodeDetailsRoute } from './routes/node_details';
+import { initLogEntryRoute } from './routes/logs';
 
 export const initInfraServer = (libs: InfraBackendLibs) => {
   const schema = makeExecutableSchema({
@@ -39,4 +40,5 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initIndexPatternsValidateRoute(libs);
   initMetricExplorerRoute(libs);
   initMetadataRoute(libs);
+  initLogEntryRoute(libs);
 };
