@@ -20,10 +20,20 @@ export const createRouteWithAuth = (
     request,
     response
   ) => {
-    if (libs.license(context)) {
+    const { statusCode, message } = libs.license(context.licensing.license);
+    if (statusCode === 200) {
       return await handler(context, request, response);
     }
-    return response.badRequest();
+    switch (statusCode) {
+      case 400:
+        return response.badRequest({ body: { message } });
+      case 401:
+        return response.unauthorized({ body: message });
+      case 403:
+        return response.forbidden({ body: message });
+      default:
+        return response.internalError();
+    }
   };
   return {
     method,

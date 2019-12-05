@@ -30,7 +30,7 @@ import {
   isStateHash,
   unhashQuery
 } from '../state_hashing';
-import { HashedItemStore } from '../state_storage/hashed_item_store';
+import { HashedItemStore } from '../../../../../plugins/kibana_utils/public';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { EventsProvider } from '../../events';
 

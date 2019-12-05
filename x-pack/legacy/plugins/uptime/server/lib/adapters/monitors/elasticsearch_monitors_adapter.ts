@@ -8,6 +8,7 @@ import { get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { MonitorChart, Ping, LocationDurationLine } from '../../../../common/graphql/types';
 import { getHistogramIntervalFormatted } from '../../helper';
+import { MonitorError } from '../../../../common/runtime_types';
 import { UMMonitorsAdapter } from './adapter_types';
 
 const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
@@ -235,6 +236,7 @@ export const elasticsearchMonitorsAdapter: UMMonitorsAdapter = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
         size: 1,
+        _source: ['error', '@timestamp'],
         query: {
           bool: {
             must: [
@@ -265,11 +267,15 @@ export const elasticsearchMonitorsAdapter: UMMonitorsAdapter = {
 
     const result = await callEs('search', params);
 
-    const monitorError: Error | undefined = get(result, 'hits.hits[0]._source.error', undefined);
+    const data = result.hits.hits[0]?._source;
+
+    const monitorError: MonitorError | undefined = data?.error;
+    const errorTimeStamp: string | undefined = data?.['@timestamp'];
 
     return {
       monitorId,
       error: monitorError,
+      timestamp: errorTimeStamp,
     };
-  }
-}
+  },
+};

@@ -4,20 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import { RequestHandlerContext } from 'kibana/server';
+import { ILicense } from '../../../../../../plugins/licensing/server';
 
-export type UMLicenseCheck = (context: RequestHandlerContext) => boolean;
+export interface UMLicenseStatusResponse {
+  statusCode: number;
+  message: string;
+}
+export type UMLicenseCheck = (
+  license?: Pick<ILicense, 'isActive' | 'isOneOf'>
+) => UMLicenseStatusResponse;
 
-export const licenseCheck: UMLicenseCheck = ({ licensing: { license } }) => {
-  if (license === null) {
-    throw Boom.badRequest('Missing license information');
+export const licenseCheck: UMLicenseCheck = license => {
+  if (license === undefined) {
+    return {
+      message: 'Missing license information',
+      statusCode: 400,
+    };
   }
   if (!license.isOneOf(['basic', 'standard', 'gold', 'platinum', 'trial'])) {
-    throw Boom.forbidden('License not supported');
+    return {
+      message: 'License not supported',
+      statusCode: 401,
+    };
   }
   if (license.isActive === false) {
-    throw Boom.forbidden('License not active');
+    return {
+      message: 'License not active',
+      statusCode: 403,
+    };
   }
-  return true;
+  return {
+    message: 'License is valid and active',
+    statusCode: 200,
+  };
 };
