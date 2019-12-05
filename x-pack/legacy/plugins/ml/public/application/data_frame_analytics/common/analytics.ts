@@ -75,13 +75,26 @@ export interface RegressionEvaluateResponse {
   };
 }
 
+export interface ClassificationEvaluateResponse {
+  classification: {
+    multiclass_confusion_matrix: {
+      confusion_matrix: Array<{
+        actual_class: string;
+        actual_class_doc_count: number;
+        predicted_classes: Array<{ predicted_class: string; count: number }>;
+        other_predicted_class_doc_count: number;
+      }>;
+    };
+  };
+}
+
 interface GenericAnalysis {
   [key: string]: Record<string, any>;
 }
 
 interface LoadEvaluateResult {
   success: boolean;
-  eval: RegressionEvaluateResponse | null;
+  eval: RegressionEvaluateResponse | ClassificationEvaluateResponse | null;
   error: string | null;
 }
 
@@ -305,6 +318,7 @@ export const loadEvalData = async ({
   predictionFieldName,
   searchQuery,
   ignoreDefaultQuery,
+  jobType,
 }: {
   isTraining: boolean;
   index: string;
@@ -313,6 +327,7 @@ export const loadEvalData = async ({
   predictionFieldName?: string;
   searchQuery?: RegressionResultsSearchQuery;
   ignoreDefaultQuery?: boolean;
+  jobType: ANALYSIS_CONFIG_TYPE;
 }) => {
   const results: LoadEvaluateResult = { success: false, eval: null, error: null };
   const defaultPredictionField = `${dependentVariable}_prediction`;
@@ -321,18 +336,25 @@ export const loadEvalData = async ({
   }`;
 
   const query = getEvalQueryBody({ resultsField, isTraining, searchQuery, ignoreDefaultQuery });
+  const metrics = {
+    classification: {
+      multiclass_confusion_matrix: {},
+    },
+    regression: {
+      r_squared: {},
+      mean_squared_error: {},
+    },
+  };
 
   const config = {
     index,
     query,
     evaluation: {
-      regression: {
+      [jobType]: {
         actual_field: dependentVariable,
         predicted_field: predictedField,
-        metrics: {
-          r_squared: {},
-          mean_squared_error: {},
-        },
+        // @ts-ignore
+        metrics: metrics[jobType],
       },
     },
   };

@@ -26,6 +26,7 @@ import {
   isRegressionResultsSearchBoolQuery,
   RegressionResultsSearchQuery,
   SearchQuery,
+  ANALYSIS_CONFIG_TYPE,
 } from '../../../../common/analytics';
 
 interface Props {
@@ -105,9 +106,11 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
       predictionFieldName,
       searchQuery,
       ignoreDefaultQuery,
+      jobType: ANALYSIS_CONFIG_TYPE.REGRESSION,
     });
 
     if (genErrorEval.success === true && genErrorEval.eval) {
+      // @ts-ignore
       const { meanSquaredError, rSquared } = getValuesFromResponse(genErrorEval.eval);
       setGeneralizationEval({
         meanSquaredError,
@@ -136,9 +139,11 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
       predictionFieldName,
       searchQuery,
       ignoreDefaultQuery,
+      jobType: ANALYSIS_CONFIG_TYPE.REGRESSION,
     });
 
     if (trainingErrorEval.success === true && trainingErrorEval.eval) {
+      // @ts-ignore
       const { meanSquaredError, rSquared } = getValuesFromResponse(trainingErrorEval.eval);
       setTrainingEval({
         meanSquaredError,
