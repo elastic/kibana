@@ -10,7 +10,6 @@ import { getClusterAccessor } from '../lib/cluster_access';
 import { PluginContext } from '../plugin';
 import { getClient } from '../saved_objects';
 import { Request, ResponseToolkit } from '../types';
-import { createDatasource } from './index';
 
 // TODO: duplicated from packages/handlers.ts. unduplicate.
 interface Extra extends ResponseToolkit {
