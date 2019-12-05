@@ -138,10 +138,11 @@ export const siem = (kibana: any) => {
       const initializerContext = { ...coreContext, env } as PluginInitializerContext;
 
       const serverFacade = {
-        plugins: { alerting: plugins.alerting, xpack_main: plugins.xpack_main },
+        plugins: { alerting: plugins.alerting },
         route: route.bind(server),
       };
 
+      // @ts-ignore-next-line: setup.plugins is too loosely typed
       plugin(initializerContext).setup(setup.core, setup.plugins);
 
       initServerWithKibana(initializerContext, serverFacade);

@@ -4,14 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
-
 import { PluginInitializerContext } from 'src/core/server';
-import {
-  noteSavedObjectType,
-  pinnedEventSavedObjectType,
-  timelineSavedObjectType,
-} from './saved_objects';
 
 import { rulesAlertType } from './lib/detection_engine/alerts/rules_alert_type';
 import { isAlertExecutor } from './lib/detection_engine/alerts/types';
@@ -26,7 +19,7 @@ const APP_ID = 'siem';
 
 export const initServerWithKibana = (
   context: PluginInitializerContext,
-  { plugins: { alerting, xpack_main }, route }: ServerFacade
+  { plugins: { alerting }, route }: ServerFacade
 ) => {
   const logger = context.logger.get('plugins', APP_ID);
   const version = context.env.packageInfo.version;
@@ -46,38 +39,4 @@ export const initServerWithKibana = (
   updateRulesRoute(route);
   deleteRulesRoute(route);
   findRulesRoute(route);
-
-  xpack_main.registerFeature({
-    id: APP_ID,
-    name: i18n.translate('xpack.siem.featureRegistry.linkSiemTitle', {
-      defaultMessage: 'SIEM',
-    }),
-    icon: 'securityAnalyticsApp',
-    navLinkId: 'siem',
-    app: ['siem', 'kibana'],
-    catalogue: ['siem'],
-    privileges: {
-      all: {
-        api: ['siem'],
-        savedObject: {
-          all: [noteSavedObjectType, pinnedEventSavedObjectType, timelineSavedObjectType],
-          read: ['config'],
-        },
-        ui: ['show'],
-      },
-      read: {
-        api: ['siem'],
-        savedObject: {
-          all: [],
-          read: [
-            'config',
-            noteSavedObjectType,
-            pinnedEventSavedObjectType,
-            timelineSavedObjectType,
-          ],
-        },
-        ui: ['show'],
-      },
-    },
-  });
 };
