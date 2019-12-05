@@ -17,11 +17,5 @@
  * under the License.
  */
 
-import { dirname } from 'path';
-
-export const pkg = {
-  __filename: require.resolve('../../../package.json'),
-  __dirname: dirname(require.resolve('../../../package.json')),
-  // eslint-disable no-var-requires
-  ...require('../../../package.json'),
-};
+export * from './from_root';
+export * from './package_json';
