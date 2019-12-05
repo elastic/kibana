@@ -144,7 +144,7 @@ export class HeadlessChromiumDriverFactory {
         terminate$
           .pipe(
             tap(signal => {
-              this.logger.debug(`Observer got signal: ${signal}`);
+              this.logger.debug(`Termination signal received: ${signal}`);
             }),
             ignoreElements()
           )
@@ -212,9 +212,10 @@ export class HeadlessChromiumDriverFactory {
       mergeMap(req => {
         const failure = req.failure && req.failure();
         if (failure) {
-          return Rx.throwError(
-            new Error(`Request to [${req.url()}] failed! [${failure.errorText}]`)
+          this.logger.warning(
+            `Request to [${req.url()}] failed! [${failure.errorText}]. This error will be ignored.`
           );
+          return Rx.of();
         }
         return Rx.throwError(new Error(`Unknown failure!`));
       })
