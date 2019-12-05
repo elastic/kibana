@@ -21,10 +21,10 @@ const SIDEBAR_WIDTH = '168px';
 
 const PageContainer = styled.div`
   margin: 0 auto;
-  min-width: 1200px;
+  width: 1200px;
 `;
 const PageBody = styled.div`
-  max-width: 772px;
+  min-width: 772px;
 `;
 const NavButtonBackWrapper = styled.div`
   padding: ${props => props.theme.eui.paddingSizes.xl} 0 ${props => props.theme.eui.paddingSizes.m}
