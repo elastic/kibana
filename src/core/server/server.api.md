@@ -108,6 +108,7 @@ import { PingParams } from 'elasticsearch';
 import { PutScriptParams } from 'elasticsearch';
 import { PutTemplateParams } from 'elasticsearch';
 import { Readable } from 'stream';
+import { RecursiveReadonly as RecursiveReadonly_2 } from 'kibana/public';
 import { ReindexParams } from 'elasticsearch';
 import { ReindexRethrottleParams } from 'elasticsearch';
 import { RenderSearchTemplateParams } from 'elasticsearch';
@@ -1017,6 +1018,9 @@ export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = obj
 export interface PluginInitializerContext<ConfigSchema = unknown> {
     // (undocumented)
     config: {
+        legacy: {
+            globalConfig$: Observable<SharedGlobalConfig>;
+        };
         create: <T = ConfigSchema>() => Observable<T>;
         createIfExists: <T = ConfigSchema>() => Observable<T | undefined>;
     };
@@ -1759,5 +1763,6 @@ export const validBodyOutput: readonly ["data", "stream"];
 // 
 // src/core/server/http/router/response.ts:316:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/plugins_service.ts:43:5 - (ae-forgotten-export) The symbol "InternalPluginInfo" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:228:15 - (ae-forgotten-export) The symbol "SharedGlobalConfig" needs to be exported by the entry point index.d.ts
 
 ```
