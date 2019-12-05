@@ -23,8 +23,8 @@ import { createUrlControls, getStateFromUrl, IUrlControls, setStateToUrl } from 
 
 /**
  * Configuration of StateSync utility
- * State - the interface of the form of application provided state
- * StorageState - interface of the transformed State which will be serialised into storage
+ * State - interface for application provided state
+ * StorageState - interface for the transformed State which will be passed into SyncStrategy for serialising and persisting
  * (see toStorageMapper, fromStorageMapper)
  */
 export interface IStateSyncConfig<
@@ -33,21 +33,21 @@ export interface IStateSyncConfig<
 > {
   /**
    * Storage key to use for syncing,
-   * e.g. syncKey '_a' should be synced state to ?_a query param
+   * e.g. syncKey '_a' should sync state to ?_a query param
    */
   syncKey: string;
   /**
    * Store to keep in sync with storage, have to implement IStore interface
    * The idea is that ./store/create_store.ts should be used as a state container,
-   * but it is also possible to implement own container for advanced use cases
+   * but it is also possible to implement own custom container for advanced use cases
    */
   store: IStore<State>;
   /**
    * Sync strategy to use,
-   * Is responsible for where to put to / where to get from the stored state
-   * 2 strategies available now, which replicate what State (AppState, GlobalState) implemented:
+   * Sync strategy is responsible for serialising / deserialising and persisting / retrieving stored state
+   * 2 strategies available now out of the box, which replicate what State (AppState, GlobalState) implemented:
    *
-   * SyncStrategy.Url: the same as old persisting of expanded state in rison format to url
+   * SyncStrategy.Url: the same as old persisting of expanded state in rison format to the url
    * SyncStrategy.HashedUrl: the same as old persisting of hashed state using sessionStorage for storing expanded state
    *
    * Possible to provide own custom SyncStrategy by implementing ISyncStrategy
@@ -60,7 +60,7 @@ export interface IStateSyncConfig<
    * These mappers are needed to transform application state to a different shape we want to store
    * Some use cases:
    *
-   * 1. Want to pick some specific parts of State to store.
+   * 1. Pick some specific parts of the state to persist.
    *
    * Having state in shape of:
    * type State = {a: string, b: string};
@@ -68,7 +68,7 @@ export interface IStateSyncConfig<
    * Passing toStorageMapper as:
    * toStorageMapper: (state) => ({b: state.b})
    *
-   * Will result in storing only b
+   * Will result in storing only `b`
    *
    * 2. Original state keys are too long and we want to give them a shorter name to persist in the url/storage
    *
@@ -85,9 +85,9 @@ export interface IStateSyncConfig<
    *
    * 3. Use different sync strategies for different state slices
    *
-   * We could have multiple SyncStorageConfigs for a State container,
+   * We could have multiple SyncStorageConfigs for a state container,
    * These mappers allow to pick slices of state we want to use in this particular configuration.
-   * So we can setup a slice of state to be stored in the URL as expanded state
+   * For example: we can setup a slice of state to be stored in the URL as expanded state
    * and then different slice of the same state as HashedURL (just by using different strategies).
    *
    * 4. Backward compatibility
@@ -104,12 +104,10 @@ export interface IStateSyncConfig<
   fromStorageMapper?: (storageState: StorageState) => Partial<State>;
 
   /**
-   * On app start during StateSync util setup,
-   * Storage state and Applications's default state could be out of sync.
+   * During app bootstrap we could have default app state and data in storage to be out of sync,
+   * initialTruthSource indicates who's values to consider as source of truth
    *
-   * initialTruthSource indicates who's values consider as source of truth
-   *
-   * InitialTruthSource.State - Application state take priority over storage state
+   * InitialTruthSource.Store - Application state take priority over storage state
    * InitialTruthSource.Storage (default) - Storage state take priority over Application state
    * InitialTruthSource.None - skip initial syncing do nothing
    */
@@ -117,9 +115,9 @@ export interface IStateSyncConfig<
 }
 
 /**
- * To use StateSync util application have to pass state in the shape of following interface
- * The idea is that ./store/create_store.ts should be used as state container,
- * but it is also possible to implement own container for advanced use cases
+ * To use stateSync util application have to pass state container which implements IStore interface.
+ * The idea is that ./store/create_store.ts should be used as a state container by default,
+ * but it is also possible to implement own custom container for advanced use cases
  */
 export type BaseState = Record<string, unknown>;
 export interface IStore<State extends BaseState = BaseState> {
@@ -129,12 +127,10 @@ export interface IStore<State extends BaseState = BaseState> {
 }
 
 /**
- * On app start during initial setup,
- * Storage state and applications's default state could be out of sync.
+ * During app bootstrap we could have default app state and data in storage to be out of sync,
+ * initialTruthSource indicates who's values to consider as source of truth
  *
- * initialTruthSource indicates who's values consider as source of truth
- *
- * InitialTruthSource.State - Application state take priority over storage state
+ * InitialTruthSource.Store - Application state take priority over storage state
  * InitialTruthSource.Storage (default) - Storage state take priority over Application state
  * InitialTruthSource.None - skip initial syncing do nothing
  */
@@ -145,10 +141,10 @@ export enum InitialTruthSource {
 }
 
 /**
- * Sync strategy is responsible for where to put to / where to get from the stored state
- * 2 strategies available now, which replicate what State (AppState, GlobalState) implemented:
+ * Sync strategy is responsible for serialising / deserialising and persisting / retrieving stored state
+ * 2 strategies available now out of the box, which replicate what State (AppState, GlobalState) implemented:
  *
- * SyncStrategy.Url: the same as old persisting of expanded state in rison format to url
+ * SyncStrategy.Url: the same as old persisting of expanded state in rison format to the url
  * SyncStrategy.HashedUrl: the same as old persisting of hashed state using sessionStorage for storing expanded state
  *
  * Possible to provide own custom SyncStrategy by implementing ISyncStrategy
@@ -163,8 +159,8 @@ export enum SyncStrategy {
 /**
  * Any SyncStrategy have to implement ISyncStrategy interface
  * SyncStrategy is responsible for:
- * state serialisation / deserialization
- * persisting to and retrieving from storage
+ * * state serialisation / deserialization
+ * * persisting to and retrieving from storage
  *
  * For an example take a look at already implemented URL sync strategies
  */
