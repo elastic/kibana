@@ -15,6 +15,10 @@ describe('MostRecentError component', () => {
   let monitorDetails: MonitorDetails;
   let monitorError: MonitorError;
 
+  beforeAll(() => {
+    moment.prototype.fromNow = jest.fn(() => '5 days ago');
+  });
+
   beforeEach(() => {
     monitorError = {
       type: 'io',
@@ -22,15 +26,12 @@ describe('MostRecentError component', () => {
     };
     monitorDetails = {
       monitorId: 'bad-ssl',
-      timestamp: moment()
-        .subtract(2, 'day')
-        .toString(),
+      timestamp: '2019-11-30T01:57:37.792Z',
       error: monitorError,
     };
   });
 
   it('validates props with shallow render', () => {
-    monitorDetails.timestamp = '2019-11-30T01:57:37.792Z';
     const component = shallowWithIntl(
       <Router>
         <MostRecentError
