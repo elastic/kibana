@@ -7,8 +7,14 @@
 import React, { FC, Fragment, useEffect, useState } from 'react';
 import { merge } from 'rxjs';
 
-// @ts-ignore
-import { decorateQuery, luceneStringToDsl } from '@kbn/es-query';
+import {
+  // @ts-ignore
+  decorateQuery,
+  // @ts-ignore
+  luceneStringToDsl,
+  fromKueryExpression,
+  toElasticsearchQuery,
+} from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 
 import { FieldType } from 'ui/index_patterns';
@@ -187,12 +193,8 @@ export const Page: FC = () => {
       const qryString = query.query;
       let qry;
       if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
-        qry = {
-          query_string: {
-            query: qryString,
-            default_operator: 'AND',
-          },
-        };
+        const ast = fromKueryExpression(qryString);
+        qry = toElasticsearchQuery(ast, currentIndexPattern);
       } else {
         qry = luceneStringToDsl(qryString);
         decorateQuery(qry, kibanaConfig.get('query:queryString:options'));
