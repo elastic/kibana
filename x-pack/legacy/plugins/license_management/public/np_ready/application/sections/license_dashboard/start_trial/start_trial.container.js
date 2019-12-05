@@ -13,7 +13,6 @@ import { shouldShowStartTrial } from '../../../store/reducers/license_management
 const mapStateToProps = (state) => {
   return {
     shouldShowStartTrial: shouldShowStartTrial(state),
-    esBase: state.securityDocumentationLink,
   };
 };
 

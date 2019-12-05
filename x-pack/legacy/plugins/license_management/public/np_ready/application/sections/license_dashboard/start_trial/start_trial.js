@@ -132,7 +132,7 @@ export class StartTrial extends React.PureComponent {
                         authenticationTypeList: 'AD/LDAP, SAML, PKI, SAML/SSO',
                         securityDocumentationLinkText: (
                           <EuiLink
-                            href={getDocLinks().securityDocumentationLink || ''}
+                            href={getDocLinks().securityDocumentationLink}
                             target="_blank"
                           >
                             <FormattedMessage

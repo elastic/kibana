@@ -33,17 +33,19 @@ window.location.reload = () => {};
 let store: any = null;
 let component: any = null;
 const services = {
-  kbnUrl: {
-    change: jest.fn(),
-  },
-  autoLogout: () => {},
-  xPackInfo: {
-    refresh: jest.fn(),
-    get: () => {
-      return { license: { type: 'basic' } };
+  legacy: {
+    kbnUrl: {
+      change: jest.fn(),
     },
+    autoLogout: () => {},
+    xPackInfo: {
+      refresh: jest.fn(),
+      get: () => {
+        return { license: { type: 'basic' } };
+      },
+    },
+    refreshXpack: jest.fn(),
   },
-  refreshXpack: jest.fn(),
   http: httpServiceMock.createSetupContract(),
 };
 
@@ -58,8 +60,8 @@ describe('UploadLicense', () => {
   });
 
   afterEach(() => {
-    services.xPackInfo.refresh.mockReset();
-    services.kbnUrl.change.mockReset();
+    services.legacy.xPackInfo.refresh.mockReset();
+    services.legacy.kbnUrl.change.mockReset();
     jest.clearAllMocks();
   });
 
@@ -102,8 +104,8 @@ describe('UploadLicense', () => {
     services.http.put.mockResolvedValue(JSON.parse(UPLOAD_LICENSE_SUCCESS[2]));
     const validLicense = JSON.stringify({ license: { type: 'basic' } });
     await uploadLicense(validLicense)(store.dispatch, null, services);
-    expect(services.refreshXpack).toHaveBeenCalled();
-    expect(services.kbnUrl.change).toHaveBeenCalledWith(BASE_PATH);
+    expect(services.legacy.refreshXpack).toHaveBeenCalled();
+    expect(services.legacy.kbnUrl.change).toHaveBeenCalledWith(BASE_PATH);
   });
 
   it('should display error when ES returns error', async () => {

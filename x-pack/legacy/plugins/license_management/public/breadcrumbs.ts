@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
-// @ts-ignore
 import { BASE_PATH } from '../common/constants';
 
 export function getDashboardBreadcrumbs() {

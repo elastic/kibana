@@ -5,7 +5,6 @@
  */
 
 import { management } from 'ui/management';
-// @ts-ignore
 import { BASE_PATH, PLUGIN } from '../common/constants';
 
 management.getSection('elasticsearch').register('license_management', {

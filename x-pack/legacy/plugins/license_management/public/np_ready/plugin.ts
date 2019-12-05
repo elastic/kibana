@@ -25,7 +25,13 @@ export class LicenseManagementUIPlugin implements Plugin<void, void, any, any> {
       title: PLUGIN.TITLE,
       async mount({ core: { docLinks } }, { element }) {
         const { boot } = await import('./application');
-        return boot({ ...__LEGACY, toasts: notifications.toasts, docLinks, http, element });
+        return boot({
+          legacy: { ...__LEGACY },
+          toasts: notifications.toasts,
+          docLinks,
+          http,
+          element,
+        });
       },
     });
   }

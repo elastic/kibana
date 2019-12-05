@@ -19,7 +19,7 @@ export const cancelStartBasicLicense = createAction(
 export const startBasicLicense = (currentLicenseType, ack) => async (
   dispatch,
   getState,
-  { refreshXpack, toasts, http }
+  { legacy: { refreshXpack }, toasts, http }
 ) => {
   /*eslint camelcase: 0*/
   const { acknowledged, basic_was_started, error_message, acknowledge } = await startBasic(http, ack);

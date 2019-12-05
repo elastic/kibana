@@ -19,7 +19,7 @@ export const loadTrialStatus = () => async (dispatch, getState, { http }) => {
 export const startLicenseTrial = () => async (
   dispatch,
   getState,
-  { refreshXpack, toasts, http }
+  { legacy: { refreshXpack }, toasts, http }
 ) => {
   /*eslint camelcase: 0*/
   const { trial_was_started, error_message } = await startTrial(http);

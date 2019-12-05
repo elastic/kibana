@@ -20,11 +20,14 @@ import { setDocLinks } from './lib/docs_links';
 
 interface AppDependencies {
   element: HTMLElement;
-  I18nContext: any;
-  xpackInfo: any;
-  autoLogout: () => void;
-  kbnUrlWrapper: { change: (url: string) => void };
-  refreshXpack: () => void;
+
+  legacy: {
+    I18nContext: any;
+    xpackInfo: any;
+    autoLogout: () => void;
+    kbnUrlWrapper: { change: (url: string) => void };
+    refreshXpack: () => void;
+  };
 
   toasts: ToastsSetup;
   docLinks: DocLinksStart;
@@ -32,17 +35,8 @@ interface AppDependencies {
 }
 
 export const boot = (deps: AppDependencies) => {
-  const {
-    element,
-    I18nContext,
-    xpackInfo,
-    autoLogout,
-    kbnUrlWrapper,
-    refreshXpack,
-    toasts,
-    docLinks,
-    http,
-  } = deps;
+  const { element, legacy, toasts, docLinks, http } = deps;
+  const { I18nContext, ...restLegacy } = legacy;
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
   const esBase = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}`;
   const securityDocumentationLink = `${esBase}/security-settings.html`;
@@ -52,13 +46,15 @@ export const boot = (deps: AppDependencies) => {
   setDocLinks({ securityDocumentationLink });
 
   const services = {
-    autoLogout,
-    xPackInfo: xpackInfo,
-    kbnUrl: kbnUrlWrapper,
-    refreshXpack,
+    legacy: {
+      autoLogout: restLegacy.autoLogout,
+      kbnUrl: restLegacy.kbnUrlWrapper,
+      refreshXpack: restLegacy.refreshXpack,
+    },
     toasts,
     http,
   };
+
   const store = licenseManagementStore(initialState, services);
   render(
     <I18nContext>

@@ -17,7 +17,19 @@ const genericUploadError = i18n.translate('xpack.licenseMgmt.uploadLicense.gener
   defaultMessage: 'Error encountered uploading license:'
 });
 
-const dispatchFromResponse = async (response, dispatch, currentLicenseType, newLicenseType, { xPackInfo, kbnUrl, refreshXpack }) => {
+const dispatchFromResponse = async (
+  response,
+  dispatch,
+  currentLicenseType,
+  newLicenseType,
+  {
+    legacy: {
+      xPackInfo,
+      kbnUrl,
+      refreshXpack,
+    },
+  },
+) => {
   const { error, acknowledged, license_status: licenseStatus, acknowledge } = response;
   if (error) {
     dispatch(uploadLicenseStatus({}));
