@@ -24,7 +24,7 @@ You'll provide the web developer with the access and privileges to get the job d
 
 To complete this tutorial, you'll need the following:
 
-*  **Administrative privileges**: You must have a role that grants privileges to create a space, role, and user. See the {ref}/built-in-roles.html[built-in] roles.
+*  **Administrative privileges**: You must have a role that grants privileges to create a space, role, and user. This is any role which grants the `manage_security` cluster privilege. By default, the `superuser` role provides this access. See the {ref}/built-in-roles.html[built-in] roles.  
 *  **A space**: In this tutorial, use `Dev Mortgage` as the space 
 name. See <<spaces-managing, spaces management>> for
 details on creating a space.
