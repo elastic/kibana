@@ -47,5 +47,11 @@ export const getElementPositionAndAttributes = async (
     args: [layout.selectors.screenshot, { title: 'data-title', description: 'data-description' }],
   });
 
+  if (elementsPositionAndAttributes.length === 0) {
+    throw new Error(
+      `No shared items containers were found on the page! Reporting requires an element with the '${layout.selectors.screenshot}' attributes on the page.`
+    );
+  }
+
   return elementsPositionAndAttributes;
 };
