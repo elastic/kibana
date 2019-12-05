@@ -66,41 +66,5 @@ export default function () {
     },
     services,
 
-    security: {
-      roles: [
-        {
-          name: 'data_reader',
-          definition: {
-            'cluster': [ ],
-            'indices': [
-              {
-                'names': [
-                  'logstash*'
-                ],
-                'privileges': [
-                  'view_index_metadata',
-                  'read',
-                  'read_cross_cluster'
-                ],
-                'field_security': {
-                  'grant': [
-                    '*'
-                  ],
-                  'except': [ ]
-                },
-                'allow_restricted_indices': false
-              }
-            ],
-            'applications': [ ],
-            'run_as': [ ],
-            'metadata': { },
-            'transient_metadata': {
-              'enabled': true
-            }
-          }
-
-        }
-      ]
-    }
   };
 }

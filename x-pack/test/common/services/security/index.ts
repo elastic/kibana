@@ -23,23 +23,25 @@ export async function SecurityServiceProvider({ getService }: GenericFtrProvider
   const log = getService('log');
   const config = getService('config');
   const url = formatUrl(config.get('servers.kibana'));
-
   const secService = await new SecurityService(url, log);
   try {
-  //delete the test_user if present (will it error if the user doesn't exist?)
+    // delete the test_user if present (will it error if the user doesn't exist?)
     await secService.user.delete('test_user');
-  } catch (exception){}
-   console.log(config.get('security.roles'));
-   console.log(JSON.stringify(config.get('security.roles[0]')));
+  } catch (exception){
+    log('no test user to delete');
+  }
 
-  //create the defined roles (need to map array to create roles)
-  // await secService.role.create(config.get('security.roles[0].name'), config.get('security.roles[0].definition'));
-  // //create test_user with username and pwd
-  // await secServices.user.create('test_user', {
-  //   password: 'changeme',
-  //   roles: ['data_reader', 'kibana_user'],
-  //   full_name: 'test user',
-  // });
+  // create the defined roles (need to map array to create roles)
+  await secService.role.create(
+    config.get('security.roles')[0].name,
+    config.get('security.roles')[0].definition
+  );
+  // create test_user with username and pwd
+  await secService.user.create('test_user', {
+    password: 'changeme',
+    roles: ['data_reader', 'kibana_user'],
+    full_name: 'test user',
+  });
 
   return secService;
 }
