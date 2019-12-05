@@ -54,8 +54,9 @@ export async function checkForDuplicateTitle(
     savedObject.title
   );
 
-  if (!duplicate) return true;
-  if (duplicate.id === savedObject.id) return true;
+  if (!duplicate || duplicate.id === savedObject.id) {
+    return true;
+  }
 
   if (onTitleDuplicate) {
     onTitleDuplicate();

@@ -37,7 +37,7 @@ export async function applyESResp(
   const injectReferences = config.injectReferences;
   const hydrateIndexPattern = savedObject.hydrateIndexPattern!;
 
-  if (resp.found != null && !resp.found) {
+  if (!resp.found) {
     throw new SavedObjectNotFound(esType, savedObject.id || '');
   }
 
