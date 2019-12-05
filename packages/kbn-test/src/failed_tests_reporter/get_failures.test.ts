@@ -51,6 +51,17 @@ it('discovers failures in ftr report', async () => {
         "name": "maps app \\"after all\\" hook",
         "time": "0.179",
       },
+      Object {
+        "classname": "Firefox XPack UI Functional Tests.x-pack/test/functional/apps/machine_learning/anomaly_detection/saved_search_job·ts",
+        "failure": "{ NoSuchSessionError: Tried to run command without establishing a connection
+        at Object.throwDecodedError (/dev/shm/workspace/kibana/node_modules/selenium-webdriver/lib/error.js:550:15)
+        at parseHttpResponse (/dev/shm/workspace/kibana/node_modules/selenium-webdriver/lib/http.js:563:13)
+        at Executor.execute (/dev/shm/workspace/kibana/node_modules/selenium-webdriver/lib/http.js:489:26)
+        at process._tickCallback (internal/process/next_tick.js:68:7) name: 'NoSuchSessionError', remoteStacktrace: '' }",
+        "likelyIrrelevant": true,
+        "name": "machine learning anomaly detection saved search  with lucene query job creation opens the advanced section",
+        "time": "6.040",
+      },
     ]
   `);
 });
