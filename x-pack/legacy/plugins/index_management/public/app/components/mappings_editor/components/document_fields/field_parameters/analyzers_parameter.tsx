@@ -68,12 +68,13 @@ export const AnalyzersParameter = ({ id, field, withSearchQuoteAnalyzer = false 
           const useSameAnalyzerForSearch = data[useSameAnalyzerForSearchId];
           return useSameAnalyzerForSearch ? null : (
             <>
-              <EuiSpacer />
+              <EuiSpacer size="m" />
               <AnalyzerParameter
                 path="search_analyzer"
-                defaultValue={field.source.searchAnalyzer}
+                defaultValue={field.source.search_analyzer}
                 config={getFieldConfig('search_analyzer')}
               />
+              <EuiSpacer size="s" />
             </>
           );
         }}
@@ -81,7 +82,7 @@ export const AnalyzersParameter = ({ id, field, withSearchQuoteAnalyzer = false 
 
       {withSearchQuoteAnalyzer && (
         <>
-          <EuiSpacer />
+          <EuiSpacer size="m" />
           <AnalyzerParameter
             path="search_quote_analyzer"
             defaultValue={field.source.search_quote_analyzer}

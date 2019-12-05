@@ -60,10 +60,6 @@ export const TokenCountType = ({ field }: Props) => {
           {/* null_value */}
           <NullValueParameter
             defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
-          />
-
-          <NullValueParameter
-            defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
             description={i18n.translate(
               'xpack.idxMgmt.mappingsEditor.tokenCount.nullValueFieldDescription',
               {
