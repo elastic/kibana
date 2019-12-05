@@ -329,6 +329,8 @@ export class VectorStyle extends AbstractStyle {
               min,
               max,
               delta: max - min,
+              isMinOutsideStdRange: stats.min < stdLowerBounds,
+              isMaxOutsideStdRange: stats.max > stdUpperBounds,
             };
           }
         }

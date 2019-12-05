@@ -72,12 +72,12 @@ export class StylePropertyLegendRow extends Component {
     return !this.props.style.isDynamic() || !this.props.style.isComplete() || !this.props.style.getField().getName();
   }
 
-  _formatValue = (value, prefix) => {
+  _formatValue = value => {
     if (!this.state.hasLoadedFieldFormatter || !this._fieldValueFormatter || value === EMPTY_VALUE) {
       return value;
     }
 
-    return this.props.style.isFieldMetaEnabled() ? `${prefix} ${this._fieldValueFormatter(value)}` : this._fieldValueFormatter(value);
+    return this._fieldValueFormatter(value);
   }
 
   render() {
@@ -87,11 +87,18 @@ export class StylePropertyLegendRow extends Component {
     }
 
     const header = style.renderHeader();
+
+    const min = this._formatValue(_.get(range, 'min', EMPTY_VALUE));
+    const minLabel = this.props.style.isFieldMetaEnabled() && range && range.isMinOutsideStdRange ? `< ${min}` : min;
+
+    const max = this._formatValue(_.get(range, 'max', EMPTY_VALUE));
+    const maxLabel = this.props.style.isFieldMetaEnabled() && range && range.isMaxOutsideStdRange ? `> ${max}` : max;
+
     return (
       <StyleLegendRow
         header={header}
-        minLabel={this._formatValue(_.get(range, 'min', EMPTY_VALUE), '<')}
-        maxLabel={this._formatValue(_.get(range, 'max', EMPTY_VALUE), '>')}
+        minLabel={minLabel}
+        maxLabel={maxLabel}
         propertyLabel={getVectorStyleLabel(style.getStyleName())}
         fieldLabel={this.state.label}
       />
