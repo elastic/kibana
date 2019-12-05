@@ -37,7 +37,7 @@ export function checkLicense(xpackLicenseInfo) {
     });
   }
 
-  if (xpackLicenseInfo.license.isOneOf([ 'trial', 'platinum' ])) {
+  if (xpackLicenseInfo.license.isOneOf([ 'trial', 'platinum', 'enterprise' ])) {
     return {
       showAppLink: true,
       enableAppLink: isLicenseActive,

@@ -69,7 +69,7 @@ export class SecurityLicenseService {
             };
           }
 
-          const isLicensePlatinumOrTrial = rawLicense.isOneOf(['platinum', 'trial']);
+          const isLicensePlatinumOrTrial = rawLicense.isOneOf(['platinum', 'enterprise', 'trial']);
           return {
             showLogin: true,
             allowLogin: true,

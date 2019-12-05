@@ -17,6 +17,6 @@ export function register(registry: ExportTypesRegistry) {
     jobContentExtension: 'csv',
     createJobFactory,
     executeJobFactory,
-    validLicenses: ['trial', 'basic', 'standard', 'gold', 'platinum'],
+    validLicenses: ['trial', 'basic', 'standard', 'gold', 'platinum', 'enterprise'],
   });
 }

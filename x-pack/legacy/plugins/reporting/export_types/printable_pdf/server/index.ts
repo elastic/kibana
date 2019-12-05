@@ -18,6 +18,6 @@ export function register(registry: ExportTypesRegistry) {
     jobContentExtension: 'pdf',
     createJobFactory,
     executeJobFactory,
-    validLicenses: ['trial', 'standard', 'gold', 'platinum'],
+    validLicenses: ['trial', 'standard', 'gold', 'platinum', 'enterprise'],
   });
 }

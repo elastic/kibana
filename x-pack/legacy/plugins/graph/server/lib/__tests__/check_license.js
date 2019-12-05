@@ -66,9 +66,9 @@ describe('check_license: ', function () {
       set(mockLicenseInfo, 'feature', sinon.stub().withArgs('graph').returns({ isEnabled: () => true }));
     });
 
-    describe('& license is trial or platinum', () => {
+    describe('& license is >= platinum', () => {
       beforeEach(() => {
-        set(mockLicenseInfo, 'license.isOneOf', sinon.stub().withArgs([ 'trial', 'platinum' ]).returns(true));
+        set(mockLicenseInfo, 'license.isOneOf', sinon.stub().withArgs([ 'trial', 'platinum', 'enterprise' ]).returns(true));
         set(mockLicenseInfo, 'license.getType', () => 'trial');
       });
 
@@ -104,7 +104,7 @@ describe('check_license: ', function () {
 
     });
 
-    describe('& license is neither trial nor platinum', () => {
+    describe('& license is < platinum', () => {
       beforeEach(() => {
         set(mockLicenseInfo, 'license.isOneOf', () => false);
         set(mockLicenseInfo, 'license.getType', () => 'basic');

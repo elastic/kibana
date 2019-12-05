@@ -24,7 +24,8 @@ export function checkLicense(xpackLicenseInfo) {
     'trial',
     'standard',
     'gold',
-    'platinum'
+    'platinum',
+    'enterprise'
   ];
 
   const isLicenseModeValid = xpackLicenseInfo.license.isOneOf(VALID_LICENSE_MODES);
