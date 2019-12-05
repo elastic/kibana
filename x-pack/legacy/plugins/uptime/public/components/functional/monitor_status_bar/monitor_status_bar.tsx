@@ -28,7 +28,7 @@ interface MonitorStatusBarProps {
 type Props = MonitorStatusBarProps & UptimeGraphQLQueryProps<MonitorStatusBarQueryResult>;
 
 export const MonitorStatusBarComponent = ({ data, monitorId }: Props) => {
-  if (data && data.monitorStatus && data.monitorStatus.length) {
+  if (data?.monitorStatus?.length) {
     const { monitor, timestamp, tls } = data.monitorStatus[0];
     const duration: number | undefined = get(monitor, 'duration.us', undefined);
     const status = get<'up' | 'down'>(monitor, 'status', 'down');
@@ -43,7 +43,7 @@ export const MonitorStatusBarComponent = ({ data, monitorId }: Props) => {
               color={status === 'up' ? 'success' : 'danger'}
               style={{ lineHeight: 'inherit' }}
             >
-              {status === 'up' ? labels.downLabel : labels.upLabel}
+              {status === 'up' ? labels.upLabel : labels.downLabel}
             </EuiHealth>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
