@@ -18,6 +18,8 @@
  */
 
 import { createElement } from 'react';
+import { Subject } from 'rxjs';
+import { bufferCount, skip, takeUntil } from 'rxjs/operators';
 import { shallow } from 'enzyme';
 
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
@@ -382,6 +384,58 @@ describe('#start()', () => {
 
       navigateToApp('myTestApp');
       expect(setupDeps.redirectTo).toHaveBeenCalledWith('/test/app/myTestApp');
+    });
+
+    it('updates currentApp$ after mounting', async () => {
+      service.setup(setupDeps);
+
+      const { currentAppId$, navigateToApp } = await service.start(startDeps);
+      const stop$ = new Subject();
+      const promise = currentAppId$.pipe(skip(1), bufferCount(4), takeUntil(stop$)).toPromise();
+
+      await navigateToApp('alpha');
+      await navigateToApp('beta');
+      await navigateToApp('gamma');
+      await navigateToApp('delta');
+      stop$.next();
+
+      const appIds = await promise;
+
+      expect(appIds).toMatchInlineSnapshot(`
+        Array [
+          "alpha",
+          "beta",
+          "gamma",
+          "delta",
+        ]
+      `);
+    });
+
+    it('sets window.location.href when navigating to legacy apps', async () => {
+      setupDeps.http = httpServiceMock.createSetupContract({ basePath: '/test' });
+      setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(true);
+      setupDeps.redirectTo = jest.fn();
+      service.setup(setupDeps);
+
+      const { navigateToApp } = await service.start(startDeps);
+
+      await navigateToApp('alpha');
+      expect(setupDeps.redirectTo).toHaveBeenCalledWith('/test/app/alpha');
+    });
+
+    it('handles legacy apps with subapps', async () => {
+      setupDeps.http = httpServiceMock.createSetupContract({ basePath: '/test' });
+      setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(true);
+      setupDeps.redirectTo = jest.fn();
+
+      const { registerLegacyApp } = service.setup(setupDeps);
+
+      registerLegacyApp({ id: 'baseApp:legacyApp1' } as any);
+
+      const { navigateToApp } = await service.start(startDeps);
+
+      await navigateToApp('baseApp:legacyApp1');
+      expect(setupDeps.redirectTo).toHaveBeenCalledWith('/test/app/baseApp');
     });
   });
 });
