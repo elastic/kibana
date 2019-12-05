@@ -10,7 +10,10 @@ import { HttpServiceBase } from '../../../../../../../src/core/public';
 
 export const storeFactory = ({ httpServiceBase }: { httpServiceBase: HttpServiceBase }) => {
   interface SomethingThatMightHaveReduxDevTools {
-    __REDUX_DEVTOOLS_EXTENSION__?: (options?: { name?: string }) => StoreEnhancer;
+    __REDUX_DEVTOOLS_EXTENSION__?: (options?: {
+      name?: string;
+      actionsBlacklist: readonly string[];
+    }) => StoreEnhancer;
   }
   const windowWhichMightHaveReduxDevTools = window as SomethingThatMightHaveReduxDevTools;
   const store = createStore(
@@ -18,6 +21,7 @@ export const storeFactory = ({ httpServiceBase }: { httpServiceBase: HttpService
     windowWhichMightHaveReduxDevTools.__REDUX_DEVTOOLS_EXTENSION__ &&
       windowWhichMightHaveReduxDevTools.__REDUX_DEVTOOLS_EXTENSION__({
         name: 'Resolver',
+        actionsBlacklist: ['userFocusedOnWorldCoordinates'],
       })
   );
   return {

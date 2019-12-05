@@ -46,6 +46,7 @@ interface UserCanceledPanning {
   readonly type: 'userCanceledPanning';
 }
 
+// This action is blacklisted in redux dev tools
 interface UserFocusedOnWorldCoordinates {
   readonly type: 'userFocusedOnWorldCoordinates';
   // client X and Y of mouse event, adjusted for position of resolver on the page

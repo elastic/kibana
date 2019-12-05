@@ -116,6 +116,13 @@ const Diagnostic = styled(
     );
 
     useEffect(() => {
+      window.addEventListener('mouseup', handleMouseUp, { passive: true });
+      return () => {
+        window.removeEventListener('mousemove', handleMouseUp);
+      };
+    }, [handleMouseUp]);
+
+    useEffect(() => {
       window.addEventListener('mousemove', handleMouseMove, { passive: true });
       return () => {
         window.removeEventListener('mousemove', handleMouseMove);
@@ -145,7 +152,6 @@ const Diagnostic = styled(
         ref={clientRectCallbackFunction}
         onWheel={handleWheel}
         onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
       >
         {dotPositions.map((worldPosition, index) => (
           <DiagnosticDot key={index} worldPosition={worldPosition} />
