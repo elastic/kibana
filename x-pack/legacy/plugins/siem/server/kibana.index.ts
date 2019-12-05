@@ -66,7 +66,14 @@ export const initServerWithKibana = (
       all: {
         api: ['siem'],
         savedObject: {
-          all: [noteSavedObjectType, pinnedEventSavedObjectType, timelineSavedObjectType],
+          all: [
+            'alert',
+            'action',
+            'action_task_params',
+            noteSavedObjectType,
+            pinnedEventSavedObjectType,
+            timelineSavedObjectType,
+          ],
           read: ['config'],
         },
         ui: ['show'],

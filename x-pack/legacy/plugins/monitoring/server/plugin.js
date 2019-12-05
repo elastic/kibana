@@ -72,7 +72,11 @@ export class Plugin {
       reserved: {
         privilege: {
           savedObject: {
-            all: [],
+            all: [
+              'alert',
+              'action',
+              'action_task_params',
+            ],
             read: []
           },
           ui: [],
