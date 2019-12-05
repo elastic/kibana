@@ -16,7 +16,7 @@ export interface EndpointsListState {
         value: number;
       };
     };
-    aggregations: {
+    aggregations?: {
       total: {
         value: number;
       };
