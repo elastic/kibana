@@ -18,4 +18,4 @@ Next, run the CLI in `--no-github-update` mode so that it doesn't actually commu
 node scripts/report_failed_tests.js --verbose --no-github-update --no-report-update
 ```
 
-Unless you specify the `GITHUB_TOKEN` environment variable, requests to read existing issues will use anonymous access, which is limited to 60 requests per hour.
+Unless you specify the `GITHUB_TOKEN` environment variable requests to read existing issues will use anonymous access which is limited to 60 requests per hour.
