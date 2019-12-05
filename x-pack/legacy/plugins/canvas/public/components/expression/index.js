@@ -55,17 +55,6 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 };
 
 const expressionLifecycle = lifecycle({
-  componentDidUpdate(prevProps) {
-    const prevExpression = prevProps.expression;
-
-    const { expression, formState, setFormState } = this.props;
-    if (expression !== prevExpression && expression !== formState.expression) {
-      setFormState({
-        expression,
-        dirty: false,
-      });
-    }
-  },
   componentDidMount() {
     const { functionDefinitionsPromise, setFunctionDefinitions } = this.props;
     functionDefinitionsPromise.then(defs => setFunctionDefinitions(defs));
