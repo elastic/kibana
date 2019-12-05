@@ -135,6 +135,7 @@ async function combineFieldsAndAggs(
   rollupFields: RollupFields
 ): Promise<NewJobCaps> {
   const keywordFields = getKeywordFields(fields);
+  const textFields = getTextFields(fields);
   const numericalFields = getNumericalFields(fields);
   const ipFields = getIpFields(fields);
   const geoFields = getGeoFields(fields);
@@ -148,6 +149,10 @@ async function combineFieldsAndAggs(
         case ML_JOB_AGGREGATION.LAT_LONG:
           geoFields.forEach(f => mix(f, a));
           break;
+        case ML_JOB_AGGREGATION.INFO_CONTENT:
+        case ML_JOB_AGGREGATION.HIGH_INFO_CONTENT:
+        case ML_JOB_AGGREGATION.LOW_INFO_CONTENT:
+          textFields.forEach(f => mix(f, a));
         case ML_JOB_AGGREGATION.DISTINCT_COUNT:
         case ML_JOB_AGGREGATION.HIGH_DISTINCT_COUNT:
         case ML_JOB_AGGREGATION.LOW_DISTINCT_COUNT:
@@ -218,6 +223,10 @@ function combineAllRollupFields(rollupConfigs: RollupJob[]): RollupFields {
 
 function getKeywordFields(fields: Field[]): Field[] {
   return fields.filter(f => f.type === ES_FIELD_TYPES.KEYWORD);
+}
+
+function getTextFields(fields: Field[]): Field[] {
+  return fields.filter(f => f.type === ES_FIELD_TYPES.TEXT);
 }
 
 function getIpFields(fields: Field[]): Field[] {
