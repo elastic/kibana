@@ -154,7 +154,7 @@ const StatefulEventsViewerComponent = React.memo<Props>(
       <div onMouseEnter={handleOnMouseEnter} onMouseLeave={handleOnMouseLeave}>
         <EventsViewer
           browserFields={browserFields ?? {}}
-          columns={defaultModel.columns}
+          columns={columns}
           id={id}
           dataProviders={dataProviders!}
           end={end}
