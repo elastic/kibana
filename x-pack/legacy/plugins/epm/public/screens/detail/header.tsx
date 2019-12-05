@@ -13,7 +13,7 @@ import { Version } from '../../components/version';
 import { useBreadcrumbs, useLinks } from '../../hooks';
 import { InstallationButton } from './installation_button';
 import { CenterColumn, LeftColumn, RightColumn } from './layout';
-import { NavButtonBack } from './nav_button_back';
+import { NavButtonBack } from '../../components/nav_button_back';
 
 const FullWidthNavRow = styled(EuiPage)`
   /* no left padding so link is against column left edge  */
@@ -39,7 +39,7 @@ export function Header(props: HeaderProps) {
   return (
     <Fragment>
       <FullWidthNavRow>
-        <NavButtonBack />
+        <NavButtonBack href={toListView()} text="Browse Packages" />
       </FullWidthNavRow>
       <EuiFlexGroup>
         {iconType ? (

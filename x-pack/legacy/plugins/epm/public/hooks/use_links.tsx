@@ -5,10 +5,10 @@
  */
 
 import { generatePath } from 'react-router-dom';
-import { useCore } from '.';
 import { PLUGIN } from '../../common/constants';
 import { getFilePath, getInfoPath } from '../../common/routes';
 import { patterns } from '../routes';
+import { useCore } from '.';
 import { DetailViewPanelName } from '..';
 
 // TODO: get this from server/packages/handlers.ts (move elsewhere?)
@@ -53,5 +53,13 @@ export function useLinks() {
       const params = Object.assign({ pkgkey: `${name}-${version}` }, panel ? { panel } : {});
       return appRoot(generatePath(patterns.DETAIL_VIEW, params));
     },
+    toDetailViewRelative: ({ name, version, panel }: DetailParams) => {
+      // panel is optional, but `generatePath` won't accept `path: undefined`
+      // so use this to pass `{ pkgkey }` or `{ pkgkey, panel }`
+      const params = Object.assign({ pkgkey: `${name}-${version}` }, panel ? { panel } : {});
+      return generatePath(patterns.DETAIL_VIEW, params);
+    },
+    toAddDataSourceView: ({ name, version }: { name: string; version: string }) =>
+      appRoot(generatePath(patterns.ADD_DATA_SOURCE_VIEW, { pkgkey: `${name}-${version}` })),
   };
 }
