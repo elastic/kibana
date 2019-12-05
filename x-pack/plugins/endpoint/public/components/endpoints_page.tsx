@@ -154,7 +154,6 @@ export const EndpointsPage = () => {
             pagination={paginationSetup}
             sorting={sortingSetup}
             onChange={handleTableChange}
-            data-test-subj="endpointsTable"
           />
         </EuiPageContentBody>
       </EuiPageContent>
