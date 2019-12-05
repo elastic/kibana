@@ -111,13 +111,11 @@ export function maps(kibana) {
 
       // legacy dependencies
       const __LEGACY = {
-        pluginRef: this,
         config: server.config,
         mapConfig() { return server.config().get('map'); },
         route: server.route.bind(server),
         plugins: {
           elasticsearch: server.plugins.elasticsearch,
-          xpackMainPlugin: server.plugins.xpack_main
         },
         savedObjects: {
           getSavedObjectsRepository: server.savedObjects.getSavedObjectsRepository
