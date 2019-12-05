@@ -20,9 +20,8 @@
 import Joi from 'joi';
 import os from 'os';
 import { join } from 'path';
-import {
-  getData
-} from '../path';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getDataPath } from '../../../core/server/path'; // Still used by optimize config schema
 import {
   DEFAULT_CSP_RULES,
   DEFAULT_CSP_STRICT,
@@ -156,9 +155,7 @@ export default () => Joi.object({
     initialize: Joi.boolean().default(true)
   }).default(),
 
-  path: Joi.object({
-    data: Joi.string().default(getData())
-  }).default(),
+  path: HANDLED_IN_NEW_PLATFORM,
 
   stats: Joi.object({
     maximumWaitTimeForAllCollectorsInS: Joi.number().default(60)
@@ -167,7 +164,7 @@ export default () => Joi.object({
   optimize: Joi.object({
     enabled: Joi.boolean().default(true),
     bundleFilter: Joi.string().default('!tests'),
-    bundleDir: Joi.string().default(join(getData(), 'optimize')),
+    bundleDir: Joi.string().default(join(getDataPath(), 'optimize')),
     viewCaching: Joi.boolean().default(Joi.ref('$prod')),
     watch: Joi.boolean().default(false),
     watchPort: Joi.number().default(5602),
