@@ -11,11 +11,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'endpoint']);
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
+  const esArchiver = getService('esArchiver');
 
   describe('Endpoint Home Page', function() {
     this.tags(['skipCloud']);
     before(async () => {
+      esArchiver.load('endpoint/endpoints');
       await pageObjects.common.navigateToApp('endpoint');
+    });
+
+    after(async () => {
+      await esArchiver.unload('endpoint/endpoints');
     });
 
     it('Loads the app', async () => {
