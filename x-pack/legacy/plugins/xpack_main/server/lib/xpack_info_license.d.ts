@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-type LicenseType = 'oss' | 'basic' | 'trial' | 'standard' | 'basic' | 'gold' | 'platinum';
+type LicenseType = 'oss' | 'basic' | 'trial' | 'standard' | 'gold' | 'platinum' | 'enterprise';
 
 export declare class XPackInfoLicense {
   constructor(getRawLicense: () => any);
