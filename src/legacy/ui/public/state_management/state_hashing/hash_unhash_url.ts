@@ -22,7 +22,7 @@ import rison, { RisonObject } from 'rison-node';
 import { stringify as stringifyQueryString } from 'querystring';
 import encodeUriQuery from 'encode-uri-query';
 import { format as formatUrl, parse as parseUrl } from 'url';
-import { HashedItemStoreSingleton } from '../state_storage';
+import { hashedItemStore } from '../../../../../plugins/kibana_utils/public';
 import { createStateHash, isStateHash } from './state_hash';
 
 export type IParsedUrlQuery = Record<string, any>;
@@ -95,7 +95,7 @@ function createQueryReplacer(
 // src/legacy/ui/public/state_management/state_storage/hashed_item_store.ts
 // maybe to become simplified stateless version
 export function retrieveState(stateHash: string): RisonObject {
-  const json = HashedItemStoreSingleton.getItem(stateHash);
+  const json = hashedItemStore.getItem(stateHash);
   const throwUnableToRestoreUrlError = () => {
     throw new Error(
       i18n.translate('common.ui.stateManagement.unableToRestoreUrlErrorMessage', {
@@ -121,7 +121,7 @@ export function persistState(state: RisonObject): string {
   const json = JSON.stringify(state);
   const hash = createStateHash(json);
 
-  const isItemSet = HashedItemStoreSingleton.setItem(hash, json);
+  const isItemSet = hashedItemStore.setItem(hash, json);
   if (isItemSet) return hash;
   // If we ran out of space trying to persist the state, notify the user.
   const message = i18n.translate(
