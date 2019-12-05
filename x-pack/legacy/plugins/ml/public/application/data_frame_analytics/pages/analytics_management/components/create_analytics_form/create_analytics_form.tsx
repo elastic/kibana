@@ -54,6 +54,8 @@ const NUMERICAL_FIELD_TYPES = new Set([
   'scaled_float',
 ]);
 
+const SUPPORTED_CLASSIFICATION_FIELD_TYPES = new Set(['boolean', 'text', 'keyword', 'ip']);
+
 // List of system fields we want to ignore for the numeric field check.
 const OMIT_FIELDS: string[] = ['_source', '_type', '_index', '_id', '_version', '_score'];
 
@@ -112,6 +114,18 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     }
   };
 
+  // Regression supports numeric fields. Classification supports numeric, boolean, text, keyword and ip.
+  const shouldAddFieldOption = (field: Field) => {
+    if (field.id === EVENT_RATE_FIELD_ID) return false;
+
+    const isNumerical = NUMERICAL_FIELD_TYPES.has(field.type);
+    const isSupportedByClassification =
+      isNumerical || SUPPORTED_CLASSIFICATION_FIELD_TYPES.has(field.type);
+
+    if (jobType === JOB_TYPES.REGRESSION) return isNumerical;
+    if (jobType === JOB_TYPES.CLASSIFICATION) return isNumerical || isSupportedByClassification;
+  };
+
   const debouncedMmlEstimateLoad = debounce(async () => {
     try {
       const jobConfig = getJobConfigFromFormState(form);
@@ -146,12 +160,12 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
 
       if (indexPattern !== undefined) {
         await newJobCapsService.initializeFromIndexPattern(indexPattern);
-        // Get fields and filter for numeric
+        // Get fields and filter for supported types for job type
         const { fields } = newJobCapsService;
         const options: Array<{ label: string }> = [];
 
         fields.forEach((field: Field) => {
-          if (NUMERICAL_FIELD_TYPES.has(field.type) && field.id !== EVENT_RATE_FIELD_ID) {
+          if (shouldAddFieldOption(field)) {
             options.push({ label: field.id });
           }
         });
@@ -196,7 +210,10 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
   };
 
   useEffect(() => {
-    if (jobType === JOB_TYPES.REGRESSION && sourceIndexNameEmpty === false) {
+    if (
+      (jobType === JOB_TYPES.REGRESSION || jobType === JOB_TYPES.CLASSIFICATION) &&
+      sourceIndexNameEmpty === false
+    ) {
       loadDependentFieldOptions();
     } else if (jobType === JOB_TYPES.OUTLIER_DETECTION && sourceIndexNameEmpty === false) {
       validateSourceIndexFields();
@@ -206,11 +223,11 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
   useEffect(() => {
     const hasBasicRequiredFields =
       jobType !== undefined && sourceIndex !== '' && sourceIndexNameValid === true;
+    const jobTypesWithDepVar =
+      jobType === JOB_TYPES.REGRESSION || jobType === JOB_TYPES.CLASSIFICATION;
 
     const hasRequiredAnalysisFields =
-      (jobType === JOB_TYPES.REGRESSION &&
-        dependentVariable !== '' &&
-        trainingPercent !== undefined) ||
+      (jobTypesWithDepVar && dependentVariable !== '' && trainingPercent !== undefined) ||
       jobType === JOB_TYPES.OUTLIER_DETECTION;
 
     if (hasBasicRequiredFields && hasRequiredAnalysisFields) {
@@ -248,6 +265,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               )}
               checked={isAdvancedEditorEnabled}
               onChange={actions.switchToAdvancedEditor}
+              data-test-subj="mlAnalyticsCreateJobFlyoutAdvancedEditorSwitch"
             />
           </EuiFormRow>
           <EuiFormRow
@@ -301,6 +319,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                 }
               )}
               isInvalid={(!jobIdEmpty && !jobIdValid) || jobIdExists}
+              data-test-subj="mlAnalyticsCreateJobFlyoutJobIdInput"
             />
           </EuiFormRow>
           <EuiFormRow
@@ -338,6 +357,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                     setFormState({ sourceIndex: selectedOptions[0].label || '' })
                   }
                   isClearable={false}
+                  data-test-subj="mlAnalyticsCreateJobFlyoutSourceIndexSelect"
                 />
               )}
               {isJobCreated && (
@@ -404,9 +424,10 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                 }
               )}
               isInvalid={!destinationIndexNameEmpty && !destinationIndexNameValid}
+              data-test-subj="mlAnalyticsCreateJobFlyoutDestinationIndexInput"
             />
           </EuiFormRow>
-          {jobType === JOB_TYPES.REGRESSION && (
+          {(jobType === JOB_TYPES.REGRESSION || jobType === JOB_TYPES.CLASSIFICATION) && (
             <Fragment>
               <EuiFormRow
                 label={i18n.translate(
@@ -463,6 +484,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                   }
                   isClearable={false}
                   isInvalid={dependentVariable === ''}
+                  data-test-subj="mlAnalyticsCreateJobFlyoutDependentVariableSelect"
                 />
               </EuiFormRow>
               <EuiFormRow
@@ -480,6 +502,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                   value={trainingPercent}
                   // @ts-ignore Property 'value' does not exist on type 'EventTarget' | (EventTarget & HTMLInputElement)
                   onChange={e => setFormState({ trainingPercent: e.target.value })}
+                  data-test-subj="mlAnalyticsCreateJobFlyoutTrainingPercentSlider"
                 />
               </EuiFormRow>
             </Fragment>
@@ -500,6 +523,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               value={modelMemoryLimit || ''}
               onChange={e => setFormState({ modelMemoryLimit: e.target.value })}
               isInvalid={modelMemoryLimit === ''}
+              data-test-subj="mlAnalyticsCreateJobFlyoutModelMemoryInput"
             />
           </EuiFormRow>
           <EuiFormRow
@@ -521,6 +545,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               })}
               checked={createIndexPattern === true}
               onChange={() => setFormState({ createIndexPattern: !createIndexPattern })}
+              data-test-subj="mlAnalyticsCreateJobFlyoutCreateIndexPatternSwitch"
             />
           </EuiFormRow>
         </Fragment>

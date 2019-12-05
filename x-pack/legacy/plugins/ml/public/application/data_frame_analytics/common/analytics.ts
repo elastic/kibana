@@ -31,6 +31,14 @@ interface RegressionAnalysis {
   };
 }
 
+interface ClassificationAnalysis {
+  classification: {
+    dependent_variable: string;
+    training_percent?: number;
+    num_top_classes?: string;
+  };
+}
+
 export const SEARCH_SIZE = 1000;
 
 export const defaultSearchQuery = {
@@ -77,11 +85,16 @@ interface LoadEvaluateResult {
   error: string | null;
 }
 
-type AnalysisConfig = OutlierAnalysis | RegressionAnalysis | GenericAnalysis;
+type AnalysisConfig =
+  | OutlierAnalysis
+  | RegressionAnalysis
+  | ClassificationAnalysis
+  | GenericAnalysis;
 
 export enum ANALYSIS_CONFIG_TYPE {
   OUTLIER_DETECTION = 'outlier_detection',
   REGRESSION = 'regression',
+  CLASSIFICATION = 'classification',
   UNKNOWN = 'unknown',
 }
 
@@ -99,6 +112,10 @@ export const getDependentVar = (analysis: AnalysisConfig) => {
   let depVar = '';
   if (isRegressionAnalysis(analysis)) {
     depVar = analysis.regression.dependent_variable;
+  }
+
+  if (isClassificationAnalysis(analysis)) {
+    depVar = analysis.classification.dependent_variable;
   }
   return depVar;
 };
@@ -130,6 +147,11 @@ export const isOutlierAnalysis = (arg: any): arg is OutlierAnalysis => {
 export const isRegressionAnalysis = (arg: any): arg is RegressionAnalysis => {
   const keys = Object.keys(arg);
   return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.REGRESSION;
+};
+
+export const isClassificationAnalysis = (arg: any): arg is ClassificationAnalysis => {
+  const keys = Object.keys(arg);
+  return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
 };
 
 export const isRegressionResultsSearchBoolQuery = (
