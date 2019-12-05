@@ -66,7 +66,7 @@ const Diagnostic = styled(
     );
 
     const handleMouseMove = useCallback(
-      (event: React.MouseEvent<HTMLDivElement>) => {
+      (event: MouseEvent) => {
         if (event.buttons === 1 && userIsPanning) {
           dispatch({
             type: 'userContinuedPanning',
@@ -115,6 +115,13 @@ const Diagnostic = styled(
       [elementBoundingClientRect, dispatch]
     );
 
+    useEffect(() => {
+      window.addEventListener('mousemove', handleMouseMove, { passive: true });
+      return () => {
+        window.removeEventListener('mousemove', handleMouseMove);
+      };
+    }, [handleMouseMove]);
+
     // TODO, handle mouse up when no longer on element or event window. ty
 
     const dotPositions = useMemo(
@@ -136,7 +143,6 @@ const Diagnostic = styled(
       <div
         className={className}
         ref={clientRectCallbackFunction}
-        onMouseMove={handleMouseMove}
         onWheel={handleWheel}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
