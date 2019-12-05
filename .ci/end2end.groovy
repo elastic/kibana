@@ -39,7 +39,7 @@ pipeline {
                     shallow: false, reference: "/var/lib/jenkins/.git-references/kibana.git")
         script {
           dir("${BASE_DIR}"){
-            def regexps =[ "^x-pack/legacy/plugins/apm/" ]
+            def regexps =[ "^x-pack/legacy/plugins/apm/.*" ]
             env.APM_UPDATED = isGitRegionMatch(patterns: regexps)
           }
         }
