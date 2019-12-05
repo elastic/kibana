@@ -56,7 +56,11 @@ export async function updateActionConnector({
   id: string;
 }): Promise<ActionConnector> {
   return await http.put(`${BASE_ACTION_API_PATH}/${id}`, {
-    body: JSON.stringify({ ...connector, id: undefined, actionTypeId: undefined }),
+    body: JSON.stringify({
+      name: connector.name,
+      config: connector.config,
+      secrets: connector.secrets,
+    }),
   });
 }
 
