@@ -8,7 +8,6 @@
 
 import { timeMilliseconds } from 'd3-time';
 import * as runtimeTypes from 'io-ts';
-import first from 'lodash/fp/first';
 import get from 'lodash/fp/get';
 import has from 'lodash/fp/has';
 import zip from 'lodash/fp/zip';
@@ -17,7 +16,6 @@ import { map, fold } from 'fp-ts/lib/Either';
 import { identity, constant } from 'fp-ts/lib/function';
 import { RequestHandlerContext } from 'src/core/server';
 import { compareTimeKeys, isTimeKey, TimeKey } from '../../../../common/time';
-import { JsonObject } from '../../../../common/typed_json';
 import {
   LogEntriesAdapter,
   LogEntryDocument,
@@ -31,13 +29,6 @@ import { KibanaFramework } from '../framework/kibana_framework_adapter';
 const DAY_MILLIS = 24 * 60 * 60 * 1000;
 const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000, Infinity].map(days => days * DAY_MILLIS);
 const TIMESTAMP_FORMAT = 'epoch_millis';
-
-interface LogItemHit {
-  _index: string;
-  _id: string;
-  _source: JsonObject;
-  sort: [number, number];
-}
 
 export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
   constructor(private readonly framework: KibanaFramework) {}
@@ -177,39 +168,6 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
       ),
       fold(constant([]), identity)
     );
-  }
-
-  public async getLogItem(
-    requestContext: RequestHandlerContext,
-    id: string,
-    sourceConfiguration: InfraSourceConfiguration
-  ) {
-    const search = (searchOptions: object) =>
-      this.framework.callWithRequest<LogItemHit, {}>(requestContext, 'search', searchOptions);
-
-    const params = {
-      index: sourceConfiguration.logAlias,
-      terminate_after: 1,
-      body: {
-        size: 1,
-        sort: [
-          { [sourceConfiguration.fields.timestamp]: 'desc' },
-          { [sourceConfiguration.fields.tiebreaker]: 'desc' },
-        ],
-        query: {
-          ids: {
-            values: [id],
-          },
-        },
-      },
-    };
-
-    const response = await search(params);
-    const document = first(response.hits.hits);
-    if (!document) {
-      throw new Error('Document not found');
-    }
-    return document;
   }
 
   private async getLogEntryDocumentsBetween(

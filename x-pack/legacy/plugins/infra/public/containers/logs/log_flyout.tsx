@@ -8,11 +8,11 @@ import createContainer from 'constate';
 import { isString } from 'lodash';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 
-import { InfraLogItem } from '../../graphql/types';
 import { UrlStateContainer } from '../../utils/url_state';
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
 import { Source } from '../source';
 import { fetchLogEntry } from './log_stream/api';
+import { LogEntry } from '../../../common/http_api/logs';
 
 export enum FlyoutVisibility {
   hidden = 'hidden',
@@ -29,7 +29,7 @@ export const useLogFlyout = () => {
   const { sourceId } = useContext(Source.Context);
   const [flyoutVisible, setFlyoutVisibility] = useState<boolean>(false);
   const [flyoutId, setFlyoutId] = useState<string | null>(null);
-  const [flyoutItem, setFlyoutItem] = useState<InfraLogItem | null>(null);
+  const [flyoutItem, setFlyoutItem] = useState<LogEntry | null>(null);
   const [surroundingLogsId, setSurroundingLogsId] = useState<string | null>(null);
 
   const [loadFlyoutItemRequest, loadFlyoutItem] = useTrackedPromise(

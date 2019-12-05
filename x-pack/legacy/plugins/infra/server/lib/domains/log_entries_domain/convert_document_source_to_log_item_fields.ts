@@ -8,7 +8,7 @@ import stringify from 'json-stable-stringify';
 import { isArray, isPlainObject } from 'lodash';
 
 import { JsonObject } from '../../../../common/typed_json';
-import { InfraLogItemField } from '../../../graphql/types';
+import { LogEntryField } from '../../../../common/http_api/logs';
 
 const isJsonObject = (subject: any): subject is JsonObject => {
   return isPlainObject(subject);
@@ -24,8 +24,8 @@ const serializeValue = (value: any): string => {
 export const convertDocumentSourceToLogItemFields = (
   source: JsonObject,
   path: string[] = [],
-  fields: InfraLogItemField[] = []
-): InfraLogItemField[] => {
+  fields: LogEntryField[] = []
+): LogEntryField[] => {
   return Object.keys(source).reduce((acc, key) => {
     const value = source[key];
     const nextPath = [...path, key];

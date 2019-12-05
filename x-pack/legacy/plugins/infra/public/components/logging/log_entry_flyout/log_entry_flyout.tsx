@@ -22,12 +22,12 @@ import React, { useCallback, useMemo } from 'react';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { TimeKey } from '../../../../common/time';
-import { InfraLogItem, InfraLogItemField } from '../../../graphql/types';
 import { InfraLoadingPanel } from '../../loading';
 import { LogEntryActionsMenu } from './log_entry_actions_menu';
+import { LogEntry, LogEntryField } from '../../../../common/http_api/logs';
 
 interface Props {
-  flyoutItem: InfraLogItem | null;
+  flyoutItem: LogEntry | null;
   setFlyoutVisibility: (visible: boolean) => void;
   setFilter: (filter: string) => void;
   setTarget: (timeKey: TimeKey, flyoutItemId: string) => void;
@@ -43,7 +43,7 @@ export const LogEntryFlyout = ({
   setTarget,
 }: Props) => {
   const createFilterHandler = useCallback(
-    (field: InfraLogItemField) => () => {
+    (field: LogEntryField) => () => {
       const filter = `${field.field}:"${field.value}"`;
       setFilter(filter);
 
@@ -80,7 +80,7 @@ export const LogEntryFlyout = ({
           defaultMessage: 'Value',
         }),
         sortable: true,
-        render: (_name: string, item: InfraLogItemField) => (
+        render: (_name: string, item: LogEntryField) => (
           <span>
             <EuiToolTip
               content={i18n.translate('xpack.infra.logFlyout.setFilterTooltip', {

@@ -39,7 +39,6 @@ export interface InfraSource {
   /** Spans of summary highlight buckets within an interval */
   logSummaryHighlightsBetween: InfraLogSummaryHighlightInterval[];
 
-  logItem: InfraLogItem;
   /** A snapshot of nodes */
   snapshot?: InfraSnapshotResponse | null;
 
@@ -251,24 +250,6 @@ export interface InfraLogSummaryHighlightBucket {
   entriesCount: number;
   /** The time key of a representative of the highlighted log entries in this bucket */
   representativeKey: InfraTimeKey;
-}
-
-export interface InfraLogItem {
-  /** The ID of the document */
-  id: string;
-  /** The index where the document was found */
-  index: string;
-  /** Time key for the document - derived from the source configuration timestamp and tiebreaker settings */
-  key: InfraTimeKey;
-  /** An array of flattened fields and values */
-  fields: InfraLogItemField[];
-}
-
-export interface InfraLogItemField {
-  /** The flattened field name */
-  field: string;
-  /** The value for the Field as a string */
-  value: string;
 }
 
 export interface InfraSnapshotResponse {
@@ -631,49 +612,6 @@ export type InfraLogMessageSegment = InfraLogMessageFieldSegment | InfraLogMessa
 // ====================================================
 // Documents
 // ====================================================
-
-export namespace FlyoutItemQuery {
-  export type Variables = {
-    sourceId: string;
-    itemId: string;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'InfraSource';
-
-    id: string;
-
-    logItem: LogItem;
-  };
-
-  export type LogItem = {
-    __typename?: 'InfraLogItem';
-
-    id: string;
-
-    index: string;
-
-    key: Key;
-
-    fields: Fields[];
-  };
-
-  export type Key = InfraTimeKeyFields.Fragment;
-
-  export type Fields = {
-    __typename?: 'InfraLogItemField';
-
-    field: string;
-
-    value: string;
-  };
-}
 
 export namespace LogEntryHighlightsQuery {
   export type Variables = {

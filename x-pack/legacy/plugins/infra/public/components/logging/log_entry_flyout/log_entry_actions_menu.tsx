@@ -10,13 +10,13 @@ import React, { useMemo } from 'react';
 import url from 'url';
 
 import chrome from 'ui/chrome';
-import { InfraLogItem } from '../../../graphql/types';
 import { useVisibilityState } from '../../../utils/use_visibility_state';
+import { LogEntry } from '../../../../common/http_api/logs';
 
 const UPTIME_FIELDS = ['container.id', 'host.ip', 'kubernetes.pod.uid'];
 
 export const LogEntryActionsMenu: React.FunctionComponent<{
-  logItem: InfraLogItem;
+  logItem: LogEntry;
 }> = ({ logItem }) => {
   const { hide, isVisible, show } = useVisibilityState(false);
 
@@ -83,7 +83,7 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
   );
 };
 
-const getUptimeLink = (logItem: InfraLogItem) => {
+const getUptimeLink = (logItem: LogEntry) => {
   const searchExpressions = logItem.fields
     .filter(({ field, value }) => value != null && UPTIME_FIELDS.includes(field))
     .map(({ field, value }) => `${field}:${value}`);
@@ -98,7 +98,7 @@ const getUptimeLink = (logItem: InfraLogItem) => {
   });
 };
 
-const getAPMLink = (logItem: InfraLogItem) => {
+const getAPMLink = (logItem: LogEntry) => {
   const traceIdEntry = logItem.fields.find(
     ({ field, value }) => value != null && field === 'trace.id'
   );
